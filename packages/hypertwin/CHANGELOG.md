@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-prerelease.14](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.13...v0.35.0-prerelease.14) (2019-11-07)
+
+**Note:** Version bump only for package @valos/hypertwin
+
+
+
+
+
 # [0.35.0-prerelease.13](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.12...v0.35.0-prerelease.13) (2019-09-06)
 
 **Note:** Version bump only for package @valos/hypertwin

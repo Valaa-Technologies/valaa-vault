@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-prerelease.14](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.13...v0.35.0-prerelease.14) (2019-11-07)
+
+
+### Bug Fixes
+
+* Minor ontology, perspire --spindle-ids, ([ab1a5e2](https://github.com/valaatech/kernel/commit/ab1a5e2ea0fc4f7834903d638166e958f40b5627))
+* testdoc generation during assemble-packages ([31d894c](https://github.com/valaatech/kernel/commit/31d894cf61420f86faa37e987ff547f941bc4a6e))
+* valma help, type-vault configure issue with workspaces ([1fbc649](https://github.com/valaatech/kernel/commit/1fbc6496046d3d03a419fb30d9f9dbc06bd7f974))
+
+
+### Features
+
+* Add VPath minting and validator functions ([9a2e86a](https://github.com/valaatech/kernel/commit/9a2e86a6007243e231dfe6638a55ca92a3374e76))
+* removed-from ontology ([c61116f](https://github.com/valaatech/kernel/commit/c61116f2e2e768f190fa6f310d3b20e5e2bcc908))
+
+
+
+
+
 # [0.35.0-prerelease.13](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.12...v0.35.0-prerelease.13) (2019-09-06)
 
 **Note:** Version bump only for package @valos/kernel

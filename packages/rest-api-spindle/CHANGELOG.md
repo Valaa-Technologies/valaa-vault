@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-prerelease.14](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.13...v0.35.0-prerelease.14) (2019-11-07)
+
+
+### Features
+
+* Add schema-builder routes, projections and site config testdoc chapter ([39a4528](https://github.com/valaatech/kernel/commit/39a452847fef94b1d79839c08237fd75549acb0a))
+* Update schema-builder, add testdoc ([fbf88d4](https://github.com/valaatech/kernel/commit/fbf88d40dbb0877274864a07202d2329ad3e40fe))
+
+
+
+
+
 # [0.35.0-prerelease.13](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.12...v0.35.0-prerelease.13) (2019-09-06)
 
 **Note:** Version bump only for package @valos/toolset-rest-api-gateway-plugin

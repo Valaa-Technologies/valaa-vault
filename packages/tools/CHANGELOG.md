@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-prerelease.14](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.13...v0.35.0-prerelease.14) (2019-11-07)
+
+
+### Features
+
+* Add bindExpandedVPath contextState for callback state ([0893fb2](https://github.com/valaatech/kernel/commit/0893fb2248b4f4060ae5a795c36909599fdd896a))
+
+
+
+
+
 # [0.35.0-prerelease.13](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.12...v0.35.0-prerelease.13) (2019-09-06)
 
 **Note:** Version bump only for package @valos/tools

@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-prerelease.14](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.13...v0.35.0-prerelease.14) (2019-11-07)
+
+
+### Bug Fixes
+
+* testdoc generation during assemble-packages ([31d894c](https://github.com/valaatech/kernel/commit/31d894cf61420f86faa37e987ff547f941bc4a6e))
+
+
+### Features
+
+* Add regenerate-docs name-pattern for selective revdoc regeneration ([e27d57d](https://github.com/valaatech/kernel/commit/e27d57d7783bf4bccdec9785df3a5d7a3210d0f2))
+* Update schema-builder, add testdoc ([fbf88d4](https://github.com/valaatech/kernel/commit/fbf88d40dbb0877274864a07202d2329ad3e40fe))
+* vlm write-revdoc --testdoc ([4adc9a3](https://github.com/valaatech/kernel/commit/4adc9a3b9619ba399e6539070cd3011f4975e0ba))
+
+
+
+
+
 # [0.35.0-prerelease.13](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.12...v0.35.0-prerelease.13) (2019-09-06)
 
 

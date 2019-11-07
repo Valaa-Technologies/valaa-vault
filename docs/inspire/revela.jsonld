@@ -46,9 +46,9 @@
     "revdoc:package": "@valos/inspire",
     "revdoc:prefix": "revela",
     "revdoc:prefixIRI": "https://valospace.org/inspire/revela#",
-    "revdoc:version": "0.35.0-prerelease.13",
+    "revdoc:version": "0.35.0-prerelease.14",
     "respecConfig": {
-      "subtitle": "0.35.0-prerelease.13",
+      "subtitle": "0.35.0-prerelease.14",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -177,7 +177,7 @@
                       {
                         "@type": "vdoc:CharacterData",
                         "vdoc:content": [
-                          "\n      return combineRevelationsLazily(gatewayMock, {\n        a: [1]\n      }, {\n        a: [2]\n      });\n    }"
+                          " combineRevelationsLazily(gatewayMock, { a: [1] }, { a: [2] })"
                         ]
                       }
                     ]
@@ -214,7 +214,7 @@
                       {
                         "@type": "vdoc:CharacterData",
                         "vdoc:content": [
-                          "\n      return combineRevelationsLazily(gatewayMock, {}, {\n        \"!!!\": \"./path\"\n      });\n    }"
+                          " combineRevelationsLazily(gatewayMock, {}, { \"!!!\": \"./path\" })"
                         ]
                       }
                     ]
@@ -251,7 +251,7 @@
                       {
                         "@type": "vdoc:CharacterData",
                         "vdoc:content": [
-                          "\n      return combineRevelationsLazily(gatewayMock, \"\", {\n        \"!!!\": [[\"!$revela:import\", \"/path\"], \"requireKey\"]\n      });\n    }"
+                          " combineRevelationsLazily(gatewayMock, \"\",\n            { \"!!!\": [[\"!$revela:import\", \"/path\"], \"requireKey\"] })"
                         ]
                       }
                     ]
@@ -288,7 +288,7 @@
                       {
                         "@type": "vdoc:CharacterData",
                         "vdoc:content": [
-                          "\n      return regeneratorRuntime.async(function _callee$(_context) {\n        while (1) {\n          switch (_context.prev = _context.next) {\n            case 0:\n              return _context.abrupt(\"return\", combineRevelationsLazily(gatewayMock, [], {\n                \"!!!\": [[\"!$revela:import\", \"<https://foobar.com/path>\"], [\"fetchedField\", [\".:fetchOptions:input\"]]]\n              }));\n\n            case 1:\n            case \"end\":\n              return _context.stop();\n          }\n        }\n      });\n    }"
+                          " combineRevelationsLazily(gatewayMock, [], { \"!!!\": [\n          [\"!$revela:import\", \"<https://foobar.com/path>\"],\n          [\"fetchedField\", [\".:fetchOptions:input\"]],\n        ] })"
                         ]
                       }
                     ]

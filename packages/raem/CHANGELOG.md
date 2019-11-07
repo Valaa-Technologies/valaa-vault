@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-prerelease.14](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.13...v0.35.0-prerelease.14) (2019-11-07)
+
+
+### Bug Fixes
+
+* Minor ontology, perspire --spindle-ids, ([ab1a5e2](https://github.com/valaatech/kernel/commit/ab1a5e2ea0fc4f7834903d638166e958f40b5627))
+
+
+### Features
+
+* Add bindExpandedVPath contextState for callback state ([0893fb2](https://github.com/valaatech/kernel/commit/0893fb2248b4f4060ae5a795c36909599fdd896a))
+* Add object and sequence support to VPath binding ([c7d5873](https://github.com/valaatech/kernel/commit/c7d58733db05ec8dbdaf210d889bed44d215c7e0))
+* Add schema-builder routes, projections and site config testdoc chapter ([39a4528](https://github.com/valaatech/kernel/commit/39a452847fef94b1d79839c08237fd75549acb0a))
+* Add valos-raem:Verb and revela ontology ([db80949](https://github.com/valaatech/kernel/commit/db8094973fb0f033a9b375418a334a48aa29e070))
+* Add VPath minting and validator functions ([9a2e86a](https://github.com/valaatech/kernel/commit/9a2e86a6007243e231dfe6638a55ca92a3374e76))
+* expressors, impressors and resolvers ([4acb9a3](https://github.com/valaatech/kernel/commit/4acb9a39ea7d0bdf218a25478ae109a3aa231600))
+* Implement VPath expanded form helpers ([5aec6da](https://github.com/valaatech/kernel/commit/5aec6da0a56c5eef2b28343c427d4ddd218a90a7))
+* removed-from ontology ([c61116f](https://github.com/valaatech/kernel/commit/c61116f2e2e768f190fa6f310d3b20e5e2bcc908))
+
+
+
+
+
 # [0.35.0-prerelease.13](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.12...v0.35.0-prerelease.13) (2019-09-06)
 
 **Note:** Version bump only for package @valos/raem

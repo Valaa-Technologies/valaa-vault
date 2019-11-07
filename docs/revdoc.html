@@ -7,7 +7,7 @@
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"subtitle":"0.35.0-prerelease.13","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"shortName":"revdoc","alternateFormats":[{"label":"VDoc","uri":"revdoc.jsonld"}]};
+      var respecConfig = {"subtitle":"0.35.0-prerelease.14","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"shortName":"revdoc","alternateFormats":[{"label":"VDoc","uri":"revdoc.jsonld"}]};
     </script>
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
@@ -363,9 +363,9 @@ primitives and specifies a ReSpec html emission transformation.</span>
         tests.push([named, operations, toSatisfy, result]);
         return {
           "dc:title": named,
-          "#0": [].concat(_toConsumableArray([].concat(operations).map(_extractTestPieceText).map(function (bodyText, index) {
+          "#0": [].concat(_toConsumableArray([].concat(operations).map(extractExampleText).map(function (bodyText, index) {
             return [index ? "via" : "we expect", blockquote(c(bodyText))];
-          })), [toSatisfy, blockquote(c(_extractTestPieceText(result)))])
+          })), [toSatisfy, blockquote(c(extractExampleText(result)))])
         };
       },
       runTestDoc: function runTestDoc() {
@@ -498,6 +498,14 @@ primitives and specifies a ReSpec html emission transformation.</span>
       }
     };
   }</td></tr>
+        <tr><td>extractExampleText</td><td>function extractExampleText(example) {
+  if (typeof example === "function") {
+    var bodyText = example.toString();
+    return bodyText.slice(Math.min(bodyText.indexOf("{") !== -1 ? bodyText.indexOf("{") : bodyText.length, bodyText.indexOf(">") !== -1 ? bodyText.indexOf(">") : bodyText.length) + 1, Math.max(bodyText.lastIndexOf("}"), bodyText.length));
+  }
+
+  return JSON.stringify(example, null, 2);
+}</td></tr>
       </tbody>
     </table>
 

@@ -126,7 +126,7 @@
       ]
     },
     "package": "@valos/engine",
-    "version": "0.35.0-prerelease.13"
+    "version": "0.35.0-prerelease.14"
   },
   "inspire": {
     "@id": "https://valospace.org/inspire",
@@ -199,7 +199,7 @@
       ]
     },
     "package": "@valos/inspire",
-    "version": "0.35.0-prerelease.13"
+    "version": "0.35.0-prerelease.14"
   },
   "inspire/revela": {
     "@id": "https://valospace.org/inspire/revela",
@@ -267,7 +267,7 @@
                       {
                         "@type": "vdoc:CharacterData",
                         "vdoc:content": [
-                          "\n      return combineRevelationsLazily(gatewayMock, {\n        a: [1]\n      }, {\n        a: [2]\n      });\n    }"
+                          " combineRevelationsLazily(gatewayMock, { a: [1] }, { a: [2] })"
                         ]
                       }
                     ]
@@ -304,7 +304,7 @@
                       {
                         "@type": "vdoc:CharacterData",
                         "vdoc:content": [
-                          "\n      return combineRevelationsLazily(gatewayMock, {}, {\n        \"!!!\": \"./path\"\n      });\n    }"
+                          " combineRevelationsLazily(gatewayMock, {}, { \"!!!\": \"./path\" })"
                         ]
                       }
                     ]
@@ -341,7 +341,7 @@
                       {
                         "@type": "vdoc:CharacterData",
                         "vdoc:content": [
-                          "\n      return combineRevelationsLazily(gatewayMock, \"\", {\n        \"!!!\": [[\"!$revela:import\", \"/path\"], \"requireKey\"]\n      });\n    }"
+                          " combineRevelationsLazily(gatewayMock, \"\",\n            { \"!!!\": [[\"!$revela:import\", \"/path\"], \"requireKey\"] })"
                         ]
                       }
                     ]
@@ -378,7 +378,7 @@
                       {
                         "@type": "vdoc:CharacterData",
                         "vdoc:content": [
-                          "\n      return regeneratorRuntime.async(function _callee$(_context) {\n        while (1) {\n          switch (_context.prev = _context.next) {\n            case 0:\n              return _context.abrupt(\"return\", combineRevelationsLazily(gatewayMock, [], {\n                \"!!!\": [[\"!$revela:import\", \"<https://foobar.com/path>\"], [\"fetchedField\", [\".:fetchOptions:input\"]]]\n              }));\n\n            case 1:\n            case \"end\":\n              return _context.stop();\n          }\n        }\n      });\n    }"
+                          " combineRevelationsLazily(gatewayMock, [], { \"!!!\": [\n          [\"!$revela:import\", \"<https://foobar.com/path>\"],\n          [\"fetchedField\", [\".:fetchOptions:input\"]],\n        ] })"
                         ]
                       }
                     ]
@@ -419,7 +419,7 @@
       ]
     },
     "package": "@valos/inspire",
-    "version": "0.35.0-prerelease.13"
+    "version": "0.35.0-prerelease.14"
   },
   "raem": {
     "@id": "https://valospace.org/raem",
@@ -538,7 +538,7 @@
       ]
     },
     "package": "@valos/raem",
-    "version": "0.35.0-prerelease.13"
+    "version": "0.35.0-prerelease.14"
   },
   "raem/VPath": {
     "@id": "https://valospace.org/raem/VPath",
@@ -603,7 +603,7 @@
       ]
     },
     "package": "@valos/raem",
-    "version": "0.35.0-prerelease.13"
+    "version": "0.35.0-prerelease.14"
   },
   "rest-api-spindle": {
     "@id": "https://valospace.org/rest-api-spindle",
@@ -709,7 +709,7 @@
       ]
     },
     "package": "@valos/rest-api-spindle",
-    "version": "0.35.0-prerelease.13"
+    "version": "0.35.0-prerelease.14"
   },
   "rest-api-spindle/schema-builder": {
     "@id": "https://valospace.org/rest-api-spindle/schema-builder",
@@ -722,7 +722,44 @@
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "REST API schema builder is a javascript library for generating the\nfull REST API spindle JSON schema mapping definition. This definition\nis specified using convenient types and routes which have the valospace\nprojections embedded as fine-grained VPaths."
+            "Schema builder is a javascript library for exporting a site\nconfiguration that can be consumed by the REST API spindle. This config\nis a fully declarative ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "JSON schema"
+              ],
+              "vdoc:ref": "http://json-schema.org/"
+            },
+            "-based format which not just describes the external API routes and\ntypes but also defines their valospace projections using embedded ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "vpath"
+              ],
+              "vdoc:ref": "@valos/raem/VPath"
+            },
+            "."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "This library is primarily intended to be used from inside a\n",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "spindle configuration library"
+              ]
+            },
+            " which is invoked from inside\na ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "revela.json"
+              ],
+              "vdoc:ref": "@valos/inspire/revela"
+            },
+            " gateway to emit\nthe JSON configuration."
           ]
         }
       ]
@@ -733,25 +770,67 @@
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "The three schema builder concepts are:"
+            "The four schema builder concepts are:"
           ]
         },
         {
           "@type": "vdoc:BulletList",
           "vdoc:entries": [
             [
-              "Types describe layouts of valospace resources and their properties.\n  These are used for GET result body contents, POST, PATCH and PUT\n  request body fields."
+              {
+                "@type": "vdoc:Reference",
+                "vdoc:content": [
+                  "Site configuration"
+                ],
+                "vdoc:ref": "#section_site_configuration"
+              },
+              " is the\n  JSON output of this library, consumable by REST API spindle."
             ],
             {
               "@type": "vdoc:Paragraph",
               "vdoc:content": [
-                "Projections are VPaths embedded in the type schemas which define the\n  mappings into valospace resources. "
+                {
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    "Type and property schemas"
+                  ],
+                  "vdoc:ref": "#section_schemas"
+                },
+                " describe\n  layouts of REST API and valospace resources and properties. These are\n  used for GET result body contents, POST, PATCH and PUT request body\n  fields. When exported in the site configuration these are transformed\n  into shared schema objects."
               ]
             },
             {
               "@type": "vdoc:Paragraph",
               "vdoc:content": [
-                "Routes define the traditional entry points and parameters. Primary\n  resource type gate injections are projections which define the\n  entry mappings to valospace resources."
+                {
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    "Routes definitions"
+                  ],
+                  "vdoc:ref": "#section_routes"
+                },
+                " are the traditional\n  tool to define the request entry points and to descrbibe their\n  parameters. Routes tie into valospace resources via gate projections\n  which are embedded inside primary type schemas."
+              ]
+            },
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    "Projections and reflections"
+                  ],
+                  "vdoc:ref": "#section_projections"
+                },
+                " are ",
+                {
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    "VPaths"
+                  ],
+                  "vdoc:ref": "@valos/raem/VPath"
+                },
+                " that are embedded in the gates\n  and types respectively and which define paths into and between\n  valospace resources, respectively"
               ]
             }
           ]
@@ -759,7 +838,7 @@
       ]
     },
     "package": "@valos/rest-api-spindle",
-    "version": "0.35.0-prerelease.13"
+    "version": "0.35.0-prerelease.14"
   },
   "revdoc": {
     "@id": "https://valospace.org/revdoc",
@@ -818,7 +897,7 @@
       ]
     },
     "package": "@valos/revdoc",
-    "version": "0.35.0-prerelease.13"
+    "version": "0.35.0-prerelease.14"
   },
   "revdoc/tutorial": {
     "@id": "https://valospace.org/revdoc/tutorial",
@@ -892,7 +971,7 @@
       ]
     },
     "package": "@valos/revdoc",
-    "version": "0.35.0-prerelease.13"
+    "version": "0.35.0-prerelease.14"
   },
   "sbomdoc": {
     "@id": "https://valospace.org/sbomdoc",
@@ -951,7 +1030,7 @@
       ]
     },
     "package": "@valos/sbomdoc",
-    "version": "0.35.0-prerelease.13"
+    "version": "0.35.0-prerelease.14"
   },
   "script": {
     "@id": "https://valospace.org/script",
@@ -1004,7 +1083,7 @@
       ]
     },
     "package": "@valos/script",
-    "version": "0.35.0-prerelease.13"
+    "version": "0.35.0-prerelease.14"
   },
   "sourcerer": {
     "@id": "https://valospace.org/sourcerer",
@@ -1049,7 +1128,7 @@
       ]
     },
     "package": "@valos/sourcerer",
-    "version": "0.35.0-prerelease.13"
+    "version": "0.35.0-prerelease.14"
   },
   "sourcerer/valos-event-log": {
     "@id": "https://valospace.org/sourcerer/valos-event-log",
@@ -1079,7 +1158,7 @@
       ]
     },
     "package": "@valos/sourcerer",
-    "version": "0.35.0-prerelease.13"
+    "version": "0.35.0-prerelease.14"
   },
   "sourcerer/VState": {
     "@id": "https://valospace.org/sourcerer/VState",
@@ -1118,7 +1197,7 @@
       ]
     },
     "package": "@valos/sourcerer",
-    "version": "0.35.0-prerelease.13"
+    "version": "0.35.0-prerelease.14"
   },
   "twindoc": {
     "@id": "https://valospace.org/twindoc",
@@ -1199,7 +1278,7 @@
       ]
     },
     "package": "@valos/twindoc",
-    "version": "0.35.0-prerelease.13"
+    "version": "0.35.0-prerelease.14"
   },
   "type-vault/AssortedTutorials": {
     "@id": "https://valospace.org/type-vault/AssortedTutorials",
@@ -1218,7 +1297,7 @@
     },
     "introduction": {},
     "package": "@valos/type-vault",
-    "version": "0.35.0-prerelease.13"
+    "version": "0.35.0-prerelease.14"
   },
   "vdoc": {
     "@id": "https://valospace.org/vdoc",
@@ -1306,7 +1385,7 @@
       ]
     },
     "package": "@valos/vdoc",
-    "version": "0.35.0-prerelease.13"
+    "version": "0.35.0-prerelease.14"
   },
   "kernel": {
     "@id": "https://valospace.org/kernel",

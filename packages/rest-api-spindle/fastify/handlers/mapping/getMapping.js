@@ -14,8 +14,9 @@ export default function createRouter (mapper: MapperService, route: Route) {
 
     prepare (/* fastify */) {
       this.runtime = mapper.createRouteRuntime(this);
-      this.toSuccessBodyFields = _createTargetedToMappingFields(mapper, route, ["~$:targetId"])
-          .toMappingFields;
+      this.toMapping = _createToMapping(mapper, route, this.runtime);
+      this.toSuccessBodyFields = mapper.appendSchemaSteps(this.runtime, route.schema.response[200],
+        { expandProperties: true });
     },
 
     preload () {
@@ -42,7 +43,7 @@ export default function createRouter (mapper: MapperService, route: Route) {
       }
 
       const { fields } = request.query;
-      return thenChainEagerly(scope.resource, [
+      return thenChainEagerly(scope.mapping, [
         vMapping => vMapping.get(this.toSuccessBodyFields, valkOptions),
         results => ((!fields || !results)
             ? results

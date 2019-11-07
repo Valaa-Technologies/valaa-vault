@@ -14,15 +14,7 @@ export default function createRouter (mapper: MapperService, route: Route) {
 
     prepare (/* fastify */) {
       this.runtime = mapper.createRouteRuntime(this);
-      const { toMapping } = _createTargetedToMapping(mapper, route, ["~$:targetId"]);
-      this.toMapping = toMapping;
-      /*
-      const toRelations = mapper.buildSchemaKuery(route.config.mapping.schema, [
-        "§->",
-        ...route.config.mapping.name.split("/").slice(0, -1).map(name => ["§..", name]),
-      ]);
-      toRelations.splice(-1);
-      */
+      this.toMapping = _createToMapping(mapper, route, this.runtime);
     },
 
     preload () {

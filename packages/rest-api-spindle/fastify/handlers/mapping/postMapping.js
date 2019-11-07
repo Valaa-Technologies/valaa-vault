@@ -15,15 +15,9 @@ export default function createRouter (mapper: MapperService, route: Route) {
     prepare (/* fastify */) {
       this.runtime = mapper.createRouteRuntime(this);
 
-      const { toMappingsResults, relationsStepIndex } = _createToMappingsParts(mapper, route);
-
-      if (relationsStepIndex > 1) this.toSource = toMappingsResults.slice(0, relationsStepIndex);
-      // const toMappingFields = _createToMappingFields(mapper, route);
-      // toMappingFields.splice(-1);
-
-      this.toPatchTarget = mapper
-          .buildSchemaKuery(route.config.target.schema, ["§->", false, "target"])
-          .slice(0, -1);
+      this.toTargetPatchable = ["§->", false, "target"];
+      mapper.appendSchemaSteps(this.runtime, route.config.target.schema,
+          { targetVAKON: this.toTargetPatchable });
     },
 
     preload () {
@@ -58,22 +52,10 @@ export default function createRouter (mapper: MapperService, route: Route) {
       valkOptions.route = route;
       valkOptions.discourse = mapper.getDiscourse().acquireFabricator();
       return thenChainEagerly(scope.resource, [
-        () => {
-          scope.source = !this.toSource
-              ? scope.resource
-              : scope.resource.get(this.toSource, { discourse, scope });
-          console.log("mapping POST dump:", ...dumpObject(scope.createResourceAndMapping),
-              "\n\tservice index:", ...dumpObject(scope.serviceIndex),
-              "\n\tsource:", ...dumpObject(scope.source),
-              "\n\tname:", targetName);
-          return scope.serviceIndex.do(scope.createResourceAndMapping, { discourse, scope });
-        },
-        vMapping => {
-          scope.mapping = mapper.updateResource(vMapping, request.body,
-              { discourse, scope, route });
-          scope.target = mapper.updateResource(vMapping, request.body.$V.target,
-              { discourse, scope, route, toPatchTarget: this.toPatchTarget });
-        },
+        vResource => vResource.do(scope.doCreateMappingAndTarget, valkOptions),
+        vMapping => mapper.updateResource((scope.mapping = vMapping), request.body, valkOptions),
+        vMapping => mapper.updateResource(vMapping, request.body.$V.target,
+              { ...valkOptions, toPatchTarget: this.toTargetPatchable }),
         () => valkOptions.discourse && valkOptions.discourse.releaseFabricator(),
         eventResult => eventResult && eventResult.getPersistedEvent(),
         (/* persistedEvent */) => {

@@ -14,11 +14,7 @@ export default function createRouter (mapper: MapperService, route: Route) {
 
     prepare (/* fastify */) {
       this.runtime = mapper.createRouteRuntime(this);
-
-      const { toMappingFields, relationsStepIndex } =
-          _createTargetedToMappingFields(mapper, route, ["~$:targetId"]);
-      if (relationsStepIndex > 1) this.toSource = toMappingFields.slice(0, relationsStepIndex);
-      this.toMapping = toMappingFields.slice(0, -2).concat(0);
+      this.toMapping = _createToMapping(mapper, route, this.runtime);
     },
 
     preload () {
@@ -42,35 +38,13 @@ export default function createRouter (mapper: MapperService, route: Route) {
         reply.code(405);
         reply.send(`${this.name} is disabled: no doCreateMapping configured`);
         return true;
-      if (_resolveMappingResource(mapper, route, request, reply, scope)) return true;
-      const vExistingMapping = scope.resource.get(this.toMapping, { scope });
-      if (!vExistingMapping) {
-        if (!scope.createMapping) {
-          reply.code(405);
-          reply.send(`${this.name} CREATE is disabled: no configuration for mapping creation`);
-          return true;
-        }
-        scope.target = mapper._engine.tryVrapper([scope.targetId]);
-        if (!scope.target) {
-          reply.code(404);
-          reply.send(`No such ${route.config.target.name} route target: ${scope.targetId}`);
-          return true;
-        }
       }
 
       const wrap = new Error(this.name);
       valkOptions.route = route;
       valkOptions.discourse = mapper.getDiscourse().acquireFabricator();
       return thenChainEagerly(scope.resource, [
-        () => {
-          if (vExistingMapping) return vExistingMapping;
-          // vSource is not needed if the mapping was found already
-          scope.source = !this.toSource ? scope.resource
-              : scope.resource.get(this.toSource, { scope, discourse });
-          // Replace with createMapping call proper. Now using old idiom
-          // and explicit instantiate.
-          return scope.serviceIndex.do(scope.createMapping, { discourse, scope });
-        },
+        vResource => scope.mapping || vResource.do(scope.doCreateMapping, valkOptions),
         vMapping => mapper.updateResource((scope.mapping = vMapping), request.body, valkOptions),
         () => valkOptions.discourse.releaseFabricator(),
         eventResult => eventResult

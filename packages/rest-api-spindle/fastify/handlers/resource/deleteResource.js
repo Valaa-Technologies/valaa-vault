@@ -26,20 +26,6 @@ export default function createRouter (mapper: MapperService, route: Route) {
         `${this.name}:`, ...dumpObject(scope.resource),
         "\n\trequest.query:", ...dumpObject(request.query),
       ]);
-      reply.code(501);
-      reply.send("Unimplemented");
-      return true;
-      // Root resource deletion not implemented yet, due to lack of
-      // mechanisms for declaring what sub-resources should be
-      // destroyed as well.
-      /*
-      if (_verifyResourceAuthorization(mapper, route, request, reply, scope)) return true;
-      scope.resource = mapper._engine.tryVrapper([scope.resourceId]);
-      if (!scope.resource) {
-        reply.code(404);
-        reply.send(`No such ${route.config.resourceTypeName} route resource: ${scope.resourceId}`);
-        return false;
-      }
       const wrap = new Error(this.name);
       valkOptions.discourse = mapper.getDiscourse().acquireFabricator();
       return thenChainEagerly(valkOptions.discourse, [
@@ -67,7 +53,6 @@ export default function createRouter (mapper: MapperService, route: Route) {
           "\n\trouteRuntime:", ...dumpObject(this.runtime),
         );
       });
-      */
     },
   };
 }

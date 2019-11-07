@@ -11,8 +11,11 @@ export default function createRouter (mapper: MapperService, route: Route) {
 
     prepare (/* fastify */) {
       this.runtime = mapper.createRouteRuntime(this);
-      this.toSuccessBodyFields = mapper.buildSchemaKuery(route.schema.response[200],
-          _buildToRelationsSource(mapper, route.config.resource.schema, route.config.mapping.name));
+      this.toSuccessBodyFields = ["§->"];
+      mapper.appendSchemaSteps(this.runtime, route.config.resource.schema,
+          { targetVAKON: this.toSuccessBodyFields });
+      mapper.appendSchemaSteps(this.runtime, route.schema.response[200],
+          { expandProperties: true, targetVAKON: this.toSuccessBodyFields });
     },
 
     preload () {
@@ -29,12 +32,6 @@ export default function createRouter (mapper: MapperService, route: Route) {
         `${this.name}:`, ...dumpObject(scope.resource),
         "\n\trequest.query:", request.query,
       ]);
-      scope.resource = mapper.getEngine().tryVrapper([scope.resourceId]);
-      if (!scope.resource) {
-        reply.code(404);
-        reply.send(`No such ${route.config.resource.name} route resource: ${scope.resourceId}`);
-        return true;
-      }
       const { fields } = request.query;
       return thenChainEagerly(scope.resource, [
         vResource => vResource.get(this.toSuccessBodyFields, valkOptions),

@@ -13,7 +13,6 @@ export default function createRouter (mapper: MapperService, route: Route) {
       this.runtime = mapper.createRouteRuntime(this);
       this.toPatchTarget = mapper.appendSchemaSteps(this.runtime, route.config.resource.schema);
       if (this.toPatchTarget.length <= 1) this.toPatchTarget = undefined;
-      else this.toPatchTarget.splice(-1, 1);
     },
 
     preload () {
@@ -23,10 +22,6 @@ export default function createRouter (mapper: MapperService, route: Route) {
     handler (request, reply) {
       const valkOptions = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       if (_presolveResourceRouteRequest(mapper, route, this.runtime, valkOptions)) {
-      scope.resource = mapper._engine.tryVrapper([scope.resourceId]);
-      if (!scope.resource) {
-        reply.code(404);
-        reply.send(`No such ${route.config.resourceTypeName} route resource: ${scope.resourceId}`);
         return true;
       }
       const scope = valkOptions.scope;

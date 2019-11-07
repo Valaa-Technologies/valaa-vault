@@ -14,7 +14,7 @@ export default function createRouter (mapper: MapperService, route: Route) {
     prepare (/* fastify */) {
       this.runtime = mapper.createRouteRuntime(this);
       this.toPatchTarget = mapper.appendSchemaSteps(this.runtime, route.config.resource.schema);
-      // if (toPatchTarget.length > 1) this.toPatchTarget = toPatchTarget;
+      if (this.toPatchTarget.length <= 1) this.toPatchTarget = undefined;
     },
 
     preload () {

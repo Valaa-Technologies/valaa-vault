@@ -3,7 +3,7 @@
 import type MapperService, { Route } from "~/rest-api-spindle/fastify/MapperService";
 import { dumpObject, thenChainEagerly } from "~/tools";
 
-import { _buildToRelationsSource } from "../_handlerOps";
+import { _presolveResourceRouteRequest } from "../resource/_resourceHandlerOps";
 
 export default function createRouter (mapper: MapperService, route: Route) {
   return {
@@ -21,6 +21,9 @@ export default function createRouter (mapper: MapperService, route: Route) {
 
     handler (request, reply) {
       const valkOptions = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      if (_presolveResourceRouteRequest(mapper, route, this.runtime, valkOptions)) {
+        return true;
+      }
       const scope = valkOptions.scope;
       mapper.infoEvent(1, () => [
         `${this.name}:`, ...dumpObject(scope.resource),

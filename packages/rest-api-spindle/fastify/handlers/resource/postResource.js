@@ -5,7 +5,7 @@ import { Vrapper } from "~/engine";
 import type MapperService, { Route } from "~/rest-api-spindle/fastify/MapperService";
 import { dumpObject, thenChainEagerly } from "~/tools";
 
-import { _verifyResourceAuthorization } from "./_resourceHandlerOps";
+import { _presolveRouteRequest } from "../_handlerOps";
 
 export default function createRouter (mapper: MapperService, route: Route) {
   return {
@@ -13,8 +13,7 @@ export default function createRouter (mapper: MapperService, route: Route) {
 
     prepare (/* fastify */) {
       this.runtime = mapper.createRouteRuntime(this);
-      const toPatchTarget = ["§->"];
-      mapper.buildKuery(route.config.resourceSchema, toPatchTarget);
+      this.toPatchTarget = mapper.appendSchemaSteps(this.runtime, route.config.resource.schema);
       // if (toPatchTarget.length > 1) this.toPatchTarget = toPatchTarget;
     },
 
@@ -25,12 +24,14 @@ export default function createRouter (mapper: MapperService, route: Route) {
     handler (request, reply) {
       const valkOptions = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       const scope = valkOptions.scope;
+      if (_presolveRouteRequest(mapper, route, this.runtime, valkOptions)) {
+        return true;
+      }
       mapper.infoEvent(1, () => [
         `${this.name}:`,
         "\n\trequest.query:", request.query,
         "\n\trequest.body:", request.body,
       ]);
-      if (_verifyResourceAuthorization(mapper, route, request, reply, scope)) return true;
       if (!scope.doCreateResource) {
         reply.code(405);
         reply.send(`${this.name} is disabled: no scope.doCreateResource defined`);

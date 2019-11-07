@@ -4,6 +4,8 @@ import Vrapper from "~/engine/Vrapper";
 
 import { dumpify, dumpObject } from "~/tools";
 
+import { _vakonpileVPath } from "./_vakonpileOps";
+
 export function _createRouteRuntime (mapper, { url, config }, runtime) {
   for (const ruleName of config.requiredRules) {
     if (config.rules[ruleName] === undefined) {
@@ -15,40 +17,24 @@ export function _createRouteRuntime (mapper, { url, config }, runtime) {
   runtime.staticResources = [];
   runtime.identity = mapper.getIdentity();
 
-  Object.assign(routeRuntime, {
-    category, method, url: fastifyRoute.url,
-    fastifyRoute,
-    scopeBase: { ...(fastifyRoute.config.staticRules || {}) },
-    requestRules: [],
-    // kueryRules: [],
-    requiredRuntimeRules: requiredRuntimeRules || [],
-  });
-  [..._entriesOf(builtinRules || {}),
-    ..._entriesOf(fastifyRoute.config.constantRules || {})
-        .map(([k, v]) => ([k, ["constant", v]])),
-    ..._entriesOf(fastifyRoute.config.routeRules || {})
-        .map(([k, v]) => ([k, ["params", v]])),
-    ..._entriesOf(fastifyRoute.config.queryRules || {})
-        .map(([k, v]) => ([k, ["query", v]])),
-    ..._entriesOf(fastifyRoute.config.cookieRules || {})
-        .map(([k, v]) => ([k, ["cookies", v]])),
-  ].forEach(([ruleName, [sourceSection, source]]) => {
-    if (source === undefined) return;
-    if (sourceSection === "constant") {
-      routeRuntime.scopeBase[ruleName] = source;
+  Object.entries(config.rules).forEach(([ruleName, rule]) => {
+    if (!Array.isArray(rule)) {
+      scopeBase[ruleName] = rule;
+      return;
+    }
+    const ruleVAKON = _vakonpileVPath(rule, runtime);
+    const maybeStaticReference = (ruleVAKON != null) && (ruleVAKON[0] === "§ref")
+        && !ruleVAKON[1].slice(1).find(e => Array.isArray(e))
+        && ruleVAKON[1].slice(1);
+    const resolveRule = maybeStaticReference ? (engine => engine.getVrapper(maybeStaticReference))
+        : (ruleVAKON !== null) ? ((engine, head, options) => engine.run(head, ruleVAKON, options))
+        : (engine, head) => head;
+    if (ruleName === "routeRoot") {
+      runtime.resolveRouteRoot = resolveRule;
     } else {
-      routeRuntime.requestRules.push([ruleName, sourceSection, source]);
+      runtime.ruleResolvers.push([ruleName, resolveRule, true]);
     }
   });
-  // routeRuntime.kueryRules.push(..._entriesOf(fastifyRoute.config.kueryRules));
-  for (const requiredRuleName of [...(requiredRules || []), ...(requiredRuntimeRules || [])]) {
-    if ((routeRuntime.scopeBase[requiredRuleName] === undefined)
-        && !routeRuntime.requestRules.find(([ruleName]) => (ruleName === requiredRuleName))
-        // && !routeRuntime.kueryRules.find(([ruleName]) => (ruleName === requiredRuleName)
-        ) {
-      throw new Error(`Required ${category} ${method} rule '${requiredRuleName}' is undefined`);
-    }
-  }
   return runtime;
 }
 
@@ -71,12 +57,9 @@ export async function _preloadRuntimeResources (mapper, route, runtime) {
     mapper.infoEvent("Preloading route ", route.name, "; activating root resource and",
         runtime.staticResources.length, "static rule resources");
     await vRouteRoot.activate();
-    const activations = [];
-    for (const staticResource of runtime.staticResources) {
-      const vStaticResource = mapper.getEngine().getVrapper(staticResource);
-      const activation = vStaticResource.activate();
-      if (activation) activations.push(activation);
-    }
+    const activations = runtime.staticResources
+        .map(staticResource => mapper.getEngine().getVrapper(staticResource).activate())
+        .filter(e => e);
     await Promise.all(activations);
     mapper.infoEvent("Done preloading route:", route.name,
         "\n\tactive route root:", ...dumpObject(vRouteRoot.debugId()),
@@ -95,6 +78,12 @@ export function _buildRuntimeVALKOptions (mapper, route, runtime, request, reply
   const valkOptions = { scope };
   scope.request = request;
   scope.reply = reply;
+  return valkOptions;
+}
+
+export function _resolveRuntimeRules (mapper, runtime, valkOptions) {
+  const scope = valkOptions.scope;
+  // TODO: create transaction here.
   for (const [ruleName, resolveRule, requireRuntimeRule] of runtime.ruleResolvers) {
     scope[ruleName] = resolveRule(mapper.getEngine(), scope.routeRoot, valkOptions);
     if (requireRuntimeRule && scope[ruleName] === undefined) {
@@ -106,5 +95,5 @@ export function _buildRuntimeVALKOptions (mapper, route, runtime, request, reply
       }
     }
   }
-  return valkOptions;
+  return false; // Success.
 }

@@ -3,7 +3,7 @@
 import type MapperService, { Route } from "~/rest-api-spindle/fastify/MapperService";
 import { dumpObject, thenChainEagerly } from "~/tools";
 
-import { _createToMappingsParts, _resolveMappingResource } from "./_mappingHandlerOps";
+import { _presolveResourceRouteRequest } from "../resource/_resourceHandlerOps";
 
 export default function createRouter (mapper: MapperService, route: Route) {
   return {
@@ -32,6 +32,9 @@ export default function createRouter (mapper: MapperService, route: Route) {
 
     handler (request, reply) {
       const valkOptions = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      if (_presolveResourceRouteRequest(mapper, route, this.runtime, valkOptions)) {
+        return true;
+      }
       const scope = valkOptions.scope;
       if (!scope.doCreateMappingAndTarget) {
         reply.code(405);
@@ -50,8 +53,6 @@ export default function createRouter (mapper: MapperService, route: Route) {
         reply.send(`Required body.$V.target.name field is missing or is not a string`);
         return true;
       }
-
-      if (_resolveMappingResource(mapper, route, request, reply, scope)) return true;
 
       const wrap = new Error(`mapping POST ${route.url}`);
       valkOptions.route = route;

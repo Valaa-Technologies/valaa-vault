@@ -3,7 +3,7 @@
 import type MapperService, { Route } from "~/rest-api-spindle/fastify/MapperService";
 import { dumpObject, thenChainEagerly } from "~/tools";
 
-import { _verifyResourceAuthorization } from "./_resourceHandlerOps";
+import { _presolveResourceRouteRequest } from "./_resourceHandlerOps";
 
 export default function createRouter (mapper: MapperService, route: Route) {
   return {
@@ -11,8 +11,8 @@ export default function createRouter (mapper: MapperService, route: Route) {
 
     prepare (/* fastify */) {
       this.runtime = mapper.createRouteRuntime(this);
-      this.toSuccessBodyFields = mapper.buildSchemaKuery(route.schema.response[200]);
-      this.hardcodedResources = route.config.valos.hardcodedResources;
+      this.toSuccessBodyFields = mapper.appendSchemaSteps(this.runtime, route.schema.response[200],
+          { expandProperties: true });
     },
 
     preload () {
@@ -21,7 +21,7 @@ export default function createRouter (mapper: MapperService, route: Route) {
 
     handler (request, reply) {
       const valkOptions = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
-      if (_verifyResourceAuthorization(mapper, route, request, reply, scope)) return true;
+      if (_presolveResourceRouteRequest(mapper, route, this.runtime, valkOptions)) {
       scope.resource = mapper._engine.tryVrapper([scope.resourceId]);
       if (!scope.resource) {
         reply.code(404);

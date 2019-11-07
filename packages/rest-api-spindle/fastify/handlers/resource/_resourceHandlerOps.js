@@ -1,13 +1,21 @@
 // @flow
 
-import { Vrapper } from "~/engine";
+import { _verifyResourceAuthorization, _presolveRouteRequest } from "../_handlerOps";
 
-import { verifySessionAuthorization } from "~/rest-api-spindle/fastify/security";
-
-export function _verifyResourceAuthorization (mapper, route, request, reply, scope) {
-  if (!scope.routeRoot || !(scope.routeRoot instanceof Vrapper)) {
-    throw new Error("Resource route routeRoot missing or invalid");
+export function _presolveResourceRouteRequest (mapper, route, runtime, valkOptions) {
+  if (_presolveRouteRequest(
+      mapper, { method: "GET", category: route.category }, runtime, valkOptions)) {
+    return true;
   }
-  return verifySessionAuthorization(mapper, route, request, reply, scope, scope.routeRoot);
-}
+  const scope = valkOptions.scope;
+  if (!scope.resource) {
+    scope.reply.code(404);
+    scope.reply.send(`No such ${route.config.resource.name} route resource`);
+    return true;
+  }
+
+  if (_verifyResourceAuthorization(mapper, route, scope, scope.resource, "route resource")) {
+    return true;
+  }
+  return false;
 }

@@ -2,23 +2,19 @@
 
 import path from "path";
 
-export function _buildSchemaKuery (routeMapper, jsonSchema, outerKuery, innerKuery, isValOSFields) {
-  const hardcoded = (innerKuery === undefined)
-      && (jsonSchema.valospace || {}).hardcodedResources;
-  if (hardcoded) {
-    outerKuery.push(["§'", Object.values(hardcoded).map(e => e)]);
-    return outerKuery;
-  }
+export function _appendSchemaSteps (routeMapper, runtime, jsonSchema, targetVAKON, innerTargetVAKON,
+    expandProperties, isValOSFields) {
   if (jsonSchema.type === "array") {
     if (!innerTargetVAKON) {
       throw new Error("json schema valospace vpath missing with json schema type 'array'");
     }
-    routeMapper.buildSchemaKuery(jsonSchema.items, innerKuery);
-  } else if (jsonSchema.type === "object") {
+    routeMapper.appendSchemaSteps(runtime, jsonSchema.items,
+        { expandProperties, targetVAKON: innerTargetVAKON });
+  } else if ((jsonSchema.type === "object") && expandProperties) {
     const objectKuery = {};
     Object.entries(jsonSchema.properties).forEach(([key, valueSchema]) => {
       let op;
-      if (isValOSFields && ((valueSchema.valospace || {}).projection === undefined)) {
+      if (isValOSFields && ((valueSchema.valospace || {}).reflection === undefined)) {
         if (key === "href") {
           op = ["§->", "target", false, "rawId",
             ["§+", _getResourceHRefPrefix(routeMapper, jsonSchema), ["§->", null]]
@@ -26,12 +22,13 @@ export function _buildSchemaKuery (routeMapper, jsonSchema, outerKuery, innerKue
         } else if (key === "rel") op = "self";
         else op = ["§->", key];
       } else if (key === "$V") {
-        op = routeMapper.buildSchemaKuery(valueSchema, undefined, true);
+        op = routeMapper.appendSchemaSteps(runtime, valueSchema,
+            { expandProperties: true, isValOSFields: true });
       } else {
-        op = routeMapper.buildSchemaKuery(valueSchema);
+        op = routeMapper.appendSchemaSteps(runtime, valueSchema, { expandProperties: true });
         op = (op.length === 1) ? ["§..", key]
             : ((valueSchema.type === "array")
-                || (valueSchema.valospace || {}).projection !== undefined) ? op
+                || (valueSchema.valospace || {}).reflection !== undefined) ? op
             : ["§->", ["§..", key], false, ...op.slice(1)];
       }
       objectKuery[key] = op;

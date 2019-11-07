@@ -3,17 +3,16 @@
 import path from "path";
 import fs from "fs";
 
-import VALEK from "~/engine/VALEK";
-
 import { dumpify, dumpObject, FabricEventTarget, outputError } from "~/tools";
 
 import { _createPrefixService } from "./_mapperOps";
 import {
-  _createRouteRuntime, _preloadRuntimeResources, _buildRuntimeVALKOptions,
+  _createRouteRuntime, _preloadRuntimeResources, _buildRuntimeVALKOptions, _resolveRuntimeRules,
 } from "./_routeRuntimeOps";
-import { _buildSchemaKuery, _resolveSchemaName, _getResourceHRefPrefix } from "./_buildOps";
+import { _appendSchemaSteps, _derefSchema, _getResourceHRefPrefix } from "./_buildOps";
 import { _filterResults, _sortResults, _paginateResults, _pickResultFields } from "./_resultOps";
 import { _updateResource } from "./_updateOps";
+import { _vakonpileVPath } from "./_vakonpileOps";
 
 const Fastify = require("fastify");
 
@@ -122,26 +121,64 @@ export default class MapperService extends FabricEventTarget {
       throw this.wrapErrorEvent(error,
           new Error(`buildRuntimeVALKOptions(${route.category} ${route.method} ${route.url})`),
           "\n\tconfig:", ...dumpObject(route.config),
-          "\n\truntime:", ...dumpObject(runtime),
           "\n\troute:", ...dumpObject(route),
+          "\n\truntime:", ...dumpObject(runtime),
+      );
+    }
+  }
+
+  resolveRuntimeRules (runtime, valkOptions) {
+    try {
+      return _resolveRuntimeRules(this, runtime, valkOptions);
+    } catch (error) {
+      throw this.wrapErrorEvent(error,
+          new Error(`buildRuntimeVALKOptions()`),
+          "\n\truntime:", ...dumpObject(runtime),
+          "\n\tvalkOptions:", ...dumpObject(valkOptions),
       );
     }
   }
 
   // Build ops
 
-  buildSchemaKuery (maybeJSONSchema, outerKuery = ["§->"], isValOSFields) {
-    let innerKuery, jsonSchema;
-    if (!maybeJSONSchema) return outerKuery;
+  appendSchemaSteps (runtime, maybeJSONSchema,
+      { expandProperties, isValOSFields, targetVAKON = ["§->"] } = {}) {
+    let jsonSchema, innerTargetVAKON;
+    if (!maybeJSONSchema) return targetVAKON;
     try {
       jsonSchema = this.derefSchema(maybeJSONSchema);
-      innerKuery = this.addSchemaStep(jsonSchema, outerKuery);
-      return _buildSchemaKuery(this, jsonSchema, outerKuery, innerKuery, isValOSFields);
+      innerTargetVAKON = this.appendVPathSteps(
+          runtime, (jsonSchema.valospace || {}).reflection, targetVAKON);
+      return _appendSchemaSteps(this, runtime, jsonSchema, targetVAKON,
+          innerTargetVAKON, expandProperties, isValOSFields);
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error("buildSchemaKuery"),
+      throw this.wrapErrorEvent(error, new Error("appendSchemaSteps"),
+          "\n\truntime:", ...dumpObject(runtime),
           "\n\tjsonSchema:", ...dumpObject(jsonSchema),
-          "\n\touterKuery:", ...dumpObject(outerKuery),
-          "\n\tinnerKuery:", ...dumpObject(innerKuery));
+          "\n\ttargetVAKON:", ...dumpObject(targetVAKON),
+          "\n\tinnerTargetVAKON:", ...dumpObject(innerTargetVAKON),
+        );
+    }
+  }
+
+  appendVPathSteps (runtime, vpath, targetVAKON = ["§->"]) {
+    let vpathVAKON, maybeInnerMapVAKON;
+    try {
+      if (vpath === undefined) return undefined;
+      if (!vpath) return targetVAKON;
+      vpathVAKON = _vakonpileVPath(vpath, runtime);
+      targetVAKON.push(...vpathVAKON);
+      maybeInnerMapVAKON = targetVAKON[targetVAKON.length - 1];
+      return maybeInnerMapVAKON[0] === "§map"
+          ? maybeInnerMapVAKON
+          : targetVAKON;
+    } catch (error) {
+      throw this.wrapErrorEvent(error, new Error("appendSchemaSteps"),
+          "\n\truntime:", ...dumpObject(runtime),
+          "\n\tvpath:", ...dumpObject(vpath),
+          "\n\ttargetVAKON:", ...dumpObject(targetVAKON),
+          "\n\tvpathVAKON:", ...dumpObject(runtime),
+          "\n\tmaybeInnerMapVAKON:", ...dumpObject(maybeInnerMapVAKON));
     }
   }
 
@@ -158,33 +195,6 @@ export default class MapperService extends FabricEventTarget {
 
   derefSchema (maybeJSONSchemaOrName: string | Object) {
     return _derefSchema(this, maybeJSONSchemaOrName);
-  addSchemaStep (maybeJSONSchema, outerKuery) {
-    const jsonSchema = _resolveSchemaName(this, maybeJSONSchema);
-    const predicate = (jsonSchema.valos || {}).predicate;
-    if (predicate === undefined) return undefined;
-    if (predicate === "") return outerKuery;
-    return predicate.split("!").reduce((innerKuery, part) => {
-      if (innerKuery.length > 1) innerKuery.push(false);
-      const fieldName = (part.match(/^(valos:field:|\$V:)(.*)$/) || [])[2];
-      if (fieldName) {
-        innerKuery.push(decodeURIComponent(fieldName));
-        return innerKuery;
-      }
-      const propertyName = (part.match(/^(valos:Property:|\.:)(.*)$/) || [])[2];
-      if (propertyName) {
-        innerKuery.push(["§..", decodeURIComponent(propertyName)]);
-        return innerKuery;
-      }
-      const relationName = (part.match(/^(valos:Relation:|-:)(.*)$/) || [])[2];
-      if (relationName) {
-        innerKuery.push(...VALEK.relations(relationName).toVAKON().slice(1));
-        const mapper = ["§map"];
-        innerKuery.push(mapper);
-        return mapper;
-      }
-      throw new Error(`Unrecognized part <${part}> in valos predicate <${
-          jsonSchema.valos.predicate}>`);
-    }, outerKuery);
   }
 
   // Result ops

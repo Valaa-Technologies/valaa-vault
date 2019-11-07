@@ -388,7 +388,8 @@ function _expandVPathStringParts (vpathArray, start = 0) {
     --i;
   }
   if (vpathArray[start] !== "@") {
-    _nestSegment(vpathArray);
+    _nestSegment(vpathArray, start);
+    if (vpathArray.length === 1) return vpathArray[0];
   } else if (start) {
     throw new Error(`Invalid vpath element:${
       ""} missing closing "@" (opening "@" is at non-zero location ${start})`);

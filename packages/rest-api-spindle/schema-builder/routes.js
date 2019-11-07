@@ -5,7 +5,7 @@ import { wrapError, dumpify, dumpObject, patchWith } from "~/tools";
 
 import {
   CollectionSchema, ObjectSchema, StringType, XWWWFormURLEncodedStringType, IdValOSType,
-  extendType, getBaseRelationTypeOf, schemaRefOf, trySchemaNameOf,
+  extendType, getBaseRelationTypeOf, schemaRefOf, trySchemaNameOf, _resolveFunction,
 } from "./types";
 
 import * as handlers from "~/rest-api-spindle/fastify/handlers";
@@ -476,10 +476,6 @@ function _setupRoute (route, userConfig, globalRules, resourceType, relationFiel
   });
 
   return route;
-}
-
-function _resolveFunction (maybeFunction) {
-  return typeof maybeFunction === "function" ? maybeFunction() : maybeFunction;
 }
 
 function _routeName (route) {

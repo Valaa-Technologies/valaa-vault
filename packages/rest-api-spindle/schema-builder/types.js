@@ -45,19 +45,15 @@ export const ResourceType = {
   $V: $VType,
 };
 
-export function namedResourceType (schemaName, baseTypes, schema) {
-  return patchWith({},
-      [].concat(
-          baseTypes || [], {
-            [ObjectSchema]: { schemaName },
-            $V: $VType,
-          },
-          schema),
+export function extendType (baseTypes, schema) {
+  return patchWith({}, [].concat(baseTypes || [], schema || []),
       { patchSymbols: true, concatArrays: false });
 }
 
-export function extendType (baseTypes, schema) {
-  return patchWith({}, [].concat(baseTypes || [], schema));
+export function namedResourceType (schemaName, baseTypes, schema) {
+  return extendType(
+      [].concat(baseTypes || [], { [ObjectSchema]: { schemaName }, $V: $VType }),
+      schema);
 }
 
 export function mappingToOneOf (mappingName, targetType, relationNameOrProjection,
@@ -92,15 +88,10 @@ export function relationToManyOf (targetType, relationNameOrProjection, options 
   return _createRelationTypeTo(targetType, relationNameOrProjection, options);
 }
 
-export function getBaseRelationTypeOf (anAnyRelationType, schemaPatch) {
-  const actualRelationType = (typeof anAnyRelationType === "function")
-      ? anAnyRelationType()
-      : anAnyRelationType;
-  return patchWith({
-    ...actualRelationType,
-    [ObjectSchema]: actualRelationType[ObjectSchema],
-    [CollectionSchema]: undefined,
-  }, schemaPatch || []);
+export function getBaseRelationTypeOf (anAnyRelationType, optionalSchema) {
+  return extendType(
+      [_resolveFunction(anAnyRelationType), { [CollectionSchema]: null }],
+      optionalSchema);
 }
 
 export function enumerateMappingsOf (aResourceType) {
@@ -120,7 +111,7 @@ export function sharedSchemaOf (aType) {
   if (!schemaName) {
     throw new Error("Type[ObjectSchema].schemaName missing when trying to get a shared Type");
   }
-  const schema = generateSchemaOf(aType);
+  const schema = exportSchemaOf(aType);
   schema.$id = schemaName;
   return schema;
 }
@@ -132,7 +123,7 @@ export function trySchemaNameOf (aType) {
 export function schemaRefOf (aType) {
   return trySchemaNameOf(aType)
       ? `${aType[ObjectSchema].schemaName}#`
-      : generateSchemaOf(aType);
+      : exportSchemaOf(aType);
 }
 
 function _createRelationTypeTo (targetType, relationNameOrProjection, {
@@ -169,8 +160,8 @@ function _createRelationTypeTo (targetType, relationNameOrProjection, {
   return ret;
 }
 
-export function generateSchemaOf (aType) {
-  if (typeof aType === "function") return generateSchemaOf(aType());
+export function exportSchemaOf (aType) {
+  if (typeof aType === "function") return exportSchemaOf(aType());
   if ((aType == null) || (typeof aType !== "object") || (Array.isArray(aType))) return aType;
   const ret = {};
   let current = ret;
@@ -205,4 +196,8 @@ export function generateSchemaOf (aType) {
     }
   }
   return ret;
+}
+
+export function _resolveFunction (maybeFunction) {
+  return typeof maybeFunction === "function" ? maybeFunction() : maybeFunction;
 }

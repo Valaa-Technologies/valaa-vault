@@ -91,6 +91,8 @@ describe("VPath", () => {
     it("Parses simple VPath's", () => {
       expect(expandVPath("@!:scriptRoot@!random@"))
           .toEqual(["@", ["!", [":", "scriptRoot"]], ["!random"]]);
+      expect(expandVPath("$~u4:aaaabbbb-cccc-dddd-eeee-ffffffffffff"))
+          .toEqual(["$", "~u4", "aaaabbbb-cccc-dddd-eeee-ffffffffffff"]);
       expect(expandVPath("@!invoke:create:@!:body$V:target:name@@"))
           .toEqual(["@", [
             "!invoke", [":", "create"],

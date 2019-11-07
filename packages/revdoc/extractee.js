@@ -208,10 +208,10 @@ module.exports = {
           "dc:title": named,
           "#0": [
             ...[].concat(operations)
-                .map(_extractTestPieceText)
+                .map(extractExampleText)
                 .map((bodyText, index) => [index ? "via" : "we expect", blockquote(c(bodyText))]),
             toSatisfy,
-            blockquote(c(_extractTestPieceText(result))),
+            blockquote(c(extractExampleText(result))),
           ],
         };
       },
@@ -238,17 +238,19 @@ module.exports = {
       }
     };
   },
+
+  extractExampleText,
 };
 
-function _extractTestPieceText (piece) {
-  if (typeof piece === "function") {
-    const bodyText = piece.toString();
+function extractExampleText (example) {
+  if (typeof example === "function") {
+    const bodyText = example.toString();
     return bodyText.slice(
         Math.min(bodyText.indexOf("{") !== -1 ? bodyText.indexOf("{") : bodyText.length,
             bodyText.indexOf(">") !== -1 ? bodyText.indexOf(">") : bodyText.length) + 1,
         Math.max(bodyText.lastIndexOf("}"), bodyText.length));
   }
-  return JSON.stringify(piece, null, 2);
+  return JSON.stringify(example, null, 2);
 }
 
 function filterKeysWithFieldReduction (entryFieldName, searchedValueOrValues, container,

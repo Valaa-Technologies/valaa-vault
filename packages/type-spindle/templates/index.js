@@ -9,7 +9,9 @@ export default valosheath.exportSpindle({
   authorityConfigs: [],
   mediaDecoders: [],
 
-  attachSpawn (/* gateway */) { return Object.create(this); },
+  attachSpawn (gateway, revelation) {
+    return Object.assign(Object.create(this), { gateway, revelation });
+  },
 
   onGatewayInitialized (/* gateway */) {
     throw new Error(`${this.name}.onGatewayInitialized not implemented`);

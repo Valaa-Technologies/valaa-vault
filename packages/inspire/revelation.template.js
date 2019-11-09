@@ -38,6 +38,7 @@ export default {
     blobBuffers: dictionaryOf(blobBuffer()), // deprecated
   },
   views: dictionaryOf(viewConfig()),
+  spindles: dictionaryOf(spindleConfig())
 };
 
 function spindlePrototype () {
@@ -188,6 +189,12 @@ function blobBuffer () {
 }
 
 function viewConfig () {
+  return {
+    verbosity: 0,
+  };
+}
+
+function spindleConfig () {
   return {
     verbosity: 0,
   };

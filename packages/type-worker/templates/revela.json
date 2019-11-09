@@ -15,5 +15,7 @@
     "rootPartitionURI": {
       "!!!": ["./toolsets.json", "@valos/type-worker", "rootPartitionURI"]
     }
-  }
+  },
+  "views": {},
+  "spindles": {}
 }

@@ -172,6 +172,7 @@ export default class Gateway extends FabricEventTarget {
       // Create a connection and an identity for the gateway towards false prophet
       this.discourse = await this._initiateDiscourse(this.gatewayRevelation, this.falseProphet);
 
+      this.spindleRevelations = (await this.revelation.spindles) || {};
       await this.attachSpindles(await this.gatewayRevelation.spindlePrototypes);
 
       this.prologueRevelation = await this.revelation.prologue;
@@ -184,14 +185,17 @@ export default class Gateway extends FabricEventTarget {
       this.clockEvent(1, `vidgets.register`, `Registering builtin Inspire vidgets`);
       registerVidgets();
       const spindleNames = Object.keys(this._attachedSpindles);
+      this.clockEvent(1, `initialized`, "Gateway initialized");
+      this._isInitialized = true;
+
+      this.viewRevelations = (await this.revelation.views) || {};
+
       this.clockEvent(1, `spindles.notify`,
           `Notifying ${spindleNames.length} spindles of gateway initialization:`,
           spindleNames.join(", "));
       for (const spindle of Object.values(this._attachedSpindles)) {
         await this._notifySpindleOfGatewayInitialized(spindle);
       }
-      this._isInitialized = true;
-      this.clockEvent(1, `initialized`, "Gateway initialized");
     } catch (error) {
       throw this.wrapErrorEvent(error, "initialize", "\n\tthis:", ...dumpObject(this));
     }
@@ -205,108 +209,139 @@ export default class Gateway extends FabricEventTarget {
     return this.rootLensURI || this.getRootPartitionURI();
   }
 
-  createAndConnectViewsToDOM (viewConfigs: { [string]: {
+  createAndConnectViewsToDOM (views: { [string]: {
     container: Object, hostGlobal: Object, window: Object,
     name: string, size: Object, rootId: string, lensURI: any, verbosity: ?number,
-  } }, createView = (options) => new InspireView(options)) {
-    const gateway = this;
-    this._views = {};
-    Object.entries(viewConfigs).forEach(([viewId, {
-      container, hostGlobal, window: explicitWindow, verbosity = this.getVerbosity(),
-      ...paramViewConfig
-    }]) => {
-      const view = createView({ gateway, engine: null, name: viewId, verbosity });
-      view.clockEvent(1, () => [`view.create`,
-          `createView({ name: ${viewId}, verbosity: ${verbosity} })`]);
-      let engine;
-      let rootScope;
-      let viewConfig;
-      this._views[viewId] = thenChainEagerly(view, view.addChainClockers(1, "view.create.ops", [
-        async function _createViewOptions () {
-          const revelationConfig = (await ((await gateway.revelation.views) || {})[viewId]) || {};
-          viewConfig = patchWith({ verbosity }, [revelationConfig, paramViewConfig]);
-          view.setRawName(viewId);
-          view.setName(`${viewConfig.name}-View`);
-          view.setVerbosity(viewConfig.verbosity);
-        },
-        function _createEngine () {
-          const engineOptions = {
-            name: `${viewConfig.name} Engine`,
-            ...(viewConfig.engine || {}),
-            logger: gateway.getLogger(),
-            sourcerer: gateway.falseProphet,
-            revelation: gateway.revelation,
-          };
-          engine = new Engine(engineOptions);
-          gateway.clockEvent(1, () => [
-            `${viewConfig.name}.engine.create`,
-            `Created Engine ${engine.debugId()}`,
-            ...(!gateway.getVerbosity() ? [] : [", with:",
-              "\n\tengineOptions:", ...dumpObject(engineOptions),
-              "\n\tengine:", ...dumpObject(engine),
-            ]),
-          ]);
-          view.setEngine(engine);
-        },
-        function _buildRootScope () {
-          rootScope = engine.getRootScope();
-          const hostDescriptors = engine.getHostDescriptors();
-          extendValosheathWithEngine(
-              rootScope, hostDescriptors, engine.discourse.getRootDiscourse());
-          if (!viewConfig.defaultAuthorityURI) {
-            extendValosheathWithInspire(rootScope, hostDescriptors, hostGlobal || getGlobal());
-          } else {
-            // FIXME(iridian): Implement this.schemes - still missing.
-            const defaultAuthorityConfig = gateway.schemes[viewConfig.defaultAuthorityURI];
-            invariantify(defaultAuthorityConfig,
-                `defaultAuthorityConfig missing when looking for default authority ${
-                      String(viewConfig.defaultAuthorityURI)}`);
-            extendValosheathWithInspire(rootScope, hostDescriptors, hostGlobal || getGlobal(),
-                  defaultAuthorityConfig, engine);
-          }
-          rootScope.valos.gateway = gateway;
-          rootScope.valos.identity = engine.getIdentityManager();
-          rootScope.valos.view = {};
-          rootScope.console = Object.assign(Object.create(engine), {
-            info: function verboseInfoEvent (...rest) {
-              this.infoEvent(0, ...[].concat(...rest.map(_trimObjects)));
-            },
-            log: function verboseLogEvent (...rest) {
-              this.logEvent(0, ...[].concat(...rest.map(_trimObjects)));
-            },
-            warn: function verboseWarnEvent (...rest) {
-              this.warnEvent(0, ...[].concat(...rest.map(_trimObjects)));
-            },
-            error: function verboseErrorEvent (...rest) {
-              this.errorEvent(0, ...[].concat(...rest.map(_trimObjects)));
-            },
-          });
-          function _trimObjects (entry) {
-            if (entry && (typeof entry === "object") && !inBrowser()) return dumpObject(entry);
-            return entry;
-          }
-        },
-        function _attachView () {
-          return view.attach(container, explicitWindow, viewConfig);
-        },
-        function _notifyViewSpindles (attachedView) {
-          gateway._views[viewId] = rootScope.valos.view = attachedView;
-          attachedView.rootScope = rootScope;
-          const attachedViewAwareSpindles = Object.values(gateway._attachedSpindles)
-              .filter(spindle => spindle.onViewAttached);
-          attachedView.clockEvent(1, () => [`view.attach.spindles.notify`,
-            `Notifying ${attachedViewAwareSpindles.length} attached view-aware spindles`,
-          ]);
-          return mapEagerly(attachedViewAwareSpindles,
-              spindle => gateway._notifySpindleOfViewAttached(spindle, attachedView, viewId));
-        },
-        reactions => gateway._views[viewId].clockEvent(1, () => [`view.attach.spindles.reactions`,
-          "\n\tspindle reactions:", ...dumpObject(reactions.filter(notNull => notNull)),
-        ]),
-        () => gateway._views[viewId],
-      ]));
-    });
+  } }, createView) {
+    this._hostComponents = { createView };
+    for (const { container, hostGlobal, window } of Object.values(views)) {
+      if (container) this._hostComponents.container = container;
+      if (hostGlobal) this._hostComponents.hostGlobal = hostGlobal;
+      if (window) this._hostComponents.window = window;
+    }
+    for (const [viewId, config] of [
+      ...Object.entries(views || {}),
+      ...this._pendingViews || [],
+      ...Object.entries(this.viewRevelations),
+    ]) {
+      this.addView(viewId, config);
+    }
     return this._views;
+  }
+
+  addView (viewId, viewConfig) {
+    if (!this._hostComponents) {
+      (this._pendingViews || (this._pendingViews = [])).push([viewId, viewConfig]);
+    } else {
+      const fullConfig = { ...this._hostComponents, ...viewConfig };
+      if (!viewConfig.container) {
+        const viewContainer = this._hostComponents.createElement("div");
+        viewContainer.id = `valos-gateway--view-container-${viewId}`;
+        this._hostComponents.container.appendChild(viewContainer);
+      }
+      this.createAndConnectViewToDOM(viewId, fullConfig);
+    }
+  }
+
+  createAndConnectViewToDOM (viewId, {
+    container, hostGlobal, window: explicitWindow,
+    verbosity = this.getVerbosity(),
+    createView = (options) => new InspireView(options),
+    ...paramViewConfig
+  }) {
+    if (!this._views) this._views = {};
+    if (this._views[viewId]) throw new Error(`View ${viewId} already exists`);
+    const view = createView({ gateway: this, engine: null, name: viewId, verbosity });
+    view.clockEvent(1, () => [`view.create`,
+        `createView({ name: ${viewId}, verbosity: ${verbosity} })`]);
+    let engine;
+    let rootScope;
+    let viewConfig;
+    const gateway = this;
+    this._views[viewId] = thenChainEagerly(view, view.addChainClockers(1, "view.create.ops", [
+      async function _createViewOptions () {
+        const revelationConfig = (await ((await gateway.revelation.views) || {})[viewId]) || {};
+        viewConfig = patchWith({ verbosity }, [revelationConfig, paramViewConfig]);
+        view.setRawName(viewId);
+        view.setName(`${viewConfig.name}-View`);
+        view.setVerbosity(viewConfig.verbosity);
+      },
+      function _createEngine () {
+        const engineOptions = {
+          name: `${viewConfig.name} Engine`,
+          ...(viewConfig.engine || {}),
+          logger: gateway.getLogger(),
+          sourcerer: gateway.falseProphet,
+          revelation: gateway.revelation,
+        };
+        engine = new Engine(engineOptions);
+        gateway.clockEvent(1, () => [
+          `${viewConfig.name}.engine.create`,
+          `Created Engine ${engine.debugId()}`,
+          ...(!gateway.getVerbosity() ? [] : [", with:",
+            "\n\tengineOptions:", ...dumpObject(engineOptions),
+            "\n\tengine:", ...dumpObject(engine),
+          ]),
+        ]);
+        view.setEngine(engine);
+      },
+      function _buildRootScope () {
+        rootScope = engine.getRootScope();
+        const hostDescriptors = engine.getHostDescriptors();
+        extendValosheathWithEngine(
+            rootScope, hostDescriptors, engine.discourse.getRootDiscourse());
+        if (!viewConfig.defaultAuthorityURI) {
+          extendValosheathWithInspire(rootScope, hostDescriptors, hostGlobal || getGlobal());
+        } else {
+          // FIXME(iridian): Implement this.schemes - still missing.
+          const defaultAuthorityConfig = gateway.schemes[viewConfig.defaultAuthorityURI];
+          invariantify(defaultAuthorityConfig,
+              `defaultAuthorityConfig missing when looking for default authority ${
+                    String(viewConfig.defaultAuthorityURI)}`);
+          extendValosheathWithInspire(rootScope, hostDescriptors, hostGlobal || getGlobal(),
+                defaultAuthorityConfig, engine);
+        }
+        rootScope.valos.gateway = gateway;
+        rootScope.valos.identity = engine.getIdentityManager();
+        rootScope.valos.view = {};
+        rootScope.console = Object.assign(Object.create(engine), {
+          info: function verboseInfoEvent (...rest) {
+            gateway.infoEvent(0, ...[].concat(...rest.map(_trimObjects)));
+          },
+          log: function verboseLogEvent (...rest) {
+            gateway.logEvent(0, ...[].concat(...rest.map(_trimObjects)));
+          },
+          warn: function verboseWarnEvent (...rest) {
+            gateway.warnEvent(0, ...[].concat(...rest.map(_trimObjects)));
+          },
+          error: function verboseErrorEvent (...rest) {
+            gateway.errorEvent(0, ...[].concat(...rest.map(_trimObjects)));
+          },
+        });
+        function _trimObjects (entry) {
+          if (entry && (typeof entry === "object") && !inBrowser()) return dumpObject(entry);
+          return entry;
+        }
+      },
+      function _attachView () {
+        return view.attach(container, explicitWindow, viewConfig);
+      },
+      function _notifyViewSpindles (attachedView) {
+        gateway._views[viewId] = rootScope.valos.view = attachedView;
+        attachedView.rootScope = rootScope;
+        const attachedViewAwareSpindles = Object.values(gateway._attachedSpindles)
+            .filter(spindle => spindle.onViewAttached);
+        attachedView.clockEvent(1, () => [`view.attach.spindles.notify`,
+          `Notifying ${attachedViewAwareSpindles.length} attached view-aware spindles`,
+        ]);
+        return mapEagerly(attachedViewAwareSpindles,
+            spindle => gateway._notifySpindleOfViewAttached(spindle, attachedView, viewId));
+      },
+      reactions => gateway._views[viewId].clockEvent(1, () => [`view.attach.spindles.reactions`,
+        "\n\tspindle reactions:", ...dumpObject(reactions.filter(notNull => notNull)),
+      ]),
+      () => gateway._views[viewId],
+    ]));
   }
 
   /**
@@ -561,7 +596,7 @@ export default class Gateway extends FabricEventTarget {
     const spindlePrototypes = await Promise.all(spindlePrototypes_);
     const newSpindleLookup = {};
     const spindleNames = [];
-    spindlePrototypes.forEach(spindlePrototype => {
+    await Promise.all(spindlePrototypes.map(async spindlePrototype => {
       if (newSpindleLookup[spindlePrototype.name]) {
         this.errorEvent(`Spindle '${spindlePrototype.name}' already being added:`,
             newSpindleLookup[spindlePrototype.name],
@@ -571,10 +606,12 @@ export default class Gateway extends FabricEventTarget {
         throw new Error(`Spindle '${spindlePrototype.name}' already attached`);
       }
       spindleNames.push(spindlePrototype.name);
+      const spindleRevelation = this.spindleRevelations[spindlePrototype.name];
       newSpindleLookup[spindlePrototype.name] = spindlePrototype.attachSpawn
-          ? spindlePrototype.attachSpawn(this)
-          : Object.create(spindlePrototype);
-    });
+          ? spindlePrototype.attachSpawn(this, spindleRevelation)
+          : Object.assign(Object.create(spindlePrototype),
+              { gateway: this, revelation: spindleRevelation });
+    }));
     this.clockEvent(1, `spindles.attach`, `Attaching ${spindleNames.length} spindles:`,
         spindleNames.join(", "));
     for (const name of spindleNames) await this._attachSpindle(name, newSpindleLookup[name]);
@@ -591,8 +628,8 @@ export default class Gateway extends FabricEventTarget {
     for (const MediaDecoder_: any of Object.values(spindle.mediaDecoders || {})) {
       this.oracle.getDecoderArray().addDecoder(this.callRevelation(MediaDecoder_));
     }
-    return thenChainEagerly(null, [
-      () => this._isInitialized && this._notifySpindleOfGatewayInitialized(spindle),
+    return this._isInitialized && thenChainEagerly(null, [
+      () => this._notifySpindleOfGatewayInitialized(spindle),
       ...Object.keys(this._views || {}).map(viewName =>
       // Do not block for views to init
           () => !isPromise(this._views[viewName])
@@ -602,7 +639,7 @@ export default class Gateway extends FabricEventTarget {
   }
 
   _notifySpindleOfGatewayInitialized (spindle: Object) {
-    return spindle.onGatewayInitialized && spindle.onGatewayInitialized(this);
+    return spindle.onGatewayInitialized && spindle.onGatewayInitialized(this, spindle.revelation);
   }
 
   _notifySpindleOfViewAttached (spindle: Object, view: InspireView, viewName: string) {

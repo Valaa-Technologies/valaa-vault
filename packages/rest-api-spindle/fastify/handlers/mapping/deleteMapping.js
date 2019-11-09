@@ -1,33 +1,33 @@
 // @flow
 
-import type MapperService, { Route } from "~/rest-api-spindle/fastify/MapperService";
+import type { PrefixRouter, Route } from "~/rest-api-spindle/fastify/MapperService";
 import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _createToMapping, _presolveMappingRouteRequest } from "./_mappingHandlerOps";
 
-export default function createRouter (mapper: MapperService, route: Route) {
+export default function createProjector (router: PrefixRouter, route: Route) {
   return {
     requiredRules: ["routeRoot", "resource", "target", "destroyMapping"],
     rules: {
       mappingName: route && route.config.relation.name,
     },
 
-    prepare (/* fastify */) {
-      this.runtime = mapper.createRouteRuntime(this);
-      this.toMapping = _createToMapping(mapper, route, this.runtime);
+    prepare () {
+      this.runtime = router.createRouteRuntime(this);
+      this.toMapping = _createToMapping(router, route, this.runtime);
     },
 
     preload () {
-      return mapper.preloadRuntimeResources(this, this.runtime);
+      return router.preloadRuntimeResources(this, this.runtime);
     },
 
     handler (request, reply) {
-      const valkOptions = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
-      if (_presolveMappingRouteRequest(mapper, route, this.runtime, valkOptions, this.toMapping)) {
+      const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      if (_presolveMappingRouteRequest(router, route, this.runtime, valkOptions, this.toMapping)) {
         return true;
       }
       const scope = valkOptions.scope;
-      mapper.infoEvent(1, () => [
+      router.infoEvent(1, () => [
         `${this.name}:`, ...dumpObject(scope.resource),
         `\n\t${scope.mappingName}:`, ...dumpObject(scope.mapping),
         `\n\ttarget:`, ...dumpObject(scope.target),
@@ -41,7 +41,7 @@ export default function createRouter (mapper: MapperService, route: Route) {
       }
 
       const wrap = new Error(this.name);
-      valkOptions.discourse = mapper.getDiscourse().acquireFabricator();
+      valkOptions.discourse = router.getDiscourse().acquireFabricator();
       return thenChainEagerly(scope.mapping, [
         vMapping => (scope.destroyMapping
             ? vMapping.do(scope.destroyMapping, valkOptions)
@@ -52,7 +52,7 @@ export default function createRouter (mapper: MapperService, route: Route) {
           const results = "DESTROYED";
           reply.code(200);
           reply.send(results);
-          mapper.infoEvent(2, () => [
+          router.infoEvent(2, () => [
             `${this.name}:`,
             "\n\tresults:", ...dumpObject(results),
           ]);
@@ -60,7 +60,7 @@ export default function createRouter (mapper: MapperService, route: Route) {
         },
       ], (error) => {
         valkOptions.discourse.releaseFabricator({ abort: error });
-        throw mapper.wrapErrorEvent(error, wrap,
+        throw router.wrapErrorEvent(error, wrap,
           "\n\trequest.query:", ...dumpObject(request.query),
           "\n\tscope.mapping:", ...dumpObject(scope.mapping),
           "\n\tscope.resource:", ...dumpObject(scope.resource),

@@ -2,32 +2,32 @@
 
 import { Vrapper } from "~/engine";
 
-import type MapperService, { Route } from "~/rest-api-spindle/fastify/MapperService";
+import type { PrefixRouter, Route } from "~/rest-api-spindle/fastify/MapperService";
 import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _presolveRouteRequest } from "../_handlerOps";
 
-export default function createRouter (mapper: MapperService, route: Route) {
+export default function createProjector (router: PrefixRouter, route: Route) {
   return {
     requiredRules: ["routeRoot", "doCreateResource"],
 
-    prepare (/* fastify */) {
-      this.runtime = mapper.createRouteRuntime(this);
-      this.toPatchTarget = mapper.appendSchemaSteps(this.runtime, route.config.resource.schema);
+    prepare () {
+      this.runtime = router.createRouteRuntime(this);
+      this.toPatchTarget = router.appendSchemaSteps(this.runtime, route.config.resource.schema);
       if (this.toPatchTarget.length <= 1) this.toPatchTarget = undefined;
     },
 
     preload () {
-      return mapper.preloadRuntimeResources(this, this.runtime);
+      return router.preloadRuntimeResources(this, this.runtime);
     },
 
     handler (request, reply) {
-      const valkOptions = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       const scope = valkOptions.scope;
-      if (_presolveRouteRequest(mapper, route, this.runtime, valkOptions)) {
+      if (_presolveRouteRequest(router, route, this.runtime, valkOptions)) {
         return true;
       }
-      mapper.infoEvent(1, () => [
+      router.infoEvent(1, () => [
         `${this.name}:`,
         "\n\trequest.query:", request.query,
         "\n\trequest.body:", request.body,
@@ -38,7 +38,7 @@ export default function createRouter (mapper: MapperService, route: Route) {
         return false;
       }
       const wrap = new Error(`resource POST ${route.url}`);
-      valkOptions.discourse = mapper.getDiscourse().acquireFabricator();
+      valkOptions.discourse = router.getDiscourse().acquireFabricator();
       return thenChainEagerly(valkOptions.discourse, [
         () => {
           console.log("resource POST dump:", ...dumpObject(scope.doCreateResource),
@@ -53,7 +53,7 @@ export default function createRouter (mapper: MapperService, route: Route) {
           }
           scope.resource = vResource;
           if (request.body) {
-            mapper.updateResource(vResource, request.body,
+            router.updateResource(vResource, request.body,
                   { ...valkOptions, route, toPatchTarget: this.toPatchTarget });
           }
         },
@@ -64,13 +64,13 @@ export default function createRouter (mapper: MapperService, route: Route) {
           const resourceId = scope.resource.getRawId();
           const results = {
             $V: {
-              href: `${mapper.getResourceHRefPrefix(route.config.resource.schema)}${resourceId}`,
+              href: `${router.getResourceHRefPrefix(route.config.resource.schema)}${resourceId}`,
               rel: "self",
             },
           };
           reply.code(201);
           reply.send(JSON.stringify(results, null, 2));
-          mapper.infoEvent(2, () => [
+          router.infoEvent(2, () => [
             `${this.name}:`,
             "\n\tresults:", ...dumpObject(results),
           ]);
@@ -78,7 +78,7 @@ export default function createRouter (mapper: MapperService, route: Route) {
         },
       ], (error) => {
         valkOptions.discourse.releaseFabricator({ abort: error });
-        throw mapper.wrapErrorEvent(error, wrap,
+        throw router.wrapErrorEvent(error, wrap,
             "\n\trequest.query:", ...dumpObject(request.query),
             "\n\trequest.body:", ...dumpObject(request.body),
             "\n\tscope.resource:", ...dumpObject(scope.resource),

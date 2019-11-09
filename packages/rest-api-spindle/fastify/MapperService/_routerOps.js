@@ -4,12 +4,12 @@ import { asyncConnectToPartitionsIfMissingAndRetry } from "~/raem/tools/denormal
 
 import { dumpify, dumpObject, outputError, thenChainEagerly } from "~/tools";
 
-import * as routerCreators from "./handlers";
+import * as projectorCreators from "../handlers";
 
 const FastifySwaggerPlugin = require("fastify-swagger");
 const FastifyCookiePlugin = require("fastify-cookie");
 
-export function _createPrefixService (rootService, prefix, {
+export function _createPrefixRouter (rootService, prefix, {
   openapi, swaggerPrefix, schemas, routes, identity, sessionDuration, ...pluginOptions
 }) {
   const ret = Object.create(rootService);
@@ -17,10 +17,12 @@ export function _createPrefixService (rootService, prefix, {
   ret.getSessionDuration = () => (sessionDuration || rootService.getSessionDuration());
   ret.getIdentity = () => identity;
 
+  // FIXME(iridian, 2019-11): testing.
+
   // Create handlers for all routes before trying to register.
   // At this stage neither schema nor fastify is available for the
   // handlers.
-  const routers = routes.map(route => _createRouter(ret, route)).filter(r => r);
+  const projectors = routes.map(route => _createProjector(ret, route)).filter(r => r);
   // https://github.com/fastify/fastify/blob/master/docs/Server.md
   rootService.getRootFastify().register(async (fastify, opts, next) => {
     ret._fastify = fastify;
@@ -38,17 +40,17 @@ export function _createPrefixService (rootService, prefix, {
     ]);
     schemas.forEach(schema => fastify.addSchema(schema));
     ret.infoEvent(1, () => [
-      `${prefix}: preparing ${routers.length} routers`,
+      `${prefix}: preparing ${projectors.length} projectors`,
     ]);
-    await Promise.all(routers.map(router => router.prepare && router.prepare(fastify)));
+    await Promise.all(projectors.map(projector => projector.prepare && projector.prepare(fastify)));
     ret.infoEvent(1, () => [
-      `${prefix}: preloading ${routers.length} routers`,
+      `${prefix}: preloading ${projectors.length} projectors`,
     ]);
-    await Promise.all(routers.map(router => router.preload && router.preload(fastify)));
+    await Promise.all(projectors.map(projector => projector.preload && projector.preload(fastify)));
     ret.infoEvent(1, () => [
-      `${prefix}: adding ${routers.length} fastify routes`,
+      `${prefix}: adding ${projectors.length} fastify routes`,
     ]);
-    routers.forEach(router => fastify.route(_fastifyRouteOptions(ret, router)));
+    projectors.forEach(projector => fastify.route(_fastifyRouteOptions(ret, projector)));
     ret.infoEvent(1, () => [
       `${prefix}: plugin ready`,
     ]);
@@ -64,46 +66,48 @@ export function _createPrefixService (rootService, prefix, {
   return ret;
 }
 
-function _createRouter (mapper, route) {
+function _createProjector (router, route) {
   const wrap = new Error(
-      `createRouter(${route.category} ${route.method} ${route.url})`);
+      `createProjector(${route.category} ${route.method} ${route.url})`);
   try {
     if (!route.url) throw new Error(`Route url undefined`);
     if (!route.category) throw new Error(`Route category undefined`);
     if (!route.method) throw new Error(`Route method undefined`);
     if (!route.config) throw new Error(`Route config undefined`);
-    const createRouter = (routerCreators[route.category] || {})[route.method];
-    if (!createRouter) throw new Error(`No router found for '${route.category} ${route.method}'`);
-    const router = createRouter(mapper, route);
-    if (router == null) return undefined;
-    if (!router.name) router.name = `${route.category} ${route.method} ${route.url}`;
-    router.route = route;
-    return router;
+    const createProjector = (projectorCreators[route.category] || {})[route.method];
+    if (!createProjector) {
+      throw new Error(`No projector found for '${route.category} ${route.method}'`);
+    }
+    const projector = createProjector(router, route);
+    if (projector == null) return undefined;
+    if (!projector.name) projector.name = `${route.category} ${route.method} ${route.url}`;
+    projector.route = route;
+    return projector;
   } catch (error) {
-    throw mapper.wrapErrorEvent(error, wrap,
+    throw router.wrapErrorEvent(error, wrap,
         "\n\troute:", dumpify(route, { indent: 2 }));
   }
 }
 
-function _fastifyRouteOptions (mapper, router) {
+function _fastifyRouteOptions (router, projector) {
   return {
-    ...router.route,
-    handler: _wrapHandler(mapper, router),
+    ...projector.route,
+    handler: _wrapHandler(router, projector),
   };
 }
 
-function _wrapHandler (mapper, router) {
-  const routeErrorMessage = `Exception caught during: ${router.name}`;
+function _wrapHandler (router, projector) {
+  const routeErrorMessage = `Exception caught during: ${projector.name}`;
   const handleRequestAndErrors = asyncConnectToPartitionsIfMissingAndRetry(
       (request, reply) => thenChainEagerly(
-          router.handler(request, reply),
+          projector.handler(request, reply),
           result => {
             if (result !== true) {
-              throw mapper.wrapErrorEvent(
+              throw router.wrapErrorEvent(
                   new Error("INTERNAL SERVER ERROR: invalid route handler return value"),
                   new Error(`handler return value validator`),
                   "\n\treturn value:", ...dumpObject(result),
-                  "Note: router.handler must explicitly call reply.code/send",
+                  "Note: projector.handler must explicitly call reply.code/send",
                   "and return true or return a Promise which resolves to true.",
                   "This ensures that exceptions are always caught and logged properly");
             }
@@ -111,11 +115,11 @@ function _wrapHandler (mapper, router) {
       (error, request, reply) => {
         reply.code(500);
         reply.send(error.message);
-        outputError(mapper.wrapErrorEvent(error, new Error(`${router.name}`),
+        outputError(router.wrapErrorEvent(error, new Error(`${projector.name}`),
             "\n\trequest.params:", ...dumpObject(request.params),
             "\n\trequest.query:", ...dumpObject(request.query),
             "\n\trequest.body:", ...dumpObject(request.body),
-        ), routeErrorMessage, mapper.getLogger());
+        ), routeErrorMessage, router.getLogger());
       },
   );
   return (request, reply) => { handleRequestAndErrors(request, reply); };

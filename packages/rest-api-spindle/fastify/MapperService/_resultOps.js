@@ -2,7 +2,7 @@
 
 const FieldSchemaTag = Symbol("FieldSchema");
 
-export function _filterResults (mapper, results, filter, ids, fieldRequirements) {
+export function _filterResults (router, results, filter, ids, fieldRequirements) {
   const idLookup = ids
       && ids.split(",").reduce((lookup, id) => (lookup[id] = true) && lookup, {});
   let requirementCount = 0;
@@ -51,7 +51,7 @@ export function _filterResults (mapper, results, filter, ids, fieldRequirements)
   });
 }
 
-export function _sortResults (mapper, results, sort) {
+export function _sortResults (router, results, sort) {
   const sortKeys = sort.split(",");
   const order = sortKeys.map((key, index) => {
     if (key[0] !== "-") return 1;
@@ -69,11 +69,11 @@ export function _sortResults (mapper, results, sort) {
   return results;
 }
 
-export function _paginateResults (mapper, results, offset, limit) {
+export function _paginateResults (router, results, offset, limit) {
   return results.slice(offset || 0, limit && ((offset || 0) + limit));
 }
 
-export function _pickResultFields (mapper, rootResult, fields /* , resultSchema */) {
+export function _pickResultFields (router, rootResult, fields /* , resultSchema */) {
   const selectors = { [FieldSchemaTag]: false };
   fields.split(",").forEach(field => {
     const steps = field.split("/");
@@ -87,7 +87,7 @@ export function _pickResultFields (mapper, rootResult, fields /* , resultSchema 
         : {}; /* : steps.reduce((subSchema, step, index) => {
       let returning;
       for (let current = subSchema; ;) {
-        if (typeof current === "string") current = _derefSchema(mapper, current);
+        if (typeof current === "string") current = _derefSchema(router, current);
         else if (current.type === "array") current = current.items;
         else if (returning) return current;
         else if (current.type !== "object") {
@@ -129,7 +129,7 @@ export function _pickResultFields (mapper, rootResult, fields /* , resultSchema 
       // having clients make separate queries for the entries.
       const subFields = _gatherSubFields(selector).join(",");
       injects.push(
-        mapper.getRootFastify().inject({
+        router.getRootFastify().inject({
           method: "GET",
           url: V.href,
           query: { fields: subFields },

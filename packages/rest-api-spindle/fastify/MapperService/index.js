@@ -5,16 +5,18 @@ import fs from "fs";
 
 import { dumpify, dumpObject, FabricEventTarget, outputError } from "~/tools";
 
-import { _createPrefixService } from "./_mapperOps";
+import { _createRouter } from "./_routerOps";
 import {
   _createRouteRuntime, _preloadRuntimeResources, _buildRuntimeVALKOptions, _resolveRuntimeRules,
 } from "./_routeRuntimeOps";
 import { _appendSchemaSteps, _derefSchema, _getResourceHRefPrefix } from "./_buildOps";
 import { _filterResults, _sortResults, _paginateResults, _pickResultFields } from "./_resultOps";
-import { _updateResource } from "./_updateOps";
+import { _updateResource } from "./_updateResourceOps";
 import { _vakonpileVPath } from "./_vakonpileOps";
 
 const Fastify = require("fastify");
+
+export type PrefixRouter = MapperService;
 
 export default class MapperService extends FabricEventTarget {
   constructor ({ view, viewName, port, address, fastify, prefixes, ...rest }) {
@@ -87,41 +89,41 @@ export default class MapperService extends FabricEventTarget {
 
   // Runtime ops
 
-  createRouteRuntime (route) {
+  createRouteRuntime (projector) {
     const runtime = {};
     try {
-      return _createRouteRuntime(this, route, runtime);
+      return _createRouteRuntime(this, projector, runtime);
     } catch (error) {
       throw this.wrapErrorEvent(error,
-          new Error(`createRouteRuntime(${route.category} ${route.method} ${route.url})`),
-          "\n\tconfig:", ...dumpObject(route.config),
-          "\n\truntime:", ...dumpObject(runtime),
-          "\n\troute:", ...dumpObject(route),
-      );
-    }
-  }
-
-  async preloadRuntimeResources (route, runtime) {
-    try {
-      return await _preloadRuntimeResources(this, route, runtime);
-    } catch (error) {
-      throw this.wrapErrorEvent(error,
-          new Error(`preloadRuntimeResources(${route.category} ${route.method} ${route.url})`),
-          "\n\tconfig:", ...dumpObject(route.config),
-          "\n\troute:", ...dumpObject(route),
+          new Error(`createRouteRuntime(${this._projectorName(projector)})`),
+          "\n\tconfig:", ...dumpObject(projector.config),
+          "\n\tprojector:", ...dumpObject(projector),
           "\n\truntime:", ...dumpObject(runtime),
       );
     }
   }
 
-  buildRuntimeVALKOptions (route, runtime, request, reply) {
+  async preloadRuntimeResources (projector, runtime) {
     try {
-      return _buildRuntimeVALKOptions(this, route, runtime, request, reply);
+      return await _preloadRuntimeResources(this, projector, runtime);
     } catch (error) {
       throw this.wrapErrorEvent(error,
-          new Error(`buildRuntimeVALKOptions(${route.category} ${route.method} ${route.url})`),
-          "\n\tconfig:", ...dumpObject(route.config),
-          "\n\troute:", ...dumpObject(route),
+          new Error(`preloadRuntimeResources(${this._projectorName(projector)})`),
+          "\n\tconfig:", ...dumpObject(projector.config),
+          "\n\tprojector:", ...dumpObject(projector),
+          "\n\truntime:", ...dumpObject(runtime),
+      );
+    }
+  }
+
+  buildRuntimeVALKOptions (projector, runtime, request, reply) {
+    try {
+      return _buildRuntimeVALKOptions(this, projector, runtime, request, reply);
+    } catch (error) {
+      throw this.wrapErrorEvent(error,
+          new Error(`buildRuntimeVALKOptions(${this._projectorName(projector)})`),
+          "\n\tconfig:", ...dumpObject(projector.config),
+          "\n\tprojector:", ...dumpObject(projector),
           "\n\truntime:", ...dumpObject(runtime),
       );
     }
@@ -137,6 +139,10 @@ export default class MapperService extends FabricEventTarget {
           "\n\tvalkOptions:", ...dumpObject(valkOptions),
       );
     }
+  }
+
+  _projectorName (projector) {
+    return `${projector.method}-${projector.category} <${projector.url}>`;
   }
 
   // Build ops

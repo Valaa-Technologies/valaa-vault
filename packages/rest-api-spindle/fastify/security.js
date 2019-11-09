@@ -15,10 +15,9 @@ const _normalizeAlg = Object.assign(Object.create(null), {
   "aes-256-gcm": "aes-256-gcm",
 });
 
-export function verifySessionAuthorization (
-    routeMapper, route, scope: Object, accessRoot: Vrapper) {
+export function verifySessionAuthorization (router, route, scope: Object, accessRoot: Vrapper) {
   try {
-    const identity = routeMapper.getIdentity();
+    const identity = router.getIdentity();
     if (!identity) {
       throw new Error("Cannot verify session authorization: valosheath identity not configured");
     }
@@ -34,9 +33,9 @@ export function verifySessionAuthorization (
         ({ identityPartition, timeStamp } =
             burlaesgDecode(accessToken, identity.clientSecret).payload);
         if (!(Math.floor(Date.now() / 1000)
-            < Number(timeStamp) + routeMapper.getSessionDuration())) {
+            < Number(timeStamp) + router.getSessionDuration())) {
           console.log("Session expired:", Math.floor(Date.now() / 1000), ">=", timeStamp,
-              routeMapper.getSessionDuration(),
+              router.getSessionDuration(),
               "\n\tpayload:", timeStamp, identityPartition);
           scope.reply.code(401);
           scope.reply.send("Session has expired");
@@ -55,7 +54,7 @@ export function verifySessionAuthorization (
     scope.reply.send("Unauthorized");
     return true;
   } catch (error) {
-    throw routeMapper.wrapErrorEvent(error, new Error("verifySessionAuthorization"),
+    throw router.wrapErrorEvent(error, new Error("verifySessionAuthorization"),
         "\n\taccessRoot:", ...dumpObject(accessRoot));
   }
 }

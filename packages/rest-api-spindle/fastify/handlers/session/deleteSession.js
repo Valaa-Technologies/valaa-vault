@@ -1,15 +1,15 @@
 
-import type MapperService from "~/rest-api-spindle/fastify/MapperService";
+import type { PrefixRouter /* , Route */ } from "~/rest-api-spindle/fastify/MapperService";
 import { burlaesgDecode, hs256JWTDecode } from "~/rest-api-spindle/fastify/security";
 
-export default function createRouter (mapper: MapperService /* , route: Route */) {
+export default function createProjector (router: PrefixRouter /* , route: Route */) {
   return {
     requiredRules: [
       "routeRoot", "clientRedirectPath", "clientCookie", "sessionCookie",
     ],
 
-    prepare (/* fastify */) {
-      this.runtime = mapper.createRouteRuntime(this);
+    prepare () {
+      this.runtime = router.createRouteRuntime(this);
 
       const routeIdentity = this.runtime.identity;
       if (!routeIdentity) {
@@ -24,12 +24,12 @@ export default function createRouter (mapper: MapperService /* , route: Route */
     },
 
     preload () {
-      return mapper.preloadRuntimeResources(this, this.runtime);
+      return router.preloadRuntimeResources(this, this.runtime);
     },
 
     handler (request, reply) {
-      const { scope } = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
-      mapper.infoEvent(1, () => [
+      const { scope } = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      router.infoEvent(1, () => [
         "\n\trequest.query:", request.query,
         "\n\trequest.cookies:", request.cookies,
       ]);

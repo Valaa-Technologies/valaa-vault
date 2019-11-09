@@ -1,48 +1,48 @@
 // @flow
 
-import type MapperService, { Route } from "~/rest-api-spindle/fastify/MapperService";
+import type { PrefixRouter, Route } from "~/rest-api-spindle/fastify/MapperService";
 
 import { dumpify, dumpObject, thenChainEagerly } from "~/tools";
 
 import { _presolveRouteRequest } from "../_handlerOps";
 
-export default function createRouter (mapper: MapperService, route: Route) {
+export default function createProjector (router: PrefixRouter, route: Route) {
   return {
     requiredRules: ["routeRoot"],
 
-    prepare (/* fastify */) {
+    prepare () {
       try {
-        this.runtime = mapper.createRouteRuntime(this);
+        this.runtime = router.createRouteRuntime(this);
 
         const gate = route.config.resource.gate;
         this.toSuccessBodyFields = ["§->"];
-        const fromEntry = mapper.appendVPathSteps(
+        const fromEntry = router.appendVPathSteps(
             this.runtime, gate.projection, this.toSuccessBodyFields);
-        mapper.appendSchemaSteps(this.runtime, route.schema.response[200],
+        router.appendSchemaSteps(this.runtime, route.schema.response[200],
             { expandProperties: true, targetVAKON: fromEntry });
         if (gate.filterCondition) {
           const filter = ["§filter"];
-          mapper.appendVPathSteps(this.runtime, gate.filterCondition, filter);
+          router.appendVPathSteps(this.runtime, gate.filterCondition, filter);
           this.toSuccessBodyFields.push(filter);
         }
       } catch (error) {
-        throw mapper.wrapErrorEvent(error, new Error(`prepare(${this.name})`),
+        throw router.wrapErrorEvent(error, new Error(`prepare(${this.name})`),
             "\n\ttoPreloads:", dumpify(this.toPreloads, { indent: 2 }),
         );
       }
     },
 
     async preload () {
-      await mapper.preloadRuntimeResources(this, this.runtime);
+      await router.preloadRuntimeResources(this, this.runtime);
     },
 
     handler (request, reply) {
-      const valkOptions = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       const scope = valkOptions.scope;
-      if (_presolveRouteRequest(mapper, route, this.runtime, valkOptions)) {
+      if (_presolveRouteRequest(router, route, this.runtime, valkOptions)) {
         return true;
       }
-      mapper.infoEvent(1, () => [
+      router.infoEvent(1, () => [
         `${this.name}:`,
         "\n\trequest.query:", ...dumpObject(request.query),
         "\n\troute.config:", ...dumpObject(route.config),
@@ -60,16 +60,16 @@ export default function createRouter (mapper: MapperService, route: Route) {
       return thenChainEagerly(scope.routeRoot, [
         vRouteRoot => vRouteRoot.get(this.toSuccessBodyFields, valkOptions),
         (filter || ids || Object.keys(fieldRequirements).length)
-            && (results => mapper.filterResults(results, filter, ids, fieldRequirements)),
+            && (results => router.filterResults(results, filter, ids, fieldRequirements)),
         (sort)
-            && (results => mapper.sortResults(results, sort)),
+            && (results => router.sortResults(results, sort)),
         (offset || (limit !== undefined))
-            && (results => mapper.paginateResults(results, offset || 0, limit)),
+            && (results => router.paginateResults(results, offset || 0, limit)),
         (fields)
-            && (results => mapper.pickResultFields(results, fields, route.schema.response[200])),
+            && (results => router.pickResultFields(results, fields, route.schema.response[200])),
         results => JSON.stringify(results, null, 2),
         results => {
-          mapper.infoEvent(2, () => [
+          router.infoEvent(2, () => [
             `${this.name}:`,
             "\n\tresults:", ...dumpObject(results),
           ]);

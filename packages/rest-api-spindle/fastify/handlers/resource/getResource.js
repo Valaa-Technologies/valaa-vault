@@ -1,31 +1,31 @@
 // @flow
 
-import type MapperService, { Route } from "~/rest-api-spindle/fastify/MapperService";
+import type { PrefixRouter, Route } from "~/rest-api-spindle/fastify/MapperService";
 import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _presolveResourceRouteRequest } from "./_resourceHandlerOps";
 
-export default function createRouter (mapper: MapperService, route: Route) {
+export default function createProjector (router: PrefixRouter, route: Route) {
   return {
     requiredRules: ["routeRoot", "resource"],
 
-    prepare (/* fastify */) {
-      this.runtime = mapper.createRouteRuntime(this);
-      this.toSuccessBodyFields = mapper.appendSchemaSteps(this.runtime, route.schema.response[200],
+    prepare () {
+      this.runtime = router.createRouteRuntime(this);
+      this.toSuccessBodyFields = router.appendSchemaSteps(this.runtime, route.schema.response[200],
           { expandProperties: true });
     },
 
     preload () {
-      return mapper.preloadRuntimeResources(this, this.runtime);
+      return router.preloadRuntimeResources(this, this.runtime);
     },
 
     handler (request, reply) {
-      const valkOptions = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
-      if (_presolveResourceRouteRequest(mapper, route, this.runtime, valkOptions)) {
+      const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      if (_presolveResourceRouteRequest(router, route, this.runtime, valkOptions)) {
         return true;
       }
       const scope = valkOptions.scope;
-      mapper.infoEvent(2, () => [
+      router.infoEvent(2, () => [
         `${this.name}:`, ...dumpObject(scope.resource),
         "\n\trequest.query:", ...dumpObject(request.query),
       ]);
@@ -34,11 +34,11 @@ export default function createRouter (mapper: MapperService, route: Route) {
       return thenChainEagerly(valkOptions.scope.resource, [
         vResource => vResource.get(this.toSuccessBodyFields, valkOptions),
         (fields) && (results =>
-            mapper.pickResultFields(results, fields, route.schema.response[200])),
+            router.pickResultFields(results, fields, route.schema.response[200])),
         results => {
           reply.code(200);
           reply.send(JSON.stringify(results, null, 2));
-          mapper.infoEvent(2, () => [
+          router.infoEvent(2, () => [
             `${this.name}:`, ...dumpObject(scope.resource),
             "\n\tresults:", ...dumpObject(results),
           ]);

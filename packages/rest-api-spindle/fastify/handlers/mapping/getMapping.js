@@ -1,35 +1,35 @@
 // @flow
 
-import type MapperService, { Route } from "~/rest-api-spindle/fastify/MapperService";
+import type { PrefixRouter, Route } from "~/rest-api-spindle/fastify/MapperService";
 import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _createToMapping, _presolveMappingRouteRequest } from "./_mappingHandlerOps";
 
-export default function createRouter (mapper: MapperService, route: Route) {
+export default function createProjector (router: PrefixRouter, route: Route) {
   return {
     requiredRules: ["routeRoot", "resource", "target"],
     rules: {
       mappingName: route && route.config.relation.name,
     },
 
-    prepare (/* fastify */) {
-      this.runtime = mapper.createRouteRuntime(this);
-      this.toMapping = _createToMapping(mapper, route, this.runtime);
-      this.toSuccessBodyFields = mapper.appendSchemaSteps(this.runtime, route.schema.response[200],
+    prepare () {
+      this.runtime = router.createRouteRuntime(this);
+      this.toMapping = _createToMapping(router, route, this.runtime);
+      this.toSuccessBodyFields = router.appendSchemaSteps(this.runtime, route.schema.response[200],
         { expandProperties: true });
     },
 
     preload () {
-      return mapper.preloadRuntimeResources(this, this.runtime);
+      return router.preloadRuntimeResources(this, this.runtime);
     },
 
     handler (request, reply) {
-      const valkOptions = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
-      if (_presolveMappingRouteRequest(mapper, route, this.runtime, valkOptions, this.toMapping)) {
+      const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      if (_presolveMappingRouteRequest(router, route, this.runtime, valkOptions, this.toMapping)) {
         return true;
       }
       const scope = valkOptions.scope;
-      mapper.infoEvent(1, () => [
+      router.infoEvent(1, () => [
         `${this.name}:`, ...dumpObject(scope.resource),
         `\n\t${scope.mappingName}:`, ...dumpObject(scope.mapping),
         `\n\ttarget:`, ...dumpObject(scope.target),
@@ -47,7 +47,7 @@ export default function createRouter (mapper: MapperService, route: Route) {
         vMapping => vMapping.get(this.toSuccessBodyFields, valkOptions),
         results => ((!fields || !results)
             ? results
-            : mapper.pickResultFields(results, fields, route.schema.response[200])),
+            : router.pickResultFields(results, fields, route.schema.response[200])),
         results => {
           if (!results) {
             reply.code(404);
@@ -57,7 +57,7 @@ export default function createRouter (mapper: MapperService, route: Route) {
           }
           reply.code(200);
           reply.send(JSON.stringify(results, null, 2));
-          mapper.infoEvent(2, () => [
+          router.infoEvent(2, () => [
             `${this.name}:`,
             "\n\tresults:", ...dumpObject(results),
           ]);

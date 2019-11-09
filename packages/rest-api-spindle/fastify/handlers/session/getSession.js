@@ -1,11 +1,11 @@
 // @flow
 
-import type MapperService from "~/rest-api-spindle/fastify/MapperService";
+import type { PrefixRouter /* , Route */ } from "~/rest-api-spindle/fastify/MapperService";
 import {
   burlaesgDecode, burlaesgEncode, hs256JWTEncode,
 } from "~/rest-api-spindle/fastify/security";
 
-export default function createRouter (mapper: MapperService/* , route: Route */) {
+export default function createProjector (router: PrefixRouter /* , route: Route */) {
   return {
     requiredRules: [
       "routeRoot",
@@ -14,8 +14,8 @@ export default function createRouter (mapper: MapperService/* , route: Route */)
       "authorizationGrant", "grantProviderState", "error", "errorDescription", "errorURI",
     ],
 
-    prepare (/* fastify */) {
-      this.runtime = mapper.createRouteRuntime(this);
+    prepare () {
+      this.runtime = router.createRouteRuntime(this);
 
       if (!this.runtime.identity) {
         throw new Error("Cannot prepare session route GET: service identity not configured");
@@ -29,12 +29,12 @@ export default function createRouter (mapper: MapperService/* , route: Route */)
     },
 
     preload () {
-      return mapper.preloadRuntimeResources(this, this.runtime);
+      return router.preloadRuntimeResources(this, this.runtime);
     },
 
     handler (request, reply) {
-      const { scope } = mapper.buildRuntimeVALKOptions(this, this.runtime, request, reply);
-      mapper.infoEvent(1, () => [
+      const { scope } = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      router.infoEvent(1, () => [
         "\n\trequest.query:", request.query,
         "\n\trequest.cookies:", request.cookies,
       ]);
@@ -90,7 +90,7 @@ export default function createRouter (mapper: MapperService/* , route: Route */)
         reply.redirect(scope.clientRedirectPath);
         return true;
       } catch (error) {
-        throw mapper.wrapErrorEvent(error,
+        throw router.wrapErrorEvent(error,
             new Error(`authorizeSessionWithGrant(${scope.identity.clientURI})`),
             "\n\ttimeStamp:", timeStamp,
             "\n\tauthorizationGrant:", scope.authorizationGrant,

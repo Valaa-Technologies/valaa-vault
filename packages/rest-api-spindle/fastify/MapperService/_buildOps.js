@@ -2,13 +2,13 @@
 
 import path from "path";
 
-export function _appendSchemaSteps (routeMapper, runtime, jsonSchema, targetVAKON, innerTargetVAKON,
+export function _appendSchemaSteps (router, runtime, jsonSchema, targetVAKON, innerTargetVAKON,
     expandProperties, isValOSFields) {
   if (jsonSchema.type === "array") {
     if (!innerTargetVAKON) {
       throw new Error("json schema valospace vpath missing with json schema type 'array'");
     }
-    routeMapper.appendSchemaSteps(runtime, jsonSchema.items,
+    router.appendSchemaSteps(runtime, jsonSchema.items,
         { expandProperties, targetVAKON: innerTargetVAKON });
   } else if ((jsonSchema.type === "object") && expandProperties) {
     const objectKuery = {};
@@ -17,15 +17,15 @@ export function _appendSchemaSteps (routeMapper, runtime, jsonSchema, targetVAKO
       if (isValOSFields && ((valueSchema.valospace || {}).reflection === undefined)) {
         if (key === "href") {
           op = ["§->", "target", false, "rawId",
-            ["§+", _getResourceHRefPrefix(routeMapper, jsonSchema), ["§->", null]]
+            ["§+", _getResourceHRefPrefix(router, jsonSchema), ["§->", null]]
           ];
         } else if (key === "rel") op = "self";
         else op = ["§->", key];
       } else if (key === "$V") {
-        op = routeMapper.appendSchemaSteps(runtime, valueSchema,
+        op = router.appendSchemaSteps(runtime, valueSchema,
             { expandProperties: true, isValOSFields: true });
       } else {
-        op = routeMapper.appendSchemaSteps(runtime, valueSchema, { expandProperties: true });
+        op = router.appendSchemaSteps(runtime, valueSchema, { expandProperties: true });
         op = (op.length === 1) ? ["§..", key]
             : ((valueSchema.type === "array")
                 || (valueSchema.valospace || {}).reflection !== undefined) ? op
@@ -38,20 +38,20 @@ export function _appendSchemaSteps (routeMapper, runtime, jsonSchema, targetVAKO
   return targetVAKON;
 }
 
-export function _getResourceHRefPrefix (routeMapper, jsonSchema) {
+export function _getResourceHRefPrefix (router, jsonSchema) {
   const routeName = ((jsonSchema.valospace || {}).gate || {}).name;
   if (typeof routeName !== "string") {
     throw new Error("href requested of a resource without a valospace.gate.name");
   }
-  return path.join("/", routeMapper.getRoutePrefix(), routeName, "/");
+  return path.join("/", router.getRoutePrefix(), routeName, "/");
 }
 
-export function _derefSchema (routeMapper, schemaOrSchemaName) {
+export function _derefSchema (router, schemaOrSchemaName) {
   if (typeof maybeSchemaName !== "string") return schemaOrSchemaName;
   if (schemaOrSchemaName[(schemaOrSchemaName.length || 1) - 1] !== "#") {
     throw new Error(`Invalid shared schema name: "${schemaOrSchemaName}" is missing '#'-suffix`);
   }
-  const sharedSchema = routeMapper._fastify.getSchemas()[schemaOrSchemaName.slice(0, -1)];
+  const sharedSchema = router._fastify.getSchemas()[schemaOrSchemaName.slice(0, -1)];
   if (!sharedSchema) {
     throw new Error(`Can't resolve shared schema "${schemaOrSchemaName}"`);
   }

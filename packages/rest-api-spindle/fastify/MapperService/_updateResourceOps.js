@@ -3,7 +3,7 @@
 import VALEK from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
 
-export function _updateResource (mapper, vResource, patch,
+export function _updateResource (router, vResource, patch,
     { discourse, scope, toPatchTarget }) {
   if (!vResource) {
     if (!toPatchTarget) return undefined;

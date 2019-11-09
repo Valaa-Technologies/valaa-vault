@@ -1,22 +1,25 @@
 // @flow
 
+import type { PrefixRouter, Route } from "~/rest-api-spindle/fastify/MapperService";
+
 import { _verifyResourceAuthorization } from "../_handlerOps";
 import { _presolveResourceRouteRequest } from "../resource/_resourceHandlerOps";
 
-export function _createToMapping (mapper, route, runtime) {
+export function _createToMapping (router: PrefixRouter, route: Route, runtime) {
   const toMapping = ["§->"];
-  mapper.appendSchemaSteps(runtime, route.config.resource.schema, { targetVAKON: toMapping });
-  mapper.appendSchemaSteps(runtime, route.config.relation.schema, { targetVAKON: toMapping });
+  router.appendSchemaSteps(runtime, route.config.resource.schema, { targetVAKON: toMapping });
+  router.appendSchemaSteps(runtime, route.config.relation.schema, { targetVAKON: toMapping });
   toMapping.push(false, ["§filter", ["§==", ["§.", "target"], ["§$", "target"]]], 0);
   return toMapping;
 }
 
-export function _presolveMappingRouteRequest (mapper, route, runtime, valkOptions, toMapping) {
-  if (_presolveResourceRouteRequest(mapper, route, runtime, valkOptions)) {
+export function _presolveMappingRouteRequest (
+    router: PrefixRouter, route: Route, runtime, valkOptions, toMapping) {
+  if (_presolveResourceRouteRequest(router, route, runtime, valkOptions)) {
     return true;
   }
   const scope = valkOptions.scope;
-  if (_verifyResourceAuthorization(mapper, { method: "GET", category: "mapping" }, scope,
+  if (_verifyResourceAuthorization(router, { method: "GET", category: "mapping" }, scope,
       scope.target, "route target resource")) {
     return true;
   }
@@ -25,17 +28,17 @@ export function _presolveMappingRouteRequest (mapper, route, runtime, valkOption
 }
 
 /*
-const { toMapping } = _createTargetedToMapping(mapper, this.runtime, route, ["!:target"]);
+const { toMapping } = _createTargetedToMapping(router, this.runtime, route, ["!:target"]);
 this.toMapping = toMapping;
-const toRelations = mapper.appendSchemaSteps(this.runtime, route.config.relation.schema, [
+const toRelations = router.appendSchemaSteps(this.runtime, route.config.relation.schema, [
   "§->",
   ...route.config.relation.name.split("/").slice(0, -1).map(name => ["§..", name]),
 ]);
 toRelations.splice(-1);
 
-export function _createTargetedToMapping (mapper, runtime, route, toTargetId) {
+export function _createTargetedToMapping (router: PrefixRouter, runtime, route, toTargetId) {
   const { toMappingFields, relationsStepIndex } =
-      _createTargetedToMappingFields(mapper, runtime, route, toTargetId);
+      _createTargetedToMappingFields(router, runtime, route, toTargetId);
   toMappingFields.splice(-2, 1);
   return {
     toMapping: toMappingFields,
@@ -46,12 +49,12 @@ export function _createTargetedToMapping (mapper, runtime, route, toTargetId) {
 
 /*
 const { toMappingFields, relationsStepIndex } =
-    _createTargetedToMappingFields(mapper, this.runtime, route, ["~$:targetId"]);
+    _createTargetedToMappingFields(router, this.runtime, route, ["~$:targetId"]);
 if (relationsStepIndex > 1) this.toRelationSource = toMappingFields.slice(0, relationsStepIndex);
 this.toMapping = toMappingFields.slice(0, -2).concat(0);
 
-export function _createTargetedToMappingFields (mapper, runtime, route, toTargetId) {
-  const { toMappingsResults, relationsStepIndex } = _createToMappingsParts(mapper, runtime, route);
+export function _createTargetedToMappingFields (router: PrefixRouter, runtime, route, toTargetId) {
+  const { toMappingsResults, relationsStepIndex } = _createToMappingsParts(router, runtime, route);
   toMappingsResults.splice(relationsStepIndex + 1, 0,
       ["~filter", ["~==", ["~->:target:rawId"], toTargetId]]);
   return {
@@ -63,15 +66,15 @@ export function _createTargetedToMappingFields (mapper, runtime, route, toTarget
 
 /*
 const { toMappingsResults, relationsStepIndex } =
-    _createToMappingsParts(mapper, this.runtime, route);
+    _createToMappingsParts(router, this.runtime, route);
 
 if (relationsStepIndex > 1) this.toRelationSource =
     toMappingsResults.slice(0, relationsStepIndex);
-// const toMappingFields = _createToMappingFields(mapper, route);
+// const toMappingFields = _createToMappingFields(router, route);
 // toMappingFields.splice(-1);
 
-export function _createToMappingsParts (mapper, runtime, route) {
-  const toMappingsResults = mapper.appendSchemaSteps(
+export function _createToMappingsParts (router: PrefixRouter, runtime, route) {
+  const toMappingsResults = router.appendSchemaSteps(
       runtime, route.config.relation.schema, { expandProperties: true, targetVAKON: toRelations });
   const relationsStepIndex = toMappingsResults.indexOf("relations");
   if (!(relationsStepIndex >= 0)) {

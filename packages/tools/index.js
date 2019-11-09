@@ -2,11 +2,11 @@
 
 import * as mediaDecoders from "./mediaDecoders";
 
-export const valos = require("~/gateway-api/valos").default;
+export const valosheath = require("~/gateway-api/valosheath").default;
 export const inBrowser = require("~/gateway-api/inBrowser").default;
 export const getGlobal = require("~/gateway-api/getGlobal").default;
 
-export default valos.exportSpindle({ name: "@valos/tools", mediaDecoders });
+export default valosheath.exportSpindle({ name: "@valos/tools", mediaDecoders });
 
 export { default as valosHash } from "./id/valosHash";
 export { default as valosUUID } from "./id/valosUUID";

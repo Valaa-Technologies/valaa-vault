@@ -21,6 +21,10 @@ exports.builder = (yargs) => yargs.options({
     type: "boolean", default: true,
     description: "Generate Software Bill of Materials documents",
   },
+  "alternate-root": {
+    type: "string", default: "dist/packages",
+    description: "Alternate doc source root to search for processed docs versions.",
+  },
   revdocs: {
     default: true,
     description: "Generate revdocs from all vault **/*revdoc*.js files",
@@ -106,8 +110,8 @@ exports.handler = async (yargv) => {
           }
         }
         let sourcePath = revdocPath;
-        if (workspaceBase === "packages/") {
-          const babelifiedPath = vlm.path.join("dist", "packages",
+        if (yargv["alternate-root"] && (workspaceBase === "packages/")) {
+          const babelifiedPath = vlm.path.join(yargv["alternate-root"],
               config.valos.domain.match(/^([^/]*)/)[1], revdocPath.replace(/^packages\//, ""));
           if (vlm.shell.test("-f", vlm.path.join(process.cwd(), babelifiedPath))) {
             sourcePath = babelifiedPath;

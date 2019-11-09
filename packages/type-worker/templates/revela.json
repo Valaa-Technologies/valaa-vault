@@ -2,7 +2,7 @@
   "name": { "!!!": ["./package.json", "name"] },
   "description": { "!!!": ["./package.json", "description"] },
   "valos": {
-    "type": "site"
+    "type": "revelation"
   },
   "gateway": {
     "authorityConfigs": {

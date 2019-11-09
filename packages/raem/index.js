@@ -2,9 +2,9 @@
 
 import ContentAPI from "./RAEMContentAPI";
 
-const valos = require("~/gateway-api/valos").default;
+export const valosheath = require("~/gateway-api/valosheath").default;
 
-export default valos.exportSpindle({ name: "@valos/raem", ContentAPI });
+export default valosheath.exportSpindle({ name: "@valos/raem", ContentAPI });
 
 
 export {

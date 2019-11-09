@@ -2,9 +2,9 @@
 
 import ContentAPI from "./EngineContentAPI";
 
-const valos = require("~/gateway-api/valos").default;
+export const valosheath = require("~/gateway-api/valosheath").default;
 
-export default valos.exportSpindle({ name: "@valos/engine", ContentAPI });
+export default valosheath.exportSpindle({ name: "@valos/engine", ContentAPI });
 
 
 export {

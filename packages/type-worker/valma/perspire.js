@@ -148,13 +148,13 @@ exports.handler = async (yargv) => {
     domainRoot,
     revelationRoot,
     revelations: [
-      { "...": revelationPath },
+      { "!!!": revelationPath },
       ...(yargv.additionalRevelationPaths || []).map(p => {
         const absolutePath = vlm.path.resolve(p);
         if (!vlm.shell.test("-f", absolutePath)) {
           throw new Error(`Cannot open additional revelation path "${absolutePath}" for reading`);
         }
-        return { "...": absolutePath };
+        return { "!!!": absolutePath };
       }),
       { gateway: { verbosity: vlm.verbosity } },
       yargv.revelation || {},

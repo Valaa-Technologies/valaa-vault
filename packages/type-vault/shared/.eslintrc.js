@@ -81,7 +81,7 @@ module.exports = {
     "import/extensions": 0,
     "import/no-dynamic-require": 0, // Too many infrastructure tools use dynamic requires to warrant putting selective disables aroudn
     "import/no-extraneous-dependencies": 0,
-    "import/no-unresolved": 0,
+    "import/no-unresolved": 0, // Doesn't work with "~/" root prefix replacement
     "import/prefer-default-export": 0, // lambda's and flow often necessitate a single named export
     "import/no-cycle": 0, // This is unacceptably disabled as it is an excellent flag, but there was too much to fix at once...
 

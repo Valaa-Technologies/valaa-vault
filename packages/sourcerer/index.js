@@ -5,9 +5,9 @@
 import ContentAPI from "./SourcererContentAPI";
 import schemeModules from "./schemeModules";
 
-const valos = require("~/gateway-api/valos").default;
+export const valosheath = require("~/gateway-api/valosheath").default;
 
-export default valos.exportSpindle({ name: "@valos/sourcerer", ContentAPI, schemeModules });
+export default valosheath.exportSpindle({ name: "@valos/sourcerer", ContentAPI, schemeModules });
 
 export {                   default as EVENT_VERSION } from "./tools/EVENT_VERSION";
 

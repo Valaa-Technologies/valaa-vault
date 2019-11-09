@@ -62,10 +62,10 @@ when it is expanded as triples.
     "/*in~": { "@id": "$V:pairedInRelations", "@type": "@id", "@container": "@list" },
     "/.S*": { "@id": "$V:source", "@type": "@id" },
     "/.O*": { "@id": "$V:target", "@type": "@id" },
-    "/.O*~": { "@id": "$V:pairedTarget", "@type": "@id" },
     "/.S*~": { "@id": "$V:pairedSource", "@type": "@id" },
-    "/.O*!": { "@id": "$V:connectedTarget", "@type": "@id" },
+    "/.O*~": { "@id": "$V:pairedTarget", "@type": "@id" },
     "/.S*!": { "@id": "$V:connectedSource", "@type": "@id" },
+    "/.O*!": { "@id": "$V:connectedTarget", "@type": "@id" },
 
     "$V--": "https://valospace.org/removed-from#",
     "/--.": { "@id": "$V--:properties", "@type": "@id" },

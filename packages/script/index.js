@@ -3,9 +3,9 @@
 import ContentAPI from "./ScriptContentAPI";
 import * as mediaDecoders from "./mediaDecoders";
 
-const valos = require("~/gateway-api/valos").default;
+const valosheath = require("~/gateway-api/valosheath").default;
 
-export default valos.exportSpindle({ name: "@valos/script", ContentAPI, mediaDecoders });
+export default valosheath.exportSpindle({ name: "@valos/script", ContentAPI, mediaDecoders });
 
 
 export {

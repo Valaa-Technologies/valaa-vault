@@ -6,7 +6,7 @@ import "@babel/polyfill";
 import { getURIQueryField } from "~/raem/ValaaURI";
 
 import Gateway from "~/inspire/Gateway";
-import { combineRevelationsLazily } from "~/inspire/Revelation";
+import { lazyPatchRevelations, lazy } from "~/inspire/Revelation";
 
 import revelationTemplate from "~/inspire/revelation.template";
 
@@ -15,6 +15,8 @@ import {
 } from "~/tools";
 
 import * as mediaDecoders from "./mediaDecoders";
+
+export { lazy };
 
 if (inBrowser()) {
   require("./inspire.css");
@@ -73,8 +75,9 @@ export default (valosheath.createGateway = async function createGateway (
       "\n\tand the spindlesRevelation:", ...dumpObject(spindlesRevelation),
     ]);
 
-    combinedRevelation = await combineRevelationsLazily(
+    combinedRevelation = await lazyPatchRevelations(
         ret,
+        {},
         revelationTemplate,
         ...revelations,
         spindlesRevelation);

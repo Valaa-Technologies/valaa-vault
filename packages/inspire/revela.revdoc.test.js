@@ -7,7 +7,9 @@ const {
   ontologyHeaders,
 } = require("@valos/revdoc");
 
-const { combineRevelationsLazily } = require("./Revelation");
+const { wrapError } = require("@valos/tools/wrapError");
+
+const { lazyPatchRevelations } = require("./Revelation");
 
 const {
   revela: { prefix, prefixIRI, prefixes, vocabulary, context },
@@ -22,9 +24,20 @@ const gatewayMock = {
   siteRoot: "/site",
   domainRoot: "/",
   revelationRoot: "/site/revelation/",
-  require (requireKey) { return { requireKey, someField: 1 }; },
-  fetch (fetchOptions) { return { fetchOptions, fetchedField: 1 }; },
-  wrapErrorEvent (error) { throw error; },
+  require (requireKey) {
+    return {
+      requireKey,
+      someField: 1,
+      callMe (p) { return ({ [requireKey]: p }); },
+    };
+  },
+  fetch (fetchOptions) {
+    return {
+      fetchOptions,
+      fetchedField: 1,
+    };
+  },
+  wrapErrorEvent: wrapError,
 };
 
 module.exports = {
@@ -69,26 +82,73 @@ for various valos fabric config files.`],
     "#0": [
 ``,
     ],
-    "example#1": itExpects("trivial combine",
-        () => combineRevelationsLazily(gatewayMock, { a: [1] }, { a: [2] }),
+    "example#1": itExpects(
+        "trivial revelation patch",
+() => lazyPatchRevelations(gatewayMock, { a: [1] }, { a: [2] }),
         "toEqual",
-        { a: [1, 2] }),
-    "example#2": itExpects("spread of a simple relative import",
-        () => combineRevelationsLazily(gatewayMock, {}, { "!!!": "./path" }),
+() => ({ a: [1, 2] })),
+    "example#2": itExpects(
+        "spread of a simple relative import",
+() => lazyPatchRevelations(gatewayMock, {}, { "!!!": "./path" }),
+        "toMatchObject",
+() => ({ requireKey: "/site/revelation/path", someField: 1 })),
+    "example#3": itExpects(
+        "spread of an explicit site root import followed by field access",
+() => lazyPatchRevelations(gatewayMock, "", {
+  "!!!": [["!$revela:import", "/path"], "requireKey"],
+}),
         "toEqual",
-        { requireKey: "/site/revelation/path", someField: 1 }),
-    "example#3": itExpects("spread of an explicit site root import followed by field access",
-        () => combineRevelationsLazily(gatewayMock, "",
-            { "!!!": [["!$revela:import", "/path"], "requireKey"] }),
+"/site/path"),
+    "example#4": itExpects(
+        "spread of an implicit URI import followed by array append",
+async () => lazyPatchRevelations(gatewayMock, [0], {
+  "!!!": [
+    ["!$revela:import", "<https://foobar.com/path>"],
+    ["fetchedField", ["@.:fetchOptions@.:input@"]],
+  ],
+}),
         "toEqual",
-        "/site/path"),
-    "example#4": itExpects("spread of an implicit URI import followed by array creation",
-        async () => combineRevelationsLazily(gatewayMock, [], { "!!!": [
-          ["!$revela:import", "<https://foobar.com/path>"],
-          ["fetchedField", [".:fetchOptions:input"]],
-        ] }),
+() => [0, 1, "https://foobar.com/path"]),
+    "example#5": itExpects(
+        "nested import & invoke spread to resolve all spreads",
+async () => lazyPatchRevelations(gatewayMock, {}, {
+  out: {
+    "!!!": ["@", { prefixes: {
+      "/test/v0": {
+        name: "test",
+        "test-lib": {
+          preset: 10, overridden: 10, sessionDuration: 0,
+          view: { focus: "no focus", nulled: "still not null" },
+        },
+      } },
+    }],
+    prefixes: {
+      "/test/v0": {
+        "!!!": ["test-lib", ["!$valk:invoke:callMe", {
+          view: { focus: "valaa-aws://example.org/deployment?id=f0c5-f0c5", nulled: null },
+          identity: { "!!!": ["./config", "requireKey"] },
+          sessionDuration: 86400,
+        }]],
+        "test-lib": { overridden: 20 }
+      },
+    }
+  }
+}),
         "toEqual",
-        [1, "https://foobar.com/path"]),
+() => ({
+  out: {
+    prefixes: {
+      "/test/v0": {
+        name: "test",
+        "test-lib": {
+          preset: 10, overridden: 20, sessionDuration: 86400,
+          view: { focus: "valaa-aws://example.org/deployment?id=f0c5-f0c5", nulled: null },
+          identity: "/site/revelation/config",
+        }
+      }
+    }
+  }
+})),
   },
   "chapter#ontology>8": {
     "dc:title": [em(prefix), ` ontology`],

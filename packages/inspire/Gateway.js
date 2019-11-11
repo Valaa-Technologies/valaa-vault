@@ -28,7 +28,7 @@ import extendValosheathWithEngine from "~/engine/valosheath";
 import InspireView from "~/inspire/InspireView";
 
 import { registerVidgets } from "~/inspire/ui";
-import type { Revelation } from "~/inspire/Revelation";
+import { Revelation, lazy } from "~/inspire/Revelation";
 import extendValosheathWithInspire from "~/inspire/valosheath";
 
 import { setGlobalLogger } from "~/tools/wrapError";
@@ -147,9 +147,9 @@ export default class Gateway extends FabricEventTarget {
       // full snapshots of all partitions that were active during previous session, allowing full
       // offline functionality. Alternatively the service worker can provide the event logs through
       // indexeddb and keep the landing page revelation minimal; whatever is most efficient.
-      this.revelation = await this._interpretRevelation(revelation);
-      this.gatewayRevelation = await this.revelation.gateway;
-      if (this.gatewayRevelation.name) this.setName(await this.gatewayRevelation.name);
+      this.revelation = await lazy(this._interpretRevelation(revelation));
+      this.gatewayRevelation = await lazy(this.revelation.gateway);
+      if (this.gatewayRevelation.name) this.setName(await lazy(this.gatewayRevelation.name));
 
       this.setVerbosity(this.gatewayRevelation.verbosity || 0);
 
@@ -172,10 +172,10 @@ export default class Gateway extends FabricEventTarget {
       // Create a connection and an identity for the gateway towards false prophet
       this.discourse = await this._initiateDiscourse(this.gatewayRevelation, this.falseProphet);
 
-      this.spindleRevelations = (await this.revelation.spindles) || {};
-      await this.attachSpindles(await this.gatewayRevelation.spindlePrototypes);
+      this.spindleRevelations = (await lazy(this.revelation.spindles)) || {};
+      await this.attachSpindles(await lazy(this.gatewayRevelation.spindlePrototypes));
 
-      this.prologueRevelation = await this.revelation.prologue;
+      this.prologueRevelation = await lazy(this.revelation.prologue);
 
       // Locate entry point event log (prologue), make it optimally available through scribe,
       // narrate it with false prophet and get the false prophet connection for it.
@@ -188,7 +188,7 @@ export default class Gateway extends FabricEventTarget {
       this.clockEvent(1, `initialized`, "Gateway initialized");
       this._isInitialized = true;
 
-      this.viewRevelations = (await this.revelation.views) || {};
+      this.viewRevelations = (await lazy(this.revelation.views)) || {};
 
       this.clockEvent(1, `spindles.notify`,
           `Notifying ${spindleNames.length} spindles of gateway initialization:`,
@@ -260,7 +260,8 @@ export default class Gateway extends FabricEventTarget {
     const gateway = this;
     this._views[viewId] = thenChainEagerly(view, view.addChainClockers(1, "view.create.ops", [
       async function _createViewOptions () {
-        const revelationConfig = (await ((await gateway.revelation.views) || {})[viewId]) || {};
+        const views = (await lazy(gateway.revelation.views)) || {};
+        const revelationConfig = (await lazy(views[viewId])) || {};
         viewConfig = patchWith({ verbosity }, [revelationConfig, paramViewConfig]);
         view.setRawName(viewId);
         view.setName(`${viewConfig.name}-View`);
@@ -367,8 +368,8 @@ export default class Gateway extends FabricEventTarget {
     try {
       nexusOptions = {
         name: "Inspire AuthorityNexus",
-        authorityConfigs: await gatewayRevelation.authorityConfigs,
-        ...(await gatewayRevelation.nexus || {}),
+        authorityConfigs: await lazy(gatewayRevelation.authorityConfigs),
+        ...(await lazy(gatewayRevelation.nexus) || {}),
       };
       this.clockEvent(1, () => [`authorityNexus.create`,
         "new AuthorityNexus", ...dumpObject(nexusOptions)]);
@@ -393,7 +394,7 @@ export default class Gateway extends FabricEventTarget {
         logger: this.getLogger(),
         upstream: oracle,
         databaseAPI: gatewayRevelation.scribe.getDatabaseAPI(),
-        ...await gatewayRevelation.scribe,
+        ...await lazy(gatewayRevelation.scribe),
       };
       this.clockEvent(1, () => [`scribe.create`,
         "new Scribe", ...dumpObject(scribeOptions)]);
@@ -423,7 +424,7 @@ export default class Gateway extends FabricEventTarget {
         name: "Inspire Oracle",
         logger: this.getLogger(),
         authorityNexus,
-        ...await gatewayRevelation.oracle,
+        ...await lazy(gatewayRevelation.oracle),
       };
       this.clockEvent(1, () => [`oracle.create`,
         "new Oracle", ...dumpObject(oracleOptions)]);
@@ -448,7 +449,7 @@ export default class Gateway extends FabricEventTarget {
     const reducerOptions = {
       ...EngineContentAPI, // schema, validators, reducers
       eventLogger: this,
-      ...await gatewayRevelation.reducer,
+      ...await lazy(gatewayRevelation.reducer),
     };
     const { schema, validators, mainReduce, subReduce } = createRootReducer(reducerOptions);
 
@@ -465,7 +466,7 @@ export default class Gateway extends FabricEventTarget {
       subReduce,
       initialState: new ImmutableMap(),
       logger: this.getLogger(),
-      ...await gatewayRevelation.corpus,
+      ...await lazy(gatewayRevelation.corpus),
     };
     this.clockEvent(1, () => [`corpus.create`, "new Corpus", ...dumpObject(corpusOptions)]);
     return new Corpus(corpusOptions);
@@ -511,7 +512,7 @@ export default class Gateway extends FabricEventTarget {
             }
           });
         },
-        ...await gatewayRevelation.falseProphet,
+        ...await lazy(gatewayRevelation.falseProphet),
       };
       this.clockEvent(1, () => [`falseProphet.create`,
         "new FalseProphet", ...dumpObject(falseProphetOptions)]);
@@ -562,7 +563,7 @@ export default class Gateway extends FabricEventTarget {
     let discourseOptions, discourse;
     try {
       discourseOptions = {
-        ...((await gatewayRevelation.discourse) || {}),
+        ...((await lazy(gatewayRevelation.discourse)) || {}),
       };
       this.clockEvent(1, () => [`falseProphet.discourse.create`,
         "new FalseProphetDiscourse", ...dumpObject(discourseOptions)]);
@@ -606,7 +607,7 @@ export default class Gateway extends FabricEventTarget {
         throw new Error(`Spindle '${spindlePrototype.name}' already attached`);
       }
       spindleNames.push(spindlePrototype.name);
-      const spindleRevelation = this.spindleRevelations[spindlePrototype.name];
+      const spindleRevelation = await lazy(this.spindleRevelations[spindlePrototype.name]);
       newSpindleLookup[spindlePrototype.name] = spindlePrototype.attachSpawn
           ? spindlePrototype.attachSpawn(this, spindleRevelation)
           : Object.assign(Object.create(spindlePrototype),
@@ -618,24 +619,32 @@ export default class Gateway extends FabricEventTarget {
   }
 
   _attachSpindle (name: string, spindle: Object) {
-    this._attachedSpindles[name] = spindle;
-    for (const schemeModule of Object.values(spindle.schemeModules || {})) {
-      this.authorityNexus.addSchemeModule(this.callRevelation(schemeModule));
+    try {
+      this._attachedSpindles[name] = spindle;
+      for (const schemeModule of Object.values(spindle.schemeModules || {})) {
+        const called = this.callRevelation(schemeModule);
+        this.authorityNexus.addSchemeModule(called);
+      }
+      for (const authorityConfig of Object.values(spindle.authorityConfigs || {})) {
+        this.authorityNexus.addAuthorityPreConfig(authorityConfig);
+      }
+      for (const MediaDecoder_: any of Object.values(spindle.mediaDecoders || {})) {
+        this.oracle.getDecoderArray().addDecoder(this.callRevelation(MediaDecoder_));
+      }
+      return this._isInitialized && thenChainEagerly(null, [
+        () => this._notifySpindleOfGatewayInitialized(spindle),
+        ...Object.keys(this._views || {}).map(viewName =>
+        // Do not block for views to init
+            () => !isPromise(this._views[viewName])
+        // Do wait for spindle itself
+                && this._notifySpindleOfViewAttached(spindle, this._views[viewName], viewName))
+      ]);
+    } catch (error) {
+      throw this.wrapErrorEvent(error, new Error(`attachSpindle(${name})`),
+          "\n\tspindle:", ...dumpObject(spindle),
+          "\n\tspindle proto:", ...dumpObject(Object.getPrototypeOf(spindle)),
+      );
     }
-    for (const authorityConfig of Object.values(spindle.authorityConfigs || {})) {
-      this.authorityNexus.addAuthorityPreConfig(authorityConfig);
-    }
-    for (const MediaDecoder_: any of Object.values(spindle.mediaDecoders || {})) {
-      this.oracle.getDecoderArray().addDecoder(this.callRevelation(MediaDecoder_));
-    }
-    return this._isInitialized && thenChainEagerly(null, [
-      () => this._notifySpindleOfGatewayInitialized(spindle),
-      ...Object.keys(this._views || {}).map(viewName =>
-      // Do not block for views to init
-          () => !isPromise(this._views[viewName])
-      // Do wait for spindle itself
-              && this._notifySpindleOfViewAttached(spindle, this._views[viewName], viewName))
-    ]);
   }
 
   _notifySpindleOfGatewayInitialized (spindle: Object) {
@@ -652,8 +661,8 @@ export default class Gateway extends FabricEventTarget {
       this.clockEvent(1, `prologues.extract`, `Determining prologues and the root partition <${
           rootPartitionURI}>`);
       const rootPartitionURI = this.prologueRevelation.rootPartitionURI
-          && naiveURI.createPartitionURI(await this.prologueRevelation.rootPartitionURI);
-      this.rootLensURI = await this.prologueRevelation.rootLensURI;
+          && naiveURI.createPartitionURI(await lazy(this.prologueRevelation.rootPartitionURI));
+      this.rootLensURI = await lazy(this.prologueRevelation.rootLensURI);
       prologues = await this._determineRevelationPrologues(prologueRevelation, rootPartitionURI);
       this.warnEvent(1, () => [
         `Extracted ${prologues.length} prologues from the revelation`,
@@ -684,9 +693,10 @@ export default class Gateway extends FabricEventTarget {
     const ret = [];
     let rootPartitionURISeen = false;
     try {
-      for (const [uri, info] of (Object.entries((await prologueRevelation.partitionInfos) || {}))) {
+      for (const [uri, info] of (Object.entries(
+          (await lazy(prologueRevelation.partitionInfos)) || {}))) {
         const partitionURI = naiveURI.createPartitionURI(uri);
-        ret.push({ partitionURI, info: await info });
+        ret.push({ partitionURI, info: await lazy(info) });
         if (String(partitionURI) === String(rootPartitionURI)) rootPartitionURISeen = true;
       }
       if (rootPartitionURI && !rootPartitionURISeen) {
@@ -711,7 +721,7 @@ export default class Gateway extends FabricEventTarget {
   }
 
   _connectChronicleNarratePrologue = async ({ partitionURI, info }: any) => {
-    if ((await info.commandId) >= 0 || ((await info.commandCount) > 0)) {
+    if ((await lazy(info.commandId)) >= 0 || ((await lazy(info.commandCount)) > 0)) {
       throw new Error("Command queues in revelation are not supported yet");
     }
     // Acquire connection without remote narration to determine the current last authorized event
@@ -723,10 +733,10 @@ export default class Gateway extends FabricEventTarget {
         });
     connection.clockEvent(1, "prologue.activate", "Activating connection");
     await connection.asActiveConnection();
-    let prologueTruthCount = await info.truthCount;
+    let prologueTruthCount = await lazy(info.truthCount);
     if (!Number.isInteger(prologueTruthCount)) {
       // Migration code for eventId deprecation.
-      const lastEventId = await info.eventId;
+      const lastEventId = await lazy(info.eventId);
       prologueTruthCount = lastEventId !== undefined ? lastEventId + 1 : 0;
     }
     const eventIdEnd = connection.getFirstUnusedTruthEventId() || 0;
@@ -736,19 +746,19 @@ export default class Gateway extends FabricEventTarget {
           `Chronicling truths, medias and bvobs from revelation`);
       // If no event logs are replayed, we don't need to precache the bvobs either, so we delay
       // loading them up to this point.
-      await (this.bvobInfos || (this.bvobInfos = this._getBvobInfos()));
-      const logs = await info.logs;
-      let truthLog = await logs.truthLog;
+      await (lazy(this.bvobInfos) || (this.bvobInfos = this._getBvobInfos()));
+      const logs = await lazy(info.logs);
+      let truthLog = await lazy(logs.truthLog);
       if (!truthLog || !truthLog.length) {
         // Migration code for eventLog deprecation.
-        const eventLog = await logs.eventLog;
+        const eventLog = await lazy(logs.eventLog);
         if (eventLog && eventLog.length) truthLog = eventLog;
       }
-      const commandQueue = await logs.commandQueue;
+      const commandQueue = await lazy(logs.commandQueue);
       if (commandQueue && commandQueue.length) {
         throw new Error("commandQueue revelation not implemented yet");
       }
-      const latestMediaInfos = await logs.latestMediaInfos; // only used for validation for now
+      const latestMediaInfos = await lazy(logs.latestMediaInfos); // only used for validation
       const upgradedEventLog = truthLog.map(event => upgradeEventTo0Dot2(connection, event));
       const chronicling = connection.chronicleEvents(upgradedEventLog, {
         name: `prologue truths for '${connection.getName()}'`,
@@ -792,24 +802,24 @@ export default class Gateway extends FabricEventTarget {
   async _getBvobInfos () {
     const readRevelationBvobContent = async (contentHash: string) => {
       const bvobBuffers = {
-        ...await this.prologueRevelation.bvobBuffers,
-        ...await this.prologueRevelation.blobBuffers, // deprecated
+        ...await lazy(this.prologueRevelation.bvobBuffers),
+        ...await lazy(this.prologueRevelation.blobBuffers), // deprecated
       };
       if (bvobBuffers[contentHash] === undefined) {
         this.errorEvent("Could not locate precached content for bvob", contentHash,
             "from revelation bvobBuffers", ...dumpObject(bvobBuffers));
         return undefined;
       }
-      const container = await bvobBuffers[contentHash];
+      const container = await lazy(bvobBuffers[contentHash]);
       if (container.base64 !== undefined) return byteArrayFromBase64(container.base64).buffer;
       return container;
     };
     const bvobInfos = {
-      ...((await this.prologueRevelation.bvobInfos) || {}),
-      ...((await this.prologueRevelation.blobInfos) || {}), // deprecated
+      ...((await lazy(this.prologueRevelation.bvobInfos)) || {}),
+      ...((await lazy(this.prologueRevelation.blobInfos)) || {}), // deprecated
     };
     for (const [contentHash, bvobInfoMaybe] of Object.entries(bvobInfos || {})) {
-      const bvobInfo = await bvobInfoMaybe;
+      const bvobInfo = await lazy(bvobInfoMaybe);
       if (bvobInfo.persistRefCount !== 0) {
         await this.scribe.preCacheBvob(contentHash, bvobInfo, readRevelationBvobContent,
             Gateway.revelationBvobInitialPersistRefCount);

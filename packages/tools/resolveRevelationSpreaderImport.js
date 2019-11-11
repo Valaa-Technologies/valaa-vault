@@ -6,11 +6,9 @@ const inBrowser = require("../gateway-api/inBrowser").default;
 exports.default = function resolveRevelationSpreaderImport (reference, siteRoot,
   revelationRoot, domainRoot, currentRevelationPath
 ) {
-  if ((reference[0] !== "<") || (reference[reference.length - 1] !== ">")) {
-    return path.join(
-        reference[0] === "/" ? (siteRoot || "") : (currentRevelationPath || revelationRoot),
-        reference);
-  }
+  if (reference[0] === "/") return path.join((siteRoot || ""), reference);
+  if (reference[0] === ".") return path.join((currentRevelationPath || revelationRoot), reference);
+  if ((reference[0] !== "<") || (reference[reference.length - 1] !== ">")) return reference;
   const uri = reference.slice(1, -1);
   if (uri[0] === "/") {
     if (inBrowser()) return uri;

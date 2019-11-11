@@ -173,5 +173,16 @@ describe("VPath", () => {
       expect(expandVPath(["out*", [":", "TAGS"]]))
       .toEqual(["out*", [":", "TAGS"]]);
     });
+    it("Doesn't expand spurious fields", () => {
+      expect(expandVPath(["!$"]))
+          .toEqual(["!", [":"]]);
+      expect(expandVPath(["!$random"]))
+          .toEqual(["!", ["$", "random"]]);
+      expect(expandVPath(["!$random"])[1].length)
+          .toEqual(2);
+      expect(expandVPath(["@!:scriptRoot@!$random@"]))
+          .toEqual(["@", ["!", [":", "scriptRoot"]], ["!", ["$", "random"]]]);
+
+    });
   });
 });

@@ -8,6 +8,8 @@ const inProduction = require("../tools/inProduction").default;
 const resolveRevelationSpreaderImport = require("../tools/resolveRevelationSpreaderImport").default;
 const trivialClone = require("../tools/trivialClone").default;
 const isPromise = require("../tools/isPromise").default;
+const patchWith = require("../tools/patchWith").default;
+const thenChainEagerly = require("../tools/thenChainEagerly").thenChainEagerly;
 
 const { dumpObject, wrapError } = require("../tools/wrapError");
 
@@ -172,7 +174,8 @@ module.exports = {
   dictionaryOf,
   arrayOf,
   deprecated,
-  combineRevelationsLazily,
+  lazyPatchRevelations,
+  lazy,
 };
 
 function dictionaryOf (valueTemplate) {
@@ -202,122 +205,151 @@ function deprecated (template, deprecationMessage) {
  * @param {...any} extensionSets
  * @returns
  */
-function combineRevelationsLazily (gateway, ...revelations) {
-  return _keepCalling(_combineRevelationsLazily(gateway, ...revelations));
+function lazyPatchRevelations (gateway, targetRevelation, ...patchRevelations) {
+  return _keepCalling(_lazyPatchRevelations(gateway, targetRevelation, ...patchRevelations));
 }
 
-function _combineRevelationsLazily (gateway, ...revelations) {
-  return revelations.reduce(
-      (template, update) => ((isPromise(template) || isPromise(update))
+function _lazyPatchRevelations (gateway, targetRevelation, ...patchRevelations) {
+  return patchRevelations.reduce(
+      (target, patch) => ((isPromise(target) || isPromise(patch))
           ? _markLazy(async () =>
-              _keepCalling(_combineRevelation(gateway, await template, await update)))
-          : _combineRevelation(gateway, template, update)));
+              _keepCalling(_patchRevelation(gateway, await target, await patch)))
+          : _patchRevelation(gateway, target, patch)),
+      targetRevelation);
 }
 
-function _combineRevelation (gateway, template, update, validateeFieldName, updateName) {
-  let currentKey;
-  let ret;
+function _patchRevelation (gateway, targetRevelation, patchRevelation) {
   try {
-    if (update === undefined) {
-      if (validateeFieldName) {
-        throw new Error(`Revelation update '${updateName}' is missing field '${validateeFieldName
-            }' required by template ${typeof template} `);
-      }
-      return (ret = template);
-    }
-
-    if ((template === undefined) || (update === null)) {
-      return (ret = update);
-    }
-
-    if (_isLazy(template) || _isLazy(update)) {
-      return (ret = _markLazy(() =>
-          _combineRevelationsLazily(gateway, _keepCalling(template), _keepCalling(update))));
-    }
-
-    const spreader = (update != null) && (typeof update === "object")
-        && update.hasOwnProperty("!!!") && update["!!!"];
-    if (spreader) {
-      return (ret = _spreadAndCombineRevelation(gateway, template, update, spreader));
-    }
-
-    // const expandedExtension = _tryExpandExtension(gateway, update, template);
-    // if (expandedExtension) return (ret = expandedExtension);
-
-    if (typeof update === "function" && (!validateeFieldName || (typeof template === "function"))) {
-      return (ret = _callAndCombineRevelation(gateway, template, update));
-    }
-
-    if (template === null) {
-      return (ret = update);
-    }
-
-    const templateType = Array.isArray(template) ? "array" : typeof template;
-    const updateType = Array.isArray(update) ? "array" : typeof update;
-    if ((typeof template === "object") && template[Deprecated]) {
-      gateway.warnEvent(template[Deprecated], "while extending", template, "with", update);
-      if (updateType !== "object") {
-        return (ret = update);
-      }
-    } else if (templateType !== updateType) {
-      if (updateType === "object" && Object.keys(update).length === 0) {
-        return template;
-      }
-      throw new Error(`Revelation type mismatch: trying to override an entry of type '${
-          templateType}' with a value of type '${updateType}'`);
-    } else if (typeof template !== "object") {
-      return (ret = update); // non-array, non-object values are always overridden
-    }
-
-    if (validateeFieldName) return undefined;
-
-    const valuePrototype = template[EntryTemplate];
-
-    if (!Array.isArray(template)) {
-      ret = Object.create(Object.getPrototypeOf(template),
-          Object.getOwnPropertyDescriptors(template));
-      for (const [key_, value] of Object.entries(update)) {
-        currentKey = key_;
-        const currentValue = (ret[currentKey] !== undefined) ? ret[currentKey] : valuePrototype;
-        if (currentValue === undefined) {
-          ret[currentKey] = value;
-        } else {
-          _setMaybeLazyProperty(ret, currentKey,
-              _combineRevelationsLazily(gateway, currentValue, value));
+    return patchWith(targetRevelation, patchRevelation, {
+      spreaderKey: "!!!",
+      keyPath: [],
+      concatArrays: true,
+      patchSymbols: true,
+      preExtend (target, patch, key, targetParent, patchParent) {
+        if (target === undefined) {
+          if (patch && (typeof patch === "object") && !Array.isArray(patch)
+              && Object.getPrototypeOf(patch) !== Object.prototype) {
+            return patch;
+          }
         }
-      }
-    } else if (!valuePrototype) {
-      ret = [].concat(template, update);
-    } else {
-      ret = [].concat(template);
-      for (const entry of [].concat(update)) {
-        _setMaybeLazyProperty(ret, ret.length,
-            _combineRevelationsLazily(gateway, valuePrototype, entry));
-      }
-    }
-    return ret;
-  } catch (error) {
-    throw gateway.wrapErrorEvent(error, !updateName
-            ? "_combineRevelation()"
-            : `validateField '${validateeFieldName}' of extender '${updateName}' call`,
-        "\n\ttemplate revelation:", ...dumpObject(template),
-        "\n\tupdate revelation:", ...dumpObject(update),
-        ...(currentKey ? ["\n\twhile processing update key:", currentKey] : []));
-  } /* finally {
-    console.log("extended, with:",
-        "\n\tbase revelation:", ...dumpObject(template),
-        "\n\textension revelation:", ...dumpObject(update),
-        "\n\tresult:", ret);
-  } */
-}
+        if ((target == null) || (patch == null) || (key === EntryTemplate)) return undefined;
 
-function _spreadAndCombineRevelation (gateway, template, update, spreader) {
-  const postUpdate = { ...update };
-  delete postUpdate["!!!"];
-  const spreadUpdate = (typeof spreader === "function")
-      ? spreader
-      : _valk(gateway, null, _pathOpFromSpreader(spreader));
-  return _markLazy(() => _combineRevelationsLazily(gateway, template, spreadUpdate, postUpdate));
+        if (_isLazy(target) || _isLazy(patch)) {
+          return _markLazy(() => {
+            const delayedResult = this.extend(
+                _keepCalling(target), _keepCalling(patch), key, targetParent, patchParent);
+            targetParent[key] = delayedResult;
+            if (isPromise(delayedResult)) {
+              delayedResult.then(resolvedResult => { targetParent[key] = resolvedResult; });
+            }
+            return delayedResult;
+          });
+        }
+        try {
+          if (typeof patch === "function") {
+            if (typeof target === "function") {
+              if (!inProduction() && (patch.name !== target.name)) {
+                throw new Error(`Revelation function name mismatch: trying to override function '${
+                    target.name}' with '${patch.name}'`);
+              }
+              return patch;
+            }
+            let revelationPatch;
+            try {
+              revelationPatch = gateway.callRevelation(patch);
+              const combined = this.extend(target, revelationPatch);
+              if (typeof revelationPatch !== "object") return combined;
+              for (const baseKey of Object.keys(target)) {
+                if ((target[baseKey] !== undefined) && !revelationPatch.hasOwnProperty(baseKey)) {
+                  throw new Error(`Revelation update '${patch.name}' is missing field '${
+                    baseKey}' required by target ${typeof target[baseKey]}`);
+                }
+              }
+              return revelationPatch;
+            } catch (error) {
+              throw gateway.wrapErrorEvent(error, `_patchRevelation via patch '${patch.name}' call`,
+                  "\n\trevelationPatch:", revelationPatch,
+                  "\n\ttarget:", target);
+            }
+          }
+
+          const targetType = Array.isArray(target) ? "array" : typeof target;
+          const patchType = Array.isArray(patch) ? "array" : typeof patch;
+          if (((patchType === "array") && (patch[0] === "!!!"))
+              || ((patchType === "object") && patch["!!!"])) return undefined;
+          if ((typeof target === "object") && target[Deprecated]) {
+            gateway.warnEvent(target[Deprecated], "while patching", target, "with", patch);
+            if (patchType !== "object") return patch;
+          } else if (targetType !== patchType) {
+            if ((patchType === "object") && Object.keys(patch).length === 0) {
+              return target;
+            }
+            throw new Error(`Revelation type mismatch: trying to override target of type '${
+                targetType}' with a patch of type '${patchType}'`);
+          } else if (typeof target !== "object") {
+            return undefined;
+          } else if (targetType === "object") {
+            if (Object.getPrototypeOf(target) !== Object.prototype) {
+              if (target.constructor === patch.constructor) {
+                return patch;
+              }
+              throw new Error(`Cannot patch complex target: ${target.constructor.name}`);
+            }
+            if (Object.getPrototypeOf(patch) !== Object.prototype) {
+              for (const targetKey of Object.keys(target)) {
+                if ((target[targetKey] !== undefined) && !patch.hasOwnProperty(targetKey)) {
+                  throw new Error(`Complex revelation patch '${patch.name}' is missing field '${
+                      targetKey}' specified in its target: ${typeof target[targetKey]}`);
+                }
+              }
+              return patch;
+            }
+          }
+          const entryTemplate = target[EntryTemplate];
+          if (entryTemplate) {
+            if (Array.isArray(patch)) {
+              target.push(...patch.map(patchEntry => this.extend(
+                  this.extend({}, entryTemplate), patchEntry, key, targetParent, patchParent)));
+              return target;
+            }
+            const ret = Object.create(
+                Object.getPrototypeOf(target),
+                Object.getOwnPropertyDescriptors(target));
+            Object.entries(patch).forEach(([subKey, subValue]) => {
+              ret[subKey] = this.extend(
+                  this.extend({}, entryTemplate), subValue, subKey, ret, patch);
+            });
+            return ret;
+          }
+          return undefined;
+        } catch (error) {
+          throw gateway.wrapErrorEvent(error, new Error(`patchRevelation.preExtend(key: ${key})`),
+              "\n\ttarget:", ...dumpObject(target),
+              "\n\tpatch:", ...dumpObject(patch),
+              "\n\ttargetParent:", ...dumpObject(targetParent),
+              "\n\tpatchParent:", ...dumpObject(patchParent));
+        }
+      },
+      spread (spreader /* , outerRet */) {
+        let spreadedSpreader = spreader;
+        if (typeof spreader === "string") {
+          spreadedSpreader = spreader;
+        } else if (spreader === null || typeof spreader !== "object") {
+          return spreader;
+        } else {
+          spreadedSpreader = this.extend(undefined, spreader);
+          if (!Array.isArray(spreader)) return spreadedSpreader || spreader;
+        }
+        const pathOp = _pathOpFromSpreader(spreadedSpreader);
+        const ret = _valk(gateway, null, pathOp);
+        return ret;
+      },
+    });
+  } catch (error) {
+    throw gateway.wrapErrorEvent(error, new Error("_patchRevelation()"),
+        "\n\ttargetRevelation:", ...dumpObject(targetRevelation),
+        "\n\tpatchRevelation:", ...dumpObject(patchRevelation));
+  }
 }
 
 const revelationContext = {
@@ -337,8 +369,10 @@ const revelationContext = {
 };
 
 function _pathOpFromSpreader (spreader) {
-  const vpath = expandVPath(_vpathFromSpreader(spreader));
-  return bindExpandedVPath(vpath, revelationContext);
+  const conciseVPath = _vpathFromSpreader(spreader);
+  const expandedVPath = expandVPath(conciseVPath);
+  const boundVPath = bindExpandedVPath(expandedVPath, revelationContext);
+  return boundVPath;
   function _vpathFromSpreader (entry, isInnerOp) {
     if ((typeof entry === "string") || (typeof entry === "number")) {
       return [!isInnerOp ? "!$revela:import" : ".", entry];
@@ -360,37 +394,6 @@ function _pathOpFromSpreader (spreader) {
   }
 }
 
-function _callAndCombineRevelation (gateway, template, update) {
-  if (typeof template !== "function") {
-    let updateCallResult;
-    try {
-      updateCallResult = gateway.callRevelation(update, template);
-      const combined = _combineRevelation(gateway, template, updateCallResult);
-      if (typeof updateCallResult !== "object") {
-        return combined;
-      }
-      for (const baseKey of Object.keys(template)) {
-        if ((template[baseKey] !== undefined) && !updateCallResult.hasOwnProperty(baseKey)) {
-          _combineRevelation(gateway,
-              template[baseKey], updateCallResult[baseKey], baseKey, update.name);
-        }
-      }
-      return updateCallResult;
-    } catch (error) {
-      throw gateway.wrapErrorEvent(error,
-              `_combineRevelation via update '${update.name}' call`,
-          "\n\tupdate call result:", updateCallResult,
-          "\n\tbase:", template);
-    }
-  }
-  if (!inProduction() && (update.name !== template.name)) {
-    throw new Error(`Revelation function name mismatch: trying to override function '${
-        template.name}' with '${update.name}'`);
-  }
-  return update;
-}
-
-
 function _keepCalling (callMeMaybe) {
   try {
     return _isLazy(callMeMaybe) ? _keepCalling(callMeMaybe())
@@ -410,27 +413,8 @@ function _isLazy (candidate) {
   return (typeof candidate === "function") && candidate._isLazy;
 }
 
-function _setMaybeLazyProperty (target, key, value) {
-  if (!_isLazy(value)) {
-    target[key] = value;
-  } else {
-    if (typeof key === "number") target[key] = undefined;
-    let _cachedValue;
-    Object.defineProperty(target, key, {
-      enumerable: true,
-      configurable: true,
-      get () {
-        if (_cachedValue !== undefined) return _cachedValue;
-        _cachedValue = _keepCalling(value);
-        Object.defineProperty(target, key, { value: _cachedValue, writable: true });
-        Promise.resolve(_cachedValue).then(resolvedValue => {
-          _cachedValue = resolvedValue;
-          Object.defineProperty(target, key, { value: resolvedValue, writable: true });
-        });
-        return _cachedValue;
-      }
-    });
-  }
+function lazy (candidate) {
+  return _isLazy(candidate) ? _keepCalling(candidate) : candidate;
 }
 
 function _valk (gateway, head, step) {
@@ -458,10 +442,20 @@ function _valk (gateway, head, step) {
     if (opId === "§..") return head[step[1]];
     if (opId === "§->") return step.slice(1).reduce(_valk.bind(null, gateway), head);
     if (opId === "§[]") {
-      const ret = step.slice(1).map(_valk.bind(null, gateway, head));
-      return ret;
+      return step.slice(1).map(_valk.bind(null, gateway, head));
     }
-    if (opId === "§import") return _require(gateway, step);
+    if (opId === "§import") return _import(gateway, step);
+    if (opId === "§{}") {
+      return step.slice(1).reduce((o, [key, value]) => {
+        o[key] = (typeof value !== "object") ? value : _valk(gateway, head, value);
+        return o;
+      }, {});
+    }
+    if (opId === "§invoke") {
+      return head[step[1]]
+          .call(head, ...step.slice(2)
+              .map(arg => ((typeof arg !== "object") ? arg : _valk(gateway, head, arg))));
+    }
     /*
     // Spreader stuff, currently untested.
     if (opId === "§merge") {
@@ -478,7 +472,7 @@ function _valk (gateway, head, step) {
   }
 }
 
-function _require (gateway, step) {
+function _import (gateway, step) {
   let location = step[1];
   let options = step[2] || {};
   let pathOp = step.slice(3);
@@ -487,26 +481,24 @@ function _require (gateway, step) {
     location = options.url || options.input || options.path;
     pathOp = step.slice(2);
   }
-  const spreadOptions = options.spread || {};
   try {
     if (!options.url) {
       location = resolveRevelationSpreaderImport(location,
           gateway.siteRoot, gateway.revelationRoot, gateway.domainRoot,
           gateway.currentRevelationPath);
     }
-    if (inBrowser() || options.fetch || location.match(/^[^/]*:/)) {
-      return _markLazy(async () => _postProcessGetContent(gateway, spreadOptions.final, location,
-          await gateway.fetch({
-            input: location,
-            fetch: options.fetch || {},
-          }),
-          pathOp,
-      ));
-    }
-    return _postProcessGetContent(gateway, spreadOptions.final, location,
-        gateway.require(location),
-        pathOp,
-    );
+    const relativeGateway = Object.create(gateway);
+    relativeGateway.currentRevelationPath = path.dirname(location);
+
+    return thenChainEagerly(
+          (inBrowser() || options.fetch || location.match(/^[^/]*:/))
+              ? gateway.fetch({ input: location, fetch: options.fetch || {} })
+              : gateway.require(location), [
+            result => _patchRevelation(relativeGateway, undefined, result),
+            revelation => (!pathOp.length
+                ? revelation
+                : _valk(relativeGateway, revelation, ["§->", ...pathOp])),
+          ]);
   } catch (error) {
     throw gateway.wrapErrorEvent(error,
         `_require('${location}')`,
@@ -528,6 +520,7 @@ function _delayIfAnyPromise (promiseCandidate, operation) {
   return delay.then(operation);
 }
 
+/*
 function _postProcessGetContent (gateway, isFinal, resourceLocation, content_, pathOp) {
   let content = content_;
   if (!isFinal) {
@@ -544,3 +537,4 @@ function _postProcessGetContent (gateway, isFinal, resourceLocation, content_, p
   }
   return !pathOp.length ? content : _valk(gateway, content, ["§->", ...pathOp]);
 }
+*/

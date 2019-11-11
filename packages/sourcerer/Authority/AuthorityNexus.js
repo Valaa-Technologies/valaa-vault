@@ -41,6 +41,7 @@ export default class AuthorityNexus extends FabricEventTarget {
   }
 
   addSchemeModule (schemeModule: SchemeModule) {
+    invariantify(schemeModule.scheme, `schemeModule is missing scheme`);
     invariantify(!this._schemeModules[schemeModule.scheme],
         `URI scheme '${schemeModule.scheme}' module already exists`);
     this._schemeModules[schemeModule.scheme] = schemeModule;

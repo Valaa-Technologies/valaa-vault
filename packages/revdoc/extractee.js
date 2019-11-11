@@ -203,6 +203,7 @@ module.exports = {
     const tests = [];
     return {
       itExpects (named, operations, toSatisfy, result) {
+        if (!named) return {};
         tests.push([named, operations, toSatisfy, result]);
         return {
           "dc:title": named,

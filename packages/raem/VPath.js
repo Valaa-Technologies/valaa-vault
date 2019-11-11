@@ -312,19 +312,25 @@ function _expandVParamValue (vparam, type, initial) {
   const entry = vparam[initial + requiredParams - 1];
   if ((entry == null) || (typeof entry !== "object")) return entry;
   if (Array.isArray(entry)) return expandVPath(entry);
-  return _appendVObject(["-"], entry);
+  return _appendVObject(["-", [":"]], entry);
 }
 
 function _appendVRest (target, rest, initial) {
   if (rest === undefined) return target;
-  if ((rest === null) || (typeof rest !== "object")) target.push([":", rest]);
-  else if (!Array.isArray(rest)) {
+  if ((rest === null) || (typeof rest !== "object")) {
+    target.push([":", rest]);
+  } else if (!Array.isArray(rest)) {
     _appendVObject(target, rest);
   } else {
     for (let i = initial; i !== rest.length; ++i) {
       const entry = rest[i];
-      if (Array.isArray(entry)) target.push(expandVPath(entry));
-      else _appendVRest(target, entry, 0);
+      if ((entry === null) || (typeof entry !== "object")) {
+        target.push([":", entry]);
+      } else if (!Array.isArray(entry)) {
+        target.push(_appendVObject(["-", [":"]], entry));
+      } else {
+        target.push(expandVPath(entry));
+      }
     }
   }
   return target;
@@ -333,13 +339,14 @@ function _appendVRest (target, rest, initial) {
 function _appendVObject (target, vobject) {
   for (const key of Object.keys(vobject).sort()) {
     const parts = key.split(/(@|\$|:)/);
-    target.push(
-        _appendVRest((parts.length === 1)
-                ? [".", [":", parts[0]]]
-                : _expandVPathStringParts(parts.filter(e => e)),
-            vobject[key],
-            0));
+    target.push(_appendVRest(
+        (parts.length === 1)
+            ? [".", [":", parts[0]]]
+            : _expandVPathStringParts(parts.filter(e => e)),
+        vobject[key],
+        0));
   }
+  return target;
 }
 
 function _expandVPathStringParts (vpathArray, start = 0) {
@@ -402,20 +409,24 @@ function _nestSegment (segment, initial = 1) {
   let nested;
   try {
     for (; i !== segment.length; ++i) {
+      let verbValue;
       if (segment[i] === "$") {
         if (segment[i + 2] === ":") {
           nested = segment.splice(i, 4);
           nested.splice(2, 1);
+          verbValue = nested[2];
         } else if (segment[i + 1] === ":") {
           nested = segment.splice(i, 3);
           nested.shift();
+          verbValue = nested[1];
         } else {
           nested = segment.splice(i, 2);
+          if (nested.length === 1) nested[0] = ":";
         }
       } else if (segment[i] === ":") {
         nested = segment.splice(i, 2);
+        verbValue = nested[1];
       } else continue;
-      const verbValue = nested[nested.length - 1];
       if (typeof verbValue === "string") {
         validateParamValueText(verbValue);
         nested[nested.length - 1] = decodeURIComponent(verbValue);
@@ -438,11 +449,12 @@ function _nestSegment (segment, initial = 1) {
   }
 }
 
-function bindExpandedVPath (vp, contextLookup = {}, contextState, componentType) {
+function bindExpandedVPath (vp, contextLookup = {}, contextState, componentType, index) {
   let expandedVPath = vp;
   try {
+    if (vp === undefined) throw new Error("Cannot expand undefined vpath");
     if (!componentType || (componentType === "@")) {
-      if (!Array.isArray(vp)) return vp;
+      if (!Array.isArray(vp)) return (typeof vp === "string") ? vp : ["§'", vp];
     } else if (!Array.isArray(vp) || (vp[0] === "@")) {
       expandedVPath = [":", vp];
     }
@@ -453,20 +465,21 @@ function bindExpandedVPath (vp, contextLookup = {}, contextState, componentType)
     }
     if (elementType[0] === "!") {
       expandedVPath[0] = `§${elementType.slice(1)}`;
-      return _expandRest(expandedVPath, contextLookup, contextState, "!", 1);
+      return _bindRest(expandedVPath, contextLookup, contextState, "!", 1);
     }
     throw new Error(`unrecognized verb type: ${JSON.stringify(elementType)}`);
   } catch (error) {
-    throw wrapError(error, new Error("During bindExpandedVPath"),
+    throw wrapError(error,
+        new Error(`During bindExpandedVPath(#${index} of ${componentType} -component)`),
         "\n\texpandedVPath:", ...dumpObject(expandedVPath),
         "\n\tcomponentType:", ...dumpObject(componentType));
   }
 }
 
-function _expandRest (expandedVPath, contextLookup, contextState, componentType, initial) {
+function _bindRest (expandedVPath, contextLookup, contextState, componentType, initial) {
   for (let i = initial; i !== expandedVPath.length; ++i) {
     expandedVPath[i] = bindExpandedVPath(expandedVPath[i], contextLookup, contextState,
-        componentType);
+        componentType, i);
   }
   return expandedVPath;
 }
@@ -502,23 +515,15 @@ const _typeBinders = {
   "": _invalidHead,
   $: _vparam,
   ":": _vparamContextLess,
-  "!": _computation,
-  "~": function _subspace () {
+  _: function _subspace () {
     throw new Error("subspace selector not implemented");
   },
+  "!": _computation,
   ...(Object.keys(_singularLookup)
       .reduce((a, p) => { a[p] = _singularProperty; return a; }, {})),
   ...(Object.keys(_pluralLookup)
       .reduce((a, p) => { a[p] = _pluralProperty; return a; }, {})),
-  ".": function _property (expandedVPath, contextLookup, contextState, componentType) {
-    // ref("@valos/raem/VPath#section_structured_scope_property")
-    const first = bindExpandedVPath(expandedVPath[1], contextLookup, contextState,
-        componentType || ".");
-    if (expandedVPath.length <= 2) return first;
-    expandedVPath[0] = "§->";
-    expandedVPath[1] = first;
-    return _expandRest(expandedVPath, contextLookup, contextState, ".", 2);
-  },
+  ".": _property,
   "-": _namedCollection,
   "'": _namedCollection,
   "*": _namedCollection,
@@ -530,16 +535,16 @@ function _invalidHead () {
 
 function _tryAsNameParam (vparam) {
   if (Array.isArray(vparam) && ((vparam[0] === "$") || (vparam[0] === ":"))
-    && !vparam[1] && !vparam[2]) return null;
+      && !vparam[1] && !vparam[2]) return null;
   return vparam;
 }
 
 function _statements (expandedVPath, contextLookup, contextState) {
   if (expandedVPath.length === 2) {
-    return bindExpandedVPath(expandedVPath[1], contextLookup, contextState, expandedVPath[0]);
+    return bindExpandedVPath(expandedVPath[1], contextLookup, contextState, "@", 1);
   }
   expandedVPath[0] = "§->";
-  return _expandRest(expandedVPath, contextLookup, contextState, ".", 1);
+  return _bindRest(expandedVPath, contextLookup, contextState, "@", 1);
 }
 
 function _vparamContextLess (expandedVPath, contextLookup, contextState, componentType) {
@@ -548,7 +553,9 @@ function _vparamContextLess (expandedVPath, contextLookup, contextState, compone
 }
 
 function _vparam (expandedVPath, contextLookup, contextState, componentType) {
-  let value = bindExpandedVPath(expandedVPath[2], contextLookup, contextState);
+  let value = (expandedVPath[2] === undefined)
+      ? undefined
+      : bindExpandedVPath(expandedVPath[2], contextLookup, contextState);
   let contextValue;
   const contextTerm = expandedVPath[1];
   if (contextTerm) {
@@ -588,9 +595,8 @@ function _vparam (expandedVPath, contextLookup, contextState, componentType) {
     return ["§ref", value];
   case "!0": // first entry of a trivial resource valk
     return ["§$", value];
-  case ".":
-    return ["§..", value]; // valospace native property
-  case ":":
+  case "!*":
+    return ["§..", value]; // subsequent entries of trivial resource valk
   default: // eslint-disable-line no-fallthrough
     return value;
   }
@@ -603,10 +609,31 @@ function _computation (expandedVPath, contextLookup, contextState) {
   if (first[0] === "§$") {
     expandedVPath[0] = "§->";
     expandedVPath[1] = first;
-    return _expandRest(expandedVPath, contextLookup, contextState, ".", 2);
+    return _bindRest(expandedVPath, contextLookup, contextState, "!*", 2);
   }
   expandedVPath.splice(0, 2, ...first);
-  return _expandRest(expandedVPath, contextLookup, contextState, computationType, first.length);
+  return _bindRest(expandedVPath, contextLookup, contextState, computationType, first.length);
+}
+
+function _property (expandedVPath, contextLookup, contextState, componentType) {
+  // ref("@valos/raem/VPath#section_structured_scope_property")
+  const first = bindExpandedVPath(expandedVPath[1], contextLookup, contextState, ".", 1);
+  if (expandedVPath.length <= 2) return ["§..", first];
+  const rest = _bindRest(expandedVPath, contextLookup, contextState, ".", 2);
+  const setter = [first, rest];
+  if (rest.length === 3 && (rest[2] && rest[2][0] !== "§.<-")) {
+    setter[1] = rest[2];
+  } else {
+    rest[0] = "§{}";
+    for (let i = 2; i !== rest.length; ++i) {
+      if ((rest[i] == null) || rest[i][0] !== "§.<-") {
+        throw new Error("Property verb only accepts multiple params of nested properties");
+      }
+      rest[i - 1] = rest[i][1];
+    }
+    rest.pop();
+  }
+  return componentType === "-" ? setter : ["§.<-", setter];
 }
 
 function _namedCollection (expandedVPath, contextLookup, contextState) {
@@ -622,7 +649,7 @@ function _namedCollection (expandedVPath, contextLookup, contextState) {
         } (must begin with "-" or "*")`);
   }
   if (expandedVPath.length > 2) {
-    _expandRest(expandedVPath, contextLookup, contextState, isSequence ? "*" : "-", 2);
+    _bindRest(expandedVPath, contextLookup, contextState, isSequence ? "*" : "-", 2);
   }
   expandedVPath.splice(0, 2, isSequence ? "§[]" : "§{}");
   return !nameSelector ? expandedVPath

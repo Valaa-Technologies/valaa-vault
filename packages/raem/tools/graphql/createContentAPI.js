@@ -123,7 +123,7 @@ export default function createContentAPI ({ name, inherits = [], exposes, mutati
         }' with multiple candidates: ${ret.join(",")}`);
   };
 
-  return Object.freeze({
+  return Object.freeze(Object.assign(Object.create(complexBase), {
     name,
     schema,
     mutations: Object.freeze(actualMutations),
@@ -141,8 +141,10 @@ export default function createContentAPI ({ name, inherits = [], exposes, mutati
     inactiveType,
     destroyedType,
     subAPIs,
-  });
+  }));
 }
+
+const complexBase = {};
 
 function _assign (target: Object, ...sources: Object) {
   for (const source of sources) {

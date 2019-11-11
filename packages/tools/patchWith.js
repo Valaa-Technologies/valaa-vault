@@ -1,13 +1,17 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 
+const { dumpObject, wrapError } = require("./wrapError");
+
 /**
  * Recursively updates the *target* with the changes described in *patch*
  * using customized rules and callbacks of *options*: {
+ *   spreaderKey: string = "...",
  *   preExtend: (tgt, patch, key, tgtObj, patchObj) => any,
  *   spread (spreader, tgt, patch, key, tgtObj, patchObj) => any,
- *   spreaderKey: string,
  *   postExtend: (tgt, patch, key, tgtObj, patchObj) => any,
- *   keyPath: string[],
+ *   keyPath: string[] = [],
+ *   concatArrays: boolean = true,
+ *   patchSymbols: boolean = false,
  * }
  * If *pre|postExtend* returns non-undefined then that value is directly
  * returned skipping the rest of that patch recursion branch,
@@ -163,58 +167,73 @@ exports.default = function patchWith (target /* : Object */, patch /* : Array<an
 const _returnUndefined = Symbol("returnUndefined");
 
 function extend (target_, patch_, keyInParent, targetParent, patchParent, skipSpread = false) {
-  if (this.keyPath && (keyInParent !== undefined)) this.keyPath.push(keyInParent);
-  let ret = this.preExtend
-      && this.preExtend(target_, patch_, keyInParent, targetParent, patchParent);
-  if (ret === undefined) {
-    ret = target_;
-    if (typeof patch_ !== "object") ret = (patch_ === undefined ? target_ : patch_);
-    else if (patch_ === null) ret = null;
-    else if (patch_ === target_) throw new Error("Cannot extend to self");
-    else if (Array.isArray(patch_)) {
-      const isSpreader = !skipSpread && (patch_[0] === this.spreaderKey) && this.spreaderKey;
-      if (isSpreader || ((ret !== undefined) && !Array.isArray(ret))) {
-        for (let i = isSpreader ? 1 : 0; i !== patch_.length; ++i) {
-          if (_setRetFromSpreadAndMaybeBail(this, patch_[i])) break;
+  let ret;
+  try {
+    if (this.keyPath && (keyInParent !== undefined)) this.keyPath.push(keyInParent);
+    ret = this.preExtend
+        && this.preExtend(target_, patch_, keyInParent, targetParent, patchParent);
+    if (ret === undefined) {
+      ret = target_;
+      if (typeof patch_ !== "object") ret = (patch_ === undefined ? target_ : patch_);
+      else if (patch_ === null) ret = null;
+      else if (patch_ === target_) throw new Error("Cannot extend to self");
+      else if (Array.isArray(patch_)) {
+        const isSpreader = !skipSpread && (patch_[0] === this.spreaderKey) && this.spreaderKey;
+        if (isSpreader || ((ret !== undefined) && !Array.isArray(ret))) {
+          for (let i = isSpreader ? 1 : 0; i !== patch_.length; ++i) {
+            if (_setRetFromSpreadAndMaybeBail(this, patch_[i])) break;
+          }
+        } else if (Array.isArray(ret) || !_setRetFromCacheAndMaybeBail(this)) {
+          if (!this.concatArrays) ret = [];
+          for (const entry of patch_) {
+            const newEntry = this.extend(undefined, entry, ret.length, ret, patch_);
+            if (newEntry !== undefined) ret.push(newEntry);
+          }
         }
-      } else if (Array.isArray(ret) || !_setRetFromCacheAndMaybeBail(this)) {
-        if (!this.concatArrays) ret = [];
-        for (const entry of patch_) {
-          const newEntry = this.extend(undefined, entry, ret.length, ret, patch_);
-          if (newEntry !== undefined) ret.push(newEntry);
+      } else if (Object.getPrototypeOf(patch_) !== Object.prototype) {
+        throw new Error("Invalid patch object: prototype must be Object.prototype");
+      } else if (!skipSpread && this.spreaderKey
+          && patch_[this.spreaderKey] && patch_.hasOwnProperty(this.spreaderKey)) {
+        if (!_setRetFromSpreadAndMaybeBail(this, patch_[this.spreaderKey])
+            && Object.keys(patch_).length > 1) {
+          const src = !this.preExtend ? patch_ : { ...patch_ };
+          if (this.preExtend) delete src[this.spreaderKey];
+          ret = this.extend(ret, src, keyInParent, targetParent, patchParent, true);
         }
-      }
-    } else if (!skipSpread && this.spreaderKey && patch_.hasOwnProperty(this.spreaderKey)) {
-      if (!_setRetFromSpreadAndMaybeBail(this, patch_[this.spreaderKey])) {
-        const src = !this.preExtend ? patch_ : { ...patch_ };
-        if (this.preExtend) delete src[this.spreaderKey];
-        ret = this.extend(ret, src, keyInParent, targetParent, patchParent, true);
-      }
-    } else {
-      const targetIsArray = Array.isArray(ret);
-      const keys = Object.keys(patch_);
-      if (this.patchSymbols) {
-        keys.push(...Object.getOwnPropertySymbols(patch_));
-      }
-      for (const key of keys) {
-        if (key === this.spreaderKey) continue;
-        if (((ret === null) || (typeof ret !== "object")) && _setRetFromCacheAndMaybeBail(this)) {
-          break;
+      } else {
+        const targetIsArray = Array.isArray(ret);
+        const keys = Object.keys(patch_);
+        if (this.patchSymbols) {
+          keys.push(...Object.getOwnPropertySymbols(patch_));
         }
-        const newValue = this.extend(ret[key], patch_[key], key, ret, patch_);
-        if (newValue !== undefined) ret[key] = newValue;
-        else if (!targetIsArray) delete ret[key];
-      }
-      if (targetIsArray) {
-        for (let i = 0; i !== ret.length; ++i) if (ret[i] === undefined) ret.splice(i--, 1);
+        for (const key of keys) {
+          if (key === this.spreaderKey) continue;
+          if (((ret === null) || (typeof ret !== "object")) && _setRetFromCacheAndMaybeBail(this)) {
+            break;
+          }
+          const newValue = this.extend(ret[key], patch_[key], key, ret, patch_);
+          if (newValue !== undefined) ret[key] = newValue;
+          else if (!targetIsArray) delete ret[key];
+        }
+        if (targetIsArray) {
+          for (let i = 0; i !== ret.length; ++i) if (ret[i] === undefined) ret.splice(i--, 1);
+        }
       }
     }
+    if (this.postExtend) {
+      ret = this.postExtend(ret, patch_, keyInParent, targetParent, patchParent, this);
+    }
+    if (this.keyPath && (keyInParent !== undefined)) this.keyPath.pop();
+    return ret === _returnUndefined ? undefined : ret;
+  } catch (error) {
+    throw wrapError(error, new Error(`patchWith.extend(${(this.keyPath || []).join(" | ")})`),
+      "\n\ttarget_:", ...dumpObject(target_),
+      "\n\tpatch_:", ...dumpObject(patch_),
+      "\n\tkeyInParent:", ...dumpObject(keyInParent),
+      "\n\ttargetParent:", ...dumpObject(targetParent),
+      "\n\tpatchParent:", ...dumpObject(patchParent),
+    );
   }
-  if (this.postExtend) {
-    ret = this.postExtend(ret, patch_, keyInParent, targetParent, patchParent, this);
-  }
-  if (this.keyPath && (keyInParent !== undefined)) this.keyPath.pop();
-  return ret === _returnUndefined ? undefined : ret;
 
   function _setRetFromSpreadAndMaybeBail (stack, spreaderValue) {
     const spreadee = stack.spread(

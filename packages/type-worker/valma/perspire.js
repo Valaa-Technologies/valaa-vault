@@ -138,6 +138,9 @@ exports.handler = async (yargv) => {
   }
 
   vlm.shell.mkdir("-p", yargv.cacheBasePath);
+  if ((revelationPath[0] !== "/") && (revelationPath[0] !== ".")) {
+    revelationPath = `./${revelationPath}`;
+  }
 
   vlm.clock("perspire.handler", "gateway.create", "server = new PerspireServer");
   const server = new PerspireServer({

@@ -1,6 +1,6 @@
 import { vRef } from "~/raem/VRL";
 import type { VRL } from "~/raem/VRL"; // eslint-disable-line no-duplicate-imports
-import { expandVPath, bindExpandedVPath } from "~/raem/VPath";
+import { expandVPath, affixVPath } from "~/raem/VPath";
 
 import beaumpify from "~/tools/beaumpify";
 import invariantify, { invariantifyArray, invariantifyNumber, invariantifyString,
@@ -428,7 +428,7 @@ export default class Kuery {
   }
 
   fromVPath (vrid: string | Array<any>, type: ?string): Kuery {
-    return this._addRawVAKON(bindExpandedVPath(expandVPath(vrid)), type);
+    return this._addRawVAKON(affixVPath(expandVPath(vrid)), type);
   }
 
   /**

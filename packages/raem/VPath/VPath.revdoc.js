@@ -192,23 +192,45 @@ current resource.`
 Mnemonic: The '_$~' is a 'subspace of ghoStS'.`,
         ],
       },
-      "chapter#section_verb_computation>6;verb type \"`!`\": eager evaluator": {
+      "chapter#section_verb_computation>6;verb type \"`!`\": computation evaluators": {
         "#0": [`
-Verb representing the result of an eager evaluation. When a VPath is
-bound to a `, em("context"), ` all nested eager evaluators selectors
-are resolved depth first, left to right. The resolution of a selector
-first evaluates the evaluator operation using the head and term lookups
-of the original context and then replaces the selector with the result
-of the evaluation.
+VPaths are data. In general whenever a representation of a VPath
+appears in some `, em("evaluation context"), ` the representation
+evaluates into itself. The only exception are the verbs with \`!\` as
+the leading character of their type: these represent the class of
+computation evaluators.
 
-The first parameter defines the evaluation operation. If this parameter
-has a trivial context-term (ie. no context-term or is a simple prefix
-term in the context term definition) then the operation is a path
-operation.
+VPath spec tries to specify as little as possible. As such it doesn't
+specify an execution model itself but delegates this to context term
+ontologies. VPath only provides a way to specify evaluation dependency
+chains and the mapping between VPath data structures and evaluator
+inputs and outputs.
 
-If the context-term is non-trivial then the context must
-have a definition for the operation.`],
-        "example#example_verb_computation>0;Computation selector example": [
+Following principles apply:`,
+        ],
+        "numbered#1": [
+[`The different evaluator verb types only specify the means to access
+  and process the VPath data structure itself. These
+  \`evaluator types\` are defined by the VPath specification(s).`],
+[`All computation (f.ex. flow control and method call) semantics are
+  specified by the first vpath param of the evaluator verb, ie. the
+  \`computation id\`. This specification shall be provided by the
+  ontology that defines the context-term of the computation id param.`],
+[`If the computation id doesn't have a context-term of if the
+  specification denotes the computation id to be a \`trivial name\`
+  then the computation is a \`context scope lookup path\`.`],
+[`When a computation evaluator is evaluated all of its params are
+  evaluated first in an order defined by the evaluation context and
+  their results stores as evaluation arguments.`],
+[`The evaluation context is then searched for an implementation for the
+  evaluator type / computation id combination. If none is found the
+  context does not implement the computation and the whole evaluation
+  chain is rejected.`],
+[`The evaluation implementation is resolved with the evaluation
+  arguments and its result is the result of the computation
+  evaluator.`],
+        ],
+        "example#example_verb_computation>1;Computation selector example": [
 `Triple pattern \`?s <urn:valos:!$valk:add$number:10:@!:myVal@> ?o\`
 matches like:
 `, turtle(`

@@ -32,7 +32,7 @@ export {
                                       vRef,
 } from "./VRL";
 export {
-                                      mintVPath,
+                                      formVPath,
                                       expandVPath,
                                       validateVPath,
 } from "./VPath";

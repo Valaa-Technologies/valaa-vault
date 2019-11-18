@@ -1,6 +1,6 @@
 // @flow
 
-import { validateVPath, mintVPath, expandVPath } from "./VPath";
+import { validateVPath, formVPath, expandVPath } from ".";
 
 describe("VPath", () => {
   describe("VPath validation", () => {
@@ -46,18 +46,18 @@ describe("VPath", () => {
   });
   describe("VPath minting", () => {
     it("Mints simple VPaths", () => {
-      expect(mintVPath(["!", "scriptRoot"], ["!random"]))
+      expect(formVPath(["!", "scriptRoot"], ["!random"]))
           .toEqual("@!:scriptRoot@!random@");
-      expect(mintVPath([
+      expect(formVPath([
         "!invoke",
         "create",
         ["@", ["!", "body", ["$", "V", "target"], "name"]],
       ])).toEqual("@!invoke:create:@!:body$V:target:name@@");
-      expect(mintVPath(["$", "~u4", "0000"], ["!random"]))
+      expect(formVPath(["$", "~u4", "0000"], ["!random"]))
           .toEqual("@$~u4:0000@!random@");
     });
     it("Mints complex nested VPaths", () => {
-      expect(mintVPath([
+      expect(formVPath([
         "!invoke",
         [":", "create"],
         "event",
@@ -68,7 +68,7 @@ describe("VPath", () => {
           [".", "name"],
         ]],
       ])).toEqual("@!invoke:create:event:@!:source@:@!:body@.$V:target@.:name@@");
-      expect(mintVPath(
+      expect(formVPath(
         ["$", "~u4", "55a5c4fb-1fd4-424f-8578-7b06ffdb3ef0"],
         ["_", ["$", "~pw",
           ["@", [".", ["$", "pot"], ["@", [".O.", "7741938f-801a-4892-9cf0-dd59bd8c9166"]]]]
@@ -171,7 +171,11 @@ describe("VPath", () => {
     });
     it("Expands already expanded VPaths correctly", () => {
       expect(expandVPath(["out*", [":", "TAGS"]]))
-      .toEqual(["out*", [":", "TAGS"]]);
+          .toEqual(["out*", [":", "TAGS"]]);
+      expect(expandVPath([{ val: [] }]))
+          .toEqual(["@", ["-", [":"], [".", [":", "val"]]]]);
+      expect(expandVPath([{ val: ["@"] }]))
+          .toEqual(["@", ["-", [":"], [".", [":", "val"], ["@"]]]]);
     });
     it("Doesn't expand spurious fields", () => {
       expect(expandVPath(["!$"]))
@@ -182,7 +186,6 @@ describe("VPath", () => {
           .toEqual(2);
       expect(expandVPath(["@!:scriptRoot@!$random@"]))
           .toEqual(["@", ["!", [":", "scriptRoot"]], ["!", ["$", "random"]]]);
-
     });
   });
 });

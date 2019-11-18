@@ -1,6 +1,6 @@
 const path = require("path");
 
-const { expandVPath, bindExpandedVPath } = require("../raem/VPath");
+const { expandVPath, affixVPath } = require("../raem/VPath");
 
 const inBrowser = require("../gateway-api/inBrowser").default;
 

@@ -5,7 +5,7 @@ import fs from "fs";
 
 import { dumpify, dumpObject, FabricEventTarget, outputError } from "~/tools";
 
-import { _createRouter } from "./_routerOps";
+import { _createPrefixRouter, _projectPrefixRoutesFromView } from "./_routerOps";
 import {
   _createRouteRuntime, _preloadRuntimeResources, _buildRuntimeVALKOptions, _resolveRuntimeRules,
 } from "./_routeRuntimeOps";
@@ -19,16 +19,14 @@ const Fastify = require("fastify");
 export type PrefixRouter = MapperService;
 
 export default class MapperService extends FabricEventTarget {
-  constructor ({ view, viewName, port, address, fastify, prefixes, ...rest }) {
-    super(rest.name, rest.verbosity, view._gateway.getLogger());
-    this._view = view;
-    this._viewName = viewName;
-    this._engine  = view.engine;
-    this._gateway = view._gateway;
+  constructor (gateway, { identity, port, address, fastify, ...rest }) {
+    super(rest.name, rest.verbosity, gateway.getLogger());
+    this._gateway = gateway;
 
+    this._identity = identity;
     this._port = port;
     this._address = address;
-    this._prefixes = prefixes;
+
     const options = { ...fastify };
     if (options.https) {
       options.https = {
@@ -38,52 +36,81 @@ export default class MapperService extends FabricEventTarget {
       };
     }
     this._rootFastify = Fastify(options || {});
+    this._prefixRouters = {};
   }
 
   getRootFastify () { return this._rootFastify; }
+
+  createPrefixRouter (prefix, prefixConfig) {
+    const service = this;
+    const openapi = prefixConfig.openapi || { info: { name: "<missing>", version: "<missing>" } };
+    try {
+      if (this._prefixRouters[prefix]) {
+        throw new Error(`Prefix router already exists for: <${prefix}>`);
+      }
+      if (!prefixConfig.openapi) {
+        throw new Error(`Prefix config openapi section missing for prefix: <${prefix}>`);
+      }
+      this.clockEvent(1, () => [
+        `restAPISpindle.prefixRouter.create`,
+        `Creating prefix router for: ${prefix}`,
+      ]);
+      // console.log("prefix:", prefix, "\n\tconfig:", prefixConfig);
+      const router = this._prefixRouters[prefix] = _createPrefixRouter(this, prefix, prefixConfig);
+      this.getRootFastify().after(error => {
+        if (error) {
+          outputError(errorOnCreatePrefixRouter(error),
+              "Exception intercepted during router register");
+          throw error;
+        }
+      });
+      return router;
+    } catch (error) {
+      throw errorOnCreatePrefixRouter(error);
+    }
+    function errorOnCreatePrefixRouter (error) {
+      return service.wrapErrorEvent(error, new Error(
+            `createPrefixRouter(${openapi.info.name}@${openapi.info.version}: <${prefix}>)`),
+        "\n\tprefixConfig:", ...dumpObject(prefixConfig),
+        "\n\tswaggerPrefix:", prefixConfig.swaggerPrefix,
+        "\n\tschemas:", ...dumpObject(prefixConfig.schemas),
+        "\n\troutes:", ...dumpObject({ routes: prefixConfig.routes }));
+    }
+  }
+
+  start () {
+    const wrap = new Error(`start()`);
+    try {
+      this.getRootFastify().listen(this._port, this._address || undefined,
+          (error) => {
+            if (error) throw error;
+            this.infoEvent(1, `listening @`, this.getRootFastify().server.address(),
+                "prepared prefixes:",
+                ...[].concat(...Object.entries(this._prefixRouters).map(
+                    ([prefix, { _config: { openapi: { info: { name, title, version } } } }]) =>
+                        [`\n\t${prefix}:`, `${name}@${version} -`, title]
+                )));
+          });
+    } catch (error) {
+      throw this.wrapErrorEvent(error, wrap,
+          "\n\trouters:", ...dumpObject(this._prefixRouters));
+    }
+  }
+
+  // PrefixRouter methods
+
   getEngine () { return this._engine; }
   getDiscourse () { return this._engine.discourse; }
   getViewFocus () { return this._view.getViewFocus(); }
   getSessionDuration () { return 86400 * 1.5; }
 
-  async start () {
-    const wrap = new Error(`start`);
+  async projectFromView (view, viewName) {
     try {
-      this._mappers = Object.entries(this._prefixes).map(([prefix, options]) => {
-        const service = this;
-        try {
-          const mapper = _createPrefixService(this, prefix, options);
-          this.getRootFastify().after(error => {
-            if (error) {
-              outputError(errorOnCreatePrefixPlugin(error),
-                  "Exception caught during plugin register");
-              throw error;
-            }
-          });
-          return mapper;
-        } catch (error) { throw errorOnCreatePrefixPlugin(error); }
-        function errorOnCreatePrefixPlugin (error) {
-          return service.wrapErrorEvent(error, new Error(
-                `createPrefixPlugin(${options.openapi.info.name}@${options.openapi.info.version}:"${
-                  prefix}")`),
-            "\n\topenapi:", ...dumpObject(options.openapi),
-            "\n\tswaggerPrefix:", options.swaggerPrefix,
-            "\n\tschemas:", ...dumpObject(options.schemas),
-            "\n\troutes:", ...dumpObject({ routes: options.routes }));
-        }
-      });
-      this.getRootFastify().listen(this._port, this._address || undefined, (error) => {
-        if (error) throw error;
-        this.infoEvent(1, `listening @`, this.getRootFastify().server.address(),
-            "exposing prefixes:",
-            ...[].concat(...Object.entries(this._prefixes).map(
-                ([prefix, { openapi: { info: { name, title, version } } }]) =>
-                    [`\n\t${prefix}:`, `${name}@${version} -`, title]
-            )));
-      });
+      return await _projectPrefixRoutesFromView(this, view, viewName);
     } catch (error) {
-      throw this.wrapErrorEvent(error, wrap,
-          "\n\tprefixes:", ...dumpObject(this._prefixes));
+      throw this.wrapErrorEvent(error, new Error(`projectFromView(${viewName})`),
+          "\n\tview:", ...dumpObject(view),
+          "\n\trouters:", ...dumpObject(this._prefixRouters));
     }
   }
 
@@ -142,25 +169,29 @@ export default class MapperService extends FabricEventTarget {
   }
 
   _projectorName (projector) {
-    return `${projector.method}-${projector.category} <${projector.url}>`;
+    return projector.name || this._routeName(projector.route);
+  }
+
+  _routeName (route) {
+    return `${route.method}-${route.category} <${route.url}>`;
   }
 
   // Build ops
 
   appendSchemaSteps (runtime, maybeJSONSchema,
       { expandProperties, isValOSFields, targetVAKON = ["§->"] } = {}) {
-    let jsonSchema, innerTargetVAKON;
+    let schema, innerTargetVAKON;
     if (!maybeJSONSchema) return targetVAKON;
     try {
-      jsonSchema = this.derefSchema(maybeJSONSchema);
+      schema = this.derefSchema(maybeJSONSchema);
       innerTargetVAKON = this.appendVPathSteps(
-          runtime, (jsonSchema.valospace || {}).reflection, targetVAKON);
-      return _appendSchemaSteps(this, runtime, jsonSchema, targetVAKON,
+          runtime, (schema.valospace || {}).reflection, targetVAKON);
+      return _appendSchemaSteps(this, runtime, schema, targetVAKON,
           innerTargetVAKON, expandProperties, isValOSFields);
     } catch (error) {
       throw this.wrapErrorEvent(error, new Error("appendSchemaSteps"),
           "\n\truntime:", ...dumpObject(runtime),
-          "\n\tjsonSchema:", ...dumpObject(jsonSchema),
+          "\n\tschema:", dumpify(schema),
           "\n\ttargetVAKON:", ...dumpObject(targetVAKON),
           "\n\tinnerTargetVAKON:", ...dumpObject(innerTargetVAKON),
         );
@@ -173,8 +204,8 @@ export default class MapperService extends FabricEventTarget {
       if (vpath === undefined) return undefined;
       if (!vpath) return targetVAKON;
       vpathVAKON = _vakonpileVPath(vpath, runtime);
-      targetVAKON.push(...vpathVAKON);
-      maybeInnerMapVAKON = targetVAKON[targetVAKON.length - 1];
+      targetVAKON.push(vpathVAKON);
+      maybeInnerMapVAKON = vpathVAKON[vpathVAKON.length - 1];
       return maybeInnerMapVAKON[0] === "§map"
           ? maybeInnerMapVAKON
           : targetVAKON;
@@ -188,14 +219,34 @@ export default class MapperService extends FabricEventTarget {
     }
   }
 
-  getResourceHRefPrefix (maybeJSONSchema: string | Object) {
-    let jsonSchema;
+  appendGateSteps (runtime, gate, targetVAKON = ["§->"]) {
+    let projectionVAKON;
     try {
-      jsonSchema = this.derefSchema(maybeJSONSchema);
-      return _getResourceHRefPrefix(this, jsonSchema);
+      if (gate.projection === undefined) throw new Error("Gate is missing projection");
+      projectionVAKON = _vakonpileVPath(gate.projection, runtime);
+      targetVAKON.push(projectionVAKON);
+      if (gate.filterCondition) {
+        const filter = ["§filter"];
+        this.appendVPathSteps(runtime, gate.filterCondition, filter);
+        targetVAKON.push(filter);
+      }
+    } catch (error) {
+      throw this.wrapErrorEvent(error, new Error(`appendGateSteps(${gate.name})`),
+          "\n\truntime:", ...dumpObject(runtime),
+          "\n\tgate:", ...dumpObject(gate),
+          "\n\ttargetVAKON:", ...dumpObject(targetVAKON),
+          "\n\tprojectionVAKON:", ...dumpObject(projectionVAKON));
+    }
+  }
+
+  getResourceHRefPrefix (maybeJSONSchema: string | Object) {
+    let schema;
+    try {
+      schema = this.derefSchema(maybeJSONSchema);
+      return _getResourceHRefPrefix(this, schema);
     } catch (error) {
       throw this.wrapErrorEvent(error, new Error("getResourceHRefPrefix"),
-          "\n\tjsonSchema:", dumpify(jsonSchema || maybeJSONSchema, { indent: 2 }));
+          "\n\tschema:", dumpify(schema || maybeJSONSchema, { indent: 2 }));
     }
   }
 

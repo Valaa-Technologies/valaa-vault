@@ -1,11 +1,11 @@
 // @flow
 
-import { expandVPath, bindExpandedVPath } from "~/raem/VPath";
+import { expandVKeyPath, affixVPath } from "~/raem/VPath";
 
 export function _vakonpileVPath (vpath, runtime) {
-  if (vpath.length === 0) return null;
-  const expandedVPath = expandVPath(vpath);
-  const ret = bindExpandedVPath(expandedVPath, ruleContextLookup, runtime);
+  const expandedVPath = expandVKeyPath("@", vpath);
+  if ((expandedVPath.length === 1) && (expandedVPath[0] === "@")) return null;
+  const ret = affixVPath(expandedVPath, ruleContextLookup, runtime);
   const lastVerb = (expandedVPath[0] === "@")
       ? expandedVPath[expandedVPath.length - 1]
       : expandedVPath;

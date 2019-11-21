@@ -1,6 +1,6 @@
 // @flow
 
-import { mintVerb, expandVPath } from "~/raem";
+import { expandVPath } from "~/raem";
 import patchWith from "~/tools/patchWith";
 
 export const ObjectSchema = Symbol("Object-JSONSchema");
@@ -51,9 +51,10 @@ export function extendType (baseTypes, schema) {
 }
 
 export function namedResourceType (schemaName, baseTypes, schema) {
-  return extendType(
+  const ret = extendType(
       [].concat(baseTypes || [], { [ObjectSchema]: { schemaName }, $V: $VType }),
       schema);
+  return ret;
 }
 
 export function mappingToOneOf (mappingName, targetType, relationNameOrProjection,
@@ -131,9 +132,10 @@ function _createRelationTypeTo (targetType, relationNameOrProjection, {
     [ObjectSchema]: objectSchema = {},
     ...relationProperties
 } = {}) {
-  const reflection = (typeof relationNameOrProjection === "string")
-      ? mintVerb("*out", ["$", "", relationNameOrProjection])
-      : expandVPath(relationNameOrProjection);
+  const reflection = expandVPath((typeof relationNameOrProjection === "string")
+      ? ["*out", [":", relationNameOrProjection]]
+      : relationNameOrProjection
+  ).slice(1);
   const ret = {
     [CollectionSchema]: collectionSchema && { ...collectionSchema },
     [ObjectSchema]: { ...objectSchema },
@@ -186,12 +188,12 @@ export function exportSchemaOf (aType) {
       ret.valospace.targetType = schemaRefOf(ret.valospace.targetType);
     }
     if (ret.valospace.reflection) {
-      ret.valospace.reflection = expandVPath(ret.valospace.reflection);
+      ret.valospace.reflection = expandVPath(ret.valospace.reflection).slice(1);
     }
     if (ret.valospace.gate) {
       ret.valospace.gate = {
         ...ret.valospace.gate,
-        projection: expandVPath(ret.valospace.gate.projection),
+        projection: expandVPath(ret.valospace.gate.projection).slice(1),
       };
     }
   }

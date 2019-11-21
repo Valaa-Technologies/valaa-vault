@@ -1,41 +1,59 @@
 // @flow
 
-import path from "path";
-
 const valosheath = require("~/gateway-api/valosheath").default;
+
+const MapperService = require("./fastify/MapperService").default;
 
 export default valosheath.exportSpindle({
   name: "@valos/rest-api-spindle",
 
-  onViewAttached (view, viewName) {
-    const patchWith = require("@valos/tools/patchWith").default;
-    const MapperService = require("./fastify/MapperService").default;
-    const configRequire = (module) =>
-        valosheath.require(path.isAbsolute(module) ? module : path.join(process.cwd(), module));
+  async onGatewayInitialized (gateway, { server, prefixes }) {
+    const { lazy } = gateway.require("@valos/inspire");
+    if (!server) throw new Error(`${this.name} revelation server section missing`);
+    if (!prefixes) throw new Error(`${this.name} revelation prefixes section missing`);
+    this._prefixRouters = {};
+    this._service = new MapperService(gateway, { identity: valosheath.identity, ...server });
+    gateway.clockEvent(1, () => [
+      "restAPISpindle.onGatewayInitialized",
+      `Adding routers for prefixes: '${Object.keys(prefixes).join("', '")}'`,
+    ]);
+    console.error(`Adding routers for prefixes: '${Object.keys(prefixes).join("', '")}'`);
+    await Promise.all(Object.entries(prefixes).map(async ([prefix, prefixConfig]) =>
+        this._addPrefixRouter(gateway, prefix, await lazy(prefixConfig))));
+    return this._service.start();
+  },
 
-    const { service, prefixes } = require(`${process.cwd()}/toolsets.json`)[this.name];
-    const options = patchWith({
-      name: `${viewName} REST API Server`,
-      prefixes: {},
-    }, service, {
-      require: configRequire,
-    });
-    options.view = view;
-    options.viewName = viewName;
-    Object.entries(prefixes).forEach(([prefix, { api, extensions }]) => {
-      const prefixAPI = options.prefixes[prefix] = patchWith(options.prefixes[prefix] || {}, [
-        api,
-        ...[].concat(extensions).map(extension => (typeof extension !== "string"
-            ? extension
-            : require(extension).api)),
-      ], {
-        require: configRequire,
-      });
-      if (prefixAPI.identity) {
-        prefixAPI.identity = Object.assign(Object.create(valosheath.identity), prefixAPI.identity);
+  async _addPrefixRouter (gateway, prefix, prefixConfig) {
+    const { dumpObject } = gateway.require("@valos/tools");
+    try {
+      const viewConfig = prefixConfig.view;
+      const viewName = (typeof viewConfig === "string") ? viewConfig
+          : (typeof viewConfig === "object") ? `${this.name}:view:${prefix}`
+          : "host";
+
+      this._prefixRouters[viewName] = this._service.createPrefixRouter(prefix, prefixConfig);
+      if (typeof viewConfig === "object") {
+        const view = await gateway.addView(viewName, { ...viewConfig, lensURI: viewConfig.focus });
+        view.clockEvent(1, () => [
+          `rest-api-spindle.addView.done`,
+          `Added view for prefixRouter ${prefix}: ${viewName}`,
+          ...(!gateway.getVerbosity() ? [] : [", with:",
+            "\n\tviewConfig:", ...dumpObject(viewConfig),
+          ]),
+        ]);
       }
-    });
-    view._restAPIService = new MapperService(options);
-    return view._restAPIService.start();
+    } catch (error) {
+      gateway.outputErrorEvent(
+          gateway.wrapErrorEvent(error,
+              new Error(`rest-api-spindle:addPrefixRouter(${prefix}`),
+              "\n\tprefixConfig:", ...dumpObject(prefixConfig)),
+          `Exception caught during rest-api-spindle:addPrefixRouter(${prefix}):${
+            ""}\n\n\n\tROUTER NOT ADDED FOR PREFIX: ${prefix}\n\n`);
+    }
+  },
+
+  onViewAttached (view, viewName) {
+    return this._prefixRouters[viewName]
+        && this._prefixRouters[viewName].projectFromView(view, viewName);
   },
 });

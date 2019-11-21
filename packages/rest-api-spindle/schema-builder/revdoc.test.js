@@ -23,11 +23,11 @@ const { itExpects, runTestDoc } = prepareTestDoc(title);
 
 const _createTestGlobalRules = () => ({
   scriptRoot: ["$~gh:0123456789abcdef"],
-  ":ofMapping": {
+  "&ofMapping": {
     tags: { routeRoot: ["$~u4:aaaabbbb-cccc-dddd-eeee-ffffffffffff"] },
   },
-  ":ofMethod": { POST: {
-    ":ofMapping": { tags: {
+  "&ofMethod": { POST: {
+    "&ofMapping": { tags: {
       oesType: "tag",
     }, },
   }, },
@@ -197,7 +197,7 @@ inside out to get the appropriate JSON schema layout.`
 () => ({
   description: "simple object type",
   type: "object",
-  valospace: { reflection: [".", [":", "forwardedFields"]] },
+  valospace: { reflection: [[".", [":", "forwardedFields"]]] },
   properties: { name: { type: "string" } },
 })),
     "chapter#extending_schemas>1;Extending schemas": {
@@ -216,7 +216,7 @@ type => exportSchemaOf(type),
           "toEqual",
 () => ({
   type: "string",
-  valospace: { reflection: [".", ["$", "V", "name"]] },
+  valospace: { reflection: [[".", ["$", "V", "name"]]] },
 })),
     },
     "chapter#resource_type_schemas>2;Shared resource type schemas": {
@@ -243,9 +243,7 @@ which contains the resource 'id' field.`,
   valospace: {
     gate: {
       name: "tags",
-      projection: ["@",
-        ["out*", [":", "TAG"]], [".", ["$", "V", "target"]],
-      ],
+      projection: [["out*", [":", "TAG"]], [".", ["$", "V", "target"]]],
     },
   },
   properties: {
@@ -255,7 +253,7 @@ which contains the resource 'id' field.`,
         id: {
           pattern: "^[a-zA-Z0-9\\-_.~]+$",
           type: "string",
-          valospace: { reflection: [".", ["$", "V", "rawId"]] }
+          valospace: { reflection: [[".", ["$", "V", "rawId"]]] }
         },
       },
     },
@@ -304,7 +302,7 @@ type => exportSchemaOf(type),
   type: "array",
   valospace: {
     mappingName: "tags",
-    reflection: ["out*", [":", "TAGS"]],
+    reflection: [["out*", [":", "TAGS"]]],
   },
   items: {
     type: "object",
@@ -333,11 +331,9 @@ type => exportSchemaOf(type),
   valospace: {
     gate: {
       name: "things",
-      projection: ["@",
-        ["out*", [":", "THING"]], [".", ["$", "V", "target"]],
-      ],
+      projection: [["out*", [":", "THING"]], [".", ["$", "V", "target"]]],
     },
-    reflection: [".", [":", "fields"]],
+    reflection: [[".", [":", "fields"]]],
   },
   properties: {
     $V: {
@@ -345,7 +341,7 @@ type => exportSchemaOf(type),
       properties: {
         id: {
           type: "string", pattern: "^[a-zA-Z0-9\\-_.~]+$",
-          valospace: { reflection: ["@",
+          valospace: { reflection: [
             [".", ["$", "V", "owner"]], [".", ["$", "V", "rawId"]],
           ], },
         },
@@ -362,14 +358,14 @@ type => exportSchemaOf(type),
     icon: { type: "string" },
     image: {
       type: "string",
-      valospace: { reflection: [".", ["$", "V", "name"]] },
+      valospace: { reflection: [[".", ["$", "V", "name"]]] },
     },
     name: { type: "string" },
     tags: {
       type: "array",
       valospace: {
         mappingName: "tags",
-        reflection: ["@",
+        reflection: [
           [".", [":", "tags"]], ["out*", [":", "TAG"]]
         ],
       },
@@ -461,16 +457,14 @@ TestThingType gate projection.`
       schema: "TestThing#",
       gate: {
         name: "things",
-        projection: ["@",
-          ["out*", [":", "THING"]], [".", ["$", "V", "target"]],
-        ],
+        projection: [["out*", [":", "THING"]], [".", ["$", "V", "target"]]],
       },
     },
     rules: {
-      resource: ["!", ["$", "valk", "ref"],
-        ["!", [":", "request"], [":", "params"], [":", "resourceId"]]
-      ],
-      routeRoot: null,
+      resource: [["!", ["$", "valk", "ref"],
+        ["@", ["!", [":", "request"], [":", "params"], [":", "resourceId"]]]
+      ]],
+      routeRoot: [[":", null]],
     },
   },
 })),
@@ -548,9 +542,7 @@ containing the mapping.`,
       schema: "TestThing#",
       gate: {
         name: "things",
-        projection: ["@",
-          ["out*", [":", "THING"]], [".", ["$", "V", "target"]],
-        ],
+        projection: [["out*", [":", "THING"]], [".", ["$", "V", "target"]]],
       },
     },
     relation: {
@@ -559,9 +551,7 @@ containing the mapping.`,
         type: "array",
         valospace: {
           mappingName: "tags",
-          reflection: ["@",
-            [".", [":", "tags"]], ["out*", [":", "TAG"]],
-          ]
+          reflection: [[".", [":", "tags"]], ["out*", [":", "TAG"]]]
         },
         items: {
           type: "object",
@@ -585,21 +575,22 @@ containing the mapping.`,
       "scriptRoot", "oesType",
     ],
     rules: {
-      doCreateMappingAndTarget: ["'",
-        ["!", [":", "scriptRoot"]],
-        ["!", ["$", "valk", "invoke"], [":", "createOES"],
-          ["!", [":", "oesType"]],
-          ["!", [":", "resource"]],
-          ["!", [":", "request"], [":", "body"], [":", "$V"],
-            [":", "target"], [":", "name"]],
-        ]
-      ],
-      oesType: "tag",
-      resource: ["!", ["$", "valk", "ref"],
-        ["!", [":", "request"], [":", "params"], [":", "resourceId"]]
-      ],
-      routeRoot: ["$", "~u4", "aaaabbbb-cccc-dddd-eeee-ffffffffffff"],
-      scriptRoot: ["$", "~gh", "0123456789abcdef"],
+      doCreateMappingAndTarget: [["'",
+        ["@", ["!", [":", "scriptRoot"]]],
+        ["@", ["!", ["$", "valk", "invoke"], [":", "createOES"],
+          ["@", ["!", [":", "oesType"]]],
+          ["@", ["!", [":", "resource"]]],
+          ["@", ["!", [":", "request"], [":", "body"], [":", "$V"],
+            [":", "target"], [":", "name"]
+          ]],
+        ]],
+      ]],
+      oesType: [[":", "tag"]],
+      resource: [["!", ["$", "valk", "ref"],
+        ["@", ["!", [":", "request"], [":", "params"], [":", "resourceId"]]]
+      ]],
+      routeRoot: [["$", "~u4", "aaaabbbb-cccc-dddd-eeee-ffffffffffff"]],
+      scriptRoot: [["$", "~gh", "0123456789abcdef"]],
     },
   },
 })),

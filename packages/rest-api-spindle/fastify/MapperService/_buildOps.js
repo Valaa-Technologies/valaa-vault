@@ -2,11 +2,15 @@
 
 import path from "path";
 
-export function _appendSchemaSteps (router, runtime, jsonSchema, targetVAKON, innerTargetVAKON,
+import { dumpObject } from "~/tools/wrapError";
+
+export function _appendSchemaSteps (router, runtime, jsonSchema, targetVAKON, innerReflectionVAKON,
     expandProperties, isValOSFields) {
+  let innerTargetVAKON = innerReflectionVAKON;
   if (jsonSchema.type === "array") {
     if (!innerTargetVAKON) {
-      throw new Error("json schema valospace vpath missing with json schema type 'array'");
+      innerTargetVAKON = ["§map"];
+      targetVAKON.push(innerTargetVAKON);
     }
     router.appendSchemaSteps(runtime, jsonSchema.items,
         { expandProperties, targetVAKON: innerTargetVAKON });
@@ -14,8 +18,16 @@ export function _appendSchemaSteps (router, runtime, jsonSchema, targetVAKON, in
     const objectKuery = {};
     Object.entries(jsonSchema.properties).forEach(([key, valueSchema]) => {
       let op;
-      if (isValOSFields && ((valueSchema.valospace || {}).reflection === undefined)) {
+      const reflectionVPath = (valueSchema.valospace || {}).reflection;
+      if (isValOSFields && (reflectionVPath === undefined)) {
         if (key === "href") {
+          if (!((jsonSchema.valospace || {}).gate || {}).name) {
+            router.errorEvent(`Trying to generate a href to a resource without valospace.gate.name:`,
+                "\n\troute:", runtime.name,
+                "\n\tjsonSchema:", ...dumpObject(jsonSchema),
+                "\n\tSKIPPING FIELD");
+            return;
+          }
           op = ["§->", "target", false, "rawId",
             ["§+", _getResourceHRefPrefix(router, jsonSchema), ["§->", null]]
           ];
@@ -27,8 +39,8 @@ export function _appendSchemaSteps (router, runtime, jsonSchema, targetVAKON, in
       } else {
         op = router.appendSchemaSteps(runtime, valueSchema, { expandProperties: true });
         op = (op.length === 1) ? ["§..", key]
-            : ((valueSchema.type === "array")
-                || (valueSchema.valospace || {}).reflection !== undefined) ? op
+            : ((valueSchema.type === "array") || (reflectionVPath !== undefined))
+                ? op
             : ["§->", ["§..", key], false, ...op.slice(1)];
       }
       objectKuery[key] = op;

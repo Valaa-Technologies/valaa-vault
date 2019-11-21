@@ -2,19 +2,20 @@
 
 import Vrapper from "~/engine/Vrapper";
 
-import type { PrefixRouter, Route } from "~/rest-api-spindle/fastify/MapperService";
+import type { PrefixRouter } from "~/rest-api-spindle/fastify/MapperService";
 
 import { dumpify, dumpObject } from "~/tools";
 
 import { _vakonpileVPath } from "./_vakonpileOps";
 
-export function _createRouteRuntime (router: PrefixRouter, { url, config }, runtime) {
+export function _createRouteRuntime (router: PrefixRouter, { name, url, config }, runtime) {
   for (const ruleName of config.requiredRules) {
     if (config.rules[ruleName] === undefined) {
       throw new Error(`Required route rule '${ruleName}' missing for route <${url}>`);
     }
   }
   const scopeBase = runtime.scopeBase = {};
+  runtime.name = name;
   runtime.ruleResolvers = [];
   runtime.staticResources = [];
   runtime.identity = router.getIdentity();
@@ -24,24 +25,33 @@ export function _createRouteRuntime (router: PrefixRouter, { url, config }, runt
       scopeBase[ruleName] = rule;
       return;
     }
-    const ruleVAKON = _vakonpileVPath(rule, runtime);
-    const maybeStaticReference = (ruleVAKON != null) && (ruleVAKON[0] === "§ref")
-        && !ruleVAKON[1].slice(1).find(e => Array.isArray(e))
-        && ruleVAKON[1].slice(1);
-    const resolveRule = maybeStaticReference ? (engine => engine.getVrapper(maybeStaticReference))
-        : (ruleVAKON !== null) ? ((engine, head, options) => engine.run(head, ruleVAKON, options))
-        : (engine, head) => head;
-    if (ruleName === "routeRoot") {
-      runtime.resolveRouteRoot = resolveRule;
-    } else {
-      runtime.ruleResolvers.push([ruleName, resolveRule, true]);
+    let ruleVAKON, maybeStaticReference, resolveRule;
+    try {
+      ruleVAKON = _vakonpileVPath(rule, runtime);
+      maybeStaticReference = (ruleVAKON != null) && (ruleVAKON[0] === "§ref")
+          && !ruleVAKON[1].slice(1).find(e => Array.isArray(e))
+          && ruleVAKON[1].slice(1);
+      resolveRule = maybeStaticReference ? (engine => engine.getVrapper(maybeStaticReference))
+          : (ruleVAKON !== null) ? ((engine, head, options) => engine.run(head, ruleVAKON, options))
+          : (engine, head) => head;
+      if (ruleName === "routeRoot") {
+        runtime.resolveRouteRoot = resolveRule;
+      } else {
+        runtime.ruleResolvers.push([ruleName, resolveRule, true]);
+      }
+    } catch (error) {
+      throw router.wrapErrorEvent(error, new Error(`prepareRule(${ruleName})`),
+          "\n\trule:", ...dumpObject(rule),
+          "\n\truleVAKON:", ...dumpObject(ruleVAKON),
+          "\n\tmaybeStaticReference:", ...dumpObject(maybeStaticReference),
+      );
     }
   });
   return runtime;
 }
 
 export async function _preloadRuntimeResources (router: PrefixRouter, projector, runtime) {
-  let vRouteRoot, vPreloads;
+  let vRouteRoot;
   try {
     runtime.scopeBase.serviceIndex = router.getViewFocus();
     if (runtime.scopeBase.serviceIndex === undefined) {
@@ -49,7 +59,7 @@ export async function _preloadRuntimeResources (router: PrefixRouter, projector,
     }
 
     if (!runtime.resolveRouteRoot) {
-      throw new Error(`Route root rule 'toRouteRoot' missing for ${
+      throw new Error(`Route root rule 'routeRoot' missing for ${
           router._projectorName(projector)}`);
     }
     vRouteRoot = runtime.scopeBase.routeRoot = runtime.resolveRouteRoot(
@@ -71,8 +81,7 @@ export async function _preloadRuntimeResources (router: PrefixRouter, projector,
     throw router.wrapErrorEvent(error, new Error(`preloadRuntimeResources(${
             router._projectorName(projector)})`),
         "\n\tvRouteRoot:", ...dumpObject(vRouteRoot),
-        "\n\ttoPreloads:", dumpify(this.toPreloads, { indent: 2 }),
-        "\n\tvTargets:", ...dumpObject(vPreloads),
+        "\n\tconfig.rules:", JSON.stringify(projector.config.rules, null, 2),
     );
   }
 }

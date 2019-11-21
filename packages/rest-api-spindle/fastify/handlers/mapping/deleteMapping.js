@@ -7,7 +7,7 @@ import { _createToMapping, _presolveMappingRouteRequest } from "./_mappingHandle
 
 export default function createProjector (router: PrefixRouter, route: Route) {
   return {
-    requiredRules: ["routeRoot", "resource", "target", "destroyMapping"],
+    requiredRules: ["routeRoot", "resource", "target", "doDestroyMapping"],
     rules: {
       mappingName: route && route.config.relation.name,
     },
@@ -43,8 +43,8 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       const wrap = new Error(this.name);
       valkOptions.discourse = router.getDiscourse().acquireFabricator();
       return thenChainEagerly(scope.mapping, [
-        vMapping => (scope.destroyMapping
-            ? vMapping.do(scope.destroyMapping, valkOptions)
+        vMapping => (scope.doDestroyMapping
+            ? vMapping.do(scope.doDestroyMapping, valkOptions)
             : vMapping.destroy(valkOptions)),
         () => valkOptions.discourse.releaseFabricator(),
         eventResult => eventResult.getPersistedEvent(),

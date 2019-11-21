@@ -2,7 +2,7 @@
 
 import type { PrefixRouter, Route } from "~/rest-api-spindle/fastify/MapperService";
 
-import { dumpify, dumpObject, thenChainEagerly } from "~/tools";
+import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _presolveRouteRequest } from "../_handlerOps";
 
@@ -11,25 +11,13 @@ export default function createProjector (router: PrefixRouter, route: Route) {
     requiredRules: ["routeRoot"],
 
     prepare () {
-      try {
-        this.runtime = router.createRouteRuntime(this);
+      this.runtime = router.createRouteRuntime(this);
 
-        const gate = route.config.resource.gate;
-        this.toSuccessBodyFields = ["§->"];
-        const fromEntry = router.appendVPathSteps(
-            this.runtime, gate.projection, this.toSuccessBodyFields);
-        router.appendSchemaSteps(this.runtime, route.schema.response[200],
-            { expandProperties: true, targetVAKON: fromEntry });
-        if (gate.filterCondition) {
-          const filter = ["§filter"];
-          router.appendVPathSteps(this.runtime, gate.filterCondition, filter);
-          this.toSuccessBodyFields.push(filter);
-        }
-      } catch (error) {
-        throw router.wrapErrorEvent(error, new Error(`prepare(${this.name})`),
-            "\n\ttoPreloads:", dumpify(this.toPreloads, { indent: 2 }),
-        );
-      }
+      this.toSuccessBodyFields = ["§->"];
+      const fromEntry = router.appendGateSteps(
+          this.runtime, route.config.resource.gate, this.toSuccessBodyFields);
+      router.appendSchemaSteps(this.runtime, route.schema.response[200],
+          { expandProperties: true, targetVAKON: fromEntry });
     },
 
     async preload () {

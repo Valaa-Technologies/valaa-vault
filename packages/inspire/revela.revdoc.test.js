@@ -95,17 +95,17 @@ for various valos fabric config files.`],
     "example#3": itExpects(
         "spread of an explicit site root import followed by field access",
 () => lazyPatchRevelations(gatewayMock, "", {
-  "!!!": [["!$revela:import", "/path"], "requireKey"],
+  "!!!": ["/path", "requireKey"],
 }),
         "toEqual",
 "/site/path"),
     "example#4": itExpects(
-        "spread of an implicit URI import followed by array append",
+        "spread of a URI import followed by pick-array append",
 async () => lazyPatchRevelations(gatewayMock, [0], {
-  "!!!": [
-    ["!$revela:import", "<https://foobar.com/path>"],
-    ["fetchedField", ["@.:fetchOptions@.:input@"]],
-  ],
+  "!!!": [["$https:foobar.com/path"], [
+    ["@", [".:fetchedField"]],
+    ["@", [".:fetchOptions"], [".:input"]],
+  ]],
 }),
         "toEqual",
 () => [0, 1, "https://foobar.com/path"]),
@@ -113,23 +113,30 @@ async () => lazyPatchRevelations(gatewayMock, [0], {
         "nested import & invoke spread to resolve all spreads",
 async () => lazyPatchRevelations(gatewayMock, {}, {
   out: {
-    "!!!": ["@", { prefixes: {
-      "/test/v0": {
-        name: "test",
-        "test-lib": {
-          preset: 10, overridden: 10, sessionDuration: 0,
-          view: { focus: "no focus", nulled: "still not null" },
+    "!!!": {
+      prefixes: {
+        "/test/v0": {
+          name: "test",
+          "test-lib": {
+            preset: 10, overridden: 10, sessionDuration: 0,
+            view: { focus: "focus to be overwritten", nulled: "nulled to be overwritten" },
+            expandedButUnbound: ["$un:bound"],
+          },
         },
-      } },
-    }],
+      },
+    },
     prefixes: {
       "/test/v0": {
         "!!!": ["test-lib", ["!$valk:invoke:callMe", {
-          view: { focus: "valaa-aws://example.org/deployment?id=f0c5-f0c5", nulled: null },
+          view: {
+            focus: "valaa-aws://example.org/deployment?id=f0c5-f0c5",
+            nulled: null,
+          },
           identity: { "!!!": ["./config", "requireKey"] },
           sessionDuration: 86400,
+          expandedAlsoUnbound: ["$also:unbound"],
         }]],
-        "test-lib": { overridden: 20 }
+        "test-lib": { overridden: 20 },
       },
     }
   }
@@ -144,6 +151,8 @@ async () => lazyPatchRevelations(gatewayMock, {}, {
           preset: 10, overridden: 20, sessionDuration: 86400,
           view: { focus: "valaa-aws://example.org/deployment?id=f0c5-f0c5", nulled: null },
           identity: "/site/revelation/config",
+          expandedButUnbound: ["$un:bound"],
+          expandedAlsoUnbound: ["$", "also", "unbound"],
         }
       }
     }

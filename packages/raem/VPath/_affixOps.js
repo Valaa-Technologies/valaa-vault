@@ -8,7 +8,7 @@ function affixVPath (vp, contextLookup = {}, contextState, componentType, index)
     if (vp === undefined) throw new Error("Cannot affix undefined vpath");
     if (!componentType || (componentType === "@")) {
       if (!Array.isArray(vp)) return (typeof vp === "string") ? vp : ["§'", vp];
-      if (vp.length === 1) return null;
+      if (vp.length === 1) return ["§->", null];
     } else if (!Array.isArray(vp) || (vp[0] === "@")) {
       expandedVPath = [":", vp];
     }
@@ -93,8 +93,21 @@ function _affixStatements (expandedVPath, contextLookup, contextState) {
   if (expandedVPath.length === 2) {
     return affixVPath(expandedVPath[1], contextLookup, contextState, "@", 1);
   }
-  expandedVPath[0] = "§->";
-  return _affixRest(expandedVPath, contextLookup, contextState, "@", 1);
+  const fullPath = ["§->"];
+  for (let i = 1; i !== expandedVPath.length; ++i) {
+    const entry = expandedVPath[i];
+    if (entry[0] !== ":") {
+      fullPath.push(affixVPath(expandedVPath[i], contextLookup, contextState, "@", i));
+    } else {
+      const arrayPath = ["§[]"];
+      do {
+        arrayPath.push(affixVPath(expandedVPath[i], contextLookup, contextState, "*", i));
+      } while ((++i !== expandedVPath.length) && (expandedVPath[i][0] === ":"));
+      fullPath.push(arrayPath);
+      --i;
+    }
+  }
+  return (fullPath.length === 2) ? fullPath[1] : fullPath;
 }
 
 function _affixContextlessVParam (expandedVPath, contextLookup, contextState, componentType) {
@@ -103,41 +116,36 @@ function _affixContextlessVParam (expandedVPath, contextLookup, contextState, co
 }
 
 function _affixVParam (expandedVPath, contextLookup, contextState, componentType) {
-  let value = (expandedVPath[2] === undefined)
-      ? undefined
-      : affixVPath(expandedVPath[2], contextLookup, contextState);
-  let contextValue;
+  let value;
   const contextTerm = expandedVPath[1];
-  if (contextTerm) {
-    const context = contextLookup[contextTerm];
-    if (!context) {
-      expandedVPath[0] = "§:";
-      if (value !== undefined) expandedVPath[2] = value;
-      value = expandedVPath;
-    } else {
-      if (typeof context === "function") contextValue = context;
-      if (contextValue == null) contextValue = (context.symbolFor || {})[value];
-      if (contextValue == null) contextValue = (context.stepsFor || {})[value];
-      if ((contextValue == null) && context.steps) {
-        contextValue = [
-          ...(typeof context.steps !== "function"
-              ? context.steps
-              : context.steps(contextState, value, contextTerm)),
-          value,
-        ];
-      }
-      if (!contextValue) {
-        throw new Error(`Term operation '${value}' ${
-            contextValue === false ? "disabled" : "not found"} in the non-trivial context '${
-            contextTerm}'`);
-      }
-      if (typeof contextValue === "function") {
-        contextValue = contextValue(contextState, value, contextTerm);
-      }
-      if (Array.isArray(contextValue)) return contextValue;
-      value = contextValue;
-      contextValue = null;
+  const context = contextLookup[contextTerm];
+  if (!contextTerm) {
+    value = expandedVPath[2]
+        && affixVPath(expandedVPath[2], contextLookup, contextState);
+    if (Array.isArray(value)) return value;
+  } else if (!context) {
+    return ["§'", expandedVPath];
+  } else {
+    const affixedValue = expandedVPath[2]
+        && affixVPath(expandedVPath[2], contextLookup, contextState);
+    if (typeof context === "function") value = context;
+    if (typeof affixedValue === "string") {
+      if (value === undefined) value = (context.symbolFor || {})[affixedValue];
+      if (value === undefined) value = (context.stepsFor || {})[affixedValue];
     }
+    if ((value === undefined) && context.steps) {
+      value = (typeof context.steps !== "function")
+          ? [...context.steps, affixedValue]
+          : context.steps(contextState, affixedValue, contextTerm);
+    }
+    if (value == null) {
+      throw new Error(`VParam non-trivial context '${contextTerm}' value ${
+        value === null ? "disabled" : "not found"}`);
+    }
+    if (typeof value === "function") {
+      value = value(contextState, affixedValue, contextTerm, componentType);
+    }
+    if (Array.isArray(value)) return value;
   }
   switch (componentType) {
   case "@":
@@ -180,19 +188,8 @@ function _affixProperty (expandedVPath, contextLookup, contextState, componentTy
     setter[1] = rest[2];
   } else {
     rest[0] = "§{}";
-    for (let i = 2; i !== rest.length; ++i) {
-      if ((rest[i] == null) || rest[i][0] !== "§.<-") {
-        throw wrapError(
-            new Error(
-                "Property verb can only have more than one param if they're all nested properties"),
-            new Error("During type affixer _affixProperty"),
-            `\n\trest[${i}]:`, dumpObject(rest[i]),
-            `\n\trest:`, dumpObject(rest),
-          );
-      }
-      rest[i - 1] = rest[i][1];
-    }
-    rest.pop();
+    rest.splice(1, 1);
+    _flattenObjectSetters(rest);
   }
   return componentType === "-" ? setter : ["§.<-", setter];
 }
@@ -200,10 +197,6 @@ function _affixProperty (expandedVPath, contextLookup, contextState, componentTy
 function _affixNamedCollection (expandedVPath, contextLookup, contextState) {
   const collectionType = expandedVPath[0];
   const nameParam = _tryAsNameParam(expandedVPath[1]);
-  /*
-  console.log("nameParam:", nameParam,
-      "\n\tof expandedVPath[1]:", expandedVPath[1]);
-  */
   const nameSelector = (nameParam != null)
       && _affixPluralProperty(expandedVPath, contextLookup, contextState, collectionType);
   if (nameSelector && expandedVPath.length <= 2) return nameSelector;
@@ -217,9 +210,25 @@ function _affixNamedCollection (expandedVPath, contextLookup, contextState) {
     _affixRest(expandedVPath, contextLookup, contextState, isSequence ? "*" : "-", 2);
   }
   expandedVPath.splice(0, 2, isSequence ? "§[]" : "§{}");
+  if (!isSequence) _flattenObjectSetters(expandedVPath);
   return !nameSelector ? expandedVPath
       : isSequence ? ["§concat", nameSelector, expandedVPath]
       : ["§append", ["§{}"], nameSelector, expandedVPath];
+}
+
+function _flattenObjectSetters (setters) {
+  for (let i = 1; i !== setters.length; ++i) {
+    if ((setters[i] == null) || (setters[i][0] !== "§.<-")) {
+      throw wrapError(
+          new Error(
+              "Property verb can only have more than one param if they're all nested properties"),
+          new Error("During _affixProperty"),
+          `\n\tsetters[${i}]:`, dumpObject(setters[i]),
+          `\n\tsetters:`, dumpObject(setters),
+        );
+    }
+    setters[i] = setters[i][1];
+  }
 }
 
 function _tryAsNameParam (vparam) {

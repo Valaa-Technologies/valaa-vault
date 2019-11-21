@@ -6,7 +6,7 @@ const inBrowser = require("../gateway-api/inBrowser").default;
 
 const inProduction = require("../tools/inProduction").default;
 const resolveRevelationSpreaderImport = require("../tools/resolveRevelationSpreaderImport").default;
-const trivialClone = require("../tools/trivialClone").default;
+// const trivialClone = require("../tools/trivialClone").default;
 const isPromise = require("../tools/isPromise").default;
 const patchWith = require("../tools/patchWith").default;
 const thenChainEagerly = require("../tools/thenChainEagerly").thenChainEagerly;
@@ -331,18 +331,25 @@ function _patchRevelation (gateway, targetRevelation, patchRevelation) {
         }
       },
       spread (spreader /* , outerRet */) {
-        let spreadedSpreader = spreader;
-        if (typeof spreader === "string") {
-          spreadedSpreader = spreader;
-        } else if (spreader === null || typeof spreader !== "object") {
-          return spreader;
-        } else {
-          spreadedSpreader = this.extend(undefined, spreader);
-          if (!Array.isArray(spreader)) return spreadedSpreader || spreader;
+        if (typeof spreader === "string") return _spreadValk(spreader);
+        if ((spreader === null) || (typeof spreader !== "object")) return spreader;
+        // Expand inner spreaders.
+        const extendedSpreader = this.extend(undefined, spreader);
+        if (isPromise(extendedSpreader)) return extendedSpreader.then(_spreadValk);
+        if (!Array.isArray(spreader)) return extendedSpreader || spreader;
+        return _spreadValk(extendedSpreader);
+        function _spreadValk (spreadedSpreader) {
+          const pathOp = _affixSpreaderPath(spreadedSpreader);
+          // console.log("pre-spreaderSpreader:", JSON.stringify(spreadedSpreader, null, 2));
+          const ret = _valk(gateway, null, pathOp);
+          /*
+          console.log("post-spreaderSpreader:", JSON.stringify(spreadedSpreader, null, 2),
+              "\n\tpathOp:", JSON.stringify(pathOp, null, 2),
+              "\n\tret:", JSON.stringify(ret, null, 2),
+              "\n\touter ret:", JSON.stringify(outerRet, null, 2));
+          */
+          return ret;
         }
-        const pathOp = _pathOpFromSpreader(spreadedSpreader);
-        const ret = _valk(gateway, null, pathOp);
-        return ret;
       },
     });
   } catch (error) {
@@ -363,35 +370,22 @@ const revelationContext = {
       invoke: ["§invoke"],
     },
   },
+  http: _importURI,
+  https: _importURI,
   V: {
     steps: ["§."],
   },
 };
 
-function _pathOpFromSpreader (spreader) {
-  const conciseVPath = _vpathFromSpreader(spreader);
+function _importURI (state, suffix, prefix) { return `<${prefix}://${suffix}>`; }
+
+function _affixSpreaderPath (spreader) {
+  const conciseVPath = (Array.isArray(spreader) && spreader[0] === "@")
+       ? spreader
+       : ["!"].concat(spreader);
   const expandedVPath = expandVPath(conciseVPath);
-  const boundVPath = bindExpandedVPath(expandedVPath, revelationContext);
-  return boundVPath;
-  function _vpathFromSpreader (entry, isInnerOp) {
-    if ((typeof entry === "string") || (typeof entry === "number")) {
-      return [!isInnerOp ? "!$revela:import" : ".", entry];
-    }
-    if (Array.isArray(entry)) {
-      if ((typeof entry[0] === "string") && entry[0].match(/^[^a-zA-Z]*(:.*|\$.*|)$/)) return entry;
-      return [
-        ...(isInnerOp ? ["*", [":"]] : ["@"]),
-        ...entry.map((e, i) => _vpathFromSpreader(e, (isInnerOp !== undefined) || i)),
-      ];
-    }
-    if (typeof entry === "object") {
-      return Object.entries(entry).reduce((a, [k, v]) => {
-        a[k] = _vpathFromSpreader(v, true);
-        return a;
-      }, {});
-    }
-    return entry;
-  }
+  const affixedVPath = affixVPath(expandedVPath, revelationContext);
+  return affixedVPath;
 }
 
 function _keepCalling (callMeMaybe) {
@@ -441,13 +435,11 @@ function _valk (gateway, head, step) {
     if (opId === "§'") return step[1];
     if (opId === "§..") return head[step[1]];
     if (opId === "§->") return step.slice(1).reduce(_valk.bind(null, gateway), head);
-    if (opId === "§[]") {
-      return step.slice(1).map(_valk.bind(null, gateway, head));
-    }
-    if (opId === "§import") return _import(gateway, step);
+    if (opId === "§[]") return step.slice(1).map(_tryLiteralOrValk);
+    if ((opId === "§import") || (opId === "§$")) return _import(gateway, step);
     if (opId === "§{}") {
       return step.slice(1).reduce((o, [key, value]) => {
-        o[key] = (typeof value !== "object") ? value : _valk(gateway, head, value);
+        o[key] = _tryLiteralOrValk(value);
         return o;
       }, {});
     }
@@ -469,6 +461,10 @@ function _valk (gateway, head, step) {
     throw wrapError(error, new Error("_valk"),
       "\n\thead:", ...dumpObject(head),
       "\n\tstep:", ...dumpObject(step));
+  }
+  function _tryLiteralOrValk (candidate) {
+    if ((candidate === null) || (typeof candidate !== "object")) return candidate;
+    return _valk(gateway, head, candidate);
   }
 }
 

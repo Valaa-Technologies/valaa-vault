@@ -1,5 +1,5 @@
 const { dumpObject, wrapError } = require("../../tools/wrapError");
-const { expandVPath } = require("./_expandOps");
+const { expandVPath, expandVKeyPath } = require("./_expandOps");
 
 const {
   validateFormatTerm, validateVerbType, validateContextTerm, validateContextTermNS,
@@ -8,6 +8,7 @@ const {
 
 module.exports = {
   validateVPath,
+  validateVKeyPath,
   validateFullVPath,
   validateVRId,
   validateVerbs,
@@ -24,6 +25,11 @@ module.exports = {
 function validateVPath (element) {
   expandVPath(element);
   return element;
+}
+
+function validateVKeyPath (vkey, value) {
+  expandVKeyPath(vkey, value);
+  return value;
 }
 
 function validateFullVPath (element) {

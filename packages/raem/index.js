@@ -34,7 +34,10 @@ export {
 export {
                                       formVPath,
                                       expandVPath,
+                                      expandVKeyPath,
+                                      expandVerb,
                                       validateVPath,
+                                      validateVKeyPath,
 } from "./VPath";
 export type {
                                       ValaaURI,

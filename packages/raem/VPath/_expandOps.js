@@ -5,6 +5,7 @@ const {
 
 module.exports = {
   expandVPath,
+  expandVKeyPath,
 };
 
 /**
@@ -43,89 +44,152 @@ module.exports = {
  * @param {*} vpath
  * @returns
  */
-function expandVPath (vpath) {
+function expandVPath (vpathStringOrArray) {
+  const vpath = (typeof vpathStringOrArray === "string") ? [vpathStringOrArray]
+      : Array.isArray(vpathStringOrArray) ? vpathStringOrArray
+      : undefined;
   try {
-    if (typeof vpath === "string") return _expandVPathFirstAndRest(vpath, undefined, 0);
-    if (Array.isArray(vpath)) return _expandVPathFirstAndRest(vpath[0], vpath, 1);
-    throw new Error("Invalid VPath: expected a string or an array");
+    if (vpath === undefined) throw new Error("vpath must be a valid string or an expandable array");
+    return expandVKeyPath(null, vpath);
   } catch (error) {
     throw wrapError(error, new Error("During expandVPath"),
         "\n\tvpath:", ...dumpObject(vpath));
   }
 }
 
-function _expandVPathFirstAndRest (first, rest, initial) {
-  let ret;
-  if (typeof first !== "string") {
-    ret = ["@"];
-    initial = 0; // eslint-disable-line no-param-reassign
-  } else if (first === "@") {
-    ret = [first];
-  } else if (first === "$" || first === ":") {
-    const expandedValue = _expandVParamValue(rest, first, initial);
-    ret = [first];
-    if (first === "$") ret.push(validateContextTerm(rest[initial]));
-    if (expandedValue !== undefined) ret.push(expandedValue);
+function expandVKeyPath (vkey, vpath) {
+  let expansion;
+  let containerType;
+  if (vkey === null) {
+    expansion = ["@"];
+    containerType = null;
+  } else {
+    const keyParts = vkey.split(/(@|\$|:)/);
+    expansion = (keyParts.length === 1)
+        ? [".", [":", keyParts[0]]]
+        : _expandVPathStringParts(keyParts.filter(e => e));
+    containerType = expansion[0];
+  }
+  if (vpath === undefined) return expansion;
+  const pathExpansion = _expandEntryOf(containerType, vpath);
+  if ((vkey === null) && (pathExpansion[0] === "@")) return pathExpansion;
+  if (pathExpansion[0] !== null) expansion.push(pathExpansion);
+  else expansion.push(...pathExpansion.slice(1));
+  return expansion;
+}
+
+function _expandEntryOf (targetType, entry) {
+  try {
+    const expansion
+        = (entry === undefined)
+            ? [":"]
+        : (entry == null) || (typeof entry !== "object")
+            ? [":", entry]
+        : Array.isArray(entry)
+            ? _expandArrayOf(targetType, entry)
+        : Object.entries(entry).sort().reduce((target, [key, value]) => {
+          target.push(_asEntryOf("-", expandVKeyPath(key, value)));
+          return target;
+        }, ["-", [":"]]);
+    const ret = _asEntryOf(targetType, expansion);
     return ret;
-  } else {
-    const parts = first.split(/(@|\$|:)/);
-    if (parts.length === 1) {
-      validateVerbType(first);
-      ret = [first];
+  } catch (error) {
+    throw wrapError(error, new Error(`During _expandEntryOf("${targetType}")`),
+        "\n\tentry:", ...dumpObject(entry));
+  }
+}
+
+function _asEntryOf (containerType, expanded) {
+  const type = expanded[0];
+  switch (containerType) {
+  default:
+    // entry of verb: wrap others verbs in vpath
+    if ((type === "$") || (type === ":")) break;
+  case ":": // eslint-disable-line no-fallthrough
+    // param value: convert into vpath or primitive value
+    if (type === ":") return expanded[1];
+    if (type !== "@") return ["@", expanded];
+    break;
+  case null: // eslint-disable-line no-fallthrough
+    if (type === "@") expanded[0] = null;
+    break;
+  case "": // Top-level context: convert into vpath
+  case "@": // vpath entry: convert into verb
+    if (type === "@") return [":", expanded];
+    if (type === null) expanded[0] = "@";
+    break;
+  case "$": // context-term: forbidden - this must always be string
+    throw new Error("Cannot use vpath as context-term");
+  }
+  return expanded;
+}
+
+/* expandArray can have following contexts:
+ * - target[0] === "@": entry of an explicit top-level vpath.
+ *   Split-expansion. Entries are verbs or optionally contextual params.
+ * - target[0] === "": entry of an implicit array vpath.
+ *   No split-expansion. ALL entries are non-contextual params.
+ * - otherwise a verb/vgrid param.
+ *   Split-expansion. VPaths are wrapped in non-contextual params.
+ */
+function _expandArrayOf (containerType, parts) {
+  let i, expandedArray;
+  try {
+    if (parts[0] === ":") {
+      return _expandVParamWithValue([":"], parts, 1);
+    }
+    if (parts[0] === "$") {
+      return _expandVParamWithValue(
+          (parts[1] == null || parts[1] === "")
+              ? [":"]
+              : ["$", validateContextTerm(parts[1])],
+          parts, 2);
+    }
+    i = 1;
+    if (parts[0] === "@") {
+      expandedArray = ["@"];
+    } else if ((containerType === "") || (typeof parts[0] !== "string")) {
+      expandedArray = [containerType && ""];
+      --i;
     } else {
-      ret = _expandVPathStringParts(parts.filter(e => e));
+      const maybeSplitParts = parts[0].split(/(@|\$|:)/).filter(e => e);
+      expandedArray =
+          (maybeSplitParts.length > 1)
+              ? _expandVPathStringParts(maybeSplitParts)
+          : ((containerType === "@") || (containerType === null))
+              ? [validateVerbType(maybeSplitParts[0])]
+          : ((i--) && [""]);
     }
-  }
-  return _appendVRest(ret, rest, initial);
-}
-
-function _expandVParamValue (vparam, type, initial) {
-  if (!Array.isArray(vparam)) throw new Error(`Invalid "${type}" vparam: missing parts`);
-  const requiredParams = type === "$" ? 2 : 1;
-  if (vparam.length - initial > requiredParams) {
-    throw new Error(`Invalid "${type}" vparam: expected max ${requiredParams} parts, got ${
-        vparam.length - initial}`);
-  }
-  const entry = vparam[initial + requiredParams - 1];
-  if ((entry == null) || (typeof entry !== "object")) return entry;
-  if (Array.isArray(entry)) return expandVPath(entry);
-  return _appendVObject(["-", [":"]], entry);
-}
-
-function _appendVRest (target, rest, initial) {
-  if (rest === undefined) return target;
-  if ((rest === null) || (typeof rest !== "object")) {
-    target.push([":", rest]);
-  } else if (!Array.isArray(rest)) {
-    _appendVObject(target, rest);
-  } else if ((initial === 0) && (typeof rest[0] === "string")) {
-    target.push(expandVPath(rest));
-  } else {
-    for (let i = initial; i !== rest.length; ++i) {
-      const entry = rest[i];
-      if ((entry === null) || (typeof entry !== "object")) {
-        target.push([":", entry]);
-      } else if (!Array.isArray(entry)) {
-        target.push(_appendVObject(["-", [":"]], entry));
-      } else {
-        target.push(expandVPath(entry));
-      }
+    for (; i !== parts.length; ++i) {
+      const expandedPart = _expandEntryOf(expandedArray[0], parts[i]);
+      if (expandedPart[0] !== null) expandedArray.push(expandedPart);
+      else expandedArray.push(...expandedPart.slice(1));
     }
+    if (expandedArray[0] === "") expandedArray[0] = "@";
+    return expandedArray;
+  } catch (error) {
+    throw wrapError(error, new Error(`During _expandArrayOf(targetType = "${containerType}")`),
+        "\n\tparts:", ...dumpObject(parts),
+        ...(i === undefined ? [] : [
+          `\n\tpart[${i}]:`, ...dumpObject(parts[i]),
+          "\n\texpandedArray:", ...dumpObject(expandedArray),
+        ]),
+    );
   }
-  return target;
 }
 
-function _appendVObject (target, vobject) {
-  for (const key of Object.keys(vobject).sort()) {
-    const parts = key.split(/(@|\$|:)/);
-    target.push(_appendVRest(
-        (parts.length === 1)
-            ? [".", [":", parts[0]]]
-            : _expandVPathStringParts(parts.filter(e => e)),
-        vobject[key],
-        0));
+function _expandVParamWithValue (vparam, parts, initial) {
+  if (parts.length > initial + 1) {
+    throw new Error(`Invalid "${parts[0]}" vparam: expected max ${initial + 1} parts, got ${
+      parts.length}`);
   }
-  return target;
+  const entry = parts[initial];
+  if (entry !== undefined) {
+    vparam.push(((entry == null) || (typeof entry !== "object"))
+        ? entry
+        : expandVPath(entry));
+  }
+  return vparam;
 }
 
 function _expandVPathStringParts (vpathArray, start = 0) {

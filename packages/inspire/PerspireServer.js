@@ -82,14 +82,14 @@ export default class PerspireServer {
         },
       },
     }, (options) => new PerspireView(options));
-    const ret = await views.perspireMain;
-    this.valos = views.perspireMain.rootScope.valos;
+    const perspireMain = await views.perspireMain;
+    this.valos = perspireMain.rootScope.valos;
     // Creating perspire specific objects and variables.
     // Please use server.valos.Perspire for external packages
     this.valos.views = views;
     this.valos.Perspire = {};
     this.valos.isServer = true;
-    return ret;
+    return perspireMain;
   }
 
   async run (interval: number, heartbeat: Function, options: Object) {

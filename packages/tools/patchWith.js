@@ -12,6 +12,7 @@ const { dumpObject, wrapError } = require("./wrapError");
  *   keyPath: string[] = [],
  *   concatArrays: boolean = true,
  *   patchSymbols: boolean = false,
+ *   complexPatch: ?("overwrite", "patch", "setOnInitialize", "reject") = "reject",
  * }
  * If *pre|postExtend* returns non-undefined then that value is directly
  * returned skipping the rest of that patch recursion branch,
@@ -166,6 +167,8 @@ exports.default = function patchWith (target /* : Object */, patch /* : Array<an
 
 const _returnUndefined = Symbol("returnUndefined");
 
+/* eslint-disable complexity */
+
 function extend (target_, patch_, keyInParent, targetParent, patchParent, skipSpread = false) {
   let ret;
   try {
@@ -180,7 +183,14 @@ function extend (target_, patch_, keyInParent, targetParent, patchParent, skipSp
       else if (Array.isArray(patch_)) {
         const isSpreader = !skipSpread && (patch_[0] === this.spreaderKey) && this.spreaderKey;
         if (isSpreader || ((ret !== undefined) && !Array.isArray(ret))) {
+          // FIXME(iridian, 2019-11): this path should not be taken when this.concatArrays is false
+          // even if ret is not an array. Fix was not straightforward.
           for (let i = isSpreader ? 1 : 0; i !== patch_.length; ++i) {
+            /*
+            console.log("array-spreader:", i,
+                "\n\tpatch[", i, "]", JSON.stringify(patch_[i]),
+                "\n\tret:", JSON.stringify(ret));
+            */
             if (_setRetFromSpreadAndMaybeBail(this, patch_[i])) break;
           }
         } else if (Array.isArray(ret) || !_setRetFromCacheAndMaybeBail(this)) {
@@ -191,7 +201,16 @@ function extend (target_, patch_, keyInParent, targetParent, patchParent, skipSp
           }
         }
       } else if (Object.getPrototypeOf(patch_) !== Object.prototype) {
-        throw new Error("Invalid patch object: prototype must be Object.prototype");
+        switch (this.complexPatch) {
+          case "overwrite": return patch_;
+          case "patch": return undefined;
+          case "setOnInitialize":
+            if (ret === undefined) return patch_;
+            throw new Error("Invalid complex patch with setOnInitialize: target is not undefined");
+          default:
+            throw new Error(`Invalid complex patch (prototype not equal to Object.prototype): ${
+                ""}see options.complexPatch`);
+        }
       } else if (!skipSpread && this.spreaderKey
           && patch_[this.spreaderKey] && patch_.hasOwnProperty(this.spreaderKey)) {
         if (!_setRetFromSpreadAndMaybeBail(this, patch_[this.spreaderKey])

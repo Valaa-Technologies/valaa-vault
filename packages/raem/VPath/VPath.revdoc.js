@@ -15,12 +15,13 @@ module.exports = {
   },
   "chapter#abstract>0": {
     "#0": [
-`ValOS Paths ('VPaths') identify paths between valospace resources.
-Vrids (a subset of VPaths) identify valospace resources.
+`ValOS Paths ('VPaths') are structured strings which identify paths
+between valospace resources. A subset of vpaths called 'vrids' specify
+a fixed starting point and identify valospace resources.
 
-These VRIds are also affiliated with `, ref("ValOS event logs",
-"@valos/sourcerer/valos-event-log"), ` which define their internal path
-semantics further.
+VPaths can contain 'context terms' whose meaning is defined by the
+context where the vpath appears, typically by expanding the term to a
+URI member of some globally available ontology.
 
 VPaths are strings with restricted grammar so that they can be embedded
 into various URI component and list formats without additional encoding.`,
@@ -32,8 +33,18 @@ into various URI component and list formats without additional encoding.`,
 but is \`NOT SUPPORTED NOR IMPLEMENTED\` by it yet in any manner.`,
     ],
   },
-  "chapter#introduction>2;VPath with a vgrid is a resource identifier: a VRId": {
-    "#0": `
+  "chapter#introduction>2": {
+    "#0": [`
+The primary example of a vpath context is the JSON-LD @context of a `,
+ref("ValOS event chronicle", "@valos/sourcerer/valos-event-log"), `
+which provides the semantics for all vpaths that appear inside the
+chronicle.
+    `],
+  },
+  "chapter#section_structure>3;VPath structure": {
+    "#0": [``],
+    "chapter#section_vrid>2;VPath with a vgrid is a resource identifier: a VRId": {
+      "#0": `
 VPaths serve two notably different purposes, both as paths and as
 resource identifiers. A VPath which has a global valospace resource
 identifier (or 'vgrid') as its first segment is a valospace resource
@@ -44,7 +55,7 @@ identifier (or *VRId*).`,
   verbs-tail    = verb "@" [ verbs-tail ]
   verb          = verb-type params
 `),
-    "#1": `
+      "#1": `
 Many valospace resources, so called *structural sub-resources* are
 identified by a fixed path from the global resource defined by the same
 verbs that define non-VRId VPaths. Thus while paths and identifiers are
@@ -53,22 +64,77 @@ same VPath verb structure.
 
 Both verb and vgrid params can also have context term references to
 an external lookup of URI prefixes and semantic definitions.`
+    },
+    "chapter#section_representations>3;VPath representations": {
+      "#0": [`
+The primary representation of a VPath is a string, but there are other
+format specific representations.
+      `],
+      "chapter#section_expanded_JSON>0;Expanded JSON VPath representation": {
+        "#0": [`
+Expanded JSON is a canonical, recursive expansion of the VPath
+structure where each structural element is expressed as an array. The
+first entry of an element is a string which denotes the element type
+and the remaining entries contain the element payload:
+`],
+        "bulleted#expanded_element_types>1": [
+[`"@" for a vpath, remaining entries are the optional vgrid and verb
+  elements`],
+[`"$" for a param with second entry being a valid context term string
+  and third optional entry being the param value element`],
+[`":" for a param without a context-term and with the optional second
+  entry being the param value element`],
+[`for remaining elements the first entry is a verb type and other
+  entries are the param elements`],
+        ],
+        "#1": [`
+JSON numbers and strings can only appear as param values of "$" or
+":"-elements. JSON objects cannot appear.
+A vpath which is used as a contextless param of a verb must appear
+directly without intermediate ":"-element (unlike in the string VPath
+construct).
+Conversely a verb used as a contextless param must still be wrapped
+inside a "@"-element.`
+        ],
+      },
+      "chapter#section_cemented_vpaths>1;Cemented VPaths": {
+        "#0": [`
+VPaths contain context references but do not _contain_ knowledge about
+the context. This is to ensure that a VPath can be moved from a context
+to a compabible one without modification.
+
+Cementing a VPath with a context inside an environment produces a
+construct where the vpath itself and specifically its context terms are
+converted to their environment-specific representations. This
+representation can be anything from interpretable JSON to fully
+compiled executable code.
+
+Cementing also performs the security critical step of validating the
+context terms and their parameters against their context inside that
+particular environment (e.g. a typical validation failure being the
+lack of implementation for a specific context term by the environment).`
+        ],
+      },
+    },
   },
-  "chapter#section_equivalence>3;VPath equivalence follows URN equivalence": {
+  "chapter#section_semantics>4;VPath semantics": {
     "#0": [`
-Two VPaths identify the same path and in case they're VRIds, refer to
-the same resource iff their URN representations are `,
+    `],
+    "chapter#section_equivalence>3;VPath equivalence follows URN equivalence": {
+      "#0": [`
+Two VPaths identify the same path (and in case they're VRIds, refer to
+the same resource) iff their URN representations are `,
 ref("urn-equivalent", "https://tools.ietf.org/html/rfc8141#section-3"),
-`. In other words two VPath are equivalent if and only if they are
-lexically equivalent after case normalization of any percent-encoded
-characters.
+` and their context term when resolved in their corresponding
+contexts are uri-equivalent.
 
 For the general case the actual semantics of a VPath and specifically
 of its context-term's depends on the context it is used. Vrids have a
 fixed context which is established by the vgrid. `,
 ref("This has implications on VRId equivalence",
-    "@valos/raem/VPath#section_vrid_equivalence"), `.`,
-    ],
+      "@valos/raem/VPath#section_vrid_equivalence"), `.`,
+      ],
+    },
   },
   [`chapter#section_verb>4;${
       ""}*verb* - a step from a source resource to target resource(s)`]: {

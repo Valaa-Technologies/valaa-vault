@@ -1,6 +1,6 @@
 const path = require("path");
 
-const { expandVPath, affixVPath } = require("../raem/VPath");
+const { expandVPath, cementVPath } = require("../raem/VPath");
 
 const inBrowser = require("../gateway-api/inBrowser").default;
 
@@ -339,7 +339,7 @@ function _patchRevelation (gateway, targetRevelation, patchRevelation) {
         if (!Array.isArray(spreader)) return extendedSpreader || spreader;
         return _spreadValk(extendedSpreader);
         function _spreadValk (spreadedSpreader) {
-          const pathOp = _affixSpreaderPath(spreadedSpreader);
+          const pathOp = _cementSpreaderPath(spreadedSpreader);
           // console.log("pre-spreaderSpreader:", JSON.stringify(spreadedSpreader, null, 2));
           const ret = _valk(gateway, null, pathOp);
           /*
@@ -379,13 +379,13 @@ const revelationContext = {
 
 function _importURI (state, suffix, prefix) { return `<${prefix}://${suffix}>`; }
 
-function _affixSpreaderPath (spreader) {
-  const conciseVPath = (Array.isArray(spreader) && spreader[0] === "@")
+function _cementSpreaderPath (spreader) {
+  const shortcutVPath = (Array.isArray(spreader) && spreader[0] === "@")
        ? spreader
        : ["!"].concat(spreader);
-  const expandedVPath = expandVPath(conciseVPath);
-  const affixedVPath = affixVPath(expandedVPath, revelationContext);
-  return affixedVPath;
+  const expandedVPath = expandVPath(shortcutVPath);
+  const cementedVPath = cementVPath(expandedVPath, { context: revelationContext });
+  return cementedVPath;
 }
 
 function _keepCalling (callMeMaybe) {

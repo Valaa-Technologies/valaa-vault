@@ -101,14 +101,16 @@ for various valos fabric config files.`],
 "/site/path"),
     "example#4": itExpects(
         "spread of a URI import followed by pick-array append",
-async () => lazyPatchRevelations(gatewayMock, [0], {
-  "!!!": [["$https:foobar.com/path"], [
-    ["@", [".:fetchedField"]],
-    ["@", [".:fetchOptions"], [".:input"]],
-  ]],
-}),
+async () => lazyPatchRevelations(gatewayMock,
+    [0], {
+      "!!!": [["$https:foobar.com/path"], ["*$",
+        [".:fetchedField"],
+        ["@.:fetchOptions@.:input@"],
+      ]],
+    },
+    ["last"]),
         "toEqual",
-() => [0, 1, "https://foobar.com/path"]),
+() => [0, 1, "https://foobar.com/path", "last"]),
     "example#5": itExpects(
         "nested import & invoke spread to resolve all spreads",
 async () => lazyPatchRevelations(gatewayMock, {}, {

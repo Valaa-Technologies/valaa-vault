@@ -44,36 +44,47 @@ describe("VALK basic functionality tests", () => {
   });
 });
 
-describe("VPath to VAKON conversions", () => {
-  it("Converts simple VPaths into VAKON", () => {
-    expect(VALK.fromVPath("@!:scriptRoot@!$random@").toVAKON())
-        .toEqual(["§->", ["§$", "scriptRoot"], ["§'", ["$", "random"]]]);
+describe("VPath to concrete VAKON valks", () => {
+  const testContext = {
+    random: {
+      steps: ["§!random"],
+    },
+  };
+
+  it("Cements simple VPaths into VAKON", () => {
+    expect(VALK.fromVPath("@!:scriptRoot@!$random@", { context: testContext }).toVAKON())
+        .toEqual(["§->", ["§$", "scriptRoot"], ["§!random"]]);
     expect(VALK.fromVPath("@!invoke:create:@!:body:%24V:target:name@@").toVAKON())
         .toEqual([
           "§invoke", "create",
           ["§->", ["§$", "body"], ["§..", "$V"], ["§..", "target"], ["§..", "name"]],
         ]);
   });
-  it("Converts complex VPaths into VAKON", () => {
+  it("Rejects VPaths context terms which are undefined by the context", () => {
+    expect(() => VALK.fromVPath("@!:scriptRoot@!$thisIsBad@", { context: testContext }).toVAKON())
+        .toThrow(/unrecognized context term 'thisIsBad'/);
+  });
+  it("Cements complex VPaths into VAKON", () => {
     expect(VALK.fromVPath("@!invoke:create:event:@!:source@:@!:body@.:%24V@.:target@.:name@@")
         .toVAKON())
     .toEqual([
-      "§invoke", "create", "event", ["§$", "source"],
+      "§invoke", "create", "event",
+      ["§$", "source"],
       ["§->", ["§$", "body"], ["§..", "$V"], ["§..", "target"], ["§..", "name"]],
     ]);
   });
-  it("Converts object VPaths into VAKON", () => {
+  it("Cements object VPaths into VAKON while escaping nested vpaths", () => {
     expect(VALK.fromVPath([{ val: ["@"] }])
         .toVAKON())
-    .toEqual(["§{}", ["val", ["§->", null]]]);
+    .toEqual(["§{}", ["val", ["§'", ["@"]]]]);
     expect(VALK.fromVPath([{ val: ["@"], val3: [1, 2, 3], val2: null }])
         .toVAKON())
     .toEqual(["§{}",
-        ["val", ["§->", null]],
+        ["val", ["§'", ["@"]]],
         ["val2", null],
-        ["val3", ["§[]", ["§'", 1], ["§'", 2], ["§'", 3]]]]);
+        ["val3", ["§[]", 1, 2, 3]]]);
   });
-  it("Converts complex embedded VPaths into VAKON", () => {
+  it("Cements complex embedded VPaths into VAKON", () => {
     expect(VALK.fromVPath([
       "!invoke:create:event", ["!:source"],
         ["@!:body@.:%24V@", [".:target"], [".:name"]],

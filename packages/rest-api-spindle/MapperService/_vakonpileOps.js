@@ -5,7 +5,7 @@ import { expandVKeyPath, cementVPath } from "~/raem/VPath";
 export function _vakonpileVPath (vpath, runtime) {
   const expandedVPath = expandVKeyPath("@", vpath);
   if ((expandedVPath.length === 1) && (expandedVPath[0] === "@")) return null;
-  const ret = cementVPath(expandedVPath, ruleContextLookup, runtime);
+  const ret = cementVPath(expandedVPath, { context: ruleContextLookup, contextState: runtime });
   const lastVerb = (expandedVPath[0] === "@")
       ? expandedVPath[expandedVPath.length - 1]
       : expandedVPath;

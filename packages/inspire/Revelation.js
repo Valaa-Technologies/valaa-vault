@@ -515,22 +515,3 @@ function _delayIfAnyPromise (promiseCandidate, operation) {
   if (delay === undefined) return delay;
   return delay.then(operation);
 }
-
-/*
-function _postProcessGetContent (gateway, isFinal, resourceLocation, content_, pathOp) {
-  let content = content_;
-  if (!isFinal) {
-    content = trivialClone(content, (value, key) => {
-      if (key !== "!!!") return undefined;
-      if (isPromise(value)) return value;
-      return _markLazy(() => _valk(
-          Object.assign(Object.create(gateway), {
-            currentRevelationPath: path.dirname(resourceLocation),
-          }),
-          null,
-          _pathOpFromSpreader(value)));
-    });
-  }
-  return !pathOp.length ? content : _valk(gateway, content, ["§->", ...pathOp]);
-}
-*/

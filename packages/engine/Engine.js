@@ -143,7 +143,7 @@ export default class Engine extends Cog {
     let transient;
     const discourse = options.discourse || this.discourse;
     const state = options.state || discourse.getState();
-    const id = discourse.obtainReference(idData);
+    const id = discourse.obtainReference(idData, options.contextPartitionURI);
     try {
       if (explicitTransient) {
         typeName = getTransientTypeName(explicitTransient, discourse.schema);

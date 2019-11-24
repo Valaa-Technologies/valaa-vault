@@ -45,6 +45,7 @@ export function _createPrefixRouter (rootService, prefix, prefixConfig) {
 
     _addSchemas(ret, schemas);
     _prepareProjectors(ret, errorOnCreatePrefixRouter);
+    _attachProjectorFastifyRoutes(ret);
 
     ret.infoEvent(1, () => [
       `${prefix}: preparing the projectors and attaching their fastify routes done`,
@@ -167,8 +168,6 @@ export async function _projectPrefixRoutesFromView (router, view, viewName) {
     `${router.getRoutePrefix()}: preparation done and view attached`,
     `\n\tpreloading ${router._projectors.length} projectors`,
   ]);
-  router._projectors.forEach(projector =>
-      router._fastify.route(_fastifyRouteOptions(router, projector)));
   const preloadedProjectors = await Promise.all(router._projectors.map(async projector => {
     let ret;
     try {

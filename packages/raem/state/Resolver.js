@@ -46,7 +46,7 @@ import { _getFieldGhostElevation, _elevateReference } from "./FieldInfo";
  * @class Resolver
  */
 export default class Resolver extends FabricEventTarget {
-  deserializeReference: (idData: IdData, originatingPartitionURI?: ValaaURI) => VRL;
+  deserializeReference: (idData: IdData, contextPartitionURI?: ValaaURI) => VRL;
 
   constructor (options: ?Object) {
     super(options.name, options.verbosity, options.logger);
@@ -59,12 +59,12 @@ export default class Resolver extends FabricEventTarget {
 
   schema: GraphQLSchema;
 
-  obtainReference (params, originatingPartitionURI: ?ValaaURI) {
+  obtainReference (params, contextPartitionURI: ?ValaaURI) {
     return params
         && (tryHostRef(params)
             || (this._deserializeReference
-                && this._deserializeReference(params, originatingPartitionURI))
-            || obtainVRL(params, undefined, undefined, originatingPartitionURI || undefined));
+                && this._deserializeReference(params, contextPartitionURI))
+            || obtainVRL(params, undefined, undefined, contextPartitionURI || undefined));
   }
 
   setDeserializeReference (deserializeReference: Function) {

@@ -32,7 +32,7 @@ export function _createProjectorRuntime (router: PrefixRouter, { name, url, conf
           && !ruleVAKON[1].slice(1).find(e => Array.isArray(e))
           && ruleVAKON[1].slice(1);
       resolveRule = maybeStaticReference
-              ? (engine => engine.getVrapper(maybeStaticReference))
+              ? (engine => engine.getVrapper(maybeStaticReference, { contextPartitionURI: null }))
           : (ruleVAKON !== null)
               ? ((engine, head, options) => engine.run(head, ruleVAKON, options))
               : (engine, head) => head;
@@ -76,7 +76,7 @@ export async function _preloadRuntimeResources (router: PrefixRouter, projector,
     if (rootActivation) await rootActivation;
     const activations = runtime.staticResources
         .map(staticResource => router.getEngine()
-            .getVrapper(staticResource).activate())
+            .getVrapper(staticResource, { contextPartitionURI: null }).activate())
         .filter(e => e);
     await Promise.all(activations);
     router.infoEvent("Done preloading projector:", router._projectorName(projector),

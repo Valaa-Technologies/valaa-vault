@@ -1,14 +1,16 @@
 // @flow
 
-import type { PrefixRouter, Route } from "~/rest-api-spindle/fastify/MapperService";
+import type { PrefixRouter, Route } from "~/rest-api-spindle/MapperService";
 import { dumpObject, thenChainEagerly } from "~/tools";
+
+import { _presolveResourceRouteRequest } from "./_resourceHandlerOps";
 
 export default function createProjector (router: PrefixRouter, route: Route) {
   return {
-    requiredRules: ["routeRoot", "name"],
+    requiredRules: ["routeRoot", "resource"],
 
     prepare () {
-      this.runtime = router.createRouteRuntime(this);
+      this.runtime = router.createProjectorRuntime(this);
       this.toSuccessBodyFields = router.appendSchemaSteps(this.runtime, route.schema.response[200],
           { expandProperties: true });
     },
@@ -19,27 +21,25 @@ export default function createProjector (router: PrefixRouter, route: Route) {
 
     handler (request, reply) {
       const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
-      const scope = valkOptions.scope;
-      router.infoEvent(1, () => [
-        `${this.name}:`, scope.name,
-        "\n\trequest.query:", request.query,
-      ]);
-      scope.resource = router._engine.tryVrapper([scope.resourceId]);
-      if (!scope.resource) {
-        reply.code(404);
-        reply.send(`No such ${route.config.resource.name} route resource: ${scope.resourceId}`);
+      if (_presolveResourceRouteRequest(router, route, this.runtime, valkOptions)) {
         return true;
       }
+      const scope = valkOptions.scope;
+      router.infoEvent(2, () => [
+        `${this.name}:`, ...dumpObject(scope.resource),
+        "\n\trequest.query:", ...dumpObject(request.query),
+      ]);
+
       const { fields } = request.query;
-      return thenChainEagerly(scope.resource, [
-        vResource => vResource.get(this.toSuccessBodyFields, { scope, verbosity: 0 }),
-        (fields)
-            && (results => router.pickResultFields(results, fields, route.schema.response[200])),
+      return thenChainEagerly(valkOptions.scope.resource, [
+        vResource => vResource.get(this.toSuccessBodyFields, valkOptions),
+        (fields) && (results =>
+            router.pickResultFields(results, fields, route.schema.response[200])),
         results => {
           reply.code(200);
           reply.send(JSON.stringify(results, null, 2));
           router.infoEvent(2, () => [
-            `${this.name}:`,
+            `${this.name}:`, ...dumpObject(scope.resource),
             "\n\tresults:", ...dumpObject(results),
           ]);
           return true;

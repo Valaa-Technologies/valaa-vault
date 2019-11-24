@@ -1,6 +1,6 @@
 // @flow
 
-import type { PrefixRouter, Route } from "~/rest-api-spindle/fastify/MapperService";
+import type { PrefixRouter, Route } from "~/rest-api-spindle/MapperService";
 import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _presolveResourceRouteRequest } from "../resource/_resourceHandlerOps";
@@ -13,7 +13,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
     },
 
     prepare () {
-      this.runtime = router.createRouteRuntime(this);
+      this.runtime = router.createProjectorRuntime(this);
 
       this.toTargetPatchable = ["§->", false, "target"];
       router.appendSchemaSteps(this.runtime, route.config.target.schema,
@@ -87,7 +87,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
             "\n\tscope.resource:", ...dumpObject(scope.resource),
             "\n\tscope.source:", ...dumpObject(scope.source),
             "\n\tscope.target:", ...dumpObject(scope.target),
-            "\n\trouteRuntime:", ...dumpObject(this.runtime),
+            "\n\tprojectorRuntime:", ...dumpObject(this.runtime),
         );
       });
     },

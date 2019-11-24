@@ -2,7 +2,7 @@
 
 import { Vrapper } from "~/engine";
 
-import { verifySessionAuthorization } from "~/rest-api-spindle/fastify/security";
+import { verifySessionAuthorization } from "~/rest-api-spindle/tools/security";
 
 import { dumpObject } from "~/tools";
 

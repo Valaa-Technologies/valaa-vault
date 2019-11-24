@@ -8,7 +8,7 @@ import {
   extendType, getBaseRelationTypeOf, schemaRefOf, trySchemaNameOf, _resolveFunction,
 } from "./types";
 
-import * as handlers from "~/rest-api-spindle/fastify/handlers";
+import * as projectors from "~/rest-api-spindle/projectors";
 
 export function assignRulesFrom (
     ruleSource: Object,
@@ -461,7 +461,7 @@ export function sessionDELETERoute (url, userConfig, globalRules) {
 }
 
 function _setupRoute (route, userConfig, globalRules, resourceType, relationField) {
-  const category = handlers[route.category];
+  const category = projectors[route.category];
   if (!category) throw new Error(`No such category '${route.category}' for ${_routeName(route)}`);
   const handler = category[route.method];
   if (!handler) {

@@ -1,8 +1,8 @@
 // @flow
 
-import type { PrefixRouter, Route } from "~/rest-api-spindle/fastify/MapperService";
+import type { PrefixRouter, Route } from "~/rest-api-spindle/MapperService";
 
-import { _verifyResourceAuthorization } from "../_handlerOps";
+import { _verifyResourceAuthorization } from "../_commonProjectorOps";
 import { _presolveResourceRouteRequest } from "../resource/_resourceHandlerOps";
 
 export function _createToMapping (router: PrefixRouter, route: Route, runtime) {

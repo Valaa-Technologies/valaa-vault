@@ -1,6 +1,6 @@
 // @flow
 
-import type { PrefixRouter, Route } from "~/rest-api-spindle/fastify/MapperService";
+import type { PrefixRouter, Route } from "~/rest-api-spindle/MapperService";
 import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _createToMapping, _presolveMappingRouteRequest } from "./_mappingHandlerOps";
@@ -13,7 +13,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
     },
 
     prepare () {
-      this.runtime = router.createRouteRuntime(this);
+      this.runtime = router.createProjectorRuntime(this);
       this.toMapping = _createToMapping(router, route, this.runtime);
       this.toSuccessBodyFields = router.appendSchemaSteps(this.runtime, route.schema.response[200],
         { expandProperties: true });

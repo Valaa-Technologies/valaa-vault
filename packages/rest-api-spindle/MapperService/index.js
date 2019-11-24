@@ -7,8 +7,8 @@ import { dumpify, dumpObject, FabricEventTarget, outputError } from "~/tools";
 
 import { _createPrefixRouter, _projectPrefixRoutesFromView } from "./_routerOps";
 import {
-  _createRouteRuntime, _preloadRuntimeResources, _buildRuntimeVALKOptions, _resolveRuntimeRules,
-} from "./_routeRuntimeOps";
+  _createProjectorRuntime, _preloadRuntimeResources, _buildRuntimeVALKOptions, _resolveRuntimeRules,
+} from "./_projectorOps";
 import { _appendSchemaSteps, _derefSchema, _getResourceHRefPrefix } from "./_buildOps";
 import { _filterResults, _sortResults, _paginateResults, _pickResultFields } from "./_resultOps";
 import { _updateResource } from "./_updateResourceOps";
@@ -19,13 +19,14 @@ const Fastify = require("fastify");
 export type PrefixRouter = MapperService;
 
 export default class MapperService extends FabricEventTarget {
-  constructor (gateway, { identity, port, address, fastify, ...rest }) {
+  constructor (gateway, { identity, port, address, fastify, ...rest }, projectorCreators) {
     super(rest.name, rest.verbosity, gateway.getLogger());
     this._gateway = gateway;
 
     this._identity = identity;
     this._port = port;
     this._address = address;
+    this._projectorCreators = projectorCreators;
 
     const options = { ...fastify };
     if (options.https) {
@@ -114,15 +115,38 @@ export default class MapperService extends FabricEventTarget {
     }
   }
 
+  createRouteProjector (route) {
+    const wrap = new Error(`createRouteProjector(${this._routeName(route)})`);
+    try {
+      if (!route.url) throw new Error(`Route url undefined`);
+      if (!route.category) throw new Error(`Route category undefined`);
+      if (!route.method) throw new Error(`Route method undefined`);
+      if (!route.config) throw new Error(`Route config undefined`);
+      const createProjector = (this._projectorCreators[route.category] || {})[route.method];
+      if (!createProjector) {
+        throw new Error(`No projector found for '${route.category} ${route.method}'`);
+      }
+      const projector = createProjector(this, route);
+      if (projector == null) return undefined;
+      if (!projector.name) projector.name = this._routeName(route);
+      projector.route = route;
+      projector.config = route.config;
+      return projector;
+    } catch (error) {
+      throw this.wrapErrorEvent(error, wrap,
+          "\n\troute:", ...dumpObject(route));
+    }
+  }
+
   // Runtime ops
 
-  createRouteRuntime (projector) {
+  createProjectorRuntime (projector) {
     const runtime = {};
     try {
-      return _createRouteRuntime(this, projector, runtime);
+      return _createProjectorRuntime(this, projector, runtime);
     } catch (error) {
       throw this.wrapErrorEvent(error,
-          new Error(`createRouteRuntime(${this._projectorName(projector)})`),
+          new Error(`createProjectorRuntime(${this._projectorName(projector)})`),
           "\n\tconfig:", ...dumpObject(projector.config),
           "\n\tprojector:", ...dumpObject(projector),
           "\n\truntime:", ...dumpObject(runtime),

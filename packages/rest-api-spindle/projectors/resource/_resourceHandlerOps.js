@@ -1,8 +1,8 @@
 // @flow
 
-import type { PrefixRouter, Route } from "~/rest-api-spindle/fastify/MapperService";
+import type { PrefixRouter, Route } from "~/rest-api-spindle/MapperService";
 
-import { _verifyResourceAuthorization, _presolveRouteRequest } from "../_handlerOps";
+import { _verifyResourceAuthorization, _presolveRouteRequest } from "../_commonProjectorOps";
 
 export function _presolveResourceRouteRequest (
     router: PrefixRouter, route: Route, runtime, valkOptions) {

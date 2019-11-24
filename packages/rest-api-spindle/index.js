@@ -1,8 +1,10 @@
 // @flow
 
+import * as projectors from "./projectors";
+
 const valosheath = require("~/gateway-api/valosheath").default;
 
-const MapperService = require("./fastify/MapperService").default;
+const MapperService = require("./MapperService").default;
 
 export default valosheath.exportSpindle({
   name: "@valos/rest-api-spindle",
@@ -12,7 +14,8 @@ export default valosheath.exportSpindle({
     if (!server) throw new Error(`${this.name} revelation server section missing`);
     if (!prefixes) throw new Error(`${this.name} revelation prefixes section missing`);
     this._prefixRouters = {};
-    this._service = new MapperService(gateway, { identity: valosheath.identity, ...server });
+    this._service = new MapperService(
+        gateway, { identity: valosheath.identity, ...server }, projectors);
     gateway.clockEvent(1, () => [
       "restAPISpindle.onGatewayInitialized",
       `Adding routers for prefixes: '${Object.keys(prefixes).join("', '")}'`,

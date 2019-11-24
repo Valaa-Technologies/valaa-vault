@@ -1,19 +1,19 @@
 // @flow
 
-import type { PrefixRouter, Route } from "~/rest-api-spindle/fastify/MapperService";
+import type { PrefixRouter, Route } from "~/rest-api-spindle/MapperService";
 import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _createToMapping, _presolveMappingRouteRequest } from "./_mappingHandlerOps";
 
 export default function createProjector (router: PrefixRouter, route: Route) {
   return {
-    requiredRules: ["routeRoot", "resource", "target", "doCreateMapping"],
+    requiredRules: ["routeRoot", "resource", "target", "doDestroyMapping"],
     rules: {
       mappingName: route && route.config.relation.name,
     },
 
     prepare () {
-      this.runtime = router.createRouteRuntime(this);
+      this.runtime = router.createProjectorRuntime(this);
       this.toMapping = _createToMapping(router, route, this.runtime);
     },
 
@@ -32,38 +32,26 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         `\n\t${scope.mappingName}:`, ...dumpObject(scope.mapping),
         `\n\ttarget:`, ...dumpObject(scope.target),
         "\n\trequest.query:", request.query,
-        "\n\trequest.body:", request.body,
       ]);
-      if (!scope.mapping && !scope.doCreateMapping) {
-        reply.code(405);
-        reply.send(`${this.name} is disabled: no doCreateMapping configured`);
+      if (scope.mapping === undefined) {
+        scope.reply.code(404);
+        scope.reply.send(`No mapping '${route.config.relation.name}' found from ${
+          scope.resource.getRawId()} to ${scope.target.getRawId()}`);
         return true;
       }
 
       const wrap = new Error(this.name);
-      valkOptions.route = route;
       valkOptions.discourse = router.getDiscourse().acquireFabricator();
-      return thenChainEagerly(scope.resource, [
-        vResource => scope.mapping || vResource.do(scope.doCreateMapping, valkOptions),
-        vMapping => router.updateResource((scope.mapping = vMapping), request.body, valkOptions),
+      return thenChainEagerly(scope.mapping, [
+        vMapping => (scope.doDestroyMapping
+            ? vMapping.do(scope.doDestroyMapping, valkOptions)
+            : vMapping.destroy(valkOptions)),
         () => valkOptions.discourse.releaseFabricator(),
-        eventResult => eventResult
-            && eventResult.getPersistedEvent(),
-        (/* persistedEvent */) => {
-          const results = {
-            $V: {
-              href: `${router.getResourceHRefPrefix(route.config.resource.schema)}${
-                scope.resource.getRawId()}/${scope.mappingName}/${scope.target.getRawId()}`,
-              rel: "self",
-              target: { $V: {
-                href: `${router.getResourceHRefPrefix(route.config.target.schema)}${
-                  scope.target.getRawId()}`,
-                rel: "self",
-              } },
-            }
-          };
-          reply.code(scope.mapping ? 200 : 201);
-          reply.send(JSON.stringify(results, null, 2));
+        eventResult => eventResult.getPersistedEvent(),
+        () => {
+          const results = "DESTROYED";
+          reply.code(200);
+          reply.send(results);
           router.infoEvent(2, () => [
             `${this.name}:`,
             "\n\tresults:", ...dumpObject(results),
@@ -74,14 +62,11 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         valkOptions.discourse.releaseFabricator({ abort: error });
         throw router.wrapErrorEvent(error, wrap,
           "\n\trequest.query:", ...dumpObject(request.query),
-          "\n\trequest.body:", ...dumpObject(request.body),
-          "\n\tscope.resource:", ...dumpObject(scope.resource),
-          "\n\tscope.source:", ...dumpObject(scope.source),
           "\n\tscope.mapping:", ...dumpObject(scope.mapping),
-          "\n\tscope.target:", ...dumpObject(scope.target),
-          "\n\trouteRuntime:", ...dumpObject(this.runtime),
+          "\n\tscope.resource:", ...dumpObject(scope.resource),
+          "\n\tprojectorRuntime:", ...dumpObject(this.runtime),
         );
       });
-    },
+    }
   };
 }

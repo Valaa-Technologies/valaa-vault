@@ -1,17 +1,17 @@
 // @flow
 
-import type { PrefixRouter, Route } from "~/rest-api-spindle/fastify/MapperService";
+import type { PrefixRouter, Route } from "~/rest-api-spindle/MapperService";
 
 import { dumpObject, thenChainEagerly } from "~/tools";
 
-import { _presolveRouteRequest } from "../_handlerOps";
+import { _presolveRouteRequest } from "../_commonProjectorOps";
 
 export default function createProjector (router: PrefixRouter, route: Route) {
   return {
     requiredRules: ["routeRoot"],
 
     prepare () {
-      this.runtime = router.createRouteRuntime(this);
+      this.runtime = router.createProjectorRuntime(this);
 
       this.toSuccessBodyFields = ["§->"];
       const fromEntry = router.appendGateSteps(

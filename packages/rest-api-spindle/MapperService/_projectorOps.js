@@ -2,13 +2,13 @@
 
 import Vrapper from "~/engine/Vrapper";
 
-import type { PrefixRouter } from "~/rest-api-spindle/fastify/MapperService";
+import type { PrefixRouter } from "~/rest-api-spindle/MapperService";
 
-import { dumpify, dumpObject } from "~/tools";
+import { dumpObject } from "~/tools";
 
 import { _vakonpileVPath } from "./_vakonpileOps";
 
-export function _createRouteRuntime (router: PrefixRouter, { name, url, config }, runtime) {
+export function _createProjectorRuntime (router: PrefixRouter, { name, url, config }, runtime) {
   for (const ruleName of config.requiredRules) {
     if (config.rules[ruleName] === undefined) {
       throw new Error(`Required route rule '${ruleName}' missing for route <${url}>`);
@@ -31,9 +31,11 @@ export function _createRouteRuntime (router: PrefixRouter, { name, url, config }
       maybeStaticReference = (ruleVAKON != null) && (ruleVAKON[0] === "§ref")
           && !ruleVAKON[1].slice(1).find(e => Array.isArray(e))
           && ruleVAKON[1].slice(1);
-      resolveRule = maybeStaticReference ? (engine => engine.getVrapper(maybeStaticReference))
-          : (ruleVAKON !== null) ? ((engine, head, options) => engine.run(head, ruleVAKON, options))
-          : (engine, head) => head;
+      resolveRule = maybeStaticReference
+              ? (engine => engine.getVrapper(maybeStaticReference))
+          : (ruleVAKON !== null)
+              ? ((engine, head, options) => engine.run(head, ruleVAKON, options))
+              : (engine, head) => head;
       if (ruleName === "routeRoot") {
         runtime.resolveRouteRoot = resolveRule;
       } else {
@@ -67,16 +69,22 @@ export async function _preloadRuntimeResources (router: PrefixRouter, projector,
     if (!(vRouteRoot instanceof Vrapper)) {
       throw new Error(`Route root is not a resource for ${router._projectorName(projector)}`);
     }
-    router.infoEvent("Preloading projector", router._projectorName(projector),
-        "; activating root resource and", runtime.staticResources.length, "static rule resources");
-    await vRouteRoot.activate();
+    router.infoEvent(`Preloading projector ${router._projectorName(projector)}`,
+        "; activating", runtime.staticResources.length, "static rule resources and root",
+        vRouteRoot.debugId());
+    const rootActivation = vRouteRoot.activate();
+    if (rootActivation) await rootActivation;
     const activations = runtime.staticResources
-        .map(staticResource => router.getEngine().getVrapper(staticResource).activate())
+        .map(staticResource => router.getEngine()
+            .getVrapper(staticResource).activate())
         .filter(e => e);
     await Promise.all(activations);
     router.infoEvent("Done preloading projector:", router._projectorName(projector),
-        "\n\tactive route root:", ...dumpObject(vRouteRoot.debugId()),
-        "\n\tactivated", activations.length, "static rule resources");
+        (rootActivation
+            ? "\n\twaited for route root activation:"
+            : "\n\troute root already active:"), ...dumpObject(vRouteRoot.debugId()),
+        "\n\twaited for", activations.length, `static resource activations (${
+          runtime.staticResources.length - activations.length} were already active})`);
   } catch (error) {
     throw router.wrapErrorEvent(error, new Error(`preloadRuntimeResources(${
             router._projectorName(projector)})`),

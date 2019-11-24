@@ -1,6 +1,6 @@
 
-import type { PrefixRouter /* , Route */ } from "~/rest-api-spindle/fastify/MapperService";
-import { burlaesgDecode, hs256JWTDecode } from "~/rest-api-spindle/fastify/security";
+import type { PrefixRouter /* , Route */ } from "~/rest-api-spindle/MapperService";
+import { burlaesgDecode, hs256JWTDecode } from "~/rest-api-spindle/tools/security";
 
 export default function createProjector (router: PrefixRouter /* , route: Route */) {
   return {
@@ -9,7 +9,7 @@ export default function createProjector (router: PrefixRouter /* , route: Route 
     ],
 
     prepare () {
-      this.runtime = router.createRouteRuntime(this);
+      this.runtime = router.createProjectorRuntime(this);
 
       const routeIdentity = this.runtime.identity;
       if (!routeIdentity) {

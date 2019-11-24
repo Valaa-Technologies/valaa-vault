@@ -1,6 +1,6 @@
 // @flow
 
-import type { PrefixRouter, Route } from "~/rest-api-spindle/fastify/MapperService";
+import type { PrefixRouter, Route } from "~/rest-api-spindle/MapperService";
 import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _presolveResourceRouteRequest } from "../resource/_resourceHandlerOps";
@@ -10,7 +10,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
     requiredRules: ["routeRoot", "resource"],
 
     prepare () {
-      this.runtime = router.createRouteRuntime(this);
+      this.runtime = router.createProjectorRuntime(this);
       this.toSuccessBodyFields = ["§->"];
       router.appendSchemaSteps(this.runtime, route.config.resource.schema,
           { targetVAKON: this.toSuccessBodyFields });

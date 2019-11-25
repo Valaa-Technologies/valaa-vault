@@ -144,16 +144,14 @@ can be as simple as a trivial predicate of a triple or it can represent
 something as complex as a fully parameterized computation or a function
 call.`,
     "example#main_verb_rules>0;Main verb rules": abnf(
-`  verbs-tail     = verb "@" [ verbs-tail ]
-  verb          = verb-type params
+`  vsteps-tail   = verb "@" [ vsteps-tail ]
+  verb          = verb-type vparams
   verb-type     = 1*unencoded
 
-  params        = context-tail / value-tail
-  context-tail  = "$" [ context-term ] [ ":" param-value [ params ] / context-tail ]
-  value-tail    = ":" param-value [ params ]
-
+  vparams       = [ vparam vparams ]
+  vparam        = [ "$" context-term ] ":" vparam-value
   context-term  = ALPHA *unreserved-nt
-  param-value   = vpath / 1*( unencoded / pct-encoded )
+  vparam-value  = "$" / 1*( unencoded / pct-encoded ) / vpath
 `),
     "#1": `
 A verb is made up of type and a parameter list. A parameter
@@ -285,7 +283,7 @@ Following principles apply:`,
 [`If the computation id doesn't have a context-term of if the
   specification denotes the computation id to be a \`trivial name\`
   then the computation is a \`context scope lookup path\`.`],
-[`When a computation evaluator is evaluated all of its params are
+[`When a computation evaluator is evaluated all of its vparams are
   evaluated first in an order defined by the evaluation context and
   their results stores as evaluation arguments.`],
 [`The evaluation context is then searched for an implementation for the
@@ -347,9 +345,9 @@ them as the value type of the param-value etc.`,
 A VRId is a vpath which has vgrid as its first production
 (via vgrid-tail).`,
     "example#main_vrid_rules>0;Main vrid rules": abnf(
-`  vpath         = "@" vgrid-tail / verbs-tail
-  vgrid-tail    = "$" vgrid "@" [ verbs-tail ]
-  vgrid         = format-term ":" param-value [ params ]
+`  vpath         = "@" vgrid-tail / vsteps-tail
+  vgrid-tail    = "$" vgrid "@" [ vsteps-tail ]
+  vgrid         = format-term ":" vparam-value vparams
 `),
     "#1": [`
 The VRId can be directly used as the NSS part of an 'urn:valos:'
@@ -378,28 +376,26 @@ The vgrid uniquely identifies a *global resource*. If a VRId contains
 a vgrid and no verbs this global resource is also the
 *referenced resource* of the VRId itself.`,
       "example#main_vgrid_rules>0;Main vgrid rules": abnf(
-`  vgrid-tail    = "$" vgrid "@" [ verbs-tail ]
-  vgrid         = format-term ":" param-value [ params ]
+`  vgrid-tail    = "$" vgrid "@" [ vsteps-tail ]
+  vgrid         = format-term ":" vparam-value vparams
   format-term   = "~" context-term
 
-  params        = context-tail / value-tail
-  context-tail  = "$" [ context-term ] [ ":" param-value [ params ] / context-tail ]
-  value-tail    = ":" param-value [ params ]
-
+  vparams       = [ vparam vparams ]
+  vparam        = [ "$" context-term ] ":" vparam-value
   context-term  = ALPHA *unreserved-nt
-  param-value   = vpath / 1*( unencoded / pct-encoded )
+  vparam-value  = "$" / 1*( unencoded / pct-encoded ) / vpath
 `),
       "#1": [`
 The format-term defines the global resource identifier schema as well
 as often some (or all) characteristics of the resource.
 
-Some vgrid types restrict the param-value further, with only "$" in
+Some vgrid types restrict the vparam-value further, with only "$" in
 addition to *unreserved*  as specified in the `,
 ref("URI specification", "https://tools.ietf.org/html/rfc3986"), `).
 `,
       ],
       "example#2": [`
-Note: when using base64 encoded values as vgrid param-value, use the
+Note: when using base64 encoded values as vgrid vparam-value, use the
 url-and-filename-ready`, ref("base64url characters",
 "https://tools.ietf.org/html/rfc4648#section-5"), `.`,
       ],
@@ -411,9 +407,9 @@ log of its global resource. Because the VRId doesn't contain the
 locator information of this event log it must be discoverable from the
 context where the VRId is used.
 
-All context-terms of the VGRId and VRId verb params are references to
-the event log `, ref("JSON-LD context", "https://w3c.github.io/json-ld-syntax/#the-context"),
-` (this applies only to immediate but not to nested VPath params).
+All context-terms of the VGRId and VRId vparams are references to the
+event log `, ref("JSON-LD context", "https://w3c.github.io/json-ld-syntax/#the-context"),
+` (Note: this applies only to immediate but not to nested vparams).
 
 Global resources can be transferred between event logs. To maintain
 immutability across these transfers VGRId's must not contain partition
@@ -460,15 +456,15 @@ the equivalence semantics.`,
     [`chapter#section_structural_sub_resources>3;VRId verbs identify structural sub-resources${
         ""} - fixed ownership, inferred state, 'secondary keys'`]: {
       "#0": [
-`In VRId context the verbs-tail that follows the VGRId specifies
+`In VRId context the vsteps-tail that follows the VGRId specifies
 a structural path from the global resource to a
 *structural sub-resource* of the global resource. The triple
 constraints of each verb in that path are _inferred as triples_ for the
 particular resource that that verb affects.
 
 `, blockquote(`Principle: a structural sub-resource using a particular
-verbs-tail in its identifying VRId will always infer the triples that
-are required to satisfy the same verbs-tail in a query context which
+vsteps-tail in its identifying VRId will always infer the triples that
+are required to satisfy the same vsteps-tail in a query context which
 starts from the same global resource.`), `
 
 This fixed triple inference is the meat and bones of the structural
@@ -512,13 +508,13 @@ used in trusted, protected environments.`,
           ""}VGRId format "\`~bv\`": The content hash of Binary ValOS object`]: {
         "#0": `
 An identifier of an immutable octet-stream, with the content hash in
-the param-value.`
+the vparam-value.`
       },
       [`chapter#section_vgrid_platonic_resource>2;${
           ""}VGRId format "\`~pw\`": The id of an immutable Platonic resource With inferences`]: {
         "#0": `
 An identifier of an immutable, procedurally generated resource with its
-content inferred from the vpath embedded in the param-value.
+content inferred from the vpath embedded in the vparam-value.
 While of limited use in itself this is useful when used as the
 prototype of structural ghost sub-resources which are quite mutable.`,
       },
@@ -717,27 +713,25 @@ homologous prototype inside f00b-b507-0763 and thus infers triples:
   },
   "chapter#section_grammar>8;Collected VPath ABNF grammar": {
     "#0": [
-`The VPath grammar is an LL(1) grammar. It is recursive as param-value
+`The VPath grammar is an LL(1) grammar. It is recursive as vparam-value
 productions can contain nested vpaths without additional encoding.
 
 The list of definitive rules:
 `, abnf(
-`  vpath         = "@" vgrid-tail / verbs-tail
+`  vpath         = "@" vgrid-tail / vsteps-tail
 
-  vgrid-tail    = "$" vgrid "@" [ verbs-tail ]
-  vgrid         = format-term ":" param-value [ params ]
+  vgrid-tail    = "$" vgrid "@" [ vsteps-tail ]
+  vgrid         = format-term ":" vparam-value vparams
   format-term   = "~" context-term
 
-  verbs-tail     = verb "@" [ verbs-tail ]
-  verb          = verb-type params
+  vsteps-tail   = verb "@" [ vsteps-tail ]
+  verb          = verb-type vparams
   verb-type     = 1*unencoded
 
-  params        = context-tail / value-tail
-  context-tail  = "$" [ context-term ] [ ":" param-value [ params ] / context-tail ]
-  value-tail    = ":" param-value [ params ]
-
+  vparams       = [ vparam vparams ]
+  vparam        = [ "$" context-term ] ":" vparam-value
   context-term  = ALPHA *unreserved-nt
-  param-value   = vpath / 1*( unencoded / pct-encoded )
+  vparam-value  = "$" / 1*( unencoded / pct-encoded ) / vpath
 
   unencoded     = unreserved / "!" / "*" / "'" / "(" / ")"
   unreserved    = unreserved-nt / "~"
@@ -751,9 +745,8 @@ from other documents.
 
 The list of informative pseudo-rules:
 `, abnf(
-`  vrid            = "@" "$" vgrid "@" [ verbs-tail ]
-  verbs           = "@" verbs-tail
-  vparam          = [ "$" [ context-term ] ] [ ":" param-value ]
+`  vrid            = "@" "$" vgrid "@" [ vsteps-tail ]
+  verbs           = "@" vsteps-tail
   context-term-ns = ALPHA 0*30unreserved-nt ( ALPHA / DIGIT )
 `), `
 
@@ -763,20 +756,6 @@ itself. These notes primarily relate to LL(1)-parseability:`
     "bulleted#1": [
 [`Pseudo-rule 'vrid': this class contains all 'vpath' productions with
   'vgrid' as their first expansion.`],
-[`Pseudo-rule 'vparam': this class contains all 'context-tail' and
-  'value-tail' expansions while excluding their '[ params ]' and
-  'context-tail' right recursive expansions.`],
-[`Also note how 'params' rule is right recursive. This is to ensure
-  that the string "$foo:bar" will be properly LL(1)-parsed as a
-  singular 'context-tail' with 'param-value', instead of a
-  'context-tail' (without 'param-value') that is followed by
-  'value-tail'.
-  To represent a 'context-tail' (without 'param-value') that is
-  followed by a 'value-tail' an empty context must be added:
-  "$foo$:bar". To represent an empty param an empty "$" can be
-  inserted: "$$foo:bar" and as a consequence if the following param of
-  an empty param has no context it must also prepended with "$" like
-  so: "$$:bar".`],
 [`Pseudo-rule 'context-term-ns': this class contains all 'context-term'
   expansions which match this more restrictive specification (max 32
   chars, special chars only in the middle). All 'context-term's which

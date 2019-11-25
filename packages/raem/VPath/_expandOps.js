@@ -66,7 +66,9 @@ function expandVKeyPath (vkey, vpath) {
   } else {
     const keyParts = vkey.split(/(@|\$|:)/);
     expansion = (keyParts.length === 1)
-        ? [".", [":", keyParts[0]]]
+            ? [".", [":", keyParts[0]]]
+        : keyParts.length === 3
+            ? [keyParts[1]]
         : _expandVPathStringParts(keyParts.filter(e => e));
     containerType = expansion[0];
   }
@@ -252,36 +254,31 @@ function _nestSegment (segment, initial = 1) {
   let nested;
   try {
     for (; i !== segment.length; ++i) {
-      let verbValue;
+      let paramValue;
       if (segment[i] === "$") {
-        if (segment[i + 2] === ":") {
-          nested = segment.splice(i, 4);
-          nested.splice(2, 1);
-          verbValue = nested[2];
-        } else if (segment[i + 1] === ":") {
-          nested = segment.splice(i, 3);
-          nested.shift();
-          verbValue = nested[1];
-        } else {
-          nested = segment.splice(i, 2);
-          if (nested.length === 1) nested[0] = ":";
+        validateContextTerm(segment[i + 1]);
+        if (segment[i + 2] !== ":") {
+          throw new Error(`vparam context-term must be followed by ":"`);
         }
+        nested = segment.splice(i, 4);
+        paramValue = nested[3];
+        nested.splice(2, 1);
       } else if (segment[i] === ":") {
         nested = segment.splice(i, 2);
-        verbValue = nested[1];
+        paramValue = nested[1];
       } else continue;
-      if (typeof verbValue === "string") {
-        validateParamValueText(verbValue);
-        nested[nested.length - 1] = decodeURIComponent(verbValue);
-      } else if (verbValue != null) {
-        if (Array.isArray(verbValue)) {
-          if (verbValue[0] !== "@") {
-            validateVerbType(verbValue[0]);
+      if (paramValue === undefined) throw new Error("Missing vparam vparam-value");
+      if (paramValue === "$") {
+        nested.pop();
+      } else if (typeof paramValue === "string") {
+        validateParamValueText(paramValue);
+        nested[nested.length - 1] = decodeURIComponent(paramValue);
+      } else if (paramValue != null) {
+        if (Array.isArray(paramValue)) {
+          if (paramValue[0] !== "@") {
+            validateVerbType(paramValue[0]);
           }
         }
-      }
-      if (nested[0] === "$") {
-        validateContextTerm(nested[1]);
       }
       segment.splice(i, 0, nested);
     }

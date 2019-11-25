@@ -213,14 +213,16 @@ begins with '@')`,
     "revdoc:brief": "VPath rule 'vrid' datatype",
     "rdfs:comment":
 `The class of all resources representing the VPath pseudo-rule
-'vrid' (always begins with '@')`,
+'vrid', ie. a resource identifier with VGRId as the first step (always
+begins with '@')`,
   },
   Verbs: { "@type": "valos-kernel:Class",
     "rdfs:subClassOf": "valos-raem:VPathRule",
     "revdoc:brief": "VPath rule 'verbs' datatype",
     "rdfs:comment":
 `The class of all resources representing the VPath pseudo-rule
-'verbs' (always begins with '@').`,
+'verbs', ie. a path between other resources without a VGRId as the
+first step (always begins with '@').`,
   },
   VGRId: { "@type": "valos-kernel:Class",
     "rdfs:subClassOf": "valos-raem:VPathRule",

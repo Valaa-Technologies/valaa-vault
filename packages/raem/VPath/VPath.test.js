@@ -82,16 +82,22 @@ describe("VPath", () => {
           ]],
         ],
       )).toEqual(`@$~u4:55a5c4fb-1fd4-424f-8578-7b06ffdb3ef0${""
-        }@_$~pw:@.$pot$:@.O.:7741938f-801a-4892-9cf0-dd59bd8c9166@@${""
+        }@_$~pw:@.$pot:$:@.O.:7741938f-801a-4892-9cf0-dd59bd8c9166@@${""
         }@-$pot-hypertwin:inLinks${""
-        }@*in~$pot:ownerOf:@.S*~:@$~pw:@.$pot$:@.O.:aa592f56-1d82-4484-8360-ad9b82d00592@@@@@`);
+        }@*in~$pot:ownerOf:@.S*~:@$~pw:@.$pot:$:@.O.:aa592f56-1d82-4484-8360-ad9b82d00592@@@@@`);
     });
   });
   describe("VPath parsing", () => {
     it("Expands simple VPath's", () => {
-      expect(expandVPath(["!$"]))
+      expect(() => expandVPath(["!$"]))
+          .toThrow(/Invalid context-term/);
+      expect(() => expandVPath(["!:"]))
+          .toThrow(/Missing vparam vparam-value/);
+      expect(expandVPath(["!:$"]))
           .toEqual(["@", ["!", [":"]]]);
-      expect(expandVPath(["@", ["!$"]]))
+      expect(() => expandVPath(["@", ["!$"]]))
+          .toThrow(/Invalid context-term/);
+      expect(expandVPath(["@", ["!:$"]]))
           .toEqual(["@", ["!", [":"]]]);
       expect(expandVPath(["@", ["!", [":"]]]))
           .toEqual(["@", ["!", [":"]]]);
@@ -120,9 +126,9 @@ describe("VPath", () => {
           ]]);
       expect(expandVPath(
           `@$~u4:55a5c4fb-1fd4-424f-8578-7b06ffdb3ef0${
-            ""}@_$~pw:@.$pot$:@.O.:7741938f-801a-4892-9cf0-dd59bd8c9166@@${
+            ""}@_$~pw:@.$pot:$:@.O.:7741938f-801a-4892-9cf0-dd59bd8c9166@@${
             ""}@-$pot-hypertwin:inLinks${
-            ""}@*in~$pot:ownerOf:@.S*~:@$~pw:@.$pot$:@.O.:aa592f56-1d82-4484-8360-ad9b82d00592@@@@@`
+            ""}@*in~$pot:ownerOf:@.S*~:@$~pw:@.$pot:$:@.O.:aa592f56-1d82-4484-8360-ad9b82d00592@@@@@`
       )).toEqual([
         "@",
         ["$", "~u4", "55a5c4fb-1fd4-424f-8578-7b06ffdb3ef0"],
@@ -196,13 +202,13 @@ describe("VPath", () => {
           .toEqual(["@", [".", ["$", "V", "owner"]], [".", ["$", "V", "rawId"]]]);
     });
     it("Doesn't expand spurious fields", () => {
-      expect(expandVPath(["!$"]))
+      expect(expandVPath(["!:$"]))
           .toEqual(["@", ["!", [":"]]]);
-      expect(expandVPath(["!$random"]))
+      expect(expandVPath(["!$random:$"]))
           .toEqual(["@", ["!", ["$", "random"]]]);
-      expect(expandVPath(["!$random"])[1][1].length)
+      expect(expandVPath(["!$random:$"])[1][1].length)
           .toEqual(2);
-      expect(expandVPath(["@!:scriptRoot@!$random@"]))
+      expect(expandVPath(["@!:scriptRoot@!$random:$@"]))
           .toEqual(["@", ["!", [":", "scriptRoot"]], ["!", ["$", "random"]]]);
     });
     it("Expands a non-trivial verb", () => {
@@ -220,23 +226,23 @@ describe("VPath", () => {
     it("Expands key paths", () => {
       expect(expandVKeyPath(":", "value"))
           .toEqual([":", "value"]);
-      expect(expandVKeyPath(null, ["!$"]))
+      expect(expandVKeyPath(null, ["!:$"]))
           .toEqual(["@", ["!", [":"]]]);
-      expect(expandVKeyPath(null, ["@", ["!$"]]))
+      expect(expandVKeyPath(null, ["@", ["!:$"]]))
           .toEqual(["@", ["!", [":"]]]);
       expect(expandVKeyPath(null, ["@", ["!", [":"]]]))
           .toEqual(["@", ["!", [":"]]]);
-      expect(expandVKeyPath("@", ["!$"]))
+      expect(expandVKeyPath("@", ["!:$"]))
           .toEqual(["@", ["!", [":"]]]);
-      expect(expandVKeyPath("@", ["@", ["!$"]]))
+      expect(expandVKeyPath("@", ["@", ["!:$"]]))
           .toEqual(["@", [":", ["@", ["!", [":"]]]]]);
       expect(expandVKeyPath("@", ["@", ["!", [":"]]]))
           .toEqual(["@", [":", ["@", ["!", [":"]]]]]);
-      expect(expandVKeyPath(":", ["!$"]))
+      expect(expandVKeyPath(":", ["!:$"]))
           .toEqual([":", ["@", ["!", [":"]]]]);
-      expect(expandVKeyPath(":", ["@", ["!$"]]))
+      expect(expandVKeyPath(":", ["@", ["!:$"]]))
           .toEqual([":", ["@", ["!", [":"]]]]);
-      // expect(expandVKeyPath(":", ["$"]))
+      // expect(expandVKeyPath(":", [":$"]))
       //    .toEqual([":", ["@", [":"]]]);
     });
   });

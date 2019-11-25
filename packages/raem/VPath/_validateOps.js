@@ -86,7 +86,7 @@ function validateVParam (element) {
   try {
     if (contextTerm !== undefined) {
       if (typeof contextTerm !== "string") {
-        throw new Error(`Invalid vparam: context-term must be undefined or a string`);
+        throw new Error(`Invalid vparam: expected context-term to be undefined or a string`);
       }
       if (contextTerm !== "") validateContextTerm(contextTerm);
     }

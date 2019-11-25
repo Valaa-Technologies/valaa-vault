@@ -103,7 +103,7 @@ for various valos fabric config files.`],
         "spread of a URI import followed by pick-array append",
 async () => lazyPatchRevelations(gatewayMock,
     [0], {
-      "!!!": [["$https:foobar.com/path"], ["*$",
+      "!!!": [["$https:foobar.com/path"], ["*:$",
         [".:fetchedField"],
         ["@.:fetchOptions@.:input@"],
       ]],

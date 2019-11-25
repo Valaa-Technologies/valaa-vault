@@ -52,7 +52,7 @@ describe("VPath to concrete VAKON valks", () => {
   };
 
   it("Cements simple VPaths into VAKON", () => {
-    expect(VALK.fromVPath("@!:scriptRoot@!$random@", { context: testContext }).toVAKON())
+    expect(VALK.fromVPath("@!:scriptRoot@!$random:$@", { context: testContext }).toVAKON())
         .toEqual(["§->", ["§$", "scriptRoot"], ["§!random"]]);
     expect(VALK.fromVPath("@!invoke:create:@!:body:%24V:target:name@@").toVAKON())
         .toEqual([
@@ -61,7 +61,7 @@ describe("VPath to concrete VAKON valks", () => {
         ]);
   });
   it("Rejects VPaths context terms which are undefined by the context", () => {
-    expect(() => VALK.fromVPath("@!:scriptRoot@!$thisIsBad@", { context: testContext }).toVAKON())
+    expect(() => VALK.fromVPath("@!:scriptRoot@!$thisIsBad:$@", { context: testContext }).toVAKON())
         .toThrow(/unrecognized context term 'thisIsBad'/);
   });
   it("Cements complex VPaths into VAKON", () => {

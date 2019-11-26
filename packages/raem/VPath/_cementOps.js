@@ -2,28 +2,29 @@ const { dumpObject, wrapError } = require("../../tools/wrapError");
 
 module.exports = { cementVPath };
 
-function cementVPath (vpath, { context = {}, contextState, componentType, index } = {}) {
-  return _cementVPath(vpath, context, contextState, componentType, index);
+function cementVPath (vpath, stack /* : { context: Obje, contextState, isPluralHead } */ = {}) {
+  if (!stack.context) stack.context = {};
+  return _cementVPath(stack, vpath, stack.componentType || "@", stack.index);
 }
 
-function _cementVPath (vpath, context = {}, contextState, componentType, index) {
+function _cementVPath (stack, vpath, componentType, index) {
   let expandedVPath = vpath;
   try {
     if (vpath === undefined) throw new Error("Cannot cement undefined vpath");
-    if (!componentType || (componentType === "@")) {
+    if (componentType === "@") {
       if (!Array.isArray(vpath)) return (typeof vpath === "string") ? vpath : ["§'", vpath];
       if (vpath.length === 1) return ["§->", null];
     } else if (!Array.isArray(vpath) || (vpath[0] === "@")) {
       expandedVPath = [":", vpath];
     }
     const elementType = expandedVPath[0];
-    const cement = _cementersByType[elementType];
-    if (cement) {
-      return cement(expandedVPath, context, contextState, componentType || elementType);
+    const cementer = _cementersByType[elementType];
+    if (cementer) {
+      return cementer(stack, expandedVPath, componentType);
     }
     if (elementType[0] === "!") {
       expandedVPath[0] = `§${elementType.slice(1)}`;
-      return _cementRest(expandedVPath, context, contextState, "!", 1);
+      return _cementRest(stack, expandedVPath, "!", 1);
     }
     throw new Error(`unrecognized verb type: ${JSON.stringify(elementType)}`);
   } catch (error) {
@@ -35,10 +36,9 @@ function _cementVPath (vpath, context = {}, contextState, componentType, index) 
   }
 }
 
-function _cementRest (expandedVPath, context, contextState, componentType, initial) {
+function _cementRest (stack, expandedVPath, componentType, initial) {
   for (let i = initial; i !== expandedVPath.length; ++i) {
-    expandedVPath[i] = _cementVPath(expandedVPath[i], context, contextState,
-        componentType, i);
+    expandedVPath[i] = _cementVPath(Object.create(stack), expandedVPath[i], componentType, i);
   }
   return expandedVPath;
 }
@@ -93,46 +93,51 @@ function _invalidCementHead () {
   throw new Error(`Cannot cement: invalid VPath with "" as first entry`);
 }
 
-function _cementStatements (expandedVPath, context, contextState) {
+function _cementStatements (stack, expandedVPath) {
   if (expandedVPath.length === 2) {
-    return _cementVPath(expandedVPath[1], context, contextState, "@", 1);
+    return _cementVPath(stack, expandedVPath[1], "@", 1);
   }
   const fullPath = ["§->"];
   for (let i = 1; i !== expandedVPath.length; ++i) {
     if (expandedVPath[i][0] !== ":") {
-      fullPath.push(_cementVPath(expandedVPath[i], context, contextState, "@", i));
+      fullPath.push(_cementVPath(stack, expandedVPath[i], "@", i));
     } else {
       const arrayPath = ["§[]"];
       do {
-        arrayPath.push(_maybeEscapeCement(expandedVPath[i])
-            || _cementVPath(expandedVPath[i], context, contextState, "*", i));
+        arrayPath.push(_maybeEscapedCement(expandedVPath[i])
+            || _cementVPath(stack, expandedVPath[i], "*", i));
       } while ((++i !== expandedVPath.length) && (expandedVPath[i][0] === ":"));
       fullPath.push(arrayPath);
       --i;
+      stack.isPluralHead = true;
     }
   }
   return (fullPath.length === 2) ? fullPath[1] : fullPath;
 }
 
-function _cementContextlessVParam (expandedVPath, context, contextState, componentType) {
-  return _cementVParam(["$", "", expandedVPath[1]], context, contextState,
-      (componentType === "@") ? ":" : componentType);
+function _cementContextlessVParam (stack, expandedVPath, componentType) {
+  return _cementVParam(
+      stack, ["$", "", expandedVPath[1]], (componentType === "@") ? ":" : componentType);
 }
 
-function _cementVParam (expandedVPath, context, contextState, componentType) {
+function _cementVParam (stack, expandedVPath, componentType) {
   let cemented;
   const contextTerm = expandedVPath[1];
-  const termContext = context[contextTerm];
+  const termContext = stack.context[contextTerm];
   if (!contextTerm) {
-    cemented = expandedVPath[2]
-        && _cementVPath(expandedVPath[2], context, contextState);
+    cemented = (expandedVPath[2] === undefined)
+            ? ["§void"]
+        : (componentType === ":")
+            && ((expandedVPath[2] === null) || (typeof expandedVPath[2] !== "object"))
+            ? ["§'", expandedVPath[2]]
+            : _cementVPath(stack, expandedVPath[2], "@");
     if (Array.isArray(cemented)) return cemented;
   } else if (!termContext) {
     throw new Error(`Cannot cement param: unrecognized context term '${contextTerm}'`);
     // return ["§'", expandedVPath];
   } else {
     const cementedParamValue = expandedVPath[2]
-        && _cementVPath(expandedVPath[2], context, contextState);
+        && _cementVPath(stack, expandedVPath[2], "@");
     if (typeof termContext === "function") cemented = termContext;
     if (typeof cementedParamValue === "string") {
       if (cemented === undefined) cemented = (termContext.symbolFor || {})[cementedParamValue];
@@ -140,9 +145,10 @@ function _cementVParam (expandedVPath, context, contextState, componentType) {
     }
     if ((cemented === undefined) && termContext.steps) {
       cemented = (typeof termContext.steps === "function")
-          ? termContext.steps(contextState, cementedParamValue, contextTerm)
-          : cementedParamValue !== undefined ? [...termContext.steps, cementedParamValue]
-          : [...termContext.steps];
+              ? termContext.steps(stack.contextState, cementedParamValue, contextTerm)
+          : (cementedParamValue !== undefined)
+              ? [...termContext.steps, cementedParamValue]
+              : [...termContext.steps];
     }
     if (cemented == null) {
       throw new Error(`Cannot cement param context term '${contextTerm}' value ${
@@ -152,7 +158,7 @@ function _cementVParam (expandedVPath, context, contextState, componentType) {
           cemented === null ? "explicitly disabled" : "undefined"}`);
     }
     if (typeof cemented === "function") {
-      cemented = cemented(contextState, cementedParamValue, contextTerm, componentType);
+      cemented = cemented(stack.contextState, cementedParamValue, contextTerm, componentType);
     }
     if (Array.isArray(cemented)) return cemented;
   }
@@ -169,44 +175,46 @@ function _cementVParam (expandedVPath, context, contextState, componentType) {
   }
 }
 
-function _cementComputation (expandedVPath, context, contextState) {
+function _cementComputation (stack, expandedVPath) {
   const computationType = expandedVPath[0];
-  const first = _cementVPath(expandedVPath[1], context, contextState, "!0", 1);
+  const first = _cementVPath(stack, expandedVPath[1], "!0", 1);
   if (expandedVPath.length === 2) return first;
   if (first[0] === "§$") {
     expandedVPath[0] = "§->";
     expandedVPath[1] = first;
-    return _cementRest(expandedVPath, context, contextState, "!*", 2);
+    return _cementRest(stack, expandedVPath, "!*", 2);
   }
   expandedVPath.splice(0, 2, ...first);
-  return _cementRest(expandedVPath, context, contextState, computationType, first.length);
+  return _cementRest(stack, expandedVPath, computationType, first.length);
 }
 
-function _cementQuotation (expandedVPath) {
-  expandedVPath[0] = "§'";
-  return expandedVPath;
+function _cementQuotation (stack, expandedVPath, componentType, index) {
+  expandedVPath[0] = "!";
+  return ["§'", _cementVPath(stack, expandedVPath, componentType, index)];
 }
 
-function _cementProperty (expandedVPath, context, contextState, componentType) {
+function _cementProperty (stack, expandedVPath, componentType) {
   // ref("@valos/raem/VPath#section_structured_scope_cementProperty")
-  const first = _cementVPath(expandedVPath[1], context, contextState, ".", 1);
+  const first = _cementVPath(stack, expandedVPath[1], ".", 1);
   if (expandedVPath.length <= 2) {
-    if (componentType !== "-") return ["§..", first];
+    if (componentType !== "-") {
+      const ret = Array.isArray(first) ? first : ["§..", first];
+      return ((componentType === "@") && stack.isPluralHead)
+          ? ["§map", ret] : ret;
+    }
     if (typeof first !== "string") {
       throw new Error("Cannot cement object property: non-string name not supported");
     }
-    return [
-      first,
-      ["§'", ["@", [".", [":", first]]]]];
+    return [first, ["§'", ["@", [".", [":", first]]]]];
   }
   if (componentType === "-") {
     if (expandedVPath.length > 3) {
       throw new Error("Cannot cement object property: multi-param property verbs not supported");
     }
-    return [first, _maybeEscapeCement(expandedVPath[2])
-        || _cementVPath(expandedVPath[2], context, contextState, ".", 2)];
+    return [first, _maybeEscapedCement(expandedVPath[2])
+        || _cementVPath(stack, expandedVPath[2], ".", 2)];
   }
-  const rest = _cementRest(expandedVPath, context, contextState, ".", 2);
+  const rest = _cementRest(stack, expandedVPath, ".", 2);
   const setter = [first, rest];
   if ((rest.length === 3)
       && ((rest[2] == null) || (rest[2] && rest[2][0] !== "§.<-"))) {
@@ -219,7 +227,7 @@ function _cementProperty (expandedVPath, context, contextState, componentType) {
   return ["§.<-", setter];
 }
 
-function _maybeEscapeCement (entry) {
+function _maybeEscapedCement (entry) {
   if ((entry[0] === ":") && ((entry[1] === null) || (typeof entry[1] !== "object"))) {
     return entry[1];
   }
@@ -247,21 +255,18 @@ function _flattenObjectSetters (setters) {
   }
 }
 
-function _cementNamedCollection (expandedVPath, context, contextState) {
+function _cementNamedCollection (stack, expandedVPath) {
   const collectionType = expandedVPath[0];
   const nameParam = _tryAsNameParam(expandedVPath[1]);
-  const nameSelector = (nameParam != null)
-      && _cementPluralProperty(expandedVPath, context, contextState, collectionType);
-  if (nameSelector && expandedVPath.length <= 2) return nameSelector;
-  let isSequence;
-  if (collectionType[0] === "*") isSequence = true;
-  else if (collectionType[0] !== "-") {
-    throw new Error(`Cannot cement named collection: unrecognized verb type '${
-      collectionType}' (collection verb types must begin with "-" or "*")`);
-  }
-  expandedVPath.splice(0, 2, isSequence ? "§[]" : "§{}");
+  const paramStack = Object.create(stack);
+  paramStack.isPluralHead = paramStack.isPluralHead;
+  const byNameSelector = (nameParam != null)
+      && _cementPluralProperty(stack, expandedVPath, collectionType);
+  if (byNameSelector && expandedVPath.length <= 2) return byNameSelector;
+  stack.isPluralHead = (collectionType[0] === "*");
+  expandedVPath.splice(0, 2, stack.isPluralHead ? "§[]" : "§{}");
   if (expandedVPath.length > 1) {
-    if (isSequence) _cementRest(expandedVPath, context, contextState, "*", 1);
+    if (stack.isPluralHead) _cementRest(paramStack, expandedVPath, "*", 1);
     else {
       for (let i = 1; i !== expandedVPath.length; ++i) {
         if (expandedVPath[i][0] !== "@") {
@@ -272,14 +277,16 @@ function _cementNamedCollection (expandedVPath, context, contextState) {
           throw new Error(`Cannot cement named dictionary '${
             collectionType}': each param must be a path containing a single property verb`);
         }
-        expandedVPath[i] = _cementVPath(expandedVPath[i][1], context, contextState, "-", i);
+        expandedVPath[i] = _cementVPath(paramStack, expandedVPath[i][1], "-", i);
       }
     }
   }
   // if (!isSequence) _flattenObjectSetters(cementedCollection);
-  return !nameSelector ? expandedVPath
-      : isSequence ? ["§concat", nameSelector, expandedVPath]
-      : ["§append", ["§{}"], nameSelector, expandedVPath];
+  return !byNameSelector
+          ? expandedVPath
+      : stack.isPluralHead
+          ? ["§concat", byNameSelector, expandedVPath]
+          : ["§append", ["§{}"], byNameSelector, expandedVPath];
 }
 
 function _tryAsNameParam (vparam) {
@@ -288,40 +295,42 @@ function _tryAsNameParam (vparam) {
   return vparam;
 }
 
-function _cementSingularProperty (expandedVPath) {
+function _cementSingularProperty (stack, expandedVPath) {
   // ref("@valos/raem/VPath#section_structured_object_value")
   const selector = _singularLookup[expandedVPath[0]];
   if (selector === undefined) {
     throw new Error(`Cannot cement singular '${expandedVPath[0]}': undefined property`);
   }
   if (expandedVPath.length > 1) {
-    throw new Error(`Cannot cement singular '${expandedVPath[0]}': multi-param selectors not allowed`);
+    throw new Error(
+        `Cannot cement singular '${expandedVPath[0]}': multi-param selectors not allowed`);
   }
   return selector;
 }
 
-function _cementPluralProperty (expandedVPath, context, contextState) {
+function _cementPluralProperty (stack, expandedVPath) {
   // ref("@valos/raem/VPath#section_structured_relation")
   const field = _pluralLookup[expandedVPath[0]];
   if (field === undefined) {
-    throw new Error(`Cannot cement singular '${expandedVPath[0]}': undefined property`);
+    throw new Error(`Cannot cement plural '${expandedVPath[0]}': undefined property`);
   }
   if (expandedVPath.length > 2) {
     throw new Error(`Cannot cement plural '${field}': multi-param selectors not allowed`);
   }
-  return ["§->", false, field,
-    ..._filterByFieldValue("name",
-        _cementVPath(expandedVPath[1], context, contextState)),
+  stack.isPluralHead = (expandedVPath[0][0] === "*");
+  return ["§->", false, field, false,
+    ..._filterByFieldValue("name", _cementVPath(stack, expandedVPath[1], "!")),
+    ...(stack.isPluralHead ? [] : [false, 0])
   ];
 }
 
 function _filterByFieldValue (fieldName, requiredValue) {
   return (typeof requiredValue !== "object")
       ? [
-        ["§filter", ["§===", fieldName, requiredValue]]
+        ["§filter", ["§===", ["§.", fieldName], requiredValue]]
       ]
       : [
-        ["§$<-", "requiredValue", requiredValue],
-        ["§filter", ["§===", fieldName, ["§$", "requiredValue"]]],
+        ["§$<-", ["requiredValue", requiredValue]],
+        ["§filter", ["§===", ["§.", fieldName], ["§$", "requiredValue"]]],
       ];
 }

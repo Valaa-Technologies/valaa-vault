@@ -45,14 +45,25 @@ export const ResourceType = {
   $V: $VType,
 };
 
-export function extendType (baseTypes, schema) {
-  return patchWith({}, [].concat(baseTypes || [], schema || []),
-      { patchSymbols: true, concatArrays: false });
+export function extendType (...allTypes) {
+  return patchWith({}, [].concat(...allTypes), {
+    patchSymbols: true, concatArrays: false,
+  });
 }
 
 export function namedResourceType (schemaName, baseTypes, schema) {
+  if (baseTypes === undefined) throw new Error("namedResourceType baseTypes missing");
+  const nonObjectBaseIndex = Array.isArray(baseTypes)
+          ? baseTypes.findIndex(v => (typeof v !== "object"))
+      : (typeof baseTypes !== "object") ? 0
+      : -1;
+  if (nonObjectBaseIndex !== -1) {
+    throw new Error(`namedResourceType baseType #${nonObjectBaseIndex} is not an object`);
+  }
   const ret = extendType(
-      [].concat(baseTypes || [], { [ObjectSchema]: { schemaName }, $V: $VType }),
+      { $V: $VType },
+      baseTypes,
+      { [ObjectSchema]: { schemaName } },
       schema);
   return ret;
 }
@@ -132,6 +143,7 @@ function _createRelationTypeTo (targetType, relationNameOrProjection, {
     [ObjectSchema]: objectSchema = {},
     ...relationProperties
 } = {}) {
+  if (!targetType) throw new Error("targetType missing");
   const reflection = expandVPath((typeof relationNameOrProjection === "string")
       ? ["*out", [":", relationNameOrProjection]]
       : relationNameOrProjection
@@ -184,9 +196,6 @@ export function exportSchemaOf (aType) {
   }
   if (ret.valospace) {
     ret.valospace = { ...ret.valospace };
-    if (ret.valospace.targetType) {
-      ret.valospace.targetType = schemaRefOf(ret.valospace.targetType);
-    }
     if (ret.valospace.reflection) {
       ret.valospace.reflection = expandVPath(ret.valospace.reflection).slice(1);
     }
@@ -195,6 +204,12 @@ export function exportSchemaOf (aType) {
         ...ret.valospace.gate,
         projection: expandVPath(ret.valospace.gate.projection).slice(1),
       };
+    }
+    if (ret.valospace.targetType) {
+      const gateName = (((ret.valospace.targetType[ObjectSchema] || {}).valospace || {}).gate || {})
+          .name;
+      if (gateName) (ret.valospace.gate || (ret.valospace.gate = {})).name = gateName;
+      ret.valospace.targetType = trySchemaNameOf(ret.valospace.targetType);
     }
   }
   return ret;

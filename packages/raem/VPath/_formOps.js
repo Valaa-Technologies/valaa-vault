@@ -55,8 +55,7 @@ function formVerb (verbType, ...params /* : (string | ["$", string, ?string])[] 
   return `${verbType}${params.map(formParam).join("")}`;
 }
 
-function formParam (paramElement /* : (string | ["$", string, ?string]) */, index, params) {
-  let ret;
+function formParam (paramElement /* : (string | ["$", string, ?string]) */, index) {
   if ((typeof paramElement === "string") || (paramElement[0] === "@")) {
     return `:${formParamValue(paramElement)}`;
   }

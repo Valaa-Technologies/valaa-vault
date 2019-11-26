@@ -45,13 +45,15 @@ export function listingGETRoute (url, userConfig, globalRules, resourceType) {
     if (!resourceType || (typeof resourceType !== "object")) {
       throw new Error(`resourceType missing or invalid for ${_routeName(route)}`);
     }
-    _setupRoute(route, userConfig, globalRules, resourceType);
-    route.schema = {
+    if (!_setupRoute(route, userConfig, globalRules, resourceType)) {
+      return undefined;
+    }
+    Object.assign(route.schema, {
       description: `List all listable ${route.config.resource.name} resources`,
       querystring: {
         ..._genericGETResourceQueryStringSchema(resourceType),
         ..._resourceSequenceQueryStringSchema(resourceType),
-        ...(route.querystring || {}),
+        ...(route.schema.querystring || {}),
       },
       response: {
         200: {
@@ -59,7 +61,7 @@ export function listingGETRoute (url, userConfig, globalRules, resourceType) {
           items: route.config.resource.schema,
         },
       },
-    };
+    });
     return route;
   } catch (error) {
     throw wrapError(error, new Error(`listingGETRoute(${_routeName(route)})`),
@@ -76,16 +78,17 @@ export function resourcePOSTRoute (url, userConfig, globalRules, resourceType) {
     if (!resourceType || (typeof resourceType !== "object")) {
       throw new Error(`resourceType missing or invalid for ${_routeName(route)}`);
     }
-    _setupRoute(route, userConfig, globalRules, resourceType);
-    route.schema = {
+    if (!_setupRoute(route, userConfig, globalRules, resourceType)) {
+      return undefined;
+    }
+    Object.assign(route.schema, {
       description: `Create a new ${route.config.resource.name} resource`,
-      querystring: route.querystring ? { ...route.querystring } : undefined,
       body: route.config.resource.schema,
       response: {
         200: route.config.resource.schema,
         403: { type: "string" },
       },
-    };
+    });
     return route;
   } catch (error) {
     throw wrapError(error, new Error(`resourcePOSTRoute(${_routeName(route)})`),
@@ -102,18 +105,20 @@ export function resourceGETRoute (url, userConfig, globalRules, resourceType) {
     if (!resourceType || (typeof resourceType !== "object")) {
       throw new Error(`resourceType missing or invalid for ${_routeName(route)}`);
     }
-    _setupRoute(route, userConfig, globalRules, resourceType);
-    route.schema = {
+    if (!_setupRoute(route, userConfig, globalRules, resourceType)) {
+      return undefined;
+    }
+    Object.assign(route.schema, {
       description: `Get the contents of a ${route.config.resource.name} route resource`,
       querystring: {
         ..._genericGETResourceQueryStringSchema(resourceType),
-        ...(route.querystring || {}),
+        ...(route.schema.querystring || {}),
       },
       response: {
         200: route.config.resource.schema,
         404: { type: "string" },
       },
-    };
+    });
     return route;
   } catch (error) {
     throw wrapError(error, new Error(`resourceGETRoute(${_routeName(route)})`),
@@ -130,17 +135,18 @@ export function resourcePATCHRoute (url, userConfig, globalRules, resourceType) 
     if (!resourceType || (typeof resourceType !== "object")) {
       throw new Error(`resourceType missing or invalid for ${_routeName(route)}`);
     }
-    _setupRoute(route, userConfig, globalRules, resourceType);
-    route.schema = {
+    if (!_setupRoute(route, userConfig, globalRules, resourceType)) {
+      return undefined;
+    }
+    Object.assign(route.schema, {
       description: `Update parts of a ${route.config.resource.name} route resource`,
-      querystring: route.config.querystring ? { ...route.config.querystring } : undefined,
       body: route.config.resource.schema,
       response: {
         200: { type: "string" },
         403: { type: "string" },
         404: { type: "string" },
       },
-    };
+    });
     return route;
   } catch (error) {
     throw wrapError(error, new Error(`resourcePATCHRoute(${_routeName(route)})`),
@@ -157,16 +163,17 @@ export function resourceDELETERoute (url, userConfig, globalRules, resourceType)
     if (!resourceType || (typeof resourceType !== "object")) {
       throw new Error(`resourceType missing or invalid for ${_routeName(route)}`);
     }
-    _setupRoute(route, userConfig, globalRules, resourceType);
-    route.schema = {
+    if (!_setupRoute(route, userConfig, globalRules, resourceType)) {
+      return undefined;
+    }
+    Object.assign(route.schema, {
       description: `Destroy a ${route.config.resource.name} route resource`,
-      querystring: route.config.querystring ? { ...route.config.querystring } : undefined,
       response: {
         200: { type: "string" },
         403: { type: "string" },
         404: { type: "string" },
       },
-    };
+    });
     return route;
   } catch (error) {
     throw wrapError(error, new Error(`resourceDELETERoute(${_routeName(route)})`),
@@ -186,20 +193,22 @@ export function relationsGETRoute (url, userConfig, globalRules, resourceType, r
     if (!relationField || (typeof relationField !== "object")) {
       throw new Error(`relationField missing or invalid for ${_routeName(route)}`);
     }
-    _setupRoute(route, userConfig, globalRules, resourceType, relationField);
-    route.schema = {
+    if (!_setupRoute(route, userConfig, globalRules, resourceType, relationField)) {
+      return undefined;
+    }
+    Object.assign(route.schema, {
       description: `List all '${route.config.relation.name}' relations from the source ${
         route.config.resource.name} route resource to all target ${
         route.config.target.name} resources`,
       querystring: {
         ..._genericGETResourceQueryStringSchema(relationField),
         ..._resourceSequenceQueryStringSchema(relationField),
-        ...(route.config.querystring || {}),
+        ...(route.schema.querystring || {}),
       },
       response: {
         200: route.config.relation.schema,
       },
-    };
+    });
     return route;
   } catch (error) {
     throw wrapError(error, new Error(`relationsGETRoute(${_routeName(route)})`),
@@ -231,11 +240,13 @@ export function mappingPOSTRoute (url, userConfig, globalRules, resourceType, re
     if (!relationField || (typeof relationField !== "object")) {
       throw new Error(`relationField missing or invalid for ${_routeName(route)}`);
     }
-    _setupRoute(route, userConfig, globalRules, resourceType, relationField);
+    if (!_setupRoute(route, userConfig, globalRules, resourceType, relationField)) {
+      return undefined;
+    }
 
     const target = relationField.$V[ObjectSchema].valospace.targetType;
 
-    route.schema = {
+    Object.assign(route.schema, {
       description:
 `Create a new ${route.config.target.name} resource
 *using **body.$V.target** as content* and then a new '${route.config.relation.name}'
@@ -244,7 +255,6 @@ resource. The remaining fields of the body are set as the mapping
 content. Similarily the response will contain the newly created target
 resource content in *response.$V.target* with the rest of the response
 containing the mapping.`,
-      querystring: route.config.querystring ? { ...route.config.querystring } : undefined,
       body: schemaRefOf(getBaseRelationTypeOf(relationField, {
         $V: [null, { target }]
       })),
@@ -254,7 +264,7 @@ containing the mapping.`,
         })),
         403: { type: "string" },
       },
-    };
+    });
     return route;
   } catch (error) {
     throw wrapError(error, new Error(`mappingPOSTRoute(${_routeName(route)})`),
@@ -279,24 +289,26 @@ export function mappingGETRoute (url, userConfig, globalRules, resourceType, rel
     if (!relationField || (typeof relationField !== "object")) {
       throw new Error(`relationField missing or invalid for ${_routeName(route)}`);
     }
-    _setupRoute(route, userConfig, globalRules, resourceType, relationField);
+    if (!_setupRoute(route, userConfig, globalRules, resourceType, relationField)) {
+      return undefined;
+    }
 
     const BaseRelationType = getBaseRelationTypeOf(relationField);
 
-    route.schema = {
+    Object.assign(route.schema, {
       description:
 `Get the contents of a '${route.config.relation.name}' relation from the
 source ${route.config.resource.name} route resource to the target ${
 route.config.target.name} route resource`,
       querystring: {
         ..._genericGETResourceQueryStringSchema(BaseRelationType),
-        ...(route.config.querystring || {}),
+        ...(route.schema.querystring || {}),
       },
       response: {
         200: schemaRefOf(BaseRelationType),
         404: { type: "string" },
       },
-    };
+    });
     return route;
   } catch (error) {
     throw wrapError(error, new Error(`mappingGETRoute(${_routeName(route)})`),
@@ -321,17 +333,18 @@ export function mappingPATCHRoute (url, userConfig, globalRules, resourceType, r
     if (!relationField || (typeof relationField !== "object")) {
       throw new Error(`relationField missing or invalid for ${_routeName(route)}`);
     }
-    _setupRoute(route, userConfig, globalRules, resourceType, relationField);
+    if (!_setupRoute(route, userConfig, globalRules, resourceType, relationField)) {
+      return undefined;
+    }
 
     route.config.relation.schema = schemaRefOf(extendType(relationField, {
       $V: { id: [null, IdValOSType] },
     }));
 
-    route.schema = {
+    Object.assign(route.schema, {
       description: `Update the contents of a '${route.config.relation.name
         }' mapping from the source ${route.config.resource.name
         } route resource to the target ${route.config.target.name} route resource`,
-      querystring: route.config.querystring ? { ...route.config.querystring } : undefined,
       body: schemaRefOf(getBaseRelationTypeOf(relationField)),
       response: {
         200: { type: "string" },
@@ -339,7 +352,7 @@ export function mappingPATCHRoute (url, userConfig, globalRules, resourceType, r
         403: { type: "string" },
         404: { type: "string" },
       },
-    };
+    });
     return route;
   } catch (error) {
     throw wrapError(error, new Error(`mappingPATCHRoute(${_routeName(route)})`),
@@ -364,18 +377,19 @@ export function mappingDELETERoute (url, userConfig, globalRules, resourceType, 
     if (!relationField || (typeof relationField !== "object")) {
       throw new Error(`relationField missing or invalid for ${_routeName(route)}`);
     }
-    _setupRoute(route, userConfig, globalRules, resourceType, relationField);
-    route.schema = {
+    if (!_setupRoute(route, userConfig, globalRules, resourceType, relationField)) {
+      return undefined;
+    }
+    Object.assign(route.schema, {
       description: `Delete a '${route.config.relation.name}' mapping from the source ${
         route.config.resource.name} route resource to the target ${
         route.config.target.name} route resource.`,
-      querystring: route.config.querystring ? { ...route.config.querystring } : undefined,
       response: {
         200: { type: "string" },
         403: { type: "string" },
         404: { type: "string" },
       },
-    };
+    });
     return route;
   } catch (error) {
     throw wrapError(error, new Error(`mappingDELETERoute(${_routeName(route)})`),
@@ -404,8 +418,10 @@ export function sessionGETRoute (url, userConfig, globalRules) {
     },
   } };
   try {
-    _setupRoute(route, userConfig, globalRules);
-    route.schema = {
+    if (!_setupRoute(route, userConfig, globalRules)) {
+      return undefined;
+    }
+    Object.assign(route.schema, {
       description: `Get a session redirection via a ValOS OpenId Connect authorization response`,
       querystring: {
         code: { ...XWWWFormURLEncodedStringType },
@@ -418,13 +434,13 @@ export function sessionGETRoute (url, userConfig, globalRules) {
         // Values for the "error_uri" parameter MUST conform to the
         // URI-reference syntax and thus MUST NOT include characters
         // outside the set %x21 / %x23-5B / %x5D-7E.
-        ...(route.config.querystring || {}),
+        ...(route.schema.querystring || {}),
       },
       response: {
         302: StringType,
         404: { type: "string" },
       },
-    };
+    });
     return route;
   } catch (error) {
     throw wrapError(error, new Error(`sessionGETRoute(${_routeName(route)})`),
@@ -441,17 +457,18 @@ export function sessionDELETERoute (url, userConfig, globalRules) {
     },
   } };
   try {
-    _setupRoute(route, userConfig, globalRules);
-    route.schema = {
+    if (!_setupRoute(route, userConfig, globalRules)) {
+      return undefined;
+    }
+    Object.assign(route.schema, {
       description: `Close an active session specified by the client${
         ""} and session token cookies and also clear those cookies.`,
-      querystring: route.config.querystring ? { ...route.config.querystring } : undefined,
       response: {
         303: StringType,
         400: { type: "string" },
         404: { type: "string" },
       },
-    };
+    });
     return route;
   } catch (error) {
     throw wrapError(error, new Error(`sessionDELETERoute(${_routeName(route)})`),
@@ -469,12 +486,12 @@ function _setupRoute (route, userConfig, globalRules, resourceType, relationFiel
         route.category}' for ${_routeName(route)}`);
   }
   const { requiredRules } = handler();
+  if (!route.schema) route.schema = {};
   if (!route.config) route.config = {};
   if (!route.config.rules) route.config.rules = {};
   (route.config.requiredRules || (route.config.requiredRules = [])).push(...requiredRules);
 
   route.config = patchWith(route.config, userConfig);
-
   if (resourceType) {
     const name = trySchemaNameOf(resourceType) || "<resource>";
     const valospace = resourceType[ObjectSchema].valospace || {};
@@ -517,14 +534,20 @@ function _setupRoute (route, userConfig, globalRules, resourceType, relationFiel
   }
 
   assignRulesFrom(globalRules, route, route.config.rules);
+  for (const ruleName of (route.config.enabledWithRules || [])) {
+    if (route.config.rules[ruleName] === undefined) return undefined;
+  }
   for (const [key, rule] of Object.entries(route.config.rules)) {
     route.config.rules[key] = expandVKeyPath("@", rule).slice(1);
   }
-  route.config.requiredRules.forEach(ruleName => {
+  for (const ruleName of (route.config.requiredRules || [])) {
     if (route.config.rules[ruleName] === undefined) {
+      console.log("route.config.rules:", JSON.stringify(route.config.rules, null, 2));
       throw new Error(`Required route rule '${ruleName}' missing for ${_routeName(route)}`);
     }
-  });
+  }
+
+  if (route.config.querystring) route.schema.querystring = route.config.querystring;
 
   return route;
 }

@@ -14,10 +14,8 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       this.runtime = router.createProjectorRuntime(this);
 
       this.toSuccessBodyFields = ["§->"];
-      const fromEntry = router.appendGateSteps(
-          this.runtime, route.config.resource.gate, this.toSuccessBodyFields);
-      router.appendSchemaSteps(this.runtime, route.schema.response[200],
-          { expandProperties: true, targetVAKON: fromEntry });
+      router.appendGateProjectionSteps(
+          this.runtime, route.config.resource, this.toSuccessBodyFields);
     },
 
     async preload () {
@@ -30,12 +28,8 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       if (_presolveRouteRequest(router, route, this.runtime, valkOptions)) {
         return true;
       }
-      router.infoEvent(1, () => [
-        `${this.name}:`,
+      router.infoEvent(1, () => [`${this.name}:`,
         "\n\trequest.query:", ...dumpObject(request.query),
-        "\n\troute.config:", ...dumpObject(route.config),
-        "\n\troute.schema.response[200]:", ...dumpObject(route.schema.response[200]),
-        "\n\ttoSuccessBodyFields:", ...dumpObject(this.toSuccessBodyFields),
       ]);
       const {
         filter, // unimplemented
@@ -47,6 +41,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       } = request.query;
       return thenChainEagerly(scope.routeRoot, [
         vRouteRoot => vRouteRoot.get(this.toSuccessBodyFields, valkOptions),
+        (results => results.filter(e => e)),
         (filter || ids || Object.keys(fieldRequirements).length)
             && (results => router.filterResults(results, filter, ids, fieldRequirements)),
         (sort)
@@ -54,7 +49,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         (offset || (limit !== undefined))
             && (results => router.paginateResults(results, offset || 0, limit)),
         (fields)
-            && (results => router.pickResultFields(results, fields, route.schema.response[200])),
+            && (results => router.pickResultFields(results, fields, route.config.resource)),
         results => JSON.stringify(results, null, 2),
         results => {
           router.infoEvent(2, () => [

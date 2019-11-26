@@ -4,16 +4,10 @@ import path from "path";
 
 import { dumpObject } from "~/tools/wrapError";
 
-export function _appendSchemaSteps (router, runtime, jsonSchema, targetVAKON, innerReflectionVAKON,
-    expandProperties, isValOSFields) {
-  let innerTargetVAKON = innerReflectionVAKON;
+export function _appendSchemaSteps (
+    router, runtime, jsonSchema, targetVAKON, expandProperties, isValOSFields) {
   if (jsonSchema.type === "array") {
-    if (!innerTargetVAKON) {
-      innerTargetVAKON = ["§map"];
-      targetVAKON.push(innerTargetVAKON);
-    }
-    router.appendSchemaSteps(runtime, jsonSchema.items,
-        { expandProperties, targetVAKON: innerTargetVAKON });
+    router.appendSchemaSteps(runtime, jsonSchema.items, { expandProperties, targetVAKON });
   } else if ((jsonSchema.type === "object") && expandProperties) {
     const objectKuery = {};
     Object.entries(jsonSchema.properties).forEach(([key, valueSchema]) => {
@@ -22,9 +16,10 @@ export function _appendSchemaSteps (router, runtime, jsonSchema, targetVAKON, in
       if (isValOSFields && (reflectionVPath === undefined)) {
         if (key === "href") {
           if (!((jsonSchema.valospace || {}).gate || {}).name) {
-            router.errorEvent(`Trying to generate a href to a resource without valospace.gate.name:`,
+            router.errorEvent(
+                `Trying to generate a href to a resource without valospace.gate.name:`,
                 "\n\troute:", runtime.name,
-                "\n\tjsonSchema:", ...dumpObject(jsonSchema),
+                "\n\tjsonSchema:", ...dumpObject(jsonSchema, { nest: true }),
                 "\n\tSKIPPING FIELD");
             return;
           }
@@ -45,9 +40,8 @@ export function _appendSchemaSteps (router, runtime, jsonSchema, targetVAKON, in
       }
       objectKuery[key] = op;
     });
-    (innerTargetVAKON || targetVAKON).push(objectKuery);
+    targetVAKON.push(objectKuery);
   }
-  return targetVAKON;
 }
 
 export function _getResourceHRefPrefix (router, jsonSchema) {
@@ -59,7 +53,7 @@ export function _getResourceHRefPrefix (router, jsonSchema) {
 }
 
 export function _derefSchema (router, schemaOrSchemaName) {
-  if (typeof maybeSchemaName !== "string") return schemaOrSchemaName;
+  if (typeof schemaOrSchemaName !== "string") return schemaOrSchemaName;
   if (schemaOrSchemaName[(schemaOrSchemaName.length || 1) - 1] !== "#") {
     throw new Error(`Invalid shared schema name: "${schemaOrSchemaName}" is missing '#'-suffix`);
   }

@@ -203,15 +203,19 @@ export default class MapperService extends FabricEventTarget {
   // Build ops
 
   appendSchemaSteps (runtime, maybeJSONSchema,
-      { expandProperties, isValOSFields, targetVAKON = ["§->"] } = {}) {
+      { expandProperties, isValOSFields, targetVAKON = ["§->"], entryTargetVAKON } = {}) {
     let schema, innerTargetVAKON;
-    if (!maybeJSONSchema) return targetVAKON;
+    if (!maybeJSONSchema) return targetVAKON || entryTargetVAKON;
     try {
       schema = this.derefSchema(maybeJSONSchema);
-      innerTargetVAKON = this.appendVPathSteps(
-          runtime, (schema.valospace || {}).reflection, targetVAKON);
-      return _appendSchemaSteps(this, runtime, schema, targetVAKON,
-          innerTargetVAKON, expandProperties, isValOSFields);
+      innerTargetVAKON = entryTargetVAKON
+          || this.appendVPathSteps(runtime, (schema.valospace || {}).reflection, targetVAKON);
+      if (!innerTargetVAKON) {
+        if (schema.type !== "array") innerTargetVAKON = targetVAKON;
+        else targetVAKON.push((innerTargetVAKON = ["§map"]));
+      }
+      _appendSchemaSteps(this, runtime, schema, innerTargetVAKON, expandProperties, isValOSFields);
+      return targetVAKON;
     } catch (error) {
       throw this.wrapErrorEvent(error, new Error("appendSchemaSteps"),
           "\n\truntime:", ...dumpObject(runtime),
@@ -223,43 +227,51 @@ export default class MapperService extends FabricEventTarget {
   }
 
   appendVPathSteps (runtime, vpath, targetVAKON = ["§->"]) {
-    let vpathVAKON, maybeInnerMapVAKON;
+    let vpathVAKON, maybeInnerPluralMapVAKON;
     try {
       if (vpath === undefined) return undefined;
       if (!vpath) return targetVAKON;
       vpathVAKON = _vakonpileVPath(vpath, runtime);
       targetVAKON.push(vpathVAKON);
-      maybeInnerMapVAKON = vpathVAKON[vpathVAKON.length - 1];
-      return maybeInnerMapVAKON[0] === "§map"
-          ? maybeInnerMapVAKON
-          : targetVAKON;
+      if (Array.isArray(vpathVAKON)) {
+        maybeInnerPluralMapVAKON = vpathVAKON[vpathVAKON.length - 1];
+        if (maybeInnerPluralMapVAKON[0] === "§map") return maybeInnerPluralMapVAKON;
+      }
+      return targetVAKON;
     } catch (error) {
       throw this.wrapErrorEvent(error, new Error("appendSchemaSteps"),
           "\n\truntime:", ...dumpObject(runtime),
           "\n\tvpath:", ...dumpObject(vpath),
           "\n\ttargetVAKON:", ...dumpObject(targetVAKON),
           "\n\tvpathVAKON:", ...dumpObject(runtime),
-          "\n\tmaybeInnerMapVAKON:", ...dumpObject(maybeInnerMapVAKON));
+          "\n\tmaybeInnerPluralMapVAKON:", ...dumpObject(maybeInnerPluralMapVAKON));
     }
   }
 
-  appendGateSteps (runtime, gate, targetVAKON = ["§->"]) {
-    let projectionVAKON;
+  appendGateProjectionSteps (runtime, resource, targetVAKON = ["§->"]) {
+    const gate = resource.gate;
+    let entryTargetVAKON;
     try {
-      if (gate.projection === undefined) throw new Error("Gate is missing projection");
-      projectionVAKON = _vakonpileVPath(gate.projection, runtime);
-      targetVAKON.push(projectionVAKON);
-      if (gate.filterCondition) {
-        const filter = ["§filter"];
-        this.appendVPathSteps(runtime, gate.filterCondition, filter);
-        targetVAKON.push(filter);
+      if (!gate || (gate.projection === undefined)) {
+        throw new Error(`Resource ${resource.name} gate or projection missing`);
       }
+      entryTargetVAKON = this.appendVPathSteps(runtime, gate.projection, targetVAKON);
+      this.appendSchemaSteps(runtime, resource.schema, { targetVAKON: entryTargetVAKON });
+      if (gate.filterCondition) {
+        const filter = ["§?"];
+        this.appendVPathSteps(runtime, gate.filterCondition, filter);
+        filter.push(null);
+        entryTargetVAKON.push(filter, false);
+      }
+      this.appendSchemaSteps(runtime, resource.schema,
+            { entryTargetVAKON, expandProperties: true });
+      return entryTargetVAKON;
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error(`appendGateSteps(${gate.name})`),
+      throw this.wrapErrorEvent(error, new Error(`appendGateProjectionSteps(${gate.name})`),
           "\n\truntime:", ...dumpObject(runtime),
           "\n\tgate:", ...dumpObject(gate),
           "\n\ttargetVAKON:", ...dumpObject(targetVAKON),
-          "\n\tprojectionVAKON:", ...dumpObject(projectionVAKON));
+          "\n\tentryTargetVAKON:", ...dumpObject(entryTargetVAKON));
     }
   }
 

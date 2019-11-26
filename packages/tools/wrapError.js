@@ -24,10 +24,10 @@ module.exports = {
 // getting out of hand. They should be streamlined.
 
 // returns an spreadable array with different views to the value.
-function dumpObject (value) {
+function dumpObject (value, { nest, alwaysStringify } = {}) {
   const ret = [];
   if ((value != null) && (typeof value.debugId === "function")) ret.push(`'${value.debugId()}'`);
-  ret.push(debugObject(value));
+  ret.push(debugObjectNest(value, nest, alwaysStringify));
   return ret;
 }
 
@@ -296,7 +296,9 @@ function debugObjectNest (head, nest = 1, alwaysStringify = false,
         || `{ ${Object.keys(head).map(key => {
               const desc = Object.getOwnPropertyDescriptor(head, key);
               return `${isSymbol(key) ? key.toString() : key}: ${
-                debugObjectNest(desc.get || desc.value, nest - 1, alwaysStringify, cache)
+                debugObjectNest(desc.get || desc.value,
+                    (typeof nest !== "number") ? nest : nest - 1,
+                    alwaysStringify, cache)
               }`;
             }).join(", ")} }`);
   } catch (error) {

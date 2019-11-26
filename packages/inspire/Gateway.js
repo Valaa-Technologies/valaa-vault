@@ -678,7 +678,6 @@ export default class Gateway extends FabricEventTarget {
         ]),
         error => this.outputErrorEvent(error,
             `Exception caught during notify '${notifyMethodName}' to spindle ${spindle.name}`));
-
   }
 
   async _narratePrologues (prologueRevelation: Object) {

@@ -15,7 +15,7 @@ const {
 } = require("./routes");
 
 const {
-  createTestTagType, TestTagType, createTestThingType, TestThingType,
+  createTestTagType, TestTagType, createTestThingType, TestThingType, createTestNewsItemType,
 } = require("../test/test-types");
 
 const title = "REST API Schema Builder TestDoc";
@@ -189,7 +189,9 @@ inside out to get the appropriate JSON schema layout.`
 () => exportSchemaOf({
   [ObjectSchema]: {
     description: "simple object type",
-    valospace: { reflection: [".:forwardedFields"] },
+    valospace: {
+      reflection: [".:forwardedFields"],
+    },
   },
   name: StringType,
 }),
@@ -197,7 +199,9 @@ inside out to get the appropriate JSON schema layout.`
 () => ({
   description: "simple object type",
   type: "object",
-  valospace: { reflection: [[".", [":", "forwardedFields"]]] },
+  valospace: {
+    reflection: [[".", [":", "forwardedFields"]]],
+  },
   properties: { name: { type: "string" } },
 })),
     "chapter#extending_schemas>1;Extending schemas": {
@@ -216,7 +220,9 @@ type => exportSchemaOf(type),
           "toEqual",
 () => ({
   type: "string",
-  valospace: { reflection: [[".", ["$", "V", "name"]]] },
+  valospace: {
+    reflection: [[".", ["$", "V", "name"]]],
+  },
 })),
     },
     "chapter#resource_type_schemas>2;Shared resource type schemas": {
@@ -247,12 +253,11 @@ which contains the resource 'id' field.`,
     },
   },
   properties: {
-    $V: {
-      type: "object",
+    $V: { type: "object",
+      valospace: {},
       properties: {
-        id: {
+        id: { type: "string",
           pattern: "^[a-zA-Z0-9\\-_.~]+$",
-          type: "string",
           valospace: { reflection: [[".", ["$", "V", "rawId"]]] }
         },
       },
@@ -304,14 +309,12 @@ type => exportSchemaOf(type),
     mappingName: "tags",
     reflection: [["out*", [":", "TAGS"]]],
   },
-  items: {
-    type: "object",
+  items: { type: "object",
     properties: {
       highlight: { type: "boolean" },
-      $V: {
-        type: "object",
-        properties: { href: { type: "string" }, rel: { type: "string" } },
-        valospace: { targetType: "TestTag#" }
+      $V: { type: "object",
+        valospace: { targetType: "TestTag", gate: { name: "tags" } },
+        properties: { href: { type: "string" }, rel: { type: "string" } }
       },
     },
   },
@@ -336,49 +339,41 @@ type => exportSchemaOf(type),
     reflection: [[".", [":", "fields"]]],
   },
   properties: {
-    $V: {
-      type: "object",
+    $V: { type: "object",
+      valospace: {},
       properties: {
-        id: {
-          type: "string", pattern: "^[a-zA-Z0-9\\-_.~]+$",
+        id: { type: "string",
+          pattern: "^[a-zA-Z0-9\\-_.~]+$",
           valospace: { reflection: [
             [".", ["$", "V", "owner"]], [".", ["$", "V", "rawId"]],
           ], },
         },
       },
     },
-    contact: {
+    contact: { type: "object", properties: {
       email: { type: "string" },
       facebook: { type: "string" },
       linkedin: { type: "string" },
       phone: { type: "string" },
       website: { type: "string" }
-    },
+    }, },
     description: { type: "string" },
     icon: { type: "string" },
-    image: {
-      type: "string",
+    image: { type: "string",
       valospace: { reflection: [[".", ["$", "V", "name"]]] },
     },
     name: { type: "string" },
-    tags: {
-      type: "array",
+    tags: { type: "array",
       valospace: {
         mappingName: "tags",
-        reflection: [
-          [".", [":", "tags"]], ["out*", [":", "TAG"]]
-        ],
+        reflection: [[".", [":", "tags"]], ["out*", [":", "TAG"]]],
       },
-      items: {
-        type: "object",
+      items: { type: "object",
         valospace: { filterable: true },
         properties: {
-          $V: {
-            type: "object",
-            valospace: { targetType: "TestTag#" },
-            properties: {
-              href: { type: "string" }, rel: { type: "string" },
-            },
+          $V: { type: "object",
+            valospace: { targetType: "TestTag", gate: { name: "tags" } },
+            properties: { href: { type: "string" }, rel: { type: "string" } },
           },
           highlight: { type: "boolean" },
         },
@@ -441,10 +436,11 @@ TestThingType gate projection.`
   url: "/things/:resourceId",
   schema: {
     description: "Get the contents of a TestThing route resource",
-    querystring: { fields: {
-      type: "string",
-      pattern: "^([a-zA-Z0-9\\-_.~/*$]*(\\,([a-zA-Z0-9\\-_.~/*$])*)*)?$"
-    }, },
+    querystring: {
+      fields: { type: "string",
+        pattern: "^([a-zA-Z0-9\\-_.~/*$]*(\\,([a-zA-Z0-9\\-_.~/*$])*)*)?$"
+      },
+    },
     response: {
       200: "TestThing#",
       404: { type: "string" }
@@ -501,32 +497,23 @@ resource. The remaining fields of the body are set as the mapping
 content. Similarily the response will contain the newly created target
 resource content in *response.$V.target* with the rest of the response
 containing the mapping.`,
-    body: {
-      type: "object",
+    body: { type: "object",
       valospace: { filterable: true },
       properties: {
-        $V: {
-          type: "object",
-          valospace: { targetType: "TestTag#" },
-          properties: {
-            href: { type: "string" }, rel: { type: "string" },
-          },
+        $V: { type: "object",
+          valospace: { targetType: "TestTag", gate: { name: "tags" } },
+          properties: { href: { type: "string" }, rel: { type: "string" } },
         },
         highlight: { type: "boolean" },
       },
     },
-    querystring: undefined,
     response: {
-      200: {
-        type: "object",
+      200: { type: "object",
         valospace: { filterable: true },
         properties: {
-          $V: {
-            type: "object",
-            valospace: { targetType: "TestTag#" },
-            properties: {
-              href: { type: "string" },
-              rel: { type: "string" },
+          $V: { type: "object",
+            valospace: { targetType: "TestTag", gate: { name: "tags" } },
+            properties: { href: { type: "string" }, rel: { type: "string" },
               target: "TestTag#",
             },
           },
@@ -547,22 +534,17 @@ containing the mapping.`,
     },
     relation: {
       name: "tags",
-      schema: {
-        type: "array",
+      schema: { type: "array",
         valospace: {
           mappingName: "tags",
           reflection: [[".", [":", "tags"]], ["out*", [":", "TAG"]]]
         },
-        items: {
-          type: "object",
+        items: { type: "object",
           valospace: { filterable: true },
           properties: {
-            $V: {
-              type: "object",
-              valospace: { targetType: "TestTag#" },
-              properties: {
-                href: { type: "string" }, rel: { type: "string" },
-              },
+            $V: { type: "object",
+              valospace: { targetType: "TestTag", gate: { name: "tags" } },
+              properties: { href: { type: "string" }, rel: { type: "string" } },
             },
             highlight: { type: "boolean" }
           },
@@ -613,6 +595,80 @@ in type and property \`valospace.reflection\` fields.`
       ],
       "example#example_projections_common>0;Data common to all projections examples":
           blockquote(c(extractExampleText(createExampleData))),
+      "example#example_extended_resource_type>1": itExpects(
+            "expanded schema of an extended resource type",
+            [createTestNewsItemType, type => exportSchemaOf(type)],
+            "toEqual",
+  () => ({
+    schemaName: "TestNewsItem",
+    type: "object",
+    description: "Test News Item resource",
+    valospace: {
+      gate: {
+        name: "news",
+        projection: [["out*", [":", "NEWSITEM"]], [".", ["$", "V", "target"]]],
+        filterCondition: [".:visible"],
+      },
+      reflection: [[".", [":", "fields"]]],
+    },
+    properties: {
+      $V: { type: "object",
+        valospace: {},
+        properties: {
+          id: { type: "string",
+            pattern: "^[a-zA-Z0-9\\-_.~]+$",
+            valospace: { reflection: [
+              [".", ["$", "V", "owner"]], [".", ["$", "V", "rawId"]],
+            ], },
+          },
+        },
+      },
+      contact: { type: "object", properties: {
+        email: { type: "string" },
+        facebook: { type: "string" },
+        linkedin: { type: "string" },
+        phone: { type: "string" },
+        website: { type: "string" }
+      }, },
+      description: { type: "string" },
+      icon: { type: "string" },
+      image: { type: "string",
+        valospace: { reflection: [[".", ["$", "V", "name"]]] },
+      },
+      name: { type: "string" },
+      tags: { type: "array",
+        valospace: {
+          mappingName: "tags",
+          reflection: [[".", [":", "tags"]], ["out*", [":", "TAG"]]],
+        },
+        items: { type: "object",
+          valospace: { filterable: true },
+          properties: {
+            $V: { type: "object",
+              valospace: { targetType: "TestTag", gate: { name: "tags" } },
+              properties: { href: { type: "string" }, rel: { type: "string" } },
+            },
+            highlight: { type: "boolean" },
+          },
+        },
+      },
+      visible: { type: "boolean" },
+      startTime: { type: "object",
+        valospace: {},
+        properties: {
+          unixSeconds: { type: "number" },
+          zone: { type: "string" }
+        },
+      },
+      endTime: { type: "object",
+        valospace: {},
+        properties: {
+          unixSeconds: { type: "number" },
+          zone: { type: "string" }
+        },
+      },
+    },
+  })),
     },
   };
 }

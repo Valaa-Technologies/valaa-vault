@@ -9,58 +9,65 @@ const FastifyCookiePlugin = require("fastify-cookie");
 
 export function _createPrefixRouter (rootService, prefix, prefixConfig) {
   const frameError = new Error(`createPrefixRouter(<${prefix}>)`);
-  const ret = Object.create(rootService);
+  const prefixRouter = Object.create(rootService);
   const {
     openapi, swaggerPrefix, schemas, routes, identity, sessionDuration, ...pluginOptions
-  } = ret._config = prefixConfig;
-  ret.setName(prefix);
-  ret._identity = Object.assign(Object.create(rootService._identity || {}), identity || {});
+  } = prefixRouter._config = prefixConfig;
+  prefixRouter.setName(prefix);
+  prefixRouter._identity = Object.assign(
+      Object.create(rootService._identity || {}),
+      identity || {});
 
-  ret.getRoutePrefix = () => prefix;
-  ret.getSessionDuration = () => (sessionDuration || rootService.getSessionDuration());
-  ret.getIdentity = () => ret._identity;
+  prefixRouter.getRoutePrefix = () => prefix;
+  prefixRouter.getSessionDuration = () => (sessionDuration || rootService.getSessionDuration());
+  prefixRouter.getIdentity = () => prefixRouter._identity;
 
   // Create the projectors for all routes before trying to register.
   // At this stage neither schema nor fastify is available for the
   // handlers.
-  ret._projectors = routes
-      .map(route => ret.createRouteProjector(route))
+  prefixRouter._projectors = routes
+      .map(route => prefixRouter.createRouteProjector(route))
       .filter(r => r);
 
   let resolveWhenProjectorsPrepared;
-  ret._whenProjectorsPrepared = new Promise(resolve => (resolveWhenProjectorsPrepared = resolve));
+  prefixRouter._whenProjectorsPrepared = new Promise(resolve =>
+      (resolveWhenProjectorsPrepared = resolve));
 
   // https://github.com/fastify/fastify/blob/master/docs/Server.md
   rootService.getRootFastify()
   .register((routerFastify, opts, next) => {
-    ret._fastify = routerFastify;
-    routerFastify.register(FastifyCookiePlugin);
-    if (swaggerPrefix) {
-      routerFastify.register(FastifySwaggerPlugin, {
-        routePrefix: swaggerPrefix,
-        exposeRoute: true,
-        swagger: openapi,
-      });
+    prefixRouter._fastify = routerFastify;
+    try {
+      routerFastify.register(FastifyCookiePlugin);
+      if (swaggerPrefix) {
+        routerFastify.register(FastifySwaggerPlugin, {
+          routePrefix: swaggerPrefix,
+          exposeRoute: true,
+          swagger: openapi,
+        });
+      }
+
+      _addSchemas(prefixRouter, schemas);
+      _prepareProjectors(prefixRouter);
+      _attachProjectorFastifyRoutes(prefixRouter);
+
+      prefixRouter.infoEvent(1, () => [
+        `${prefix}: preparing the projectors and attaching their fastify routes done`,
+        "\n\tinitialization now waiting for view to load to proceed",
+      ]);
+      thenChainEagerly(
+          new Promise(resolve => resolveWhenProjectorsPrepared(resolve)),
+          () => routerFastify.ready(err => {
+            if (err) throw err;
+            prefixRouter.infoEvent(1, () => [
+              `${prefix}: projector fastify plugin ready, exposing swagger`,
+            ]);
+            routerFastify.swagger();
+          }));
+    } catch (error) {
+      errorOnCreatePrefixRouter(error);
+      throw error;
     }
-
-    _addSchemas(ret, schemas);
-    _prepareProjectors(ret, errorOnCreatePrefixRouter);
-    _attachProjectorFastifyRoutes(ret);
-
-    ret.infoEvent(1, () => [
-      `${prefix}: preparing the projectors and attaching their fastify routes done`,
-      "\n\tinitialization now waiting for view to load to proceed",
-    ]);
-    thenChainEagerly(
-        new Promise(resolve => resolveWhenProjectorsPrepared(resolve)),
-        () => routerFastify.ready(err => {
-          if (err) throw err;
-          ret.infoEvent(1, () => [
-            `${prefix}: projector fastify plugin ready, exposing swagger`,
-          ]);
-          routerFastify.swagger();
-        }));
-
     next(); // Always install other plugins
   }, {
     prefix,
@@ -71,9 +78,9 @@ export function _createPrefixRouter (rootService, prefix, prefixConfig) {
       throw error;
     }
   });
-  return ret;
+  return prefixRouter;
   function errorOnCreatePrefixRouter (error) {
-    ret.outputErrorEvent(ret.wrapErrorEvent(error, frameError,
+    prefixRouter.outputErrorEvent(prefixRouter.wrapErrorEvent(error, frameError,
         "\n\tplugin options:", ...dumpObject(pluginOptions),
     ), `Exception intercepted during createPrefixRouter(<${prefix}>)`);
   }
@@ -84,31 +91,34 @@ function _addSchemas (router, schemas) {
     `${router.getRoutePrefix()}: adding ${schemas.length} schemas:`,
     ...schemas.map(schema => schema.schemaName),
   ]);
-  for (const schema of schemas) router._fastify.addSchema(schema);
+  for (const schema of schemas) {
+    try {
+      router._fastify.addSchema(schema);
+    } catch (error) {
+      throw router.wrapErrorEvent(error,
+          new Error(`_addSchemas(${schema.schemaName})`),
+          "\n\tschema:", dumpify(schema, { indent: 2 }));
+    }
+  }
 }
 
-function _prepareProjectors (router, errorOnCreatePrefixRouter) {
+function _prepareProjectors (router) {
   router.infoEvent(1, () => [
     `${router.getRoutePrefix()}: preparing ${router._projectors.length} projectors`,
   ]);
   for (const projector of router._projectors) {
-    const options = {};
     try {
-      if (projector.prepare && isPromise(projector.prepare(options))) {
+      if (projector.prepare && isPromise(projector.prepare())) {
         throw new Error(`Projector prepare must not be async for ${
           router._projectorName(projector)}`);
       }
       projector._whenReady = new Promise(resolve => (projector._resolveWhenReady = resolve));
     } catch (error) {
-      const wrappedError = router.wrapErrorEvent(error,
+      throw router.wrapErrorEvent(error,
           new Error(`prepare(${router._projectorName(projector)})`),
               "\n\tprojector:", dumpify(projector, { indent: 2 }),
               "\n\tprojector.config:", dumpify(projector.config),
-              "\n\tprojector.runtime:", dumpify(projector.runtime, { indent: 2 }),
-              "\n\toptions:", ...dumpObject(options),
       );
-      errorOnCreatePrefixRouter(wrappedError);
-      throw wrappedError;
     }
   }
 }
@@ -118,26 +128,26 @@ function _attachProjectorFastifyRoutes (router) {
     `${router.getRoutePrefix()}: attaching ${router._projectors.length} fastify routes`,
   ]);
   for (const projector of router._projectors) {
-    router._fastify.route({
+    const fastifyRoute = {
       ...projector.route,
       handler: asyncConnectToPartitionsIfMissingAndRetry(
-          (request, reply) => thenChainEagerly(
-              projector._whenReady,
-              readiness => {
-                if (readiness === true) return projector.handler(request, reply);
-                throw (readiness || new Error("route failed to initialize"));
-              },
-              result => {
-                if (result !== true) {
-                  throw router.wrapErrorEvent(
-                      new Error("INTERNAL SERVER ERROR: invalid route handler return value"),
-                      new Error(`handler return value validator`),
-                      "\n\treturn value:", ...dumpObject(result),
-                      "Note: projector.handler must explicitly call reply.code/send",
-                      "and return true or return a Promise which resolves to true.",
-                      "This ensures that exceptions are always caught and logged properly");
-                }
-              }),
+          (request, reply) => thenChainEagerly(projector._whenReady, [
+            readiness => {
+              if (readiness === true) return projector.handler(request, reply);
+              throw (readiness || new Error("route failed to initialize"));
+            },
+            result => {
+              if (result !== true) {
+                throw router.wrapErrorEvent(
+                    new Error("INTERNAL SERVER ERROR: invalid route handler return value"),
+                    new Error(`handler return value validator`),
+                    "\n\treturn value:", ...dumpObject(result),
+                    "\n\tNote: projector.handler must explicitly call reply.code/send",
+                    "and return true or return a Promise which resolves to true.",
+                    "This ensures that exceptions are always caught and logged properly");
+              }
+            }
+          ]),
           (error, request, reply) => {
             reply.code(500);
             reply.send(error.message);
@@ -152,7 +162,15 @@ function _attachProjectorFastifyRoutes (router) {
                 router.getLogger());
           },
       )
-    });
+    };
+    try {
+      router._fastify.route(fastifyRoute);
+    } catch (error) {
+      throw router.wrapErrorEvent(error,
+          new Error(`_attachProjectorFastifyRoute(${router._projectorName(projector)})`),
+          "\n\tfastifyRoute:", dumpify(fastifyRoute, { indent: 2 }),
+      );
+    }
   }
 }
 

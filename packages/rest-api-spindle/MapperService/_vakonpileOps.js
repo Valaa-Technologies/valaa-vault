@@ -1,20 +1,15 @@
 // @flow
 
-import { expandVKeyPath, cementVPath } from "~/raem/VPath";
+import { expandVPath, cementVPath } from "~/raem/VPath";
 
 export function _vakonpileVPath (vpath, runtime) {
-  const expandedVPath = expandVKeyPath("@", vpath);
+  const expandedVPath = expandVPath(vpath);
   if ((expandedVPath.length === 1) && (expandedVPath[0] === "@")) return null;
-  const ret = cementVPath(expandedVPath, { context: ruleContextLookup, contextState: runtime });
-  const lastVerb = (expandedVPath[0] === "@")
-      ? expandedVPath[expandedVPath.length - 1]
-      : expandedVPath;
-  if ((lastVerb[0] || "")[0] === "*") {
-    if (expandedVPath[0] !== "@") {
-      return ["§->", ret, ["§map"]];
-    }
-    ret.push(["§map"]);
-  }
+  const stack = { context: ruleContextLookup, contextState: runtime, isPluralHead: false };
+  const ret = cementVPath(expandedVPath, stack);
+  if (!stack.isPluralHead || ((ret[ret.length - 1] || [])[0] === "§map")) return ret;
+  if (expandedVPath[0] !== "@") return ["§->", ret, ["§map"]];
+  ret.push(["§map"]);
   return ret;
 }
 

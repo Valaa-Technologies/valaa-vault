@@ -74,6 +74,12 @@ describe("VPath to concrete VAKON valks", () => {
     ]);
   });
   it("Cements object VPaths into VAKON while escaping nested vpaths", () => {
+    expect(VALK.fromVPath(["@", [":", "constant"]])
+        .toVAKON())
+    .toEqual(["§'", "constant"]);
+    expect(VALK.fromVPath([{ val: "constant", val2: 10 }])
+        .toVAKON())
+    .toEqual(["§{}", ["val", "constant"], ["val2", 10]]);
     expect(VALK.fromVPath([{ val: ["@"] }])
         .toVAKON())
     .toEqual(["§{}", ["val", ["§'", ["@"]]]]);
@@ -81,7 +87,7 @@ describe("VPath to concrete VAKON valks", () => {
         .toVAKON())
     .toEqual(["§{}",
         ["val", ["§'", ["@"]]],
-        ["val2", null],
+        ["val2", ["§'", null]],
         ["val3", ["§[]", 1, 2, 3]]]);
   });
   it("Cements complex embedded VPaths into VAKON", () => {

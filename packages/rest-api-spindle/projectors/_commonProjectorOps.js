@@ -11,9 +11,9 @@ export function _presolveRouteRequest (router, route, runtime, valkOptions) {
   if (_verifyResourceAuthorization(router, route, scope, scope.routeRoot, "route root")) {
     return true;
   }
-  if (router.resolveRuntimeRules(this.runtime, valkOptions)) {
+  if (router.resolveRuntimeRules(runtime, valkOptions)) {
     router.warnEvent(1, () => [
-      `RUNTIME RULE FAILURE ${this.name}.`,
+      `RUNTIME RULE FAILURE ${router._routeName(route)}.`,
       "\n\trequest.query:", ...dumpObject(scope.request.query),
       "\n\trequest.body:", ...dumpObject(scope.request.body),
     ]);
@@ -27,10 +27,11 @@ export function _verifyResourceAuthorization (router, route, scope, resource, re
   const failure = !isValid || verifySessionAuthorization(router, route, scope, resource);
   if (!failure) return failure;
   router.warnEvent(1, () => [
-    `UNAUTHORIZED ACCESS of ${resourceName} in ${this.name}:`, ...dumpObject(scope.resource),
+    `UNAUTHORIZED ACCESS of ${resourceName} in ${router._routeName(route)}:`,
+        ...dumpObject(scope.resource),
     "\n\trequest.query:", ...dumpObject((scope.request || {}).query),
     "\n\trequest.body:", ...dumpObject((scope.request || {}).body),
   ]);
-  if (!isValid) throw new Error(`Resource ${resourceName} missing or invalid`);
+  if (!isValid) throw new Error(`Resource '${resourceName}' missing or invalid`);
   return true;
 }

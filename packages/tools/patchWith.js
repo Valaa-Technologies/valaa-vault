@@ -236,6 +236,8 @@ function extend (target_, patch_, keyInParent, targetParent, patchParent, skipSp
         }
         if (targetIsArray) {
           for (let i = 0; i !== ret.length; ++i) if (ret[i] === undefined) ret.splice(i--, 1);
+        } else if (ret === undefined) {
+          _setRetFromCacheAndMaybeBail(this);
         }
       }
     }

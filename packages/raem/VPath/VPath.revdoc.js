@@ -15,26 +15,30 @@ module.exports = {
   },
   "chapter#abstract>0": {
     "#0": [
-`ValOS Paths ('VPaths') are structured strings which identify paths
-between valospace resources. A subset of vpaths called 'vrids' specify
-a fixed starting point and identify valospace resources.
+`ValOS Paths ('VPaths') are strings which are used to identify
+valospace resources as well as paths between them.
 
-VPaths can contain 'context terms' whose meaning is defined by the
-context where the vpath appears, typically by expanding the term to a
-URI member of some globally available ontology.
+The vpath strings have a recursive structure allowing for the
+expression of arbitrary relationships but also a grammar that is
+sufficiently restrictive for embedding into URI's and similar contexts.
 
-VPaths are strings with restricted grammar so that they can be embedded
-into various URI component and list formats without additional encoding.`,
+VPaths contain 'context terms' which refer to definitions provided by
+the surrounding context, usually as references to some external
+ontology. This allows VPath semantics to be extended in domain
+specific but reusable manner.`,
     ],
   },
   "chapter#sotd>1": {
     "#0": [
 `This document is part of the library workspace `, pkg("@valos/raem"), `
-but is \`NOT SUPPORTED NOR IMPLEMENTED\` by it yet in any manner.`,
+but is only partially implemented by it.`,
     ],
   },
   "chapter#introduction>2": {
     "#0": [`
+A subset of vpaths called 'vrids' contain a fixed starting point and
+identify valospace resources.
+
 The primary example of a vpath context is the JSON-LD @context of a `,
 ref("ValOS event chronicle", "@valos/sourcerer/valos-event-log"), `
 which provides the semantics for all vpaths that appear inside the
@@ -42,20 +46,37 @@ chronicle.
     `],
   },
   "chapter#section_structure>3;VPath structure": {
-    "#0": [``],
-    "chapter#section_vrid>2;VPath with a vgrid is a resource identifier: a VRId": {
+    "#0": [
+`VPath structure has two primary building blocks: vsteps and vparams.`
+    ],
+    "bulleted#>0": [
+[`A vpath itself is an ordered sequence of "@"-separated vsteps, each
+  of which logically depends on the preceding one.`],
+[`A vstep can have a 'verb type' and a sequence of "$" or ":"
+  -separated vparams, all logically independent of each other.`],
+[`A vparam can have a 'context term' and a value; this vparam value can
+  be a primitive or a fully nested vpath.`],
+    ],
+    "example#main_vpath_rules>1;Main VPath rules": abnf(
+`  vpath         = "@" vgrid-tail / vsteps-tail
+  vgrid-tail    = "$" vgrid "@" [ vsteps-tail ]
+  vsteps-tail   = verb "@" [ vsteps-tail ]
+  verb          = verb-type vparams
+  vparams       = [ vparam vparams ]
+  vparam        = [ "$" context-term ] ":" vparam-value
+  vparam-value  = "$" / 1*( unencoded / pct-encoded ) / vpath`
+    ),
+    "#1":
+`VPaths serve two superficially distinct purposes as paths and as
+identifiers. If the first vstep of a vpath begins with a context term
+(ie. doesn't have a verb type) then the whole vpath is valospace
+resource identifier (a *vrid*) and the first vstep is a valospace
+global resource identifier (a *vgrid*).`,
+    "chapter#section_vrid_structure>2;VPath with a vgrid is a resource identifier: a VRId": {
       "#0": `
-VPaths serve two notably different purposes, both as paths and as
-resource identifiers. A VPath which has a global valospace resource
-identifier (or 'vgrid') as its first segment is a valospace resource
-identifier (or *VRId*).`,
-    "example#main_vpath_rules>0;Main VPath rules": abnf(
-`  vpath         = "@" vgrid-tail / verbs-tail
-  vgrid-tail    = "$" vgrid "@" [ verbs-tail ]
-  verbs-tail    = verb "@" [ verbs-tail ]
-  verb          = verb-type params
-`),
-      "#1": `
+A vpath with a first vstep lacking a verb type and no other vsteps
+identifies a global resource.
+
 Many valospace resources, so called *structural sub-resources* are
 identified by a fixed path from the global resource defined by the same
 verbs that define non-VRId VPaths. Thus while paths and identifiers are
@@ -70,6 +91,16 @@ an external lookup of URI prefixes and semantic definitions.`
 The primary representation of a VPath is a string, but there are other
 format specific representations.
       `],
+      "chapter#section_shortcut_JSON>0;Shortcut VPath representation": {
+        "#0": [`
+Shortcut VPath format is a compact object representation of a VPath as
+'human readable' JSON which can then be expanded to the canonical
+representation. In fact any JSON construct is a valid shortcut VPath,
+and as long as all initial array entries equal to "@", "$" and ":"  are
+escaped as [":", "@"], [":", "$"] and [":", ":"] the shortcut expansion
+will resolve back into the original JSON construct.
+`],
+      },
       "chapter#section_expanded_JSON>0;Expanded JSON VPath representation": {
         "#0": [`
 Expanded JSON is a canonical, recursive expansion of the VPath
@@ -109,24 +140,36 @@ converted to their environment-specific representations. This
 representation can be anything from interpretable JSON to fully
 compiled executable code.
 
-Cementing also performs the security critical step of validating the
-context terms and their parameters against their context inside that
-particular environment (e.g. a typical validation failure being the
-lack of implementation for a specific context term by the environment).`
+Cementing also performs the security critical function of validating
+the context terms and their parameters against their context inside
+that particular environment (e.g. a typical validation failure being
+the lack of implementation for a specific context term by the
+environment).`
         ],
       },
     },
   },
   "chapter#section_semantics>4;VPath semantics": {
-    "#0": [`
-    `],
-    "chapter#section_equivalence>3;VPath equivalence follows URN equivalence": {
+    "#0": [
+`The full semantics of a particular VPath string in some environment
+comes from several different sources:`
+    ],
+    "numbered#semantic_sources>0": [
+[`VPath specification (ie. this document) fully specifies the VPath
+  structure and grammar and defines several verb types`],
+[`VPath extension specifications can define additional conforming verb type semantics`],
+[`VPath environment can define context terms directly`],
+[`VPath environment can delegate context term definitions to external
+  ontologies`],
+    ],
+    "chapter#section_equivalence>1;VPath equivalence follows URN equivalence": {
       "#0": [`
 Two VPaths identify the same path (and in case they're VRIds, refer to
 the same resource) iff their URN representations are `,
 ref("urn-equivalent", "https://tools.ietf.org/html/rfc8141#section-3"),
-` and their context term when resolved in their corresponding
-contexts are uri-equivalent.
+` and 1. they either share the same environment or 2. their
+corresponding context terms expand to URIs which are pair-wise
+URI-equivalent.
 
 For the general case the actual semantics of a VPath and specifically
 of its context-term's depends on the context it is used. Vrids have a
@@ -135,13 +178,47 @@ ref("This has implications on VRId equivalence",
       "@valos/raem/VPath#section_vrid_equivalence"), `.`,
       ],
     },
-  },
-  [`chapter#section_verb>4;${
-      ""}*verb* - a step from a source resource to target resource(s)`]: {
-    "#0": `
+    [`chapter#section_context_term>2;${
+      ""} 'context-term' is a lookup to definitions provided by the context`]: {
+      "#0": [`
+A vpath can be contextual via the vparam context-term's. These are
+case-sensitive strings with very restricted grammar. The context where
+the vpath is used defines the exact meaning of these terms.
+The meaning for two identical context-terms is recommended to be
+uniform across domains where possible.
+A vpath is invalid in contexts which don't have definitions for the
+context-terms of all of its steps. This gives different contexts
+a fine-grained mechanism for defining the vocabularies that are
+available.
+
+Idiomatic example of such context is the event log and its JSON-LD
+context structure which is to define both URI namespace prefixes as
+well as available semantics.`
+      ],
+    },
+    "chapter#section_vparam_value>3;'vparam-value' carries content": {
+      "#0": [`
+*vparams* is a sequence of vparam's, optionally prefixed with
+"$" and a context-term. The idiomatic vparam-value is a string.
+If present a context-term may denote a URI prefix in which case the
+vparam-value forms the suffix of the full expanded URI reference.
+However contexts are free to provide specific semantics for specific
+context-terms, such as interpreting them as the value type of the
+vparam-value etc.
+
+"$" for a vparam-value denotes empty string.
+
+*vparam-value* both allows for fully
+unencoded nesting of vpath's as well as allows encoding of all unicode
+characters in percent encoded form (as per encodeURIComponent)`,
+      ],
+    },
+    [`chapter#section_verb>4;${
+        ""}*verb* - a vstep from a source resource to target resource(s)`]: {
+      "#0": `
 A verb is a one-to-maybe-many relationship between resources. A verb
 can be as simple as a trivial predicate of a triple or it can represent
-something as complex as a fully parameterized computation or a function
+something as complex as a fully parameterized computational function
 call.`,
     "example#main_verb_rules>0;Main verb rules": abnf(
 `  vsteps-tail   = verb "@" [ vsteps-tail ]
@@ -153,37 +230,35 @@ call.`,
   context-term  = ALPHA *unreserved-nt
   vparam-value  = "$" / 1*( unencoded / pct-encoded ) / vpath
 `),
-    "#1": `
-A verb is made up of type and a parameter list. A parameter
-consists of an optional context-term and an optional value.
-
-Note that while the grammar of verb-type and context-term are
-still relatively restricted, *param-value* both allows for fully
-unencoded nesting of vpath's as well as allows encoding of all unicode
-characters in percent encoded form (as per encodeURIComponent).`,
-    "chapter#section_verb_type>1;*verb-type*": {
-      "#0": [`
+      "#1": `
+A verb is made up of verb type and a sequence of vparams. The grammar
+of verb-type is restricted but less than for context-term.  The verb
+type semantics is always fixed. Because of this the first vparam may be
+semantically special and act as a contextual name of the verb.
+`,
+      "chapter#section_verb_type>1;*verb-type*": {
+        "#0": [`
 *verb-type* specifies the relationship category between the segment
 host resource and sub-resource, a set of inferred triples as well as
 other possible constraints.`
-      ],
-      "chapter#section_verb_property>1;verb type \"`.`\": property or ScopeProperty selector": {
-        "#0": `
+        ],
+        "chapter#section_verb_property>1;verb type \"`.`\": property or ScopeProperty selector": {
+          "#0": `
 Verb for selecting the resource (typically a ScopeProperty) with the
 given name and which has the head as its scope.`,
-        "example#example_verb_property>0;Property selector example": [
+          "example#example_verb_property>0;Property selector example": [
 `Triple pattern \`?s <urn:valos:.:myProp> ?o\` matches like:
 `, turtle(`
   ?o    valos:scope ?s
       ; valos:name "myProp"
 `), `Mnemonic: '.' is traditional property accessor (ie. ScopeProperty).`,
-        ],
-      },
-      "chapter#section_verb_sequence>2;verb type \"`*`\": sequence or Relation selector": {
-        "#0": `
+          ],
+        },
+        "chapter#section_verb_sequence>2;verb type \"`*`\": sequence or Relation selector": {
+          "#0": `
 Verb for selecting all resources (typically Relations) with the given
 name and which have the head as their source.`,
-        "example#example_verb_sequence>0;Sequence selector example": [
+          "example#example_verb_sequence>0;Sequence selector example": [
 `Triple pattern \`?s <urn:valos:*:PERMISSIONS> ?o\` matches like:
 `, turtle(`
   ?o    valos:source ?s
@@ -191,49 +266,49 @@ name and which have the head as their source.`,
 `), `
 Mnemonic: '*' for many things as per regex/glob syntax (Relations are
 the only things that can have multiple instances with the same name).`,
-        ],
-      },
-      "chapter#section_verb_container>3;verb type \"`-`\": container or Entity selector": {
-        "#0": `
+          ],
+        },
+        "chapter#section_verb_container>3;verb type \"`-`\": container or Entity selector": {
+          "#0": `
 Verb for selecting the resource (typically an Entity) with the given
 name and which has the head as their container.`,
-        "example#example_verb_container>0;Container selector example": [
+          "example#example_verb_container>0;Container selector example": [
 `Triple pattern \`?s <urn:valos:-:Scripts> ?o\` matches like:
 `, turtle(`
   ?o    valos:parent ?s
       ; valos:name "Scripts"
 `), `
 Mnemonic: "-" links a container to its parent.`,
-        ],
-      },
-      "chapter#section_verb_content>3;verb type \"`'`\": content or Media selector": {
-        "#0": `
+          ],
+        },
+        "chapter#section_verb_content>3;verb type \"`'`\": content or Media selector": {
+          "#0": `
 Verb for selecting the Media with the given name which has the
 head as their folder.`,
-        "example#example_verb_content>0;Content selector example": [
+          "example#example_verb_content>0;Content selector example": [
 `Triple pattern \`?s <urn:valos:':foo.vs> ?o\` matches like:
 `, turtle(`
   ?o    valos:folder ?s
       ; valos:name "foo.vs"
 `), `
 Mnemonic: "'" for quoted content suggests text data.`,
-        ],
-      },
-      "chapter#section_verb_object>4;verb type \"`-`\": object or target selector": {
-        "#0": `
+          ],
+        },
+        "chapter#section_verb_object>4;verb type \"`-`\": object or target selector": {
+          "#0": `
 Verb that is a synonym for predicate 'rdf:object'.`,
-        "example#example_verb_object>0;Property selector example": [
+          "example#example_verb_object>0;Property selector example": [
 `Triple pattern \`?s <urn:valos:-> ?o\` matches like:
 `, turtle(`
   ?s    rdf:object ?o
 `), `
 Mnemonic: follow line '-' to target.`,
-        ],
-      },
-      "chapter#section_verb_ghost>5;verb type \"`_`\": subspace selector": {
-        "#0": `
+          ],
+        },
+        "chapter#section_verb_ghost>5;verb type \"`_`\": subspace selector": {
+          "#0": `
 Verb for selecting named subspaces and ghosts.`,
-        "example#example_verb_language_subspace>0;Language subspace selector example": [
+          "example#example_verb_language_subspace>0;Language subspace selector example": [
 `Triple pattern \`?s <urn:valos:.:myProp@_$lang:fi> ?o\` matches like:
 `, turtle(`
   ?_sp  valos:scope ?s
@@ -242,22 +317,22 @@ Verb for selecting named subspaces and ghosts.`,
       ; valos:language "fi"
 `), `
 Mnemonic: '_' is underscore is subscript is subspace.`],
-        "#1": [
+          "#1": [
 `If the verb name context term is an identifier term then the subspace
 denotes the ghost subspace of the identified resource inside the
 current resource.`
-        ],
-        "example#example_verb_ghost_subspace>1;Ghost subspace selector example": [
+          ],
+          "example#example_verb_ghost_subspace>1;Ghost subspace selector example": [
 `Triple pattern \`?s <urn:valos:_$~u4:ba54> ?o\` matches like:
 `, turtle(`
   ?o    valos:ghostHost ?s
       ; valos:ghostPrototype <urn:valos:$~u4:ba54>
 `), `
 Mnemonic: The '_$~' is a 'subspace of ghoStS'.`,
-        ],
-      },
-      "chapter#section_verb_computation>6;verb type \"`!`\": computation evaluators": {
-        "#0": [`
+          ],
+        },
+        "chapter#section_verb_computation>6;verb type \"`!`\": computation evaluators": {
+          "#0": [`
 VPaths are data. In general whenever a representation of a VPath
 appears in some `, em("evaluation context"), ` the representation
 evaluates into itself. The only exception are the verbs with \`!\` as
@@ -271,8 +346,8 @@ chains and the mapping between VPath data structures and evaluator
 inputs and outputs.
 
 Following principles apply:`,
-        ],
-        "numbered#1": [
+          ],
+          "numbered#1": [
 [`The different evaluator verb types only specify the means to access
   and process the VPath data structure itself. These
   \`evaluator types\` are defined by the VPath specification(s).`],
@@ -293,8 +368,8 @@ Following principles apply:`,
 [`The evaluation implementation is resolved with the evaluation
   arguments and its result is the result of the computation
   evaluator.`],
-        ],
-        "example#example_verb_computation>1;Computation selector example": [
+          ],
+          "example#example_verb_computation>1;Computation selector example": [
 `Triple pattern \`?s <urn:valos:!$valk:add$number:10:@!:myVal@> ?o\`
 matches like:
 `, turtle(`
@@ -303,41 +378,47 @@ matches like:
       ; valos:value ?myVal
   . FILTER (?o === 10 + ?myVal)
 `),
-        ],
-        "example#1": `
+          ],
+          "example#1": `
 Editorial Note: this section should be greatly improved.
 The purpose of computation verbs lies more on representing various
 conversions (as part of dynamic operations such as rest API route
 mapping) and less on clever SPARQL trickery. The illustration here uses
 (questionable) SPARQL primarily for consistency.`,
+        },
       },
     },
-    [`chapter#section_verb_context_term>2;${
-        ""} 'context-term' is a lookup to definitions provided by the context`]: {
-      "#0": [`
-A verb (and vgrid via its format-term) can be contextual via the
-context-term's of its params. The context where the verb is used
-defines the exact meaning of these terms. The meaning for context-terms
-is recommended to be uniform across domains where possible. A verb is
-invalid in contexts which don't have a definition for its context-term.
-This gives different contexts a fine-grained mechanism for defining the
-vocabularies that are available.
-
-Idiomatic example of such context is the event log and its JSON-LD
-context structure which is to define both URI namespace prefixes as
-well as available semantics.`
+    "chapter#section_semantic_considerations>3;Semantic design choices and guidelines": {
+      "#0": [
+`As VPath structure is expressive there are often multiple ways to
+express a particular design need. Following juxtapositions and
+guidelines apply:`,
       ],
-    },
-    "chapter#section_param_value>3;'param-value' specifies vgrid and verb payload": {
-      "#0": [`
-*params* is a sequence of param-value's, optionally prefixed with
-"$" and a context-term. The idiomatic param-value is a string. If
-present a context-term usually denotes a URI prefix in which case the
-param-value is a URI reference. However contexts are free to provide
-specific semantics for specific context-terms, such as interpreting
-them as the value type of the param-value etc.`,
+      "bulleted#>0": [
+[`"vsteps vs. vparams" or "How should I express a sequence?":
+  If the entries of a sequence depend on each other (e.g. in a query or
+  in an execution list) they are vsteps, if not (e.g. data entries)
+  they are vparams of a vstep.`],
+[`"verb type vs. context term" or "How should I express a concept?":
+  If the concept is interaction logic, domain specific, visible to the
+  end-users or it doesn't require infrastructure code changes it is
+  probably a context term with URI expansion to some ontology.
+  If the concept concerns VPath structure or its interpretation and is
+  generic enough to warrant a specification and corresponding
+  infrastructure implementation work it is possibly a verb type with
+  new extension spec or new release of an existing spec.`],
+[`"!-computational vs. declarational" or "Who writes the code?":
+  Computational vsteps (those with verb type beginning with "!") allow
+  for turing-complete computation to be embedded inside vpaths. An
+  environment that chooses to support these verbs and context terms
+  has the upside of rapid and arbitrarily expressive configurability
+  without further code changes. The downside is that security and
+  complexity analysis becomes intractable even more rapidly.
+  Declarational vsteps (all other verb types) require explicit
+  interpretation but should be preferred when meaningful semantics can
+  be specified.`],
       ],
-    },
+    }
   },
   [`chapter#section_vrid>5;${
       ""}VRId is a stable identifier of a global resource or a structural sub-resource`]: {

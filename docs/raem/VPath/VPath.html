@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>ValOS Path</title>
+    <script
+     src='https://www.w3.org/Tools/respec/respec-w3c-common'
+     class='remove'></script>
+    <script class='remove'>
+      var respecConfig = {"specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"VPath"};
+    </script>
+    <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
+    
+  </head>
+  <body class="vdoc vdoc-body">
+    
+  <section id="abstract" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">ValOS Paths (&#x27;VPaths&#x27;) are strings which are used to identify
+valospace resources as well as paths between them.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">The vpath strings have a recursive structure allowing for the
+expression of arbitrary relationships but also a grammar that is
+sufficiently restrictive for embedding into URI&#x27;s and similar contexts.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">VPaths contain &#x27;context terms&#x27; which refer to definitions provided by
+the surrounding context, usually as references to some external
+ontology. This allows VPath semantics to be extended in domain
+specific but reusable manner.</span>
+</p></div>
+  </section>
+
+  <section id="sotd" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">This document is part of the library workspace <a href="https://valospace.org/raem" class="vdoc type-revdoc-package"><em>@valos/raem</em></a>
+but is only partially implemented by it.</span>
+</p></div>
+  </section>
+
+  <section id="introduction" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">
+A subset of vpaths called &#x27;vrids&#x27; contain a fixed starting point and
+identify valospace resources.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">The primary example of a vpath context is the JSON-LD @context of a <a href="https://valospace.org/sourcerer/valos-event-log" class="vdoc type-vdoc-reference">ValOS event chronicle</a>
+which provides the semantics for all vpaths that appear inside the
+chronicle.
+    </span>
+</p></div>
+  </section>
+
+  <section id="section_structure" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_structure">§ </a>VPath structure</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">VPath structure has two primary building blocks: vsteps and vparams.</span>
+</p></div>
+    <ul>
+      <li>A vpath itself is an ordered sequence of &#x22;@&#x22;-separated vsteps, each
+  of which logically depends on the preceding one.</li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">A vstep can have a &#x27;verb type&#x27; and a sequence of &#x22;$&#x22; or &#x22;:&#x22;
+  -separated vparams, all logically independent of each other.</span>
+</p></div></li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">A vparam can have a &#x27;context term&#x27; and a value; this vparam value can
+  be a primitive or a fully nested vpath.</span>
+</p></div></li>
+    </ul>
+<div><p><span class="vdoc type-vdoc-paragraph">VPaths serve two superficially distinct purposes as paths and as
+identifiers. If the first vstep of a vpath begins with a context term
+(ie. doesn&#x27;t have a verb type) then the whole vpath is valospace
+resource identifier (a *vrid*) and the first vstep is a valospace
+global resource identifier (a *vgrid*).</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="main_vpath_rules" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#main_vpath_rules">§ </a>Main VPath rules</h3>
+<pre><code><span class="vdoc type-vdoc-node">  vpath         = &#x22;@&#x22; vgrid-tail / vsteps-tail
+  vgrid-tail    = &#x22;$&#x22; vgrid &#x22;@&#x22; [ vsteps-tail ]
+  vsteps-tail   = verb &#x22;@&#x22; [ vsteps-tail ]
+  verb          = verb-type vparams
+  vparams       = [ vparam vparams ]
+  vparam        = [ &#x22;$&#x22; context-term ] &#x22;:&#x22; vparam-value
+  vparam-value  = &#x22;$&#x22; / 1*( unencoded / pct-encoded ) / vpath</span>
+</code></pre></span>
+
+</blockquote>
+  <section id="section_vrid_structure" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_vrid_structure">§ </a>VPath with a vgrid is a resource identifier: a VRId</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+A vpath with a first vstep lacking a verb type and no other vsteps
+identifies a global resource.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">Many valospace resources, so called *structural sub-resources* are
+identified by a fixed path from the global resource defined by the same
+verbs that define non-VRId VPaths. Thus while paths and identifiers are
+superficially different it is useful to represent them both using the
+same VPath verb structure.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">Both verb and vgrid params can also have context term references to
+an external lookup of URI prefixes and semantic definitions.</span>
+</p></div>
+  </section>
+
+  <section id="section_representations" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_representations">§ </a>VPath representations</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+The primary representation of a VPath is a string, but there are other
+format specific representations.
+      </span>
+</p></div>
+  <section id="section_shortcut_JSON" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_shortcut_JSON">§ </a>Shortcut VPath representation</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+Shortcut VPath format is a compact object representation of a VPath as
+&#x27;human readable&#x27; JSON which can then be expanded to the canonical
+representation. In fact any JSON construct is a valid shortcut VPath,
+and as long as all initial array entries equal to &#x22;@&#x22;, &#x22;$&#x22; and &#x22;:&#x22;  are
+escaped as [&#x22;:&#x22;, &#x22;@&#x22;], [&#x22;:&#x22;, &#x22;$&#x22;] and [&#x22;:&#x22;, &#x22;:&#x22;] the shortcut expansion
+will resolve back into the original JSON construct.
+</span>
+</p></div>
+  </section>
+
+  <section id="section_expanded_JSON" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_expanded_JSON">§ </a>Expanded JSON VPath representation</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+Expanded JSON is a canonical, recursive expansion of the VPath
+structure where each structural element is expressed as an array. The
+first entry of an element is a string which denotes the element type
+and the remaining entries contain the element payload:
+</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">
+JSON numbers and strings can only appear as param values of &#x22;$&#x22; or
+&#x22;:&#x22;-elements. JSON objects cannot appear.
+A vpath which is used as a contextless param of a verb must appear
+directly without intermediate &#x22;:&#x22;-element (unlike in the string VPath
+construct).
+Conversely a verb used as a contextless param must still be wrapped
+inside a &#x22;@&#x22;-element.</span>
+</p></div>
+    <ul>
+      <li>&#x22;@&#x22; for a vpath, remaining entries are the optional vgrid and verb
+  elements</li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">&#x22;$&#x22; for a param with second entry being a valid context term string
+  and third optional entry being the param value element</span>
+</p></div></li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">&#x22;:&#x22; for a param without a context-term and with the optional second
+  entry being the param value element</span>
+</p></div></li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">for remaining elements the first entry is a verb type and other
+  entries are the param elements</span>
+</p></div></li>
+    </ul>
+
+  </section>
+
+  <section id="section_cemented_vpaths" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_cemented_vpaths">§ </a>Cemented VPaths</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+VPaths contain context references but do not _contain_ knowledge about
+the context. This is to ensure that a VPath can be moved from a context
+to a compabible one without modification.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">Cementing a VPath with a context inside an environment produces a
+construct where the vpath itself and specifically its context terms are
+converted to their environment-specific representations. This
+representation can be anything from interpretable JSON to fully
+compiled executable code.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">Cementing also performs the security critical function of validating
+the context terms and their parameters against their context inside
+that particular environment (e.g. a typical validation failure being
+the lack of implementation for a specific context term by the
+environment).</span>
+</p></div>
+  </section>
+
+  </section>
+
+  </section>
+
+  <section id="section_semantics" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_semantics">§ </a>VPath semantics</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">The full semantics of a particular VPath string in some environment
+comes from several different sources:</span>
+</p></div>
+    <ol>
+      <li>VPath specification (ie. this document) fully specifies the VPath
+  structure and grammar and defines several verb types</li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">VPath extension specifications can define additional conforming verb type semantics</span>
+</p></div></li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">VPath environment can define context terms directly</span>
+</p></div></li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">VPath environment can delegate context term definitions to external
+  ontologies</span>
+</p></div></li>
+    </ol>
+
+  <section id="section_equivalence" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_equivalence">§ </a>VPath equivalence follows URN equivalence</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+Two VPaths identify the same path (and in case they&#x27;re VRIds, refer to
+the same resource) iff their URN representations are <a href="https://tools.ietf.org/html/rfc8141#section-3" class="vdoc type-vdoc-reference">urn-equivalent</a> and 1. they either share the same environment or 2. their
+corresponding context terms expand to URIs which are pair-wise
+URI-equivalent.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">For the general case the actual semantics of a VPath and specifically
+of its context-term&#x27;s depends on the context it is used. Vrids have a
+fixed context which is established by the vgrid. <a href="https://valospace.org/raem/VPath#section_vrid_equivalence" class="vdoc type-vdoc-reference">This has implications on VRId equivalence</a>.</span>
+</p></div>
+  </section>
+
+  <section id="section_context_term" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_context_term">§ </a> &#x27;context-term&#x27; is a lookup to definitions provided by the context</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+A vpath can be contextual via the vparam context-term&#x27;s. These are
+case-sensitive strings with very restricted grammar. The context where
+the vpath is used defines the exact meaning of these terms.
+The meaning for two identical context-terms is recommended to be
+uniform across domains where possible.
+A vpath is invalid in contexts which don&#x27;t have definitions for the
+context-terms of all of its steps. This gives different contexts
+a fine-grained mechanism for defining the vocabularies that are
+available.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">Idiomatic example of such context is the event log and its JSON-LD
+context structure which is to define both URI namespace prefixes as
+well as available semantics.</span>
+</p></div>
+  </section>
+
+  <section id="section_vparam_value" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_vparam_value">§ </a>&#x27;vparam-value&#x27; carries content</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+*vparams* is a sequence of vparam&#x27;s, optionally prefixed with
+&#x22;$&#x22; and a context-term. The idiomatic vparam-value is a string.
+If present a context-term may denote a URI prefix in which case the
+vparam-value forms the suffix of the full expanded URI reference.
+However contexts are free to provide specific semantics for specific
+context-terms, such as interpreting them as the value type of the
+vparam-value etc.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">&#x22;$&#x22; for a vparam-value denotes empty string.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">*vparam-value* both allows for fully
+unencoded nesting of vpath&#x27;s as well as allows encoding of all unicode
+characters in percent encoded form (as per encodeURIComponent)</span>
+</p></div>
+  </section>
+
+  <section id="section_semantic_considerations" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_semantic_considerations">§ </a>Semantic design choices and guidelines</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">As VPath structure is expressive there are often multiple ways to
+express a particular design need. Following juxtapositions and
+guidelines apply:</span>
+</p></div>
+    <ul>
+      <li>&#x22;vsteps vs. vparams&#x22; or &#x22;How should I express a sequence?&#x22;:
+  If the entries of a sequence depend on each other (e.g. in a query or
+  in an execution list) they are vsteps, if not (e.g. data entries)
+  they are vparams of a vstep.</li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">&#x22;verb type vs. context term&#x22; or &#x22;How should I express a concept?&#x22;:
+  If the concept is interaction logic, domain specific, visible to the
+  end-users or it doesn&#x27;t require infrastructure code changes it is
+  probably a context term with URI expansion to some ontology.
+  If the concept concerns VPath structure or its interpretation and is
+  generic enough to warrant a specification and corresponding
+  infrastructure implementation work it is possibly a verb type with
+  new extension spec or new release of an existing spec.</span>
+</p></div></li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">&#x22;!-computational vs. declarational&#x22; or &#x22;Who writes the code?&#x22;:
+  Computational vsteps (those with verb type beginning with &#x22;!&#x22;) allow
+  for turing-complete computation to be embedded inside vpaths. An
+  environment that chooses to support these verbs and context terms
+  has the upside of rapid and arbitrarily expressive configurability
+  without further code changes. The downside is that security and
+  complexity analysis becomes intractable even more rapidly.
+  Declarational vsteps (all other verb types) require explicit
+  interpretation but should be preferred when meaningful semantics can
+  be specified.</span>
+</p></div></li>
+    </ul>
+
+  </section>
+
+  <section id="section_verb" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_verb">§ </a>*verb* - a vstep from a source resource to target resource(s)</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+A verb is a one-to-maybe-many relationship between resources. A verb
+can be as simple as a trivial predicate of a triple or it can represent
+something as complex as a fully parameterized computational function
+call.</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="main_verb_rules" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#main_verb_rules">§ </a>Main verb rules</h3>
+<pre><code><span class="vdoc type-vdoc-node">  vsteps-tail   = verb &#x22;@&#x22; [ vsteps-tail ]
+  verb          = verb-type vparams
+  verb-type     = 1*unencoded
+
+  vparams       = [ vparam vparams ]
+  vparam        = [ &#x22;$&#x22; context-term ] &#x22;:&#x22; vparam-value
+  context-term  = ALPHA *unreserved-nt
+  vparam-value  = &#x22;$&#x22; / 1*( unencoded / pct-encoded ) / vpath
+</span>
+</code></pre></span>
+
+</blockquote><div><p><span class="vdoc type-vdoc-paragraph">
+A verb is made up of verb type and a sequence of vparams. The grammar
+of verb-type is restricted but less than for context-term.  The verb
+type semantics is always fixed. Because of this the first vparam may be
+semantically special and act as a contextual name of the verb.
+</span>
+</p></div>
+  <section id="section_verb_type" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_verb_type">§ </a>*verb-type*</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+*verb-type* specifies the relationship category between the segment
+host resource and sub-resource, a set of inferred triples as well as
+other possible constraints.</span>
+</p></div>
+  <section id="section_verb_property" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_verb_property">§ </a>verb type &#x22;&#x60;.&#x60;&#x22;: property or ScopeProperty selector</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+Verb for selecting the resource (typically a ScopeProperty) with the
+given name and which has the head as its scope.</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="example_verb_property" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#example_verb_property">§ </a>Property selector example</h3>
+Triple pattern &#x60;?s &#x3C;urn:valos:.:myProp&#x3E; ?o&#x60; matches like:
+<pre><code><span class="vdoc type-vdoc-node">
+  ?o    valos:scope ?s
+      ; valos:name &#x22;myProp&#x22;
+</span>
+</code></pre>Mnemonic: &#x27;.&#x27; is traditional property accessor (ie. ScopeProperty).</span>
+
+</blockquote>
+  </section>
+
+  <section id="section_verb_sequence" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_verb_sequence">§ </a>verb type &#x22;&#x60;*&#x60;&#x22;: sequence or Relation selector</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+Verb for selecting all resources (typically Relations) with the given
+name and which have the head as their source.</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="example_verb_sequence" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#example_verb_sequence">§ </a>Sequence selector example</h3>
+Triple pattern &#x60;?s &#x3C;urn:valos:*:PERMISSIONS&#x3E; ?o&#x60; matches like:
+<pre><code><span class="vdoc type-vdoc-node">
+  ?o    valos:source ?s
+      ; valos:name &#x22;PERMISSIONS&#x22;
+</span>
+</code></pre>
+Mnemonic: &#x27;*&#x27; for many things as per regex/glob syntax (Relations are
+the only things that can have multiple instances with the same name).</span>
+
+</blockquote>
+  </section>
+
+  <section id="section_verb_container" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_verb_container">§ </a>verb type &#x22;&#x60;-&#x60;&#x22;: container or Entity selector</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+Verb for selecting the resource (typically an Entity) with the given
+name and which has the head as their container.</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="example_verb_container" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#example_verb_container">§ </a>Container selector example</h3>
+Triple pattern &#x60;?s &#x3C;urn:valos:-:Scripts&#x3E; ?o&#x60; matches like:
+<pre><code><span class="vdoc type-vdoc-node">
+  ?o    valos:parent ?s
+      ; valos:name &#x22;Scripts&#x22;
+</span>
+</code></pre>
+Mnemonic: &#x22;-&#x22; links a container to its parent.</span>
+
+</blockquote>
+  </section>
+
+  <section id="section_verb_content" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_verb_content">§ </a>verb type &#x22;&#x60;&#x27;&#x60;&#x22;: content or Media selector</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+Verb for selecting the Media with the given name which has the
+head as their folder.</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="example_verb_content" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#example_verb_content">§ </a>Content selector example</h3>
+Triple pattern &#x60;?s &#x3C;urn:valos:&#x27;:foo.vs&#x3E; ?o&#x60; matches like:
+<pre><code><span class="vdoc type-vdoc-node">
+  ?o    valos:folder ?s
+      ; valos:name &#x22;foo.vs&#x22;
+</span>
+</code></pre>
+Mnemonic: &#x22;&#x27;&#x22; for quoted content suggests text data.</span>
+
+</blockquote>
+  </section>
+
+  <section id="section_verb_object" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_verb_object">§ </a>verb type &#x22;&#x60;-&#x60;&#x22;: object or target selector</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+Verb that is a synonym for predicate &#x27;rdf:object&#x27;.</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="example_verb_object" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#example_verb_object">§ </a>Property selector example</h3>
+Triple pattern &#x60;?s &#x3C;urn:valos:-&#x3E; ?o&#x60; matches like:
+<pre><code><span class="vdoc type-vdoc-node">
+  ?s    rdf:object ?o
+</span>
+</code></pre>
+Mnemonic: follow line &#x27;-&#x27; to target.</span>
+
+</blockquote>
+  </section>
+
+  <section id="section_verb_ghost" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_verb_ghost">§ </a>verb type &#x22;&#x60;_&#x60;&#x22;: subspace selector</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+Verb for selecting named subspaces and ghosts.</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="example_verb_language_subspace" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#example_verb_language_subspace">§ </a>Language subspace selector example</h3>
+Triple pattern &#x60;?s &#x3C;urn:valos:.:myProp@_$lang:fi&#x3E; ?o&#x60; matches like:
+<pre><code><span class="vdoc type-vdoc-node">
+  ?_sp  valos:scope ?s
+      ; valos:name &#x22;myProp&#x22;
+  . ?o  valos:subspacePrototype* ?_sp
+      ; valos:language &#x22;fi&#x22;
+</span>
+</code></pre>
+Mnemonic: &#x27;_&#x27; is underscore is subscript is subspace.</span>
+
+</blockquote><div><p><span class="vdoc type-vdoc-paragraph">If the verb name context term is an identifier term then the subspace
+denotes the ghost subspace of the identified resource inside the
+current resource.</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="example_verb_ghost_subspace" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#example_verb_ghost_subspace">§ </a>Ghost subspace selector example</h3>
+Triple pattern &#x60;?s &#x3C;urn:valos:_$~u4:ba54&#x3E; ?o&#x60; matches like:
+<pre><code><span class="vdoc type-vdoc-node">
+  ?o    valos:ghostHost ?s
+      ; valos:ghostPrototype &#x3C;urn:valos:$~u4:ba54&#x3E;
+</span>
+</code></pre>
+Mnemonic: The &#x27;_$~&#x27; is a &#x27;subspace of ghoStS&#x27;.</span>
+
+</blockquote>
+  </section>
+
+  <section id="section_verb_computation" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_verb_computation">§ </a>verb type &#x22;&#x60;!&#x60;&#x22;: computation evaluators</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+VPaths are data. In general whenever a representation of a VPath
+appears in some <em>evaluation context</em> the representation
+evaluates into itself. The only exception are the verbs with &#x60;!&#x60; as
+the leading character of their type: these represent the class of
+computation evaluators.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">VPath spec tries to specify as little as possible. As such it doesn&#x27;t
+specify an execution model itself but delegates this to context term
+ontologies. VPath only provides a way to specify evaluation dependency
+chains and the mapping between VPath data structures and evaluator
+inputs and outputs.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">Following principles apply:</span>
+</p></div>
+    <ol>
+      <li>The different evaluator verb types only specify the means to access
+  and process the VPath data structure itself. These
+  &#x60;evaluator types&#x60; are defined by the VPath specification(s).</li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">All computation (f.ex. flow control and method call) semantics are
+  specified by the first vpath param of the evaluator verb, ie. the
+  &#x60;computation id&#x60;. This specification shall be provided by the
+  ontology that defines the context-term of the computation id param.</span>
+</p></div></li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">If the computation id doesn&#x27;t have a context-term of if the
+  specification denotes the computation id to be a &#x60;trivial name&#x60;
+  then the computation is a &#x60;context scope lookup path&#x60;.</span>
+</p></div></li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">When a computation evaluator is evaluated all of its vparams are
+  evaluated first in an order defined by the evaluation context and
+  their results stores as evaluation arguments.</span>
+</p></div></li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">The evaluation context is then searched for an implementation for the
+  evaluator type / computation id combination. If none is found the
+  context does not implement the computation and the whole evaluation
+  chain is rejected.</span>
+</p></div></li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">The evaluation implementation is resolved with the evaluation
+  arguments and its result is the result of the computation
+  evaluator.</span>
+</p></div></li>
+    </ol>
+
+<blockquote class="vdoc type-revdoc-example">
+    <span class="vdoc type-vdoc-node">
+Editorial Note: this section should be greatly improved.
+The purpose of computation verbs lies more on representing various
+conversions (as part of dynamic operations such as rest API route
+mapping) and less on clever SPARQL trickery. The illustration here uses
+(questionable) SPARQL primarily for consistency.</span>
+
+</blockquote>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="example_verb_computation" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#example_verb_computation">§ </a>Computation selector example</h3>
+Triple pattern &#x60;?s &#x3C;urn:valos:!$valk:add$number:10:@!:myVal@&#x3E; ?o&#x60;
+matches like:
+<pre><code><span class="vdoc type-vdoc-node">
+  ?_:0  valos:scope ?s
+      ; valos:name &#x22;myVal&#x22;
+      ; valos:value ?myVal
+  . FILTER (?o === 10 + ?myVal)
+</span>
+</code></pre></span>
+
+</blockquote>
+  </section>
+
+  </section>
+
+  </section>
+
+  </section>
+
+  <section id="section_vrid" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_vrid">§ </a>VRId is a stable identifier of a global resource or a structural sub-resource</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+A VRId is a vpath which has vgrid as its first production
+(via vgrid-tail).</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="main_vrid_rules" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#main_vrid_rules">§ </a>Main vrid rules</h3>
+<pre><code><span class="vdoc type-vdoc-node">  vpath         = &#x22;@&#x22; vgrid-tail / vsteps-tail
+  vgrid-tail    = &#x22;$&#x22; vgrid &#x22;@&#x22; [ vsteps-tail ]
+  vgrid         = format-term &#x22;:&#x22; vparam-value vparams
+</span>
+</code></pre></span>
+
+</blockquote>
+  <section id="section_vgrid" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_vgrid">§ </a>vgrid identifies global resources - primary keys, free ownership, concrete state</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+The vgrid uniquely identifies a *global resource*. If a VRId contains
+a vgrid and no verbs this global resource is also the
+*referenced resource* of the VRId itself.</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="main_vgrid_rules" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#main_vgrid_rules">§ </a>Main vgrid rules</h3>
+<pre><code><span class="vdoc type-vdoc-node">  vgrid-tail    = &#x22;$&#x22; vgrid &#x22;@&#x22; [ vsteps-tail ]
+  vgrid         = format-term &#x22;:&#x22; vparam-value vparams
+  format-term   = &#x22;~&#x22; context-term
+
+  vparams       = [ vparam vparams ]
+  vparam        = [ &#x22;$&#x22; context-term ] &#x22;:&#x22; vparam-value
+  context-term  = ALPHA *unreserved-nt
+  vparam-value  = &#x22;$&#x22; / 1*( unencoded / pct-encoded ) / vpath
+</span>
+</code></pre></span>
+
+</blockquote><div><p><span class="vdoc type-vdoc-paragraph">
+The format-term defines the global resource identifier schema as well
+as often some (or all) characteristics of the resource.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">Some vgrid types restrict the vparam-value further, with only &#x22;$&#x22; in
+addition to *unreserved*  as specified in the <a href="https://tools.ietf.org/html/rfc3986" class="vdoc type-vdoc-reference">URI specification</a>).
+</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span class="vdoc type-vdoc-node">
+Note: when using base64 encoded values as vgrid vparam-value, use the
+url-and-filename-ready<a href="https://tools.ietf.org/html/rfc4648#section-5" class="vdoc type-vdoc-reference">base64url characters</a>.</span>
+
+</blockquote>
+  </section>
+<div><p><span class="vdoc type-vdoc-paragraph">
+The VRId can be directly used as the NSS part of an &#x27;urn:valos:&#x27;
+prefixed URI.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">Each valospace resource is identified by a VRId.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">If a resource VRId has only vgrid part but no verbs the resource is
+called a global resource.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">If a resource VRId has verbs then the verbs describe a structural path
+from the global resource of its initial vgrid part to the resource
+itself. The resource is called a *structural sub-resource* of that
+global resource.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">Each resource is affiliated with an event log of its global resource.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">All direct VRId context-terms are references to this event log <a href="https://w3c.github.io/json-ld-syntax/#the-context" class="vdoc type-vdoc-reference">JSON-LD context</a>.</span>
+</p></div>
+  <section id="section_vrid_event_log" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_vrid_event_log">§ </a>VRId is affiliated with an event log</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+The resource identified by a VRId is always affiliated with an event
+log of its global resource. Because the VRId doesn&#x27;t contain the
+locator information of this event log it must be discoverable from the
+context where the VRId is used.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">All context-terms of the VGRId and VRId vparams are references to the
+event log <a href="https://w3c.github.io/json-ld-syntax/#the-context" class="vdoc type-vdoc-reference">JSON-LD context</a> (Note: this applies only to immediate but not to nested vparams).</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">Global resources can be transferred between event logs. To maintain
+immutability across these transfers VGRId&#x27;s must not contain partition
+or other non-identifying locator information. Similar to URN&#x27;s VRId&#x27;s
+always relies external structures and systems for carrying locator
+information.
+</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span class="vdoc type-vdoc-node">Note: uuid v4 (format term &#x60;~u4&#x60;) is recommended for
+now, but eventually VGRId generation will be tied to the
+deterministic event id chain (format term &#x60;~cc&#x60;).
+This in turn should be seeded by some ValOS authority.</span>
+
+</blockquote>
+  </section>
+
+  <section id="section_vrid_equivalence" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">
+Two VRIds refer to the same resource iff their URN representations are <a href="https://tools.ietf.org/html/rfc8141#section-3" class="vdoc type-vdoc-reference">urn-equivalent</a>(i.e. if the two VRIds are equivalent after section 3.1. case
+normalization for step 3. percent-encoding case normalization).</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">Maintaining the consistency between this lexical equivalence and the
+semantic equivalence of a resource which has been transferred between
+event logs without having to dereference VRIds is useful but has
+implications.
+<blockquote>Rule: When resources are transferred between event logs
+  the semantics of their context terms and body-parts must remain
+  equivalent.</blockquote></span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">A *simple equivalence* is that two simple prefix term definitions
+resolve to the same URI. An *extended equivalence* is when two extended
+term definitions in the source and target event logs are equivalent
+after normalization. These two equivalences are [will be] defined by
+this document.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">More complex equivalences are outside the scope of this document but
+can be defined by specifications specifying segment types. These
+equivalences might take details of the particular verb-type into
+account and/or specify context definition additions which do not change
+the equivalence semantics.</span>
+</p></div>
+  </section>
+
+  <section id="section_structural_sub_resources" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_structural_sub_resources">§ </a>VRId verbs identify structural sub-resources - fixed ownership, inferred state, &#x27;secondary keys&#x27;</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">In VRId context the vsteps-tail that follows the VGRId specifies
+a structural path from the global resource to a
+*structural sub-resource* of the global resource. The triple
+constraints of each verb in that path are _inferred as triples_ for the
+particular resource that that verb affects.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph"><blockquote>Principle: a structural sub-resource using a particular
+vsteps-tail in its identifying VRId will always infer the triples that
+are required to satisfy the same vsteps-tail in a query context which
+starts from the same global resource.</blockquote></span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">This fixed triple inference is the meat and bones of the structural
+sub-resources: they allow for protected, constrained semantics to be
+expressed in the valospace resources. This allows both simplified
+semantics (eg. properties _cannot_ be renamed so the complex
+functionality doesn&#x27;t need to be supported on fabric level), more
+principled mechanism for partition crypto behaviours (permission
+relations are structural sub-resources which simplifies security
+analysis but retains valospace convenience) and also a mechanism for
+expressing non-trivial resources such as hypertwin resources.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">The sub-resources can be nested and form a tree with the global
+resource as the root. Typical verb sub-segments specify the edges in
+this tree (some verbs only specify the current node resource further
+without specifying a new edge). The global resource is the host
+resource for the first verb; the sub-resource of that segment is the
+host resource of the second verb and so on.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">As the VRId identities of the sub-resources are structurally fixed to
+this tree the coupling between host and sub-resource must be static.
+The typical implementation for this is an ownership coupling.</span>
+</p></div>
+  </section>
+
+  <section id="section_vgrid_types" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_vgrid_types">§ </a>List of VGRId formats:</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+VGRId context-term specifies the particular identifier format and
+possible semantics of the identified global resource. ValOS kernel
+reserves all context-terms matching &#x27;&#x22;i&#x22; 2( ALPHA / DIGIT )&#x27; for
+itself with currently defined formats exhaustively listed here.
+      </span>
+</p></div>
+  <section id="section_vgrid_uuid_v4" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_vgrid_uuid_v4">§ </a>VGRId format &#x22;&#x60;~u4&#x60;&#x22;: Uuid v4 of a native, insecure resource</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+An identifier for native valospace resource with an event log.
+This is insecure as there are no guarantees against resource id
+collisions by malicious event logs. These identifiers can thus only be
+used in trusted, protected environments.</span>
+</p></div>
+  </section>
+
+  <section id="section_vgrid_content_hash" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_vgrid_content_hash">§ </a>VGRId format &#x22;&#x60;~bv&#x60;&#x22;: The content hash of Binary ValOS object</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+An identifier of an immutable octet-stream, with the content hash in
+the vparam-value.</span>
+</p></div>
+  </section>
+
+  <section id="section_vgrid_platonic_resource" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_vgrid_platonic_resource">§ </a>VGRId format &#x22;&#x60;~pw&#x60;&#x22;: The id of an immutable Platonic resource With inferences</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+An identifier of an immutable, procedurally generated resource with its
+content inferred from the vpath embedded in the vparam-value.
+While of limited use in itself this is useful when used as the
+prototype of structural ghost sub-resources which are quite mutable.</span>
+</p></div>
+  </section>
+
+  <section id="section_vgrid_crypto_chained" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_vgrid_crypto_chained">§ </a>VGRId format &#x22;&#x60;~cc&#x60;&#x22;: The id of Crypto-event-log-Chained secure resource</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+An identifier of a native, secure valospace resource with an event log.
+This id is deterministically derived from the most recent hash-chain
+event log entry of the particular event which created it, the
+cryptographic secret of the creating identity and a salt, thus ensuring
+collision resistance and a mechanism for creator to prove their claim
+to the resource.</span>
+</p></div>
+  </section>
+
+  <section id="section_vgrid_ghost" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_vgrid_ghost">§ </a>VGRId format &#x22;&#x60;~gh&#x60;&#x22;: The derived Hash id of a native, insecure Ghost resource</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+This is a legacy format for native ghost resources, with id created
+from the hash of the &#x27;ghost path&#x27; of the resource.</span>
+</p></div>
+  </section>
+
+  </section>
+
+  <section id="section_vrid_verb_types" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_vrid_verb_types">§ </a>List of VRId-specific verb type semantics:</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+VRId *verb-type* specifies the relationship category between the
+segment host resource and sub-resource, a set of inferred triples as
+well as other possible constraints.</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="example_shared_vrid_verb_data" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#example_shared_vrid_verb_data">§ </a>Shared example data</h3>
+The examples below all share the following triples:<pre><code><span class="vdoc type-vdoc-node">
+  &#x3C;urn:valos:$~u4:f00b&#x3E; a valos:Entity
+      ; valos:prototype &#x3C;urn:valos:$~u4:f00b-b507-0763&#x3E;
+</span>
+</code></pre></span>
+
+</blockquote>
+  <section id="section_structural_ghost" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_structural_ghost">§ </a>verb type &#x22;&#x60;_&#x60;&#x22;: structural subspace sub-resource</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+Ghost sub-resources are products of ghost instantiation. All the ghosts
+of the directly _and indirectly_ owned resources of the instance
+prototype are flattened as _direct_ structural sub-resources of the
+instance itself. The instance is called *ghost host* of all such ghosts.</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="example_structural_ghost" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#example_structural_ghost">§ </a>Structural ghost triple inference</h3>
+&#x60;&#x3C;urn:valos:$~u4:f00b@_$~u4:ba54&#x3E;&#x60; reads as &#x22;inside the
+instance resource &#x60;f00b&#x60; the ghost of the $~u4 resource &#x60;ba54&#x60;&#x22;
+and infers triples:
+<pre><code><span class="vdoc type-vdoc-node">
+  &#x3C;urn:valos:$~u4:f00b@_$~u4:ba54&#x3E;
+        valos:ghostHost &#x3C;urn:valos:$~u4:f00b&#x3E;
+      ; valos:ghostPrototype &#x3C;urn:valos:$~u4:ba54&#x3E;
+</span>
+</code></pre></span>
+
+</blockquote><div><p><span class="vdoc type-vdoc-paragraph">
+In case of deeper instantiation chains the outermost ghost segment
+provides inferences recursively to all of its sub-resources; nested
+ghost segments wont provide any further inferences.</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="example_structural_ghost_recursive" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#example_structural_ghost_recursive">§ </a>Recursive ghost triple inference</h3>
+&#x60;&#x3C;urn:valos:$~u4:f00b@_$~u4:ba54@_$~u4:b7e4&#x3E;&#x60; reads as &#x22;inside
+the instance resource &#x60;f00b&#x60; the ghost of
+&#x60;&#x3C;urn:valos:$~u4:ba54@_$~u4:b7e4&#x3E;&#x60;&#x22; and infers triples:
+<pre><code><span class="vdoc type-vdoc-node">
+  &#x3C;urn:valos:$~u4:f00b@_$~u4:ba54@_$~u4:b7e4&#x3E;
+        valos:ghostHost &#x3C;urn:valos:$~u4:f00b&#x3E;
+      ; valos:ghostPrototype &#x3C;urn:valos:$~u4:ba54@_$~u4:b7e4&#x3E;
+</span>
+</code></pre></span>
+
+</blockquote>
+  </section>
+
+  <section id="section_structural_subspace" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_structural_subspace">§ </a>verb type &#x22;&#x60;_&#x60;&#x22;: structural subspace override</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+Selects a variant resource value for a base resource within a
+structurally identified subspace. The variant resource provides
+inferred &#x60;subspacePrototype&#x60; fallbacks to an *inner* subspace and
+eventually to the non-variant base resource as well as to the
+homologous sub-resource of the host resource inheritancePrototype.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">This means that no matter where a subspace variant is defined in
+the prototype chain or in the nested sub-structure its value will be
+found.</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="example_structural_subspace" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#example_structural_subspace">§ </a>Structural subspace triple inference</h3>
+&#x60;&#x3C;urn:valos:$~u4:f00b@.:myProp@_$lang:fi&#x3E;&#x60; is a lang fi variant of
+f00b myProp and infers triples:
+<pre><code><span class="vdoc type-vdoc-node">
+  &#x3C;urn:valos:$~u4:f00b@.:myProp@_$lang:fi&#x3E; a valos:ScopeProperty
+      ; valos:subspacePrototype &#x3C;urn:valos:$~u4:f00b@.:myProp&#x3E;
+                              , &#x3C;urn:valos:$~u4:f00b-b507-0763@.:myProp@_$lang:fi&#x3E;
+      ; valos:language &#x22;fi&#x22;
+</span>
+</code></pre></span>
+
+</blockquote><div><p><span class="vdoc type-vdoc-paragraph">
+Subspace selectors can be used to access language variants,
+statically identified ghost variants within an instance, statically
+identified Relation&#x27;s etc.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">The verb segment-term can also specify triple inferences for *all*
+sub-resources in the subspace (not just for the immediate
+sub-resource of the selector segment).</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="example_structural_subspace_recursive" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#example_structural_subspace_recursive">§ </a>Structural subspace recursive inference</h3>
+&#x60;&#x3C;urn:valos:$~u4:f00b@_$~u4:b453@_$lang:fi@_$~u4:b74e@.:myProp&#x3E;&#x60;
+infers triples:
+<pre><code><span class="vdoc type-vdoc-node">
+  &#x3C;urn:valos:$~u4:f00b@_$~u4:b453@_$lang:fi@_$~u4:b74e@.:myProp&#x3E; a valos:ScopeProperty
+      ; valos:ghostHost &#x3C;urn:valos:$~u4:f00b&#x3E;
+      ; valos:ghostPrototype &#x3C;urn:valos:$~u4:b453@_$lang:fi@_$~u4:b74e@.:myProp&#x3E;
+      ; valos:subspacePrototype &#x3C;urn:valos:$~u4:f00b@_$~u4:b453@_$~u4:b74e@_$lang:fi@.:myProp&#x3E;
+      ; valos:language &#x22;fi&#x22;
+</span>
+</code></pre></span>
+
+</blockquote>
+  </section>
+
+  <section id="section_structural_scope_property" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_structural_scope_property">§ </a>verb type &#x22;&#x60;.&#x60;&#x22;: structural ScopeProperty</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+Structural properties infer a type, fixed owner and name.</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="example_structural_scope_property" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#example_structural_scope_property">§ </a>Structural scope property triple inference</h3>
+&#x60;&#x3C;urn:valos:$~u4:f00b@.:myProp&#x3E;&#x60; is a resource with fixed name
+&#x22;myProp&#x22;, dominant type ScopeProperty, $~u4 resource f00b as the owning
+scope and a structurally homologous prototype inside
+f00b-b507-0763 and thus infers triples:
+<pre><code><span class="vdoc type-vdoc-node">
+  &#x3C;urn:valos:$~u4:f00b@.:myProp&#x3E; a valos:ScopeProperty
+      ; valos:scope &#x3C;urn:valos:$~u4:f00b&#x3E;
+      ; valos:inheritancePrototype &#x3C;urn:valos:$~u4:f00b-b507-0763@.:myProp&#x3E;
+      ; valos:name &#x22;myProp&#x22;
+</span>
+</code></pre></span>
+
+</blockquote><div><p><span class="vdoc type-vdoc-paragraph">The verbs &#x60;.O.&#x60;, &#x60;.O*&#x60;, and &#x60;.O&#x27;&#x60; denote the properties
+&#x60;valos:value&#x60;, &#x60;valos:target&#x60;, and &#x60;valos:content&#x27;&#x60; respectively.
+These are the primary <em>rdf:object sub-properties</em> of
+ScopeProperty, Entity and Media, respectively (the letter &#x27;o&#x27; in the
+verbs stands for rdf:object). When given as a parameter to a primary
+resource they modify it with a fixed rdf:object triple.
+In addition &#x60;.S*&#x60; and &#x60;.O*&#x60; denote &#x60;valos:source&#x60; &#x60;valos:target&#x60;
+which are the rdf:subject and rdf:object properties of a Relation.</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="example_structural_object" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#example_structural_object">§ </a>Structural rdf:object triple inference</h3>
+&#x60;&#x3C;urn:valos:$~u4:f00b@*:PERMISSIONS:@.*$~ih:8766&#x3E;&#x60; is a PERMISSIONS
+relation with fixed ~ih target 8766 and infers triples:
+<pre><code><span class="vdoc type-vdoc-node">
+  &#x3C;urn:valos:$~u4:f00b@*:PERMISSIONS:@.*$~ih:8766&#x3E; a valos:Relation
+      ; valos:connectedSource &#x3C;urn:valos:$~u4:f00b&#x3E;
+      ; valos:prototype &#x3C;urn:valos:$~u4:f00b-b507-0763@*:PERMISSIONS:@.*$~ih:8766&#x3E;
+      ; valos:name &#x22;PERMISSIONS&#x22;
+      ; valos:target &#x3C;urn:valos:$~u4:8766-src&#x3E;
+</span>
+</code></pre>Mnemonic: these verbs are read right-to-left, eg. &#x60;.O*&#x60; -&#x3E; &#x27;Relation
+rdf:object property is valos:target&#x27;</span>
+
+</blockquote>
+  </section>
+
+  <section id="section_structural_relation" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_structural_relation">§ </a>verb type &#x22;&#x60;*&#x60;&#x22;: structural Relation</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+Structural relations infer a type, fixed owner (connector), name and
+possibly source and target.</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="example_structural_relation" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#example_structural_relation">§ </a>Structural relation triple inference</h3>
+&#x60;&#x3C;urn:valos:$~u4:f00b@*:PERMISSIONS@_:1&#x3E;&#x60; is a resource with
+fixed name &#x22;PERMISSIONS&#x22;, dominant type Relation, ~u4 f00b as the
+source, a structurally homologous prototype inside f00b-b507-0763
+and thus infers triples:
+<pre><code><span class="vdoc type-vdoc-node">
+  &#x3C;urn:valos:$~u4:f00b@*:PERMISSIONS&#x3E; a valos:Relation
+      ; valos:connectedSource &#x3C;urn:valos:$~u4:f00b&#x3E;
+      ; valos:inheritancePrototype &#x3C;urn:valos:$~u4:f00b-b507-0763@*:PERMISSIONS&#x3E;
+      ; valos:name &#x22;PERMISSIONS&#x22;
+  &#x3C;urn:valos:$~u4:f00b@*:PERMISSIONS@_:1&#x3E; a valos:Relation
+      ; valos:subspacePrototype &#x3C;urn:valos:$~u4:f00b@*:PERMISSIONS&#x3E;
+                              , &#x3C;urn:valos:$~u4:f00b-b507-0763@*:PERMISSIONS@_:1&#x3E;
+</span>
+</code></pre></span>
+
+</blockquote>
+  </section>
+
+  <section id="section_structural_entity" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_structural_entity">§ </a>verb type &#x22;&#x60;-&#x60;&#x22;: structural Entity</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+Structural entities infer a type, fixed owner (parent) and name.</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="example_structural_entity" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#example_structural_entity">§ </a>Structural Entity triple inference</h3>
+&#x60;&#x3C;urn:valos:$~u4:f00b@-:Scripts&#x3E;&#x60; has a fixed name &#x22;scripts&#x22;,
+dominant type Entity, $~u4 resource f00b as the owning container and
+a structurally homologous prototype inside f00b-b507-0763 and thus
+infers triples:
+<pre><code><span class="vdoc type-vdoc-node">
+  &#x3C;urn:valos:$~u4:f00b@-:Scripts&#x3E; a valos:Entity
+      ; valos:parent &#x3C;urn:valos:$~u4:f00b&#x3E;
+      ; valos:inheritancePrototype &#x3C;urn:valos:$~u4:f00b-b507-0763@-:scripts&#x3E;
+      ; valos:name &#x22;scripts&#x22;
+</span>
+</code></pre></span>
+
+</blockquote>
+  </section>
+
+  <section id="section_structural_media" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_structural_media">§ </a>verb type &#x22;&#x60;&#x27;&#x60;&#x22;: structural Media</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+Structural medias infer a type, fixed owner (folder) and name.</span>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="example_structural_media" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#example_structural_media">§ </a>Structural Media triple inference</h3>
+&#x60;&#x3C;urn:valos:$~u4:f00b@&#x27;:foo.vs&#x3E;&#x60; has a fixed name &#x22;foo.vs&#x22;, dominant
+type Media, $~u4 resource f00b as the owning folder and a structurally
+homologous prototype inside f00b-b507-0763 and thus infers triples:
+<pre><code><span class="vdoc type-vdoc-node">
+  &#x3C;urn:valos:$~u4:f00b@&#x27;:foo.vs&#x3E; a valos:Media
+      ; valos:folder &#x3C;urn:valos:$~u4:f00b&#x3E;
+      ; valos:inheritancePrototype &#x3C;urn:valos:$~u4:f00b-b507-0763@&#x27;:foo.vs&#x3E;
+      ; valos:name &#x22;foo.vs&#x22;
+</span>
+</code></pre></span>
+
+</blockquote>
+  </section>
+
+  </section>
+
+  </section>
+
+  <section id="section_grammar" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_grammar">§ </a>Collected VPath ABNF grammar</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">The VPath grammar is an LL(1) grammar. It is recursive as vparam-value
+productions can contain nested vpaths without additional encoding.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">The list of definitive rules:
+<pre><code><span class="vdoc type-vdoc-node">  vpath         = &#x22;@&#x22; vgrid-tail / vsteps-tail
+
+  vgrid-tail    = &#x22;$&#x22; vgrid &#x22;@&#x22; [ vsteps-tail ]
+  vgrid         = format-term &#x22;:&#x22; vparam-value vparams
+  format-term   = &#x22;~&#x22; context-term
+
+  vsteps-tail   = verb &#x22;@&#x22; [ vsteps-tail ]
+  verb          = verb-type vparams
+  verb-type     = 1*unencoded
+
+  vparams       = [ vparam vparams ]
+  vparam        = [ &#x22;$&#x22; context-term ] &#x22;:&#x22; vparam-value
+  context-term  = ALPHA *unreserved-nt
+  vparam-value  = &#x22;$&#x22; / 1*( unencoded / pct-encoded ) / vpath
+
+  unencoded     = unreserved / &#x22;!&#x22; / &#x22;*&#x22; / &#x22;&#x27;&#x22; / &#x22;(&#x22; / &#x22;)&#x22;
+  unreserved    = unreserved-nt / &#x22;~&#x22;
+  unreserved-nt = ALPHA / DIGIT / &#x22;-&#x22; / &#x22;_&#x22; / &#x22;.&#x22;
+  pct-encoded   = &#x22;%&#x22; HEXDIG HEXDIG</span>
+</code></pre></span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">In addition there are pseudo-rules which are not used by an LL(1)
+parser but which have well-defined meaning and can thus be referred to
+from other documents.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">The list of informative pseudo-rules:
+<pre><code><span class="vdoc type-vdoc-node">  vrid            = &#x22;@&#x22; &#x22;$&#x22; vgrid &#x22;@&#x22; [ vsteps-tail ]
+  verbs           = &#x22;@&#x22; vsteps-tail
+  context-term-ns = ALPHA 0*30unreserved-nt ( ALPHA / DIGIT )
+</span>
+</code></pre></span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">There are couple notes not explicitly expressed by the the grammar
+itself. These notes primarily relate to LL(1)-parseability:</span>
+</p></div>
+    <ul>
+      <li>Pseudo-rule &#x27;vrid&#x27;: this class contains all &#x27;vpath&#x27; productions with
+  &#x27;vgrid&#x27; as their first expansion.</li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">Pseudo-rule &#x27;context-term-ns&#x27;: this class contains all &#x27;context-term&#x27;
+  expansions which match this more restrictive specification (max 32
+  chars, special chars only in the middle). All &#x27;context-term&#x27;s which
+  are plain namespace prefixes should be restricted to this rule as
+  this is the prefix grammar of some relevant prefix context.
+  
+<blockquote class="vdoc type-revdoc-example">
+    <span class="vdoc type-vdoc-node">Editorial Note: which context was this again? Neither
+    SPARQL, Turtle nor JSON-LD have this limitation.</span>
+
+</blockquote></span>
+</p></div></li>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">The nesting hierarchy can be manually quickly established by first
+  splitting a valid vpath string by the delimiter regex /(@$:)/
+  (retaining these delimiters in the result). Then a tree structure is
+  formed by traversing the array from left to right and dividing it to
+  different nesting depths. The nesting depth is increased for the
+  initial &#x22;@&#x22; and for each &#x22;@&#x22; that is preceded by a &#x22;:&#x22; (corresponds
+  to the &#x27;vpath&#x27; production prefix of some &#x27;short-param&#x27; production)
+  and reducing the nesting depth for each &#x22;@&#x22; that is succeeded by a
+  &#x22;$&#x22;, &#x22;:&#x22;, &#x22;@&#x22; or EOF (corresponds to the terminator of the last
+  &#x27;vgrid&#x27; or &#x27;verb&#x27; production of some &#x27;vpath&#x27; production). All
+  remaining &#x22;@&#x22; correspond to non-final &#x27;vgrid&#x27; or &#x27;verb&#x27; production
+  terminators of some &#x27;vpath&#x27; rule production and thus don&#x27;t change the
+  nesting depth.</span>
+</p></div></li>
+    </ul>
+
+  </section>
+
+  <section id="section_encoding_considerations" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_encoding_considerations">§ </a>VPath design considerations and case studies</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+This section contains considerations on the choice of character set and
+on where and how VPaths need or don&#x27;t need to be encoded. There&#x27;s a
+historical emphasis on the decision of which characters to use as
+delimiters (ie. &#x22;@&#x22;, &#x22;:&#x22; and &#x22;$&#x22;).</span>
+</p></div>
+  <section id="section_robust_composition" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_robust_composition">§ </a>VPath composition and decomposition should be robust</h3>
+
+  <section id="section_no_contextual_delimiters" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_no_contextual_delimiters">§ </a>No contextual delimiters</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+If a character is a delimiter in some context within a VPath then this
+character must always encoded when not used as a delimiter.</span>
+</p></div>
+  </section>
+
+  <section id="section_consistent_encoding" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_consistent_encoding">§ </a>All value segments are encoded and decoded using encodeURIComponent</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+Characters not encoded are ruled out from structural delimiters.
+This leaves &#x22;?&#x22; | &#x22;#&#x22; and &#x22;/&#x22; | &#x22;:&#x22; | &#x22;@&#x22; and &#x22;$&#x22; | &#x22;+&#x22; | &#x22;;&#x22; | &#x22;,&#x22; | &#x22;=&#x22; | &#x22;&#x26;&#x22;</span>
+</p></div>
+  </section>
+
+  </section>
+
+  <section id="section_unencoded_contexts" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_unencoded_contexts">§ </a>Contexts where VPath doesn&#x27;t need encoding</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+In general VPaths don&#x27;t require encoding in contexts where the VPath
+delimiters &#x22;@&#x22; / &#x22;:&#x22; / &#x22;$&#x22; and the encodeURIComponent result character
+set ALPHA / DIGIT / &#x22;-&#x22; / &#x22;_&#x22; / &#x22;.&#x22; / &#x22;~&#x22; / &#x22;!&#x22; / &#x22;*&#x22; / &#x22;&#x27;&#x22; / &#x22;(&#x22; / &#x22;)&#x22;
+can be used.
+<blockquote>Editorial Note: &#x22;(&#x22; and &#x22;)&#x22; can in principle be
+  substantially inconvenient in many contexts. But as they&#x27;re grouped
+  with &#x22;!&#x22; / &#x22;*&#x22; / &#x22;&#x27;&#x22; which have their uses in verb-type&#x27;s all
+  five are for now retained as allowed characters.</blockquote></span>
+</p></div>
+  <section id="section_unencoded_in_rfc_3986_segment_nz" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_unencoded_in_rfc_3986_segment_nz">§ </a>As RFC 3986 URI segment-nz component</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+VPaths can be used as-is in URI path parts (except as segment-nz-nc, see below).
+This rules out &#x22;?&#x22;, &#x22;#&#x22;, &#x22;/&#x22; from structural delimiters</span>
+</p></div>
+  </section>
+
+  <section id="section_unencoded_in_sequences" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_unencoded_in_sequences">§ </a>As a typical sequence entry</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+Rules out &#x22;,&#x22; | &#x22;;&#x22; from structural delimiters</span>
+</p></div>
+  </section>
+
+  <section id="section_unencoded_in_rfc_3986_query" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_unencoded_in_rfc_3986_query">§ </a>As part of RFC 3986 URI query component when consumer is known not to decode</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+VPath can and is intended to be used as-is in the query part (even as
+the right-hand side value of &#x22;=&#x22;) <em>as long as the URI
+consumer or possible middlewares don&#x27;t perform x-www-form-urlencoded
+(or other) decoding of the key-value pairs</em>before VPath expansion.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">Rules out &#x22;=&#x22; , &#x22;&#x26;&#x22; from structural characters.
+<blockquote>Note: This is completely regular. If the consumer is
+  known to explicitly decode query values and because VPaths can
+  contain &#x22;%&#x22; characters they must be appropriately symmetrically
+  encoded. This can result in double encoding. However as the intent is that VPath
+  expansion should be considered to be part of <a href="https://tools.ietf.org/html/rfc3986#section-2.4" class="vdoc type-vdoc-reference">the URI parsing and separation itself</a> any  separate encoding and decoding should not be needed.</blockquote></span>
+</p></div>
+  </section>
+
+  <section id="section_unencoded_in_rfc_3986_fragment" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_unencoded_in_rfc_3986_fragment">§ </a>As RFC 3986 URI fragment component</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+Doesn&#x27;t rule out any delimiter options not yet ruled out.</span>
+</p></div>
+  </section>
+
+  <section id="section_unencoded_in_rfc_8141_nss" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_unencoded_in_rfc_8141_nss">§ </a>As RFC 8141 URN NSS components</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+Doesn&#x27;t rule out any delimiter options not yet ruled out.
+Specifically this does not rule out &#x22;:&#x22; as that is allowed in NSS sub-parts.</span>
+</p></div>
+  </section>
+
+  <section id="section_unencoded_in_rfc_8141_rq_f" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_unencoded_in_rfc_8141_rq_f">§ </a>As RFC 8141 URN rq-, and f-component</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+Covered by URI query and fragment sections.</span>
+</p></div>
+  </section>
+
+  </section>
+
+  <section id="section_encoded_contexts" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_encoded_contexts">§ </a>VPath must be used escaped/quoted/encoded in following contexts</h3>
+
+  <section id="section_quoted_string" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_quoted_string">§ </a>In HTTP/1.1 headers always as a quoted-string</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+URI&#x27;s in general need to be quoted here and VPath is URI-like.
+This retains &#x22;@&#x22; as an allowed delimiter.</span>
+</p></div>
+  </section>
+
+  <section id="section_in_rfc_3986_segment_nz_nc" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_in_rfc_3986_segment_nz_nc">§ </a>In URI relative-part with no scheme must be prefixed with &#x22;./&#x22;</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+This retains &#x22;:&#x22; as an allowed delimiter which segment-nz-nc would
+otherwise prevent.</span>
+</p></div>
+  </section>
+
+  <section id="section_x_www_form_urlencoded" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_x_www_form_urlencoded">§ </a>In form fields as x-www-form-urlencoded</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+Encoded and serialized as per <a href="https://url.spec.whatwg.org/#urlencoded-serializing" class="vdoc type-vdoc-reference">https://url.spec.whatwg.org/#urlencoded-serializing</a></span>
+</p></div>
+  </section>
+
+  </section>
+
+  <section id="section_tilde_problem" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_tilde_problem">§ </a>The tilde problem with URN RFC 2141 is solved by RFC 8141</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+RFC 2141 reserves &#x22;~&#x22; but encodeURIComponent doesn&#x27;t encode it. To
+maintain direct drop-in 2141 compatibility would require disallowing
+&#x22;~&#x22; from the character set. This in turn would complicate specific
+javascript domain implementations as they would have to encode &#x22;~&#x22;
+separately without being able to solely rely on encodeURIComponent.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">As this concern is not likely to be a problem in practice anyway we
+choose to refer to RFC 8141 for URN&#x27;s which removes &#x22;~&#x22; from the set of
+reserved character. This solves this (relatively theoretical) issue.</span>
+</p></div>
+  </section>
+
+  </section>
+
+  </body>
+</html>

@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-prerelease.15](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.14...v0.35.0-prerelease.15) (2019-11-26)
+
+
+### Bug Fixes
+
+* All 4 rest API GET routes ([e416e14](https://github.com/valaatech/kernel/commit/e416e14a5eb3a9a2031f895ef1ef358bb03f4edc))
+* attach fastify routes immediately after preparation ([d43f1b5](https://github.com/valaatech/kernel/commit/d43f1b54ff972f7d1d0252ac31c5c4e56f24a0ff))
+* nested valk spreaders, vpath object notation ([e712f9a](https://github.com/valaatech/kernel/commit/e712f9a5129f7793ba66ef99199f6683af16cf89))
+* revdoc generation for es6 imports ([5db67a6](https://github.com/valaatech/kernel/commit/5db67a64bc3dcbd56e2e78b32cba4c4f70a3676c))
+
+
+### Features
+
+* Add revelation.views and revelation.spindles sections ([a85c079](https://github.com/valaatech/kernel/commit/a85c079690215742ecb0984437c45d18edffdb53))
+
+
+
+
+
 # [0.35.0-prerelease.14](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.13...v0.35.0-prerelease.14) (2019-11-07)
 
 

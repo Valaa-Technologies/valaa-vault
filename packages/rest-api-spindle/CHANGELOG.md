@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-prerelease.15](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.14...v0.35.0-prerelease.15) (2019-11-26)
+
+
+### Bug Fixes
+
+* All 4 rest API GET routes ([e416e14](https://github.com/valaatech/kernel/commit/e416e14a5eb3a9a2031f895ef1ef358bb03f4edc))
+* attach fastify routes immediately after preparation ([d43f1b5](https://github.com/valaatech/kernel/commit/d43f1b54ff972f7d1d0252ac31c5c4e56f24a0ff))
+
+
+
+
+
 # [0.35.0-prerelease.14](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.13...v0.35.0-prerelease.14) (2019-11-07)
 
 

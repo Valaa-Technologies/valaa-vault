@@ -75,11 +75,11 @@ the other building blocks.</span>
     <h3><a aria-label="§" href="#example_test_global_rules">§ </a>The testGlobalRules shared by the example testdocs</h3>
 <pre><code><span class="vdoc type-vdoc-node"> ({
   scriptRoot: [&#x22;$~gh:0123456789abcdef&#x22;],
-  &#x22;:ofMapping&#x22;: {
+  &#x22;&#x26;ofMapping&#x22;: {
     tags: { routeRoot: [&#x22;$~u4:aaaabbbb-cccc-dddd-eeee-ffffffffffff&#x22;] },
   },
-  &#x22;:ofMethod&#x22;: { POST: {
-    &#x22;:ofMapping&#x22;: { tags: {
+  &#x22;&#x26;ofMethod&#x22;: { POST: {
+    &#x22;&#x26;ofMapping&#x22;: { tags: {
       oesType: &#x22;tag&#x22;,
     }, },
   }, },
@@ -167,14 +167,18 @@ inside out to get the appropriate JSON schema layout.</span>
 <div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> exportSchemaOf({
   [ObjectSchema]: {
     description: &#x22;simple object type&#x22;,
-    valospace: { reflection: [&#x22;.:forwardedFields&#x22;] },
+    valospace: {
+      reflection: [&#x22;.:forwardedFields&#x22;],
+    },
   },
   name: StringType,
 })</span>
 </code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node"> ({
   description: &#x22;simple object type&#x22;,
   type: &#x22;object&#x22;,
-  valospace: { reflection: [&#x22;.&#x22;, [&#x22;:&#x22;, &#x22;forwardedFields&#x22;]] },
+  valospace: {
+    reflection: [[&#x22;.&#x22;, [&#x22;:&#x22;, &#x22;forwardedFields&#x22;]]],
+  },
   properties: { name: { type: &#x22;string&#x22; } },
 })</span>
 </code></pre></blockquote></span>
@@ -195,7 +199,9 @@ field <a href="@valos/kernel#name" class="vdoc type-vdoc-reference">@valos/kerne
 </code></pre></blockquote>via<blockquote><pre><code><span class="vdoc type-vdoc-node"> exportSchemaOf(type)</span>
 </code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node"> ({
   type: &#x22;string&#x22;,
-  valospace: { reflection: [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;name&#x22;]] },
+  valospace: {
+    reflection: [[&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;name&#x22;]]],
+  },
 })</span>
 </code></pre></blockquote></span>
 </p></div></span>
@@ -249,19 +255,16 @@ which contains the resource &#x27;id&#x27; field.</span>
   valospace: {
     gate: {
       name: &#x22;tags&#x22;,
-      projection: [&#x22;@&#x22;,
-        [&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;TAG&#x22;]], [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;target&#x22;]],
-      ],
+      projection: [[&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;TAG&#x22;]], [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;target&#x22;]]],
     },
   },
   properties: {
-    $V: {
-      type: &#x22;object&#x22;,
+    $V: { type: &#x22;object&#x22;,
+      valospace: {},
       properties: {
-        id: {
+        id: { type: &#x22;string&#x22;,
           pattern: &#x22;^[a-zA-Z0-9\\-_.~]+$&#x22;,
-          type: &#x22;string&#x22;,
-          valospace: { reflection: [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;rawId&#x22;]] }
+          valospace: { reflection: [[&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;rawId&#x22;]]] }
         },
       },
     },
@@ -317,16 +320,14 @@ where the target resource is a Tag type defined earlier.</span>
   type: &#x22;array&#x22;,
   valospace: {
     mappingName: &#x22;tags&#x22;,
-    reflection: [&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;TAGS&#x22;]],
+    reflection: [[&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;TAGS&#x22;]]],
   },
-  items: {
-    type: &#x22;object&#x22;,
+  items: { type: &#x22;object&#x22;,
     properties: {
       highlight: { type: &#x22;boolean&#x22; },
-      $V: {
-        type: &#x22;object&#x22;,
-        properties: { href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; } },
-        valospace: { targetType: &#x22;TestTag#&#x22; }
+      $V: { type: &#x22;object&#x22;,
+        valospace: { targetType: &#x22;TestTag&#x22;, gate: { name: &#x22;tags&#x22; } },
+        properties: { href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; } }
       },
     },
   },
@@ -387,56 +388,46 @@ where the target resource is a Tag type defined earlier.</span>
   valospace: {
     gate: {
       name: &#x22;things&#x22;,
-      projection: [&#x22;@&#x22;,
-        [&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;THING&#x22;]], [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;target&#x22;]],
-      ],
+      projection: [[&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;THING&#x22;]], [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;target&#x22;]]],
     },
-    reflection: [&#x22;.&#x22;, [&#x22;:&#x22;, &#x22;fields&#x22;]],
+    reflection: [[&#x22;.&#x22;, [&#x22;:&#x22;, &#x22;fields&#x22;]]],
   },
   properties: {
-    $V: {
-      type: &#x22;object&#x22;,
+    $V: { type: &#x22;object&#x22;,
+      valospace: {},
       properties: {
-        id: {
-          type: &#x22;string&#x22;, pattern: &#x22;^[a-zA-Z0-9\\-_.~]+$&#x22;,
-          valospace: { reflection: [&#x22;@&#x22;,
+        id: { type: &#x22;string&#x22;,
+          pattern: &#x22;^[a-zA-Z0-9\\-_.~]+$&#x22;,
+          valospace: { reflection: [
             [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;owner&#x22;]], [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;rawId&#x22;]],
           ], },
         },
       },
     },
-    contact: {
+    contact: { type: &#x22;object&#x22;, properties: {
       email: { type: &#x22;string&#x22; },
       facebook: { type: &#x22;string&#x22; },
       linkedin: { type: &#x22;string&#x22; },
       phone: { type: &#x22;string&#x22; },
       website: { type: &#x22;string&#x22; }
-    },
+    }, },
     description: { type: &#x22;string&#x22; },
     icon: { type: &#x22;string&#x22; },
-    image: {
-      type: &#x22;string&#x22;,
-      valospace: { reflection: [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;name&#x22;]] },
+    image: { type: &#x22;string&#x22;,
+      valospace: { reflection: [[&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;name&#x22;]]] },
     },
     name: { type: &#x22;string&#x22; },
-    tags: {
-      type: &#x22;array&#x22;,
+    tags: { type: &#x22;array&#x22;,
       valospace: {
         mappingName: &#x22;tags&#x22;,
-        reflection: [&#x22;@&#x22;,
-          [&#x22;.&#x22;, [&#x22;:&#x22;, &#x22;tags&#x22;]], [&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;TAG&#x22;]]
-        ],
+        reflection: [[&#x22;.&#x22;, [&#x22;:&#x22;, &#x22;tags&#x22;]], [&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;TAG&#x22;]]],
       },
-      items: {
-        type: &#x22;object&#x22;,
+      items: { type: &#x22;object&#x22;,
         valospace: { filterable: true },
         properties: {
-          $V: {
-            type: &#x22;object&#x22;,
-            valospace: { targetType: &#x22;TestTag#&#x22; },
-            properties: {
-              href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; },
-            },
+          $V: { type: &#x22;object&#x22;,
+            valospace: { targetType: &#x22;TestTag&#x22;, gate: { name: &#x22;tags&#x22; } },
+            properties: { href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; } },
           },
           highlight: { type: &#x22;boolean&#x22; },
         },
@@ -502,10 +493,11 @@ TestThingType gate projection.</span>
   url: &#x22;/things/:resourceId&#x22;,
   schema: {
     description: &#x22;Get the contents of a TestThing route resource&#x22;,
-    querystring: { fields: {
-      type: &#x22;string&#x22;,
-      pattern: &#x22;^([a-zA-Z0-9\\-_.~/*$]*(\\,([a-zA-Z0-9\\-_.~/*$])*)*)?$&#x22;
-    }, },
+    querystring: {
+      fields: { type: &#x22;string&#x22;,
+        pattern: &#x22;^([a-zA-Z0-9\\-_.~/*$]*(\\,([a-zA-Z0-9\\-_.~/*$])*)*)?$&#x22;
+      },
+    },
     response: {
       200: &#x22;TestThing#&#x22;,
       404: { type: &#x22;string&#x22; }
@@ -518,16 +510,14 @@ TestThingType gate projection.</span>
       schema: &#x22;TestThing#&#x22;,
       gate: {
         name: &#x22;things&#x22;,
-        projection: [&#x22;@&#x22;,
-          [&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;THING&#x22;]], [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;target&#x22;]],
-        ],
+        projection: [[&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;THING&#x22;]], [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;target&#x22;]]],
       },
     },
     rules: {
-      resource: [&#x22;!&#x22;, [&#x22;$&#x22;, &#x22;valk&#x22;, &#x22;ref&#x22;],
-        [&#x22;!&#x22;, [&#x22;:&#x22;, &#x22;request&#x22;], [&#x22;:&#x22;, &#x22;params&#x22;], [&#x22;:&#x22;, &#x22;resourceId&#x22;]]
-      ],
-      routeRoot: null,
+      resource: [[&#x22;!&#x22;, [&#x22;$&#x22;, &#x22;valk&#x22;, &#x22;ref&#x22;],
+        [&#x22;@&#x22;, [&#x22;!&#x22;, [&#x22;:&#x22;, &#x22;request&#x22;], [&#x22;:&#x22;, &#x22;params&#x22;], [&#x22;:&#x22;, &#x22;resourceId&#x22;]]]
+      ]],
+      routeRoot: [[&#x22;:&#x22;, null]],
     },
   },
 })</span>
@@ -569,32 +559,23 @@ resource. The remaining fields of the body are set as the mapping
 content. Similarily the response will contain the newly created target
 resource content in *response.$V.target* with the rest of the response
 containing the mapping.&#x60;,
-    body: {
-      type: &#x22;object&#x22;,
+    body: { type: &#x22;object&#x22;,
       valospace: { filterable: true },
       properties: {
-        $V: {
-          type: &#x22;object&#x22;,
-          valospace: { targetType: &#x22;TestTag#&#x22; },
-          properties: {
-            href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; },
-          },
+        $V: { type: &#x22;object&#x22;,
+          valospace: { targetType: &#x22;TestTag&#x22;, gate: { name: &#x22;tags&#x22; } },
+          properties: { href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; } },
         },
         highlight: { type: &#x22;boolean&#x22; },
       },
     },
-    querystring: undefined,
     response: {
-      200: {
-        type: &#x22;object&#x22;,
+      200: { type: &#x22;object&#x22;,
         valospace: { filterable: true },
         properties: {
-          $V: {
-            type: &#x22;object&#x22;,
-            valospace: { targetType: &#x22;TestTag#&#x22; },
-            properties: {
-              href: { type: &#x22;string&#x22; },
-              rel: { type: &#x22;string&#x22; },
+          $V: { type: &#x22;object&#x22;,
+            valospace: { targetType: &#x22;TestTag&#x22;, gate: { name: &#x22;tags&#x22; } },
+            properties: { href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; },
               target: &#x22;TestTag#&#x22;,
             },
           },
@@ -610,31 +591,22 @@ containing the mapping.&#x60;,
       schema: &#x22;TestThing#&#x22;,
       gate: {
         name: &#x22;things&#x22;,
-        projection: [&#x22;@&#x22;,
-          [&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;THING&#x22;]], [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;target&#x22;]],
-        ],
+        projection: [[&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;THING&#x22;]], [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;target&#x22;]]],
       },
     },
     relation: {
       name: &#x22;tags&#x22;,
-      schema: {
-        type: &#x22;array&#x22;,
+      schema: { type: &#x22;array&#x22;,
         valospace: {
           mappingName: &#x22;tags&#x22;,
-          reflection: [&#x22;@&#x22;,
-            [&#x22;.&#x22;, [&#x22;:&#x22;, &#x22;tags&#x22;]], [&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;TAG&#x22;]],
-          ]
+          reflection: [[&#x22;.&#x22;, [&#x22;:&#x22;, &#x22;tags&#x22;]], [&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;TAG&#x22;]]]
         },
-        items: {
-          type: &#x22;object&#x22;,
+        items: { type: &#x22;object&#x22;,
           valospace: { filterable: true },
           properties: {
-            $V: {
-              type: &#x22;object&#x22;,
-              valospace: { targetType: &#x22;TestTag#&#x22; },
-              properties: {
-                href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; },
-              },
+            $V: { type: &#x22;object&#x22;,
+              valospace: { targetType: &#x22;TestTag&#x22;, gate: { name: &#x22;tags&#x22; } },
+              properties: { href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; } },
             },
             highlight: { type: &#x22;boolean&#x22; }
           },
@@ -647,21 +619,22 @@ containing the mapping.&#x60;,
       &#x22;scriptRoot&#x22;, &#x22;oesType&#x22;,
     ],
     rules: {
-      doCreateMappingAndTarget: [&#x22;&#x27;&#x22;,
-        [&#x22;!&#x22;, [&#x22;:&#x22;, &#x22;scriptRoot&#x22;]],
-        [&#x22;!&#x22;, [&#x22;$&#x22;, &#x22;valk&#x22;, &#x22;invoke&#x22;], [&#x22;:&#x22;, &#x22;createOES&#x22;],
-          [&#x22;!&#x22;, [&#x22;:&#x22;, &#x22;oesType&#x22;]],
-          [&#x22;!&#x22;, [&#x22;:&#x22;, &#x22;resource&#x22;]],
-          [&#x22;!&#x22;, [&#x22;:&#x22;, &#x22;request&#x22;], [&#x22;:&#x22;, &#x22;body&#x22;], [&#x22;:&#x22;, &#x22;$V&#x22;],
-            [&#x22;:&#x22;, &#x22;target&#x22;], [&#x22;:&#x22;, &#x22;name&#x22;]],
-        ]
-      ],
-      oesType: &#x22;tag&#x22;,
-      resource: [&#x22;!&#x22;, [&#x22;$&#x22;, &#x22;valk&#x22;, &#x22;ref&#x22;],
-        [&#x22;!&#x22;, [&#x22;:&#x22;, &#x22;request&#x22;], [&#x22;:&#x22;, &#x22;params&#x22;], [&#x22;:&#x22;, &#x22;resourceId&#x22;]]
-      ],
-      routeRoot: [&#x22;$&#x22;, &#x22;~u4&#x22;, &#x22;aaaabbbb-cccc-dddd-eeee-ffffffffffff&#x22;],
-      scriptRoot: [&#x22;$&#x22;, &#x22;~gh&#x22;, &#x22;0123456789abcdef&#x22;],
+      doCreateMappingAndTarget: [[&#x22;&#x27;&#x22;,
+        [&#x22;@&#x22;, [&#x22;!&#x22;, [&#x22;:&#x22;, &#x22;scriptRoot&#x22;]]],
+        [&#x22;@&#x22;, [&#x22;!&#x22;, [&#x22;$&#x22;, &#x22;valk&#x22;, &#x22;invoke&#x22;], [&#x22;:&#x22;, &#x22;createOES&#x22;],
+          [&#x22;@&#x22;, [&#x22;!&#x22;, [&#x22;:&#x22;, &#x22;oesType&#x22;]]],
+          [&#x22;@&#x22;, [&#x22;!&#x22;, [&#x22;:&#x22;, &#x22;resource&#x22;]]],
+          [&#x22;@&#x22;, [&#x22;!&#x22;, [&#x22;:&#x22;, &#x22;request&#x22;], [&#x22;:&#x22;, &#x22;body&#x22;], [&#x22;:&#x22;, &#x22;$V&#x22;],
+            [&#x22;:&#x22;, &#x22;target&#x22;], [&#x22;:&#x22;, &#x22;name&#x22;]
+          ]],
+        ]],
+      ]],
+      oesType: [[&#x22;:&#x22;, &#x22;tag&#x22;]],
+      resource: [[&#x22;!&#x22;, [&#x22;$&#x22;, &#x22;valk&#x22;, &#x22;ref&#x22;],
+        [&#x22;@&#x22;, [&#x22;!&#x22;, [&#x22;:&#x22;, &#x22;request&#x22;], [&#x22;:&#x22;, &#x22;params&#x22;], [&#x22;:&#x22;, &#x22;resourceId&#x22;]]]
+      ]],
+      routeRoot: [[&#x22;$&#x22;, &#x22;~u4&#x22;, &#x22;aaaabbbb-cccc-dddd-eeee-ffffffffffff&#x22;]],
+      scriptRoot: [[&#x22;$&#x22;, &#x22;~gh&#x22;, &#x22;0123456789abcdef&#x22;]],
     },
   },
 })</span>
@@ -688,6 +661,98 @@ in type and property &#x60;valospace.reflection&#x60; fields.</span>
     <h3><a aria-label="§" href="#example_projections_common">§ </a>Data common to all projections examples</h3>
 <pre><code><span class="vdoc type-vdoc-node"> ({ shared: &#x22;shared example data example&#x22; })</span>
 </code></pre></blockquote></span>
+
+</blockquote>
+<blockquote class="vdoc type-revdoc-example">
+    <span id="example_extended_resource_type" class="vdoc type-vdoc-node">
+    <h3><a aria-label="§" href="#example_extended_resource_type">§ </a>expanded schema of an extended resource type</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> namedResourceType(&#x22;TestNewsItem&#x22;, exports.TestThingType, {
+  [ObjectSchema]: {
+    description: &#x22;Test News Item resource&#x22;,
+    valospace: {
+      gate: {
+        name: &#x22;news&#x22;,
+        projection: [[&#x22;out*:NEWSITEM&#x22;], [&#x22;.$V:target&#x22;]],
+        filterCondition: [&#x22;.:visible&#x22;],
+      },
+    },
+  },
+  startTime: exports.TestDateTimeType,
+  endTime: exports.TestDateTimeType,
+})</span>
+</code></pre></blockquote>via<blockquote><pre><code><span class="vdoc type-vdoc-node"> exportSchemaOf(type)</span>
+</code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node"> ({
+    schemaName: &#x22;TestNewsItem&#x22;,
+    type: &#x22;object&#x22;,
+    description: &#x22;Test News Item resource&#x22;,
+    valospace: {
+      gate: {
+        name: &#x22;news&#x22;,
+        projection: [[&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;NEWSITEM&#x22;]], [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;target&#x22;]]],
+        filterCondition: [&#x22;.:visible&#x22;],
+      },
+      reflection: [[&#x22;.&#x22;, [&#x22;:&#x22;, &#x22;fields&#x22;]]],
+    },
+    properties: {
+      $V: { type: &#x22;object&#x22;,
+        valospace: {},
+        properties: {
+          id: { type: &#x22;string&#x22;,
+            pattern: &#x22;^[a-zA-Z0-9\\-_.~]+$&#x22;,
+            valospace: { reflection: [
+              [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;owner&#x22;]], [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;rawId&#x22;]],
+            ], },
+          },
+        },
+      },
+      contact: { type: &#x22;object&#x22;, properties: {
+        email: { type: &#x22;string&#x22; },
+        facebook: { type: &#x22;string&#x22; },
+        linkedin: { type: &#x22;string&#x22; },
+        phone: { type: &#x22;string&#x22; },
+        website: { type: &#x22;string&#x22; }
+      }, },
+      description: { type: &#x22;string&#x22; },
+      icon: { type: &#x22;string&#x22; },
+      image: { type: &#x22;string&#x22;,
+        valospace: { reflection: [[&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;name&#x22;]]] },
+      },
+      name: { type: &#x22;string&#x22; },
+      tags: { type: &#x22;array&#x22;,
+        valospace: {
+          mappingName: &#x22;tags&#x22;,
+          reflection: [[&#x22;.&#x22;, [&#x22;:&#x22;, &#x22;tags&#x22;]], [&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;TAG&#x22;]]],
+        },
+        items: { type: &#x22;object&#x22;,
+          valospace: { filterable: true },
+          properties: {
+            $V: { type: &#x22;object&#x22;,
+              valospace: { targetType: &#x22;TestTag&#x22;, gate: { name: &#x22;tags&#x22; } },
+              properties: { href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; } },
+            },
+            highlight: { type: &#x22;boolean&#x22; },
+          },
+        },
+      },
+      visible: { type: &#x22;boolean&#x22; },
+      startTime: { type: &#x22;object&#x22;,
+        valospace: {},
+        properties: {
+          unixSeconds: { type: &#x22;number&#x22; },
+          zone: { type: &#x22;string&#x22; }
+        },
+      },
+      endTime: { type: &#x22;object&#x22;,
+        valospace: {},
+        properties: {
+          unixSeconds: { type: &#x22;number&#x22; },
+          zone: { type: &#x22;string&#x22; }
+        },
+      },
+    },
+  })</span>
+</code></pre></blockquote></span>
+</p></div></span>
 
 </blockquote>
   </section>

@@ -252,7 +252,7 @@
         {
           "@type": "vdoc:CharacterData",
           "vdoc:content": [
-            " ({\n  scriptRoot: [\"$~gh:0123456789abcdef\"],\n  \":ofMapping\": {\n    tags: { routeRoot: [\"$~u4:aaaabbbb-cccc-dddd-eeee-ffffffffffff\"] },\n  },\n  \":ofMethod\": { POST: {\n    \":ofMapping\": { tags: {\n      oesType: \"tag\",\n    }, },\n  }, },\n})"
+            " ({\n  scriptRoot: [\"$~gh:0123456789abcdef\"],\n  \"&ofMapping\": {\n    tags: { routeRoot: [\"$~u4:aaaabbbb-cccc-dddd-eeee-ffffffffffff\"] },\n  },\n  \"&ofMethod\": { POST: {\n    \"&ofMapping\": { tags: {\n      oesType: \"tag\",\n    }, },\n  }, },\n})"
           ]
         }
       ]
@@ -318,7 +318,7 @@
                   {
                     "@type": "vdoc:CharacterData",
                     "vdoc:content": [
-                      " exportSchemaOf({\n  [ObjectSchema]: {\n    description: \"simple object type\",\n    valospace: { reflection: [\".:forwardedFields\"] },\n  },\n  name: StringType,\n})"
+                      " exportSchemaOf({\n  [ObjectSchema]: {\n    description: \"simple object type\",\n    valospace: {\n      reflection: [\".:forwardedFields\"],\n    },\n  },\n  name: StringType,\n})"
                     ]
                   }
                 ]
@@ -331,7 +331,7 @@
                 {
                   "@type": "vdoc:CharacterData",
                   "vdoc:content": [
-                    " ({\n  description: \"simple object type\",\n  type: \"object\",\n  valospace: { reflection: [\".\", [\":\", \"forwardedFields\"]] },\n  properties: { name: { type: \"string\" } },\n})"
+                    " ({\n  description: \"simple object type\",\n  type: \"object\",\n  valospace: {\n    reflection: [[\".\", [\":\", \"forwardedFields\"]]],\n  },\n  properties: { name: { type: \"string\" } },\n})"
                   ]
                 }
               ]
@@ -420,7 +420,7 @@
                 {
                   "@type": "vdoc:CharacterData",
                   "vdoc:content": [
-                    " ({\n  type: \"string\",\n  valospace: { reflection: [\".\", [\"$\", \"V\", \"name\"]] },\n})"
+                    " ({\n  type: \"string\",\n  valospace: {\n    reflection: [[\".\", [\"$\", \"V\", \"name\"]]],\n  },\n})"
                   ]
                 }
               ]
@@ -514,7 +514,7 @@
                 {
                   "@type": "vdoc:CharacterData",
                   "vdoc:content": [
-                    " ({\n  schemaName: \"TestTag\",\n  description: \"Test Tag resource\",\n  type: \"object\",\n  valospace: {\n    gate: {\n      name: \"tags\",\n      projection: [\"@\",\n        [\"out*\", [\":\", \"TAG\"]], [\".\", [\"$\", \"V\", \"target\"]],\n      ],\n    },\n  },\n  properties: {\n    $V: {\n      type: \"object\",\n      properties: {\n        id: {\n          pattern: \"^[a-zA-Z0-9\\\\-_.~]+$\",\n          type: \"string\",\n          valospace: { reflection: [\".\", [\"$\", \"V\", \"rawId\"]] }\n        },\n      },\n    },\n    name: { summary: \"Tag name\", type: \"string\" },\n  },\n})"
+                    " ({\n  schemaName: \"TestTag\",\n  description: \"Test Tag resource\",\n  type: \"object\",\n  valospace: {\n    gate: {\n      name: \"tags\",\n      projection: [[\"out*\", [\":\", \"TAG\"]], [\".\", [\"$\", \"V\", \"target\"]]],\n    },\n  },\n  properties: {\n    $V: { type: \"object\",\n      valospace: {},\n      properties: {\n        id: { type: \"string\",\n          pattern: \"^[a-zA-Z0-9\\\\-_.~]+$\",\n          valospace: { reflection: [[\".\", [\"$\", \"V\", \"rawId\"]]] }\n        },\n      },\n    },\n    name: { summary: \"Tag name\", type: \"string\" },\n  },\n})"
                   ]
                 }
               ]
@@ -695,7 +695,7 @@
                 {
                   "@type": "vdoc:CharacterData",
                   "vdoc:content": [
-                    " ({\n  type: \"array\",\n  valospace: {\n    mappingName: \"tags\",\n    reflection: [\"out*\", [\":\", \"TAGS\"]],\n  },\n  items: {\n    type: \"object\",\n    properties: {\n      highlight: { type: \"boolean\" },\n      $V: {\n        type: \"object\",\n        properties: { href: { type: \"string\" }, rel: { type: \"string\" } },\n        valospace: { targetType: \"TestTag#\" }\n      },\n    },\n  },\n})"
+                    " ({\n  type: \"array\",\n  valospace: {\n    mappingName: \"tags\",\n    reflection: [[\"out*\", [\":\", \"TAGS\"]]],\n  },\n  items: { type: \"object\",\n    properties: {\n      highlight: { type: \"boolean\" },\n      $V: { type: \"object\",\n        valospace: { targetType: \"TestTag\", gate: { name: \"tags\" } },\n        properties: { href: { type: \"string\" }, rel: { type: \"string\" } }\n      },\n    },\n  },\n})"
                   ]
                 }
               ]
@@ -763,7 +763,7 @@
                 {
                   "@type": "vdoc:CharacterData",
                   "vdoc:content": [
-                    " ({\n  schemaName: \"TestThing\",\n  type: \"object\",\n  valospace: {\n    gate: {\n      name: \"things\",\n      projection: [\"@\",\n        [\"out*\", [\":\", \"THING\"]], [\".\", [\"$\", \"V\", \"target\"]],\n      ],\n    },\n    reflection: [\".\", [\":\", \"fields\"]],\n  },\n  properties: {\n    $V: {\n      type: \"object\",\n      properties: {\n        id: {\n          type: \"string\", pattern: \"^[a-zA-Z0-9\\\\-_.~]+$\",\n          valospace: { reflection: [\"@\",\n            [\".\", [\"$\", \"V\", \"owner\"]], [\".\", [\"$\", \"V\", \"rawId\"]],\n          ], },\n        },\n      },\n    },\n    contact: {\n      email: { type: \"string\" },\n      facebook: { type: \"string\" },\n      linkedin: { type: \"string\" },\n      phone: { type: \"string\" },\n      website: { type: \"string\" }\n    },\n    description: { type: \"string\" },\n    icon: { type: \"string\" },\n    image: {\n      type: \"string\",\n      valospace: { reflection: [\".\", [\"$\", \"V\", \"name\"]] },\n    },\n    name: { type: \"string\" },\n    tags: {\n      type: \"array\",\n      valospace: {\n        mappingName: \"tags\",\n        reflection: [\"@\",\n          [\".\", [\":\", \"tags\"]], [\"out*\", [\":\", \"TAG\"]]\n        ],\n      },\n      items: {\n        type: \"object\",\n        valospace: { filterable: true },\n        properties: {\n          $V: {\n            type: \"object\",\n            valospace: { targetType: \"TestTag#\" },\n            properties: {\n              href: { type: \"string\" }, rel: { type: \"string\" },\n            },\n          },\n          highlight: { type: \"boolean\" },\n        },\n      },\n    },\n    visible: { type: \"boolean\" },\n  },\n})"
+                    " ({\n  schemaName: \"TestThing\",\n  type: \"object\",\n  valospace: {\n    gate: {\n      name: \"things\",\n      projection: [[\"out*\", [\":\", \"THING\"]], [\".\", [\"$\", \"V\", \"target\"]]],\n    },\n    reflection: [[\".\", [\":\", \"fields\"]]],\n  },\n  properties: {\n    $V: { type: \"object\",\n      valospace: {},\n      properties: {\n        id: { type: \"string\",\n          pattern: \"^[a-zA-Z0-9\\\\-_.~]+$\",\n          valospace: { reflection: [\n            [\".\", [\"$\", \"V\", \"owner\"]], [\".\", [\"$\", \"V\", \"rawId\"]],\n          ], },\n        },\n      },\n    },\n    contact: { type: \"object\", properties: {\n      email: { type: \"string\" },\n      facebook: { type: \"string\" },\n      linkedin: { type: \"string\" },\n      phone: { type: \"string\" },\n      website: { type: \"string\" }\n    }, },\n    description: { type: \"string\" },\n    icon: { type: \"string\" },\n    image: { type: \"string\",\n      valospace: { reflection: [[\".\", [\"$\", \"V\", \"name\"]]] },\n    },\n    name: { type: \"string\" },\n    tags: { type: \"array\",\n      valospace: {\n        mappingName: \"tags\",\n        reflection: [[\".\", [\":\", \"tags\"]], [\"out*\", [\":\", \"TAG\"]]],\n      },\n      items: { type: \"object\",\n        valospace: { filterable: true },\n        properties: {\n          $V: { type: \"object\",\n            valospace: { targetType: \"TestTag\", gate: { name: \"tags\" } },\n            properties: { href: { type: \"string\" }, rel: { type: \"string\" } },\n          },\n          highlight: { type: \"boolean\" },\n        },\n      },\n    },\n    visible: { type: \"boolean\" },\n  },\n})"
                   ]
                 }
               ]
@@ -889,7 +889,7 @@
                 {
                   "@type": "vdoc:CharacterData",
                   "vdoc:content": [
-                    " ({\n  name: \"things\", method: \"GET\", category: \"resource\",\n  url: \"/things/:resourceId\",\n  schema: {\n    description: \"Get the contents of a TestThing route resource\",\n    querystring: { fields: {\n      type: \"string\",\n      pattern: \"^([a-zA-Z0-9\\\\-_.~/*$]*(\\\\,([a-zA-Z0-9\\\\-_.~/*$])*)*)?$\"\n    }, },\n    response: {\n      200: \"TestThing#\",\n      404: { type: \"string\" }\n    }\n  },\n  config: {\n    requiredRules: [\"routeRoot\", \"resource\"],\n    resource: {\n      name: \"TestThing\",\n      schema: \"TestThing#\",\n      gate: {\n        name: \"things\",\n        projection: [\"@\",\n          [\"out*\", [\":\", \"THING\"]], [\".\", [\"$\", \"V\", \"target\"]],\n        ],\n      },\n    },\n    rules: {\n      resource: [\"!\", [\"$\", \"valk\", \"ref\"],\n        [\"!\", [\":\", \"request\"], [\":\", \"params\"], [\":\", \"resourceId\"]]\n      ],\n      routeRoot: null,\n    },\n  },\n})"
+                    " ({\n  name: \"things\", method: \"GET\", category: \"resource\",\n  url: \"/things/:resourceId\",\n  schema: {\n    description: \"Get the contents of a TestThing route resource\",\n    querystring: {\n      fields: { type: \"string\",\n        pattern: \"^([a-zA-Z0-9\\\\-_.~/*$]*(\\\\,([a-zA-Z0-9\\\\-_.~/*$])*)*)?$\"\n      },\n    },\n    response: {\n      200: \"TestThing#\",\n      404: { type: \"string\" }\n    }\n  },\n  config: {\n    requiredRules: [\"routeRoot\", \"resource\"],\n    resource: {\n      name: \"TestThing\",\n      schema: \"TestThing#\",\n      gate: {\n        name: \"things\",\n        projection: [[\"out*\", [\":\", \"THING\"]], [\".\", [\"$\", \"V\", \"target\"]]],\n      },\n    },\n    rules: {\n      resource: [[\"!\", [\"$\", \"valk\", \"ref\"],\n        [\"@\", [\"!\", [\":\", \"request\"], [\":\", \"params\"], [\":\", \"resourceId\"]]]\n      ]],\n      routeRoot: [[\":\", null]],\n    },\n  },\n})"
                   ]
                 }
               ]
@@ -943,7 +943,7 @@
                 {
                   "@type": "vdoc:CharacterData",
                   "vdoc:content": [
-                    " ({\n  name: \"things\", method: \"POST\", category: \"mapping\",\n  url: \"/things/:resourceId/tags\",\n  schema: {\n    description:\n`Create a new TestTag resource\n*using **body.$V.target** as content* and then a new 'tags'\nmapping to it from the source TestThing route\nresource. The remaining fields of the body are set as the mapping\ncontent. Similarily the response will contain the newly created target\nresource content in *response.$V.target* with the rest of the response\ncontaining the mapping.`,\n    body: {\n      type: \"object\",\n      valospace: { filterable: true },\n      properties: {\n        $V: {\n          type: \"object\",\n          valospace: { targetType: \"TestTag#\" },\n          properties: {\n            href: { type: \"string\" }, rel: { type: \"string\" },\n          },\n        },\n        highlight: { type: \"boolean\" },\n      },\n    },\n    querystring: undefined,\n    response: {\n      200: {\n        type: \"object\",\n        valospace: { filterable: true },\n        properties: {\n          $V: {\n            type: \"object\",\n            valospace: { targetType: \"TestTag#\" },\n            properties: {\n              href: { type: \"string\" },\n              rel: { type: \"string\" },\n              target: \"TestTag#\",\n            },\n          },\n          highlight: { type: \"boolean\" },\n        },\n      },\n      403: { type: \"string\" }\n    }\n  },\n  config: {\n    resource: {\n      name: \"TestThing\",\n      schema: \"TestThing#\",\n      gate: {\n        name: \"things\",\n        projection: [\"@\",\n          [\"out*\", [\":\", \"THING\"]], [\".\", [\"$\", \"V\", \"target\"]],\n        ],\n      },\n    },\n    relation: {\n      name: \"tags\",\n      schema: {\n        type: \"array\",\n        valospace: {\n          mappingName: \"tags\",\n          reflection: [\"@\",\n            [\".\", [\":\", \"tags\"]], [\"out*\", [\":\", \"TAG\"]],\n          ]\n        },\n        items: {\n          type: \"object\",\n          valospace: { filterable: true },\n          properties: {\n            $V: {\n              type: \"object\",\n              valospace: { targetType: \"TestTag#\" },\n              properties: {\n                href: { type: \"string\" }, rel: { type: \"string\" },\n              },\n            },\n            highlight: { type: \"boolean\" }\n          },\n        },\n      },\n    },\n    target: { name: \"TestTag\", schema: \"TestTag#\" },\n    requiredRules: [\n      \"routeRoot\", \"resource\", \"doCreateMappingAndTarget\",\n      \"scriptRoot\", \"oesType\",\n    ],\n    rules: {\n      doCreateMappingAndTarget: [\"'\",\n        [\"!\", [\":\", \"scriptRoot\"]],\n        [\"!\", [\"$\", \"valk\", \"invoke\"], [\":\", \"createOES\"],\n          [\"!\", [\":\", \"oesType\"]],\n          [\"!\", [\":\", \"resource\"]],\n          [\"!\", [\":\", \"request\"], [\":\", \"body\"], [\":\", \"$V\"],\n            [\":\", \"target\"], [\":\", \"name\"]],\n        ]\n      ],\n      oesType: \"tag\",\n      resource: [\"!\", [\"$\", \"valk\", \"ref\"],\n        [\"!\", [\":\", \"request\"], [\":\", \"params\"], [\":\", \"resourceId\"]]\n      ],\n      routeRoot: [\"$\", \"~u4\", \"aaaabbbb-cccc-dddd-eeee-ffffffffffff\"],\n      scriptRoot: [\"$\", \"~gh\", \"0123456789abcdef\"],\n    },\n  },\n})"
+                    " ({\n  name: \"things\", method: \"POST\", category: \"mapping\",\n  url: \"/things/:resourceId/tags\",\n  schema: {\n    description:\n`Create a new TestTag resource\n*using **body.$V.target** as content* and then a new 'tags'\nmapping to it from the source TestThing route\nresource. The remaining fields of the body are set as the mapping\ncontent. Similarily the response will contain the newly created target\nresource content in *response.$V.target* with the rest of the response\ncontaining the mapping.`,\n    body: { type: \"object\",\n      valospace: { filterable: true },\n      properties: {\n        $V: { type: \"object\",\n          valospace: { targetType: \"TestTag\", gate: { name: \"tags\" } },\n          properties: { href: { type: \"string\" }, rel: { type: \"string\" } },\n        },\n        highlight: { type: \"boolean\" },\n      },\n    },\n    response: {\n      200: { type: \"object\",\n        valospace: { filterable: true },\n        properties: {\n          $V: { type: \"object\",\n            valospace: { targetType: \"TestTag\", gate: { name: \"tags\" } },\n            properties: { href: { type: \"string\" }, rel: { type: \"string\" },\n              target: \"TestTag#\",\n            },\n          },\n          highlight: { type: \"boolean\" },\n        },\n      },\n      403: { type: \"string\" }\n    }\n  },\n  config: {\n    resource: {\n      name: \"TestThing\",\n      schema: \"TestThing#\",\n      gate: {\n        name: \"things\",\n        projection: [[\"out*\", [\":\", \"THING\"]], [\".\", [\"$\", \"V\", \"target\"]]],\n      },\n    },\n    relation: {\n      name: \"tags\",\n      schema: { type: \"array\",\n        valospace: {\n          mappingName: \"tags\",\n          reflection: [[\".\", [\":\", \"tags\"]], [\"out*\", [\":\", \"TAG\"]]]\n        },\n        items: { type: \"object\",\n          valospace: { filterable: true },\n          properties: {\n            $V: { type: \"object\",\n              valospace: { targetType: \"TestTag\", gate: { name: \"tags\" } },\n              properties: { href: { type: \"string\" }, rel: { type: \"string\" } },\n            },\n            highlight: { type: \"boolean\" }\n          },\n        },\n      },\n    },\n    target: { name: \"TestTag\", schema: \"TestTag#\" },\n    requiredRules: [\n      \"routeRoot\", \"resource\", \"doCreateMappingAndTarget\",\n      \"scriptRoot\", \"oesType\",\n    ],\n    rules: {\n      doCreateMappingAndTarget: [[\"'\",\n        [\"@\", [\"!\", [\":\", \"scriptRoot\"]]],\n        [\"@\", [\"!\", [\"$\", \"valk\", \"invoke\"], [\":\", \"createOES\"],\n          [\"@\", [\"!\", [\":\", \"oesType\"]]],\n          [\"@\", [\"!\", [\":\", \"resource\"]]],\n          [\"@\", [\"!\", [\":\", \"request\"], [\":\", \"body\"], [\":\", \"$V\"],\n            [\":\", \"target\"], [\":\", \"name\"]\n          ]],\n        ]],\n      ]],\n      oesType: [[\":\", \"tag\"]],\n      resource: [[\"!\", [\"$\", \"valk\", \"ref\"],\n        [\"@\", [\"!\", [\":\", \"request\"], [\":\", \"params\"], [\":\", \"resourceId\"]]]\n      ]],\n      routeRoot: [[\"$\", \"~u4\", \"aaaabbbb-cccc-dddd-eeee-ffffffffffff\"]],\n      scriptRoot: [[\"$\", \"~gh\", \"0123456789abcdef\"]],\n    },\n  },\n})"
                   ]
                 }
               ]
@@ -989,6 +989,9 @@
         },
         {
           "@id": "example_projections_common"
+        },
+        {
+          "@id": "example_extended_resource_type"
         }
       ]
     },
@@ -1002,6 +1005,58 @@
           "@type": "vdoc:CharacterData",
           "vdoc:content": [
             " ({ shared: \"shared example data example\" })"
+          ]
+        }
+      ]
+    },
+    "example_extended_resource_type": {
+      "@id": "example_extended_resource_type",
+      "@type": "revdoc:Example",
+      "dc:title": "expanded schema of an extended resource type",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            [
+              "we expect",
+              {
+                "vdoc:blockquote": true,
+                "vdoc:content": [
+                  {
+                    "@type": "vdoc:CharacterData",
+                    "vdoc:content": [
+                      " namedResourceType(\"TestNewsItem\", exports.TestThingType, {\n  [ObjectSchema]: {\n    description: \"Test News Item resource\",\n    valospace: {\n      gate: {\n        name: \"news\",\n        projection: [[\"out*:NEWSITEM\"], [\".$V:target\"]],\n        filterCondition: [\".:visible\"],\n      },\n    },\n  },\n  startTime: exports.TestDateTimeType,\n  endTime: exports.TestDateTimeType,\n})"
+                    ]
+                  }
+                ]
+              }
+            ],
+            [
+              "via",
+              {
+                "vdoc:blockquote": true,
+                "vdoc:content": [
+                  {
+                    "@type": "vdoc:CharacterData",
+                    "vdoc:content": [
+                      " exportSchemaOf(type)"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "toEqual",
+            {
+              "vdoc:blockquote": true,
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:CharacterData",
+                  "vdoc:content": [
+                    " ({\n    schemaName: \"TestNewsItem\",\n    type: \"object\",\n    description: \"Test News Item resource\",\n    valospace: {\n      gate: {\n        name: \"news\",\n        projection: [[\"out*\", [\":\", \"NEWSITEM\"]], [\".\", [\"$\", \"V\", \"target\"]]],\n        filterCondition: [\".:visible\"],\n      },\n      reflection: [[\".\", [\":\", \"fields\"]]],\n    },\n    properties: {\n      $V: { type: \"object\",\n        valospace: {},\n        properties: {\n          id: { type: \"string\",\n            pattern: \"^[a-zA-Z0-9\\\\-_.~]+$\",\n            valospace: { reflection: [\n              [\".\", [\"$\", \"V\", \"owner\"]], [\".\", [\"$\", \"V\", \"rawId\"]],\n            ], },\n          },\n        },\n      },\n      contact: { type: \"object\", properties: {\n        email: { type: \"string\" },\n        facebook: { type: \"string\" },\n        linkedin: { type: \"string\" },\n        phone: { type: \"string\" },\n        website: { type: \"string\" }\n      }, },\n      description: { type: \"string\" },\n      icon: { type: \"string\" },\n      image: { type: \"string\",\n        valospace: { reflection: [[\".\", [\"$\", \"V\", \"name\"]]] },\n      },\n      name: { type: \"string\" },\n      tags: { type: \"array\",\n        valospace: {\n          mappingName: \"tags\",\n          reflection: [[\".\", [\":\", \"tags\"]], [\"out*\", [\":\", \"TAG\"]]],\n        },\n        items: { type: \"object\",\n          valospace: { filterable: true },\n          properties: {\n            $V: { type: \"object\",\n              valospace: { targetType: \"TestTag\", gate: { name: \"tags\" } },\n              properties: { href: { type: \"string\" }, rel: { type: \"string\" } },\n            },\n            highlight: { type: \"boolean\" },\n          },\n        },\n      },\n      visible: { type: \"boolean\" },\n      startTime: { type: \"object\",\n        valospace: {},\n        properties: {\n          unixSeconds: { type: \"number\" },\n          zone: { type: \"string\" }\n        },\n      },\n      endTime: { type: \"object\",\n        valospace: {},\n        properties: {\n          unixSeconds: { type: \"number\" },\n          zone: { type: \"string\" }\n        },\n      },\n    },\n  })"
+                  ]
+                }
+              ]
+            }
           ]
         }
       ]

@@ -47,9 +47,9 @@
     "revdoc:package": "@valos/raem",
     "revdoc:prefix": "valos-raem",
     "revdoc:prefixIRI": "https://valospace.org/raem#",
-    "revdoc:version": "0.35.0-prerelease.14",
+    "revdoc:version": "0.35.0-prerelease.15",
     "respecConfig": {
-      "subtitle": "0.35.0-prerelease.14",
+      "subtitle": "0.35.0-prerelease.15",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -834,13 +834,13 @@
         "@type": "valos-kernel:Class",
         "rdfs:subClassOf": "valos-raem:VPathRule",
         "revdoc:brief": "VPath rule 'vrid' datatype",
-        "rdfs:comment": "The class of all resources representing the VPath pseudo-rule\n'vrid' (always begins with '@')"
+        "rdfs:comment": "The class of all resources representing the VPath pseudo-rule\n'vrid', ie. a resource identifier with VGRId as the first step (always\nbegins with '@')"
       },
       "Verbs": {
         "@type": "valos-kernel:Class",
         "rdfs:subClassOf": "valos-raem:VPathRule",
         "revdoc:brief": "VPath rule 'verbs' datatype",
-        "rdfs:comment": "The class of all resources representing the VPath pseudo-rule\n'verbs' (always begins with '@')."
+        "rdfs:comment": "The class of all resources representing the VPath pseudo-rule\n'verbs', ie. a path between other resources without a VGRId as the\nfirst step (always begins with '@')."
       },
       "VGRId": {
         "@type": "valos-kernel:Class",

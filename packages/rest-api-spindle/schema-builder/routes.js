@@ -1,6 +1,6 @@
 // @flow
 
-import { expandVPath, expandVKeyPath } from "~/raem/VPath";
+import { segmentVPath, segmentVKeyPath } from "~/raem/VPath";
 import { wrapError, dumpify, dumpObject, patchWith } from "~/tools";
 
 import {
@@ -504,7 +504,7 @@ function _setupRoute (route, userConfig, globalRules, resourceType, relationFiel
       schema: schemaRefOf(resourceType),
       gate: {
         ...valospace.gate,
-        projection: expandVPath(valospace.gate.projection).slice(1),
+        projection: segmentVPath(valospace.gate.projection).slice(1),
       },
     };
   }
@@ -538,7 +538,7 @@ function _setupRoute (route, userConfig, globalRules, resourceType, relationFiel
     if (route.config.rules[ruleName] === undefined) return undefined;
   }
   for (const [key, rule] of Object.entries(route.config.rules)) {
-    route.config.rules[key] = expandVKeyPath("@", rule).slice(1);
+    route.config.rules[key] = segmentVKeyPath("@", rule).slice(1);
   }
   for (const ruleName of (route.config.requiredRules || [])) {
     if (route.config.rules[ruleName] === undefined) {

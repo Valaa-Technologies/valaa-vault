@@ -1,6 +1,6 @@
 // @flow
 
-import { validateVPath, formVPath, expandVPath, expandVKeyPath } from ".";
+import { validateVPath, formVPath, segmentVPath, segmentVKeyPath } from ".";
 
 describe("VPath", () => {
   describe("VPath validation", () => {
@@ -16,7 +16,7 @@ describe("VPath", () => {
       expect(validateVPath("@!invoke:create:event:@!:source@:@!:body@.$V:target@.:name@@"))
           .toBeTruthy();
     });
-    it("Validates expanded VPaths", () => {
+    it("Validates segmented VPaths", () => {
       expect(validateVPath(["@", ["!", [":", "scriptRoot"]], ["!random"]]))
           .toBeTruthy();
       expect(validateVPath(["@", [
@@ -35,7 +35,7 @@ describe("VPath", () => {
         ],
       ]])).toBeTruthy();
     });
-    it("Validates expanded VPaths", () => {
+    it("Validates segmented VPaths", () => {
       expect(validateVPath([
         "@", ["!invoke:create:event", ["!:source"], ["@!:body@!:%24V@", ["!:target"], ["!:name"]]],
       ])).toBeTruthy();
@@ -88,33 +88,33 @@ describe("VPath", () => {
     });
   });
   describe("VPath parsing", () => {
-    it("Expands simple VPath's", () => {
-      expect(() => expandVPath(["!$"]))
+    it("Segments simple VPath's", () => {
+      expect(() => segmentVPath(["!$"]))
           .toThrow(/Invalid context-term/);
-      expect(() => expandVPath(["!:"]))
-          .toThrow(/Missing vparam vparam-value/);
-      expect(expandVPath(["!:$"]))
-          .toEqual(["@", ["!", [":"]]]);
-      expect(() => expandVPath(["@", ["!$"]]))
+      expect(() => segmentVPath(["!:"]))
+          .toThrow(/Invalid vparam value/);
+      expect(segmentVPath(["!:$"]))
+          .toEqual(["@", ["!", [":", ""]]]);
+      expect(() => segmentVPath(["@", ["!$"]]))
           .toThrow(/Invalid context-term/);
-      expect(expandVPath(["@", ["!:$"]]))
+      expect(segmentVPath(["@", ["!:$"]]))
+          .toEqual(["@", ["!", [":", ""]]]);
+      expect(segmentVPath(["@", ["!", [":"]]]))
           .toEqual(["@", ["!", [":"]]]);
-      expect(expandVPath(["@", ["!", [":"]]]))
-          .toEqual(["@", ["!", [":"]]]);
-      expect(expandVPath("@!:scriptRoot@!random@"))
+      expect(segmentVPath("@!:scriptRoot@!random@"))
           .toEqual(["@", ["!", [":", "scriptRoot"]], ["!random"]]);
-      expect(expandVPath("$~u4:aaaabbbb-cccc-dddd-eeee-ffffffffffff"))
+      expect(segmentVPath("$~u4:aaaabbbb-cccc-dddd-eeee-ffffffffffff"))
           .toEqual(["@", ["$", "~u4", "aaaabbbb-cccc-dddd-eeee-ffffffffffff"]]);
-      expect(expandVPath("@!invoke:create:@!:body$V:target:name@@"))
+      expect(segmentVPath("@!invoke:create:@!:body$V:target:name@@"))
           .toEqual(["@", [
             "!invoke", [":", "create"],
             [":", ["@", ["!", [":", "body"], ["$", "V", "target"], [":", "name"]]]],
           ]]);
-      expect(expandVPath("@$~u4:0000@!random@"))
+      expect(segmentVPath("@$~u4:0000@!random@"))
           .toEqual(["@", ["$", "~u4", "0000"], ["!random"]]);
     });
     it("Parses complex nested VPath's", () => {
-      expect(expandVPath("@!invoke:create:event:@!:source@:@!:body@.$V:target@.:name@@"))
+      expect(segmentVPath("@!invoke:create:event:@!:source@:@!:body@.$V:target@.:name@@"))
           .toEqual(["@", [
             "!invoke", [":", "create"], [":", "event"],
             [":", ["@", ["!", [":", "source"]]]],
@@ -124,7 +124,7 @@ describe("VPath", () => {
               [".", [":", "name"]],
             ]],
           ]]);
-      expect(expandVPath(
+      expect(segmentVPath(
           `@$~u4:55a5c4fb-1fd4-424f-8578-7b06ffdb3ef0${
             ""}@_$~pw:@.$pot:$:@.O.:7741938f-801a-4892-9cf0-dd59bd8c9166@@${
             ""}@-$pot-hypertwin:inLinks${
@@ -134,7 +134,7 @@ describe("VPath", () => {
         ["$", "~u4", "55a5c4fb-1fd4-424f-8578-7b06ffdb3ef0"],
         ["_", ["$", "~pw",
           ["@", [".",
-            ["$", "pot"],
+            ["$", "pot", ""],
             [":", ["@", [".O.", [":", "7741938f-801a-4892-9cf0-dd59bd8c9166"]]]]
           ]],
         ]],
@@ -144,7 +144,7 @@ describe("VPath", () => {
           [":", ["@", [".S*~",
             [":", ["@", ["$", "~pw",
               ["@", [".",
-                ["$", "pot"],
+                ["$", "pot", ""],
                 [":", ["@", [".O.", [":", "aa592f56-1d82-4484-8360-ad9b82d00592"]]]]
               ]],
             ]]],
@@ -152,8 +152,8 @@ describe("VPath", () => {
         ],
       ]);
     });
-    it("Expands embedded VPath's", () => {
-      expect(expandVPath(["@", ["!invoke:create:event",
+    it("Segments embedded VPath's", () => {
+      expect(segmentVPath(["@", ["!invoke:create:event",
         ["!:source"],
         ["@!:body@!:%24V@", ["!:target"], ["!:name"]],
       ]]))
@@ -167,7 +167,7 @@ describe("VPath", () => {
           ["!", [":", "name"]],
         ],
       ]]);
-      expect(expandVPath([
+      expect(segmentVPath([
         "@", ["!invoke:create:event", ["@!:source@"], ["@!:body@!:%24V@!:target@", ["!:name"]]],
       ]))
       .toEqual(["@", [
@@ -181,38 +181,38 @@ describe("VPath", () => {
         ],
       ]]);
     });
-    it("Expands VPath objects", () => {
-      expect(expandVPath([{ val: [] }]))
+    it("Segments VPath objects", () => {
+      expect(segmentVPath([{ val: [] }]))
           .toEqual(["@", ["-", [":"], ["@", [".", [":", "val"], ["@"]]]]]);
-      expect(expandVPath([{ val: ["@"] }]))
+      expect(segmentVPath([{ val: ["@"] }]))
           .toEqual(["@", ["-", [":"], ["@", [".", [":", "val"], ["@"]]]]]);
-      expect(expandVPath([{ val: undefined }]))
+      expect(segmentVPath([{ val: undefined }]))
           .toEqual(["@", ["-", [":"], ["@", [".", [":", "val"]]]]]);
-      expect(expandVPath([{ val: [":"] }]))
+      expect(segmentVPath([{ val: [":"] }]))
           .toEqual(["@", ["-", [":"], ["@", [".", [":", "val"], [":"]]]]]);
     });
-    it("Expands already expanded VPaths correctly", () => {
-      expect(expandVPath([["out*:TAGS"], [".$V:target"]]))
+    it("Segments already segmented VPaths correctly", () => {
+      expect(segmentVPath([["out*:TAGS"], [".$V:target"]]))
           .toEqual(["@", ["out*", [":", "TAGS"]], [".", ["$", "V", "target"]]]);
-      expect(expandVPath(["@", ["out*", [":", "TAGS"]], [".", ["$", "V", "target"]]]))
+      expect(segmentVPath(["@", ["out*", [":", "TAGS"]], [".", ["$", "V", "target"]]]))
           .toEqual(["@", ["out*", [":", "TAGS"]], [".", ["$", "V", "target"]]]);
-      expect(expandVPath([["out*", [":", "TAGS"]], [".", ["$", "V", "target"]]]))
+      expect(segmentVPath([["out*", [":", "TAGS"]], [".", ["$", "V", "target"]]]))
           .toEqual(["@", ["out*", [":", "TAGS"]], [".", ["$", "V", "target"]]]);
-      expect(expandVPath([[".$V:owner"], [".$V:rawId"]]))
+      expect(segmentVPath([[".$V:owner"], [".$V:rawId"]]))
           .toEqual(["@", [".", ["$", "V", "owner"]], [".", ["$", "V", "rawId"]]]);
     });
-    it("Doesn't expand spurious fields", () => {
-      expect(expandVPath(["!:$"]))
-          .toEqual(["@", ["!", [":"]]]);
-      expect(expandVPath(["!$random:$"]))
-          .toEqual(["@", ["!", ["$", "random"]]]);
-      expect(expandVPath(["!$random:$"])[1][1].length)
-          .toEqual(2);
-      expect(expandVPath(["@!:scriptRoot@!$random:$@"]))
-          .toEqual(["@", ["!", [":", "scriptRoot"]], ["!", ["$", "random"]]]);
+    it("Doesn't segment spurious fields", () => {
+      expect(segmentVPath(["!:$"]))
+          .toEqual(["@", ["!", [":", ""]]]);
+      expect(segmentVPath(["!$random:$"]))
+          .toEqual(["@", ["!", ["$", "random", ""]]]);
+      expect(segmentVPath(["!$random:$"])[1][1].length)
+          .toEqual(3);
+      expect(segmentVPath(["@!:scriptRoot@!$random:$@"]))
+          .toEqual(["@", ["!", [":", "scriptRoot"]], ["!", ["$", "random", ""]]]);
     });
-    it("Expands a non-trivial verb", () => {
-      expect(expandVPath(["!", ["$https:foobar.com/path"], [
+    it("Segments a non-trivial verb", () => {
+      expect(segmentVPath(["!", ["$https:foobar.com/path"], [
         "fetchedField",
         ["@", [".:fetchOptions"], [".:input"]]
       ]])).toEqual(["@", ["!",
@@ -223,26 +223,26 @@ describe("VPath", () => {
         ],
       ]]);
     });
-    it("Expands key paths", () => {
-      expect(expandVKeyPath(":", "value"))
+    it("Segments key paths", () => {
+      expect(segmentVKeyPath(":", "value"))
           .toEqual([":", "value"]);
-      expect(expandVKeyPath(null, ["!:$"]))
+      expect(segmentVKeyPath(null, ["!:$"]))
+          .toEqual(["@", ["!", [":", ""]]]);
+      expect(segmentVKeyPath(null, ["@", ["!:$"]]))
+          .toEqual(["@", ["!", [":", ""]]]);
+      expect(segmentVKeyPath(null, ["@", ["!", [":"]]]))
           .toEqual(["@", ["!", [":"]]]);
-      expect(expandVKeyPath(null, ["@", ["!:$"]]))
-          .toEqual(["@", ["!", [":"]]]);
-      expect(expandVKeyPath(null, ["@", ["!", [":"]]]))
-          .toEqual(["@", ["!", [":"]]]);
-      expect(expandVKeyPath("@", ["!:$"]))
-          .toEqual(["@", ["!", [":"]]]);
-      expect(expandVKeyPath("@", ["@", ["!:$"]]))
+      expect(segmentVKeyPath("@", ["!:$"]))
+          .toEqual(["@", ["!", [":", ""]]]);
+      expect(segmentVKeyPath("@", ["@", ["!:$"]]))
+          .toEqual(["@", [":", ["@", ["!", [":", ""]]]]]);
+      expect(segmentVKeyPath("@", ["@", ["!", [":"]]]))
           .toEqual(["@", [":", ["@", ["!", [":"]]]]]);
-      expect(expandVKeyPath("@", ["@", ["!", [":"]]]))
-          .toEqual(["@", [":", ["@", ["!", [":"]]]]]);
-      expect(expandVKeyPath(":", ["!:$"]))
-          .toEqual([":", ["@", ["!", [":"]]]]);
-      expect(expandVKeyPath(":", ["@", ["!:$"]]))
-          .toEqual([":", ["@", ["!", [":"]]]]);
-      // expect(expandVKeyPath(":", [":$"]))
+      expect(segmentVKeyPath(":", ["!:$"]))
+          .toEqual([":", ["@", ["!", [":", ""]]]]);
+      expect(segmentVKeyPath(":", ["@", ["!:$"]]))
+          .toEqual([":", ["@", ["!", [":", ""]]]]);
+      // expect(segmentVKeyPath(":", [":$"]))
       //    .toEqual([":", ["@", [":"]]]);
     });
   });

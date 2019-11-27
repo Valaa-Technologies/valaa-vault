@@ -122,7 +122,7 @@ async () => lazyPatchRevelations(gatewayMock, {}, {
           "test-lib": {
             preset: 10, overridden: 10, sessionDuration: 0,
             view: { focus: "focus to be overwritten", nulled: "nulled to be overwritten" },
-            expandedButUnbound: ["$un:bound"],
+            unboundAndUnsegmented: ["$un:bound"],
           },
         },
       },
@@ -136,7 +136,7 @@ async () => lazyPatchRevelations(gatewayMock, {}, {
           },
           identity: { "!!!": ["./config", "requireKey"] },
           sessionDuration: 86400,
-          expandedAlsoUnbound: ["$also:unbound"],
+          unboundButSegmented: ["$also:unbound"],
         }]],
         "test-lib": { overridden: 20 },
       },
@@ -153,8 +153,8 @@ async () => lazyPatchRevelations(gatewayMock, {}, {
           preset: 10, overridden: 20, sessionDuration: 86400,
           view: { focus: "valaa-aws://example.org/deployment?id=f0c5-f0c5", nulled: null },
           identity: "/site/revelation/config",
-          expandedButUnbound: ["$un:bound"],
-          expandedAlsoUnbound: ["$", "also", "unbound"],
+          unboundAndUnsegmented: ["$un:bound"],
+          unboundButSegmented: ["$", "also", "unbound"],
         }
       }
     }

@@ -53,7 +53,7 @@ describe("VPath to concrete VAKON valks", () => {
 
   it("Cements simple VPaths into VAKON", () => {
     expect(VALK.fromVPath("@!:scriptRoot@!$random:$@", { context: testContext }).toVAKON())
-        .toEqual(["§->", ["§$", "scriptRoot"], ["§!random"]]);
+        .toEqual(["§->", ["§$", "scriptRoot"], ["§!random", ""]]);
     expect(VALK.fromVPath("@!invoke:create:@!:body:%24V:target:name@@").toVAKON())
         .toEqual([
           "§invoke", "create",

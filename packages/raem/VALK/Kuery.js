@@ -1,6 +1,6 @@
 import { vRef } from "~/raem/VRL";
 import type { VRL } from "~/raem/VRL"; // eslint-disable-line no-duplicate-imports
-import { expandVPath, cementVPath } from "~/raem/VPath";
+import { segmentVPath, cementVPath } from "~/raem/VPath";
 
 import beaumpify from "~/tools/beaumpify";
 import invariantify, { invariantifyArray, invariantifyNumber, invariantifyString,
@@ -428,7 +428,7 @@ export default class Kuery {
   }
 
   fromVPath (vrid: string | Array<any>, options: { context: Object, type: ?string }): Kuery {
-    const expansion = expandVPath(vrid);
+    const expansion = segmentVPath(vrid);
     const cemented = cementVPath(expansion, options);
     return this._addRawVAKON(cemented, options && options.type);
   }

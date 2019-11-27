@@ -199,7 +199,7 @@ If this class is used as literal datatype URI the literal contains the
 flat string VPath rule representation. Otherwise when this class is
 the range of a property which is used as a predicate in a triple, and
 the object of the triple is not a literal, then the object contains
-the expanded representation of the VPath rule value as an rdf List.`
+the segmented representation of the VPath rule value as an rdf List.`
   },
   VPath: { "@type": "valos-kernel:Class",
     "rdfs:subClassOf": "valos-raem:VPathRule",

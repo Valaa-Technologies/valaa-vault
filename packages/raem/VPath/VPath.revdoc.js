@@ -88,45 +88,46 @@ an external lookup of URI prefixes and semantic definitions.`
     },
     "chapter#section_representations>3;VPath representations": {
       "#0": [`
-The primary representation of a VPath is a string, but there are other
-format specific representations.
+The canonical VPath is a string, but there are other format specific
+representations.
       `],
-      "chapter#section_shortcut_JSON>0;Shortcut VPath representation": {
+      "chapter#section_segmented_vpaths>0;Segmented VPath representation": {
         "#0": [`
-Shortcut VPath format is a compact object representation of a VPath as
-'human readable' JSON which can then be expanded to the canonical
-representation. In fact any JSON construct is a valid shortcut VPath,
-and as long as all initial array entries equal to "@", "$" and ":"  are
-escaped as [":", "@"], [":", "$"] and [":", ":"] the shortcut expansion
-will resolve back into the original JSON construct.
+Segmented VPath is a recursive partitioning of a VPath as a JSON object
+where each structural segment is expressed as an array. The first entry
+of each such segment is a string which denotes the segment type and the
+remaining entries contain the segment payload:
 `],
-      },
-      "chapter#section_expanded_JSON>0;Expanded JSON VPath representation": {
-        "#0": [`
-Expanded JSON is a canonical, recursive expansion of the VPath
-structure where each structural element is expressed as an array. The
-first entry of an element is a string which denotes the element type
-and the remaining entries contain the element payload:
-`],
-        "bulleted#expanded_element_types>1": [
-[`"@" for a vpath, remaining entries are the optional vgrid and verb
-  elements`],
-[`"$" for a param with second entry being a valid context term string
-  and third optional entry being the param value element`],
-[`":" for a param without a context-term and with the optional second
-  entry being the param value element`],
-[`for remaining elements the first entry is a verb type and other
-  entries are the param elements`],
+        "bulleted#segment_types>1": [
+[`"@" identifies a vpath segment with remaining entries as step
+  segments`],
+[`"$" identifies a vparam segment with its second entry being a valid
+  context term string and an optional third entry containing the vparam
+  value`],
+[`":" identifies a vparam segment without a context-term and with an
+  optional second entry containing the vparam value`],
+[`otherwise the segment type denotes the verb type of a verb segment
+  and remaining entries containing the parameter segments`],
         ],
         "#1": [`
 JSON numbers and strings can only appear as param values of "$" or
-":"-elements. JSON objects cannot appear.
+":"-segments. JSON objects cannot appear.
 A vpath which is used as a contextless param of a verb must appear
-directly without intermediate ":"-element (unlike in the string VPath
+directly without intermediate ":"-segments (unlike in the string VPath
 construct).
 Conversely a verb used as a contextless param must still be wrapped
-inside a "@"-element.`
+inside a "@"-segment.`
         ],
+      },
+      "chapter#section_shortcut_vpaths>0;Shortcut VPath representation": {
+        "#0": [`
+Shortcut VPath format is a compact object representation of a VPath as
+'human readable' JSON which can then be distributed to the canonical
+representation. In fact any JSON construct is a valid shortcut VPath,
+and as long as all initial array entries equal to "@", "$" and ":"  are
+escaped as [":", "@"], [":", "$"] and [":", ":"] the shortcut egment
+will resolve back into the original JSON construct.
+`],
       },
       "chapter#section_cemented_vpaths>1;Cemented VPaths": {
         "#0": [`
@@ -936,8 +937,8 @@ Rules out "=" , "&" from structural characters.
   `Note: This is completely regular. If the consumer is
   known to explicitly decode query values and because VPaths can
   contain "%" characters they must be appropriately symmetrically
-  encoded. This can result in double encoding. However as the intent is that VPath
-  expansion should be considered to be part of `,
+  encoded. This can result in double encoding. However as the intent is
+  that VPath expansion should be considered to be part of `,
   ref("the URI parsing and separation itself", "https://tools.ietf.org/html/rfc3986#section-2.4"),
   ` any  separate encoding and decoding should not be needed.`
 ),

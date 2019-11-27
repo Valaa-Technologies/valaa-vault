@@ -33,9 +33,8 @@ export {
 } from "./VRL";
 export {
                                       formVPath,
-                                      expandVPath,
-                                      expandVKeyPath,
-                                      expandVerb,
+                                      segmentVPath,
+                                      segmentVKeyPath,
                                       validateVPath,
                                       validateVKeyPath,
 } from "./VPath";

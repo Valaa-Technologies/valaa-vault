@@ -77,7 +77,7 @@ function formParamValue (value) {
   if (value === null) throw new Error(`Invalid param-value: null`);
   if (!Array.isArray(value)) throw new Error(`Invalid param-value with type ${typeof value}`);
   if (value[0] !== "@") {
-    throw new Error(`Invalid param-value: expanded vpath must begin with "@"`);
+    throw new Error(`Invalid param-value: vpath segment must begin with "@"`);
   }
   return formVPath(...value.slice(1));
 }

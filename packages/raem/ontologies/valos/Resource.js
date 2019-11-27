@@ -38,7 +38,7 @@ fields which are available even for unsourced bodies.`,
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
     "valos-raem:expressor": "$valos-raem:resolveVRIdTransient",
     "rdfs:comment":
-`The immutable, expanded object representation of the vrid of this
+`The immutable, segmented object representation of the vrid of this
 resource.`,
   },
 

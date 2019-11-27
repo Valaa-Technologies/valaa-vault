@@ -1,5 +1,5 @@
 const { dumpObject, wrapError } = require("../../tools/wrapError");
-const { expandVPath, expandVKeyPath } = require("./_expandOps");
+const { segmentVPath, segmentVKeyPath } = require("./_segmentOps");
 
 const {
   validateFormatTerm, validateVerbType, validateContextTerm, validateContextTermNS,
@@ -23,25 +23,25 @@ module.exports = {
 };
 
 function validateVPath (element) {
-  expandVPath(element);
+  segmentVPath(element);
   return element;
 }
 
 function validateVKeyPath (vkey, value) {
-  expandVKeyPath(vkey, value);
+  segmentVKeyPath(vkey, value);
   return value;
 }
 
 function validateFullVPath (element) {
-  const expandedVPath = expandVPath(element);
-  if (expandedVPath[0] !== "@") {
-    throw new Error(`Invalid vpath: expected "@" as element type, got "${expandedVPath[0]}"`);
+  const segmentedVPath = segmentVPath(element);
+  if (segmentedVPath[0] !== "@") {
+    throw new Error(`Invalid vpath: expected "@" as element type, got "${segmentedVPath[0]}"`);
   }
   return element;
 }
 
 function validateVRId (element) {
-  const [firstEntry, vgrid, ...verbs] = expandVPath(element);
+  const [firstEntry, vgrid, ...verbs] = segmentVPath(element);
   if (firstEntry !== "@") {
     throw new Error(`Invalid vrid: expected "@" as first entry`);
   }
@@ -51,7 +51,7 @@ function validateVRId (element) {
 }
 
 function validateVerbs (element) {
-  const [firstEntry, ...verbs] = expandVPath(element);
+  const [firstEntry, ...verbs] = segmentVPath(element);
   if (firstEntry !== "@") {
     throw new Error(`Invalid verbs: expected "@" as first entry`);
   }
@@ -60,7 +60,7 @@ function validateVerbs (element) {
 }
 
 function validateVGRId (element) {
-  const [firstEntry, formatTerm, paramValue, ...params] = expandVPath(element);
+  const [firstEntry, formatTerm, paramValue, ...params] = segmentVPath(element);
   if (firstEntry !== "$") {
     throw new Error(`Invalid vgrid: expected "$" as first entry`);
   }
@@ -71,14 +71,14 @@ function validateVGRId (element) {
 }
 
 function validateVerb (element) {
-  const [verbType, ...params] = expandVPath(element);
+  const [verbType, ...params] = segmentVPath(element);
   validateVerbType(verbType);
   params.forEach(validateVParam);
   return element;
 }
 
 function validateVParam (element) {
-  const expandedParam = (typeof element !== "string") ? element : expandVPath(element);
+  const expandedParam = (typeof element !== "string") ? element : segmentVPath(element);
   const [firstEntry, contextTerm, paramValue] =
       ((expandedParam.length === 1) || (expandedParam[0] !== "$"))
           ? [":", expandedParam[0]]

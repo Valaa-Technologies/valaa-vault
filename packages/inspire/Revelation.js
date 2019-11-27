@@ -1,6 +1,6 @@
 const path = require("path");
 
-const { expandVPath, cementVPath } = require("../raem/VPath");
+const { segmentVPath, cementVPath } = require("../raem/VPath");
 
 const inBrowser = require("../gateway-api/inBrowser").default;
 
@@ -383,8 +383,8 @@ function _cementSpreaderPath (spreader) {
   const shortcutVPath = (Array.isArray(spreader) && spreader[0] === "@")
        ? spreader
        : ["!"].concat(spreader);
-  const expandedVPath = expandVPath(shortcutVPath);
-  const cementedVPath = cementVPath(expandedVPath, { context: revelationContext });
+  const segmentedVPath = segmentVPath(shortcutVPath);
+  const cementedVPath = cementVPath(segmentedVPath, { context: revelationContext });
   return cementedVPath;
 }
 

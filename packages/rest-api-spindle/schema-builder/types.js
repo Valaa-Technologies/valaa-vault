@@ -1,6 +1,6 @@
 // @flow
 
-import { expandVPath } from "~/raem";
+import { segmentVPath } from "~/raem";
 import patchWith from "~/tools/patchWith";
 
 export const ObjectSchema = Symbol("Object-JSONSchema");
@@ -144,7 +144,7 @@ function _createRelationTypeTo (targetType, relationNameOrProjection, {
     ...relationProperties
 } = {}) {
   if (!targetType) throw new Error("targetType missing");
-  const reflection = expandVPath((typeof relationNameOrProjection === "string")
+  const reflection = segmentVPath((typeof relationNameOrProjection === "string")
       ? ["*out", [":", relationNameOrProjection]]
       : relationNameOrProjection
   ).slice(1);
@@ -197,12 +197,12 @@ export function exportSchemaOf (aType) {
   if (ret.valospace) {
     ret.valospace = { ...ret.valospace };
     if (ret.valospace.reflection) {
-      ret.valospace.reflection = expandVPath(ret.valospace.reflection).slice(1);
+      ret.valospace.reflection = segmentVPath(ret.valospace.reflection).slice(1);
     }
     if (ret.valospace.gate) {
       ret.valospace.gate = {
         ...ret.valospace.gate,
-        projection: expandVPath(ret.valospace.gate.projection).slice(1),
+        projection: segmentVPath(ret.valospace.gate.projection).slice(1),
       };
     }
     if (ret.valospace.targetType) {

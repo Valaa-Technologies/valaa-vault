@@ -1,14 +1,14 @@
 // @flow
 
-import { expandVPath, cementVPath } from "~/raem/VPath";
+import { segmentVPath, cementVPath } from "~/raem/VPath";
 
 export function _vakonpileVPath (vpath, runtime) {
-  const expandedVPath = expandVPath(vpath);
-  if ((expandedVPath.length === 1) && (expandedVPath[0] === "@")) return null;
+  const segmentedVPath = segmentVPath(vpath);
+  if ((segmentedVPath.length === 1) && (segmentedVPath[0] === "@")) return null;
   const stack = { context: ruleContextLookup, contextState: runtime, isPluralHead: false };
-  const ret = cementVPath(expandedVPath, stack);
+  const ret = cementVPath(segmentedVPath, stack);
   if (!stack.isPluralHead || ((ret[ret.length - 1] || [])[0] === "§map")) return ret;
-  if (expandedVPath[0] !== "@") return ["§->", ret, ["§map"]];
+  if (segmentedVPath[0] !== "@") return ["§->", ret, ["§map"]];
   ret.push(["§map"]);
   return ret;
 }

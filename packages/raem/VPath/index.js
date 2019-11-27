@@ -1,5 +1,5 @@
 const { formVPath, formVGRId, formVerb, formParam, formParamValue } = require("./_formOps");
-const { expandVPath, expandVKeyPath } = require("./_expandOps");
+const { segmentVPath, segmentVKeyPath } = require("./_segmentOps");
 const {
   validateVPath, validateVKeyPath, validateFullVPath,
   validateVRId, validateVerbs, validateVGRId,
@@ -27,7 +27,7 @@ module.exports = {
   validateContextTerm,
   validateContextTermNS,
   validateParamValueText,
-  expandVPath,
-  expandVKeyPath,
+  segmentVPath,
+  segmentVKeyPath,
   cementVPath,
 };

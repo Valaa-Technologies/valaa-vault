@@ -8,39 +8,39 @@ function cementVPath (vpath, stack /* : { context: Obje, contextState, isPluralH
 }
 
 function _cementVPath (stack, vpath, componentType, index) {
-  let expandedVPath = vpath;
+  let segmentedVPath = vpath;
   try {
     if (vpath === undefined) throw new Error("Cannot cement undefined vpath");
     if (componentType === "@") {
       if (!Array.isArray(vpath)) return (typeof vpath === "string") ? vpath : ["§'", vpath];
       if (vpath.length === 1) return ["§->", null];
     } else if (!Array.isArray(vpath) || (vpath[0] === "@")) {
-      expandedVPath = [":", vpath];
+      segmentedVPath = [":", vpath];
     }
-    const elementType = expandedVPath[0];
+    const elementType = segmentedVPath[0];
     const cementer = _cementersByType[elementType];
     if (cementer) {
-      return cementer(stack, expandedVPath, componentType);
+      return cementer(stack, segmentedVPath, componentType);
     }
     if (elementType[0] === "!") {
-      expandedVPath[0] = `§${elementType.slice(1)}`;
-      return _cementRest(stack, expandedVPath, "!", 1);
+      segmentedVPath[0] = `§${elementType.slice(1)}`;
+      return _cementRest(stack, segmentedVPath, "!", 1);
     }
     throw new Error(`unrecognized verb type: ${JSON.stringify(elementType)}`);
   } catch (error) {
     throw wrapError(error,
         new Error(
             `During _cementVPath(#${index} of a parent '${componentType}'-type component)`),
-        "\n\texpandedVPath:", ...dumpObject(expandedVPath),
+        "\n\tsegmentedVPath:", ...dumpObject(segmentedVPath),
         "\n\tcomponentType:", ...dumpObject(componentType));
   }
 }
 
-function _cementRest (stack, expandedVPath, componentType, initial) {
-  for (let i = initial; i !== expandedVPath.length; ++i) {
-    expandedVPath[i] = _cementVPath(Object.create(stack), expandedVPath[i], componentType, i);
+function _cementRest (stack, segmentedVPath, componentType, initial) {
+  for (let i = initial; i !== segmentedVPath.length; ++i) {
+    segmentedVPath[i] = _cementVPath(Object.create(stack), segmentedVPath[i], componentType, i);
   }
-  return expandedVPath;
+  return segmentedVPath;
 }
 
 const _singularLookup = {
@@ -93,20 +93,20 @@ function _invalidCementHead () {
   throw new Error(`Cannot cement: invalid VPath with "" as first entry`);
 }
 
-function _cementStatements (stack, expandedVPath) {
-  if (expandedVPath.length === 2) {
-    return _cementVPath(stack, expandedVPath[1], "@", 1);
+function _cementStatements (stack, segmentedVPath) {
+  if (segmentedVPath.length === 2) {
+    return _cementVPath(stack, segmentedVPath[1], "@", 1);
   }
   const fullPath = ["§->"];
-  for (let i = 1; i !== expandedVPath.length; ++i) {
-    if (expandedVPath[i][0] !== ":") {
-      fullPath.push(_cementVPath(stack, expandedVPath[i], "@", i));
+  for (let i = 1; i !== segmentedVPath.length; ++i) {
+    if (segmentedVPath[i][0] !== ":") {
+      fullPath.push(_cementVPath(stack, segmentedVPath[i], "@", i));
     } else {
       const arrayPath = ["§[]"];
       do {
-        arrayPath.push(_maybeEscapedCement(expandedVPath[i])
-            || _cementVPath(stack, expandedVPath[i], "*", i));
-      } while ((++i !== expandedVPath.length) && (expandedVPath[i][0] === ":"));
+        arrayPath.push(_maybeEscapedCement(segmentedVPath[i])
+            || _cementVPath(stack, segmentedVPath[i], "*", i));
+      } while ((++i !== segmentedVPath.length) && (segmentedVPath[i][0] === ":"));
       fullPath.push(arrayPath);
       --i;
       stack.isPluralHead = true;
@@ -115,29 +115,29 @@ function _cementStatements (stack, expandedVPath) {
   return (fullPath.length === 2) ? fullPath[1] : fullPath;
 }
 
-function _cementContextlessVParam (stack, expandedVPath, componentType) {
+function _cementContextlessVParam (stack, segmentedVPath, componentType) {
   return _cementVParam(
-      stack, ["$", "", expandedVPath[1]], (componentType === "@") ? ":" : componentType);
+      stack, ["$", "", segmentedVPath[1]], (componentType === "@") ? ":" : componentType);
 }
 
-function _cementVParam (stack, expandedVPath, componentType) {
+function _cementVParam (stack, segmentedVPath, componentType) {
   let cemented;
-  const contextTerm = expandedVPath[1];
+  const contextTerm = segmentedVPath[1];
   const termContext = stack.context[contextTerm];
   if (!contextTerm) {
-    cemented = (expandedVPath[2] === undefined)
+    cemented = (segmentedVPath[2] === undefined)
             ? ["§void"]
         : (componentType === ":")
-            && ((expandedVPath[2] === null) || (typeof expandedVPath[2] !== "object"))
-            ? ["§'", expandedVPath[2]]
-            : _cementVPath(stack, expandedVPath[2], "@");
+            && ((segmentedVPath[2] === null) || (typeof segmentedVPath[2] !== "object"))
+            ? ["§'", segmentedVPath[2]]
+            : _cementVPath(stack, segmentedVPath[2], "@");
     if (Array.isArray(cemented)) return cemented;
   } else if (!termContext) {
     throw new Error(`Cannot cement param: unrecognized context term '${contextTerm}'`);
-    // return ["§'", expandedVPath];
+    // return ["§'", segmentedVPath];
   } else {
-    const cementedParamValue = expandedVPath[2]
-        && _cementVPath(stack, expandedVPath[2], "@");
+    const cementedParamValue = segmentedVPath[2]
+        && _cementVPath(stack, segmentedVPath[2], "@");
     if (typeof termContext === "function") cemented = termContext;
     if (typeof cementedParamValue === "string") {
       if (cemented === undefined) cemented = (termContext.symbolFor || {})[cementedParamValue];
@@ -175,28 +175,28 @@ function _cementVParam (stack, expandedVPath, componentType) {
   }
 }
 
-function _cementComputation (stack, expandedVPath) {
-  const computationType = expandedVPath[0];
-  const first = _cementVPath(stack, expandedVPath[1], "!0", 1);
-  if (expandedVPath.length === 2) return first;
+function _cementComputation (stack, segmentedVPath) {
+  const computationType = segmentedVPath[0];
+  const first = _cementVPath(stack, segmentedVPath[1], "!0", 1);
+  if (segmentedVPath.length === 2) return first;
   if (first[0] === "§$") {
-    expandedVPath[0] = "§->";
-    expandedVPath[1] = first;
-    return _cementRest(stack, expandedVPath, "!*", 2);
+    segmentedVPath[0] = "§->";
+    segmentedVPath[1] = first;
+    return _cementRest(stack, segmentedVPath, "!*", 2);
   }
-  expandedVPath.splice(0, 2, ...first);
-  return _cementRest(stack, expandedVPath, computationType, first.length);
+  segmentedVPath.splice(0, 2, ...first);
+  return _cementRest(stack, segmentedVPath, computationType, first.length);
 }
 
-function _cementQuotation (stack, expandedVPath, componentType, index) {
-  expandedVPath[0] = "!";
-  return ["§'", _cementVPath(stack, expandedVPath, componentType, index)];
+function _cementQuotation (stack, segmentedVPath, componentType, index) {
+  segmentedVPath[0] = "!";
+  return ["§'", _cementVPath(stack, segmentedVPath, componentType, index)];
 }
 
-function _cementProperty (stack, expandedVPath, componentType) {
+function _cementProperty (stack, segmentedVPath, componentType) {
   // ref("@valos/raem/VPath#section_structured_scope_cementProperty")
-  const first = _cementVPath(stack, expandedVPath[1], ".", 1);
-  if (expandedVPath.length <= 2) {
+  const first = _cementVPath(stack, segmentedVPath[1], ".", 1);
+  if (segmentedVPath.length <= 2) {
     if (componentType !== "-") {
       const ret = Array.isArray(first) ? first : ["§..", first];
       return ((componentType === "@") && stack.isPluralHead)
@@ -208,13 +208,13 @@ function _cementProperty (stack, expandedVPath, componentType) {
     return [first, ["§'", ["@", [".", [":", first]]]]];
   }
   if (componentType === "-") {
-    if (expandedVPath.length > 3) {
+    if (segmentedVPath.length > 3) {
       throw new Error("Cannot cement object property: multi-param property verbs not supported");
     }
-    return [first, _maybeEscapedCement(expandedVPath[2])
-        || _cementVPath(stack, expandedVPath[2], ".", 2)];
+    return [first, _maybeEscapedCement(segmentedVPath[2])
+        || _cementVPath(stack, segmentedVPath[2], ".", 2)];
   }
-  const rest = _cementRest(stack, expandedVPath, ".", 2);
+  const rest = _cementRest(stack, segmentedVPath, ".", 2);
   const setter = [first, rest];
   if ((rest.length === 3)
       && ((rest[2] == null) || (rest[2] && rest[2][0] !== "§.<-"))) {
@@ -255,38 +255,38 @@ function _flattenObjectSetters (setters) {
   }
 }
 
-function _cementNamedCollection (stack, expandedVPath) {
-  const collectionType = expandedVPath[0];
-  const nameParam = _tryAsNameParam(expandedVPath[1]);
+function _cementNamedCollection (stack, segmentedVPath) {
+  const collectionType = segmentedVPath[0];
+  const nameParam = _tryAsNameParam(segmentedVPath[1]);
   const paramStack = Object.create(stack);
   paramStack.isPluralHead = paramStack.isPluralHead;
   const byNameSelector = (nameParam != null)
-      && _cementPluralProperty(stack, expandedVPath, collectionType);
-  if (byNameSelector && expandedVPath.length <= 2) return byNameSelector;
+      && _cementPluralProperty(stack, segmentedVPath, collectionType);
+  if (byNameSelector && segmentedVPath.length <= 2) return byNameSelector;
   stack.isPluralHead = (collectionType[0] === "*");
-  expandedVPath.splice(0, 2, stack.isPluralHead ? "§[]" : "§{}");
-  if (expandedVPath.length > 1) {
-    if (stack.isPluralHead) _cementRest(paramStack, expandedVPath, "*", 1);
+  segmentedVPath.splice(0, 2, stack.isPluralHead ? "§[]" : "§{}");
+  if (segmentedVPath.length > 1) {
+    if (stack.isPluralHead) _cementRest(paramStack, segmentedVPath, "*", 1);
     else {
-      for (let i = 1; i !== expandedVPath.length; ++i) {
-        if (expandedVPath[i][0] !== "@") {
+      for (let i = 1; i !== segmentedVPath.length; ++i) {
+        if (segmentedVPath[i][0] !== "@") {
           throw new Error(`Cannot cement named dictionary '${
             collectionType}': non-vpath params not supported`);
         }
-        if ((expandedVPath[i].length !== 2) || (expandedVPath[i][1][0] !== ".")) {
+        if ((segmentedVPath[i].length !== 2) || (segmentedVPath[i][1][0] !== ".")) {
           throw new Error(`Cannot cement named dictionary '${
             collectionType}': each param must be a path containing a single property verb`);
         }
-        expandedVPath[i] = _cementVPath(paramStack, expandedVPath[i][1], "-", i);
+        segmentedVPath[i] = _cementVPath(paramStack, segmentedVPath[i][1], "-", i);
       }
     }
   }
   // if (!isSequence) _flattenObjectSetters(cementedCollection);
   return !byNameSelector
-          ? expandedVPath
+          ? segmentedVPath
       : stack.isPluralHead
-          ? ["§concat", byNameSelector, expandedVPath]
-          : ["§append", ["§{}"], byNameSelector, expandedVPath];
+          ? ["§concat", byNameSelector, segmentedVPath]
+          : ["§append", ["§{}"], byNameSelector, segmentedVPath];
 }
 
 function _tryAsNameParam (vparam) {
@@ -295,31 +295,31 @@ function _tryAsNameParam (vparam) {
   return vparam;
 }
 
-function _cementSingularProperty (stack, expandedVPath) {
+function _cementSingularProperty (stack, segmentedVPath) {
   // ref("@valos/raem/VPath#section_structured_object_value")
-  const selector = _singularLookup[expandedVPath[0]];
+  const selector = _singularLookup[segmentedVPath[0]];
   if (selector === undefined) {
-    throw new Error(`Cannot cement singular '${expandedVPath[0]}': undefined property`);
+    throw new Error(`Cannot cement singular '${segmentedVPath[0]}': undefined property`);
   }
-  if (expandedVPath.length > 1) {
+  if (segmentedVPath.length > 1) {
     throw new Error(
-        `Cannot cement singular '${expandedVPath[0]}': multi-param selectors not allowed`);
+        `Cannot cement singular '${segmentedVPath[0]}': multi-param selectors not allowed`);
   }
   return selector;
 }
 
-function _cementPluralProperty (stack, expandedVPath) {
+function _cementPluralProperty (stack, segmentedVPath) {
   // ref("@valos/raem/VPath#section_structured_relation")
-  const field = _pluralLookup[expandedVPath[0]];
+  const field = _pluralLookup[segmentedVPath[0]];
   if (field === undefined) {
-    throw new Error(`Cannot cement plural '${expandedVPath[0]}': undefined property`);
+    throw new Error(`Cannot cement plural '${segmentedVPath[0]}': undefined property`);
   }
-  if (expandedVPath.length > 2) {
+  if (segmentedVPath.length > 2) {
     throw new Error(`Cannot cement plural '${field}': multi-param selectors not allowed`);
   }
-  stack.isPluralHead = (expandedVPath[0][0] === "*");
+  stack.isPluralHead = (segmentedVPath[0][0] === "*");
   return ["§->", false, field, false,
-    ..._filterByFieldValue("name", _cementVPath(stack, expandedVPath[1], "!")),
+    ..._filterByFieldValue("name", _cementVPath(stack, segmentedVPath[1], "!")),
     ...(stack.isPluralHead ? [] : [false, 0])
   ];
 }

@@ -5,15 +5,15 @@ import { validateVPath, formVPath, segmentVPath, segmentVKeyPath } from ".";
 describe("VPath", () => {
   describe("VPath validation", () => {
     it("Validates VPath strings", () => {
-      expect(validateVPath("@!:scriptRoot@!random@"))
+      expect(validateVPath("@!:scriptRoot@!random@@"))
           .toBeTruthy();
       expect(validateVPath("$~u4:0000"))
           .toBeTruthy();
-      expect(validateVPath("@!invoke:create:@!:body$V:target:name@@"))
+      expect(validateVPath("@!invoke:create:@!:body$V:target:name@@@@"))
           .toBeTruthy();
-      expect(validateVPath("@$~u4:0000@!random@"))
+      expect(validateVPath("@$~u4:0000@!random@@"))
           .toBeTruthy();
-      expect(validateVPath("@!invoke:create:event:@!:source@:@!:body@.$V:target@.:name@@"))
+      expect(validateVPath("@!invoke:create:event:@!:source@@:@!:body@.$V:target@.:name@@@@"))
           .toBeTruthy();
     });
     it("Validates segmented VPaths", () => {
@@ -37,26 +37,26 @@ describe("VPath", () => {
     });
     it("Validates segmented VPaths", () => {
       expect(validateVPath([
-        "@", ["!invoke:create:event", ["!:source"], ["@!:body@!:%24V@", ["!:target"], ["!:name"]]],
+        "@", ["!invoke:create:event", ["!:source"], ["@!:body@!:%24V@@", ["!:target"], ["!:name"]]],
       ])).toBeTruthy();
       expect(validateVPath([
-        "@", ["!invoke:create:event", ["!:source"], ["@!:body@!:%24V@!:target@"], ["!:name"]],
+        "@", ["!invoke:create:event", ["!:source"], ["@!:body@!:%24V@!:target@@"], ["!:name"]],
       ])).toBeTruthy();
     });
   });
-  describe("VPath minting", () => {
-    it("Mints simple VPaths", () => {
+  describe("VPath forming", () => {
+    it("Forms simple VPaths", () => {
       expect(formVPath(["!", "scriptRoot"], ["!random"]))
-          .toEqual("@!:scriptRoot@!random@");
+          .toEqual("@!:scriptRoot@!random@@");
       expect(formVPath([
         "!invoke",
         "create",
         ["@", ["!", "body", ["$", "V", "target"], "name"]],
-      ])).toEqual("@!invoke:create:@!:body$V:target:name@@");
+      ])).toEqual("@!invoke:create:@!:body$V:target:name@@@@");
       expect(formVPath(["$", "~u4", "0000"], ["!random"]))
-          .toEqual("@$~u4:0000@!random@");
+          .toEqual("@$~u4:0000@!random@@");
     });
-    it("Mints complex nested VPaths", () => {
+    it("Forms complex nested VPaths", () => {
       expect(formVPath([
         "!invoke",
         [":", "create"],
@@ -67,7 +67,7 @@ describe("VPath", () => {
           [".", ["$", "V", "target"]],
           [".", "name"],
         ]],
-      ])).toEqual("@!invoke:create:event:@!:source@:@!:body@.$V:target@.:name@@");
+      ])).toEqual("@!invoke:create:event:@!:source@@:@!:body@.$V:target@.:name@@@@");
       expect(formVPath(
         ["$", "~u4", "55a5c4fb-1fd4-424f-8578-7b06ffdb3ef0"],
         ["_", ["$", "~pw",
@@ -82,9 +82,9 @@ describe("VPath", () => {
           ]],
         ],
       )).toEqual(`@$~u4:55a5c4fb-1fd4-424f-8578-7b06ffdb3ef0${""
-        }@_$~pw:@.$pot:$:@.O.:7741938f-801a-4892-9cf0-dd59bd8c9166@@${""
-        }@-$pot-hypertwin:inLinks${""
-        }@*in~$pot:ownerOf:@.S*~:@$~pw:@.$pot:$:@.O.:aa592f56-1d82-4484-8360-ad9b82d00592@@@@@`);
+        }@_$~pw:@.$pot:$:@.O.:7741938f-801a-4892-9cf0-dd59bd8c9166@@@@${""
+        }@-$pot-hypertwin:inLinks@*in~$pot:ownerOf${""
+        }:@.S*~:@$~pw:@.$pot:$:@.O.:aa592f56-1d82-4484-8360-ad9b82d00592@@@@@@@@@@`);
     });
   });
   describe("VPath parsing", () => {
@@ -101,20 +101,20 @@ describe("VPath", () => {
           .toEqual(["@", ["!", [":", ""]]]);
       expect(segmentVPath(["@", ["!", [":"]]]))
           .toEqual(["@", ["!", [":"]]]);
-      expect(segmentVPath("@!:scriptRoot@!random@"))
+      expect(segmentVPath("@!:scriptRoot@!random@@"))
           .toEqual(["@", ["!", [":", "scriptRoot"]], ["!random"]]);
       expect(segmentVPath("$~u4:aaaabbbb-cccc-dddd-eeee-ffffffffffff"))
           .toEqual(["@", ["$", "~u4", "aaaabbbb-cccc-dddd-eeee-ffffffffffff"]]);
-      expect(segmentVPath("@!invoke:create:@!:body$V:target:name@@"))
+      expect(segmentVPath("@!invoke:create:@!:body$V:target:name@@@@"))
           .toEqual(["@", [
             "!invoke", [":", "create"],
             [":", ["@", ["!", [":", "body"], ["$", "V", "target"], [":", "name"]]]],
           ]]);
-      expect(segmentVPath("@$~u4:0000@!random@"))
+      expect(segmentVPath("@$~u4:0000@!random@@"))
           .toEqual(["@", ["$", "~u4", "0000"], ["!random"]]);
     });
     it("Parses complex nested VPath's", () => {
-      expect(segmentVPath("@!invoke:create:event:@!:source@:@!:body@.$V:target@.:name@@"))
+      expect(segmentVPath("@!invoke:create:event:@!:source@@:@!:body@.$V:target@.:name@@@@"))
           .toEqual(["@", [
             "!invoke", [":", "create"], [":", "event"],
             [":", ["@", ["!", [":", "source"]]]],
@@ -126,9 +126,9 @@ describe("VPath", () => {
           ]]);
       expect(segmentVPath(
           `@$~u4:55a5c4fb-1fd4-424f-8578-7b06ffdb3ef0${
-            ""}@_$~pw:@.$pot:$:@.O.:7741938f-801a-4892-9cf0-dd59bd8c9166@@${
-            ""}@-$pot-hypertwin:inLinks${
-            ""}@*in~$pot:ownerOf:@.S*~:@$~pw:@.$pot:$:@.O.:aa592f56-1d82-4484-8360-ad9b82d00592@@@@@`
+            ""}@_$~pw:@.$pot:$:@.O.:7741938f-801a-4892-9cf0-dd59bd8c9166@@@@${
+            ""}@-$pot-hypertwin:inLinks@*in~$pot:ownerOf${
+            ""}:@.S*~:@$~pw:@.$pot:$:@.O.:aa592f56-1d82-4484-8360-ad9b82d00592@@@@@@@@@@`
       )).toEqual([
         "@",
         ["$", "~u4", "55a5c4fb-1fd4-424f-8578-7b06ffdb3ef0"],
@@ -155,7 +155,7 @@ describe("VPath", () => {
     it("Segments embedded VPath's", () => {
       expect(segmentVPath(["@", ["!invoke:create:event",
         ["!:source"],
-        ["@!:body@!:%24V@", ["!:target"], ["!:name"]],
+        ["@!:body@!:%24V@@", ["!:target"], ["!:name"]],
       ]]))
       .toEqual(["@", [
         "!invoke", [":", "create"], [":", "event"],
@@ -168,7 +168,7 @@ describe("VPath", () => {
         ],
       ]]);
       expect(segmentVPath([
-        "@", ["!invoke:create:event", ["@!:source@"], ["@!:body@!:%24V@!:target@", ["!:name"]]],
+        "@", ["!invoke:create:event", ["@!:source@@"], ["@!:body@!:%24V@!:target@@", ["!:name"]]],
       ]))
       .toEqual(["@", [
         "!invoke", [":", "create"], [":", "event"],
@@ -208,7 +208,7 @@ describe("VPath", () => {
           .toEqual(["@", ["!", ["$", "random", ""]]]);
       expect(segmentVPath(["!$random:$"])[1][1].length)
           .toEqual(3);
-      expect(segmentVPath(["@!:scriptRoot@!$random:$@"]))
+      expect(segmentVPath(["@!:scriptRoot@!$random:$@@"]))
           .toEqual(["@", ["!", [":", "scriptRoot"]], ["!", ["$", "random", ""]]]);
     });
     it("Segments a non-trivial verb", () => {

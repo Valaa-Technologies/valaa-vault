@@ -105,7 +105,7 @@ async () => lazyPatchRevelations(gatewayMock,
     [0], {
       "!!!": [["$https:foobar.com/path"], ["*:$",
         [".:fetchedField"],
-        ["@.:fetchOptions@.:input@"],
+        ["@.:fetchOptions@.:input@@"],
       ]],
     },
     ["last"]),

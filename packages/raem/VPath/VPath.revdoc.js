@@ -15,17 +15,19 @@ module.exports = {
   },
   "chapter#abstract>0": {
     "#0": [
-`ValOS Paths ('VPaths') are strings which are used to identify
-valospace resources as well as paths between them.
+`ValOS Paths ('VPaths') are recursively structured general purpose
+strings. They have a simple grammar making them readily URI embeddable.
 
-The vpath strings have a recursive structure allowing for the
-expression of arbitrary relationships but also a grammar that is
-sufficiently restrictive for embedding into URI's and similar contexts.
+A step below JSON in generality they are the fundamental
+primitive used by valos to implement resource identifiers, valospace
+queries, deterministic JSON serialization, an intermediate language
+for computation, a configuration language, JSON-LD interactions and
+more.
 
-VPaths contain 'context terms' which refer to definitions provided by
-the surrounding context, usually as references to some external
-ontology. This allows VPath semantics to be extended in domain
-specific but reusable manner.`,
+VPaths have a formalized mechanism for making parameterized use of
+context-specific definitions. This enables integrations to semantic
+web. This context-specific yet formally semantic system forms the
+cornerstone of valos security architecture.`,
     ],
   },
   "chapter#sotd>1": {
@@ -39,6 +41,11 @@ but is only partially implemented by it.`,
 A subset of vpaths called 'vrids' contain a fixed starting point and
 identify valospace resources.
 
+VPaths contain 'context terms' which refer to definitions provided by
+the surrounding context, usually as references to some external
+ontology. This allows VPath semantics to be extended in domain
+specific but reusable manner.
+
 The primary example of a vpath context is the JSON-LD @context of a `,
 ref("ValOS event chronicle", "@valos/sourcerer/valos-event-log"), `
 which provides the semantics for all vpaths that appear inside the
@@ -47,24 +54,23 @@ chronicle.
   },
   "chapter#section_structure>3;VPath structure": {
     "#0": [
-`VPath structure has two primary building blocks: vsteps and vparams.`
+`VPath grammar only adds "@", ":" and "$" in addition to
+encodeURIComponent characters. VPath grammar has two primary building
+blocks: vsteps and vparams.`
     ],
     "bulleted#>0": [
 [`A vpath itself is an ordered sequence of "@"-separated vsteps, each
   of which logically depends on the preceding one.`],
-[`A vstep can have a 'verb type' and a sequence of "$" or ":"
-  -separated vparams, all logically independent of each other.`],
-[`A vparam can have a 'context term' and a value; this vparam value can
-  be a primitive or a fully nested vpath.`],
+[`A vstep can have a 'verb type' and a sequence of vparams, all
+  logically independent of each other.`],
+[`A vparam always contains a ":"-prefixed vvalue. The vvalue can
+  optionally be preceded with a "$"-prefixed context-term.`],
     ],
     "example#main_vpath_rules>1;Main VPath rules": abnf(
-`  vpath         = "@" vgrid-tail / vsteps-tail
-  vgrid-tail    = "$" vgrid "@" [ vsteps-tail ]
-  vsteps-tail   = verb "@" [ vsteps-tail ]
-  verb          = verb-type vparams
-  vparams       = [ vparam vparams ]
-  vparam        = [ "$" context-term ] ":" vparam-value
-  vparam-value  = "$" / 1*( unencoded / pct-encoded ) / vpath`
+`  vpath = "@" *(vstep "@") "@"
+  vstep  = [ verb-type ] *vparam
+  vparam = [ "$" context-term ] ":" vvalue
+  vvalue = vpath / "$" / 1*( unencoded / pct-encoded )`
     ),
     "#1":
 `VPaths serve two superficially distinct purposes as paths and as
@@ -91,21 +97,39 @@ an external lookup of URI prefixes and semantic definitions.`
 The canonical VPath is a string, but there are other format specific
 representations.
       `],
-      "chapter#section_segmented_vpaths>0;Segmented VPath representation": {
+      "chapter#section_vpath_urn>0;VPath URN-scheme (tentative)": {
+        "#0": [`
+A VRId VPath string can be expressed as an URN by removing the "@"
+prefix and the "@@" suffix and then prefixing the string with
+\`urn:valos:\`.
+`],
+        "example#1": [`
+Editorial Note: the urn:valos is fully speculative as of 2019-11. On
+one hand there is salient overlap between valos vrid and urn
+principles: URN calls for structured and managed process of name
+assignment and resolution and vrid system is precisely that. On the
+other hand vrid defers a lot of detail to specific vgrid format-term
+specifications which might prove problematic for actual standardization
+process. It is possible that instead of a generic urn:valos namespace
+there would be specific urn namespaces for specific vrid formats (e.g.
+urn:valos-u4, urn:valos-cc) or that urn:valos would stand for one
+specific format (which would most likely be the ~cc).`,
+        ],
+      },
+      "chapter#section_segmented_vpaths>1;Segmented VPath representation": {
         "#0": [`
 Segmented VPath is a recursive partitioning of a VPath as a JSON object
 where each structural segment is expressed as an array. The first entry
 of each such segment is a string which denotes the segment type and the
 remaining entries contain the segment payload:
 `],
-        "bulleted#segment_types>1": [
+        "bulleted#segment_types>0": [
 [`"@" identifies a vpath segment with remaining entries as step
   segments`],
 [`"$" identifies a vparam segment with its second entry being a valid
-  context term string and an optional third entry containing the vparam
-  value`],
+  context term string and an optional third entry containing the vvalue`],
 [`":" identifies a vparam segment without a context-term and with an
-  optional second entry containing the vparam value`],
+  optional second entry containing the vvalue`],
 [`otherwise the segment type denotes the verb type of a verb segment
   and remaining entries containing the parameter segments`],
         ],
@@ -119,7 +143,7 @@ Conversely a verb used as a contextless param must still be wrapped
 inside a "@"-segment.`
         ],
       },
-      "chapter#section_shortcut_vpaths>0;Shortcut VPath representation": {
+      "chapter#section_shortcut_vpaths>2;Shortcut VPath representation": {
         "#0": [`
 Shortcut VPath format is a compact object representation of a VPath as
 'human readable' JSON which can then be distributed to the canonical
@@ -129,7 +153,7 @@ escaped as [":", "@"], [":", "$"] and [":", ":"] the shortcut egment
 will resolve back into the original JSON construct.
 `],
       },
-      "chapter#section_cemented_vpaths>1;Cemented VPaths": {
+      "chapter#section_cemented_vpaths>3;Cemented VPaths": {
         "#0": [`
 VPaths contain context references but do not _contain_ knowledge about
 the context. This is to ensure that a VPath can be moved from a context
@@ -197,19 +221,19 @@ context structure which is to define both URI namespace prefixes as
 well as available semantics.`
       ],
     },
-    "chapter#section_vparam_value>3;'vparam-value' carries content": {
+    "chapter#section_vparam_value>3;'vvalue' carries content": {
       "#0": [`
 *vparams* is a sequence of vparam's, optionally prefixed with
-"$" and a context-term. The idiomatic vparam-value is a string.
+"$" and a context-term. The idiomatic vvalue is a string.
 If present a context-term may denote a URI prefix in which case the
-vparam-value forms the suffix of the full expanded URI reference.
+vvalue forms the suffix of the full expanded URI reference.
 However contexts are free to provide specific semantics for specific
 context-terms, such as interpreting them as the value type of the
-vparam-value etc.
+vvalue etc.
 
-"$" for a vparam-value denotes empty string.
+"$" for a vvalue denotes empty string.
 
-*vparam-value* both allows for fully
+*vvalue* both allows for fully
 unencoded nesting of vpath's as well as allows encoding of all unicode
 characters in percent encoded form (as per encodeURIComponent)`,
       ],
@@ -221,15 +245,12 @@ A verb is a one-to-maybe-many relationship between resources. A verb
 can be as simple as a trivial predicate of a triple or it can represent
 something as complex as a fully parameterized computational function
 call.`,
-    "example#main_verb_rules>0;Main verb rules": abnf(
-`  vsteps-tail   = verb "@" [ vsteps-tail ]
-  verb          = verb-type vparams
-  verb-type     = 1*unencoded
-
-  vparams       = [ vparam vparams ]
-  vparam        = [ "$" context-term ] ":" vparam-value
-  context-term  = ALPHA *unreserved-nt
-  vparam-value  = "$" / 1*( unencoded / pct-encoded ) / vpath
+    "example#main_verb_rules>0;Informative verb rules": abnf(
+`  vverb        = verb-type *vparam
+  vparam       = [ "$" context-term ] ":" vvalue
+  verb-type    = 1*unencoded
+  context-term = ALPHA *unreserved-nt
+  vvalue       = vpath / "$" / 1*( unencoded / pct-encoded )
 `),
       "#1": `
 A verb is made up of verb type and a sequence of vparams. The grammar
@@ -371,7 +392,7 @@ Following principles apply:`,
   evaluator.`],
           ],
           "example#example_verb_computation>1;Computation selector example": [
-`Triple pattern \`?s <urn:valos:!$valk:add$number:10:@!:myVal@> ?o\`
+`Triple pattern \`?s <urn:valos:!$valk:add$number:10:@!:myVal@@> ?o\`
 matches like:
 `, turtle(`
   ?_:0  valos:scope ?s
@@ -426,10 +447,9 @@ guidelines apply:`,
     "#0": `
 A VRId is a vpath which has vgrid as its first production
 (via vgrid-tail).`,
-    "example#main_vrid_rules>0;Main vrid rules": abnf(
-`  vpath         = "@" vgrid-tail / vsteps-tail
-  vgrid-tail    = "$" vgrid "@" [ vsteps-tail ]
-  vgrid         = format-term ":" vparam-value vparams
+    "example#main_vrid_rules>0;Informative vrid rules": abnf(
+`  vrid        = "@" "$" vgrid "@" *(vstep "@") "@"
+  vgrid       = format-term ":" vgrid-value *vparam
 `),
     "#1": [`
 The VRId can be directly used as the NSS part of an 'urn:valos:'
@@ -457,27 +477,25 @@ ref("JSON-LD context", "https://w3c.github.io/json-ld-syntax/#the-context"),
 The vgrid uniquely identifies a *global resource*. If a VRId contains
 a vgrid and no verbs this global resource is also the
 *referenced resource* of the VRId itself.`,
-      "example#main_vgrid_rules>0;Main vgrid rules": abnf(
-`  vgrid-tail    = "$" vgrid "@" [ vsteps-tail ]
-  vgrid         = format-term ":" vparam-value vparams
-  format-term   = "~" context-term
+      "example#main_vgrid_rules>0;Informative vgrid rules": abnf(
+`  vgrid         = format-term ":" vgrid-value *vparam
+  format-term   = "~" 1*unreserved-nt
+  vgrid-value   = 1*unreserved-nt
 
-  vparams       = [ vparam vparams ]
-  vparam        = [ "$" context-term ] ":" vparam-value
-  context-term  = ALPHA *unreserved-nt
-  vparam-value  = "$" / 1*( unencoded / pct-encoded ) / vpath
+  unreserved-nt = ALPHA / DIGIT / "-" / "_" / "."
+  ALPHA         = %x41-5A / %x61-7A                         ; A-Z / a-z
+  DIGIT         = %x30-39                                   ; 0-9
 `),
       "#1": [`
 The format-term defines the global resource identifier schema as well
 as often some (or all) characteristics of the resource.
 
-Some vgrid types restrict the vparam-value further, with only "$" in
-addition to *unreserved*  as specified in the `,
-ref("URI specification", "https://tools.ietf.org/html/rfc3986"), `).
-`,
+format-term and vgrid-value are subsets of verb-type and vvalue; vgrid
+restricts the grammar of these to unreserved-nt as specified in
+the `, ref("URI specification", "https://tools.ietf.org/html/rfc3986"), `).`,
       ],
       "example#2": [`
-Note: when using base64 encoded values as vgrid vparam-value, use the
+Note: when using base64 encoded values as vgrid vvalue, use the
 url-and-filename-ready`, ref("base64url characters",
 "https://tools.ietf.org/html/rfc4648#section-5"), `.`,
       ],
@@ -587,16 +605,16 @@ collisions by malicious event logs. These identifiers can thus only be
 used in trusted, protected environments.`,
       },
       [`chapter#section_vgrid_content_hash>1;${
-          ""}VGRId format "\`~bv\`": The content hash of Binary ValOS object`]: {
+          ""}VGRId format "\`~bvo\`": The content hash of Binary ValOS object`]: {
         "#0": `
 An identifier of an immutable octet-stream, with the content hash in
-the vparam-value.`
+the vvalue.`
       },
       [`chapter#section_vgrid_platonic_resource>2;${
           ""}VGRId format "\`~pw\`": The id of an immutable Platonic resource With inferences`]: {
         "#0": `
 An identifier of an immutable, procedurally generated resource with its
-content inferred from the vpath embedded in the vparam-value.
+content inferred from the vpath embedded in the vvalue.
 While of limited use in itself this is useful when used as the
 prototype of structural ghost sub-resources which are quite mutable.`,
       },
@@ -795,30 +813,27 @@ homologous prototype inside f00b-b507-0763 and thus infers triples:
   },
   "chapter#section_grammar>8;Collected VPath ABNF grammar": {
     "#0": [
-`The VPath grammar is an LL(1) grammar. It is recursive as vparam-value
-productions can contain nested vpaths without additional encoding.
+`The VPath grammar is an LL(1) grammar. It is recursive be virtue of
+vvalue productions which can nest vpaths themselves without additional
+encoding.
 
 The list of definitive rules:
 `, abnf(
-`  vpath         = "@" vgrid-tail / vsteps-tail
+`  vpath         = "@" *(vstep "@") "@"
+  vstep         = [ verb-type ] *vparam
+  vparam        = [ "$" context-term ] ":" vvalue
+  vvalue        = vpath / "$" / 1*( unencoded / pct-encoded )
 
-  vgrid-tail    = "$" vgrid "@" [ vsteps-tail ]
-  vgrid         = format-term ":" vparam-value vparams
-  format-term   = "~" context-term
-
-  vsteps-tail   = verb "@" [ vsteps-tail ]
-  verb          = verb-type vparams
   verb-type     = 1*unencoded
-
-  vparams       = [ vparam vparams ]
-  vparam        = [ "$" context-term ] ":" vparam-value
-  context-term  = ALPHA *unreserved-nt
-  vparam-value  = "$" / 1*( unencoded / pct-encoded ) / vpath
-
+  context-term  = 1*unreserved
   unencoded     = unreserved / "!" / "*" / "'" / "(" / ")"
   unreserved    = unreserved-nt / "~"
   unreserved-nt = ALPHA / DIGIT / "-" / "_" / "."
-  pct-encoded   = "%" HEXDIG HEXDIG`,
+  pct-encoded   = "%" HEXDIG HEXDIG
+
+  ALPHA         = %x41-5A / %x61-7A                         ; A-Z / a-z
+  HEXDIG        = DIGIT / "A" / "B" / "C" / "D" / "E" / "F" ; 0-9 / A-F
+  DIGIT         = %x30-39                                   ; 0-9`
 ), `
 
 In addition there are pseudo-rules which are not used by an LL(1)
@@ -827,8 +842,14 @@ from other documents.
 
 The list of informative pseudo-rules:
 `, abnf(
-`  vrid            = "@" "$" vgrid "@" [ vsteps-tail ]
-  verbs           = "@" vsteps-tail
+`  vverb           = verb-type *vparam
+  vcontext-param  = "$" context-term ":" vvalue
+
+  vrid            = "@" "$" vgrid "@" *(vstep "@") "@"
+  vgrid           = format-term ":" vgrid-value *vparam
+  format-term     = "~" 1*(ALPHA / DIGIT / "-" / "_" / ".")
+  vgrid-value     = 1*( unencoded / pct-encoded )
+
   context-term-ns = ALPHA 0*30unreserved-nt ( ALPHA / DIGIT )
 `), `
 

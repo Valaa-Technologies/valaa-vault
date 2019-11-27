@@ -11,11 +11,11 @@ module.exports = {
   formParamValue,
 };
 
-function formVPath (...segments) {
-  return `@${segments.map(_formVPathSegment).join("@")}@`;
+function formVPath (...steps) {
+  return `@${steps.map(step => `${_formVStep(step)}@`).join("")}@`;
 }
 
-function _formVPathSegment (segment, index) {
+function _formVStep (segment, index) {
   try {
     if (typeof segment === "string") {
       return segment[0] === "$"
@@ -23,7 +23,7 @@ function _formVPathSegment (segment, index) {
           : validateVerb(segment, index);
     }
     if (!Array.isArray(segment)) {
-      throw new Error(`Invalid segment #${index} while minting: must be a string or Array, got ${
+      throw new Error(`Invalid segment #${index} while forming: must be a string or Array, got ${
         typeof segment}`);
     }
     if (segment[0] !== "$") {

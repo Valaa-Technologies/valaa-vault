@@ -1,6 +1,6 @@
 const { dumpObject, wrapError } = require("../../tools/wrapError");
 const {
-  validateVerbType, validateContextTerm, validateParamValueText,
+  validateVerbType, validateContextTerm,
 } = require("./_validateTerminalOps");
 
 module.exports = {
@@ -211,14 +211,20 @@ function _segmentVPathString (vpath) {
   function _eof () { return undefined; }
   function _recurseIntoVPath () {
     const vpathSegment = ["@"];
-    const opening = i;
+    const vpathPos = i;
     while (_advance() === 3 || (nextOpId === 4 && (vpathSegment.length === 1))) {
+      const vstepPos = i;
       vpathSegment.push(ops[nextOpId]());
       if (nextOpId !== 2) {
-        throw new Error(`Invalid vpath at pos ${i}: expected a closing "@" (for opening "@" at ${
-          opening}), got: "${vpath[i]}"`);
+        throw new Error(
+            `Invalid vstep at pos ${vstepPos}: expected a closing "@" at ${i}, got: "${vpath[i]}"`);
       }
     }
+    if (nextOpId !== 2) {
+      throw new Error(
+          `Invalid vpath at pos ${vpathPos}: expected a closing "@" at ${i}, got: "${vpath[i]}"`);
+    }
+    _advance();
     return vpathSegment;
   }
   function _recurseIntoVerb () {
@@ -265,6 +271,7 @@ function _segmentVPathString (vpath) {
       }
     }
     const literal = vpath.substring(literalBegin, i);
+    // TODO(iridian, 2019-11): Could validate on the fly.
     return (literalType === 3) ? validateVerbType(literal)
         : (literalType === 4) ? validateContextTerm(literal)
         : hasEscapes ? decodeURIComponent(literal)

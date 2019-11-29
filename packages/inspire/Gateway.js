@@ -202,6 +202,14 @@ export default class Gateway extends FabricEventTarget {
     }
   }
 
+  async terminate () {
+    this.clockEvent(1, `spindles.terminating`,
+        `Notifying spindles of gateway termination:`,
+        Object.keys(this._attachedSpindles).join(" "));
+    return Promise.all(Object.values(this._attachedSpindles).map(spindle =>
+        this._notifySpindle(spindle, "onGatewayTerminating")));
+  }
+
   getRootPartitionURI () {
     return String(this.rootPartition.getPartitionURI());
   }
@@ -212,7 +220,7 @@ export default class Gateway extends FabricEventTarget {
 
   createAndConnectViewsToDOM (views: { [string]: {
     container: Object, hostGlobal: Object, window: Object,
-    name: string, size: Object, rootId: string, lensURI: any, verbosity: ?number,
+    name: string, size: Object, viewRootId: string, lensURI: any, verbosity: ?number,
   } }, createView) {
     this._hostComponents = { createView };
     for (const { container, hostGlobal, window } of Object.values(views)) {
@@ -242,24 +250,14 @@ export default class Gateway extends FabricEventTarget {
   }
 
   addView (viewId, viewConfig) {
-    if (!this._hostComponents) {
-      return new Promise((resolve, reject) => {
-        (this._pendingViews || (this._pendingViews = []))
-            .push([viewId, viewConfig, resolve, reject]);
-      });
-    }
-    const fullConfig = { ...this._hostComponents, ...viewConfig };
-    if (!viewConfig.container) {
-      const viewContainer = this._hostComponents.global.document.createElement("div");
-      viewContainer.id = `valos-gateway--view-container-${viewId}`;
-      this._hostComponents.container.appendChild(viewContainer);
-    }
-    return this.createAndConnectViewToDOM(viewId, fullConfig);
+    return (!this._hostComponents)
+        ? new Promise((resolve, reject) =>
+            this._pendingViews.push([viewId, viewConfig, resolve, reject]))
+        : this.createAndConnectViewToDOM(viewId, { ...this._hostComponents, ...viewConfig });
   }
 
   createAndConnectViewToDOM (viewId, {
-    container, global: hostGlobal, window: explicitWindow,
-    verbosity = this.getVerbosity(),
+    container, global: hostGlobal, verbosity = this.getVerbosity(),
     createView = (options) => new InspireView(options),
     ...paramViewConfig
   }) {
@@ -275,9 +273,10 @@ export default class Gateway extends FabricEventTarget {
       async function _createViewOptions () {
         const views = (await lazy(gateway.revelation.views)) || {};
         const revelationConfig = (await lazy(views[viewId])) || {};
-        viewConfig = patchWith({ verbosity }, [revelationConfig, paramViewConfig], {
-          complexPatch: "setOnInitialize",
-        });
+        viewConfig = patchWith(
+            { verbosity, viewRootId: `valos-gateway--${viewId}--view-root` },
+            [revelationConfig, paramViewConfig],
+            { complexPatch: "setOnInitialize" });
         view.setRawName(viewId);
         view.setName(`${viewConfig.name}-View`);
         view.setVerbosity(viewConfig.verbosity);
@@ -341,7 +340,7 @@ export default class Gateway extends FabricEventTarget {
         }
       },
       function _attachView () {
-        return view.attach(container, explicitWindow, viewConfig);
+        return view.attach(container, viewConfig);
       },
       function _notifyViewSpindles (attachedView) {
         gateway._views[viewId] = rootScope.valos.view = attachedView;
@@ -377,7 +376,7 @@ export default class Gateway extends FabricEventTarget {
    */
   async _interpretRevelation (revelation: Revelation): Object {
     try {
-      this.clockEvent(0, () => ["gateway.revelation",
+      this.clockEvent(1, () => ["gateway.revelation",
           `Interpreted revelation`, ...dumpObject(revelation)]);
       return revelation;
     } catch (error) {

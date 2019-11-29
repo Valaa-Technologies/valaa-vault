@@ -14,10 +14,12 @@ module.exports = {
     "jest": "readable",
     "FEATURES": "readable",
     "describe": "readable",
-    "afterEach": "readable",
     "it": "readable",
     "expect": "readable",
     "beforeEach": "readable",
+    "afterEach": "readable",
+    "beforeAll": "readable",
+    "afterAll": "readable",
     "xit": "readable",
   },
   "plugins": [

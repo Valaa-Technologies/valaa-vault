@@ -74,7 +74,7 @@ export default class PerspireServer {
         hostGlobal: global,
         window: viewWindow,
         container: this.container,
-        rootId: "perspire-gateway--main-root",
+        viewRootId: "perspire-gateway--main-root",
         size: {
           width: viewWindow.innerWidth,
           height: viewWindow.innerHeight,
@@ -109,6 +109,10 @@ export default class PerspireServer {
         return false;
       }
     });
+  }
+
+  async terminate () {
+    return this.gateway.terminate();
   }
 
   serializeMainDOM () {

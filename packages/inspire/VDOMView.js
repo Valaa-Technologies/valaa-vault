@@ -35,8 +35,10 @@ export default class VDOMView extends Cog {
           lensRef.rawId() || this._viewPartition.getPartitionRawId());
       this._lensPropertyName = lensRef.getQueryComponent().lens;
       await this._vViewFocus.activate();
-      this.warnEvent(`preAttach(): partition '${this._vViewFocus.get("name")}' UI view focus set:`,
-          this._vViewFocus.debugId());
+      this.warnEvent(1, () => [
+        `preAttach(): partition '${this._vViewFocus.get("name")}' UI view focus set:`,
+        this._vViewFocus.debugId(),
+      ]);
       // this.warn("\n\n");
       // this.warnEvent(`createView('${name}'): LISTING ENGINE RESOURCES`);
       // this.engine.outputStatus(this.getLogger());
@@ -62,10 +64,11 @@ export default class VDOMView extends Cog {
  /**
   * Creates the root UI component with the react context, and connects it to the html container.
   */
-  async _createReactRoot (rootId: string, window: Object, container: Object, viewName: string,
-      vViewFocus: Vrapper, lensPropertyName: ?string) {
-    this._rootElement = window.document.createElement("DIV");
-    this._rootElement.setAttribute("id", rootId);
+  async _createReactRoot (viewRootId: string, container: Object,
+      viewName: string, vViewFocus: Vrapper, lensPropertyName: ?string) {
+    if (!viewRootId) throw new Error("createReactRoot: viewRootId missing");
+    this._rootElement = container.ownerDocument.createElement("DIV");
+    this._rootElement.setAttribute("id", viewRootId);
     container.appendChild(this._rootElement);
     const lensProperty = lensPropertyName
         ? [lensPropertyName]

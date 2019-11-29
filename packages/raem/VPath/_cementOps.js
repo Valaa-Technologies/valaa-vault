@@ -160,7 +160,7 @@ function _cementVParam (stack, segmentedVPath, componentType) {
     if (typeof cemented === "function") {
       cemented = cemented(stack.contextState, cementedParamValue, contextTerm, componentType);
     }
-    if (Array.isArray(cemented)) return cemented;
+    if (typeof cemented !== "string") return cemented;
   }
   switch (componentType) {
   case "@":

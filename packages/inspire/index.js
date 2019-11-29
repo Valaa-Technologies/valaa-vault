@@ -69,7 +69,7 @@ export default (valosheath.createGateway = async function createGateway (
 
     ret.clockEvent(1, `gateway.revelations`, `Preparing revelations in environment (${
         String(process.env.NODE_ENV)})`);
-    ret.warnEvent(0, () => [
+    ret.warnEvent(1, () => [
       `Combining ${revelations.length} revelations:`,
       ...[].concat(...revelations.map(revelation => dumpify(revelation))),
       "\n\tand the spindlesRevelation:", ...dumpObject(spindlesRevelation),
@@ -86,7 +86,7 @@ export default (valosheath.createGateway = async function createGateway (
     await ret.initialize(combinedRevelation);
 
     valosheath.gateway = ret;
-    ret.warnEvent(`Gateway set to window.valos.gateway as`, ...dumpObject(ret));
+    ret.warnEvent(1, () => [`Gateway set to window.valos.gateway as`, ...dumpObject(ret)]);
 
     ret.clockEvent(1, `gateway.spindles.delayed.attach`, `Attaching ${
         delayedSpindlePrototypes.length} delayed second stage spindles`);

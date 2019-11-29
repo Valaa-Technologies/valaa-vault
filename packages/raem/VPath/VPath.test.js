@@ -192,12 +192,12 @@ describe("VPath", () => {
           .toEqual(["@", ["-", [":"], ["@", [".", [":", "val"], [":"]]]]]);
     });
     it("Segments already segmented VPaths correctly", () => {
-      expect(segmentVPath([["out*:TAGS"], [".$V:target"]]))
-          .toEqual(["@", ["out*", [":", "TAGS"]], [".", ["$", "V", "target"]]]);
-      expect(segmentVPath(["@", ["out*", [":", "TAGS"]], [".", ["$", "V", "target"]]]))
-          .toEqual(["@", ["out*", [":", "TAGS"]], [".", ["$", "V", "target"]]]);
-      expect(segmentVPath([["out*", [":", "TAGS"]], [".", ["$", "V", "target"]]]))
-          .toEqual(["@", ["out*", [":", "TAGS"]], [".", ["$", "V", "target"]]]);
+      expect(segmentVPath([["*out:TAGS"], [".$V:target"]]))
+          .toEqual(["@", ["*out", [":", "TAGS"]], [".", ["$", "V", "target"]]]);
+      expect(segmentVPath(["@", ["*out", [":", "TAGS"]], [".", ["$", "V", "target"]]]))
+          .toEqual(["@", ["*out", [":", "TAGS"]], [".", ["$", "V", "target"]]]);
+      expect(segmentVPath([["*out", [":", "TAGS"]], [".", ["$", "V", "target"]]]))
+          .toEqual(["@", ["*out", [":", "TAGS"]], [".", ["$", "V", "target"]]]);
       expect(segmentVPath([[".$V:owner"], [".$V:rawId"]]))
           .toEqual(["@", [".", ["$", "V", "owner"]], [".", ["$", "V", "rawId"]]]);
     });

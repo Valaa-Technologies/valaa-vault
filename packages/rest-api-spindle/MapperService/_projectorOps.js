@@ -14,7 +14,7 @@ export function _createProjectorRuntime (router: PrefixRouter, { name, url, conf
       throw new Error(`Required route rule '${ruleName}' missing for route <${url}>`);
     }
   }
-  const scopeBase = runtime.scopeBase = {};
+  const scopeBase = runtime.scopeBase = Object.create(router.getViewScope());
   runtime.name = name;
   runtime.ruleResolvers = [];
   runtime.staticResources = [];
@@ -69,9 +69,9 @@ export async function _preloadRuntimeResources (router: PrefixRouter, projector,
     if (!(vRouteRoot instanceof Vrapper)) {
       throw new Error(`Route root is not a resource for ${router._projectorName(projector)}`);
     }
-    router.infoEvent(`Preloading projector ${router._projectorName(projector)}`,
+    router.infoEvent(1, () => [`Preloading projector ${router._projectorName(projector)}`,
         "; activating", runtime.staticResources.length, "static rule resources and root",
-        vRouteRoot.debugId());
+        vRouteRoot.debugId()]);
     const rootActivation = vRouteRoot.activate();
     if (rootActivation) await rootActivation;
     const activations = runtime.staticResources
@@ -79,12 +79,12 @@ export async function _preloadRuntimeResources (router: PrefixRouter, projector,
             .getVrapper(staticResource, { contextPartitionURI: null }).activate())
         .filter(e => e);
     await Promise.all(activations);
-    router.infoEvent("Done preloading projector:", router._projectorName(projector),
+    router.infoEvent(1, () => ["Done preloading projector:", router._projectorName(projector),
         (rootActivation
             ? "\n\twaited for route root activation:"
             : "\n\troute root already active:"), ...dumpObject(vRouteRoot.debugId()),
         "\n\twaited for", activations.length, `static resource activations (${
-          runtime.staticResources.length - activations.length} were already active})`);
+          runtime.staticResources.length - activations.length} were already active})`]);
   } catch (error) {
     throw router.wrapErrorEvent(error, new Error(`preloadRuntimeResources(${
             router._projectorName(projector)})`),

@@ -40,13 +40,14 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       const wrap = new Error(`resource POST ${route.url}`);
       valkOptions.discourse = router.getDiscourse().acquireFabricator();
       return thenChainEagerly(valkOptions.discourse, [
-        () => {
+        () =>
+          /*
           console.log("resource POST dump:", ...dumpObject(scope.doCreateResource),
               "\n\tserviceIndex:", ...dumpObject(scope.serviceIndex),
               "\n\ttoPatchTarget:", ...dumpObject(this.toPatchTarget));
-          return scope.routeRoot.do(scope.doCreateResource, valkOptions);
+          */
+          scope.routeRoot.do(scope.doCreateResource, valkOptions),
           // return scope.serviceIndex.do(scope.doCreateResource, valkOptions);
-        },
         vResource => {
           if (!vResource || !(vResource instanceof Vrapper)) {
             throw new Error(`${this.name} doCreateResource didn't return a resource value`);

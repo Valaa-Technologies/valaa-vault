@@ -7,10 +7,7 @@ import { _createToMapping, _presolveMappingRouteRequest } from "./_mappingHandle
 
 export default function createProjector (router: PrefixRouter, route: Route) {
   return {
-    requiredRules: ["routeRoot", "resource", "target", "doDestroyMapping"],
-    rules: {
-      mappingName: route && route.config.relation.name,
-    },
+    requiredRules: ["routeRoot", "resource", "target", "mappingName", "doDestroyMapping"],
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this);
@@ -35,7 +32,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       ]);
       if (scope.mapping === undefined) {
         scope.reply.code(404);
-        scope.reply.send(`No mapping '${route.config.relation.name}' found from ${
+        scope.reply.send(`No mapping '${scope.mappingName}' found from ${
           scope.resource.getRawId()} to ${scope.target.getRawId()}`);
         return true;
       }

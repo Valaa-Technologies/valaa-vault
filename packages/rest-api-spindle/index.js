@@ -20,10 +20,13 @@ export default valosheath.exportSpindle({
       "restAPISpindle.onGatewayInitialized",
       `Adding routers for prefixes: '${Object.keys(prefixes).join("', '")}'`,
     ]);
-    console.error(`Adding routers for prefixes: '${Object.keys(prefixes).join("', '")}'`);
     await Promise.all(Object.entries(prefixes).map(async ([prefix, prefixConfig]) =>
         this._addPrefixRouter(gateway, prefix, await lazy(prefixConfig))));
     return this._service.start();
+  },
+
+  async onGatewayTerminating () {
+    return this._service.stop();
   },
 
   async _addPrefixRouter (gateway, prefix, prefixConfig) {

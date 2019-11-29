@@ -98,11 +98,21 @@ export default class MapperService extends FabricEventTarget {
     }
   }
 
+  async stop () {
+    try {
+      return await this.getRootFastify().close();
+    } catch (error) {
+      throw this.wrapErrorEvent(error, new Error("stop()"),
+          "\n\trouters:", ...dumpObject(this._prefixRouters));
+    }
+  }
+
   // PrefixRouter methods
 
   getEngine () { return this._engine; }
   getDiscourse () { return this._engine.discourse; }
   getViewFocus () { return this._view.getViewFocus(); }
+  getViewScope () { return this._engine.getLexicalScope(); }
   getSessionDuration () { return 86400 * 1.5; }
 
   async projectFromView (view, viewName) {

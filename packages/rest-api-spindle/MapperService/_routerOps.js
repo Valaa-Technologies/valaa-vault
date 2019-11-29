@@ -29,9 +29,9 @@ export function _createPrefixRouter (rootService, prefix, prefixConfig) {
       .map(route => prefixRouter.createRouteProjector(route))
       .filter(r => r);
 
-  let resolveWhenProjectorsPrepared;
-  prefixRouter._whenProjectorsPrepared = new Promise(resolve =>
-      (resolveWhenProjectorsPrepared = resolve));
+  let whenProjectorsPrepared;
+  prefixRouter._whenProjectorsPrepared = new Promise((resolve, reject) =>
+      (whenProjectorsPrepared = { resolve, reject }));
 
   // https://github.com/fastify/fastify/blob/master/docs/Server.md
   rootService.getRootFastify()
@@ -56,17 +56,19 @@ export function _createPrefixRouter (rootService, prefix, prefixConfig) {
         "\n\tinitialization now waiting for view to load to proceed",
       ]);
       thenChainEagerly(
-          new Promise(resolve => resolveWhenProjectorsPrepared(resolve)),
+          new Promise(resolve => whenProjectorsPrepared.resolve(resolve)),
           () => routerFastify.ready(err => {
             if (err) throw err;
             prefixRouter.infoEvent(1, () => [
               `${prefix}: projector fastify plugin ready, exposing swagger`,
             ]);
-            routerFastify.swagger();
+            if (swaggerPrefix) {
+              routerFastify.swagger();
+            }
           }));
     } catch (error) {
       errorOnCreatePrefixRouter(error);
-      throw error;
+      whenProjectorsPrepared.reject(error);
     }
     next(); // Always install other plugins
   }, {

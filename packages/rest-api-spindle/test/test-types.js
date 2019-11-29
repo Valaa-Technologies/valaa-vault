@@ -35,7 +35,7 @@ exports.createTestTagType = () => namedResourceType("TestTag", [], {
     valospace: {
       gate: {
         name: "tags",
-        projection: [["out*:TAG"], [".$V:target"]],
+        projection: [["*out:TAG"], [".$V:target"]],
       },
     },
   },
@@ -45,16 +45,10 @@ exports.TestTagType = exports.createTestTagType();
 
 exports.createTestThingType = () => namedResourceType("TestThing", [], {
   [ObjectSchema]: {
-    valospace: {
-      gate: {
-        name: "things",
-        projection: [["out*:THING"], [".$V:target"]],
-      },
-      reflection: [".:fields"]
-    },
+    valospace: {},
   },
   $V: {
-    id: { valospace: { reflection: [[".$V:owner"], [".$V:rawId"]] } },
+    id: { valospace: { reflection: [[".$V:rawId"]] } },
   },
   name: StringType, // title
   description: StringType,
@@ -62,15 +56,13 @@ exports.createTestThingType = () => namedResourceType("TestThing", [], {
   contact: {
     [ObjectSchema]: {},
     email: EmailType,
-    facebook: StringType,
-    linkedin: StringType,
     phone: StringType,
     website: URIReferenceType,
   },
 
   // Meta
   tags: () => mappingToManyOf("tags", exports.TestTagType,
-      [[".:tags"], ["out*:TAG"]], {
+      [["*out:TAG"], ["$valk:nullable"]], {
         [ObjectSchema]: { valospace: { filterable: true } },
         highlight: BooleanType,
       }),
@@ -81,16 +73,7 @@ exports.createTestThingType = () => namedResourceType("TestThing", [], {
 });
 exports.TestThingType = exports.createTestThingType();
 
-exports.createTestProfileType = () => namedResourceType("TestProfile", exports.TestThingType, {
-  owned: {
-    services: () => mappingToManyOf("owned/services", exports.TestServiceType,
-        [[".:owned"], ["out*:SERVICE"]],
-        { highlight: BooleanType }),
-  },
-});
-exports.TestProfileType = exports.createTestProfileType();
-
-// TestThing routes
+// TestThing types
 
 exports.createTestNewsItemType = () => namedResourceType("TestNewsItem", exports.TestThingType, {
   [ObjectSchema]: {
@@ -98,8 +81,8 @@ exports.createTestNewsItemType = () => namedResourceType("TestNewsItem", exports
     valospace: {
       gate: {
         name: "news",
-        projection: [["out*:NEWSITEM"], [".$V:target"]],
-        filterCondition: [".:visible"],
+        projection: [["*out:NEWSITEM"], [".$V:target"]],
+        filterCondition: [["$valk:nullable"], [".:visible"]],
       },
     },
   },
@@ -108,22 +91,37 @@ exports.createTestNewsItemType = () => namedResourceType("TestNewsItem", exports
 });
 exports.TestNewsItemType = exports.createTestNewsItemType();
 
-exports.createTestIndividualType = () =>
-    namedResourceType("TestIndividual", exports.TestProfileType, {
+exports.createTestProfileType = () => namedResourceType("TestProfile", exports.TestThingType, {
+  [ObjectSchema]: {},
+  owned: {
+    [ObjectSchema]: {
+      valospace: { reflection: ["@"] },
+    },
+    services: () => mappingToManyOf("owned/services", exports.TestServiceType,
+        [["*out:SERVICE"], ["$valk:nullable"]],
+        { highlight: BooleanType }),
+  },
+});
+exports.TestProfileType = exports.createTestProfileType();
+
+// TestProfile types
+
+exports.createTestIndividualType = () => namedResourceType(
+    "TestIndividual", exports.TestProfileType, {
   [ObjectSchema]: {
     description: "Test Individual resource",
     valospace: {
       gate: {
         name: "individuals",
-        projection: [["out*:INDIVIDUAL"], [".$V:target"]],
-        filterCondition: [".:visible"],
+        projection: [["*out:INDIVIDUAL"], [".$V:target"]],
+        filterCondition: [["$valk:nullable"], [".:visible"]],
       },
     },
   },
   title: StringType,
   company: StringType,
   interests: () => mappingToManyOf("interests", exports.TestTagType,
-      [[".:interests"], ["out*:INTEREST"]],
+      [["*out:INTEREST"], ["$valk:nullable"]],
       { [ObjectSchema]: { valospace: { filterable: true } } }),
 });
 exports.TestIndividualType = exports.createTestIndividualType();
@@ -136,10 +134,15 @@ exports.createTestServiceType = () => namedResourceType("TestService", exports.T
     valospace: {
       gate: {
         name: "services",
-        projection: [["out*:SERVICE"], [".$V:target"]],
-        filterCondition: [".:visible"],
+        projection: [["*out:SERVICE"], [".$V:target"]],
+        filterCondition: [["$valk:nullable"], [".:visible"]],
       },
     },
+  },
+  owned: {
+    news: () => mappingToManyOf("owned/news", exports.TestNewsItemType,
+        [["*out:NEWSITEM"], ["$valk:nullable"]],
+        { highlight: BooleanType, [ObjectSchema]: { valospace: { filterable: true } } }),
   },
 });
 exports.TestServiceType = exports.createTestServiceType();

@@ -43,8 +43,8 @@ export default function createProjector (router: PrefixRouter, route: Route) {
             && eventResult.getPersistedEvent(),
         (/* persistedEvent */) => {
           const results = "UPDATED";
-          reply.code(200);
-          reply.send(results);
+          reply.code(204);
+          reply.send();
           router.infoEvent(2, () => [
             `${this.name}:`,
             "\n\tresults:", ...dumpObject(results),

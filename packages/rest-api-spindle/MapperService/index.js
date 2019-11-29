@@ -115,6 +115,9 @@ export default class MapperService extends FabricEventTarget {
   getViewScope () { return this._engine.getLexicalScope(); }
   getSessionDuration () { return 86400 * 1.5; }
 
+  isSessionAuthorizationEnabled () { return this._isSessionAuthorizationEnabled; }
+  setSessionAuthorizationEnabled (value = true) { this._isSessionAuthorizationEnabled = value; }
+
   async projectFromView (view, viewName) {
     try {
       return await _projectPrefixRoutesFromView(this, view, viewName);

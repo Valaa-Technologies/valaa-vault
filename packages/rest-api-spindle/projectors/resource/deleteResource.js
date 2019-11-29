@@ -36,12 +36,10 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         eventResult => eventResult
             && eventResult.getPersistedEvent(),
         () => {
-          const results = "DESTROYED";
-          reply.code(200);
-          reply.send(results);
+          reply.code(204);
+          reply.send();
           router.infoEvent(2, () => [
             `${this.name}:`, ...dumpObject(scope.resource),
-            "\n\tresults:", ...dumpObject(results),
           ]);
           return true;
         },

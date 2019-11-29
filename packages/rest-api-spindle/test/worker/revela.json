@@ -1,0 +1,74 @@
+{
+  "name": "@valos/rest-api-test-worker",
+  "description": "",
+  "valos": {
+    "type": "revelation"
+  },
+  "gateway": {
+    "authorityConfigs": { "!!!": "./revelation/authorityConfigs.json" },
+    "verbosity": 0,
+    "falseProphet": { "verbosity": 0 },
+    "scribe": { "verbosity": 0 }
+  },
+  "prologue": {
+    "rootPartitionURI": "valaa-local:?id=f3d306d9-79ac-4087-afbc-46f739226eb2",
+    "partitionInfos": { "!!!": "./revelation/partitionInfos.json" },
+    "bvobInfos": { "!!!": "./revelation/bvobInfos.json" },
+    "bvobBuffers": { "!!!": "./revelation/bvobBuffers.json" },
+    "authorityConfigs": { "!!!": "./revelation/authorityConfigs.json" }
+  },
+  "spindles": {
+    "@valos/rest-api-spindle": {
+      "server": {
+        "port": "7357",
+        "address": "127.0.0.1",
+        "verbosity": 0,
+        "fastify": {
+          "ignoreTrailingSlash": false,
+          "logger": false,
+          "pluginTimeout": 30000
+        }
+      },
+      "prefixes": {
+        "/rest-test/v0": { "!!!": ["@valos/rest-api-spindle/test", ["!$valk:invoke:createConfig", {
+          "view": {
+            "name": "REST API Test",
+            "verbosity": 0,
+            "focus": "valaa-local:?id=f3d306d9-79ac-4087-afbc-46f739226eb2"
+          },
+          "rules": {
+            "routeRoot": ["@"],
+            "scriptRoot": ["$~u4:f3d306d9-79ac-4087-afbc-46f739226eb2"],
+            "&ofResource": {
+              "TestIndividual": { "listingName": "INDIVIDUAL" },
+              "TestNewsItem": { "listingName": "NEWSITEM" },
+              "TestService": { "listingName": "SERVICE" },
+              "TestTag": { "listingName": "TAG" }
+            },
+            "&ofMapping": {
+              "interests": {
+                "routeRoot": ["$~u4:f3d306d9-79ac-4087-afbc-46f739226eb2"],
+                "relationName": "INTEREST"
+              },
+              "tags": {
+                "routeRoot": ["$~u4:f3d306d9-79ac-4087-afbc-46f739226eb2"],
+                "relationName": "TAG"
+              },
+              "owned/news": { "relationName": "NEWSITEM" },
+              "owned/services": { "relationName": "SERVICE" }
+            },
+            "&ofMethod": {
+              "PATCH": {
+                "&ofMapping": {
+                  "offering": { "mappingPrototype": ["$~u4:f3d306d9-79ac-4087-afbc-46f739226eb2"] },
+                  "seeking": { "mappingPrototype": ["$~u4:f3d306d9-79ac-4087-afbc-46f739226eb2"] },
+                  "interests": { "mappingPrototype": ["$~u4:f3d306d9-79ac-4087-afbc-46f739226eb2"] }
+                }
+              }
+            }
+          }
+        }]]}
+      }
+    }
+  }
+}

@@ -1,13 +1,13 @@
 import { vRef } from "~/raem/VRL";
 // import VALEK from "~/engine/VALEK";
-import { request } from "~/tools";
+import { fetchJSON } from "~/tools";
 
 // TODO(iridian): I think this is dead code. Verify and remove or at least deprecate, using
 // accessor properties which output warnings but return the concrete values below.
 
 export default {
   vRef,
-  asyncFetch: request,
+  asyncFetch: fetchJSON,
   /*
   setField: VALEK.setField(VALEK.fromScope("$1"), VALEK.fromScope("$2")),
   addToField: VALEK.addToField(VALEK.fromScope("$1"), VALEK.fromScope("$2")),

@@ -19,6 +19,7 @@ export function assignRulesFrom (
     "&ofName": ofName,
     "&ofCategory": ofCategory,
     "&ofMethod": ofMethod,
+    "&ofResource": ofResource,
     "&ofMapping": ofMapping,
     ...rest
   } = ruleSource;
@@ -31,6 +32,10 @@ export function assignRulesFrom (
   }
   if ((ofMethod || {})[routeToExtract.method]) {
     assignRulesFrom(ofMethod[routeToExtract.method], routeToExtract, rules);
+  }
+  const resourceName = ((routeToExtract.config || {}).resource || {}).name;
+  if ((ofResource || {})[resourceName]) {
+    assignRulesFrom(ofResource[resourceName], routeToExtract, rules);
   }
   const mappingName = ((routeToExtract.config || {}).relation || {}).name;
   if ((ofMapping || {})[mappingName]) {
@@ -512,13 +517,13 @@ function _setupRoute (route, userConfig, globalRules, resourceType, relationFiel
   if (relationField) {
     const actualRelation = (typeof relationField === "function" ? relationField() : relationField);
     const outermost = actualRelation[CollectionSchema] || actualRelation[ObjectSchema];
-    const mappingName = (outermost.valospace || {}).mappingName;
-    if (!mappingName) {
+    route.config.rules.mappingName = (outermost.valospace || {}).mappingName;
+    if (!route.config.rules.mappingName) {
       throw new Error(`relationType[(Array|Object)JSONSchema].valospace.mappingName missing for ${
           _routeName(route)}`);
     }
     route.config.relation = {
-      name: mappingName,
+      name: route.config.rules.mappingName, // this is wrong. Should be the internal Relation name.
       schema: schemaRefOf(actualRelation),
     };
 

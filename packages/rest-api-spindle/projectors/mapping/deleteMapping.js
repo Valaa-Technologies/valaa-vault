@@ -46,13 +46,9 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         () => valkOptions.discourse.releaseFabricator(),
         eventResult => eventResult.getPersistedEvent(),
         () => {
-          const results = "DESTROYED";
-          reply.code(200);
-          reply.send(results);
-          router.infoEvent(2, () => [
-            `${this.name}:`,
-            "\n\tresults:", ...dumpObject(results),
-          ]);
+          reply.code(204);
+          reply.send();
+          router.infoEvent(2, () => [`${this.name}`]);
           return true;
         },
       ], (error) => {

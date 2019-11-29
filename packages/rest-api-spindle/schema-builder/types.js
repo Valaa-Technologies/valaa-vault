@@ -1,57 +1,88 @@
-// @flow
+const { segmentVPath } = require("~/raem/VPath");
+const patchWith = require("~/tools/patchWith").default;
 
-import { segmentVPath } from "~/raem";
-import patchWith from "~/tools/patchWith";
+const ObjectSchema = Symbol("Object-JSONSchema");
+const CollectionSchema = Symbol("Array-JSONSchema");
 
-export const ObjectSchema = Symbol("Object-JSONSchema");
-export const CollectionSchema = Symbol("Array-JSONSchema");
+// const EmailType = { type: "email" };
+const EmailType = { type: "string" };
+const BooleanType = { type: "boolean" };
+const StringType = { type: "string" };
+const XWWWFormURLEncodedStringType = { type: "string" };
+const NumberType = { type: "number" };
+// const URIReferenceType = { type: "uri-reference" };
+const URIReferenceType = { type: "string" };
 
-// export const EmailType = { type: "email" };
-export const EmailType = { type: "string" };
-export const BooleanType = { type: "boolean" };
-export const StringType = { type: "string" };
-export const XWWWFormURLEncodedStringType = { type: "string" };
-export const NumberType = { type: "number" };
-// export const URIReferenceType = { type: "uri-reference" };
-export const URIReferenceType = { type: "string" };
-
-export const UnixEpochSecondsType = { type: "number" };
+const UnixEpochSecondsType = { type: "number" };
 /*
-export const DateExtendedISO8601Type = { type: "date" };
-export const TimeExtendedISO8601Type = { type: "time" };
-export const ZoneExtendedISO8601Type = { type: "string" };
-export const DateTimeZoneExtendedISO8601Type = { type: "date-time" };
+const DateExtendedISO8601Type = { type: "date" };
+const TimeExtendedISO8601Type = { type: "time" };
+const ZoneExtendedISO8601Type = { type: "string" };
+const DateTimeZoneExtendedISO8601Type = { type: "date-time" };
 */
-export const DateExtendedISO8601Type = { type: "string", format: "date" };
-export const TimeExtendedISO8601Type = { type: "string" };
-export const ZoneExtendedISO8601Type = { type: "string" };
-export const DateTimeZoneExtendedISO8601Type = { type: "string", format: "date-time" };
+const DateExtendedISO8601Type = { type: "string", format: "date" };
+const TimeExtendedISO8601Type = { type: "string" };
+const ZoneExtendedISO8601Type = { type: "string" };
+const DateTimeZoneExtendedISO8601Type = { type: "string", format: "date-time" };
 
-export const IdValOSType = {
+const IdValOSType = {
   type: "string",
   pattern: "^[a-zA-Z0-9\\-_.~]+$",
   valospace: { reflection: [".$V:rawId"] },
 };
-// export const ReferenceValOSType = { type: "uri" };
-export const ReferenceValOSType = { type: "string" };
+// const ReferenceValOSType = { type: "uri" };
+const ReferenceValOSType = { type: "string" };
 
-export const $VType = {
+const $VType = {
   [ObjectSchema]: { valospace: { /* reflection: "" */ } },
   id: IdValOSType,
   // name: StringType, // internal ValOS name
 };
 
-export const ResourceType = {
+const ResourceType = {
   $V: $VType,
 };
 
-export function extendType (...allTypes) {
+module.exports = {
+  ObjectSchema,
+  CollectionSchema,
+  EmailType,
+  BooleanType,
+  StringType,
+  XWWWFormURLEncodedStringType,
+  NumberType,
+  URIReferenceType,
+  UnixEpochSecondsType,
+  DateExtendedISO8601Type,
+  TimeExtendedISO8601Type,
+  ZoneExtendedISO8601Type,
+  DateTimeZoneExtendedISO8601Type,
+  IdValOSType,
+  ReferenceValOSType,
+  $VType,
+  ResourceType,
+  extendType,
+  namedResourceType,
+  mappingToOneOf,
+  mappingToManyOf,
+  relationToOneOf,
+  relationToManyOf,
+  getBaseRelationTypeOf,
+  enumerateMappingsOf,
+  sharedSchemaOf,
+  trySchemaNameOf,
+  schemaRefOf,
+  exportSchemaOf,
+  _resolveFunction,
+};
+
+function extendType (...allTypes) {
   return patchWith({}, [].concat(...allTypes), {
     patchSymbols: true, concatArrays: false,
   });
 }
 
-export function namedResourceType (schemaName, baseTypes, schema) {
+function namedResourceType (schemaName, baseTypes, schema) {
   if (baseTypes === undefined) throw new Error("namedResourceType baseTypes missing");
   const nonObjectBaseIndex = Array.isArray(baseTypes)
           ? baseTypes.findIndex(v => (typeof v !== "object"))
@@ -68,7 +99,7 @@ export function namedResourceType (schemaName, baseTypes, schema) {
   return ret;
 }
 
-export function mappingToOneOf (mappingName, targetType, relationNameOrProjection,
+function mappingToOneOf (mappingName, targetType, relationNameOrProjection,
     options = {}) {
   if (!options[ObjectSchema]) options[ObjectSchema] = {};
   options[ObjectSchema].valospace = {
@@ -78,7 +109,7 @@ export function mappingToOneOf (mappingName, targetType, relationNameOrProjectio
   return relationToOneOf(targetType, relationNameOrProjection, options);
 }
 
-export function mappingToManyOf (mappingName, targetType, relationNameOrProjection,
+function mappingToManyOf (mappingName, targetType, relationNameOrProjection,
     options = {}) {
   if (!options[CollectionSchema]) options[CollectionSchema] = {};
   options[CollectionSchema].valospace = {
@@ -88,25 +119,25 @@ export function mappingToManyOf (mappingName, targetType, relationNameOrProjecti
   return relationToManyOf(targetType, relationNameOrProjection, options);
 }
 
-export function relationToOneOf (targetType, relationNameOrProjection, options = {}) {
+function relationToOneOf (targetType, relationNameOrProjection, options = {}) {
   if (options[CollectionSchema] !== undefined) {
     throw new Error("Must not specify options[CollectionSchema] for a Relation-to-one type");
   }
   return _createRelationTypeTo(targetType, relationNameOrProjection, options);
 }
 
-export function relationToManyOf (targetType, relationNameOrProjection, options = {}) {
+function relationToManyOf (targetType, relationNameOrProjection, options = {}) {
   if (options[CollectionSchema] === undefined) options[CollectionSchema] = {};
   return _createRelationTypeTo(targetType, relationNameOrProjection, options);
 }
 
-export function getBaseRelationTypeOf (anAnyRelationType, optionalSchema) {
+function getBaseRelationTypeOf (anAnyRelationType, optionalSchema) {
   return extendType(
       [_resolveFunction(anAnyRelationType), { [CollectionSchema]: null }],
       optionalSchema);
 }
 
-export function enumerateMappingsOf (aResourceType) {
+function enumerateMappingsOf (aResourceType) {
   return [].concat(...Object.values(aResourceType).map(property => {
     const actualProperty = (typeof property !== "function") ? property : property();
     const outermostSchema = (actualProperty != null)
@@ -118,7 +149,7 @@ export function enumerateMappingsOf (aResourceType) {
   }));
 }
 
-export function sharedSchemaOf (aType) {
+function sharedSchemaOf (aType) {
   const schemaName = aType[ObjectSchema].schemaName;
   if (!schemaName) {
     throw new Error("Type[ObjectSchema].schemaName missing when trying to get a shared Type");
@@ -128,11 +159,11 @@ export function sharedSchemaOf (aType) {
   return schema;
 }
 
-export function trySchemaNameOf (aType) {
+function trySchemaNameOf (aType) {
   return ((aType || {})[ObjectSchema] || {}).schemaName;
 }
 
-export function schemaRefOf (aType) {
+function schemaRefOf (aType) {
   return trySchemaNameOf(aType)
       ? `${aType[ObjectSchema].schemaName}#`
       : exportSchemaOf(aType);
@@ -174,7 +205,7 @@ function _createRelationTypeTo (targetType, relationNameOrProjection, {
   return ret;
 }
 
-export function exportSchemaOf (aType) {
+function exportSchemaOf (aType) {
   if (typeof aType === "function") return exportSchemaOf(aType());
   if ((aType == null) || (typeof aType !== "object") || (Array.isArray(aType))) return aType;
   const ret = {};
@@ -215,6 +246,6 @@ export function exportSchemaOf (aType) {
   return ret;
 }
 
-export function _resolveFunction (maybeFunction) {
+function _resolveFunction (maybeFunction) {
   return typeof maybeFunction === "function" ? maybeFunction() : maybeFunction;
 }

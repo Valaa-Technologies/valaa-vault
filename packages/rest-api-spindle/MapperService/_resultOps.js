@@ -6,24 +6,35 @@ export function _filterResults (router, results, filter, ids, fieldRequirements)
   const idLookup = ids
       && ids.split(",").reduce((lookup, id) => (lookup[id] = true) && lookup, {});
   let requirementCount = 0;
-  const requiredFields = [];
+  const requiredValuesByField = [];
   Object.entries(fieldRequirements).forEach(([fieldName, requirements]) => {
-    if (!requirements) return;
-    const requireFieldName = (fieldName.match(/require-(.*)/) || [])[1];
-    if (!requireFieldName) return;
-    const requiredIds = {};
-    requirements.split(",").forEach(targetId => {
+    const requireFieldName = (fieldName.match(/^require-(.*)$/) || [])[1];
+    if (!requireFieldName) {
+      const excludeFieldName = (fieldName.match(/^exclude-(.*)$/) || [])[1];
+      if (excludeFieldName) {
+        requiredValuesByField.push([requireFieldName, false]);
+      }
+    }
+    if (!requirements) {
+      // require any truthy.
+      ++requirementCount;
+      requiredValuesByField.push([requireFieldName, true]);
+      return;
+    }
+    const requiredValues = {};
+    requirements.split(",").forEach(requiredValue => {
       const condition = true; // This can have a more elaborate condition in the future
-      if (requiredIds[targetId]) {
-        if (requiredIds[targetId] === condition) return; // just ignore duplicates
-        throw new Error(`Complex compount field requirements for ${fieldName}=${targetId
-            } are not implemented, {${condition}} requested, {${requiredIds[targetId]}
+      const needleValue = requiredValue === "";
+      if (requiredValues[needleValue]) {
+        if (requiredValues[needleValue] === condition) return; // just ignore duplicates
+        throw new Error(`Complex compount field requirements for ${fieldName}=${needleValue
+            } are not implemented, {${condition}} requested, {${requiredValues[needleValue]}
             } already exists`);
       }
-      requiredIds[targetId] = condition;
+      requiredValues[needleValue] = condition;
       ++requirementCount;
     });
-    requiredFields.push([requireFieldName, requiredIds]);
+    requiredValuesByField.push([requireFieldName, requiredValues]);
   });
   return results.filter(result => {
     if (result == null) return false;
@@ -31,18 +42,26 @@ export function _filterResults (router, results, filter, ids, fieldRequirements)
     // of all matching route resources in corpus befor filtering,
     // not the number of requested resources. Improve.
     if (idLookup && !idLookup[(result.$V || {}).id]) return false;
-
     let satisfiedRequirements = 0;
-    for (const [fieldName, requiredIds] of requiredFields) {
-      const remainingRequiredIds = Object.create(requiredIds);
-      for (const sequenceEntry of (result[fieldName] || [])) {
-        const currentHref = ((sequenceEntry || {}).$V || {}).href;
-        const currentId = currentHref && (currentHref.match(/\/([a-zA-Z0-9\-_.~]+)$/) || [])[1];
+    for (const [fieldName, requiredValues] of requiredValuesByField) {
+      const resultField = result[fieldName];
+      if (resultField === undefined) return false;
+      if (typeof requiredValues === "boolean") {
+        if (!!resultField === requiredValues) ++satisfiedRequirements;
+        continue;
+      }
+      const remainingRequiredValues = Object.create(requiredValues);
+      for (const resultEntry of (Array.isArray(resultField) ? resultField : [resultField])) {
+        let needleValue = resultEntry;
+        if (resultEntry && (typeof resultEntry === "object")) {
+          const needleHRef = (resultEntry.$V || {}).href;
+          needleValue = needleHRef && (needleHRef.match(/\/([a-zA-Z0-9\-_.~]+)$/) || [])[1];
+        }
         // Check for more elaborate condition here in the future
-        if (remainingRequiredIds[currentId]) {
+        if (remainingRequiredValues[needleValue]) {
           // Prevent multiple relations with same target from
           // incrementing satisfiedRequirements
-          remainingRequiredIds[currentId] = false;
+          remainingRequiredValues[needleValue] = false;
           ++satisfiedRequirements;
         }
       }

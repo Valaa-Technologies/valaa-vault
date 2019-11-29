@@ -32,9 +32,18 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         `${this.name}:`, ...dumpObject(scope.resource),
         "\n\trequest.query:", request.query,
       ]);
-      const { fields } = request.query;
+      const {
+        filter, sort, offset, limit, ids, fields,
+        ...fieldRequirements
+      } = request.query;
       return thenChainEagerly(scope.resource, [
         vResource => vResource.get(this.toSuccessBodyFields, valkOptions),
+        (filter || ids || Object.keys(fieldRequirements).length)
+            && (results => router.filterResults(results, filter, ids, fieldRequirements)),
+        (sort)
+            && (results => router.sortResults(results, sort)),
+        (offset || (limit !== undefined))
+            && (results => router.paginateResults(results, offset || 0, limit)),
         (fields) && (results =>
             router.pickResultFields(results, fields, route.schema.response[200])),
         results => {

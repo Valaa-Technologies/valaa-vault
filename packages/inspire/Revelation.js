@@ -234,15 +234,21 @@ function _patchRevelation (gateway, targetRevelation, patchRevelation) {
         }
         if ((target == null) || (patch == null) || (key === EntryTemplate)) return undefined;
 
-        if (_isLazy(target) || _isLazy(patch)) {
+        if (_isDelayed(target) || _isDelayed(patch)) {
           return _markLazy(() => {
-            const delayedResult = this.extend(
-                _keepCalling(target), _keepCalling(patch), key, targetParent, patchParent);
-            targetParent[key] = delayedResult;
-            if (isPromise(delayedResult)) {
-              delayedResult.then(resolvedResult => { targetParent[key] = resolvedResult; });
-            }
-            return delayedResult;
+            let _resolvedTarget;
+            return thenChainEagerly(_keepCalling(target), [
+              resolvedTarget => {
+                _resolvedTarget = resolvedTarget;
+                return _keepCalling(patch);
+              },
+              resolvedPatch =>
+                  this.extend(_resolvedTarget, resolvedPatch, key, targetParent, patchParent),
+              resolvedResult => {
+                if (targetParent) targetParent[key] = resolvedResult;
+                return resolvedResult;
+              },
+            ]);
           });
         }
         try {
@@ -405,6 +411,10 @@ function _markLazy (func) {
 
 function _isLazy (candidate) {
   return (typeof candidate === "function") && candidate._isLazy;
+}
+
+function _isDelayed (candidate) {
+  return isPromise(candidate) || _isLazy(candidate);
 }
 
 function lazy (candidate) {

@@ -16,6 +16,7 @@ export default function createProjector (router: PrefixRouter /* , route: Route 
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this);
+      router.setSessionAuthorizationEnabled();
 
       if (!this.runtime.identity) {
         throw new Error("Cannot prepare session route GET: service identity not configured");

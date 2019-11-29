@@ -17,6 +17,7 @@ const _normalizeAlg = Object.assign(Object.create(null), {
 
 export function verifySessionAuthorization (router, route, scope: Object, accessRoot: Vrapper) {
   try {
+    if (!router.isSessionAuthorizationEnabled()) return false;
     const identity = router.getIdentity();
     if (!identity) {
       throw new Error("Cannot verify session authorization: valosheath identity not configured");

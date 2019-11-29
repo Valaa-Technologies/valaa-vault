@@ -36,7 +36,7 @@ import { setGlobalLogger } from "~/tools/wrapError";
 import getGlobal from "~/gateway-api/getGlobal";
 import { byteArrayFromBase64 } from "~/gateway-api/base64";
 
-const fetch = require("@valos/tools/request").default;
+const fetchJSON = require("@valos/tools/fetchJSON").default;
 const patchWith = require("@valos/tools/patchWith").default;
 
 const { AuthorityNexus, FalseProphet, Oracle, Sourcerer, Scribe } = valosSourcerer;
@@ -58,6 +58,7 @@ export default class Gateway extends FabricEventTarget {
     this.siteRoot = options.siteRoot;
     this.revelationRoot = options.revelationRoot;
     this.domainRoot = options.domainRoot;
+    this._pendingViews = [];
   }
 
   callRevelation (Type: Function | any) {
@@ -134,7 +135,7 @@ export default class Gateway extends FabricEventTarget {
     return ret;
   }
 
-  fetch (...rest) { return fetch(...rest); }
+  fetchJSON (...rest) { return fetchJSON(...rest); }
 
   async initialize (revelation: Revelation) {
     try {

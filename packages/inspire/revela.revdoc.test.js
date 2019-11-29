@@ -31,9 +31,9 @@ const gatewayMock = {
       callMe (p) { return ({ [requireKey]: p }); },
     };
   },
-  fetch (fetchOptions) {
+  fetchJSON (input, options = {}) {
     return {
-      fetchOptions,
+      fetchOptions: { input, ...options },
       fetchedField: 1,
     };
   },

@@ -488,7 +488,7 @@ function _import (gateway, step) {
 
     return thenChainEagerly(
           (inBrowser() || options.fetch || location.match(/^[^/]*:/))
-              ? gateway.fetch({ input: location, fetch: options.fetch || {} })
+              ? gateway.fetchJSON(location, options.fetch)
               : gateway.require(location), [
             result => _patchRevelation(relativeGateway, undefined, result),
             revelation => (!pathOp.length

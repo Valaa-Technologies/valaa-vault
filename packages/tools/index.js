@@ -64,6 +64,6 @@ export const outputCollapsedError = require("./wrapError").outputCollapsedError;
 export const unwrapError = require("./wrapError").unwrapError;
 export const wrapError = require("./wrapError").wrapError;
 
-export const request = require("./request").default;
+export const fetchJSON = require("./fetchJSON").default;
 
 export const traverse = require("./traverse").default;

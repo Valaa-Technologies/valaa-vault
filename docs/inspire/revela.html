@@ -7,7 +7,7 @@
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"subtitle":"0.35.0-prerelease.15","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"revela"};
+      var respecConfig = {"subtitle":"0.35.0-prerelease.16","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"revela"};
     </script>
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
@@ -68,7 +68,7 @@ for various valos fabric config files.</span>
     [0], {
       &#x22;!!!&#x22;: [[&#x22;$https:foobar.com/path&#x22;], [&#x22;*:$&#x22;,
         [&#x22;.:fetchedField&#x22;],
-        [&#x22;@.:fetchOptions@.:input@&#x22;],
+        [&#x22;@.:fetchOptions@.:input@@&#x22;],
       ]],
     },
     [&#x22;last&#x22;])</span>
@@ -89,7 +89,7 @@ for various valos fabric config files.</span>
           &#x22;test-lib&#x22;: {
             preset: 10, overridden: 10, sessionDuration: 0,
             view: { focus: &#x22;focus to be overwritten&#x22;, nulled: &#x22;nulled to be overwritten&#x22; },
-            expandedButUnbound: [&#x22;$un:bound&#x22;],
+            unboundAndUnsegmented: [&#x22;$un:bound&#x22;],
           },
         },
       },
@@ -103,7 +103,7 @@ for various valos fabric config files.</span>
           },
           identity: { &#x22;!!!&#x22;: [&#x22;./config&#x22;, &#x22;requireKey&#x22;] },
           sessionDuration: 86400,
-          expandedAlsoUnbound: [&#x22;$also:unbound&#x22;],
+          unboundButSegmented: [&#x22;$also:unbound&#x22;],
         }]],
         &#x22;test-lib&#x22;: { overridden: 20 },
       },
@@ -119,8 +119,8 @@ for various valos fabric config files.</span>
           preset: 10, overridden: 20, sessionDuration: 86400,
           view: { focus: &#x22;valaa-aws://example.org/deployment?id=f0c5-f0c5&#x22;, nulled: null },
           identity: &#x22;/site/revelation/config&#x22;,
-          expandedButUnbound: [&#x22;$un:bound&#x22;],
-          expandedAlsoUnbound: [&#x22;$&#x22;, &#x22;also&#x22;, &#x22;unbound&#x22;],
+          unboundAndUnsegmented: [&#x22;$un:bound&#x22;],
+          unboundButSegmented: [&#x22;$&#x22;, &#x22;also&#x22;, &#x22;unbound&#x22;],
         }
       }
     }

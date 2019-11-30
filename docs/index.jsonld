@@ -47,9 +47,9 @@
     "revdoc:package": "@valos/kernel",
     "revdoc:prefix": "valos",
     "revdoc:prefixIRI": "https://valospace.org/#",
-    "revdoc:version": "0.35.0-prerelease.14",
+    "revdoc:version": "0.35.0-prerelease.15",
     "respecConfig": {
-      "subtitle": "0.35.0-prerelease.14",
+      "subtitle": "0.35.0-prerelease.15",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -70,7 +70,7 @@
           "SBOM"
         ],
         "subProfiles": [],
-        "title": "@valos/kernel@0.35.0-prerelease.13 Software Bill of Materials",
+        "title": "@valos/kernel@0.35.0-prerelease.14 Software Bill of Materials",
         "abstract": {
           "@type": "vdoc:Chapter",
           "vdoc:content": [
@@ -117,7 +117,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-prerelease.13"
+        "version": "0.35.0-prerelease.14"
       },
       "engine": {
         "@id": "https://valospace.org/engine",
@@ -190,7 +190,7 @@
           ]
         },
         "package": "@valos/engine",
-        "version": "0.35.0-prerelease.14"
+        "version": "0.35.0-prerelease.15"
       },
       "inspire": {
         "@id": "https://valospace.org/inspire",
@@ -263,7 +263,7 @@
           ]
         },
         "package": "@valos/inspire",
-        "version": "0.35.0-prerelease.14"
+        "version": "0.35.0-prerelease.15"
       },
       "inspire/revela": {
         "@id": "https://valospace.org/inspire/revela",
@@ -318,7 +318,7 @@
           "vdoc:content": [
             {
               "@type": "revdoc:Example",
-              "dc:title": "trivial combine",
+              "dc:title": "trivial revelation patch",
               "vdoc:content": [
                 {
                   "@type": "vdoc:Paragraph",
@@ -331,7 +331,7 @@
                           {
                             "@type": "vdoc:CharacterData",
                             "vdoc:content": [
-                              " combineRevelationsLazily(gatewayMock, { a: [1] }, { a: [2] })"
+                              " lazyPatchRevelations(gatewayMock, { a: [1] }, { a: [2] })"
                             ]
                           }
                         ]
@@ -344,7 +344,7 @@
                         {
                           "@type": "vdoc:CharacterData",
                           "vdoc:content": [
-                            "{\n  \"a\": [\n    1,\n    2\n  ]\n}"
+                            " ({ a: [1, 2] })"
                           ]
                         }
                       ]
@@ -368,20 +368,20 @@
                           {
                             "@type": "vdoc:CharacterData",
                             "vdoc:content": [
-                              " combineRevelationsLazily(gatewayMock, {}, { \"!!!\": \"./path\" })"
+                              " lazyPatchRevelations(gatewayMock, {}, { \"!!!\": \"./path\" })"
                             ]
                           }
                         ]
                       }
                     ],
-                    "toEqual",
+                    "toMatchObject",
                     {
                       "vdoc:blockquote": true,
                       "vdoc:content": [
                         {
                           "@type": "vdoc:CharacterData",
                           "vdoc:content": [
-                            "{\n  \"requireKey\": \"/site/revelation/path\",\n  \"someField\": 1\n}"
+                            " ({ requireKey: \"/site/revelation/path\", someField: 1 })"
                           ]
                         }
                       ]
@@ -405,7 +405,7 @@
                           {
                             "@type": "vdoc:CharacterData",
                             "vdoc:content": [
-                              " combineRevelationsLazily(gatewayMock, \"\",\n            { \"!!!\": [[\"!$revela:import\", \"/path\"], \"requireKey\"] })"
+                              " lazyPatchRevelations(gatewayMock, \"\", {\n  \"!!!\": [\"/path\", \"requireKey\"],\n})"
                             ]
                           }
                         ]
@@ -429,7 +429,7 @@
             },
             {
               "@type": "revdoc:Example",
-              "dc:title": "spread of an implicit URI import followed by array creation",
+              "dc:title": "spread of a URI import followed by pick-array append",
               "vdoc:content": [
                 {
                   "@type": "vdoc:Paragraph",
@@ -442,7 +442,7 @@
                           {
                             "@type": "vdoc:CharacterData",
                             "vdoc:content": [
-                              " combineRevelationsLazily(gatewayMock, [], { \"!!!\": [\n          [\"!$revela:import\", \"<https://foobar.com/path>\"],\n          [\"fetchedField\", [\".:fetchOptions:input\"]],\n        ] })"
+                              " lazyPatchRevelations(gatewayMock,\n    [0], {\n      \"!!!\": [[\"$https:foobar.com/path\"], [\"*:$\",\n        [\".:fetchedField\"],\n        [\"@.:fetchOptions@.:input@\"],\n      ]],\n    },\n    [\"last\"])"
                             ]
                           }
                         ]
@@ -455,7 +455,44 @@
                         {
                           "@type": "vdoc:CharacterData",
                           "vdoc:content": [
-                            "[\n  1,\n  \"https://foobar.com/path\"\n]"
+                            " [0, 1, \"https://foobar.com/path\", \"last\"]"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "@type": "revdoc:Example",
+              "dc:title": "nested import & invoke spread to resolve all spreads",
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:Paragraph",
+                  "vdoc:content": [
+                    [
+                      "we expect",
+                      {
+                        "vdoc:blockquote": true,
+                        "vdoc:content": [
+                          {
+                            "@type": "vdoc:CharacterData",
+                            "vdoc:content": [
+                              " lazyPatchRevelations(gatewayMock, {}, {\n  out: {\n    \"!!!\": {\n      prefixes: {\n        \"/test/v0\": {\n          name: \"test\",\n          \"test-lib\": {\n            preset: 10, overridden: 10, sessionDuration: 0,\n            view: { focus: \"focus to be overwritten\", nulled: \"nulled to be overwritten\" },\n            expandedButUnbound: [\"$un:bound\"],\n          },\n        },\n      },\n    },\n    prefixes: {\n      \"/test/v0\": {\n        \"!!!\": [\"test-lib\", [\"!$valk:invoke:callMe\", {\n          view: {\n            focus: \"valaa-aws://example.org/deployment?id=f0c5-f0c5\",\n            nulled: null,\n          },\n          identity: { \"!!!\": [\"./config\", \"requireKey\"] },\n          sessionDuration: 86400,\n          expandedAlsoUnbound: [\"$also:unbound\"],\n        }]],\n        \"test-lib\": { overridden: 20 },\n      },\n    }\n  }\n})"
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "toEqual",
+                    {
+                      "vdoc:blockquote": true,
+                      "vdoc:content": [
+                        {
+                          "@type": "vdoc:CharacterData",
+                          "vdoc:content": [
+                            " ({\n  out: {\n    prefixes: {\n      \"/test/v0\": {\n        name: \"test\",\n        \"test-lib\": {\n          preset: 10, overridden: 20, sessionDuration: 86400,\n          view: { focus: \"valaa-aws://example.org/deployment?id=f0c5-f0c5\", nulled: null },\n          identity: \"/site/revelation/config\",\n          expandedButUnbound: [\"$un:bound\"],\n          expandedAlsoUnbound: [\"$\", \"also\", \"unbound\"],\n        }\n      }\n    }\n  }\n})"
                           ]
                         }
                       ]
@@ -483,7 +520,7 @@
           ]
         },
         "package": "@valos/inspire",
-        "version": "0.35.0-prerelease.14"
+        "version": "0.35.0-prerelease.15"
       },
       "raem": {
         "@id": "https://valospace.org/raem",
@@ -602,10 +639,10 @@
           ]
         },
         "package": "@valos/raem",
-        "version": "0.35.0-prerelease.14"
+        "version": "0.35.0-prerelease.15"
       },
-      "raem/VPath": {
-        "@id": "https://valospace.org/raem/VPath",
+      "raem/VPath/VPath": {
+        "@id": "https://valospace.org/raem/VPath/VPath",
         "tags": [],
         "subProfiles": [],
         "title": "ValOS Path",
@@ -615,27 +652,19 @@
             {
               "@type": "vdoc:Paragraph",
               "vdoc:content": [
-                "ValOS Paths ('VPaths') identify paths between valospace resources.\nVrids (a subset of VPaths) identify valospace resources."
+                "ValOS Paths ('VPaths') are strings which are used to identify\nvalospace resources as well as paths between them."
               ]
             },
             {
               "@type": "vdoc:Paragraph",
               "vdoc:content": [
-                "These VRIds are also affiliated with ",
-                {
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
-                    "ValOS event logs"
-                  ],
-                  "vdoc:ref": "@valos/sourcerer/valos-event-log"
-                },
-                " which define their internal path\nsemantics further."
+                "The vpath strings have a recursive structure allowing for the\nexpression of arbitrary relationships but also a grammar that is\nsufficiently restrictive for embedding into URI's and similar contexts."
               ]
             },
             {
               "@type": "vdoc:Paragraph",
               "vdoc:content": [
-                "VPaths are strings with restricted grammar so that they can be embedded\ninto various URI component and list formats without additional encoding."
+                "VPaths contain 'context terms' which refer to definitions provided by\nthe surrounding context, usually as references to some external\nontology. This allows VPath semantics to be extended in domain\nspecific but reusable manner."
               ]
             }
           ]
@@ -646,28 +675,27 @@
             {
               "@type": "vdoc:Paragraph",
               "vdoc:content": [
-                "\nVPaths serve two notably different purposes, both as paths and as\nresource identifiers. A VPath which has a global valospace resource\nidentifier (or 'vgrid') as its first segment is a valospace resource\nidentifier (or *VRId*)."
-              ]
-            },
-            {
-              "@id": "main_vpath_rules"
-            },
-            {
-              "@type": "vdoc:Paragraph",
-              "vdoc:content": [
-                "\nMany valospace resources, so called *structural sub-resources* are\nidentified by a fixed path from the global resource defined by the same\nverbs that define non-VRId VPaths. Thus while paths and identifiers are\nsuperficially different it is useful to represent them both using the\nsame VPath verb structure."
+                "\nA subset of vpaths called 'vrids' contain a fixed starting point and\nidentify valospace resources."
               ]
             },
             {
               "@type": "vdoc:Paragraph",
               "vdoc:content": [
-                "Both verb and vgrid params can also have context term references to\nan external lookup of URI prefixes and semantic definitions."
+                "The primary example of a vpath context is the JSON-LD @context of a ",
+                {
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    "ValOS event chronicle"
+                  ],
+                  "vdoc:ref": "@valos/sourcerer/valos-event-log"
+                },
+                "\nwhich provides the semantics for all vpaths that appear inside the\nchronicle.\n    "
               ]
             }
           ]
         },
         "package": "@valos/raem",
-        "version": "0.35.0-prerelease.14"
+        "version": "0.35.0-prerelease.15"
       },
       "rest-api-spindle": {
         "@id": "https://valospace.org/rest-api-spindle",
@@ -773,7 +801,7 @@
           ]
         },
         "package": "@valos/rest-api-spindle",
-        "version": "0.35.0-prerelease.14"
+        "version": "0.35.0-prerelease.15"
       },
       "rest-api-spindle/schema-builder": {
         "@id": "https://valospace.org/rest-api-spindle/schema-builder",
@@ -902,7 +930,7 @@
           ]
         },
         "package": "@valos/rest-api-spindle",
-        "version": "0.35.0-prerelease.14"
+        "version": "0.35.0-prerelease.15"
       },
       "revdoc": {
         "@id": "https://valospace.org/revdoc",
@@ -961,7 +989,7 @@
           ]
         },
         "package": "@valos/revdoc",
-        "version": "0.35.0-prerelease.14"
+        "version": "0.35.0-prerelease.15"
       },
       "revdoc/tutorial": {
         "@id": "https://valospace.org/revdoc/tutorial",
@@ -1035,7 +1063,7 @@
           ]
         },
         "package": "@valos/revdoc",
-        "version": "0.35.0-prerelease.14"
+        "version": "0.35.0-prerelease.15"
       },
       "sbomdoc": {
         "@id": "https://valospace.org/sbomdoc",
@@ -1094,7 +1122,7 @@
           ]
         },
         "package": "@valos/sbomdoc",
-        "version": "0.35.0-prerelease.14"
+        "version": "0.35.0-prerelease.15"
       },
       "script": {
         "@id": "https://valospace.org/script",
@@ -1147,7 +1175,7 @@
           ]
         },
         "package": "@valos/script",
-        "version": "0.35.0-prerelease.14"
+        "version": "0.35.0-prerelease.15"
       },
       "sourcerer": {
         "@id": "https://valospace.org/sourcerer",
@@ -1192,7 +1220,7 @@
           ]
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0-prerelease.14"
+        "version": "0.35.0-prerelease.15"
       },
       "sourcerer/valos-event-log": {
         "@id": "https://valospace.org/sourcerer/valos-event-log",
@@ -1222,7 +1250,7 @@
           ]
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0-prerelease.14"
+        "version": "0.35.0-prerelease.15"
       },
       "sourcerer/VState": {
         "@id": "https://valospace.org/sourcerer/VState",
@@ -1261,7 +1289,7 @@
           ]
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0-prerelease.14"
+        "version": "0.35.0-prerelease.15"
       },
       "twindoc": {
         "@id": "https://valospace.org/twindoc",
@@ -1342,7 +1370,7 @@
           ]
         },
         "package": "@valos/twindoc",
-        "version": "0.35.0-prerelease.14"
+        "version": "0.35.0-prerelease.15"
       },
       "type-vault/AssortedTutorials": {
         "@id": "https://valospace.org/type-vault/AssortedTutorials",
@@ -1361,7 +1389,7 @@
         },
         "introduction": {},
         "package": "@valos/type-vault",
-        "version": "0.35.0-prerelease.14"
+        "version": "0.35.0-prerelease.15"
       },
       "vdoc": {
         "@id": "https://valospace.org/vdoc",
@@ -1449,7 +1477,7 @@
           ]
         },
         "package": "@valos/vdoc",
-        "version": "0.35.0-prerelease.14"
+        "version": "0.35.0-prerelease.15"
       },
       "kernel": {
         "@id": "https://valospace.org/kernel",
@@ -1651,7 +1679,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-prerelease.13"
+        "version": "0.35.0-prerelease.14"
       },
       "removed-from": {
         "@id": "https://valospace.org/removed-from",
@@ -1694,7 +1722,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-prerelease.13"
+        "version": "0.35.0-prerelease.14"
       },
       "@valos/kernel": {
         "@id": "https://valospace.org/index",
@@ -1839,7 +1867,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-prerelease.13"
+        "version": "0.35.0-prerelease.14"
       },
       "technician": {
         "@id": "https://valospace.org/technician",
@@ -1927,7 +1955,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-prerelease.13"
+        "version": "0.35.0-prerelease.14"
       },
       "valonaut": {
         "@id": "https://valospace.org/valonaut",
@@ -2001,7 +2029,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-prerelease.13"
+        "version": "0.35.0-prerelease.14"
       },
       "voyager": {
         "@id": "https://valospace.org/voyager",
@@ -2061,7 +2089,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-prerelease.13"
+        "version": "0.35.0-prerelease.14"
       }
     },
     "prefixes": {
@@ -2116,7 +2144,7 @@
           "owl:cardinality": 1
         },
         "valos-raem:expressor": "$valos-raem:resolveVRIdTransient",
-        "rdfs:comment": "The immutable, expanded object representation of the vrid of this\nresource."
+        "rdfs:comment": "The immutable, segmented object representation of the vrid of this\nresource."
       },
       "typeName": {
         "@type": "valos-raem:GeneratedField",

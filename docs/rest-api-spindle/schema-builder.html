@@ -76,11 +76,13 @@ the other building blocks.</span>
 <pre><code><span class="vdoc type-vdoc-node"> ({
   scriptRoot: [&#x22;$~gh:0123456789abcdef&#x22;],
   &#x22;&#x26;ofMapping&#x22;: {
-    tags: { routeRoot: [&#x22;$~u4:aaaabbbb-cccc-dddd-eeee-ffffffffffff&#x22;] },
+    tags: {
+      routeRoot: [&#x22;$~u4:aaaabbbb-cccc-dddd-eeee-ffffffffffff&#x22;],
+    },
   },
   &#x22;&#x26;ofMethod&#x22;: { POST: {
     &#x22;&#x26;ofMapping&#x22;: { tags: {
-      oesType: &#x22;tag&#x22;,
+      relationName: &#x22;TAG&#x22;,
     }, },
   }, },
 })</span>
@@ -107,7 +109,7 @@ the other building blocks.</span>
     externalDocs: {
       url: &#x22;https://swagger.io&#x22;, description: &#x22;Find more info here&#x22;,
     },
-    servers: [], host: &#x22;0.0.0.0&#x22;, schemes: [&#x22;http&#x22;, &#x22;https&#x22;],
+    servers: [], host: &#x22;127.0.0.1&#x22;, schemes: [&#x22;http&#x22;, &#x22;https&#x22;],
     consumes: [&#x22;application/json&#x22;], produces: [&#x22;application/json&#x22;],
     tags: [{ name: &#x22;user&#x22;, description: &#x22;User end-points&#x22; }],
     securityDefinitions: { apiKey: {
@@ -116,7 +118,7 @@ the other building blocks.</span>
   },
   schemas: [
     sharedSchemaOf(TestTagType),
-    sharedSchemaOf(TestThingType),
+    sharedSchemaOf(TestIndividualType),
   ],
   routes: [
     sessionGETRoute(&#x60;/session&#x60;,
@@ -129,22 +131,26 @@ the other building blocks.</span>
           clientRedirectPath: &#x60;/&#x60;,
         } }, testGlobalRules),
     listingGETRoute(&#x60;/tags&#x60;, {}, testGlobalRules, TestTagType),
-    resourceGETRoute(&#x60;/things/:resourceId&#x60;,
+    resourceGETRoute(&#x60;/individuals/:resourceId&#x60;,
         { rules: {
           routeRoot: [],
           resource: [&#x22;!$valk:ref&#x22;, [&#x22;!:request:params:resourceId&#x22;]],
-        } }, testGlobalRules, TestThingType),
-    mappingPOSTRoute(&#x60;/things/:resourceId/tags&#x60;, {
+        } }, testGlobalRules, TestIndividualType),
+    mappingPOSTRoute(&#x60;/individuals/:resourceId/tags&#x60;, {
+          enabledWithRules: [&#x22;relationName&#x22;],
           rules: {
-            resource: [&#x22;!$valk:ref&#x22;, [&#x22;!:request:params:resourceId&#x22;]],
-            doCreateMappingAndTarget: [&#x22;&#x27;&#x22;,
-              [&#x22;!:scriptRoot&#x22;],
-              [&#x22;!$valk:invoke:createOES&#x22;, [&#x22;!:oesType&#x22;], [&#x22;!:resource&#x22;],
-                [&#x22;!:request:body&#x22;, &#x22;$V&#x22;, &#x22;target&#x22;, &#x22;name&#x22;]],
-            ],
+            resource: [&#x22;!$valk:ref&#x22;, [&#x22;*:$&#x22;, [&#x22;!:request:params:resourceId&#x22;]]],
+            doCreateMappingAndTarget: [&#x22;!&#x27;&#x22;, [&#x22;!$valk:new&#x22;, [&#x22;!:Relation&#x22;], {
+              name: [&#x22;!:relationName&#x22;],
+              source: [&#x22;!:resource&#x22;],
+              target: [&#x22;!$valk:new&#x22;, [&#x22;!:Entity&#x22;], {
+                name: [&#x22;!:request:body&#x22;, &#x22;$V&#x22;, &#x22;target&#x22;, &#x22;name&#x22;],
+                owner: [&#x22;!:routeRoot&#x22;],
+                properties: { name: [&#x22;!:request:body&#x22;, &#x22;$V&#x22;, &#x22;target&#x22;, &#x22;name&#x22;] },
+              }],
+            }]],
           },
-          requiredRules: [&#x22;scriptRoot&#x22;, &#x22;oesType&#x22;],
-        }, testGlobalRules, TestThingType, TestThingType.tags),
+        }, testGlobalRules, TestIndividualType, TestIndividualType.tags),
   ],
 })</span>
 </code></pre></blockquote></span>
@@ -241,7 +247,7 @@ which contains the resource &#x27;id&#x27; field.</span>
     valospace: {
       gate: {
         name: &#x22;tags&#x22;,
-        projection: [[&#x22;out*:TAG&#x22;], [&#x22;.$V:target&#x22;]],
+        projection: [[&#x22;*out:TAG&#x22;], [&#x22;.$V:target&#x22;]],
       },
     },
   },
@@ -255,7 +261,7 @@ which contains the resource &#x27;id&#x27; field.</span>
   valospace: {
     gate: {
       name: &#x22;tags&#x22;,
-      projection: [[&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;TAG&#x22;]], [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;target&#x22;]]],
+      projection: [[&#x22;*out&#x22;, [&#x22;:&#x22;, &#x22;TAG&#x22;]], [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;target&#x22;]]],
     },
   },
   properties: {
@@ -313,14 +319,14 @@ where the target resource is a Tag type defined earlier.</span>
     <span id="example_mapping" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_mapping">§ </a>expanded schema of a mapping property</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> mappingToManyOf(&#x22;tags&#x22;, TestTagType,
-    [&#x22;out*:TAGS&#x22;],
+    [&#x22;*out:TAG&#x22;],
     { highlight: BooleanType })</span>
 </code></pre></blockquote>via<blockquote><pre><code><span class="vdoc type-vdoc-node"> exportSchemaOf(type)</span>
 </code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node"> ({
   type: &#x22;array&#x22;,
   valospace: {
     mappingName: &#x22;tags&#x22;,
-    reflection: [[&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;TAGS&#x22;]]],
+    reflection: [[&#x22;*out&#x22;, [&#x22;:&#x22;, &#x22;TAG&#x22;]]],
   },
   items: { type: &#x22;object&#x22;,
     properties: {
@@ -345,52 +351,35 @@ where the target resource is a Tag type defined earlier.</span>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_complex_resource_type" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_complex_resource_type">§ </a>expanded schema of a complex resource type</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> namedResourceType(&#x22;TestThing&#x22;, [], {
+<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> namedResourceType(
+    &#x22;TestIndividual&#x22;, exports.TestProfileType, {
   [ObjectSchema]: {
+    description: &#x22;Test Individual resource&#x22;,
     valospace: {
       gate: {
-        name: &#x22;things&#x22;,
-        projection: [[&#x22;out*:THING&#x22;], [&#x22;.$V:target&#x22;]],
+        name: &#x22;individuals&#x22;,
+        projection: [[&#x22;*out:INDIVIDUAL&#x22;], [&#x22;.$V:target&#x22;]],
+        filterCondition: [[&#x22;$valk:nullable&#x22;], [&#x22;.:visible&#x22;]],
       },
-      reflection: [&#x22;.:fields&#x22;]
     },
   },
-  $V: {
-    id: { valospace: { reflection: [[&#x22;.$V:owner&#x22;], [&#x22;.$V:rawId&#x22;]] } },
-  },
-  name: StringType, // title
-  description: StringType,
-  visible: BooleanType,
-  contact: {
-    [ObjectSchema]: {},
-    email: EmailType,
-    facebook: StringType,
-    linkedin: StringType,
-    phone: StringType,
-    website: URIReferenceType,
-  },
-
-  // Meta
-  tags: () =&#x3E; mappingToManyOf(&#x22;tags&#x22;, exports.TestTagType,
-      [[&#x22;.:tags&#x22;], [&#x22;out*:TAG&#x22;]], {
-        [ObjectSchema]: { valospace: { filterable: true } },
-        highlight: BooleanType,
-      }),
-
-  // Presentation
-  icon: StringType,
-  image: extendType(StringType, { valospace: { reflection: [&#x22;.$V:name&#x22;] } }),
+  title: StringType,
+  company: StringType,
+  interests: () =&#x3E; mappingToManyOf(&#x22;interests&#x22;, exports.TestTagType,
+      [[&#x22;*out:INTEREST&#x22;], [&#x22;$valk:nullable&#x22;]],
+      { [ObjectSchema]: { valospace: { filterable: true } } }),
 })</span>
 </code></pre></blockquote>via<blockquote><pre><code><span class="vdoc type-vdoc-node"> exportSchemaOf(type)</span>
 </code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node"> ({
-  schemaName: &#x22;TestThing&#x22;,
+  schemaName: &#x22;TestIndividual&#x22;,
   type: &#x22;object&#x22;,
+  description: &#x22;Test Individual resource&#x22;,
   valospace: {
     gate: {
-      name: &#x22;things&#x22;,
-      projection: [[&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;THING&#x22;]], [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;target&#x22;]]],
+      name: &#x22;individuals&#x22;,
+      projection: [[&#x22;*out&#x22;, [&#x22;:&#x22;, &#x22;INDIVIDUAL&#x22;]], [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;target&#x22;]]],
+      filterCondition: [[&#x22;$valk:nullable&#x22;], [&#x22;.:visible&#x22;]],
     },
-    reflection: [[&#x22;.&#x22;, [&#x22;:&#x22;, &#x22;fields&#x22;]]],
   },
   properties: {
     $V: { type: &#x22;object&#x22;,
@@ -398,16 +387,13 @@ where the target resource is a Tag type defined earlier.</span>
       properties: {
         id: { type: &#x22;string&#x22;,
           pattern: &#x22;^[a-zA-Z0-9\\-_.~]+$&#x22;,
-          valospace: { reflection: [
-            [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;owner&#x22;]], [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;rawId&#x22;]],
-          ], },
+          valospace: { reflection: [[&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;rawId&#x22;]]], },
         },
       },
     },
+    company: { type: &#x22;string&#x22; },
     contact: { type: &#x22;object&#x22;, properties: {
       email: { type: &#x22;string&#x22; },
-      facebook: { type: &#x22;string&#x22; },
-      linkedin: { type: &#x22;string&#x22; },
       phone: { type: &#x22;string&#x22; },
       website: { type: &#x22;string&#x22; }
     }, },
@@ -416,11 +402,50 @@ where the target resource is a Tag type defined earlier.</span>
     image: { type: &#x22;string&#x22;,
       valospace: { reflection: [[&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;name&#x22;]]] },
     },
+    interests: { type: &#x22;array&#x22;,
+      valospace: {
+        mappingName: &#x22;interests&#x22;,
+        reflection: [[&#x22;*out&#x22;, [&#x22;:&#x22;, &#x22;INTEREST&#x22;]], [&#x22;$&#x22;, &#x22;valk&#x22;, &#x22;nullable&#x22;]],
+      },
+      items: {
+        type: &#x22;object&#x22;,
+        valospace: { filterable: true },
+        properties: {
+          $V: {
+            type: &#x22;object&#x22;,
+            properties: { href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; } },
+            valospace: { gate: { name: &#x22;tags&#x22; }, targetType: &#x22;TestTag&#x22; }
+          }
+        },
+      },
+    },
     name: { type: &#x22;string&#x22; },
+    owned: { type: &#x22;object&#x22;,
+      valospace: { reflection: [] },
+      properties: {
+        services: { type: &#x22;array&#x22;,
+          valospace: {
+            mappingName: &#x22;owned/services&#x22;,
+            reflection: [[&#x22;*out&#x22;, [&#x22;:&#x22;, &#x22;SERVICE&#x22;]], [&#x22;$&#x22;, &#x22;valk&#x22;, &#x22;nullable&#x22;]],
+          },
+          items: {
+            properties: {
+              $V: {
+                type: &#x22;object&#x22;,
+                properties: { href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; } },
+                valospace: { gate: { name: &#x22;services&#x22; }, targetType: &#x22;TestService&#x22; }
+              },
+              highlight: { type: &#x22;boolean&#x22; }
+            },
+            type: &#x22;object&#x22;,
+          },
+        },
+      },
+    },
     tags: { type: &#x22;array&#x22;,
       valospace: {
         mappingName: &#x22;tags&#x22;,
-        reflection: [[&#x22;.&#x22;, [&#x22;:&#x22;, &#x22;tags&#x22;]], [&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;TAG&#x22;]]],
+        reflection: [[&#x22;*out&#x22;, [&#x22;:&#x22;, &#x22;TAG&#x22;]], [&#x22;$&#x22;, &#x22;valk&#x22;, &#x22;nullable&#x22;]],
       },
       items: { type: &#x22;object&#x22;,
         valospace: { filterable: true },
@@ -433,6 +458,7 @@ where the target resource is a Tag type defined earlier.</span>
         },
       },
     },
+    title: { type: &#x22;string&#x22; },
     visible: { type: &#x22;boolean&#x22; },
   },
 })</span>
@@ -457,10 +483,10 @@ where the target resource is a Tag type defined earlier.</span>
     <h3><a aria-label="§" href="#example_route_common">§ </a>Data common to all route testdoc examples</h3>
 <pre><code><span class="vdoc type-vdoc-node"> ({
     TestTagType,
-    TestThingType,
-    gate: TestThingType[ObjectSchema].valospace.gate,
+    TestIndividualType,
+    gate: TestIndividualType[ObjectSchema].valospace.gate,
     mappingName: &#x22;tags&#x22;,
-    testThingTagsMapping: TestThingType.tags,
+    testThingTagsMapping: TestIndividualType.tags,
   })</span>
 </code></pre></blockquote></span>
 
@@ -471,13 +497,13 @@ is sourced from configuration files.</span>
 
   <section id="route_basic_get" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#route_basic_get">§ </a>Basic GET resource route</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">Simple resource-GET route retrieves a primary TestThingType resource
+<div><p><span class="vdoc type-vdoc-paragraph">Simple resource-GET route retrieves a primary TestIndividualType resource
 based on an id string given as a route parameter.</span>
 </p></div><div><p><span class="vdoc type-vdoc-paragraph">The route defines the reflection rule &#x60;resource&#x60; which converts
 the id string into a valospace resource id. The resource-GET handler (a
 built-in component of the REST API spindle) then uses this id to pick
 the correct resource from the set of resources located by the
-TestThingType gate projection.</span>
+TestIndividualType gate projection.</span>
 </p></div>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_route_get_resource" class="vdoc type-vdoc-node">
@@ -487,30 +513,31 @@ TestThingType gate projection.</span>
     routeRoot: null,
     resource: [&#x22;!$valk:ref&#x22;, [&#x22;!:request:params:resourceId&#x22;]],
   },
-}, {}, TestThingType)</span>
+}, {}, TestIndividualType)</span>
 </code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node"> ({
-  name: &#x22;things&#x22;, method: &#x22;GET&#x22;, category: &#x22;resource&#x22;,
-  url: &#x22;/things/:resourceId&#x22;,
+  name: &#x22;individuals&#x22;, method: &#x22;GET&#x22;, category: &#x22;resource&#x22;,
+  url: &#x22;/individuals/:resourceId&#x22;,
   schema: {
-    description: &#x22;Get the contents of a TestThing route resource&#x22;,
+    description: &#x22;Get the contents of a TestIndividual route resource&#x22;,
     querystring: {
       fields: { type: &#x22;string&#x22;,
         pattern: &#x22;^([a-zA-Z0-9\\-_.~/*$]*(\\,([a-zA-Z0-9\\-_.~/*$])*)*)?$&#x22;
       },
     },
     response: {
-      200: &#x22;TestThing#&#x22;,
+      200: &#x22;TestIndividual#&#x22;,
       404: { type: &#x22;string&#x22; }
     }
   },
   config: {
     requiredRules: [&#x22;routeRoot&#x22;, &#x22;resource&#x22;],
     resource: {
-      name: &#x22;TestThing&#x22;,
-      schema: &#x22;TestThing#&#x22;,
+      name: &#x22;TestIndividual&#x22;,
+      schema: &#x22;TestIndividual#&#x22;,
       gate: {
-        name: &#x22;things&#x22;,
-        projection: [[&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;THING&#x22;]], [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;target&#x22;]]],
+        name: &#x22;individuals&#x22;,
+        projection: [[&#x22;*out&#x22;, [&#x22;:&#x22;, &#x22;INDIVIDUAL&#x22;]], [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;target&#x22;]]],
+        filterCondition: [[&#x22;$valk:nullable&#x22;], [&#x22;.:visible&#x22;]],
       },
     },
     rules: {
@@ -536,25 +563,28 @@ thing.</span>
     <span id="example_route_post_mapping" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_route_post_mapping">§ </a>route of a complex POST mapping</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> mappingPOSTRoute(&#x60;/${gate.name}/:resourceId/${mappingName}&#x60;, {
+  enabledWithRules: [&#x22;relationName&#x22;],
   rules: {
     resource: [&#x22;!$valk:ref&#x22;, [&#x22;!:request:params:resourceId&#x22;]],
-    doCreateMappingAndTarget: [&#x22;&#x27;&#x22;,
-      [&#x22;!:scriptRoot&#x22;],
-      [&#x22;!$valk:invoke:createOES&#x22;, [&#x22;!:oesType&#x22;], [&#x22;!:resource&#x22;],
-        [&#x22;!:request:body&#x22;, &#x22;$V&#x22;, &#x22;target&#x22;, &#x22;name&#x22;],
-      ],
-    ]
+    doCreateMappingAndTarget: [&#x22;!&#x27;&#x22;, [&#x22;!$valk:new&#x22;, [&#x22;!:Relation&#x22;], {
+      name: [&#x22;!:relationName&#x22;],
+      source: [&#x22;!:resource&#x22;],
+      target: [&#x22;!$valk:new&#x22;, [&#x22;!:Entity&#x22;], {
+        name: [&#x22;!:request:body&#x22;, &#x22;$V&#x22;, &#x22;target&#x22;, &#x22;name&#x22;],
+        owner: [&#x22;!:routeRoot&#x22;],
+        properties: { name: [&#x22;!:request:body&#x22;, &#x22;$V&#x22;, &#x22;target&#x22;, &#x22;name&#x22;] },
+      }],
+    }]],
   },
-  requiredRules: [&#x22;scriptRoot&#x22;, &#x22;oesType&#x22;],
-}, testGlobalRules, TestThingType, testThingTagsMapping)</span>
+}, testGlobalRules, TestIndividualType, testThingTagsMapping)</span>
 </code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node"> ({
-  name: &#x22;things&#x22;, method: &#x22;POST&#x22;, category: &#x22;mapping&#x22;,
-  url: &#x22;/things/:resourceId/tags&#x22;,
+  name: &#x22;individuals&#x22;, method: &#x22;POST&#x22;, category: &#x22;mapping&#x22;,
+  url: &#x22;/individuals/:resourceId/tags&#x22;,
   schema: {
     description:
 &#x60;Create a new TestTag resource
 *using **body.$V.target** as content* and then a new &#x27;tags&#x27;
-mapping to it from the source TestThing route
+mapping to it from the source TestIndividual route
 resource. The remaining fields of the body are set as the mapping
 content. Similarily the response will contain the newly created target
 resource content in *response.$V.target* with the rest of the response
@@ -587,11 +617,12 @@ containing the mapping.&#x60;,
   },
   config: {
     resource: {
-      name: &#x22;TestThing&#x22;,
-      schema: &#x22;TestThing#&#x22;,
+      name: &#x22;TestIndividual&#x22;,
+      schema: &#x22;TestIndividual#&#x22;,
       gate: {
-        name: &#x22;things&#x22;,
-        projection: [[&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;THING&#x22;]], [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;target&#x22;]]],
+        name: &#x22;individuals&#x22;,
+        projection: [[&#x22;*out&#x22;, [&#x22;:&#x22;, &#x22;INDIVIDUAL&#x22;]], [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;target&#x22;]]],
+        filterCondition: [[&#x22;$valk:nullable&#x22;], [&#x22;.:visible&#x22;]],
       },
     },
     relation: {
@@ -599,7 +630,7 @@ containing the mapping.&#x60;,
       schema: { type: &#x22;array&#x22;,
         valospace: {
           mappingName: &#x22;tags&#x22;,
-          reflection: [[&#x22;.&#x22;, [&#x22;:&#x22;, &#x22;tags&#x22;]], [&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;TAG&#x22;]]]
+          reflection: [[&#x22;*out&#x22;, [&#x22;:&#x22;, &#x22;TAG&#x22;]], [&#x22;$&#x22;, &#x22;valk&#x22;, &#x22;nullable&#x22;]],
         },
         items: { type: &#x22;object&#x22;,
           valospace: { filterable: true },
@@ -614,22 +645,36 @@ containing the mapping.&#x60;,
       },
     },
     target: { name: &#x22;TestTag&#x22;, schema: &#x22;TestTag#&#x22; },
+    enabledWithRules: [&#x22;relationName&#x22;],
     requiredRules: [
-      &#x22;routeRoot&#x22;, &#x22;resource&#x22;, &#x22;doCreateMappingAndTarget&#x22;,
-      &#x22;scriptRoot&#x22;, &#x22;oesType&#x22;,
+      &#x22;routeRoot&#x22;, &#x22;resource&#x22;, &#x22;mappingName&#x22;,
+      &#x22;doCreateMappingAndTarget&#x22;,
     ],
     rules: {
-      doCreateMappingAndTarget: [[&#x22;&#x27;&#x22;,
-        [&#x22;@&#x22;, [&#x22;!&#x22;, [&#x22;:&#x22;, &#x22;scriptRoot&#x22;]]],
-        [&#x22;@&#x22;, [&#x22;!&#x22;, [&#x22;$&#x22;, &#x22;valk&#x22;, &#x22;invoke&#x22;], [&#x22;:&#x22;, &#x22;createOES&#x22;],
-          [&#x22;@&#x22;, [&#x22;!&#x22;, [&#x22;:&#x22;, &#x22;oesType&#x22;]]],
-          [&#x22;@&#x22;, [&#x22;!&#x22;, [&#x22;:&#x22;, &#x22;resource&#x22;]]],
-          [&#x22;@&#x22;, [&#x22;!&#x22;, [&#x22;:&#x22;, &#x22;request&#x22;], [&#x22;:&#x22;, &#x22;body&#x22;], [&#x22;:&#x22;, &#x22;$V&#x22;],
-            [&#x22;:&#x22;, &#x22;target&#x22;], [&#x22;:&#x22;, &#x22;name&#x22;]
-          ]],
+      doCreateMappingAndTarget: [[&#x22;!&#x27;&#x22;, [&#x22;@&#x22;, [
+        &#x22;!&#x22;, [&#x22;$&#x22;, &#x22;valk&#x22;, &#x22;new&#x22;], [&#x22;@&#x22;, [&#x22;!&#x22;, [&#x22;:&#x22;, &#x22;Relation&#x22;]]],
+        [&#x22;@&#x22;, [&#x22;-&#x22;, [&#x22;:&#x22;],
+          [&#x22;@&#x22;, [&#x22;.&#x22;, [&#x22;:&#x22;, &#x22;name&#x22;], [&#x22;@&#x22;, [&#x22;!&#x22;, [&#x22;:&#x22;, &#x22;relationName&#x22;]]]]],
+          [&#x22;@&#x22;, [&#x22;.&#x22;, [&#x22;:&#x22;, &#x22;source&#x22;], [&#x22;@&#x22;, [&#x22;!&#x22;, [&#x22;:&#x22;, &#x22;resource&#x22;]]]]],
+          [&#x22;@&#x22;, [&#x22;.&#x22;, [&#x22;:&#x22;, &#x22;target&#x22;], [&#x22;@&#x22;,
+            [&#x22;!&#x22;, [&#x22;$&#x22;, &#x22;valk&#x22;, &#x22;new&#x22;], [&#x22;@&#x22;, [&#x22;!&#x22;, [&#x22;:&#x22;, &#x22;Entity&#x22;]]], [&#x22;@&#x22;, [
+              &#x22;-&#x22;, [&#x22;:&#x22;],
+              [&#x22;@&#x22;, [&#x22;.&#x22;, [&#x22;:&#x22;, &#x22;name&#x22;], [&#x22;@&#x22;, [
+                &#x22;!&#x22;, [&#x22;:&#x22;, &#x22;request&#x22;], [&#x22;:&#x22;, &#x22;body&#x22;], [&#x22;:&#x22;, &#x22;$V&#x22;], [&#x22;:&#x22;, &#x22;target&#x22;], [&#x22;:&#x22;, &#x22;name&#x22;],
+              ]]]],
+              [&#x22;@&#x22;, [&#x22;.&#x22;, [&#x22;:&#x22;, &#x22;owner&#x22;], [&#x22;@&#x22;, [&#x22;!&#x22;, [&#x22;:&#x22;, &#x22;routeRoot&#x22;]]]]],
+              [&#x22;@&#x22;, [&#x22;.&#x22;, [&#x22;:&#x22;, &#x22;properties&#x22;], [&#x22;@&#x22;, [
+                &#x22;-&#x22;, [&#x22;:&#x22;],
+                [&#x22;@&#x22;, [&#x22;.&#x22;, [&#x22;:&#x22;, &#x22;name&#x22;], [&#x22;@&#x22;, [
+                  &#x22;!&#x22;, [&#x22;:&#x22;, &#x22;request&#x22;], [&#x22;:&#x22;, &#x22;body&#x22;], [&#x22;:&#x22;, &#x22;$V&#x22;], [&#x22;:&#x22;, &#x22;target&#x22;], [&#x22;:&#x22;, &#x22;name&#x22;],
+                ]]]],
+              ]]]],
+            ]]],
+          ]]],
         ]],
-      ]],
-      oesType: [[&#x22;:&#x22;, &#x22;tag&#x22;]],
+      ]]]],
+      mappingName: [[&#x22;:&#x22;, &#x22;tags&#x22;]],
+      relationName: [[&#x22;:&#x22;, &#x22;TAG&#x22;]],
       resource: [[&#x22;!&#x22;, [&#x22;$&#x22;, &#x22;valk&#x22;, &#x22;ref&#x22;],
         [&#x22;@&#x22;, [&#x22;!&#x22;, [&#x22;:&#x22;, &#x22;request&#x22;], [&#x22;:&#x22;, &#x22;params&#x22;], [&#x22;:&#x22;, &#x22;resourceId&#x22;]]]
       ]],
@@ -672,8 +717,8 @@ in type and property &#x60;valospace.reflection&#x60; fields.</span>
     valospace: {
       gate: {
         name: &#x22;news&#x22;,
-        projection: [[&#x22;out*:NEWSITEM&#x22;], [&#x22;.$V:target&#x22;]],
-        filterCondition: [&#x22;.:visible&#x22;],
+        projection: [[&#x22;*out:NEWSITEM&#x22;], [&#x22;.$V:target&#x22;]],
+        filterCondition: [[&#x22;$valk:nullable&#x22;], [&#x22;.:visible&#x22;]],
       },
     },
   },
@@ -688,10 +733,9 @@ in type and property &#x60;valospace.reflection&#x60; fields.</span>
     valospace: {
       gate: {
         name: &#x22;news&#x22;,
-        projection: [[&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;NEWSITEM&#x22;]], [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;target&#x22;]]],
-        filterCondition: [&#x22;.:visible&#x22;],
+        projection: [[&#x22;*out&#x22;, [&#x22;:&#x22;, &#x22;NEWSITEM&#x22;]], [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;target&#x22;]]],
+        filterCondition: [[&#x22;$valk:nullable&#x22;], [&#x22;.:visible&#x22;]],
       },
-      reflection: [[&#x22;.&#x22;, [&#x22;:&#x22;, &#x22;fields&#x22;]]],
     },
     properties: {
       $V: { type: &#x22;object&#x22;,
@@ -699,16 +743,12 @@ in type and property &#x60;valospace.reflection&#x60; fields.</span>
         properties: {
           id: { type: &#x22;string&#x22;,
             pattern: &#x22;^[a-zA-Z0-9\\-_.~]+$&#x22;,
-            valospace: { reflection: [
-              [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;owner&#x22;]], [&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;rawId&#x22;]],
-            ], },
+            valospace: { reflection: [[&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;rawId&#x22;]]], },
           },
         },
       },
       contact: { type: &#x22;object&#x22;, properties: {
         email: { type: &#x22;string&#x22; },
-        facebook: { type: &#x22;string&#x22; },
-        linkedin: { type: &#x22;string&#x22; },
         phone: { type: &#x22;string&#x22; },
         website: { type: &#x22;string&#x22; }
       }, },
@@ -721,7 +761,7 @@ in type and property &#x60;valospace.reflection&#x60; fields.</span>
       tags: { type: &#x22;array&#x22;,
         valospace: {
           mappingName: &#x22;tags&#x22;,
-          reflection: [[&#x22;.&#x22;, [&#x22;:&#x22;, &#x22;tags&#x22;]], [&#x22;out*&#x22;, [&#x22;:&#x22;, &#x22;TAG&#x22;]]],
+          reflection: [[&#x22;*out&#x22;, [&#x22;:&#x22;, &#x22;TAG&#x22;]], [&#x22;$&#x22;, &#x22;valk&#x22;, &#x22;nullable&#x22;]],
         },
         items: { type: &#x22;object&#x22;,
           valospace: { filterable: true },

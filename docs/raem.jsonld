@@ -47,9 +47,9 @@
     "revdoc:package": "@valos/raem",
     "revdoc:prefix": "valos-raem",
     "revdoc:prefixIRI": "https://valospace.org/raem#",
-    "revdoc:version": "0.35.0-prerelease.15",
+    "revdoc:version": "0.35.0-prerelease.16",
     "respecConfig": {
-      "subtitle": "0.35.0-prerelease.15",
+      "subtitle": "0.35.0-prerelease.16",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -822,7 +822,7 @@
           "rdfs:List"
         ],
         "revdoc:brief": "VPath 'vrid' literal datatype",
-        "rdfs:comment": "The class of all resources representing some VPath rule or\npseudo-rule. 'vrid'.\nIf this class is used as literal datatype URI the literal contains the\nflat string VPath rule representation. Otherwise when this class is\nthe range of a property which is used as a predicate in a triple, and\nthe object of the triple is not a literal, then the object contains\nthe expanded representation of the VPath rule value as an rdf List."
+        "rdfs:comment": "The class of all resources representing some VPath rule or\npseudo-rule. 'vrid'.\nIf this class is used as literal datatype URI the literal contains the\nflat string VPath rule representation. Otherwise when this class is\nthe range of a property which is used as a predicate in a triple, and\nthe object of the triple is not a literal, then the object contains\nthe segmented representation of the VPath rule value as an rdf List."
       },
       "VPath": {
         "@type": "valos-kernel:Class",

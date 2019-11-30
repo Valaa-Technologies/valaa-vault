@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-prerelease.16](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.15...v0.35.0-prerelease.16) (2019-11-30)
+
+
+### Bug Fixes
+
+* gateway container rootId -> viewRootId, others ([ae57c30](https://github.com/valaatech/kernel/commit/ae57c3095900fc441fb1217c2a9ace8224cb4923))
+
+
+
+
+
 # [0.35.0-prerelease.15](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.14...v0.35.0-prerelease.15) (2019-11-26)
 
 

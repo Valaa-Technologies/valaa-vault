@@ -241,11 +241,12 @@ export default class Vrapper extends Cog {
    *
    * @memberof Vrapper
    */
-  activate (state?: Object) {
-    const initialBlocker = this.refreshPhase(state);
+  activate (options?: Object) {
+    const initialBlocker = this.refreshPhase(options && options.state);
     if (!initialBlocker) return undefined;
     if (this._activationProcess) return this._activationProcess;
-    if (this._phase !== INACTIVE) {
+    if (this._phase !== INACTIVE
+        && !(this._phase === NONCREATED && options && options.allowNonCreated)) {
       throw new Error(`Cannot activate non-inactive ${this.debugId()}`);
     }
     this._phase = ACTIVATING;
@@ -413,7 +414,7 @@ export default class Vrapper extends Cog {
   requireActive (options?: VALKOptions) {
     if (this._phase === ACTIVE) return;
     const blocker = (options && options.activate)
-        ? this.activate(options.state)
+        ? this.activate(options)
         : this.refreshPhase(options && options.state);
     const phase = this._phase;
     if (!blocker || (options && options.allowActivating && (phase === ACTIVATING))) return;

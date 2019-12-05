@@ -272,7 +272,8 @@ export default class Engine extends Cog {
             : result.story.id;
         const vResource = this.getVrapper(id, { discourse });
         if (vResource.isResource()) {
-          Promise.resolve(vResource.activate(discourse.getState()))
+          Promise.resolve(vResource.activate(
+                  { state: discourse.getState(), allowNonCreated: true }))
               .then(undefined, (error) => {
                 outputCollapsedError(localWrapError(this, error,
                     `${constructCommand.name}.activate ${vResource.debugId()}`),

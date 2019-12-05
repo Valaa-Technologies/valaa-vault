@@ -314,4 +314,26 @@ describe("Engine bug tests", async () => {
     const result = entities().creator.do(bodyKuery, { verbosity: 0 });
     expect(result).toEqual("prefixsuffix");
   });
+
+  it(`creates a chronicle with reference to non-existent chronicle`, async () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
+    const properties = {
+      reference: vRef("secondpartitionid", null, null, "valaa-memory:?id=secondpartitionid")
+    };
+    await harness.runValoscript(null, `
+      new Entity({
+        owner: null,
+        name: "firstPartition",
+        partitionAuthorityURI: "valaa-memory:",
+        properties
+      });
+
+      new Entity({
+        id: "secondpartitionid",
+        owner: null,
+        name: "secondPartition",
+        partitionAuthorityURI: "valaa-memory:"
+      });
+    `, { scope: { properties }, awaitResult: (result) => result.getComposedEvent() });
+  });
 });

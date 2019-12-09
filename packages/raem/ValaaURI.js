@@ -108,6 +108,13 @@ export const naiveURI = {
       invariantifyString(partitionRawId, "naiveURI.createPartitionURI.partitionRawId",
           { allowUndefined: true });
     }
+    let idPart;
+    if (partitionRawId.slice(-2) === "@@") {
+      idPart = partitionRawId;
+    } else {
+      idPart = encodeURIComponent(partitionRawId);
+    }
+
     return `${baseParts[genericURI.protocolPart]
         }${baseParts[genericURI.authorityPart] || ""
         // https://tools.ietf.org/html/rfc3986#section-3.3
@@ -115,7 +122,7 @@ export const naiveURI = {
         // component must either be empty or begin with a slash ("/") character.
         }${baseParts[genericURI.pathPart]
             || (baseParts[genericURI.authorityPart] ? "/" : "")
-        }?id=${encodeURIComponent(partitionRawId)
+        }?id=${idPart
         }${!baseParts[genericURI.paramsPart] ? "" : `&${baseParts[genericURI.paramsPart]}`}`;
   },
 
@@ -127,7 +134,10 @@ export const naiveURI = {
       invariantifyString(naivePartitionURI, "naivePartitionURI", { allowEmpty: true });
     }
     const parts = naivePartitionURI.match(naiveURI.regex);
-    return decodeURIComponent(parts[naiveURI.partitionIdPart]);
+    const partitionIdPart = parts[naiveURI.partitionIdPart];
+    return (partitionIdPart.slice(-2) === "@@")
+        ? partitionIdPart
+        : decodeURIComponent(partitionIdPart);
   },
 
   getAuthorityURI: function getNaiveAuthorityURI (naivePartitionURI: ValaaURI): ValaaURI {

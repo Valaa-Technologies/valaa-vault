@@ -3,6 +3,7 @@
 import URLParse from "url-parse";
 
 import { invariantifyString } from "~/tools/invariantify";
+import { validateVRId } from "~/raem/VPath";
 import { vdon } from "~/tools/vdon";
 
 export const vdoc = vdon({ "...": { heading:
@@ -108,6 +109,14 @@ export const naiveURI = {
       invariantifyString(partitionRawId, "naiveURI.createPartitionURI.partitionRawId",
           { allowUndefined: true });
     }
+    let idPart;
+    if (partitionRawId.slice(-2) === "@@") {
+      validateVRId(partitionRawId);
+      idPart = partitionRawId;
+    } else {
+      idPart = encodeURIComponent(partitionRawId);
+    }
+
     return `${baseParts[genericURI.protocolPart]
         }${baseParts[genericURI.authorityPart] || ""
         // https://tools.ietf.org/html/rfc3986#section-3.3
@@ -115,7 +124,7 @@ export const naiveURI = {
         // component must either be empty or begin with a slash ("/") character.
         }${baseParts[genericURI.pathPart]
             || (baseParts[genericURI.authorityPart] ? "/" : "")
-        }?id=${encodeURIComponent(partitionRawId)
+        }?id=${idPart
         }${!baseParts[genericURI.paramsPart] ? "" : `&${baseParts[genericURI.paramsPart]}`}`;
   },
 
@@ -133,8 +142,10 @@ export const naiveURI = {
       throw new Error(`Invalid naivePartitionURI (does not match naiveURI regex): <${
           naivePartitionURI}>`);
     }
-    const parts = naivePartitionURI.match(naiveURI.regex);
-    return decodeURIComponent(parts[naiveURI.partitionIdPart]);
+    const partitionIdPart = match[naiveURI.partitionIdPart];
+    return (partitionIdPart.slice(-2) === "@@")
+        ? partitionIdPart
+        : decodeURIComponent(partitionIdPart);
   },
 
   getChronicleId: function getNaiveChronicleId (naiveChronicleURI) {

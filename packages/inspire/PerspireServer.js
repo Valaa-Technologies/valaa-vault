@@ -5,7 +5,7 @@ import path from "path";
 
 import createGateway from "~/inspire";
 import PerspireView from "~/inspire/PerspireView";
-import { invariantifyString } from "~/tools";
+import { invariantifyString, wrapError } from "~/tools";
 
 export default class PerspireServer {
   constructor ({
@@ -36,7 +36,15 @@ export default class PerspireServer {
     global.atob = (str) => Buffer.from(str, "base64").toString("binary");
     global.btoa = (str) => Buffer.from(str, "binary").toString("base64");
 
-    (this.spindleIds || []).forEach(spindleId => require(spindleId));
+    (this.spindleIds || []).forEach(spindleId => {
+      try {
+        return require(spindleId);
+      } catch (error) {
+        throw wrapError(error,
+            new Error(`During PerspireServer.initialize.require("${spindleId}")`));
+      }
+    });
+
     return (this.gateway =
         (!this.isTest
             ? this._createWorkerPerspireGateway(this.gatewayOptions, ...this.revelations)

@@ -608,6 +608,12 @@ export default class Gateway extends FabricEventTarget {
 
   _attachedSpindles = {};
 
+  getAttachedSpindle (name) {
+    const ret = this._attachedSpindles[name];
+    if (!ret) throw new Error(`No spindle found with name "${name}"`);
+    return ret;
+  }
+
   async attachSpindle (spindlePrototype: Promise<Object>) {
     return this.attachSpindles([spindlePrototype]);
   }

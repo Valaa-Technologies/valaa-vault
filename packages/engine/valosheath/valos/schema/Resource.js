@@ -45,7 +45,7 @@ export default {
         ""}activating all Resource's in the prototype chain. Returns a Promise which resolves ${
         ""}once all corresponding partitions have completed their first narration`
     )(function activate (resource) {
-      return Promise.resolve(resource.activate());
+      return Promise.resolve(resource.activate() || resource);
     }),
 
     isActive: denoteValOSBuiltinWithSignature(
@@ -123,7 +123,8 @@ export default {
           ""}An active resource is an existing, non-destroyed resource in a fully connected ${
           ""}partition whose all possible prototypes are also active.`
     )(function tryActiveResource (id: string | VRL) {
-      return this.__callerValker__.run({}, VALEK.fromObject(id).nullable());
+      const ret = this.__callerValker__.run({}, VALEK.fromObject(id).nullable());
+      return ret && (ret.getPhase() === "Active") && ret;
     }),
 
     recombine: denoteValOSBuiltinWithSignature(

@@ -268,7 +268,7 @@ export default class Vrapper extends Cog {
           }
         }
         operationInfo.pendingConnection = null;
-        return true;
+        return this;
       } catch (error) {
         this._phase =
             (blocker !== this) ? INACTIVE
@@ -343,8 +343,12 @@ export default class Vrapper extends Cog {
     }
     this[HostRef] = id;
     const connection = this.tryConnection();
+    const newTypeName = transient.get("typeName");
     if (!connection || !connection.isActive()) {
       if (this[HostRef].isInactive()) return this;
+    } else if (newTypeName && isInactiveTypeName(newTypeName)) {
+      this._phase = NONCREATED;
+      return this;
     }
     let prototypeId = transient.get("prototype");
     if (!prototypeId) {
@@ -361,13 +365,11 @@ export default class Vrapper extends Cog {
     }
     this._phase = ACTIVE;
     this._activationProcess = undefined;
-    this._postActivate(resolver, transient);
+    this._postActivate(resolver, transient, newTypeName);
     return undefined;
   }
 
-  _postActivate (resolver: Object, transient: Transient) {
-    let partitionAuthorityURIString;
-    let authorityConnection;
+  _postActivate (resolver: Object, transient: Transient, newTypeName: string) {
     try {
       if (!this._typeName || isInactiveTypeName(this._typeName)) {
         const ref = this[HostRef];
@@ -375,12 +377,10 @@ export default class Vrapper extends Cog {
           this.warnEvent("Activating id explicitly! Should have been activated by reducers");
           ref.setInactive(false);
         }
-        let newTypeName = transient.get("typeName");
-        if (isInactiveTypeName(newTypeName)) {
-          newTypeName = resolver.tryGoToTransient(
-              ref, "TransientFields", true, false, true, "typeName").get("typeName");
-        }
-        this._setTypeName(newTypeName);
+        this._setTypeName(!isInactiveTypeName(newTypeName)
+            ? newTypeName
+            : resolver.tryGoToTransient(
+              ref, "TransientFields", true, false, true, "typeName").get("typeName"));
       }
       this.setName(`Vrapper/${this.getRawId()}:${this._typeName}`);
       if (!this.isInactive()) {
@@ -391,10 +391,10 @@ export default class Vrapper extends Cog {
     } catch (error) {
       outputError(this.wrapErrorEvent(error,
               new Error("_postActivate()"),
+              "\n\tid:", ...dumpObject(this[HostRef]),
+              "\n\tid.getPartitionURI:", ...dumpObject(this[HostRef].getPartitionURI()),
               "\n\ttransient:", ...dumpObject(transient.toJS()),
               "\n\tconnection:", ...dumpObject(this._connection),
-              "\n\tpartitionAuthorityURI:", partitionAuthorityURIString,
-              "\n\tauthorityConnection:", authorityConnection,
               "\n\tthis:", ...dumpObject(this),
               "\n\tresolver.state:", ...dumpObject(resolver.state.toJS()),
               "\n\tengine.discourse.state:", ...dumpObject(this.engine.discourse.getState().toJS())),

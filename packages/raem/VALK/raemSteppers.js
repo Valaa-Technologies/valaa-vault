@@ -328,20 +328,24 @@ export default {
       [, left, right]: BuiltinStep) {
     const eLeft = (typeof left !== "object") ? left : tryUnpackLiteral(valker, head, left, scope);
     const eRight = typeof right !== "object" ? right : tryUnpackLiteral(valker, head, right, scope);
-    const eLeftRef = tryHostRef(eLeft);
-    if (eLeftRef) return eLeftRef.equals(eRight);
-    const eRightRef = tryHostRef(eRight);
-    if (eRightRef) return eRightRef.equals(eLeft);
+    if (eLeft && eRight) {
+      const eLeftRef = tryHostRef(eLeft);
+      if (eLeftRef) return eLeftRef.equals(eRight);
+      const eRightRef = tryHostRef(eRight);
+      if (eRightRef) return eRightRef.equals(eLeft);
+    }
     return eLeft == eRight; // eslint-disable-line
   },
   "§!=": function looseNotEqualTo (valker: Valker, head: any, scope: ?Object,
       [, left, right]: BuiltinStep) {
     const eLeft = (typeof left !== "object") ? left : tryUnpackLiteral(valker, head, left, scope);
     const eRight = typeof right !== "object" ? right : tryUnpackLiteral(valker, head, right, scope);
-    const eLeftRef = tryHostRef(eLeft);
-    if (eLeftRef) return !eLeftRef.equals(eRight);
-    const eRightRef = tryHostRef(eRight);
-    if (eRightRef) return !eRightRef.equals(eLeft);
+    if (eLeft && eRight) {
+      const eLeftRef = tryHostRef(eLeft);
+      if (eLeftRef) return !eLeftRef.equals(eRight);
+      const eRightRef = tryHostRef(eRight);
+      if (eRightRef) return !eRightRef.equals(eLeft);
+    }
     return eLeft != eRight; // eslint-disable-line
   },
   "§===": function equalTo (valker: Valker, head: any, scope: ?Object,

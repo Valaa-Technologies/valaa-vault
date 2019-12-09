@@ -94,7 +94,7 @@ export default class ValoscriptTranspiler extends FabricEventTarget {
         }
       }
       throw actualTranspiler.wrapErrorEvent(error, `transpileKueryFromText`,
-          "\n\ttext:", { text: `\n${"```"}\n${errorText}\n${"```"}\n` },
+          "\n\ttext:", `\n${"```"}\n${errorText}\n${"```"}\n`,
           "\n\tast:", ...dumpObject(ast),
       );
     }

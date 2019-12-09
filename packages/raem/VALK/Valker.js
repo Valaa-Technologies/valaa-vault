@@ -406,7 +406,7 @@ export default class Valker extends Resolver {
       throw this.wrapErrorEvent(error,
           `trySingularTransient(${requireIfRef ? "require-if-ref" : ""}):`,
           "\n\tobject:", ...this._dumpObject(object),
-          "\n\tstate:", ...this._dumpObject(this.getJSState()),
+          // "\n\tstate:", ...this._dumpObject(this.getJSState()),
       );
     }
   }

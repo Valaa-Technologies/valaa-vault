@@ -10,6 +10,7 @@ import { Command, created, duplicated, recombined, isCreatedLike } from "~/raem/
 import VRL, { vRef, IdData, getRawIdFrom } from "~/raem/VRL";
 import { tryHostRef } from "~/raem/VALK/hostReference";
 import { getActionFromPassage } from "~/raem/redux/Bard";
+import { formVPath } from "~/raem/VPath";
 
 import Transient, { createTransient, getTransientTypeName } from "~/raem/state/Transient";
 import layoutByObjectField from "~/raem/tools/denormalized/layoutByObjectField";
@@ -339,7 +340,14 @@ export default class Engine extends Cog {
   _resolveIdForConstructDirective (directive, options: VALKOptions) {
     const discourse = options.discourse;
     const initialState = directive.initialState || {};
-    const explicitRawId = options.id || initialState.id;
+    let explicitRawId = options.id || initialState.id;
+    if (explicitRawId && (typeof explicitRawId !== "string")) {
+      if (!Array.isArray(explicitRawId)) {
+        throw new Error("explicit id must be either a string or a VPath steps array");
+      }
+      explicitRawId = formVPath(...explicitRawId);
+      if (explicitRawId[1] !== "$") throw new Error("explicit vrid must have a GRId as first step");
+    }
     delete initialState.id;
     if (initialState.partitionAuthorityURI) {
       return discourse.assignNewPartitionId(directive,

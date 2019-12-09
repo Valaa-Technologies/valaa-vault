@@ -6,6 +6,7 @@ import { ValaaURI, naiveURI, hasScheme } from "~/raem/ValaaURI";
 import { vRef } from "~/raem/VRL";
 import { dumpObject } from "~/raem/VALK";
 import { getHostRef } from "~/raem/VALK/hostReference";
+import { validateVRId } from "~/raem/VPath";
 import { addConnectToPartitionToError } from "~/raem/tools/denormalized/partitions";
 
 import Discourse from "~/sourcerer/api/Discourse";
@@ -180,47 +181,60 @@ export default class FalseProphetDiscourse extends Discourse {
   }
 
   assignNewResourceId (targetAction: EventBase, partitionURI: string, explicitRawId?: string) {
-    if (!partitionURI) throw new Error("assignNewResourceId.partitionURI missing");
-    const root = this._transactorState ? this._transactorState.obtainRootEvent() : targetAction;
-    if (!tryAspect(root, "command").id) this._assignCommandId(root, this);
-    const partitions = (root.meta || (root.meta = {})).partitions || (root.meta.partitions = {});
-    const partition = partitions[partitionURI] || (partitions[partitionURI] = {});
-    if (!partition.createIndex) partition.createIndex = 0;
-    let resourceRawId;
-    if (!explicitRawId) {
-      if (targetAction.typeName === "Property") {
-        const ownerRawId = getHostRef(targetAction.initialState.owner,
-            `${targetAction.type}.Property.initialState.owner`).rawId();
-        const propertyName = targetAction.initialState.name;
-        if (!targetAction.initialState.name) {
-          throw new Error(`${targetAction.type
-              }.Property.initialState.name required for Property id secondary part`);
+    try {
+      if (!partitionURI) throw new Error("assignNewResourceId.partitionURI missing");
+      const root = this._transactorState ? this._transactorState.obtainRootEvent() : targetAction;
+      if (!tryAspect(root, "command").id) this._assignCommandId(root, this);
+      const partitions = (root.meta || (root.meta = {})).partitions || (root.meta.partitions = {});
+      const partition = partitions[partitionURI] || (partitions[partitionURI] = {});
+      if (!partition.createIndex) partition.createIndex = 0;
+      let resourceRawId;
+      if (!explicitRawId) {
+        if (targetAction.typeName === "Property") {
+          const ownerRawId = getHostRef(targetAction.initialState.owner,
+              `${targetAction.type}.Property.initialState.owner`).rawId();
+          const propertyName = targetAction.initialState.name;
+          if (!targetAction.initialState.name) {
+            throw new Error(`${targetAction.type
+                }.Property.initialState.name required for Property id secondary part`);
+          }
+          resourceRawId = (ownerRawId[0] !== "@" || (ownerRawId.slice(-2) !== "@@"))
+              ? `${ownerRawId}/.:${encodeURIComponent(propertyName)}`
+              : `${ownerRawId.slice(0, -1)}.:${encodeURIComponent(propertyName)}@@`;
+        } else {
+          resourceRawId = createResourceId0Dot2(
+              root.aspects.command.id, partitionURI, partition.createIndex++);
         }
-        resourceRawId = `${ownerRawId}/.:${encodeURIComponent(propertyName)}`;
+      } else if (explicitRawId[0] === "@") {
+        resourceRawId = validateVRId(explicitRawId);
       } else {
-        resourceRawId = createResourceId0Dot2(
-            root.aspects.command.id, partitionURI, partition.createIndex++);
+        if (!hasScheme(partitionURI, "valaa-memory")) {
+          this.errorEvent(`a non-VPath assignNewResourceId.explicitRawId was explicitly provided for${
+              ""} a regular partition resource in non-'valaa-memory:' partition: this will be${
+              ""} deprecated Very Soon(tm) in favor of VPath resource identifiers.`,
+              "\n\texplicitRawId:", explicitRawId,
+              "\n\tpartitionURI:", partitionURI);
+        }
+        resourceRawId = explicitRawId;
       }
-    } else {
-      if (!hasScheme(partitionURI, "valaa-memory")) {
-        this.warnEvent(`assignNewResourceId.explicitRawId was explicitly provided for a regular${
-            ""} partition resource in non-'valaa-memory:' partition: this will be deprecated`,
-            "\n\texplicitrawId:", explicitRawId,
-            "\n\tpartitionURI:", partitionURI);
-      }
-      resourceRawId = explicitRawId;
-    }
 
-    targetAction.id = vRef(resourceRawId, undefined, undefined,
-        naiveURI.createPartitionURI(partitionURI));
-    /*
-    console.log("assignNewResourceId", tryAspect(root, "command").id, partitionURI, explicitRawId,
-        "\n\tresourceRawId:", resourceRawId,
-        "\n\tresults:", String(targetAction.id), targetAction.id,
-        "\n\ttargetAction:", ...dumpObject(targetAction),
-        "\n\ttargetAction.initialState:", ...dumpObject(targetAction.initialState));
-    // */
-    return targetAction.id;
+      targetAction.id = vRef(resourceRawId, undefined, undefined,
+          naiveURI.createPartitionURI(partitionURI));
+      /*
+      console.log("assignNewResourceId", tryAspect(root, "command").id, partitionURI, explicitRawId,
+          "\n\tresourceRawId:", resourceRawId,
+          "\n\tresults:", String(targetAction.id), targetAction.id,
+          "\n\ttargetAction:", ...dumpObject(targetAction),
+          "\n\ttargetAction.initialState:", ...dumpObject(targetAction.initialState));
+      // */
+      return targetAction.id;
+    } catch (error) {
+      throw this.wrapErrorEvent(error, "assignNewResourceId()",
+          "\n\ttargetAction:", ...dumpObject(targetAction),
+          "\n\tpartitionURI:", ...dumpObject(partitionURI),
+          "\n\texplicitRawId:", ...dumpObject(explicitRawId),
+      );
+    }
   }
 
   assignNewPartitionlessResourceId (targetAction: EventBase, explicitRawId?: string) {

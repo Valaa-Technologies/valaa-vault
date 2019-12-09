@@ -33,7 +33,8 @@ function validateVKeyPath (vkey, value) {
 }
 
 function validateFullVPath (element) {
-  const segmentedVPath = segmentVPath(element);
+  const segmentedVPath =
+      (typeof element === "string" ? segmentVPath(element) : element);
   if (segmentedVPath[0] !== "@") {
     throw new Error(`Invalid vpath: expected "@" as element type, got "${segmentedVPath[0]}"`);
   }
@@ -41,7 +42,8 @@ function validateFullVPath (element) {
 }
 
 function validateVRId (element) {
-  const [firstEntry, vgrid, ...verbs] = segmentVPath(element);
+  const [firstEntry, vgrid, ...verbs] =
+      (typeof element === "string" ? segmentVPath(element) : element);
   if (firstEntry !== "@") {
     throw new Error(`Invalid vrid: expected "@" as first entry`);
   }
@@ -51,7 +53,8 @@ function validateVRId (element) {
 }
 
 function validateVerbs (element) {
-  const [firstEntry, ...verbs] = segmentVPath(element);
+  const [firstEntry, ...verbs] =
+      (typeof element === "string" ? segmentVPath(element) : element);
   if (firstEntry !== "@") {
     throw new Error(`Invalid verbs: expected "@" as first entry`);
   }
@@ -60,7 +63,8 @@ function validateVerbs (element) {
 }
 
 function validateVGRId (element) {
-  const [firstEntry, formatTerm, paramValue, ...params] = segmentVPath(element);
+  const [firstEntry, formatTerm, paramValue, ...params] =
+      (typeof element === "string" ? segmentVPath(element) : element);
   if (firstEntry !== "$") {
     throw new Error(`Invalid vgrid: expected "$" as first entry`);
   }
@@ -71,7 +75,8 @@ function validateVGRId (element) {
 }
 
 function validateVerb (element) {
-  const [verbType, ...params] = segmentVPath(element);
+  const [verbType, ...params] =
+      (typeof element === "string" ? segmentVPath(element) : element);
   validateVerbType(verbType);
   params.forEach(validateVParam);
   return element;
@@ -81,7 +86,7 @@ function validateVParam (element) {
   const expandedParam = (typeof element !== "string") ? element : segmentVPath(element);
   const [firstEntry, contextTerm, paramValue] =
       ((expandedParam.length === 1) || (expandedParam[0] !== "$"))
-          ? [":", expandedParam[0]]
+          ? [":", undefined, expandedParam[1]]
           : expandedParam;
   try {
     if (contextTerm !== undefined) {

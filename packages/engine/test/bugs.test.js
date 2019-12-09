@@ -324,7 +324,7 @@ describe("Engine bug tests", async () => {
       new Entity({
         owner: null,
         name: "firstPartition",
-        partitionAuthorityURI: "valaa-memory:",
+        authorityURI: "valaa-memory:",
         properties
       });
 
@@ -332,7 +332,7 @@ describe("Engine bug tests", async () => {
         id: "secondpartitionid",
         owner: null,
         name: "secondPartition",
-        partitionAuthorityURI: "valaa-memory:"
+        authorityURI: "valaa-memory:"
       });
     `, { scope: { properties }, awaitResult: (result) => result.getComposedEvent() });
   });

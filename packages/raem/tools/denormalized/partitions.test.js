@@ -23,7 +23,7 @@ describe("partitions", () => {
     // LocalPartition is implicitly created
     created({ id: ["A_grandparent"], typeName: "TestThing",
       initialState: {
-        partitionAuthorityURI: "valaa-local:"
+        authorityURI: "valaa-local:"
       },
     }),
     created({ id: ["A_parent"], typeName: "TestThing",
@@ -35,7 +35,7 @@ describe("partitions", () => {
     created({ id: ["A_child2"], typeName: "TestThing",
       initialState: {
         owner: vRef("A_parent", "children"),
-        partitionAuthorityURI: "valaa-memory:",
+        authorityURI: "valaa-memory:",
       },
     }),
     created({ id: ["A_grandchild"], typeName: "TestThing",
@@ -57,7 +57,7 @@ describe("partitions", () => {
 
     expect(grandparentPartitionURI)
         .toEqual(createLocalPartitionURIFromRawId("A_grandparent"));
-    expect(harness.run(grandparent, "partitionAuthorityURI"))
+    expect(harness.run(grandparent, "authorityURI"))
         .toEqual("valaa-local:");
     expect(harness.run(grandparent, "partition"))
         .toBe(grandparent);
@@ -80,7 +80,7 @@ describe("partitions", () => {
 
     expect(child2PartitionURI)
         .toEqual(createMemoryPartitionURIFromRawId("A_child2"));
-    expect(harness.run(child2, "partitionAuthorityURI"))
+    expect(harness.run(child2, "authorityURI"))
         .toEqual("valaa-memory:");
     expect(harness.run(child2, "partition"))
         .toBe(child2);
@@ -102,7 +102,7 @@ describe("partitions", () => {
       actions: [
         created({ id: ["B_testRoot"], typeName: "TestThing",
           initialState: {
-            partitionAuthorityURI: testAuthorityURI,
+            authorityURI: testAuthorityURI,
           },
         }),
         addedTo({ id: ["A_grandparent"], typeName: "TestThing",

@@ -11,6 +11,11 @@ export default {
     // TODO(iridian): Replace naiveURI.createPartitionURI with appropriate authority scheme-specific
     // implementation dispatcher.
     )(naiveURI.createPartitionURI),
+    createChronicleURI: denoteValOSBuiltinWithSignature(
+        `Creates a URI from given *base* and *chronicleId* strings`
+    // TODO(iridian): Replace naiveURI.createPartitionURI with appropriate authority scheme-specific
+    // implementation dispatcher.
+    )(naiveURI.createPartitionURI),
     tryPartitionConnection: denoteValOSBuiltinWithSignature(
         `DEPRECATED: prefer tryConnection.
         Returns an existing, fully active connection to the partition with given${

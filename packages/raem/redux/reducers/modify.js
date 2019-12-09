@@ -376,7 +376,7 @@ const customSetFieldHandlers = {
       }
     }
   },
-  partitionAuthorityURI (bard: Bard, fieldInfo: Object, newAuthorityURI: ?string) {
+  authorityURI (bard: Bard, fieldInfo: Object, newAuthorityURI: ?string) {
     const newPartitionURI = newAuthorityURI
         && naiveURI.createPartitionURI(newAuthorityURI, bard.objectId.rawId());
     const oldPartitionURI = bard.objectId.getPartitionURI();
@@ -385,13 +385,17 @@ const customSetFieldHandlers = {
       bard.refreshPartition = true;
     }
   },
+  partitionAuthorityURI (bard, fieldInfo, newAuthorityURI) {
+    return customSetFieldHandlers.authorityURI(bard, fieldInfo, newAuthorityURI);
+  },
   isFrozen (bard: Bard, fieldInfo: Object, value: any, newValue: any, oldLocalValue: any) {
     if (typeof value !== "boolean") {
       throw new Error(`Trying to set isFrozen to a non-boolean type '${typeof value}'`);
     }
     if ((oldLocalValue !== true) && (newValue === true)) {
       if (bard.event.meta.isBeingUniversalized
-          && bard.objectTransient.get("partitionAuthorityURI")) {
+          && (bard.objectTransient.get("authorityURI")
+              || bard.objectTransient.get("partitionAuthorityURI"))) {
         universalizeFreezePartitionRoot(bard, bard.objectTransient);
       }
       bard.setState(freezeOwnlings(bard, bard.objectTransient));

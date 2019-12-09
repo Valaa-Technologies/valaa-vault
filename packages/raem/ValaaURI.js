@@ -69,7 +69,7 @@ export const naiveURI = {
   // Matching groups are shared with rfc3986matcher up to paramsPart
   ...genericURI,
   regex: /^(([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(\?(id=([^#&]+)(&([^#]*))?))(#(([^?]*)(\?(.*)))?)?$/,
-//           12            3    4          5       6  7   8       9 a          b cd      e  f
+  //       12            3    4          5       6  7   8       9 a          b cd      e  f
   partitionIdPart: 8,
   paramsPart: 10,
   fragmentPart: 11,
@@ -119,15 +119,36 @@ export const naiveURI = {
         }${!baseParts[genericURI.paramsPart] ? "" : `&${baseParts[genericURI.paramsPart]}`}`;
   },
 
+  createChronicleURI: function createNaiveChronicleURI (baseString, chronicleId) {
+    return naiveURI.createPartitionURI(baseString, chronicleId);
+  },
+
   // FIXME(iridian, 2019-02): naive partition URI's must be replaced with
   // partition schema specific logic and VRL-based API instead
   // of raw string access API.
   getPartitionRawId: function getNaivePartitionRawId (naivePartitionURI: ValaaURI): string {
-    if ((typeof naivePartitionURI !== "object") || !naivePartitionURI) {
-      invariantifyString(naivePartitionURI, "naivePartitionURI", { allowEmpty: true });
+    const match = (typeof naivePartitionURI === "string")
+        && naivePartitionURI.match(naiveURI.regex);
+    if (!match) {
+      throw new Error(`Invalid naivePartitionURI (does not match naiveURI regex): <${
+          naivePartitionURI}>`);
     }
     const parts = naivePartitionURI.match(naiveURI.regex);
     return decodeURIComponent(parts[naiveURI.partitionIdPart]);
+  },
+
+  getChronicleId: function getNaiveChronicleId (naiveChronicleURI) {
+    const match = (typeof naiveChronicleURI === "string")
+        && naiveChronicleURI.match(naiveURI.regex);
+    if (!match) {
+      throw new Error(`Invalid naiveChronicleURI (does not match naiveURI regex): <${
+          naiveChronicleURI}>`);
+    }
+    const chronicleIdPart = match[naiveURI.partitionIdPart];
+    if (chronicleIdPart[0] !== "@") {
+      throw new Error(`chronicle id must be a VPath in naive chronicle URI <${naiveChronicleURI}>`);
+    }
+    return chronicleIdPart;
   },
 
   getAuthorityURI: function getNaiveAuthorityURI (naivePartitionURI: ValaaURI): ValaaURI {

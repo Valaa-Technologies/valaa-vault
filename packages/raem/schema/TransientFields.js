@@ -62,7 +62,7 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
       ...generatedField("partitionURI", GraphQLString,
           `The partitionURI string of the partition this ${objectDescription} belongs to.{
               ""} This root resource of this Partition is the innermost owning resource with {
-              ""} Partition.partitionAuthorityURI set.`,
+              ""} Partition.authorityURI set.`,
           partitionURIResolver,
           { affiliatedType: "TransientFields" },
       ),

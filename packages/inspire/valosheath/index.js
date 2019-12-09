@@ -17,7 +17,8 @@ export default function extendValosheathWithInspire (scope: Object,
   };
 
   if (defaultAuthorityConfig) {
-    RemoteAuthorityURI = defaultAuthorityConfig.partitionAuthorityURI;
+    RemoteAuthorityURI = defaultAuthorityConfig.authorityURI
+        || defaultAuthorityConfig.partitionAuthorityURI;
     getPartitionIndexEntityCall = function getPartitionIndexEntity () {
       return engine.tryVrapper(defaultAuthorityConfig.repositoryIndexId);
     };

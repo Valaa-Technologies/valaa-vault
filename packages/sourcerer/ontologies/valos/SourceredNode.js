@@ -39,7 +39,7 @@ graph.`,
 node.`,
   },
 
-  authorityURL: {
+  authorityURI: {
     "@type": "valos-raem:EventLoggedField",
     "rdfs:domain": "valos:SourceredNode",
     "rdfs:range": "xsd:anyURI", // still a literal
@@ -84,9 +84,9 @@ impression on this Media resource.`,
 
   partitionAuthorityURI: {
     "@type": "valos-raem:AliasField",
-    "revdoc:deprecatedInFavorOf": "valos:authorityURL",
-    "valos-raem:aliasOf": "valos:authorityURL",
-    "rdfs:subPropertyOf": "valos:authorityURL",
+    "revdoc:deprecatedInFavorOf": "valos:authorityURI",
+    "valos-raem:aliasOf": "valos:authorityURI",
+    "rdfs:subPropertyOf": "valos:authorityURI",
     "rdfs:domain": "valos:SourceredNode",
     "rdfs:range": "xsd:string",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },

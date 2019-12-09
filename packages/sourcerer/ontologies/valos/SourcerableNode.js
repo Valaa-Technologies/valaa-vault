@@ -47,7 +47,7 @@ be eventually locateable from anywhere.`,
     "rdfs:comment":
 `The partition root node of this sourcerable (ie. the nearest ancestor,
 possibly this sourcerable itself self which has a non-null
-valos:authorityURL).`,
+valos:authorityURI).`,
   },
 
   partitionURL: {
@@ -87,7 +87,7 @@ of this resource`,
     "valos-raem:expressor": "$valos-sourcerer:resolvePartitionRoot",
     "rdfs:comment":
 `The partition root node of this sourcerable, ie. the nearest ancestor
-(possibly self) with a non-null valos:authorityURL.`,
+(possibly self) with a non-null valos:authorityURI.`,
   },
 
   partitionURI: {

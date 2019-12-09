@@ -145,9 +145,9 @@ export default class ReactRoot extends React.Component {
     return rootContext;
   }
 
-  async _obtainUIRootFrame (partitionAuthorityURI: string, vViewFocus: Vrapper, viewName: string) {
+  async _obtainUIRootFrame (authorityURI: string, vViewFocus: Vrapper, viewName: string) {
     const localInstanceRawId = derivedId(vViewFocus.getRawId(), "LOCAL-UIROOT-PARTITION", viewName);
-    const partitionURI = naiveURI.createPartitionURI(partitionAuthorityURI, localInstanceRawId);
+    const partitionURI = naiveURI.createPartitionURI(authorityURI, localInstanceRawId);
     await vViewFocus.engine.discourse
         .acquireConnection(partitionURI)
         .asActiveConnection();
@@ -156,7 +156,7 @@ export default class ReactRoot extends React.Component {
       vLocalUIRoot = await vViewFocus.engine.create("Entity", {
         id: localInstanceRawId, owner: null,
         name: `Local UI root view '${viewName}' to '${vViewFocus.debugId()}'`,
-        partitionAuthorityURI,
+        authorityURI,
       });
     }
     return vLocalUIRoot;

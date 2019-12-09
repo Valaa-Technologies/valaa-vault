@@ -480,7 +480,8 @@ export default class Vrapper extends Cog {
         if (transient) {
           partitionURI = transient && transient.get("id").getPartitionURI();
           if (!partitionURI) {
-            const authorityURIString = transient.get("partitionAuthorityURI");
+            const authorityURIString = transient.get("authorityURI")
+                || transient.get("partitionAuthorityURI");
             partitionURI = authorityURIString
                 && naiveURI.create(authorityURIString, transient.get("id").rawId());
           }
@@ -899,7 +900,7 @@ export default class Vrapper extends Cog {
     initialState.instancePrototype = this;
     if (initialState.owner === undefined
         && !((typeName === "Relation") && initialState.source)
-        && !initialState.partitionAuthorityURI) {
+        && !initialState.authorityURI && !initialState.partitionAuthorityURI) {
       initialState.owner = this.get("owner", Object.create(options));
     }
     return this.create(typeName, initialState, options);

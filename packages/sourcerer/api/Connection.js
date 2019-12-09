@@ -57,6 +57,8 @@ export default class Connection extends Follower {
 
   getPartitionURI (): ValaaURI { return this._partitionURI; }
   getPartitionRawId (): string { return naiveURI.getPartitionRawId(this._partitionURI); }
+  getChronicleURI (): ValaaURI { return this._partitionURI; }
+  getChronicleId (): string { return naiveURI.getPartitionRawId(this._partitionURI); }
 
   getStatus (): Object {
     return {

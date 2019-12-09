@@ -181,6 +181,9 @@ class VRL {
           "\n\tpartitionURI:", this._r.partition);
     }
   }
+  getChronicleURI (): ValaaURI { return this._r.partition; }
+  getChronicleId (): string { return this.getPartitionRawId(); }
+
   setPartitionURI (partitionURI: ValaaURI) {
     try {
       if (this._r.partition) {
@@ -194,6 +197,7 @@ class VRL {
     } catch (error) {
       throw wrapError(error, `During ${this.debugId()}\n .setPartitionURI(), with:`,
           "\n\tpartitionURI:", partitionURI,
+          "\n\texisting partition:", this._r.partition,
           "\n\tthis:", ...dumpObject(this));
     }
   }

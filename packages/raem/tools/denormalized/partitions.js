@@ -95,7 +95,7 @@ export function addConnectToPartitionToError (error, connectToPartition) {
  * Partition system
  *
  * The partition of a Resource is the innermost owning object (or self)
- * which has Partition.partitionAuthorityURI defined. For all non-ghost
+ * which has Partition.authorityURI defined. For all non-ghost
  * Resource's the partition is also cached in the
  * id:VRL.getPartitionURI. For ghosts the partition can be
  * fetched from the ghost host.
@@ -234,13 +234,13 @@ export function setModifiedObjectPartitionAndUpdateOwneeObjectIdPartitions (
 }
 
 export function determineNewObjectPartition (mutableTransient: Transient, transientId: VRL) {
-  const authorityURI = mutableTransient.get("partitionAuthorityURI");
+  const authorityURI = mutableTransient.get("authorityURI")
+      || mutableTransient.get("partitionAuthorityURI");
   if (transientId.isGhost()) {
     // Materializing or modifying ghost.
     if (authorityURI) {
       throw new Error(`Ghost objects cannot be partitions; ${
-          ""}while trying to set partitionAuthorityURI <${authorityURI}> for ${
-              transientId}`);
+          ""}while trying to set authorityURI <${authorityURI}> for ${transientId}`);
     }
     transientId.clearPartitionURI();
     return undefined;

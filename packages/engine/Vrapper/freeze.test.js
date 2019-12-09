@@ -99,7 +99,7 @@ describe("Partition freezing", () => {
       created({ id: vCrossRef("test_partition_b", "test_partition_b"), typeName: "Entity",
         initialState: {
           name: "Test Partition B",
-          partitionAuthorityURI: "valaa-test:",
+          authorityURI: "valaa-test:",
         }, }),
       created({ id: vCrossRef("test_entity_b", "test_partition_b"), typeName: "Entity",
         initialState: {

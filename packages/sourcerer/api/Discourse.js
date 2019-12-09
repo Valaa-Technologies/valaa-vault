@@ -41,7 +41,7 @@ export default class Discourse extends Valker {
    *
    * @returns {type} partitionURI
    */
-  assignNewPartitionId (targetAction: EventBase, partitionAuthorityURI: string): ValaaURI { // eslint-disable-line
+  assignNewPartitionId (targetAction: EventBase, authorityURI: string): ValaaURI { // eslint-disable-line
     throw new Error(`${this.constructor.name}/Discourse.assignNewPartitionId not implemented`);
   }
 

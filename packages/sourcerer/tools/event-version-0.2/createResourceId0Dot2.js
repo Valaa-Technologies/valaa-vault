@@ -13,6 +13,6 @@ export default function createResourceId0Dot2 (commandId: string, partitionURI: 
   return hashV240(`${commandId} ${partitionURI} ${String(intraEventIndex)}`);
 }
 
-export function createPartitionId0Dot2 (commandId: string, partitionAuthorityURI: string) {
-  return hashV240(`${commandId} ${partitionAuthorityURI} partition`);
+export function createPartitionId0Dot2 (commandId: string, authorityURI: string) {
+  return hashV240(`${commandId} ${authorityURI} partition`);
 }

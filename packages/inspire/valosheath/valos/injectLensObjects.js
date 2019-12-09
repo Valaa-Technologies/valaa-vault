@@ -629,7 +629,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
           in id derivation.
         4. If defined the *owner* is used as part of the id derivation.
         5. If the lens authority is defined and is not falsy it's used as
-          the Partition.partitionAuthorityURI of the possible new
+          the Partition.authorityURI of the possible new
           Resource.
           Otherwise if the *owner* is defined its used as Resource.owner
           for the possible new Resource.
@@ -710,7 +710,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
             return undefined;
           }
           if (!lensAuthorityURI && !owner) {
-            throw new Error(`Cannot obtain scope frame: neither partitionAuthorityURI ${
+            throw new Error(`Cannot obtain scope frame: neither authorityURI ${
                 ""}nor owner could be determined`);
           }
           const partitionURI = naiveURI.createPartitionURI(lensAuthorityURI, frameRawId);
@@ -728,7 +728,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
                 prototype ? prototype.get("name") || prototypePart : "Entity"}->${
                 (vFocus && vFocus.hasInterface("Scope") && vFocus.get("name")) || focusPart}`,
           };
-          if (lensAuthorityURI) initialState.partitionAuthorityURI = lensAuthorityURI;
+          if (lensAuthorityURI) initialState.authorityURI = lensAuthorityURI;
           else initialState.owner = owner;
           discourse = engine.getActiveGlobalOrNewLocalEventGroupTransaction();
           /*

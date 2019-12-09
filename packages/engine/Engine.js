@@ -261,7 +261,7 @@ export default class Engine extends Cog {
       // contain inconsistent data until the next actual update on it.
 
       ret = directiveArray.map((directive, index) => {
-        if (directive.initialState && directive.initialState.partitionAuthorityURI) {
+        if ((directive.initialState || {}).partitionAuthorityURI) {
           // Create partition(s) before the transaction is committed
           // (and thus before the commands leave upstream).
           discourse
@@ -349,9 +349,13 @@ export default class Engine extends Cog {
       if (explicitRawId[1] !== "$") throw new Error("explicit vrid must have a GRId as first step");
     }
     delete initialState.id;
+    if (initialState.authorityURI) {
+      initialState.partitionAuthorityURI = initialState.authorityURI;
+      delete initialState.authorityURI;
+    }
     if (initialState.partitionAuthorityURI) {
-      return discourse.assignNewPartitionId(directive,
-          initialState.partitionAuthorityURI, explicitRawId);
+      return discourse.assignNewPartitionId(
+          directive, initialState.partitionAuthorityURI, explicitRawId);
     }
     let owner = initialState.owner || initialState.source;
     if (owner) {

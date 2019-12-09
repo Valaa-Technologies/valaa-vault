@@ -1,5 +1,6 @@
 // @flow
 import { GraphQLID, GraphQLNonNull, GraphQLInterfaceType, GraphQLString } from "graphql/type";
+import aliasField from "~/raem/tools/graphql/aliasField";
 import primaryField from "~/raem/tools/graphql/primaryField";
 import generatedField from "~/raem/tools/graphql/generatedField";
 import { partitionHeadEventIdResolver, partitionSnapshotResolver,
@@ -40,7 +41,7 @@ Resource to always be locateable from anywhere.`,
       ...resourceInterface(objectDescription).fields(),
 
       ...primaryField("partitionAuthorityURI", GraphQLString,
-          `The partition authority URI of this ${objectDescription}. If this field is set it ${
+          `The chronicle authority URI of this ${objectDescription}. If this field is set it ${
           ""} means that this is an active partition root object. The full partition URI is ${
           ""} generated as per the rules specified by the partition authority URI schema.`, {
             isDuplicateable: false,
@@ -48,6 +49,16 @@ Resource to always be locateable from anywhere.`,
             affiliatedType: "Partition",
           },
       ),
+
+      ...aliasField("authorityURI", "partitionAuthorityURI", GraphQLString,
+`The chronicle authority URI of this ${objectDescription}. This will
+replace partitionAuthorityURI which will be deprecated.`, {
+            isDuplicateable: false,
+            ownDefaultValue: null,
+            affiliatedType: "Partition",
+          },
+      ),
+
 
       ...generatedField("partitionHeadId", new GraphQLNonNull(GraphQLID),
           `The id of the latest event recorded in this ${objectDescription}.`,

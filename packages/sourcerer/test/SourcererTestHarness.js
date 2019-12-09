@@ -111,7 +111,7 @@ export const createdTestPartitionEntity = created({
   id: ["test_partition"], typeName: "Entity",
   initialState: {
     name: "Automatic Test Partition Root",
-    partitionAuthorityURI: "valaa-test:",
+    authorityURI: "valaa-test:",
   },
 });
 

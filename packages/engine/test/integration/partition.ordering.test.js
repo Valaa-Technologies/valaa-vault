@@ -38,7 +38,7 @@ describe("Partition load ordering and inactive resource handling", () => {
     await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
     let vLaterRoot;
     const creation = harness.engine.create("Entity",
-        { partitionAuthorityURI: String(harness.testAuthorityURI) },
+        { authorityURI: String(harness.testAuthorityURI) },
         { awaitResult (result, vRet) { vLaterRoot = vRet; return result.getPremiereStory(); } });
     const laterConnection = vLaterRoot.getConnection();
     harness.tryGetTestAuthorityConnection(laterConnection)

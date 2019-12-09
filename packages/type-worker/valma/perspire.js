@@ -215,7 +215,7 @@ exports.handler = async (yargv) => {
       try {
         vlm.clock(mainViewName, `worker.interactive.result`, {
           action: "executed interactive command", command,
-          result: vExecThis && vExecThis.doValoscript(command, { sourceInfo, mutableScope }),
+          result: vExecThis && vExecThis.doValoscript(command, {}, { sourceInfo, mutableScope }),
         });
       } catch (error) {
         vlm.clock(mainViewName, `worker.interactive.error`, {
@@ -288,7 +288,7 @@ exports.handler = async (yargv) => {
       }
       try {
         const execResult = vExecThis && execBody
-            && vExecThis.doValoscript(execBody, { sourceInfo });
+            && vExecThis.doValoscript(execBody, {}, { sourceInfo });
         if (execResult !== undefined) return execResult;
       } catch (error) {
         status.action = `caught exception: ${error.message}`;

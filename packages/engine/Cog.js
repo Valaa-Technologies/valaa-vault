@@ -47,13 +47,18 @@ export default class Cog extends FabricEventTarget {
     return this.run(this.getSelfAsHead(), kuery, options);
   }
 
-  doValoscript (valoscriptBody: string, options: VALKOptions = {}) {
+  doValoscript (valoscriptBody: string, extendScope = {}, options: VALKOptions = {}) {
     options.discourse = this.engine.discourse.acquireFabricator("do-body");
-    const ret = this.do(transpileValoscriptBody(valoscriptBody, {
-      verbosity: options.verbosity || 0,
-      customVALK: VALEK,
-      sourceInfo: options.sourceInfo,
-    }), options);
+    if (!options.scope) options.scope = Object.create(this.getLexicalScope());
+    Object.assign(options.scope, extendScope);
+    const valoscriptKuery = (typeof valoscriptBody !== "string"
+        ? valoscriptBody
+        : transpileValoscriptBody(valoscriptBody, {
+          verbosity: options.verbosity || 0,
+          customVALK: VALEK,
+          sourceInfo: options.sourceInfo,
+        }));
+    const ret = this.do(valoscriptKuery, options);
     if (options.discourse) {
       const result = options.discourse.releaseFabricator();
       if (result) {

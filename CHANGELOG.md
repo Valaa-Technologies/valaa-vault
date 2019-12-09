@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.34.1](https://github.com/valaatech/kernel/compare/v0.34.0...v0.34.1) (2019-12-09)
+
+
+### Bug Fixes
+
+* **toolset-vault:** set lerna bump with appropriate pre(patch|minor|major) ([1492e62](https://github.com/valaatech/kernel/commit/1492e62))
+
+
+
+
+
 # [0.34.0](https://github.com/valaatech/vault/compare/v0.34.0-rc.3...v0.34.0) (2019-06-14)
 
 

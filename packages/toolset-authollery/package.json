@@ -4,7 +4,7 @@
     "type": "toolset",
     "domain": "authollery"
   },
-  "version": "0.34.0",
+  "version": "0.34.1",
   "description": "A valma toolset for managing autholleries",
   "license": "MIT",
   "author": "Valaa Technologies Ltd",
@@ -20,8 +20,8 @@
     "valma-deploy-release": "valma/deploy-release.js"
   },
   "dependencies": {
-    "@valos/toolset-revealer": "^0.34.0",
+    "@valos/toolset-revealer": "^0.34.1",
     "lerna": "^3.4.0",
-    "valma": "^0.34.0"
+    "valma": "^0.34.1"
   }
 }

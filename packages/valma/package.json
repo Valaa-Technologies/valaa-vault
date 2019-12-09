@@ -1,6 +1,6 @@
 {
   "name": "valma",
-  "version": "0.34.0",
+  "version": "0.34.1",
   "valos": {
     "type": "toolset",
     "domain": "infrastructure"
@@ -41,7 +41,7 @@
     ".valma-": "valma/this.js"
   },
   "dependencies": {
-    "@valos/tools": "^0.34.0",
+    "@valos/tools": "^0.34.1",
     "cardinal": "^2.1.1",
     "colors": "1.3.0",
     "glob-to-regexp": "^0.4.0",

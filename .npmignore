@@ -11,6 +11,8 @@
 .yalc
 coverage
 dist
+dev
+env
 temp
 
 # Never publish src to ensure that the source assembly is properly

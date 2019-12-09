@@ -12,6 +12,8 @@
 coverage
 dist
 temp
+dev
+env
 
 # Never publish src to ensure that the source assembly is properly
 # executed. Assembly should use the package root as the source root.

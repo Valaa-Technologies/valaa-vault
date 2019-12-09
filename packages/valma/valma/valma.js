@@ -939,7 +939,11 @@ module.exports
     })
     .catch(error => {
       if (error !== undefined) {
-        _vlm.exception(error, "vlm root");
+        _vlm.exception(
+            ((error == null) || !(error instanceof Error))
+                ? error
+                : wrapError(error, new Error(`During "$ vlm ${process.argv.slice(2).join(" ")}"`)),
+            "vlm root");
       }
       process.exit(typeof error === "number" ? error : ((error && error.code) || -1));
     });
@@ -1179,8 +1183,8 @@ async function execute (args, options = {}) {
         stdio: options.delegate
             ? ["ignore", "pipe", "pipe"]
             : [0, options.asTTY ? 1 : "pipe", 2],
-        ...options.spawn,
         detached: false,
+        ...options.spawn,
       };
       executeVLM.ifVerbose(3)
       .babble(`spawning child process "${argv[0]}" with options:`, spawnOptions);
@@ -1188,13 +1192,16 @@ async function execute (args, options = {}) {
       const subProcess = childProcess.spawn(argv[0], argv.slice(1), spawnOptions);
       subProcess.on("exit", (code, signal) => _onDone(null, code, signal));
       subProcess.on("error", _onDone);
+      if (options.onProcess) options.onProcess(subProcess);
       process.on("SIGINT", () => {
-        this.warn(`vlm killing pid ${subProcess.pid} / ${process.getgid()}:`, this.theme.green(...argv));
+        this.warn(`vlm killing pid ${subProcess.pid} / ${process.getgid()}:`,
+            this.theme.green(...argv));
         process.kill(-subProcess.pid, "SIGTERM");
         process.kill(-subProcess.pid, "SIGKILL");
       });
       process.on("SIGTERM", () => {
-        this.warn(`vlm killing pid ${subProcess.pid} / ${process.getgid()}:`, this.theme.green(...argv));
+        this.warn(`vlm killing pid ${subProcess.pid} / ${process.getgid()}:`,
+            this.theme.green(...argv));
         process.kill(-subProcess.pid, "SIGTERM");
         process.kill(-subProcess.pid, "SIGKILL");
       });
@@ -1819,7 +1826,7 @@ function __processArgs (args) {
     if (Array.isArray(value)) return [].concat(...value.map(entry => _toArgString(entry, keys)));
     if (typeof value !== "object") {
       const valueString = (typeof value === "string") ? value : JSON.stringify(value);
-      return keys ? `--${keys.join(".")}=${valueString}` : valueString;
+      return keys ? `--${keys.join(".")}='${valueString}'` : valueString;
     }
     return [].concat(...Object.keys(value)
         .map(key => ((key[0] === ".") ? [] : _toArgString(value[key], [...(keys || []), key]))));
@@ -2378,10 +2385,11 @@ function __createVargs (args, cwd = process.cwd()) {
       optionState.causes[opt] = attributes.causes;
     }
     const subVLM = this.vlm;
-    if (subVLM && subVLM.toolset) {
+    const toolset = subVLM && (subVLM.toolset || (_vlm.packageConfig || {}).name);
+    if (toolset) {
       const subPath = ["commands", subVLM.contextCommand, "options", opt];
-      let default_ = subVLM.tool && subVLM.getToolConfig(subVLM.toolset, subVLM.tool, ...subPath);
-      if (default_ === undefined) default_ = subVLM.getToolsetConfig(subVLM.toolset, ...subPath);
+      let default_ = subVLM.tool && subVLM.getToolConfig(toolset, subVLM.tool, ...subPath);
+      if (default_ === undefined) default_ = subVLM.getToolsetConfig(toolset, ...subPath);
       if (default_ !== undefined) attributes.default = default_;
     }
     if (attributes.default && attributes.choices) {

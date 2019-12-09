@@ -124,6 +124,7 @@ const _deepExtendOptions = Object.freeze({
     if (source === null) return "";
     if ((source[0] === _spreaderKey) || source[_spreaderKey]) return undefined;
     if ((Object.getPrototypeOf(source) !== Object.prototype) && !Array.isArray(source)) {
+      if (source.debugId) return source.debugId();
       return this.errorOn("preExtend",
           new Error(`Cannot markdownify a complex object with type '${
             (source.constructor || { name: "<unknown object>" }).name}'`),

@@ -57,6 +57,7 @@ exports.builder = (yargs) => yargs.option({
     description: "Cache base path for indexeddb sqlite shim and other cache storages",
   },
   revelation: {
+    type: "object",
     description: "Direct revelation object placed after other revelations for gateway init.",
   },
   root: {
@@ -104,6 +105,7 @@ exports.handler = async (yargv) => {
   }
   vlm.clock("perspire.handler", "gateway.require", `require("@valos/inspire/PerspireServer")`);
   const PerspireServer = require("@valos/inspire/PerspireServer").default;
+  const { wrapError } = require("@valos/tools");
 
   const siteRoot = yargv.siteRoot[0] === "/" ? yargv.siteRoot
       : vlm.path.join(process.cwd(), yargv.siteRoot || ".");
@@ -152,12 +154,12 @@ exports.handler = async (yargv) => {
     revelationRoot,
     revelations: [
       { "!!!": revelationPath },
-      ...(yargv.additionalRevelationPaths || []).map(p => {
-        const absolutePath = vlm.path.resolve(p);
+      ...(yargv.additionalRevelationPaths || []).map(maybeRelativePath => {
+        const absolutePath = vlm.path.resolve(maybeRelativePath);
         if (!vlm.shell.test("-f", absolutePath)) {
           throw new Error(`Cannot open additional revelation path "${absolutePath}" for reading`);
         }
-        return { "!!!": absolutePath };
+        return { "!!!": maybeRelativePath };
       }),
       { gateway: { verbosity: vlm.verbosity } },
       yargv.revelation || {},
@@ -234,7 +236,7 @@ exports.handler = async (yargv) => {
     vlm.clock(mainViewName, "perspire.immediate", "falsy keepalive interval");
     vlm.info("No keepalive enabled");
     state.mode = "immediate rendering";
-    ret = await _tick("immediate", 0);
+    ret = await _tick({ info: "immediate" }, 0);
   } else {
     vlm.info(`Setting up keepalive render every ${keepaliveInterval} seconds`);
     state.mode = keepaliveInterval >= 0 ? "keepalive rendering" : "delayed single shot rendering";
@@ -293,6 +295,10 @@ exports.handler = async (yargv) => {
         status.message = error.message;
         status.error = error;
         vlm.clock(mainViewName, `worker.heartbeat.exec.error`, status);
+        server.gateway.outputErrorEvent(
+            wrapError(error, new Error("During perspire.tick.doValoscript"),
+                "\n\texec.body:\n```", execBody, "\n```\n"),
+            "Exception caught during worker.tick");
       }
     }
     return state;

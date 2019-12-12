@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-prerelease.17](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.16...v0.35.0-prerelease.17) (2019-12-12)
+
+
+### Bug Fixes
+
+* Pre-existing cross-chronicle reference prevents resource creation ([82dba04](https://github.com/valaatech/kernel/commit/82dba04ec62ef0082ab07b65568550d20d1380ec))
+
+
+### Features
+
+* Add @valos/inspire/rekuery for importing valoscript files in node ([686a9eb](https://github.com/valaatech/kernel/commit/686a9eb1eacc6577d18ae1e42d04d7e3807649d8))
+* Add Vrapper.getURI, valos.tools .Chronicle, some fixes ([58c3030](https://github.com/valaatech/kernel/commit/58c3030abcdf9cfa132d17db8d8f6fad64c80a7e))
+* Gateway.getAttachedSpindle, Vrapper.activate to resolve to self ([a716edd](https://github.com/valaatech/kernel/commit/a716edd3694352ec5e992031b9e08ebb692f9e77))
+* VPath support for new resource ids ([57dbe6f](https://github.com/valaatech/kernel/commit/57dbe6f00cc26f436393641848572773c71fffaf))
+
+
+
+
+
 # [0.35.0-prerelease.16](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.15...v0.35.0-prerelease.16) (2019-11-30)
 
 **Note:** Version bump only for package @valos/engine

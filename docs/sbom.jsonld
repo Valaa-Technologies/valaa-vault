@@ -37,7 +37,7 @@
         "@type": "@id"
       }
     },
-    "dc:title": "@valos/kernel@0.35.0-prerelease.15 Software Bill of Materials",
+    "dc:title": "@valos/kernel@0.35.0-prerelease.16 Software Bill of Materials",
     "respecConfig": {
       "specStatus": "unofficial",
       "editors": [
@@ -89,7 +89,7 @@
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
             "This document was automatically generated on ",
-            "2019-11-30T01:23:29.694Z",
+            "2019-12-12T22:48:44.725Z",
             "."
           ]
         },
@@ -399,6 +399,15 @@
       },
       {
         "type": "library",
+        "name": "npm-normalize-package-bin",
+        "version": "1.0.1",
+        "description": "Turn any flavor of allowable package.json bin into a normalized object",
+        "licenses": "ISC",
+        "purl": "pkg:npm/npm-normalize-package-bin@1.0.1",
+        "modified": false
+      },
+      {
+        "type": "library",
         "name": "parse-packagejson-name",
         "version": "1.0.1",
         "description": "Parse an npm package name and returns some mildly interesting details about it",
@@ -427,19 +436,10 @@
       {
         "type": "library",
         "name": "read-package-json",
-        "version": "2.1.0",
+        "version": "2.1.1",
         "description": "The thing npm uses to read package.json files with semantics and defaults and validation",
         "licenses": "ISC",
-        "purl": "pkg:npm/read-package-json@2.1.0",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "name": "slash",
-        "version": "1.0.0",
-        "description": "Convert Windows backslash paths to slash paths",
-        "licenses": "MIT",
-        "purl": "pkg:npm/slash@1.0.0",
+        "purl": "pkg:npm/read-package-json@2.1.1",
         "modified": false
       },
       {
@@ -510,39 +510,39 @@
         "type": "library",
         "group": "valos",
         "name": "inspire",
-        "version": "0.35.0-prerelease.16",
+        "version": "0.35.0-prerelease.17",
         "description": "ValOS Inspire application gateway",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/inspire@0.35.0-prerelease.16",
+        "purl": "pkg:npm/%40valos/inspire@0.35.0-prerelease.17",
         "modified": false
       },
       {
         "type": "library",
         "group": "valos",
         "name": "kernel",
-        "version": "0.35.0-prerelease.16",
+        "version": "0.35.0-prerelease.17",
         "description": "@valos/kernel domain",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/kernel@0.35.0-prerelease.16",
+        "purl": "pkg:npm/%40valos/kernel@0.35.0-prerelease.17",
         "modified": false
       },
       {
         "type": "library",
         "group": "valos",
         "name": "toolset-revealer",
-        "version": "0.35.0-prerelease.16",
+        "version": "0.35.0-prerelease.17",
         "description": "Tools for building revelations both for development and deployment purposes",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/toolset-revealer@0.35.0-prerelease.16",
+        "purl": "pkg:npm/%40valos/toolset-revealer@0.35.0-prerelease.17",
         "modified": false
       },
       {
         "type": "library",
         "name": "valma",
-        "version": "0.35.0-prerelease.16",
+        "version": "0.35.0-prerelease.17",
         "description": "A ValOS CLI tool for discovering and executing context-dependent command scripts",
         "licenses": "MIT",
-        "purl": "pkg:npm/valma@0.35.0-prerelease.16",
+        "purl": "pkg:npm/valma@0.35.0-prerelease.17",
         "modified": false
       },
       {
@@ -603,10 +603,10 @@
         "type": "library",
         "group": "valos",
         "name": "type-vault",
-        "version": "0.35.0-prerelease.16",
+        "version": "0.35.0-prerelease.17",
         "description": "The ValOS 'vault' workspace type toolset",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/type-vault@0.35.0-prerelease.16",
+        "purl": "pkg:npm/%40valos/type-vault@0.35.0-prerelease.17",
         "modified": false
       },
       {

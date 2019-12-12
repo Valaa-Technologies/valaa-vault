@@ -7,7 +7,7 @@
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"subtitle":"0.35.0-prerelease.15","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"valos"};
+      var respecConfig = {"subtitle":"0.35.0-prerelease.16","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"valos"};
     </script>
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
@@ -372,7 +372,7 @@ Otherwise equals to the valos:value itself.
         <tr id="partitionRoot" class=" vdoc-nth-child-2n"><td><a href="#partitionRoot" class="vdoc type-vdoc-reference"><em>partitionRoot</em></a></td><td>valos:SourcerableNode</td><td>valos:SourceredNode</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The partition root node of this sourcerable (ie. the nearest ancestor,
 possibly this sourcerable itself self which has a non-null
-valos:authorityURL).</td></tr>
+valos:authorityURI).</td></tr>
         <tr id="partitionURL"><td><a href="#partitionURL" class="vdoc type-vdoc-reference"><em>partitionURL</em></a></td><td>valos:SourcerableNode</td><td>xsd:anyURI</td><td>valos-raem:GeneratedField</td><td></td><td></td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The partition URL of the event log that contain this potentially
 absent sourcerable as is known by the current view of the world.</td></tr>
@@ -383,7 +383,7 @@ of the world. Always equivalent to a catenation of
 of this resource</td></tr>
         <tr id="partition"><td><a href="#partition" class="vdoc type-vdoc-reference"><em>partition</em></a></td><td>valos:SourcerableNode</td><td>valos:SourceredNode</td><td>valos-raem:AliasField</td><td>valos:partitionRoot</td><td></td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The partition root node of this sourcerable, ie. the nearest ancestor
-(possibly self) with a non-null valos:authorityURL.</td></tr>
+(possibly self) with a non-null valos:authorityURI.</td></tr>
         <tr id="partitionURI" class=" vdoc-nth-child-2n"><td><a href="#partitionURI" class="vdoc type-vdoc-reference"><em>partitionURI</em></a></td><td>valos:SourcerableNode</td><td>xsd:anyURI</td><td>valos-raem:AliasField</td><td>valos:partitionURL</td><td></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>Deprecated in favor of 'partitionURL'. This field is by definition
 always a locator so its name should reflect it.</td></tr>
@@ -392,7 +392,7 @@ always a locator so its name should reflect it.</td></tr>
         <tr id="nodes" class=" vdoc-nth-child-2n"><td><a href="#nodes" class="vdoc type-vdoc-reference"><em>nodes</em></a></td><td>valos:SourceredNode</td><td>rdfs:List</td><td>valos-raem:EventLoggedField</td><td>valos:ownlings</td><td>valos:container</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6>The ordered list of all nodes directly contained by this sourcered
 node.</td></tr>
-        <tr id="authorityURL"><td><a href="#authorityURL" class="vdoc type-vdoc-reference"><em>authorityURL</em></a></td><td>valos:SourceredNode</td><td>xsd:anyURI</td><td>valos-raem:EventLoggedField</td><td></td><td></td></tr>
+        <tr id="authorityURI"><td><a href="#authorityURI" class="vdoc type-vdoc-reference"><em>authorityURI</em></a></td><td>valos:SourceredNode</td><td>xsd:anyURI</td><td>valos-raem:EventLoggedField</td><td></td><td></td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The authority URL of this sourcered partition root node. If this field
 is null then this sourcered node is not a root node. Setting this field
 makes this resource the root of a new partition root (if allowed). The
@@ -408,7 +408,7 @@ into being.</td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The latest modification UNIX epoch time of this node. This is defined
 as the log aspect timestamp of the most recent event with a direct
 impression on this Media resource.</td></tr>
-        <tr id="partitionAuthorityURI" class=" vdoc-nth-child-2n"><td><a href="#partitionAuthorityURI" class="vdoc type-vdoc-reference"><em>partitionAuthorityURI</em></a></td><td>valos:SourceredNode</td><td>xsd:string</td><td>valos-raem:AliasField</td><td>valos:authorityURL</td><td></td></tr>
+        <tr id="partitionAuthorityURI" class=" vdoc-nth-child-2n"><td><a href="#partitionAuthorityURI" class="vdoc type-vdoc-reference"><em>partitionAuthorityURI</em></a></td><td>valos:SourceredNode</td><td>xsd:string</td><td>valos-raem:AliasField</td><td>valos:authorityURI</td><td></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=6></td></tr>
         <tr id="directory"><td><a href="#directory" class="vdoc type-vdoc-reference"><em>directory</em></a></td><td>valos:Entityvalos:Media</td><td>valos:SourceredNode</td><td>valos-raem:EventLoggedField</td><td>valos:container</td><td>valos:entries</td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=6>The directory (and owner) node of this sourcered node.</td></tr>

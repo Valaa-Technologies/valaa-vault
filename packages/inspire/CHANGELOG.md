@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-prerelease.17](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.16...v0.35.0-prerelease.17) (2019-12-12)
+
+
+### Features
+
+* Add @valos/inspire/rekuery for importing valoscript files in node ([686a9eb](https://github.com/valaatech/kernel/commit/686a9eb1eacc6577d18ae1e42d04d7e3807649d8))
+* Gateway.getAttachedSpindle, Vrapper.activate to resolve to self ([a716edd](https://github.com/valaatech/kernel/commit/a716edd3694352ec5e992031b9e08ebb692f9e77))
+
+
+
+
+
 # [0.35.0-prerelease.16](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.15...v0.35.0-prerelease.16) (2019-11-30)
 
 

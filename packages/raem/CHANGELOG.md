@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-prerelease.17](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.16...v0.35.0-prerelease.17) (2019-12-12)
+
+
+### Features
+
+* Add Vrapper.getURI, valos.tools .Chronicle, some fixes ([58c3030](https://github.com/valaatech/kernel/commit/58c3030abcdf9cfa132d17db8d8f6fad64c80a7e))
+* VPath support for new resource ids ([57dbe6f](https://github.com/valaatech/kernel/commit/57dbe6f00cc26f436393641848572773c71fffaf))
+
+
+
+
+
 # [0.35.0-prerelease.16](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.15...v0.35.0-prerelease.16) (2019-11-30)
 
 

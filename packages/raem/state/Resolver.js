@@ -16,8 +16,7 @@ import { tryHostRef } from "~/raem/VALK/hostReference";
 
 import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
 
-import { dumpObject, invariantify, invariantifyObject, invariantifyString, FabricEventTarget }
-    from "~/tools";
+import { dumpObject, invariantifyObject, invariantifyString, FabricEventTarget } from "~/tools";
 
 import { _getFieldGhostElevation, _elevateReference } from "./FieldInfo";
 
@@ -82,7 +81,9 @@ export default class Resolver extends FabricEventTarget {
   getJSState () { return this.state.toJS(); }
 
   setState (state: State) {
-    if (!state) invariantify(state, "state must be truthy");
+    if (!(state || {}).toJS) {
+      throw new Error("state must be a truthy immutable Map");
+    }
     this.state = state;
     return this;
   }
@@ -316,7 +317,7 @@ export default class Resolver extends FabricEventTarget {
               ghostPath ? `/${ghostPath}` : ""})`),
           "\n\trequire:", require,
           "\n\tghostPath:", ...dumpObject(ghostPath),
-          "\n\tstate:", ...dumpObject(this.state.toJS()),
+          "\n\tstate:", ...dumpObject(this.state.toJS && this.state.toJS()),
           "\n\tthis:", ...dumpObject(this),
       );
     }

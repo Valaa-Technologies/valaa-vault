@@ -249,10 +249,10 @@ export default class Engine extends Cog {
       for (const directive of directiveArray) {
         extractedProperties.push(this._extractProperties(directive.initialState, options.head));
         addToConstructParams(constructParams,
-          this._resolveIdForConstructDirective(directive, options),
-          universalizeCommandData(directive.initialState, options),
-          directive,
-          options);
+            this._resolveIdForConstructDirective(directive, options),
+            universalizeCommandData(directive.initialState, options),
+            directive,
+            options);
       }
 
       result = discourse.chronicleEvent(constructCommand(constructParams));
@@ -268,18 +268,21 @@ export default class Engine extends Cog {
               .acquireConnection(directive.id.getPartitionURI(), { newPartition: true })
               .asActiveConnection();
         }
-        const id = isRecombine
-            ? result.story.passages[index].id
-            : result.story.id;
-        const vResource = this.getVrapper(id, { discourse });
+        const resultPassage = !isRecombine ? result.story : result.story.passages[index];
+        const vResource = this.getVrapper(resultPassage.id, { discourse });
         if (vResource.isResource()) {
-          Promise.resolve(vResource.activate(
-                  { state: discourse.getState(), allowNonCreated: true }))
-              .then(undefined, (error) => {
-                outputCollapsedError(localWrapError(this, error,
-                    `${constructCommand.name}.activate ${vResource.debugId()}`),
-                    `Exception caught during resource activation of ${vResource.debugId()}`);
-              });
+          if (resultPassage.typeName) vResource._setTypeName(resultPassage.typeName);
+          const state = discourse.getState();
+          const initialBlocker = vResource.refreshPhase(state);
+          if (initialBlocker) {
+            Promise.resolve(vResource.activate({ state, allowNonCreated: true, initialBlocker }))
+                .then(undefined, (error) => {
+                  outputCollapsedError(localWrapError(this, error,
+                      `${constructCommand.name}.activate ${vResource.debugId()}`),
+                      `Exception caught during resource construction activate of ${
+                        vResource.debugId()}`);
+                });
+          }
         }
         if (extractedProperties[index]) {
           this._updateProperties(vResource, extractedProperties[index], { discourse });
@@ -303,6 +306,7 @@ export default class Engine extends Cog {
           "\n\tconstruct params:", ...dumpObject(constructParams),
           "\n\textractedProperties:", ...dumpObject(extractedProperties),
           "\n\tclaim result:", ...dumpObject(result),
+          "\n\tclaim event:", ...dumpObject(result.event),
           "\n\tret:", ...dumpObject(ret),
       );
     }

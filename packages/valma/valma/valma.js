@@ -1188,8 +1188,10 @@ async function execute (args, options = {}) {
       };
       executeVLM.ifVerbose(3)
       .babble(`spawning child process "${argv[0]}" with options:`, spawnOptions);
+      const finalArgv = !spawnOptions.shell ? argv
+          : __processArgs(args, { shellEscapeChar: "'" });
 
-      const subProcess = childProcess.spawn(argv[0], argv.slice(1), spawnOptions);
+      const subProcess = childProcess.spawn(finalArgv[0], finalArgv.slice(1), spawnOptions);
       subProcess.on("exit", (code, signal) => _onDone(null, code, signal));
       subProcess.on("error", _onDone);
       if (options.onProcess) options.onProcess(subProcess);
@@ -1812,7 +1814,7 @@ function listAllMatchingCommands (commandSelector) {
 // Array values are expanded as sequence of "--<key>=<value1> --<key>=<value2> ...".
 // type like so: ["y", { foo: "bar", val: true, nothing: null, neg: false, bar: ["xy", false, 0] }]
 //            -> ["y", "--foo", "bar", "--val", "--no-neg", "--bar=xy", "--no-bar", "--bar=0"]
-function __processArgs (args) {
+function __processArgs (args, { shellEscapeChar = "" } = {}) {
   return [].concat(...[].concat(args).map(entry =>
     ((typeof entry === "string")
         ? entry.split(" ")
@@ -1825,11 +1827,17 @@ function __processArgs (args) {
     if (typeof value === "boolean") return !keys ? [] : `--${value ? "" : "no-"}${keys.join(".")}`;
     if (Array.isArray(value)) return [].concat(...value.map(entry => _toArgString(entry, keys)));
     if (typeof value !== "object") {
-      const valueString = (typeof value === "string") ? value : JSON.stringify(value);
-      return keys ? `--${keys.join(".")}='${valueString}'` : valueString;
+      const str = _maybeEscape((typeof value === "string") ? value : JSON.stringify(value));
+      return !keys ? str : `--${keys.join(".")}=${str}`;
     }
     return [].concat(...Object.keys(value)
         .map(key => ((key[0] === ".") ? [] : _toArgString(value[key], [...(keys || []), key]))));
+  }
+  function _maybeEscape (str) {
+    return !shellEscapeChar ? str : `${
+        shellEscapeChar}${
+        str.replace(shellEscapeChar, `\\${shellEscapeChar}`)}${
+        shellEscapeChar}`;
   }
 }
 

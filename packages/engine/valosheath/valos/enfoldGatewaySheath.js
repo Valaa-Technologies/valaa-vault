@@ -5,7 +5,7 @@ import { toVAKON } from "~/script/VALSK";
 
 import type { Discourse } from "~/sourcerer/api/types";
 
-import { beaumpify } from "~/tools";
+import * as tools from "~/tools";
 
 import { denoteDeprecatedValOSBuiltin, denoteValOSBuiltinWithSignature } from "~/raem/VALK";
 
@@ -13,10 +13,11 @@ import { denoteDeprecatedValOSBuiltin, denoteValOSBuiltinWithSignature } from "~
 
 export default function enfoldGatewaySheath (valos: Object, rootDiscourse: Discourse) {
   Object.assign(valos, {
-    beautify: beaumpify,
+    beautify: tools.dumpify,
     toVAKON,
     Primitive: ValoscriptPrimitiveKind,
     Lens: null,
+    tools,
   });
 
   valos.Discourse = Object.assign(Object.create(valoscriptInterfacePrototype), {

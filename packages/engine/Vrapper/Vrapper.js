@@ -242,8 +242,9 @@ export default class Vrapper extends Cog {
    * @memberof Vrapper
    */
   activate (options?: Object) {
-    const initialBlocker = this.refreshPhase(options && options.state);
-    if (!initialBlocker) return undefined;
+    let blocker = (options && options.initialBlocker)
+        || this.refreshPhase(options && options.state);
+    if (!blocker) return undefined;
     if (this._activationProcess) return this._activationProcess;
     if (this._phase !== INACTIVE
         && !(this._phase === NONCREATED && options && options.allowNonCreated)) {
@@ -252,9 +253,8 @@ export default class Vrapper extends Cog {
     this._phase = ACTIVATING;
     const operationInfo = { pendingConnection: null };
     this._activationProcess = (async () => {
-      let blocker;
       try {
-        for (blocker = initialBlocker; blocker; blocker = this.refreshPhase()) {
+        while (blocker) {
           if (isNonActivateablePhase(blocker.getPhase())) {
             throw new Error(`Cannot activate ${blocker.debugId()
                 } because it is ${blocker.getPhase()}`);
@@ -266,6 +266,7 @@ export default class Vrapper extends Cog {
             throw new Error(
                 `Connection is active but blocker is still this ${this._phase} Vrapper itself`);
           }
+          blocker = this.refreshPhase();
         }
         operationInfo.pendingConnection = null;
         return this;
@@ -550,6 +551,10 @@ export default class Vrapper extends Cog {
   getId (options?: VALKOptions): VRL {
     const transient = options ? this.getTransient(options) : this._transient;
     return transient ? transient.get("id") : this[HostRef];
+  }
+
+  getURI (): string {
+    return `${this.getConnection().getChronicleURI()}#${this.getRawId()}`;
   }
 
   /**

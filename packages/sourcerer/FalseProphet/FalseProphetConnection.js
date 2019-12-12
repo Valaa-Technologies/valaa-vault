@@ -303,8 +303,11 @@ export default class FalseProphetConnection extends Connection {
       if (!schismaticCommands && schismaticCommand) {
         const index = this._unconfirmedCommands.indexOf(schismaticCommand);
         if (index < 0) {
-          console.error(
-              "schismatic command notificed but not in queue", this._unconfirmedCommands);
+          this.errorEvent("schismatic command noticed but not in queue of", this.debugId(),
+              "\n\tschismaticCommand.aspects:", JSON.stringify(schismaticCommand.aspects, null, 2),
+              "\n\tschismaticCommand:", JSON.stringify(schismaticCommand),
+              "\n\tunconfirmed:", this._unconfirmedCommands.map(
+                  unconfirmed => ({ aspects: JSON.stringify(unconfirmed.aspects) })));
         } else {
           schismaticCommands = this._unconfirmedCommands.splice(index);
         }

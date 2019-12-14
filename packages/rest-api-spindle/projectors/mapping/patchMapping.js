@@ -7,7 +7,8 @@ import { _createToMapping, _presolveMappingRouteRequest } from "./_mappingHandle
 
 export default function createProjector (router: PrefixRouter, route: Route) {
   return {
-    requiredRules: ["routeRoot", "resource", "target", "mappingName", "doCreateMapping"],
+    requiredRules: ["routeRoot", "mappingName", "doCreateMapping"],
+    requiredRuntimeRules: ["resource", "target"],
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this);

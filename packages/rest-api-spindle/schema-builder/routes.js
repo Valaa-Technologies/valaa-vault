@@ -490,11 +490,15 @@ function _setupRoute (route, userConfig, globalRules, resourceType, relationFiel
     throw new Error(`No such method '${route.method}' in category '${
         route.category}' for ${_routeName(route)}`);
   }
-  const { requiredRules } = handler();
+  const { requiredRules, requiredRuntimeRules } = handler();
   if (!route.schema) route.schema = {};
   if (!route.config) route.config = {};
   if (!route.config.rules) route.config.rules = {};
-  (route.config.requiredRules || (route.config.requiredRules = [])).push(...requiredRules);
+  (route.config.requiredRules || (route.config.requiredRules = [])).push(...(requiredRules || []));
+  if (requiredRuntimeRules) {
+    (route.config.requiredRuntimeRules || (route.config.requiredRuntimeRules = []))
+        .push(...requiredRuntimeRules);
+  }
 
   route.config = patchWith(route.config, userConfig);
   if (resourceType) {
@@ -545,9 +549,10 @@ function _setupRoute (route, userConfig, globalRules, resourceType, relationFiel
   for (const [key, rule] of Object.entries(route.config.rules)) {
     route.config.rules[key] = segmentVKeyPath("@", rule).slice(1);
   }
-  for (const ruleName of (route.config.requiredRules || [])) {
+  for (const ruleName of [].concat(
+      route.config.requiredRules || [],
+      route.config.requiredRuntimeRules || [])) {
     if (route.config.rules[ruleName] === undefined) {
-      console.log("route.config.rules:", JSON.stringify(route.config.rules, null, 2));
       throw new Error(`Required route rule '${ruleName}' missing for ${_routeName(route)}`);
     }
   }

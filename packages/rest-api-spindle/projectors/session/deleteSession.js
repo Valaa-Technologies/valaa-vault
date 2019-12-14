@@ -4,9 +4,8 @@ import { burlaesgDecode, hs256JWTDecode } from "~/rest-api-spindle/tools/securit
 
 export default function createProjector (router: PrefixRouter /* , route: Route */) {
   return {
-    requiredRules: [
-      "routeRoot", "clientRedirectPath", "clientCookie", "sessionCookie",
-    ],
+    requiredRules: ["routeRoot"],
+    requiredRuntimeRules: ["clientRedirectPath", "clientCookie", "sessionCookie"],
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this);

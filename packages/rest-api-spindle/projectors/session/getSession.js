@@ -5,13 +5,17 @@ import {
   burlaesgDecode, burlaesgEncode, hs256JWTEncode,
 } from "~/rest-api-spindle/tools/security";
 
+import { dumpObject } from "~/tools/wrapError";
+
 export default function createProjector (router: PrefixRouter /* , route: Route */) {
   return {
     requiredRules: [
       "routeRoot",
-      "clientRedirectPath", "grantExpirationDelay", "tokenExpirationDelay",
-      "userAgentState",
-      "authorizationGrant", "grantProviderState", "error", "errorDescription", "errorURI",
+      "grantExpirationDelay", "tokenExpirationDelay",
+      "error", "errorDescription", "errorURI",
+    ],
+    requiredRuntimeRules: [
+      "clientRedirectPath", "userAgentState", "authorizationGrant", "grantProviderState",
     ],
 
     prepare () {

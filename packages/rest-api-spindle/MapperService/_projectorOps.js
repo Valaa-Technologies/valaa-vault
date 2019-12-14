@@ -9,9 +9,14 @@ import { dumpObject } from "~/tools";
 import { _vakonpileVPath } from "./_vakonpileOps";
 
 export function _createProjectorRuntime (router: PrefixRouter, { name, url, config }, runtime) {
-  for (const ruleName of config.requiredRules) {
+  for (const ruleName of (config.requiredRules || [])) {
     if (config.rules[ruleName] === undefined) {
       throw new Error(`Required route rule '${ruleName}' missing for route <${url}>`);
+    }
+  }
+  for (const ruleName of (config.requiredRuntimeRules || [])) {
+    if (config.rules[ruleName] === undefined) {
+      throw new Error(`Required runtime route rule '${ruleName}' missing for route <${url}>`);
     }
   }
   const scopeBase = runtime.scopeBase = Object.create(router.getViewScope());
@@ -39,7 +44,9 @@ export function _createProjectorRuntime (router: PrefixRouter, { name, url, conf
       if (ruleName === "routeRoot") {
         runtime.resolveRouteRoot = resolveRule;
       } else {
-        runtime.ruleResolvers.push([ruleName, resolveRule, true]);
+        runtime.ruleResolvers.push([
+          ruleName, resolveRule, (config.requiredRuntimeRules || []).indexOf(ruleName) !== -1,
+        ]);
       }
     } catch (error) {
       throw router.wrapErrorEvent(error, new Error(`prepareRule(${ruleName})`),
@@ -108,13 +115,13 @@ export function _resolveRuntimeRules (router: PrefixRouter, runtime, valkOptions
   // TODO: create transaction here.
   for (const [ruleName, resolveRule, requireRuntimeRule] of runtime.ruleResolvers) {
     scope[ruleName] = resolveRule(router.getEngine(), scope.routeRoot, valkOptions);
-    if (requireRuntimeRule && scope[ruleName] === undefined) {
+    if (requireRuntimeRule && (scope[ruleName] === undefined)) {
       if (typeof requireRuntimeRule === "function") {
-        requireRuntimeRule(ruleName, router.getEngine(), scope.routeRoot, valkOptions);
-      } else {
-        throw new Error(`Required route runtime rule '${ruleName
-          }' unsatisfied: value resolved into undefined`);
+        return requireRuntimeRule(ruleName, router.getEngine(), scope.routeRoot, valkOptions);
       }
+      scope.reply.code(400);
+      scope.reply.send(`Required route runtime rule '${ruleName}' resolved into undefined`);
+      return true;
     }
   }
   return false; // Success.

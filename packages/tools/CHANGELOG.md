@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-prerelease.18](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.17...v0.35.0-prerelease.18) (2019-12-14)
+
+
+### Features
+
+* Add chronicleURI aliases, Cog.getEngine, fetch, fixes ([464f600](https://github.com/valaatech/kernel/commit/464f6002414a92c8ed76e5ce348ca9356d830cf3))
+
+
+
+
+
 # [0.35.0-prerelease.17](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.16...v0.35.0-prerelease.17) (2019-12-12)
 
 **Note:** Version bump only for package @valos/tools

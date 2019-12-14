@@ -530,7 +530,8 @@ TestIndividualType gate projection.</span>
     }
   },
   config: {
-    requiredRules: [&#x22;routeRoot&#x22;, &#x22;resource&#x22;],
+    requiredRules: [&#x22;routeRoot&#x22;],
+    requiredRuntimeRules: [&#x22;resource&#x22;],
     resource: {
       name: &#x22;TestIndividual&#x22;,
       schema: &#x22;TestIndividual#&#x22;,
@@ -646,10 +647,8 @@ containing the mapping.&#x60;,
     },
     target: { name: &#x22;TestTag&#x22;, schema: &#x22;TestTag#&#x22; },
     enabledWithRules: [&#x22;relationName&#x22;],
-    requiredRules: [
-      &#x22;routeRoot&#x22;, &#x22;resource&#x22;, &#x22;mappingName&#x22;,
-      &#x22;doCreateMappingAndTarget&#x22;,
-    ],
+    requiredRules: [&#x22;routeRoot&#x22;, &#x22;mappingName&#x22;, &#x22;doCreateMappingAndTarget&#x22;],
+    requiredRuntimeRules: [&#x22;resource&#x22;],
     rules: {
       doCreateMappingAndTarget: [[&#x22;!&#x27;&#x22;, [&#x22;@&#x22;, [
         &#x22;!&#x22;, [&#x22;$&#x22;, &#x22;valk&#x22;, &#x22;new&#x22;], [&#x22;@&#x22;, [&#x22;!&#x22;, [&#x22;:&#x22;, &#x22;Relation&#x22;]]],

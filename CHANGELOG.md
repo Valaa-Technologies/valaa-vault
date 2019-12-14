@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-prerelease.18](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.17...v0.35.0-prerelease.18) (2019-12-14)
+
+
+### Features
+
+* Add chronicleURI aliases, Cog.getEngine, fetch, fixes ([464f600](https://github.com/valaatech/kernel/commit/464f6002414a92c8ed76e5ce348ca9356d830cf3))
+* Add session and access control tests, scope.sessionIdentity ([90384e4](https://github.com/valaatech/kernel/commit/90384e442805c928ba73b5cca2a418723811f8e3))
+* Separate requiredRuntimeRules from requiredRules ([eb44138](https://github.com/valaatech/kernel/commit/eb44138039ed881663cd113e33d466e0c9f00b1b))
+
+
+
+
+
 # [0.35.0-prerelease.17](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.16...v0.35.0-prerelease.17) (2019-12-12)
 
 

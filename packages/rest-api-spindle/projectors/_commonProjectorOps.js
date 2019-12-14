@@ -28,7 +28,7 @@ export function _verifyResourceAuthorization (router, route, scope, resource, re
   if (!failure) return failure;
   router.warnEvent(1, () => [
     `UNAUTHORIZED ACCESS of ${resourceName} in ${router._routeName(route)}:`,
-        ...dumpObject(scope.resource),
+    "\n\taccessRoot:", ...dumpObject(scope.resource),
     "\n\trequest.query:", ...dumpObject((scope.request || {}).query),
     "\n\trequest.body:", ...dumpObject((scope.request || {}).body),
   ]);

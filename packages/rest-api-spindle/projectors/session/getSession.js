@@ -34,13 +34,23 @@ export default function createProjector (router: PrefixRouter /* , route: Route 
     },
 
     handler (request, reply) {
-      const { scope } = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      const scope = valkOptions.scope;
+      if (router.resolveRuntimeRules(this.runtime, valkOptions)) {
+        router.warnEvent(1, () => [
+          `RUNTIME RULE FAILURE ${router._routeName(this)}.`,
+          "\n\trequest.query:", ...dumpObject(scope.request.query),
+          "\n\trequest.body:", ...dumpObject(scope.request.body),
+        ]);
+        return true;
+      }
       router.infoEvent(1, () => [
         "\n\trequest.query:", request.query,
         "\n\trequest.cookies:", request.cookies,
       ]);
       /* eslint-disable camelcase */
-      let iv, alg, grantTimeStamp, nonce, identityPartition, payload, email, preferred_username;
+      let iv, alg, payload;
+      let nonce, identityChronicle, identityPartition, grantTimeStamp, email, preferred_username;
       let sessionToken, clientToken;
       const timeStamp = Math.floor(Date.now() / 1000);
       try {
@@ -54,10 +64,11 @@ export default function createProjector (router: PrefixRouter /* , route: Route 
         ({ iv, alg, payload } =
             burlaesgDecode(scope.authorizationGrant, scope.identity.clientSecret));
         ({
-          nonce, identityPartition, timeStamp: grantTimeStamp,
+          nonce, identityChronicle, identityPartition, timeStamp: grantTimeStamp,
           claims: { email, preferred_username },
         } = payload);
-        console.log("Authorizing session with payload:", payload);
+        if (!identityChronicle) identityChronicle = identityPartition;
+        router.logEvent(1, () => ["Authorizing session with payload:", payload]);
 
         if (!(timeStamp < Number(grantTimeStamp) + scope.grantExpirationDelay)) {
           reply.code(401);
@@ -66,7 +77,7 @@ export default function createProjector (router: PrefixRouter /* , route: Route 
           // return false;
         }
 
-        sessionToken = { timeStamp, nonce, identityPartition };
+        sessionToken = { timeStamp, nonce, identityChronicle };
         reply.setCookie(scope.identity.sessionCookieName,
             burlaesgEncode(sessionToken, scope.identity.clientSecret, iv), {
               httpOnly: true,
@@ -75,7 +86,7 @@ export default function createProjector (router: PrefixRouter /* , route: Route 
 
         clientToken = {
           iss: scope.identity.clientURI,
-          sub: identityPartition,
+          sub: identityChronicle,
           iat: timeStamp,
           exp: timeStamp + scope.tokenExpirationDelay,
           email, preferred_username,
@@ -86,7 +97,6 @@ export default function createProjector (router: PrefixRouter /* , route: Route 
               httpOnly: false,
               secure: true, maxAge: scope.tokenExpirationDelay, path: scope.clientRedirectPath,
             });
-
         reply.code(302);
         reply.redirect(scope.clientRedirectPath);
         return true;
@@ -102,7 +112,7 @@ export default function createProjector (router: PrefixRouter /* , route: Route 
             "\n\talg:", alg,
             "\n\tgrantTimeStamp:", grantTimeStamp,
             "\n\tnonce:", nonce,
-            "\n\tidentityPartition:", identityPartition,
+            "\n\tidentityChronicle:", identityChronicle,
             "\n\temail:", email,
             "\n\tsessionToken:", sessionToken,
             "\n\tclientToken:", clientToken);

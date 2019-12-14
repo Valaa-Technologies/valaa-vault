@@ -30,12 +30,17 @@
         }
       },
       "prefixes": {
-        "/rest-test/v0": { "!!!": ["@valos/rest-api-spindle/test", ["!$valk:invoke:createConfig", {
+        "/rest-test/v0": { "!!!": ["@", ["!", "../index"], ["!$valk:invoke:createConfig", {
           "view": {
             "name": "REST API Test",
             "verbosity": 0,
             "focus": "valaa-local:?id=f3d306d9-79ac-4087-afbc-46f739226eb2"
           },
+          "identity": {
+            "clientURI": "valaa-local:?id=f3d306d9-79ac-4087-afbc-46f739226eb2",
+            "clientSecret": "pen-pineapple-apple-pen"
+          },
+          "sessionDuration": 3600,
           "rules": {
             "routeRoot": ["@"],
             "scriptRoot": ["$~u4:f3d306d9-79ac-4087-afbc-46f739226eb2"],

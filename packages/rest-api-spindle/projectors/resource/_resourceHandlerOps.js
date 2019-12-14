@@ -7,7 +7,7 @@ import { _verifyResourceAuthorization, _presolveRouteRequest } from "../_commonP
 export function _presolveResourceRouteRequest (
     router: PrefixRouter, route: Route, runtime, valkOptions) {
   if (_presolveRouteRequest(
-      router, { method: "GET", category: route.category }, runtime, valkOptions)) {
+      router, { method: "GET", category: route.category, url: route.url }, runtime, valkOptions)) {
     return true;
   }
   const scope = valkOptions.scope;

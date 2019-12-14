@@ -158,6 +158,7 @@ function _attachProjectorFastifyRoutes (router) {
                     new Error(`${projector.name}`),
                     "\n\trequest.params:", ...dumpObject(request.params),
                     "\n\trequest.query:", ...dumpObject(request.query),
+                    "\n\trequest.cookies:", ...dumpObject(request.cookies),
                     "\n\trequest.body:", ...dumpObject(request.body),
                 ),
                 `Exception caught during projector: ${projector.name}`,

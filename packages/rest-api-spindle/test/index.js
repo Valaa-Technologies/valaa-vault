@@ -7,7 +7,7 @@ const {
 const {
   listingGETRoute, resourceDELETERoute, resourceGETRoute, resourcePATCHRoute, resourcePOSTRoute,
   relationsGETRoute, mappingDELETERoute, mappingGETRoute, mappingPATCHRoute, mappingPOSTRoute,
-  // sessionGETRoute, sessionDELETERoute,
+  sessionGETRoute, sessionDELETERoute,
 } = require("@valos/rest-api-spindle/schema-builder/routes");
 
 const patchWith = require("@valos/tools/patchWith").default;
@@ -53,23 +53,21 @@ exports.createConfig = function createConfig (options) {
     },
     schemas: testTypes.filter(schema => trySchemaNameOf(schema)).map(s => sharedSchemaOf(s)),
     routes: [
-/*
       sessionGETRoute(`/session`, {
         name: "session",
         rules: {
           grantExpirationDelay: 300,
           tokenExpirationDelay: 86400 * 7,
-          clientRedirectPath: `/`,
+          clientRedirectPath: `/rest-test-app/`,
         },
       }, globalRules),
 
       sessionDELETERoute(`/session`, {
         name: "session",
         rules: {
-          clientRedirectPath: `/`,
+          clientRedirectPath: `/rest-test-app/`,
         },
       }, globalRules),
-*/
       ...[].concat(...testTypes.map(_createGateRoutes.bind(null, globalRules))).filter(e => e),
     ],
   }, rest);
@@ -90,20 +88,25 @@ function _createGateRoutes (globalRules, resourceType) {
     resourcePOSTRoute(`/${gate.name}`, {
       requiredRules: ["listingName"],
       rules: {
-        doCreateResource: ["!'",
-          ["@",
-            ["!$valk:new", ["!:Relation"], {
-              name: ["!:listingName"],
-              source: ["!:routeRoot"],
-              target: ["!$valk:new", ["!:Entity"], {
-                name: ["!:request:body:name"],
-                owner: ["!:routeRoot"],
-                properties: { name: ["!:request:body:name"] },
-              }],
-            }],
-            [".$V:target"],
-          ],
-        ],
+        doCreateResource: ["!'", ["@",
+          ["!$valk:const:newResource", ["!$valk:new", ["!:Entity"], {
+            name: ["!:request:body:name"],
+            owner: ["!:routeRoot"],
+            properties: { name: ["!:request:body:name"] },
+          }]],
+          ["!$valk:new", ["!:Relation"], {
+            name: "RIGHTS", source: ["!:newResource"], target: ["!:sessionIdentity"],
+            properties: { read: true, write: true },
+          }],
+          ["!$valk:new", ["!:Relation"], {
+            name: "RIGHTS", source: ["!:newResource"], target: ["!:routeRoot:user"],
+            properties: { read: true, write: false },
+          }],
+          ["!$valk:new", ["!:Relation"], {
+            name: ["!:listingName"], source: ["!:routeRoot"], target: ["!:newResource"],
+          }],
+          [".$V:target"],
+        ]],
       },
     }, globalRules, resourceType),
 
@@ -178,18 +181,22 @@ function _createResourceTypeMappingRoutes (
     }, globalRules, resourceType, relationField),
 
     mappingPOSTRoute(`/${gate.name}/:resourceId/${mappingName}`, {
-      enabledWithRules: ["relationName"],
+      enabledWithRules: ["listingName", "relationName"],
       rules: {
         resource: ["!$valk:ref", ["*:$", ["!:request:params:resourceId"]]],
-        doCreateMappingAndTarget: ["!'", ["!$valk:new", ["!:Relation"], {
-          name: ["!:relationName"],
-          source: ["!:resource"],
-          target: ["!$valk:new", ["!:Entity"], {
+        doCreateMappingAndTarget: ["!'", ["@",
+          ["!$valk:const:newResource", ["!$valk:new", ["!:Entity"], {
             name: ["!:request:body", "$V", "target", "name"],
             owner: ["!:routeRoot"],
             properties: { name: ["!:request:body", "$V", "target", "name"] },
+          }]],
+          ["!$valk:new", ["!:Relation"], {
+            name: ["!:listingName"], source: ["!:routeRoot"], target: ["!:newResource"],
           }],
-        }]],
+          ["!$valk:new", ["!:Relation"], {
+            name: ["!:relationName"], source: ["!:resource"], target: ["!:newResource"],
+          }],
+        ]],
       },
     }, globalRules, resourceType, relationField),
   ];

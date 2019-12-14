@@ -2,6 +2,8 @@
 
 // import buffer from "buffer";
 import crypto from "crypto";
+
+import { vRef } from "~/raem/VRL";
 import { VALEK, Vrapper } from "~/engine";
 
 import { dumpObject } from "~/tools";
@@ -18,41 +20,31 @@ const _normalizeAlg = Object.assign(Object.create(null), {
 export function verifySessionAuthorization (router, route, scope: Object, accessRoot: Vrapper) {
   try {
     if (!router.isSessionAuthorizationEnabled()) return false;
-    const identity = router.getIdentity();
-    if (!identity) {
-      throw new Error("Cannot verify session authorization: valosheath identity not configured");
-    }
     const rights = accessRoot.get(toRIGHTSFields);
     // const permissions = accessRoot.get(toPERMISSIONSFields);
-    // console.log("rights:", accessRoot.getId(), rights, permissions);
     if ((rights == null) || !rights.length) {
       if (route.method === "GET") return false;
     } else {
-      const accessToken = scope.request.cookies[identity.getSessionCookieName()];
-      let timeStamp, identityPartition;
-      if (accessToken) {
-        ({ identityPartition, timeStamp } =
-            burlaesgDecode(accessToken, identity.clientSecret).payload);
-        if (!(Math.floor(Date.now() / 1000)
-            < Number(timeStamp) + router.getSessionDuration())) {
-          console.log("Session expired:", Math.floor(Date.now() / 1000), ">=", timeStamp,
-              router.getSessionDuration(),
-              "\n\tpayload:", timeStamp, identityPartition);
-          scope.reply.code(401);
-          scope.reply.send("Session has expired");
-          return true;
-        }
+      let identityRoles = scope.identityRoles;
+      if (identityRoles === undefined) {
+        identityRoles = scope.identityRoles = resolveIdentityRoles(router, route, scope);
       }
-      // console.log("scanning rights for partition:", route.method, identityPartition,
-      //    "\n\trights:", rights);
+      if (identityRoles === true) return true;
+      /*
+      console.log("scanning rights for route:", router._routeName(route),
+          "\n\tfor roles:", JSON.stringify(identityRoles),
+          "\n\tof access root:", accessRoot.getURI(),
+          "\n\twhich grants rights:", rights.map(r => JSON.stringify(r)),
+      );
+      */
       for (const right of rights) {
-        if (right.partition && (right.partition !== identityPartition)) continue;
+        if (!identityRoles[right.chronicle]) continue;
         if ((route.method === "GET") && (right.read !== false)) return false;
         if (right.write !== false) return false;
       }
     }
     scope.reply.code(403);
-    scope.reply.send("Unauthorized");
+    scope.reply.send("Forbidden");
     return true;
   } catch (error) {
     throw router.wrapErrorEvent(error, new Error("verifySessionAuthorization"),
@@ -60,10 +52,41 @@ export function verifySessionAuthorization (router, route, scope: Object, access
   }
 }
 
+export function resolveIdentityRoles (router, route, scope) {
+  const identity = router.getIdentity();
+  if (!identity) {
+    throw new Error("Cannot verify session authorization: valosheath identity not configured");
+  }
+  const accessToken = scope.request.cookies[identity.getSessionCookieName()];
+  if (!accessToken) return {};
+  const identityRoles = {};
+  const { timeStamp, identityChronicle } =
+      burlaesgDecode(accessToken, identity.clientSecret).payload;
+  if (!(Math.floor(Date.now() / 1000)
+      < Number(timeStamp) + router.getSessionDuration())) {
+    router.logEvent(1, () => [
+      "Session expired:", Math.floor(Date.now() / 1000), ">=", timeStamp,
+        router.getSessionDuration(),
+      "\n\tpayload:", timeStamp, identityChronicle,
+    ]);
+    scope.reply.code(401);
+    scope.reply.send("Session has expired");
+    return true;
+  }
+  identityRoles[identityChronicle] = true;
+  const [, authorityURI, identityId] = identityChronicle.match(/^(.*)\?id=(.*)$/) || [];
+  if (authorityURI) {
+    scope.sessionIdentity = vRef(identityId, undefined, undefined, identityChronicle);
+    scope.sessionIdentity.setInactive();
+    identityRoles[`${authorityURI}?id=@$~au:${encodeURIComponent(authorityURI)}@@`] = true;
+  }
+  return identityRoles;
+}
+
 const accessFields = {
   id: VALEK.toField("rawId"),
   name: VALEK.toField("name"),
-  partition: VALEK.toField("target").nullable().toField("partitionURI"),
+  chronicle: VALEK.toField("target").nullable().toField("chronicleURI"),
   read: VALEK.propertyValue("read"),
   write: VALEK.propertyValue("write"),
 };

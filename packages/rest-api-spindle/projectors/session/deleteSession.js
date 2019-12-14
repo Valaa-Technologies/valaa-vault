@@ -38,11 +38,12 @@ export default function createProjector (router: PrefixRouter /* , route: Route 
         reply.send("No session found");
         return true;
       }
-      const { identityPartition } =
-          burlaesgDecode(scope.sessionCookie, scope.identity.clientSecret).payload;
+      const { identityChronicle } = burlaesgDecode(
+          scope.sessionCookie, scope.identity.clientSecret).payload;
+
       const { iss, sub } =
           hs256JWTDecode(scope.clientCookie, scope.identity.clientSecret).payload;
-      if (iss !== scope.identity.clientURI || !identityPartition || (identityPartition !== sub)) {
+      if (iss !== scope.identity.clientURI || !identityChronicle || (identityChronicle !== sub)) {
         reply.code(400);
         reply.send("Bad Request");
         return true;

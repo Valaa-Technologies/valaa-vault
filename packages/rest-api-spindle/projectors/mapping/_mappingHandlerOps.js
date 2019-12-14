@@ -20,8 +20,8 @@ export function _presolveMappingRouteRequest (
   }
   const scope = valkOptions.scope;
   if (scope.mappingName === undefined) throw new Error("mappingName missing from scope");
-  if (_verifyResourceAuthorization(router, { method: "GET", category: "mapping" }, scope,
-      scope.target, "route target resource")) {
+  if (_verifyResourceAuthorization(router, { method: "GET", category: "mapping", url: route.url },
+      scope, scope.target, "route target resource")) {
     return true;
   }
   scope.mapping = scope.resource.get(toMapping, valkOptions);

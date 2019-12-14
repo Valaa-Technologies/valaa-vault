@@ -18,6 +18,7 @@ const valk = {
     invoke: ["§invoke"],
     ref: ["§ref"],
     new: ["§new"],
+    const: ["§$<-"],
     nullable: false,
   },
 };

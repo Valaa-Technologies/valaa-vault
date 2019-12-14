@@ -59,9 +59,24 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
           { affiliatedType: "TransientFields" },
       ),
 
+      ...generatedField("chronicle", Partition,
+          `The chronicle root Resource of this ${objectDescription}, ie. the nearest owner${
+              ""} (or self) which is also an active chronicle.`,
+          partitionResolver,
+          { affiliatedType: "TransientFields" },
+      ),
+
       ...generatedField("partitionURI", GraphQLString,
           `The partitionURI string of the partition this ${objectDescription} belongs to.{
               ""} This root resource of this Partition is the innermost owning resource with {
+              ""} Partition.authorityURI set.`,
+          partitionURIResolver,
+          { affiliatedType: "TransientFields" },
+      ),
+
+      ...generatedField("chronicleURI", GraphQLString,
+          `The chronicleURI string of the chronicle this ${objectDescription} belongs to.{
+              ""} This root resource of this chronicle is the innermost owning resource with {
               ""} Partition.authorityURI set.`,
           partitionURIResolver,
           { affiliatedType: "TransientFields" },

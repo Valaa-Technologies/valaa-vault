@@ -1,6 +1,5 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 
-const inBrowser = require("../gateway-api/inBrowser").default;
 const getGlobal = require("../gateway-api/getGlobal").default;
 
 const { thenChainEagerly } = require("./thenChainEagerly");
@@ -17,9 +16,6 @@ exports.default = function fetchJSON (input, options) {
             ""}environment please execute through perspire gateway (or similar)`);
       }
       if (!input) throw new Error(`missing fetchJSON input`);
-      if (!inBrowser() && (innerOptions.crossOrigin === undefined)) {
-        innerOptions.crossOrigin = false;
-      }
       if (innerOptions.body && (typeof innerOptions.body === "object")) {
         innerOptions.body = JSON.stringify(innerOptions.body);
         innerOptions.headers = {
@@ -36,7 +32,8 @@ exports.default = function fetchJSON (input, options) {
         error.response = response;
         throw error;
       }
-      return (response.status === 204) ? undefined
+      return (response.status === 204)
+          ? undefined
           : response.json();
     },
     function clearCache (json) {
@@ -49,4 +46,8 @@ exports.default = function fetchJSON (input, options) {
         "\n\toptions:", options,
     );
   }));
+};
+
+exports.fetch = function fetch (...rest) {
+  return getGlobal().fetch(...rest);
 };

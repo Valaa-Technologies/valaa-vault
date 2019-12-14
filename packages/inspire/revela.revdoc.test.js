@@ -129,7 +129,7 @@ async () => lazyPatchRevelations(gatewayMock, {}, {
     },
     prefixes: {
       "/test/v0": {
-        "!!!": ["test-lib", ["!$valk:invoke:callMe", {
+        "!!!": ["@", ["!:test-lib"], ["!$valk:invoke:callMe", {
           view: {
             focus: "valaa-aws://example.org/deployment?id=f0c5-f0c5",
             nulled: null,

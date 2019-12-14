@@ -306,7 +306,7 @@ export default class Engine extends Cog {
           "\n\tconstruct params:", ...dumpObject(constructParams),
           "\n\textractedProperties:", ...dumpObject(extractedProperties),
           "\n\tclaim result:", ...dumpObject(result),
-          "\n\tclaim event:", ...dumpObject(result.event),
+          "\n\tclaim event:", ...dumpObject((result || {}).event),
           "\n\tret:", ...dumpObject(ret),
       );
     }

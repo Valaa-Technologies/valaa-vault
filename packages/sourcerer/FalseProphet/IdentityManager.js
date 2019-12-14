@@ -13,34 +13,34 @@ export default class IdentityManager extends FabricEventTarget {
 
   list () { return Object.keys(this._activeIdentities); }
 
-  add (identityPartitionURI: any, options: Object = {}) {
+  add (identityChronicleURI: any, options: Object = {}) {
     try {
-      if (!identityPartitionURI) {
-        throw new Error(`identityPartition required, got: ${
-            debugObjectType(identityPartitionURI)}`);
+      if (!identityChronicleURI) {
+        throw new Error(`identityChronicle required, got: ${
+            debugObjectType(identityChronicleURI)}`);
       }
-      options.authority = this._sourcerer.obtainAuthorityOfPartition(identityPartitionURI);
+      options.authority = this._sourcerer.obtainAuthorityOfPartition(identityChronicleURI);
       if (!options.authority) {
-        throw new Error(`Can't locate the authority for identity partition: <${
-            identityPartitionURI}>`);
+        throw new Error(`Can't locate the authority for identity chronicle: <${
+            identityChronicleURI}>`);
       }
-      this._activeIdentities[String(identityPartitionURI)] = options;
+      this._activeIdentities[String(identityChronicleURI)] = options;
       return true;
     } catch (error) {
       throw this.wrapErrorEvent(error, new Error("identity.add"),
-          "\n\tidentityPartitionURI:", ...dumpObject(identityPartitionURI));
+          "\n\tidentityChronicleURI:", ...dumpObject(identityChronicleURI));
     }
   }
 
-  get (identityPartitionURI: any) { return this._activeIdentities[identityPartitionURI]; }
+  get (identityChronicleURI: any) { return this._activeIdentities[identityChronicleURI]; }
 
-  remove (identityPartitionURI: any) {
+  remove (identityChronicleURI: any) {
     try {
-      if (!identityPartitionURI) {
-        throw new Error(`identityPartition required, got: ${
-            debugObjectType(identityPartitionURI)}`);
+      if (!identityChronicleURI) {
+        throw new Error(`identityChronicle required, got: ${
+            debugObjectType(identityChronicleURI)}`);
       }
-      const uriString = String(identityPartitionURI);
+      const uriString = String(identityChronicleURI);
       if (!this._activeIdentities[uriString]) {
         throw new Error(`No such active identity: <${uriString}>`);
       }
@@ -48,7 +48,7 @@ export default class IdentityManager extends FabricEventTarget {
       return true;
     } catch (error) {
       throw this.wrapErrorEvent(error, new Error("identity.remove"),
-          "\n\tidentityPartitionURI:", ...dumpObject(identityPartitionURI));
+          "\n\tidentityChronicleURI:", ...dumpObject(identityChronicleURI));
     }
   }
 }

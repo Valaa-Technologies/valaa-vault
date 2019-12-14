@@ -758,6 +758,9 @@ export function resolveTypeof (valker: Valker, head: any, scope: ?Object,
 
 function _headOrScopeSet (valker: Valker, target: any, head: any, scope: ?Object,
     settersStep: any[]) {
+  if (typeof settersStep[1] === "string") {
+    return _headOrScopeSet(valker, target, head, scope, [null, [settersStep[1], settersStep[2]]]);
+  }
   for (let index = 1; index !== settersStep.length; ++index) {
     const setter = settersStep[index];
     if (Array.isArray(setter)) {

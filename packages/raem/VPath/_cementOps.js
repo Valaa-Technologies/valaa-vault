@@ -125,13 +125,16 @@ function _cementVParam (stack, segmentedVPath, componentType) {
   const contextTerm = segmentedVPath[1];
   const termContext = stack.context[contextTerm];
   if (!contextTerm) {
-    cemented = (segmentedVPath[2] === undefined)
-            ? ["§void"]
-        : (componentType === ":")
-            && ((segmentedVPath[2] === null) || (typeof segmentedVPath[2] !== "object"))
-            ? ["§'", segmentedVPath[2]]
-            : _cementVPath(stack, segmentedVPath[2], "@");
-    if (Array.isArray(cemented)) return cemented;
+    if (segmentedVPath[2] === undefined) return ["§void"];
+    if (componentType === ":"
+        && ((segmentedVPath[2] === null) || (typeof segmentedVPath[2] !== "object"))) {
+      return ["§'", segmentedVPath[2]];
+    }
+    const isComputation = (((segmentedVPath[2] || "")[1] || "")[0] || "")[0] === "!";
+    cemented = _cementVPath(stack, segmentedVPath[2], "@");
+    if (Array.isArray(cemented) && ((componentType !== "!*") || !isComputation)) {
+      return cemented;
+    }
   } else if (!termContext) {
     throw new Error(`Cannot cement param: unrecognized context term '${contextTerm}'`);
     // return ["§'", segmentedVPath];

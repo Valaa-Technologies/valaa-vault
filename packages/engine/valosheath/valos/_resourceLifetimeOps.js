@@ -28,15 +28,17 @@ function _prepareInitialState (valospaceType: Object, scope: ?Object, initialSta
     requireOwnerOperation: ?string) {
   let initialState = initialState_;
   if ((initialState != null) && (typeof initialState !== "object")) {
-    throw new Error(`new.initialState must by undefined or an object, got ${typeof initialState}`);
+    throw new Error(`new.initialState must be undefined or an object, got ${typeof initialState}`);
   }
 
   // TODO(iridian): Check for non-allowed fields.
-  const initialOwner = initialState && (initialState.owner !== undefined
-      ? initialState.owner : _tryOwnerAlias(valospaceType, initialState));
+  const initialOwner = initialState
+      && ((initialState.owner !== undefined)
+          ? initialState.owner
+          : _tryOwnerAlias(valospaceType, initialState));
   if (!initialOwner) {
-    if (initialOwner === null) return initialState;
-    if (requireOwnerOperation) {
+    if (requireOwnerOperation && (initialOwner === undefined)
+        && !(initialState && (initialState.authorityURI || initialState.partitionAuthorityURI))) {
       // throw new Error(`${requireOwnerOperation} initialState.owner required`);
       console.error(`DEPRECATED behaviour: ${
           requireOwnerOperation} ${valospaceType.name} initialState.owner required`);

@@ -30,6 +30,7 @@ export default class Cog extends FabricEventTarget {
 
   // Public API
 
+  getEngine () { return this.engine; }
   setEngine (engine: Object) {
     this.engine = engine;
     if (engine && (this.getLogger() === console)) this.setLogger(engine.getLogger());

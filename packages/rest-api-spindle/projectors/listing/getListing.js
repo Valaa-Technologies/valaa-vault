@@ -20,6 +20,18 @@ export default function createProjector (router: PrefixRouter, route: Route) {
 
     async preload () {
       await router.preloadRuntimeResources(this, this.runtime);
+      const preloadOptions = router.buildRuntimeVALKOptions(this, this.runtime, null, null);
+      if (_presolveRouteRequest(router, route, this.runtime, preloadOptions)) return;
+      // if runtime rules fail just skip preload
+      this.runtime.subscription = preloadOptions.scope.routeRoot
+          .obtainSubscription(this.toSuccessBodyFields, preloadOptions);
+      this.runtime.subscription
+          .addListenerCallback(this.runtime, "fields", update => {
+            router.infoEvent(1, () => [
+              "route listing preload update", router._routeName(route),
+              "\n\tupdate entry count:", update.value().length,
+            ]);
+          });
     },
 
     handler (request, reply) {

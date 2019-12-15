@@ -8,7 +8,8 @@ import { dumpObject } from "~/tools";
 
 export function _presolveRouteRequest (router, route, runtime, valkOptions) {
   const scope = valkOptions.scope;
-  if (_verifyResourceAuthorization(router, route, scope, scope.routeRoot, "route root")) {
+  if ((valkOptions.scope.request !== null) // if there is no request, this is a preload request
+      && _verifyResourceAuthorization(router, route, scope, scope.routeRoot, "route root")) {
     return true;
   }
   if (router.resolveRuntimeRules(runtime, valkOptions)) {

@@ -41,23 +41,23 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       } = request.query;
       return thenChainEagerly(scope.routeRoot, [
         vRouteRoot => vRouteRoot.get(this.toSuccessBodyFields, valkOptions),
-        (results => results.filter(e => e)),
-        (filter || ids || Object.keys(fieldRequirements).length)
-            && (results => router.filterResults(results, filter, ids, fieldRequirements)),
-        (sort)
-            && (results => router.sortResults(results, sort)),
-        (offset || (limit !== undefined))
-            && (results => router.paginateResults(results, offset || 0, limit)),
-        (fields)
-            && (results => router.pickResultFields(results, fields, route.config.resource)),
-        results => JSON.stringify(results, null, 2),
+        (results => results
+            .filter(e => e)),
+        (filter || ids || Object.keys(fieldRequirements).length) && (results => router
+            .filterResults(results, filter, ids, fieldRequirements)),
+        (sort) && (results => router
+            .sortResults(results, sort)),
+        (offset || (limit !== undefined)) && (results => router
+            .paginateResults(results, offset || 0, limit)),
+        (fields) && (results => router
+            .pickResultFields(valkOptions, results, fields, route.config.resource)),
         results => {
           router.infoEvent(2, () => [
             `${this.name}:`,
             "\n\tresults:", ...dumpObject(results),
           ]);
           reply.code(200);
-          reply.send(results);
+          router.replySendJSON(reply, results);
           return true;
         },
       ]);

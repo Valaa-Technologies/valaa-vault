@@ -130,9 +130,9 @@ function _attachProjectorFastifyRoutes (router) {
     `${router.getRoutePrefix()}: attaching ${router._projectors.length} fastify routes`,
   ]);
   for (const projector of router._projectors) {
-    const fastifyRoute = {
-      ...projector.route,
-      handler: asyncConnectToPartitionsIfMissingAndRetry(
+    let fastifyRoute;
+    try {
+      projector.smartHandler = asyncConnectToPartitionsIfMissingAndRetry(
           (request, reply) => thenChainEagerly(projector._whenReady, [
             readiness => {
               if (readiness === true) return projector.handler(request, reply);
@@ -164,9 +164,8 @@ function _attachProjectorFastifyRoutes (router) {
                 `Exception caught during projector: ${projector.name}`,
                 router.getLogger());
           },
-      )
-    };
-    try {
+      );
+      fastifyRoute = { ...projector.route, handler: projector.smartHandler };
       router._fastify.route(fastifyRoute);
     } catch (error) {
       throw router.wrapErrorEvent(error,

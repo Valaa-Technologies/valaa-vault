@@ -11,6 +11,7 @@ import {
 } from "./_projectorOps";
 import { _appendSchemaSteps, _derefSchema, _getResourceHRefPrefix } from "./_buildOps";
 import { _filterResults, _sortResults, _paginateResults, _pickResultFields } from "./_resultOps";
+import { _addResourceProjector, _relRequest, _replySendJSON } from "./_relOps";
 import { _updateResource } from "./_updateResourceOps";
 import { _vakonpileVPath } from "./_vakonpileOps";
 
@@ -326,5 +327,19 @@ export default class MapperService extends FabricEventTarget {
   updateResource (vResource, patch,
         options: { discourse: Object, scope: Object, toPatchTarget: Object } = {}) {
     return _updateResource(this, vResource, patch, options);
+  }
+
+  // Rel ops
+
+  replySendJSON (reply, json) {
+    return _replySendJSON(this, reply, json);
+  }
+
+  addResourceProjector (route, projector) {
+    return _addResourceProjector(this, route, projector);
+  }
+
+  relRequest (rel, options) {
+    return _relRequest(this, rel, options);
   }
 }

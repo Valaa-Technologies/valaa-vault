@@ -1,5 +1,7 @@
 // @flow
 
+import { thenChainEagerly } from "~/tools";
+
 const FieldSchemaTag = Symbol("FieldSchema");
 
 export function _filterResults (router, results, filter, ids, fieldRequirements) {
@@ -92,7 +94,7 @@ export function _paginateResults (router, results, offset, limit) {
   return results.slice(offset || 0, limit && ((offset || 0) + limit));
 }
 
-export function _pickResultFields (router, rootResult, fields /* , resultSchema */) {
+export function _pickResultFields (router, valkOptions, rootResult, fields/* , resultSchema */) {
   const selectors = { [FieldSchemaTag]: false };
   fields.split(",").forEach(field => {
     const steps = field.split("/");
@@ -124,7 +126,7 @@ export function _pickResultFields (router, rootResult, fields /* , resultSchema 
     }, resultSchema);
     */
   });
-  const injects = [];
+  const pendingRelRequests = [];
   const _pickFields = (result, selector) => {
     if (!result || (typeof result !== "object")) return;
     if (Array.isArray(result)) {
@@ -138,37 +140,35 @@ export function _pickResultFields (router, rootResult, fields /* , resultSchema 
       if (subSelector) _pickFields(value, subSelector);
       else if ((fieldSchema === false) && (key !== "$V")) delete result[key];
     }
-    if (((V || {}).rel === "self")
+    if (((V || {}).rel)
         && ((fieldSchema && (fieldSchema !== true)) || Object.keys(selector).length)) {
-      // So this is not exactly kosher. To implement expansion of
-      // nested properties we make virtual GET requests using the
-      // projection API which is primarily intended for testing and
-      // incurs full request overheads for each call. On the other
-      // hand, this is simple, complete and way more efficient than
-      // having clients make separate queries for the entries.
       const subFields = _gatherSubFields(selector).join(",");
-      injects.push(
-        router.getRootFastify().inject({
-          method: "GET",
-          url: V.href,
-          query: { fields: subFields },
-        }).then(response => {
+      const relRequestProcess = thenChainEagerly({
+        method: "GET",
+        url: V.href,
+        query: { fields: subFields },
+        cookies: valkOptions.scope.request.cookies,
+      }, [
+        requestOptions => router.relRequest(V.rel, requestOptions),
+        (response) => {
           if (response.statusCode === 200) {
-            V.target = JSON.parse(response.payload);
+            V.target = response.payloadJSON || JSON.parse(response.payload);
           } else {
             V.expansion = { statusCode: response.statusCode, payload: response.payload };
           }
           result.$V = V;
-        }).catch(error => {
-          V.expansion = { statusCode: 500, payload: error.message };
-          result.$V = V;
-        }),
-      );
+        }
+      ],
+      error => {
+        V.expansion = { statusCode: 500, payload: error.message };
+        result.$V = V;
+      });
+      if (relRequestProcess) pendingRelRequests.push(relRequestProcess);
     }
   };
   _pickFields(rootResult, selectors);
-  if (!injects.length) return rootResult;
-  return Promise.all(injects).then(() => rootResult);
+  if (!pendingRelRequests.length) return rootResult;
+  return Promise.all(pendingRelRequests).then(() => rootResult);
   function _gatherSubFields (selector, currentPath = "", subFields = []) {
     if (selector[FieldSchemaTag]) {
       subFields.push((selector[FieldSchemaTag] === true) ? currentPath

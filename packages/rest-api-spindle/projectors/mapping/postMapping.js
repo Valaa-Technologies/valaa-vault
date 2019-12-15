@@ -70,7 +70,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
             }
           };
           reply.code(201);
-          reply.send(JSON.stringify(results, null, 2));
+          router.replySendJSON(reply, results);
           router.infoEvent(2, () => [
             `${this.name}:`,
             "\n\tresults:", ...dumpObject(results),

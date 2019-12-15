@@ -45,7 +45,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         vMapping => vMapping.get(this.toSuccessBodyFields, valkOptions),
         results => ((!fields || !results)
             ? results
-            : router.pickResultFields(results, fields, route.schema.response[200])),
+            : router.pickResultFields(valkOptions, results, fields, route.schema.response[200])),
         results => {
           if (!results) {
             reply.code(404);
@@ -54,7 +54,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
             return true;
           }
           reply.code(200);
-          reply.send(JSON.stringify(results, null, 2));
+          router.replySendJSON(reply, results);
           router.infoEvent(2, () => [
             `${this.name}:`,
             "\n\tresults:", ...dumpObject(results),

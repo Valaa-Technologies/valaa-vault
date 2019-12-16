@@ -6,7 +6,7 @@ const {
   validateFormatTerm, validateVerb, validateVerbType, validateVParam,
   validateContextTerm, validateContextTermNS, validateParamValueText
 } = require("./_validateOps");
-const { cementVPath } = require("./_cementOps");
+const { cementVPath, extendVAKON } = require("./_cementOps");
 
 module.exports = {
   formVPath,
@@ -30,4 +30,5 @@ module.exports = {
   segmentVPath,
   segmentVKeyPath,
   cementVPath,
+  extendVAKON,
 };

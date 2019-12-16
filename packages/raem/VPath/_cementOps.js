@@ -1,10 +1,16 @@
 const { dumpObject, wrapError } = require("../../tools/wrapError");
 
-module.exports = { cementVPath };
+module.exports = { cementVPath, extendVAKON };
 
 function cementVPath (vpath, stack /* : { context: Obje, contextState, isPluralHead } */ = {}) {
   if (!stack.context) stack.context = {};
   return _cementVPath(stack, vpath, stack.componentType || "@", stack.index);
+}
+
+function extendVAKON (target, extension) {
+  if (target[0] !== "§->" || !Array.isArray(extension) || extension[0] !== "§->") {
+    target.push(extension);
+  } else target.push(...extension.slice(1));
 }
 
 function _cementVPath (stack, vpath, componentType, index) {
@@ -100,7 +106,7 @@ function _cementStatements (stack, segmentedVPath) {
   const fullPath = ["§->"];
   for (let i = 1; i !== segmentedVPath.length; ++i) {
     if (segmentedVPath[i][0] !== ":") {
-      fullPath.push(_cementVPath(stack, segmentedVPath[i], "@", i));
+      extendVAKON(fullPath, _cementVPath(stack, segmentedVPath[i], "@", i));
     } else {
       const arrayPath = ["§[]"];
       do {

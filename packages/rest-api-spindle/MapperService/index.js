@@ -3,6 +3,7 @@
 import path from "path";
 import fs from "fs";
 
+import { extendVAKON } from "~/raem/VPath";
 import { dumpify, dumpObject, FabricEventTarget, outputError } from "~/tools";
 
 import { _createPrefixRouter, _projectPrefixRoutesFromView } from "./_routerOps";
@@ -216,8 +217,9 @@ export default class MapperService extends FabricEventTarget {
 
   // Build ops
 
-  appendSchemaSteps (runtime, maybeJSONSchema,
-      { expandProperties, isValOSFields, targetVAKON = ["§->"], entryTargetVAKON } = {}) {
+  appendSchemaSteps (runtime, maybeJSONSchema, {
+    expandProperties, isValOSFields, targetVAKON = ["§->"], entryTargetVAKON,
+  } = {}) {
     let schema, innerTargetVAKON;
     if (!maybeJSONSchema) return targetVAKON || entryTargetVAKON;
     try {
@@ -246,7 +248,7 @@ export default class MapperService extends FabricEventTarget {
       if (vpath === undefined) return undefined;
       if (!vpath) return targetVAKON;
       vpathVAKON = _vakonpileVPath(vpath, runtime);
-      targetVAKON.push(vpathVAKON);
+      extendVAKON(targetVAKON, vpathVAKON);
       if (Array.isArray(vpathVAKON)) {
         maybeInnerPluralMapVAKON = vpathVAKON[vpathVAKON.length - 1];
         if (maybeInnerPluralMapVAKON[0] === "§map") return maybeInnerPluralMapVAKON;

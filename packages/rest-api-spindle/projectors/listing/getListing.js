@@ -16,6 +16,8 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       this.toSuccessBodyFields = ["§->"];
       router.appendGateProjectionSteps(
           this.runtime, route.config.resource, this.toSuccessBodyFields);
+      this.toListingResources = this.toSuccessBodyFields.slice(0, -1);
+      this.toListingResources.push(["§map", "target"]);
     },
 
     async preload () {
@@ -23,15 +25,24 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       const preloadOptions = router.buildRuntimeVALKOptions(this, this.runtime, null, null);
       if (_presolveRouteRequest(router, route, this.runtime, preloadOptions)) return;
       // if runtime rules fail just skip preload
+      let activations = [];
       this.runtime.subscription = preloadOptions.scope.routeRoot
-          .obtainSubscription(this.toSuccessBodyFields, preloadOptions);
+          .obtainSubscription(this.toListingResources, preloadOptions);
       this.runtime.subscription
           .addListenerCallback(this.runtime, "fields", update => {
+            const newActivations = [];
+            for (const newEntry of update.actualAdds()) {
+              const activation = newEntry && newEntry.activate();
+              if (activation) newActivations.push(activation);
+            }
             router.infoEvent(1, () => [
-              "route listing preload update", router._routeName(route),
-              "\n\tupdate entry count:", update.value().length,
+              "route listing", router._routeName(route),
+              "\n\tgot", update.actualAdds().length, "new entries, of which",
+                  newActivations.length, "new activations",
             ]);
+            activations = newActivations;
           });
+      await Promise.all(activations);
     },
 
     handler (request, reply) {

@@ -12,7 +12,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this);
-      this.toMapping = _createToMapping(router, route, this.runtime);
+      _createToMapping(router, route, this.runtime);
       this.toSuccessBodyFields = router.appendSchemaSteps(this.runtime, route.schema.response[200],
         { expandProperties: true });
     },
@@ -23,7 +23,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
 
     handler (request, reply) {
       const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
-      if (_presolveMappingRouteRequest(router, route, this.runtime, valkOptions, this.toMapping)) {
+      if (_presolveMappingRouteRequest(router, route, this.runtime, valkOptions)) {
         return true;
       }
       const scope = valkOptions.scope;

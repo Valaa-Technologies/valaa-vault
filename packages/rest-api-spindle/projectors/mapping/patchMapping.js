@@ -12,7 +12,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this);
-      this.toMapping = _createToMapping(router, route, this.runtime);
+      _createToMapping(router, route, this.runtime);
     },
 
     preload () {
@@ -21,7 +21,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
 
     handler (request, reply) {
       const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
-      if (_presolveMappingRouteRequest(router, route, this.runtime, valkOptions, this.toMapping)) {
+      if (_presolveMappingRouteRequest(router, route, this.runtime, valkOptions)) {
         return true;
       }
       const scope = valkOptions.scope;
@@ -32,7 +32,9 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         "\n\trequest.query:", request.query,
         "\n\trequest.body:", request.body,
       ]);
-      if (!scope.mapping && !scope.doCreateMapping) {
+
+      const alreadyExisting = scope.mapping;
+      if (!alreadyExisting && !scope.doCreateMapping) {
         reply.code(405);
         reply.send(`${this.name} is disabled: no doCreateMapping configured`);
         return true;
@@ -45,8 +47,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         vResource => scope.mapping || vResource.do(scope.doCreateMapping, valkOptions),
         vMapping => router.updateResource((scope.mapping = vMapping), request.body, valkOptions),
         () => valkOptions.discourse.releaseFabricator(),
-        eventResult => eventResult
-            && eventResult.getPersistedEvent(),
+        eventResult => eventResult && eventResult.getPersistedEvent(),
         (/* persistedEvent */) => {
           const results = {
             $V: {
@@ -60,7 +61,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
               } },
             }
           };
-          reply.code(scope.mapping ? 200 : 201);
+          reply.code(alreadyExisting ? 200 : 201);
           router.replySendJSON(reply, results);
           router.infoEvent(2, () => [
             `${this.name}:`,

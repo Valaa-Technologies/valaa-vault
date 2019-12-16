@@ -13,24 +13,30 @@ export function _appendSchemaSteps (
     Object.entries(jsonSchema.properties).forEach(([key, valueSchema]) => {
       let op;
       const reflectionVPath = (valueSchema.valospace || {}).reflection;
-      if (isValOSFields && (reflectionVPath === undefined)) {
+      if (key === "$V") {
+        op = router.appendSchemaSteps(
+            runtime, valueSchema, { expandProperties: true, isValOSFields: true });
+      } else if (isValOSFields && (reflectionVPath === undefined)) {
         if (key === "href") {
-          if (!((jsonSchema.valospace || {}).gate || {}).name) {
+          const targetType = ((jsonSchema.properties.target || {}).valospace || {}).resourceType;
+          const targetSchema = targetType && router.derefSchema(`${targetType}#`);
+          if (!(((targetSchema || {}).valospace || {}).gate || {}).name) {
             router.errorEvent(
                 `Trying to generate a href to a resource without valospace.gate.name:`,
                 "\n\troute:", runtime.name,
-                "\n\tjsonSchema:", ...dumpObject(jsonSchema, { nest: true }),
+                "\n\ttargetSchema:", ...dumpObject(targetSchema, { nest: true }),
                 "\n\tSKIPPING FIELD");
             return;
           }
-          op = ["§->", "target", false, "rawId",
-            ["§+", _getResourceHRefPrefix(router, jsonSchema), ["§->", null]]
+          op = ["§->", "target", false,
+            ["§+", _getResourceHRefPrefix(router, targetSchema), ["§->", "rawId"]],
           ];
-        } else if (key === "rel") op = "self";
-        else op = ["§->", key];
-      } else if (key === "$V") {
-        op = router.appendSchemaSteps(runtime, valueSchema,
-            { expandProperties: true, isValOSFields: true });
+        } else if (key === "rel") {
+          op = "self";
+        } else {
+          op = router.appendSchemaSteps(runtime, valueSchema,
+              { expandProperties: true, targetVAKON: ["§->", key, false] });
+        }
       } else {
         op = router.appendSchemaSteps(runtime, valueSchema, { expandProperties: true });
         op = (op.length === 1) ? ["§..", key]
@@ -44,8 +50,8 @@ export function _appendSchemaSteps (
   }
 }
 
-export function _getResourceHRefPrefix (router, jsonSchema) {
-  const routeName = ((jsonSchema.valospace || {}).gate || {}).name;
+export function _getResourceHRefPrefix (router, resourceSchema) {
+  const routeName = ((resourceSchema.valospace || {}).gate || {}).name;
   if (typeof routeName !== "string") {
     throw new Error("href requested of a resource without a valospace.gate.name");
   }

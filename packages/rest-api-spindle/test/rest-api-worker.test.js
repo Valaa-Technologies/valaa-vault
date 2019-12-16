@@ -255,15 +255,29 @@ describe("REST API spindle worker", () => {
         `http://127.0.0.1:7357${announcerHRef}/owned/news?require-highlight`,
         { method: "GET", headers });
     expect(utterancesGET)
-        .toEqual([{ highlight: true, $V: { href: shoutHRef, rel: "self" } }]);
+        .toEqual([{
+          highlight: true,
+          $V: { href: shoutHRef, rel: "self", target: { $V: { id: shoutId } } }
+        }]);
 
     const screamPATCH = await fetchJSON(
         `http://127.0.0.1:7357${announcerHRef}/owned/news/${yellId}`,
-        { method: "PATCH", headers, body: { highlight: true, $V: { name: "scream" } } });
+        { method: "PATCH", headers, body: {
+          highlight: true, $V: { target: { name: "scream" } },
+        } });
     expect(screamPATCH)
         .toEqual({ $V: {
           href: yellingHRef, rel: "self",
           target: { $V: { href: `/rest-test/v0/news/${yellId}`, rel: "self" } },
+        } });
+
+    const screamGET = await fetchJSON(
+        `http://127.0.0.1:7357${announcerHRef}/owned/news/${yellId}?fields=*`,
+        { method: "GET", headers });
+    expect(screamGET)
+        .toEqual({ highlight: true, $V: {
+          href: `/rest-test/v0/news/${yellId}`, rel: "self",
+          target: { $V: { id: yellId }, name: "scream", image: "yell", visible: true, tags: [] },
         } });
 
     const exclamationsGET = await fetchJSON(
@@ -271,8 +285,12 @@ describe("REST API spindle worker", () => {
         { method: "GET", headers });
     expect(exclamationsGET)
         .toEqual([
-          { $V: { href: shoutHRef, rel: "self" }, highlight: true },
-          { $V: { href: yellHRef, rel: "self" }, highlight: true },
+          { highlight: true, $V: {
+            href: shoutHRef, rel: "self", target: { $V: { id: shoutId } },
+          } },
+          { highlight: true, $V: {
+            href: yellHRef, rel: "self", target: { $V: { id: yellId } },
+          } },
         ]);
 
     const silencerDELETE = await fetchJSON(
@@ -296,7 +314,9 @@ describe("REST API spindle worker", () => {
         `http://127.0.0.1:7357${announcerHRef}/owned/news`,
         { method: "GET", headers });
     expect(echoGET)
-        .toEqual([{ $V: { href: shoutHRef, rel: "self" }, highlight: false }]);
+        .toEqual([{ highlight: false, $V: {
+          href: shoutHRef, rel: "self", target: { $V: { id: shoutId } },
+        } }]);
 
     const silenceGET = await fetchJSON(
         `http://127.0.0.1:7357${announcerHRef}/owned/news?require-highlight`,

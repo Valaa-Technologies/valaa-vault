@@ -67,7 +67,7 @@ module.exports = {
   mappingToManyOf,
   relationToOneOf,
   relationToManyOf,
-  getBaseRelationTypeOf,
+  getSingularRelationTypeOf,
   enumerateMappingsOf,
   sharedSchemaOf,
   trySchemaNameOf,
@@ -77,7 +77,7 @@ module.exports = {
 };
 
 function extendType (...allTypes) {
-  return patchWith({}, [].concat(...allTypes), {
+  return patchWith({}, ["..."].concat(...allTypes), {
     patchSymbols: true, concatArrays: false,
   });
 }
@@ -131,9 +131,10 @@ function relationToManyOf (targetType, relationNameOrProjection, options = {}) {
   return _createRelationTypeTo(targetType, relationNameOrProjection, options);
 }
 
-function getBaseRelationTypeOf (anAnyRelationType, optionalSchema) {
+function getSingularRelationTypeOf (anAnyRelationType, optionalSchema) {
   return extendType(
-      [_resolveFunction(anAnyRelationType), { [CollectionSchema]: null }],
+      _resolveFunction(anAnyRelationType),
+      { [CollectionSchema]: null },
       optionalSchema);
 }
 
@@ -182,18 +183,13 @@ function _createRelationTypeTo (targetType, relationNameOrProjection, {
   const ret = {
     [CollectionSchema]: collectionSchema && { ...collectionSchema },
     [ObjectSchema]: { ...objectSchema },
-    $V: {
-      [ObjectSchema]: {
-        valospace: { targetType },
-      },
-      href: {
-        ...URIReferenceType,
-        // valospace: { reflection: "" }, // not yet
-      },
-      rel: {
-        ...StringType,
-        // valospace: { reflection: "" }, // not yet
-      },
+    $V: { [ObjectSchema]: {},
+      href: { ...URIReferenceType },
+      rel: { ...StringType },
+      target: {
+        [ObjectSchema]: { valospace: { resourceType: targetType } },
+        $V: { [ObjectSchema]: {}, id: IdValOSType },
+      }
     },
     ...relationProperties,
   };
@@ -236,11 +232,8 @@ function exportSchemaOf (aType) {
         projection: segmentVPath(ret.valospace.gate.projection).slice(1),
       };
     }
-    if (ret.valospace.targetType) {
-      const gateName = (((ret.valospace.targetType[ObjectSchema] || {}).valospace || {}).gate || {})
-          .name;
-      if (gateName) (ret.valospace.gate || (ret.valospace.gate = {})).name = gateName;
-      ret.valospace.targetType = trySchemaNameOf(ret.valospace.targetType);
+    if (ret.valospace.resourceType) {
+      ret.valospace.resourceType = trySchemaNameOf(ret.valospace.resourceType);
     }
   }
   return ret;

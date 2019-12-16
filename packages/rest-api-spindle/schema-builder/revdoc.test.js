@@ -318,11 +318,18 @@ type => exportSchemaOf(type),
   },
   items: { type: "object",
     properties: {
-      highlight: { type: "boolean" },
-      $V: { type: "object",
-        valospace: { targetType: "TestTag", gate: { name: "tags" } },
-        properties: { href: { type: "string" }, rel: { type: "string" } }
-      },
+    highlight: { type: "boolean" },
+      $V: { type: "object", properties: {
+        href: { type: "string" }, rel: { type: "string" },
+        target: { type: "object", valospace: { resourceType: "TestTag" }, properties: {
+          $V: { type: "object", properties: {
+            id: { type: "string",
+              pattern: "^[a-zA-Z0-9\\-_.~]+$",
+              valospace: { reflection: [[".", ["$", "V", "rawId"]]], },
+            },
+          } },
+        } },
+      } },
     },
   },
 })),
@@ -376,11 +383,17 @@ type => exportSchemaOf(type),
         type: "object",
         valospace: { filterable: true },
         properties: {
-          $V: {
-            type: "object",
-            properties: { href: { type: "string" }, rel: { type: "string" } },
-            valospace: { gate: { name: "tags" }, targetType: "TestTag" }
-          }
+          $V: { type: "object", properties: {
+            href: { type: "string" }, rel: { type: "string" },
+            target: { type: "object", valospace: { resourceType: "TestTag" }, properties: {
+              $V: { type: "object", properties: {
+                id: { type: "string",
+                  pattern: "^[a-zA-Z0-9\\-_.~]+$",
+                  valospace: { reflection: [[".", ["$", "V", "rawId"]]], },
+                },
+              } },
+            } },
+          } },
         },
       },
     },
@@ -395,12 +408,18 @@ type => exportSchemaOf(type),
           },
           items: {
             properties: {
-              $V: {
-                type: "object",
-                properties: { href: { type: "string" }, rel: { type: "string" } },
-                valospace: { gate: { name: "services" }, targetType: "TestService" }
-              },
-              highlight: { type: "boolean" }
+              highlight: { type: "boolean" },
+              $V: { type: "object", properties: {
+                href: { type: "string" }, rel: { type: "string" },
+                target: { type: "object", valospace: { resourceType: "TestService" }, properties: {
+                  $V: { type: "object", properties: {
+                    id: { type: "string",
+                      pattern: "^[a-zA-Z0-9\\-_.~]+$",
+                      valospace: { reflection: [[".", ["$", "V", "rawId"]]], },
+                    },
+                  } },
+                } },
+              } },
             },
             type: "object",
           },
@@ -415,11 +434,18 @@ type => exportSchemaOf(type),
       items: { type: "object",
         valospace: { filterable: true },
         properties: {
-          $V: { type: "object",
-            valospace: { targetType: "TestTag", gate: { name: "tags" } },
-            properties: { href: { type: "string" }, rel: { type: "string" } },
-          },
           highlight: { type: "boolean" },
+          $V: { type: "object", properties: {
+            href: { type: "string" }, rel: { type: "string" },
+            target: { type: "object", valospace: { resourceType: "TestTag" }, properties: {
+              $V: { type: "object", properties: {
+                id: { type: "string",
+                  pattern: "^[a-zA-Z0-9\\-_.~]+$",
+                  valospace: { reflection: [[".", ["$", "V", "rawId"]]], },
+                },
+              } },
+            } },
+          } },
         },
       },
     },
@@ -550,24 +576,18 @@ containing the mapping.`,
     body: { type: "object",
       valospace: { filterable: true },
       properties: {
-        $V: { type: "object",
-          valospace: { targetType: "TestTag", gate: { name: "tags" } },
-          properties: { href: { type: "string" }, rel: { type: "string" } },
-        },
         highlight: { type: "boolean" },
+        $V: { type: "object", properties: { target: "TestTag#" } },
       },
     },
     response: {
       200: { type: "object",
         valospace: { filterable: true },
         properties: {
-          $V: { type: "object",
-            valospace: { targetType: "TestTag", gate: { name: "tags" } },
-            properties: { href: { type: "string" }, rel: { type: "string" },
-              target: "TestTag#",
-            },
-          },
           highlight: { type: "boolean" },
+          $V: { type: "object", properties: {
+            href: { type: "string" }, rel: { type: "string" }, target: "TestTag#",
+          } },
         },
       },
       403: { type: "string" }
@@ -593,11 +613,18 @@ containing the mapping.`,
         items: { type: "object",
           valospace: { filterable: true },
           properties: {
-            $V: { type: "object",
-              valospace: { targetType: "TestTag", gate: { name: "tags" } },
-              properties: { href: { type: "string" }, rel: { type: "string" } },
-            },
-            highlight: { type: "boolean" }
+            highlight: { type: "boolean" },
+            $V: { type: "object", properties: {
+              href: { type: "string" }, rel: { type: "string" },
+              target: { type: "object", valospace: { resourceType: "TestTag" }, properties: {
+                $V: { type: "object", properties: {
+                  id: { type: "string",
+                    pattern: "^[a-zA-Z0-9\\-_.~]+$",
+                    valospace: { reflection: [[".", ["$", "V", "rawId"]]], },
+                  },
+                } },
+              } },
+            } },
           },
         },
       },
@@ -702,11 +729,18 @@ in type and property \`valospace.reflection\` fields.`
         items: { type: "object",
           valospace: { filterable: true },
           properties: {
-            $V: { type: "object",
-              valospace: { targetType: "TestTag", gate: { name: "tags" } },
-              properties: { href: { type: "string" }, rel: { type: "string" } },
-            },
             highlight: { type: "boolean" },
+            $V: { type: "object", properties: {
+              href: { type: "string" }, rel: { type: "string" },
+              target: { type: "object", valospace: { resourceType: "TestTag" }, properties: {
+                $V: { type: "object", properties: {
+                  id: { type: "string",
+                    pattern: "^[a-zA-Z0-9\\-_.~]+$",
+                    valospace: { reflection: [[".", ["$", "V", "rawId"]]], },
+                  },
+                } },
+              } },
+            } },
           },
         },
       },

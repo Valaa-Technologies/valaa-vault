@@ -5,7 +5,7 @@ import { wrapError, dumpify, dumpObject, patchWith } from "~/tools";
 
 import {
   CollectionSchema, ObjectSchema, StringType, XWWWFormURLEncodedStringType, IdValOSType,
-  extendType, getBaseRelationTypeOf, schemaRefOf, trySchemaNameOf, _resolveFunction,
+  extendType, getSingularRelationTypeOf, schemaRefOf, trySchemaNameOf, _resolveFunction,
 } from "./types";
 
 import * as projectors from "~/rest-api-spindle/projectors";
@@ -249,7 +249,7 @@ export function mappingPOSTRoute (url, userConfig, globalRules, resourceType, re
       return undefined;
     }
 
-    const target = relationField.$V[ObjectSchema].valospace.targetType;
+    const target = relationField.$V.target[ObjectSchema].valospace.resourceType;
 
     Object.assign(route.schema, {
       description:
@@ -260,11 +260,11 @@ resource. The remaining fields of the body are set as the mapping
 content. Similarily the response will contain the newly created target
 resource content in *response.$V.target* with the rest of the response
 containing the mapping.`,
-      body: schemaRefOf(getBaseRelationTypeOf(relationField, {
-        $V: [null, { target }]
+      body: schemaRefOf(getSingularRelationTypeOf(relationField, {
+        $V: ["...", null, { [ObjectSchema]: {}, target }],
       })),
       response: {
-        200: schemaRefOf(getBaseRelationTypeOf(relationField, {
+        200: schemaRefOf(getSingularRelationTypeOf(relationField, {
           $V: { target },
         })),
         403: { type: "string" },
@@ -298,19 +298,18 @@ export function mappingGETRoute (url, userConfig, globalRules, resourceType, rel
       return undefined;
     }
 
-    const BaseRelationType = getBaseRelationTypeOf(relationField);
-
+    const singularRelationSchema = getSingularRelationTypeOf(relationField);
     Object.assign(route.schema, {
       description:
 `Get the contents of a '${route.config.relation.name}' relation from the
 source ${route.config.resource.name} route resource to the target ${
 route.config.target.name} route resource`,
       querystring: {
-        ..._genericGETResourceQueryStringSchema(BaseRelationType),
+        ..._genericGETResourceQueryStringSchema(singularRelationSchema),
         ...(route.schema.querystring || {}),
       },
       response: {
-        200: schemaRefOf(BaseRelationType),
+        200: schemaRefOf(singularRelationSchema),
         404: { type: "string" },
       },
     });
@@ -350,7 +349,7 @@ export function mappingPATCHRoute (url, userConfig, globalRules, resourceType, r
       description: `Update the contents of a '${route.config.relation.name
         }' mapping from the source ${route.config.resource.name
         } route resource to the target ${route.config.target.name} route resource`,
-      body: schemaRefOf(getBaseRelationTypeOf(relationField)),
+      body: schemaRefOf(getSingularRelationTypeOf(relationField)),
       response: {
         200: { type: "string" },
         201: { type: "string" },
@@ -531,7 +530,7 @@ function _setupRoute (route, userConfig, globalRules, resourceType, relationFiel
       schema: schemaRefOf(actualRelation),
     };
 
-    const targetType = actualRelation.$V[ObjectSchema].valospace.targetType;
+    const targetType = actualRelation.$V.target[ObjectSchema].valospace.resourceType;
     if (!targetType) {
       throw new Error(`relationType.$V[ObjectSchema].valospace.targetType missing for ${
           _routeName(route)}`);

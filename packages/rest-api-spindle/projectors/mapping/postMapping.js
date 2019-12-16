@@ -13,9 +13,9 @@ export default function createProjector (router: PrefixRouter, route: Route) {
     prepare () {
       this.runtime = router.createProjectorRuntime(this);
 
-      this.toTargetPatchable = ["§->", false, "target"];
+      this.toMappingPatchTarget = ["§->", false, "target"];
       router.appendSchemaSteps(this.runtime, route.config.target.schema,
-          { targetVAKON: this.toTargetPatchable });
+          { targetVAKON: this.toMappingPatchTarget });
     },
 
     preload () {
@@ -51,9 +51,17 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       valkOptions.discourse = router.getDiscourse().acquireFabricator();
       return thenChainEagerly(scope.resource, [
         vResource => vResource.do(scope.doCreateMappingAndTarget, valkOptions),
-        vMapping => router.updateResource((scope.mapping = vMapping), request.body, valkOptions),
-        vMapping => router.updateResource(vMapping, request.body.$V.target,
-              { ...valkOptions, toPatchTarget: this.toTargetPatchable }),
+        vMapping => {
+          if (!vMapping) throw new Error("doCreateMappingAndTarget didn't return anything");
+          return scope.mapping = vMapping;
+        },
+        () => valkOptions.discourse && valkOptions.discourse.releaseFabricator(),
+        eventResult => eventResult && eventResult.getPersistedEvent(),
+        () => (valkOptions.discourse = router.getDiscourse().acquireFabricator()),
+        () => router.updateResource(scope.mapping, request.body,
+              { ...valkOptions, patchValosFields: false }),
+        () => router.updateResource(scope.mapping, request.body.$V.target,
+              { ...valkOptions, toPatchTarget: this.toMappingPatchTarget }),
         () => valkOptions.discourse && valkOptions.discourse.releaseFabricator(),
         eventResult => eventResult && eventResult.getPersistedEvent(),
         (/* persistedEvent */) => {
@@ -83,8 +91,8 @@ export default function createProjector (router: PrefixRouter, route: Route) {
             "\n\trequest.query:", ...dumpObject(request.query),
             "\n\trequest.body:", ...dumpObject(request.body),
             "\n\tscope.resource:", ...dumpObject(scope.resource),
-            "\n\tscope.source:", ...dumpObject(scope.source),
-            "\n\tscope.target:", ...dumpObject(scope.target),
+            "\n\tscope.mapping:", ...dumpObject(scope.mapping),
+            "\n\tthis.toMappingPatchTarget:", ...dumpObject(scope.toMappingPatchTarget),
             "\n\tprojectorRuntime:", ...dumpObject(this.runtime),
         );
       });

@@ -275,7 +275,7 @@ export default class Gateway extends FabricEventTarget {
         const revelationConfig = (await lazy(views[viewId])) || {};
         viewConfig = patchWith(
             { verbosity, viewRootId: `valos-gateway--${viewId}--view-root` },
-            [revelationConfig, paramViewConfig],
+            ["...", revelationConfig, paramViewConfig],
             { complexPatch: "setOnInitialize" });
         view.setRawName(viewId);
         view.setName(`${viewConfig.name}-View`);

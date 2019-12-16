@@ -145,7 +145,9 @@ exports.default = function patchWith (target /* : Object */, patch /* : Array<an
     stack.spread = function spread (spreadee_, target_, patch_, keyInParent,
         targetParent /* , patchParent */) {
       if ((spreadee_ === null) || (spreadee_ === undefined)) return undefined;
-      if (typeof spreadee_ === "function") return (targetParent[keyInParent] = spreadee_(target_));
+      if (typeof spreadee_ === "function") {
+        return (targetParent[keyInParent] = spreadee_(target_));
+      }
       if (typeof spreadee_ === "string") {
         if (!this.require) {
           throw new Error(`No patchWith.options.require specified (needed by default spread ${
@@ -182,16 +184,11 @@ function extend (target_, patch_, keyInParent, targetParent, patchParent, skipSp
       else if (patch_ === target_) throw new Error("Cannot extend to self");
       else if (Array.isArray(patch_)) {
         const isSpreader = !skipSpread && (patch_[0] === this.spreaderKey) && this.spreaderKey;
-        if (isSpreader || ((ret !== undefined) && !Array.isArray(ret))) {
+        if (isSpreader /* || ((ret !== undefined) && !Array.isArray(ret)) */) {
           // FIXME(iridian, 2019-11): this path should not be taken when this.concatArrays is false
           // even if ret is not an array. Fix was not straightforward.
-          for (let i = isSpreader ? 1 : 0; i !== patch_.length; ++i) {
-            /*
-            console.log("array-spreader:", i,
-                "\n\tpatch[", i, "]", JSON.stringify(patch_[i]),
-                "\n\tret:", JSON.stringify(ret));
-            */
-            if (_setRetFromSpreadAndMaybeBail(this, patch_[i])) break;
+          for (let i = 1; i !== patch_.length; ++i) {
+            ret = this.extend(ret, patch_[i], keyInParent);
           }
         } else if (Array.isArray(ret) || !_setRetFromCacheAndMaybeBail(this)) {
           if (!this.concatArrays) ret = [];

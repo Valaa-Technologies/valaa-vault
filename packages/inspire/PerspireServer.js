@@ -120,7 +120,7 @@ export default class PerspireServer {
   }
 
   async terminate () {
-    return this.gateway.terminate();
+    return this.gateway && this.gateway.terminate();
   }
 
   serializeMainDOM () {

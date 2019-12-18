@@ -50,7 +50,7 @@ beforeAll(async () => {
 
   _vAuRoot = await _vViewFocus.doValoscript(
       `new Entity({ id, name: "test authority root", authorityURI: "valaa-local:" })`,
-      { id: "@$~au:valaa-local%3A@@" });
+      { id: "@$~aur:valaa-local%3A@@" });
   _vAdmin = await _vViewFocus.doValoscript(
       `new Entity({ id, name: "admin", authorityURI: "valaa-local:" })`,
       { id: testAdminId });

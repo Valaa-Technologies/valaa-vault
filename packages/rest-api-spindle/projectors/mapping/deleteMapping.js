@@ -20,16 +20,19 @@ export default function createProjector (router: PrefixRouter, route: Route) {
     },
 
     handler (request, reply) {
+      router.infoEvent(1, () => [`${this.name}:`,
+        "\n\trequest.query:", ...dumpObject(request.query),
+        "\n\trequest.cookies:", ...dumpObject(Object.keys(request.cookies || {})),
+      ]);
       const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      const scope = valkOptions.scope;
       if (_presolveMappingRouteRequest(router, route, this.runtime, valkOptions)) {
         return true;
       }
-      const scope = valkOptions.scope;
-      router.infoEvent(1, () => [
-        `${this.name}:`, ...dumpObject(scope.resource),
+      router.infoEvent(2, () => [`${this.name}:`,
+        "\n\tresource:", ...dumpObject(scope.resource),
         `\n\t${scope.mappingName}:`, ...dumpObject(scope.mapping),
         `\n\ttarget:`, ...dumpObject(scope.target),
-        "\n\trequest.query:", request.query,
       ]);
       if (scope.mapping === undefined) {
         scope.reply.code(404);

@@ -129,7 +129,7 @@ function _attachProjectorFastifyRoutes (router) {
   router.infoEvent(1, () => [
     `${router.getRoutePrefix()}: attaching ${router._projectors.length} fastify routes`,
   ]);
-  for (const projector of router._projectors) {
+  router._projectors.forEach(projector => {
     let fastifyRoute;
     try {
       projector.smartHandler = asyncConnectToPartitionsIfMissingAndRetry(
@@ -158,7 +158,7 @@ function _attachProjectorFastifyRoutes (router) {
                     new Error(`${projector.name}`),
                     "\n\trequest.params:", ...dumpObject(request.params),
                     "\n\trequest.query:", ...dumpObject(request.query),
-                    "\n\trequest.cookies:", ...dumpObject(request.cookies),
+                    "\n\trequest.cookies:", ...dumpObject(Object.keys(request.cookies || {})),
                     "\n\trequest.body:", ...dumpObject(request.body),
                 ),
                 `Exception caught during projector: ${projector.name}`,
@@ -173,7 +173,7 @@ function _attachProjectorFastifyRoutes (router) {
           "\n\tfastifyRoute:", dumpify(fastifyRoute, { indent: 2 }),
       );
     }
-  }
+  });
 }
 
 export async function _projectPrefixRoutesFromView (router, view, viewName) {

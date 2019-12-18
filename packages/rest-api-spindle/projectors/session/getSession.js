@@ -38,20 +38,23 @@ export default function createProjector (router: PrefixRouter /* , route: Route 
     },
 
     handler (request, reply) {
+      router.infoEvent(1, () => [`${this.name}:`,
+        "\n\trequest.query:", ...dumpObject(request.query),
+        "\n\trequest.cookies:", ...dumpObject(Object.keys(request.cookies || {})),
+      ]);
       const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       const scope = valkOptions.scope;
       if (router.resolveRuntimeRules(this.runtime, valkOptions)) {
-        router.warnEvent(1, () => [
-          `RUNTIME RULE FAILURE ${router._routeName(this)}.`,
-          "\n\trequest.query:", ...dumpObject(scope.request.query),
-          "\n\trequest.body:", ...dumpObject(scope.request.body),
-        ]);
+        router.warnEvent(1, () => [`RUNTIME RULE FAILURE ${router._routeName(this)}.`]);
         return true;
       }
-      router.infoEvent(1, () => [
-        "\n\trequest.query:", request.query,
-        "\n\trequest.cookies:", request.cookies,
+      /*
+      router.infoEvent(2, () => [`${this.name}:`,
+        "\n\tresource:", ...dumpObject(scope.resource),
+        `\n\t${scope.mappingName}:`, ...dumpObject(scope.mapping),
+        `\n\ttarget:`, ...dumpObject(scope.target),
       ]);
+      */
       /* eslint-disable camelcase */
       let iv, alg, payload;
       let nonce, identityChronicle, identityPartition, grantTimeStamp, email, preferred_username;

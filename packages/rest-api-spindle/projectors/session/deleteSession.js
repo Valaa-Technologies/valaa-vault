@@ -2,6 +2,8 @@
 import type { PrefixRouter /* , Route */ } from "~/rest-api-spindle/MapperService";
 import { burlaesgDecode, hs256JWTDecode } from "~/rest-api-spindle/tools/security";
 
+import { dumpObject } from "~/tools/wrapError";
+
 export default function createProjector (router: PrefixRouter /* , route: Route */) {
   return {
     requiredRules: ["routeRoot"],
@@ -27,10 +29,19 @@ export default function createProjector (router: PrefixRouter /* , route: Route 
     },
 
     handler (request, reply) {
-      const { scope } = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
-      router.infoEvent(1, () => [
-        "\n\trequest.query:", request.query,
-        "\n\trequest.cookies:", request.cookies,
+      router.infoEvent(1, () => [`${this.name}:`,
+        "\n\trequest.query:", ...dumpObject(request.query),
+        "\n\trequest.cookies:", ...dumpObject(Object.keys(request.cookies || {})),
+      ]);
+      const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      if (router.resolveRuntimeRules(this.runtime, valkOptions)) {
+        router.warnEvent(1, () => [`RUNTIME RULE FAILURE ${router._routeName(this)}.`]);
+        return true;
+      }
+      const scope = valkOptions.scope;
+      router.infoEvent(2, () => [`${this.name}:`,
+        "\n\tclientCookie:", ...dumpObject(scope.clientCookie),
+        "\n\tsessionCookie:", ...dumpObject(scope.sessionCookie),
       ]);
       if (!scope.clientCookie || !scope.sessionCookie) {
         reply.code(404);

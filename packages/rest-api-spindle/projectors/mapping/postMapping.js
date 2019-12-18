@@ -3,7 +3,7 @@
 import type { PrefixRouter, Route } from "~/rest-api-spindle/MapperService";
 import { dumpObject, thenChainEagerly } from "~/tools";
 
-import { _presolveResourceRouteRequest } from "../resource/_resourceHandlerOps";
+import { _createToMapping, _presolveMappingRouteRequest } from "./_mappingHandlerOps";
 
 export default function createProjector (router: PrefixRouter, route: Route) {
   return {
@@ -12,6 +12,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this);
+      _createToMapping(router, route, this.runtime);
 
       this.toMappingPatchTarget = ["§->", false, "target"];
       router.appendSchemaSteps(this.runtime, route.config.target.schema,
@@ -23,8 +24,13 @@ export default function createProjector (router: PrefixRouter, route: Route) {
     },
 
     handler (request, reply) {
+      router.infoEvent(1, () => [`${this.name}:`,
+        "\n\trequest.query:", ...dumpObject(request.query),
+        "\n\trequest.cookies:", ...dumpObject(Object.keys(request.cookies || {})),
+        "\n\trequest.body:", ...dumpObject(request.body),
+      ]);
       const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
-      if (_presolveResourceRouteRequest(router, route, this.runtime, valkOptions)) {
+      if (_presolveMappingRouteRequest(router, route, this.runtime, valkOptions)) {
         return true;
       }
       const scope = valkOptions.scope;
@@ -34,11 +40,11 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         return true;
       }
       const targetName = ((request.body.$V || {}).target || {}).name;
-      router.infoEvent(1, () => [
-        `${this.name}:`, ...dumpObject(scope.resource),
-        `\n\t${scope.mappingName} new target name:`, ...dumpObject(targetName),
-        "\n\trequest.query:", request.query,
-        "\n\trequest.body:", request.body,
+      router.infoEvent(2, () => [`${this.name}:`,
+        "\n\tresource:", ...dumpObject(scope.resource),
+        "\n\ttoMappingSource:", ...dumpObject(this.runtime.toMappingSource),
+        "\n\tsource:", ...dumpObject(scope.source),
+        `\n\ttarget:`, ...dumpObject(scope.target),
       ]);
       if (typeof targetName !== "string") {
         reply.code(400);
@@ -49,7 +55,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       const wrap = new Error(`mapping POST ${route.url}`);
       valkOptions.route = route;
       valkOptions.discourse = router.getDiscourse().acquireFabricator();
-      return thenChainEagerly(scope.resource, [
+      return thenChainEagerly(scope.source, [
         vResource => vResource.do(scope.doCreateMappingAndTarget, valkOptions),
         vMapping => {
           if (!vMapping) throw new Error("doCreateMappingAndTarget didn't return anything");
@@ -57,6 +63,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         },
         () => valkOptions.discourse && valkOptions.discourse.releaseFabricator(),
         eventResult => eventResult && eventResult.getPersistedEvent(),
+
         () => (valkOptions.discourse = router.getDiscourse().acquireFabricator()),
         () => router.updateResource(scope.mapping, request.body,
               { ...valkOptions, patchValosFields: false }),
@@ -64,6 +71,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
               { ...valkOptions, toPatchTarget: this.toMappingPatchTarget }),
         () => valkOptions.discourse && valkOptions.discourse.releaseFabricator(),
         eventResult => eventResult && eventResult.getPersistedEvent(),
+
         (/* persistedEvent */) => {
           const targetId = scope.mapping.get("target").getRawId();
           const results = {

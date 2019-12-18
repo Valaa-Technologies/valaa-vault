@@ -46,14 +46,15 @@ export default function createProjector (router: PrefixRouter, route: Route) {
     },
 
     handler (request, reply) {
+      router.infoEvent(1, () => [`${this.name}:`,
+        "\n\trequest.query:", ...dumpObject(request.query),
+        "\n\trequest.cookies:", ...dumpObject(Object.keys(request.cookies || {})),
+      ]);
       const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       const scope = valkOptions.scope;
       if (_presolveRouteRequest(router, route, this.runtime, valkOptions)) {
         return true;
       }
-      router.infoEvent(1, () => [`${this.name}:`,
-        "\n\trequest.query:", ...dumpObject(request.query),
-      ]);
       const {
         filter, // unimplemented
         sort, offset, limit, ids,

@@ -11,6 +11,7 @@ import {
   _createProjectorRuntime, _preloadRuntimeResources, _buildRuntimeVALKOptions, _resolveRuntimeRules,
 } from "./_projectorOps";
 import { _appendSchemaSteps, _derefSchema, _getResourceHRefPrefix } from "./_buildOps";
+import { _getIdentityRoles } from "./_identityOps";
 import { _filterResults, _sortResults, _paginateResults, _pickResultFields } from "./_resultOps";
 import { _addResourceProjector, _relRequest, _replySendJSON } from "./_relOps";
 import { _updateResource } from "./_updateResourceOps";
@@ -26,6 +27,7 @@ export default class MapperService extends FabricEventTarget {
     this._gateway = gateway;
 
     this._identity = identity;
+    this._rolesByIdentity = {};
     this._port = port;
     this._address = address;
     this._projectorCreators = projectorCreators;
@@ -343,5 +345,11 @@ export default class MapperService extends FabricEventTarget {
 
   relRequest (rel, options) {
     return _relRequest(this, rel, options);
+  }
+
+  // Identity ops
+
+  getIdentityRoles (identityChronicleURI) {
+    return _getIdentityRoles(this, identityChronicleURI);
   }
 }

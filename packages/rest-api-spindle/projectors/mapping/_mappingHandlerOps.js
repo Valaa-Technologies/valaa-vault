@@ -27,13 +27,16 @@ export function _presolveMappingRouteRequest (
   }
   const scope = valkOptions.scope;
   if (scope.mappingName === undefined) throw new Error("mappingName missing from scope");
-  if (_verifyResourceAuthorization(router, { method: "GET", category: "mapping", url: route.url },
+  if (scope.target && _verifyResourceAuthorization(router,
+      { method: "GET", category: "mapping", url: route.url },
       scope, scope.target, "route target resource")) {
     return true;
   }
   scope.source = scope.resource.get(runtime.toMappingSource, valkOptions);
   if (!scope.source) throw new Error("Could not resolve mapping source from resource");
-  scope.mapping = scope.source.get(runtime.toMapping, valkOptions);
+  if (runtime.toMapping) {
+    scope.mapping = scope.source.get(runtime.toMapping, valkOptions);
+  }
   return false;
 }
 

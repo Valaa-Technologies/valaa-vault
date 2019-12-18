@@ -17,7 +17,8 @@ export function _presolveResourceRouteRequest (
     return true;
   }
 
-  if (_verifyResourceAuthorization(router, route, scope, scope.resource, "route resource")) {
+  if (_verifyResourceAuthorization(router, route, scope, [scope.resource, scope.routeRoot],
+      "route resource")) {
     return true;
   }
   return false;

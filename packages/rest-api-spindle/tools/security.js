@@ -17,49 +17,61 @@ const _normalizeAlg = Object.assign(Object.create(null), {
   "aes-256-gcm": "aes-256-gcm",
 });
 
-export function verifySessionAuthorization (router, route, scope: Object, accessRoot: Vrapper) {
+export function verifySessionAuthorization (
+    router, route, scope: Object, accessRoots: Vrapper, accessRootDescription: string) {
   try {
     if (!router.isSessionAuthorizationEnabled()) return false;
-    const rights = accessRoot.get(toRIGHTSFields);
+    let rights;
+    for (const accessRoot of [].concat(accessRoots)) {
+      rights = accessRoot.get(toRIGHTSFields);
+      if ((rights != null) && rights.length) break;
+    }
     // const permissions = accessRoot.get(toPERMISSIONSFields);
+    let identityRoles;
     if ((rights == null) || !rights.length) {
       if (route.method === "GET") return false;
     } else {
-      let identityRoles = scope.identityRoles;
-      if (identityRoles === undefined) {
-        identityRoles = scope.identityRoles = resolveIdentityRoles(router, route, scope);
-      }
-      if (identityRoles === true) return true;
-      /*
-      console.log("scanning rights for route:", router._routeName(route),
-          "\n\tfor roles:", JSON.stringify(identityRoles),
-          "\n\tof access root:", accessRoot.getURI(),
-          "\n\twhich grants rights:", rights.map(r => JSON.stringify(r)),
-      );
-      */
+      identityRoles = resolveIdentityRoles(router, route, scope);
+      if (identityRoles === null) return true;
+      router.infoEvent(3, () => [
+        `CHECKING ACCESS of ${accessRootDescription} via ${router._routeName(route)}:`,
+        "\n\tby identity with roles:", JSON.stringify(identityRoles),
+        `\n\t${accessRootDescription}:`, ...dumpObject(accessRoots),
+        "\n\twhich grants rights:", (rights || []).map(r => JSON.stringify(r)),
+        "\n\trequest.query:", ...dumpObject((scope.request || {}).query),
+        "\n\trequest.cookies:", ...dumpObject(Object.keys((scope.request || {}).cookies)),
+      ]);
       for (const right of rights) {
-        if (!identityRoles[right.chronicle]) continue;
+        if (!identityRoles[right.chronicle || ""]) continue;
         if ((route.method === "GET") && (right.read !== false)) return false;
         if (right.write !== false) return false;
       }
     }
+    router.warnEvent(1, () => [
+      `UNAUTHORIZED ACCESS of ${accessRootDescription} via ${router._routeName(route)}:`,
+      "\n\tby identity with roles:", JSON.stringify(identityRoles),
+      `\n\t${accessRootDescription}:`, ...dumpObject(accessRoots),
+      "\n\twhich grants rights:", (rights || []).map(r => JSON.stringify(r)),
+      "\n\trequest.query:", ...dumpObject((scope.request || {}).query),
+      "\n\trequest.cookies:", ...dumpObject(Object.keys((scope.request || {}).cookies)),
+    ]);
     scope.reply.code(403);
     scope.reply.send("Forbidden");
     return true;
   } catch (error) {
     throw router.wrapErrorEvent(error, new Error("verifySessionAuthorization"),
-        "\n\taccessRoot:", ...dumpObject(accessRoot));
+        "\n\taccessRoots:", ...dumpObject(accessRoots));
   }
 }
 
 export function resolveIdentityRoles (router, route, scope) {
+  if (scope.identityRoles !== undefined) return scope.identityRoles;
   const identity = router.getIdentity();
   if (!identity) {
     throw new Error("Cannot verify session authorization: valosheath identity not configured");
   }
   const accessToken = scope.request.cookies[identity.getSessionCookieName()];
-  if (!accessToken) return {};
-  const identityRoles = {};
+  if (!accessToken) return (scope.identityRoles = { "": true });
   const { timeStamp, identityChronicle } =
       burlaesgDecode(accessToken, identity.clientSecret).payload;
   if (!(Math.floor(Date.now() / 1000)
@@ -71,16 +83,16 @@ export function resolveIdentityRoles (router, route, scope) {
     ]);
     scope.reply.code(401);
     scope.reply.send("Session has expired");
-    return true;
+    return (scope.identityRoles = null);
   }
-  identityRoles[identityChronicle] = true;
+  scope.identityRoles = router.getIdentityRoles(identityChronicle);
   const [, authorityURI, identityId] = identityChronicle.match(/^(.*)\?id=(.*)$/) || [];
   if (authorityURI) {
     scope.sessionIdentity = vRef(identityId, undefined, undefined, identityChronicle);
     scope.sessionIdentity.setInactive();
-    identityRoles[`${authorityURI}?id=@$~au:${encodeURIComponent(authorityURI)}@@`] = true;
+    scope.identityRoles[`${authorityURI}?id=@$~aur:${encodeURIComponent(authorityURI)}@@`] = true;
   }
-  return identityRoles;
+  return scope.identityRoles;
 }
 
 const accessFields = {

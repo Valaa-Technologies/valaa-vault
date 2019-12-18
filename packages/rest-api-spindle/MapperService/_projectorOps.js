@@ -114,7 +114,7 @@ export function _resolveRuntimeRules (router: PrefixRouter, runtime, valkOptions
   const scope = valkOptions.scope;
   // TODO: create transaction here.
   for (const [ruleName, resolveRule, requireRuntimeRule] of runtime.ruleResolvers) {
-    scope[ruleName] = resolveRule(router.getEngine(), scope.routeRoot, valkOptions);
+    scope[ruleName] = resolveRule(router.getEngine(), scope.routeRoot, Object.create(valkOptions));
     if (requireRuntimeRule && (scope[ruleName] === undefined)) {
       if (typeof requireRuntimeRule === "function") {
         return requireRuntimeRule(ruleName, router.getEngine(), scope.routeRoot, valkOptions);

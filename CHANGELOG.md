@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-prerelease.19](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.18...v0.35.0-prerelease.19) (2019-12-18)
+
+
+### Bug Fixes
+
+* postMapping sync issues ([15ce407](https://github.com/valaatech/kernel/commit/15ce4072dfb7243ec675abda392ad7eb5354a05d))
+* **rest-api-spindle:** deleteSession, postMapping, reorder info events ([f51c684](https://github.com/valaatech/kernel/commit/f51c684a1eb8caacbf9fa5b48e28981bef1f6af2))
+* **rest-api-spindle:** Extract toMappingSource from toMapping ([b0ce29f](https://github.com/valaatech/kernel/commit/b0ce29f27b0420809be0c94edc834761fc51a79e))
+
+
+### Features
+
+* **rest-api-spindle:** Add listing live preload kuery ([7809e1f](https://github.com/valaatech/kernel/commit/7809e1f5ee47a4e258d177d70f1a86adc03adcc5))
+* Add support for nested PATCHing, simplify href/rel code ([ed4016f](https://github.com/valaatech/kernel/commit/ed4016f5f0b5cad03aaa6223c979a64462ff734e))
+* **rest-api-spindle:** Add multi-identity authorization check ([4dd401b](https://github.com/valaatech/kernel/commit/4dd401b318ec1ba7f596e3ca6230471e6c3f4503))
+* **rest-api-spindle:** Parallelize live preloads ([2e2107b](https://github.com/valaatech/kernel/commit/2e2107b4326e52c3ccbe38d45775930b23e34b68))
+
+
+
+
+
 # [0.35.0-prerelease.18](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.17...v0.35.0-prerelease.18) (2019-12-14)
 
 

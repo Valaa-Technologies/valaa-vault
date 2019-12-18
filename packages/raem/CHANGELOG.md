@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-prerelease.19](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.18...v0.35.0-prerelease.19) (2019-12-18)
+
+
+### Features
+
+* **rest-api-spindle:** Parallelize live preloads ([2e2107b](https://github.com/valaatech/kernel/commit/2e2107b4326e52c3ccbe38d45775930b23e34b68))
+
+
+
+
+
 # [0.35.0-prerelease.18](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.17...v0.35.0-prerelease.18) (2019-12-14)
 
 

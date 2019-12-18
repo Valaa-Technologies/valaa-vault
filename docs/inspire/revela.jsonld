@@ -46,9 +46,9 @@
     "revdoc:package": "@valos/inspire",
     "revdoc:prefix": "revela",
     "revdoc:prefixIRI": "https://valospace.org/inspire/revela#",
-    "revdoc:version": "0.35.0-prerelease.18",
+    "revdoc:version": "0.35.0-prerelease.19",
     "respecConfig": {
-      "subtitle": "0.35.0-prerelease.18",
+      "subtitle": "0.35.0-prerelease.19",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -288,7 +288,7 @@
                       {
                         "@type": "vdoc:CharacterData",
                         "vdoc:content": [
-                          " lazyPatchRevelations(gatewayMock,\n    [0], {\n      \"!!!\": [[\"$https:foobar.com/path\"], [\"*:$\",\n        [\".:fetchedField\"],\n        [\"@.:fetchOptions@.:input@@\"],\n      ]],\n    },\n    [\"last\"])"
+                          " lazyPatchRevelations(gatewayMock,\n    [0], {\n      \"!!!\": [[\"$https:foobar.com/path\"], [\"*:$\",\n        [\".:fetchedField\"],\n        [\"@.:fetchOptions@.:input@@\"],\n      ]],\n    },\n    undefined,\n    [\"last\"])"
                         ]
                       }
                     ]

@@ -1,6 +1,6 @@
 {
   "name": "@valos/type-worker",
-  "version": "0.35.0-prerelease.18",
+  "version": "0.35.0-prerelease.19",
   "valos": {
     "type": "toolset",
     "domain": "@valos/kernel"
@@ -18,6 +18,6 @@
     "valma-perspire": "valma/perspire.js"
   },
   "dependencies": {
-    "@valos/inspire": "^0.35.0-prerelease.18"
+    "@valos/inspire": "^0.35.0-prerelease.19"
   }
 }

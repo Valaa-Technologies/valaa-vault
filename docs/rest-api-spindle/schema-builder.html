@@ -330,11 +330,18 @@ where the target resource is a Tag type defined earlier.</span>
   },
   items: { type: &#x22;object&#x22;,
     properties: {
-      highlight: { type: &#x22;boolean&#x22; },
-      $V: { type: &#x22;object&#x22;,
-        valospace: { targetType: &#x22;TestTag&#x22;, gate: { name: &#x22;tags&#x22; } },
-        properties: { href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; } }
-      },
+    highlight: { type: &#x22;boolean&#x22; },
+      $V: { type: &#x22;object&#x22;, properties: {
+        href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; },
+        target: { type: &#x22;object&#x22;, valospace: { resourceType: &#x22;TestTag&#x22; }, properties: {
+          $V: { type: &#x22;object&#x22;, properties: {
+            id: { type: &#x22;string&#x22;,
+              pattern: &#x22;^[a-zA-Z0-9\\-_.~]+$&#x22;,
+              valospace: { reflection: [[&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;rawId&#x22;]]], },
+            },
+          } },
+        } },
+      } },
     },
   },
 })</span>
@@ -411,11 +418,17 @@ where the target resource is a Tag type defined earlier.</span>
         type: &#x22;object&#x22;,
         valospace: { filterable: true },
         properties: {
-          $V: {
-            type: &#x22;object&#x22;,
-            properties: { href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; } },
-            valospace: { gate: { name: &#x22;tags&#x22; }, targetType: &#x22;TestTag&#x22; }
-          }
+          $V: { type: &#x22;object&#x22;, properties: {
+            href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; },
+            target: { type: &#x22;object&#x22;, valospace: { resourceType: &#x22;TestTag&#x22; }, properties: {
+              $V: { type: &#x22;object&#x22;, properties: {
+                id: { type: &#x22;string&#x22;,
+                  pattern: &#x22;^[a-zA-Z0-9\\-_.~]+$&#x22;,
+                  valospace: { reflection: [[&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;rawId&#x22;]]], },
+                },
+              } },
+            } },
+          } },
         },
       },
     },
@@ -430,12 +443,18 @@ where the target resource is a Tag type defined earlier.</span>
           },
           items: {
             properties: {
-              $V: {
-                type: &#x22;object&#x22;,
-                properties: { href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; } },
-                valospace: { gate: { name: &#x22;services&#x22; }, targetType: &#x22;TestService&#x22; }
-              },
-              highlight: { type: &#x22;boolean&#x22; }
+              highlight: { type: &#x22;boolean&#x22; },
+              $V: { type: &#x22;object&#x22;, properties: {
+                href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; },
+                target: { type: &#x22;object&#x22;, valospace: { resourceType: &#x22;TestService&#x22; }, properties: {
+                  $V: { type: &#x22;object&#x22;, properties: {
+                    id: { type: &#x22;string&#x22;,
+                      pattern: &#x22;^[a-zA-Z0-9\\-_.~]+$&#x22;,
+                      valospace: { reflection: [[&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;rawId&#x22;]]], },
+                    },
+                  } },
+                } },
+              } },
             },
             type: &#x22;object&#x22;,
           },
@@ -450,11 +469,18 @@ where the target resource is a Tag type defined earlier.</span>
       items: { type: &#x22;object&#x22;,
         valospace: { filterable: true },
         properties: {
-          $V: { type: &#x22;object&#x22;,
-            valospace: { targetType: &#x22;TestTag&#x22;, gate: { name: &#x22;tags&#x22; } },
-            properties: { href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; } },
-          },
           highlight: { type: &#x22;boolean&#x22; },
+          $V: { type: &#x22;object&#x22;, properties: {
+            href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; },
+            target: { type: &#x22;object&#x22;, valospace: { resourceType: &#x22;TestTag&#x22; }, properties: {
+              $V: { type: &#x22;object&#x22;, properties: {
+                id: { type: &#x22;string&#x22;,
+                  pattern: &#x22;^[a-zA-Z0-9\\-_.~]+$&#x22;,
+                  valospace: { reflection: [[&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;rawId&#x22;]]], },
+                },
+              } },
+            } },
+          } },
         },
       },
     },
@@ -593,24 +619,18 @@ containing the mapping.&#x60;,
     body: { type: &#x22;object&#x22;,
       valospace: { filterable: true },
       properties: {
-        $V: { type: &#x22;object&#x22;,
-          valospace: { targetType: &#x22;TestTag&#x22;, gate: { name: &#x22;tags&#x22; } },
-          properties: { href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; } },
-        },
         highlight: { type: &#x22;boolean&#x22; },
+        $V: { type: &#x22;object&#x22;, properties: { target: &#x22;TestTag#&#x22; } },
       },
     },
     response: {
       200: { type: &#x22;object&#x22;,
         valospace: { filterable: true },
         properties: {
-          $V: { type: &#x22;object&#x22;,
-            valospace: { targetType: &#x22;TestTag&#x22;, gate: { name: &#x22;tags&#x22; } },
-            properties: { href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; },
-              target: &#x22;TestTag#&#x22;,
-            },
-          },
           highlight: { type: &#x22;boolean&#x22; },
+          $V: { type: &#x22;object&#x22;, properties: {
+            href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; }, target: &#x22;TestTag#&#x22;,
+          } },
         },
       },
       403: { type: &#x22;string&#x22; }
@@ -636,11 +656,18 @@ containing the mapping.&#x60;,
         items: { type: &#x22;object&#x22;,
           valospace: { filterable: true },
           properties: {
-            $V: { type: &#x22;object&#x22;,
-              valospace: { targetType: &#x22;TestTag&#x22;, gate: { name: &#x22;tags&#x22; } },
-              properties: { href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; } },
-            },
-            highlight: { type: &#x22;boolean&#x22; }
+            highlight: { type: &#x22;boolean&#x22; },
+            $V: { type: &#x22;object&#x22;, properties: {
+              href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; },
+              target: { type: &#x22;object&#x22;, valospace: { resourceType: &#x22;TestTag&#x22; }, properties: {
+                $V: { type: &#x22;object&#x22;, properties: {
+                  id: { type: &#x22;string&#x22;,
+                    pattern: &#x22;^[a-zA-Z0-9\\-_.~]+$&#x22;,
+                    valospace: { reflection: [[&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;rawId&#x22;]]], },
+                  },
+                } },
+              } },
+            } },
           },
         },
       },
@@ -765,11 +792,18 @@ in type and property &#x60;valospace.reflection&#x60; fields.</span>
         items: { type: &#x22;object&#x22;,
           valospace: { filterable: true },
           properties: {
-            $V: { type: &#x22;object&#x22;,
-              valospace: { targetType: &#x22;TestTag&#x22;, gate: { name: &#x22;tags&#x22; } },
-              properties: { href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; } },
-            },
             highlight: { type: &#x22;boolean&#x22; },
+            $V: { type: &#x22;object&#x22;, properties: {
+              href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; },
+              target: { type: &#x22;object&#x22;, valospace: { resourceType: &#x22;TestTag&#x22; }, properties: {
+                $V: { type: &#x22;object&#x22;, properties: {
+                  id: { type: &#x22;string&#x22;,
+                    pattern: &#x22;^[a-zA-Z0-9\\-_.~]+$&#x22;,
+                    valospace: { reflection: [[&#x22;.&#x22;, [&#x22;$&#x22;, &#x22;V&#x22;, &#x22;rawId&#x22;]]], },
+                  },
+                } },
+              } },
+            } },
           },
         },
       },

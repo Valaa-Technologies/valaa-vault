@@ -58,6 +58,8 @@ module.exports = {
     // non-content-aware searching.
     "space-before-function-paren": [2, "always"],
 
+    "max-len": ["error", { "code": 100, "tabWidth": 2 }],
+
     // ## Minor exceptions to AirBnB style
 
     // These exceptions are more of convenience, might have weaker or

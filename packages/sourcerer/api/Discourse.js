@@ -28,21 +28,21 @@ export default class Discourse extends Valker {
   }
 
   /**
-   * assignNewResourceId - Creates a new resource id and assigns it to targetAction.
+   * assignNewVRId - Creates a new resource id and assigns it to targetAction.
    *
    * @returns {type} a new id for the object
    */
-  assignNewResourceId (targetAction: EventBase, partitionURI: string): VRL { // eslint-disable-line
-    throw new Error(`${this.constructor.name}/Discourse.assignNewResourceId not implemented`);
+  assignNewVRId (targetAction: EventBase, partitionURI: string): VRL { // eslint-disable-line
+    throw new Error(`${this.constructor.name}/Discourse.assignNewVRId not implemented`);
   }
 
   /**
-   * assignNewPartitionId - Creates a new partition id and assigns it to targetAction.
+   * assignNewChronicleRootId - Creates a new partition id and assigns it to targetAction.
    *
    * @returns {type} partitionURI
    */
-  assignNewPartitionId (targetAction: EventBase, authorityURI: string): ValaaURI { // eslint-disable-line
-    throw new Error(`${this.constructor.name}/Discourse.assignNewPartitionId not implemented`);
+  assignNewChronicleRootId (targetAction: EventBase, authorityURI: string): ValaaURI { // eslint-disable-line
+    throw new Error(`${this.constructor.name}/Discourse.assignNewChronicleRootId not implemented`);
   }
 
   /**

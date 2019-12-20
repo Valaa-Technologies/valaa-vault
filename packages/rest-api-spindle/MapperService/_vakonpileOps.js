@@ -31,8 +31,11 @@ const ruleContextLookup = {
   valk,
   valos,
   V: valos,
+  "~chr": reference,
+  "~ch3": reference,
+  "~cih": reference,
+  "~raw": reference,
   "~u4": reference,
-  "~gh": reference,
 };
 
 function reference (runtime, param, contextTerm) {

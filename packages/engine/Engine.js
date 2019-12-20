@@ -344,39 +344,72 @@ export default class Engine extends Cog {
   _resolveIdForConstructDirective (directive, options: VALKOptions) {
     const discourse = options.discourse;
     const initialState = directive.initialState || {};
-    let explicitRawId = options.id || initialState.id;
-    if (explicitRawId && (typeof explicitRawId !== "string")) {
-      if (!Array.isArray(explicitRawId)) {
-        throw new Error("explicit id must be either a string or a VPath steps array");
-      }
-      explicitRawId = formVPath(...explicitRawId);
-      if (explicitRawId[1] !== "$") throw new Error("explicit vrid must have a GRId as first step");
-    }
+
+    let explicitId = options.id || initialState.id;
     delete initialState.id;
+    const subPath = options.subPath || initialState.subPath;
+    delete initialState.subPath;
     if (initialState.authorityURI) {
       initialState.partitionAuthorityURI = initialState.authorityURI;
       delete initialState.authorityURI;
     }
-    if (initialState.partitionAuthorityURI) {
-      return discourse.assignNewPartitionId(
-          directive, initialState.partitionAuthorityURI, explicitRawId);
-    }
-    let owner = initialState.owner || initialState.source;
-    if (owner) {
-      if (!(owner instanceof VRL)) owner = universalizeCommandData(owner, options);
-      if (owner instanceof VRL) {
-        let partitionURI = owner.getPartitionURI();
-        if (!partitionURI && owner.isGhost()) {
-          partitionURI = discourse
-              .bindObjectId([owner.getGhostPath().headHostRawId()], "Resource")
-              .getPartitionURI();
-        }
-        if (partitionURI) {
-          return discourse.assignNewResourceId(directive, String(partitionURI), explicitRawId);
-        }
+    const authorityURI = initialState.partitionAuthorityURI;
+    /* Allowed combinations of id, sub, owner, aur
+      0:              : no, must have owner or be chronicle root
+      1: id,          : no, must have owner or be chronicle root
+      2:     sub,     : no, must have owner or be chronicle root
+      3: id, sub,     : no, must have owner or be chronicle root
+      4:          auri: yes, generated chronicle root id
+      5: id,      auri: yes, explicit chronicle root id
+      6:     sub, auri: no, sub parent must exist
+      7: id, sub, auri: no, sub parent must be the owner
+     */
+    if (explicitId) {
+      // cases 3, 7, b, f
+      if (subPath) throw new Error("Can't have both explicit id and explicit subPath");
+      if (Array.isArray(explicitId)) {
+        explicitId = formVPath(...explicitId);
+        if (explicitId[1] !== "$") throw new Error("explicit vrid must have a GRId as first step");
+      } else if (typeof explicitId !== "string") {
+        throw new Error("explicit id must be either a string or a VPath steps array");
       }
     }
-    return discourse.assignNewPartitionlessResourceId(directive, explicitRawId);
+    let owner = initialState.owner || initialState.source;
+    if (!owner) {
+      if (subPath) throw new Error("Can't have subPath without owner"); // cases 2, 6
+      if (authorityURI) { // cases 4, 5
+        return discourse.assignNewChronicleRootId(directive, authorityURI, explicitId);
+      }
+      // cases 0, 1, (2, 3 already handled)
+      // throw new Error("new resource must have either owner or authorityURI");
+      // This is legacy stuff, but removing this might break things.
+      return discourse.assignNewUnchronicledVRId(directive, explicitId);
+    }
+    /*
+      8:                owner: yes, global resource id
+      9: id,            owner: yes, global explicit id
+      a:     sub,       owner: yes, structured id with owner as sub parent
+      b: id, sub,       owner: no, both owner and explicit id can't be the sub parent
+      c:          auri, owner: future (with multi-chronicle tx), generated chronicle id
+      d: id,      auri, owner: future (with multi-chronicle tx), explicit chronicle id
+      e:     sub, auri, owner: future (with multi-chronicle tx), structured id, owner as sub parent
+      f: id, sub, auri, owner: no, both owner and explicit id can't be the sub parent
+    */
+    if (!(owner instanceof VRL)) {
+      owner = universalizeCommandData(owner, options);
+      if (!(owner instanceof VRL)) throw new Error("new resource owner must be a valid resource");
+    }
+    let chronicleURI = owner.getPartitionURI();
+    if (!chronicleURI && owner.isGhost()) {
+      chronicleURI = discourse
+          .bindObjectId([owner.getGhostPath().headHostRawId()], "Resource")
+          .getPartitionURI();
+      if (!chronicleURI) {
+        throw new Error("INTERNAL ERROR: could not determine new resource chronicle");
+      }
+    }
+    // cases 8, 9, a, c, d, e
+    return discourse.assignNewVRId(directive, String(chronicleURI), explicitId, subPath);
   }
 
   outputStatus (output = console) {

@@ -597,7 +597,7 @@ reserves all context-terms matching '"i" 2( ALPHA / DIGIT )' for
 itself with currently defined formats exhaustively listed here.
       `,
       [`chapter#section_vgrid_uuid_v4>0;${
-          ""}VGRId format "\`~u4\`": Uuid v4 of a native, insecure resource`]: {
+          ""}VGRId format "\`~u4\`": UUID v4 of a native, insecure resource`]: {
         "#0": `
 An identifier for native valospace resource with an event log.
 This is insecure as there are no guarantees against resource id
@@ -611,15 +611,27 @@ An identifier of an immutable octet-stream, with the content hash in
 the vvalue.`
       },
       [`chapter#section_vgrid_platonic_resource>2;${
-          ""}VGRId format "\`~pw\`": The id of an immutable Platonic resource With inferences`]: {
+          ""}VGRId format "\`~plt\`": The id of an immutable Platonic resource With inferences`]: {
         "#0": `
 An identifier of an immutable, procedurally generated resource with its
 content inferred from the vpath embedded in the vvalue.
 While of limited use in itself this is useful when used as the
 prototype of structural ghost sub-resources which are quite mutable.`,
       },
-      [`chapter#section_vgrid_crypto_chained>3;${
-          ""}VGRId format "\`~cc\`": The id of Crypto-event-log-Chained secure resource`]: {
+      [`chapter#section_vgrid_command_resource_hash>3;${
+          ""}VGRId format "\`~cih\`": The id of a command-id hash-based insecure resource`]: {
+        "#0": `
+An identifier which has been hashed from a command id, chronicle URI
+and a running counter.`,
+      },
+      [`chapter#section_vgrid_command_chronicle_hash>4;${
+          ""}VGRId format "\`~chr\`": The id of a command hash-based chronicle`]: {
+        "#0": `
+A chronicle identifier which has been hashed from a command id and an
+authority URI.`,
+      },
+      [`chapter#section_vgrid_crypto_chained>5;${
+          ""}VGRId format "\`~ch3\`": The id of Crypto-Hash-CHained secure CHronicle resource`]: {
         "#0": `
 An identifier of a native, secure valospace resource with an event log.
 This id is deterministically derived from the most recent hash-chain
@@ -628,11 +640,22 @@ cryptographic secret of the creating identity and a salt, thus ensuring
 collision resistance and a mechanism for creator to prove their claim
 to the resource.`,
       },
-      [`chapter#section_vgrid_ghost>4;${
+      [`chapter#section_vgrid_authority_root>6;${
+          ""}VGRId format "\`~aur\`": The id of an authority root resource`]: {
+        "#0": `
+The fixed identifier of an immovable root resource of an authority
+chronicle. The authority vgrid param equals to the authority URI.`,
+      },
+      [`chapter#section_vgrid_ghost>7;${
           ""}VGRId format "\`~gh\`": The derived Hash id of a native, insecure Ghost resource`]: {
         "#0": `
 This is a legacy format for native ghost resources, with id created
 from the hash of the 'ghost path' of the resource.`,
+      },
+      [`chapter#section_vgrid_raw>8;${
+          ""}VGRId format "\`~raw\`": The insecure raw text id of a resource`]: {
+        "#0": `
+An id with an unknown schema.`
       },
     },
     "chapter#section_vrid_verb_types>4;List of VRId-specific verb type semantics:": {

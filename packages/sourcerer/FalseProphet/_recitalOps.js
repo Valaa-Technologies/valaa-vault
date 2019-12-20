@@ -76,7 +76,9 @@ export function _composeRecitalStoryFromEvent (falseProphet: FalseProphet, event
 
 export function _purgeLatestRecitedStory (falseProphet: FalseProphet, heresy: EventBase, require) {
   const latestStory = falseProphet._primaryRecital.getLast();
-  if (!latestStory || (latestStory.aspects.command.id !== heresy.aspects.command.id)) {
+  if (!latestStory
+      || (((latestStory.aspects || {}).command || {}).id
+          !== ((heresy.aspects || {}).command || {}).id)) {
     if (!require && !falseProphet._primaryRecital.getStoryBy(heresy.aspects.command.id)) {
       return; // Already purged.
     }

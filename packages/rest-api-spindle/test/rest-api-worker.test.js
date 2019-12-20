@@ -141,7 +141,7 @@ describe("REST API spindle worker", () => {
         .toMatchObject({ $V: { rel: "self" } });
 
     const href = testingividualPOST.$V.href;
-    const id = href.match(/^\/rest-test\/v0\/individuals\/([a-zA-Z0-9\-_]*)$/)[1];
+    const id = href.match(/^\/rest-test\/v0\/individuals\/([@$:a-zA-Z0-9\-_~]*)$/)[1];
 
     const testingividualGET = await fetchJSON(`http://127.0.0.1:7357${href}?fields=*`,
         { method: "GET", headers });
@@ -222,7 +222,7 @@ describe("REST API spindle worker", () => {
     expect(shoutPOST)
         .toMatchObject({ $V: { rel: "self" } });
     const shoutHRef = shoutPOST.$V.href;
-    const shoutId = shoutHRef.match(/^\/rest-test\/v0\/news\/([a-zA-Z0-9\-_]*)$/)[1];
+    const shoutId = shoutHRef.match(/^\/rest-test\/v0\/news\/([@$:a-zA-Z0-9\-_~]*)$/)[1];
 
     const shoutingPATCH = await fetchJSON(
         `http://127.0.0.1:7357${announcerHRef}/owned/news/${shoutId}`,
@@ -241,7 +241,7 @@ describe("REST API spindle worker", () => {
         .toMatchObject({ $V: { rel: "self", target: { $V: { rel: "self" } } } });
     const yellingHRef = yellingPOST.$V.href;
     const yellId = yellingHRef.match(
-        /^\/rest-test\/v0\/services\/[a-zA-Z0-9\-_]*\/owned\/news\/([a-zA-Z0-9\-_]*)$/)[1];
+        /^\/rest-test\/v0\/services\/[@$:a-zA-Z0-9\-_~]*\/owned\/news\/([@$:a-zA-Z0-9\-_~]*)$/)[1];
     const yellHRef = `/rest-test/v0/news/${yellId}`;
     expect(yellingPOST.$V.target.$V.href)
         .toEqual(yellHRef);

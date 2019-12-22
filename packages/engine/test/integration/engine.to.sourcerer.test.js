@@ -37,7 +37,7 @@ describe("Media handling", () => {
           .then(createBvob => ({ bvobId: (media[valos.Media.content] = createBvob()) }));
       this.text = media;
       ({ media, contentUpdateStarted });
-    `, { scope: { exampleBuffer, console }, awaitResult: (result) => result.getComposedEvent() });
+    `, { exampleBuffer, console }, { awaitResult: (result) => result.getComposedEvent() });
     expect(media.getId().toJSON())
         .toEqual(entities().test_partition.get(["§..", "text"]).getId().toJSON());
     expect(testPartitionBackend.getPreparation(exampleContentHash))
@@ -85,7 +85,7 @@ describe("Media handling", () => {
         media, contentUpdateStarted,
         newMediaPersist: new Promise(resolve => (valos.getTransactor().onpersist = resolve)),
       });
-    `, { scope: { exampleBuffer, console } });
+    `, { exampleBuffer, console });
     await newMediaPersist;
     expect(media.getId().toJSON())
         .toEqual(entities().test_partition.get(["§..", "text"]).getId().toJSON());
@@ -143,10 +143,9 @@ describe("Media handling", () => {
         media, contentUpdateStarted,
         newMediaPersist: new Promise(resolve => (valos.getTransactor().onpersist = resolve)),
       });
-    `, {
-      scope: { exampleBuffer, console, onReform },
-      awaitResult: (result) => result.getComposedEvent(),
-    });
+    `,
+        { exampleBuffer, console, onReform },
+        { awaitResult: (result) => result.getComposedEvent() });
     harness.clockEvent(1, () => ["test.newMediaPersist"]);
     await newMediaPersist;
     expect(testPartitionBackend._chroniclings.length)
@@ -206,11 +205,9 @@ describe("Media handling", () => {
         media, contentUpdateStarted,
         newMediaPersist: new Promise(resolve => (valos.getTransactor().onpersist = resolve)),
         newMediaError: new Promise(resolve => (valos.getTransactor().onerror = resolve)),
-      });
-    `, {
-      scope: { exampleBuffer, console, onReform },
-      awaitResult: (result) => result.getComposedEvent(),
-    });
+      });`,
+        { exampleBuffer, console, onReform },
+        { awaitResult: (result) => result.getComposedEvent() });
     harness.clockEvent(1, () => ["test.newMediaPersist"]);
     await newMediaPersist;
     expect(testPartitionBackend._chroniclings.length)
@@ -280,11 +277,9 @@ describe("Media handling", () => {
       ({
         media, contentUpdateStarted,
         newMediaPersist: new Promise(resolve => (valos.getTransactor().onpersist = resolve)),
-      });
-    `, {
-      scope: { buffer, console, onReform, onPurge },
-      awaitResult: (result) => (mediaProphecy = result).getComposedEvent(),
-    });
+      });`,
+        { buffer, console, onReform, onPurge },
+        { awaitResult: (result) => (mediaProphecy = result).getComposedEvent() });
     harness.clockEvent(1, () => ["test.newMediaPersist"]);
     await newMediaPersist;
     expect(testPartitionBackend._chroniclings.length)
@@ -382,7 +377,7 @@ describe("Media handling", () => {
           contentMedia,
           createdProcess: new Promise(subscribeToContentUpdate(contentMedia)),
         };
-      })`, { scope: { initialBuffer, console, subscribeToContentUpdate } },
+      })`, { initialBuffer, console, subscribeToContentUpdate },
     );
     const createdUpdate = await createdProcess;
 
@@ -408,7 +403,7 @@ describe("Media handling", () => {
           modifiedProcess: new Promise(subscribeToContentUpdate(this)),
           updateBvob: (this.$V.content = createBvob()),
         }));`,
-        { scope: { updateBuffer, console, subscribeToContentUpdate } },
+        { updateBuffer, console, subscribeToContentUpdate },
     );
     const modifiedUpdate = await modifiedProcess;
 
@@ -433,7 +428,7 @@ describe("Media handling", () => {
           modifiedAgainProcess: new Promise(subscribeToContentUpdate(this)),
           updateAgainBvob: (this.$V.content = createBvob()),
         }));`,
-        { scope: { updateBuffer, console, subscribeToContentUpdate } },
+        { updateBuffer, console, subscribeToContentUpdate },
     );
     const modifiedAgainUpdate = await modifiedAgainProcess;
 
@@ -548,7 +543,7 @@ describe("Two paired harnesses emulating two gateways connected through event st
       values.push(callbackEntity.antiresult);
       values.push(obj.callback);
       values;
-    `, { scope: { console } });
+    `, { console });
     expect(values.slice(0, -1))
         .toEqual([12, 12, 2, 16, 18, 18, -2, -18]);
     // expect(values[values.length - 1].call({ increment: 3 }))

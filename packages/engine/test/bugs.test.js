@@ -334,6 +334,6 @@ describe("Engine bug tests", async () => {
         name: "secondPartition",
         authorityURI: "valaa-memory:"
       });
-    `, { scope: { properties }, awaitResult: (result) => result.getComposedEvent() });
+    `, { properties }, { awaitResult: (result) => result.getComposedEvent() });
   });
 });

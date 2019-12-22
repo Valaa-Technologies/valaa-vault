@@ -16,7 +16,8 @@ export function createScriptTestHarness (options: Object, ...commandBlocks: any)
 }
 
 export default class ScriptTestHarness extends RAEMTestHarness {
-  runValoscript (self: any, valoscriptBody: string, options: Object = {}) {
+  runValoscript (self: any, valoscriptBody: string,
+      extendScope: Object = {}, options: Object = {}) {
     const bodyKuery = transpileValoscriptBody(valoscriptBody, {
       verbosity: options.verbosity || 0,
       customVALK: this.ContentAPI.VALK,
@@ -25,6 +26,7 @@ export default class ScriptTestHarness extends RAEMTestHarness {
     options.discourse = this.valker.acquireFabricator("test-run-body");
     const selfMaybeRef = tryHostRef(self) || self;
     (options.scope || (options.scope = {})).this = selfMaybeRef;
+    Object.assign(options.scope, extendScope);
     const ret = this.run(selfMaybeRef, bodyKuery, options);
     if (options.discourse) {
       const result = options.discourse.releaseFabricator();

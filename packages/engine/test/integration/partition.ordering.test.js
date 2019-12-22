@@ -61,7 +61,7 @@ describe("Partition load ordering and inactive resource handling", () => {
       componentGhost.num = 10;
       componentGhost.child = new Entity({ owner: componentGhost, name: "child" });
       componentGhost;
-    `, { scope: { Prototype }, awaitResult: (result) => result.getPremiereStory() });
+    `, { Prototype }, { awaitResult: (result) => result.getPremiereStory() });
     expect(componentGhost.propertyValue("num"))
         .toEqual(10);
     expect(componentGhost.get("prototype"))

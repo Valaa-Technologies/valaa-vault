@@ -7,6 +7,7 @@ const {
   validateContextTerm, validateContextTermNS, validateParamValueText
 } = require("./_validateOps");
 const { cementVPath, extendVAKON } = require("./_cementOps");
+const { coerceAsVRId } = require("./_coerceOps");
 
 module.exports = {
   formVPath,
@@ -31,4 +32,5 @@ module.exports = {
   segmentVKeyPath,
   cementVPath,
   extendVAKON,
+  coerceAsVRId,
 };

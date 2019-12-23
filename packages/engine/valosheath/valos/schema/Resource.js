@@ -4,6 +4,7 @@ import {
   denoteValOSBuiltinWithSignature, denoteDeprecatedValOSBuiltin, denoteValOSKueryFunction,
 } from "~/raem/VALK";
 import type { VRL } from "~/raem/VRL";
+import derivedId from "~/raem/tools/derivedId";
 
 import VALEK from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
@@ -12,7 +13,7 @@ import { duplicateResource, instantiateResource }
     from "~/engine/valosheath/valos/_resourceLifetimeOps";
 import { OwnerDefaultCouplingTag } from "~/engine/valosheath/valos/enfoldSchemaSheath";
 
-import { derivedId, dumpObject, outputCollapsedError, wrapError } from "~/tools";
+import { dumpObject, outputCollapsedError, wrapError } from "~/tools";
 
 const symbols = {
   getField: Symbol("Resource.getField"),

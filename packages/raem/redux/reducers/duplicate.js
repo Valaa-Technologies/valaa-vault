@@ -1,13 +1,14 @@
 import { OrderedSet } from "immutable";
 
 import VRL, { vRef } from "~/raem/VRL";
+import derivedId from "~/raem/tools/derivedId";
 
 import Transient, { createTransient, getTransientTypeName, PrototypeOfImmaterialTag }
     from "~/raem/state/Transient";
 
 import Bard, { getActionFromPassage } from "~/raem/redux/Bard";
 
-import { derivedId, dumpify, dumpObject, invariantify, wrapError } from "~/tools";
+import { dumpify, dumpObject, invariantify, wrapError } from "~/tools";
 import {
   DuplicateBard,
   prepareCreateOrDuplicateObjectTransientAndId, recurseCreateOrDuplicate,
@@ -170,12 +171,11 @@ function _duplicateOwnlingField (bard: Bard, fieldIntro: Object, originalRef: VR
           .withNewGhostStep(bard._duplicationRootPrototypeId, bard._duplicationRootId);
       const newOwnlingRawId = newGhostPath
           ? newGhostPath.headRawId() // ghost instance id is deterministic by instantiation
-          : derivedId(originalOwnlingRawId, "_duplicationRootId", bard._duplicationRootId);
+          : derivedId(originalOwnlingRawId, "dup", bard._duplicationRootId);
       newObjectId = vRef(newOwnlingRawId, null, newGhostPath);
     }
     if (!newObjectId) {
-      newObjectId = vRef(
-          derivedId(originalOwnlingRawId, "_duplicationRootId", bard._duplicationRootId));
+      newObjectId = vRef(derivedId(originalOwnlingRawId, "dup", bard._duplicationRootId));
     }
     bard.tryGoToTransientOfRawId(originalOwnlingRawId, fieldIntro.namedType.name);
     if (bard.objectTransient) {

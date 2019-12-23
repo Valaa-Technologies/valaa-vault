@@ -1,12 +1,24 @@
 // @flow
 
 import type { RawId } from "~/raem/VRL";
+import derivedId from "~/raem/tools/derivedId";
+import { coerceAsVRId } from "~/raem/VPath";
 
 import { invariantifyString } from "~/tools/invariantify";
-import derivedId from "~/tools/id/derivedId";
 
-export function createGhostRawId (ghostPrototypeRawId: string, instanceRawId: string): string {
-  return derivedId(ghostPrototypeRawId, "instance", instanceRawId);
+export function createGhostRawId (
+    protoRawId: string, hostRawId: string, hostProtoRawId: string = ""): string {
+  if (hostRawId[0] !== "@") return derivedId(protoRawId, "instance", hostRawId);
+  let protoVRId = coerceAsVRId(protoRawId);
+  const hostProtoVRId = coerceAsVRId(hostProtoRawId);
+  const lenSansLast = Math.min(protoVRId.length, hostProtoVRId.length) - 1;
+  let lastStepSeparator;
+  for (let i = 0; (i < lenSansLast) && (protoVRId[i] === hostProtoVRId[i]); ++i) {
+    if (protoVRId[i] === "@") lastStepSeparator = i;
+  }
+  if (lastStepSeparator) protoVRId = protoVRId.slice(lastStepSeparator); // already always a vstep
+  else if (protoVRId[1] === "$") protoVRId = `@_${protoVRId.slice(1)}`; // vgrid into a ghost vstep
+  return `${hostRawId.slice(0, -2)}${protoVRId}`;
 }
 
 export type JSONGhostStep =
@@ -142,7 +154,7 @@ export default class GhostPath {
 
   withNewGhostStep (ghostHostPrototypeId: RawId, ghostHostId: RawId): GhostPath {
     return this.withNewStep(ghostHostPrototypeId, ghostHostId,
-        createGhostRawId(this.headRawId(), ghostHostId));
+        createGhostRawId(this.headRawId(), ghostHostId, ghostHostPrototypeId));
   }
 
   withNewInstanceStep (instanceRawId: RawId) {

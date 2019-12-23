@@ -1,4 +1,8 @@
+// @flow
+
 import crypto from "crypto";
+
+import { coerceAsVRId } from "~/raem/VPath";
 
 // IMPORTANT! This function must not be changed because DUPLICATED and ghost id's break.
 //
@@ -7,7 +11,15 @@ import crypto from "crypto";
 // accumulate a list of ids in the top-level command. Sub-sequent executions shall then fetch the
 // ids from there in order.
 export default function derivedId (id, derivationName, contextId = "") {
-  const hash = crypto.createHash("sha256");
-  hash.update(id + derivationName + contextId, "ascii");
-  return hash.digest("base64");
+  if (contextId[0] !== "@") {
+    const hash = crypto.createHash("sha256");
+    hash.update(id + derivationName + contextId, "ascii");
+    return hash.digest("base64");
+  }
+  return derivedVRId(coerceAsVRId(id), derivationName, contextId);
+}
+
+export function derivedVRId (vrid, derivationName, contextVRId) {
+  return `${contextVRId.slice(0, -2)}@_:${derivationName}${
+    (vrid[1] !== "$") ? vrid : `@_${vrid.slice(1)}`}`;
 }

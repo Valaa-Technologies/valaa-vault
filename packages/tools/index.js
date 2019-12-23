@@ -14,8 +14,6 @@ export { default as valosUUID } from "./id/valosUUID";
 export const contentHashFromArrayBuffer = require("./id/contentId").contentHashFromArrayBuffer;
 export const contentHashFromNativeStream = require("./id/contentId").contentHashFromNativeStream;
 
-export const derivedId = require("./id/derivedId").default;
-
 export { default as DelayedQueue } from "./DelayedQueue";
 
 export { arrayFromAny, iterableFromAny } from "./sequenceFromAny";

@@ -140,7 +140,7 @@ export function _elevateObjectId (referenceElevator: Resolver, elevationBasePath
     elevationInstancePath: GhostPath, verbosity: ?number): VRL {
   if (elevationBasePath === elevationInstancePath) return referenceElevator.objectId;
   let elevatedGhostPath: GhostPath = referenceElevator.objectId.getGhostPath();
-  let ghostHostRawId;
+  let ghostHostRawId, ghostHostPrototypeRawId;
   let newGhostRawId;
   const ownersResolver = Object.create(referenceElevator);
   let currentReferencePath = elevationBasePath;
@@ -214,9 +214,10 @@ export function _elevateObjectId (referenceElevator: Resolver, elevationBasePath
       // Phase 2: determine the instance parameters in referenceElevator.objectId/objectTransient
       currentReferencePath = instanceGhostPath;
       ghostHostRawId = currentReferencePath.headHostRawId();
+      ghostHostPrototypeRawId = currentReferencePath.headHostPrototypeRawId();
       newGhostRawId = (ownersResolver.objectId.rawId() === referenceElevator.objectId.rawId())
-          ? ghostHostRawId
-          : createGhostRawId(referenceElevator.objectId.rawId(), ghostHostRawId);
+          ? ghostHostRawId : createGhostRawId(
+              referenceElevator.objectId.rawId(), ghostHostRawId, ghostHostPrototypeRawId);
       const ghostPrototypeTransient = referenceElevator.objectTransient;
       referenceElevator.tryGoToTransientOfRawId(newGhostRawId);
       if (typeof verbosity === "number") {
@@ -224,7 +225,7 @@ export function _elevateObjectId (referenceElevator: Resolver, elevationBasePath
                 newGhostRawId === ghostHostRawId ? "instance" : "ghost", newGhostRawId,
             "\n ", "  ".repeat(verbosity + 1), "ghostHostRawId:", ghostHostRawId,
             "\n ", "  ".repeat(verbosity + 1), "ghostHostPrototypeRawId:",
-                currentReferencePath.headHostPrototypeRawId(),
+                ghostHostPrototypeRawId,
             "\n ", "  ".repeat(verbosity + 1), "transient:",
                 referenceElevator.objectTransient
                     ? referenceElevator.objectTransient.toJS() : "is immaterial ghost",
@@ -245,7 +246,6 @@ export function _elevateObjectId (referenceElevator: Resolver, elevationBasePath
             .withNewStep(ownersResolver.objectId.rawId(), ghostHostRawId, newGhostRawId);
         const ghostTransient = createImmaterialTransient(
             newGhostRawId, elevatedGhostPath, mostMaterializedTransientForImmaterialGhost);
-        const ghostHostPrototypeRawId = currentReferencePath.headHostPrototypeRawId();
         // Search for smallest possible materialized owner of the ghost to satisfy phase 1.
         // We temporarily use referenceElevator.objectId/Transient to iterate the prototype owners,
         // starting from the innermost known materialized prototype. We stop once we find
@@ -258,7 +258,7 @@ export function _elevateObjectId (referenceElevator: Resolver, elevationBasePath
             break;
           }
           const ghostOwnerCandidateId = createGhostRawId(
-              referenceElevator.objectId.rawId(), ghostHostRawId);
+              referenceElevator.objectId.rawId(), ghostHostRawId, ghostHostPrototypeRawId);
           if (ownersResolver.tryGoToTransientOfRawId(ghostOwnerCandidateId, "Resource")) {
             break;
           }

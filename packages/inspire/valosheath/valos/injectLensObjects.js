@@ -4,6 +4,7 @@ import React from "react";
 
 import { denoteValOSBuiltinWithSignature } from "~/raem/VALK";
 import { naiveURI } from "~/raem/ValaaURI";
+import derivedId from "~/raem/tools/derivedId";
 
 import type { Connection } from "~/sourcerer";
 
@@ -13,9 +14,7 @@ import VALEK, { dumpObject } from "~/engine/VALEK";
 
 import UIComponent from "~/inspire/ui/UIComponent";
 
-import {
-  arrayFromAny, derivedId, dumpify, messageFromError, thenChainEagerly, wrapError,
-} from "~/tools";
+import { arrayFromAny, dumpify, messageFromError, thenChainEagerly, wrapError } from "~/tools";
 
 type LensParameters = {
   type: string,
@@ -673,7 +672,9 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
             debugId(prototype)}`);
         }
       }
-      const frameRawId = derivedId(ownerPart, `-${lensName}-${focusPart}`, prototypePart);
+      let frameRawId = derivedId(
+          prototypePart, `frames-${encodeURIComponent(lensName)}`, ownerPart);
+      if (focusPart) frameRawId = derivedId(focusPart, "foci", frameRawId);
       // "postLoadProperties" and "options" are optional arguments
       const engine = component.context.engine;
       const vResource = engine.tryVrapper(frameRawId, { optional: true });

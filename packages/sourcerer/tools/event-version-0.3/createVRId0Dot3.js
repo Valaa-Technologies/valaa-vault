@@ -1,6 +1,6 @@
 // @flow
 
-import { validateVRId } from "~/raem/VPath";
+import { coerceAsVRId } from "~/raem/VPath";
 
 import hashV240 from "~/sourcerer/tools/hashV240";
 
@@ -29,21 +29,6 @@ export function createChronicleRootVRId0Dot3 (commandId: string, authorityURI: s
   return `@$~chr:${hashV240(`${commandId} ${authorityURI} chronicle`)}@@`;
 }
 
-
-const _uuidv4Regex = /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/;
-
 export function upgradeVRIdTo0Dot3 (version0Dot2RawId) {
-  if (version0Dot2RawId[0] === "@") return validateVRId(version0Dot2RawId);
-  let gridType;
-  let [gridValue, subPath] = version0Dot2RawId.split("/.:");
-  subPath = subPath ? `.:${subPath}` : "";
-  if ((gridValue.length === 36) && gridValue.match(_uuidv4Regex)) {
-    gridType = "u4";
-  } else if (gridValue.length === 40) {
-    gridType = "cih";
-  } else {
-    gridType = "raw";
-    gridValue = encodeURIComponent(gridValue);
-  }
-  return `@$~${gridType}:${gridValue}@${subPath}@`;
+  return coerceAsVRId(version0Dot2RawId);
 }

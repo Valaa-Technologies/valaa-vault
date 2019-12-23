@@ -4,6 +4,7 @@ import preset from "jss-preset-default";
 import jss, { SheetsManager } from "jss";
 
 import { naiveURI } from "~/raem/ValaaURI";
+import derivedId from "~/raem/tools/derivedId";
 
 import Vrapper, { getImplicitMediaInterpretation } from "~/engine/Vrapper";
 
@@ -12,7 +13,9 @@ import { unthunkRepeat } from "~/inspire/ui/thunk";
 import Valoscope from "~/inspire/ui/Valoscope";
 import { VS } from "~/engine/VALEK";
 
-import { derivedId, dumpObject, invariantifyString, traverse, wrapError, valosHash } from "~/tools";
+import {
+  dumpObject, invariantifyString, traverse, wrapError, outputError, valosHash,
+} from "~/tools";
 
 jss.setup(preset());
 
@@ -43,6 +46,9 @@ export default class ReactRoot extends React.Component {
       .then(rootContext => {
         this._rootContext = rootContext;
         this.forceUpdate();
+      }, failure => {
+        outputError(failure, "Exception caught during ReactRoot._createRootContext");
+        throw failure;
       });
     }
   }
@@ -146,8 +152,9 @@ export default class ReactRoot extends React.Component {
   }
 
   async _obtainUIRootFrame (authorityURI: string, vViewFocus: Vrapper, viewName: string) {
-    const localInstanceRawId = derivedId(vViewFocus.getRawId(), "LOCAL-UIROOT-PARTITION", viewName);
-    const partitionURI = naiveURI.createPartitionURI(authorityURI, localInstanceRawId);
+    const localInstanceRawId = derivedId(
+        vViewFocus.getRawId(), "ui-roots", `@$~raw:${encodeURIComponent(viewName)}@@`);
+    const partitionURI = naiveURI.createChronicleURI(authorityURI, localInstanceRawId);
     await vViewFocus.engine.discourse
         .acquireConnection(partitionURI)
         .asActiveConnection();

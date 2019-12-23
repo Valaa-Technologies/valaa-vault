@@ -1,13 +1,16 @@
 // @flow
 
+import { vRef } from "~/raem/VRL";
+import { denoteDeprecatedValOSBuiltin, denoteValOSBuiltinWithSignature } from "~/raem/VALK";
+
+
 import { valoscriptInterfacePrototype, ValoscriptPrimitiveKind } from "~/script";
 import { toVAKON } from "~/script/VALSK";
+import VALEK from "~/engine/VALEK";
 
 import type { Discourse } from "~/sourcerer/api/types";
 
 import * as tools from "~/tools";
-
-import { denoteDeprecatedValOSBuiltin, denoteValOSBuiltinWithSignature } from "~/raem/VALK";
 
 /* eslint-disable prefer-arrow-callback */
 
@@ -18,6 +21,31 @@ export default function enfoldGatewaySheath (valos: Object, rootDiscourse: Disco
     Primitive: ValoscriptPrimitiveKind,
     Lens: null,
     tools,
+  });
+
+  valos.vrefer = denoteValOSBuiltinWithSignature(
+      `returns a resource referred to by the given vref parameters.`
+  )(function vrefer (authorityURI_, chronicleVRId_, resourceVRId_) {
+    let resourceVRId, chronicleURI;
+    if (resourceVRId_ !== undefined) {
+      resourceVRId = resourceVRId_;
+      chronicleURI = `${authorityURI_}?id=${chronicleVRId_}`;
+    } else if (chronicleVRId_ !== undefined) {
+      resourceVRId = chronicleVRId_;
+      chronicleURI = authorityURI_;
+    } else {
+      ([chronicleURI, resourceVRId] = authorityURI_.split("#"));
+      if (resourceVRId === undefined) {
+        throw new Error("vref fragment resource vrid part missing");
+      }
+    }
+    resourceVRId = resourceVRId.split(";")[0];
+    let ret = this.__callerValker__.run(null, VALEK.fromObject(resourceVRId).nullable());
+    if (!ret) {
+      ret = vRef(resourceVRId, undefined, undefined, chronicleURI);
+      ret.setInactive();
+    }
+    return ret;
   });
 
   valos.Discourse = Object.assign(Object.create(valoscriptInterfacePrototype), {

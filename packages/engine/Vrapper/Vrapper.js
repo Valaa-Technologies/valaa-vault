@@ -150,24 +150,24 @@ export default class Vrapper extends Cog {
     this.vrapperIndex = Vrapper.vrapperIndex;
     this[HostRef] = id;
     this._setTypeName(typeName);
-    if (typeName === "Blob" || !this.engine) {
+    if (typeName === "Blob" || !this.engine || !isResourceType(this.getTypeIntro())) {
       this._phase = NONRESOURCE;
-    } else {
-      this._phase = isResourceType(this.getTypeIntro()) ? INACTIVE : NONRESOURCE;
-      this.engine.addCog(this);
-      if (!id.isGhost() && !id.getPartitionURI()) {
-        if (!id.isInactive()) {
-          throw new Error(`Cannot create an active non-ghost Vrapper without id.partitionURI: <${
-              id}>`);
-        }
-        this.logEvent(1, () => [
-          "non-ghost Vrapper encountered without a partitionURI and which thus cannot be",
-          "activated directly. This is most likely ghost prototype path root resource which",
-          "needs to have all intervening partitions activated first",
-        ]);
-      } else if (immediateRefresh) {
-        this.refreshPhase(...immediateRefresh);
+      return;
+    }
+    this._phase = INACTIVE;
+    this.engine.addCog(this);
+    if (!id.isGhost() && !id.getPartitionURI()) {
+      if (!id.isInactive()) {
+        throw new Error(
+            `Cannot create an active non-ghost Vrapper without id.partitionURI: <${id}>`);
       }
+      this.logEvent(1, () => [
+        "non-ghost Vrapper encountered without a partitionURI and which thus cannot be",
+        "activated directly. This is most likely ghost prototype path root resource which",
+        "needs to have all intervening partitions activated first",
+      ]);
+    } else if (immediateRefresh) {
+      this.refreshPhase(...immediateRefresh);
     }
   }
 
@@ -255,11 +255,15 @@ export default class Vrapper extends Cog {
     this._activationProcess = (async () => {
       try {
         while (blocker) {
-          if (isNonActivateablePhase(blocker.getPhase())) {
-            throw new Error(`Cannot activate ${blocker.debugId()
-                } because it is ${blocker.getPhase()}`);
-          }
-          if (!blocker._connection || !blocker._connection.isActive()) {
+          const blockerPhase = blocker.getPhase();
+          if (isNonActivateablePhase(blockerPhase)) {
+            if ((blockerPhase === NONCREATED) && (options && options.allowNonCreated)) {
+              await blocker.untilCreated();
+            } else {
+              throw new Error(
+                  `Cannot activate ${blocker.debugId()} because it is ${blocker.getPhase()}`);
+            }
+          } else if (!blocker._connection || !blocker._connection.isActive()) {
             await (operationInfo.pendingConnection = blocker.getConnection())
                 .asActiveConnection();
           } else if (blocker === this) {
@@ -284,6 +288,16 @@ export default class Vrapper extends Cog {
     })();
     this._activationProcess.operationInfo = operationInfo;
     return this._activationProcess;
+  }
+
+  untilCreated () {
+    return this._untilCreated || (this._untilCreated = new Promise(resolve => {
+      this._resolveCreated = () => {
+        this._resolveCreated = null;
+        this._untilCreated = null;
+        resolve();
+      };
+    }));
   }
 
   /**
@@ -346,8 +360,8 @@ export default class Vrapper extends Cog {
     const connection = this.tryConnection();
     const newTypeName = transient.get("typeName");
     if (!connection || !connection.isActive()) {
-      if (this[HostRef].isInactive()) return this;
-    } else if (newTypeName && isInactiveTypeName(newTypeName)) {
+      if (id.isInactive()) return this;
+    } else if (!newTypeName ? id.isInactive() : isInactiveTypeName(newTypeName)) {
       this._phase = NONCREATED;
       return this;
     }
@@ -378,7 +392,7 @@ export default class Vrapper extends Cog {
           this.warnEvent("Activating id explicitly! Should have been activated by reducers");
           ref.setInactive(false);
         }
-        this._setTypeName(!isInactiveTypeName(newTypeName)
+        this._setTypeName((newTypeName && !isInactiveTypeName(newTypeName))
             ? newTypeName
             : resolver.tryGoToTransient(
               ref, "TransientFields", true, false, true, "typeName").get("typeName"));
@@ -390,16 +404,17 @@ export default class Vrapper extends Cog {
       this._refreshDebugId(transient, { state: resolver.state });
       if (this.hasInterface("Scope")) this._setUpScopeFeatures(resolver);
     } catch (error) {
-      outputError(this.wrapErrorEvent(error,
-              new Error("_postActivate()"),
-              "\n\tid:", ...dumpObject(this[HostRef]),
-              "\n\tid.getPartitionURI:", ...dumpObject(this[HostRef].getPartitionURI()),
-              "\n\ttransient:", ...dumpObject(transient.toJS()),
-              "\n\tconnection:", ...dumpObject(this._connection),
-              "\n\tthis:", ...dumpObject(this),
-              "\n\tresolver.state:", ...dumpObject(resolver.state.toJS()),
-              "\n\tengine.discourse.state:", ...dumpObject(this.engine.discourse.getState().toJS())),
-          "Exception caught and swallowed in Vrapper._postActivate");
+      const wrappedError = this.wrapErrorEvent(error,
+          new Error("_postActivate()"),
+          "\n\tid:", ...dumpObject(this[HostRef]),
+          "\n\tid.getPartitionURI:", ...dumpObject(this[HostRef].getPartitionURI()),
+          "\n\ttransient:", ...dumpObject(transient.toJS()),
+          "\n\tconnection:", ...dumpObject(this._connection),
+          "\n\tthis:", ...dumpObject(this),
+          "\n\tresolver.state:", ...dumpObject(resolver.state.toJS()),
+          "\n\tengine.discourse.state:", ...dumpObject(this.engine.discourse.getState().toJS()));
+      // throw wrappedError;
+      outputError(wrappedError, "Exception caught and swallowed in Vrapper._postActivate");
     }
   }
 
@@ -1725,6 +1740,7 @@ export default class Vrapper extends Cog {
 
   onEventCREATED (passage: Passage, story: Story) {
     this._updateTransient(story.state);
+    if (this._resolveCreated) this._resolveCreated();
     if (this._fieldSubscriptions) {
       const transient = this.getTransient({ typeName: passage.typeName, state: story.state });
       for (const key of transient.keys()) {

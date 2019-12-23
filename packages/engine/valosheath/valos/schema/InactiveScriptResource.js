@@ -1,10 +1,7 @@
 // @flow
 
 export default {
-  schemaTypeName: "TransientFields",
-  namespaces: {
-    V: "@valos"
-  },
+  schemaTypeName: "InactiveScriptResource",
   symbols: {},
   typeFields: {},
   prototypeFields: {},

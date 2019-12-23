@@ -35,9 +35,6 @@ const symbols = {
 
 export default {
   isGlobal: true,
-  namespaces: {
-    V: "@valos"
-  },
 
   symbols,
   typeFields: {

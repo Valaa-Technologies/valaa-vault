@@ -95,14 +95,17 @@ export const naiveURI = {
   createPartitionURI: function createNaivePartitionURI (
       baseString: string, partitionRawId: ?string): ValaaURI {
     if (!baseString || (typeof baseString !== "string")) {
-      invariantifyString(baseString, "naiveURI.createPartitionURI.baseString", { allowEmpty: false });
+      invariantifyString(baseString, "naiveURI.createPartitionURI.baseString",
+          { allowEmpty: false });
     }
     const baseParts = baseString.match(genericURI.regex);
     if (!baseParts) {
-      throw new Error(`naiveURI.createPartitionURI.baseString is not a well-formed URI: <${baseString}>`);
+      throw new Error(
+          `naiveURI.createPartitionURI.baseString is not a well-formed URI: <${baseString}>`);
     }
     if (!baseParts[genericURI.schemePart]) {
-      throw new Error(`naiveURI.createPartitionURI.baseString is missing scheme part: <${baseString}>`);
+      throw new Error(
+          `naiveURI.createPartitionURI.baseString is missing scheme part: <${baseString}>`);
     }
     if (!partitionRawId) {
       if (partitionRawId === undefined) return baseString;
@@ -128,8 +131,13 @@ export const naiveURI = {
         }${!baseParts[genericURI.paramsPart] ? "" : `&${baseParts[genericURI.paramsPart]}`}`;
   },
 
-  createChronicleURI: function createNaiveChronicleURI (baseString, chronicleId) {
-    return naiveURI.createPartitionURI(baseString, chronicleId);
+  createChronicleURI: function createNaiveChronicleURI (authorityURI: string, chronicleId: string) {
+    if ((chronicleId === undefined)
+        || (chronicleId[0] !== "@") || (chronicleId.slice(-2) !== "@@")) {
+      throw new Error(
+          `createChronicleURI.chronicleId must be a valid VPath, got: "${chronicleId}"`);
+    }
+    return naiveURI.createPartitionURI(authorityURI, chronicleId);
   },
 
   // FIXME(iridian, 2019-02): naive partition URI's must be replaced with

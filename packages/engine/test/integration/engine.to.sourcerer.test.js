@@ -568,6 +568,68 @@ describe("Two paired harnesses emulating two gateways connected through event st
     expect(await harness.runValoscript(vRef(testRootId), `this.obj.callbackEntity.result`))
         .toEqual(20);
   });
+
+  it("activates an inactive vref properly", async () => {
+    harness = await createEngineOracleHarness({ verbosity: 0, oracle: {
+      testAuthorityConfig: { isRemoteAuthority: true, isLocallyPersisted: true },
+    } });
+    const pairness = await createEngineOracleHarness({ verbosity: 0, pairedHarness: harness });
+
+    const newVRef = await harness.runValoscript(vRef(testRootId), `
+      (new Entity({ owner: this, subPath: "@_:subEntity@@", properties: {
+        thing: "the", over: "base",
+      } })).$V.vref;
+    `);
+    expect(newVRef)
+        .toEqual(`valaa-test:?id=${testRootId}#@$~raw:test_chronicle@_:subEntity@@`);
+
+    const { target, instance, isActive, targetVRef } = await pairness.runValoscript(
+        vRef(testRootId), `
+      const newChronicle = new Entity({ authorityURI: "valaa-test:" });
+      const relation = new Relation({ owner: newChronicle, target: valos.vrefer(newVRef) });
+      const instance = new Entity({
+        owner: newChronicle, instancePrototype: relation.$V.target,
+        // properties: { over: "ridden" },
+      });
+      const target = relation.$V.target;
+      ({ target, instance, isActive: valos.Resource.isActive(target), targetVRef: target.$V.vref });
+    `, { newVRef });
+    expect(isActive)
+        .toEqual(false);
+    expect(targetVRef)
+        .toEqual(newVRef);
+    expect(target.getPhase())
+        .toEqual("NonCreated");
+    expect(instance.getPhase())
+        .toEqual("Activating");
+
+    await pairness.receiveTruthsFrom(harness);
+
+    expect(target.getPhase())
+        .toEqual("Active");
+
+    const { isNowActive, thing, over, ithing, itprop } = await pairness.runValoscript(target, `({
+      isNowActive: valos.Resource.isActive(this),
+      thing: this.thing,
+      over: instance.over,
+      ithing: instance.thing,
+      itprop: instance.$V.properties[0],
+    });
+    `, { instance });
+    const instanceId = instance.getRawId();
+    expect(isNowActive)
+        .toEqual(true);
+    expect(thing)
+        .toEqual("the");
+    expect(over)
+        .toEqual("base");
+    expect(ithing)
+        .toEqual("the");
+    expect(target.getPhase())
+        .toEqual("Active");
+    expect(itprop.getRawId())
+        .toEqual(`${instanceId.slice(0, -2)}@.:thing@@`);
+  });
 });
 
 describe("Regressions", () => {

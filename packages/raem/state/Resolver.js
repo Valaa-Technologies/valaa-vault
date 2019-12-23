@@ -195,7 +195,7 @@ export default class Resolver extends FabricEventTarget {
       }
       this.warnEvent(`Cannot bind to non-existent non-ghost resource <${
             objectId}> inside active partition <${partitionURI}>`,
-          "\n\tlikely destroyed, marking reference as inactive",
+          "\n\teither destroyed or non-created; marking reference as inactive",
           "\n\tduring passage:", ...dumpObject(this.passage));
       // TODO(iridian, 2019-01): Improve destroyed resource handling
       objectId.setInactive();

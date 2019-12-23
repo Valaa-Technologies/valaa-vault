@@ -194,7 +194,7 @@ export default class FalseProphetDiscourse extends Discourse {
       if (subPath) { // case a -> 9, e -> d
         if (Array.isArray(subPath)) subPath = formVPath(...subPath);
         else validateVerbs(subPath);
-        if (subPath[1] !== "$") {
+        if (subPath[1] === "$") {
           throw new Error("explicit subPath must not have a GRId as first step");
         }
       } else if (!explicitRawId) {
@@ -236,8 +236,7 @@ export default class FalseProphetDiscourse extends Discourse {
         return (targetAction.id = vRef(explicitRawId, undefined, undefined,
             naiveURI.createPartitionURI(chronicleURI)));
       }
-      targetAction.id = vRef(resourceVRId, undefined, undefined,
-          naiveURI.createChronicleURI(chronicleURI));
+      targetAction.id = vRef(resourceVRId, undefined, undefined, chronicleURI);
       /*
       console.log("assignNewVRId", tryAspect(root, "command").id, chronicleURI, explicitRawId,
           "\n\tresourceRawId:", resourceRawId,
@@ -251,6 +250,7 @@ export default class FalseProphetDiscourse extends Discourse {
           "\n\ttargetAction:", ...dumpObject(targetAction),
           "\n\tchronicleURI:", ...dumpObject(chronicleURI),
           "\n\texplicitRawId:", ...dumpObject(explicitRawId),
+          "\n\texplicitSubPath:", ...dumpObject(explicitSubPath),
       );
     }
   }

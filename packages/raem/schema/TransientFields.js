@@ -14,6 +14,7 @@ import ghostHostResolver from "~/raem/tools/graphql/ghostHostResolver";
 import partitionResolver, { partitionURIResolver }
     from "~/raem/tools/graphql/partitionResolver";
 import { typeNameResolver } from "~/raem/tools/graphql/typeResolver";
+import vrefResolver from "~/raem/tools/graphql/vrefResolver";
 
 import { toOne, toMany, toOwner, toManyOwnlings, unspecifiedSingular, unspecifiedPlural }
     from "~/raem/tools/graphql/coupling";
@@ -79,6 +80,12 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
               ""} This root resource of this chronicle is the innermost owning resource with {
               ""} Partition.authorityURI set.`,
           partitionURIResolver,
+          { affiliatedType: "TransientFields" },
+      ),
+
+      ...generatedField("vref", new GraphQLNonNull(GraphQLString),
+          `ValOS reference URI to this ${objectDescription}`,
+          vrefResolver,
           { affiliatedType: "TransientFields" },
       ),
 

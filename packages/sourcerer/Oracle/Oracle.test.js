@@ -2,7 +2,7 @@ import { created, transacted, fieldsSet } from "~/raem/events/index";
 import { vRef } from "~/raem/VRL";
 import { naiveURI } from "~/raem/ValaaURI";
 
-import { createSourcererOracleHarness } from "~/sourcerer/test/SourcererTestHarness";
+import { createSourcererOracleHarness, testRootId } from "~/sourcerer/test/SourcererTestHarness";
 
 const testAuthorityURI = "valaa-test:";
 // const sharedURI = "valos-shared-content";
@@ -16,13 +16,16 @@ describe("Oracle", () => {
     expect(harness.testConnection).toBeTruthy();
     expect(harness.testConnection.isConnected())
         .toEqual(true);
-    expect(harness.run(vRef("test_partition"), "name"))
+    expect(harness.run(vRef(testRootId), "name"))
         .toEqual("Automatic Test Partition Root");
   });
 
   const freezePartitionEvent = transacted({
     actions: [
-      fieldsSet({ id: vRef("test_partition"), typeName: "Entity", sets: { isFrozen: true } })],
+      fieldsSet({
+        id: vRef(testRootId), typeName: "Entity",
+        sets: { isFrozen: true },
+      })],
   });
 
   const lateCommand = created({
@@ -30,13 +33,13 @@ describe("Oracle", () => {
     typeName: "Entity",
     initialState: {
       name: "A late entity",
-      owner: vRef("test_partition", "unnamedOwnlings"),
+      owner: vRef(testRootId, "unnamedOwnlings"),
     }
   });
 
   it("Rejects commands chronicled after a freeze command", async () => {
     harness = await createSourcererOracleHarness({});
-    const partitionURI = naiveURI.createPartitionURI(testAuthorityURI, "test_partition");
+    const partitionURI = naiveURI.createChronicleURI(testAuthorityURI, testRootId);
     await harness.sourcerer
         .acquireConnection(partitionURI).asActiveConnection();
 
@@ -47,6 +50,6 @@ describe("Oracle", () => {
 
     // Attempt to run an action post-freeze and expect complaints
     expect(() => harness.chronicleEvent(lateCommand))
-        .toThrow(/Cannot modify frozen.*test_partition/);
+        .toThrow(/Cannot modify frozen.*@\$~raw:test_chronicle@@/);
   });
 });

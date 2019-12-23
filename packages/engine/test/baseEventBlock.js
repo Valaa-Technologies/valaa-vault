@@ -3,12 +3,13 @@
 import { created } from "~/raem/events";
 import { vRef } from "~/raem/VRL";
 import VALEK, { literal, pointer, kueryExpression } from "~/engine/VALEK";
+import { testRootId } from "~/sourcerer/test/SourcererTestHarness";
 
 export default [{
   type: "TRANSACTED",
   actions: [
     created({ id: ["test"], typeName: "Entity", initialState: {
-      owner: ["test_partition"],
+      owner: [testRootId],
       name: "testName",
     }, }),
     created({ id: ["ownling_prototype"], typeName: "Entity", initialState: {
@@ -50,7 +51,7 @@ export default [{
     }, }),
     created({ id: ["test+1"], typeName: "Entity", initialState: {
       name: "testInstance",
-      owner: ["test_partition"],
+      owner: [testRootId],
       instancePrototype: ["test"],
     }, }),
   ]

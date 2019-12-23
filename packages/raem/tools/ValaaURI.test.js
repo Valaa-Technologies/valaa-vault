@@ -10,9 +10,9 @@ describe("Basic operations", () => {
 
   it("roundtrips non-trivial uri 'foo://bar.com/?id=baz'", () => {
     const sourceURI = "foo://bar.com/";
-    const roundtripURI = naiveURI.createPartitionURI(sourceURI, "baz");
+    const roundtripURI = naiveURI.createChronicleURI(sourceURI, "@$~raw:baz@@");
     expect(String(roundtripURI))
-        .toEqual(`${sourceURI}?id=baz`);
+        .toEqual(`${sourceURI}?id=@$~raw:baz@@`);
 
     const authorityURIString = naiveURI.getAuthorityURI(roundtripURI);
     expect(String(authorityURIString))
@@ -21,9 +21,9 @@ describe("Basic operations", () => {
 
   it("adds '/' to path part when host uri 'foo://bar.com' is used as authority URI base", () => {
     const sourceURI = "foo://bar.com";
-    const roundtripURI = naiveURI.createPartitionURI(sourceURI, "baz");
+    const roundtripURI = naiveURI.createChronicleURI(sourceURI, "@$~raw:baz@@");
     expect(String(roundtripURI))
-        .toEqual(`${sourceURI}/?id=baz`);
+        .toEqual(`${sourceURI}/?id=@$~raw:baz@@`);
 
     const authorityURIString = naiveURI.getAuthorityURI(roundtripURI);
     expect(String(authorityURIString))
@@ -32,9 +32,9 @@ describe("Basic operations", () => {
 
   it("doesn't add '/' to path part for pathed authority URI 'foo://bar.com/xyz'", () => {
     const sourceURI = "foo://bar.com/xyz";
-    const roundtripURI = naiveURI.createPartitionURI(sourceURI, "baz");
+    const roundtripURI = naiveURI.createChronicleURI(sourceURI, "@$~raw:baz@@");
     expect(String(roundtripURI))
-        .toEqual(`${sourceURI}?id=baz`);
+        .toEqual(`${sourceURI}?id=@$~raw:baz@@`);
 
     const authorityURIString = naiveURI.getAuthorityURI(roundtripURI);
     expect(String(authorityURIString))

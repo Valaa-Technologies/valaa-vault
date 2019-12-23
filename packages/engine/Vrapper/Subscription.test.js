@@ -5,7 +5,7 @@ import { created } from "~/raem/events";
 import VALEK, { Kuery, pointer, literal } from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
 
-import { createEngineTestHarness } from "~/engine/test/EngineTestHarness";
+import { createEngineTestHarness, testRootId } from "~/engine/test/EngineTestHarness";
 
 function idOf (candidate: any) {
   if ((candidate === null) || (candidate === undefined)) return undefined;
@@ -177,7 +177,7 @@ describe("Subscription", () => {
     it("updates on ghost-of-ghost-of-thing property when middle ghost property is modified", () => {
       setUpHarnessAndCallback({ verbosity: 0, claimBaseBlock: true }, [
         created({ id: ["test+1+1"], typeName: "Entity", initialState: {
-          owner: ["test_partition"], instancePrototype: ["test+1"],
+          owner: [testRootId], instancePrototype: ["test+1"],
         }, }),
       ]);
       const creatori1 = entities().creator.getGhostIn(entities()["test+1"]);

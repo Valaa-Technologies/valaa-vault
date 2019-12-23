@@ -9,7 +9,7 @@ import { created, transacted, fieldsSet } from "~/raem/events/index";
 import VALEK from "~/engine/VALEK";
 // import Vrapper from "~/engine/Vrapper";
 
-import EngineTestHarness, { createEngineOracleHarness }
+import EngineTestHarness, { testRootId, createEngineOracleHarness }
     from "~/engine/test/EngineTestHarness";
 
 function vCrossRef (rawId, partitionRawId = rawId) {
@@ -26,15 +26,17 @@ afterEach(() => {
 });
 const entities = () => harness.createds.Entity;
 
+const bTestRootId = "@$~raw:b_test_chronicle@@";
+
 describe("Partition freezing", () => {
   const transactionA = Object.freeze({
     type: "TRANSACTED",
     actions: [
-      created({ id: vCrossRef("test_entity", "test_partition"), typeName: "Entity", initialState: {
+      created({ id: vCrossRef("test_entity", testRootId), typeName: "Entity", initialState: {
         name: "Test Entity",
-        owner: vRef("test_partition", "unnamedOwnlings"),
+        owner: vRef(testRootId, "unnamedOwnlings"),
       }, }),
-      created({ id: vCrossRef("test_entity.prop", "test_partition"), typeName: "Property",
+      created({ id: vCrossRef("test_entity.prop", testRootId), typeName: "Property",
         initialState: {
           name: "prop",
           owner: vRef("test_entity", "properties"),
@@ -45,9 +47,9 @@ describe("Partition freezing", () => {
   });
 
   const lateEntityEvent = created({
-    id: vCrossRef("late_entity", "test_partition"), typeName: "Entity", initialState: {
+    id: vCrossRef("late_entity", testRootId), typeName: "Entity", initialState: {
       name: "Late Entity",
-      owner: vRef("test_partition", "unnamedOwnlings"),
+      owner: vRef(testRootId, "unnamedOwnlings"),
     },
   });
 
@@ -57,17 +59,17 @@ describe("Partition freezing", () => {
 
   it("allows freezing a partition", async () => {
     harness = await createEngineOracleHarness({ claimBaseBlock: false }, [transactionA]);
-    expect(entities().test_partition.get("isFrozen")).toBeFalsy();
-    await harness.chronicleEvent(freezeEventFor("test_partition")).getPremiereStory();
-    expect(entities().test_partition.get("isFrozen")).toBeTruthy();
+    expect(entities()[testRootId].get("isFrozen")).toBeFalsy();
+    await harness.chronicleEvent(freezeEventFor(testRootId)).getPremiereStory();
+    expect(entities()[testRootId].get("isFrozen")).toBeTruthy();
     expect(harness.testConnection.isFrozenConnection()).toBeTruthy();
   });
 
   it("prevents adding contents to a frozen partition", async () => {
     harness = await createEngineOracleHarness({ claimBaseBlock: false }, [transactionA]);
-    await harness.chronicleEvent(freezeEventFor("test_partition")).getPremiereStory();
+    await harness.chronicleEvent(freezeEventFor(testRootId)).getPremiereStory();
     expect(() => harness.chronicleEvent(lateEntityEvent))
-        .toThrow(/Cannot modify frozen.*test_partition/);
+        .toThrow(/Cannot modify frozen.*@\$~raw:test_chronicle@@/);
     expect(entities().late_entity).toBeFalsy();
   });
 
@@ -96,18 +98,18 @@ describe("Partition freezing", () => {
   const transactionB = {
     type: "TRANSACTED",
     actions: [
-      created({ id: vCrossRef("test_partition_b", "test_partition_b"), typeName: "Entity",
+      created({ id: vCrossRef(bTestRootId, bTestRootId), typeName: "Entity",
         initialState: {
           name: "Test Partition B",
           authorityURI: "valaa-test:",
         }, }),
-      created({ id: vCrossRef("test_entity_b", "test_partition_b"), typeName: "Entity",
+      created({ id: vCrossRef("test_entity_b", bTestRootId), typeName: "Entity",
         initialState: {
           name: "Test Entity B",
-          owner: vRef("test_partition_b", "unnamedOwnlings"),
+          owner: vRef(bTestRootId, "unnamedOwnlings"),
         },
       }),
-      created({ id: vCrossRef("test_entity_b.prop_b", "test_partition_b"), typeName: "Property",
+      created({ id: vCrossRef("test_entity_b.prop_b", bTestRootId), typeName: "Property",
         initialState: {
           name: "prop_b",
           owner: vRef("test_entity_b", "properties"),
@@ -118,19 +120,19 @@ describe("Partition freezing", () => {
   };
 
   const lateEntityEventB = created({
-    id: vCrossRef("late_entity_b", "test_partition_b"), typeName: "Entity", initialState: {
+    id: vCrossRef("late_entity_b", bTestRootId), typeName: "Entity", initialState: {
       name: "Another Late Entity",
-      owner: vRef("test_partition_b", "unnamedOwnlings"),
+      owner: vRef(bTestRootId, "unnamedOwnlings"),
     },
   });
 
   it("doesn't prevent the user from editing non-frozen partitions", async () => {
     harness = await createEngineOracleHarness({
-      verbosity: 0, claimBaseBlock: false, acquirePartitions: ["test_partition_b"],
+      verbosity: 0, claimBaseBlock: false, acquirePartitions: [bTestRootId],
     }, [transactionA, transactionB]);
-    await harness.chronicleEvent(freezeEventFor("test_partition")).getPremiereStory();
+    await harness.chronicleEvent(freezeEventFor(testRootId)).getPremiereStory();
     expect(() => harness.chronicleEvent(lateEntityEvent))
-        .toThrow(/Cannot modify frozen.*test_partition/);
+        .toThrow(/Cannot modify frozen.*@\$~raw:test_chronicle@@/);
     expect(entities().late_entity).toBeFalsy();
     await harness.chronicleEvent(lateEntityEventB).getPremiereStory();
     expect(entities().late_entity_b).toBeTruthy();

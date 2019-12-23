@@ -2,15 +2,12 @@
 
 import { created } from "~/raem/events/index";
 import { vRef } from "~/raem/VRL";
-import { naiveURI } from "~/raem/ValaaURI";
 
 import {
+  testRootId, testChronicleURI,
   createFalseProphet, createSourcererOracleHarness, createTestMockSourcerer,
   createdTestPartitionEntity, MockFollower,
 } from "~/sourcerer/test/SourcererTestHarness";
-
-const testAuthorityURI = "valaa-test:";
-const partitionURI = naiveURI.createPartitionURI(testAuthorityURI, "test_partition");
 
 let harness = null;
 afterEach(async () => {
@@ -21,17 +18,17 @@ const basicCommands = [
   created({
     id: ["Entity-A"],
     typeName: "Entity",
-    initialState: { name: "Entity A", owner: vRef("test_partition", "unnamedOwnlings") },
+    initialState: { name: "Entity A", owner: vRef(testRootId, "unnamedOwnlings") },
   }),
   created({
     id: ["Entity-B"],
     typeName: "Entity",
-    initialState: { name: "Entity B", owner: vRef("test_partition", "unnamedOwnlings") },
+    initialState: { name: "Entity B", owner: vRef(testRootId, "unnamedOwnlings") },
   }),
   created({
     id: ["Entity-C"],
     typeName: "Entity",
-    initialState: { name: "Entity C", owner: vRef("test_partition", "unnamedOwnlings") },
+    initialState: { name: "Entity C", owner: vRef(testRootId, "unnamedOwnlings") },
   }),
 ];
 
@@ -40,7 +37,7 @@ describe("FalseProphet", () => {
     harness = await createSourcererOracleHarness({});
 
     const connection = await harness.sourcerer
-        .acquireConnection(partitionURI).asActiveConnection();
+        .acquireConnection(testChronicleURI).asActiveConnection();
     const scribeConnection = connection.getUpstreamConnection();
 
     let oldCommandId;
@@ -64,7 +61,7 @@ describe("FalseProphet", () => {
       verbosity: 0, onCommandCountUpdate,
       upstream: createTestMockSourcerer({ isLocallyPersisted: false, isRemoteAuthority: true }),
     });
-    let connection = falseProphet.acquireConnection(partitionURI);
+    let connection = falseProphet.acquireConnection(testChronicleURI);
     connection.getUpstreamConnection().addNarrateResults({ eventIdBegin: 0 }, []);
     falseProphet.clockEvent(2, () => ["test.asActiveConnection"]);
     connection = await connection.asActiveConnection();

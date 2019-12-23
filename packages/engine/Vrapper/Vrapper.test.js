@@ -8,13 +8,13 @@ import { createGhostRawId } from "~/raem/state/GhostPath";
 import VALEK from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
 
-import { createEngineTestHarness } from "~/engine/test/EngineTestHarness";
+import { createEngineTestHarness, testRootId } from "~/engine/test/EngineTestHarness";
 
 const transactionA = {
   type: "TRANSACTED",
   actions: [
     created({ id: ["test"], typeName: "TestScriptyThing", initialState: {
-      owner: ["test_partition"],
+      owner: [testRootId],
       name: "testName",
     }, }),
     created({ id: ["child"], typeName: "TestScriptyThing", initialState: {
@@ -43,7 +43,7 @@ const transactionA = {
 
 const createAInstance
     = created({ id: ["test+1"], typeName: "TestScriptyThing", initialState: {
-      owner: ["test_partition"],
+      owner: [testRootId],
       instancePrototype: vRef("test"),
     }, });
 
@@ -563,7 +563,7 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         created({ id: ["top"], typeName: "Entity", initialState: {
           name: "TopElement",
-          owner: ["test_partition"],
+          owner: [testRootId],
         }, }),
         created({ id: ["middleA"], typeName: "Entity", initialState: {
           name: "MiddleElementA",
@@ -659,7 +659,8 @@ describe("Vrapper", () => {
       expect(console.warn.mock.calls.length).toBe(2);
       expect(console.warn.mock.calls[0][0])
           .toBe(`Overriding existing Property 'testField' in Scope Vrapper(<TestScriptyThing ${""
-              }"testName"'urn:valos:test?+partition=valaa-test%3A%3Fid%3Dtest_partition'>)`);
+              }"testName"'urn:valos:test?+partition=${""
+              }valaa-test%3A%3Fid%3D%40%24~raw%3Atest_chronicle%40%40'>)`);
       console.warn = oldWarn;
       expect(testScriptPartitions().test.get(VALEK.fromScope("testField").toValueLiteral()))
           .toEqual("testOwned.conflictingTestField");

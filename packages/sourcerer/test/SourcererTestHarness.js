@@ -32,7 +32,8 @@ import { openDB } from "~/tools/html5/InMemoryIndexedDBUtils";
 import { dumpify, dumpObject, isPromise, wrapError } from "~/tools";
 
 export const testAuthorityURI = "valaa-test:";
-export const testPartitionURI = naiveURI.createPartitionURI(testAuthorityURI, "test_partition");
+export const testRootId = "@$~raw:test_chronicle@@";
+export const testChronicleURI = naiveURI.createChronicleURI(testAuthorityURI, testRootId);
 
 export function createSourcererTestHarness (options: Object, ...commandBlocks: any) {
   const wrap = new Error("During createSourcererHarness");
@@ -108,7 +109,7 @@ export async function createSourcererOracleHarness (options: Object, ...commandB
 }
 
 export const createdTestPartitionEntity = created({
-  id: ["test_partition"], typeName: "Entity",
+  id: [testRootId], typeName: "Entity",
   initialState: {
     name: "Automatic Test Partition Root",
     authorityURI: "valaa-test:",
@@ -126,10 +127,10 @@ export default class SourcererTestHarness extends ScriptTestHarness {
     this.falseProphetOptions = options.falseProphet;
     this.nexusOptions = options.nexus;
     this.testAuthorityURI = options.testAuthorityURI || testAuthorityURI;
-    this.testPartitionURI = options.testPartitionURI
+    this.testChronicleURI = options.testChronicleURI
         || (options.testAuthorityURI
-            && naiveURI.createPartitionURI(this.testAuthorityURI, "test_partition"))
-        || testPartitionURI;
+            && naiveURI.createChronicleURI(this.testAuthorityURI, testRootId))
+        || testChronicleURI;
   }
 
   initialize () {
@@ -150,7 +151,7 @@ export default class SourcererTestHarness extends ScriptTestHarness {
         () => {
           hasRemoteTestBackend = (this.testAuthorityConfig || {}).isRemoteAuthority;
           const testConnection = this.sourcerer.acquireConnection(
-              this.testPartitionURI, { newPartition: !hasRemoteTestBackend });
+              this.testChronicleURI, { newPartition: !hasRemoteTestBackend });
           if (hasRemoteTestBackend) {
             // For remote test partitions with oracle we provide the root
             // entity as a response to the initial narrate request.

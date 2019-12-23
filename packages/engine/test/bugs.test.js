@@ -2,7 +2,7 @@
 import { created } from "~/raem/events";
 import { vRef } from "~/raem/VRL";
 
-import { createEngineTestHarness, createEngineOracleHarness }
+import { testRootId, createEngineTestHarness, createEngineOracleHarness }
     from "~/engine/test/EngineTestHarness";
 import VALEK, { literal, pointer } from "~/engine/VALEK";
 
@@ -18,7 +18,7 @@ describe("Engine bug tests", async () => {
     // This test could be extracted as a separate DUPLICATED test case somewhere
     const commands = [
       created({ id: ["Foo"], typeName: "Entity", initialState: {
-        owner: ["test_partition"],
+        owner: [testRootId],
         name: "Foo",
       }, }),
       created({ id: ["FooTen"], typeName: "Property", initialState: {
@@ -41,7 +41,7 @@ describe("Engine bug tests", async () => {
         value: pointer(vRef("FooChild")),
       }, }),
       created({ id: ["Bar"], typeName: "Entity", initialState: {
-        owner: ["test_partition"],
+        owner: [testRootId],
         name: "Bar",
       }, }),
       created({ id: ["FooBarPtr"], typeName: "Property", initialState: {
@@ -318,20 +318,21 @@ describe("Engine bug tests", async () => {
   it(`creates a chronicle with reference to non-existent chronicle`, async () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
     const properties = {
-      reference: vRef("secondpartitionid", null, null, "valaa-memory:?id=secondpartitionid")
+      reference: vRef(
+          "@$~raw:secondchronicle@@", null, null, "valaa-memory:?id=@$~raw:secondchronicle@@"),
     };
     await harness.runValoscript(null, `
       new Entity({
         owner: null,
-        name: "firstPartition",
+        name: "firstChronicle",
         authorityURI: "valaa-memory:",
         properties
       });
 
       new Entity({
-        id: "secondpartitionid",
+        id: "@$~raw:secondchronicle@@",
         owner: null,
-        name: "secondPartition",
+        name: "secondChronicle",
         authorityURI: "valaa-memory:"
       });
     `, { properties }, { awaitResult: (result) => result.getComposedEvent() });

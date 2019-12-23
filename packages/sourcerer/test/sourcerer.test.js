@@ -9,8 +9,9 @@ import { naiveURI } from "~/raem/ValaaURI";
 import VALK from "~/raem/VALK";
 
 import {
+  testRootId,
   createScribe, clearAllScribeDatabases, createOracle, createSourcererOracleHarness,
-  testPartitionURI,
+  testChronicleURI,
 } from "~/sourcerer/test/SourcererTestHarness";
 import { initializeAspects, obtainAspect } from "~/sourcerer/tools/EventAspects";
 
@@ -25,11 +26,11 @@ async function setUp (testAuthorityConfig: Object = {}, options: {}) {
   });
   const ret = {
     connection: await harness.sourcerer.acquireConnection(
-        harness.testPartitionURI).asActiveConnection(),
+        harness.testChronicleURI).asActiveConnection(),
     scribeConnection: await harness.scribe.acquireConnection(
-        harness.testPartitionURI, { newConnection: false }).asActiveConnection(),
+        harness.testChronicleURI, { newConnection: false }).asActiveConnection(),
     oracleConnection: await harness.oracle.acquireConnection(
-        harness.testPartitionURI, { newConnection: false }).asActiveConnection(),
+        harness.testChronicleURI, { newConnection: false }).asActiveConnection(),
   };
   ret.authorityConnection = ret.oracleConnection.getUpstreamConnection();
   return ret;
@@ -40,7 +41,7 @@ afterEach(async () => {
     await harness.cleanupScribe();
     harness = null;
   }
-  await clearAllScribeDatabases(/* [testPartitionURI] */);
+  await clearAllScribeDatabases(/* [testChronicleURI] */);
 });
 
 describe("Sourcerer", () => {
@@ -70,12 +71,12 @@ describe("Sourcerer", () => {
   });
 
   const commands = [
-    created({ id: ["Entity-A"], typeName: "Entity", initialState: { owner: ["test_partition"] } }),
-    created({ id: ["Entity-B"], typeName: "Entity", initialState: { owner: ["test_partition"] } }),
-    created({ id: ["Entity-C"], typeName: "Entity", initialState: { owner: ["test_partition"] } }),
-    created({ id: ["Entity-D"], typeName: "Entity", initialState: { owner: ["test_partition"] } }),
-    created({ id: ["Entity-E"], typeName: "Entity", initialState: { owner: ["test_partition"] } }),
-    created({ id: ["Entity-F"], typeName: "Entity", initialState: { owner: ["test_partition"] } }),
+    created({ id: ["Entity-A"], typeName: "Entity", initialState: { owner: [testRootId] } }),
+    created({ id: ["Entity-B"], typeName: "Entity", initialState: { owner: [testRootId] } }),
+    created({ id: ["Entity-C"], typeName: "Entity", initialState: { owner: [testRootId] } }),
+    created({ id: ["Entity-D"], typeName: "Entity", initialState: { owner: [testRootId] } }),
+    created({ id: ["Entity-E"], typeName: "Entity", initialState: { owner: [testRootId] } }),
+    created({ id: ["Entity-F"], typeName: "Entity", initialState: { owner: [testRootId] } }),
   ];
 
   it("stores the contents of the actions on the scribe correctly", async () => {
@@ -83,14 +84,14 @@ describe("Sourcerer", () => {
       oracle: { testAuthorityConfig: { isLocallyPersisted: true, isRemoteAuthority: true } },
     });
     const connection = await harness.sourcerer
-        .acquireConnection(harness.testPartitionURI).asActiveConnection();
+        .acquireConnection(harness.testChronicleURI).asActiveConnection();
     const scribeConnection = connection.getUpstreamConnection();
     const database = await openDB(scribeConnection._db.databaseId);
 
     for (const command of commands) {
       const claimResult = await harness.chronicleEvent(command);
       await claimResult.getPremiereStory();
-      const partitionCommand = await claimResult.getCommandOf(harness.testPartitionURI);
+      const partitionCommand = await claimResult.getCommandOf(harness.testChronicleURI);
       const logIndex = scribeConnection.getFirstUnusedCommandEventId() - 1;
       await expectStoredInDB(partitionCommand, database, "commands", logIndex);
     }
@@ -101,7 +102,7 @@ describe("Sourcerer", () => {
       oracle: { testAuthorityConfig: { isLocallyPersisted: true } },
     });
     const connection = await harness.sourcerer
-        .acquireConnection(harness.testPartitionURI).asActiveConnection();
+        .acquireConnection(harness.testChronicleURI).asActiveConnection();
     const scribeConnection = connection.getUpstreamConnection();
 
     let oldCommandId;
@@ -121,19 +122,19 @@ describe("Sourcerer", () => {
 describe("Sourcerer", () => {
   const simpleCommand = created({
     id: ["simple_entity"], typeName: "Entity", initialState: {
-      name: "Simple Entity", owner: ["test_partition", {}, {}],
+      name: "Simple Entity", owner: [testRootId, {}, {}],
     }
   });
 
   const coupleCommands = [
     created({ id: ["some_media"], typeName: "Media", initialState: {
       name: "Simple Media",
-      owner: ["test_partition", { partition: String(testPartitionURI) }, {}],
+      owner: [testRootId, { partition: String(testChronicleURI) }, {}],
     } }),
     created({ id: ["simple_relation"], typeName: "Relation", initialState: {
       name: "Simple-other Relation",
-      owner: vRef("simple_entity", "relations", undefined, testPartitionURI).toJSON(),
-      target: ["some_media", { partition: String(testPartitionURI) }],
+      owner: vRef("simple_entity", "relations", undefined, testChronicleURI).toJSON(),
+      target: ["some_media", { partition: String(testChronicleURI) }],
     } }),
   ];
 
@@ -159,7 +160,7 @@ describe("Sourcerer", () => {
 
     const first = harness.chronicleEvent(simpleCommand);
 
-    expect(first.getLogAspectOf(harness.testPartitionURI).index).toEqual(1);
+    expect(first.getLogAspectOf(harness.testChronicleURI).index).toEqual(1);
     await harness.sourcerer._pendingCommandNotification;
     expect(totalCommandCount).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 1, 2);
@@ -170,8 +171,8 @@ describe("Sourcerer", () => {
 
     const seconds = harness.chronicleEvents(coupleCommands).eventResults;
 
-    expect(seconds[0].getLogAspectOf(harness.testPartitionURI).index).toEqual(2);
-    expect(seconds[1].getLogAspectOf(harness.testPartitionURI).index).toEqual(3);
+    expect(seconds[0].getLogAspectOf(harness.testChronicleURI).index).toEqual(2);
+    expect(seconds[1].getLogAspectOf(harness.testChronicleURI).index).toEqual(3);
     expectConnectionEventIds(scribeConnection, 0, 1, 4);
     await harness.sourcerer._pendingCommandNotification;
     expect(totalCommandCount).toEqual(3);
@@ -207,7 +208,7 @@ describe("Sourcerer", () => {
     expect(totalCommandCount).toEqual(0);
     expectConnectionEventIds(scribeConnection, 0, 1, 1);
     const first = harness.chronicleEvent(simpleCommand);
-    expect(first.getLogAspectOf(harness.testPartitionURI).index).toEqual(1);
+    expect(first.getLogAspectOf(harness.testChronicleURI).index).toEqual(1);
     await harness.sourcerer._pendingCommandNotification;
     expect(totalCommandCount).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 1, 2);
@@ -220,8 +221,8 @@ describe("Sourcerer", () => {
     expectConnectionEventIds(scribeConnection, 0, 2, 2);
 
     const seconds = harness.chronicleEvents(coupleCommands).eventResults;
-    expect(seconds[0].getLogAspectOf(harness.testPartitionURI).index).toEqual(2);
-    expect(seconds[1].getLogAspectOf(harness.testPartitionURI).index).toEqual(3);
+    expect(seconds[0].getLogAspectOf(harness.testChronicleURI).index).toEqual(2);
+    expect(seconds[1].getLogAspectOf(harness.testChronicleURI).index).toEqual(3);
     await harness.sourcerer._pendingCommandNotification;
     expect(totalCommandCount).toEqual(2);
     expectConnectionEventIds(scribeConnection, 0, 2, 4);
@@ -294,7 +295,7 @@ describe("Sourcerer", () => {
     expectConnectionEventIds(scribeConnection, 0, 1, 1);
 
     const first = harness.chronicleEvent(simpleCommand, { reformHeresy });
-    expect(first.getLogAspectOf(harness.testPartitionURI).index).toEqual(1);
+    expect(first.getLogAspectOf(harness.testChronicleURI).index).toEqual(1);
 
     let firstTruth, firstFailure;
     const firstTruthProcess = first.getTruthEvent()
@@ -350,8 +351,8 @@ describe("Sourcerer", () => {
     harness.clockEvent(2, () => ["test.secondsTruthProcesses[1]"]);
     await secondsTruthProcesses[1];
 
-    expect(seconds[0].getLogAspectOf(harness.testPartitionURI).index).toEqual(1);
-    expect(seconds[1].getCommandOf(harness.testPartitionURI)).toEqual(null);
+    expect(seconds[0].getLogAspectOf(harness.testChronicleURI).index).toEqual(1);
+    expect(seconds[1].getCommandOf(harness.testChronicleURI)).toEqual(null);
     expect(secondsTruths.length).toEqual(1);
     expect(secondsFailures.length).toEqual(2);
     expect(secondsFailures[0]).toEqual(undefined);
@@ -368,7 +369,7 @@ describe("Sourcerer", () => {
     expectConnectionEventIds(scribeConnection, 0, 2, 4);
 
     // Check that first command has been properly revised and resent
-    expect(rechronicleResults[0].getLogAspectOf(harness.testPartitionURI).index).toEqual(2);
+    expect(rechronicleResults[0].getLogAspectOf(harness.testChronicleURI).index).toEqual(2);
     expect(authorityConnection._chroniclings.length).toEqual(2);
 
     const lastEntry = authorityConnection._chroniclings.splice(0, 2);
@@ -417,10 +418,10 @@ describe("Sourcerer", () => {
     // ...until a divergence due to revise-instead-of-reject happens here.
     harness.clockEvent(1, () => ["sourcerer.test.seconds[0].getTruthEvent"]);
     await seconds[0].getTruthEvent();
-    expect(seconds[0].getLogAspectOf(harness.testPartitionURI).index).toEqual(1);
+    expect(seconds[0].getLogAspectOf(harness.testChronicleURI).index).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 2, 4);
-    expect(first.getLogAspectOf(harness.testPartitionURI).index).toEqual(2);
-    expect(seconds[1].getLogAspectOf(harness.testPartitionURI).index).toEqual(3);
+    expect(first.getLogAspectOf(harness.testChronicleURI).index).toEqual(2);
+    expect(seconds[1].getLogAspectOf(harness.testChronicleURI).index).toEqual(3);
     harness.clockEvent(1, () => ["sourcerer.test.seconds[1].getPersistedEvent"]);
     await seconds[1].getPersistedEvent();
 
@@ -437,14 +438,14 @@ describe("Sourcerer", () => {
     await firstTruthProcess;
     expect(firstTruth).toMatchObject(simpleCommand);
     expect(firstFailure).toEqual(undefined);
-    expect(first.getCommandOf(harness.testPartitionURI)).toMatchObject(stageTwoEntries[0]);
+    expect(first.getCommandOf(harness.testChronicleURI)).toMatchObject(stageTwoEntries[0]);
 
     harness.clockEvent(1, () => ["sourcerer.test.secondsTruthProcesses[0]"]);
     await secondsTruthProcesses[0];
     harness.clockEvent(1, () => ["sourcerer.test.secondsTruthProcesses[1]"]);
     await secondsTruthProcesses[1];
-    expect(seconds[0].getLogAspectOf(harness.testPartitionURI).index).toEqual(1);
-    expect(roundtripEvent(seconds[1].getCommandOf(harness.testPartitionURI)))
+    expect(seconds[0].getLogAspectOf(harness.testChronicleURI).index).toEqual(1);
+    expect(roundtripEvent(seconds[1].getCommandOf(harness.testChronicleURI)))
         .toMatchObject(stageTwoEntries[1]);
 
     expect(secondsTruths.length).toEqual(2);
@@ -472,7 +473,7 @@ describe("Sourcerer", () => {
     authorityConnection._chroniclings = [];
     const foreignTruth = initializeAspects(created({
       id: ["foreign_entity"], typeName: "Entity", initialState: {
-        name: "Simple Entity", owner: ["test_partition"],
+        name: "Simple Entity", owner: [testRootId],
       },
     }), { version: "0.2", command: { id: "foreign_entity" }, log: { index: 1 } });
     await authorityConnection.getReceiveTruths()([foreignTruth]);
@@ -491,13 +492,13 @@ describe("Sourcerer", () => {
     await firstTruthProcess;
     expect(firstTruth).toMatchObject(simpleCommand);
     expect(firstFailure).toEqual(undefined);
-    expect(first.getCommandOf(harness.testPartitionURI)).toMatchObject(stageTwoEntries[0]);
+    expect(first.getCommandOf(harness.testChronicleURI)).toMatchObject(stageTwoEntries[0]);
 
     await secondsTruthProcesses[0];
     await secondsTruthProcesses[1];
-    expect(JSON.parse(JSON.stringify(seconds[0].getCommandOf(harness.testPartitionURI))))
+    expect(JSON.parse(JSON.stringify(seconds[0].getCommandOf(harness.testChronicleURI))))
         .toMatchObject(stageTwoEntries[1]);
-    expect(JSON.parse(JSON.stringify(seconds[1].getCommandOf(harness.testPartitionURI))))
+    expect(JSON.parse(JSON.stringify(seconds[1].getCommandOf(harness.testChronicleURI))))
         .toMatchObject(stageTwoEntries[2]);
 
     expect(secondsTruths.length).toEqual(2);
@@ -512,7 +513,7 @@ describe("Sourcerer", () => {
       simpleCommand,
       created({
         id: ["followup_entity"], typeName: "Entity", initialState: {
-          name: "Followup Entity", owner: ["test_partition", {}, {}],
+          name: "Followup Entity", owner: [testRootId, {}, {}],
         }
       }),
     ]).eventResults;
@@ -522,7 +523,7 @@ describe("Sourcerer", () => {
             truthEvent_ => (truths[index] = truthEvent_),
             failure => (failures[index] = failure)));
     await results[1].getPersistedEvent();
-    expect(results[1].getLogAspectOf(harness.testPartitionURI).index)
+    expect(results[1].getLogAspectOf(harness.testChronicleURI).index)
         .toEqual(2);
 
     expect(harness.run(vRef("simple_entity"), ["§->", "name"]))
@@ -547,7 +548,7 @@ describe("Sourcerer", () => {
     expect(truths.length === 0);
     expectConnectionEventIds(scribeConnection, 0, 1, 2);
     await results[1].getPersistedEvent();
-    expect(results[1].getLogAspectOf(harness.testPartitionURI).index)
+    expect(results[1].getLogAspectOf(harness.testChronicleURI).index)
         .toEqual(1);
     expect(authorityConnection._chroniclings.length).toEqual(1);
 
@@ -564,10 +565,10 @@ describe("Sourcerer", () => {
     expectConnectionEventIds(scribeConnection, 0, 2, 2);
     expect(failures[0].message)
         .toEqual(expect.stringMatching(/Not permitted/));
-    expect(truths[1].meta.partitions[String(harness.testPartitionURI)].truth.aspects.log.index)
+    expect(truths[1].meta.partitions[String(harness.testChronicleURI)].truth.aspects.log.index)
         .toEqual(1);
     await results[1].getTruthEvent();
-    expect(results[1].getLogAspectOf(harness.testPartitionURI).index)
+    expect(results[1].getLogAspectOf(harness.testChronicleURI).index)
         .toEqual(1);
 
     expect(() => harness.run(vRef("simple_entity"), ["§->", "name"]))
@@ -581,14 +582,15 @@ describe("Cross-partition", () => {
   it("handles out-of-order cross-partition incomingRelations", async () => {
     const { scribeConnection } =
         await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
-    const latePartitionURI = naiveURI.createPartitionURI(harness.testAuthorityURI, "test_late");
+    const latePartitionURI = naiveURI.createChronicleURI(
+        harness.testAuthorityURI, "@$~raw:test_late@@");
 
     const lateTargetId = vRef("late_target", undefined, undefined, latePartitionURI);
 
     await scribeConnection.chronicleEvent(created({
       id: ["CrossRelation_A"], typeName: "Relation",
       initialState: {
-        source: ["test_partition"], name: "CrossRelation", target: lateTargetId.toJSON(),
+        source: [testRootId], name: "CrossRelation", target: lateTargetId.toJSON(),
       },
       aspects: {
         version: "0.2",
@@ -600,7 +602,7 @@ describe("Cross-partition", () => {
     const lateConnection = harness.sourcerer.acquireConnection(latePartitionURI);
     harness.tryGetTestAuthorityConnection(lateConnection).addNarrateResults({ eventIdBegin: 0 }, [
       created({
-        id: ["test_late"], typeName: "Entity",
+        id: ["@$~raw:test_late@@"], typeName: "Entity",
         initialState: { name: "Test Late" },
         aspects: { version: "0.2", log: { index: 0 }, command: { id: "lid-0" } },
       }),
@@ -619,7 +621,8 @@ describe("Cross-partition", () => {
   it("handles out-of-order instantiation with properties in both partitions", async () => {
     const { scribeConnection } =
         await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
-    const latePartitionURI = naiveURI.createPartitionURI(harness.testAuthorityURI, "test_late");
+    const latePartitionURI = naiveURI.createChronicleURI(
+        harness.testAuthorityURI, "@$~raw:test_late@@");
 
     const latePrototypeId = vRef("late_prototype", undefined, undefined, latePartitionURI);
 
@@ -627,7 +630,7 @@ describe("Cross-partition", () => {
     await Promise.all(scribeConnection.chronicleEvents([
       created({
         id: ["CrossEntryInstance_A"], typeName: "Entity",
-        initialState: { owner: ["test_partition"], instancePrototype: latePrototypeId.toJSON(),
+        initialState: { owner: [testRootId], instancePrototype: latePrototypeId.toJSON(),
           name: "Cross-partition instance",
         },
         aspects: { version: "0.2", log: { index: index + 0 }, command: { id: "cid-1" } },
@@ -643,7 +646,7 @@ describe("Cross-partition", () => {
     const lateConnection = harness.sourcerer.acquireConnection(latePartitionURI);
     harness.tryGetTestAuthorityConnection(lateConnection).addNarrateResults({ eventIdBegin: 0 }, [
       created({
-        id: ["test_late"], typeName: "Entity",
+        id: ["@$~raw:test_late@@"], typeName: "Entity",
         initialState: { name: "Test Late" },
         aspects: { version: "0.2", log: { index: 0 }, command: { id: "lid-0" } },
       }),
@@ -674,11 +677,11 @@ describe("Disjoint clients using paired harnesses", () => {
     const { scribeConnection } = await setUp({ isRemoteAuthority: true, isLocallyPersisted: true },
         { verbosity: 0 });
     const pairness = await createSourcererOracleHarness({ verbosity: 0, pairedHarness: harness });
-    const pairedConnection = pairness.sourcerer.acquireConnection(harness.testPartitionURI);
+    const pairedConnection = pairness.sourcerer.acquireConnection(harness.testChronicleURI);
 
     const result = harness.chronicleEvent(created({
       id: ["multiharness-entity"], typeName: "Entity",
-      initialState: { owner: ["test_partition"], name: "Multi-harness test entity" },
+      initialState: { owner: [testRootId], name: "Multi-harness test entity" },
       aspects: { version: "0.2", log: {}, command: { id: "cid-1" } },
     }));
     await result.getPersistedEvent();
@@ -695,24 +698,24 @@ describe("Disjoint clients using paired harnesses", () => {
   it("reorders conflicting commands between harnesses", async () => {
     await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
     const pairness = await createSourcererOracleHarness({ verbosity: 0, pairedHarness: harness });
-    await pairness.sourcerer.acquireConnection(harness.testPartitionURI);
+    await pairness.sourcerer.acquireConnection(harness.testChronicleURI);
 
     const result = harness.chronicleEvent(created({
       id: ["multiharness-entity"], typeName: "Entity",
-      initialState: { owner: ["test_partition"], name: "Multi-harness test entity" },
+      initialState: { owner: [testRootId], name: "Multi-harness test entity" },
       aspects: { version: "0.2", log: {}, command: { id: "cid-1" } },
     }));
     await result.getComposedEvent();
-    expect(result.getCommandOf(harness.testPartitionURI).aspects.log.index)
+    expect(result.getCommandOf(harness.testChronicleURI).aspects.log.index)
         .toEqual(1);
 
     const pairedResult = pairness.chronicleEvent(created({
       id: ["pairedharness-entity"], typeName: "Entity",
-      initialState: { owner: ["test_partition"], name: "Multi-harness distinct entity" },
+      initialState: { owner: [testRootId], name: "Multi-harness distinct entity" },
       aspects: { version: "0.2", log: {}, command: { id: "cid-p-1" } },
     }));
     await pairedResult.getPersistedEvent();
-    expect(pairedResult.getCommandOf(harness.testPartitionURI).aspects.log.index)
+    expect(pairedResult.getCommandOf(harness.testChronicleURI).aspects.log.index)
         .toEqual(1);
     // Make paired harness commands into truths first.
     await harness.receiveTruthsFrom(pairness, { clearReceiverUpstreamEntries: true });
@@ -722,9 +725,9 @@ describe("Disjoint clients using paired harnesses", () => {
     await harness.receiveTruthsFrom(harness, { clearReceiverUpstreamEntries: true });
     expect(immutableIs(harness.corpus.getState(), pairness.corpus.getState()))
         .toEqual(true);
-    expect(harness.run(vRef("test_partition"), ["§->", "unnamedOwnlings", ["§map", "name"]]))
+    expect(harness.run(vRef(testRootId), ["§->", "unnamedOwnlings", ["§map", "name"]]))
         .toEqual(["Multi-harness distinct entity", "Multi-harness test entity"]);
-    expect(pairness.run(vRef("test_partition"), ["§->", "unnamedOwnlings", ["§map", "name"]]))
+    expect(pairness.run(vRef(testRootId), ["§->", "unnamedOwnlings", ["§map", "name"]]))
         .toEqual(["Multi-harness distinct entity", "Multi-harness test entity"]);
   });
 });

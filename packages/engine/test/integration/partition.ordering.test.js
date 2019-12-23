@@ -1,7 +1,7 @@
 // @flow
 
 import { createEngineOracleHarness } from "~/engine/test/EngineTestHarness";
-import { clearAllScribeDatabases } from "~/sourcerer/test/SourcererTestHarness";
+import { testRootId, clearAllScribeDatabases } from "~/sourcerer/test/SourcererTestHarness";
 
 let harness = null;
 
@@ -12,11 +12,11 @@ async function setUp (testAuthorityConfig: Object = {}, options: {}) {
   });
   const ret = {
     connection: await harness.sourcerer.acquireConnection(
-        harness.testPartitionURI).asActiveConnection(),
+        harness.testChronicleURI).asActiveConnection(),
     scribeConnection: await harness.scribe.acquireConnection(
-        harness.testPartitionURI, { newConnection: false }).asActiveConnection(),
+        harness.testChronicleURI, { newConnection: false }).asActiveConnection(),
     oracleConnection: await harness.oracle.acquireConnection(
-        harness.testPartitionURI, { newConnection: false }).asActiveConnection(),
+        harness.testChronicleURI, { newConnection: false }).asActiveConnection(),
   };
   ret.authorityConnection = ret.oracleConnection.getUpstreamConnection();
   return ret;
@@ -27,7 +27,7 @@ afterEach(async () => {
     await harness.cleanupScribe();
     harness = null;
   }
-  await clearAllScribeDatabases(/* [testPartitionURI] */);
+  await clearAllScribeDatabases(/* [testChronicleURI] */);
 });
 
 describe("Partition load ordering and inactive resource handling", () => {
@@ -55,7 +55,7 @@ describe("Partition load ordering and inactive resource handling", () => {
         .toEqual(vLaterRoot);
     expect(component.get("owner"))
         .toEqual(Prototype);
-    const componentGhost = await harness.runValoscript(harness.createds.Entity.test_partition, `
+    const componentGhost = await harness.runValoscript(harness.createds.Entity[testRootId], `
       const instance = new Prototype({ owner: this });
       const componentGhost = instance.c;
       componentGhost.num = 10;
@@ -68,7 +68,7 @@ describe("Partition load ordering and inactive resource handling", () => {
         .toEqual(component);
 
     const pairness = await createEngineOracleHarness({ verbosity: 0, pairedHarness: harness });
-    await pairness.sourcerer.acquireConnection(harness.testPartitionURI)
+    await pairness.sourcerer.acquireConnection(harness.testChronicleURI)
         .asActiveConnection();
     await pairness.receiveTruthsFrom(harness.testConnection, { verbosity: 0 });
 
@@ -90,7 +90,7 @@ describe("Partition load ordering and inactive resource handling", () => {
     //    .asActiveConnection();
     /*
 
-    await pairness.sourcerer.acquireConnection(harness.testPartitionURI);
+    await pairness.sourcerer.acquireConnection(harness.testChronicleURI);
     */
   });
 });

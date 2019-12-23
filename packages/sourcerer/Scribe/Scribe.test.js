@@ -1,9 +1,9 @@
 // @flow
 
 import { created, transacted } from "~/raem/events/index";
-import { naiveURI } from "~/raem/ValaaURI";
 
 import {
+  testRootId, testChronicleURI,
   createScribe, clearAllScribeDatabases, createTestMockSourcerer
 } from "~/sourcerer/test/SourcererTestHarness";
 // @flow
@@ -15,8 +15,6 @@ import { utf8StringFromArrayBuffer } from "~/tools/textEncoding";
 import { openDB, getFromDB, getKeysFromDB, expectStoredInDB }
     from "~/tools/html5/InMemoryIndexedDBUtils";
 
-const testAuthorityURI = "valaa-test:";
-const testPartitionURI = naiveURI.createPartitionURI(testAuthorityURI, "test_partition");
 const sharedURI = "valos-shared-content";
 
 afterEach(async () => {
@@ -35,7 +33,9 @@ describe("Scribe", () => {
     ],
   }), { version: "0.2", command: { id: "cid-1" }, log: { index: 1 } });
 
-  const simpleEntityTemplate = { typeName: "Entity", initialState: { owner: ["test_partition"] } };
+  const simpleEntityTemplate = {
+    typeName: "Entity", initialState: { owner: [testRootId] },
+  };
   const simpleCommandList = [
     created({ id: ["Entity-A"], ...simpleEntityTemplate }),
     created({ id: ["Entity-B"], ...simpleEntityTemplate }),
@@ -51,10 +51,10 @@ describe("Scribe", () => {
   it("stores truths/commands in the database", async () => {
     const scribe = await createScribe(createTestMockSourcerer({ isRemoteAuthority: true }));
 
-    const connection = scribe.acquireConnection(testPartitionURI);
+    const connection = scribe.acquireConnection(testChronicleURI);
     connection.getUpstreamConnection().addNarrateResults({ eventIdBegin: 0 }, []);
     await connection.asActiveConnection();
-    const database = await openDB(testPartitionURI.toString());
+    const database = await openDB(testChronicleURI.toString());
 
     // Adds an entity and checks that it has been stored
     let storedEvent = await connection.chronicleEvent(simpleCommand).getComposedEvent();
@@ -81,7 +81,7 @@ describe("Scribe", () => {
   it("stores (and returns) utf-8 strings correctly", async () => {
     const scribe = await createScribe(createTestMockSourcerer());
 
-    const connection = await scribe.acquireConnection(testPartitionURI)
+    const connection = await scribe.acquireConnection(testChronicleURI)
         .asActiveConnection();
     const sharedDB = await openDB(sharedURI);
 
@@ -104,7 +104,7 @@ describe("Scribe", () => {
   it("populates a new connection to an existing partition with its cached commands", async () => {
     const scribe = await createScribe(createTestMockSourcerer());
 
-    const firstConnection = await scribe.acquireConnection(testPartitionURI)
+    const firstConnection = await scribe.acquireConnection(testChronicleURI)
         .asActiveConnection();
 
     await firstConnection.chronicleEvent(simpleCommand).getComposedEvent();
@@ -117,7 +117,7 @@ describe("Scribe", () => {
     expect(firstUnusedCommandEventId).toBeGreaterThan(1);
     firstConnection.disconnect();
 
-    const secondConnection = await scribe.acquireConnection(testPartitionURI)
+    const secondConnection = await scribe.acquireConnection(testChronicleURI)
         .asActiveConnection();
     expect(secondConnection.getFirstUnusedCommandEventId()).toBe(firstUnusedCommandEventId);
   });
@@ -125,7 +125,7 @@ describe("Scribe", () => {
   it("ensures commands are stored in a proper ascending order", async () => {
     const scribe = await createScribe(createTestMockSourcerer());
 
-    const connection = await scribe.acquireConnection(testPartitionURI)
+    const connection = await scribe.acquireConnection(testChronicleURI)
         .asActiveConnection();
     let oldUnusedCommandId;
     let newUnusedCommandId = connection.getFirstUnusedCommandEventId();
@@ -144,7 +144,7 @@ describe("Scribe", () => {
   it("writes multiple commands in a single go gracefully", async () => {
     const scribe = await createScribe(createTestMockSourcerer());
 
-    const connection = await scribe.acquireConnection(testPartitionURI)
+    const connection = await scribe.acquireConnection(testChronicleURI)
         .asActiveConnection();
 
     const chronicling = connection.chronicleEvents(simpleCommandList);

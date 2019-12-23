@@ -1,7 +1,9 @@
 // @flow
 
-import SourcererTestHarness, { createSourcererTestHarness, createSourcererOracleHarness }
-    from "~/sourcerer/test/SourcererTestHarness";
+import SourcererTestHarness, {
+  testAuthorityURI, testRootId, testChronicleURI,
+  createSourcererTestHarness, createSourcererOracleHarness,
+} from "~/sourcerer/test/SourcererTestHarness";
 import { obtainAspect } from "~/sourcerer/tools/EventAspects";
 
 import EngineTestAPI from "~/engine/test/EngineTestAPI";
@@ -13,6 +15,8 @@ import extendValosheath from "~/engine/valosheath";
 import baseEventBlock from "~/engine/test/baseEventBlock";
 
 import { isPromise } from "~/tools";
+
+export { testAuthorityURI, testRootId, testChronicleURI };
 
 export function createEngineTestHarness (options: Object, ...commandBlocks: any) {
   const ret = createSourcererTestHarness({

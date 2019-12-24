@@ -111,7 +111,8 @@ function validateDestroyed (command: Object): Object {
   validateCommandInterface(command);
 
   invariantifyId(id, "DESTROYED.id", {}, "\n\tcommand:", command);
-  invariantifyBoolean(dontUpdateCouplings, "DESTROYED.dontUpdateCouplings", { allowUndefined: true },
+  invariantifyBoolean(dontUpdateCouplings, "DESTROYED.dontUpdateCouplings",
+      { allowUndefined: true },
       "\n\tcommand:", command);
 
   // deprecated and denied, this shouldn't exist in the wild

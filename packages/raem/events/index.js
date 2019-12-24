@@ -18,7 +18,8 @@
  * resources, connections and properties after the last event has been
  * applied.
  *
- * This process is called `reduction` and [it has a long history](https://en.wikipedia.org/wiki/Fold_(higher-order_function) )
+ * This process is called `reduction` and
+ * [it has a long history](https://en.wikipedia.org/wiki/Fold_(higher-order_function) )
  * . It is carried out by `reducer` functions which process the events
  * of the event log one by one while applying the changes to a concrete
  * state representation at the same time, starting from an initially

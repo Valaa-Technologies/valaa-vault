@@ -4,7 +4,8 @@ import { dumpKuery, dumpObject, Valker } from "~/raem/VALK";
 import raemSteppers, {
   tryLiteral, tryFullLiteral, tryUnpackLiteral, isHostRef, resolveTypeof, callOrApply
 } from "~/raem/VALK/raemSteppers";
-import type { BuiltinStep } from "~/raem/VALK/raemSteppers"; // eslint-disable-line no-duplicate-imports
+/* eslint-disable no-duplicate-imports */
+import type { BuiltinStep } from "~/raem/VALK/raemSteppers";
 
 import { createNativeIdentifier, isNativeIdentifier, getNativeIdentifierValue,
   setNativeIdentifierValue,

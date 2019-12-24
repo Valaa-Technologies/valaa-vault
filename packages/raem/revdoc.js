@@ -156,7 +156,8 @@ care where a resource comes from once it has been loaded, but about its
 identity, relationships and the parameters of those relationships. This
 is reflected in how frontend code regularily drops the partition URI.`,
         },
-        "chapter#2;Partition URI structure is specified by the scheme, local reference structure is specified by ValOS": {
+        [`chapter#2;Partition URI structure is specified by the scheme,${
+          ""} local reference structure is specified by ValOS`]: {
           "#0":
 `By the nature of its distributed event sourcing architecture ValOS
 focuses heavily on the frontend. The cross-compatibility between
@@ -170,7 +171,8 @@ identifies and locates partitions and authorities but leaves it to
 the scheme specifications and their reference implementations of
 frontend spindles.`,
         },
-        "chapter#3;Partitions URI's identify self-contained wholes, resource references need their context": {
+        [`chapter#3;Partitions URI's identify self-contained wholes,${
+          ""} resource references need their context`]: {
           "#0":
 `Web architecture specifies that all or none of the document is
 retrieved. This corresponds to the behaviour of ValOS partitions which

@@ -380,7 +380,8 @@ export default class Gateway extends FabricEventTarget {
           `Interpreted revelation`, ...dumpObject(revelation)]);
       return revelation;
     } catch (error) {
-      throw this.wrapErrorEvent(error, "interpretRevelation", "\n\trevelation:", ...dumpObject(revelation));
+      throw this.wrapErrorEvent(error, "interpretRevelation",
+          "\n\trevelation:", ...dumpObject(revelation));
     }
   }
 

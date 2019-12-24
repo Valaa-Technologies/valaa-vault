@@ -333,7 +333,9 @@ export default class Kuery {
    */
   to (step: any, headType: ?string): Kuery {
     switch (typeof step) {
-      case "object": if (step) return this.toTemplate(step, headType); // eslint-disable-line no-fallthrough
+      case "object":
+        if (step) return this.toTemplate(step, headType);
+      // eslint-disable-line no-fallthrough
       case "boolean":
       case "string":
       case "symbol": // TODO(iridian): This will not serialize and is thus quite broken.

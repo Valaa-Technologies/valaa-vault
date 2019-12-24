@@ -11,7 +11,8 @@ describe("Session security", () => {
     const identityChronicle = `valaa-test:?id=test-partition`;
     const code = burlaesgEncode({ identityChronicle, nonce }, key, iv);
     const roundtripped = burlaesgDecode(code, key);
-    expect(roundtripped).toMatchObject({ alg: "A256GCM", iv, payload: { nonce, identityChronicle } });
+    expect(roundtripped)
+        .toMatchObject({ alg: "A256GCM", iv, payload: { nonce, identityChronicle } });
   });
 
   it("roundtrips a basic JWT properly", () => {

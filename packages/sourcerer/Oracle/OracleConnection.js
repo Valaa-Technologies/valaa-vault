@@ -4,7 +4,9 @@ import type { EventBase } from "~/raem/events";
 import { hasScheme } from "~/raem/ValaaURI";
 
 import Connection from "~/sourcerer/api/Connection";
-import { ConnectOptions, MediaInfo, ReceiveEvents, RetrieveMediaBuffer } from "~/sourcerer/api/types";
+import {
+  ConnectOptions, MediaInfo, ReceiveEvents, RetrieveMediaBuffer,
+} from "~/sourcerer/api/types";
 
 import DecoderArray from "~/sourcerer/Oracle/DecoderArray";
 import upgradeEventTo0Dot2 from "~/sourcerer/tools/event-version-0.2/upgradeEventTo0Dot2";

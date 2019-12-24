@@ -1,7 +1,7 @@
 // @flow
 
 import jsSHA from "jssha/src/sha3";
-
+/* eslint-disable max-len */
 /**
  * Returns a 240-bit SHAKE256 hash of the given input buffer or utf-8
  * text string as a base64-url encoded string (ie. [A-Za-z0-9\-_]{40}).
@@ -19,6 +19,7 @@ import jsSHA from "jssha/src/sha3";
  *    identifiers in various listings.
  *
  * See also:
+ *
  * https://crypto.stackexchange.com/questions/43718/if-the-output-size-of-shake128-256-is-variable-why-is-the-security-fixed-at-128
  *
  * @export
@@ -26,6 +27,7 @@ import jsSHA from "jssha/src/sha3";
  * @returns
  */
 export default function hashV240 (input: string | ArrayBuffer): HashV240 {
+/* eslint-enable max-len */
   const hash = new jsSHA("SHAKE256",
       (typeof input === "string") ? "TEXT"
       : (input instanceof ArrayBuffer) ? "ARRAYBUFFER"

@@ -253,7 +253,7 @@ blockquote(em("valos-vault-4.1.2"), `: utility must explicitly define
 `Below is a rough correlation of similar concepts across utilities.`,
       ],
       "table#1": {
-  /* eslint-disable comma-spacing */
+  /* eslint-disable comma-spacing, max-len */
         "vdoc:headers":
 ["Utility"    , "Tool"          , "Payload"                    , "Providers"   , "Consumed via"      , "Upstream", "Configuration" , "Modified via"        , "Produced via"       , "Authority"  , "Distributed via"],
         "vdoc:entries": [
@@ -262,7 +262,7 @@ blockquote(em("valos-vault-4.1.2"), `: utility must explicitly define
 ["authorities", "`vlm`"         , "APIs, site & gateway files" , "IaaS, custom", "browsers, various" , "`files`" , "upstream *"    , "upstream *"          , "upstream"           , "hybrid"     , "`build-release` `deploy-release`"],
 ["partitions" , "`vlm`, gateway", "event logs, bvobs"          , "authorities" , "event & bvob APIs" , "N/A"     , "N/A"           , "gateway"             , "command & bvob APIs", "authorities", "automatic, custom"],
         ],
-  /* eslint-enable comma-spacing */
+  /* eslint-enable comma-spacing, max-len */
       },
       "#2": [
         { "bulleted#": [

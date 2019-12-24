@@ -228,8 +228,8 @@ export default class FalseProphetDiscourse extends Discourse {
       } else {
         if (!hasScheme(chronicleURI, "valaa-memory")) {
           this.errorEvent(`a non-VPath assignNewVRId.explicitRawId was explicitly provided${
-              ""} for a regular chronicle resource in a non-'valaa-memory:' chronicle: this will be${
-              ""} deprecated Very Soon(tm) in favor of VPath resource identifiers.`,
+              ""} for a regular chronicle resource in a non-'valaa-memory:' chronicle: this will${
+              ""} be deprecated Very Soon(tm) in favor of VPath resource identifiers.`,
               "\n\texplicitRawId:", explicitRawId,
               "\n\tchronicleURI:", chronicleURI);
         }

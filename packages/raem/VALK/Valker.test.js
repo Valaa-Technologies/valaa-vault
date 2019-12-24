@@ -837,7 +837,8 @@ describe("complex structures", () => {
     expect(harness.run(gA1_B1, ["§->", "children", ["§map", "prototype"]]))
         .toEqual(harness.run(A_B1i, "children"));
 
-    expect(harness.run(gA1_B1, ["§->", "children", ["§map", "prototype", "prototype"]]).slice(0, -1))
+    expect(harness.run(gA1_B1, ["§->", "children", ["§map", "prototype", "prototype"]])
+            .slice(0, -1))
         .toEqual(startingList);
 
     // Modify the name of the newly-added object
@@ -851,7 +852,8 @@ describe("complex structures", () => {
     expect(harness.run(gA1_B, ["§->", "children", ["§map", "prototype"]]))
         .toEqual(startingList);
 
-    expect(harness.run(gA1_B1, ["§->", "children", ["§map", "prototype", "prototype"]]).slice(0, -1))
+    expect(harness.run(gA1_B1, ["§->", "children", ["§map", "prototype", "prototype"]])
+            .slice(0, -1))
         .toEqual(startingList);
 
     expect(harness.run(gA1_B1, ["§->", "children", ["§map", "prototype"]]))

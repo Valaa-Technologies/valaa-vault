@@ -171,7 +171,8 @@ const _vlm = {
   // Opens interactive inquirer prompt and returns a completion promise.
   // See https://github.com/SBoudrias/Inquirer.js/
   inquire (...rest) {
-    if (!inquirer) inquirer = require("inquirer"); // inquirer is fat and loads slowly. Postpone here.
+    // inquirer loads slowly. Lazy load here.
+    if (!inquirer) inquirer = require("inquirer");
 
     _vlm.inquire = inquirer.createPromptModule();
     return this.inquire(...rest);
@@ -692,7 +693,7 @@ module.exports = {
         "package-config-env": {
           group: "Valma root options:",
           type: "boolean", default: false, global: false,
-          description: "Add npm package environment variables if they are missing (not implemented)",
+          description: "Add missing npm package environment variables (not implemented)",
         },
         forward: {
           group: "Valma root options:",
@@ -875,7 +876,9 @@ if (_vlm.vargv.clock) {
 
 _vlm.ifVerbose(1).babble("phase 1, init:", "determine global options and available pools.",
     `\n\tcommand: ${_vlm.theme.command(_vlm.vargv.command)
-        }, verbosity: ${_vlm.verbosity}, interactive: ${_vlm.interactive}, echo: ${_vlm.vargv.echo}`,
+        }, verbosity: ${_vlm.verbosity
+        }, interactive: ${_vlm.interactive
+        }, echo: ${_vlm.vargv.echo}`,
     "\n\tprocess.argv:", ...process.argv
 ).ifVerbose(2).babble("paths:", "cwd:", process.cwd(),
     "\n\tprocess.env.VLM_GLOBAL_POOL:", process.env.VLM_GLOBAL_POOL,
@@ -1656,7 +1659,7 @@ function _selectActiveCommands (commandGlob, argv, introspect, isWildcardCommand
         try {
           poolCommand.module = require(poolCommand.linkPath);
           this.ifVerbose(2)
-              .babble(`matching command '${commandName}' module found at path`, poolCommand.linkPath);
+              .babble(`matching command '${commandName}' module found at`, poolCommand.linkPath);
         } catch (error) {
           if (!this.isCompleting && !introspect && !this.vargv.dryRun) throw error;
           poolCommand.module = false;

@@ -3,7 +3,9 @@
 import { GraphQLSchema } from "graphql/type";
 
 import VRL, { obtainVRL, tryCoupledFieldFrom } from "~/raem/VRL";
-import type { JSONIdData, IdData, RawId } from "~/raem/VRL"; // eslint-disable-line no-duplicate-imports
+import type {
+  JSONIdData, IdData, RawId,
+} from "~/raem/VRL"; // eslint-disable-line no-duplicate-imports
 import type { ValaaURI } from "~/raem/ValaaURI";
 
 import GhostPath from "~/raem/state/GhostPath";

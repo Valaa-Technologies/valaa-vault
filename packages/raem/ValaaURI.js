@@ -69,8 +69,9 @@ export const genericURI = {
 export const naiveURI = {
   // Matching groups are shared with rfc3986matcher up to paramsPart
   ...genericURI,
-  regex: /^(([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(\?(id=([^#&]+)(&([^#]*))?))(#(([^?]*)(\?(.*)))?)?$/,
-  //       12            3    4          5       6  7   8       9 a          b cd      e  f
+  regex:
+      /^(([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(\?(id=([^#&]+)(&([^#]*))?))(#(([^?]*)(\?(.*)))?)?$/,
+  //    12            3    4          5       6  7   8       9 a          b cd      e  f
   partitionIdPart: 8,
   paramsPart: 10,
   fragmentPart: 11,

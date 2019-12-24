@@ -3,6 +3,8 @@ const {
   extractee: { authors, jsonld, pkg },
 } = require("@valos/revdoc");
 
+/* eslint-disable max-len */
+
 module.exports = {
   "dc:title": "ValOS state serialization format",
   respecConfig: {

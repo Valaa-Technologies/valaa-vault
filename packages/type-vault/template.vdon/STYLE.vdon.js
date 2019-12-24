@@ -150,7 +150,7 @@ module.exports = {
       },
       0: `[BEM (Block, Element, Modifier)](https://en.bem.info/methodology/quick-start/)
         is a component-based approach to web development. ValOS uses
-        [the camelCase naming convention variant](https://en.bem.info/methodology/naming-convention/)
+        [the camelCase naming convention](https://en.bem.info/methodology/naming-convention/)
         with option library-scope prefix described below.
         BEM principles should be followed more generally as well whenever
         applicable.`,

@@ -345,6 +345,7 @@ function visitNode (traverse, object, path, state) {
  */
 visitNode.test = (object/* , path, state */) => object.type === Syntax.JSXElement;
 
+/* eslint-disable max-len */
 /**
  * Taken from {@link https://github.com/facebook/react/blob/0.10-stable/vendor/fbtransform/transforms/xjs.js}
  *
@@ -356,6 +357,7 @@ visitNode.test = (object/* , path, state */) => object.type === Syntax.JSXElemen
  * @private
  */
 function renderJSXLiteral (object, isLast, state, start, end) {
+  /* eslint-enable max-len */
   const lines = object.value.split(/\r\n|\n|\r/);
 
   if (start) {
@@ -417,6 +419,7 @@ function renderJSXLiteral (object, isLast, state, start, end) {
   utils.move(object.range[1], state);
 }
 
+/* eslint-disable max-len */
 /**
  * Taken from {@link https://github.com/facebook/react/blob/0.10-stable/vendor/fbtransform/transforms/xjs.js}
  *
@@ -429,6 +432,7 @@ function renderJSXLiteral (object, isLast, state, start, end) {
  * @private
  */
 function renderJSXExpressionContainer (traverse, object, isLast, path, state) {
+  /* eslint-enable max-len */
   // Plus 1 to skip `{`.
   utils.move(object.range[0] + 1, state);
 

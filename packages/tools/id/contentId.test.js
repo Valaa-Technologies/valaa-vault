@@ -15,6 +15,7 @@ function toArrayBuffer (buf) {
 
 describe("contentHash module", () => {
   const testData = [
+    /* eslint-disable max-len */
     // Test vectors from https://www.di-mgt.com.au/sha_testvectors.html
     { msg: "abc", hash: "ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f" },
     { msg: "", hash: "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e" },
@@ -35,6 +36,7 @@ describe("contentHash module", () => {
     { path: path.join(__dirname, "test", "utf16le.txt"), hash: "38bb3c5fa65dfe4537c6e9c3fb85603756422ed62943d907945572095136d4238ac9c9449630769a9223d2d38a712bb346d84ca36dcbfe16e1bc16d9aa71dad9" },
     { path: path.join(__dirname, "test", "image.png"), hash: "598ea3ab1028138652203d5288e9bc6d70242e6ea3e626e2ddabcee775e77cd30978a037f8815771ee834d532ae2baa2f1e425f095935572818c249b71ceb8f3" },
     { path: path.join(__dirname, "test", "sound.mp3"), hash: "b386920757497b94d15e334d31582b8ea321b01258da59d2904035ae2c915b07d5d59d80eeecece5eb9ee90ae2e40a4116254e8c36cde1ab3ed28b867831dbbc" },
+    /* eslint-enable max-len */
   ];
 
   // Set these env variables to test using a big file.

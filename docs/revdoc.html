@@ -7,7 +7,7 @@
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"subtitle":"0.35.0-prerelease.19","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"shortName":"revdoc","alternateFormats":[{"label":"VDoc","uri":"revdoc.jsonld"}]};
+      var respecConfig = {"subtitle":"0.35.0-prerelease.20","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"shortName":"revdoc","alternateFormats":[{"label":"VDoc","uri":"revdoc.jsonld"}]};
     </script>
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
@@ -342,16 +342,16 @@ primitives and specifies a ReSpec html emission transformation.</span>
         <tr class=" vdoc-nth-child-2n"><td>valosRaemFieldClasses</td><td>valos-raem:Fieldvalos-raem:ExpressedFieldvalos-raem:EventLoggedFieldvalos-raem:CoupledFieldvalos-raem:GeneratedFieldvalos-raem:TransientFieldvalos-raem:AliasField</td></tr>
         <tr><td>filterKeysWithFieldReduction</td><td>function filterKeysWithFieldReduction(entryFieldName, searchedValueOrValues, container, reduction, initial) {
   var searchedValues = [].concat(searchedValueOrValues !== undefined ? searchedValueOrValues : []);
-  return Object.entries(container).filter(function (_ref8) {
-    var _ref9 = _slicedToArray(_ref8, 2),
-        entry = _ref9[1];
+  return Object.entries(container).filter(function (_ref10) {
+    var _ref11 = _slicedToArray(_ref10, 2),
+        entry = _ref11[1];
 
     return searchedValues.reduce(function (a, searchedValue) {
       return reduction(a, [[].concat(entry[entryFieldName] !== undefined ? entry[entryFieldName] : []), searchedValue]);
     }, initial);
-  }).map(function (_ref10) {
-    var _ref11 = _slicedToArray(_ref10, 1),
-        key = _ref11[0];
+  }).map(function (_ref12) {
+    var _ref13 = _slicedToArray(_ref12, 1),
+        key = _ref13[0];
 
     return key;
   });
@@ -384,34 +384,48 @@ primitives and specifies a ReSpec html emission transformation.</span>
                     toSatisfy = _step2$value[2],
                     result = _step2$value[3];
 
-                it(named, function _callee2() {
+                it(named,
+                /*#__PURE__*/
+                _asyncToGenerator(
+                /*#__PURE__*/
+                regeneratorRuntime.mark(function _callee2() {
                   var actual;
-                  return regeneratorRuntime.async(function _callee2$(_context2) {
+                  return regeneratorRuntime.wrap(function _callee2$(_context2) {
                     while (1) {
                       switch (_context2.prev = _context2.next) {
                         case 0:
                           _context2.prev = 0;
                           _context2.next = 3;
-                          return regeneratorRuntime.awrap([].concat(operations).reduce(function _callee(a, op) {
-                            var ra;
-                            return regeneratorRuntime.async(function _callee$(_context) {
-                              while (1) {
-                                switch (_context.prev = _context.next) {
-                                  case 0:
-                                    _context.next = 2;
-                                    return regeneratorRuntime.awrap(a);
+                          return [].concat(operations).reduce(
+                          /*#__PURE__*/
+                          function () {
+                            var _ref9 = _asyncToGenerator(
+                            /*#__PURE__*/
+                            regeneratorRuntime.mark(function _callee(a, op) {
+                              var ra;
+                              return regeneratorRuntime.wrap(function _callee$(_context) {
+                                while (1) {
+                                  switch (_context.prev = _context.next) {
+                                    case 0:
+                                      _context.next = 2;
+                                      return a;
 
-                                  case 2:
-                                    ra = _context.sent;
-                                    return _context.abrupt("return", op(typeof ra === "function" ? ra() : ra));
+                                    case 2:
+                                      ra = _context.sent;
+                                      return _context.abrupt("return", op(typeof ra === "function" ? ra() : ra));
 
-                                  case 4:
-                                  case "end":
-                                    return _context.stop();
+                                    case 4:
+                                    case "end":
+                                      return _context.stop();
+                                  }
                                 }
-                              }
-                            });
-                          }));
+                              }, _callee);
+                            }));
+
+                            return function (_x, _x2) {
+                              return _ref9.apply(this, arguments);
+                            };
+                          }());
 
                         case 3:
                           actual = _context2.sent;
@@ -423,7 +437,7 @@ primitives and specifies a ReSpec html emission transformation.</span>
                           }
 
                           _context2.next = 8;
-                          return regeneratorRuntime.awrap(actual());
+                          return actual();
 
                         case 8:
                           _context2.t2 = _context2.sent;
@@ -444,7 +458,7 @@ primitives and specifies a ReSpec html emission transformation.</span>
                           }
 
                           _context2.next = 18;
-                          return regeneratorRuntime.awrap(result());
+                          return result();
 
                         case 18:
                           _context2.t5 = _context2.sent;
@@ -473,8 +487,8 @@ primitives and specifies a ReSpec html emission transformation.</span>
                           return _context2.stop();
                       }
                     }
-                  }, null, null, [[0, 26]]);
-                });
+                  }, _callee2, null, [[0, 26]]);
+                })));
               };
 
               for (var _iterator2 = tests[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {

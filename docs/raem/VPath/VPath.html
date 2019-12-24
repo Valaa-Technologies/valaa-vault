@@ -687,7 +687,7 @@ itself with currently defined formats exhaustively listed here.
       </span>
 </p></div>
   <section id="section_vgrid_uuid_v4" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_vgrid_uuid_v4">§ </a>VGRId format &#x22;&#x60;~u4&#x60;&#x22;: Uuid v4 of a native, insecure resource</h3>
+    <h3><a aria-label="§" href="#section_vgrid_uuid_v4">§ </a>VGRId format &#x22;&#x60;~u4&#x60;&#x22;: UUID v4 of a native, insecure resource</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
 An identifier for native valospace resource with an event log.
 This is insecure as there are no guarantees against resource id
@@ -705,7 +705,7 @@ the vvalue.</span>
   </section>
 
   <section id="section_vgrid_platonic_resource" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_vgrid_platonic_resource">§ </a>VGRId format &#x22;&#x60;~pw&#x60;&#x22;: The id of an immutable Platonic resource With inferences</h3>
+    <h3><a aria-label="§" href="#section_vgrid_platonic_resource">§ </a>VGRId format &#x22;&#x60;~plt&#x60;&#x22;: The id of an immutable Platonic resource With inferences</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
 An identifier of an immutable, procedurally generated resource with its
 content inferred from the vpath embedded in the vvalue.
@@ -714,8 +714,24 @@ prototype of structural ghost sub-resources which are quite mutable.</span>
 </p></div>
   </section>
 
+  <section id="section_vgrid_command_resource_hash" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_vgrid_command_resource_hash">§ </a>VGRId format &#x22;&#x60;~cih&#x60;&#x22;: The id of a command-id hash-based insecure resource</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+An identifier which has been hashed from a command id, chronicle URI
+and a running counter.</span>
+</p></div>
+  </section>
+
+  <section id="section_vgrid_command_chronicle_hash" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_vgrid_command_chronicle_hash">§ </a>VGRId format &#x22;&#x60;~chr&#x60;&#x22;: The id of a command hash-based chronicle</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+A chronicle identifier which has been hashed from a command id and an
+authority URI.</span>
+</p></div>
+  </section>
+
   <section id="section_vgrid_crypto_chained" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_vgrid_crypto_chained">§ </a>VGRId format &#x22;&#x60;~cc&#x60;&#x22;: The id of Crypto-event-log-Chained secure resource</h3>
+    <h3><a aria-label="§" href="#section_vgrid_crypto_chained">§ </a>VGRId format &#x22;&#x60;~ch3&#x60;&#x22;: The id of Crypto-Hash-CHained secure CHronicle resource</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
 An identifier of a native, secure valospace resource with an event log.
 This id is deterministically derived from the most recent hash-chain
@@ -726,11 +742,26 @@ to the resource.</span>
 </p></div>
   </section>
 
+  <section id="section_vgrid_authority_root" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_vgrid_authority_root">§ </a>VGRId format &#x22;&#x60;~aur&#x60;&#x22;: The id of an authority root resource</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+The fixed identifier of an immovable root resource of an authority
+chronicle. The authority vgrid param equals to the authority URI.</span>
+</p></div>
+  </section>
+
   <section id="section_vgrid_ghost" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#section_vgrid_ghost">§ </a>VGRId format &#x22;&#x60;~gh&#x60;&#x22;: The derived Hash id of a native, insecure Ghost resource</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
 This is a legacy format for native ghost resources, with id created
 from the hash of the &#x27;ghost path&#x27; of the resource.</span>
+</p></div>
+  </section>
+
+  <section id="section_vgrid_raw" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_vgrid_raw">§ </a>VGRId format &#x22;&#x60;~raw&#x60;&#x22;: The insecure raw text id of a resource</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">
+An id with an unknown schema.</span>
 </p></div>
   </section>
 

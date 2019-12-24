@@ -269,7 +269,7 @@
         </component>
         <component type="library">
             <name>resolve</name>
-            <version>1.14.0</version>
+            <version>1.14.1</version>
             <description>
                 <![CDATA[resolve like require.resolve() on behalf of files asynchronously and synchronously]]>
             </description>
@@ -278,7 +278,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/resolve@1.14.0</purl>
+            <purl>pkg:npm/resolve@1.14.1</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -551,7 +551,7 @@
         <component type="library">
             <group>valos</group>
             <name>inspire</name>
-            <version>0.35.0-prerelease.19</version>
+            <version>0.35.0-prerelease.20</version>
             <description>
                 <![CDATA[ValOS Inspire application gateway]]>
             </description>
@@ -560,13 +560,13 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/inspire@0.35.0-prerelease.19</purl>
+            <purl>pkg:npm/%40valos/inspire@0.35.0-prerelease.20</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <group>valos</group>
             <name>kernel</name>
-            <version>0.35.0-prerelease.19</version>
+            <version>0.35.0-prerelease.20</version>
             <description>
                 <![CDATA[@valos/kernel domain]]>
             </description>
@@ -575,13 +575,13 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/kernel@0.35.0-prerelease.19</purl>
+            <purl>pkg:npm/%40valos/kernel@0.35.0-prerelease.20</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <group>valos</group>
             <name>toolset-revealer</name>
-            <version>0.35.0-prerelease.19</version>
+            <version>0.35.0-prerelease.20</version>
             <description>
                 <![CDATA[Tools for building revelations both for development and deployment purposes]]>
             </description>
@@ -590,12 +590,12 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/toolset-revealer@0.35.0-prerelease.19</purl>
+            <purl>pkg:npm/%40valos/toolset-revealer@0.35.0-prerelease.20</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <name>valma</name>
-            <version>0.35.0-prerelease.19</version>
+            <version>0.35.0-prerelease.20</version>
             <description>
                 <![CDATA[A ValOS CLI tool for discovering and executing context-dependent command scripts]]>
             </description>
@@ -604,7 +604,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/valma@0.35.0-prerelease.19</purl>
+            <purl>pkg:npm/valma@0.35.0-prerelease.20</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -694,7 +694,7 @@
         <component type="library">
             <group>valos</group>
             <name>type-vault</name>
-            <version>0.35.0-prerelease.19</version>
+            <version>0.35.0-prerelease.20</version>
             <description>
                 <![CDATA[The ValOS 'vault' workspace type toolset]]>
             </description>
@@ -703,7 +703,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/type-vault@0.35.0-prerelease.19</purl>
+            <purl>pkg:npm/%40valos/type-vault@0.35.0-prerelease.20</purl>
             <modified>false</modified>
         </component>
         <component type="library">

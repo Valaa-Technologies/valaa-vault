@@ -1205,16 +1205,28 @@
           "@id": "section_vgrid_platonic_resource"
         },
         {
+          "@id": "section_vgrid_command_resource_hash"
+        },
+        {
+          "@id": "section_vgrid_command_chronicle_hash"
+        },
+        {
           "@id": "section_vgrid_crypto_chained"
         },
         {
+          "@id": "section_vgrid_authority_root"
+        },
+        {
           "@id": "section_vgrid_ghost"
+        },
+        {
+          "@id": "section_vgrid_raw"
         }
       ]
     },
     "section_vgrid_uuid_v4": {
       "@id": "section_vgrid_uuid_v4",
-      "dc:title": "VGRId format \"`~u4`\": Uuid v4 of a native, insecure resource",
+      "dc:title": "VGRId format \"`~u4`\": UUID v4 of a native, insecure resource",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -1240,7 +1252,7 @@
     },
     "section_vgrid_platonic_resource": {
       "@id": "section_vgrid_platonic_resource",
-      "dc:title": "VGRId format \"`~pw`\": The id of an immutable Platonic resource With inferences",
+      "dc:title": "VGRId format \"`~plt`\": The id of an immutable Platonic resource With inferences",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -1251,15 +1263,54 @@
         }
       ]
     },
+    "section_vgrid_command_resource_hash": {
+      "@id": "section_vgrid_command_resource_hash",
+      "dc:title": "VGRId format \"`~cih`\": The id of a command-id hash-based insecure resource",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "\nAn identifier which has been hashed from a command id, chronicle URI\nand a running counter."
+          ]
+        }
+      ]
+    },
+    "section_vgrid_command_chronicle_hash": {
+      "@id": "section_vgrid_command_chronicle_hash",
+      "dc:title": "VGRId format \"`~chr`\": The id of a command hash-based chronicle",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "\nA chronicle identifier which has been hashed from a command id and an\nauthority URI."
+          ]
+        }
+      ]
+    },
     "section_vgrid_crypto_chained": {
       "@id": "section_vgrid_crypto_chained",
-      "dc:title": "VGRId format \"`~cc`\": The id of Crypto-event-log-Chained secure resource",
+      "dc:title": "VGRId format \"`~ch3`\": The id of Crypto-Hash-CHained secure CHronicle resource",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
             "\nAn identifier of a native, secure valospace resource with an event log.\nThis id is deterministically derived from the most recent hash-chain\nevent log entry of the particular event which created it, the\ncryptographic secret of the creating identity and a salt, thus ensuring\ncollision resistance and a mechanism for creator to prove their claim\nto the resource."
+          ]
+        }
+      ]
+    },
+    "section_vgrid_authority_root": {
+      "@id": "section_vgrid_authority_root",
+      "dc:title": "VGRId format \"`~aur`\": The id of an authority root resource",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "\nThe fixed identifier of an immovable root resource of an authority\nchronicle. The authority vgrid param equals to the authority URI."
           ]
         }
       ]
@@ -1273,6 +1324,19 @@
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
             "\nThis is a legacy format for native ghost resources, with id created\nfrom the hash of the 'ghost path' of the resource."
+          ]
+        }
+      ]
+    },
+    "section_vgrid_raw": {
+      "@id": "section_vgrid_raw",
+      "dc:title": "VGRId format \"`~raw`\": The insecure raw text id of a resource",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "\nAn id with an unknown schema."
           ]
         }
       ]

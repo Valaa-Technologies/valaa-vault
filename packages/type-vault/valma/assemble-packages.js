@@ -131,10 +131,10 @@ exports.handler = async (yargv) => {
   const requestGlobs = (yargv.packageNameGlobs || []).length ? yargv.packageNameGlobs : ["**/*"];
 
   const packageSelection = {};
-  const addAll = yargv.addChanged && yargv.addUnchanged;
+  const addAll = yargv["add-changed"] && yargv["add-unchanged"];
   if (addAll) vlm.info("Adding all packages to initial selection.");
-  else if (yargv.addChanged || yargv.addUnchanged) {
-    if (yargv.addChanged) {
+  else if (yargv["add-changed"] || yargv["add-unchanged"]) {
+    if (yargv["add-changed"]) {
       vlm.info("Adding only changed packages to initial selection.");
     } else {
       vlm.info("Adding only unchanged packages to initial selection.");
@@ -143,14 +143,15 @@ exports.handler = async (yargv) => {
       const updatedPackages = await vlm.execute(
           `lerna changed --json --loglevel=silent`, { stdout: "json" });
       updatedPackages.forEach(p => {
-        packageSelection[vlm.path.join(p.location, "/")] = (yargv.addChanged && "changed") || false;
+        packageSelection[vlm.path.join(p.location, "/")]
+            = (yargv["add-changed"] && "changed") || false;
       });
     } catch (error) {
       if (error.code !== 1) throw error;
       // Otherwise possibly no commit since last release.
     }
   }
-  if (!addAll && yargv.addDirty) {
+  if (!addAll && yargv["add-dirty"]) {
     vlm.info("Adding dirty packages to initial selection.");
     (await vlm.execute(`git status --porcelain=v1`))
         .split("\n")
@@ -234,7 +235,7 @@ exports.handler = async (yargv) => {
       }
       if (vlm.shell.test("-f", vlm.path.join(sourceDirectory, "babel.config.js"))) {
         const result = await vlm.delegate(`babel ${sourceDirectory} --out-dir ${targetDirectory}`,
-            { spawn: { env: { ...process.env, TARGET_ENV: yargv.babelTargetEnv } } });
+            { spawn: { env: { ...process.env, TARGET_ENV: yargv["babel-target-env"] } } });
         if (!String(result).match(/Successfully compiled/)) {
           selection.failure = "babel transpilation not successful";
           vlm.error(`${selection.failure} for ${vlm.theme.package(name)}`);
@@ -286,15 +287,15 @@ exports.handler = async (yargv) => {
     }
   }
 
-  if ((yargv.postExecute || []).length) {
+  if ((yargv["post-execute"] || []).length) {
     selections.forEach(({ name, targetDirectory, failure }) => {
       if (failure) {
         vlm.info(`Skipping post-execute(s) '${
-            yargv.postExecute.map(exec => vlm.theme.executable(exec)).join("', '")}' for '${
+            yargv["post-execute"].map(exec => vlm.theme.executable(exec)).join("', '")}' for '${
           vlm.theme.package(name)}'`,
           `because of a previous failure: ${failure}`);
       } else {
-        for (const postExecute of yargv.postExecute) {
+        for (const postExecute of yargv["post-execute"]) {
           const command = postExecute
               .replace(/\$ASSEMBLY_TARGET/g, targetDirectory)
               .replace(/\$PACKAGE_NAME/g, name);

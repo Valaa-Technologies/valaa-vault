@@ -48,9 +48,9 @@ const nodeCheck = ">=8.10.0";
 const npmCheck = ">=5.0.0";
 
 const defaultPaths = {
-  poolBase: path.posix.resolve("."),
-  poolDirectories: ["valma.bin/", "node_modules/.bin/"],
-  globalPool: process.env.VLM_GLOBAL_POOL || (shell.which("vlm") || "").slice(0, -3),
+  "pool-base": path.posix.resolve("."),
+  "pool-directories": ["valma.bin/", "node_modules/.bin/"],
+  "global-pool": process.env.VLM_GLOBAL_POOL || (shell.which("vlm") || "").slice(0, -3),
 };
 
 const defaultCommandPrefix = "valma-";
@@ -707,17 +707,17 @@ module.exports = {
         },
         "pool-base": {
           group: "Valma root options:",
-          type: "string", default: defaultPaths.poolBase, global: false,
+          type: "string", default: defaultPaths["pool-base"], global: false,
           description: "Initial pool base path for gathering pools through all parent paths.",
         },
         "pool-directories": {
           group: "Valma root options:", array: true,
-          type: "string", default: defaultPaths.poolDirectories, global: false,
+          type: "string", default: defaultPaths["pool-directories"], global: false,
           description: "Pool directories are appended to current pool base to locate pools",
         },
         "global-pool": {
           group: "Valma root options:",
-          type: "string", default: defaultPaths.globalPool || null, global: false,
+          type: "string", default: defaultPaths["global-pool"] || null, global: false,
           description: "Global pool path is the last pool to be searched",
         },
         "bash-completion": {
@@ -854,7 +854,7 @@ _vlm.vargs = globalVargs;
 _vlm.argv = processArgv;
 _vlm.vargv = _vlm._parseUntilLastPositional(_vlm.argv, module.exports.command);
 
-const _commandPrefix = _vlm.vargv.commandPrefix;
+const _commandPrefix = _vlm.vargv["command-prefix"];
 
 _vlm.verbosity = _vlm.isCompleting ? 0 : _vlm.vargv.verbose;
 _vlm.interactive = _vlm.isCompleting ? 0 : _vlm.vargv.interactive;
@@ -890,11 +890,11 @@ _vlm.ifVerbose(1).babble("phase 1, init:", "determine global options and availab
 // When a command begins with ./ or contains the command prefix (if it
 // is non-empty) it is considered a direct file valma command.
 // Its parent directory is made the initial "file" pool.
-let _poolBase = _vlm.vargv.poolBase;
+let _poolBase = _vlm.vargv["pool-base"];
 let _filePoolPath;
 if ((_commandPrefix && (_vlm.vargv.command || "").includes(_commandPrefix))
     || (_vlm.vargv.command || "").slice(0, 2) === "./") {
-  if (_vlm.vargv.isCompleting) process.exit(0); // Let bash filename completion do its thing.
+  if (_vlm.isCompleting) process.exit(0); // Let bash filename completion do its thing.
   const commandMatcher = new RegExp(`(.*/)?(\\.?)${_commandPrefix}(.*?)(.js)?$`);
   const match = _vlm.vargv.command.match(commandMatcher);
   _vlm.vargv.command = match ? `${match[2]}${match[3]}` : "";
@@ -963,7 +963,7 @@ async function handler (vargv) {
   const fullyBuiltin = _vlm.isCompleting && !vargv.command;
   const contextVLM = vargv.vlm;
 
-  const needNPM = vargv.command && vargv.npmConfigEnv && !process.env.npm_package_name;
+  const needNPM = vargv.command && vargv["npm-config-env"] && !process.env.npm_package_name;
   const needVLMPath = !fullyBuiltin && !process.env.VLM_PATH;
   const needForward = !fullyBuiltin && needVLMPath;
 
@@ -988,7 +988,7 @@ async function handler (vargv) {
     if (!shouldForwardVLM) return undefined;
     Object.assign(process.env, {
       VLM_PATH: process.env.VLM_PATH || pool.path,
-      VLM_GLOBAL_POOL: process.env.VLM_GLOBAL_POOL || _vlm.vargv.globalPool,
+      VLM_GLOBAL_POOL: process.env.VLM_GLOBAL_POOL || _vlm.vargv["global-pool"],
       INIT_CWD: process.cwd(),
       PATH: `${[
         pool.path,
@@ -1176,7 +1176,7 @@ async function execute (args, options = {}) {
         })
         .then(resolve, failure);
 
-    if (options.dryRun || (options.dryRun !== false && this.vargv && this.vargv.dryRun)) {
+    if (options.dryRun || ((options.dryRun !== false) && this.vargv && this.vargv["dry-run"])) {
       executeVLM.echo("dry-run: skipping execution and returning:",
           executeVLM.theme.blue(options.dryRunResult));
       maybeOutput = options.dryRunResult;
@@ -1300,8 +1300,8 @@ async function _invoke (commandSelector, argv) {
   }
 
   const contextVargv = this.contextVLM.vargv;
-  const commandGlob = __underToSlash((contextVargv.revealHidden || this.isCompleting)
-      ? __globFromPrefixSelector(commandSelector, contextVargv.revealHidden)
+  const commandGlob = __underToSlash((contextVargv["reveal-hidden"] || this.isCompleting)
+      ? __globFromPrefixSelector(commandSelector, contextVargv["reveal-hidden"])
       : __globFromExactSelector(commandSelector || "*"));
   const isWildcardCommand = __isWildcardCommand(commandSelector);
   const introspect = this.contextVLM._determineIntrospection(
@@ -1319,16 +1319,18 @@ async function _invoke (commandSelector, argv) {
   const activeCommands = this._selectActiveCommands(
       commandGlob, argv, introspect, isWildcardCommand);
 
-  if (this.isCompleting || contextVargv.bashCompletion) {
+  if (this.isCompleting || contextVargv["bash-completion"]) {
     globalVargs.completion("bash-completion", (current, argvSoFar) => {
-      const rule = __underToSlash(__globFromPrefixSelector(argvSoFar._[1], argvSoFar.revealHidden));
+      const rule = __underToSlash(
+          __globFromPrefixSelector(argvSoFar._[1], argvSoFar["reveal-hidden"]));
       const ret = [].concat(...this._activePools.map(pool => pool.listing
           .filter(node => !__isDirectory(node) && minimatch(__underToSlash(node.name || ""), rule,
-              { dot: argvSoFar.revealHidden }))
+              { dot: argvSoFar["reveal-hidden"] }))
           .map(node => __valmaCommandFromPath(node.name))));
       return ret;
     });
-    globalVargs.parse(contextVargv.bashCompletion ? ["bash-completion"] : process.argv.slice(2));
+    globalVargs.parse(
+        contextVargv["bash-completion"] ? ["bash-completion"] : process.argv.slice(2));
     return 0;
   }
 
@@ -1341,7 +1343,7 @@ async function _invoke (commandSelector, argv) {
     return introspect.builtinHelp
         ? this._renderBuiltinHelp(introspect)
         : this._introspectCommands(introspect, activeCommands, commandGlob,
-            isWildcardCommand, contextVargv.enableDisabled);
+            isWildcardCommand, contextVargv["enable-disabled"]);
   }
 
   if (!isWildcardCommand) {
@@ -1357,7 +1359,7 @@ async function _invoke (commandSelector, argv) {
 
   // Phase 4: Dispatch the command(s)
 
-  const dryRunCommands = contextVargv.dryRun && {};
+  const dryRunCommands = contextVargv["dry-run"] && {};
   let ret = [];
 
   this.ifVerbose(1)
@@ -1400,7 +1402,7 @@ async function _invoke (commandSelector, argv) {
         ret = ret.concat(subIntrospect.builtinHelp
             ? activeCommand.vlm._renderBuiltinHelp(subIntrospect)
             : this._introspectCommands(subIntrospect, { [commandName]: activeCommand },
-                commandSelector, isWildcardCommand, subVLM.vargv.enableDisabled));
+                commandSelector, isWildcardCommand, subVLM.vargv["enable-disabled"]));
       } else if (isWildcardCommand && activeCommand.disabled) {
         this.ifVerbose(1)
             .info(`Skipping disabled command '${this.theme.command(commandName)}'`,
@@ -1488,7 +1490,7 @@ async function _invoke (commandSelector, argv) {
   }
   if (dryRunCommands) {
     this._introspectCommands(this.contextVLM._determineIntrospection(module),
-        dryRunCommands, commandSelector, isWildcardCommand, contextVargv.enableDisabled);
+        dryRunCommands, commandSelector, isWildcardCommand, contextVargv["enable-disabled"]);
   }
   return isWildcardCommand ? ret : ret[0];
 }
@@ -1564,9 +1566,9 @@ function _refreshAvailablePools () {
   }
   this._availablePools.push(...this._locateDependedPools(
       _poolBase,
-      _vlm.vargv.poolDirectories,
+      _vlm.vargv["pool-directories"],
       _poolBase === path.posix.resolve(".") ? "." : _poolBase));
-  this._availablePools.push({ name: "global", path: _vlm.vargv.globalPool });
+  this._availablePools.push({ name: "global", path: _vlm.vargv["global-pool"] });
 }
 
 function _locateDependedPools (initialPoolBase, poolDirectories, relativePoolBase) {
@@ -1638,7 +1640,7 @@ function _selectActiveCommands (commandGlob, argv, introspect, isWildcardCommand
     pool.stats = {};
     pool.listing.forEach(file => {
       const normalizedName = __underToSlash(file.name);
-      const matches = minimatch(normalizedName, commandGlob, { dot: this.vargv.revealHidden });
+      const matches = minimatch(normalizedName, commandGlob, { dot: this.vargv["reveal-hidden"] });
       this.ifVerbose(3)
           .expound(`     evaluating file ${file.name}`, "matches:", matches, "vs glob:",
               commandGlob, ", dir:", __isDirectory(file), ", normalizedName:", normalizedName);
@@ -1661,18 +1663,18 @@ function _selectActiveCommands (commandGlob, argv, introspect, isWildcardCommand
           this.ifVerbose(2)
               .babble(`matching command '${commandName}' module found at`, poolCommand.linkPath);
         } catch (error) {
-          if (!this.isCompleting && !introspect && !this.vargv.dryRun) throw error;
+          if (!this.isCompleting && !introspect && !this.vargv["dry-run"]) throw error;
           poolCommand.module = false;
           poolCommand.disabled = poolCommand.broken = error;
           poolCommand.explanation = `module require threw: ${String(error)}`;
-          this.ifVerbose(this.vargv.dryRun ? 0 : 1)
+          this.ifVerbose(this.vargv["dry-run"] ? 0 : 1)
               .exception(error, `require() for command '${commandName}' at "${
                   poolCommand.linkPath}"`);
         }
       }
       const module = poolCommand.module;
       if (!module || !module.command || !module.describe || !module.handler) {
-        if (this.isCompleting || introspect || this.vargv.dryRun) {
+        if (this.isCompleting || introspect || this.vargv["dry-run"]) {
           ret[commandName] = { ...poolCommand };
           return;
         }
@@ -1723,7 +1725,7 @@ function _selectActiveCommands (commandGlob, argv, introspect, isWildcardCommand
 
       subVargs.usage(module.command.replace(exportedCommandName, "$0"), description);
       if (!activeCommand.disabled
-          || (activeCommand.broken ? this.vargv.broken : this.vargv.enableDisabled)) {
+          || (activeCommand.broken ? this.vargv.broken : this.vargv["enable-disabled"])) {
         globalVargs.command(module.command, description,
             ...(!activeCommand.disabled && module.builder ? [module.builder] : []), () => {});
       } else {
@@ -1764,7 +1766,7 @@ async function __loadNPMConfigVariables () {
   Upside of current solution is that running "npm config list" is very fast, and can be optimized
   further too: npm can be programmatically invoked.
   */
-  if (_vlm.vargv.packageConfigEnv) {
+  if (_vlm.vargv["package-config-env"]) {
     _vlm.error("did not load npm_package_* variables (not implemented yet)");
   }
   Object.assign(process.env, {
@@ -1868,14 +1870,14 @@ function _determineIntrospection (module, selector, isWildcard, invokeEntry, raw
 
   if (!ret.entryIntro) {
     // show default listing
-    if (!this.vargv.dryRun) {
+    if (!this.vargv["dry-run"]) {
       if (selector) return undefined;
       ret.defaultUsage = true;
     }
     ret.show.pool = 1;
     ret.show.usage = 2;
     ret.show.status = 3;
-  } else if (!selector && !this.vargv.dryRun && !this.vargv.matchAll) {
+  } else if (!selector && !this.vargv["dry-run"] && !this.vargv["match-all"]) {
     // Introspect context
     ret.aggregatePool = { isAggregate: true, path: path.dirname(process.argv[1]), commands: {} };
     ret.aggregatePool.commands.vlm = {
@@ -1887,7 +1889,7 @@ function _determineIntrospection (module, selector, isWildcard, invokeEntry, raw
   }
   ret.displayHeaders = !ret.aggregatePool && isWildcard;
   if (!ret.show.name && !ret.show.usage) {
-    if (this.vargv.dryRun && !isWildcard) ret.show.usage = 1;
+    if (this.vargv["dry-run"] && !isWildcard) ret.show.usage = 1;
     else if (!ret.entryIntro) ret.show.name = 1;
   }
   return ret;
@@ -2361,7 +2363,7 @@ function _flushPendingConfigWrites () {
 function _commitUpdates (filename, configStatus, createUpdatedConfig) {
   // TODO(iridian): Implement locally pending config writes. See _flushPendingConfigWrites
   if (!configStatus.updated) return;
-  if (_vlm.vargv && _vlm.vargv.dryRun) {
+  if (_vlm.vargv && _vlm.vargv["dry-run"]) {
     this.info(`commit '${filename}' updates --dry-run:`, "not committing queued updates to file");
     return;
   }
@@ -2375,7 +2377,14 @@ function _commitUpdates (filename, configStatus, createUpdatedConfig) {
 function __createVargs (args, cwd = process.cwd()) {
   // Get a proper, clean yargs instance for neat extending.
   const ret = yargs(args, cwd, require);
-
+  ret.parserConfiguration({
+    "short-option-groups": true,
+    "camel-case-expansion": false,
+    "dot-notation": true,
+    "parse-numbers": true,
+    "boolean-negation": true,
+    "deep-merge-config": false
+  });
   // Extend option/options with:
   //   interactive
   //   causes

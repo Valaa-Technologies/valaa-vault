@@ -22,7 +22,7 @@ exports.builder = (yargs) => yargs.option({
     default: true,
     description: `Outputs a heartbeat message everytime the keepalive heartbeat is emitted.`,
   },
-  stopClockEvent: {
+  "stop-clock-event": {
     type: "string",
     description: `The clock event name which stops the worker on next tick`,
   },
@@ -51,7 +51,7 @@ exports.builder = (yargs) => yargs.option({
     type: "string", array: true, default: [],
     description: `List of spindle id's which are require'd before gateway creation.`,
   },
-  cacheBasePath: {
+  "cache-base": {
     type: "string",
     default: "dist/perspire/cache/",
     description: "Cache base path for indexeddb sqlite shim and other cache storages",
@@ -139,7 +139,7 @@ exports.handler = async (yargv) => {
         yargv.exec.path}"`);
   }
 
-  vlm.shell.mkdir("-p", yargv.cacheBasePath);
+  vlm.shell.mkdir("-p", yargv["cache-base"]);
   if ((revelationPath[0] !== "/") && (revelationPath[0] !== ".")) {
     revelationPath = `./${revelationPath}`;
   }
@@ -148,7 +148,7 @@ exports.handler = async (yargv) => {
   const server = new PerspireServer({
     logger: vlm,
     spindleIds: yargv["spindle-ids"],
-    cacheBasePath: yargv.cacheBasePath,
+    cacheBasePath: yargv["cache-base"],
     siteRoot,
     domainRoot,
     revelationRoot,
@@ -247,10 +247,12 @@ exports.handler = async (yargv) => {
           typeof yargv.heartbeat === "string" ? { info: yargv.heartbeat }
               : yargv.heartbeat ? {} : undefined,
           tickIndex);
-      const stopEntrySearch = yargv.stopClockEvent && vlm.clockEvents;
+      const stopEntrySearch = yargv["stop-clock-event"] && vlm.clockEvents;
       if (stopEntrySearch) {
         while (nextUncheckedEvent < stopEntrySearch.length) {
-          if (stopEntrySearch[nextUncheckedEvent++].event === yargv.stopClockEvent) return tickRet;
+          if (stopEntrySearch[nextUncheckedEvent++].event === yargv["stop-clock-event"]) {
+            return tickRet;
+          }
         }
       }
       if (keepaliveInterval >= 0) return undefined;

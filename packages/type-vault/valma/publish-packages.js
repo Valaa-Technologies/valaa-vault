@@ -48,7 +48,7 @@ exports.handler = (yargv) => {
       const publishResult = vlm.shell.exec(executable);
       if (!publishResult.code && packagePath) {
         vlm.info(`Successfully published with '${vlm.theme.executable(executable)}'`);
-        if (yargv.deletePublished) {
+        if (yargv["delete-published"]) {
           vlm.info("\tremoving the package assembly");
           vlm.shell.rm("-rf", packagePath);
         }

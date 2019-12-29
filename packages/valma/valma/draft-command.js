@@ -144,7 +144,7 @@ function _draftSource (command, yargv) {
   const components = yargv.skeleton ? _draftSkeleton() : _draftExample();
   return `${(command[0] === ".") || command.includes("/.") ? "" : "#!/usr/bin/env vlm\n\n"
 }${yargv.header || ""
-}${!yargv.exportsVlm ? "" : `exports.vlm = ${yargv.exportsVlm};\n`
+}${!yargv["exports-vlm"] ? "" : `exports.vlm = ${yargv["exports-vlm"]};\n`
 }exports.command = "${command}";
 exports.brief = "${yargv.brief || ""}";
 exports.describe = "${yargv.describe || yargv.brief || ""}";

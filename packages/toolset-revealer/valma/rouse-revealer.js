@@ -48,13 +48,13 @@ exports.builder = function builder (yargs) {
 };
 exports.handler = async function handler (yargv) {
   const vlm = yargv.vlm;
-  const contentBase = yargv.contentBase;
+  const contentBase = yargv["content-base"];
   if (!vlm.shell.test("-d", contentBase)) {
     vlm.info("Creating and populating an initially missing content base directory",
         vlm.theme.path(contentBase), `(for this first time only) from ${
-        vlm.theme.path(String(yargv.contentSource))}`);
+        vlm.theme.path(String(yargv["content-source"]))}`);
     vlm.shell.mkdir("-p", contentBase);
-    (yargv.contentSource || []).forEach(source =>
+    (yargv["content-source"] || []).forEach(source =>
         vlm.shell.cp("-R", vlm.path.join(source, "*"), contentBase));
   }
 

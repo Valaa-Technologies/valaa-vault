@@ -1,7 +1,7 @@
 // @flow
 
 import type { PrefixRouter, Route } from "~/rest-api-spindle/MapperService";
-import { dumpObject, thenChainEagerly } from "~/tools";
+import { thenChainEagerly } from "~/tools";
 
 export default function createProjector (router: PrefixRouter, route: Route) {
   return {
@@ -9,7 +9,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this);
-      this.toSuccessBodyFields = router.appendSchemaSteps(this.runtime, route.schema.response[200],
+      this.toResponseContent = router.appendSchemaSteps(this.runtime, route.schema.response[200],
           { expandProperties: true });
     },
 
@@ -32,18 +32,11 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       }
       const { fields } = request.query;
       return thenChainEagerly(scope.resource, [
-        vResource => vResource.get(this.toSuccessBodyFields, { scope, verbosity: 0 }),
-        (fields) && (results => router
-            .pickResultFields(valkOptions, results, fields, route.schema.response[200])),
-        results => {
-          reply.code(200);
-          router.replySendJSON(reply, results);
-          router.infoEvent(2, () => [
-            `${this.name}:`,
-            "\n\tresults:", ...dumpObject(results),
-          ]);
-          return true;
-        }
+        vResource => vResource.get(this.toResponseContent, { scope, verbosity: 0 }),
+        (fields) && (responseContent => router
+            .pickResultFields(valkOptions, responseContent, fields, route.schema.response[200])),
+        responseContent => router
+            .fillReplyFromResponse(responseContent, this.runtime, valkOptions),
       ]);
     },
   };

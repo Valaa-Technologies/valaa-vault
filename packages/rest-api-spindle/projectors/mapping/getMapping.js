@@ -13,8 +13,8 @@ export default function createProjector (router: PrefixRouter, route: Route) {
     prepare () {
       this.runtime = router.createProjectorRuntime(this);
       _createToMapping(router, route, this.runtime);
-      this.toSuccessBodyFields = router.appendSchemaSteps(this.runtime, route.schema.response[200],
-        { expandProperties: true });
+      this.toResponseContent = router.appendSchemaSteps(
+          this.runtime, route.schema.response[200], { expandProperties: true });
     },
 
     preload () {
@@ -45,25 +45,20 @@ export default function createProjector (router: PrefixRouter, route: Route) {
 
       const { fields } = request.query;
       return thenChainEagerly(scope.mapping, [
-        vMapping => vMapping.get(this.toSuccessBodyFields, valkOptions),
-        results => ((!fields || !results)
-            ? results
-            : router.pickResultFields(valkOptions, results, fields, route.schema.response[200])),
-        results => {
-          if (!results) {
+        vMapping => vMapping.get(this.toResponseContent, valkOptions),
+        responseContent => ((!fields || !responseContent)
+            ? responseContent
+            : router.pickResultFields(
+                valkOptions, responseContent, fields, route.schema.response[200])),
+        responseContent => {
+          if (!responseContent) {
             reply.code(404);
             reply.send(`No mapping '${route.config.relation.name}' found from route resource ${
               scope.resource.getRawId()} to ${scope.target.getRawId()}`);
             return true;
           }
-          reply.code(200);
-          router.replySendJSON(reply, results);
-          router.infoEvent(2, () => [
-            `${this.name}:`,
-            "\n\tresults:", ...dumpObject(results),
-          ]);
-          return true;
-        }
+          return router.fillReplyFromResponse(responseContent, this.runtime, valkOptions);
+        },
       ]);
     },
   };

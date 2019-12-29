@@ -48,7 +48,9 @@ export default function createProjector (router: PrefixRouter, route: Route) {
           return true;
         },
       ], (error) => {
-        valkOptions.discourse.releaseFabricator({ abort: error });
+        if (valkOptions.discourse.isActiveFabricator()) {
+          valkOptions.discourse.releaseFabricator({ abort: error });
+        }
         throw router.wrapErrorEvent(error, wrap,
           "\n\trequest.query:", ...dumpObject(request.query),
           "\n\tscope.resource:", ...dumpObject(scope.resource),

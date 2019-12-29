@@ -1,18 +1,57 @@
+import path from "path";
+
+import Vrapper from "~/engine/Vrapper";
+
 import { thenChainEagerly } from "~/tools/thenChainEagerly";
+import { dumpObject } from "~/tools/wrapError";
 
 export function _addResourceProjector (router, route, projector) {
   const resourceSchema = ((route.config || {}).resource || {}).schema;
   if (!resourceSchema) return;
   const idParamName = route.url.match(/:([^/]*)/)[1];
   (router._resourceProjectors || (router._resourceProjectors = []))
-      .push([router.getResourceHRefPrefix(resourceSchema), projector, idParamName]);
+      .push([_getResourceHRefPrefix(router, resourceSchema), projector, idParamName]);
+}
+
+function _findResourceProjector (router, requestURL) {
+  for (const projectorInfo of router._resourceProjectors) {
+    if (requestURL.slice(0, projectorInfo[0].length) === projectorInfo[0]) return projectorInfo;
+  }
+  return [];
+}
+
+export function _createGetRelSelfHRef (router, runtime, type, resourceSchema) {
+  if (!(((resourceSchema || {}).valospace || {}).gate || {}).name) {
+    router.errorEvent(
+        `Trying to generate a href to a resource without valospace.gate.name:`,
+        "\n\truntime:", (runtime || {}).name,
+        "\n\tresourceSchema:", ...dumpObject(resourceSchema, { nest: true }),
+        "\n\tSKIPPING FIELD");
+    return undefined;
+  }
+  const prefix = _getResourceHRefPrefix(router, resourceSchema);
+  const ret = (resources/* , scope */) =>
+      path.posix.join(prefix,
+          ...[].concat(resources).map(v => (!(v instanceof Vrapper) ? v : v.getRawId())));
+  if (type) runtime[type] = ret;
+  return ret;
+}
+
+export function _getResourceHRefPrefix (router, maybeResourceSchema) {
+  const resourceSchema = router.derefSchema(maybeResourceSchema);
+  const routeName = ((resourceSchema.valospace || {}).gate || {}).name;
+  if (typeof routeName !== "string") {
+    throw new Error("href requested of a resource without a valospace.gate.name");
+  }
+  return path.posix.join("/", router.getRoutePrefix(), routeName, "/");
 }
 
 export function _relRequest (router, rel, requestOptions) {
   if (rel !== "self") {
     return { statusCode: 501, payload: "Only 'rel: self' nested expansions supported" };
   }
-  const [prefix, selfProjector, idParamName] = _findSelfProjector(router, requestOptions.url);
+  const [prefix, selfProjector, idParamName] =
+      _findResourceProjector(router, requestOptions.url);
   if (selfProjector) {
     /*
     console.log("self-projector found:", prefix,
@@ -30,7 +69,7 @@ export function _relRequest (router, rel, requestOptions) {
         }, {
           // reply
           code (statusCode) { response.statusCode = statusCode; },
-          sendJSON (payloadJSON) { response.payloadJSON = payloadJSON; },
+          sendLoopbackContent (payloadJSON) { response.payloadJSON = payloadJSON; },
           send (payload) { response.payload = payload; },
         }),
         () => response);
@@ -50,19 +89,4 @@ export function _relRequest (router, rel, requestOptions) {
   // having clients make separate queries for the entries.
   return router.getRootFastify()
       .inject(requestOptions);
-}
-
-export function _replySendJSON (router, reply, payloadJSON) {
-  if (reply.sendJSON) {
-    reply.sendJSON(payloadJSON);
-  } else {
-    reply.send(JSON.stringify(payloadJSON, null, 2));
-  }
-}
-
-function _findSelfProjector (router, requestURL) {
-  for (const projectorInfo of router._resourceProjectors) {
-    if (requestURL.slice(0, projectorInfo[0].length) === projectorInfo[0]) return projectorInfo;
-  }
-  return [];
 }

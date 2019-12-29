@@ -13,6 +13,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this);
+      router.createGetRelSelfHRef(this.runtime, "resourceHRef", route.config.resource.schema);
       this.toPatchTarget = router.appendSchemaSteps(this.runtime, route.config.resource.schema);
       if (this.toPatchTarget.length <= 1) this.toPatchTarget = undefined;
     },
@@ -66,23 +67,13 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         eventResult => eventResult
             && eventResult.getPersistedEvent(),
         (/* persistedEvent */) => {
-          const resourceId = scope.resource.getRawId();
-          const results = {
-            $V: {
-              href: `${router.getResourceHRefPrefix(route.config.resource.schema)}${resourceId}`,
-              rel: "self",
-            },
-          };
           reply.code(201);
-          router.replySendJSON(reply, results);
-          router.infoEvent(2, () => [
-            `${this.name}:`,
-            "\n\tresults:", ...dumpObject(results),
-          ]);
-          return true;
+          return router.fillReplyFromResponse(scope.resource, this.runtime, valkOptions);
         },
       ], (error) => {
-        valkOptions.discourse.releaseFabricator({ abort: error });
+        if (valkOptions.discourse.isActiveFabricator()) {
+          valkOptions.discourse.releaseFabricator({ abort: error });
+        }
         throw router.wrapErrorEvent(error, wrap,
             "\n\trequest.query:", ...dumpObject(request.query),
             "\n\trequest.body:", ...dumpObject(request.body),

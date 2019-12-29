@@ -10,10 +10,12 @@ import { _createPrefixRouter, _projectPrefixRoutesFromView } from "./_routerOps"
 import {
   _createProjectorRuntime, _preloadRuntimeResources, _buildRuntimeVALKOptions, _resolveRuntimeRules,
 } from "./_projectorOps";
-import { _appendSchemaSteps, _derefSchema, _getResourceHRefPrefix } from "./_buildOps";
+import { _appendSchemaSteps, _derefSchema } from "./_buildOps";
 import { _getIdentityRoles } from "./_identityOps";
-import { _filterResults, _sortResults, _paginateResults, _pickResultFields } from "./_resultOps";
-import { _addResourceProjector, _relRequest, _replySendJSON } from "./_relOps";
+import {
+  _filterResults, _sortResults, _paginateResults, _pickResultFields, _fillReplyFromResponse,
+} from "./_resultOps";
+import { _addResourceProjector, _createGetRelSelfHRef, _relRequest } from "./_relOps";
 import { _updateResource } from "./_updateResourceOps";
 import { _vakonpileVPath } from "./_vakonpileOps";
 
@@ -219,6 +221,10 @@ export default class MapperService extends FabricEventTarget {
 
   // Build ops
 
+  derefSchema (maybeJSONSchemaOrName: string | Object) {
+    return _derefSchema(this, maybeJSONSchemaOrName);
+  }
+
   appendSchemaSteps (runtime, maybeJSONSchema, {
     expandProperties, isValOSFields, targetVAKON = ["§->"], entryTargetVAKON,
   } = {}) {
@@ -293,21 +299,6 @@ export default class MapperService extends FabricEventTarget {
     }
   }
 
-  getResourceHRefPrefix (maybeJSONSchema: string | Object) {
-    let schema;
-    try {
-      schema = this.derefSchema(maybeJSONSchema);
-      return _getResourceHRefPrefix(this, schema);
-    } catch (error) {
-      throw this.wrapErrorEvent(error, new Error("getResourceHRefPrefix"),
-          "\n\tschema:", dumpify(schema || maybeJSONSchema, { indent: 2 }));
-    }
-  }
-
-  derefSchema (maybeJSONSchemaOrName: string | Object) {
-    return _derefSchema(this, maybeJSONSchemaOrName);
-  }
-
   // Result ops
 
   filterResults (...rest) {
@@ -326,6 +317,10 @@ export default class MapperService extends FabricEventTarget {
     return _pickResultFields(this, ...rest);
   }
 
+  fillReplyFromResponse (...rest) {
+    return _fillReplyFromResponse(this, ...rest);
+  }
+
   // Update resource ops
 
   updateResource (vResource, patch,
@@ -335,16 +330,27 @@ export default class MapperService extends FabricEventTarget {
 
   // Rel ops
 
-  replySendJSON (reply, json) {
-    return _replySendJSON(this, reply, json);
-  }
-
   addResourceProjector (route, projector) {
     return _addResourceProjector(this, route, projector);
   }
 
   relRequest (rel, options) {
     return _relRequest(this, rel, options);
+  }
+
+  createGetRelSelfHRef (
+      runtime: Object,
+      type: "resourceHRef" | "targetHRef" | null,
+      maybeJSONSchema: string | Object) {
+    let schema;
+    try {
+      schema = this.derefSchema(maybeJSONSchema);
+      return _createGetRelSelfHRef(this, runtime, type, schema);
+    } catch (error) {
+      throw this.wrapErrorEvent(error, new Error("resourceHRef"),
+          "\n\tschema:", ...dumpObject(schema || maybeJSONSchema),
+      );
+    }
   }
 
   // Identity ops

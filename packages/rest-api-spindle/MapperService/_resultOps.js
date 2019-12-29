@@ -1,6 +1,10 @@
 // @flow
 
-import { thenChainEagerly } from "~/tools";
+import { Readable, Transform, Duplex } from "stream";
+
+import Vrapper from "~/engine/Vrapper";
+
+import { dumpObject, thenChainEagerly } from "~/tools";
 
 const FieldSchemaTag = Symbol("FieldSchema");
 
@@ -181,3 +185,72 @@ export function _pickResultFields (router, valkOptions, rootResult, fields/* , r
     return subFields;
   }
 }
+
+export function _fillReplyFromResponse (router, responseContent, runtime, valkOptions) {
+  const scope = valkOptions.scope;
+  const reply = scope.reply;
+  if (reply.sent) return true;
+  if (!reply.statusCode) reply.code(200);
+
+  if (runtime.resourceHRef) {
+    const relResponse = { $V: {
+      rel: "self", href: runtime.resourceHRef(responseContent, scope),
+    } };
+    if (runtime.targetHRef) {
+      relResponse.$V.target = { $V: {
+        rel: "self", href: runtime.targetHRef(responseContent[2], scope),
+      } };
+    }
+    return _fillReplyFromResponse(router, relResponse, {}, valkOptions);
+  }
+  if (reply.sendLoopbackContent) {
+    reply.sendLoopbackContent(responseContent);
+  } else if ((responseContent == null) || (typeof responseContent !== "object")) {
+    reply.send(responseContent);
+  } else if (Object.getPrototypeOf(responseContent) === Object.prototype
+      || Array.isArray(responseContent)) {
+    reply.send(JSON.stringify(responseContent, null, 2));
+  } else if (responseContent instanceof Vrapper) {
+    switch (responseContent.getTypeName()) {
+      case "Entity":
+      case "Relation":
+      case "Media":
+      default:
+    }
+  } else if (Buffer.isBuffer(responseContent)) {
+    reply.send(responseContent);
+  } else if (responseContent instanceof ArrayBuffer) {
+    reply.send(Buffer.from(responseContent));
+  } else if (ArrayBuffer.isView(responseContent)) {
+    reply.send(Buffer.from(responseContent.buffer));
+  } else if (responseContent instanceof Readable
+      || responseContent instanceof Transform
+      || responseContent instanceof Duplex) {
+    reply.send(responseContent);
+  } else if (responseContent.body !== undefined) {
+    // A proxied fetch response
+    // TODO(iridian, 2019-12): Handle/forward all other response fields
+    // such as redirections, cookies etc.
+    return _fillReplyFromResponse(router, responseContent.body, runtime, valkOptions);
+/*
+  } else if (responseContent instanceof ReadableStream) {
+    _fillReplyWithReadableStream(reply, responseContent);
+  } else if (responseContent instanceof Blob) {
+    _fillReplyWithReadableStream(reply, responseContent.stream());
+*/
+  } else {
+    throw new Error(`Unrecognized complex response object of type ${
+      (responseContent.constructor || {}).name || "<constructor missing>"}`);
+  }
+  router.infoEvent(2, () => [
+    `${this.name}:`, ...dumpObject(scope.resource),
+    "\n\tresponseContent:", ...dumpObject(responseContent),
+  ]);
+  return true;
+}
+
+/*
+function _fillReplyWithReadableStream (reply, readable) {
+
+}
+*/

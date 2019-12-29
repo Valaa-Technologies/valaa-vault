@@ -12,9 +12,9 @@ export default function createProjector (router: PrefixRouter, route: Route) {
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this);
-      this.toSuccessBodyFields = ["§->"];
+      this.toResponseContent = ["§->"];
       router.appendSchemaSteps(this.runtime, route.schema.response[200],
-          { expandProperties: true, targetVAKON: this.toSuccessBodyFields });
+          { expandProperties: true, targetVAKON: this.toResponseContent });
 
       router.addResourceProjector(route, this);
     },
@@ -38,19 +38,12 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       ]);
 
       const { fields } = request.query;
-      return thenChainEagerly(valkOptions.scope.resource, [
-        vResource => vResource.get(this.toSuccessBodyFields, valkOptions),
-        (fields) && (results => router
-            .pickResultFields(valkOptions, results, fields, route.schema.response[200])),
-        results => {
-          reply.code(200);
-          router.replySendJSON(reply, results);
-          router.infoEvent(2, () => [
-            `${this.name}:`, ...dumpObject(scope.resource),
-            "\n\tresults:", ...dumpObject(results),
-          ]);
-          return true;
-        }
+      return thenChainEagerly(scope.resource, [
+        vResource => vResource.get(this.toResponseContent, valkOptions),
+        (fields) && (responseContent => router
+            .pickResultFields(valkOptions, responseContent, fields, route.schema.response[200])),
+        responseContent => router
+            .fillReplyFromResponse(responseContent, this.runtime, valkOptions),
       ]);
     },
   };

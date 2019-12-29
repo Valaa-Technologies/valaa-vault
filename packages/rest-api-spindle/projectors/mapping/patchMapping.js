@@ -13,6 +13,8 @@ export default function createProjector (router: PrefixRouter, route: Route) {
     prepare () {
       this.runtime = router.createProjectorRuntime(this);
       _createToMapping(router, route, this.runtime);
+      router.createGetRelSelfHRef(this.runtime, "resourceHRef", route.config.resource.schema);
+      router.createGetRelSelfHRef(this.runtime, "targetHRef", route.config.target.schema);
     },
 
     preload () {
@@ -36,8 +38,8 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         `\n\ttarget:`, ...dumpObject(scope.target),
       ]);
 
-      const alreadyExisting = scope.mapping;
-      if (!alreadyExisting && !scope.doCreateMapping) {
+      const isNewlyCreated = !scope.mapping;
+      if (isNewlyCreated && !scope.doCreateMapping) {
         reply.code(405);
         reply.send(`${this.name} is disabled: no doCreateMapping configured`);
         return true;
@@ -52,28 +54,15 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         () => valkOptions.discourse.releaseFabricator(),
         eventResult => eventResult && eventResult.getPersistedEvent(),
         (/* persistedEvent */) => {
-          const results = {
-            $V: {
-              href: `${router.getResourceHRefPrefix(route.config.resource.schema)}${
-                scope.resource.getRawId()}/${scope.mappingName}/${scope.target.getRawId()}`,
-              rel: "self",
-              target: { $V: {
-                href: `${router.getResourceHRefPrefix(route.config.target.schema)}${
-                  scope.target.getRawId()}`,
-                rel: "self",
-              } },
-            }
-          };
-          reply.code(alreadyExisting ? 200 : 201);
-          router.replySendJSON(reply, results);
-          router.infoEvent(2, () => [
-            `${this.name}:`,
-            "\n\tresults:", ...dumpObject(results),
-          ]);
-          return true;
-        },
+          if (isNewlyCreated) reply.code(201);
+          return router.fillReplyFromResponse(
+              [scope.resource, scope.mappingName, scope.mapping.get("target")],
+              this.runtime, valkOptions);
+      },
       ], (error) => {
-        valkOptions.discourse.releaseFabricator({ abort: error });
+        if (valkOptions.discourse.isActiveFabricator()) {
+          valkOptions.discourse.releaseFabricator({ abort: error });
+        }
         throw router.wrapErrorEvent(error, wrap,
           "\n\trequest.query:", ...dumpObject(request.query),
           "\n\trequest.body:", ...dumpObject(request.body),

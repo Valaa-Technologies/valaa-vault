@@ -1,9 +1,5 @@
 // @flow
 
-import path from "path";
-
-import { dumpObject } from "~/tools/wrapError";
-
 export function _appendSchemaSteps (
     router, runtime, jsonSchema, targetVAKON, expandProperties, isValOSFields) {
   if (jsonSchema.type === "array") {
@@ -20,16 +16,11 @@ export function _appendSchemaSteps (
         if (key === "href") {
           const targetType = ((jsonSchema.properties.target || {}).valospace || {}).resourceType;
           const targetSchema = targetType && router.derefSchema(`${targetType}#`);
-          if (!(((targetSchema || {}).valospace || {}).gate || {}).name) {
-            router.errorEvent(
-                `Trying to generate a href to a resource without valospace.gate.name:`,
-                "\n\troute:", runtime.name,
-                "\n\ttargetSchema:", ...dumpObject(targetSchema, { nest: true }),
-                "\n\tSKIPPING FIELD");
-            return;
-          }
-          op = ["§->", "target", false,
-            ["§+", _getResourceHRefPrefix(router, targetSchema), ["§->", "rawId"]],
+          const targetHRef = router.createGetRelSelfHRef(runtime, null, targetSchema);
+          if (!targetHRef) return;
+          op = [
+            "§->", "target", false,
+            (head, scope, valker) => targetHRef(valker.unpack(head), scope),
           ];
         } else if (key === "rel") {
           op = "self";
@@ -48,14 +39,6 @@ export function _appendSchemaSteps (
     });
     targetVAKON.push(objectKuery);
   }
-}
-
-export function _getResourceHRefPrefix (router, resourceSchema) {
-  const routeName = ((resourceSchema.valospace || {}).gate || {}).name;
-  if (typeof routeName !== "string") {
-    throw new Error("href requested of a resource without a valospace.gate.name");
-  }
-  return path.join("/", router.getRoutePrefix(), routeName, "/");
 }
 
 export function _derefSchema (router, schemaOrSchemaName) {

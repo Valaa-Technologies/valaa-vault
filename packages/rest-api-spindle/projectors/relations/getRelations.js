@@ -12,11 +12,11 @@ export default function createProjector (router: PrefixRouter, route: Route) {
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this);
-      this.toSuccessBodyFields = ["§->"];
+      this.toResponseContent = ["§->"];
       router.appendSchemaSteps(this.runtime, route.config.resource.schema,
-          { targetVAKON: this.toSuccessBodyFields });
+          { targetVAKON: this.toResponseContent });
       router.appendSchemaSteps(this.runtime, route.schema.response[200],
-          { expandProperties: true, targetVAKON: this.toSuccessBodyFields });
+          { expandProperties: true, targetVAKON: this.toResponseContent });
     },
 
     preload () {
@@ -41,24 +41,17 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         ...fieldRequirements
       } = request.query;
       return thenChainEagerly(scope.resource, [
-        vResource => vResource.get(this.toSuccessBodyFields, valkOptions),
-        (filter || ids || Object.keys(fieldRequirements).length) && (results => router
-            .filterResults(results, filter, ids, fieldRequirements)),
-        (sort) && (results => router
-            .sortResults(results, sort)),
-        (offset || (limit !== undefined)) && (results => router
-            .paginateResults(results, offset || 0, limit)),
-        (fields) && (results => router
-            .pickResultFields(valkOptions, results, fields, route.schema.response[200])),
-        results => {
-          reply.code(200);
-          router.replySendJSON(reply, results);
-          router.infoEvent(2, () => [
-            `${this.name}:`, ...dumpObject(scope.resource),
-            "\n\tresults:", ...dumpObject(results),
-          ]);
-          return true;
-        }
+        vResource => vResource.get(this.toResponseContent, valkOptions),
+        (filter || ids || Object.keys(fieldRequirements).length) && (responseContent => router
+            .filterResults(responseContent, filter, ids, fieldRequirements)),
+        (sort) && (responseContent => router
+            .sortResults(responseContent, sort)),
+        (offset || (limit !== undefined)) && (responseContent => router
+            .paginateResults(responseContent, offset || 0, limit)),
+        (fields) && (responseContent => router
+            .pickResultFields(valkOptions, responseContent, fields, route.schema.response[200])),
+        responseContent => router
+            .fillReplyFromResponse(responseContent, this.runtime, valkOptions),
       ]);
     },
   };

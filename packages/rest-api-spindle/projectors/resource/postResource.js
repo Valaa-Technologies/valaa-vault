@@ -9,7 +9,8 @@ import { _presolveRouteRequest } from "../_commonProjectorOps";
 
 export default function createProjector (router: PrefixRouter, route: Route) {
   return {
-    requiredRules: ["routeRoot", "doCreateResource"],
+    requiredRules: ["routeRoot"],
+    runtimeRules: ["doCreateResource"],
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this);
@@ -28,36 +29,33 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         "\n\trequest.cookies:", ...dumpObject(Object.keys(request.cookies || {})),
         "\n\trequest.body:", ...dumpObject(request.body),
       ]);
+      const { doCreateResource } = this.runtime.resolvers;
+      if (!doCreateResource) {
+        reply.code(405);
+        reply.send(`${this.name} is disabled: no runtime rule doCreateResource defined`);
+        return true;
+      }
       const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
-      const scope = valkOptions.scope;
       if (_presolveRouteRequest(router, route, this.runtime, valkOptions)) {
         return true;
       }
-      /*
+      const scope = valkOptions.scope;
       router.infoEvent(2, () => [`${this.name}:`,
+        "\n\tresolvers:", ...dumpObject(this.runtime.resolvers),
       ]);
-      */
-      if (!scope.doCreateResource) {
-        reply.code(405);
-        reply.send(`${this.name} is disabled: no scope.doCreateResource defined`);
-        return false;
-      }
       const wrap = new Error(`resource POST ${route.url}`);
       valkOptions.discourse = router.getDiscourse().acquireFabricator();
       return thenChainEagerly(valkOptions.discourse, [
-        () =>
+        () => router.resolveToScope("resource", doCreateResource, scope.routeRoot, valkOptions),
           /*
           console.log("resource POST dump:", ...dumpObject(scope.doCreateResource),
               "\n\tserviceIndex:", ...dumpObject(scope.serviceIndex),
               "\n\ttoPatchTarget:", ...dumpObject(this.toPatchTarget));
           */
-          scope.routeRoot.do(scope.doCreateResource, valkOptions),
-          // return scope.serviceIndex.do(scope.doCreateResource, valkOptions);
         vResource => {
           if (!vResource || !(vResource instanceof Vrapper)) {
             throw new Error(`${this.name} doCreateResource didn't return a resource value`);
           }
-          scope.resource = vResource;
           if (request.body) {
             router.updateResource(vResource, request.body,
                   { ...valkOptions, route, toPatchTarget: this.toPatchTarget });

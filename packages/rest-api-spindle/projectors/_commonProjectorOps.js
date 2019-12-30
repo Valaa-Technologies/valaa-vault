@@ -12,7 +12,7 @@ export function _presolveRouteRequest (router, route, runtime, valkOptions) {
       && _verifyResourceAuthorization(router, route, scope, scope.routeRoot, "route root")) {
     return true;
   }
-  if (router.resolveRuntimeRules(runtime, valkOptions)) {
+  if (router.presolveRulesToScope(runtime, valkOptions)) {
     router.warnEvent(1, () => [
       `RUNTIME RULE FAILURE ${router._routeName(route)}.`,
       "\n\trequest.query:", ...dumpObject(scope.request.query),

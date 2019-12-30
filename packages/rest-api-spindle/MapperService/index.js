@@ -8,7 +8,7 @@ import { dumpify, dumpObject, FabricEventTarget, outputError } from "~/tools";
 
 import { _createPrefixRouter, _projectPrefixRoutesFromView } from "./_routerOps";
 import {
-  _createProjectorRuntime, _preloadRuntimeResources, _buildRuntimeVALKOptions, _resolveRuntimeRules,
+  _createProjectorRuntime, _preloadRuntimeResources, _buildRuntimeVALKOptions, _resolveToScope,
 } from "./_projectorOps";
 import { _appendSchemaSteps, _derefSchema } from "./_buildOps";
 import { _getIdentityRoles } from "./_identityOps";
@@ -199,14 +199,37 @@ export default class MapperService extends FabricEventTarget {
     }
   }
 
-  resolveRuntimeRules (runtime, valkOptions) {
+  presolveRulesToScope (runtime, valkOptions) {
+    for (const [ruleName, resolveRule, requiredAtRuntime] of runtime.rulePresolvers) {
+      try {
+        if (!_resolveToScope(this, valkOptions.scope.routeRoot, valkOptions,
+            ruleName, resolveRule, requiredAtRuntime)) {
+          return true; // Failure.
+        }
+      } catch (error) {
+        throw this.wrapErrorEvent(error,
+            new Error(`presolveRulesToScope(ruleName: '${ruleName}')`),
+            "\n\tresolveRule:", ...dumpObject(resolveRule),
+            "\n\truntime:", ...dumpObject(runtime),
+            "\n\tvalkOptions:", ...dumpObject(valkOptions),
+        );
+      }
+    }
+    return false; // Success.
+  }
+
+  resolveToScope (scopeKey, [resolveRule, requiredAtRuntime], resolveHead, valkOptions) {
     try {
-      return _resolveRuntimeRules(this, runtime, valkOptions);
+      if (!_resolveToScope(
+          this, resolveHead, valkOptions, scopeKey, resolveRule, requiredAtRuntime)) {
+        throw new Error(`Runtime failure when resolving scope key '${scopeKey}'`);
+      }
+      return valkOptions.scope[scopeKey];
     } catch (error) {
       throw this.wrapErrorEvent(error,
-          new Error(`buildRuntimeVALKOptions()`),
-          "\n\truntime:", ...dumpObject(runtime),
+          new Error(`resolveToScope('${scopeKey}')`),
           "\n\tvalkOptions:", ...dumpObject(valkOptions),
+          "\n\tresolveHead:", ...dumpObject(resolveHead || valkOptions.scope.routeRoot),
       );
     }
   }

@@ -7,7 +7,7 @@ import { dumpObject } from "~/tools/wrapError";
 export default function createProjector (router: PrefixRouter /* , route: Route */) {
   return {
     requiredRules: ["routeRoot"],
-    requiredRuntimeRules: ["clientRedirectPath", "clientCookie", "sessionCookie"],
+    valueAssertedRules: ["clientRedirectPath", "clientCookie", "sessionCookie"],
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this);
@@ -34,7 +34,7 @@ export default function createProjector (router: PrefixRouter /* , route: Route 
         "\n\trequest.cookies:", ...dumpObject(Object.keys(request.cookies || {})),
       ]);
       const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
-      if (router.resolveRuntimeRules(this.runtime, valkOptions)) {
+      if (router.presolveRulesToScope(this.runtime, valkOptions)) {
         router.warnEvent(1, () => [`RUNTIME RULE FAILURE ${router._routeName(this)}.`]);
         return true;
       }

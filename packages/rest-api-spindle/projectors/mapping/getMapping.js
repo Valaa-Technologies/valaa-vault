@@ -8,7 +8,7 @@ import { _createToMapping, _presolveMappingRouteRequest } from "./_mappingHandle
 export default function createProjector (router: PrefixRouter, route: Route) {
   return {
     requiredRules: ["routeRoot", "mappingName"],
-    requiredRuntimeRules: ["resource", "target"],
+    valueAssertedRules: ["resource", "target"],
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this);
@@ -31,6 +31,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       if (_presolveMappingRouteRequest(router, route, this.runtime, valkOptions)) {
         return true;
       }
+
       router.infoEvent(2, () => [`${this.name}:`,
         "\n\tresource:", ...dumpObject(scope.resource),
         `\n\t${scope.mappingName}:`, ...dumpObject(scope.mapping),

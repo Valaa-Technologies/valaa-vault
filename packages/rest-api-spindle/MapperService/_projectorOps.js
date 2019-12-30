@@ -4,7 +4,7 @@ import Vrapper from "~/engine/Vrapper";
 
 import type { PrefixRouter } from "~/rest-api-spindle/MapperService";
 
-import { dumpObject } from "~/tools";
+import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _vakonpileVPath } from "./_vakonpileOps";
 
@@ -14,15 +14,16 @@ export function _createProjectorRuntime (router: PrefixRouter, { name, url, conf
       throw new Error(`Required route rule '${ruleName}' missing for route <${url}>`);
     }
   }
-  for (const ruleName of (config.requiredRuntimeRules || [])) {
+  for (const ruleName of (config.valueAssertedRules || [])) {
     if (config.rules[ruleName] === undefined) {
       throw new Error(`Required runtime route rule '${ruleName}' missing for route <${url}>`);
     }
   }
   const scopeBase = runtime.scopeBase = Object.create(router.getViewScope());
   runtime.name = name;
-  runtime.ruleResolvers = [];
+  runtime.rulePresolvers = [];
   runtime.staticResources = [];
+  runtime.resolvers = {};
   runtime.identity = router.getIdentity();
 
   Object.entries(config.rules).forEach(([ruleName, rule]) => {
@@ -33,20 +34,25 @@ export function _createProjectorRuntime (router: PrefixRouter, { name, url, conf
     let ruleVAKON, maybeStaticReference, resolveRule;
     try {
       ruleVAKON = _vakonpileVPath(rule, runtime);
+      if (ruleVAKON[0] === "§'" && !Array.isArray(ruleVAKON[1])) {
+        scopeBase[ruleName] = ruleVAKON[1];
+        return;
+      }
       maybeStaticReference = (ruleVAKON != null) && (ruleVAKON[0] === "§ref")
           && !ruleVAKON[1].slice(1).find(e => Array.isArray(e))
           && ruleVAKON[1].slice(1);
-      resolveRule = maybeStaticReference
+      resolveRule = (ruleVAKON === null)
+              ? (engine, head) => head
+          : maybeStaticReference
               ? (engine => engine.getVrapper(maybeStaticReference, { contextPartitionURI: null }))
-          : (ruleVAKON !== null)
-              ? ((engine, head, options) => engine.run(head, ruleVAKON, options))
-              : (engine, head) => head;
+          : ((engine, head, options) => engine.run(head, ruleVAKON, options));
+      const requiredAtRuntime = (config.valueAssertedRules || []).indexOf(ruleName) !== -1;
       if (ruleName === "routeRoot") {
         runtime.resolveRouteRoot = resolveRule;
+      } else if ((config.runtimeRules || []).indexOf(ruleName) !== -1) {
+        runtime.resolvers[ruleName] = [resolveRule, requiredAtRuntime];
       } else {
-        runtime.ruleResolvers.push([
-          ruleName, resolveRule, (config.requiredRuntimeRules || []).indexOf(ruleName) !== -1,
-        ]);
+        runtime.rulePresolvers.push([ruleName, resolveRule, requiredAtRuntime]);
       }
     } catch (error) {
       throw router.wrapErrorEvent(error, new Error(`prepareRule(${ruleName})`),
@@ -110,19 +116,18 @@ export function _buildRuntimeVALKOptions (
   return valkOptions;
 }
 
-export function _resolveRuntimeRules (router: PrefixRouter, runtime, valkOptions) {
+export function _resolveToScope (router: PrefixRouter, resolveHead: any, valkOptions: Object,
+    scopeKey: string, resolveRule: Function, requiredAtRuntime: boolean | Function) {
   const scope = valkOptions.scope;
-  // TODO: create transaction here.
-  for (const [ruleName, resolveRule, requireRuntimeRule] of runtime.ruleResolvers) {
-    scope[ruleName] = resolveRule(router.getEngine(), scope.routeRoot, Object.create(valkOptions));
-    if (requireRuntimeRule && (scope[ruleName] === undefined)) {
-      if (typeof requireRuntimeRule === "function") {
-        return requireRuntimeRule(ruleName, router.getEngine(), scope.routeRoot, valkOptions);
-      }
-      scope.reply.code(400);
-      scope.reply.send(`Required route runtime rule '${ruleName}' resolved into undefined`);
-      return true;
-    }
+  scope[scopeKey] = thenChainEagerly(resolveHead, [
+    head => resolveRule(router.getEngine(), head, Object.create(valkOptions)),
+    resolution => (scope[scopeKey] = resolution),
+  ]);
+  if (!requiredAtRuntime || (scope[scopeKey] !== undefined)) return true;
+  if (typeof requiredAtRuntime === "function") {
+    return requiredAtRuntime(scopeKey, router.getEngine(), resolveHead, valkOptions);
   }
-  return false; // Success.
+  scope.reply.code(400);
+  scope.reply.send(`Required route runtime rule '${scopeKey}' resolved into undefined`);
+  return false;
 }

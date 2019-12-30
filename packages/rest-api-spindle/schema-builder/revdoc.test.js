@@ -154,7 +154,7 @@ function _createSiteConfigurationChapter () {
           enabledWithRules: ["relationName"],
           rules: {
             resource: ["!$valk:ref", ["*:$", ["!:request:params:resourceId"]]],
-            doCreateMappingAndTarget: ["!'", ["!$valk:new", ["!:Relation"], {
+            doCreateMappingAndTarget: ["!$valk:new", ["!:Relation"], {
               name: ["!:relationName"],
               source: ["!:resource"],
               target: ["!$valk:new", ["!:Entity"], {
@@ -162,7 +162,7 @@ function _createSiteConfigurationChapter () {
                 owner: ["!:routeRoot"],
                 properties: { name: ["!:request:body", "$V", "target", "name"] },
               }],
-            }]],
+            }],
           },
         }, testGlobalRules, TestIndividualType, TestIndividualType.tags),
   ],
@@ -519,7 +519,8 @@ TestIndividualType gate projection.`
   },
   config: {
     requiredRules: ["routeRoot"],
-    requiredRuntimeRules: ["resource"],
+    valueAssertedRules: ["resource"],
+    runtimeRules: [],
     resource: {
       name: "TestIndividual",
       schema: "TestIndividual#",
@@ -549,7 +550,7 @@ thing.`
   enabledWithRules: ["relationName"],
   rules: {
     resource: ["!$valk:ref", ["!:request:params:resourceId"]],
-    doCreateMappingAndTarget: ["!'", ["!$valk:new", ["!:Relation"], {
+    doCreateMappingAndTarget: ["!$valk:new", ["!:Relation"], {
       name: ["!:relationName"],
       source: ["!:resource"],
       target: ["!$valk:new", ["!:Entity"], {
@@ -557,7 +558,7 @@ thing.`
         owner: ["!:routeRoot"],
         properties: { name: ["!:request:body", "$V", "target", "name"] },
       }],
-    }]],
+    }],
   },
 }, testGlobalRules, TestIndividualType, testThingTagsMapping),
           "toEqual",
@@ -631,10 +632,11 @@ containing the mapping.`,
     },
     target: { name: "TestTag", schema: "TestTag#" },
     enabledWithRules: ["relationName"],
-    requiredRules: ["routeRoot", "mappingName", "doCreateMappingAndTarget"],
-    requiredRuntimeRules: ["resource"],
+    requiredRules: ["routeRoot", "mappingName"],
+    valueAssertedRules: ["resource"],
+    runtimeRules: ["doCreateMappingAndTarget"],
     rules: {
-      doCreateMappingAndTarget: [["!'", ["@", [
+      doCreateMappingAndTarget: [[
         "!", ["$", "valk", "new"], ["@", ["!", [":", "Relation"]]],
         ["@", ["-", [":"],
           ["@", [".", [":", "name"], ["@", ["!", [":", "relationName"]]]]],
@@ -655,7 +657,7 @@ containing the mapping.`,
             ]]],
           ]]],
         ]],
-      ]]]],
+      ]],
       mappingName: [[":", "tags"]],
       relationName: [[":", "TAG"]],
       resource: [["!", ["$", "valk", "ref"],

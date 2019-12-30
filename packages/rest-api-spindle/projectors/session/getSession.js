@@ -14,7 +14,7 @@ export default function createProjector (router: PrefixRouter /* , route: Route 
       "grantExpirationDelay", "tokenExpirationDelay",
       "error", "errorDescription", "errorURI",
     ],
-    requiredRuntimeRules: [
+    valueAssertedRules: [
       "clientRedirectPath", "userAgentState", "authorizationGrant", "grantProviderState",
     ],
 
@@ -44,7 +44,7 @@ export default function createProjector (router: PrefixRouter /* , route: Route 
       ]);
       const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       const scope = valkOptions.scope;
-      if (router.resolveRuntimeRules(this.runtime, valkOptions)) {
+      if (router.presolveRulesToScope(this.runtime, valkOptions)) {
         router.warnEvent(1, () => [`RUNTIME RULE FAILURE ${router._routeName(this)}.`]);
         return true;
       }

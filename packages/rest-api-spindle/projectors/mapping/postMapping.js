@@ -1,5 +1,7 @@
 // @flow
 
+import { Vrapper } from "~/engine";
+
 import type { PrefixRouter, Route } from "~/rest-api-spindle/MapperService";
 import { dumpObject, thenChainEagerly } from "~/tools";
 
@@ -7,8 +9,9 @@ import { _createToMapping, _presolveMappingRouteRequest } from "./_mappingHandle
 
 export default function createProjector (router: PrefixRouter, route: Route) {
   return {
-    requiredRules: ["routeRoot", "mappingName", "doCreateMappingAndTarget"],
-    requiredRuntimeRules: ["resource"],
+    requiredRules: ["routeRoot", "mappingName"],
+    runtimeRules: ["doCreateMappingAndTarget"],
+    valueAssertedRules: ["resource"],
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this);
@@ -30,18 +33,20 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         "\n\trequest.cookies:", ...dumpObject(Object.keys(request.cookies || {})),
         "\n\trequest.body:", ...dumpObject(request.body),
       ]);
+      const { doCreateMappingAndTarget } = this.runtime.resolvers;
+      if (!doCreateMappingAndTarget) {
+        reply.code(405);
+        reply.send(`${this.name} is disabled: no 'doCreateMappingAndTarget' rule`);
+        return true;
+      }
       const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       if (_presolveMappingRouteRequest(router, route, this.runtime, valkOptions)) {
         return true;
       }
       const scope = valkOptions.scope;
-      if (!scope.doCreateMappingAndTarget) {
-        reply.code(405);
-        reply.send(`${this.name} is disabled: no 'doCreateMappingAndTarget' rule`);
-        return true;
-      }
       const targetName = ((request.body.$V || {}).target || {}).name;
       router.infoEvent(2, () => [`${this.name}:`,
+        "\n\tresolvers:", ...dumpObject(this.runtime.resolvers),
         "\n\tresource:", ...dumpObject(scope.resource),
         "\n\ttoMappingSource:", ...dumpObject(this.runtime.toMappingSource),
         "\n\tsource:", ...dumpObject(scope.source),
@@ -57,10 +62,12 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       valkOptions.route = route;
       valkOptions.discourse = router.getDiscourse().acquireFabricator();
       return thenChainEagerly(scope.source, [
-        vResource => vResource.do(scope.doCreateMappingAndTarget, valkOptions),
+        vResource => router
+            .resolveToScope("mapping", doCreateMappingAndTarget, vResource, valkOptions),
         vMapping => {
-          if (!vMapping) throw new Error("doCreateMappingAndTarget didn't return anything");
-          return scope.mapping = vMapping;
+          if (!vMapping || !(vMapping instanceof Vrapper)) {
+            throw new Error("doCreateMappingAndTarget didn't return anything");
+          }
         },
         () => valkOptions.discourse && valkOptions.discourse.releaseFabricator(),
         eventResult => eventResult && eventResult.getPersistedEvent(),

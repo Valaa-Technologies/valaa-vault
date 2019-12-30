@@ -88,7 +88,7 @@ function _createGateRoutes (globalRules, resourceType) {
     resourcePOSTRoute(`/${gate.name}`, {
       requiredRules: ["listingName"],
       rules: {
-        doCreateResource: ["!'", ["@",
+        doCreateResource: ["@",
           ["!$valk:const:newResource", ["!$valk:new", ["!:Entity"], {
             name: ["!:request:body:name"],
             owner: ["!:routeRoot"],
@@ -106,7 +106,7 @@ function _createGateRoutes (globalRules, resourceType) {
             name: ["!:listingName"], source: ["!:routeRoot"], target: ["!:newResource"],
           }],
           [".$V:target"],
-        ]],
+        ],
       },
     }, globalRules, resourceType),
 
@@ -154,12 +154,11 @@ function _createResourceTypeMappingRoutes (
       rules: {
         resource: ["!$valk:ref", ["*:$", ["!:request:params:resourceId"]]],
         target: ["!$valk:ref", ["*:$", ["!:request:params:targetId"]]],
-          doCreateMapping: ["!'", ["!$valk:new", ["!:Relation"], {
-            name: ["!:relationName"],
-            source: ["!:resource"],
-            target: ["!:target"],
-          }],
-        ],
+        doCreateMapping: ["!$valk:new", ["!:Relation"], {
+          name: ["!:relationName"],
+          source: ["!:resource"],
+          target: ["!:target"],
+        }],
       },
     }, globalRules, resourceType, relationField),
 
@@ -168,15 +167,10 @@ function _createResourceTypeMappingRoutes (
       rules: {
         resource: ["!$valk:ref", ["*:$", ["!:request:params:resourceId"]]],
         target: ["!$valk:ref", ["*:$", ["!:request:params:targetId"]]],
-        doDestroyMapping: null,
-        /*
-        doDestroyMapping: ["!'",
-          ["!:scriptRoot"],
-          ["!$valk:invoke:destroyOESMapping",
-            ["!:oesType"], { source: ["!:resource"], target: ["!:target"] }
-          ],
+        doDestroyMapping: ["@",
+          ["!:valos:Resource"], ["!$valk:invoke:destroy", ["!:target"]],
+          ["!:valos:Resource"], ["!$valk:invoke:destroy", ["!:mapping"]],
         ],
-        */
       },
     }, globalRules, resourceType, relationField),
 
@@ -184,7 +178,7 @@ function _createResourceTypeMappingRoutes (
       enabledWithRules: ["listingName", "relationName"],
       rules: {
         resource: ["!$valk:ref", ["*:$", ["!:request:params:resourceId"]]],
-        doCreateMappingAndTarget: ["!'", ["@",
+        doCreateMappingAndTarget: ["@",
           ["!$valk:const:newResource", ["!$valk:new", ["!:Entity"], {
             name: ["!:request:body", "$V", "target", "name"],
             owner: ["!:routeRoot"],
@@ -196,7 +190,7 @@ function _createResourceTypeMappingRoutes (
           ["!$valk:new", ["!:Relation"], {
             name: ["!:relationName"], source: ["!:resource"], target: ["!:newResource"],
           }],
-        ]],
+        ],
       },
     }, globalRules, resourceType, relationField),
   ];

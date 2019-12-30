@@ -7,8 +7,9 @@ import { _presolveResourceRouteRequest } from "./_resourceHandlerOps";
 
 export default function createProjector (router: PrefixRouter, route: Route) {
   return {
-    requiredRules: ["routeRoot", "doPatchResource"],
-    requiredRuntimeRules: ["resource"],
+    requiredRules: ["routeRoot"],
+    runtimeRules: ["doPatchResource"],
+    valueAssertedRules: ["resource"],
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this);
@@ -32,21 +33,22 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       }
       const scope = valkOptions.scope;
       router.infoEvent(2, () => [`${this.name}:`,
+        "\n\tresolvers:", ...dumpObject(this.runtime.resolvers),
         "\n\tresource:", ...dumpObject(scope.resource),
       ]);
+      const { doPatchResource } = this.runtime.resolvers;
 
       const wrap = new Error(this.name);
       valkOptions.discourse = router.getDiscourse().acquireFabricator();
       return thenChainEagerly(scope.resource, [
-        () => (scope.doPatchResource
-            ? scope.resource.do(scope.doPatchResource, valkOptions)
+        () => (doPatchResource
+            ? router.resolveToScope("patching", doPatchResource, scope.resource, valkOptions)
             : router.updateResource(scope.resource, request.body,
                 { ...valkOptions, route, toPatchTarget: this.toPatchTarget })),
         () => valkOptions.discourse.releaseFabricator(),
-        eventResult => eventResult
-            && eventResult.getPersistedEvent(),
-        (/* persistedEvent */) => {
-          const results = "UPDATED";
+        eventResult => eventResult && eventResult.getPersistedEvent(),
+        (persistedEvent) => {
+          const results = persistedEvent ? "UPDATED" : "UNCHANGED";
           reply.code(204);
           reply.send();
           router.infoEvent(2, () => [

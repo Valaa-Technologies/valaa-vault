@@ -7,8 +7,9 @@ import { _createToMapping, _presolveMappingRouteRequest } from "./_mappingHandle
 
 export default function createProjector (router: PrefixRouter, route: Route) {
   return {
-    requiredRules: ["routeRoot", "mappingName", "doDestroyMapping"],
-    requiredRuntimeRules: ["resource", "target"],
+    requiredRules: ["routeRoot", "mappingName"],
+    runtimeRules: ["doDestroyMapping"],
+    valueAssertedRules: ["resource", "target"],
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this);
@@ -33,6 +34,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         "\n\tresource:", ...dumpObject(scope.resource),
         `\n\t${scope.mappingName}:`, ...dumpObject(scope.mapping),
         `\n\ttarget:`, ...dumpObject(scope.target),
+        "\n\tresolvers:", ...dumpObject(this.runtime.resolvers),
       ]);
       if (scope.mapping === undefined) {
         scope.reply.code(404);
@@ -40,17 +42,18 @@ export default function createProjector (router: PrefixRouter, route: Route) {
           scope.resource.getRawId()} to ${scope.target.getRawId()}`);
         return true;
       }
+      const { doDestroyMapping } = this.runtime.resolvers;
 
       const wrap = new Error(this.name);
       valkOptions.discourse = router.getDiscourse().acquireFabricator();
       return thenChainEagerly(scope.mapping, [
-        vMapping => (scope.doDestroyMapping
-            ? vMapping.do(scope.doDestroyMapping, valkOptions)
+        vMapping => (doDestroyMapping
+            ? router.resolveToScope("destruction", doDestroyMapping, vMapping, valkOptions)
             : vMapping.destroy(valkOptions)),
         () => valkOptions.discourse.releaseFabricator(),
-        eventResult => eventResult.getPersistedEvent(),
-        () => {
-          reply.code(204);
+        eventResult => eventResult && eventResult.getPersistedEvent(),
+        event => {
+          reply.code(event ? 204 : 404);
           reply.send();
           router.infoEvent(2, () => [`${this.name}`]);
           return true;
@@ -63,7 +66,8 @@ export default function createProjector (router: PrefixRouter, route: Route) {
           "\n\trequest.query:", ...dumpObject(request.query),
           "\n\tscope.mapping:", ...dumpObject(scope.mapping),
           "\n\tscope.resource:", ...dumpObject(scope.resource),
-          "\n\tprojectorRuntime:", ...dumpObject(this.runtime),
+          "\n\truntime:", ...dumpObject(this.runtime),
+          "\n\tresolvers:", ...dumpObject(this.runtime.resolvers),
         );
       });
     }

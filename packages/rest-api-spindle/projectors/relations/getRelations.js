@@ -8,7 +8,7 @@ import { _presolveResourceRouteRequest } from "../resource/_resourceHandlerOps";
 export default function createProjector (router: PrefixRouter, route: Route) {
   return {
     requiredRules: ["routeRoot"],
-    requiredRuntimeRules: ["resource"],
+    valueAssertedRules: ["resource"],
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this);

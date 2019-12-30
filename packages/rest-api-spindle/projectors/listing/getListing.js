@@ -55,6 +55,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       if (_presolveRouteRequest(router, route, this.runtime, valkOptions)) {
         return true;
       }
+
       const {
         filter, // unimplemented
         sort, offset, limit, ids,

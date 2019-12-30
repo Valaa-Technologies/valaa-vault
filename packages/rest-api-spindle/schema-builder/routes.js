@@ -489,14 +489,15 @@ function _setupRoute (route, userConfig, globalRules, resourceType, relationFiel
     throw new Error(`No such method '${route.method}' in category '${
         route.category}' for ${_routeName(route)}`);
   }
-  const { requiredRules, requiredRuntimeRules } = handler();
+  const { requiredRules, valueAssertedRules, runtimeRules } = handler();
   if (!route.schema) route.schema = {};
   if (!route.config) route.config = {};
   if (!route.config.rules) route.config.rules = {};
   (route.config.requiredRules || (route.config.requiredRules = [])).push(...(requiredRules || []));
-  if (requiredRuntimeRules) {
-    (route.config.requiredRuntimeRules || (route.config.requiredRuntimeRules = []))
-        .push(...requiredRuntimeRules);
+  (route.config.runtimeRules || (route.config.runtimeRules = [])).push(...(runtimeRules || []));
+  if (valueAssertedRules) {
+    (route.config.valueAssertedRules || (route.config.valueAssertedRules = []))
+        .push(...valueAssertedRules);
   }
 
   route.config = patchWith(route.config, userConfig);
@@ -550,7 +551,7 @@ function _setupRoute (route, userConfig, globalRules, resourceType, relationFiel
   }
   for (const ruleName of [].concat(
       route.config.requiredRules || [],
-      route.config.requiredRuntimeRules || [])) {
+      route.config.valueAssertedRules || [])) {
     if (route.config.rules[ruleName] === undefined) {
       throw new Error(`Required route rule '${ruleName}' missing for ${_routeName(route)}`);
     }

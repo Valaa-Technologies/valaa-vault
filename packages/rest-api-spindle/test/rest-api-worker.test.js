@@ -246,6 +246,7 @@ describe("REST API spindle worker", () => {
     expect(yellingPOST.$V.target.$V.href)
         .toEqual(yellHRef);
 
+    // TODO(iridian, 2019-12): This is wrong? Should at least have "yell" as entry.
     const newsGET = await fetchJSON("http://127.0.0.1:7357/rest-test/v0/news",
         { method: "GET", headers });
     expect(newsGET)

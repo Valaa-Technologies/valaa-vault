@@ -32,10 +32,10 @@ export function _presolveMappingRouteRequest (
       scope, scope.target, "route target resource")) {
     return true;
   }
-  scope.source = scope.resource.get(runtime.toMappingSource, valkOptions);
+  scope.source = scope.resource.get(runtime.toMappingSource, Object.create(valkOptions));
   if (!scope.source) throw new Error("Could not resolve mapping source from resource");
   if (runtime.toMapping) {
-    scope.mapping = scope.source.get(runtime.toMapping, valkOptions);
+    scope.mapping = scope.source.get(runtime.toMapping, Object.create(valkOptions));
   }
   return false;
 }

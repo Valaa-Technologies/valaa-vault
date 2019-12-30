@@ -7,8 +7,9 @@ import { _createToMapping, _presolveMappingRouteRequest } from "./_mappingHandle
 
 export default function createProjector (router: PrefixRouter, route: Route) {
   return {
-    requiredRules: ["routeRoot", "mappingName", "doCreateMapping"],
-    requiredRuntimeRules: ["resource", "target"],
+    requiredRules: ["routeRoot", "mappingName"],
+    runtimeRules: ["doCreateMapping"],
+    valueAssertedRules: ["resource", "target"],
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this);
@@ -33,13 +34,15 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         return true;
       }
       router.infoEvent(2, () => [`${this.name}:`,
+        "\n\tresolvers:", ...dumpObject(this.runtime.resolvers),
         "\n\tresource:", ...dumpObject(scope.resource),
         `\n\t${scope.mappingName}:`, ...dumpObject(scope.mapping),
         `\n\ttarget:`, ...dumpObject(scope.target),
       ]);
+      const { doCreateMapping } = this.runtime.resolvers;
 
       const isNewlyCreated = !scope.mapping;
-      if (isNewlyCreated && !scope.doCreateMapping) {
+      if (isNewlyCreated && !doCreateMapping) {
         reply.code(405);
         reply.send(`${this.name} is disabled: no doCreateMapping configured`);
         return true;
@@ -49,8 +52,9 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       valkOptions.route = route;
       valkOptions.discourse = router.getDiscourse().acquireFabricator();
       return thenChainEagerly(scope.resource, [
-        vResource => scope.mapping || vResource.do(scope.doCreateMapping, valkOptions),
-        vMapping => router.updateResource((scope.mapping = vMapping), request.body, valkOptions),
+        vResource => scope.mapping
+            || router.resolveToScope("mapping", doCreateMapping, vResource, valkOptions),
+        vMapping => router.updateResource(vMapping, request.body, valkOptions),
         () => valkOptions.discourse.releaseFabricator(),
         eventResult => eventResult && eventResult.getPersistedEvent(),
         (/* persistedEvent */) => {

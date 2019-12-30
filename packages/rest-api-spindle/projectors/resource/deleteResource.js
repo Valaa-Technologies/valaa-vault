@@ -6,8 +6,9 @@ import { _presolveResourceRouteRequest } from "./_resourceHandlerOps";
 
 export default function createProjector (router: PrefixRouter, route: Route) {
   return {
-    requiredRules: ["routeRoot", "doDeleteResource"],
-    requiredRuntimeRules: ["resource"],
+    requiredRules: ["routeRoot"],
+    runtimeRules: ["doDeleteResource"],
+    valueAssertedRules: ["resource"],
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this);
@@ -28,13 +29,16 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       }
       const scope = valkOptions.scope;
       router.infoEvent(2, () => [`${this.name}:`,
+        "\n\tresolvers:", ...dumpObject(this.runtime.resolvers),
         "\n\tresource:", ...dumpObject(scope.resource),
       ]);
+      const { doDeleteResource } = this.runtime.resolvers;
+
       const wrap = new Error(this.name);
       valkOptions.discourse = router.getDiscourse().acquireFabricator();
       return thenChainEagerly(valkOptions.discourse, [
-        () => (scope.doDeleteResource
-            ? scope.resource.do(scope.doDeleteResource, valkOptions)
+        () => (doDeleteResource
+            ? router.resolveToScope("deletion", doDeleteResource, scope.resource, valkOptions)
             : scope.resource.destroy(valkOptions)),
         () => valkOptions.discourse.releaseFabricator(),
         eventResult => eventResult

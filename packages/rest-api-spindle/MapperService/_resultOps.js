@@ -243,7 +243,7 @@ export function _fillReplyFromResponse (router, responseContent, runtime, valkOp
       (responseContent.constructor || {}).name || "<constructor missing>"}`);
   }
   router.infoEvent(2, () => [
-    `${this.name}:`, ...dumpObject(scope.resource),
+    `${router.name}:`, ...dumpObject(scope.resource),
     "\n\tresponseContent:", ...dumpObject(responseContent),
   ]);
   return true;

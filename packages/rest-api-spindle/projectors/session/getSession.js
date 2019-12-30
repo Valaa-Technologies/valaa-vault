@@ -1,13 +1,13 @@
 // @flow
 
-import type { PrefixRouter /* , Route */ } from "~/rest-api-spindle/MapperService";
+import type { PrefixRouter, Route } from "~/rest-api-spindle/MapperService";
 import {
   burlaesgDecode, burlaesgEncode, hs256JWTEncode,
 } from "~/rest-api-spindle/tools/security";
 
 import { dumpObject } from "~/tools/wrapError";
 
-export default function createProjector (router: PrefixRouter /* , route: Route */) {
+export default function createProjector (router: PrefixRouter, route: Route) {
   return {
     requiredRules: [
       "routeRoot",
@@ -19,7 +19,7 @@ export default function createProjector (router: PrefixRouter /* , route: Route 
     ],
 
     prepare () {
-      this.runtime = router.createProjectorRuntime(this);
+      this.runtime = router.createProjectorRuntime(this, route);
       router.setSessionAuthorizationEnabled();
 
       if (!this.runtime.identity) {
@@ -39,6 +39,7 @@ export default function createProjector (router: PrefixRouter /* , route: Route 
 
     handler (request, reply) {
       router.infoEvent(1, () => [`${this.name}:`,
+        "\n\trequest.params:", ...dumpObject(request.params),
         "\n\trequest.query:", ...dumpObject(request.query),
         "\n\trequest.cookies:", ...dumpObject(Object.keys(request.cookies || {})),
       ]);

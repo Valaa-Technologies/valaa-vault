@@ -11,7 +11,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
     valueAssertedRules: ["resource"],
 
     prepare () {
-      this.runtime = router.createProjectorRuntime(this);
+      this.runtime = router.createProjectorRuntime(this, route);
       this.toResponseContent = ["§->"];
       router.appendSchemaSteps(this.runtime, route.config.resource.schema,
           { targetVAKON: this.toResponseContent });
@@ -25,12 +25,13 @@ export default function createProjector (router: PrefixRouter, route: Route) {
 
     handler (request, reply) {
       router.infoEvent(1, () => [`${this.name}:`,
+        "\n\trequest.params:", ...dumpObject(request.params),
         "\n\trequest.query:", ...dumpObject(request.query),
         "\n\trequest.cookies:", ...dumpObject(Object.keys(request.cookies || {})),
       ]);
       const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       const scope = valkOptions.scope;
-      if (_presolveResourceRouteRequest(router, route, this.runtime, valkOptions)) {
+      if (_presolveResourceRouteRequest(router, this.runtime, valkOptions)) {
         return true;
       }
       router.infoEvent(2, () => [`${this.name}:`,

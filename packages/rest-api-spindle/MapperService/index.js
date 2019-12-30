@@ -159,10 +159,10 @@ export default class MapperService extends FabricEventTarget {
 
   // Runtime ops
 
-  createProjectorRuntime (projector) {
+  createProjectorRuntime (projector, route) {
     const runtime = {};
     try {
-      return _createProjectorRuntime(this, projector, runtime);
+      return _createProjectorRuntime(this, projector, route, runtime);
     } catch (error) {
       throw this.wrapErrorEvent(error,
           new Error(`createProjectorRuntime(${this._projectorName(projector)})`),
@@ -353,8 +353,8 @@ export default class MapperService extends FabricEventTarget {
 
   // Rel ops
 
-  addResourceProjector (route, projector) {
-    return _addResourceProjector(this, route, projector);
+  addResourceProjector (projector) {
+    return _addResourceProjector(this, projector);
   }
 
   relRequest (rel, options) {

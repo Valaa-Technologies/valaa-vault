@@ -5,10 +5,10 @@ import Vrapper from "~/engine/Vrapper";
 import { thenChainEagerly } from "~/tools/thenChainEagerly";
 import { dumpObject } from "~/tools/wrapError";
 
-export function _addResourceProjector (router, route, projector) {
-  const resourceSchema = ((route.config || {}).resource || {}).schema;
+export function _addResourceProjector (router, projector) {
+  const resourceSchema = ((projector.config || {}).resource || {}).schema;
   if (!resourceSchema) return;
-  const idParamName = route.url.match(/:([^/]*)/)[1];
+  const idParamName = projector.route.url.match(/:([^/]*)/)[1];
   (router._resourceProjectors || (router._resourceProjectors = []))
       .push([_getResourceHRefPrefix(router, resourceSchema), projector, idParamName]);
 }

@@ -12,7 +12,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
     valueAssertedRules: ["resource", "target"],
 
     prepare () {
-      this.runtime = router.createProjectorRuntime(this);
+      this.runtime = router.createProjectorRuntime(this, route);
       _createToMapping(router, route, this.runtime);
       router.createGetRelSelfHRef(this.runtime, "resourceHRef", route.config.resource.schema);
       router.createGetRelSelfHRef(this.runtime, "targetHRef", route.config.target.schema);
@@ -24,16 +24,17 @@ export default function createProjector (router: PrefixRouter, route: Route) {
 
     handler (request, reply) {
       router.infoEvent(1, () => [`${this.name}:`,
+        "\n\trequest.params:", ...dumpObject(request.params),
         "\n\trequest.query:", ...dumpObject(request.query),
         "\n\trequest.cookies:", ...dumpObject(Object.keys(request.cookies || {})),
-        "\n\trequest.body:", ...dumpObject(request.body),
       ]);
       const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       const scope = valkOptions.scope;
-      if (_presolveMappingRouteRequest(router, route, this.runtime, valkOptions)) {
+      if (_presolveMappingRouteRequest(router, this.runtime, valkOptions)) {
         return true;
       }
       router.infoEvent(2, () => [`${this.name}:`,
+        "\n\trequest.body:", ...dumpObject(request.body),
         "\n\tresolvers:", ...dumpObject(this.runtime.resolvers),
         "\n\tresource:", ...dumpObject(scope.resource),
         `\n\t${scope.mappingName}:`, ...dumpObject(scope.mapping),
@@ -49,7 +50,6 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       }
 
       const wrap = new Error(this.name);
-      valkOptions.route = route;
       valkOptions.discourse = router.getDiscourse().acquireFabricator();
       return thenChainEagerly(scope.resource, [
         vResource => scope.mapping

@@ -13,7 +13,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
     runtimeRules: ["doCreateResource"],
 
     prepare () {
-      this.runtime = router.createProjectorRuntime(this);
+      this.runtime = router.createProjectorRuntime(this, route);
       router.createGetRelSelfHRef(this.runtime, "resourceHRef", route.config.resource.schema);
       this.toPatchTarget = router.appendSchemaSteps(this.runtime, route.config.resource.schema);
       if (this.toPatchTarget.length <= 1) this.toPatchTarget = undefined;
@@ -25,9 +25,9 @@ export default function createProjector (router: PrefixRouter, route: Route) {
 
     handler (request, reply) {
       router.infoEvent(1, () => [`${this.name}:`,
+        "\n\trequest.params:", ...dumpObject(request.params),
         "\n\trequest.query:", ...dumpObject(request.query),
         "\n\trequest.cookies:", ...dumpObject(Object.keys(request.cookies || {})),
-        "\n\trequest.body:", ...dumpObject(request.body),
       ]);
       const { doCreateResource } = this.runtime.resolvers;
       if (!doCreateResource) {
@@ -36,11 +36,12 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         return true;
       }
       const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
-      if (_presolveRouteRequest(router, route, this.runtime, valkOptions)) {
+      if (_presolveRouteRequest(router, this.runtime, valkOptions)) {
         return true;
       }
       const scope = valkOptions.scope;
       router.infoEvent(2, () => [`${this.name}:`,
+        "\n\trequest.body:", ...dumpObject(request.body),
         "\n\tresolvers:", ...dumpObject(this.runtime.resolvers),
       ]);
       const wrap = new Error(`resource POST ${route.url}`);

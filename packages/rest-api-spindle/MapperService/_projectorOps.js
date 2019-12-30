@@ -8,23 +8,26 @@ import { dumpObject, thenChainEagerly } from "~/tools";
 
 import { _vakonpileVPath } from "./_vakonpileOps";
 
-export function _createProjectorRuntime (router: PrefixRouter, { name, url, config }, runtime) {
+export function _createProjectorRuntime (
+    router: PrefixRouter, { name, config }, route, runtime) {
   for (const ruleName of (config.requiredRules || [])) {
     if (config.rules[ruleName] === undefined) {
-      throw new Error(`Required route rule '${ruleName}' missing for route <${url}>`);
+      throw new Error(`Required route rule '${ruleName}' missing for route <${route.url}>`);
     }
   }
   for (const ruleName of (config.valueAssertedRules || [])) {
     if (config.rules[ruleName] === undefined) {
-      throw new Error(`Required runtime route rule '${ruleName}' missing for route <${url}>`);
+      throw new Error(`Required runtime route rule '${ruleName}' missing for route <${route.url}>`);
     }
   }
-  const scopeBase = runtime.scopeBase = Object.create(router.getViewScope());
   runtime.name = name;
+  runtime.route = route;
   runtime.rulePresolvers = [];
   runtime.staticResources = [];
   runtime.resolvers = {};
   runtime.identity = router.getIdentity();
+
+  const scopeBase = runtime.scopeBase = Object.create(router.getViewScope());
 
   Object.entries(config.rules).forEach(([ruleName, rule]) => {
     if (!Array.isArray(rule)) {

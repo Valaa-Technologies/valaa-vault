@@ -11,7 +11,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
     requiredRules: ["routeRoot"],
 
     prepare () {
-      this.runtime = router.createProjectorRuntime(this);
+      this.runtime = router.createProjectorRuntime(this, route);
 
       this.toResponseContent = ["§->"];
       router.appendGateProjectionSteps(
@@ -23,7 +23,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
     async preload () {
       await router.preloadRuntimeResources(this, this.runtime);
       const preloadOptions = router.buildRuntimeVALKOptions(this, this.runtime, null, null);
-      if (_presolveRouteRequest(router, route, this.runtime, preloadOptions)) return;
+      if (_presolveRouteRequest(router, this.runtime, preloadOptions)) return;
       // if runtime rules fail just skip preload
       let activations = [];
       this.runtime.subscription = preloadOptions.scope.routeRoot
@@ -47,12 +47,13 @@ export default function createProjector (router: PrefixRouter, route: Route) {
 
     handler (request, reply) {
       router.infoEvent(1, () => [`${this.name}:`,
+        "\n\trequest.params:", ...dumpObject(request.params),
         "\n\trequest.query:", ...dumpObject(request.query),
         "\n\trequest.cookies:", ...dumpObject(Object.keys(request.cookies || {})),
       ]);
       const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       const scope = valkOptions.scope;
-      if (_presolveRouteRequest(router, route, this.runtime, valkOptions)) {
+      if (_presolveRouteRequest(router, this.runtime, valkOptions)) {
         return true;
       }
 

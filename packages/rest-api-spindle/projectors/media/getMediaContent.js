@@ -8,7 +8,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
     requiredRules: ["routeRoot", "name"],
 
     prepare () {
-      this.runtime = router.createProjectorRuntime(this);
+      this.runtime = router.createProjectorRuntime(this, route);
       this.toResponseContent = router.appendSchemaSteps(this.runtime, route.schema.response[200],
           { expandProperties: true });
     },

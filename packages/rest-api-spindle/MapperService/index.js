@@ -145,6 +145,12 @@ export default class MapperService extends FabricEventTarget {
       if (!createProjector) {
         throw new Error(`No projector found for '${route.category} ${route.method}'`);
       }
+      route.params = [];
+      route.parts = route.url.split("/").slice(1).map(part => {
+        if (part[0] !== ":") return part;
+        route.params.push(part.slice(1));
+        return route.params.length - 1;
+      });
       const projector = createProjector(this, route);
       if (projector == null) return undefined;
       if (!projector.name) projector.name = this._routeName(route);

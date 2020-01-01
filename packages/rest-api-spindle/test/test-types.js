@@ -6,7 +6,7 @@ const {
   // DateTimeZoneExtendedISO8601Type,
 
   namedResourceType, extendType, mappingToManyOf,
-} = require("../schema-builder/types");
+} = require("../schema-builder");
 
 exports.createTestDateTimeType = () => ({
   [ObjectSchema]: { valospace: {

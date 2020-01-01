@@ -8,11 +8,8 @@ const {
 const {
   BooleanType, ObjectSchema, StringType, ResourceType, extendType, mappingToManyOf,
   sharedSchemaOf, exportSchemaOf,
-} = require("./types");
-
-const {
   listingGETRoute, resourceGETRoute, mappingPOSTRoute, sessionGETRoute, sessionDELETERoute
-} = require("./routes");
+} = require(".");
 
 const {
   createTestTagType, TestTagType,
@@ -24,13 +21,13 @@ const { itExpects, runTestDoc } = prepareTestDoc(title);
 
 const _createTestGlobalRules = () => ({
   scriptRoot: ["$~gh:0123456789abcdef"],
-  "&ofMapping": {
+  "&ofRelation": {
     tags: {
       routeRoot: ["$~u4:aaaabbbb-cccc-dddd-eeee-ffffffffffff"],
     },
   },
   "&ofMethod": { POST: {
-    "&ofMapping": { tags: {
+    "&ofRelation": { tags: {
       relationName: "TAG",
     }, },
   }, },
@@ -514,7 +511,8 @@ TestIndividualType gate projection.`
     },
     response: {
       200: "TestIndividual#",
-      404: { type: "string" }
+      403: { type: "string" },
+      404: { type: "string" },
     }
   },
   config: {
@@ -591,7 +589,8 @@ containing the mapping.`,
           } },
         },
       },
-      403: { type: "string" }
+      403: { type: "string" },
+      404: { type: "string" },
     }
   },
   config: {

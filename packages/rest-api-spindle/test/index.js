@@ -2,13 +2,10 @@
 
 const {
   ObjectSchema, trySchemaNameOf, sharedSchemaOf, enumerateMappingsOf,
-} = require("@valos/rest-api-spindle/schema-builder/types");
-
-const {
   listingGETRoute, resourceDELETERoute, resourceGETRoute, resourcePATCHRoute, resourcePOSTRoute,
   relationsGETRoute, mappingDELETERoute, mappingGETRoute, mappingPATCHRoute, mappingPOSTRoute,
   sessionGETRoute, sessionDELETERoute,
-} = require("@valos/rest-api-spindle/schema-builder/routes");
+} = require("@valos/rest-api-spindle/schema-builder");
 
 const patchWith = require("@valos/tools/patchWith").default;
 

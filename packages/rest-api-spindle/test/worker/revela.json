@@ -50,7 +50,7 @@
               "TestService": { "listingName": "SERVICE" },
               "TestTag": { "listingName": "TAG" }
             },
-            "&ofMapping": {
+            "&ofRelation": {
               "interests": {
                 "routeRoot": ["$~u4:f3d306d9-79ac-4087-afbc-46f739226eb2"],
                 "relationName": "INTEREST"
@@ -64,7 +64,7 @@
             },
             "&ofMethod": {
               "PATCH": {
-                "&ofMapping": {
+                "&ofRelation": {
                   "offering": { "mappingPrototype": ["$~u4:f3d306d9-79ac-4087-afbc-46f739226eb2"] },
                   "seeking": { "mappingPrototype": ["$~u4:f3d306d9-79ac-4087-afbc-46f739226eb2"] },
                   "interests": { "mappingPrototype": ["$~u4:f3d306d9-79ac-4087-afbc-46f739226eb2"] }

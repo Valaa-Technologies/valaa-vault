@@ -5,43 +5,43 @@ const ObjectSchema = Symbol("Object-JSONSchema");
 const CollectionSchema = Symbol("Array-JSONSchema");
 
 // const EmailType = { type: "email" };
-const EmailType = { type: "string" };
-const BooleanType = { type: "boolean" };
-const StringType = { type: "string" };
-const XWWWFormURLEncodedStringType = { type: "string" };
-const NumberType = { type: "number" };
-// const URIReferenceType = { type: "uri-reference" };
-const URIReferenceType = { type: "string" };
+const EmailType = Object.freeze({ type: "string" });
+const BooleanType = Object.freeze({ type: "boolean" });
+const StringType = Object.freeze({ type: "string" });
+const XWWWFormURLEncodedStringType = Object.freeze({ type: "string" });
+const NumberType = Object.freeze({ type: "number" });
+// const URIReferenceType = { type: "uri-reference" });
+const URIReferenceType = Object.freeze({ type: "string" });
 
-const UnixEpochSecondsType = { type: "number" };
+const UnixEpochSecondsType = Object.freeze({ type: "number" });
 /*
-const DateExtendedISO8601Type = { type: "date" };
+const DateExtendedISO8601Type = Object.freeze({ type: "date" };
 const TimeExtendedISO8601Type = { type: "time" };
 const ZoneExtendedISO8601Type = { type: "string" };
 const DateTimeZoneExtendedISO8601Type = { type: "date-time" };
 */
-const DateExtendedISO8601Type = { type: "string", format: "date" };
-const TimeExtendedISO8601Type = { type: "string" };
-const ZoneExtendedISO8601Type = { type: "string" };
-const DateTimeZoneExtendedISO8601Type = { type: "string", format: "date-time" };
+const DateExtendedISO8601Type = Object.freeze({ type: "string", format: "date" });
+const TimeExtendedISO8601Type = Object.freeze({ type: "string" });
+const ZoneExtendedISO8601Type = Object.freeze({ type: "string" });
+const DateTimeZoneExtendedISO8601Type = Object.freeze({ type: "string", format: "date-time" });
 
-const IdValOSType = {
+const IdValOSType = Object.freeze({
   type: "string",
   pattern: "^[a-zA-Z0-9\\-_.~]+$",
   valospace: { reflection: [".$V:rawId"] },
-};
+});
 // const ReferenceValOSType = { type: "uri" };
-const ReferenceValOSType = { type: "string" };
+const ReferenceValOSType = Object.freeze({ type: "string" });
 
-const $VType = {
+const $VType = Object.freeze({
   [ObjectSchema]: { valospace: { /* reflection: "" */ } },
   id: IdValOSType,
   // name: StringType, // internal ValOS name
-};
+});
 
-const ResourceType = {
+const ResourceType = Object.freeze({
   $V: $VType,
-};
+});
 
 module.exports = {
   ObjectSchema,

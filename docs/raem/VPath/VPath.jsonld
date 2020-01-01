@@ -847,7 +847,7 @@
         {
           "@type": "revdoc:Example",
           "vdoc:content": [
-            "\nEditorial Note: this section should be greatly improved.\nThe purpose of computation verbs lies more on representing various\nconversions (as part of dynamic operations such as rest API route\nmapping) and less on clever SPARQL trickery. The illustration here uses\n(questionable) SPARQL primarily for consistency."
+            "\nEditorial Note: this section should be greatly improved.\nThe purpose of computation verbs lies more on representing various\nconversions (as part of dynamic operations such as web API route\nmapping) and less on clever SPARQL trickery. The illustration here uses\n(questionable) SPARQL primarily for consistency."
           ]
         },
         {

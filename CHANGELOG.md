@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-prerelease.21](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.20...v0.35.0-prerelease.21) (2020-01-01)
+
+
+### Features
+
+* Add bridge projectors ([82b8955](https://github.com/valaatech/kernel/commit/82b89558ddfe98acccbe8f11f2f0ce901c34a4d8))
+* Add bridge routes to schema-builder ([af45bfa](https://github.com/valaatech/kernel/commit/af45bfad235a1829c864cf4f37e8668cab956811))
+* runtimeRules, runtime.resolvers and resolveToScope ([e9de16a](https://github.com/valaatech/kernel/commit/e9de16af4ef1cfb3a7a7cca525a63e624639c1fb))
+
+
+
+
+
 # [0.35.0-prerelease.20](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.19...v0.35.0-prerelease.20) (2019-12-24)
 
 

@@ -1,0 +1,356 @@
+[
+  {
+    "@id": "https://valospace.org/web-spindle",
+    "@context": {
+      "@base": "https://valospace.org/web-spindle#",
+      "sbomdoc": "https://valospace.org/sbomdoc#",
+      "revdoc": "https://valospace.org/revdoc#",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "vdoc": "https://valospace.org/vdoc#",
+      "vdoc:content": {
+        "@id": "https://valospace.org/vdoc#content",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:words": {
+        "@id": "https://valospace.org/vdoc#words",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:entries": {
+        "@id": "https://valospace.org/vdoc#entries",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:headers": {
+        "@id": "https://valospace.org/vdoc#headers",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:cell": {
+        "@id": "https://valospace.org/vdoc#cell",
+        "@container": "@list",
+        "@type": "@id"
+      }
+    },
+    "dc:title": "Web API spindle",
+    "respecConfig": {
+      "specStatus": "unofficial",
+      "editors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ],
+      "authors": [],
+      "shortName": "webAPI"
+    },
+    "abstract": {
+      "@id": "abstract",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Web API spindle extends the gateway with a http(s) service endpoint\nwhich maps valospace resources to a RESTful API using a reusable\ndeclarative route mapping definition JSON-LD document."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Once a well-defined mapping definition for some use case is created and\ndocumented by a technician then all valonauts are able to create\nconforming resource structures fully inside the valospace. After that\na service provider can be commissioned to expose those resources via\nsome internet endpoint using the mapping definition."
+          ]
+        }
+      ]
+    },
+    "sotd": {
+      "@id": "sotd",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "This document is the introduction document of the spindle ",
+            {
+              "@type": "revdoc:Package",
+              "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/web-spindle"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/web-spindle"
+            },
+            " and part of the domain ",
+            {
+              "@type": "revdoc:Package",
+              "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/kernel"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/kernel"
+            },
+            "."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The current implementation is a working prototype. The core is\nstructurally sound but messy and there's little in the way of\nspecification. There's also some abstraction leakage; the JSON schema\nis fixed at what the underlying fastify web server consumes."
+          ]
+        }
+      ]
+    },
+    "introduction": {
+      "@id": "introduction",
+      "dc:title": "Web API routes map to valospace resources",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "As is traditional the web API spindle is configured via a set of route\npatterns which are matched against incoming request IRIs."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The mapping definition is JSON-LD document (created by a technician)\nwhich describes a set of routes and their mapping vpaths to valospace\nresources. These paths typically originate from a single, configurable\n",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "service index"
+              ]
+            },
+            " valospace resource."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "A well-defined and documented mapping definition for some use case can\nbe reused. A valonaut can create a conforming valospace service index\nand its surrounding resource structure and then request for a service\nfrom a ",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "web API provider"
+              ]
+            },
+            " by providing only the mapping\ndefinition, the service index and any necessary security credentials."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The route definition format is ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "JSON schema"
+              ],
+              "vdoc:ref": "https://json-schema.org/"
+            },
+            " which is as expected used to describe the route request and response\ndata types. These route specs can optionally exposed via an ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "OpenAPI 3.0.0"
+              ],
+              "vdoc:ref": "https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md"
+            },
+            " (or newer) route). In addition to route format specification the\ndefinition schema includes the ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "declarative mapping definitions"
+              ],
+              "vdoc:ref": "#section_mapping_definition"
+            },
+            " from the route requests to valospace resources and eventually back to\nresponses."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The sub-library ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "schema-builder"
+              ],
+              "vdoc:ref": "@valos/web-spindle/schema-builder"
+            },
+            "\ncontains the convenience functions that can be used to build the schema\ndescription types and routes and also emit the plain data description\nobjects which the web API spindle can then consume."
+          ]
+        }
+      ]
+    },
+    "section_service": {
+      "@id": "section_service",
+      "dc:title": "The mapping service is a lens plus a focus",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@id": "section_routes"
+        },
+        {
+          "@id": "section_service_index"
+        }
+      ]
+    },
+    "section_routes": {
+      "@id": "section_routes",
+      "dc:title": "Routes map request IRIs to valospace operations",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "All routes share common as well as separate characteristics. The\nhandler of a request is located using the most specific route config\nwhich matches the request IRI and its HTTP method. The route config\nspecifies the route *category* which when combined with the request\nmethod uniquely specifies the actual route type and thus the\nhandler callback."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "A route mapping is defined in terms of the service index resource,\na ",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "route path"
+              ]
+            },
+            " from it to a ",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "route root resource"
+              ]
+            },
+            "\nand zero to many ",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "runtime paths"
+              ]
+            },
+            " and their associated ",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "runtime resources"
+              ]
+            }
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The mapping rule semantics for the shared service index resource and\nfor the individual route paths and route root resources are uniform.\nThese are all preloaded during service initialization.\nConversely the semantics of a runtime path and runtime resources\ndepends on the route type. As these paths and resources depend on\nrequest parameters they are loaded dynamically during request\nresolution."
+          ]
+        }
+      ]
+    },
+    "section_service_index": {
+      "@id": "section_service_index",
+      "dc:title": "The service index is a view focus",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The *service index resource* is statically configured and should be\nthe same for all routes starting from the same public endpoint. This\nindex resource is typically the root entity of the service master index\npartition. The route paths (and some of their runtime paths) are then\ntypically defined as relations and references in the index partition."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The subject path is a path from the root resource to the subject\nresource. The subject resource is the immediate _parent_ resource of\nthe route runtime parts. Its role is to act as the local index entry\npoint to the route runtime resources. The subject resource is preloaded\nand mostly static. But because the subject path is a live kuery the\nsubject resource does change if the subject path resources and fields\nthemselves change."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The runtime paths and resources if any, are determined by the handler\nwhich handles the particular request. They are based on the route\nconfiguration and can depend on the request route, query and other\nparameters. They use the route subject resource as their head."
+          ]
+        }
+      ]
+    },
+    "section_mapping_definition": {
+      "@id": "section_mapping_definition",
+      "dc:title": "The mapping definition is a view lens",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "This package is a major study on whether Web API <-> ValOS mappings\nfor a particular domain can be specified in a fully declarative\nfashion.\nReaching this goal would have several desirable qualities:"
+          ]
+        },
+        {
+          "@id": "declarative_desirable_qualities"
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The biggest design feature to reduce the need for multitude of\nmappings is the subject paths. Using subject paths a particular common\nmapping use case can specify an well-known ordered index partition\nstructure and the web-spindle compatible mapping route\nspecification for it sans route root resource.\nThen the different use cases can specify their mappings solely in terms\nof the endpoint prefix, the mapping root resource id and the identifier\nof the above mapping route spec."
+          ]
+        }
+      ]
+    },
+    "declarative_desirable_qualities": {
+      "@id": "declarative_desirable_qualities",
+      "@type": "vdoc:NumberedList",
+      "vdoc:entries": [
+        [
+          "ValOS resource model allows business logic to reside within the\n  valospace execution model. If the Web API integration logic can\n  be made to rely on this then the need for custom fabric code is\n  removed. This means lighter fabric-valospace integration overheads\n  and quicker development cycles."
+        ],
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Taken further, purely declarative mappings can allow Web API\nendpoints be opened fully from inside valospace. A well-designed\nRelation-based specification scheme can make route exposition a near\ntrivial matter of instructing a worker group to \"open all routes that\nare specified to start from this resource when used as the route root\"."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Purely declarative mappings provide a stronger foundation for\n  introspection, debugging and validation of the mappings in general\n  and particular requests in specific, at least on the fabric side."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The no-code aspect can allow for local inspire web-spindles.\n  These spindles can collaboratively intercept remote Web API GET\n  calls and then opportunistically serve them locally. This can be\n  done if the remote endpoint is known to be a web-spindle and if\n  all data is locally available. If implemented well this allows\n  trivial web apps to rely on naive Web API interaction flows without\n  having to care about minimizing the number of requests or\n  roundtrips."
+          ]
+        }
+      ]
+    },
+    "@type": "revdoc:Document",
+    "vdoc:content": [
+      {
+        "@id": "abstract"
+      },
+      {
+        "@id": "sotd"
+      },
+      {
+        "@id": "introduction"
+      },
+      {
+        "@id": "section_mapping_definition"
+      },
+      {
+        "@id": "section_service"
+      }
+    ]
+  }
+]

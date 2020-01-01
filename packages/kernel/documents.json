@@ -6,7 +6,7 @@
       "SBOM"
     ],
     "subProfiles": [],
-    "title": "@valos/kernel@0.35.0-prerelease.19 Software Bill of Materials",
+    "title": "@valos/kernel@0.35.0-prerelease.20 Software Bill of Materials",
     "abstract": {
       "@type": "vdoc:Chapter",
       "vdoc:content": [
@@ -53,7 +53,7 @@
       ]
     },
     "package": "@valos/kernel",
-    "version": "0.35.0-prerelease.19"
+    "version": "0.35.0-prerelease.20"
   },
   "engine": {
     "@id": "https://valospace.org/engine",
@@ -126,7 +126,7 @@
       ]
     },
     "package": "@valos/engine",
-    "version": "0.35.0-prerelease.20"
+    "version": "0.35.0-prerelease.21"
   },
   "inspire": {
     "@id": "https://valospace.org/inspire",
@@ -199,7 +199,7 @@
       ]
     },
     "package": "@valos/inspire",
-    "version": "0.35.0-prerelease.20"
+    "version": "0.35.0-prerelease.21"
   },
   "inspire/revela": {
     "@id": "https://valospace.org/inspire/revela",
@@ -456,7 +456,7 @@
       ]
     },
     "package": "@valos/inspire",
-    "version": "0.35.0-prerelease.20"
+    "version": "0.35.0-prerelease.21"
   },
   "raem": {
     "@id": "https://valospace.org/raem",
@@ -575,7 +575,7 @@
       ]
     },
     "package": "@valos/raem",
-    "version": "0.35.0-prerelease.20"
+    "version": "0.35.0-prerelease.21"
   },
   "raem/VPath/VPath": {
     "@id": "https://valospace.org/raem/VPath/VPath",
@@ -637,242 +637,7 @@
       ]
     },
     "package": "@valos/raem",
-    "version": "0.35.0-prerelease.20"
-  },
-  "web-spindle": {
-    "@id": "https://valospace.org/web-spindle",
-    "tags": [],
-    "subProfiles": [],
-    "title": "Web API spindle",
-    "abstract": {
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
-            "Web API spindle extends the gateway with a http(s) service endpoint\nwhich maps valospace resources to a RESTful API using a reusable\ndeclarative route mapping definition JSON-LD document."
-          ]
-        },
-        {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
-            "Once a well-defined mapping definition for some use case is created and\ndocumented by a technician then all valonauts are able to create\nconforming resource structures fully inside the valospace. After that\na service provider can be commissioned to expose those resources via\nsome internet endpoint using the mapping definition."
-          ]
-        }
-      ]
-    },
-    "introduction": {
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
-            "As is traditional the rest api spindle web service is defined as a set\nof route patterns which are matched against incoming request IRIs."
-          ]
-        },
-        {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
-            "The mapping definition is JSON-LD document (created by a technician)\nwhich describes a set of routes and their mapping vpaths to valospace\nresources. These paths typically originate from a single, configurable\n",
-            {
-              "vdoc:em": true,
-              "vdoc:content": [
-                "service index"
-              ]
-            },
-            " valospace resource."
-          ]
-        },
-        {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
-            "A well-defined and documented mapping definition for some use case can\nbe reused. A valonaut can create a conforming valospace service index\nand its surrounding resource structure and then request for a service\nfrom a ",
-            {
-              "vdoc:em": true,
-              "vdoc:content": [
-                "rest API provider"
-              ]
-            },
-            " by providing only the mapping\ndefinition, the service index and any necessary security credentials."
-          ]
-        },
-        {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
-            "The route definition format is ",
-            {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
-                "JSON schema"
-              ],
-              "vdoc:ref": "https://json-schema.org/"
-            },
-            " which is as expected used to describe the route request and response\ndata types. These route specs can optionally exposed via an ",
-            {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
-                "OpenAPI 3.0.0"
-              ],
-              "vdoc:ref": "https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md"
-            },
-            " (or newer) route). In addition to route format specification the\ndefinition schema includes the ",
-            {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
-                "declarative mapping definitions"
-              ],
-              "vdoc:ref": "#section_mapping_definition"
-            },
-            " from the route requests to valospace resources and eventually back to\nresponses."
-          ]
-        },
-        {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
-            "The sub-library ",
-            {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
-                "schema-builder"
-              ],
-              "vdoc:ref": "@valos/web-spindle/schema-builder"
-            },
-            "\ncontains the convenience functions that can be used to build the schema\ndescription types and routes and also emit the plain data description\nobjects which the rest api spindle can then consume."
-          ]
-        }
-      ]
-    },
-    "package": "@valos/web-spindle",
-    "version": "0.35.0-prerelease.20"
-  },
-  "web-spindle/schema-builder": {
-    "@id": "https://valospace.org/web-spindle/schema-builder",
-    "tags": [],
-    "subProfiles": [],
-    "title": "REST API Schema Builder TestDoc",
-    "abstract": {
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
-            "Schema builder is a javascript library for exporting a site\nconfiguration that can be consumed by the REST API spindle. This config\nis a fully declarative ",
-            {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
-                "JSON schema"
-              ],
-              "vdoc:ref": "http://json-schema.org/"
-            },
-            "-based format which not just describes the external API routes and\ntypes but also defines their valospace projections using embedded ",
-            {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
-                "vpath"
-              ],
-              "vdoc:ref": "@valos/raem/VPath"
-            },
-            "."
-          ]
-        },
-        {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
-            "This library is primarily intended to be used from inside a\n",
-            {
-              "vdoc:em": true,
-              "vdoc:content": [
-                "spindle configuration library"
-              ]
-            },
-            " which is invoked from inside\na ",
-            {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
-                "revela.json"
-              ],
-              "vdoc:ref": "@valos/inspire/revela"
-            },
-            " gateway to emit\nthe JSON configuration."
-          ]
-        }
-      ]
-    },
-    "introduction": {
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
-        {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
-            "The four schema builder concepts are:"
-          ]
-        },
-        {
-          "@type": "vdoc:BulletList",
-          "vdoc:entries": [
-            [
-              {
-                "@type": "vdoc:Reference",
-                "vdoc:content": [
-                  "Site configuration"
-                ],
-                "vdoc:ref": "#section_site_configuration"
-              },
-              " is the\n  JSON output of this library, consumable by REST API spindle."
-            ],
-            {
-              "@type": "vdoc:Paragraph",
-              "vdoc:content": [
-                {
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
-                    "Type and property schemas"
-                  ],
-                  "vdoc:ref": "#section_schemas"
-                },
-                " describe\n  layouts of REST API and valospace resources and properties. These are\n  used for GET result body contents, POST, PATCH and PUT request body\n  fields. When exported in the site configuration these are transformed\n  into shared schema objects."
-              ]
-            },
-            {
-              "@type": "vdoc:Paragraph",
-              "vdoc:content": [
-                {
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
-                    "Routes definitions"
-                  ],
-                  "vdoc:ref": "#section_routes"
-                },
-                " are the traditional\n  tool to define the request entry points and to descrbibe their\n  parameters. Routes tie into valospace resources via gate projections\n  which are embedded inside primary type schemas."
-              ]
-            },
-            {
-              "@type": "vdoc:Paragraph",
-              "vdoc:content": [
-                {
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
-                    "Projections and reflections"
-                  ],
-                  "vdoc:ref": "#section_projections"
-                },
-                " are ",
-                {
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
-                    "VPaths"
-                  ],
-                  "vdoc:ref": "@valos/raem/VPath"
-                },
-                " that are embedded in the gates\n  and types respectively and which define paths into and between\n  valospace resources, respectively"
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    "package": "@valos/web-spindle",
-    "version": "0.35.0-prerelease.20"
+    "version": "0.35.0-prerelease.21"
   },
   "revdoc": {
     "@id": "https://valospace.org/revdoc",
@@ -931,7 +696,7 @@
       ]
     },
     "package": "@valos/revdoc",
-    "version": "0.35.0-prerelease.20"
+    "version": "0.35.0-prerelease.21"
   },
   "revdoc/tutorial": {
     "@id": "https://valospace.org/revdoc/tutorial",
@@ -1005,7 +770,7 @@
       ]
     },
     "package": "@valos/revdoc",
-    "version": "0.35.0-prerelease.20"
+    "version": "0.35.0-prerelease.21"
   },
   "sbomdoc": {
     "@id": "https://valospace.org/sbomdoc",
@@ -1064,7 +829,7 @@
       ]
     },
     "package": "@valos/sbomdoc",
-    "version": "0.35.0-prerelease.20"
+    "version": "0.35.0-prerelease.21"
   },
   "script": {
     "@id": "https://valospace.org/script",
@@ -1117,7 +882,7 @@
       ]
     },
     "package": "@valos/script",
-    "version": "0.35.0-prerelease.20"
+    "version": "0.35.0-prerelease.21"
   },
   "sourcerer": {
     "@id": "https://valospace.org/sourcerer",
@@ -1162,7 +927,7 @@
       ]
     },
     "package": "@valos/sourcerer",
-    "version": "0.35.0-prerelease.20"
+    "version": "0.35.0-prerelease.21"
   },
   "sourcerer/valos-event-log": {
     "@id": "https://valospace.org/sourcerer/valos-event-log",
@@ -1192,7 +957,7 @@
       ]
     },
     "package": "@valos/sourcerer",
-    "version": "0.35.0-prerelease.20"
+    "version": "0.35.0-prerelease.21"
   },
   "sourcerer/VState": {
     "@id": "https://valospace.org/sourcerer/VState",
@@ -1231,7 +996,7 @@
       ]
     },
     "package": "@valos/sourcerer",
-    "version": "0.35.0-prerelease.20"
+    "version": "0.35.0-prerelease.21"
   },
   "twindoc": {
     "@id": "https://valospace.org/twindoc",
@@ -1312,7 +1077,7 @@
       ]
     },
     "package": "@valos/twindoc",
-    "version": "0.35.0-prerelease.20"
+    "version": "0.35.0-prerelease.21"
   },
   "type-vault/AssortedTutorials": {
     "@id": "https://valospace.org/type-vault/AssortedTutorials",
@@ -1331,7 +1096,7 @@
     },
     "introduction": {},
     "package": "@valos/type-vault",
-    "version": "0.35.0-prerelease.20"
+    "version": "0.35.0-prerelease.21"
   },
   "vdoc": {
     "@id": "https://valospace.org/vdoc",
@@ -1419,7 +1184,242 @@
       ]
     },
     "package": "@valos/vdoc",
-    "version": "0.35.0-prerelease.20"
+    "version": "0.35.0-prerelease.21"
+  },
+  "web-spindle": {
+    "@id": "https://valospace.org/web-spindle",
+    "tags": [],
+    "subProfiles": [],
+    "title": "Web API spindle",
+    "abstract": {
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Web API spindle extends the gateway with a http(s) service endpoint\nwhich maps valospace resources to a RESTful API using a reusable\ndeclarative route mapping definition JSON-LD document."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Once a well-defined mapping definition for some use case is created and\ndocumented by a technician then all valonauts are able to create\nconforming resource structures fully inside the valospace. After that\na service provider can be commissioned to expose those resources via\nsome internet endpoint using the mapping definition."
+          ]
+        }
+      ]
+    },
+    "introduction": {
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "As is traditional the web API spindle is configured via a set of route\npatterns which are matched against incoming request IRIs."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The mapping definition is JSON-LD document (created by a technician)\nwhich describes a set of routes and their mapping vpaths to valospace\nresources. These paths typically originate from a single, configurable\n",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "service index"
+              ]
+            },
+            " valospace resource."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "A well-defined and documented mapping definition for some use case can\nbe reused. A valonaut can create a conforming valospace service index\nand its surrounding resource structure and then request for a service\nfrom a ",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "web API provider"
+              ]
+            },
+            " by providing only the mapping\ndefinition, the service index and any necessary security credentials."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The route definition format is ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "JSON schema"
+              ],
+              "vdoc:ref": "https://json-schema.org/"
+            },
+            " which is as expected used to describe the route request and response\ndata types. These route specs can optionally exposed via an ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "OpenAPI 3.0.0"
+              ],
+              "vdoc:ref": "https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md"
+            },
+            " (or newer) route). In addition to route format specification the\ndefinition schema includes the ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "declarative mapping definitions"
+              ],
+              "vdoc:ref": "#section_mapping_definition"
+            },
+            " from the route requests to valospace resources and eventually back to\nresponses."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The sub-library ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "schema-builder"
+              ],
+              "vdoc:ref": "@valos/web-spindle/schema-builder"
+            },
+            "\ncontains the convenience functions that can be used to build the schema\ndescription types and routes and also emit the plain data description\nobjects which the web API spindle can then consume."
+          ]
+        }
+      ]
+    },
+    "package": "@valos/web-spindle",
+    "version": "0.35.0-prerelease.21"
+  },
+  "web-spindle/schema-builder": {
+    "@id": "https://valospace.org/web-spindle/schema-builder",
+    "tags": [],
+    "subProfiles": [],
+    "title": "Web API Schema Builder TestDoc",
+    "abstract": {
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Schema builder is a javascript library for exporting a site\nconfiguration that can be consumed by the Web API spindle. This config\nis a fully declarative ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "JSON schema"
+              ],
+              "vdoc:ref": "http://json-schema.org/"
+            },
+            "-based format which not just describes the external API routes and\ntypes but also defines their valospace projections using embedded ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "vpath"
+              ],
+              "vdoc:ref": "@valos/raem/VPath"
+            },
+            "."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "This library is primarily intended to be used from inside a\n",
+            {
+              "vdoc:em": true,
+              "vdoc:content": [
+                "spindle configuration library"
+              ]
+            },
+            " which is invoked from inside\na ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "revela.json"
+              ],
+              "vdoc:ref": "@valos/inspire/revela"
+            },
+            " gateway to emit\nthe JSON configuration."
+          ]
+        }
+      ]
+    },
+    "introduction": {
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The four schema builder concepts are:"
+          ]
+        },
+        {
+          "@type": "vdoc:BulletList",
+          "vdoc:entries": [
+            [
+              {
+                "@type": "vdoc:Reference",
+                "vdoc:content": [
+                  "Site configuration"
+                ],
+                "vdoc:ref": "#section_site_configuration"
+              },
+              " is the\n  JSON output of this library, consumable by Web API spindle."
+            ],
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    "Type and property schemas"
+                  ],
+                  "vdoc:ref": "#section_schemas"
+                },
+                " describe\n  layouts of Web API and valospace resources and properties. These are\n  used for GET result body contents, POST, PATCH and PUT request body\n  fields. When exported in the site configuration these are transformed\n  into shared schema objects."
+              ]
+            },
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    "Routes definitions"
+                  ],
+                  "vdoc:ref": "#section_routes"
+                },
+                " are the traditional\n  tool to define the request entry points and to descrbibe their\n  parameters. Routes tie into valospace resources via gate projections\n  which are embedded inside primary type schemas."
+              ]
+            },
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    "Projections and reflections"
+                  ],
+                  "vdoc:ref": "#section_projections"
+                },
+                " are ",
+                {
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    "VPaths"
+                  ],
+                  "vdoc:ref": "@valos/raem/VPath"
+                },
+                " that are embedded in the gates\n  and types respectively and which define paths into and between\n  valospace resources, respectively"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "package": "@valos/web-spindle",
+    "version": "0.35.0-prerelease.21"
   },
   "kernel": {
     "@id": "https://valospace.org/kernel",
@@ -1621,7 +1621,7 @@
       ]
     },
     "package": "@valos/kernel",
-    "version": "0.35.0-prerelease.19"
+    "version": "0.35.0-prerelease.20"
   },
   "removed-from": {
     "@id": "https://valospace.org/removed-from",
@@ -1664,7 +1664,7 @@
       ]
     },
     "package": "@valos/kernel",
-    "version": "0.35.0-prerelease.19"
+    "version": "0.35.0-prerelease.20"
   },
   "@valos/kernel": {
     "@id": "https://valospace.org/index",
@@ -1809,7 +1809,7 @@
       ]
     },
     "package": "@valos/kernel",
-    "version": "0.35.0-prerelease.19"
+    "version": "0.35.0-prerelease.20"
   },
   "technician": {
     "@id": "https://valospace.org/technician",
@@ -1897,7 +1897,7 @@
       ]
     },
     "package": "@valos/kernel",
-    "version": "0.35.0-prerelease.19"
+    "version": "0.35.0-prerelease.20"
   },
   "valonaut": {
     "@id": "https://valospace.org/valonaut",
@@ -1971,7 +1971,7 @@
       ]
     },
     "package": "@valos/kernel",
-    "version": "0.35.0-prerelease.19"
+    "version": "0.35.0-prerelease.20"
   },
   "voyager": {
     "@id": "https://valospace.org/voyager",
@@ -2031,6 +2031,6 @@
       ]
     },
     "package": "@valos/kernel",
-    "version": "0.35.0-prerelease.19"
+    "version": "0.35.0-prerelease.20"
   }
 }

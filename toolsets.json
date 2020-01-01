@@ -53,7 +53,7 @@
           "@valos/script": "./packages/script",
           "@valos/sourcerer": "./packages/sourcerer",
           "@valos/tools": "./packages/tools",
-          "@valos/rest-api-spindle": "./packages/rest-api-spindle",
+          "@valos/web-spindle": "./packages/web-spindle",
           "@valos/toolset-revealer": "./packages/toolset-revealer",
           "@valos/twindoc": "./packages/twindoc",
           "@valos/type-spindle": "./packages/type-spindle",

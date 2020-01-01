@@ -639,18 +639,18 @@
     "package": "@valos/raem",
     "version": "0.35.0-prerelease.20"
   },
-  "rest-api-spindle": {
-    "@id": "https://valospace.org/rest-api-spindle",
+  "web-spindle": {
+    "@id": "https://valospace.org/web-spindle",
     "tags": [],
     "subProfiles": [],
-    "title": "REST API web service spindle",
+    "title": "Web API spindle",
     "abstract": {
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "REST API spindle extends the gateway with a http(s) service endpoint\nwhich maps valospace resources to a RESTful API using a reusable\ndeclarative route mapping definition JSON-LD document."
+            "Web API spindle extends the gateway with a http(s) service endpoint\nwhich maps valospace resources to a RESTful API using a reusable\ndeclarative route mapping definition JSON-LD document."
           ]
         },
         {
@@ -735,18 +735,18 @@
               "vdoc:content": [
                 "schema-builder"
               ],
-              "vdoc:ref": "@valos/rest-api-spindle/schema-builder"
+              "vdoc:ref": "@valos/web-spindle/schema-builder"
             },
             "\ncontains the convenience functions that can be used to build the schema\ndescription types and routes and also emit the plain data description\nobjects which the rest api spindle can then consume."
           ]
         }
       ]
     },
-    "package": "@valos/rest-api-spindle",
+    "package": "@valos/web-spindle",
     "version": "0.35.0-prerelease.20"
   },
-  "rest-api-spindle/schema-builder": {
-    "@id": "https://valospace.org/rest-api-spindle/schema-builder",
+  "web-spindle/schema-builder": {
+    "@id": "https://valospace.org/web-spindle/schema-builder",
     "tags": [],
     "subProfiles": [],
     "title": "REST API Schema Builder TestDoc",
@@ -871,7 +871,7 @@
         }
       ]
     },
-    "package": "@valos/rest-api-spindle",
+    "package": "@valos/web-spindle",
     "version": "0.35.0-prerelease.20"
   },
   "revdoc": {

@@ -404,7 +404,7 @@ matches like:
           "example#1": `
 Editorial Note: this section should be greatly improved.
 The purpose of computation verbs lies more on representing various
-conversions (as part of dynamic operations such as rest API route
+conversions (as part of dynamic operations such as web API route
 mapping) and less on clever SPARQL trickery. The illustration here uses
 (questionable) SPARQL primarily for consistency.`,
         },

@@ -23,7 +23,7 @@
     ".valma-configure_.type_worker": "valma/configure/type/worker.js",
     ".valma-configure_.type_domain": "valma/configure/type/domain.js",
     ".valma-configure_.select_@valos_toolset-revealer": "valma/configure/select__toolset-revealer.js",
-    ".valma-configure_.@valos_type-worker_.tools_.select_@valos_rest-api-spindle": "valma/configure/type-worker_tools_select__rest-api-spindle.js",
+    ".valma-configure_.@valos_type-worker_.tools_.select_@valos_web-spindle": "valma/configure/type-worker_tools_select__web-spindle.js",
     ".valma-configure_.domain_@valos_kernel": "valma/configure/domain__kernel.js"
   },
   "dependencies": {

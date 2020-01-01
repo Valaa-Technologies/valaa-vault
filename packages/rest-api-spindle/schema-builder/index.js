@@ -50,3 +50,11 @@ export {
   sessionGETRoute,
   sessionDELETERoute,
 } from "./_sessionRoutes";
+
+export {
+  bridgeDELETERoute,
+  bridgeGETRoute,
+  bridgePATCHRoute,
+  bridgePUTRoute,
+  bridgePOSTRoute,
+} from "./_bridgeRoutes";

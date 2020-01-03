@@ -190,8 +190,6 @@ export function _fillReplyFromResponse (router, responseContent, runtime, valkOp
   const scope = valkOptions.scope;
   const reply = scope.reply;
   if (reply.sent) return true;
-  if (!reply.statusCode) reply.code(200);
-
   if (runtime.resourceHRef) {
     const relResponse = { $V: {
       rel: "self", href: runtime.resourceHRef(responseContent, scope),
@@ -231,6 +229,10 @@ export function _fillReplyFromResponse (router, responseContent, runtime, valkOp
     // A proxied fetch response
     // TODO(iridian, 2019-12): Handle/forward all other response fields
     // such as redirections, cookies etc.
+    reply.code(responseContent.status);
+    for (const entry of (responseContent.headers || [])) {
+      reply.header(...entry);
+    }
     return _fillReplyFromResponse(router, responseContent.body, runtime, valkOptions);
 /*
   } else if (responseContent instanceof ReadableStream) {
@@ -242,6 +244,7 @@ export function _fillReplyFromResponse (router, responseContent, runtime, valkOp
     throw new Error(`Unrecognized complex response object of type ${
       (responseContent.constructor || {}).name || "<constructor missing>"}`);
   }
+  if (!reply.statusCode) reply.code(200);
   router.infoEvent(2, () => [
     `${router.name}:`, ...dumpObject(scope.resource),
     "\n\tresponseContent:", ...dumpObject(responseContent),

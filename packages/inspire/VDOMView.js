@@ -65,16 +65,18 @@ export default class VDOMView extends Cog {
   * Creates the root UI component with the react context, and connects it to the html container.
   */
   async _createReactRoot (viewRootId: string, container: Object,
-      viewName: string, vViewFocus: Vrapper, lensPropertyName: ?string) {
+      viewName: string, vViewFocus: Vrapper, lensPropertyNames: ?(string | Array<string>)) {
     if (!viewRootId) throw new Error("createReactRoot: viewRootId missing");
     this._rootElement = container.ownerDocument.createElement("DIV");
     this._rootElement.setAttribute("id", viewRootId);
     container.appendChild(this._rootElement);
-    const lensProperty = lensPropertyName
-        ? [lensPropertyName]
-        : ["ROOT_LENS", "LENS", "EDITOR_LENS"];
-    this._reactRoot =
-        <ReactRoot viewName={viewName} vViewFocus={vViewFocus} lensProperty={lensProperty} />;
+    this._reactRoot = (
+      <ReactRoot
+        viewName={viewName}
+        vViewFocus={vViewFocus}
+        lensProperty={[].concat(lensPropertyNames || [], "ROOT_LENS", "LENS")}
+      />
+    );
     return new Promise(onDone => {
       ReactDOM.render(this._reactRoot, this._rootElement, onDone);
     });

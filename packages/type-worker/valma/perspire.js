@@ -185,7 +185,7 @@ exports.handler = async (yargv) => {
 
   mainView.rootScope.valos.Perspire.options = yargv;
   mainView.rootScope.valos.Perspire.state = state;
-  const mainViewName = `worker.view.${mainView.getRawName()}`;
+  const mainViewName = `perspire.view.${mainView.getRawName()}`;
 
   let vExecThis, mutableScope;
   if (yargv.exec || yargv.interactive) {

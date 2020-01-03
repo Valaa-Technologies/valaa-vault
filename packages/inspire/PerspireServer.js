@@ -76,13 +76,14 @@ export default class PerspireServer {
         (callback) => { setTimeout(callback, 0); };
 
     const views = (await this.gateway).createAndConnectViewsToDOM({
-      perspireMain: {
-        name: "ValOS Local Perspire Main",
+      worker: {
+        name: "ValOS Perspire Worker",
         lensURI: this.gateway.getRootLensURI(),
+        lensPropertyFallbacks: ["WORKER_LENS"],
         hostGlobal: global,
         window: viewWindow,
         container: this.container,
-        viewRootId: "perspire-gateway--main-root",
+        viewRootId: "perspire-gateway--worker-view",
         size: {
           width: viewWindow.innerWidth,
           height: viewWindow.innerHeight,
@@ -90,14 +91,14 @@ export default class PerspireServer {
         },
       },
     }, (options) => new PerspireView(options));
-    const perspireMain = await views.perspireMain;
-    this.valos = perspireMain.rootScope.valos;
+    const worker = await views.worker;
+    this.valos = worker.rootScope.valos;
     // Creating perspire specific objects and variables.
     // Please use server.valos.Perspire for external packages
     this.valos.views = views;
     this.valos.Perspire = {};
     this.valos.isServer = true;
-    return perspireMain;
+    return worker;
   }
 
   async run (interval: number, heartbeat: Function, options: Object) {

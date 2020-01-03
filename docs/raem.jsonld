@@ -47,9 +47,9 @@
     "revdoc:package": "@valos/raem",
     "revdoc:prefix": "valos-raem",
     "revdoc:prefixIRI": "https://valospace.org/raem#",
-    "revdoc:version": "0.35.0-prerelease.21",
+    "revdoc:version": "0.35.0-prerelease.22",
     "respecConfig": {
-      "subtitle": "0.35.0-prerelease.21",
+      "subtitle": "0.35.0-prerelease.22",
       "specStatus": "unofficial",
       "editors": [
         {

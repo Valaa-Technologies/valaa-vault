@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-prerelease.22](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.21...v0.35.0-prerelease.22) (2020-01-03)
+
+
+### Features
+
+* Expose fetch, Headers, Request and Response via inspire valosheath ([143c4c9](https://github.com/valaatech/kernel/commit/143c4c95850432585baeedd0649c0f910ca28d4a))
+
+
+
+
+
 # [0.35.0-prerelease.21](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.20...v0.35.0-prerelease.21) (2020-01-01)
 
 **Note:** Version bump only for package @valos/inspire

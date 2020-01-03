@@ -14,11 +14,13 @@ export function _setupRoute (route, userConfig, globalRules) {
 
 export function _prepareRoute (route, userConfig) {
   const category = projectors[route.category];
-  if (!category) throw new Error(`No such category '${route.category}' for ${_routeName(route)}`);
+  if (!category) {
+    throw new Error(`No such category '${route.category}' for route: ${_routeName(route)}`);
+  }
   const handler = category[route.method];
   if (!handler) {
     throw new Error(`No such method '${route.method}' in category '${
-        route.category}' for ${_routeName(route)}`);
+        route.category}' for route: ${_routeName(route)}`);
   }
   const { requiredRules, valueAssertedRules, runtimeRules } = handler();
   if (!route.schema) route.schema = {};

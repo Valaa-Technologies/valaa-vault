@@ -39,7 +39,11 @@ export default valosheath.exportSpindle({
 
       this._prefixRouters[viewName] = this._service.createPrefixRouter(prefix, prefixConfig);
       if (typeof viewConfig === "object") {
-        const view = await gateway.addView(viewName, { ...viewConfig, lensURI: viewConfig.focus });
+        const view = await gateway.addView(viewName, {
+          lensPropertyFallbacks: ["WEB_API_LENS"],
+          ...viewConfig,
+          lensURI: viewConfig.focus,
+        });
         view.clockEvent(1, () => [
           `web-spindle.addView.done`,
           `Added view for prefixRouter ${prefix}: ${viewName}`,

@@ -27,18 +27,18 @@ export function _createProjectorRuntime (
   runtime.resolvers = {};
   runtime.identity = router.getIdentity();
 
-  const scopeBase = runtime.scopeBase = Object.create(router.getViewScope());
+  const scopePreparations = runtime.scopePreparations = {};
 
   Object.entries(config.rules).forEach(([ruleName, rule]) => {
     if (!Array.isArray(rule)) {
-      scopeBase[ruleName] = rule;
+      scopePreparations[ruleName] = rule;
       return;
     }
     let ruleVAKON, maybeStaticReference, resolveRule;
     try {
       ruleVAKON = _vakonpileVPath(rule, runtime);
       if (ruleVAKON[0] === "§'" && !Array.isArray(ruleVAKON[1])) {
-        scopeBase[ruleName] = ruleVAKON[1];
+        scopePreparations[ruleName] = ruleVAKON[1];
         return;
       }
       maybeStaticReference = (ruleVAKON != null) && (ruleVAKON[0] === "§ref")
@@ -71,6 +71,10 @@ export function _createProjectorRuntime (
 export async function _preloadRuntimeResources (router: PrefixRouter, projector, runtime) {
   let vRouteRoot;
   try {
+    runtime.scopeBase = Object.assign(
+        Object.create(router.getViewScope()),
+        runtime.scopePreparations);
+
     runtime.scopeBase.serviceIndex = router.getViewFocus();
     if (runtime.scopeBase.serviceIndex === undefined) {
       throw new Error(`Can't locate service index for ${router._projectorName(projector)}`);

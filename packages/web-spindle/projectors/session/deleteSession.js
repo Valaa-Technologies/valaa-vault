@@ -16,7 +16,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       if (!routeIdentity) {
         throw new Error("Cannot prepare session route DELETE: service identity not configured");
       }
-      this.runtime.scopeBase.identity = Object.freeze({
+      this.runtime.scopePreparations.identity = Object.freeze({
         clientSecret: routeIdentity.clientSecret,
         clientURI: routeIdentity.clientURI,
         clientCookieName: routeIdentity.getClientCookieName(),

@@ -178,7 +178,7 @@ function _attachProjectorFastifyRoutes (router) {
 
 export async function _projectPrefixRoutesFromView (router, view, viewName) {
   router._view = view;
-  router._engine  = view.engine;
+  router._engine = view.engine;
   router._viewName = viewName;
   router.infoEvent(1, () => [
     `${router.getRoutePrefix()}: projecting from view ${viewName}`,

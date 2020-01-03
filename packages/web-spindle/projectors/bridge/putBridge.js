@@ -12,7 +12,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this, route);
-      this.runtime.scopeBase.route = route;
+      this.runtime.scopePreparations.route = route;
     },
 
     preload () {

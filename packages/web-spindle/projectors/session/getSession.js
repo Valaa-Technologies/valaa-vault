@@ -25,7 +25,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       if (!this.runtime.identity) {
         throw new Error("Cannot prepare session route GET: service identity not configured");
       }
-      this.runtime.scopeBase.identity = Object.freeze({
+      this.runtime.scopePreparations.identity = Object.freeze({
         clientSecret: this.runtime.identity.clientSecret,
         clientURI: this.runtime.identity.clientURI,
         clientCookieName: this.runtime.identity.getClientCookieName(),

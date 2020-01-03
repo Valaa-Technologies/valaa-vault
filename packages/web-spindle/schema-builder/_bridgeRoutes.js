@@ -16,7 +16,6 @@ export function bridgeDELETERoute (url, userConfig, globalRules) {
     Object.assign(route.schema, {
       description: route.schema.description
           || `Generic DELETE-method bridge into valospace`,
-      querystring: { ...(route.schema.querystring || {}), },
       response: { ...(route.schema.response || {}) },
     });
     return route;
@@ -34,7 +33,6 @@ export function bridgeGETRoute (url, userConfig, globalRules) {
     Object.assign(route.schema, {
       description: route.schema.description
           || `Generic GET-method bridge into valospace`,
-      querystring: { ...(route.schema.querystring || {}), },
       response: { ...(route.schema.response || {}) },
     });
     return route;
@@ -52,7 +50,6 @@ export function bridgePATCHRoute (url, userConfig, globalRules) {
     Object.assign(route.schema, {
       description: route.schema.description
           || `Generic PATCH-method bridge into valospace`,
-      querystring: { ...(route.schema.querystring || {}), },
       response: { ...(route.schema.response || {}) },
     });
     return route;
@@ -70,7 +67,6 @@ export function bridgePOSTRoute (url, userConfig, globalRules) {
     Object.assign(route.schema, {
       description: route.schema.description
           || `Generic POST-method bridge into valospace`,
-      querystring: { ...(route.schema.querystring || {}), },
       response: { ...(route.schema.response || {}) },
     });
     return route;
@@ -88,7 +84,6 @@ export function bridgePUTRoute (url, userConfig, globalRules) {
     Object.assign(route.schema, {
       description: route.schema.description
           || `Generic PUT-method bridge into valospace`,
-      querystring: { ...(route.schema.querystring || {}), },
       response: { ...(route.schema.response || {}) },
     });
     return route;

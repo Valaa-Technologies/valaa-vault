@@ -16,7 +16,7 @@ fields which are available even for unsourced bodies.`,
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
     "valos-raem:expressor": "$valos-raem:resolveId",
     "rdfs:comment":
-`The immutable string representation of the vrid of this resource.`,
+`The immutable string representation of the VRID of this resource.`,
   },
 
   rawId: {
@@ -28,7 +28,7 @@ fields which are available even for unsourced bodies.`,
     "rdfs:range": "xsd:string",
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
     "rdfs:comment":
-`The immutable string representation of the vrid of this resource.`,
+`The immutable string representation of the VRID of this resource.`,
   },
 
   vrid: {
@@ -36,9 +36,9 @@ fields which are available even for unsourced bodies.`,
     "rdfs:domain": "valos:Resource",
     "rdfs:range": "rdfs:List",
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
-    "valos-raem:expressor": "$valos-raem:resolveVRIdTransient",
+    "valos-raem:expressor": "$valos-raem:resolveVRIDTransient",
     "rdfs:comment":
-`The immutable, segmented object representation of the vrid of this
+`The immutable, segmented object representation of the VRID of this
 resource.`,
   },
 

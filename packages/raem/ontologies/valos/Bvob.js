@@ -6,10 +6,10 @@ module.exports = {
     "rdfs:comment":
 `The dominant type class of resources which are immutably associated
 with an octet-stream of fixed length. Bvob resources have a hash of
-that octet-stream, prefixed with the hash algorithm, as their vgrid.`
+that octet-stream, prefixed with the hash algorithm, as their VGRID.`
   },
   // and have a valid base64-url encoded 240-bit SHAKE256 hash of that
-  // octet-streamprefixed with "hashV240:" as their vgrid.`,
+  // octet-streamprefixed with "hashV240:" as their VGRID.`,
 
   hashAlgorithm: {
     "@type": "valos-raem:GeneratedField",

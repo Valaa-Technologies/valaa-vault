@@ -3,7 +3,7 @@
 import URLParse from "url-parse";
 
 import { invariantifyString } from "~/tools/invariantify";
-import { validateVRId } from "~/raem/VPath";
+import { validateVRID } from "~/raem/VPath";
 import { vdon } from "~/tools/vdon";
 
 export const vdoc = vdon({ "...": { heading:
@@ -115,7 +115,7 @@ export const naiveURI = {
     }
     let idPart;
     if (partitionRawId.slice(-2) === "@@") {
-      validateVRId(partitionRawId);
+      validateVRID(partitionRawId);
       idPart = partitionRawId;
     } else {
       idPart = encodeURIComponent(partitionRawId);

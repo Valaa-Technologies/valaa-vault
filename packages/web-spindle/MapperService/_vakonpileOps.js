@@ -40,7 +40,7 @@ const ruleContextLookup = {
 
 function reference (runtime, param, contextTerm) {
   if (typeof param !== "string") {
-    throw new Error(`Expected string vgrid '${contextTerm}' param value, got ${
+    throw new Error(`Expected string VGRID '${contextTerm}' param value, got ${
         param === null ? "null" : typeof param}`);
   }
   runtime.staticResources.push([param]);

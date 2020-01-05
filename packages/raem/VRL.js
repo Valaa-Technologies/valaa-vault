@@ -367,7 +367,7 @@ export function vRef (rawId: RawId, coupling: ?string = null, ghostPath: ?GhostP
     invariantifyString(coupling, "vRef.coupling", { allowNull: true });
     invariantifyObject(ghostPath, "vRef.ghostPath", { allowNull: true, instanceof: GhostPath });
     invariantifyString(partitionURI, "vRef.partitionURI", { allowNull: true, allowEmpty: true });
-    // if (rawId[0] === "@") { validateVRId(rawId); }
+    // if (rawId[0] === "@") { validateVRID(rawId); }
     const ret = new VRL(rawId);
     let resolverComponent;
     if (ghostPath) resolverComponent = { ghostPath };

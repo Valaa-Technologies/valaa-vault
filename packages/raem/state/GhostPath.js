@@ -2,23 +2,23 @@
 
 import type { RawId } from "~/raem/VRL";
 import derivedId from "~/raem/tools/derivedId";
-import { coerceAsVRId } from "~/raem/VPath";
+import { coerceAsVRID } from "~/raem/VPath";
 
 import { invariantifyString } from "~/tools/invariantify";
 
 export function createGhostRawId (
     protoRawId: string, hostRawId: string, hostProtoRawId: string = ""): string {
   if (hostRawId[0] !== "@") return derivedId(protoRawId, "instance", hostRawId);
-  let protoVRId = coerceAsVRId(protoRawId);
-  const hostProtoVRId = coerceAsVRId(hostProtoRawId);
-  const lenSansLast = Math.min(protoVRId.length, hostProtoVRId.length) - 1;
+  let protoVRID = coerceAsVRID(protoRawId);
+  const hostProtoVRID = coerceAsVRID(hostProtoRawId);
+  const lenSansLast = Math.min(protoVRID.length, hostProtoVRID.length) - 1;
   let lastStepSeparator;
-  for (let i = 0; (i < lenSansLast) && (protoVRId[i] === hostProtoVRId[i]); ++i) {
-    if (protoVRId[i] === "@") lastStepSeparator = i;
+  for (let i = 0; (i < lenSansLast) && (protoVRID[i] === hostProtoVRID[i]); ++i) {
+    if (protoVRID[i] === "@") lastStepSeparator = i;
   }
-  if (lastStepSeparator) protoVRId = protoVRId.slice(lastStepSeparator); // already always a vstep
-  else if (protoVRId[1] === "$") protoVRId = `@_${protoVRId.slice(1)}`; // vgrid into a ghost vstep
-  return `${hostRawId.slice(0, -2)}${protoVRId}`;
+  if (lastStepSeparator) protoVRID = protoVRID.slice(lastStepSeparator); // already always a vstep
+  else if (protoVRID[1] === "$") protoVRID = `@_${protoVRID.slice(1)}`; // VGRID into a ghost vstep
+  return `${hostRawId.slice(0, -2)}${protoVRID}`;
 }
 
 export type JSONGhostStep =

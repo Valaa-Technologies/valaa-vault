@@ -6,9 +6,9 @@ module.exports = {
     "rdfs:subClassOf": "valos-kernel:Property",
     "revdoc:brief": "verb name type",
     "rdfs:comment":
-`The class of all verb names. Each context which performs vpath
+`The class of all verb names. Each context which performs VPath
 computation valks provides native implementations for the resolvers
-it supports in its vpath valks.
+it supports in its VPath valks.
 `,
   },
 

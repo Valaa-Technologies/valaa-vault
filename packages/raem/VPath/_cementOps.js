@@ -16,7 +16,7 @@ function extendVAKON (target, extension) {
 function _cementVPath (stack, vpath, componentType, index) {
   let segmentedVPath = vpath;
   try {
-    if (vpath === undefined) throw new Error("Cannot cement undefined vpath");
+    if (vpath === undefined) throw new Error("Cannot cement undefined VPath");
     if (componentType === "@") {
       if (!Array.isArray(vpath)) return (typeof vpath === "string") ? vpath : ["§'", vpath];
       if (vpath.length === 1) return ["§->", null];
@@ -173,7 +173,7 @@ function _cementVParam (stack, segmentedVPath, componentType) {
   }
   switch (componentType) {
   case "@":
-    // vgrid
+    // VGRID
     return ["§ref", cemented];
   case "!0": // first entry of a trivial resource valk
     return ["§$", cemented];
@@ -280,7 +280,7 @@ function _cementNamedCollection (stack, segmentedVPath) {
       for (let i = 1; i !== segmentedVPath.length; ++i) {
         if (segmentedVPath[i][0] !== "@") {
           throw new Error(`Cannot cement named dictionary '${
-            collectionType}': non-vpath params not supported`);
+            collectionType}': non-VPath params not supported`);
         }
         if ((segmentedVPath[i].length !== 2) || (segmentedVPath[i][1][0] !== ".")) {
           throw new Error(`Cannot cement named dictionary '${

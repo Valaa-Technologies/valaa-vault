@@ -13,7 +13,7 @@ module.exports = {
  *
  * This nested array has following constraints:
  * 1. All the nested entries are either arrays, non-empty strings, or
- * 1.1. If the given VPath is an array vrid with embedded non-string,
+ * 1.1. If the given VPath is an array VRID with embedded non-string,
  *      non-array values then those values appear as-is.
  * 2. Concatenating the nested array strings yields the original VPath.
  *    VPath arrays with embedded values cannot be reconstructed.
@@ -44,13 +44,15 @@ module.exports = {
  * @param {*} vpath
  * @returns
  */
-function segmentVPath (vpathStringOrArray) {
-  const vpath = (typeof vpathStringOrArray === "string") ? [vpathStringOrArray]
-      : Array.isArray(vpathStringOrArray) ? vpathStringOrArray
+function segmentVPath (vpath) {
+  const actualVPath = (typeof vpath === "string") ? [vpath]
+      : Array.isArray(vpath) ? vpath
       : undefined;
   try {
-    if (vpath === undefined) throw new Error("vpath must be a valid string or a segment array");
-    return segmentVKeyPath(null, vpath);
+    if (actualVPath === undefined) {
+      throw new Error("segmentVPath.vpath must be a valid string or a segment array");
+    }
+    return segmentVKeyPath(null, actualVPath);
   } catch (error) {
     throw wrapError(error, new Error("During segmentVPath"),
         "\n\tvpath:", ...dumpObject(vpath));
@@ -202,7 +204,7 @@ function _segmentVPathString (vpath) {
   const ret = ops[nextOpId]();
   if ((firstOp === 3) && (ret.length === 1)) return undefined;
   if (i !== vpath.length) {
-    throw new Error(`Invalid vpath: expected eof at pos ${i}, got: "${vpath[i]}"`);
+    throw new Error(`Invalid VPath: expected eof at pos ${i}, got: "${vpath[i]}"`);
   }
   return ret;
   function _advance () {
@@ -222,7 +224,7 @@ function _segmentVPathString (vpath) {
     }
     if (nextOpId !== 2) {
       throw new Error(
-          `Invalid vpath at pos ${vpathPos}: expected a closing "@" at ${i}, got: "${vpath[i]}"`);
+          `Invalid VPath at pos ${vpathPos}: expected a closing "@" at ${i}, got: "${vpath[i]}"`);
     }
     _advance();
     return vpathSegment;

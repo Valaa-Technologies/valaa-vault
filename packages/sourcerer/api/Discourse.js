@@ -28,12 +28,12 @@ export default class Discourse extends Valker {
   }
 
   /**
-   * assignNewVRId - Creates a new resource id and assigns it to targetAction.
+   * assignNewVRID - Creates a new resource id and assigns it to targetAction.
    *
    * @returns {type} a new id for the object
    */
-  assignNewVRId (targetAction: EventBase, partitionURI: string): VRL { // eslint-disable-line
-    throw new Error(`${this.constructor.name}/Discourse.assignNewVRId not implemented`);
+  assignNewVRID (targetAction: EventBase, partitionURI: string): VRL { // eslint-disable-line
+    throw new Error(`${this.constructor.name}/Discourse.assignNewVRID not implemented`);
   }
 
   /**

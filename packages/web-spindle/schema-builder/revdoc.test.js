@@ -49,7 +49,7 @@ configuration that can be consumed by the Web API spindle. This config
 is a fully declarative `, ref("JSON schema", "http://json-schema.org/"),
 `-based format which not just describes the external API routes and
 types but also defines their valospace projections using embedded `,
-ref("vpath", "@valos/raem/VPath"), `.
+ref("VPath", "@valos/raem/VPath"), `.
 
 This library is primarily intended to be used from inside a
 `, em("spindle configuration library"), ` which is invoked from inside
@@ -676,7 +676,7 @@ function _createProjectionsChapter () {
   // const { shared } = createExampleData();
   return {
     "#0": [
-`Projections and reflections are `, ref("vpath", "@valos/raem/VPath"), `
+`Projections and reflections are `, ref("VPaths", "@valos/raem/VPath"), `
 which are present primary type \`valospace.gate.projection\` fields and
 in type and property \`valospace.reflection\` fields.`
     ],

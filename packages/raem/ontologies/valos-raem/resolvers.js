@@ -19,10 +19,10 @@ module.exports = {
     "revdoc:brief": "resolve resource id",
     "rdfs:comment": "resolve resource id of the given resource",
   },
-  resolveVRIdTransient: {
+  resolveVRIDTransient: {
     "@type": "valos-raem:Resolver",
-    "revdoc:brief": "resolve resource vrid object",
-    "rdfs:comment": "resolve resource vrid object of the given resource",
+    "revdoc:brief": "resolve resource VRID object",
+    "rdfs:comment": "resolve resource VRID object of the given resource",
   },
   resolveDominantTypeName: {
     "@type": "valos-raem:Resolver",

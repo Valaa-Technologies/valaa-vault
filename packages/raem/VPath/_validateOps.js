@@ -10,9 +10,9 @@ module.exports = {
   validateVPath,
   validateVKeyPath,
   validateFullVPath,
-  validateVRId,
+  validateVRID,
   validateVerbs,
-  validateVGRId,
+  validateVGRID,
   validateFormatTerm,
   validateVerb,
   validateVerbType,
@@ -36,18 +36,18 @@ function validateFullVPath (element) {
   const segmentedVPath =
       (typeof element === "string" ? segmentVPath(element) : element);
   if (segmentedVPath[0] !== "@") {
-    throw new Error(`Invalid vpath: expected "@" as element type, got "${segmentedVPath[0]}"`);
+    throw new Error(`Invalid VPath: expected "@" as element type, got "${segmentedVPath[0]}"`);
   }
   return element;
 }
 
-function validateVRId (element) {
+function validateVRID (element) {
   const [firstEntry, vgrid, ...verbs] =
       (typeof element === "string" ? segmentVPath(element) : element);
   if (firstEntry !== "@") {
-    throw new Error(`Invalid vrid: expected "@" as first entry`);
+    throw new Error(`Invalid VRID: expected "@" as first entry`);
   }
-  validateVGRId(vgrid);
+  validateVGRID(vgrid);
   verbs.forEach(validateVerb);
   return element;
 }
@@ -62,11 +62,11 @@ function validateVerbs (element) {
   return element;
 }
 
-function validateVGRId (element) {
+function validateVGRID (element) {
   const [firstEntry, formatTerm, paramValue, ...params] =
       (typeof element === "string" ? segmentVPath(element) : element);
   if (firstEntry !== "$") {
-    throw new Error(`Invalid vgrid: expected "$" as first entry`);
+    throw new Error(`Invalid VGRID: expected "$" as first entry`);
   }
   validateFormatTerm(formatTerm);
   validateParamValueText(paramValue);
@@ -103,7 +103,7 @@ function validateVParam (element) {
         validateVPath(paramValue);
       } else {
         throw new Error(`Invalid vparam:${
-          ""} param-value must be undefined, string or an array containing an expanded vpath`);
+          ""} param-value must be undefined, string or an array containing an expanded VPath`);
       }
     }
     return element;

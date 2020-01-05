@@ -38,7 +38,7 @@ but is only partially implemented by it.`,
   },
   "chapter#introduction>2": {
     "#0": [`
-A subset of vpaths called 'vrids' contain a fixed starting point and
+A subset of VPaths called 'vrids' contain a fixed starting point and
 identify valospace resources.
 
 VPaths contain 'context terms' which refer to definitions provided by
@@ -46,9 +46,9 @@ the surrounding context, usually as references to some external
 ontology. This allows VPath semantics to be extended in domain
 specific but reusable manner.
 
-The primary example of a vpath context is the JSON-LD @context of a `,
+The primary example of a VPath context is the JSON-LD @context of a `,
 ref("ValOS event chronicle", "@valos/sourcerer/valos-event-log"), `
-which provides the semantics for all vpaths that appear inside the
+which provides the semantics for all VPaths that appear inside the
 chronicle.
     `],
   },
@@ -59,7 +59,7 @@ encodeURIComponent characters. VPath grammar has two primary building
 blocks: vsteps and vparams.`
     ],
     "bulleted#>0": [
-[`A vpath itself is an ordered sequence of "@"-separated vsteps, each
+[`A VPath itself is an ordered sequence of "@"-separated vsteps, each
   of which logically depends on the preceding one.`],
 [`A vstep can have a 'verb type' and a sequence of vparams, all
   logically independent of each other.`],
@@ -74,22 +74,22 @@ blocks: vsteps and vparams.`
     ),
     "#1":
 `VPaths serve two superficially distinct purposes as paths and as
-identifiers. If the first vstep of a vpath begins with a context term
-(ie. doesn't have a verb type) then the whole vpath is valospace
-resource identifier (a *vrid*) and the first vstep is a valospace
-global resource identifier (a *vgrid*).`,
-    "chapter#section_vrid_structure>2;VPath with a vgrid is a resource identifier: a VRId": {
+identifiers. If the first vstep of a VPath begins with a context term
+(ie. doesn't have a verb type) then the whole VPath is valospace
+resource identifier (a *VRID*) and the first vstep is a valospace
+global resource identifier (a *VGRID*).`,
+    "chapter#section_vrid_structure>2;VPath with a VGRID is a resource identifier: a VRID": {
       "#0": `
-A vpath with a first vstep lacking a verb type and no other vsteps
+A VPath with a first vstep lacking a verb type and no other vsteps
 identifies a global resource.
 
 Many valospace resources, so called *structural sub-resources* are
 identified by a fixed path from the global resource defined by the same
-verbs that define non-VRId VPaths. Thus while paths and identifiers are
+verbs that define non-VRID VPaths. Thus while paths and identifiers are
 superficially different it is useful to represent them both using the
 same VPath verb structure.
 
-Both verb and vgrid params can also have context term references to
+Both verb and VGRID params can also have context term references to
 an external lookup of URI prefixes and semantic definitions.`
     },
     "chapter#section_representations>3;VPath representations": {
@@ -99,19 +99,19 @@ representations.
       `],
       "chapter#section_vpath_urn>0;VPath URN-scheme (tentative)": {
         "#0": [`
-A VRId VPath string can be expressed as an URN by removing the "@"
+A VRID VPath string can be expressed as an URN by removing the "@"
 prefix and the "@@" suffix and then prefixing the string with
 \`urn:valos:\`.
 `],
         "example#1": [`
 Editorial Note: the urn:valos is fully speculative as of 2019-11. On
-one hand there is salient overlap between valos vrid and urn
+one hand there is salient overlap between valos VRID and URN
 principles: URN calls for structured and managed process of name
-assignment and resolution and vrid system is precisely that. On the
-other hand vrid defers a lot of detail to specific vgrid format-term
+assignment and resolution and VRID system is precisely that. On the
+other hand VRID defers a lot of detail to specific VGRID format-term
 specifications which might prove problematic for actual standardization
 process. It is possible that instead of a generic urn:valos namespace
-there would be specific urn namespaces for specific vrid formats (e.g.
+there would be specific urn namespaces for specific VRID formats (e.g.
 urn:valos-u4, urn:valos-cc) or that urn:valos would stand for one
 specific format (which would most likely be the ~cc).`,
         ],
@@ -124,7 +124,7 @@ of each such segment is a string which denotes the segment type and the
 remaining entries contain the segment payload:
 `],
         "bulleted#segment_types>0": [
-[`"@" identifies a vpath segment with remaining entries as step
+[`"@" identifies a VPath segment with remaining entries as step
   segments`],
 [`"$" identifies a vparam segment with its second entry being a valid
   context term string and an optional third entry containing the vvalue`],
@@ -136,7 +136,7 @@ remaining entries contain the segment payload:
         "#1": [`
 JSON numbers and strings can only appear as param values of "$" or
 ":"-segments. JSON objects cannot appear.
-A vpath which is used as a contextless param of a verb must appear
+A VPath which is used as a contextless param of a verb must appear
 directly without intermediate ":"-segments (unlike in the string VPath
 construct).
 Conversely a verb used as a contextless param must still be wrapped
@@ -160,7 +160,7 @@ the context. This is to ensure that a VPath can be moved from a context
 to a compabible one without modification.
 
 Cementing a VPath with a context inside an environment produces a
-construct where the vpath itself and specifically its context terms are
+construct where the VPath itself and specifically its context terms are
 converted to their environment-specific representations. This
 representation can be anything from interpretable JSON to fully
 compiled executable code.
@@ -189,7 +189,7 @@ comes from several different sources:`
     ],
     "chapter#section_equivalence>1;VPath equivalence follows URN equivalence": {
       "#0": [`
-Two VPaths identify the same path (and in case they're VRIds, refer to
+Two VPaths identify the same path (and in case they're VRIDs, refer to
 the same resource) iff their URN representations are `,
 ref("urn-equivalent", "https://tools.ietf.org/html/rfc8141#section-3"),
 ` and 1. they either share the same environment or 2. their
@@ -198,20 +198,20 @@ URI-equivalent.
 
 For the general case the actual semantics of a VPath and specifically
 of its context-term's depends on the context it is used. Vrids have a
-fixed context which is established by the vgrid. `,
-ref("This has implications on VRId equivalence",
+fixed context which is established by the VGRID. `,
+ref("This has implications on VRID equivalence",
       "@valos/raem/VPath#section_vrid_equivalence"), `.`,
       ],
     },
     [`chapter#section_context_term>2;${
       ""} 'context-term' is a lookup to definitions provided by the context`]: {
       "#0": [`
-A vpath can be contextual via the vparam context-term's. These are
+A VPath can be contextual via the vparam context-term's. These are
 case-sensitive strings with very restricted grammar. The context where
-the vpath is used defines the exact meaning of these terms.
+the VPath is used defines the exact meaning of these terms.
 The meaning for two identical context-terms is recommended to be
 uniform across domains where possible.
-A vpath is invalid in contexts which don't have definitions for the
+A VPath is invalid in contexts which don't have definitions for the
 context-terms of all of its steps. This gives different contexts
 a fine-grained mechanism for defining the vocabularies that are
 available.
@@ -234,7 +234,7 @@ vvalue etc.
 "$" for a vvalue denotes empty string.
 
 *vvalue* both allows for fully
-unencoded nesting of vpath's as well as allows encoding of all unicode
+unencoded nesting of VPath's as well as allows encoding of all unicode
 characters in percent encoded form (as per encodeURIComponent)`,
       ],
     },
@@ -431,7 +431,7 @@ guidelines apply:`,
   new extension spec or new release of an existing spec.`],
 [`"!-computational vs. declarational" or "Who writes the code?":
   Computational vsteps (those with verb type beginning with "!") allow
-  for turing-complete computation to be embedded inside vpaths. An
+  for turing-complete computation to be embedded inside VPaths. An
   environment that chooses to support these verbs and context terms
   has the upside of rapid and arbitrarily expressive configurability
   without further code changes. The downside is that security and
@@ -443,41 +443,41 @@ guidelines apply:`,
     }
   },
   [`chapter#section_vrid>5;${
-      ""}VRId is a stable identifier of a global resource or a structural sub-resource`]: {
+      ""}VRID is a stable identifier of a global resource or a structural sub-resource`]: {
     "#0": `
-A VRId is a vpath which has vgrid as its first production
+A VRID is a VPath which has VGRID as its first production
 (via vgrid-tail).`,
-    "example#main_vrid_rules>0;Informative vrid rules": abnf(
+    "example#main_vrid_rules>0;Informative VRID rules": abnf(
 `  vrid        = "@" "$" vgrid "@" *(vstep "@") "@"
   vgrid       = format-term ":" vgrid-value *vparam
 `),
     "#1": [`
-The VRId can be directly used as the NSS part of an 'urn:valos:'
+The VRID can be directly used as the NSS part of an 'urn:valos:'
 prefixed URI.
 
-Each valospace resource is identified by a VRId.
+Each valospace resource is identified by a VRID.
 
-If a resource VRId has only vgrid part but no verbs the resource is
+If a resource VRID has only VGRID part but no verbs the resource is
 called a global resource.
 
-If a resource VRId has verbs then the verbs describe a structural path
-from the global resource of its initial vgrid part to the resource
+If a resource VRID has verbs then the verbs describe a structural path
+from the global resource of its initial VGRID part to the resource
 itself. The resource is called a *structural sub-resource* of that
 global resource.
 
 Each resource is affiliated with an event log of its global resource.
 
-All direct VRId context-terms are references to this event log `,
+All direct VRID context-terms are references to this event log `,
 ref("JSON-LD context", "https://w3c.github.io/json-ld-syntax/#the-context"),
 `.`,
     ],
     [`chapter#section_vgrid>0;${
-        ""}vgrid identifies global resources - primary keys, free ownership, concrete state`]: {
+        ""}VGRID identifies global resources - primary keys, free ownership, concrete state`]: {
       "#0": `
-The vgrid uniquely identifies a *global resource*. If a VRId contains
-a vgrid and no verbs this global resource is also the
-*referenced resource* of the VRId itself.`,
-      "example#main_vgrid_rules>0;Informative vgrid rules": abnf(
+The VGRID uniquely identifies a *global resource*. If a VRID contains
+a VGRID and no verbs this global resource is also the
+*referenced resource* of the VRID itself.`,
+      "example#main_vgrid_rules>0;Informative VGRID rules": abnf(
 `  vgrid         = format-term ":" vgrid-value *vparam
   format-term   = "~" 1*unreserved-nt
   vgrid-value   = 1*unreserved-nt
@@ -490,49 +490,49 @@ a vgrid and no verbs this global resource is also the
 The format-term defines the global resource identifier schema as well
 as often some (or all) characteristics of the resource.
 
-format-term and vgrid-value are subsets of verb-type and vvalue; vgrid
+format-term and vgrid-value are subsets of verb-type and vvalue; VGRID
 restricts the grammar of these to unreserved-nt as specified in
 the `, ref("URI specification", "https://tools.ietf.org/html/rfc3986"), `).`,
       ],
       "example#2": [`
-Note: when using base64 encoded values as vgrid vvalue, use the
+Note: when using base64 encoded values as VGRID vvalue, use the
 url-and-filename-ready`, ref("base64url characters",
 "https://tools.ietf.org/html/rfc4648#section-5"), `.`,
       ],
     },
-    [`chapter#section_vrid_event_log>1;VRId is affiliated with an event log`]: {
+    [`chapter#section_vrid_event_log>1;VRID is affiliated with an event log`]: {
       "#0": [`
-The resource identified by a VRId is always affiliated with an event
-log of its global resource. Because the VRId doesn't contain the
+The resource identified by a VRID is always affiliated with an event
+log of its global resource. Because the VRID doesn't contain the
 locator information of this event log it must be discoverable from the
-context where the VRId is used.
+context where the VRID is used.
 
-All context-terms of the VGRId and VRId vparams are references to the
+All context-terms of the VGRID and VRID vparams are references to the
 event log `, ref("JSON-LD context", "https://w3c.github.io/json-ld-syntax/#the-context"),
 ` (Note: this applies only to immediate but not to nested vparams).
 
 Global resources can be transferred between event logs. To maintain
-immutability across these transfers VGRId's must not contain partition
-or other non-identifying locator information. Similar to URN's VRId's
+immutability across these transfers VGRID's must not contain partition
+or other non-identifying locator information. Similar to URN's VRID's
 always relies external structures and systems for carrying locator
 information.
 `],
       "example#1":
 `Note: uuid v4 (format term \`~u4\`) is recommended for
-now, but eventually VGRId generation will be tied to the
+now, but eventually VGRID generation will be tied to the
 deterministic event id chain (format term \`~cc\`).
 This in turn should be seeded by some ValOS authority.`,
     },
     "chapter#section_vrid_equivalence>2": {
       "#0": [`
-Two VRIds refer to the same resource iff their URN representations are `,
+Two VRIDs refer to the same resource iff their URN representations are `,
 ref("urn-equivalent", "https://tools.ietf.org/html/rfc8141#section-3"),
-`(i.e. if the two VRIds are equivalent after section 3.1. case
+`(i.e. if the two VRIDs are equivalent after section 3.1. case
 normalization for step 3. percent-encoding case normalization).
 
 Maintaining the consistency between this lexical equivalence and the
 semantic equivalence of a resource which has been transferred between
-event logs without having to dereference VRIds is useful but has
+event logs without having to dereference VRIDs is useful but has
 implications.
 `, blockquote(
   `Rule: When resources are transferred between event logs
@@ -553,17 +553,17 @@ account and/or specify context definition additions which do not change
 the equivalence semantics.`,
       ],
     },
-    [`chapter#section_structural_sub_resources>3;VRId verbs identify structural sub-resources${
+    [`chapter#section_structural_sub_resources>3;VRID verbs identify structural sub-resources${
         ""} - fixed ownership, inferred state, 'secondary keys'`]: {
       "#0": [
-`In VRId context the vsteps-tail that follows the VGRId specifies
+`In VRID context the vsteps-tail that follows the VGRID specifies
 a structural path from the global resource to a
 *structural sub-resource* of the global resource. The triple
 constraints of each verb in that path are _inferred as triples_ for the
 particular resource that that verb affects.
 
 `, blockquote(`Principle: a structural sub-resource using a particular
-vsteps-tail in its identifying VRId will always infer the triples that
+vsteps-tail in its identifying VRID will always infer the triples that
 are required to satisfy the same vsteps-tail in a query context which
 starts from the same global resource.`), `
 
@@ -584,20 +584,20 @@ without specifying a new edge). The global resource is the host
 resource for the first verb; the sub-resource of that segment is the
 host resource of the second verb and so on.
 
-As the VRId identities of the sub-resources are structurally fixed to
+As the VRID identities of the sub-resources are structurally fixed to
 this tree the coupling between host and sub-resource must be static.
 The typical implementation for this is an ownership coupling.`,
       ],
     },
-    "chapter#section_vgrid_types>4;List of VGRId formats:": {
+    "chapter#section_vgrid_types>4;List of VGRID formats:": {
       "#0": `
-VGRId context-term specifies the particular identifier format and
+VGRID context-term specifies the particular identifier format and
 possible semantics of the identified global resource. ValOS kernel
 reserves all context-terms matching '"i" 2( ALPHA / DIGIT )' for
 itself with currently defined formats exhaustively listed here.
       `,
       [`chapter#section_vgrid_uuid_v4>0;${
-          ""}VGRId format "\`~u4\`": UUID v4 of a native, insecure resource`]: {
+          ""}VGRID format "\`~u4\`": UUID v4 of a native, insecure resource`]: {
         "#0": `
 An identifier for native valospace resource with an event log.
 This is insecure as there are no guarantees against resource id
@@ -605,33 +605,33 @@ collisions by malicious event logs. These identifiers can thus only be
 used in trusted, protected environments.`,
       },
       [`chapter#section_vgrid_content_hash>1;${
-          ""}VGRId format "\`~bvo\`": The content hash of Binary ValOS object`]: {
+          ""}VGRID format "\`~bvo\`": The content hash of Binary ValOS object`]: {
         "#0": `
 An identifier of an immutable octet-stream, with the content hash in
 the vvalue.`
       },
       [`chapter#section_vgrid_platonic_resource>2;${
-          ""}VGRId format "\`~plt\`": The id of an immutable Platonic resource With inferences`]: {
+          ""}VGRID format "\`~plt\`": The id of an immutable Platonic resource With inferences`]: {
         "#0": `
 An identifier of an immutable, procedurally generated resource with its
-content inferred from the vpath embedded in the vvalue.
+content inferred from the VPath embedded in the vvalue.
 While of limited use in itself this is useful when used as the
 prototype of structural ghost sub-resources which are quite mutable.`,
       },
       [`chapter#section_vgrid_command_resource_hash>3;${
-          ""}VGRId format "\`~cih\`": The id of a command-id hash-based insecure resource`]: {
+          ""}VGRID format "\`~cih\`": The id of a command-id hash-based insecure resource`]: {
         "#0": `
 An identifier which has been hashed from a command id, chronicle URI
 and a running counter.`,
       },
       [`chapter#section_vgrid_command_chronicle_hash>4;${
-          ""}VGRId format "\`~chr\`": The id of a command hash-based chronicle`]: {
+          ""}VGRID format "\`~chr\`": The id of a command hash-based chronicle`]: {
         "#0": `
 A chronicle identifier which has been hashed from a command id and an
 authority URI.`,
       },
       [`chapter#section_vgrid_crypto_chained>5;${
-          ""}VGRId format "\`~ch3\`": The id of Crypto-Hash-CHained secure CHronicle resource`]: {
+          ""}VGRID format "\`~ch3\`": The id of Crypto-Hash-CHained secure CHronicle resource`]: {
         "#0": `
 An identifier of a native, secure valospace resource with an event log.
 This id is deterministically derived from the most recent hash-chain
@@ -641,26 +641,26 @@ collision resistance and a mechanism for creator to prove their claim
 to the resource.`,
       },
       [`chapter#section_vgrid_authority_root>6;${
-          ""}VGRId format "\`~aur\`": The id of an authority root resource`]: {
+          ""}VGRID format "\`~aur\`": The id of an authority root resource`]: {
         "#0": `
 The fixed identifier of an immovable root resource of an authority
-chronicle. The authority vgrid param equals to the authority URI.`,
+chronicle. The authority VGRID param equals to the authority URI.`,
       },
       [`chapter#section_vgrid_ghost>7;${
-          ""}VGRId format "\`~gh\`": The derived Hash id of a native, insecure Ghost resource`]: {
+          ""}VGRID format "\`~gh\`": The derived Hash id of a native, insecure Ghost resource`]: {
         "#0": `
 This is a legacy format for native ghost resources, with id created
 from the hash of the 'ghost path' of the resource.`,
       },
       [`chapter#section_vgrid_raw>8;${
-          ""}VGRId format "\`~raw\`": The insecure raw text id of a resource`]: {
+          ""}VGRID format "\`~raw\`": The insecure raw text id of a resource`]: {
         "#0": `
 An id with an unknown schema.`
       },
     },
-    "chapter#section_vrid_verb_types>4;List of VRId-specific verb type semantics:": {
+    "chapter#section_vrid_verb_types>4;List of VRID-specific verb type semantics:": {
       "#0": `
-VRId *verb-type* specifies the relationship category between the
+VRID *verb-type* specifies the relationship category between the
 segment host resource and sub-resource, a set of inferred triples as
 well as other possible constraints.`,
       "example#example_shared_vrid_verb_data>0;Shared example data": [
@@ -837,7 +837,7 @@ homologous prototype inside f00b-b507-0763 and thus infers triples:
   "chapter#section_grammar>8;Collected VPath ABNF grammar": {
     "#0": [
 `The VPath grammar is an LL(1) grammar. It is recursive be virtue of
-vvalue productions which can nest vpaths themselves without additional
+vvalue productions which can nest VPaths themselves without additional
 encoding.
 
 The list of definitive rules:
@@ -892,7 +892,7 @@ itself. These notes primarily relate to LL(1)-parseability:`
     SPARQL, Turtle nor JSON-LD have this limitation.`
   )],
 [`The nesting hierarchy can be manually quickly established by first
-  splitting a valid vpath string by the delimiter regex /(@$:)/
+  splitting a valid VPath string by the delimiter regex /(@$:)/
   (retaining these delimiters in the result). Then a tree structure is
   formed by traversing the array from left to right and dividing it to
   different nesting depths. The nesting depth is increased for the

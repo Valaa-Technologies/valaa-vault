@@ -6,7 +6,7 @@ import { ValaaURI, naiveURI, hasScheme } from "~/raem/ValaaURI";
 import { vRef } from "~/raem/VRL";
 import { dumpObject } from "~/raem/VALK";
 import { getHostRef } from "~/raem/VALK/hostReference";
-import { formVPath, validateVRId, validateVerbs } from "~/raem/VPath";
+import { formVPath, validateVRID, validateVerbs } from "~/raem/VPath";
 import { addConnectToPartitionToError } from "~/raem/tools/denormalized/partitions";
 
 import Discourse from "~/sourcerer/api/Discourse";
@@ -19,8 +19,8 @@ import type { ChronicleOptions, ChroniclePropheciesRequest, ConnectOptions, Prop
 import EVENT_VERSION from "~/sourcerer/tools/EVENT_VERSION";
 
 import { initializeAspects, obtainAspect, tryAspect } from "~/sourcerer/tools/EventAspects";
-import createVRId0Dot3, { upgradeVRIdTo0Dot3, createChronicleRootVRId0Dot3 }
-    from "~/sourcerer/tools/event-version-0.3/createVRId0Dot3";
+import createVRID0Dot3, { upgradeVRIDTo0Dot3, createChronicleRootVRID0Dot3 }
+    from "~/sourcerer/tools/event-version-0.3/createVRID0Dot3";
 
 import TransactionState, { fabricatorOps } from "~/sourcerer/FalseProphet/TransactionState";
 import IdentityManager from "~/sourcerer/FalseProphet/IdentityManager";
@@ -164,7 +164,7 @@ export default class FalseProphetDiscourse extends Discourse {
 
   create ({ typeName, initialState, id }: Object): ProphecyEventResult {
     const command = created({ id, typeName, initialState });
-    if (!command.id) command.id = this.assignNewVRId(command);
+    if (!command.id) command.id = this.assignNewVRID(command);
     return this.chronicleEvent(command, {});
   }
 
@@ -172,7 +172,7 @@ export default class FalseProphetDiscourse extends Discourse {
     duplicateOf, initialState, id,
   }: Object): ProphecyEventResult {
     const command = duplicated({ id, duplicateOf, initialState });
-    if (!command.id) command.id = this.assignNewVRId(command);
+    if (!command.id) command.id = this.assignNewVRID(command);
     return this.chronicleEvent(command, {});
   }
 
@@ -180,10 +180,10 @@ export default class FalseProphetDiscourse extends Discourse {
     return this.chronicleEvent(destroyed({ id }), {});
   }
 
-  assignNewVRId (targetAction: EventBase, chronicleURI: string,
+  assignNewVRID (targetAction: EventBase, chronicleURI: string,
       explicitRawId?: string, explicitSubPath?: string | Array) {
     try {
-      if (!chronicleURI) throw new Error("assignNewVRId.chronicleURI missing");
+      if (!chronicleURI) throw new Error("assignNewVRID.chronicleURI missing");
       const root = this._transactorState ? this._transactorState.obtainRootEvent() : targetAction;
       if (!tryAspect(root, "command").id) this._assignCommandId(root, this);
       const chronicles = (root.meta || (root.meta = {})).partitions || (root.meta.partitions = {});
@@ -208,12 +208,12 @@ export default class FalseProphetDiscourse extends Discourse {
         }
       }
 
-      let resourceVRId;
+      let resourceVRID;
       if (subPath) {
-        let parentVRId = getHostRef(
+        let parentVRID = getHostRef(
             targetAction.initialState.owner || targetAction.initialState.source,
             `${targetAction.type}.Property.initialState.owner`).rawId();
-        if (parentVRId[0] !== "@") parentVRId = upgradeVRIdTo0Dot3(parentVRId);
+        if (parentVRID[0] !== "@") parentVRID = upgradeVRIDTo0Dot3(parentVRID);
         resourceVRId = `${parentVRId.slice(0, -2)}${subPath}`;
         /*
         resourceRawId = ((ownerRawId[0] !== "@") || (ownerRawId.slice(-2) !== "@@"))
@@ -221,13 +221,13 @@ export default class FalseProphetDiscourse extends Discourse {
             : `${ownerRawId.slice(0, -1)}.:${encodeURIComponent(propertyName)}@@`;
         */
       } else if (!explicitRawId) {
-        resourceVRId =
-            createVRId0Dot3(root.aspects.command.id, chronicleURI, chronicle.createIndex++);
+        resourceVRID =
+            createVRID0Dot3(root.aspects.command.id, chronicleURI, chronicle.createIndex++);
       } else if (explicitRawId[0] === "@") {
-        resourceVRId = validateVRId(explicitRawId);
+        resourceVRID = validateVRID(explicitRawId);
       } else {
         if (!hasScheme(chronicleURI, "valaa-memory")) {
-          this.errorEvent(`a non-VPath assignNewVRId.explicitRawId was explicitly provided${
+          this.errorEvent(`a non-VPath assignNewVRID.explicitRawId was explicitly provided${
               ""} for a regular chronicle resource in a non-'valaa-memory:' chronicle: this will${
               ""} be deprecated Very Soon(tm) in favor of VPath resource identifiers.`,
               "\n\texplicitRawId:", explicitRawId,
@@ -236,9 +236,9 @@ export default class FalseProphetDiscourse extends Discourse {
         return (targetAction.id = vRef(explicitRawId, undefined, undefined,
             naiveURI.createPartitionURI(chronicleURI)));
       }
-      targetAction.id = vRef(resourceVRId, undefined, undefined, chronicleURI);
+      targetAction.id = vRef(resourceVRID, undefined, undefined, chronicleURI);
       /*
-      console.log("assignNewVRId", tryAspect(root, "command").id, chronicleURI, explicitRawId,
+      console.log("assignNewVRID", tryAspect(root, "command").id, chronicleURI, explicitRawId,
           "\n\tresourceRawId:", resourceRawId,
           "\n\tresults:", String(targetAction.id), targetAction.id,
           "\n\ttargetAction:", ...dumpObject(targetAction),
@@ -246,7 +246,7 @@ export default class FalseProphetDiscourse extends Discourse {
       // */
       return targetAction.id;
     } catch (error) {
-      throw this.wrapErrorEvent(error, "assignNewVRId()",
+      throw this.wrapErrorEvent(error, "assignNewVRID()",
           "\n\ttargetAction:", ...dumpObject(targetAction),
           "\n\tchronicleURI:", ...dumpObject(chronicleURI),
           "\n\texplicitRawId:", ...dumpObject(explicitRawId),
@@ -255,14 +255,14 @@ export default class FalseProphetDiscourse extends Discourse {
     }
   }
 
-  assignNewUnchronicledVRId (targetAction: EventBase, explicitRawId?: string) {
+  assignNewUnchronicledVRID (targetAction: EventBase, explicitRawId?: string) {
     if (targetAction.typeName === "Property") {
       throw new Error(
           "Cannot create a resource id for a structural type 'Property' which is missing an owner");
     }
     targetAction.id = vRef(explicitRawId || `@$~u4:${valosUUID()}`);
     /*
-    console.log("assignNewUnchronicledVRId", String(targetAction.id), explicitRawId,
+    console.log("assignNewUnchronicledVRID", String(targetAction.id), explicitRawId,
         "\n\ttargetAction:", ...dumpObject(targetAction),
         "\n\ttargetAction.initialState:", ...dumpObject(targetAction.initialState));
     */
@@ -270,16 +270,16 @@ export default class FalseProphetDiscourse extends Discourse {
   }
 
   assignNewChronicleRootId (targetAction: EventBase, authorityURI: string,
-      explicitChronicleRootVRId?: string) {
+      explicitChronicleRootVRID?: string) {
     const root = this._transactorState ? this._transactorState.obtainRootEvent() : targetAction;
     if (!tryAspect(root, "command").id) this._assignCommandId(root, this);
-    const chronicleRootVRId = explicitChronicleRootVRId
-        || createChronicleRootVRId0Dot3(root.aspects.command.id, authorityURI);
-    targetAction.id = vRef(chronicleRootVRId, undefined, undefined,
-        naiveURI.createChronicleURI(authorityURI, chronicleRootVRId));
+    const chronicleRootVRID = explicitChronicleRootVRID
+        || createChronicleRootVRID0Dot3(root.aspects.command.id, authorityURI);
+    targetAction.id = vRef(chronicleRootVRID, undefined, undefined,
+        naiveURI.createChronicleURI(authorityURI, chronicleRootVRID));
     /*
     console.log("assignNewChronicleRootId", String(targetAction.id), authorityURI,
-        explicitChronicleRootVRId, "\n\ttargetAction:", ...dumpObject(targetAction));
+        explicitChronicleRootVRID, "\n\ttargetAction:", ...dumpObject(targetAction));
     */
     return targetAction.id;
   }

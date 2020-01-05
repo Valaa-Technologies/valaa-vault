@@ -30,9 +30,9 @@ non-triple semantics or triple expression only in limited contexts).`
     "rdfs:domain": "valos-raem:ExpressedField",
     "rdfs:range": "rdfs:List",
     "rdfs:comment":
-`The custom expressor of an ExpressedField as a vpath. If defined and
+`The custom expressor of an ExpressedField as a VPath. If defined and
 whenever a triple expression for this field is required the expressor
-vpath is valked with scope values:
+VPath is valked with scope values:
 - valos-raem:0 being the field owner,
 - valos-raem:1 being the field id, and
 - valos-raem:2 being the possible field raw triple object value if it
@@ -53,9 +53,9 @@ these are the primary, persisted sources of truth.`
     "rdfs:domain": "valos-raem:EventLoggedField",
     "rdfs:range": "rdfs:List",
     "rdfs:comment":
-`The custom impressor of an EventLoggedField as a vpath. Whenever an
+`The custom impressor of an EventLoggedField as a VPath. Whenever an
 event log entry is required for an update that targets this field the
-impressor vpath is valked with scope values:
+impressor VPath is valked with scope values:
 - valos-raem:0 as the field owner,
 - valos-raem:1 as the field id,
 - valos-raem:2 as the possible current field raw triple object value or
@@ -208,12 +208,12 @@ the segmented representation of the VPath rule value as an rdf List.`
 `The class of all resources representing the VPath rule 'vpath' (always
 begins with '@')`,
   },
-  VRId: { "@type": "valos-kernel:Class",
+  VRID: { "@type": "valos-kernel:Class",
     "rdfs:subClassOf": "valos-raem:VPathRule",
     "revdoc:brief": "VPath rule 'vrid' datatype",
     "rdfs:comment":
 `The class of all resources representing the VPath pseudo-rule
-'vrid', ie. a resource identifier with VGRId as the first step (always
+'vrid', ie. a resource identifier with VGRID as the first step (always
 begins with '@')`,
   },
   Verbs: { "@type": "valos-kernel:Class",
@@ -221,10 +221,10 @@ begins with '@')`,
     "revdoc:brief": "VPath rule 'verbs' datatype",
     "rdfs:comment":
 `The class of all resources representing the VPath pseudo-rule
-'verbs', ie. a path between other resources without a VGRId as the
+'verbs', ie. a path between other resources without a VGRID as the
 first step (always begins with '@').`,
   },
-  VGRId: { "@type": "valos-kernel:Class",
+  VGRID: { "@type": "valos-kernel:Class",
     "rdfs:subClassOf": "valos-raem:VPathRule",
     "revdoc:brief": "VPath rule 'vgrid' datatype",
     "rdfs:comment":

@@ -369,7 +369,7 @@ export default class Engine extends Cog {
       if (subPath) throw new Error("Can't have both explicit id and explicit subPath");
       if (Array.isArray(explicitId)) {
         explicitId = formVPath(...explicitId);
-        if (explicitId[1] !== "$") throw new Error("explicit vrid must have a GRId as first step");
+        if (explicitId[1] !== "$") throw new Error("explicit VRID must have a GRId as first step");
       } else if (typeof explicitId !== "string") {
         throw new Error("explicit id must be either a string or a VPath steps array");
       }
@@ -383,7 +383,7 @@ export default class Engine extends Cog {
       // cases 0, 1, (2, 3 already handled)
       // throw new Error("new resource must have either owner or authorityURI");
       // This is legacy stuff, but removing this might break things.
-      return discourse.assignNewUnchronicledVRId(directive, explicitId);
+      return discourse.assignNewUnchronicledVRID(directive, explicitId);
     }
     /*
       8:                owner: yes, global resource id

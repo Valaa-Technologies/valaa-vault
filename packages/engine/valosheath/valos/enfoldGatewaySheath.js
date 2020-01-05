@@ -25,24 +25,24 @@ export default function enfoldGatewaySheath (valos: Object, rootDiscourse: Disco
 
   valos.vrefer = denoteValOSBuiltinWithSignature(
       `returns a resource referred to by the given vref parameters.`
-  )(function vrefer (authorityURI_, chronicleVRId_, resourceVRId_) {
-    let resourceVRId, chronicleURI;
-    if (resourceVRId_ !== undefined) {
-      resourceVRId = resourceVRId_;
-      chronicleURI = `${authorityURI_}?id=${chronicleVRId_}`;
-    } else if (chronicleVRId_ !== undefined) {
-      resourceVRId = chronicleVRId_;
+  )(function vrefer (authorityURI_, chronicleVRID_, resourceVRID_) {
+    let resourceVRID, chronicleURI;
+    if (resourceVRID_ !== undefined) {
+      resourceVRID = resourceVRID_;
+      chronicleURI = `${authorityURI_}?id=${chronicleVRID_}`;
+    } else if (chronicleVRID_ !== undefined) {
+      resourceVRID = chronicleVRID_;
       chronicleURI = authorityURI_;
     } else {
-      ([chronicleURI, resourceVRId] = authorityURI_.split("#"));
-      if (resourceVRId === undefined) {
-        throw new Error("vref fragment resource vrid part missing");
+      ([chronicleURI, resourceVRID] = authorityURI_.split("#"));
+      if (resourceVRID === undefined) {
+        throw new Error("vref fragment resource VRID part missing");
       }
     }
-    resourceVRId = resourceVRId.split(";")[0];
-    let ret = this.__callerValker__.run(null, VALEK.fromObject(resourceVRId).nullable());
+    resourceVRID = resourceVRID.split(";")[0];
+    let ret = this.__callerValker__.run(null, VALEK.fromObject(resourceVRID).nullable());
     if (!ret) {
-      ret = vRef(resourceVRId, undefined, undefined, chronicleURI);
+      ret = vRef(resourceVRID, undefined, undefined, chronicleURI);
       ret.setInactive();
     }
     return ret;

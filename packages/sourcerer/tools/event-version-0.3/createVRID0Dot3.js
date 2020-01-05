@@ -1,6 +1,6 @@
 // @flow
 
-import { coerceAsVRId } from "~/raem/VPath";
+import { coerceAsVRID } from "~/raem/VPath";
 
 import hashV240 from "~/sourcerer/tools/hashV240";
 
@@ -14,7 +14,7 @@ import hashV240 from "~/sourcerer/tools/hashV240";
  * @param {?number} intraEventIndex
  * @returns
  */
-export default function createVRId0Dot3 (commandId: string, chronicleURI: string,
+export default function createVRID0Dot3 (commandId: string, chronicleURI: string,
     intraEventIndex: ?number) {
   if (typeof commandId !== "string") throw new Error("commandId is not a string");
   if (typeof chronicleURI !== "string") throw new Error("chronicleURI is not a string");
@@ -25,10 +25,10 @@ export default function createVRId0Dot3 (commandId: string, chronicleURI: string
   return `@$~cih:${hashV240(`${commandId} ${chronicleURI} ${String(intraEventIndex)}`)}@@`;
 }
 
-export function createChronicleRootVRId0Dot3 (commandId: string, authorityURI: string) {
+export function createChronicleRootVRID0Dot3 (commandId: string, authorityURI: string) {
   return `@$~chr:${hashV240(`${commandId} ${authorityURI} chronicle`)}@@`;
 }
 
-export function upgradeVRIdTo0Dot3 (version0Dot2RawId) {
-  return coerceAsVRId(version0Dot2RawId);
+export function upgradeVRIDTo0Dot3 (version0Dot2RawId) {
+  return coerceAsVRID(version0Dot2RawId);
 }

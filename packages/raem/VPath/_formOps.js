@@ -1,11 +1,11 @@
 const { wrapError } = require("../../tools/wrapError");
 const {
-  validateVGRId, validateVerb, validateFormatTerm, validateVerbType, validateContextTerm,
+  validateVGRID, validateVerb, validateFormatTerm, validateVerbType, validateContextTerm,
 } = require("./_validateOps");
 
 module.exports = {
   formVPath,
-  formVGRId,
+  formVGRID,
   formVerb,
   formParam,
   formParamValue,
@@ -19,7 +19,7 @@ function _formVStep (segment, index) {
   try {
     if (typeof segment === "string") {
       return segment[0] === "$"
-          ? validateVGRId(segment)
+          ? validateVGRID(segment)
           : validateVerb(segment, index);
     }
     if (!Array.isArray(segment)) {
@@ -30,23 +30,23 @@ function _formVStep (segment, index) {
       // verb
       return formVerb(...segment);
     }
-    // vgrid
+    // VGRID
     if (index) {
       throw new Error(`Invalid segment #${index} while minting:${
-        ""} expected verb (is not first segment), got vgrid ("$" as first segment element)`);
+        ""} expected verb (is not first segment), got VGRID ("$" as first segment element)`);
     }
-    return formVGRId(...segment.slice(1));
+    return formVGRID(...segment.slice(1));
   } catch (error) {
     throw wrapError(error, new Error(`While minting VPath segment #${index}`),
         "\n\tsegment:", segment);
   }
 }
 
-function formVGRId (formatTerm, paramElement,
+function formVGRID (formatTerm, paramElement,
     ...params /* : (string | ["$", string, ?string]) */) {
   validateFormatTerm(formatTerm);
   const paramValue = formParamValue(paramElement);
-  if (paramValue === "$") throw new Error(`Invalid vgrid: param-value missing`);
+  if (paramValue === "$") throw new Error(`Invalid VGRID: param-value missing`);
   return `$${formatTerm}:${paramValue}${params.map(formParam).join("")}`;
 }
 
@@ -77,7 +77,7 @@ function formParamValue (value) {
   if (value === null) throw new Error(`Invalid param-value: null`);
   if (!Array.isArray(value)) throw new Error(`Invalid param-value with type ${typeof value}`);
   if (value[0] !== "@") {
-    throw new Error(`Invalid param-value: vpath segment must begin with "@"`);
+    throw new Error(`Invalid param-value: VPath segment must begin with "@"`);
   }
   return formVPath(...value.slice(1));
 }

@@ -144,7 +144,7 @@ export default class Engine extends Cog {
     let transient;
     const discourse = options.discourse || this.discourse;
     const state = options.state || discourse.getState();
-    const id = discourse.obtainReference(idData, options.contextPartitionURI);
+    const id = discourse.obtainReference(idData, options.contextChronicleURI);
     try {
       if (explicitTransient) {
         typeName = getTransientTypeName(explicitTransient, discourse.schema);
@@ -347,8 +347,8 @@ export default class Engine extends Cog {
 
     let explicitId = options.id || initialState.id;
     delete initialState.id;
-    const subPath = options.subPath || initialState.subPath;
-    delete initialState.subPath;
+    const subResource = options.subResource || initialState.subResource;
+    delete initialState.subResource;
     if (initialState.authorityURI) {
       initialState.partitionAuthorityURI = initialState.authorityURI;
       delete initialState.authorityURI;
@@ -366,7 +366,7 @@ export default class Engine extends Cog {
      */
     if (explicitId) {
       // cases 3, 7, b, f
-      if (subPath) throw new Error("Can't have both explicit id and explicit subPath");
+      if (subResource) throw new Error("Can't have both explicit id and explicit subResource");
       if (Array.isArray(explicitId)) {
         explicitId = formVPath(...explicitId);
         if (explicitId[1] !== "$") throw new Error("explicit VRID must have a GRId as first step");
@@ -376,7 +376,7 @@ export default class Engine extends Cog {
     }
     let owner = initialState.owner || initialState.source;
     if (!owner) {
-      if (subPath) throw new Error("Can't have subPath without owner"); // cases 2, 6
+      if (subResource) throw new Error("Can't have subResource without owner"); // cases 2, 6
       if (authorityURI) { // cases 4, 5
         return discourse.assignNewChronicleRootId(directive, authorityURI, explicitId);
       }
@@ -409,7 +409,7 @@ export default class Engine extends Cog {
       }
     }
     // cases 8, 9, a, c, d, e
-    return discourse.assignNewVRId(directive, String(chronicleURI), explicitId, subPath);
+    return discourse.assignNewVRID(directive, String(chronicleURI), explicitId, subResource);
   }
 
   outputStatus (output = console) {

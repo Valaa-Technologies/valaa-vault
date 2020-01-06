@@ -1,6 +1,7 @@
 const { wrapError } = require("../../tools/wrapError");
 const {
-  validateVGRID, validateVerb, validateFormatTerm, validateVerbType, validateContextTerm,
+  validateVPath, validateVGRID, validateVerb, validateFormatTerm, validateVerbType,
+  validateContextTerm,
 } = require("./_validateOps");
 
 module.exports = {
@@ -11,33 +12,38 @@ module.exports = {
   formParamValue,
 };
 
-function formVPath (...steps) {
-  return `@${steps.map(step => `${_formVStep(step)}@`).join("")}@`;
+function formVPath (...stepsOrVPaths) {
+  return `${stepsOrVPaths.map((step, index) => _formVStep(step, index)).join("")}@@`;
 }
 
 function _formVStep (segment, index) {
   try {
-    if (typeof segment === "string") {
-      return segment[0] === "$"
-          ? validateVGRID(segment)
-          : validateVerb(segment, index);
-    }
-    if (!Array.isArray(segment)) {
-      throw new Error(`Invalid segment #${index} while forming: must be a string or Array, got ${
-        typeof segment}`);
-    }
-    if (segment[0] !== "$") {
+    let ret;
+    if (segment[0] === "@") {
+      if (typeof segment === "string") ret = validateVPath(segment, index).slice(0, -2);
+      else if (Array.isArray(segment)) ret = formVPath(...segment).slice(0, -2);
+    } else if (segment[0] === "$") { // works both for arrays and strings
+      // VGRID
+      if (typeof segment === "string") ret = `@${validateVGRID(segment)}`;
+      else if (Array.isArray(segment)) ret = `@${formVGRID(...segment.slice(1))}`;
+    } else if (segment[0] !== ":") {
       // verb
-      return formVerb(...segment);
+      if (typeof segment === "string") ret = `@${validateVerb(segment, index)}`;
+      else if (Array.isArray(segment)) ret = `@${formVerb(...segment)}`;
+    } else {
+      throw new Error(`Invalid step #${index} while forming VPath: step cannot begin with ':'`);
     }
-    // VGRID
-    if (index) {
-      throw new Error(`Invalid segment #${index} while minting:${
-        ""} expected verb (is not first segment), got VGRID ("$" as first segment element)`);
+    if (ret === undefined) {
+      throw new Error(`Invalid step #${index} while forming VPath:${
+        ""} expected string or an Array`);
     }
-    return formVGRID(...segment.slice(1));
+    if (index && (ret[1] === "$")) {
+      throw new Error(`Invalid non-first step #${index} while forming VPath:${
+        ""} expected verb, got VGRID instead`);
+    }
+    return ret;
   } catch (error) {
-    throw wrapError(error, new Error(`While minting VPath segment #${index}`),
+    throw wrapError(error, new Error(`While forming VPath step #${index}`),
         "\n\tsegment:", segment);
   }
 }

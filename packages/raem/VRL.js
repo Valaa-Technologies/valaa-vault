@@ -5,6 +5,7 @@ import ValaaURI, { naiveURI } from "~/raem/ValaaURI";
 import GhostPath, { JSONGhostPath, ghostPathFromJSON } from "~/raem/state/GhostPath";
 
 import { HostRef, tryHostRef } from "~/raem/VALK/hostReference";
+import { coerceAsVRID } from "~/raem/VPath";
 
 import { debugObjectType, dumpObject, wrapError } from "~/tools/wrapError";
 import invariantify, { invariantifyString, invariantifyObject } from "~/tools/invariantify";
@@ -115,6 +116,7 @@ class VRL {
   debugId (): string { return this.toString(); }
 
   rawId (): RawId { return this._nss; }
+  vrid (): string { return this._vrid || (this._vrid = coerceAsVRID(this._nss)); }
 
   typeof (): string { return "Resource"; }
 

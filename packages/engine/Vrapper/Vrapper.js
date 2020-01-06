@@ -583,7 +583,6 @@ export default class Vrapper extends Cog {
    */
   getRawId () { return this[HostRef].rawId(); }
 
-
   getTypeName (options: any) {
     if (this.isResource() && (!options || (options.require !== false))) this.requireActive(options);
     return this._typeName;
@@ -1737,6 +1736,17 @@ export default class Vrapper extends Cog {
     // TODO(iridian): Verify and return null if this object has no ghost in instance, ie. if this
     // object is not a sub-component in the direct prototype of vInstance
     return this.engine.getVrapper(ghostVRL, { state });
+  }
+
+  getSubResource (subPath, options: { contextChronicleURI: string, discourse: ?Discourse } = {}) {
+    this.requireActive(options);
+    if (!options.contextChronicleURI) {
+      options.contextChronicleURI = this.getConnection().getChronicleURI(options);
+    }
+    const subVRID = formVPath(this[HostRef].vrid(), subPath);
+    return this.engine.tryVrapper(subVRID, options)
+        || vRef(subVRID, undefined, undefined, options.contextChronicleURI)
+            .setInactive();
   }
 
   onEventCREATED (passage: Passage, story: Story) {

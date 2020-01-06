@@ -105,6 +105,33 @@ describe("transpileValoscriptBody with Engine scriptAPI", () => {
       expect(MyTypeEntity.get(VALEK.relations("myRelation").to(0)))
           .toEqual(myRelation);
     });
+    it("adds with 'new' a structured sub-Relation to an existing Entity", () => {
+      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+      harness.interceptErrors(() => {
+      const bodyText = `
+          const parent = new Entity({ name: "parent", owner: this,
+              properties: { position: { x: 10, y: 20 } } });
+          const ret = parent.$V.getSubResource("@_:rel-1@@");
+          new Relation({
+            name: "myRelation",
+            owner: parent, subResource: "@_:rel-1@@",
+            properties: { position: { x: 1, y: 2 } },
+          });
+          ret;
+      `;
+      const bodyKuery = transpileValoscriptTestBody(bodyText);
+      const myRelation = entities().creator.do(bodyKuery);
+      expect(myRelation.get("name"))
+          .toEqual("myRelation");
+      expect(myRelation.get(VALEK.propertyLiteral("position")))
+          .toEqual({ x: 1, y: 2 });
+      const MyTypeEntity = myRelation.get("owner");
+      expect(MyTypeEntity.get("name"))
+          .toEqual("parent");
+      expect(MyTypeEntity.get(VALEK.relations("myRelation").to(0)))
+          .toEqual(myRelation);
+      })();
+    });
     it("modifies existing Entity property", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
       const bodyText = `

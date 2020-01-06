@@ -25,6 +25,7 @@ const symbols = {
   setOwner: Symbol("Resource.setOwner"),
   getEntity: Symbol("Resource.getEntity"),
   getMedia: Symbol("Resource.getMedia"),
+  getSubResource: Symbol("Resource.getSubResource"),
   createDerivedId: Symbol("Resource.createDerivedId"),
   hasInterface: Symbol("Resource.hasInterface"),
   instantiate: Symbol("Resource.instantiate"),
@@ -245,6 +246,15 @@ export default {
     )(function getMedia (name) {
       return VALEK.toField("unnamedOwnlings")
           .filter(VALEK.isOfType("Media").and(VALEK.hasName(name))).toIndex(0).toVAKON();
+    }),
+
+    [symbols.getSubResource]: denoteValOSBuiltinWithSignature(
+`returns the structured sub-resource accessed from this resource via
+the given *subPath*.`
+    )(function getSubResource (subPath, explicitChronicleURI) {
+      return Vrapper.prototype.getSubResource.call(this, subPath, {
+        contextChronicleURI: explicitChronicleURI, discourse: this.__callerValker__,
+      });
     }),
 
     [symbols.instantiate]: denoteValOSBuiltinWithSignature(

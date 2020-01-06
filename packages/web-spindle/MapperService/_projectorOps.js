@@ -47,7 +47,7 @@ export function _createProjectorRuntime (
       resolveRule = (ruleVAKON === null)
               ? (engine, head) => head
           : maybeStaticReference
-              ? (engine => engine.getVrapper(maybeStaticReference, { contextPartitionURI: null }))
+              ? (engine => engine.getVrapper(maybeStaticReference, { contextChronicleURI: null }))
           : ((engine, head, options) => engine.run(head, ruleVAKON, options));
       const requiredAtRuntime = (config.valueAssertedRules || []).indexOf(ruleName) !== -1;
       if (ruleName === "routeRoot") {
@@ -96,7 +96,7 @@ export async function _preloadRuntimeResources (router: PrefixRouter, projector,
     if (rootActivation) await rootActivation;
     const activations = runtime.staticResources
         .map(staticResource => router.getEngine()
-            .getVrapper(staticResource, { contextPartitionURI: null }).activate())
+            .getVrapper(staticResource, { contextChronicleURI: null }).activate())
         .filter(e => e);
     await Promise.all(activations);
     router.infoEvent(1, () => ["Done preloading projector:", router._projectorName(projector),

@@ -181,7 +181,7 @@ export default class FalseProphetDiscourse extends Discourse {
   }
 
   assignNewVRID (targetAction: EventBase, chronicleURI: string,
-      explicitRawId?: string, explicitSubPath?: string | Array) {
+      explicitRawId?: string, explicitSubResource?: string | Array) {
     try {
       if (!chronicleURI) throw new Error("assignNewVRID.chronicleURI missing");
       const root = this._transactorState ? this._transactorState.obtainRootEvent() : targetAction;
@@ -190,12 +190,12 @@ export default class FalseProphetDiscourse extends Discourse {
       const chronicle = chronicles[chronicleURI] || (chronicles[chronicleURI] = {});
       if (!chronicle.createIndex) chronicle.createIndex = 0;
 
-      let subPath = explicitSubPath;
-      if (subPath) { // case a -> 9, e -> d
-        if (Array.isArray(subPath)) subPath = formVPath(...subPath);
-        else validateVerbs(subPath);
-        if (subPath[1] === "$") {
-          throw new Error("explicit subPath must not have a GRId as first step");
+      let subResource = explicitSubResource;
+      if (subResource) { // case a -> 9, e -> d
+        if (Array.isArray(subResource)) subResource = formVPath(...subResource);
+        else validateVerbs(subResource);
+        if (subResource[1] === "$") {
+          throw new Error("explicit subResource must not have a GRId as first step");
         }
       } else if (!explicitRawId) {
         if (targetAction.typeName === "Property") {
@@ -204,17 +204,17 @@ export default class FalseProphetDiscourse extends Discourse {
             throw new Error(`${targetAction.type
                 }.Property.initialState.name required for Property id secondary part`);
           }
-          subPath = `@.:${encodeURIComponent(propertyName)}@@`;
+          subResource = `@.:${encodeURIComponent(propertyName)}@@`;
         }
       }
 
       let resourceVRID;
-      if (subPath) {
+      if (subResource) {
         let parentVRID = getHostRef(
             targetAction.initialState.owner || targetAction.initialState.source,
             `${targetAction.type}.Property.initialState.owner`).rawId();
         if (parentVRID[0] !== "@") parentVRID = upgradeVRIDTo0Dot3(parentVRID);
-        resourceVRId = `${parentVRId.slice(0, -2)}${subPath}`;
+        resourceVRID = `${parentVRID.slice(0, -2)}${subResource}`;
         /*
         resourceRawId = ((ownerRawId[0] !== "@") || (ownerRawId.slice(-2) !== "@@"))
             ? `${ownerRawId}/.:${encodeURIComponent(propertyName)}`
@@ -250,7 +250,7 @@ export default class FalseProphetDiscourse extends Discourse {
           "\n\ttargetAction:", ...dumpObject(targetAction),
           "\n\tchronicleURI:", ...dumpObject(chronicleURI),
           "\n\texplicitRawId:", ...dumpObject(explicitRawId),
-          "\n\texplicitSubPath:", ...dumpObject(explicitSubPath),
+          "\n\texplicitSubResource:", ...dumpObject(explicitSubResource),
       );
     }
   }

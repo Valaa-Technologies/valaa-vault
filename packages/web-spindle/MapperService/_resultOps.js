@@ -231,7 +231,7 @@ export function _fillReplyFromResponse (router, responseContent, runtime, valkOp
     // such as redirections, cookies etc.
     reply.code(responseContent.status);
     for (const entry of (responseContent.headers || [])) {
-      reply.header(...entry);
+      if (!reply.getHeader(entry[0])) reply.header(...entry);
     }
     return _fillReplyFromResponse(router, responseContent.body, runtime, valkOptions);
 /*

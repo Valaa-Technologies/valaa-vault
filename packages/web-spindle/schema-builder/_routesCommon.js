@@ -23,8 +23,8 @@ export function _prepareRoute (route, userConfig) {
         route.category}' for route: ${_routeName(route)}`);
   }
   const { requiredRules, valueAssertedRules, runtimeRules } = handler();
-  if (!route.schema) route.schema = {};
   if (!route.config) route.config = {};
+  if (!route.config.schema) route.config.schema = {};
   if (!route.config.rules) route.config.rules = {};
   (route.config.requiredRules || (route.config.requiredRules = [])).push(...(requiredRules || []));
   (route.config.runtimeRules || (route.config.runtimeRules = [])).push(...(runtimeRules || []));
@@ -33,6 +33,8 @@ export function _prepareRoute (route, userConfig) {
         .push(...valueAssertedRules);
   }
   route.config = patchWith(route.config, userConfig);
+  route.schema = route.config.schema;
+  delete route.config.schema;
 }
 
 export function _finalizeRoute (route, userConfig, globalRules) {

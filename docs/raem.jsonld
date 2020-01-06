@@ -47,9 +47,9 @@
     "revdoc:package": "@valos/raem",
     "revdoc:prefix": "valos-raem",
     "revdoc:prefixIRI": "https://valospace.org/raem#",
-    "revdoc:version": "0.35.0-prerelease.22",
+    "revdoc:version": "0.35.0-prerelease.23",
     "respecConfig": {
-      "subtitle": "0.35.0-prerelease.22",
+      "subtitle": "0.35.0-prerelease.23",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -716,7 +716,7 @@
         "@type": "valos-kernel:Property",
         "rdfs:domain": "valos-raem:ExpressedField",
         "rdfs:range": "rdfs:List",
-        "rdfs:comment": "The custom expressor of an ExpressedField as a vpath. If defined and\nwhenever a triple expression for this field is required the expressor\nvpath is valked with scope values:\n- valos-raem:0 being the field owner,\n- valos-raem:1 being the field id, and\n- valos-raem:2 being the possible field raw triple object value if it\n  exists, otherwise undefined.\nThe resulting valk value is used as the object of a new triple, with\nfield owner and field id used as the subject and predicate."
+        "rdfs:comment": "The custom expressor of an ExpressedField as a VPath. If defined and\nwhenever a triple expression for this field is required the expressor\nVPath is valked with scope values:\n- valos-raem:0 being the field owner,\n- valos-raem:1 being the field id, and\n- valos-raem:2 being the possible field raw triple object value if it\n  exists, otherwise undefined.\nThe resulting valk value is used as the object of a new triple, with\nfield owner and field id used as the subject and predicate."
       },
       "EventLoggedField": {
         "@type": "valos-kernel:Class",
@@ -727,7 +727,7 @@
         "@type": "valos-kernel:Property",
         "rdfs:domain": "valos-raem:EventLoggedField",
         "rdfs:range": "rdfs:List",
-        "rdfs:comment": "The custom impressor of an EventLoggedField as a vpath. Whenever an\nevent log entry is required for an update that targets this field the\nimpressor vpath is valked with scope values:\n- valos-raem:0 as the field owner,\n- valos-raem:1 as the field id,\n- valos-raem:2 as the possible current field raw triple object value or\n  undefined otherwise, and\n- valos-raem:3 the new value being updated to this field."
+        "rdfs:comment": "The custom impressor of an EventLoggedField as a VPath. Whenever an\nevent log entry is required for an update that targets this field the\nimpressor VPath is valked with scope values:\n- valos-raem:0 as the field owner,\n- valos-raem:1 as the field id,\n- valos-raem:2 as the possible current field raw triple object value or\n  undefined otherwise, and\n- valos-raem:3 the new value being updated to this field."
       },
       "CoupledField": {
         "@type": "valos-kernel:Class",
@@ -830,19 +830,19 @@
         "revdoc:brief": "VPath rule 'vpath' datatype",
         "rdfs:comment": "The class of all resources representing the VPath rule 'vpath' (always\nbegins with '@')"
       },
-      "VRId": {
+      "VRID": {
         "@type": "valos-kernel:Class",
         "rdfs:subClassOf": "valos-raem:VPathRule",
         "revdoc:brief": "VPath rule 'vrid' datatype",
-        "rdfs:comment": "The class of all resources representing the VPath pseudo-rule\n'vrid', ie. a resource identifier with VGRId as the first step (always\nbegins with '@')"
+        "rdfs:comment": "The class of all resources representing the VPath pseudo-rule\n'vrid', ie. a resource identifier with VGRID as the first step (always\nbegins with '@')"
       },
       "Verbs": {
         "@type": "valos-kernel:Class",
         "rdfs:subClassOf": "valos-raem:VPathRule",
         "revdoc:brief": "VPath rule 'verbs' datatype",
-        "rdfs:comment": "The class of all resources representing the VPath pseudo-rule\n'verbs', ie. a path between other resources without a VGRId as the\nfirst step (always begins with '@')."
+        "rdfs:comment": "The class of all resources representing the VPath pseudo-rule\n'verbs', ie. a path between other resources without a VGRID as the\nfirst step (always begins with '@')."
       },
-      "VGRId": {
+      "VGRID": {
         "@type": "valos-kernel:Class",
         "rdfs:subClassOf": "valos-raem:VPathRule",
         "revdoc:brief": "VPath rule 'vgrid' datatype",
@@ -858,7 +858,7 @@
         "@type": "valos-kernel:Class",
         "rdfs:subClassOf": "valos-kernel:Property",
         "revdoc:brief": "verb name type",
-        "rdfs:comment": "The class of all verb names. Each context which performs vpath\ncomputation valks provides native implementations for the resolvers\nit supports in its vpath valks.\n"
+        "rdfs:comment": "The class of all verb names. Each context which performs VPath\ncomputation valks provides native implementations for the resolvers\nit supports in its VPath valks.\n"
       },
       "Resolver": {
         "@type": "valos-kernel:Class",
@@ -886,10 +886,10 @@
         "revdoc:brief": "resolve resource id",
         "rdfs:comment": "resolve resource id of the given resource"
       },
-      "resolveVRIdTransient": {
+      "resolveVRIDTransient": {
         "@type": "valos-raem:Resolver",
-        "revdoc:brief": "resolve resource vrid object",
-        "rdfs:comment": "resolve resource vrid object of the given resource"
+        "revdoc:brief": "resolve resource VRID object",
+        "rdfs:comment": "resolve resource VRID object of the given resource"
       },
       "resolveDominantTypeName": {
         "@type": "valos-raem:Resolver",
@@ -1067,9 +1067,9 @@
             "AliasField",
             "VPathRule",
             "VPath",
-            "VRId",
+            "VRID",
             "Verbs",
-            "VGRId",
+            "VGRID",
             "VParam",
             "Verb",
             "Resolver"
@@ -1447,7 +1447,7 @@
             "impressViaVPath",
             "resolveContextTerm",
             "resolveId",
-            "resolveVRIdTransient",
+            "resolveVRIDTransient",
             "resolveDominantTypeName",
             "resolveOwnFieldsTransient",
             "resolveGhostPrototype",

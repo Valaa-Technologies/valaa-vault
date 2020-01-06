@@ -69,7 +69,7 @@
             {
               "@type": "vdoc:Reference",
               "vdoc:content": [
-                "vpath"
+                "VPath"
               ],
               "vdoc:ref": "@valos/raem/VPath"
             },
@@ -964,7 +964,7 @@
             {
               "@type": "vdoc:Reference",
               "vdoc:content": [
-                "vpath"
+                "VPaths"
               ],
               "vdoc:ref": "@valos/raem/VPath"
             },

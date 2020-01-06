@@ -34,14 +34,14 @@ but is only partially implemented by it.</span>
   </section>
 
   <section id="introduction" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">
-A subset of vpaths called &#x27;vrids&#x27; contain a fixed starting point and
+A subset of VPaths called &#x27;vrids&#x27; contain a fixed starting point and
 identify valospace resources.</span>
 </p></div><div><p><span class="vdoc type-vdoc-paragraph">VPaths contain &#x27;context terms&#x27; which refer to definitions provided by
 the surrounding context, usually as references to some external
 ontology. This allows VPath semantics to be extended in domain
 specific but reusable manner.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">The primary example of a vpath context is the JSON-LD @context of a <a href="https://valospace.org/sourcerer/valos-event-log" class="vdoc type-vdoc-reference">ValOS event chronicle</a>
-which provides the semantics for all vpaths that appear inside the
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">The primary example of a VPath context is the JSON-LD @context of a <a href="https://valospace.org/sourcerer/valos-event-log" class="vdoc type-vdoc-reference">ValOS event chronicle</a>
+which provides the semantics for all VPaths that appear inside the
 chronicle.
     </span>
 </p></div>
@@ -54,7 +54,7 @@ encodeURIComponent characters. VPath grammar has two primary building
 blocks: vsteps and vparams.</span>
 </p></div>
     <ul>
-      <li>A vpath itself is an ordered sequence of &#x22;@&#x22;-separated vsteps, each
+      <li>A VPath itself is an ordered sequence of &#x22;@&#x22;-separated vsteps, each
   of which logically depends on the preceding one.</li>
       <li><div><p><span class="vdoc type-vdoc-paragraph">A vstep can have a &#x27;verb type&#x27; and a sequence of vparams, all
   logically independent of each other.</span>
@@ -64,10 +64,10 @@ blocks: vsteps and vparams.</span>
 </p></div></li>
     </ul>
 <div><p><span class="vdoc type-vdoc-paragraph">VPaths serve two superficially distinct purposes as paths and as
-identifiers. If the first vstep of a vpath begins with a context term
-(ie. doesn&#x27;t have a verb type) then the whole vpath is valospace
-resource identifier (a *vrid*) and the first vstep is a valospace
-global resource identifier (a *vgrid*).</span>
+identifiers. If the first vstep of a VPath begins with a context term
+(ie. doesn&#x27;t have a verb type) then the whole VPath is valospace
+resource identifier (a *VRID*) and the first vstep is a valospace
+global resource identifier (a *VGRID*).</span>
 </p></div>
 <blockquote class="vdoc type-revdoc-example">
     <span id="main_vpath_rules" class="vdoc type-vdoc-node">
@@ -80,16 +80,16 @@ global resource identifier (a *vgrid*).</span>
 
 </blockquote>
   <section id="section_vrid_structure" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_vrid_structure">§ </a>VPath with a vgrid is a resource identifier: a VRId</h3>
+    <h3><a aria-label="§" href="#section_vrid_structure">§ </a>VPath with a VGRID is a resource identifier: a VRID</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
-A vpath with a first vstep lacking a verb type and no other vsteps
+A VPath with a first vstep lacking a verb type and no other vsteps
 identifies a global resource.</span>
 </p></div><div><p><span class="vdoc type-vdoc-paragraph">Many valospace resources, so called *structural sub-resources* are
 identified by a fixed path from the global resource defined by the same
-verbs that define non-VRId VPaths. Thus while paths and identifiers are
+verbs that define non-VRID VPaths. Thus while paths and identifiers are
 superficially different it is useful to represent them both using the
 same VPath verb structure.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">Both verb and vgrid params can also have context term references to
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">Both verb and VGRID params can also have context term references to
 an external lookup of URI prefixes and semantic definitions.</span>
 </p></div>
   </section>
@@ -104,7 +104,7 @@ representations.
   <section id="section_vpath_urn" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#section_vpath_urn">§ </a>VPath URN-scheme (tentative)</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
-A VRId VPath string can be expressed as an URN by removing the &#x22;@&#x22;
+A VRID VPath string can be expressed as an URN by removing the &#x22;@&#x22;
 prefix and the &#x22;@@&#x22; suffix and then prefixing the string with
 &#x60;urn:valos:&#x60;.
 </span>
@@ -112,13 +112,13 @@ prefix and the &#x22;@@&#x22; suffix and then prefixing the string with
 <blockquote class="vdoc type-revdoc-example">
     <span class="vdoc type-vdoc-node">
 Editorial Note: the urn:valos is fully speculative as of 2019-11. On
-one hand there is salient overlap between valos vrid and urn
+one hand there is salient overlap between valos VRID and URN
 principles: URN calls for structured and managed process of name
-assignment and resolution and vrid system is precisely that. On the
-other hand vrid defers a lot of detail to specific vgrid format-term
+assignment and resolution and VRID system is precisely that. On the
+other hand VRID defers a lot of detail to specific VGRID format-term
 specifications which might prove problematic for actual standardization
 process. It is possible that instead of a generic urn:valos namespace
-there would be specific urn namespaces for specific vrid formats (e.g.
+there would be specific urn namespaces for specific VRID formats (e.g.
 urn:valos-u4, urn:valos-cc) or that urn:valos would stand for one
 specific format (which would most likely be the ~cc).</span>
 
@@ -135,7 +135,7 @@ remaining entries contain the segment payload:
 </span>
 </p></div>
     <ul>
-      <li>&#x22;@&#x22; identifies a vpath segment with remaining entries as step
+      <li>&#x22;@&#x22; identifies a VPath segment with remaining entries as step
   segments</li>
       <li><div><p><span class="vdoc type-vdoc-paragraph">&#x22;$&#x22; identifies a vparam segment with its second entry being a valid
   context term string and an optional third entry containing the vvalue</span>
@@ -150,7 +150,7 @@ remaining entries contain the segment payload:
 <div><p><span class="vdoc type-vdoc-paragraph">
 JSON numbers and strings can only appear as param values of &#x22;$&#x22; or
 &#x22;:&#x22;-segments. JSON objects cannot appear.
-A vpath which is used as a contextless param of a verb must appear
+A VPath which is used as a contextless param of a verb must appear
 directly without intermediate &#x22;:&#x22;-segments (unlike in the string VPath
 construct).
 Conversely a verb used as a contextless param must still be wrapped
@@ -178,7 +178,7 @@ VPaths contain context references but do not _contain_ knowledge about
 the context. This is to ensure that a VPath can be moved from a context
 to a compabible one without modification.</span>
 </p></div><div><p><span class="vdoc type-vdoc-paragraph">Cementing a VPath with a context inside an environment produces a
-construct where the vpath itself and specifically its context terms are
+construct where the VPath itself and specifically its context terms are
 converted to their environment-specific representations. This
 representation can be anything from interpretable JSON to fully
 compiled executable code.</span>
@@ -214,25 +214,25 @@ comes from several different sources:</span>
   <section id="section_equivalence" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#section_equivalence">§ </a>VPath equivalence follows URN equivalence</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
-Two VPaths identify the same path (and in case they&#x27;re VRIds, refer to
+Two VPaths identify the same path (and in case they&#x27;re VRIDs, refer to
 the same resource) iff their URN representations are <a href="https://tools.ietf.org/html/rfc8141#section-3" class="vdoc type-vdoc-reference">urn-equivalent</a> and 1. they either share the same environment or 2. their
 corresponding context terms expand to URIs which are pair-wise
 URI-equivalent.</span>
 </p></div><div><p><span class="vdoc type-vdoc-paragraph">For the general case the actual semantics of a VPath and specifically
 of its context-term&#x27;s depends on the context it is used. Vrids have a
-fixed context which is established by the vgrid. <a href="https://valospace.org/raem/VPath#section_vrid_equivalence" class="vdoc type-vdoc-reference">This has implications on VRId equivalence</a>.</span>
+fixed context which is established by the VGRID. <a href="https://valospace.org/raem/VPath#section_vrid_equivalence" class="vdoc type-vdoc-reference">This has implications on VRID equivalence</a>.</span>
 </p></div>
   </section>
 
   <section id="section_context_term" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#section_context_term">§ </a> &#x27;context-term&#x27; is a lookup to definitions provided by the context</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
-A vpath can be contextual via the vparam context-term&#x27;s. These are
+A VPath can be contextual via the vparam context-term&#x27;s. These are
 case-sensitive strings with very restricted grammar. The context where
-the vpath is used defines the exact meaning of these terms.
+the VPath is used defines the exact meaning of these terms.
 The meaning for two identical context-terms is recommended to be
 uniform across domains where possible.
-A vpath is invalid in contexts which don&#x27;t have definitions for the
+A VPath is invalid in contexts which don&#x27;t have definitions for the
 context-terms of all of its steps. This gives different contexts
 a fine-grained mechanism for defining the vocabularies that are
 available.</span>
@@ -254,7 +254,7 @@ context-terms, such as interpreting them as the value type of the
 vvalue etc.</span>
 </p></div><div><p><span class="vdoc type-vdoc-paragraph">&#x22;$&#x22; for a vvalue denotes empty string.</span>
 </p></div><div><p><span class="vdoc type-vdoc-paragraph">*vvalue* both allows for fully
-unencoded nesting of vpath&#x27;s as well as allows encoding of all unicode
+unencoded nesting of VPath&#x27;s as well as allows encoding of all unicode
 characters in percent encoded form (as per encodeURIComponent)</span>
 </p></div>
   </section>
@@ -281,7 +281,7 @@ guidelines apply:</span>
 </p></div></li>
       <li><div><p><span class="vdoc type-vdoc-paragraph">&#x22;!-computational vs. declarational&#x22; or &#x22;Who writes the code?&#x22;:
   Computational vsteps (those with verb type beginning with &#x22;!&#x22;) allow
-  for turing-complete computation to be embedded inside vpaths. An
+  for turing-complete computation to be embedded inside VPaths. An
   environment that chooses to support these verbs and context terms
   has the upside of rapid and arbitrarily expressive configurability
   without further code changes. The downside is that security and
@@ -536,14 +536,14 @@ matches like:
   </section>
 
   <section id="section_vrid" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_vrid">§ </a>VRId is a stable identifier of a global resource or a structural sub-resource</h3>
+    <h3><a aria-label="§" href="#section_vrid">§ </a>VRID is a stable identifier of a global resource or a structural sub-resource</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
-A VRId is a vpath which has vgrid as its first production
+A VRID is a VPath which has VGRID as its first production
 (via vgrid-tail).</span>
 </p></div>
 <blockquote class="vdoc type-revdoc-example">
     <span id="main_vrid_rules" class="vdoc type-vdoc-node">
-    <h3><a aria-label="§" href="#main_vrid_rules">§ </a>Informative vrid rules</h3>
+    <h3><a aria-label="§" href="#main_vrid_rules">§ </a>Informative VRID rules</h3>
 <pre><code><span class="vdoc type-vdoc-node">  vrid        = &#x22;@&#x22; &#x22;$&#x22; vgrid &#x22;@&#x22; *(vstep &#x22;@&#x22;) &#x22;@&#x22;
   vgrid       = format-term &#x22;:&#x22; vgrid-value *vparam
 </span>
@@ -551,15 +551,15 @@ A VRId is a vpath which has vgrid as its first production
 
 </blockquote>
   <section id="section_vgrid" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_vgrid">§ </a>vgrid identifies global resources - primary keys, free ownership, concrete state</h3>
+    <h3><a aria-label="§" href="#section_vgrid">§ </a>VGRID identifies global resources - primary keys, free ownership, concrete state</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
-The vgrid uniquely identifies a *global resource*. If a VRId contains
-a vgrid and no verbs this global resource is also the
-*referenced resource* of the VRId itself.</span>
+The VGRID uniquely identifies a *global resource*. If a VRID contains
+a VGRID and no verbs this global resource is also the
+*referenced resource* of the VRID itself.</span>
 </p></div>
 <blockquote class="vdoc type-revdoc-example">
     <span id="main_vgrid_rules" class="vdoc type-vdoc-node">
-    <h3><a aria-label="§" href="#main_vgrid_rules">§ </a>Informative vgrid rules</h3>
+    <h3><a aria-label="§" href="#main_vgrid_rules">§ </a>Informative VGRID rules</h3>
 <pre><code><span class="vdoc type-vdoc-node">  vgrid         = format-term &#x22;:&#x22; vgrid-value *vparam
   format-term   = &#x22;~&#x22; 1*unreserved-nt
   vgrid-value   = 1*unreserved-nt
@@ -573,49 +573,49 @@ a vgrid and no verbs this global resource is also the
 </blockquote><div><p><span class="vdoc type-vdoc-paragraph">
 The format-term defines the global resource identifier schema as well
 as often some (or all) characteristics of the resource.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">format-term and vgrid-value are subsets of verb-type and vvalue; vgrid
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">format-term and vgrid-value are subsets of verb-type and vvalue; VGRID
 restricts the grammar of these to unreserved-nt as specified in
 the <a href="https://tools.ietf.org/html/rfc3986" class="vdoc type-vdoc-reference">URI specification</a>).</span>
 </p></div>
 <blockquote class="vdoc type-revdoc-example">
     <span class="vdoc type-vdoc-node">
-Note: when using base64 encoded values as vgrid vvalue, use the
+Note: when using base64 encoded values as VGRID vvalue, use the
 url-and-filename-ready<a href="https://tools.ietf.org/html/rfc4648#section-5" class="vdoc type-vdoc-reference">base64url characters</a>.</span>
 
 </blockquote>
   </section>
 <div><p><span class="vdoc type-vdoc-paragraph">
-The VRId can be directly used as the NSS part of an &#x27;urn:valos:&#x27;
+The VRID can be directly used as the NSS part of an &#x27;urn:valos:&#x27;
 prefixed URI.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">Each valospace resource is identified by a VRId.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">If a resource VRId has only vgrid part but no verbs the resource is
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">Each valospace resource is identified by a VRID.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">If a resource VRID has only VGRID part but no verbs the resource is
 called a global resource.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">If a resource VRId has verbs then the verbs describe a structural path
-from the global resource of its initial vgrid part to the resource
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">If a resource VRID has verbs then the verbs describe a structural path
+from the global resource of its initial VGRID part to the resource
 itself. The resource is called a *structural sub-resource* of that
 global resource.</span>
 </p></div><div><p><span class="vdoc type-vdoc-paragraph">Each resource is affiliated with an event log of its global resource.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">All direct VRId context-terms are references to this event log <a href="https://w3c.github.io/json-ld-syntax/#the-context" class="vdoc type-vdoc-reference">JSON-LD context</a>.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">All direct VRID context-terms are references to this event log <a href="https://w3c.github.io/json-ld-syntax/#the-context" class="vdoc type-vdoc-reference">JSON-LD context</a>.</span>
 </p></div>
   <section id="section_vrid_event_log" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_vrid_event_log">§ </a>VRId is affiliated with an event log</h3>
+    <h3><a aria-label="§" href="#section_vrid_event_log">§ </a>VRID is affiliated with an event log</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
-The resource identified by a VRId is always affiliated with an event
-log of its global resource. Because the VRId doesn&#x27;t contain the
+The resource identified by a VRID is always affiliated with an event
+log of its global resource. Because the VRID doesn&#x27;t contain the
 locator information of this event log it must be discoverable from the
-context where the VRId is used.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">All context-terms of the VGRId and VRId vparams are references to the
+context where the VRID is used.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">All context-terms of the VGRID and VRID vparams are references to the
 event log <a href="https://w3c.github.io/json-ld-syntax/#the-context" class="vdoc type-vdoc-reference">JSON-LD context</a> (Note: this applies only to immediate but not to nested vparams).</span>
 </p></div><div><p><span class="vdoc type-vdoc-paragraph">Global resources can be transferred between event logs. To maintain
-immutability across these transfers VGRId&#x27;s must not contain partition
-or other non-identifying locator information. Similar to URN&#x27;s VRId&#x27;s
+immutability across these transfers VGRID&#x27;s must not contain partition
+or other non-identifying locator information. Similar to URN&#x27;s VRID&#x27;s
 always relies external structures and systems for carrying locator
 information.
 </span>
 </p></div>
 <blockquote class="vdoc type-revdoc-example">
     <span class="vdoc type-vdoc-node">Note: uuid v4 (format term &#x60;~u4&#x60;) is recommended for
-now, but eventually VGRId generation will be tied to the
+now, but eventually VGRID generation will be tied to the
 deterministic event id chain (format term &#x60;~cc&#x60;).
 This in turn should be seeded by some ValOS authority.</span>
 
@@ -623,11 +623,11 @@ This in turn should be seeded by some ValOS authority.</span>
   </section>
 
   <section id="section_vrid_equivalence" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">
-Two VRIds refer to the same resource iff their URN representations are <a href="https://tools.ietf.org/html/rfc8141#section-3" class="vdoc type-vdoc-reference">urn-equivalent</a>(i.e. if the two VRIds are equivalent after section 3.1. case
+Two VRIDs refer to the same resource iff their URN representations are <a href="https://tools.ietf.org/html/rfc8141#section-3" class="vdoc type-vdoc-reference">urn-equivalent</a>(i.e. if the two VRIDs are equivalent after section 3.1. case
 normalization for step 3. percent-encoding case normalization).</span>
 </p></div><div><p><span class="vdoc type-vdoc-paragraph">Maintaining the consistency between this lexical equivalence and the
 semantic equivalence of a resource which has been transferred between
-event logs without having to dereference VRIds is useful but has
+event logs without having to dereference VRIDs is useful but has
 implications.
 <blockquote>Rule: When resources are transferred between event logs
   the semantics of their context terms and body-parts must remain
@@ -646,14 +646,14 @@ the equivalence semantics.</span>
   </section>
 
   <section id="section_structural_sub_resources" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_structural_sub_resources">§ </a>VRId verbs identify structural sub-resources - fixed ownership, inferred state, &#x27;secondary keys&#x27;</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">In VRId context the vsteps-tail that follows the VGRId specifies
+    <h3><a aria-label="§" href="#section_structural_sub_resources">§ </a>VRID verbs identify structural sub-resources - fixed ownership, inferred state, &#x27;secondary keys&#x27;</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">In VRID context the vsteps-tail that follows the VGRID specifies
 a structural path from the global resource to a
 *structural sub-resource* of the global resource. The triple
 constraints of each verb in that path are _inferred as triples_ for the
 particular resource that that verb affects.</span>
 </p></div><div><p><span class="vdoc type-vdoc-paragraph"><blockquote>Principle: a structural sub-resource using a particular
-vsteps-tail in its identifying VRId will always infer the triples that
+vsteps-tail in its identifying VRID will always infer the triples that
 are required to satisfy the same vsteps-tail in a query context which
 starts from the same global resource.</blockquote></span>
 </p></div><div><p><span class="vdoc type-vdoc-paragraph">This fixed triple inference is the meat and bones of the structural
@@ -671,23 +671,23 @@ this tree (some verbs only specify the current node resource further
 without specifying a new edge). The global resource is the host
 resource for the first verb; the sub-resource of that segment is the
 host resource of the second verb and so on.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">As the VRId identities of the sub-resources are structurally fixed to
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">As the VRID identities of the sub-resources are structurally fixed to
 this tree the coupling between host and sub-resource must be static.
 The typical implementation for this is an ownership coupling.</span>
 </p></div>
   </section>
 
   <section id="section_vgrid_types" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_vgrid_types">§ </a>List of VGRId formats:</h3>
+    <h3><a aria-label="§" href="#section_vgrid_types">§ </a>List of VGRID formats:</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
-VGRId context-term specifies the particular identifier format and
+VGRID context-term specifies the particular identifier format and
 possible semantics of the identified global resource. ValOS kernel
 reserves all context-terms matching &#x27;&#x22;i&#x22; 2( ALPHA / DIGIT )&#x27; for
 itself with currently defined formats exhaustively listed here.
       </span>
 </p></div>
   <section id="section_vgrid_uuid_v4" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_vgrid_uuid_v4">§ </a>VGRId format &#x22;&#x60;~u4&#x60;&#x22;: UUID v4 of a native, insecure resource</h3>
+    <h3><a aria-label="§" href="#section_vgrid_uuid_v4">§ </a>VGRID format &#x22;&#x60;~u4&#x60;&#x22;: UUID v4 of a native, insecure resource</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
 An identifier for native valospace resource with an event log.
 This is insecure as there are no guarantees against resource id
@@ -697,7 +697,7 @@ used in trusted, protected environments.</span>
   </section>
 
   <section id="section_vgrid_content_hash" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_vgrid_content_hash">§ </a>VGRId format &#x22;&#x60;~bvo&#x60;&#x22;: The content hash of Binary ValOS object</h3>
+    <h3><a aria-label="§" href="#section_vgrid_content_hash">§ </a>VGRID format &#x22;&#x60;~bvo&#x60;&#x22;: The content hash of Binary ValOS object</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
 An identifier of an immutable octet-stream, with the content hash in
 the vvalue.</span>
@@ -705,17 +705,17 @@ the vvalue.</span>
   </section>
 
   <section id="section_vgrid_platonic_resource" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_vgrid_platonic_resource">§ </a>VGRId format &#x22;&#x60;~plt&#x60;&#x22;: The id of an immutable Platonic resource With inferences</h3>
+    <h3><a aria-label="§" href="#section_vgrid_platonic_resource">§ </a>VGRID format &#x22;&#x60;~plt&#x60;&#x22;: The id of an immutable Platonic resource With inferences</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
 An identifier of an immutable, procedurally generated resource with its
-content inferred from the vpath embedded in the vvalue.
+content inferred from the VPath embedded in the vvalue.
 While of limited use in itself this is useful when used as the
 prototype of structural ghost sub-resources which are quite mutable.</span>
 </p></div>
   </section>
 
   <section id="section_vgrid_command_resource_hash" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_vgrid_command_resource_hash">§ </a>VGRId format &#x22;&#x60;~cih&#x60;&#x22;: The id of a command-id hash-based insecure resource</h3>
+    <h3><a aria-label="§" href="#section_vgrid_command_resource_hash">§ </a>VGRID format &#x22;&#x60;~cih&#x60;&#x22;: The id of a command-id hash-based insecure resource</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
 An identifier which has been hashed from a command id, chronicle URI
 and a running counter.</span>
@@ -723,7 +723,7 @@ and a running counter.</span>
   </section>
 
   <section id="section_vgrid_command_chronicle_hash" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_vgrid_command_chronicle_hash">§ </a>VGRId format &#x22;&#x60;~chr&#x60;&#x22;: The id of a command hash-based chronicle</h3>
+    <h3><a aria-label="§" href="#section_vgrid_command_chronicle_hash">§ </a>VGRID format &#x22;&#x60;~chr&#x60;&#x22;: The id of a command hash-based chronicle</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
 A chronicle identifier which has been hashed from a command id and an
 authority URI.</span>
@@ -731,7 +731,7 @@ authority URI.</span>
   </section>
 
   <section id="section_vgrid_crypto_chained" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_vgrid_crypto_chained">§ </a>VGRId format &#x22;&#x60;~ch3&#x60;&#x22;: The id of Crypto-Hash-CHained secure CHronicle resource</h3>
+    <h3><a aria-label="§" href="#section_vgrid_crypto_chained">§ </a>VGRID format &#x22;&#x60;~ch3&#x60;&#x22;: The id of Crypto-Hash-CHained secure CHronicle resource</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
 An identifier of a native, secure valospace resource with an event log.
 This id is deterministically derived from the most recent hash-chain
@@ -743,15 +743,15 @@ to the resource.</span>
   </section>
 
   <section id="section_vgrid_authority_root" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_vgrid_authority_root">§ </a>VGRId format &#x22;&#x60;~aur&#x60;&#x22;: The id of an authority root resource</h3>
+    <h3><a aria-label="§" href="#section_vgrid_authority_root">§ </a>VGRID format &#x22;&#x60;~aur&#x60;&#x22;: The id of an authority root resource</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
 The fixed identifier of an immovable root resource of an authority
-chronicle. The authority vgrid param equals to the authority URI.</span>
+chronicle. The authority VGRID param equals to the authority URI.</span>
 </p></div>
   </section>
 
   <section id="section_vgrid_ghost" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_vgrid_ghost">§ </a>VGRId format &#x22;&#x60;~gh&#x60;&#x22;: The derived Hash id of a native, insecure Ghost resource</h3>
+    <h3><a aria-label="§" href="#section_vgrid_ghost">§ </a>VGRID format &#x22;&#x60;~gh&#x60;&#x22;: The derived Hash id of a native, insecure Ghost resource</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
 This is a legacy format for native ghost resources, with id created
 from the hash of the &#x27;ghost path&#x27; of the resource.</span>
@@ -759,7 +759,7 @@ from the hash of the &#x27;ghost path&#x27; of the resource.</span>
   </section>
 
   <section id="section_vgrid_raw" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_vgrid_raw">§ </a>VGRId format &#x22;&#x60;~raw&#x60;&#x22;: The insecure raw text id of a resource</h3>
+    <h3><a aria-label="§" href="#section_vgrid_raw">§ </a>VGRID format &#x22;&#x60;~raw&#x60;&#x22;: The insecure raw text id of a resource</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
 An id with an unknown schema.</span>
 </p></div>
@@ -768,9 +768,9 @@ An id with an unknown schema.</span>
   </section>
 
   <section id="section_vrid_verb_types" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_vrid_verb_types">§ </a>List of VRId-specific verb type semantics:</h3>
+    <h3><a aria-label="§" href="#section_vrid_verb_types">§ </a>List of VRID-specific verb type semantics:</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
-VRId *verb-type* specifies the relationship category between the
+VRID *verb-type* specifies the relationship category between the
 segment host resource and sub-resource, a set of inferred triples as
 well as other possible constraints.</span>
 </p></div>
@@ -1002,7 +1002,7 @@ homologous prototype inside f00b-b507-0763 and thus infers triples:
   <section id="section_grammar" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#section_grammar">§ </a>Collected VPath ABNF grammar</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">The VPath grammar is an LL(1) grammar. It is recursive be virtue of
-vvalue productions which can nest vpaths themselves without additional
+vvalue productions which can nest VPaths themselves without additional
 encoding.</span>
 </p></div><div><p><span class="vdoc type-vdoc-paragraph">The list of definitive rules:
 <pre><code><span class="vdoc type-vdoc-node">  vpath         = &#x22;@&#x22; *(vstep &#x22;@&#x22;) &#x22;@&#x22;
@@ -1055,7 +1055,7 @@ itself. These notes primarily relate to LL(1)-parseability:</span>
 </blockquote></span>
 </p></div></li>
       <li><div><p><span class="vdoc type-vdoc-paragraph">The nesting hierarchy can be manually quickly established by first
-  splitting a valid vpath string by the delimiter regex /(@$:)/
+  splitting a valid VPath string by the delimiter regex /(@$:)/
   (retaining these delimiters in the result). Then a tree structure is
   formed by traversing the array from left to right and dividing it to
   different nesting depths. The nesting depth is increased for the

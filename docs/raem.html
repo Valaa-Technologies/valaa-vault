@@ -7,7 +7,7 @@
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"subtitle":"0.35.0-prerelease.22","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"raem"};
+      var respecConfig = {"subtitle":"0.35.0-prerelease.23","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"raem"};
     </script>
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
@@ -301,24 +301,24 @@ the segmented representation of the VPath rule value as an rdf List.</td></tr>
         <tr id="VPath"><td><a href="#VPath" class="vdoc type-vdoc-reference"><em>VPath</em></a></td><td>valos-raem:VPathRule</td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=2>The class of all resources representing the VPath rule 'vpath' (always
 begins with '@')</td></tr>
-        <tr id="VRId" class=" vdoc-nth-child-2n"><td><a href="#VRId" class="vdoc type-vdoc-reference"><em>VRId</em></a></td><td>valos-raem:VPathRule</td></tr>
+        <tr id="VRID" class=" vdoc-nth-child-2n"><td><a href="#VRID" class="vdoc type-vdoc-reference"><em>VRID</em></a></td><td>valos-raem:VPathRule</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=2>The class of all resources representing the VPath pseudo-rule
-'vrid', ie. a resource identifier with VGRId as the first step (always
+'vrid', ie. a resource identifier with VGRID as the first step (always
 begins with '@')</td></tr>
         <tr id="Verbs"><td><a href="#Verbs" class="vdoc type-vdoc-reference"><em>Verbs</em></a></td><td>valos-raem:VPathRule</td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=2>The class of all resources representing the VPath pseudo-rule
-'verbs', ie. a path between other resources without a VGRId as the
+'verbs', ie. a path between other resources without a VGRID as the
 first step (always begins with '@').</td></tr>
-        <tr id="VGRId" class=" vdoc-nth-child-2n"><td><a href="#VGRId" class="vdoc type-vdoc-reference"><em>VGRId</em></a></td><td>valos-raem:VPathRule</td></tr>
+        <tr id="VGRID" class=" vdoc-nth-child-2n"><td><a href="#VGRID" class="vdoc type-vdoc-reference"><em>VGRID</em></a></td><td>valos-raem:VPathRule</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=2>The class of all resources representing the VPath rule 'vgrid' (always
 begins with '$').</td></tr>
         <tr id="VParam"><td><a href="#VParam" class="vdoc type-vdoc-reference"><em>VParam</em></a></td><td>valos-raem:VPathRule</td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=2>The class of all resources representing the VPath pseudo-rule
 'vparam' (always begins with '$' or ':').</td></tr>
         <tr id="Verb" class=" vdoc-nth-child-2n"><td><a href="#Verb" class="vdoc type-vdoc-reference"><em>Verb</em></a></td><td>valos-kernel:Property</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=2>The class of all verb names. Each context which performs vpath
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=2>The class of all verb names. Each context which performs VPath
 computation valks provides native implementations for the resolvers
-it supports in its vpath valks.
+it supports in its VPath valks.
 </td></tr>
         <tr id="Resolver"><td><a href="#Resolver" class="vdoc type-vdoc-reference"><em>Resolver</em></a></td><td>valos-raem:Verb</td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=2>The class of all resolver names. Resolvers are verbs which are used
@@ -341,9 +341,9 @@ for resolving generated properties.
       </thead>
       <tbody>
         <tr id="expressor" class=" vdoc-nth-child-2n"><td><a href="#expressor" class="vdoc type-vdoc-reference"><em>expressor</em></a></td><td></td><td>valos-raem:ExpressedField</td><td>rdfs:List</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=4>The custom expressor of an ExpressedField as a vpath. If defined and
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=4>The custom expressor of an ExpressedField as a VPath. If defined and
 whenever a triple expression for this field is required the expressor
-vpath is valked with scope values:
+VPath is valked with scope values:
 - valos-raem:0 being the field owner,
 - valos-raem:1 being the field id, and
 - valos-raem:2 being the possible field raw triple object value if it
@@ -351,9 +351,9 @@ vpath is valked with scope values:
 The resulting valk value is used as the object of a new triple, with
 field owner and field id used as the subject and predicate.</td></tr>
         <tr id="impressor"><td><a href="#impressor" class="vdoc type-vdoc-reference"><em>impressor</em></a></td><td></td><td>valos-raem:EventLoggedField</td><td>rdfs:List</td></tr>
-        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=4>The custom impressor of an EventLoggedField as a vpath. Whenever an
+        <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=4>The custom impressor of an EventLoggedField as a VPath. Whenever an
 event log entry is required for an update that targets this field the
-impressor vpath is valked with scope values:
+impressor VPath is valked with scope values:
 - valos-raem:0 as the field owner,
 - valos-raem:1 as the field id,
 - valos-raem:2 as the possible current field raw triple object value or
@@ -452,8 +452,8 @@ to allow for singular fields.</td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3>resolve context term against the event log of the given resource</td></tr>
         <tr id="resolveId"><td><a href="#resolveId" class="vdoc type-vdoc-reference"><em>resolveId</em></a></td><td>valos-raem:Resolver</td><td></td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=3>resolve resource id of the given resource</td></tr>
-        <tr id="resolveVRIdTransient" class=" vdoc-nth-child-2n"><td><a href="#resolveVRIdTransient" class="vdoc type-vdoc-reference"><em>resolveVRIdTransient</em></a></td><td>valos-raem:Resolver</td><td></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3>resolve resource vrid object of the given resource</td></tr>
+        <tr id="resolveVRIDTransient" class=" vdoc-nth-child-2n"><td><a href="#resolveVRIDTransient" class="vdoc type-vdoc-reference"><em>resolveVRIDTransient</em></a></td><td>valos-raem:Resolver</td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><em>rdfs:comment</em></td><td colspan=3>resolve resource VRID object of the given resource</td></tr>
         <tr id="resolveDominantTypeName"><td><a href="#resolveDominantTypeName" class="vdoc type-vdoc-reference"><em>resolveDominantTypeName</em></a></td><td>valos-raem:Resolver</td><td></td></tr>
         <tr class="vdoc vdoc-wide"><td><em>rdfs:comment</em></td><td colspan=3>resolve dominant type name of the given resource</td></tr>
         <tr id="resolveOwnFieldsTransient" class=" vdoc-nth-child-2n"><td><a href="#resolveOwnFieldsTransient" class="vdoc type-vdoc-reference"><em>resolveOwnFieldsTransient</em></a></td><td>valos-raem:Resolver</td><td></td></tr>

@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-prerelease.23](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.22...v0.35.0-prerelease.23) (2020-01-06)
+
+
+### Bug Fixes
+
+* schema config & only forward unset headers from forwarded response ([36162a9](https://github.com/valaatech/kernel/commit/36162a9d36380f0f56275d0b74b1577c8b31a4e2))
+
+
+### Features
+
+* **web-spindle:** Fill reply status, headers from fetch passthru response ([cad7645](https://github.com/valaatech/kernel/commit/cad7645151ead0408f1bebb0e8b53995c0092fce))
+* $V.getSubResource, new Thing({ subResource: "@_:foo@@" }) ([446e726](https://github.com/valaatech/kernel/commit/446e72677c094c4dce7f5490d7e5488f9c791c65))
+
+
+
+
+
 # [0.35.0-prerelease.22](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.21...v0.35.0-prerelease.22) (2020-01-03)
 
 

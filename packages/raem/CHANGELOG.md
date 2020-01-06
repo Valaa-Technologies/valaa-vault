@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-prerelease.23](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.22...v0.35.0-prerelease.23) (2020-01-06)
+
+
+### Features
+
+* $V.getSubResource, new Thing({ subResource: "@_:foo@@" }) ([446e726](https://github.com/valaatech/kernel/commit/446e72677c094c4dce7f5490d7e5488f9c791c65))
+
+
+
+
+
 # [0.35.0-prerelease.22](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.21...v0.35.0-prerelease.22) (2020-01-03)
 
 **Note:** Version bump only for package @valos/raem

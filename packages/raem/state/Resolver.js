@@ -200,8 +200,7 @@ export default class Resolver extends FabricEventTarget {
           "\n\teither destroyed or non-created; marking reference as inactive",
           "\n\tduring passage:", ...dumpObject(this.passage));
       // TODO(iridian, 2019-01): Improve destroyed resource handling
-      objectId.setInactive();
-      return objectId;
+      return objectId.setInactive();
     } catch (error) {
       throw this.wrapErrorEvent(error, `bindObjectId(${rawId || objectId || idData}:${typeName})`,
           "\n\tidData:", ...dumpObject(idData),

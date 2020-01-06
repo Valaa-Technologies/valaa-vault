@@ -1280,7 +1280,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
     description: `Slot for viewing a destroyed Resource.
 
         @focus {Object} focus  the destroyed Resource focus.`,
-    isEnabled: (focus?: Vrapper) => focus && focus.isNonCreated(),
+    isEnabled: (focus?: Vrapper) => focus && (focus.isImmaterial() && !focus.isGhost()),
     rootValue: ({ delegate: [
       loadingFailedLens,
       <div {..._lensMessageLoadingFailedProps}>

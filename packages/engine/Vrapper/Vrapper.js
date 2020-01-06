@@ -11,6 +11,7 @@ import { getHostRef, HostRef, UnpackedHostValue } from "~/raem/VALK/hostReferenc
 import { addedTo, fieldsSet, isCreatedLike, removedFrom, replacedWithin } from "~/raem/events";
 import VRL, { vRef, invariantifyId, getRawIdFrom, tryCoupledFieldFrom } from "~/raem/VRL";
 import { naiveURI } from "~/raem/ValaaURI";
+import { formVPath } from "~/raem/VPath";
 
 import dataFieldValue from "~/raem/tools/denormalized/dataFieldValue";
 
@@ -56,11 +57,11 @@ const INACTIVE = "Inactive";
 const ACTIVATING = "Activating";
 const ACTIVE = "Active";
 const UNAVAILABLE = "Unavailable";
-const NONCREATED = "NonCreated";
+const IMMATERIAL = "Immaterial";
 const NONRESOURCE = "NonResource";
 
 function isNonActivateablePhase (candidate: string) {
-  return (candidate === UNAVAILABLE) || (candidate === NONCREATED) || (candidate === NONRESOURCE);
+  return (candidate === UNAVAILABLE) || (candidate === IMMATERIAL) || (candidate === NONRESOURCE);
 }
 
 /**
@@ -116,9 +117,9 @@ function isNonActivateablePhase (candidate: string) {
  *   isActive() returns true and getPhase() returns "Active".
  *   Active-operations can be synchronously accessed.
  *
- * 2.4. NonCreated: the Resource belongs to an active partition but has
+ * 2.4. Immaterial: the Resource belongs to an active partition but has
  *   not been created yet, has been purged or has been destroyed.
- *   isNonCreated() returns true and getPhase() returns "NonCreated".
+ *   isImmaterial() returns true and getPhase() returns "Immaterial".
  *   Active-operations will throw an exception.
  *
  * 2.5. Unavailable: the connection for a prototype chain Resource partition couldn't be acquired.
@@ -176,7 +177,7 @@ export default class Vrapper extends Cog {
   isActivating () { return this._phase === ACTIVATING; }
   isActive () { return this._phase === ACTIVE; }
   isUnavailable () { return this._phase === UNAVAILABLE; }
-  isNonCreated () { return this._phase === NONCREATED; }
+  isImmaterial () { return this._phase === IMMATERIAL; }
 
   isResource () {
     return this._phase !== NONRESOURCE;
@@ -247,7 +248,7 @@ export default class Vrapper extends Cog {
     if (!blocker) return undefined;
     if (this._activationProcess) return this._activationProcess;
     if (this._phase !== INACTIVE
-        && !(this._phase === NONCREATED && options && options.allowNonCreated)) {
+        && !(this._phase === IMMATERIAL && options && options.allowImmaterial)) {
       throw new Error(`Cannot activate non-inactive ${this.debugId()}`);
     }
     this._phase = ACTIVATING;
@@ -257,7 +258,7 @@ export default class Vrapper extends Cog {
         while (blocker) {
           const blockerPhase = blocker.getPhase();
           if (isNonActivateablePhase(blockerPhase)) {
-            if ((blockerPhase === NONCREATED) && (options && options.allowNonCreated)) {
+            if ((blockerPhase === IMMATERIAL) && (options && options.allowImmaterial)) {
               await blocker.untilCreated();
             } else {
               throw new Error(
@@ -309,7 +310,7 @@ export default class Vrapper extends Cog {
    */
   purgePassage (passage): boolean {
     if (isCreatedLike(passage)) {
-      this._phase = NONCREATED;
+      this._phase = IMMATERIAL;
     }
     return this._phase === ACTIVE;
   }
@@ -326,7 +327,7 @@ export default class Vrapper extends Cog {
    * The blocking cause can be inspected by blocker.getPhase(): if the
    * phase is Inactive or Activating, the cause is a non-full partition
    * connection. Otherwise the cause is a non-activateable phase
-   * (NonCreated, Unavailable, NonResource).
+   * (Immaterial, Unavailable, NonResource).
    * Unavailable indicates an error on the partition connection sync
    * which can be extracted with
    * `Promise.resolve(conn.asActiveConnection()).catch(onError);`
@@ -346,7 +347,7 @@ export default class Vrapper extends Cog {
     const transient = refreshingTransient
         || resolver.tryGoToTransient(this[HostRef], this._typeName);
     if (!transient) {
-      this._phase = this[HostRef].isGhost() ? INACTIVE : NONCREATED;
+      this._phase = this[HostRef].isGhost() ? INACTIVE : IMMATERIAL;
       return this;
     }
     this._updateTransient(resolver.state, transient);
@@ -362,7 +363,7 @@ export default class Vrapper extends Cog {
     if (!connection || !connection.isActive()) {
       if (id.isInactive()) return this;
     } else if (!newTypeName ? id.isInactive() : isInactiveTypeName(newTypeName)) {
-      this._phase = NONCREATED;
+      this._phase = IMMATERIAL;
       return this;
     }
     let prototypeId = transient.get("prototype");
@@ -434,7 +435,7 @@ export default class Vrapper extends Cog {
         : this.refreshPhase(options && options.state);
     const phase = this._phase;
     if (!blocker || (options && options.allowActivating && (phase === ACTIVATING))) return;
-    if (this.isNonCreated() && options) {
+    if (this.isImmaterial() && options) {
       // TODO(iridian): While this takes care of the situation where
       // a Resource is destroyed in the main line but not destroyed in
       // a transaction, the reverse scenario is not handled: if a
@@ -451,7 +452,7 @@ export default class Vrapper extends Cog {
     const error =
         !this.isResource() ?
             new Error(`Cannot operate on a non-Resource ${this.debugId()}`)
-        : this.isNonCreated() ?
+        : this.isImmaterial() ?
             new Error(`Cannot operate on a non-Created ${this.debugId()}`)
         : this.isUnavailable() ?
             new Error(`Cannot operate on an Unavailable ${this.debugId()}`)
@@ -1033,7 +1034,7 @@ export default class Vrapper extends Cog {
     // actual Engine events which have not yet landed. Similar issues
     // might arise with heresy rollbacks.
         && this._lexicalScope[propertyName];
-    if (ret && !ret.isNonCreated()) return ret;
+    if (ret && !ret.isImmaterial()) return ret;
     // New properties which don't exist in _lexicalScope still work as
     // they get kueried here.
     return this.get(VALEK.property(propertyName), options);
@@ -1810,7 +1811,7 @@ export default class Vrapper extends Cog {
 
   onEventDESTROYED (passage: Passage, story: Story) {
     (this._destroyedHooks || []).forEach(hook => hook(story.timed));
-    this._phase = NONCREATED;
+    this._phase = IMMATERIAL;
     return this.engine.addDelayedRemoveCog(this, story);
   }
 

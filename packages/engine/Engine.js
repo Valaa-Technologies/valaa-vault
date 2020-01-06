@@ -275,7 +275,7 @@ export default class Engine extends Cog {
           const state = discourse.getState();
           const initialBlocker = vResource.refreshPhase(state);
           if (initialBlocker) {
-            Promise.resolve(vResource.activate({ state, allowNonCreated: true, initialBlocker }))
+            Promise.resolve(vResource.activate({ state, allowImmaterial: true, initialBlocker }))
                 .then(undefined, (error) => {
                   outputCollapsedError(localWrapError(this, error,
                       `${constructCommand.name}.activate ${vResource.debugId()}`),

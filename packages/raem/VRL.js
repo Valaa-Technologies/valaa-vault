@@ -170,6 +170,7 @@ class VRL {
   isInactive (): ?boolean { return this._r.inactive || false; }
   setInactive (value: boolean = true): ?boolean {
     this.obtainOwnResolverComponent().inactive = value;
+    return this;
   }
 
   getPartitionURI (): ?ValaaURI { return this._r.partition; }

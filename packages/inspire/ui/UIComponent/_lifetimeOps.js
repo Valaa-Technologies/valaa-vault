@@ -170,7 +170,7 @@ function _createContextAndSetFocus (component: UIComponent, newFocus: any, newPr
           error = new Error(`Resource ${newFocus.debugId()} did not activate properly; ${
             ""} expected focus status to be 'Active', got '${newFocus.getPhase()}' instead`);
           error.slotName = newFocus.isInactive() ? "inactiveLens" : "activatingLens";
-        } else if (newFocus.isNonCreated()) {
+        } else if (newFocus.isImmaterial()) {
           error = new Error(`Resource ${newFocus.debugId()} has been destroyed`);
           error.slotName = "destroyedLens";
         } else if (newFocus.isUnavailable()) {

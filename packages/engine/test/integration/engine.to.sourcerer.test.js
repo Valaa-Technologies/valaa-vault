@@ -599,7 +599,7 @@ describe("Two paired harnesses emulating two gateways connected through event st
     expect(targetVRef)
         .toEqual(newVRef);
     expect(target.getPhase())
-        .toEqual("NonCreated");
+        .toEqual("Immaterial");
     expect(instance.getPhase())
         .toEqual("Activating");
 

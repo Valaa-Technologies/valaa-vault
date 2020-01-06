@@ -5,6 +5,7 @@ const ObjectSchema = Symbol("Object-JSONSchema");
 const CollectionSchema = Symbol("Array-JSONSchema");
 
 // const EmailType = { type: "email" };
+const NullType = Object.freeze({ type: "null" });
 const EmailType = Object.freeze({ type: "string" });
 const BooleanType = Object.freeze({ type: "boolean" });
 const StringType = Object.freeze({ type: "string" });
@@ -47,6 +48,7 @@ module.exports = {
   ObjectSchema,
   CollectionSchema,
   EmailType,
+  NullType,
   BooleanType,
   StringType,
   XWWWFormURLEncodedStringType,

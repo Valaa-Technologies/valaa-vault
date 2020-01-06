@@ -35,12 +35,12 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       }
       router.infoEvent(2, () => [`${this.name}:`,
         "\n\trequest.body:", ...dumpObject(request.body),
-        "\n\tresolvers:", ...dumpObject(this.runtime.resolvers),
+        "\n\tresolvers:", ...dumpObject(this.runtime.ruleResolvers),
         "\n\tresource:", ...dumpObject(scope.resource),
         `\n\t${scope.mappingName}:`, ...dumpObject(scope.mapping),
         `\n\ttarget:`, ...dumpObject(scope.target),
       ]);
-      const { doCreateMapping } = this.runtime.resolvers;
+      const { doCreateMapping } = this.runtime.ruleResolvers;
 
       const isNewlyCreated = !scope.mapping;
       if (isNewlyCreated && !doCreateMapping) {

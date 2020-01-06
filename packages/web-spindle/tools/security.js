@@ -17,6 +17,14 @@ const _normalizeAlg = Object.assign(Object.create(null), {
   "aes-256-gcm": "aes-256-gcm",
 });
 
+const _isReadOnlyMethod = {
+  CONNECT: true,
+  GET: true,
+  HEAD: true,
+  TRACE: true,
+  OPTIONS: true,
+};
+
 export function verifySessionAuthorization (
     router, route, scope: Object, accessRoots: Vrapper, accessRootDescription: string) {
   try {
@@ -29,7 +37,7 @@ export function verifySessionAuthorization (
     // const permissions = accessRoot.get(toPERMISSIONSFields);
     let identityRoles;
     if ((rights == null) || !rights.length) {
-      if (route.method === "GET") return false;
+      if (_isReadOnlyMethod[route.method]) return false;
     } else {
       identityRoles = resolveIdentityRoles(router, route, scope);
       if (identityRoles === null) return true;
@@ -43,7 +51,7 @@ export function verifySessionAuthorization (
       ]);
       for (const right of rights) {
         if (!identityRoles[right.chronicle || ""]) continue;
-        if ((route.method === "GET") && (right.read !== false)) return false;
+        if (_isReadOnlyMethod[route.method] && (right.read !== false)) return false;
         if (right.write !== false) return false;
       }
     }

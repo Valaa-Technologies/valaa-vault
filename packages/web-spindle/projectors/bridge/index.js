@@ -1,23 +1,16 @@
 // @flow
 
-// import CONNECT from "./connectBridge";
-import DELETE from "./deleteBridge";
-import GET from "./getBridge";
-// import HEAD from "./headBridge";
-// import OPTIONS from "./optionsBridge";
-import PATCH from "./patchBridge";
-import POST from "./postBridge";
-import PUT from "./putBridge";
-// import TRACE from "./traceBridge";
+import createSimpleBridge from "./simpleBridge";
+import createFullBridge from "./fullBridge";
 
 export {
-  // CONNECT,
-  DELETE,
-  GET,
-  // HEAD,
-  // OPTIONS,
-  PATCH,
-  POST,
-  PUT,
-  // TRACE,
+  createSimpleBridge as CONNECT,
+  createFullBridge as DELETE,
+  createSimpleBridge as GET,
+  createSimpleBridge as HEAD,
+  createSimpleBridge as OPTIONS,
+  createFullBridge as PATCH,
+  createFullBridge as POST,
+  createFullBridge as PUT,
+  createSimpleBridge as TRACE,
 };

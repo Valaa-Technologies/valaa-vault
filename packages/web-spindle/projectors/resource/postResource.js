@@ -29,7 +29,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         "\n\trequest.query:", ...dumpObject(request.query),
         "\n\trequest.cookies:", ...dumpObject(Object.keys(request.cookies || {})),
       ]);
-      const { doCreateResource } = this.runtime.resolvers;
+      const { doCreateResource } = this.runtime.ruleResolvers;
       if (!doCreateResource) {
         reply.code(405);
         reply.send(`${this.name} is disabled: no runtime rule doCreateResource defined`);
@@ -42,7 +42,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       const scope = valkOptions.scope;
       router.infoEvent(2, () => [`${this.name}:`,
         "\n\trequest.body:", ...dumpObject(request.body),
-        "\n\tresolvers:", ...dumpObject(this.runtime.resolvers),
+        "\n\tresolvers:", ...dumpObject(this.runtime.ruleResolvers),
       ]);
       const wrap = new Error(`resource POST ${route.url}`);
       valkOptions.discourse = router.getDiscourse().acquireFabricator();

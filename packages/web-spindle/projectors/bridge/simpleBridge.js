@@ -21,6 +21,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
 
     handler (request, reply) {
       router.infoEvent(1, () => [`${this.name}:`,
+        "\n\trequest.params:", ...dumpObject(request.params),
         "\n\trequest.query:", ...dumpObject(request.query),
         "\n\trequest.cookies:", ...dumpObject(Object.keys(request.cookies || {})),
       ]);
@@ -29,30 +30,14 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         return true;
       }
       router.infoEvent(2, () => [`${this.name}:`,
-        "\n\trequest.body:", ...dumpObject(request.body),
-        "\n\tresolvers:", ...dumpObject(this.runtime.resolvers),
+        "\n\tresolvers:", ...dumpObject(this.runtime.ruleResolvers),
       ]);
-      const { response } = this.runtime.resolvers;
-
-      const wrap = new Error(`bridge DELETE ${route.url}`);
-      valkOptions.discourse = router.getDiscourse().acquireFabricator();
+      const { response } = this.runtime.ruleResolvers;
       return thenChainEagerly(valkOptions.scope.routeRoot, [
         vRouteRoot => router.resolveToScope("response", response, vRouteRoot, valkOptions),
-        () => valkOptions.discourse.releaseFabricator(),
-        eventResult => eventResult && eventResult.getPersistedEvent(),
-        (/* persistedEvent */) => router
-            .fillReplyFromResponse(valkOptions.scope.response, this.runtime, valkOptions),
-      ], (error) => {
-        if (valkOptions.discourse && valkOptions.discourse.isActiveFabricator()) {
-          valkOptions.discourse.releaseFabricator({ abort: error });
-        }
-        throw router.wrapErrorEvent(error, wrap,
-            "\n\trequest.query:", ...dumpObject(request.query),
-            "\n\trequest.cookies:", ...dumpObject(Object.keys(request.cookies || {})),
-            "\n\trequest.body:", ...dumpObject(request.body),
-            "\n\tprojectorRuntime:", ...dumpObject(this.runtime),
-        );
-      });
+        responseContent => router
+            .fillReplyFromResponse(responseContent, this.runtime, valkOptions),
+      ]);
     },
   };
 }

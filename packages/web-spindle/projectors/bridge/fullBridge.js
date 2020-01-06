@@ -24,18 +24,21 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         "\n\trequest.params:", ...dumpObject(request.params),
         "\n\trequest.query:", ...dumpObject(request.query),
         "\n\trequest.cookies:", ...dumpObject(Object.keys(request.cookies || {})),
+        "\n\trequest.body:", ...dumpObject((typeof request.body !== "object") ? request.body
+            : Object.keys(request.body || {})),
       ]);
       const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       if (_presolveRouteRequest(router, this.runtime, valkOptions)) {
         return true;
       }
       router.infoEvent(2, () => [`${this.name}:`,
+        "\n\trequest.cookies:", ...dumpObject(request.cookies),
         "\n\trequest.body:", ...dumpObject(request.body),
-        "\n\tresolvers:", ...dumpObject(this.runtime.resolvers),
+        "\n\tresolvers:", ...dumpObject(this.runtime.ruleResolvers),
       ]);
-      const { response } = this.runtime.resolvers;
+      const { response } = this.runtime.ruleResolvers;
 
-      const wrap = new Error(`bridge POST ${route.url}`);
+      const wrap = new Error(`bridge ${route.method} ${route.url}`);
       valkOptions.discourse = router.getDiscourse().acquireFabricator();
       return thenChainEagerly(valkOptions.scope.routeRoot, [
         vRouteRoot => router.resolveToScope("response", response, vRouteRoot, valkOptions),

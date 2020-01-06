@@ -33,7 +33,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         "\n\trequest.query:", ...dumpObject(request.query),
         "\n\trequest.cookies:", ...dumpObject(Object.keys(request.cookies || {})),
       ]);
-      const { doCreateMappingAndTarget } = this.runtime.resolvers;
+      const { doCreateMappingAndTarget } = this.runtime.ruleResolvers;
       if (!doCreateMappingAndTarget) {
         reply.code(405);
         reply.send(`${this.name} is disabled: no 'doCreateMappingAndTarget' rule`);
@@ -47,7 +47,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       const targetName = ((request.body.$V || {}).target || {}).name;
       router.infoEvent(2, () => [`${this.name}:`,
         "\n\trequest.body:", ...dumpObject(request.body),
-        "\n\tresolvers:", ...dumpObject(this.runtime.resolvers),
+        "\n\tresolvers:", ...dumpObject(this.runtime.ruleResolvers),
         "\n\tresource:", ...dumpObject(scope.resource),
         "\n\ttoMappingSource:", ...dumpObject(this.runtime.toMappingSource),
         "\n\tsource:", ...dumpObject(scope.source),

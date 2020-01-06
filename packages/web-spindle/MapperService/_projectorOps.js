@@ -24,7 +24,7 @@ export function _createProjectorRuntime (
   runtime.route = route;
   runtime.rulePresolvers = [];
   runtime.staticResources = [];
-  runtime.resolvers = {};
+  runtime.ruleResolvers = {};
   runtime.identity = router.getIdentity();
 
   const scopePreparations = runtime.scopePreparations = {};
@@ -53,7 +53,7 @@ export function _createProjectorRuntime (
       if (ruleName === "routeRoot") {
         runtime.resolveRouteRoot = resolveRule;
       } else if ((config.runtimeRules || []).indexOf(ruleName) !== -1) {
-        runtime.resolvers[ruleName] = [resolveRule, requiredAtRuntime];
+        runtime.ruleResolvers[ruleName] = [resolveRule, requiredAtRuntime];
       } else {
         runtime.rulePresolvers.push([ruleName, resolveRule, requiredAtRuntime]);
       }

@@ -34,10 +34,10 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       const scope = valkOptions.scope;
       router.infoEvent(2, () => [`${this.name}:`,
         "\n\trequest.body:", ...dumpObject(request.body),
-        "\n\tresolvers:", ...dumpObject(this.runtime.resolvers),
+        "\n\tresolvers:", ...dumpObject(this.runtime.ruleResolvers),
         "\n\tresource:", ...dumpObject(scope.resource),
       ]);
-      const { doPatchResource } = this.runtime.resolvers;
+      const { doPatchResource } = this.runtime.ruleResolvers;
 
       const wrap = new Error(this.name);
       valkOptions.discourse = router.getDiscourse().acquireFabricator();

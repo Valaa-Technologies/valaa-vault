@@ -35,7 +35,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         "\n\tresource:", ...dumpObject(scope.resource),
         `\n\t${scope.mappingName}:`, ...dumpObject(scope.mapping),
         `\n\ttarget:`, ...dumpObject(scope.target),
-        "\n\tresolvers:", ...dumpObject(this.runtime.resolvers),
+        "\n\tresolvers:", ...dumpObject(this.runtime.ruleResolvers),
       ]);
       if (scope.mapping === undefined) {
         scope.reply.code(404);
@@ -43,7 +43,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
           scope.resource.getRawId()} to ${scope.target.getRawId()}`);
         return true;
       }
-      const { doDestroyMapping } = this.runtime.resolvers;
+      const { doDestroyMapping } = this.runtime.ruleResolvers;
 
       const wrap = new Error(this.name);
       valkOptions.discourse = router.getDiscourse().acquireFabricator();
@@ -68,7 +68,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
           "\n\tscope.mapping:", ...dumpObject(scope.mapping),
           "\n\tscope.resource:", ...dumpObject(scope.resource),
           "\n\truntime:", ...dumpObject(this.runtime),
-          "\n\tresolvers:", ...dumpObject(this.runtime.resolvers),
+          "\n\tresolvers:", ...dumpObject(this.runtime.ruleResolvers),
         );
       });
     }

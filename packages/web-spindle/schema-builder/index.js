@@ -52,9 +52,13 @@ export {
 } from "./_sessionRoutes";
 
 export {
+  bridgeCONNECTRoute,
   bridgeDELETERoute,
   bridgeGETRoute,
+  bridgeHEADRoute,
+  bridgeOPTIONSRoute,
   bridgePATCHRoute,
   bridgePUTRoute,
   bridgePOSTRoute,
+  bridgeTRACERoute,
 } from "./_bridgeRoutes";

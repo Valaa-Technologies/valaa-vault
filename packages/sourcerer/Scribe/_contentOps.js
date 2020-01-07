@@ -68,7 +68,7 @@ const defaultRetries = 3;
 export function _prepareBvob (connection: ScribeConnection, content: any,
     mediaInfo: MediaInfo = {}, onError: Function) {
   const { buffer, contentHash } = bufferAndContentHashFromNative(content, mediaInfo);
-  const expectedContentHash = mediaInfo && (mediaInfo.contentHash || mediaInfo.bvobId);
+  const expectedContentHash = mediaInfo && mediaInfo.contentHash;
   const mediaName = mediaInfo && (mediaInfo.name ? `"${mediaInfo.name}"` : expectedContentHash);
   if (expectedContentHash && (expectedContentHash !== contentHash)) {
     connection.errorEvent(
@@ -81,7 +81,7 @@ export function _prepareBvob (connection: ScribeConnection, content: any,
     );
     return {};
   }
-  mediaInfo.contentHash = mediaInfo.bvobId = contentHash;
+  mediaInfo.contentHash = contentHash;
 
   const pendingBvobInfo = connection._pendingBvobLookup[contentHash]
       || (connection._pendingBvobLookup[contentHash] = {});
@@ -199,7 +199,7 @@ export function _determineEventMediaPreOps (connection: ScribeConnection,
     Object.assign(mediaInfo, mediaType);
   }
   if (update.content) {
-    mediaInfo.contentHash = mediaInfo.bvobId = getRawIdFrom(update.content);
+    mediaInfo.contentHash = getRawIdFrom(update.content);
   }
   return [{ mediaEntry: newEntry }];
 }
@@ -232,10 +232,9 @@ export async function _retryingTwoWaySyncMediaContent (connection: ScribeConnect
   let content;
   while (++i) {
     try {
-      const contentHash = mediaInfo.contentHash || mediaInfo.bvobId;
-      if (contentHash) {
+      if (mediaInfo.contentHash) {
         content = content
-            || connection._sourcerer.tryGetCachedBvobContent(contentHash)
+            || connection._sourcerer.tryGetCachedBvobContent(mediaInfo.contentHash)
             || (!options.retrieveMediaBuffer ? undefined
                 : (await options.retrieveMediaBuffer(mediaInfo)));
         if ((content !== undefined) && options.prepareBvob) {
@@ -302,7 +301,7 @@ export function _requestMediaContents (connection: ScribeConnection,
       const actualInfo = { ...mediaInfo };
       // If contentHash is null or defined then downstream has provided
       // the full mediaInfo.
-      if ((actualInfo.bvobId || actualInfo.contentHash) === undefined) {
+      if (actualInfo.contentHash === undefined) {
         // the require clause was !!mediaInfo.asURL. Why, though?
         const mediaEntry = connection._getMediaEntry(mediaInfo.mediaVRL, false);
         if (!mediaEntry || !mediaEntry.mediaInfo) {
@@ -346,7 +345,7 @@ export function _requestMediaContents (connection: ScribeConnection,
 function _getMediaContent (connection: ScribeConnection, mediaInfo: MediaInfo,
     upstreamOperation: Object) {
   const actualInfo = { ...mediaInfo };
-  const contentHash = actualInfo.contentHash || actualInfo.bvobId || "";
+  const contentHash = actualInfo.contentHash || "";
   const bvobInfo = connection._sourcerer._bvobLookup[contentHash];
   if (bvobInfo) {
     actualInfo.buffer = bvobInfo.buffer || bvobInfo.pendingBuffer
@@ -355,8 +354,8 @@ function _getMediaContent (connection: ScribeConnection, mediaInfo: MediaInfo,
     // this site as well.
         || ((bvobInfo.persistRefCount !== undefined)
           && connection._sourcerer.readBvobContent(contentHash));
-    const isArrayBufferType = !actualInfo.type
-        || (actualInfo.type === "application" && actualInfo.subtype === "octet-stream");
+    const isArrayBufferType = !actualInfo.contentType
+        || (actualInfo.contentType === "application/octet-stream");
     if (isArrayBufferType && actualInfo.buffer) return actualInfo.buffer;
     if (!isArrayBufferType && !bvobInfo.decodings) bvobInfo.decodings = new WeakMap();
     // Even if the decoding could be found from the cache we have to forward the call to
@@ -377,7 +376,7 @@ const maxDataURISourceBytes = 48000;
 function _getMediaURL (connection: ScribeConnection, mediaInfo: MediaInfo,
     upstreamOperation: Object, onError: Function): any {
   // Only use cached in-memory nativeContent if its id matches the requested id.
-  const contentHash = mediaInfo.contentHash || mediaInfo.bvobId || "";
+  const contentHash = mediaInfo.contentHash || "";
   const bvobInfo = connection._sourcerer._bvobLookup[contentHash];
   // Media's with sourceURL or too large/missing bvobs will be handled by Oracle
   if (!bvobInfo) {

@@ -46,10 +46,10 @@ afterEach(async () => {
 
 describe("Sourcerer", () => {
   const structuredMediaContents = [
-    [`"Hello world"`, { name: "hello.txt", type: "text", subtype: "plain" }, `"Hello world"`],
-    [`"Hello world"`, { name: "hello.txt", type: "text", subtype: "whatevs" }, `"Hello world"`],
-    [`"Hello world"`, { name: "hello.json", type: "application", subtype: "json" }, "Hello world"],
-    [`{ "a": 10 }`, { name: "a10.json", type: "application", subtype: "json" }, { a: 10 }],
+    [`"Hello world"`, { name: "hello.txt", contentType: "text/plain" }, `"Hello world"`],
+    [`"Hello world"`, { name: "hello.txt", contentType: "text/whatevs" }, `"Hello world"`],
+    [`"Hello world"`, { name: "hello.json", contentType: "application/json" }, "Hello world"],
+    [`{ "a": 10 }`, { name: "a10.json", contentType: "application/json" }, { a: 10 }],
   ];
 
   it("decodes cached bvob buffers based on media type", async () => {
@@ -64,7 +64,7 @@ describe("Sourcerer", () => {
       const preparation = await connection.prepareBvob(bufferContent);
       const contentHash = await preparation.persistProcess;
       const decodedContent = await connection.decodeMediaContent({
-        mediaVRL, contentHash, bvobId: contentHash, ...mediaInfo,
+        mediaVRL, contentHash, /* bvobId: contentHash, */ ...mediaInfo,
       });
       expect(decodedContent).toEqual(expectedContent);
     }

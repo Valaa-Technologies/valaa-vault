@@ -1,7 +1,7 @@
 // @flow
 /**
  * mediaType is a structure corresponding to MediaType schema data object.
- * mime is a string.
+ * contentType is a corresponding string.
  */
 
 import SimpleData from "~/tools/SimpleData";
@@ -9,23 +9,25 @@ import SimpleData from "~/tools/SimpleData";
 export default class MediaTypeData extends SimpleData {
   type: string;
   subtype: string;
-  text: string;
+  contentType: string;
   parameters: Array<Array<string>>;
 }
 
 /**
- * Parses a mime string into MediaTypeData.
+ * Parses a contentType string into MediaTypeData.
  *
  * @export
- * @param {string} mime  string as per https://en.wikipedia.org/wiki/MIME to be converted
- * @returns              MediaTypeData corresponding to given mime
+ * @param {string} contentType  string as per https://en.wikipedia.org/wiki/MIME to be converted
+ * @returns              MediaTypeData corresponding to given contentType
  */
-export function mediaTypeFromMime (mime: string): MediaTypeData {
-  const mimeItems = /([^/]*)\/([^;]*);?(.*)/.exec(mime) || [null, "", "", ""];
+export function mediaTypeFromContentType (contentType: string): MediaTypeData {
+  const mimeItems = /([^/]*)\/([^;]*);?(.*)/.exec(contentType) || [null, "", "", ""];
   const parameters =
       (mimeItems[3] && mimeItems[3].split(";").map(parameter => parameter.split("=")))
       || null;
-  return new MediaTypeData({ type: mimeItems[1], subtype: mimeItems[2], text: mime, parameters });
+  return new MediaTypeData({
+    type: mimeItems[1], subtype: mimeItems[2], contentType, parameters,
+  });
 }
 
 export function mediaTypeFromFilename (filename: string): ?MediaTypeData {
@@ -37,7 +39,7 @@ export function mediaTypeFromFilename (filename: string): ?MediaTypeData {
 }
 
 /**
- *  Returns a list of mime types associated with extension.
+ *  Returns a list of media types associated with extension.
  *  The first entry in the list is the preferred one, based on following heuristics:
  *  1. vnd.* subtypes go last
  *  2. after that, x-* subtypes go second last
@@ -45,11 +47,12 @@ export function mediaTypeFromFilename (filename: string): ?MediaTypeData {
  *  4. after that, more commonly used preferred as per http://fileinfo.com/extension/??? top entry
  */
 export function mediaTypesByExtension (extension: string) {
-  const mimes = (_mimeLookup || (_mimeLookup = createMimeLookup()))[extension];
-  return mimes && mimes.map(mime => mediaTypeFromMime(mime));
+  const contentTypes = (_extensionLookup
+      || (_extensionLookup = _createExtensionLookup()))[extension];
+  return contentTypes && contentTypes.map(contentType => mediaTypeFromContentType(contentType));
 }
 
-let _mimeLookup;
+let _extensionLookup;
 
 
 // This content was separate from MediaTypeData also because mmmagic is a native library, and could
@@ -57,6 +60,7 @@ let _mimeLookup;
 // functionality here.
 // import { MAGIC_MIME_TYPE, MAGIC_MIME_ENCODING, Magic } from "mmmagic";
 
+/*
 export async function resolveMediaType (path: string, extension: string, content: any) {
   const extensionMimes = extension && mediaTypesByExtension(extension);
   // TODO(iridian): We might want to inspect media dimensions
@@ -77,30 +81,33 @@ export async function resolveMediaType (path: string, extension: string, content
         || (contentMime.type === "application" && contentMime.subtype === "x-empty")) {
         return extensionMimes[0];
       }
-      console.log("Warning: while determining mime for file", path, ", got mismatching contentMime",
-          contentMime, "and extension mimes:", extensionMimes, "defaulting to the content mime");
+      console.log("Warning: while determining contentType for file", path,
+          ", got mismatching content-based type", contentMime,
+          "and extension-based type:", extensionMimes,
+          ": defaulting to the content contentType");
     }
     return contentMime;
   }
   if (extensionMimes) {
     return extensionMimes[0];
   }
-  console.log("Warning: while determining mime for file", path,
-      ", could not determine either extension or content mime.",
+  console.log("Warning: while determining contentType for file", path,
+      ", couldn't determine either extension-based or content-based contentType.",
       "Defaulting to application/octet-stream");
-  return mediaTypeFromMime("application/octet-stream");
+  return mediaTypeFromContentType("application/octet-stream");
 }
 
 // const magic = new Magic(MAGIC_MIME_TYPE | MAGIC_MIME_ENCODING);
 
-export async function mediaTypeFromContent (/* content */) {
+export async function mediaTypeFromContent (content) {
   throw new Error("Content based media type recognition DISABLED:",
       "mmmagic is not pure js and doesn't work on browsers");
-  // const mime = await new Promise(resolve => magic.detect(content, resolve));
-  // return mime && mediaTypeFromMime(mime);
+  // const contentType = await new Promise(resolve => magic.detect(content, resolve));
+  // return contentType && mediaTypeFromContentType(contentType);
 }
+*/
 
-function createMimeLookup () {
+function _createExtensionLookup () {
   // TODO(iridian): Implement for real.
   const lookup = {};
 

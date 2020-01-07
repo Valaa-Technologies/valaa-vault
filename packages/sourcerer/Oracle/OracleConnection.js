@@ -11,6 +11,7 @@ import {
 import DecoderArray from "~/sourcerer/Oracle/DecoderArray";
 import upgradeEventTo0Dot2 from "~/sourcerer/tools/event-version-0.2/upgradeEventTo0Dot2";
 
+import { mediaTypeFromContentType } from "~/tools/MediaTypeData";
 import { DelayedQueue, dumpObject, thenChainEagerly } from "~/tools";
 
 /**
@@ -89,14 +90,15 @@ export default class OracleConnection extends Connection {
       const wrap = new Error(`requestMediaContents().mediaInfo["${
           mediaInfo.name || `unnamed media`}"]`);
       try {
-        const contentHash = mediaInfo.contentHash || mediaInfo.bvobId;
+        const contentHash = mediaInfo.contentHash;
+        mediaInfo.bvobId = contentHash; // DEPRECATING(2020-01)
         if (!contentHash) {
           if (!mediaInfo.sourceURL) return undefined;
           const sourceURI = mediaInfo.sourceURL;
           if (mediaInfo.asURL) {
-            if (mediaInfo.type) {
+            if (mediaInfo.contentType) {
               throw new Error(`Cannot explicitly decode sourceURL-based content as '${
-                  mediaInfo.mime}' typed URL`);
+                  mediaInfo.contentType}' typed URL`);
             }
             if (hasScheme(sourceURI, "http") || hasScheme(sourceURI, "https")) {
               return mediaInfo.sourceURL;
@@ -107,16 +109,16 @@ export default class OracleConnection extends Connection {
           }
           // TODO(iridian): Implement schema-based request forwarding to authorities
           // TODO(iridian): Implement straight mediaInfo.sourceURL retrieval if the field is
-          // present, using mediaInfo.type/subtype as the request ContentType.
+          // present, using mediaInfo.contentType as the request ContentType.
           throw new Error(`direct retrieval not implemented for mediaInfo.sourceURL '${
               sourceURI}'`);
         }
         if (mediaInfo.asURL) return urlRequests.push(mediaInfo)[0];
         let decoder;
-        if (mediaInfo.type
-            && !((mediaInfo.type === "application") && (mediaInfo.subtype === "octet-stream"))) {
-          decoder = connection._decoderArray.findDecoder(mediaInfo);
-          if (!decoder) throw new Error(`Can't find decoder for ${mediaInfo.mime}`);
+        if (mediaInfo.contentType && (mediaInfo.contentType !== "application/octet-stream")) {
+          const { type, subtype } = mediaTypeFromContentType(mediaInfo.contentType);
+          decoder = connection._decoderArray.findDecoder(type, subtype);
+          if (!decoder) throw new Error(`Can't find decoder for ${mediaInfo.contentType}`);
           if (mediaInfo.decodingCache) {
             const decoding = mediaInfo.decodingCache.get(decoder);
             if (decoding !== undefined) return decoding;

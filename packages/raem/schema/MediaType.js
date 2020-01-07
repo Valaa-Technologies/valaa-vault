@@ -22,7 +22,12 @@ https://tools.ietf.org/html/rfc6838`,
 
     ...generatedField("text", new GraphQLNonNull(GraphQLString),
         "Text representation of the media type.",
-        mimeFromMediaType
+        contentTypeFromMediaType
+    ),
+
+    ...generatedField("contentType", new GraphQLNonNull(GraphQLString),
+        "Text representation of the media type.",
+        contentTypeFromMediaType
     ),
 
     ...primaryField("type", new GraphQLNonNull(GraphQLString),
@@ -41,7 +46,7 @@ Token matching is case insensitive.`,
   // typeofEqualTo (value) { return value.kind === POSITION; },
 });
 
-function mimeFromMediaType (source) {
+function contentTypeFromMediaType (source) {
   const params = dataFieldValue(source, "parameters");
   return `${dataFieldValue(source, "type")}/${dataFieldValue(source, "subtype")}${
     !params ? "" :

@@ -97,7 +97,7 @@ export default class AuthorityConnection extends Connection {
   prepareBvob (content: any, mediaInfo?: Object):
       Promise<Object> | { contentHash: string, persistProcess: ?Promise<any> } {
     const connection = this;
-    const contentHash = mediaInfo && (mediaInfo.contentHash || mediaInfo.bvobId);
+    const contentHash = mediaInfo && mediaInfo.contentHash;
     const wrap = new Error(`prepareBvob(${contentHash || "<undefined>"})`);
     try {
       if (!contentHash) throw new Error("mediaInfo.contentHash not defined");

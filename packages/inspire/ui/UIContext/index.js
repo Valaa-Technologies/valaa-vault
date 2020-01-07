@@ -52,7 +52,7 @@ class UIContext extends UIComponent {
           thenChainEagerly(
               (lensPropertyNotFoundLens instanceof Vrapper)
                   && lensPropertyNotFoundLens.hasInterface("Media")
-                  && lensPropertyNotFoundLens.interpretContent({ mimeFallback: "text/vsx" }),
+                  && lensPropertyNotFoundLens.interpretContent({ fallbackContentType: "text/vsx" }),
               (lensMediaContent) => {
                 this.setState({ lensPropertyNotFoundLens, active: true });
                 this.outputDiagnostic(lensMediaContent, lensPropertyNotFoundLens);

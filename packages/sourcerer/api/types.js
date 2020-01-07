@@ -9,10 +9,10 @@ import { FabricEventTarget } from "~/tools/FabricEvent";
 
 export type MediaInfo = {
   mediaVRL: VRL,
-  bvobId?: string,
+  // bvobId?: string,
   name?: string,
   sourceURL?: string,
-  mime?: string,
+  // mime?: string,
   type?: string,
   subtype?: string,
   asURL?: any,                // default false. Available options: true, false, "data", "public",

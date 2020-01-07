@@ -27,7 +27,7 @@ export default class MediaDecoder extends FabricEventTarget {
 
   getByMediaTypeLookup () { return this._lookup; }
 
-  canDecode ({ type, subtype }: Object): boolean {
+  canDecode (type: string, subtype: string): boolean {
     if (!this.mediaTypes.length) {
       throw new Error(`${this.constructor.name}.canDecode must be implemented if no ${
           this.constructor.name}.mediaTypes are specified`);

@@ -171,10 +171,10 @@ else). Their in-memory representation is shared between all consumers
 inside the same execution environment.
 
 
-#### 3.3.2. Content ArrayBuffer is *decoded* into immutable, cacheable object representation based on mime
+#### 3.3.2. Content ArrayBuffer is *decoded* into immutable, cacheable object representation based on media type
 
 The octet stream is decoded by decoder spindles associated with
-the requested mime type into some runtime object representation. This
+the requested media type into some runtime object representation. This
 object representation can range anything from a flat text decoding,
 through a complex JavaScript composite object representation into a
 full-blown component with rich, asynchronous API's for accessing

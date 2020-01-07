@@ -52,10 +52,10 @@ export default {
         `returns a promise to an interpretation of the Media content${
         ""} with a particular media type. This media type is${
         ""} determined by the first valid entry from the list:${
-        ""} 1. options.mime argument of this call${
+        ""} 1. options.contentType argument of this call${
         ""} 2. Media.mediaType field of this Media resource${
         ""} 3. inferred from the Media name extension${
-        ""} 4. options.mimeFallback of this call`
+        ""} 4. options.fallbackContentType of this call`
     )(function interpretContent (options: any) {
       const ret = VALEK.interpretContent({
         synchronous: false,

@@ -23,8 +23,8 @@ export const vdoc = vdon({
 });
 
 export type BvobInfo = {
-  bvobId: string, // primary key, to be deprecated, see contentHash,
-  contentHash: string, // future db primary key for "bvobs" and "buffers"
+  contentHash: string, // primary key for "bvobs" and "buffers"
+  // bvobId: string, // primary key, to be deprecated, see contentHash,
   persistRefCount: number, // db-backed in "bvobs"
   byteLength: number, // db-backed in "bvobs"
   inMemoryRefCount: number, // not db-backed
@@ -36,8 +36,8 @@ export type BvobInfo = {
 export async function _initializeSharedIndexedDB (scribe: Scribe) {
   scribe._sharedDb = new IndexedDBWrapper(`${scribe._databasePrefix}valos-shared-content`,
     [
-      { name: "bvobs", keyPath: "bvobId" },
-      { name: "buffers", keyPath: "bvobId" },
+      { name: "bvobs", keyPath: "contentHash" },
+      { name: "buffers", keyPath: "contentHash" },
     ],
     scribe.getLogger(),
     scribe.getDatabaseAPI(),
@@ -142,7 +142,7 @@ export async function _updateMediaEntries (connection: ScribeConnection,
         const updateEntryReq = medias.put(entry);
         updateEntryReq.onsuccess = () => {
           const newInfo = entry.mediaInfo;
-          const contentHash = newInfo.contentHash || newInfo.bvobId;
+          const contentHash = newInfo.contentHash;
           if (contentHash) {
             if (connection._sourcerer._bvobLookup[contentHash]) {
               if (entry.isInMemory) _addAdjust(inMemoryRefCountAdjusts, contentHash, 1);
@@ -153,7 +153,7 @@ export async function _updateMediaEntries (connection: ScribeConnection,
             }
           }
           const currentMediaInfo = ((currentEntryReq.result || {}).mediaInfo || {});
-          const currentContentHash = currentMediaInfo.contentHash || currentMediaInfo.bvobId;
+          const currentContentHash = currentMediaInfo.contentHash;
           if (currentContentHash && currentEntryReq.result.isPersisted) {
             if (connection._sourcerer._bvobLookup[currentContentHash]) {
               _addAdjust(persistRefCountAdjusts, currentContentHash, -1);
@@ -184,8 +184,7 @@ export async function _updateMediaEntries (connection: ScribeConnection,
     if (connection.isLocallyPersisted() && !entry.updatePersisted) return;
     delete entry.updatePersisted;
     const currentScribeEntry = connection._sourcerer._persistedMediaLookup[entry.mediaId] || {};
-    const contentHash = (currentScribeEntry.mediaInfo || {}).contentHash
-        || (currentScribeEntry.mediaInfo || {}).bvobId;
+    const contentHash = (currentScribeEntry.mediaInfo || {}).contentHash;
     if (currentScribeEntry.isInMemory && contentHash) {
       _addAdjust(inMemoryRefCountAdjusts, contentHash, -1);
     }
@@ -211,7 +210,7 @@ export function _readMediaEntries (connection: ScribeConnection) {
             return;
           }
           const entry = { ...cursor.value, isInMemory: true };
-          const contentHash = (entry.mediaInfo || {}).contentHash || (entry.mediaInfo || {}).bvobId;
+          const contentHash = (entry.mediaInfo || {}).contentHash;
           if (contentHash && entry.isInMemory) {
             if (connection._sourcerer._bvobLookup[contentHash]) {
               connection._sourcerer._adjustInMemoryBvobBufferRefCounts({ [contentHash]: 1 });
@@ -238,7 +237,7 @@ export function _destroyMediaInfo (connection: ScribeConnection, mediaRawId: str
   return connection._db.transaction(["medias"], "readwrite", ({ medias }) => {
     const req = medias.delete(mediaRawId);
     req.onsuccess = () => {
-      const contentHash = mediaEntry.mediaInfo.contentHash || mediaEntry.mediaInfo.bvobId;
+      const contentHash = mediaEntry.mediaInfo.contentHash;
       if (contentHash) {
         if (mediaEntry.isInMemory) {
           connection._sourcerer._adjustInMemoryBvobBufferRefCounts({ [contentHash]: -1 });
@@ -269,7 +268,7 @@ export function _writeBvobBuffer (scribe: Scribe, buffer: ArrayBuffer,
   // next _initializeContentLookup.
   const actualBvobInfo = scribe._bvobLookup[contentHash] = {
     contentHash,
-    bvobId: contentHash,
+    // bvobId: contentHash,
     buffer,
     byteLength: buffer.byteLength,
     persistRefCount: initialPersistRefCount,
@@ -281,11 +280,11 @@ export function _writeBvobBuffer (scribe: Scribe, buffer: ArrayBuffer,
             actualBvobInfo.persistRefCount = existingRefCount || initialPersistRefCount;
             bvobs.put({
               contentHash,
-              bvobId: contentHash,
+              // bvobId: contentHash,
               byteLength: actualBvobInfo.byteLength,
               persistRefCount: actualBvobInfo.persistRefCount,
             });
-            if (!existingRefCount) buffers.put({ contentHash, bvobId: contentHash, buffer });
+            if (!existingRefCount) buffers.put({ contentHash, buffer, /* bvobId: contentHash */ });
           };
           return contentHash;
         })
@@ -311,7 +310,7 @@ export function _readBvobBuffers (scribe: Scribe, bvobInfos: BvobInfo[]):
     scribe._sharedDb.transaction(["buffers"], "readonly", ({ buffers }) => {
       pendingReads.forEach(pendingRead => {
         const bvobInfo = pendingRead.bvobInfo;
-        const req = buffers.get(bvobInfo.contentHash || bvobInfo.bvobId);
+        const req = buffers.get(bvobInfo.contentHash);
         req.onerror = (error) => {
           delete bvobInfo.pendingBuffer;
           pendingRead.reject(error);
@@ -356,7 +355,7 @@ export async function _adjustBvobBufferPersistRefCounts (
           persistRefCount = 0;
         }
         const updateReq = bvobs.put({
-          contentHash, bvobId: contentHash, byteLength: req.result.byteLength, persistRefCount,
+          contentHash, byteLength: req.result.byteLength, persistRefCount, /* bvobId: contentHash */
         });
         updateReq.onsuccess = () => newPersistRefcounts.push([contentHash, persistRefCount]);
         /* Only removing bvob infos and associated buffers on start-up.
@@ -369,7 +368,7 @@ export async function _adjustBvobBufferPersistRefCounts (
     });
   });
   return newPersistRefcounts.map(([contentHash, persistRefCount]) => {
-    const bvobInfo = scribe._bvobLookup[contentHash] || { contentHash, bvobId: contentHash };
+    const bvobInfo = scribe._bvobLookup[contentHash] || { contentHash /* , bvobId: contentHash */ };
     bvobInfo.persistRefCount = persistRefCount;
     return bvobInfo;
   });

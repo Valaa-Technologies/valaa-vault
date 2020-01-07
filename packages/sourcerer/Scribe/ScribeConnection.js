@@ -309,6 +309,7 @@ export default class ScribeConnection extends Connection {
     const wrap = new Error(`prepareBvob(${
         mediaInfo && mediaInfo.name ? `of Media "${mediaInfo.name}"` : typeof content})`);
     try {
+      if (mediaInfo) mediaInfo.bvobId = mediaInfo.contentHash; // DEPRECATING(2020-01)
       return _prepareBvob(this, content, mediaInfo, errorOnPrepareBvob);
     } catch (error) { return errorOnPrepareBvob(error); }
     function errorOnPrepareBvob (error) {

@@ -1,7 +1,5 @@
 // @flow
 
-import { MediaInfo } from "~/sourcerer/api/types";
-
 import MediaDecoder from "~/tools/MediaDecoder";
 import { mergeDeepWith } from "~/tools/mergeDeep";
 import { arrayFromAny, FabricEventTarget } from "~/tools";
@@ -27,26 +25,26 @@ export default class DecoderArray extends FabricEventTarget {
     }
   }
 
-  findDecoder (mediaInfo: MediaInfo) {
+  findDecoder (type: string, subtype: string) {
     if (this._decodersByType) {
       // Find by exact match first
-      const ret = this._findByTypeAndSubType(mediaInfo, mediaInfo.type, mediaInfo.subtype)
+      const ret = this._findByTypeAndSubType(type, subtype)
       // Find by main type match second
-          || this._findByTypeAndSubType(mediaInfo, mediaInfo.type, "")
+          || this._findByTypeAndSubType(type, "")
       // Find by subtype match third
-          || this._findByTypeAndSubType(mediaInfo, "", mediaInfo.subtype)
+          || this._findByTypeAndSubType("", subtype)
       // Find by generic matchers the last
-          || this._findByTypeAndSubType(mediaInfo, "", "");
+          || this._findByTypeAndSubType("", "");
       if (ret) return ret;
     }
-    // Delegate to the next circle in line to see if they can decode this media type
-    return (this._fallbackArray && this._fallbackArray.findDecoder(mediaInfo));
+    // Delegate to the next circle in line to see if any of those can decode this media type
+    return (this._fallbackArray && this._fallbackArray.findDecoder(type, subtype));
   }
 
-  _findByTypeAndSubType (mediaInfo: MediaInfo, type: string, subtype: string) {
+  _findByTypeAndSubType (type: string, subtype: string) {
     for (const decodersBySubType of arrayFromAny(this._decodersByType[type] || undefined)) {
       for (const decoder of arrayFromAny(decodersBySubType[subtype] || undefined)) {
-        if (decoder.canDecode(mediaInfo)) return decoder;
+        if (decoder.canDecode(type, subtype)) return decoder;
       }
     }
     return undefined;

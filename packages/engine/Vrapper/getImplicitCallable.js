@@ -4,7 +4,7 @@ import getImplicitMediaInterpretation from "~/engine/Vrapper/getImplicitMediaInt
 
 export default function getImplicitCallable (calleeCandidate: any, roleName: string,
     options: Object = {}) {
-  options.mime = "application/valoscript";
+  options.contentType = "application/valoscript";
   const ret = getImplicitMediaInterpretation(calleeCandidate, roleName, options);
   if (typeof ret === "function") return ret;
   if ((typeof ret === "object") && (typeof ret.default === "function")) return ret.default;

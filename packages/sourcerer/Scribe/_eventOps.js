@@ -271,10 +271,25 @@ export function _throwOnMediaRequest (connection: ScribeConnection,
  #####    ####   #    #  #    #   ####   #    #
 */
 
+function _readMediaContent (connection: ScribeConnection, mediaInfo: MediaInfo) {
+  const actualMediaInfo = { ...mediaInfo };
+  delete actualMediaInfo.contentType;
+  // delete actualMediaInfo.type;
+  // delete actualMediaInfo.subtype;
+  return thenChainEagerly(
+      connection.requestMediaContents([actualMediaInfo]),
+      results => results[0],
+      (error) => {
+        throw this.wrapErrorEvent(error, `_readMediaContent(${mediaInfo.name})`,
+            "\n\tmediaInfo:", ...dumpObject(mediaInfo));
+      },
+  );
+}
+
 export function _receiveEvents (
     connection: ScribeConnection,
     events: EventBase,
-    retrieveMediaBuffer: RetrieveMediaBuffer = connection.readMediaContent.bind(connection),
+    retrieveMediaBuffer: RetrieveMediaBuffer = _readMediaContent.bind(null, connection),
     downstreamReceiveTruths: ReceiveEvents,
     type: "receiveTruths" | "receiveCommands" | "rechronicleCommands",
     onError: Function,

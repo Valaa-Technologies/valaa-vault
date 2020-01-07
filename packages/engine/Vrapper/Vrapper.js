@@ -1216,46 +1216,49 @@ export default class Vrapper extends Cog {
     return { ret: target, valueEntry };
   }
 
-  _mediaInterpretations: WeakMap<Object, { [mime: string]: Object }>;
+  _mediaInterpretations: WeakMap<Object, { [contentType: string]: Object }>;
 
   static toMediaInfoFields = VALK.fromVAKON({
-    bvobId: ["§->", "content", false, "contentHash"],
+    // bvobId: ["§->", "content", false, "contentHash"],
     contentHash: ["§->", "content", false, "contentHash"],
     name: ["§->", "name"],
     sourceURL: ["§->", "sourceURL"],
-    type: ["§->", "mediaType", false, "type"],
-    subtype: ["§->", "mediaType", false, "subtype"],
+    contentType: ["§->", "mediaType", false, "contentType"],
+    // type: ["§->", "mediaType", false, "type"],
+    // subtype: ["§->", "mediaType", false, "subtype"],
   });
 
   /* (re-)assigns options.mediaInfo */
   resolveMediaInfo (options: VALKOptions = {}) {
     const mediaInfo = Object.assign({},
         options.mediaInfo || this.get(Vrapper.toMediaInfoFields, options));
-    function setMediaInfoMIME (mime) {
-      const split = mime.split("/");
+    /*
+    function _setMediaInfoTypeAndSubtype (contentType) {
+      const split = contentType.split("/");
       mediaInfo.type = split[0];
       mediaInfo.subtype = split[1];
     }
-    // First try explicitly requested mime
-    const explicitMime = options.mime || ((options.mediaInfo || {}).mime);
-    if (explicitMime) {
-      setMediaInfoMIME(explicitMime);
-      mediaInfo.mime = mediaInfo.explicitMime;
-    }
-    // Secondly accept Media.$V.mediaType-based mime
-    if (!mediaInfo.type || !mediaInfo.subtype) {
-      // Thirdly try to determine mime from file type
-      const fileNameMediaType = mediaTypeFromFilename(mediaInfo.name);
-      if (fileNameMediaType) Object.assign(mediaInfo, fileNameMediaType);
+    */
+    // First always use explicitly requested contentType
+    if (options.contentType) mediaInfo.contentType = options.contentType;
+    // Secondly accept Media.$V.mediaType-based contentType
+    else if (!mediaInfo.contentType) {
+      // Thirdly try to determine contentType from file type
+      const nameBasedMediaType = mediaTypeFromFilename(mediaInfo.name);
+      if (nameBasedMediaType) Object.assign(mediaInfo, nameBasedMediaType);
       else {
-        // Fourthly fall back to option.mimeFallback / option.mediaInfo.mimeFallback
-        setMediaInfoMIME((options && options.mimeFallback)
-            || mediaInfo.mimeFallback
+        // Fourthly fall back to option.fallbackContentType / option.mediaInfo.fallbackContentType
+        mediaInfo.contentType = (options && options.fallbackContentType)
+            || mediaInfo.fallbackContentType
         // Fifthly use octet-stream
-            || "application/octet-stream");
+            || "application/octet-stream";
       }
     }
-    if (!mediaInfo.mime) mediaInfo.mime = `${mediaInfo.type}/${mediaInfo.subtype}`;
+    /*
+    if (!mediaInfo.contentType) {
+      mediaInfo.contentType = `${mediaInfo.type}/${mediaInfo.subtype}`;
+    }
+    */
     mediaInfo.mediaVRL = this.getId(options);
     return mediaInfo;
   }
@@ -1293,12 +1296,12 @@ export default class Vrapper extends Cog {
           (this._mediaInterpretations || (this._mediaInterpretations = new WeakMap()))
               .get(mostMaterializedTransient);
       if (interpretationsByMime) {
-        const mime = options.mime
-            || (mediaInfo = this.resolveMediaInfo(Object.create(options))).mime;
-        const cachedInterpretation = mime && interpretationsByMime[mime];
+        const contentType = options.contentType || options.mime
+            || (mediaInfo = this.resolveMediaInfo(Object.create(options))).contentType;
+        const cachedInterpretation = contentType && interpretationsByMime[contentType];
         if (cachedInterpretation
-            && (mime || !options.mimeFallback
-                || (cachedInterpretation === interpretationsByMime[options.mimeFallback]))) {
+            && (contentType || !options.fallbackContentType
+                || (cachedInterpretation === interpretationsByMime[options.fallbackContentType]))) {
           return (options.synchronous !== false)
               ? cachedInterpretation
               : Promise.resolve(cachedInterpretation);
@@ -1309,7 +1312,7 @@ export default class Vrapper extends Cog {
       if (decodedContent === undefined) {
         const name = this.get("name", options);
         wrap = new Error(`_obtainMediaInterpretation('${name}').connection.decodeMediaContent(as ${
-          String(mediaInfo && mediaInfo.mime)})`);
+          String(mediaInfo && mediaInfo.contentType)})`);
         decodedContent = this._withActiveConnectionChainEagerly(Object.create(options), [
           connection => connection.decodeMediaContent(mediaInfo),
         ], function errorOnDecodeMediaContent (error) {
@@ -1342,7 +1345,7 @@ export default class Vrapper extends Cog {
     } catch (error) {
       _setInterPretationByMimeCacheEntry(error);
       wrap = new Error(`_obtainMediaInterpretation('${this.get("name", options)}' as ${
-          String(mediaInfo && mediaInfo.mime)})`);
+          String((mediaInfo || {}).contentType)})`);
       return errorOnObtainMediaInterpretation(error);
     }
     function errorOnObtainMediaInterpretation (error) {
@@ -1359,14 +1362,15 @@ export default class Vrapper extends Cog {
       throw wrapped;
     }
     function _setInterPretationByMimeCacheEntry (interpretation: any) {
-      if (!(mediaInfo || {}).mime || !mostMaterializedTransient) return;
+      if (!(mediaInfo || {}).contentType || !mostMaterializedTransient) return;
       if (!interpretationsByMime) {
         vrapper._mediaInterpretations
             .set(mostMaterializedTransient, interpretationsByMime = {});
       }
-      interpretationsByMime[mediaInfo.mime] = interpretation;
-      if (!options.mediaInfo && !options.mime
-          && (!options.mimeFallback || (mediaInfo.mime === options.mimeFallback))) {
+      interpretationsByMime[mediaInfo.contentType] = interpretation;
+      if (!options.mediaInfo && !options.contentType
+          && (!options.fallbackContentType
+              || (mediaInfo.contentType === options.fallbackContentType))) {
         // Set default integration lookup
         interpretationsByMime[""] = interpretation;
       }
@@ -1383,10 +1387,9 @@ export default class Vrapper extends Cog {
     for (const tag of this.get("tags")) {
       const specificWithFragment = tag.tagURI.split(":")[2];
       if (!specificWithFragment) continue;
-      const [specific, fragment] = specificWithFragment.split("#");
-      if (specific !== "mediaType" || !fragment) continue;
-      const [type, subtype] = fragment.split("/");
-      ret = { type, subtype };
+      const [specific, contentType] = specificWithFragment.split("#");
+      if (specific !== "mediaType" || !contentType) continue;
+      ret = { contentType };
       break;
     }
     return ret;
@@ -1503,13 +1506,24 @@ export default class Vrapper extends Cog {
    * @memberof Vrapper
    */
   interpretContent (options: VALKOptions = {}) {
+    if (options.mime) {
+      console.error("DEPRECATED: interpretContent.mime",
+          "\n\tprefer: interpretContent.contentType");
+      options.contentType = options.mime;
+      delete options.mime;
+    }
+    if (options.mimeFallback) {
+      console.error("DEPRECATED: interpretContent.mimeFallback",
+          "\n\tprefer: interpretContent.fallbackContentType");
+      options.fallbackContentType = options.mimeFallback;
+      delete options.mimeFallback;
+    }
     return this._obtainMediaInterpretation(options);
   }
 
   static toMediaPrepareBvobInfoFields = VALK.fromVAKON({
     name: ["§->", "name"],
-    type: ["§->", "mediaType", false, "type"],
-    subtype: ["§->", "mediaType", false, "subtype"],
+    contentType: ["§->", "mediaType", false, "contentType"],
   });
 
   /**

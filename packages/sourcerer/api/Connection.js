@@ -314,33 +314,6 @@ export default class Connection extends Follower {
   }
 
   /**
-   * TODO(iridian): Specify the semantics for this function.
-   * An ArrayBuffer can be retrieved using mime
-   * application/octet-stream and decodeMediaContent. What should this
-   * return? Maybe always sync or always aync? Or just delete this
-   * whole function?
-   *
-   * @param {VRL} mediaVRL
-   * @param {MediaInfo} mediaInfo
-   * @returns
-   *
-   * @memberof Engine
-   */
-  readMediaContent (mediaInfo: MediaInfo): any {
-    delete mediaInfo.mime;
-    delete mediaInfo.type;
-    delete mediaInfo.subtype;
-    return thenChainEagerly(
-        this.requestMediaContents([mediaInfo]),
-        results => results[0],
-        (error) => {
-          throw this.wrapErrorEvent(error, `readMediaContent(${mediaInfo.name})`,
-              "\n\tmediaInfo:", ...dumpObject(mediaInfo));
-        },
-    );
-  }
-
-  /**
    * Returns the media content if it is immediately synchronously
    * available or a Promise if the content is asynchronously available.
    * Throws directly if the content is not available at all or
@@ -356,8 +329,8 @@ export default class Connection extends Follower {
    * @memberof Engine
    */
   decodeMediaContent (mediaInfo: MediaInfo): any {
-    if (!mediaInfo.type) {
-      throw this.wrapErrorEvent(new Error("decodeMediaContent: mediaInfo.type is missing"),
+    if (!mediaInfo.contentType) {
+      throw this.wrapErrorEvent(new Error("decodeMediaContent: mediaInfo.contentType is missing"),
           `decodeMediaContent('${mediaInfo.name || "<unnamed>"}')`,
               "\n\tmediaInfo:", ...dumpObject(mediaInfo));
     }
@@ -366,7 +339,7 @@ export default class Connection extends Follower {
         results => results[0],
         (error) => {
           throw this.wrapErrorEvent(error, `decodeMediaContent(${mediaInfo.name} as ${
-                mediaInfo.mime})`,
+                mediaInfo.contentType})`,
             "\n\tmediaInfo:", ...dumpObject(mediaInfo));
         },
     );

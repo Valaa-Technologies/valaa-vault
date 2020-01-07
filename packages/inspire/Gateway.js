@@ -803,9 +803,7 @@ export default class Gateway extends FabricEventTarget {
         eventIdBegin: eventIdEnd,
         retrieveMediaBuffer (mediaInfo: Object) {
           const latestInfo = mediaInfo.mediaVRL && latestMediaInfos[mediaInfo.mediaVRL.rawId()];
-          if (!latestInfo || (mediaInfo.contentHash !==
-              (latestInfo.mediaInfo.contentHash || latestInfo.mediaInfo.bvobId
-                  || latestInfo.mediaInfo.blobId))) {
+          if (!latestInfo || (mediaInfo.contentHash !== latestInfo.mediaInfo.contentHash)) {
             // Bvob wasn't found in cache and the contentHash doesn't match the latest known
             // contentHash for the requested media. The request for the latest bvob should come
             // later: Return undefined to silently ignore this request.

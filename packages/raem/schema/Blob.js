@@ -17,6 +17,7 @@ export default new GraphQLObjectType({
         bvob => bvob.get("id")
     ),
 
+    /*
     ...generatedField("blobId", new GraphQLNonNull(GraphQLString),
         `DEPRECATED Globally unique identifier string of this Bvob`,
         bvob => bvob.get("id").rawId(),
@@ -28,6 +29,7 @@ export default new GraphQLObjectType({
         bvob => bvob.get("id").rawId(),
         { affiliatedType: "Blob" },
     ),
+    */
 
     ...generatedField("contentHash", new GraphQLNonNull(GraphQLString),
         `The content hash of this Bvob`,

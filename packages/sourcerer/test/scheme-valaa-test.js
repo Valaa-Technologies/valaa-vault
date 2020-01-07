@@ -93,7 +93,7 @@ export class TestConnection extends AuthorityConnection {
 
   prepareBvob (content: any, mediaInfo: MediaInfo): Object | Promise<Object> {
     if (!this.isRemoteAuthority()) return super.prepareBvob(content, mediaInfo);
-    const contentHash = mediaInfo && (mediaInfo.contentHash || mediaInfo.bvobId);
+    const contentHash = mediaInfo && mediaInfo.contentHash;
     if (!contentHash) throw new Error("mediaInfo.contentHash not defined");
     const preparation = this._preparations[contentHash] || (this._preparations[contentHash] = {});
     preparation.content = content;

@@ -7,7 +7,9 @@ import VALEK from "~/engine/VALEK";
 import { dumpObject, thenChainEagerly, wrapError } from "~/tools";
 
 const toTextPlainInterpretation =
-    VALEK.if(VALEK.toMediaContentField(), { then: VALEK.interpretContent({ mime: "text/plain" }) });
+    VALEK.if(VALEK.toMediaContentField(), {
+      then: VALEK.interpretContent({ contentType: "text/plain" }),
+    });
 
 export default @Presentable(require("./presentation").default, "MediaContentEditor")
 class MediaContentEditor extends UIComponent {

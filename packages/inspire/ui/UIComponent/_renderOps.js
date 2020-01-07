@@ -199,7 +199,7 @@ function _tryRenderMediaLens (component: UIComponent, media: any, focus: any) {
       updateImmediately: false,
     });
   }
-  const options = { mimeFallback: "text/vsx" };
+  const options = { fallbackContentType: "text/vsx" };
   const ret = thenChainEagerly(null, [
     media.interpretContent.bind(media, options),
     function postProcessInterpretedMediaContent (content) {

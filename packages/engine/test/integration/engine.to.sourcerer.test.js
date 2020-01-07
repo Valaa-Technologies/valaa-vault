@@ -363,7 +363,7 @@ describe("Media handling", () => {
         .addListenerCallback(harness, "test", liveUpdate => resolve({
           liveUpdate,
           bvobId: contentMedia.get("content"),
-          content: contentMedia.interpretContent({ synchronous: true, mime: "text/plain" }),
+          content: contentMedia.interpretContent({ synchronous: true, contentType: "text/plain" }),
         }), false);
     const { contentMedia, createdProcess } = await harness.runValoscript(vRef(testRootId), `
       this[valos.prepareBvob](initialBuffer).then(createBvob => {
@@ -390,7 +390,7 @@ describe("Media handling", () => {
 
     expect(contentMedia.get("content").getRawId())
         .toEqual(initialContentHash);
-    expect(contentMedia.interpretContent({ synchronous: true, mime: "text/plain" }))
+    expect(contentMedia.interpretContent({ synchronous: true, contentType: "text/plain" }))
         .toEqual(initialContent);
 
     const updateContent = "update content";
@@ -419,7 +419,7 @@ describe("Media handling", () => {
 
     expect(undefinedMedia.get("content").getRawId())
         .toEqual(updateContentHash);
-    expect(undefinedMedia.interpretContent({ synchronous: true, mime: "text/plain" }))
+    expect(undefinedMedia.interpretContent({ synchronous: true, contentType: "text/plain" }))
         .toEqual(updateContent);
 
     const { updateAgainBvob, modifiedAgainProcess } = await harness.runValoscript(
@@ -444,7 +444,7 @@ describe("Media handling", () => {
 
     expect(contentMedia.get("content").getRawId())
         .toEqual(updateContentHash);
-    expect(contentMedia.interpretContent({ synchronous: true, mime: "text/plain" }))
+    expect(contentMedia.interpretContent({ synchronous: true, contentType: "text/plain" }))
         .toEqual(updateContent);
   });
 });

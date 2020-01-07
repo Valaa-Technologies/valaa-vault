@@ -187,8 +187,7 @@ describe("Vrapper", () => {
           tagURI: "tag:valaa.com,2017-07-21-date:mediaType#application/valoscript"
         });
         expect(testVrapper._getMediaTypeFromTags()).toEqual({
-          type: "application",
-          subtype: "valoscript"
+          contentType: "application/valoscript",
         });
       });
 
@@ -214,7 +213,7 @@ describe("Vrapper", () => {
       let testVrapperMediaInfo;
       beforeEach(() => {
         testVrapperMediaInfo = {
-          name: "file.vs", type: "meta", subtype: "data",
+          name: "file.vs", contentType: "meta/data",
         };
         testVrapper.engine._integrateDecoding = mockIntegrateDecoding;
         testVrapper.interpretContent = (() => "");
@@ -232,43 +231,37 @@ describe("Vrapper", () => {
           tagURI: "tag:valaa.com,2017-07-21-date:mediaType#application/javascript"
         });
         testVrapper._obtainMediaInterpretation({
-          decodedContent: "", mediaInfo: { type: "application", subtype: "javascript" },
+          decodedContent: "", mediaInfo: { contentType: "application/javascript" },
         }, testVrapper);
-        expect(mediaTypeUsed.type).toEqual("application");
-        expect(mediaTypeUsed.subtype).toEqual("javascript");
+        expect(mediaTypeUsed.contentType).toEqual("application/javascript");
 
-        testVrapper._obtainMediaInterpretation({ decodedContent: "", mime: "text/plain" },
+        testVrapper._obtainMediaInterpretation({ decodedContent: "", contentType: "text/plain" },
             testVrapper);
-        expect(mediaTypeUsed.type).toEqual("text");
-        expect(mediaTypeUsed.subtype).toEqual("plain");
+        expect(mediaTypeUsed.contentType).toEqual("text/plain");
 
         testVrapper._obtainMediaInterpretation({ decodedContent: "" }, testVrapper);
-        expect(mediaTypeUsed.type).toEqual("meta");
-        expect(mediaTypeUsed.subtype).toEqual("data");
+        expect(mediaTypeUsed.contentType).toEqual("meta/data");
 
-        testVrapper._obtainMediaInterpretation({ decodedContent: "", mimeFallback: "fall/back" },
+        testVrapper._obtainMediaInterpretation(
+            { decodedContent: "", fallbackContentType: "fall/back" },
             testVrapper);
-        expect(mediaTypeUsed.type).toEqual("meta");
-        expect(mediaTypeUsed.subtype).toEqual("data");
+        expect(mediaTypeUsed.contentType).toEqual("meta/data");
 
-        testVrapperMediaInfo.type = "";
-        testVrapperMediaInfo.subtype = "";
+        testVrapperMediaInfo.contentType = "";
         testVrapper._obtainMediaInterpretation({ decodedContent: "" }, testVrapper);
-        expect(mediaTypeUsed.type).toEqual("application");
-        expect(mediaTypeUsed.subtype).toEqual("valoscript");
-        testVrapper._obtainMediaInterpretation({ decodedContent: "", mimeFallback: "fall/back" },
+        expect(mediaTypeUsed.contentType).toEqual("application/valoscript");
+        testVrapper._obtainMediaInterpretation(
+            { decodedContent: "", fallbackContentType: "fall/back" },
             testVrapper);
-        expect(mediaTypeUsed.type).toEqual("application");
-        expect(mediaTypeUsed.subtype).toEqual("valoscript");
+        expect(mediaTypeUsed.contentType).toEqual("application/valoscript");
 
         testVrapperMediaInfo.name = "file";
         testVrapper._obtainMediaInterpretation({ decodedContent: "" }, testVrapper);
-        expect(mediaTypeUsed.type).toEqual("application");
-        expect(mediaTypeUsed.subtype).toEqual("octet-stream");
-        testVrapper._obtainMediaInterpretation({ decodedContent: "", mimeFallback: "fall/back" },
+        expect(mediaTypeUsed.contentType).toEqual("application/octet-stream");
+        testVrapper._obtainMediaInterpretation(
+            { decodedContent: "", fallbackContentType: "fall/back" },
             testVrapper);
-        expect(mediaTypeUsed.type).toEqual("fall");
-        expect(mediaTypeUsed.subtype).toEqual("back");
+        expect(mediaTypeUsed.contentType).toEqual("fall/back");
       });
     });
   });

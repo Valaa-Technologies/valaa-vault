@@ -64,9 +64,10 @@ function argumentOf (valker: Valker, head: any /* , scope: ?Object,
     if (eHostValue != null) {
       const vrapper = tryUnpackedHostValue(eHostValue);
       if (vrapper && (vrapper.tryTypeName() === "Media")) {
-        const mime = vrapper.resolveMediaInfo({ discourse: valker }).mime;
-        if ((mime === "application/javascript")
-            || (mime === "application/valaascript") || (mime === "application/valoscript")) {
+        const contentType = vrapper.resolveMediaInfo({ discourse: valker }).contentType;
+        if ((contentType === "application/javascript")
+            || (contentType === "application/valaascript")
+            || (contentType === "application/valoscript")) {
           const ret = vrapper.extractValue({ discourse: valker, synchronous: true });
           if (ret !== undefined) {
             if ((ret != null) && (typeof ret.default === "function")) return ret.default;

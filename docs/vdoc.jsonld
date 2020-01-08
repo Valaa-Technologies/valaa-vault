@@ -45,9 +45,9 @@
     "revdoc:package": "@valos/vdoc",
     "revdoc:prefix": "vdoc",
     "revdoc:prefixIRI": "https://valospace.org/vdoc#",
-    "revdoc:version": "0.35.0-prerelease.23",
+    "revdoc:version": "0.35.0-rc.0",
     "respecConfig": {
-      "subtitle": "0.35.0-prerelease.23",
+      "subtitle": "0.35.0-rc.0",
       "specStatus": "unofficial",
       "editors": [
         {

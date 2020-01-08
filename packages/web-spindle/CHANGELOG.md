@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.0](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.23...v0.35.0-rc.0) (2020-01-08)
+
+
+### Features
+
+* Add CONNECT, HEAD, OPTIONS and TRACE bridges ([a737e46](https://github.com/valaatech/kernel/commit/a737e469ef02a2d52e53805d5b0cab700ea3195c))
+* **web-spindle:** Media, Entity and Relation resource responses ([4ca1462](https://github.com/valaatech/kernel/commit/4ca1462ea93dad6938b91b14c2aba563aa2d6323))
+
+
+
+
+
 # [0.35.0-prerelease.23](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.22...v0.35.0-prerelease.23) (2020-01-06)
 
 

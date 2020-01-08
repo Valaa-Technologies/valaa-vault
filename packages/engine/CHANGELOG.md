@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.0](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.23...v0.35.0-rc.0) (2020-01-08)
+
+
+### Bug Fixes
+
+* [#619](https://github.com/valaatech/kernel/issues/619) Null values in array Properties return a Vrapper ([b19ff2e](https://github.com/valaatech/kernel/commit/b19ff2e45476bc5784632a0872aa3aee48edfacd))
+
+
+
+
+
 # [0.35.0-prerelease.23](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.22...v0.35.0-prerelease.23) (2020-01-06)
 
 

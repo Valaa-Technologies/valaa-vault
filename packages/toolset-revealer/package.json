@@ -4,7 +4,7 @@
     "type": "toolset",
     "domain": "@valos/kernel"
   },
-  "version": "0.35.0-prerelease.23",
+  "version": "0.35.0-rc.0",
   "description": "Tools for building revelations both for development and deployment purposes",
   "license": "MIT",
   "author": "Valaa Technologies Ltd",

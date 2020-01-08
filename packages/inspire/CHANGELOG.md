@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.0](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.23...v0.35.0-rc.0) (2020-01-08)
+
+
+### Features
+
+* **web-spindle:** Media, Entity and Relation resource responses ([4ca1462](https://github.com/valaatech/kernel/commit/4ca1462ea93dad6938b91b14c2aba563aa2d6323))
+
+
+
+
+
 # [0.35.0-prerelease.23](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.22...v0.35.0-prerelease.23) (2020-01-06)
 
 **Note:** Version bump only for package @valos/inspire

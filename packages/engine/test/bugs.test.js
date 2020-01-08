@@ -337,4 +337,17 @@ describe("Engine bug tests", async () => {
       });
     `, { properties }, { awaitResult: (result) => result.getComposedEvent() });
   });
+
+  it(`handles 'null' values in arrays`, async () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
+    harness.interceptErrors(async () => {
+    const values = await harness.runValoscript(null, `
+      const ret = new Entity({ owner: null, name: "root", authorityURI: "valaa-memory:" });
+      ret.values = [1, null, "test"];
+      ret.values;
+    `, { console });
+    expect(values)
+        .toEqual([1, null, "test"]);
+    })();
+  });
 });

@@ -133,7 +133,7 @@ export default {
     const ret = new Array(entriesStep.length - startIndex);
     for (let index = startIndex; index !== entriesStep.length; ++index) {
       const entry = entriesStep[index];
-      ret[index - startIndex] = tryUnpackLiteral(valker, head, entry, scope);
+      ret[index - startIndex] = tryUnpackFullLiteral(valker, head, entry, scope);
     }
     return ret;
   },
@@ -533,6 +533,15 @@ export function tryUnpackLiteral (valker: Valker, head: any, vakon: any, scope: 
     nonFinalStep: ?boolean): ?any {
   if (typeof vakon !== "object") return vakon;
   if (vakon === null) return (typeof head === "object") ? valker.tryUnpack(head, true) : head;
+  if (vakon[0] === "§'") return vakon[1];
+  const ret = valker.advance(head, vakon, scope, nonFinalStep);
+  if (typeof ret !== "object") return ret;
+  return valker.tryUnpack(ret, true);
+}
+
+export function tryUnpackFullLiteral (valker: Valker, head: any, vakon: any, scope: ?Object,
+    nonFinalStep: ?boolean): ?any {
+  if ((typeof vakon !== "object") || (vakon === null)) return vakon;
   if (vakon[0] === "§'") return vakon[1];
   const ret = valker.advance(head, vakon, scope, nonFinalStep);
   if (typeof ret !== "object") return ret;

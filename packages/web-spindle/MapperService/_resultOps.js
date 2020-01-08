@@ -1,6 +1,11 @@
 // @flow
 
+import { JSDOM } from "jsdom";
+import React from "react";
+import ReactDOM from "react-dom";
 import { Readable, Transform, Duplex } from "stream";
+
+import ReactRoot from "~/inspire/ui/ReactRoot";
 
 import Vrapper from "~/engine/Vrapper";
 
@@ -190,6 +195,9 @@ export function _fillReplyFromResponse (router, responseContent, runtime, valkOp
   const scope = valkOptions.scope;
   const reply = scope.reply;
   if (reply.sent) return true;
+
+  let sendContent;
+
   if (runtime.resourceHRef) {
     const relResponse = { $V: {
       rel: "self", href: runtime.resourceHRef(responseContent, scope),
@@ -203,28 +211,37 @@ export function _fillReplyFromResponse (router, responseContent, runtime, valkOp
   }
   if (reply.sendLoopbackContent) {
     reply.sendLoopbackContent(responseContent);
-  } else if ((responseContent == null) || (typeof responseContent !== "object")) {
-    reply.send(responseContent);
+    return true;
+  }
+  if ((responseContent == null) || (typeof responseContent !== "object")) {
+    sendContent = responseContent;
   } else if (Object.getPrototypeOf(responseContent) === Object.prototype
       || Array.isArray(responseContent)) {
-    reply.send(JSON.stringify(responseContent, null, 2));
+    sendContent = JSON.stringify(responseContent, null, 2);
   } else if (responseContent instanceof Vrapper) {
-    switch (responseContent.getTypeName()) {
+    const resourceTypeName = responseContent.getTypeName();
+    switch (resourceTypeName) {
+      case "Media":
+        return _fillReplyFromMedia(router, responseContent, runtime, valkOptions, reply);
       case "Entity":
       case "Relation":
-      case "Media":
+        return _fillReplyFromWebLens(router, responseContent, runtime, valkOptions);
       default:
     }
+    throw new Error(`Unrecognized response resource type: ${resourceTypeName}`);
   } else if (Buffer.isBuffer(responseContent)) {
-    reply.send(responseContent);
+    sendContent = responseContent;
   } else if (responseContent instanceof ArrayBuffer) {
-    reply.send(Buffer.from(responseContent));
+    sendContent = Buffer.from(responseContent);
   } else if (ArrayBuffer.isView(responseContent)) {
-    reply.send(Buffer.from(responseContent.buffer));
+    sendContent = Buffer.from(responseContent.buffer);
   } else if (responseContent instanceof Readable
       || responseContent instanceof Transform
       || responseContent instanceof Duplex) {
-    reply.send(responseContent);
+    sendContent = responseContent;
+  } else if (responseContent.outerHTML !== undefined) {
+    reply.header("content-type", "text/html");
+    sendContent = `<!DOCTYPE html>${responseContent.outerHTML}`;
   } else if (responseContent.body !== undefined) {
     // A proxied fetch response
     // TODO(iridian, 2019-12): Handle/forward all other response fields
@@ -245,6 +262,7 @@ export function _fillReplyFromResponse (router, responseContent, runtime, valkOp
       (responseContent.constructor || {}).name || "<constructor missing>"}`);
   }
   if (!reply.statusCode) reply.code(200);
+  if (sendContent !== undefined) reply.send(sendContent);
   router.infoEvent(2, () => [
     `${router.name}:`, ...dumpObject(scope.resource),
     "\n\tresponseContent:", ...dumpObject(responseContent),
@@ -252,8 +270,48 @@ export function _fillReplyFromResponse (router, responseContent, runtime, valkOp
   return true;
 }
 
-/*
-function _fillReplyWithReadableStream (reply, readable) {
-
+function _fillReplyFromMedia (router, vMedia, runtime, valkOptions, reply) {
+  const mediaInfo = vMedia.resolveMediaInfo(Object.create(valkOptions));
+  if (!mediaInfo.contentHash && mediaInfo.sourceURL) {
+    reply.redirect(mediaInfo.sourceURL);
+    return true;
+  }
+  reply.header("content-type", mediaInfo.contentType);
+  reply.header("content-disposition", `filename="${mediaInfo.name}"`);
+  return thenChainEagerly(vMedia.getConnection(), [
+    connection =>
+        connection.decodeMediaContent({ ...mediaInfo, contentType: "application/octet-stream" }),
+    mediaContent =>
+        _fillReplyFromResponse(router, mediaContent, runtime, valkOptions),
+  ]);
 }
-*/
+
+function _fillReplyFromWebLens (router, vFocus, runtime, valkOptions) {
+  const lens = vFocus.get(["§..", "WEB_LENS"], Object.create(valkOptions));
+  if (!lens) {
+    throw new Error(`No lens property 'WEB_LENS' found from response resource type: ${
+      vFocus.getTypeName(valkOptions)}`);
+  }
+  const scope = valkOptions.scope;
+  const name = String(scope.request.raw.url || "").split("?")[0];
+  for (const [queryKey, queryValue] of Object.entries(scope.request.query || {})) {
+    scope[queryKey] = queryValue;
+  }
+  const resultElement = (new JSDOM(`<!DOCTYPE html>`)).window.document.documentElement;
+  const reactRoot = (
+    <ReactRoot
+      isHTMLRoot
+      viewName={name}
+      vViewFocus={vFocus}
+      lensProperty="WEB_LENS"
+      uiScope={scope}
+    />
+  );
+  return new Promise(resolve => {
+    ReactDOM.render(reactRoot, resultElement, () => {
+      setTimeout(
+          () => resolve(_fillReplyFromResponse(router, resultElement, runtime, valkOptions)),
+          200);
+    });
+  });
+}

@@ -23,10 +23,12 @@ const _sheetIds = new WeakMap();
 
 export default class ReactRoot extends React.Component {
   static propTypes = {
+    isHTMLRoot: PropTypes.bool,
     viewName: PropTypes.string,
     children: PropTypes.object,
     vViewFocus: PropTypes.object,
     lensProperty: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
+    uiScope: PropTypes.object,
   };
 
   static childContextTypes = {
@@ -42,7 +44,7 @@ export default class ReactRoot extends React.Component {
     super(props, context);
     this.cssRoot = {};
     if (props.vViewFocus) {
-      this._createRootContext(props.vViewFocus, props.viewName)
+      this._createRootContext(props.vViewFocus, props.viewName, props.uiScope)
       .then(rootContext => {
         this._rootContext = rootContext;
         this.forceUpdate();
@@ -140,8 +142,8 @@ export default class ReactRoot extends React.Component {
     }
   }
 
-  async _createRootContext (vViewFocus: Vrapper, viewName: string) {
-    const rootContext = Object.create(vViewFocus.engine.getLexicalScope());
+  async _createRootContext (vViewFocus: Vrapper, viewName: string, customUIScope: Object) {
+    const rootContext = Object.create(customUIScope || vViewFocus.engine.getLexicalScope());
     const valos = rootContext.valos;
     rootContext.frame = await this._obtainUIRootFrame(
         rootContext[valos.Lens.shadowLensAuthority], vViewFocus, viewName);
@@ -154,9 +156,9 @@ export default class ReactRoot extends React.Component {
   async _obtainUIRootFrame (authorityURI: string, vViewFocus: Vrapper, viewName: string) {
     const localInstanceRawId = derivedId(
         vViewFocus.getRawId(), "ui-roots", `@$~raw:${encodeURIComponent(viewName)}@@`);
-    const partitionURI = naiveURI.createChronicleURI(authorityURI, localInstanceRawId);
+    const chronicleURI = naiveURI.createChronicleURI(authorityURI, localInstanceRawId);
     await vViewFocus.engine.discourse
-        .acquireConnection(partitionURI)
+        .acquireConnection(chronicleURI)
         .asActiveConnection();
     let vLocalUIRoot = vViewFocus.engine.getVrapperByRawId(localInstanceRawId, { optional: true });
     if (!vLocalUIRoot) {
@@ -236,16 +238,12 @@ export default class ReactRoot extends React.Component {
   render () {
     const vViewFocus = this.props.vViewFocus;
     if (!vViewFocus || !this._rootContext) return null;
-    return (
-      <div style={{ width: "100vw", height: "100vh" }}>
-        <Valoscope
-          {...uiComponentProps({
-            name: "root", parentUIContext: this._rootContext, focus: vViewFocus,
-          })}
-        >
-          {this.props.children}
-        </Valoscope>
-      </div>
-    );
+    const valoscopeProps = uiComponentProps({
+      name: "root", parentUIContext: this._rootContext, focus: vViewFocus,
+    });
+    const valoscope = <Valoscope {...valoscopeProps}>{this.props.children}</Valoscope>;
+    return this.props.isHTMLRoot
+        ? valoscope
+        : (<div style={{ width: "100vw", height: "100vh" }}>{valoscope}</div>);
   }
 }

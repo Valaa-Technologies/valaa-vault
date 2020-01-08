@@ -19,8 +19,8 @@
     "fastify-cookie": "^3.0.2",
     "fastify-swagger": "^2.3.2"
   },
-  "peerDependencies": {
-    "@valos/inspire": "^0.35.0-prerelease.0"
+  "devDependencies": {
+    "@valos/inspire": "^0.35.0-prerelease.23"
   },
   "homepage": "https://valospace.org/web-spindle"
 }

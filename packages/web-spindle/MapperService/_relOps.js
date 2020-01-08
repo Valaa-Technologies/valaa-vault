@@ -69,7 +69,10 @@ export function _relRequest (router, rel, requestOptions) {
         }, {
           // reply
           code (statusCode) { response.statusCode = statusCode; },
-          sendLoopbackContent (payloadJSON) { response.payloadJSON = payloadJSON; },
+          sendLoopbackContent (payloadJSON) {
+            if (!response.statusCode) response.statusCode = 200;
+            response.payloadJSON = payloadJSON;
+          },
           send (payload) { response.payload = payload; },
         }),
         () => response);

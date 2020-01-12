@@ -214,6 +214,9 @@ export function _fillReplyFromResponse (router, responseContent, runtime, valkOp
     return true;
   }
   if ((responseContent == null) || (typeof responseContent !== "object")) {
+    if ((responseContent === undefined) && !reply.statusCode) {
+      throw new Error("Undefined response content and reply.statusCode is not set");
+    }
     sendContent = responseContent;
   } else if (Object.getPrototypeOf(responseContent) === Object.prototype
       || Array.isArray(responseContent)) {
@@ -262,7 +265,7 @@ export function _fillReplyFromResponse (router, responseContent, runtime, valkOp
       (responseContent.constructor || {}).name || "<constructor missing>"}`);
   }
   if (!reply.statusCode) reply.code(200);
-  if (sendContent !== undefined) reply.send(sendContent);
+  if (!reply.sent) reply.send(...(sendContent !== undefined ? [sendContent] : []));
   router.infoEvent(2, () => [
     `${router.name}:`, ...dumpObject(scope.resource),
     "\n\tresponseContent:", ...dumpObject(responseContent),

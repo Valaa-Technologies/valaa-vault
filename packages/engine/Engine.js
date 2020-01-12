@@ -81,12 +81,11 @@ export default class Engine extends Cog {
   getValospaceTypePrototype (typeName: string) {
     return (this._rootScope.valos[typeName] || {}).prototype;
   }
-  getIdentityManager () {
-    return this.discourse._identityManager;
-  }
   setRootScopeEntry (entryName: string, value: any) {
     this._rootScope[entryName] = value;
   }
+
+  getIdentityManager () { return this._rootScope.identity; }
 
   run (head: any, kuery: Kuery, options: VALKOptions = {}) {
     if (options.scope === undefined) options.scope = this.getLexicalScope();

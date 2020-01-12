@@ -115,9 +115,8 @@ export default class FalseProphetConnection extends Connection {
 
   _resolveOptionsIdentity (options) {
     if (options.identity !== undefined) return;
-    options.identity = options.discourse
-        ? options.discourse.getIdentityManager()
-        : this._originatingIdentity;
+    const identity = options.discourse && options.discourse.getIdentityManager();
+    options.identity = identity || this._originatingIdentity;
   }
 
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest {

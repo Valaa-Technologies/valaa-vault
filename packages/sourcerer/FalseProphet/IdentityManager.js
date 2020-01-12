@@ -4,10 +4,14 @@ import type FalseProphet from "~/sourcerer/FalseProphet/FalseProphet";
 
 import { debugObjectType, dumpObject, FabricEventTarget } from "~/tools";
 
+const identityPrototypeMethods = require("~/gateway-api/identity");
+
 export default class IdentityManager extends FabricEventTarget {
-  constructor (sourcerer: FalseProphet) {
-    super(undefined, sourcerer.getVerbosity(), sourcerer);
-    this._sourcerer = sourcerer;
+  constructor (options: { sourcerer: FalseProphet, clientURI: string, sessionURI: string }) {
+    super(undefined, options.sourcerer.getVerbosity(), options.sourcerer);
+    this._sourcerer = options.sourcerer;
+    this.clientURI = options.clientURI;
+    this.sessionURI = options.sessionURI;
     this._activeIdentities = {};
   }
 
@@ -52,3 +56,5 @@ export default class IdentityManager extends FabricEventTarget {
     }
   }
 }
+
+Object.assign(IdentityManager.prototype, identityPrototypeMethods);

@@ -23,7 +23,6 @@ import createVRID0Dot3, { upgradeVRIDTo0Dot3, createChronicleRootVRID0Dot3 }
     from "~/sourcerer/tools/event-version-0.3/createVRID0Dot3";
 
 import TransactionState, { fabricatorOps } from "~/sourcerer/FalseProphet/TransactionState";
-import IdentityManager from "~/sourcerer/FalseProphet/IdentityManager";
 
 import { invariantify, invariantifyObject, thenChainEagerly, trivialClone } from "~/tools";
 import valosUUID from "~/tools/id/valosUUID";
@@ -47,7 +46,6 @@ export default class FalseProphetDiscourse extends Discourse {
     this._follower = follower;
     this._sourcerer = sourcerer;
     this._implicitlySyncingConnections = {};
-    this._identityManager = new IdentityManager(sourcerer);
     this.setState(this._sourcerer.getState());
     invariantify(this.state, "FalseProphetDiscourse.state");
     this._assignCommandId = assignCommandId || (command => {
@@ -63,7 +61,7 @@ export default class FalseProphetDiscourse extends Discourse {
 
   getRootDiscourse () { return this._rootDiscourse; }
   getTransactor () { return this._transactorState && this._transactorState._transactor; }
-  getIdentityManager () { return this._identityManager; }
+  getIdentityManager () { return this._follower.getIdentityManager(); }
 
   setAssignCommandId (assignCommandId) {
     this._assignCommandId = assignCommandId;

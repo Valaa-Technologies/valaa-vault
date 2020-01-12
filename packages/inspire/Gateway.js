@@ -20,6 +20,7 @@ import Corpus from "~/raem/Corpus";
 
 import upgradeEventTo0Dot2 from "~/sourcerer/tools/event-version-0.2/upgradeEventTo0Dot2";
 import EVENT_VERSION from "~/sourcerer/tools/EVENT_VERSION";
+import IdentityManager from "~/sourcerer/FalseProphet/IdentityManager";
 
 import Engine from "~/engine/Engine";
 import EngineContentAPI from "~/engine/EngineContentAPI";
@@ -170,6 +171,8 @@ export default class Gateway extends FabricEventTarget {
       this.falseProphet = await this._proselytizeFalseProphet(this.gatewayRevelation,
           this.corpus, this.scribe);
 
+      this.identity = await this._establishIdentity(this.gatewayRevelation, this.falseProphet);
+
       // Create a connection and an identity for the gateway towards false prophet
       this.discourse = await this._initiateDiscourse(this.gatewayRevelation, this.falseProphet);
 
@@ -218,15 +221,19 @@ export default class Gateway extends FabricEventTarget {
     return this.rootLensURI || this.getRootPartitionURI();
   }
 
+  getIdentityManager () {
+    return this.identity;
+  }
+
   createAndConnectViewsToDOM (views: { [string]: {
     container: Object, hostGlobal: Object, window: Object,
     name: string, size: Object, viewRootId: string, lensURI: any, verbosity: ?number,
   } }, createView) {
     this._hostComponents = { createView };
     for (const { container, hostGlobal, window } of Object.values(views)) {
-      if (container) this._hostComponents.container = container;
-      if (hostGlobal) this._hostComponents.global = hostGlobal;
-      if (window) this._hostComponents.window = window;
+      if (this._hostComponents.container == null) this._hostComponents.container = container;
+      if (this._hostComponents.hostGlobal == null) this._hostComponents.global = hostGlobal;
+      if (this._hostComponents.window == null) this._hostComponents.window = window;
     }
     for (const [viewId, config, resolve, reject] of [
       ...Object.entries(views || {}),
@@ -268,10 +275,13 @@ export default class Gateway extends FabricEventTarget {
         `createView({ name: ${viewId}, verbosity: ${verbosity} })`]);
     let rootScope;
     let viewConfig;
+    let identity;
     const gateway = this;
     this._views[viewId] = thenChainEagerly(view, view.addChainClockers(1, "view.create.ops", [
       async function _createViewOptions () {
         const views = (await lazy(gateway.revelation.views)) || {};
+// TODO(iridian, 2020-01): Streamline the view parameterization hodgepodge
+// monstrosity to use this revelationConfig as much as possible.
         const revelationConfig = (await lazy(views[viewId])) || {};
         viewConfig = patchWith(
             { verbosity, viewRootId: `valos-gateway--${viewId}--view-root` },
@@ -280,6 +290,13 @@ export default class Gateway extends FabricEventTarget {
         view.setRawName(viewId);
         view.setName(`${viewConfig.name}-View`);
         view.setVerbosity(viewConfig.verbosity);
+      },
+      function _createIdentity () {
+        identity = new IdentityManager({
+          sourcerer: gateway.falseProphet,
+          ...(viewConfig.identity || {}),
+        });
+        return identity;
       },
       function _createEngine () {
         const engineOptions = {
@@ -318,7 +335,7 @@ export default class Gateway extends FabricEventTarget {
                 defaultAuthorityConfig, engine);
         }
         rootScope.valos.gateway = gateway;
-        rootScope.valos.identity = engine.getIdentityManager();
+        rootScope.valos.identity = identity;
         rootScope.valos.view = {};
         rootScope.console = Object.assign(Object.create(engine), {
           info: function verboseInfoEvent (...rest) {
@@ -581,6 +598,34 @@ export default class Gateway extends FabricEventTarget {
     }
   }
 
+  async _establishIdentity (gatewayRevelation: Object, falseProphet: FalseProphet) {
+    let identityOptions, identity;
+    try {
+      identityOptions = {
+        ...((await lazy(gatewayRevelation.identity)) || {}),
+        sourcerer: falseProphet,
+      };
+      this.clockEvent(1, () => [`falseProphet.identity.create`,
+        "new IdentityManager", ...dumpObject(identityOptions)]);
+      identity = new IdentityManager({
+        ...identityOptions,
+      });
+      this.warnEvent(1, () => [
+        `Established Gateway Identity ${identity.debugId()}`,
+        ...(!this.getVerbosity() ? [] : [", with:",
+          "\n\tidentityOptions:", ...dumpObject(identityOptions),
+          "\n\tidentity:", ...dumpObject(identity),
+        ]),
+      ]);
+      return identity;
+    } catch (error) {
+      throw this.wrapErrorEvent(error, "initiateDiscourse",
+          "\n\tdiscourseOptions:", ...dumpObject(identityOptions),
+          "\n\tfalseProphet:", ...dumpObject(falseProphet),
+          "\n\tidentity:", ...dumpObject(identity));
+    }
+  }
+
   async _initiateDiscourse (gatewayRevelation: Object, falseProphet: FalseProphet) {
     let discourseOptions, discourse;
     try {
@@ -590,7 +635,6 @@ export default class Gateway extends FabricEventTarget {
       this.clockEvent(1, () => [`falseProphet.discourse.create`,
         "new FalseProphetDiscourse", ...dumpObject(discourseOptions)]);
       discourse = falseProphet.createDiscourse(this, discourseOptions);
-      // TODO(iridian, 2019-05): Add provisions for gateway initialization identity acquisition
       this.warnEvent(1, () => [
         `Initiated FalseProphetDiscourse ${discourse.debugId()}`,
         ...(!this.getVerbosity() ? [] : [", with:",

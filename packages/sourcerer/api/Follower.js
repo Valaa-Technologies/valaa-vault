@@ -48,4 +48,6 @@ export default class Follower extends FabricEventTarget {
   chronicleEvent (event: EventBase, options: ChronicleOptions = {}): ChronicleEventResult {
     return this.chronicleEvents([event], options).eventResults[0];
   }
+
+  getIdentityManager () { return null;  }
 }

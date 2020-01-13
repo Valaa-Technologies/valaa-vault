@@ -67,7 +67,7 @@ export function verifySessionAuthorization (
     scope.reply.send("Forbidden");
     return true;
   } catch (error) {
-    throw router.wrapErrorEvent(error, new Error("verifySessionAuthorization"),
+    throw router.wrapErrorEvent(error, 1, new Error("verifySessionAuthorization"),
         "\n\taccessRoots:", ...dumpObject(accessRoots));
   }
 }

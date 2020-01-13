@@ -14,7 +14,7 @@ import { NamespaceInterfaceTag } from "~/engine/valosheath/namespace";
 
 // import { createNativeIdentifier } from "~/script/denormalized/nativeIdentifier";
 
-import { isSymbol, wrapError, dumpObject } from "~/tools";
+import { isSymbol, dumpObject } from "~/tools";
 
 const engineSteppers = Object.assign(Object.create(valoscriptSteppers), {
   "§callableof": callableOf,
@@ -47,10 +47,11 @@ function callableOf (valker: Valker, head: any, scope: ?Object,
     }
     throw new Error(`Can't convert ${typeof eCandidate} callee to a function for ${roleName}`);
   } catch (error) {
-    throw wrapError(error, `During ${valker.debugId()}\n .callableof, with:`,
-        "\n\thead:", ...dumpObject(head),
-        "\n\tcallee candidate:", ...dumpObject(eCandidate),
-    );
+    throw valker.wrapErrorEvent(error, 2, () => [
+      `§callableof`,
+      "\n\thead:", ...dumpObject(head),
+      "\n\tcallee candidate:", ...dumpObject(eCandidate),
+    ]);
   }
 }
 
@@ -79,10 +80,11 @@ function argumentOf (valker: Valker, head: any /* , scope: ?Object,
     */
     return head;
   } catch (error) {
-    throw wrapError(error, `During ${valker.debugId()}\n .argumentOf, with:`,
-        "\n\thead:", ...dumpObject(head),
-        "\n\tcallee candidate:", ...dumpObject(eHostValue),
-    );
+    throw valker.wrapErrorEvent(error, 2, () => [
+      `§argumentOf`,
+      "\n\thead:", ...dumpObject(head),
+      "\n\tcallee candidate:", ...dumpObject(eHostValue),
+    ]);
   }
 }
 
@@ -120,10 +122,14 @@ function toMethod (valker: Valker, head: any, scope: ?Object, [, callableName]: 
   const transient = valker.trySingularTransient(head);
   const actualHostHead = hostHead || valker.unpack(transient) || head;
   if (!actualHostHead || !actualHostHead.getVALKMethod) {
-    throw wrapError(new Error("Can't find host object or it is missing member .getVALKMethod"),
-        `During ${valker.debugId()}\n .toMethod(${callableName}), with:`,
-        "\n\thead:", ...dumpObject(head),
-        "\n\thostValue:", ...dumpObject(actualHostHead));
+    throw valker.wrapErrorEvent(
+        new Error("Can't find host object or it is missing member .getVALKMethod"),
+        1, () => [
+          `§method(${callableName})`,
+          "\n\thead:", ...dumpObject(head),
+          "\n\thostValue:", ...dumpObject(actualHostHead),
+        ],
+      );
   }
   const eMethodName = (typeof callableName !== "object") ? callableName
       : tryLiteral(valker, head, callableName, scope);
@@ -185,7 +191,7 @@ function _engineIdentifierOrPropertyValue (steppers: Object, valker: Valker, hea
             isGetProperty ? "property" : "identifier"} name`);
       }
     }
-    throw valker.wrapErrorEvent(actualError, isGetProperty ? "getProperty" : "getIdentifier",
+    throw valker.wrapErrorEvent(actualError, 1, isGetProperty ? "getProperty" : "getIdentifier",
         "\n\thead:", ...dumpObject(head),
         "\n\tcontainer:", ...dumpObject(eContainer),
         "(via kuery:", ...dumpKuery(container), ")",

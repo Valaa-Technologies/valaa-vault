@@ -5,14 +5,18 @@ import path from "path";
 
 import createGateway from "~/inspire";
 import PerspireView from "~/inspire/PerspireView";
-import { invariantifyString, wrapError } from "~/tools";
+import { invariantifyString } from "~/tools";
+import { FabricEventTarget } from "~/tools/FabricEvent";
 
-export default class PerspireServer {
+export default class PerspireServer extends FabricEventTarget {
   constructor ({
-    isTest, logger, siteRoot, domainRoot, revelationRoot, revelations, cacheBasePath, spindles,
+    isTest, name, logger,
+    siteRoot, domainRoot, revelationRoot,
+    revelations, cacheBasePath, spindles,
   }: Object) {
     invariantifyString(revelationRoot, "PerspireServer.options.revelationRoot",
         { allowEmpty: true });
+    super(name, undefined, logger);
     this.isTest = isTest;
     this.gatewayOptions = {
       logger,
@@ -43,7 +47,7 @@ export default class PerspireServer {
       try {
         return require(spindle);
       } catch (error) {
-        throw wrapError(error,
+        throw this.wrapErrorEvent(error, 1,
             new Error(`During PerspireServer.initialize.require("${spindle}")`));
       }
     });
@@ -56,7 +60,7 @@ export default class PerspireServer {
   }
 
   async createMainView () {
-    global.name = "Perspire window";
+    global.name = `${this.getName()} window`;
 
     this.jsdom = new JSDOM(`<div id="perspire-gateway--main-container"></div>`,
         { pretendToBeVisual: true });
@@ -80,7 +84,7 @@ export default class PerspireServer {
 
     const views = (await this.gateway).createAndConnectViewsToDOM({
       worker: {
-        name: "ValOS Perspire Worker",
+        name: `${this.getName()} worker`,
         lensURI: this.gateway.getRootLensURI(),
         lensPropertyFallbacks: ["WORKER_LENS"],
         hostGlobal: global,

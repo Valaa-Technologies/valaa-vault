@@ -24,7 +24,7 @@ import { createMaterializeGhostAction, createInactiveTransientAction }
 
 import Bard from "~/raem/redux/Bard";
 
-import { dumpObject, invariantify, wrapError } from "~/tools";
+import { dumpObject, invariantify } from "~/tools";
 
 // TODO(iridian): Well. MODIFIED is stupid, it should be four (or more)
 // different actions: FIELDS_SET, ADDED_TO, REMOVED_FROM, REPLACED_WITHIN.
@@ -122,12 +122,13 @@ export default function modifyResource (bard: Bard) {
       return ret;
     });
   } catch (error) {
-    throw wrapError(error, `During ${bard.debugId()}\n .modifyResource(${
-            objectTypeName}/${passage.typeName}), with:`,
-        "\n\tpassage:", ...dumpObject(passage),
-        "\n\treifyTransientSubAction:", ...dumpObject(reifyTransientSubAction),
-        "\n\ttransient:", ...dumpObject(bard.objectTransient),
-        "\n\tbard:", ...dumpObject(bard));
+    throw bard.wrapErrorEvent(error, 1, () => [
+      `modifyResource(${objectTypeName}/${passage.typeName})`,
+      "\n\tpassage:", ...dumpObject(passage),
+      "\n\treifyTransientSubAction:", ...dumpObject(reifyTransientSubAction),
+      "\n\ttransient:", ...dumpObject(bard.objectTransient),
+      "\n\tbard:", ...dumpObject(bard),
+    ]);
   }
 }
 
@@ -191,13 +192,15 @@ export function processUpdate (bard: Bard, updatesByField, handleFieldUpdate,
       else mutableObject.set(fieldInfo.name, newValue);
     } catch (error) {
       const aliasInfo = fieldInfo.name !== fieldName ? ` (via its alias '${fieldName}')` : "";
-      throw wrapError(error, `During ${bard.debugId()}\n .${operationDescription} on field ${
-              bard.interfaceIntro.name}.${fieldInfo.name}${aliasInfo}, with:`,
-          "\n\tfieldInfo:", ...dumpObject(fieldInfo),
-          "\n\told value:", ...dumpObject(oldLocalValue),
-          "\n\tupdateClause:", ...dumpObject(updateClause),
-          "\n\tupdate coupling:", ...dumpObject(updateCoupling),
-          "\n\tbard:", ...dumpObject(bard));
+      throw bard.wrapErrorEvent(error, 1, () => [
+        `${operationDescription} on field ${
+              bard.interfaceIntro.name}.${fieldInfo.name}${aliasInfo}`,
+        "\n\tfieldInfo:", ...dumpObject(fieldInfo),
+        "\n\told value:", ...dumpObject(oldLocalValue),
+        "\n\tupdateClause:", ...dumpObject(updateClause),
+        "\n\tupdate coupling:", ...dumpObject(updateCoupling),
+        "\n\tbard:", ...dumpObject(bard),
+      ]);
     }
   }
   return isPrimaryMutation;

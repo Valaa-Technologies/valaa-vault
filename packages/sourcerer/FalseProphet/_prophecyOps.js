@@ -342,7 +342,7 @@ class ProphecyOperation extends ProphecyEventResult {
   }
 
   errorOnProphecyOperation (errorWrap, error, nothrow) {
-    const wrappedError = this._sourcerer.wrapErrorEvent(error, errorWrap,
+    const wrappedError = this._sourcerer.wrapErrorEvent(error, 1, errorWrap,
         "\n\tduring:", this._debugPhase,
         "\n\tevents:", ...dumpObject(this._events),
         "\n\tevent:", ...dumpObject(this._events[this.index]),
@@ -495,7 +495,7 @@ class ProphecyOperation extends ProphecyEventResult {
         partition.chronicling = partition.connection
             .chronicleEvent(partition.commandEvent, Object.create(this._options));
       } catch (error) {
-        throw this._sourcerer.wrapErrorEvent(error,
+        throw this._sourcerer.wrapErrorEvent(error, 1,
             new Error(`chronicleEvents.stage["${this._stageName}"].connection["${
                 partition.connection.getName()}"].chronicleEvents`),
             "\n\tcommandEvent:", ...dumpObject(partition.commandEvent),

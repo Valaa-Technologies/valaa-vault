@@ -100,7 +100,7 @@ export default (valosheath.createGateway = async function createGateway (
     ret.clockEvent(1, "gateway.initialized");
     return ret;
   } catch (error) {
-    outputError((ret || new FabricEventTarget(logger)).wrapErrorEvent(error,
+    outputError((ret || new FabricEventTarget(logger)).wrapErrorEvent(error, 1,
             new Error(`createGateway()`),
             "\n\trevelation components:", revelations,
             "\n\tcombined revelation:", combinedRevelation),

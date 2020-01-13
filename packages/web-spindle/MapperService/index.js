@@ -76,8 +76,8 @@ export default class MapperService extends FabricEventTarget {
       throw errorOnCreatePrefixRouter(error);
     }
     function errorOnCreatePrefixRouter (error) {
-      return service.wrapErrorEvent(error, new Error(
-            `createPrefixRouter(${openapi.info.name}@${openapi.info.version}: <${prefix}>)`),
+      return service.wrapErrorEvent(error, 1,
+        new Error(`createPrefixRouter(${openapi.info.name}@${openapi.info.version}: <${prefix}>)`),
         "\n\tprefixConfig:", ...dumpObject(prefixConfig),
         "\n\tswaggerPrefix:", prefixConfig.swaggerPrefix,
         "\n\tschemas:", ...dumpObject(prefixConfig.schemas),
@@ -99,7 +99,7 @@ export default class MapperService extends FabricEventTarget {
                 )));
           });
     } catch (error) {
-      throw this.wrapErrorEvent(error, wrap,
+      throw this.wrapErrorEvent(error, 1, wrap,
           "\n\trouters:", ...dumpObject(this._prefixRouters));
     }
   }
@@ -108,7 +108,7 @@ export default class MapperService extends FabricEventTarget {
     try {
       return await this.getRootFastify().close();
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error("stop()"),
+      throw this.wrapErrorEvent(error, 1, new Error("stop()"),
           "\n\trouters:", ...dumpObject(this._prefixRouters));
     }
   }
@@ -128,7 +128,7 @@ export default class MapperService extends FabricEventTarget {
     try {
       return await _projectPrefixRoutesFromView(this, view, viewName);
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error(`projectFromView(${viewName})`),
+      throw this.wrapErrorEvent(error, 1, new Error(`projectFromView(${viewName})`),
           "\n\tview:", ...dumpObject(view),
           "\n\trouters:", ...dumpObject(this._prefixRouters));
     }
@@ -158,7 +158,7 @@ export default class MapperService extends FabricEventTarget {
       projector.config = route.config;
       return projector;
     } catch (error) {
-      throw this.wrapErrorEvent(error, wrap,
+      throw this.wrapErrorEvent(error, 1, wrap,
           "\n\troute:", ...dumpObject(route));
     }
   }
@@ -170,7 +170,7 @@ export default class MapperService extends FabricEventTarget {
     try {
       return _createProjectorRuntime(this, projector, route, runtime);
     } catch (error) {
-      throw this.wrapErrorEvent(error,
+      throw this.wrapErrorEvent(error, 1,
           new Error(`createProjectorRuntime(${this._projectorName(projector)})`),
           "\n\tconfig:", ...dumpObject(projector.config),
           "\n\tprojector:", ...dumpObject(projector),
@@ -183,7 +183,7 @@ export default class MapperService extends FabricEventTarget {
     try {
       return await _preloadRuntimeResources(this, projector, runtime);
     } catch (error) {
-      throw this.wrapErrorEvent(error,
+      throw this.wrapErrorEvent(error, 1,
           new Error(`preloadRuntimeResources(${this._projectorName(projector)})`),
           "\n\tconfig:", ...dumpObject(projector.config),
           "\n\tprojector:", ...dumpObject(projector),
@@ -196,7 +196,7 @@ export default class MapperService extends FabricEventTarget {
     try {
       return _buildRuntimeVALKOptions(this, projector, runtime, request, reply);
     } catch (error) {
-      throw this.wrapErrorEvent(error,
+      throw this.wrapErrorEvent(error, 1,
           new Error(`buildRuntimeVALKOptions(${this._projectorName(projector)})`),
           "\n\tconfig:", ...dumpObject(projector.config),
           "\n\tprojector:", ...dumpObject(projector),
@@ -213,8 +213,8 @@ export default class MapperService extends FabricEventTarget {
           return true; // Failure.
         }
       } catch (error) {
-        throw this.wrapErrorEvent(error,
-            new Error(`presolveRulesToScope(ruleName: '${ruleName}')`),
+        throw this.wrapErrorEvent(error, 1,
+            new Error(`presolveRulesToScope(rulwrapErrorEventeName: '${ruleName}')`),
             "\n\tresolveRule:", ...dumpObject(resolveRule),
             "\n\truntime:", ...dumpObject(runtime),
             "\n\tvalkOptions:", ...dumpObject(valkOptions),
@@ -232,7 +232,7 @@ export default class MapperService extends FabricEventTarget {
       }
       return valkOptions.scope[scopeKey];
     } catch (error) {
-      throw this.wrapErrorEvent(error,
+      throw this.wrapErrorEvent(error, 1,
           new Error(`resolveToScope('${scopeKey}')`),
           "\n\tvalkOptions:", ...dumpObject(valkOptions),
           "\n\tresolveHead:", ...dumpObject(resolveHead || valkOptions.scope.routeRoot),
@@ -270,7 +270,7 @@ export default class MapperService extends FabricEventTarget {
       _appendSchemaSteps(this, runtime, schema, innerTargetVAKON, expandProperties, isValOSFields);
       return targetVAKON;
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error("appendSchemaSteps"),
+      throw this.wrapErrorEvent(error, 1, new Error("appendSchemaSteps"),
           "\n\truntime:", ...dumpObject(runtime),
           "\n\tschema:", dumpify(schema),
           "\n\ttargetVAKON:", ...dumpObject(targetVAKON),
@@ -292,7 +292,7 @@ export default class MapperService extends FabricEventTarget {
       }
       return targetVAKON;
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error("appendSchemaSteps"),
+      throw this.wrapErrorEvent(error, 1, new Error("appendSchemaSteps"),
           "\n\truntime:", ...dumpObject(runtime),
           "\n\tvpath:", ...dumpObject(vpath),
           "\n\ttargetVAKON:", ...dumpObject(targetVAKON),
@@ -320,7 +320,7 @@ export default class MapperService extends FabricEventTarget {
             { entryTargetVAKON, expandProperties: true });
       return entryTargetVAKON;
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error(`appendGateProjectionSteps(${gate.name})`),
+      throw this.wrapErrorEvent(error, 1, new Error(`appendGateProjectionSteps(${gate.name})`),
           "\n\truntime:", ...dumpObject(runtime),
           "\n\tgate:", ...dumpObject(gate),
           "\n\ttargetVAKON:", ...dumpObject(targetVAKON),
@@ -376,7 +376,7 @@ export default class MapperService extends FabricEventTarget {
       schema = this.derefSchema(maybeJSONSchema);
       return _createGetRelSelfHRef(this, runtime, type, schema);
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error("resourceHRef"),
+      throw this.wrapErrorEvent(error, 1, new Error("resourceHRef"),
           "\n\tschema:", ...dumpObject(schema || maybeJSONSchema),
       );
     }

@@ -91,7 +91,7 @@ export default class Scribe extends Sourcerer {
     try {
       return _preCacheBvob(this, contentHash, newInfo, retrieveBvobContent, initialPersistRefCount);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `preCacheBvob('${contentHash}')`,
+      throw this.wrapErrorEvent(error, 1, `preCacheBvob('${contentHash}')`,
           "\n\tbvobInfo:", ...dumpObject(this._bvobLookup[contentHash]));
     }
   }
@@ -107,7 +107,7 @@ export default class Scribe extends Sourcerer {
       if (!bvobInfo) throw new Error(`Can't find Bvob info '${contentHash}'`);
       return _readBvobBuffers(this, [bvobInfo])[0];
     } catch (error) {
-      throw this.wrapErrorEvent(error, `readBvobContent('${contentHash}')`,
+      throw this.wrapErrorEvent(error, 1, `readBvobContent('${contentHash}')`,
           "\n\tbvobInfo:", ...dumpObject(bvobInfo));
     }
   }
@@ -123,7 +123,7 @@ export default class Scribe extends Sourcerer {
           { instanceof: ArrayBuffer, allowEmpty: true });
       return _writeBvobBuffer(this, buffer, contentHash, bvobInfo, initialPersistRefCount);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_writeBvobBuffer('${contentHash}')`,
+      throw this.wrapErrorEvent(error, 1, `_writeBvobBuffer('${contentHash}')`,
           "\n\tbuffer:", ...dumpObject(buffer),
           "\n\tbvobInfo:", ...dumpObject(bvobInfo));
     }
@@ -172,7 +172,7 @@ export default class Scribe extends Sourcerer {
           .catch(errorOnAdjustInMemoryBvobBufferRefCounts.bind(this));
     } catch (error) { throw errorOnAdjustInMemoryBvobBufferRefCounts.call(this, error); }
     function errorOnAdjustInMemoryBvobBufferRefCounts (error) {
-      throw this.wrapErrorEvent(error,
+      throw this.wrapErrorEvent(error, 1,
           new Error(`_adjustInMemoryBvobBufferRefCounts(${
               Object.keys(adjusts || {}).length} adjusts)`),
           "\n\tbvob buffer reads:", ...dumpObject(readBuffers),
@@ -190,7 +190,7 @@ export default class Scribe extends Sourcerer {
       });
       return await _adjustBvobBufferPersistRefCounts(this, adjusts);
     } catch (error) {
-      throw this.wrapErrorEvent(error,
+      throw this.wrapErrorEvent(error, 1,
           `_adjustBvobBufferPersistRefCounts(${Object.keys(adjusts || {}).length} adjusts)`,
           "\n\tadjusts:", ...dumpObject(adjusts),
       );

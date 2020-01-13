@@ -134,7 +134,7 @@ export default class Sourcerer extends FabricEventTarget {
       if (options.connect !== false) connection.connect(options); // Initiate connect but dont wait.
       return connection;
     } catch (error) {
-      throw this.wrapErrorEvent(error,
+      throw this.wrapErrorEvent(error, 1,
           new Error(`acquireConnection(${String(partitionURI)})`),
           "\n\toptions:", ...dumpObject(options));
     }

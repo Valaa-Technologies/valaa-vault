@@ -13,7 +13,7 @@ import denormalizedFromJS from "~/raem/state/denormalizedFromJS";
 import fieldFinalDefaultValue from "~/raem/tools/graphql/fieldFinalDefaultValue";
 import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
 
-import { wrapError, dumpObject } from "~/tools";
+import { dumpObject } from "~/tools";
 
 /**
  * Return the fully evaluated value of the field with given fieldName from given object transient,
@@ -96,7 +96,7 @@ export function getObjectRawField (resolver: Resolver, object: Transient,
     if (ret !== undefined) {
       fieldInfoOut.name = fieldName;
       if (actualTypeIntro) {
-        fillFieldInfoAndResolveAliases(object, fields, fieldInfoOut);
+        fillFieldInfoAndResolveAliases(object, fields, fieldInfoOut, resolver);
       }
       return ret;
     }
@@ -106,7 +106,7 @@ export function getObjectRawField (resolver: Resolver, object: Transient,
     fieldInfo.name = fieldName;
 
     if (actualTypeIntro) {
-      fillFieldInfoAndResolveAliases(object, fields, fieldInfo);
+      fillFieldInfoAndResolveAliases(object, fields, fieldInfo, resolver);
       if (fieldInfo.intro && fieldInfo.intro.isGenerated) {
         ret = fieldInfo.intro.resolve(object, undefined, {
           // TODO(iridian): Complete context variable fields
@@ -193,7 +193,7 @@ export function getObjectRawField (resolver: Resolver, object: Transient,
     }
     return ret;
   } catch (error) {
-    throw resolver.wrapErrorEvent(error,
+    throw resolver.wrapErrorEvent(error, 1,
         new Error(`getObjectField(${fieldName}/${(fieldInfo && fieldInfo.name) || fieldName})`),
         "\n\tobject", ...dumpObject(object),
         "\n\tfieldGhostPath:", fieldInfo && fieldInfo.fieldGhostPath,
@@ -202,7 +202,7 @@ export function getObjectRawField (resolver: Resolver, object: Transient,
 }
 
 export function fillFieldInfoAndResolveAliases (object: Transient, objectFields: Object,
-    fieldInfo: FieldInfo) {
+    fieldInfo: FieldInfo, resolver: ?Resolver) {
   try {
     fieldInfo.intro = objectFields[fieldInfo.name];
     if (!fieldInfo.intro) {
@@ -241,13 +241,14 @@ export function fillFieldInfoAndResolveAliases (object: Transient, objectFields:
       fieldInfo.coupledField = coupling.coupledField;
     }
     fieldInfo.name = fieldInfo.intro.alias;
-    fillFieldInfoAndResolveAliases(object, objectFields, fieldInfo);
+    fillFieldInfoAndResolveAliases(object, objectFields, fieldInfo, resolver);
   } catch (error) {
-    throw wrapError(error, `During fillFieldInfoAndResolveAliases, with:`,
-        "\n\tobject:", ...dumpObject(object),
-        "\n\tobjectFields:", ...dumpObject(objectFields),
-        "\n\tfieldInfo:", ...dumpObject(fieldInfo),
-    );
+    throw !resolver ? error : resolver.wrapErrorEvent(error, 1, () => [
+      `fillFieldInfoAndResolveAliases()`,
+      "\n\tobject:", ...dumpObject(object),
+      "\n\tobjectFields:", ...dumpObject(objectFields),
+      "\n\tfieldInfo:", ...dumpObject(fieldInfo),
+    ]);
   }
 }
 

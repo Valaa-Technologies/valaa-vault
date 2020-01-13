@@ -74,7 +74,7 @@ export default class OracleConnection extends Connection {
           truths.map(event => upgradeEventTo0Dot2(this, event)),
           retrieveMediaBuffer);
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error(type),
+      throw this.wrapErrorEvent(error, 1, new Error(type),
           "\n\ttruths:", ...dumpObject(truths),
           "\n\tretrieveMediaBuffer:", ...dumpObject(retrieveMediaBuffer));
     }
@@ -143,7 +143,7 @@ export default class OracleConnection extends Connection {
         return errorOnOracleConnectionRequestMediaContentForInfo(error);
       }
       function errorOnOracleConnectionRequestMediaContentForInfo (error) {
-        const wrapped = connection.wrapErrorEvent(error, wrap,
+        const wrapped = connection.wrapErrorEvent(error, 1, wrap,
             "\n\tmediaVRL:", ...dumpObject(mediaInfo.mediaVRL),
             "\n\tmediaInfo:", ...dumpObject(mediaInfo));
         if (mediaInfos.length === 1) throw wrapped;

@@ -58,7 +58,7 @@ export function _createProjectorRuntime (
         runtime.rulePresolvers.push([ruleName, resolveRule, requiredAtRuntime]);
       }
     } catch (error) {
-      throw router.wrapErrorEvent(error, new Error(`prepareRule(${ruleName})`),
+      throw router.wrapErrorEvent(error, 1, new Error(`prepareRule(${ruleName})`),
           "\n\trule:", ...dumpObject(rule),
           "\n\truleVAKON:", ...dumpObject(ruleVAKON),
           "\n\tmaybeStaticReference:", ...dumpObject(maybeStaticReference),
@@ -106,7 +106,7 @@ export async function _preloadRuntimeResources (router: PrefixRouter, projector,
         "\n\twaited for", activations.length, `static resource activations (${
           runtime.staticResources.length - activations.length} were already active})`]);
   } catch (error) {
-    throw router.wrapErrorEvent(error, new Error(`preloadRuntimeResources(${
+    throw router.wrapErrorEvent(error, 1, new Error(`preloadRuntimeResources(${
             router._projectorName(projector)})`),
         "\n\tvRouteRoot:", ...dumpObject(vRouteRoot),
         "\n\tconfig.rules:", JSON.stringify(projector.config.rules, null, 2),

@@ -106,13 +106,13 @@ export default class AuthorityConnection extends Connection {
         const error = new Error(`prepareBvob not implemented by remote authority partition`);
         error.isRetryable = false;
         persistProcess = Promise
-            .reject(this.wrapErrorEvent(error, new Error("prepareBvob")))
+            .reject(this.wrapErrorEvent(error, 1, new Error("prepareBvob")))
             .catch(errorOnAuthorityConnectionPrepareBvob);
       }
       return { contentHash, persistProcess };
     } catch (error) { return errorOnAuthorityConnectionPrepareBvob(error); }
     function errorOnAuthorityConnectionPrepareBvob (error) {
-      throw connection.wrapErrorEvent(error, wrap,
+      throw connection.wrapErrorEvent(error, 1, wrap,
           "\n\tcontent:", debugObjectType(content),
           "\n\tmediaInfo:", ...dumpObject(mediaInfo),
           "\n\tconnection:", ...dumpObject(connection));

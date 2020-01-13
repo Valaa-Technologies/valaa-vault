@@ -79,7 +79,7 @@ export function _narrateEventLog (connection: ScribeConnection,
                 : mapEagerly(section, entry => entry,
                     function _onResultEventError (error, entry, entryIndex) {
                       entry.localPersistError = error;
-                      const wrapped = connection.wrapErrorEvent(error,
+                      const wrapped = connection.wrapErrorEvent(error, 1,
                           `narrateEventLog.upstreamResults[${name}][${entryIndex}]`,
                           "\n\toptions:", ...dumpObject(options),
                           "\n\tsection:", ...dumpObject(section));
@@ -218,7 +218,7 @@ export function _chronicleEvents (connection: ScribeConnection,
         const discard = resultBase._locallyReceivedEvents[0].aspects;
         connection._deleteQueuedCommandsOnwardsFrom(discard.log.index, discard.command.id);
       }
-      throw connection.wrapErrorEvent(error, new Error("chronicleEvents()"),
+      throw connection.wrapErrorEvent(error, 1, new Error("chronicleEvents()"),
           "\n\teventLog:", ...dumpObject(events),
           "\n\toptions:", ...dumpObject(options),
       );
@@ -251,9 +251,9 @@ class ScribeEventResult extends ChronicleEventResult {
 
 export function _throwOnMediaRequest (connection: ScribeConnection,
     mediaInfo: MediaInfo) {
-  throw connection.wrapErrorEvent(
-      new Error(`Cannot retrieve media '${mediaInfo.name}' content through partition '${
-        connection.getName()}'`),
+  const error = new Error(`Cannot retrieve media '${mediaInfo.name}' content through partition '${
+      connection.getName()}'`);
+  throw connection.wrapErrorEvent(error, 1,
       "retrieveMediaBuffer",
       "\n\tdata not found in local bvob cache and no remote content retriever is specified",
       ...(connection.isRemoteAuthority()
@@ -280,7 +280,7 @@ function _readMediaContent (connection: ScribeConnection, mediaInfo: MediaInfo) 
       connection.requestMediaContents([actualMediaInfo]),
       results => results[0],
       (error) => {
-        throw this.wrapErrorEvent(error, `_readMediaContent(${mediaInfo.name})`,
+        throw this.wrapErrorEvent(error, 1, `_readMediaContent(${mediaInfo.name})`,
             "\n\tmediaInfo:", ...dumpObject(mediaInfo));
       },
   );
@@ -381,7 +381,7 @@ export function _receiveEvents (
   ], (error, stepIndex, head) => {
     error.isSchismatic = true;
     if ((error.originalError || error).cacheConflict) error.isRevisable = true;
-    return onError(connection.wrapErrorEvent(error,
+    return onError(connection.wrapErrorEvent(error, 1,
         new Error(`_receiveEvents(${type}).${
           stepIndex === 0 ? "contentSync" : "updateMediaEntries"}`),
         "\n\tmediaPreOps:", ...dumpObject(mediaPreOps),

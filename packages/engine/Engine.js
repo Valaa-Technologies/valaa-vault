@@ -26,7 +26,7 @@ import integrateDecoding from "~/engine/Vrapper/integrateDecoding";
 import LiveUpdate from "~/engine/Vrapper/LiveUpdate";
 import Subscription from "~/engine/Vrapper/Subscription";
 
-import { outputCollapsedError, thenChainEagerly, wrapError } from "~/tools";
+import { thenChainEagerly } from "~/tools";
 
 export default class Engine extends Cog {
   constructor ({ name, logger, sourcerer, timeDilation = 1.0, verbosity }: Object) {
@@ -169,13 +169,15 @@ export default class Engine extends Cog {
       }
       return new Vrapper(this, transient.get("id"), typeName, [state, transient]);
     } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .getVrapper(${idData}), with:`,
-          "\n\tidData:", ...dumpObject(idData),
-          "\n\tid:", ...dumpObject(id),
-          "\n\ttypeName:", ...dumpObject(typeName),
-          "\n\texplicitTransient:", ...dumpObject(explicitTransient),
-          "\n\ttransient:", ...dumpObject(transient),
-          "\n\tstate:", ...dumpObject(state && state.toJS()));
+      throw this.wrapErrorEvent(error, 1, () => [
+        `getVrapper(${idData})`,
+        "\n\tidData:", ...dumpObject(idData),
+        "\n\tid:", ...dumpObject(id),
+        "\n\ttypeName:", ...dumpObject(typeName),
+        "\n\texplicitTransient:", ...dumpObject(explicitTransient),
+        "\n\ttransient:", ...dumpObject(transient),
+        "\n\tstate:", ...dumpObject(state && state.toJS()),
+      ]);
     }
   }
 
@@ -276,8 +278,10 @@ export default class Engine extends Cog {
           if (initialBlocker) {
             Promise.resolve(vResource.activate({ state, allowImmaterial: true, initialBlocker }))
                 .then(undefined, (error) => {
-                  outputCollapsedError(localWrapError(this, error,
-                      `${constructCommand.name}.activate ${vResource.debugId()}`),
+                  this.outputErrorEvent(
+                      localWrapError(this, error,
+                          `${constructCommand.name}.activate ${vResource.debugId()}`),
+                      2,
                       `Exception caught during resource construction activate of ${
                         vResource.debugId()}`);
                 });
@@ -329,13 +333,14 @@ export default class Engine extends Cog {
       try {
         target.alterProperty(propertyName, kuery, Object.create(options));
       } catch (error) {
-        throw this.wrapErrorEvent(error,
-            new Error(`constructWith._updateProperties(${propertyName})`),
-            "\n\tobject:", ...dumpObject(target),
-            "\n\tvalue:", ...dumpObject(properties[propertyName]),
-            "\n\talter value kuery:", ...dumpObject(kuery),
-            "\n\toptions:", ...dumpObject(options),
-        );
+        const name = new Error(`constructWith._updateProperties(${propertyName})`);
+        throw this.wrapErrorEvent(error, 1, () => [
+          name,
+          "\n\tobject:", ...dumpObject(target),
+          "\n\tvalue:", ...dumpObject(properties[propertyName]),
+          "\n\talter value kuery:", ...dumpObject(kuery),
+          "\n\toptions:", ...dumpObject(options),
+        ]);
       }
     }
   }
@@ -472,7 +477,8 @@ export default class Engine extends Cog {
         }
         story._delayedFieldUpdates = null;
       } catch (error) {
-        outputCollapsedError(error, "Exception caught during Engine.receiveCommands recital");
+        this.outputErrorEvent(error, 1,
+            "Exception caught during Engine.receiveCommands recital");
       }
     }
     this.logEvent(1, () => [
@@ -514,9 +520,11 @@ export default class Engine extends Cog {
               const blocker = passage.vProtagonist.refreshPhase(story.state);
               if (blocker !== undefined) {
                 Promise.resolve(blocker).then(undefined, (error) => {
-                  outputCollapsedError(errorOnReceiveCommands.call(this, error,
-                      `receiveCommands(${passage.type} ${
-                        passage.vProtagonist.debugId()}).refreshPhase`),
+                  this.outputErrorEvent(
+                      errorOnReceiveCommands.call(this, error,
+                          `receiveCommands(${passage.type} ${
+                            passage.vProtagonist.debugId()}).refreshPhase`),
+                      2,
                       "Exception caught during passage recital protagonist refresh phase");
                 });
               }

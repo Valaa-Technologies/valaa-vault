@@ -1,6 +1,6 @@
 // @flow
 
-import { dumpObject, outputError, wrapError } from "~/tools/wrapError";
+import { dumpObject, outputError, outputCollapsedError, wrapError } from "~/tools/wrapError";
 import { thisChainEagerly } from "~/tools/thenChainEagerly";
 
 const inBrowser = require("~/gateway-api/inBrowser").default;
@@ -87,10 +87,12 @@ export class FabricEventTarget {
   _logger: FabricEventLogger | Object;
 
   constructor (
-      name = `${this.constructor.name}#${++_eventTargetCounter}`, verbosity = 0, logger) {
+      name = `${this.constructor.name}#${++_eventTargetCounter}`, verbosity, logger) {
     this._name = name;
-    this._verbosity = verbosity;
     this._logger = logger || console;
+    this._verbosity = verbosity !== undefined ? verbosity
+        : this._logger.verbosity !== undefined ? this._logger.verbosity
+        : 0;
   }
 
   getLogger (): FabricEventLogger | Object { return this._logger; }
@@ -118,52 +120,64 @@ export class FabricEventTarget {
         .apply(this._logger, rest);
   }
 
-  infoEvent (minVerbosity: any, maybeFunction: any, ...messagePieces: any[]) {
-    if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
+  infoEvent (firstPartOrMinVerbosity: number | any, ...rest: any[]) {
+    const messageParts = this._getArgsIfVerboseEnough(firstPartOrMinVerbosity, ...rest);
+    if (!messageParts) return this;
     return this._outputMessageEvent((this._logger || this).info.bind(this._logger || this),
-        true, minVerbosity, maybeFunction, ...messagePieces);
+        true, ...messageParts);
   }
-  logEvent (minVerbosity: any, maybeFunction: any, ...messagePieces: any[]) {
-    if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
+  logEvent (firstPartOrMinVerbosity: number | any, ...rest: any[]) {
+    const messageParts = this._getArgsIfVerboseEnough(firstPartOrMinVerbosity, ...rest);
+    if (!messageParts) return this;
     return this._outputMessageEvent((this._logger || this).log.bind(this._logger || this),
-        true, minVerbosity, maybeFunction, ...messagePieces);
+        true, ...messageParts);
   }
-  warnEvent (minVerbosity: any, maybeFunction: any, ...messagePieces: any[]) {
-    if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
+  warnEvent (firstPartOrMinVerbosity: number | any, ...rest: any[]) {
+    const messageParts = this._getArgsIfVerboseEnough(firstPartOrMinVerbosity, ...rest);
+    if (!messageParts) return this;
     return this._outputMessageEvent((this._logger || this).warn.bind(this._logger || this),
-        true, minVerbosity, maybeFunction, ...messagePieces);
+        true, ...messageParts);
   }
-  errorEvent (minVerbosity: any, maybeFunction: any, ...messagePieces: any[]) {
-    if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
+  errorEvent (firstPartOrMinVerbosity: number | any, ...rest: any[]) {
+    const messageParts = this._getArgsIfVerboseEnough(firstPartOrMinVerbosity, ...rest);
+    if (!messageParts) return this;
     return this._outputMessageEvent((this._logger || this).error.bind(this._logger || this),
-        true, minVerbosity, maybeFunction, ...messagePieces);
+        true, ...messageParts);
   }
-  clockEvent (minVerbosity: any, maybeFunction: any, ...messagePieces: any[]) {
-    if ((typeof minVerbosity === "number") && (minVerbosity > this._verbosity)) return this;
+  clockEvent (firstPartOrMinVerbosity: number | any, ...rest: any[]) {
+    const messageParts = this._getArgsIfVerboseEnough(firstPartOrMinVerbosity, ...rest);
+    if (!messageParts) return this;
     return this._outputMessageEvent(this.clock.bind(this),
-        false, minVerbosity, maybeFunction, ...messagePieces);
+        false, ...messageParts);
   }
 
-  _outputMessageEvent (operation: Function, joinFirstPieceWithId: boolean,
-      minVerbosity: any, maybeFunction: any, ...messagePieces: any[]) {
-    let pieces = (typeof minVerbosity === "number") && !messagePieces.length
-            && (typeof maybeFunction === "function") && maybeFunction();
-    if (!Array.isArray(pieces)) {
-      pieces = pieces ? [pieces]
-          : typeof minVerbosity !== "number" ? [minVerbosity, maybeFunction, ...messagePieces]
-          : typeof maybeFunction !== "function" ? [maybeFunction, ...messagePieces]
-          : messagePieces;
-    }
+  _getArgsIfVerboseEnough (maybeMinVerbosity, maybeGetArgs, ...rest) {
+    return (typeof maybeMinVerbosity !== "number")
+            ? [maybeMinVerbosity, maybeGetArgs, ...rest]
+        : maybeMinVerbosity > this._verbosity
+            ? undefined
+        : (typeof maybeGetArgs === "function")
+            ? [].concat(maybeGetArgs(), rest)
+        : (maybeGetArgs !== undefined)
+            ? [maybeGetArgs, ...rest]
+        : [];
+  }
+
+  _outputMessageEvent (output: Function, joinFirstPieceWithId: boolean,
+      firstPiece: any = "", ...restPieces: any[]) {
     // Prepend the debug id to the first entry if it is a string.
     // Valma logger gives only the first argument a specific coloring,
     // this way the actual first piece will get the coloring as well.
-    return (typeof pieces[0] !== "string" || !joinFirstPieceWithId)
-        ? operation(`${this.debugId({ raw: !joinFirstPieceWithId })}:`, ...pieces)
-        : operation(`${this.debugId({ raw: !joinFirstPieceWithId })}: ${pieces[0]}`,
-            ...pieces.slice(1));
+    return (typeof firstPiece !== "string" || !joinFirstPieceWithId)
+        ? output(`${this.debugId({ raw: !joinFirstPieceWithId })}:`, firstPiece, ...restPieces)
+        : output(`${this.debugId({ raw: !joinFirstPieceWithId })}: ${firstPiece}`, ...restPieces);
   }
 
-  wrapErrorEvent (error: Error, functionName: Error | string, ...contexts: any[]) {
+  wrapErrorEvent (
+      error: Error, functionNameOrMinVerbosity: Error | string | number, ...contexts: any[]) {
+    const actualArgs = this._getArgsIfVerboseEnough(functionNameOrMinVerbosity, ...contexts);
+    if (!actualArgs) return error;
+    const [functionName, ...actualContexts] = actualArgs;
     const actualFunctionName = functionName instanceof Error ? functionName.message : functionName;
     if (error.hasOwnProperty("functionName")
         && (error.functionName === actualFunctionName)
@@ -172,21 +186,24 @@ export class FabricEventTarget {
       // functionName in the same context.
       return error;
     }
-    const wrapperError = (functionName instanceof Error) ? functionName : new Error("");
-    if (!wrapperError.tidyFrameList) {
-      wrapperError.tidyFrameList = wrapperError.stack.split("\n")
+    const errorWrapper = (functionName instanceof Error) ? functionName : new Error("");
+    if (!errorWrapper.tidyFrameList) {
+      errorWrapper.tidyFrameList = errorWrapper.stack.split("\n")
           .slice((functionName instanceof Error) ? 2 : 3);
     }
-    wrapperError.message =
-        `During ${this.debugId()}\n .${actualFunctionName}${contexts.length ? ", with:" : ""}`;
-    const ret = wrapError(error, wrapperError, ...contexts);
+    errorWrapper.message = `During ${
+        this.debugId()}\n .${actualFunctionName}${actualContexts.length ? ", with:" : ""}`;
+    const ret = wrapError(error, errorWrapper, ...actualContexts);
     ret.functionName = actualFunctionName;
     ret.contextObject = this;
     return ret;
   }
 
-  outputErrorEvent (error: Error, ...rest) {
-    return outputError(error, ...rest);
+  outputErrorEvent (error: Error, firstMessageOrMinVerbosity, ...restMessages) {
+    const actualParts = this._getArgsIfVerboseEnough(firstMessageOrMinVerbosity, ...restMessages);
+    return actualParts
+        ? outputError(error, ...actualParts)
+        : outputCollapsedError(error, ...restMessages);
   }
 
   performChain (params: any, staticChainName: string, staticErrorHandlerName: string,

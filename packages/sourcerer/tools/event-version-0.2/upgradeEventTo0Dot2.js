@@ -32,7 +32,7 @@ export default function upgradeEventTo0Dot2 (connection: Connection, event: Even
     validateAnyVersion(ret);
     return ret;
   } catch (error) {
-    throw connection.wrapErrorEvent(error,
+    throw connection.wrapErrorEvent(error, 1,
         new Error(`upgradeEventTo0Dot2(${connection.getName()})`),
         "\n\tpartitionRawId:", connection.getPartitionRawId(),
         "\n\tpartitionURI:", ...dumpObject(connection.getPartitionURI()),
@@ -87,7 +87,7 @@ export function convertEvent0Dot1To0Dot2 (connection: Connection,
     }
     return ret;
   } catch (error) {
-    throw connection.wrapErrorEvent(error,
+    throw connection.wrapErrorEvent(error, 1,
         new Error(`convertEvent0Dot1To0Dot2()`),
         "\n\taction:", ...dumpObject(action),
         "\n\tret (partial):", ...dumpObject(ret),

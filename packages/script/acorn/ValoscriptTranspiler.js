@@ -18,7 +18,7 @@ export default class ValoscriptTranspiler extends FabricEventTarget {
   acornParseOptions: Object;
 
   constructor (language: Language, acornParseOptions: Object) {
-    super(language.name);
+    super(language.name, 1);
     invariantifyObject(language, "ValoscriptTranspiler.language", { instanceOf: Language });
     invariantifyObject(acornParseOptions.VALK, "ValoscriptTranspiler.language",
         { instanceOf: Kuery });
@@ -93,7 +93,7 @@ export default class ValoscriptTranspiler extends FabricEventTarget {
           addStackFrameToError(error, parseDummy, sourceInfo);
         }
       }
-      throw actualTranspiler.wrapErrorEvent(error, `transpileKueryFromText`,
+      throw actualTranspiler.wrapErrorEvent(error, 1, `transpileKueryFromText`,
           "\n\ttext:", `\n${"```"}\n${errorText}\n${"```"}\n`,
           "\n\tast:", ...dumpObject(ast),
       );
@@ -173,7 +173,7 @@ export default class ValoscriptTranspiler extends FabricEventTarget {
       }
       return result;
     } catch (error) {
-      const wrappedError = this.wrapErrorEvent(error, `parseFromAst(${type})`,
+      const wrappedError = this.wrapErrorEvent(error, 1, `parseFromAst(${type})`,
           "\n\tast:", ...dumpObject(ast),
           "\n\toptions:", ...dumpObject(options),
       );
@@ -227,7 +227,7 @@ export default class ValoscriptTranspiler extends FabricEventTarget {
   }
 
   wrapParseError (error: Error, ast: Node, options: Object, ...rest) {
-    return this.wrapErrorEvent(error, "parseError()",
+    return this.wrapErrorEvent(error, 1, "parseError()",
         "\n\tast:", ...dumpObject(ast),
         "\n\noptions:", ...dumpObject(options),
         ...rest);

@@ -202,7 +202,8 @@ export default class Resolver extends FabricEventTarget {
       // TODO(iridian, 2019-01): Improve destroyed resource handling
       return objectId.setInactive();
     } catch (error) {
-      throw this.wrapErrorEvent(error, `bindObjectId(${rawId || objectId || idData}:${typeName})`,
+      throw this.wrapErrorEvent(error, 2,
+          `bindObjectId(${rawId || objectId || idData}:${typeName})`,
           "\n\tidData:", ...dumpObject(idData),
           "\n\tcontextPartitionURI:", ...dumpObject(contextPartitionURI),
           "\n\tobjectId candidate:", ...dumpObject(objectId),
@@ -255,7 +256,7 @@ export default class Resolver extends FabricEventTarget {
       return this.tryGoToTransientOfRawId(objectId.rawId(), typeName, require,
           !nonGhostLookup && objectId.tryGhostPath(), onlyMostMaterialized, withOwnField, objectId);
     } catch (error) {
-      throw this.wrapErrorEvent(error, "tryGoToTransient",
+      throw this.wrapErrorEvent(error, 2, "tryGoToTransient",
           "\n\tid:", ...dumpObject(objectId), ":", typeName,
           "\n\trequire:", require, ", nonGhostLookup:", nonGhostLookup);
     }
@@ -313,7 +314,7 @@ export default class Resolver extends FabricEventTarget {
       }
       return this.objectTransient;
     } catch (error) {
-      throw this.wrapErrorEvent(error,
+      throw this.wrapErrorEvent(error, 2,
           new Error(`goToTransientOfRawId("${rawId}":${this.objectTypeName}${
               ghostPath ? `/${ghostPath}` : ""})`),
           "\n\trequire:", require,
@@ -378,7 +379,7 @@ export default class Resolver extends FabricEventTarget {
         nextStep = currentPath;
       }
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error(`goToMostInheritedMaterializedTransient`),
+      throw this.wrapErrorEvent(error, 2, new Error(`goToMostInheritedMaterializedTransient`),
           "\n\tghostPath:", ...dumpObject(ghostPath),
           "\n\tcurrentPath:", ...dumpObject(currentPath),
           "\n\twithOwnField:", withOwnField);
@@ -405,7 +406,7 @@ export default class Resolver extends FabricEventTarget {
       }
       return this.objectTransient;
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error(`goToCurrentObjectOwnerTransient`),
+      throw this.wrapErrorEvent(error, 2, new Error(`goToCurrentObjectOwnerTransient`),
           "\n\nowner:", ...dumpObject(owner),
           "\n\tobjectTransient:", ...dumpObject(this.objectTransient),
           "\n\tthis:", ...dumpObject(this),

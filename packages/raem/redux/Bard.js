@@ -12,9 +12,7 @@ import type { FieldInfo, State } from "~/raem/state"; // eslint-disable-line no-
 import Transient, { getTransientTypeName } from "~/raem/state/Transient";
 import isResourceType from "~/raem/tools/graphql/isResourceType";
 
-import { debugObjectType, dumpObject, invariantify, invariantifyString,
-  outputCollapsedError, outputError, wrapError,
-} from "~/tools";
+import { debugObjectType, dumpObject, invariantify, invariantifyString } from "~/tools";
 
 /**
  * Bard subsystem.
@@ -86,25 +84,20 @@ export function createBardReducer (bardOperation: (bard: Bard) => State,
       return nextState;
     } catch (error) {
       if (apprentice.event.meta.isBeingUniversalized) {
-        throw apprentice.wrapErrorEvent(error, `bardOperation(${apprentice.passage.type})`,
+        throw apprentice.wrapErrorEvent(error, 1, `bardOperation(${apprentice.passage.type})`,
             "\n\taction:", ...dumpObject(getActionFromPassage(apprentice.passage)),
             "\n\tpassage:", ...dumpObject(apprentice.passage),
             "\n\tapprentice:", ...dumpObject(apprentice),
         );
       }
-      const wrappedError = apprentice.wrapErrorEvent(error,
+      const wrappedError = apprentice.wrapErrorEvent(error, 1,
         `bardOperation(${apprentice.passage.type}) - sub-event IGNORED, reduction skipped`,
         "\n\taction:", ...dumpObject(getActionFromPassage(apprentice.passage)),
         "\n\tpassage:", ...dumpObject(apprentice.passage),
         "\n\tapprentice:", ...dumpObject(apprentice),
       );
-      if (!this.getVerbosity()) {
-        outputCollapsedError(wrappedError,
-            "Exception caught during event replay reduction (corresponding sub-event IGNORED)");
-      } else {
-        outputError(wrappedError,
-            "Exception caught during event replay reduction (corresponding sub-event IGNORED)");
-      }
+      this.outputErrorEvent(wrappedError, 1,
+          "Exception caught during event replay reduction (corresponding sub-event IGNORED)");
       return state;
     } finally {
       delete apprentice.passage.apprentice;
@@ -289,7 +282,7 @@ export default class Bard extends Resolver {
         nextState[StoryIndexTag] = this.story.storyIndex;
         nextState[PassageIndexTag] = passage.passageIndex;
       } catch (error) {
-        throw this.wrapErrorEvent(error, `updateStateWithPassages(#${index})`,
+        throw this.wrapErrorEvent(error, 1, `updateStateWithPassages(#${index})`,
             "\n\tpassage:", ...dumpObject(passage),
             "\n\tparentPassage:", ...dumpObject(parentPassage));
       }
@@ -329,8 +322,8 @@ export default class Bard extends Resolver {
   goToResourceTransientTypeIntro (transient: Transient): Object {
     const ret = this.goToTypeIntro(getTransientTypeName(transient, this.schema));
     if (!isResourceType(ret) && ((this.passage.meta || {}).updateCouplings !== false)) {
-      throw this.wrapErrorEvent(
-          new Error(`${this.passage.type} attempted on a non-Resource object`),
+      const error = new Error(`${this.passage.type} attempted on a non-Resource object`);
+      throw this.wrapErrorEvent(error, 1,
           new Error(`goToResourceTransientTypeIntro(${this.passage.type})`),
           "\n\ttypeIntro:", ret);
     }
@@ -388,7 +381,7 @@ export default class Bard extends Resolver {
               (target, deserializedEntry) => target.push(deserializedEntry),
               List());
     } catch (error) {
-      throw this.wrapErrorEvent(error,
+      throw this.wrapErrorEvent(error, 1,
           new Error(`deserializeField(${fieldInfo.name}: ${
               fieldInfo.intro.namedType.name}${fieldInfo.intro.isSequence ? "[]" : ""})`),
           "\n\tnewValue:", newValue,
@@ -418,11 +411,13 @@ export default class Bard extends Resolver {
       forEachDeserializeAndDo(bard, sequence, fieldInfo, deserialized => ret.push(deserialized));
       return ret;
     } catch (error) {
-      throw wrapError(error, `During ${bard.debugId()}\n .deserializeAsArray(), with:`,
-          "\n\tsequence:", sequence,
-          "\n\tfieldInfo:", fieldInfo,
-          "\n\taccumulated ret:", ret,
-          "\n\tbard:", bard);
+      throw bard.wrapErrorEvent(error, 1, () => [
+        `deserializeAsArray()`,
+        "\n\tsequence:", sequence,
+        "\n\tfieldInfo:", fieldInfo,
+        "\n\taccumulated ret:", ret,
+        "\n\tbard:", bard,
+      ]);
     }
   }
   */
@@ -517,14 +512,15 @@ function _createSingularDataDeserializer (fieldInfo) {
         }
       });
     } catch (error) {
-      throw wrapError(error, `During ${bard.debugId()
-              }\n.deserializeSingularData(parent field: '${fieldInfo.name}'), with:`,
-          "\n\tdata:", data,
-          "\n\tobject intro:", objectIntro,
-          "\n\tparent fieldInfo:", fieldInfo,
-          "\n\tparent field type:", fieldInfo.intro.namedType,
-          "\n\tisResource:", fieldInfo.intro.isResource,
-          "\n\tbard:", bard);
+      throw bard.wrapErrorEvent(error, 1, () => [
+        `deserializeSingularData(parent field: '${fieldInfo.name}')`,
+        "\n\tdata:", data,
+        "\n\tobject intro:", objectIntro,
+        "\n\tparent fieldInfo:", fieldInfo,
+        "\n\tparent field type:", fieldInfo.intro.namedType,
+        "\n\tisResource:", fieldInfo.intro.isResource,
+        "\n\tbard:", bard,
+      ]);
     }
   };
 }

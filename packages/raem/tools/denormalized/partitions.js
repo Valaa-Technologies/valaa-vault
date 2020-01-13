@@ -192,15 +192,16 @@ export function universalizePartitionMutation (bard: Bard, id: VRL) {
     }
     return partitionURI;
   } catch (error) {
-    throw bard.wrapErrorEvent(error, "universalizePartitionMutation",
-        "\n\tbard:", ...dumpObject(bard),
-        "\n\tid:", id,
-        "\n\tref:", ...dumpObject(ref),
-        "\n\tpartitionURI:", partitionURI,
-        "\n\tbard.passage:", ...dumpObject(bard.passage),
-        "\n\tenclosingPassage:", ...dumpObject(enclosingPassage), enclosingPartitionURI,
-        "\n\ttarget.meta:", ...dumpObject(targetMeta),
-      );
+    throw bard.wrapErrorEvent(error, 1, () => [
+      "universalizePartitionMutation",
+      "\n\tbard:", ...dumpObject(bard),
+      "\n\tid:", id,
+      "\n\tref:", ...dumpObject(ref),
+      "\n\tpartitionURI:", partitionURI,
+      "\n\tbard.passage:", ...dumpObject(bard.passage),
+      "\n\tenclosingPassage:", ...dumpObject(enclosingPassage), enclosingPartitionURI,
+      "\n\ttarget.meta:", ...dumpObject(targetMeta),
+    ]);
   }
 }
 

@@ -106,7 +106,7 @@ export default class AuthorityNexus extends FabricEventTarget {
       }
       return ret;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `tryAuthorityURIFromPartitionURI("${partitionURI}")`,
+      throw this.wrapErrorEvent(error, 2, `tryAuthorityURIFromPartitionURI("${partitionURI}")`,
           "\n\tschemeModule:", schemeModule);
     }
   }
@@ -127,7 +127,7 @@ export default class AuthorityNexus extends FabricEventTarget {
             ? authorityConfig.verbosity : this.getVerbosity(),
       });
     } catch (error) {
-      throw this.wrapErrorEvent(error, `createAuthority("${String(authorityURI)}")`,
+      throw this.wrapErrorEvent(error, 2, `createAuthority("${String(authorityURI)}")`,
           "\n\tschemeModule:", schemeModule,
           "\n\tauthorityConfig:", authorityConfig,
           "\n\tconfigs:", this._authorityPreConfigs);

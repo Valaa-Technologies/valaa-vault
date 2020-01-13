@@ -279,7 +279,7 @@ export function _elevateObjectId (referenceElevator: Resolver, elevationBasePath
       }
     }
   } catch (error) {
-    throw referenceElevator.wrapErrorEvent(error, `_elevateObjectId()`,
+    throw referenceElevator.wrapErrorEvent(error, 2, `_elevateObjectId()`,
         "\n\televator:", referenceElevator,
         "\n\televationBasePath:", elevationBasePath,
         "\n\televationInstancePath:", elevationInstancePath,

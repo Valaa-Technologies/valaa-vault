@@ -108,7 +108,7 @@ export default class FalseProphetDiscourse extends Discourse {
       return ret;
     } catch (error) {
       addConnectToPartitionToError(error, this.connectToMissingPartition);
-      throw this.wrapErrorEvent(error, `chronicleEvents()`,
+      throw this.wrapErrorEvent(error, 1, `chronicleEvents()`,
           "\n\tevents:", ...dumpObject(events),
       );
     }
@@ -244,7 +244,7 @@ export default class FalseProphetDiscourse extends Discourse {
       // */
       return targetAction.id;
     } catch (error) {
-      throw this.wrapErrorEvent(error, "assignNewVRID()",
+      throw this.wrapErrorEvent(error, 1, "assignNewVRID()",
           "\n\ttargetAction:", ...dumpObject(targetAction),
           "\n\tchronicleURI:", ...dumpObject(chronicleURI),
           "\n\texplicitRawId:", ...dumpObject(explicitRawId),

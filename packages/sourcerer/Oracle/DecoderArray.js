@@ -21,7 +21,7 @@ export default class DecoderArray extends FabricEventTarget {
               ? arrayFromAny(targetEntry).concat(arrayFromAny(sourceEntry))
               : undefined));
     } catch (error) {
-      throw this.wrapErrorEvent(error, "addDecoder(", decoder, ")");
+      throw this.wrapErrorEvent(error, 1, "addDecoder(", decoder, ")");
     }
   }
 

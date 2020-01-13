@@ -222,7 +222,7 @@ export default class TransactionState {
         })
       };
     } catch (error) {
-      throw this._transactor.wrapErrorEvent(error,
+      throw this._transactor.wrapErrorEvent(error, 1,
           `chronicleEvents(${this._transactor.corpus.getName()})`,
           "\n\tevents:", ...dumpObject(events),
           "\n\ttransactor:", ...dumpObject(this._transactor),
@@ -266,7 +266,7 @@ export default class TransactionState {
       }
       return this._commitChronicleResult;
     } catch (error) {
-      throw this._transactor.wrapErrorEvent(error,
+      throw this._transactor.wrapErrorEvent(error, 1,
         `transaction(${this._transactor.corpus.getName()}).commit()`,
           "\n\tcommand:", ...dumpObject(command),
           "\n\ttransaction:", ...dumpObject(this._transactor),

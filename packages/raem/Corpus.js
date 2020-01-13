@@ -60,7 +60,7 @@ export default class Corpus extends Bard {
       this.logEvent(1, () => ["dispatching event:", ...dumpObject(event)]);
       return this._dispatch(event, this);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `dispatch()`,
+      throw this.wrapErrorEvent(error, 1, `dispatch()`,
           "\n\tevent:", dumpify(event),
           "\n\tthis:", ...dumpObject(this),
       );

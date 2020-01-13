@@ -126,7 +126,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
           return true;
         },
       ], error => {
-        throw router.wrapErrorEvent(error,
+        throw router.wrapErrorEvent(error, 1,
           new Error(`authorizeSessionWithGrant(${scope.identity.clientURI})`),
           "\n\ttimeStamp:", timeStamp,
           "\n\tauthorizationGrant:", scope.authorizationGrant,

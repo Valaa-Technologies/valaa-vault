@@ -36,8 +36,9 @@ export class TestConnection extends AuthorityConnection {
   addNarrateResults ({ eventIdBegin }, events) {
     const narration = this._narrations[eventIdBegin] || (this._narrations[eventIdBegin] = {});
     if (narration.resultEvents) {
-      throw this.wrapErrorEvent(new Error(`narration result events already exist for ${
-        eventIdBegin}`), new Error("addNarrateResults"));
+      const error = new Error(`narration result events already exist for ${eventIdBegin}`);
+      throw this.wrapErrorEvent(error, 1,
+          new Error("addNarrateResults"));
     }
     narration.resultEvents = events;
     this._tryFulfillNarration(narration);
@@ -54,8 +55,9 @@ export class TestConnection extends AuthorityConnection {
   addPrepareBvobResult ({ contentHash }) {
     const preparation = this._preparations[contentHash] || (this._preparations[contentHash] = {});
     if (preparation.contentHash) {
-      throw this.wrapErrorEvent(new Error(`bvob preparation result already exists for ${
-        contentHash}`), new Error("addPrepareBvobResult"));
+      const error = new Error(`bvob preparation result already exists for ${contentHash}`);
+      throw this.wrapErrorEvent(error, 1,
+          new Error("addPrepareBvobResult"));
     }
     preparation.contentHash = contentHash;
     this._tryFulfillPreparation(preparation);
@@ -118,7 +120,7 @@ export class TestConnection extends AuthorityConnection {
       if (narration.resolve) narration.resolve(ret);
       return ret;
     } catch (error) {
-      const wrapped = this.wrapErrorEvent(error, new Error("tryFulfillNarration()"),
+      const wrapped = this.wrapErrorEvent(error, 1, new Error("tryFulfillNarration()"),
           "\n\tnarration:", ...dumpObject(narration));
       if (!narration.reject) throw wrapped;
       narration.reject(wrapped);
@@ -132,7 +134,7 @@ export class TestConnection extends AuthorityConnection {
       if (preparation.resolve) preparation.resolve(preparation.contentHash);
       return preparation.contentHash;
     } catch (error) {
-      const wrapped = this.wrapErrorEvent(error, new Error("_tryFulfillPreparation()"),
+      const wrapped = this.wrapErrorEvent(error, 1, new Error("_tryFulfillPreparation()"),
           "\n\tnarration:", ...dumpObject(preparation));
       if (!preparation.reject) throw wrapped;
       preparation.reject(wrapped);

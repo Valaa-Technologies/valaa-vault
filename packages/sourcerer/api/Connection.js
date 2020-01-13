@@ -81,7 +81,7 @@ export default class Connection extends Follower {
         return this.receiveTruths(truths, retrieveMediaBuffer, downstreamReceiveTruths,
             rejectedEvent);
       } catch (error) {
-        throw this.wrapErrorEvent(error,
+        throw this.wrapErrorEvent(error, 1,
             new Error(`receiveTruths(${this._dumpEventIds(truths)})`),
             "\n\ttruths:", ...dumpObject(truths));
       }
@@ -94,7 +94,7 @@ export default class Connection extends Follower {
         invariantifyArray(commands, "receiveTruths.commands", { min: 1 });
         return this.receiveCommands(commands, retrieveMediaBuffer, downstreamReceiveCommands);
       } catch (error) {
-        throw this.wrapErrorEvent(error,
+        throw this.wrapErrorEvent(error, 1,
             new Error(`receiveCommands(${this._dumpEventIds(commands)})`),
             "\n\tcommands:", ...dumpObject(commands));
       }
@@ -172,7 +172,7 @@ export default class Connection extends Follower {
         return (connection._activeConnection = connection);
       },
     ]), function errorOnConnect (error, stepIndex, stepHead) {
-      throw connection.wrapErrorEvent(error, wrap,
+      throw connection.wrapErrorEvent(error, 1, wrap,
           "\n\toptions:", ...dumpObject(options),
           `\n\tstep #${stepIndex} head:`, ...dumpObject(stepHead));
     }));
@@ -248,7 +248,7 @@ export default class Connection extends Follower {
       throw new Error(
           `Cannot get an active connection promise from connection which is not being activated`);
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error(`asActiveConnection(${
+      throw this.wrapErrorEvent(error, 1, new Error(`asActiveConnection(${
           requireSynchronous ? "sync" : "async"})`));
     }
   }
@@ -299,7 +299,7 @@ export default class Connection extends Follower {
       }
       return downstreamReceiveTruths(truths, retrieveMediaBuffer);
     } catch (error) {
-      throw this.wrapErrorEvent(error,
+      throw this.wrapErrorEvent(error, 1,
           new Error(`${type}(${this._dumpEventIds(truths)})`),
           "\n\ttruths:", ...dumpObject(truths),
           "\n\tretrieveMediaBuffer:", ...dumpObject(retrieveMediaBuffer));
@@ -330,7 +330,8 @@ export default class Connection extends Follower {
    */
   decodeMediaContent (mediaInfo: MediaInfo): any {
     if (!mediaInfo.contentType) {
-      throw this.wrapErrorEvent(new Error("decodeMediaContent: mediaInfo.contentType is missing"),
+      const error = new Error("decodeMediaContent: mediaInfo.contentType is missing");
+      throw this.wrapErrorEvent(error, 1,
           `decodeMediaContent('${mediaInfo.name || "<unnamed>"}')`,
               "\n\tmediaInfo:", ...dumpObject(mediaInfo));
     }
@@ -338,7 +339,7 @@ export default class Connection extends Follower {
         this.requestMediaContents([mediaInfo]),
         results => results[0],
         (error) => {
-          throw this.wrapErrorEvent(error, `decodeMediaContent(${mediaInfo.name} as ${
+          throw this.wrapErrorEvent(error, 1, `decodeMediaContent(${mediaInfo.name} as ${
                 mediaInfo.contentType})`,
             "\n\tmediaInfo:", ...dumpObject(mediaInfo));
         },
@@ -363,7 +364,7 @@ export default class Connection extends Follower {
         this.requestMediaContents([mediaInfo]),
         results => results[0],
         (error) => {
-          throw this.wrapErrorEvent(error, `getMediaURL(${mediaInfo.name})`,
+          throw this.wrapErrorEvent(error, 1, `getMediaURL(${mediaInfo.name})`,
               "\n\tmediaInfo:", ...dumpObject(mediaInfo));
         },
     );

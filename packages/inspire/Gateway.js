@@ -43,7 +43,6 @@ const patchWith = require("@valos/tools/patchWith").default;
 const { AuthorityNexus, FalseProphet, Oracle, Sourcerer, Scribe } = valosSourcerer;
 const {
   dumpObject, inBrowser, invariantify, isPromise, FabricEventTarget, mapEagerly, thenChainEagerly,
-  outputError,
 } = valosTools;
 
 export default class Gateway extends FabricEventTarget {
@@ -201,7 +200,7 @@ export default class Gateway extends FabricEventTarget {
         await this._notifySpindle(spindle, "onGatewayInitialized", this, spindle.revelation);
       }
     } catch (error) {
-      throw this.wrapErrorEvent(error, "initialize", "\n\tthis:", ...dumpObject(this));
+      throw this.wrapErrorEvent(error, 1, "initialize", "\n\tthis:", ...dumpObject(this));
     }
   }
 
@@ -246,7 +245,7 @@ export default class Gateway extends FabricEventTarget {
     }
     return this._views;
     function errorOnCreateAndConnectViewsToDOM (viewId, config, reject, error) {
-      const wrappedError = this.wrapErrorEvent(error,
+      const wrappedError = this.wrapErrorEvent(error, 1,
           new Error(`createAndConnectViewsToDom(view: ${viewId}`),
               "\n\tviewConfig:", ...dumpObject(config));
       if (reject) reject(wrappedError);
@@ -375,8 +374,7 @@ export default class Gateway extends FabricEventTarget {
       ]),
       () => gateway._views[viewId],
     ]), error => {
-      throw this.wrapErrorEvent(error,
-          new Error(`createAndConnectViewToDOM(${viewId})`),
+      throw this.wrapErrorEvent(error, 1, new Error(`createAndConnectViewToDOM(${viewId})`),
           "\n\tcontainer:", ...dumpObject(container),
           "\n\tviewConfig:", ...dumpObject(paramViewConfig));
     });
@@ -397,7 +395,7 @@ export default class Gateway extends FabricEventTarget {
           `Interpreted revelation`, ...dumpObject(revelation)]);
       return revelation;
     } catch (error) {
-      throw this.wrapErrorEvent(error, "interpretRevelation",
+      throw this.wrapErrorEvent(error, 1, new Error(`interpretRevelation`),
           "\n\trevelation:", ...dumpObject(revelation));
     }
   }
@@ -420,7 +418,7 @@ export default class Gateway extends FabricEventTarget {
           ]));
       return nexus;
     } catch (error) {
-      throw this.wrapErrorEvent(error, "establishAuthorityNexus",
+      throw this.wrapErrorEvent(error, 1, new Error(`establishAuthorityNexus`),
           "\n\tnexusOptions:", ...dumpObject(nexusOptions));
     }
   }
@@ -450,7 +448,7 @@ export default class Gateway extends FabricEventTarget {
       ]);
       return scribe;
     } catch (error) {
-      throw this.wrapErrorEvent(error, "proselytizeScribe",
+      throw this.wrapErrorEvent(error, 1, new Error(`proselytizeScribe`),
           "\n\tscribeOptions:", ...dumpObject(scribeOptions));
     }
   }
@@ -477,7 +475,7 @@ export default class Gateway extends FabricEventTarget {
       ]);
       return oracle;
     } catch (error) {
-      throw this.wrapErrorEvent(error, "summonOracle",
+      throw this.wrapErrorEvent(error, 1, new Error(`summonOracle`),
           "\n\toracleOptions:", ...dumpObject(oracleOptions),
           "\n\tauthorityNexus:", ...dumpObject(authorityNexus));
     }
@@ -542,7 +540,8 @@ export default class Gateway extends FabricEventTarget {
             try {
               listener(totalCount, partitionCommandCounts);
             } catch (error) {
-              outputError(this.wrapErrorEvent(error, new Error("onCommandCountUpdate.listener()"),
+              this.outputErrorEvent(this.wrapErrorEvent(error, 1,
+                      new Error("onCommandCountUpdate.listener()"),
                       "\n\tlistener key:", ...dumpObject(component),
                       "\n\ttotalCount:", totalCount,
                       "\n\tpartitionCommandcounts:", ...dumpObject(partitionCommandCounts)),
@@ -565,7 +564,7 @@ export default class Gateway extends FabricEventTarget {
       ]);
       return falseProphet;
     } catch (error) {
-      throw this.wrapErrorEvent(error, "proselytizeFalseProphet",
+      throw this.wrapErrorEvent(error, 1, new Error(`proselytizeFalseProphet`),
           "\n\tfalseProphetOptions:", ...dumpObject(falseProphetOptions),
           "\n\tupstream:", ...dumpObject(upstream));
     }
@@ -619,7 +618,7 @@ export default class Gateway extends FabricEventTarget {
       ]);
       return identity;
     } catch (error) {
-      throw this.wrapErrorEvent(error, "initiateDiscourse",
+      throw this.wrapErrorEvent(error, 1, new Error(`establishIdentity`),
           "\n\tdiscourseOptions:", ...dumpObject(identityOptions),
           "\n\tfalseProphet:", ...dumpObject(falseProphet),
           "\n\tidentity:", ...dumpObject(identity));
@@ -644,7 +643,7 @@ export default class Gateway extends FabricEventTarget {
       ]);
       return discourse;
     } catch (error) {
-      throw this.wrapErrorEvent(error, "initiateDiscourse",
+      throw this.wrapErrorEvent(error, 1, new Error(`initiateDiscourse`),
           "\n\tdiscourseOptions:", ...dumpObject(discourseOptions),
           "\n\tfalseProphet:", ...dumpObject(falseProphet),
           "\n\tdiscourse:", ...dumpObject(discourse));
@@ -717,7 +716,7 @@ export default class Gateway extends FabricEventTarget {
                 && this._notifySpindle(spindle, "onViewAttached", this._views[viewName], viewName))
       ]);
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error(`attachSpindle(${name})`),
+      throw this.wrapErrorEvent(error, 1, new Error(`attachSpindle(${name})`),
           "\n\tspindle:", ...dumpObject(spindle),
           "\n\tspindle proto:", ...dumpObject(Object.getPrototypeOf(spindle)),
       );
@@ -763,7 +762,7 @@ export default class Gateway extends FabricEventTarget {
           (String(connection.getPartitionURI()) === String(rootPartitionURI)));
       return { connections, rootPartition };
     } catch (error) {
-      throw this.wrapErrorEvent(error, "narratePrologue",
+      throw this.wrapErrorEvent(error, 1, new Error(`narratePrologue`),
           "\n\tprologue revelation:", prologueRevelation,
           "\n\tprologues:", ...dumpObject(prologues));
     }
@@ -795,7 +794,7 @@ export default class Gateway extends FabricEventTarget {
       }
       return ret;
     } catch (error) {
-      throw this.wrapErrorEvent(error, "loadRevelationEntryPartitionAndPrologues",
+      throw this.wrapErrorEvent(error, 1, new Error(`loadRevelationEntryPartitionAndPrologues`),
           "\n\tprologue revelation:", ...dumpObject(prologueRevelation),
       );
     }

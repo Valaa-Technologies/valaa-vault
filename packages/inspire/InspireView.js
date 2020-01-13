@@ -19,7 +19,7 @@ export default class InspireView extends VDOMView {
           options.size, `unused)`]);
       return this;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `attach('${options.name}' -> ${options.rootLensURI})`);
+      throw this.wrapErrorEvent(error, 1, `attach('${options.name}' -> ${options.rootLensURI})`);
     }
   }
 

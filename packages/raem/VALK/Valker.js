@@ -22,7 +22,7 @@ import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
 
 import type { FabricEventLogger } from "~/tools/FabricEvent";
 import { dumpify } from "~/tools";
-import { debugObjectNest, wrapError } from "~/tools/wrapError";
+import { debugObjectNest } from "~/tools/wrapError";
 
 export type Packer = (unpackedValue: any, valker: Valker) => any;
 export type Unpacker = (packedValue: any, valker: Valker) => any;
@@ -201,16 +201,18 @@ export default class Valker extends Resolver {
       }
       return ret;
     } catch (error) {
-      throw wrapError(error,
-          `During ${this.debugId()}\n .run(), with:`,
-          "\n\tvalk head:", ...dumpObject(packedHead),
-          "\n\tvalk kuery:", ...dumpKuery(kuery),
+      throw this.wrapErrorEvent(error, 1, () => [
+        `run()`,
+        "\n\tvalk head:", ...dumpObject(packedHead),
+        "\n\tvalk kuery:", ...dumpKuery(kuery),
+        ...(this.getVerbosity() < 2 ? [] : [
           "\n\tscope:", scope,
           "\n\tstate:", ...dumpObject(valker.state && valker.state.toJS()),
           "\n\tbase-state === self-state", this.state === valker.state,
           "\n\targ-state type:", typeof state,
           "\n\tvalker:", ...dumpObject(valker),
-      );
+        ]),
+      ]);
     }
   }
 
@@ -272,10 +274,13 @@ export default class Valker extends Resolver {
       const origin = `${this.debugId()}.advance(${Array.isArray(step) ? step[0] : step})`;
       if (sourceInfo) addStackFrameToError(error, step, sourceInfo, origin, this);
       if (this._indent < 0) throw error;
-      throw wrapError(error, new Error(`During ${origin}, with:`),
-          "\n\thead:", ...this._dumpObject(head),
-          "\n\tkuery:", ...dumpKuery(step),
-          "\n\tscope:", dumpScope(scope));
+      const name = new Error(origin);
+      throw this.wrapErrorEvent(error, 1, () => [
+        name,
+        "\n\thead:", ...this._dumpObject(head),
+        "\n\tkuery:", ...dumpKuery(step),
+        "\n\tscope:", dumpScope(scope),
+      ]);
     }
   }
 
@@ -369,8 +374,10 @@ export default class Valker extends Resolver {
       }
       return ret;
     } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .tryUnpack(`, value, requireIfRef, `):`,
-          "\n\tfieldInfo:", (typeof value === "object") ? value._fieldInfo : undefined);
+      throw this.wrapErrorEvent(error, 2, () => [
+        `tryUnpack({ value: ${value}, requireIfRef: ${requireIfRef} })`,
+        "\n\tfieldInfo:", (typeof value === "object") ? value._fieldInfo : undefined,
+      ]);
     }
   }
 
@@ -403,11 +410,11 @@ export default class Valker extends Resolver {
       }
       return ret;
     } catch (error) {
-      throw this.wrapErrorEvent(error,
-          `trySingularTransient(${requireIfRef ? "require-if-ref" : ""}):`,
-          "\n\tobject:", ...this._dumpObject(object),
-          // "\n\tstate:", ...this._dumpObject(this.getJSState()),
-      );
+      throw this.wrapErrorEvent(error, 2, () => [
+        `trySingularTransient(${requireIfRef ? "require-if-ref" : ""}):`,
+        "\n\tobject:", ...this._dumpObject(object),
+        // "\n\tstate:", ...this._dumpObject(this.getJSState()),
+      ]);
     }
   }
 

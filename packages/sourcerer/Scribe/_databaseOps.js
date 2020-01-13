@@ -4,7 +4,7 @@ import type { EventBase } from "~/raem/events";
 
 import { tryAspect, swapAspectRoot } from "~/sourcerer/tools/EventAspects";
 
-import { debugObjectType, dumpObject, vdon, wrapError } from "~/tools";
+import { debugObjectType, dumpObject, vdon } from "~/tools";
 import IndexedDBWrapper from "~/tools/html5/IndexedDBWrapper";
 import type MediaDecoder from "~/tools/MediaDecoder";
 import trivialClone from "~/tools/trivialClone";
@@ -391,7 +391,7 @@ export function _writeTruths (connection: ScribeConnection, truthLog: EventBase[
         throw new Error(`INTERNAL ERROR: Truth is missing aspects.log.index when trying to write ${
             truthLog.length} truths to local cache, aborting _writeTruths`);
       }
-      const req = truths.add(_serializeEventAsJSON(truth));
+      const req = truths.add(_serializeEventAsJSON(connection, truth));
       req.onerror = reqEvent => {
         if (((reqEvent.target || {}).error || {}).name !== "ConstraintError") throw req.error;
         reqEvent.preventDefault(); // Prevent transaction abort.
@@ -400,8 +400,9 @@ export function _writeTruths (connection: ScribeConnection, truthLog: EventBase[
         validateReq.onsuccess = validateReqEvent => {
           if (tryAspect(validateReqEvent.target.result, "command").id
               === tryAspect(truth, "command").id) return;
-          throw connection.wrapErrorEvent(
-              new Error(`Mismatching existing truth aspects.command.id when persisting truth`),
+          const error = new Error(
+              `Mismatching existing truth aspects.command.id when persisting truth`);
+          throw connection.wrapErrorEvent(error, 1,
               `_writeTruths(#${truth.aspects.log.index})`,
               "\n\texisting aspects.command.id:",
                   tryAspect(validateReqEvent.target.result, "command").id,
@@ -434,7 +435,7 @@ export function _writeCommands (connection: ScribeConnection,
         throw new Error(`INTERNAL ERROR: Command is missing aspects.log.index when writing ${
             commandLog.length} commands to local cache: aborting _writeCommands`);
       }
-      const req = commands.add(_serializeEventAsJSON(command));
+      const req = commands.add(_serializeEventAsJSON(connection, command));
       req.onerror = reqEvent => {
         if (reqEvent.error.name !== "ConstraintError") throw req.error;
         const error = new Error(`Cross-tab command cache conflict`);
@@ -493,7 +494,7 @@ export function _deleteCommands (connection: ScribeConnection,
   }
 }
 
-function _serializeEventAsJSON (event) {
+function _serializeEventAsJSON (logger: Object, event) {
   const logRoot = swapAspectRoot("event", event, "log");
   try {
     return trivialClone(logRoot, (value, key) => {
@@ -508,13 +509,16 @@ function _serializeEventAsJSON (event) {
         if (typeof value.toJSON === "function") return value.toJSON();
         return undefined;
       } catch (error) {
-        throw wrapError(error, new Error("During serializeEventAsJSON.trivialClone.customizer"),
-            `\n\t${key}:`, ...dumpObject(value));
+        const name = new Error("trivialClone.customizer");
+        throw logger.wrapErrorEvent(error, 2, () => [
+          name,
+          `\n\t${key}:`, ...dumpObject(value),
+        ]);
       }
     });
   } catch (error) {
-    throw wrapError(error, new Error("During serializeEventAsJSON"),
-        "\n\tevent:", ...dumpObject(event));
+    const name = new Error("serializeEventAsJSON");
+    throw logger.wrapErrorEvent(error, 1, () => [name, "\n\tevent:", ...dumpObject(event)]);
   } finally {
     swapAspectRoot("log", logRoot, "event");
   }
@@ -535,7 +539,7 @@ function _getAllShim (connection: ScribeConnection, database, range: IDBKeyRange
           `resolve(${req.result.length})`]);
         resolve(req.result.map(eventLogRoot => swapAspectRoot("log", eventLogRoot, "event")));
       } catch (error) {
-        reject(connection.wrapErrorEvent(error, `getAll("${database.name}", ${range})`,
+        reject(connection.wrapErrorEvent(error, 1, `getAll("${database.name}", ${range})`,
             "\n\treq.result:", ...dumpObject(req.result)));
       }
     };

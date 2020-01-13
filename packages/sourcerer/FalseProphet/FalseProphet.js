@@ -98,7 +98,7 @@ export default class FalseProphet extends Sourcerer {
     try {
       return _chronicleEvents(this, commands, options);
     } catch (error) {
-      throw this.wrapErrorEvent(error, "chronicleEvents()",
+      throw this.wrapErrorEvent(error, 1, "chronicleEvents()",
           "\n\toptions:", ...dumpObject(options));
     }
   }
@@ -112,7 +112,7 @@ export default class FalseProphet extends Sourcerer {
     try {
       return _deliverStoriesToFollowers(this, stories, purgedRecital);
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error(`_deliverStoriesToFollowers()`),
+      throw this.wrapErrorEvent(error, 1, new Error(`_deliverStoriesToFollowers()`),
           "\n\tstories:", ...dumpObject(stories),
           "\n\tpurgedRecital:", ...dumpObject(purgedRecital));
     } finally {
@@ -176,7 +176,7 @@ export default class FalseProphet extends Sourcerer {
     try {
       return deserializeVRL(serializedReference, currentPartitionURI, this);
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error("deserializeReference"),
+      throw this.wrapErrorEvent(error, 1, new Error("deserializeReference"),
           "\n\tserializedReference:", ...dumpObject(serializedReference),
           "\n\tcurrentPartitionURI:", ...dumpObject(currentPartitionURI));
     }

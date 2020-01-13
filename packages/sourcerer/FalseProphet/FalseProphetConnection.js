@@ -260,7 +260,7 @@ export default class FalseProphetConnection extends Connection {
     function errorOnFalseProphetChronicleEvents (wrap, error) {
       const wrap_ = new Error(`chronicleEvents(${events.length} events).${wrap.message}`);
       wrap_.stack = wrap.stack;
-      throw connection.wrapErrorEvent(error, wrap_,
+      throw connection.wrapErrorEvent(error, 1, wrap_,
           "\n\toptions:", ...dumpObject(options),
           "\n\tevents:", ...dumpObject(connection._dumpEventIds(events)),
           "\n\tinternal:", ...dumpObject({
@@ -332,7 +332,7 @@ export default class FalseProphetConnection extends Connection {
       _refineRecital(this, newTruths, "receive-truth", schismaticCommands);
       return truths;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `receiveTruths(${this._dumpEventIds(truths)})`,
+      throw this.wrapErrorEvent(error, 1, `receiveTruths(${this._dumpEventIds(truths)})`,
           "\n\treceived truths:", ...dumpObject(truths),
           "\n\tpendingTruths:", ...dumpObject([...this._pendingTruths]),
           "\n\tunconfirmedCommands:", ...dumpObject([...this._unconfirmedCommands]),
@@ -357,7 +357,7 @@ export default class FalseProphetConnection extends Connection {
       _refineRecital(this, newCommands || [], "receive-command", schismaticCommands);
       return commands;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `receiveCommand(${this._dumpEventIds(commands)})`,
+      throw this.wrapErrorEvent(error, 1, `receiveCommand(${this._dumpEventIds(commands)})`,
           "\n\treceived commands:", ...dumpObject(commands),
           "\n\tpendingTruths:", ...dumpObject([...this._pendingTruths]),
           "\n\tunconfirmedCommands:", ...dumpObject([...this._unconfirmedCommands]),
@@ -391,7 +391,7 @@ export default class FalseProphetConnection extends Connection {
         }
         targetQueue[queueIndex] = event;
       } catch (error) {
-        throw this.wrapErrorEvent(error, isCommand
+        throw this.wrapErrorEvent(error, 2, isCommand
                 ? `_insertUnconfirmedCommandsToQueue().events[${index}]`
                 : `_insertPendingTruthsToQueue().events[${index}]`,
             "\n\tevents:", ...dumpObject(events),
@@ -429,7 +429,7 @@ export default class FalseProphetConnection extends Connection {
     try {
       return _reviewRecomposedSchism(this, purged, newProphecy);
     } catch (error) {
-      throw this.wrapErrorEvent(error,
+      throw this.wrapErrorEvent(error, 2,
           new Error(`_reviewRecomposedSchism(${tryAspect(purged, "command").id} -> ${
               tryAspect(newProphecy, "command").id})`),
           "\n\tpurged prophecy:", ...dumpObject(purged),
@@ -529,7 +529,7 @@ export default class FalseProphetConnection extends Connection {
   }
 
   _errorOnReformHeresy (error, index, [{ schism, reformation, newEvents, purgedStories }]) {
-    const wrappedError = this.wrapErrorEvent(error,
+    const wrappedError = this.wrapErrorEvent(error, 2,
         new Error(`_reformHeresy(${this._dumpEventIds(schism)}, ${
           this._dumpEventIds(newEvents)}, ${this._dumpEventIds(purgedStories)})`));
     const transactor = schism && schism.meta && schism.meta.transactor;

@@ -11,7 +11,7 @@ import { unspecifiedPlural, unspecifiedSingular } from "~/raem/tools/graphql/cou
 
 import Bard from "~/raem/redux/Bard";
 
-import { dumpify, dumpObject, wrapError } from "~/tools";
+import { dumpify, dumpObject } from "~/tools";
 
 export function getCoupling (fieldIntro) {
   if (fieldIntro.coupling && typeof fieldIntro.coupling !== "string") {
@@ -85,12 +85,13 @@ function checkAndAddCouplingPassages (bard: Bard, fieldIntro,
       });
     }
   } catch (error) {
-    throw wrapError(error, `During ${bard.debugId()
-            }\n.checkAndAddCouplingPassages(${actionType}, ${
-            dataFieldValue(bard.objectTransient, "id")}.${fieldIntro.name}), with:`,
-        "\n\tentryOrList:", entryOrList,
-        "\n\tfieldIntro:", fieldIntro,
-        "\n\tbard:", bard);
+    throw bard.wrapErrorEvent(error, 1, () => [
+      `checkAndAddCouplingPassages(${actionType}, ${
+            dataFieldValue(bard.objectTransient, "id")}.${fieldIntro.name})`,
+      "\n\tentryOrList:", entryOrList,
+      "\n\tfieldIntro:", fieldIntro,
+      "\n\tbard:", bard,
+    ]);
   }
 }
 
@@ -186,13 +187,13 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
               fieldIntro.name));
     }
   } catch (error) {
-    throw bard.wrapErrorEvent(error,
-        `addCouplingPassages(when ${actionType} via near field '${fieldIntro.name
-            }' to remote field '${remoteType && remoteType.name}.${coupledField}')`,
-        "\n\tcoupling:", coupling,
-        "\n\ttarget:", ...dumpObject(remote),
-        "\n\treverse coupling:", ...dumpObject(reverseCoupling),
-        "\n\tbard:", ...dumpObject(bard),
-    );
+    throw bard.wrapErrorEvent(error, 1, () => [
+      `addCouplingPassages(when ${actionType} via near field '${fieldIntro.name
+          }' to remote field '${remoteType && remoteType.name}.${coupledField}')`,
+      "\n\tcoupling:", coupling,
+      "\n\ttarget:", ...dumpObject(remote),
+      "\n\treverse coupling:", ...dumpObject(reverseCoupling),
+      "\n\tbard:", ...dumpObject(bard),
+    ]);
   }
 }

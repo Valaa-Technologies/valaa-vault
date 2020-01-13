@@ -44,7 +44,7 @@ export default function extractPartitionEvent0Dot2 (connection: Connection, acti
     }
     return ret;
   } catch (error) {
-    throw connection.wrapErrorEvent(error,
+    throw connection.wrapErrorEvent(error, 1,
         new Error(`extractPartitionEvent0Dot2(${connection.getName()})`),
         "\n\tpartitionKey:", partitionKey,
         "\n\taction:", ...dumpObject(action),

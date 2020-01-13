@@ -94,8 +94,10 @@ export function createMaterializeGhostAction (resolver: Resolver, ghostId: VRL,
     return !actions.length ? undefined
         : actions.length === 1 ? actions[0] : transacted({ actions });
   } catch (error) {
-    throw wrapError(error, `During createMaterializeGhostAction(), with:`,
-        "\n\tghostId:", ...dumpObject(ghostId));
+    throw resolver.wrapErrorEvent(error, 1, () => [
+      `createMaterializeGhostAction()`,
+      "\n\tghostId:", ...dumpObject(ghostId),
+    ]);
   }
 }
 
@@ -211,14 +213,16 @@ function _createMaterializeGhostAction (resolver: Resolver, state: State,
     }));
     return { id, internallyKnownType: prototypeTypeName || externalKnownType, ghostPath };
   } catch (error) {
-    throw wrapError(error, `During createMaterializeGhostAction(${dumpify(ghostObjectPath)}:${
-            internallyKnownType || externalKnownType}}), with:`,
-        "\n\texternalKnownType:", externalKnownType,
-        "\n\tinternallyKnownType:", internallyKnownType,
-        "\n\tknownId:", knownId,
-        "\n\tresource id:", rawId,
-        "\n\tghost host prototype:", ghostHostPrototypeRawId,
-        "\n\tghost host:", ghostHostRawId);
+    throw resolver.wrapErrorEvent(error, 2, () => [
+      `_createMaterializeGhostAction.detail(${dumpify(ghostObjectPath)}:${
+            internallyKnownType || externalKnownType}})`,
+      "\n\texternalKnownType:", externalKnownType,
+      "\n\tinternallyKnownType:", internallyKnownType,
+      "\n\tknownId:", knownId,
+      "\n\tresource id:", rawId,
+      "\n\tghost host prototype:", ghostHostPrototypeRawId,
+      "\n\tghost host:", ghostHostRawId,
+    ]);
   }
 }
 

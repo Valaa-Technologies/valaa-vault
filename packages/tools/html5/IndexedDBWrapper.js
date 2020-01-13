@@ -50,7 +50,7 @@ export default class IndexedDBWrapper extends FabricEventTarget {
   _setDatabaseObject = (event: Event) => {
     this.database = event.target.result;
     this.database.onerror = (evt: Event) => {
-      throw this.wrapErrorEvent(evt.target.error, `IDB.onerror`,
+      throw this.wrapErrorEvent(evt.target.error, 1, `IDB.onerror`,
           "\n\tstores:", this.storeDescriptors
               .map(descriptor => (descriptor ? descriptor.name : "<no descriptor>")).join(", "));
     };
@@ -77,7 +77,7 @@ export default class IndexedDBWrapper extends FabricEventTarget {
       result = await opsCallback(objStores);
       await onCompletePromise;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `transaction([${stores}], mode)`);
+      throw this.wrapErrorEvent(error, 1, `transaction([${stores}], mode)`);
     }
     return result;
   }
@@ -94,7 +94,7 @@ export default class IndexedDBWrapper extends FabricEventTarget {
               ? this.databaseAPI.IDBKeyRange.bound(eventIdBegin, eventIdEnd - 1)
           : null;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `getIDBKeyRange([${eventIdBegin}, ${eventIdEnd}))`);
+      throw this.wrapErrorEvent(error, 1, `getIDBKeyRange([${eventIdBegin}, ${eventIdEnd}))`);
     }
   }
 }

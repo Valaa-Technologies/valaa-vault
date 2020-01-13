@@ -10,7 +10,7 @@ import { MediaInfo } from "~/sourcerer/api/types";
 import Vrapper from "~/engine/Vrapper";
 import VALEK, { Kuery } from "~/engine/VALEK";
 
-import { dumpObject, wrapError } from "~/tools";
+import { dumpObject } from "~/tools";
 
 /**
  * Integrates the given context-free, shared decoding of some Media into the runtime context
@@ -42,11 +42,12 @@ export default function integrateDecoding (decodedContent: any, vScope: Vrapper,
             ? _integrateKuery(decodedContent, vScope, mediaInfo, options)
         : decodedContent;
   } catch (error) {
-    throw wrapError(error, `During integrateDecoding(${mediaInfo.name}), with:`,
-        "\n\tdecodedContent:", ...dumpObject({ decodedContent }),
-        "\n\tvScope:", ...dumpObject(vScope),
-        "\n\tmediaInfo:", ...dumpObject(mediaInfo),
-    );
+    throw vScope.wrapErrorEvent(error, 1, () => [
+      `integrateDecoding(${mediaInfo.name})`,
+      "\n\tdecodedContent:", ...dumpObject({ decodedContent }),
+      "\n\tvScope:", ...dumpObject(vScope),
+      "\n\tmediaInfo:", ...dumpObject(mediaInfo),
+    ]);
   }
 }
 
@@ -138,11 +139,12 @@ function _require (vScope: Vrapper, options: Object, importPath: string) {
     }
     return nextHead;
   } catch (error) {
-    throw vScope.wrapErrorEvent(error, `require("${importPath}")`,
-        "\n\tcurrent head:", ...dumpObject(head),
-        "\n\tcurrent step:", steps[i],
-        "\n\tnext head candidate:", ...dumpObject(nextHead),
-        "\n\tscope resource:", ...dumpObject(vScope),
-    );
+    throw vScope.wrapErrorEvent(error, 1, () => [
+      `require("${importPath}")`,
+      "\n\tcurrent head:", ...dumpObject(head),
+      "\n\tcurrent step:", steps[i],
+      "\n\tnext head candidate:", ...dumpObject(nextHead),
+      "\n\tscope resource:", ...dumpObject(vScope),
+    ]);
   }
 }

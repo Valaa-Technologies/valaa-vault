@@ -45,7 +45,7 @@ export default class VDOMView extends Cog {
       this.engine.addCog(this);
       return this;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `preAttach('${name}' -> ${actualLensURI})`);
+      throw this.wrapErrorEvent(error, 1, `preAttach('${name}' -> ${actualLensURI})`);
     }
   }
 

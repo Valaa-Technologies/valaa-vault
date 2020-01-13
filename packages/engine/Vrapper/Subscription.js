@@ -235,17 +235,20 @@ export default class Subscription extends LiveUpdate {
     }
     if (!this._listeners.size) this.detachHooks();
     function errorOnEmitLiveUpdate (error, stage, listener, callbackKey) {
-      return this._emitter.wrapErrorEvent(error,
-          new Error(`${this.debugId()}\n ._broadcastUpdate(stage #${stage}, ${passageCounter})`),
-          "\n\tliveUpdate:", ...dumpObject(liveUpdate),
-          "\n\tliveUpdate.emitter:", ...dumpObject(liveUpdate.getEmitter()),
-          "\n\tliveUpdate._value:", ...dumpObject(liveUpdate._value),
-          "\n\tliveUpdate.state:", ...dumpObject(liveUpdate.getState().toJS()),
-          ...(!listener ? [] : [
-            "\n\tlistener:", ...dumpObject(listener),
-            "\n\tcallbackKey:", callbackKey || "<missing callback>",
-          ]),
-          "\n\tthis subscription:", ...dumpObject(this));
+      const name = new Error(
+          `${this.debugId()}\n ._broadcastUpdate(stage #${stage}, ${passageCounter})`);
+      return this._emitter.wrapErrorEvent(error, 1, () => [
+        name,
+        "\n\tliveUpdate:", ...dumpObject(liveUpdate),
+        "\n\tliveUpdate.emitter:", ...dumpObject(liveUpdate.getEmitter()),
+        "\n\tliveUpdate._value:", ...dumpObject(liveUpdate._value),
+        "\n\tliveUpdate.state:", ...dumpObject(liveUpdate.getState().toJS()),
+        ...(!listener ? [] : [
+          "\n\tlistener:", ...dumpObject(listener),
+          "\n\tcallbackKey:", callbackKey || "<missing callback>",
+        ]),
+        "\n\tthis subscription:", ...dumpObject(this),
+      ]);
     }
   }
 
@@ -275,6 +278,7 @@ export default class Subscription extends LiveUpdate {
       const origin = new Error(
           `${this.debugId()}\n .attachHooks(${triggerBroadcast})`);
       const wrappedError = this._emitter.wrapErrorEvent(error,
+          1,
           origin,
           "\n\temitter:", this._emitter,
           ...(this._liveKuery === undefined ? [
@@ -359,7 +363,7 @@ export default class Subscription extends LiveUpdate {
         this._invalidateState();
         this.attachHooks(triggerBroadcast);
       })) return;
-      throw this._emitter.wrapErrorEvent(error,
+      throw this._emitter.wrapErrorEvent(error, 1,
           `${this.debugId()}\n .attachLiveKueryHooks()`,
           "\n\thead:", ...dumpObject(this._liveHead),
           "\n\tkuery:", ...dumpKuery(this._liveKuery),

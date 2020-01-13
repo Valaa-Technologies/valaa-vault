@@ -31,7 +31,7 @@ export default class IdentityManager extends FabricEventTarget {
       this._activeIdentities[String(identityChronicleURI)] = options;
       return true;
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error("identity.add"),
+      throw this.wrapErrorEvent(error, 1, new Error("identity.add"),
           "\n\tidentityChronicleURI:", ...dumpObject(identityChronicleURI));
     }
   }
@@ -51,7 +51,7 @@ export default class IdentityManager extends FabricEventTarget {
       delete this._activeIdentities[uriString];
       return true;
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error("identity.remove"),
+      throw this.wrapErrorEvent(error, 1, new Error("identity.remove"),
           "\n\tidentityChronicleURI:", ...dumpObject(identityChronicleURI));
     }
   }

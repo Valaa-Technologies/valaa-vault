@@ -47,7 +47,7 @@ import { OwnerDefaultCouplingTag, PropertyDescriptorsTag } from "~/engine/valosh
 
 import { arrayFromAny, iterableFromAny, dumpify, dumpObject,
   invariantify, invariantifyObject, invariantifyString,
-  isPromise, isSymbol, thenChainEagerly, outputError, wrapError,
+  isPromise, isSymbol, thenChainEagerly,
 } from "~/tools";
 import { mediaTypeFromFilename } from "~/tools/MediaTypeData";
 
@@ -280,7 +280,7 @@ export default class Vrapper extends Cog {
             (blocker !== this) ? INACTIVE
             : this.isActivating() ? UNAVAILABLE
             : this._phase; // no change.
-        throw this.wrapErrorEvent(error, "activate.process",
+        throw this.wrapErrorEvent(error, 1, "activate.process",
             "\n\tthis:", ...dumpObject(this),
             "\n\tblocker:", ...dumpObject(blocker));
       } finally {
@@ -405,7 +405,7 @@ export default class Vrapper extends Cog {
       this._refreshDebugId(transient, { state: resolver.state });
       if (this.hasInterface("Scope")) this._setUpScopeFeatures(resolver);
     } catch (error) {
-      const wrappedError = this.wrapErrorEvent(error,
+      const wrappedError = this.wrapErrorEvent(error, 1,
           new Error("_postActivate()"),
           "\n\tid:", ...dumpObject(this[HostRef]),
           "\n\tid.getPartitionURI:", ...dumpObject(this[HostRef].getPartitionURI()),
@@ -415,7 +415,9 @@ export default class Vrapper extends Cog {
           "\n\tresolver.state:", ...dumpObject(resolver.state.toJS()),
           "\n\tengine.discourse.state:", ...dumpObject(this.engine.discourse.getState().toJS()));
       // throw wrappedError;
-      outputError(wrappedError, "Exception caught and swallowed in Vrapper._postActivate");
+      this.outputErrorEvent(
+          wrappedError,
+          "Exception caught and swallowed in Vrapper._postActivate");
     }
   }
 
@@ -460,7 +462,7 @@ export default class Vrapper extends Cog {
                 `Missing or not fully narrated partition connection for ${this.debugId()}`,
                 [this.activate()]),
             this.engine.discourse.connectToMissingPartition);
-    throw this.wrapErrorEvent(error, "requireActive",
+    throw this.wrapErrorEvent(error, 1, "requireActive",
         "\n\toptions:", ...dumpObject(options),
         "\n\tphase was:", phase,
         "\n\tactivation blocker is",
@@ -522,7 +524,7 @@ export default class Vrapper extends Cog {
           options.require ? "require" : "optional"})`), error);
     }
     function onError (wrapper, error) {
-      throw this.wrapErrorEvent(error, wrapper,
+      throw this.wrapErrorEvent(error, 1, wrapper,
           "\n\toptions:", ...dumpObject(options),
           "\n\tthis[HostRef]:", this[HostRef],
           "\n\tthis._transient:", this._transient,
@@ -751,7 +753,7 @@ export default class Vrapper extends Cog {
     try {
       return this.run(this[HostRef], kuery, options);
     } catch (error) {
-      throw this.wrapErrorEvent(error, "do",
+      throw this.wrapErrorEvent(error, 1, "do",
           "\n\tkuery:", ...dumpKuery(kuery),
           "\n\toptions:", ...dumpObject(options));
     }
@@ -782,7 +784,7 @@ export default class Vrapper extends Cog {
         sets: { [fieldName]: commandValue },
       }));
     } catch (error) {
-      throw this.wrapErrorEvent(error, `setField(${fieldName})`,
+      throw this.wrapErrorEvent(error, 1, `setField(${fieldName})`,
           "\n\tfield name:", fieldName,
           "\n\tnew value:", ...dumpObject(value),
           "\n\tnew value (after universalization):", ...dumpObject(commandValue),
@@ -800,7 +802,7 @@ export default class Vrapper extends Cog {
         adds: { [fieldName]: arrayFromAny(commandValue || undefined) },
       }));
     } catch (error) {
-      throw this.wrapErrorEvent(error, `addToField(${fieldName})`,
+      throw this.wrapErrorEvent(error, 1, `addToField(${fieldName})`,
           "\n\tfield name:", fieldName,
           "\n\tnew value:", ...dumpObject(value),
           "\n\tnew value (after universalization):", ...dumpObject(commandValue),
@@ -818,7 +820,7 @@ export default class Vrapper extends Cog {
         removes: { [fieldName]: (commandValue === null) ? null : arrayFromAny(commandValue) },
       }));
     } catch (error) {
-      throw this.wrapErrorEvent(error, `removeFromField(${fieldName})`,
+      throw this.wrapErrorEvent(error, 1, `removeFromField(${fieldName})`,
           "\n\tfield name:", fieldName,
           "\n\tremoved value:", ...dumpObject(value),
           "\n\tremoved value (after universalization):", ...dumpObject(commandValue),
@@ -850,7 +852,7 @@ export default class Vrapper extends Cog {
         adds: { [fieldName]: universalAddedValues },
       }));
     } catch (error) {
-      throw this.wrapErrorEvent(error, `replaceInField(${fieldName})`,
+      throw this.wrapErrorEvent(error, 1, `replaceInField(${fieldName})`,
           "\n\tfield name:", fieldName,
           "\n\treplaced values:", ...dumpObject(replacedValues),
           "\n\tremoved values (after universalization):",
@@ -983,7 +985,8 @@ export default class Vrapper extends Cog {
       return vFieldValue;
     } catch (error) {
       discourse.releaseFabricator({ rollback: error });
-      throw this.wrapErrorEvent(error, `emplace${isSet ? "SetField" : "AddToField"}(${fieldName})`,
+      throw this.wrapErrorEvent(error, 1,
+          `emplace${isSet ? "SetField" : "AddToField"}(${fieldName})`,
           "\n\tfield name:", fieldName,
           "\n\tinitialState:", initialState,
           "\n\toptions.typeName:", options.typeName,
@@ -1130,7 +1133,7 @@ export default class Vrapper extends Cog {
       }
       return this;
     } catch (error) {
-      throw this.wrapErrorEvent(error, "extractValue",
+      throw this.wrapErrorEvent(error, 1, "extractValue",
           "\n\toptions:", ...dumpObject(options),
           "\n\tvExplicitOwner:", ...dumpObject(vExplicitOwner));
     }
@@ -1194,11 +1197,12 @@ export default class Vrapper extends Cog {
       }
       return ret;
     } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .extractPropertyValue(), with:`,
-          "\n\toptions:", ...dumpObject(options),
-          "\n\tvalueEntry:", ...dumpObject(valueEntry),
-          "\n\tret:", ...dumpObject(ret),
-      );
+      throw this.wrapErrorEvent(error, 1, () => [
+        `extractPropertyValue()`,
+        "\n\toptions:", ...dumpObject(options),
+        "\n\tvalueEntry:", ...dumpObject(valueEntry),
+        "\n\tret:", ...dumpObject(ret),
+      ]);
     }
   }
 
@@ -1349,7 +1353,7 @@ export default class Vrapper extends Cog {
       return errorOnObtainMediaInterpretation(error);
     }
     function errorOnObtainMediaInterpretation (error) {
-      const wrapped = vrapper.wrapErrorEvent(error, wrap,
+      const wrapped = vrapper.wrapErrorEvent(error, 1, wrap,
         "\n\tid:", vrapper.getId(options).toString(),
         "\n\toptions:", ...dumpObject(options),
         "\n\tvExplicitOwner:", ...dumpObject(vExplicitOwner),
@@ -1413,8 +1417,10 @@ export default class Vrapper extends Cog {
       }
       return newValue;
     } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .alterValue(), with:`,
-          "\n\talterationVAKON:", dumpify(alterationVAKON));
+      throw this.wrapErrorEvent(error, 1, () => [
+        `alterValue()`,
+        "\n\talterationVAKON:", dumpify(alterationVAKON),
+      ]);
     }
   }
 
@@ -1441,7 +1447,7 @@ export default class Vrapper extends Cog {
       throw new Error(`Cannot locate Bvob buffer directly from caches (with id '${
           this.getRawId()}'`);
     } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .bvobContent()`);
+      throw this.wrapErrorEvent(error, 1, `bvobContent()`);
     }
   }
 
@@ -1483,7 +1489,7 @@ export default class Vrapper extends Cog {
       return ret;
     } catch (error) { return errorOnMediaURL(error); }
     function errorOnMediaURL (error) {
-      throw vrapper.wrapErrorEvent(error, wrap, "\n\tinfo:", ...dumpObject(mediaInfo));
+      throw vrapper.wrapErrorEvent(error, 1, wrap, "\n\tinfo:", ...dumpObject(mediaInfo));
     }
   }
 
@@ -1583,7 +1589,7 @@ export default class Vrapper extends Cog {
       ], errorOnPrepareBvob);
     } catch (error) { return errorOnPrepareBvob(error); }
     function errorOnPrepareBvob (error) {
-      throw vrapper.wrapErrorEvent(error, wrap,
+      throw vrapper.wrapErrorEvent(error, 1, wrap,
           "\n\tmediaInfo:", ...dumpObject(mediaInfo));
     }
   }
@@ -1686,7 +1692,7 @@ export default class Vrapper extends Cog {
       } while (ghostPath);
       this.refreshHandlers(targetEventHandlers, listenedRawIds, idHandlers);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `registerComplexHandlers`,
+      throw this.wrapErrorEvent(error, 1, `registerComplexHandlers`,
           "\n\trawId:", currentRawId,
           "\n\tcurrentObject:", ...dumpObject(currentObject),
           "\n\tghost path:", ...dumpObject(ghostPath),
@@ -1809,7 +1815,7 @@ export default class Vrapper extends Cog {
         }
       }
     } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .onEventMODIFIED()`);
+      throw this.wrapErrorEvent(error, 1, `onEventMODIFIED()`);
     }
   }
 
@@ -1918,7 +1924,7 @@ export default class Vrapper extends Cog {
       }
       return ret;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `obtainSubscription()`,
+      throw this.wrapErrorEvent(error, 1, `obtainSubscription()`,
           "\n\tliveOperation:", ...(liveOperation instanceof Kuery
               ? dumpKuery(liveOperation) : dumpObject(liveOperation)),
           "\n\tthis:", ...dumpObject(this));
@@ -1956,7 +1962,7 @@ export default class Vrapper extends Cog {
       }
       return fieldSubscription;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `obtainFieldSubscription('${fieldName}')`,
+      throw this.wrapErrorEvent(error, 1, `obtainFieldSubscription('${fieldName}')`,
           "\n\tfieldSubscription:", ...dumpObject(fieldSubscription),
           "\n\tthis:", ...dumpObject(this));
     }
@@ -1973,7 +1979,7 @@ export default class Vrapper extends Cog {
       this._filterHooks.set(subscription, hookData);
       return this._filterHooks;
     } catch (error) {
-      throw this.wrapErrorEvent(error, "_addFilterHook()",
+      throw this.wrapErrorEvent(error, 1, "_addFilterHook()",
           "\n\tsubscription:", ...dumpObject(subscription),
           "\n\thookData:", ...dumpObject(hookData),
           "\n\tfilterHandlers:", ...dumpObject(this._filterHooks),
@@ -1990,13 +1996,15 @@ export default class Vrapper extends Cog {
           subscription.triggerFilterUpdate(isStructural, fieldUpdate, passageCounter);
         }
       } catch (error) {
-        outputError(this.wrapErrorEvent(error,
+        this.outputErrorEvent(
+            this.wrapErrorEvent(error, 1,
                 new Error(`Subscription.triggerFilterHooks('${fieldUpdate._fieldName
                     }').filterHook(${subscription.debugId()}, [${filter}, ${isStructural}])`),
                 "\n\tlive update:", fieldUpdate,
                 "\n\tlive update options:", fieldUpdate.getOptions(),
                 "\n\tfailing filter subscription:", ...dumpObject(subscription),
                 "\n\tstate:", ...dumpObject(fieldUpdate.getState().toJS())),
+            1,
             `Exception caught during Subscription.triggerFilterHooks('${fieldUpdate._fieldName}')`);
       }
     }
@@ -2054,7 +2062,7 @@ export default class Vrapper extends Cog {
       this._lexicalScope.self = this._lexicalScope;
     });
     if (!this._lexicalScope) {
-      throw this.wrapErrorEvent(new Error("Vrapper owner is not immediately available"),
+      throw this.wrapErrorEvent(new Error("Vrapper owner is not immediately available"), 1,
           "_setUpScopeFeatures",
           "\n\tthis:", ...dumpObject(this));
     }
@@ -2112,6 +2120,7 @@ export default class Vrapper extends Cog {
           /*
           throw this.wrapErrorEvent(
               new Error(`Overriding existing Property '${newName}'`),
+              1,
               new Error(`onPropertiesUpdate in Scope ${this.debugId()}`),
               "\n\tnew value:", ...dumpObject(vActualAdd),
               "\n\tprevious value:", ...dumpObject(this._lexicalScope[newName]),
@@ -2195,10 +2204,11 @@ function createApplicatorWithNoOptions (vrapper: Vrapper, methodName: string) {
     try {
       return vrapper[methodName](...args);
     } catch (error) {
-      throw wrapError(error, `During ${vrapper.debugId()}\n .getVALKMethod(${methodName}), with:`,
-          ...args.reduce((accum, arg, index) =>
-                  accum.concat([`\n\targ#${index}:`]).concat(dumpify(arg)), []),
-      );
+      throw vrapper.wrapErrorEvent(error, 1, () => [
+        `getVALKMethod(${methodName})`,
+        ...args.reduce((accum, arg, index) =>
+                accum.concat([`\n\targ#${index}:`]).concat(dumpify(arg)), []),
+      ]);
     }
   };
 }
@@ -2209,10 +2219,10 @@ function createApplicatorWithOptionsFirst (vrapper: Vrapper, methodName: string,
       options.discourse = valker;
       return vrapper[methodName](options, ...rest);
     } catch (error) {
-      throw wrapError(error, `During ${vrapper.debugId()}\n .getVALKMethod(${
-              methodName}), with:`,
-          "\n\targ#0, options:", ...dumpObject(options),
-      );
+      throw vrapper.wrapErrorEvent(error, 1, () => [
+        `getVALKMethod(${methodName})`,
+        "\n\targ#0, options:", ...dumpObject(options),
+      ]);
     }
   };
 }
@@ -2223,11 +2233,11 @@ function createApplicatorWithOptionsSecond (vrapper: Vrapper, methodName: string
       options.discourse = valker;
       return vrapper[methodName](first, options, ...rest);
     } catch (error) {
-      throw wrapError(error, `During ${vrapper.debugId()}\n .getVALKMethod(${
-              methodName}), with:`,
-          "\n\targ#0:", dumpify(first),
-          "\n\targ#1, options:", ...dumpObject(options),
-      );
+      throw vrapper.wrapErrorEvent(error, 1, () => [
+        `getVALKMethod(${methodName})`,
+        "\n\targ#0:", dumpify(first),
+        "\n\targ#1, options:", ...dumpObject(options),
+      ]);
     }
   };
 }
@@ -2238,12 +2248,12 @@ function createApplicatorWithOptionsThird (vrapper: Vrapper, methodName: string,
       options.discourse = valker;
       return vrapper[methodName](first, second, options, ...rest);
     } catch (error) {
-      throw wrapError(error, `During ${vrapper.debugId()}\n .getVALKMethod(${
-              methodName}), with:`,
-          "\n\targ#0:", dumpify(first),
-          "\n\targ#1:", dumpify(second),
-          "\n\targ#2, options:", ...dumpObject(options),
-      );
+      throw vrapper.wrapErrorEvent(error, 1, () => [
+        `getVALKMethod(${methodName})`,
+        "\n\targ#0:", dumpify(first),
+        "\n\targ#1:", dumpify(second),
+        "\n\targ#2, options:", ...dumpObject(options),
+      ]);
     }
   };
 }
@@ -2261,12 +2271,12 @@ function createApplicatorWithNamespaceFieldFirstOptionsSecond (vrapper: Vrapper,
       options.discourse = valker;
       return vrapper[methodName](fieldSymbol, options, ...rest);
     } catch (error) {
-      throw wrapError(error, `During ${vrapper.debugId()}\n .getVALKMethod(${
-              methodName}), with:`,
-          "\n\targ#0:", dumpify(fieldName),
-          "\n\targ#1, options:", ...dumpObject(options),
-          "\n\tknown host fields:", ...dumpObject(namespaceFieldLookup),
-      );
+      throw vrapper.wrapErrorEvent(error, 1, () => [
+        `getVALKMethod(${methodName})`,
+        "\n\targ#0:", dumpify(fieldName),
+        "\n\targ#1, options:", ...dumpObject(options),
+        "\n\tknown host fields:", ...dumpObject(namespaceFieldLookup),
+      ]);
     }
   };
 }
@@ -2284,13 +2294,13 @@ function createApplicatorWithNamespaceFieldFirstOptionsThird (vrapper: Vrapper, 
       options.discourse = valker;
       return vrapper[methodName](fieldSymbol, second, options, ...rest);
     } catch (error) {
-      throw wrapError(error, `During ${vrapper.debugId()}\n .getVALKMethod(${
-              methodName}), with:`,
-          "\n\targ#0:", dumpify(fieldName),
-          "\n\targ#1:", dumpify(second),
-          "\n\targ#2, options:", ...dumpObject(options),
-          "\n\tknown host fields:", ...dumpObject(namespaceFieldLookup),
-      );
+      throw vrapper.wrapErrorEvent(error, 1, () => [
+        `getVALKMethod(${methodName})`,
+        "\n\targ#0:", dumpify(fieldName),
+        "\n\targ#1:", dumpify(second),
+        "\n\targ#2, options:", ...dumpObject(options),
+        "\n\tknown host fields:", ...dumpObject(namespaceFieldLookup),
+      ]);
     }
   };
 }

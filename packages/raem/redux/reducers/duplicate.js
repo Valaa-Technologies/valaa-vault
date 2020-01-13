@@ -8,7 +8,7 @@ import Transient, { createTransient, getTransientTypeName, PrototypeOfImmaterial
 
 import Bard, { getActionFromPassage } from "~/raem/redux/Bard";
 
-import { dumpify, dumpObject, invariantify, wrapError } from "~/tools";
+import { dumpify, dumpObject, invariantify } from "~/tools";
 import {
   DuplicateBard,
   prepareCreateOrDuplicateObjectTransientAndId, recurseCreateOrDuplicate,
@@ -136,10 +136,11 @@ export function duplicateFields (bard: DuplicateBard, mutableTransient: Transien
       }
       mutableTransient.set(fieldIntro.name, newFieldValue);
     } catch (error) {
-      throw wrapError(error, `During ${bard.debugId()}\n .duplicateFields(${
-              fieldIntro.name}), with:`,
-          "\n\toriginalField:", originalFieldValue,
-          "\n\tfieldIntro:", fieldIntro);
+      throw bard.wrapErrorEvent(error, 1, () => [
+        `duplicateFields(${fieldIntro.name})`,
+        "\n\toriginalField:", originalFieldValue,
+        "\n\tfieldIntro:", fieldIntro,
+      ]);
     }
   }
 }
@@ -189,7 +190,7 @@ function _duplicateOwnlingField (bard: Bard, fieldIntro: Object, originalRef: VR
     }
     return newObjectId;
   } catch (error) {
-    throw bard.wrapErrorEvent(error, `duplicateField(${fieldIntro.name}:${
+    throw bard.wrapErrorEvent(error, 1, `duplicateField(${fieldIntro.name}:${
             fieldIntro.namedType.name}/${bard.objectTypeName})`,
         "\n\tfieldIntro:", ...dumpObject(fieldIntro),
         "\n\toriginalRef:", ...dumpObject(originalRef),

@@ -13,7 +13,7 @@ import _jsxTransformFromString from "~/inspire/mediaDecoders/_jsxTransformFromSt
 
 import MediaDecoder from "~/tools/MediaDecoder";
 import notThatSafeEval from "~/tools/notThatSafeEval";
-import { dumpObject, wrapError } from "~/tools";
+import { dumpObject } from "~/tools";
 
 export default class JSXDecoder extends MediaDecoder {
   static mediaTypes = [
@@ -51,7 +51,7 @@ export default class JSXDecoder extends MediaDecoder {
       }
       return this._decodeIntoIntegrator(sourceInfo, sourceInfo.jsxTransformedSource);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `decode(${sourceInfo.phaseBase})`,
+      throw this.wrapErrorEvent(error, 1, `decode(${sourceInfo.phaseBase})`,
           "\n\tsource:", sourceInfo.source);
     }
   }
@@ -87,7 +87,7 @@ export default class JSXDecoder extends MediaDecoder {
       sourceInfo.phase = `run phase of ${sourceInfo.phaseBase}`;
       return integrator;
     } catch (error) {
-      const wrappedError = this.wrapErrorEvent(error,
+      const wrappedError = this.wrapErrorEvent(error, 1,
           `_integrate(${sourceInfo.phaseBase}):`,
           "\n\tsourceInfo:", sourceInfo);
       if (!sourceInfo || !error.column || !error.lineNumber) throw wrappedError;
@@ -180,9 +180,10 @@ export default class JSXDecoder extends MediaDecoder {
             ret[SourceInfoTag] = sourceInfo;
             return ret;
           } catch (error) {
-            throw wrapError(error, `During ${sourceInfo.mediaName} integration, with`,
-                "\n\tintegrationHostGlobal:", ...dumpObject(integrationHostGlobal),
-            );
+            throw this.wrapErrorEvent(error, 1, () => [
+              `createDecodeScope/${sourceInfo.mediaName} integration`,
+              "\n\tintegrationHostGlobal:", ...dumpObject(integrationHostGlobal),
+            ]);
           }
         };
       },

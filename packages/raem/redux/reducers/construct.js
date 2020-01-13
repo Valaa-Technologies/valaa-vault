@@ -18,7 +18,7 @@ import { createMaterializeGhostAction } from "~/raem/tools/denormalized/ghost";
 import { setCreatedObjectPartition, universalizePartitionMutation }
     from "~/raem/tools/denormalized/partitions";
 
-import { dumpObject, invariantify, invariantifyString, wrapError } from "~/tools";
+import { dumpObject, invariantify, invariantifyString } from "~/tools";
 
 export class CreateBard extends Bard {
   getDenormalizedTable: Function;
@@ -198,9 +198,11 @@ export function recurseCreateOrDuplicate (bard: CreateBard, actionTypeName: stri
     });
     bard.getDenormalizedTable(typeName)[rawId] = bard.objectTransient;
   } catch (error) {
-    throw wrapError(error, `During ${bard.debugId()}\n .recurseCreateOrDuplicate(), with:`,
-        "\n\tobject:", ...dumpObject(bard.objectTransient),
-        "\n\tinitialState:", ...dumpObject(initialState));
+    throw bard.wrapErrorEvent(error, 1, () => [
+      `recurseCreateOrDuplicate()`,
+      "\n\tobject:", ...dumpObject(bard.objectTransient),
+      "\n\tinitialState:", ...dumpObject(initialState),
+    ]);
   }
 }
 

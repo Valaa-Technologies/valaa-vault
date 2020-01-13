@@ -140,7 +140,8 @@ function _getIdentifierOrPropertyValue (steppers: Object, valker: Valker, head: 
             isGetProperty ? "property" : "identifier"} name`);
       }
     }
-    throw valker.wrapErrorEvent(actualError, isGetProperty ? "getProperty" : "getIdentifier",
+    throw valker.wrapErrorEvent(actualError, 1,
+        isGetProperty ? "getProperty" : "getIdentifier",
         "\n\thead:", ...dumpObject(head),
         "\n\tcontainer:", ...dumpObject(eContainer),
         "(via kuery:", ...dumpKuery(container), ")",
@@ -213,7 +214,8 @@ function _alterIdentifierOrPropertyValue (steppers: Object, valker: Valker, head
         "\n\talterationVAKON:", ...dumpKuery(alterationVAKON),
         "\n\talterationVAKON run:", eAlterationVAKON);
     */
-    throw valker.wrapErrorEvent(actualError, isAlterProperty ? "alterProperty" : "alterIdentifier",
+    throw valker.wrapErrorEvent(actualError, 1,
+        isAlterProperty ? "alterProperty" : "alterIdentifier",
         "\n\thead:", ...dumpObject(head),
         "\n\tcontainer:", ...dumpObject(eContainer),
         "(via kuery:", ...dumpKuery(container), ")",
@@ -275,7 +277,7 @@ function _deleteIdentifierOrProperty (steppers: Object, valker: Valker, head: an
             isPropertyNotIdentifier ? "property" : "identifier"} name when deleting`);
       }
     }
-    throw valker.wrapErrorEvent(actualError,
+    throw valker.wrapErrorEvent(actualError, 1,
         isPropertyNotIdentifier ? "deleteProperty" : "deleteIdentifier",
         "\n\thead:", ...dumpObject(head),
         "\n\tcontainer:", ...dumpObject(eContainer),
@@ -354,8 +356,10 @@ function _new (valker: Valker, head: any, scope: ?Object, newOp: any) {
         }', expected either a function for native object construction, a ValOS type for${
         ""} ValOS object creation or a ValOS Resource for instantiation`);
   } catch (error) {
-    throw valker.wrapErrorEvent(error, `builtin.§new`,
-        "\n\tType:", ...dumpObject(Type),
-        "\n\targs:", ...dumpObject(eArgs));
+    throw valker.wrapErrorEvent(error, 1, () => [
+      `§new`,
+      "\n\tType:", ...dumpObject(Type),
+      "\n\targs:", ...dumpObject(eArgs),
+    ]);
   }
 }

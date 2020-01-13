@@ -112,7 +112,7 @@ export default class ScribeConnection extends Connection {
         return connection.narrateEventLog(narrateOptions);
       },
     ]), function errorOnScribePartitionConnect (error) {
-      throw connection.wrapErrorEvent(error, new Error("_doConnect"),
+      throw connection.wrapErrorEvent(error, 1, new Error("_doConnect"),
           "\n\toptions:", ...dumpObject(options));
     });
   }
@@ -143,7 +143,7 @@ export default class ScribeConnection extends Connection {
     const ret = {};
     return _narrateEventLog(this, options, ret,
         function errorOnScribeNarrateEventLog (error) {
-          throw connection.wrapErrorEvent(error, wrap,
+          throw connection.wrapErrorEvent(error, 1, wrap,
               "\n\toptions:", ...dumpObject(options),
               "\n\tcurrent ret:", ...dumpObject(ret));
         });
@@ -161,7 +161,7 @@ export default class ScribeConnection extends Connection {
     function errorOnScribeChronicleEvents (error) {
       const cycleWraps = wrap;
       wrap = new Error("chronicleEvents()");
-      throw connection.wrapErrorEvent(error, cycleWraps,
+      throw connection.wrapErrorEvent(error, 1, cycleWraps,
           "\n\teventLog:", ...dumpObject(events),
           "\n\toptions:", ...dumpObject(options),
       );
@@ -181,7 +181,7 @@ export default class ScribeConnection extends Connection {
           type, errorOnReceiveTruths);
     } catch (error) { throw errorOnReceiveTruths(error); }
     function errorOnReceiveTruths (error) {
-      throw connection.wrapErrorEvent(error, wrap,
+      throw connection.wrapErrorEvent(error, 1, wrap,
           "\n\ttruths:", ...dumpObject(truths), truths,
           "\n\tthis:", ...dumpObject(this));
     }
@@ -245,7 +245,7 @@ export default class ScribeConnection extends Connection {
           if (typeof error.conflictingCommandEventId === "number") {
             return this._reloadCommandQueue(error.conflictingCommandEventId);
           }
-          throw this.wrapErrorEvent(error, wrap,
+          throw this.wrapErrorEvent(error, 1, wrap,
               "\n\tdeleteBegin:", deleteBegin,
               "\n\tdeleteBegin + len:", deleteBegin + deletedIds.length,
               "\n\tdeletedIds:", deletedIds);
@@ -277,7 +277,7 @@ export default class ScribeConnection extends Connection {
       return _determineEventMediaPreOps(this, mediaEvent, rootEvent, mediaVRL, pendingEntry);
     } catch (error) {
       if (!pendingEntry) pendingEntry = this._pendingMediaLookup[mediaVRL.rawId()];
-      throw this.wrapErrorEvent(error, `_initiateMediaRetrievals(${
+      throw this.wrapErrorEvent(error, 1, `_initiateMediaRetrievals(${
               ((pendingEntry || {}).mediaInfo || {}).name || ""}/${mediaVRL.rawId()})`,
           "\n\tmediaVRL:", mediaVRL,
           "\n\tmediaEvent:", ...dumpObject(mediaEvent),
@@ -295,7 +295,7 @@ export default class ScribeConnection extends Connection {
       return _requestMediaContents(this, mediaInfos, errorOnRequestMediaContents);
     } catch (error) { return errorOnRequestMediaContents(error); }
     function errorOnRequestMediaContents (error: Object, mediaInfo: MediaInfo = error.mediaInfo) {
-      throw connection.wrapErrorEvent(error, wrap,
+      throw connection.wrapErrorEvent(error, 1, wrap,
           "\n\tmediaInfo:", ...dumpObject(mediaInfo),
           "\n\tmediaInfos:", ...dumpObject(mediaInfos),
           "\n\tconnection:", ...dumpObject(connection),
@@ -313,7 +313,7 @@ export default class ScribeConnection extends Connection {
       return _prepareBvob(this, content, mediaInfo, errorOnPrepareBvob);
     } catch (error) { return errorOnPrepareBvob(error); }
     function errorOnPrepareBvob (error) {
-      throw connection.wrapErrorEvent(error, wrap,
+      throw connection.wrapErrorEvent(error, 1, wrap,
           "\n\tcontent:", ...dumpObject({ content }),
           "\n\tmediaInfo:", ...dumpObject(mediaInfo));
     }
@@ -333,7 +333,7 @@ export default class ScribeConnection extends Connection {
       if (require_) throw new Error(`Media entry for ${mediaVRL.toString()} not found`);
       return undefined;
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_getMediaEntry(..., require = ${require_})`,
+      throw this.wrapErrorEvent(error, 1, `_getMediaEntry(..., require = ${require_})`,
           "\n\tmediaId:", ...dumpObject(mediaVRL));
     }
   }
@@ -342,7 +342,7 @@ export default class ScribeConnection extends Connection {
     try {
       return await _updateMediaEntries(this, updates);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_updateMediaEntries(${updates.length} updates)`,
+      throw this.wrapErrorEvent(error, 1, `_updateMediaEntries(${updates.length} updates)`,
           "\n\tupdates:", ...dumpObject(updates));
     }
   }
@@ -351,7 +351,7 @@ export default class ScribeConnection extends Connection {
     try {
       return await _readMediaEntries(this);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_readMediaEntries()`);
+      throw this.wrapErrorEvent(error, 1, `_readMediaEntries()`);
     }
   }
 
@@ -359,7 +359,7 @@ export default class ScribeConnection extends Connection {
     try {
       return await _destroyMediaInfo(this, mediaRawId);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_destroyMediaInfo('${mediaRawId}')`);
+      throw this.wrapErrorEvent(error, 1, `_destroyMediaInfo('${mediaRawId}')`);
     }
   }
 
@@ -368,8 +368,8 @@ export default class ScribeConnection extends Connection {
     try {
       return await _writeTruths(this, truths);
     } catch (error) {
-      throw this.wrapErrorEvent(error,
-          `_writeTruths([${tryAspect(truths[0], "log").index} ,${
+      throw this.wrapErrorEvent(error, 1,
+          `_writeTruths([${tryAspect(truths[0], "wrapErrorEventlog").index} ,${
               tryAspect(truths[truths.length - 1], "log").index}])`,
           "\n\teventLog:", ...dumpObject(truths));
     }
@@ -379,7 +379,7 @@ export default class ScribeConnection extends Connection {
     try {
       return await _readTruths(this, options);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_readTruths()`,
+      throw this.wrapErrorEvent(error, 1, `_readTruths()`,
           "\n\toptions", ...dumpObject(options));
     }
   }
@@ -388,7 +388,7 @@ export default class ScribeConnection extends Connection {
     try {
       return await _writeCommands(this, commands);
     } catch (error) {
-      throw this.wrapErrorEvent(error,
+      throw this.wrapErrorEvent(error, 1,
           `_writeCommands([${tryAspect(commands[0], "log").index},${
               tryAspect(commands[commands.length - 1], "log").index}])`,
           "\n\tcommands:", ...dumpObject(commands));
@@ -399,7 +399,7 @@ export default class ScribeConnection extends Connection {
     try {
       return await _readCommands(this, options);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_readCommands()`,
+      throw this.wrapErrorEvent(error, 1, `_readCommands()`,
           "\n\toptions", ...dumpObject(options));
     }
   }
@@ -409,7 +409,7 @@ export default class ScribeConnection extends Connection {
     try {
       return await _deleteCommands(this, fromEventId, toEventId, expectedCommandIds);
     } catch (error) {
-      throw this.wrapErrorEvent(error, `_deleteCommands(${fromEventId}, ${toEventId})`,
+      throw this.wrapErrorEvent(error, 1, `_deleteCommands(${fromEventId}, ${toEventId})`,
           "\n\texpectedCommandIds:", ...dumpObject(expectedCommandIds));
     }
   }

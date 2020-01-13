@@ -120,7 +120,7 @@ export default class RAEMTestHarness extends FabricEventTarget {
         }),
       };
     } catch (error) {
-      throw this.wrapErrorEvent(error, "dispatch",
+      throw this.wrapErrorEvent(error, 1, "dispatch",
           "\n\tevents:", ...dumpObject(events));
     }
   }

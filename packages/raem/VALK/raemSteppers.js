@@ -19,8 +19,8 @@ import { addStackFrameToError, SourceInfoTag } from "~/raem/VALK/StackTrace";
 
 import { isTildeStepName, expandTildeVAKON } from "./_tildeOps";
 
-import { dumpify, invariantify, invariantifyObject, invariantifyArray, isPromise, isSymbol,
-  outputCollapsedError, wrapError,
+import {
+  dumpify, invariantify, invariantifyObject, invariantifyArray, isPromise, isSymbol,
 } from "~/tools";
 
 /* eslint-disable no-bitwise */
@@ -84,10 +84,11 @@ export default {
         if (typeof statement === "object") valker.advance(head, statement, scope, true);
       }
     } catch (error) {
-      throw wrapError(error, `During ${valker.debugId()}\n .statement(#${index}), with:`,
-          "\n\thead:", ...dumpObject(head),
-          "\n\tstatement:", dumpify(statementsStep[index + 1]),
-      );
+      throw valker.wrapErrorEvent(error, 1, () => [
+        `§@/statement(#${index})`,
+        "\n\thead:", ...dumpObject(head),
+        "\n\tstatement:", dumpify(statementsStep[index + 1]),
+      ]);
     }
     return head;
   },
@@ -109,7 +110,7 @@ export default {
     } catch (error) {
       const commentText = typeof commentKuery !== "object" ? commentKuery
           : tryLiteral(valker, head, commentKuery, scope);
-      throw wrapError(error, "\n-\nKUERY NOTE:", commentText, "\n-\n");
+      throw valker.wrapErrorEvent(error, "\n-\nKUERY NOTE:", commentText, "\n-\n");
     }
   },
   "§debug": function debug (valker: Valker, head: any, scope: ?Object,
@@ -668,13 +669,15 @@ function _advance (valker: Valker, head: any, scope: ?Object, pathStep: BuiltinS
     }
     return stepHead;
   } catch (error) {
-    throw wrapError(error, `During ${valker.debugId()}\n ._advance, step #${index}: ${type}, with:`,
-        "\n\tstep head:", ...dumpObject(stepHead),
-        "\n\tstep:", type, ...dumpKuery(step),
-        "\n\tpath head:", ...dumpObject(head),
-        "\n\tpath:", ...dumpObject([...pathStep].slice(initialIndex, finalIndex)),
-        "\n\tpath length:", pathStep.length,
-        "\n\tscope:", dumpScope(pathScope));
+    throw valker.wrapErrorEvent(error, 1, () => [
+      `During ${valker.debugId()}\n ._advance, step #${index}: ${type}, with:`,
+      "\n\tstep head:", ...dumpObject(stepHead),
+      "\n\tstep:", type, ...dumpKuery(step),
+      "\n\tpath head:", ...dumpObject(head),
+      "\n\tpath:", ...dumpObject([...pathStep].slice(initialIndex, finalIndex)),
+      "\n\tpath length:", pathStep.length,
+      "\n\tscope:", dumpScope(pathScope),
+    ]);
   }
 }
 
@@ -692,11 +695,13 @@ function _map (valker: Valker, head: any, scope: ?Object, mapStep: any, nonFinal
       const result = this["§->"](valker, entryHead, mapScope, mapStep);
       ret.push(valker.tryUnpack(result, true));
     } catch (error) {
-      throw wrapError(error, `During ${valker.debugId()}\n .map, with:`,
-          "\n\tmap head", ...dumpObject(sequence),
-          "\n\tmap step:", ...dumpKuery(mapStep),
-          `\n\tentry #${index} head:`, ...dumpObject(entryHead),
-          "\n\tscope", dumpScope(mapScope));
+      throw valker.wrapErrorEvent(error, 1, () => [
+        `§map/entry#${index}`,
+        "\n\tmap head", ...dumpObject(sequence),
+        "\n\tmap step:", ...dumpKuery(mapStep),
+        `\n\tentry #${index} head:`, ...dumpObject(entryHead),
+        "\n\tscope", dumpScope(mapScope),
+      ]);
     }
   });
   return ret;
@@ -718,11 +723,13 @@ function _filter (valker: Valker, head: any, scope: ?Object, filterStep: any,
       const result = this["§->"](valker, entryHead, filterScope, filterStep);
       if (result) ret.push(isPackedSequence ? valker.tryUnpack(entry, true) : entry);
     } catch (error) {
-      throw wrapError(error, `During ${valker.debugId()}\n .filter, with:`,
-          "\n\tfilter head:", ...dumpObject(sequence),
-          "\n\tfilter step:", ...dumpKuery(filterStep),
-          `\n\tentry #${index} head:`, ...dumpObject(entryHead),
-          "\n\tscope", dumpScope(filterScope));
+      throw valker.wrapErrorEvent(error, 1, () => [
+        `§filter/entry#${index}`,
+        "\n\tfilter head:", ...dumpObject(sequence),
+        "\n\tfilter step:", ...dumpKuery(filterStep),
+        `\n\tentry #${index} head:`, ...dumpObject(entryHead),
+        "\n\tscope", dumpScope(filterScope),
+      ]);
     }
   });
   return ret;
@@ -852,7 +859,11 @@ export function denoteValOSKueryFunction (description: any = "") {
         }
         return this.get(vakon, { discourse: this.__callerValker__ });
       } catch (error) {
-        throw wrapError(error, `During ${createKuery.name}`);
+        throw !this.__callerValker__ ? error
+            : this.__callerValker__.wrapErrorEvent(error, 1, () => [
+          `During ${createKuery.name}`,
+          "\n\targs:", ...dumpObject(args),
+        ]);
       }
     }
     callee._valkThunk = true;
@@ -955,7 +966,7 @@ function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object
       }
     }
     const wrap = (transaction || capturingValker).wrapErrorEvent(
-        transactionError || advanceError,
+        transactionError || advanceError, 1,
         opName,
         ...((transactionError && advanceError)
             ? ["\n\t\tadvance rollback cause:", ...dumpObject(advanceError)] : []),
@@ -1029,7 +1040,9 @@ export function callOrApply (steppers: Object, valker: Valker, head: any, scope:
         : eCallee.call(eThis, ...eArgs);
     if ((ret != null) && ret.then && isPromise(ret)) {
       ret.catch(error => {
-        outputCollapsedError(onError(error),
+        valker.outputErrorEvent(
+            onError(error),
+            1,
             `Exception re-raised by VALK.${opName}('${eCallee.name}').ret:Promise.catch`);
         throw error;
       });
@@ -1041,7 +1054,7 @@ export function callOrApply (steppers: Object, valker: Valker, head: any, scope:
     throw onError(error);
   }
   function onError (error) {
-    return valker.wrapErrorEvent(error, `builtin.${opName}`,
+    return valker.wrapErrorEvent(error, 1, `builtin.${opName}`,
         "\n\thead:", ...dumpObject(head),
         "\n\tcallee (is valk):", (eCallee != null) && eCallee._valkThunk, ...dumpObject(eCallee),
         "(via kuery:", ...dumpKuery(step[1]), ")",

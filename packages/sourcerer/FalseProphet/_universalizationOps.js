@@ -160,7 +160,7 @@ export function deserializeVRL (serializedRef: string | JSONIdData,
     }
     return ret;
   } catch (error) {
-    throw (falseProphet ? falseProphet.wrapErrorEvent.bind(falseProphet) : wrapError)(error,
+    throw (falseProphet ? falseProphet.wrapErrorEvent.bind(falseProphet, 1) : wrapError)(error,
         new Error("deserializeVRL()"),
             "\n\tserializedReference:", serializedRef,
             "\n\tcurrentPartitionURI:", currentPartitionURI,

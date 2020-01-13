@@ -54,7 +54,7 @@ export default valosheath.exportSpindle({
       }
     } catch (error) {
       gateway.outputErrorEvent(
-          gateway.wrapErrorEvent(error,
+          gateway.wrapErrorEvent(error, 1,
               new Error(`web-spindle:addPrefixRouter(${prefix}`),
               "\n\tprefixConfig:", ...dumpObject(prefixConfig)),
           `Exception caught during web-spindle:addPrefixRouter(${prefix}):${

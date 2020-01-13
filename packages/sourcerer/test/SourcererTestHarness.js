@@ -102,7 +102,7 @@ export async function createSourcererOracleHarness (options: Object, ...commandB
     }
     return ret;
   } catch (error) {
-    throw ret.wrapErrorEvent(error, new Error("During createSourcererOracleHarness"),
+    throw ret.wrapErrorEvent(error, 1, new Error("During createSourcererOracleHarness"),
         "\n\toptions:", ...dumpObject(options),
         "\n\tcommandBlocks:", ...dumpObject(commandBlocks));
   }

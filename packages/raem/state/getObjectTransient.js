@@ -3,8 +3,6 @@
 import { IdData } from "~/raem/VRL";
 import { Resolver, Transient } from "~/raem/state";
 
-import { dumpObject, wrapError } from "~/tools";
-
 /**
  * Returns a transient which corresponds to given idData and typeName
  * in the given state or resolver.
@@ -29,14 +27,8 @@ import { dumpObject, wrapError } from "~/tools";
  */
 export function tryObjectTransient (resolver: Resolver, idData: IdData, typeName: string,
     require: boolean = false): Transient {
-  try {
-    if (!(resolver instanceof Resolver)) {
-      throw new Error("INTERNAL ERROR: getObjectTransientDetailed.resolver is not a Resolver");
-    }
-    return resolver.tryGoToTransient(resolver.obtainReference(idData), typeName, require, false);
-  } catch (error) {
-    throw wrapError(error, `During getObjectTransientDetailed(${idData}: ${typeName}), with:`,
-        "\n\trequire:", require,
-        "\n\tresolver:", ...dumpObject(resolver));
+  if (!(resolver instanceof Resolver)) {
+    throw new Error("INTERNAL ERROR: getObjectTransientDetailed.resolver is not a Resolver");
   }
+  return resolver.tryGoToTransient(resolver.obtainReference(idData), typeName, require, false);
 }

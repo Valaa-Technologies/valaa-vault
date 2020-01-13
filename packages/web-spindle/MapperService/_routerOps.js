@@ -82,7 +82,7 @@ export function _createPrefixRouter (rootService, prefix, prefixConfig) {
   });
   return prefixRouter;
   function errorOnCreatePrefixRouter (error) {
-    prefixRouter.outputErrorEvent(prefixRouter.wrapErrorEvent(error, frameError,
+    prefixRouter.outputErrorEvent(prefixRouter.wrapErrorEvent(error, 1, frameError,
         "\n\tplugin options:", ...dumpObject(pluginOptions),
     ), `Exception intercepted during createPrefixRouter(<${prefix}>)`);
   }
@@ -97,7 +97,7 @@ function _addSchemas (router, schemas) {
     try {
       router._fastify.addSchema(schema);
     } catch (error) {
-      throw router.wrapErrorEvent(error,
+      throw router.wrapErrorEvent(error, 1,
           new Error(`_addSchemas(${schema.schemaName})`),
           "\n\tschema:", dumpify(schema, { indent: 2 }));
     }
@@ -116,7 +116,7 @@ function _prepareProjectors (router) {
       }
       projector._whenReady = new Promise(resolve => (projector._resolveWhenReady = resolve));
     } catch (error) {
-      throw router.wrapErrorEvent(error,
+      throw router.wrapErrorEvent(error, 1,
           new Error(`prepare(${router._projectorName(projector)})`),
               "\n\tprojector:", dumpify(projector, { indent: 2 }),
               "\n\tprojector.config:", dumpify(projector.config),
@@ -140,8 +140,8 @@ function _attachProjectorFastifyRoutes (router) {
             },
             result => {
               if (result !== true) {
-                throw router.wrapErrorEvent(
-                    new Error("INTERNAL SERVER ERROR: invalid route handler return value"),
+                const error = new Error("INTERNAL ERROR: invalid route handler return value");
+                throw router.wrapErrorEvent(error, 0,
                     new Error(`handler return value validator`),
                     "\n\treturn value:", ...dumpObject(result),
                     "\n\tNote: projector.handler must explicitly call reply.code/send",
@@ -154,7 +154,7 @@ function _attachProjectorFastifyRoutes (router) {
             reply.code(500);
             reply.send(error.message);
             outputError(
-                router.wrapErrorEvent(error,
+                router.wrapErrorEvent(error, 1,
                     new Error(`${projector.name}`),
                     "\n\trequest.params:", ...dumpObject(request.params),
                     "\n\trequest.query:", ...dumpObject(request.query),
@@ -168,7 +168,7 @@ function _attachProjectorFastifyRoutes (router) {
       fastifyRoute = { ...projector.route, handler: projector.smartHandler };
       router._fastify.route(fastifyRoute);
     } catch (error) {
-      throw router.wrapErrorEvent(error,
+      throw router.wrapErrorEvent(error, 1,
           new Error(`_attachProjectorFastifyRoute(${router._projectorName(projector)})`),
           "\n\tfastifyRoute:", dumpify(fastifyRoute, { indent: 2 }),
       );
@@ -197,8 +197,7 @@ export async function _projectPrefixRoutesFromView (router, view, viewName) {
       ret = true;
     } catch (error) {
       router.outputErrorEvent(
-          (ret = router.wrapErrorEvent(
-              error,
+          (ret = router.wrapErrorEvent(error, 1,
               new Error(`preload(${projector.name})`),
           )),
           `During preload(${projector.name})`,

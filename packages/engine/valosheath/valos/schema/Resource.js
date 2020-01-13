@@ -13,7 +13,7 @@ import { duplicateResource, instantiateResource }
     from "~/engine/valosheath/valos/_resourceLifetimeOps";
 import { OwnerDefaultCouplingTag } from "~/engine/valosheath/valos/enfoldSchemaSheath";
 
-import { dumpObject, outputCollapsedError, wrapError } from "~/tools";
+import { dumpObject, wrapError } from "~/tools";
 
 const symbols = {
   getField: Symbol("Resource.getField"),
@@ -108,11 +108,14 @@ export default {
             "\n\tprefer: Resource.tryActiveResource returning null",
             "\n\tchange: Resource.getActiveResource will throw if no active resource is found",
             "instead of returning null. Actual error listed as collapsed below.");
-        outputCollapsedError(this.__callerValker__.wrapErrorEvent(error,
-                `Resource.getActiveResource('${String(id)}')`,
-            "\n\tvalker:", ...dumpObject(this.__callerValker__),
-        ), `Caught exception (collapsed and ignored during deprecation period: ${
-            ""}\n\n\tEVENTUALLY THIS WILL BECOME AN ACTUAL ERROR\n\n)`);
+        this.__callerValker__.outputErrorEvent(
+            this.__callerValker__.wrapErrorEvent(error, 1, () => [
+              `Resource.getActiveResource('${String(id)}')`,
+              "\n\tvalker:", ...dumpObject(this.__callerValker__),
+            ]),
+            1,
+            `Exception caught (collapsed and ignored during deprecation period: ${
+              ""}\n\n\tEVENTUALLY THIS WILL BECOME AN ACTUAL ERROR\n\n)`);
         return ret;
       }
     }),

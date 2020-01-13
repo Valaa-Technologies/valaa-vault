@@ -128,7 +128,7 @@ function _prepareBvobToUpstreamWithRetries (connection: ScribeConnection,
     preparation => preparation.persistProcess,
   ], errorOnScribePrepareBvobToUpstream);
   function errorOnScribePrepareBvobToUpstream (error) {
-    const wrappedError = connection.wrapErrorEvent(error, wrap,
+    const wrappedError = connection.wrapErrorEvent(error, 1, wrap,
         "\n\tmediaInfo:", ...dumpObject(mediaInfo),
     );
     if ((error.isRetryable !== false) && (retriesRemaining > 0)) {
@@ -247,7 +247,7 @@ export async function _retryingTwoWaySyncMediaContent (connection: ScribeConnect
       return mediaEntry;
     } catch (error) {
       const nextBackoff = getNextBackoffSeconds && getNextBackoffSeconds(i - 1, mediaInfo, error);
-      const wrappedError = connection.wrapErrorEvent(error,
+      const wrappedError = connection.wrapErrorEvent(error, 1,
           `scribe.retrieveMedia("${mediaInfo.name}") attempt#${i}`,
           "\n\terror.statusCode:", error.statusCode, ", isRetryable:", error.isRetryable,
               ", immediateRetry:", error.immediateRetry,

@@ -87,7 +87,7 @@ export default function createRootReducer ({
           `WARNING: While reducing, no reducer for action type ${story.type}, ignoring`);
       return state;
     } catch (error) {
-      throw mainLogger.wrapErrorEvent(error, `mainReduce(${story.type}, ${story.id || ""})`,
+      throw mainLogger.wrapErrorEvent(error, 1, `mainReduce(${story.type}, ${story.id || ""})`,
           "\n\tstory:", ...dumpObject(story),
           "\n\tevent:", ...dumpObject(getActionFromPassage(story)),
           "\n\tthis:", this);
@@ -120,7 +120,7 @@ export default function createRootReducer ({
       if (reducer) return reducer.call(this, state, passage);
       throw new Error(`No reducer found for sub-action of type ${passage.type}`);
     } catch (error) {
-      throw subEventLogger.wrapErrorEvent(error, `subReduce(${passage.typeName})`,
+      throw subEventLogger.wrapErrorEvent(error, 1, `subReduce(${passage.typeName})`,
           "\n\tpassage:", ...dumpObject(passage),
           "\n\taction:", ...dumpObject(getActionFromPassage(passage)),
           "\n\tthis:", this);

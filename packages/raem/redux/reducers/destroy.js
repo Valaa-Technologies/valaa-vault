@@ -8,7 +8,7 @@ import { universalizePartitionMutation } from "~/raem/tools/denormalized/partiti
 
 import Bard from "~/raem/redux/Bard";
 
-import { wrapError, invariantifyObject, dumpObject } from "~/tools";
+import { invariantifyObject, dumpObject } from "~/tools";
 
 const allowedHiddenFields = { typeName: true };
 
@@ -56,12 +56,13 @@ export default function destroy (bard: Bard) {
           .setIn([destroyedTypeName, rawId], destroyedTransient.set("typeName", destroyedTypeName));
     });
   } catch (error) {
-    throw wrapError(error, `During ${bard.debugId()}\n .destroy(${rawId}), with:`,
-        "\n\tid:", passage.id,
-        "\n\towner:", transient && transient.get("owner"),
-        "\n\ttransient:", ...dumpObject(transient),
-        "\n\tintro type:", objectTypeIntro.name,
-        "\n\tstate:", JSON.stringify(bard.getState().toJS(), null, 2));
+    throw bard.wrapErrorEvent(error, 1, () => [
+      `destroy(${rawId})`,
+      "\n\tid:", passage.id,
+      "\n\towner:", transient && transient.get("owner"),
+      "\n\ttransient:", ...dumpObject(transient),
+      "\n\tintro type:", objectTypeIntro.name,
+    ]);
   }
 }
 

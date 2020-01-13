@@ -273,7 +273,8 @@ function _patchRevelation (gateway, targetRevelation, patchRevelation) {
               }
               return revelationPatch;
             } catch (error) {
-              throw gateway.wrapErrorEvent(error, `_patchRevelation via patch '${patch.name}' call`,
+              throw gateway.wrapErrorEvent(error, 1,
+                  `_patchRevelation via patch '${patch.name}' call`,
                   "\n\trevelationPatch:", revelationPatch,
                   "\n\ttarget:", target);
             }
@@ -329,7 +330,8 @@ function _patchRevelation (gateway, targetRevelation, patchRevelation) {
           }
           return undefined;
         } catch (error) {
-          throw gateway.wrapErrorEvent(error, new Error(`patchRevelation.preExtend(key: ${key})`),
+          throw gateway.wrapErrorEvent(error, 1,
+              new Error(`patchRevelation.preExtend(key: ${key})`),
               "\n\ttarget:", ...dumpObject(target),
               "\n\tpatch:", ...dumpObject(patch),
               "\n\ttargetParent:", ...dumpObject(targetParent),
@@ -359,7 +361,7 @@ function _patchRevelation (gateway, targetRevelation, patchRevelation) {
       },
     });
   } catch (error) {
-    throw gateway.wrapErrorEvent(error, new Error("_patchRevelation()"),
+    throw gateway.wrapErrorEvent(error, 1, new Error("_patchRevelation()"),
         "\n\ttargetRevelation:", ...dumpObject(targetRevelation),
         "\n\tpatchRevelation:", ...dumpObject(patchRevelation));
   }
@@ -468,9 +470,11 @@ function _valk (gateway, head, step) {
     */
     throw new Error(`Unrecognized revelation op '${opId}'`);
   } catch (error) {
-    throw wrapError(error, new Error("_valk"),
+    throw gateway.wrapErrorEvent(error, 1,
+      new Error("_valk"),
       "\n\thead:", ...dumpObject(head),
-      "\n\tstep:", ...dumpObject(step));
+      "\n\tstep:", ...dumpObject(step),
+    );
   }
   function _tryLiteralOrValk (candidate) {
     if ((candidate === null) || (typeof candidate !== "object")) return candidate;
@@ -506,7 +510,7 @@ function _import (gateway, step) {
                 : _valk(relativeGateway, revelation, ["§->", ...pathOp])),
           ]);
   } catch (error) {
-    throw gateway.wrapErrorEvent(error,
+    throw gateway.wrapErrorEvent(error, 1,
         `_require('${location}')`,
         "\n\tgateway.siteRoot:", gateway.siteRoot,
         "\n\tgateway.revelationRoot:", gateway.revelationRoot,

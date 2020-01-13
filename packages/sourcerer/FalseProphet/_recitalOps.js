@@ -335,7 +335,7 @@ export function _recomposeSchismaticStory (falseProphet: FalseProphet, story: Pr
     return recomposedStory;
   } catch (error) {
     const commandId = story.aspects.command.id;
-    const wrappedError = falseProphet.wrapErrorEvent(error,
+    const wrappedError = falseProphet.wrapErrorEvent(error, 1,
         new Error(`_recomposeSchismaticStory.${composeDescription}.dispatch(${commandId}) ${
           (composeDescription !== "story-recompose")
               ? "recomposition schism: failed to reduce the purged command against fresh corpus"
@@ -369,6 +369,7 @@ function _rewriteSchismaticProphecyPartitionCommand (
   const error = reformation.instigatorConnection.wrapErrorEvent(
       new Error(`REFORMATION BREACH ERROR: a schismatic prophecy with a new truth${
         ""} remains schismatic after recomposition.`),
+      1,
       new Error("_rewriteSchismaticProphecyPartitionCommand"),
       "\n\tRecomposing only the new event while rejecting the rest of the original prophecy.",
       "\n\tschism description:", progress.message,
@@ -440,7 +441,7 @@ export function _deliverStoriesToFollowers (falseProphet: FalseProphet, stories:
         followerReactions.set(follower, reactions);
       }
     } catch (error) {
-      falseProphet.outputErrorEvent(falseProphet.wrapErrorEvent(error,
+      falseProphet.outputErrorEvent(falseProphet.wrapErrorEvent(error, 2,
           "_deliverStoriesToFollowers",
           "\n\tstories:", ...dumpObject(stories),
           "\n\treactions:", ...dumpObject(reactions),
@@ -482,7 +483,7 @@ export function _confirmLeadingTruthsToFollowers (falseProphet: FalseProphet) {
     try {
       discourse.receiveTruths(truths);
     } catch (error) {
-      falseProphet.outputErrorEvent(falseProphet.wrapErrorEvent(error,
+      falseProphet.outputErrorEvent(falseProphet.wrapErrorEvent(error, 2,
           "_confirmLeadingTruthsToFollowers",
           "\n\tstories:", ...dumpObject(truths),
           "\n\ttarget discourse:", ...dumpObject(discourse),

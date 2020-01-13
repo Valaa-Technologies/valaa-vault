@@ -11,7 +11,7 @@ import {
   PropertyDescriptorsTag,
 } from "~/engine/valosheath/hostDescriptors";
 
-import { wrapError, dumpObject } from "~/tools";
+import { dumpObject } from "~/tools";
 
 /* eslint-disable prefer-rest-params */
 
@@ -249,12 +249,12 @@ export default function extendObject (scope: Object, hostDescriptors: Map<any, O
       }
       return vResource;
     } catch (error) {
-      throw wrapError(error, `During ${vResource.debugId()}\n .defineProperty(${
-              String(property)}), with:`,
-          "\n\tresource:", ...dumpObject(vResource),
-          "\n\tproperty:", String(property),
-          "\n\tdescriptor:", ...dumpObject(descriptor),
-      );
+      throw vResource.wrapErrorEvent(error, 1, () => [
+        `defineProperty(${String(property)})`,
+        "\n\tresource:", ...dumpObject(vResource),
+        "\n\tproperty:", String(property),
+        "\n\tdescriptor:", ...dumpObject(descriptor),
+      ]);
     }
   }
 

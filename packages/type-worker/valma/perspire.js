@@ -105,7 +105,6 @@ exports.handler = async (yargv) => {
   }
   vlm.clock("perspire.handler", "gateway.require", `require("@valos/inspire/PerspireServer")`);
   const PerspireServer = require("@valos/inspire/PerspireServer").default;
-  const { wrapError } = require("@valos/tools");
 
   const siteRoot = yargv.siteRoot[0] === "/" ? yargv.siteRoot
       : vlm.path.join(process.cwd(), yargv.siteRoot || ".");
@@ -297,9 +296,12 @@ exports.handler = async (yargv) => {
         status.message = error.message;
         status.error = error;
         vlm.clock(mainViewName, `worker.heartbeat.exec.error`, status);
-        server.gateway.outputErrorEvent(
-            wrapError(error, new Error("During perspire.tick.doValoscript"),
-                "\n\texec.body:\n```", execBody, "\n```\n"),
+        const name = new Error("perspire.tick.doValoscript");
+        server.outputErrorEvent(
+            server.wrapErrorEvent(error, 1, () => [
+              name,
+              "\n\texec.body:\n```", execBody, "\n```\n",
+            ]),
             "Exception caught during worker.tick");
       }
     }

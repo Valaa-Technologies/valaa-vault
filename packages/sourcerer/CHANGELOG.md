@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.1](https://github.com/valaatech/kernel/compare/v0.35.0-rc.0...v0.35.0-rc.1) (2020-01-13)
+
+
+### Features
+
+* Combine gateway-api/identity with IdentityManager ([8f769b1](https://github.com/valaatech/kernel/commit/8f769b1bc95a97cdbca5b4e6ab7bfd4d5543d331))
+
+
+
+
+
 # [0.35.0-rc.0](https://github.com/valaatech/kernel/compare/v0.35.0-prerelease.23...v0.35.0-rc.0) (2020-01-08)
 
 **Note:** Version bump only for package @valos/sourcerer

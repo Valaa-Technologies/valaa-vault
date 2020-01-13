@@ -1,6 +1,6 @@
 {
   "name": "@valos/kernel",
-  "version": "0.35.0-rc.0",
+  "version": "0.35.0-rc.1",
   "valos": {
     "type": "domain",
     "domain": "@valos/kernel"
@@ -27,9 +27,9 @@
     ".valma-configure_.domain_@valos_kernel": "valma/configure/domain__kernel.js"
   },
   "dependencies": {
-    "@valos/raem": "^0.35.0-rc.0",
-    "@valos/type-domain": "^0.35.0-rc.0",
-    "valma": "^0.35.0-rc.0"
+    "@valos/raem": "^0.35.0-rc.1",
+    "@valos/type-domain": "^0.35.0-rc.1",
+    "valma": "^0.35.0-rc.1"
   },
   "devDependencies": {
     "@valos/type-domain": "^0.35.0-prerelease.13"

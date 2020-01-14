@@ -36,7 +36,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       ]);
       const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       if (router.presolveRulesToScope(this.runtime, valkOptions)) {
-        router.warnEvent(1, () => [`RUNTIME RULE FAILURE ${router._routeName(this)}.`]);
+        router.warnEvent(1, () => [`RUNTIME RULE FAILURE ${router._routeName(route)}.`]);
         return true;
       }
       const scope = valkOptions.scope;
@@ -50,7 +50,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         return true;
       }
       const { identityChronicle } = burlaesgDecode(
-          scope.sessionCookie, scope.identity.clientSecret).payload;
+          scope.sessionCookie, scope.identity.clientSecret.slice(0, 30)).payload;
 
       const { iss, sub } =
           hs256JWTDecode(scope.clientCookie, scope.identity.clientSecret).payload;

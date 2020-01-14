@@ -1,12 +1,16 @@
 // @flow
 
-import { burlaesgEncode, burlaesgDecode, hs256JWTDecode, hs256JWTEncode } from "./security";
+import {
+  generateBurlaesgIV, burlaesgEncode, burlaesgDecode, hs256JWTDecode, hs256JWTEncode,
+} from "./security";
 
 describe("Session security", () => {
   it("roundtrips a burlaesg payload properly", () => {
     const key = "abcdefghijklmnopqrstuvwxyz0123";
-    const iv = new Uint8Array(12);
-    iv.set([185, 101, 152, 96, 39, 227, 175, 178, 236, 173, 121, 187], 0);
+    // USE THIS in external code (only occasionally in tests)
+    const iv = generateBurlaesgIV();
+    // const iv = new Uint8Array(12);
+    // iv.set([185, 101, 152, 96, 39, 227, 175, 178, 236, 173, 121, 187], 0);
     const nonce = "sdsd098131##";
     const identityChronicle = `valaa-test:?id=test-partition`;
     const code = burlaesgEncode({ identityChronicle, nonce }, key, iv);

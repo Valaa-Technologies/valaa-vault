@@ -6,7 +6,6 @@ import fetchJSON, { fetch } from "~/tools/fetchJSON";
 
 import { burlaesgEncode } from "~/web-spindle/tools/security";
 
-
 const revelationRoot = "./packages/web-spindle/test/worker";
 const expectedOutputHTML = `<html><head>${
   ""}<meta http-equiv="refresh" content="1"></head>${
@@ -81,7 +80,7 @@ beforeAll(async () => {
 afterAll(() => _server.terminate());
 
 async function _initiateTestSession (identityChronicle) {
-  // DO NOT COPY TO OUTSIDE TESTS. iv and nonce must be unique.
+  // DO NOT COPY TO OUTSIDE TESTS. iv and nonce must be unique. See security.test.js
   const iv = new Uint8Array(12);
   iv.set([185, 101, 152, 96, 39, 227, 175, 178, 236, 173, 121, 187], 0);
   const nonce = "sdsd098131##";

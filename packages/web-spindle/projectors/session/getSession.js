@@ -2,10 +2,11 @@
 
 import type { PrefixRouter, Route } from "~/web-spindle/MapperService";
 import {
-  burlaesgDecode, burlaesgEncode, hs256JWTEncode,
+  burlaesgDecode, burlaesgEncode, generateBurlaesgIV, hs256JWTEncode,
 } from "~/web-spindle/tools/security";
 
 import { dumpObject } from "~/tools/wrapError";
+import { thenChainEagerly } from "~/tools/thenChainEagerly";
 
 export default function createProjector (router: PrefixRouter, route: Route) {
   return {
@@ -13,6 +14,9 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       "routeRoot",
       "grantExpirationDelay", "tokenExpirationDelay",
       "error", "errorDescription", "errorURI",
+    ],
+    runtimeRules: [
+      "assembleSessionPayload"
     ],
     valueAssertedRules: [
       "clientRedirectPath", "userAgentState", "authorizationGrant", "grantProviderState",
@@ -46,7 +50,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       const scope = valkOptions.scope;
       if (router.presolveRulesToScope(this.runtime, valkOptions)) {
-        router.warnEvent(1, () => [`RUNTIME RULE FAILURE ${router._routeName(this)}.`]);
+        router.warnEvent(1, () => [`RUNTIME RULE FAILURE ${router._routeName(route)}.`]);
         return true;
       }
       /*
@@ -57,75 +61,97 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       ]);
       */
       /* eslint-disable camelcase */
-      let iv, alg, payload;
-      let nonce, identityChronicle, identityPartition, grantTimeStamp, email, preferred_username;
-      let sessionToken, clientToken;
+      let sessionPayload, clientToken;
       const timeStamp = Math.floor(Date.now() / 1000);
-      try {
-        if (scope.error) {
-          throw new Error(`Authorization error: ${scope.errorDescription}`);
-        }
-        if (!scope.userAgentState || (scope.userAgentState !== scope.grantProviderState)) {
-          throw new Error("Inconsistent session authorization state");
-        }
-
-        ({ iv, alg, payload } =
-            burlaesgDecode(scope.authorizationGrant, scope.identity.clientSecret));
-        ({
-          nonce, identityChronicle, identityPartition, timeStamp: grantTimeStamp,
-          claims: { email, preferred_username },
-        } = payload);
-        if (!identityChronicle) identityChronicle = identityPartition;
-        router.logEvent(1, () => ["Authorizing session with payload:", payload]);
-
-        if (!(timeStamp < Number(grantTimeStamp) + scope.grantExpirationDelay)) {
-          reply.code(401);
-          reply.send("Authorization session request has expired");
-          throw new Error("Expired");
-          // return false;
-        }
-
-        sessionToken = { timeStamp, nonce, identityChronicle };
-        reply.setCookie(scope.identity.sessionCookieName,
-            burlaesgEncode(sessionToken, scope.identity.clientSecret, iv), {
-              httpOnly: true,
-              secure: true, maxAge: scope.tokenExpirationDelay, path: scope.clientRedirectPath,
-            });
-
-        clientToken = {
-          iss: scope.identity.clientURI,
-          sub: identityChronicle,
-          iat: timeStamp,
-          exp: timeStamp + scope.tokenExpirationDelay,
-          email, preferred_username,
-          // aud: "", nbf: "", jti: "",
-        };
-        reply.setCookie(scope.identity.clientCookieName,
-            hs256JWTEncode(clientToken, scope.identity.clientSecret), {
-              httpOnly: false,
-              secure: true, maxAge: scope.tokenExpirationDelay, path: scope.clientRedirectPath,
-            });
-        reply.code(302);
-        reply.redirect(scope.clientRedirectPath);
-        return true;
-      } catch (error) {
+      const { assembleSessionPayload } = this.runtime.ruleResolvers;
+      return thenChainEagerly(scope.routeRoot, [
+        () => {
+          if (scope.error) {
+            throw new Error(`Authorization error: ${scope.errorDescription}`);
+          }
+          if (!scope.userAgentState || (scope.userAgentState !== scope.grantProviderState)) {
+            throw new Error("Inconsistent session authorization state");
+          }
+        },
+        () => (assembleSessionPayload
+            ? router.resolveToScope(
+                "sessionPayload", assembleSessionPayload, scope.routeRoot, valkOptions)
+            : _assembleSimpleAuthSessionPayload(router, scope)),
+        sessionPayloadEnvelope => {
+          const {
+            iv, nonce, grantTimeStamp, identityChronicle, email, preferred_username,
+            ...sessionPayloadFields
+          } = sessionPayloadEnvelope;
+          ["grantTimeStamp", "identityChronicle", "email", "preferred_username"].forEach(name => {
+            if (sessionPayloadEnvelope[name] === undefined) {
+              throw new Error(`session payload '${name}' resolution undefined`);
+            }
+          });
+          if (!(timeStamp < Number(grantTimeStamp) + scope.grantExpirationDelay)) {
+            reply.code(401);
+            reply.send("Authorization session request has expired");
+            throw new Error("Expired");
+          }
+          sessionPayload = {
+            timeStamp, nonce: nonce || "", identityChronicle,
+            ...sessionPayloadFields,
+          };
+          reply.setCookie(
+              scope.identity.sessionCookieName,
+              burlaesgEncode(sessionPayload,
+                  scope.identity.clientSecret.slice(0, 30),
+                  iv || generateBurlaesgIV()),
+              {
+                httpOnly: true, secure: true, maxAge: scope.tokenExpirationDelay,
+                path: scope.clientRedirectPath,
+              });
+          clientToken = {
+            iss: scope.identity.clientURI,
+            sub: identityChronicle,
+            iat: timeStamp,
+            exp: timeStamp + scope.tokenExpirationDelay,
+            email,
+            preferred_username,
+            // aud: "", nbf: "", jti: "",
+          };
+          reply.setCookie(
+              scope.identity.clientCookieName,
+              hs256JWTEncode(clientToken, scope.identity.clientSecret),
+              {
+                httpOnly: false, secure: true, maxAge: scope.tokenExpirationDelay,
+                path: scope.clientRedirectPath,
+              });
+          reply.code(302);
+          reply.redirect(scope.clientRedirectPath);
+          return true;
+        },
+      ], error => {
         throw router.wrapErrorEvent(error,
-            new Error(`authorizeSessionWithGrant(${scope.identity.clientURI})`),
-            "\n\ttimeStamp:", timeStamp,
-            "\n\tauthorizationGrant:", scope.authorizationGrant,
-            "\n\tclientRedirectPath:", scope.clientRedirectPath,
-            "\n\tgrantExpirationDelay:", scope.grantExpirationDelay,
-            "\n\ttokenExpirationDelay:", scope.tokenExpirationDelay,
-            "\n\tiv:", iv,
-            "\n\talg:", alg,
-            "\n\tgrantTimeStamp:", grantTimeStamp,
-            "\n\tnonce:", nonce,
-            "\n\tidentityChronicle:", identityChronicle,
-            "\n\temail:", email,
-            "\n\tsessionToken:", sessionToken,
-            "\n\tclientToken:", clientToken);
-      }
+          new Error(`authorizeSessionWithGrant(${scope.identity.clientURI})`),
+          "\n\ttimeStamp:", timeStamp,
+          "\n\tauthorizationGrant:", scope.authorizationGrant,
+          "\n\tclientRedirectPath:", scope.clientRedirectPath,
+          "\n\tgrantExpirationDelay:", scope.grantExpirationDelay,
+          "\n\ttokenExpirationDelay:", scope.tokenExpirationDelay,
+          "\n\tsessionPayload:", sessionPayload,
+          "\n\tclientToken:", clientToken);
+      });
     },
+  };
+}
+
+function _assembleSimpleAuthSessionPayload (router, scope) {
+  const { iv, alg, payload } =
+      burlaesgDecode(scope.authorizationGrant, scope.identity.clientSecret.slice(0, 30));
+  const {
+    nonce, timeStamp: grantTimeStamp,
+    claims: { email, preferred_username },
+    identityChronicle, identityPartition,
+  } = payload;
+  router.logEvent(1, () => [`Authorizing session with alg '${alg}' payload:`, payload]);
+  return {
+    iv, nonce, grantTimeStamp,
+    email, preferred_username, identityChronicle: identityChronicle || identityPartition,
   };
 }
 

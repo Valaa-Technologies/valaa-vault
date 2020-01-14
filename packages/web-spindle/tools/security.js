@@ -78,10 +78,13 @@ export function resolveIdentityRoles (router, route, scope) {
   if (!identity) {
     throw new Error("Cannot verify session authorization: valosheath identity not configured");
   }
-  const accessToken = scope.request.cookies[identity.getSessionCookieName()];
-  if (!accessToken) return (scope.identityRoles = { "": true });
-  const { timeStamp, identityChronicle } =
-      burlaesgDecode(accessToken, identity.clientSecret).payload;
+  if (!scope.sessionPayload) {
+    const sessionToken = scope.request.cookies[identity.getSessionCookieName()];
+    if (!sessionToken) return (scope.identityRoles = { "": true });
+    scope.sessionPayload = burlaesgDecode(sessionToken, identity.clientSecret.slice(0, 30)).payload;
+    if (!scope.sessionPayload) throw new Error("session token without content");
+  }
+  const { timeStamp, identityChronicle } = scope.sessionPayload;
   if (!(Math.floor(Date.now() / 1000)
       < Number(timeStamp) + router.getSessionDuration())) {
     router.logEvent(1, () => [
@@ -112,6 +115,12 @@ const accessFields = {
 };
 const toRIGHTSFields = VALEK.relations("RIGHTS").map(VALEK.select(accessFields));
 // const toPERMISSIONSFields = VALEK.relations("PERMISSIONS").map(VALEK.select(accessFields));
+
+export function generateBurlaesgIV () {
+  // TODO(iridian, 2020-01): This should be randomized on start and
+  // then 'one'-incremented for every request
+  return new Uint8Array(crypto.randomBytes(12));
+}
 
 export function burlaesgEncode (payload: any, key: string, iv: Uint8Array) {
   const cipher = crypto.createCipheriv("aes-256-gcm", _to32BytesNullPad(key), iv);

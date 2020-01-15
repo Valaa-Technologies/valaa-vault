@@ -47,7 +47,7 @@ export function _createPrefixRouter (rootService, prefix, prefixConfig) {
         });
       }
 
-      _addSchemas(prefixRouter, schemas);
+      _addSchemas(prefixRouter, schemas || []);
       _prepareProjectors(prefixRouter);
       _attachProjectorFastifyRoutes(prefixRouter);
 

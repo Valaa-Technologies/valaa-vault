@@ -38,7 +38,7 @@ let _vViewFocus, _vAuRoot, _vAdmin, _vUser/* , _vRando */;
 beforeAll(async () => {
   _server = new PerspireServer({
     isTest: true,
-    spindleIds: ["../web-spindle"],
+    spindles: ["../web-spindle"],
     siteRoot: process.cwd(),
     revelationRoot,
     revelations: [{ "!!!": "./revela.json" }],

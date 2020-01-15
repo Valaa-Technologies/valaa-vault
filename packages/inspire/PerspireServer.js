@@ -9,7 +9,7 @@ import { invariantifyString, wrapError } from "~/tools";
 
 export default class PerspireServer {
   constructor ({
-    isTest, logger, siteRoot, domainRoot, revelationRoot, revelations, cacheBasePath, spindleIds,
+    isTest, logger, siteRoot, domainRoot, revelationRoot, revelations, cacheBasePath, spindles,
   }: Object) {
     invariantifyString(revelationRoot, "PerspireServer.options.revelationRoot",
         { allowEmpty: true });
@@ -25,7 +25,7 @@ export default class PerspireServer {
 
     this.revelations = revelations || [];
     this.cacheBasePath = cacheBasePath;
-    this.spindleIds = spindleIds;
+    this.spindles = spindles;
   }
 
   async initialize () {
@@ -39,12 +39,12 @@ export default class PerspireServer {
     global.atob = (str) => Buffer.from(str, "base64").toString("binary");
     global.btoa = (str) => Buffer.from(str, "binary").toString("base64");
 
-    (this.spindleIds || []).forEach(spindleId => {
+    (this.spindles || []).forEach(spindle => {
       try {
-        return require(spindleId);
+        return require(spindle);
       } catch (error) {
         throw wrapError(error,
-            new Error(`During PerspireServer.initialize.require("${spindleId}")`));
+            new Error(`During PerspireServer.initialize.require("${spindle}")`));
       }
     });
 

@@ -197,9 +197,10 @@ function _cementComputation (stack, segmentedVPath) {
   return _cementRest(stack, segmentedVPath, computationType, first.length);
 }
 
-function _cementQuotation (stack, segmentedVPath, componentType, index) {
+function _cementQuotation (stack, segmentedVPath /* , componentType, index */) {
   segmentedVPath[0] = "!";
-  return ["§'", _cementVPath(stack, segmentedVPath, componentType, index)];
+  return ["§'", segmentedVPath];
+  // return ["§'", _cementVPath(stack, segmentedVPath, componentType, index)];
 }
 
 function _cementProperty (stack, segmentedVPath, componentType) {

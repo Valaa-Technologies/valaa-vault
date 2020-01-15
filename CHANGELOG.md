@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.2](https://github.com/valaatech/kernel/compare/v0.35.0-rc.1...v0.35.0-rc.2) (2020-01-15)
+
+
+### Features
+
+* rule 'assembleSessionPayload', scope.sessionPayload ([fda5148](https://github.com/valaatech/kernel/commit/fda514833e2bc99544c08cc6d433f08755bcb8ae))
+
+
+
+
+
 # [0.35.0-rc.1](https://github.com/valaatech/kernel/compare/v0.35.0-rc.0...v0.35.0-rc.1) (2020-01-13)
 
 

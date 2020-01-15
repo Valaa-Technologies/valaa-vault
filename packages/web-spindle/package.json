@@ -1,6 +1,6 @@
 {
   "name": "@valos/web-spindle",
-  "version": "0.35.0-rc.1",
+  "version": "0.35.0-rc.2",
   "valos": {
     "type": "spindle",
     "domain": "@valos/kernel",
@@ -20,7 +20,7 @@
     "fastify-swagger": "^2.3.2"
   },
   "devDependencies": {
-    "@valos/inspire": "^0.35.0-rc.1"
+    "@valos/inspire": "^0.35.0-rc.2"
   },
   "homepage": "https://valospace.org/web-spindle"
 }

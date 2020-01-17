@@ -1,6 +1,7 @@
 // @flow
 
 import "@babel/polyfill";
+import path from "path";
 
 import { Map as ImmutableMap } from "immutable";
 
@@ -77,7 +78,7 @@ export default class Gateway extends FabricEventTarget {
    * @returns
    * @memberof Gateway
    */
-  require (module: string) {
+  require (module: string, options: Object) {
     // TODO(iridian, 2018-12): fabric library version semver
     //   compatibility checking against spindle package.json dependencies
     // TODO(iridian, 2018-12): spindle-sourced library registration
@@ -97,42 +98,58 @@ export default class Gateway extends FabricEventTarget {
     // (also contain the inBrowser code) with inherently different
     // paths for various platform-specific functionalities like the
     // require here.
-    if (!inBrowser()) return require(module);
+    try {
+      if (!inBrowser()) {
+        let modulePath;
+        if (options) {
+          modulePath = require.resolve(module);
+          const basename = path.posix.basename(modulePath);
+          if ((basename === "index.js") || (basename === "index.json")) {
+            // TODO(iridian, 2020-01): Fix handling directories with package.json:main set
+            options.wasDirectory = true;
+          }
+        }
+        return require(modulePath || module);
+      }
 
-    const parts = Gateway.moduleMatcher.exec(module);
-    if (!parts) {
-      throw new Error(`Invalid valos.require module: "${module
-          }" doesn't match regex /${Gateway.moduleMatcherString}/)`);
+      const parts = Gateway.moduleMatcher.exec(module);
+      if (!parts) {
+        throw new Error(`Invalid valos.require module: "${module
+            }" doesn't match regex /${Gateway.moduleMatcherString}/)`);
+      }
+      const scope = parts[2];
+      const library = parts[3];
+      const subPath = parts[4];
+      let ret;
+      if (scope === "@valos/") {
+        // Each of these must be explicitly require'd, so that
+        // 1. webpack knows to pack the library sources to the bundle
+        // 2. the require is still only performed when actually needed as
+        //    not all ValOS sub-modules need to be loaded at startup.
+        // TODO(iridian, 2018-12):
+        //    The above point 2. is a bit moot as there are a lot of
+        //    top-level library index.js imports in ValOS libs; all the
+        //    library content is imported via their index.js anyway.
+        //    When timing is right all the ValOS internal imports should
+        //    be replaced with most specific imports possible.
+        if (library === "engine") ret = valosEngine;
+        else if (library === "inspire") ret = valosInspire;
+        else if (library === "sourcerer") ret = valosSourcerer;
+        else if (library === "raem") ret = valosRaem;
+        else if (library === "script") ret = valosScript;
+        else if (library === "tools") ret = valosTools;
+        else throw new Error(`Unrecognized valos.require @valos library: '${library}'`);
+      } else if (scope) throw new Error(`Unrecognized valos.require scope: '${scope}'`);
+      else throw new Error(`Unrecognized valos.require library: '${library}'`);
+      if (subPath) {
+        throw new Error(`Unsupported valos.require sub-path: "${subPath
+            }" (only top level library require's supported for now)`);
+      }
+      return ret;
+    } catch (error) {
+      throw this.wrapErrorEvent(error, new Error(`require("${module}")`),
+          "\n\toptions:", ...dumpObject(options));
     }
-    const scope = parts[2];
-    const library = parts[3];
-    const subPath = parts[4];
-    let ret;
-    if (scope === "@valos/") {
-      // Each of these must be explicitly require'd, so that
-      // 1. webpack knows to pack the library sources to the bundle
-      // 2. the require is still only performed when actually needed as
-      //    not all ValOS sub-modules need to be loaded at startup.
-      // TODO(iridian, 2018-12):
-      //    The above point 2. is a bit moot as there are a lot of
-      //    top-level library index.js imports in ValOS libs; all the
-      //    library content is imported via their index.js anyway.
-      //    When timing is right all the ValOS internal imports should
-      //    be replaced with most specific imports possible.
-      if (library === "engine") ret = valosEngine;
-      else if (library === "inspire") ret = valosInspire;
-      else if (library === "sourcerer") ret = valosSourcerer;
-      else if (library === "raem") ret = valosRaem;
-      else if (library === "script") ret = valosScript;
-      else if (library === "tools") ret = valosTools;
-      else throw new Error(`Unrecognized valos.require @valos library: '${library}'`);
-    } else if (scope) throw new Error(`Unrecognized valos.require scope: '${scope}'`);
-    else throw new Error(`Unrecognized valos.require library: '${library}'`);
-    if (subPath) {
-      throw new Error(`Unsupported valos.require sub-path: "${subPath
-          }" (only top level library require's supported for now)`);
-    }
-    return ret;
   }
 
   fetchJSON (...rest) { return fetchJSON(...rest); }

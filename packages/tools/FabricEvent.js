@@ -191,8 +191,12 @@ export class FabricEventTarget {
       errorWrapper.tidyFrameList = errorWrapper.stack.split("\n")
           .slice((functionName instanceof Error) ? 2 : 3);
     }
-    errorWrapper.message = `During ${
-        this.debugId()}\n .${actualFunctionName}${actualContexts.length ? ", with:" : ""}`;
+    if (typeof functionNameOrMinVerbosity === "number") {
+      errorWrapper.verbosities = [this.getVerbosity(), functionNameOrMinVerbosity];
+    }
+    errorWrapper.message = `${
+      errorWrapper.verbosities ? `[${errorWrapper.verbosities.join(">=")}] ` : ""
+      }During ${this.debugId()}\n .${actualFunctionName}${actualContexts.length ? ", with:" : ""}`;
     const ret = wrapError(error, errorWrapper, ...actualContexts);
     ret.functionName = actualFunctionName;
     ret.contextObject = this;

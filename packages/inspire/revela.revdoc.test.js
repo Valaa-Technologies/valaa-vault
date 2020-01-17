@@ -1,4 +1,3 @@
-
 const {
   extractee: {
     authors, em, ref, pkg,
@@ -7,7 +6,7 @@ const {
   ontologyHeaders,
 } = require("@valos/revdoc");
 
-const { wrapError } = require("@valos/tools/wrapError");
+const { FabricEventTarget } = require("@valos/tools");
 
 const { lazyPatchRevelations } = require("./Revelation");
 
@@ -20,7 +19,7 @@ const { name, version } = require("./package");
 const title = "revela.json format specification";
 const { itExpects, runTestDoc } = prepareTestDoc(title);
 
-const gatewayMock = {
+const gatewayMock = Object.assign(new FabricEventTarget("revela.gateway.mock", 2), {
   siteRoot: "/site",
   domainRoot: "/",
   revelationRoot: "/site/revelation/",
@@ -32,13 +31,12 @@ const gatewayMock = {
     };
   },
   fetchJSON (input, options = {}) {
-    return {
+    return Promise.resolve({
       fetchOptions: { input, ...options },
       fetchedField: 1,
-    };
+    });
   },
-  wrapErrorEvent: wrapError,
-};
+});
 
 module.exports = {
   "dc:title": title,
@@ -111,7 +109,7 @@ async () => lazyPatchRevelations(gatewayMock,
     undefined,
     ["last"]),
         "toEqual",
-() => [0, 1, "https://foobar.com/path", "last"]),
+() => [0, 1, "https://foobar.com/path.json", "last"]),
     "example#5": itExpects(
         "nested import & invoke spread to resolve all spreads",
 async () => lazyPatchRevelations(gatewayMock, {}, {

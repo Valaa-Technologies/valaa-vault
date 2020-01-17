@@ -2,11 +2,10 @@ const path = require("path");
 
 const { segmentVPath, cementVPath } = require("../raem/VPath");
 
-const inBrowser = require("../gateway-api/inBrowser").default;
-
 const inProduction = require("../tools/inProduction").default;
-const resolveRevelationSpreaderImport = require("../tools/resolveRevelationSpreaderImport").default;
+const resolveRevealOrigin = require("../tools/resolveRevealOrigin").default;
 // const trivialClone = require("../tools/trivialClone").default;
+const inBrowser = require("../gateway-api/inBrowser").default;
 const isPromise = require("../tools/isPromise").default;
 const patchWith = require("../tools/patchWith").default;
 const thenChainEagerly = require("../tools/thenChainEagerly").thenChainEagerly;
@@ -368,11 +367,6 @@ function _patchRevelation (gateway, targetRevelation, patchRevelation) {
 }
 
 const revelationContext = {
-  revela: {
-    stepsFor: {
-      import: ["§import"],
-    },
-  },
   valk: {
     stepsFor: {
       invoke: ["§invoke"],
@@ -448,7 +442,7 @@ function _valk (gateway, head, step) {
     if (opId === "§..") return head[step[1]];
     if (opId === "§->") return step.slice(1).reduce(_valk.bind(null, gateway), head);
     if (opId === "§[]") return step.slice(1).map(_tryLiteralOrValk);
-    if ((opId === "§import") || (opId === "§$")) return _import(gateway, step);
+    if ((opId === "§reveal") || (opId === "§$")) return _reveal(gateway, step);
     if (opId === "§{}") {
       return step.slice(1).reduce((o, [key, value]) => {
         o[key] = _tryLiteralOrValk(value);
@@ -470,11 +464,11 @@ function _valk (gateway, head, step) {
     */
     throw new Error(`Unrecognized revelation op '${opId}'`);
   } catch (error) {
-    throw gateway.wrapErrorEvent(error, 1,
+    throw gateway.wrapErrorEvent(error, 1, () => [
       new Error("_valk"),
       "\n\thead:", ...dumpObject(head),
       "\n\tstep:", ...dumpObject(step),
-    );
+    ]);
   }
   function _tryLiteralOrValk (candidate) {
     if ((candidate === null) || (typeof candidate !== "object")) return candidate;
@@ -482,39 +476,60 @@ function _valk (gateway, head, step) {
   }
 }
 
-function _import (gateway, step) {
-  let location = step[1];
+function _reveal (gateway, step) {
+  let origin = step[1];
   let options = step[2] || {};
   let pathOp = step.slice(3);
   if (typeof step[1] === "object") {
     options = step[1];
-    location = options.url || options.input || options.path;
+    origin = options.url || options.input || options.path;
     pathOp = step.slice(2);
   }
   try {
     if (!options.url) {
-      location = resolveRevelationSpreaderImport(location,
-          gateway.siteRoot, gateway.revelationRoot, gateway.domainRoot,
-          gateway.currentRevelationPath);
+      origin = resolveRevealOrigin(
+          origin, gateway.siteRoot, gateway.revelationRoot, gateway.domainRoot, gateway.currentDir);
     }
     const relativeGateway = Object.create(gateway);
-    relativeGateway.currentRevelationPath = path.dirname(location);
+    relativeGateway.currentDir = path.posix.dirname(origin);
+    let maybeDirName = path.posix.basename(origin);
+    if ((maybeDirName === "index") || (maybeDirName === "index.json")) maybeDirName = undefined;
+    const revealOptions = { fetch: options.fetch };
 
-    return thenChainEagerly(
-          (inBrowser() || options.fetch || location.match(/^[^/]*:/))
-              ? gateway.fetchJSON(location, options.fetch)
-              : gateway.require(location), [
-            result => _patchRevelation(relativeGateway, undefined, result),
-            revelation => (!pathOp.length
-                ? revelation
-                : _valk(relativeGateway, revelation, ["§->", ...pathOp])),
-          ]);
+    let revealing;
+    if (!inBrowser() && !revealOptions.fetch && !origin.match(/^[^/]*:/)) {
+      revealing = gateway.require(origin, revealOptions);
+    } else {
+      const basename = path.posix.basename(origin);
+      revealing = (basename === "")
+              ? gateway.fetchJSON(`${origin}index.json`, revealOptions.fetch)
+          : ((basename.slice(-5) === ".json") || (basename.slice(-3) === ".js"))
+              ? gateway.fetchJSON(origin, revealOptions.fetch)
+              : gateway.fetchJSON(`${origin}.json`, revealOptions.fetch)
+                    .catch(() => gateway.fetchJSON(`${origin}/index.json`, revealOptions.fetch)
+                        .then(directoryRevelation => {
+                          revealOptions.wasDirectory = true;
+                          return directoryRevelation;
+                        }));
+    }
+
+    return thenChainEagerly(revealing, [
+      result => {
+        if (maybeDirName && revealOptions.wasDirectory) {
+          relativeGateway.currentDir = path.posix.join(relativeGateway.currentDir, maybeDirName);
+        }
+        return _patchRevelation(relativeGateway, undefined, result);
+      },
+      revelation => (!pathOp.length
+          ? revelation
+          : _valk(relativeGateway, revelation, ["§->", ...pathOp])),
+    ]);
   } catch (error) {
     throw gateway.wrapErrorEvent(error, 1,
-        `_require('${location}')`,
+        `_reveal('${origin}')`,
         "\n\tgateway.siteRoot:", gateway.siteRoot,
         "\n\tgateway.revelationRoot:", gateway.revelationRoot,
-        "\n\tgateway.currentRevelationPath:", gateway.currentRevelationPath,
+        "\n\tgateway.currentDir:", gateway.currentDir,
     );
   }
 }

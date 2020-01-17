@@ -26,6 +26,7 @@ exports.default = function fetchJSON (input, options) {
       return fetch(input, innerOptions);
     },
     function extractJSON (response) {
+      if (options) options.response = response;
       if (response.status >= 400) {
         const error = new Error(`fetch response ${response.status} for ${
           (options || {}).method || "GET"} ${input}: ${response.statusText}`);

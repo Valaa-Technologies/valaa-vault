@@ -6,6 +6,7 @@ const identity = require("./identity");
 export const standalone = {
   gateway: null,
 
+  reveal (origin) { return this.require(origin); },
   require (module) {
     if (!inBrowser()) return require(module);
     throw new Error(`Cannot valos.require requested module "${

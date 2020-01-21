@@ -46,9 +46,9 @@
     "revdoc:package": "@valos/inspire",
     "revdoc:prefix": "revela",
     "revdoc:prefixIRI": "https://valospace.org/inspire/revela#",
-    "revdoc:version": "0.35.0-rc.2",
+    "revdoc:version": "0.35.0-rc.3",
     "respecConfig": {
-      "subtitle": "0.35.0-rc.2",
+      "subtitle": "0.35.0-rc.3",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -70,12 +70,7 @@
       "revela": "https://valospace.org/inspire/revela#"
     },
     "vocabulary": {
-      "@id": "vocabulary",
-      "import": {
-        "@type": "valos-raem:Verb",
-        "revdoc:brief": "revela.json import verb",
-        "rdfs:comment": "import verb with first param being the location to import and second\nparam being an options object."
-      }
+      "@id": "vocabulary"
     },
     "context": {
       "@id": "context"
@@ -301,7 +296,7 @@
                     {
                       "@type": "vdoc:CharacterData",
                       "vdoc:content": [
-                        " [0, 1, \"https://foobar.com/path\", \"last\"]"
+                        " [0, 1, \"https://foobar.com/path.json\", \"last\"]"
                       ]
                     }
                   ]
@@ -503,9 +498,7 @@
               }
             ]
           },
-          "vdoc:entries": [
-            "import"
-          ]
+          "vdoc:entries": []
         }
       ]
     },

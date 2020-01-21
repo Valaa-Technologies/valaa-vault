@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.3](https://github.com/valaatech/kernel/compare/v0.35.0-rc.2...v0.35.0-rc.3) (2020-01-21)
+
+
+### Features
+
+* Add dumpObject.expandFields option ([d846158](https://github.com/valaatech/kernel/commit/d846158184d3394e9d3dd0b7ae947d9bd0e61963))
+* Add full implicit .json support to revelations ([1c50e75](https://github.com/valaatech/kernel/commit/1c50e75b085cc60d667a38b2692381cf43a89eb9))
+
+
+
+
+
 # [0.35.0-rc.2](https://github.com/valaatech/kernel/compare/v0.35.0-rc.1...v0.35.0-rc.2) (2020-01-15)
 
 **Note:** Version bump only for package @valos/tools

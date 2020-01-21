@@ -24,10 +24,10 @@ module.exports = {
 // getting out of hand. They should be streamlined.
 
 // returns an spreadable array with different views to the value.
-function dumpObject (value, { nest, alwaysStringify } = {}) {
+function dumpObject (value, { nest, alwaysStringify, indent, expandFields } = {}) {
   const ret = [];
   if ((value != null) && (typeof value.debugId === "function")) ret.push(`'${value.debugId()}'`);
-  ret.push(debugObjectNest(value, nest, alwaysStringify));
+  ret.push(debugObjectNest(value, nest, alwaysStringify, indent, expandFields));
   return ret;
 }
 
@@ -251,8 +251,7 @@ function debugObjectType (head) {
   return debugObjectNest(head, false, false);
 }
 
-function debugObjectNest (head, nest = 1, alwaysStringify = false,
-    cache_) {
+function debugObjectNest (head, nest = 1, alwaysStringify = false, indent, expandFields, cache_) {
   try {
     if (head === null) return "<null>";
     if (head === undefined) return "<undefined>";
@@ -281,26 +280,39 @@ function debugObjectNest (head, nest = 1, alwaysStringify = false,
         && (head.toString !== Array.prototype.toString)) {
       return head.toString(nest);
     }
-    if (!nest) {
-      return `<${(head.constructor && head.constructor.name) || "no-constructor"} keys.length=${
-          Object.keys(head).length}>`;
+    if (nest) {
+      const cache = cache_ || new Map();
+      const circularIndex = cache.get(head);
+      if (circularIndex) return `<Circular #${circularIndex}: ${debugObjectNest(head, 0)}>`;
+      cache.set(head, (cache.objectIndex = (cache.objectIndex || 0) + 1));
+      if (Array.isArray(head)) {
+        return `[${
+          head.map(entry => debugObjectNest(
+                  entry, nest, alwaysStringify, indent ? indent + 1 : 0, expandFields, cache))
+              .join(", ")}]`;
+      }
+      if (isIterable(head)) {
+        return debugObjectNest(
+            head.toJS(), nest, alwaysStringify, indent ? indent + 1 : 0, expandFields, cache);
+      }
+      if (head[Symbol.iterator]) {
+        return debugObjectNest(
+            [...head], nest, alwaysStringify, indent ? indent + 1 : 0, expandFields, cache);
+      }
+      if (expandFields || Object.getPrototypeOf(head) === Object.prototype) {
+        return `{ ${Object.keys(head).map(key => {
+          const desc = Object.getOwnPropertyDescriptor(head, key);
+          return `${indent ? `\n${"  ".repeat(indent)}` : ""}${
+            isSymbol(key) ? key.toString() : key}: ${
+            debugObjectNest(desc.get || desc.value,
+                (typeof nest !== "number") ? nest : nest - 1, alwaysStringify,
+                indent ? indent + 1 : undefined, expandFields, cache)
+          }`;
+        }).join(", ")}${indent ? `\n${"  ".repeat(indent - 1)}` : " "}}`;
+      }
     }
-    const cache = cache_ || new Map();
-    const circularIndex = cache.get(head);
-    if (circularIndex) return `<Circular #${circularIndex}: ${debugObjectNest(head, 0)}>`;
-    cache.set(head, (cache.objectIndex = (cache.objectIndex || 0) + 1));
-    return ((Array.isArray(head) && `[${
-            head.map(entry => debugObjectNest(entry, nest, alwaysStringify, cache)).join(", ")}]`)
-        || (isIterable(head) && debugObjectNest(head.toJS(), nest, alwaysStringify, cache))
-        || (head[Symbol.iterator] && debugObjectNest([...head], nest, alwaysStringify, cache))
-        || `{ ${Object.keys(head).map(key => {
-              const desc = Object.getOwnPropertyDescriptor(head, key);
-              return `${isSymbol(key) ? key.toString() : key}: ${
-                debugObjectNest(desc.get || desc.value,
-                    (typeof nest !== "number") ? nest : nest - 1,
-                    alwaysStringify, cache)
-              }`;
-            }).join(", ")} }`);
+    return `<${(head.constructor || {}).name || "no-constructor"} keys.length=${
+      Object.keys(head).length}>`;
   } catch (error) {
     console.error("Suppressed an error in debugObjectNest:",
         "\n\terror.message:", error.message,

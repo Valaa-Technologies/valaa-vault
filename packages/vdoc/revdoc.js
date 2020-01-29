@@ -121,7 +121,7 @@ dfn("Source graph", "#source_graph", ` is a cyclic graph of
 ), ` It can be manually hand-written, programmatically generated
 or even dynamically introspected.`,
     ], [
-dfn("VDocLD", "#vdocld", ` is a JSON-LD construct and the
+dfn("VDocState", "#vdocstate", ` is a JSON-LD construct and the
   primary VDoc interchange format. It is a normalized, complete
   and self-contained structure with potentially multiple
   different format-specific @context(s).`,
@@ -129,23 +129,23 @@ dfn("VDocLD", "#vdocld", ` is a JSON-LD construct and the
     ], [
 dfn("Emission output", "#extension_output", ` is a format specific
   output that is produced by `, ref("emission", "#emission"),
-  ` from a VDocLD and format specific set of emission parameters.`
+  ` from a VDocState and format specific set of emission parameters.`
 ),
     ]],
     "#1":
 `VDoc defines two transformations between the phases:`,
     "numbered#document_transformations>1": [[
 dfn("Extraction", "#extraction", ` transforms a source graph into
-  a VDocLD by applying the idempotent `,
+  a VDocState by applying the idempotent `,
   ref("VDoc extraction rules", "#extension_extraction_rules"),
   " until the output no longer changes.",
 ), `Due to idempotence the source graph can wildly different or
-arbitrarily close to the resulting VDocLD; in fact a VDocLD is
+arbitrarily close to the resulting VDocState; in fact a VDocState is
 always its own source graph.`,
     ], [
 dfn("Emission", "#emission", ` is a format specific transformation
   which emits the `, ref("format specific output", "#output_format"),
-  " from VDocLD.",
+  " from VDocState.",
 ),
     ]],
     "#2": [
@@ -153,12 +153,12 @@ dfn("Emission", "#emission", ` is a format specific transformation
 ref("JSON-LD 1.1 format", "https://www.w3.org/TR/json-ld11/"),
 `, its `, ref("API and algorithms", "https://www.w3.org/TR/json-ld11-api/"),
 ` and (maybe) `, ref("its framing", "https://www.w3.org/TR/json-ld11-framing/"),
-" for providing a mapping from VDocLD to RDF model.",
+" for providing a mapping from VDocState to RDF model.",
     ],
   },
-  "chapter#vdocld>5;VDocLD - primary interchange format": {
+  "chapter#vdocstate>5;VDocState - primary interchange format": {
     "#0": `
-VDocLD is a JSON-LD document with a well-formed tree structure
+VDocState is a VState JSON-LD document with a well-formed tree structure
 consisting of three types of nodes, corresponding to the first, second
 and remaining levels of the tree:`,
     "numbered#node_types>0": [
@@ -180,14 +180,14 @@ and remaining levels of the tree:`,
     ],
     "#1": [
 `There can be multiple first-level document nodes in a single
-VDocLD (as per JSON-LD). `,
+VDocState (as per JSON-LD). `,
 dfn("The tree root node", "#root_node", ` is the singular,
-  implicit '0th-level' VDocLD node without semantics defined by
+  implicit '0th-level' VDocState node without semantics defined by
   VDoc itself.`),
     ],
     "chapter#node_keys>1;Node keys": {
       "#0": `
-The keys of the VDocLD nodes have four categories depending on whether
+The keys of the VDocState nodes have four categories depending on whether
 the key is an IRI or not and whether an IRI key has semantics defined
 VDoc or extension format specifications:`,
       "numbered#node_key_categories>0": [
@@ -230,12 +230,12 @@ lack a stable identity even within the document.`
       ],
     },
   },
-  "chapter#transformations_spec>6;Transformations convert documents to and from VDocLD": {
+  "chapter#transformations_spec>6;Transformations convert documents to and from VDocState": {
     "#0": [],
-    "chapter#extraction_transformation>6;Extraction transforms source graphs into VDocLD": {
+    "chapter#extraction_transformation>6;Extraction transforms source graphs into VDocState": {
       "#0": [],
     },
-    "chapter#emission_transformation>7;Emission transforms VDocLD into output targets": {
+    "chapter#emission_transformation>7;Emission transforms VDocState into output targets": {
       "#0": [],
     },
   },
@@ -296,7 +296,7 @@ via the VDoc interchange format into various output formats.`,
       "chapter#extension_extraction_rules>4;Extraction transformation rules": {
         "#0": [
 `Extraction rules specify how a source graph is interpreted as
-mutations (usually additions) to a given target VDocLD document.
+mutations (usually additions) to a given target VDocState document.
 An extraction rule consists of two parts:`,
           { "bulleted#": [
 [dfn("key pattern matcher", "#extraction_key_pattern", ` is
@@ -306,7 +306,7 @@ An extraction rule consists of two parts:`,
 [dfn("extraction action", "#extraction_action", ` specifies
     how the extraction rule parameters and `, ref("extraction context"),
     ` is interpreted as a set of mutations on the current
-    target VDocLD document node`)],
+    target VDocState document node`)],
           ] },
 dfn("Extraction context", "#extraction_context", ` is
     defined as a collection of `, ...[].concat(...[

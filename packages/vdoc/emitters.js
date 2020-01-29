@@ -93,7 +93,7 @@ function emitArrayHTML (content, emission, stack) {
   for (let i = 0; i <= content.length; ++i) {
     // TODO(iridian, 2019-10): This is legacy code: paragraph is now
     // done on the extraction side. 'null' array entries should be
-    // removed from vdocld, and then this code can be removed also.
+    // removed from vdocstate, and then this code can be removed also.
     if (i < content.length ? (content[i] === null) : paragraphBegin) {
       if (i > paragraphBegin) {
         const body = emitArrayHTML(content.slice(paragraphBegin, i), "", stack);

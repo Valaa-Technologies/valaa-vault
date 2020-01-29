@@ -34,9 +34,9 @@ exports.builder = (yargs) => yargs.options({
     default: [].concat(yargs.vlm.getToolConfig(yargs.vlm.toolset, "docs", "stylesheets") || []),
     description: "CSS directives to add to revdoc generation",
   },
-  vdocld: {
+  vdocstate: {
     default: true,
-    description: "Generate vdocld documents from all vault **/*revdoc*.js files",
+    description: "Generate VDocState documents from all vault **/*revdoc*.js files",
   },
   "listing-target": {
     type: "string", default: yargs.vlm.getToolConfig(yargs.vlm.toolset, "docs", "listingTarget"),
@@ -59,17 +59,18 @@ exports.handler = async (yargv) => {
   const vaultDocsConfig = vlm.getToolConfig("@valos/type-vault", "docs") || {};
   const docsBaseIRI = vaultDocsConfig.docsBaseIRI;
   const listing = {};
-  function _addDocumentToListing (documentPath, vdocld, { tags = [], ...rest }) {
+  function _addDocumentToListing (documentPath, vdocState, { tags = [], ...rest }) {
     listing[documentPath] = {
-      "@id": vdocld[0]["@id"],
-      tags: (vdocld[0]["vdoc:tags"] || []).concat(...tags)
+      "@id": vdocState[0]["@id"],
+      tags: (vdocState[0]["vdoc:tags"] || []).concat(...tags)
           .filter((v, i, a) => a.indexOf(v) === i),
-      subProfiles: (vdocld[0].subProfiles || []),
-      title: vdocld[0]["dc:title"] || documentPath,
-      ..._embedSection("abstract", vdocld[0].abstract),
-      ..._embedSection("introduction", { ...vdocld[0].introduction || {}, "dc:title": undefined }),
-      ..._embedSection("apiAbstract", vdocld[0].section_api_abstract),
-      ..._embedSection("ontologyAbstract", vdocld[0].section_ontology_abstract),
+      subProfiles: (vdocState[0].subProfiles || []),
+      title: vdocState[0]["dc:title"] || documentPath,
+      ..._embedSection("abstract", vdocState[0].abstract),
+      ..._embedSection("introduction",
+          { ...vdocState[0].introduction || {}, "dc:title": undefined }),
+      ..._embedSection("apiAbstract", vdocState[0].section_api_abstract),
+      ..._embedSection("ontologyAbstract", vdocState[0].section_ontology_abstract),
       ...rest,
     };
   }
@@ -124,13 +125,13 @@ exports.handler = async (yargv) => {
           await updateReVDocParentPackageValOSDocsBaseIRI(
               workspaceName, targetWorkspaceBase, packageJSON, packageJSONPath);
         }
-        const { revdocld } = await generateRevdocAndWriteToDocs(
-            sourcePath, targetDocPath, targetDocName, yargv.vdocld);
-        if (revdocld) {
+        const { revdocState } = await generateRevdocAndWriteToDocs(
+            sourcePath, targetDocPath, targetDocName, yargv.vdocstate);
+        if (revdocState) {
           const documentName = targetDocName === "index"
               ? config.name
               : vlm.path.join(targetDocPath, targetDocName);
-          _addDocumentToListing(documentName, revdocld, {
+          _addDocumentToListing(documentName, revdocState, {
             package: packageJSON.name, version: packageJSON.version,
           });
         }
@@ -152,19 +153,19 @@ exports.handler = async (yargv) => {
     const sbomxml = await scrapeCycloneDXXML();
     await vlm.shell.ShellString(sbomxml)
         .to("docs/sbom.cyclonedx.xml");
-    const sbomvdocld = await extractVDocLD(sbomxml);
-    await vlm.shell.ShellString(JSON.stringify(sbomvdocld, null, 2))
+    const sbomDocState = await extractVDocState(sbomxml);
+    await vlm.shell.ShellString(JSON.stringify(sbomDocState, null, 2))
         .to("docs/sbom.jsonld");
-    _addDocumentToListing("sbom", sbomvdocld, {
+    _addDocumentToListing("sbom", sbomDocState, {
       package: config.name, version: config.version, tags: ["PRIMARY", "SBOM"],
     });
-    const sbomhtml = await emitHTML(sbomvdocld);
+    const sbomhtml = await emitHTML(sbomDocState);
     await vlm.shell.ShellString(sbomhtml)
         .to("docs/sbom.html");
-    const sbommarkdown = await emitMarkdown(sbomvdocld);
+    const sbommarkdown = await emitMarkdown(sbomDocState);
     await vlm.shell.ShellString(sbommarkdown)
         .to("docs/sbom.md");
-    return { sbomxml, sbomvdocld, sbomhtml, sbommarkdown };
+    return { sbomxml, sbomDocState, sbomhtml, sbommarkdown };
   }
 
   async function updateReVDocParentPackageValOSDocsBaseIRI (
@@ -178,28 +179,28 @@ exports.handler = async (yargv) => {
   }
 
   async function generateRevdocAndWriteToDocs (
-      revdocPath, targetDocPath, targetDocName, emitReVDocLD) {
+      revdocPath, targetDocPath, targetDocName, emitRevDocState) {
     try {
       const revdocSource = require(vlm.path.join(process.cwd(), revdocPath));
-      const revdocld = extension.extract(revdocSource, {
+      const revdocState = extension.extract(revdocSource, {
         documentIRI: _combineIRI(docsBaseIRI, targetDocPath, targetDocName),
       });
-      const revdocHTML = await emitHTML(revdocld);
+      const revdocHTML = await emitHTML(revdocState);
       const targetDir = vlm.path.join("docs", targetDocPath);
       await vlm.shell.mkdir("-p", targetDir);
       const targetDocumentPath = vlm.path.join(targetDir, targetDocName);
       await vlm.shell.ShellString(revdocHTML)
           .to(`${targetDocumentPath}.html`);
-      if (emitReVDocLD) {
-        await vlm.shell.ShellString(JSON.stringify(revdocld, null, 2))
+      if (emitRevDocState) {
+        await vlm.shell.ShellString(JSON.stringify(revdocState, null, 2))
             .to(`${targetDocumentPath}.jsonld`);
       }
-      return { revdocld };
+      return { revdocState };
     } catch (error) {
       throw wrapError(error, new Error(`During generateRevdocAndWriteToDocs("${revdocPath}")`),
           "\n\ttargetDocPath:", targetDocPath,
           "\n\ttargetDocName:", targetDocName,
-          "\n\temitReVDocLD:", emitReVDocLD);
+          "\n\temitReVDocState:", emitRevDocState);
     }
   }
 
@@ -213,7 +214,7 @@ exports.handler = async (yargv) => {
     return sbomxml;
   }
 
-  async function extractVDocLD (sbomxml) {
+  async function extractVDocState (sbomxml) {
     const sbomgraph = patchWith({}, convert.xml2js(sbomxml, { compact: true, nativeType: true }), {
       preExtend (target, patch, key, targetObject) {
         if (patch == null || Array.isArray(patch)) return undefined;
@@ -276,15 +277,15 @@ to define the content of this section.`,
     return extension.extract(sbomSource, { documentIRI: `${docsBaseIRI || ""}sbom` });
   }
 
-  async function emitHTML (sbomvdocld) {
-    const sbomhtml = extension.emit(sbomvdocld, "html", {
+  async function emitHTML (sbomDocState) {
+    const sbomhtml = extension.emit(sbomDocState, "html", {
       revdoc: { stylesheets: yargv.stylesheets },
     });
     return sbomhtml;
   }
 
-  async function emitMarkdown (sbomvdocld) {
-    const sbommarkdown = `# ${sbomvdocld[0]["dc:title"]}
+  async function emitMarkdown (sbomDocState) {
+    const sbommarkdown = `# ${sbomDocState[0]["dc:title"]}
 
 Markdown VDoc extension not implemented yet.
 `;

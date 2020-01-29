@@ -20,9 +20,9 @@ module.exports = {
 function extract (sourceGraphs, {
   target, documentIRI, extensions = [this, ...this.extends], omitContext,
 } = {}) {
-  const vdocld = [];
+  const vdocState = [];
   try {
-    return patchWith(vdocld, [].concat(sourceGraphs), {
+    return patchWith(vdocState, [].concat(sourceGraphs), {
       keyPath: [],
       extractionRules: extensions.reduce((a, { ontology }) =>
           Object.assign(a, ontology.extractionRules || {}), {}),
@@ -71,10 +71,10 @@ function extract (sourceGraphs, {
   }
 }
 
-function emit (vdocld, formatName, options) {
+function emit (vdocState, formatName, options) {
   if (options.extensions === undefined) options.extensions = [this, ...this.extends];
-  if (options.document === undefined) options.document = vdocld[0];
-  if (options.vdocld === undefined) options.vdocld = vdocld;
+  if (options.document === undefined) options.document = vdocState[0];
+  if (options.vdocState === undefined) options.vdocState = vdocState;
   options.emitNode = function emitNode (node, target, explicitType) {
     const type = explicitType
         || ((node == null) && "null")
@@ -102,5 +102,5 @@ function emit (vdocld, formatName, options) {
     if (!subClassOf) return target;
     return this.emitNode(node, target, subClassOf);
   };
-  return options.emitNode(vdocld[0], options.target);
+  return options.emitNode(vdocState[0], options.target);
 }

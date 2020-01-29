@@ -1,4 +1,5 @@
 const { extension: vdocExtension } = require("@valos/vdoc");
+const { wrapError, dumpObject } = require("@valos/tools/wrapError");
 
 module.exports = {
   html: {
@@ -45,31 +46,37 @@ function emitReVDocChapter (node, emission, stack) {
 }
 
 function emitReVDocReference (node, emission, stack) {
-  let node_ = node;
-  let ref = node_["vdoc:ref"];
-  if ((ref != null) && (typeof ref !== "string")) {
-    node_ = { ...node, "vdoc:ref": ref = stack.emitNode(node_["vdoc:ref"], "") };
-  }
-  if ((ref || "")[0] === "@") {
-    const refParts = ref.match(/^([^/#]*)\/([^/#]*)\/?(#?.*)?$/);
-    const packageName = (refParts[1] === "@")
-        ? refParts[2]
-        : refParts.slice(1, 3).join("/");
-    let packageJSON;
-    try {
-      packageJSON = require(`${packageName}/package`);
-    } catch (error) {
-      packageJSON = {};
+  try {
+    let node_ = node;
+    let ref = node_["vdoc:ref"];
+    if ((ref != null) && (typeof ref !== "string")) {
+      node_ = { ...node, "vdoc:ref": ref = stack.emitNode(node_["vdoc:ref"], "") };
     }
-    const docsBase = (packageJSON.valos || {}).docs || packageName;
-    const subPath = refParts[3] || "";
-    node_ = Object.assign({}, node, {
-      "vdoc:ref": (!refParts[3] || (subPath[0] === "#") || (docsBase[docsBase.length - 1] === "/"))
-          ? `${docsBase}${refParts[3] || ""}`
-          : `${docsBase}/${refParts[3]}`,
-    });
+    const refParts = ref.match(/^(@[^/#]*)\/([^/#]*)\/?(#?.*)?$/);
+    if (refParts) {
+      const packageName = (refParts[1] === "@")
+          ? refParts[2]
+          : refParts.slice(1, 3).join("/");
+      let packageJSON;
+      try {
+        packageJSON = require(`${packageName}/package`);
+      } catch (error) {
+        packageJSON = {};
+      }
+      const docsBase = (packageJSON.valos || {}).docs || packageName;
+      const subPath = refParts[3] || "";
+      node_ = Object.assign({}, node, {
+        "vdoc:ref": (!refParts[3] || (subPath[0] === "#")
+                || (docsBase[docsBase.length - 1] === "/"))
+            ? `${docsBase}${refParts[3] || ""}`
+            : `${docsBase}/${refParts[3]}`,
+      });
+    }
+    return vdocExtension.emitters.html["vdoc:Reference"](node_, emission, stack);
+  } catch (error) {
+    throw wrapError(error, new Error("During emitReVDocReference, with:"),
+        "\n\tnode:", ...dumpObject(node, { nest: true }));
   }
-  return vdocExtension.emitters.html["vdoc:Reference"](node_, emission, stack);
 }
 
 function emitReVDocInvokation (node, emission, stack) {

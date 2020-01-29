@@ -2,8 +2,6 @@
 {
   "javascript.validate.enable": false,
   "typescript.autoImportSuggestions.enabled": false,
-  "typescript.suggest.autoImports": false,
-  "javascript.suggest.autoImports": false,
   "editor.renderWhitespace": "boundary",
   "editor.renderControlCharacters": true,
   "editor.trimAutoWhitespace": true,

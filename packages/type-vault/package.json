@@ -14,19 +14,19 @@
     "access": "public"
   },
   "bin": {
-    ".valma-configure_.type_.vault_@valos_type-vault": "valma/configure__vault__type-vault.js",
-    "valma-assemble-packages": "valma/assemble-packages.js",
-    "valma-publish-packages": "valma/publish-packages.js",
-    "valma-clean-vault": "valma/clean-vault.js",
-    "valma-release-vault": "valma/release-vault.js",
-    ".valma-configure_.type_.library_.select_@valos_type-vault_enable-babel": "valma/configure_.type_.library_.select_@valos_type-vault_enable-babel.js",
-    "valma-regenerate-docs": "valma/regenerate-docs.js",
-    ".valma-release-vault_.assembled-hooks_regenerate-docs": "valma/regenerate-docs.js",
-    "valma-write-revdoc": "valma/write-revdoc.js",
-    "valma-generate-domain-summary": "valma/generate-domain-summary.js",
-    ".valma-release-vault_.assembled-hooks_00-generate-domain-summary": "valma/generate-domain-summary.js",
-    ".valma-configure_.@valos_type-vault_.tools_.select_docs": "valma/configure__type-vault_.tools_.select_docs.js",
-    ".valma-configure_.@valos_type-vault_.tools_.select_domain": "valma/configure__type-vault_.tools_.select_domain.js"
+    "_vlm_assemble-packages": "valma/assemble-packages.js",
+    "_vlm_publish-packages": "valma/publish-packages.js",
+    "_vlm_clean-vault": "valma/clean-vault.js",
+    "_vlm_release-vault": "valma/release-vault.js",
+    "_vlm_regenerate-docs": "valma/regenerate-docs.js",
+    "_vlm_write-revdoc": "valma/write-revdoc.js",
+    "_vlm_generate-domain-summary": "valma/generate-domain-summary.js",
+    "_vlm__configure__type__vault_-valos_type-vault": "valma/configure__vault__type-vault.js",
+    "_vlm__configure__type__library__select_-valos_type-vault_enable-babel": "valma/configure_.type_.library_.select_@valos_type-vault_enable-babel.js",
+    "_vlm__configure__-valos_type-vault__tools__select_docs": "valma/configure__type-vault_.tools_.select_docs.js",
+    "_vlm__configure__-valos_type-vault__tools__select_domain": "valma/configure__type-vault_.tools_.select_domain.js",
+    "_vlm__release-vault__assembled-hooks_regenerate-docs": "valma/regenerate-docs.js",
+    "_vlm__release-vault__assembled-hooks_00-generate-domain-summary": "valma/generate-domain-summary.js"
   },
   "dependencies": {
     "@babel/cli": ">7.0.0-rc",

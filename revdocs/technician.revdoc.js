@@ -206,13 +206,13 @@ context would forward the command to `, command("valma.bin/valma-status"),
 if not. The call eventually resolves at the global `,
 command("/usr/bin/valma-status"), `. Its implementation then calls `,
 command("vlm .status/**/*"), ` which calls all scripts which match
-the glob `, command(".valma-status/**/*"), ` and are visible on the
+the glob `, command(".status/**/*"), ` and are visible on the
 execution context pools (the scripts called by `, command("vlm status"),
 ` are known as `, em("valma status scripts"), `).`,
 blockquote(em("valos-vault-3.3"),
     `: A package can export valma scripts using npm package.json `,
     em("bin"), ` section and by prefixing the exported name with `,
-    em("valma-"), ` as usual. These scripts will be available for
+    em("_vlm_"), ` as usual. These scripts will be available for
     all packages depending on this package in their `, em("depends"),
     ` pool.`),
 `Running `, command("vlm"), ` with no arguments lists all available

@@ -6,10 +6,10 @@ exports.vlm = { toolset: "@valos/type-opspace" };
 exports.command = "build-release [toolsetGlob]";
 exports.describe = "Build a new release of this opspace";
 exports.introduction =
-`This command prepares, builds and tests a new opspace release locally.
-This command forms the first half of a release deployment process which
-doesn't trigger external changes; \`deploy-release\` initiates the
-actual deployment process.
+`This command prepares, builds and tests a new opspace release locally
+without making external changes. This forms the first part of the
+opspace deployment process. The second half is \`deploy-release\` which
+performs the actual deployment process.
 
 This command resolves a local 'releasePath' for the build and then
 invokes all release-build sub-commands as follows:

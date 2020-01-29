@@ -17,15 +17,15 @@
   },
   "bin": {
     "vlm": "valma/valma.js",
-    "valma-configure": "valma/configure.js",
-    "valma-draft-command": "valma/draft-command.js",
-    "valma-init": "valma/init.js",
-    "valma-status": "valma/status.js",
-    "valma-$": "valma/execute.js",
-    ".valma-configure_.valos-stanza": "valma/configure/valos-stanza.js",
-    ".valma-configure_.select-toolsets": "valma/configure/select-toolsets.js",
-    ".valma-status_10-header": "valma/status_10-header.js",
-    ".valma-": "valma/this.js"
+    "_vlm_configure": "valma/configure.js",
+    "_vlm_draft-command": "valma/draft-command.js",
+    "_vlm_init": "valma/init.js",
+    "_vlm_status": "valma/status.js",
+    "_vlm__configure__valos-stanza": "valma/configure/valos-stanza.js",
+    "_vlm__configure__select-toolsets": "valma/configure/select-toolsets.js",
+    "_vlm__status_10-header": "valma/status_10-header.js",
+    "_vlm__": "valma/this.js",
+    "_vlm_-": "valma/execute.js"
   },
   "dependencies": {
     "@valos/tools": "^0.35.0-rc.3",

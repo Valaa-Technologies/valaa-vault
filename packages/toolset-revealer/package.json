@@ -13,8 +13,8 @@
     "access": "public"
   },
   "bin": {
-    "valma-compose-revelation": "valma/compose-revelation.js",
-    "valma-rouse-revealer": "valma/rouse-revealer.js"
+    "_vlm_compose-revelation": "valma/compose-revelation.js",
+    "_vlm_rouse-revealer": "valma/rouse-revealer.js"
   },
   "dependencies": {
     "autoprefixer": "^8.6.2",

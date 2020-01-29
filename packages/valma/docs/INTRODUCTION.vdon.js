@@ -22,7 +22,7 @@ module.exports = { "...": { heading:
     with option -a.`,
     "",
     `The export name in the npm package.json .bin stanza must be the
-    command name prefixed with 'valma-' (or '.valma-' if a hidden
+    command name prefixed with '_vlm_' (or '_vlm__' if a hidden
     command begins with a '.'). Additionally export name must have all
     '/' replaced with '_' due to npm limitations. Valma will always
     treat '_' and '/' characters to be equal although '/' is

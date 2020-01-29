@@ -11,7 +11,7 @@ function exportDomainAggregateOntologiesFromDocuments (name, documents) {
     if (document.package === name
         || !(document.tags || []).includes("ONTOLOGY")) return;
 
-    // Maybe source from the document vdocld?
+    // Maybe source from the document vdocstate?
     const ontologies = require(`${document.package}/ontologies`);
     for (const [prefix, source] of Object.entries(ontologies)) {
       const current = preOntologies[prefix]

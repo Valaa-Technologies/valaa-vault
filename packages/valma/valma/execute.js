@@ -1,5 +1,5 @@
-exports.command = "$ [command]";
-exports.describe = "Execute a non-valma command within valma context interactively";
+exports.command = "@ [command]";
+exports.describe = "Execute a package bin command within valma context interactively";
 exports.introduction = `${exports.describe}.
 
 This is the command line shim to valma script vlm.interact.
@@ -7,7 +7,7 @@ Like 'npx -c' it executes a regular command exported by some package
 dependency to the node_modules/.bin/ folder.
 
 Unlike 'npx' which only searches the current directory and the global
-cache '$' prepends all available valma pools to env.PATH, innermost
+cache '@' prepends all available valma pools to env.PATH, innermost
 pool first.
 `;
 

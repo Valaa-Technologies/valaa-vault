@@ -13,18 +13,18 @@
     "access": "public"
   },
   "bin": {
-    ".valma-configure_.type_opspace": "valma/configure/type/opspace.js",
-    ".valma-configure_.type_spindle": "valma/configure/type/spindle.js",
-    ".valma-configure_.type_library": "valma/configure/type/library.js",
-    ".valma-configure_.type_tool": "valma/configure/type/tool.js",
-    ".valma-configure_.type_toolset": "valma/configure/type/toolset.js",
-    ".valma-configure_.type_vault": "valma/configure/type/vault.js",
-    ".valma-configure_.type_vdoc-extension": "valma/configure/type/vdoc-extension.js",
-    ".valma-configure_.type_worker": "valma/configure/type/worker.js",
-    ".valma-configure_.type_domain": "valma/configure/type/domain.js",
-    ".valma-configure_.select_@valos_toolset-revealer": "valma/configure/select__toolset-revealer.js",
-    ".valma-configure_.@valos_type-worker_.tools_.select_@valos_web-spindle": "valma/configure/type-worker_tools_select__web-spindle.js",
-    ".valma-configure_.domain_@valos_kernel": "valma/configure/domain__kernel.js"
+    "_vlm__configure__type_opspace": "valma/configure/type/opspace.js",
+    "_vlm__configure__type_spindle": "valma/configure/type/spindle.js",
+    "_vlm__configure__type_library": "valma/configure/type/library.js",
+    "_vlm__configure__type_tool": "valma/configure/type/tool.js",
+    "_vlm__configure__type_toolset": "valma/configure/type/toolset.js",
+    "_vlm__configure__type_vault": "valma/configure/type/vault.js",
+    "_vlm__configure__type_vdoc-extension": "valma/configure/type/vdoc-extension.js",
+    "_vlm__configure__type_worker": "valma/configure/type/worker.js",
+    "_vlm__configure__type_domain": "valma/configure/type/domain.js",
+    "_vlm__configure__select_-valos_toolset-revealer": "valma/configure/select__toolset-revealer.js",
+    "_vlm__configure__-valos_type-worker__tools__select_-valos_web-spindle": "valma/configure/type-worker_tools_select__web-spindle.js",
+    "_vlm__configure__domain_-valos_kernel": "valma/configure/domain__kernel.js"
   },
   "dependencies": {
     "@valos/raem": "^0.35.0-rc.3",

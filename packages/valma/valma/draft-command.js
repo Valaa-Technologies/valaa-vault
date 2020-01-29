@@ -58,20 +58,19 @@ exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
   const command = yargv.commandName;
   if (!command) throw new Error("commandName missing");
-  const commandParts = command.replace(/\//g, "_").match(/^(\.)?(.*)$/);
-  const commandExportName = `${commandParts[1] || ""}valma-${commandParts[2]}`;
-  const scriptPath = `valma/${yargv.filename || `${commandParts[2]}.js`}`;
+  const commandFilename = vlm.filenameFromCommand(command);
+  const scriptPath = `valma/${yargv.filename || `${commandFilename}.js`}`;
   let verb = "already exports";
   const import_ = yargv.import;
   let local = !yargv.export;
-  while (!(vlm.packageConfig.bin || {})[commandExportName]) {
+  while (!(vlm.packageConfig.bin || {})[commandFilename]) {
     const choices = [import_ ? "Import" : local ? "Create" : "Export", "skip",
       local ? "export instead" : "local instead"
     ];
     if (yargv.introduction) choices.push("help");
     const linkMessage = local
-        ? `'valma.bin/${commandExportName}'`
-        : `'package.json':bin["${commandExportName}"]`;
+        ? `'valma.bin/${commandFilename}'`
+        : `'package.json':bin["${commandFilename}"]`;
     const answer = await vlm.inquire([{
       message: `${import_ ? "Import" : local ? "Create" : "Export"
           } ${(yargv.brief && `'${yargv.brief}'`)
@@ -109,9 +108,9 @@ exports.handler = async (yargv) => {
         vlm.shell.cp(sourcePath, scriptPath);
       }
     }
-    const symlinkPath = vlm.path.join("valma.bin", commandExportName);
+    const symlinkPath = vlm.path.join("valma.bin", commandFilename);
     if (!local) {
-      vlm.updatePackageConfig({ bin: { [commandExportName]: scriptPath } });
+      vlm.updatePackageConfig({ bin: { [commandFilename]: scriptPath } });
       verb = "now package.json.bin exports";
     } else if (!vlm.shell.test("-e", symlinkPath)) {
       vlm.shell.mkdir("-p", vlm.path.dirname(symlinkPath));
@@ -130,7 +129,7 @@ exports.handler = async (yargv) => {
   if (verb === "already exports") {
     vlm.warn(message);
     vlm.instruct("You can edit the existing command script at:",
-        vlm.theme.path(vlm.packageConfig.bin[commandExportName]));
+        vlm.theme.path(vlm.packageConfig.bin[commandFilename]));
   } else {
     vlm.info(message);
     vlm.instruct(`You can edit the command ${yargv.skeleton ? "skeleton" : "template"} at:`,

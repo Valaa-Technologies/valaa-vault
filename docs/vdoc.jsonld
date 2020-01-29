@@ -45,9 +45,9 @@
     "revdoc:package": "@valos/vdoc",
     "revdoc:prefix": "vdoc",
     "revdoc:prefixIRI": "https://valospace.org/vdoc#",
-    "revdoc:version": "0.35.0-rc.3",
+    "revdoc:version": "0.35.0-rc.5",
     "respecConfig": {
-      "subtitle": "0.35.0-rc.3",
+      "subtitle": "0.35.0-rc.5",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -372,7 +372,7 @@
               ],
               "vdoc:ref": "https://www.w3.org/TR/json-ld11-framing/"
             },
-            " for providing a mapping from VDocLD to RDF model."
+            " for providing a mapping from VDocState to RDF model."
           ]
         }
       ]
@@ -414,7 +414,7 @@
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
             {
-              "revdoc:dfn": "#vdocld",
+              "revdoc:dfn": "#vdocstate",
               "vdoc:content": [
                 {
                   "vdoc:strong": true,
@@ -422,9 +422,9 @@
                     {
                       "@type": "vdoc:Reference",
                       "vdoc:content": [
-                        "VDocLD"
+                        "VDocState"
                       ],
-                      "vdoc:ref": "#vdocld"
+                      "vdoc:ref": "#vdocstate"
                     }
                   ]
                 },
@@ -459,7 +459,7 @@
                   ],
                   "vdoc:ref": "#emission"
                 },
-                " from a VDocLD and format specific set of emission parameters."
+                " from a VDocState and format specific set of emission parameters."
               ]
             }
           ]
@@ -486,7 +486,7 @@
                   }
                 ]
               },
-              " transforms a source graph into\n  a VDocLD by applying the idempotent ",
+              " transforms a source graph into\n  a VDocState by applying the idempotent ",
               {
                 "@type": "vdoc:Reference",
                 "vdoc:content": [
@@ -497,7 +497,7 @@
               " until the output no longer changes."
             ]
           },
-          "Due to idempotence the source graph can wildly different or\narbitrarily close to the resulting VDocLD; in fact a VDocLD is\nalways its own source graph."
+          "Due to idempotence the source graph can wildly different or\narbitrarily close to the resulting VDocState; in fact a VDocState is\nalways its own source graph."
         ],
         {
           "@type": "vdoc:Paragraph",
@@ -525,22 +525,22 @@
                   ],
                   "vdoc:ref": "#output_format"
                 },
-                " from VDocLD."
+                " from VDocState."
               ]
             }
           ]
         }
       ]
     },
-    "vdocld": {
-      "@id": "vdocld",
-      "dc:title": "VDocLD - primary interchange format",
+    "vdocstate": {
+      "@id": "vdocstate",
+      "dc:title": "VDocState - primary interchange format",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "\nVDocLD is a JSON-LD document with a well-formed tree structure\nconsisting of three types of nodes, corresponding to the first, second\nand remaining levels of the tree:"
+            "\nVDocState is a VState JSON-LD document with a well-formed tree structure\nconsisting of three types of nodes, corresponding to the first, second\nand remaining levels of the tree:"
           ]
         },
         {
@@ -549,7 +549,7 @@
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "There can be multiple first-level document nodes in a single\nVDocLD (as per JSON-LD). ",
+            "There can be multiple first-level document nodes in a single\nVDocState (as per JSON-LD). ",
             {
               "revdoc:dfn": "#root_node",
               "vdoc:content": [
@@ -565,7 +565,7 @@
                     }
                   ]
                 },
-                " is the singular,\n  implicit '0th-level' VDocLD node without semantics defined by\n  VDoc itself."
+                " is the singular,\n  implicit '0th-level' VDocState node without semantics defined by\n  VDoc itself."
               ]
             }
           ]
@@ -697,7 +697,7 @@
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "\nThe keys of the VDocLD nodes have four categories depending on whether\nthe key is an IRI or not and whether an IRI key has semantics defined\nVDoc or extension format specifications:"
+            "\nThe keys of the VDocState nodes have four categories depending on whether\nthe key is an IRI or not and whether an IRI key has semantics defined\nVDoc or extension format specifications:"
           ]
         },
         {
@@ -893,7 +893,7 @@
     },
     "transformations_spec": {
       "@id": "transformations_spec",
-      "dc:title": "Transformations convert documents to and from VDocLD",
+      "dc:title": "Transformations convert documents to and from VDocState",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -906,13 +906,13 @@
     },
     "extraction_transformation": {
       "@id": "extraction_transformation",
-      "dc:title": "Extraction transforms source graphs into VDocLD",
+      "dc:title": "Extraction transforms source graphs into VDocState",
       "@type": "vdoc:Chapter",
       "vdoc:content": []
     },
     "emission_transformation": {
       "@id": "emission_transformation",
-      "dc:title": "Emission transforms VDocLD into output targets",
+      "dc:title": "Emission transforms VDocState into output targets",
       "@type": "vdoc:Chapter",
       "vdoc:content": []
     },
@@ -1063,7 +1063,7 @@
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "Extraction rules specify how a source graph is interpreted as\nmutations (usually additions) to a given target VDocLD document.\nAn extraction rule consists of two parts:",
+            "Extraction rules specify how a source graph is interpreted as\nmutations (usually additions) to a given target VDocState document.\nAn extraction rule consists of two parts:",
             {
               "vdoc:content": [
                 {
@@ -1115,7 +1115,7 @@
                               ],
                               "vdoc:ref": "extraction context"
                             },
-                            " is interpreted as a set of mutations on the current\n    target VDocLD document node"
+                            " is interpreted as a set of mutations on the current\n    target VDocState document node"
                           ]
                         }
                       ]
@@ -2304,7 +2304,7 @@
         "@id": "document_flow"
       },
       {
-        "@id": "vdocld"
+        "@id": "vdocstate"
       },
       {
         "@id": "transformations_spec"

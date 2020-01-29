@@ -2,117 +2,117 @@
   "workspaces": {
     "toolset": {
       "valma": {
-        "version": "0.35.0-rc.2",
+        "version": "0.35.0-rc.4",
         "description": "A ValOS CLI tool for discovering and executing context-dependent command scripts",
         "license": "MIT"
       },
       "@valos/toolset-revealer": {
-        "version": "0.35.0-rc.2",
+        "version": "0.35.0-rc.4",
         "description": "Tools for building revelations both for development and deployment purposes",
         "license": "MIT"
       },
       "@valos/type-spindle": {
-        "version": "0.35.0-rc.2",
+        "version": "0.35.0-rc.4",
         "description": "The ValOS 'spindle' workspace type toolset",
         "license": "MIT"
       },
       "@valos/type-opspace": {
-        "version": "0.35.0-rc.2",
+        "version": "0.35.0-rc.4",
         "description": "The ValOS 'opspace' workspace type toolset",
         "license": "MIT"
       },
       "@valos/type-vault": {
-        "version": "0.35.0-rc.2",
+        "version": "0.35.0-rc.4",
         "description": "The ValOS 'vault' workspace type toolset",
         "homepage": "https://valospace.org/type-vault",
         "license": "MIT"
       },
       "@valos/type-worker": {
-        "version": "0.35.0-rc.2",
+        "version": "0.35.0-rc.4",
         "description": "The ValOS 'worker' workspace type toolset",
         "license": "MIT"
       },
       "@valos/type-domain": {
-        "version": "0.35.0-rc.2",
+        "version": "0.35.0-rc.4",
         "description": "The ValOS domain workspace type toolset",
         "license": "MIT"
       }
     },
     "library": {
       "@valos/engine": {
-        "version": "0.35.0-rc.2",
+        "version": "0.35.0-rc.4",
         "description": "ValOS Engine API and Schema",
         "homepage": "https://valospace.org/engine",
         "license": "MIT"
       },
       "@valos/gateway-api": {
-        "version": "0.35.0-rc.2",
+        "version": "0.35.0-rc.4",
         "description": "Minimal footprint ValOS Gateway API local forwards",
         "license": "MIT"
       },
       "@valos/hypertwin": {
-        "version": "0.35.0-rc.2",
+        "version": "0.35.0-rc.4",
         "description": "ValOS Hypertwin Specifications and Tools Library",
         "license": "MIT"
       },
       "@valos/inspire": {
-        "version": "0.35.0-rc.2",
+        "version": "0.35.0-rc.4",
         "description": "ValOS Inspire application gateway",
         "homepage": "https://valospace.org/inspire",
         "license": "MIT"
       },
       "@valos/raem": {
-        "version": "0.35.0-rc.2",
+        "version": "0.35.0-rc.4",
         "description": "ValOS Resources And Events Model (ValOS-RAEM) API, schema and ontology",
         "homepage": "https://valospace.org/raem",
         "license": "MIT"
       },
       "@valos/script": {
-        "version": "0.35.0-rc.2",
+        "version": "0.35.0-rc.4",
         "description": "ValOS Script API, schema",
         "homepage": "https://valospace.org/script",
         "license": "MIT"
       },
       "@valos/sourcerer": {
-        "version": "0.35.0-rc.2",
+        "version": "0.35.0-rc.4",
         "description": "ValOS Sourcerer API, schema",
         "homepage": "https://valospace.org/sourcerer",
         "license": "MIT"
       },
       "@valos/tools": {
-        "version": "0.35.0-rc.2",
+        "version": "0.35.0-rc.4",
         "description": "ValOS Tools API",
         "license": "MIT"
       }
     },
     "domain": {
       "@valos/kernel": {
-        "version": "0.35.0-rc.2",
+        "version": "0.35.0-rc.4",
         "description": "@valos/kernel domain",
         "license": "MIT"
       }
     },
     "vdoc-extension": {
       "@valos/revdoc": {
-        "version": "0.35.0-rc.2",
+        "version": "0.35.0-rc.4",
         "description": "ReVDoc - ReSpec document VDoc extension",
         "homepage": "https://valospace.org/revdoc",
         "license": "MIT"
       },
       "@valos/sbomdoc": {
-        "version": "0.35.0-rc.2",
+        "version": "0.35.0-rc.4",
         "description": "SBoMDoc - Software Bill of Materials VDoc extension",
         "homepage": "https://valospace.org/sbomdoc",
         "license": "MIT"
       },
       "@valos/twindoc": {
-        "version": "0.35.0-rc.2",
+        "version": "0.35.0-rc.4",
         "description": "TwinDoc - Valospace Hypertwin VDoc extension",
         "homepage": "https://valospace.org/twindoc",
         "license": "MIT"
       },
       "@valos/vdoc": {
-        "version": "0.35.0-rc.2",
+        "version": "0.35.0-rc.4",
         "description": "VDoc - ValOS document interchange specification",
         "homepage": "https://valospace.org/vdoc",
         "license": "MIT"
@@ -120,7 +120,7 @@
     },
     "spindle": {
       "@valos/web-spindle": {
-        "version": "0.35.0-rc.2",
+        "version": "0.35.0-rc.4",
         "description": "A spindle for structured ValOS Web APIs",
         "homepage": "https://valospace.org/web-spindle",
         "license": "MIT"
@@ -130,7 +130,7 @@
   "types": {
     "domain": {
       "disabled": "DISABLED",
-      "explanation": ".disabled => Workspace is not a 'domain' (is 'vault')",
+      "explanation": ".disabled => Workspace is not a domain",
       "description": "Select 'domain' workspace type",
       "package": "@valos/kernel",
       "version": "0.35.0-rc.3",
@@ -138,7 +138,7 @@
     },
     "library": {
       "disabled": "DISABLED",
-      "explanation": ".disabled => Workspace is not a 'library' (is 'vault')",
+      "explanation": ".disabled => Workspace is not a library",
       "description": "Select 'library' workspace type",
       "package": "@valos/kernel",
       "version": "0.35.0-rc.3",
@@ -146,7 +146,7 @@
     },
     "opspace": {
       "disabled": "DISABLED",
-      "explanation": ".disabled => Workspace is not an 'opspace' (is 'vault')",
+      "explanation": ".disabled => Workspace is not an opspace",
       "description": "Select 'opspace' workspace type",
       "package": "@valos/kernel",
       "version": "0.35.0-rc.3",
@@ -154,7 +154,7 @@
     },
     "spindle": {
       "disabled": "DISABLED",
-      "explanation": ".disabled => Workspace is not a 'spindle' (is 'vault')",
+      "explanation": ".disabled => Workspace is not a spindle",
       "description": "Select 'spindle' workspace type",
       "package": "@valos/kernel",
       "version": "0.35.0-rc.3",
@@ -162,7 +162,7 @@
     },
     "tool": {
       "disabled": "DISABLED",
-      "explanation": ".disabled => Workspace is not a 'tool' (is 'vault')",
+      "explanation": ".disabled => Workspace is not a tool",
       "description": "Select 'tool' workspace type",
       "package": "@valos/kernel",
       "version": "0.35.0-rc.3",
@@ -170,7 +170,7 @@
     },
     "toolset": {
       "disabled": "DISABLED",
-      "explanation": ".disabled => Workspace is not a 'toolset' (is 'vault')",
+      "explanation": ".disabled => Workspace is not a toolset",
       "description": "Select 'toolset' workspace type",
       "package": "@valos/kernel",
       "version": "0.35.0-rc.3",
@@ -184,7 +184,7 @@
     },
     "vdoc-extension": {
       "disabled": "DISABLED",
-      "explanation": ".disabled => Workspace is not a 'vdoc-extension' (is 'vault')",
+      "explanation": ".disabled => Workspace is not a vdoc-extension",
       "description": "Select 'vdoc-extension' workspace type",
       "package": "@valos/kernel",
       "version": "0.35.0-rc.3",
@@ -192,7 +192,7 @@
     },
     "worker": {
       "disabled": "DISABLED",
-      "explanation": ".disabled => Workspace is not a 'worker' (is 'vault')",
+      "explanation": ".disabled => Workspace is not a worker",
       "description": "Select 'worker' workspace type",
       "package": "@valos/kernel",
       "version": "0.35.0-rc.3",
@@ -208,139 +208,139 @@
     },
     "@valos/type-vault/enable-babel": {
       "disabled": "DISABLED",
-      "explanation": ".disabled => Workspace is not a library (is vault)",
+      "explanation": ".disabled => Workspace is not a library",
       "description": "Select the workspace to be transpiled using vault babel.config.js",
-      "package": "@valos/type-vault",
+      "package": "@valos/kernel",
       "version": "0.35.0-rc.3",
       "introduction": "Select the workspace to be transpiled using vault babel.config.js.\n\nThis toolset enables babel transpilation for a library workspace\nwhen 'vlm assemble-packages' is executed in the surrounding vault\nworkspace.\n"
     }
   },
   "tools": {
-    "@valos/type-worker#@valos/web-spindle": {
-      "disabled": "DISABLED",
-      "explanation": ".disabled => Workspace is not a worker (is vault)",
-      "description": "Select the worker toolset 'web-spindle'",
-      "package": "@valos/kernel",
-      "version": "0.35.0-rc.3",
-      "introduction": "Select the worker toolset 'web-spindle'.\n\nThis spindle extends a perspire worker workspace with REST-style\nconfigurable and extensible web service.\n"
-    },
     "@valos/type-vault#docs": {
       "description": "Select /docs generation tool for a vault workspace",
-      "package": "@valos/type-vault",
+      "package": "@valos/kernel",
       "version": "0.35.0-rc.3",
       "introduction": "Select /docs generation tool for a vault workspace.\n\nThis type-vault tool provides commands for (re)generating the /docs\nfolder from document sources present in the local workspaces, notably\nall revdoc documents matching glob '*.revdoc{,.test}.js'.\nAdditionally this tool can be configured to regenerate all docs on\n(pre)release time.\n"
     },
     "@valos/type-vault#domain": {
       "description": "Select domain management tool for a vault workspace",
-      "package": "@valos/type-vault",
+      "package": "@valos/kernel",
       "version": "0.35.0-rc.3",
       "introduction": "Select domain management tool for a vault workspace.\n\nThis type-vault tool enables the domain management and (re)generation\nof docs/index.html domain summary revdoc document.\n"
+    },
+    "@valos/type-worker#@valos/web-spindle": {
+      "disabled": "DISABLED",
+      "explanation": ".disabled => Workspace is not a worker",
+      "description": "Select the worker toolset 'web-spindle'",
+      "package": "@valos/kernel",
+      "version": "0.35.0-rc.3",
+      "introduction": "Select the worker toolset 'web-spindle'.\n\nThis spindle extends a perspire worker workspace with REST-style\nconfigurable and extensible web service.\n"
     }
   },
   "commands": {
-    "compose-revelation": {
-      "description": "Compose revealer bundles based on the revealer toolset config",
-      "package": "@valos/toolset-revealer",
-      "version": "0.35.0-rc.3",
-      "introduction": "Compose revealer bundles based on the revealer toolset config.\n\n\n"
-    },
-    "rouse-revealer": {
-      "description": "Launch a webpack-dev-server at localhost serving a local revelation",
-      "package": "@valos/toolset-revealer",
-      "version": "0.35.0-rc.3",
-      "introduction": "Launch a webpack-dev-server at localhost serving a local revelation.\n\nThe revelation consists of two parts: webpack output and static files.\nWebpack output is configured by the project root webpack.config.js and\nthe static files are served from --content-base. If this --content-base\ndoesn't exist it is created by copying all files from the directory(s)\nprovided by --content-source.\n"
-    },
-    "build-release": {
-      "description": "Build a new release of this opspace",
-      "package": "@valos/type-opspace",
-      "version": "0.35.0-rc.3",
-      "introduction": "Build a new release of this opspace.\n\nThis command prepares, builds and tests a new opspace release locally.\nThis command forms the first half of a release deployment process which\ndoesn't trigger external changes; `deploy-release` initiates the\nactual deployment process.\n\nThis command resolves a local 'releasePath' for the build and then\ninvokes all release-build sub-commands as follows:\n\nvlm .release-build/${toolsetGlob || \"**/*\"} --target=${releasePath} ${rest}\n\nThese sub-commands (which can be local opspace commands or commands\nprovided by opspace toolset dependencies) then (re)build the actual\nbuild artifacts under the target path.\n\n"
-    },
-    "deploy-release": {
-      "description": "Deploy previously built releases to their deployment targets",
-      "package": "@valos/type-opspace",
-      "version": "0.35.0-rc.3",
-      "introduction": "Deploy previously built releases to their deployment targets.\n\nThis command is second part of the two-part deployment with\nbuild-release building the release.\n"
-    },
     "assemble-packages": {
       "description": "Assemble all current modified vault packages (preparing for publish)",
-      "package": "@valos/type-vault",
+      "package": "@valos/kernel",
       "version": "0.35.0-rc.3",
       "introduction": "Assemble all current modified vault packages (preparing for publish).\n\nUses lerna to handle the monorepo sub-packages update detection,\nversioning, and git interactions. Configuration for lerna is in\nlerna.json: notably the version increase semantics is configured there.\n\nLerna is not used for constructing the actual packages. This is done by\na flat recursive cp to the target at the moment.\n\nInvokes babel for all projects with babel.config.js in their root. If\nthe vault has a shared babel.config.js for all packages, a symlink from\nthis root to each project should be created.\n\nWhen assembling lerna will automatically update the shared version for\nall packages and their cross-dependencies and make a git commit and git\ntag for the new version.\nThis behaviour can be omitted with --no-versioning.\n\n  Iterative development with yalc and publish-packages:\n\nOnce a set of packages has been been built to the target, run:\n\n'vlm publish-packages --publisher=yalc'\n\nThis will make the package assemblies available in a local yalc\n'registry'; see https://github.com/whitecolor/yalc for more details on\nhow to use such packages by other depending packages. Reassembling\nand pushing those changes through yalc to dependents can be done with:\n\n'vlm assemble-packages --reassemble --post-execute=\"cd $ASSEMBLY_TARGET && yalc push --no-sig\"'\n\nThis allows packages to be developed iteratively locally while having\nother packages depend and be tested against them.\n\n"
     },
+    "build-release": {
+      "description": "Build a new release of this opspace",
+      "package": "@valos/kernel",
+      "version": "0.35.0-rc.3",
+      "introduction": "Build a new release of this opspace.\n\nThis command prepares, builds and tests a new opspace release locally\nwithout making external changes. This forms the first part of the\nopspace deployment process. The second half is `deploy-release` which\nperforms the actual deployment process.\n\nThis command resolves a local 'releasePath' for the build and then\ninvokes all release-build sub-commands as follows:\n\nvlm .release-build/${toolsetGlob || \"**/*\"} --target=${releasePath} ${rest}\n\nThese sub-commands (which can be local opspace commands or commands\nprovided by opspace toolset dependencies) then (re)build the actual\nbuild artifacts under the target path.\n\n"
+    },
     "clean-vault": {
       "description": "Clean various more or less transient vault files and subdirectories",
-      "package": "@valos/type-vault",
+      "package": "@valos/kernel",
       "version": "0.35.0-rc.3",
       "introduction": "Clean various more or less transient vault files and subdirectories.\n\nBy default the three elements installed by 'yarn install' are cleaned:\n1. workspace packages by 'lerna clean --yes'\n2. yalc local dependencies by 'yalc remove --all'\n3. vault root node_modules by 'rm -rf'\n\nIn addition, dist/ can be removed with --dist in preparation for a clean slate publish/deploy ops.\nBe mindful that all of dist/ will be removed.\nyarn.lock can be removed with --yarn in preparation for persisted dependency updates.\n"
     },
-    "generate-domain-summary": {
-      "description": "Generate the domain components summary file for the domain root revdoc",
-      "package": "@valos/type-vault",
+    "compose-revelation": {
+      "description": "Compose revealer bundles based on the revealer toolset config",
+      "package": "@valos/kernel",
       "version": "0.35.0-rc.3",
-      "introduction": "Generate the domain components summary file for the domain root revdoc.\n\n\n"
-    },
-    "release-vault": {
-      "description": "Prepare, commit and potentially publish a new release of vault packages",
-      "package": "@valos/type-vault",
-      "version": "0.35.0-rc.3",
-      "introduction": "Prepare, commit and potentially publish a new release of vault packages.\n\nCreate a new release/prerelease branch or extend an existing one\nbased on given options and current environment.\n\nPrepares the release by first running sanity checks, then cleaning and\nreinstalling intermediate files like node_modules, yarn workspaces,\nyarn.lock and dist/ and finally requires all test suites and lint to\npass without errors.\n\nOnce preparation is done creates a new release commit and tag using\n'lerna version'.\n\nIf --publish is not explicitly given then the final publish step must\nbe manually performed. In this case a pre-publish phase is done which\nprepares the manual publish command instructions in the results output.\n\nWill invoke valma command hooks between stages as per:\n1. 'vlm .release-vault/.prepared-hooks/{**/,}* --summary=<obj>' after successful preparation\n2. 'vlm .release-vault/.committed-hooks/{**/,}* --summary=<obj>' after successful commit\n3. 'vlm .release-vault/.pre-published-hooks/{**/,}* --summary=<obj>' after successful pre-publish\n4. 'vlm .release-vault/.published-hooks/{**/,}* --summary=<obj>' after successful publish\n\n"
-    },
-    "publish-packages": {
-      "description": "Publish package assemblies to their registries",
-      "package": "@valos/type-vault",
-      "version": "0.35.0-rc.3",
-      "introduction": "Publish package assemblies to their registries.\n\n\n"
-    },
-    "regenerate-docs": {
-      "description": "Regenerate all configured /docs content",
-      "package": "@valos/type-vault",
-      "version": "0.35.0-rc.3",
-      "introduction": "Regenerate all configured /docs content.\n\n\n"
-    },
-    "write-revdoc": {
-      "description": "Write a new revdoc source code file",
-      "package": "@valos/type-vault",
-      "version": "0.35.0-rc.3",
-      "introduction": "Write a new revdoc source code file.\n\n\n"
-    },
-    "perspire": {
-      "description": "Launch a headless worker gateway for persistent virtual DOM ValOS computation",
-      "package": "@valos/type-worker",
-      "version": "0.35.0-rc.3",
-      "introduction": "Launch a headless worker gateway for persistent virtual DOM ValOS computation.\n\n\n"
+      "introduction": "Compose revealer bundles based on the revealer toolset config.\n\n\n"
     },
     "configure": {
       "description": "Configure the current ValOS workspace and its toolsets",
-      "package": "valma",
+      "package": "@valos/kernel",
       "version": "0.35.0-rc.3",
       "introduction": "Configure the current ValOS workspace and its toolsets.\n\nAllows grabbing and stowing of available toolsets and their tools and\nthen invokes all in-use toolset configure commands.\n"
     },
+    "deploy-release": {
+      "description": "Deploy previously built releases to their deployment targets",
+      "package": "@valos/kernel",
+      "version": "0.35.0-rc.3",
+      "introduction": "Deploy previously built releases to their deployment targets.\n\nThis command is second part of the two-part deployment with\nbuild-release building the release.\n"
+    },
     "status": {
       "description": "Display the status of the current workspace",
-      "package": "valma",
+      "package": "@valos/kernel",
       "version": "0.35.0-rc.3",
       "introduction": "Display the status of the current workspace.\n\nIf toolsetGlob is specified the status is limited to status scripts\nmatching '.status/*{toolsetGlob}*/**/*', otherwise all status scripts\nby '.status/**/*' are used.\n"
     },
     "draft-command": {
       "description": "Draft and possibly export a new valma command script",
-      "package": "valma",
+      "package": "@valos/kernel",
       "version": "0.35.0-rc.3",
       "introduction": "Draft and possibly export a new valma command script.\n\nThe new command is drafted as a local valma.bin/ command with the\nsource file in valma/, making it the highest priority command and\nimmediately available.\nWith --import a existing exported script is copied for local editing\nand development.\n"
     },
-    "$": {
-      "description": "Execute a non-valma command within valma context interactively",
-      "package": "valma",
+    "@": {
+      "description": "Execute a package bin command within valma context interactively",
+      "package": "@valos/kernel",
       "version": "0.35.0-rc.3",
-      "introduction": "Execute a non-valma command within valma context interactively.\n\nExecute a non-valma command within valma context interactively.\n\nThis is the command line shim to valma script vlm.interact.\nLike 'npx -c' it executes a regular command exported by some package\ndependency to the node_modules/.bin/ folder.\n\nUnlike 'npx' which only searches the current directory and the global\ncache '$' prepends all available valma pools to env.PATH, innermost\npool first.\n\n"
+      "introduction": "Execute a package bin command within valma context interactively.\n\nExecute a package bin command within valma context interactively.\n\nThis is the command line shim to valma script vlm.interact.\nLike 'npx -c' it executes a regular command exported by some package\ndependency to the node_modules/.bin/ folder.\n\nUnlike 'npx' which only searches the current directory and the global\ncache '@' prepends all available valma pools to env.PATH, innermost\npool first.\n\n"
+    },
+    "generate-domain-summary": {
+      "description": "Generate the domain components summary file for the domain root revdoc",
+      "package": "@valos/kernel",
+      "version": "0.35.0-rc.3",
+      "introduction": "Generate the domain components summary file for the domain root revdoc.\n\n\n"
     },
     "init": {
       "disabled": "DISABLED",
       "explanation": ".disabled => Already initialized (package.json:valos section exists)",
       "description": "Initialize the current directory as a ValOS workspace from scratch",
-      "package": "valma",
+      "package": "@valos/kernel",
       "version": "0.35.0-rc.3",
       "introduction": "Initialize the current directory as a ValOS workspace from scratch.\n\nThis command will interactively walk through the process of creating\nand configuring a new valma workspace in the current working directory\nfrom scratch.\n\nValma init has following interactive phases:\n1. Initialization of package.json via 'yarn init'\n2. Configuration of workspace valos.type and .domain via 'vlm .configure/.valos-stanza'\n3. Addition of new known domains via 'yarn add --dev (-W)'\n4. Selection of in-use toolsets from available toolsets via 'vlm .configure/.select-toolsets'\n5. Configuration of in-use toolsets and tools via 'vlm configure'\n"
+    },
+    "perspire": {
+      "description": "Launch a headless worker gateway for persistent virtual DOM ValOS computation",
+      "package": "@valos/kernel",
+      "version": "0.35.0-rc.3",
+      "introduction": "Launch a headless worker gateway for persistent virtual DOM ValOS computation.\n\n\n"
+    },
+    "rouse-revealer": {
+      "description": "Launch a webpack-dev-server at localhost serving a local revelation",
+      "package": "@valos/kernel",
+      "version": "0.35.0-rc.3",
+      "introduction": "Launch a webpack-dev-server at localhost serving a local revelation.\n\nThe revelation consists of two parts: webpack output and static files.\nWebpack output is configured by the project root webpack.config.js and\nthe static files are served from --content-base. If this --content-base\ndoesn't exist it is created by copying all files from the directory(s)\nprovided by --content-source.\n"
+    },
+    "release-vault": {
+      "description": "Prepare, commit and potentially publish a new release of vault packages",
+      "package": "@valos/kernel",
+      "version": "0.35.0-rc.3",
+      "introduction": "Prepare, commit and potentially publish a new release of vault packages.\n\nCreate a new release/prerelease branch or extend an existing one\nbased on given options and current environment.\n\nPrepares the release by first running sanity checks, then cleaning and\nreinstalling intermediate files like node_modules, yarn workspaces,\nyarn.lock and dist/ and finally requires all test suites and lint to\npass without errors.\n\nOnce preparation is done creates a new release commit and tag using\n'lerna version'.\n\nIf --publish is not explicitly given then the final publish step must\nbe manually performed. In this case a pre-publish phase is done which\nprepares the manual publish command instructions in the results output.\n\nWill invoke valma command hooks between stages as per:\n1. 'vlm .release-vault/.prepared-hooks/{**/,}* --summary=<obj>' after successful preparation\n2. 'vlm .release-vault/.committed-hooks/{**/,}* --summary=<obj>' after successful commit\n3. 'vlm .release-vault/.pre-published-hooks/{**/,}* --summary=<obj>' after successful pre-publish\n4. 'vlm .release-vault/.published-hooks/{**/,}* --summary=<obj>' after successful publish\n\n"
+    },
+    "publish-packages": {
+      "description": "Publish package assemblies to their registries",
+      "package": "@valos/kernel",
+      "version": "0.35.0-rc.3",
+      "introduction": "Publish package assemblies to their registries.\n\n\n"
+    },
+    "regenerate-docs": {
+      "description": "Regenerate all configured /docs content",
+      "package": "@valos/kernel",
+      "version": "0.35.0-rc.3",
+      "introduction": "Regenerate all configured /docs content.\n\n\n"
+    },
+    "write-revdoc": {
+      "description": "Write a new revdoc source code file",
+      "package": "@valos/kernel",
+      "version": "0.35.0-rc.3",
+      "introduction": "Write a new revdoc source code file.\n\n\n"
     }
   }
 }

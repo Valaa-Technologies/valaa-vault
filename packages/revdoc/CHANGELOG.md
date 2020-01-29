@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.5](https://github.com/valaatech/kernel/compare/v0.35.0-rc.4...v0.35.0-rc.5) (2020-01-29)
+
+
+### Bug Fixes
+
+* Ignore malformed vdoc:ref's for now ([b2acddc](https://github.com/valaatech/kernel/commit/b2acddc07f40d7f8386119acbc43dacc16c08bab))
+
+
+
+
+
 # [0.35.0-rc.4](https://github.com/valaatech/kernel/compare/v0.35.0-rc.3...v0.35.0-rc.4) (2020-01-29)
 
 **Note:** Version bump only for package @valos/revdoc

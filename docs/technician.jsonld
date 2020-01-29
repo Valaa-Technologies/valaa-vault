@@ -809,7 +809,7 @@
             {
               "@type": "revdoc:Command",
               "vdoc:content": [
-                ".valma-status/**/*"
+                ".status/**/*"
               ]
             },
             " and are visible on the\nexecution context pools (the scripts called by ",
@@ -847,7 +847,7 @@
                 {
                   "vdoc:em": true,
                   "vdoc:content": [
-                    "valma-"
+                    "_vlm_"
                   ]
                 },
                 " as usual. These scripts will be available for\n    all packages depending on this package in their ",

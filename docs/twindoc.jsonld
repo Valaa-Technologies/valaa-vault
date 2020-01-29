@@ -45,9 +45,9 @@
     "revdoc:package": "@valos/twindoc",
     "revdoc:prefix": "twindoc",
     "revdoc:prefixIRI": "https://valospace.org/twindoc#",
-    "revdoc:version": "0.35.0-rc.3",
+    "revdoc:version": "0.35.0-rc.5",
     "respecConfig": {
-      "subtitle": "0.35.0-rc.3",
+      "subtitle": "0.35.0-rc.5",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -149,12 +149,12 @@
                   "@type": "vdoc:NumberedList",
                   "vdoc:entries": [
                     [
-                      "emit + extract: a roundtrip starting from VDocLD into valospace back into VDocLD"
+                      "emit + extract: a roundtrip starting from VDocState into valospace back into VDocState"
                     ],
                     {
                       "@type": "vdoc:Paragraph",
                       "vdoc:content": [
-                        "extract + emit: a roundtrip starting from valospace into VDocLD back into valospace"
+                        "extract + emit: a roundtrip starting from valospace into VDocState back into valospace"
                       ]
                     }
                   ]

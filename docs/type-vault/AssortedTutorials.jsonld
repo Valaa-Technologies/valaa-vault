@@ -137,7 +137,7 @@
                       ]
                     },
                     " Note: If you create your RevDoc under the revdocs/ folder, ",
-                    "your HTML and VDocLD files will be generated to the project root"
+                    "your HTML and VDocState files will be generated to the project root"
                   ]
                 },
                 {
@@ -201,7 +201,7 @@
                         ]
                       ]
                     },
-                    " This will create HTML and VDocLD files based on your RevDoc"
+                    " This will create HTML and VDocState files based on your RevDoc"
                   ]
                 },
                 {
@@ -241,7 +241,7 @@
                 {
                   "@type": "vdoc:Paragraph",
                   "vdoc:content": [
-                    "Your HTML and VDocLD files can now be found ",
+                    "Your HTML and VDocState files can now be found ",
                     "under docs/ in the same path as where you saved your RevDoc file; ",
                     "for example if you saved your RevDoc under packages/type-vault ",
                     "it can now be found under docs/packages/type-vault."

@@ -198,10 +198,10 @@ context would forward the command to <strong><em class="vdoc type-revdoc-command
 if not. The call eventually resolves at the global <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">/usr/bin/valma-status</span>
 </em></strong>. Its implementation then calls <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">vlm .status/**/*</span>
 </em></strong> which calls all scripts which match
-the glob <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">.valma-status/**/*</span>
+the glob <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">.status/**/*</span>
 </em></strong> and are visible on the
 execution context pools (the scripts called by <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">vlm status</span>
-</em></strong> are known as <em>valma status scripts</em>).<blockquote><em>valos-vault-3.3</em>: A package can export valma scripts using npm package.json <em>bin</em> section and by prefixing the exported name with <em>valma-</em> as usual. These scripts will be available for
+</em></strong> are known as <em>valma status scripts</em>).<blockquote><em>valos-vault-3.3</em>: A package can export valma scripts using npm package.json <em>bin</em> section and by prefixing the exported name with <em>_vlm_</em> as usual. These scripts will be available for
     all packages depending on this package in their <em>depends</em> pool.</blockquote>Running <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">vlm</span>
 </em></strong> with no arguments lists all available
 commands grouped by pool in current directory context.<blockquote><em>valos-vault-3.5</em>: valma can be used in programmatic contexts to run valma

@@ -8,7 +8,7 @@ templates which is useful for VDoc extensions in specific.
 `;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "vdoc-extension")
-    && `Workspace is not a 'vdoc-extension' (is '${yargs.vlm.getValOSConfig("type")}')`;
+    && `Workspace is not a vdoc-extension`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",

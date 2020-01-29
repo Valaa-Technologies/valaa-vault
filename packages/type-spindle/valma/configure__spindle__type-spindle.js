@@ -7,7 +7,7 @@ exports.introduction = `${exports.describe}.
 `;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "spindle")
-    && `Workspace is not a spindle (is ${yargs.vlm.getValOSConfig("type")})`;
+    && `Workspace is not a spindle`;
 exports.builder = (yargs) => yargs.options({
   ...yargs.vlm.createConfigureToolsetOptions(exports),
 });

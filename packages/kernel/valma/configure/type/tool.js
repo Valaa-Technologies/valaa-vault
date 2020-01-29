@@ -28,7 +28,7 @@ commands must have an option for '--toolset=<@scope/toolsetname>' which
 uses yargs.vlm.toolset as its default value.`;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "tool")
-    && `Workspace is not a 'tool' (is '${yargs.vlm.getValOSConfig("type")}')`;
+    && `Workspace is not a tool`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",

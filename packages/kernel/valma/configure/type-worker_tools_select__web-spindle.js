@@ -7,7 +7,7 @@ exports.introduction =
 configurable and extensible web service.`;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "worker")
-    && `Workspace is not a worker (is ${yargs.vlm.getValOSConfig("type")})`;
+    && `Workspace is not a worker`;
 exports.builder = (yargs) => {
   const toolsetConfig = yargs.vlm.getToolsetConfig(yargs.vlm.toolset) || {};
   return yargs.options({

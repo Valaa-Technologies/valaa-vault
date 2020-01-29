@@ -7,7 +7,7 @@ when 'vlm assemble-packages' is executed in the surrounding vault
 workspace.`;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "library")
-    && `Workspace is not a library (is ${yargs.vlm.getValOSConfig("type")})`;
+    && `Workspace is not a library`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",

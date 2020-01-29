@@ -6,7 +6,7 @@ exports.introduction = `
 `;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "domain")
-    && `Workspace is not a domain (is ${yargs.vlm.getValOSConfig("type")})`;
+    && `Workspace is not a domain`;
 exports.builder = (yargs) => yargs.options({
   ...yargs.vlm.createConfigureToolsetOptions(exports),
 });

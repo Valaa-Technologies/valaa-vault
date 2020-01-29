@@ -29,7 +29,7 @@ const cleanDefault = Object.freeze({ yes: true, yarn: true, install: true, dist:
 const assembleDefault = Object.freeze({ "add-unchanged": true });
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "vault")
-    && `Workspace is not a vault (is ${yargs.vlm.getValOSConfig("type")})`;
+    && `Workspace is not a vault`;
 exports.builder = (yargs) => yargs.options({
   clean: {
     group: "Active options",

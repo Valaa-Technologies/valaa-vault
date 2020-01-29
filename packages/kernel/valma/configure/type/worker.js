@@ -23,7 +23,7 @@ A worker workspace is fully agnostic to version control solutions:
   repository if appropriate.`;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "worker")
-    && `Workspace is not a 'worker' (is '${yargs.vlm.getValOSConfig("type")}')`;
+    && `Workspace is not a worker`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",

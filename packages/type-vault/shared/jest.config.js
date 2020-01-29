@@ -12,9 +12,11 @@ module.exports = {
   testPathIgnorePatterns: [
     "/node_modules/",
     "<rootDir>/dist/",
+    "<rootDir>/.yalc/",
   ],
   modulePathIgnorePatterns: [
     "<rootDir>/dist/",
+    "<rootDir>/.yalc/",
   ],
   moduleNameMapper: {
     "\\.(css|less)$": "<rootDir>/node_modules/@valos/type-vault/jest/styleMock.js",

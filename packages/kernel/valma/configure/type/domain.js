@@ -16,7 +16,7 @@ Idiomatic way to implement this is a domain command which issues a PR
 against the source control repository of the domain package.`;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "domain")
-    && `Workspace is not a 'domain' (is '${yargs.vlm.getValOSConfig("type")}')`;
+    && `Workspace is not a domain`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",

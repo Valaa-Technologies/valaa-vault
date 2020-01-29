@@ -11,7 +11,7 @@ Library workspaces are almost always published as a packages and
 typically reside in "packages/*" vault workspace directory.`;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "library")
-    && `Workspace is not a 'library' (is '${yargs.vlm.getValOSConfig("type")}')`;
+    && `Workspace is not a library`;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",

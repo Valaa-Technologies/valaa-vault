@@ -10,7 +10,7 @@ Additionally this tool can be configured to regenerate all docs on
 (pre)release time.`;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "vault")
-    && `Workspace is not a vault (is ${yargs.vlm.getValOSConfig("type")})`;
+    && `Workspace is not a vault`;
 
 exports.builder = (yargs) => yargs.options({
   ...yargs.vlm.createConfigureToolOptions(exports),

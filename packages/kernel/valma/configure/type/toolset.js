@@ -11,7 +11,7 @@ workspace and allows these commands to easily access and manipulate
 their local configuration in the target workspace.`;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "toolset")
-    && `Workspace is not a 'toolset' (is '${yargs.vlm.getValOSConfig("type")}')`;
+    && `Workspace is not a toolset`;
 exports.builder = (yargs) => {
   const vlm = yargs.vlm;
   const typeChoices = vlm.listMatchingCommands(".configure/.type/{,*/**/}*")

@@ -32,7 +32,7 @@ and other workspaces for this package.
 `;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "vault")
-    && `Workspace is not a 'vault' (is '${yargs.vlm.getValOSConfig("type")}')`;
+    && `Workspace is not a vault`;
 exports.builder = (yargs) => {
   const vlm = yargs.vlm;
   const current = (vlm.getPackageConfig("workspaces") || []).join(",");

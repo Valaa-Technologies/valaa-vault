@@ -5,7 +5,7 @@ exports.introduction = `
 `;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "opspace")
-    && `Workspace is not an opspace (is ${yargs.vlm.getValOSConfig("type")})`;
+    && `Workspace is not an opspace`;
 exports.builder = (yargs) => yargs;
 
 exports.handler = (yargv) => {

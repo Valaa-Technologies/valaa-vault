@@ -84,7 +84,7 @@ export function resolveIdentityRoles (router, route, scope) {
     scope.sessionPayload = burlaesgDecode(sessionToken, identity.clientSecret.slice(0, 30)).payload;
     if (!scope.sessionPayload) throw new Error("session token without content");
   }
-  const { timeStamp, identityChronicle } = scope.sessionPayload;
+  const { timeStamp, identityChronicle, clientRedirectPath } = scope.sessionPayload;
   if (!(Math.floor(Date.now() / 1000)
       < Number(timeStamp) + router.getSessionDuration())) {
     router.logEvent(1, () => [
@@ -92,8 +92,16 @@ export function resolveIdentityRoles (router, route, scope) {
         router.getSessionDuration(),
       "\n\tpayload:", timeStamp, identityChronicle,
     ]);
-    scope.reply.code(401);
-    scope.reply.send("Session has expired");
+    scope.reply.clearCookie(identity.getSessionCookieName(), {
+      httpOnly: true, secure: true, path: clientRedirectPath || "/",
+    });
+    scope.reply.clearCookie(identity.getClientCookieName(), {
+      httpOnly: false, secure: true, path: clientRedirectPath || "/",
+    });
+    // scope.reply.code(401);
+    // scope.reply.send("Session has expired, please refresh");
+    scope.reply.code(302);
+    scope.reply.redirect(clientRedirectPath || "/");
     return (scope.identityRoles = null);
   }
   scope.identityRoles = router.getIdentityRoles(identityChronicle);

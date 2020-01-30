@@ -82,6 +82,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
             iv, nonce, grantTimeStamp, identityChronicle, email, preferred_username,
             ...sessionPayloadFields
           } = sessionPayloadEnvelope;
+          const clientRedirectPath = scope.clientRedirectPath;
           ["grantTimeStamp", "identityChronicle", "email", "preferred_username"].forEach(name => {
             if (sessionPayloadEnvelope[name] === undefined) {
               throw new Error(`session payload '${name}' resolution undefined`);
@@ -93,7 +94,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
             throw new Error("Expired");
           }
           sessionPayload = {
-            timeStamp, nonce: nonce || "", identityChronicle,
+            timeStamp, nonce: nonce || "", identityChronicle, clientRedirectPath,
             ...sessionPayloadFields,
           };
           reply.setCookie(
@@ -103,7 +104,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
                   iv || generateBurlaesgIV()),
               {
                 httpOnly: true, secure: true, maxAge: scope.tokenExpirationDelay,
-                path: scope.clientRedirectPath,
+                path: clientRedirectPath,
               });
           clientToken = {
             iss: scope.identity.clientURI,
@@ -119,10 +120,10 @@ export default function createProjector (router: PrefixRouter, route: Route) {
               hs256JWTEncode(clientToken, scope.identity.clientSecret),
               {
                 httpOnly: false, secure: true, maxAge: scope.tokenExpirationDelay,
-                path: scope.clientRedirectPath,
+                path: clientRedirectPath,
               });
           reply.code(302);
-          reply.redirect(scope.clientRedirectPath);
+          reply.redirect(clientRedirectPath);
           return true;
         },
       ], error => {

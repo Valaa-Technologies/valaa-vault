@@ -22,9 +22,10 @@ describe("testing perspire", () => {
         revelations: [{ "!!!": "./revela.json", gateway: { verbosity: 0 } }],
       });
       await server.initialize();
-      await server.createMainView();
-      // This wait should be removeable: however as it stands the creation of frame partitions will
-      // cause an asynchronous delay in creation of UI tree, which the above await doesn't catch.
+      await server.createWorkerView();
+      // This wait should be removeable: however as it stands the
+      // creation of frame chronicles will cause an asynchronous delay
+      // in creation of UI tree, which the above await doesn't catch.
       // So we wait a small bit.
       await new Promise((resolve) => setTimeout(resolve, 1000));
       expect(server.serializeMainDOM())

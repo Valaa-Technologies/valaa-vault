@@ -71,7 +71,7 @@ class TextFileEditor extends MediaContentEditor {
     this.saveContent(this.editor.getValue());
   }
 
-  componentWillReceiveProps () {
+  UNSAFE_componentWillReceiveProps () { // eslint-disable-line
     const text = this.editor && this.editor.getValue();
     if (text) this.saveContent(text);
   }

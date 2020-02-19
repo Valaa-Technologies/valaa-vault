@@ -196,7 +196,7 @@ class UIComponent extends React.Component {
 
   // React section: if overriding remember to super() call these base implementations
 
-  componentWillMount () {
+  UNSAFE_componentWillMount () { // eslint-disable-line
     try {
       _componentWillMount(this);
     } catch (error) {
@@ -210,7 +210,7 @@ class UIComponent extends React.Component {
     this._isMounted = true;
   }
 
-  componentWillReceiveProps (nextProps: Object, nextContext: any,
+  UNSAFE_componentWillReceiveProps (nextProps: Object, nextContext: any, // eslint-disable-line
       forceReattachListeners: ?boolean) {
     try {
       _componentWillReceiveProps(this, nextProps, nextContext, forceReattachListeners);

@@ -12,8 +12,8 @@
     "scribe": { "verbosity": 0 }
   },
   "prologue": {
-    "rootPartitionURI": {
-      "!!!": ["./toolsets.json", "@valos/type-worker", "rootPartitionURI"]
+    "rootChronicleURI": {
+      "!!!": ["./toolsets.json", "@valos/type-worker", "rootChronicleURI"]
     }
   },
   "views": {},

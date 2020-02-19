@@ -44,8 +44,8 @@ beforeAll(async () => {
     revelations: [{ "!!!": "./revela.json" }],
   });
   await _server.initialize();
-  const view = await _server.createMainView();
-  _vViewFocus = view.getViewFocus();
+  const view = await _server.createWorkerView();
+  _vViewFocus = view.getFocus();
 
   _vAuRoot = await _vViewFocus.doValoscript(
       `new Entity({ id, name: "test authority root", authorityURI: "valaa-local:" })`,

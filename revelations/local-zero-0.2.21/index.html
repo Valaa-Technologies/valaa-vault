@@ -30,14 +30,14 @@
               verbosity: 1,
             },
             prologue: {
-              rootPartitionURI: valos.getURIQueryField(document.location, "partition"),
+              rootChronicleURI: valos.getURIQueryField(document.location, "partition"),
             },
           }
       ).then(function (gateway) {
         valos.views = gateway.createAndConnectViewsToDOM({
           inspireMain: {
             name: "ValOS local-zero-0.2.21 Main",
-            lensURI: gateway.getRootLensURI() || gateway.getRootPartitionURI(),
+            focus: gateway.getRootFocusURI() || gateway.getRootChronicleURI(),
             setTitleKuery: "name",
             container: document.querySelector("#valos-inspire--main-container"),
             viewRootId: "valos-inspire--main-root",

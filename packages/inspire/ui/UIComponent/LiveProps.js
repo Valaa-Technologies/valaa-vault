@@ -131,8 +131,8 @@ export default class LiveProps extends UIComponent {
     return false;
   }
 
-  componentWillReceiveProps (nextProps: Object, nextContext: Object) {
-    super.componentWillReceiveProps(nextProps, nextContext,
+  UNSAFE_componentWillReceiveProps (nextProps: Object, nextContext: Object) { // eslint-disable-line
+    super.UNSAFE_componentWillReceiveProps(nextProps, nextContext,
         nextProps.liveProps !== this.props.liveProps);
   }
 

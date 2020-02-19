@@ -23,12 +23,14 @@ const _sheetIds = new WeakMap();
 
 export default class ReactRoot extends React.Component {
   static propTypes = {
+    // TODO(iridiann, 2020-03): Fix crap semantics flag isHTMLRoot which
+    // if _true_ will _not_ wrap contents in <div style={{ width: "100vw", height: "100vh" }}...>
     isHTMLRoot: PropTypes.bool,
     viewName: PropTypes.string,
     children: PropTypes.object,
-    vViewFocus: PropTypes.object,
-    lensProperty: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
+    contextLensProperty: PropTypes.arrayOf(PropTypes.string),
     uiScope: PropTypes.object,
+    rootProps: PropTypes.object,
   };
 
   static childContextTypes = {
@@ -36,15 +38,16 @@ export default class ReactRoot extends React.Component {
     css: PropTypes.func,
     getVSSSheet: PropTypes.func,
     releaseVssSheets: PropTypes.func,
-    lensProperty: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
+    lensProperty: PropTypes.arrayOf(PropTypes.string),
     lensPropertyNotFoundLens: PropTypes.any,
   };
 
   constructor (props, context) {
     super(props, context);
     this.cssRoot = {};
-    if (props.vViewFocus) {
-      this._createRootContext(props.vViewFocus, props.viewName, props.uiScope)
+    const vRootFocus = (props.rootProps || {}).focus;
+    if (vRootFocus) {
+      this._createRootContext(vRootFocus, props.viewName, props.uiScope)
       .then(rootContext => {
         this._rootContext = rootContext;
         this.forceUpdate();
@@ -57,7 +60,7 @@ export default class ReactRoot extends React.Component {
 
   getChildContext () {
     return {
-      engine: (this.props.vViewFocus || {}).engine,
+      engine: ((this.props.rootProps || {}).focus || {}).engine,
       css: (...cssClassPaths: string[]) =>
         cssClassPaths.map(cssClassPath => {
           const className = traverse(this.cssRoot, cssClassPath);
@@ -68,11 +71,11 @@ export default class ReactRoot extends React.Component {
         .join(" "),
       getVSSSheet: this.getVSSSheet,
       releaseVssSheets: this.releaseVssSheets,
-      lensProperty: this.props.lensProperty,
+      lensProperty: this.props.contextLensProperty,
     };
   }
 
-  componentWillMount () {
+  UNSAFE_componentWillMount () { // eslint-disable-line
     this._initializeVSSSheetManager();
   }
 
@@ -142,29 +145,29 @@ export default class ReactRoot extends React.Component {
     }
   }
 
-  async _createRootContext (vViewFocus: Vrapper, viewName: string, customUIScope: Object) {
-    const rootContext = Object.create(customUIScope || vViewFocus.engine.getLexicalScope());
+  async _createRootContext (vRootFocus: Vrapper, viewName: string, customUIScope: Object) {
+    const rootContext = Object.create(customUIScope || vRootFocus.engine.getLexicalScope());
     const valos = rootContext.valos;
     rootContext.frame = await this._obtainUIRootFrame(
-        rootContext[valos.Lens.shadowLensAuthority], vViewFocus, viewName);
+        rootContext[valos.Lens.shadowLensAuthority], vRootFocus, viewName);
     rootContext[valos.Lens.scopeFrameResource] = rootContext.frame;
-    rootContext.VSS = this._createVSS(vViewFocus.engine);
+    rootContext.VSS = this._createVSS(vRootFocus.engine);
     rootContext.VS = VS;
     return rootContext;
   }
 
-  async _obtainUIRootFrame (authorityURI: string, vViewFocus: Vrapper, viewName: string) {
-    const localInstanceRawId = derivedId(
-        vViewFocus.getRawId(), "ui-roots", `@$~raw:${encodeURIComponent(viewName)}@@`);
-    const chronicleURI = naiveURI.createChronicleURI(authorityURI, localInstanceRawId);
-    await vViewFocus.engine.discourse
+  async _obtainUIRootFrame (authorityURI: string, vRootFocus: Vrapper, viewName: string) {
+    const localInstanceVRID = derivedId(
+        vRootFocus.getRawId(), "ui-roots", `@$~raw:${encodeURIComponent(viewName)}@@`);
+    const chronicleURI = naiveURI.createChronicleURI(authorityURI, localInstanceVRID);
+    await vRootFocus.engine.discourse
         .acquireConnection(chronicleURI)
         .asActiveConnection();
-    let vLocalUIRoot = vViewFocus.engine.getVrapperByRawId(localInstanceRawId, { optional: true });
+    let vLocalUIRoot = vRootFocus.engine.getVrapperByRawId(localInstanceVRID, { optional: true });
     if (!vLocalUIRoot) {
-      vLocalUIRoot = await vViewFocus.engine.create("Entity", {
-        id: localInstanceRawId, owner: null,
-        name: `Local UI root view '${viewName}' to '${vViewFocus.debugId()}'`,
+      vLocalUIRoot = await vRootFocus.engine.create("Entity", {
+        id: localInstanceVRID, owner: null,
+        name: `Local UI root view '${viewName}' to '${vRootFocus.debugId()}'`,
         authorityURI,
       });
     }
@@ -180,7 +183,7 @@ export default class ReactRoot extends React.Component {
             "VSS.rootStyleSheet", { fallbackContentType: "text/css", discourse: engine.discourse });
         const contextSheet = rootSheet
             && reactRoot.getVSSSheet(rootSheet, this.reactComponent).classes;
-        reactRoot._resolveVSSOption(this, ret, contextSheet, rest);
+        reactRoot._resolveVSSOption(this, engine, ret, contextSheet, rest);
         return ret.data;
       } catch (error) {
         throw wrapError(error, `During ${this.reactComponent.debugId()}\n .VSS:`,
@@ -191,7 +194,7 @@ export default class ReactRoot extends React.Component {
     };
   }
 
-  _resolveVSSOption (localContext: Object, result: Object, sheet: ?Object, option: any) {
+  _resolveVSSOption (localContext: Object, engine, result: Object, sheet: ?Object, option: any) {
     try {
       if (typeof option === "string") {
         option.split(" ").forEach(sheetClassKey => {
@@ -213,17 +216,19 @@ export default class ReactRoot extends React.Component {
           }
         });
       } else if (typeof option === "function") {
-        this._resolveVSSOption(localContext, result, sheet, unthunkRepeat(option, localContext));
+        this._resolveVSSOption(
+            localContext, engine, result, sheet, unthunkRepeat(option, localContext));
       } else if (option === null) {
         return null;
       } else if (typeof option !== "object") {
         console.warn(`Unrecognized VSS option`, option, "with sheet", sheet);
+        throw new Error(`Unrecognized VSS option "${option}"`);
       } else if (Array.isArray(option)) {
-        option.reduce((activeSheet, singularOption) =>
-            this._resolveVSSOption(localContext, result, activeSheet, singularOption), sheet);
+        option.reduce((activeSheet, singularOption) => this._resolveVSSOption(
+            localContext, engine, result, activeSheet, singularOption), sheet);
       } else {
         const newSheet = getImplicitMediaInterpretation(option, "VSS.option",
-            { discourse: this.props.vViewFocus.engine.discourse, contentType: "text/css" });
+            { discourse: engine.discourse, contentType: "text/css" });
         return this.getVSSSheet(newSheet, localContext.reactComponent).classes;
       }
       return sheet;
@@ -236,11 +241,10 @@ export default class ReactRoot extends React.Component {
   }
 
   render () {
-    const vViewFocus = this.props.vViewFocus;
-    if (!vViewFocus || !this._rootContext) return null;
-    const valoscopeProps = uiComponentProps({
-      name: "root", parentUIContext: this._rootContext, focus: vViewFocus,
-    });
+    if (!(this.props.rootProps || {}).focus || !this._rootContext) return null;
+    const valoscopeProps = uiComponentProps(
+        { name: "root", parentUIContext: this._rootContext },
+        { ...(this.props.rootProps || {}) });
     const valoscope = <Valoscope {...valoscopeProps}>{this.props.children}</Valoscope>;
     return this.props.isHTMLRoot
         ? valoscope

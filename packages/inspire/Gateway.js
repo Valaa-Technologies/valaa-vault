@@ -234,6 +234,8 @@ export default class Gateway extends FabricEventTarget {
         this._notifySpindle(spindle, "onGatewayTerminating")));
   }
 
+  getRootConnection () { return this._rootConnection; }
+
   getRootChronicleURI () {
     return this._rootConnection.getChronicleURI();
   }
@@ -248,7 +250,7 @@ export default class Gateway extends FabricEventTarget {
 
   createAndConnectViewsToDOM (views: { [string]: {
     container: Object, hostGlobal: Object, window: Object,
-    name: string, size: Object, viewRootId: string, lensURI: any, verbosity: ?number,
+    name: string, size: Object, viewRootId: string, focus: any, verbosity: ?number,
   } }, createView) {
     this._hostComponents = { createView };
     for (const { container, hostGlobal, window } of Object.values(views)) {
@@ -760,11 +762,11 @@ export default class Gateway extends FabricEventTarget {
   async _narratePrologues (prologueRevelation: Object) {
     let prologues;
     try {
-      this.clockEvent(1, `prologues.extract`, `Determining prologues and the root partition <${
-          rootPartitionURI}>`);
-      const rootPartitionURI = this.prologueRevelation.rootPartitionURI
-          && naiveURI.createPartitionURI(await lazy(this.prologueRevelation.rootPartitionURI));
-      this.rootLensURI = await lazy(this.prologueRevelation.rootLensURI);
+      const rootChronicleURI = this.prologueRevelation.rootChronicleURI
+          && naiveURI.createChronicleURI(await lazy(this.prologueRevelation.rootChronicleURI));
+      this.clockEvent(1, `prologues.extract`, `Determining prologues and the root chronicle <${
+        rootChronicleURI}>`);
+      this._rootFocusURI = await lazy(this.prologueRevelation.rootFocusURI);
       prologues = await this._determineRevelationPrologues(prologueRevelation, rootChronicleURI);
       this.warnEvent(1, () => [
         `Extracted ${prologues.length} prologues from the revelation`,

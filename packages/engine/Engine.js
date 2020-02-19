@@ -191,6 +191,17 @@ export default class Engine extends Cog {
     return ret;
   }
 
+  async activateResource (resourceURI: string) {
+    const reference = this.discourse.obtainReference(resourceURI);
+    const connection = await this.discourse
+        .acquireConnection(reference.getChronicleURI())
+        .asActiveConnection();
+    const vResource = await this.getVrapperByRawId(
+        reference.rawId() || connection.getChronicleId());
+    await vResource.activate();
+    return { reference, vResource };
+  }
+
   create (typeName: string, initialState: Object, options: Object): Vrapper {
     return this._constructWith(created,
         { initialState, typeName },

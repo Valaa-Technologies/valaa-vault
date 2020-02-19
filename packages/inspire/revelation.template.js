@@ -29,7 +29,7 @@ export default {
   },
   prologue: {
     endpoint: "",
-    rootPartitionURI: "",
+    rootChronicleURI: "",
     endpoints: dictionaryOf(""),
     partitionInfos: dictionaryOf(partitionInfo()),
     bvobInfos: dictionaryOf(bvobInfo()),

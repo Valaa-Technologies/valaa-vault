@@ -59,9 +59,8 @@ export default class PerspireServer extends FabricEventTarget {
         .then(gateway => (this.gateway = gateway)));
   }
 
-  async createMainView () {
+  async createWorkerView (viewConfig = {}) {
     global.name = `${this.getName()} window`;
-
     this.jsdom = new JSDOM(`<div id="perspire-gateway--main-container"></div>`,
         { pretendToBeVisual: true });
     const viewWindow = this.jsdom.window;
@@ -70,7 +69,6 @@ export default class PerspireServer extends FabricEventTarget {
     meta.content = "1";
     viewWindow.document.getElementsByTagName("head")[0].appendChild(meta);
     this.container = viewWindow.document.querySelector("#perspire-gateway--main-container");
-
     // re-set after jsdom is set
     global.window = viewWindow;
     global.document = viewWindow.document;
@@ -82,30 +80,37 @@ export default class PerspireServer extends FabricEventTarget {
     global.cancelAnimationFrame = viewWindow.cancelAnimationFrame =
         (callback) => { setTimeout(callback, 0); };
 
+    const ret = await this.createView("worker", {
+      contextLensProperty: ["WORKER_LENS", "LENS"],
+      ...viewConfig,
+    });
+    this.valos = ret.rootScope.valos;
+    return ret;
+  }
+
+  async createView (viewName, viewConfig = {}) {
+    if (!this.container) throw new Error("PerspireServer main worker view hasn't been created yet");
+    const viewWindow = this.jsdom.window;
     const views = (await this.gateway).createAndConnectViewsToDOM({
-      worker: {
-        name: `${this.getName()} worker`,
-        lensURI: this.gateway.getRootLensURI(),
-        lensPropertyFallbacks: ["WORKER_LENS"],
+      [viewName]: {
+        name: `${this.getName()} ${viewName}`,
+        focus: this.gateway.getRootFocusURI(),
+        contextLensProperty: ["JOB_LENS", "LENS"],
         hostGlobal: global,
         window: viewWindow,
         container: this.container,
-        viewRootId: "perspire-gateway--worker-view",
-        size: {
-          width: viewWindow.innerWidth,
-          height: viewWindow.innerHeight,
-          scale: 1
-        },
+        viewRootId: `perspire-gateway--${viewName}-view`,
+        size: { width: viewWindow.innerWidth, height: viewWindow.innerHeight, scale: 1 },
+        ...viewConfig,
       },
     }, (options) => new PerspireView(options));
-    const worker = await views.worker;
-    this.valos = worker.rootScope.valos;
+    const view = await views[viewName];
     // Creating perspire specific objects and variables.
     // Please use server.valos.Perspire for external packages
-    this.valos.views = views;
-    this.valos.Perspire = {};
-    this.valos.isServer = true;
-    return worker;
+    view.rootScope.valos.views = views;
+    view.rootScope.valos.Perspire = {};
+    view.rootScope.valos.isServer = true;
+    return view;
   }
 
   async run (interval: number, heartbeat: Function, options: Object) {
@@ -128,7 +133,7 @@ export default class PerspireServer extends FabricEventTarget {
   }
 
   async terminate () {
-    return this.gateway && this.gateway.terminate();
+    return this.gateway && (await this.gateway).terminate();
   }
 
   serializeMainDOM () {

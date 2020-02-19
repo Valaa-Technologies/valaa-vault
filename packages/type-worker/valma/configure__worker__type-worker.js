@@ -11,15 +11,15 @@ exports.builder = (yargs) => {
   const toolsetConfig = yargs.vlm.getToolsetConfig(yargs.vlm.toolset) || {};
   return yargs.options({
     ...yargs.vlm.createConfigureToolsetOptions(exports),
-    rootPartitionURI: {
-      type: "string", default: toolsetConfig.rootPartitionURI || undefined,
+    rootChronicleURI: {
+      type: "string", default: toolsetConfig.rootChronicleURI || undefined,
       interactive: { type: "input", when: yargs.vlm.reconfigure ? "always" : "if-undefined" },
-      description: "The partition URI perspire gateway loads and renders first",
+      description: "The chronicle URI which perspire gateway loads and renders first",
     },
     spindles: {
       type: "string", array: true,
       default: (((toolsetConfig.commands || {}).perspire || {}).options || {}).spindles || [],
-      description: "List of spindle id's which are require'd before gateway creation.",
+      description: "List of spindles to require before gateway creation.",
     },
   });
 };
@@ -34,7 +34,7 @@ exports.handler = async (yargv) => {
       vlm.theme.path(templates), "(will not clobber existing files)");
   vlm.shell.cp("-n", templates, ".");
   const toolsetConfigUpdate = { ...vlm.getToolsetConfig(vlm.toolset) };
-  toolsetConfigUpdate.rootPartitionURI = yargv.rootPartitionURI;
+  toolsetConfigUpdate.rootChronicleURI = yargv.rootChronicleURI;
   if (yargv.reconfigure || !(toolsetConfigUpdate.commands || {}).perspire) {
     toolsetConfigUpdate.commands = toolsetConfigUpdate.commands || {};
     toolsetConfigUpdate.commands.perspire = {

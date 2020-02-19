@@ -3,7 +3,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-import Vrapper from "~/engine/Vrapper";
 import Cog from "~/engine/Cog";
 
 import ReactRoot from "~/inspire/ui/ReactRoot";
@@ -17,66 +16,73 @@ export default class VDOMView extends Cog {
     this._gateway = options.gateway;
   }
 
-  async preAttach ({ name, lensURI, rootLensURI }: Object) {
-    const actualLensURI = lensURI || rootLensURI;
-    try {
-      if (!actualLensURI) {
-        throw new Error(`No options.lensURI found for view ${name}`);
-      }
-      if (rootLensURI) {
-        this.warnEvent(`${name}.rootLensURI is DEPRECATED in favor of lensURI`);
-      }
-      // Load project
-      const lensRef = this.engine.discourse.obtainReference(actualLensURI);
-      this._viewPartition = await this.engine.discourse
-          .acquireConnection(lensRef.getPartitionURI())
-          .asActiveConnection();
-      this._vViewFocus = await this.engine.getVrapperByRawId(
-          lensRef.rawId() || this._viewPartition.getPartitionRawId());
-      this._lensPropertyName = lensRef.getQueryComponent().lens;
-      await this._vViewFocus.activate();
-      this.warnEvent(1, () => [
-        `preAttach(): partition '${this._vViewFocus.get("name")}' UI view focus set:`,
-        this._vViewFocus.debugId(),
-      ]);
-      // this.warn("\n\n");
-      // this.warnEvent(`createView('${name}'): LISTING ENGINE RESOURCES`);
-      // this.engine.outputStatus(this.getLogger());
-      this.engine.addCog(this);
-      return this;
-    } catch (error) {
-      throw this.wrapErrorEvent(error, 1, `preAttach('${name}' -> ${actualLensURI})`);
-    }
-  }
-
-  getViewPartition () { return this._viewPartition; }
-
-  getViewFocus () { return this._vViewFocus; }
+  getGateway () { return this._gateway; }
+  getFocus () { return this._vFocus; }
+  getViewConfig () { return this._viewConfig; }
 
   getSelfAsHead () {
-    return this._vViewFocus.getSelfAsHead();
+    return this._vFocus.getSelfAsHead();
   }
 
   run (head: any, kuery: Object, options: Object) {
-    return this._vViewFocus.run(head, kuery, options);
+    return this._vFocus.run(head, kuery, options);
+  }
+
+  async attach (container: Object, viewConfig: Object) {
+    try {
+      const rootProps = await this._setupViewRootProps(viewConfig);
+      this._vFocus = rootProps.focus;
+      this._viewConfig = viewConfig;
+      this.engine.addCog(this);
+      await this._createReactRoot(container, viewConfig.viewRootId, {
+        viewName: viewConfig.name,
+        contextLensProperty: [].concat(viewConfig.contextLensProperty || ["LENS"]),
+        rootProps,
+      });
+      return this;
+    } catch (error) {
+      throw this.wrapErrorEvent(error, 1, `attach('${viewConfig.name}' -> ${viewConfig.focus})`);
+    }
+  }
+
+  async detach () {
+    await this._destroy();
+    // TODO(iridian, 2020-02): release all other resources as well.
+  }
+
+  async _setupViewRootProps ({ focus, lensURI, rootLensURI, lens, lensProperty }) {
+    if (lensURI) this.warnEvent("options.lensURI DEPRECATED in favor of options.focus");
+    if (rootLensURI) this.warnEvent("options.rootLensURI DEPRECATED in favor of options.focus");
+    const actualFocus = focus || lensURI || rootLensURI;
+    if (!actualFocus) throw new Error(`No options.focus found for view ${name}`);
+    // Load project
+    const { reference: focusRef, vResource: vFocus } =
+        await this.engine.activateResource(actualFocus);
+    const ret = {
+      focus: vFocus,
+      lensProperty: [].concat(
+          focusRef.getQueryComponent().lens || lensProperty || ["ROOT_LENS", "LENS"]),
+    };
+    if (lens !== undefined) {
+      ret.lens = lens.includes("://")
+          ? (await this.engine.activateResource(lens)).vResource
+          : lens;
+    }
+    this.warnEvent(1, () => [
+      `preAttach(): view '${vFocus.get("name")}' focus set:`, ret.focus.debugId(),
+    ]);
+    return ret;
   }
 
  /**
   * Creates the root UI component with the react context, and connects it to the html container.
   */
-  async _createReactRoot (viewRootId: string, container: Object,
-      viewName: string, vViewFocus: Vrapper, lensPropertyNames: ?(string | Array<string>)) {
+  async _createReactRoot (container: Object, viewRootId: string, reactRootProps) {
     if (!viewRootId) throw new Error("createReactRoot: viewRootId missing");
-    this._rootElement = container.ownerDocument.createElement("DIV");
+    this._rootElement = container.ownerDocument.createElement("div");
     this._rootElement.setAttribute("id", viewRootId);
     container.appendChild(this._rootElement);
-    this._reactRoot = (
-      <ReactRoot
-        viewName={viewName}
-        vViewFocus={vViewFocus}
-        lensProperty={[].concat(lensPropertyNames || [], "ROOT_LENS", "LENS")}
-      />
-    );
+    this._reactRoot = (<ReactRoot {...reactRootProps} />);
     return new Promise(onDone => {
       ReactDOM.render(this._reactRoot, this._rootElement, onDone);
     });

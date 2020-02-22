@@ -1512,22 +1512,31 @@ async function _invoke (commandSelector, argv) {
 */
 
 function _parseUntilLastPositional (argv_, commandUsage, isBroken) {
-  const endIndex = argv_.findIndex(arg => (arg === "--") || (arg[0] !== "-"));
+  const usageParts = commandUsage.split(" ");
+  const positionalNames = usageParts.slice(1)
+      .filter(param => (param[1] !== "-"))
+      .map(positional => positional.match(/^[[<]?([^<>[\]]*)[\]>]?$/)[1]);
+  const lastVariadicName = positionalNames.length
+      && (positionalNames[positionalNames.length - 1].match(/^(.*)\.\.$/) || [])[1];
+  if (lastVariadicName) positionalNames.pop();
+  let positionalArgsRemaining = positionalNames.length;
+  const endIndex = argv_.findIndex(arg => (arg === "--")
+      || (!positionalArgsRemaining && positionalNames.length)
+      || ((arg[0] !== "-") && (positionalArgsRemaining-- <= 0)));
   const args = argv_.slice(0, (endIndex === -1) ? undefined : endIndex);
+  if (lastVariadicName && (endIndex >= 0)) args.push("dummy");
+  this.vargs.$0 = this.theme.command(usageParts[0]);
   const ret = !isBroken ? this.vargs.parse(args) : {};
+  if (ret._.length) {
+    for (const positionalName of positionalNames) ret[positionalName] = ret._.shift();
+  }
+  ret._.push(...((endIndex === -1) ? [] : argv_.slice(endIndex)));
+  if (lastVariadicName) {
+    ret[lastVariadicName] = ret._;
+    ret._ = [];
+  }
   if (ret.vlm) ret.vlmOption = ret.vlm;
   ret.vlm = this;
-  const usageParts = commandUsage.split(" ");
-  const positionals = usageParts.slice(1).filter(param => (param[1] !== "-"));
-  ret._ = (endIndex === -1) ? [] : argv_.slice(endIndex);
-  for (const positional of positionals) {
-    const variadic = positional.match(/^.(.*)\.\..$/);
-    if (variadic) {
-      ret[variadic[1]] = ret._.splice(0, ret._.indexOf("--") + 1 || 100000);
-      break;
-    }
-    ret[positional.slice(1, -1)] = ret._.shift();
-  }
   return ret;
 }
 
@@ -1553,8 +1562,8 @@ function commandFromFilename (filename) {
 
 function filenameFromCommand (command) {
   return `${_filenamePrefix}/${command}`
-          .replace(/\/.@/g, "__-")
-          .replace(/\/./g, "__")
+          .replace(/\/\.@/g, "__-")
+          .replace(/\/\./g, "__")
           .replace(/\/@/g, "_-")
           .replace(/\//g, "_");
 }

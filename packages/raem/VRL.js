@@ -66,19 +66,19 @@ class VRL {
   // urn components
   _q: Object; // urn q-component ie. query
   _r: Object; // urn r-component ie. resolver
-  // partition: ?ValaaURI ?
+  // chronicle: ?ValaaURI ?
   _f: ?string; // urn f-component ie. fragment
 
-  constructor (rawId: ?string) {
-    if (rawId) this._nss = rawId;
+  initNSS (nss: string) {
+    if (nss) this._initPart("_nss", (nss[0] === "@") ? nss : coerceAsVRID(nss));
+    return this;
   }
-  initNSS (nss: string) { return this._initPart("_nss", nss); }
   initQueryComponent (query: Object) { return this._initPart("_q", query); }
   initResolverComponent (resolver: Object) {
     if (!resolver) return this;
     if (!resolver.partition) {
       if (resolver.hasOwnProperty("partition")) delete resolver.partition;
-    } else resolver.partition = naiveURI.createPartitionURI(resolver.partition);
+    } else resolver.partition = naiveURI.createChronicleURI(resolver.partition);
     if (!resolver.ghostPath) {
       if (resolver.hasOwnProperty("ghostPath")) delete resolver.ghostPath;
     } else if (!(resolver.ghostPath instanceof GhostPath)) {
@@ -184,23 +184,21 @@ class VRL {
           "\n\tchronicleURI:", this._r.partition);
     }
   }
-  getChronicleURI (): ValaaURI { return this._r.partition; }
-  getChronicleId (): string { return this.getPartitionRawId(); }
 
-  setPartitionURI (partitionURI: ValaaURI) {
+  setChronicleURI (chronicleURI: ValaaURI) {
     try {
       if (this._r.partition) {
-        throw new Error(`partitionURI already exists when trying to assign '${
-            partitionURI}' into ${this.toString()}`);
+        throw new Error(`chronicleURI already exists when trying to assign '${
+          chronicleURI}' into ${this.toString()}`);
       }
-      if (typeof partitionURI !== "string") {
-        invariantifyString(partitionURI, "setPartitionURI.partitionURI", { allowEmpty: true });
+      if (typeof chronicleURI !== "string") {
+        invariantifyString(chronicleURI, "setChronicleURI.chronicleURI", { allowEmpty: true });
       }
-      this.obtainOwnResolverComponent().partition = partitionURI;
+      this.obtainOwnResolverComponent().partition = chronicleURI;
     } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .setPartitionURI(), with:`,
-          "\n\tpartitionURI:", partitionURI,
-          "\n\texisting partition:", this._r.partition,
+      throw wrapError(error, `During ${this.debugId()}\n .setChronicleURI(), with:`,
+          "\n\tchronicleURI:", chronicleURI,
+          "\n\texisting chronicle:", this._r.partition,
           "\n\tthis:", ...dumpObject(this));
     }
   }
@@ -367,11 +365,13 @@ export function vRef (rawId: RawId, coupling: ?string = null, ghostPath: ?GhostP
     chronicleURI: ?string = null): VRL {
   try {
     if (typeof rawId !== "string") invariantifyString(rawId, "vRef.rawId");
+    /*
     invariantifyString(coupling, "vRef.coupling", { allowNull: true });
     invariantifyObject(ghostPath, "vRef.ghostPath", { allowNull: true, instanceof: GhostPath });
     invariantifyString(chronicleURI, "vRef.chronicleURI", { allowNull: true, allowEmpty: true });
+    */
     // if (rawId[0] === "@") { validateVRID(rawId); }
-    const ret = new VRL(rawId);
+    const ret = (new VRL()).initNSS(rawId);
     let resolverComponent;
     if (ghostPath) resolverComponent = { ghostPath };
     if (chronicleURI) (resolverComponent || (resolverComponent = {})).partition = chronicleURI;
@@ -430,10 +430,13 @@ export function getRawIdFrom (idData: IdData | JSONIdData): string {
  * @returns null
  */
 export function tryRawIdFrom (idData: IdData | JSONIdData): ?string {
-  if (typeof idData === "string") return idData;
   if (idData instanceof VRL) return idData._nss;
-  if (Array.isArray(idData)) return idData[0];
-  return undefined;
+  const rawId = (typeof idData === "string")
+          ? idData
+      : Array.isArray(idData)
+          ? idData[0]
+          : undefined;
+  return rawId[0] === "@" ? rawId : coerceAsVRID(rawId);
 }
 
 
@@ -488,24 +491,24 @@ export function tryCoupledFieldFrom (idData: IdData | JSONIdData): ?string {
   return undefined;
 }
 
-export const tryPartitionURIFrom = vdocorate(`
-  Returns partitionURI from given idData or undefined if no valid
-  partitionURI can be found. If idData is a VRL its .getPartitionURI() is
+export const tryChronicleURIFrom = vdocorate(`
+  Returns chronicleURI from given idData or undefined if no valid
+  chronicleURI can be found. If idData is a VRL its .getChronicleURI() is
   called and used as the candidate.
   @export
   @param {IdData} idData
   @returns null
-`)((idData: IdData | JSONIdData): ?ValaaURI => {
-  if (idData instanceof VRL) return idData.getPartitionURI();
+`)((idData: IdData | JSONIdData): ?string => {
+  if (idData instanceof VRL) return idData.getChronicleURI();
   if (!Array.isArray(idData)) return undefined;
   if (idData[1] && (typeof idData[1] === "object")) {
     return (typeof idData[1].partition !== "string")
         ? idData[1].partition
-        : naiveURI.createPartitionURI(idData[1].partition);
+        : naiveURI.createChronicleURI(idData[1].partition);
   }
   if (((typeof idData[1] === "string") || (idData[1] === null))
       && (typeof idData[3] === "string")) {
-    return naiveURI.createPartitionURI(idData[3]);
+    return naiveURI.createChronicleURI(idData[3]);
   }
   return undefined;
 });

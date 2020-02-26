@@ -1,14 +1,14 @@
 import { naiveURI, getHostname } from "~/raem/ValaaURI";
 
 describe("Basic operations", () => {
-  it("roundtrips trivial uri 'foo:'", () => {
-    const sourceURI = "foo:";
-    const roundtripURI = naiveURI.createPartitionURI(sourceURI);
+  it("roundtrips trivial uri 'foo:?id=@$~raw:a@@'", () => {
+    const sourceURI = "foo:?id=@$~raw:a@@";
+    const roundtripURI = naiveURI.createChronicleURI(sourceURI);
     expect(String(roundtripURI))
         .toEqual(sourceURI);
   });
 
-  it("roundtrips non-trivial uri 'foo://bar.com/?id=baz'", () => {
+  it("roundtrips non-trivial uri 'foo://bar.com/?id=@$~raw:baz@@'", () => {
     const sourceURI = "foo://bar.com/";
     const roundtripURI = naiveURI.createChronicleURI(sourceURI, "@$~raw:baz@@");
     expect(String(roundtripURI))
@@ -42,7 +42,7 @@ describe("Basic operations", () => {
   });
 
   it("doesn't lose // from string uri with naiveURI.getAuthorityURI", () => {
-    const uriString = "valaa-test://example.com/developtest?id=aaaaaaa-bbbb-cdef-1234";
+    const uriString = "valaa-test://example.com/developtest?id=@$~raw:aaaaaaa-bbbb-cdef-1234@@";
     const authorityString = "valaa-test://example.com/developtest";
     expect(naiveURI.getAuthorityURI(uriString))
         .toEqual(authorityString);

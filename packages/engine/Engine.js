@@ -182,7 +182,7 @@ export default class Engine extends Cog {
   }
 
   getVrapperByRawId (rawId: string, options: VALKOptions, explicitTransient: Transient) {
-    return this.getVrapper(new VRL(rawId), options, explicitTransient);
+    return this.getVrapper((new VRL()).initNSS(rawId), options, explicitTransient);
   }
 
   getVrappers (idSequence: IdData[], options: VALKOptions = {}) {

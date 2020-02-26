@@ -22,7 +22,7 @@ const expectedOutputHTML = `<html><head>${
 
 beforeEach(() => {});
 
-const testClientChronicleURI = "valaa-local:?id=f3d306d9-79ac-4087-afbc-46f739226eb2";
+const testClientChronicleURI = "valaa-local:?id=@$~u4:f3d306d9-79ac-4087-afbc-46f739226eb2@@";
 const testClientId = encodeURIComponent(testClientChronicleURI);
 
 const testAdminId = "@$~test:admin@@";

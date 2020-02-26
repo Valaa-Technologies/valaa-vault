@@ -382,8 +382,12 @@ class ProphecyOperation extends ProphecyEventResult {
       let chronicleURI = chronicleOrPartitionURI;
       let connection = this._sourcerer._connections[chronicleURI];
       if (!connection) {
-        missingConnections.push(naiveURI.createPartitionURI(partitionURIString));
-        return;
+        chronicleURI = naiveURI.createChronicleURI(chronicleOrPartitionURI);
+        connection = this._sourcerer._connections[chronicleURI];
+        if (!connection) {
+          missingConnections.push(chronicleURI);
+          return;
+        }
       }
       if (!this._prophecy.meta) throw new Error("prophecy.meta missing");
       const commandEvent = connection.extractChronicleEvent(getActionFromPassage(this._prophecy));

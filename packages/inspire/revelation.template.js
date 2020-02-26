@@ -59,7 +59,7 @@ function spindlePrototype () {
 function schemeModule () {
   return {
     scheme: "",
-    getAuthorityURIFromPartitionURI () {},
+    getAuthorityURIFromChronicleURI () {},
     obtainAuthorityConfig () {},
     createAuthority () {},
   };

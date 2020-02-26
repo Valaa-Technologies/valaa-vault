@@ -55,7 +55,7 @@ export function packedSingular (value, typeName, fieldInfo) {
   invariantifyString(typeName, "packed.typeName");
   return {
     [HostRef]: tryHostRef(value)
-        || ((typeof value === "string") && new VRL(value))
+        || ((typeof value === "string") && (new VRL()).initNSS(value))
         || undefined,
     [PackedHostValue]: value,
     _singular: value,

@@ -23,9 +23,8 @@ export default new GraphQLObjectType({
         bvob => bvob.get("id").rawId(),
         { affiliatedType: "Blob" },
     ),
-
     ...generatedField("bvobId", new GraphQLNonNull(GraphQLString),
-        `DEPRECATED Globally unique identifier string of this Bvob (prefer contentHash)`,
+        `VRID of this Bvob`,
         bvob => bvob.get("id").rawId(),
         { affiliatedType: "Blob" },
     ),
@@ -33,7 +32,7 @@ export default new GraphQLObjectType({
 
     ...generatedField("contentHash", new GraphQLNonNull(GraphQLString),
         `The content hash of this Bvob`,
-        bvob => bvob.get("id").rawId(),
+        bvob => bvob.get("id").rawId().match(/^@\$~bvob:([^@]*)@@$/)[1],
         { affiliatedType: "Blob" },
     ),
 

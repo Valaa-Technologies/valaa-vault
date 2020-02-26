@@ -9,7 +9,7 @@
     "scribe": { "verbosity": 0 }
   },
   "prologue": {
-    "rootPartitionURI": "valaa-local:?id=f3d306d9-79ac-4087-afbc-46f739226eb2",
+    "rootChronicleURI": "valaa-local:?id=@$~u4:f3d306d9-79ac-4087-afbc-46f739226eb2@@",
     "partitionInfos": {
       "!!!": "<partitions/partitionInfos.json>"
     },

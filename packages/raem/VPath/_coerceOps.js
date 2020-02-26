@@ -17,6 +17,8 @@ export function coerceAsVRID (rawId) {
         gridType = "u4";
       } else if (gridValue.length === 40) {
         gridType = "cih";
+      } else if (gridValue.length === 128) {
+        gridType = "bvob";
       } else {
         gridType = "raw";
         gridValue = encodeURIComponent(gridValue);

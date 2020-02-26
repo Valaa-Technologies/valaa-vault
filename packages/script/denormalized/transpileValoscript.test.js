@@ -129,7 +129,7 @@ describe("valoscript", () => {
       const temp = evaluateProgram([], head, bodyKuery, scope);
       temp.field = temp.field.toJSON();
       expect(temp)
-          .toEqual({ key: 10, field: ["A_parent"], otherField: "otherValue" });
+          .toEqual({ key: 10, field: ["@$~raw:A_parent@@"], otherField: "otherValue" });
     });
   });
 

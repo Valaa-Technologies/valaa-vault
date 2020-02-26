@@ -1,8 +1,9 @@
 // @flow
 
-// import ValaaURI, { createValaaURI } from "~/raem/ValaaURI";
+import { naiveURI } from "~/raem/ValaaURI";
 import VRL, { /* vRef, */ JSONIdData } from "~/raem/VRL";
 import GhostPath, { ghostPathFromJSON } from "~/raem/state/GhostPath";
+import { coerceAsVRID } from "~/raem/VPath";
 
 import { dumpObject, debugObjectType, wrapError } from "~/tools/wrapError";
 
@@ -126,8 +127,8 @@ export function deserializeVRL (serializedRef: string | JSONIdData,
       chronicleURI = naiveURI.createChronicleURI(String(currentChronicleURI));
     }
     if (!falseProphet || ((currentChronicleURI === null) && !chronicleURI)) {
-
-      return new VRL(nss)
+      return new VRL()
+          .initNSS(nss)
           .initResolverComponent(resolver)
           .initQueryComponent(query)
           .initFragmentComponent(fragment);
@@ -153,7 +154,7 @@ export function deserializeVRL (serializedRef: string | JSONIdData,
         .initNSS(nss)
         .initQueryComponent(query)
         .initFragmentComponent(fragment);
-    ret._nss = nss;
+    // ret._nss = nss;
     if (ghostPath) {
       ret.obtainOwnResolverComponent().ghostPath = (ghostPath instanceof GhostPath)
           ? ghostPath : ghostPathFromJSON(ghostPath);

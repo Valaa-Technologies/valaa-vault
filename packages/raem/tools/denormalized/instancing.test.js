@@ -74,7 +74,7 @@ describe("CREATED with instancePrototype", () => {
     expect(child1Instance.get("prototype").toJSON())
         .toEqual(vRef("A_child1", "instances").toJSON());
     expect(harness.run(child1Instance, "prototype").rawId())
-        .toEqual("A_child1");
+        .toEqual("@$~raw:A_child1@@");
   });
 
   it("sets instance owner explicitly to the owner of the prototype", async () => {
@@ -85,7 +85,7 @@ describe("CREATED with instancePrototype", () => {
     expect(harness.run(child1Instance, "parent"))
         .toEqual(undefined);
     expect(harness.run(vRef("A_parent"), ["§->", "unnamedOwnlings", 0]).rawId())
-        .toEqual("A_child1Instance");
+        .toEqual("@$~raw:A_child1Instance@@");
   });
 
   it("forwards non-mutated instance leaf property access to the prototype", async () => {
@@ -119,10 +119,12 @@ describe("CREATED with instancePrototype", () => {
         harness.run(vRef("A_parent"), "children")
             .map(child => createMaterializeGhostPathAction(harness.getValker(),
                 child.getGhostPath()
-                    .withNewGhostStep("A_parent", "A_parentInstance")))
+                    .withNewGhostStep("@$~raw:A_parent@@", "@$~raw:A_parentInstance@@")))
     }));
-    const child1InParentInstanceId = createGhostRawId("A_child1", "A_parentInstance");
-    const child2InParentInstanceId = createGhostRawId("A_child2", "A_parentInstance");
+    const child1InParentInstanceId = createGhostRawId(
+        "@$~raw:A_child1@@", "@$~raw:A_parentInstance@@");
+    const child2InParentInstanceId = createGhostRawId(
+        "@$~raw:A_child2@@", "@$~raw:A_parentInstance@@");
     expect(tryObjectTransient(harness.getValker(), child1InParentInstanceId, "TestThing"))
         .toBeTruthy();
     expect(tryObjectTransient(harness.getValker(), child2InParentInstanceId, "TestThing"))
@@ -137,9 +139,10 @@ describe("CREATED with instancePrototype", () => {
                 ["§->", "children", 0, "children"])
             .map(grandling => createMaterializeGhostPathAction(harness.getValker(),
                 grandling.getGhostPath()
-                    .withNewGhostStep("A_grandparent", "A_grandparentInstance")))
+                    .withNewGhostStep("@$~raw:A_grandparent@@", "@$~raw:A_grandparentInstance@@")))
     }));
-    const parentInGrandparentInstanceId = createGhostRawId("A_parent", "A_grandparentInstance");
+    const parentInGrandparentInstanceId = createGhostRawId(
+          "@$~raw:A_parent@@", "@$~raw:A_grandparentInstance@@");
     expect(tryObjectTransient(harness.getValker(), parentInGrandparentInstanceId, "TestThing"))
         .toBeFalsy();
   });
@@ -150,14 +153,15 @@ describe("CREATED with instancePrototype", () => {
     const ghostGrandlings = harness.run(vRef("A_grandparentInstance"),
         ["§->", "children", 0, "children"]);
     expect(ghostGrandlings[0].rawId())
-        .toEqual(createGhostRawId("A_child1", "A_grandparentInstance"));
+        .toEqual(createGhostRawId("@$~raw:A_child1@@", "@$~raw:A_grandparentInstance@@"));
     expect(ghostGrandlings[1].rawId())
-        .toEqual(createGhostRawId("A_child2", "A_grandparentInstance"));
+        .toEqual(createGhostRawId("@$~raw:A_child2@@", "@$~raw:A_grandparentInstance@@"));
     harness.chronicleEvent(transacted({ actions:
         ghostGrandlings.map(
             ghostGrandling => createMaterializeGhostAction(harness.getValker(), ghostGrandling))
     }));
-    const parentInGrandparentInstanceId = createGhostRawId("A_parent", "A_grandparentInstance");
+    const parentInGrandparentInstanceId = createGhostRawId(
+        "@$~raw:A_parent@@", "@$~raw:A_grandparentInstance@@");
     expect(tryObjectTransient(harness.getValker(), parentInGrandparentInstanceId, "TestThing"))
         .toBeFalsy();
   });

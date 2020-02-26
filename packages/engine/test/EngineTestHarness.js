@@ -80,6 +80,10 @@ export class TestCollectCREATEDCog extends Cog {
   onEventCREATED (passage: Object) {
     const typeName = passage.vProtagonist.getTypeName({ require: false });
     if (!this[typeName]) this[typeName] = {};
-    this[typeName][passage.vProtagonist.getRawId()] = passage.vProtagonist;
+    const id = passage.vProtagonist.getRawId();
+    this[typeName][id] = passage.vProtagonist;
+    if (id.slice(0, 7) === "@$~raw:") {
+      this[typeName][decodeURIComponent(id.slice(7, id.length - 2))] = passage.vProtagonist;
+    }
   }
 }

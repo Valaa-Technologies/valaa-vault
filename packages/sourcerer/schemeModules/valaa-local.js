@@ -7,7 +7,7 @@ export default function createValaaLocalScheme (/* { logger } */): SchemeModule 
   return {
     scheme: "valaa-local",
 
-    getAuthorityURIFromPartitionURI: () => `valaa-local:`,
+    getAuthorityURIFromChronicleURI: () => `valaa-local:`,
 
     obtainAuthorityConfig: (/* chronicleURI: string, authorityPreConfig: Object */) => ({
       eventVersion: EVENT_VERSION,

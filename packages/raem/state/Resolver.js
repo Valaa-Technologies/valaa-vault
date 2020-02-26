@@ -2,7 +2,7 @@
 
 import { GraphQLSchema } from "graphql/type";
 
-import VRL, { obtainVRL, tryCoupledFieldFrom } from "~/raem/VRL";
+import VRL, { obtainVRL, tryCoupledFieldFrom, tryRawIdFrom } from "~/raem/VRL";
 import type {
   JSONIdData, IdData, RawId,
 } from "~/raem/VRL"; // eslint-disable-line no-duplicate-imports
@@ -175,8 +175,8 @@ export default class Resolver extends FabricEventTarget {
     let object;
     let objectId = tryHostRef(idData);
     const rawId = objectId ? objectId.rawId()
-        : Array.isArray(idData) ? idData[0]
-        : (objectId = this.obtainReference(idData, contextPartitionURI)).rawId();
+        : tryRawIdFrom(idData)
+            || (objectId = this.obtainReference(idData, contextChronicleURI)).rawId();
     try {
       object = this.tryStateTransient(rawId, typeName);
       // TODO(iridian): Evaluate if validating a bound id against the
@@ -287,7 +287,7 @@ export default class Resolver extends FabricEventTarget {
         this.objectId = this.objectTransient.get("id");
       } else if ((this.objectTypeName === "Blob") || (objectId && objectId.isInactive())) {
         // Blob and inactive resources are given an id-transient
-        this.objectId = objectId || new VRL(rawId);
+        this.objectId = objectId || (new VRL()).initNSS(rawId);
         if (this.objectTypeName !== "Blob") this.objectTypeName = this.schema.inactiveType.name;
         this.objectTransient = createIdTransient(this.objectId);
       } else if ((!withOwnField && (!ghostPath || !ghostPath.isGhost()))

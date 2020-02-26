@@ -11,7 +11,7 @@
     "scribe": { "verbosity": 0 }
   },
   "prologue": {
-    "rootPartitionURI": "valaa-local:?id=f3d306d9-79ac-4087-afbc-46f739226eb2",
+    "rootChronicleURI": "valaa-local:?id=@$~u4:f3d306d9-79ac-4087-afbc-46f739226eb2@@",
     "partitionInfos": { "!!!": "./revelation/partitionInfos.json" },
     "bvobInfos": { "!!!": "./revelation/bvobInfos.json" },
     "bvobBuffers": { "!!!": "./revelation/bvobBuffers.json" },
@@ -34,10 +34,10 @@
           "view": {
             "name": "Web API Test",
             "verbosity": 0,
-            "focus": "valaa-local:?id=f3d306d9-79ac-4087-afbc-46f739226eb2"
+            "focus": "valaa-local:?id=@$~u4:f3d306d9-79ac-4087-afbc-46f739226eb2@@"
           },
           "identity": {
-            "clientURI": "valaa-local:?id=f3d306d9-79ac-4087-afbc-46f739226eb2",
+            "clientURI": "valaa-local:?id=@$~u4:f3d306d9-79ac-4087-afbc-46f739226eb2@@",
             "clientSecret": "pen-pineapple-apple-pen"
           },
           "sessionDuration": 3600,

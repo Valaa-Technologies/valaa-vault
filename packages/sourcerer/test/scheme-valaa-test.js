@@ -12,7 +12,7 @@ export default function createValaaTestScheme ({ config, authorityURI } = {}) {
   return {
     scheme: "valaa-test",
 
-    getAuthorityURIFromPartitionURI: () => authorityURI || `valaa-test:`,
+    getAuthorityURIFromChronicleURI: () => authorityURI || `valaa-test:`,
 
     obtainAuthorityConfig: () => ({
       eventVersion: EVENT_VERSION,

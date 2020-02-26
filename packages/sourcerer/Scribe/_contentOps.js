@@ -200,6 +200,9 @@ export function _determineEventMediaPreOps (connection: ScribeConnection,
   }
   if (update.content) {
     mediaInfo.contentHash = getRawIdFrom(update.content);
+    if (mediaInfo.contentHash.slice(0, 8) === "@$~bvob:") {
+      mediaInfo.contentHash = mediaInfo.contentHash.slice(8, mediaInfo.contentHash.length - 2);
+    }
   }
   return [{ mediaEntry: newEntry }];
 }
@@ -215,7 +218,7 @@ export async function _retryingTwoWaySyncMediaContent (connection: ScribeConnect
   let previousBackoff;
   invariantifyString(mediaEntry.mediaId, "_retryingTwoWaySyncMediaContent.mediaEntry.mediaId",
       {}, "\n\tnewEntry", mediaEntry);
-  mediaInfo.mediaVRL = new VRL(mediaEntry.mediaId);
+  mediaInfo.mediaVRL = (new VRL()).initNSS(mediaEntry.mediaId);
   let getNextBackoffSeconds = options.getNextBackoffSeconds;
   if (!getNextBackoffSeconds && (typeof options.retryTimes === "number")) {
     getNextBackoffSeconds = (previousRetries: number, mediaInfo_, error = {}) =>

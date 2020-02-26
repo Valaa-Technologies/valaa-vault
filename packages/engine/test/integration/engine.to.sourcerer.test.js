@@ -18,6 +18,7 @@ afterEach(async () => {
 const exampleContent = "example content";
 const exampleBuffer = arrayBufferFromUTF8String(exampleContent);
 const exampleContentHash = contentHashFromArrayBuffer(exampleBuffer);
+const exampleContentId = `@$~bvob:${exampleContentHash}@@`;
 
 describe("Media handling", () => {
   it("does an async prepareBvob for non-locally persisted Media content", async () => {
@@ -27,8 +28,8 @@ describe("Media handling", () => {
       } },
       awaitResult: (result) => result.getComposedStory(),
     });
-    const testPartitionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
-    const existingChroniclingCount = testPartitionBackend._chroniclings.length;
+    const testConnectionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
+    const existingChroniclingCount = testConnectionBackend._chroniclings.length;
     const { media, contentUpdateStarted } = await harness.runValoscript(vRef(testRootId), `
       const media = new Media({
         name: "text media", owner: this, mediaType: { type: "text", subtype: "plain" },
@@ -40,19 +41,19 @@ describe("Media handling", () => {
     `, { exampleBuffer, console }, { awaitResult: (result) => result.getComposedEvent() });
     expect(media.getId().toJSON())
         .toEqual(entities()[testRootId].get(["§..", "text"]).getId().toJSON());
-    expect(testPartitionBackend.getPreparation(exampleContentHash))
+    expect(testConnectionBackend.getPreparation(exampleContentHash))
         .toBeTruthy();
     expect(media.get("content"))
         .toBeFalsy();
-    expect(testPartitionBackend._chroniclings.length)
+    expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 1);
-    testPartitionBackend.addPrepareBvobResult({ contentHash: exampleContentHash });
+    testConnectionBackend.addPrepareBvobResult({ contentHash: exampleContentHash });
     const { bvobId } = await contentUpdateStarted;
     expect(bvobId.getId().rawId())
-        .toEqual(exampleContentHash);
+        .toEqual(exampleContentId);
     expect(bvobId.getId().toJSON())
         .toEqual(media.get("content").getId().toJSON());
-    expect(testPartitionBackend._chroniclings.length)
+    expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 2);
 
     await expect(media.extractValue()).rejects
@@ -65,8 +66,8 @@ describe("Media handling", () => {
         isRemoteAuthority: true, isLocallyPersisted: true, // as opposed to false of previous test
       } },
     });
-    const testPartitionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
-    const existingChroniclingCount = testPartitionBackend._chroniclings.length;
+    const testConnectionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
+    const existingChroniclingCount = testConnectionBackend._chroniclings.length;
     const { media, contentUpdateStarted, newMediaPersist } = await harness.runValoscript(
         vRef(testRootId), `
       const media = new Media({
@@ -89,12 +90,12 @@ describe("Media handling", () => {
     await newMediaPersist;
     expect(media.getId().toJSON())
         .toEqual(entities()[testRootId].get(["§..", "text"]).getId().toJSON());
-    expect(testPartitionBackend._chroniclings.length)
+    expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 1);
     // local bvob persisted internally but not remotely
     const { bvobId, bvobComposed, bvobPersisted } = await contentUpdateStarted;
     expect(bvobId.getId().rawId())
-        .toEqual(exampleContentHash);
+        .toEqual(exampleContentId);
     expect(bvobId.getId().toJSON())
         .toEqual(media.get("content").getId().toJSON());
     const bvobComposedEvent = await bvobComposed;
@@ -103,11 +104,11 @@ describe("Media handling", () => {
         .toEqual(exampleContent);
 
     expect(bvobComposedEvent.command.actions.length).toEqual(2);
-    testPartitionBackend.addPrepareBvobResult({ contentHash: exampleContentHash });
-    expect(testPartitionBackend._chroniclings.length)
+    testConnectionBackend.addPrepareBvobResult({ contentHash: exampleContentHash });
+    expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 1);
     await bvobPersisted;
-    expect(testPartitionBackend._chroniclings.length)
+    expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 2);
 
     expect(await media.extractValue())
@@ -119,8 +120,8 @@ describe("Media handling", () => {
       oracle: { testAuthorityConfig: { isRemoteAuthority: true, isLocallyPersisted: true } },
       awaitResult: (result) => result.getPersistedStory(),
     });
-    const testPartitionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
-    const existingChroniclingCount = testPartitionBackend._chroniclings.length;
+    const testConnectionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
+    const existingChroniclingCount = testConnectionBackend._chroniclings.length;
     let reformCause;
     const onReform = e => { reformCause = e.error; e.preventDefault(); };
     harness.clockEvent(1, () => ["test.runValoscript"]);
@@ -148,20 +149,20 @@ describe("Media handling", () => {
         { awaitResult: (result) => result.getComposedEvent() });
     harness.clockEvent(1, () => ["test.newMediaPersist"]);
     await newMediaPersist;
-    expect(testPartitionBackend._chroniclings.length)
+    expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 1);
     harness.clockEvent(1, () => ["test.contentUpdateStarted"]);
     const { bvobPersisted, bvobPurged } = await contentUpdateStarted;
-    testPartitionBackend.addPrepareBvobResult({ contentHash: exampleContentHash });
+    testConnectionBackend.addPrepareBvobResult({ contentHash: exampleContentHash });
     harness.clockEvent(1, () => ["test.bvobPersisted"]);
     await bvobPersisted;
 
     expect(await media.extractValue())
         .toEqual(exampleContent);
 
-    expect(testPartitionBackend._chroniclings.length)
+    expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 2);
-    testPartitionBackend._chroniclings.splice(existingChroniclingCount, 2)[0]
+    testConnectionBackend._chroniclings.splice(existingChroniclingCount, 2)[0]
         .rejectTruthEvent(Object.assign(new Error("Not permitted"),
             { isRevisable: false, isReformable: true }));
     harness.clockEvent(1, () => ["test.bvobPurged"]);
@@ -183,8 +184,8 @@ describe("Media handling", () => {
       oracle: { testAuthorityConfig: { isRemoteAuthority: true, isLocallyPersisted: true } },
       awaitResult: (result) => result.getPersistedStory(),
     });
-    const testPartitionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
-    const existingChroniclingCount = testPartitionBackend._chroniclings.length;
+    const testConnectionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
+    const existingChroniclingCount = testConnectionBackend._chroniclings.length;
     let reformCause;
     const onReform = e => { reformCause = e.error; e.preventDefault(); };
     harness.clockEvent(1, () => ["test.runValoscript"]);
@@ -210,20 +211,20 @@ describe("Media handling", () => {
         { awaitResult: (result) => result.getComposedEvent() });
     harness.clockEvent(1, () => ["test.newMediaPersist"]);
     await newMediaPersist;
-    expect(testPartitionBackend._chroniclings.length)
+    expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 1);
     harness.clockEvent(1, () => ["test.contentUpdateStarted"]);
     const { bvobPersisted } = await contentUpdateStarted;
-    testPartitionBackend.addPrepareBvobResult({ contentHash: exampleContentHash });
+    testConnectionBackend.addPrepareBvobResult({ contentHash: exampleContentHash });
     harness.clockEvent(1, () => ["test.bvobPersisted"]);
     await bvobPersisted;
 
     expect(await media.extractValue())
         .toEqual(exampleContent);
 
-    expect(testPartitionBackend._chroniclings.length)
+    expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 2);
-    testPartitionBackend._chroniclings.splice(existingChroniclingCount, 2)[0]
+    testConnectionBackend._chroniclings.splice(existingChroniclingCount, 2)[0]
         .rejectTruthEvent(Object.assign(new Error("Connection lost"),
             { isSchismatic: false }));
     harness.clockEvent(1, () => ["test.newMediaError"]);
@@ -248,8 +249,8 @@ describe("Media handling", () => {
     });
     const buffer = arrayBufferFromUTF8String("example content");
     const contentHash = contentHashFromArrayBuffer(buffer);
-    const testPartitionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
-    const existingChroniclingCount = testPartitionBackend._chroniclings.length;
+    const testConnectionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
+    const existingChroniclingCount = testConnectionBackend._chroniclings.length;
     let mediaProphecy, mediaPurgeEvent, mediaReformCause;
     let resolveReformationDelay;
     const onReform = e => {
@@ -282,21 +283,21 @@ describe("Media handling", () => {
         { awaitResult: (result) => (mediaProphecy = result).getComposedEvent() });
     harness.clockEvent(1, () => ["test.newMediaPersist"]);
     await newMediaPersist;
-    expect(testPartitionBackend._chroniclings.length)
+    expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 1);
     harness.clockEvent(1, () => ["test.contentUpdateStarted"]);
         const { bvobPersisted, bvobPurged } = await contentUpdateStarted;
-    testPartitionBackend.addPrepareBvobResult({ contentHash });
+    testConnectionBackend.addPrepareBvobResult({ contentHash });
     harness.clockEvent(1, () => ["test.bvobPersisted"]);
     await bvobPersisted;
-    expect(testPartitionBackend._chroniclings.length)
+    expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 2);
-    testPartitionBackend._chroniclings.splice(existingChroniclingCount, 2)[0]
+    testConnectionBackend._chroniclings.splice(existingChroniclingCount, 2)[0]
         .rejectTruthEvent(Object.assign(new Error("Not permitted"),
             { isRevisable: false, isReformable: true }));
     harness.clockEvent(1, () => ["test.bvobPurged"]);
     const bvobPurgeEvent = await bvobPurged;
-    expect(testPartitionBackend._chroniclings.length)
+    expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount);
     expect(bvobPurgeEvent.error.message)
         .toMatch(/Media does not exist/);
@@ -324,7 +325,7 @@ describe("Media handling", () => {
       }
       await new Promise(resolve => setTimeout(resolve, 100));
     }
-    expect(testPartitionBackend._chroniclings.length)
+    expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 1);
     // FIXME(iridian, 2019-05): This test and its underlying
     // implementation is partial. This test does not make sure that the
@@ -357,6 +358,7 @@ describe("Media handling", () => {
     const initialContent = "initial content";
     const initialBuffer = arrayBufferFromUTF8String(initialContent);
     const initialContentHash = contentHashFromArrayBuffer(initialBuffer);
+    const initialContentId = `@$~bvob:${initialContentHash}@@`;
 
     const subscribeToContentUpdate = contentMedia => resolve => contentMedia
         .obtainSubscription("content")
@@ -382,20 +384,21 @@ describe("Media handling", () => {
     const createdUpdate = await createdProcess;
 
     expect(createdUpdate.liveUpdate.value().getRawId())
-        .toEqual(initialContentHash);
+        .toEqual(initialContentId);
     expect(createdUpdate.bvobId.getRawId())
-        .toEqual(initialContentHash);
+        .toEqual(initialContentId);
     expect(createdUpdate.content)
         .toEqual(initialContent);
 
     expect(contentMedia.get("content").getRawId())
-        .toEqual(initialContentHash);
+        .toEqual(initialContentId);
     expect(contentMedia.interpretContent({ synchronous: true, contentType: "text/plain" }))
         .toEqual(initialContent);
 
     const updateContent = "update content";
     const updateBuffer = arrayBufferFromUTF8String(updateContent);
     const updateContentHash = contentHashFromArrayBuffer(updateBuffer);
+    const updateContentId = `@$~bvob:${updateContentHash}@@`;
 
     const { updateBvob, modifiedProcess } = await harness.runValoscript(
         undefinedMedia,
@@ -408,17 +411,17 @@ describe("Media handling", () => {
     const modifiedUpdate = await modifiedProcess;
 
     expect(updateBvob.getRawId())
-        .toEqual(updateContentHash);
+        .toEqual(updateContentId);
 
     expect(modifiedUpdate.liveUpdate.value().getRawId())
-        .toEqual(updateContentHash);
+        .toEqual(updateContentId);
     expect(modifiedUpdate.bvobId.getRawId())
-        .toEqual(updateContentHash);
+        .toEqual(updateContentId);
     expect(modifiedUpdate.content)
         .toEqual(updateContent);
 
     expect(undefinedMedia.get("content").getRawId())
-        .toEqual(updateContentHash);
+        .toEqual(updateContentId);
     expect(undefinedMedia.interpretContent({ synchronous: true, contentType: "text/plain" }))
         .toEqual(updateContent);
 
@@ -433,17 +436,17 @@ describe("Media handling", () => {
     const modifiedAgainUpdate = await modifiedAgainProcess;
 
     expect(updateAgainBvob.getRawId())
-        .toEqual(updateContentHash);
+        .toEqual(updateContentId);
 
     expect(modifiedAgainUpdate.liveUpdate.value().getRawId())
-        .toEqual(updateContentHash);
+        .toEqual(updateContentId);
     expect(modifiedAgainUpdate.bvobId.getRawId())
-        .toEqual(updateContentHash);
+        .toEqual(updateContentId);
     expect(modifiedAgainUpdate.content)
         .toEqual(updateContent);
 
     expect(contentMedia.get("content").getRawId())
-        .toEqual(updateContentHash);
+        .toEqual(updateContentId);
     expect(contentMedia.interpretContent({ synchronous: true, contentType: "text/plain" }))
         .toEqual(updateContent);
   });
@@ -633,19 +636,19 @@ describe("Two paired harnesses emulating two gateways connected through event st
 });
 
 describe("Regressions", () => {
-  it("returns $V.partitionURI for root, child, instance and ghosts properly", () => {
+  it("returns $V.chronicleURI for root, child, instance and ghosts properly", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
     const { rootURI, testURI, instanceURI, ghostURI } = harness.runValoscript(
         vRef(testRootId), `
-      const rootURI = this.$V.partitionURI;
+      const rootURI = this.$V.chronicleURI;
       const test = this.$V.unnamedOwnlings.find(e => (e.$V.name === "testName"));
       const instance = this.$V.unnamedOwnlings.find(e => (e.$V.name === "testInstance"));
       const ghost = instance.$V.unnamedOwnlings.find(e => (e.$V.name === "ownlingCreator"));
       ({
-        rootURI: this.$V.partitionURI,
-        testURI: test.$V.partitionURI,
-        instanceURI: instance.$V.partitionURI,
-        ghostURI: ghost.$V.partitionURI,
+        rootURI: this.$V.chronicleURI,
+        testURI: test.$V.chronicleURI,
+        instanceURI: instance.$V.chronicleURI,
+        ghostURI: ghost.$V.chronicleURI,
       });
     `);
     expect(rootURI).toEqual(String(harness.testChronicleURI));

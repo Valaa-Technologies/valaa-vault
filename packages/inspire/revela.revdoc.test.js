@@ -130,7 +130,7 @@ async () => lazyPatchRevelations(gatewayMock, {}, {
       "/test/v0": {
         "!!!": ["@", ["!:test-lib"], ["!$valk:invoke:callMe", {
           view: {
-            focus: "valaa-aws://example.org/deployment?id=f0c5-f0c5",
+            focus: "valaa-aws://example.org/deployment?id=@$~raw:f0c5-f0c5@@",
             nulled: null,
           },
           identity: { "!!!": ["./config", "requireKey"] },
@@ -150,7 +150,7 @@ async () => lazyPatchRevelations(gatewayMock, {}, {
         name: "test",
         "test-lib": {
           preset: 10, overridden: 20, sessionDuration: 86400,
-          view: { focus: "valaa-aws://example.org/deployment?id=f0c5-f0c5", nulled: null },
+          view: { focus: "valaa-aws://example.org/deployment?id=@$~raw:f0c5-f0c5@@", nulled: null },
           identity: "/site/revelation/config",
           unboundAndUnsegmented: ["$un:bound"],
           unboundButSegmented: ["$", "also", "unbound"],

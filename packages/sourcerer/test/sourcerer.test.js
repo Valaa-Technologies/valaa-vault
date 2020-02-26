@@ -44,6 +44,8 @@ afterEach(async () => {
   await clearAllScribeDatabases(/* [testChronicleURI] */);
 });
 
+const simpleEntityId = "@$~raw:simple_entity@@";
+
 describe("Sourcerer", () => {
   const structuredMediaContents = [
     [`"Hello world"`, { name: "hello.txt", contentType: "text/plain" }, `"Hello world"`],
@@ -55,8 +57,8 @@ describe("Sourcerer", () => {
   it("decodes cached bvob buffers based on media type", async () => {
     const scribe = await createScribe(createOracle());
 
-    const connection = await scribe.acquireConnection(
-            naiveURI.createPartitionURI("valaa-test:"))
+    const connection = await scribe
+        .acquireConnection(naiveURI.createChronicleURI("valaa-test:", testRootId))
         .asActiveConnection();
 
     const mediaVRL = vRef("abcd-0123");
@@ -121,20 +123,20 @@ describe("Sourcerer", () => {
 
 describe("Sourcerer", () => {
   const simpleCommand = created({
-    id: ["simple_entity"], typeName: "Entity", initialState: {
+    id: [simpleEntityId], typeName: "Entity", initialState: {
       name: "Simple Entity", owner: [testRootId, {}, {}],
     }
   });
 
   const coupleCommands = [
-    created({ id: ["some_media"], typeName: "Media", initialState: {
+    created({ id: ["@$~raw:some_media@@"], typeName: "Media", initialState: {
       name: "Simple Media",
       owner: [testRootId, { partition: String(testChronicleURI) }, {}],
     } }),
-    created({ id: ["simple_relation"], typeName: "Relation", initialState: {
+    created({ id: ["@$~raw:simple_relation@@"], typeName: "Relation", initialState: {
       name: "Simple-other Relation",
       owner: vRef("simple_entity", "relations", undefined, testChronicleURI).toJSON(),
-      target: ["some_media", { partition: String(testChronicleURI) }],
+      target: ["@$~raw:some_media@@", { partition: String(testChronicleURI) }],
     } }),
   ];
 

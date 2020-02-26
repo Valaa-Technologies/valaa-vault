@@ -131,7 +131,7 @@ this document.`
          authority-uri               chronicle-id   resource-id         coupling           lens
 ┌──────────────┴───────────────┐    ┌─────┴──────┐ ┌─────┴──────┐  ┌───────┴────────┐ ┌─────┴──────┐
 
-valaa-test://example.com:123/dev?id=abcd-123...234#987b-72...8263?=coupling=relations&lens=ROOT_LENS
+valaa-test://example.com:123/dev?id=@$~raw:a...2@@#987b-72...8263?=coupling=relations&lens=ROOT_LENS
 
                                                    └─────┬──────┘  └──────────────┬────────────────┘
                                                         nss                  q-component

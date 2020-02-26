@@ -7,7 +7,7 @@ export default function createValaaTransientScheme (/* { logger } */): SchemeMod
   return {
     scheme: "valaa-transient",
 
-    getAuthorityURIFromPartitionURI: () => `valaa-transient:`,
+    getAuthorityURIFromChronicleURI: () => `valaa-transient:`,
 
     obtainAuthorityConfig: (/* chronicleURI: string, authorityPreConfig: Object */) => ({
       eventVersion: EVENT_VERSION,

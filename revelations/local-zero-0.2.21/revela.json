@@ -14,9 +14,9 @@
     "scribe": { "verbosity": 0 }
   },
   "prologue": {
-    "rootPartitionURI": "valaa-local:?id=efff2621-b8e6-46d9-af39-604f242e15da",
-    "partitionInfos": { "!!!": "/local-zero-0.2.21/partitions/../partitions/partitionInfos.json" },
-    "bvobInfos": { "!!!": "</local-zero-0.2.21/partitions/./bvobInfos.json>" },
+    "rootChronicleURI": "valaa-local:?id=@$~u4:efff2621-b8e6-46d9-af39-604f242e15da@@",
+    "partitionInfos": { "!!!": "./partitions/partitionInfos.json" },
+    "bvobInfos": { "!!!": "</partitions/./bvobInfos.json>" },
     "bvobBuffers": { "!!!": "./partitions/../partitions/bvobBuffers.json" },
     "authorityConfigs": {}
   }

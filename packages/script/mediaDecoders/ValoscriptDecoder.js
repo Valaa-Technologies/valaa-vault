@@ -18,14 +18,14 @@ export default class ValoscriptDecoder extends MediaDecoder {
     this._customVALK = options.customVALK;
   }
 
-  decode (buffer: ArrayBuffer, { mediaName, partitionName, contentHash }: Object = {}): any {
+  decode (buffer: ArrayBuffer, { mediaName, chronicleName, contentHash }: Object = {}): any {
     const source = this.stringFromBuffer(buffer);
     return transpileValoscriptModule(source, {
       customVALK: this._customVALK,
       cache: this._transpilationCache,
       sourceInfo: {
         phase: `valoscript Media "${mediaName}" as VALK module transpilation`,
-        partitionName,
+        chronicleName,
         mediaName,
         source,
         contentHash,

@@ -9,7 +9,7 @@ export default function createValaaMemoryScheme (/* { logger } */): SchemeModule
 
     getAuthorityURIFromPartitionURI: () => `valaa-memory:`,
 
-    obtainAuthorityConfig: (/* partitionURI: ValaaURI, authorityPreConfig: Object */) => ({
+    obtainAuthorityConfig: (/* chronicleURI: string, authorityPreConfig: Object */) => ({
       eventVersion: EVENT_VERSION,
       isLocallyPersisted: false,
       isPrimaryAuthority: true,

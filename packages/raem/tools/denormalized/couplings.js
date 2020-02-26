@@ -155,10 +155,10 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
               fieldIntro.name));
     } else {
       if (coupling.preventsDestroy && (actionType === DESTROY_COUPLING)) {
-        // Check if remote is in other partition as they can't prevent destroy, otherwise throw.
-        const partitionURI = remoteRef.getPartitionURI();
-        // Missing partitionURI means local partition reference, so throw.
-        if (!partitionURI || (partitionURI.toString() === bard.destroyedResourcePartition)) {
+        // Check if remote is in other chronicle as they can't prevent destroy, otherwise throw.
+        const chronicleURI = remoteRef.getChronicleURI();
+        // Missing chronicleURI means the reference is a chronicle-internal reference: throw.
+        if (!chronicleURI || (chronicleURI === bard.destroyedResourceChronicle)) {
           const nameBard = Object.create(bard);
           const name = bard.interfaceIntro.getFields().name
               ? `'${getObjectField(nameBard, bard.objectTransient, "name")}' `

@@ -10,6 +10,6 @@ buts its existence is inferred due to existing references to it.
 
 The transition from Absent to and from other dominant types is the
 only possible runtime type change and happens dynamically based on
-the partition sourcery and banishment.`,
+the chronicle sourcery and banishment.`,
   },
 };

@@ -19,34 +19,32 @@ import {
  */
 export default class Connection extends Follower {
   _sourcerer: Sourcerer;
-  _partitionURI: ValaaURI;
+  _chronicleURI: string;
 
   _refCount: number;
   _upstreamConnection: Connection;
   _activeConnection: Connection | Promise<Connection>;
 
   constructor ({
-    name, sourcerer, partitionURI, receiveTruths, receiveCommands, logger, verbosity
+    name, sourcerer, chronicleURI, receiveTruths, receiveCommands, logger, verbosity,
   }: {
-    name: any, sourcerer: Sourcerer, partitionURI: ValaaURI,
+    name: any, sourcerer: Sourcerer, chronicleURI: string,
     receiveTruths?: ReceiveEvents, receiveCommands?: ReceiveEvents,
     logger?: FabricEventLogger, verbosity?: number,
   }) {
     super(name || null, verbosity, logger || sourcerer.getLogger());
     invariantifyObject(sourcerer, "Connection.constructor.sourcerer",
         { instanceof: Sourcerer });
-
-    if (typeof partitionURI !== "string") {
-      invariantifyString(partitionURI, "Connection.constructor.partitionURI",
+    if (typeof chronicleURI !== "string") {
+      invariantifyString(chronicleURI, "Connection.constructor.chronicleURI",
           { allowEmpty: true });
     }
-
     this._sourcerer = sourcerer;
-    this._partitionURI = partitionURI;
+    this._chronicleURI = chronicleURI;
     this._refCount = 0;
     this._downstreamReceiveTruths = receiveTruths;
     this._downstreamReceiveCommands = receiveCommands;
-    this.setRawName(String(partitionURI));
+    this.setRawName(this._chronicleURI);
   }
 
   getName (): string {
@@ -55,10 +53,8 @@ export default class Connection extends Follower {
   }
   getSourcerer (): Sourcerer { return this._sourcerer; }
 
-  getPartitionURI (): ValaaURI { return this._partitionURI; }
-  getPartitionRawId (): string { return naiveURI.getPartitionRawId(this._partitionURI); }
-  getChronicleURI (): ValaaURI { return this._partitionURI; }
-  getChronicleId (): string { return naiveURI.getPartitionRawId(this._partitionURI); }
+  getChronicleURI (): string { return this._chronicleURI; }
+  getChronicleId (): string { return naiveURI.getChronicleId(this._chronicleURI); }
 
   getStatus (): Object {
     return {
@@ -148,18 +144,18 @@ export default class Connection extends Follower {
           const actionCount = Object.values(connectResults).reduce(
               (s, log) => s + (Array.isArray(log) ? log.length : 0),
               options.eventIdBegin || 0);
-          if (!actionCount && (options.newPartition === false)) {
-            throw new Error(`No events found when connecting to an existing partition '${
-              connection.getPartitionURI().toString()}'`);
-          } else if (actionCount && (options.newPartition === true)) {
-            throw new Error(`Existing events found when trying to create a new partition '${
-              connection.getPartitionURI().toString()}'`);
+          if (!actionCount && (options.newChronicle === false)) {
+            throw new Error(`No events found when connecting to an existing chronicle '${
+              connection.getChronicleURI()}'`);
+          } else if (actionCount && (options.newChronicle === true)) {
+            throw new Error(`Existing events found when trying to create a new chronicle '${
+              connection.getChronicleURI()}'`);
           }
           if ((options.requireLatestMediaContents !== false)
               && (connectResults.mediaRetrievalStatus
                   || { latestFailures: [] }).latestFailures.length) {
             // FIXME(iridian): This error temporarily demoted to log error
-            connection.outputErrorEvent(new Error(`Failed to connect to partition: encountered ${
+            connection.outputErrorEvent(new Error(`Failed to connect to chronicle: encountered ${
               connectResults.mediaRetrievalStatus.latestFailures.length
                 } latest media content retrieval failures (and ${
                 ""}options.requireLatestMediaContents does not equal false).`));
@@ -186,8 +182,8 @@ export default class Connection extends Follower {
     options.receiveCommands = this.getReceiveCommands(options.receiveCommands);
     const postponedNarrateOptions = options.narrateOptions;
     options.narrateOptions = false;
-    this.setUpstreamConnection(this._sourcerer._upstream.acquireConnection(
-        this.getPartitionURI(), options));
+    this.setUpstreamConnection(this._sourcerer._upstream
+        .acquireConnection(this.getChronicleURI(), options));
     const connection = this;
     return thenChainEagerly(null, this.addChainClockers(1, "connection.doConnect.ops", [
       function _waitActiveUpstream () {
@@ -201,9 +197,8 @@ export default class Connection extends Follower {
   }
 
   /**
-   * disconnect - Disconnects from partition, stops receiving further requests
+   * disconnect - Disconnects from chronicle, stops receiving further requests
    *
-   * @param  {type} partitions = null description
    * @returns {type}                   description
    */
   disconnect () {
@@ -255,7 +250,7 @@ export default class Connection extends Follower {
 
   /**
    * Request replay of the event log using provided narration options
-   * from the partition upstream.
+   * from the chronicle upstream.
    *
    * @param {NarrateOptions} [options={}]
    * @returns {Promise<Object>}
@@ -375,7 +370,7 @@ export default class Connection extends Follower {
   }
 
   /**
-   * Prepares the bvob content to be available for this partition,
+   * Prepares the bvob content to be available for this chronicle,
    * returning its contentHash and a promise to the persist process.
    *
    * This availability is impermanent. If the contentHash is not

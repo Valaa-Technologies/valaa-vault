@@ -110,7 +110,7 @@ class BufferAspect {
 class CommandAspect {
   // Command identifier
   // uuidv4 || hashV240(`${aspect.command.idCertId} ${aspect.command.idSalt}`)
-  // HashV240 is required for all signed and/or multi-partition events.
+  // HashV240 is required for all signed and/or multi-chronicle events.
   // uuid or HashV240 is required for all events which create resources.
   id: number | string | HashV240;
 
@@ -125,13 +125,13 @@ class CommandAspect {
   idSalt: ?number;
 
   // hashV240(aspect.buffer.event)
-  // Required for signed and multi-partition events
+  // Required for signed and multi-chronicle events
   eventHash: ?HashV240;
 
-  // map of all other partitions and their particular event hashes
-  // of a multi-partition command with the same aspects.command.id.
-  // Required for multi-partition events.
-  partitions: ?{ [partitionURI: string]: HashV240 };
+  // map of all other chronicles and their particular event hashes
+  // of a multi-chronicle command with the same aspects.command.id.
+  // Required for multi-chronicle events.
+  chronicles: ?{ [chronicleURI: string]: HashV240 };
 
   // Contains the other aspects. Only present if this aspect is the root aspect.
   aspects: ?EventAspects;

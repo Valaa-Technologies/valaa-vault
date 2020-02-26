@@ -10,7 +10,7 @@ import Resource from "~/raem/schema/Resource";
 import Position from "~/raem/schema/Position";
 import { toOne } from "~/raem/tools/graphql/coupling";
 
-const OBJECT_DESCRIPTION = "test partition glue";
+const OBJECT_DESCRIPTION = "test chronicle glue";
 
 export default new GraphQLObjectType({
   name: "TestGlue",
@@ -23,12 +23,12 @@ export default new GraphQLObjectType({
     ...discoverableInterface(OBJECT_DESCRIPTION).fields(),
 
     ...aliasField("source", "owner", Discoverable,
-        "The source partition of the glue",
+        "The source chronicle of the glue",
         { coupling: toOne({ coupledField: "targetGlues" }), affiliatedType: "TestGlue" },
     ),
 
     ...primaryField("target", Discoverable,
-        "The target partition of the glue",
+        "The target chronicle of the glue",
         { coupling: toOne({ coupledField: "sourceGlues" }), affiliatedType: "TestGlue" },
     ),
 

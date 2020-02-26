@@ -11,15 +11,15 @@ export default function extendValosheathWithInspire (scope: Object,
   extendValOSWithInspire(scope, hostDescriptors);
 
   let RemoteAuthorityURI = null;
-  let getPartitionIndexEntityCall = function getPartitionIndexEntity () {
-    throw new Error(`Cannot locate partition index entity; Inspire view configuration${
+  let getChronicleIndexEntityCall = function getChronicleIndexEntity () {
+    throw new Error(`Cannot locate chronicle index entity; Inspire view configuration${
         ""} doesn't specify defaultAuthorityURI`);
   };
 
   if (defaultAuthorityConfig) {
     RemoteAuthorityURI = defaultAuthorityConfig.authorityURI
         || defaultAuthorityConfig.partitionAuthorityURI;
-    getPartitionIndexEntityCall = function getPartitionIndexEntity () {
+    getChronicleIndexEntityCall = function getChronicleIndexEntity () {
       return engine.tryVrapper(defaultAuthorityConfig.repositoryIndexId);
     };
   }
@@ -28,7 +28,7 @@ export default function extendValosheathWithInspire (scope: Object,
     RemoteAuthorityURI,
     LocalAuthorityURI: "valaa-local:",
     getPartitionIndexEntity: denoteValOSBuiltinWithSignature(
-      `Returns the partition corresponding to the partition index.`
-    )(getPartitionIndexEntityCall),
+      `Returns the chronicle corresponding to the chronicle index.`
+    )(getChronicleIndexEntityCall),
   };
 }

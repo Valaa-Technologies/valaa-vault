@@ -62,7 +62,7 @@ const createMedia = {
 
 describe("Vrapper", () => {
   let harness: { createds: Object, engine: Object, sourcerer: Object, testEntities: Object };
-  const testScriptPartitions = () => harness.createds.TestScriptyThing;
+  const testScriptyThings = () => harness.createds.TestScriptyThing;
   const medias = () => harness.createds.Media;
   const entities = () => harness.createds.Entity;
 
@@ -106,7 +106,7 @@ describe("Vrapper", () => {
         transactionA, createAInstance,
       ]);
       expectVrapper("test");
-      const vChild = testScriptPartitions().test.get(["§->", "children", 0]);
+      const vChild = testScriptyThings().test.get(["§->", "children", 0]);
       expect(vChild instanceof Vrapper)
           .toEqual(true);
       expect(vChild)
@@ -117,8 +117,8 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      touchField(testScriptPartitions().test, "name");
-      expect(testScriptPartitions().test.get("name"))
+      touchField(testScriptyThings().test, "name");
+      expect(testScriptyThings().test.get("name"))
           .toEqual("touched_testName");
       expect(harness.engine.getVrapperByRawId("test").get("name"))
           .toEqual("touched_testName");
@@ -128,17 +128,17 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      expectNoVrapper(createGhostRawId("child", "test+1"));
+      expectNoVrapper(createGhostRawId("@$~raw:child@@", "@$~raw:test%2B1@@"));
     });
 
     it("returns Vrappers for ghost when returned from kuery", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      const vChildGhost = testScriptPartitions()["test+1"].get(["§->", "children", 0]);
+      const vChildGhost = testScriptyThings()["test+1"].get(["§->", "children", 0]);
       expect(vChildGhost instanceof Vrapper)
           .toEqual(true);
-      const expectedChildGhostRawId = createGhostRawId("child", "test+1");
+      const expectedChildGhostRawId = createGhostRawId("@$~raw:child@@", "@$~raw:test%2B1@@");
       expect(vChildGhost.getRawId())
           .toEqual(expectedChildGhostRawId);
       expectVrapper(expectedChildGhostRawId);
@@ -148,18 +148,18 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      const result = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test+1"]);
+      const result = testScriptyThings().child.getGhostIn(testScriptyThings()["test+1"]);
       expect(result)
-          .toEqual(getGhostVrapperById("child", "test+1"));
+          .toEqual(getGhostVrapperById("@$~raw:child@@", "@$~raw:test%2B1@@"));
     });
 
     it("returns a correct Vrapper with kuery", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      const result = testScriptPartitions()["test+1"].get(["§->", "children", 0]);
+      const result = testScriptyThings()["test+1"].get(["§->", "children", 0]);
       expect(result)
-          .toEqual(getGhostVrapperById("child", "test+1"));
+          .toEqual(getGhostVrapperById("@$~raw:child@@", "@$~raw:test%2B1@@"));
     });
   });
 
@@ -271,7 +271,7 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      checkVrapperSets(testScriptPartitions().test, {
+      checkVrapperSets(testScriptyThings().test, {
         expectFields: { name: "testName" },
         targetId: ["test"],
         sets: { name: "harambe" },
@@ -283,7 +283,7 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      checkVrapperSets(testScriptPartitions()["test+1"], {
+      checkVrapperSets(testScriptyThings()["test+1"], {
         expectFields: { name: "testName" },
         targetId: ["test"],
         sets: { name: "harambe" },
@@ -298,8 +298,8 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      touchField(testScriptPartitions["test+1"], "name");
-      checkVrapperSets(testScriptPartitions["test+1"], {
+      touchField(testScriptyThings["test+1"], "name");
+      checkVrapperSets(testScriptyThings["test+1"], {
         expectFields: { name: "touched_testName" },
         targetId: "test",
         sets: { name: "harambe" },
@@ -312,7 +312,7 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      const vChildGhost = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test+1"]);
+      const vChildGhost = testScriptyThings().child.getGhostIn(testScriptyThings()["test+1"]);
       expect(vChildGhost.isMaterialized())
           .toEqual(false);
       checkVrapperSets(vChildGhost, {
@@ -328,7 +328,7 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      const vChildGhost = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test+1"]);
+      const vChildGhost = testScriptyThings().child.getGhostIn(testScriptyThings()["test+1"]);
       vChildGhost.materialize();
       expect(vChildGhost.isMaterialized())
           .toEqual(true);
@@ -344,7 +344,7 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      const vChildGhost = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test+1"]);
+      const vChildGhost = testScriptyThings().child.getGhostIn(testScriptyThings()["test+1"]);
       expect(vChildGhost.isMaterialized())
           .toEqual(false);
       checkVrapperSets(vChildGhost, {
@@ -362,7 +362,7 @@ describe("Vrapper", () => {
         transactionA, createAInstance,
       ]);
       let modCalled = false;
-      testScriptPartitions().child.obtainSubscription("children")
+      testScriptyThings().child.obtainSubscription("children")
           .addListenerCallback(harness, "test", () => { modCalled = true; }, false);
       harness.chronicleEvent(destroyed({ type: "DESTROYED", id: ["grandChild"] }));
       // children modified subscriber should have been called when the sub-event to remove
@@ -375,10 +375,10 @@ describe("Vrapper", () => {
         transactionA, createAInstance,
       ]);
       let modCalled = false;
-      testScriptPartitions().grandChild.obtainSubscription("children")
+      testScriptyThings().grandChild.obtainSubscription("children")
           .addListenerCallback(harness, "test", () => { modCalled = true; }, false);
-      testScriptPartitions().greatGrandChild.setField("parent",
-          testScriptPartitions().grandSibling);
+      testScriptyThings().greatGrandChild.setField("parent",
+          testScriptyThings().grandSibling);
 
       // children modified subscriber should have been called when the sub-event to remove
       // grandChild from the children list was reduced
@@ -402,30 +402,30 @@ describe("Vrapper", () => {
   describe("Vrapper DESTROYED notifications", () => {
     it("calls destroy subscribers when the object is destroyed", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [transactionA]);
-      checkVrapperDestroy(testScriptPartitions().test);
+      checkVrapperDestroy(testScriptyThings().test);
     });
 
     it("calls destroy subscribers when the instance is destroyed", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      checkVrapperDestroy(testScriptPartitions()["test+1"]);
+      checkVrapperDestroy(testScriptyThings()["test+1"]);
     });
 
     it("calls destroy subscribers when the ghost is destroyed", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      checkVrapperDestroy(testScriptPartitions().child.getGhostIn(
-          testScriptPartitions()["test+1"]));
+      checkVrapperDestroy(testScriptyThings().child.getGhostIn(
+          testScriptyThings()["test+1"]));
     });
 
     it("calls destroy subscribers on an instance when its prototype is destroyed", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      expect(() => checkVrapperDestroy(testScriptPartitions()["test+1"],
-              { destroyVrapper: testScriptPartitions().test }))
+      expect(() => checkVrapperDestroy(testScriptyThings()["test+1"],
+              { destroyVrapper: testScriptyThings().test }))
           .toThrow(/destruction blocked/);
     });
 
@@ -434,8 +434,8 @@ describe("Vrapper", () => {
         transactionA, createAInstance,
       ]);
       checkVrapperDestroy(
-          testScriptPartitions().child.getGhostIn(testScriptPartitions()["test+1"]),
-          { destroyVrapper: testScriptPartitions().child });
+          testScriptyThings().child.getGhostIn(testScriptyThings()["test+1"]),
+          { destroyVrapper: testScriptyThings().child });
     });
   });
 
@@ -445,11 +445,11 @@ describe("Vrapper", () => {
         transactionA,
       ]);
       const counts = [];
-      testScriptPartitions().test.addDESTROYEDHandler(() => { counts[0] = (counts[0] || 0) + 1; });
-      testScriptPartitions().child.addDESTROYEDHandler(() => { counts[1] = (counts[1] || 0) + 1; });
-      testScriptPartitions().grandChild.addDESTROYEDHandler(
+      testScriptyThings().test.addDESTROYEDHandler(() => { counts[0] = (counts[0] || 0) + 1; });
+      testScriptyThings().child.addDESTROYEDHandler(() => { counts[1] = (counts[1] || 0) + 1; });
+      testScriptyThings().grandChild.addDESTROYEDHandler(
           () => { counts[2] = (counts[2] || 0) + 1; });
-      testScriptPartitions().test.destroy();
+      testScriptyThings().test.destroy();
       expect(counts)
           .toEqual([1, 1, 1]);
     });
@@ -459,16 +459,16 @@ describe("Vrapper", () => {
         transactionA, createAInstance,
       ]);
       const counts = [];
-      const childGhost = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test+1"]);
+      const childGhost = testScriptyThings().child.getGhostIn(testScriptyThings()["test+1"]);
       childGhost.addDESTROYEDHandler(() => { counts[0] = (counts[0] || 0) + 1; });
-      const grandChildGhost = testScriptPartitions().grandChild.getGhostIn(
-          testScriptPartitions()["test+1"]);
+      const grandChildGhost = testScriptyThings().grandChild.getGhostIn(
+          testScriptyThings()["test+1"]);
       grandChildGhost.addDESTROYEDHandler(() => { counts[1] = (counts[1] || 0) + 1; });
       expect(harness.engine.tryVrapper("child"))
           .toBeTruthy();
       expect(harness.engine.tryVrapper("grandChild"))
           .toBeTruthy();
-      testScriptPartitions().child.destroy();
+      testScriptyThings().child.destroy();
       expect(counts)
           .toEqual([1, 1]);
       expect(harness.engine.tryVrapper(childGhost.getRawId()))
@@ -483,11 +483,11 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      const childGhost = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test+1"]);
-      expect(testScriptPartitions().child.get("children").length)
+      const childGhost = testScriptyThings().child.getGhostIn(testScriptyThings()["test+1"]);
+      expect(testScriptyThings().child.get("children").length)
           .toEqual(2);
       harness.engine.create("TestScriptyThing", { parent: childGhost, name: "guest" });
-      expect(testScriptPartitions().child.get("children").length)
+      expect(testScriptyThings().child.get("children").length)
           .toEqual(2);
     });
 
@@ -495,9 +495,9 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      const childGhost = testScriptPartitions().child.getGhostIn(testScriptPartitions()["test+1"]);
-      const grandChildGhost = testScriptPartitions().grandChild.getGhostIn(
-          testScriptPartitions()["test+1"]);
+      const childGhost = testScriptyThings().child.getGhostIn(testScriptyThings()["test+1"]);
+      const grandChildGhost = testScriptyThings().grandChild.getGhostIn(
+          testScriptyThings()["test+1"]);
       expect(childGhost.get(["§->", "children", 0]))
           .toEqual(grandChildGhost);
       const vGuest = harness.engine.create("TestScriptyThing",
@@ -521,7 +521,10 @@ describe("Vrapper", () => {
       ]);
       expect(harness.engine.getVrapperByRawId("test")
               .do(VALEK.recurseMaterializedFieldResources(["children"]).map("rawId")))
-          .toEqual(["child", "grandChild", "greatGrandChild", "grandSibling"]);
+          .toEqual([
+            "@$~raw:child@@", "@$~raw:grandChild@@", "@$~raw:greatGrandChild@@",
+            "@$~raw:grandSibling@@",
+          ]);
     });
     it("doesn't recurse immaterialized fields: ['children']", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
@@ -537,7 +540,7 @@ describe("Vrapper", () => {
       ]);
       expect(harness.engine.getVrapperByRawId("test")
               .do(VALEK.recurseMaterializedFieldResources(["unnamedOwnlings"]).map("rawId")))
-          .toEqual(["ownling"]);
+          .toEqual(["@$~raw:ownling@@"]);
     });
     it("recurses materialized fields: ['children', 'unnamedOwnlings']", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
@@ -546,8 +549,9 @@ describe("Vrapper", () => {
       expect(harness.engine.getVrapperByRawId("test")
               .do(VALEK.recurseMaterializedFieldResources(["children", "unnamedOwnlings"])
                   .map("rawId")))
-          .toEqual(["child", "grandChild", "greatGrandChild", "greatGrandChildOwnling",
-            "grandSibling", "ownling",
+          .toEqual([
+            "@$~raw:child@@", "@$~raw:grandChild@@", "@$~raw:greatGrandChild@@",
+            "@$~raw:greatGrandChildOwnling@@", "@$~raw:grandSibling@@", "@$~raw:ownling@@",
           ]);
     });
     it("0000101: recurseMaterializedFieldResources kueries must not leak non-vrapped data", () => {
@@ -612,9 +616,9 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
       ]);
-      expect(testScriptPartitions().test.get(VALEK.fromScope("testField").toValueLiteral()))
+      expect(testScriptyThings().test.get(VALEK.fromScope("testField").toValueLiteral()))
           .toEqual("testOwned.testField");
-      expect(testScriptPartitions().test.get(VALEK.fromScope("secondField").toValueLiteral()))
+      expect(testScriptyThings().test.get(VALEK.fromScope("secondField").toValueLiteral()))
           .toEqual("testOwned.secondField");
     });
 
@@ -622,7 +626,7 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
       ]);
-      expect(testScriptPartitions().grandChild.get(VALEK.fromScope("secondField").toValueLiteral()))
+      expect(testScriptyThings().grandChild.get(VALEK.fromScope("secondField").toValueLiteral()))
           .toEqual("testOwned.secondField");
     });
 
@@ -630,7 +634,7 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
       ]);
-      expect(testScriptPartitions().grandChild.get(VALEK.fromScope("testField").toValueLiteral()))
+      expect(testScriptyThings().grandChild.get(VALEK.fromScope("testField").toValueLiteral()))
           .toEqual("grandChildOwned.testField");
     });
   });
@@ -652,10 +656,10 @@ describe("Vrapper", () => {
       expect(console.warn.mock.calls.length).toBe(2);
       expect(console.warn.mock.calls[0][0])
           .toBe(`Overriding existing Property 'testField' in Scope Vrapper(<TestScriptyThing ${""
-              }"testName"'urn:valos:test?+partition=${""
+              }"testName"'urn:valos:@$~raw:test@@?+partition=${""
               }valaa-test%3A%3Fid%3D%40%24~raw%3Atest_chronicle%40%40'>)`);
       console.warn = oldWarn;
-      expect(testScriptPartitions().test.get(VALEK.fromScope("testField").toValueLiteral()))
+      expect(testScriptyThings().test.get(VALEK.fromScope("testField").toValueLiteral()))
           .toEqual("testOwned.conflictingTestField");
     });
 
@@ -663,14 +667,14 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
       ]);
-      testScriptPartitions().test.get(VALEK.property("testField"))
+      testScriptyThings().test.get(VALEK.property("testField"))
           .setField("name", "renamedField");
-      expect(testScriptPartitions().test.get(VALEK.fromScope("renamedField").toValueLiteral()))
+      expect(testScriptyThings().test.get(VALEK.fromScope("renamedField").toValueLiteral()))
           .toEqual("testOwned.testField");
-      expect(testScriptPartitions().grandChild.get(
+      expect(testScriptyThings().grandChild.get(
               VALEK.fromScope("renamedField").toValueLiteral()))
           .toEqual("testOwned.testField");
-      expect(testScriptPartitions().grandChild.get(VALEK.fromScope("testField").toValueLiteral()))
+      expect(testScriptyThings().grandChild.get(VALEK.fromScope("testField").toValueLiteral()))
           .toEqual("grandChildOwned.testField");
     });
 
@@ -678,11 +682,11 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
       ]);
-      expect(testScriptPartitions().test.get(VALEK.fromScope("testField").toValueLiteral()))
+      expect(testScriptyThings().test.get(VALEK.fromScope("testField").toValueLiteral()))
           .toEqual("testOwned.testField");
-      testScriptPartitions().test.get(VALEK.property("testField"))
+      testScriptyThings().test.get(VALEK.property("testField"))
           .setField("name", "renamedField");
-      expect(() => testScriptPartitions().test
+      expect(() => testScriptyThings().test
               .get(VALEK.fromScope("testField").toValueLiteral(), { verbosity: 0 }))
           .toThrow(/Valk path step head unpacks to 'undefined' at notNull assertion/);
     });
@@ -691,7 +695,7 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
       ]);
-      const vTest = testScriptPartitions().test;
+      const vTest = testScriptyThings().test;
       expect(vTest.get(VALEK.fromScope("testField").toValueLiteral()))
           .toEqual("testOwned.testField");
       await vTest.get(VALEK.property("testField"))
@@ -704,27 +708,27 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
       ]);
-      testScriptPartitions().greatGrandChild.emplaceAddToField("properties", {
+      testScriptyThings().greatGrandChild.emplaceAddToField("properties", {
         name: "ggField", value: { typeName: "Literal", value: "ggChildOwned.ggField" }
       });
-      expect(testScriptPartitions().greatGrandChild.get(
+      expect(testScriptyThings().greatGrandChild.get(
               VALEK.fromScope("ggField").toValueLiteral()))
           .toEqual("ggChildOwned.ggField");
-      expect(testScriptPartitions().greatGrandChild.get(
+      expect(testScriptyThings().greatGrandChild.get(
               VALEK.fromScope("testField").toValueLiteral()))
           .toEqual("grandChildOwned.testField");
-      expect(() => testScriptPartitions().greatGrandChild.get(
+      expect(() => testScriptyThings().greatGrandChild.get(
               VALEK.fromScope("siblingField").toValueLiteral()))
           .toThrow(/Valk path step head unpacks to 'undefined' at notNull assertion/);
-      testScriptPartitions().greatGrandChild.setField(
-          "parent", testScriptPartitions().grandSibling);
-      expect(testScriptPartitions().greatGrandChild.get(
+      testScriptyThings().greatGrandChild.setField(
+          "parent", testScriptyThings().grandSibling);
+      expect(testScriptyThings().greatGrandChild.get(
               VALEK.fromScope("ggField").toValueLiteral()))
           .toEqual("ggChildOwned.ggField");
-      expect(testScriptPartitions().greatGrandChild.get(
+      expect(testScriptyThings().greatGrandChild.get(
               VALEK.fromScope("testField").toValueLiteral()))
           .toEqual("testOwned.testField");
-      expect(testScriptPartitions().greatGrandChild.get(
+      expect(testScriptyThings().greatGrandChild.get(
               VALEK.fromScope("siblingField").toValueLiteral()))
           .toEqual("grandSiblingOwned.siblingField");
     });
@@ -738,7 +742,7 @@ describe("Vrapper", () => {
           value: { typeName: "Literal", value: "testOwned.namelessField" },
         }, }),
       ]);
-      expect(() => testScriptPartitions().test.get(VALEK.fromScope("").toValueLiteral()))
+      expect(() => testScriptyThings().test.get(VALEK.fromScope("").toValueLiteral()))
           .toThrow(/Valk path step head unpacks to 'undefined' at notNull assertion/);
     });
   });

@@ -156,15 +156,20 @@ export default class Gateway extends FabricEventTarget {
 
   async initialize (revelation: Revelation) {
     try {
-      // Process the initially served landing page and extract the initial ValOS configuration
-      // ('revelation') from it. The revelation might be device/locality specific.
-      // The revelation might contain initial event log snapshots for select partitions. These
-      // event logs might be provided by the landing page provider and might contain relevant
-      // partition for showing the front page; alternatively the revelation might be served by the
-      // local service worker which intercepted the landing page network request and might contain
-      // full snapshots of all partitions that were active during previous session, allowing full
-      // offline functionality. Alternatively the service worker can provide the event logs through
-      // indexeddb and keep the landing page revelation minimal; whatever is most efficient.
+/*
+ * Process the initially served landing page and extract the initial
+ * ValOS configuration ('revelation') from it. The revelation might be
+ * device/locality specific. The revelation might contain initial event
+ * log snapshots for select chronicles. These event logs might be
+ * provided by the landing page provider and might contain relevant
+ * chronicle for showing the front page; alternatively the revelation
+ * might be served by the local service worker which intercepted the
+ * landing page network request and might contain full snapshots of all
+ * chronicles that were active during previous session, allowing full
+ * offline functionality. Alternatively the service worker can provide
+ * the event logs through indexeddb and keep the landing page
+ * revelation minimal; whatever is most efficient.
+ */
       this.revelation = await lazy(this._interpretRevelation(revelation));
       this.gatewayRevelation = await lazy(this.revelation.gateway);
       if (this.gatewayRevelation.name) this.setName(await lazy(this.gatewayRevelation.name));
@@ -199,7 +204,7 @@ export default class Gateway extends FabricEventTarget {
 
       // Locate entry point event log (prologue), make it optimally available through scribe,
       // narrate it with false prophet and get the false prophet connection for it.
-      ({ connections: this.prologueConnections, rootPartition: this.rootPartition }
+      ({ connections: this.prologueConnections, rootConnection: this._rootConnection }
           = await this._narratePrologues(this.prologueRevelation));
 
       this.clockEvent(1, `vidgets.register`, `Registering builtin Inspire vidgets`);
@@ -229,12 +234,12 @@ export default class Gateway extends FabricEventTarget {
         this._notifySpindle(spindle, "onGatewayTerminating")));
   }
 
-  getRootPartitionURI () {
-    return String(this.rootPartition.getPartitionURI());
+  getRootChronicleURI () {
+    return this._rootConnection.getChronicleURI();
   }
 
-  getRootLensURI () {
-    return this.rootLensURI || this.getRootPartitionURI();
+  getRootFocusURI () {
+    return this._rootFocusURI || this.getRootChronicleURI();
   }
 
   getIdentityManager () {
@@ -550,18 +555,18 @@ export default class Gateway extends FabricEventTarget {
         schema: EngineContentAPI.schema,
         logger: this.getLogger(),
         commandNotificationMinDelay: 500,
-        onCommandCountUpdate: (totalCount: number, partitionCommandCounts: Object) => {
+        onCommandCountUpdate: (totalCount: number, chronicleCommandCounts: Object) => {
           this._totalCommandCount = totalCount;
-          this._partitionCommandCounts = partitionCommandCounts;
+          this._chronicleCommandCounts = chronicleCommandCounts;
           this._commandCountListeners.forEach((listener, component) => {
             try {
-              listener(totalCount, partitionCommandCounts);
+              listener(totalCount, chronicleCommandCounts);
             } catch (error) {
               this.outputErrorEvent(this.wrapErrorEvent(error, 1,
                       new Error("onCommandCountUpdate.listener()"),
                       "\n\tlistener key:", ...dumpObject(component),
                       "\n\ttotalCount:", totalCount,
-                      "\n\tpartitionCommandcounts:", ...dumpObject(partitionCommandCounts)),
+                      "\n\tchronicleCommandcounts:", ...dumpObject(chronicleCommandCounts)),
                   "Exception caught during Gateway.onCommandCountUpdate.listener call",
                   this.getLogger());
             }
@@ -588,11 +593,11 @@ export default class Gateway extends FabricEventTarget {
   }
 
   getTotalCommandCount () { return this._totalCommandCount || 0; }
-  getPartitionStatuses (options: { listEmpty: boolean }) {
-    if (!this._partitionCommandCounts) return {};
-    if (options && options.listEmpty) return this._partitionCommandCounts;
+  getChronicleStatuses (options: { listEmpty: boolean }) {
+    if (!this._chronicleCommandCounts) return {};
+    if (options && options.listEmpty) return this._chronicleCommandCounts;
     const ret = {};
-    for (const [key, count] of Object.entries(this._partitionCommandCounts)) {
+    for (const [key, count] of Object.entries(this._chronicleCommandCounts)) {
       if (count) {
         try {
           const connection = this.falseProphet.acquireConnection(key, { newConnection: false });
@@ -606,11 +611,11 @@ export default class Gateway extends FabricEventTarget {
   }
 
   setCommandCountListener (component: Object,
-      callback: (totalCount: number, partitionCommandCounts: Object) => void) {
+      callback: (totalCount: number, chronicleCommandCounts: Object) => void) {
     if (!callback) this._commandCountListeners.delete(component);
     else {
       this._commandCountListeners.set(component, callback);
-      callback(this._totalCommandCount, this._partitionCommandCounts);
+      callback(this._totalCommandCount, this._chronicleCommandCounts);
     }
   }
 
@@ -760,24 +765,24 @@ export default class Gateway extends FabricEventTarget {
       const rootPartitionURI = this.prologueRevelation.rootPartitionURI
           && naiveURI.createPartitionURI(await lazy(this.prologueRevelation.rootPartitionURI));
       this.rootLensURI = await lazy(this.prologueRevelation.rootLensURI);
-      prologues = await this._determineRevelationPrologues(prologueRevelation, rootPartitionURI);
+      prologues = await this._determineRevelationPrologues(prologueRevelation, rootChronicleURI);
       this.warnEvent(1, () => [
         `Extracted ${prologues.length} prologues from the revelation`,
-        "\n\tprologue partitions:",
-            `'${prologues.map(({ partitionURI }) => String(partitionURI)).join("', '")}'`,
-        "\n\troot partition:", rootPartitionURI,
+        "\n\tprologue chronicles:",
+            `<${prologues.map(({ partitionURI }) => partitionURI).join(">, <")}>`,
+        "\n\troot chronicle:", rootChronicleURI,
       ]);
       this.clockEvent(1, `prologues.connect`, `Narrating and connecting ${prologues.length
-          } prologues and root partition`, `<${rootPartitionURI}>`);
+          } prologues and root chronicle`, `<${rootChronicleURI}>`);
       const connections = await Promise.all(prologues.map(this._connectChronicleNarratePrologue));
       this.warnEvent(1, () => [
-        `Acquired active connections for all revelation prologue partitions:`,
+        `Acquired active connections for all revelation prologue chronicles:`,
         ...[].concat(...connections.map(connection =>
             [`\n\t${connection.getName()}:`, ...dumpObject(connection.getStatus())]))
       ]);
-      const rootPartition = connections.find(connection =>
-          (String(connection.getPartitionURI()) === String(rootPartitionURI)));
-      return { connections, rootPartition };
+      const rootConnection = connections.find(connection =>
+          (connection.getChronicleURI() === rootChronicleURI));
+      return { connections, rootConnection };
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, new Error(`narratePrologue`),
           "\n\tprologue revelation:", prologueRevelation,
@@ -785,20 +790,19 @@ export default class Gateway extends FabricEventTarget {
     }
   }
 
-  async _determineRevelationPrologues (prologueRevelation: Object,
-      rootPartitionURI: any) {
+  async _determineRevelationPrologues (prologueRevelation: Object, rootChronicleURI: any) {
     const ret = [];
-    let rootPartitionURISeen = false;
+    let rootChronicleURISeen = false;
     try {
-      for (const [uri, info] of (Object.entries(
+      for (const [partitionURI, info] of (Object.entries(
           (await lazy(prologueRevelation.partitionInfos)) || {}))) {
-        const partitionURI = naiveURI.createPartitionURI(uri);
-        ret.push({ partitionURI, info: await lazy(info) });
-        if (String(partitionURI) === String(rootPartitionURI)) rootPartitionURISeen = true;
+        const chronicleURI = naiveURI.createChronicleURI(partitionURI);
+        ret.push({ partitionURI: chronicleURI, info: await lazy(info) });
+        if (chronicleURI === rootChronicleURI) rootChronicleURISeen = true;
       }
-      if (rootPartitionURI && !rootPartitionURISeen) {
+      if (rootChronicleURI && !rootChronicleURISeen) {
         ret.push({
-          partitionURI: rootPartitionURI,
+          partitionURI: rootChronicleURI,
           info: {
             commandCount: 0, truthCount: 0,
             logs: { commandQueue: [], truthLog: [] },
@@ -807,11 +811,11 @@ export default class Gateway extends FabricEventTarget {
       }
       if (!ret.length) {
         throw new Error(`Revelation prologue is missing an entry point${
-            ""} (last of the prologue.partitionInfos or prologue.rootPartitionURI)`);
+            ""} (last of the prologue.partitionInfos or prologue.rootChronicleURI)`);
       }
       return ret;
     } catch (error) {
-      throw this.wrapErrorEvent(error, 1, new Error(`loadRevelationEntryPartitionAndPrologues`),
+      throw this.wrapErrorEvent(error, 1, new Error(`determineRevelationPrologues`),
           "\n\tprologue revelation:", ...dumpObject(prologueRevelation),
       );
     }
@@ -825,7 +829,7 @@ export default class Gateway extends FabricEventTarget {
     // so that we can narrate any content in the prologue before any remote activity.
     this.clockEvent(1, "prologue.acquire", `Acquiring connection <${partitionURI}>`);
     const connection = this.discourse
-        .acquireConnection(partitionURI, {
+        .acquireConnection(naiveURI.createChronicleURI(partitionURI), {
           subscribeEvents: false, narrateOptions: { remote: false },
         });
     connection.clockEvent(1, "prologue.activate", "Activating connection");

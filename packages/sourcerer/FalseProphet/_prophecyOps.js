@@ -3,7 +3,7 @@
 import { getActionFromPassage } from "~/raem";
 import { Command, EventBase } from "~/raem/events";
 import type { Story } from "~/raem/redux/Bard";
-import { MissingConnectionsError } from "~/raem/tools/denormalized/partitions";
+import { AbsentChroniclesError } from "~/raem/tools/denormalized/partitions";
 import { naiveURI } from "~/raem/ValaaURI";
 
 import { ChronicleEventResult, Connection, ProphecyChronicleRequest, ProphecyEventResult }
@@ -22,7 +22,7 @@ export type Prophecy = Story & {
   isProphecy: true;
 }
 
-// Create prophecies out of provided events and send their partition
+// Create prophecies out of provided events and send their chronicle
 // commands upstream. Aborts all remaining events on first exception
 // and rolls back previous ones.
 export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[],
@@ -65,7 +65,7 @@ export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[
   }
   return ret;
 
-  // TODO(iridian): Implement prophecies' partition sub-commands grouping.
+  // TODO(iridian): Implement prophecies' chronicle sub-command grouping.
   // Also implement it for purge revision re-chronicles.
   //
   // For purge revision re-chronicles this is a potentially crucial
@@ -96,7 +96,7 @@ export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[
   //    log.index changes, and
   // 3. a transport-level session can be maintained between the gateway
   //    and the authority, allowing
-  // 4. client gateway to inform the partition authority that the
+  // 4. client gateway to inform the authority that the
   //    commands are valid with just a log.index adjustment, this
   // 5. minimizing latency, bandwith usage and recurring conflicts,
   //    and maximizing throughput.
@@ -116,20 +116,20 @@ export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[
   // which can still be retracted.
 }
 
-export function _confirmProphecyPartitionCommand (connection: FalseProphetConnection,
+export function _confirmVenueCommand (connection: FalseProphetConnection,
     prophecy: Prophecy, command: Command) {
   const operation = (prophecy.meta || {}).operation;
   if (operation) {
-    const partition = operation._partitions[String(connection.getPartitionURI())];
-    if (!partition) {
+    const venue = operation._venues[connection.getChronicleURI()];
+    if (!venue) {
       connection.warnEvent(0, () => [
-        "confirmProphecyCommand operation partition missing",
+        "confirmVenueCommand operation venue missing",
         "\n\tcommand:", ...dumpObject(command),
         "\n\toperation:", ...dumpObject(operation),
       ]);
       return false;
     }
-    if (!partition.confirmCommand) return false;
+    if (!venue.confirmCommand) return false;
     /*
     connection.warnEvent(1, () => [
       "\n\t.confirmProphecyCommand:",
@@ -137,21 +137,21 @@ export function _confirmProphecyPartitionCommand (connection: FalseProphetConnec
       "\n\tcommand:", ...dumpObject(command),
     ]);
     */
-    partition.confirmCommand(command);
-    partition.confirmCommand = null;
+    venue.confirmCommand(command);
+    venue.confirmCommand = null;
   }
   prophecy.confirmedCommandCount = (prophecy.confirmedCommandCount || 0) + 1;
-  if (prophecy.meta && prophecy.meta.partitions
-      && (prophecy.confirmedCommandCount < Object.keys(prophecy.meta.partitions).length)) {
+  if (prophecy.meta && prophecy.meta.chronicles
+      && (prophecy.confirmedCommandCount < Object.keys(prophecy.meta.chronicles).length)) {
     return false;
   }
   return true;
 }
 
-export function _rewriteProphecyPartitionCommand (connection: FalseProphetConnection,
+export function _rewriteVenueCommand (connection: FalseProphetConnection,
     prophecy: Prophecy, reformedCommand: Command) {
-  const partition = prophecy.meta.operation._partitions[String(connection.getPartitionURI())];
-  const originalCommand = partition.commandEvent;
+  const venue = prophecy.meta.operation._venues[connection.getChronicleURI()];
+  const originalCommand = venue.commandEvent;
   connection.warnEvent(1, () => [
     "\n\treforming prophecy", tryAspect(prophecy, "command").id,
     `command #${tryAspect(originalCommand, "log").index} with command #${
@@ -160,7 +160,7 @@ export function _rewriteProphecyPartitionCommand (connection: FalseProphetConnec
     "\n\treformed command:", ...dumpObject(reformedCommand),
     "\n\treformed prophecy:", ...dumpObject(prophecy),
   ]);
-  return (partition.commandEvent = reformedCommand);
+  return (venue.commandEvent = reformedCommand);
 }
 
 export function _reviewRecomposedSchism (connection: FalseProphetConnection, schism: Prophecy,
@@ -202,16 +202,16 @@ function _checkForSemanticSchism (/* purgedProphecy: Prophecy, revisedProphecy: 
 export function _purgeHeresy (falseProphet: FalseProphet, heresy: Prophecy) {
   const meta = heresy.meta || {};
   const operation = meta.operation;
-  if (!operation || !operation._partitions) return;
+  if (!operation || !operation._venues) return;
   const progress = operation.getProgress({ type: "purge", isSchismatic: true });
   const error = progress.error || new Error(progress.message);
   if (meta.transactor && meta.transactor.onpurge) {
     meta.transactor.dispatchAndDefaultActEvent(progress);
   }
-  for (const partition of Object.values(operation._partitions)) {
-    if (!partition.confirmedTruth) {
-      partition.rejectCommand(partition.rejectionReason || error);
-      partition.commandEvent = null;
+  for (const venue of Object.values(operation._venues)) {
+    if (!venue.confirmedTruth) {
+      venue.rejectCommand(venue.rejectionReason || error);
+      venue.commandEvent = null;
     }
   }
 }
@@ -220,27 +220,26 @@ class ProphecyOperation extends ProphecyEventResult {
   _prophecy: Prophecy;
   _sourcerer: FalseProphet;
   _events: EventBase[];
-  _options: Object; // partition command chronicleEvents options
-  _partitions: { [partitionURI: string]: {
-    // note: this does _not_ correspond to _prophecy.meta.partitions
+  _options: Object; // upstream chronicleEvents options
+  _venues: { [chronicleURI: string]: {
     connection: Connection,
     commandEvent: Command,
-    chronicling: ChronicleEventResult,
+    chronicling: Promise<ChronicleEventResult>,
     confirmCommand?: Function,
     rejectCommand?: Function,
   } };
   _fulfillment: Promise<Object>;
   _stageIndex: number = 0;
-  _firstStage: Promise<Object>;
+  _firstStageVenues: Promise<Object>;
   _persistment: Promise<Object>;
   _debugPhase: string = "construct";
 
   getDebugPhase () { return this._debugPhase; }
-  getCommandOf (partitionURI) {
-    return this._partitions[String(partitionURI)].commandEvent;
+  getCommandOf (chronicleURI: string) {
+    return this._venues[chronicleURI].commandEvent;
   }
-  getLogAspectOf (partitionURI) {
-    return this._partitions[String(partitionURI)].commandEvent.aspects.log;
+  getLogAspectOf (chronicleURI: string) {
+    return this._venues[chronicleURI].commandEvent.aspects.log;
   }
   getProgress (fields) {
     const ret = this._progress || (this._progress = new FabricatorEvent("", {
@@ -261,7 +260,7 @@ class ProphecyOperation extends ProphecyEventResult {
 
   getComposedStory () {
     return thenChainEagerly(
-        this._firstStage,
+        this._firstStageVenues,
         () => this._prophecy || this.throwRejectionError(),
         this.errorOnProphecyOperation.bind(this,
             new Error(`chronicleEvents.eventResults[${this.index}].getComposedStory()`)));
@@ -271,15 +270,15 @@ class ProphecyOperation extends ProphecyEventResult {
     let reformationAttempt = this._reformationAttempt;
     return this._persistedStory || (this._persistedStory = thenChainEagerly(
         // TODO(iridian, 2019-01): Add also local stage chroniclings to
-        // the waited list, as _firstStage only contains remote
+        // the waited list, as _firstStageVenues only contains remote
         // stage chroniclings. This requires refactoring: local
         // stage persisting currently waits remote truths. This command
         // must be operable offline, so it cannot rely on remote truths.
         // Local persisting must thus be refactored to not await on
         // remote truths, but this needs to have support for discarding
         // the locally persisted commands if the remotes rejected.
-        this._firstStage
-            && mapEagerly(this._firstStage, ({ chronicling }) => {
+        this._firstStageVenues
+            && mapEagerly(this._firstStageVenues, ({ chronicling }) => {
               if (!chronicling) throw new Error("Heresy pending reformation");
               return chronicling.getPersistedEvent();
             }),
@@ -347,10 +346,10 @@ class ProphecyOperation extends ProphecyEventResult {
         "\n\tevents:", ...dumpObject(this._events),
         "\n\tevent:", ...dumpObject(this._events[this.index]),
         "\n\tprophecy:", ...dumpObject(this.event),
-        "\n\tpartitions:", ...dumpObject(this._partitions),
-        "\n\tremote stage:", ...dumpObject(this._remoteStage),
-        "\n\tlocal stage:", ...dumpObject(this._localStage),
-        "\n\tmemory stage:", ...dumpObject(this._memoryStage),
+        "\n\tvenues:", ...dumpObject(this._venues),
+        "\n\tremote stage:", ...dumpObject(this._remoteVenues),
+        "\n\tlocal stage:", ...dumpObject(this._localVenues),
+        "\n\tmemory stage:", ...dumpObject(this._memoryVenues),
         "\n\toperation:", ...dumpObject(this),
     );
     if (!nothrow) throw wrappedError;
@@ -365,114 +364,117 @@ class ProphecyOperation extends ProphecyEventResult {
   static executeChain = [
     ProphecyOperation.prototype._prepareStagesAndCommands,
     ProphecyOperation.prototype._initiateConnectionValidations,
-    ProphecyOperation.prototype._processRemoteStage,
-    ProphecyOperation.prototype._processLocalStage,
-    ProphecyOperation.prototype._processMemoryStage,
+    ProphecyOperation.prototype._processRemoteVenues,
+    ProphecyOperation.prototype._processLocalVenues,
+    ProphecyOperation.prototype._processMemoryVenues,
     ProphecyOperation.prototype._fulfillProphecy,
   ];
 
   _prepareStagesAndCommands () {
     this._debugPhase = "prepare stages";
-    this._partitions = {};
+    this._venues = {};
     const missingConnections = [];
-    const partitions = (this._prophecy.meta || {}).partitions;
-    if (!partitions) {
-      throw new Error("prophecy is missing partition information");
+    const chronicles = (this._prophecy.meta || {}).chronicles;
+    if (!chronicles) {
+      throw new Error("prophecy is missing chronicle information");
     }
-    Object.keys(partitions).forEach((partitionURIString) => {
-      const connection = this._sourcerer._connections[partitionURIString];
+    Object.keys(chronicles).forEach(chronicleOrPartitionURI => {
+      let chronicleURI = chronicleOrPartitionURI;
+      let connection = this._sourcerer._connections[chronicleURI];
       if (!connection) {
         missingConnections.push(naiveURI.createPartitionURI(partitionURIString));
         return;
       }
       if (!this._prophecy.meta) throw new Error("prophecy.meta missing");
-      const commandEvent = connection.extractPartitionEvent(getActionFromPassage(this._prophecy));
-      (connection.isRemoteAuthority() ? (this._remoteStage || (this._remoteStage = []))
-          : connection.isLocallyPersisted() ? (this._localStage || (this._localStage = []))
-          : (this._memoryStage || (this._memoryStage = []))
-      ).push((this._partitions[partitionURIString] = { connection, commandEvent }));
+      const commandEvent = connection.extractChronicleEvent(getActionFromPassage(this._prophecy));
+      (connection.isRemoteAuthority()
+              ? (this._remoteVenues || (this._remoteVenues = []))
+          : connection.isLocallyPersisted()
+              ? (this._localVenues || (this._localVenues = []))
+              : (this._memoryVenues || (this._memoryVenues = []))
+      ).push((this._venues[chronicleURI] = { connection, commandEvent }));
     });
     if (missingConnections.length) {
-      throw new MissingConnectionsError(`Missing active partition connections: '${
+      throw new AbsentChroniclesError(`Missing active connections: '${
           missingConnections.map(c => c.toString()).join("', '")}'`, missingConnections);
     }
   }
 
   getStages () {
-    return this._allStages || (this._allStages =
-        [this._remoteStage, this._localStage, this._memoryStage].filter(s => s));
+    return this._allStages || (this._allStages = [
+      this._remoteVenues, this._localVenues, this._memoryVenues,
+    ].filter(s => s));
   }
 
   _initiateConnectionValidations () {
-    this._debugPhase = `validate partitions`;
-    this.getStages().forEach(stagePartitions => stagePartitions.forEach(partition => {
-      partition.validatedConnection = thenChainEagerly(
-          partition.connection.asActiveConnection(),
+    this._debugPhase = `validate venues`;
+    this.getStages().forEach(stageVenues => stageVenues.forEach(venue => {
+      venue.validatedConnection = thenChainEagerly(
+          venue.connection.asActiveConnection(),
           (connection) => {
-            this._debugPhase = `validate partition ${connection.getName()}`;
+            this._debugPhase = `validate venue connection ${connection.getName()}`;
             if (connection.isFrozenConnection()) {
-              throw new Error(`Trying to chronicle events to a frozen partition ${
+              throw new Error(`Trying to chronicle events to a frozen chronicle ${
                   connection.getName()}`);
             }
-            const commandEventVersion = partition.commandEvent.aspects.version;
+            const commandEventVersion = venue.commandEvent.aspects.version;
             const connectionEventVersion = connection.getEventVersion();
             if (!connectionEventVersion || (connectionEventVersion !== commandEventVersion)) {
               throw new Error(`Command event version "${commandEventVersion
                   }" not supported by connection ${connection.getName()} which only supports "${
                   connectionEventVersion}"`);
             }
-            // Perform other partition validation
-            // TODO(iridian): extract partition content (EDIT: a what now?)
-            return (partition.validatedConnection = connection);
+            // Perform other chronicle validation
+            // TODO(iridian): extract chronicle content (EDIT: a what now?)
+            return (venue.validatedConnection = connection);
           },
       );
     }));
   }
 
-  _processRemoteStage () {
-    if (!this._remoteStage) return undefined;
-    return this.performChain(["remote", this._remoteStage], "_processFirstStageChain");
+  _processRemoteVenues () {
+    if (!this._remoteVenues) return undefined;
+    return this.performChain(["remote", this._remoteVenues], "_processFirstStageChain");
   }
 
-  _processLocalStage () {
-    if (!this._localStage) return undefined;
-    return this.performChain(["local", this._localStage],
-        this._firstStage ? "_processStageChain" : "_processFirstStageChain");
+  _processLocalVenues () {
+    if (!this._localVenues) return undefined;
+    return this.performChain(["local", this._localVenues],
+        this._firstStageVenues ? "_processStageChain" : "_processFirstStageChain");
   }
 
-  _processMemoryStage () {
-    if (!this._memoryStage) return undefined;
-    return this.performChain(["memory", this._memoryStage], "_processStageChain");
+  _processMemoryVenues () {
+    if (!this._memoryVenues) return undefined;
+    return this.performChain(["memory", this._memoryVenues], "_processStageChain");
   }
 
   static _processStageChain = [
-    ProphecyOperation.prototype._validatePartitionConnections,
-    ProphecyOperation.prototype._chronicleStagePartitionCommands,
-    ProphecyOperation.prototype._processIndividualStagePartitionChroniclings,
+    ProphecyOperation.prototype._validateConnections,
+    ProphecyOperation.prototype._chronicleStageVenueCommands,
+    ProphecyOperation.prototype._processStageVenues,
   ];
 
   static _processFirstStageChain = [
-    ProphecyOperation.prototype._validatePartitionConnections,
-    ProphecyOperation.prototype._chronicleFirstStagePartitionCommands,
-    ProphecyOperation.prototype._processIndividualStagePartitionChroniclings,
+    ProphecyOperation.prototype._validateConnections,
+    ProphecyOperation.prototype._chronicleFirstStageVenueCommands,
+    ProphecyOperation.prototype._processStageVenues,
   ];
 
-  _validatePartitionConnections (stageName, stagePartitions) {
+  _validateConnections (stageName, venues) {
     this._stageName = stageName;
-    this._debugPhase = `await stage #${this._stageIndex} '${stageName}' partition validations`;
-    return [stagePartitions]
-          .concat(stagePartitions.map(partition => partition.validatedConnection));
+    this._debugPhase = `await stage #${this._stageIndex} '${stageName}' connection validations`;
+    return [venues, ...venues.map(venue => venue.validatedConnection)];
   }
 
-  _chronicleFirstStagePartitionCommands (stagePartitions) {
-    this._firstStage = stagePartitions;
-    const ret = this._chronicleStagePartitionCommands(stagePartitions);
+  _chronicleFirstStageVenueCommands (venues) {
+    this._firstStageVenues = venues;
+    const ret = this._chronicleStageVenueCommands(venues);
     const transactor = this.event.meta.transactor;
     if (transactor && transactor.onpersist) this.getPersistedStory();
     return ret;
   }
 
-  _chronicleStagePartitionCommands (stagePartitions) {
+  _chronicleStageVenueCommands (venues) {
     // Persist the prophecy and add refs to all associated event bvobs.
     // This is necessary for prophecy reattempts so that the bvobs aren't
     // garbage collected on browser refresh. Otherwise they can't be
@@ -486,47 +488,47 @@ class ProphecyOperation extends ProphecyEventResult {
 
     // Maybe determine aspects.log.index's beforehand?
 
-    // Get aspects.log.index and scribe persist finalizer for each partition
+    // Get aspects.log.index and scribe persist finalizer for each chronicle
     this._debugPhase = `chronicle stage #${this._stageIndex} '${this._stageName}' commands`;
-    for (const partition of stagePartitions) {
+    for (const venue of venues) {
       try {
         this._debugPhase = `chronicle stage #${this._stageIndex} '${this._stageName}' command to ${
-            partition.connection.getName()}`;
-        partition.chronicling = partition.connection
-            .chronicleEvent(partition.commandEvent, Object.create(this._options));
+            venue.connection.getName()}`;
+        venue.chronicling = venue.connection
+            .chronicleEvent(venue.commandEvent, Object.create(this._options));
       } catch (error) {
         throw this._sourcerer.wrapErrorEvent(error, 1,
             new Error(`chronicleEvents.stage["${this._stageName}"].connection["${
-                partition.connection.getName()}"].chronicleEvents`),
-            "\n\tcommandEvent:", ...dumpObject(partition.commandEvent),
-            "\n\tchronicling:", ...dumpObject(partition.chronicling),
+                venue.connection.getName()}"].chronicleEvents`),
+            "\n\tcommandEvent:", ...dumpObject(venue.commandEvent),
+            "\n\tchronicling:", ...dumpObject(venue.chronicling),
         );
       }
     }
     this._stageIndex++;
     this._debugPhase = `await stage #${this._stageIndex} '${this._stageName}' truths`;
-    return [stagePartitions];
+    return [venues];
   }
 
-  _processIndividualStagePartitionChroniclings (stagePartitions) {
-    return stagePartitions.map(partition => this.performChain(
-        [partition, partition.currentChronicling = partition.chronicling],
-        "_stagePartitionChain",
-        "_errorOnProcessStagePartition"));
+  _processStageVenues (venues) {
+    return venues.map(venue => this.performChain(
+        [venue, venue.currentChronicling = venue.chronicling],
+        "_stageVenuesChain",
+        "_errorOnProcessStageVenue"));
   }
 
-  static _stagePartitionChain = [
-    ProphecyOperation.prototype._divergentWaitStagePartitionChroniclings,
-    ProphecyOperation.prototype._resolveStagePartitionTruth,
+  static _stageVenuesChain = [
+    ProphecyOperation.prototype._divergentWaitStageVenueChronicling,
+    ProphecyOperation.prototype._resolveStageVenueTruth,
   ];
 
-  _divergentWaitStagePartitionChroniclings (partition, chroniclingResult) {
-    if (!chroniclingResult) return [partition, undefined, []];
+  _divergentWaitStageVenueChronicling (venue, chroniclingResult) {
+    if (!chroniclingResult) return [venue, undefined, []];
     const chronicledTruth = chroniclingResult.getTruthEvent();
-    if (!isPromise(chronicledTruth)) return [partition, chronicledTruth];
+    if (!isPromise(chronicledTruth)) return [venue, chronicledTruth];
     const receivedTruth = new Promise((resolve, reject) => {
-      partition.confirmCommand = resolve;
-      partition.rejectCommand = reject;
+      venue.confirmCommand = resolve;
+      venue.rejectCommand = reject;
     });
     const truthProcesses = [
       chronicledTruth.catch(reason => {
@@ -535,37 +537,40 @@ class ProphecyOperation extends ProphecyEventResult {
       }),
       receivedTruth,
     ];
-    return [partition, Promise.race(truthProcesses), truthProcesses];
+    return [venue, Promise.race(truthProcesses), truthProcesses];
   }
 
-  _resolveStagePartitionTruth (partition, truth, truthProcesses) {
+  _resolveStageVenueTruth (venue, truth, truthProcesses) {
     if (!truth) {
-      if (partition.chronicling !== partition.currentChronicling) {
-        return { 0: [partition, partition.currentChronicling = partition.chronicling] }; // retry
+      if (venue.chronicling !== venue.currentChronicling) {
+        return { // retry
+          0: [venue, venue.currentChronicling = venue.chronicling],
+        };
       }
       Promise.all(truthProcesses).then(([chronicled, received]) => {
-        partition.connection.errorEvent(
+        venue.connection.errorEvent(
           "\n\tnull truth when fulfilling prophecy:", ...dumpObject(this._prophecy),
           "\n\tchronicled:", isPromise(truthProcesses[0]),
               ...dumpObject(chronicled), ...dumpObject(truthProcesses[0]),
           "\n\treceived:", isPromise(truthProcesses[1]),
               ...dumpObject(received), ...dumpObject(truthProcesses[1]));
       });
-    } else if (truth.aspects.log.index !== partition.commandEvent.aspects.log.index) {
-      // this partition command was/will be revised
+    } else if (truth.aspects.log.index !== venue.commandEvent.aspects.log.index) {
+      // this chronicle command was/will be revised
     }
-    this._prophecy.meta.partitions[String(partition.connection.getPartitionURI())].truth
-        = partition.confirmedTruth = truth;
-    return [partition];
+    this._prophecy.meta.chronicles[venue.connection.getChronicleURI()].truth
+        = venue.confirmedTruth = truth;
+    return [venue];
   }
 
-  _errorOnProcessStagePartition (error, index, params) {
-    const partition = params[0];
+  _errorOnProcessStageVenue (error, index, params) {
+    const venue = params[0];
     if ((!this._progress || !this._progress.isSchismatic)
-        && (partition.chronicling !== partition.currentChronicling)) {
-      return { 0: [partition, partition.currentChronicling = partition.chronicling] };  // retry
+        && (venue.chronicling !== venue.currentChronicling)) {
+      // retry
+      return { 0: [venue, venue.currentChronicling = venue.chronicling] };
     }
-    partition.rejectionReason = error;
+    venue.rejectionReason = error;
     throw error;
   }
 

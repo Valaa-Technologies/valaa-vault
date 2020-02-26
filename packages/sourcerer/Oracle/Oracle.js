@@ -12,17 +12,19 @@ import OracleConnection from "./OracleConnection";
 /**
  * TODO(iridian): Outdated, clean up.
  *
- * Oracle is the central hub for routing content and metadata streams between the downstream users,
- * upstream authorities and local caches.
+ * Oracle is the central hub for routing content and metadata streams
+ * between the downstream users, upstream authorities and local caches.
  *
- * 1. Provides downstream multi-partition event synchronization and deduplication by gating
- * individual partition event downstreams until all partitions reach the same point.
+ * 1. Provides downstream multi-chronicle event synchronization and
+ *   deduplication by gating individual chronicle event downstreams
+ *   until all chronicles reach the same point.
  *
- * 2. Provides media bvob pre-caching by gating downstream events until all required bvob content
- * has been retrieved and stored in scribe.
+ * 2. Provides media bvob pre-caching by gating downstream events until
+ *   all required bvob content has been retrieved and stored in scribe.
  *
- * 3. Provides upstream media command gating by making sure all associated bvob content is stored in
- * corresponding authority storage before letting the commands go further upstream.
+ * 3. Provides upstream media command gating by making sure all
+ *   associated bvob content is stored in corresponding authority
+ *   storage before letting the commands go further upstream.
  *
  * 4. Provides offline mode handling through scribe.
  *
@@ -42,21 +44,21 @@ export default class Oracle extends Sourcerer {
 
   getDecoderArray () { return this._decoderArray; }
 
-  obtainAuthorityOfPartition (partitionURI: ValaaURI) {
-    const ret = this._authorityNexus.obtainAuthorityOfPartition(partitionURI);
+  obtainAuthorityOfChronicle (chronicleURI: string) {
+    const ret = this._authorityNexus.obtainAuthorityOfChronicle(chronicleURI);
     if (!ret) {
-      throw new Error(`Can't obtain authority for partition <${partitionURI}>`);
+      throw new Error(`Can't obtain authority of chronicle <${chronicleURI}>`);
     }
     return ret;
   }
 
-  _createConnection (partitionURI: ValaaURI, options: ConnectOptions) {
-    const authoritySourcerer = this._authorityNexus.obtainAuthorityOfPartition(partitionURI);
+  _createConnection (chronicleURI: string, options: ConnectOptions) {
+    const authoritySourcerer = this._authorityNexus.obtainAuthorityOfChronicle(chronicleURI);
     if (!authoritySourcerer) {
-      throw new Error(`Can't obtain authority for partition <${partitionURI}>`);
+      throw new Error(`Can't obtain authority for chronicle <${chronicleURI}>`);
     }
     return new OracleConnection({
-      partitionURI, sourcerer: this, verbosity: this.getVerbosity(),
+      chronicleURI, sourcerer: this, verbosity: this.getVerbosity(),
       receiveTruths: options.receiveTruths, authoritySourcerer,
     });
   }

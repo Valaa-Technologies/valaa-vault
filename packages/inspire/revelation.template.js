@@ -122,7 +122,7 @@ function actionDeprecated () {
     timeStamp: NaN, // Deprecated since 0.2. Use aspects.log.timeStamp instead.
     partitions: dictionaryOf({
       eventId: NaN, // Deprecated since 0.2. Use aspects.log.index isntead.
-      partitionAuthorityURI: "", // Deprecated since 0.2: events are now single-partition only.
+      partitionAuthorityURI: "", // Deprecated since 0.2: events are now single-chronicle only.
     }),
     // aspects: aspects(),
     /*

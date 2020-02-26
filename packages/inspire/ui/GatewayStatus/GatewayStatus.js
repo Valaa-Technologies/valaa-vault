@@ -13,8 +13,8 @@ class GatewayStatus extends UIComponent {
     const inspireGateway = this.getValos().gateway;
     if (inspireGateway) {
       inspireGateway.setCommandCountListener(this,
-          (totalCommandCount: number, partitionCommandCounts: Object) =>
-              this.setState({ totalCommandCount, partitionCommandCounts }));
+          (totalCommandCount: number, chronicleCommandCounts: Object) =>
+              this.setState({ totalCommandCount, chronicleCommandCounts }));
     }
   }
 
@@ -33,7 +33,7 @@ class GatewayStatus extends UIComponent {
         >
           {this.state.totalCommandCount}
         </span>
-        {this.props.show && <div>{beaumpify(this.state.partitionCommandCounts)}</div>}
+        {this.props.show && <div>{beaumpify(this.state.chronicleCommandCounts)}</div>}
       </div>
     );
   }

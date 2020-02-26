@@ -120,8 +120,8 @@ export type ChronicleRequest = {
 export class ProphecyEventResult extends ChronicleEventResult {
   story: Story; // Preliminary story before any revisions
 
-  // Returns the partition specific command of this prophecy event
-  getCommandOf (/* partitionURI: string */): Command | Promise<Command> {
+  // Returns the chronicle specific command of this prophecy event
+  getCommandOf (/* chronicleURI: string */): Command | Promise<Command> {
     throw new Error(`getCommandOf not implemented by ${this.constructor.name}`);
   }
 

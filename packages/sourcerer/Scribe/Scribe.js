@@ -33,9 +33,9 @@ import {
  * execution.
  *
  * As a basic principle all Bvob operations ie. operations which
- * manipulate ArrayBuffer-based data are shared between all partitions
+ * manipulate ArrayBuffer-based data are shared between all chronicles
  * and thus handled by Scribe object itself. All Media operations which
- * associate metadata to bvods are partition specific and handled by
+ * associate metadata to bvods are chronicle specific and handled by
  * ScribeConnection's.
  *
  * @export

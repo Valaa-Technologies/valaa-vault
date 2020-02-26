@@ -8,15 +8,15 @@ export function isFrozen (bard: Bard, transient: Transient) {
   return transient.get("isFrozen");
 }
 
-export function universalizeFreezePartitionRoot (bard: Bard, partitionRootTransient: Transient) {
+export function universalizeFreezeChronicleRoot (bard: Bard, partitionRootTransient: Transient) {
   if ((bard.event.type !== "TRANSACTED") && (bard.event.type !== "FROZEN")) {
-    throw new Error("Cannot freeze partition root entity without a TRANSACTED event");
+    throw new Error("Cannot freeze chronicle root entity without a TRANSACTED event");
   }
   bard.event.type = "FROZEN";
   const partitionRawId = partitionRootTransient.get("id").rawId();
   if (!bard.event.frozenPartitions) bard.event.frozenPartitions = [];
   else if (bard.event.frozenPartitions.findIndex(partitionRawId) !== -1) {
-    throw new Error(`Cannot universalize partition root freeze again; ${
+    throw new Error(`Cannot universalize chronicle root freeze again; ${
         partitionRawId} is already being frozen`);
   }
   bard.event.frozenPartitions.push(partitionRawId);

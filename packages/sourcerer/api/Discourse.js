@@ -7,8 +7,8 @@ import type { ProphecyEventResult } from "~/sourcerer/api/types";
  * channel between a single Sourcerer and a single Follower.
  * It is optimistic: downstream events can be either confirmed truths
  * or unconfirmed optimistic commands.
- * It is partition agnostic: downstream events can be multi-partition
- * and it can fabricate multi-partition commands towards upstream.
+ * It is chronicle agnostic: downstream events can be multi-chronicle
+ * and it can fabricate multi-chronicle commands towards upstream.
  * It manages an the identities of the Follower towards the sourcerer
  * fabric.
  *
@@ -32,14 +32,14 @@ export default class Discourse extends Valker {
    *
    * @returns {type} a new id for the object
    */
-  assignNewVRID (targetAction: EventBase, partitionURI: string): VRL { // eslint-disable-line
+  assignNewVRID (targetAction: EventBase, chronicleURI: string): VRL { // eslint-disable-line
     throw new Error(`${this.constructor.name}/Discourse.assignNewVRID not implemented`);
   }
 
   /**
-   * assignNewChronicleRootId - Creates a new partition id and assigns it to targetAction.
+   * assignNewChronicleRootId - Creates a new chronicle id and assigns it to targetAction.
    *
-   * @returns {type} partitionURI
+   * @returns {type} chronicleURI
    */
   assignNewChronicleRootId (targetAction: EventBase, authorityURI: string): ValaaURI { // eslint-disable-line
     throw new Error(`${this.constructor.name}/Discourse.assignNewChronicleRootId not implemented`);

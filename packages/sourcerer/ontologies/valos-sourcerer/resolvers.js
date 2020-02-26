@@ -1,13 +1,13 @@
 module.exports = {
-  resolvePartitionRoot: {
+  resolveChronicleRoot: {
     "@type": "valos-raem:Resolver",
-    "revdoc:brief": "resolve partition root",
-    "rdfs:comment": "resolve partition root of the resource",
+    "revdoc:brief": "resolve chronicle root",
+    "rdfs:comment": "resolve chronicle root of the resource",
   },
-  resolvePartitionURL: {
+  resolveChronicleURI: {
     "@type": "valos-raem:Resolver",
-    "revdoc:brief": "resolve partition URL",
-    "rdfs:comment": "resolve partition URL of the resource",
+    "revdoc:brief": "resolve chronicle URI",
+    "rdfs:comment": "resolve chronicle URI of the resource",
   },
   resolveModifiedAt: {
     "@type": "valos-raem:Resolver",

@@ -3,11 +3,11 @@
 import URLParse from "url-parse";
 
 import { invariantifyString } from "~/tools/invariantify";
-import { validateVRID } from "~/raem/VPath";
+import { coerceAsVRID, validateVRID } from "~/raem/VPath";
 import { vdon } from "~/tools/vdon";
 
 export const vdoc = vdon({ "...": { heading:
-  "ValaaURI's refer to authorities, partitions, resources and their sub-aspects",
+  "ValaaURI's refer to authorities, chronicles, resources and their sub-aspects",
 },
   0: [
     `ValaaURI is a convenience object type used to represent Valaa URI
@@ -16,11 +16,11 @@ export const vdoc = vdon({ "...": { heading:
     Valaa constructs.`,
     `The main conceptual separation is by URI fragment separator \`#\`.
     Everything to the left of it (ie. URI scheme, hierarchical and
-    query parts) is the *partition* part. Everything to the right (ie.
+    query parts) is the *chronicle* part. Everything to the right (ie.
     the URI fragment part) is the *resource*.`,
-    `The partition part is used to refer to authorities and partitions.
+    `The chronicle part is used to refer to authorities and chronicles.
     The ValOS spec does not specify the structure or semantics of the
-    partition part at all but instead delegates the definition to
+    chronicle part at all but instead delegates the definition to
     particular Valaa URI schemes (which are identified by the Valaa URI
     scheme part).`,
     `The resource part is used to not just refer to valospace
@@ -32,14 +32,14 @@ export const vdoc = vdon({ "...": { heading:
     applications to interpret.`,
 /*
     * URI scheme part: is used to identify the specification for the rest . One of the following:
-    *   - "valaa-memory": partition resides in memory and will not survive across restarts.
+    *   - "valaa-memory": chronicle resides in memory and will not survive across restarts.
     *     authority part must be empty, thus making this URI not a URL.
     *   - "valaa-transient": deprecated alias for valaa-memory
-    *   - "valaa-local": partition is local to the client device but is persisted.
+    *   - "valaa-local": chronicle is local to the client device but is persisted.
     *     authority part must be empty, thus making this URI not a URL.
     *   Future candidate schemes:
-    *   - "valaa": partition location is not specified (authority part must be empty). The authority
-    *     for this partition must be known by the surrounding context.
+    *   - "valaa": chronicle location is not specified (authority part must be empty). The authority
+    *     for this chronicle must be known by the surrounding context.
     *
     `
 */
@@ -62,8 +62,8 @@ export const genericURI = {
   secondaryResourcePart: 9, // without '#'
 };
 
-// Naive partition URI is a fixed format URI where first query param is
-// `id` and its value is the partition Id and consequently the raw id
+// Naive chronicle URI is a fixed format URI where first query param is
+// `id` and its value is the chronicle Id and consequently the raw id
 // of its root resource. Other query arguments
 
 export const naiveURI = {
@@ -72,7 +72,7 @@ export const naiveURI = {
   regex:
       /^(([^:/?#]+):)?(\/\/([^/?#]*))?([^?#]*)(\?(id=([^#&]+)(&([^#]*))?))(#(([^?]*)(\?(.*)))?)?$/,
   //    12            3    4          5       6  7   8       9 a          b cd      e  f
-  partitionIdPart: 8,
+  chronicleIdPart: 8,
   paramsPart: 10,
   fragmentPart: 11,
   secondaryResourcePart: 12,
@@ -81,11 +81,12 @@ export const naiveURI = {
   secondaryParamsPart: 15,
 
   /**
-   * Creates a partition URI from one or two string as a native URL object.
-   * If only one string is given it is considered to be the full partition URI string and consumed
-   * as is.
-   * If the optional partitionRawId is specified the baseString is considered to be the partition
-   * authority URI, and the full partition URI is generated as per authority URI schema.
+   * Creates a chronicle URI from one or two string as a native URL
+   * object. If only one string is given it is considered to be the
+   * full chronicle URI string and consumed as is.
+   * If the optional partitionRawId is specified the baseString is
+   * considered to be the chronicle authority URI, and the full
+   * chronicle URI is generated as per authority URI schema.
    *
    * @export
    * @param {string} baseString
@@ -132,17 +133,36 @@ export const naiveURI = {
         }${!baseParts[genericURI.paramsPart] ? "" : `&${baseParts[genericURI.paramsPart]}`}`;
   },
 
-  createChronicleURI: function createNaiveChronicleURI (authorityURI: string, chronicleId: string) {
-    if ((chronicleId === undefined)
-        || (chronicleId[0] !== "@") || (chronicleId.slice(-2) !== "@@")) {
-      throw new Error(
+  createChronicleURI: function createNaiveChronicleURI (
+        authorityOrPartitionURI: string, chronicleId: string) {
+    let actualAuthorityURI = authorityOrPartitionURI;
+    let actualChronicleId = chronicleId;
+    if (typeof chronicleId !== "string") {
+      const ret = _naiveChronicleURILookup[authorityOrPartitionURI];
+      if (ret) return ret;
+      const chronicleURIMatch = authorityOrPartitionURI
+          .match(/^([^?#]*)\?id=([^/;=&#]*)([/;=&#].*)?$/);
+      if (!chronicleURIMatch) {
+        throw new Error(
           `createChronicleURI.chronicleId must be a valid VPath, got: "${chronicleId}"`);
+      }
+      ([, actualAuthorityURI, actualChronicleId] = chronicleURIMatch);
     }
-    return naiveURI.createPartitionURI(authorityURI, chronicleId);
+    if ((actualChronicleId[0] !== "@") || (actualChronicleId.slice(-2) !== "@@")) {
+      actualChronicleId = coerceAsVRID(actualChronicleId);
+      console.warn(`DEPRECATED: createChronicleURI.chronicleId must be a valid VPath`,
+          `\n\tgot: ${chronicleId || authorityOrPartitionURI}`,
+          `\n\tfor now coerced as: ${actualChronicleId}`);
+    }
+    const ret = naiveURI.createPartitionURI(actualAuthorityURI, actualChronicleId);
+    if (typeof chronicleId !== "string") {
+      _naiveChronicleURILookup[authorityOrPartitionURI] = ret;
+    }
+    return ret;
   },
 
-  // FIXME(iridian, 2019-02): naive partition URI's must be replaced with
-  // partition schema specific logic and VRL-based API instead
+  // FIXME(iridian, 2019-02): naive chronicle URI's must be replaced with
+  // chronicle schema specific logic and VRL-based API instead
   // of raw string access API.
   getPartitionRawId: function getNaivePartitionRawId (naivePartitionURI: ValaaURI): string {
     const match = (typeof naivePartitionURI === "string")
@@ -151,10 +171,9 @@ export const naiveURI = {
       throw new Error(`Invalid naivePartitionURI (does not match naiveURI regex): <${
           naivePartitionURI}>`);
     }
-    const partitionIdPart = match[naiveURI.partitionIdPart];
-    return (partitionIdPart.slice(-2) === "@@")
-        ? partitionIdPart
-        : decodeURIComponent(partitionIdPart);
+    const chronicleIdPart = match[naiveURI.chronicleIdPart];
+    if (chronicleIdPart.slice(-2) === "@@") return chronicleIdPart;
+    return decodeURIComponent(chronicleIdPart);
   },
 
   getChronicleId: function getNaiveChronicleId (naiveChronicleURI) {
@@ -164,18 +183,18 @@ export const naiveURI = {
       throw new Error(`Invalid naiveChronicleURI (does not match naiveURI regex): <${
           naiveChronicleURI}>`);
     }
-    const chronicleIdPart = match[naiveURI.partitionIdPart];
+    const chronicleIdPart = match[naiveURI.chronicleIdPart];
     if (chronicleIdPart[0] !== "@") {
       throw new Error(`chronicle id must be a VPath in naive chronicle URI <${naiveChronicleURI}>`);
     }
     return chronicleIdPart;
   },
 
-  getAuthorityURI: function getNaiveAuthorityURI (naivePartitionURI: ValaaURI): ValaaURI {
-    const parts = naivePartitionURI.match(naiveURI.regex);
+  getAuthorityURI: function getNaiveAuthorityURI (naiveChronicleURI: ValaaURI): ValaaURI {
+    const parts = naiveChronicleURI.match(naiveURI.regex);
     if (!parts) {
-      throw new Error(`Cannot extract authority URI from non-naive partition URI candidate: <${
-          naivePartitionURI}>`);
+      throw new Error(`Cannot extract authority URI from non-naive chronicle URI candidate: <${
+          naiveChronicleURI}>`);
     }
     return `${parts[naiveURI.protocolPart]
         }${parts[naiveURI.authorityPart]
@@ -211,20 +230,16 @@ export function getURIQueryField (uri: ValaaURI, fieldName: string): ?any {
   return uriObject.query && uriObject.query[fieldName];
 }
 
-export function createLocalPartitionURIFromRawId (rawId: string): ValaaURI {
-  return naiveURI.createPartitionURI("valaa-local:", rawId);
+export function createLocalChronicleURIFromRootId (rootId: string): ValaaURI {
+  return naiveURI.createChronicleURI("valaa-local:", rootId);
 }
 
-export function createMemoryPartitionURIFromRawId (rawId: string): ValaaURI {
-  return naiveURI.createPartitionURI("valaa-memory:", rawId);
+export function createMemoryChronicleURIFromRootId (rootId: string): ValaaURI {
+  return naiveURI.createChronicleURI("valaa-memory:", rootId);
 }
 
-export function createTransientPartitionURIFromRawId (rawId: string): ValaaURI {
-  return naiveURI.createPartitionURI("valaa-transient:", rawId);
-}
-
-export function createTestPartitionURIFromRawId (rawId: string): ValaaURI {
-  return naiveURI.createPartitionURI("valaa-test:", rawId);
+export function createTestChronicleURIFromRootId (rootId: string): ValaaURI {
+  return naiveURI.createChronicleURI("valaa-test:", rootId);
 }
 
 export function getScheme (uri: string): string {
@@ -238,3 +253,5 @@ export function getHostname (uri: string): string {
 export function hasScheme (uri: string, scheme): boolean {
   return uri.slice(0, scheme.length + 1) === `${scheme}:`;
 }
+
+const _naiveChronicleURILookup = {};

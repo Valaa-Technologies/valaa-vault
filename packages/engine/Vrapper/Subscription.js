@@ -3,7 +3,7 @@
 import type { VALKOptions } from "~/raem/VALK";
 import { addStackFrameToError, SourceInfoTag } from "~/raem/VALK/StackTrace";
 
-import { tryConnectToMissingPartitionsAndThen } from "~/raem/tools/denormalized/partitions";
+import { tryConnectToAbsentChroniclesAndThen } from "~/raem/tools/denormalized/partitions";
 
 import liveKuerySteppers from "~/engine/Vrapper/liveKuerySteppers";
 import Vrapper from "~/engine/Vrapper";
@@ -167,7 +167,7 @@ export default class Subscription extends LiveUpdate {
         return this.getDiscourse().run(this._liveHead, this._liveKuery, this._valkOptions);
       } catch (error) {
         this._invalidateState();
-        const connecting = tryConnectToMissingPartitionsAndThen(error, () => this._resolveValue());
+        const connecting = tryConnectToAbsentChroniclesAndThen(error, () => this._resolveValue());
         if (connecting) return connecting;
         throw error;
       } finally {
@@ -359,7 +359,7 @@ export default class Subscription extends LiveUpdate {
       }
     } catch (error) {
       this.detachHooks();
-      if (tryConnectToMissingPartitionsAndThen(error, () => {
+      if (tryConnectToAbsentChroniclesAndThen(error, () => {
         this._invalidateState();
         this.attachHooks(triggerBroadcast);
       })) return;

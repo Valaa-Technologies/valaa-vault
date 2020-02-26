@@ -10,19 +10,19 @@ import FalseProphet from "./FalseProphet";
 
 /*
 export function vRefFromURI (uri: ValaaURI | string): VRL {
-  const [partitionURI, fragment] = String(uri).split("#");
-  if (!fragment) return vRef("", null, null, createValaaURI(partitionURI));
+  const [chronicleURI, fragment] = String(uri).split("#");
+  if (!fragment) return vRef("", null, null, createValaaURI(chronicleURI));
   const [rawId, referenceOptions] = fragment.split("?");
   // TODO(iridian): validate rawId against [-_0-9a-zA-Z] and do base64 -> base64url conversion
   // which needs codebase wide changes.
-  if (!referenceOptions) return vRef(rawId, null, null, createValaaURI(partitionURI));
+  if (!referenceOptions) return vRef(rawId, null, null, createValaaURI(chronicleURI));
   // const options = {};
   let coupling;
   for (const [key, value] of referenceOptions.split("&").map(pair => pair.split("="))) {
     if (key === "coupling") coupling = value;
     else throw new Error(`VRL option '${key}' not implemented yet`);
   }
-  return vRef(rawId, coupling, undefined, createValaaURI(partitionURI));
+  return vRef(rawId, coupling, undefined, createValaaURI(chronicleURI));
 }
 */
 
@@ -42,7 +42,7 @@ export function vRefFromJSON (json: JSONIdData, RefType: Object = VRL): VRL {
     ret[PackedHostValue][2] = ghostPathFromJSON(ret[PackedHostValue][2]);
   }
   if (ret[PackedHostValue][3] && !(ret[PackedHostValue][3] instanceof ValaaURI)) {
-    ret[PackedHostValue][3] = naiveURI.createPartitionURI(ret[PackedHostValue][3]);
+    ret[PackedHostValue][3] = naiveURI.createChronicleURI(ret[PackedHostValue][3]);
   }
   return ret;
 }
@@ -59,7 +59,7 @@ const oldRawIdRegExpString = "^([a-zA-Z0-9+/_-]*)$";
 const oldRawIdRegExp = new RegExp(oldRawIdRegExpString);
 
 export function deserializeVRL (serializedRef: string | JSONIdData,
-    currentPartitionURI?: string, falseProphet: ?FalseProphet, isInRefClause: ?boolean) {
+    currentChronicleURI?: string, falseProphet: ?FalseProphet, isInRefClause: ?boolean) {
   let nss, resolver, query, fragment;
   try {
     if (typeof serializedRef === "string") {
@@ -98,7 +98,7 @@ export function deserializeVRL (serializedRef: string | JSONIdData,
       throw new Error(`Malformed urn:valos reference ${debugObjectType(serializedRef)
           }, expected URI string or an array expansion`);
     } else if ((serializedRef[0] === "§vrl") || (serializedRef[0] === "§ref")) {
-      return deserializeVRL(serializedRef[1], currentPartitionURI, falseProphet, true);
+      return deserializeVRL(serializedRef[1], currentChronicleURI, falseProphet, true);
     } else if ((serializedRef.length === 1)
         || (serializedRef[1] && (typeof serializedRef[1] === "object"))) {
       // new-style array expansion: [nss, resolverComponent, queryComponent, fragmentComponent]
@@ -106,7 +106,7 @@ export function deserializeVRL (serializedRef: string | JSONIdData,
       if (resolver) resolver = { ...resolver };
       if (query) query = { ...query };
     } else {
-      // old-style array expansion: [rawId, coupling, ghostPath, partitionURI]
+      // old-style array expansion: [rawId, coupling, ghostPath, chronicleURI]
       nss = serializedRef[0];
       resolver = { ghostPath: serializedRef[2], partition: serializedRef[3] };
       query = { coupling: serializedRef[1] };
@@ -120,33 +120,33 @@ export function deserializeVRL (serializedRef: string | JSONIdData,
       */
     }
 
-    let partitionURIString = resolver && resolver.partition;
-    if (!partitionURIString && currentPartitionURI) {
-      (resolver || (resolver = {})).partition = currentPartitionURI;
-      partitionURIString = String(currentPartitionURI);
+    let chronicleURI = resolver && resolver.partition;
+    if (!chronicleURI && currentChronicleURI) {
+      (resolver || (resolver = {})).partition = currentChronicleURI;
+      chronicleURI = naiveURI.createChronicleURI(String(currentChronicleURI));
     }
+    if (!falseProphet || ((currentChronicleURI === null) && !chronicleURI)) {
 
-    if (!falseProphet || ((currentPartitionURI === null) && !partitionURIString)) {
       return new VRL(nss)
           .initResolverComponent(resolver)
           .initQueryComponent(query)
           .initFragmentComponent(fragment);
     }
-    if (!partitionURIString) {
-      throw new Error(`Cannot deserialize urn:valos reference, no current partition provided${
+    if (!chronicleURI) {
+      throw new Error(`Cannot deserialize urn:valos reference, no current chronicle provided${
           ""} (and isn't explicitly disabled as 'null') and${
-          ""} reference is missing partition URI part: "${serializedRef}"`);
+          ""} reference is missing chronicle URI part: "${serializedRef}"`);
     }
     let referencePrototype;
-    const connection = falseProphet._connections[partitionURIString];
+    const connection = falseProphet._connections[chronicleURI];
     referencePrototype = connection
         ? connection._referencePrototype
-        : falseProphet._inactivePartitionVRLPrototypes[partitionURIString];
+        : falseProphet._absentChronicleVRLPrototypes[chronicleURI];
     const ghostPath = resolver.ghostPath;
     if (!referencePrototype) {
       resolver.inactive = true;
       delete resolver.ghostPath;
-      referencePrototype = falseProphet._inactivePartitionVRLPrototypes[partitionURIString] =
+      referencePrototype = falseProphet._absentChronicleVRLPrototypes[chronicleURI] =
           new VRL().initResolverComponent(resolver);
     }
     const ret = Object.create(referencePrototype)
@@ -160,10 +160,12 @@ export function deserializeVRL (serializedRef: string | JSONIdData,
     }
     return ret;
   } catch (error) {
-    throw (falseProphet ? falseProphet.wrapErrorEvent.bind(falseProphet, 1) : wrapError)(error,
-        new Error("deserializeVRL()"),
+    const wrap = new Error("deserializeVRL()");
+    throw (falseProphet
+        ? falseProphet.wrapErrorEvent.bind(falseProphet, error, 1, wrap)
+        : wrapError.bind(null, error, wrap))(
             "\n\tserializedReference:", serializedRef,
-            "\n\tcurrentPartitionURI:", currentPartitionURI,
+            "\n\tcurrentChronicleURI:", currentChronicleURI,
             "\n\tnss:", nss,
             "\n\tresolver:", ...dumpObject(resolver),
             "\n\tquery:", ...dumpObject(query),

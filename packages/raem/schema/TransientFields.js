@@ -11,7 +11,7 @@ import transientField from "~/raem/tools/graphql/transientField";
 import ghostHostResolver from "~/raem/tools/graphql/ghostHostResolver";
 
 
-import partitionResolver, { partitionURIResolver }
+import chronicleResolver, { chronicleURIResolver }
     from "~/raem/tools/graphql/partitionResolver";
 import { typeNameResolver } from "~/raem/tools/graphql/typeResolver";
 import vrefResolver from "~/raem/tools/graphql/vrefResolver";
@@ -19,7 +19,7 @@ import vrefResolver from "~/raem/tools/graphql/vrefResolver";
 import { toOne, toMany, toOwner, toManyOwnlings, unspecifiedSingular, unspecifiedPlural }
     from "~/raem/tools/graphql/coupling";
 
-import Partition from "~/raem/schema/Partition";
+import Chronicle from "~/raem/schema/Chronicle";
 
 const INTERFACE_DESCRIPTION = "inactive resource fields";
 
@@ -53,33 +53,33 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
           { affiliatedType: "TransientFields" },
       ),
 
-      ...generatedField("partition", Partition,
-          `The partition Resource of this ${objectDescription}, ie. the nearest owner (or self)${
-              ""} which is also an active partition.`,
-          partitionResolver,
+      ...generatedField("partition", Chronicle,
+          `The chronicle Resource of this ${objectDescription}, ie. the nearest owner (or self)${
+              ""} which is also an active chronicle.`,
+          chronicleResolver,
           { affiliatedType: "TransientFields" },
       ),
 
-      ...generatedField("chronicle", Partition,
+      ...generatedField("chronicle", Chronicle,
           `The chronicle root Resource of this ${objectDescription}, ie. the nearest owner${
               ""} (or self) which is also an active chronicle.`,
-          partitionResolver,
+          chronicleResolver,
           { affiliatedType: "TransientFields" },
       ),
 
       ...generatedField("partitionURI", GraphQLString,
-          `The partitionURI string of the partition this ${objectDescription} belongs to.{
-              ""} This root resource of this Partition is the innermost owning resource with {
-              ""} Partition.authorityURI set.`,
-          partitionURIResolver,
+          `The chronicleURI string of the chronicle this ${objectDescription} belongs to.{
+              ""} This root resource of this Chronicle is the innermost owning resource with {
+              ""} Chronicle.authorityURI set.`,
+          chronicleURIResolver,
           { affiliatedType: "TransientFields" },
       ),
 
       ...generatedField("chronicleURI", GraphQLString,
           `The chronicleURI string of the chronicle this ${objectDescription} belongs to.{
               ""} This root resource of this chronicle is the innermost owning resource with {
-              ""} Partition.authorityURI set.`,
-          partitionURIResolver,
+              ""} Chronicle.authorityURI set.`,
+          chronicleURIResolver,
           { affiliatedType: "TransientFields" },
       ),
 

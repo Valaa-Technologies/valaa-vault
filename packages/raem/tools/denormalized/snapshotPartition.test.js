@@ -2,7 +2,7 @@ import { created, fieldsSet } from "~/raem/events";
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
 import { vRef } from "~/raem/VRL";
 
-import snapshotPartition from "./snapshotPartition";
+import snapshotChronicle from "./snapshotPartition";
 
 describe("The snapshot node walker", () => {
   const createBlockA = [
@@ -61,8 +61,8 @@ describe("The snapshot node walker", () => {
 
     // console.log("Store before roundtrip", beaumpify(store.getState()));
 
-    await snapshotPartition({
-      partitionId: "A_grandparent",
+    await snapshotChronicle({
+      chronicleId: "A_grandparent",
       state: harness.corpus.getState(),
       schema: harness.ContentAPI.schema,
       onCreated: (id, typeName, getInitialState) => {
@@ -70,7 +70,7 @@ describe("The snapshot node walker", () => {
         resultEvents.push(createdEvent);
       },
       onModified: (/* id, typeName, modifies */) => {
-        throw new Error("snapshotPartition.onModified has rotten");
+        throw new Error("snapshotChronicle.onModified has rotten");
         /*
         const modifiedEvent = fieldsSet({ id, typeName, ...modifies });
         resultEvents.push(modifiedEvent);

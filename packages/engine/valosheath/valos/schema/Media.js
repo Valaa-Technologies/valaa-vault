@@ -28,7 +28,7 @@ export default {
     [symbols.immediateContent]: denoteValOSKueryFunction(
         `returns the Media content if it is immediately available,${
         ""} otherwise throws an error. This error can be a missing${
-        ""} partition connection error which triggers an implicit${
+        ""} connection error which triggers an implicit${
         ""} connection process.${
         ""} See Media.interpretContent for more details.`
     )(function immediateContent (options: any) {
@@ -67,7 +67,7 @@ export default {
     [symbols.immediateURL]: denoteValOSKueryFunction(
         `returns a Media URL to access the Media content if one is${
         ""} is immediately available, otherwise throws an error.${
-        ""} This error can be a missing partition connection error${
+        ""} This error can be a missing connection error${
         ""} which triggers an implicit connection process.${
         ""} See Media.getURL for more details.`
     )(function immediateURL (options: any) {

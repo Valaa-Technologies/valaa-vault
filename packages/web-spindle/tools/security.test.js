@@ -12,7 +12,7 @@ describe("Session security", () => {
     // const iv = new Uint8Array(12);
     // iv.set([185, 101, 152, 96, 39, 227, 175, 178, 236, 173, 121, 187], 0);
     const nonce = "sdsd098131##";
-    const identityChronicle = `valaa-test:?id=test-partition`;
+    const identityChronicle = `valaa-test:?id=test-partition`; // old name for 'chronicle'
     const code = burlaesgEncode({ identityChronicle, nonce }, key, iv);
     const roundtripped = burlaesgDecode(code, key);
     expect(roundtripped)

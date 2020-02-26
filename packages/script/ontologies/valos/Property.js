@@ -45,7 +45,7 @@ block as an rdf:Statement reification of hypertwinned triples.`,
     "rdfs:comment":
 `The twinspace of this ScopeProperty. Equates to the expanded prefix
 of the valos:name of this ScopeProperty using the context of this
-partition. Additionally if the local part of the valos:name is an empty
+chronicle. Additionally if the local part of the valos:name is an empty
 string then the valos:value of this ScopeProperty defines
 the twinspace id of the scope resource for this twinspace.`,
   },
@@ -73,7 +73,7 @@ the valos:twinspace of this ScopeProperty.`,
     "rdfs:comment":
 `The predicate of this ScopeProperty when interpreted as a reified
 rdf:Statement. Equates to the IRI expansion of valos:name of this
-ScopeProperty using the context of this partition.`,
+ScopeProperty using the context of this chronicle.`,
   },
 
   object: {

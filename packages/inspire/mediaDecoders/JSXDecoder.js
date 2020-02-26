@@ -22,12 +22,12 @@ export default class JSXDecoder extends MediaDecoder {
 
   static columnOffset = 0;
 
-  decode (buffer: ArrayBuffer, { partitionName, mediaName }: Object = {}): any {
+  decode (buffer: ArrayBuffer, { chronicleName, mediaName }: Object = {}): any {
     if (!buffer) return null;
     const sourceInfo: Object = {
-      partitionName,
+      chronicleName,
       mediaName,
-      phaseBase: `'${mediaName}'/'${partitionName}' as ${this.type}/${this.subtype}`,
+      phaseBase: `'${mediaName}'/'${chronicleName}' as ${this.type}/${this.subtype}`,
       phase: undefined,
       sourceMap: new Map(),
     };

@@ -48,7 +48,7 @@ OAuth2 term definitions are used as follows:
   grant definitions are not inherited here either.
 
 ValOS meanings (not well defined yet) are used for the following terms:
-- `authority`, `partition`, `narrate`, `chronicle`, `perspire worker`,
+- `authority`, `chronicle`, `narrate`, `chronicle`, `perspire worker`,
   `identity service`, `crypto-resource-id`, `crypto-write-protection`,
   `event-crypto-auditing`
 
@@ -77,7 +77,7 @@ application and the login site.
 
 ### 1.3.1. The authority is a singular, standard ValOS authority
 
-The authority hosts all the partitions necessary for the client
+The authority hosts all the chronicles necessary for the client
 application as well as for all of its users.
 
 ### 1.3.2. The vapp-worker is a perspire worker
@@ -108,25 +108,25 @@ is served by the vid-server).
 ## 1.4. Changes to the system when the auth-auth is complete
 
 The two main side-effects of a completed auth-auth flow are a new
-session partition in the authority and a combination of cookie and
+session chronicle in the authority and a combination of cookie and
 local storage state on the user-agent.
 
-### 1.4.1. A new partition (`session partition`) exists within the authority
+### 1.4.1. A new chronicle (`session chronicle`) exists within the authority
 
-The session partition represents a conceptual session between the
+The session chronicle represents a conceptual session between the
 end-user, the user-agent and the client application as a whole. The
-session partition (and only it!) contains all persisted metadata,
+session chronicle (and only it!) contains all persisted metadata,
 revocation status, logging information and all similar data pertinent
 to the session.
 
 It is conceptually owned by the end-user but has shared write access to
 it by the client application owner. This is implemented via
 crypto-write-protection by an [Ed25519](https://tools.ietf.org/html/rfc8032)
-key pair called `session-guard`. The session partition is registered
+key pair called `session-guard`. The session chronicle is registered
 with the session-guard public key.
 
-The vid-server has an active connection to this partition. Notably the
-vapp-worker itself has no active connection to the session partition
+The vid-server has an active connection to this chronicle. Notably the
+vapp-worker itself has no active connection to the session chronicle
 (even though the client application owner could conceptually obtain the
 access).
 
@@ -134,8 +134,8 @@ access).
 
 The access token contains the session data needed by the vapp-worker.
 This token was authorized by the vid-server and prepared for the
-user-agent by the vapp-worker. It contains the session partition id
-which the worker adds as a multi-partition transaction target to all
+user-agent by the vapp-worker. It contains the session chronicle id
+which the worker adds as a multi-chronicle transaction target to all
 authority modification commands. To enable stateless worker operations
 the token also contains the session-guard private key which vapp-worker
 will use to sign all commands.
@@ -187,7 +187,7 @@ Conversely, as the session-guard can be arbitrarily restrictive, and as
 these restrictions are enforced by the authority, and as they are
 further upheld by event-crypto-auditing infrastructure, the end result
 is that the application owner cannot use the key to sign events in the
-name of the end-user beyond the scope of the session partition itself.
+name of the end-user beyond the scope of the session chronicle itself.
 
 These two qualities enable feasible agency separation.
 
@@ -197,17 +197,17 @@ between authority and application owners.
 
 #### 1.4.4.2. Session lifecycle management
 
-The session-guard can be specified to always require session partition
+The session-guard can be specified to always require session chronicle
 be part of all command transactions where session-guard is used to sign
-commands targeting other partitions. If session partition is missing
+commands targeting other chronicles. If session chronicle is missing
 the authority shall reject the command; if it doesn't this results in
 an audition violation which the vid-server can detect.
 
 The trivial way to terminate a session early is to freeze the session
-partition (or destroy its root, which freezes the partition).
+chronicle (or destroy its root, which freezes the chronicle).
 A simple way to revoke session access token(s) and inflict automatic
 token refresh process is to change the session-guard associated with
-the session partition. Either way, command transactions sent by the
+the session chronicle. Either way, command transactions sent by the
 client application will then be rejected by the authority.
 This allows the vapp-worker to inform the user-agent to use its
 possible refresh-token to refresh its access-token or if there is none
@@ -249,42 +249,42 @@ in principle implement arbitrarily elaborate systems.
 vid-server also issues an authorization code for the client via
 [oauth2 user-agent redirection](https://tools.ietf.org/html/rfc6749#section-4.1.2)
 
-#### 1.5.2.1. vid-server creates a new session partition for the grant
+#### 1.5.2.1. vid-server creates a new session chronicle for the grant
 
-This session partition is a ValOS partition owned by the resource
+This session chronicle is a ValOS chronicle owned by the resource
 owner, hosted by the authority which also hosts the resources for which
-the grant is requested. As such the session partition represents the
+the grant is requested. As such the session chronicle represents the
 grant itself. In addition to all metadata of the grant request itself
 it contains the signature verification certificates and tracking events
 of all relevant grant activity. It can be used to revoke the grant
 prematurely.
 
-#### 1.5.2.1.1. vid-server obtains the private partition associated with the end-user in the resource authority
+#### 1.5.2.1.1. vid-server obtains the private chronicle associated with the end-user in the resource authority
 
-This can already exist, in which case the existing private partition is
+This can already exist, in which case the existing private chronicle is
 used.
 
-If no existing private partition is found then the vid-server,
+If no existing private chronicle is found then the vid-server,
 the authority and the end-user negotiate and create a new private
-partition for the end-user within the authority.
+chronicle for the end-user within the authority.
 
 This process might involve substantial delays and is outside the scope
 of this doc.
 
 The vid-server then registers the current end-user signing
-certificate into the private partition.
+certificate into the private chronicle.
 
-#### 1.5.2.1.2. vid-server creates the session-partition
+#### 1.5.2.1.2. vid-server creates the session-chronicle
 
 This is done via CREATED command for a new session Relation (or
 possibly a new fabric type), with:
 - the name of the session Relation is `SESSION`
 - the source of the session Relation is set to the structured
-  sub-resource `sessions` of the private partition
+  sub-resource `sessions` of the private chronicle
 - the target of the session Relation is set to the client application
-  identity partition
-- the authorityPartitionURI is set to the requested authority, making
-  the session Resource into a sub-partition
+  identity chronicle
+- the authorityURI is set to the requested authority, making
+  the session Resource into a sub-chronicle
 
 The vid-server generates the `session-guard` Ed25519 key-pair and puts
 its public key into (which?) session property/field.
@@ -292,20 +292,20 @@ its public key into (which?) session property/field.
 #### 1.5.2.1.3. The id of the session Relation is used as the basis for the authorization code
 
 This id is implicitly created by crypto-resource-id algo
-[CRYPTO-RESOURCE-ID.md] and is derived from the private partition event
+[CRYPTO-RESOURCE-ID.md] and is derived from the private chronicle event
 log hash-chain, its owner cert and a secret salt.
 
 This id can be optimistically delivered in the grant response even
-before the authority confirms or rejects the session partition creation
+before the authority confirms or rejects the session chronicle creation
 transaction.
 
-If the authority subsequently rejects the session partition creation
+If the authority subsequently rejects the session chronicle creation
 then the only result is that the authorization code itself will be
 rejected.
 
 #### 1.5.2.2. vid-server constructs the authorization grant redirection response
 
-The session partition id is placed in the authorization code.
+The session chronicle id is placed in the authorization code.
 The session-guard private key is placed in the authorization code.
 An authenticity-id is created (for CSFR prevention) and placed in the
 authorization code.
@@ -329,10 +329,10 @@ validates it and creates an access token which:
 - Is JWS? JWE? plain JSON, after all it gets encrypted anyway
 - TODO(describe fields)
 
-#### 1.5.3.1 vapp-worker chronicles an initial session partition client command
+#### 1.5.3.1 vapp-worker chronicles an initial session chronicle client command
 
 The chronicled command contains the unencrypted access token (somehow),
-is targeted to the session partition with log.index equal to 1
+is targeted to the session chronicle with log.index equal to 1
 (log.index 0 event is chronicled by the vid-server) and is signed using
 the session-guard private key.
 
@@ -346,7 +346,7 @@ the session-guard private key.
   is an attempt to reuse the authorization grant and
   [must be rejected](https://tools.ietf.org/html/rfc6749#section-4.1.2),
   also possibly (yes or no? when yes?) also invalidating all access
-  codes from the session partition.
+  codes from the session chronicle.
 - If this fails because of a forbidden session-guard signature then
   this is either erroneous or malicious request and should be elevated.
 

@@ -58,7 +58,7 @@ export default {
             ""} and which satisfy all constraints of the optionally given *additionalConditions*.${
             ""} Outgoing relations are listed in *Relatable.relations*${
             ""} and they all have *this* *Relatable* as their *Relation.source*.${
-            ""} Note: all matching relations are selected, even those in unconnected partitions.`
+            ""} Note: all matching relations are selected, even those in unconnected chronicles.`
     )(function getRelations (name, ...additionalConditions) {
       return VALEK.relations(name,
           ...additionalConditions.map(condition =>
@@ -97,7 +97,7 @@ export default {
             ""} and which satisfy all constraints of the optionally given *additionalConditions*.${
             ""} Incoming relations are listed in *Relatable.incomingRelations*${
             ""} and they all have *this* *Relatable* as their *Relation.target*.${
-            ""} Note: only relations inside connected partitions are listed${
+            ""} Note: only relations inside connected chronicles are listed${
             ""} (even though some might be inactive, f.ex. if they have an inactive prototype).`
     )(function getIncomingRelations (name, ...additionalConditions) {
       return VALEK.incomingRelations(name,

@@ -8,7 +8,7 @@ import { invariantifyObject } from "~/tools/invariantify";
 import { dumpObject, wrapError } from "~/tools/wrapError";
 
 export default function universalizeCommandData (object: ?any, options:
-    { head?: Vrapper, discourse?: Object, scope?: Object, partitionURIString?: string } = {}) {
+    { head?: Vrapper, discourse?: Object, scope?: Object, chronicleURI?: string } = {}) {
   let id, connectedId;
   try {
     if ((typeof object !== "object") || (object === null)) {
@@ -45,17 +45,17 @@ export default function universalizeCommandData (object: ?any, options:
     // ValOS reference
     if (!options.discourse) return id;
     connectedId = options.discourse.bindFieldVRL(id, {}, null);
-    const partitionURI = connectedId.getPartitionURI();
-    if (partitionURI) {
-      if (String(partitionURI) === options.partitionURIString) {
-        return connectedId.immutateWithPartitionURI();
+    const chronicleURI = connectedId.getChronicleURI();
+    if (chronicleURI) {
+      if (chronicleURI === options.chronicleURI) {
+        return connectedId.immutateWithChronicleURI();
       }
     } else if (connectedId.isGhost()) {
-      const ghostPartitionURI = options.discourse
+      const ghostChronicleURI = options.discourse
           .bindObjectId([id.getGhostPath().headHostRawId()], "Resource")
-          .getPartitionURI();
-      if (ghostPartitionURI.toString() !== options.partitionURIString) {
-        return connectedId.immutateWithPartitionURI(partitionURI);
+          .getChronicleURI();
+      if (ghostChronicleURI !== options.chronicleURI) {
+        return connectedId.immutateWithChronicleURI(chronicleURI);
       }
     }
     return connectedId;

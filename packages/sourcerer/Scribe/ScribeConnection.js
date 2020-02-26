@@ -40,7 +40,7 @@ export default class ScribeConnection extends Connection {
   // See Scribe._persistedMediaLookup for contrast.
   _pendingMediaLookup: { [mediaRawId: string]: MediaEntry } = {};
 
-  // Contains partition specific bvob state data.
+  // Contains chronicle specific bvob state data.
   _pendingBvobLookup: { [contentHash: string]: {
     localPersistProcess: Promise<Object>,
     upstreamPrepareBvobProcess: Promise<Object>,
@@ -61,18 +61,18 @@ export default class ScribeConnection extends Connection {
   getStatus () {
     return {
       indexedDB: { truthLog: this._truthLogInfo, commandQueue: this._commandQueueInfo },
-      name: this._partitionName,
+      name: this._chronicleName,
       ...super.getStatus(),
     };
   }
 
-  setPartitionName (name: string) {
-    this._partitionName = name;
-    this.setName(`'${name}'/${this.getPartitionURI().toString()}`);
+  setChronicleName (name: string) {
+    this._chronicleName = name;
+    this.setName(`'${name}'/${this.getChronicleURI()}`);
   }
 
   getName () {
-    if (this._partitionName) return `'${this._partitionName}'/${this.getRawName()}`;
+    if (this._chronicleName) return `'${this._chronicleName}'/${this.getRawName()}`;
     return super.getName();
   }
 
@@ -88,7 +88,7 @@ export default class ScribeConnection extends Connection {
       upstreamOptions.subscribeEvents = (options.narrateOptions === false)
           && options.subscribeEvents;
       this.setUpstreamConnection(
-          this._sourcerer._upstream.acquireConnection(this.getPartitionURI(), upstreamOptions));
+          this._sourcerer._upstream.acquireConnection(this.getChronicleURI(), upstreamOptions));
     }
     // ScribeConnection can be active even if the upstream
     // connection isn't, as long as there are any events in the local
@@ -111,7 +111,7 @@ export default class ScribeConnection extends Connection {
         narrateOptions.subscribeEvents = options.subscribeEvents;
         return connection.narrateEventLog(narrateOptions);
       },
-    ]), function errorOnScribePartitionConnect (error) {
+    ]), function errorOnScribeChronicleConnect (error) {
       throw connection.wrapErrorEvent(error, 1, new Error("_doConnect"),
           "\n\toptions:", ...dumpObject(options));
     });
@@ -375,7 +375,7 @@ export default class ScribeConnection extends Connection {
     }
   }
 
-  async _readTruths (options: Object) {
+  async _readTruths (options: Object = {}) {
     try {
       return await _readTruths(this, options);
     } catch (error) {
@@ -395,7 +395,7 @@ export default class ScribeConnection extends Connection {
     }
   }
 
-  async _readCommands (options: Object) {
+  async _readCommands (options: Object = {}) {
     try {
       return await _readCommands(this, options);
     } catch (error) {

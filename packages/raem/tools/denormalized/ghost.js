@@ -44,7 +44,7 @@
  * 2. Ghost prototype: Resource.prototype of the ghost is the proxy target sub-component.
  * The coupled field of the prototype is target sub-component's Resource.materializedGhosts.
  *
- * 3. Ghost partition: Resource.partition of the ghost is the instance component itself.
+ * 3. Ghost chronicle: Resource.chronicle of the ghost is the instance component itself.
  * This means that the instance is a transitive Resource.owner of the ghost (directly or through
  * intermediate ghosts). The coupled field of these owner properties is Resource.ghostOwnlings.
  * This ownership tree of the instance component thus initially reflects the ownership tree of the
@@ -52,7 +52,7 @@
  *
  * 4. Ghost access: Whenever accessing fields of an instance or any of its sub-component ghosts, all
  * resource id's which belong to the prototype or any of its must be translated (or attempted)
- * into ghost id's of the ghost partition. This makes it possible to use the prototypically accessed
+ * into ghost id's of the ghost chronicle. This makes it possible to use the prototypically accessed
  * id references of original sub-components in conjunction with explicit references to ghost and
  * non-ghost instance sub-components.
  *
@@ -159,7 +159,7 @@ function _createMaterializeGhostAction (resolver: Resolver, state: State,
   try {
     if (internallyKnownType) {
       // Transient found: already materialized ghost or not a ghost to
-      // begin with. Still possibly inside an inactive partition.
+      // begin with. Still possibly inside an absent chronicle.
       // Return without side effects.
       const transient = state.getIn([internallyKnownType, rawId]);
       const id = transient.get("id");
@@ -169,15 +169,15 @@ function _createMaterializeGhostAction (resolver: Resolver, state: State,
       // No host prototype means this is the Ghost path base Resource
       // and ghostHostRawId equal to rawId means this is an instance.
       // In both cases a missing transient means we're either inside an
-      // unconnected partition or the referred resource doesn't exist.
+      // unconnected chronicle or the referred resource doesn't exist.
       // As it stands there is no theoretical way to determine the
-      // actual partition id reliably, either.
+      // actual chronicle id reliably, either.
       // Create an inactive reference for the resource.
       const id = knownId || vRef(rawId);
       if (knownId && !knownId.isInactive()) {
-        throw new Error("Cannot materialize a non-existent resource (partition is active)");
+        throw new Error("Cannot materialize a non-existent resource (chronicle is active)");
       }
-      // Also make the resource inactive, not the partition reference
+      // Also make the resource inactive, not the chronicle reference
       // prototype. This way only transient merging will activate it.
       id.setInactive();
       internallyKnownType = resolver.schema.inactiveType.name;
@@ -188,7 +188,7 @@ function _createMaterializeGhostAction (resolver: Resolver, state: State,
       return { id, internallyKnownType, ghostPath: id.getGhostPath() };
     }
     // A regular non-root ghost Resource with no transient.
-    // Still possibly inside an inactive partition.
+    // Still possibly inside an absent chronicle.
     const { id: ghostPrototype, internallyKnownType: prototypeTypeName, ghostPath: prototypePath }
         = _createMaterializeGhostAction(resolver, state,
             ghostObjectPath.previousPrototypeStep(), undefined, undefined,

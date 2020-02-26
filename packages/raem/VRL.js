@@ -31,9 +31,9 @@ export default @vdocorate([
     coupledField: `the coupled field name on the target Resource which
                   contains a backreference to a referring Resource if
                   this reference is part of a coupling.`,
-    partitionURI: `for cross-partition ValOS references partitionURI
+    chronicleURI: `for cross-chronicle ValOS references the chronicleURI
                   denotes the fully specified universal location of the
-                  target partition.`,
+                  target chronicle.`,
   } },
   `Because many use cases only need the rawId there is a collection
   type:`,
@@ -43,12 +43,12 @@ export default @vdocorate([
   object reference is required. This usage has limitations, however.
   Because rawId only specifies the identity of an object it cannot be
   reliably used to locate the object content in isolation. The most
-  notable examples of this are immaterial ghosts and cross-partition
+  notable examples of this are immaterial ghosts and cross-chronicle
   references: Immaterial ghosts inherit their properties from a
   prototype but don't data have any data entries themselves (by
   design). The ghostPath is required to locate the prototypes. For a
-  cross-partition reference the target partition might not necessarily
-  be loaded: partitionURI (which the ValOS infrastructure guarantees to
+  cross-chronicle reference the target chronicle might not necessarily
+  be loaded: chronicleURI (which the ValOS infrastructure guarantees to
   be locateable) is needed in this case.`,
   "@export",
   "@class VRL",
@@ -167,7 +167,7 @@ class VRL {
     return this._r.ghostPath ? this._r.ghostPath.isInstance() : false;
   }
 
-  // Partitions section
+  // Chronicles section
 
   isInactive (): ?boolean { return this._r.inactive || false; }
   setInactive (value: boolean = true): ?boolean {
@@ -175,13 +175,13 @@ class VRL {
     return this;
   }
 
-  getPartitionURI (): ?ValaaURI { return this._r.partition; }
-  getPartitionRawId (): ?string {
+  getChronicleURI (): string { return this._r.partition; }
+  getChronicleId (): ?string {
     try {
       return naiveURI.getPartitionRawId(this._r.partition);
     } catch (error) {
       throw wrapError(error, `During ${this.debugId()}\n .getPartitionRawId(), with:`,
-          "\n\tpartitionURI:", this._r.partition);
+          "\n\tchronicleURI:", this._r.partition);
     }
   }
   getChronicleURI (): ValaaURI { return this._r.partition; }
@@ -204,11 +204,11 @@ class VRL {
           "\n\tthis:", ...dumpObject(this));
     }
   }
-  clearPartitionURI () { this._r.partition = undefined; }
-  immutateWithPartitionURI (partitionURI?: ValaaURI) {
+  clearChronicleURI () { this._r.partition = undefined; }
+  immutateWithChronicleURI (chronicleURI?: string) {
     const ret = Object.create(this);
     ret._r = Object.create(ret._r);
-    ret._r.partition = partitionURI;
+    ret._r.partition = chronicleURI;
     return ret;
   }
 
@@ -248,7 +248,7 @@ class VRL {
       if (this._r.partition) {
         ret[1].partition = this._r.partition.toString();
         if (typeof ret[1].partition !== "string") {
-          throw new Error(`Invalid stringification of partition ${this._r.partition}`);
+          throw new Error(`Invalid stringification of chronicle ${this._r.partition}`);
         }
         if (usedFields < 2) usedFields = 2;
       }
@@ -354,34 +354,34 @@ export function invariantifyTypeName (candidate: ?string, name: string = "typeNa
 }
 
 /**
- * Create a VRL from given rawId, coupling, ghostPath and partitionURI.
+ * Create a VRL from given rawId, coupling, ghostPath and chronicleURI.
  *
  * @export
  * @param {string} idData
  * @param {string} coupling
  * @param {GhostPath} ghostPath
- * @param {ValaaURI} partitionURI
+ * @param {string} chronicleURI
  * @returns {VRL}
  */
 export function vRef (rawId: RawId, coupling: ?string = null, ghostPath: ?GhostPath = null,
-    partitionURI: ?ValaaURI = null): VRL {
+    chronicleURI: ?string = null): VRL {
   try {
-    invariantifyString(rawId, "vRef.rawId");
+    if (typeof rawId !== "string") invariantifyString(rawId, "vRef.rawId");
     invariantifyString(coupling, "vRef.coupling", { allowNull: true });
     invariantifyObject(ghostPath, "vRef.ghostPath", { allowNull: true, instanceof: GhostPath });
-    invariantifyString(partitionURI, "vRef.partitionURI", { allowNull: true, allowEmpty: true });
+    invariantifyString(chronicleURI, "vRef.chronicleURI", { allowNull: true, allowEmpty: true });
     // if (rawId[0] === "@") { validateVRID(rawId); }
     const ret = new VRL(rawId);
     let resolverComponent;
     if (ghostPath) resolverComponent = { ghostPath };
-    if (partitionURI) (resolverComponent || (resolverComponent = {})).partition = partitionURI;
+    if (chronicleURI) (resolverComponent || (resolverComponent = {})).partition = chronicleURI;
     if (resolverComponent) ret.initResolverComponent(resolverComponent);
     if (coupling) ret.initQueryComponent({ coupling });
     return ret;
   } catch (error) {
     throw wrapError(error, `During vRef('${rawId
             }', { coupling: '${coupling}' ghostPath: ${String(ghostPath)
-            } }, { partition: '${String(partitionURI)}' }}), with:`,
+            } }, { partition: '${chronicleURI}' }}), with:`,
         "\n\tghostPath:", ghostPath);
   }
 }
@@ -389,19 +389,19 @@ export function vRef (rawId: RawId, coupling: ?string = null, ghostPath: ?GhostP
 export const obtainVRL = vdocorate([
   `Returns a new VRL object copied or deserialized from given idData,
   with its fields overridden with given coupling, ghostPath and/or
-  partitionURI. If any of the overrides is null the original value is
+  chronicleURI. If any of the overrides is null the original value is
   kept.`,
   "@export",
   "@param {IdData} idData",
   "@param {string=tryCoupledFieldFrom(idData)} coupling",
   "@param {GhostPath=tryGhostPathFrom(idData)} ghostPath",
-  "@param {ValaaURI=tryPartitionURIFrom(idData)} partitionURI",
+  "@param {ValaaURI=tryChronicleURIFrom(idData)} chronicleURI",
   "@returns {VRL}",
 ])((idData: IdData | JSONIdData,
     coupling: ?string = tryCoupledFieldFrom(idData) || null,
     ghostPath: ?GhostPath = tryGhostPathFrom(idData) || null,
-    partitionURI: ?ValaaURI = tryPartitionURIFrom(idData) || null): VRL =>
-        vRef(getRawIdFrom(idData), coupling, ghostPath, partitionURI));
+    chronicleURI: ?ValaaURI = tryChronicleURIFrom(idData) || null): VRL =>
+        vRef(getRawIdFrom(idData), coupling, ghostPath, chronicleURI));
 
 /**
  * Returns rawId from given idData or throws if the input does not have a valid rawId.

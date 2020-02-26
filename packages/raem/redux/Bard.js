@@ -143,19 +143,19 @@ export function createBardReducer (bardOperation: (bard: Bard) => State,
  *                 overhauled
  *
  * A fundamental event log requirement is that it must fully reduceable in any configuration of
- * other partitions being partially or fully connected. This is called an universal playback
- * context. In this context some partition resources might remain inactive if they depend on another
- * (by definition, non-connected) partition. Even so, the event log playback must succeed in a way
+ * other chronicles being partially or fully connected. This is called an universal playback
+ * context. In this context some chronicle resources might remain inactive if they depend on another
+ * (by definition, non-connected) chronicle. Even so, the event log playback must succeed in a way
  * that all other resources must not be affected but become active with up-to-date state (unless
  * they have their own dependencies).
  * But not only that, any inactive resources in the universal context must be in a state that they
- * become fully active when their dependent partitions are connected without the need for replaying
+ * become fully active when their dependent chronicles are connected without the need for replaying
  * the original event log.
  *
  * Event objects coming in from downstream can be incomplete in the universal context.
  * For example ghost objects and their ownership relationships might depend on information that is
  * only available in their prototypes: this prototype and all the information on all its owned
- * objects can reside in another partition.
+ * objects can reside in another chronicle.
  * Event universalisation is the process where the event is extended to contain all information that
  * is needed for its playback on the universal context.
  */
@@ -171,11 +171,11 @@ export default class Bard extends Resolver {
   constructor (options: Object) {
     super(options);
     this.subReduce = options.subReduce;
-    this.createCommandPartitionInfo = () => ({});
+    this.createCommandChronicleInfo = () => ({});
   }
 
-  setCreateCommandPartitionInfo (createCommandPartitionInfo: Function) {
-    this.createCommandPartitionInfo = createCommandPartitionInfo;
+  setCreateCommandChronicleInfo (createCommandChronicleInfo: Function) {
+    this.createCommandChronicleInfo = createCommandChronicleInfo;
   }
 
   debugId () {
@@ -342,10 +342,10 @@ export default class Bard extends Resolver {
     if (!reference) return reference;
     if (!this.event.meta.isBeingUniversalized) {
       // Downstream reduction
-      reference = this.obtainReference(reference, this.event.meta.partitionURI);
-      if (!reference.getPartitionURI() && !this.event.meta.partitionURI) {
+      reference = this.obtainReference(reference, this.event.meta.chronicleURI);
+      if (!reference.getChronicleURI() && !this.event.meta.chronicleURI) {
         throw new Error(`INTERNAL ERROR: Cannot correlate downstream event reference (field '${
-            propertyName}') because root action is missing meta.partitionURI`);
+            propertyName}') because root action is missing meta.chronicleURI`);
       }
       passage[propertyName] = reference;
     } else {
@@ -449,13 +449,13 @@ function _createResourceVRLDeserializer (fieldInfo) {
   function deserializeResourceVRL (serialized, bard) {
     if (!serialized) return null;
     const resourceId = bard.bindFieldVRL(
-        serialized, fieldInfo, bard.event.meta.partitionURI || null);
-    // Non-ghosts have the correct partitionURI in the Resource.id itself
-    if (resourceId.getPartitionURI() || !resourceId.isGhost()) return resourceId;
-    // Ghosts have the correct partitionURI in the host Resource.id
+        serialized, fieldInfo, bard.event.meta.chronicleURI || null);
+    // Non-ghosts have the correct chronicleURI in the Resource.id itself
+    if (resourceId.getChronicleURI() || !resourceId.isGhost()) return resourceId;
+    // Ghosts have the correct chronicleURI in the host Resource.id
     const ghostPath = resourceId.getGhostPath();
     const hostId = bard.bindObjectId([ghostPath.headHostRawId()], "Resource");
-    return resourceId.immutateWithPartitionURI(hostId.getPartitionURI());
+    return resourceId.immutateWithChronicleURI(hostId.getChronicleURI());
   }
   return deserializeResourceVRL;
 }
@@ -471,7 +471,7 @@ function _createSingularDataDeserializer (fieldInfo) {
         return bard.bindObjectId(
             (typeof dat === "string") ? [data] : data,
             concreteTypeName || "Data",
-            bard.event.meta.partitionURI || null);
+            bard.event.meta.chronicleURI || null);
       }
       const typeName = concreteTypeName || data.typeName;
       if (!typeName) {

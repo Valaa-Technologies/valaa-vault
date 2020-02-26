@@ -17,18 +17,18 @@ export default class IdentityManager extends FabricEventTarget {
 
   list () { return Object.keys(this._activeIdentities); }
 
-  add (identityChronicleURI: any, options: Object = {}) {
+  add (identityChronicleURI: string, options: Object = {}) {
     try {
-      if (!identityChronicleURI) {
-        throw new Error(`identityChronicle required, got: ${
+      if (!identityChronicleURI || (typeof identityChronicleURI !== "string")) {
+        throw new Error(`IdentityManager.add.identityChronicleURI string required, got: ${
             debugObjectType(identityChronicleURI)}`);
       }
-      options.authority = this._sourcerer.obtainAuthorityOfPartition(identityChronicleURI);
+      options.authority = this._sourcerer.obtainAuthorityOfChronicle(identityChronicleURI);
       if (!options.authority) {
-        throw new Error(`Can't locate the authority for identity chronicle: <${
-            identityChronicleURI}>`);
+        throw new Error(
+            `Can't determine the authority of identity chronicle: <${identityChronicleURI}>`);
       }
-      this._activeIdentities[String(identityChronicleURI)] = options;
+      this._activeIdentities[identityChronicleURI] = options;
       return true;
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, new Error("identity.add"),
@@ -36,12 +36,12 @@ export default class IdentityManager extends FabricEventTarget {
     }
   }
 
-  get (identityChronicleURI: any) { return this._activeIdentities[identityChronicleURI]; }
+  get (identityChronicleURI: string) { return this._activeIdentities[identityChronicleURI]; }
 
-  remove (identityChronicleURI: any) {
+  remove (identityChronicleURI: string) {
     try {
-      if (!identityChronicleURI) {
-        throw new Error(`identityChronicle required, got: ${
+      if (!identityChronicleURI || (typeof identityChronicleURI !== "string")) {
+        throw new Error(`IdentityManager.remove.identityChronicle required, got: ${
             debugObjectType(identityChronicleURI)}`);
       }
       const uriString = String(identityChronicleURI);

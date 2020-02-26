@@ -11,16 +11,16 @@ let harness = null;
 afterEach(() => { if (harness) harness.cleanupScribe(); harness = null; });
 
 describe("Oracle", () => {
-  it("sets up a connection and creates a partition", async () => {
+  it("sets up a connection and creates a chronicle", async () => {
     harness = await createSourcererOracleHarness({});
     expect(harness.testConnection).toBeTruthy();
     expect(harness.testConnection.isConnected())
         .toEqual(true);
     expect(harness.run(vRef(testRootId), "name"))
-        .toEqual("Automatic Test Partition Root");
+        .toEqual("Automatic Test Chronicle Root");
   });
 
-  const freezePartitionEvent = transacted({
+  const freezeChronicleEvent = transacted({
     actions: [
       fieldsSet({
         id: vRef(testRootId), typeName: "Entity",
@@ -39,11 +39,10 @@ describe("Oracle", () => {
 
   it("Rejects commands chronicled after a freeze command", async () => {
     harness = await createSourcererOracleHarness({});
-    const partitionURI = naiveURI.createChronicleURI(testAuthorityURI, testRootId);
-    await harness.sourcerer
-        .acquireConnection(partitionURI).asActiveConnection();
+    const chronicleURI = naiveURI.createChronicleURI(testAuthorityURI, testRootId);
+    await harness.sourcerer.acquireConnection(chronicleURI).asActiveConnection();
 
-    const commandsUpToFreeze = [freezePartitionEvent];
+    const commandsUpToFreeze = [freezeChronicleEvent];
     for (const command of commandsUpToFreeze) {
       await harness.chronicleEvent(command).getPremiereStory();
     }

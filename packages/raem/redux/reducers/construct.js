@@ -15,7 +15,7 @@ import isResourceType from "~/raem/tools/graphql/isResourceType";
 import fieldInitialValue from "~/raem/tools/graphql/fieldInitialValue";
 import { addCoupleCouplingPassages } from "~/raem/tools/denormalized/couplings";
 import { createMaterializeGhostAction } from "~/raem/tools/denormalized/ghost";
-import { setCreatedObjectPartition, universalizePartitionMutation }
+import { setCreatedObjectChronicle, universalizeChronicleMutation }
     from "~/raem/tools/denormalized/partitions";
 
 import { dumpObject, invariantify, invariantifyString } from "~/tools";
@@ -59,7 +59,7 @@ export function prepareCreateOrDuplicateObjectTransientAndId (bard: CreateBard, 
       return bard.state;
     }
     // 3. Inactive object stub transients are created in denormalized
-    //    state by various cross-partition references. Such a stub
+    //    state by various cross-chronicle references. Such a stub
     //    contains "id" and any possible already-related transientField
     //    fields. These stubs are merged to the newly created Resource
     //    on creation.
@@ -179,10 +179,10 @@ export function recurseCreateOrDuplicate (bard: CreateBard, actionTypeName: stri
       }
 
       if (isResource) {
-        bard.refreshPartition = false;
-        setCreatedObjectPartition(bard.objectTransient);
+        bard.refreshChronicle = false;
+        setCreatedObjectChronicle(bard.objectTransient);
         if (!(bard.passage.meta || {}).isVirtualAction) {
-          universalizePartitionMutation(bard, bard.objectId);
+          universalizeChronicleMutation(bard, bard.objectId);
         }
       }
 

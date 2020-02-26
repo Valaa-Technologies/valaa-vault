@@ -5,7 +5,7 @@ import primaryField from "~/raem/tools/graphql/primaryField";
 import Data, { dataInterface } from "~/raem/schema/Data";
 import Discoverable from "~/raem/schema/Discoverable";
 
-const OBJECT_DESCRIPTION = "test partition glue";
+const OBJECT_DESCRIPTION = "test chronicle glue";
 
 export default new GraphQLObjectType({
   name: "TestDataGlue",
@@ -18,11 +18,11 @@ export default new GraphQLObjectType({
     ...dataInterface(OBJECT_DESCRIPTION).fields(),
 
     ...primaryField("source", Discoverable,
-        "The source partition of the glue",
+        "The source chronicle of the glue",
     ),
 
     ...primaryField("target", Discoverable,
-        "The target partition of the glue",
+        "The target chronicle of the glue",
     ),
   }),
 });

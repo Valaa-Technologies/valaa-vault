@@ -14,13 +14,13 @@ The dense definition of ValOS ecosystem is:
   2. a unified, global, immense *valospace* network, which is
      segmented into
   3. smaller, non-divisible but fully cross-connected groups of
-     Resources called *Partition*s, each of which is owned by
-  4. *Authorities*, which also govern, host and serve those partitions
+     Resources called *Chronicle*s, each of which is owned by
+  4. *Authorities*, which also govern, host and serve those chronicles
      to downstream users via
   5. a distributed network of high-level *Sourcerer* nodes, which provide
      the concrete
   6. *Connection* access points which enable users to access
-    the upstream partitions.
+    the upstream chronicles.
 
 With these concepts this specification aims to implement the
 distributed event sourcing paradigm between many independent downstream
@@ -82,7 +82,7 @@ and appreciates the knowledge of history at the front and center.
 
 ### 2.2. *valospace* contains everything
 
-### 2.3. *Partition*s allow loading resources and requesting updates selectively
+### 2.3. *Chronicle*s allow loading resources and requesting updates selectively
 
 Event sourcing, for all its expressive power and architectural
 simplicity, has a major glaring weakness: loading a single resource
@@ -91,60 +91,60 @@ limited contexts like singular projects of a desktop application. But
 valospace as a unified, global repository is immense. In order to not
 be useless it cannot be a trivial singular event log.
 
-ValOS solves this problem with *Partition*s which divide the valospace
+ValOS solves this problem with *Chronicle*s which divide the valospace
 into smaller pieces.
 
 
-#### 2.3.1. Partition rules
+#### 2.3.1. Chronicle rules
 
-##### 2.3.1.1. A Partition contains a single root Entity
+##### 2.3.1.1. A Chronicle contains a single root Entity
 
-This entity is called *the partition root*.
-
-
-##### 2.3.1.2. All resources owned (even indirectly) by the partition root belong to the partition
-
-Together with the partition root these are called
-*the partition resources*.
+This entity is called *the chronicle root*.
 
 
-##### 2.3.1.3. Each partition has an event log which contains all the events that modify the partition resources and no other events
+##### 2.3.1.2. All resources owned (even indirectly) by the chronicle root belong to the chronicle
+
+Together with the chronicle root these are called
+*the chronicle resources*.
+
+
+##### 2.3.1.3. Each chronicle has an event log which contains all the events that modify the chronicle resources and no other events
 
 Those events have an incrementing serial number *log.index*. Together
-they form *the partition event log*.
+they form *the chronicle event log*.
 
 
 #### 2.3.2. Low coupling and high cohesion rules even more
 
 ##### 2.3.2.1. Low coupling saves network bandwidth and CPU ...
 
-When [partitions have low coupling in relation to each other](https://en.wikipedia.org/wiki/Coupling_(computer_programming))
-(ie. dependencies between partitions are clear and mostly
+When [chronicles have low coupling in relation to each other](https://en.wikipedia.org/wiki/Coupling_(computer_programming))
+(ie. dependencies between chronicles are clear and mostly
 one-directional) then bandwidth and computational resources can be
-saved. Partitions which contain information that is auxiliary to
+saved. Chronicles which contain information that is auxiliary to
 the application don't need to be loaded before needed. For example
-a game might have separate areas be in separate partitions and only
+a game might have separate areas be in separate chronicles and only
 start loading the next area when the player is about to finish
 the previous one.
 
 
 ##### 2.3.2.2. ... and high cohesion saves time, spares nerves and minimizes overheads
 
-Loading a partition still loads all of its resources. With a sound
-partition design this is advantageous. As a corollary to the low
-coupling above, when [resources inside a partition have high cohesion](https://en.wikipedia.org/wiki/Cohesion_(computer_science))
+Loading a chronicle still loads all of its resources. With a sound
+chronicle design this is advantageous. As a corollary to the low
+coupling above, when [resources inside a chronicle have high cohesion](https://en.wikipedia.org/wiki/Cohesion_(computer_science))
 (ie. loading one resource means that it is very likely to load the
 others) it is useful to load them all together as it spares the network
 latency and overheads of repeated consequtive requests.
 
 
-### 2.4. *Authority*s implement the infrastructure and authorize new events for their partitions
+### 2.4. *Authority*s implement the infrastructure and authorize new events for their chronicles
 
 ### 2.5. *Sourcerer*s are software components which connect to each other and form information streams
 
-### 2.6. *Connection* provides an API for accessing an individual partition
+### 2.6. *Connection* provides an API for accessing an individual chronicle
 
-Receiving and sending information to a partition is done using
+Receiving and sending information to a chronicle is done using
 a *Connection*. With the the Sourcerer that provided
 the connection it manages four types of information streams:
   1. commands sent towards upstream
@@ -230,19 +230,19 @@ host object associated with the context resource.
 TODO(iridian): Update outdated documentation
 Restricted commands are commands created by downstream components which
 contain incomplete information and cannot yet be chronicled upstream.
-An example of such is a cross-partition DUPLICATED command which only
+An example of such is a cross-chronicle DUPLICATED command which only
 contains the source and the target owner resources: the final command
-which reaches the target partition event log must also contain full
+which reaches the target chronicle event log must also contain full
 state of the duplicated resource.
 The process of adding all necessary information to a command is called
 *universalization*. A universalized command can then be handled by any
-clients irrespective of their local partition availability context.
+clients irrespective of their local chronicle availability context.
 
 
 ## 5. Concrete components
 
 ### 5.1. The *FalseProphet* extends Corpus in-memory store with full connectivity and transactionality
 
-### 5.2. The *Scribe* provides partition content, command queue and event log caching in IndexedDB.
+### 5.2. The *Scribe* provides chronicle content, command queue and event log caching in IndexedDB.
 
 ### 5.3. The *Oracle* manages connection information stream routing to authorities and Scribe

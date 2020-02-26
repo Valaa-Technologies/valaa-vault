@@ -35,7 +35,8 @@ export default function enfoldSchemaSheath (global: Object, valos: Object, hostD
   // TODO(iridian, 2019-04): Deprecate and remove
   valos.Blob = valos.Bvob;
   valos.ResourceStub = valos.TransientFields;
-  valos.Chronicle = valos.Partition;
+  valos.Partition = valos.Chronicle;
+  // valos.Chronicle = valos.Partition;
 }
 
 /**

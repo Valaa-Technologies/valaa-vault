@@ -6,7 +6,7 @@ import { vRef } from "~/raem/VRL";
 import {
   testRootId, testChronicleURI,
   createFalseProphet, createSourcererOracleHarness, createTestMockSourcerer,
-  createdTestPartitionEntity, MockFollower,
+  createdTestChronicleEntity, MockFollower,
 } from "~/sourcerer/test/SourcererTestHarness";
 
 let harness = null;
@@ -73,8 +73,8 @@ describe("FalseProphet", () => {
     let delayer = new Promise(resolve => { resolveDelay = resolve; });
     falseProphet.setCommandNotificationBlocker(delayer);
     falseProphet.clockEvent(2, () =>
-        ["test.chronicleEvent.createdTestPartitionEntity.getPremiereStory"]);
-    await discourse.chronicleEvent(createdTestPartitionEntity).getPremiereStory();
+        ["test.chronicleEvent.createdTestChronicleEntity.getPremiereStory"]);
+    await discourse.chronicleEvent(createdTestChronicleEntity).getPremiereStory();
     resolveDelay();
     falseProphet.clockEvent(2, () => ["test.pendingCommandNotification#1"]);
     await falseProphet._pendingCommandNotification;

@@ -47,7 +47,7 @@ import { _getFieldGhostElevation, _elevateReference } from "./FieldInfo";
  * @class Resolver
  */
 export default class Resolver extends FabricEventTarget {
-  deserializeReference: (idData: IdData, contextPartitionURI?: ValaaURI) => VRL;
+  deserializeReference: (idData: IdData, contextChronicleURI?: string) => VRL;
 
   constructor (options: ?Object) {
     super(options.name, options.verbosity, options.logger);
@@ -60,12 +60,11 @@ export default class Resolver extends FabricEventTarget {
 
   schema: GraphQLSchema;
 
-  obtainReference (params, contextPartitionURI: ?ValaaURI) {
-    return params
-        && (tryHostRef(params)
-            || (this._deserializeReference
-                && this._deserializeReference(params, contextPartitionURI))
-            || obtainVRL(params, undefined, undefined, contextPartitionURI || undefined));
+  obtainReference (params, contextChronicleURI: ?ValaaURI) {
+    return params && (tryHostRef(params)
+        || (this._deserializeReference
+            && this._deserializeReference(params, contextChronicleURI))
+        || obtainVRL(params, undefined, undefined, contextChronicleURI || undefined));
   }
 
   setDeserializeReference (deserializeReference: Function) {
@@ -133,11 +132,11 @@ export default class Resolver extends FabricEventTarget {
    * @returns
    */
   bindFieldVRL (fieldRef: VRL | JSONIdData, fieldInfo: FieldInfo,
-      contextPartitionURI?: ValaaURI) {
+      contextChronicleURI?: ValaaURI) {
     const coupledField = fieldInfo.coupledField
         || tryCoupledFieldFrom(fieldRef)
         || fieldInfo.defaultCoupledField;
-    const boundId = this.bindObjectId(fieldRef, "TransientFields", contextPartitionURI);
+    const boundId = this.bindObjectId(fieldRef, "TransientFields", contextChronicleURI);
     return !coupledField ? boundId : boundId.coupleWith(coupledField);
   }
 
@@ -148,7 +147,7 @@ export default class Resolver extends FabricEventTarget {
    *
    * 1. it validates that the referred resource actually exists within
    *    the Corpus
-   * 2. for commands going upstream the correct partition URI is made
+   * 2. for commands going upstream the correct chronicle URI is made
    *    available
    * 3. it applies flyweight pattern on the non-trivial id VRL
    *    construct, improving performance
@@ -172,7 +171,7 @@ export default class Resolver extends FabricEventTarget {
    * @param {JSONIdData} id             serialized JSONIdData or plain VRL
    * @returns {VRL}
    */
-  bindObjectId (idData: IdData, typeName: string, contextPartitionURI?: ValaaURI) {
+  bindObjectId (idData: IdData, typeName: string, contextChronicleURI?: ValaaURI) {
     let object;
     let objectId = tryHostRef(idData);
     const rawId = objectId ? objectId.rawId()
@@ -181,22 +180,22 @@ export default class Resolver extends FabricEventTarget {
     try {
       object = this.tryStateTransient(rawId, typeName);
       // TODO(iridian): Evaluate if validating a bound id against the
-      // reference idData (for partitions etc.) makes sense.
+      // reference idData (for chronicles etc.) makes sense.
       if (object) return object.get("id");
-      if (!objectId) objectId = this.obtainReference(idData, contextPartitionURI);
+      if (!objectId) objectId = this.obtainReference(idData, contextChronicleURI);
 
       // Immaterial ghost, inactive or fail
       // Inactive references might become active.
       if (objectId.isInactive()) return objectId;
       // Immaterial ghosts are not bound (although maybe the ghost path steps should be)
       if (objectId.isGhost()) return objectId;
-      const partitionURI = objectId.getPartitionURI();
-      if (!partitionURI) {
-        throw new Error(`Cannot determine the partition of reference <${objectId
-            }> to missing transient`);
+      const chronicleURI = objectId.getChronicleURI();
+      if (!chronicleURI) {
+        throw new Error(`Cannot determine the chronicle of reference <${objectId
+            }> (which refers to a missing transient)`);
       }
-      this.warnEvent(`Cannot bind to non-existent non-ghost resource <${
-            objectId}> inside active partition <${partitionURI}>`,
+      this.warnEvent(`Could not bind to non-existent non-ghost resource <${
+            objectId}> via active connection <${chronicleURI}>`,
           "\n\teither destroyed or non-created; marking reference as inactive",
           "\n\tduring passage:", ...dumpObject(this.passage));
       // TODO(iridian, 2019-01): Improve destroyed resource handling
@@ -205,7 +204,7 @@ export default class Resolver extends FabricEventTarget {
       throw this.wrapErrorEvent(error, 2,
           `bindObjectId(${rawId || objectId || idData}:${typeName})`,
           "\n\tidData:", ...dumpObject(idData),
-          "\n\tcontextPartitionURI:", ...dumpObject(contextPartitionURI),
+          "\n\tcontextChronicleURI:", ...dumpObject(contextChronicleURI),
           "\n\tobjectId candidate:", ...dumpObject(objectId),
           "\n\tobject:", ...dumpObject(object),
           "\n\tthis:", ...dumpObject(this));
@@ -295,7 +294,7 @@ export default class Resolver extends FabricEventTarget {
           || !this.goToMostInheritedMaterializedTransient(ghostPath,
               typeName || this.objectTypeName, require, withOwnField, this.objectTransient)) {
         // A missing concrete resource or a ghost resource with its
-        // base prototype fully in an inactive partition.
+        // base prototype fully in an absent chronicle.
         this.objectId = null;
         this.objectTransient = null;
       } else if (onlyMostMaterialized || withOwnField) {

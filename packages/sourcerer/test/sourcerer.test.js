@@ -91,9 +91,9 @@ describe("Sourcerer", () => {
     for (const command of commands) {
       const claimResult = await harness.chronicleEvent(command);
       await claimResult.getPremiereStory();
-      const partitionCommand = await claimResult.getCommandOf(harness.testChronicleURI);
+      const venueCommand = await claimResult.getCommandOf(harness.testChronicleURI);
       const logIndex = scribeConnection.getFirstUnusedCommandEventId() - 1;
-      await expectStoredInDB(partitionCommand, database, "commands", logIndex);
+      await expectStoredInDB(venueCommand, database, "commands", logIndex);
     }
   });
 
@@ -150,7 +150,7 @@ describe("Sourcerer", () => {
     return JSON.parse(JSON.stringify(event));
   }
 
-  it("confirms remote partition commands as truths", async () => {
+  it("confirms remote chronicle commands as truths", async () => {
     const { scribeConnection, authorityConnection } =
         await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
     let totalCommandCount;
@@ -200,7 +200,7 @@ describe("Sourcerer", () => {
     expectConnectionEventIds(scribeConnection, 0, 4, 4);
   });
 
-  it("automatically confirms local partition commands as truths", async () => {
+  it("automatically confirms local chronicle commands as truths", async () => {
     const { scribeConnection } = await setUp({ isLocallyPersisted: true }, { verbosity: 0 });
     let totalCommandCount;
     harness.sourcerer.setCommandCountCallback((total) => { totalCommandCount = total; });
@@ -332,7 +332,7 @@ describe("Sourcerer", () => {
     authorityConnection._chroniclings.splice(0, 1);
     oneEntries[0].resolveTruthEvent(oneTruthEvent[0]);
     // Mismatching log.index's between sent commands and incoming truths
-    // will inhibit prophecy partition command rechronicles and will
+    // will inhibit prophecy chronicle command rechronicles and will
     // delay prophecy resolutions but otherwise has no other effect.
     expect(secondsTruths.length).toEqual(0);
     expectConnectionEventIds(scribeConnection, 0, 1, 4);
@@ -565,7 +565,7 @@ describe("Sourcerer", () => {
     expectConnectionEventIds(scribeConnection, 0, 2, 2);
     expect(failures[0].message)
         .toEqual(expect.stringMatching(/Not permitted/));
-    expect(truths[1].meta.partitions[String(harness.testChronicleURI)].truth.aspects.log.index)
+    expect(truths[1].meta.chronicles[String(harness.testChronicleURI)].truth.aspects.log.index)
         .toEqual(1);
     await results[1].getTruthEvent();
     expect(results[1].getLogAspectOf(harness.testChronicleURI).index)
@@ -578,14 +578,14 @@ describe("Sourcerer", () => {
   });
 });
 
-describe("Cross-partition", () => {
-  it("handles out-of-order cross-partition incomingRelations", async () => {
+describe("Cross-chronicle", () => {
+  it("handles out-of-order cross-chronicle incomingRelations", async () => {
     const { scribeConnection } =
         await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
-    const latePartitionURI = naiveURI.createChronicleURI(
+    const lateChronicleURI = naiveURI.createChronicleURI(
         harness.testAuthorityURI, "@$~raw:test_late@@");
 
-    const lateTargetId = vRef("late_target", undefined, undefined, latePartitionURI);
+    const lateTargetId = vRef("late_target", undefined, undefined, lateChronicleURI);
 
     await scribeConnection.chronicleEvent(created({
       id: ["CrossRelation_A"], typeName: "Relation",
@@ -599,7 +599,7 @@ describe("Cross-partition", () => {
       },
     }), { isTruth: true }).getPersistedEvent();
 
-    const lateConnection = harness.sourcerer.acquireConnection(latePartitionURI);
+    const lateConnection = harness.sourcerer.acquireConnection(lateChronicleURI);
     harness.tryGetTestAuthorityConnection(lateConnection).addNarrateResults({ eventIdBegin: 0 }, [
       created({
         id: ["@$~raw:test_late@@"], typeName: "Entity",
@@ -618,20 +618,20 @@ describe("Cross-partition", () => {
         .toEqual(1);
   });
 
-  it("handles out-of-order instantiation with properties in both partitions", async () => {
+  it("handles out-of-order instantiation with properties in both chronicles", async () => {
     const { scribeConnection } =
         await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
-    const latePartitionURI = naiveURI.createChronicleURI(
+    const lateChronicleURI = naiveURI.createChronicleURI(
         harness.testAuthorityURI, "@$~raw:test_late@@");
 
-    const latePrototypeId = vRef("late_prototype", undefined, undefined, latePartitionURI);
+    const latePrototypeId = vRef("late_prototype", undefined, undefined, lateChronicleURI);
 
     const index = scribeConnection.getFirstUnusedCommandEventId();
     await Promise.all(scribeConnection.chronicleEvents([
       created({
         id: ["CrossEntryInstance_A"], typeName: "Entity",
         initialState: { owner: [testRootId], instancePrototype: latePrototypeId.toJSON(),
-          name: "Cross-partition instance",
+          name: "Cross-chronicle instance",
         },
         aspects: { version: "0.2", log: { index: index + 0 }, command: { id: "cid-1" } },
       }),
@@ -643,7 +643,7 @@ describe("Cross-partition", () => {
         aspects: { version: "0.2", log: { index: index + 1 }, command: { id: "cid-2" } },
       })], { isTruth: true }).eventResults.map(result => result.getPersistedEvent()));
 
-    const lateConnection = harness.sourcerer.acquireConnection(latePartitionURI);
+    const lateConnection = harness.sourcerer.acquireConnection(lateChronicleURI);
     harness.tryGetTestAuthorityConnection(lateConnection).addNarrateResults({ eventIdBegin: 0 }, [
       created({
         id: ["@$~raw:test_late@@"], typeName: "Entity",

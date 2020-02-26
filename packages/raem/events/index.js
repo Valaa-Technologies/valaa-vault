@@ -30,7 +30,7 @@
  * finally then create new events to represent new modifications to the
  * state (in addition to any other useful side-effects).
  *
- * ## Event streams and partitions.
+ * ## Event streams and chronicles.
  *
  * Because the state essentially exists in the event logs this means
  * that only events need to be `streamed` from place to place. While
@@ -40,18 +40,18 @@
  *
  * ## Authorities - the backend servers and the sources of truths.
  *
- * An event log can be contained in a `partition` which is managed by
- * an `authority`. Each partition also has an identifier URL.
+ * An event log can be contained in a `chronicle` which is managed by
+ * an `authority`. Each chronicle also has an identifier URL.
  * An authority then performs the traditional server backend role by
- * providing an API for forming `partition connections` to the
- * partitions it hosts using these partition ids.
+ * providing an API for forming `chronicle connections` to the
+ * chronicles it hosts using these chronicle ids.
  *
- * Each partition connection is a two-directional, asymmetrical event
- * stream to and from the event log of a particular partition.
+ * Each chronicle connection is a two-directional, asymmetrical event
+ * stream to and from the event log of a particular chronicle.
  *
  * This connection contains `command` events moving `upstream` towards
- * the partition which when authorized by the authority transform
- * into `truth` events and move `dowstream` coming from the partition.
+ * the chronicle which when authorized by the authority transform
+ * into `truth` events and move `dowstream` coming from the chronicle.
  *
  * ## Gateways - the frontend clients and application hosts.
  *
@@ -60,7 +60,7 @@
  * most of the computation and updating the user interfaces.
  * Thus they serve the traditional frontend, client-side role.
  * Gateways are heavy event consumers, command producers and the most
- * typical originator of partition connections towards authorities.
+ * typical originator of chronicle connections towards authorities.
  *
  * ### Action reduction
  *
@@ -73,7 +73,7 @@
  * Non-top-level actions are further divided to concrete and virtual
  * actions (top-level actions ie. events are always concrete).
  * Concrete actions are 'primary' actions that are serialized and then
- * either recorded or transmitted via partition connection event
+ * either recorded or transmitted via chronicle connection event
  * streams.
  * Virtual actions are abstract actions which can be dynamically
  * derived from the primary actions. They represent side-effects of the
@@ -88,12 +88,12 @@
  * downstream inside a gateway, such as what entries were *actually*
  * added and removed from some list.
  *
- * ### Prophecies - non-universal, multi-partition command stories
+ * ### Prophecies - non-universal, multi-chronicle command stories
  *
  * FalseProphet (in @valos/sourcerer) component introduces transactions.
  * These allow the grouping of a several resource changes together into
  * a single command. Prophecy is the Story of such a command, an
- * internal helper object which FalseProphet splits into per-partition
+ * internal helper object which FalseProphet splits into per-chronicle
  * commands. The prophecy is then either accept or reject depending on
  * whether the transactionality requirements can be guaranteed or not.
  */

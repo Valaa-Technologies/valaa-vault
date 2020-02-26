@@ -21,9 +21,9 @@ export type AuthorityOptions = {
 
 export type SchemeModule = {
   scheme: string,
-  getAuthorityURIFromPartitionURI: (partitionURI: ValaaURI) => ValaaURI,
+  getAuthorityURIFromChronicleURI: (chronicleURI: string) => string,
   obtainAuthorityConfig:
-      (partitionURI: ValaaURI, authorityPreConfig: ?AuthorityConfig) => ?AuthorityConfig,
+      (chronicleURI: string, authorityPreConfig: ?AuthorityConfig) => ?AuthorityConfig,
   createAuthority: (options: AuthorityOptions) => Sourcerer,
 };
 
@@ -76,9 +76,8 @@ export default class AuthorityNexus extends FabricEventTarget {
     throw new Error(`Cannot find authority for "${String(authorityURI)}"`);
   }
 
-  obtainAuthorityOfPartition (partitionURI: ValaaURI) {
-    return this.obtainAuthority(
-        this.getAuthorityURIFromPartitionURI(partitionURI));
+  obtainAuthorityOfChronicle (chronicleURI: string) {
+    return this.obtainAuthority(this.getAuthorityURIFromChronicleURI(chronicleURI));
   }
 
   obtainAuthority (authorityURI: ValaaURI): Sourcerer {
@@ -90,23 +89,23 @@ export default class AuthorityNexus extends FabricEventTarget {
     return ret;
   }
 
-  getAuthorityURIFromPartitionURI (partitionURI: ValaaURI): ValaaURI {
-    return this._tryAuthorityURIFromPartitionURI(partitionURI, { require: true });
+  getAuthorityURIFromChronicleURI (chronicleURI: string): ValaaURI {
+    return this._tryAuthorityURIFromChronicleURI(chronicleURI, { require: true });
   }
 
-  _tryAuthorityURIFromPartitionURI (partitionURI: ValaaURI, { require }: Object = {}): ValaaURI {
+  _tryAuthorityURIFromChronicleURI (chronicleURI: string, { require }: Object = {}): ValaaURI {
     let schemeModule;
     try {
-      schemeModule = this.trySchemeModule(getScheme(partitionURI), { require });
+      schemeModule = this.trySchemeModule(getScheme(chronicleURI), { require });
       if (!schemeModule) return undefined;
-      const ret = schemeModule.getAuthorityURIFromPartitionURI(partitionURI, { require });
+      const ret = schemeModule.getAuthorityURIFromChronicleURI(chronicleURI, { require });
       if (require && (ret === undefined)) {
-        throw new Error(`Scheme "${getScheme(partitionURI)
-            }" could not determine authority URI of partitionURI "${partitionURI}"`);
+        throw new Error(`Scheme "${getScheme(chronicleURI)
+            }" could not determine authority URI of chronicle <${chronicleURI}>`);
       }
       return ret;
     } catch (error) {
-      throw this.wrapErrorEvent(error, 2, `tryAuthorityURIFromPartitionURI("${partitionURI}")`,
+      throw this.wrapErrorEvent(error, 2, `_tryAuthorityURIFromChronicleURI("${chronicleURI}")`,
           "\n\tschemeModule:", schemeModule);
     }
   }

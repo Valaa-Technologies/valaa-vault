@@ -622,18 +622,18 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
           the id derivation. Then if lens authority is not yet defined
           and if the focus has a lens authority property its value will
           is defined as the lens authority. Alternatively, if the focus
-          is a partition root then valos.shadowLensAuthority is
+          is a chronicle root then valos.shadowLensAuthority is
           defined as the lens authority.
           Otherwise (focus is not a singular Resource) focus is not used
           in id derivation.
         4. If defined the *owner* is used as part of the id derivation.
         5. If the lens authority is defined and is not falsy it's used as
-          the Partition.authorityURI of the possible new
+          the Chronicle.authorityURI of the possible new
           Resource.
           Otherwise if the *owner* is defined its used as Resource.owner
           for the possible new Resource.
           Otherwise no scope frame is obtained and frame is set to null.
-          Note that even if a new partition is created for a Resource
+          Note that even if a new chronicle is created for a Resource
           (in which case it will not be given an owner) the owner id and
           lens name are used as part of the id derivation.
         6. If the component has a custom key then it will be used as part
@@ -698,7 +698,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
               if (lensAuthorityProperty && (vFocus.hasInterface("Scope"))) {
                 lensAuthorityURI = vFocus.propertyValue(lensAuthorityProperty);
               }
-              if ((lensAuthorityURI === undefined) && vFocus.isPartitionRoot()) {
+              if ((lensAuthorityURI === undefined) && vFocus.isChronicleRoot()) {
                 lensAuthorityURI = component.getUIContextValue(valos.Lens.shadowLensAuthority);
               }
             }
@@ -706,7 +706,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
         },
         () => {
           if (!lensAuthorityURI) return undefined;
-          if (prototypePart && !prototype.hasInterface("Partition")) {
+          if (prototypePart && !prototype.hasInterface("Chronicle")) {
             lensAuthorityURI = "";
             return undefined;
           }
@@ -714,8 +714,8 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
             throw new Error(`Cannot obtain scope frame: neither authorityURI ${
                 ""}nor owner could be determined`);
           }
-          const partitionURI = naiveURI.createPartitionURI(lensAuthorityURI, frameRawId);
-          return engine.discourse.acquireConnection(partitionURI)
+          const chronicleURI = naiveURI.createChronicleURI(lensAuthorityURI, frameRawId);
+          return engine.discourse.acquireConnection(chronicleURI)
               .asActiveConnection();
         },
         (connection: ?Connection) => {
@@ -754,7 +754,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
         (vResource_) => {
           if ((lensAuthorityURI !== undefined) && vFocus) {
             component.setUIContextValue(valos.Lens.shadowedFocus, vFocus);
-            component.setUIContextValue(valos.Lens.shadowLensPartitionRoot,
+            component.setUIContextValue(valos.Lens.shadowLensChronicleRoot,
                 lensAuthorityURI ? vResource_ : null);
           }
           return vResource_;
@@ -769,19 +769,19 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
         when searching for an authority URI string.
         This property will be searched for from a lens instance
         prototype or a Resource focus when obtaining a lens frame.
-        If found the authority URI will be used for the lens partition.
-        If the partition didn't already exist new lens partition is
+        If found the authority URI will be used for the lens chronicle.
+        If the chronicle didn't already exist new lens chronicle is
         created in that authority URI with a new scope frame resource
-        as its partition root.`,
+        as its chronicle root.`,
     isEnabled: undefined,
     rootValue: "LENS_AUTHORITY",
   }));
 
-  createSlotSymbol("shadowLensPartitionRoot", () => ({
+  createSlotSymbol("shadowLensChronicleRoot", () => ({
     type: "(Resource | null)",
     description: `Slot which contains the resource that is the root
-        resource of the current shadow lens partition. A shadow lens
-        partition is the partition which was created to contain lens
+        resource of the current shadow lens chronicle. A shadow lens
+        chronicle is the chronicle which was created to contain lens
         states for a particular focus resource. This focused resource
         is maintained in slot 'shadowedFocus'.`,
   }));
@@ -789,16 +789,16 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
   createSlotSymbol("shadowedFocus", () => ({
     type: "(Resource | null)",
     description: `Slot which contains a resource that is being shadowed
-        by a shadow lens partition (the root resource of this partition
-        is stored in slot 'shadowLensPartitionRoot'). This slot is used
+        by a shadow lens chronicle (the root resource of this chronicle
+        is stored in slot 'shadowLensChronicleRoot'). This slot is used
         to detect if a particular focus is already being shadowed in
-        which case no new shadow partition will needlessly be created.`,
+        which case no new shadow chronicle will needlessly be created.`,
   }));
 
   createSlotSymbol("shadowLensAuthority", () => ({
     type: "(string | null)",
     description: `Slot which contains the default lens authority URI
-        for scope frames which have a partition root Resource as their
+        for scope frames which have a chronicle root Resource as their
         focus. Used when a lens authority is not explicitly provided
         via property stored 'lensAuthorityProperty' of the instance or
         of the focus.`,
@@ -887,17 +887,17 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
 
   createSlotSymbol("pendingConnectionsLens", () => ({
     type: "Lens",
-    description: `Slot for viewing a description of partition
+    description: `Slot for viewing a description of chronicle
         connection(s) that are being acquired.
 
-        @focus {Object[]} partitions  the partition connection(s) that are being acquired.`,
+        @focus {Object[]} connections  the chronicle connection(s) that are being acquired.`,
     isEnabled: true,
     rootValue: ({ delegate: [
       loadingLens,
       <div {..._lensMessageLoadingProps}>
-        <div {..._message}>Acquiring partition connection(s).</div>
+        <div {..._message}>Acquiring chronicle connection(s).</div>
         <div {..._parameter}>
-          <span {..._key}>Partitions:</span>
+          <span {..._key}>Chronicles:</span>
           <span {..._value}>{focusDescriptionLens}</span>
         </div>
         {commonMessageRows}
@@ -907,7 +907,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
 
   createSlotSymbol("failedConnectionsLens", () => ({
     type: "Lens",
-    description: `Slot for viewing partition connection failure(s).
+    description: `Slot for viewing chronicle connection failure(s).
 
         @focus {string|Error|Object} reason  a description of why the connection failed.`,
     isEnabled: true,
@@ -915,11 +915,11 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
       loadingFailedLens,
       <div {..._lensMessageInternalFailureProps}>
         <div {..._message}>
-          Render Error: Optimistic Partition connection failed.
+          Render Error: Optimistic Chronicle connection failed.
           {toggleableErrorDetailLens}
         </div>
         <div {..._parameter}>
-          <span {..._key}>Partition:</span>
+          <span {..._key}>Chronicle:</span>
           <span {..._value}>
             {valos.Lens.instrument(error => error.resource, focusDescriptionLens)}
           </span>

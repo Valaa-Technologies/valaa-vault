@@ -7,7 +7,7 @@ import { vRef } from "~/raem/VRL";
 import { dumpObject } from "~/raem/VALK";
 import { getHostRef } from "~/raem/VALK/hostReference";
 import { formVPath, validateVRID, validateVerbs } from "~/raem/VPath";
-import { addConnectToPartitionToError } from "~/raem/tools/denormalized/partitions";
+import { addConnectToChronicleToError } from "~/raem/tools/denormalized/partitions";
 
 import Discourse from "~/sourcerer/api/Discourse";
 import Follower from "~/sourcerer/api/Follower";
@@ -77,7 +77,7 @@ export default class FalseProphetDiscourse extends Discourse {
           : !options.discourse ? { ...options, discourse: this }
           : options);
     } catch (error) {
-      addConnectToPartitionToError(error, this.connectToMissingPartition);
+      addConnectToChronicleToError(error, this.connectToAbsentChronicle);
       throw error;
     }
   }
@@ -107,7 +107,7 @@ export default class FalseProphetDiscourse extends Discourse {
 
       return ret;
     } catch (error) {
-      addConnectToPartitionToError(error, this.connectToMissingPartition);
+      addConnectToChronicleToError(error, this.connectToAbsentChronicle);
       throw this.wrapErrorEvent(error, 1, `chronicleEvents()`,
           "\n\tevents:", ...dumpObject(events),
       );
@@ -134,7 +134,7 @@ export default class FalseProphetDiscourse extends Discourse {
 
   _implicitlySyncingConnections: Object;
 
-  connectToMissingPartition = async (missingChronicleURI: ValaaURI) => {
+  connectToAbsentChronicle = async (missingChronicleURI: ValaaURI) => {
     const chronicleURIString = String(missingChronicleURI);
     if (!this._implicitlySyncingConnections[chronicleURIString]) {
       this._implicitlySyncingConnections[chronicleURIString] = this
@@ -184,7 +184,7 @@ export default class FalseProphetDiscourse extends Discourse {
       if (!chronicleURI) throw new Error("assignNewVRID.chronicleURI missing");
       const root = this._transactorState ? this._transactorState.obtainRootEvent() : targetAction;
       if (!tryAspect(root, "command").id) this._assignCommandId(root, this);
-      const chronicles = (root.meta || (root.meta = {})).partitions || (root.meta.partitions = {});
+      const chronicles = (root.meta || (root.meta = {})).chronicles || (root.meta.chronicles = {});
       const chronicle = chronicles[chronicleURI] || (chronicles[chronicleURI] = {});
       if (!chronicle.createIndex) chronicle.createIndex = 0;
 
@@ -219,8 +219,8 @@ export default class FalseProphetDiscourse extends Discourse {
             : `${ownerRawId.slice(0, -1)}.:${encodeURIComponent(propertyName)}@@`;
         */
       } else if (!explicitRawId) {
-        resourceVRID =
-            createVRID0Dot3(root.aspects.command.id, chronicleURI, chronicle.createIndex++);
+        resourceVRID = createVRID0Dot3(
+            root.aspects.command.id, chronicleURI, chronicle.createIndex++);
       } else if (explicitRawId[0] === "@") {
         resourceVRID = validateVRID(explicitRawId);
       } else {
@@ -232,7 +232,7 @@ export default class FalseProphetDiscourse extends Discourse {
               "\n\tchronicleURI:", chronicleURI);
         }
         return (targetAction.id = vRef(explicitRawId, undefined, undefined,
-            naiveURI.createPartitionURI(chronicleURI)));
+            naiveURI.createChronicleURI(chronicleURI)));
       }
       targetAction.id = vRef(resourceVRID, undefined, undefined, chronicleURI);
       /*

@@ -52,7 +52,7 @@ describe("Engine bug tests", async () => {
     ];
 
     harness = await createEngineOracleHarness({
-      verbosity: 0, claimBaseBlock: false, acquirePartitions: ["Foo"],
+      verbosity: 0, claimBaseBlock: false, acquireConnections: ["Foo"],
     }, commands);
 
     const foo = entities().Foo;

@@ -14,15 +14,15 @@ import { dumpObject } from "~/tools/wrapError";
    * returns a promise of one. If any narration options are specified in the options, said
    * narration is also performed before the connection is considered fully connected.
    *
-   * @param {ValaaURI} partitionURI
+   * @param {ValaaURI} chronicleURI
    * @param {NarrateOptions} [options={
    *   // If true and a connection (even a non-fully-connected) exists it is returned synchronously.
    *   allowPartialConnection: boolean = false,
    *   // If false does not create a new connection process is one cannot be found.
    *   newConnection: boolean = true,
-   *   // If true requests a creation of a new partition and asserts if one exists. If false,
-   *   // asserts if no commands or events for the partition can be found.
-   *   newPartition: boolean = false,
+   *   // If true requests a creation of a new chronicle and asserts if one exists. If false,
+   *   // asserts if no commands or events for the chronicle can be found.
+   *   newChronicle: boolean = false,
    *   // If true, throws an error if the retrieval for the latest content for any media fails.
    *   // Otherwise allows the connection to complete successfully. But because then not all latest
    *   // content might be locally available, Media.immediateContent calls for script files might
@@ -40,8 +40,8 @@ export type ConnectOptions = {
   narrateOptions?: NarrateOptions, // default: {}. Narrate with default options. False to disable.
   newConnection?: boolean,         // if true, throw if a connection exists,
                                    // if false, throw if no connection exists,
-  newPartition?: boolean,          // if true, throw if a partition exists (has persisted events)
-                                   // if false, throw if no partition exists (no persisted events)
+  newChronicle?: boolean,          // if true, throw if a chronicle exists (has persisted events)
+                                   // if false, throw if no chronicle exists (no persisted events)
   allowPartialConnection?: boolean,       // default: false. If true, return not fully narrated
                                           // connection synchronously
   requireLatestMediaContents?: boolean,   //
@@ -55,7 +55,7 @@ export type ConnectOptions = {
 export default class Sourcerer extends FabricEventTarget {
   _upstream: Sourcerer;
   _followers: Follower;
-  _connections: { [partitionURIString: string]: Connection };
+  _connections: { [chronicleURI: string]: Connection };
 
   constructor (options: Object = {}) {
     super(options.name, options.verbosity, options.logger);
@@ -82,7 +82,7 @@ export default class Sourcerer extends FabricEventTarget {
   }
 
   /**
-   * Returns a connection to partition identified by given partitionURI.
+   * Returns a connection to chronicle identified by given chronicleURI.
    *
    * The returned connection might be shared between other users and
    * implements internal reference counting; it is acquired once as
@@ -103,7 +103,7 @@ export default class Sourcerer extends FabricEventTarget {
    * More specifically in inspire context the first source resulting in
    * non-zero events is chosen:
    * 1. all events of the latest previously seen full narration of this
-   *    partition in the Scribe
+   *    chronicle in the Scribe
    * 2. all events in the most recent authorized snapshot known by the
    *    remote authority connection
    * 3. all events in the remote authorize event log itself
@@ -112,53 +112,53 @@ export default class Sourcerer extends FabricEventTarget {
    * authorized full narration is initiated against the remote
    * authority if available.
    *
-   * @param {ValaaURI} partitionURI
+   * @param {ValaaURI} chronicleURI
    * @returns {Connection}
    *
    * @memberof Sourcerer
    */
-  acquireConnection (partitionURI: ValaaURI, options: ConnectOptions = {}): ?Connection {
+  acquireConnection (chronicleURI: string, options: ConnectOptions = {}): ?Connection {
     try {
-      let connection = this._connections[String(partitionURI)];
+      let connection = this._connections[chronicleURI];
       if (connection) return connection;
       if (options.newConnection === false) {
         if (options.require === false) return undefined;
         throw new Error(
-            "Can't create new partition connection with options.newConnection === false");
+            "Can't create new chronicle connection with options.newConnection === false");
       }
-      connection = this._createConnection(partitionURI,
+      connection = this._createConnection(chronicleURI,
           Object.assign(Object.create(options), { connect: false }));
       if (!connection) return undefined;
       connection.addReference();
-      this._connections[String(partitionURI)] = connection;
+      this._connections[chronicleURI] = connection;
       if (options.connect !== false) connection.connect(options); // Initiate connect but dont wait.
       return connection;
     } catch (error) {
       throw this.wrapErrorEvent(error, 1,
-          new Error(`acquireConnection(${String(partitionURI)})`),
+          new Error(`acquireConnection(${chronicleURI})`),
           "\n\toptions:", ...dumpObject(options));
     }
 
       /*
-      if (options.newPartition && connection && connection.getFirstUnusedTruthEventId()) {
-        throw new Error(`Partition already exists when trying to create a new partition '${
-            String(partitionURI)}'`);
+      if (options.newChronicle && connection && connection.getFirstUnusedTruthEventId()) {
+        throw new Error(`Chronicle already exists when trying to create a new chronicle '${
+            chronicleURI}'`);
       }
 
       if (!ret || (!ret.isActive() && (options.allowPartialConnection === false))) return undefined;
-      // oracle.logEvent("acquirePC:", partitionURI, ...dumpObject(options),
+      // oracle.logEvent("acquirePC:", chronicleURI, ...dumpObject(options),
       //    "\n\tret:", ...dumpObject(ret));
       return ret;
       */
   }
 
-  _createConnection (partitionURI: ValaaURI, options: ConnectOptions) {
+  _createConnection (chronicleURI: string, options: ConnectOptions) {
     const ConnectionType = this.constructor.ConnectionType;
     if (!ConnectionType) {
-      return this._upstream.acquireConnection(partitionURI, options);
+      return this._upstream.acquireConnection(chronicleURI, options);
     }
     return new ConnectionType({
-      partitionURI, sourcerer: this, verbosity: this.getVerbosity(),
+      chronicleURI, sourcerer: this, verbosity: this.getVerbosity(),
       receiveTruths: options.receiveTruths, receiveCommands: options.receiveCommands,
       ...(options.createConnectionOptions || {}),
     });
@@ -178,8 +178,8 @@ export default class Sourcerer extends FabricEventTarget {
   }
 
   /**
-   * Returns a map of fully active partition connections keyed by their
-   * partition id.
+   * Returns a map of fully active chronicle connections keyed by their
+   * chronicle id.
    */
   getActiveConnections (): Map<string, Connection> {
     const ret = {};
@@ -195,8 +195,8 @@ export default class Sourcerer extends FabricEventTarget {
   }
 
   /**
-   * Returns a map of still synchronizing partition connections keyed
-   * by their partition id.
+   * Returns a map of still synchronizing chronicle connections keyed
+   * by their chronicle id.
    */
   getActivatingConnections () : Map<string, Promise<Connection> > {
     const ret = {};
@@ -211,7 +211,7 @@ export default class Sourcerer extends FabricEventTarget {
     return this.getActiveConnections();
   }
 
-  obtainAuthorityOfPartition (partitionURI: ValaaURI) {
-    return this._upstream.obtainAuthorityOfPartition(partitionURI);
+  obtainAuthorityOfChronicle (chronicleURI: string) {
+    return this._upstream.obtainAuthorityOfChronicle(chronicleURI);
   }
 }

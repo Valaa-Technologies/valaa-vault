@@ -14,10 +14,10 @@ import { separatePartialSequence, combineAsPartialSequence, shouldAddAsPartialRe
 
 import { addCoupleCouplingPassages, addUncoupleCouplingPassages, getCoupling }
     from "~/raem/tools/denormalized/couplings";
-import { universalizePartitionMutation,
-    setModifiedObjectPartitionAndUpdateOwneeObjectIdPartitions }
+import { universalizeChronicleMutation,
+    setModifiedObjectChronicleAndUpdateOwneeObjectIdChronicles }
     from "~/raem/tools/denormalized/partitions";
-import { isFrozen, universalizeFreezePartitionRoot, freezeOwnlings }
+import { isFrozen, universalizeFreezeChronicleRoot, freezeOwnlings }
     from "~/raem/tools/denormalized/freezes";
 import { createMaterializeGhostAction, createInactiveTransientAction }
     from "~/raem/tools/denormalized/ghost";
@@ -101,9 +101,9 @@ export default function modifyResource (bard: Bard) {
             passage.adds, handleAdds, "ADDED_TO.adds", mutableObject)
                 || isPrimaryMutation;
       }
-      if (bard.refreshPartition) {
-        setModifiedObjectPartitionAndUpdateOwneeObjectIdPartitions(bard, mutableObject);
-        bard.refreshPartition = false;
+      if (bard.refreshChronicle) {
+        setModifiedObjectChronicleAndUpdateOwneeObjectIdChronicles(bard, mutableObject);
+        bard.refreshChronicle = false;
       }
       return mutableObject;
     });
@@ -111,7 +111,7 @@ export default function modifyResource (bard: Bard) {
       if (wasFrozen) {
         throw new Error(`Cannot modify frozen ${passage.id.rawId()}:${passage.typeName}`);
       }
-      universalizePartitionMutation(bard, passage.id);
+      universalizeChronicleMutation(bard, passage.id);
     }
     return bard.updateStateWith(state => {
       let ret = state.setIn([objectTypeName, passage.id.rawId()], newResource);
@@ -301,10 +301,10 @@ export function handleSets (bard: Bard, fieldInfo, value, oldLocalValue, updateC
   if (bard.event.meta.isBeingUniversalized && fieldInfo.intro.isResource) {
     if (!isCreated && (isSequence || (oldLocalValue === undefined))) {
       // For universalisation we need to create the sub-actions for
-      // cross-partition modifications, and for that we need to have
+      // cross-chronicle modifications, and for that we need to have
       // access to the actual previous value of the field. Absolutized
       // commands and truths will already have sub-actions present to
-      // make cross-partition updates.
+      // make cross-chronicle updates.
       oldCompleteValue = !isSequence
           ? getObjectField(Object.create(bard), bard.objectTransient, fieldInfo.name,
               Object.create(fieldInfo))
@@ -362,8 +362,8 @@ const customSetFieldHandlers = {
         "prototype self-recursion for %s", bard.objectTransient);
   },
   owner (bard: Bard, fieldInfo: Object, value: any, newOwnerId: any) {
-    if ((newOwnerId && newOwnerId.getPartitionURI()) !== bard.objectId.getPartitionURI()) {
-      bard.refreshPartition = true;
+    if ((newOwnerId && newOwnerId.getChronicleURI()) !== bard.objectId.getChronicleURI()) {
+      bard.refreshChronicle = true;
     }
     if (bard.event.meta.isBeingUniversalized && newOwnerId) {
       let i = 0;
@@ -380,12 +380,12 @@ const customSetFieldHandlers = {
     }
   },
   authorityURI (bard: Bard, fieldInfo: Object, newAuthorityURI: ?string) {
-    const newPartitionURI = newAuthorityURI
-        && naiveURI.createPartitionURI(newAuthorityURI, bard.objectId.rawId());
-    const oldPartitionURI = bard.objectId.getPartitionURI();
-    if ((newPartitionURI && newPartitionURI.toString()) !==
-        (oldPartitionURI && oldPartitionURI.toString())) {
-      bard.refreshPartition = true;
+    const newChronicleURI = newAuthorityURI
+        && naiveURI.createChronicleURI(newAuthorityURI, bard.objectId.rawId());
+    const oldChronicleURI = bard.objectId.getChronicleURI();
+    if ((newChronicleURI && newChronicleURI.toString()) !==
+        (oldChronicleURI && oldChronicleURI.toString())) {
+      bard.refreshChronicle = true;
     }
   },
   partitionAuthorityURI (bard, fieldInfo, newAuthorityURI) {
@@ -399,7 +399,7 @@ const customSetFieldHandlers = {
       if (bard.event.meta.isBeingUniversalized
           && (bard.objectTransient.get("authorityURI")
               || bard.objectTransient.get("partitionAuthorityURI"))) {
-        universalizeFreezePartitionRoot(bard, bard.objectTransient);
+        universalizeFreezeChronicleRoot(bard, bard.objectTransient);
       }
       bard.setState(freezeOwnlings(bard, bard.objectTransient));
     }

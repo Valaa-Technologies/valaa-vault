@@ -64,7 +64,7 @@ export function _narrateEventLog (connection: ScribeConnection,
         }));
         // ...but only wait for it if requested or if we didn't find any local events
         return ((options.fullNarrate === true)
-                || !(options.newPartition
+                || !(options.newChronicle
                     || (ret.scribeTruthLog || []).length || (ret.scribeCommandQueue || []).length))
             && upstreamNarration;
       },
@@ -251,13 +251,13 @@ class ScribeEventResult extends ChronicleEventResult {
 
 export function _throwOnMediaRequest (connection: ScribeConnection,
     mediaInfo: MediaInfo) {
-  const error = new Error(`Cannot retrieve media '${mediaInfo.name}' content through partition '${
+  const error = new Error(`Cannot retrieve media '${mediaInfo.name}' content through chronicle '${
       connection.getName()}'`);
   throw connection.wrapErrorEvent(error, 1,
       "retrieveMediaBuffer",
       "\n\tdata not found in local bvob cache and no remote content retriever is specified",
       ...(connection.isRemoteAuthority()
-          ? ["\n\tlocal/transient partitions don't have remote storage backing"] : []),
+          ? ["\n\tlocal/transient chronicles don't have remote storage backing"] : []),
       "\n\tmediaInfo:", ...dumpObject(mediaInfo));
 }
 
@@ -402,9 +402,9 @@ function _determineEventPreOps (connection: ScribeConnection, event: Object,
   } else if (event.typeName === "MediaType") {
     connection._sourcerer._mediaTypes[getRawIdFrom(event.id)] = event.initialState;
   } else if ((event.initialState !== undefined) || (event.sets !== undefined)) {
-    if (getRawIdFrom(event.id) === connection.getPartitionRawId()) {
+    if (getRawIdFrom(event.id) === connection.getChronicleId()) {
       const newName = (event.initialState || event.sets || {}).name;
-      if (newName) connection.setPartitionName(newName);
+      if (newName) connection.setChronicleName(newName);
     }
     if (event.typeName === "Media") {
       ret = connection._determineEventMediaPreOps(event, rootEvent);

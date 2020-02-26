@@ -40,9 +40,9 @@ export default {
   symbols,
   typeFields: {
     activate: denoteValOSBuiltinWithSignature(
-      `activates the Resource by acquiring the partition connection and also recursively ${
+      `activates the Resource by acquiring the chronicle connection and also recursively ${
         ""}activating all Resource's in the prototype chain. Returns a Promise which resolves ${
-        ""}once all corresponding partitions have completed their first narration`
+        ""}once all corresponding chronicles have completed their first narration`
     )(function activate (resource) {
       return Promise.resolve(resource.activate() || resource);
     }),
@@ -88,9 +88,9 @@ export default {
     getActiveResource: denoteValOSBuiltinWithSignature(
         `returns the active resource with given *id* if one exists, otherwise throws an error. ${
           ""}An active resource is an existing, non-destroyed resource in a fully connected ${
-          ""}partition whose all possible prototypes are also active. If the error is due to an ${
-          ""}unconnected or partially connected partition a missing partition error is thrown. ${
-          ""}This causes an implicit partition connection attempt which by default restarts this ${
+          ""}chronicle whose all possible prototypes are also active. If the error is due to an ${
+          ""}unconnected or partially connected chronicle an absent chronicle error is thrown. ${
+          ""}This causes an implicit chronicle connection attempt which by default restarts this ${
           ""}transaction. Otherwise a regular, by default unhandled exception is thrown.`
     )(function getActiveResource (id: string | VRL) {
       try {
@@ -123,7 +123,7 @@ export default {
     tryActiveResource: denoteValOSBuiltinWithSignature(
         `returns the active resource with given *id* if one exists, otherwise returns null. ${
           ""}An active resource is an existing, non-destroyed resource in a fully connected ${
-          ""}partition whose all possible prototypes are also active.`
+          ""}chronicle whose all possible prototypes are also active.`
     )(function tryActiveResource (id: string | VRL) {
       const ret = this.__callerValker__.run({}, VALEK.fromObject(id).nullable());
       return ret && (ret.getPhase() === "Active") && ret;
@@ -146,10 +146,10 @@ export default {
             ""} the recombination can fully alter ownership hierarchy of the duplicated objects${
             ""} (unlike duplication which once again can only manage duplicated top-level resource).
             ""} Specifically this enables duplication of resources from different locations and${
-            ""} even partitions to under the same entity while maintaining the internal${
+            ""} even chronicles to under the same entity while maintaining the internal${
             ""} cross-references between different recombined resources. Vice versa recombine${
-            ""} allows spreading the duplicates to separate partitions (at least insofar a${
-            ""} multi-partition commands between said partitions is possible).`
+            ""} allows spreading the duplicates to separate chronicles (at least insofar a${
+            ""} multi-chronicle commands between said chronicles is possible).`
     )(function recombine (...duplicationDirectives) {
       return this.__callerValker__._follower.recombine(duplicationDirectives,
           { discourse: this.__callerValker__ });
@@ -307,15 +307,15 @@ the given *subPath*.`
             ""} resolves when the given content has been converted into raw data and persisted in${
             ""} the local binary caches and its content id has been determined. When the resolved${
             ""} Bvob callback is called it creates a Bvob object in the current execution context${
-            ""} (usually the partition of *this* Resource) and returns the content id.${
+            ""} (usually the chronicle of *this* Resource) and returns the content id.${
             ""} This bvob id can then be used as part of a command (usually Media.content) in the${
             ""} current execution context to refer to the raw content.${
             ""} Note that all encoding information, media type and any other metadata must be${
             ""} persisted separately (see Media).${
             ""} The bvob id is valid until one of the following conditions is true:${
             ""} 1. the bvob id is used in a command that has been successfully locally persisted${
-            ""} in the command queue of this partition. At this point the bvob id cache validity${
-            ""} is governed by the partition bvob content caching rules.${
+            ""} in the command queue of this chronicle. At this point the bvob id cache validity${
+            ""} is governed by the chronicle bvob content caching rules.${
             ""} 2. the execution context is reset (ie. on a browser/tab refresh).${
             ""} 3. local bvob cache is explicitly flushed (which is unimplemented).`
     )(function prepareBvob (content: any) {

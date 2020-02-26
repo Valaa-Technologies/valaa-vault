@@ -102,8 +102,8 @@ resolution.`,
 `The *service index resource* is statically configured and should be
 the same for all routes starting from the same public endpoint. This
 index resource is typically the root entity of the service master index
-partition. The route paths (and some of their runtime paths) are then
-typically defined as relations and references in the index partition.
+chronicle. The route paths (and some of their runtime paths) are then
+typically defined as relations and references in the index chronicle.
 
 The subject path is a path from the root resource to the subject
 resource. The subject resource is the immediate _parent_ resource of
@@ -153,7 +153,7 @@ are specified to start from this resource when used as the route root".`],
     "#1":
 `The biggest design feature to reduce the need for multitude of
 mappings is the subject paths. Using subject paths a particular common
-mapping use case can specify an well-known ordered index partition
+mapping use case can specify an well-known ordered index chronicle
 structure and the web-spindle compatible mapping route
 specification for it sans route root resource.
 Then the different use cases can specify their mappings solely in terms

@@ -9,7 +9,7 @@ export default function createValaaLocalScheme (/* { logger } */): SchemeModule 
 
     getAuthorityURIFromPartitionURI: () => `valaa-local:`,
 
-    obtainAuthorityConfig: (/* partitionURI: ValaaURI, authorityPreConfig: Object */) => ({
+    obtainAuthorityConfig: (/* chronicleURI: string, authorityPreConfig: Object */) => ({
       eventVersion: EVENT_VERSION,
       isLocallyPersisted: true,
       isPrimaryAuthority: true,

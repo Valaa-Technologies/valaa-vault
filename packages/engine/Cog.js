@@ -39,7 +39,8 @@ export default class Cog extends FabricEventTarget {
   VALK () { return VALEK; }
 
   /**
-   * get - runs the kuery against current engine entry partition as head and returns results.
+   * get - runs the kuery against current engine entry chronicle as
+   *       head and returns results.
    */
   get (kuery: any, options: VALKOptions) {
     return this.run(this.getSelfAsHead(), kuery, options);

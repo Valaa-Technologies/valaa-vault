@@ -4,7 +4,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { OrderedMap } from "immutable";
 
-import { tryConnectToMissingPartitionsAndThen } from "~/raem/tools/denormalized/partitions";
+import { tryConnectToAbsentChroniclesAndThen } from "~/raem/tools/denormalized/partitions";
 import { Kuery } from "~/raem/VALK";
 
 import Vrapper, { LiveUpdate, getImplicitCallable } from "~/engine/Vrapper";
@@ -286,9 +286,9 @@ export default class LiveProps extends UIComponent {
       try {
         return callback.call(this, ...args);
       } catch (error) {
-        const connectingMissingPartitions = tryConnectToMissingPartitionsAndThen(error,
+        const absentChronicleSourcings = tryConnectToAbsentChroniclesAndThen(error,
             () => handleCallbackExceptions(...args));
-        if (connectingMissingPartitions) return connectingMissingPartitions;
+        if (absentChronicleSourcings) return absentChronicleSourcings;
         const finalError = wrapError(error,
             new Error(`props.${name} valospace callback`),
             "\n\targs:", args,

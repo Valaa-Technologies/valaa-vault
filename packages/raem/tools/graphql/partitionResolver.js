@@ -1,35 +1,34 @@
 // @flow
 
 import { naiveURI } from "~/raem/ValaaURI";
-import { resolvePartitionURI } from "~/raem/tools/denormalized/partitions";
+import { resolveChronicleURI } from "~/raem/tools/denormalized/partitions";
 
-export default function partitionResolver (source: any, args: any,
+export default function chronicleResolver (source: any, args: any,
     { rootValue: { resolver } }: Object) {
-  const partitionURI = resolvePartitionURI(resolver, source.get("id"));
-  return partitionURI && Object.create(resolver)
-      .goToTransientOfRawId(naiveURI.getPartitionRawId(partitionURI), "TransientFields");
+  const chronicleURI = resolveChronicleURI(resolver, source.get("id"));
+  return chronicleURI && Object.create(resolver)
+      .goToTransientOfRawId(naiveURI.getChronicleId(chronicleURI), "TransientFields");
 }
 
-export function partitionURIResolver (source: any, args: any,
+export function chronicleURIResolver (source: any, args: any,
     { rootValue: { resolver } }: Object) {
-  const partitionURI = resolvePartitionURI(resolver, source.get("id"));
-  return partitionURI && partitionURI.toString();
+  return resolveChronicleURI(resolver, source.get("id"));
 }
 
 export function partitionHeadEventIdResolver (/* source, args, {
     parentType, returnType, fieldName, rootValue, } */) {
-  // FIXME(iridian): Implement partitions.
+  // FIXME(iridian): Implement chronicles.
   throw new Error("partitionHeadEventIdResolver not implemented");
 }
 
 export function partitionSnapshotResolver (/* source, args, {
     parentType, returnType, fieldName, rootValue, } */) {
-  // FIXME(iridian): Implement partitions.
+  // FIXME(iridian): Implement chronicles.
   throw new Error("partitionSnapshotResolver not implemented");
 }
 
 export function partitionDeepSnapshotResolver (/* source, args, {
     parentType, returnType, fieldName, rootValue, } */) {
-  // FIXME(iridian): Implement partitions.
+  // FIXME(iridian): Implement chronicles.
   throw new Error("partitionDeepSnapshotResolver not implemented");
 }

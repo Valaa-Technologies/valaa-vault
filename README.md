@@ -90,12 +90,12 @@ together these qualities unifies `valospace` as the most consequential
 domain for all of ValOS content.
 
 In order to efficiently present these applications to the gateway
-loads only small parts of the whole valospace (called `partitions`)
+loads only small parts of the whole valospace (called `chronicles`)
 inside the user's browser. It accomplishes this using `event streams`.
 
 ### Event stream circle of life
 
-Inspire client connects to selected partitions inside remote
+Inspire client connects to selected chronicles inside remote
 `authorities` to receive application and content event streams. It
 then locally interprets these events as ValOS resources which contain
 the structure, code, UI components and data all together making up the
@@ -120,7 +120,7 @@ A minimal but complete backend authority needs to be two things:
 
 - An `event sourcing` pub-sub hub and event log provider; to be able
   authorize (or reject) incoming commands into events and then publish
-  these to clients who are subscribed to the relevant `partitions`, as
+  these to clients who are subscribed to the relevant `chronicles`, as
   well as provide full event logs when requested
 - An immutable binary hosting provider: to receive bvob content which
   is referred to by above events and then later deliver the content to
@@ -162,7 +162,7 @@ form of `reducers` which convert event streams into in-memory ValOS
 resources and their updates. Provides schema definitions for `Resource`
 and other essential ValOS resource model interfaces. Provides a kuery
 language `VALK` for accessing and making limited manipulations to the
-resources. Provides the low level APIs for manipulating partitions.
+resources. Provides the low level APIs for manipulating chronicles.
 Implements `ghost instancing` for the ValOS resource model;
 a generalization extension of the traditional prototypical inheritance
 which recursively inherits the sub-components of the prototype as
@@ -171,8 +171,8 @@ integrity to the resource model via `couplings`.
 
 - depends: `@valos/tools`, `immutable`
 - exports: `Corpus`, `Command`, `VALK`, `RAEMContentAPI`
-- valosheath: `Resource`, `TransientFields`, `Bvob`, `Partition`
-- concepts: `ghost instancing`, `partitions`, `couplings`
+- valosheath: `Resource`, `TransientFields`, `Bvob`, `Chronicle`
+- concepts: `ghost instancing`, `chronicles`, `couplings`
 
 
 ### @valos/script extends JavaScript with ValOS-RAEM as `valoscript`
@@ -236,8 +236,8 @@ browser.
 
 Provides the runtime entry point and UI rendering integration using
 `React`. Sets up the full ValOS gateway stack. Manages initial
-authentication and connects to the entry partition. Sets up the
-rendering module, attaches it to DOM and renders the entry partition
+authentication and connects to the entry chronicle. Sets up the
+rendering module, attaches it to DOM and renders the entry chronicle
 `LENS`. Renders resources using attached `lens` Media files. Introduces
 a Media type `VSX` (similar to `JSX`) specifically for this purpose,
 which allows writing natural HTML but also embedding it with fully live

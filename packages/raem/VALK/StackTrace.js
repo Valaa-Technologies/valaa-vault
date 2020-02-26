@@ -5,7 +5,7 @@ import { dumpObject } from "~/raem/VALK/Kuery";
 
 type VALKSourceInfo = {
   phase: string,
-  partitionName: string,
+  chronicleName: string,
   mediaName: string,
   source: string,
   sourceMap: Object,
@@ -57,9 +57,9 @@ export function parseErrorMessagesFromStackTrace (stackTrace: VALKStackTrace) {
   }
   stackTrace.forEach(frame => {
     const mediaName = frame.sourceInfo.mediaName;
-    const partitionInfo = frame.sourceInfo.partitionName
-        ? `partition "${frame.sourceInfo.partitionName}"` : "unspecified partition";
-    const mediaInfoString = `in media "${mediaName}" of ${partitionInfo}`;
+    const chronicleInfo = frame.sourceInfo.chronicleName
+        ? `chronicle "${frame.sourceInfo.chronicleName}"` : "unspecified chronicle";
+    const mediaInfoString = `in media "${mediaName}" of ${chronicleInfo}`;
     const mapEntry = frame.sourceInfo.sourceMap.get(frame.sourceObject);
 
     // Gets the error boundaries

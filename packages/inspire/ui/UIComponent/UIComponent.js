@@ -3,7 +3,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { tryConnectToMissingPartitionsAndThen } from "~/raem/tools/denormalized/partitions";
+import { tryConnectToAbsentChroniclesAndThen } from "~/raem/tools/denormalized/partitions";
 
 import { Subscription, LiveUpdate } from "~/engine/Vrapper";
 import debugId from "~/engine/debugId";
@@ -664,13 +664,13 @@ class UIComponent extends React.Component {
           latestRenderedLensSlot = this.constructor.mainLensSlotName;
           ret = this.tryRenderSlotAsLens(latestRenderedLensSlot);
         } catch (error) {
-          // Try to connect to missing partitions.
-          if (!tryConnectToMissingPartitionsAndThen(error, () => this.forceUpdate())) {
+          // Try to connect to absent chronicles.
+          if (!tryConnectToAbsentChroniclesAndThen(error, () => this.forceUpdate())) {
             throw error;
           }
           latestRenderedLensSlot = "pendingConnectionsLens";
           ret = this.tryRenderSlotAsLens(latestRenderedLensSlot,
-              (error.originalError || error).missingPartitions.map(entry => String(entry)));
+              (error.originalError || error).absentChronicleURIs.map(entry => String(entry)));
         }
         // Try to handle pending promises.
         if (isPromise(ret)) {

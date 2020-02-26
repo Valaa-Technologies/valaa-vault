@@ -22,7 +22,7 @@ import { getObjectRawField } from "~/raem/state/getObjectField";
 
 import { createGhostVRLInInstance, isMaterialized, createMaterializeGhostAction }
     from "~/raem/tools/denormalized/ghost";
-import { MissingConnectionsError, addConnectToPartitionToError }
+import { AbsentChroniclesError, addConnectToChronicleToError }
     from "~/raem/tools/denormalized/partitions";
 
 import isResourceType from "~/raem/tools/graphql/isResourceType";
@@ -65,73 +65,90 @@ function isNonActivateablePhase (candidate: string) {
 }
 
 /**
- * Vrapper is a proxy for accessing a specific ValOS Resource in the backend.
- * With the Engine, these Vrapper instances form the interface between ValOS backend content
- * (through the backing FalseProphet in-memory shadow repository) and between local presentation
- * and computation layers.
+ * Vrapper is a proxy for accessing a specific ValOS Resource in the
+ * backend. With the Engine, these Vrapper instances form the interface
+ * between ValOS backend content (through the backing FalseProphet
+ * in-memory shadow repository) and between local presentation and
+ * computation layers.
  *
  * 1. Vrapper as a singular, shared proxy object to single ValOS resource.
  *
- * There is zero or one Vrapper objects per one ValOS resource, identified and shared by
- * the resource raw id. Vrapper proxies for resources which don't have already are created
- * on-demand; see Engine.getVrapper.
+ * There is zero or one Vrapper objects per one ValOS resource,
+ * identified and shared by the resource raw id. Vrapper proxies for
+ * resources which don't have already are created on-demand; see
+ * Engine.getVrapper.
  *
- * By default all Vrapper operations are executed in the context of the most recent state known by
- * ('main line state') the backing FalseProphet.
+ * By default all Vrapper operations are executed in the context of
+ * the most recent state known by ('main line state') the backing
+ * FalseProphet.
  *
- * Transactions can have differing states for this same resource. To make it possible to share
- * the same Vrapper object possible, all operations accept options: { discourse: Discourse }.
- * This can be used to override the operation execution context and must be used whenever operations
- * are being performed inside a transactional context; see FalseProphetDiscourse.acquireFabricator.
+ * Transactions can have differing states for this same resource. To
+ * make it possible to share the same Vrapper object possible, all
+ * operations accept options: { discourse: Discourse }. This can be
+ * used to override the operation execution context and must be used
+ * whenever operations are being performed inside a transactional
+ * context; see FalseProphetDiscourse.acquireFabricator.
  *
  * 2. Vrapper lifecycle and active operations.
  *
- * The Vrapper can be in multiple different phases, depending on the current status of associated
- * partition connections as well as whether the resource or any of its prototypes are destroyed.
+ * The Vrapper can be in multiple different phases, depending on the
+ * current status of associated chronicle connections as well as
+ * whether the resource or any of its prototypes are destroyed.
  *
- * Active-operations are operations like kueries, mutations but also introspection calls represented
- * by Vrapper member functions which all require that the backing FalseProphet has full knowledge
- * of the proxied, non-destroyed resource and all of its non-destroyed prototypes. This means all
- * partitions of the prototype chain must be fully connected and no resource in the prototype chain
- * can be destroyed.
+ * Active-operations are operations like kueries, mutations but also
+ * introspection calls represented by Vrapper member functions which
+ * all require that the backing FalseProphet has full knowledge of the
+ * proxied, non-destroyed resource and all of its non-destroyed
+ * prototypes. This means all chronicles of the prototype chain must be
+ * fully connected and no resource in the prototype chain can be
+ * destroyed.
  *
  * The lifecycle phases:
  *
- * 2.1. Inactive: the partition of some prototype chain Resource is not connected and the connection
- *   is not being acquired (note: Resource itself is considered part of the prototype chain here)
- *   or some prototype chain resource is destroyed.
+ * 2.1. Inactive: the chronicle of some prototype chain Resource is not
+ *   connected and the connection is not being acquired (note: Resource
+ *   itself is considered part of the prototype chain here) or some
+ *   prototype chain resource is destroyed.
  *   isInactive() returns true and getPhase() returns "Inactive".
- *   Active-operations will throw MissingConnectionsError.
- *   Calling activate() will transfer the Vrapper into 'Activating' by acquiring the connections
- *   to all the partitions of all the Resource's in the prototype chain.
+ *   Active-operations will throw AbsentChroniclesError.
+ *   Calling activate() will transfer the Vrapper into 'Activating' by
+ *   acquiring the connections to all the chronicles of all the
+ *   Resource's in the prototype chain.
  *
- * 2.2. Activating: all partitions of prototype chain Resource's are being connected or already have
- *   a connection.
+ * 2.2. Activating: all chronicles of prototype chain Resource's are
+ *   being connected or already have a connection.
  *   isActivating() returns true and getPhase() returns "Activating".
- *   Active-operations will throw MissingConnectionsError.
- *   Calling activate() will return a Promise which resolves once Vrapper enters 'Active'
- *   state, or throws if the Vrapper enters 'Unavailable' state but won't cause other changes.
+ *   Active-operations will throw AbsentChroniclesError.
+ *   Calling activate() will return a Promise which resolves once
+ *   Vrapper enters 'Active' state, or throws if the Vrapper enters
+ *   'Unavailable' state but won't cause other changes.
  *
- * 2.3. Active: all partitions of this resource and all of its prototype chain resources have
- *   an active connection and no prototype chain resource is destroyed.
+ * 2.3. Active: all chronicles of this resource and all of its
+ *   prototype chain resources have an active connection and no
+ *   prototype chain resource is destroyed.
  *   isActive() returns true and getPhase() returns "Active".
  *   Active-operations can be synchronously accessed.
  *
- * 2.4. Immaterial: the Resource belongs to an active partition but has
+ * 2.4. Immaterial: the Resource belongs to an active chronicle but has
  *   not been created yet, has been purged or has been destroyed.
  *   isImmaterial() returns true and getPhase() returns "Immaterial".
  *   Active-operations will throw an exception.
  *
- * 2.5. Unavailable: the connection for a prototype chain Resource partition couldn't be acquired.
+ * 2.5. Unavailable: the connection for a prototype chain Resource
+ *   chronicle couldn't be acquired.
  *   isUnavailable() returns true and getPhase() returns "Unavailable".
- *   Active-operations will throw an exception describing the cause of unavailability.
+ *   Active-operations will throw an exception describing the cause of
+ *   unavailability.
  *
- * 2.6. NonResource: the Vrapper is a degenerate proxy to a non-Resource ValOS object; Bvob or Data.
+ * 2.6. NonResource: the Vrapper is a degenerate proxy to a
+ *   non-Resource ValOS object; Bvob or Data.
  *   isUnavailable() returns true and getPhase() returns "NonResource".
- *   Such Vrapper's like their associated backend objects are essentially immutable. They have no
- *   lifecycle and many operations (usually those with side-effects) are not available for them.
- *   They cannot have listeners associated with them and they are not cached by Engine (this
- *   means that these objects can in fact have multiple different Vrapper objects per same id).
+ *   Such Vrapper's like their associated backend objects are
+ *   essentially immutable. They have no lifecycle and many operations
+ *   (usually those with side-effects) are not available for them.
+ *   They cannot have listeners associated with them and they are not
+ *   cached by Engine (this means that these objects can in fact have
+ *   multiple different Vrapper objects per same id).
  *
  * There are two primary mechanisms for creating Vrapper's:
  * 1. All CREATED and DUPLICATED create Vrapper for their primary resource.
@@ -157,15 +174,15 @@ export default class Vrapper extends Cog {
     }
     this._phase = INACTIVE;
     this.engine.addCog(this);
-    if (!id.isGhost() && !id.getPartitionURI()) {
+    if (!id.isGhost() && !id.getChronicleURI()) {
       if (!id.isInactive()) {
         throw new Error(
-            `Cannot create an active non-ghost Vrapper without id.partitionURI: <${id}>`);
+            `Cannot create an active non-ghost Vrapper without id.chronicleURI: <${id}>`);
       }
       this.logEvent(1, () => [
-        "non-ghost Vrapper encountered without a partitionURI and which thus cannot be",
+        "non-ghost Vrapper encountered without a chronicleURI and which thus cannot be",
         "activated directly. This is most likely ghost prototype path root resource which",
-        "needs to have all intervening partitions activated first",
+        "needs to have all intervening chronicles activated first",
       ]);
     } else if (immediateRefresh) {
       this.refreshPhase(...immediateRefresh);
@@ -183,10 +200,10 @@ export default class Vrapper extends Cog {
     return this._phase !== NONRESOURCE;
   }
 
-  isPartitionRoot () {
-    const partitionURI = this[HostRef].getPartitionURI();
-    if (!partitionURI) return false;
-    return naiveURI.getPartitionRawId(partitionURI) === this[HostRef].rawId();
+  isChronicleRoot () {
+    const chronicleURI = this[HostRef].getChronicleURI();
+    if (!chronicleURI) return false;
+    return naiveURI.getChronicleId(chronicleURI) === this[HostRef].rawId();
   }
 
   toJSON () {
@@ -325,10 +342,10 @@ export default class Vrapper extends Cog {
    * Finally, if the activation is blocked by a fully inactive
    * prototype the VRL id of that prototype is returned.
    * The blocking cause can be inspected by blocker.getPhase(): if the
-   * phase is Inactive or Activating, the cause is a non-full partition
+   * phase is Inactive or Activating, the cause is a non-full chronicle
    * connection. Otherwise the cause is a non-activateable phase
    * (Immaterial, Unavailable, NonResource).
-   * Unavailable indicates an error on the partition connection sync
+   * Unavailable indicates an error on the chronicle connection sync
    * which can be extracted with
    * `Promise.resolve(conn.asActiveConnection()).catch(onError);`
    *
@@ -352,9 +369,9 @@ export default class Vrapper extends Cog {
     }
     this._updateTransient(resolver.state, transient);
     const id = transient.get("id");
-    if (!id.getPartitionURI() && !id.isGhost() && (this._typeName !== "Blob")) {
+    if (!id.getChronicleURI() && !id.isGhost() && (this._typeName !== "Blob")) {
       if (id.isInactive()) return this;
-      throw new Error(`Cannot update an active non-ghost Vrapper id with no partitionURI: <${
+      throw new Error(`Cannot update an active non-ghost Vrapper id with no chronicleURI: <${
           id}>, (current id: <${this[HostRef]}>)`);
     }
     this[HostRef] = id;
@@ -408,7 +425,7 @@ export default class Vrapper extends Cog {
       const wrappedError = this.wrapErrorEvent(error, 1,
           new Error("_postActivate()"),
           "\n\tid:", ...dumpObject(this[HostRef]),
-          "\n\tid.getPartitionURI:", ...dumpObject(this[HostRef].getPartitionURI()),
+          "\n\tid.getChronicleURI:", ...dumpObject(this[HostRef].getChronicleURI()),
           "\n\ttransient:", ...dumpObject(transient.toJS()),
           "\n\tconnection:", ...dumpObject(this._connection),
           "\n\tthis:", ...dumpObject(this),
@@ -458,10 +475,10 @@ export default class Vrapper extends Cog {
             new Error(`Cannot operate on a non-Created ${this.debugId()}`)
         : this.isUnavailable() ?
             new Error(`Cannot operate on an Unavailable ${this.debugId()}`)
-        : addConnectToPartitionToError(new MissingConnectionsError(
-                `Missing or not fully narrated partition connection for ${this.debugId()}`,
+        : addConnectToChronicleToError(new AbsentChroniclesError(
+                `Missing or not fully narrated connection for ${this.debugId()}`,
                 [this.activate()]),
-            this.engine.discourse.connectToMissingPartition);
+            this.engine.discourse.connectToAbsentChronicle);
     throw this.wrapErrorEvent(error, 1, "requireActive",
         "\n\toptions:", ...dumpObject(options),
         "\n\tphase was:", phase,
@@ -485,34 +502,34 @@ export default class Vrapper extends Cog {
       { require?: boolean, discourse?: Discourse, newConnection?: boolean }
           = { require: true }): ?Connection {
     if (this._connection) return this._connection;
-    let partitionURI;
+    let chronicleURI;
     let nonGhostOwnerRawId;
     try {
       if (!this.isResource()) {
-        throw new Error(`Non-resource Vrapper's cannot have partition connections`);
+        throw new Error(`Non-resource Vrapper's cannot have chronicle connections`);
       }
-      partitionURI = this[HostRef].getPartitionURI();
+      chronicleURI = this[HostRef].getChronicleURI();
       const discourse = options.discourse || this.engine.discourse;
-      if (!partitionURI) {
+      if (!chronicleURI) {
         nonGhostOwnerRawId = this[HostRef].getGhostPath().headHostRawId() || this[HostRef].rawId();
         const transient = discourse.tryGoToTransientOfRawId(nonGhostOwnerRawId, "Resource");
         if (transient) {
-          partitionURI = transient && transient.get("id").getPartitionURI();
-          if (!partitionURI) {
-            const authorityURIString = transient.get("authorityURI")
+          chronicleURI = transient && transient.get("id").getChronicleURI();
+          if (!chronicleURI) {
+            const authorityURI = transient.get("authorityURI")
                 || transient.get("partitionAuthorityURI");
-            partitionURI = authorityURIString
-                && naiveURI.create(authorityURIString, transient.get("id").rawId());
+            chronicleURI = authorityURI
+                && naiveURI.createChronicleURI(authorityURI, transient.get("id").rawId());
           }
         }
       }
-      this._connection = partitionURI
-          && discourse.acquireConnection(partitionURI, {
-            newPartition: false, newConnection: options.newConnection, require: options.require,
+      this._connection = chronicleURI
+          && discourse.acquireConnection(chronicleURI, {
+            newChronicle: false, newConnection: options.newConnection, require: options.require,
           });
       if (!this._connection) {
         if (!options.require) return undefined;
-        throw new Error(`Failed to acquire the partition connection of ${this.debugId()}`);
+        throw new Error(`Failed to acquire the connection of ${this.debugId()}`);
       }
       if (!this._connection.isActive()) {
         this._connection.asActiveConnection().catch(onError.bind(this,
@@ -528,7 +545,7 @@ export default class Vrapper extends Cog {
           "\n\toptions:", ...dumpObject(options),
           "\n\tthis[HostRef]:", this[HostRef],
           "\n\tthis._transient:", this._transient,
-          "\n\tpartitionURI:", partitionURI,
+          "\n\tchronicleURI:", chronicleURI,
           "\n\tthis:", ...dumpObject(this));
     }
   }
@@ -578,7 +595,7 @@ export default class Vrapper extends Cog {
   /**
    * Returns the unique raw id string of this resource.
    * This id string should not be used as an id in outgoing kueries because it might belong to a
-   * immaterial ghost or a resource outside known partitions. So in other words, while rawId
+   * immaterial ghost or a resource outside known chronicles. So in other words, while rawId
    * identifies a resource, it doesn't act as a universal locator. See idData for that.
    *
    * @returns
@@ -623,7 +640,7 @@ export default class Vrapper extends Cog {
       const targetId = transient.get("target");
       if (!targetId) targetText = "<null target>";
       else if (targetId.isInactive()) {
-        targetText = `<in inactive '${targetId.getPartitionURI()}'>`;
+        targetText = `<in inactive '${targetId.getChronicleURI()}'>`;
       } else {
         const target = this.get("target", options);
         targetText = (target && debugId(target, options)) || "<target not found>";
@@ -870,13 +887,13 @@ export default class Vrapper extends Cog {
     this.requireActive(options);
     let id = discourse.bindObjectId(this.getId(), this._typeName);
     options.head = this;
-    let partitionURI = id.getPartitionURI();
-    if (!partitionURI && id.isGhost()) {
-      partitionURI = discourse.bindObjectId([id.getGhostPath().headHostRawId()], "Resource")
-          .getPartitionURI();
-      id = id.immutateWithPartitionURI(partitionURI);
+    let chronicleURI = id.getChronicleURI();
+    if (!chronicleURI && id.isGhost()) {
+      chronicleURI = discourse.bindObjectId([id.getGhostPath().headHostRawId()], "Resource")
+          .getChronicleURI();
+      id = id.immutateWithChronicleURI(chronicleURI);
     }
-    options.partitionURIString = partitionURI && String(partitionURI);
+    options.chronicleURI = chronicleURI;
     return { discourse, id };
   }
 
@@ -1452,13 +1469,16 @@ export default class Vrapper extends Cog {
   }
 
   /**
-   * Eagerly returns a URL for accessing the content of this Media with optionally provided media
-   * type. The content is a retrieved and decoded like described by the Media interpretation
-   * process. Unlike full interpretation the content is not integrated in any specific context.
-   * TODO(iridian): Should the integration be included as an option? How will the interpretation
-   * infrastructure be used outside VS/JS/VSX/JSX
-   * If the partition of the Media is not yet acquired, returns a promise which resolves to the URL
-   * after the corresponding partition is acquired.
+   * Eagerly returns a URL for accessing the content of this Media with
+   * optionally provided media type. The content is a retrieved and
+   * decoded like described by the Media interpretation process. Unlike
+   * full interpretation the content is not integrated in any specific
+   * context.
+   * TODO(iridian): Should the integration be included as an option?
+   * How will the interpretation infrastructure be used outside VS/JS/VSX/JSX
+   * If the chronicle of the Media is not yet acquired, returns a
+   * promise which resolves to the URL after the corresponding
+   * chronicle is acquired.
    *
    * @param {VALKOptions} [options={}]
    * @returns
@@ -1499,8 +1519,8 @@ export default class Vrapper extends Cog {
    * associated with this resource and the provided media type.
    *
    * If the interpretation is not immediately available or if the
-   * partition of the Media is not acquired, returns a promise for
-   * acquiring the partition and performing this operation instead.
+   * chronicle of the Media is not acquired, returns a promise for
+   * acquiring the chronicle and performing this operation instead.
    *
    * If options.synchronous equals true and this would return a
    * promise, throws instead.
@@ -1533,22 +1553,22 @@ export default class Vrapper extends Cog {
   });
 
   /**
-   * Prepares given content for use within the partition of this
+   * Prepares given content for use within the chronicle of this
    * resource in the form of a newly created Bvob object.
    * Returns a promise which resolves to a `createBvob` function once
-   * the partition is connected and the content has been optimistically
+   * the chronicle is connected and the content has been optimistically
    * persisted. Calling createBvob will then create and return a new
    * Bvob resource which represents the given content and which can be
    * assigned to some Media.content.
    *
-   * The semantics of optimistic persistence depends on the partition
+   * The semantics of optimistic persistence depends on the chronicle
    * authority scheme and its configuration. valaa-memory doesn't
    * support Media content (or stores them in memory). valaa-local
    * optimistically and fully persists in the local Scribe. Typical
-   * remote partitions optimistically persist on the local Scribe and
+   * remote chronicles optimistically persist on the local Scribe and
    * fully persist on the remote authority once online.
    *
-   * In general only the partition of this resource matters. However
+   * In general only the chronicle of this resource matters. However
    * if this resource is a Media then its name and mediaType fields are
    * used as debug information. Even then the final resulting bvob
    * can be used with any media.
@@ -1594,14 +1614,14 @@ export default class Vrapper extends Cog {
     }
   }
 
-  recurseConnectedPartitionMaterializedFieldResources (fieldNames: Array<string>,
+  recurseConnectedChronicleMaterializedFieldResources (fieldNames: Array<string>,
       options: Kuery = {}) {
     const activeConnections = this.engine.getSourcerer().getActiveConnections();
     const result = [];
-    for (const partitionRawId of Object.keys(activeConnections)) {
-      const partition = this.engine.tryVrapper(partitionRawId);
-      if (partition) {
-        result.push(...(partition.recurseMaterializedFieldResources(fieldNames, options)));
+    for (const chronicleId of Object.keys(activeConnections)) {
+      const vRoot = this.engine.tryVrapper(chronicleId);
+      if (vRoot) {
+        result.push(...(vRoot.recurseMaterializedFieldResources(fieldNames, options)));
       }
     }
     return result;
@@ -1733,19 +1753,24 @@ export default class Vrapper extends Cog {
 
 
 /**
- * Returns or finds an existing partition proxy of this object in the given partition.
- * Given partition p proxy x of prototype object o as x = pProxy(o, p), the following hold:
+ * Returns or finds an existing chronicle proxy of this object in the
+ * given chronicle.
+ * Given chronicle p proxy x of prototype object o as x = pProxy(o, p),
+ * the following hold:
  * 1. primary proxy object rules:
- * 1.1. x.id = derivedId(o.id, { proxyPartition: p.id })
+ * 1.1. x.id = derivedId(o.id, { proxyChronicle: p.id })
  * 1.2. x.prototype = p.id
- * Thus obtaining the proxy object is idempotent in its partition, after first creation.
- * Unlike with partition instances the member couplings of the proxy object are not processed at
- * all. This means that any property accesses have to perform a further obtainProxyIn translation
+ * Thus obtaining the proxy object is idempotent in its chronicle,
+ * after first creation.
+ * Unlike with chronicle instances the member couplings of the proxy
+ * object are not processed at all. This means that any property
+ * accesses have to perform a further obtainProxyIn translation
  * to obtain similar proxy objects.
- * Partition proxies and partition instances are disjoint even for same prototypes.
- * @param {any} partition
- * @param {any} discourse If given, the proxy lookup and possible creation are performed in the
- *   discourse context. Otherwise, the lookup and creation are immediately performed against the
+ * Chronicle proxies and chronicle instances are disjoint even for same prototypes.
+ * @param {any} chronicle
+ * @param {any} discourse If given, the proxy lookup and possible
+ *   creation are performed in the discourse context. Otherwise, the
+ *   lookup and creation are immediately performed against the
  *   backing engine and its false prophet.
  */
   getGhostIn (vInstance: Vrapper, discourse: ?Discourse) {
@@ -2196,7 +2221,7 @@ const applicatorCreators = {
   prepareBvob: createApplicatorWithOptionsSecond,
   updateMediaContent: createApplicatorWithOptionsSecond,
   recurseMaterializedFieldResources: createApplicatorWithOptionsSecond,
-  recurseConnectedPartitionMaterializedFieldResources: createApplicatorWithOptionsSecond,
+  recurseConnectedChronicleMaterializedFieldResources: createApplicatorWithOptionsSecond,
 };
 
 function createApplicatorWithNoOptions (vrapper: Vrapper, methodName: string) {

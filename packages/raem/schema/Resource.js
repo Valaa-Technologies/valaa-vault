@@ -46,7 +46,7 @@ containing non-nullable references will be cascade destroyed.`,
           `Indicates whether this ${objectDescription} is frozen. A frozen Resource nor any of its${
           ""} ownlings cannot have any of their primary fields be modified. Setting isFrozen to${
           ""} true is (by design) an irreversible operation. If this ${objectDescription} is also${
-          ""} the root resource of a partition the whole partition is permanently frozen.`, {
+          ""} the root resource of a chronicle the whole chronicle is permanently frozen.`, {
             isDuplicateable: false,
             ownDefaultValue: false,
             affiliatedType: "Resource",

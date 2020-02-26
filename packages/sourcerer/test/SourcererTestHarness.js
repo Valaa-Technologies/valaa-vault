@@ -84,11 +84,11 @@ export async function createSourcererOracleHarness (options: Object, ...commandB
 
   const ret = await createSourcererTestHarness(combinedOptions);
   try {
-    if (options.acquirePartitions) {
-      const partitionURIs = options.acquirePartitions.map(
-          partitionId => naiveURI.createPartitionURI("valaa-test:", partitionId));
-      const connections = partitionURIs.map(uri =>
-          ret.sourcerer.acquireConnection(uri).asActiveConnection());
+    if (options.acquireConnections) {
+      const chronicleURIs = options.acquireConnections.map(
+          chronicleId => naiveURI.createChronicleURI("valaa-test:", chronicleId));
+      const connections = chronicleURIs.map(chronicleURI =>
+          ret.sourcerer.acquireConnection(chronicleURI).asActiveConnection());
       (await Promise.all(connections)).forEach(connection => {
         if (ret.sourcerer.getVerbosity() >= 1) {
           console.log("Connection fully active:", connection.debugId());
@@ -108,10 +108,10 @@ export async function createSourcererOracleHarness (options: Object, ...commandB
   }
 }
 
-export const createdTestPartitionEntity = created({
+export const createdTestChronicleEntity = created({
   id: [testRootId], typeName: "Entity",
   initialState: {
-    name: "Automatic Test Partition Root",
+    name: "Automatic Test Chronicle Root",
     authorityURI: "valaa-test:",
   },
 });
@@ -151,13 +151,13 @@ export default class SourcererTestHarness extends ScriptTestHarness {
         () => {
           hasRemoteTestBackend = (this.testAuthorityConfig || {}).isRemoteAuthority;
           const testConnection = this.sourcerer.acquireConnection(
-              this.testChronicleURI, { newPartition: !hasRemoteTestBackend });
+              this.testChronicleURI, { newChronicle: !hasRemoteTestBackend });
           if (hasRemoteTestBackend) {
-            // For remote test partitions with oracle we provide the root
+            // For remote test chronicles with oracle we provide the root
             // entity as a response to the initial narrate request.
             const testBackend = this.tryGetTestAuthorityConnection(testConnection);
             testBackend.addNarrateResults({ eventIdBegin: 0 }, [{
-              ...createdTestPartitionEntity,
+              ...createdTestChronicleEntity,
               aspects: { version: "0.2", log: { index: 0 }, command: { id: "rid-0" } },
             }]);
           }
@@ -167,7 +167,7 @@ export default class SourcererTestHarness extends ScriptTestHarness {
           // For non-remotes we chronicle the root entity explicitly.
         () => {
           if (hasRemoteTestBackend) return undefined;
-          const result = this.chronicleEvent(createdTestPartitionEntity, { isTruth: true });
+          const result = this.chronicleEvent(createdTestChronicleEntity, { isTruth: true });
           return result.getPremiereStory();
         },
       ],
@@ -212,7 +212,7 @@ export default class SourcererTestHarness extends ScriptTestHarness {
   }
 
   /**
-   * Retrieves out-going test partition commands from the given source,
+   * Retrieves out-going test chronicle commands from the given source,
    * converts them into truths and then has corresponding active
    * connections in this harness receive them via their receiveTruths.
    *
@@ -238,15 +238,15 @@ export default class SourcererTestHarness extends ScriptTestHarness {
         : Object.values((source instanceof Sourcerer ? source : source.sourcerer)._connections))) {
       const testSourceBackend = this.tryGetTestAuthorityConnection(connection);
       if (!testSourceBackend) continue;
-      const partitionURI = String(testSourceBackend.getPartitionURI());
-      const receiver = this.oracle._connections[partitionURI];
+      const chronicleURI = testSourceBackend.getChronicleURI();
+      const receiver = this.oracle._connections[chronicleURI];
       if (!receiver) {
         if (!requireReceivingConnection) continue;
-        throw new Error(`Could not find a receiving connection for <${partitionURI}>`);
+        throw new Error(`Could not find a receiving connection for <${chronicleURI}>`);
       }
       const receiverBackend = this.tryGetTestAuthorityConnection(receiver);
       if (!receiverBackend) {
-        throw new Error(`Receving connection <${partitionURI
+        throw new Error(`Receving connection <${chronicleURI
             }> has no TestConnection at the end of the chain`);
       }
       const truths = JSON.parse(JSON.stringify(
@@ -347,7 +347,7 @@ export function createFalseProphet (options?: Object) {
 
 export function createTestMockSourcerer (configOverrides: Object = {}) {
   return new TestSourcerer({
-    authorityURI: naiveURI.createPartitionURI("valaa-test:"),
+    authorityURI: "valaa-test:",
     authorityConfig: {
       eventVersion: EVENT_VERSION,
       isLocallyPersisted: true,

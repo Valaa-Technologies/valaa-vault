@@ -16,7 +16,7 @@ module.exports = {
 `ValOS Event Log is an ordered, numbered sequence of JSON-LD documents.
 Each document represents a single event. Together these events
 incrementally, exclusively and deterministically specify the state
-changes of a single valospace partition from its initial empty state to
+changes of a single valospace chronicle from its initial empty state to
 the current state after the most recent event.`,
     ],
   },

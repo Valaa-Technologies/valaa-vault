@@ -40,15 +40,15 @@ import { thenChainEagerly } from "~/tools";
  * 6. If UI focus is a valos resource, an appropriate valos Lens for it is located and rendered
  *    (with the resource set as its focus) as per rules below.
  *    valos Lens is a UI component which always has valos Resource as its focus.
- * 6.1. If UI focus is not an Active valos resource, ie. if any of its partitions does not have a
+ * 6.1. If UI focus is not an Active valos resource, ie. if any of its chronicless does not have a
  *    fully formed active connection, then:
- * 6.1.1. If UI focus is an Inactive valos resource, ie. if some of its partitions are not connected
+ * 6.1.1. If UI focus is an Inactive valos resource, ie. if some of its chronicles are not connected
  *    and no connection attempt is being made:
  *    value-renders props/context "inactiveLens" or "disabledLens".
- * 6.1.2. If UI focus is an Activating valos resource, ie. if all of its partitions are either
+ * 6.1.2. If UI focus is an Activating valos resource, ie. if all of its chronicles are either
  *    connected or a connection attempt is being made:
  *    value-renders props/context "activatingLens", "loadingLens" or "disabledLens".
- * 6.1.3. If UI focus is an Unavailable valos resource, ie. if some of its partitions connections
+ * 6.1.3. If UI focus is an Unavailable valos resource, ie. if some of its chronicles connections
  *    have failed (due to networks issues, permission issues etc.):
  *    value-renders props/context "unavailableLens" or "disabledLens".
  * 6.1.4. If UI focus is an Immaterial non-ghost valos resource:

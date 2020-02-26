@@ -146,7 +146,7 @@ only orphan the subject resource.`,
     "rdfs:range": "xsd:boolean",
     "rdfs:comment":
 `Field with this property prevent destruction of their subject
-resource if the field has active couplings inside the same partition.`,
+resource if the field has active couplings inside the same chronicle.`,
   },
   isDuplicateable: {
     "@type": "valos-kernel:Property",

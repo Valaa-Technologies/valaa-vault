@@ -107,7 +107,7 @@ export function _prepareBvob (connection: ScribeConnection, content: any,
         if (pendingBvobInfo.upstreamPrepareBvobProcess !== undefined) {
           return pendingBvobInfo.upstreamPrepareBvobProcess;
         }
-        throw new Error(`Can't prepare bvob locally (partition isLocallyPersisted is falsy) ${
+        throw new Error(`Can't prepare bvob locally (chronicle isLocallyPersisted is falsy) ${
             ""}and upstream prepare is not available.`);
       },
       (persistedContentHash) => (pendingBvobInfo.persistProcess = persistedContentHash),
@@ -165,7 +165,7 @@ export function _determineEventMediaPreOps (connection: ScribeConnection,
       const mediaEntry = connection._getMediaEntry(mediaVRL, false);
       if (!mediaEntry) {
         console.warn(`Could not determine media entry for media <${
-            mediaVRL}>; most likely a ghost media with inactive prototype partition`);
+            mediaVRL}>; most likely a ghost media with absent prototype chronicle`);
         return [];
       }
       mediaInfo = { ...mediaEntry.mediaInfo };

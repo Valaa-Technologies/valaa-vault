@@ -53,7 +53,7 @@ builds or depends on the previous layers.
    These packages are created by git repositories called `vaults`.
 - `authorities` layer provides the ValOS live authority service APIs.
    Authorities are deployed and managed with `opspace` workspaces.
-- `partitions` layer provides the resource content as partition
+- `chronicles` layer provides the resource content as chronicle
    events and bvobs. These are served via authority service APIs.
 
 TODO(iridian): Figure out and describe the concrete role of domains.
@@ -177,7 +177,7 @@ their dependencies.
 ## 4. ValOS `utility` layer provides a particular operational service for all
 
 ValOS has four main utility layers: `files`, `packages`, `authorities`
-and `partitions`. These layers form the core operational infrastructure
+and `chronicles`. These layers form the core operational infrastructure
 of ValOS.
 
 ### 4.1. Overview of utility layers
@@ -196,7 +196,7 @@ Utility    |Tool          |Payload                    |Providers   |Consumed via
 files      |`git`         |files in `./*`             |github.com  |`git clone`       |N/A     |`.git/*`      |`branch` `commit`   |`git push` & PR    |human      |merge PR to & `git push master`
 packages   |`vlm`, `yarn` |files in `/node_modules/..`|npmjs.com   |`depend` `require`|`files` |`package.json`|ups. `src/*` `bin/*`|upstream           |hybrid     |`assemble-packages` `publish-packages`
 authorities|`vlm`         |APIs, site & gateway files |IaaS, custom|browsers, various |`files` |upstream *    |upstream *          |upstream           |hybrid     |`build-release` `deploy-release`
-partitions |`vlm`, gateway|event logs, bvobs          |authorities |event & bvob APIs |N/A     |N/A           |gateway             |command & bvob APIs|authorities|automatic, custom
+chronicles |`vlm`, gateway|event logs, bvobs          |authorities |event & bvob APIs |N/A     |N/A           |gateway             |command & bvob APIs|authorities|automatic, custom
 
 - `Utility` - the utility layer which is being described
 - `Tool` - the name of the tool used to manipulate the payload and/or metadata
@@ -210,7 +210,7 @@ partitions |`vlm`, gateway|event logs, bvobs          |authorities |event & bvob
 - `Authority` - who accepts and distributes a change request
 - `Distributed via` - how changes are made live to all consumers
 
-Note that `files` and `partitions` don't have an external upstream and
+Note that `files` and `chronicles` don't have an external upstream and
 thus these bands are the defining authority of all of their payload.
 
 On the other hand `packages` and `authorities` use the `files` as their
@@ -268,9 +268,9 @@ valma package commands: `vlm assemble-packages` `vlm publish-packages`
 [Read more about valos URIs](packages/raem/README.md).
 
 > `valos-vault-4.4.2`: A ValOS `authority` can contain ValOS
-> `partitions` and must provide a mechanism for accessing event logs
+> `chronicles` and must provide a mechanism for accessing event logs
 > and bvob content as well as for accepting and authorizing incoming
-> commands into authorized partition events.
+> commands into authorized chronicle events.
 
 Authorities are usually live deployments on some infrastructure and
 they provide service APIs as the required mechanisms.
@@ -288,7 +288,7 @@ upstream and with empty payload).
 The payload here refers to the service deployments and their live APIs
 themselves and not any dynamic content delivered through them. Such
 dynamic content belongs to other domains (notably valospace content
-resides in the `partitions` utility layer, see below).
+resides in the `chronicles` utility layer, see below).
 
 The static content includes HTTP landing pages, site routes and their
 configurations, ValOS gateway and plugin runtimes and any other similar
@@ -337,7 +337,7 @@ valma opspace commands: `vlm build-release` `vlm deploy-release`
 
 ### 4.4.1. ValOS core vs. auxiliary authorities
 
-ValOS authorities and any partition content they provide do not need to
+ValOS authorities and any chronicle content they provide do not need to
 be public. A ValOS core authority is an authority which can be accessed
 using only ValOS core plugins (including no plugins at all). A ValOS
 auxiliary authority is an authority which requires a conforming but
@@ -349,24 +349,24 @@ gateway plugins cannot interfere with other reasonably written
 plugins).
 
 
-## 4.5. Partitions utility layer - the foundation of valospace
+## 4.5. Chronicles utility layer - the foundation of valospace
 
-Event logs and bvob content are the partitions payload and are consumed
+Event logs and bvob content are the chronicles payload and are consumed
 by ValOS gateways. It is more extensively covered elsewhere and is
 mentioned here for completeness; precious little infrastructural
 tooling is provided for them yet.
 
-Eventually various partition diagnostics tools will come in handy:
+Eventually various chronicle diagnostics tools will come in handy:
 - Media content import/export tools
-- Complete partition to file system hierarchy save/load tools
+- Complete chronicle to file system hierarchy save/load tools
 - Event log introspection and manipulation tools
 - etc.
 
 
-### 4.5.1. ValOS public vs protected partitions
+### 4.5.1. ValOS public vs protected chronicles
 
-All partitions provided by ValOS authorities are ValOS partitions.
-Additionally ValOS public partitions are partitions which are both
+All chronicles provided by ValOS authorities are ValOS chronicles.
+Additionally ValOS public chronicles are chronicles which are both
 1. provided by ValOS core authorities, and
 2. are available for an anonymous consumer with nothing but a client
    capable of running the ValOS gateway runtime which the authority
@@ -375,7 +375,7 @@ Additionally ValOS public partitions are partitions which are both
 
 TODO(iridian): Figure out whether this is the actually most meaningful
                place to put this semantic border. A specific term for
-               non-authenticated partitions capable of running only on
+               non-authenticated chronicles capable of running only on
                standard runtime is useful, but how useful actually?
 
 

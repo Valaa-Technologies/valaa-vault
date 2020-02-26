@@ -1,6 +1,6 @@
 // @flow
 
-import { asyncConnectToPartitionsIfMissingAndRetry } from "~/raem/tools/denormalized/partitions";
+import { asyncConnectToChronicleIfAbsentAndRetry } from "~/raem/tools/denormalized/partitions";
 
 import { dumpify, dumpObject, isPromise, outputError, thenChainEagerly } from "~/tools";
 
@@ -132,7 +132,7 @@ function _attachProjectorFastifyRoutes (router) {
   router._projectors.forEach(projector => {
     let fastifyRoute;
     try {
-      projector.smartHandler = asyncConnectToPartitionsIfMissingAndRetry(
+      projector.smartHandler = asyncConnectToChronicleIfAbsentAndRetry(
           (request, reply) => thenChainEagerly(projector._whenReady, [
             readiness => {
               if (readiness === true) return projector.handler(request, reply);

@@ -17,7 +17,7 @@ export class Timed extends ActionCollection {
 
 /**
  * A delayed, command-ownership-transferring action.
- * TIMED will be expanded by appropriate partition service time-engine(s) at specified time into
+ * TIMED will be expanded by appropriate chronicle service time-engine(s) at specified time into
  * concrete sub-actions.
  * These sub-actions are non-authoritative suggestions for the time-engine(s) to invoke.
  * The time-engine(s) is completely free to fully modify or ignore the sub-actions before
@@ -26,8 +26,8 @@ export class Timed extends ActionCollection {
  * The 'time' argument is a context dependent timestamp suggestion, its meaning interpreted by the
  * authoritative time-engine(s).
  *
- * TIMED action is always associated with a primary partition, just like TRANSACTED is.
- * The authority of this partition, which usually is a time-engine, then accepts, rejects or
+ * TIMED action is always associated with a primary chronicle, just like TRANSACTED is.
+ * The authority of this chronicle, which usually is a time-engine, then accepts, rejects or
  * rewrites the action as usual.
  * The only guarantee for an accepted or rewritten TIMED action is that its sub-actions have been
  * form-, and schema-validated. Their sub-actions are still considered only suggestions and can be

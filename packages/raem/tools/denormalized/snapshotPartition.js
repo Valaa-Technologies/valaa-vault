@@ -12,8 +12,9 @@ import { createId, wrapError } from "~/tools";
 */
 
 /**
- * snapshotPartition - traverses all descendants and dependents of the given partition and then
- * serializes them via given onCreated and onModified callbacks.
+ * snapshotChronicle - traverses all descendants and dependents of the
+ * given chronicle and then serializes them via given onCreated and
+ * onModified callbacks.
  * Traversal rules:
  * 1. owners are always traversed before ownees
  * 2. only the owner link and leaf properties are given in onCreated calls
@@ -28,25 +29,25 @@ import { createId, wrapError } from "~/tools";
  * @param  {async function(id, typeName, modifies)}            onModified description
  * @returns {type}                                                            description
  */
-export default async function snapshotPartition (/* { partitionId, state, schema, onCreated,
+export default async function snapshotChronicle (/* { chronicleId, state, schema, onCreated,
   onModified,
 } */) {
-  // TODO(iridian): Refactor snapshotPartition to use Resolver
-  throw new Error("snapshotPartition has rotted.");
+  // TODO(iridian): Refactor snapshotChronicle to use Resolver
+  throw new Error("snapshotChronicle has rotted.");
   /*
   const walkedIds = new Set();
   let defers = { resources: [], datas: [], modifies: [] };
-  const partition = tryObjectTransient(state, partitionId, "Partition", true);
+  const chronicle = tryObjectTransient(state, chronicleId, "Chronicle", true);
   try {
-    walkResourceProcessingOwnersFirst(partition, (object) =>
+    walkResourceProcessingOwnersFirst(chronicle, (object) =>
       collectFields(schema, state, object.get("id").rawId(),
           getTransientTypeName(object, schema),
           fieldReviver));
     processDefers();
     return;
   } catch (error) {
-    throw wrapError(error, `During snapshotPartition(${partitionId}:${
-        partition && getTransientTypeName(partition, schema)})`);
+    throw wrapError(error, `During snapshotChronicle(${chronicleId}:${
+        chronicle && getTransientTypeName(chronicle, schema)})`);
   }
 
   function walkResourceProcessingOwnersFirst (resource, walkValue, field, parent, parentType) {
@@ -65,7 +66,7 @@ export default async function snapshotPartition (/* { partitionId, state, schema
           return onCreated(id, typeName, () =>
               walkValue(resource, schema.getType(typeName), field, parent, parentType));
         } catch (error) {
-          throw wrapError(error, `During snapshotPartition.onCreated(${id}:${typeName
+          throw wrapError(error, `During snapshotChronicle.onCreated(${id}:${typeName
               }), initialData:`, initialData);
         }
       });
@@ -126,7 +127,7 @@ export default async function snapshotPartition (/* { partitionId, state, schema
       }
       return null;
     } catch (error) {
-      throw wrapError(error, `During snapshotPartition.fieldReviver(${value.get("id")}:${
+      throw wrapError(error, `During snapshotChronicle.fieldReviver(${value.get("id")}:${
           parentType.name}.${field.name}):`, value);
     }
   }
@@ -159,7 +160,7 @@ export default async function snapshotPartition (/* { partitionId, state, schema
           try {
             onModified(id, typeName, byId[id]);
           } catch (error) {
-            throw wrapError(error, `During snapshotPartition.onModified(${id}:${typeName}):`,
+            throw wrapError(error, `During snapshotChronicle.onModified(${id}:${typeName}):`,
                 byId[id]);
           }
         }

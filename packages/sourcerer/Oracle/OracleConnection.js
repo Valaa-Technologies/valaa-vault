@@ -45,7 +45,7 @@ export default class OracleConnection extends Connection {
     // proxy/connection creation.
     this.clockEvent(1, "oracle.doConnect", "_authoritySourcerer.acquireConnection");
     this.setUpstreamConnection(this._authoritySourcerer.acquireConnection(
-        this.getPartitionURI(), {
+        this.getChronicleURI(), {
           narrateOptions: false,
           subscribeEvents: (options.narrateOptions === false) && options.subscribeEvents,
           receiveTruths: this.getReceiveTruths(options.receiveTruths),
@@ -134,7 +134,7 @@ export default class OracleConnection extends Connection {
               if (!decoder) return buffer;
               const name = mediaInfo.name ? `'${mediaInfo.name}'` : `unnamed media`;
               const decoding = decoder.decode(buffer,
-                  { mediaName: name, partitionName: connection.getName(), contentHash });
+                  { mediaName: name, chronicleName: connection.getName(), contentHash });
               if (mediaInfo.decodingCache) mediaInfo.decodingCache.set(decoder, decoding);
               return decoding;
             },

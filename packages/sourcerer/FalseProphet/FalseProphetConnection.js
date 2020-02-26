@@ -10,7 +10,7 @@ import { ChronicleOptions, ChronicleRequest, ChronicleEventResult, ConnectOption
     from "~/sourcerer/api/types";
 import { initializeAspects, obtainAspect, tryAspect } from "~/sourcerer/tools/EventAspects";
 import EVENT_VERSION from "~/sourcerer/tools/EVENT_VERSION";
-import extractPartitionEvent0Dot2
+import extractChronicleEvent0Dot2
     from "~/sourcerer/tools/event-version-0.2/extractPartitionEvent0Dot2";
 import IdentityManager from "~/sourcerer/FalseProphet/IdentityManager";
 
@@ -49,13 +49,13 @@ export default class FalseProphetConnection extends Connection {
 
   constructor (options) {
     super(options);
-    const existingRef = this._sourcerer._inactivePartitionVRLPrototypes[String(this._partitionURI)];
+    const existingRef = this._sourcerer._absentChronicleVRLPrototypes[this._chronicleURI];
     if (existingRef) {
       this._referencePrototype = existingRef;
-      delete this._sourcerer._inactivePartitionVRLPrototypes[String(this._partitionURI)];
+      delete this._sourcerer._absentChronicleVRLPrototypes[this._chronicleURI];
     } else {
       this._referencePrototype = new VRL()
-          .initResolverComponent({ inactive: true, partition: this._partitionURI });
+          .initResolverComponent({ inactive: true, partition: this._chronicleURI });
     }
   }
 
@@ -404,14 +404,14 @@ export default class FalseProphetConnection extends Connection {
     return undefined;
   }
 
-  extractPartitionEvent (command: Command) {
-    return extractPartitionEvent0Dot2(this, command);
+  extractChronicleEvent (command: Command) {
+    return extractChronicleEvent0Dot2(this, command);
   }
 
-  createCommandPartitionInfo (/* action: Object, command: Command , bard: Bard */) {
+  createCommandChronicleInfo (/* action: Object, command: Command , bard: Bard */) {
     if (this._isFrozen) {
-      throw new Error(`Cannot chronicle a command to frozen partition: <${
-          this.getPartitionURI()}>`);
+      throw new Error(
+          `Cannot chronicle a command to frozen chronicle: <${this.getChronicleURI()}>`);
     }
     return {};
   }
@@ -422,7 +422,7 @@ export default class FalseProphetConnection extends Connection {
       `_checkForFreezeAndNotify(${this._unconfirmedCommands.length})`]);
     if (lastEvent) this.setIsFrozen(lastEvent.type === "FROZEN");
     this._sourcerer.setConnectionCommandCount(
-        this.getPartitionURI().toString(), this._unconfirmedCommands.length);
+        this.getChronicleURI(), this._unconfirmedCommands.length);
   }
 
   _reviewRecomposedSchism (purged: Prophecy, newProphecy: Prophecy) {
@@ -457,10 +457,10 @@ export default class FalseProphetConnection extends Connection {
     const operation = meta.operation;
     // No way to revise non-prophecy schisms: these come from elsewhere so not our job.
     if (!operation) return false;
-    const operationPartition = operation._partitions[String(this.getPartitionURI())];
-    if (operationPartition) {
+    const venue = operation._venues[this.getChronicleURI()];
+    if (venue) {
       operation._persistedStory = null;
-      operationPartition.chronicling = null;
+      venue.chronicling = null;
     }
     // First try to revise using the original chronicleEvents options.reformHeresy
     if (operation._options.reformHeresy) {
@@ -493,16 +493,16 @@ export default class FalseProphetConnection extends Connection {
     }
     const recomposedProphecy = _recomposeSchismaticStory(this.getSourcerer(), params.schism);
     if (!recomposedProphecy
-        || (Object.keys((recomposedProphecy.meta || {}).partitions).length !== 1)) {
-      // Recomposition failed, revision failed or a multi-partition command reformation
+        || (Object.keys((recomposedProphecy.meta || {}).chronicles).length !== 1)) {
+      // Recomposition failed, revision failed or a multi-chronicle command reformation
       // which is not supported (for now).
       return false;
     }
     const recomposedCommand = getActionFromPassage(recomposedProphecy);
     if (!recomposedCommand.meta) throw new Error("recomposedCommand.meta missing");
-    const recomposedPartitionCommand = this.extractPartitionEvent(recomposedCommand);
-    // Can only revise commands belonging to the originating partition
-    if (!recomposedPartitionCommand) return false;
+    const recomposedChronicleCommand = this.extractChronicleEvent(recomposedCommand);
+    // Can only revise commands belonging to the originating chronicle
+    if (!recomposedChronicleCommand) return false;
 
     const operation = recomposedCommand.meta.operation = params.schism.meta.operation;
     operation._prophecy = recomposedProphecy;
@@ -512,11 +512,10 @@ export default class FalseProphetConnection extends Connection {
       operation._progress.previousProphecy = operation._progress.prophecy;
       operation._progress.prophecy = recomposedProphecy;
     }
-    const operationPartition = operation._partitions[String(this.getPartitionURI())];
-    operationPartition._reformationAttempt = operation._reformationAttempt;
-    operationPartition.commandEvent = recomposedPartitionCommand;
-    operationPartition.chronicling = this.chronicleEvent(
-        operationPartition.commandEvent, Object.create(operation._options));
+    const venue = operation._venues[this.getChronicleURI()];
+    venue._reformationAttempt = operation._reformationAttempt;
+    venue.commandEvent = recomposedChronicleCommand;
+    venue.chronicling = this.chronicleEvent(venue.commandEvent, Object.create(operation._options));
     return [params, recomposedProphecy];
   }
 

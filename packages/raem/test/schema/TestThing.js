@@ -11,7 +11,7 @@ import Blob from "~/raem/schema/Blob";
 import Data from "~/raem/schema/Data";
 import Discoverable, { discoverableInterface } from "~/raem/schema/Discoverable";
 import TransientFields from "~/raem/schema/TransientFields";
-import Partition, { partitionInterface } from "~/raem/schema/Partition";
+import Chronicle, { chronicleInterface } from "~/raem/schema/Chronicle";
 import Resource from "~/raem/schema/Resource";
 
 import SemVer from "~/raem/schema/SemVer";
@@ -21,31 +21,31 @@ import MediaType from "~/raem/schema/MediaType";
 import TestDataGlue from "~/raem/test/schema/TestDataGlue";
 import TestGlue from "~/raem/test/schema/TestGlue";
 
-const OBJECT_DESCRIPTION = "testing partition";
+const OBJECT_DESCRIPTION = "testing chronicle";
 
 const TestThing = new GraphQLObjectType({
   name: "TestThing",
 
-  description: "An encompassing partition for testing RAEM schema and tools.",
+  description: "An encompassing chronicle for testing RAEM schema and tools.",
 
-  interfaces: () => [Partition, Discoverable, Resource, TransientFields],
+  interfaces: () => [Chronicle, Discoverable, Resource, TransientFields],
 
   fields: () => ({
     ...discoverableInterface(OBJECT_DESCRIPTION).fields(),
-    ...partitionInterface(OBJECT_DESCRIPTION).fields(),
+    ...chronicleInterface(OBJECT_DESCRIPTION).fields(),
 
     ...aliasField("parent", "owner", TestThing,
-        "Non-owning parent test partition",
+        "Non-owning parent test chronicle",
         { coupling: toOne({ coupledField: "children" }), affiliatedType: "TestThing" },
     ),
 
     ...primaryField("children", new GraphQLList(TestThing),
-        "Ownling child test partitions",
+        "Ownling child test chronicles",
         { coupling: toManyOwnlings({}), affiliatedType: "TestThing" },
     ),
 
     ...primaryField("siblings", new GraphQLList(TestThing),
-        "Sibling test partitions",
+        "Sibling test chronicles",
         { coupling: toMany({ coupledField: "siblings" }), affiliatedType: "TestThing" },
     ),
 
@@ -73,19 +73,19 @@ const TestThing = new GraphQLObjectType({
     ),
 
     ...primaryField("version", new GraphQLNonNull(SemVer),
-        "Version of the testing partition",
+        "Version of the testing chronicle",
     ),
 
     ...primaryField("bvobs", new GraphQLList(Blob),
-        "Bvob's contained in the testing partition",
+        "Bvob's contained in the testing chronicle",
     ),
 
     ...primaryField("music", new GraphQLList(Sprite),
-        "Referenced abstract denoted music Sprite's in the testing partition",
+        "Referenced abstract denoted music Sprite's in the testing chronicle",
     ),
 
     ...primaryField("mediaType", MediaType,
-    `The media type of this test partition`),
+    `The media type of this test chronicle`),
   }),
 });
 

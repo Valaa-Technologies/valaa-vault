@@ -68,7 +68,7 @@ export default class Engine extends Cog {
   debugId () { return `${super.debugId()}->${this.discourse.debugId()}`; }
 
   getSelfAsHead () {
-    return this._enginePartitionId ? vRef(this._enginePartitionId) : {};
+    return this._engineChronicleId ? vRef(this._engineChronicleId) : {};
   }
   getSourcerer () { return this._sourcerer; }
 
@@ -263,10 +263,10 @@ export default class Engine extends Cog {
 
       ret = directiveArray.map((directive, index) => {
         if ((directive.initialState || {}).partitionAuthorityURI) {
-          // Create partition(s) before the transaction is committed
+          // Create chronicle(s) before the transaction is committed
           // (and thus before the commands leave upstream).
           discourse
-              .acquireConnection(directive.id.getPartitionURI(), { newPartition: true })
+              .acquireConnection(directive.id.getChronicleURI(), { newChronicle: true })
               .asActiveConnection();
         }
         const resultPassage = !isRecombine ? result.story : result.story.passages[index];
@@ -403,11 +403,11 @@ export default class Engine extends Cog {
       owner = universalizeCommandData(owner, options);
       if (!(owner instanceof VRL)) throw new Error("new resource owner must be a valid resource");
     }
-    let chronicleURI = owner.getPartitionURI();
+    let chronicleURI = owner.getChronicleURI();
     if (!chronicleURI && owner.isGhost()) {
       chronicleURI = discourse
           .bindObjectId([owner.getGhostPath().headHostRawId()], "Resource")
-          .getPartitionURI();
+          .getChronicleURI();
       if (!chronicleURI) {
         throw new Error("INTERNAL ERROR: could not determine new resource chronicle");
       }

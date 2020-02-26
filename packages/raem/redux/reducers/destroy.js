@@ -4,7 +4,7 @@ import GhostPath from "~/raem/state/GhostPath";
 import Transient from "~/raem/state/Transient";
 
 import { addDestroyCouplingPassages } from "~/raem/tools/denormalized/couplings";
-import { universalizePartitionMutation } from "~/raem/tools/denormalized/partitions";
+import { universalizeChronicleMutation } from "~/raem/tools/denormalized/partitions";
 
 import Bard from "~/raem/redux/Bard";
 
@@ -19,8 +19,8 @@ export default function destroy (bard: Bard) {
     rawId = passage.id.rawId();
     transient = bard.goToTransientOfPassageObject("Resource", true, true); // require, ghost-lookup
     objectTypeIntro = bard.goToResourceTransientTypeIntro(transient);
-    const partitionURI = universalizePartitionMutation(bard, passage.id);
-    bard.destroyedResourcePartition = partitionURI && partitionURI.toString();
+    const chronicleURI = universalizeChronicleMutation(bard, passage.id);
+    bard.destroyedResourceChronicle = chronicleURI;
     const resourceFieldIntros = objectTypeIntro.getFields();
     transient.forEach((fieldValue, fieldName) => {
       // Need to process non-default fields only ie. those in store: only they can have couplings.

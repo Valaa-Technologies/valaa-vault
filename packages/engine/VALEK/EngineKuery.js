@@ -264,9 +264,9 @@ export default class EngineKuery extends ValoscriptKuery {
         fieldNames, options);
   }
 
-  recurseConnectedPartitionMaterializedFieldResources (fieldNames: Array<string>,
+  recurseConnectedChronicleMaterializedFieldResources (fieldNames: Array<string>,
       options: Kuery = {}) {
-    return this.call(this._root.toMethod("recurseConnectedPartitionMaterializedFieldResources"),
+    return this.call(this._root.toMethod("recurseConnectedChronicleMaterializedFieldResources"),
         null, fieldNames, options);
   }
 }

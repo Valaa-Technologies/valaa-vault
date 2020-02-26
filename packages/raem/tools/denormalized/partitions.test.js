@@ -3,20 +3,13 @@ import { created, addedTo, transacted } from "~/raem/events";
 import { vRef } from "~/raem/VRL";
 
 import { createRAEMTestHarness } from "~/raem/test/RAEMTestHarness";
-import { createLocalPartitionURIFromRawId, createMemoryPartitionURIFromRawId }
+import { createLocalChronicleURIFromRootId, createMemoryChronicleURIFromRootId }
     from "~/raem/ValaaURI";
 
 const testAuthorityURI = "valaa-test:";
 // const sharedURI = "valos-shared-content";
 
-/*
-function vCrossRef (rawId, partitionRawId = rawId) {
-  const uri = naiveURI.createPartitionURI("valaa-test:", partitionRawId);
-  return vRef(rawId, null, null, uri);
-}
-*/
-
-describe("partitions", () => {
+describe("chronicles", () => {
   beforeEach(() => {});
 
   const createBlockA = [
@@ -50,53 +43,53 @@ describe("partitions", () => {
     }),
   ];
 
-  it("CREATED has correct partition and id.getPartitionURI() for top-level children", () => {
+  it("CREATED has correct chronicle and id.getChronicleURI() for top-level children", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
     const grandparent = harness.run(vRef("A_grandparent"), null);
-    const grandparentPartitionURI = harness.run(grandparent, "id").getPartitionURI();
+    const grandparentChronicleURI = harness.run(grandparent, "id").getChronicleURI();
 
-    expect(grandparentPartitionURI)
+    expect(grandparentChronicleURI)
         .toEqual(createLocalPartitionURIFromRawId("A_grandparent"));
     expect(harness.run(grandparent, "authorityURI"))
         .toEqual("valaa-local:");
     expect(harness.run(grandparent, "partition"))
         .toBe(grandparent);
 
-    expect(harness.run(vRef("A_parent"), "id").getPartitionURI())
-        .toBe(grandparentPartitionURI);
+    expect(harness.run(vRef("A_parent"), "id").getChronicleURI())
+        .toBe(grandparentChronicleURI);
     expect(harness.run(vRef("A_parent"), "partition"))
         .toBe(grandparent);
 
-    expect(harness.run(vRef("A_child1"), "id").getPartitionURI())
-        .toBe(grandparentPartitionURI);
+    expect(harness.run(vRef("A_child1"), "id").getChronicleURI())
+        .toBe(grandparentChronicleURI);
     expect(harness.run(vRef("A_child1"), "partition"))
         .toBe(grandparent);
   });
 
-  it("CREATED has correct partition and id.getPartitionURI() for non-top-level partition", () => {
+  it("CREATED has correct chronicle and id.getChronicleURI() for non-top-level chronicle", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
     const child2 = harness.run(vRef("A_child2"), null);
-    const child2PartitionURI = harness.run(child2, "id").getPartitionURI();
+    const child2ChronicleURI = harness.run(child2, "id").getChronicleURI();
 
-    expect(child2PartitionURI)
+    expect(child2ChronicleURI)
         .toEqual(createMemoryPartitionURIFromRawId("A_child2"));
     expect(harness.run(child2, "authorityURI"))
         .toEqual("valaa-memory:");
     expect(harness.run(child2, "partition"))
         .toBe(child2);
 
-    expect(harness.run(vRef("A_grandchild"), "id").getPartitionURI())
-        .toBe(child2PartitionURI);
+    expect(harness.run(vRef("A_grandchild"), "id").getChronicleURI())
+        .toBe(child2ChronicleURI);
     expect(harness.run(vRef("A_grandchild"), "partition"))
         .toBe(child2);
 
-    expect(harness.run(vRef("A_grandownee"), "id").getPartitionURI())
-        .toBe(child2PartitionURI);
+    expect(harness.run(vRef("A_grandownee"), "id").getChronicleURI())
+        .toBe(child2ChronicleURI);
     expect(harness.run(vRef("A_grandownee"), "partition"))
         .toBe(child2);
   });
 
-  it("meshes partition infos properly when setting cross-partition dependency", () => {
+  it("meshes chronicle infos properly when setting cross-chronicle dependency", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
     const finalEvent = harness.chronicleEvent(transacted({
       actions: [
@@ -110,30 +103,30 @@ describe("partitions", () => {
         }),
       ],
     })).getTruthEvent();
-    const aGrandparentPartition = { // eslint-disable-line
+    const aGrandparentChronicle = { // eslint-disable-line
       "valaa-local:?id=A_grandparent": {},
     };
-    const bTestRootPartition = { // eslint-disable-line
+    const bTestRootChronicle = { // eslint-disable-line
       "valaa-test:?id=B_testRoot": {},
     };
-    expect(finalEvent.meta.partitions)
-        .toEqual({ ...aGrandparentPartition, ...bTestRootPartition });
-    expect(finalEvent.meta.partitionURI)
+    expect(finalEvent.meta.chronicles)
+        .toEqual({ ...aGrandparentChronicle, ...bTestRootChronicle });
+    expect(finalEvent.meta.chronicleURI)
         .toEqual("valaa-test:?id=B_testRoot");
-    expect((finalEvent.actions[0].meta || {}).partitions)
+    expect((finalEvent.actions[0].meta || {}).chronicles)
         .toBeFalsy();
-    expect((finalEvent.actions[0].meta || {}).partitionURI)
+    expect((finalEvent.actions[0].meta || {}).chronicleURI)
         .toBeFalsy();
-    expect(finalEvent.actions[1].meta.partitions)
-        .toEqual({ ...aGrandparentPartition, ...bTestRootPartition });
+    expect(finalEvent.actions[1].meta.chronicles)
+        .toEqual({ ...aGrandparentChronicle, ...bTestRootChronicle });
 
 
     const aGrandParent = harness.run(vRef("A_grandparent"), null);
     const bTestRoot = harness.run(vRef("B_testRoot"), null);
-    expect(aGrandParent.getPartitionRawId())
+    expect(aGrandParent.getChronicleId())
         .toEqual("A_grandparent");
-    expect(bTestRoot.getPartitionRawId())
         .toEqual("B_testRoot");
+    expect(bTestRoot.getChronicleId())
 
     expect(harness.run(vRef("A_grandparent"), ["§->", "siblings", 0]))
         .toBe(bTestRoot);

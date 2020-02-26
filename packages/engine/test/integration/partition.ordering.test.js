@@ -30,7 +30,7 @@ afterEach(async () => {
   await clearAllScribeDatabases(/* [testChronicleURI] */);
 });
 
-describe("Partition load ordering and inactive resource handling", () => {
+describe("Chronicle load ordering and inactive resource handling", () => {
   it("handles out-of-order new property creation for an immaterial ghost", async () => {
     // The test is a bit broken with "no events found when connecting":
     // this is not a bug of the payload source, but of arrangement of
@@ -73,7 +73,7 @@ describe("Partition load ordering and inactive resource handling", () => {
     await pairness.receiveTruthsFrom(harness.testConnection, { verbosity: 0 });
 
     const pairedLaterConnection = pairness.sourcerer
-        .acquireConnection(laterConnection.getPartitionURI());
+        .acquireConnection(laterConnection.getChronicleURI());
     await pairness.receiveTruthsFrom(laterConnection, { verbosity: 0, asNarrateResults: true });
     await pairedLaterConnection.asActiveConnection();
 
@@ -86,7 +86,7 @@ describe("Partition load ordering and inactive resource handling", () => {
     expect(pairness.runValoscript(pairedComponent, `
       this.num;
     `)).toEqual(10);
-    // await pairness.sourcerer.acquireConnection(laterConnection.getPartitionURI())
+    // await pairness.sourcerer.acquireConnection(laterConnection.getChronicleURI())
     //    .asActiveConnection();
     /*
 

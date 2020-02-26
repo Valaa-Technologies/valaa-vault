@@ -40,7 +40,7 @@ export default class Authority extends Sourcerer {
   isRecordable ()   - exposes a direct API for extending (non-frozen)
                       event logs with new events
   isGenerated ()    - event log is programmatically generated from
-                      partition URI itself
+                      chronicle URI itself
   isProcedural ()   - contains locally generated resource model
                       extensions which only use an event log as a seed
   isHashChained ()  - enforces event log consistency
@@ -50,11 +50,11 @@ export default class Authority extends Sourcerer {
                       snapshot of the most recent content
 
   Use cases which employ above qualities in different ways:
-  Bvob/Tag/Data authorities / partitions
-  Database proxy authorities / partitions (db data represented as partition event logs)
-  IoT device authorities / partitions (event logs representing state history & actuator changes)
-  Query authorities (queries as partition URI's which return immutable event logs,
+  Bvob/Tag/Data authorities / chronicles
+  Database proxy authorities / chronicles (db data represented as chronicle event logs)
+  IoT device authorities / chronicles (event logs representing state history & actuator changes)
+  Query authorities (queries as chronicle URI's which return immutable event logs,
       representing query result sets, live queries, etc.)
-  Identity authorities / partitions (access control relation target user partitions)
+  Identity authorities / chronicles (access control relation target user chronicles)
   */
 }

@@ -30,11 +30,11 @@
   },
   "devDependencies": {
     "@cyclonedx/bom": "^0.2.6",
-    "@valos/inspire": "^0.35.0-rc.3",
-    "@valos/kernel": "^0.35.0-rc.3",
-    "@valos/toolset-revealer": "^0.35.0-rc.3",
-    "@valos/type-vault": "^0.35.0-rc.3",
-    "valma": "^0.35.0-rc.3",
+    "@valos/inspire": "^0.35.0-rc.5",
+    "@valos/kernel": "^0.35.0-rc.5",
+    "@valos/toolset-revealer": "^0.35.0-rc.5",
+    "@valos/type-vault": "^0.35.0-rc.5",
+    "valma": "^0.35.0-rc.5",
     "xml-js": "^1.6.11"
   },
   "dependencies": {}

@@ -8,7 +8,7 @@ import { elevateFieldRawSequence } from "~/raem/state/FieldInfo";
 import Transient, { PrototypeOfImmaterialTag } from "~/raem/state/Transient";
 import { getObjectRawField } from "~/raem/state/getObjectField";
 
-import { tryConnectToMissingPartitionsAndThen } from "~/raem/tools/denormalized/partitions";
+import { tryConnectToAbsentChroniclesAndThen } from "~/raem/tools/denormalized/partitions";
 
 import Valker from "~/raem/VALK/Valker";
 import Kuery, { dumpObject, dumpKuery, dumpScope } from "~/raem/VALK/Kuery";
@@ -960,9 +960,9 @@ function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object
     } else {
       opName = `call/${valkCaller ? "advance" : "run"}${contextText}`;
       if (!valkCaller) {
-        const connectingMissingPartitions = tryConnectToMissingPartitionsAndThen(
+        const absentChronicleSourcing = tryConnectToAbsentChroniclesAndThen(
           advanceError, () => caller.apply(this, arguments));
-        if (connectingMissingPartitions) return connectingMissingPartitions;
+        if (absentChronicleSourcing) return absentChronicleSourcing;
       }
     }
     const wrap = (transaction || capturingValker).wrapErrorEvent(

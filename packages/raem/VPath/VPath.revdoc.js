@@ -512,7 +512,7 @@ event log `, ref("JSON-LD context", "https://w3c.github.io/json-ld-syntax/#the-c
 ` (Note: this applies only to immediate but not to nested vparams).
 
 Global resources can be transferred between event logs. To maintain
-immutability across these transfers VGRID's must not contain partition
+immutability across these transfers VGRID's must not contain chronicle
 or other non-identifying locator information. Similar to URN's VRID's
 always relies external structures and systems for carrying locator
 information.
@@ -572,7 +572,7 @@ sub-resources: they allow for protected, constrained semantics to be
 expressed in the valospace resources. This allows both simplified
 semantics (eg. properties _cannot_ be renamed so the complex
 functionality doesn't need to be supported on fabric level), more
-principled mechanism for partition crypto behaviours (permission
+principled mechanism for chronicle crypto behaviours (permission
 relations are structural sub-resources which simplifies security
 analysis but retains valospace convenience) and also a mechanism for
 expressing non-trivial resources such as hypertwin resources.

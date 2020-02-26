@@ -265,7 +265,7 @@ exports.handler = async (yargv) => {
     const status = { tick, ...heartbeatClockFields };
     if (server.gateway.getTotalCommandCount()) {
       status.commandCount = server.gateway.getTotalCommandCount();
-      status.partitions = server.gateway.getPartitionStatuses();
+      status.chronicles = server.gateway.getChronicleStatuses();
     }
     if (heartbeatClockFields) {
       status.action = `serializing DOM`;

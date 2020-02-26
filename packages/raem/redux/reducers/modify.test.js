@@ -84,7 +84,7 @@ describe("MODIFIED action class", () => {
 
       const child1 = harness.run(vRef("A_child1"), null);
       expect(harness.run(child1, ["§->", "sourceDataGlues", 0, "target", "rawId"]))
-          .toEqual("A_child2");
+          .toEqual("@$~raw:A_child2@@");
     });
 
     it("adds and traverses non-expanded VRL Data", () => {
@@ -98,7 +98,7 @@ describe("MODIFIED action class", () => {
 
       const child1 = harness.run(vRef("A_child1"), null);
       expect(harness.run(child1, ["§->", "sourceDataGlues", 0, "target", "rawId"]))
-          .toEqual("A_child2");
+          .toEqual("@$~raw:A_child2@@");
     });
 
     it("adds and traverses expanded Data without explicit typeName to a concrete field", () => {
@@ -110,7 +110,7 @@ describe("MODIFIED action class", () => {
 
       const child1 = harness.run(vRef("A_child1"), null);
       expect(harness.run(child1, ["§->", "sourceDataGlues", 0, "target", "rawId"]))
-          .toEqual("A_child2");
+          .toEqual("@$~raw:A_child2@@");
     });
 
     it("fails to add expanded Data without explicit typeName to an abstract field", () => {
@@ -130,7 +130,7 @@ describe("MODIFIED action class", () => {
 
       const child1 = harness.run(vRef("A_child1"), null);
       expect(harness.run(child1, ["§->", "targetDataGlues", 0, "source", "rawId"]))
-          .toEqual("A_child2");
+          .toEqual("@$~raw:A_child2@@");
     });
 
     it("deletes a field with REMOVED_FROM null", () => {

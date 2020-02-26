@@ -14,7 +14,7 @@ import FabricEvent, { FabricEventTypesTag } from "~/tools/FabricEvent";
  * Fabricator implements the HTML5 EventTarget interface and receives
  * a number of events which relate to
  * 1. command and action fabrication in general,
- * 2. partition behaviors in specific,
+ * 2. chronicle behaviors in specific,
  * 3. the command to truth lifecycle.
  * These events are granular to particular fabricator and its specific
  * action.

@@ -38,23 +38,24 @@ export default class MediaDecoder extends FabricEventTarget {
 
 
   /**
-   * Decodes the buffer based on the decoding semantics of this decoder and returns the decoded
-   * representation.
+   * Decodes the buffer based on the decoding semantics of this decoder
+   * and returns the decoded representation.
    *
-   * mediaName and partitionName shall be used for diagnostics purposes only, as the same content
-   * associated with different medias in different partitions are allowed to reuse the decoded
-   * representation. In case of such cache hits decode() will never get called with the different
-   * media/partitionNames.
+   * mediaName and ChronicleName shall be used for diagnostics purposes
+   * only, as the same content associated with different medias in
+   * different chronicles are allowed to reuse the decoded
+   * representation. In case of such cache hits decode() will never get
+   * called with the different media/chronicleName's.
    *
    * @param {ArrayBuffer} buffer
-   * @param {Object} [{ mediaName, partitionName }={}]
+   * @param {Object} [{ mediaName, ChronicleName }={}]
    * @returns {*}
    *
    * @memberof MediaDecoder
    */
-  decode (buffer: ArrayBuffer, { mediaName, partitionName, contentHash }: Object = {}): any {
+  decode (buffer: ArrayBuffer, { mediaName, ChronicleName, contentHash }: Object = {}): any {
     throw new Error(`${this.constructor.name}.decode not implemented, when trying to decode${
-        ""} '${mediaName}' in '${partitionName} with content hash ${contentHash}`);
+        ""} '${mediaName}' in '${ChronicleName} with content hash ${contentHash}`);
   }
 
   stringFromBuffer (buffer: ArrayBuffer) {

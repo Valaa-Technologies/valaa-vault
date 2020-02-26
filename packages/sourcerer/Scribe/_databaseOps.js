@@ -82,9 +82,9 @@ export async function _initializeConnectionIndexedDB (connection: ScribeConnecti
   // TODO(iridian): Load info structures from indexed_db. These are member fields described above.
   // Also create Scribe._contentLookup entries for contents referenced by the _pendingMediaLookup
   // entries, including the in-memory contents.
-  // If the partition does not exist, create it and its structures.
+  // If the chronicle does not exist, create it and its structures.
   connection._db = new IndexedDBWrapper(
-      `${connection._sourcerer._databasePrefix}${connection._partitionURI.toString()}`, [
+      `${connection._sourcerer._databasePrefix}${connection._chronicleURI}`, [
         { name: "truths", keyPath: "index" },
         { name: "commands", keyPath: "index" },
         { name: "medias", keyPath: "mediaId" },
@@ -217,7 +217,7 @@ export function _readMediaEntries (connection: ScribeConnection) {
             } else {
               connection.errorEvent(`Can't find Media "${(entry.mediaInfo || {}).name
                   }" in-memory Bvob info for ${entry.mediaInfo.contentHash
-                  } when reading partition media infos`);
+                  } when reading chronicle media infos`);
             }
           }
           results[cursor.key] = entry;
@@ -260,7 +260,7 @@ export function _destroyMediaInfo (connection: ScribeConnection, mediaRawId: str
 */
 
 export function _writeBvobBuffer (scribe: Scribe, buffer: ArrayBuffer,
-  contentHash: string, bvobInfo?: BvobInfo, initialPersistRefCount: number = 0): ?Promise<any> {
+    contentHash: string, bvobInfo?: BvobInfo, initialPersistRefCount: number = 0): ?Promise<any> {
   if (bvobInfo && bvobInfo.persistRefCount) return bvobInfo.persistProcess;
   // Initiate write (set persistProcess so eventual commands using the contentHash can wait
   // before being accepted) but leave the bvob persist refcount to zero. Even if the bvob is

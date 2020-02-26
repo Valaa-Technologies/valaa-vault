@@ -67,16 +67,16 @@ export function _elevateReference (elevator: Resolver, reference: VRL, fieldInfo
   if (elevator.objectId.isInactive()) {
     // TODO(iridian): Following assumption has not been fully reasoned,
     // evaluate thoroughly: If reference is to a resource in an
-    // inactive partition there will be no elevation.
+    // inactive chronicle there will be no elevation.
     // Reasoning:
     // 1. both the elevation base and the elevation instance are in
-    //    an active partition, otherwise elevation would have already
+    //    an active chronicle, otherwise elevation would have already
     //    failed,
-    // 2. reference target partition is inactive partition and thus
-    //    must a separate partition,
-    // 3. reference target itself
-    // target is an outside resource and thus needs no elevation.
-    // Counter-argument: if the outside resource is in an inactive
+    // 2. reference target resource is in an inactive chronicle which
+    //    thus must a separate to the referring chronicle,
+    // 3. reference target itself is an outside resource and thus needs
+    //    no elevation.
+    // Counter-consideration: if the outside resource is in an inactive
     // prototype of an elevation base?
     elevatedId = elevator.objectId;
   } else {
@@ -152,8 +152,8 @@ export function _elevateObjectId (referenceElevator: Resolver, elevationBasePath
       // 1. algorithm below does not work for immaterials, and on the other hand,
       // 2. it does not need to work because an instantiation always materializes the prototype,
       // so a pointer to immaterial resource cannot have been instanced in this execution context.
-      // Note: This logic does not hold if some partitions in the target ghost path are
-      // not active. But if the top partition of the ghost path is active, then all partitions in
+      // Note: This logic does not hold if some chronicles in the target ghost path are
+      // not active. But if the top chronicle of the ghost path is active, then all chronicles in
       // the ghost path should be active as well.
       ownersResolver.goToCurrentObjectOwnerTransient();
     }

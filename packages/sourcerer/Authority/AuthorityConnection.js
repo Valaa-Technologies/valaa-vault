@@ -10,7 +10,7 @@ import { thenChainEagerly, mapEagerly } from "~/tools/thenChainEagerly";
 import { debugObjectType, dumpObject } from "~/tools/wrapError";
 
 /**
- * The base authority partition connection implementation.
+ * The base authority chronicle connection implementation.
  * Provides all necessary services for local authorities use this directly.
  * Remote authorities extend this class
  *
@@ -103,7 +103,7 @@ export default class AuthorityConnection extends Connection {
       if (!contentHash) throw new Error("mediaInfo.contentHash not defined");
       let persistProcess = contentHash;
       if (this.isRemoteAuthority()) {
-        const error = new Error(`prepareBvob not implemented by remote authority partition`);
+        const error = new Error(`prepareBvob not implemented by remote authority chronicle`);
         error.isRetryable = false;
         persistProcess = Promise
             .reject(this.wrapErrorEvent(error, 1, new Error("prepareBvob")))

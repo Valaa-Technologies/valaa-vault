@@ -8,7 +8,7 @@ module.exports = {
     ],
     "rdfs:comment":
 `The class of sourcered (ie. extant) valospace nodes. A node can act as
-a partition root resource, as the source and target of Relation nodes,
+a chronicle root resource, as the source and target of Relation nodes,
 as the folder of Media nodes and as the parent of Entity nodes.
 As these aforementioned types are also the primary sourcered nodes
 themselves they form the main structure of global valospace resource
@@ -47,12 +47,12 @@ node.`,
     "valos-raem:isDuplicateable": false,
     "valos-raem:ownDefaultValue": null,
     "rdfs:comment":
-`The authority URL of this sourcered partition root node. If this field
+`The authority URL of this sourcered chronicle root node. If this field
 is null then this sourcered node is not a root node. Setting this field
-makes this resource the root of a new partition root (if allowed). The
-partition URL is generated based on this as per the rules specified by
+makes this resource the root of a new chronicle root (if allowed). The
+chronicle URL is generated based on this as per the rules specified by
 the authority URL schema.
-If the partition root node is frozen the whole partition is permanently
+If the chronicle root node is frozen the whole chronicle is permanently
 frozen.`,
   },
 

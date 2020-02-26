@@ -53,9 +53,9 @@ export default class FalseProphet extends Sourcerer {
 
   _onCommandCountUpdate: Function<>;
   _commandNotificationMinDelay: number;
-  _partitionCommandCounts: Object = {};
+  _chronicleCommandCounts: Object = {};
   _totalCommandCount: number = 0;
-  _inactivePartitionVRLPrototypes: { [partitionURI: string]: VRL } = {};
+  _absentChronicleVRLPrototypes: { [chronicleURI: string]: VRL } = {};
 
   constructor ({
     schema, corpus, upstream, onCommandCountUpdate, commandNotificationMinDelay, ...rest
@@ -77,7 +77,7 @@ export default class FalseProphet extends Sourcerer {
 
   setCommandCountCallback (callback: Function) {
     this._onCommandCountUpdate = callback;
-    callback(this._totalCommandCount, this._partitionCommandCounts);
+    callback(this._totalCommandCount, this._chronicleCommandCounts);
   }
 
   recreateCorpus (newState: State) {
@@ -92,7 +92,7 @@ export default class FalseProphet extends Sourcerer {
     return new FalseProphetDiscourse(options);
   }
 
-  // Split a command and transmit resulting partition commands towards upstream.
+  // Split a command and transmit resulting chronicle commands towards upstream.
   chronicleEvents (commands: Command[], options: FalseProphetChronicleOptions = {}):
       ChroniclePropheciesRequest {
     try {
@@ -123,9 +123,9 @@ export default class FalseProphet extends Sourcerer {
   // command ops
 
   setConnectionCommandCount (connectionName: Object, value: number = 1) {
-    const previous = this._partitionCommandCounts[connectionName];
+    const previous = this._chronicleCommandCounts[connectionName];
     if (previous === value) return;
-    this._partitionCommandCounts[connectionName] = value;
+    this._chronicleCommandCounts[connectionName] = value;
     this._totalCommandCount += (value - (previous || 0));
 
     if (!this._onCommandCountUpdate || this._pendingCommandNotification) return;
@@ -138,7 +138,7 @@ export default class FalseProphet extends Sourcerer {
     const thisNotification = this._pendingCommandNotification =
         this._commandNotificationBlocker.then(() => {
       try {
-        this._onCommandCountUpdate(this._totalCommandCount, this._partitionCommandCounts);
+        this._onCommandCountUpdate(this._totalCommandCount, this._chronicleCommandCounts);
       } finally {
         if (this._pendingCommandNotification === thisNotification) {
           this._pendingCommandNotification = false;
@@ -172,23 +172,22 @@ export default class FalseProphet extends Sourcerer {
     return this._primaryRecital.dumpStatus();
   }
 
-  deserializeReference = (serializedReference: JSONIdData, currentPartitionURI?: string) => {
+  deserializeReference = (serializedReference: JSONIdData, currentChronicleURI?: string) => {
     try {
-      return deserializeVRL(serializedReference, currentPartitionURI, this);
+      return deserializeVRL(serializedReference, currentChronicleURI, this);
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, new Error("deserializeReference"),
           "\n\tserializedReference:", ...dumpObject(serializedReference),
-          "\n\tcurrentPartitionURI:", ...dumpObject(currentPartitionURI));
+          "\n\tcurrentChronicleURI:", ...dumpObject(currentChronicleURI));
     }
   }
 
-  createCommandPartitionInfo = (partitionURI: string, action: Object, command: Command,
+  createCommandChronicleInfo = (chronicleURI: string, action: Object, command: Command,
       bard: Object) => {
-    const connection = this._connections[partitionURI];
+    const connection = this._connections[chronicleURI];
     if (!connection) {
-      throw new Error(`Cannot chronicle a command: no partition connection found for partition <${
-        partitionURI}>`);
+      throw new Error(`Cannot chronicle a command: no connection found for <${chronicleURI}>`);
     }
-    return connection.createCommandPartitionInfo(action, command, bard);
+    return connection.createCommandChronicleInfo(action, command, bard);
   }
 }

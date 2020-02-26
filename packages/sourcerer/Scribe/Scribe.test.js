@@ -101,7 +101,7 @@ describe("Scribe", () => {
     }
   });
 
-  it("populates a new connection to an existing partition with its cached commands", async () => {
+  it("populates a new connection to an existing chronicle with its cached commands", async () => {
     const scribe = await createScribe(createTestMockSourcerer());
 
     const firstConnection = await scribe.acquireConnection(testChronicleURI)

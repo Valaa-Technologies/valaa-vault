@@ -141,8 +141,8 @@ and builds or depends on the previous layers.`,
 [em(`authorities`), ` layer provides the ValOS live authority
   service APIs. Authorities are deployed and managed with `,
   em("opspace"), ` workspaces.`],
-[em(`partitions`), ` layer provides the resource content as
-  partition events and bvobs. These are served via authority
+[em(`chronicles`), ` layer provides the resource content as
+  chronicle events and bvobs. These are served via authority
   service APIs.`],
       ] }, `
 
@@ -240,7 +240,7 @@ in their dependencies.`,
   "chapter#utility_layer>7;ValOS `utility` layers provide operational services": {
     "#0": [
 `ValOS has four main utility layers: `, em("files"), `, `, em("packages"), `,
-`, em("authorities"), ` and `, em("partitions"), `. These layers form
+`, em("authorities"), ` and `, em("chronicles"), `. These layers form
 the core operational infrastructure of ValOS.`,
     ],
     "chapter#utility_layer_overview>0;Overview of utility layers": {
@@ -260,7 +260,7 @@ blockquote(em("valos-vault-4.1.2"), `: utility must explicitly define
 ["files"      , "`git`"         , "files in `./*`"             , "github.com"  , "`git clone`"       , "N/A"     , "`.git/*`"      , "`branch` `commit`"   , "`git push` & PR"    , "human"      , "merge PR to & `git push master`"],
 ["packages"   , "`vlm`, `yarn`" , "files in `/node_modules/..`", "npmjs.com"   , "`depend` `require`", "`files`" , "`package.json`", "ups. `src/*` `bin/*`", "upstream"           , "hybrid"     , "`assemble-packages` `publish-packages`"],
 ["authorities", "`vlm`"         , "APIs, site & gateway files" , "IaaS, custom", "browsers, various" , "`files`" , "upstream *"    , "upstream *"          , "upstream"           , "hybrid"     , "`build-release` `deploy-release`"],
-["partitions" , "`vlm`, gateway", "event logs, bvobs"          , "authorities" , "event & bvob APIs" , "N/A"     , "N/A"           , "gateway"             , "command & bvob APIs", "authorities", "automatic, custom"],
+["chronicles" , "`vlm`, gateway", "event logs, bvobs"          , "authorities" , "event & bvob APIs" , "N/A"     , "N/A"           , "gateway"             , "command & bvob APIs", "authorities", "automatic, custom"],
         ],
   /* eslint-enable comma-spacing, max-len */
       },
@@ -278,7 +278,7 @@ blockquote(em("valos-vault-4.1.2"), `: utility must explicitly define
 [em("Authority"), " - who accepts and distributes a change request"],
 [em("Distributed via"), " - how changes are made live to all consumers"],
         ] },
-`Note that `, em("files"), ` and `, em("partitions"), ` don't have
+`Note that `, em("files"), ` and `, em("chronicles"), ` don't have
 an external upstream and thus these bands are the defining
 authority of all of their payload.
 
@@ -344,10 +344,10 @@ ref("Read more about valos URIs", "packages/raem/README.md"), `.
 
 `, blockquote(em("valos-vault-4.4.2"),
     `: A ValOS `, em("authority"), ` can contain ValOS `,
-    em("partitions"), ` and must provide a mechanism for
+    em("chronicles"), ` and must provide a mechanism for
     accessing event logs and bvob content as well as for
     accepting and authorizing incoming commands into authorized
-    partition events.`),
+    chronicle events.`),
 `Authorities are usually live deployments on some
 infrastructure and they provide service APIs as the required
 mechanisms.
@@ -365,7 +365,7 @@ upstream and with empty payload).
 `The payload here refers to the service deployments and their live APIs
 themselves and not any dynamic content delivered through them. Such
 dynamic content belongs to other domains (notably valospace content
-resides in the `, em("partitions"), ` utility layer, see below).
+resides in the `, em("chronicles"), ` utility layer, see below).
 
 The static content includes HTTP landing pages, site routes and their
 configurations, ValOS gateway and spindle runtimes and any other similar
@@ -417,7 +417,7 @@ command("vlm deploy-release"),
       ],
       "chapter#>0;ValOS core vs. auxiliary authorities": {
         "#0": [
-`ValOS authorities and any partition content they provide do not need
+`ValOS authorities and any chronicle content they provide do not need
 to be public. A ValOS core authority is an authority which can be
 accessed using only ValOS core spindles (including no spindles at all).
 
@@ -431,25 +431,25 @@ enable sophisticated protocols but constrained/sandboxed enough that
 such spindles cannot interfere with other reasonably written spindles.`,
       },
     },
-    "chapter#partitions_layer>4;Partitions utility layer - the foundation of valospace": {
+    "chapter#chronicles_layer>4;Chronicles utility layer - the foundation of valospace": {
       "#0": [
-`Event logs and bvob content are the partitions payload and are
+`Event logs and bvob content are the chronicles payload and are
 consumed by ValOS gateways. It is more extensively covered elsewhere
 and is mentioned here for completeness; precious little infrastructural
 tooling is provided for them yet.
 
-Eventually various partition diagnostics tools will come in handy:`,
+Eventually various chronicle diagnostics tools will come in handy:`,
         { "bulleted#": [
 ["Media content import/export tools"],
-["Complete partition to file system hierarchy save/load tools"],
+["Complete chronicle to file system hierarchy save/load tools"],
 ["Event log introspection and manipulation tools"],
 ["etc."],
         ] },
       ],
-      "chapter#>0;ValOS public vs protected partitions": {
+      "chapter#>0;ValOS public vs protected chronicles": {
         "#0": [
-`All partitions provided by ValOS authorities are ValOS partitions.
-Additionally ValOS public partitions are partitions which are both`,
+`All chronicles provided by ValOS authorities are ValOS chronicles.
+Additionally ValOS public chronicles are chronicles which are both`,
           { "numbered#": [
 ["provided by ValOS core authorities, and"],
 [`are available for an anonymous consumer with nothing but a client
@@ -461,7 +461,7 @@ Additionally ValOS public partitions are partitions which are both`,
         "example#1":
 `TODO(iridian): Figure out whether this is actually the most meaningful
 place to assign this semantic border. A specific term for
-non-authenticated partitions capable of running only on standard
+non-authenticated chronicles capable of running only on standard
 runtime is useful, but how useful actually?`,
       },
     },

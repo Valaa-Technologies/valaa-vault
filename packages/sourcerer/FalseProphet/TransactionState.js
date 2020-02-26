@@ -107,7 +107,7 @@ export default class TransactionState {
     this._passages = [];
     this._transacted = transactor._universalizeEvent(transacted({ actions: [] }));
     this._transacted.meta.transactor = transactor;
-    this._universalPartitions = {};
+    this._universalChronicles = {};
     this._resultPromises = [];
     const corpus = transactor.corpus = Object.create(transactor.corpus);
     this._storyIndex = corpus.getState()[StoryIndexTag] || 0;
@@ -126,7 +126,7 @@ export default class TransactionState {
           transactor.clockEvent(1, () => [
             `transactor.on${type}`,
             event.command.aspects.command.id,
-            event.instigatorConnection ? event.instigatorConnection.getPartitionURI() : "",
+            event.instigatorConnection ? event.instigatorConnection.getChronicleURI() : "",
             event.error && event.error.message,
             event.defaultPrevented ? "canceled" : "",
             event.isSchismatic === undefined ? ""
@@ -199,7 +199,7 @@ export default class TransactionState {
       this._actions.push(...this._transacted.actions);
       this._transacted.actions = [];
       this._passages.push(...transactionStory.passages);
-      Object.assign(this._universalPartitions, (transactionStory.meta || {}).partitions);
+      Object.assign(this._universalChronicles, (transactionStory.meta || {}).chronicles);
       const state = this._transactor.corpus.getState();
       state[StoryIndexTag] = this._storyIndex;
       state[PassageIndexTag] = this._actions.length;
@@ -275,23 +275,28 @@ export default class TransactionState {
     }
   }
 
-  rollbackFabricator (fabricator: Fabricator /* , reason: any */) {
-    if (!this._transacted) return; // Not lazy-inited yet even
-    if (this._finalCommand !== undefined) {
-      if (!this._finalCommand) return;
-      throw new Error(`Cannot rollback a transaction '${this._transactor.corpus.getName()
-          }' which has already been committed`);
+  rollbackFabricator (fabricator: Fabricator, reason: any) {
+    try {
+      if (!this._transacted) return; // Not lazy-inited yet even
+      if (this._finalCommand !== undefined) {
+        if (!this._finalCommand) return;
+        throw new Error(`Cannot rollback a transaction '${this._transactor.corpus.getName()
+            }' which has already been committed`);
+      }
+      const actionsAfterRollback = fabricator._firstActionIndex || 0;
+      const initialPassage = this._passages[actionsAfterRollback];
+      if (initialPassage === undefined) return;
+      const rollbackState = initialPassage.previousState;
+      if (!rollbackState) {
+        throw new Error("Cannot rollback nested transaction: can't determine initial previousState");
+      }
+      this._passages.length = actionsAfterRollback;
+      this._actions.length = actionsAfterRollback;
+      this._transactor.setState(rollbackState);
+    } catch (error) {
+      throw fabricator.wrapErrorEvent(error, new Error("rollbackFabricator()"),
+          "\n\trollback reason:", ...dumpObject(reason));
     }
-    const actionsAfterRollback = fabricator._firstActionIndex || 0;
-    const initialPassage = this._passages[actionsAfterRollback];
-    if (initialPassage === undefined) return;
-    const rollbackState = initialPassage.previousState;
-    if (!rollbackState) {
-      throw new Error("Cannot rollback nested transaction: can't determine initial previousState");
-    }
-    this._passages.length = actionsAfterRollback;
-    this._actions.length = actionsAfterRollback;
-    this._transactor.setState(rollbackState);
   }
 
   markAsAborting (/* reason: string = "" */) {
@@ -345,7 +350,7 @@ export default class TransactionState {
       actions: this._passages.map(passage => getActionFromPassage(passage)),
       meta: {
         ...(this._transacted.meta || {}),
-        partitions: this._universalPartitions,
+        partitions: this._universalChronicles,
       },
     });
     story.passages = this._passages;

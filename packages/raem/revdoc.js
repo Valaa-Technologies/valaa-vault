@@ -80,7 +80,7 @@ foundation of the Valaa Open System.`,
 [c("resource couplings"), ` mechanism which allows referential
   integrity and the definition of different types of reference
   semantics like ownership, global references and local references.`],
-// TODO(iridian, 2019-07): Valospace and partitions should in principle
+// TODO(iridian, 2019-07): Valospace and chronicles should in principle
 // be inside @valos/sourcerer. This refactoring effort would be
 // valuable otherwise as well as it would clarify Valker API's and
 // simplify its implementation considerably.
@@ -91,30 +91,30 @@ foundation of the Valaa Open System.`,
 [c("ValOSURL"), ` specification which allows for universal locating of resources.`],
 [c("valospace"), ` definition as a distributed set of resources
   containing references to each other using the VRLs.`],
-[c("partitions"), ` mechanism which allows for unlimited scalability of
+[c("chronicles"), ` mechanism which allows for unlimited scalability of
   the `, c("valospace"), ` into a singular globally distributed and
   unified object space.`],
     ],
     "bulleted#2": [
 ["depends:", pkg(`@valos/tools`), c(`immutable`)],
 ["exports:", c(`Corpus`), c(`Command`), c(`VALK`), c(`Valker`), c(`RAEMContentAPI`)],
-["valosheath:", c(`Resource`), c(`TransientFields`), c(`Bvob`), c(`Partition`)],
-["concepts:", c(`ghost instancing`), c(`partitions`), c(`couplings`)],
+["valosheath:", c(`Resource`), c(`TransientFields`), c(`Bvob`), c(`Chronicle`)],
+["concepts:", c(`ghost instancing`), c(`chronicles`), c(`couplings`)],
     ],
     "chapter#section_url_urn_id>2;ValOS URLs, urn:valos and raw id's": {
       "#0": [
 `ValOS URL is used to specify a parameterized location reference to a
 ValOS Resource. It has two major parts separated by the URI fragment
-separator \`#\`: *partition URI* part and a *local reference* part.
+separator \`#\`: *chronicle URI* part and a *local reference* part.
 
-*Partition URI* identifies the target authority and partition of
+*Chronicle URI* identifies the target authority and chronicle of
 the reference. It corresponds to scheme, hierarchical and query parts
 of an URI; everything but the fragment. Its precise structure and
 interpretation is specified by the scheme but typically the scheme and
 hierarchical part identify an authority and query part identifies
-a partition.
+a chronicle.
 
-*Local reference* identifies a particular resource inside a partition
+*Local reference* identifies a particular resource inside a chronicle
 but also contains optional *coupling*, *ghost path*, *lens* (and other)
 parts which further parameterize the reference itself. It corresponds
 to the URI fragment part but has sub-structure which is specified in
@@ -124,11 +124,11 @@ this document.`
         ""}Correlations between ValOS URL and urn:valos (top) and URI and URN (bottom)`]:
 `                                            valos-url
 ┌────────────────────────────────────────────────┴─────────────────────────────────────────────────┐
-                  partition-url                                      resource-ref
+                  chronicle-uri                                      resource-ref
 ┌───────────────────────┴────────────────────────┐ ┌──────────────────────┴────────────────────────┐
                          resource-url                                         ref-params
 ┌──────────────────────────────┴────────────────────────────────┐  ┌───────────────┴───────────────┐
-         authority-uri               partition-id   resource-id         coupling           lens
+         authority-uri               chronicle-id   resource-id         coupling           lens
 ┌──────────────┴───────────────┐    ┌─────┴──────┐ ┌─────┴──────┐  ┌───────┴────────┐ ┌─────┴──────┐
 
 valaa-test://example.com:123/dev?id=abcd-123...234#987b-72...8263?=coupling=relations&lens=ROOT_LENS
@@ -140,23 +140,23 @@ valaa-test://example.com:123/dev?id=abcd-123...234#987b-72...8263?=coupling=rela
              └────────┬────────┘
                   hier-part
 `,
-      "chapter#section_dualisms>1;Curious dualisms of *partition URI* and *local reference*": {
+      "chapter#section_dualisms>1;Curious dualisms of *chronicle URI* and *local reference*": {
         "#0":
-`The division between partition URI and local reference has many curious
+`The division between chronicle URI and local reference has many curious
 dualistic qualities: backend vs. frontend, hierarchical vs. flat,
 routing vs. computation, extensible vs. fixed, absolute vs. contextual,
 coarse vs. granular, self-contained vs. part-of-a-whole.`,
-        "chapter#1;Partition URI domain is backend, local reference domain is front-end": {
+        "chapter#1;Chronicle URI domain is backend, local reference domain is front-end": {
           "#0":
-`ValOS backends deal with the indivisible partitions and thus don't care
+`ValOS backends deal with the indivisible chronicles and thus don't care
 about the particularities of local references to individual resources.
 This corresponds to how in web architecture URI fragments are not sent
 to backend with resource requests. Conversely, ValOS frontends don't
 care where a resource comes from once it has been loaded, but about its
 identity, relationships and the parameters of those relationships. This
-is reflected in how frontend code regularily drops the partition URI.`,
+is reflected in how frontend code regularily drops the chronicle URI.`,
         },
-        [`chapter#2;Partition URI structure is specified by the scheme,${
+        [`chapter#2;Chronicle URI structure is specified by the scheme,${
           ""} local reference structure is specified by ValOS`]: {
           "#0":
 `By the nature of its distributed event sourcing architecture ValOS
@@ -166,17 +166,17 @@ existing front-end clients. This is facilitated by front-end spindle
 systems which enables new ValOS URI schemes to specify new routing
 solutions and fundamentally new backend infrastructures, as long as
 said infrastructures can route ValOS event streams to clients. This
-corresponds to how ValOS doesn't specify how a *partition URI*
-identifies and locates partitions and authorities but leaves it to
+corresponds to how ValOS doesn't specify how a *chronicle URI*
+identifies and locates chronicles and authorities but leaves it to
 the scheme specifications and their reference implementations of
 frontend spindles.`,
         },
-        [`chapter#3;Partitions URI's identify self-contained wholes,${
+        [`chapter#3;Chronicles URI's identify self-contained wholes,${
           ""} resource references need their context`]: {
           "#0":
 `Web architecture specifies that all or none of the document is
-retrieved. This corresponds to the behaviour of ValOS partitions which
-are always retrieved as a whole. Partition URI's contain all and
+retrieved. This corresponds to the behaviour of ValOS chronicles which
+are always retrieved as a whole. Chronicle URI's contain all and
 nothing but the components which identify web resources, that is
 everything but the fragment.`,
         },

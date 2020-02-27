@@ -11,7 +11,7 @@ import Transient, { tryTransientTypeName, createImmaterialTransient, PrototypeOf
 import denormalizedFromJS from "~/raem/state/denormalizedFromJS";
 
 import fieldFinalDefaultValue from "~/raem/tools/graphql/fieldFinalDefaultValue";
-import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
+import isAbsentTypeName from "~/raem/tools/graphql/isAbsentTypeName";
 
 import { dumpObject } from "~/tools";
 
@@ -83,7 +83,7 @@ export function getObjectRawField (resolver: Resolver, object: Transient,
     if (!actualTypeIntro || !((fields = actualTypeIntro.getFields()))[fieldName]) {
       const typeName = tryTransientTypeName(object, resolver.schema);
       // actualTypeIntro = typeName && resolver.schema.getType(typeName);
-      if (typeName && !isInactiveTypeName(typeName)) {
+      if (typeName && !isAbsentTypeName(typeName)) {
         actualTypeIntro = resolver.schema.getType(typeName);
       } else {
         actualTypeIntro = resolver.schema.tryAffiliatedTypeOfField(fieldName);
@@ -151,7 +151,7 @@ export function getObjectRawField (resolver: Resolver, object: Transient,
         return createImmaterialTransient(
             prototypeGhostPath.headRawId(), prototypeGhostPath, resolver.objectTransient);
       }
-      typeName = resolver.objectTransient.get("typeName") || resolver.schema.inactiveType.name;
+      typeName = resolver.objectTransient.get("typeName") || resolver.schema.absentType.name;
       resolver.objectTransient = resolver.goToTransient(resolver.objectId, typeName);
       skipFirstPrototypeStep = true;
     } else {

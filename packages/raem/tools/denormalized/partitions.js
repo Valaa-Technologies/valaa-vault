@@ -107,7 +107,7 @@ export function universalizeChronicleMutation (bard: Bard, id: VRL) {
   try {
     const eventMeta = bard.event.meta;
     if (!eventMeta.isBeingUniversalized || !ref) return undefined;
-    if (ref.isInactive()) throw new Error(`Cannot modify an inactive resource <${ref.toString()}>`);
+    if (ref.isAbsent()) throw new Error(`Cannot modify an absent resource <${ref.toString()}>`);
     let smallestNonGhostId = ref;
     chronicleURI = smallestNonGhostId.getChronicleURI();
     if (!chronicleURI && smallestNonGhostId.isGhost()) {
@@ -142,7 +142,7 @@ export function universalizeChronicleMutation (bard: Bard, id: VRL) {
       enclosingPassage = enclosingPassage.parentPassage;
     }
     if (!enclosingPassage && eventMeta.chronicleURI) {
-      // This action is materialization or inactive transient creation
+      // This action is materialization or absent transient creation
       // event. Disregard.
       return undefined;
     }

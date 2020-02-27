@@ -16,7 +16,7 @@ import { getObjectRawField } from "~/raem/state/getObjectField";
 
 import { tryHostRef } from "~/raem/VALK/hostReference";
 
-import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
+import isAbsentTypeName from "~/raem/tools/graphql/isAbsentTypeName";
 
 import { dumpObject, invariantifyObject, invariantifyString, FabricEventTarget } from "~/tools";
 
@@ -184,9 +184,9 @@ export default class Resolver extends FabricEventTarget {
       if (object) return object.get("id");
       if (!objectId) objectId = this.obtainReference(idData, contextChronicleURI);
 
-      // Immaterial ghost, inactive or fail
-      // Inactive references might become active.
-      if (objectId.isInactive()) return objectId;
+      // Immaterial ghost, absent or fail
+      // Absent references might become sourcered.
+      if (objectId.isAbsent()) return objectId;
       // Immaterial ghosts are not bound (although maybe the ghost path steps should be)
       if (objectId.isGhost()) return objectId;
       const chronicleURI = objectId.getChronicleURI();
@@ -196,10 +196,10 @@ export default class Resolver extends FabricEventTarget {
       }
       this.warnEvent(`Could not bind to non-existent non-ghost resource <${
             objectId}> via active connection <${chronicleURI}>`,
-          "\n\teither destroyed or non-created; marking reference as inactive",
+          "\n\teither destroyed or non-created; marking reference as absent",
           "\n\tduring passage:", ...dumpObject(this.passage));
       // TODO(iridian, 2019-01): Improve destroyed resource handling
-      return objectId.setInactive();
+      return objectId.setAbsent();
     } catch (error) {
       throw this.wrapErrorEvent(error, 2,
           `bindObjectId(${rawId || objectId || idData}:${typeName})`,
@@ -285,10 +285,10 @@ export default class Resolver extends FabricEventTarget {
       if (this.objectTransient
           && (!withOwnField || this._hasOwnField(this.objectTransient, withOwnField))) {
         this.objectId = this.objectTransient.get("id");
-      } else if ((this.objectTypeName === "Blob") || (objectId && objectId.isInactive())) {
-        // Blob and inactive resources are given an id-transient
+      } else if ((this.objectTypeName === "Blob") || (objectId && objectId.isAbsent())) {
+        // Blob and absent resources are given an id-transient
         this.objectId = objectId || (new VRL()).initNSS(rawId);
-        if (this.objectTypeName !== "Blob") this.objectTypeName = this.schema.inactiveType.name;
+        if (this.objectTypeName !== "Blob") this.objectTypeName = this.schema.absentType.name;
         this.objectTransient = createIdTransient(this.objectId);
       } else if ((!withOwnField && (!ghostPath || !ghostPath.isGhost()))
           || !this.goToMostInheritedMaterializedTransient(ghostPath,
@@ -328,7 +328,7 @@ export default class Resolver extends FabricEventTarget {
     const value = transient.get(fieldName);
     if (value === undefined) return false;
     if (fieldName !== "typeName") return true;
-    return !isInactiveTypeName(value);
+    return !isAbsentTypeName(value);
   }
 
   /**

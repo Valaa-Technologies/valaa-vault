@@ -55,7 +55,7 @@ export default class FalseProphetConnection extends Connection {
       delete this._sourcerer._absentChronicleVRLPrototypes[this._chronicleURI];
     } else {
       this._referencePrototype = new VRL()
-          .initResolverComponent({ inactive: true, partition: this._chronicleURI });
+          .initResolverComponent({ absent: true, partition: this._chronicleURI });
     }
   }
 
@@ -63,7 +63,7 @@ export default class FalseProphetConnection extends Connection {
     this._originatingIdentity = options.discourse && options.discourse.getIdentityManager();
     return thenChainEagerly(super._doConnect(options, onError),
         ret => {
-          this._referencePrototype.setInactive(false);
+          this._referencePrototype.setAbsent(false);
           return ret;
         });
   }

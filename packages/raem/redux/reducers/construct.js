@@ -58,12 +58,12 @@ export function prepareCreateOrDuplicateObjectTransientAndId (bard: CreateBard, 
       // this CREATED.
       return bard.state;
     }
-    // 3. Inactive object stub transients are created in denormalized
+    // 3. Absent object stub transients are created in denormalized
     //    state by various cross-chronicle references. Such a stub
     //    contains "id" and any possible already-related transientField
     //    fields. These stubs are merged to the newly created Resource
     //    on creation.
-    _mergeWithInactiveStub(bard, passage, typeName);
+    _mergeWithAbsentStub(bard, passage, typeName);
   } else if (passage.id.isGhost()) {
     // Materializing a potentially immaterial ghost
     invariantify(passage.type === "CREATED",
@@ -81,18 +81,18 @@ export function prepareCreateOrDuplicateObjectTransientAndId (bard: CreateBard, 
     bard.objectTypeName = typeName;
     bard.objectTransient = createTransient(passage);
   }
-  if (passage.id.isInactive()) passage.id.setInactive(false);
+  if (passage.id.isAbsent()) passage.id.setAbsent(false);
   return undefined;
 }
 
-function _mergeWithInactiveStub (bard: CreateBard, passage: Object, typeName?: string) {
-  if (!passage.id.isInactive()) {
-    invariantify(passage.id.isInactive(),
+function _mergeWithAbsentStub (bard: CreateBard, passage: Object, typeName?: string) {
+  if (!passage.id.isAbsent()) {
+    invariantify(passage.id.isAbsent(),
         `${passage.type}: Resource already exists with id: ${
           passage.id.rawId()}:${typeName}`, bard.objectTransient);
   }
   if (typeName) {
-    // Inactive resource typeName is an inactive type: update it to
+    // Absent resource typeName is an absent type: update it to
     // correct value for CREATEDs.
     bard.objectTransient = bard.objectTransient.set("typeName", typeName);
     bard.objectTypeName = typeName;
@@ -143,7 +143,7 @@ export function recurseCreateOrDuplicate (bard: CreateBard, actionTypeName: stri
       interfaces = [{ name: actionTypeName }];
       isResource = false;
       interfaceType = typeName;
-      typeName = bard.schema.inactiveType.name;
+      typeName = bard.schema.absentType.name;
     }
     // Make the objectId available for all VRL connectors within this Bard.
     bard.setState(bard.state

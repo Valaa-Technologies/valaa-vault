@@ -21,7 +21,7 @@ import { toOne, toMany, toOwner, toManyOwnlings, unspecifiedSingular, unspecifie
 
 import Chronicle from "~/raem/schema/Chronicle";
 
-const INTERFACE_DESCRIPTION = "inactive resource fields";
+const INTERFACE_DESCRIPTION = "absent resource fields";
 
 const TransientFields = new GraphQLInterfaceType(transientFields());
 
@@ -31,7 +31,7 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
   return {
     name: "TransientFields",
 
-    description: `Fields available even for inactive Resource ${objectDescription}.`,
+    description: `Fields available even for absent Resource ${objectDescription}.`,
 
     fields: () => ({
       // TODO(iridian): Change the return type to GraphQLValOSReference (which must be defined).

@@ -5,7 +5,7 @@ import TransientFields, { transientFields } from "~/raem/schema/TransientFields"
 import TransientScriptFields, { transientScriptFields }
     from "~/script/schema/TransientScriptFields";
 
-const OBJECT_DESCRIPTION = "inactive script resource";
+const OBJECT_DESCRIPTION = "absent script resource";
 
 export default new GraphQLObjectType({
   name: "InactiveScriptResource",

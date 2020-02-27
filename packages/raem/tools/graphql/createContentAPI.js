@@ -41,7 +41,7 @@ function contentAPIField (targetFieldName, type, description,
  *              reducers        incoming mutation reducers (fallthrough from the param reducers)
  */
 export default function createContentAPI ({ name, inherits = [], exposes, mutations, validators,
-  reducers, inactiveType, destroyedType,
+  reducers, absentType, destroyedType,
 }) {
   const exposedAccessPoints = exposes.reduce((accessPoints, exposedTypeEntry) => {
     const typeName = !Array.isArray(exposedTypeEntry) ? exposedTypeEntry.name : exposedTypeEntry[0];
@@ -70,20 +70,20 @@ export default function createContentAPI ({ name, inherits = [], exposes, mutati
     subAPI.reducers.forEach(reducer => reducer && actualReducers.add(reducer));
   }
 
-  let inheritedInactiveType, inheritedDestroyedType;
+  let inheritedAbsentType, inheritedDestroyedType;
 
   for (const inheritedContentAPI of (inherits || [])) {
     Object.values(inheritedContentAPI.subAPIs).forEach(tryToAddSubAPI);
     tryToAddSubAPI(inheritedContentAPI);
 
-    const subInactiveType = inheritedContentAPI.schema.inactiveType;
-    if (!inactiveType && subInactiveType) {
-      if (inheritedInactiveType && (inheritedInactiveType !== subInactiveType)) {
-        throw new Error(`Mismatching ${name} inherited inactiveType ${
-            inheritedInactiveType.name} !== ${subInactiveType
-                } (from ${inheritedContentAPI.name}) and no explicit inactiveType was provided`);
+    const subAbsentType = inheritedContentAPI.schema.absentType;
+    if (!absentType && subAbsentType) {
+      if (inheritedAbsentType && (inheritedAbsentType !== subAbsentType)) {
+        throw new Error(`Mismatching ${name} inherited absentType ${
+            inheritedAbsentType.name} !== ${subAbsentType
+                } (from ${inheritedContentAPI.name}) and no explicit absentType was provided`);
       }
-      inheritedInactiveType = subInactiveType;
+      inheritedAbsentType = subAbsentType;
     }
     const subDestroyedType = inheritedContentAPI.schema.destroyedType;
     if (!destroyedType && subDestroyedType) {
@@ -111,8 +111,8 @@ export default function createContentAPI ({ name, inherits = [], exposes, mutati
       fields: () => actualMutations,
     }),
   }));
-  schema.inactiveType = inactiveType || inheritedInactiveType;
-  if (!schema.inactiveType) throw new Error(`ContentAPI ${name} is missing .inactiveType`);
+  schema.absentType = absentType || inheritedAbsentType;
+  if (!schema.absentType) throw new Error(`ContentAPI ${name} is missing .absentType`);
   schema.destroyedType = destroyedType || inheritedDestroyedType;
   if (!schema.destroyedType) throw new Error(`ContentAPI ${name} is missing .destroyedType`);
 
@@ -138,7 +138,7 @@ export default function createContentAPI ({ name, inherits = [], exposes, mutati
           }
         }
     ),
-    inactiveType,
+    absentType,
     destroyedType,
     subAPIs,
   }));

@@ -108,7 +108,7 @@ export function resolveIdentityRoles (router, route, scope) {
   const [, authorityURI, identityId] = identityChronicle.match(/^(.*)\?id=(.*)$/) || [];
   if (authorityURI) {
     scope.sessionIdentity = vRef(identityId, undefined, undefined, identityChronicle)
-        .setInactive();
+        .setAbsent();
     scope.identityRoles[`${authorityURI}?id=@$~aur:${encodeURIComponent(authorityURI)}@@`] = true;
   }
   return scope.identityRoles;

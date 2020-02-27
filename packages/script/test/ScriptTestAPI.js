@@ -8,6 +8,6 @@ export default createContentAPI({
   name: "ValoscriptTestAPI",
   inherits: [ScriptContentAPI, RAEMTestAPI],
   exposes: [TestScriptyThing],
-  inactiveType: ScriptContentAPI.inactiveType,
+  absentType: ScriptContentAPI.absentType,
   destroyedType: ScriptContentAPI.destroyedType,
 });

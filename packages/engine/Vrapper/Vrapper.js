@@ -26,7 +26,7 @@ import { AbsentChroniclesError, addConnectToChronicleToError }
     from "~/raem/tools/denormalized/partitions";
 
 import isResourceType from "~/raem/tools/graphql/isResourceType";
-import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
+import isAbsentTypeName from "~/raem/tools/graphql/isAbsentTypeName";
 
 import { ValoscriptPrimitiveKind /* , NativeIdentifierTag */ } from "~/script";
 
@@ -105,8 +105,8 @@ function isNonActivateablePhase (candidate: string) {
  *
  * The lifecycle phases:
  *
- * 2.1. Inactive: the chronicle of some prototype chain Resource is not
- *   connected and the connection is not being acquired (note: Resource
+ * 2.1. Inactive: the chronicle of some prototype chain Resource is
+ *   absent and the connection is not being acquired (note: Resource
  *   itself is considered part of the prototype chain here) or some
  *   prototype chain resource is destroyed.
  *   isInactive() returns true and getPhase() returns "Inactive".
@@ -175,7 +175,7 @@ export default class Vrapper extends Cog {
     this._phase = INACTIVE;
     this.engine.addCog(this);
     if (!id.isGhost() && !id.getChronicleURI()) {
-      if (!id.isInactive()) {
+      if (!id.isAbsent()) {
         throw new Error(
             `Cannot create an active non-ghost Vrapper without id.chronicleURI: <${id}>`);
       }
@@ -370,7 +370,7 @@ export default class Vrapper extends Cog {
     this._updateTransient(resolver.state, transient);
     const id = transient.get("id");
     if (!id.getChronicleURI() && !id.isGhost() && (this._typeName !== "Blob")) {
-      if (id.isInactive()) return this;
+      if (id.isAbsent()) return this;
       throw new Error(`Cannot update an active non-ghost Vrapper id with no chronicleURI: <${
           id}>, (current id: <${this[HostRef]}>)`);
     }
@@ -378,8 +378,8 @@ export default class Vrapper extends Cog {
     const connection = this.tryConnection();
     const newTypeName = transient.get("typeName");
     if (!connection || !connection.isActive()) {
-      if (id.isInactive()) return this;
-    } else if (!newTypeName ? id.isInactive() : isInactiveTypeName(newTypeName)) {
+      if (id.isAbsent()) return this;
+    } else if (!newTypeName ? id.isAbsent() : isAbsentTypeName(newTypeName)) {
       this._phase = IMMATERIAL;
       return this;
     }
@@ -404,13 +404,13 @@ export default class Vrapper extends Cog {
 
   _postActivate (resolver: Object, transient: Transient, newTypeName: string) {
     try {
-      if (!this._typeName || isInactiveTypeName(this._typeName)) {
+      if (!this._typeName || isAbsentTypeName(this._typeName)) {
         const ref = this[HostRef];
-        if (ref.isInactive()) {
+        if (ref.isAbsent()) {
           this.warnEvent("Activating id explicitly! Should have been activated by reducers");
-          ref.setInactive(false);
+          ref.setAbsent(false);
         }
-        this._setTypeName((newTypeName && !isInactiveTypeName(newTypeName))
+        this._setTypeName((newTypeName && !isAbsentTypeName(newTypeName))
             ? newTypeName
             : resolver.tryGoToTransient(
               ref, "TransientFields", true, false, true, "typeName").get("typeName"));
@@ -639,8 +639,8 @@ export default class Vrapper extends Cog {
     } else {
       const targetId = transient.get("target");
       if (!targetId) targetText = "<null target>";
-      else if (targetId.isInactive()) {
-        targetText = `<in inactive '${targetId.getChronicleURI()}'>`;
+      else if (targetId.isAbsent()) {
+        targetText = `<in absent '${targetId.getChronicleURI()}'>`;
       } else {
         const target = this.get("target", options);
         targetText = (target && debugId(target, options)) || "<target not found>";
@@ -1791,7 +1791,7 @@ export default class Vrapper extends Cog {
     const subVRID = formVPath(this[HostRef].vrid(), subPath);
     return this.engine.tryVrapper(subVRID, options)
         || vRef(subVRID, undefined, undefined, options.contextChronicleURI)
-            .setInactive();
+            .setAbsent();
   }
 
   onEventCREATED (passage: Passage, story: Story) {

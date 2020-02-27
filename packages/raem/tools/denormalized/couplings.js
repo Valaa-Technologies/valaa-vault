@@ -101,7 +101,7 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
   console.log("addCouplingPassages", actionType, `'${fieldIntro.name}', remote:`,
       dumpify(remote, { sliceAt: 100 }), "coupling", dumpify(coupling, { sliceAt: 100 }));
   */
-  if (!remote /* || remote.isInactive() */) return;
+  if (!remote /* || remote.isAbsent() */) return;
   const remoteRef = bard.obtainReference(remote);
   let coupledField = remoteRef.getCoupledField();
   let remoteType = remoteType_ || fieldIntro.namedType;
@@ -122,14 +122,14 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
     if (!remoteFieldIntro) {
       remoteType = bard.schema.tryAffiliatedTypeOfField(coupledField);
       if (!remoteType) {
-        if (remoteRef.isInactive()) {
-          throw new Error(`Can't find affiliated type for inactive remote reference coupled to '${
+        if (remoteRef.isAbsent()) {
+          throw new Error(`Can't find affiliated type for an absent remote reference coupled to '${
               coupledField}'`);
         }
         remoteTransient = Object.create(bard)
             .tryGoToTransient(remoteRef, "TransientFields", true, false, true, "typeName");
         remoteType = bard.schema.getType((remoteTransient && remoteTransient.get("typeName"))
-            || bard.schema.inactiveType.name);
+            || bard.schema.absentType.name);
       }
       remoteFieldIntro = remoteType.getFields()[coupledField];
       if (!remoteFieldIntro) {

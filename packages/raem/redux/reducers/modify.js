@@ -19,7 +19,7 @@ import { universalizeChronicleMutation,
     from "~/raem/tools/denormalized/partitions";
 import { isFrozen, universalizeFreezeChronicleRoot, freezeOwnlings }
     from "~/raem/tools/denormalized/freezes";
-import { createMaterializeGhostAction, createInactiveTransientAction }
+import { createMaterializeGhostAction, createAbsentTransientAction }
     from "~/raem/tools/denormalized/ghost";
 
 import Bard from "~/raem/redux/Bard";
@@ -54,19 +54,19 @@ export default function modifyResource (bard: Bard) {
     bard.fieldsTouched = new Set();
     bard.goToTransientOfPassageObject(); // no-require, non-ghost-lookup
     if (!bard.objectTransient) {
-      // ghost, inactive transient or fail
+      // ghost, absent transient or fail
       reifyTransientSubAction = (bard.updateCouplings !== false)
           // direct immaterial ghost field modification, materialize
           ? createMaterializeGhostAction(bard, passage.id, passage.typeName, true)
           // coupling-based transient creation for a potentially
-          // inactive resource
-          : createInactiveTransientAction(bard, passage.id);
+          // absent resource
+          : createAbsentTransientAction(bard, passage.id);
       if (reifyTransientSubAction) {
         bard.updateState(bard.subReduce(bard.state, reifyTransientSubAction));
         objectTypeName = reifyTransientSubAction.typeName
             || reifyTransientSubAction.actions[reifyTransientSubAction.actions.length - 1].typeName;
       } else if (bard.updateCouplings === false) {
-        // An inactive transient itself already exists but there was no
+        // An absent transient itself already exists but there was no
         // interface type forward from passage.typeName to it.
         objectTypeName = "TransientFields";
       } else {

@@ -145,7 +145,7 @@ export function deserializeVRL (serializedRef: string | JSONIdData,
         : falseProphet._absentChronicleVRLPrototypes[chronicleURI];
     const ghostPath = resolver.ghostPath;
     if (!referencePrototype) {
-      resolver.inactive = true;
+      resolver.absent = true;
       delete resolver.ghostPath;
       referencePrototype = falseProphet._absentChronicleVRLPrototypes[chronicleURI] =
           new VRL().initResolverComponent(resolver);

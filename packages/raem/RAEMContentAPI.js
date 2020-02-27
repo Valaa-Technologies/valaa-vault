@@ -11,7 +11,7 @@ import createRAEMReducers from "~/raem/redux/createRAEMReducers";
 export default createContentAPI({
   name: "ValOSRAEMContentAPI",
   exposes: [Resource, InactiveResource, DestroyedResource], // TODO(iridian): Add the rest.
-  inactiveType: InactiveResource,
+  absentType: InactiveResource,
   destroyedType: DestroyedResource,
   mutations,
   validators,

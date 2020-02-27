@@ -64,15 +64,15 @@ export function _elevateReference (elevator: Resolver, reference: VRL, fieldInfo
     elevation: GhostElevation, typeName: string, verbosity: ?number) {
   elevator.tryGoToTransient(reference, typeName);
   let elevatedId;
-  if (elevator.objectId.isInactive()) {
+  if (elevator.objectId.isAbsent()) {
     // TODO(iridian): Following assumption has not been fully reasoned,
     // evaluate thoroughly: If reference is to a resource in an
-    // inactive chronicle there will be no elevation.
+    // absent chronicle there will be no elevation.
     // Reasoning:
     // 1. both the elevation base and the elevation instance are in
     //    an active chronicle, otherwise elevation would have already
     //    failed,
-    // 2. reference target resource is in an inactive chronicle which
+    // 2. reference target resource is in an absent chronicle which
     //    thus must a separate to the referring chronicle,
     // 3. reference target itself is an outside resource and thus needs
     //    no elevation.

@@ -66,7 +66,7 @@ import VRL, { vRef } from "~/raem/VRL";
 import { GhostPath, Resolver } from "~/raem/state";
 import type { State, Transient } from "~/raem/state"; // eslint-disable-line no-duplicate-imports
 
-import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
+import isAbsentTypeName from "~/raem/tools/graphql/isAbsentTypeName";
 
 import { dumpify, dumpObject, invariantify, invariantifyObject, wrapError } from "~/tools";
 
@@ -121,7 +121,7 @@ export function createMaterializeGhostPathAction (resolver: Resolver, ghostObjec
 
 /**
  * Like createMaterializeGhostAction but allows creation of
- * an inactive transient for non-ghost resources as well.
+ * an absent transient for non-ghost resources as well.
  *
  * @export
  * @param {Resolver} resolver
@@ -129,7 +129,7 @@ export function createMaterializeGhostPathAction (resolver: Resolver, ghostObjec
  * @param {string} externalType
  * @returns {?Action}
  */
-export function createInactiveTransientAction (resolver: Resolver, id: VRL): ?Action {
+export function createAbsentTransientAction (resolver: Resolver, id: VRL): ?Action {
   const actions = [];
   _createMaterializeGhostAction(resolver, resolver.getState(), id.getGhostPath(),
       id, undefined, true, actions);
@@ -172,15 +172,15 @@ function _createMaterializeGhostAction (resolver: Resolver, state: State,
       // unconnected chronicle or the referred resource doesn't exist.
       // As it stands there is no theoretical way to determine the
       // actual chronicle id reliably, either.
-      // Create an inactive reference for the resource.
+      // Create an absent reference for the resource.
       const id = knownId || vRef(rawId);
-      if (knownId && !knownId.isInactive()) {
+      if (knownId && !knownId.isAbsent()) {
         throw new Error("Cannot materialize a non-existent resource (chronicle is active)");
       }
-      // Also make the resource inactive, not the chronicle reference
+      // Also make the resource absent, not the chronicle reference
       // prototype. This way only transient merging will activate it.
-      id.setInactive();
-      internallyKnownType = resolver.schema.inactiveType.name;
+      id.setAbsent();
+      internallyKnownType = resolver.schema.absentType.name;
       outputActions.push(created({
         id, typeName: internallyKnownType,
         meta: { isVirtualAction },
@@ -200,13 +200,13 @@ function _createMaterializeGhostAction (resolver: Resolver, state: State,
         ? state.getIn([knownHostType, ghostHostRawId]).get("id")
         : Object.create(knownId
                 ? Object.getPrototypeOf(knownId)
-                : new VRL().initResolverComponent({ inactive: true }))
+                : new VRL().initResolverComponent({ absent: true }))
             .initNSS(ghostHostRawId);
     const id = Object.create(Object.getPrototypeOf(hostId)).initNSS(rawId);
     id.connectGhostPath(ghostPath);
     outputActions.push(created({
       id,
-      typeName: !externalKnownType || !isInactiveTypeName(prototypeTypeName)
+      typeName: !externalKnownType || !isAbsentTypeName(prototypeTypeName)
           ? prototypeTypeName : externalKnownType,
       initialState: { ghostPrototype, ghostOwner: hostId.getObjectId() },
       meta: { isVirtualAction },

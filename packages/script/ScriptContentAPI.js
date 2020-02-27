@@ -21,6 +21,6 @@ export default createContentAPI({
     Expression, Identifier, KueryExpression, Literal, Property, Relation, Relatable, Scope,
     InactiveScriptResource, DestroyedScriptResource,
   ],
-  inactiveType: InactiveScriptResource,
+  absentType: InactiveScriptResource,
   destroyedType: DestroyedScriptResource,
 });

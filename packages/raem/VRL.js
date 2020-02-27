@@ -169,10 +169,18 @@ class VRL {
 
   // Chronicles section
 
-  isInactive (): ?boolean { return this._r.inactive || false; }
-  setInactive (value: boolean = true): ?boolean {
-    this.obtainOwnResolverComponent().inactive = value;
+  isAbsent (): ?boolean { return this._r.absent || false; }
+  setAbsent (value: boolean = true): ?boolean {
+    this.obtainOwnResolverComponent().absent = value;
     return this;
+  }
+  isInactive (): ?boolean {
+    console.warn("VRL.isInactive DEPRECATED in favor of .isAbsent");
+    return this.isAbsent();
+  }
+  setInactive (value: boolean = true): ?boolean {
+    console.warn("VRL.setInactive DEPRECATED in favor of .setAbsent");
+    return this.setAbsent(value);
   }
 
   getChronicleURI (): string { return this._r.partition; }

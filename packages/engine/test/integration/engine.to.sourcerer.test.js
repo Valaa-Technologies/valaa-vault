@@ -572,7 +572,7 @@ describe("Two paired harnesses emulating two gateways connected through event st
         .toEqual(20);
   });
 
-  it("activates an inactive vref properly", async () => {
+  it("activates an absent vref properly", async () => {
     harness = await createEngineOracleHarness({ verbosity: 0, oracle: {
       testAuthorityConfig: { isRemoteAuthority: true, isLocallyPersisted: true },
     } });

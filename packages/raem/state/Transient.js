@@ -41,8 +41,8 @@ export function createIdTransient (id: VRL) {
   return Transient([["id", id]]);
 }
 
-export function isInactiveTransient (value: Transient) {
-  return value.get("id").isInactive();
+export function isAbsentTransient (value: Transient) {
+  return value.get("id").isAbsent();
 }
 
 export function getTransientTypeName (value: Transient, schema?: Object): string {
@@ -65,7 +65,7 @@ export function tryTransientTypeName (value: Transient, schema?: Object): ?strin
     if (typeName) return typeName;
     const id = value.get("id");
     if (!id) return undefined;
-    if (id.isInactive()) return !schema ? "InactiveResource" : schema.inactiveType.name;
+    if (id.isAbsent()) return !schema ? "InactiveResource" : schema.absentType.name;
     const immaterialPrototype = value[PrototypeOfImmaterialTag];
     if (!immaterialPrototype) return undefined;
     return tryTransientTypeName(immaterialPrototype, schema);

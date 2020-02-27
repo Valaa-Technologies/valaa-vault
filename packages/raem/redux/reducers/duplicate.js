@@ -41,8 +41,8 @@ export default function duplicate (bard: DuplicateBard) {
   const newObjectTransient = bard.objectTransient;
 
   // Specifying "Resource" as opposed to "TransientFields" as this
-  // requires the resource to be active: Inactive resources appear only
-  // in inactive interface and type tables.
+  // requires the resource to be sourcered: Absent resources appear only
+  // in absent interface and type tables.
   bard.goToTransient(duplicateOf, "Resource");
   const ghostPath = passage.id.getGhostPath();
   const typeName = passage.typeName = getTransientTypeName(bard.objectTransient, bard.schema);

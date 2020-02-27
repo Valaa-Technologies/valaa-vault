@@ -18,7 +18,7 @@ import raemSteppers, { debugWrapBuiltinSteppers } from "~/raem/VALK/raemSteppers
 import Kuery, { dumpKuery, dumpScope, dumpObject } from "~/raem/VALK/Kuery";
 import { tryHostRef } from "~/raem/VALK/hostReference";
 import { addStackFrameToError, SourceInfoTag } from "~/raem/VALK/StackTrace";
-import isInactiveTypeName from "~/raem/tools/graphql/isInactiveTypeName";
+import isAbsentTypeName from "~/raem/tools/graphql/isAbsentTypeName";
 
 import type { FabricEventLogger } from "~/tools/FabricEvent";
 import { dumpify } from "~/tools";
@@ -290,7 +290,7 @@ export default class Valker extends Resolver {
       typeName = possiblePackedHead._type;
     }
     const ret = typeName && this.getTypeIntro(typeName);
-    if ((ret === undefined) && typeName && isInactiveTypeName(typeName)) {
+    if ((ret === undefined) && typeName && isAbsentTypeName(typeName)) {
       const chronicleURI = object.get("id").getChronicleURI();
       throw new AbsentChroniclesError(
           `Missing active connections: '${chronicleURI}'`, [chronicleURI]);

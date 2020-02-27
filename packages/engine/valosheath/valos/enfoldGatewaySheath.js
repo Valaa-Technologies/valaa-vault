@@ -42,7 +42,7 @@ export default function enfoldGatewaySheath (valos: Object, rootDiscourse: Disco
     resourceVRID = resourceVRID.split(";")[0];
     return this.__callerValker__.run(null, VALEK.fromObject(resourceVRID).nullable())
         || vRef(resourceVRID, undefined, undefined, chronicleURI)
-            .setInactive();
+            .setAbsent();
   });
 
   valos.Discourse = Object.assign(Object.create(valoscriptInterfacePrototype), {

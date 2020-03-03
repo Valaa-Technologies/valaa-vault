@@ -73,9 +73,9 @@ describe("VPath", () => {
         ["_", ["$", "~plt",
           ["@", [".", ["$", "pot"], ["@", [".O.", "7741938f-801a-4892-9cf0-dd59bd8c9166"]]]]
         ]],
-        ["-", ["$", "pot-hypertwin", "inLinks"]],
-        ["*in~", ["$", "pot", "ownerOf"],
-          ["@", [".S*~",
+        ["+", ["$", "pot-hypertwin", "inLinks"]],
+        ["-in-", ["$", "pot", "ownerOf"],
+          ["@", [".S--",
             ["@", ["$", "~plt",
               ["@", [".", ["$", "pot"], ["@", [".O.", "aa592f56-1d82-4484-8360-ad9b82d00592"]]]],
             ]],
@@ -83,8 +83,8 @@ describe("VPath", () => {
         ],
       )).toEqual(`@$~u4:55a5c4fb-1fd4-424f-8578-7b06ffdb3ef0${""
         }@_$~plt:@.$pot:$:@.O.:7741938f-801a-4892-9cf0-dd59bd8c9166@@@@${""
-        }@-$pot-hypertwin:inLinks@*in~$pot:ownerOf${""
-        }:@.S*~:@$~plt:@.$pot:$:@.O.:aa592f56-1d82-4484-8360-ad9b82d00592@@@@@@@@@@`);
+        }@+$pot-hypertwin:inLinks@-in-$pot:ownerOf${""
+        }:@.S--:@$~plt:@.$pot:$:@.O.:aa592f56-1d82-4484-8360-ad9b82d00592@@@@@@@@@@`);
     });
   });
   describe("VPath parsing", () => {
@@ -127,8 +127,8 @@ describe("VPath", () => {
       expect(segmentVPath(
           `@$~u4:55a5c4fb-1fd4-424f-8578-7b06ffdb3ef0${
             ""}@_$~plt:@.$pot:$:@.O.:7741938f-801a-4892-9cf0-dd59bd8c9166@@@@${
-            ""}@-$pot-hypertwin:inLinks@*in~$pot:ownerOf${
-            ""}:@.S*~:@$~plt:@.$pot:$:@.O.:aa592f56-1d82-4484-8360-ad9b82d00592@@@@@@@@@@`
+            ""}@+$pot-hypertwin:inLinks@-in-$pot:ownerOf${
+            ""}:@.S--:@$~plt:@.$pot:$:@.O.:aa592f56-1d82-4484-8360-ad9b82d00592@@@@@@@@@@`
       )).toEqual([
         "@",
         ["$", "~u4", "55a5c4fb-1fd4-424f-8578-7b06ffdb3ef0"],
@@ -138,10 +138,10 @@ describe("VPath", () => {
             [":", ["@", [".O.", [":", "7741938f-801a-4892-9cf0-dd59bd8c9166"]]]]
           ]],
         ]],
-        ["-", ["$", "pot-hypertwin", "inLinks"]],
-        ["*in~",
+        ["+", ["$", "pot-hypertwin", "inLinks"]],
+        ["-in-",
           ["$", "pot", "ownerOf"],
-          [":", ["@", [".S*~",
+          [":", ["@", [".S--",
             [":", ["@", ["$", "~plt",
               ["@", [".",
                 ["$", "pot", ""],
@@ -183,21 +183,21 @@ describe("VPath", () => {
     });
     it("Segments VPath objects", () => {
       expect(segmentVPath([{ val: [] }]))
-          .toEqual(["@", ["-", [":"], ["@", [".", [":", "val"], ["@"]]]]]);
+          .toEqual(["@", ["+", [":"], ["@", [".", [":", "val"], ["@"]]]]]);
       expect(segmentVPath([{ val: ["@"] }]))
-          .toEqual(["@", ["-", [":"], ["@", [".", [":", "val"], ["@"]]]]]);
+          .toEqual(["@", ["+", [":"], ["@", [".", [":", "val"], ["@"]]]]]);
       expect(segmentVPath([{ val: undefined }]))
-          .toEqual(["@", ["-", [":"], ["@", [".", [":", "val"]]]]]);
+          .toEqual(["@", ["+", [":"], ["@", [".", [":", "val"]]]]]);
       expect(segmentVPath([{ val: [":"] }]))
-          .toEqual(["@", ["-", [":"], ["@", [".", [":", "val"], [":"]]]]]);
+          .toEqual(["@", ["+", [":"], ["@", [".", [":", "val"], [":"]]]]]);
     });
     it("Segments already segmented VPaths correctly", () => {
-      expect(segmentVPath([["*out:TAGS"], [".$V:target"]]))
-          .toEqual(["@", ["*out", [":", "TAGS"]], [".", ["$", "V", "target"]]]);
-      expect(segmentVPath(["@", ["*out", [":", "TAGS"]], [".", ["$", "V", "target"]]]))
-          .toEqual(["@", ["*out", [":", "TAGS"]], [".", ["$", "V", "target"]]]);
-      expect(segmentVPath([["*out", [":", "TAGS"]], [".", ["$", "V", "target"]]]))
-          .toEqual(["@", ["*out", [":", "TAGS"]], [".", ["$", "V", "target"]]]);
+      expect(segmentVPath([["-out:TAGS"], [".$V:target"]]))
+          .toEqual(["@", ["-out", [":", "TAGS"]], [".", ["$", "V", "target"]]]);
+      expect(segmentVPath(["@", ["-out", [":", "TAGS"]], [".", ["$", "V", "target"]]]))
+          .toEqual(["@", ["-out", [":", "TAGS"]], [".", ["$", "V", "target"]]]);
+      expect(segmentVPath([["-out", [":", "TAGS"]], [".", ["$", "V", "target"]]]))
+          .toEqual(["@", ["-out", [":", "TAGS"]], [".", ["$", "V", "target"]]]);
       expect(segmentVPath([[".$V:owner"], [".$V:rawId"]]))
           .toEqual(["@", [".", ["$", "V", "owner"]], [".", ["$", "V", "rawId"]]]);
     });

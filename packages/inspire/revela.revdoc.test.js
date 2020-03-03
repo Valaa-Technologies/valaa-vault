@@ -101,7 +101,7 @@ for various valos fabric config files.`],
         "spread of a URI import followed by pick-array append",
 async () => lazyPatchRevelations(gatewayMock,
     [0], {
-      "!!!": [["$https:foobar.com/path"], ["*:$",
+      "!!!": [["$https:foobar.com/path"], ["-:$",
         [".:fetchedField"],
         ["@.:fetchOptions@.:input@@"],
       ]],
@@ -110,7 +110,12 @@ async () => lazyPatchRevelations(gatewayMock,
     ["last"]),
         "toEqual",
 () => [0, 1, "https://foobar.com/path.json", "last"]),
-    "example#5": itExpects(
+    "example#5": itExpects("non-evaluated spreader contents to be segmented but non-cemented",
+async () => lazyPatchRevelations(gatewayMock,
+    {}, { "!!!": ["@", { value: ["$expanded:but-unbound"] }] }),
+        "toEqual",
+() => ({ value: ["$", "expanded", "but-unbound"] })),
+    "example#6": itExpects(
         "nested import & invoke spread to resolve all spreads",
 async () => lazyPatchRevelations(gatewayMock, {}, {
   out: {

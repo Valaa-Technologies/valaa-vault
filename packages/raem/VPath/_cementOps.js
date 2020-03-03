@@ -50,28 +50,30 @@ function _cementRest (stack, segmentedVPath, componentType, initial) {
 }
 
 const _singularLookup = {
-  ".S.!": ["§.", "owner"],
+  ".S.": ["§.", "owner"],
   ".O.": ["§.", "value"],
-  ".S-!": ["§.", "owner"],
-  ".O-": ["§.", "rawId"],
-  ".S'!": ["§.", "owner"],
-  ".O'": ["§.", "content"],
-  ".S*": ["§.", "source"],
-  ".O*": ["§.", "target"],
-  ".S*~": ["§.", "source"],
-  ".O*~": ["§.", "target"],
-  ".S*!": ["§.", "source"],
-  ".O*!": ["§.", "target"],
+  ".S+": ["§.", "owner"],
+  ".O+": ["§.", "rawId"],
+  ".S~": ["§.", "owner"],
+  ".O~": ["§.", "content"],
+  ".S-": ["§.", "source"],
+  ".O-": ["§.", "target"],
+  ".S--": ["§.", "source"],
+  ".O--": ["§.", "target"],
+  ".S---": ["§.", "source"],
+  ".O---": ["§.", "target"],
 };
 
 const _pluralLookup = {
-  "-": "unnamedOwnlings", // "entities",
-  "'": "unnamedOwnlings", // "medias",
-  "*": "relations",
-  "*out": "relations",
-  "*in": "incomingRelations",
-  "*out~": "relations",
-  "*in~": "incomingRelations",
+  "+": "unnamedOwnlings", // "entities",
+  "~": "unnamedOwnlings", // "medias",
+  "-": "relations",
+  "-out": "relations",
+  "-in": "incomingRelations",
+  "-out-": "relations",
+  "-in-": "incomingRelations",
+  "-out--": "relations",
+  "-in--": "incomingRelations",
 };
 
 
@@ -90,9 +92,9 @@ const _cementersByType = {
   ...(Object.keys(_pluralLookup)
       .reduce((a, p) => { a[p] = _cementPluralProperty; return a; }, {})),
   ".": _cementProperty,
+  "+": _cementNamedCollection,
   "-": _cementNamedCollection,
-  "'": _cementNamedCollection,
-  "*": _cementNamedCollection,
+  "~": _cementNamedCollection,
 };
 
 function _invalidCementHead () {
@@ -111,7 +113,7 @@ function _cementStatements (stack, segmentedVPath) {
       const arrayPath = ["§[]"];
       do {
         arrayPath.push(_maybeEscapedCement(segmentedVPath[i])
-            || _cementVPath(stack, segmentedVPath[i], "*", i));
+            || _cementVPath(stack, segmentedVPath[i], "-", i));
       } while ((++i !== segmentedVPath.length) && (segmentedVPath[i][0] === ":"));
       fullPath.push(arrayPath);
       --i;
@@ -138,7 +140,7 @@ function _cementVParam (stack, segmentedVPath, componentType) {
     }
     const isComputation = (((segmentedVPath[2] || "")[1] || "")[0] || "")[0] === "!";
     cemented = _cementVPath(stack, segmentedVPath[2], "@");
-    if (Array.isArray(cemented) && ((componentType !== "!*") || !isComputation)) {
+    if (Array.isArray(cemented) && ((componentType !== "!-") || !isComputation)) {
       return cemented;
     }
   } else if (!termContext) {
@@ -177,7 +179,7 @@ function _cementVParam (stack, segmentedVPath, componentType) {
     return ["§ref", cemented];
   case "!0": // first entry of a trivial resource valk
     return ["§$", cemented];
-  case "!*":
+  case "!-":
     return ["§..", cemented]; // subsequent entries of trivial resource valk
   default: // eslint-disable-line no-fallthrough
     return cemented;
@@ -191,7 +193,7 @@ function _cementComputation (stack, segmentedVPath) {
   if (first[0] === "§$") {
     segmentedVPath[0] = "§->";
     segmentedVPath[1] = first;
-    return _cementRest(stack, segmentedVPath, "!*", 2);
+    return _cementRest(stack, segmentedVPath, "!-", 2);
   }
   segmentedVPath.splice(0, 2, ...first);
   return _cementRest(stack, segmentedVPath, computationType, first.length);
@@ -207,7 +209,7 @@ function _cementProperty (stack, segmentedVPath, componentType) {
   // ref("@valos/raem/VPath#section_structured_scope_cementProperty")
   const first = _cementVPath(stack, segmentedVPath[1], ".", 1);
   if (segmentedVPath.length <= 2) {
-    if (componentType !== "-") {
+    if (componentType !== "+") {
       const ret = Array.isArray(first) ? first : ["§..", first];
       return ((componentType === "@") && stack.isPluralHead)
           ? ["§map", ret] : ret;
@@ -217,7 +219,7 @@ function _cementProperty (stack, segmentedVPath, componentType) {
     }
     return [first, ["§'", ["@", [".", [":", first]]]]];
   }
-  if (componentType === "-") {
+  if (componentType === "+") {
     if (segmentedVPath.length > 3) {
       throw new Error("Cannot cement object property: multi-param property verbs not supported");
     }
@@ -246,7 +248,7 @@ function _maybeEscapedCement (entry) {
     if ((verb.length > 1) && !verb.find((e, i) => i && e[0] !== ":")) return undefined;
     if (entry.length === 2) verb = entry[1];
   }
-  if ((verb[0] === "-") || (verb[0][0] === "!")) return undefined;
+  if ((verb[0] === "+") || (verb[0][0] === "!")) return undefined;
   return ["§'", entry];
 }
 
@@ -273,10 +275,10 @@ function _cementNamedCollection (stack, segmentedVPath) {
   const byNameSelector = (nameParam != null)
       && _cementPluralProperty(stack, segmentedVPath, collectionType);
   if (byNameSelector && segmentedVPath.length <= 2) return byNameSelector;
-  stack.isPluralHead = (collectionType[0] === "*");
+  stack.isPluralHead = (collectionType[0] === "-");
   segmentedVPath.splice(0, 2, stack.isPluralHead ? "§[]" : "§{}");
   if (segmentedVPath.length > 1) {
-    if (stack.isPluralHead) _cementRest(paramStack, segmentedVPath, "*", 1);
+    if (stack.isPluralHead) _cementRest(paramStack, segmentedVPath, "-", 1);
     else {
       for (let i = 1; i !== segmentedVPath.length; ++i) {
         if (segmentedVPath[i][0] !== "@") {
@@ -287,7 +289,7 @@ function _cementNamedCollection (stack, segmentedVPath) {
           throw new Error(`Cannot cement named dictionary '${
             collectionType}': each param must be a path containing a single property verb`);
         }
-        segmentedVPath[i] = _cementVPath(paramStack, segmentedVPath[i][1], "-", i);
+        segmentedVPath[i] = _cementVPath(paramStack, segmentedVPath[i][1], "+", i);
       }
     }
   }
@@ -327,7 +329,7 @@ function _cementPluralProperty (stack, segmentedVPath) {
   if (segmentedVPath.length > 2) {
     throw new Error(`Cannot cement plural '${field}': multi-param selectors not allowed`);
   }
-  stack.isPluralHead = (segmentedVPath[0][0] === "*");
+  stack.isPluralHead = (segmentedVPath[0][0] === "-");
   return ["§->", false, field, false,
     ..._filterByFieldValue("name", _cementVPath(stack, segmentedVPath[1], "!")),
     ...(stack.isPluralHead ? [] : [false, 0])

@@ -7,6 +7,7 @@
   "gateway": {
     "authorityConfigs": { "!!!": "./revelation/authorityConfigs.json" },
     "verbosity": 0,
+    "corpus": { "verbosity": 0 },
     "falseProphet": { "verbosity": 0 },
     "scribe": { "verbosity": 0 }
   },
@@ -34,6 +35,7 @@
           "view": {
             "name": "Web API Test",
             "verbosity": 0,
+            "engine": { "verbosity": 0 },
             "focus": "valaa-local:?id=@$~u4:f3d306d9-79ac-4087-afbc-46f739226eb2@@"
           },
           "identity": {

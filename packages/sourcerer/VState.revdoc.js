@@ -46,36 +46,38 @@ when it is expanded as triples.
     "/.O": { "@id": "$V:object" },
 
     "/.": { "@id": "$V:properties", "@type": "@id", "@container": "@index" },
-    "/.S.!": { "@id": "$V:scope", "@type": "@id" },
+    "/.S.": { "@id": "$V:scope", "@type": "@id" },
     "/.O.": { "@id": "$V:value", "@type": "@id" },
 
-    "/-": { "@id": "$V:entities", "@type": "@id", "@container": "@index" },
-    "/.S-!": { "@id": "$V:parent", "@type": "@id" },
-    "/.O-": { "@id": "$V:id", "@type": "@id" },
+    "/+": { "@id": "$V:entities", "@type": "@id", "@container": "@index" },
+    "/.S+": { "@id": "$V:parent", "@type": "@id" },
+    "/.O+": { "@id": "$V:id", "@type": "@id" },
 
-    "/'": { "@id": "$V:medias", "@type": "@id", "@container": "@index" },
-    "/.S'!": { "@id": "$V:folder", "@type": "@id" },
-    "/.O'": { "@id": "$V:content", "@type": "@id" },
+    "/~": { "@id": "$V:medias", "@type": "@id", "@container": "@index" },
+    "/.S~": { "@id": "$V:folder", "@type": "@id" },
+    "/.O~": { "@id": "$V:content", "@type": "@id" },
 
     "/*": { "@id": "$V:relations", "@type": "@id", "@container": "@list" },
-    "/*out": { "@id": "$V:outRelations", "@type": "@id", "@container": "@list" },
+    "/-out": { "@id": "$V:outRelations", "@type": "@id", "@container": "@list" },
     "/*in": { "@id": "$V:inRelations", "@type": "@id", "@container": "@list" },
-    "/*out~": { "@id": "$V:pairedOutRelations", "@type": "@id", "@container": "@list" },
-    "/*in~": { "@id": "$V:pairedInRelations", "@type": "@id", "@container": "@list" },
-    "/.S*": { "@id": "$V:source", "@type": "@id" },
-    "/.O*": { "@id": "$V:target", "@type": "@id" },
-    "/.S*~": { "@id": "$V:pairedSource", "@type": "@id" },
-    "/.O*~": { "@id": "$V:pairedTarget", "@type": "@id" },
-    "/.S*!": { "@id": "$V:connectedSource", "@type": "@id" },
-    "/.O*!": { "@id": "$V:connectedTarget", "@type": "@id" },
+    "/-out-": { "@id": "$V:pairedOutRelations", "@type": "@id", "@container": "@list" },
+    "/-in-": { "@id": "$V:pairedInRelations", "@type": "@id", "@container": "@list" },
+    "/-out--": { "@id": "$V:connectedOutRelations", "@type": "@id", "@container": "@list" },
+    "/-in--": { "@id": "$V:connectedInRelations", "@type": "@id", "@container": "@list" },
+    "/.S-": { "@id": "$V:source", "@type": "@id" },
+    "/.O-": { "@id": "$V:target", "@type": "@id" },
+    "/.S--": { "@id": "$V:pairedSource", "@type": "@id" },
+    "/.O--": { "@id": "$V:pairedTarget", "@type": "@id" },
+    "/.S---": { "@id": "$V:connectedSource", "@type": "@id" },
+    "/.O---": { "@id": "$V:connectedTarget", "@type": "@id" },
 
-    "-$V": "https://valospace.org/removed-from#",
-    "-/.": { "@id": "-$V:properties", "@type": "@id" },
-    "-/-": { "@id": "-$V:entities", "@type": "@id" },
-    "-/'": { "@id": "-$V:medias", "@type": "@id" },
-    "-/*": { "@id": "-$V:relations", "@type": "@id" },
-    "-/*out~": { "@id": "$V--:pairedOutRelations", "@type": "@id" },
-    "-/*in~": { "@id": "$V--:pairedInRelations", "@type": "@id" },
+    "--$V": "https://valospace.org/removed-from#",
+    "--/.": { "@id": "--$V:properties", "@type": "@id" },
+    "--/+": { "@id": "--$V:entities", "@type": "@id" },
+    "--/~": { "@id": "--$V:medias", "@type": "@id" },
+    "--/-": { "@id": "--$V:relations", "@type": "@id" },
+    "--/-out-": { "@id": "--$V:pairedOutRelations", "@type": "@id" },
+    "--/-in-": { "@id": "--$V:pairedInRelations", "@type": "@id" },
 
     "$~u4": { "@id": "urn:valos:u4:", "@prefix": true },
     "$~plt": { "@id": "urn:valos:plt:", "@prefix": true },
@@ -99,51 +101,51 @@ when it is expanded as triples.
     "$V:Entity": [{
       "@context": {
         "^0": "^thistwinroot:",
-        "^0-0": "^0:-$pot-hypertwin:inLinks@"
+        "^0-0": "^0:+$pot-hypertwin:inLinks@"
       },
       "@id": "^0:@",
       "/.P": "thistwinname",
       "$pot:": "building1id",
       "$pot:area": 400,
       "blah%3Afoo": "content",
-      "foo": { "@id": "^0:':foo.vs@" },
+      "foo": { "@id": "^0:~:foo.vs@" },
       "title": "sumtext",
       "/.": {
         "foo": { "@id": "^0:.:foo@", "$V:isFrozen": true }
       },
-      "/-": {
+      "/+": {
         "$pot-hypertwin:inLinks": {
           "@id": "^0-0:@",
           "/*": [{
-            "@id": "^0-0:*in~$pot:ownerOf:@.S*~:@$~plt:@.$pot:$:@.O.:aa592f56-1d82-4484-8360-ad9b82d00592@@@@@@@@@@",
-            "/.S*~": "^hyperlane:_$~plt:@.$pot:$:@.O.:aa592f56-1d82-4484-8360-ad9b82d00592@@@@@@"
+            "@id": "^0-0:-in-$pot:ownerOf:@.S--:@$~plt:@.$pot:$:@.O.:aa592f56-1d82-4484-8360-ad9b82d00592@@@@@@@@@@",
+            "/.S--": "^hyperlane:_$~plt:@.$pot:$:@.O.:aa592f56-1d82-4484-8360-ad9b82d00592@@@@@@"
             "/.P": "$pot:ownerOf",
-            "/.O*~": "^0:@",
+            "/.O--": "^0:@",
           }]
         }
       },
-      "/'": {
-        "foo.vs": { "@id": "^0:':foo.vs@" }
+      "/~": {
+        "foo.vs": { "@id": "^0:~:foo.vs@" }
       },
-      "/*": [{
-          "@id": "^0:*out~:PERMISSIONS@_:15-1@@",
-          "/.S*~": "^0:@", "/.P": "PERMISSIONS", "/.O*": "^user1:@",
+      "/-": [{
+          "@id": "^0:-out-:PERMISSIONS@_:15-1@@",
+          "/.S--": "^0:@", "/.P": "PERMISSIONS", "/.O-": "^user1:@",
           "write": true,
         },
         "@$~u4:b@@", {
-          "@id": "^0:*out~:PERMISSIONS@_:234-3@@",
-          "/.S*~": "^0:@", "/.P": "PERMISSIONS", "/.O*": "^user2:@",
+          "@id": "^0:-out-:PERMISSIONS@_:234-3@@",
+          "/.S--": "^0:@", "/.P": "PERMISSIONS", "/.O-": "^user2:@",
           "write": false,
         },
         "@$~u4:d@@",
       ],
-      "/*out~": [
-        "^0:*out~:PERMISSIONS@_:15-1@@",
-        "^0:*out~:PERMISSIONS@_:234-3@@",
+      "/-out-": [
+        "^0:-out-:PERMISSIONS@_:15-1@@",
+        "^0:-out-:PERMISSIONS@_:234-3@@",
       ],
-      "/*in~": [
+      "/-in-": [
         "@$~u4:b@@",
-        "^0-0:*in~$pot:ownerOf:@.S*~:@$~plt:@.$pot:$:@.O.:aa592f56-1d82-4484-8360-ad9b82d00592@@@@@@@@@",
+        "^0-0:-in-$pot:ownerOf:@.S--:@$~plt:@.$pot:$:@.O.:aa592f56-1d82-4484-8360-ad9b82d00592@@@@@@@@@",
         "@$~u4:d@@"
       ]
     }],

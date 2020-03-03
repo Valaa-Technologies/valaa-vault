@@ -35,7 +35,7 @@ exports.createTestTagType = () => namedResourceType("TestTag", [], {
     valospace: {
       gate: {
         name: "tags",
-        projection: [["*out:TAG"], [".$V:target"]],
+        projection: [["-out:TAG"], [".$V:target"]],
       },
     },
   },
@@ -62,7 +62,7 @@ exports.createTestThingType = () => namedResourceType("TestThing", [], {
 
   // Meta
   tags: () => mappingToManyOf("tags", exports.TestTagType,
-      [["*out:TAG"], ["$valk:nullable"]], {
+      [["-out:TAG"], ["$valk:nullable"]], {
         [ObjectSchema]: { valospace: { filterable: true } },
         highlight: BooleanType,
       }),
@@ -81,7 +81,7 @@ exports.createTestNewsItemType = () => namedResourceType("TestNewsItem", exports
     valospace: {
       gate: {
         name: "news",
-        projection: [["*out:NEWSITEM"], [".$V:target"]],
+        projection: [["-out:NEWSITEM"], [".$V:target"]],
         filterCondition: [["$valk:nullable"], [".:visible"]],
       },
     },
@@ -98,7 +98,7 @@ exports.createTestProfileType = () => namedResourceType("TestProfile", exports.T
       valospace: { reflection: ["@"] },
     },
     services: () => mappingToManyOf("owned/services", exports.TestServiceType,
-        [["*out:SERVICE"], ["$valk:nullable"]],
+        [["-out:SERVICE"], ["$valk:nullable"]],
         { highlight: BooleanType }),
   },
 });
@@ -113,7 +113,7 @@ exports.createTestIndividualType = () => namedResourceType(
     valospace: {
       gate: {
         name: "individuals",
-        projection: [["*out:INDIVIDUAL"], [".$V:target"]],
+        projection: [["-out:INDIVIDUAL"], [".$V:target"]],
         filterCondition: [["$valk:nullable"], [".:visible"]],
       },
     },
@@ -121,7 +121,7 @@ exports.createTestIndividualType = () => namedResourceType(
   title: StringType,
   company: StringType,
   interests: () => mappingToManyOf("interests", exports.TestTagType,
-      [["*out:INTEREST"], ["$valk:nullable"]],
+      [["-out:INTEREST"], ["$valk:nullable"]],
       { [ObjectSchema]: { valospace: { filterable: true } } }),
 });
 exports.TestIndividualType = exports.createTestIndividualType();
@@ -134,14 +134,14 @@ exports.createTestServiceType = () => namedResourceType("TestService", exports.T
     valospace: {
       gate: {
         name: "services",
-        projection: [["*out:SERVICE"], [".$V:target"]],
+        projection: [["-out:SERVICE"], [".$V:target"]],
         filterCondition: [["$valk:nullable"], [".:visible"]],
       },
     },
   },
   owned: {
     news: () => mappingToManyOf("owned/news", exports.TestNewsItemType,
-        [["*out:NEWSITEM"], ["$valk:nullable"]],
+        [["-out:NEWSITEM"], ["$valk:nullable"]],
         { highlight: BooleanType, [ObjectSchema]: { valospace: { filterable: true } } }),
   },
 });

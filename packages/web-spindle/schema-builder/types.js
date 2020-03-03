@@ -179,7 +179,8 @@ function _createRelationTypeTo (targetType, relationNameOrProjection, {
 } = {}) {
   if (!targetType) throw new Error("targetType missing");
   const reflection = segmentVPath((typeof relationNameOrProjection === "string")
-      ? ["*out", [":", relationNameOrProjection]]
+      ? ["-out", [":", relationNameOrProjection]]
+
       : relationNameOrProjection
   ).slice(1);
   const ret = {

@@ -14,9 +14,9 @@ function validateVerbType (str) {
   if (typeof str !== "string") {
     throw new Error(`Invalid verb-type: expected string, got ${typeof str}`);
   }
-  if (!str.match(/[a-zA-Z0-9\-_.~!*'()]+/)) {
+  if (!str.match(/[a-zA-Z0-9\-_.~+!*'()]+/)) {
     throw new Error(`Invalid verb-type: doesn't match rule${
-      ""} 1*(ALPHA / DIGIT / "-" / "_" / "." / "~" / "!" / "*" / "'" / "(" / ")")`);
+      ""} 1*(ALPHA / DIGIT / "-" / "_" / "." / "~" / "+" / "!" / "*" / "'" / "(" / ")")`);
   }
   return str;
 }

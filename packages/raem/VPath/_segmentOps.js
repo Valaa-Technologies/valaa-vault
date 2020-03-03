@@ -88,9 +88,9 @@ function _segmentEntryOf (entry, targetType) {
         : Array.isArray(entry)
             ? _segmentArrayAsEntryOf(entry, targetType)
         : Object.entries(entry).sort().reduce((target, [key, value]) => {
-          target.push(_asEntryOf("-", segmentVKeyPath(key, value)));
+          target.push(_asEntryOf("+", segmentVKeyPath(key, value)));
           return target;
-        }, ["-", [":"]]);
+        }, ["+", [":"]]);
     const ret = _asEntryOf(targetType, segment);
     return ret;
   } catch (error) {

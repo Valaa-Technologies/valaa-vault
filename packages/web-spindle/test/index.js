@@ -78,7 +78,7 @@ function _createGateRoutes (globalRules, resourceType) {
 
     resourceGETRoute(`/${gate.name}/:resourceId`, {
       rules: {
-        resource: ["!$valk:ref", ["*:$", ["!:request:params:resourceId"]]],
+        resource: ["!$valk:ref", ["-:$", ["!:request:params:resourceId"]]],
       },
     }, globalRules, resourceType),
 
@@ -109,14 +109,14 @@ function _createGateRoutes (globalRules, resourceType) {
 
     resourcePATCHRoute(`/${gate.name}/:resourceId`, {
       rules: {
-        resource: ["!$valk:ref", ["*:$", ["!:request:params:resourceId"]]],
+        resource: ["!$valk:ref", ["-:$", ["!:request:params:resourceId"]]],
         doPatchResource: null,
       },
     }, globalRules, resourceType),
 
     resourceDELETERoute(`/${gate.name}/:resourceId`, {
       rules: {
-        resource: ["!$valk:ref", ["*:$", ["!:request:params:resourceId"]]],
+        resource: ["!$valk:ref", ["-:$", ["!:request:params:resourceId"]]],
         doDeleteResource: null,
       },
     }, globalRules, resourceType),
@@ -134,23 +134,23 @@ function _createResourceTypeMappingRoutes (
     relationsGETRoute(`/${gate.name}/:resourceId/${mappingName}`, {
       enabledWithRules: ["relationName"],
       rules: {
-        resource: ["!$valk:ref", ["*:$", ["!:request:params:resourceId"]]],
+        resource: ["!$valk:ref", ["-:$", ["!:request:params:resourceId"]]],
       },
     }, globalRules, resourceType, relationField),
 
     mappingGETRoute(`/${gate.name}/:resourceId/${mappingName}/:targetId`, {
       enabledWithRules: ["relationName"],
       rules: {
-        resource: ["!$valk:ref", ["*:$", ["!:request:params:resourceId"]]],
-        target: ["!$valk:ref", ["*:$", ["!:request:params:targetId"]]],
+        resource: ["!$valk:ref", ["-:$", ["!:request:params:resourceId"]]],
+        target: ["!$valk:ref", ["-:$", ["!:request:params:targetId"]]],
       },
     }, globalRules, resourceType, relationField),
 
     mappingPATCHRoute(`/${gate.name}/:resourceId/${mappingName}/:targetId`, {
       enabledWithRules: ["relationName"],
       rules: {
-        resource: ["!$valk:ref", ["*:$", ["!:request:params:resourceId"]]],
-        target: ["!$valk:ref", ["*:$", ["!:request:params:targetId"]]],
+        resource: ["!$valk:ref", ["-:$", ["!:request:params:resourceId"]]],
+        target: ["!$valk:ref", ["-:$", ["!:request:params:targetId"]]],
         doCreateMapping: ["!$valk:new", ["!:Relation"], {
           name: ["!:relationName"],
           source: ["!:resource"],
@@ -162,8 +162,8 @@ function _createResourceTypeMappingRoutes (
     mappingDELETERoute(`/${gate.name}/:resourceId/${mappingName}/:targetId`, {
       enabledWithRules: ["relationName"],
       rules: {
-        resource: ["!$valk:ref", ["*:$", ["!:request:params:resourceId"]]],
-        target: ["!$valk:ref", ["*:$", ["!:request:params:targetId"]]],
+        resource: ["!$valk:ref", ["-:$", ["!:request:params:resourceId"]]],
+        target: ["!$valk:ref", ["-:$", ["!:request:params:targetId"]]],
         doDestroyMapping: ["@",
           ["!:valos:Resource"], ["!$valk:invoke:destroy", ["!:target"]],
           ["!:valos:Resource"], ["!$valk:invoke:destroy", ["!:mapping"]],
@@ -174,7 +174,7 @@ function _createResourceTypeMappingRoutes (
     mappingPOSTRoute(`/${gate.name}/:resourceId/${mappingName}`, {
       enabledWithRules: ["listingName", "relationName"],
       rules: {
-        resource: ["!$valk:ref", ["*:$", ["!:request:params:resourceId"]]],
+        resource: ["!$valk:ref", ["-:$", ["!:request:params:resourceId"]]],
         doCreateMappingAndTarget: ["@",
           ["!$valk:const:newResource", ["!$valk:new", ["!:Entity"], {
             name: ["!:request:body", "$V", "target", "name"],

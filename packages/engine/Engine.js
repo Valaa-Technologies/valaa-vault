@@ -305,6 +305,7 @@ export default class Engine extends Cog {
       });
       const vRet = isRecombine ? ret : ret[0];
       discourse.releaseFabricator();
+      discourse = null;
       return !options.awaitResult ? vRet
           : thenChainEagerly(options.awaitResult(result, vRet), () => vRet);
     } catch (error) {

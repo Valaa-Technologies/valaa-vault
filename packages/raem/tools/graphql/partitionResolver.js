@@ -3,7 +3,7 @@
 import { naiveURI } from "~/raem/ValaaURI";
 import { resolveChronicleURI } from "~/raem/tools/denormalized/partitions";
 
-export default function chronicleResolver (source: any, args: any,
+export default function chronicleRootResolver (source: any, args: any,
     { rootValue: { resolver } }: Object) {
   const chronicleURI = resolveChronicleURI(resolver, source.get("id"));
   return chronicleURI && Object.create(resolver)

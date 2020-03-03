@@ -30,7 +30,8 @@ describe("Media handling", () => {
     });
     const testConnectionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
     const existingChroniclingCount = testConnectionBackend._chroniclings.length;
-    const { media, contentUpdateStarted } = await harness.runValoscript(vRef(testRootId), `
+    const vTestRoot = entities()[testRootId];
+    const { media, contentUpdateStarted } = await harness.runValoscript(vTestRoot, `
       const media = new Media({
         name: "text media", owner: this, mediaType: { type: "text", subtype: "plain" },
       });
@@ -39,8 +40,16 @@ describe("Media handling", () => {
       this.text = media;
       ({ media, contentUpdateStarted });
     `, { exampleBuffer, console }, { awaitResult: (result) => result.getComposedEvent() });
+    const vMedias = vTestRoot.get(["§.", "medias"]);
+    const vEntities = vTestRoot.get(["§.", "entities"]);
+    expect(vMedias.length)
+        .toEqual(1);
+    expect(vMedias.length + vEntities.length)
+        .toEqual(vTestRoot.get(["§.", "unnamedOwnlings"]).length);
     expect(media.getId().toJSON())
-        .toEqual(entities()[testRootId].get(["§..", "text"]).getId().toJSON());
+        .toEqual(vTestRoot.get(["§..", "text"]).getId().toJSON());
+    expect(vMedias[0].getId().toJSON())
+        .toEqual(media.getId().toJSON());
     expect(testConnectionBackend.getPreparation(exampleContentHash))
         .toBeTruthy();
     expect(media.get("content"))

@@ -3,6 +3,7 @@ import { GraphQLInterfaceType, GraphQLList } from "graphql/type";
 
 import { toManyOwnlings } from "~/raem/tools/graphql/coupling";
 import { typeNameResolver } from "~/raem/tools/graphql/typeResolver";
+import aliasField from "~/raem/tools/graphql/aliasField";
 import primaryField from "~/raem/tools/graphql/primaryField";
 
 import Discoverable from "~/raem/schema/Discoverable";
@@ -38,6 +39,16 @@ export function relatableInterface (objectDescription: string = INTERFACE_DESCRI
       ...primaryField("relations", new GraphQLList(Relation),
           "List of relations that this relatable has",
           { coupling: toManyOwnlings({}), affiliatedType: "Relatable" },
+      ),
+
+      ...aliasField("entities", "unnamedOwnlings", new GraphQLList(Resource),
+          `List of entities that this relatable has`,
+          { filterTypeName: "Entity", affiliatedType: "Relatable" },
+      ),
+
+      ...aliasField("medias", "unnamedOwnlings", new GraphQLList(Resource),
+          `List of medias that this relatable has`,
+          { filterTypeName: "Media", affiliatedType: "Relatable" },
       ),
     }),
   };

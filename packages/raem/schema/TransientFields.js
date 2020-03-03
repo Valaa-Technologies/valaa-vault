@@ -11,7 +11,7 @@ import transientField from "~/raem/tools/graphql/transientField";
 import ghostHostResolver from "~/raem/tools/graphql/ghostHostResolver";
 
 
-import chronicleResolver, { chronicleURIResolver }
+import chronicleRootResolver, { chronicleURIResolver }
     from "~/raem/tools/graphql/partitionResolver";
 import { typeNameResolver } from "~/raem/tools/graphql/typeResolver";
 import vrefResolver from "~/raem/tools/graphql/vrefResolver";
@@ -53,17 +53,22 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
           { affiliatedType: "TransientFields" },
       ),
 
+      ...generatedField("chronicleRoot", Chronicle,
+          `The chronicle root Resource of this ${objectDescription}, ie. the nearest owner${
+              ""} (or self) which is also an active chronicle.`,
+          chronicleRootResolver,
+          { affiliatedType: "TransientFields" },
+      ),
+
       ...generatedField("partition", Chronicle,
-          `The chronicle Resource of this ${objectDescription}, ie. the nearest owner (or self)${
-              ""} which is also an active chronicle.`,
-          chronicleResolver,
+          `Deprecated if favor of 'chronicleRoot'.`,
+          chronicleRootResolver,
           { affiliatedType: "TransientFields" },
       ),
 
       ...generatedField("chronicle", Chronicle,
-          `The chronicle root Resource of this ${objectDescription}, ie. the nearest owner${
-              ""} (or self) which is also an active chronicle.`,
-          chronicleResolver,
+          `Deprecated if favor of 'chronicleRoot'.`,
+          chronicleRootResolver,
           { affiliatedType: "TransientFields" },
       ),
 

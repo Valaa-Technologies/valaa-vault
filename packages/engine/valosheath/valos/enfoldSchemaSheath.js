@@ -163,13 +163,15 @@ function _injectTypeSheath (global: Object, target: Object, hostDescriptors: Map
     fieldDescriptorBase.enumerable = false;
     fieldDescriptorBase.configurable = false;
     let resolvedAlias: any = fieldIntro;
-    while (resolvedAlias.alias) resolvedAlias = typeIntro.getFields()[resolvedAlias.alias];
+    if (!resolvedAlias.filterTypeName) {
+      while (resolvedAlias.alias) resolvedAlias = typeIntro.getFields()[resolvedAlias.alias];
+      if (resolvedAlias.isWritable) {
+        fieldDescriptorBase.writableFieldName = resolvedAlias.fieldName;
+      }
+    }
     fieldDescriptorBase.persisted = resolvedAlias.isPersisted;
     fieldDescriptorBase.sequence = resolvedAlias.isSequence;
     fieldDescriptorBase.writable = resolvedAlias.isWritable;
-    if (resolvedAlias.isWritable) {
-      fieldDescriptorBase.writableFieldName = resolvedAlias.fieldName;
-    }
     fieldDescriptorBase.kuery = resolvedAlias.fieldName;
 
     addNamespaceFieldAlias(target, "valos", fieldName, fieldSymbol);

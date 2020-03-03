@@ -22,13 +22,20 @@ export type FieldInfo = {
 export function tryElevateFieldValue (resolver: Resolver, value: VRL | VRL[],
     fieldInfo: FieldInfo) {
   const elevation = value && _tryFieldGhostElevation(fieldInfo);
-  if (!elevation) return value;
+  const filterTypeName = fieldInfo.filterTypeName;
+  if (!elevation && !filterTypeName) return value;
   const elevator = Object.create(resolver);
   const typeName = fieldInfo.intro.namedType.name;
-  return !fieldInfo.intro.isSequence
-      ? _elevateReference(elevator, value, fieldInfo, elevation, typeName)
-      : value.map(entry =>
-          _elevateReference(elevator, entry, fieldInfo, elevation, typeName));
+  if (!fieldInfo.intro.isSequence) {
+    return _elevateReference(elevator, value, fieldInfo, elevation, typeName);
+  }
+  const ret = [];
+  for (const entry of value) {
+    const elevatedEntry = _elevateReference(
+        elevator, entry, fieldInfo, elevation, typeName, undefined, filterTypeName);
+    if (elevatedEntry !== undefined) ret.push(elevatedEntry);
+  }
+  return ret;
 }
 
 export function elevateFieldReference (resolver: Resolver, reference: VRL, fieldInfo: FieldInfo,
@@ -44,7 +51,8 @@ export function elevateFieldRawSequence (resolver: Resolver, rawSequence: Ordere
   if (!object) return rawSequence;
   const elevator = Object.create(resolver);
   elevator.objectTypeName = "TransientFields";
-  return _elevateRawSequence(elevator, object, rawSequence, Object.create(fieldInfo), verbosity);
+  return _elevateRawSequence(elevator, object, rawSequence, Object.create(fieldInfo), verbosity,
+      fieldInfo.filterTypeName);
 }
 
 function _tryFieldGhostElevation (fieldInfo: FieldInfo) {
@@ -61,10 +69,18 @@ export function _getFieldGhostElevation (fieldInfo: FieldInfo, elevationInstance
 }
 
 export function _elevateReference (elevator: Resolver, reference: VRL, fieldInfo: FieldInfo,
-    elevation: GhostElevation, typeName: string, verbosity: ?number) {
+    elevation: GhostElevation, typeName: string, verbosity: ?number, filterTypeName: ?string) {
   elevator.tryGoToTransient(reference, typeName);
+  if (filterTypeName) {
+    if (filterTypeName !== elevator.objectTypeName) {
+      // filterTypeName is a late-stage transition hack for "medias" and
+      // "entities", and thus is only be used with owned resources which
+      // are always in a present chronicle.
+      return undefined;
+    }
+  }
   let elevatedId;
-  if (elevator.objectId.isAbsent()) {
+  if (elevator.objectId.isAbsent() || !elevation) {
     // TODO(iridian): Following assumption has not been fully reasoned,
     // evaluate thoroughly: If reference is to a resource in an
     // absent chronicle there will be no elevation.
@@ -96,8 +112,8 @@ export function _elevateReference (elevator: Resolver, reference: VRL, fieldInfo
   return !coupledField ? elevatedId : elevatedId.coupleWith(coupledField);
 }
 
-function _elevateRawSequence (resolver: Resolver, object: Transient,
-    partialRawSequence: OrderedSet, fieldInfo: FieldInfo, verbosity: ?number) {
+function _elevateRawSequence (resolver: Resolver, object: Transient, partialRawSequence: OrderedSet,
+    fieldInfo: FieldInfo, verbosity: ?number, filterTypeName: ?string) {
   // TODO(iridian): Very potential optimization/caching focus: the current implementation doing
   // combined merge + elevate of the entries from prototypes is simplistic and has redundancies.
   const partialRemoves = partialRawSequence && partialRawSequence[PartialRemovesTag];
@@ -118,7 +134,7 @@ function _elevateRawSequence (resolver: Resolver, object: Transient,
       fieldInfo.elevationInstanceId = fieldInfo.sourceTransient.get("id");
       fieldInfo.sourceTransient = resolver.objectTransient;
       fullUnelevatedSequence = _elevateRawSequence(
-          resolver, currentObject, prototypeSequence, fieldInfo, verbosity);
+          resolver, currentObject, prototypeSequence, fieldInfo, verbosity, filterTypeName);
       if (partialRemoves !== undefined) {
         fullUnelevatedSequence = fullUnelevatedSequence.subtract(partialRemoves);
       }
@@ -129,11 +145,16 @@ function _elevateRawSequence (resolver: Resolver, object: Transient,
       }
     }
   }
-  if (!elevation) return fullUnelevatedSequence;
+  if (!elevation && !filterTypeName) return fullUnelevatedSequence;
   const elevator = Object.create(resolver);
   const typeName = fieldInfo.intro.namedType.name;
-  return fullUnelevatedSequence.map(reference =>
-      _elevateReference(elevator, reference, fieldInfo, elevation, typeName, verbosity));
+  const ret = [];
+  for (const reference of fullUnelevatedSequence) {
+    const elevatedReference = _elevateReference(
+        elevator, reference, fieldInfo, elevation, typeName, verbosity, filterTypeName);
+    if (elevatedReference !== undefined) ret.push(elevatedReference);
+  }
+  return OrderedSet(ret);
 }
 
 export function _elevateObjectId (referenceElevator: Resolver, elevationBasePath: GhostPath,

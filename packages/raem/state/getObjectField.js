@@ -240,6 +240,9 @@ export function fillFieldInfoAndResolveAliases (object: Transient, objectFields:
       }
       fieldInfo.coupledField = coupling.coupledField;
     }
+    if (fieldInfo.intro.filterTypeName) {
+      fieldInfo.filterTypeName = fieldInfo.intro.filterTypeName;
+    }
     fieldInfo.name = fieldInfo.intro.alias;
     fillFieldInfoAndResolveAliases(object, objectFields, fieldInfo, resolver);
   } catch (error) {

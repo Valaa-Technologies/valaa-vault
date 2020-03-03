@@ -1,7 +1,5 @@
 // @flow
 
-import type { ValaaURI } from "~/raem/ValaaURI";
-
 import { NarrateOptions, ReceiveEvents } from "~/sourcerer/api/types";
 import Follower from "~/sourcerer/api/Follower";
 import type Connection from "~/sourcerer/api/Connection";
@@ -188,6 +186,14 @@ export default class Sourcerer extends FabricEventTarget {
     });
     return ret;
   }
+
+  getActiveConnection (chronicleURI: string) {
+    const connection = this._connections[chronicleURI];
+    if (!connection) throw new Error(`No connection to chronicle <${chronicleURI}> found`);
+    if (!connection.isActive()) throw new Error(`Chronicle <${chronicleURI}> found but not active`);
+    return connection;
+  }
+
   getFullConnections () : Map<string, Connection> {
     this.warnEvent(
         "DEPRECATED: prefer getActiveConnections instead of getFullConnections");

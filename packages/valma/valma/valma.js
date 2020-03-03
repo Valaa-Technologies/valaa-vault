@@ -242,6 +242,42 @@ const _vlm = {
     }
   },
 
+  writeFile (fileName, textOrBuffer, encoding = "utf8") {
+    return new Promise((resolve, reject) => {
+      let fd;
+      fs.open(fileName, "w", (openError, fd_) => {
+        fd = fd_;
+        if (openError) {
+          reject(new Error(`Error while opening '${fileName}' for writing: ${openError}`));
+        } else if (typeof textOrBuffer === "string") {
+          fs.write(fd, textOrBuffer, 0, encoding, onWriteDone);
+        } else {
+          const buffer = (textOrBuffer instanceof ArrayBuffer) ? Buffer.from(textOrBuffer)
+              : (textOrBuffer instanceof Uint8Array) ? textOrBuffer
+              : undefined;
+          if (buffer === undefined) {
+            throw new Error(
+                `Unrecognized textOrBuffer: not a string, an ArrayBuffer or a Uint8Array, got: ${
+                  (textOrBuffer != null && (textOrBuffer.constructor || {}).name)
+                      || typeof textOrBuffer}`);
+          }
+          fs.write(fd, buffer, 0, buffer.length, 0, onWriteDone);
+        }
+        function onWriteDone (writeError /* , bytesWritten, buffer */) {
+          try {
+            if (!writeError) {
+              resolve();
+            } else {
+              reject(new Error(`Error while writing to '${fileName}': ${writeError}`));
+            }
+          } finally {
+            if (fd) fs.close(fd, () => {});
+          }
+        }
+      });
+    });
+  },
+
   async inquireText (message, default_ = "") {
     return (await this.inquire({
       type: "input", name: "text", message, default: default_,

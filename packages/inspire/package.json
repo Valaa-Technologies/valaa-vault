@@ -1,17 +1,17 @@
 {
   "name": "@valos/inspire",
   "version": "0.35.0-rc.5",
+  "valos": {
+    "type": "library",
+    "domain": "@valos/kernel",
+    "docs": "https://valospace.org/inspire"
+  },
   "description": "ValOS Inspire application gateway",
   "license": "MIT",
   "author": "Valaa Technologies Ltd",
   "private": false,
   "publishConfig": {
     "access": "public"
-  },
-  "valos": {
-    "type": "library",
-    "domain": "@valos/kernel",
-    "docs": "https://valospace.org/inspire"
   },
   "main": "index.js",
   "dependencies": {
@@ -36,5 +36,8 @@
     "simplebar-react": "^0.1.4",
     "ws": "^6.1.4"
   },
-  "homepage": "https://valospace.org/inspire"
+  "homepage": "https://valospace.org/inspire",
+  "bin": {
+    "_vlm_export-chronicle": "valma/_vlm_export-chronicle.js"
+  }
 }

@@ -457,7 +457,7 @@ class UIComponent extends React.Component {
         Object.entries(this.props)
             .filter(([key]) => !UIComponent._debugIdExcludedPropsKeys.includes(key))
             .map(([key, value]) => `
-  ${key}=${!value || typeof value !== "object" ? JSON.stringify(value)
+  ${key}=${!value || typeof value !== "object" ? JSON.stringify(value)
       : Array.isArray(value) ? "[...]" : "{...}"}`)}
 />`;
   }

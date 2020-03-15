@@ -3,7 +3,7 @@
 import { naiveURI } from "~/raem/ValaaURI";
 import VRL, { /* vRef, */ JSONIdData } from "~/raem/VRL";
 import GhostPath, { ghostPathFromJSON } from "~/raem/state/GhostPath";
-import { coerceAsVRID } from "~/raem/VPath";
+// import { coerceAsVRID } from "~/raem/VPath";
 
 import { dumpObject, debugObjectType, wrapError } from "~/tools/wrapError";
 

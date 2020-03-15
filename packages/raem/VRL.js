@@ -8,7 +8,7 @@ import { HostRef, tryHostRef } from "~/raem/VALK/hostReference";
 import { coerceAsVRID } from "~/raem/VPath";
 
 import { debugObjectType, dumpObject, wrapError } from "~/tools/wrapError";
-import invariantify, { invariantifyString, invariantifyObject } from "~/tools/invariantify";
+import invariantify, { invariantifyString } from "~/tools/invariantify";
 import { vdocorate } from "~/tools/vdon";
 
 export type RawId = string;

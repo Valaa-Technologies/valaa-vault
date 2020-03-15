@@ -6,29 +6,70 @@ exports.describe = "Exports given chronicle as file hierarchy under target direc
 exports.introduction = `Uses perspire.`;
 
 exports.disabled = (yargs) => !yargs.vlm.packageConfig;
-exports.builder = (yargs) => {
-  const vlm = yargs.vlm;
-  return yargs.options({
-    revelation: {
-      type: "object", default: null,
-      description: `Direct revelation object forwarded to perspire worker`
-    },
-    "job-view": {
-      type: "object", default: null,
-      description: `Job view configuration object (see Gateway.addView). Notably:
-  \tview.name: lookup key to revelation views
-  \tview.focus: the view focus valos URI`
-    },
-    "bvob-buffers": {
-      type: "boolean", default: false,
-      description: `Export ~$V;bvobBuffers.json bundle`,
-    },
-  });
-};
+exports.builder = (yargs) => yargs.options({
+  revelation: {
+    type: "object", default: null,
+    description: `Direct revelation object forwarded to perspire worker`
+  },
+  "job-view": {
+    type: "object", default: null,
+    description: `Job view configuration object (see Gateway.addView). Notably:
+\tview.name: lookup key to revelation views
+\tview.focus: the view focus valos URI`
+  },
+  "bvob-buffers": {
+    type: "boolean", default: false,
+    description: `Export ~$V;bvobBuffers.json bundle`,
+  },
+});
 
 let _hacklm;
+let _valosheath;
 
 exports.handler = (yargv) => {
+  if (!_valosheath) {
+    _valosheath = require("@valos/gateway-api/valos").default;
+    _valosheath.exportSpindle({
+      name: "@valos/valma-export-chronicle-spindle",
+
+      async onViewAttached (view, viewName) {
+        view.warnEvent("attached and seen by spindle:", this.name, "as", viewName);
+      },
+
+      async runJob (view /* , journal */) {
+        view.warnEvent("job entry");
+        const vlm = _hacklm;
+        const vRoot = view.getFocus();
+        if (vRoot !== vRoot.get("chronicleRoot")) {
+          throw new Error("chronicle-uri refers to non-root resource");
+        }
+        const exportOptions = view.getViewConfig().exportChronicleOptions;
+        if (!exportOptions || !exportOptions.targetDir) {
+          throw new Error("INTERNAL ERROR: exportChronicleOptions.targetDir view config missing");
+        }
+        const expate = { // EXPort stATE
+          vlm,
+          view,
+          chronicleURI: vRoot.getId().getChronicleURI(),
+          targetDir: exportOptions.targetDir,
+          bvobInfos: {},
+          bvobBuffers: exportOptions.bvobBuffers ? {} : undefined,
+          product: {},
+        };
+        const rootRestate = { // root REsource STATE
+          vResource: vRoot,
+          vgrid: vRoot.getRawId(),
+          dirParts: [],
+        };
+        await _exportVLog(expate);
+        await _exportResourceDirectory(expate, rootRestate);
+        await _exportBvobInfos(expate);
+        await _exportBvobBuffers(expate);
+        return expate.product;
+      },
+    });
+  }
+
   _hacklm = yargv.vlm;
   const chronicleId = yargv["chronicle-uri"].match(/\?id=(.*)$/)[1];
   return yargv.vlm.invoke("perspire", [{
@@ -49,48 +90,7 @@ exports.handler = (yargv) => {
   }]);
 };
 
-const valosheath = require("@valos/gateway-api/valos").default;
 const { base64URLFromBuffer } = require("@valos/gateway-api/base64");
-
-valosheath.exportSpindle({
-  name: "@valos/valma-export-chronicle-spindle",
-
-  async onViewAttached (view, viewName) {
-    view.warnEvent("attached and seen by spindle:", this.name, "as", viewName);
-  },
-
-  async runJob (view /* , journal */) {
-    view.warnEvent("job entry");
-    const vlm = _hacklm;
-    const vRoot = view.getFocus();
-    if (vRoot !== vRoot.get("chronicleRoot")) {
-      throw new Error("chronicle-uri refers to non-root resource");
-    }
-    const exportOptions = view.getViewConfig().exportChronicleOptions;
-    if (!exportOptions || !exportOptions.targetDir) {
-      throw new Error("INTERNAL ERROR: exportChronicleOptions.targetDir view config missing");
-    }
-    const expate = { // EXPort stATE
-      vlm,
-      view,
-      chronicleURI: vRoot.getId().getChronicleURI(),
-      targetDir: exportOptions.targetDir,
-      bvobInfos: {},
-      bvobBuffers: exportOptions.bvobBuffers ? {} : undefined,
-      product: {},
-    };
-    const rootRestate = { // root REsource STATE
-      vResource: vRoot,
-      vgrid: vRoot.getRawId(),
-      dirParts: [],
-    };
-    await _exportVLog(expate);
-    await _exportResourceDirectory(expate, rootRestate);
-    await _exportBvobInfos(expate);
-    await _exportBvobBuffers(expate);
-    return expate.product;
-  },
-});
 
 async function _exportVLog (expate) {
   const scribeConnection = expate.view.getGateway().scribe.getActiveConnection(expate.chronicleURI);
@@ -159,7 +159,8 @@ async function _exportResourceDirectory (expate, restate, { skipIfEmpty } = {}) 
   await _exportEntitiesOf(expate, restate, state.entities);
 }
 
-async function _exportStateOf (expate, restate, { properties, medias, relations, entities }) {
+async function _exportStateOf (
+    expate, restate, { properties /* , medias, relations, entities */ }) {
   const vstate = {};
   for (const [k, v] of [
     ...Object.entries(properties),
@@ -292,4 +293,3 @@ const _reservedNames = { // these names are reserved on windows
   lpt1: true, lpt2: true, lpt3: true, lpt4: true, lpt5: true,
   lpt6: true, lpt7: true, lpt8: true, lpt9: true, lpt0: true,
 };
-

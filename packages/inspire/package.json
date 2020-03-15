@@ -38,6 +38,7 @@
   },
   "homepage": "https://valospace.org/inspire",
   "bin": {
-    "_vlm_export-chronicle": "valma/_vlm_export-chronicle.js"
+    "_vlm_export-chronicle": "valma/_vlm_export-chronicle.js",
+    "_vlm_bundle-revelation": "valma/_vlm_bundle-revelation.js"
   }
 }

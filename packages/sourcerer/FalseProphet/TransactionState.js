@@ -288,7 +288,8 @@ export default class TransactionState {
       if (initialPassage === undefined) return;
       const rollbackState = initialPassage.previousState;
       if (!rollbackState) {
-        throw new Error("Cannot rollback nested transaction: can't determine initial previousState");
+        throw new Error(
+            "Cannot rollback nested transaction: can't determine initial previousState");
       }
       this._passages.length = actionsAfterRollback;
       this._actions.length = actionsAfterRollback;

@@ -1,6 +1,6 @@
 // @flow
 
-import { ValaaURI, naiveURI } from "~/raem/ValaaURI";
+import { naiveURI } from "~/raem/ValaaURI";
 import type { EventBase } from "~/raem/events";
 
 import Sourcerer from "~/sourcerer/api/Sourcerer";

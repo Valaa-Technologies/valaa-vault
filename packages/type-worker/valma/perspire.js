@@ -160,13 +160,16 @@ exports.handler = (yargv) => {
 */
 
 const { thenChainEagerly } = require("@valos/tools/thenChainEagerly");
-const valosheath = require("@valos/gateway-api/valos").default;
+
+let valosheath;
 
 exports.getWorker = () => {
+  if (!valosheath) valosheath = require("@valos/gateway-api/valos").default;
   return valosheath._workerSingleton;
 };
 
 function _obtainWorker (vlm, yargv) {
+  if (!valosheath) valosheath = require("@valos/gateway-api/valos").default;
   const attach = yargv.attach;
   if (typeof attach === "string") {
     if (attach !== "require") {
@@ -242,7 +245,8 @@ function _obtainWorker (vlm, yargv) {
           ...(yargv["additional-revelation-paths"] || []).map(maybeRelativePath => {
             const absolutePath = vlm.path.resolve(maybeRelativePath);
             if (!vlm.shell.test("-f", absolutePath)) {
-              throw new Error(`Cannot open additional revelation path "${absolutePath}" for reading`);
+              throw new Error(
+                  `Cannot open additional revelation path "${absolutePath}" for reading`);
             }
             return { "!!!": maybeRelativePath };
           }),

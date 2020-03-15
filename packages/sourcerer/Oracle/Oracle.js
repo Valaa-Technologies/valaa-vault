@@ -1,7 +1,5 @@
 // @flow
 
-import { ValaaURI } from "~/raem/ValaaURI";
-
 import Sourcerer from "~/sourcerer/api/Sourcerer";
 import { ConnectOptions } from "~/sourcerer/api/types";
 

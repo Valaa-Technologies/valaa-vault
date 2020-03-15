@@ -55,11 +55,11 @@ export default class Cog extends FabricEventTarget {
     Object.assign(options.scope, extendScope);
     const valoscriptKuery = (typeof valoscriptBody !== "string"
         ? valoscriptBody
-        : transpileValoscriptBody(valoscriptBody, {
+        : (options.kuery = transpileValoscriptBody(valoscriptBody, {
           verbosity: options.verbosity || 0,
           customVALK: VALEK,
           sourceInfo: options.sourceInfo,
-        }));
+        })));
     const ret = this.do(valoscriptKuery, options);
     if (options.discourse) {
       const result = options.discourse.releaseFabricator();

@@ -437,6 +437,8 @@ class UIComponent extends React.Component {
     }
   }
 
+  static _debugIdExcludedPropsKeys = ["focus", "elementKey", "parentUIContext"];
+
   debugId (options: ?Object) {
     const keyString = this.getUIContext() && this.getUIContext().hasOwnProperty("key") // eslint-disable-line
             ? `key: '${this.getUIContext().key}'`
@@ -447,11 +449,17 @@ class UIComponent extends React.Component {
         : "no key";
     let focus = this.getUIContextValue("focus");
     if (typeof focus === "undefined") focus = this.getUIContextValue("head");
-    return `<${this.constructor.name} key="${keyString}" focus={${
-        Array.isArray(focus)
-            ? `[${focus.map(entry => debugId(entry, { short: true, ...options })).join(", ")}]`
-            : debugId(focus, { short: true, ...options })
-    }} ... />`;
+    return `<${this.constructor.name}
+  key="${keyString}"
+  focus={${Array.isArray(focus)
+      ? `[${focus.map(entry => debugId(entry, { short: true, ...options })).join(", ")}]`
+      : debugId(focus, { short: true, ...options })}}${
+        Object.entries(this.props)
+            .filter(([key]) => !UIComponent._debugIdExcludedPropsKeys.includes(key))
+            .map(([key, value]) => `
+  ${key}=${!value || typeof value !== "object" ? JSON.stringify(value)
+      : Array.isArray(value) ? "[...]" : "{...}"}`)}
+/>`;
   }
 
   /**

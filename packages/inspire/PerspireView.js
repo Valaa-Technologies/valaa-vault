@@ -7,12 +7,8 @@ import VDOMView from "~/inspire/VDOMView";
  * This class is the view entry point
  */
 export default class PerspireView extends VDOMView {
-  async attach (container, options) {
-    const ret = await super.attach(container, options);
-    if (options.window) {
-      global.window = options.window; // makes sure that React will use correct window
-      global.window.alert = (...rest) => this.warnEvent("window.alert:", ...rest);
-    }
+  async attach (container, viewConfig) {
+    const ret = await super.attach(container, viewConfig);
     await this._waitForConnectionsToActivate();
     this.warnEvent(1, () => [
       `attach(): engine running, view attached to DOM and all initial UI chronicle${

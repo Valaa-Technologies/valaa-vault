@@ -1307,27 +1307,33 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
         <div {..._message}>
           Cannot find a lens property from the active focus {focusDescriptionLens}.
         </div>
-        <div {..._parameter}>
-          <span {..._key}>focusLensProperty:</span>
-          <span {..._value}>
-            {valos.Lens.instrument(valos.Lens.focusLensProperty, p => JSON.stringify(p))}
-          </span>
+        <div>
+          <span {..._message}>Slots which add lens property names to be searched:</span>
+          <div {..._parameter}>
+            <span {..._key}>focusLensProperty:</span>
+            <span {..._value}>
+              {valos.Lens.instrument(valos.Lens.focusLensProperty, p => JSON.stringify(p))}
+            </span>
+          </div>
+          <div {..._parameter}>
+            <span {..._key}>lensProperty:</span>
+            <span {..._value}>
+              {valos.Lens.instrument(valos.Lens.lensProperty, p => JSON.stringify(p))}
+            </span>
+          </div>
         </div>
-        <div {..._parameter}>
-          <span {..._key}>lensProperty:</span>
-          <span {..._value}>
-            {valos.Lens.instrument(valos.Lens.lensProperty, p => JSON.stringify(p))}
-          </span>
-        </div>
-        <div {..._parameter}>
-          <span {..._key}>Focus detail:</span>
-          <span {..._value}>{focusDetailLens}</span>
-        </div>
-        <div {..._parameter}>
-          <span {..._key}>Focus properties:</span>
-          <span {..._value}>
-            {valos.Lens.instrument(valos.Lens.propertyKeysLens, p => JSON.stringify(p))}
-          </span>
+        <div>
+          <span {..._message}>Focus that was searched for the lens property:</span>
+          <div {..._parameter}>
+            <span {..._key}>detail:</span>
+            <span {..._value}>{focusDetailLens}</span>
+          </div>
+          <div {..._parameter}>
+            <span {..._key}>has properties:</span>
+            <span {..._value}>
+              {valos.Lens.instrument(valos.Lens.focusPropertyKeysLens, p => JSON.stringify(p))}
+            </span>
+          </div>
         </div>
         {commonMessageRows}
       </div>
@@ -1344,32 +1350,38 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
       loadingFailedLens,
       <div {..._lensMessageLoadingFailedProps}>
         <div {..._message}>
-          Resource {focusDescriptionLens} cannot be used as
-          a lens. This is because it is not a valid lens Media file and
+          Resource {focusDescriptionLens} cannot be used as a lens.
+          This is because it is not a valid lens Media file and
           it does not have a lens property that is listed in either
           %27delegateLensProperty%27 or %27lensProperty%27 slots.
         </div>
-        <div {..._parameter}>
-          <span {..._key}>delegateLensProperty:</span>
-          <span {..._value}>
-            {valos.Lens.instrument(valos.Lens.delegateLensProperty, p => JSON.stringify(p))}
-          </span>
+        <div>
+          <span {..._message}>Slots which add lens property names to be searched:</span>
+          <div {..._parameter}>
+            <span {..._key}>delegateLensProperty:</span>
+            <span {..._value}>
+              {valos.Lens.instrument(valos.Lens.delegateLensProperty, p => JSON.stringify(p))}
+            </span>
+          </div>
+          <div {..._parameter}>
+            <span {..._key}>lensProperty:</span>
+            <span {..._value}>
+              {valos.Lens.instrument(valos.Lens.lensProperty, p => JSON.stringify(p))}
+            </span>
+          </div>
         </div>
-        <div {..._parameter}>
-          <span {..._key}>lensProperty:</span>
-          <span {..._value}>
-            {valos.Lens.instrument(valos.Lens.lensProperty, p => JSON.stringify(p))}
-          </span>
-        </div>
-        <div {..._parameter}>
-          <span {..._key}>Resource detail:</span>
-          <span {..._value}>{focusDetailLens}</span>
-        </div>
-        <div {..._parameter}>
-          <span {..._key}>Resource properties:</span>
-          <span {..._value}>
-            {valos.Lens.instrument(valos.Lens.propertyKeysLens, p => JSON.stringify(p))}
-          </span>
+        <div>
+          <span {..._message}>Resource that was searched for the lens property:</span>
+          <div {..._parameter}>
+            <span {..._key}>Lens candidate detail:</span>
+            <span {..._value}>{focusDetailLens}</span>
+          </div>
+          <div {..._parameter}>
+            <span {..._key}>Lens candidate has properties:</span>
+            <span {..._value}>
+              {valos.Lens.instrument(valos.Lens.focusPropertyKeysLens, p => JSON.stringify(p))}
+            </span>
+          </div>
         </div>
         {commonMessageRows}
       </div>

@@ -103,7 +103,7 @@ export default class Gateway extends FabricEventTarget {
         let modulePath;
         if (options) {
           modulePath = require.resolve(module);
-          const basename = path.posix.basename(modulePath);
+          const basename = path.basename(modulePath);
           if ((basename === "index.js") || (basename === "index.json")) {
             // TODO(iridian, 2020-01): Fix handling directories with package.json:main set
             options.wasDirectory = true;

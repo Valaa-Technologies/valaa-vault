@@ -491,8 +491,8 @@ function _reveal (gateway, step) {
           origin, gateway.siteRoot, gateway.revelationRoot, gateway.domainRoot, gateway.currentDir);
     }
     const relativeGateway = Object.create(gateway);
-    relativeGateway.currentDir = path.posix.dirname(origin);
-    let maybeDirName = path.posix.basename(origin);
+    relativeGateway.currentDir = path.dirname(origin);
+    let maybeDirName = path.basename(origin);
     if ((maybeDirName === "index") || (maybeDirName === "index.json")) maybeDirName = undefined;
     const revealOptions = { fetch: options.fetch };
 
@@ -500,7 +500,7 @@ function _reveal (gateway, step) {
     if (!inBrowser() && !revealOptions.fetch && !origin.match(/^[^/]*:/)) {
       revealing = gateway.require(origin, revealOptions);
     } else {
-      const basename = path.posix.basename(origin);
+      const basename = path.basename(origin);
       revealing = (basename === "")
               ? gateway.fetchJSON(`${origin}index.json`, revealOptions.fetch)
           : ((basename.slice(-5) === ".json") || (basename.slice(-3) === ".js"))
@@ -516,7 +516,7 @@ function _reveal (gateway, step) {
     return thenChainEagerly(revealing, [
       result => {
         if (maybeDirName && revealOptions.wasDirectory) {
-          relativeGateway.currentDir = path.posix.join(relativeGateway.currentDir, maybeDirName);
+          relativeGateway.currentDir = path.join(relativeGateway.currentDir, maybeDirName);
         }
         return _patchRevelation(relativeGateway, undefined, result);
       },

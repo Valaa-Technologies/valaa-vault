@@ -10,9 +10,7 @@ import { FabricEventTarget } from "~/tools/FabricEvent";
 
 export default class PerspireServer extends FabricEventTarget {
   constructor ({
-    isTest, name, logger,
-    siteRoot, domainRoot, revelationRoot,
-    revelations, cacheBasePath, spindles,
+    isTest, name, logger, siteRoot, domainRoot, revelationRoot, revelations, cacheBasePath,
   }: Object) {
     invariantifyString(revelationRoot, "PerspireServer.options.revelationRoot",
         { allowEmpty: true });

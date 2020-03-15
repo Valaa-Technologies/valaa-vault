@@ -8,7 +8,7 @@ import VDOMView from "~/inspire/VDOMView";
  */
 export default class InspireView extends VDOMView {
   async attach (container, options) {
-    const ret = super.attach(container, options);
+    const ret = await super.attach(container, options);
     if (options.setTitleKuery) {
       this._setTitle(options.setTitleKuery);
     }

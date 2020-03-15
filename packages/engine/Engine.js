@@ -10,7 +10,7 @@ import { Command, created, duplicated, recombined, isCreatedLike } from "~/raem/
 import VRL, { vRef, IdData, getRawIdFrom } from "~/raem/VRL";
 import { tryHostRef } from "~/raem/VALK/hostReference";
 import { getActionFromPassage } from "~/raem/redux/Bard";
-import { formVPath } from "~/raem/VPath";
+import { formVPath, coerceAsVRID, validateVRID } from "~/raem/VPath";
 
 import Transient, { createTransient, getTransientTypeName } from "~/raem/state/Transient";
 import layoutByObjectField from "~/raem/tools/denormalized/layoutByObjectField";
@@ -388,6 +388,12 @@ export default class Engine extends Cog {
         if (explicitId[1] !== "$") throw new Error("explicit VRID must have a GRId as first step");
       } else if (typeof explicitId !== "string") {
         throw new Error("explicit id must be either a string or a VPath steps array");
+      } else if (explicitId[0] === "@") {
+        validateVRID(explicitId);
+      } else {
+        this.warnEvent("DEPRECATED non-vpath format id:", explicitId,
+            "\n\tcoerced as VRID:", coerceAsVRID(explicitId));
+        explicitId = coerceAsVRID(explicitId);
       }
     }
     let owner = initialState.owner || initialState.source;

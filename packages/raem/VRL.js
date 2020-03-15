@@ -78,7 +78,7 @@ class VRL {
     if (!resolver) return this;
     if (!resolver.partition) {
       if (resolver.hasOwnProperty("partition")) delete resolver.partition;
-    } else resolver.partition = naiveURI.createChronicleURI(resolver.partition);
+    } else resolver.partition = naiveURI.createPartitionURI(resolver.partition);
     if (!resolver.ghostPath) {
       if (resolver.hasOwnProperty("ghostPath")) delete resolver.ghostPath;
     } else if (!(resolver.ghostPath instanceof GhostPath)) {
@@ -512,11 +512,11 @@ export const tryChronicleURIFrom = vdocorate(`
   if (idData[1] && (typeof idData[1] === "object")) {
     return (typeof idData[1].partition !== "string")
         ? idData[1].partition
-        : naiveURI.createChronicleURI(idData[1].partition);
+        : naiveURI.createPartitionURI(idData[1].partition);
   }
   if (((typeof idData[1] === "string") || (idData[1] === null))
       && (typeof idData[3] === "string")) {
-    return naiveURI.createChronicleURI(idData[3]);
+    return naiveURI.createPartitionURI(idData[3]);
   }
   return undefined;
 });

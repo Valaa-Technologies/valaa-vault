@@ -43,7 +43,7 @@ export function vRefFromJSON (json: JSONIdData, RefType: Object = VRL): VRL {
     ret[PackedHostValue][2] = ghostPathFromJSON(ret[PackedHostValue][2]);
   }
   if (ret[PackedHostValue][3] && !(ret[PackedHostValue][3] instanceof ValaaURI)) {
-    ret[PackedHostValue][3] = naiveURI.createChronicleURI(ret[PackedHostValue][3]);
+    ret[PackedHostValue][3] = naiveURI.createPartitionURI(ret[PackedHostValue][3]);
   }
   return ret;
 }
@@ -124,7 +124,7 @@ export function deserializeVRL (serializedRef: string | JSONIdData,
     let chronicleURI = resolver && resolver.partition;
     if (!chronicleURI && currentChronicleURI) {
       (resolver || (resolver = {})).partition = currentChronicleURI;
-      chronicleURI = naiveURI.createChronicleURI(String(currentChronicleURI));
+      chronicleURI = naiveURI.createPartitionURI(String(currentChronicleURI));
     }
     if (!falseProphet || ((currentChronicleURI === null) && !chronicleURI)) {
       return new VRL()

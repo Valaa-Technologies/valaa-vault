@@ -45,7 +45,7 @@ function validateVRID (element) {
   const [firstEntry, vgrid, ...verbs] =
       (typeof element === "string" ? segmentVPath(element) : element);
   if (firstEntry !== "@") {
-    throw new Error(`Invalid VRID: expected "@" as first entry`);
+    throw new Error(`Invalid VRID: expected "@" as first entry, got "${element}"`);
   }
   validateVGRID(vgrid);
   verbs.forEach(validateVerb);
@@ -56,7 +56,7 @@ function validateVerbs (element) {
   const [firstEntry, ...verbs] =
       (typeof element === "string" ? segmentVPath(element) : element);
   if (firstEntry !== "@") {
-    throw new Error(`Invalid verbs: expected "@" as first entry`);
+    throw new Error(`Invalid verbs: expected "@" as first entry, got "${element}"`);
   }
   verbs.forEach(validateVerb);
   return element;
@@ -66,7 +66,7 @@ function validateVGRID (element) {
   const [firstEntry, formatTerm, paramValue, ...params] =
       (typeof element === "string" ? segmentVPath(element) : element);
   if (firstEntry !== "$") {
-    throw new Error(`Invalid VGRID: expected "$" as first entry`);
+    throw new Error(`Invalid VGRID: expected "$" as first entry, got "${element}"`);
   }
   validateFormatTerm(formatTerm);
   validateParamValueText(paramValue);
@@ -91,7 +91,8 @@ function validateVParam (element) {
   try {
     if (contextTerm !== undefined) {
       if (typeof contextTerm !== "string") {
-        throw new Error(`Invalid vparam: expected context-term to be undefined or a string`);
+        throw new Error(`Invalid vparam: expected context-term to be undefined or a string, got a ${
+            typeof contextTerm}`);
       }
       if (contextTerm !== "") validateContextTerm(contextTerm);
     }

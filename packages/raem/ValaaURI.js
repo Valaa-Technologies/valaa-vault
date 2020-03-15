@@ -80,85 +80,77 @@ export const naiveURI = {
   secondaryQueryPart: 14,
   secondaryParamsPart: 15,
 
-  /**
-   * Creates a chronicle URI from one or two string as a native URL
-   * object. If only one string is given it is considered to be the
-   * full chronicle URI string and consumed as is.
-   * If the optional partitionRawId is specified the baseString is
-   * considered to be the chronicle authority URI, and the full
-   * chronicle URI is generated as per authority URI schema.
-   *
-   * @export
-   * @param {string} baseString
-   * @param null partitionRawId
-   * @param {any} string
-   * @returns {ValaaURI}
-   */
+  validateChronicleURI: function validateNaiveChronicleURI (chronicleURI: string) {
+    const breakdown = chronicleURI.match(/^([^?#]*)\?id=([^/;=&#]*)([/;=&#].*)?$/);
+    if (!breakdown) throw new Error(`Malformed chronicleURI is not a naiveURI: <${chronicleURI}>`);
+    const [, authorityURI, chronicleVRID, rest] = breakdown;
+    if (!authorityURI || !authorityURI.match(genericURI.regex)) {
+      throw new Error(`Malformed chronicleURI authorityURI part is not a URI: <${authorityURI}>`);
+    }
+    validateVRID(chronicleVRID);
+    if (rest) throw new Error(`Invalid chronicleURI; chronicleVRID must be last, got: "${rest}"`);
+    return chronicleURI;
+  },
+  createChronicleURI: function createNaiveChronicleURI (
+      authorityURI: string, chronicleVRID: string) {
+    if (typeof chronicleVRID !== "string") {
+      throw new Error("naiveURI.createChronicleURI.chronicleVRID missing");
+    }
+    validateVRID(chronicleVRID);
+    const uriParts = authorityURI && authorityURI.match(genericURI.regex);
+    if (!uriParts) {
+      throw new Error(`naiveURI.createChronicleURI.authorityURI is not a well-formed URI: <${
+          authorityURI}>`);
+    }
+    if (uriParts[genericURI.queryPart]) {
+      throw new Error(`naiveURI.createChronicleURI.authorityURI must not have query part, got: <${
+          uriParts[genericURI.queryPart]}>`);
+    }
+    if (uriParts[genericURI.fragmentPart]) {
+      throw new Error(`naiveURI.createChronicleURI.authorityURI must not have fragment, got: <${
+          uriParts[genericURI.fragmentPart]}>`);
+    }
+    /*
+`${chronicleURIParts[genericURI.protocolPart]}${
+    chronicleURIParts[genericURI.authorityPart] || ""}${
+    // https://tools.ietf.org/html/rfc3986#section-3.3
+    // If a URI contains an authority component, then the path
+    // component must either be empty or begin with a slash ("/") character.
+    chronicleURIParts[genericURI.pathPart]
+        || (chronicleURIParts[genericURI.authorityPart] ? "/" : "")}`,
+    */
+    return `${authorityURI
+      }${(!uriParts[genericURI.pathPart] && uriParts[genericURI.authorityPart]) ? "/" : ""
+      }?id=${chronicleVRID}`;
+  },
+
   createPartitionURI: function createNaivePartitionURI (
       baseString: string, partitionRawId: ?string): ValaaURI {
+    if (partitionRawId !== undefined) {
+      if (typeof partitionRawId !== "string") {
+        throw new Error("naiveURI.createPartitionURI.partitionRawId must be a string");
+      }
+      let chronicleVRID = partitionRawId;
+      if (partitionRawId.slice(-2) !== "@@") {
+        chronicleVRID = coerceAsVRID(partitionRawId);
+        console.warn(`DEPRECATED: createPartitionURI.chronicleId must be a valid VPath`,
+            `\n\tgot: ${partitionRawId}`,
+            `\n\tfor now coerced as: ${chronicleVRID}`);
+      }
+      return naiveURI.createChronicleURI(baseString, chronicleVRID);
+    }
+    const match = _naiveChronicleURILookup[baseString];
+    if (match) return match;
     if (!baseString || (typeof baseString !== "string")) {
       invariantifyString(baseString, "naiveURI.createPartitionURI.baseString",
           { allowEmpty: false });
     }
-    const baseParts = baseString.match(genericURI.regex);
-    if (!baseParts) {
-      throw new Error(
-          `naiveURI.createPartitionURI.baseString is not a well-formed URI: <${baseString}>`);
+    const idPos = baseString.indexOf("?id=");
+    if (idPos === -1) {
+      throw new Error(`naiveURI.createPartitionURI.baseString missing required "?id=" separator`);
     }
-    if (!baseParts[genericURI.schemePart]) {
-      throw new Error(
-          `naiveURI.createPartitionURI.baseString is missing scheme part: <${baseString}>`);
-    }
-    if (!partitionRawId) {
-      if (partitionRawId === undefined) return baseString;
-      invariantifyString(partitionRawId, "naiveURI.createPartitionURI.partitionRawId",
-          { allowUndefined: true });
-    }
-    let idPart;
-    if (partitionRawId.slice(-2) === "@@") {
-      validateVRID(partitionRawId);
-      idPart = partitionRawId;
-    } else {
-      idPart = encodeURIComponent(partitionRawId);
-    }
-
-    return `${baseParts[genericURI.protocolPart]
-        }${baseParts[genericURI.authorityPart] || ""
-        // https://tools.ietf.org/html/rfc3986#section-3.3
-        // If a URI contains an authority component, then the path
-        // component must either be empty or begin with a slash ("/") character.
-        }${baseParts[genericURI.pathPart]
-            || (baseParts[genericURI.authorityPart] ? "/" : "")
-        }?id=${idPart
-        }${!baseParts[genericURI.paramsPart] ? "" : `&${baseParts[genericURI.paramsPart]}`}`;
-  },
-
-  createChronicleURI: function createNaiveChronicleURI (
-        authorityOrPartitionURI: string, chronicleId: string) {
-    let actualAuthorityURI = authorityOrPartitionURI;
-    let actualChronicleId = chronicleId;
-    if (typeof chronicleId !== "string") {
-      const ret = _naiveChronicleURILookup[authorityOrPartitionURI];
-      if (ret) return ret;
-      const chronicleURIMatch = authorityOrPartitionURI
-          .match(/^([^?#]*)\?id=([^/;=&#]*)([/;=&#].*)?$/);
-      if (!chronicleURIMatch) {
-        throw new Error(
-          `createChronicleURI.chronicleId must be a valid VPath, got: "${chronicleId}"`);
-      }
-      ([, actualAuthorityURI, actualChronicleId] = chronicleURIMatch);
-    }
-    if ((actualChronicleId[0] !== "@") || (actualChronicleId.slice(-2) !== "@@")) {
-      actualChronicleId = coerceAsVRID(actualChronicleId);
-      console.warn(`DEPRECATED: createChronicleURI.chronicleId must be a valid VPath`,
-          `\n\tgot: ${chronicleId || authorityOrPartitionURI}`,
-          `\n\tfor now coerced as: ${actualChronicleId}`);
-    }
-    const ret = naiveURI.createPartitionURI(actualAuthorityURI, actualChronicleId);
-    if (typeof chronicleId !== "string") {
-      _naiveChronicleURILookup[authorityOrPartitionURI] = ret;
-    }
-    return ret;
+    return (_naiveChronicleURILookup[baseString] =
+        naiveURI.createPartitionURI(baseString.slice(0, idPos), baseString.slice(idPos + 4)));
   },
 
   // FIXME(iridian, 2019-02): naive chronicle URI's must be replaced with
@@ -197,8 +189,8 @@ export const naiveURI = {
           naiveChronicleURI}>`);
     }
     return `${parts[naiveURI.protocolPart]
-        }${parts[naiveURI.authorityPart]
-        }${parts[naiveURI.pathPart]
+        }${parts[naiveURI.authorityPart] || ""
+        }${parts[naiveURI.pathPart] || ""
         }${!parts[naiveURI.naiveParamsPart] ? ""
             : `?${naiveURI.naiveParamsPart}`}`;
   },

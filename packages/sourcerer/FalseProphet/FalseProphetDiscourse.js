@@ -232,7 +232,7 @@ export default class FalseProphetDiscourse extends Discourse {
               "\n\tchronicleURI:", chronicleURI);
         }
         return (targetAction.id = vRef(explicitRawId, undefined, undefined,
-            naiveURI.createChronicleURI(chronicleURI)));
+            naiveURI.validateChronicleURI(chronicleURI)));
       }
       targetAction.id = vRef(resourceVRID, undefined, undefined, chronicleURI);
       /*

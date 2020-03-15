@@ -3,7 +3,7 @@ import { naiveURI, getHostname } from "~/raem/ValaaURI";
 describe("Basic operations", () => {
   it("roundtrips trivial uri 'foo:?id=@$~raw:a@@'", () => {
     const sourceURI = "foo:?id=@$~raw:a@@";
-    const roundtripURI = naiveURI.createChronicleURI(sourceURI);
+    const roundtripURI = naiveURI.validateChronicleURI(sourceURI);
     expect(String(roundtripURI))
         .toEqual(sourceURI);
   });

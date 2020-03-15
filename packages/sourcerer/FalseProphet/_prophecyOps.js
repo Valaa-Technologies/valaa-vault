@@ -382,7 +382,7 @@ class ProphecyOperation extends ProphecyEventResult {
       let chronicleURI = chronicleOrPartitionURI;
       let connection = this._sourcerer._connections[chronicleURI];
       if (!connection) {
-        chronicleURI = naiveURI.createChronicleURI(chronicleOrPartitionURI);
+        chronicleURI = naiveURI.createPartitionURI(chronicleOrPartitionURI);
         connection = this._sourcerer._connections[chronicleURI];
         if (!connection) {
           missingConnections.push(chronicleURI);
@@ -527,7 +527,7 @@ class ProphecyOperation extends ProphecyEventResult {
   ];
 
   _divergentWaitStageVenueChronicling (venue, chroniclingResult) {
-    if (!chroniclingResult) return [venue, undefined, []];
+    if (!chroniclingResult) return [venue];
     const chronicledTruth = chroniclingResult.getTruthEvent();
     if (!isPromise(chronicledTruth)) return [venue, chronicledTruth];
     const receivedTruth = new Promise((resolve, reject) => {
@@ -546,18 +546,19 @@ class ProphecyOperation extends ProphecyEventResult {
 
   _resolveStageVenueTruth (venue, truth, truthProcesses) {
     if (!truth) {
+      const actualTruthProcesses = truthProcesses || [];
       if (venue.chronicling !== venue.currentChronicling) {
         return { // retry
-          0: [venue, venue.currentChronicling = venue.chronicling],
+          0: [venue, venue.currentChronicling = venue.chronicling, []],
         };
       }
-      Promise.all(truthProcesses).then(([chronicled, received]) => {
+      Promise.all(actualTruthProcesses).then(([chronicled, received]) => {
         venue.connection.errorEvent(
           "\n\tnull truth when fulfilling prophecy:", ...dumpObject(this._prophecy),
-          "\n\tchronicled:", isPromise(truthProcesses[0]),
-              ...dumpObject(chronicled), ...dumpObject(truthProcesses[0]),
-          "\n\treceived:", isPromise(truthProcesses[1]),
-              ...dumpObject(received), ...dumpObject(truthProcesses[1]));
+          "\n\tchronicled:", isPromise(actualTruthProcesses[0]),
+              ...dumpObject(chronicled), ...dumpObject(actualTruthProcesses[0]),
+          "\n\treceived:", isPromise(actualTruthProcesses[1]),
+              ...dumpObject(received), ...dumpObject(actualTruthProcesses[1]));
       });
     } else if (truth.aspects.log.index !== venue.commandEvent.aspects.log.index) {
       // this chronicle command was/will be revised

@@ -36,7 +36,7 @@ import extendValosheathWithInspire from "~/inspire/valosheath";
 import { setGlobalLogger } from "~/tools/wrapError";
 
 import getGlobal from "~/gateway-api/getGlobal";
-import { byteArrayFromBase64 } from "~/gateway-api/base64";
+import { byteArrayFromBase64URL } from "~/gateway-api/base64";
 
 const fetchJSON = require("@valos/tools/fetchJSON").default;
 const patchWith = require("@valos/tools/patchWith").default;
@@ -200,12 +200,12 @@ export default class Gateway extends FabricEventTarget {
       this.spindleRevelations = (await lazy(this.revelation.spindles)) || {};
       await this.attachSpindles(await lazy(this.gatewayRevelation.spindlePrototypes));
 
-      this.prologueRevelation = await lazy(this.revelation.prologue);
+      this.prologue = await lazy(this.revelation.prologue);
 
       // Locate entry point event log (prologue), make it optimally available through scribe,
       // narrate it with false prophet and get the false prophet connection for it.
       ({ connections: this.prologueConnections, rootConnection: this._rootConnection }
-          = await this._narratePrologues(this.prologueRevelation));
+          = await this._connectPrologueChronicles(this.prologue));
 
       this.clockEvent(1, `vidgets.register`, `Registering builtin Inspire vidgets`);
       registerVidgets();
@@ -759,26 +759,27 @@ export default class Gateway extends FabricEventTarget {
             `Exception caught during notify '${notifyMethodName}' to spindle ${spindle.name}`));
   }
 
-  async _narratePrologues (prologueRevelation: Object) {
-    let prologues;
+  async _connectPrologueChronicles (prologue: Object) {
+    let chronicles;
     try {
-      const rootChronicleURI = this.prologueRevelation.rootChronicleURI
-          && naiveURI.createChronicleURI(await lazy(this.prologueRevelation.rootChronicleURI));
+      const rootChronicleURI = prologue.rootChronicleURI
+          && naiveURI.validateChronicleURI(await lazy(prologue.rootChronicleURI));
       this.clockEvent(1, `prologues.extract`, `Determining prologues and the root chronicle <${
         rootChronicleURI}>`);
-      this._rootFocusURI = await lazy(this.prologueRevelation.rootFocusURI);
-      prologues = await this._determineRevelationPrologues(prologueRevelation, rootChronicleURI);
+      this._rootFocusURI = await lazy(prologue.rootFocusURI);
+      chronicles = await this._determinePrologueChronicles(prologue, rootChronicleURI);
       this.warnEvent(1, () => [
-        `Extracted ${prologues.length} prologues from the revelation`,
-        "\n\tprologue chronicles:",
-            `<${prologues.map(({ partitionURI }) => partitionURI).join(">, <")}>`,
+        `Extracted ${chronicles.length} chronicles from the prologue`,
         "\n\troot chronicle:", rootChronicleURI,
+        "\n\tprologue chronicles:",
+            `<${chronicles.map(({ chronicleURI }) => chronicleURI).join(">, <")}>`,
       ]);
-      this.clockEvent(1, `prologues.connect`, `Narrating and connecting ${prologues.length
-          } prologues and root chronicle`, `<${rootChronicleURI}>`);
-      const connections = await Promise.all(prologues.map(this._connectChronicleNarratePrologue));
+      this.clockEvent(1, `prologues.connect`, `Narrating and connecting ${chronicles.length
+          } prologue and root chronicles`, `<${rootChronicleURI}>`);
+      const connections = await Promise.all(chronicles.map(chronicleInfo =>
+          this._connectPrologueChronicle(prologue, chronicleInfo)));
       this.warnEvent(1, () => [
-        `Acquired active connections for all revelation prologue chronicles:`,
+        `Acquired active connections for all prologue chronicles:`,
         ...[].concat(...connections.map(connection =>
             [`\n\t${connection.getName()}:`, ...dumpObject(connection.getStatus())]))
       ]);
@@ -787,51 +788,51 @@ export default class Gateway extends FabricEventTarget {
       return { connections, rootConnection };
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, new Error(`narratePrologue`),
-          "\n\tprologue revelation:", prologueRevelation,
-          "\n\tprologues:", ...dumpObject(prologues));
+          "\n\trevelation.prologue:", prologue,
+          "\n\tprologue chronicles:", ...dumpObject(chronicles));
     }
   }
 
-  async _determineRevelationPrologues (prologueRevelation: Object, rootChronicleURI: any) {
+  async _determinePrologueChronicles (prologue: Object, rootChronicleURI: any) {
     const ret = [];
     let rootChronicleURISeen = false;
     try {
-      for (const [partitionURI, info] of (Object.entries(
-          (await lazy(prologueRevelation.partitionInfos)) || {}))) {
-        const chronicleURI = naiveURI.createChronicleURI(partitionURI);
-        ret.push({ partitionURI: chronicleURI, info: await lazy(info) });
+      const chronicleInfos = Object.assign({},
+          await lazy(prologue.partitionInfos),
+          await lazy(prologue.chronicleInfos));
+      for (const [revelationChronicleURI, info] of Object.entries(chronicleInfos)) {
+        const chronicleURI = info.authorityURI
+            ? naiveURI.createChronicleURI(info.authorityURI, revelationChronicleURI)
+            : naiveURI.createPartitionURI(revelationChronicleURI);
+        ret.push({ chronicleURI, ...(await lazy(info)) });
         if (chronicleURI === rootChronicleURI) rootChronicleURISeen = true;
       }
       if (rootChronicleURI && !rootChronicleURISeen) {
-        ret.push({
-          partitionURI: rootChronicleURI,
-          info: {
-            commandCount: 0, truthCount: 0,
-            logs: { commandQueue: [], truthLog: [] },
-          },
-        });
+        ret.push({ chronicleURI: rootChronicleURI, truthCount: 0, logs: { truthLog: [] } });
       }
       if (!ret.length) {
         throw new Error(`Revelation prologue is missing an entry point${
-            ""} (last of the prologue.partitionInfos or prologue.rootChronicleURI)`);
+            ""} (last of the prologue.chronicleInfos or prologue.rootChronicleURI)`);
       }
       return ret;
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, new Error(`determineRevelationPrologues`),
-          "\n\tprologue revelation:", ...dumpObject(prologueRevelation),
+          "\n\tprologue revelation:", ...dumpObject(prologue),
       );
     }
   }
 
-  _connectChronicleNarratePrologue = async ({ partitionURI, info }: any) => {
-    if ((await lazy(info.commandId)) >= 0 || ((await lazy(info.commandCount)) > 0)) {
-      throw new Error("Command queues in revelation are not supported yet");
-    }
+  async _connectPrologueChronicle (prologue: Object, info: {
+    chronicleURI: string,
+    commandId: ?number, commandCount: ?number,
+    eventId: ?number, truthCount: ?number, logs: ?Object,
+  }) {
+    const chronicleURI = await lazy(info.chronicleURI);
     // Acquire connection without remote narration to determine the current last authorized event
     // so that we can narrate any content in the prologue before any remote activity.
-    this.clockEvent(1, "prologue.acquire", `Acquiring connection <${partitionURI}>`);
+    this.clockEvent(1, "prologue.acquire", `Acquiring connection <${chronicleURI}>`);
     const connection = this.discourse
-        .acquireConnection(naiveURI.createChronicleURI(partitionURI), {
+        .acquireConnection(naiveURI.validateChronicleURI(chronicleURI), {
           subscribeEvents: false, narrateOptions: { remote: false },
         });
     connection.clockEvent(1, "prologue.activate", "Activating connection");
@@ -850,32 +851,41 @@ export default class Gateway extends FabricEventTarget {
       // If no event logs are replayed, we don't need to precache the bvobs either, so we delay
       // loading them up to this point.
       await (lazy(this.bvobInfos) || (this.bvobInfos = this._getBvobInfos()));
-      const logs = await lazy(info.logs);
+      let logs = await lazy(info.logs);
+      const chronicleId = connection.getChronicleId();
+      if (!logs || !Object.keys(logs).length) {
+        logs = (await lazy(((await lazy(prologue.chronicleVLogs)) || {})[chronicleId])) || {};
+      }
       let truthLog = await lazy(logs.truthLog);
       if (!truthLog || !truthLog.length) {
-        // Migration code for eventLog deprecation.
-        const eventLog = await lazy(logs.eventLog);
-        if (eventLog && eventLog.length) truthLog = eventLog;
+        truthLog = (await lazy(logs.eventLog)) || []; // Migration code for eventLog deprecation.
       }
-      const commandQueue = await lazy(logs.commandQueue);
-      if (commandQueue && commandQueue.length) {
-        throw new Error("commandQueue revelation not implemented yet");
+      let mediaInfos = await lazy(logs.latestMediaInfos); // only used for validation
+      if (!mediaInfos || !Object.keys(mediaInfos).length) {
+        mediaInfos = (await lazy(((await lazy(prologue.chronicleMediaInfos)) || {})[chronicleId]))
+            || {};
       }
-      const latestMediaInfos = await lazy(logs.latestMediaInfos); // only used for validation
-      const upgradedEventLog = truthLog.map(event => upgradeEventTo0Dot2(connection, event));
-      const chronicling = connection.chronicleEvents(upgradedEventLog, {
+      for (let i = 0; i !== truthLog.length; ++i) {
+        const upgradedEvent = upgradeEventTo0Dot2(connection, truthLog[i]);
+        if (upgradedEvent !== truthLog[i]) truthLog[i] = upgradedEvent;
+      }
+      const chronicling = connection.chronicleEvents(truthLog, {
         name: `prologue truths for '${connection.getName()}'`,
         isTruth: true,
         eventIdBegin: eventIdEnd,
         retrieveMediaBuffer (mediaInfo: Object) {
-          const latestInfo = mediaInfo.mediaVRL && latestMediaInfos[mediaInfo.mediaVRL.rawId()];
+          const latestInfo = mediaInfo.mediaVRL && mediaInfos[mediaInfo.mediaVRL.rawId()];
           if (!latestInfo || (mediaInfo.contentHash !== latestInfo.mediaInfo.contentHash)) {
-            // Bvob wasn't found in cache and the contentHash doesn't match the latest known
-            // contentHash for the requested media. The request for the latest bvob should come
-            // later: Return undefined to silently ignore this request.
+            // Bvob wasn't found in cache (as retrieveMediaBuffer was called)
+            // and the contentHash doesn't match the latest known contentHash
+            // for the requested media. This is a Media content bvob
+            // request for old content; return undefined to silently
+            // ignore this request.
             return undefined;
           }
-          // Otherwise this is the request for last known bvob, which should have been precached.
+          // Bvob content wasn't found in cache (retrieveMediaBuffer was called)
+          // but as the content in matches the last known media content
+          // this is a validation error.
           throw new Error(`Cannot find the latest bvob of media "${mediaInfo.name
               }" during prologue narration, with bvob id "${mediaInfo.contentHash}" `);
         }
@@ -903,25 +913,32 @@ export default class Gateway extends FabricEventTarget {
   async _getBvobInfos () {
     const readRevelationBvobContent = async (contentHash: string) => {
       const bvobBuffers = {
-        ...await lazy(this.prologueRevelation.bvobBuffers),
-        ...await lazy(this.prologueRevelation.blobBuffers), // deprecated
+        ...await lazy(this.prologue.bvobBuffers),
+        ...await lazy(this.prologue.blobBuffers), // deprecated
       };
-      if (bvobBuffers[contentHash] === undefined) {
+      let entry = bvobBuffers[contentHash];
+      if ((entry === undefined) && (contentHash[0] !== "@")) {
+        entry = bvobBuffers[`@$~bvob:${contentHash}@@`];
+      }
+      if (entry === undefined) {
         this.errorEvent("Could not locate precached content for bvob", contentHash,
             "from revelation bvobBuffers", ...dumpObject(bvobBuffers));
         return undefined;
       }
-      const container = await lazy(bvobBuffers[contentHash]);
-      if (container.base64 !== undefined) return byteArrayFromBase64(container.base64).buffer;
+      const container = await lazy(entry);
+      if (container.base64 !== undefined) return byteArrayFromBase64URL(container.base64).buffer;
       return container;
     };
     const bvobInfos = {
-      ...((await lazy(this.prologueRevelation.bvobInfos)) || {}),
-      ...((await lazy(this.prologueRevelation.blobInfos)) || {}), // deprecated
+      ...((await lazy(this.prologue.bvobInfos)) || {}),
+      ...((await lazy(this.prologue.blobInfos)) || {}), // deprecated
     };
-    for (const [contentHash, bvobInfoMaybe] of Object.entries(bvobInfos || {})) {
+    for (const [contentIdOrHash, bvobInfoMaybe] of Object.entries(bvobInfos || {})) {
       const bvobInfo = await lazy(bvobInfoMaybe);
-      if (bvobInfo.persistRefCount !== 0) {
+      if (bvobInfo.persistRefCount !== 0 || (await bvobInfo.mediaPaths || []).length) {
+        const contentHash = (contentIdOrHash[0] === "@")
+            ? contentIdOrHash.slice(8, -2)
+            : contentIdOrHash;
         await this.scribe.preCacheBvob(contentHash, bvobInfo, readRevelationBvobContent,
             Gateway.revelationBvobInitialPersistRefCount);
       }

@@ -32,6 +32,9 @@ export default {
     rootChronicleURI: "",
     endpoints: dictionaryOf(""),
     partitionInfos: dictionaryOf(partitionInfo()),
+    chronicleInfos: dictionaryOf(chronicleInfo()),
+    chronicleVLogs: dictionaryOf(chronicleVLogs()),
+    chronicleMediaInfos: dictionaryOf(chronicleMediaInfos()),
     bvobInfos: dictionaryOf(bvobInfo()),
     bvobBuffers: dictionaryOf(bvobBuffer()),
     blobInfos: dictionaryOf(blobInfo()), // deprecated
@@ -86,6 +89,29 @@ function authorityConfig () {
     noconnect: null,
     test: null,
   };
+}
+
+function chronicleInfo () {
+  return {
+    name: "",
+    authorityURI: "",
+    truthCount: NaN,
+  };
+}
+
+function chronicleVLogs () {
+  return {
+    truthLog: arrayOf(action()),
+  };
+}
+
+function chronicleMediaInfos () {
+  return dictionaryOf({
+    mediaId: "",
+    mediaInfo: { name: "", contentHash: "" },
+    isPersisted: null,
+    isInMemory: null,
+  });
 }
 
 function partitionInfo () {

@@ -384,7 +384,7 @@ export default class Gateway extends FabricEventTarget {
       },
       function _notifyViewSpindles (attachedView) {
         gateway._views[viewId] = rootScope.valos.view = attachedView;
-        attachedView.rootScope = rootScope;
+        attachedView.setRootScope(rootScope);
         const attachedViewAwareSpindles = Object.values(gateway._attachedSpindles)
             .filter(spindle => spindle.onViewAttached);
         attachedView.clockEvent(1, () => [`view.attach.spindles.notify`,

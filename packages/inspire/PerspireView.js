@@ -1,5 +1,7 @@
 // @flow
 
+import readline from "readline";
+
 import "@babel/polyfill";
 import VDOMView from "~/inspire/VDOMView";
 
@@ -15,6 +17,47 @@ export default class PerspireView extends VDOMView {
         ""} connections complete`,
     ]);
     return ret;
+  }
+
+  runInteractive () {
+    const vFocus = this.getFocus();
+    if (!vFocus) throw new Error("view focus missing for interactive");
+    const mutableScope = Object.create(vFocus.getLexicalScope());
+
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    let externalExit = false;
+    rl.on("line", async (command) => {
+      if (!command) return;
+      this.clockEvent(1, `worker.interactive.command`, {
+        action: `executing interactive command`, command,
+      });
+      const sourceInfo = {
+        phase: "interactive command transpilation",
+        source: command,
+        mediaName: "worker.interactive.command",
+        sourceMap: new Map(),
+      };
+      try {
+        const result = await vFocus.doValoscript(command, {}, { sourceInfo, mutableScope });
+        this.clockEvent(1, `worker.interactive.result`, {
+          action: "executed interactive command", command, result,
+        });
+      } catch (error) {
+        this.clockEvent(1, `worker.interactive.error`, {
+          action: "caught exception during interactive command", command,
+          message: error.message, error,
+        });
+      }
+    }).on("close", () => {
+      this.infoEvent(1, "Closing perspire job interactive:", externalExit || "end of stream");
+      if (!externalExit) process.exit(0);
+    });
+    return {
+      close (jobResult, jobError) {
+        externalExit = jobError ? "job failed" : "job complete";
+        rl.close();
+      }
+    };
   }
 
   async _waitForConnectionsToActivate () {

@@ -7,6 +7,8 @@ import Cog from "~/engine/Cog";
 
 import ReactRoot from "~/inspire/ui/ReactRoot";
 
+import { dumpObject } from "~/tools";
+
 /**
  * This class is the view entry point
  */
@@ -19,6 +21,17 @@ export default class VDOMView extends Cog {
   getGateway () { return this._gateway; }
   getFocus () { return this._vFocus; }
   getViewConfig () { return this._viewConfig; }
+
+  getRootScope () { return this._rootScope; }
+  setRootScope (rootScope: Object) { this._rootScope = rootScope; }
+
+  getHTML () {
+    return this._rootElement.innerHTML;
+  }
+
+  getOuterHTML () {
+    return this._rootElement.outerHTML;
+  }
 
   getSelfAsHead () {
     return this._vFocus.getSelfAsHead();
@@ -37,6 +50,7 @@ export default class VDOMView extends Cog {
       await this._createReactRoot(container, viewConfig.viewRootId, {
         viewName: viewConfig.name,
         contextLensProperty: [].concat(viewConfig.contextLensProperty || ["LENS"]),
+        isHTMLRoot: viewConfig.isHTMLRoot,
         rootProps,
       });
       return this;
@@ -48,6 +62,54 @@ export default class VDOMView extends Cog {
   async detach () {
     await this._destroy();
     // TODO(iridian, 2020-02): release all other resources as well.
+  }
+
+  async createJob (jobStack = {}) {
+    const { delay, repeats, interval, journal } = jobStack;
+    if (typeof delay === "number") {
+      this.clockEvent(1, "job.delay", `Delaying job setup for ${delay} seconds`);
+      await new Promise(resolve => setTimeout(resolve, Math.abs(delay * 1000)));
+    }
+    const _getJobProduct = (product = jobStack.product) => product;
+    if (!repeats) {
+      this.clockEvent(1, "job.singular.run", "Running a singular job");
+      if (journal) journal.mode = "singular";
+      return _getJobProduct(await jobStack.performTask(0));
+    }
+    if (typeof interval !== "number") {
+      throw new Error("runJob.options.interval must be a number (in seconds)");
+    }
+    this.clockEvent(1, "job.repeats.setup", `Setting up a ${
+        typeof repeats === "number" ? repeats : "infinite"} repeats job every ${interval} seconds`);
+    if (journal) journal.mode = `repeats`;
+    let beat = 0;
+    return new Promise((resolve, reject) => {
+      const _runTask = async () => {
+        const currentBeat = beat++;
+        try {
+          const taskResult = await jobStack.performTask(currentBeat);
+          if (!repeater ||
+              (repeats
+                  && (taskResult === undefined)
+                  && ((typeof repeats !== "number") || (beat < repeats)))) return;
+          resolve(_getJobProduct(taskResult));
+        } catch (error) {
+          const wrapped = this.wrapErrorEvent(error,
+              new Error(`createJob.interval(beat: ${currentBeat})`),
+              "\n\tjournal:", ...dumpObject(journal));
+          if (!repeater) {
+            this.outputErrorEvent(wrapped, 1,
+                "Exception caught from a task after its job repeater was already settled");
+            return;
+          }
+          reject(wrapped);
+        }
+        clearInterval(repeater);
+        repeater = null;
+      };
+      let repeater = setInterval(_runTask, interval * 1000);
+      _runTask();
+    });
   }
 
   async _setupViewRootProps ({ focus, lensURI, rootLensURI, lens, lensProperty }) {

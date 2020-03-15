@@ -27,10 +27,10 @@ export default class PerspireServer extends FabricEventTarget {
 
     this.revelations = revelations || [];
     this.cacheBasePath = cacheBasePath;
-    this.spindles = spindles;
+    this._spindles = [];
   }
 
-  async initialize () {
+  async initialize (spindles = []) {
     global.window = global.self = global;
     // Load global node context polyfills and libraries
     global.WebSocket = require("ws");
@@ -41,101 +41,101 @@ export default class PerspireServer extends FabricEventTarget {
     global.atob = (str) => Buffer.from(str, "base64").toString("binary");
     global.btoa = (str) => Buffer.from(str, "binary").toString("base64");
 
-    (this.spindles || []).forEach(spindle => {
-      try {
-        return require(spindle);
-      } catch (error) {
-        throw this.wrapErrorEvent(error, 1,
-            new Error(`During PerspireServer.initialize.require("${spindle}")`));
-      }
-    });
+    this.requireSpindles(spindles);
 
-    return (this.gateway =
-        (!this.isTest
-            ? this._createWorkerPerspireGateway(this.gatewayOptions, ...this.revelations)
-            : this._createTestPerspireGateway(this.gatewayOptions, ...this.revelations))
-        .then(gateway => (this.gateway = gateway)));
+    global.name = `${this.getName()} window`;
+    this._jsdom = this._createJSDOM();
+    const jsdomWindow = this._jsdom.window;
+    // re-set after jsdom is set
+    global.window = jsdomWindow;
+    global.document = jsdomWindow.document;
+    global.navigator = jsdomWindow.navigator;
+    global.HTMLIFrameElement = jsdomWindow.HTMLIFrameElement;
+
+    global.requestAnimationFrame = jsdomWindow.requestAnimationFrame =
+        (callback) => { setTimeout(callback, 0); };
+    global.cancelAnimationFrame = jsdomWindow.cancelAnimationFrame =
+        (callback) => { setTimeout(callback, 0); };
+    jsdomWindow.alert = (...rest) => this.warnEvent("window.alert:", ...rest);
+
+    return (this._gateway = (!this.isTest
+        ? this._createWorkerPerspireGateway(this.gatewayOptions, ...this.revelations)
+        : this._createTestPerspireGateway(this.gatewayOptions, ...this.revelations)))
+    .then(gateway => {
+      this._gateway = gateway;
+      return this;
+    });
   }
 
-  async createWorkerView (viewConfig = {}) {
-    global.name = `${this.getName()} window`;
-    this.jsdom = new JSDOM(`<div id="perspire-gateway--main-container"></div>`,
+  requireSpindles (newSpindles = []) {
+    newSpindles.filter(newSpindle => !this._spindles.includes(newSpindle)).forEach(newSpindle => {
+      try {
+        const ret = require(newSpindle);
+        this._spindles.push(ret);
+        return ret;
+      } catch (error) {
+        throw this.wrapErrorEvent(error, 1,
+            new Error(`During PerspireServer.loadSpindle("${newSpindle}")`));
+      }
+    });
+  }
+
+  _createJSDOM () {
+    const ret = new JSDOM(`<div id="perspire-gateway--main-container"></div>`,
         { pretendToBeVisual: true });
-    const viewWindow = this.jsdom.window;
-    const meta = viewWindow.document.createElement("meta");
+    const meta = ret.window.document.createElement("meta");
     meta.httpEquiv = "refresh";
     meta.content = "1";
-    viewWindow.document.getElementsByTagName("head")[0].appendChild(meta);
-    this.container = viewWindow.document.querySelector("#perspire-gateway--main-container");
-    // re-set after jsdom is set
-    global.window = viewWindow;
-    global.document = viewWindow.document;
-    global.navigator = viewWindow.navigator;
-    global.HTMLIFrameElement = viewWindow.HTMLIFrameElement;
-
-    global.requestAnimationFrame = viewWindow.requestAnimationFrame =
-        (callback) => { setTimeout(callback, 0); };
-    global.cancelAnimationFrame = viewWindow.cancelAnimationFrame =
-        (callback) => { setTimeout(callback, 0); };
-
-    const ret = await this.createView("worker", {
-      contextLensProperty: ["WORKER_LENS", "LENS"],
-      ...viewConfig,
-    });
-    this.valos = ret.rootScope.valos;
+    ret.window.document.getElementsByTagName("head")[0].appendChild(meta);
+    this._container = ret.window.document.querySelector("#perspire-gateway--main-container");
     return ret;
   }
 
-  async createView (viewName, viewConfig = {}) {
-    if (!this.container) throw new Error("PerspireServer main worker view hasn't been created yet");
-    const viewWindow = this.jsdom.window;
-    const views = (await this.gateway).createAndConnectViewsToDOM({
-      [viewName]: {
-        name: `${this.getName()} ${viewName}`,
-        focus: this.gateway.getRootFocusURI(),
-        contextLensProperty: ["JOB_LENS", "LENS"],
-        hostGlobal: global,
-        window: viewWindow,
-        container: this.container,
-        viewRootId: `perspire-gateway--${viewName}-view`,
-        size: { width: viewWindow.innerWidth, height: viewWindow.innerHeight, scale: 1 },
-        ...viewConfig,
-      },
-    }, (options) => new PerspireView(options));
+  async createView (viewName, viewConfigAdditions = {}) {
+    if (!this._container) throw new Error("PerspireServer hasn't been initialized yet");
+    const jsdomWindow = this._jsdom.window;
+    const viewConfig = {
+      name: `${this.getName()} ${viewName}`,
+      focus: this._gateway.getRootFocusURI(),
+      hostGlobal: global,
+      window: jsdomWindow,
+      container: this._container,
+      viewRootId: `perspire-gateway--${viewName}-view`,
+      size: { width: jsdomWindow.innerWidth, height: jsdomWindow.innerHeight, scale: 1 },
+      ...viewConfigAdditions,
+    };
+    const views = (await this._gateway).createAndConnectViewsToDOM(
+        { [viewName]: viewConfig }, options => new PerspireView(options));
     const view = await views[viewName];
     // Creating perspire specific objects and variables.
-    // Please use server.valos.Perspire for external packages
-    view.rootScope.valos.views = views;
-    view.rootScope.valos.Perspire = {};
-    view.rootScope.valos.isServer = true;
+    // Please use server.valos.perspire for external packages
+    const perspire = { worker: this, view, viewName, viewConfig };
+    Object.assign(view.getRootScope().valos, { views, perspire, Perspire: perspire });
     return view;
   }
 
-  async run (interval: number, heartbeat: Function, options: Object) {
-    return new Promise((resolve, reject) => {
-      let index = 0;
-      if (options.tickOnceImmediately && !callback()) return;
-      const timeoutObject = this.jsdom.window.setInterval(callback, interval * 1000);
-      function callback () {
-        try {
-          const ret = heartbeat(index++);
-          if (ret === undefined) return true;
-          resolve(ret);
-        } catch (error) {
-          reject(error);
-        }
-        if (timeoutObject) this.jsdom.window.clearInterval(timeoutObject);
-        return false;
-      }
-    });
-  }
-
   async terminate () {
-    return this.gateway && (await this.gateway).terminate();
+    return this._gateway && (await this._gateway).terminate();
   }
 
-  serializeMainDOM () {
-    return this.jsdom.serialize();
+  getGateway () { return this._gateway; }
+
+  getRootHTML () {
+    return this._jsdom.serialize();
+  }
+
+  onHTMLUpdated (callback) {
+    (this._onHTMLUpdatedCallbacks || (this._onHTMLUpdatedCallbacks = []))
+        .push(callback);
+  }
+
+  refreshHTML () {
+    if (!this._onHTMLUpdatedCallbacks) return;
+    const html = this.getRootHTML();
+    if (this._currentHTML !== html) {
+      this._currentHTML = html;
+      this._onHTMLUpdatedCallbacks.forEach(callback => callback(html));
+    }
   }
 
   _createWorkerPerspireGateway (gatewayOptions: Object, ...revelations: any[]) {

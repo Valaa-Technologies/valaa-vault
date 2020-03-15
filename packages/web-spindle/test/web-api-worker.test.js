@@ -38,13 +38,12 @@ let _vViewFocus, _vAuRoot, _vAdmin, _vUser/* , _vRando */;
 beforeAll(async () => {
   _server = new PerspireServer({
     isTest: true,
-    spindles: ["../web-spindle"],
     siteRoot: process.cwd(),
     revelationRoot,
     revelations: [{ "!!!": "./revela.json" }],
   });
-  await _server.initialize();
-  const view = await _server.createWorkerView();
+  await _server.initialize(["../web-spindle"]);
+  const view = await _server.createView("worker");
   _vViewFocus = view.getFocus();
 
   _vAuRoot = await _vViewFocus.doValoscript(
@@ -112,7 +111,7 @@ describe("Web API spindle worker", () => {
   it("runs a trivial local revelation which renders a proper html dump", async () => {
     const server = await _server;
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    expect(server.serializeMainDOM())
+    expect(server.getRootHTML())
         .toEqual(expectedOutputHTML);
 
     expect(_vAdmin.getURI())

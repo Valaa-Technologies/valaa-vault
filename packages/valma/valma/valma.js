@@ -16,6 +16,7 @@ const yargsParser = require("yargs-parser").detailed;
 const patchWith = require("@valos/tools/patchWith").default;
 const dumpify = require("@valos/tools/dumpify").default;
 const wrapErrorModule = require("@valos/tools/wrapError");
+const thenChainEagerly = require("@valos/tools/thenChainEagerly").thenChainEagerly;
 
 cardinal.tomorrowNight = require("cardinal/themes/tomorrow-night");
 
@@ -425,6 +426,10 @@ const _vlm = {
     }
     return this;
   },
+  initializeClock () {
+    this.clockEvents = [];
+    this.clockStartTime = process.hrtime();
+  },
   finalizeClock () {
     if (!this.clockEvents) return;
     let end = process.hrtime(this.clockStartTime);
@@ -461,6 +466,8 @@ const _vlm = {
     }
     return this;
   },
+
+  thenChainEagerly,
 
   // Implementation details
   _invoke,
@@ -910,10 +917,7 @@ if (!_vlm.vargv.instructs || _vlm.isCompleting) _vlm.instruct = function noIns (
 if (!_vlm.vargv.warnings || _vlm.isCompleting) _vlm.warn = function noWarning () { return this; };
 if (!_vlm.vargv.babbles || _vlm.isCompleting) _vlm.babble = function noBabble () { return this; };
 if (!_vlm.vargv.expounds || _vlm.isCompleting) _vlm.expound = function noExpou () { return this; };
-if (_vlm.vargv.clock) {
-  _vlm.clockEvents = [];
-  _vlm.clockStartTime = process.hrtime();
-}
+if (_vlm.vargv.clock) _vlm.initializeClock();
 
 _vlm.ifVerbose(1)
 .babble("phase 1, init:", "determine global options and available pools.",

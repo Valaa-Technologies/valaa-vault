@@ -19,16 +19,22 @@ describe("testing perspire", () => {
         isTest: true,
         siteRoot: process.cwd(),
         revelationRoot,
-        revelations: [{ "!!!": "./revela.json", gateway: { verbosity: 0 } }],
+        revelations: [{
+          "!!!": "./revela.json",
+          gateway: {
+            verbosity: 1,
+            falseProphet: { verbosity: 1 },
+          },
+        }],
       });
       await server.initialize();
-      await server.createWorkerView();
+      await server.createView("worker");
       // This wait should be removeable: however as it stands the
       // creation of frame chronicles will cause an asynchronous delay
       // in creation of UI tree, which the above await doesn't catch.
       // So we wait a small bit.
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      expect(server.serializeMainDOM())
+      expect(server.getRootHTML())
           .toEqual(expectedOutputHTML);
     });
   });

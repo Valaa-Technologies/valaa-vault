@@ -26,7 +26,7 @@ import createValaaTransientScheme from "~/sourcerer/schemeModules/valaa-transien
 import * as ValoscriptDecoders from "~/script/mediaDecoders";
 import * as ToolsDecoders from "~/tools/mediaDecoders";
 
-import { thenChainEagerly } from "~/tools/thenChainEagerly";
+import { thenChainEagerly, mapEagerly } from "~/tools/thenChainEagerly";
 import { getDatabaseAPI } from "~/tools/indexedDB/getInMemoryDatabaseAPI";
 import { openDB } from "~/tools/html5/InMemoryIndexedDBUtils";
 import { dumpify, dumpObject, isPromise, wrapError } from "~/tools";
@@ -62,7 +62,7 @@ export function createSourcererTestHarness (options: Object, ...commandBlocks: a
 
 let dbIsolationAutoPrefix = 0;
 
-export async function createSourcererOracleHarness (options: Object, ...commandBlocks: any) {
+export function createSourcererOracleHarness (options: Object, ...commandBlocks: any) {
   const isPaired = !!options.pairedHarness;
   const combinedOptions = {
     name: `${isPaired ? "Paired " : ""}Sourcerer Oracle Harness`,
@@ -81,31 +81,34 @@ export async function createSourcererOracleHarness (options: Object, ...commandB
       ...(options.scribe || {}),
     },
   };
-
-  const ret = await createSourcererTestHarness(combinedOptions);
-  try {
-    if (options.acquireConnections) {
+  let harness;
+  return thenChainEagerly(combinedOptions, [
+    createSourcererTestHarness,
+    function _acquireConnections (harness_) {
+      harness = harness_;
+      if (!options.acquireConnections) return [];
       const chronicleURIs = options.acquireConnections.map(
           chronicleId => naiveURI.createChronicleURI("valaa-test:", chronicleId));
-      const connections = chronicleURIs.map(chronicleURI =>
-          ret.sourcerer.acquireConnection(chronicleURI).asActiveConnection());
-      (await Promise.all(connections)).forEach(connection => {
-        if (ret.sourcerer.getVerbosity() >= 1) {
+      return mapEagerly(chronicleURIs,
+          chronicleURI => harness.sourcerer.acquireConnection(chronicleURI).asActiveConnection());
+    },
+    connections => {
+      connections.forEach(connection => {
+        if (harness.sourcerer.getVerbosity() >= 1) {
           console.log("Connection fully active:", connection.debugId());
         }
       });
-    }
-    for (const commands of commandBlocks) {
-      const results = ret.chronicleEvents(commands).eventResults;
-      await Promise.all(results.map(
-          combinedOptions.awaitResult || (result => result.getPersistedStory())));
-    }
-    return ret;
-  } catch (error) {
-    throw ret.wrapErrorEvent(error, 1, new Error("During createSourcererOracleHarness"),
+      return mapEagerly(commandBlocks,
+          commands => mapEagerly(harness.chronicleEvents(commands).eventResults,
+              combinedOptions.awaitResult || (result => result.getPersistedStory())));
+    },
+    () => harness,
+  ], error => {
+    throw !harness ? error : harness.wrapErrorEvent(
+        error, 1, new Error("During createSourcererOracleHarness"),
         "\n\toptions:", ...dumpObject(options),
         "\n\tcommandBlocks:", ...dumpObject(commandBlocks));
-  }
+  });
 }
 
 export const createdTestChronicleEntity = created({

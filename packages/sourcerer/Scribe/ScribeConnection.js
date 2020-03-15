@@ -71,6 +71,8 @@ export default class ScribeConnection extends Connection {
     this.setName(`'${name}'/${this.getChronicleURI()}`);
   }
 
+  getChronicleName () { return this._chronicleName; }
+
   getName () {
     if (this._chronicleName) return `'${this._chronicleName}'/${this.getRawName()}`;
     return super.getName();

@@ -53,6 +53,7 @@ export default class Connection extends Follower {
   }
   getSourcerer (): Sourcerer { return this._sourcerer; }
 
+  getAuthorityURI (): string { return naiveURI.getAuthorityURI(this._chronicleURI); }
   getChronicleURI (): string { return this._chronicleURI; }
   getChronicleId (): string { return naiveURI.getChronicleId(this._chronicleURI); }
 

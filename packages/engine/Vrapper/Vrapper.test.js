@@ -128,7 +128,7 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      expectNoVrapper(createGhostRawId("@$~raw:child@@", "@$~raw:test%2B1@@"));
+      expectNoVrapper(createGhostRawId("@$~raw.child@@", "@$~raw.test%2B1@@"));
     });
 
     it("returns Vrappers for ghost when returned from kuery", () => {
@@ -138,7 +138,7 @@ describe("Vrapper", () => {
       const vChildGhost = testScriptyThings()["test+1"].get(["§->", "children", 0]);
       expect(vChildGhost instanceof Vrapper)
           .toEqual(true);
-      const expectedChildGhostRawId = createGhostRawId("@$~raw:child@@", "@$~raw:test%2B1@@");
+      const expectedChildGhostRawId = createGhostRawId("@$~raw.child@@", "@$~raw.test%2B1@@");
       expect(vChildGhost.getRawId())
           .toEqual(expectedChildGhostRawId);
       expectVrapper(expectedChildGhostRawId);
@@ -150,7 +150,7 @@ describe("Vrapper", () => {
       ]);
       const result = testScriptyThings().child.getGhostIn(testScriptyThings()["test+1"]);
       expect(result)
-          .toEqual(getGhostVrapperById("@$~raw:child@@", "@$~raw:test%2B1@@"));
+          .toEqual(getGhostVrapperById("@$~raw.child@@", "@$~raw.test%2B1@@"));
     });
 
     it("returns a correct Vrapper with kuery", () => {
@@ -159,7 +159,7 @@ describe("Vrapper", () => {
       ]);
       const result = testScriptyThings()["test+1"].get(["§->", "children", 0]);
       expect(result)
-          .toEqual(getGhostVrapperById("@$~raw:child@@", "@$~raw:test%2B1@@"));
+          .toEqual(getGhostVrapperById("@$~raw.child@@", "@$~raw.test%2B1@@"));
     });
   });
 
@@ -522,8 +522,8 @@ describe("Vrapper", () => {
       expect(harness.engine.getVrapperByRawId("test")
               .do(VALEK.recurseMaterializedFieldResources(["children"]).map("rawId")))
           .toEqual([
-            "@$~raw:child@@", "@$~raw:grandChild@@", "@$~raw:greatGrandChild@@",
-            "@$~raw:grandSibling@@",
+            "@$~raw.child@@", "@$~raw.grandChild@@", "@$~raw.greatGrandChild@@",
+            "@$~raw.grandSibling@@",
           ]);
     });
     it("doesn't recurse immaterialized fields: ['children']", () => {
@@ -540,7 +540,7 @@ describe("Vrapper", () => {
       ]);
       expect(harness.engine.getVrapperByRawId("test")
               .do(VALEK.recurseMaterializedFieldResources(["unnamedOwnlings"]).map("rawId")))
-          .toEqual(["@$~raw:ownling@@"]);
+          .toEqual(["@$~raw.ownling@@"]);
     });
     it("recurses materialized fields: ['children', 'unnamedOwnlings']", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
@@ -550,8 +550,8 @@ describe("Vrapper", () => {
               .do(VALEK.recurseMaterializedFieldResources(["children", "unnamedOwnlings"])
                   .map("rawId")))
           .toEqual([
-            "@$~raw:child@@", "@$~raw:grandChild@@", "@$~raw:greatGrandChild@@",
-            "@$~raw:greatGrandChildOwnling@@", "@$~raw:grandSibling@@", "@$~raw:ownling@@",
+            "@$~raw.child@@", "@$~raw.grandChild@@", "@$~raw.greatGrandChild@@",
+            "@$~raw.greatGrandChildOwnling@@", "@$~raw.grandSibling@@", "@$~raw.ownling@@",
           ]);
     });
     it("0000101: recurseMaterializedFieldResources kueries must not leak non-vrapped data", () => {
@@ -656,8 +656,8 @@ describe("Vrapper", () => {
       expect(console.warn.mock.calls.length).toBe(2);
       expect(console.warn.mock.calls[0][0])
           .toBe(`Overriding existing Property 'testField' in Scope Vrapper(<TestScriptyThing ${""
-              }"testName"'urn:valos:@$~raw:test@@?+partition=${""
-              }valaa-test%3A%3Fid%3D%40%24~raw%3Atest_chronicle%40%40'>)`);
+              }"testName"'urn:valos:@$~raw.test@@?+partition=${""
+              }valaa-test%3A%3Fid%3D%40%24~raw.test_chronicle%40%40'>)`);
       console.warn = oldWarn;
       expect(testScriptyThings().test.get(VALEK.fromScope("testField").toValueLiteral()))
           .toEqual("testOwned.conflictingTestField");

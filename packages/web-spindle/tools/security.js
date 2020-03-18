@@ -109,7 +109,7 @@ export function resolveIdentityRoles (router, route, scope) {
   if (authorityURI) {
     scope.sessionIdentity = vRef(identityId, undefined, undefined, identityChronicle)
         .setAbsent();
-    scope.identityRoles[`${authorityURI}?id=@$~aur:${encodeURIComponent(authorityURI)}@@`] = true;
+    scope.identityRoles[`${authorityURI}?id=@$~aur.${encodeURIComponent(authorityURI)}@@`] = true;
   }
   return scope.identityRoles;
 }

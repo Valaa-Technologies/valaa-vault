@@ -2,12 +2,18 @@ module.exports = {
   validateFormatTerm,
   validateVerbType,
   validateContextTerm,
-  validateContextTermNS,
   validateParamValueText,
 };
 
-function validateFormatTerm (element) {
-  return validateContextTerm(element);
+function validateFormatTerm (str) {
+  if (typeof str !== "string") {
+    throw new Error(`Invalid format-term: expected string, got ${typeof str}`);
+  }
+  if (!str.match(/^~[a-zA-Z]([a-zA-Z0-9_]{0,29}[a-zA-Z0-9])?$/)) {
+    throw new Error(`Invalid format-term: "${str}" doesn't match rule${
+      ""} "~" ALPHA [ 0*30unreserved-nt ( ALPHA / DIGIT ) ]`);
+  }
+  return str;
 }
 
 function validateVerbType (str) {
@@ -25,20 +31,9 @@ function validateContextTerm (str) {
   if (typeof str !== "string") {
     throw new Error(`Invalid context-term: expected string, got ${typeof str}`);
   }
-  if (!str.match(/[a-zA-Z][a-zA-Z0-9\-_.]*/)) {
+  if (!str.match(/^~?[a-zA-Z]([a-zA-Z0-9_]{0,30}[a-zA-Z0-9])?$/)) {
     throw new Error(`Invalid context-term: "${str}" doesn't match rule${
-      ""} ALPHA [ 0*30unreserved-nt ( ALPHA / DIGIT ) ]`);
-  }
-  return str;
-}
-
-function validateContextTermNS (str) {
-  if (typeof str !== "string") {
-    throw new Error(`Invalid context-term-ns: expected string, got ${typeof str}`);
-  }
-  if (!str.match(/[a-zA-Z]([a-zA-Z0-9\-_.]{0,30}[a-zA-Z0-9])?/)) {
-    throw new Error(`Invalid context-term: "${str}" doesn't match rule${
-      ""} ALPHA [ 0*30unreserved-nt ( ALPHA / DIGIT ) ]`);
+      ""} [ "~" ]  ALPHA [ 0*30unreserved-nt ( ALPHA / DIGIT ) ]`);
   }
   return str;
 }
@@ -48,7 +43,7 @@ function validateParamValueText (str) {
     throw new Error(`Invalid vparam-value: expected string, got ${typeof str}`);
   }
   if (!str.match(/([a-zA-Z0-9\-_.~!*'()]|%[0-9a-fA-F]{2})+/)) {
-    throw new Error(`invalid param-value: "${str}" doesn't match rule${
+    throw new Error(`Invalid vparam-value: "${str}" doesn't match rule${
       ""} 1*("%" HEXDIG HEXDIG |${
       ""} ALPHA / DIGIT / "-" / "_" / "." / "~" / "!" / "*" / "'" / "(" / ")")`);
   }

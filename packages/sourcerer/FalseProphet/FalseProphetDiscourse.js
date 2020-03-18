@@ -202,7 +202,7 @@ export default class FalseProphetDiscourse extends Discourse {
             throw new Error(`${targetAction.type
                 }.Property.initialState.name required for Property id secondary part`);
           }
-          subResource = `@.:${encodeURIComponent(propertyName)}@@`;
+          subResource = `@.$.${encodeURIComponent(propertyName)}@@`;
         }
       }
 
@@ -215,8 +215,8 @@ export default class FalseProphetDiscourse extends Discourse {
         resourceVRID = `${parentVRID.slice(0, -2)}${subResource}`;
         /*
         resourceRawId = ((ownerRawId[0] !== "@") || (ownerRawId.slice(-2) !== "@@"))
-            ? `${ownerRawId}/.:${encodeURIComponent(propertyName)}`
-            : `${ownerRawId.slice(0, -1)}.:${encodeURIComponent(propertyName)}@@`;
+            ? `${ownerRawId}@.$.${encodeURIComponent(propertyName)}`
+            : `${ownerRawId.slice(0, -1)}.$.${encodeURIComponent(propertyName)}@@`;
         */
       } else if (!explicitRawId) {
         resourceVRID = createVRID0Dot3(
@@ -258,7 +258,7 @@ export default class FalseProphetDiscourse extends Discourse {
       throw new Error(
           "Cannot create a resource id for a structural type 'Property' which is missing an owner");
     }
-    targetAction.id = vRef(explicitRawId || `@$~u4:${valosUUID()}`);
+    targetAction.id = vRef(explicitRawId || `@$~u4.${valosUUID()}`);
     /*
     console.log("assignNewUnchronicledVRID", String(targetAction.id), explicitRawId,
         "\n\ttargetAction:", ...dumpObject(targetAction),

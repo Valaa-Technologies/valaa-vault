@@ -158,7 +158,7 @@ export default class ReactRoot extends React.Component {
 
   async _obtainUIRootFrame (authorityURI: string, vRootFocus: Vrapper, viewName: string) {
     const localInstanceVRID = derivedId(
-        vRootFocus.getRawId(), "ui-roots", `@$~raw:${encodeURIComponent(viewName)}@@`);
+        vRootFocus.getRawId(), "ui-roots", `@$~raw.${encodeURIComponent(viewName)}@@`);
     const chronicleURI = naiveURI.createChronicleURI(authorityURI, localInstanceVRID);
     await vRootFocus.engine.discourse
         .acquireConnection(chronicleURI)

@@ -39,7 +39,7 @@ when it is expanded as triples.
 `[{
   "@context": [{
     "$V": "https://valospace.org/#",
-    "@vocab": "urn:valos:.:",
+    "@vocab": "urn:valos:.$.",
 
     "/.S": { "@id": "$V:subject", "@type": "@id" },
     "/.P": { "@id": "$V:name", "@type": "@id" },
@@ -79,80 +79,80 @@ when it is expanded as triples.
     "--/-out-": { "@id": "--$V:pairedOutRelations", "@type": "@id" },
     "--/-in-": { "@id": "--$V:pairedInRelations", "@type": "@id" },
 
-    "$~u4": { "@id": "urn:valos:u4:", "@prefix": true },
-    "$~plt": { "@id": "urn:valos:plt:", "@prefix": true },
+    "$~u4": { "@id": "urn:valos:$~u4.", "@prefix": true },
+    "$~plt": { "@id": "urn:valos:$~plt.", "@prefix": true },
 
     "$valos_sourcerer": "https://valospace.org/sourcerer#",
     "/hasGlobal": { "@id": "$valos_sourcerer:hasGlobal", "@container": "@type" },
   }, {
     "$pot": "https://oftrust/#",
-    "$pot-hypertwin": "https://pot.hypertwin.valospace.org/#",
+    "$pot_hypertwin": "https://pot.hypertwin.valospace.org/#",
   }, {
     "^a-0": "valaa-test:",
     "^a-0-c": "^a-0:?id=@",
-    "^c-0": "^a-0-c:$raw:testlane@_$~plt:@.$pot:$:@.O.:building1id@@@@@@",
-    "^hyperlane": "^c-0:#@$~raw:testlane@_$~plt:@.$pot:$:@.O.:building1id@@@@@",
-    "^thistwinroot": "^hyperlane:@_$~plt:@.$pot:$:@.O.:building1id@@@@@",
-    "^user1": "^hyperlane:@_$~plt:@.$pot:$:@.O.:user1-hyperprime-id@@@@@",
-    "^user2": "^hyperlane:@_$~plt:@.$pot:$:@.O.:user2-hyperprime-id@@@@@"
+    "^c-0": "^a-0-c:$~raw.testlane@_$~plt.@.$pot$.@.O.$.building1id@@@@@@",
+    "^hyperlane": "^c-0:#@$~raw.testlane@_$~plt.@.$pot$.@.O.$.building1id@@@@@",
+    "^thistwinroot": "^hyperlane:@_$~plt.@.$pot$.@.O.$.building1id@@@@@",
+    "^user1": "^hyperlane:@_$~plt.@.$pot$.@.O.$.user1-hyperprime-id@@@@@",
+    "^user2": "^hyperlane:@_$~plt.@.$pot$.@.O.$.user2-hyperprime-id@@@@@"
   }],
   "@id": "^c-0:",
   "/hasGlobal": {
     "$V:Entity": [{
       "@context": {
         "^0": "^thistwinroot:",
-        "^0-0": "^0:+$pot-hypertwin:inLinks@"
+        "^0-0": "^0:+$pot_hypertwin.inLinks@"
       },
       "@id": "^0:@",
       "/.P": "thistwinname",
       "$pot:": "building1id",
       "$pot:area": 400,
       "blah%3Afoo": "content",
-      "foo": { "@id": "^0:~:foo.vs@" },
+      "foo": { "@id": "^0:~$.foo.vs@" },
       "title": "sumtext",
       "/.": {
-        "foo": { "@id": "^0:.:foo@", "$V:isFrozen": true }
+        "foo": { "@id": "^0:.$.foo@", "$V:isFrozen": true }
       },
       "/+": {
-        "$pot-hypertwin:inLinks": {
+        "$pot_hypertwin:inLinks": {
           "@id": "^0-0:@",
           "/*": [{
-            "@id": "^0-0:-in-$pot:ownerOf:@.S--:@$~plt:@.$pot:$:@.O.:aa592f56-1d82-4484-8360-ad9b82d00592@@@@@@@@@@",
-            "/.S--": "^hyperlane:_$~plt:@.$pot:$:@.O.:aa592f56-1d82-4484-8360-ad9b82d00592@@@@@@"
-            "/.P": "$pot:ownerOf",
+            "@id": "^0-0:-in-$pot.ownerOf$.@.S--$.@$~plt.@.$pot$.@.O.$.aa592f56-1d82-4484-8360-ad9b82d00592@@@@@@@@@@",
+            "/.S--": "^hyperlane:_$~plt.@.$pot$.@.O.$.aa592f56-1d82-4484-8360-ad9b82d00592@@@@@@"
+            "/.P": "$pot.ownerOf",
             "/.O--": "^0:@",
           }]
         }
       },
       "/~": {
-        "foo.vs": { "@id": "^0:~:foo.vs@" }
+        "foo.vs": { "@id": "^0:~$.foo.vs@" }
       },
       "/-": [{
-          "@id": "^0:-out-:PERMISSIONS@_:15-1@@",
+          "@id": "^0:-out-$.PERMISSIONS@_$.15-1@@",
           "/.S--": "^0:@", "/.P": "PERMISSIONS", "/.O-": "^user1:@",
           "write": true,
         },
-        "@$~u4:b@@", {
-          "@id": "^0:-out-:PERMISSIONS@_:234-3@@",
+        "@$~u4.b@@", {
+          "@id": "^0:-out-$.PERMISSIONS@_$.234-3@@",
           "/.S--": "^0:@", "/.P": "PERMISSIONS", "/.O-": "^user2:@",
           "write": false,
         },
-        "@$~u4:d@@",
+        "@$~u4.d@@",
       ],
       "/-out-": [
-        "^0:-out-:PERMISSIONS@_:15-1@@",
-        "^0:-out-:PERMISSIONS@_:234-3@@",
+        "^0:-out-$.PERMISSIONS@_$.15-1@@",
+        "^0:-out-$.PERMISSIONS@_$.234-3@@",
       ],
       "/-in-": [
-        "@$~u4:b@@",
-        "^0-0:-in-$pot:ownerOf:@.S--:@$~plt:@.$pot:$:@.O.:aa592f56-1d82-4484-8360-ad9b82d00592@@@@@@@@@",
-        "@$~u4:d@@"
+        "@$~u4.b@@",
+        "^0-0:-in-$pot.ownerOf:@.S--$.@$~plt.@.$pot$.@.O.$.aa592f56-1d82-4484-8360-ad9b82d00592@@@@@@@@@",
+        "@$~u4.d@@"
       ]
     }],
     "$V:Relation": [{
-      "@context": { "^0": "@$~u4:b@" }, "@id": "^0:@",
+      "@context": { "^0": "@$~u4.b@" }, "@id": "^0:@",
     }, {
-      "@context": { "^0": "@$~u4:d@" }, "@id": "^0:@",
+      "@context": { "^0": "@$~u4.d@" }, "@id": "^0:@",
     }]
   }
 }]`),

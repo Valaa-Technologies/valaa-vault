@@ -82,7 +82,7 @@ export class TestCollectCREATEDCog extends Cog {
     if (!this[typeName]) this[typeName] = {};
     const id = passage.vProtagonist.getRawId();
     this[typeName][id] = passage.vProtagonist;
-    if (id.slice(0, 7) === "@$~raw:") {
+    if (id.slice(0, 7) === "@$~raw.") {
       this[typeName][decodeURIComponent(id.slice(7, id.length - 2))] = passage.vProtagonist;
     }
   }

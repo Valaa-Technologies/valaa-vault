@@ -20,10 +20,10 @@ const title = "Web API Schema Builder TestDoc";
 const { itExpects, runTestDoc } = prepareTestDoc(title);
 
 const _createTestGlobalRules = () => ({
-  scriptRoot: ["$~gh:0123456789abcdef"],
+  scriptRoot: ["$~gh.0123456789abcdef"],
   "&ofRelation": {
     tags: {
-      routeRoot: ["$~u4:aaaabbbb-cccc-dddd-eeee-ffffffffffff"],
+      routeRoot: ["$~u4.aaaabbbb-cccc-dddd-eeee-ffffffffffff"],
     },
   },
   "&ofMethod": { POST: {
@@ -145,19 +145,19 @@ function _createSiteConfigurationChapter () {
     resourceGETRoute(`/individuals/:resourceId`,
         { rules: {
           routeRoot: [],
-          resource: ["!$valk:ref", ["!:request:params:resourceId"]],
+          resource: ["!$valk.ref", ["!$.request$.params$.resourceId"]],
         } }, testGlobalRules, TestIndividualType),
     mappingPOSTRoute(`/individuals/:resourceId/tags`, {
           enabledWithRules: ["relationName"],
           rules: {
-            resource: ["!$valk:ref", ["!:request:params:resourceId"]],
-            doCreateMappingAndTarget: ["!$valk:new", ["!:Relation"], {
-              name: ["!:relationName"],
-              source: ["!:resource"],
-              target: ["!$valk:new", ["!:Entity"], {
-                name: ["!:request:body", "$V", "target", "name"],
-                owner: ["!:routeRoot"],
-                properties: { name: ["!:request:body", "$V", "target", "name"] },
+            resource: ["!$valk.ref", ["!$.request$.params$.resourceId"]],
+            doCreateMappingAndTarget: ["!$valk.new", ["!$.Relation"], {
+              name: ["!$.relationName"],
+              source: ["!$.resource"],
+              target: ["!$valk.new", ["!$.Entity"], {
+                name: ["!$.request$.body", "$V", "target", "name"],
+                owner: ["!$.routeRoot"],
+                properties: { name: ["!$.request$.body", "$V", "target", "name"] },
               }],
             }],
           },
@@ -194,7 +194,7 @@ inside out to get the appropriate JSON schema layout.`
   [ObjectSchema]: {
     description: "simple object type",
     valospace: {
-      reflection: [".:forwardedFields"],
+      reflection: [".$.forwardedFields"],
     },
   },
   name: StringType,
@@ -204,7 +204,7 @@ inside out to get the appropriate JSON schema layout.`
   description: "simple object type",
   type: "object",
   valospace: {
-    reflection: [[".", [":", "forwardedFields"]]],
+    reflection: [[".", ["$.", "forwardedFields"]]],
   },
   properties: { name: { type: "string" } },
 })),
@@ -218,7 +218,7 @@ field `, ref("@valos/kernel#name"), `.`,
       ],
       "example#example_schema_extension>2": itExpects(
           "expanded schema of an extended string", [
-() => extendType(StringType, { valospace: { reflection: [".$V:name"] } }),
+() => extendType(StringType, { valospace: { reflection: [".$V.name"] } }),
 type => exportSchemaOf(type),
           ],
           "toEqual",
@@ -253,7 +253,7 @@ which contains the resource 'id' field.`,
   valospace: {
     gate: {
       name: "tags",
-      projection: [["-out", [":", "TAG"]], [".", ["$", "V", "target"]]],
+      projection: [["-out", ["$.", "TAG"]], [".", ["$", "V", "target"]]],
     },
   },
   properties: {
@@ -302,7 +302,7 @@ where the target resource is a Tag type defined earlier.`,
       "example#example_mapping>0": itExpects(
           "expanded schema of a mapping property", [
 () => mappingToManyOf("tags", TestTagType,
-    ["-out:TAG"],
+    ["-out$.TAG"],
     { highlight: BooleanType }),
 type => exportSchemaOf(type),
           ],
@@ -311,7 +311,7 @@ type => exportSchemaOf(type),
   type: "array",
   valospace: {
     mappingName: "tags",
-    reflection: [["-out", [":", "TAG"]]],
+    reflection: [["-out", ["$.", "TAG"]]],
   },
   items: { type: "object",
     properties: {
@@ -346,8 +346,8 @@ type => exportSchemaOf(type),
   valospace: {
     gate: {
       name: "individuals",
-      projection: [["-out", [":", "INDIVIDUAL"]], [".", ["$", "V", "target"]]],
-      filterCondition: [["$valk:nullable"], [".:visible"]],
+      projection: [["-out", ["$.", "INDIVIDUAL"]], [".", ["$", "V", "target"]]],
+      filterCondition: [["$valk.nullable"], [".$.visible"]],
     },
   },
   properties: {
@@ -374,7 +374,7 @@ type => exportSchemaOf(type),
     interests: { type: "array",
       valospace: {
         mappingName: "interests",
-        reflection: [["-out", [":", "INTEREST"]], ["$", "valk", "nullable"]],
+        reflection: [["-out", ["$.", "INTEREST"]], ["$", "valk", "nullable"]],
       },
       items: {
         type: "object",
@@ -401,7 +401,7 @@ type => exportSchemaOf(type),
         services: { type: "array",
           valospace: {
             mappingName: "owned/services",
-            reflection: [["-out", [":", "SERVICE"]], ["$", "valk", "nullable"]],
+            reflection: [["-out", ["$.", "SERVICE"]], ["$", "valk", "nullable"]],
           },
           items: {
             properties: {
@@ -426,7 +426,7 @@ type => exportSchemaOf(type),
     tags: { type: "array",
       valospace: {
         mappingName: "tags",
-        reflection: [["-out", [":", "TAG"]], ["$", "valk", "nullable"]],
+        reflection: [["-out", ["$.", "TAG"]], ["$", "valk", "nullable"]],
       },
       items: { type: "object",
         valospace: { filterable: true },
@@ -495,7 +495,7 @@ TestIndividualType gate projection.`
 () => resourceGETRoute(`/${gate.name}/:resourceId`, {
   rules: {
     routeRoot: null,
-    resource: ["!$valk:ref", ["!:request:params:resourceId"]],
+    resource: ["!$valk.ref", ["!$.request$.params$.resourceId"]],
   },
 }, {}, TestIndividualType),
           "toEqual",
@@ -524,15 +524,15 @@ TestIndividualType gate projection.`
       schema: "TestIndividual#",
       gate: {
         name: "individuals",
-        projection: [["-out", [":", "INDIVIDUAL"]], [".", ["$", "V", "target"]]],
-        filterCondition: [["$valk:nullable"], [".:visible"]],
+        projection: [["-out", ["$.", "INDIVIDUAL"]], [".", ["$", "V", "target"]]],
+        filterCondition: [["$valk.nullable"], [".$.visible"]],
       },
     },
     rules: {
       resource: [["!", ["$", "valk", "ref"],
-        ["@", ["!", [":", "request"], [":", "params"], [":", "resourceId"]]]
+        ["@", ["!", ["$.", "request"], ["$.", "params"], ["$.", "resourceId"]]]
       ]],
-      routeRoot: [[":", null]],
+      routeRoot: [["$.", null]],
     },
   },
 })),
@@ -547,14 +547,14 @@ thing.`
 () => mappingPOSTRoute(`/${gate.name}/:resourceId/${mappingName}`, {
   enabledWithRules: ["relationName"],
   rules: {
-    resource: ["!$valk:ref", ["!:request:params:resourceId"]],
-    doCreateMappingAndTarget: ["!$valk:new", ["!:Relation"], {
-      name: ["!:relationName"],
-      source: ["!:resource"],
-      target: ["!$valk:new", ["!:Entity"], {
-        name: ["!:request:body", "$V", "target", "name"],
-        owner: ["!:routeRoot"],
-        properties: { name: ["!:request:body", "$V", "target", "name"] },
+    resource: ["!$valk.ref", ["!$.request$.params$.resourceId"]],
+    doCreateMappingAndTarget: ["!$valk.new", ["!$.Relation"], {
+      name: ["!$.relationName"],
+      source: ["!$.resource"],
+      target: ["!$valk.new", ["!$.Entity"], {
+        name: ["!$.request$.body", "$V", "target", "name"],
+        owner: ["!$.routeRoot"],
+        properties: { name: ["!$.request$.body", "$V", "target", "name"] },
       }],
     }],
   },
@@ -599,8 +599,8 @@ containing the mapping.`,
       schema: "TestIndividual#",
       gate: {
         name: "individuals",
-        projection: [["-out", [":", "INDIVIDUAL"]], [".", ["$", "V", "target"]]],
-        filterCondition: [["$valk:nullable"], [".:visible"]],
+        projection: [["-out", ["$.", "INDIVIDUAL"]], [".", ["$", "V", "target"]]],
+        filterCondition: [["$valk.nullable"], [".$.visible"]],
       },
     },
     relation: {
@@ -608,7 +608,7 @@ containing the mapping.`,
       schema: { type: "array",
         valospace: {
           mappingName: "tags",
-          reflection: [["-out", [":", "TAG"]], ["$", "valk", "nullable"]],
+          reflection: [["-out", ["$.", "TAG"]], ["$", "valk", "nullable"]],
         },
         items: { type: "object",
           valospace: { filterable: true },
@@ -636,31 +636,31 @@ containing the mapping.`,
     runtimeRules: ["doCreateMappingAndTarget"],
     rules: {
       doCreateMappingAndTarget: [[
-        "!", ["$", "valk", "new"], ["@", ["!", [":", "Relation"]]],
-        ["@", ["+", [":"],
-          ["@", [".", [":", "name"], ["@", ["!", [":", "relationName"]]]]],
-          ["@", [".", [":", "source"], ["@", ["!", [":", "resource"]]]]],
-          ["@", [".", [":", "target"], ["@",
-            ["!", ["$", "valk", "new"], ["@", ["!", [":", "Entity"]]], ["@", [
-              "+", [":"],
-              ["@", [".", [":", "name"], ["@", [
-                "!", [":", "request"], [":", "body"], [":", "$V"], [":", "target"], [":", "name"],
+        "!", ["$", "valk", "new"], ["@", ["!", ["$.", "Relation"]]],
+        ["@", ["+", ["$"],
+          ["@", [".", ["$.", "name"], ["@", ["!", ["$.", "relationName"]]]]],
+          ["@", [".", ["$.", "source"], ["@", ["!", ["$.", "resource"]]]]],
+          ["@", [".", ["$.", "target"], ["@",
+            ["!", ["$", "valk", "new"], ["@", ["!", ["$.", "Entity"]]], ["@", [
+              "+", ["$"],
+              ["@", [".", ["$.", "name"], ["@", ["!",
+                ["$.", "request"], ["$.", "body"], ["$.", "$V"], ["$.", "target"], ["$.", "name"],
               ]]]],
-              ["@", [".", [":", "owner"], ["@", ["!", [":", "routeRoot"]]]]],
-              ["@", [".", [":", "properties"], ["@", [
-                "+", [":"],
-                ["@", [".", [":", "name"], ["@", [
-                  "!", [":", "request"], [":", "body"], [":", "$V"], [":", "target"], [":", "name"],
+              ["@", [".", ["$.", "owner"], ["@", ["!", ["$.", "routeRoot"]]]]],
+              ["@", [".", ["$.", "properties"], ["@", [
+                "+", ["$"],
+                ["@", [".", ["$.", "name"], ["@", ["!",
+                  ["$.", "request"], ["$.", "body"], ["$.", "$V"], ["$.", "target"], ["$.", "name"],
                 ]]]],
               ]]]],
             ]]],
           ]]],
         ]],
       ]],
-      mappingName: [[":", "tags"]],
-      relationName: [[":", "TAG"]],
+      mappingName: [["$.", "tags"]],
+      relationName: [["$.", "TAG"]],
       resource: [["!", ["$", "valk", "ref"],
-        ["@", ["!", [":", "request"], [":", "params"], [":", "resourceId"]]]
+        ["@", ["!", ["$.", "request"], ["$.", "params"], ["$.", "resourceId"]]]
       ]],
       routeRoot: [["$", "~u4", "aaaabbbb-cccc-dddd-eeee-ffffffffffff"]],
       scriptRoot: [["$", "~gh", "0123456789abcdef"]],
@@ -697,8 +697,8 @@ in type and property \`valospace.reflection\` fields.`
     valospace: {
       gate: {
         name: "news",
-        projection: [["-out", [":", "NEWSITEM"]], [".", ["$", "V", "target"]]],
-        filterCondition: [["$valk:nullable"], [".:visible"]],
+        projection: [["-out", ["$.", "NEWSITEM"]], [".", ["$", "V", "target"]]],
+        filterCondition: [["$valk.nullable"], [".$.visible"]],
       },
     },
     properties: {
@@ -725,7 +725,7 @@ in type and property \`valospace.reflection\` fields.`
       tags: { type: "array",
         valospace: {
           mappingName: "tags",
-          reflection: [["-out", [":", "TAG"]], ["$", "valk", "nullable"]],
+          reflection: [["-out", ["$.", "TAG"]], ["$", "valk", "nullable"]],
         },
         items: { type: "object",
           valospace: { filterable: true },

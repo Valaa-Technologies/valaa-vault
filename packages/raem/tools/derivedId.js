@@ -20,6 +20,6 @@ export default function derivedId (id, derivationName, contextId = "") {
 }
 
 export function derivedVRID (vrid, derivationName, contextVRID) {
-  return `${contextVRID.slice(0, -2)}@_:${derivationName}${
+  return `${contextVRID.slice(0, -2)}@_$.${derivationName}${
     (vrid[1] !== "$") ? vrid : `@_${vrid.slice(1)}`}`;
 }

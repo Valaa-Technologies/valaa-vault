@@ -4,7 +4,7 @@ const {
   validateVPath, validateVKeyPath, validateFullVPath,
   validateVRID, validateVerbs, validateVGRID,
   validateFormatTerm, validateVerb, validateVerbType, validateVParam,
-  validateContextTerm, validateContextTermNS, validateParamValueText
+  validateContextTerm, validateParamValueText
 } = require("./_validateOps");
 const { cementVPath, extendVAKON } = require("./_cementOps");
 const { coerceAsVRID } = require("./_coerceOps");
@@ -26,7 +26,6 @@ module.exports = {
   validateVerbType,
   validateVParam,
   validateContextTerm,
-  validateContextTermNS,
   validateParamValueText,
   segmentVPath,
   segmentVKeyPath,

@@ -52,21 +52,22 @@ describe("VPath to concrete VAKON valks", () => {
   };
 
   it("Cements simple VPaths into VAKON", () => {
-    expect(VALK.fromVPath("@!:scriptRoot@!$random:$@@", { context: testContext }).toVAKON())
-        .toEqual(["§->", ["§$", "scriptRoot"], ["§!random", ""]]);
-    expect(VALK.fromVPath("@!invoke:create:@!:body:%24V:target:name@@@@").toVAKON())
+    expect(VALK.fromVPath("@!$.scriptRoot@!$random@@", { context: testContext }).toVAKON())
+        .toEqual(["§->", ["§$", "scriptRoot"], ["§!random"]]);
+    expect(VALK.fromVPath("@!invoke$.create$.@!$.body$.%24V$.target$.name@@@@").toVAKON())
         .toEqual([
           "§invoke", "create",
           ["§->", ["§$", "body"], ["§..", "$V"], ["§..", "target"], ["§..", "name"]],
         ]);
   });
   it("Rejects VPaths context terms which are undefined by the context", () => {
-    expect(() => VALK.fromVPath("@!:scriptRoot@!$thisIsBad:$@@", { context: testContext })
+    expect(() => VALK.fromVPath("@!$.scriptRoot@!$thisIsBad@@", { context: testContext })
             .toVAKON())
         .toThrow(/unrecognized context term 'thisIsBad'/);
   });
   it("Cements complex VPaths into VAKON", () => {
-    expect(VALK.fromVPath("@!invoke:create:event:@!:source@@:@!:body@.:%24V@.:target@.:name@@@@")
+    expect(VALK.fromVPath(
+            "@!invoke$.create$.event$.@!$.source@@$.@!$.body@.$.%24V@.$.target@.$.name@@@@")
         .toVAKON())
     .toEqual([
       "§invoke", "create", "event",
@@ -75,7 +76,7 @@ describe("VPath to concrete VAKON valks", () => {
     ]);
   });
   it("Cements object VPaths into VAKON while escaping nested vpaths", () => {
-    expect(VALK.fromVPath(["@", [":", "constant"]])
+    expect(VALK.fromVPath(["@", ["$.", "constant"]])
         .toVAKON())
     .toEqual(["§'", "constant"]);
     expect(VALK.fromVPath([{ val: "constant", val2: 10 }])
@@ -93,8 +94,8 @@ describe("VPath to concrete VAKON valks", () => {
   });
   it("Cements complex embedded VPaths into VAKON", () => {
     expect(VALK.fromVPath([
-      "!invoke:create:event", ["!:source"],
-        ["@!:body@.:%24V@@", [".:target"], [".:name"]],
+      "!invoke$.create$.event", ["!$.source"],
+        ["@!$.body@.$.%24V@@", [".$.target"], [".$.name"]],
     ]).toVAKON())
     .toEqual([
       "§invoke", "create", "event", ["§$", "source"],
@@ -140,7 +141,7 @@ describe("VALK corpus kueries", () => {
     const kuery = VALK.to("children");
     expect(kuery.toVAKON()).toEqual(["§->", "children"]);
     expect(harness.run(vRef("A_parent"), kuery.map("rawId")))
-        .toEqual(["@$~raw:A_child1@@", "@$~raw:A_child2@@"]);
+        .toEqual(["@$~raw.A_child1@@", "@$~raw.A_child2@@"]);
   });
 
   it("Converts VALK to-to into VAKON", () => {
@@ -170,7 +171,7 @@ describe("VALK corpus kueries", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.to("id").looseEqualTo(vRef("A_parentGlue"));
     expect(kuery.toVAKON())
-        .toEqual(["§==", ["§->", "id"], ["§vrl", ["@$~raw:A_parentGlue@@"]]]);
+        .toEqual(["§==", ["§->", "id"], ["§vrl", ["@$~raw.A_parentGlue@@"]]]);
     expect(harness.run(vRef("A_parentGlue"), kuery))
         .toEqual(true);
     expect(harness.run(vRef("A_childGlue"), kuery))
@@ -182,16 +183,16 @@ describe("VALK corpus kueries", () => {
     const kuery = VALK.if(VALK.fromValue(true));
     expect(kuery.toVAKON()).toEqual(["§?", true, null]);
     expect(harness.run(vRef("A_parent"), "rawId"))
-        .toEqual("@$~raw:A_parent@@");
+        .toEqual("@$~raw.A_parent@@");
   });
 
   it("Converts basic VALK.if into VAKON", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.if(VALK.to("id").looseEqualTo(vRef("A_child1")));
     expect(kuery.toVAKON())
-        .toEqual(["§?", ["§==", ["§->", "id"], ["§vrl", ["@$~raw:A_child1@@"]]], null]);
+        .toEqual(["§?", ["§==", ["§->", "id"], ["§vrl", ["@$~raw.A_child1@@"]]], null]);
     expect(harness.run(vRef("A_child1"), "rawId"))
-        .toEqual("@$~raw:A_child1@@");
+        .toEqual("@$~raw.A_child1@@");
     expect(harness.run(vRef("A_child2"), kuery))
         .toEqual(undefined);
   });
@@ -201,7 +202,7 @@ describe("VALK corpus kueries", () => {
     const kuery = VALK.map("rawId");
     expect(kuery.toVAKON()).toEqual(["§map", "rawId"]);
     expect(harness.run(vRef("A_parent"), VALK.to("children").toKuery(kuery)))
-        .toEqual(["@$~raw:A_child1@@", "@$~raw:A_child2@@"]);
+        .toEqual(["@$~raw.A_child1@@", "@$~raw.A_child2@@"]);
   });
 
   it("Converts basic VALK.map into VAKON", () => {
@@ -209,7 +210,7 @@ describe("VALK corpus kueries", () => {
     const kuery = VALK.to("children").map("rawId");
     expect(kuery.toVAKON()).toEqual(["§->", "children", ["§map", "rawId"]]);
     expect(harness.run(vRef("A_parent"), kuery))
-        .toEqual(["@$~raw:A_child1@@", "@$~raw:A_child2@@"]);
+        .toEqual(["@$~raw.A_child1@@", "@$~raw.A_child2@@"]);
   });
 
   it("Converts VALK.map + VALK.if into VAKON", () => {
@@ -217,7 +218,7 @@ describe("VALK corpus kueries", () => {
     const kuery = VALK.to("children").map(VALK.if(VALK.fromValue(true)));
     expect(kuery.toVAKON()).toEqual(["§->", "children", ["§map", ["§?", true, null]]]);
     expect(harness.run(vRef("A_parent"), kuery.map("rawId")))
-        .toEqual(["@$~raw:A_child1@@", "@$~raw:A_child2@@"]);
+        .toEqual(["@$~raw.A_child1@@", "@$~raw.A_child2@@"]);
   });
 
   it("Converts trivial VALK.filter into VAKON", () => {
@@ -234,9 +235,9 @@ describe("VALK corpus kueries", () => {
     const kuery = VALK.to("children").filter(VALK.to("id").looseEqualTo(vRef("A_child1")));
     expect(kuery.toVAKON())
         .toEqual(["§->", "children",
-            ["§filter", ["§==", ["§->", "id"], ["§vrl", ["@$~raw:A_child1@@"]]]]]);
+            ["§filter", ["§==", ["§->", "id"], ["§vrl", ["@$~raw.A_child1@@"]]]]]);
     expect(harness.run(vRef("A_parent"), kuery.toIndex(0).to("rawId")))
-        .toEqual("@$~raw:A_child1@@");
+        .toEqual("@$~raw.A_child1@@");
   });
 });
 
@@ -259,7 +260,7 @@ describe("VALK.nullable and VALK.nonNull - VAKON false and true", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.to("parent").nullable().to("parent");
     expect(harness.run(vRef("A_child1"), kuery.to("rawId")))
-        .toEqual("@$~raw:A_grandparent@@");
+        .toEqual("@$~raw.A_grandparent@@");
   });
 
   it("Throws if last step of a path is null", () => {
@@ -273,14 +274,14 @@ describe("VALK.nullable and VALK.nonNull - VAKON false and true", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.to("parent").notNull().to("parent");
     expect(harness.run(vRef("A_child1"), kuery.to("rawId")))
-        .toEqual("@$~raw:A_grandparent@@");
+        .toEqual("@$~raw.A_grandparent@@");
   });
 
   it("Accepts notNull with error message properly on valid paths", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createBlockARest);
     const kuery = VALK.to("parent").notNull("this should never be seen").to("parent");
     expect(harness.run(vRef("A_child1"), kuery.to("rawId")))
-        .toEqual("@$~raw:A_grandparent@@");
+        .toEqual("@$~raw.A_grandparent@@");
   });
 
   it("Throws with notNull containing an error message and an empty head", () => {

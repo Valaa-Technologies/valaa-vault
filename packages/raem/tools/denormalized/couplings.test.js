@@ -455,7 +455,7 @@ describe("Couplings", () => {
     expect(harness.run(vRef("A_child1"), "targetGlues").map(entry => entry.rawId()))
         .toEqual([]);
     expect(harness.run(vRef("A_child1"), "unnamedOwnlings").map(entry => entry.rawId()))
-        .toEqual(["@$~raw:A_childGlue@@"]);
+        .toEqual(["@$~raw.A_childGlue@@"]);
     harness.chronicleEvent(fieldsSet({ id: childGlue, typeName: "TestGlue",
       sets: { owner: vRef("A_child1", "unnamedOwnlings") },
     }));
@@ -464,7 +464,7 @@ describe("Couplings", () => {
     expect(harness.run(vRef("A_child1"), "targetGlues").map(entry => entry.rawId()))
         .toEqual([]);
     expect(harness.run(vRef("A_child1"), "unnamedOwnlings").map(entry => entry.rawId()))
-        .toEqual(["@$~raw:A_childGlue@@"]);
+        .toEqual(["@$~raw.A_childGlue@@"]);
   });
 
   it("maintains all couplings when a ghost's owner is changed within instance", async () => {
@@ -475,7 +475,7 @@ describe("Couplings", () => {
     ]);
     const parentInInstance = harness.run(vRef("A_grandparentInstance"), ["§->", "children", 0]);
     expect(harness.run(parentInInstance, "owner").rawId())
-        .toEqual("@$~raw:A_grandparentInstance@@");
+        .toEqual("@$~raw.A_grandparentInstance@@");
 
     const child1InInstance = harness.run(parentInInstance, ["§->", "children", 0]);
     expect(harness.run(child1InInstance, "owner").rawId())
@@ -486,7 +486,7 @@ describe("Couplings", () => {
         .toEqual(parentInInstance.rawId());
 
     expect(harness.run(child1InInstance, "prototype").rawId())
-        .toEqual("@$~raw:A_child1@@");
+        .toEqual("@$~raw.A_child1@@");
     expect(harness.run(child1InInstance, "owner").rawId())
         .toEqual(parentInInstance.rawId());
     expect(harness.run(child1InInstance, ["§coupling", ["§->", "owner"]]))

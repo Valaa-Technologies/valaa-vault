@@ -1,6 +1,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 
-const { dumpObject, wrapError } = require("./wrapError");
+const { dumpObject, wrapError, outputError } = require("./wrapError");
 
 /**
  * Resolves the chain of then-operations eagerly ie. synchronously if
@@ -45,6 +45,7 @@ module.exports = {
   mapEagerly,
   thenChainEagerly,
   thisChainEagerly,
+  wrapOutputError,
 };
 
 // Sequential map on maybeThenable which awaits for each entry and each
@@ -243,4 +244,28 @@ function thisChainEagerly (
     return `During thenChainEagerly ${index === -1 ? "initial params" : `#${index}`} ${info} ${
         !(onRejected && onRejected.name) ? "(no handler)" : `(with ${onRejected.name})`}`;
   }
+}
+
+function wrapOutputError (callback, header, onError) {
+  let actualOnError = onError, actualHeader = header;
+  if (typeof header === "function") {
+    actualOnError = header;
+    actualHeader = header.name;
+  }
+  return (...forwardedArgs) => thenChainEagerly(
+      null,
+      () => callback(...forwardedArgs),
+      error => {
+        let rethrow, ret;
+        try {
+          if (!actualOnError) rethrow = error;
+          else ret = actualOnError(error);
+        } catch (innerError) {
+          rethrow = innerError;
+        }
+        outputError(rethrow || error,
+            actualHeader || `Exception ${rethrow ? "rethrown" : "caught"} by wrapOutputError`);
+        if (rethrow) throw rethrow;
+        return ret;
+      });
 }

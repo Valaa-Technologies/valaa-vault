@@ -49,6 +49,6 @@ describe("Oracle", () => {
 
     // Attempt to run an action post-freeze and expect complaints
     expect(() => harness.chronicleEvent(lateCommand))
-        .toThrow(/Cannot modify frozen.*@\$~raw:test_chronicle@@/);
+        .toThrow(/Cannot modify frozen.*@\$~raw.test_chronicle@@/);
   });
 });

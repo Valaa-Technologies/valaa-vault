@@ -92,6 +92,6 @@ export function convertEvent0Dot1To0Dot2 (connection: Connection,
 function _partitionKey (connection) {
   const partitionKey = connection.getChronicleId();
   return (partitionKey[0] === "@")
-      ? partitionKey.match(/^@\$~[^:]*:([^@]*)@@$/)[1]
+      ? partitionKey.match(/^@\$~[^.]*\.([^@]*)@@$/)[1]
       : partitionKey;
 }

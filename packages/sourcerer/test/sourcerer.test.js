@@ -44,7 +44,7 @@ afterEach(async () => {
   await clearAllScribeDatabases(/* [testChronicleURI] */);
 });
 
-const simpleEntityId = "@$~raw:simple_entity@@";
+const simpleEntityId = "@$~raw.simple_entity@@";
 
 describe("Sourcerer", () => {
   const structuredMediaContents = [
@@ -129,14 +129,14 @@ describe("Sourcerer", () => {
   });
 
   const coupleCommands = [
-    created({ id: ["@$~raw:some_media@@"], typeName: "Media", initialState: {
+    created({ id: ["@$~raw.some_media@@"], typeName: "Media", initialState: {
       name: "Simple Media",
       owner: [testRootId, { partition: String(testChronicleURI) }, {}],
     } }),
-    created({ id: ["@$~raw:simple_relation@@"], typeName: "Relation", initialState: {
+    created({ id: ["@$~raw.simple_relation@@"], typeName: "Relation", initialState: {
       name: "Simple-other Relation",
       owner: vRef("simple_entity", "relations", undefined, testChronicleURI).toJSON(),
-      target: ["@$~raw:some_media@@", { partition: String(testChronicleURI) }],
+      target: ["@$~raw.some_media@@", { partition: String(testChronicleURI) }],
     } }),
   ];
 
@@ -585,7 +585,7 @@ describe("Cross-chronicle", () => {
     const { scribeConnection } =
         await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
     const lateChronicleURI = naiveURI.createChronicleURI(
-        harness.testAuthorityURI, "@$~raw:test_late@@");
+        harness.testAuthorityURI, "@$~raw.test_late@@");
 
     const lateTargetId = vRef("late_target", undefined, undefined, lateChronicleURI);
 
@@ -604,7 +604,7 @@ describe("Cross-chronicle", () => {
     const lateConnection = harness.sourcerer.acquireConnection(lateChronicleURI);
     harness.tryGetTestAuthorityConnection(lateConnection).addNarrateResults({ eventIdBegin: 0 }, [
       created({
-        id: ["@$~raw:test_late@@"], typeName: "Entity",
+        id: ["@$~raw.test_late@@"], typeName: "Entity",
         initialState: { name: "Test Late" },
         aspects: { version: "0.2", log: { index: 0 }, command: { id: "lid-0" } },
       }),
@@ -624,7 +624,7 @@ describe("Cross-chronicle", () => {
     const { scribeConnection } =
         await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
     const lateChronicleURI = naiveURI.createChronicleURI(
-        harness.testAuthorityURI, "@$~raw:test_late@@");
+        harness.testAuthorityURI, "@$~raw.test_late@@");
 
     const latePrototypeId = vRef("late_prototype", undefined, undefined, lateChronicleURI);
 
@@ -648,7 +648,7 @@ describe("Cross-chronicle", () => {
     const lateConnection = harness.sourcerer.acquireConnection(lateChronicleURI);
     harness.tryGetTestAuthorityConnection(lateConnection).addNarrateResults({ eventIdBegin: 0 }, [
       created({
-        id: ["@$~raw:test_late@@"], typeName: "Entity",
+        id: ["@$~raw.test_late@@"], typeName: "Entity",
         initialState: { name: "Test Late" },
         aspects: { version: "0.2", log: { index: 0 }, command: { id: "lid-0" } },
       }),

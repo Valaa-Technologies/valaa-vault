@@ -52,7 +52,7 @@ describe("Engine bug tests", async () => {
     ];
 
     harness = await createEngineOracleHarness({
-      verbosity: 0, claimBaseBlock: false, acquireConnections: ["@$~raw:Foo@@"],
+      verbosity: 0, claimBaseBlock: false, acquireConnections: ["@$~raw.Foo@@"],
     }, commands);
 
     const foo = entities().Foo;
@@ -319,7 +319,7 @@ describe("Engine bug tests", async () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
     const properties = {
       reference: vRef(
-          "@$~raw:secondchronicle@@", null, null, "valaa-memory:?id=@$~raw:secondchronicle@@"),
+          "@$~raw.secondchronicle@@", null, null, "valaa-memory:?id=@$~raw.secondchronicle@@"),
     };
     await harness.runValoscript(null, `
       new Entity({
@@ -330,7 +330,7 @@ describe("Engine bug tests", async () => {
       });
 
       new Entity({
-        id: "@$~raw:secondchronicle@@",
+        id: "@$~raw.secondchronicle@@",
         owner: null,
         name: "secondChronicle",
         authorityURI: "valaa-memory:"

@@ -14,16 +14,16 @@ describe("chronicles", () => {
 
   const createBlockA = [
     // LocalChronicle is implicitly created
-    created({ id: ["@$~raw:A_grandparent@@"], typeName: "TestThing",
+    created({ id: ["@$~raw.A_grandparent@@"], typeName: "TestThing",
       initialState: {
         authorityURI: "valaa-local:"
       },
     }),
     created({ id: ["A_parent"], typeName: "TestThing",
-      initialState: { owner: vRef("@$~raw:A_grandparent@@", "children") },
+      initialState: { owner: vRef("@$~raw.A_grandparent@@", "children") },
     }),
     created({ id: ["A_child1"], typeName: "TestThing",
-      initialState: { owner: vRef("@$~raw:A_parent@@", "children") },
+      initialState: { owner: vRef("@$~raw.A_parent@@", "children") },
     }),
     created({ id: ["A_child2"], typeName: "TestThing",
       initialState: {
@@ -45,11 +45,11 @@ describe("chronicles", () => {
 
   it("CREATED has correct chronicle and id.getChronicleURI() for top-level children", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
-    const grandparent = harness.run(vRef("@$~raw:A_grandparent@@"), null);
+    const grandparent = harness.run(vRef("@$~raw.A_grandparent@@"), null);
     const grandparentChronicleURI = harness.run(grandparent, "id").getChronicleURI();
 
     expect(grandparentChronicleURI)
-        .toEqual(createLocalChronicleURIFromRootId("@$~raw:A_grandparent@@"));
+        .toEqual(createLocalChronicleURIFromRootId("@$~raw.A_grandparent@@"));
     expect(harness.run(grandparent, "authorityURI"))
         .toEqual("valaa-local:");
     expect(harness.run(grandparent, "partition"))
@@ -72,7 +72,7 @@ describe("chronicles", () => {
     const child2ChronicleURI = harness.run(child2, "id").getChronicleURI();
 
     expect(child2ChronicleURI)
-        .toEqual(createMemoryChronicleURIFromRootId("@$~raw:A_child2@@"));
+        .toEqual(createMemoryChronicleURIFromRootId("@$~raw.A_child2@@"));
     expect(harness.run(child2, "authorityURI"))
         .toEqual("valaa-memory:");
     expect(harness.run(child2, "partition"))
@@ -104,15 +104,15 @@ describe("chronicles", () => {
       ],
     })).getTruthEvent();
     const aGrandparentChronicle = { // eslint-disable-line
-      "valaa-local:?id=@$~raw:A_grandparent@@": {},
+      "valaa-local:?id=@$~raw.A_grandparent@@": {},
     };
     const bTestRootChronicle = { // eslint-disable-line
-      "valaa-test:?id=@$~raw:B_testRoot@@": {},
+      "valaa-test:?id=@$~raw.B_testRoot@@": {},
     };
     expect(finalEvent.meta.chronicles)
         .toEqual({ ...aGrandparentChronicle, ...bTestRootChronicle });
     expect(finalEvent.meta.chronicleURI)
-        .toEqual("valaa-test:?id=@$~raw:B_testRoot@@");
+        .toEqual("valaa-test:?id=@$~raw.B_testRoot@@");
     expect((finalEvent.actions[0].meta || {}).chronicles)
         .toBeFalsy();
     expect((finalEvent.actions[0].meta || {}).chronicleURI)
@@ -124,9 +124,9 @@ describe("chronicles", () => {
     const aGrandParent = harness.run(vRef("A_grandparent"), null);
     const bTestRoot = harness.run(vRef("B_testRoot"), null);
     expect(aGrandParent.getChronicleId())
-        .toEqual("@$~raw:A_grandparent@@");
+        .toEqual("@$~raw.A_grandparent@@");
     expect(bTestRoot.getChronicleId())
-        .toEqual("@$~raw:B_testRoot@@");
+        .toEqual("@$~raw.B_testRoot@@");
 
     expect(harness.run(vRef("A_grandparent"), ["§->", "siblings", 0]))
         .toBe(bTestRoot);

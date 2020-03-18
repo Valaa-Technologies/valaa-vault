@@ -18,7 +18,7 @@ afterEach(async () => {
 const exampleContent = "example content";
 const exampleBuffer = arrayBufferFromUTF8String(exampleContent);
 const exampleContentHash = contentHashFromArrayBuffer(exampleBuffer);
-const exampleContentId = `@$~bvob:${exampleContentHash}@@`;
+const exampleContentId = `@$~bvob.${exampleContentHash}@@`;
 
 describe("Media handling", () => {
   it("does an async prepareBvob for non-locally persisted Media content", async () => {
@@ -367,7 +367,7 @@ describe("Media handling", () => {
     const initialContent = "initial content";
     const initialBuffer = arrayBufferFromUTF8String(initialContent);
     const initialContentHash = contentHashFromArrayBuffer(initialBuffer);
-    const initialContentId = `@$~bvob:${initialContentHash}@@`;
+    const initialContentId = `@$~bvob.${initialContentHash}@@`;
 
     const subscribeToContentUpdate = contentMedia => resolve => contentMedia
         .obtainSubscription("content")
@@ -407,7 +407,7 @@ describe("Media handling", () => {
     const updateContent = "update content";
     const updateBuffer = arrayBufferFromUTF8String(updateContent);
     const updateContentHash = contentHashFromArrayBuffer(updateBuffer);
-    const updateContentId = `@$~bvob:${updateContentHash}@@`;
+    const updateContentId = `@$~bvob.${updateContentHash}@@`;
 
     const { updateBvob, modifiedProcess } = await harness.runValoscript(
         undefinedMedia,
@@ -593,7 +593,7 @@ describe("Two paired harnesses emulating two gateways connected through event st
       } })).$V.vref;
     `);
     expect(newVRef)
-        .toEqual(`valaa-test:?id=${testRootId}#@$~raw:test_chronicle@_:subEntity@@`);
+        .toEqual(`valaa-test:?id=${testRootId}#@$~raw.test_chronicle@_:subEntity@@`);
 
     const { target, instance, isActive, targetVRef } = await pairness.runValoscript(
         vRef(testRootId), `
@@ -640,7 +640,7 @@ describe("Two paired harnesses emulating two gateways connected through event st
     expect(target.getPhase())
         .toEqual("Active");
     expect(itprop.getRawId())
-        .toEqual(`${instanceId.slice(0, -2)}@.:thing@@`);
+        .toEqual(`${instanceId.slice(0, -2)}@.$.thing@@`);
   });
 });
 

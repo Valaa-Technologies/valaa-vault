@@ -29,7 +29,7 @@ const DateTimeZoneExtendedISO8601Type = Object.freeze({ type: "string", format: 
 const IdValOSType = Object.freeze({
   type: "string",
   pattern: "^[a-zA-Z0-9\\-_.~]+$",
-  valospace: { reflection: [".$V:rawId"] },
+  valospace: { reflection: [".$V.rawId"] },
 });
 // const ReferenceValOSType = { type: "uri" };
 const ReferenceValOSType = Object.freeze({ type: "string" });

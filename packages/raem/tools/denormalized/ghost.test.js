@@ -15,9 +15,9 @@ function _ghostVRL (prototypeRef: VRL, hostRawId: string, hostPrototypeRawId: st
   return vRef(ghostPath.headRawId(), null, ghostPath);
 }
 
-const rootId = "@$~raw:root@@";
-const root1Id = "@$~raw:root-1@@";
-const root11Id = "@$~raw:root-1-1@@";
+const rootId = "@$~raw.root@@";
+const root1Id = "@$~raw.root-1@@";
+const root11Id = "@$~raw.root-1-1@@";
 
 const createBaseTestObjects = [
   created({ id: [rootId], typeName: "TestThing" }),
@@ -167,7 +167,7 @@ describe("Ghost materialization and immaterialization", () => {
   it("Materialization should not materialize the owner", () => {
     setUp({ verbosity: 0, commands: createGrandlingInstance });
     assertImmaterialized(getGhostOwnling());
-    const grandlingInRoot1 = _ghostVRL(vRef("grandling-1"), root1Id, "@$~raw:root@@");
+    const grandlingInRoot1 = _ghostVRL(vRef("grandling-1"), root1Id, "@$~raw.root@@");
     assertImmaterialized(grandlingInRoot1);
     harness.chronicleEvent(createMaterializeGhostAction(harness.getValker(),
         getGrandlingInstanceGhost()));
@@ -177,7 +177,7 @@ describe("Ghost materialization and immaterialization", () => {
 
   it("should materialize a trivial ghost prototype of a ghost which is being materialized", () => {
     setUp({ verbosity: 0, commands: [...createGrandlingInstance, ...createRootInstanceInstance] });
-    const grandlingInRoot1 = _ghostVRL(vRef("grandling-1"), root1Id, "@$~raw:root@@");
+    const grandlingInRoot1 = _ghostVRL(vRef("grandling-1"), root1Id, "@$~raw.root@@");
     const grandlingInRoot11 = _ghostVRL(grandlingInRoot1, root11Id, root1Id);
     harness.chronicleEvent(createMaterializeGhostAction(harness.getValker(), grandlingInRoot11));
     assertMaterialized(grandlingInRoot11);
@@ -222,7 +222,7 @@ describe("Ghost materialization and immaterialization", () => {
   it("materializes a ghost of a ghost when its mutated", () => {
     setUp({ verbosity: 0, commands: createGrandlingInstance });
     const greatGrandling1 = harness
-        .run(getTestChronicle("@$~raw:grandling-1@@"), VALK.to("children").to(0));
+        .run(getTestChronicle("@$~raw.grandling-1@@"), VALK.to("children").to(0));
     const greatGrandling1InRoot1VRL =
         createGhostVRLInInstance(greatGrandling1, getTestChronicle(root1Id));
     const grandlingInRoot1VRL =
@@ -289,7 +289,7 @@ describe("Mixing references across instantiation boundaries", () => {
     }));
     expect(harness.run(getTestChronicle(root1Id), ["§->", "siblings", 0]))
         .toEqual(vRef("ownling"));
-    expect(harness.run(getTestChronicle("@$~raw:ownling@@"), ["§->", "siblings", 0]).rawId())
+    expect(harness.run(getTestChronicle("@$~raw.ownling@@"), ["§->", "siblings", 0]).rawId())
         .toEqual(root1Id);
   });
 
@@ -301,7 +301,7 @@ describe("Mixing references across instantiation boundaries", () => {
     }));
     expect(harness.run(getGhostOwnling(), ["§->", "siblings", 0]))
         .toEqual(vRef("grandling"));
-    expect(harness.run(getTestChronicle("@$~raw:grandling@@"), ["§->", "siblings", 0]))
+    expect(harness.run(getTestChronicle("@$~raw.grandling@@"), ["§->", "siblings", 0]))
         .toEqual(getGhostOwnling());
   });
 
@@ -340,7 +340,7 @@ describe("Mixing references across instantiation boundaries", () => {
   it("returns the original resource for complex instantiation chain parents and ghostHost", () => {
     setUp({ verbosity: 0, commands: createGrandlingInstance });
     expect(harness.run(vRef("grandling-1"), ["§->", "parent", "rawId"]))
-        .toEqual("@$~raw:ownling@@");
+        .toEqual("@$~raw.ownling@@");
 
     const grandling1InRoot1VRL =
         createGhostVRLInInstance(vRef("grandling-1"), getTestChronicle(root1Id));
@@ -369,7 +369,7 @@ describe("Mixing references across instantiation boundaries", () => {
       instancePrototype: ownlingInRoot1VRL,
     } }));
     expect(harness.run(vRef("ownlingIn1-1"), ["§->", "children", 0, "owner", "rawId"]))
-        .toEqual("@$~raw:ownlingIn1-1@@");
+        .toEqual("@$~raw.ownlingIn1-1@@");
   });
 });
 

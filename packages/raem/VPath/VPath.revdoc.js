@@ -54,7 +54,7 @@ chronicle.
   },
   "chapter#section_structure>3;VPath structure": {
     "#0": [
-`VPath grammar only adds "@", ":" and "$" in addition to
+`VPath grammar only adds "@" and "$" in addition to
 encodeURIComponent characters. VPath grammar has two primary building
 blocks: vsteps and vparams.`
     ],
@@ -63,13 +63,13 @@ blocks: vsteps and vparams.`
   of which logically depends on the preceding one.`],
 [`A vstep can have a 'verb type' and a sequence of vparams, all
   logically independent of each other.`],
-[`A vparam always contains a ":"-prefixed vvalue. The vvalue can
-  optionally be preceded with a "$"-prefixed context-term.`],
+[`A vparam always contains a "$"-prefix. The vparam then has
+  an optional context-term and finally a "."-prefixed vvalue.`],
     ],
     "example#main_vpath_rules>1;Main VPath rules": abnf(
 `  vpath = "@" *(vstep "@") "@"
   vstep  = [ verb-type ] *vparam
-  vparam = [ "$" context-term ] ":" vvalue
+  vparam = "$" [ context-term ] "." vvalue
   vvalue = vpath / "$" / 1*( unencoded / pct-encoded )`
     ),
     "#1":
@@ -128,16 +128,16 @@ remaining entries contain the segment payload:
   segments`],
 [`"$" identifies a vparam segment with its second entry being a valid
   context term string and an optional third entry containing the vvalue`],
-[`":" identifies a vparam segment without a context-term and with an
+[`"$." identifies a vparam segment without a context-term and with an
   optional second entry containing the vvalue`],
 [`otherwise the segment type denotes the verb type of a verb segment
   and remaining entries containing the parameter segments`],
         ],
         "#1": [`
 JSON numbers and strings can only appear as param values of "$" or
-":"-segments. JSON objects cannot appear.
+"$."-segments. JSON objects cannot appear.
 A VPath which is used as a contextless param of a verb must appear
-directly without intermediate ":"-segments (unlike in the string VPath
+directly without intermediate "$."-segments (unlike in the string VPath
 construct).
 Conversely a verb used as a contextless param must still be wrapped
 inside a "@"-segment.`
@@ -148,9 +148,9 @@ inside a "@"-segment.`
 Shortcut VPath format is a compact object representation of a VPath as
 'human readable' JSON which can then be distributed to the canonical
 representation. In fact any JSON construct is a valid shortcut VPath,
-and as long as all initial array entries equal to "@", "$" and ":"  are
-escaped as [":", "@"], [":", "$"] and [":", ":"] the shortcut egment
-will resolve back into the original JSON construct.
+and as long as all initial array entries equal to "@", "$" and "$." are
+escaped as ["$.", "@"], ["$.", "$"] and ["$.", "$."] the shortcut
+segment will resolve back into the original JSON construct.
 `],
       },
       "chapter#section_cemented_vpaths>3;Cemented VPaths": {
@@ -247,7 +247,7 @@ something as complex as a fully parameterized computational function
 call.`,
     "example#main_verb_rules>0;Informative verb rules": abnf(
 `  vverb        = verb-type *vparam
-  vparam       = [ "$" context-term ] ":" vvalue
+  vparam       = "$" [ context-term ] "." vvalue
   verb-type    = 1*unencoded
   context-term = ALPHA *unreserved-nt
   vvalue       = vpath / "$" / 1*( unencoded / pct-encoded )
@@ -269,7 +269,7 @@ other possible constraints.`
 Verb for selecting the resource (typically a ScopeProperty) with the
 given name and which has the head as its scope.`,
           "example#example_verb_property>0;Property selector example": [
-`Triple pattern \`?s <urn:valos:.:myProp> ?o\` matches like:
+`Triple pattern \`?s <urn:valos:.$.myProp> ?o\` matches like:
 `, turtle(`
   ?o    valos:scope ?s
       ; valos:name "myProp"
@@ -281,7 +281,7 @@ given name and which has the head as its scope.`,
 Verb for selecting all resources (typically Relations) with the given
 name and which have the head as their source.`,
           "example#example_verb_sequence>0;Sequence selector example": [
-`Triple pattern \`?s <urn:valos:-out--:PERMISSIONS> ?o\` matches like:
+`Triple pattern \`?s <urn:valos:-out--$.PERMISSIONS> ?o\` matches like:
 `, turtle(`
   ?o    valos:source ?s
       ; valos:name "PERMISSIONS"
@@ -295,7 +295,7 @@ the only things that can have multiple instances with the same name).`,
 Verb for selecting the resource (typically an Entity) with the given
 name and which has the head as their container.`,
           "example#example_verb_container>0;Container selector example": [
-`Triple pattern \`?s <urn:valos:+:Scripts> ?o\` matches like:
+`Triple pattern \`?s <urn:valos:+$.Scripts> ?o\` matches like:
 `, turtle(`
   ?o    valos:parent ?s
       ; valos:name "Scripts"
@@ -308,7 +308,7 @@ Mnemonic: "+" is a list-view symbol of an expandable container.`,
 Verb for selecting the Media with the given name which has the
 head as their folder.`,
           "example#example_verb_content>0;Content selector example": [
-`Triple pattern \`?s <urn:valos:~:foo.vs> ?o\` matches like:
+`Triple pattern \`?s <urn:valos:~$.foo.vs> ?o\` matches like:
 `, turtle(`
   ?o    valos:folder ?s
       ; valos:name "foo.vs"
@@ -331,7 +331,7 @@ Mnemonic: follow line '-' to target.`,
           "#0": `
 Verb for selecting named subspaces and ghosts.`,
           "example#example_verb_language_subspace>0;Language subspace selector example": [
-`Triple pattern \`?s <urn:valos:.:myProp@_$lang:fi> ?o\` matches like:
+`Triple pattern \`?s <urn:valos:.$.myProp@_$lang.fi> ?o\` matches like:
 `, turtle(`
   ?_sp  valos:scope ?s
       ; valos:name "myProp"
@@ -345,10 +345,10 @@ denotes the ghost subspace of the identified resource inside the
 current resource.`
           ],
           "example#example_verb_ghost_subspace>1;Ghost subspace selector example": [
-`Triple pattern \`?s <urn:valos:_$~u4:ba54> ?o\` matches like:
+`Triple pattern \`?s <urn:valos:_$~u4.ba54> ?o\` matches like:
 `, turtle(`
   ?o    valos:ghostHost ?s
-      ; valos:ghostPrototype <urn:valos:$~u4:ba54>
+      ; valos:ghostPrototype <urn:valos:$~u4.ba54>
 `), `
 Mnemonic: The '_$~' is a 'subspace of ghoStS'.`,
           ],
@@ -392,7 +392,7 @@ Following principles apply:`,
   evaluator.`],
           ],
           "example#example_verb_computation>1;Computation selector example": [
-`Triple pattern \`?s <urn:valos:!$valk:add$number:10:@!:myVal@@> ?o\`
+`Triple pattern \`?s <urn:valos:!$valk.add$number.10$.@!$.myVal@@> ?o\`
 matches like:
 `, turtle(`
   ?_:0  valos:scope ?s
@@ -449,7 +449,7 @@ A VRID is a VPath which has VGRID as its first production
 (via vgrid-tail).`,
     "example#main_vrid_rules>0;Informative VRID rules": abnf(
 `  vrid        = "@" "$" vgrid "@" *(vstep "@") "@"
-  vgrid       = format-term ":" vgrid-value *vparam
+  vgrid       = format-term "." vgrid-value *vparam
 `),
     "#1": [`
 The VRID can be directly used as the NSS part of an 'urn:valos:'
@@ -478,7 +478,7 @@ The VGRID uniquely identifies a *global resource*. If a VRID contains
 a VGRID and no verbs this global resource is also the
 *referenced resource* of the VRID itself.`,
       "example#main_vgrid_rules>0;Informative VGRID rules": abnf(
-`  vgrid         = format-term ":" vgrid-value *vparam
+`  vgrid         = format-term "." vgrid-value *vparam
   format-term   = "~" 1*unreserved-nt
   vgrid-value   = 1*unreserved-nt
 
@@ -666,8 +666,8 @@ well as other possible constraints.`,
       "example#example_shared_vrid_verb_data>0;Shared example data": [
 `The examples below all share the following triples:`,
         turtle(`
-  <urn:valos:$~u4:f00b> a valos:Entity
-      ; valos:prototype <urn:valos:$~u4:f00b-b507-0763>
+  <urn:valos:$~u4.f00b> a valos:Entity
+      ; valos:prototype <urn:valos:$~u4.f00b-b507-0763>
 `),
       ],
       "chapter#section_structural_ghost>0;verb type \"`_`\": structural subspace sub-resource": {
@@ -677,13 +677,13 @@ of the directly _and indirectly_ owned resources of the instance
 prototype are flattened as _direct_ structural sub-resources of the
 instance itself. The instance is called *ghost host* of all such ghosts.`,
         "example#example_structural_ghost>0;Structural ghost triple inference": [
-`\`<urn:valos:$~u4:f00b@_$~u4:ba54>\` reads as "inside the
+`\`<urn:valos:$~u4.f00b@_$~u4.ba54>\` reads as "inside the
 instance resource \`f00b\` the ghost of the $~u4 resource \`ba54\`"
 and infers triples:
 `, turtle(`
-  <urn:valos:$~u4:f00b@_$~u4:ba54>
-        valos:ghostHost <urn:valos:$~u4:f00b>
-      ; valos:ghostPrototype <urn:valos:$~u4:ba54>
+  <urn:valos:$~u4.f00b@_$~u4.ba54>
+        valos:ghostHost <urn:valos:$~u4.f00b>
+      ; valos:ghostPrototype <urn:valos:$~u4.ba54>
 `),
         ],
         "#1": `
@@ -691,13 +691,13 @@ In case of deeper instantiation chains the outermost ghost segment
 provides inferences recursively to all of its sub-resources; nested
 ghost segments wont provide any further inferences.`,
         "example#example_structural_ghost_recursive>1;Recursive ghost triple inference": [
-`\`<urn:valos:$~u4:f00b@_$~u4:ba54@_$~u4:b7e4>\` reads as "inside
+`\`<urn:valos:$~u4.f00b@_$~u4.ba54@_$~u4.b7e4>\` reads as "inside
 the instance resource \`f00b\` the ghost of
-\`<urn:valos:$~u4:ba54@_$~u4:b7e4>\`" and infers triples:
+\`<urn:valos:$~u4.ba54@_$~u4.b7e4>\`" and infers triples:
 `, turtle(`
-  <urn:valos:$~u4:f00b@_$~u4:ba54@_$~u4:b7e4>
-        valos:ghostHost <urn:valos:$~u4:f00b>
-      ; valos:ghostPrototype <urn:valos:$~u4:ba54@_$~u4:b7e4>
+  <urn:valos:$~u4.f00b@_$~u4.ba54@_$~u4.b7e4>
+        valos:ghostHost <urn:valos:$~u4.f00b>
+      ; valos:ghostPrototype <urn:valos:$~u4.ba54@_$~u4.b7e4>
 `)
         ],
       },
@@ -713,12 +713,12 @@ This means that no matter where a subspace variant is defined in
 the prototype chain or in the nested sub-structure its value will be
 found.`,
         "example#example_structural_subspace>0;Structural subspace triple inference": [
-`\`<urn:valos:$~u4:f00b@.:myProp@_$lang:fi>\` is a lang fi variant of
+`\`<urn:valos:$~u4.f00b@.$.myProp@_$lang.fi>\` is a lang fi variant of
 f00b myProp and infers triples:
 `, turtle(`
-  <urn:valos:$~u4:f00b@.:myProp@_$lang:fi> a valos:ScopeProperty
-      ; valos:subspacePrototype <urn:valos:$~u4:f00b@.:myProp>
-                              , <urn:valos:$~u4:f00b-b507-0763@.:myProp@_$lang:fi>
+  <urn:valos:$~u4.f00b@.$.myProp@_$lang.fi> a valos:ScopeProperty
+      ; valos:subspacePrototype <urn:valos:$~u4.f00b@.$.myProp>
+                              , <urn:valos:$~u4.f00b-b507-0763@.$.myProp@_$lang.fi>
       ; valos:language "fi"
 `)
         ],
@@ -731,13 +731,13 @@ The verb segment-term can also specify triple inferences for *all*
 sub-resources in the subspace (not just for the immediate
 sub-resource of the selector segment).`,
         "example#example_structural_subspace_recursive>1;Structural subspace recursive inference": [
-`\`<urn:valos:$~u4:f00b@_$~u4:b453@_$lang:fi@_$~u4:b74e@.:myProp>\`
+`\`<urn:valos:$~u4.f00b@_$~u4.b453@_$lang.fi@_$~u4.b74e@.$.myProp>\`
 infers triples:
 `, turtle(`
-  <urn:valos:$~u4:f00b@_$~u4:b453@_$lang:fi@_$~u4:b74e@.:myProp> a valos:ScopeProperty
-      ; valos:ghostHost <urn:valos:$~u4:f00b>
-      ; valos:ghostPrototype <urn:valos:$~u4:b453@_$lang:fi@_$~u4:b74e@.:myProp>
-      ; valos:subspacePrototype <urn:valos:$~u4:f00b@_$~u4:b453@_$~u4:b74e@_$lang:fi@.:myProp>
+  <urn:valos:$~u4.f00b@_$~u4.b453@_$lang.fi@_$~u4.b74e@.$.myProp> a valos:ScopeProperty
+      ; valos:ghostHost <urn:valos:$~u4.f00b>
+      ; valos:ghostPrototype <urn:valos:$~u4.b453@_$lang.fi@_$~u4.b74e@.$.myProp>
+      ; valos:subspacePrototype <urn:valos:$~u4.f00b@_$~u4.b453@_$~u4.b74e@_$lang.fi@.$.myProp>
       ; valos:language "fi"
 `),
         ],
@@ -746,14 +746,14 @@ infers triples:
         "#0": `
 Structural properties infer a type, fixed owner and name.`,
         "example#example_structural_scope_property>0;Structural scope property triple inference": [
-`\`<urn:valos:$~u4:f00b@.:myProp>\` is a resource with fixed name
+`\`<urn:valos:$~u4.f00b@.$.myProp>\` is a resource with fixed name
 "myProp", dominant type ScopeProperty, $~u4 resource f00b as the owning
 scope and a structurally homologous prototype inside
 f00b-b507-0763 and thus infers triples:
 `, turtle(`
-  <urn:valos:$~u4:f00b@.:myProp> a valos:ScopeProperty
-      ; valos:scope <urn:valos:$~u4:f00b>
-      ; valos:inheritancePrototype <urn:valos:$~u4:f00b-b507-0763@.:myProp>
+  <urn:valos:$~u4.f00b@.$.myProp> a valos:ScopeProperty
+      ; valos:scope <urn:valos:$~u4.f00b>
+      ; valos:inheritancePrototype <urn:valos:$~u4.f00b-b507-0763@.$.myProp>
       ; valos:name "myProp"
 `),
         ],
@@ -768,14 +768,14 @@ In addition \`.S-\` and \`.O-\` denote \`valos:source\` \`valos:target\`
 which are the rdf:subject and rdf:object properties of a Relation.`,
         ],
         "example#example_structural_object>1;Structural rdf:object triple inference": [
-`\`<urn:valos:$~u4:f00b@-out--:PERMISSIONS:@.O-$~ih:8766>\` is a PERMISSIONS
+`\`<urn:valos:$~u4.f00b@-out--$.PERMISSIONS:@.O-$~ih.8766>\` is a PERMISSIONS
 relation with fixed ~ih target 8766 and infers triples:
 `, turtle(`
-  <urn:valos:$~u4:f00b@-out--:PERMISSIONS:@.O-$~ih:8766> a valos:Relation
-      ; valos:connectedSource <urn:valos:$~u4:f00b>
-      ; valos:prototype <urn:valos:$~u4:f00b-b507-0763@-out--:PERMISSIONS:@.O-$~ih:8766>
+  <urn:valos:$~u4.f00b@-out--$.PERMISSIONS:@.O-$~ih.8766> a valos:Relation
+      ; valos:connectedSource <urn:valos:$~u4.f00b>
+      ; valos:prototype <urn:valos:$~u4.f00b-b507-0763@-out--$.PERMISSIONS:@.O-$~ih.8766>
       ; valos:name "PERMISSIONS"
-      ; valos:target <urn:valos:$~u4:8766>
+      ; valos:target <urn:valos:$~u4.8766>
 `),
 `Mnemonic: these verbs are read right-to-left, eg. \`.O-\` -> 'Relation
 rdf:object property is valos:target'`
@@ -786,18 +786,18 @@ rdf:object property is valos:target'`
 Structural relations infer a type, fixed owner (connector), name and
 possibly source and target.`,
         "example#example_structural_relation>0;Structural relation triple inference": [
-`\`<urn:valos:$~u4:f00b@-out--:PERMISSIONS@_:1>\` is a resource with
+`\`<urn:valos:$~u4.f00b@-out--$.PERMISSIONS@_$.1>\` is a resource with
 fixed name "PERMISSIONS", dominant type Relation, ~u4 f00b as the
 source, a structurally homologous prototype inside f00b-b507-0763
 and thus infers triples:
 `, turtle(`
-  <urn:valos:$~u4:f00b@-out--:PERMISSIONS> a valos:Relation
-      ; valos:connectedSource <urn:valos:$~u4:f00b>
-      ; valos:inheritancePrototype <urn:valos:$~u4:f00b-b507-0763@-out--:PERMISSIONS>
+  <urn:valos:$~u4.f00b@-out--$.PERMISSIONS> a valos:Relation
+      ; valos:connectedSource <urn:valos:$~u4.f00b>
+      ; valos:inheritancePrototype <urn:valos:$~u4.f00b-b507-0763@-out--$.PERMISSIONS>
       ; valos:name "PERMISSIONS"
-  <urn:valos:$~u4:f00b@-out--:PERMISSIONS@_:1> a valos:Relation
-      ; valos:subspacePrototype <urn:valos:$~u4:f00b@-out--:PERMISSIONS>
-                              , <urn:valos:$~u4:f00b-b507-0763@-out--:PERMISSIONS@_:1>
+  <urn:valos:$~u4.f00b@-out--$.PERMISSIONS@_$.1> a valos:Relation
+      ; valos:subspacePrototype <urn:valos:$~u4.f00b@-out--$.PERMISSIONS>
+                              , <urn:valos:$~u4.f00b-b507-0763@-out--$.PERMISSIONS@_$.1>
 `),
         ],
       },
@@ -805,14 +805,14 @@ and thus infers triples:
         "#0": `
 Structural entities infer a type, fixed owner (parent) and name.`,
         "example#example_structural_entity>0;Structural Entity triple inference": [
-`\`<urn:valos:$~u4:f00b@+:Scripts>\` has a fixed name "scripts",
+`\`<urn:valos:$~u4.f00b@+$.Scripts>\` has a fixed name "scripts",
 dominant type Entity, $~u4 resource f00b as the owning container and
 a structurally homologous prototype inside f00b-b507-0763 and thus
 infers triples:
 `, turtle(`
-  <urn:valos:$~u4:f00b@+:Scripts> a valos:Entity
-      ; valos:parent <urn:valos:$~u4:f00b>
-      ; valos:inheritancePrototype <urn:valos:$~u4:f00b-b507-0763@+:Scripts>
+  <urn:valos:$~u4.f00b@+$.Scripts> a valos:Entity
+      ; valos:parent <urn:valos:$~u4.f00b>
+      ; valos:inheritancePrototype <urn:valos:$~u4.f00b-b507-0763@+$.Scripts>
       ; valos:name "scripts"
 `),
         ],
@@ -821,13 +821,13 @@ infers triples:
         "#0": `
 Structural medias infer a type, fixed owner (folder) and name.`,
         "example#example_structural_media>0;Structural Media triple inference": [
-`\`<urn:valos:$~u4:f00b@~:foo.vs>\` has a fixed name "foo.vs", dominant
+`\`<urn:valos:$~u4.f00b@~$.foo.vs>\` has a fixed name "foo.vs", dominant
 type Media, $~u4 resource f00b as the owning folder and a structurally
 homologous prototype inside f00b-b507-0763 and thus infers triples:
 `, turtle(`
-  <urn:valos:$~u4:f00b@~:foo.vs> a valos:Media
-      ; valos:folder <urn:valos:$~u4:f00b>
-      ; valos:inheritancePrototype <urn:valos:$~u4:f00b-b507-0763@~:foo.vs>
+  <urn:valos:$~u4.f00b@~$.foo.vs> a valos:Media
+      ; valos:folder <urn:valos:$~u4.f00b>
+      ; valos:inheritancePrototype <urn:valos:$~u4.f00b-b507-0763@~$.foo.vs>
       ; valos:name "foo.vs"
 `),
         ],
@@ -844,7 +844,7 @@ The list of definitive rules:
 `, abnf(
 `  vpath         = "@" *(vstep "@") "@"
   vstep         = [ verb-type ] *vparam
-  vparam        = [ "$" context-term ] ":" vvalue
+  vparam        = "$" [ context-term ] "." vvalue
   vvalue        = vpath / "$" / 1*( unencoded / pct-encoded )
 
   verb-type     = 1*unencoded
@@ -866,11 +866,11 @@ from other documents.
 The list of informative pseudo-rules:
 `, abnf(
 `  vverb           = verb-type *vparam
-  vcontext-param  = "$" context-term ":" vvalue
+  vcontext-param  = "$" context-term "." vvalue
 
   vrid            = "@" "$" vgrid "@" *(vstep "@") "@"
-  vgrid           = format-term ":" vgrid-value *vparam
-  format-term     = "~" 1*(ALPHA / DIGIT / "-" / "_" / ".")
+  vgrid           = format-term "." vgrid-value *vparam
+  format-term     = "~" 1*(ALPHA / DIGIT / "_")
   vgrid-value     = 1*( unencoded / pct-encoded )
 
   context-term-ns = ALPHA 0*30unreserved-nt ( ALPHA / DIGIT )
@@ -892,14 +892,14 @@ itself. These notes primarily relate to LL(1)-parseability:`
     SPARQL, Turtle nor JSON-LD have this limitation.`
   )],
 [`The nesting hierarchy can be manually quickly established by first
-  splitting a valid VPath string by the delimiter regex /(@$:)/
+  splitting a valid VPath string by the delimiter regex /(@$.)/
   (retaining these delimiters in the result). Then a tree structure is
   formed by traversing the array from left to right and dividing it to
   different nesting depths. The nesting depth is increased for the
-  initial "@" and for each "@" that is preceded by a ":" (corresponds
+  initial "@" and for each "@" that is preceded by a "." (corresponds
   to the 'vpath' production prefix of some 'short-param' production)
   and reducing the nesting depth for each "@" that is succeeded by a
-  "$", ":", "@" or EOF (corresponds to the terminator of the last
+  "$", "@" or EOF (corresponds to the terminator of the last
   'vgrid' or 'verb' production of some 'vpath' production). All
   remaining "@" correspond to non-final 'vgrid' or 'verb' production
   terminators of some 'vpath' rule production and thus don't change the
@@ -911,7 +911,7 @@ itself. These notes primarily relate to LL(1)-parseability:`
 This section contains considerations on the choice of character set and
 on where and how VPaths need or don't need to be encoded. There's a
 historical emphasis on the decision of which characters to use as
-delimiters (ie. "@", ":" and "$").`,
+delimiters (ie. "@", and "$").`,
 /*
 urn-reserved-gen-delims = "?" | "#"
  - can never appear unescaped, can't be used as delimiters
@@ -949,8 +949,8 @@ This leaves "?" | "#" and "/" | ":" | "@" and "$" | "+" | ";" | "," | "=" | "&"`
     "chapter#section_unencoded_contexts>1;Contexts where VPath doesn't need encoding": {
       "#0": [`
 In general VPaths don't require encoding in contexts where the VPath
-delimiters "@" / ":" / "$" and the encodeURIComponent result character
-set ALPHA / DIGIT / "-" / "_" / "." / "~" / "!" / "*" / "'" / "(" / ")"
+delimiters "@" / "$" and the encodeURIComponent result character set
+ALPHA / DIGIT / "-" / "_" / "." / "~" / "!" / "*" / "'" / "(" / ")"
 can be used.
 `, blockquote(
   `Editorial Note: "(" and ")" can in principle be

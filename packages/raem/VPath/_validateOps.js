@@ -2,8 +2,7 @@ const { dumpObject, wrapError } = require("../../tools/wrapError");
 const { segmentVPath, segmentVKeyPath } = require("./_segmentOps");
 
 const {
-  validateFormatTerm, validateVerbType, validateContextTerm, validateContextTermNS,
-  validateParamValueText,
+  validateFormatTerm, validateVerbType, validateContextTerm, validateParamValueText,
 } = require("./_validateTerminalOps");
 
 module.exports = {
@@ -18,7 +17,6 @@ module.exports = {
   validateVerbType,
   validateVParam,
   validateContextTerm,
-  validateContextTermNS,
   validateParamValueText,
 };
 
@@ -86,7 +84,7 @@ function validateVParam (element) {
   const expandedParam = (typeof element !== "string") ? element : segmentVPath(element);
   const [firstEntry, contextTerm, paramValue] =
       ((expandedParam.length === 1) || (expandedParam[0] !== "$"))
-          ? [":", undefined, expandedParam[1]]
+          ? ["$.", undefined, expandedParam[1]]
           : expandedParam;
   try {
     if (contextTerm !== undefined) {

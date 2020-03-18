@@ -2110,7 +2110,7 @@ export default class Vrapper extends Cog {
       // disabled very shortly. This whole sequence can be dropped.
       const propertyRawId = vActualAdd.getRawId();
       /*
-      const structuralName = (propertyRawId.match(/\.:(.*)$/) || [])[1];
+      const structuralName = (propertyRawId.match(/\.$\.(.*)$/) || [])[1];
       if (structuralName) {
         if ((structuralName === "this") || (structuralName === "self")) {
           this.warnEvent(`Structural property name '${

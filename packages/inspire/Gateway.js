@@ -918,7 +918,7 @@ export default class Gateway extends FabricEventTarget {
       };
       let entry = bvobBuffers[contentHash];
       if ((entry === undefined) && (contentHash[0] !== "@")) {
-        entry = bvobBuffers[`@$~bvob:${contentHash}@@`];
+        entry = bvobBuffers[`@$~bvob.${contentHash}@@`];
       }
       if (entry === undefined) {
         this.errorEvent("Could not locate precached content for bvob", contentHash,

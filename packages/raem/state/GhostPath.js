@@ -9,8 +9,8 @@ import { invariantifyString } from "~/tools/invariantify";
 export function createGhostRawId (
     protoRawId: string, hostRawId: string, hostProtoRawId: string = ""): string {
   if (hostRawId[0] !== "@") return derivedId(protoRawId, "instance", hostRawId);
-  let protoVRID = coerceAsVRID(protoRawId);
-  const hostProtoVRID = coerceAsVRID(hostProtoRawId);
+  let protoVRID = (protoRawId[0] === "@") ? protoRawId : coerceAsVRID(protoRawId);
+  const hostProtoVRID = (hostProtoRawId[0] === "@") ? hostProtoRawId : coerceAsVRID(hostProtoRawId);
   const lenSansLast = Math.min(protoVRID.length, hostProtoVRID.length) - 1;
   let lastStepSeparator;
   for (let i = 0; (i < lenSansLast) && (protoVRID[i] === hostProtoVRID[i]); ++i) {

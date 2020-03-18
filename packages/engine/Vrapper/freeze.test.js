@@ -26,7 +26,7 @@ afterEach(() => {
 });
 const entities = () => harness.createds.Entity;
 
-const bTestRootId = "@$~raw:b_test_chronicle@@";
+const bTestRootId = "@$~raw.b_test_chronicle@@";
 
 describe("Chronicle freezing", () => {
   const transactionA = Object.freeze({
@@ -69,7 +69,7 @@ describe("Chronicle freezing", () => {
     harness = await createEngineOracleHarness({ claimBaseBlock: false }, [transactionA]);
     await harness.chronicleEvent(freezeEventFor(testRootId)).getPremiereStory();
     expect(() => harness.chronicleEvent(lateEntityEvent))
-        .toThrow(/Cannot modify frozen.*@\$~raw:test_chronicle@@/);
+        .toThrow(/Cannot modify frozen.*@\$~raw.test_chronicle@@/);
     expect(entities().late_entity).toBeFalsy();
   });
 
@@ -132,7 +132,7 @@ describe("Chronicle freezing", () => {
     }, [transactionA, transactionB]);
     await harness.chronicleEvent(freezeEventFor(testRootId)).getPremiereStory();
     expect(() => harness.chronicleEvent(lateEntityEvent))
-        .toThrow(/Cannot modify frozen.*@\$~raw:test_chronicle@@/);
+        .toThrow(/Cannot modify frozen.*@\$~raw.test_chronicle@@/);
     expect(entities().late_entity).toBeFalsy();
     await harness.chronicleEvent(lateEntityEventB).getPremiereStory();
     expect(entities().late_entity_b).toBeTruthy();

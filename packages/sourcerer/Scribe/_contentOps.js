@@ -200,7 +200,7 @@ export function _determineEventMediaPreOps (connection: ScribeConnection,
   }
   if (update.content) {
     mediaInfo.contentHash = getRawIdFrom(update.content);
-    if (mediaInfo.contentHash.slice(0, 8) === "@$~bvob:") {
+    if (mediaInfo.contentHash.slice(0, 8) === "@$~bvob.") {
       mediaInfo.contentHash = mediaInfo.contentHash.slice(8, mediaInfo.contentHash.length - 2);
     }
   }

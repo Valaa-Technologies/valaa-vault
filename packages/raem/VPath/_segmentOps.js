@@ -1,6 +1,6 @@
 const { dumpObject, wrapError } = require("../../tools/wrapError");
 const {
-  validateVerbType, validateContextTerm,
+  validateFormatTerm, validateVerbType, validateContextTerm, validateParamValueText,
 } = require("./_validateTerminalOps");
 
 module.exports = {
@@ -10,6 +10,8 @@ module.exports = {
 
 /**
  * Parse a given VPath into a nested array structure.
+ *
+ * This documentation section is OUTDATED.
  *
  * This nested array has following constraints:
  * 1. All the nested entries are either arrays, non-empty strings, or
@@ -66,32 +68,30 @@ function segmentVKeyPath (vkey, vpath) {
     segments = ["@"];
     containerType = null;
   } else {
-    segments = (vkey === "@" || vkey === ":"  || vkey === "$") ? [vkey]
-        : (_segmentVPathString(vkey) || [".", [":", vkey]]);
+    segments = (vkey === "@" || vkey === "$." || vkey === "$")
+        ? [vkey]
+        : (_segmentVPathString(vkey) || [".", ["$.", vkey]]);
     containerType = segments[0];
   }
   if (vpath === undefined) return segments;
-  const vpathSegment = _segmentEntryOf(vpath, containerType);
+  const vpathSegment = _segmentEntryOf(containerType, vpath);
   if ((vkey === null) && (vpathSegment[0] === "@")) return vpathSegment;
   if (vpathSegment[0] !== null) segments.push(vpathSegment);
   else segments.push(...vpathSegment.slice(1));
   return segments;
 }
 
-function _segmentEntryOf (entry, targetType) {
+function _segmentEntryOf (targetType, entry) {
   try {
-    const segment
+    const segmentedEntry
         = (entry === undefined)
-            ? [":"]
+            ? ["$"]
         : (entry == null) || (typeof entry !== "object")
-            ? [":", entry]
+            ? ["$.", entry]
         : Array.isArray(entry)
-            ? _segmentArrayAsEntryOf(entry, targetType)
-        : Object.entries(entry).sort().reduce((target, [key, value]) => {
-          target.push(_asEntryOf("+", segmentVKeyPath(key, value)));
-          return target;
-        }, ["+", [":"]]);
-    const ret = _asEntryOf(targetType, segment);
+            ? _segmentArrayEntryOf(targetType, entry)
+            : _segmentObjectEntryOf(targetType, entry);
+    const ret = _simplifyAsEntryOf(targetType, segmentedEntry);
     return ret;
   } catch (error) {
     throw wrapError(error, new Error(`During _segmentEntryOf("${targetType}")`),
@@ -99,15 +99,23 @@ function _segmentEntryOf (entry, targetType) {
   }
 }
 
-function _asEntryOf (containerType, segment) {
+function _segmentObjectEntryOf (targetType, objectEntry) {
+  const ret = ["+", ["$"]];
+  for (const [key, value] of Object.entries(objectEntry)) {
+    ret.push(_simplifyAsEntryOf("+", segmentVKeyPath(key, value)));
+  }
+  return ret;
+}
+
+function _simplifyAsEntryOf (containerType, segment) {
   const type = segment[0];
   switch (containerType) {
   default:
     // entry of verb: wrap others verbs in vpath
-    if ((type === "$") || (type === ":")) break;
-  case ":": // eslint-disable-line no-fallthrough
+    if (type === "$" || type === "$.") break;
+  case "$.": // eslint-disable-line no-fallthrough
     // param value: convert into vpath or primitive value
-    if (type === ":") return segment[1];
+    if (type === "$.") return segment[1];
     if (type !== "@") return ["@", segment];
     break;
   case null: // eslint-disable-line no-fallthrough
@@ -115,7 +123,7 @@ function _asEntryOf (containerType, segment) {
     break;
   case "": // Top-level context: convert into vpath
   case "@": // vpath entry: convert into verb
-    if (type === "@") return [":", segment];
+    if (type === "@") return ["$.", segment];
     if (type === null) segment[0] = "@";
     break;
   case "$": // context-term: forbidden - this must always be string
@@ -132,30 +140,33 @@ function _asEntryOf (containerType, segment) {
  * - otherwise a verb/vgrid param.
  *   Do split-segmentation. VPaths are wrapped in non-contextual params.
  */
-function _segmentArrayAsEntryOf (array, containerType) {
+function _segmentArrayEntryOf (containerType, arrayEntry) {
   let i, segment;
   try {
-    if (array[0] === ":") {
-      return _extendVParamWithValue([":"], array, 1);
+    if (arrayEntry[0] === "$.") {
+      if (arrayEntry[1] === undefined) {
+        throw Error(`Invalid vparam: expected a value for segment '$.', got ${arrayEntry[1]}`);
+      }
+      return _extendVParamWithValue(["$."], arrayEntry, 1);
     }
-    if (array[0] === "$") {
+    if (arrayEntry[0] === "$") {
       return _extendVParamWithValue(
-          (array[1] == null || array[1] === "")
-              ? [":"]
-              : ["$", validateContextTerm(array[1])],
-          array, 2);
+          (arrayEntry[1] == null || arrayEntry[1] === "")
+              ? ["$"]
+              : ["$", validateContextTerm(arrayEntry[1])],
+          arrayEntry, 2);
     }
     i = 1;
-    segment = (array[0] === "@")
+    segment = (arrayEntry[0] === "@")
             ? ["@"]
-        : ((containerType === "") || (typeof array[0] !== "string"))
+        : ((containerType === "") || (typeof arrayEntry[0] !== "string"))
             ? (i--) && [containerType && ""]
-        : _segmentVPathString(array[0])
+        : _segmentVPathString(arrayEntry[0])
             || (((containerType === "@") || (containerType === null))
-                ? [validateVerbType(array[0])]
+                ? [validateVerbType(arrayEntry[0])]
                 : (i--) && [""]);
-    for (; i !== array.length; ++i) {
-      const entrySegment = _segmentEntryOf(array[i], segment[0]);
+    for (; i !== arrayEntry.length; ++i) {
+      const entrySegment = _segmentEntryOf(segment[0], arrayEntry[i]);
       if (entrySegment[0] !== null) segment.push(entrySegment);
       else segment.push(...entrySegment.slice(1));
     }
@@ -163,10 +174,10 @@ function _segmentArrayAsEntryOf (array, containerType) {
     return segment;
   } catch (error) {
     throw wrapError(error,
-        new Error(`During _segmentArrayAsEntryOf(containerType = "${containerType}")`),
-        "\n\tparts:", ...dumpObject(array),
+        new Error(`During _segmentArrayEntryOf(containerType = "${containerType}")`),
+        "\n\tparts:", ...dumpObject(arrayEntry),
         ...(i === undefined ? [] : [
-          `\n\tarray[${i}]:`, ...dumpObject(array[i]),
+          `\n\tarrayEntry[${i}]:`, ...dumpObject(arrayEntry[i]),
           "\n\tsegment:", ...dumpObject(segment),
         ]),
     );
@@ -187,96 +198,101 @@ function _extendVParamWithValue (vparam, parts, initial) {
   return vparam;
 }
 
-const _opIdOf = { "": 1, "@": 2, $: 4, ":": 5 };
-const _opName = [null, "eof", "vpath", "verb", "context term", "value"];
+const _vpathClass = 2;
+const _vparamClass = 3;
+const _escapeClass = 4;
+const _dotClass = 5;
+const _restClass = 6;
+const _classOf = { "": 1, "@": _vpathClass, $: _vparamClass, "%": _escapeClass, ".": _dotClass };
+
+function _isVerbClass (classId) { return classId >= 5; }
+const _className = [null, "eof", "vpath", "verb", "context term", "value"];
 
 function _segmentVPathString (vpath) {
-  const ops = [
+  const classOps = [
     null,
     _eof,
     _recurseIntoVPath,
+    _recurseIntoVParam,
+    _invalidEscape,
     _recurseIntoVerb,
-    _recurseIntoContextVParam,
-    _recurseIntoVParamValue,
+    _recurseIntoVerb,
   ];
-  let i = -1, nextOpId;
+  let i = -1, lookaheadClass;
   const firstOp = _advance();
-  const ret = ops[nextOpId]();
-  if ((firstOp === 3) && (ret.length === 1)) return undefined;
+  const ret = classOps[lookaheadClass]();
+  if (_isVerbClass(firstOp) && (ret.length === 1)) return undefined;
   if (i !== vpath.length) {
-    throw new Error(`Invalid VPath: expected eof at pos ${i}, got: "${vpath[i]}"`);
+    throw new Error(`Invalid VPath: expected eof at pos ${i}, got: "${
+        vpath[i]}", of vpath: "${vpath}"`);
   }
   return ret;
-  function _advance () {
-    return (nextOpId = (_opIdOf[vpath[++i] || ""]) || 3);
-  }
+  function _advance () { return (lookaheadClass = (_classOf[vpath[++i] || ""]) || _restClass); }
   function _eof () { return undefined; }
   function _recurseIntoVPath () {
     const vpathSegment = ["@"];
-    const vpathPos = i;
-    while (_advance() === 3 || (nextOpId === 4 && (vpathSegment.length === 1))) {
-      const vstepPos = i;
-      vpathSegment.push(ops[nextOpId]());
-      if (nextOpId !== 2) {
-        throw new Error(
-            `Invalid vstep at pos ${vstepPos}: expected a closing "@" at ${i}, got: "${vpath[i]}"`);
-      }
+    let openerPos = i;
+    let closerFailure;
+    if (_advance() === _vparamClass) {
+      vpathSegment.push(_recurseIntoVGRID());
+      if (lookaheadClass !== _vpathClass) closerFailure = "vgrid";
+      else _advance();
     }
-    if (nextOpId !== 2) {
-      throw new Error(
-          `Invalid VPath at pos ${vpathPos}: expected a closing "@" at ${i}, got: "${vpath[i]}"`);
+    for (; _isVerbClass(lookaheadClass); _advance()) {
+      openerPos = i;
+      vpathSegment.push(_recurseIntoVerb());
+      if (lookaheadClass !== _vpathClass) { closerFailure = "vstep"; break; }
+    }
+    if (lookaheadClass !== _vpathClass) {
+      throw new Error(`Invalid vpath char "${vpath[i]}" at pos ${
+          i}: expected a closing "@" for the ${closerFailure || "vpath"} opened at ${
+            openerPos} (of vpath: "${vpath}")`);
     }
     _advance();
     return vpathSegment;
   }
+  function _invalidEscape () {
+    throw new Error(`Invalid ${_className[lookaheadClass]} literal char "%" at pos ${
+      i}: only vparam values can contain escaped characters`);
+  }
   function _recurseIntoVerb () {
-    const verbSegment = [_extractLiteral(3)];
-    while (nextOpId >= 4) verbSegment.push(ops[nextOpId]());
+    const verbSegment = [validateVerbType(_extractLiteral(_dotClass))];
+    while (lookaheadClass === _vparamClass) verbSegment.push(_recurseIntoVParam());
     return verbSegment;
   }
-  function _recurseIntoContextVParam () {
+  function _recurseIntoVGRID () {
     _advance();
-    const vparamSegment = ["$", _extractLiteral(4)];
-    if (nextOpId !== 5) {
-      throw new Error(`Invalid vparam at pos ${i
-        }: expected ":" (context term must always be followed by value), got: "${vpath[i]}"`);
+    const vgridSegment = ["$", validateFormatTerm(_extractLiteral(_restClass))];
+    if (lookaheadClass !== _dotClass) {
+      throw new Error(`Invalid vgrid char "${vpath[i]}" at pos ${
+          i}: expected vgrid value separator "." (of vpath: "${vpath}")`);
     }
-    return _recurseIntoVParamValue(vparamSegment);
+    vgridSegment.push((_advance() === _vpathClass)
+        ? _recurseIntoVPath()
+        : validateParamValueText(_extractLiteral(_escapeClass)));
+    return vgridSegment;
   }
-  function _recurseIntoVParamValue (vparamSegment = [":"]) {
-    let value;
-    if (_advance() === 2) {
-      value = _recurseIntoVPath();
-    } else {
-      value = _extractLiteral(5);
-      if (!value) {
-        if (vpath[i] !== "$") {
-          throw new Error(`Invalid vparam value at pos ${i
-            }: expected value character or "$" for empty string, got: "${vpath[i]}"`);
-        }
-        _advance();
-      }
+  function _recurseIntoVParam () {
+    _advance();
+    const vparamSegment = (lookaheadClass < _dotClass) ? ["$"]
+        : (lookaheadClass === _dotClass) ? ["$."]
+        : ["$", validateContextTerm(_extractLiteral(_restClass))]; // can push lookahead to dotClass
+    if (lookaheadClass === _dotClass) {
+      vparamSegment.push((_advance() === _vpathClass)
+          ? _recurseIntoVPath()
+          : validateParamValueText(_extractLiteral(_escapeClass)));
     }
-    vparamSegment.push(value);
     return vparamSegment;
   }
-  function _extractLiteral (literalType) {
+  function _extractLiteral (minimumClass) {
     const literalBegin = i;
     let hasEscapes = false;
-    for (; nextOpId === 3; _advance()) {
-      if (vpath[i] === "%") {
-        if (literalType !== 5) {
-          throw new Error(`Invalid ${_opName[literalType]} literal at pos ${
-            i}: "%"; only vparam values can contain escaped characters`);
-        }
-        hasEscapes = true;
-      }
+    for (; lookaheadClass >= minimumClass; _advance()) {
+      if (lookaheadClass === _escapeClass) hasEscapes = true;
     }
+    if (lookaheadClass === _escapeClass) _invalidEscape();
     const literal = vpath.substring(literalBegin, i);
     // TODO(iridian, 2019-11): Could validate on the fly.
-    return (literalType === 3) ? validateVerbType(literal)
-        : (literalType === 4) ? validateContextTerm(literal)
-        : hasEscapes ? decodeURIComponent(literal)
-        : literal;
+    return hasEscapes ? decodeURIComponent(literal) : literal;
   }
 }

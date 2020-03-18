@@ -32,7 +32,7 @@ export default new GraphQLObjectType({
 
     ...generatedField("contentHash", new GraphQLNonNull(GraphQLString),
         `The content hash of this Bvob`,
-        bvob => bvob.get("id").rawId().match(/^@\$~bvob:([^@]*)@@$/)[1],
+        bvob => bvob.get("id").rawId().match(/^@\$~bvob.([^@]*)@@$/)[1],
         { affiliatedType: "Blob" },
     ),
 

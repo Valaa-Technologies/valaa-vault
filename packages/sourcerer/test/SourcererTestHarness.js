@@ -32,7 +32,7 @@ import { openDB } from "~/tools/html5/InMemoryIndexedDBUtils";
 import { dumpify, dumpObject, isPromise, wrapError } from "~/tools";
 
 export const testAuthorityURI = "valaa-test:";
-export const testRootId = "@$~raw:test_chronicle@@";
+export const testRootId = "@$~raw.test_chronicle@@";
 export const testChronicleURI = naiveURI.createChronicleURI(testAuthorityURI, testRootId);
 
 export function createSourcererTestHarness (options: Object, ...commandBlocks: any) {

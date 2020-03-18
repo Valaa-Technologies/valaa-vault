@@ -12,7 +12,7 @@ export function coerceAsVRID (rawId) {
     else {
       let gridType;
       let [gridValue, subPath] = rawId.split("/.:");
-      subPath = subPath ? `.:${subPath}@` : "";
+      subPath = subPath ? `.$.${subPath}@` : "";
       if ((gridValue.length === 36) && gridValue.match(_uuidv4Regex)) {
         gridType = "u4";
       } else if (gridValue.length === 40) {
@@ -23,7 +23,7 @@ export function coerceAsVRID (rawId) {
         gridType = "raw";
         gridValue = encodeURIComponent(gridValue);
       }
-      ret = `@$~${gridType}:${gridValue}@${subPath}@`;
+      ret = `@$~${gridType}.${gridValue}@${subPath}@`;
     }
     _migrateLookup[rawId] = ret;
   }

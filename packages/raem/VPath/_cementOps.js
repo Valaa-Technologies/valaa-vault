@@ -21,7 +21,7 @@ function _cementVPath (stack, vpath, componentType, index) {
       if (!Array.isArray(vpath)) return (typeof vpath === "string") ? vpath : ["§'", vpath];
       if (vpath.length === 1) return ["§->", null];
     } else if (!Array.isArray(vpath) || (vpath[0] === "@")) {
-      segmentedVPath = [":", vpath];
+      segmentedVPath = ["$.", vpath];
     }
     const elementType = segmentedVPath[0];
     const cementer = _cementersByType[elementType];
@@ -81,7 +81,7 @@ const _cementersByType = {
   "@": _cementStatements,
   "": _invalidCementHead,
   $: _cementVParam,
-  ":": _cementContextlessVParam,
+  "$.": _cementContextlessVParam,
   _: function _cementSubspace () {
     throw new Error("Cannot cement subspace selector: not implemented");
   },
@@ -107,14 +107,14 @@ function _cementStatements (stack, segmentedVPath) {
   }
   const fullPath = ["§->"];
   for (let i = 1; i !== segmentedVPath.length; ++i) {
-    if (segmentedVPath[i][0] !== ":") {
+    if (segmentedVPath[i][0] !== "$.") {
       extendVAKON(fullPath, _cementVPath(stack, segmentedVPath[i], "@", i));
     } else {
       const arrayPath = ["§[]"];
       do {
         arrayPath.push(_maybeEscapedCement(segmentedVPath[i])
             || _cementVPath(stack, segmentedVPath[i], "-", i));
-      } while ((++i !== segmentedVPath.length) && (segmentedVPath[i][0] === ":"));
+      } while ((++i !== segmentedVPath.length) && (segmentedVPath[i][0] === "$."));
       fullPath.push(arrayPath);
       --i;
       stack.isPluralHead = true;
@@ -125,7 +125,7 @@ function _cementStatements (stack, segmentedVPath) {
 
 function _cementContextlessVParam (stack, segmentedVPath, componentType) {
   return _cementVParam(
-      stack, ["$", "", segmentedVPath[1]], (componentType === "@") ? ":" : componentType);
+      stack, ["$", "", segmentedVPath[1]], (componentType === "@") ? "$." : componentType);
 }
 
 function _cementVParam (stack, segmentedVPath, componentType) {
@@ -134,7 +134,7 @@ function _cementVParam (stack, segmentedVPath, componentType) {
   const termContext = stack.context[contextTerm];
   if (!contextTerm) {
     if (segmentedVPath[2] === undefined) return ["§void"];
-    if (componentType === ":"
+    if (componentType === "$."
         && ((segmentedVPath[2] === null) || (typeof segmentedVPath[2] !== "object"))) {
       return ["§'", segmentedVPath[2]];
     }
@@ -217,7 +217,7 @@ function _cementProperty (stack, segmentedVPath, componentType) {
     if (typeof first !== "string") {
       throw new Error("Cannot cement object property: non-string name not supported");
     }
-    return [first, ["§'", ["@", [".", [":", first]]]]];
+    return [first, ["§'", ["@", [".", ["$.", first]]]]];
   }
   if (componentType === "+") {
     if (segmentedVPath.length > 3) {
@@ -240,12 +240,12 @@ function _cementProperty (stack, segmentedVPath, componentType) {
 }
 
 function _maybeEscapedCement (entry) {
-  if ((entry[0] === ":") && ((entry[1] === null) || (typeof entry[1] !== "object"))) {
+  if ((entry[0] === "$.") && ((entry[1] === null) || (typeof entry[1] !== "object"))) {
     return entry[1];
   }
   let verb = entry;
   if (entry[0] === "@") {
-    if ((verb.length > 1) && !verb.find((e, i) => i && e[0] !== ":")) return undefined;
+    if ((verb.length > 1) && !verb.find((e, i) => i && e[0] !== "$.")) return undefined;
     if (entry.length === 2) verb = entry[1];
   }
   if ((verb[0] === "+") || (verb[0][0] === "!")) return undefined;
@@ -276,33 +276,40 @@ function _cementNamedCollection (stack, segmentedVPath) {
       && _cementPluralProperty(stack, segmentedVPath, collectionType);
   if (byNameSelector && segmentedVPath.length <= 2) return byNameSelector;
   stack.isPluralHead = (collectionType[0] === "-");
-  segmentedVPath.splice(0, 2, stack.isPluralHead ? "§[]" : "§{}");
-  if (segmentedVPath.length > 1) {
-    if (stack.isPluralHead) _cementRest(paramStack, segmentedVPath, "-", 1);
-    else {
-      for (let i = 1; i !== segmentedVPath.length; ++i) {
-        if (segmentedVPath[i][0] !== "@") {
-          throw new Error(`Cannot cement named dictionary '${
-            collectionType}': non-VPath params not supported`);
-        }
-        if ((segmentedVPath[i].length !== 2) || (segmentedVPath[i][1][0] !== ".")) {
-          throw new Error(`Cannot cement named dictionary '${
-            collectionType}': each param must be a path containing a single property verb`);
-        }
-        segmentedVPath[i] = _cementVPath(paramStack, segmentedVPath[i][1], "+", i);
+  let ret;
+  if (segmentedVPath.length <= 2) {
+    ret = [stack.isPluralHead ? "§[]" : "§{}"];
+  } else if (stack.isPluralHead) {
+    ret = segmentedVPath;
+    ret.splice(0, 2, "§[]");
+    _cementRest(paramStack, ret, "-", 1);
+  } else {
+    ret = segmentedVPath;
+    ret.splice(0, 2);
+    for (let i = 0; i !== segmentedVPath.length; ++i) {
+      if (segmentedVPath[i][0] !== "@") {
+        throw new Error(`Cannot cement named dictionary '${
+          collectionType}': non-VPath params not supported`);
       }
+      if ((segmentedVPath[i].length !== 2) || (segmentedVPath[i][1][0] !== ".")) {
+        throw new Error(`Cannot cement named dictionary '${
+          collectionType}': each param must be a path containing a single property verb`);
+      }
+      ret[i] = _cementVPath(paramStack, segmentedVPath[i][1], "+", i);
     }
+    ret.sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
+    ret.unshift("§{}");
   }
   // if (!isSequence) _flattenObjectSetters(cementedCollection);
   return !byNameSelector
-          ? segmentedVPath
+          ? ret
       : stack.isPluralHead
-          ? ["§concat", byNameSelector, segmentedVPath]
-          : ["§append", ["§{}"], byNameSelector, segmentedVPath];
+          ? ["§concat", byNameSelector, ret]
+          : ["§append", ["§{}"], byNameSelector, ret];
 }
 
 function _tryAsNameParam (vparam) {
-  if (Array.isArray(vparam) && ((vparam[0] === "$") || (vparam[0] === ":"))
+  if (Array.isArray(vparam) && ((vparam[0] === "$") || (vparam[0] === "$."))
       && !vparam[1] && !vparam[2]) return null;
   return vparam;
 }

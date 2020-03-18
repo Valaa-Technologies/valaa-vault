@@ -76,7 +76,7 @@ this document.
          authority-uri               chronicle-id   resource-id         coupling           lens
 ┌──────────────┴───────────────┐    ┌─────┴──────┐ ┌─────┴──────┐  ┌───────┴────────┐ ┌─────┴──────┐
 
-valaa-test://example.com:123/dev?id=@$~raw:ab...@@#987b-72...8263?=coupling=relations&lens=ROOT_LENS
+valaa-test://example.com:123/dev?id=@$~raw.ab...@@#987b-72...8263?=coupling=relations&lens=ROOT_LENS
 
                                                    └─────┬──────┘  └──────────────┬────────────────┘
                                                         nss                  q-component
@@ -176,6 +176,8 @@ using `+` <-> `-`, `/` <-> `_` character mappings.
 
 ### 1.2.1 secondary-part - lenient naming, restricted ownership
 
+This section is OBSOLETE and needs to be update to new VPath structure.
+
 The *secondary* id part is a qualified name which can be expanded into
 an URI. This URI then defines how the referred resource is determined
 from the primary resource.
@@ -187,25 +189,19 @@ The expansion is done by replacing the prefix with a corresponding
 value. Currently the only allowed prefixes and their semantics is
 limited to the exclusive list of three entries:
 
-1. prefix `@:` - instance-ghost ids
-  `urn:valos:ba54/@:b7e4` reads as "inside the instanced resource
+1. prefix `_` - instance-ghost ids
+  `urn:valos:$~raw.ba54@_$~raw.b7e4` reads as "inside the instanced resource
   `ba54` the ghost of the regular resource `b7e4`".
   The expansion of the prefix `@:` is `valos:urn:` itself.
   This means nested ghost paths are allowed, like so:
-  `urn:valos:f00b/@:ba54/@:b7e4` reads as "inside the instance `f00b`
-  the ghost of `urn:valos:ba54/@:b7e4`.
-2. prefix `.:` - property ids
-  `urn:valos:f00b/.:propName` - a directly owned Property resource with
-  a constant name `propName` and prototype which is dynamically linked
-  to the corresponding Property in the prototype of `urn:valos:f00b`,
-  like so: `${prototype("urn:valos:f00b")}/.:propName`.
-3. prefix `$:` - virtual resource ids
-  permanently immaterial ghosts with nevertheless separate identities.
-  When used as prototype with instance-ghosts allows separate
-  instantiation of the same fundamental prototype in the same instance:
-  `urn:valos:f00b/$:1/@:b74e`
-  `urn:valos:f00b/$:2/@:b74e`
-  `urn:valos:f00b/$:textsalt/@:b74e`
+  `urn:valos:$~raw.f00b@_$~raw.ba54@_$~raw.b7e4` reads as "inside the
+  instance `f00b` the ghost of `urn:valos:$~raw.ba54@_$~raw.b7e4`.
+2. prefix `.` - property ids
+  `urn:valos:$~raw.f00b@.$.propName` - a directly owned Property
+  resource with a constant name `propName` and prototype which is
+  dynamically linked to the corresponding Property in the prototype of
+  `urn:valos:$~raw.f00b`,
+  like so: `${prototype("urn:valos:f00b")}@.$.propName`.
 
 Resources identified by these parts are tightly bound to the resource
 identified by the primary part (which must exist). They must be always

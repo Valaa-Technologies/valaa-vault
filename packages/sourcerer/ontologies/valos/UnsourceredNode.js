@@ -1,6 +1,6 @@
 module.exports = {
   UnsourceredNode: {
-    "@type": "valos-raem:Type",
+    "@type": "valos_raem:Type",
     "revdoc:brief": "absent, sourceable node type",
     "rdfs:subClassOf": ["valos:Resource", "valos:SourcerableNode"],
     "rdfs:comment":

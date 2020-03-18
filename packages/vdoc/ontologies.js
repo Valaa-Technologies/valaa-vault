@@ -10,11 +10,11 @@ const prefixes = {
 };
 
 module.exports = extendOntology("vdoc", "https://valospace.org/vdoc#", prefixes, {
-  Class: { "@type": ["vdoc:Class", "valos-kernel:Class"],
+  Class: { "@type": ["vdoc:Class", "valos_kernel:Class"],
     "rdfs:subClassOf": "rdfs:Class",
     "rdfs:comment": "The class of classes which are defined by vdoc or a vdoc extension",
   },
-  Property: { "@type": ["vdoc:Class", "valos-kernel:Class"],
+  Property: { "@type": ["vdoc:Class", "valos_kernel:Class"],
     "rdfs:subClassOf": "rdf:Property",
     "rdfs:comment": "The class of properties which are defined by vdoc or a vdoc extension",
   },

@@ -1,6 +1,6 @@
 module.exports = {
   Entity: {
-    "@type": "valos-raem:Type",
+    "@type": "valos_raem:Type",
     "revdoc:brief": "primary resource tree node type",
     "rdfs:subClassOf": [
       "valos:Resource", "valos:Extant", "valos:Scope",
@@ -27,13 +27,13 @@ node can act as a root resource.
   },
 
   parent: {
-    "@type": "valos-raem:EventLoggedField",
+    "@type": "valos_raem:EventLoggedField",
     "rdfs:subPropertyOf": "valos:directory",
     "rdfs:domain": "valos:Entity",
     "rdfs:range": "valos:SourceredNode",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos-raem:isOwnedBy": true,
-    "valos-raem:coupledField": "valos:entities",
+    "valos_raem:isOwnedBy": true,
+    "valos_raem:coupledField": "valos:entities",
     "rdfs:comment":
 `The parent (and directory, owner) node of this entity.`,
   },
@@ -41,12 +41,12 @@ node can act as a root resource.
   // Note: 'entities' has domain SourceredNode but is listed
   // here due to its coupling with 'parent'.
   entities: {
-    "@type": "valos-raem:EventLoggedField",
+    "@type": "valos_raem:EventLoggedField",
     "rdfs:subPropertyOf": "valos:entries",
     "rdfs:domain": "valos:SourceredNode",
     "rdfs:range": "rdfs:List",
-    "valos-raem:isOwnerOf": true,
-    "valos-raem:coupledField": "valos:parent",
+    "valos_raem:isOwnerOf": true,
+    "valos_raem:coupledField": "valos:parent",
     "rdfs:comment":
 `The ordered list of entities contained in this sourcered node.`,
   },

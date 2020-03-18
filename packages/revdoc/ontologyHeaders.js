@@ -64,7 +64,7 @@ const fields = {
   "header#2;rdfs:range": "rdfs:range",
   "header#3;@type": "rdf:type",
   "header#4;rdfs:subPropertyOf": "rdfs:subPropertyOf",
-  "header#5;valos-raem:coupledField": "valos-raem:coupledField",
+  "header#5;valos_raem:coupledField": "valos_raem:coupledField",
 };
 
 const verbs = {

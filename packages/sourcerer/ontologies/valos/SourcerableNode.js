@@ -1,6 +1,6 @@
 module.exports = {
   SourcerableNode: {
-    "@type": "valos-raem:Type",
+    "@type": "valos_raem:Type",
     "rdfs:subClassOf": "valos:Resource",
     "revdoc:brief": "sourcerable node interface",
     "rdfs:comment":
@@ -39,11 +39,11 @@ be eventually locateable from anywhere.`,
   */
 
   chronicleRoot: {
-    "@type": "valos-raem:GeneratedField",
+    "@type": "valos_raem:GeneratedField",
     "rdfs:domain": "valos:SourcerableNode",
     "rdfs:range": "valos:SourceredNode",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos-raem:expressor": "$valos-sourcerer:resolveChronicleRoot",
+    "valos_raem:expressor": "$valos_sourcerer.resolveChronicleRoot",
     "rdfs:comment":
 `The chronicle root node of this sourcerable (ie. the nearest ancestor,
 possibly this sourcerable itself self which has a non-null
@@ -51,22 +51,22 @@ valos:authorityURI).`,
   },
 
   chronicleURI: {
-    "@type": "valos-raem:GeneratedField",
+    "@type": "valos_raem:GeneratedField",
     "rdfs:domain": "valos:SourcerableNode",
     "rdfs:range": "xsd:anyURI", // still a literal
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos-raem:expressor": "$valos-sourcerer:resolveChronicleURI",
+    "valos_raem:expressor": "$valos_sourcerer.resolveChronicleURI",
     "rdfs:comment":
 `The chronicle URL of the event log that contain this potentially
 absent sourcerable as is known by the current view of the world.`,
   },
 
   url: {
-    "@type": "valos-raem:GeneratedField",
+    "@type": "valos_raem:GeneratedField",
     "rdfs:domain": "valos:SourcerableNode",
     "rdfs:range": "xsd:anyURI", // still a literal
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
-    "valos-raem:expressor": ["$valk:add:@!$V:chronicleURI@", [":", "#"], ":@!$V:id@"],
+    "valos_raem:expressor": ["$valk.add$.@!$V.chronicleURI@", ["$.", "#"], "$.@!$V.id@"],
     "rdfs:comment":
 `The authoritative URL string of this sourcerable in the current view
 of the world. Always equivalent to a catenation of
@@ -77,23 +77,23 @@ of this resource`,
   // Deprecated fields
 
   partition: {
-    "@type": "valos-raem:AliasField",
+    "@type": "valos_raem:AliasField",
     "revdoc:deprecatedInFavorOf": "valos:chronicleRoot",
-    "valos-raem:aliasOf": "valos:chronicleRoot",
+    "valos_raem:aliasOf": "valos:chronicleRoot",
     "rdfs:subPropertyOf": "valos:chronicleRoot",
     "rdfs:domain": "valos:SourcerableNode",
     "rdfs:range": "valos:SourceredNode",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos-raem:expressor": "$valos-sourcerer:resolveChronicleRoot",
+    "valos_raem:expressor": "$valos_sourcerer.resolveChronicleRoot",
     "rdfs:comment":
 `The chronicle root node of this sourcerable, ie. the nearest ancestor
 (possibly self) with a non-null valos:authorityURI.`,
   },
 
   partitionURI: {
-    "@type": "valos-raem:AliasField",
+    "@type": "valos_raem:AliasField",
     "revdoc:deprecatedInFavorOf": "valos:chronicleURI",
-    "valos-raem:aliasOf": "valos:chronicleURI",
+    "valos_raem:aliasOf": "valos:chronicleURI",
     "rdfs:subPropertyOf": "valos:chronicleURI",
     "rdfs:domain": "valos:SourcerableNode",
     "rdfs:range": "xsd:anyURI",

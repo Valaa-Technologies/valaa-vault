@@ -74,15 +74,15 @@ ValOS resources.`
       "table#>0;prefixes": ontologyHeaders.prefixes,
     },
     "chapter#section_types>4": {
-      "dc:title": [em(prefix), ` `, ref("valos-raem:Type", "@valos/raem#Type"), ` vocabulary`],
+      "dc:title": [em(prefix), ` `, ref("valos_raem:Type", "@valos/raem#Type"), ` vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.types,
-        "vdoc:entries": filterKeysWithAnyOf("@type", "valos-raem:Type", vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("@type", "valos_raem:Type", vocabulary),
       },
     },
     "chapter#section_fields>5": {
-      "dc:title": [em(prefix), ` `, ref("valos-raem:Field", "@valos/raem#Field"), ` vocabulary`],
+      "dc:title": [em(prefix), ` `, ref("valos_raem:Field", "@valos/raem#Field"), ` vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.fields,
@@ -95,7 +95,7 @@ ValOS resources.`
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.vocabularyOther,
         "vdoc:entries": filterKeysWithNoneOf("@type", [
-          "valos-raem:Type", "valos-kernel:Property", ...valosRaemFieldClasses,
+          "valos_raem:Type", "valos_kernel:Property", ...valosRaemFieldClasses,
         ], vocabulary),
       },
     },

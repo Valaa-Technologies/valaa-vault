@@ -180,11 +180,11 @@ files.`,
       "table#>0;prefixes": ontologyHeaders.prefixes,
     },
     "chapter#section_verbs>6": {
-      "dc:title": [em(prefix), ` `, ref("valos-raem:Verb", "@valos/raem#Verb"), ` vocabulary`],
+      "dc:title": [em(prefix), ` `, ref("valos_raem:Verb", "@valos/raem#Verb"), ` vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.verbs,
-        "vdoc:entries": filterKeysWithAnyOf("@type", "valos-raem:Verb", vocabulary),
+        "vdoc:entries": filterKeysWithAnyOf("@type", "valos_raem:Verb", vocabulary),
       },
     },
     "chapter#section_vocabulary_other>8": {
@@ -193,7 +193,7 @@ files.`,
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.vocabularyOther,
         "vdoc:entries": filterKeysWithNoneOf("@type", [
-          "valos-raem:Verb",
+          "valos_raem:Verb",
         ], vocabulary),
       },
     },

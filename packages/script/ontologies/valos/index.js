@@ -1,7 +1,7 @@
 module.exports = {
   nameAlias: {
-      "@type": "valos-raem:AliasField",
-      "valos-raem:aliasOf": "valos:name",
+      "@type": "valos_raem:AliasField",
+      "valos_raem:aliasOf": "valos:name",
       "rdfs:subPropertyOf": "valos:name",
       "rdfs:domain": "valos:Extant",
       "rdfs:range": "xsd:string",
@@ -14,8 +14,8 @@ This is an alias of valos:name for circumventing conflicts with the
 native javascript property 'name' in certain execution contexts`,
   },
   prototypeAlias: {
-      "@type": "valos-raem:AliasField",
-      "valos-raem:aliasOf": "valos:prototype",
+      "@type": "valos_raem:AliasField",
+      "valos_raem:aliasOf": "valos:prototype",
       "rdfs:subPropertyOf": "valos:prototype",
       "rdfs:domain": "valos:Extant",
       "rdfs:range": "valos:Resource",

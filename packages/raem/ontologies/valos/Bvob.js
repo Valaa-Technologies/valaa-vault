@@ -1,6 +1,6 @@
 module.exports = {
   Bvob: {
-    "@type": "valos-raem:Type",
+    "@type": "valos_raem:Type",
     "revdoc:brief": "Binary ValOS Object type",
     "rdfs:subClassOf": "valos:Resource",
     "rdfs:comment":
@@ -12,40 +12,40 @@ that octet-stream, prefixed with the hash algorithm, as their VGRID.`
   // octet-streamprefixed with "hashV240:" as their VGRID.`,
 
   hashAlgorithm: {
-    "@type": "valos-raem:GeneratedField",
+    "@type": "valos_raem:GeneratedField",
     "rdfs:domain": "valos:Bvob",
     "rdfs:range": "xsd:string",
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
-    "valos-raem:expressor": "$valos-raem:resolveContextTerm:@!$$valos:vrid:1:1@",
+    "valos_raem:expressor": "$valos_raem.resolveContextTerm:@!$valos.vrid$.1$.1@",
     "rdfs:comment":
 `The hash algorithm used to create the content hash of this Bvob`,
   },
 
   contentHash: {
-    "@type": "valos-raem:GeneratedField",
+    "@type": "valos_raem:GeneratedField",
     "rdfs:domain": "valos:Bvob",
     "rdfs:range": "xsd:string",
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
-    "valos-raem:expressor": "!$$valos:vrid:1:3",
+    "valos_raem:expressor": "!$valos.vrid$.1$.3",
     "rdfs:comment":
 `The content hash of the octet-stream associated with this Bvob`,
   },
 
   contentLength: {
-    "@type": "valos-raem:GeneratedField",
+    "@type": "valos_raem:GeneratedField",
     "rdfs:domain": "valos:Bvob",
     "rdfs:range": "xsd:nonNegativeInteger",
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
-    "valos-raem:expressor": "$valos-raem:resolveContentLength",
+    "valos_raem:expressor": "$valos_raem.resolveContentLength",
     "rdfs:comment":
 `The number of octets in the octet-stream associated with this Bvob.`,
   },
 
   contentReferrers: {
-    "@type": "valos-raem:CoupledField",
+    "@type": "valos_raem:CoupledField",
     "rdfs:domain": "valos:Bvob",
     "rdfs:range": "valos:Extant",
-    "valos-raem:defaultCoupledField": "valos:content",
+    "valos_raem:defaultCoupledField": "valos:content",
     "rdfs:comment":
 `The unordered set of valos:content references to this Bvob from
 within this view of the world.`,

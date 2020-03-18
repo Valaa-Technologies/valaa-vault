@@ -1,6 +1,6 @@
 module.exports = {
   SourceredNode: {
-    "@type": "valos-raem:Type",
+    "@type": "valos_raem:Type",
     "revdoc:brief": "sourcered node interface",
     "rdfs:subClassOf": [
       "valos:Resource", "valos:Extant", "valos:Scope",
@@ -16,36 +16,36 @@ graph.`,
   },
 
   container: {
-    "@type": "valos-raem:EventLoggedField",
+    "@type": "valos_raem:EventLoggedField",
     "rdfs:subPropertyOf": "valos:owner",
     "rdfs:domain": "valos:SourceredNode",
     "rdfs:range": "valos:SourceredNode",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos-raem:isOwnedBy": true,
-    "valos-raem:coupledField": "valos:nodes",
+    "valos_raem:isOwnedBy": true,
+    "valos_raem:coupledField": "valos:nodes",
     "rdfs:comment":
 `The container (and owner) node of this sourcered node.`,
   },
 
   nodes: {
-    "@type": "valos-raem:EventLoggedField",
+    "@type": "valos_raem:EventLoggedField",
     "rdfs:subPropertyOf": "valos:ownlings",
     "rdfs:domain": "valos:SourceredNode",
     "rdfs:range": "rdfs:List",
-    "valos-raem:isOwnerOf": true,
-    "valos-raem:coupledField": "valos:container",
+    "valos_raem:isOwnerOf": true,
+    "valos_raem:coupledField": "valos:container",
     "rdfs:comment":
 `The ordered list of all nodes directly contained by this sourcered
 node.`,
   },
 
   authorityURI: {
-    "@type": "valos-raem:EventLoggedField",
+    "@type": "valos_raem:EventLoggedField",
     "rdfs:domain": "valos:SourceredNode",
     "rdfs:range": "xsd:anyURI", // still a literal
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos-raem:isDuplicateable": false,
-    "valos-raem:ownDefaultValue": null,
+    "valos_raem:isDuplicateable": false,
+    "valos_raem:ownDefaultValue": null,
     "rdfs:comment":
 `The authority URL of this sourcered chronicle root node. If this field
 is null then this sourcered node is not a root node. Setting this field
@@ -57,11 +57,11 @@ frozen.`,
   },
 
   createdAt: {
-    "@type": "valos-raem:GeneratedField",
+    "@type": "valos_raem:GeneratedField",
     "rdfs:domain": "valos:SourceredNode",
     "rdfs:range": "xsd:double",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos-raem:expressor": "$valos-sourcerer:resolveCreatedAt",
+    "valos_raem:expressor": "$valos_sourcerer.resolveCreatedAt",
     "rdfs:comment":
 `The creation UNIX epoch time of this node. This is defined as the
 log aspect timestamp of the CREATED event which impressed this node
@@ -69,11 +69,11 @@ into being.`,
   },
 
   modifiedAt: {
-    "@type": "valos-raem:GeneratedField",
+    "@type": "valos_raem:GeneratedField",
     "rdfs:domain": "valos:SourceredNode",
     "rdfs:range": "xsd:double",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos-raem:expressor": "$valos-sourcerer:resolveModifiedAt",
+    "valos_raem:expressor": "$valos_sourcerer.resolveModifiedAt",
     "rdfs:comment":
 `The latest modification UNIX epoch time of this node. This is defined
 as the log aspect timestamp of the most recent event with a direct
@@ -83,9 +83,9 @@ impression on this Media resource.`,
   // Deprecated fields
 
   partitionAuthorityURI: {
-    "@type": "valos-raem:AliasField",
+    "@type": "valos_raem:AliasField",
     "revdoc:deprecatedInFavorOf": "valos:authorityURI",
-    "valos-raem:aliasOf": "valos:authorityURI",
+    "valos_raem:aliasOf": "valos:authorityURI",
     "rdfs:subPropertyOf": "valos:authorityURI",
     "rdfs:domain": "valos:SourceredNode",
     "rdfs:range": "xsd:string",

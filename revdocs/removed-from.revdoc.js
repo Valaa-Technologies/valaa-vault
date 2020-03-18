@@ -10,7 +10,7 @@ const {
 const { name, version } = require("../package");
 const {
   ontologies: {
-    "valos-removed-from": { prefix, prefixIRI, prefixes, vocabulary, context },
+    valos_removed_from: { prefix, prefixIRI, prefixes, vocabulary, context },
   },
 } = require("../packages/kernel");
 
@@ -62,7 +62,7 @@ the primary ValOS resources removed-from fields.`
       "table#>0;prefixes": ontologyHeaders.prefixes,
     },
     "chapter#section_fields>5": {
-      "dc:title": [em(prefix), ` `, ref("valos-raem:Field", "@valos/raem#Field"), ` vocabulary`],
+      "dc:title": [em(prefix), ` `, ref("valos_raem:Field", "@valos/raem#Field"), ` vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
         "vdoc:headers": ontologyHeaders.fields,

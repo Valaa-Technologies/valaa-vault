@@ -1,6 +1,6 @@
 module.exports = {
   ScopeProperty: {
-    "@type": "valos-raem:Type",
+    "@type": "valos_raem:Type",
     "revdoc:brief": "scope property type",
     "rdfs:subClassOf": ["valos:Resource", "valos:Extant", "rdf:Statement"],
     "rdfs:comment":
@@ -12,23 +12,23 @@ block as an rdf:Statement reification of hypertwinned triples.`,
   },
 
   scope: {
-    "@type": "valos-raem:EventLoggedField",
+    "@type": "valos_raem:EventLoggedField",
     "rdfs:subPropertyOf": "valos:owner",
     "rdfs:domain": "valos:ScopeProperty",
     "rdfs:range": "valos:Scope",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos-raem:isOwnedBy": true,
-    "valos-raem:coupledField": "valos:properties",
+    "valos_raem:isOwnedBy": true,
+    "valos_raem:coupledField": "valos:properties",
     "rdfs:comment":
 `The scope resource (and owner) of this ScopeProperty.`,
   },
 
   value: {
-    "@type": "valos-raem:EventLoggedField",
-    "valos-raem:expressor": "$valos-raem:resolveVPath",
-    "valos-raem:impressor": "$valos-raem:impressViaVPath",
+    "@type": "valos_raem:EventLoggedField",
+    "valos_raem:expressor": "$valos_raem.resolveVPath",
+    "valos_raem:impressor": "$valos_raem.impressViaVPath",
     "rdfs:domain": "valos:ScopeProperty",
-    "rdfs:range": ["xsd:string", "valos-raem:VPath"],
+    "rdfs:range": ["xsd:string", "valos_raem:VPath"],
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "rdfs:comment":
 `The value of this ScopeProperty.`,
@@ -37,11 +37,11 @@ block as an rdf:Statement reification of hypertwinned triples.`,
   // Hypertwin triple reification
 
   twinspace: {
-    "@type": "valos-raem:GeneratedField",
+    "@type": "valos_raem:GeneratedField",
     "rdfs:domain": "valos:ScopeProperty",
     "rdfs:range": "rdfs:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos-raem:expressor": "$valos-script:resolveTwinspace",
+    "valos_raem:expressor": "$valos_script.resolveTwinspace",
     "rdfs:comment":
 `The twinspace of this ScopeProperty. Equates to the expanded prefix
 of the valos:name of this ScopeProperty using the context of this
@@ -51,12 +51,12 @@ the twinspace id of the scope resource for this twinspace.`,
   },
 
   subject: {
-    "@type": "valos-raem:GeneratedField",
+    "@type": "valos_raem:GeneratedField",
     "rdfs:subPropertyOf": "rdf:subject",
     "rdfs:domain": "valos:ScopeProperty",
     "rdfs:range": "rdfs:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos-raem:expressor": "$valos-script:resolveTwinSubject",
+    "valos_raem:expressor": "$valos_script.resolveTwinSubject",
     "rdfs:comment":
 `The subject of this ScopeProperty when interpreted as a reified
 rdf:Statement. Equates to the twinspace id of the scope resource using
@@ -64,12 +64,12 @@ the valos:twinspace of this ScopeProperty.`,
   },
 
   predicate: {
-    "@type": "valos-raem:GeneratedField",
+    "@type": "valos_raem:GeneratedField",
     "rdfs:subPropertyOf": "rdf:predicate",
     "rdfs:domain": "valos:ScopeProperty",
     "rdfs:range": "rdfs:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos-raem:expressor": "$$valos:name",
+    "valos_raem:expressor": "$valos.name",
     "rdfs:comment":
 `The predicate of this ScopeProperty when interpreted as a reified
 rdf:Statement. Equates to the IRI expansion of valos:name of this
@@ -77,13 +77,13 @@ ScopeProperty using the context of this chronicle.`,
   },
 
   object: {
-    "@type": "valos-raem:GeneratedField",
+    "@type": "valos_raem:GeneratedField",
     "rdfs:subPropertyOf": "rdf:object",
-    "valos-raem:aliasOf": "valos:value",
+    "valos_raem:aliasOf": "valos:value",
     "rdfs:domain": "valos:ScopeProperty",
     "rdfs:range": "rdfs:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos-raem:expressor": "$valos-script:resolveTwinObject",
+    "valos_raem:expressor": "$valos_script.resolveTwinObject",
     "rdfs:comment":
 `The object of this ScopeProperty when interpreted as a reified
 rdf:Statement. If the valos:value refers to a scope which has this

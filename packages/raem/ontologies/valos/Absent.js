@@ -1,6 +1,6 @@
 module.exports = {
   Absent: {
-    "@type": "valos-raem:Type",
+    "@type": "valos_raem:Type",
     "revdoc:brief": "absent resource type",
     "rdfs:subClassOf": "valos:Resource",
     "rdfs:comment":

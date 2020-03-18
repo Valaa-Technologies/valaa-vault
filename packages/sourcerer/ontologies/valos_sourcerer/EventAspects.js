@@ -1,6 +1,6 @@
 module.exports = {
   EventAspect: {
-    "@type": "valos-kernel:Class",
+    "@type": "valos_kernel:Class",
     "revdoc:brief": "contextual event aspect",
     "rdfs:comment":
 `The class of resources which contain contextual attributes of a
@@ -8,7 +8,7 @@ particular event message lifetime phase.`,
   },
 
   EventAspects: {
-    "@type": "valos-kernel:Class",
+    "@type": "valos_kernel:Class",
     "revdoc:brief": "context-free container of event aspects",
     "rdfs:comment":
 `The class of resources which provide context-free container of all
@@ -18,8 +18,8 @@ contextual and/or functional aspects.`,
   },
 
   version: {
-    "@type": "valos-kernel:Property",
-    "rdfs:domain": "valos-sourcerer:EventAspects",
+    "@type": "valos_kernel:Property",
+    "rdfs:domain": "valos_sourcerer:EventAspects",
     "rdfs:range": "xsd:string",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "rdfs:comment":
@@ -27,27 +27,27 @@ contextual and/or functional aspects.`,
   },
 
   event: {
-    "@type": "valos-kernel:Property",
-    "rdfs:domain": "valos-sourcerer:EventAspects",
-    "rdfs:range": "valos-raem:Event",
+    "@type": "valos_kernel:Property",
+    "rdfs:domain": "valos_sourcerer:EventAspects",
+    "rdfs:range": "valos_raem:Event",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "rdfs:comment":
 `The aspect which contains the raem model event payload.`,
   },
 
   command: {
-    "@type": "valos-kernel:Property",
-    "rdfs:domain": "valos-sourcerer:EventAspects",
-    "rdfs:range": "valos-sourcerer:CommandAspect",
+    "@type": "valos_kernel:Property",
+    "rdfs:domain": "valos_sourcerer:EventAspects",
+    "rdfs:range": "valos_sourcerer:CommandAspect",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "rdfs:comment":
 `The aspect which contains the client-generated command properties.`,
   },
 
   log: {
-    "@type": "valos-kernel:Property",
-    "rdfs:domain": "valos-sourcerer:EventAspects",
-    "rdfs:range": "valos-sourcerer:LogAspect",
+    "@type": "valos_kernel:Property",
+    "rdfs:domain": "valos_sourcerer:EventAspects",
+    "rdfs:range": "valos_sourcerer:LogAspect",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "rdfs:comment":
 `The aspect which contains the authority-confirmed event log properties.`,

@@ -6,16 +6,16 @@ const prefixes = {
   xsd: "http://www.w3.org/2001/XMLSchema#",
   owl: "http://www.w3.org/2002/07/owl#",
   dc: "http://purl.org/dc/elements/1.1/",
-  "valos-kernel": "https://valospace.org/kernel#",
-  "valos-raem": "https://valospace.org/raem#",
+  valos_kernel: "https://valospace.org/kernel#",
+  valos_raem: "https://valospace.org/raem#",
 };
 
 module.exports = {
-  ...extendOntology("valos-sourcerer", "https://valospace.org/sourcerer#",
+  ...extendOntology("valos_sourcerer", "https://valospace.org/sourcerer#",
       prefixes,
-      require("./valos-sourcerer"), {
+      require("./valos_sourcerer"), {
         context: {
-          aspects: { "@reverse": "valos-sourcerer:event" },
+          aspects: { "@reverse": "valos_sourcerer:event" },
         }
       }),
   ...extendOntology("valos", "https://valospace.org/#",

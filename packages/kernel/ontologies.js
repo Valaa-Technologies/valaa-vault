@@ -5,7 +5,7 @@ module.exports = exportDomainAggregateOntologiesFromDocuments(
     require("./package").name, require("./documents"));
 
 Object.assign(module.exports,
-    createRemovedFromOntology("valos-removed-from", "https://valospace.org/removed-from#",
+    createRemovedFromOntology("valos_removed_from", "https://valospace.org/removed-from#",
         module.exports.valos));
 
 /*
@@ -16,7 +16,7 @@ module.exports = {
     xsd: "http://www.w3.org/2001/XMLSchema#",
     owl: "http://www.w3.org/2002/07/owl#",
     dc: "http://purl.org/dc/elements/1.1/",
-    "valos-kernel": "https://valospace.org/kernel#",
+    valos_kernel: "https://valospace.org/kernel#",
     vdoc: "https://valospace.org/vdoc#",
     valos: "https://valospace.org/#",
   }, vocabulary);

@@ -192,9 +192,9 @@ module.exports = {
   },
 
   valosRaemFieldClasses: [
-    "valos-raem:Field",
-    "valos-raem:ExpressedField", "valos-raem:EventLoggedField", "valos-raem:CoupledField",
-    "valos-raem:GeneratedField", "valos-raem:TransientField", "valos-raem:AliasField",
+    "valos_raem:Field",
+    "valos_raem:ExpressedField", "valos_raem:EventLoggedField", "valos_raem:CoupledField",
+    "valos_raem:GeneratedField", "valos_raem:TransientField", "valos_raem:AliasField",
   ],
 
   filterKeysWithFieldReduction,

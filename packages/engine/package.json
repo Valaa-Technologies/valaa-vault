@@ -1,6 +1,6 @@
 {
   "name": "@valos/engine",
-  "version": "0.35.0-rc.5",
+  "version": "0.35.0-rc.6",
   "description": "ValOS Engine API and Schema",
   "license": "MIT",
   "author": "Valaa Technologies Ltd",
@@ -15,7 +15,7 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@valos/sourcerer": "^0.35.0-rc.5",
+    "@valos/sourcerer": "^0.35.0-rc.6",
     "graphql": "^0.6.2",
     "immutable": "~3.7.4"
   },

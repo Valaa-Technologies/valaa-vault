@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.6](https://github.com/valaatech/kernel/compare/v0.35.0-rc.5...v0.35.0-rc.6) (2020-03-19)
+
+
+### Bug Fixes
+
+* flip createChronicleURI and createPartitionURI semantics ([4eff03c](https://github.com/valaatech/kernel/commit/4eff03c96dd01a1052d1e20c1a81bfcafebc44e9))
+* Have session expiry clear cookies and redirect to clientRedirectPath ([a4e1316](https://github.com/valaatech/kernel/commit/a4e1316f1fd38cc6c61f174078170b19c023764e))
+* path.posix. to path., logging, other fixes ([8c1c854](https://github.com/valaatech/kernel/commit/8c1c854b518a4bb8e95c13e2d4a66034775480ab))
+* **valma:** sub-command non-optional arguments, filenameFromCommand ([102c1fe](https://github.com/valaatech/kernel/commit/102c1fedbeaa796963e5067fe03efe917ef5dc6f))
+
+
+
+
+
 # [0.35.0-rc.5](https://github.com/valaatech/kernel/compare/v0.35.0-rc.4...v0.35.0-rc.5) (2020-01-29)
 
 

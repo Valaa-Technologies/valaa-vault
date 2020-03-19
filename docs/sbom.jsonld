@@ -37,7 +37,7 @@
         "@type": "@id"
       }
     },
-    "dc:title": "@valos/kernel@0.35.0-rc.3 Software Bill of Materials",
+    "dc:title": "@valos/kernel@0.35.0-rc.5 Software Bill of Materials",
     "respecConfig": {
       "specStatus": "unofficial",
       "editors": [
@@ -89,7 +89,7 @@
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
             "This document was automatically generated on ",
-            "2020-01-29T05:10:21.429Z",
+            "2020-03-19T01:17:42.180Z",
             "."
           ]
         },
@@ -165,20 +165,20 @@
       },
       {
         "type": "library",
-        "name": "brace-expansion",
-        "version": "1.1.11",
-        "description": "Brace expansion as known from sh/bash",
-        "licenses": "MIT",
-        "purl": "pkg:npm/brace-expansion@1.1.11",
-        "modified": false
-      },
-      {
-        "type": "library",
         "name": "balanced-match",
         "version": "1.0.0",
         "description": "Match balanced character pairs, like \"{\" and \"}\"",
         "licenses": "MIT",
         "purl": "pkg:npm/balanced-match@1.0.0",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "name": "brace-expansion",
+        "version": "1.1.11",
+        "description": "Brace expansion as known from sh/bash",
+        "licenses": "MIT",
+        "purl": "pkg:npm/brace-expansion@1.1.11",
         "modified": false
       },
       {
@@ -301,10 +301,10 @@
       {
         "type": "library",
         "name": "hosted-git-info",
-        "version": "2.8.5",
+        "version": "2.8.8",
         "description": "Provides metadata and conversions from repository urls for Github, Bitbucket and Gitlab",
         "licenses": "ISC",
-        "purl": "pkg:npm/hosted-git-info@2.8.5",
+        "purl": "pkg:npm/hosted-git-info@2.8.8",
         "modified": false
       },
       {
@@ -328,10 +328,10 @@
       {
         "type": "library",
         "name": "resolve",
-        "version": "1.15.0",
+        "version": "1.15.1",
         "description": "resolve like require.resolve() on behalf of files asynchronously and synchronously",
         "licenses": "MIT",
-        "purl": "pkg:npm/resolve@1.15.0",
+        "purl": "pkg:npm/resolve@1.15.1",
         "modified": false
       },
       {
@@ -509,41 +509,41 @@
       {
         "type": "library",
         "group": "valos",
-        "name": "inspire",
-        "version": "0.35.0-rc.5",
-        "description": "ValOS Inspire application gateway",
+        "name": "kernel",
+        "version": "0.35.0-rc.6",
+        "description": "@valos/kernel domain",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/inspire@0.35.0-rc.5",
+        "purl": "pkg:npm/%40valos/kernel@0.35.0-rc.6",
         "modified": false
       },
       {
         "type": "library",
         "group": "valos",
-        "name": "kernel",
-        "version": "0.35.0-rc.5",
-        "description": "@valos/kernel domain",
+        "name": "inspire",
+        "version": "0.35.0-rc.6",
+        "description": "ValOS Inspire application gateway",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/kernel@0.35.0-rc.5",
+        "purl": "pkg:npm/%40valos/inspire@0.35.0-rc.6",
         "modified": false
       },
       {
         "type": "library",
         "group": "valos",
         "name": "toolset-revealer",
-        "version": "0.35.0-rc.5",
+        "version": "0.35.0-rc.6",
         "description": "Tools for building revelations both for development and deployment purposes",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/toolset-revealer@0.35.0-rc.5",
+        "purl": "pkg:npm/%40valos/toolset-revealer@0.35.0-rc.6",
         "modified": false
       },
       {
         "type": "library",
         "group": "valos",
         "name": "type-vault",
-        "version": "0.35.0-rc.5",
+        "version": "0.35.0-rc.6",
         "description": "The ValOS 'vault' workspace type toolset",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/type-vault@0.35.0-rc.5",
+        "purl": "pkg:npm/%40valos/type-vault@0.35.0-rc.6",
         "modified": false
       },
       {
@@ -567,10 +567,10 @@
       {
         "type": "library",
         "name": "valma",
-        "version": "0.35.0-rc.5",
+        "version": "0.35.0-rc.6",
         "description": "A ValOS CLI tool for discovering and executing context-dependent command scripts",
         "licenses": "MIT",
-        "purl": "pkg:npm/valma@0.35.0-rc.5",
+        "purl": "pkg:npm/valma@0.35.0-rc.6",
         "modified": false
       },
       {
@@ -630,10 +630,10 @@
       {
         "type": "library",
         "name": "yargs",
-        "version": "15.1.0",
+        "version": "15.3.1",
         "description": "yargs the modern, pirate-themed, successor to optimist.",
         "licenses": "MIT",
-        "purl": "pkg:npm/yargs@15.1.0",
+        "purl": "pkg:npm/yargs@15.3.1",
         "modified": false
       },
       {
@@ -783,10 +783,10 @@
       {
         "type": "library",
         "name": "yargs-parser",
-        "version": "16.1.0",
+        "version": "18.1.1",
         "description": "the mighty option parser used by yargs",
         "licenses": "ISC",
-        "purl": "pkg:npm/yargs-parser@16.1.0",
+        "purl": "pkg:npm/yargs-parser@18.1.1",
         "modified": false
       }
     ],

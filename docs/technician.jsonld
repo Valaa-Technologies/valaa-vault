@@ -532,10 +532,10 @@
                         {
                           "vdoc:em": true,
                           "vdoc:content": [
-                            "partitions"
+                            "chronicles"
                           ]
                         },
-                        " layer provides the resource content as\n  partition events and bvobs. These are served via authority\n  service APIs."
+                        " layer provides the resource content as\n  chronicle events and bvobs. These are served via authority\n  service APIs."
                       ]
                     }
                   ]
@@ -964,7 +964,7 @@
             {
               "vdoc:em": true,
               "vdoc:content": [
-                "partitions"
+                "chronicles"
               ]
             },
             ". These layers form\nthe core operational infrastructure of ValOS."
@@ -983,7 +983,7 @@
           "@id": "authorities_layer"
         },
         {
-          "@id": "partitions_layer"
+          "@id": "chronicles_layer"
         }
       ]
     },
@@ -1092,7 +1092,7 @@
               "`build-release` `deploy-release`"
             ],
             [
-              "partitions",
+              "chronicles",
               "`vlm`, gateway",
               "event logs, bvobs",
               "authorities",
@@ -1258,7 +1258,7 @@
             {
               "vdoc:em": true,
               "vdoc:content": [
-                "partitions"
+                "chronicles"
               ]
             },
             " don't have\nan external upstream and thus these bands are the defining\nauthority of all of their payload."
@@ -1509,10 +1509,10 @@
                 {
                   "vdoc:em": true,
                   "vdoc:content": [
-                    "partitions"
+                    "chronicles"
                   ]
                 },
-                " and must provide a mechanism for\n    accessing event logs and bvob content as well as for\n    accepting and authorizing incoming commands into authorized\n    partition events."
+                " and must provide a mechanism for\n    accessing event logs and bvob content as well as for\n    accepting and authorizing incoming commands into authorized\n    chronicle events."
               ]
             },
             "Authorities are usually live deployments on some\ninfrastructure and they provide service APIs as the required\nmechanisms."
@@ -1563,7 +1563,7 @@
             {
               "vdoc:em": true,
               "vdoc:content": [
-                "partitions"
+                "chronicles"
               ]
             },
             " utility layer, see below)."
@@ -1695,7 +1695,7 @@
             {
               "@type": "vdoc:Paragraph",
               "vdoc:content": [
-                "ValOS authorities and any partition content they provide do not need\nto be public. A ValOS core authority is an authority which can be\naccessed using only ValOS core spindles (including no spindles at all)."
+                "ValOS authorities and any chronicle content they provide do not need\nto be public. A ValOS core authority is an authority which can be\naccessed using only ValOS core spindles (including no spindles at all)."
               ]
             },
             {
@@ -1714,21 +1714,21 @@
         }
       ]
     },
-    "partitions_layer": {
-      "@id": "partitions_layer",
-      "dc:title": "Partitions utility layer - the foundation of valospace",
+    "chronicles_layer": {
+      "@id": "chronicles_layer",
+      "dc:title": "Chronicles utility layer - the foundation of valospace",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "Event logs and bvob content are the partitions payload and are\nconsumed by ValOS gateways. It is more extensively covered elsewhere\nand is mentioned here for completeness; precious little infrastructural\ntooling is provided for them yet."
+            "Event logs and bvob content are the chronicles payload and are\nconsumed by ValOS gateways. It is more extensively covered elsewhere\nand is mentioned here for completeness; precious little infrastructural\ntooling is provided for them yet."
           ]
         },
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "Eventually various partition diagnostics tools will come in handy:",
+            "Eventually various chronicle diagnostics tools will come in handy:",
             {
               "vdoc:content": [
                 {
@@ -1740,7 +1740,7 @@
                     {
                       "@type": "vdoc:Paragraph",
                       "vdoc:content": [
-                        "Complete partition to file system hierarchy save/load tools"
+                        "Complete chronicle to file system hierarchy save/load tools"
                       ]
                     },
                     {
@@ -1762,13 +1762,13 @@
           ]
         },
         {
-          "dc:title": "ValOS public vs protected partitions",
+          "dc:title": "ValOS public vs protected chronicles",
           "@type": "vdoc:Chapter",
           "vdoc:content": [
             {
               "@type": "vdoc:Paragraph",
               "vdoc:content": [
-                "All partitions provided by ValOS authorities are ValOS partitions.\nAdditionally ValOS public partitions are partitions which are both",
+                "All chronicles provided by ValOS authorities are ValOS chronicles.\nAdditionally ValOS public chronicles are chronicles which are both",
                 {
                   "vdoc:content": [
                     {
@@ -1792,7 +1792,7 @@
             {
               "@type": "revdoc:Example",
               "vdoc:content": [
-                "TODO(iridian): Figure out whether this is actually the most meaningful\nplace to assign this semantic border. A specific term for\nnon-authenticated partitions capable of running only on standard\nruntime is useful, but how useful actually?"
+                "TODO(iridian): Figure out whether this is actually the most meaningful\nplace to assign this semantic border. A specific term for\nnon-authenticated chronicles capable of running only on standard\nruntime is useful, but how useful actually?"
               ]
             }
           ]

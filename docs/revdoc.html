@@ -7,7 +7,7 @@
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"subtitle":"0.35.0-rc.5","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"shortName":"revdoc","alternateFormats":[{"label":"VDoc","uri":"revdoc.jsonld"}]};
+      var respecConfig = {"subtitle":"0.35.0-rc.6","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"shortName":"revdoc","alternateFormats":[{"label":"VDoc","uri":"revdoc.jsonld"}]};
     </script>
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
@@ -339,7 +339,7 @@ primitives and specifies a ReSpec html emission transformation.</span>
       return a && !field.includes(searched);
     }, true);
   }</td></tr>
-        <tr class=" vdoc-nth-child-2n"><td>valosRaemFieldClasses</td><td>valos-raem:Fieldvalos-raem:ExpressedFieldvalos-raem:EventLoggedFieldvalos-raem:CoupledFieldvalos-raem:GeneratedFieldvalos-raem:TransientFieldvalos-raem:AliasField</td></tr>
+        <tr class=" vdoc-nth-child-2n"><td>valosRaemFieldClasses</td><td>valos_raem:Fieldvalos_raem:ExpressedFieldvalos_raem:EventLoggedFieldvalos_raem:CoupledFieldvalos_raem:GeneratedFieldvalos_raem:TransientFieldvalos_raem:AliasField</td></tr>
         <tr><td>filterKeysWithFieldReduction</td><td>function filterKeysWithFieldReduction(entryFieldName, searchedValueOrValues, container, reduction, initial) {
   var searchedValues = [].concat(searchedValueOrValues !== undefined ? searchedValueOrValues : []);
   return Object.entries(container).filter(function (_ref10) {
@@ -384,11 +384,7 @@ primitives and specifies a ReSpec html emission transformation.</span>
                     toSatisfy = _step2$value[2],
                     result = _step2$value[3];
 
-                it(named,
-                /*#__PURE__*/
-                _asyncToGenerator(
-                /*#__PURE__*/
-                regeneratorRuntime.mark(function _callee2() {
+                it(named, /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2() {
                   var actual;
                   return regeneratorRuntime.wrap(function _callee2$(_context2) {
                     while (1) {
@@ -396,12 +392,8 @@ primitives and specifies a ReSpec html emission transformation.</span>
                         case 0:
                           _context2.prev = 0;
                           _context2.next = 3;
-                          return [].concat(operations).reduce(
-                          /*#__PURE__*/
-                          function () {
-                            var _ref9 = _asyncToGenerator(
-                            /*#__PURE__*/
-                            regeneratorRuntime.mark(function _callee(a, op) {
+                          return [].concat(operations).reduce( /*#__PURE__*/function () {
+                            var _ref9 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(a, op) {
                               var ra;
                               return regeneratorRuntime.wrap(function _callee$(_context) {
                                 while (1) {

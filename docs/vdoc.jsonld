@@ -45,9 +45,9 @@
     "revdoc:package": "@valos/vdoc",
     "revdoc:prefix": "vdoc",
     "revdoc:prefixIRI": "https://valospace.org/vdoc#",
-    "revdoc:version": "0.35.0-rc.5",
+    "revdoc:version": "0.35.0-rc.6",
     "respecConfig": {
-      "subtitle": "0.35.0-rc.5",
+      "subtitle": "0.35.0-rc.6",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -1294,7 +1294,7 @@
       "Class": {
         "@type": [
           "vdoc:Class",
-          "valos-kernel:Class"
+          "valos_kernel:Class"
         ],
         "rdfs:subClassOf": "rdfs:Class",
         "rdfs:comment": "The class of classes which are defined by vdoc or a vdoc extension"
@@ -1302,7 +1302,7 @@
       "Property": {
         "@type": [
           "vdoc:Class",
-          "valos-kernel:Class"
+          "valos_kernel:Class"
         ],
         "rdfs:subClassOf": "rdf:Property",
         "rdfs:comment": "The class of properties which are defined by vdoc or a vdoc extension"

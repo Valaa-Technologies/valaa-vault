@@ -139,8 +139,8 @@ and builds or depends on the previous layers.
       <li><div><p><span class="vdoc type-vdoc-paragraph"><em>authorities</em> layer provides the ValOS live authority
   service APIs. Authorities are deployed and managed with <em>opspace</em> workspaces.</span>
 </p></div></li>
-      <li><div><p><span class="vdoc type-vdoc-paragraph"><em>partitions</em> layer provides the resource content as
-  partition events and bvobs. These are served via authority
+      <li><div><p><span class="vdoc type-vdoc-paragraph"><em>chronicles</em> layer provides the resource content as
+  chronicle events and bvobs. These are served via authority
   service APIs.</span>
 </p></div></li>
     </ul>
@@ -218,7 +218,7 @@ in their dependencies.</span>
   <section id="utility_layer" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#utility_layer">§ </a>ValOS &#x60;utility&#x60; layers provide operational services</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">ValOS has four main utility layers: <em>files</em>, <em>packages</em>,
-<em>authorities</em> and <em>partitions</em>. These layers form
+<em>authorities</em> and <em>chronicles</em>. These layers form
 the core operational infrastructure of ValOS.</span>
 </p></div>
   <section id="utility_layer_overview" class="vdoc type-vdoc-chapter">
@@ -273,7 +273,7 @@ the core operational infrastructure of ValOS.</span>
       <li><div><p><span class="vdoc type-vdoc-paragraph"><em>Distributed via</em> - how changes are made live to all consumers</span>
 </p></div></li>
     </ul>
-Note that <em>files</em> and <em>partitions</em> don&#x27;t have
+Note that <em>files</em> and <em>chronicles</em> don&#x27;t have
 an external upstream and thus these bands are the defining
 authority of all of their payload.</span>
 </p></div><div><p><span class="vdoc type-vdoc-paragraph">On the other hand <em>packages</em> and <em>authorities</em> use
@@ -327,10 +327,10 @@ If a need to diversity the languages arises a <a href="https://docs.npmjs.com/mi
     <h3><a aria-label="§" href="#authorities_layer">§ </a>Authorities utility layer has the authority deployments on infrastructure services</h3>
 <div><p><span class="vdoc type-vdoc-paragraph"><blockquote><em>valos-vault-4.4.1</em>: A ValOS <em>authority</em> is uniquely identified by an
     authority URI.</blockquote><a href="packages/raem/README.md" class="vdoc type-vdoc-reference">Read more about valos URIs</a>.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph"><blockquote><em>valos-vault-4.4.2</em>: A ValOS <em>authority</em> can contain ValOS <em>partitions</em> and must provide a mechanism for
+</p></div><div><p><span class="vdoc type-vdoc-paragraph"><blockquote><em>valos-vault-4.4.2</em>: A ValOS <em>authority</em> can contain ValOS <em>chronicles</em> and must provide a mechanism for
     accessing event logs and bvob content as well as for
     accepting and authorizing incoming commands into authorized
-    partition events.</blockquote>Authorities are usually live deployments on some
+    chronicle events.</blockquote>Authorities are usually live deployments on some
 infrastructure and they provide service APIs as the required
 mechanisms.</span>
 </p></div><div><p><span class="vdoc type-vdoc-paragraph">Stateless or in some way non-infrastructural authorities also exist but
@@ -342,7 +342,7 @@ upstream and with empty payload).</span>
     static content.</blockquote>The payload here refers to the service deployments and their live APIs
 themselves and not any dynamic content delivered through them. Such
 dynamic content belongs to other domains (notably valospace content
-resides in the <em>partitions</em> utility layer, see below).</span>
+resides in the <em>chronicles</em> utility layer, see below).</span>
 </p></div><div><p><span class="vdoc type-vdoc-paragraph">The static content includes HTTP landing pages, site routes and their
 configurations, ValOS gateway and spindle runtimes and any other similar
 statically configured files.</span>
@@ -384,7 +384,7 @@ are used to control).</span>
 </p></div>
   <section class="vdoc type-vdoc-chapter">
     <h3>ValOS core vs. auxiliary authorities</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">ValOS authorities and any partition content they provide do not need
+<div><p><span class="vdoc type-vdoc-paragraph">ValOS authorities and any chronicle content they provide do not need
 to be public. A ValOS core authority is an authority which can be
 accessed using only ValOS core spindles (including no spindles at all).</span>
 </p></div><div><p><span class="vdoc type-vdoc-paragraph">A ValOS auxiliary authority is an authority which requires a conforming
@@ -401,16 +401,16 @@ such spindles cannot interfere with other reasonably written spindles.</span>
 
   </section>
 
-  <section id="partitions_layer" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#partitions_layer">§ </a>Partitions utility layer - the foundation of valospace</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">Event logs and bvob content are the partitions payload and are
+  <section id="chronicles_layer" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#chronicles_layer">§ </a>Chronicles utility layer - the foundation of valospace</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">Event logs and bvob content are the chronicles payload and are
 consumed by ValOS gateways. It is more extensively covered elsewhere
 and is mentioned here for completeness; precious little infrastructural
 tooling is provided for them yet.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">Eventually various partition diagnostics tools will come in handy:
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">Eventually various chronicle diagnostics tools will come in handy:
     <ul>
       <li>Media content import/export tools</li>
-      <li><div><p><span class="vdoc type-vdoc-paragraph">Complete partition to file system hierarchy save/load tools</span>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">Complete chronicle to file system hierarchy save/load tools</span>
 </p></div></li>
       <li><div><p><span class="vdoc type-vdoc-paragraph">Event log introspection and manipulation tools</span>
 </p></div></li>
@@ -420,9 +420,9 @@ tooling is provided for them yet.</span>
 </span>
 </p></div>
   <section class="vdoc type-vdoc-chapter">
-    <h3>ValOS public vs protected partitions</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">All partitions provided by ValOS authorities are ValOS partitions.
-Additionally ValOS public partitions are partitions which are both
+    <h3>ValOS public vs protected chronicles</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">All chronicles provided by ValOS authorities are ValOS chronicles.
+Additionally ValOS public chronicles are chronicles which are both
     <ol>
       <li>provided by ValOS core authorities, and</li>
       <li><div><p><span class="vdoc type-vdoc-paragraph">are available for an anonymous consumer with nothing but a client
@@ -436,7 +436,7 @@ Additionally ValOS public partitions are partitions which are both
 <blockquote class="vdoc type-revdoc-example">
     <span class="vdoc type-vdoc-node">TODO(iridian): Figure out whether this is actually the most meaningful
 place to assign this semantic border. A specific term for
-non-authenticated partitions capable of running only on standard
+non-authenticated chronicles capable of running only on standard
 runtime is useful, but how useful actually?</span>
 
 </blockquote>

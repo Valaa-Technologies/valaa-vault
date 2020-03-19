@@ -46,9 +46,9 @@
     "revdoc:package": "@valos/inspire",
     "revdoc:prefix": "revela",
     "revdoc:prefixIRI": "https://valospace.org/inspire/revela#",
-    "revdoc:version": "0.35.0-rc.5",
+    "revdoc:version": "0.35.0-rc.6",
     "respecConfig": {
-      "subtitle": "0.35.0-rc.5",
+      "subtitle": "0.35.0-rc.6",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -283,7 +283,7 @@
                       {
                         "@type": "vdoc:CharacterData",
                         "vdoc:content": [
-                          " lazyPatchRevelations(gatewayMock,\n    [0], {\n      \"!!!\": [[\"$https:foobar.com/path\"], [\"*:$\",\n        [\".:fetchedField\"],\n        [\"@.:fetchOptions@.:input@@\"],\n      ]],\n    },\n    undefined,\n    [\"last\"])"
+                          " lazyPatchRevelations(gatewayMock,\n    [0], {\n      \"!!!\": [[\"$https.foobar.com%2Fpath\"], [\"-$\",\n        [\".$.fetchedField\"],\n        [\"@.$.fetchOptions@.$.input@@\"],\n      ]],\n    },\n    undefined,\n    [\"last\"])"
                         ]
                       }
                     ]
@@ -307,6 +307,43 @@
         },
         {
           "@type": "revdoc:Example",
+          "dc:title": "non-evaluated spreader contents to be segmented but non-cemented",
+          "vdoc:content": [
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                [
+                  "we expect",
+                  {
+                    "vdoc:blockquote": true,
+                    "vdoc:content": [
+                      {
+                        "@type": "vdoc:CharacterData",
+                        "vdoc:content": [
+                          " lazyPatchRevelations(gatewayMock,\n    {}, { \"!!!\": [\"@\", { value: [\"$expanded.but-unbound\"] }] })"
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "toEqual",
+                {
+                  "vdoc:blockquote": true,
+                  "vdoc:content": [
+                    {
+                      "@type": "vdoc:CharacterData",
+                      "vdoc:content": [
+                        " ({ value: [\"$\", \"expanded\", \"but-unbound\"] })"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "@type": "revdoc:Example",
           "dc:title": "nested import & invoke spread to resolve all spreads",
           "vdoc:content": [
             {
@@ -320,7 +357,7 @@
                       {
                         "@type": "vdoc:CharacterData",
                         "vdoc:content": [
-                          " lazyPatchRevelations(gatewayMock, {}, {\n  out: {\n    \"!!!\": {\n      prefixes: {\n        \"/test/v0\": {\n          name: \"test\",\n          \"test-lib\": {\n            preset: 10, overridden: 10, sessionDuration: 0,\n            view: { focus: \"focus to be overwritten\", nulled: \"nulled to be overwritten\" },\n            unboundAndUnsegmented: [\"$un:bound\"],\n          },\n        },\n      },\n    },\n    prefixes: {\n      \"/test/v0\": {\n        \"!!!\": [\"@\", [\"!:test-lib\"], [\"!$valk:invoke:callMe\", {\n          view: {\n            focus: \"valaa-aws://example.org/deployment?id=f0c5-f0c5\",\n            nulled: null,\n          },\n          identity: { \"!!!\": [\"./config\", \"requireKey\"] },\n          sessionDuration: 86400,\n          unboundButSegmented: [\"$also:unbound\"],\n        }]],\n        \"test-lib\": { overridden: 20 },\n      },\n    }\n  }\n})"
+                          " lazyPatchRevelations(gatewayMock, {}, {\n  out: {\n    \"!!!\": {\n      prefixes: {\n        \"/test/v0\": {\n          name: \"test\",\n          \"test-lib\": {\n            preset: 10, overridden: 10, sessionDuration: 0,\n            view: { focus: \"focus to be overwritten\", nulled: \"nulled to be overwritten\" },\n            unboundAndUnsegmented: [\"$un.bound\"],\n          },\n        },\n      },\n    },\n    prefixes: {\n      \"/test/v0\": {\n        \"!!!\": [\"@\", [\"!$.test-lib\"], [\"!$valk.invoke$.callMe\", {\n          view: {\n            focus: \"valaa-aws://example.org/deployment?id=@$~raw.f0c5-f0c5@@\",\n            nulled: null,\n          },\n          identity: { \"!!!\": [\"./config\", \"requireKey\"] },\n          sessionDuration: 86400,\n          unboundButSegmented: [\"$also.unbound\"],\n        }]],\n        \"test-lib\": { overridden: 20 },\n      },\n    }\n  }\n})"
                         ]
                       }
                     ]
@@ -333,7 +370,7 @@
                     {
                       "@type": "vdoc:CharacterData",
                       "vdoc:content": [
-                        " ({\n  out: {\n    prefixes: {\n      \"/test/v0\": {\n        name: \"test\",\n        \"test-lib\": {\n          preset: 10, overridden: 20, sessionDuration: 86400,\n          view: { focus: \"valaa-aws://example.org/deployment?id=f0c5-f0c5\", nulled: null },\n          identity: \"/site/revelation/config\",\n          unboundAndUnsegmented: [\"$un:bound\"],\n          unboundButSegmented: [\"$\", \"also\", \"unbound\"],\n        }\n      }\n    }\n  }\n})"
+                        " ({\n  out: {\n    prefixes: {\n      \"/test/v0\": {\n        name: \"test\",\n        \"test-lib\": {\n          preset: 10, overridden: 20, sessionDuration: 86400,\n          view: { focus: \"valaa-aws://example.org/deployment?id=@$~raw.f0c5-f0c5@@\", nulled: null },\n          identity: \"/site/revelation/config\",\n          unboundAndUnsegmented: [\"$un.bound\"],\n          unboundButSegmented: [\"$\", \"also\", \"unbound\"],\n        }\n      }\n    }\n  }\n})"
                       ]
                     }
                   ]
@@ -437,7 +474,7 @@
         {
           "@type": "vdoc:Reference",
           "vdoc:content": [
-            "valos-raem:Verb"
+            "valos_raem:Verb"
           ],
           "vdoc:ref": "@valos/raem#Verb"
         },

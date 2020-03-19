@@ -57,7 +57,7 @@
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "ValOS Event Log is an ordered, numbered sequence of JSON-LD documents.\nEach document represents a single event. Together these events\nincrementally, exclusively and deterministically specify the state\nchanges of a single valospace partition from its initial empty state to\nthe current state after the most recent event."
+            "ValOS Event Log is an ordered, numbered sequence of JSON-LD documents.\nEach document represents a single event. Together these events\nincrementally, exclusively and deterministically specify the state\nchanges of a single valospace chronicle from its initial empty state to\nthe current state after the most recent event."
           ]
         }
       ]

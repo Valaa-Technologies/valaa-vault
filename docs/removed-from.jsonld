@@ -43,10 +43,10 @@
       "TECHNICIAN"
     ],
     "revdoc:package": "@valos/kernel",
-    "revdoc:prefix": "valos-removed-from",
+    "revdoc:prefix": "valos_removed_from",
     "revdoc:prefixIRI": "https://valospace.org/removed-from#",
     "respecConfig": {
-      "subtitle": "0.35.0-rc.3",
+      "subtitle": "0.35.0-rc.5",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -65,87 +65,87 @@
       "xsd": "http://www.w3.org/2001/XMLSchema#",
       "owl": "http://www.w3.org/2002/07/owl#",
       "dc": "http://purl.org/dc/elements/1.1/",
-      "valos-kernel": "https://valospace.org/kernel#",
+      "valos_kernel": "https://valospace.org/kernel#",
       "valos": "https://valospace.org/#",
-      "valos-raem": "https://valospace.org/raem#",
-      "valos-removed-from": "https://valospace.org/removed-from#"
+      "valos_raem": "https://valospace.org/raem#",
+      "valos_removed_from": "https://valospace.org/removed-from#"
     },
     "vocabulary": {
       "@id": "vocabulary",
       "ownlings": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:domain": "valos:Extant",
         "rdfs:range": "rdfs:List",
         "rdfs:comment": "removed-from entries of field valos:ownlings."
       },
       "properties": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:domain": "valos:Scope",
         "rdfs:range": "rdfs:List",
         "rdfs:comment": "removed-from entries of field valos:properties."
       },
       "nodes": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:domain": "valos:SourceredNode",
         "rdfs:range": "rdfs:List",
         "rdfs:comment": "removed-from entries of field valos:nodes."
       },
       "entries": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:domain": "valos:SourceredNode",
         "rdfs:range": "rdfs:List",
         "rdfs:comment": "removed-from entries of field valos:entries."
       },
       "entities": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:domain": "valos:SourceredNode",
         "rdfs:range": "rdfs:List",
         "rdfs:comment": "removed-from entries of field valos:entities."
       },
       "medias": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:domain": "valos:SourceredNode",
         "rdfs:range": "rdfs:List",
         "rdfs:comment": "removed-from entries of field valos:medias."
       },
       "connectedRelations": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:domain": "valos:SourceredNode",
         "rdfs:range": "rdfs:List",
         "rdfs:comment": "removed-from entries of field valos:connectedRelations."
       },
       "outRelations": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:domain": "valos:SourcerableNode",
         "rdfs:range": "rdfs:List",
         "rdfs:comment": "removed-from entries of field valos:outRelations."
       },
       "inRelations": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:domain": "valos:SourcerableNode",
         "rdfs:range": "rdfs:List",
         "rdfs:comment": "removed-from entries of field valos:inRelations."
       },
       "pairedOutRelations": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:domain": "valos:SourceredNode",
         "rdfs:range": "rdfs:List",
         "rdfs:comment": "removed-from entries of field valos:pairedOutRelations."
       },
       "pairedInRelations": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:domain": "valos:SourceredNode",
         "rdfs:range": "rdfs:List",
         "rdfs:comment": "removed-from entries of field valos:pairedInRelations."
       },
       "connectedOutRelations": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:domain": "valos:SourceredNode",
         "rdfs:range": "rdfs:List",
         "rdfs:comment": "removed-from entries of field valos:connectedOutRelations."
       },
       "connectedInRelations": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:domain": "valos:SourceredNode",
         "rdfs:range": "rdfs:List",
         "rdfs:comment": "removed-from entries of field valos:connectedInRelations."
@@ -153,67 +153,67 @@
     },
     "context": {
       "@id": "context",
-      "valos-removed-from:ownlings": {
+      "valos_removed_from:ownlings": {
         "@id": "https://valospace.org/removed-from#ownlings",
         "@container": "@list",
         "@type": "@id"
       },
-      "valos-removed-from:properties": {
+      "valos_removed_from:properties": {
         "@id": "https://valospace.org/removed-from#properties",
         "@container": "@list",
         "@type": "@id"
       },
-      "valos-removed-from:nodes": {
+      "valos_removed_from:nodes": {
         "@id": "https://valospace.org/removed-from#nodes",
         "@container": "@list",
         "@type": "@id"
       },
-      "valos-removed-from:entries": {
+      "valos_removed_from:entries": {
         "@id": "https://valospace.org/removed-from#entries",
         "@container": "@list",
         "@type": "@id"
       },
-      "valos-removed-from:entities": {
+      "valos_removed_from:entities": {
         "@id": "https://valospace.org/removed-from#entities",
         "@container": "@list",
         "@type": "@id"
       },
-      "valos-removed-from:medias": {
+      "valos_removed_from:medias": {
         "@id": "https://valospace.org/removed-from#medias",
         "@container": "@list",
         "@type": "@id"
       },
-      "valos-removed-from:connectedRelations": {
+      "valos_removed_from:connectedRelations": {
         "@id": "https://valospace.org/removed-from#connectedRelations",
         "@container": "@list",
         "@type": "@id"
       },
-      "valos-removed-from:outRelations": {
+      "valos_removed_from:outRelations": {
         "@id": "https://valospace.org/removed-from#outRelations",
         "@container": "@list",
         "@type": "@id"
       },
-      "valos-removed-from:inRelations": {
+      "valos_removed_from:inRelations": {
         "@id": "https://valospace.org/removed-from#inRelations",
         "@container": "@list",
         "@type": "@id"
       },
-      "valos-removed-from:pairedOutRelations": {
+      "valos_removed_from:pairedOutRelations": {
         "@id": "https://valospace.org/removed-from#pairedOutRelations",
         "@container": "@list",
         "@type": "@id"
       },
-      "valos-removed-from:pairedInRelations": {
+      "valos_removed_from:pairedInRelations": {
         "@id": "https://valospace.org/removed-from#pairedInRelations",
         "@container": "@list",
         "@type": "@id"
       },
-      "valos-removed-from:connectedOutRelations": {
+      "valos_removed_from:connectedOutRelations": {
         "@id": "https://valospace.org/removed-from#connectedOutRelations",
         "@container": "@list",
         "@type": "@id"
       },
-      "valos-removed-from:connectedInRelations": {
+      "valos_removed_from:connectedInRelations": {
         "@id": "https://valospace.org/removed-from#connectedInRelations",
         "@container": "@list",
         "@type": "@id"
@@ -284,7 +284,7 @@
     },
     "ontology": {
       "@id": "ontology",
-      "dc:title": "Valospace ontology, prefix https://valospace.org/removed-from#, preferred label 'valos-removed-from'",
+      "dc:title": "Valospace ontology, prefix https://valospace.org/removed-from#, preferred label 'valos_removed_from'",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -322,7 +322,7 @@
         {
           "vdoc:em": true,
           "vdoc:content": [
-            "valos-removed-from"
+            "valos_removed_from"
           ]
         },
         " IRI prefixes"
@@ -357,14 +357,14 @@
         {
           "vdoc:em": true,
           "vdoc:content": [
-            "valos-removed-from"
+            "valos_removed_from"
           ]
         },
         " ",
         {
           "@type": "vdoc:Reference",
           "vdoc:content": [
-            "valos-raem:Field"
+            "valos_raem:Field"
           ],
           "vdoc:ref": "@valos/raem#Field"
         },
@@ -427,10 +427,10 @@
                 ]
               },
               {
-                "vdoc:cell": "valos-raem:coupledField",
+                "vdoc:cell": "valos_raem:coupledField",
                 "@type": "vdoc:Header",
                 "vdoc:content": [
-                  "valos-raem:coupledField"
+                  "valos_raem:coupledField"
                 ]
               },
               {
@@ -471,7 +471,7 @@
         {
           "vdoc:em": true,
           "vdoc:content": [
-            "valos-removed-from"
+            "valos_removed_from"
           ]
         },
         " remaining vocabulary"

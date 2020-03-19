@@ -139,7 +139,7 @@
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "VPath grammar only adds \"@\", \":\" and \"$\" in addition to\nencodeURIComponent characters. VPath grammar has two primary building\nblocks: vsteps and vparams."
+            "VPath grammar only adds \"@\" and \"$\" in addition to\nencodeURIComponent characters. VPath grammar has two primary building\nblocks: vsteps and vparams."
           ]
         },
         {
@@ -157,7 +157,7 @@
             {
               "@type": "vdoc:Paragraph",
               "vdoc:content": [
-                "A vparam always contains a \":\"-prefixed vvalue. The vvalue can\n  optionally be preceded with a \"$\"-prefixed context-term."
+                "A vparam always contains a \"$\"-prefix. The vparam then has\n  an optional context-term and finally a \".\"-prefixed vvalue."
               ]
             }
           ]
@@ -188,7 +188,7 @@
           "@type": "revdoc:ABNF",
           "vdoc:language": "https://tools.ietf.org/html/rfc5234",
           "vdoc:content": [
-            "  vpath = \"@\" *(vstep \"@\") \"@\"\n  vstep  = [ verb-type ] *vparam\n  vparam = [ \"$\" context-term ] \":\" vvalue\n  vvalue = vpath / \"$\" / 1*( unencoded / pct-encoded )"
+            "  vpath = \"@\" *(vstep \"@\") \"@\"\n  vstep  = [ verb-type ] *vparam\n  vparam = \"$\" [ context-term ] \".\" vvalue\n  vvalue = vpath / \"$\" / 1*( unencoded / pct-encoded )"
           ]
         }
       ]
@@ -279,7 +279,7 @@
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "\nJSON numbers and strings can only appear as param values of \"$\" or\n\":\"-segments. JSON objects cannot appear.\nA VPath which is used as a contextless param of a verb must appear\ndirectly without intermediate \":\"-segments (unlike in the string VPath\nconstruct).\nConversely a verb used as a contextless param must still be wrapped\ninside a \"@\"-segment."
+            "\nJSON numbers and strings can only appear as param values of \"$\" or\n\"$.\"-segments. JSON objects cannot appear.\nA VPath which is used as a contextless param of a verb must appear\ndirectly without intermediate \"$.\"-segments (unlike in the string VPath\nconstruct).\nConversely a verb used as a contextless param must still be wrapped\ninside a \"@\"-segment."
           ]
         }
       ]
@@ -300,7 +300,7 @@
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "\":\" identifies a vparam segment without a context-term and with an\n  optional second entry containing the vvalue"
+            "\"$.\" identifies a vparam segment without a context-term and with an\n  optional second entry containing the vvalue"
           ]
         },
         {
@@ -319,7 +319,7 @@
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "\nShortcut VPath format is a compact object representation of a VPath as\n'human readable' JSON which can then be distributed to the canonical\nrepresentation. In fact any JSON construct is a valid shortcut VPath,\nand as long as all initial array entries equal to \"@\", \"$\" and \":\"  are\nescaped as [\":\", \"@\"], [\":\", \"$\"] and [\":\", \":\"] the shortcut egment\nwill resolve back into the original JSON construct.\n"
+            "\nShortcut VPath format is a compact object representation of a VPath as\n'human readable' JSON which can then be distributed to the canonical\nrepresentation. In fact any JSON construct is a valid shortcut VPath,\nand as long as all initial array entries equal to \"@\", \"$\" and \"$.\" are\nescaped as [\"$.\", \"@\"], [\"$.\", \"$\"] and [\"$.\", \"$.\"] the shortcut\nsegment will resolve back into the original JSON construct.\n"
           ]
         }
       ]
@@ -520,7 +520,7 @@
           "@type": "revdoc:ABNF",
           "vdoc:language": "https://tools.ietf.org/html/rfc5234",
           "vdoc:content": [
-            "  vverb        = verb-type *vparam\n  vparam       = [ \"$\" context-term ] \":\" vvalue\n  verb-type    = 1*unencoded\n  context-term = ALPHA *unreserved-nt\n  vvalue       = vpath / \"$\" / 1*( unencoded / pct-encoded )\n"
+            "  vverb        = verb-type *vparam\n  vparam       = \"$\" [ context-term ] \".\" vvalue\n  verb-type    = 1*unencoded\n  context-term = ALPHA *unreserved-nt\n  vvalue       = vpath / \"$\" / 1*( unencoded / pct-encoded )\n"
           ]
         }
       ]
@@ -580,7 +580,7 @@
       "dc:title": "Property selector example",
       "@type": "revdoc:Example",
       "vdoc:content": [
-        "Triple pattern `?s <urn:valos:.:myProp> ?o` matches like:\n",
+        "Triple pattern `?s <urn:valos:.$.myProp> ?o` matches like:\n",
         {
           "@type": "revdoc:Turtle",
           "vdoc:language": "https://www.w3.org/TR/turtle/",
@@ -612,7 +612,7 @@
       "dc:title": "Sequence selector example",
       "@type": "revdoc:Example",
       "vdoc:content": [
-        "Triple pattern `?s <urn:valos:*:PERMISSIONS> ?o` matches like:\n",
+        "Triple pattern `?s <urn:valos:-out--$.PERMISSIONS> ?o` matches like:\n",
         {
           "@type": "revdoc:Turtle",
           "vdoc:language": "https://www.w3.org/TR/turtle/",
@@ -625,7 +625,7 @@
     },
     "section_verb_container": {
       "@id": "section_verb_container",
-      "dc:title": "verb type \"`-`\": container or Entity selector",
+      "dc:title": "verb type \"`+`\": container or Entity selector",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -644,7 +644,7 @@
       "dc:title": "Container selector example",
       "@type": "revdoc:Example",
       "vdoc:content": [
-        "Triple pattern `?s <urn:valos:-:Scripts> ?o` matches like:\n",
+        "Triple pattern `?s <urn:valos:+$.Scripts> ?o` matches like:\n",
         {
           "@type": "revdoc:Turtle",
           "vdoc:language": "https://www.w3.org/TR/turtle/",
@@ -652,12 +652,12 @@
             "\n  ?o    valos:parent ?s\n      ; valos:name \"Scripts\"\n"
           ]
         },
-        "\nMnemonic: \"-\" links a container to its parent."
+        "\nMnemonic: \"+\" is a list-view symbol of an expandable container."
       ]
     },
     "section_verb_content": {
       "@id": "section_verb_content",
-      "dc:title": "verb type \"`'`\": content or Media selector",
+      "dc:title": "verb type \"`~`\": content or Media selector",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -676,7 +676,7 @@
       "dc:title": "Content selector example",
       "@type": "revdoc:Example",
       "vdoc:content": [
-        "Triple pattern `?s <urn:valos:':foo.vs> ?o` matches like:\n",
+        "Triple pattern `?s <urn:valos:~$.foo.vs> ?o` matches like:\n",
         {
           "@type": "revdoc:Turtle",
           "vdoc:language": "https://www.w3.org/TR/turtle/",
@@ -684,12 +684,12 @@
             "\n  ?o    valos:folder ?s\n      ; valos:name \"foo.vs\"\n"
           ]
         },
-        "\nMnemonic: \"'\" for quoted content suggests text data."
+        "\nMnemonic: \"~\" has no mnemonic yet."
       ]
     },
     "section_verb_object": {
       "@id": "section_verb_object",
-      "dc:title": "verb type \"`-`\": object or target selector",
+      "dc:title": "verb type \"`.O`\": object or target selector",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -708,7 +708,7 @@
       "dc:title": "Property selector example",
       "@type": "revdoc:Example",
       "vdoc:content": [
-        "Triple pattern `?s <urn:valos:-> ?o` matches like:\n",
+        "Triple pattern `?s <urn:valos:.O> ?o` matches like:\n",
         {
           "@type": "revdoc:Turtle",
           "vdoc:language": "https://www.w3.org/TR/turtle/",
@@ -749,7 +749,7 @@
       "dc:title": "Language subspace selector example",
       "@type": "revdoc:Example",
       "vdoc:content": [
-        "Triple pattern `?s <urn:valos:.:myProp@_$lang:fi> ?o` matches like:\n",
+        "Triple pattern `?s <urn:valos:.$.myProp@_$lang.fi> ?o` matches like:\n",
         {
           "@type": "revdoc:Turtle",
           "vdoc:language": "https://www.w3.org/TR/turtle/",
@@ -765,12 +765,12 @@
       "dc:title": "Ghost subspace selector example",
       "@type": "revdoc:Example",
       "vdoc:content": [
-        "Triple pattern `?s <urn:valos:_$~u4:ba54> ?o` matches like:\n",
+        "Triple pattern `?s <urn:valos:_$~u4.ba54> ?o` matches like:\n",
         {
           "@type": "revdoc:Turtle",
           "vdoc:language": "https://www.w3.org/TR/turtle/",
           "vdoc:content": [
-            "\n  ?o    valos:ghostHost ?s\n      ; valos:ghostPrototype <urn:valos:$~u4:ba54>\n"
+            "\n  ?o    valos:ghostHost ?s\n      ; valos:ghostPrototype <urn:valos:$~u4.ba54>\n"
           ]
         },
         "\nMnemonic: The '_$~' is a 'subspace of ghoStS'."
@@ -860,7 +860,7 @@
       "dc:title": "Computation selector example",
       "@type": "revdoc:Example",
       "vdoc:content": [
-        "Triple pattern `?s <urn:valos:!$valk:add$number:10:@!:myVal@@> ?o`\nmatches like:\n",
+        "Triple pattern `?s <urn:valos:!$valk.add$number.10$.@!$.myVal@@> ?o`\nmatches like:\n",
         {
           "@type": "revdoc:Turtle",
           "vdoc:language": "https://www.w3.org/TR/turtle/",
@@ -990,7 +990,7 @@
           "@type": "revdoc:ABNF",
           "vdoc:language": "https://tools.ietf.org/html/rfc5234",
           "vdoc:content": [
-            "  vrid        = \"@\" \"$\" vgrid \"@\" *(vstep \"@\") \"@\"\n  vgrid       = format-term \":\" vgrid-value *vparam\n"
+            "  vrid        = \"@\" \"$\" vgrid \"@\" *(vstep \"@\") \"@\"\n  vgrid       = format-term \".\" vgrid-value *vparam\n"
           ]
         }
       ]
@@ -1054,7 +1054,7 @@
           "@type": "revdoc:ABNF",
           "vdoc:language": "https://tools.ietf.org/html/rfc5234",
           "vdoc:content": [
-            "  vgrid         = format-term \":\" vgrid-value *vparam\n  format-term   = \"~\" 1*unreserved-nt\n  vgrid-value   = 1*unreserved-nt\n\n  unreserved-nt = ALPHA / DIGIT / \"-\" / \"_\" / \".\"\n  ALPHA         = %x41-5A / %x61-7A                         ; A-Z / a-z\n  DIGIT         = %x30-39                                   ; 0-9\n"
+            "  vgrid         = format-term \".\" vgrid-value *vparam\n  format-term   = \"~\" 1*unreserved-nt\n  vgrid-value   = 1*unreserved-nt\n\n  unreserved-nt = ALPHA / DIGIT / \"-\" / \"_\" / \".\"\n  ALPHA         = %x41-5A / %x61-7A                         ; A-Z / a-z\n  DIGIT         = %x30-39                                   ; 0-9\n"
           ]
         }
       ]
@@ -1087,7 +1087,7 @@
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "Global resources can be transferred between event logs. To maintain\nimmutability across these transfers VGRID's must not contain partition\nor other non-identifying locator information. Similar to URN's VRID's\nalways relies external structures and systems for carrying locator\ninformation.\n"
+            "Global resources can be transferred between event logs. To maintain\nimmutability across these transfers VGRID's must not contain chronicle\nor other non-identifying locator information. Similar to URN's VRID's\nalways relies external structures and systems for carrying locator\ninformation.\n"
           ]
         },
         {
@@ -1167,7 +1167,7 @@
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "This fixed triple inference is the meat and bones of the structural\nsub-resources: they allow for protected, constrained semantics to be\nexpressed in the valospace resources. This allows both simplified\nsemantics (eg. properties _cannot_ be renamed so the complex\nfunctionality doesn't need to be supported on fabric level), more\nprincipled mechanism for partition crypto behaviours (permission\nrelations are structural sub-resources which simplifies security\nanalysis but retains valospace convenience) and also a mechanism for\nexpressing non-trivial resources such as hypertwin resources."
+            "This fixed triple inference is the meat and bones of the structural\nsub-resources: they allow for protected, constrained semantics to be\nexpressed in the valospace resources. This allows both simplified\nsemantics (eg. properties _cannot_ be renamed so the complex\nfunctionality doesn't need to be supported on fabric level), more\nprincipled mechanism for chronicle crypto behaviours (permission\nrelations are structural sub-resources which simplifies security\nanalysis but retains valospace convenience) and also a mechanism for\nexpressing non-trivial resources such as hypertwin resources."
           ]
         },
         {
@@ -1385,7 +1385,7 @@
           "@type": "revdoc:Turtle",
           "vdoc:language": "https://www.w3.org/TR/turtle/",
           "vdoc:content": [
-            "\n  <urn:valos:$~u4:f00b> a valos:Entity\n      ; valos:prototype <urn:valos:$~u4:f00b-b507-0763>\n"
+            "\n  <urn:valos:$~u4.f00b> a valos:Entity\n      ; valos:prototype <urn:valos:$~u4.f00b-b507-0763>\n"
           ]
         }
       ]
@@ -1420,12 +1420,12 @@
       "dc:title": "Structural ghost triple inference",
       "@type": "revdoc:Example",
       "vdoc:content": [
-        "`<urn:valos:$~u4:f00b@_$~u4:ba54>` reads as \"inside the\ninstance resource `f00b` the ghost of the $~u4 resource `ba54`\"\nand infers triples:\n",
+        "`<urn:valos:$~u4.f00b@_$~u4.ba54>` reads as \"inside the\ninstance resource `f00b` the ghost of the $~u4 resource `ba54`\"\nand infers triples:\n",
         {
           "@type": "revdoc:Turtle",
           "vdoc:language": "https://www.w3.org/TR/turtle/",
           "vdoc:content": [
-            "\n  <urn:valos:$~u4:f00b@_$~u4:ba54>\n        valos:ghostHost <urn:valos:$~u4:f00b>\n      ; valos:ghostPrototype <urn:valos:$~u4:ba54>\n"
+            "\n  <urn:valos:$~u4.f00b@_$~u4.ba54>\n        valos:ghostHost <urn:valos:$~u4.f00b>\n      ; valos:ghostPrototype <urn:valos:$~u4.ba54>\n"
           ]
         }
       ]
@@ -1435,12 +1435,12 @@
       "dc:title": "Recursive ghost triple inference",
       "@type": "revdoc:Example",
       "vdoc:content": [
-        "`<urn:valos:$~u4:f00b@_$~u4:ba54@_$~u4:b7e4>` reads as \"inside\nthe instance resource `f00b` the ghost of\n`<urn:valos:$~u4:ba54@_$~u4:b7e4>`\" and infers triples:\n",
+        "`<urn:valos:$~u4.f00b@_$~u4.ba54@_$~u4.b7e4>` reads as \"inside\nthe instance resource `f00b` the ghost of\n`<urn:valos:$~u4.ba54@_$~u4.b7e4>`\" and infers triples:\n",
         {
           "@type": "revdoc:Turtle",
           "vdoc:language": "https://www.w3.org/TR/turtle/",
           "vdoc:content": [
-            "\n  <urn:valos:$~u4:f00b@_$~u4:ba54@_$~u4:b7e4>\n        valos:ghostHost <urn:valos:$~u4:f00b>\n      ; valos:ghostPrototype <urn:valos:$~u4:ba54@_$~u4:b7e4>\n"
+            "\n  <urn:valos:$~u4.f00b@_$~u4.ba54@_$~u4.b7e4>\n        valos:ghostHost <urn:valos:$~u4.f00b>\n      ; valos:ghostPrototype <urn:valos:$~u4.ba54@_$~u4.b7e4>\n"
           ]
         }
       ]
@@ -1487,12 +1487,12 @@
       "dc:title": "Structural subspace triple inference",
       "@type": "revdoc:Example",
       "vdoc:content": [
-        "`<urn:valos:$~u4:f00b@.:myProp@_$lang:fi>` is a lang fi variant of\nf00b myProp and infers triples:\n",
+        "`<urn:valos:$~u4.f00b@.$.myProp@_$lang.fi>` is a lang fi variant of\nf00b myProp and infers triples:\n",
         {
           "@type": "revdoc:Turtle",
           "vdoc:language": "https://www.w3.org/TR/turtle/",
           "vdoc:content": [
-            "\n  <urn:valos:$~u4:f00b@.:myProp@_$lang:fi> a valos:ScopeProperty\n      ; valos:subspacePrototype <urn:valos:$~u4:f00b@.:myProp>\n                              , <urn:valos:$~u4:f00b-b507-0763@.:myProp@_$lang:fi>\n      ; valos:language \"fi\"\n"
+            "\n  <urn:valos:$~u4.f00b@.$.myProp@_$lang.fi> a valos:ScopeProperty\n      ; valos:subspacePrototype <urn:valos:$~u4.f00b@.$.myProp>\n                              , <urn:valos:$~u4.f00b-b507-0763@.$.myProp@_$lang.fi>\n      ; valos:language \"fi\"\n"
           ]
         }
       ]
@@ -1502,12 +1502,12 @@
       "dc:title": "Structural subspace recursive inference",
       "@type": "revdoc:Example",
       "vdoc:content": [
-        "`<urn:valos:$~u4:f00b@_$~u4:b453@_$lang:fi@_$~u4:b74e@.:myProp>`\ninfers triples:\n",
+        "`<urn:valos:$~u4.f00b@_$~u4.b453@_$lang.fi@_$~u4.b74e@.$.myProp>`\ninfers triples:\n",
         {
           "@type": "revdoc:Turtle",
           "vdoc:language": "https://www.w3.org/TR/turtle/",
           "vdoc:content": [
-            "\n  <urn:valos:$~u4:f00b@_$~u4:b453@_$lang:fi@_$~u4:b74e@.:myProp> a valos:ScopeProperty\n      ; valos:ghostHost <urn:valos:$~u4:f00b>\n      ; valos:ghostPrototype <urn:valos:$~u4:b453@_$lang:fi@_$~u4:b74e@.:myProp>\n      ; valos:subspacePrototype <urn:valos:$~u4:f00b@_$~u4:b453@_$~u4:b74e@_$lang:fi@.:myProp>\n      ; valos:language \"fi\"\n"
+            "\n  <urn:valos:$~u4.f00b@_$~u4.b453@_$lang.fi@_$~u4.b74e@.$.myProp> a valos:ScopeProperty\n      ; valos:ghostHost <urn:valos:$~u4.f00b>\n      ; valos:ghostPrototype <urn:valos:$~u4.b453@_$lang.fi@_$~u4.b74e@.$.myProp>\n      ; valos:subspacePrototype <urn:valos:$~u4.f00b@_$~u4.b453@_$~u4.b74e@_$lang.fi@.$.myProp>\n      ; valos:language \"fi\"\n"
           ]
         }
       ]
@@ -1529,14 +1529,14 @@
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "The verbs `.O.`, `.O*`, and `.O'` denote the properties\n`valos:value`, `valos:target`, and `valos:content'` respectively.\nThese are the primary ",
+            "The verbs `.O.`, `.O+`, and `.O~` denote the properties\n`valos:value`, `valos:id`, and `valos:content'` respectively.\nThese are the primary ",
             {
               "vdoc:em": true,
               "vdoc:content": [
                 "rdf:object sub-properties"
               ]
             },
-            " of\nScopeProperty, Entity and Media, respectively (the letter 'o' in the\nverbs stands for rdf:object). When given as a parameter to a primary\nresource they modify it with a fixed rdf:object triple.\nIn addition `.S*` and `.O*` denote `valos:source` `valos:target`\nwhich are the rdf:subject and rdf:object properties of a Relation."
+            " of\nScopeProperty, Entity and Media, respectively (the 'O' in the\nverbs stands for rdf:object). When given as a parameter to a primary\nresource they modify it with a fixed rdf:object triple.\nIn addition `.S-` and `.O-` denote `valos:source` `valos:target`\nwhich are the rdf:subject and rdf:object properties of a Relation."
           ]
         },
         {
@@ -1549,12 +1549,12 @@
       "dc:title": "Structural scope property triple inference",
       "@type": "revdoc:Example",
       "vdoc:content": [
-        "`<urn:valos:$~u4:f00b@.:myProp>` is a resource with fixed name\n\"myProp\", dominant type ScopeProperty, $~u4 resource f00b as the owning\nscope and a structurally homologous prototype inside\nf00b-b507-0763 and thus infers triples:\n",
+        "`<urn:valos:$~u4.f00b@.$.myProp>` is a resource with fixed name\n\"myProp\", dominant type ScopeProperty, $~u4 resource f00b as the owning\nscope and a structurally homologous prototype inside\nf00b-b507-0763 and thus infers triples:\n",
         {
           "@type": "revdoc:Turtle",
           "vdoc:language": "https://www.w3.org/TR/turtle/",
           "vdoc:content": [
-            "\n  <urn:valos:$~u4:f00b@.:myProp> a valos:ScopeProperty\n      ; valos:scope <urn:valos:$~u4:f00b>\n      ; valos:inheritancePrototype <urn:valos:$~u4:f00b-b507-0763@.:myProp>\n      ; valos:name \"myProp\"\n"
+            "\n  <urn:valos:$~u4.f00b@.$.myProp> a valos:ScopeProperty\n      ; valos:scope <urn:valos:$~u4.f00b>\n      ; valos:inheritancePrototype <urn:valos:$~u4.f00b-b507-0763@.$.myProp>\n      ; valos:name \"myProp\"\n"
           ]
         }
       ]
@@ -1564,15 +1564,15 @@
       "dc:title": "Structural rdf:object triple inference",
       "@type": "revdoc:Example",
       "vdoc:content": [
-        "`<urn:valos:$~u4:f00b@*:PERMISSIONS:@.*$~ih:8766>` is a PERMISSIONS\nrelation with fixed ~ih target 8766 and infers triples:\n",
+        "`<urn:valos:$~u4.f00b@-out--$.PERMISSIONS:@.O-$~ih.8766>` is a PERMISSIONS\nrelation with fixed ~ih target 8766 and infers triples:\n",
         {
           "@type": "revdoc:Turtle",
           "vdoc:language": "https://www.w3.org/TR/turtle/",
           "vdoc:content": [
-            "\n  <urn:valos:$~u4:f00b@*:PERMISSIONS:@.*$~ih:8766> a valos:Relation\n      ; valos:connectedSource <urn:valos:$~u4:f00b>\n      ; valos:prototype <urn:valos:$~u4:f00b-b507-0763@*:PERMISSIONS:@.*$~ih:8766>\n      ; valos:name \"PERMISSIONS\"\n      ; valos:target <urn:valos:$~u4:8766-src>\n"
+            "\n  <urn:valos:$~u4.f00b@-out--$.PERMISSIONS:@.O-$~ih.8766> a valos:Relation\n      ; valos:connectedSource <urn:valos:$~u4.f00b>\n      ; valos:prototype <urn:valos:$~u4.f00b-b507-0763@-out--$.PERMISSIONS:@.O-$~ih.8766>\n      ; valos:name \"PERMISSIONS\"\n      ; valos:target <urn:valos:$~u4.8766>\n"
           ]
         },
-        "Mnemonic: these verbs are read right-to-left, eg. `.O*` -> 'Relation\nrdf:object property is valos:target'"
+        "Mnemonic: these verbs are read right-to-left, eg. `.O-` -> 'Relation\nrdf:object property is valos:target'"
       ]
     },
     "section_structural_relation": {
@@ -1596,19 +1596,19 @@
       "dc:title": "Structural relation triple inference",
       "@type": "revdoc:Example",
       "vdoc:content": [
-        "`<urn:valos:$~u4:f00b@*:PERMISSIONS@_:1>` is a resource with\nfixed name \"PERMISSIONS\", dominant type Relation, ~u4 f00b as the\nsource, a structurally homologous prototype inside f00b-b507-0763\nand thus infers triples:\n",
+        "`<urn:valos:$~u4.f00b@-out--$.PERMISSIONS@_$.1>` is a resource with\nfixed name \"PERMISSIONS\", dominant type Relation, ~u4 f00b as the\nsource, a structurally homologous prototype inside f00b-b507-0763\nand thus infers triples:\n",
         {
           "@type": "revdoc:Turtle",
           "vdoc:language": "https://www.w3.org/TR/turtle/",
           "vdoc:content": [
-            "\n  <urn:valos:$~u4:f00b@*:PERMISSIONS> a valos:Relation\n      ; valos:connectedSource <urn:valos:$~u4:f00b>\n      ; valos:inheritancePrototype <urn:valos:$~u4:f00b-b507-0763@*:PERMISSIONS>\n      ; valos:name \"PERMISSIONS\"\n  <urn:valos:$~u4:f00b@*:PERMISSIONS@_:1> a valos:Relation\n      ; valos:subspacePrototype <urn:valos:$~u4:f00b@*:PERMISSIONS>\n                              , <urn:valos:$~u4:f00b-b507-0763@*:PERMISSIONS@_:1>\n"
+            "\n  <urn:valos:$~u4.f00b@-out--$.PERMISSIONS> a valos:Relation\n      ; valos:connectedSource <urn:valos:$~u4.f00b>\n      ; valos:inheritancePrototype <urn:valos:$~u4.f00b-b507-0763@-out--$.PERMISSIONS>\n      ; valos:name \"PERMISSIONS\"\n  <urn:valos:$~u4.f00b@-out--$.PERMISSIONS@_$.1> a valos:Relation\n      ; valos:subspacePrototype <urn:valos:$~u4.f00b@-out--$.PERMISSIONS>\n                              , <urn:valos:$~u4.f00b-b507-0763@-out--$.PERMISSIONS@_$.1>\n"
           ]
         }
       ]
     },
     "section_structural_entity": {
       "@id": "section_structural_entity",
-      "dc:title": "verb type \"`-`\": structural Entity",
+      "dc:title": "verb type \"`+`\": structural Entity",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -1627,19 +1627,19 @@
       "dc:title": "Structural Entity triple inference",
       "@type": "revdoc:Example",
       "vdoc:content": [
-        "`<urn:valos:$~u4:f00b@-:Scripts>` has a fixed name \"scripts\",\ndominant type Entity, $~u4 resource f00b as the owning container and\na structurally homologous prototype inside f00b-b507-0763 and thus\ninfers triples:\n",
+        "`<urn:valos:$~u4.f00b@+$.Scripts>` has a fixed name \"scripts\",\ndominant type Entity, $~u4 resource f00b as the owning container and\na structurally homologous prototype inside f00b-b507-0763 and thus\ninfers triples:\n",
         {
           "@type": "revdoc:Turtle",
           "vdoc:language": "https://www.w3.org/TR/turtle/",
           "vdoc:content": [
-            "\n  <urn:valos:$~u4:f00b@-:Scripts> a valos:Entity\n      ; valos:parent <urn:valos:$~u4:f00b>\n      ; valos:inheritancePrototype <urn:valos:$~u4:f00b-b507-0763@-:scripts>\n      ; valos:name \"scripts\"\n"
+            "\n  <urn:valos:$~u4.f00b@+$.Scripts> a valos:Entity\n      ; valos:parent <urn:valos:$~u4.f00b>\n      ; valos:inheritancePrototype <urn:valos:$~u4.f00b-b507-0763@+$.Scripts>\n      ; valos:name \"scripts\"\n"
           ]
         }
       ]
     },
     "section_structural_media": {
       "@id": "section_structural_media",
-      "dc:title": "verb type \"`'`\": structural Media",
+      "dc:title": "verb type \"`~`\": structural Media",
       "@type": "vdoc:Chapter",
       "vdoc:content": [
         {
@@ -1658,12 +1658,12 @@
       "dc:title": "Structural Media triple inference",
       "@type": "revdoc:Example",
       "vdoc:content": [
-        "`<urn:valos:$~u4:f00b@':foo.vs>` has a fixed name \"foo.vs\", dominant\ntype Media, $~u4 resource f00b as the owning folder and a structurally\nhomologous prototype inside f00b-b507-0763 and thus infers triples:\n",
+        "`<urn:valos:$~u4.f00b@~$.foo.vs>` has a fixed name \"foo.vs\", dominant\ntype Media, $~u4 resource f00b as the owning folder and a structurally\nhomologous prototype inside f00b-b507-0763 and thus infers triples:\n",
         {
           "@type": "revdoc:Turtle",
           "vdoc:language": "https://www.w3.org/TR/turtle/",
           "vdoc:content": [
-            "\n  <urn:valos:$~u4:f00b@':foo.vs> a valos:Media\n      ; valos:folder <urn:valos:$~u4:f00b>\n      ; valos:inheritancePrototype <urn:valos:$~u4:f00b-b507-0763@':foo.vs>\n      ; valos:name \"foo.vs\"\n"
+            "\n  <urn:valos:$~u4.f00b@~$.foo.vs> a valos:Media\n      ; valos:folder <urn:valos:$~u4.f00b>\n      ; valos:inheritancePrototype <urn:valos:$~u4.f00b-b507-0763@~$.foo.vs>\n      ; valos:name \"foo.vs\"\n"
           ]
         }
       ]
@@ -1687,7 +1687,7 @@
               "@type": "revdoc:ABNF",
               "vdoc:language": "https://tools.ietf.org/html/rfc5234",
               "vdoc:content": [
-                "  vpath         = \"@\" *(vstep \"@\") \"@\"\n  vstep         = [ verb-type ] *vparam\n  vparam        = [ \"$\" context-term ] \":\" vvalue\n  vvalue        = vpath / \"$\" / 1*( unencoded / pct-encoded )\n\n  verb-type     = 1*unencoded\n  context-term  = 1*unreserved\n  unencoded     = unreserved / \"!\" / \"*\" / \"'\" / \"(\" / \")\"\n  unreserved    = unreserved-nt / \"~\"\n  unreserved-nt = ALPHA / DIGIT / \"-\" / \"_\" / \".\"\n  pct-encoded   = \"%\" HEXDIG HEXDIG\n\n  ALPHA         = %x41-5A / %x61-7A                         ; A-Z / a-z\n  HEXDIG        = DIGIT / \"A\" / \"B\" / \"C\" / \"D\" / \"E\" / \"F\" ; 0-9 / A-F\n  DIGIT         = %x30-39                                   ; 0-9"
+                "  vpath         = \"@\" *(vstep \"@\") \"@\"\n  vstep         = [ verb-type ] *vparam\n  vparam        = \"$\" [ context-term ] \".\" vvalue\n  vvalue        = vpath / \"$\" / 1*( unencoded / pct-encoded )\n\n  verb-type     = 1*unencoded\n  context-term  = 1*unreserved\n  unencoded     = unreserved / \"!\" / \"*\" / \"'\" / \"(\" / \")\"\n  unreserved    = unreserved-nt / \"~\"\n  unreserved-nt = ALPHA / DIGIT / \"-\" / \"_\" / \".\"\n  pct-encoded   = \"%\" HEXDIG HEXDIG\n\n  ALPHA         = %x41-5A / %x61-7A                         ; A-Z / a-z\n  HEXDIG        = DIGIT / \"A\" / \"B\" / \"C\" / \"D\" / \"E\" / \"F\" ; 0-9 / A-F\n  DIGIT         = %x30-39                                   ; 0-9"
               ]
             }
           ]
@@ -1706,7 +1706,7 @@
               "@type": "revdoc:ABNF",
               "vdoc:language": "https://tools.ietf.org/html/rfc5234",
               "vdoc:content": [
-                "  vverb           = verb-type *vparam\n  vcontext-param  = \"$\" context-term \":\" vvalue\n\n  vrid            = \"@\" \"$\" vgrid \"@\" *(vstep \"@\") \"@\"\n  vgrid           = format-term \":\" vgrid-value *vparam\n  format-term     = \"~\" 1*(ALPHA / DIGIT / \"-\" / \"_\" / \".\")\n  vgrid-value     = 1*( unencoded / pct-encoded )\n\n  context-term-ns = ALPHA 0*30unreserved-nt ( ALPHA / DIGIT )\n"
+                "  vverb           = verb-type *vparam\n  vcontext-param  = \"$\" context-term \".\" vvalue\n\n  vrid            = \"@\" \"$\" vgrid \"@\" *(vstep \"@\") \"@\"\n  vgrid           = format-term \".\" vgrid-value *vparam\n  format-term     = \"~\" 1*(ALPHA / DIGIT / \"_\")\n  vgrid-value     = 1*( unencoded / pct-encoded )\n\n  context-term-ns = ALPHA 0*30unreserved-nt ( ALPHA / DIGIT )\n"
               ]
             }
           ]
@@ -1738,7 +1738,7 @@
             {
               "@type": "vdoc:Paragraph",
               "vdoc:content": [
-                "The nesting hierarchy can be manually quickly established by first\n  splitting a valid VPath string by the delimiter regex /(@$:)/\n  (retaining these delimiters in the result). Then a tree structure is\n  formed by traversing the array from left to right and dividing it to\n  different nesting depths. The nesting depth is increased for the\n  initial \"@\" and for each \"@\" that is preceded by a \":\" (corresponds\n  to the 'vpath' production prefix of some 'short-param' production)\n  and reducing the nesting depth for each \"@\" that is succeeded by a\n  \"$\", \":\", \"@\" or EOF (corresponds to the terminator of the last\n  'vgrid' or 'verb' production of some 'vpath' production). All\n  remaining \"@\" correspond to non-final 'vgrid' or 'verb' production\n  terminators of some 'vpath' rule production and thus don't change the\n  nesting depth."
+                "The nesting hierarchy can be manually quickly established by first\n  splitting a valid VPath string by the delimiter regex /(@$.)/\n  (retaining these delimiters in the result). Then a tree structure is\n  formed by traversing the array from left to right and dividing it to\n  different nesting depths. The nesting depth is increased for the\n  initial \"@\" and for each \"@\" that is preceded by a \".\" (corresponds\n  to the 'vpath' production prefix of some 'short-param' production)\n  and reducing the nesting depth for each \"@\" that is succeeded by a\n  \"$\", \"@\" or EOF (corresponds to the terminator of the last\n  'vgrid' or 'verb' production of some 'vpath' production). All\n  remaining \"@\" correspond to non-final 'vgrid' or 'verb' production\n  terminators of some 'vpath' rule production and thus don't change the\n  nesting depth."
               ]
             }
           ]
@@ -1753,7 +1753,7 @@
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "\nThis section contains considerations on the choice of character set and\non where and how VPaths need or don't need to be encoded. There's a\nhistorical emphasis on the decision of which characters to use as\ndelimiters (ie. \"@\", \":\" and \"$\")."
+            "\nThis section contains considerations on the choice of character set and\non where and how VPaths need or don't need to be encoded. There's a\nhistorical emphasis on the decision of which characters to use as\ndelimiters (ie. \"@\", and \"$\")."
           ]
         },
         {
@@ -1817,7 +1817,7 @@
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "\nIn general VPaths don't require encoding in contexts where the VPath\ndelimiters \"@\" / \":\" / \"$\" and the encodeURIComponent result character\nset ALPHA / DIGIT / \"-\" / \"_\" / \".\" / \"~\" / \"!\" / \"*\" / \"'\" / \"(\" / \")\"\ncan be used.\n",
+            "\nIn general VPaths don't require encoding in contexts where the VPath\ndelimiters \"@\" / \"$\" and the encodeURIComponent result character set\nALPHA / DIGIT / \"-\" / \"_\" / \".\" / \"~\" / \"!\" / \"*\" / \"'\" / \"(\" / \")\"\ncan be used.\n",
             {
               "vdoc:blockquote": true,
               "vdoc:content": [

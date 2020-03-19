@@ -49,7 +49,7 @@ chronicle.
 
   <section id="section_structure" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#section_structure">§ </a>VPath structure</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">VPath grammar only adds &#x22;@&#x22;, &#x22;:&#x22; and &#x22;$&#x22; in addition to
+<div><p><span class="vdoc type-vdoc-paragraph">VPath grammar only adds &#x22;@&#x22; and &#x22;$&#x22; in addition to
 encodeURIComponent characters. VPath grammar has two primary building
 blocks: vsteps and vparams.</span>
 </p></div>
@@ -59,8 +59,8 @@ blocks: vsteps and vparams.</span>
       <li><div><p><span class="vdoc type-vdoc-paragraph">A vstep can have a &#x27;verb type&#x27; and a sequence of vparams, all
   logically independent of each other.</span>
 </p></div></li>
-      <li><div><p><span class="vdoc type-vdoc-paragraph">A vparam always contains a &#x22;:&#x22;-prefixed vvalue. The vvalue can
-  optionally be preceded with a &#x22;$&#x22;-prefixed context-term.</span>
+      <li><div><p><span class="vdoc type-vdoc-paragraph">A vparam always contains a &#x22;$&#x22;-prefix. The vparam then has
+  an optional context-term and finally a &#x22;.&#x22;-prefixed vvalue.</span>
 </p></div></li>
     </ul>
 <div><p><span class="vdoc type-vdoc-paragraph">VPaths serve two superficially distinct purposes as paths and as
@@ -74,7 +74,7 @@ global resource identifier (a *VGRID*).</span>
     <h3><a aria-label="§" href="#main_vpath_rules">§ </a>Main VPath rules</h3>
 <pre><code><span class="vdoc type-vdoc-node">  vpath = &#x22;@&#x22; *(vstep &#x22;@&#x22;) &#x22;@&#x22;
   vstep  = [ verb-type ] *vparam
-  vparam = [ &#x22;$&#x22; context-term ] &#x22;:&#x22; vvalue
+  vparam = &#x22;$&#x22; [ context-term ] &#x22;.&#x22; vvalue
   vvalue = vpath / &#x22;$&#x22; / 1*( unencoded / pct-encoded )</span>
 </code></pre></span>
 
@@ -140,7 +140,7 @@ remaining entries contain the segment payload:
       <li><div><p><span class="vdoc type-vdoc-paragraph">&#x22;$&#x22; identifies a vparam segment with its second entry being a valid
   context term string and an optional third entry containing the vvalue</span>
 </p></div></li>
-      <li><div><p><span class="vdoc type-vdoc-paragraph">&#x22;:&#x22; identifies a vparam segment without a context-term and with an
+      <li><div><p><span class="vdoc type-vdoc-paragraph">&#x22;$.&#x22; identifies a vparam segment without a context-term and with an
   optional second entry containing the vvalue</span>
 </p></div></li>
       <li><div><p><span class="vdoc type-vdoc-paragraph">otherwise the segment type denotes the verb type of a verb segment
@@ -149,9 +149,9 @@ remaining entries contain the segment payload:
     </ul>
 <div><p><span class="vdoc type-vdoc-paragraph">
 JSON numbers and strings can only appear as param values of &#x22;$&#x22; or
-&#x22;:&#x22;-segments. JSON objects cannot appear.
+&#x22;$.&#x22;-segments. JSON objects cannot appear.
 A VPath which is used as a contextless param of a verb must appear
-directly without intermediate &#x22;:&#x22;-segments (unlike in the string VPath
+directly without intermediate &#x22;$.&#x22;-segments (unlike in the string VPath
 construct).
 Conversely a verb used as a contextless param must still be wrapped
 inside a &#x22;@&#x22;-segment.</span>
@@ -164,9 +164,9 @@ inside a &#x22;@&#x22;-segment.</span>
 Shortcut VPath format is a compact object representation of a VPath as
 &#x27;human readable&#x27; JSON which can then be distributed to the canonical
 representation. In fact any JSON construct is a valid shortcut VPath,
-and as long as all initial array entries equal to &#x22;@&#x22;, &#x22;$&#x22; and &#x22;:&#x22;  are
-escaped as [&#x22;:&#x22;, &#x22;@&#x22;], [&#x22;:&#x22;, &#x22;$&#x22;] and [&#x22;:&#x22;, &#x22;:&#x22;] the shortcut egment
-will resolve back into the original JSON construct.
+and as long as all initial array entries equal to &#x22;@&#x22;, &#x22;$&#x22; and &#x22;$.&#x22; are
+escaped as [&#x22;$.&#x22;, &#x22;@&#x22;], [&#x22;$.&#x22;, &#x22;$&#x22;] and [&#x22;$.&#x22;, &#x22;$.&#x22;] the shortcut
+segment will resolve back into the original JSON construct.
 </span>
 </p></div>
   </section>
@@ -306,7 +306,7 @@ call.</span>
     <span id="main_verb_rules" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#main_verb_rules">§ </a>Informative verb rules</h3>
 <pre><code><span class="vdoc type-vdoc-node">  vverb        = verb-type *vparam
-  vparam       = [ &#x22;$&#x22; context-term ] &#x22;:&#x22; vvalue
+  vparam       = &#x22;$&#x22; [ context-term ] &#x22;.&#x22; vvalue
   verb-type    = 1*unencoded
   context-term = ALPHA *unreserved-nt
   vvalue       = vpath / &#x22;$&#x22; / 1*( unencoded / pct-encoded )
@@ -336,7 +336,7 @@ given name and which has the head as its scope.</span>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_verb_property" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_verb_property">§ </a>Property selector example</h3>
-Triple pattern &#x60;?s &#x3C;urn:valos:.:myProp&#x3E; ?o&#x60; matches like:
+Triple pattern &#x60;?s &#x3C;urn:valos:.$.myProp&#x3E; ?o&#x60; matches like:
 <pre><code><span class="vdoc type-vdoc-node">
   ?o    valos:scope ?s
       ; valos:name &#x22;myProp&#x22;
@@ -355,7 +355,7 @@ name and which have the head as their source.</span>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_verb_sequence" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_verb_sequence">§ </a>Sequence selector example</h3>
-Triple pattern &#x60;?s &#x3C;urn:valos:*:PERMISSIONS&#x3E; ?o&#x60; matches like:
+Triple pattern &#x60;?s &#x3C;urn:valos:-out--$.PERMISSIONS&#x3E; ?o&#x60; matches like:
 <pre><code><span class="vdoc type-vdoc-node">
   ?o    valos:source ?s
       ; valos:name &#x22;PERMISSIONS&#x22;
@@ -368,7 +368,7 @@ the only things that can have multiple instances with the same name).</span>
   </section>
 
   <section id="section_verb_container" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_verb_container">§ </a>verb type &#x22;&#x60;-&#x60;&#x22;: container or Entity selector</h3>
+    <h3><a aria-label="§" href="#section_verb_container">§ </a>verb type &#x22;&#x60;+&#x60;&#x22;: container or Entity selector</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
 Verb for selecting the resource (typically an Entity) with the given
 name and which has the head as their container.</span>
@@ -376,19 +376,19 @@ name and which has the head as their container.</span>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_verb_container" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_verb_container">§ </a>Container selector example</h3>
-Triple pattern &#x60;?s &#x3C;urn:valos:-:Scripts&#x3E; ?o&#x60; matches like:
+Triple pattern &#x60;?s &#x3C;urn:valos:+$.Scripts&#x3E; ?o&#x60; matches like:
 <pre><code><span class="vdoc type-vdoc-node">
   ?o    valos:parent ?s
       ; valos:name &#x22;Scripts&#x22;
 </span>
 </code></pre>
-Mnemonic: &#x22;-&#x22; links a container to its parent.</span>
+Mnemonic: &#x22;+&#x22; is a list-view symbol of an expandable container.</span>
 
 </blockquote>
   </section>
 
   <section id="section_verb_content" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_verb_content">§ </a>verb type &#x22;&#x60;&#x27;&#x60;&#x22;: content or Media selector</h3>
+    <h3><a aria-label="§" href="#section_verb_content">§ </a>verb type &#x22;&#x60;~&#x60;&#x22;: content or Media selector</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
 Verb for selecting the Media with the given name which has the
 head as their folder.</span>
@@ -396,26 +396,26 @@ head as their folder.</span>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_verb_content" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_verb_content">§ </a>Content selector example</h3>
-Triple pattern &#x60;?s &#x3C;urn:valos:&#x27;:foo.vs&#x3E; ?o&#x60; matches like:
+Triple pattern &#x60;?s &#x3C;urn:valos:~$.foo.vs&#x3E; ?o&#x60; matches like:
 <pre><code><span class="vdoc type-vdoc-node">
   ?o    valos:folder ?s
       ; valos:name &#x22;foo.vs&#x22;
 </span>
 </code></pre>
-Mnemonic: &#x22;&#x27;&#x22; for quoted content suggests text data.</span>
+Mnemonic: &#x22;~&#x22; has no mnemonic yet.</span>
 
 </blockquote>
   </section>
 
   <section id="section_verb_object" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_verb_object">§ </a>verb type &#x22;&#x60;-&#x60;&#x22;: object or target selector</h3>
+    <h3><a aria-label="§" href="#section_verb_object">§ </a>verb type &#x22;&#x60;.O&#x60;&#x22;: object or target selector</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
 Verb that is a synonym for predicate &#x27;rdf:object&#x27;.</span>
 </p></div>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_verb_object" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_verb_object">§ </a>Property selector example</h3>
-Triple pattern &#x60;?s &#x3C;urn:valos:-&#x3E; ?o&#x60; matches like:
+Triple pattern &#x60;?s &#x3C;urn:valos:.O&#x3E; ?o&#x60; matches like:
 <pre><code><span class="vdoc type-vdoc-node">
   ?s    rdf:object ?o
 </span>
@@ -433,7 +433,7 @@ Verb for selecting named subspaces and ghosts.</span>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_verb_language_subspace" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_verb_language_subspace">§ </a>Language subspace selector example</h3>
-Triple pattern &#x60;?s &#x3C;urn:valos:.:myProp@_$lang:fi&#x3E; ?o&#x60; matches like:
+Triple pattern &#x60;?s &#x3C;urn:valos:.$.myProp@_$lang.fi&#x3E; ?o&#x60; matches like:
 <pre><code><span class="vdoc type-vdoc-node">
   ?_sp  valos:scope ?s
       ; valos:name &#x22;myProp&#x22;
@@ -450,10 +450,10 @@ current resource.</span>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_verb_ghost_subspace" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_verb_ghost_subspace">§ </a>Ghost subspace selector example</h3>
-Triple pattern &#x60;?s &#x3C;urn:valos:_$~u4:ba54&#x3E; ?o&#x60; matches like:
+Triple pattern &#x60;?s &#x3C;urn:valos:_$~u4.ba54&#x3E; ?o&#x60; matches like:
 <pre><code><span class="vdoc type-vdoc-node">
   ?o    valos:ghostHost ?s
-      ; valos:ghostPrototype &#x3C;urn:valos:$~u4:ba54&#x3E;
+      ; valos:ghostPrototype &#x3C;urn:valos:$~u4.ba54&#x3E;
 </span>
 </code></pre>
 Mnemonic: The &#x27;_$~&#x27; is a &#x27;subspace of ghoStS&#x27;.</span>
@@ -516,7 +516,7 @@ mapping) and less on clever SPARQL trickery. The illustration here uses
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_verb_computation" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_verb_computation">§ </a>Computation selector example</h3>
-Triple pattern &#x60;?s &#x3C;urn:valos:!$valk:add$number:10:@!:myVal@@&#x3E; ?o&#x60;
+Triple pattern &#x60;?s &#x3C;urn:valos:!$valk.add$number.10$.@!$.myVal@@&#x3E; ?o&#x60;
 matches like:
 <pre><code><span class="vdoc type-vdoc-node">
   ?_:0  valos:scope ?s
@@ -545,7 +545,7 @@ A VRID is a VPath which has VGRID as its first production
     <span id="main_vrid_rules" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#main_vrid_rules">§ </a>Informative VRID rules</h3>
 <pre><code><span class="vdoc type-vdoc-node">  vrid        = &#x22;@&#x22; &#x22;$&#x22; vgrid &#x22;@&#x22; *(vstep &#x22;@&#x22;) &#x22;@&#x22;
-  vgrid       = format-term &#x22;:&#x22; vgrid-value *vparam
+  vgrid       = format-term &#x22;.&#x22; vgrid-value *vparam
 </span>
 </code></pre></span>
 
@@ -560,7 +560,7 @@ a VGRID and no verbs this global resource is also the
 <blockquote class="vdoc type-revdoc-example">
     <span id="main_vgrid_rules" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#main_vgrid_rules">§ </a>Informative VGRID rules</h3>
-<pre><code><span class="vdoc type-vdoc-node">  vgrid         = format-term &#x22;:&#x22; vgrid-value *vparam
+<pre><code><span class="vdoc type-vdoc-node">  vgrid         = format-term &#x22;.&#x22; vgrid-value *vparam
   format-term   = &#x22;~&#x22; 1*unreserved-nt
   vgrid-value   = 1*unreserved-nt
 
@@ -607,7 +607,7 @@ context where the VRID is used.</span>
 </p></div><div><p><span class="vdoc type-vdoc-paragraph">All context-terms of the VGRID and VRID vparams are references to the
 event log <a href="https://w3c.github.io/json-ld-syntax/#the-context" class="vdoc type-vdoc-reference">JSON-LD context</a> (Note: this applies only to immediate but not to nested vparams).</span>
 </p></div><div><p><span class="vdoc type-vdoc-paragraph">Global resources can be transferred between event logs. To maintain
-immutability across these transfers VGRID&#x27;s must not contain partition
+immutability across these transfers VGRID&#x27;s must not contain chronicle
 or other non-identifying locator information. Similar to URN&#x27;s VRID&#x27;s
 always relies external structures and systems for carrying locator
 information.
@@ -661,7 +661,7 @@ sub-resources: they allow for protected, constrained semantics to be
 expressed in the valospace resources. This allows both simplified
 semantics (eg. properties _cannot_ be renamed so the complex
 functionality doesn&#x27;t need to be supported on fabric level), more
-principled mechanism for partition crypto behaviours (permission
+principled mechanism for chronicle crypto behaviours (permission
 relations are structural sub-resources which simplifies security
 analysis but retains valospace convenience) and also a mechanism for
 expressing non-trivial resources such as hypertwin resources.</span>
@@ -778,8 +778,8 @@ well as other possible constraints.</span>
     <span id="example_shared_vrid_verb_data" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_shared_vrid_verb_data">§ </a>Shared example data</h3>
 The examples below all share the following triples:<pre><code><span class="vdoc type-vdoc-node">
-  &#x3C;urn:valos:$~u4:f00b&#x3E; a valos:Entity
-      ; valos:prototype &#x3C;urn:valos:$~u4:f00b-b507-0763&#x3E;
+  &#x3C;urn:valos:$~u4.f00b&#x3E; a valos:Entity
+      ; valos:prototype &#x3C;urn:valos:$~u4.f00b-b507-0763&#x3E;
 </span>
 </code></pre></span>
 
@@ -795,13 +795,13 @@ instance itself. The instance is called *ghost host* of all such ghosts.</span>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_structural_ghost" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_structural_ghost">§ </a>Structural ghost triple inference</h3>
-&#x60;&#x3C;urn:valos:$~u4:f00b@_$~u4:ba54&#x3E;&#x60; reads as &#x22;inside the
+&#x60;&#x3C;urn:valos:$~u4.f00b@_$~u4.ba54&#x3E;&#x60; reads as &#x22;inside the
 instance resource &#x60;f00b&#x60; the ghost of the $~u4 resource &#x60;ba54&#x60;&#x22;
 and infers triples:
 <pre><code><span class="vdoc type-vdoc-node">
-  &#x3C;urn:valos:$~u4:f00b@_$~u4:ba54&#x3E;
-        valos:ghostHost &#x3C;urn:valos:$~u4:f00b&#x3E;
-      ; valos:ghostPrototype &#x3C;urn:valos:$~u4:ba54&#x3E;
+  &#x3C;urn:valos:$~u4.f00b@_$~u4.ba54&#x3E;
+        valos:ghostHost &#x3C;urn:valos:$~u4.f00b&#x3E;
+      ; valos:ghostPrototype &#x3C;urn:valos:$~u4.ba54&#x3E;
 </span>
 </code></pre></span>
 
@@ -813,13 +813,13 @@ ghost segments wont provide any further inferences.</span>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_structural_ghost_recursive" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_structural_ghost_recursive">§ </a>Recursive ghost triple inference</h3>
-&#x60;&#x3C;urn:valos:$~u4:f00b@_$~u4:ba54@_$~u4:b7e4&#x3E;&#x60; reads as &#x22;inside
+&#x60;&#x3C;urn:valos:$~u4.f00b@_$~u4.ba54@_$~u4.b7e4&#x3E;&#x60; reads as &#x22;inside
 the instance resource &#x60;f00b&#x60; the ghost of
-&#x60;&#x3C;urn:valos:$~u4:ba54@_$~u4:b7e4&#x3E;&#x60;&#x22; and infers triples:
+&#x60;&#x3C;urn:valos:$~u4.ba54@_$~u4.b7e4&#x3E;&#x60;&#x22; and infers triples:
 <pre><code><span class="vdoc type-vdoc-node">
-  &#x3C;urn:valos:$~u4:f00b@_$~u4:ba54@_$~u4:b7e4&#x3E;
-        valos:ghostHost &#x3C;urn:valos:$~u4:f00b&#x3E;
-      ; valos:ghostPrototype &#x3C;urn:valos:$~u4:ba54@_$~u4:b7e4&#x3E;
+  &#x3C;urn:valos:$~u4.f00b@_$~u4.ba54@_$~u4.b7e4&#x3E;
+        valos:ghostHost &#x3C;urn:valos:$~u4.f00b&#x3E;
+      ; valos:ghostPrototype &#x3C;urn:valos:$~u4.ba54@_$~u4.b7e4&#x3E;
 </span>
 </code></pre></span>
 
@@ -841,12 +841,12 @@ found.</span>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_structural_subspace" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_structural_subspace">§ </a>Structural subspace triple inference</h3>
-&#x60;&#x3C;urn:valos:$~u4:f00b@.:myProp@_$lang:fi&#x3E;&#x60; is a lang fi variant of
+&#x60;&#x3C;urn:valos:$~u4.f00b@.$.myProp@_$lang.fi&#x3E;&#x60; is a lang fi variant of
 f00b myProp and infers triples:
 <pre><code><span class="vdoc type-vdoc-node">
-  &#x3C;urn:valos:$~u4:f00b@.:myProp@_$lang:fi&#x3E; a valos:ScopeProperty
-      ; valos:subspacePrototype &#x3C;urn:valos:$~u4:f00b@.:myProp&#x3E;
-                              , &#x3C;urn:valos:$~u4:f00b-b507-0763@.:myProp@_$lang:fi&#x3E;
+  &#x3C;urn:valos:$~u4.f00b@.$.myProp@_$lang.fi&#x3E; a valos:ScopeProperty
+      ; valos:subspacePrototype &#x3C;urn:valos:$~u4.f00b@.$.myProp&#x3E;
+                              , &#x3C;urn:valos:$~u4.f00b-b507-0763@.$.myProp@_$lang.fi&#x3E;
       ; valos:language &#x22;fi&#x22;
 </span>
 </code></pre></span>
@@ -862,13 +862,13 @@ sub-resource of the selector segment).</span>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_structural_subspace_recursive" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_structural_subspace_recursive">§ </a>Structural subspace recursive inference</h3>
-&#x60;&#x3C;urn:valos:$~u4:f00b@_$~u4:b453@_$lang:fi@_$~u4:b74e@.:myProp&#x3E;&#x60;
+&#x60;&#x3C;urn:valos:$~u4.f00b@_$~u4.b453@_$lang.fi@_$~u4.b74e@.$.myProp&#x3E;&#x60;
 infers triples:
 <pre><code><span class="vdoc type-vdoc-node">
-  &#x3C;urn:valos:$~u4:f00b@_$~u4:b453@_$lang:fi@_$~u4:b74e@.:myProp&#x3E; a valos:ScopeProperty
-      ; valos:ghostHost &#x3C;urn:valos:$~u4:f00b&#x3E;
-      ; valos:ghostPrototype &#x3C;urn:valos:$~u4:b453@_$lang:fi@_$~u4:b74e@.:myProp&#x3E;
-      ; valos:subspacePrototype &#x3C;urn:valos:$~u4:f00b@_$~u4:b453@_$~u4:b74e@_$lang:fi@.:myProp&#x3E;
+  &#x3C;urn:valos:$~u4.f00b@_$~u4.b453@_$lang.fi@_$~u4.b74e@.$.myProp&#x3E; a valos:ScopeProperty
+      ; valos:ghostHost &#x3C;urn:valos:$~u4.f00b&#x3E;
+      ; valos:ghostPrototype &#x3C;urn:valos:$~u4.b453@_$lang.fi@_$~u4.b74e@.$.myProp&#x3E;
+      ; valos:subspacePrototype &#x3C;urn:valos:$~u4.f00b@_$~u4.b453@_$~u4.b74e@_$lang.fi@.$.myProp&#x3E;
       ; valos:language &#x22;fi&#x22;
 </span>
 </code></pre></span>
@@ -884,40 +884,40 @@ Structural properties infer a type, fixed owner and name.</span>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_structural_scope_property" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_structural_scope_property">§ </a>Structural scope property triple inference</h3>
-&#x60;&#x3C;urn:valos:$~u4:f00b@.:myProp&#x3E;&#x60; is a resource with fixed name
+&#x60;&#x3C;urn:valos:$~u4.f00b@.$.myProp&#x3E;&#x60; is a resource with fixed name
 &#x22;myProp&#x22;, dominant type ScopeProperty, $~u4 resource f00b as the owning
 scope and a structurally homologous prototype inside
 f00b-b507-0763 and thus infers triples:
 <pre><code><span class="vdoc type-vdoc-node">
-  &#x3C;urn:valos:$~u4:f00b@.:myProp&#x3E; a valos:ScopeProperty
-      ; valos:scope &#x3C;urn:valos:$~u4:f00b&#x3E;
-      ; valos:inheritancePrototype &#x3C;urn:valos:$~u4:f00b-b507-0763@.:myProp&#x3E;
+  &#x3C;urn:valos:$~u4.f00b@.$.myProp&#x3E; a valos:ScopeProperty
+      ; valos:scope &#x3C;urn:valos:$~u4.f00b&#x3E;
+      ; valos:inheritancePrototype &#x3C;urn:valos:$~u4.f00b-b507-0763@.$.myProp&#x3E;
       ; valos:name &#x22;myProp&#x22;
 </span>
 </code></pre></span>
 
-</blockquote><div><p><span class="vdoc type-vdoc-paragraph">The verbs &#x60;.O.&#x60;, &#x60;.O*&#x60;, and &#x60;.O&#x27;&#x60; denote the properties
-&#x60;valos:value&#x60;, &#x60;valos:target&#x60;, and &#x60;valos:content&#x27;&#x60; respectively.
+</blockquote><div><p><span class="vdoc type-vdoc-paragraph">The verbs &#x60;.O.&#x60;, &#x60;.O+&#x60;, and &#x60;.O~&#x60; denote the properties
+&#x60;valos:value&#x60;, &#x60;valos:id&#x60;, and &#x60;valos:content&#x27;&#x60; respectively.
 These are the primary <em>rdf:object sub-properties</em> of
-ScopeProperty, Entity and Media, respectively (the letter &#x27;o&#x27; in the
+ScopeProperty, Entity and Media, respectively (the &#x27;O&#x27; in the
 verbs stands for rdf:object). When given as a parameter to a primary
 resource they modify it with a fixed rdf:object triple.
-In addition &#x60;.S*&#x60; and &#x60;.O*&#x60; denote &#x60;valos:source&#x60; &#x60;valos:target&#x60;
+In addition &#x60;.S-&#x60; and &#x60;.O-&#x60; denote &#x60;valos:source&#x60; &#x60;valos:target&#x60;
 which are the rdf:subject and rdf:object properties of a Relation.</span>
 </p></div>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_structural_object" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_structural_object">§ </a>Structural rdf:object triple inference</h3>
-&#x60;&#x3C;urn:valos:$~u4:f00b@*:PERMISSIONS:@.*$~ih:8766&#x3E;&#x60; is a PERMISSIONS
+&#x60;&#x3C;urn:valos:$~u4.f00b@-out--$.PERMISSIONS:@.O-$~ih.8766&#x3E;&#x60; is a PERMISSIONS
 relation with fixed ~ih target 8766 and infers triples:
 <pre><code><span class="vdoc type-vdoc-node">
-  &#x3C;urn:valos:$~u4:f00b@*:PERMISSIONS:@.*$~ih:8766&#x3E; a valos:Relation
-      ; valos:connectedSource &#x3C;urn:valos:$~u4:f00b&#x3E;
-      ; valos:prototype &#x3C;urn:valos:$~u4:f00b-b507-0763@*:PERMISSIONS:@.*$~ih:8766&#x3E;
+  &#x3C;urn:valos:$~u4.f00b@-out--$.PERMISSIONS:@.O-$~ih.8766&#x3E; a valos:Relation
+      ; valos:connectedSource &#x3C;urn:valos:$~u4.f00b&#x3E;
+      ; valos:prototype &#x3C;urn:valos:$~u4.f00b-b507-0763@-out--$.PERMISSIONS:@.O-$~ih.8766&#x3E;
       ; valos:name &#x22;PERMISSIONS&#x22;
-      ; valos:target &#x3C;urn:valos:$~u4:8766-src&#x3E;
+      ; valos:target &#x3C;urn:valos:$~u4.8766&#x3E;
 </span>
-</code></pre>Mnemonic: these verbs are read right-to-left, eg. &#x60;.O*&#x60; -&#x3E; &#x27;Relation
+</code></pre>Mnemonic: these verbs are read right-to-left, eg. &#x60;.O-&#x60; -&#x3E; &#x27;Relation
 rdf:object property is valos:target&#x27;</span>
 
 </blockquote>
@@ -932,18 +932,18 @@ possibly source and target.</span>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_structural_relation" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_structural_relation">§ </a>Structural relation triple inference</h3>
-&#x60;&#x3C;urn:valos:$~u4:f00b@*:PERMISSIONS@_:1&#x3E;&#x60; is a resource with
+&#x60;&#x3C;urn:valos:$~u4.f00b@-out--$.PERMISSIONS@_$.1&#x3E;&#x60; is a resource with
 fixed name &#x22;PERMISSIONS&#x22;, dominant type Relation, ~u4 f00b as the
 source, a structurally homologous prototype inside f00b-b507-0763
 and thus infers triples:
 <pre><code><span class="vdoc type-vdoc-node">
-  &#x3C;urn:valos:$~u4:f00b@*:PERMISSIONS&#x3E; a valos:Relation
-      ; valos:connectedSource &#x3C;urn:valos:$~u4:f00b&#x3E;
-      ; valos:inheritancePrototype &#x3C;urn:valos:$~u4:f00b-b507-0763@*:PERMISSIONS&#x3E;
+  &#x3C;urn:valos:$~u4.f00b@-out--$.PERMISSIONS&#x3E; a valos:Relation
+      ; valos:connectedSource &#x3C;urn:valos:$~u4.f00b&#x3E;
+      ; valos:inheritancePrototype &#x3C;urn:valos:$~u4.f00b-b507-0763@-out--$.PERMISSIONS&#x3E;
       ; valos:name &#x22;PERMISSIONS&#x22;
-  &#x3C;urn:valos:$~u4:f00b@*:PERMISSIONS@_:1&#x3E; a valos:Relation
-      ; valos:subspacePrototype &#x3C;urn:valos:$~u4:f00b@*:PERMISSIONS&#x3E;
-                              , &#x3C;urn:valos:$~u4:f00b-b507-0763@*:PERMISSIONS@_:1&#x3E;
+  &#x3C;urn:valos:$~u4.f00b@-out--$.PERMISSIONS@_$.1&#x3E; a valos:Relation
+      ; valos:subspacePrototype &#x3C;urn:valos:$~u4.f00b@-out--$.PERMISSIONS&#x3E;
+                              , &#x3C;urn:valos:$~u4.f00b-b507-0763@-out--$.PERMISSIONS@_$.1&#x3E;
 </span>
 </code></pre></span>
 
@@ -951,21 +951,21 @@ and thus infers triples:
   </section>
 
   <section id="section_structural_entity" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_structural_entity">§ </a>verb type &#x22;&#x60;-&#x60;&#x22;: structural Entity</h3>
+    <h3><a aria-label="§" href="#section_structural_entity">§ </a>verb type &#x22;&#x60;+&#x60;&#x22;: structural Entity</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
 Structural entities infer a type, fixed owner (parent) and name.</span>
 </p></div>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_structural_entity" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_structural_entity">§ </a>Structural Entity triple inference</h3>
-&#x60;&#x3C;urn:valos:$~u4:f00b@-:Scripts&#x3E;&#x60; has a fixed name &#x22;scripts&#x22;,
+&#x60;&#x3C;urn:valos:$~u4.f00b@+$.Scripts&#x3E;&#x60; has a fixed name &#x22;scripts&#x22;,
 dominant type Entity, $~u4 resource f00b as the owning container and
 a structurally homologous prototype inside f00b-b507-0763 and thus
 infers triples:
 <pre><code><span class="vdoc type-vdoc-node">
-  &#x3C;urn:valos:$~u4:f00b@-:Scripts&#x3E; a valos:Entity
-      ; valos:parent &#x3C;urn:valos:$~u4:f00b&#x3E;
-      ; valos:inheritancePrototype &#x3C;urn:valos:$~u4:f00b-b507-0763@-:scripts&#x3E;
+  &#x3C;urn:valos:$~u4.f00b@+$.Scripts&#x3E; a valos:Entity
+      ; valos:parent &#x3C;urn:valos:$~u4.f00b&#x3E;
+      ; valos:inheritancePrototype &#x3C;urn:valos:$~u4.f00b-b507-0763@+$.Scripts&#x3E;
       ; valos:name &#x22;scripts&#x22;
 </span>
 </code></pre></span>
@@ -974,20 +974,20 @@ infers triples:
   </section>
 
   <section id="section_structural_media" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_structural_media">§ </a>verb type &#x22;&#x60;&#x27;&#x60;&#x22;: structural Media</h3>
+    <h3><a aria-label="§" href="#section_structural_media">§ </a>verb type &#x22;&#x60;~&#x60;&#x22;: structural Media</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
 Structural medias infer a type, fixed owner (folder) and name.</span>
 </p></div>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_structural_media" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_structural_media">§ </a>Structural Media triple inference</h3>
-&#x60;&#x3C;urn:valos:$~u4:f00b@&#x27;:foo.vs&#x3E;&#x60; has a fixed name &#x22;foo.vs&#x22;, dominant
+&#x60;&#x3C;urn:valos:$~u4.f00b@~$.foo.vs&#x3E;&#x60; has a fixed name &#x22;foo.vs&#x22;, dominant
 type Media, $~u4 resource f00b as the owning folder and a structurally
 homologous prototype inside f00b-b507-0763 and thus infers triples:
 <pre><code><span class="vdoc type-vdoc-node">
-  &#x3C;urn:valos:$~u4:f00b@&#x27;:foo.vs&#x3E; a valos:Media
-      ; valos:folder &#x3C;urn:valos:$~u4:f00b&#x3E;
-      ; valos:inheritancePrototype &#x3C;urn:valos:$~u4:f00b-b507-0763@&#x27;:foo.vs&#x3E;
+  &#x3C;urn:valos:$~u4.f00b@~$.foo.vs&#x3E; a valos:Media
+      ; valos:folder &#x3C;urn:valos:$~u4.f00b&#x3E;
+      ; valos:inheritancePrototype &#x3C;urn:valos:$~u4.f00b-b507-0763@~$.foo.vs&#x3E;
       ; valos:name &#x22;foo.vs&#x22;
 </span>
 </code></pre></span>
@@ -1007,7 +1007,7 @@ encoding.</span>
 </p></div><div><p><span class="vdoc type-vdoc-paragraph">The list of definitive rules:
 <pre><code><span class="vdoc type-vdoc-node">  vpath         = &#x22;@&#x22; *(vstep &#x22;@&#x22;) &#x22;@&#x22;
   vstep         = [ verb-type ] *vparam
-  vparam        = [ &#x22;$&#x22; context-term ] &#x22;:&#x22; vvalue
+  vparam        = &#x22;$&#x22; [ context-term ] &#x22;.&#x22; vvalue
   vvalue        = vpath / &#x22;$&#x22; / 1*( unencoded / pct-encoded )
 
   verb-type     = 1*unencoded
@@ -1026,11 +1026,11 @@ parser but which have well-defined meaning and can thus be referred to
 from other documents.</span>
 </p></div><div><p><span class="vdoc type-vdoc-paragraph">The list of informative pseudo-rules:
 <pre><code><span class="vdoc type-vdoc-node">  vverb           = verb-type *vparam
-  vcontext-param  = &#x22;$&#x22; context-term &#x22;:&#x22; vvalue
+  vcontext-param  = &#x22;$&#x22; context-term &#x22;.&#x22; vvalue
 
   vrid            = &#x22;@&#x22; &#x22;$&#x22; vgrid &#x22;@&#x22; *(vstep &#x22;@&#x22;) &#x22;@&#x22;
-  vgrid           = format-term &#x22;:&#x22; vgrid-value *vparam
-  format-term     = &#x22;~&#x22; 1*(ALPHA / DIGIT / &#x22;-&#x22; / &#x22;_&#x22; / &#x22;.&#x22;)
+  vgrid           = format-term &#x22;.&#x22; vgrid-value *vparam
+  format-term     = &#x22;~&#x22; 1*(ALPHA / DIGIT / &#x22;_&#x22;)
   vgrid-value     = 1*( unencoded / pct-encoded )
 
   context-term-ns = ALPHA 0*30unreserved-nt ( ALPHA / DIGIT )
@@ -1055,14 +1055,14 @@ itself. These notes primarily relate to LL(1)-parseability:</span>
 </blockquote></span>
 </p></div></li>
       <li><div><p><span class="vdoc type-vdoc-paragraph">The nesting hierarchy can be manually quickly established by first
-  splitting a valid VPath string by the delimiter regex /(@$:)/
+  splitting a valid VPath string by the delimiter regex /(@$.)/
   (retaining these delimiters in the result). Then a tree structure is
   formed by traversing the array from left to right and dividing it to
   different nesting depths. The nesting depth is increased for the
-  initial &#x22;@&#x22; and for each &#x22;@&#x22; that is preceded by a &#x22;:&#x22; (corresponds
+  initial &#x22;@&#x22; and for each &#x22;@&#x22; that is preceded by a &#x22;.&#x22; (corresponds
   to the &#x27;vpath&#x27; production prefix of some &#x27;short-param&#x27; production)
   and reducing the nesting depth for each &#x22;@&#x22; that is succeeded by a
-  &#x22;$&#x22;, &#x22;:&#x22;, &#x22;@&#x22; or EOF (corresponds to the terminator of the last
+  &#x22;$&#x22;, &#x22;@&#x22; or EOF (corresponds to the terminator of the last
   &#x27;vgrid&#x27; or &#x27;verb&#x27; production of some &#x27;vpath&#x27; production). All
   remaining &#x22;@&#x22; correspond to non-final &#x27;vgrid&#x27; or &#x27;verb&#x27; production
   terminators of some &#x27;vpath&#x27; rule production and thus don&#x27;t change the
@@ -1078,7 +1078,7 @@ itself. These notes primarily relate to LL(1)-parseability:</span>
 This section contains considerations on the choice of character set and
 on where and how VPaths need or don&#x27;t need to be encoded. There&#x27;s a
 historical emphasis on the decision of which characters to use as
-delimiters (ie. &#x22;@&#x22;, &#x22;:&#x22; and &#x22;$&#x22;).</span>
+delimiters (ie. &#x22;@&#x22;, and &#x22;$&#x22;).</span>
 </p></div>
   <section id="section_robust_composition" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#section_robust_composition">§ </a>VPath composition and decomposition should be robust</h3>
@@ -1105,8 +1105,8 @@ This leaves &#x22;?&#x22; | &#x22;#&#x22; and &#x22;/&#x22; | &#x22;:&#x22; | &#
     <h3><a aria-label="§" href="#section_unencoded_contexts">§ </a>Contexts where VPath doesn&#x27;t need encoding</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">
 In general VPaths don&#x27;t require encoding in contexts where the VPath
-delimiters &#x22;@&#x22; / &#x22;:&#x22; / &#x22;$&#x22; and the encodeURIComponent result character
-set ALPHA / DIGIT / &#x22;-&#x22; / &#x22;_&#x22; / &#x22;.&#x22; / &#x22;~&#x22; / &#x22;!&#x22; / &#x22;*&#x22; / &#x22;&#x27;&#x22; / &#x22;(&#x22; / &#x22;)&#x22;
+delimiters &#x22;@&#x22; / &#x22;$&#x22; and the encodeURIComponent result character set
+ALPHA / DIGIT / &#x22;-&#x22; / &#x22;_&#x22; / &#x22;.&#x22; / &#x22;~&#x22; / &#x22;!&#x22; / &#x22;*&#x22; / &#x22;&#x27;&#x22; / &#x22;(&#x22; / &#x22;)&#x22;
 can be used.
 <blockquote>Editorial Note: &#x22;(&#x22; and &#x22;)&#x22; can in principle be
   substantially inconvenient in many contexts. But as they&#x27;re grouped

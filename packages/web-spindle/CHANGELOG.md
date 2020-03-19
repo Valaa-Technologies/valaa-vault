@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.6](https://github.com/valaatech/kernel/compare/v0.35.0-rc.5...v0.35.0-rc.6) (2020-03-19)
+
+
+### Bug Fixes
+
+* Have session expiry clear cookies and redirect to clientRedirectPath ([a4e1316](https://github.com/valaatech/kernel/commit/a4e1316f1fd38cc6c61f174078170b19c023764e))
+
+
+
+
+
 # [0.35.0-rc.5](https://github.com/valaatech/kernel/compare/v0.35.0-rc.4...v0.35.0-rc.5) (2020-01-29)
 
 **Note:** Version bump only for package @valos/web-spindle

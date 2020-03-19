@@ -45,9 +45,9 @@
     "revdoc:package": "@valos/revdoc",
     "revdoc:prefix": "revdoc",
     "revdoc:prefixIRI": "https://valospace.org/revdoc#",
-    "revdoc:version": "0.35.0-rc.5",
+    "revdoc:version": "0.35.0-rc.6",
     "respecConfig": {
-      "subtitle": "0.35.0-rc.5",
+      "subtitle": "0.35.0-rc.6",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -723,13 +723,13 @@
     "extractee_api_lookup": {
       "@id": "extractee_api_lookup",
       "valosRaemFieldClasses": [
-        "valos-raem:Field",
-        "valos-raem:ExpressedField",
-        "valos-raem:EventLoggedField",
-        "valos-raem:CoupledField",
-        "valos-raem:GeneratedField",
-        "valos-raem:TransientField",
-        "valos-raem:AliasField"
+        "valos_raem:Field",
+        "valos_raem:ExpressedField",
+        "valos_raem:EventLoggedField",
+        "valos_raem:CoupledField",
+        "valos_raem:GeneratedField",
+        "valos_raem:TransientField",
+        "valos_raem:AliasField"
       ]
     },
     "emission_output": {

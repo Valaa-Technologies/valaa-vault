@@ -45,9 +45,9 @@
       "LIBRARY"
     ],
     "revdoc:package": "@valos/script",
-    "revdoc:prefix": "valos-script",
+    "revdoc:prefix": "valos_script",
     "revdoc:prefixIRI": "https://valospace.org/script#",
-    "revdoc:version": "0.35.0-rc.5",
+    "revdoc:version": "0.35.0-rc.6",
     "respecConfig": {
       "specStatus": "unofficial",
       "editors": [
@@ -145,7 +145,7 @@
         {
           "vdoc:em": true,
           "vdoc:content": [
-            "valos-script"
+            "valos_script"
           ]
         }
       ],
@@ -181,7 +181,7 @@
     },
     "prefixes": {
       "@id": "prefixes",
-      "valos-script": "https://valospace.org/script#"
+      "valos_script": "https://valospace.org/script#"
     },
     "vocabulary": {
       "@id": "vocabulary"
@@ -242,14 +242,14 @@
         {
           "vdoc:em": true,
           "vdoc:content": [
-            "valos-script"
+            "valos_script"
           ]
         },
         " ",
         {
           "@type": "vdoc:Reference",
           "vdoc:content": [
-            "valos-kernel:Class"
+            "valos_kernel:Class"
           ],
           "vdoc:ref": "@valos/kernel#Class"
         },
@@ -318,14 +318,14 @@
         {
           "vdoc:em": true,
           "vdoc:content": [
-            "valos-script"
+            "valos_script"
           ]
         },
         " ",
         {
           "@type": "vdoc:Reference",
           "vdoc:content": [
-            "valos-kernel:Property"
+            "valos_kernel:Property"
           ],
           "vdoc:ref": "@valos/kernel#Property"
         },
@@ -404,14 +404,14 @@
         {
           "vdoc:em": true,
           "vdoc:content": [
-            "valos-script"
+            "valos_script"
           ]
         },
         " ",
         {
           "@type": "vdoc:Reference",
           "vdoc:content": [
-            "valos-raem:Type"
+            "valos_raem:Type"
           ],
           "vdoc:ref": "@valos/raem#Type"
         },
@@ -494,14 +494,14 @@
         {
           "vdoc:em": true,
           "vdoc:content": [
-            "valos-script"
+            "valos_script"
           ]
         },
         " ",
         {
           "@type": "vdoc:Reference",
           "vdoc:content": [
-            "valos-raem:Field"
+            "valos_raem:Field"
           ],
           "vdoc:ref": "@valos/raem#Field"
         },
@@ -564,10 +564,10 @@
                 ]
               },
               {
-                "vdoc:cell": "valos-raem:coupledField",
+                "vdoc:cell": "valos_raem:coupledField",
                 "@type": "vdoc:Header",
                 "vdoc:content": [
-                  "valos-raem:coupledField"
+                  "valos_raem:coupledField"
                 ]
               },
               {
@@ -594,14 +594,14 @@
         {
           "vdoc:em": true,
           "vdoc:content": [
-            "valos-script"
+            "valos_script"
           ]
         },
         " ",
         {
           "@type": "vdoc:Reference",
           "vdoc:content": [
-            "valos-raem:Resolver"
+            "valos_raem:Resolver"
           ],
           "vdoc:ref": "@valos/raem#Resolver"
         },
@@ -673,7 +673,7 @@
         {
           "vdoc:em": true,
           "vdoc:content": [
-            "valos-script"
+            "valos_script"
           ]
         },
         " remaining vocabulary"
@@ -748,7 +748,7 @@
         {
           "vdoc:em": true,
           "vdoc:content": [
-            "valos-script"
+            "valos_script"
           ]
         },
         " JSON-LD context term definitions"

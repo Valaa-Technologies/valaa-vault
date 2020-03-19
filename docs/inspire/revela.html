@@ -7,7 +7,7 @@
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"subtitle":"0.35.0-rc.5","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"revela"};
+      var respecConfig = {"subtitle":"0.35.0-rc.6","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"revela"};
     </script>
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
@@ -66,14 +66,24 @@ for various valos fabric config files.</span>
     <h3>spread of a URI import followed by pick-array append</h3>
 <div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> lazyPatchRevelations(gatewayMock,
     [0], {
-      &#x22;!!!&#x22;: [[&#x22;$https:foobar.com/path&#x22;], [&#x22;*:$&#x22;,
-        [&#x22;.:fetchedField&#x22;],
-        [&#x22;@.:fetchOptions@.:input@@&#x22;],
+      &#x22;!!!&#x22;: [[&#x22;$https.foobar.com%2Fpath&#x22;], [&#x22;-$&#x22;,
+        [&#x22;.$.fetchedField&#x22;],
+        [&#x22;@.$.fetchOptions@.$.input@@&#x22;],
       ]],
     },
     undefined,
     [&#x22;last&#x22;])</span>
 </code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node"> [0, 1, &#x22;https://foobar.com/path.json&#x22;, &#x22;last&#x22;]</span>
+</code></pre></blockquote></span>
+</p></div></span>
+
+</blockquote>
+<blockquote class="vdoc type-revdoc-example">
+    <span class="vdoc type-vdoc-node">
+    <h3>non-evaluated spreader contents to be segmented but non-cemented</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> lazyPatchRevelations(gatewayMock,
+    {}, { &#x22;!!!&#x22;: [&#x22;@&#x22;, { value: [&#x22;$expanded.but-unbound&#x22;] }] })</span>
+</code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node"> ({ value: [&#x22;$&#x22;, &#x22;expanded&#x22;, &#x22;but-unbound&#x22;] })</span>
 </code></pre></blockquote></span>
 </p></div></span>
 
@@ -90,21 +100,21 @@ for various valos fabric config files.</span>
           &#x22;test-lib&#x22;: {
             preset: 10, overridden: 10, sessionDuration: 0,
             view: { focus: &#x22;focus to be overwritten&#x22;, nulled: &#x22;nulled to be overwritten&#x22; },
-            unboundAndUnsegmented: [&#x22;$un:bound&#x22;],
+            unboundAndUnsegmented: [&#x22;$un.bound&#x22;],
           },
         },
       },
     },
     prefixes: {
       &#x22;/test/v0&#x22;: {
-        &#x22;!!!&#x22;: [&#x22;@&#x22;, [&#x22;!:test-lib&#x22;], [&#x22;!$valk:invoke:callMe&#x22;, {
+        &#x22;!!!&#x22;: [&#x22;@&#x22;, [&#x22;!$.test-lib&#x22;], [&#x22;!$valk.invoke$.callMe&#x22;, {
           view: {
-            focus: &#x22;valaa-aws://example.org/deployment?id=f0c5-f0c5&#x22;,
+            focus: &#x22;valaa-aws://example.org/deployment?id=@$~raw.f0c5-f0c5@@&#x22;,
             nulled: null,
           },
           identity: { &#x22;!!!&#x22;: [&#x22;./config&#x22;, &#x22;requireKey&#x22;] },
           sessionDuration: 86400,
-          unboundButSegmented: [&#x22;$also:unbound&#x22;],
+          unboundButSegmented: [&#x22;$also.unbound&#x22;],
         }]],
         &#x22;test-lib&#x22;: { overridden: 20 },
       },
@@ -118,9 +128,9 @@ for various valos fabric config files.</span>
         name: &#x22;test&#x22;,
         &#x22;test-lib&#x22;: {
           preset: 10, overridden: 20, sessionDuration: 86400,
-          view: { focus: &#x22;valaa-aws://example.org/deployment?id=f0c5-f0c5&#x22;, nulled: null },
+          view: { focus: &#x22;valaa-aws://example.org/deployment?id=@$~raw.f0c5-f0c5@@&#x22;, nulled: null },
           identity: &#x22;/site/revelation/config&#x22;,
-          unboundAndUnsegmented: [&#x22;$un:bound&#x22;],
+          unboundAndUnsegmented: [&#x22;$un.bound&#x22;],
           unboundButSegmented: [&#x22;$&#x22;, &#x22;also&#x22;, &#x22;unbound&#x22;],
         }
       }
@@ -159,7 +169,7 @@ files.</span>
   </section>
 
   <section id="section_verbs" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_verbs">§ </a><em>revela</em> <a href="https://valospace.org/raem#Verb" class="vdoc type-vdoc-reference">valos-raem:Verb</a> vocabulary</h3>
+    <h3><a aria-label="§" href="#section_verbs">§ </a><em>revela</em> <a href="https://valospace.org/raem#Verb" class="vdoc type-vdoc-reference">valos_raem:Verb</a> vocabulary</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>

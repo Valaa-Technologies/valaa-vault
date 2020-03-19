@@ -268,7 +268,7 @@
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "The *service index resource* is statically configured and should be\nthe same for all routes starting from the same public endpoint. This\nindex resource is typically the root entity of the service master index\npartition. The route paths (and some of their runtime paths) are then\ntypically defined as relations and references in the index partition."
+            "The *service index resource* is statically configured and should be\nthe same for all routes starting from the same public endpoint. This\nindex resource is typically the root entity of the service master index\nchronicle. The route paths (and some of their runtime paths) are then\ntypically defined as relations and references in the index chronicle."
           ]
         },
         {
@@ -302,7 +302,7 @@
         {
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
-            "The biggest design feature to reduce the need for multitude of\nmappings is the subject paths. Using subject paths a particular common\nmapping use case can specify an well-known ordered index partition\nstructure and the web-spindle compatible mapping route\nspecification for it sans route root resource.\nThen the different use cases can specify their mappings solely in terms\nof the endpoint prefix, the mapping root resource id and the identifier\nof the above mapping route spec."
+            "The biggest design feature to reduce the need for multitude of\nmappings is the subject paths. Using subject paths a particular common\nmapping use case can specify an well-known ordered index chronicle\nstructure and the web-spindle compatible mapping route\nspecification for it sans route root resource.\nThen the different use cases can specify their mappings solely in terms\nof the endpoint prefix, the mapping root resource id and the identifier\nof the above mapping route spec."
           ]
         }
       ]

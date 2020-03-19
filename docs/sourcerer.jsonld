@@ -45,9 +45,9 @@
       "LIBRARY"
     ],
     "revdoc:package": "@valos/sourcerer",
-    "revdoc:prefix": "valos-sourcerer",
+    "revdoc:prefix": "valos_sourcerer",
     "revdoc:prefixIRI": "https://valospace.org/sourcerer#",
-    "revdoc:version": "0.35.0-rc.5",
+    "revdoc:version": "0.35.0-rc.6",
     "respecConfig": {
       "specStatus": "unofficial",
       "editors": [
@@ -137,7 +137,7 @@
         {
           "vdoc:em": true,
           "vdoc:content": [
-            "valos-sourcerer"
+            "valos_sourcerer"
           ]
         }
       ],
@@ -178,25 +178,25 @@
       "xsd": "http://www.w3.org/2001/XMLSchema#",
       "owl": "http://www.w3.org/2002/07/owl#",
       "dc": "http://purl.org/dc/elements/1.1/",
-      "valos-kernel": "https://valospace.org/kernel#",
-      "valos-raem": "https://valospace.org/raem#",
-      "valos-sourcerer": "https://valospace.org/sourcerer#"
+      "valos_kernel": "https://valospace.org/kernel#",
+      "valos_raem": "https://valospace.org/raem#",
+      "valos_sourcerer": "https://valospace.org/sourcerer#"
     },
     "vocabulary": {
       "@id": "vocabulary",
       "EventAspect": {
-        "@type": "valos-kernel:Class",
+        "@type": "valos_kernel:Class",
         "revdoc:brief": "contextual event aspect",
         "rdfs:comment": "The class of resources which contain contextual attributes of a\nparticular event message lifetime phase."
       },
       "EventAspects": {
-        "@type": "valos-kernel:Class",
+        "@type": "valos_kernel:Class",
         "revdoc:brief": "context-free container of event aspects",
         "rdfs:comment": "The class of resources which provide context-free container of all\ndifferent aspects of event message lifetime as it travels through the\nValOS sourcing streams. These properties are grouped to different\ncontextual and/or functional aspects."
       },
       "version": {
-        "@type": "valos-kernel:Property",
-        "rdfs:domain": "valos-sourcerer:EventAspects",
+        "@type": "valos_kernel:Property",
+        "rdfs:domain": "valos_sourcerer:EventAspects",
         "rdfs:range": "xsd:string",
         "restriction": {
           "@type": "owl:Restriction",
@@ -205,9 +205,9 @@
         "rdfs:comment": "The aspect version string. The version number of this specification is \"0.3\""
       },
       "event": {
-        "@type": "valos-kernel:Property",
-        "rdfs:domain": "valos-sourcerer:EventAspects",
-        "rdfs:range": "valos-raem:Event",
+        "@type": "valos_kernel:Property",
+        "rdfs:domain": "valos_sourcerer:EventAspects",
+        "rdfs:range": "valos_raem:Event",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
@@ -215,9 +215,9 @@
         "rdfs:comment": "The aspect which contains the raem model event payload."
       },
       "command": {
-        "@type": "valos-kernel:Property",
-        "rdfs:domain": "valos-sourcerer:EventAspects",
-        "rdfs:range": "valos-sourcerer:CommandAspect",
+        "@type": "valos_kernel:Property",
+        "rdfs:domain": "valos_sourcerer:EventAspects",
+        "rdfs:range": "valos_sourcerer:CommandAspect",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
@@ -225,32 +225,32 @@
         "rdfs:comment": "The aspect which contains the client-generated command properties."
       },
       "log": {
-        "@type": "valos-kernel:Property",
-        "rdfs:domain": "valos-sourcerer:EventAspects",
-        "rdfs:range": "valos-sourcerer:LogAspect",
+        "@type": "valos_kernel:Property",
+        "rdfs:domain": "valos_sourcerer:EventAspects",
+        "rdfs:range": "valos_sourcerer:LogAspect",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
         "rdfs:comment": "The aspect which contains the authority-confirmed event log properties."
       },
-      "resolvePartitionRoot": {
-        "@type": "valos-raem:Resolver",
-        "revdoc:brief": "resolve partition root",
-        "rdfs:comment": "resolve partition root of the resource"
+      "resolveChronicleRoot": {
+        "@type": "valos_raem:Resolver",
+        "revdoc:brief": "resolve chronicle root",
+        "rdfs:comment": "resolve chronicle root of the resource"
       },
-      "resolvePartitionURL": {
-        "@type": "valos-raem:Resolver",
-        "revdoc:brief": "resolve partition URL",
-        "rdfs:comment": "resolve partition URL of the resource"
+      "resolveChronicleURI": {
+        "@type": "valos_raem:Resolver",
+        "revdoc:brief": "resolve chronicle URI",
+        "rdfs:comment": "resolve chronicle URI of the resource"
       },
       "resolveModifiedAt": {
-        "@type": "valos-raem:Resolver",
+        "@type": "valos_raem:Resolver",
         "revdoc:brief": "resolve modification timestamp",
         "rdfs:comment": "resolve modification timestamp of the resource"
       },
       "resolveCreatedAt": {
-        "@type": "valos-raem:Resolver",
+        "@type": "valos_raem:Resolver",
         "revdoc:brief": "resolve creation timestamp",
         "rdfs:comment": "resolve creation timestamp of the resource"
       }
@@ -258,17 +258,17 @@
     "context": {
       "@id": "context",
       "aspects": {
-        "@reverse": "valos-sourcerer:event"
+        "@reverse": "valos_sourcerer:event"
       },
-      "valos-sourcerer:event": {
+      "valos_sourcerer:event": {
         "@id": "https://valospace.org/sourcerer#event",
         "@type": "@id"
       },
-      "valos-sourcerer:command": {
+      "valos_sourcerer:command": {
         "@id": "https://valospace.org/sourcerer#command",
         "@type": "@id"
       },
-      "valos-sourcerer:log": {
+      "valos_sourcerer:log": {
         "@id": "https://valospace.org/sourcerer#log",
         "@type": "@id"
       }
@@ -326,14 +326,14 @@
         {
           "vdoc:em": true,
           "vdoc:content": [
-            "valos-sourcerer"
+            "valos_sourcerer"
           ]
         },
         " ",
         {
           "@type": "vdoc:Reference",
           "vdoc:content": [
-            "valos-kernel:Class"
+            "valos_kernel:Class"
           ],
           "vdoc:ref": "@valos/kernel#Class"
         },
@@ -405,14 +405,14 @@
         {
           "vdoc:em": true,
           "vdoc:content": [
-            "valos-sourcerer"
+            "valos_sourcerer"
           ]
         },
         " ",
         {
           "@type": "vdoc:Reference",
           "vdoc:content": [
-            "valos-kernel:Property"
+            "valos_kernel:Property"
           ],
           "vdoc:ref": "@valos/kernel#Property"
         },
@@ -496,14 +496,14 @@
         {
           "vdoc:em": true,
           "vdoc:content": [
-            "valos-sourcerer"
+            "valos_sourcerer"
           ]
         },
         " ",
         {
           "@type": "vdoc:Reference",
           "vdoc:content": [
-            "valos-raem:Type"
+            "valos_raem:Type"
           ],
           "vdoc:ref": "@valos/raem#Type"
         },
@@ -586,14 +586,14 @@
         {
           "vdoc:em": true,
           "vdoc:content": [
-            "valos-sourcerer"
+            "valos_sourcerer"
           ]
         },
         " ",
         {
           "@type": "vdoc:Reference",
           "vdoc:content": [
-            "valos-raem:Field"
+            "valos_raem:Field"
           ],
           "vdoc:ref": "@valos/raem#Field"
         },
@@ -656,10 +656,10 @@
                 ]
               },
               {
-                "vdoc:cell": "valos-raem:coupledField",
+                "vdoc:cell": "valos_raem:coupledField",
                 "@type": "vdoc:Header",
                 "vdoc:content": [
-                  "valos-raem:coupledField"
+                  "valos_raem:coupledField"
                 ]
               },
               {
@@ -686,14 +686,14 @@
         {
           "vdoc:em": true,
           "vdoc:content": [
-            "valos-sourcerer"
+            "valos_sourcerer"
           ]
         },
         " ",
         {
           "@type": "vdoc:Reference",
           "vdoc:content": [
-            "valos-raem:Resolver"
+            "valos_raem:Resolver"
           ],
           "vdoc:ref": "@valos/raem#Resolver"
         },
@@ -755,8 +755,8 @@
             ]
           },
           "vdoc:entries": [
-            "resolvePartitionRoot",
-            "resolvePartitionURL",
+            "resolveChronicleRoot",
+            "resolveChronicleURI",
             "resolveModifiedAt",
             "resolveCreatedAt"
           ]
@@ -770,7 +770,7 @@
         {
           "vdoc:em": true,
           "vdoc:content": [
-            "valos-sourcerer"
+            "valos_sourcerer"
           ]
         },
         " remaining vocabulary"
@@ -845,7 +845,7 @@
         {
           "vdoc:em": true,
           "vdoc:content": [
-            "valos-sourcerer"
+            "valos_sourcerer"
           ]
         },
         " JSON-LD context term definitions"

@@ -47,9 +47,9 @@
     "revdoc:package": "@valos/kernel",
     "revdoc:prefix": "valos",
     "revdoc:prefixIRI": "https://valospace.org/#",
-    "revdoc:version": "0.35.0-rc.3",
+    "revdoc:version": "0.35.0-rc.5",
     "respecConfig": {
-      "subtitle": "0.35.0-rc.3",
+      "subtitle": "0.35.0-rc.5",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -70,7 +70,7 @@
           "SBOM"
         ],
         "subProfiles": [],
-        "title": "@valos/kernel@0.35.0-rc.2 Software Bill of Materials",
+        "title": "@valos/kernel@0.35.0-rc.3 Software Bill of Materials",
         "abstract": {
           "@type": "vdoc:Chapter",
           "vdoc:content": [
@@ -117,7 +117,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.2"
+        "version": "0.35.0-rc.3"
       },
       "engine": {
         "@id": "https://valospace.org/engine",
@@ -190,7 +190,7 @@
           ]
         },
         "package": "@valos/engine",
-        "version": "0.35.0-rc.3"
+        "version": "0.35.0-rc.5"
       },
       "inspire": {
         "@id": "https://valospace.org/inspire",
@@ -263,7 +263,7 @@
           ]
         },
         "package": "@valos/inspire",
-        "version": "0.35.0-rc.3"
+        "version": "0.35.0-rc.5"
       },
       "inspire/revela": {
         "@id": "https://valospace.org/inspire/revela",
@@ -520,7 +520,7 @@
           ]
         },
         "package": "@valos/inspire",
-        "version": "0.35.0-rc.3"
+        "version": "0.35.0-rc.5"
       },
       "raem": {
         "@id": "https://valospace.org/raem",
@@ -639,7 +639,7 @@
           ]
         },
         "package": "@valos/raem",
-        "version": "0.35.0-rc.3"
+        "version": "0.35.0-rc.5"
       },
       "raem/VPath/VPath": {
         "@id": "https://valospace.org/raem/VPath/VPath",
@@ -701,7 +701,7 @@
           ]
         },
         "package": "@valos/raem",
-        "version": "0.35.0-rc.3"
+        "version": "0.35.0-rc.5"
       },
       "revdoc": {
         "@id": "https://valospace.org/revdoc",
@@ -760,7 +760,7 @@
           ]
         },
         "package": "@valos/revdoc",
-        "version": "0.35.0-rc.3"
+        "version": "0.35.0-rc.5"
       },
       "revdoc/tutorial": {
         "@id": "https://valospace.org/revdoc/tutorial",
@@ -834,7 +834,7 @@
           ]
         },
         "package": "@valos/revdoc",
-        "version": "0.35.0-rc.3"
+        "version": "0.35.0-rc.5"
       },
       "sbomdoc": {
         "@id": "https://valospace.org/sbomdoc",
@@ -893,7 +893,7 @@
           ]
         },
         "package": "@valos/sbomdoc",
-        "version": "0.35.0-rc.3"
+        "version": "0.35.0-rc.5"
       },
       "script": {
         "@id": "https://valospace.org/script",
@@ -946,7 +946,7 @@
           ]
         },
         "package": "@valos/script",
-        "version": "0.35.0-rc.3"
+        "version": "0.35.0-rc.5"
       },
       "sourcerer": {
         "@id": "https://valospace.org/sourcerer",
@@ -991,7 +991,7 @@
           ]
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0-rc.3"
+        "version": "0.35.0-rc.5"
       },
       "sourcerer/valos-event-log": {
         "@id": "https://valospace.org/sourcerer/valos-event-log",
@@ -1021,7 +1021,7 @@
           ]
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0-rc.3"
+        "version": "0.35.0-rc.5"
       },
       "sourcerer/VState": {
         "@id": "https://valospace.org/sourcerer/VState",
@@ -1060,7 +1060,7 @@
           ]
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0-rc.3"
+        "version": "0.35.0-rc.5"
       },
       "twindoc": {
         "@id": "https://valospace.org/twindoc",
@@ -1108,12 +1108,12 @@
                       "@type": "vdoc:NumberedList",
                       "vdoc:entries": [
                         [
-                          "emit + extract: a roundtrip starting from VDocLD into valospace back into VDocLD"
+                          "emit + extract: a roundtrip starting from VDocState into valospace back into VDocState"
                         ],
                         {
                           "@type": "vdoc:Paragraph",
                           "vdoc:content": [
-                            "extract + emit: a roundtrip starting from valospace into VDocLD back into valospace"
+                            "extract + emit: a roundtrip starting from valospace into VDocState back into valospace"
                           ]
                         }
                       ]
@@ -1141,7 +1141,7 @@
           ]
         },
         "package": "@valos/twindoc",
-        "version": "0.35.0-rc.3"
+        "version": "0.35.0-rc.5"
       },
       "type-vault/AssortedTutorials": {
         "@id": "https://valospace.org/type-vault/AssortedTutorials",
@@ -1160,7 +1160,7 @@
         },
         "introduction": {},
         "package": "@valos/type-vault",
-        "version": "0.35.0-rc.3"
+        "version": "0.35.0-rc.5"
       },
       "vdoc": {
         "@id": "https://valospace.org/vdoc",
@@ -1248,7 +1248,7 @@
           ]
         },
         "package": "@valos/vdoc",
-        "version": "0.35.0-rc.3"
+        "version": "0.35.0-rc.5"
       },
       "web-spindle": {
         "@id": "https://valospace.org/web-spindle",
@@ -1354,7 +1354,7 @@
           ]
         },
         "package": "@valos/web-spindle",
-        "version": "0.35.0-rc.3"
+        "version": "0.35.0-rc.5"
       },
       "web-spindle/schema-builder": {
         "@id": "https://valospace.org/web-spindle/schema-builder",
@@ -1483,7 +1483,7 @@
           ]
         },
         "package": "@valos/web-spindle",
-        "version": "0.35.0-rc.3"
+        "version": "0.35.0-rc.5"
       },
       "kernel": {
         "@id": "https://valospace.org/kernel",
@@ -1685,7 +1685,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.2"
+        "version": "0.35.0-rc.3"
       },
       "removed-from": {
         "@id": "https://valospace.org/removed-from",
@@ -1728,7 +1728,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.2"
+        "version": "0.35.0-rc.3"
       },
       "@valos/kernel": {
         "@id": "https://valospace.org/index",
@@ -1873,7 +1873,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.2"
+        "version": "0.35.0-rc.3"
       },
       "technician": {
         "@id": "https://valospace.org/technician",
@@ -1961,7 +1961,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.2"
+        "version": "0.35.0-rc.3"
       },
       "valonaut": {
         "@id": "https://valospace.org/valonaut",
@@ -2035,7 +2035,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.2"
+        "version": "0.35.0-rc.3"
       },
       "voyager": {
         "@id": "https://valospace.org/voyager",
@@ -2095,7 +2095,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.2"
+        "version": "0.35.0-rc.3"
       }
     },
     "prefixes": {
@@ -2105,33 +2105,33 @@
       "xsd": "http://www.w3.org/2001/XMLSchema#",
       "owl": "http://www.w3.org/2002/07/owl#",
       "dc": "http://purl.org/dc/elements/1.1/",
-      "valos-kernel": "https://valospace.org/kernel#",
+      "valos_kernel": "https://valospace.org/kernel#",
       "valos": "https://valospace.org/#",
-      "valos-raem": "https://valospace.org/raem#"
+      "valos_raem": "https://valospace.org/raem#"
     },
     "vocabulary": {
       "@id": "vocabulary",
       "Resource": {
-        "@type": "valos-raem:Type",
+        "@type": "valos_raem:Type",
         "revdoc:brief": "base resource interface",
         "rdfs:subClassOf": "rdfs:Resource",
         "rdfs:comment": "The class of resources which can appear as a subject in valospace\nresource and event graphs. The domain of all transient and generated\nfields which are available even for unsourced bodies."
       },
       "id": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:domain": "valos:Resource",
         "rdfs:range": "xsd:string",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:cardinality": 1
         },
-        "valos-raem:expressor": "$valos-raem:resolveId",
+        "valos_raem:expressor": "$valos_raem.resolveId",
         "rdfs:comment": "The immutable string representation of the VRID of this resource."
       },
       "rawId": {
-        "@type": "valos-raem:AliasField",
+        "@type": "valos_raem:AliasField",
         "revdoc:deprecatedInFavorOf": "valos:id",
-        "valos-raem:aliasOf": "valos:id",
+        "valos_raem:aliasOf": "valos:id",
         "rdfs:subPropertyOf": "valos:id",
         "rdfs:domain": "valos:Resource",
         "rdfs:range": "xsd:string",
@@ -2142,76 +2142,76 @@
         "rdfs:comment": "The immutable string representation of the VRID of this resource."
       },
       "vrid": {
-        "@type": "valos-raem:TransientField",
+        "@type": "valos_raem:TransientField",
         "rdfs:domain": "valos:Resource",
         "rdfs:range": "rdfs:List",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:cardinality": 1
         },
-        "valos-raem:expressor": "$valos-raem:resolveVRIDTransient",
+        "valos_raem:expressor": "$valos_raem.resolveVRIDTransient",
         "rdfs:comment": "The immutable, segmented object representation of the VRID of this\nresource."
       },
       "typeName": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:domain": "valos:Resource",
         "rdfs:range": "xsd:string",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:cardinality": 1
         },
-        "valos-raem:expressor": "$valos-raem:resolveDominantTypeName",
+        "valos_raem:expressor": "$valos_raem.resolveDominantTypeName",
         "rdfs:comment": "The dominant type name of this resource"
       },
       "prototype": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:domain": "valos:Resource",
         "rdfs:range": "valos:Resource",
-        "valos-raem:coupledField": "valos:derivations",
+        "valos_raem:coupledField": "valos:derivations",
         "rdfs:comment": "The prototypes of this resource. All field lookups for which there is\nno associated value set and whose field descriptors don't have\nownDefaultValue are forwarded to the prototype."
       },
       "derivations": {
-        "@type": "valos-raem:CoupledField",
+        "@type": "valos_raem:CoupledField",
         "rdfs:domain": "valos:Resource",
         "rdfs:range": "valos:Resource",
-        "valos-raem:coupledField": "valos:prototype",
-        "valos-raem:preventsDestroy": true,
-        "valos-raem:ownDefaultValue": [],
+        "valos_raem:coupledField": "valos:prototype",
+        "valos_raem:preventsDestroy": true,
+        "valos_raem:ownDefaultValue": [],
         "rdfs:comment": "An unordered set of resources which have this resource as their\nvalos:prototype."
       },
       "ownFields": {
-        "@type": "valos-raem:TransientField",
+        "@type": "valos_raem:TransientField",
         "rdfs:domain": "valos:Resource",
         "rdfs:range": "valos:Resource",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:expressor": "$valos-raem:resolveOwnFieldsTransient",
+        "valos_raem:expressor": "$valos_raem.resolveOwnFieldsTransient",
         "rdfs:comment": "A transient version of this object as if prototype was undefined.\nAll property accesses will only return field values which are directly\nowned by this resource."
       },
       "inheritors": {
-        "@type": "valos-raem:CoupledField",
+        "@type": "valos_raem:CoupledField",
         "rdfs:subPropertyOf": "valos:derivations",
         "rdfs:domain": "valos:Resource",
         "rdfs:range": "valos:Resource",
-        "valos-raem:coupledField": "valos:inheritancePrototype",
-        "valos-raem:preventsDestroy": true,
-        "valos-raem:ownDefaultValue": [],
+        "valos_raem:coupledField": "valos:inheritancePrototype",
+        "valos_raem:preventsDestroy": true,
+        "valos_raem:ownDefaultValue": [],
         "rdfs:comment": "An unordered set of resources which have this resource as their\nvalos:inheritancePrototype."
       },
       "instances": {
-        "@type": "valos-raem:CoupledField",
+        "@type": "valos_raem:CoupledField",
         "rdfs:subPropertyOf": "valos:derivations",
         "rdfs:domain": "valos:Resource",
         "rdfs:range": "valos:Resource",
-        "valos-raem:coupledField": "valos:instancePrototype",
-        "valos-raem:preventsDestroy": true,
-        "valos-raem:ownDefaultValue": [],
+        "valos_raem:coupledField": "valos:instancePrototype",
+        "valos_raem:preventsDestroy": true,
+        "valos_raem:ownDefaultValue": [],
         "rdfs:comment": "An unordered set of resources which have this resource as their\ndirect valos:instancePrototype."
       },
       "ghostPrototype": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:subPropertyOf": "valos:prototype",
         "rdfs:domain": "valos:Resource",
         "rdfs:range": "valos:Resource",
@@ -2219,151 +2219,151 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:expressor": "$valos-raem:resolveGhostPrototype",
-        "valos-raem:coupledField": "valos:ghosts",
+        "valos_raem:expressor": "$valos_raem.resolveGhostPrototype",
+        "valos_raem:coupledField": "valos:ghosts",
         "rdfs:comment": "Ghost prototype of this ghost resource. The ghost prototype is the\nbase resource from which this ghost was created during some primary\ninstantiation.\nThis instantiation (which happens on prototype and results in an\ninstance of it) also ghost-instantiates all the direct and indirect\nownlings of the prototype as ghost ownlings in the instance. The\ninstance is called the *ghost host* of all these ghosts. Likewise, the\ninstance prototype is called the ghost host prototype, and the\n(grand-)ownlings of this ghost host prototype are the ghost prototypes\nof the corresponding ghosts (ie. this field).} ."
       },
       "ghosts": {
-        "@type": "valos-raem:CoupledField",
+        "@type": "valos_raem:CoupledField",
         "rdfs:subPropertyOf": "valos:derivations",
         "rdfs:domain": "valos:Resource",
         "rdfs:range": "valos:Resource",
-        "valos-raem:coupledField": "valos:ghostPrototype",
-        "valos-raem:preventsDestroy": true,
-        "valos-raem:ownDefaultValue": [],
+        "valos_raem:coupledField": "valos:ghostPrototype",
+        "valos_raem:preventsDestroy": true,
+        "valos_raem:ownDefaultValue": [],
         "rdfs:comment": "An unordered set of all (materialized) ghosts which have this resource\nas their valos:ghostPrototype. See @valos/raem#section_ghost_instancing\nfor why immaterial ghosts are not listed."
       },
       "materializedGhosts": {
-        "@type": "valos-raem:AliasField",
+        "@type": "valos_raem:AliasField",
         "revdoc:deprecatedInFavorOf": "valos:ghosts",
-        "valos-raem:aliasOf": "valos:ghosts",
+        "valos_raem:aliasOf": "valos:ghosts",
         "rdfs:subPropertyOf": "valos:ghosts",
         "rdfs:domain": "valos:Resource",
         "rdfs:range": "valos:Resource",
-        "valos-raem:coupledField": "valos:ghostPrototype",
-        "valos-raem:preventsDestroy": true,
-        "valos-raem:ownDefaultValue": []
+        "valos_raem:coupledField": "valos:ghostPrototype",
+        "valos_raem:preventsDestroy": true,
+        "valos_raem:ownDefaultValue": []
       },
       "unnamedCouplings": {
-        "@type": "valos-raem:CoupledField",
+        "@type": "valos_raem:CoupledField",
         "rdfs:domain": "valos:Resource",
         "rdfs:range": "valos:Resource",
-        "valos-raem:isOwnerOf": true,
-        "valos-raem:coupledField": "",
+        "valos_raem:isOwnerOf": true,
+        "valos_raem:coupledField": "",
         "rdfs:comment": "Referrers with a missing coupledField referring this resource"
       },
       "ghostHost": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:domain": "valos:Resource",
         "rdfs:range": "valos:Resource",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:expressor": "$valos-raem:resolveGhostHost",
+        "valos_raem:expressor": "$valos_raem.resolveGhostHost",
         "rdfs:comment": "The instance resource which brought this ghost into being. This\ninstance is equivalent to the innermost ancestor of this ghost which is\nnot a ghost itself."
       },
       "ghostOwner": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:domain": "valos:Resource",
         "rdfs:range": "valos:Resource",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:isOwnedBy": true,
-        "valos-raem:coupledField": "valos:ghostOwnlings",
-        "valos-raem:ownDefaultValue": null,
-        "valos-raem:allowTransientFieldToBeSingular": true,
+        "valos_raem:isOwnedBy": true,
+        "valos_raem:coupledField": "valos:ghostOwnlings",
+        "valos_raem:ownDefaultValue": null,
+        "valos_raem:allowTransientFieldToBeSingular": true,
         "rdfs:comment": "The instance resource which owns this materialized ghost or null if\nthis ghost is immaterial.\nNote that materialized ghosts will have a two own fields: the\nghostOwner and the regular owner (or one of its aliases). The\nremoval of either of these owning field relationships will\nimmaterialize, not destroy, the ghost."
       },
       "ghostOwnlings": {
-        "@type": "valos-raem:CoupledField",
+        "@type": "valos_raem:CoupledField",
         "rdfs:domain": "valos:Resource",
         "rdfs:range": "valos:Resource",
-        "valos-raem:isOwnerOf": true,
-        "valos-raem:coupledField": "valos:ghostOwner",
-        "valos-raem:ownDefaultValue": [],
+        "valos_raem:isOwnerOf": true,
+        "valos_raem:coupledField": "valos:ghostOwner",
+        "valos_raem:ownDefaultValue": [],
         "rdfs:comment": "Materialized ghost resources which have this instance as their ghost\nhost."
       },
       "Bvob": {
-        "@type": "valos-raem:Type",
+        "@type": "valos_raem:Type",
         "revdoc:brief": "Binary ValOS Object type",
         "rdfs:subClassOf": "valos:Resource",
         "rdfs:comment": "The dominant type class of resources which are immutably associated\nwith an octet-stream of fixed length. Bvob resources have a hash of\nthat octet-stream, prefixed with the hash algorithm, as their VGRID."
       },
       "hashAlgorithm": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:domain": "valos:Bvob",
         "rdfs:range": "xsd:string",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:cardinality": 1
         },
-        "valos-raem:expressor": "$valos-raem:resolveContextTerm:@!$$valos:vrid:1:1@",
+        "valos_raem:expressor": "$valos_raem.resolveContextTerm:@!$valos.vrid$.1$.1@",
         "rdfs:comment": "The hash algorithm used to create the content hash of this Bvob"
       },
       "contentHash": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:domain": "valos:Bvob",
         "rdfs:range": "xsd:string",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:cardinality": 1
         },
-        "valos-raem:expressor": "!$$valos:vrid:1:3",
+        "valos_raem:expressor": "!$valos.vrid$.1$.3",
         "rdfs:comment": "The content hash of the octet-stream associated with this Bvob"
       },
       "contentLength": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:domain": "valos:Bvob",
         "rdfs:range": "xsd:nonNegativeInteger",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:cardinality": 1
         },
-        "valos-raem:expressor": "$valos-raem:resolveContentLength",
+        "valos_raem:expressor": "$valos_raem.resolveContentLength",
         "rdfs:comment": "The number of octets in the octet-stream associated with this Bvob."
       },
       "contentReferrers": {
-        "@type": "valos-raem:CoupledField",
+        "@type": "valos_raem:CoupledField",
         "rdfs:domain": "valos:Bvob",
         "rdfs:range": "valos:Extant",
-        "valos-raem:defaultCoupledField": "valos:content",
+        "valos_raem:defaultCoupledField": "valos:content",
         "rdfs:comment": "The unordered set of valos:content references to this Bvob from\nwithin this view of the world."
       },
       "Absent": {
-        "@type": "valos-raem:Type",
+        "@type": "valos_raem:Type",
         "revdoc:brief": "absent resource type",
         "rdfs:subClassOf": "valos:Resource",
-        "rdfs:comment": "The dominant type class of absent valospace resources. An absent\nresource doesn't have a known representation in this view of the world,\nbuts its existence is inferred due to existing references to it.\n\nThe transition from Absent to and from other dominant types is the\nonly possible runtime type change and happens dynamically based on\nthe partition sourcery and banishment."
+        "rdfs:comment": "The dominant type class of absent valospace resources. An absent\nresource doesn't have a known representation in this view of the world,\nbuts its existence is inferred due to existing references to it.\n\nThe transition from Absent to and from other dominant types is the\nonly possible runtime type change and happens dynamically based on\nthe chronicle sourcery and banishment."
       },
       "Extant": {
-        "@type": "valos-raem:Type",
+        "@type": "valos_raem:Type",
         "revdoc:brief": "extant and present resource interface",
         "rdfs:subClassOf": "valos:Resource",
         "rdfs:comment": "The class of valospace resources that are present and extant in this\nview of the world. An extant resource has all of its fields and\nproperties available and it can thus be manipulated."
       },
       "owner": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:domain": "valos:Extant",
         "rdfs:range": "valos:Extant",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:isOwnedBy": true,
-        "valos-raem:defaultCoupledField": "valos:ownlings",
+        "valos_raem:isOwnedBy": true,
+        "valos_raem:defaultCoupledField": "valos:ownlings",
         "rdfs:comment": "The owner of this extant resource."
       },
       "name": {
-        "@type": "valos-raem:EventLoggedField",
-        "valos-raem:expressor": "$valos-raem:resolveVPath",
-        "valos-raem:impressor": "$valos-raem:impressViaVPath",
+        "@type": "valos_raem:EventLoggedField",
+        "valos_raem:expressor": "$valos_raem.resolveVPath",
+        "valos_raem:impressor": "$valos_raem.impressViaVPath",
         "rdfs:domain": "valos:Extant",
         "rdfs:range": [
           "xsd:string",
-          "valos-raem:VParam"
+          "valos_raem:VParam"
         ],
         "restriction": {
           "@type": "owl:Restriction",
@@ -2372,7 +2372,7 @@
         "rdfs:comment": "The primary ValOS name of this extant resource. This name is a local\nidentifier to differentiate the resource from other resources within\nthe same context. Idiomatically this context is all resources of\na particular type which are owned by the same resource."
       },
       "inheritancePrototype": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:subPropertyOf": "valos:prototype",
         "rdfs:domain": "valos:Extant",
         "rdfs:range": "valos:Resource",
@@ -2380,11 +2380,11 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:coupledField": "valos:inheritors",
+        "valos_raem:coupledField": "valos:inheritors",
         "rdfs:comment": "The inheritance prototype of this extant resource. This represents the\ntraditional prototypical inheritance where inherited field values are\nnot remapped in any way."
       },
       "instancePrototype": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:subPropertyOf": "valos:prototype",
         "rdfs:domain": "valos:Extant",
         "rdfs:range": "valos:Resource",
@@ -2392,47 +2392,47 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:coupledField": "valos:instances",
+        "valos_raem:coupledField": "valos:instances",
         "rdfs:comment": "The instance prototype of this extant resource. This represents\nvalos 'ghost instantiation' where all recursively owned resources of\nthe instancePrototype are also inherited as 'ghosts' under this extant\nresource."
       },
       "ownlings": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:domain": "valos:Extant",
         "rdfs:range": "rdfs:List",
-        "valos-raem:isOwnerOf": true,
-        "valos-raem:coupledField": "valos:owner",
-        "rdfs:comment": "The ordered list of all resources owned by this extant resource. This\nlist is a union of all fields with a valos-raem:isOwnerOf in their\nontology definition."
+        "valos_raem:isOwnerOf": true,
+        "valos_raem:coupledField": "valos:owner",
+        "rdfs:comment": "The ordered list of all resources owned by this extant resource. This\nlist is a union of all fields with a valos_raem:isOwnerOf in their\nontology definition."
       },
       "unnamedOwnlings": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:subPropertyOf": "valos:ownlings",
         "rdfs:domain": "valos:Extant",
         "rdfs:range": "valos:Extant",
-        "valos-raem:isOwnerOf": true,
-        "valos-raem:coupledField": "valos:owner",
-        "rdfs:comment": "The ordered list of all resources owned by this extant resource which\nare not contained in another valos-raem:isOwnerOf field list."
+        "valos_raem:isOwnerOf": true,
+        "valos_raem:coupledField": "valos:owner",
+        "rdfs:comment": "The ordered list of all resources owned by this extant resource which\nare not contained in another valos_raem:isOwnerOf field list."
       },
       "isFrozen": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:domain": "valos:Extant",
         "rdfs:range": "xsd:boolean",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:cardinality": 1
         },
-        "valos-raem:isDuplicateable": false,
-        "valos-raem:ownDefaultValue": false,
+        "valos_raem:isDuplicateable": false,
+        "valos_raem:ownDefaultValue": false,
         "rdfs:comment": "Indicates whether this extant resource is frozen. A frozen resource\nnor any of its ownlings cannot have any of their primary fields be\nmodified.\nSetting isFrozen to true is (by design) an irreversible operation."
       },
       "NonExistent": {
-        "@type": "valos-raem:Type",
+        "@type": "valos_raem:Type",
         "revdoc:brief:": "non-existent resource type",
         "rdfs:subClassOf": "valos:Resource",
         "rdfs:comment": "The dominant type class of resources which should be present but are\nnot. This is typically because they have been destroyed or because they\nhave never existed in the first place.\n\nOnly provides the transient fields of the Resource interface."
       },
       "nameAlias": {
-        "@type": "valos-raem:AliasField",
-        "valos-raem:aliasOf": "valos:name",
+        "@type": "valos_raem:AliasField",
+        "valos_raem:aliasOf": "valos:name",
         "rdfs:subPropertyOf": "valos:name",
         "rdfs:domain": "valos:Extant",
         "rdfs:range": "xsd:string",
@@ -2443,8 +2443,8 @@
         "rdfs:comment": "The primary name of this resource. It is globally non-unique but often\ncontext-dependently unique.\n\nThis is an alias of valos:name for circumventing conflicts with the\nnative javascript property 'name' in certain execution contexts"
       },
       "prototypeAlias": {
-        "@type": "valos-raem:AliasField",
-        "valos-raem:aliasOf": "valos:prototype",
+        "@type": "valos_raem:AliasField",
+        "valos_raem:aliasOf": "valos:prototype",
         "rdfs:subPropertyOf": "valos:prototype",
         "rdfs:domain": "valos:Extant",
         "rdfs:range": "valos:Resource",
@@ -2455,7 +2455,7 @@
         "rdfs:comment": "The prototype of this resource.\n\nThis is an alias for valos:prototype to bypass conflicts with native\njavascript property 'prototype' in certain execution contexts."
       },
       "ScopeProperty": {
-        "@type": "valos-raem:Type",
+        "@type": "valos_raem:Type",
         "revdoc:brief": "scope property type",
         "rdfs:subClassOf": [
           "valos:Resource",
@@ -2465,7 +2465,7 @@
         "rdfs:comment": "The dominant type class of resources representing properties with a\nlocally unique name inside an owning Scope namespace resource.\n\nAdditionally a ScopeProperty represents the core hypertwin building\nblock as an rdf:Statement reification of hypertwinned triples."
       },
       "scope": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:subPropertyOf": "valos:owner",
         "rdfs:domain": "valos:ScopeProperty",
         "rdfs:range": "valos:Scope",
@@ -2473,18 +2473,18 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:isOwnedBy": true,
-        "valos-raem:coupledField": "valos:properties",
+        "valos_raem:isOwnedBy": true,
+        "valos_raem:coupledField": "valos:properties",
         "rdfs:comment": "The scope resource (and owner) of this ScopeProperty."
       },
       "value": {
-        "@type": "valos-raem:EventLoggedField",
-        "valos-raem:expressor": "$valos-raem:resolveVPath",
-        "valos-raem:impressor": "$valos-raem:impressViaVPath",
+        "@type": "valos_raem:EventLoggedField",
+        "valos_raem:expressor": "$valos_raem.resolveVPath",
+        "valos_raem:impressor": "$valos_raem.impressViaVPath",
         "rdfs:domain": "valos:ScopeProperty",
         "rdfs:range": [
           "xsd:string",
-          "valos-raem:VPath"
+          "valos_raem:VPath"
         ],
         "restriction": {
           "@type": "owl:Restriction",
@@ -2493,18 +2493,18 @@
         "rdfs:comment": "The value of this ScopeProperty."
       },
       "twinspace": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:domain": "valos:ScopeProperty",
         "rdfs:range": "rdfs:Resource",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:expressor": "$valos-script:resolveTwinspace",
-        "rdfs:comment": "The twinspace of this ScopeProperty. Equates to the expanded prefix\nof the valos:name of this ScopeProperty using the context of this\npartition. Additionally if the local part of the valos:name is an empty\nstring then the valos:value of this ScopeProperty defines\nthe twinspace id of the scope resource for this twinspace."
+        "valos_raem:expressor": "$valos_script.resolveTwinspace",
+        "rdfs:comment": "The twinspace of this ScopeProperty. Equates to the expanded prefix\nof the valos:name of this ScopeProperty using the context of this\nchronicle. Additionally if the local part of the valos:name is an empty\nstring then the valos:value of this ScopeProperty defines\nthe twinspace id of the scope resource for this twinspace."
       },
       "subject": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:subPropertyOf": "rdf:subject",
         "rdfs:domain": "valos:ScopeProperty",
         "rdfs:range": "rdfs:Resource",
@@ -2512,11 +2512,11 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:expressor": "$valos-script:resolveTwinSubject",
+        "valos_raem:expressor": "$valos_script.resolveTwinSubject",
         "rdfs:comment": "The subject of this ScopeProperty when interpreted as a reified\nrdf:Statement. Equates to the twinspace id of the scope resource using\nthe valos:twinspace of this ScopeProperty."
       },
       "predicate": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:subPropertyOf": "rdf:predicate",
         "rdfs:domain": "valos:ScopeProperty",
         "rdfs:range": "rdfs:Resource",
@@ -2524,24 +2524,24 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:expressor": "$$valos:name",
-        "rdfs:comment": "The predicate of this ScopeProperty when interpreted as a reified\nrdf:Statement. Equates to the IRI expansion of valos:name of this\nScopeProperty using the context of this partition."
+        "valos_raem:expressor": "$valos.name",
+        "rdfs:comment": "The predicate of this ScopeProperty when interpreted as a reified\nrdf:Statement. Equates to the IRI expansion of valos:name of this\nScopeProperty using the context of this chronicle."
       },
       "object": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:subPropertyOf": "rdf:object",
-        "valos-raem:aliasOf": "valos:value",
+        "valos_raem:aliasOf": "valos:value",
         "rdfs:domain": "valos:ScopeProperty",
         "rdfs:range": "rdfs:Resource",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:expressor": "$valos-script:resolveTwinObject",
+        "valos_raem:expressor": "$valos_script.resolveTwinObject",
         "rdfs:comment": "The object of this ScopeProperty when interpreted as a reified\nrdf:Statement. If the valos:value refers to a scope which has this\ntwinspace id defined (ie. it owns a property with twinspace id as a\nname), then this field will be expressed as that twinspace id.\nOtherwise equals to the valos:value itself.\n"
       },
       "Scope": {
-        "@type": "valos-raem:Type",
+        "@type": "valos_raem:Type",
         "rdfs:subClassOf": [
           "valos:Resource",
           "valos:Extant"
@@ -2550,98 +2550,98 @@
         "rdfs:comment": "The class of valospace resources which can have scoped properties."
       },
       "properties": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:subPropertyOf": "valos:ownlings",
         "rdfs:domain": "valos:Scope",
         "rdfs:range": "rdfs:List",
-        "valos-raem:isOwnerOf": true,
-        "valos-raem:coupledField": "valos:scope",
+        "valos_raem:isOwnerOf": true,
+        "valos_raem:coupledField": "valos:scope",
         "rdfs:comment": "The ordered list of ScopeProperty resources of this scope"
       },
       "SourcerableNode": {
-        "@type": "valos-raem:Type",
+        "@type": "valos_raem:Type",
         "rdfs:subClassOf": "valos:Resource",
         "revdoc:brief": "sourcerable node interface",
         "rdfs:comment": "The class of sourcerable valospace nodes which either are already\nsourcered or are unsourcered but have references to them from extant\nresources.\n\nThis interface is the domain of all transient and generated fields\nwhich are available even for unsourcered node resources."
       },
-      "partitionRoot": {
-        "@type": "valos-raem:GeneratedField",
+      "chronicleRoot": {
+        "@type": "valos_raem:GeneratedField",
         "rdfs:domain": "valos:SourcerableNode",
         "rdfs:range": "valos:SourceredNode",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:expressor": "$valos-sourcerer:resolvePartitionRoot",
-        "rdfs:comment": "The partition root node of this sourcerable (ie. the nearest ancestor,\npossibly this sourcerable itself self which has a non-null\nvalos:authorityURI)."
+        "valos_raem:expressor": "$valos_sourcerer.resolveChronicleRoot",
+        "rdfs:comment": "The chronicle root node of this sourcerable (ie. the nearest ancestor,\npossibly this sourcerable itself self which has a non-null\nvalos:authorityURI)."
       },
-      "partitionURL": {
-        "@type": "valos-raem:GeneratedField",
+      "chronicleURI": {
+        "@type": "valos_raem:GeneratedField",
         "rdfs:domain": "valos:SourcerableNode",
         "rdfs:range": "xsd:anyURI",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:expressor": "$valos-sourcerer:resolvePartitionURL",
-        "rdfs:comment": "The partition URL of the event log that contain this potentially\nabsent sourcerable as is known by the current view of the world."
+        "valos_raem:expressor": "$valos_sourcerer.resolveChronicleURI",
+        "rdfs:comment": "The chronicle URL of the event log that contain this potentially\nabsent sourcerable as is known by the current view of the world."
       },
       "url": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:domain": "valos:SourcerableNode",
         "rdfs:range": "xsd:anyURI",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:cardinality": 1
         },
-        "valos-raem:expressor": [
-          "$valk:add:@!$V:partitionURL@",
+        "valos_raem:expressor": [
+          "$valk.add$.@!$V.chronicleURI@",
           [
-            ":",
+            "$.",
             "#"
           ],
-          ":@!$V:id@"
+          "$.@!$V.id@"
         ],
-        "rdfs:comment": "The authoritative URL string of this sourcerable in the current view\nof the world. Always equivalent to a catenation of\n<valos:partitionURL> \"#\" <valos:id>\nof this resource"
+        "rdfs:comment": "The authoritative URL string of this sourcerable in the current view\nof the world. Always equivalent to a catenation of\n<valos:chronicleURI> \"#\" <valos:id>\nof this resource"
       },
       "partition": {
-        "@type": "valos-raem:AliasField",
-        "revdoc:deprecatedInFavorOf": "valos:partitionRoot",
-        "valos-raem:aliasOf": "valos:partitionRoot",
-        "rdfs:subPropertyOf": "valos:partitionRoot",
+        "@type": "valos_raem:AliasField",
+        "revdoc:deprecatedInFavorOf": "valos:chronicleRoot",
+        "valos_raem:aliasOf": "valos:chronicleRoot",
+        "rdfs:subPropertyOf": "valos:chronicleRoot",
         "rdfs:domain": "valos:SourcerableNode",
         "rdfs:range": "valos:SourceredNode",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:expressor": "$valos-sourcerer:resolvePartitionRoot",
-        "rdfs:comment": "The partition root node of this sourcerable, ie. the nearest ancestor\n(possibly self) with a non-null valos:authorityURI."
+        "valos_raem:expressor": "$valos_sourcerer.resolveChronicleRoot",
+        "rdfs:comment": "The chronicle root node of this sourcerable, ie. the nearest ancestor\n(possibly self) with a non-null valos:authorityURI."
       },
       "partitionURI": {
-        "@type": "valos-raem:AliasField",
-        "revdoc:deprecatedInFavorOf": "valos:partitionURL",
-        "valos-raem:aliasOf": "valos:partitionURL",
-        "rdfs:subPropertyOf": "valos:partitionURL",
+        "@type": "valos_raem:AliasField",
+        "revdoc:deprecatedInFavorOf": "valos:chronicleURI",
+        "valos_raem:aliasOf": "valos:chronicleURI",
+        "rdfs:subPropertyOf": "valos:chronicleURI",
         "rdfs:domain": "valos:SourcerableNode",
         "rdfs:range": "xsd:anyURI",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "rdfs:comment": "Deprecated in favor of 'partitionURL'. This field is by definition\nalways a locator so its name should reflect it."
+        "rdfs:comment": "Deprecated in favor of 'chronicleURI'. This field is by definition\nalways a locator so its name should reflect it."
       },
       "UnsourceredNode": {
-        "@type": "valos-raem:Type",
+        "@type": "valos_raem:Type",
         "revdoc:brief": "absent, sourceable node type",
         "rdfs:subClassOf": [
           "valos:Resource",
           "valos:SourcerableNode"
         ],
-        "rdfs:comment": "The dominant type class of absent but sourcerable valospace nodes. An\nabsent resource doesn't have a known representation in this view of the\nworld because it is inside an unsourcered Partition.\n\nThe transition from UnsourceredNode to and from other dominant types is\nthe only possible runtime type change for SourcerableNodes and happens\ndynamically based on the partition sourcery and banishment."
+        "rdfs:comment": "The dominant type class of absent but sourcerable valospace nodes. An\nabsent resource doesn't have a known representation in this view of the\nworld because it is inside an unsourcered Chronicle.\n\nThe transition from UnsourceredNode to and from other dominant types is\nthe only possible runtime type change for SourcerableNodes and happens\ndynamically based on the chronicle sourcery and banishment."
       },
       "NonExistentNode": {
-        "@type": "valos-raem:Type",
+        "@type": "valos_raem:Type",
         "rdfs:subClassOf": [
           "valos:Resource",
           "valos:SourcerableNode"
@@ -2650,7 +2650,7 @@
         "rdfs:comment": "The dominant type class of sourcered resources which should be present\nbut are not. This typically because they have been destroyed or because\nthey never existed in the first place.\n\nOnly provides the transient fields of the SourcerableNode and Resource\ninterfaces."
       },
       "SourceredNode": {
-        "@type": "valos-raem:Type",
+        "@type": "valos_raem:Type",
         "revdoc:brief": "sourcered node interface",
         "rdfs:subClassOf": [
           "valos:Resource",
@@ -2658,10 +2658,10 @@
           "valos:Scope",
           "valos:SourcerableNode"
         ],
-        "rdfs:comment": "The class of sourcered (ie. extant) valospace nodes. A node can act as\na partition root resource, as the source and target of Relation nodes,\nas the folder of Media nodes and as the parent of Entity nodes.\nAs these aforementioned types are also the primary sourcered nodes\nthemselves they form the main structure of global valospace resource\ngraph."
+        "rdfs:comment": "The class of sourcered (ie. extant) valospace nodes. A node can act as\na chronicle root resource, as the source and target of Relation nodes,\nas the folder of Media nodes and as the parent of Entity nodes.\nAs these aforementioned types are also the primary sourcered nodes\nthemselves they form the main structure of global valospace resource\ngraph."
       },
       "container": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:subPropertyOf": "valos:owner",
         "rdfs:domain": "valos:SourceredNode",
         "rdfs:range": "valos:SourceredNode",
@@ -2669,57 +2669,57 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:isOwnedBy": true,
-        "valos-raem:coupledField": "valos:nodes",
+        "valos_raem:isOwnedBy": true,
+        "valos_raem:coupledField": "valos:nodes",
         "rdfs:comment": "The container (and owner) node of this sourcered node."
       },
       "nodes": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:subPropertyOf": "valos:ownlings",
         "rdfs:domain": "valos:SourceredNode",
         "rdfs:range": "rdfs:List",
-        "valos-raem:isOwnerOf": true,
-        "valos-raem:coupledField": "valos:container",
+        "valos_raem:isOwnerOf": true,
+        "valos_raem:coupledField": "valos:container",
         "rdfs:comment": "The ordered list of all nodes directly contained by this sourcered\nnode."
       },
       "authorityURI": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:domain": "valos:SourceredNode",
         "rdfs:range": "xsd:anyURI",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:isDuplicateable": false,
-        "valos-raem:ownDefaultValue": null,
-        "rdfs:comment": "The authority URL of this sourcered partition root node. If this field\nis null then this sourcered node is not a root node. Setting this field\nmakes this resource the root of a new partition root (if allowed). The\npartition URL is generated based on this as per the rules specified by\nthe authority URL schema.\nIf the partition root node is frozen the whole partition is permanently\nfrozen."
+        "valos_raem:isDuplicateable": false,
+        "valos_raem:ownDefaultValue": null,
+        "rdfs:comment": "The authority URL of this sourcered chronicle root node. If this field\nis null then this sourcered node is not a root node. Setting this field\nmakes this resource the root of a new chronicle root (if allowed). The\nchronicle URL is generated based on this as per the rules specified by\nthe authority URL schema.\nIf the chronicle root node is frozen the whole chronicle is permanently\nfrozen."
       },
       "createdAt": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:domain": "valos:SourceredNode",
         "rdfs:range": "xsd:double",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:expressor": "$valos-sourcerer:resolveCreatedAt",
+        "valos_raem:expressor": "$valos_sourcerer.resolveCreatedAt",
         "rdfs:comment": "The creation UNIX epoch time of this node. This is defined as the\nlog aspect timestamp of the CREATED event which impressed this node\ninto being."
       },
       "modifiedAt": {
-        "@type": "valos-raem:GeneratedField",
+        "@type": "valos_raem:GeneratedField",
         "rdfs:domain": "valos:SourceredNode",
         "rdfs:range": "xsd:double",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:expressor": "$valos-sourcerer:resolveModifiedAt",
+        "valos_raem:expressor": "$valos_sourcerer.resolveModifiedAt",
         "rdfs:comment": "The latest modification UNIX epoch time of this node. This is defined\nas the log aspect timestamp of the most recent event with a direct\nimpression on this Media resource."
       },
       "partitionAuthorityURI": {
-        "@type": "valos-raem:AliasField",
+        "@type": "valos_raem:AliasField",
         "revdoc:deprecatedInFavorOf": "valos:authorityURI",
-        "valos-raem:aliasOf": "valos:authorityURI",
+        "valos_raem:aliasOf": "valos:authorityURI",
         "rdfs:subPropertyOf": "valos:authorityURI",
         "rdfs:domain": "valos:SourceredNode",
         "rdfs:range": "xsd:string",
@@ -2729,7 +2729,7 @@
         }
       },
       "directory": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:subPropertyOf": "valos:container",
         "rdfs:domain": [
           "valos:Entity",
@@ -2740,21 +2740,21 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:isOwnedBy": true,
-        "valos-raem:coupledField": "valos:entries",
+        "valos_raem:isOwnedBy": true,
+        "valos_raem:coupledField": "valos:entries",
         "rdfs:comment": "The directory (and owner) node of this sourcered node."
       },
       "entries": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:subPropertyOf": "valos:nodes",
         "rdfs:domain": "valos:SourceredNode",
         "rdfs:range": "rdfs:List",
-        "valos-raem:isOwnerOf": true,
-        "valos-raem:coupledField": "valos:directory",
+        "valos_raem:isOwnerOf": true,
+        "valos_raem:coupledField": "valos:directory",
         "rdfs:comment": "The ordered list of entries of this sourcered node when seen as\na directory."
       },
       "Entity": {
-        "@type": "valos-raem:Type",
+        "@type": "valos_raem:Type",
         "revdoc:brief": "primary resource tree node type",
         "rdfs:subClassOf": [
           "valos:Resource",
@@ -2766,7 +2766,7 @@
         "rdfs:comment": "The class of valospace resources which act as the main valospace tree\nhierarchy building block. With Relation and Media it forms the group of\nthree primary node types. As a Scope it can have scriptable properties,\nwhich entities expose to all child resources as their lexical scripting\nnamespace.\n\nThe set of valospace tree hierarchies is defined via triple pattern:\n\n  SELECT ?root ?parent ?node WHERE {\n    ?node valos:parent ?parent .\n    ?parent valos:parent* ?root .\n    NOT EXISTS ( ?root valos:parent ?rootParent )\n  }\n\nThis implies that only Entity resources can be nodes but any primary\nnode can act as a root resource.\n"
       },
       "parent": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:subPropertyOf": "valos:directory",
         "rdfs:domain": "valos:Entity",
         "rdfs:range": "valos:SourceredNode",
@@ -2774,21 +2774,21 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:isOwnedBy": true,
-        "valos-raem:coupledField": "valos:entities",
+        "valos_raem:isOwnedBy": true,
+        "valos_raem:coupledField": "valos:entities",
         "rdfs:comment": "The parent (and directory, owner) node of this entity."
       },
       "entities": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:subPropertyOf": "valos:entries",
         "rdfs:domain": "valos:SourceredNode",
         "rdfs:range": "rdfs:List",
-        "valos-raem:isOwnerOf": true,
-        "valos-raem:coupledField": "valos:parent",
+        "valos_raem:isOwnerOf": true,
+        "valos_raem:coupledField": "valos:parent",
         "rdfs:comment": "The ordered list of entities contained in this sourcered node."
       },
       "Media": {
-        "@type": "valos-raem:Type",
+        "@type": "valos_raem:Type",
         "revdoc:brief": "file media node type",
         "rdfs:subClassOf": [
           "valos:Resource",
@@ -2800,7 +2800,7 @@
         "rdfs:comment": "The class of valospace resources which represent interpretable media\nand can be associated with mutable binary content and accompanying\nmetadata. With Relation and Media it forms the group of three primary\nnode types.\n"
       },
       "folder": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:subPropertyOf": "valos:directory",
         "rdfs:domain": "valos:Media",
         "rdfs:range": "valos:SourceredNode",
@@ -2808,21 +2808,21 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:isOwnedBy": true,
-        "valos-raem:coupledField": "valos:medias",
+        "valos_raem:isOwnedBy": true,
+        "valos_raem:coupledField": "valos:medias",
         "rdfs:comment": "The folder (and directory, owner) node of this media."
       },
       "medias": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:subPropertyOf": "valos:entries",
         "rdfs:domain": "valos:SourceredNode",
         "rdfs:range": "rdfs:List",
-        "valos-raem:isOwnerOf": true,
-        "valos-raem:coupledField": "valos:folder",
+        "valos_raem:isOwnerOf": true,
+        "valos_raem:coupledField": "valos:folder",
         "rdfs:comment": "The ordered list of medias contained in this sourcered node when seen\nas a folder"
       },
       "sourceURL": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:domain": "valos:Media",
         "rdfs:range": "xsd:anyURI",
         "restriction": {
@@ -2832,7 +2832,7 @@
         "rdfs:comment": "The unreliable source URL of this Media. This URL is dereferenced\nwhen the Media content is accessed and as such is subject to all\nfailure considerations associated with its protocol."
       },
       "content": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:subPropertyOf": "rdf:object",
         "rdfs:domain": "valos:Media",
         "rdfs:range": "valos:Bvob",
@@ -2840,11 +2840,11 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:coupledField": "valos:contentReferrers",
+        "valos_raem:coupledField": "valos:contentReferrers",
         "rdfs:comment": "The infrastructure-backed octet-stream content of this Media."
       },
       "Relation": {
-        "@type": "valos-raem:Type",
+        "@type": "valos_raem:Type",
         "rdfs:subClassOf": [
           "valos:Resource",
           "valos:Extant",
@@ -2856,7 +2856,7 @@
         "rdfs:comment": "The class of valospace resources which represent directed,\nmany-to-many relationships between nodes.\nWith Entity and Media it forms the group of three primary node types.\nAs a Scope it can have scriptable properties. Relation being\na SourceredNode itself allows for nested and recursive relationship\nstructures."
       },
       "connector": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:subPropertyOf": "valos:container",
         "rdfs:domain": "valos:Relation",
         "rdfs:range": "valos:SourceredNode",
@@ -2864,21 +2864,21 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:isOwnedBy": true,
-        "valos-raem:coupledField": "valos:connectedRelations",
+        "valos_raem:isOwnedBy": true,
+        "valos_raem:coupledField": "valos:connectedRelations",
         "rdfs:comment": "The connector (and container, owner) node of this relation.\nTypically also either the source or the target but possibly neither."
       },
       "connectedRelations": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:subPropertyOf": "valos:nodes",
         "rdfs:domain": "valos:SourceredNode",
         "rdfs:range": "rdfs:List",
-        "valos-raem:isOwnerOf": true,
-        "valos-raem:coupledField": "valos:connector",
+        "valos_raem:isOwnerOf": true,
+        "valos_raem:coupledField": "valos:connector",
         "rdfs:comment": "The ordered list of relations that are connected (and contained,\nowned) _by_ this sourcered node. This includes both\nconnectedInRelations and connectedOutRelations (ie. incoming and\noutgoing relations which are also connected by this sourcered node) but\nalso relations which only have this sourcered node as their connector\nbut not as source or target."
       },
       "source": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:subPropertyOf": "rdf:subject",
         "rdfs:domain": "valos:Relation",
         "rdfs:range": "valos:SourceredNode",
@@ -2886,19 +2886,19 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:coupledField": "valos:outRelations",
+        "valos_raem:coupledField": "valos:outRelations",
         "rdfs:comment": "The source node of this relation."
       },
       "outRelations": {
-        "@type": "valos-raem:CoupledField",
+        "@type": "valos_raem:CoupledField",
         "rdfs:subPropertyOf": "valos:nodes",
         "rdfs:domain": "valos:SourcerableNode",
         "rdfs:range": "rdfs:List",
-        "valos-raem:coupledField": "valos:source",
+        "valos_raem:coupledField": "valos:source",
         "rdfs:comment": "The unordered list of outgoing relations with this sourcerable\n(but possibly absent) node as their source (note that sourcerable and\nsource are completely separate concepts here)."
       },
       "target": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:subPropertyOf": "rdf:object",
         "rdfs:domain": "valos:Relation",
         "rdfs:range": "valos:SourceredNode",
@@ -2906,19 +2906,19 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:coupledField": "valos:inRelations",
+        "valos_raem:coupledField": "valos:inRelations",
         "rdfs:comment": "The target node of this relation."
       },
       "inRelations": {
-        "@type": "valos-raem:CoupledField",
+        "@type": "valos_raem:CoupledField",
         "rdfs:subPropertyOf": "valos:nodes",
         "rdfs:domain": "valos:SourcerableNode",
         "rdfs:range": "rdfs:List",
-        "valos-raem:coupledField": "valos:target",
+        "valos_raem:coupledField": "valos:target",
         "rdfs:comment": "The unordered list of incoming relations with this sourcerable\n(but possibly absent) node as their target."
       },
       "pairedSource": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:subPropertyOf": "valos:source",
         "rdfs:domain": "valos:Relation",
         "rdfs:range": "valos:SourceredNode",
@@ -2926,19 +2926,19 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:coupledField": "valos:pairedOutRelations",
+        "valos_raem:coupledField": "valos:pairedOutRelations",
         "rdfs:comment": "The paired source node of this relation (paired denotes that the\ncoupled field 'pairedOutRelations' is an event logged field)."
       },
       "pairedOutRelations": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:subPropertyOf": "valos:outgoingRelations",
         "rdfs:domain": "valos:SourceredNode",
         "rdfs:range": "rdfs:List",
-        "valos-raem:coupledField": "valos:pairedSource",
+        "valos_raem:coupledField": "valos:pairedSource",
         "rdfs:comment": "The ordered list of outgoing relations paired to this sourcered node."
       },
       "pairedTarget": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:subPropertyOf": "valos:target",
         "rdfs:domain": "valos:Relation",
         "rdfs:range": "valos:SourceredNode",
@@ -2946,19 +2946,19 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:coupledField": "valos:pairedInRelations",
+        "valos_raem:coupledField": "valos:pairedInRelations",
         "rdfs:comment": "The paired target node of this relation (the coupled field\n'pairedInRelations' is an event logged field)."
       },
       "pairedInRelations": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:subPropertyOf": "valos:incomingRelations",
         "rdfs:domain": "valos:SourceredNode",
         "rdfs:range": "rdfs:List",
-        "valos-raem:coupledField": "valos:pairedTarget",
+        "valos_raem:coupledField": "valos:pairedTarget",
         "rdfs:comment": "The ordered list of incoming relations paired to this sourcered node."
       },
       "connectedSource": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:subPropertyOf": [
           "valos:connector",
           "valos:pairedSource"
@@ -2969,24 +2969,24 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:isOwnedBy": true,
-        "valos-raem:coupledField": "valos:connectedOutRelations",
+        "valos_raem:isOwnedBy": true,
+        "valos_raem:coupledField": "valos:connectedOutRelations",
         "rdfs:comment": "The source and also the connector node of this relation."
       },
       "connectedOutRelations": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:subPropertyOf": [
           "valos:connectedRelations",
           "valos:pairedOutRelations"
         ],
         "rdfs:domain": "valos:SourceredNode",
         "rdfs:range": "rdfs:List",
-        "valos-raem:isOwnerOf": true,
-        "valos-raem:coupledField": "valos:connectedSource",
+        "valos_raem:isOwnerOf": true,
+        "valos_raem:coupledField": "valos:connectedSource",
         "rdfs:comment": "The ordered list of outgoing relations contained in (and owned by)\nthis sourcered node."
       },
       "connectedTarget": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:subPropertyOf": [
           "valos:connector",
           "valos:pairedTarget"
@@ -2997,51 +2997,51 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos-raem:isOwnedBy": true,
-        "valos-raem:coupledField": "valos:connectedInRelations",
+        "valos_raem:isOwnedBy": true,
+        "valos_raem:coupledField": "valos:connectedInRelations",
         "rdfs:comment": "The target and also the connector node of this relation."
       },
       "connectedInRelations": {
-        "@type": "valos-raem:EventLoggedField",
+        "@type": "valos_raem:EventLoggedField",
         "rdfs:subPropertyOf": [
           "valos:connectedRelations",
           "valos:pairedInRelations"
         ],
         "rdfs:domain": "valos:SourceredNode",
         "rdfs:range": "rdfs:List",
-        "valos-raem:isOwnerOf": true,
-        "valos-raem:coupledField": "valos:connectedTarget",
+        "valos_raem:isOwnerOf": true,
+        "valos_raem:coupledField": "valos:connectedTarget",
         "rdfs:comment": "The ordered list of incoming relations contained in (and owned by)\nthis sourcered node."
       },
       "relations": {
-        "@type": "valos-raem:AliasField",
+        "@type": "valos_raem:AliasField",
         "revdoc:deprecatedInFavorOf": "valos:connectedRelations",
-        "valos-raem:aliasOf": "valos:connectedRelations",
+        "valos_raem:aliasOf": "valos:connectedRelations",
         "rdfs:subPropertyOf": "valos:connectedRelations",
         "rdfs:domain": "valos:SourceredNode",
         "rdfs:range": "rdfs:List",
-        "valos-raem:isOwnerOf": true,
-        "valos-raem:coupledField": "valos:connector",
+        "valos_raem:isOwnerOf": true,
+        "valos_raem:coupledField": "valos:connector",
         "rdfs:comment": "A deprecation of valos:connectedRelations; the ordered list of\nrelations contained within this sourcered node when seen as a graph.\nDo note that the semantics have changed: connectedRelations can now\nalso contain relations which have this sourcered node as their the\ntarget (instead of source) or as neither source nor target.\nThe set of just outgoing relations is 'outgoingRelations' and the set\nof owned outgoing relations is 'connectedOutRelations'."
       },
       "outgoingRelations": {
-        "@type": "valos-raem:AliasField",
+        "@type": "valos_raem:AliasField",
         "revdoc:deprecatedInFavorOf": "valos:outRelations",
-        "valos-raem:aliasOf": "valos:outRelations",
+        "valos_raem:aliasOf": "valos:outRelations",
         "rdfs:subPropertyOf": "valos:outRelations",
         "rdfs:domain": "valos:SourcerableNode",
         "rdfs:range": "rdfs:List",
-        "valos-raem:coupledField": "valos:source",
+        "valos_raem:coupledField": "valos:source",
         "rdfs:comment": "The unordered list of outgoing relations with this sourcerable\n(but possibly absent) node as their source (note that sourcerable and\nsource are completely separate concepts here)."
       },
       "incomingRelations": {
-        "@type": "valos-raem:AliasField",
+        "@type": "valos_raem:AliasField",
         "revdoc:deprecatedInFavorOf": "valos:inRelations",
-        "valos-raem:aliasOf": "valos:inRelations",
+        "valos_raem:aliasOf": "valos:inRelations",
         "rdfs:subPropertyOf": "valos:inRelations",
         "rdfs:domain": "valos:SourcerableNode",
         "rdfs:range": "rdfs:List",
-        "valos-raem:coupledField": "valos:target",
+        "valos_raem:coupledField": "valos:target",
         "rdfs:comment": "The unordered list of incoming relations with this sourcerable\n(but possibly absent) node as their target."
       }
     },
@@ -3149,8 +3149,8 @@
         "@container": "@list",
         "@type": "@id"
       },
-      "valos:partitionRoot": {
-        "@id": "https://valospace.org/#partitionRoot",
+      "valos:chronicleRoot": {
+        "@id": "https://valospace.org/#chronicleRoot",
         "@type": "@id"
       },
       "valos:partition": {
@@ -3529,7 +3529,7 @@
         {
           "@type": "vdoc:Reference",
           "vdoc:content": [
-            "valos-raem:Type"
+            "valos_raem:Type"
           ],
           "vdoc:ref": "@valos/raem#Type"
         },
@@ -3634,7 +3634,7 @@
         {
           "@type": "vdoc:Reference",
           "vdoc:content": [
-            "valos-raem:Field"
+            "valos_raem:Field"
           ],
           "vdoc:ref": "@valos/raem#Field"
         },
@@ -3697,10 +3697,10 @@
                 ]
               },
               {
-                "vdoc:cell": "valos-raem:coupledField",
+                "vdoc:cell": "valos_raem:coupledField",
                 "@type": "vdoc:Header",
                 "vdoc:content": [
-                  "valos-raem:coupledField"
+                  "valos_raem:coupledField"
                 ]
               },
               {
@@ -3753,8 +3753,8 @@
             "predicate",
             "object",
             "properties",
-            "partitionRoot",
-            "partitionURL",
+            "chronicleRoot",
+            "chronicleURI",
             "url",
             "partition",
             "partitionURI",

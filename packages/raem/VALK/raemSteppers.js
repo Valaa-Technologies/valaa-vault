@@ -669,6 +669,11 @@ function _advance (valker: Valker, head: any, scope: ?Object, pathStep: BuiltinS
     }
     return stepHead;
   } catch (error) {
+    const initialStackFrameSourceInfo = !error.originalError && !error.sourceStackFrames
+        && valker[SourceInfoTag];
+    if (initialStackFrameSourceInfo) {
+      addStackFrameToError(error, step, initialStackFrameSourceInfo, "runtime", valker);
+    }
     throw valker.wrapErrorEvent(error, 1, () => [
       `During ${valker.debugId()}\n ._advance, step #${index}: ${type}, with:`,
       "\n\tstep head:", ...dumpObject(stepHead),

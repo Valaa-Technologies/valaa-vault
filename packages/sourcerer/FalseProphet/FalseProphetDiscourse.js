@@ -65,15 +65,17 @@ export default class FalseProphetDiscourse extends Discourse {
     this._assignCommandId = assignCommandId;
   }
 
-  run (head: any, kuery: any, options: Object = {}): any {
+  run (head: any, kuery: any, options: Object): any {
     try {
-      if (options && options.discourse && (this !== options.discourse)) {
+      let actualOptions = options;
+      if (!options) actualOptions = { discourse: this };
+      else if (!options.discourse) {
+        actualOptions = Object.create(options);
+        actualOptions.discourse = this;
+      } else if (this !== options.discourse) {
         return options.discourse.run(head, kuery, options);
       }
-      return super.run(head, kuery,
-          !options ? { discourse: this }
-          : !options.discourse ? { ...options, discourse: this }
-          : options);
+      return super.run(head, kuery, actualOptions);
     } catch (error) {
       addConnectToChronicleToError(error, this.connectToAbsentChronicle);
       throw error;

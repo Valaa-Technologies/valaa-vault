@@ -139,16 +139,13 @@ function toMethod (valker: Valker, head: any, scope: ?Object, [, callableName]: 
 function _engineIdentifierOrPropertyValue (steppers: Object, valker: Valker, head: any,
       scope: ?Object, propertyName: string, container: any, isGetProperty: ?boolean,
       allowUndefinedIdentifier: ?boolean): any {
-  let eContainer: Object;
-  let ePropertyName: string | Symbol;
+  let eContainer = (container === undefined)
+      ? (isGetProperty ? head : scope)
+      : tryFullLiteral(valker, head, container, scope);
+  let ePropertyName = (typeof propertyName !== "object") || isSymbol(propertyName)
+      ? propertyName
+      : tryLiteral(valker, head, propertyName, scope);
   try {
-    eContainer = (container === undefined)
-        ? (isGetProperty ? head : scope)
-        : tryFullLiteral(valker, head, container, scope);
-    ePropertyName = (typeof propertyName !== "object") || isSymbol(propertyName)
-        ? propertyName
-        : tryLiteral(valker, head, propertyName, scope);
-    let ret;
     if (eContainer._sequence) {
       eContainer = valker.tryUnpack(eContainer, true);
     } else if (isHostRef(eContainer)) {
@@ -164,32 +161,28 @@ function _engineIdentifierOrPropertyValue (steppers: Object, valker: Valker, hea
       }
       return valker.tryPack(vContainer.propertyValue(ePropertyName, { discourse: valker }));
     }
-    ret = eContainer[ePropertyName];
-    if (!isGetProperty) {
-      if ((ret === undefined) && !allowUndefinedIdentifier
-          && !(ePropertyName in eContainer)) {
-        throw new Error(`Cannot find identifier '${ePropertyName}' in scope`);
-      }
-      if ((typeof ret !== "object") || (ret === null)) return ret;
-      ret = isNativeIdentifier(ret) ? getNativeIdentifierValue(ret)
-          : (ret._typeName === "Property") && isHostRef(valker.tryPack(ret))
-              ? ret.extractValue({ discourse: valker }, eContainer.this)
-              : ret;
+    const property = eContainer[ePropertyName];
+    if (isGetProperty) return valker.tryPack(property);
+    if ((property === undefined) && !allowUndefinedIdentifier
+        && !(ePropertyName in eContainer)) {
+      throw new Error(`Cannot find identifier '${ePropertyName}' in scope`);
     }
-    return valker.tryPack(ret);
+    if ((typeof property !== "object") || (property === null)) return property;
+    return valker.tryPack(
+        isNativeIdentifier(property)
+            ? getNativeIdentifierValue(property)
+        : (property._typeName === "Property") && isHostRef(valker.tryPack(property))
+            ? property.extractValue({ discourse: valker }, eContainer.this)
+            : property);
   } catch (error) {
     let actualError = error;
-    if (!error.originalError) {
-      if ((eContainer === null)
-          || ((typeof eContainer !== "object") && (typeof eContainer !== "function")
-              && (typeof eContainer !== "string"))) {
-        actualError = new Error(`Cannot access ${isGetProperty ? "property" : "identifier"} '${
-            String(ePropertyName)}' from ${isGetProperty ? "non-object-like" : "non-scope"
-            } value '${String(eContainer)}'`);
-      } else if ((typeof ePropertyName !== "string") && !isSymbol(ePropertyName)) {
-        actualError = new Error(`Cannot use a value with type '${typeof ePropertyName}' as ${
-            isGetProperty ? "property" : "identifier"} name`);
-      }
+    if (eContainer == null) {
+      actualError = new Error(`Cannot access ${isGetProperty ? "property" : "identifier"} '${
+        String(ePropertyName)}' from ${isGetProperty ? "non-object-like" : "non-scope"
+        } value '${String(eContainer)}'`);
+    } else if ((typeof ePropertyName !== "string") && !isSymbol(ePropertyName)) {
+      actualError = new Error(`Cannot use a value with type '${typeof ePropertyName}' as ${
+          isGetProperty ? "property" : "identifier"} name`);
     }
     throw valker.wrapErrorEvent(actualError, 1, isGetProperty ? "getProperty" : "getIdentifier",
         "\n\thead:", ...dumpObject(head),

@@ -29,7 +29,7 @@ import Subscription from "~/engine/Vrapper/Subscription";
 import { thenChainEagerly } from "~/tools";
 
 export default class Engine extends Cog {
-  constructor ({ name, parent, sourcerer, timeDilation = 1.0, verbosity }: Object) {
+  constructor ({ name, parent, sourcerer, timeDilation = 1.0, verbosity, discourse }: Object) {
     super(parent, verbosity, `${name}/Engine`);
     this._sourcerer = sourcerer;
     this._cogs = new Set();
@@ -40,7 +40,7 @@ export default class Engine extends Cog {
     this.addCog(this);
     this._motor = new Motor(this, `${name}/Motor`, timeDilation);
     this.addCog(this._motor);
-    this.discourse = this._connectWithSourcerer(sourcerer);
+    this.discourse = this._connectWithSourcerer(sourcerer, discourse);
     this._currentPassageCounter = 0;
     this._hostDescriptors = new Map();
     this._rootScope = {};
@@ -49,8 +49,11 @@ export default class Engine extends Cog {
 
   getEngine () { return this; }
 
-  _connectWithSourcerer (sourcerer: Sourcerer) {
-    const ret = sourcerer.addFollower(this, { verbosity: this.getVerbosity() - 1 });
+  _connectWithSourcerer (sourcerer: Sourcerer, discourseOptions: Object = {}) {
+    const ret = sourcerer.addFollower(this, {
+      verbosity: this.getVerbosity() - 1,
+      ...discourseOptions,
+    });
     ret.setHostValuePacker(packFromHost);
     function packFromHost (value) {
       if (value instanceof Vrapper) return value.getSelfAsHead(value.getId());

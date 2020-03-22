@@ -141,7 +141,8 @@ class VRL {
   tryGhostPath (): ?GhostPath { return this._r.ghostPath; }
 
   connectGhostPath (connectedGhostPath: GhostPath) {
-    if (this._nss !== connectedGhostPath.headRawId()) {
+    if (this._nss !== connectedGhostPath.headRawId()
+        && (this._nss !== coerceAsVRID(connectedGhostPath.headRawId()))) {
       throw new Error(`Inconsistent VRL: this.rawId !== connectedGhostPath.headRawId, ${
           ""} with rawId: '${this._nss}' and ghostPath.headRawId: '${
           connectedGhostPath.headRawId()}'`);

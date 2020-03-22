@@ -144,8 +144,8 @@ export default class Valker extends Resolver {
     this._steppers = steppers || raemSteppers;
   }
 
-  run (head: any, kuery: any,
-      { scope, state, verbosity, pure, sourceInfo, steppers }: VALKOptions = {}) {
+  run (head: any, kuery: any, options: Object = {}) {
+    const { scope, state, verbosity, pure, sourceInfo, steppers } = options;
     const valker = Object.create(this);
     if (pure !== undefined) valker.pure = pure;
     if (verbosity !== undefined) {

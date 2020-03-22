@@ -96,14 +96,13 @@ const _propertyValueMethodStep = ["§method", "propertyValue"];
 function _getIdentifierOrPropertyValue (steppers: Object, valker: Valker, head: any, scope: ?Object,
       propertyName: string, container: any, isGetProperty: ?boolean,
       allowUndefinedIdentifier: ?boolean): any {
-  let eContainer: Object;
-  let ePropertyName: string | Symbol;
+  let eContainer = (container === undefined)
+      ? (isGetProperty ? head : scope)
+      : tryFullLiteral(valker, head, container, scope);
+  const ePropertyName = (typeof propertyName !== "object") || isSymbol(propertyName)
+      ? propertyName
+      : tryLiteral(valker, head, propertyName, scope);
   try {
-    eContainer = (container === undefined)
-        ? (isGetProperty ? head : scope)
-        : tryFullLiteral(valker, head, container, scope);
-    ePropertyName = (typeof propertyName !== "object") ? propertyName
-        : tryLiteral(valker, head, propertyName, scope);
     if (eContainer._sequence) {
       eContainer = valker.tryUnpack(eContainer, true);
     } else if (isHostRef(eContainer)) {
@@ -118,30 +117,19 @@ function _getIdentifierOrPropertyValue (steppers: Object, valker: Valker, head: 
       throw new Error(`Cannot find identifier '${ePropertyName}' in scope`);
     }
     if ((typeof property !== "object") || (property === null)) return property;
-    const ret = isNativeIdentifier(property) ? getNativeIdentifierValue(property)
-        // FIXME(iridian): Leaking abstractions like there's no tomorrow. This (among many other
-        // parts of this file) belong to the @valos/engine steppers-extension, which
-        // doesn't exist, which is the reason these are not there.
-        : (property._typeName === "Property") && isHostRef(valker.tryPack(property))
-            ? property.extractValue({ discourse: valker }, eContainer.this)
-            : property;
-    return valker.tryPack(ret);
+    return valker.tryPack(
+        isNativeIdentifier(property) ? getNativeIdentifierValue(property) : property);
   } catch (error) {
     let actualError = error;
-    if (!error.originalError) {
-      if ((eContainer === null)
-          || ((typeof eContainer !== "object") && (typeof eContainer !== "function")
-              && (typeof eContainer !== "string"))) {
-        actualError = new Error(`Cannot access ${isGetProperty ? "property" : "identifier"} '${
-            String(ePropertyName)}' from ${isGetProperty ? "non-object-like" : "non-scope"
-            } value '${String(eContainer)}'`);
-      } else if ((typeof ePropertyName !== "string") && !isSymbol(ePropertyName)) {
-        actualError = new Error(`Cannot use a value with type '${typeof ePropertyName}' as ${
-            isGetProperty ? "property" : "identifier"} name`);
-      }
+    if (eContainer == null) {
+      actualError = new Error(`Cannot access ${isGetProperty ? "property" : "identifier"} '${
+        String(ePropertyName)}' from ${isGetProperty ? "non-object-like" : "non-scope"
+        } value '${String(eContainer)}'`);
+    } else if ((typeof ePropertyName !== "string") && !isSymbol(ePropertyName)) {
+      actualError = new Error(`Cannot use a value with type '${typeof ePropertyName}' as ${
+          isGetProperty ? "property" : "identifier"} name`);
     }
-    throw valker.wrapErrorEvent(actualError, 1,
-        isGetProperty ? "getProperty" : "getIdentifier",
+    throw valker.wrapErrorEvent(actualError, 1, isGetProperty ? "getProperty" : "getIdentifier",
         "\n\thead:", ...dumpObject(head),
         "\n\tcontainer:", ...dumpObject(eContainer),
         "(via kuery:", ...dumpKuery(container), ")",

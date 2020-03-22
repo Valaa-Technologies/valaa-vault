@@ -133,7 +133,7 @@ export const naiveURI = {
       let chronicleVRID = partitionRawId;
       if (partitionRawId.slice(-2) !== "@@") {
         chronicleVRID = coerceAsVRID(partitionRawId);
-        console.warn(`DEPRECATED: createPartitionURI.chronicleId must be a valid VPath, got: ${
+        console.log(`DEPRECATED: createPartitionURI.chronicleId must be a valid VPath, got: ${
           partitionRawId}, coerced as: ${chronicleVRID}`);
       }
       return naiveURI.createChronicleURI(baseString, chronicleVRID);

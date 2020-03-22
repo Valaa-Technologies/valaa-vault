@@ -324,11 +324,13 @@ export default class Gateway extends FabricEventTarget {
       function _createEngine () {
         const engineOptions = {
           name: `${viewConfig.name} Engine`,
+          discourse: {},
           ...(viewConfig.engine || {}),
           parent: view,
           sourcerer: gateway.falseProphet,
           revelation: gateway.revelation,
         };
+        Object.assign(engineOptions.discourse, viewConfig.discourse || {});
         const engine = new Engine(engineOptions);
         gateway.clockEvent(1, () => [
           `${viewConfig.name}.engine.create`,

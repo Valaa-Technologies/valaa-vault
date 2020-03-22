@@ -10,8 +10,6 @@ import { formVPath, validateVRID, validateVerbs } from "~/raem/VPath";
 import { addConnectToChronicleToError } from "~/raem/tools/denormalized/partitions";
 
 import Discourse from "~/sourcerer/api/Discourse";
-import Follower from "~/sourcerer/api/Follower";
-import Sourcerer from "~/sourcerer/api/Sourcerer";
 import type Connection from "~/sourcerer/api/Connection";
 import type { ChronicleOptions, ChroniclePropheciesRequest, ConnectOptions, ProphecyEventResult }
     from "~/sourcerer/api/types";
@@ -22,33 +20,33 @@ import { initializeAspects, obtainAspect, tryAspect } from "~/sourcerer/tools/Ev
 import createVRID0Dot3, { upgradeVRIDTo0Dot3, createChronicleRootVRID0Dot3 }
     from "~/sourcerer/tools/event-version-0.3/createVRID0Dot3";
 
+import FalseProphet from "~/sourcerer/FalseProphet";
 import TransactionState, { fabricatorOps } from "~/sourcerer/FalseProphet/TransactionState";
 
 import { invariantify, invariantifyObject, thenChainEagerly, trivialClone } from "~/tools";
 import valosUUID from "~/tools/id/valosUUID";
 
 export default class FalseProphetDiscourse extends Discourse {
-  _follower: Follower;
-  _sourcerer: Sourcerer;
+  _falseProphet: FalseProphet;
   _transactorState: ?TransactionState = null;
   _assignCommandId: (command: Command, discourse: FalseProphetDiscourse) => string;
 
-  constructor ({
-    follower, sourcerer, verbosity, logger, packFromHost, unpackToHost, steppers,
-    assignCommandId,
-  }: Object) {
+  constructor (options: {
+    parent: Object, verbosity: ?number, name: ?string,
+    packFromHost: ?Function, unpackToHost: ?Function, steppers: Object,
+    sourcerer: Object, assignCommandId: ?Function,
+  }) {
     // goes to Valker
-    super(sourcerer.corpus.schema, verbosity, logger, packFromHost, unpackToHost, steppers);
-    invariantifyObject(follower, "FalseProphetDiscourse.constructor.follower");
-    this.setDeserializeReference(sourcerer.deserializeReference);
-    this.corpus = sourcerer.corpus;
+    super(options);
+    invariantifyObject(parent, "FalseProphetDiscourse.constructor.parent");
+    this._falseProphet = options.sourcerer;
+    this._corpus = this._falseProphet._corpus; // This will be shadowed by transactor._corpus
     this._rootDiscourse = this;
-    this._follower = follower;
-    this._sourcerer = sourcerer;
     this._implicitlySyncingConnections = {};
-    this.setState(this._sourcerer.getState());
+    this.setDeserializeReference(this._falseProphet.deserializeReference);
+    this.setState(this._falseProphet.getState());
     invariantify(this.state, "FalseProphetDiscourse.state");
-    this._assignCommandId = assignCommandId || (command => {
+    this._assignCommandId = options.assignCommandId || (command => {
       obtainAspect(command, "command").id = valosUUID();
     });
   }
@@ -61,7 +59,7 @@ export default class FalseProphetDiscourse extends Discourse {
 
   getRootDiscourse () { return this._rootDiscourse; }
   getTransactor () { return this._transactorState && this._transactorState._transactor; }
-  getIdentityManager () { return this._follower.getIdentityManager(); }
+  getIdentityManager () { return this.getFollower().getIdentityManager(); }
 
   setAssignCommandId (assignCommandId) {
     this._assignCommandId = assignCommandId;
@@ -85,7 +83,7 @@ export default class FalseProphetDiscourse extends Discourse {
   acquireConnection (chronicleURI: ValaaURI,
       options: ConnectOptions = {}): ?Connection {
     options.discourse = this;
-    return this._sourcerer.acquireConnection(chronicleURI, options);
+    return this._falseProphet.acquireConnection(chronicleURI, options);
   }
 
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}):
@@ -94,12 +92,12 @@ export default class FalseProphetDiscourse extends Discourse {
     if (this._transactorState) return this._transactorState.chronicleEvents(events, options);
     try {
       options.discourse = this;
-      const ret = this._sourcerer.chronicleEvents(
+      const ret = this._falseProphet.chronicleEvents(
           events.map(event => this._universalizeEvent(event)), options);
 
       ret.eventResults.forEach(eventResult => {
         const getPremiereStory = eventResult.getPremiereStory;
-        eventResult.waitOwnReactions = (() => eventResult.getFollowerReactions(this._follower));
+        eventResult.waitOwnReactions = (() => eventResult.getFollowerReactions(this.getFollower()));
         eventResult.getPremiereStory = () => thenChainEagerly(
             eventResult.waitOwnReactions(),
             () => getPremiereStory.call(eventResult));
@@ -153,11 +151,11 @@ export default class FalseProphetDiscourse extends Discourse {
     } else {
       return undefined;
     }
-    return this._follower.receiveCommands(commands, purgedRecital);
+    return this.getFollower().receiveCommands(commands, purgedRecital);
   }
 
   receiveTruths (truthEvents: EventBase[]) {
-    return this._follower.receiveTruths(truthEvents);
+    return this.getFollower().receiveTruths(truthEvents);
   }
 
   create ({ typeName, initialState, id }: Object): ProphecyEventResult {
@@ -258,7 +256,7 @@ export default class FalseProphetDiscourse extends Discourse {
       throw new Error(
           "Cannot create a resource id for a structural type 'Property' which is missing an owner");
     }
-    targetAction.id = vRef(explicitRawId || `@$~u4.${valosUUID()}`);
+    targetAction.id = vRef(explicitRawId || `@$~u4.${valosUUID()}@@`);
     /*
     console.log("assignNewUnchronicledVRID", String(targetAction.id), explicitRawId,
         "\n\ttargetAction:", ...dumpObject(targetAction),

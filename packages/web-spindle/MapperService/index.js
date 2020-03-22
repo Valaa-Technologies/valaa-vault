@@ -25,8 +25,7 @@ export type PrefixRouter = MapperService;
 
 export default class MapperService extends FabricEventTarget {
   constructor (gateway, { identity, port, address, fastify, ...rest }, projectorCreators) {
-    super(rest.name, rest.verbosity, gateway.getLogger());
-    this._gateway = gateway;
+    super(gateway, rest.verbosity, rest.name);
 
     this._identity = identity;
     this._rolesByIdentity = {};
@@ -45,6 +44,8 @@ export default class MapperService extends FabricEventTarget {
     this._rootFastify = Fastify(options || {});
     this._prefixRouters = {};
   }
+
+  getGateway () { return this._parent; }
 
   getRootFastify () { return this._rootFastify; }
 

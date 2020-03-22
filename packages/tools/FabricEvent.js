@@ -75,34 +75,45 @@ export class FabricEventLogger {
   clock: Function;
 }
 
-let _eventTargetCounter = 0;
 let _clockerId = 0;
+
+const _typeInstanceCounter = {};
 
 export const FabricEventTypesTag = Symbol("FabricEvent.Types");
 const FabricEventTargetTag = Symbol("FabricEvent.EventListener.EventTarget");
 
 export class FabricEventTarget {
-  _name: string;
+  _parent: FabricEventTarget | Object;
   _verbosity: ?number;
-  _logger: FabricEventLogger | Object;
+  _name: ?string;
 
-  constructor (
-      name = `${this.constructor.name}#${++_eventTargetCounter}`, verbosity, logger) {
-    this._name = name;
-    this._logger = logger || console;
-    this._verbosity = verbosity !== undefined ? verbosity
-        : this._logger.verbosity !== undefined ? this._logger.verbosity
-        : 0;
+  constructor (parent, verbosity, name) {
+    this._parent = parent;
+    if (verbosity !== undefined) this._verbosity = verbosity;
+    if (name !== undefined) this._name = name;
+    if (!parent) {
+      this._parent = Object.create(console);
+      this._parent.getVerbosity = () => 0;
+    }
   }
 
-  getLogger (): FabricEventLogger | Object { return this._logger; }
-  setLogger (logger: FabricEventLogger) { this._logger = logger; }
-  getName (): string { return this._name; }
-  getRawName (): string { return this._rawName || this._name; }
+  getParent () { return this._parent; }
+
+  getName (): string {
+    const name = this._name;
+    if (name !== undefined) return name;
+    const typeName = this.constructor.name;
+    if (!_typeInstanceCounter[typeName]) _typeInstanceCounter[typeName] = 0;
+    return (this._name = `${this.constructor.name}#${++_typeInstanceCounter[typeName]}`);
+  }
   setName (name: any) { this._name = name; }
+  getRawName (): string { return this._rawName || this.getName(); }
   setRawName (rawName: any) { this._rawName = rawName; }
 
-  getVerbosity () { return this._verbosity; }
+  getVerbosity () {
+    const ret = this._verbosity;
+    return (ret != null) ? ret : this._parent.getVerbosity();
+  }
   setVerbosity (value: number) { this._verbosity = value; }
 
   debugId (opts): string {
@@ -110,74 +121,63 @@ export class FabricEventTarget {
   }
 
   info (...rest: any[]) {
-    return (this._logger.info || this._logger.log).apply(this._logger, rest);
+    return (this._parent.info || this._parent.log).apply(this._parent, rest);
   }
-  log (...rest: any[]) { return this._logger.log(...rest); }
-  warn (...rest: any[]) { return this._logger.warn(...rest); }
-  error (...rest: any[]) { return this._logger.error(...rest); }
+  log (...rest: any[]) { return this._parent.log(...rest); }
+  warn (...rest: any[]) { return this._parent.warn(...rest); }
+  error (...rest: any[]) { return this._parent.error(...rest); }
   clock (...rest: any[]) {
-    return (this._logger.clock || (inBrowser() ? this._logger.log : this._logger.warn))
-        .apply(this._logger, rest);
+    return (this._parent.clock || (inBrowser() ? this._parent.log : this._parent.warn))
+        .apply(this._parent, rest);
   }
 
   infoEvent (firstPartOrMinVerbosity: number | any, ...rest: any[]) {
-    const messageParts = this._getArgsIfVerboseEnough(firstPartOrMinVerbosity, ...rest);
-    if (!messageParts) return this;
-    return this._outputMessageEvent((this._logger || this).info.bind(this._logger || this),
-        true, ...messageParts);
+    if (!_isVerboseEnough(firstPartOrMinVerbosity, this._verbosity, this)) return this;
+    return this._outputMessageEvent((this._parent || this).info.bind(this._parent || this),
+        true, this._getMessageParts(firstPartOrMinVerbosity, rest));
   }
   logEvent (firstPartOrMinVerbosity: number | any, ...rest: any[]) {
-    const messageParts = this._getArgsIfVerboseEnough(firstPartOrMinVerbosity, ...rest);
-    if (!messageParts) return this;
-    return this._outputMessageEvent((this._logger || this).log.bind(this._logger || this),
-        true, ...messageParts);
+    if (!_isVerboseEnough(firstPartOrMinVerbosity, this._verbosity, this)) return this;
+    return this._outputMessageEvent((this._parent || this).log.bind(this._parent || this),
+        true, this._getMessageParts(firstPartOrMinVerbosity, rest));
   }
   warnEvent (firstPartOrMinVerbosity: number | any, ...rest: any[]) {
-    const messageParts = this._getArgsIfVerboseEnough(firstPartOrMinVerbosity, ...rest);
-    if (!messageParts) return this;
-    return this._outputMessageEvent((this._logger || this).warn.bind(this._logger || this),
-        true, ...messageParts);
+    if (!_isVerboseEnough(firstPartOrMinVerbosity, this._verbosity, this)) return this;
+    return this._outputMessageEvent((this._parent || this).warn.bind(this._parent || this),
+        true, this._getMessageParts(firstPartOrMinVerbosity, rest));
   }
   errorEvent (firstPartOrMinVerbosity: number | any, ...rest: any[]) {
-    const messageParts = this._getArgsIfVerboseEnough(firstPartOrMinVerbosity, ...rest);
-    if (!messageParts) return this;
-    return this._outputMessageEvent((this._logger || this).error.bind(this._logger || this),
-        true, ...messageParts);
+    if (!_isVerboseEnough(firstPartOrMinVerbosity, this._verbosity, this)) return this;
+    return this._outputMessageEvent((this._parent || this).error.bind(this._parent || this),
+        true, this._getMessageParts(firstPartOrMinVerbosity, rest));
   }
   clockEvent (firstPartOrMinVerbosity: number | any, ...rest: any[]) {
-    const messageParts = this._getArgsIfVerboseEnough(firstPartOrMinVerbosity, ...rest);
-    if (!messageParts) return this;
+    if (!_isVerboseEnough(firstPartOrMinVerbosity, this._verbosity, this)) return this;
     return this._outputMessageEvent(this.clock.bind(this),
-        false, ...messageParts);
+        false, this._getMessageParts(firstPartOrMinVerbosity, rest));
   }
 
-  _getArgsIfVerboseEnough (maybeMinVerbosity, maybeGetArgs, ...rest) {
+  _getMessageParts (maybeMinVerbosity, rest) {
     return (typeof maybeMinVerbosity !== "number")
-            ? [maybeMinVerbosity, maybeGetArgs, ...rest]
-        : maybeMinVerbosity > this._verbosity
-            ? undefined
-        : (typeof maybeGetArgs === "function")
-            ? [].concat(maybeGetArgs(), rest)
-        : (maybeGetArgs !== undefined)
-            ? [maybeGetArgs, ...rest]
-        : [];
+            ? [maybeMinVerbosity, ...(rest || [])]
+        : rest && (typeof rest[0] === "function")
+            ? [].concat(rest[0](), rest.slice(1))
+        : rest || [];
   }
 
-  _outputMessageEvent (output: Function, joinFirstPieceWithId: boolean,
-      firstPiece: any = "", ...restPieces: any[]) {
+  _outputMessageEvent (output: Function, joinFirstPieceWithId: boolean, parts: any[]) {
     // Prepend the debug id to the first entry if it is a string.
     // Valma logger gives only the first argument a specific coloring,
     // this way the actual first piece will get the coloring as well.
-    return (typeof firstPiece !== "string" || !joinFirstPieceWithId)
-        ? output(`${this.debugId({ raw: !joinFirstPieceWithId })}:`, firstPiece, ...restPieces)
-        : output(`${this.debugId({ raw: !joinFirstPieceWithId })}: ${firstPiece}`, ...restPieces);
+    const first = parts[0];
+    return (typeof first !== "string" || !joinFirstPieceWithId)
+        ? output(`${this.debugId({ raw: !joinFirstPieceWithId })}:`, ...parts)
+        : output(`${this.debugId({ raw: !joinFirstPieceWithId })}: ${first}`, ...parts.slice(1));
   }
 
-  wrapErrorEvent (
-      error: Error, functionNameOrMinVerbosity: Error | string | number, ...contexts: any[]) {
-    const actualArgs = this._getArgsIfVerboseEnough(functionNameOrMinVerbosity, ...contexts);
-    if (!actualArgs) return error;
-    const [functionName, ...actualContexts] = actualArgs;
+  wrapErrorEvent (error: Error, nameOrMinVerbosity: Error | string | number, ...contexts_: any[]) {
+    if (!_isVerboseEnough(nameOrMinVerbosity, this._verbosity, this)) return error;
+    const [functionName, ...contexts] = this._getMessageParts(nameOrMinVerbosity, contexts_);
     const actualFunctionName = functionName instanceof Error ? functionName.message : functionName;
     if (error.hasOwnProperty("functionName")
         && (error.functionName === actualFunctionName)
@@ -191,23 +191,24 @@ export class FabricEventTarget {
       errorWrapper.tidyFrameList = errorWrapper.stack.split("\n")
           .slice((functionName instanceof Error) ? 2 : 3);
     }
-    if (typeof functionNameOrMinVerbosity === "number") {
-      errorWrapper.verbosities = [this.getVerbosity(), functionNameOrMinVerbosity];
+    if (typeof nameOrMinVerbosity === "number") {
+      errorWrapper.verbosities = [this.getVerbosity(), nameOrMinVerbosity];
     }
     errorWrapper.message = `${
       errorWrapper.verbosities ? `[${errorWrapper.verbosities.join(">=")}] ` : ""
-      }During ${this.debugId()}\n .${actualFunctionName}${actualContexts.length ? ", with:" : ""}`;
-    const ret = wrapError(error, errorWrapper, ...actualContexts);
+      }During ${this.debugId()}\n .${actualFunctionName}${contexts.length ? ", with:" : ""}`;
+    const ret = wrapError(error, errorWrapper, ...contexts);
     ret.functionName = actualFunctionName;
     ret.contextObject = this;
     return ret;
   }
 
   outputErrorEvent (error: Error, firstMessageOrMinVerbosity, ...restMessages) {
-    const actualParts = this._getArgsIfVerboseEnough(firstMessageOrMinVerbosity, ...restMessages);
-    return actualParts
-        ? outputError(error, ...actualParts)
-        : outputCollapsedError(error, ...restMessages);
+    if (!_isVerboseEnough(firstMessageOrMinVerbosity, this._verbosity, this)) {
+      return outputCollapsedError(error, ...restMessages);
+    }
+    return outputError(error,
+        ...this._getMessageParts(firstMessageOrMinVerbosity, restMessages));
   }
 
   performChain (params: any, staticChainName: string, staticErrorHandlerName: string,
@@ -362,6 +363,11 @@ export class FabricEventTarget {
 }
 
 FabricEventTarget.prototype[FabricEventTypesTag] = {};
+
+function _isVerboseEnough (maybeMinVerbosity, verbosity, eventTarget) {
+  return (typeof maybeMinVerbosity === "number")
+      && (maybeMinVerbosity <= (verbosity !== undefined ? verbosity : eventTarget.getVerbosity()));
+}
 
 function _createListener (type, callback, options) {
   return {

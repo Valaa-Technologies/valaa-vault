@@ -182,8 +182,7 @@ function _clipFrameListToCurrentContext (innerError, outerError) {
   return inner;
 }
 
-function outputError (error, header = "Exception caught",
-    logger = errorLogger) {
+function outputError (error, header = "Exception caught", logger = _globalLogger) {
   logger.error.call(logger,
       `  ${header} (with ${(error.errorContexts || []).length} contexts):\n\n`,
       error.originalMessage || error.message, `\n `);
@@ -201,8 +200,7 @@ function outputError (error, header = "Exception caught",
   }
 }
 
-function outputCollapsedError (error, header = "Exception caught",
-    logger = errorLogger) {
+function outputCollapsedError (error, header = "Exception caught", logger = _globalLogger) {
   const collapsedContexts = [];
   const collapsingLogger = {
     log: (...args) => collapsedContexts[collapsedContexts.length - 1].traces.push(
@@ -326,7 +324,7 @@ function isIterable (candidate) {
   return (typeof candidate === "object") && (typeof candidate.toJS === "function");
 }
 
-let errorLogger = (typeof window !== "undefined") || !process
+let _globalLogger = (typeof window !== "undefined") || !process
     ? console
     : {
       log (...params) { console.log(...params.map(dumpifyObject)); },
@@ -335,7 +333,7 @@ let errorLogger = (typeof window !== "undefined") || !process
     };
 
 function setGlobalLogger (logger) {
-  errorLogger = logger;
+  _globalLogger = logger;
 }
 
 let stackFrameCounter = 0;
@@ -359,10 +357,10 @@ function unhandledError (error) {
   stackFrameCounter += 1;
   const header = `UNHANDLED ERROR #${stackFrameCounter}`;
   if (error instanceof Error) {
-    outputError(error, header, errorLogger);
+    outputError(error, header, _globalLogger);
   } else {
-    errorLogger.error(header);
-    errorLogger.error(`  Irregular error info:`,
+    _globalLogger.error(header);
+    _globalLogger.error(`  Irregular error info:`,
         (error && (typeof error === "object") && (error.stack || error.message)) || error);
   }
 }
@@ -377,10 +375,10 @@ function unhandledRejection (reason, promise) {
       + `by explicit .then/.catch).
 The actual error:`;
   if (reason instanceof Error) {
-    outputError(reason, header, errorLogger);
+    outputError(reason, header, _globalLogger);
   } else {
-    errorLogger.error(header);
-    errorLogger.error(`  Error info:`, promise,
+    _globalLogger.error(header);
+    _globalLogger.error(`  Error info:`, promise,
         (reason && typeof reason === "object" && (reason.stack || reason.message)) || reason);
   }
 }

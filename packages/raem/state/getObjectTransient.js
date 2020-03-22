@@ -15,15 +15,6 @@ import { Resolver, Transient } from "~/raem/state";
  *
  * idData :[id :string, ghostPath, coupledField :string]
  * ghostPath :Map<hostPrototypeRawId, [ghostHostId, optional<ghostId>]>
- *
- * @export
- * @param {State} state
- * @param {IdData} idData
- * @param {string} typeName
- * @param {Object} logger
- * @param null objectTable
- * @param {any} Object
- * @returns {Transient}
  */
 export function tryObjectTransient (resolver: Resolver, idData: IdData, typeName: string,
     require: boolean = false): Transient {

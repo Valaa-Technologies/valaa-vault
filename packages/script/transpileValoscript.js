@@ -16,8 +16,9 @@ export default function transpileValoscript (expressionText: string, options: Ob
   let transpiler = lookup.get(VALK);
   if (!transpiler) {
     transpiler = new ValoscriptTranspiler(
+        options.parent,
         isModule ? es2017module : es2017body,
-        { locations: true, allowReturnOutsideFunction: !isModule, VALK, }
+        { locations: true, allowReturnOutsideFunction: !isModule, VALK }
     );
     lookup.set(VALK, transpiler);
   }

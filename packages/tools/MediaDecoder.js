@@ -14,7 +14,7 @@ export default class MediaDecoder extends FabricEventTarget {
   _lookup: { [string]: { [string]: Object | Object[] } };
 
   constructor (options: Object = {}) {
-    super(options.name, options.verbosity, options.logger);
+    super(options.parent, options.verbosity, options.name);
     this.mediaTypes = this.constructor.mediaTypes;
     const { type, subtype } = this.mediaTypes[0];
     this.type = type;

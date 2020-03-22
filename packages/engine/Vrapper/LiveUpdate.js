@@ -26,7 +26,7 @@ export default class LiveUpdate {
 
   getEmitter (): Vrapper { return this._emitter; }
   getOptions (): ?VALKOptions { return this._valkOptions; }
-  getDiscourse () { return this._valkOptions.discourse || this._emitter.engine.discourse; }
+  getDiscourse () { return this._valkOptions.discourse || this._emitter.getEngine().discourse; }
   getState (): Object { return this._valkOptions.state || this.getDiscourse().getState(); }
   getJSState (): Object { return this.getState().toJS(); }
   value (): ?any {
@@ -129,7 +129,7 @@ export default class LiveUpdate {
       if (adds && adds.length) {
         const ids = this._emitter._tryElevateFieldValueFrom(
             passage.state, this._fieldName, adds, passage.vProtagonist);
-        return this._emitter.engine.getVrappers(ids, passage);
+        return this._emitter.getEngine().getVrappers(ids, passage);
       }
     }
     return undefined;
@@ -150,7 +150,7 @@ export default class LiveUpdate {
     if (passage.actualRemoves) {
       const removes = passage.actualRemoves.get(this._fieldName);
       if (removes && removes.length) {
-        return this._emitter.engine.getVrappers(removes, { state: passage.previousState });
+        return this._emitter.getEngine().getVrappers(removes, { state: passage.previousState });
       }
     } else if (passage.type === "DESTROYED") {
       // TODO(iridian): .get is getting called twice, redundantly, in

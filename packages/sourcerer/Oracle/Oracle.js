@@ -34,10 +34,7 @@ export default class Oracle extends Sourcerer {
   constructor ({ authorityNexus, ...rest }: Object) {
     super({ ...rest });
     this._authorityNexus = authorityNexus;
-    this._decoderArray = new DecoderArray({
-      name: `Decoders of ${this.getName()}`,
-      logger: this.getLogger(),
-    });
+    this._decoderArray = new DecoderArray({ name: `Decoders of ${this.getName()}`, parent: this });
   }
 
   getDecoderArray () { return this._decoderArray; }

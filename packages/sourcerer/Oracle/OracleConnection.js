@@ -34,9 +34,11 @@ export default class OracleConnection extends Connection {
     this._authoritySourcerer = authoritySourcerer;
     this._decoderArray = new DecoderArray({
       name: `Decoders of ${this.getName()}`,
-      fallbackArray: this.getSourcerer().getDecoderArray(),
+      fallbackArray: this.getOracle().getDecoderArray(),
     });
   }
+
+  getOracle () { return this._parent; }
 
   _doConnect (options: ConnectOptions) {
     // Handle step 2. of the acquireConnection first narration

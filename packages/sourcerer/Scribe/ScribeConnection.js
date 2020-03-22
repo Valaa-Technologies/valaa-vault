@@ -58,6 +58,8 @@ export default class ScribeConnection extends Connection {
     };
   }
 
+  getScribe () { return this._parent; }
+
   getStatus () {
     return {
       indexedDB: { truthLog: this._truthLogInfo, commandQueue: this._commandQueueInfo },
@@ -79,7 +81,7 @@ export default class ScribeConnection extends Connection {
   }
 
   _doConnect (options: ConnectOptions) {
-    if (this._sourcerer._upstream) {
+    if (this.getScribe()._upstream) {
       const upstreamOptions = Object.create(options);
       // Set the permanent receiver without options.receiveTruths,
       // initiate connection but disable initial narration; perform
@@ -90,7 +92,7 @@ export default class ScribeConnection extends Connection {
       upstreamOptions.subscribeEvents = (options.narrateOptions === false)
           && options.subscribeEvents;
       this.setUpstreamConnection(
-          this._sourcerer._upstream.acquireConnection(this.getChronicleURI(), upstreamOptions));
+          this.getScribe()._upstream.acquireConnection(this.getChronicleURI(), upstreamOptions));
     }
     // ScribeConnection can be active even if the upstream
     // connection isn't, as long as there are any events in the local
@@ -103,7 +105,7 @@ export default class ScribeConnection extends Connection {
         function _initializeMediaLookups (mediaEntries) {
           connection._pendingMediaLookup = mediaEntries;
           for (const [mediaRawId, entry] of Object.entries(connection._pendingMediaLookup)) {
-            connection._sourcerer._persistedMediaLookup[mediaRawId] = entry;
+            connection.getScribe()._persistedMediaLookup[mediaRawId] = entry;
           }
         },
       ]),
@@ -123,9 +125,9 @@ export default class ScribeConnection extends Connection {
     const adjusts = {};
     for (const entry of Object.values(this._pendingMediaLookup)) {
       if (entry.isInMemory) adjusts[entry.contentHash] = -1;
-      if (entry.isPersisted) delete this._sourcerer._persistedMediaLookup[entry.mediaId];
+      if (entry.isPersisted) delete this.getScribe()._persistedMediaLookup[entry.mediaId];
     }
-    this._sourcerer._adjustInMemoryBvobBufferRefCounts(adjusts);
+    this.getScribe()._adjustInMemoryBvobBufferRefCounts(adjusts);
     this._pendingMediaLookup = {};
     super.disconnect();
   }
@@ -328,7 +330,7 @@ export default class ScribeConnection extends Connection {
       do {
         const mediaRawId = currentStep ? currentStep.headRawId() : mediaVRL.rawId();
         const ret = this._pendingMediaLookup[mediaRawId]
-            || this._sourcerer._persistedMediaLookup[mediaRawId];
+            || this.getScribe()._persistedMediaLookup[mediaRawId];
         if (ret) return ret;
         currentStep = currentStep ? currentStep.previousGhostStep() : mediaVRL.previousGhostStep();
       } while (currentStep);

@@ -8,7 +8,7 @@ import { OwnerDefaultCouplingTag } from "~/engine/valosheath/valos/enfoldSchemaS
 
 export function newResource (discourse: Discourse, scope: ?Object, initialState: ?Object) {
   const actualInitialState = _prepareInitialState(this, scope, initialState, "new");
-  const resource = discourse._follower.create(this.name, actualInitialState, { discourse });
+  const resource = discourse.getFollower().create(this.name, actualInitialState, { discourse });
   return resource;
 }
 

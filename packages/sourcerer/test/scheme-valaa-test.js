@@ -8,7 +8,7 @@ import { ChronicleRequest, ChronicleOptions, ChronicleEventResult, MediaInfo, Na
 
 import { dumpObject } from "~/tools";
 
-export default function createValaaTestScheme ({ config, authorityURI } = {}) {
+export default function createValaaTestScheme ({ config, authorityURI, /* parent */ } = {}) {
   return {
     scheme: "valaa-test",
 
@@ -85,7 +85,9 @@ export class TestConnection extends AuthorityConnection {
   chronicleEvents (events: EventBase[], options: ChronicleOptions): ChronicleRequest {
     if (!this.isRemoteAuthority()) return super.chronicleEvents(events, options);
     this._mostRecentChronicleOptions = options;
-    const resultBase = new TestEventResult(null, this, { isPrimary: this.isPrimaryAuthority() });
+    const resultBase = new TestEventResult(this);
+    resultBase._events = events;
+    resultBase.isPrimary = this.isPrimaryAuthority();
     const eventResults = events.map((event, index) => {
       const ret = Object.create(resultBase); ret.event = event; ret.index = index; return ret;
     });
@@ -145,6 +147,7 @@ export class TestConnection extends AuthorityConnection {
 
 class TestEventResult extends ChronicleEventResult {
   getComposedEvent () { return undefined; }
+  getPersistedEvent () { return undefined; }
   getTruthEvent () {
     if (!this.isPrimary) {
       return Promise.reject(new Error("Non-primary authority cannot chronicle events"));

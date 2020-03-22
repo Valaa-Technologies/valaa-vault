@@ -3,7 +3,7 @@
 import { Authority, EVENT_VERSION } from "~/sourcerer";
 import type { SchemeModule } from "~/sourcerer";
 
-export default function createValaaMemoryScheme (/* { logger } */): SchemeModule {
+export default function createValaaMemoryScheme (/* { parent } */): SchemeModule {
   return {
     scheme: "valaa-memory",
 

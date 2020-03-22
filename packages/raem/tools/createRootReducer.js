@@ -57,25 +57,25 @@ function mergeActionReducers (reducerDictionaryCreates, context) {
  *    escalated.
  */
 export default function createRootReducer ({
-  schema, eventLogger, reducers, validators, context = {},
+  schema, parent, reducers, validators, context = {},
   subReduceLogThreshold = 2, reduceLogThreshold = 1
 }) {
   const reducerContext = {
     subReduce,
     ...context,
     schema,
-    eventLogger,
+    parent,
     mainReduce,
     reducers,
     validators,
   };
   const reducerByActionType = mergeActionReducers(reducers, reducerContext);
-  if (!reducerContext.eventLogger) {
-    reducerContext.eventLogger = new FabricEventTarget({ name: "Unnamed reducer" });
+  if (!reducerContext.parent) {
+    reducerContext.parent = new FabricEventTarget({ name: "Unnamed reducer" });
   }
 
   function mainReduce (state = Map(), story) {
-    const mainLogger = this || reducerContext.eventLogger;
+    const mainLogger = this || reducerContext.parent;
     try {
       if (mainLogger.getVerbosity() >= reduceLogThreshold) {
         logActionInfo(mainLogger, `Reducing${story.timeStamp ? ` @${story.timeStamp}` : ""}`,
@@ -101,7 +101,7 @@ export default function createRootReducer ({
    * @returns
    */
   function subReduce (state, passage) {
-    const subEventLogger = this || reducerContext.eventLogger;
+    const subEventLogger = this || reducerContext.parent;
     try {
       if (subEventLogger.getVerbosity() >= subReduceLogThreshold) {
         logActionInfo(subEventLogger, "Sub-reducing",
@@ -127,7 +127,7 @@ export default function createRootReducer ({
     }
   }
 
-  function logActionInfo (logger, header, passage) {
+  function logActionInfo (parent_, header, passage) {
     let idString = "";
     const isSubReduce = (header === "Sub-reducing");
     if (passage.id) {
@@ -137,7 +137,7 @@ export default function createRootReducer ({
     // eslint-disable-next-line
     const { type, timeStamp, typeName, id, passages, parentPassage, bard, ...rest } = passage;
     const action = getActionFromPassage(passage);
-    logger.logEvent(
+    parent_.logEvent(
         `\n\t${header} ${passage.type} ${idString}`,
         (isSubReduce ? "\n\tpassage/rest:" : "\n\tstory/rest:"),
         ...dumpObject(rest),

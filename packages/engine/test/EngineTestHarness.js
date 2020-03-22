@@ -43,7 +43,7 @@ export default class EngineTestHarness extends SourcererTestHarness {
   createValker () {
     this.engine = new Engine({
       name: "Test Engine",
-      logger: this.getLogger(),
+      parent: this,
       sourcerer: this.sourcerer, // created by createCorpus of SourcererTestHarness
       verbosity: this.getVerbosity(),
     });
@@ -54,7 +54,7 @@ export default class EngineTestHarness extends SourcererTestHarness {
       RemoteAuthorityURI: "valaa-testing:",
       LocalAuthorityURI: "valaa-local:",
     };
-    this.createds = new TestCollectCREATEDCog();
+    this.createds = new TestCollectCREATEDCog(this);
     this.engine.addCog(this.createds);
     this.entities = this.createds.Entity;
     this.discourse = this.chronicler = this.engine.discourse;
@@ -72,8 +72,8 @@ export default class EngineTestHarness extends SourcererTestHarness {
 }
 
 export class TestCollectCREATEDCog extends Cog {
-  constructor () {
-    super({ name: "Test Collect CREATED's Cog" });
+  constructor (parent, verbosity) {
+    super(parent, verbosity, "Test Collect CREATED's Cog");
     this.TestScriptyThing = {};
   }
 

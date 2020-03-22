@@ -9,6 +9,8 @@ import layoutByObjectField from "~/raem/tools/denormalized/layoutByObjectField";
 import { dumpify } from "~/tools";
 import { dumpObject } from "~/tools/wrapError";
 
+// TODO(iridian, 2020-03): Corpus and Bard could be merged.
+
 /**
  * Bards in general and Corpus in specific are responsibile for
  * managing incoming actions and modifying state in response to them.
@@ -25,27 +27,27 @@ import { dumpObject } from "~/tools/wrapError";
  * @extends {Bard}
  */
 export default class Corpus extends Bard {
-  constructor ({
-    schema, verbosity, logger, middlewares, reduce, subReduce, initialState, deserializeReference,
-  }: Object) {
-    invariantifyObject(schema, "schema");
-    invariantifyFunction(reduce, "reduce");
-    invariantifyFunction(subReduce, "subReduce");
-    invariantifyObject(initialState, "initialState", { allowUndefined: true });
-    super({
-      schema, verbosity, logger, subReduce: subReduce || reduce, deserializeReference,
-    });
-    // TODO(iridian): These indirections are spaghetti. Simplify.
-    this.reduce = reduce;
-    this._dispatch = middlewares.reduceRight(
+  constructor (options: {
+    name: ?string, verbosity: ?number, parent: Object,
+    schema: Object, middlewares: Array, reduce: Function, subReduce: Function,
+    initialState: Object,
+  }) {
+    super(options);
+    invariantifyObject(options.schema, "schema");
+    invariantifyFunction(options.reduce, "reduce");
+    invariantifyFunction(options.subReduce, "subReduce");
+    invariantifyObject(options.initialState, "initialState", { allowUndefined: true });
+    this.subReduce = options.subReduce || options.reduce;
+    this.reduce = options.reduce;
+    this._dispatch = options.middlewares.reduceRight(
         (next, middleware) => middleware(this)(next),
         (action, corpus) => {
           const newState = corpus.reduce(corpus.getState(), action);
           corpus.updateState(newState);
           return action;
         });
-    initialState[StoryIndexTag] = -1;
-    this.reinitialize(initialState);
+    options.initialState[StoryIndexTag] = -1;
+    this.reinitialize(options.initialState);
   }
 
   reinitialize (newInitialState) {

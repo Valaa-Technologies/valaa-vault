@@ -4,10 +4,8 @@ import { outputError } from "~/tools/wrapError";
 // NOTE(iridian, 2018-03): Motor is currently unused, but the base design of TIMED events it relates
 // I feel is still sound, so it's not being removed yet.
 export default class Motor extends Cog {
-  constructor ({ engine, sourcerer, name, timeDilation }) {
-    super({ name });
-    this.engine = engine;
-    this.sourcerer = sourcerer;
+  constructor ({ name, verbosity, engine, timeDilation }) {
+    super(engine, verbosity, name);
     this.engineTime = 0.0;
     this.timeOrigin = undefined;
     this.timeDilation = timeDilation;
@@ -34,8 +32,8 @@ export default class Motor extends Cog {
         const deltaTimeS = (now - previousTime) / 1000;
         previousTime = now;
         const engineDeltaS = this.advanceTimeBy(deltaTimeS);
-        for (const cog of this.engine.cogs) {
-          if ((cog !== this.engine) && cog.advanceEngine) {
+        for (const cog of this.getEngine()._cogs) {
+          if ((cog !== this.getEngine()) && cog.advanceEngine) {
             cog.advanceEngine(engineDeltaS, this.engineTime);
           }
         }
@@ -89,7 +87,8 @@ export default class Motor extends Cog {
       this.futureEventsByTime.delete(next.key);
       this.engineTime = next.key;
       // console.log("TIMED expanding", timed.startTime || timed.time, timed);
-      next.value.forEach(story => this.sourcerer.chronicleEvents(story.actions, { timed: story }));
+      next.value.forEach(story =>
+          this.getEngine().getSourcerer().chronicleEvents(story.actions, { timed: story }));
     }
     this.engineTime = future;
     return actualDeltaS;

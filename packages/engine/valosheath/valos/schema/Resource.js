@@ -151,7 +151,7 @@ export default {
             ""} allows spreading the duplicates to separate chronicles (at least insofar a${
             ""} multi-chronicle commands between said chronicles is possible).`
     )(function recombine (...duplicationDirectives) {
-      return this.__callerValker__._follower.recombine(duplicationDirectives,
+      return this.__callerValker__.getFollower().recombine(duplicationDirectives,
           { discourse: this.__callerValker__ });
     }),
 

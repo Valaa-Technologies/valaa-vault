@@ -10,14 +10,15 @@ import { FabricEventTarget } from "~/tools/FabricEvent";
 
 export default class PerspireServer extends FabricEventTarget {
   constructor ({
-    isTest, name, logger, siteRoot, domainRoot, revelationRoot, revelations, cacheBasePath,
+    isTest, name, verbosity, parent,
+    siteRoot, domainRoot, revelationRoot, revelations, cacheBasePath,
   }: Object) {
     invariantifyString(revelationRoot, "PerspireServer.options.revelationRoot",
         { allowEmpty: true });
-    super(name, undefined, logger);
+    super(parent, verbosity, name);
     this.isTest = isTest;
     this.gatewayOptions = {
-      logger,
+      parent: this,
       siteRoot,
       domainRoot,
       revelationRoot: revelationRoot[0] === "/"
@@ -105,7 +106,8 @@ export default class PerspireServer extends FabricEventTarget {
       ...viewConfigAdditions,
     };
     const views = (await this._gateway).createAndConnectViewsToDOM(
-        { [viewName]: viewConfig }, options => new PerspireView(options));
+        { [viewName]: viewConfig },
+        options => new PerspireView(options));
     const view = await views[viewName];
     // Creating perspire specific objects and variables.
     // Please use server.valos.perspire for external packages

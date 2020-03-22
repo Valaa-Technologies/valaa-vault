@@ -13,14 +13,16 @@ import { dumpObject } from "~/tools";
  * This class is the view entry point
  */
 export default class VDOMView extends Cog {
-  constructor (options) {
-    super(options);
-    this._gateway = options.gateway;
+  constructor (options = {}) {
+    super(options.parent, options.verbosity, options.name);
   }
 
-  getGateway () { return this._gateway; }
+  getGateway () { return this._parent; }
   getFocus () { return this._vFocus; }
   getViewConfig () { return this._viewConfig; }
+
+  getEngine () { return this._engine; }
+  setEngine (engine: Object) { this._engine = engine; }
 
   getRootScope () { return this._rootScope; }
   setRootScope (rootScope: Object) { this._rootScope = rootScope; }
@@ -46,7 +48,7 @@ export default class VDOMView extends Cog {
       const rootProps = await this._setupViewRootProps(viewConfig);
       this._vFocus = rootProps.focus;
       this._viewConfig = viewConfig;
-      this.engine.addCog(this);
+      this.getEngine().addCog(this);
       await this._createReactRoot(container, viewConfig.viewRootId, {
         viewName: viewConfig.name,
         contextLensProperty: [].concat(viewConfig.contextLensProperty || ["LENS"]),
@@ -119,7 +121,7 @@ export default class VDOMView extends Cog {
     if (!actualFocus) throw new Error(`No options.focus found for view ${name}`);
     // Load project
     const { reference: focusRef, vResource: vFocus } =
-        await this.engine.activateResource(actualFocus);
+        await this.getEngine().activateResource(actualFocus);
     const ret = {
       focus: vFocus,
       lensProperty: [].concat(
@@ -127,7 +129,7 @@ export default class VDOMView extends Cog {
     };
     if (lens !== undefined) {
       ret.lens = lens.includes("://")
-          ? (await this.engine.activateResource(lens)).vResource
+          ? (await this.getEngine().activateResource(lens)).vResource
           : lens;
     }
     this.warnEvent(1, () => [

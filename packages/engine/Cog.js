@@ -22,20 +22,6 @@ import { FabricEventTarget, wrapError, dumpObject, thenChainEagerly } from "~/to
  * @extends {FabricEventTarget}
  */
 export default class Cog extends FabricEventTarget {
-  constructor ({ name, engine, parent, logger, verbosity }: Object) {
-    super(name, verbosity, logger || (engine && engine.getLogger()));
-    if (engine) this.engine = engine;
-    if (parent) this.parent = parent;
-  }
-
-  // Public API
-
-  getEngine () { return this.engine; }
-  setEngine (engine: Object) {
-    this.engine = engine;
-    if (engine && (this.getLogger() === console)) this.setLogger(engine.getLogger());
-  }
-
   VALK () { return VALEK; }
 
   /**
@@ -50,7 +36,7 @@ export default class Cog extends FabricEventTarget {
   }
 
   doValoscript (valoscriptBody: string, extendScope = {}, options: VALKOptions = {}) {
-    options.discourse = this.engine.discourse.acquireFabricator("do-body");
+    options.discourse = this.getEngine().discourse.acquireFabricator("do-body");
     if (!options.scope) options.scope = Object.create(this.getLexicalScope());
     Object.assign(options.scope, extendScope);
     const valoscriptKuery = (typeof valoscriptBody !== "string"
@@ -76,7 +62,7 @@ export default class Cog extends FabricEventTarget {
     try {
       options.scope = options.mutableScope ||
           (options.scope ? Object.create(options.scope) : {});
-      return this.engine.discourse.run(head, kuery, options);
+      return this.getEngine().discourse.run(head, kuery, options);
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, () => [
         `run()`,
@@ -88,7 +74,7 @@ export default class Cog extends FabricEventTarget {
   }
 
   acquireFabricator (name: string): Discourse {
-    return this.engine.discourse.acquireFabricator(name);
+    return this.getEngine().discourse.acquireFabricator(name);
   }
 
   obtainSubscription (liveOperation: any, options: ?Object, obtainDiscourse: Function, head: ?any) {

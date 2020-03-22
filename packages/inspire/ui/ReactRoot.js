@@ -59,8 +59,9 @@ export default class ReactRoot extends React.Component {
   }
 
   getChildContext () {
+    const focus = (this.props.rootProps || {}).focus;
     return {
-      engine: ((this.props.rootProps || {}).focus || {}).engine,
+      engine: focus && focus.getEngine(),
       css: (...cssClassPaths: string[]) =>
         cssClassPaths.map(cssClassPath => {
           const className = traverse(this.cssRoot, cssClassPath);
@@ -146,12 +147,12 @@ export default class ReactRoot extends React.Component {
   }
 
   async _createRootContext (vRootFocus: Vrapper, viewName: string, customUIScope: Object) {
-    const rootContext = Object.create(customUIScope || vRootFocus.engine.getLexicalScope());
+    const rootContext = Object.create(customUIScope || vRootFocus.getEngine().getLexicalScope());
     const valos = rootContext.valos;
     rootContext.frame = await this._obtainUIRootFrame(
         rootContext[valos.Lens.shadowLensAuthority], vRootFocus, viewName);
     rootContext[valos.Lens.scopeFrameResource] = rootContext.frame;
-    rootContext.VSS = this._createVSS(vRootFocus.engine);
+    rootContext.VSS = this._createVSS(vRootFocus.getEngine());
     rootContext.VS = VS;
     return rootContext;
   }
@@ -160,12 +161,13 @@ export default class ReactRoot extends React.Component {
     const localInstanceVRID = derivedId(
         vRootFocus.getRawId(), "ui-roots", `@$~raw.${encodeURIComponent(viewName)}@@`);
     const chronicleURI = naiveURI.createChronicleURI(authorityURI, localInstanceVRID);
-    await vRootFocus.engine.discourse
+    await vRootFocus.getEngine().discourse
         .acquireConnection(chronicleURI)
         .asActiveConnection();
-    let vLocalUIRoot = vRootFocus.engine.getVrapperByRawId(localInstanceVRID, { optional: true });
+    let vLocalUIRoot = vRootFocus.getEngine()
+        .getVrapperByRawId(localInstanceVRID, { optional: true });
     if (!vLocalUIRoot) {
-      vLocalUIRoot = await vRootFocus.engine.create("Entity", {
+      vLocalUIRoot = await vRootFocus.getEngine().create("Entity", {
         id: localInstanceVRID, owner: null,
         name: `Local UI root view '${viewName}' to '${vRootFocus.debugId()}'`,
         authorityURI,

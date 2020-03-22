@@ -61,7 +61,7 @@ export default class FalseProphet extends Sourcerer {
     schema, corpus, upstream, onCommandCountUpdate, commandNotificationMinDelay, ...rest
   }: Object) {
     super(rest);
-    this.corpus = corpus;
+    this._corpus = corpus;
     corpus.setDeserializeReference(this.deserializeReference);
     this.schema = schema || corpus.getSchema();
 
@@ -71,9 +71,9 @@ export default class FalseProphet extends Sourcerer {
     if (upstream) this.setUpstream(upstream);
   }
 
-  debugId () { return `${this.constructor.name}(${this.corpus.debugId()})`; }
+  debugId () { return `${this.constructor.name}(${this._corpus.debugId()})`; }
 
-  getState () { return this.corpus.getState(); }
+  getState () { return this._corpus.getState(); }
 
   setCommandCountCallback (callback: Function) {
     this._onCommandCountUpdate = callback;
@@ -81,15 +81,13 @@ export default class FalseProphet extends Sourcerer {
   }
 
   recreateCorpus (newState: State) {
-    this.corpus.reinitialize(newState);
+    this._corpus.reinitialize(newState);
   }
 
   createDiscourse (follower: Follower, options: ?Object = {}) {
-    options.sourcerer = this;
-    options.follower = follower;
-    if (options.verbosity === undefined) options.verbosity = follower.getVerbosity();
-    if (options.logger === undefined) options.logger = follower.getLogger();
-    return new FalseProphetDiscourse(options);
+    return new FalseProphetDiscourse({
+      sourcerer: this, parent: follower, schema: this._corpus.schema, ...(options || {}),
+    });
   }
 
   // Split a command and transmit resulting chronicle commands towards upstream.

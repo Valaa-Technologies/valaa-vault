@@ -36,7 +36,7 @@ function _liveAccess (valker: Valker, head: any, scope: any,
   const hostRef = tryHostRef(head);
   if (hostRef) {
     const kuerySubscription = this.kuerySubscription;
-    const vrapper = kuerySubscription._emitter.engine
+    const vrapper = kuerySubscription._emitter.getEngine()
         .getVrapper(hostRef, kuerySubscription._valkOptions);
     // TODO(iridian, 2019-04): Replace the 'true' with false if this is
     // a leaf property access. This will mark this hook as

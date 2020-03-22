@@ -57,24 +57,22 @@ export type ChronicleOptions = NarrateOptions & {
 };
 
 export class ChronicleEventResult extends FabricEventTarget {
-  constructor (event, chronicler, overrides) {
-    super(overrides.name,
-        overrides.verbosity !== undefined ? overrides.verbosity : chronicler.getVerbosity(),
-        overrides.logger || chronicler.getLogger());
-    this.chronicler = chronicler;
+  constructor (chronicler, event) {
+    super(chronicler);
     this.event = event;
-    Object.assign(this, overrides);
   }
 
   event: EventBase; // Preliminary event after universalization
   index: number; // Index of this event result in a result set
   _forwardResults: ChronicleEventResult[];
 
+  getChronicler () { return this._parent; }
+
   // Get a fully universalized event (complete with aspects.log.index if appropriate).
   getUniversalEvent (): EventBase {
     const forward = this._universalForwardResults || this._forwardResults;
     return thenChainEagerly(forward, r => {
-      const forwardedResult = r[this.index - (this._events.length - r.length)];
+      const forwardedResult = r && r[this.index - (this._events.length - r.length)];
       return forwardedResult && forwardedResult.getUniversalEvent();
     }, this.onError);
   }
@@ -85,7 +83,7 @@ export class ChronicleEventResult extends FabricEventTarget {
   getComposedEvent (): EventBase | null | Promise<EventBase | null> {
     const forward = this._localForwardResults || this._forwardResults;
     return thenChainEagerly(forward, r => {
-      const forwardedResult = r[this.index - (this._events.length - r.length)];
+      const forwardedResult = r && r[this.index - (this._events.length - r.length)];
       return forwardedResult && forwardedResult.getComposedEvent();
     }, this.onError);
   }
@@ -94,6 +92,9 @@ export class ChronicleEventResult extends FabricEventTarget {
   // necessarily authorized.
   getPersistedEvent (): EventBase | Promise<EventBase> {
     const forward = this._persistedForwardResults || this._forwardResults;
+    if (!forward) {
+      throw new Error(`getPersistedEvent not implemented by ${this.constructor.name}`);
+    }
     return thenChainEagerly(forward, r => {
       const forwardedResult = r[this.index - (this._events.length - r.length)];
       return forwardedResult && forwardedResult.getPersistedEvent();

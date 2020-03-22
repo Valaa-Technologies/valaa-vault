@@ -20,7 +20,7 @@ import { tryHostRef } from "~/raem/VALK/hostReference";
 import { addStackFrameToError, SourceInfoTag } from "~/raem/VALK/StackTrace";
 import isAbsentTypeName from "~/raem/tools/graphql/isAbsentTypeName";
 
-import type { FabricEventLogger } from "~/tools/FabricEvent";
+import type { FabricEventTarget } from "~/tools/FabricEvent";
 import { dumpify } from "~/tools";
 import { debugObjectNest } from "~/tools/wrapError";
 
@@ -80,9 +80,7 @@ export type VALKOptions = {
  * @returns
  */
 export function run (head: any, kuery: any, options: Object = {}) {
-  return (new Valker(options.schema, options.verbosity, options.logger, options.packFromHost,
-          options.unpackToHost, options.steppers))
-      .run(head, kuery, options);
+  return (new Valker(options)).run(head, kuery, options);
 }
 
 /**
@@ -92,14 +90,15 @@ export function run (head: any, kuery: any, options: Object = {}) {
  * @class Valker
  */
 export default class Valker extends Resolver {
-  constructor (schema: GraphQLSchema, verbosity: number = 0, logger: FabricEventLogger,
-      packFromHost?: Packer, unpackToHost?: Unpacker, steppers?: Object) {
-    super({ schema, logger });
-    this._indent = verbosity - 2;
-    this.setVerbosity(verbosity);
-    this.setHostValuePacker(packFromHost);
-    this.setHostValueUnpacker(unpackToHost);
-    this.setSteppers(steppers);
+  constructor (options: {
+    parent: FabricEventTarget, verbosity: ?number, name: ?string,
+    schema: GraphQLSchema, packFromHost?: Packer, unpackToHost?: Unpacker, steppers?: Object,
+  }) {
+    super(options);
+    this._indent = this.getVerbosity() - 2;
+    this.setHostValuePacker(options.packFromHost);
+    this.setHostValueUnpacker(options.unpackToHost);
+    this.setSteppers(options.steppers);
   }
 
   static identityPacker (value: any) { return value; }

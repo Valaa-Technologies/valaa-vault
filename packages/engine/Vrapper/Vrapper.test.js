@@ -215,7 +215,7 @@ describe("Vrapper", () => {
         testVrapperMediaInfo = {
           name: "file.vs", contentType: "meta/data",
         };
-        testVrapper.engine._integrateDecoding = mockIntegrateDecoding;
+        testVrapper.getEngine()._integrateDecoding = mockIntegrateDecoding;
         testVrapper.interpretContent = (() => "");
         testVrapper.hasInterface = () => true;
         testVrapper.get = function get (kuery) {

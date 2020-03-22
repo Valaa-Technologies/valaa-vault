@@ -49,9 +49,8 @@ import { _getFieldGhostElevation, _elevateReference } from "./FieldInfo";
 export default class Resolver extends FabricEventTarget {
   deserializeReference: (idData: IdData, contextChronicleURI?: string) => VRL;
 
-  constructor (options: ?Object) {
-    super(options.name, options.verbosity, options.logger);
-    this.state = options.state;
+  constructor (options: Object) {
+    super(options.parent, options.verbosity, options.name);
     this.schema = options.schema;
     if (!(this.schema instanceof GraphQLSchema)) {
       invariantifyObject(this.schema, `${this.getName()}.schema`, { instanceof: GraphQLSchema });

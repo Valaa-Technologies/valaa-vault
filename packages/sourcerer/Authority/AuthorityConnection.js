@@ -19,10 +19,10 @@ import { debugObjectType, dumpObject } from "~/tools/wrapError";
  * @extends {Connection}
  */
 export default class AuthorityConnection extends Connection {
-  isLocallyPersisted () { return this._sourcerer.isLocallyPersisted(); }
-  isPrimaryAuthority () { return this._sourcerer.isPrimaryAuthority(); }
-  isRemoteAuthority () { return this._sourcerer.isRemoteAuthority(); }
-  getEventVersion () { return this._sourcerer.getEventVersion(); }
+  isLocallyPersisted () { return this.getSourcerer().isLocallyPersisted(); }
+  isPrimaryAuthority () { return this.getSourcerer().isPrimaryAuthority(); }
+  isRemoteAuthority () { return this.getSourcerer().isRemoteAuthority(); }
+  getEventVersion () { return this.getSourcerer().getEventVersion(); }
 
   isConnected () {
     if (!this.isRemoteAuthority()) return true;
@@ -49,10 +49,9 @@ export default class AuthorityConnection extends Connection {
           }.chronicleEvents not overridden and options.remoteEventsProcess not defined`);
     }
     let rejectedIndex;
-    const resultBase = new AuthorityEventResult(null, this, {
-      remoteResults: null,
-      isPrimary: this.isPrimaryAuthority(),
-    });
+    const resultBase = new AuthorityEventResult(this);
+    resultBase.remoteResults = null;
+    resultBase.isPrimary = this.isPrimaryAuthority();
     resultBase.localProcess = thenChainEagerly(null, this.addChainClockers(2,
         "authority.chronicle.localProcess.ops", [
       function _processRemoteEvents () {
@@ -70,7 +69,7 @@ export default class AuthorityConnection extends Connection {
         const truths = (rejectedIndex !== undefined) ? remoteResults.slice(0, rejectedIndex)
             : remoteResults || events;
         if (!truths || !truths.length) return [];
-        return resultBase.chronicler.getReceiveTruths(options.receivedTruths)(truths);
+        return resultBase.getChronicler().getReceiveTruths(options.receivedTruths)(truths);
       },
       function _finalizeLocallyReceivedTruths (receivedTruths) {
         return (resultBase.localProcess = receivedTruths);
@@ -128,7 +127,7 @@ export class AuthorityEventResult extends ChronicleEventResult {
   }
   getTruthEvent () {
     if (!this.isPrimary) {
-      throw new Error(`Non-primary authority '${this.chronicler.getName()
+      throw new Error(`Non-primary authority '${this.getChronicler().getName()
           }' cannot deliver truths (by default)`);
     }
     if (!this.truthsProcess) return this.getComposedEvent(); // implies: not remote

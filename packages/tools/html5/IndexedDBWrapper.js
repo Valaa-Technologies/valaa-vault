@@ -1,6 +1,6 @@
 // @flow
 
-import { FabricEventLogger, FabricEventTarget } from "~/tools";
+import { FabricEventTarget } from "~/tools";
 import { type DatabaseAPI } from "~/tools/indexedDB/databaseAPI";
 
 export type KeyRangeQuery = {
@@ -8,18 +8,20 @@ export type KeyRangeQuery = {
   eventIdEnd: ?number,
 };
 
-
 export default class IndexedDBWrapper extends FabricEventTarget {
   database: IDBDatabase;
   databaseAPI: DatabaseAPI;
   databaseId: string;
 
-  constructor (databaseId: string, storeDescriptors: Array<{ name: string, keyPath: string}>,
-      logger: FabricEventLogger, databaseAPI: DatabaseAPI) {
-    super(databaseId, undefined, logger);
-    this.databaseAPI = databaseAPI;
-    this.databaseId = databaseId;
-    this.storeDescriptors = storeDescriptors;
+  constructor (options: {
+    parent: FabricEventTarget, verbosity: ?number, name: ?string,
+    databaseId: string, storeDescriptors: Array<{ name: string, keyPath: string}>,
+    databaseAPI: DatabaseAPI,
+  }) {
+    super(options.parent, options.verbosity, options.name || options.databaseId);
+    this.databaseAPI = options.databaseAPI;
+    this.databaseId = options.databaseId;
+    this.storeDescriptors = options.storeDescriptors;
   }
 
   initialize () {

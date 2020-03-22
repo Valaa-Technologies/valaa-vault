@@ -57,8 +57,8 @@ export function createRAEMTestHarness (options: Object, ...commandBlocks: any) {
 }
 
 export default class RAEMTestHarness extends FabricEventTarget {
-  constructor ({ ContentAPI, name, verbosity, logger, reducer = {}, corpus = {}, ...rest }) {
-    super(name, verbosity, logger);
+  constructor ({ ContentAPI, name, verbosity, parent, reducer = {}, corpus = {}, ...rest }) {
+    super(parent, verbosity, name);
     this.ContentAPI = ContentAPI;
     this.schema = ContentAPI.schema;
     this.reducerOptions = reducer;
@@ -130,32 +130,30 @@ export default class RAEMTestHarness extends FabricEventTarget {
 
   createCorpus (corpusOptions: Object = {}) {
     return createCorpus(this.ContentAPI, {
-      eventLogger: this,
       ...this.reducerOptions,
+      parent: this,
     }, {
       name: `${this.getName()} Corpus`,
-      verbosity: this.getVerbosity(),
-      logger: this.getLogger(),
       // stubify all unpacked Transient's when packing: this causes them to autorefresh
       ...this.corpusOptions,
       ...corpusOptions,
+      parent: this,
     });
   }
 
   createValker () {
-    return new Valker(
-        this.schema,
-        this.getVerbosity(),
-        this,
-        value => (value instanceof OrderedMap ? value.get("id") : value),
-        value => {
-          if (!(value instanceof OrderedMap)) return value;
-          const id = value.get("id");
-          if (!id || (id.typeof() !== "Resource")) return value;
-          return id;
-        },
-        this.corpusOptions.steppers,
-    );
+    return new Valker({
+      parent: this,
+      schema: this.schema,
+      packFromHost (value) { return (value instanceof OrderedMap ? value.get("id") : value); },
+      unpackToHost (value) {
+        if (!(value instanceof OrderedMap)) return value;
+        const id = value.get("id");
+        if (!id || (id.typeof() !== "Resource")) return value;
+        return id;
+      },
+      steppers: this.corpusOptions.steppers,
+    });
   }
 
   static interceptErrors (testFunction) {
@@ -189,11 +187,9 @@ export function createCorpus (ContentAPI: Object, reducerOptions?: Object, corpu
   }));
   return new Corpus(Object.freeze({
     name: "Test Corpus",
-    middlewares: _createTestMiddlewares({ schema, validators }),
+    schema, middlewares: _createTestMiddlewares({ schema, validators }),
+    reduce: mainReduce, subReduce,
     initialState: OrderedMap(),
-    reduce: mainReduce,
-    subReduce,
-    schema,
     ...corpusOptions,
   }));
 }

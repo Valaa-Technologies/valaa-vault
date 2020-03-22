@@ -8,8 +8,8 @@ export default class DecoderArray extends FabricEventTarget {
   _decodersByType: ?{ [string]: { [string]: Object } };
 
   constructor (options: Object = {}) {
-    super(options.name, options.verbosity,
-        options.logger || (options.fallbackArray && options.fallbackArray.getLogger()));
+    super(options.parent || (options.fallbackArray && options.fallbackArray.getParent()),
+        options.verbosity, options.name);
     this._fallbackArray = options.fallbackArray;
   }
 

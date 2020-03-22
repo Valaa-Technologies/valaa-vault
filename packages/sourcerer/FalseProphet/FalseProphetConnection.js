@@ -49,15 +49,17 @@ export default class FalseProphetConnection extends Connection {
 
   constructor (options) {
     super(options);
-    const existingRef = this._sourcerer._absentChronicleVRLPrototypes[this._chronicleURI];
+    const existingRef = this.getFalseProphet()._absentChronicleVRLPrototypes[this._chronicleURI];
     if (existingRef) {
       this._referencePrototype = existingRef;
-      delete this._sourcerer._absentChronicleVRLPrototypes[this._chronicleURI];
+      delete this.getFalseProphet()._absentChronicleVRLPrototypes[this._chronicleURI];
     } else {
       this._referencePrototype = new VRL()
           .initResolverComponent({ absent: true, partition: this._chronicleURI });
     }
   }
+
+  getFalseProphet () { return this._parent; }
 
   _doConnect (options: ConnectOptions, onError: Function) {
     this._originatingIdentity = options.discourse && options.discourse.getIdentityManager();
@@ -153,11 +155,11 @@ export default class FalseProphetConnection extends Connection {
         `upstream.chronicleEvents(${events.length})`]);
       chronicling = this._upstreamConnection.chronicleEvents(events, options);
 
-      resultBase = new ChronicleEventResult(null, this, {
-        _events: events,
-        onError: errorOnFalseProphetChronicleEvents.bind(this, new Error("chronicleResultBase")),
-      });
-      const primaryRecital = this._sourcerer._primaryRecital;
+      resultBase = new ChronicleEventResult(this);
+      resultBase._events = events;
+      resultBase.onError = errorOnFalseProphetChronicleEvents
+          .bind(this, new Error("chronicleResultBase"));
+      const primaryRecital = this.getFalseProphet()._primaryRecital;
       const ret = {
         eventResults: events.map((event, index) => {
           const result = Object.create(resultBase);
@@ -317,7 +319,7 @@ export default class FalseProphetConnection extends Connection {
       if (confirmations) {
         _confirmRecitalStories(this, confirmations);
         if (!newTruths.length && !(schismaticCommands || []).length) {
-          _confirmLeadingTruthsToFollowers(this.getSourcerer());
+          _confirmLeadingTruthsToFollowers(this.getFalseProphet());
           this._checkForFreezeAndNotify();
           return truths;
         }
@@ -421,7 +423,7 @@ export default class FalseProphetConnection extends Connection {
     this.clockEvent(2, () => ["falseProphet.unconfirmed.notify",
       `_checkForFreezeAndNotify(${this._unconfirmedCommands.length})`]);
     if (lastEvent) this.setIsFrozen(lastEvent.type === "FROZEN");
-    this._sourcerer.setConnectionCommandCount(
+    this.getFalseProphet().setConnectionCommandCount(
         this.getChronicleURI(), this._unconfirmedCommands.length);
   }
 
@@ -491,7 +493,7 @@ export default class FalseProphetConnection extends Connection {
     if (failingIndex >= 0) {
       throw new Error(`Reformation aborted due to falsy proceed condition #${failingIndex}`);
     }
-    const recomposedProphecy = _recomposeSchismaticStory(this.getSourcerer(), params.schism);
+    const recomposedProphecy = _recomposeSchismaticStory(this.getFalseProphet(), params.schism);
     if (!recomposedProphecy
         || (Object.keys((recomposedProphecy.meta || {}).chronicles).length !== 1)) {
       // Recomposition failed, revision failed or a multi-chronicle command reformation
@@ -522,7 +524,7 @@ export default class FalseProphetConnection extends Connection {
   _deliverStoriesIfReformationComplete (params, ...recomposedProphecies) {
     if (params) {
       if (!params.reformation.isComplete) return recomposedProphecies;
-      this._sourcerer._deliverStoriesToFollowers(recomposedProphecies);
+      this.getFalseProphet()._deliverStoriesToFollowers(recomposedProphecies);
     }
     return false;
   }

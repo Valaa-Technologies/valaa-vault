@@ -143,11 +143,13 @@ export default class SourcererTestHarness extends ScriptTestHarness {
         ...(!this.oracleOptions ? [
           () => createTestMockSourcerer({ isLocallyPersisted: false }),
         ] : [
-          () => createOracle(this.oracleOptions, this.nexusOptions),
+          () => createOracle(
+              { ...(this.oracleOptions || {}), parent: this },
+              { ...(this.nexusOptions || {}), parent: this }),
           oracle => (this.oracle = oracle),
         ]),
         ...(!this.scribeOptions ? [] : [
-          upstream => createScribe(upstream, this.scribeOptions),
+          upstream => createScribe(upstream, { ...this.scribeOptions, parent: this }),
           scribe => (this.scribe = scribe),
         ]),
         upstream => this.sourcerer.setUpstream(upstream),
@@ -186,8 +188,9 @@ export default class SourcererTestHarness extends ScriptTestHarness {
     // Called by RAEMTestHarness.constructor (so before oracle/scribe are created)
     const corpus = super.createCorpus(corpusOptions);
     this.sourcerer = this.falseProphet = createFalseProphet({
-      schema: this.schema, corpus, logger: this.getLogger(), verbosity: this.getVerbosity(),
+      schema: this.schema, corpus,
       ...(this.falseProphetOptions || {}),
+      parent: this,
     });
     this.chronicler = this.sourcerer;
     return corpus;
@@ -196,10 +199,9 @@ export default class SourcererTestHarness extends ScriptTestHarness {
   createValker () {
     return (this.discourse = this.chronicler = new FalseProphetDiscourse({
       sourcerer: this.sourcerer,
-      follower: new MockFollower(),
-      schema: this.schema,
+      parent: new MockFollower(this),
       verbosity: this.getVerbosity(),
-      logger: this.getLogger(),
+      schema: this.schema,
       packFromHost: value => (value instanceof OrderedMap ? value.get("id") : value),
       unpackToHost: value => {
         if (!(value instanceof OrderedMap)) return value;
@@ -322,18 +324,18 @@ export function createOracle (options?: Object, nexusOptions?: Object) {
   const authorityNexus = new AuthorityNexus(nexusOptions);
   const ret = new Oracle({
     name: "Test Oracle",
-    authorityNexus,
     ...options,
+    authorityNexus,
   });
-  authorityNexus.addSchemeModule(createValaaLocalScheme({ logger: ret.getLogger() }));
-  authorityNexus.addSchemeModule(createValaaTransientScheme({ logger: ret.getLogger() }));
-  authorityNexus.addSchemeModule(createValaaMemoryScheme({ logger: ret.getLogger() }));
+  authorityNexus.addSchemeModule(createValaaLocalScheme({ parent: ret }));
+  authorityNexus.addSchemeModule(createValaaTransientScheme({ parent: ret }));
+  authorityNexus.addSchemeModule(createValaaMemoryScheme({ parent: ret }));
   authorityNexus.addSchemeModule(createValaaTestScheme({
-    logger: ret.getLogger(), config: (options || {}).testAuthorityConfig,
+    parent: ret, config: (options || {}).testAuthorityConfig,
   }));
   for (const Decoder: any of Object.values({ ...ToolsDecoders, ...ValoscriptDecoders })) {
     if (Decoder.mediaTypes) {
-      ret.getDecoderArray().addDecoder(new Decoder({ logger: ret.getLogger() }));
+      ret.getDecoderArray().addDecoder(new Decoder({ parent: ret }));
     }
   }
   return ret;

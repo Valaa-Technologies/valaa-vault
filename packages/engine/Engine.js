@@ -29,24 +29,25 @@ import Subscription from "~/engine/Vrapper/Subscription";
 import { thenChainEagerly } from "~/tools";
 
 export default class Engine extends Cog {
-  constructor ({ name, logger, sourcerer, timeDilation = 1.0, verbosity }: Object) {
-    super({ name: `${name}/Engine`, logger, verbosity });
-    this.engine = this;
+  constructor ({ name, parent, sourcerer, timeDilation = 1.0, verbosity }: Object) {
+    super(parent, verbosity, `${name}/Engine`);
     this._sourcerer = sourcerer;
-    this.cogs = new Set();
+    this._cogs = new Set();
     this._vrappers = new Map();
     this._storyHandlerRoot = new Map();
     this._storyHandlerRoot.set("rawId", this._vrappers);
 
     this.addCog(this);
-    this.motor = new Motor({ engine: this, name: `${name}/Motor`, sourcerer, timeDilation });
-    this.addCog(this.motor);
+    this._motor = new Motor(this, `${name}/Motor`, timeDilation);
+    this.addCog(this._motor);
     this.discourse = this._connectWithSourcerer(sourcerer);
     this._currentPassageCounter = 0;
     this._hostDescriptors = new Map();
     this._rootScope = {};
     this._rootScope[rootScopeSelf] = this._rootScope;
   }
+
+  getEngine () { return this; }
 
   _connectWithSourcerer (sourcerer: Sourcerer) {
     const ret = sourcerer.addFollower(this, { verbosity: this.getVerbosity() - 1 });
@@ -93,14 +94,14 @@ export default class Engine extends Cog {
   }
 
   addCog (cog) {
-    if (!this.cogs.has(cog)) {
-      this.cogs.add(cog);
+    if (!this._cogs.has(cog)) {
+      this._cogs.add(cog);
       cog.registerHandlers(this._storyHandlerRoot);
     }
   }
 
   removeCog (cog) {
-    if (this.cogs.delete(cog)) {
+    if (this._cogs.delete(cog)) {
       cog.unregisterHandlers(this._storyHandlerRoot);
     }
   }
@@ -439,13 +440,13 @@ export default class Engine extends Cog {
         layoutByObjectField(this.getSourcerer().getState(), "name"));
     output.log(`${this.name}: Handlers:`, this._storyHandlerRoot);
     output.log(`${this.name}: Cogs:`);
-    for (const cog of this.cogs) if (cog !== this) cog.outputStatus(output);
+    for (const cog of this._cogs) if (cog !== this) cog.outputStatus(output);
   }
 
   requestFullScreen () {
     // TODO(iridian): This should happen through sourcerer to reach the cogs in uniform
     // manner.
-    for (const cog of this.cogs) {
+    for (const cog of this._cogs) {
       if (cog !== this && cog.requestFullScreen) cog.requestFullScreen();
     }
   }
@@ -635,12 +636,12 @@ export default class Engine extends Cog {
 
   receiveTruths () {}
 
-  start () { return this.motor.start(); }
-  setTimeOrigin (timeOrigin) { return this.motor.setTimeOrigin(timeOrigin); }
-  isPaused () { return this.motor.isPaused(); }
-  setPaused (value = true) { return this.motor.setPaused(value); }
-  getTimeDilation () { return this.motor.getTimeDilation(); }
-  setTimeDilation (timeDilation) { return this.motor.setTimeDilation(timeDilation); }
+  start () { return this._motor.start(); }
+  setTimeOrigin (timeOrigin) { return this._motor.setTimeOrigin(timeOrigin); }
+  isPaused () { return this._motor.isPaused(); }
+  setPaused (value = true) { return this._motor.setPaused(value); }
+  getTimeDilation () { return this._motor.getTimeDilation(); }
+  setTimeDilation (timeDilation) { return this._motor.setTimeDilation(timeDilation); }
 
   _integrateDecoding (...rest: any[]) {
     return integrateDecoding(...rest);

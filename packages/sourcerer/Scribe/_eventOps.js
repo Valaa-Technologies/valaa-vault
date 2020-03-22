@@ -150,7 +150,9 @@ export function _chronicleEvents (connection: ScribeConnection,
     events: EventBase[], options: ChronicleOptions = {}, onError: Function,
 ): ChronicleRequest {
   if (!events || !events.length) return { eventResults: events };
-  const resultBase = new ScribeEventResult(null, connection, { _events: events, onError });
+  const resultBase = new ScribeEventResult(connection);
+  resultBase._events = events;
+  resultBase.onError = onError;
   // the 'mostRecentReceiveEventsProcess' is a kludge to sequentialize
   // the chronicling process so that waiting for possible media ops
   // doesn't mess up the order.
@@ -325,7 +327,7 @@ export function _receiveEvents (
     retryTimes: 4, delayBaseSeconds: 5, blockOnBrokenDownload: false,
     retrieveMediaBuffer:
         isReceivingTruths ? retrieveMediaBuffer
-        : isRechronicling ? ({ contentHash }) => connection._sourcerer.readBvobContent(contentHash)
+        : isRechronicling ? ({ contentHash }) => connection.getScribe().readBvobContent(contentHash)
         : undefined,
     prepareBvob: (content, mediaInfo) => connection.prepareBvob(
         content, { ...mediaInfo, prepareBvobToUpstream: !isReceivingTruths }),
@@ -400,7 +402,7 @@ function _determineEventPreOps (connection: ScribeConnection, event: Object,
         .map(action => _determineEventPreOps(connection, action, rootEvent))
         .filter(notFalsy => notFalsy));
   } else if (event.typeName === "MediaType") {
-    connection._sourcerer._mediaTypes[getRawIdFrom(event.id)] = event.initialState;
+    connection.getScribe()._mediaTypes[getRawIdFrom(event.id)] = event.initialState;
   } else if ((event.initialState !== undefined) || (event.sets !== undefined)) {
     if (getRawIdFrom(event.id) === connection.getChronicleId()) {
       const newName = (event.initialState || event.sets || {}).name;

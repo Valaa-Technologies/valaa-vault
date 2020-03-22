@@ -63,7 +63,7 @@ export default class PerspireView extends VDOMView {
   async _waitForConnectionsToActivate () {
     let pendingConnections;
     while (true) { // eslint-disable-line no-constant-condition
-      pendingConnections = this._vFocus.engine.getSourcerer().getActivatingConnections();
+      pendingConnections = this._vFocus.getEngine().getSourcerer().getActivatingConnections();
       const keys = Object.keys(pendingConnections);
       if (!keys.length) break;
       this.warnEvent(1, () => [
@@ -73,7 +73,7 @@ export default class PerspireView extends VDOMView {
     }
     this.warnEvent(1, () => [
       `attach(): all connections acquired:`,
-      ...Object.values(this._vFocus.engine.getSourcerer().getActiveConnections())
+      ...Object.values(this._vFocus.getEngine().getSourcerer().getActiveConnections())
           .map(connection => `\n\t${connection.debugId()}`),
     ]);
   }

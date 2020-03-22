@@ -40,7 +40,6 @@ export const isSymbol = require("./isSymbol").default;
 export { default as inProduction } from "./inProduction";
 
 export const FabricEvent = require("./FabricEvent").default;
-export const FabricEventLogger = require("./FabricEvent").FabricEventLogger;
 export const FabricEventTarget = require("./FabricEvent").FabricEventTarget;
 
 export const SimpleData = require("./SimpleData").default;

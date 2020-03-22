@@ -162,7 +162,7 @@ function _attachProjectorFastifyRoutes (router) {
                     "\n\trequest.body:", ...dumpObject(request.body),
                 ),
                 `Exception caught during projector: ${projector.name}`,
-                router.getLogger());
+                router);
           },
       );
       fastifyRoute = { ...projector.route, handler: projector.smartHandler };
@@ -178,7 +178,7 @@ function _attachProjectorFastifyRoutes (router) {
 
 export async function _projectPrefixRoutesFromView (router, view, viewName) {
   router._view = view;
-  router._engine = view.engine;
+  router._engine = view.getEngine();
   router._viewName = viewName;
   router.infoEvent(1, () => [
     `${router.getRoutePrefix()}: projecting from view ${viewName}`,
@@ -201,7 +201,7 @@ export async function _projectPrefixRoutesFromView (router, view, viewName) {
               new Error(`preload(${projector.name})`),
           )),
           `During preload(${projector.name})`,
-          router.getLogger());
+          router);
     }
     projector._resolveWhenReady(ret);
     projector._whenReady = ret;

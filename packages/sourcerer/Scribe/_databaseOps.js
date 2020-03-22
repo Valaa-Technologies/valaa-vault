@@ -34,14 +34,15 @@ export type BvobInfo = {
 };
 
 export async function _initializeSharedIndexedDB (scribe: Scribe) {
-  scribe._sharedDb = new IndexedDBWrapper(`${scribe._databasePrefix}valos-shared-content`,
-    [
+  scribe._sharedDb = new IndexedDBWrapper({
+    parent: scribe,
+    databaseId: `${scribe._databasePrefix}valos-shared-content`,
+    storeDescriptors: [
       { name: "bvobs", keyPath: "contentHash" },
       { name: "buffers", keyPath: "contentHash" },
     ],
-    scribe.getLogger(),
-    scribe.getDatabaseAPI(),
-  );
+    databaseAPI: scribe.getDatabaseAPI(),
+  });
   await scribe._sharedDb.initialize();
 
   const contentLookup = {};
@@ -83,12 +84,16 @@ export async function _initializeConnectionIndexedDB (connection: ScribeConnecti
   // Also create Scribe._contentLookup entries for contents referenced by the _pendingMediaLookup
   // entries, including the in-memory contents.
   // If the chronicle does not exist, create it and its structures.
-  connection._db = new IndexedDBWrapper(
-      `${connection._sourcerer._databasePrefix}${connection._chronicleURI}`, [
-        { name: "truths", keyPath: "index" },
-        { name: "commands", keyPath: "index" },
-        { name: "medias", keyPath: "mediaId" },
-      ], connection.getLogger(), connection._sourcerer.getDatabaseAPI());
+  connection._db = new IndexedDBWrapper({
+    parent: connection,
+    databaseId: `${connection.getScribe()._databasePrefix}${connection._chronicleURI}`,
+    storeDescriptors: [
+      { name: "truths", keyPath: "index" },
+      { name: "commands", keyPath: "index" },
+      { name: "medias", keyPath: "mediaId" },
+    ],
+    databaseAPI: connection.getScribe().getDatabaseAPI(),
+  });
   await connection._db.initialize();
 
   // Populate _truthLogInfo with first and last events
@@ -144,7 +149,7 @@ export async function _updateMediaEntries (connection: ScribeConnection,
           const newInfo = entry.mediaInfo;
           const contentHash = newInfo.contentHash;
           if (contentHash) {
-            if (connection._sourcerer._bvobLookup[contentHash]) {
+            if (connection.getScribe()._bvobLookup[contentHash]) {
               if (entry.isInMemory) _addAdjust(inMemoryRefCountAdjusts, contentHash, 1);
               if (entry.isPersisted) _addAdjust(persistRefCountAdjusts, contentHash, 1);
             } else {
@@ -155,7 +160,7 @@ export async function _updateMediaEntries (connection: ScribeConnection,
           const currentMediaInfo = ((currentEntryReq.result || {}).mediaInfo || {});
           const currentContentHash = currentMediaInfo.contentHash;
           if (currentContentHash && currentEntryReq.result.isPersisted) {
-            if (connection._sourcerer._bvobLookup[currentContentHash]) {
+            if (connection.getScribe()._bvobLookup[currentContentHash]) {
               _addAdjust(persistRefCountAdjusts, currentContentHash, -1);
             } else {
               console.log(`Can't find Media "${newInfo.name}" Bvob info for ${currentContentHash
@@ -183,16 +188,16 @@ export async function _updateMediaEntries (connection: ScribeConnection,
   updates.forEach(entry => {
     if (connection.isLocallyPersisted() && !entry.updatePersisted) return;
     delete entry.updatePersisted;
-    const currentScribeEntry = connection._sourcerer._persistedMediaLookup[entry.mediaId] || {};
+    const currentScribeEntry = connection.getScribe()._persistedMediaLookup[entry.mediaId] || {};
     const contentHash = (currentScribeEntry.mediaInfo || {}).contentHash;
     if (currentScribeEntry.isInMemory && contentHash) {
       _addAdjust(inMemoryRefCountAdjusts, contentHash, -1);
     }
-    connection._sourcerer._persistedMediaLookup[entry.mediaId] = entry;
+    connection.getScribe()._persistedMediaLookup[entry.mediaId] = entry;
     ret[entry.mediaId] = entry;
   });
-  connection._sourcerer._adjustInMemoryBvobBufferRefCounts(inMemoryRefCountAdjusts);
-  await connection._sourcerer._adjustBvobBufferPersistRefCounts(persistRefCountAdjusts);
+  connection.getScribe()._adjustInMemoryBvobBufferRefCounts(inMemoryRefCountAdjusts);
+  await connection.getScribe()._adjustBvobBufferPersistRefCounts(persistRefCountAdjusts);
   return ret;
 }
 
@@ -212,8 +217,8 @@ export function _readMediaEntries (connection: ScribeConnection) {
           const entry = { ...cursor.value, isInMemory: true };
           const contentHash = (entry.mediaInfo || {}).contentHash;
           if (contentHash && entry.isInMemory) {
-            if (connection._sourcerer._bvobLookup[contentHash]) {
-              connection._sourcerer._adjustInMemoryBvobBufferRefCounts({ [contentHash]: 1 });
+            if (connection.getScribe()._bvobLookup[contentHash]) {
+              connection.getScribe()._adjustInMemoryBvobBufferRefCounts({ [contentHash]: 1 });
             } else {
               connection.errorEvent(`Can't find Media "${(entry.mediaInfo || {}).name
                   }" in-memory Bvob info for ${entry.mediaInfo.contentHash
@@ -232,7 +237,7 @@ export function _destroyMediaInfo (connection: ScribeConnection, mediaRawId: str
   const mediaEntry = connection._pendingMediaLookup[mediaRawId];
   if (!mediaEntry || !connection._db) return undefined;
   delete connection._pendingMediaLookup[mediaRawId];
-  delete connection._sourcerer._persistedMediaLookup[mediaRawId];
+  delete connection.getScribe()._persistedMediaLookup[mediaRawId];
 
   return connection._db.transaction(["medias"], "readwrite", ({ medias }) => {
     const req = medias.delete(mediaRawId);
@@ -240,10 +245,10 @@ export function _destroyMediaInfo (connection: ScribeConnection, mediaRawId: str
       const contentHash = mediaEntry.mediaInfo.contentHash;
       if (contentHash) {
         if (mediaEntry.isInMemory) {
-          connection._sourcerer._adjustInMemoryBvobBufferRefCounts({ [contentHash]: -1 });
+          connection.getScribe()._adjustInMemoryBvobBufferRefCounts({ [contentHash]: -1 });
         }
         if (mediaEntry.isPersisted) {
-          connection._sourcerer._adjustBvobBufferPersistRefCounts({ [contentHash]: -1 });
+          connection.getScribe()._adjustBvobBufferPersistRefCounts({ [contentHash]: -1 });
         }
       }
     };
@@ -494,7 +499,7 @@ export function _deleteCommands (connection: ScribeConnection,
   }
 }
 
-function _serializeEventAsJSON (logger: Object, event) {
+function _serializeEventAsJSON (connection: Object, event) {
   const logRoot = swapAspectRoot("event", event, "log");
   try {
     return trivialClone(logRoot, (value, key) => {
@@ -510,7 +515,7 @@ function _serializeEventAsJSON (logger: Object, event) {
         return undefined;
       } catch (error) {
         const name = new Error("trivialClone.customizer");
-        throw logger.wrapErrorEvent(error, 2, () => [
+        throw connection.wrapErrorEvent(error, 2, () => [
           name,
           `\n\t${key}:`, ...dumpObject(value),
         ]);
@@ -518,7 +523,7 @@ function _serializeEventAsJSON (logger: Object, event) {
     });
   } catch (error) {
     const name = new Error("serializeEventAsJSON");
-    throw logger.wrapErrorEvent(error, 1, () => [name, "\n\tevent:", ...dumpObject(event)]);
+    throw connection.wrapErrorEvent(error, 1, () => [name, "\n\tevent:", ...dumpObject(event)]);
   } finally {
     swapAspectRoot("log", logRoot, "event");
   }

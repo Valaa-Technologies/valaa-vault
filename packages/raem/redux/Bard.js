@@ -44,11 +44,11 @@ export function getActionFromPassage (passage: Passage) {
  * The fluff: journeyman bard arrives with a story of some event and
  * recruits apprentices to flesh out the passages of the event details
  * for followers to hear. In doing so the bards use the knowledge
- * provided by the master bard (reducers, schema, logger).
+ * provided by the master bard (reducers, schema, parent).
  *
  * @export
  * @param {{
- *   name: any, schema: GraphQLSchema, logger: Object, subReduce: () => any
+ *   name: any, schema: GraphQLSchema, parent: Object, subReduce: () => any
  * }} bardOptions
  * @returns
  */
@@ -115,7 +115,7 @@ export function createBardReducer (bardOperation: (bard: Bard) => State,
  * 4. universalizes a command by validating and updating it in-place before it's sent upstream
  *
  * A Bard object itself contains as fields:
- * 1. reducer context: .schema and ._logger
+ * 1. reducer context: .schema and .parent
  * 2. bard context: .state, .story, .passage, .subReduce
  * 3. output data: .passages, .preCommands
  * 4. operation-specific data as operations are free to use the bard as a blackboard.
@@ -167,16 +167,6 @@ export default class Bard extends Resolver {
   passage: Passage; // Passages are the individual wrappers around sub-actions
 
   interfaceIntro: ?GraphQLObjectType;
-
-  constructor (options: Object) {
-    super(options);
-    this.subReduce = options.subReduce;
-    this.createCommandChronicleInfo = () => ({});
-  }
-
-  setCreateCommandChronicleInfo (createCommandChronicleInfo: Function) {
-    this.createCommandChronicleInfo = createCommandChronicleInfo;
-  }
 
   debugId () {
     const action = this.passage || this.story;

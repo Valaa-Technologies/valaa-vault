@@ -102,7 +102,7 @@ export function _prepareBvob (connection: ScribeConnection, content: any,
     pendingBvobInfo.persistProcess = thenChainEagerly(null, [
       () => {
         if (connection.isLocallyPersisted()) {
-          return connection._sourcerer._writeBvobBuffer(buffer, contentHash);
+          return connection.getScribe()._writeBvobBuffer(buffer, contentHash);
         }
         if (pendingBvobInfo.upstreamPrepareBvobProcess !== undefined) {
           return pendingBvobInfo.upstreamPrepareBvobProcess;
@@ -194,7 +194,7 @@ export function _determineEventMediaPreOps (connection: ScribeConnection,
   if (update.name) mediaInfo.name = update.name;
   if (update.mediaType) {
     const mediaType = (typeof update.mediaType === "string")
-        ? connection._sourcerer._mediaTypes[getRawIdFrom(update.mediaType)]
+        ? connection.getScribe()._mediaTypes[getRawIdFrom(update.mediaType)]
         : update.mediaType;
     Object.assign(mediaInfo, mediaType);
   }
@@ -237,7 +237,7 @@ export async function _retryingTwoWaySyncMediaContent (connection: ScribeConnect
     try {
       if (mediaInfo.contentHash) {
         content = content
-            || connection._sourcerer.tryGetCachedBvobContent(mediaInfo.contentHash)
+            || connection.getScribe().tryGetCachedBvobContent(mediaInfo.contentHash)
             || (!options.retrieveMediaBuffer ? undefined
                 : (await options.retrieveMediaBuffer(mediaInfo)));
         if ((content !== undefined) && options.prepareBvob) {
@@ -349,14 +349,14 @@ function _getMediaContent (connection: ScribeConnection, mediaInfo: MediaInfo,
     upstreamOperation: Object) {
   const actualInfo = { ...mediaInfo };
   const contentHash = actualInfo.contentHash || "";
-  const bvobInfo = connection._sourcerer._bvobLookup[contentHash];
+  const bvobInfo = connection.getScribe()._bvobLookup[contentHash];
   if (bvobInfo) {
     actualInfo.buffer = bvobInfo.buffer || bvobInfo.pendingBuffer
     // TODO(iridian, 2019-05): even ref count 0 is persisted at the
     // moment. Once finalizing the ref count persistence system, fix
     // this site as well.
         || ((bvobInfo.persistRefCount !== undefined)
-          && connection._sourcerer.readBvobContent(contentHash));
+          && connection.getScribe().readBvobContent(contentHash));
     const isArrayBufferType = !actualInfo.contentType
         || (actualInfo.contentType === "application/octet-stream");
     if (isArrayBufferType && actualInfo.buffer) return actualInfo.buffer;
@@ -380,7 +380,7 @@ function _getMediaURL (connection: ScribeConnection, mediaInfo: MediaInfo,
     upstreamOperation: Object, onError: Function): any {
   // Only use cached in-memory nativeContent if its id matches the requested id.
   const contentHash = mediaInfo.contentHash || "";
-  const bvobInfo = connection._sourcerer._bvobLookup[contentHash];
+  const bvobInfo = connection.getScribe()._bvobLookup[contentHash];
   // Media's with sourceURL or too large/missing bvobs will be handled by Oracle
   if (!bvobInfo) {
     if (mediaInfo.asURL === "data") {
@@ -403,7 +403,7 @@ function _getMediaURL (connection: ScribeConnection, mediaInfo: MediaInfo,
   // Otherwise IndexedDB can't be accessed by the web pages directly, but horrible hacks must be
   // used like so:
   // https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB
-  return thenChainEagerly(connection._sourcerer.readBvobContent(contentHash),
+  return thenChainEagerly(connection.getScribe().readBvobContent(contentHash),
       (buffer => {
         if (!buffer) {
           if (mediaInfo.asURL === "data") {

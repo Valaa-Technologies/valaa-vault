@@ -10,7 +10,7 @@ import { ConnectOptions, MediaInfo, NarrateOptions, ChronicleOptions, ChronicleR
 import Follower from "~/sourcerer/api/Follower";
 
 import {
-  dumpObject, FabricEventLogger, invariantifyArray, invariantifyObject, invariantifyString,
+  dumpObject, invariantifyArray, invariantifyObject, invariantifyString,
   isPromise, thenChainEagerly,
 } from "~/tools";
 
@@ -18,7 +18,6 @@ import {
  * Interface for sending commands to upstream and registering for downstream truth updates
  */
 export default class Connection extends Follower {
-  _sourcerer: Sourcerer;
   _chronicleURI: string;
 
   _refCount: number;
@@ -26,20 +25,18 @@ export default class Connection extends Follower {
   _activeConnection: Connection | Promise<Connection>;
 
   constructor ({
-    name, sourcerer, chronicleURI, receiveTruths, receiveCommands, logger, verbosity,
+    name, sourcerer, chronicleURI, receiveTruths, receiveCommands, verbosity,
   }: {
-    name: any, sourcerer: Sourcerer, chronicleURI: string,
-    receiveTruths?: ReceiveEvents, receiveCommands?: ReceiveEvents,
-    logger?: FabricEventLogger, verbosity?: number,
+    name: ?any, verbosity?: number, sourcerer: Sourcerer,
+    chronicleURI: string, receiveTruths?: ReceiveEvents, receiveCommands?: ReceiveEvents,
   }) {
-    super(name || null, verbosity, logger || sourcerer.getLogger());
+    super(sourcerer, verbosity, name);
     invariantifyObject(sourcerer, "Connection.constructor.sourcerer",
         { instanceof: Sourcerer });
     if (typeof chronicleURI !== "string") {
       invariantifyString(chronicleURI, "Connection.constructor.chronicleURI",
           { allowEmpty: true });
     }
-    this._sourcerer = sourcerer;
     this._chronicleURI = chronicleURI;
     this._refCount = 0;
     this._downstreamReceiveTruths = receiveTruths;
@@ -51,7 +48,7 @@ export default class Connection extends Follower {
     return (this._upstreamConnection && this._upstreamConnection.getName())
         || super.getName() || super.getRawName();
   }
-  getSourcerer (): Sourcerer { return this._sourcerer; }
+  getSourcerer (): Sourcerer { return this._parent; }
 
   getAuthorityURI (): string { return naiveURI.getAuthorityURI(this._chronicleURI); }
   getChronicleURI (): string { return this._chronicleURI; }
@@ -176,14 +173,14 @@ export default class Connection extends Follower {
   }
 
   _doConnect (options: ConnectOptions) {
-    if (!this._sourcerer._upstream) {
+    if (!this.getSourcerer()._upstream) {
       throw new Error("Cannot connect using default _doConnect with no upstream");
     }
     options.receiveTruths = this.getReceiveTruths(options.receiveTruths);
     options.receiveCommands = this.getReceiveCommands(options.receiveCommands);
     const postponedNarrateOptions = options.narrateOptions;
     options.narrateOptions = false;
-    this.setUpstreamConnection(this._sourcerer._upstream
+    this.setUpstreamConnection(this.getSourcerer()._upstream
         .acquireConnection(this.getChronicleURI(), options));
     const connection = this;
     return thenChainEagerly(null, this.addChainClockers(1, "connection.doConnect.ops", [

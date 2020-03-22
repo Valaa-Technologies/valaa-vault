@@ -41,9 +41,9 @@ export function _composeRecitalStoryFromEvent (falseProphet: FalseProphet, event
     if (!transactor.dispatchAndDefaultActEvent(progress)) return undefined;
   }
 
-  const previousState = falseProphet.corpus.getState();
+  const previousState = falseProphet._corpus.getState();
 
-  let story = (transactionState && transactionState._tryFastForwardOnCorpus(falseProphet.corpus));
+  let story = (transactionState && transactionState._tryFastForwardOnCorpus(falseProphet._corpus));
   if (!story) {
     // If no transaction or transaction is not a fast-forward, do a regular dispatch
     if (transactionState) {
@@ -51,7 +51,7 @@ export function _composeRecitalStoryFromEvent (falseProphet: FalseProphet, event
           `Committing a diverged transaction '${transactionState.name}' normally:`,
           "\n\trestrictedTransacted:", ...dumpObject(event)]);
     }
-    story = falseProphet.corpus.dispatch(event, dispatchDescription);
+    story = falseProphet._corpus.dispatch(event, dispatchDescription);
   }
   story.timed = timed;
   if (dispatchDescription.slice(0, 8) === "prophecy") story.isProphecy = true;
@@ -97,7 +97,7 @@ export function _purgeLatestRecitedStory (falseProphet: FalseProphet, heresy: Ev
 
 export function _confirmRecitalStories (instigatorConnection: FalseProphetConnection,
     confirmations: Command[]) {
-  const falseProphet = instigatorConnection.getSourcerer();
+  const falseProphet = instigatorConnection.getFalseProphet();
   for (const confirmation of confirmations) {
     const story = falseProphet._primaryRecital.getStoryBy(confirmation.aspects.command.id);
     if (story) {
@@ -121,7 +121,7 @@ export function _refineRecital (instigatorConnection: FalseProphetConnection,
           instigatorConnection._dumpEventIds(schismaticCommands)})`]);
   if (schismaticCommands && schismaticCommands.length) instigatorConnection.setIsFrozen(false);
   const reformation = {
-    falseProphet: instigatorConnection.getSourcerer(),
+    falseProphet: instigatorConnection.getFalseProphet(),
     instigatorConnection,
     instigatorChronicleURI: instigatorConnection.getChronicleURI(),
     newEventIndex: 0,

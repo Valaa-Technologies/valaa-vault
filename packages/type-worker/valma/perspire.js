@@ -235,7 +235,7 @@ function _obtainWorker (vlm, yargv) {
 
       vlm.clock("perspire.handler", "worker.create", "worker = new PerspireServer");
       const worker = new PerspireServer({
-        logger: vlm,
+        parent: vlm,
         cacheBasePath: yargv["cache-base"],
         siteRoot,
         domainRoot,

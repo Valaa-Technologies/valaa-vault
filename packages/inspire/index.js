@@ -10,9 +10,8 @@ import { lazyPatchRevelations, lazy } from "~/inspire/Revelation";
 
 import revelationTemplate from "~/inspire/revelation.template";
 
-import {
-  dumpify, dumpObject, FabricEventLogger, FabricEventTarget, outputError, inBrowser, valosheath,
-} from "~/tools";
+import { dumpify, dumpObject, outputError, inBrowser, valosheath } from "~/tools";
+import { setGlobalLogger } from "~/tools/wrapError";
 
 import * as mediaDecoders from "./mediaDecoders";
 
@@ -22,8 +21,6 @@ if (inBrowser()) {
   require("./inspire.css");
   require("./simplebar.min.css");
 }
-
-const logger = new FabricEventLogger();
 
 // TODO(iridian, 2018-12): Oof... this should be moved to @valos/raem
 // spindle initializer. This requires spindle initializers though which
@@ -48,10 +45,12 @@ valosheath.createInspireGateway = function createInspireGateway (...revelations:
 
 export default (valosheath.createGateway = async function createGateway (
     gatewayOptions: Object = {}, ...revelations: any) {
-  let ret;
+  const ret = new Gateway({ name: "Uninitialized Gateway", ...gatewayOptions });
   let combinedRevelation;
   const delayedSpindlePrototypes = [];
   try {
+    setGlobalLogger(ret);
+
     valosheath.exportSpindle({ name: "@valos/inspire", mediaDecoders });
     if (valosheath.gateway) {
       throw new Error(`valos.gateway already exists as ${
@@ -64,7 +63,6 @@ export default (valosheath.createGateway = async function createGateway (
       push (spindlePrototype) { delayedSpindlePrototypes.push(spindlePrototype); }
     };
 
-    ret = new Gateway({ name: "Uninitialized Gateway", logger, ...gatewayOptions });
     valosheath.require = ret.require.bind(ret);
 
     ret.clockEvent(1, `gateway.revelations`, `Preparing revelations in environment (${
@@ -100,7 +98,7 @@ export default (valosheath.createGateway = async function createGateway (
     ret.clockEvent(1, "gateway.initialized");
     return ret;
   } catch (error) {
-    outputError((ret || new FabricEventTarget(logger)).wrapErrorEvent(error, 1,
+    outputError(ret.wrapErrorEvent(error, 1,
             new Error(`createGateway()`),
             "\n\trevelation components:", revelations,
             "\n\tcombined revelation:", combinedRevelation),

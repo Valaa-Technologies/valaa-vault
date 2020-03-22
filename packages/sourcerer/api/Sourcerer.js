@@ -56,7 +56,7 @@ export default class Sourcerer extends FabricEventTarget {
   _connections: { [chronicleURI: string]: Connection };
 
   constructor (options: Object = {}) {
-    super(options.name, options.verbosity, options.logger);
+    super(options.parent, options.verbosity, options.name);
     this._followers = new Map();
     this._connections = {};
     this.setUpstream(options.upstream);

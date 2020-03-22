@@ -33,8 +33,6 @@ import { registerVidgets } from "~/inspire/ui";
 import { Revelation, lazy } from "~/inspire/Revelation";
 import extendValosheathWithInspire from "~/inspire/valosheath";
 
-import { setGlobalLogger } from "~/tools/wrapError";
-
 import getGlobal from "~/gateway-api/getGlobal";
 import { byteArrayFromBase64URL } from "~/gateway-api/base64";
 
@@ -48,14 +46,14 @@ const {
 
 export default class Gateway extends FabricEventTarget {
   constructor (options: Object) {
-    super(options.name, options.verbosity, options.logger);
+    super(options.parent, options.verbosity, options.name);
+
     if (options.siteRoot === undefined) {
       throw new Error("Required gateway.options.siteRoot is undefined");
     }
     if (options.revelationRoot === undefined) {
       throw new Error("Required gateway.options.revelationRoot is undefined");
     }
-    if (options.logger) setGlobalLogger(options.logger);
     this.siteRoot = options.siteRoot;
     this.revelationRoot = options.revelationRoot;
     this.domainRoot = options.domainRoot;
@@ -64,7 +62,7 @@ export default class Gateway extends FabricEventTarget {
 
   callRevelation (Type: Function | any) {
     if (typeof Type !== "function") return Type;
-    return new Type({ gateway: this, logger: this.getLogger() });
+    return new Type({ parent: this, gateway: this });
   }
 
   static moduleMatcherString = "^((@[^@/]+\\/)?([^/]+))(\\/(.*))?$";
@@ -287,13 +285,14 @@ export default class Gateway extends FabricEventTarget {
   }
 
   createAndConnectViewToDOM (viewId, {
-    container, global: hostGlobal, verbosity = this.getVerbosity(),
-    createView = (options) => new InspireView(options),
+    parent = this, verbosity,
+    container, global: hostGlobal,
+    createView = options => new InspireView(options),
     ...paramViewConfig
   }) {
     if (!this._views) this._views = {};
     if (this._views[viewId]) throw new Error(`View ${viewId} already exists`);
-    const view = createView({ gateway: this, engine: null, name: viewId, verbosity });
+    const view = createView({ parent, verbosity, name: viewId });
     view.clockEvent(1, () => [`view.create`,
         `createView({ name: ${viewId}, verbosity: ${verbosity} })`]);
     let rootScope;
@@ -316,8 +315,9 @@ export default class Gateway extends FabricEventTarget {
       },
       function _createIdentity () {
         identity = new IdentityManager({
-          sourcerer: gateway.falseProphet,
           ...(viewConfig.identity || {}),
+          parent: view,
+          sourcerer: gateway.falseProphet,
         });
         return identity;
       },
@@ -325,7 +325,7 @@ export default class Gateway extends FabricEventTarget {
         const engineOptions = {
           name: `${viewConfig.name} Engine`,
           ...(viewConfig.engine || {}),
-          logger: gateway.getLogger(),
+          parent: view,
           sourcerer: gateway.falseProphet,
           revelation: gateway.revelation,
         };
@@ -431,9 +431,11 @@ export default class Gateway extends FabricEventTarget {
         name: "Inspire AuthorityNexus",
         authorityConfigs: await lazy(gatewayRevelation.authorityConfigs),
         ...(await lazy(gatewayRevelation.nexus) || {}),
+        parent: this,
       };
-      this.clockEvent(1, () => [`authorityNexus.create`,
-        "new AuthorityNexus", ...dumpObject(nexusOptions)]);
+      this.clockEvent(1, () => [
+        `authorityNexus.create`, "new AuthorityNexus", ...dumpObject(nexusOptions),
+      ]);
       const nexus = new AuthorityNexus(nexusOptions);
       nexus.clockEvent(1, `create`,
           ...(!this.getVerbosity() ? [] : [", with:",
@@ -452,10 +454,10 @@ export default class Gateway extends FabricEventTarget {
     try {
       scribeOptions = {
         name: "Inspire Scribe",
-        logger: this.getLogger(),
-        upstream: oracle,
         databaseAPI: gatewayRevelation.scribe.getDatabaseAPI(),
         ...await lazy(gatewayRevelation.scribe),
+        parent: this,
+        upstream: oracle,
       };
       this.clockEvent(1, () => [`scribe.create`,
         "new Scribe", ...dumpObject(scribeOptions)]);
@@ -483,12 +485,11 @@ export default class Gateway extends FabricEventTarget {
     try {
       oracleOptions = {
         name: "Inspire Oracle",
-        logger: this.getLogger(),
-        authorityNexus,
         ...await lazy(gatewayRevelation.oracle),
+        parent: this,
+        authorityNexus,
       };
-      this.clockEvent(1, () => [`oracle.create`,
-        "new Oracle", ...dumpObject(oracleOptions)]);
+      this.clockEvent(1, () => [`oracle.create`, "new Oracle", ...dumpObject(oracleOptions)]);
       const oracle = new Oracle(oracleOptions);
       this.warnEvent(1, () => [
         `Proselytized Oracle ${oracle.debugId()}`,
@@ -509,8 +510,8 @@ export default class Gateway extends FabricEventTarget {
     const name = "Inspire Corpus";
     const reducerOptions = {
       ...EngineContentAPI, // schema, validators, reducers
-      eventLogger: this,
       ...await lazy(gatewayRevelation.reducer),
+      parent: this,
     };
     const { schema, validators, mainReduce, subReduce } = createRootReducer(reducerOptions);
 
@@ -522,11 +523,10 @@ export default class Gateway extends FabricEventTarget {
     ];
 
     const corpusOptions = {
-      name, schema, middlewares,
-      reduce: mainReduce,
-      subReduce,
+      parent: this, name,
+      schema, middlewares,
+      reduce: mainReduce, subReduce,
       initialState: new ImmutableMap(),
-      logger: this.getLogger(),
       ...await lazy(gatewayRevelation.corpus),
     };
     this.clockEvent(1, () => [`corpus.create`, "new Corpus", ...dumpObject(corpusOptions)]);
@@ -555,7 +555,6 @@ export default class Gateway extends FabricEventTarget {
         corpus,
         upstream,
         schema: EngineContentAPI.schema,
-        logger: this.getLogger(),
         commandNotificationMinDelay: 500,
         onCommandCountUpdate: (totalCount: number, chronicleCommandCounts: Object) => {
           this._totalCommandCount = totalCount;
@@ -564,17 +563,19 @@ export default class Gateway extends FabricEventTarget {
             try {
               listener(totalCount, chronicleCommandCounts);
             } catch (error) {
-              this.outputErrorEvent(this.wrapErrorEvent(error, 1,
+              this.outputErrorEvent(
+                  this.wrapErrorEvent(error, 1,
                       new Error("onCommandCountUpdate.listener()"),
                       "\n\tlistener key:", ...dumpObject(component),
                       "\n\ttotalCount:", totalCount,
                       "\n\tchronicleCommandcounts:", ...dumpObject(chronicleCommandCounts)),
                   "Exception caught during Gateway.onCommandCountUpdate.listener call",
-                  this.getLogger());
+                  this);
             }
           });
         },
         ...await lazy(gatewayRevelation.falseProphet),
+        parent: this,
       };
       this.clockEvent(1, () => [`falseProphet.create`,
         "new FalseProphet", ...dumpObject(falseProphetOptions)]);
@@ -626,6 +627,7 @@ export default class Gateway extends FabricEventTarget {
     try {
       identityOptions = {
         ...((await lazy(gatewayRevelation.identity)) || {}),
+        parent: this,
         sourcerer: falseProphet,
       };
       this.clockEvent(1, () => [`falseProphet.identity.create`,
@@ -656,7 +658,7 @@ export default class Gateway extends FabricEventTarget {
         ...((await lazy(gatewayRevelation.discourse)) || {}),
       };
       this.clockEvent(1, () => [`falseProphet.discourse.create`,
-        "new FalseProphetDiscourse", ...dumpObject(discourseOptions)]);
+          "new FalseProphetDiscourse", ...dumpObject(discourseOptions)]);
       discourse = falseProphet.createDiscourse(this, discourseOptions);
       this.warnEvent(1, () => [
         `Initiated FalseProphetDiscourse ${discourse.debugId()}`,
@@ -728,8 +730,8 @@ export default class Gateway extends FabricEventTarget {
       for (const authorityConfig of Object.values(spindle.authorityConfigs || {})) {
         this.authorityNexus.addAuthorityPreConfig(authorityConfig);
       }
-      for (const MediaDecoder_: any of Object.values(spindle.mediaDecoders || {})) {
-        this.oracle.getDecoderArray().addDecoder(this.callRevelation(MediaDecoder_));
+      for (const MediaDecoderType: any of Object.values(spindle.mediaDecoders || {})) {
+        this.oracle.getDecoderArray().addDecoder(this.callRevelation(MediaDecoderType));
       }
       return this._isInitialized && thenChainEagerly(null, [
         () => this._notifySpindle(spindle, "onGatewayInitialized", this, spindle.revelation),

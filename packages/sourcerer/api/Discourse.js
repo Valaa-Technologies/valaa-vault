@@ -19,6 +19,8 @@ import type { ProphecyEventResult } from "~/sourcerer/api/types";
 export default class Discourse extends Valker {
   static isDiscourse = true;
 
+  getFollower () { return this._parent; }
+
   obtainId (rawId: string): VRL { // eslint-disable-line
     throw new Error(`${this.constructor.name}/Discourse.obtainId not implemented`);
   }

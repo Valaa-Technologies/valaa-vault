@@ -34,7 +34,7 @@ export default class AuthorityNexus extends FabricEventTarget {
   _authoritySourcerers: { [authorityURI: string]: Sourcerer };
 
   constructor (options: Object = {}) {
-    super(options.name, options.verbosity, options.logger);
+    super(options.parent, options.verbosity, options.name);
     this._schemeModules = {};
     this._authorityPreConfigs = options.authorityConfigs || {};
     this._authoritySourcerers = {};
@@ -122,8 +122,7 @@ export default class AuthorityNexus extends FabricEventTarget {
       }
       return schemeModule.createAuthority({
         authorityURI, authorityConfig, nexus: this,
-        verbosity: authorityConfig.hasOwnProperty("verbosity")
-            ? authorityConfig.verbosity : this.getVerbosity(),
+        parent: this, verbosity: authorityConfig.verbosity,
       });
     } catch (error) {
       throw this.wrapErrorEvent(error, 2, `createAuthority("${String(authorityURI)}")`,

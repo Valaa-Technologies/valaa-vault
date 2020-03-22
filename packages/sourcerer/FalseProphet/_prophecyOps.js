@@ -28,11 +28,9 @@ export type Prophecy = Story & {
 export function _chronicleEvents (falseProphet: FalseProphet, events: EventBase[],
     { timed, transactionState, ...rest } = {}): ProphecyChronicleRequest {
   if (timed) throw new Error("timed events not supported yet");
-  const resultBase = new ProphecyOperation(null, falseProphet, {
-    _sourcerer: falseProphet,
-    _events: events,
-    _options: rest,
-  });
+  const resultBase = new ProphecyOperation(falseProphet);
+  resultBase._events = events;
+  resultBase._options = rest;
   resultBase._options.isProphecy = true;
   const prophecies = [];
   const ret = {
@@ -218,7 +216,7 @@ export function _purgeHeresy (falseProphet: FalseProphet, heresy: Prophecy) {
 
 class ProphecyOperation extends ProphecyEventResult {
   _prophecy: Prophecy;
-  _sourcerer: FalseProphet;
+  _parent: FalseProphet;
   _events: EventBase[];
   _options: Object; // upstream chronicleEvents options
   _venues: { [chronicleURI: string]: {
@@ -341,7 +339,7 @@ class ProphecyOperation extends ProphecyEventResult {
   }
 
   errorOnProphecyOperation (errorWrap, error, nothrow) {
-    const wrappedError = this._sourcerer.wrapErrorEvent(error, 1, errorWrap,
+    const wrappedError = this.getChronicler().wrapErrorEvent(error, 1, errorWrap,
         "\n\tduring:", this._debugPhase,
         "\n\tevents:", ...dumpObject(this._events),
         "\n\tevent:", ...dumpObject(this._events[this.index]),
@@ -380,10 +378,10 @@ class ProphecyOperation extends ProphecyEventResult {
     }
     Object.keys(chronicles).forEach(chronicleOrPartitionURI => {
       let chronicleURI = chronicleOrPartitionURI;
-      let connection = this._sourcerer._connections[chronicleURI];
+      let connection = this._parent._connections[chronicleURI];
       if (!connection) {
         chronicleURI = naiveURI.createPartitionURI(chronicleOrPartitionURI);
-        connection = this._sourcerer._connections[chronicleURI];
+        connection = this._parent._connections[chronicleURI];
         if (!connection) {
           missingConnections.push(chronicleURI);
           return;
@@ -501,7 +499,7 @@ class ProphecyOperation extends ProphecyEventResult {
         venue.chronicling = venue.connection
             .chronicleEvent(venue.commandEvent, Object.create(this._options));
       } catch (error) {
-        throw this._sourcerer.wrapErrorEvent(error, 1,
+        throw this._parent.wrapErrorEvent(error, 1,
             new Error(`chronicleEvents.stage["${this._stageName}"].connection["${
                 venue.connection.getName()}"].chronicleEvents`),
             "\n\tcommandEvent:", ...dumpObject(venue.commandEvent),
@@ -606,7 +604,7 @@ class ProphecyOperation extends ProphecyEventResult {
           `Exception caught during a fire-and-forget chronicleEvents.execute`);
     }
     try {
-      _purgeLatestRecitedStory(this._sourcerer, prophecy, false);
+      _purgeLatestRecitedStory(this._parent, prophecy, false);
     } catch (innerError) {
       outputError(innerError, `Exception caught during chronicleEvents.execute.purge`);
     }

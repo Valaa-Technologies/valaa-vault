@@ -147,7 +147,7 @@ export default class Subscription extends LiveUpdate {
         || (options.discourse && !options.discourse.isActiveFabricator())) {
       options.discourse = this._obtainDiscourse
           ? this._obtainDiscourse()
-          : this._emitter.engine.discourse;
+          : this._emitter.getEngine().discourse;
     }
     if (options.state === null) {
       options.state = this.getDiscourse().getState();

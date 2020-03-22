@@ -7,11 +7,14 @@ import { debugObjectType, dumpObject, FabricEventTarget } from "~/tools";
 const identityPrototypeMethods = require("~/gateway-api/identity");
 
 export default class IdentityManager extends FabricEventTarget {
-  constructor (options: { sourcerer: FalseProphet, clientURI: string, sessionURI: string }) {
-    super(undefined, options.sourcerer.getVerbosity(), options.sourcerer);
-    this._sourcerer = options.sourcerer;
+  constructor (options: {
+    parent: Object, verbosity: ?number, name: ?string,
+    sourcerer: FalseProphet, clientURI: string, sessionURI: string,
+  }) {
+    super(options.parent, options.verbosity, options.name);
     this.clientURI = options.clientURI;
     this.sessionURI = options.sessionURI;
+    this._sourcerer = options.sourcerer;
     this._activeIdentities = {};
   }
 

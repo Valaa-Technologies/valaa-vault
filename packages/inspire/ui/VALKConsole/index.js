@@ -6,15 +6,15 @@ import VRL from "~/raem/VRL";
 import VALEK from "~/engine/VALEK";
 import UIComponent from "~/inspire/ui/UIComponent";
 import Vrapper from "~/engine/Vrapper";
-import Presentable from "~/inspire/ui/Presentable";
+import { unthunkRepeat } from "~/inspire/ui/thunk";
 
 import { dumpify, outputError, wrapError } from "~/tools";
 import notThatSafeEval from "~/tools/notThatSafeEval";
 
 // TODO(iridian): Obsoleted and detached.
 
-export default @Presentable(require("./presentation").default, "VALKConsole") // eslint-disable-line
-class VALKConsole extends UIComponent {
+export default class VALKConsole extends UIComponent {
+  static _defaultPresentation = () => unthunkRepeat(require("./presentation").default);
   static propTypes = {
     ...UIComponent.PropTypes,
     show: PropTypes.bool,

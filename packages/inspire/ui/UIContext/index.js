@@ -2,7 +2,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import Presentable from "~/inspire/ui/Presentable";
+import { unthunkRepeat } from "~/inspire/ui/thunk";
 import UIComponent, { LENS } from "~/inspire/ui/UIComponent";
 import Valoscope from "~/inspire/ui/Valoscope";
 
@@ -12,8 +12,8 @@ import VALEK from "~/engine/VALEK";
 
 import { invariantify, thenChainEagerly } from "~/tools";
 
-export default @Presentable(require("./presentation").default, "UIContext")
-class UIContext extends UIComponent {
+export default class UIContext extends UIComponent {
+  static _defaultPresentation = () => unthunkRepeat(require("./presentation").default);
   static contextTypes = {
     ...UIComponent.contextTypes,
     lensProperty: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),

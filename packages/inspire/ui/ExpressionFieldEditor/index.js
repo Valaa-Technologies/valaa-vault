@@ -1,13 +1,13 @@
 // @flow
 import React from "react";
 
-import Presentable from "~/inspire/ui/Presentable";
+import { unthunkRepeat } from "~/inspire/ui/thunk";
 import FieldEditor from "~/inspire/ui/FieldEditor";
 import Vrapper from "~/engine/Vrapper";
 import VALEK, { literal } from "~/engine/VALEK";
 
-export default @Presentable(require("./presentation").default, "ExpressionFieldEditor")
-class ExpressionFieldEditor extends FieldEditor {
+export default class ExpressionFieldEditor extends FieldEditor {
+  static _defaultPresentation = () => unthunkRepeat(require("./presentation").default);
   preRenderFocus () {
     return (
       <input

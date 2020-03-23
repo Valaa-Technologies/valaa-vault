@@ -3,15 +3,15 @@ import React from "react";
 import PropTypes from "prop-types";
 
 import UIComponent from "~/inspire/ui/UIComponent";
-import Presentable from "~/inspire/ui/Presentable";
+import { unthunkRepeat } from "~/inspire/ui/thunk";
 import FieldEditor from "~/inspire/ui/FieldEditor";
 import VALEK, { Kuery, pointer } from "~/engine/VALEK";
 import Vrapper, { LiveUpdate } from "~/engine/Vrapper";
 
 import { dumpObject, thenChainEagerly, wrapError } from "~/tools";
 
-export default @Presentable(require("./presentation").default, "LinkFieldEditor")
-class LinkFieldEditor extends UIComponent {
+export default class LinkFieldEditor extends UIComponent {
+  static _defaultPresentation = () => unthunkRepeat(require("./presentation").default);
   static propTypes = {
     ...FieldEditor.propTypes,
     fieldName: PropTypes.string,

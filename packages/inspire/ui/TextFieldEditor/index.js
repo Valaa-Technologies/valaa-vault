@@ -1,11 +1,11 @@
 // @flow
 import React from "react";
 
-import Presentable from "~/inspire/ui/Presentable";
+import { unthunkRepeat } from "~/inspire/ui/thunk";
 import FieldEditor from "~/inspire/ui/FieldEditor";
 
-export default @Presentable(require("./presentation").default, "TextFieldEditor")
-class TextFieldEditor extends FieldEditor {
+export default class TextFieldEditor extends FieldEditor {
+  static _defaultPresentation = () => unthunkRepeat(require("./presentation").default);
   preRenderFocus () {
     return (
       <input

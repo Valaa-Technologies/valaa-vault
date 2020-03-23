@@ -9,7 +9,7 @@ import { Subscription, LiveUpdate } from "~/engine/Vrapper";
 import debugId from "~/engine/debugId";
 import { Kuery, dumpKuery, dumpObject } from "~/engine/VALEK";
 
-import Presentable from "~/inspire/ui/Presentable";
+import { unthunkRepeat } from "~/inspire/ui/thunk";
 
 import { arrayFromAny, invariantify, isPromise, outputError, wrapError }
     from "~/tools";
@@ -43,11 +43,9 @@ export function isUIComponentElement (element: any) {
 
 const _propertyNames = PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]);
 
-export default @Presentable(require("./presentation").default, "UIComponent")
-class UIComponent extends React.Component {
+export default class UIComponent extends React.Component {
+  static _defaultPresentation = () => unthunkRepeat(require("./presentation").default);
   static mainLensSlotName = "uiComponentLens";
-
-  static _defaultPresentation = () => ({ root: {} });
 
   static isUIComponent = true;
 

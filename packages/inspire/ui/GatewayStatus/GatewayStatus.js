@@ -1,13 +1,13 @@
 // @flow
 import React from "react";
 
-import Presentable from "~/inspire/ui/Presentable";
+import { unthunkRepeat } from "~/inspire/ui/thunk";
 import UIComponent from "~/inspire/ui/UIComponent";
 
 import { beaumpify } from "~/tools";
 
-export default @Presentable(require("./presentation").default, "GatewayStatus")
-class GatewayStatus extends UIComponent {
+export default class GatewayStatus extends UIComponent {
+  static _defaultPresentation = () => unthunkRepeat(require("./presentation").default);
   bindFocusSubscriptions (focus: any, props: Object) {
     super.bindFocusSubscriptions(focus, props);
     const inspireGateway = this.getValos().gateway;

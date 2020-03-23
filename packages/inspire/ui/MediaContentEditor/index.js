@@ -1,6 +1,6 @@
 // @flow
 import UIComponent from "~/inspire/ui/UIComponent";
-import Presentable from "~/inspire/ui/Presentable";
+import { unthunkRepeat } from "~/inspire/ui/thunk";
 import type { LiveUpdate } from "~/engine/Vrapper";
 import VALEK from "~/engine/VALEK";
 
@@ -11,8 +11,8 @@ const toTextPlainInterpretation =
       then: VALEK.interpretContent({ contentType: "text/plain" }),
     });
 
-export default @Presentable(require("./presentation").default, "MediaContentEditor")
-class MediaContentEditor extends UIComponent {
+export default class MediaContentEditor extends UIComponent {
+  static _defaultPresentation = () => unthunkRepeat(require("./presentation").default);
   bindFocusSubscriptions (focus: any, props: Object) {
     super.bindFocusSubscriptions(focus, props);
     return thenChainEagerly(null, [

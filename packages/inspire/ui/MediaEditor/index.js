@@ -1,15 +1,15 @@
 // @flow
 import React from "react";
 import VALEK from "~/engine/VALEK";
-import Presentable from "~/inspire/ui/Presentable";
 import UIComponent from "~/inspire/ui/UIComponent";
+import { unthunkRepeat } from "~/inspire/ui/thunk";
 
 import TextFileEditor from "~/inspire/ui/TextFileEditor";
 
 import { mediaTypeFromFilename } from "~/tools/MediaTypeData";
 
-export default @Presentable(require("./presentation").default, "MediaEditor")
-class MediaEditor extends UIComponent {
+export default class MediaEditor extends UIComponent {
+  static _defaultPresentation = () => unthunkRepeat(require("./presentation").default);
   preRenderFocus (focus: any) {
     const mediaType = focus.get(
             VALEK.to("mediaType").nullable().select(["type", "subtype", "contentType"]))

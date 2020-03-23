@@ -23,6 +23,7 @@ const _sheetIds = new WeakMap();
 
 export default class ReactRoot extends React.Component {
   static propTypes = {
+    isRoot: PropTypes.bool,
     viewName: PropTypes.string,
     children: PropTypes.object,
     contextLensProperty: PropTypes.arrayOf(PropTypes.string),
@@ -240,10 +241,15 @@ export default class ReactRoot extends React.Component {
   }
 
   render () {
-    if (!(this.props.rootProps || {}).focus || !this._rootContext) return null;
+    const vFocus = (this.props.rootProps || {}).focus;
+    if (!vFocus || !this._rootContext) return null;
     const valoscopeProps = uiComponentProps(
         { name: "root", parentUIContext: this._rootContext },
         { ...(this.props.rootProps || {}) });
-    return <Valoscope {...valoscopeProps}>{this.props.children}</Valoscope>;
+
+    const valoscope = <Valoscope {...valoscopeProps}>{this.props.children}</Valoscope>;
+    return this.props.isRoot
+        ? valoscope
+        : (<div style={{ width: "100vw", height: "100vh" }}>{valoscope}</div>);
   }
 }

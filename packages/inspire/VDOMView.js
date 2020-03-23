@@ -49,9 +49,16 @@ export default class VDOMView extends Cog {
       this._vFocus = rootProps.focus;
       this._viewConfig = viewConfig;
       this.getEngine().addCog(this);
+      const rootPropertyNames = ["ROOT_LENS", "VIEW_LENS"];
+
       await this._createReactRoot(container, viewConfig.viewRootId, {
         viewName: viewConfig.name,
         contextLensProperty: [].concat(viewConfig.contextLensProperty || ["LENS"]),
+        isRoot: viewConfig.isRoot
+            || viewConfig.isView
+            || [].concat(rootProps.lensProperty || []).find(property =>
+                rootPropertyNames.includes(property)
+                    && (this._vFocus.propertyValue(property) !== undefined)),
         rootProps,
       });
       return this;

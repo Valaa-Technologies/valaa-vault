@@ -68,8 +68,12 @@ exports.handler = async (yargv) => {
   const hadGit = vlm.shell.test("-d", ".git");
   if (!hadGit && await vlm.inquireConfirm("Initialize git repository?")) {
     await vlm.interact("git init");
-    const newOrigin = (await vlm.inquireText(
-        `git remote "origin" to add (leave empty to skip):`) || "").trim();
+    const newOrigin = (config.repository
+            && (await vlm.inquireConfirm(
+                `Set git remote "origin" to package.json:repository "${config.repository}"?`))
+            && config.repository)
+        || (await vlm.inquireText(`Set git remote "origin" to (leave empty to skip):`) || "")
+            .trim();
     if (newOrigin) {
       await vlm.interact(`git remote add origin ${newOrigin}`);
       await vlm.interact(`git fetch`);

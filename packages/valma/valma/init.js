@@ -119,8 +119,11 @@ package configuration file for yarn (and also for npm, which yarn is
       "Is this a 'public' published package? ('n' for 'restricted')")) ? "public" : "restricted"}"
 }`;
           } else if (parts[0][parts[0].length - 1] === "s") parts[0] = parts[0].slice(0, -1);
-          const workspacePrefix = ((vaultConfig || {}).valos || {}).workspacePrefix
-              || `${vaultConfig.name.split("/")[0]}/`;
+          let workspacePrefix = ((vaultConfig || {}).valos || {}).workspacePrefix || "";
+          if (!workspacePrefix) {
+            const nameParts = vaultConfig.name.split("/");
+            if (nameParts.length > 1) workspacePrefix = `${nameParts[0]}/`;
+          }
           vlm.shell.ShellString(
 `{
 "name": "${workspacePrefix}${parts.join("-")}",

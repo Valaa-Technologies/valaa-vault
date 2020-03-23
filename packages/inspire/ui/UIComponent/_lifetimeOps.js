@@ -25,39 +25,41 @@ import { _initiateSubscriptions, _finalizeUnbindSubscribersExcept } from "./_sub
   */
 // }
 
-export function _componentWillMount (component: UIComponent) {
+export function _componentConstructed (component: UIComponent, props: Object) {
   // const start = performance.now();
-  component._activeParentFocus = _getActiveParentFocus(component, component.props);
-  _updateFocus(component, component.props);
+  component._activeParentFocus = _getActiveParentFocus(props);
+  _updateFocus(component, props);
   // _addTiming(component, "componentWillMount.updateFocus", start);
 }
 
 export function _componentWillReceiveProps (component: UIComponent, nextProps: Object,
     nextContext: Object, forceReattachListeners: ?boolean) {
   // const start = performance.now();
-  const nextActiveParentFocus = _getActiveParentFocus(component, nextProps);
+  const nextActiveParentFocus = _getActiveParentFocus(nextProps);
+  const oldProps = component.props;
   const shouldUpdateFocus = (forceReattachListeners === true)
-      || (nextProps.uiContext !== component.props.uiContext)
-      || (nextProps.parentUIContext !== component.props.parentUIContext)
+      || (nextProps.uiContext !== oldProps.uiContext)
+      || (nextProps.parentUIContext !== oldProps.parentUIContext)
       || (component._activeParentFocus !== nextActiveParentFocus)
-      || (nextProps.focus !== component.props.focus)
-      || (nextProps.head !== component.props.head)
-      || (nextProps.kuery !== component.props.kuery)
-      || _comparePropsOrState(nextProps.context, component.props.context, "shallow")
-      || _comparePropsOrState(nextProps.locals, component.props.locals, "shallow");
+      || (nextProps.focus !== oldProps.focus)
+      || (nextProps.head !== oldProps.head)
+      || (nextProps.kuery !== oldProps.kuery)
+      || _comparePropsOrState(nextProps.context, oldProps.context, "shallow")
+      || _comparePropsOrState(nextProps.locals, oldProps.locals, "shallow");
   // _addTiming(component, "componentWillReceiveProps.check", start, shouldUpdateFocus);
   if (shouldUpdateFocus) {
     component._activeParentFocus = nextActiveParentFocus;
     // const startUpdate = performance.now();
-    _updateFocus(component, nextProps);
+    component.unbindSubscriptions();
+    component._errorObject = null;
+    _updateFocus(component, nextProps, oldProps);
     // _addTiming(component, "componentWillReceiveProps.updateFocus", startUpdate);
   }
 }
 
 // If there is no local props focus, we track parent focus changes for props updates.
-function _getActiveParentFocus (component: UIComponent, props: Object) {
-  if (props.hasOwnProperty("focus") || props.hasOwnProperty("head")
-      || !props.parentUIContext) {
+function _getActiveParentFocus (props: Object) {
+  if (props.hasOwnProperty("focus") || props.hasOwnProperty("head") || !props.parentUIContext) {
     return undefined;
   }
   return props.parentUIContext.hasOwnProperty("focus")
@@ -65,7 +67,7 @@ function _getActiveParentFocus (component: UIComponent, props: Object) {
       : getScopeValue(props.parentUIContext, "head");
 }
 
-function _updateFocus (component: UIComponent, newProps: Object) {
+function _updateFocus (component: UIComponent, newProps: Object, oldProps: Object) {
   try {
     /*
     console.warn(component.debugId(), "._updateFocus",
@@ -75,8 +77,6 @@ function _updateFocus (component: UIComponent, newProps: Object) {
         "\n\tnew props.focus:", newProps.focus,
         "\n\tnew props.kuery:", ...dumpKuery(newProps.kuery));
     // */
-    component.unbindSubscriptions();
-    component._errorObject = null;
     const newUIContext = newProps.uiContext;
 
     if (newUIContext && newProps.parentUIContext) {
@@ -96,7 +96,7 @@ function _updateFocus (component: UIComponent, newProps: Object) {
             : getScopeValue(scope, "head");
     if (focus === undefined) return;
     if (newProps.kuery === undefined) {
-      _createContextAndSetFocus(component, focus, newProps);
+      _createContextAndSetFocus(component, focus, newProps, oldProps);
       return;
     }
     if (!newProps.parentUIContext) {
@@ -111,7 +111,8 @@ function _updateFocus (component: UIComponent, newProps: Object) {
       scope,
       onUpdate: function updateFocusDependents (liveUpdate: LiveUpdate) {
         _finalizeUnbindSubscribersExcept(component, "UIComponent.focus");
-        _createContextAndSetFocus(component, liveUpdate.value(), newProps);
+        _createContextAndSetFocus(
+            component, liveUpdate.value(), newProps, component.props || oldProps);
       },
     });
   } catch (error) {
@@ -121,18 +122,20 @@ function _updateFocus (component: UIComponent, newProps: Object) {
         ...(newProps.parentUIContext
             ? ["\n\tnew props.parentUIContext:", newProps.parentUIContext] : []),
         ...(newProps.kuery ? ["\n\tnew props.kuery:", ...dumpKuery(newProps.kuery)] : []),
-        "\n\tcurrent props:", component.props,
+        "\n\told props:", oldProps,
         "\n\tstate:", component.state,
     );
   }
 }
 
-function _createContextAndSetFocus (component: UIComponent, newFocus: any, newProps: Object) {
+function _createContextAndSetFocus (
+    component: UIComponent, newFocus: any, newProps: Object, oldProps: Object) {
+  const parentUIContext = (oldProps || {}).parentUIContext || newProps.parentUIContext;
   const uiContext = newProps.uiContext
       || component.state.uiContext
-      || Object.create(component.props.parentUIContext);
+      || Object.create(parentUIContext);
   const currentDepthSlot = component.getValos().Lens.currentRenderDepth;
-  uiContext[currentDepthSlot] = (component.props.parentUIContext[currentDepthSlot] || 0) + 1;
+  uiContext[currentDepthSlot] = (parentUIContext[currentDepthSlot] || 0) + 1;
   if (newProps.context) {
     for (const name of Object.getOwnPropertyNames(newProps.context)) {
       setScopeValue(uiContext, name, newProps.context[name]);
@@ -146,7 +149,7 @@ function _createContextAndSetFocus (component: UIComponent, newFocus: any, newPr
     component.setState({ uiContext }, _attachSubscribersWhenDone);
   } else {
     _attachSubscribersWhenDone();
-    component.forceUpdate();
+    if (oldProps) component.forceUpdate();
   }
   function _attachSubscribersWhenDone () {
     if (newFocus === undefined) return;
@@ -208,7 +211,6 @@ export function _shouldComponentUpdate (component: UIComponent, nextProps: Objec
 
 export function _componentWillUnmount (component: UIComponent) {
   // const start = performance.now();
-  component._isMounted = false;
   component.unbindSubscriptions();
   if (component.context.releaseVssSheets) component.context.releaseVssSheets(component);
   // _addTiming(component, "componentWillUnmount", start);

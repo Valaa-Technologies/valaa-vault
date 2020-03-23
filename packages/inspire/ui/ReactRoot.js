@@ -74,7 +74,7 @@ export default class ReactRoot extends React.Component {
     };
   }
 
-  UNSAFE_componentWillMount () { // eslint-disable-line
+  componentDidMount () { // eslint-disable-line
     this._initializeVSSSheetManager();
   }
 

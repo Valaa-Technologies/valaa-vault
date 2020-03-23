@@ -64,11 +64,7 @@ export default class LiveProps extends UIComponent {
   }
 
   constructor (props: any, context: any) {
-    super(props, context);
-    this.state = {
-      ...super.state,
-      livePropValues: null,
-    };
+    super(props, context, { livePropValues: null });
   }
 
   bindFocusSubscriptions (focus: any, props: Object) {

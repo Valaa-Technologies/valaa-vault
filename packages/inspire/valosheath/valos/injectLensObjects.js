@@ -57,21 +57,24 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
   }
 
   const _lensMessageLoadingProps = {
+    key: "lp",
     className: `inspire__lensMessage inspire__lensMessage_loading`,
   };
   const _lensMessageLoadingFailedProps = {
+    key: "lfp",
     className: `inspire__lensMessage inspire__lensMessage_loadingFailed`,
   };
   const _lensMessageInternalFailureProps = {
+    key: "ifp",
     className: `inspire__lensMessage inspire__lensMessage_internalFailure`,
   };
   const _element = "inspire__lensMessage-infoRow";
-  const _message = { className: `${_element} ${_element}_message` };
-  const _parameter = { className: `${_element} ${_element}_parameter` };
-  const _lensChain = { className: `${_element} ${_element}_lensChain` };
-  const _component = { className: `${_element} ${_element}_component` };
-  const _key = { className: `inspire__lensMessage-infoKey` };
-  const _value = { className: `inspire__lensMessage-infoValue` };
+  const _message = { key: "msg", className: `${_element} ${_element}_message` };
+  const _parameter = { key: "p0", className: `${_element} ${_element}_parameter` };
+  const _lensChain = { key: "elc", className: `${_element} ${_element}_lensChain` };
+  const _component = { key: "ec", className: `${_element} ${_element}_component` };
+  const _key = { key: "i-k", className: `inspire__lensMessage-infoKey` };
+  const _value = { key: "i-v", className: `inspire__lensMessage-infoValue` };
 
   valos.Lens.instrument = denoteValOSBuiltinWithSignature(
       `function(subLens1[, subLens2[, ...[, subLensN]]])
@@ -205,10 +208,10 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
     isEnabled: true,
     rootValue: function renderToggleableErrorDetail (failure: any, component: UIComponent) {
       return ([
-        <button onClick={component.toggleError}>
+        <button onClick={() => component.toggleError()}>
           {component.state.errorHidden ? "Show" : "Hide"}
         </button>,
-        <button onClick={component.clearError}>
+        <button onClick={() => component.clearError()}>
           Clear
         </button>,
         component.state.errorHidden ? null : (
@@ -274,7 +277,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
           <span {..._key}>currentRenderDepth:</span>
           <span {..._value}>{currentRenderDepth}</span>
         </div>
-        <div {..._parameter}>
+        <div key="p1" {..._parameter}>
           <span {..._key}>maximumRenderDepth:</span>
           <span {..._value}>{maximumRenderDepth}</span>
         </div>
@@ -1052,7 +1055,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
             {valos.Lens.instrument(error => error.media, focusDescriptionLens)}
           </span>
         </div>
-        <div {..._parameter}>
+        <div key="p1" {..._parameter}>
           <span {..._key}>Interpretation info:</span>
           <span {..._value}>
             {valos.Lens.instrument(error => error.mediaInfo, valos.Lens.focusDetail)}
@@ -1315,7 +1318,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
               {valos.Lens.instrument(valos.Lens.focusLensProperty, p => JSON.stringify(p))}
             </span>
           </div>
-          <div {..._parameter}>
+          <div key="p1" {..._parameter}>
             <span {..._key}>lensProperty:</span>
             <span {..._value}>
               {valos.Lens.instrument(valos.Lens.lensProperty, p => JSON.stringify(p))}
@@ -1328,7 +1331,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
             <span {..._key}>detail:</span>
             <span {..._value}>{focusDetailLens}</span>
           </div>
-          <div {..._parameter}>
+          <div key="p1" {..._parameter}>
             <span {..._key}>has properties:</span>
             <span {..._value}>
               {valos.Lens.instrument(valos.Lens.focusPropertyKeysLens, p => JSON.stringify(p))}
@@ -1363,7 +1366,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
               {valos.Lens.instrument(valos.Lens.delegateLensProperty, p => JSON.stringify(p))}
             </span>
           </div>
-          <div {..._parameter}>
+          <div key="p1" {..._parameter}>
             <span {..._key}>lensProperty:</span>
             <span {..._value}>
               {valos.Lens.instrument(valos.Lens.lensProperty, p => JSON.stringify(p))}
@@ -1376,7 +1379,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
             <span {..._key}>Lens candidate detail:</span>
             <span {..._value}>{focusDetailLens}</span>
           </div>
-          <div {..._parameter}>
+          <div key="p1" {..._parameter}>
             <span {..._key}>Lens candidate has properties:</span>
             <span {..._value}>
               {valos.Lens.instrument(valos.Lens.focusPropertyKeysLens, p => JSON.stringify(p))}

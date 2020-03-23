@@ -21,7 +21,7 @@ import {
   _enableError, _toggleError, _clearError,
 } from "./_errorOps";
 import {
-  _componentWillMount, _componentWillReceiveProps, _shouldComponentUpdate, _componentWillUnmount,
+  _componentConstructed, _componentWillReceiveProps, _shouldComponentUpdate, _componentWillUnmount,
 } from "./_lifetimeOps";
 import {
   _childProps, _checkForInfiniteRenderRecursion,
@@ -178,7 +178,7 @@ class UIComponent extends React.Component {
 
   static stateCompareModesOnComponentUpdate = {}
 
-  constructor (props: any, context: any) {
+  constructor (props: any, context: any, extraState: Object) {
     super(props, context);
     invariantify(!(props.uiContext && props.parentUIContext),
         `only either ${this.constructor.name
@@ -187,28 +187,26 @@ class UIComponent extends React.Component {
         `${this.constructor.name}.contextTypes is missing css, ${
         ""}: did you forget to inherit super contextTypes somewhere? ${
         ""} (like: static ContextTypes = { ...Super.contextTypes, ...)`);
-    this.state = { error: undefined, errorHidden: false };
+    this.state = { error: undefined, errorHidden: false, ...(extraState || {}) };
     this._subscriptions = {};
+    this._isConstructing = true;
+    try {
+      _componentConstructed(this, props);
+    } catch (error) {
+      this.enableError(wrapError(error,
+              new Error(`During ${this.debugId()})\n .constructor(), with:`),
+              "\n\tuiContext:", this.state.uiContext,
+              "\n\tstate:", this.state,
+              "\n\tprops:", this.props,
+          ), "UIComponent.constructor");
+    }
+    this._isConstructing = false;
   }
 
   state: Object;
   _activeParentFocus: ?any;
 
   // React section: if overriding remember to super() call these base implementations
-
-  UNSAFE_componentWillMount () { // eslint-disable-line
-    try {
-      _componentWillMount(this);
-    } catch (error) {
-      this.enableError(wrapError(error,
-              new Error(`During ${this.debugId()})\n .componentWillMount(), with:`),
-              "\n\tuiContext:", this.state.uiContext,
-              "\n\tstate:", this.state,
-              "\n\tprops:", this.props,
-          ), "UIComponent.componentWillMount");
-    }
-    this._isMounted = true;
-  }
 
   UNSAFE_componentWillReceiveProps (nextProps: Object, nextContext: any, // eslint-disable-line
       forceReattachListeners: ?boolean) {
@@ -256,7 +254,7 @@ class UIComponent extends React.Component {
   }
 
   setState (newState: any, callback: any) {
-    if (this._isMounted) super.setState(newState, callback);
+    if (!this._isConstructing) super.setState(newState, callback);
     else {
       // Performance optimization: mutate state directly if not mounted
       // or just mounting. setState calls are queued and could result
@@ -545,20 +543,20 @@ class UIComponent extends React.Component {
     return _finalizeUnbindSubscriptions(this);
   }
 
-  _isMounted: boolean;
+  _isConstructing: boolean;
   _areSubscriptionsBound: ?boolean;
 
   // Helpers
 
   _errorObject: ?any;
 
-  enableError = (error: string | Error, outputHeader: ?string) => {
+  enableError (error: string | Error, outputHeader: ?string) {
     const ret = _enableError(this, error);
     if (outputHeader) outputError(error, `Exception caught in ${outputHeader}`);
     return ret;
   }
-  toggleError = () => _toggleError(this)
-  clearError = () => _clearError(this)
+  toggleError () { return _toggleError(this); }
+  clearError () { return _clearError(this); }
 
   // defaults to lens itself
   renderLens (lens: any, focus?: any, lensName: string, onlyIfAble?: boolean, onlyOnce?: boolean):

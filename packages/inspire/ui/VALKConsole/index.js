@@ -21,14 +21,13 @@ class VALKConsole extends UIComponent {
   }
 
   constructor (props) {
-    super(props);
-    this.state = {
+    super(props, undefined, {
       tCmd: "",
       cmd: "",
       output: [],
       prevCmds: [],
       prevCmdIndex: -1,
-    };
+    });
   }
 
   onKeyDown = (evt) => {

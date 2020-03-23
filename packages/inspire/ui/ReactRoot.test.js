@@ -8,14 +8,14 @@ describe("UIContext", () => {
 
   describe("jss integration", () => {
     it("should create a jss sheet manager and user cache on mount", () => {
-      testRoot.UNSAFE_componentWillMount();
+      testRoot.componentDidMount();
       expect(testRoot._vssSheetManager).toBeDefined();
       expect(testRoot._vssSheetUsers).toBeDefined();
     });
 
     describe("getVSSSheet", () => {
       beforeEach(() => {
-        testRoot.UNSAFE_componentWillMount();
+        testRoot.componentDidMount();
       });
 
       const style1 = { foo: { color: "red" } };

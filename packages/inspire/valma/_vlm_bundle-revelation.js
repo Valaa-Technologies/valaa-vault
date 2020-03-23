@@ -37,7 +37,7 @@ exports.handler = async (yargv) => {
       interval: 2,
       repeats: true,
       "stop-event": "bundle.done",
-      "job-view": { lens: "disabled", isHTMLRoot: true },
+      "job-view": { lens: "disabled" },
       interactive: true,
     }, ...(yargv._ || [])]);
     await Promise.resolve();

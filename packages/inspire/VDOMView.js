@@ -52,7 +52,6 @@ export default class VDOMView extends Cog {
       await this._createReactRoot(container, viewConfig.viewRootId, {
         viewName: viewConfig.name,
         contextLensProperty: [].concat(viewConfig.contextLensProperty || ["LENS"]),
-        isHTMLRoot: viewConfig.isHTMLRoot,
         rootProps,
       });
       return this;

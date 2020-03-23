@@ -23,9 +23,6 @@ const _sheetIds = new WeakMap();
 
 export default class ReactRoot extends React.Component {
   static propTypes = {
-    // TODO(iridiann, 2020-03): Fix crap semantics flag isHTMLRoot which
-    // if _true_ will _not_ wrap contents in <div style={{ width: "100vw", height: "100vh" }}...>
-    isHTMLRoot: PropTypes.bool,
     viewName: PropTypes.string,
     children: PropTypes.object,
     contextLensProperty: PropTypes.arrayOf(PropTypes.string),
@@ -247,9 +244,6 @@ export default class ReactRoot extends React.Component {
     const valoscopeProps = uiComponentProps(
         { name: "root", parentUIContext: this._rootContext },
         { ...(this.props.rootProps || {}) });
-    const valoscope = <Valoscope {...valoscopeProps}>{this.props.children}</Valoscope>;
-    return this.props.isHTMLRoot
-        ? valoscope
-        : (<div style={{ width: "100vw", height: "100vh" }}>{valoscope}</div>);
+    return <Valoscope {...valoscopeProps}>{this.props.children}</Valoscope>;
   }
 }

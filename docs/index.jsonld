@@ -47,9 +47,9 @@
     "revdoc:package": "@valos/kernel",
     "revdoc:prefix": "valos",
     "revdoc:prefixIRI": "https://valospace.org/#",
-    "revdoc:version": "0.35.0-rc.5",
+    "revdoc:version": "0.35.0-rc.6",
     "respecConfig": {
-      "subtitle": "0.35.0-rc.5",
+      "subtitle": "0.35.0-rc.6",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -70,7 +70,7 @@
           "SBOM"
         ],
         "subProfiles": [],
-        "title": "@valos/kernel@0.35.0-rc.3 Software Bill of Materials",
+        "title": "@valos/kernel@0.35.0-rc.5 Software Bill of Materials",
         "abstract": {
           "@type": "vdoc:Chapter",
           "vdoc:content": [
@@ -117,7 +117,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.3"
+        "version": "0.35.0-rc.5"
       },
       "engine": {
         "@id": "https://valospace.org/engine",
@@ -190,7 +190,7 @@
           ]
         },
         "package": "@valos/engine",
-        "version": "0.35.0-rc.5"
+        "version": "0.35.0-rc.6"
       },
       "inspire": {
         "@id": "https://valospace.org/inspire",
@@ -263,7 +263,7 @@
           ]
         },
         "package": "@valos/inspire",
-        "version": "0.35.0-rc.5"
+        "version": "0.35.0-rc.6"
       },
       "inspire/revela": {
         "@id": "https://valospace.org/inspire/revela",
@@ -442,7 +442,7 @@
                           {
                             "@type": "vdoc:CharacterData",
                             "vdoc:content": [
-                              " lazyPatchRevelations(gatewayMock,\n    [0], {\n      \"!!!\": [[\"$https:foobar.com/path\"], [\"*:$\",\n        [\".:fetchedField\"],\n        [\"@.:fetchOptions@.:input@@\"],\n      ]],\n    },\n    undefined,\n    [\"last\"])"
+                              " lazyPatchRevelations(gatewayMock,\n    [0], {\n      \"!!!\": [[\"$https.foobar.com%2Fpath\"], [\"-$\",\n        [\".$.fetchedField\"],\n        [\"@.$.fetchOptions@.$.input@@\"],\n      ]],\n    },\n    undefined,\n    [\"last\"])"
                             ]
                           }
                         ]
@@ -466,6 +466,43 @@
             },
             {
               "@type": "revdoc:Example",
+              "dc:title": "non-evaluated spreader contents to be segmented but non-cemented",
+              "vdoc:content": [
+                {
+                  "@type": "vdoc:Paragraph",
+                  "vdoc:content": [
+                    [
+                      "we expect",
+                      {
+                        "vdoc:blockquote": true,
+                        "vdoc:content": [
+                          {
+                            "@type": "vdoc:CharacterData",
+                            "vdoc:content": [
+                              " lazyPatchRevelations(gatewayMock,\n    {}, { \"!!!\": [\"@\", { value: [\"$expanded.but-unbound\"] }] })"
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "toEqual",
+                    {
+                      "vdoc:blockquote": true,
+                      "vdoc:content": [
+                        {
+                          "@type": "vdoc:CharacterData",
+                          "vdoc:content": [
+                            " ({ value: [\"$\", \"expanded\", \"but-unbound\"] })"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "@type": "revdoc:Example",
               "dc:title": "nested import & invoke spread to resolve all spreads",
               "vdoc:content": [
                 {
@@ -479,7 +516,7 @@
                           {
                             "@type": "vdoc:CharacterData",
                             "vdoc:content": [
-                              " lazyPatchRevelations(gatewayMock, {}, {\n  out: {\n    \"!!!\": {\n      prefixes: {\n        \"/test/v0\": {\n          name: \"test\",\n          \"test-lib\": {\n            preset: 10, overridden: 10, sessionDuration: 0,\n            view: { focus: \"focus to be overwritten\", nulled: \"nulled to be overwritten\" },\n            unboundAndUnsegmented: [\"$un:bound\"],\n          },\n        },\n      },\n    },\n    prefixes: {\n      \"/test/v0\": {\n        \"!!!\": [\"@\", [\"!:test-lib\"], [\"!$valk:invoke:callMe\", {\n          view: {\n            focus: \"valaa-aws://example.org/deployment?id=f0c5-f0c5\",\n            nulled: null,\n          },\n          identity: { \"!!!\": [\"./config\", \"requireKey\"] },\n          sessionDuration: 86400,\n          unboundButSegmented: [\"$also:unbound\"],\n        }]],\n        \"test-lib\": { overridden: 20 },\n      },\n    }\n  }\n})"
+                              " lazyPatchRevelations(gatewayMock, {}, {\n  out: {\n    \"!!!\": {\n      prefixes: {\n        \"/test/v0\": {\n          name: \"test\",\n          \"test-lib\": {\n            preset: 10, overridden: 10, sessionDuration: 0,\n            view: { focus: \"focus to be overwritten\", nulled: \"nulled to be overwritten\" },\n            unboundAndUnsegmented: [\"$un.bound\"],\n          },\n        },\n      },\n    },\n    prefixes: {\n      \"/test/v0\": {\n        \"!!!\": [\"@\", [\"!$.test-lib\"], [\"!$valk.invoke$.callMe\", {\n          view: {\n            focus: \"valaa-aws://example.org/deployment?id=@$~raw.f0c5-f0c5@@\",\n            nulled: null,\n          },\n          identity: { \"!!!\": [\"./config\", \"requireKey\"] },\n          sessionDuration: 86400,\n          unboundButSegmented: [\"$also.unbound\"],\n        }]],\n        \"test-lib\": { overridden: 20 },\n      },\n    }\n  }\n})"
                             ]
                           }
                         ]
@@ -492,7 +529,7 @@
                         {
                           "@type": "vdoc:CharacterData",
                           "vdoc:content": [
-                            " ({\n  out: {\n    prefixes: {\n      \"/test/v0\": {\n        name: \"test\",\n        \"test-lib\": {\n          preset: 10, overridden: 20, sessionDuration: 86400,\n          view: { focus: \"valaa-aws://example.org/deployment?id=f0c5-f0c5\", nulled: null },\n          identity: \"/site/revelation/config\",\n          unboundAndUnsegmented: [\"$un:bound\"],\n          unboundButSegmented: [\"$\", \"also\", \"unbound\"],\n        }\n      }\n    }\n  }\n})"
+                            " ({\n  out: {\n    prefixes: {\n      \"/test/v0\": {\n        name: \"test\",\n        \"test-lib\": {\n          preset: 10, overridden: 20, sessionDuration: 86400,\n          view: { focus: \"valaa-aws://example.org/deployment?id=@$~raw.f0c5-f0c5@@\", nulled: null },\n          identity: \"/site/revelation/config\",\n          unboundAndUnsegmented: [\"$un.bound\"],\n          unboundButSegmented: [\"$\", \"also\", \"unbound\"],\n        }\n      }\n    }\n  }\n})"
                           ]
                         }
                       ]
@@ -520,7 +557,7 @@
           ]
         },
         "package": "@valos/inspire",
-        "version": "0.35.0-rc.5"
+        "version": "0.35.0-rc.6"
       },
       "raem": {
         "@id": "https://valospace.org/raem",
@@ -639,7 +676,7 @@
           ]
         },
         "package": "@valos/raem",
-        "version": "0.35.0-rc.5"
+        "version": "0.35.0-rc.6"
       },
       "raem/VPath/VPath": {
         "@id": "https://valospace.org/raem/VPath/VPath",
@@ -701,7 +738,7 @@
           ]
         },
         "package": "@valos/raem",
-        "version": "0.35.0-rc.5"
+        "version": "0.35.0-rc.6"
       },
       "revdoc": {
         "@id": "https://valospace.org/revdoc",
@@ -760,7 +797,7 @@
           ]
         },
         "package": "@valos/revdoc",
-        "version": "0.35.0-rc.5"
+        "version": "0.35.0-rc.6"
       },
       "revdoc/tutorial": {
         "@id": "https://valospace.org/revdoc/tutorial",
@@ -834,7 +871,7 @@
           ]
         },
         "package": "@valos/revdoc",
-        "version": "0.35.0-rc.5"
+        "version": "0.35.0-rc.6"
       },
       "sbomdoc": {
         "@id": "https://valospace.org/sbomdoc",
@@ -893,7 +930,7 @@
           ]
         },
         "package": "@valos/sbomdoc",
-        "version": "0.35.0-rc.5"
+        "version": "0.35.0-rc.6"
       },
       "script": {
         "@id": "https://valospace.org/script",
@@ -946,7 +983,7 @@
           ]
         },
         "package": "@valos/script",
-        "version": "0.35.0-rc.5"
+        "version": "0.35.0-rc.6"
       },
       "sourcerer": {
         "@id": "https://valospace.org/sourcerer",
@@ -991,7 +1028,7 @@
           ]
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0-rc.5"
+        "version": "0.35.0-rc.6"
       },
       "sourcerer/valos-event-log": {
         "@id": "https://valospace.org/sourcerer/valos-event-log",
@@ -1004,7 +1041,7 @@
             {
               "@type": "vdoc:Paragraph",
               "vdoc:content": [
-                "ValOS Event Log is an ordered, numbered sequence of JSON-LD documents.\nEach document represents a single event. Together these events\nincrementally, exclusively and deterministically specify the state\nchanges of a single valospace partition from its initial empty state to\nthe current state after the most recent event."
+                "ValOS Event Log is an ordered, numbered sequence of JSON-LD documents.\nEach document represents a single event. Together these events\nincrementally, exclusively and deterministically specify the state\nchanges of a single valospace chronicle from its initial empty state to\nthe current state after the most recent event."
               ]
             }
           ]
@@ -1021,7 +1058,7 @@
           ]
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0-rc.5"
+        "version": "0.35.0-rc.6"
       },
       "sourcerer/VState": {
         "@id": "https://valospace.org/sourcerer/VState",
@@ -1060,7 +1097,7 @@
           ]
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0-rc.5"
+        "version": "0.35.0-rc.6"
       },
       "twindoc": {
         "@id": "https://valospace.org/twindoc",
@@ -1141,7 +1178,7 @@
           ]
         },
         "package": "@valos/twindoc",
-        "version": "0.35.0-rc.5"
+        "version": "0.35.0-rc.6"
       },
       "type-vault/AssortedTutorials": {
         "@id": "https://valospace.org/type-vault/AssortedTutorials",
@@ -1160,7 +1197,7 @@
         },
         "introduction": {},
         "package": "@valos/type-vault",
-        "version": "0.35.0-rc.5"
+        "version": "0.35.0-rc.6"
       },
       "vdoc": {
         "@id": "https://valospace.org/vdoc",
@@ -1248,7 +1285,7 @@
           ]
         },
         "package": "@valos/vdoc",
-        "version": "0.35.0-rc.5"
+        "version": "0.35.0-rc.6"
       },
       "web-spindle": {
         "@id": "https://valospace.org/web-spindle",
@@ -1354,7 +1391,7 @@
           ]
         },
         "package": "@valos/web-spindle",
-        "version": "0.35.0-rc.5"
+        "version": "0.35.0-rc.6"
       },
       "web-spindle/schema-builder": {
         "@id": "https://valospace.org/web-spindle/schema-builder",
@@ -1483,7 +1520,7 @@
           ]
         },
         "package": "@valos/web-spindle",
-        "version": "0.35.0-rc.5"
+        "version": "0.35.0-rc.6"
       },
       "kernel": {
         "@id": "https://valospace.org/kernel",
@@ -1685,7 +1722,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.3"
+        "version": "0.35.0-rc.5"
       },
       "removed-from": {
         "@id": "https://valospace.org/removed-from",
@@ -1728,7 +1765,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.3"
+        "version": "0.35.0-rc.5"
       },
       "@valos/kernel": {
         "@id": "https://valospace.org/index",
@@ -1873,7 +1910,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.3"
+        "version": "0.35.0-rc.5"
       },
       "technician": {
         "@id": "https://valospace.org/technician",
@@ -1961,7 +1998,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.3"
+        "version": "0.35.0-rc.5"
       },
       "valonaut": {
         "@id": "https://valospace.org/valonaut",
@@ -2035,7 +2072,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.3"
+        "version": "0.35.0-rc.5"
       },
       "voyager": {
         "@id": "https://valospace.org/voyager",
@@ -2095,7 +2132,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.3"
+        "version": "0.35.0-rc.5"
       }
     },
     "prefixes": {

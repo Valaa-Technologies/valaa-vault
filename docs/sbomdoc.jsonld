@@ -45,9 +45,9 @@
     "revdoc:package": "@valos/sbomdoc",
     "revdoc:prefix": "sbomdoc",
     "revdoc:prefixIRI": "https://valospace.org/sbomdoc#",
-    "revdoc:version": "0.35.0-rc.6",
+    "revdoc:version": "0.35.0-rc.7",
     "respecConfig": {
-      "subtitle": "0.35.0-rc.6",
+      "subtitle": "0.35.0-rc.7",
       "specStatus": "unofficial",
       "editors": [
         {

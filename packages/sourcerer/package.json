@@ -1,6 +1,6 @@
 {
   "name": "@valos/sourcerer",
-  "version": "0.35.0-rc.6",
+  "version": "0.35.0-rc.7",
   "description": "ValOS Sourcerer API, schema",
   "license": "MIT",
   "author": "Valaa Technologies Ltd",
@@ -15,7 +15,7 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@valos/script": "^0.35.0-rc.6",
+    "@valos/script": "^0.35.0-rc.7",
     "graphql": "^0.6.2",
     "jssha": "^2.3.1"
   },

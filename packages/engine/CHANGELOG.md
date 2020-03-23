@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.7](https://github.com/valaatech/kernel/compare/v0.35.0-rc.6...v0.35.0-rc.7) (2020-03-23)
+
+
+### Bug Fixes
+
+* Missing source location on some errors ([83e9d4d](https://github.com/valaatech/kernel/commit/83e9d4df29be3a996bceb308137bef4a28dfd0fa))
+
+
+
+
+
 # [0.35.0-rc.6](https://github.com/valaatech/kernel/compare/v0.35.0-rc.5...v0.35.0-rc.6) (2020-03-19)
 
 

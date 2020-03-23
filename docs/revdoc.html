@@ -7,7 +7,7 @@
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"subtitle":"0.35.0-rc.6","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"shortName":"revdoc","alternateFormats":[{"label":"VDoc","uri":"revdoc.jsonld"}]};
+      var respecConfig = {"subtitle":"0.35.0-rc.7","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"shortName":"revdoc","alternateFormats":[{"label":"VDoc","uri":"revdoc.jsonld"}]};
     </script>
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
@@ -272,12 +272,12 @@ primitives and specifies a ReSpec html emission transformation.</span>
     });
     var currentContext = "";
     var contextedRows = [];
-    var _iteratorNormalCompletion = true;
-    var _didIteratorError = false;
-    var _iteratorError = undefined;
+
+    var _iterator = _createForOfIteratorHelper(commandedRows),
+        _step;
 
     try {
-      for (var _iterator = commandedRows[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
         var row = _step.value;
 
         if (row != null && row["@type"] === "vdoc:ContextBase") {
@@ -287,18 +287,9 @@ primitives and specifies a ReSpec html emission transformation.</span>
         }
       }
     } catch (err) {
-      _didIteratorError = true;
-      _iteratorError = err;
+      _iterator.e(err);
     } finally {
-      try {
-        if (!_iteratorNormalCompletion && _iterator["return"] != null) {
-          _iterator["return"]();
-        }
-      } finally {
-        if (_didIteratorError) {
-          throw _iteratorError;
-        }
-      }
+      _iterator.f();
     }
 
     return {
@@ -372,9 +363,8 @@ primitives and specifies a ReSpec html emission transformation.</span>
       runTestDoc: function runTestDoc() {
         if (typeof describe !== "undefined") {
           describe("testdoc: ".concat(title), function () {
-            var _iteratorNormalCompletion2 = true;
-            var _didIteratorError2 = false;
-            var _iteratorError2 = undefined;
+            var _iterator2 = _createForOfIteratorHelper(tests),
+                _step2;
 
             try {
               var _loop = function _loop() {
@@ -483,22 +473,13 @@ primitives and specifies a ReSpec html emission transformation.</span>
                 })));
               };
 
-              for (var _iterator2 = tests[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+              for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
                 _loop();
               }
             } catch (err) {
-              _didIteratorError2 = true;
-              _iteratorError2 = err;
+              _iterator2.e(err);
             } finally {
-              try {
-                if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
-                  _iterator2["return"]();
-                }
-              } finally {
-                if (_didIteratorError2) {
-                  throw _iteratorError2;
-                }
-              }
+              _iterator2.f();
             }
           });
         }

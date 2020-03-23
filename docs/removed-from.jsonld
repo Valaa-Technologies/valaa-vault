@@ -46,7 +46,7 @@
     "revdoc:prefix": "valos_removed_from",
     "revdoc:prefixIRI": "https://valospace.org/removed-from#",
     "respecConfig": {
-      "subtitle": "0.35.0-rc.5",
+      "subtitle": "0.35.0-rc.6",
       "specStatus": "unofficial",
       "editors": [
         {

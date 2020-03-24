@@ -46,9 +46,9 @@
     "revdoc:package": "@valos/inspire",
     "revdoc:prefix": "revela",
     "revdoc:prefixIRI": "https://valospace.org/inspire/revela#",
-    "revdoc:version": "0.35.0-rc.7",
+    "revdoc:version": "0.35.0-rc.8",
     "respecConfig": {
-      "subtitle": "0.35.0-rc.7",
+      "subtitle": "0.35.0-rc.8",
       "specStatus": "unofficial",
       "editors": [
         {

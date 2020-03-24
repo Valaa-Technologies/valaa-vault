@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.8](https://github.com/valaatech/kernel/compare/v0.35.0-rc.7...v0.35.0-rc.8) (2020-03-24)
+
+
+### Bug Fixes
+
+* Revert vw100, vh100 to apply only to ROOT_LENS, VIEW_LENS ([4782f83](https://github.com/valaatech/kernel/commit/4782f83dea81edadc35c2e5b4740cf0752d4f6b5))
+
+
+### Features
+
+* Add getSession projector scope.crypto and clientTokenFields parsing ([ab8894a](https://github.com/valaatech/kernel/commit/ab8894a9d459caff16cd4def0ebd2f2492227b5c))
+
+
+
+
+
 # [0.35.0-rc.7](https://github.com/valaatech/kernel/compare/v0.35.0-rc.6...v0.35.0-rc.7) (2020-03-23)
 
 

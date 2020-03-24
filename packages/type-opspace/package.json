@@ -4,7 +4,7 @@
     "type": "toolset",
     "domain": "@valos/kernel"
   },
-  "version": "0.35.0-rc.7",
+  "version": "0.35.0-rc.8",
   "description": "The ValOS 'opspace' workspace type toolset",
   "license": "MIT",
   "author": "Valaa Technologies Ltd",
@@ -20,8 +20,8 @@
     "_vlm_deploy-release": "valma/deploy-release.js"
   },
   "dependencies": {
-    "@valos/toolset-revealer": "^0.35.0-rc.7",
+    "@valos/toolset-revealer": "^0.35.0-rc.8",
     "lerna": "^3.4.0",
-    "valma": "^0.35.0-rc.7"
+    "valma": "^0.35.0-rc.8"
   }
 }

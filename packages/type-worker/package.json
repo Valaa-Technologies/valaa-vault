@@ -15,6 +15,8 @@
   },
   "bin": {
     "_vlm_perspire": "valma/perspire.js",
+    "_vlm_export-chronicle": "valma/export-chronicle.js",
+    "_vlm_bundle-revelation": "valma/bundle-revelation.js",
     "_vlm__configure__type__worker_-valos_type-worker": "valma/configure__worker__type-worker.js"
   },
   "dependencies": {

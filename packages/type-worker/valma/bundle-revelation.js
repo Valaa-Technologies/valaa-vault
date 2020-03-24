@@ -23,7 +23,7 @@ exports.builder = (yargs) => yargs.options({
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
-  const perspire = require("@valos/type-worker/valma/perspire");
+  const perspire = require("./perspire");
   vlm.initializeClock();
   let revelationPath = yargv["revelation-path"] || "./";
   revelationPath = vlm.path.join(".", revelationPath,

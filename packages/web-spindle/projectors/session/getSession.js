@@ -1,5 +1,7 @@
 // @flow
 
+import crypto from "crypto";
+
 import type { PrefixRouter, Route } from "~/web-spindle/MapperService";
 import {
   burlaesgDecode, burlaesgEncode, generateBurlaesgIV, hs256JWTEncode,
@@ -30,6 +32,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         throw new Error("Cannot prepare session route GET: service identity not configured");
       }
       this.runtime.scopePreparations.identity = Object.freeze({
+        crypto,
         clientSecret: this.runtime.identity.clientSecret,
         clientURI: this.runtime.identity.clientURI,
         clientCookieName: this.runtime.identity.getClientCookieName(),
@@ -80,6 +83,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         sessionPayloadEnvelope => {
           const {
             iv, nonce, grantTimeStamp, identityChronicle, email, preferred_username,
+            clientTokenFields,
             ...sessionPayloadFields
           } = sessionPayloadEnvelope;
           const clientRedirectPath = scope.clientRedirectPath;
@@ -113,6 +117,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
             exp: timeStamp + scope.tokenExpirationDelay,
             email,
             preferred_username,
+            ...(clientTokenFields || {}),
             // aud: "", nbf: "", jti: "",
           };
           reply.setCookie(

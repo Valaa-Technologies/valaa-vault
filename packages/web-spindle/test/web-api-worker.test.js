@@ -10,14 +10,14 @@ const revelationRoot = "./packages/web-spindle/test/worker";
 const expectedOutputHTML = `<html><head>${
   ""}<meta http-equiv="refresh" content="1"></head>${
   ""}<body><div id="perspire-gateway--main-container">${
-    ""}<div id="perspire-gateway--worker-view"><div style="width: 100vw; height: 100vh;">${
-      ""}<div><h1>Hello World!</h1><h2>Hello World! function</h2></div>${
-    ""}</div></div>${
     ""}<div id="valos-gateway--@valos/web-spindle:view:/rest-test/v0--view-root">${
       ""}<div style="width: 100vw; height: 100vh;">${
         ""}<div><h1>Hello World!</h1><h2>Hello World! function</h2></div>${
       ""}</div>${
     ""}</div>${
+    ""}<div id="perspire-gateway--worker-view"><div style="width: 100vw; height: 100vh;">${
+      ""}<div><h1>Hello World!</h1><h2>Hello World! function</h2></div>${
+    ""}</div></div>${
   ""}</div></body></html>`;
 
 beforeEach(() => {});

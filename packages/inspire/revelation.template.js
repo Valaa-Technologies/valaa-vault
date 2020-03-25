@@ -101,7 +101,8 @@ function chronicleInfo () {
 
 function chronicleVLogs () {
   return {
-    truthLog: arrayOf(action()),
+    // FIXME(iridian, 2020-03): patch() has a bug which would alter arrayOf template itself.
+    truthLog: null, // arrayOf(action()),
   };
 }
 

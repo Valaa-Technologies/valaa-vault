@@ -8,7 +8,7 @@ const resolveRevealOrigin = require("../tools/resolveRevealOrigin").default;
 const inBrowser = require("../gateway-api/inBrowser").default;
 const isPromise = require("../tools/isPromise").default;
 const patchWith = require("../tools/patchWith").default;
-const thenChainEagerly = require("../tools/thenChainEagerly").thenChainEagerly;
+const { mapEagerly, thenChainEagerly } = require("../tools/thenChainEagerly");
 
 const { dumpObject, wrapError } = require("../tools/wrapError");
 
@@ -174,7 +174,7 @@ module.exports = {
   arrayOf,
   deprecated,
   lazyPatchRevelations,
-  lazy,
+  reveal,
 };
 
 function dictionaryOf (valueTemplate) {
@@ -194,6 +194,16 @@ function deprecated (template, deprecationMessage) {
   return template;
 }
 
+function reveal (mystery) {
+  try {
+    return _isDelayed(mystery) ? reveal(mystery())
+        : isPromise(mystery) ? mystery.then(reveal)
+        : mystery;
+  } catch (error) {
+    throw wrapError(error, "During reveal", { mystery });
+  }
+}
+
 /**
  * Combines several revelations together, performing a lazy deep merge
  * which resolves promises, merges objects, concatenates arrays and
@@ -205,14 +215,15 @@ function deprecated (template, deprecationMessage) {
  * @returns
  */
 function lazyPatchRevelations (gateway, targetRevelation, ...patchRevelations) {
-  return _keepCalling(_lazyPatchRevelations(gateway, targetRevelation, ...patchRevelations));
+  return reveal(_lazyPatchRevelations(gateway, targetRevelation, ...patchRevelations));
 }
 
 function _lazyPatchRevelations (gateway, targetRevelation, ...patchRevelations) {
   return patchRevelations.reduce(
       (target, patch) => ((isPromise(target) || isPromise(patch))
-          ? _markLazy(async () =>
-              _keepCalling(_patchRevelation(gateway, await target, await patch)))
+          ? _markDelayed(async function _delayedPatchRevelations () {
+            return reveal(_patchRevelation(gateway, await target, await patch));
+          })
           : _patchRevelation(gateway, target, patch)),
       targetRevelation);
 }
@@ -224,6 +235,7 @@ function _patchRevelation (gateway, targetRevelation, patchRevelation) {
       keyPath: [],
       concatArrays: true,
       patchSymbols: true,
+      complexPatch: "overwrite",
       preExtend (target, patch, key, targetParent, patchParent) {
         if (target === undefined) {
           if (patch && (typeof patch === "object") && !Array.isArray(patch)
@@ -233,23 +245,16 @@ function _patchRevelation (gateway, targetRevelation, patchRevelation) {
         }
         if ((target == null) || (patch == null) || (key === EntryTemplate)) return undefined;
 
-        if (_isDelayed(target) || _isDelayed(patch)) {
-          return _markLazy(() => {
-            let _resolvedTarget;
-            return thenChainEagerly(_keepCalling(target), [
-              resolvedTarget => {
-                _resolvedTarget = resolvedTarget;
-                return _keepCalling(patch);
-              },
-              resolvedPatch =>
-                  this.extend(_resolvedTarget, resolvedPatch, key, targetParent, patchParent),
-              resolvedResult => {
-                if (targetParent) targetParent[key] = resolvedResult;
-                return resolvedResult;
-              },
-            ]);
-          });
-        }
+        const delayed = _delayIfAnyObscured([target, patch], [
+          ([revealedTarget, revealedPatch]) =>
+              this.extend(revealedTarget, revealedPatch, key, targetParent, patchParent),
+          extendResult => {
+            if (targetParent) targetParent[key] = extendResult;
+            return extendResult;
+          },
+        ]);
+        if (delayed) return delayed;
+
         try {
           if (typeof patch === "function") {
             if (typeof target === "function") {
@@ -390,36 +395,22 @@ function _cementSpreaderPath (spreader) {
   return cementedVPath;
 }
 
-function _keepCalling (callMeMaybe) {
-  try {
-    return _isLazy(callMeMaybe) ? _keepCalling(callMeMaybe())
-        : isPromise(callMeMaybe) ? callMeMaybe.then(_keepCalling)
-        : callMeMaybe;
-  } catch (error) {
-    throw wrapError(error, "During _keepCalling", { callMeMaybe });
-  }
-}
-
-function _markLazy (func) {
-  func._isLazy = true;
+function _markDelayed (func) {
+  func._isDelayed = true;
   return func;
 }
 
-function _isLazy (candidate) {
-  return (typeof candidate === "function") && candidate._isLazy;
-}
-
 function _isDelayed (candidate) {
-  return isPromise(candidate) || _isLazy(candidate);
+  return (typeof candidate === "function") && candidate._isDelayed;
 }
 
-function lazy (candidate) {
-  return _isLazy(candidate) ? _keepCalling(candidate) : candidate;
+function _isObscured (candidate) {
+  return isPromise(candidate) || _isDelayed(candidate);
 }
 
 function _valk (gateway, head, step) {
-  const delayed = _delayIfAnyPromise(head, head_ => _valk(gateway, head_, step))
-      || _delayIfAnyPromise(step, step_ => this._valk(gateway, head, step_));
+  const delayed = _delayIfAnyObscured(head, revealedHead => _valk(gateway, revealedHead, step))
+      || _delayIfAnyObscured(step, revealedStep => this._valk(gateway, head, revealedStep));
   try {
     if (delayed !== undefined) return delayed;
     if ((step === null) || (step === undefined)) return head;
@@ -428,14 +419,14 @@ function _valk (gateway, head, step) {
       const ret = {};
       const keys = Object.keys(step);
       const values = keys.map(key => (ret[key] = _valk(gateway, head, step[key])));
-      return _delayIfAnyPromise(values, resolved => {
-        keys.forEach((key, index) => { ret[key] = resolved[index]; });
+      return _delayIfAnyObscured(values, revealed => {
+        keys.forEach((key, index) => { ret[key] = revealed[index]; });
         return ret;
       }) || ret;
     }
     if ((typeof step[0] !== "string") || (step[0][0] !== "§")) {
       const ret = step.map(substep => _valk(gateway, head, substep));
-      return _delayIfAnyPromise(ret, resolved => resolved) || ret;
+      return _delayIfAnyObscured(ret, revealed => revealed) || ret;
     }
     const opId = step[0];
     if (opId === "§'") return step[1];
@@ -477,6 +468,10 @@ function _valk (gateway, head, step) {
 }
 
 function _reveal (gateway, step) {
+  return _markDelayed(function _delayedReveal () { return _eagerReveal(gateway, step); });
+}
+
+function _eagerReveal (gateway, step) {
   let origin = step[1];
   let options = step[2] || {};
   let pathOp = step.slice(3);
@@ -534,13 +529,16 @@ function _reveal (gateway, step) {
   }
 }
 
-function _delayIfAnyPromise (promiseCandidate, operation) {
-  const eager = _isLazy(promiseCandidate) ? promiseCandidate() : promiseCandidate;
-  const delay = isPromise(eager)
-          ? eager
-      : Array.isArray(eager) && eager.find(isPromise)
-          ? Promise.all(eager)
-      : undefined;
-  if (delay === undefined) return delay;
-  return delay.then(operation);
+function _delayIfAnyObscured (mystery, operations) {
+  if (!_isObscured(mystery) && (!Array.isArray(mystery) || !mystery.find(_isObscured))) {
+    return undefined;
+  }
+  return _markDelayed(function _delayed () {
+    return thenChainEagerly(mystery, [
+      reveal,
+      revealedMystery => ((!Array.isArray(revealedMystery) || !revealedMystery.find(_isObscured))
+          ? revealedMystery
+          : mapEagerly(revealedMystery, reveal)),
+    ].concat(operations));
+  });
 }

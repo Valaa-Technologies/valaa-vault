@@ -10,7 +10,7 @@ export default valosheath.exportSpindle({
   name: "@valos/web-spindle",
 
   async onGatewayInitialized (gateway, { server, prefixes }) {
-    const { lazy } = gateway.require("@valos/inspire");
+    const { reveal } = gateway.require("@valos/inspire");
     if (!server) throw new Error(`${this.name} revelation server section missing`);
     if (!prefixes) throw new Error(`${this.name} revelation prefixes section missing`);
     this._prefixRouters = {};
@@ -21,7 +21,7 @@ export default valosheath.exportSpindle({
       `Adding routers for prefixes: '${Object.keys(prefixes).join("', '")}'`,
     ]);
     await Promise.all(Object.entries(prefixes).map(async ([prefix, prefixConfig]) =>
-        this._addPrefixRouter(gateway, prefix, await lazy(prefixConfig))));
+        this._addPrefixRouter(gateway, prefix, await reveal(prefixConfig))));
     return this._service.start();
   },
 

@@ -8,7 +8,7 @@ const {
 
 const { FabricEventTarget } = require("@valos/tools");
 
-const { lazyPatchRevelations } = require("./Revelation");
+const { lazyPatchRevelations, reveal } = require("./Revelation");
 
 const {
   revela: { prefix, prefixIRI, prefixes, vocabulary, context },
@@ -117,36 +117,41 @@ async () => lazyPatchRevelations(gatewayMock,
 () => ({ value: ["$", "expanded", "but-unbound"] })),
     "example#6": itExpects(
         "nested import & invoke spread to resolve all spreads",
-async () => lazyPatchRevelations(gatewayMock, {}, {
-  out: {
-    "!!!": {
-      prefixes: {
-        "/test/v0": {
-          name: "test",
-          "test-lib": {
-            preset: 10, overridden: 10, sessionDuration: 0,
-            view: { focus: "focus to be overwritten", nulled: "nulled to be overwritten" },
-            unboundAndUnsegmented: ["$un.bound"],
+async () => {
+  const ret = lazyPatchRevelations(gatewayMock, {}, {
+    out: {
+      "!!!": {
+        prefixes: {
+          "/test/v0": {
+            name: "test",
+            "test-lib": {
+              preset: 10, overridden: 10, sessionDuration: 0,
+              view: { focus: "focus to be overwritten", nulled: "nulled to be overwritten" },
+              unboundAndUnsegmented: ["$un.bound"],
+            },
           },
         },
       },
-    },
-    prefixes: {
-      "/test/v0": {
-        "!!!": ["@", ["!$.test-lib"], ["!$valk.invoke$.callMe", {
-          view: {
-            focus: "valaa-aws://example.org/deployment?id=@$~raw.f0c5-f0c5@@",
-            nulled: null,
-          },
-          identity: { "!!!": ["./config", "requireKey"] },
-          sessionDuration: 86400,
-          unboundButSegmented: ["$also.unbound"],
-        }]],
-        "test-lib": { overridden: 20 },
-      },
+      prefixes: {
+        "/test/v0": {
+          "!!!": ["@", ["!$.test-lib"], ["!$valk.invoke$.callMe", {
+            view: {
+              focus: "valaa-aws://example.org/deployment?id=@$~raw.f0c5-f0c5@@",
+              nulled: null,
+            },
+            identity: { "!!!": ["./config", "requireKey"] },
+            sessionDuration: 86400,
+            unboundButSegmented: ["$also.unbound"],
+          }]],
+          "test-lib": { overridden: 20 },
+        },
+      }
     }
-  }
-}),
+  });
+  const testV0 = ret.out.prefixes["/test/v0"] = await reveal(ret.out.prefixes["/test/v0"]);
+  testV0["test-lib"].identity = await reveal(testV0["test-lib"].identity);
+  return ret;
+},
         "toEqual",
 () => ({
   out: {

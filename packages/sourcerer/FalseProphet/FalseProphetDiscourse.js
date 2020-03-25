@@ -38,7 +38,7 @@ export default class FalseProphetDiscourse extends Discourse {
   }) {
     // goes to Valker
     super(options);
-    invariantifyObject(parent, "FalseProphetDiscourse.constructor.parent");
+    invariantifyObject(options.parent, "FalseProphetDiscourse.constructor.parent");
     this._falseProphet = options.sourcerer;
     this._corpus = this._falseProphet._corpus; // This will be shadowed by transactor._corpus
     this._rootDiscourse = this;

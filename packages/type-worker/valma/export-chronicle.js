@@ -19,7 +19,7 @@ exports.builder = (yargs) => yargs.options({
   },
   "bvob-buffers": {
     type: "boolean", default: false,
-    description: `Export ~$V;bvobBuffers.json bundle`,
+    description: `Export ~$V.bvobBuffers.json bundle`,
   },
 });
 
@@ -96,7 +96,7 @@ async function _exportVLog (expate) {
   const scribeConnection = expate.view.getGateway().scribe.getActiveConnection(expate.chronicleURI);
   const events = await scribeConnection._readTruths();
   expate.vlm.shell.mkdir("-p", expate.targetDir);
-  const vlogPath = expate.vlm.path.join(expate.targetDir, "~$V;log.json");
+  const vlogPath = expate.vlm.path.join(expate.targetDir, "~$V.log.json");
   await expate.vlm.writeFile(vlogPath, `[
 ${events.map(event => {
   const { type, aspects, ...rest } = event;
@@ -117,7 +117,7 @@ function _addDotSlashIfRelative (maybeRelativePath) {
 }
 
 async function _exportBvobInfos (expate) {
-  const bvobInfosPath = expate.vlm.path.join(expate.targetDir, "~$V;bvobInfos.json");
+  const bvobInfosPath = expate.vlm.path.join(expate.targetDir, "~$V.bvobInfos.json");
   await expate.vlm.writeFile(bvobInfosPath, `{
 ${Object.entries(expate.bvobInfos).map(([key, value]) =>
     `${JSON.stringify(key)}:${JSON.stringify(value)}`).join(",\n")}
@@ -127,7 +127,7 @@ ${Object.entries(expate.bvobInfos).map(([key, value]) =>
 
 async function _exportBvobBuffers (expate) {
   if (!expate.bvobBuffers) return;
-  const bvobBuffersPath = expate.vlm.path.join(expate.targetDir, "~$V;bvobBuffers.json");
+  const bvobBuffersPath = expate.vlm.path.join(expate.targetDir, "~$V.bvobBuffers.json");
   await expate.vlm.writeFile(bvobBuffersPath, `{
     ${Object.entries(expate.bvobBuffers).map(([key, value]) =>
         `${JSON.stringify(key)}:${JSON.stringify(value)}`).join(",\n")}
@@ -172,7 +172,7 @@ async function _exportStateOf (
       vstate[k] = v;
     }
   }
-  const vstatePath = expate.vlm.path.join(expate.targetDir, ...restate.dirParts, "~$V;state.json");
+  const vstatePath = expate.vlm.path.join(expate.targetDir, ...restate.dirParts, "~$V.state.json");
   await expate.vlm.writeFile(vstatePath, JSON.stringify(vstate, null, 2), "utf8");
 }
 

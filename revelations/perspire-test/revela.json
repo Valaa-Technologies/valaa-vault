@@ -6,6 +6,7 @@
       "!!!": "./authorityConfigs.json"
     },
     "verbosity": 1,
+    "falseProphet": { "verbosity": 0 },
     "scribe": { "verbosity": 0 }
   },
   "prologue": {

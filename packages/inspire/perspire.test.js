@@ -22,8 +22,7 @@ describe("testing perspire", () => {
         revelations: [{
           "!!!": "./revela.json",
           gateway: {
-            verbosity: 1,
-            falseProphet: { verbosity: 1 },
+            verbosity: 0,
           },
         }],
       });

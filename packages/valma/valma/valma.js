@@ -306,6 +306,8 @@ const _vlm = {
     return renderer && rest.map(value => renderer(value, this));
   },
 
+  getVerbosity () { return this.verbosity; },
+
   ifVerbose (minimumVerbosity, callback) {
     function hush () { return this; }
     if (this.verbosity < minimumVerbosity) {

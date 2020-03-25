@@ -77,7 +77,24 @@ exports.handler = async (yargv) => {
     prologueSequence.push({ "!!!": yargv["revelogundle-path"] });
     await vlm.writeFile(revelationPath, JSON.stringify(revelaJSON, null, 2));
   }
-  await vlm.writeFile(yargv["revelogundle-path"], JSON.stringify(bundle, null, 2));
+  const revelogundleString =
+`{
+  "chronicleInfos": ${JSON.stringify({ "": bundle.chronicleInfos || {} }, null, 2).slice(8, -2)},
+  "chronicleVLogs": {
+${Object.entries(bundle.chronicleVLogs || {}).map(([key, value]) =>
+`    ${JSON.stringify(key)}: ${JSON.stringify(value)}`).join(",\n")}
+  },
+  "bvobInfos": ["!!!",
+${(bundle.bvobInfos || []).slice(1).map(bvobInfo =>
+`    ${JSON.stringify(bvobInfo)}`).join(",\n")}
+  ],
+  "bvobBuffers": ["!!!",
+${(bundle.bvobBuffers || []).slice(1).map(bvobBuffer =>
+`    ${JSON.stringify(bvobBuffer)}`).join(",\n")}
+  ]
+}
+`;
+  await vlm.writeFile(yargv["revelogundle-path"], revelogundleString);
 
   vlm.clock("bundle-revelation", "bundle.done");
   if (workerJob) {

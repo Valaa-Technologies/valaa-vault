@@ -855,10 +855,13 @@ export default class Gateway extends FabricEventTarget {
     const chronicleURI = await reveal(info.chronicleURI);
     // Acquire connection without remote narration to determine the current last authorized event
     // so that we can narrate any content in the prologue before any remote activity.
-    this.clockEvent(1, "prologue.acquire", `Acquiring connection <${chronicleURI}>`);
+    this.clockEvent(1, "prologue.connect", `Acquiring connection <${chronicleURI}>`);
+    const connectionOptions = await reveal(info.connection || {});
     const connection = this.discourse
         .acquireConnection(naiveURI.validateChronicleURI(chronicleURI), {
-          subscribeEvents: false, narrateOptions: { remote: false },
+          ...connectionOptions,
+          subscribeEvents: false,
+          narrateOptions: { remote: false },
         });
     connection.clockEvent(1, "prologue.activate", "Activating connection");
     await connection.asActiveConnection();
@@ -920,15 +923,23 @@ export default class Gateway extends FabricEventTarget {
       for (const result of chronicling.eventResults) await result.getComposedEvent();
     }
     // Initiate remote narration.
-    connection.clockEvent(1, `prologue.narrate`,
-        `Starting full remote narration and subscribing for events`);
-    const remoteNarration = connection.narrateEventLog(
-        { subscribeEvents: true, eventIdBegin: eventIdEnd });
+    let remoteNarration;
+    if (connectionOptions.remote !== false) {
+      connection.clockEvent(1, `prologue.narrate`,
+          `Starting full remote narration and subscribing for events`);
+      remoteNarration = (connectionOptions.remote !== false) && connection.narrateEventLog({
+        subscribeEvents: true,
+        eventIdBegin: eventIdEnd,
+      });
+    }
     if (!shouldChroniclePrologue && !(eventIdEnd > 0)) {
+      if (!remoteNarration) {
+        throw new Error(`No truths found in prologue for non-remote chronicle <${chronicleURI}>`);
+      }
       connection.clockEvent(1, `prologue.narrate.await`, `Waiting for remote narration`);
       await remoteNarration;
     }
-    connection.clockEvent(1, `prologue.acquire.done`);
+    connection.clockEvent(1, `prologue.connect.done`);
     return connection;
   }
 

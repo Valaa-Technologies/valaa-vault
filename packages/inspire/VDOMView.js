@@ -124,7 +124,7 @@ export default class VDOMView extends Cog {
     if (lensURI) this.warnEvent("options.lensURI DEPRECATED in favor of options.focus");
     if (rootLensURI) this.warnEvent("options.rootLensURI DEPRECATED in favor of options.focus");
     const actualFocus = focus || lensURI || rootLensURI;
-    if (!actualFocus) throw new Error(`No options.focus found for view ${name}`);
+    if (!actualFocus) throw new Error(`No options.focus found for view '${this.getName()}'`);
     // Load project
     const { reference: focusRef, vResource: vFocus } =
         await this.getEngine().activateResource(actualFocus);

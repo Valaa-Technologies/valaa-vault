@@ -246,24 +246,45 @@ export default class Gateway extends FabricEventTarget {
     return this.identity;
   }
 
+  setupHostComponents (components: Object) {
+    this._hostComponents = {
+      createView: components.createView || (options => new InspireView(options)),
+      container: components.container,
+      hostGlobal: components.hostGlobal,
+      window: components.window,
+    };
+  }
+
   createAndConnectViewsToDOM (views: { [string]: {
     container: Object, hostGlobal: Object, window: Object,
     name: string, size: Object, viewRootId: string, focus: any, verbosity: ?number,
-  } }, createView) {
-    this._hostComponents = { createView };
-    for (const { container, hostGlobal, window } of Object.values(views)) {
-      if (this._hostComponents.container == null) this._hostComponents.container = container;
-      if (this._hostComponents.hostGlobal == null) this._hostComponents.global = hostGlobal;
-      if (this._hostComponents.window == null) this._hostComponents.window = window;
+  } }) {
+    if (this._views) {
+      throw new Error("Gateway.createAndConnectViewsToDOM has already been called");
+    }
+    if (!this._views) this._views = {};
+    if (!this._hostComponents) {
+      this.setupHostComponents({});
+      for (const { container, hostGlobal, window } of Object.values(views)) {
+        if (this._hostComponents.container == null) this._hostComponents.container = container;
+        if (this._hostComponents.hostGlobal == null) this._hostComponents.hostGlobal = hostGlobal;
+        if (this._hostComponents.window == null) this._hostComponents.window = window;
+      }
     }
     for (const [viewId, config, resolve, reject] of [
       ...Object.entries(views || {}),
-      ...this._pendingViews || [],
-      ...Object.entries(this.viewRevelations),
+      ...(this._pendingViews || []),
     ]) {
       thenChainEagerly(this.addView(viewId, config),
           view => resolve && resolve(view),
           errorOnCreateAndConnectViewsToDOM.bind(this, viewId, config, reject));
+    }
+    for (const [viewId, viewConfigPromise] of Object.entries(this.viewRevelations)) {
+      if (!this._views[viewId]) {
+        thenChainEagerly(reveal(viewConfigPromise),
+          viewConfig => (viewConfig.focus !== undefined || viewConfig.lens !== undefined)
+              && this.addView(viewId, {}));
+      }
     }
     return this._views;
     function errorOnCreateAndConnectViewsToDOM (viewId, config, reject, error) {
@@ -278,19 +299,19 @@ export default class Gateway extends FabricEventTarget {
   }
 
   addView (viewId, viewConfig) {
+    if ((this._views || {})[viewId]) throw new Error(`View ${viewId} already created`);
     return (!this._hostComponents)
         ? new Promise((resolve, reject) =>
             this._pendingViews.push([viewId, viewConfig, resolve, reject]))
-        : this.createAndConnectViewToDOM(viewId, { ...this._hostComponents, ...viewConfig });
+        : this._createAndConnectViewToDOM(viewId, { ...this._hostComponents, ...viewConfig });
   }
 
-  createAndConnectViewToDOM (viewId, {
+  _createAndConnectViewToDOM (viewId, {
     parent = this, verbosity,
-    container, global: hostGlobal,
-    createView = options => new InspireView(options),
+    container, hostGlobal, createView,
     ...paramViewConfig
   }) {
-    if (!this._views) this._views = {};
+    if (!this._views) throw new Error("createAndConnectViewsToDOM must be called first");
     if (this._views[viewId]) throw new Error(`View ${viewId} already exists`);
     const view = createView({ parent, verbosity, name: viewId });
     view.clockEvent(1, () => [`view.create`,
@@ -306,7 +327,7 @@ export default class Gateway extends FabricEventTarget {
 // monstrosity to use this revelationConfig as much as possible.
         const revelationConfig = (await reveal(views[viewId])) || {};
         viewConfig = patchWith(
-            { verbosity, viewRootId: `valos-gateway--${viewId}--view-root` },
+            { verbosity, name: viewId, viewRootId: `valos-gateway--${viewId}--view-root` },
             ["...", revelationConfig, paramViewConfig],
             { complexPatch: "setOnInitialize" });
         view.setRawName(viewId);
@@ -400,7 +421,7 @@ export default class Gateway extends FabricEventTarget {
       ]),
       () => gateway._views[viewId],
     ]), error => {
-      throw this.wrapErrorEvent(error, 1, new Error(`createAndConnectViewToDOM(${viewId})`),
+      throw this.wrapErrorEvent(error, 1, new Error(`_createAndConnectViewToDOM(${viewId})`),
           "\n\tcontainer:", ...dumpObject(container),
           "\n\tviewConfig:", ...dumpObject(paramViewConfig));
     });

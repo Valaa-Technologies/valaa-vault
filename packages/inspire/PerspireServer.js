@@ -63,6 +63,15 @@ export default class PerspireServer extends FabricEventTarget {
         ? this._createWorkerPerspireGateway(this.gatewayOptions, ...this.revelations)
         : this._createTestPerspireGateway(this.gatewayOptions, ...this.revelations)))
     .then(gateway => {
+      gateway.setupHostComponents({
+        createView: (options) => new PerspireView(options),
+        container: this._container,
+        window: jsdomWindow,
+        hostGlobal: global,
+      });
+      return Promise.all([gateway, ...Object.values(gateway.createAndConnectViewsToDOM())]);
+    })
+    .then(([gateway]) => {
       this._gateway = gateway;
       return this;
     });
@@ -94,25 +103,18 @@ export default class PerspireServer extends FabricEventTarget {
 
   async createView (viewName, viewConfigAdditions = {}) {
     if (!this._container) throw new Error("PerspireServer hasn't been initialized yet");
-    const jsdomWindow = this._jsdom.window;
+    const gateway = await this._gateway;
     const viewConfig = {
       name: `${this.getName()} ${viewName}`,
-      focus: this._gateway.getRootFocusURI(),
-      hostGlobal: global,
-      window: jsdomWindow,
-      container: this._container,
+      focus: gateway.getRootFocusURI(),
       viewRootId: `perspire-gateway--${viewName}-view`,
-      size: { width: jsdomWindow.innerWidth, height: jsdomWindow.innerHeight, scale: 1 },
       ...viewConfigAdditions,
     };
-    const views = (await this._gateway).createAndConnectViewsToDOM(
-        { [viewName]: viewConfig },
-        options => new PerspireView(options));
-    const view = await views[viewName];
+    const view = await gateway.addView(viewName, viewConfig);
     // Creating perspire specific objects and variables.
     // Please use server.valos.perspire for external packages
     const perspire = { worker: this, view, viewName, viewConfig };
-    Object.assign(view.getRootScope().valos, { views, perspire, Perspire: perspire });
+    Object.assign(view.getRootScope().valos, { view, perspire, Perspire: perspire });
     return view;
   }
 

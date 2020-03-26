@@ -7,7 +7,7 @@
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"subtitle":"0.35.0-rc.8","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"revela"};
+      var respecConfig = {"subtitle":"0.35.0-rc.9","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"revela"};
     </script>
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
@@ -91,36 +91,41 @@ for various valos fabric config files.</span>
 <blockquote class="vdoc type-revdoc-example">
     <span class="vdoc type-vdoc-node">
     <h3>nested import &#x26; invoke spread to resolve all spreads</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> lazyPatchRevelations(gatewayMock, {}, {
-  out: {
-    &#x22;!!!&#x22;: {
-      prefixes: {
-        &#x22;/test/v0&#x22;: {
-          name: &#x22;test&#x22;,
-          &#x22;test-lib&#x22;: {
-            preset: 10, overridden: 10, sessionDuration: 0,
-            view: { focus: &#x22;focus to be overwritten&#x22;, nulled: &#x22;nulled to be overwritten&#x22; },
-            unboundAndUnsegmented: [&#x22;$un.bound&#x22;],
+<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> {
+  const ret = lazyPatchRevelations(gatewayMock, {}, {
+    out: {
+      &#x22;!!!&#x22;: {
+        prefixes: {
+          &#x22;/test/v0&#x22;: {
+            name: &#x22;test&#x22;,
+            &#x22;test-lib&#x22;: {
+              preset: 10, overridden: 10, sessionDuration: 0,
+              view: { focus: &#x22;focus to be overwritten&#x22;, nulled: &#x22;nulled to be overwritten&#x22; },
+              unboundAndUnsegmented: [&#x22;$un.bound&#x22;],
+            },
           },
         },
       },
-    },
-    prefixes: {
-      &#x22;/test/v0&#x22;: {
-        &#x22;!!!&#x22;: [&#x22;@&#x22;, [&#x22;!$.test-lib&#x22;], [&#x22;!$valk.invoke$.callMe&#x22;, {
-          view: {
-            focus: &#x22;valaa-aws://example.org/deployment?id=@$~raw.f0c5-f0c5@@&#x22;,
-            nulled: null,
-          },
-          identity: { &#x22;!!!&#x22;: [&#x22;./config&#x22;, &#x22;requireKey&#x22;] },
-          sessionDuration: 86400,
-          unboundButSegmented: [&#x22;$also.unbound&#x22;],
-        }]],
-        &#x22;test-lib&#x22;: { overridden: 20 },
-      },
+      prefixes: {
+        &#x22;/test/v0&#x22;: {
+          &#x22;!!!&#x22;: [&#x22;@&#x22;, [&#x22;!$.test-lib&#x22;], [&#x22;!$valk.invoke$.callMe&#x22;, {
+            view: {
+              focus: &#x22;valaa-aws://example.org/deployment?id=@$~raw.f0c5-f0c5@@&#x22;,
+              nulled: null,
+            },
+            identity: { &#x22;!!!&#x22;: [&#x22;./config&#x22;, &#x22;requireKey&#x22;] },
+            sessionDuration: 86400,
+            unboundButSegmented: [&#x22;$also.unbound&#x22;],
+          }]],
+          &#x22;test-lib&#x22;: { overridden: 20 },
+        },
+      }
     }
-  }
-})</span>
+  });
+  const testV0 = ret.out.prefixes[&#x22;/test/v0&#x22;] = await reveal(ret.out.prefixes[&#x22;/test/v0&#x22;]);
+  testV0[&#x22;test-lib&#x22;].identity = await reveal(testV0[&#x22;test-lib&#x22;].identity);
+  return ret;
+}</span>
 </code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node"> ({
   out: {
     prefixes: {

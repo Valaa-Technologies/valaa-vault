@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.9](https://github.com/valaatech/kernel/compare/v0.35.0-rc.8...v0.35.0-rc.9) (2020-03-26)
+
+
+### Bug Fixes
+
+* Add delayed handling to revelation downloads ([4ca31db](https://github.com/valaatech/kernel/commit/4ca31db09af3f628cf1f35ed78bbbd9f762901ff))
+
+
+
+
+
 # [0.35.0-rc.8](https://github.com/valaatech/kernel/compare/v0.35.0-rc.7...v0.35.0-rc.8) (2020-03-24)
 
 

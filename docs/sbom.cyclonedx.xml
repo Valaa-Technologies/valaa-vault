@@ -101,7 +101,7 @@
         </component>
         <component type="library">
             <name>figgy-pudding</name>
-            <version>3.5.1</version>
+            <version>3.5.2</version>
             <description>
                 <![CDATA[Delicious, festive, cascading config/opts definitions]]>
             </description>
@@ -110,7 +110,7 @@
                     <id>ISC</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/figgy-pudding@3.5.1</purl>
+            <purl>pkg:npm/figgy-pudding@3.5.2</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -422,20 +422,6 @@
             <modified>false</modified>
         </component>
         <component type="library">
-            <name>read-installed</name>
-            <version>4.0.3</version>
-            <description>
-                <![CDATA[Read all the installed packages in a folder, and return a tree structure with all the data.]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>ISC</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/read-installed@4.0.3</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
             <name>read-package-json</name>
             <version>2.1.1</version>
             <description>
@@ -447,6 +433,20 @@
                 </license>
             </licenses>
             <purl>pkg:npm/read-package-json@2.1.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>read-installed</name>
+            <version>4.0.3</version>
+            <description>
+                <![CDATA[Read all the installed packages in a folder, and return a tree structure with all the data.]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>ISC</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/read-installed@4.0.3</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -550,23 +550,8 @@
         </component>
         <component type="library">
             <group>valos</group>
-            <name>inspire</name>
-            <version>0.35.0-rc.8</version>
-            <description>
-                <![CDATA[ValOS Inspire application gateway]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/%40valos/inspire@0.35.0-rc.8</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <group>valos</group>
             <name>kernel</name>
-            <version>0.35.0-rc.8</version>
+            <version>0.35.0-rc.9</version>
             <description>
                 <![CDATA[@valos/kernel domain]]>
             </description>
@@ -575,13 +560,28 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/kernel@0.35.0-rc.8</purl>
+            <purl>pkg:npm/%40valos/kernel@0.35.0-rc.9</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <group>valos</group>
+            <name>inspire</name>
+            <version>0.35.0-rc.9</version>
+            <description>
+                <![CDATA[ValOS Inspire application gateway]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/%40valos/inspire@0.35.0-rc.9</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <group>valos</group>
             <name>toolset-revealer</name>
-            <version>0.35.0-rc.8</version>
+            <version>0.35.0-rc.9</version>
             <description>
                 <![CDATA[Tools for building revelations both for development and deployment purposes]]>
             </description>
@@ -590,13 +590,13 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/toolset-revealer@0.35.0-rc.8</purl>
+            <purl>pkg:npm/%40valos/toolset-revealer@0.35.0-rc.9</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <group>valos</group>
             <name>type-vault</name>
-            <version>0.35.0-rc.8</version>
+            <version>0.35.0-rc.9</version>
             <description>
                 <![CDATA[The ValOS 'vault' workspace type toolset]]>
             </description>
@@ -605,7 +605,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/type-vault@0.35.0-rc.8</purl>
+            <purl>pkg:npm/%40valos/type-vault@0.35.0-rc.9</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -638,7 +638,7 @@
         </component>
         <component type="library">
             <name>valma</name>
-            <version>0.35.0-rc.8</version>
+            <version>0.35.0-rc.9</version>
             <description>
                 <![CDATA[A ValOS CLI tool for discovering and executing context-dependent command scripts]]>
             </description>
@@ -647,7 +647,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/valma@0.35.0-rc.8</purl>
+            <purl>pkg:npm/valma@0.35.0-rc.9</purl>
             <modified>false</modified>
         </component>
         <component type="library">

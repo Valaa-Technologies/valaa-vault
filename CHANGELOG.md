@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.9](https://github.com/valaatech/kernel/compare/v0.35.0-rc.8...v0.35.0-rc.9) (2020-03-26)
+
+
+### Bug Fixes
+
+* Add delayed handling to revelation downloads ([4ca31db](https://github.com/valaatech/kernel/commit/4ca31db09af3f628cf1f35ed78bbbd9f762901ff))
+* Missing valma.getVerbosity, export-chronicle vpaths, options.parent ([d40a11d](https://github.com/valaatech/kernel/commit/d40a11d735c0d0a959bfcb7eb05edfe133cfb9c4))
+
+
+### Features
+
+* Add Gateway prologue chronicle.connection and its .remote option ([47b6280](https://github.com/valaatech/kernel/commit/47b628066320bd045ac6ec6dfa59763945a738c8))
+* Add Gateway.setupHostComponents ([cb2e39d](https://github.com/valaatech/kernel/commit/cb2e39d6928776c8ff4c7015d9072b98cd8a6e05))
+
+
+
+
+
 # [0.35.0-rc.8](https://github.com/valaatech/kernel/compare/v0.35.0-rc.7...v0.35.0-rc.8) (2020-03-24)
 
 

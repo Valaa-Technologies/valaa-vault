@@ -13,6 +13,9 @@ exports.builder = (yargs) => yargs.options({
     alias: "r", type: "boolean",
     description: "Reconfigure all config of this workspace.",
   },
+  "default-tags": {
+    description: `Custom default package tags lookup (by package prefix) for new packages.`,
+  },
   domain: {
     type: "boolean", default: true,
     description: "(re)configure all domain settings.",
@@ -36,6 +39,11 @@ exports.handler = async (yargv) => {
         + "(maybe run 'vlm init' to initialize?)");
   }
   if (!vlm.getToolsetsConfig()) vlm.updateToolsetsConfig({});
+
+  let defaultTags = yargv["default-tags"];
+  if (typeof defaultTags === "string") defaultTags = { "": defaultTags };
+  if (defaultTags) vlm.defaultTags = { ...(vlm.defaultTags || {}), ...defaultTags };
+
   const rest = [{ reconfigure: yargv.reconfigure }, ...yargv._];
 
   const ret = {
@@ -84,7 +92,8 @@ async function updateResultSideEffects (vlm, ...results) {
   return resultBreakdown;
 }
 
-async function yarnAddNewDevDependencies (vlm, candidateDevDependencies) {
+async function yarnAddNewDevDependencies (
+    vlm, candidateDevDependencies, defaultTags = vlm.defaultTags) {
   const { valos, dependencies, devDependencies } = vlm.packageConfig;
   const newDevDependencies = Object.entries(candidateDevDependencies)
       .filter(([name, newVersion]) => {
@@ -94,7 +103,12 @@ async function yarnAddNewDevDependencies (vlm, candidateDevDependencies) {
         if (newVersion === true) return false;
         return newVersion !== currentVersion;
       })
-      .map(([name, newVersion]) => (newVersion === true ? name : `${name}@${newVersion}`));
+      .map(([name, newVersion]) => {
+        const tag = (newVersion !== true) ? newVersion
+            : (Object.entries(defaultTags || {}).find(([namePrefix]) => name.startsWith(namePrefix))
+                || [null, ""])[1];
+        return !tag ? name : `${name}@${tag}`;
+      });
   if (!newDevDependencies.length) return undefined;
   await vlm.interact([`yarn add --dev${valos.type === "vault" ? [" -W"] : ""}`,
       ...newDevDependencies]);

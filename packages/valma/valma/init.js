@@ -2,10 +2,9 @@
 
 exports.command = "init";
 exports.describe = "Initialize the current directory as a ValOS workspace from scratch";
-exports.introduction =
-`This command will interactively walk through the process of creating
-and configuring a new valma workspace in the current working directory
-from scratch.
+exports.introduction = `
+This command will interactively create and configure a new valma ${
+  ""}workspace in the current working directory from scratch.
 
 Valma init has following interactive phases:
 1. Initialization of package.json via 'yarn init'
@@ -28,6 +27,9 @@ exports.builder = (yargs) => yargs.options({
     alias: "r", type: "boolean",
     description: "Reconfigure all config of this workspace.",
   },
+  "default-tags": {
+    description: `Custom default package tags lookup (by package prefix) for new packages.`,
+  },
   breakdown: {
     type: "boolean", description: "Show full breakdown of the init process even if successful.",
   },
@@ -48,13 +50,18 @@ exports.handler = async (yargv) => {
   vlm.speak(exports.introduction.match(/[^\n]*\n(.*)/)[1]);
   const tellIfNoReconfigure = !yargv.reconfigure ? ["(no --reconfigure given)"] : [];
 
+  let defaultTags = yargv["default-tags"];
+  if (typeof defaultTags === "string") defaultTags = { "": defaultTags };
+  if (defaultTags) vlm.defaultTags = { ...(vlm.defaultTags || {}), ...defaultTags };
+
   let packageJSON;
   try { packageJSON = require(vlm.path.join(process.cwd(), "package")); } catch (error) { /* */ }
   const ret_ = { success: true };
   Object.assign(await _initPackageJSON());
   if (ret_.success === false) return ret_;
+
   if (!packageJSON) {
-    return vlm.interact(["vlm init", {
+    return vlm.interact(["vlm -b init", {
       breakdown: yargv.breakdown, devDependencies: yargv.devDependencies, valos: yargv.valos,
     }]);
   }
@@ -182,7 +189,7 @@ publishConfigLine}
     let wasError;
     const wasInitial = !vlm.packageConfig.devDependencies;
     while (yargv.reconfigure || wasInitial) {
-      const visibleDomains = await vlm.delegate("vlm -ePVO .configure/.domain/{,*/**/}*");
+      const visibleDomains = await vlm.delegate("vlm -bePVO .configure/.domain/{,*/**/}*");
       vlm.info("Visible domains:\n", visibleDomains);
       const choices = vlm.packageConfig.devDependencies
           ? ["Bypass", "yes", "help", "quit"]

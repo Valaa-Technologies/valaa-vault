@@ -118,7 +118,7 @@ async function _configureSelections (
   for (const grabName of (reconfigure ? newSelection : grabbed)) {
     ret.selectionConfigures.push(...await vlm.invoke(
         `.configure/{.domain/.${valos.domain}/,.type/.${valos.type}/,}${toolsetGlob
-          }.select/${grabName}`, [{ reconfigure: true }, ...rest]));
+          }.select/${grabName}`, rest));
   }
   Object.assign(ret, await updateResultSideEffects(vlm, ...ret.selectionConfigures));
   if (!reconfigure) {

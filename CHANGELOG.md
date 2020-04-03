@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.10](https://github.com/valaatech/kernel/compare/v0.35.0-rc.9...v0.35.0-rc.10) (2020-04-03)
+
+
+### Features
+
+* Revelation expose; recursively reveals all nested mysteries ([916d94e](https://github.com/valaatech/kernel/commit/916d94e3fb0e7242276dd9c2f4eaab0a98897ff0))
+* vlm configure --default-tags options ([dbe1b3e](https://github.com/valaatech/kernel/commit/dbe1b3e349b160ca7fb2d97e275a6e047a9bfc1f))
+
+
+
+
+
 # [0.35.0-rc.9](https://github.com/valaatech/kernel/compare/v0.35.0-rc.8...v0.35.0-rc.9) (2020-03-26)
 
 

@@ -7,7 +7,7 @@
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"subtitle":"0.35.0-rc.9","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"revela"};
+      var respecConfig = {"subtitle":"0.35.0-rc.10","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"revela"};
     </script>
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
@@ -91,8 +91,7 @@ for various valos fabric config files.</span>
 <blockquote class="vdoc type-revdoc-example">
     <span class="vdoc type-vdoc-node">
     <h3>nested import &#x26; invoke spread to resolve all spreads</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> {
-  const ret = lazyPatchRevelations(gatewayMock, {}, {
+<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> expose(lazyPatchRevelations(gatewayMock, {}, {
     out: {
       &#x22;!!!&#x22;: {
         prefixes: {
@@ -121,11 +120,7 @@ for various valos fabric config files.</span>
         },
       }
     }
-  });
-  const testV0 = ret.out.prefixes[&#x22;/test/v0&#x22;] = await reveal(ret.out.prefixes[&#x22;/test/v0&#x22;]);
-  testV0[&#x22;test-lib&#x22;].identity = await reveal(testV0[&#x22;test-lib&#x22;].identity);
-  return ret;
-}</span>
+  }))</span>
 </code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node"> ({
   out: {
     prefixes: {

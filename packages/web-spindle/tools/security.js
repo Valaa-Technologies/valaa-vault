@@ -88,8 +88,8 @@ export function resolveIdentityRoles (router, route, scope) {
   if (!(Math.floor(Date.now() / 1000)
       < Number(timeStamp) + router.getSessionDuration())) {
     router.logEvent(1, () => [
-      "Session expired:", Math.floor(Date.now() / 1000), ">=", timeStamp,
-        router.getSessionDuration(),
+      "Session expired:", Math.floor(Date.now() / 1000),
+          ">=", timeStamp, router.getSessionDuration(),
       "\n\tpayload:", timeStamp, identityChronicle,
     ]);
     scope.reply.clearCookie(identity.getSessionCookieName(), {

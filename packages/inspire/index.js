@@ -6,7 +6,7 @@ import "@babel/polyfill";
 import { getURIQueryField } from "~/raem/ValaaURI";
 
 import Gateway from "~/inspire/Gateway";
-import { lazyPatchRevelations, reveal } from "~/inspire/Revelation";
+import { lazyPatchRevelations, reveal, expose } from "~/inspire/Revelation";
 
 import revelationTemplate from "~/inspire/revelation.template";
 
@@ -15,7 +15,7 @@ import { setGlobalLogger } from "~/tools/wrapError";
 
 import * as mediaDecoders from "./mediaDecoders";
 
-export { reveal };
+export { reveal, expose };
 
 if (inBrowser()) {
   require("./inspire.css");

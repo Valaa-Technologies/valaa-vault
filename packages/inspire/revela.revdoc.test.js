@@ -8,7 +8,7 @@ const {
 
 const { FabricEventTarget } = require("@valos/tools");
 
-const { lazyPatchRevelations, reveal } = require("./Revelation");
+const { lazyPatchRevelations, expose } = require("./Revelation");
 
 const {
   revela: { prefix, prefixIRI, prefixes, vocabulary, context },
@@ -117,8 +117,7 @@ async () => lazyPatchRevelations(gatewayMock,
 () => ({ value: ["$", "expanded", "but-unbound"] })),
     "example#6": itExpects(
         "nested import & invoke spread to resolve all spreads",
-async () => {
-  const ret = lazyPatchRevelations(gatewayMock, {}, {
+async () => expose(lazyPatchRevelations(gatewayMock, {}, {
     out: {
       "!!!": {
         prefixes: {
@@ -147,11 +146,7 @@ async () => {
         },
       }
     }
-  });
-  const testV0 = ret.out.prefixes["/test/v0"] = await reveal(ret.out.prefixes["/test/v0"]);
-  testV0["test-lib"].identity = await reveal(testV0["test-lib"].identity);
-  return ret;
-},
+  })),
         "toEqual",
 () => ({
   out: {

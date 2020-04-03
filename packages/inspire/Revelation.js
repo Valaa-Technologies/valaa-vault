@@ -175,6 +175,7 @@ module.exports = {
   deprecated,
   lazyPatchRevelations,
   reveal,
+  expose,
 };
 
 function dictionaryOf (valueTemplate) {
@@ -202,6 +203,32 @@ function reveal (mystery) {
   } catch (error) {
     throw wrapError(error, "During reveal", { mystery });
   }
+}
+
+function expose (mystery) {
+  // in-place reveal and replace object properties
+  let revealedTrivialObject_;
+  return thenChainEagerly(reveal(mystery), [
+    revealed => {
+      if ((revealed == null) || (typeof revealed !== "object")) return revealed;
+      if (!Array.isArray(revealed)) {
+        if (Object.getPrototypeOf(revealed) !== Object.prototype) return revealed;
+        revealedTrivialObject_ = revealed;
+      }
+      return mapEagerly(
+          revealedTrivialObject_ ? Object.entries(revealedTrivialObject_) : revealed,
+          entry => {
+            const revealedValue = revealedTrivialObject_ ? entry[1] : entry;
+            return thenChainEagerly(expose(revealedValue), exposedValue => {
+              if (revealedTrivialObject_ && (revealedValue !== exposedValue)) {
+                revealedTrivialObject_[entry[0]] = exposedValue;
+              }
+              return exposedValue;
+            });
+          });
+    },
+    exposed => revealedTrivialObject_ || exposed,
+  ]);
 }
 
 /**
@@ -468,7 +495,8 @@ function _valk (gateway, head, step) {
 }
 
 function _reveal (gateway, step) {
-  return _markDelayed(function _delayedReveal () { return _eagerReveal(gateway, step); });
+  return /* !inBrowser() ? _eagerReveal(gateway, step) : */ _markDelayed(
+      function _delayedReveal () { return _eagerReveal(gateway, step); });
 }
 
 function _eagerReveal (gateway, step) {

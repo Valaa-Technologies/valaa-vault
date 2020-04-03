@@ -20,6 +20,10 @@ exports.builder = function builder (yargs) {
       type: "string", array: true, default: ["./revelations"],
       description: "The revelations source directory for populating an empty content-base",
     },
+    "content-target": {
+      type: "string", default: "",
+      description: "Target subdirectory for populated content",
+    },
     host: {
       type: "string", default: "0.0.0.0",
       description: "The local ip where the server will be bound"
@@ -34,7 +38,7 @@ exports.builder = function builder (yargs) {
     },
     open: {
       type: "boolean", default: true,
-      description: "webpack-dev-server --open option"
+      description: "webpack-dev-server --open option. A string argument is provided to --openPage"
     },
     prod: {
       type: "boolean",
@@ -48,14 +52,14 @@ exports.builder = function builder (yargs) {
 };
 exports.handler = async function handler (yargv) {
   const vlm = yargv.vlm;
-  const contentBase = yargv["content-base"];
-  if (!vlm.shell.test("-d", contentBase)) {
-    vlm.info("Creating and populating an initially missing content base directory",
-        vlm.theme.path(contentBase), `(for this first time only) from ${
-        vlm.theme.path(String(yargv["content-source"]))}`);
-    vlm.shell.mkdir("-p", contentBase);
+  const contentBase = yargv["content-base"] || "";
+  if (contentBase || yargv["content-target"]) {
+    const targetDir = vlm.path.join(contentBase, yargv["content-target"]);
+    vlm.info("Creating and populating content directory",
+        vlm.theme.path(targetDir), `from ${vlm.theme.path(String(yargv["content-source"]))}`);
+    vlm.shell.mkdir("-p", targetDir);
     (yargv["content-source"] || []).forEach(source =>
-        vlm.shell.cp("-R", vlm.path.join(source, "*"), contentBase));
+        vlm.shell.cp("-R", vlm.path.join(source, "*"), targetDir));
   }
 
   vlm.info(`${vlm.theme.bold("Rousing revealer")} using ${
@@ -69,6 +73,7 @@ exports.handler = async function handler (yargv) {
     yargv.inline && "--inline",
     yargv.progress && "--progress",
     yargv.open && "--open",
+    ...((typeof yargv.open === "string") ? ["--open-page", yargv.open] : []),
     "--host", yargv.host,
     "--content-base", contentBase,
   ], { spawn: { env } });

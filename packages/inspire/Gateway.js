@@ -30,7 +30,7 @@ import extendValosheathWithEngine from "~/engine/valosheath";
 import InspireView from "~/inspire/InspireView";
 
 import { registerVidgets } from "~/inspire/ui";
-import { Revelation, reveal } from "~/inspire/Revelation";
+import { Revelation, reveal, expose } from "~/inspire/Revelation";
 import extendValosheathWithInspire from "~/inspire/valosheath";
 
 import getGlobal from "~/gateway-api/getGlobal";
@@ -169,8 +169,8 @@ export default class Gateway extends FabricEventTarget {
  * revelation minimal; whatever is most efficient.
  */
       this.revelation = await reveal(this._interpretRevelation(revelation));
-      this.gatewayRevelation = await reveal(this.revelation.gateway);
-      if (this.gatewayRevelation.name) this.setName(await reveal(this.gatewayRevelation.name));
+      this.gatewayRevelation = await expose(this.revelation.gateway);
+      if (this.gatewayRevelation.name) this.setName(this.gatewayRevelation.name);
 
       this.setVerbosity(this.gatewayRevelation.verbosity || 0);
 
@@ -195,8 +195,8 @@ export default class Gateway extends FabricEventTarget {
       // Create a connection and an identity for the gateway towards false prophet
       this.discourse = await this._initiateDiscourse(this.gatewayRevelation, this.falseProphet);
 
-      this.spindleRevelations = (await reveal(this.revelation.spindles)) || {};
-      await this.attachSpindles(await reveal(this.gatewayRevelation.spindlePrototypes));
+      this.spindleRevelations = (await expose(this.revelation.spindles)) || {};
+      await this.attachSpindles(this.gatewayRevelation.spindlePrototypes);
 
       this.prologue = await reveal(this.revelation.prologue);
 
@@ -211,7 +211,7 @@ export default class Gateway extends FabricEventTarget {
       this.clockEvent(1, `initialized`, "Gateway initialized");
       this._isInitialized = true;
 
-      this.viewRevelations = (await reveal(this.revelation.views)) || {};
+      this.viewRevelations = (await expose(this.revelation.views)) || {};
 
       this.clockEvent(1, `spindles.notify`,
           `Notifying ${spindleNames.length} spindles of gateway initialization:`,
@@ -279,11 +279,10 @@ export default class Gateway extends FabricEventTarget {
           view => resolve && resolve(view),
           errorOnCreateAndConnectViewsToDOM.bind(this, viewId, config, reject));
     }
-    for (const [viewId, viewConfigPromise] of Object.entries(this.viewRevelations)) {
-      if (!this._views[viewId]) {
-        thenChainEagerly(reveal(viewConfigPromise),
-          viewConfig => (viewConfig.focus !== undefined || viewConfig.lens !== undefined)
-              && this.addView(viewId, {}));
+    for (const [viewId, viewConfig] of Object.entries(this.viewRevelations)) {
+      if (!this._views[viewId]
+          && (viewConfig.focus !== undefined || viewConfig.lens !== undefined)) {
+        this.addView(viewId, {});
       }
     }
     return this._views;
@@ -322,10 +321,10 @@ export default class Gateway extends FabricEventTarget {
     const gateway = this;
     this._views[viewId] = thenChainEagerly(view, view.addChainClockers(1, "view.create.ops", [
       async function _createViewOptions () {
-        const views = (await reveal(gateway.revelation.views)) || {};
+        const views = (await expose(gateway.revelation.views)) || {};
 // TODO(iridian, 2020-01): Streamline the view parameterization hodgepodge
 // monstrosity to use this revelationConfig as much as possible.
-        const revelationConfig = (await reveal(views[viewId])) || {};
+        const revelationConfig = views[viewId] || {};
         viewConfig = patchWith(
             { verbosity, name: viewId, viewRootId: `valos-gateway--${viewId}--view-root` },
             ["...", revelationConfig, paramViewConfig],
@@ -452,8 +451,8 @@ export default class Gateway extends FabricEventTarget {
     try {
       nexusOptions = {
         name: "Inspire AuthorityNexus",
-        authorityConfigs: await reveal(gatewayRevelation.authorityConfigs),
-        ...(await reveal(gatewayRevelation.nexus) || {}),
+        authorityConfigs: gatewayRevelation.authorityConfigs,
+        ...(gatewayRevelation.nexus || {}),
         parent: this,
       };
       this.clockEvent(1, () => [
@@ -478,7 +477,7 @@ export default class Gateway extends FabricEventTarget {
       scribeOptions = {
         name: "Inspire Scribe",
         databaseAPI: gatewayRevelation.scribe.getDatabaseAPI(),
-        ...await reveal(gatewayRevelation.scribe),
+        ...(gatewayRevelation.scribe || {}),
         parent: this,
         upstream: oracle,
       };
@@ -508,7 +507,7 @@ export default class Gateway extends FabricEventTarget {
     try {
       oracleOptions = {
         name: "Inspire Oracle",
-        ...await reveal(gatewayRevelation.oracle),
+        ...(gatewayRevelation.oracle || {}),
         parent: this,
         authorityNexus,
       };
@@ -533,7 +532,7 @@ export default class Gateway extends FabricEventTarget {
     const name = "Inspire Corpus";
     const reducerOptions = {
       ...EngineContentAPI, // schema, validators, reducers
-      ...await reveal(gatewayRevelation.reducer),
+      ...(gatewayRevelation.reducer || {}),
       parent: this,
     };
     const { schema, validators, mainReduce, subReduce } = createRootReducer(reducerOptions);
@@ -550,7 +549,7 @@ export default class Gateway extends FabricEventTarget {
       schema, middlewares,
       reduce: mainReduce, subReduce,
       initialState: new ImmutableMap(),
-      ...await reveal(gatewayRevelation.corpus),
+      ...(gatewayRevelation.corpus || {}),
     };
     this.clockEvent(1, () => [`corpus.create`, "new Corpus", ...dumpObject(corpusOptions)]);
     return new Corpus(corpusOptions);
@@ -597,7 +596,7 @@ export default class Gateway extends FabricEventTarget {
             }
           });
         },
-        ...await reveal(gatewayRevelation.falseProphet),
+        ...(gatewayRevelation.falseProphet || {}),
         parent: this,
       };
       this.clockEvent(1, () => [`falseProphet.create`,
@@ -649,7 +648,7 @@ export default class Gateway extends FabricEventTarget {
     let identityOptions, identity;
     try {
       identityOptions = {
-        ...((await reveal(gatewayRevelation.identity)) || {}),
+        ...(gatewayRevelation.identity || {}),
         parent: this,
         sourcerer: falseProphet,
       };
@@ -678,7 +677,7 @@ export default class Gateway extends FabricEventTarget {
     let discourseOptions, discourse;
     try {
       discourseOptions = {
-        ...((await reveal(gatewayRevelation.discourse)) || {}),
+        ...(gatewayRevelation.discourse || {}),
       };
       this.clockEvent(1, () => [`falseProphet.discourse.create`,
           "new FalseProphetDiscourse", ...dumpObject(discourseOptions)]);
@@ -732,7 +731,7 @@ export default class Gateway extends FabricEventTarget {
         throw new Error(`Spindle '${spindlePrototype.name}' already attached`);
       }
       spindleNames.push(spindlePrototype.name);
-      const spindleRevelation = await reveal(this.spindleRevelations[spindlePrototype.name]);
+      const spindleRevelation = this.spindleRevelations[spindlePrototype.name];
       newSpindleLookup[spindlePrototype.name] = spindlePrototype.attachSpawn
           ? spindlePrototype.attachSpawn(this, spindleRevelation)
           : Object.assign(Object.create(spindlePrototype),

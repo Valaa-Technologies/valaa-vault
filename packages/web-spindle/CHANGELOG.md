@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.11](https://github.com/valaatech/kernel/compare/v0.35.0-rc.10...v0.35.0-rc.11) (2020-04-09)
+
+
+### Features
+
+* Add postSession for refreshing the session token ([d580da8](https://github.com/valaatech/kernel/commit/d580da8dc44241fe42dcfb360df0e04672e6819d))
+
+
+
+
+
 # [0.35.0-rc.10](https://github.com/valaatech/kernel/compare/v0.35.0-rc.9...v0.35.0-rc.10) (2020-04-03)
 
 

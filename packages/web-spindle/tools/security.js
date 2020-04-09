@@ -39,7 +39,7 @@ export function verifySessionAuthorization (
     if ((rights == null) || !rights.length) {
       if (_isReadOnlyMethod[route.method]) return false;
     } else {
-      identityRoles = resolveIdentityRoles(router, route, scope);
+      identityRoles = resolveScopeIdentityRoles(router, route, scope);
       if (identityRoles === null) return true;
       router.infoEvent(3, () => [
         `CHECKING ACCESS of ${accessRootDescription} via ${router._routeName(route)}:`,
@@ -72,46 +72,122 @@ export function verifySessionAuthorization (
   }
 }
 
-export function resolveIdentityRoles (router, route, scope) {
+export function resolveScopeIdentityRoles (router, route, scope) {
   if (scope.identityRoles !== undefined) return scope.identityRoles;
-  const identity = router.getIdentity();
-  if (!identity) {
-    throw new Error("Cannot verify session authorization: valosheath identity not configured");
-  }
   if (!scope.sessionPayload) {
-    const sessionToken = scope.request.cookies[identity.getSessionCookieName()];
-    if (!sessionToken) return (scope.identityRoles = { "": true });
-    scope.sessionPayload = burlaesgDecode(sessionToken, identity.clientSecret.slice(0, 30)).payload;
-    if (!scope.sessionPayload) throw new Error("session token without content");
+    const sessionCookie = scope.request.cookies[router.getIdentity().getSessionCookieName()];
+    if (sessionCookie) scope.sessionPayload = extractSessionPayload(router, sessionCookie);
   }
-  const { timeStamp, identityChronicle, clientRedirectPath } = scope.sessionPayload;
-  if (!(Math.floor(Date.now() / 1000)
-      < Number(timeStamp) + router.getSessionDuration())) {
-    router.logEvent(1, () => [
-      "Session expired:", Math.floor(Date.now() / 1000),
-          ">=", timeStamp, router.getSessionDuration(),
-      "\n\tpayload:", timeStamp, identityChronicle,
-    ]);
-    scope.reply.clearCookie(identity.getSessionCookieName(), {
-      httpOnly: true, secure: true, path: clientRedirectPath || "/",
-    });
-    scope.reply.clearCookie(identity.getClientCookieName(), {
-      httpOnly: false, secure: true, path: clientRedirectPath || "/",
-    });
-    // scope.reply.code(401);
-    // scope.reply.send("Session has expired, please refresh");
-    scope.reply.code(302);
-    scope.reply.redirect(clientRedirectPath || "/");
-    return (scope.identityRoles = null);
-  }
-  scope.identityRoles = router.getIdentityRoles(identityChronicle);
-  const [, authorityURI, identityId] = identityChronicle.match(/^(.*)\?id=(.*)$/) || [];
-  if (authorityURI) {
-    scope.sessionIdentity = vRef(identityId, undefined, undefined, identityChronicle)
-        .setAbsent();
-    scope.identityRoles[`${authorityURI}?id=@$~aur.${encodeURIComponent(authorityURI)}@@`] = true;
+  const identityChronicle = (scope.sessionPayload || {}).identityChronicle;
+  if (!identityChronicle) {
+    scope.identityRoles = { "": true };
+  } else if (fillReplyIfSessionExpired(router, scope.reply, scope.sessionPayload)) {
+    scope.identityRoles = null;
+  } else {
+    scope.identityRoles = router.getIdentityRoles(identityChronicle);
+    const [, authorityURI, identityId] = identityChronicle.match(/^(.*)\?id=(.*)$/) || [];
+    if (authorityURI) {
+      scope.sessionIdentity = vRef(identityId, undefined, undefined, identityChronicle)
+          .setAbsent();
+      scope.identityRoles[`${authorityURI}?id=@$~aur.${encodeURIComponent(authorityURI)}@@`] = true;
+    }
   }
   return scope.identityRoles;
+}
+
+export function extractAuthorizationGrantContent (router, identity, authorizationGrant) {
+  return burlaesgDecode(authorizationGrant, identity.clientSecret.slice(0, 30));
+}
+
+export function assembleSimpleSessionEnvelope (router, grantPayload) {
+  const {
+    identityChronicle, identityPartition,
+    claims: { email, preferred_username }, // eslint-disable-line camelcase
+  } = grantPayload;
+  return {
+    identityChronicle: identityChronicle || identityPartition,
+    clientClaimsFields: { email, preferred_username },
+  };
+}
+
+export function fillReplySessionAndClientCookies (router, reply, sessionEnvelope, {
+  identity, tokenExpirationDelay, clientRedirectPath, now, iv, nonce,
+}) {
+  const {
+    identityChronicle, sessionPayloadFields, clientClaimsFields, ...spuriousFields
+  } = sessionEnvelope;
+  const spuriousKeys = Object.keys(spuriousFields);
+  if (spuriousKeys.length) {
+    throw new Error(`session envelope contains spurious fields: ${spuriousKeys}`);
+  }
+  ["identityChronicle", "email", "preferred_username"].forEach(name => {
+    if ((sessionEnvelope[name] === undefined) && ((clientClaimsFields || {})[name] === undefined)) {
+      throw new Error(`session envelope is missing required field: "${name}"`);
+    }
+  });
+  const sessionPayload = {
+    timeStamp: now, nonce: nonce || "", identityChronicle, clientRedirectPath,
+    ...(sessionPayloadFields || {}),
+  };
+  reply.setCookie(
+      identity.sessionCookieName,
+      burlaesgEncode(
+          sessionPayload, identity.clientSecret.slice(0, 30), iv || generateBurlaesgIV()),
+      {
+        httpOnly: true, secure: true, maxAge: tokenExpirationDelay,
+        path: clientRedirectPath,
+      });
+  const clientToken = {
+    iss: identity.clientURI,
+    sub: identityChronicle,
+    iat: now,
+    exp: now + tokenExpirationDelay,
+    ...(clientClaimsFields || {}),
+    // aud: "", nbf: "", jti: "",
+  };
+  reply.setCookie(
+      identity.clientCookieName,
+      hs256JWTEncode(clientToken, identity.clientSecret),
+      {
+        httpOnly: false, secure: true, maxAge: tokenExpirationDelay,
+        path: clientRedirectPath,
+      });
+}
+
+export function extractSessionPayload (router, sessionCookie) {
+  const identity = router.getIdentity();
+  const ret = burlaesgDecode(sessionCookie, identity.clientSecret.slice(0, 30)).payload;
+  if (!ret) throw new Error("session token without content");
+  return ret;
+}
+
+export function extractClientToken (router, clientCookie) {
+  const identity = router.getIdentity();
+  const ret = hs256JWTDecode(clientCookie, identity.clientSecret);
+  if (!ret) throw new Error("client token without content");
+  return ret;
+}
+
+export function fillReplyIfSessionExpired (router, reply, sessionPayload) {
+  const identity = router.getIdentity();
+  const { timeStamp, identityChronicle, clientRedirectPath } = sessionPayload;
+  if (Math.floor(Date.now() / 1000) < Number(timeStamp) + router.getSessionDuration()) return false;
+  router.logEvent(1, () => [
+    "Session expired:", Math.floor(Date.now() / 1000),
+        ">=", timeStamp, router.getSessionDuration(),
+    "\n\tpayload:", timeStamp, identityChronicle,
+  ]);
+  reply.clearCookie(identity.getSessionCookieName(), {
+    httpOnly: true, secure: true, path: clientRedirectPath || "/",
+  });
+  reply.clearCookie(identity.getClientCookieName(), {
+    httpOnly: false, secure: true, path: clientRedirectPath || "/",
+  });
+  // scope.reply.code(401);
+  // scope.reply.send("Session has expired, please refresh");
+  reply.code(302);
+  reply.redirect(clientRedirectPath || "/");
+  return true;
 }
 
 const accessFields = {
@@ -173,7 +249,7 @@ export function hs256JWTEncode (payload: string, key: string,
   return `${base64HeaderAndPayload}.${base64URLFromBase64(signer.digest("base64"))}`;
 }
 
-export function hs256JWTDecode (jwt: string, key: string) {
+export function hs256JWTDecode (jwt: string, validationKey: ?string) {
   const parts = jwt.split(".");
   const ret = {
     header: JSON.parse(base64URLDecode(parts[0])),
@@ -183,10 +259,12 @@ export function hs256JWTDecode (jwt: string, key: string) {
   if (ret.header.alg !== "HS256") {
     throw new Error(`Cannot decode non-HS256 JWT with alg = '${ret.header.alg}'`);
   }
-  const signer = crypto.createHmac("sha256", key);
-  signer.update(jwt.substr(0, parts[0].length + 1 + parts[1].length));
-  if (base64URLFromBase64(signer.digest("base64")) !== parts[2]) {
-    throw new Error("HS256 JWT signature mismatch");
+  if (validationKey) {
+    const signer = crypto.createHmac("sha256", validationKey);
+    signer.update(jwt.substr(0, parts[0].length + 1 + parts[1].length));
+    if (base64URLFromBase64(signer.digest("base64")) !== parts[2]) {
+      throw new Error("HS256 JWT signature mismatch");
+    }
   }
   return ret;
 }

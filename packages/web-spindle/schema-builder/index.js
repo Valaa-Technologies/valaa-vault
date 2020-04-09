@@ -48,6 +48,7 @@ export {
 
 export {
   sessionGETRoute,
+  sessionPOSTRoute,
   sessionDELETERoute,
 } from "./_sessionRoutes";
 

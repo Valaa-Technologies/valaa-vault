@@ -6,7 +6,7 @@ const {
   ObjectSchema, trySchemaNameOf, sharedSchemaOf, enumerateMappingsOf,
   listingGETRoute, resourceDELETERoute, resourceGETRoute, resourcePATCHRoute, resourcePOSTRoute,
   relationsGETRoute, mappingDELETERoute, mappingGETRoute, mappingPATCHRoute, mappingPOSTRoute,
-  sessionGETRoute, sessionDELETERoute,
+  sessionGETRoute, sessionPOSTRoute, sessionDELETERoute,
 } = require("../schema-builder");
 
 const testTypes = Object.values(require("./test-types")).filter(tt => (typeof tt !== "function"));
@@ -54,8 +54,16 @@ exports.createConfig = function createConfig (options) {
         name: "session",
         rules: {
           grantExpirationDelay: 300,
-          tokenExpirationDelay: 86400 * 7,
+          tokenExpirationDelay: 86400,
           clientRedirectPath: `/rest-test-app/`,
+        },
+      }, globalRules),
+
+      sessionPOSTRoute(`/session`, {
+        name: "session",
+        rules: {
+          refreshExpirationDelay: 86400 * 7,
+          tokenExpirationDelay: 86400,
         },
       }, globalRules),
 

@@ -20,7 +20,11 @@ export function _createPrefixRouter (rootService, prefix, prefixConfig) {
 
   prefixRouter.getRoutePrefix = () => prefix;
   prefixRouter.getSessionDuration = () => (sessionDuration || rootService.getSessionDuration());
-  prefixRouter.getIdentity = () => prefixRouter._identity;
+  prefixRouter.tryIdentity = () => prefixRouter._identity;
+  prefixRouter.getIdentity = () => {
+    if (!prefixRouter._identity) throw new Error("Router identity not configured");
+    return prefixRouter._identity;
+  };
 
   // Create the projectors for all routes before trying to register.
   // At this stage neither schema nor fastify is available for the

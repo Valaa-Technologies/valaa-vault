@@ -25,7 +25,7 @@ export function _createProjectorRuntime (
   runtime.rulePresolvers = [];
   runtime.staticResources = [];
   runtime.ruleResolvers = {};
-  runtime.identity = router.getIdentity();
+  runtime.identity = router.tryIdentity();
 
   const scopePreparations = runtime.scopePreparations = {};
 

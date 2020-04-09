@@ -51,6 +51,33 @@ export function sessionGETRoute (url, userConfig, globalRules) {
   }
 }
 
+export function sessionPOSTRoute (url, userConfig, globalRules) {
+  const route = { url, category: "session", method: "POST", config: {
+    rules: {
+      refreshExpirationDelay: 7 * 86400,
+      clientCookie: ["!$.request$.cookies", ["!$.identity$.clientCookieName"]],
+      sessionCookie: ["!$.request$.cookies", ["!$.identity$.sessionCookieName"]],
+    },
+  } };
+  try {
+    if (!_setupRoute(route, userConfig, globalRules)) {
+      return undefined;
+    }
+    Object.assign(route.schema, {
+      description: `Refresh the session authorization grant`,
+      response: {
+        302: StringType,
+        404: { type: "string" },
+      },
+    });
+    return route;
+  } catch (error) {
+    throw wrapError(error, new Error(`sessionPOSTRoute(${_routeName(route)})`),
+        "\n\troute:", ...dumpObject(route),
+    );
+  }
+}
+
 export function sessionDELETERoute (url, userConfig, globalRules) {
   const route = { url, category: "session", method: "DELETE", config: {
     rules: {

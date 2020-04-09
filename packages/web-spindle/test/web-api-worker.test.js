@@ -4,7 +4,7 @@ import PerspireServer from "~/inspire/PerspireServer";
 
 import fetchJSON, { fetch } from "~/tools/fetchJSON";
 
-import { burlaesgEncode } from "~/web-spindle/tools/security";
+import { burlaesgEncode, hs256JWTDecode } from "~/web-spindle/tools/security";
 
 const revelationRoot = "./packages/web-spindle/test/worker";
 const expectedOutputHTML = `<html><head>${
@@ -24,6 +24,8 @@ beforeEach(() => {});
 
 const testClientChronicleURI = "valaa-local:?id=@$~u4.f3d306d9-79ac-4087-afbc-46f739226eb2@@";
 const testClientId = encodeURIComponent(testClientChronicleURI);
+const sessionCookieName = `__Secure-valos-session-token-${testClientId}`;
+const clientCookieName = `__Secure-valos-client-${testClientId}`;
 
 const testAdminId = "@$~test.admin@@";
 const testUserId = "@$~test.user@@";
@@ -89,22 +91,28 @@ async function _initiateTestSession (identityChronicle) {
     nonce, timeStamp: Math.floor(Date.now() / 1000),
   }, "pen-pineapple-apple-pen", iv);
 
-  const clientTokenName = `__Secure-valos-client-${testClientId}`;
-
   const sessionRedirect = await fetch(`http://127.0.0.1:7357/rest-test/v0/session${
       ""}?code=${code}&state=auth-state`, {
         method: "GET",
-        headers: { cookie: `${clientTokenName}=auth-state` },
+        headers: { cookie: `${clientCookieName}=auth-state` },
         redirect: "manual",
       });
   expect(sessionRedirect.status)
       .toEqual(302);
   expect(sessionRedirect.headers.get("location"))
       .toEqual("http://127.0.0.1:7357/rest-test-app/");
-  const cookies = sessionRedirect.headers.get("set-cookie");
-  const sessionTokenName = `__Secure-valos-session-token-${testClientId}`;
-  const sessionCookieContent = cookies.match(new RegExp(`${sessionTokenName}\\=([^;]*)\\;`))[1];
-  return `${sessionTokenName}=${sessionCookieContent}`;
+  return _extractSessionClientCookie(sessionRedirect.headers);
+}
+
+function _extractSessionClientCookie (incomingHeaders) {
+  const cookies = incomingHeaders.get("set-cookie");
+  const sessionCookie = cookies.match(new RegExp(`${sessionCookieName}\\=([^;]*)\\;`))[1];
+  const clientCookie = cookies.match(new RegExp(`${clientCookieName}\\=([^;]*)\\;`))[1];
+  return {
+    sessionCookie,
+    clientCookie,
+    cookie: `${sessionCookieName}=${sessionCookie}; ${clientCookieName}=${clientCookie}`,
+  };
 }
 
 describe("Web API spindle worker", () => {
@@ -127,11 +135,11 @@ describe("Web API spindle worker", () => {
             { method: "POST", body: { name: "unauthorized-without-session" } }))
         .rejects.toMatchObject({ message: /403/ });
 
-    const sessionCookie = await _initiateTestSession(adminChronicleURI);
-    const headers = { cookie: sessionCookie };
+    const { cookie } = await _initiateTestSession(adminChronicleURI);
+    const headers = { cookie };
 
-    const userHeaders = { cookie: await _initiateTestSession(userChronicleURI) };
-    const randoHeaders = { cookie: await _initiateTestSession(randoChronicleURI) };
+    const userHeaders = { cookie: (await _initiateTestSession(userChronicleURI)).cookie };
+    const randoHeaders = { cookie: (await _initiateTestSession(randoChronicleURI)).cookie };
 
     const testingividualPOST = await fetchJSON("http://127.0.0.1:7357/rest-test/v0/individuals",
         { method: "POST", body: { name: "testingividual" }, headers });
@@ -204,8 +212,8 @@ describe("Web API spindle worker", () => {
   it("performs a full mapping methods session", async () => {
     await _server;
 
-    const sessionCookie = await _initiateTestSession(adminChronicleURI);
-    const headers = { cookie: sessionCookie };
+    const { cookie } = await _initiateTestSession(adminChronicleURI);
+    const headers = { cookie };
 
     const announcerPOST = await fetchJSON(
         "http://127.0.0.1:7357/rest-test/v0/services",
@@ -322,5 +330,85 @@ describe("Web API spindle worker", () => {
         { method: "GET", headers });
     expect(silenceGET)
         .toEqual([]);
+  });
+
+  it("refreshes and closes a session", async () => {
+    await _server;
+
+    await expect(fetchJSON("http://127.0.0.1:7357/rest-test/v0/individuals",
+            { method: "POST", body: { name: "unauthorized-without-session" } }))
+        .rejects.toMatchObject({ message: /403/ });
+
+    const { cookie, clientCookie } = await _initiateTestSession(adminChronicleURI);
+    const headers = { cookie };
+
+    const testingividualPOST = await fetchJSON("http://127.0.0.1:7357/rest-test/v0/individuals",
+        { method: "POST", body: { name: "testingividual" }, headers });
+    expect(testingividualPOST)
+        .toMatchObject({ $V: { rel: "self" } });
+    const href = testingividualPOST.$V.href;
+    const id = href.match(/^\/rest-test\/v0\/individuals\/([@$.a-zA-Z0-9\-_~]*)$/)[1];
+
+    const testingividualGET = await fetchJSON(`http://127.0.0.1:7357${href}?fields=*`,
+        { method: "GET", headers });
+    expect(testingividualGET)
+        .toMatchObject({ $V: { id }, name: "testingividual", image: "testingividual", owned: {} });
+
+    // wait so that the client cookie iat and exp timestamps have time to change.
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    const refreshSessionRedirect = await fetch(`http://127.0.0.1:7357/rest-test/v0/session`, {
+      method: "POST", headers, redirect: "manual",
+    });
+    expect(refreshSessionRedirect.status)
+        .toEqual(302);
+    expect(refreshSessionRedirect.headers.get("location"))
+        .toEqual("http://127.0.0.1:7357/rest-test-app/");
+    const { cookie: refreshedCookie, clientCookie: refreshedClientCookie } =
+        _extractSessionClientCookie(refreshSessionRedirect.headers);
+
+    expect(refreshedCookie)
+        .not.toEqual(cookie);
+
+    const clientToken = hs256JWTDecode(clientCookie);
+    const refreshedClientToken = hs256JWTDecode(refreshedClientCookie);
+    expect(refreshedClientToken.header)
+        .toEqual(clientToken.header);
+    expect(refreshedClientToken.payload.iss)
+        .toEqual(clientToken.payload.iss);
+    expect(refreshedClientToken.payload.sub)
+        .toEqual(clientToken.payload.sub);
+    expect(refreshedClientToken.payload.iat)
+        .not.toEqual(clientToken.payload.iat);
+    expect(refreshedClientToken.payload.exp)
+        .not.toEqual(clientToken.payload.exp);
+    expect(refreshedClientToken.signature)
+        .not.toEqual(clientToken.signature);
+
+    headers.cookie = refreshedCookie;
+
+    const otherPOST = await fetchJSON("http://127.0.0.1:7357/rest-test/v0/individuals",
+        { method: "POST", body: { name: "other" }, headers });
+    expect(otherPOST)
+        .toMatchObject({ $V: { rel: "self" } });
+    const otherHRef = otherPOST.$V.href;
+    const otherId = otherHRef.match(/^\/rest-test\/v0\/individuals\/([@$.a-zA-Z0-9\-_~]*)$/)[1];
+
+    const otherGET = await fetchJSON(`http://127.0.0.1:7357${otherHRef}?fields=*`,
+        { method: "GET", headers });
+    expect(otherGET)
+        .toMatchObject({ $V: { id: otherId }, name: "other", image: "other", owned: {} });
+
+    const deleteSessionRedirect = await fetch(`http://127.0.0.1:7357/rest-test/v0/session`, {
+      method: "DELETE", headers, redirect: "manual",
+    });
+    expect(deleteSessionRedirect.status)
+        .toEqual(303);
+    expect(deleteSessionRedirect.headers.get("location"))
+        .toEqual("http://127.0.0.1:7357/rest-test-app/");
+    const { cookie: deleteSessionCookies } =
+        _extractSessionClientCookie(deleteSessionRedirect.headers);
+    expect(deleteSessionCookies)
+        .toEqual(`${sessionCookieName}=; ${clientCookieName}=`);
   });
 });

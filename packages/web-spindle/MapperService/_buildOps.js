@@ -1,9 +1,9 @@
 // @flow
 
 export function _appendSchemaSteps (
-    router, runtime, jsonSchema, targetVAKON, expandProperties, isValOSFields) {
+    router, runtime, jsonSchema, targetTrack, expandProperties, isValOSFields) {
   if (jsonSchema.type === "array") {
-    router.appendSchemaSteps(runtime, jsonSchema.items, { expandProperties, targetVAKON });
+    router.appendSchemaSteps(runtime, jsonSchema.items, { expandProperties, targetTrack });
   } else if ((jsonSchema.type === "object") && expandProperties) {
     const objectKuery = {};
     Object.entries(jsonSchema.properties).forEach(([key, valueSchema]) => {
@@ -26,7 +26,7 @@ export function _appendSchemaSteps (
           op = "self";
         } else {
           op = router.appendSchemaSteps(runtime, valueSchema,
-              { expandProperties: true, targetVAKON: ["§->", key, false] });
+              { expandProperties: true, targetTrack: ["§->", key, false] });
         }
       } else {
         op = router.appendSchemaSteps(runtime, valueSchema, { expandProperties: true });
@@ -37,7 +37,7 @@ export function _appendSchemaSteps (
       }
       objectKuery[key] = op;
     });
-    targetVAKON.push(objectKuery);
+    targetTrack.push(objectKuery);
   }
 }
 

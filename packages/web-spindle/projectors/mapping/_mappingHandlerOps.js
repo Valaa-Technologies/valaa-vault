@@ -5,19 +5,31 @@ import type { PrefixRouter, Route } from "~/web-spindle/MapperService";
 import { _verifyResourceAuthorization } from "../_commonProjectorOps";
 import { _presolveResourceRouteRequest } from "../resource/_resourceHandlerOps";
 
+import { dumpObject } from "~/tools";
+
 export function _createToMapping (router: PrefixRouter, route: Route, runtime) {
   const toMappingSource = runtime.toMappingSource = ["§->"];
-  router.appendSchemaSteps(runtime, route.config.resource.schema, { targetVAKON: toMappingSource });
-  const relationSchema = router.derefSchema(route.config.relation.schema);
-  router.appendVPathSteps(runtime, relationSchema.valospace.reflection, toMappingSource);
-  const relationsIndex = toMappingSource.findIndex(e => (e === "relations"));
-
   const toMapping = runtime.toMapping = ["§->"];
-  toMapping.push(...toMappingSource.splice(relationsIndex));
-  const filter = toMapping.find(e => e && (e[0] === "§filter"));
-  filter[1] = ["§&&", filter[1], ["§==", ["§.", "target"], ["§$", "target"]]];
-  if (toMapping[toMappingSource.length - 1][0] === "§map") toMapping.splice(-2, 2);
-  toMapping.push(0);
+  try {
+    router.appendSchemaSteps(
+        runtime, route.config.resource.schema, { targetTrack: toMappingSource });
+    const relationSchema = router.derefSchema(route.config.relation.schema);
+    router.appendVPathSteps(runtime, relationSchema.valospace.reflection, toMappingSource);
+    const relationsIndex = toMappingSource.findIndex(e => (e === "relations"));
+
+    toMapping.push(...toMappingSource.splice(relationsIndex));
+    const filter = toMapping.find(e => e && (e[0] === "§filter"));
+    if (!filter) throw new Error("mapping is missing filter clause");
+    filter[1] = ["§&&", filter[1], ["§==", ["§.", "target"], ["§$", "target"]]];
+    if (toMapping[toMappingSource.length - 1][0] === "§map") toMapping.splice(-2, 2);
+    toMapping.push(0);
+  } catch (error) {
+    throw router.wrapErrorEvent(error, 1,
+        new Error(`During _createToMapping(${router._routeName(route)}`),
+        "\n\ttoMappingSource:", ...dumpObject(toMappingSource),
+        "\n\ttoMapping:", ...dumpObject(toMapping),
+    );
+  }
 }
 
 export function _presolveMappingRouteRequest (

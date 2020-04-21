@@ -206,7 +206,7 @@ function reveal (mystery) {
 }
 
 function expose (mystery) {
-  // in-place reveal and replace object properties
+  // in-place deep reveal and replace object properties
   let revealedTrivialObject_;
   return thenChainEagerly(reveal(mystery), [
     revealed => {
@@ -373,7 +373,7 @@ function _patchRevelation (gateway, targetRevelation, patchRevelation) {
         if (typeof spreader === "string") return _spreadValk(spreader);
         if ((spreader === null) || (typeof spreader !== "object")) return spreader;
         // Expand inner spreaders.
-        const extendedSpreader = this.extend(undefined, spreader);
+        const extendedSpreader = expose(this.extend(undefined, spreader));
         if (isPromise(extendedSpreader)) return extendedSpreader.then(_spreadValk);
         if (!Array.isArray(spreader)) return extendedSpreader || spreader;
         return _spreadValk(extendedSpreader);
@@ -467,13 +467,15 @@ function _valk (gateway, head, step) {
     if (opId === "§[]") return step.slice(1).map(_tryLiteralOrValk);
     if ((opId === "§reveal") || (opId === "§$")) return _reveal(gateway, step);
     if (opId === "§{}") {
-      return step.slice(1).reduce((o, [key, value]) => {
-        o[key] = _tryLiteralOrValk(value);
-        return o;
-      }, {});
+      const ret = {};
+      const values = step.slice(1).map(([key, value]) => (ret[key] = _tryLiteralOrValk(value)));
+      return _delayIfAnyObscured(values, revealed => {
+        for (let i = 1; i !== step.length; ++i) ret[step[i][0]] = revealed[i - 1];
+        return ret;
+      }) || ret;
     }
     if (opId === "§invoke") {
-      return head[step[1]]
+      return head[_tryLiteralOrValk(step[1])]
           .call(head, ...step.slice(2)
               .map(arg => ((typeof arg !== "object") ? arg : _valk(gateway, head, arg))));
     }
@@ -487,8 +489,8 @@ function _valk (gateway, head, step) {
     */
     throw new Error(`Unrecognized revelation op '${opId}'`);
   } catch (error) {
-    throw gateway.wrapErrorEvent(error, 1, () => [
-      new Error("_valk"),
+    const errorName = new Error(`_valk(${step && step[0]})`);
+    throw gateway.wrapErrorEvent(error, 0, () => [errorName,
       "\n\thead:", ...dumpObject(head),
       "\n\tstep:", ...dumpObject(step),
     ]);

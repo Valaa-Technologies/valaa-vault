@@ -54,13 +54,16 @@ module.exports = {
 
 function mapEagerly (
     entriesOrThenables, // : any[] | Promise<any[]>,
-    callback, // : Function,
+    callbacks, // : Function,
     onRejected, // ?: Function,
     startIndex = 0,
     results = []) {
   let index = null;
   let wrap;
   let entries;
+  const callback = (typeof callbacks === "function")
+      ? callbacks
+      : (e => thenChainEagerly(e, callbacks));
   try {
     if (!Array.isArray(entriesOrThenables)) {
       if ((entriesOrThenables == null) || (typeof entriesOrThenables.then !== "function")) {

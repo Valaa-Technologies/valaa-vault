@@ -541,7 +541,8 @@ export default class FalseProphetConnection extends Connection {
       if (!transactor.dispatchAndDefaultActEvent(progress)) return false; // just prevents output
     }
     if (reformation.isComplete) {
-      this.outputErrorEvent(wrappedError, "Exception caught during reformHeresy");
+      this.outputErrorEvent(wrappedError,
+          "Exception caught when reforming heresy");
     }
     return false;
   }

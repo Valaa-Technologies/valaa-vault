@@ -98,8 +98,8 @@ export default class Subscription extends LiveUpdate {
   debugId (): string {
     return `${this.constructor.name}(${
       this._fieldName ? `field: ${this._fieldName}`
-      : this._fieldFilter ? `filter: ${debugObject(this._fieldName)}`
-      : `kuery: ${debugObject(this._liveKuery)}`
+          : this._fieldFilter ? `filter: ${debugObject(this._fieldName)}`
+          : `kuery: ${debugObject(this._liveKuery)}`
     })`;
   }
 
@@ -235,8 +235,7 @@ export default class Subscription extends LiveUpdate {
     }
     if (!this._listeners.size) this.detachHooks();
     function errorOnEmitLiveUpdate (error, stage, listener, callbackKey) {
-      const name = new Error(
-          `${this.debugId()}\n ._broadcastUpdate(stage #${stage}, ${passageCounter})`);
+      const name = new Error(`_broadcastUpdate(stage #${stage}, ${passageCounter})`);
       return this._emitter.wrapErrorEvent(error, 1, () => [
         name,
         "\n\tliveUpdate:", ...dumpObject(liveUpdate),
@@ -275,26 +274,25 @@ export default class Subscription extends LiveUpdate {
       if (triggerBroadcast !== false) this._triggerPostUpdate();
     } catch (error) {
       if (this._attachedHooks) this.detachHooks();
-      const origin = new Error(
-          `${this.debugId()}\n .attachHooks(${triggerBroadcast})`);
-      const wrappedError = this._emitter.wrapErrorEvent(error,
-          1,
-          origin,
-          "\n\temitter:", this._emitter,
-          ...(this._liveKuery === undefined ? [
-            "\n\tfilter:", this._fieldFilter || this._fieldName,
-            "\n\tstate:", ...dumpObject(this._valkOptions.state),
-            "\n\tstate was:", ...dumpObject(state),
-            "\n\tstate prestate:", ...dumpObject(prestate),
-          ] : [
-            "\n\thead:", ...dumpObject(this._liveHead),
-            "\n\tkuery:", ...dumpKuery(this._liveKuery),
-            "\n\toptions:", ...dumpObject(this._valkOptions),
-          ]),
-          "\n\tsubscription:", ...dumpObject(this));
+      const name = new Error(`attachHooks(${triggerBroadcast})`);
+      const wrappedError = this._emitter.wrapErrorEvent(error, 1, () => [
+        name,
+        "\n\temitter:", this._emitter,
+        ...(this._liveKuery === undefined ? [
+          "\n\tfilter:", this._fieldFilter || this._fieldName,
+          "\n\tstate:", ...dumpObject(this._valkOptions.state),
+          "\n\tstate was:", ...dumpObject(state),
+          "\n\tstate prestate:", ...dumpObject(prestate),
+        ] : [
+          "\n\thead:", ...dumpObject(this._liveHead),
+          "\n\tkuery:", ...dumpKuery(this._liveKuery),
+          "\n\toptions:", ...dumpObject(this._valkOptions),
+        ]),
+        "\n\tsubscription:", ...dumpObject(this),
+      ]);
       if (this._valkOptions.sourceInfo) {
         addStackFrameToError(wrappedError, this._liveKuery,
-            this._valkOptions.sourceInfo, origin, this._valkOptions.discourse);
+            this._valkOptions.sourceInfo, name, this._valkOptions.discourse);
       }
       throw wrappedError;
     }
@@ -363,13 +361,14 @@ export default class Subscription extends LiveUpdate {
         this._invalidateState();
         this.attachHooks(triggerBroadcast);
       })) return;
-      throw this._emitter.wrapErrorEvent(error, 1,
-          `${this.debugId()}\n .attachLiveKueryHooks()`,
-          "\n\thead:", ...dumpObject(this._liveHead),
-          "\n\tkuery:", ...dumpKuery(this._liveKuery),
-          "\n\tscope:", ...dumpObject(scope),
-          "\n\toptions.state:", ...dumpObject(options.state && options.state.toJS()),
-      );
+      const name = new Error(`attachLiveKueryHooks()`);
+      throw this._emitter.wrapErrorEvent(error, 1, () => [
+        name,
+        "\n\thead:", ...dumpObject(this._liveHead),
+        "\n\tkuery:", ...dumpKuery(this._liveKuery),
+        "\n\tscope:", ...dumpObject(scope),
+        "\n\toptions.state:", ...dumpObject(options.state && options.state.toJS()),
+      ]);
     } finally {
       if (options.discourse) options.discourse = null;
     }

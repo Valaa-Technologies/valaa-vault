@@ -8,6 +8,12 @@ export function _vakonpileVPath (vpath, runtime) {
   if ((sections[0] === "@$") && !sections[1]) return null;
   const stack = { context: contextRuleLookup, contextState: runtime, isPluralHead: false };
   const track = cementVPath(sections, stack);
+  /*
+  console.log("cemented vpath:", ...dumpObject(vpath),
+      "\n\tvia sections:", ...dumpObject(sections),
+      "\n\tinto track:", ...dumpObject(track),
+      "\n\tplural head:", stack.isPluralHead);
+  */
   if (!stack.isPluralHead || ((track[track.length - 1] || [])[0] === "§map")) return track;
   if (sections[0] !== "@@") return ["§->", track, ["§map"]];
   track.push(["§map"]);

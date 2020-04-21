@@ -14,9 +14,9 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       this.runtime = router.createProjectorRuntime(this, route);
       this.toResponseContent = ["§->"];
       router.appendSchemaSteps(this.runtime, route.config.resource.schema,
-          { targetVAKON: this.toResponseContent });
+          { targetTrack: this.toResponseContent });
       router.appendSchemaSteps(this.runtime, route.schema.response[200],
-          { expandProperties: true, targetVAKON: this.toResponseContent });
+          { expandProperties: true, targetTrack: this.toResponseContent });
     },
 
     preload () {

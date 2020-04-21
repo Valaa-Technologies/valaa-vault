@@ -153,10 +153,12 @@ export default class Connection extends Follower {
               && (connectResults.mediaRetrievalStatus
                   || { latestFailures: [] }).latestFailures.length) {
             // FIXME(iridian): This error temporarily demoted to log error
-            connection.outputErrorEvent(new Error(`Failed to connect to chronicle: encountered ${
-              connectResults.mediaRetrievalStatus.latestFailures.length
-                } latest media content retrieval failures (and ${
-                ""}options.requireLatestMediaContents does not equal false).`));
+            connection.outputErrorEvent(
+                new Error(`Failed to connect to chronicle: encountered ${
+                  connectResults.mediaRetrievalStatus.latestFailures.length
+                    } latest media content retrieval failures (and ${
+                    ""}options.requireLatestMediaContents does not equal false).`),
+                "Exception logged when connecting to chronicle");
           }
         }
         connection.warnEvent(1, () => [

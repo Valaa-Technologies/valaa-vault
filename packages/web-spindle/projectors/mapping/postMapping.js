@@ -20,7 +20,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       router.createGetRelSelfHRef(this.runtime, "targetHRef", route.config.target.schema);
       this.toMappingPatchTarget = ["§->", false, "target"];
       router.appendSchemaSteps(this.runtime, route.config.target.schema,
-          { targetVAKON: this.toMappingPatchTarget });
+          { targetTrack: this.toMappingPatchTarget });
     },
 
     preload () {

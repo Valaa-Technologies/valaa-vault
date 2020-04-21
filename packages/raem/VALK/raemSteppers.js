@@ -674,8 +674,8 @@ function _advance (valker: Valker, head: any, scope: ?Object, pathStep: BuiltinS
     if (initialStackFrameSourceInfo) {
       addStackFrameToError(error, step, initialStackFrameSourceInfo, "runtime", valker);
     }
-    throw valker.wrapErrorEvent(error, 1, () => [
-      `During ${valker.debugId()}\n ._advance, step #${index}: ${type}, with:`,
+    const name = new Error(`_advance(step #${index}: ${type})`);
+    throw valker.wrapErrorEvent(error, 1, () => [name,
       "\n\tstep head:", ...dumpObject(stepHead),
       "\n\tstep:", type, ...dumpKuery(step),
       "\n\tpath head:", ...dumpObject(head),

@@ -132,8 +132,9 @@ function _prepareBvobToUpstreamWithRetries (connection: ScribeConnection,
         "\n\tmediaInfo:", ...dumpObject(mediaInfo),
     );
     if ((error.isRetryable !== false) && (retriesRemaining > 0)) {
-      connection.outputErrorEvent(wrappedError, `error while preparing bvob ${mediaName
-          } to upstream (${retriesRemaining} retries remaining):`);
+      connection.outputErrorEvent(wrappedError,
+          `Exception caught while preparing bvob ${mediaName
+            } to upstream (retrying with ${retriesRemaining} retries remaining):`);
       return _prepareBvobToUpstreamWithRetries(connection, buffer, mediaInfo, mediaName, wrap,
           retriesRemaining - 1);
     }
@@ -267,13 +268,14 @@ export async function _retryingTwoWaySyncMediaContent (connection: ScribeConnect
       if (typeof nextBackoff !== "number") {
         if ((content === undefined) && (options.blockOnBrokenDownload === false)) {
           connection.outputErrorEvent(wrappedError,
-              "Error caught for a broken but non-blocking download");
+              "Exception caught for a broken but non-blocking download");
           mediaEntry.downloadStatus = "broken";
           return mediaEntry;
         }
         throw wrappedError;
       }
-      connection.outputErrorEvent(wrappedError);
+      connection.outputErrorEvent(wrappedError,
+          "Exception caught when downloading content, retrying");
       if (i > 1) await _waitBackoff(nextBackoff);
       previousBackoff = nextBackoff;
     }

@@ -591,8 +591,7 @@ export default class Gateway extends FabricEventTarget {
                       "\n\tlistener key:", ...dumpObject(component),
                       "\n\ttotalCount:", totalCount,
                       "\n\tchronicleCommandcounts:", ...dumpObject(chronicleCommandCounts)),
-                  "Exception caught during Gateway.onCommandCountUpdate.listener call",
-                  this);
+                  "Exception caught during Gateway.onCommandCountUpdate.listener call");
             }
           });
         },

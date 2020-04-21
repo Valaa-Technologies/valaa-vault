@@ -65,6 +65,7 @@ function wrapError (errorIn, ...contextDescriptions) {
     contextError.tidyFrameList = contextError.stack.split("\n").slice(3);
   } else {
     contextError.tidyFrameList = contextDescriptions[0].stack.split("\n").slice(2);
+    contextError.logger = contextDescriptions[0].logger;
     contextDescriptions[0] = contextDescriptions[0].message;
   }
   const outermostError = error.errorContexts
@@ -182,8 +183,9 @@ function _clipFrameListToCurrentContext (innerError, outerError) {
   return inner;
 }
 
-function outputError (error, header = "Exception caught", logger = _globalLogger) {
-  logger.error.call(logger,
+function outputError (error, header = "Exception caught", logger = _globalLogger,
+    contextVerbosity = -2) {
+  (logger.errorEvent || logger.error).call(logger,
       `  ${header} (with ${(error.errorContexts || []).length} contexts):\n\n`,
       error.originalMessage || error.message, `\n `);
   if (error.customErrorHandler) {
@@ -195,22 +197,28 @@ function outputError (error, header = "Exception caught", logger = _globalLogger
     logger.log(error.stack.split("\n").slice(1).join("\n"));
   }
   for (const context of (error.errorContexts || [])) {
-    logger.warn(...context.contextDescriptions.map(dumpifyObject));
+    const contextLogger = context.logger || logger;
+    if (contextLogger.warnEvent) {
+      contextLogger.warnEvent(contextVerbosity, ...context.contextDescriptions.map(dumpifyObject));
+    } else {
+      contextLogger.warn(...context.contextDescriptions.map(dumpifyObject));
+    }
     logger.log((context.tidyFrameList || []).join("\n"));
   }
 }
 
 function outputCollapsedError (error, header = "Exception caught", logger = _globalLogger) {
   const collapsedContexts = [];
-  const collapsingLogger = {
-    log: (...args) => collapsedContexts[collapsedContexts.length - 1].traces.push(
-        ...args[0].split("\n")),
+  const collapser = {
+    log: (...args) => collapsedContexts[collapsedContexts.length - 1].traces
+        .push(...args[0].split("\n")),
     warn: (...args) => collapsedContexts.push({ context: args, traces: [] }),
     error: (...args) => collapsedContexts.push({ context: args, traces: [] }),
   };
-  const ret = outputError(error, header, collapsingLogger);
+  const ret = outputError(error, header, collapser);
   delete collapsedContexts[0].context;
-  logger.error(`  ${header} (with ${(error.errorContexts || []).length} collapsed contexts):\n`,
+  (logger.errorEvent || logger.error).call(logger,
+      `  ${header} (with ${(error.errorContexts || []).length} collapsed contexts):\n`,
       error.originalMessage || error.message, "\n", { collapsedContexts });
   return ret;
 }

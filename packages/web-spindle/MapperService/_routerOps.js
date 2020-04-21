@@ -204,7 +204,7 @@ export async function _projectPrefixRoutesFromView (router, view, viewName) {
           (ret = router.wrapErrorEvent(error, 1,
               new Error(`preload(${projector.name})`),
           )),
-          `During preload(${projector.name})`,
+          `Exception caught during preload(${projector.name})`,
           router);
     }
     projector._resolveWhenReady(ret);

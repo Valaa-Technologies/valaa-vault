@@ -3,7 +3,7 @@
 import path from "path";
 import fs from "fs";
 
-import { extendVAKON } from "~/raem/VPath";
+import { extendTrack } from "~/raem/VPath";
 import { dumpify, dumpObject, FabricEventTarget, outputError } from "~/tools";
 
 import { _createPrefixRouter, _projectPrefixRoutesFromView } from "./_routerOps";
@@ -77,7 +77,7 @@ export default class MapperService extends FabricEventTarget {
       throw errorOnCreatePrefixRouter(error);
     }
     function errorOnCreatePrefixRouter (error) {
-      return service.wrapErrorEvent(error, 1,
+      return service.wrapErrorEvent(error, 0,
         new Error(`createPrefixRouter(${openapi.info.name}@${openapi.info.version}: <${prefix}>)`),
         "\n\tprefixConfig:", ...dumpObject(prefixConfig),
         "\n\tswaggerPrefix:", prefixConfig.swaggerPrefix,
@@ -256,76 +256,76 @@ export default class MapperService extends FabricEventTarget {
   }
 
   appendSchemaSteps (runtime, maybeJSONSchema, {
-    expandProperties, isValOSFields, targetVAKON = ["§->"], entryTargetVAKON,
+    expandProperties, isValOSFields, targetTrack = ["§->"], entryTargetTrack,
   } = {}) {
-    let schema, innerTargetVAKON;
-    if (!maybeJSONSchema) return targetVAKON || entryTargetVAKON;
+    let schema, innerTargetTrack;
+    if (!maybeJSONSchema) return targetTrack || entryTargetTrack;
     try {
       schema = this.derefSchema(maybeJSONSchema);
-      innerTargetVAKON = entryTargetVAKON
-          || this.appendVPathSteps(runtime, (schema.valospace || {}).reflection, targetVAKON);
-      if (!innerTargetVAKON) {
-        if (schema.type !== "array") innerTargetVAKON = targetVAKON;
-        else targetVAKON.push((innerTargetVAKON = ["§map"]));
+      innerTargetTrack = entryTargetTrack
+          || this.appendVPathSteps(runtime, (schema.valospace || {}).reflection, targetTrack);
+      if (!innerTargetTrack) {
+        if (schema.type !== "array") innerTargetTrack = targetTrack;
+        else targetTrack.push((innerTargetTrack = ["§map"]));
       }
-      _appendSchemaSteps(this, runtime, schema, innerTargetVAKON, expandProperties, isValOSFields);
-      return targetVAKON;
+      _appendSchemaSteps(this, runtime, schema, innerTargetTrack, expandProperties, isValOSFields);
+      return targetTrack;
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, new Error("appendSchemaSteps"),
           "\n\truntime:", ...dumpObject(runtime),
           "\n\tschema:", dumpify(schema),
-          "\n\ttargetVAKON:", ...dumpObject(targetVAKON),
-          "\n\tinnerTargetVAKON:", ...dumpObject(innerTargetVAKON),
+          "\n\ttargetTrack:", ...dumpObject(targetTrack),
+          "\n\tinnerTargetTrack:", ...dumpObject(innerTargetTrack),
         );
     }
   }
 
-  appendVPathSteps (runtime, vpath, targetVAKON = ["§->"]) {
-    let vpathVAKON, maybeInnerPluralMapVAKON;
+  appendVPathSteps (runtime, vpath, targetTrack = ["§->"]) {
+    let track, maybeInnerPluralMapTrack;
     try {
       if (vpath === undefined) return undefined;
-      if (!vpath) return targetVAKON;
-      vpathVAKON = _vakonpileVPath(vpath, runtime);
-      extendVAKON(targetVAKON, vpathVAKON);
-      if (Array.isArray(vpathVAKON)) {
-        maybeInnerPluralMapVAKON = vpathVAKON[vpathVAKON.length - 1];
-        if (maybeInnerPluralMapVAKON[0] === "§map") return maybeInnerPluralMapVAKON;
+      if (!vpath) return targetTrack;
+      track = _vakonpileVPath(vpath, runtime);
+      extendTrack(targetTrack, track);
+      if (Array.isArray(track)) {
+        maybeInnerPluralMapTrack = track[track.length - 1];
+        if (maybeInnerPluralMapTrack[0] === "§map") return maybeInnerPluralMapTrack;
       }
-      return targetVAKON;
+      return targetTrack;
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, new Error("appendSchemaSteps"),
           "\n\truntime:", ...dumpObject(runtime),
           "\n\tvpath:", ...dumpObject(vpath),
-          "\n\ttargetVAKON:", ...dumpObject(targetVAKON),
-          "\n\tvpathVAKON:", ...dumpObject(runtime),
-          "\n\tmaybeInnerPluralMapVAKON:", ...dumpObject(maybeInnerPluralMapVAKON));
+          "\n\ttargetTrack:", ...dumpObject(targetTrack),
+          "\n\tvpathTrack:", ...dumpObject(runtime),
+          "\n\tmaybeInnerPluralMapTrack:", ...dumpObject(maybeInnerPluralMapTrack));
     }
   }
 
-  appendGateProjectionSteps (runtime, resource, targetVAKON = ["§->"]) {
+  appendGateProjectionSteps (runtime, resource, targetTrack = ["§->"]) {
     const gate = resource.gate;
-    let entryTargetVAKON;
+    let entryTargetTrack;
     try {
       if (!gate || (gate.projection === undefined)) {
         throw new Error(`Resource ${resource.name} gate or projection missing`);
       }
-      entryTargetVAKON = this.appendVPathSteps(runtime, gate.projection, targetVAKON);
-      this.appendSchemaSteps(runtime, resource.schema, { targetVAKON: entryTargetVAKON });
+      entryTargetTrack = this.appendVPathSteps(runtime, gate.projection, targetTrack);
+      this.appendSchemaSteps(runtime, resource.schema, { targetTrack: entryTargetTrack });
       if (gate.filterCondition) {
         const filter = ["§?"];
         this.appendVPathSteps(runtime, gate.filterCondition, filter);
         filter.push(null);
-        entryTargetVAKON.push(filter, false);
+        entryTargetTrack.push(filter, false);
       }
       this.appendSchemaSteps(runtime, resource.schema,
-            { entryTargetVAKON, expandProperties: true });
-      return entryTargetVAKON;
+            { entryTargetTrack, expandProperties: true });
+      return entryTargetTrack;
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, new Error(`appendGateProjectionSteps(${gate.name})`),
           "\n\truntime:", ...dumpObject(runtime),
           "\n\tgate:", ...dumpObject(gate),
-          "\n\ttargetVAKON:", ...dumpObject(targetVAKON),
-          "\n\tentryTargetVAKON:", ...dumpObject(entryTargetVAKON));
+          "\n\ttargetTrack:", ...dumpObject(targetTrack),
+          "\n\tentryTargetTrack:", ...dumpObject(entryTargetTrack));
     }
   }
 

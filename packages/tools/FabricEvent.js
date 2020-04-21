@@ -176,7 +176,6 @@ export class FabricEventTarget {
   }
 
   wrapErrorEvent (error: Error, nameOrMinVerbosity: Error | string | number, ...contexts_: any[]) {
-    if (!_isVerboseEnough(nameOrMinVerbosity, this._verbosity, this)) return error;
     const [functionName, ...contexts] = this._getMessageParts(nameOrMinVerbosity, contexts_);
     const actualFunctionName = functionName instanceof Error ? functionName.message : functionName;
     if (error.hasOwnProperty("functionName")
@@ -186,29 +185,37 @@ export class FabricEventTarget {
       // functionName in the same context.
       return error;
     }
-    const errorWrapper = (functionName instanceof Error) ? functionName : new Error("");
-    if (!errorWrapper.tidyFrameList) {
-      errorWrapper.tidyFrameList = errorWrapper.stack.split("\n")
+    const wrapper = (functionName instanceof Error) ? functionName : new Error("");
+    if (!wrapper.tidyFrameList) {
+      wrapper.tidyFrameList = wrapper.stack.split("\n")
           .slice((functionName instanceof Error) ? 2 : 3);
+      wrapper.logger = this;
     }
     if (typeof nameOrMinVerbosity === "number") {
-      errorWrapper.verbosities = [this.getVerbosity(), nameOrMinVerbosity];
+      wrapper.verbosities = [this.getVerbosity(), nameOrMinVerbosity];
     }
-    errorWrapper.message = `${
-      errorWrapper.verbosities ? `[${errorWrapper.verbosities.join(">=")}] ` : ""
-      }During ${this.debugId()}\n .${actualFunctionName}${contexts.length ? ", with:" : ""}`;
-    const ret = wrapError(error, errorWrapper, ...contexts);
+    let ret;
+    if (!_isVerboseEnough(nameOrMinVerbosity, this._verbosity, this)) {
+      wrapper.message = `${wrapper.verbosities ? `[${wrapper.verbosities.join("<")}] ` : ""
+        }Hidden error context by .${actualFunctionName}`;
+      ret = wrapError(error, wrapper);
+    } else {
+      wrapper.message = `${wrapper.verbosities ? `[${wrapper.verbosities.join(">=")}] ` : ""
+        }Error context by \n  ${actualFunctionName}${contexts.length ? ", with:" : ""}`;
+      ret = wrapError(error, wrapper, ...contexts);
+    }
     ret.functionName = actualFunctionName;
     ret.contextObject = this;
     return ret;
   }
 
   outputErrorEvent (error: Error, firstMessageOrMinVerbosity, ...restMessages) {
-    if (!_isVerboseEnough(firstMessageOrMinVerbosity, this._verbosity, this)) {
-      return outputCollapsedError(error, ...restMessages);
-    }
-    return outputError(error,
-        ...this._getMessageParts(firstMessageOrMinVerbosity, restMessages));
+    return (!_isVerboseEnough(firstMessageOrMinVerbosity, this._verbosity, this)
+            ? outputCollapsedError
+            : outputError)(
+        error,
+        this._getMessageParts(firstMessageOrMinVerbosity, restMessages).join(", "),
+        this);
   }
 
   performChain (params: any, staticChainName: string, staticErrorHandlerName: string,
@@ -365,8 +372,8 @@ export class FabricEventTarget {
 FabricEventTarget.prototype[FabricEventTypesTag] = {};
 
 function _isVerboseEnough (maybeMinVerbosity, verbosity, eventTarget) {
-  return (typeof maybeMinVerbosity === "number")
-      && (maybeMinVerbosity <= (verbosity !== undefined ? verbosity : eventTarget.getVerbosity()));
+  return (typeof maybeMinVerbosity !== "number")
+      || (maybeMinVerbosity <= (verbosity !== undefined ? verbosity : eventTarget.getVerbosity()));
 }
 
 function _createListener (type, callback, options) {

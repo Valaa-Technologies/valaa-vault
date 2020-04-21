@@ -382,7 +382,8 @@ function _rewriteSchismaticVenueCommand (
     isRevisable: false, isReformable: false, isRefabricateable: false,
     message: error.message,
   });
-  reformation.instigatorConnection.outputErrorEvent(error);
+  reformation.instigatorConnection.outputErrorEvent(error,
+      "Exception caught during schismatic command rewrite");
   _purgeHeresy(reformation.falseProphet, schism);
   progress.type = "breach";
   reformation.newRecitalStories.push(
@@ -440,12 +441,14 @@ export function _deliverStoriesToFollowers (falseProphet: FalseProphet, stories:
         followerReactions.set(follower, reactions);
       }
     } catch (error) {
-      falseProphet.outputErrorEvent(falseProphet.wrapErrorEvent(error, 2,
-          "_deliverStoriesToFollowers",
-          "\n\tstories:", ...dumpObject(stories),
-          "\n\treactions:", ...dumpObject(reactions),
-          "\n\ttarget discourse:", ...dumpObject(discourse),
-      ));
+      falseProphet.outputErrorEvent(
+          falseProphet.wrapErrorEvent(error, 2,
+              "_deliverStoriesToFollowers",
+              "\n\tstories:", ...dumpObject(stories),
+              "\n\treactions:", ...dumpObject(reactions),
+              "\n\ttarget discourse:", ...dumpObject(discourse),
+          ),
+          "Exception caught when delivering stories to follower");
     }
   });
   return stories.map((story, index) => ({
@@ -482,11 +485,13 @@ export function _confirmLeadingTruthsToFollowers (falseProphet: FalseProphet) {
     try {
       discourse.receiveTruths(truths);
     } catch (error) {
-      falseProphet.outputErrorEvent(falseProphet.wrapErrorEvent(error, 2,
-          "_confirmLeadingTruthsToFollowers",
-          "\n\tstories:", ...dumpObject(truths),
-          "\n\ttarget discourse:", ...dumpObject(discourse),
-      ));
+      falseProphet.outputErrorEvent(
+          falseProphet.wrapErrorEvent(error, 2,
+              "_confirmLeadingTruthsToFollowers",
+              "\n\tstories:", ...dumpObject(truths),
+              "\n\ttarget discourse:", ...dumpObject(discourse),
+          ),
+          "Exception caught during follower truth confirmation");
     }
   });
 }

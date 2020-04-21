@@ -84,7 +84,8 @@ export function _narrateEventLog (connection: ScribeConnection,
                           "\n\toptions:", ...dumpObject(options),
                           "\n\tsection:", ...dumpObject(section));
                       if (error.blocksNarration) throw wrapped;
-                      connection.outputErrorEvent(wrapped);
+                      connection.outputErrorEvent(wrapped,
+                          "Exception caught when processing narration results");
                     })));
       },
     ] : []),

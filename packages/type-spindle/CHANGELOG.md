@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.12](https://github.com/valaatech/kernel/compare/v0.35.0-rc.11...v0.35.0-rc.12) (2020-04-21)
+
+**Note:** Version bump only for package @valos/type-spindle
+
+
+
+
+
 # [0.35.0-rc.11](https://github.com/valaatech/kernel/compare/v0.35.0-rc.10...v0.35.0-rc.11) (2020-04-09)
 
 **Note:** Version bump only for package @valos/type-spindle

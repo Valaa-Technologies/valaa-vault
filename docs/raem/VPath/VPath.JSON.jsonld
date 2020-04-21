@@ -1,0 +1,387 @@
+[
+  {
+    "@id": "https://valospace.org/raem/VPath/VPath.JSON",
+    "@context": {
+      "@base": "https://valospace.org/raem/VPath/VPath.JSON#",
+      "sbomdoc": "https://valospace.org/sbomdoc#",
+      "revdoc": "https://valospace.org/revdoc#",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "vdoc": "https://valospace.org/vdoc#",
+      "vdoc:content": {
+        "@id": "https://valospace.org/vdoc#content",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:words": {
+        "@id": "https://valospace.org/vdoc#words",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:entries": {
+        "@id": "https://valospace.org/vdoc#entries",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:headers": {
+        "@id": "https://valospace.org/vdoc#headers",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "vdoc:cell": {
+        "@id": "https://valospace.org/vdoc#cell",
+        "@container": "@list",
+        "@type": "@id"
+      }
+    },
+    "dc:title": "VPath JSON representations",
+    "respecConfig": {
+      "specStatus": "unofficial",
+      "editors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ],
+      "authors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ],
+      "shortName": "vpathJSON"
+    },
+    "abstract": {
+      "@id": "abstract",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "VPath JSON is a JSON representation of VPath strings. It\nhas two formats: generic 'VPath outlines' and their strict subset\n'sectioned VPaths'."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Sectioned VPaths are the verbose, machine-processible canonical\nJSON 1-1 representation of VPath strings. Outlines are the more\nconcise, writable and readable but non-canonical format: many different\noutlines can have the same VPath meaning. The normalization of an\noutline into its canonical, sectioned VPath is called disjoining."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "As sectioned VPaths are a subset of VPath outlines, a sectioned VPath\nalways disjoins into itself.\n"
+          ]
+        }
+      ]
+    },
+    "sotd": {
+      "@id": "sotd",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "This document is part of the library workspace ",
+            {
+              "@type": "revdoc:Package",
+              "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/raem"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/raem"
+            },
+            "\n(of domain ",
+            {
+              "@type": "revdoc:Package",
+              "vdoc:content": [
+                {
+                  "vdoc:em": true,
+                  "vdoc:content": [
+                    "@valos/kernel"
+                  ]
+                }
+              ],
+              "vdoc:ref": "@valos/kernel"
+            },
+            ") which has the description:\n`ValOS Resources And Events Model (ValOS-RAEM) API, schema and ontology`."
+          ]
+        }
+      ]
+    },
+    "introduction": {
+      "@id": "introduction",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "VPath JSON is a JSON representation of a VPath string.\nDifferent VPath JSON objects can express the same VPath which allows\nthe most suitable representation to be chosen based on use case."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The canonical subset of VPath JSON (with 1-1 mapping to VPath strings)\nis called sectioned VPaths. These use a limited subset of JSON\nprimitives and are designed to be easily machine-processible."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "Finally, the remaining, non-sectioned VPath JSON objects are called\nVPath outlines. Arbitrary JSON objects can be trivially escaped as\nVPath outline, allowing for generic JSON <-> VPath roundtripping.\nEdit me - this is the first payload chapter. Abstract and SOTD are\nessential ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "ReSpec boilerplate"
+              ],
+              "vdoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
+            }
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "See ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "ReVDoc tutorial"
+              ],
+              "vdoc:ref": "@valos/revdoc/tutorial"
+            },
+            " for\ninstructions on how to write revdoc source documents."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "See also ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "ReVdoc specification"
+              ],
+              "vdoc:ref": "@valos/revdoc"
+            },
+            " and ",
+            {
+              "@type": "vdoc:Reference",
+              "vdoc:content": [
+                "VDoc specification"
+              ],
+              "vdoc:ref": "@valos/vdoc"
+            },
+            " for reference documentation."
+          ]
+        }
+      ]
+    },
+    "sectioned_vpath_json": {
+      "@id": "sectioned_vpath_json",
+      "dc:title": "Sectioned VPath JSON",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "\nSectioned VPaths are the canonical JSON representation of a VPath.\nThey use only a limited subset of JSON primitives: objects are not\nused; the literal 'null', the booleans 'true' and 'false', all string\nvalues and all safe integers (ie. whole numbers from -(2^53-1) to\n(2^53-1)) are used to represent their corresponding contextless vparam\nvalues directly."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "All remaining VPath elements are represented with two-entry arrays\nas the titular 'sections'. The mandatory first entry contains a\n\"@\"-prefixed section type string. The optional second entry contains\nthe section payload."
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "The first two characters of the section type determine which vpath\nelement the section represents:",
+            [
+              [
+                "'@@' denote a vpath element. The type has no other characters. The\noptional payload is an array of /two/ or more sections or values."
+              ],
+              [
+                "'@$' denote a vparam element. The remaining type characters contain\nthe vparam context-term. If there are none the vparam is contextless.\nThe optional payload is a singular section or an unencoded string\nvalue."
+              ],
+              [
+                "'@' denotes a vgrid element or a verb without a type. The mandatory\npayload is a non-empty array of vparam sections or values."
+              ],
+              [
+                "Remaining types denote a verb element with the verb type contained\nin the characters after initial '@'. The optional payload is a\nnon-empty array of sections or values."
+              ]
+            ]
+          ]
+        },
+        {
+          "@type": "revdoc:Example",
+          "dc:title": "forms a VPath string from VPath section of computing a random value between 2.5 and 10",
+          "vdoc:content": [
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                [
+                  "we expect",
+                  {
+                    "vdoc:blockquote": true,
+                    "vdoc:content": [
+                      {
+                        "@type": "vdoc:CharacterData",
+                        "vdoc:content": [
+                          " conjoinVPath(\n    [\"@@\", [                // declare two-step path\n      [\"@!random\"],         // first step: compute a random value\n      [\"@!min\", [           // second step: compute the min of\n        10,                 // a whole number >= Number.MIN_SAFE_INTEGER, <= Number.MAX_SAFE_INTEGER\n        [\"@!max\", [         // and the max of\n          [\"@$f\", \"2.5\"], // a fractional number\n          [\"@@\"],           // and the 'head' ie. the result of first step random computation\n        ]],\n      ]],\n    ]],\n)"
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "toEqual",
+                {
+                  "vdoc:blockquote": true,
+                  "vdoc:content": [
+                    {
+                      "@type": "vdoc:CharacterData",
+                      "vdoc:content": [
+                        "\"@!random@!min$f.10$.@!max$f.2.5$.@@@@@@\""
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "\nDuring sectioning (be it from a vpath string or from an outline) all\nredundant sections are elided or simplified:",
+            [
+              [
+                "Single-step vpath sections are replaced with that step itself - a\nvpath represents a sequential dependency between its\nconstitutient steps so a single-step vpath is redundant"
+              ],
+              [
+                "VParam sections that represent null, true, false or any integer\nvalues are replaced with the direct JSON value"
+              ],
+              [
+                "Contextless vparam sections which contain a path or a verb section\nas the payload are replaced with the payload section itself."
+              ]
+            ]
+          ]
+        },
+        {
+          "@type": "revdoc:Example",
+          "dc:title": "elides degenerate vpath elements during sectioning",
+          "vdoc:content": [
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                [
+                  "we expect",
+                  {
+                    "vdoc:blockquote": true,
+                    "vdoc:content": [
+                      {
+                        "@type": "vdoc:CharacterData",
+                        "vdoc:content": [
+                          " disjoinVPathString(\"@!random@!min$f.10$.@!max$f.2.5$.@@@@@@\")"
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "toEqual",
+                {
+                  "vdoc:blockquote": true,
+                  "vdoc:content": [
+                    {
+                      "@type": "vdoc:CharacterData",
+                      "vdoc:content": [
+                        "[\n  \"@@\",\n  [\n    [\n      \"@!random\"\n    ],\n    [\n      \"@!min\",\n      [\n        10,\n        [\n          \"@!max\",\n          [\n            [\n              \"@$f\",\n              \"2.5\"\n            ],\n            [\n              \"@@\"\n            ]\n          ]\n        ]\n      ]\n    ]\n  ]\n]"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "vpath_json_outline": {
+      "@id": "vpath_json_outline",
+      "dc:title": "VPath JSON outlines",
+      "@type": "vdoc:Chapter",
+      "vdoc:content": [
+        {
+          "@type": "vdoc:Paragraph",
+          "vdoc:content": [
+            "\nVPath outlines are JSON structures which use convenience constructs.\n"
+          ]
+        },
+        {
+          "@type": "revdoc:Example",
+          "dc:title": "disjoins a configuration outline",
+          "vdoc:content": [
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                [
+                  "we expect",
+                  {
+                    "vdoc:blockquote": true,
+                    "vdoc:content": [
+                      {
+                        "@type": "vdoc:CharacterData",
+                        "vdoc:content": [
+                          " disjoinVPathOutline([\n  [\"@$o.folder\", \"vault\"],\n  [\"@$o.vlm\", \"@\", \"webpack\"],\n  [\"@$o.folder\", \"build\"],\n  [\"@$o.import\", {\n    \"@.:workshop\": [\n      [\"@$o.folder\", \"vault\", {\n        \"@+:workers\": {\n          \"@+:ot-worker-hyperbridge-dev\": [],\n        },\n        \"@+:env\": {\n          \"@.:ot:@.:ot-dev@@\": [\n            [\"@+:public-session\"],\n            [\"@+:session\"],\n            [\"@~:ot-identity.json\"],\n            [\"@~:hyperbridge-identity.json\"],\n          ]\n        },\n        \"@+:revelations\": {\n          \"@+:sites\": [\n            [\"@.:inspire\", [\"@$o.folder\", \"vault\", \"dist\", \"revealer\", \"sites\", \"inspire\"]],\n            [\"@+:myworld-dev\"],\n          ]\n        }\n      }],\n      [\"@$o.folder\", \"opspace\", \"build\", [\"@+:env\"]]\n    ]\n  }, {\n    \"workshop.tar.gz\": [\"@$o.tar-gz\", [\"@+:workshop\"]],\n  }]\n], \"@@\")"
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "toEqual",
+                {
+                  "vdoc:blockquote": true,
+                  "vdoc:content": [
+                    {
+                      "@type": "vdoc:CharacterData",
+                      "vdoc:content": [
+                        "[\n  \"@@\",\n  [\n    [\n      \"@\",\n      [\n        [\n          \"@$o\",\n          \"folder\"\n        ],\n        \"vault\"\n      ]\n    ],\n    [\n      \"@\",\n      [\n        [\n          \"@$o\",\n          \"vlm\"\n        ],\n        \"@\",\n        \"webpack\"\n      ]\n    ],\n    [\n      \"@\",\n      [\n        [\n          \"@$o\",\n          \"folder\"\n        ],\n        \"build\"\n      ]\n    ],\n    [\n      \"@\",\n      [\n        [\n          \"@$o\",\n          \"import\"\n        ],\n        [\n          \"@.\",\n          [\n            \"workshop\",\n            [\n              \"@\",\n              [\n                [\n                  \"@$o\",\n                  \"folder\"\n                ],\n                \"vault\",\n                [\n                  \"@+\",\n                  [\n                    \"env\",\n                    [\n                      \"@.\",\n                      [\n                        \"ot\",\n                        [\n                          \"@.\",\n                          [\n                            \"ot-dev\"\n                          ]\n                        ],\n                        [\n                          \"@+\",\n                          [\n                            \"public-session\"\n                          ]\n                        ],\n                        [\n                          \"@+\",\n                          [\n                            \"session\"\n                          ]\n                        ],\n                        [\n                          \"@~\",\n                          [\n                            \"ot-identity.json\"\n                          ]\n                        ],\n                        [\n                          \"@~\",\n                          [\n                            \"hyperbridge-identity.json\"\n                          ]\n                        ]\n                      ]\n                    ]\n                  ]\n                ],\n                [\n                  \"@+\",\n                  [\n                    \"revelations\",\n                    [\n                      \"@+\",\n                      [\n                        \"sites\",\n                        [\n                          \"@.\",\n                          [\n                            \"inspire\",\n                            [\n                              \"@\",\n                              [\n                                [\n                                  \"@$o\",\n                                  \"folder\"\n                                ],\n                                \"vault\",\n                                \"dist\",\n                                \"revealer\",\n                                \"sites\",\n                                \"inspire\"\n                              ]\n                            ]\n                          ]\n                        ],\n                        [\n                          \"@+\",\n                          [\n                            \"myworld-dev\"\n                          ]\n                        ]\n                      ]\n                    ]\n                  ]\n                ],\n                [\n                  \"@+\",\n                  [\n                    \"workers\",\n                    [\n                      \"@+\",\n                      [\n                        \"ot-worker-hyperbridge-dev\"\n                      ]\n                    ]\n                  ]\n                ]\n              ]\n            ],\n            [\n              \"@\",\n              [\n                [\n                  \"@$o\",\n                  \"folder\"\n                ],\n                \"opspace\",\n                \"build\",\n                [\n                  \"@+\",\n                  [\n                    \"env\"\n                  ]\n                ]\n              ]\n            ]\n          ]\n        ],\n        [\n          \"@.\",\n          [\n            \"workshop.tar.gz\",\n            [\n              \"@\",\n              [\n                [\n                  \"@$o\",\n                  \"tar-gz\"\n                ],\n                [\n                  \"@+\",\n                  [\n                    \"workshop\"\n                  ]\n                ]\n              ]\n            ]\n          ]\n        ]\n      ]\n    ]\n  ]\n]"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "@type": "revdoc:Document",
+    "vdoc:content": [
+      {
+        "@id": "abstract"
+      },
+      {
+        "@id": "sotd"
+      },
+      {
+        "@id": "introduction"
+      },
+      {
+        "@id": "sectioned_vpath_json"
+      },
+      {
+        "@id": "vpath_json_outline"
+      }
+    ]
+  }
+]

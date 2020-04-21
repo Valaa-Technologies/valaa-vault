@@ -47,9 +47,9 @@
     "revdoc:package": "@valos/kernel",
     "revdoc:prefix": "valos",
     "revdoc:prefixIRI": "https://valospace.org/#",
-    "revdoc:version": "0.35.0-rc.10",
+    "revdoc:version": "0.35.0-rc.11",
     "respecConfig": {
-      "subtitle": "0.35.0-rc.10",
+      "subtitle": "0.35.0-rc.11",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -70,7 +70,7 @@
           "SBOM"
         ],
         "subProfiles": [],
-        "title": "@valos/kernel@0.35.0-rc.9 Software Bill of Materials",
+        "title": "@valos/kernel@0.35.0-rc.10 Software Bill of Materials",
         "abstract": {
           "@type": "vdoc:Chapter",
           "vdoc:content": [
@@ -117,7 +117,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.9"
+        "version": "0.35.0-rc.10"
       },
       "engine": {
         "@id": "https://valospace.org/engine",
@@ -190,7 +190,7 @@
           ]
         },
         "package": "@valos/engine",
-        "version": "0.35.0-rc.10"
+        "version": "0.35.0-rc.11"
       },
       "inspire": {
         "@id": "https://valospace.org/inspire",
@@ -263,7 +263,7 @@
           ]
         },
         "package": "@valos/inspire",
-        "version": "0.35.0-rc.10"
+        "version": "0.35.0-rc.11"
       },
       "inspire/revela": {
         "@id": "https://valospace.org/inspire/revela",
@@ -557,7 +557,7 @@
           ]
         },
         "package": "@valos/inspire",
-        "version": "0.35.0-rc.10"
+        "version": "0.35.0-rc.11"
       },
       "raem": {
         "@id": "https://valospace.org/raem",
@@ -676,7 +676,7 @@
           ]
         },
         "package": "@valos/raem",
-        "version": "0.35.0-rc.10"
+        "version": "0.35.0-rc.11"
       },
       "raem/VPath/VPath": {
         "@id": "https://valospace.org/raem/VPath/VPath",
@@ -738,7 +738,7 @@
           ]
         },
         "package": "@valos/raem",
-        "version": "0.35.0-rc.10"
+        "version": "0.35.0-rc.11"
       },
       "revdoc": {
         "@id": "https://valospace.org/revdoc",
@@ -797,7 +797,7 @@
           ]
         },
         "package": "@valos/revdoc",
-        "version": "0.35.0-rc.10"
+        "version": "0.35.0-rc.11"
       },
       "revdoc/tutorial": {
         "@id": "https://valospace.org/revdoc/tutorial",
@@ -871,7 +871,7 @@
           ]
         },
         "package": "@valos/revdoc",
-        "version": "0.35.0-rc.10"
+        "version": "0.35.0-rc.11"
       },
       "sbomdoc": {
         "@id": "https://valospace.org/sbomdoc",
@@ -930,7 +930,7 @@
           ]
         },
         "package": "@valos/sbomdoc",
-        "version": "0.35.0-rc.10"
+        "version": "0.35.0-rc.11"
       },
       "script": {
         "@id": "https://valospace.org/script",
@@ -983,7 +983,7 @@
           ]
         },
         "package": "@valos/script",
-        "version": "0.35.0-rc.10"
+        "version": "0.35.0-rc.11"
       },
       "sourcerer": {
         "@id": "https://valospace.org/sourcerer",
@@ -1028,7 +1028,7 @@
           ]
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0-rc.10"
+        "version": "0.35.0-rc.11"
       },
       "sourcerer/valos-event-log": {
         "@id": "https://valospace.org/sourcerer/valos-event-log",
@@ -1058,7 +1058,7 @@
           ]
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0-rc.10"
+        "version": "0.35.0-rc.11"
       },
       "sourcerer/VState": {
         "@id": "https://valospace.org/sourcerer/VState",
@@ -1097,7 +1097,7 @@
           ]
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0-rc.10"
+        "version": "0.35.0-rc.11"
       },
       "twindoc": {
         "@id": "https://valospace.org/twindoc",
@@ -1178,7 +1178,7 @@
           ]
         },
         "package": "@valos/twindoc",
-        "version": "0.35.0-rc.10"
+        "version": "0.35.0-rc.11"
       },
       "type-vault/AssortedTutorials": {
         "@id": "https://valospace.org/type-vault/AssortedTutorials",
@@ -1197,7 +1197,7 @@
         },
         "introduction": {},
         "package": "@valos/type-vault",
-        "version": "0.35.0-rc.10"
+        "version": "0.35.0-rc.11"
       },
       "vdoc": {
         "@id": "https://valospace.org/vdoc",
@@ -1285,7 +1285,7 @@
           ]
         },
         "package": "@valos/vdoc",
-        "version": "0.35.0-rc.10"
+        "version": "0.35.0-rc.11"
       },
       "web-spindle": {
         "@id": "https://valospace.org/web-spindle",
@@ -1391,7 +1391,7 @@
           ]
         },
         "package": "@valos/web-spindle",
-        "version": "0.35.0-rc.10"
+        "version": "0.35.0-rc.11"
       },
       "web-spindle/schema-builder": {
         "@id": "https://valospace.org/web-spindle/schema-builder",
@@ -1520,7 +1520,7 @@
           ]
         },
         "package": "@valos/web-spindle",
-        "version": "0.35.0-rc.10"
+        "version": "0.35.0-rc.11"
       },
       "kernel": {
         "@id": "https://valospace.org/kernel",
@@ -1722,7 +1722,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.9"
+        "version": "0.35.0-rc.10"
       },
       "removed-from": {
         "@id": "https://valospace.org/removed-from",
@@ -1765,7 +1765,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.9"
+        "version": "0.35.0-rc.10"
       },
       "@valos/kernel": {
         "@id": "https://valospace.org/index",
@@ -1910,7 +1910,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.9"
+        "version": "0.35.0-rc.10"
       },
       "technician": {
         "@id": "https://valospace.org/technician",
@@ -1998,7 +1998,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.9"
+        "version": "0.35.0-rc.10"
       },
       "valonaut": {
         "@id": "https://valospace.org/valonaut",
@@ -2072,7 +2072,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.9"
+        "version": "0.35.0-rc.10"
       },
       "voyager": {
         "@id": "https://valospace.org/voyager",
@@ -2132,7 +2132,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.9"
+        "version": "0.35.0-rc.10"
       }
     },
     "prefixes": {
@@ -2162,7 +2162,9 @@
           "@type": "owl:Restriction",
           "owl:cardinality": 1
         },
-        "valos_raem:expressor": "$valos_raem.resolveId",
+        "valos_raem:expressor": [
+          "@$valos_raem.resolveId@@"
+        ],
         "rdfs:comment": "The immutable string representation of the VRID of this resource."
       },
       "rawId": {
@@ -2186,7 +2188,9 @@
           "@type": "owl:Restriction",
           "owl:cardinality": 1
         },
-        "valos_raem:expressor": "$valos_raem.resolveVRIDTransient",
+        "valos_raem:expressor": [
+          "@$valos_raem.resolveVRIDTransient@@"
+        ],
         "rdfs:comment": "The immutable, segmented object representation of the VRID of this\nresource."
       },
       "typeName": {
@@ -2197,7 +2201,9 @@
           "@type": "owl:Restriction",
           "owl:cardinality": 1
         },
-        "valos_raem:expressor": "$valos_raem.resolveDominantTypeName",
+        "valos_raem:expressor": [
+          "@$valos_raem.resolveDominantTypeName@@"
+        ],
         "rdfs:comment": "The dominant type name of this resource"
       },
       "prototype": {
@@ -2224,7 +2230,9 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos_raem:expressor": "$valos_raem.resolveOwnFieldsTransient",
+        "valos_raem:expressor": [
+          "@$valos_raem.resolveOwnFieldsTransient@@"
+        ],
         "rdfs:comment": "A transient version of this object as if prototype was undefined.\nAll property accesses will only return field values which are directly\nowned by this resource."
       },
       "inheritors": {
@@ -2256,7 +2264,9 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos_raem:expressor": "$valos_raem.resolveGhostPrototype",
+        "valos_raem:expressor": [
+          "@$valos_raem.resolveGhostPrototype@@"
+        ],
         "valos_raem:coupledField": "valos:ghosts",
         "rdfs:comment": "Ghost prototype of this ghost resource. The ghost prototype is the\nbase resource from which this ghost was created during some primary\ninstantiation.\nThis instantiation (which happens on prototype and results in an\ninstance of it) also ghost-instantiates all the direct and indirect\nownlings of the prototype as ghost ownlings in the instance. The\ninstance is called the *ghost host* of all these ghosts. Likewise, the\ninstance prototype is called the ghost host prototype, and the\n(grand-)ownlings of this ghost host prototype are the ghost prototypes\nof the corresponding ghosts (ie. this field).} ."
       },
@@ -2297,7 +2307,9 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos_raem:expressor": "$valos_raem.resolveGhostHost",
+        "valos_raem:expressor": [
+          "@$valos_raem.resolveGhostHost@@"
+        ],
         "rdfs:comment": "The instance resource which brought this ghost into being. This\ninstance is equivalent to the innermost ancestor of this ghost which is\nnot a ghost itself."
       },
       "ghostOwner": {
@@ -2337,7 +2349,9 @@
           "@type": "owl:Restriction",
           "owl:cardinality": 1
         },
-        "valos_raem:expressor": "$valos_raem.resolveContextTerm:@!$valos.vrid$.1$.1@",
+        "valos_raem:expressor": [
+          "@$valos_raem.resolveContextTerm:@!$valos.vrid:1:1@@"
+        ],
         "rdfs:comment": "The hash algorithm used to create the content hash of this Bvob"
       },
       "contentHash": {
@@ -2348,7 +2362,9 @@
           "@type": "owl:Restriction",
           "owl:cardinality": 1
         },
-        "valos_raem:expressor": "!$valos.vrid$.1$.3",
+        "valos_raem:expressor": [
+          "@!$valos.vrid:1:3@@"
+        ],
         "rdfs:comment": "The content hash of the octet-stream associated with this Bvob"
       },
       "contentLength": {
@@ -2359,7 +2375,9 @@
           "@type": "owl:Restriction",
           "owl:cardinality": 1
         },
-        "valos_raem:expressor": "$valos_raem.resolveContentLength",
+        "valos_raem:expressor": [
+          "@$valos_raem.resolveContentLength@@"
+        ],
         "rdfs:comment": "The number of octets in the octet-stream associated with this Bvob."
       },
       "contentReferrers": {
@@ -2395,8 +2413,12 @@
       },
       "name": {
         "@type": "valos_raem:EventLoggedField",
-        "valos_raem:expressor": "$valos_raem.resolveVPath",
-        "valos_raem:impressor": "$valos_raem.impressViaVPath",
+        "valos_raem:expressor": [
+          "@$valos_raem.resolveVPath@@"
+        ],
+        "valos_raem:impressor": [
+          "@$valos_raem.impressViaVPath@@"
+        ],
         "rdfs:domain": "valos:Extant",
         "rdfs:range": [
           "xsd:string",
@@ -2516,8 +2538,12 @@
       },
       "value": {
         "@type": "valos_raem:EventLoggedField",
-        "valos_raem:expressor": "$valos_raem.resolveVPath",
-        "valos_raem:impressor": "$valos_raem.impressViaVPath",
+        "valos_raem:expressor": [
+          "@$valos_raem.resolveVPath@@"
+        ],
+        "valos_raem:impressor": [
+          "@$valos_raem.impressViaVPath@@"
+        ],
         "rdfs:domain": "valos:ScopeProperty",
         "rdfs:range": [
           "xsd:string",
@@ -2537,7 +2563,9 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos_raem:expressor": "$valos_script.resolveTwinspace",
+        "valos_raem:expressor": [
+          "@$valos_script.resolveTwinspace@@"
+        ],
         "rdfs:comment": "The twinspace of this ScopeProperty. Equates to the expanded prefix\nof the valos:name of this ScopeProperty using the context of this\nchronicle. Additionally if the local part of the valos:name is an empty\nstring then the valos:value of this ScopeProperty defines\nthe twinspace id of the scope resource for this twinspace."
       },
       "subject": {
@@ -2549,7 +2577,9 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos_raem:expressor": "$valos_script.resolveTwinSubject",
+        "valos_raem:expressor": [
+          "@$valos_script.resolveTwinSubject@@"
+        ],
         "rdfs:comment": "The subject of this ScopeProperty when interpreted as a reified\nrdf:Statement. Equates to the twinspace id of the scope resource using\nthe valos:twinspace of this ScopeProperty."
       },
       "predicate": {
@@ -2561,7 +2591,9 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos_raem:expressor": "$valos.name",
+        "valos_raem:expressor": [
+          "@$valos.name@@"
+        ],
         "rdfs:comment": "The predicate of this ScopeProperty when interpreted as a reified\nrdf:Statement. Equates to the IRI expansion of valos:name of this\nScopeProperty using the context of this chronicle."
       },
       "object": {
@@ -2574,7 +2606,9 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos_raem:expressor": "$valos_script.resolveTwinObject",
+        "valos_raem:expressor": [
+          "@$valos_script.resolveTwinObject@@"
+        ],
         "rdfs:comment": "The object of this ScopeProperty when interpreted as a reified\nrdf:Statement. If the valos:value refers to a scope which has this\ntwinspace id defined (ie. it owns a property with twinspace id as a\nname), then this field will be expressed as that twinspace id.\nOtherwise equals to the valos:value itself.\n"
       },
       "Scope": {
@@ -2609,7 +2643,9 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos_raem:expressor": "$valos_sourcerer.resolveChronicleRoot",
+        "valos_raem:expressor": [
+          "@$valos_sourcerer.resolveChronicleRoot@@"
+        ],
         "rdfs:comment": "The chronicle root node of this sourcerable (ie. the nearest ancestor,\npossibly this sourcerable itself self which has a non-null\nvalos:authorityURI)."
       },
       "chronicleURI": {
@@ -2620,7 +2656,9 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos_raem:expressor": "$valos_sourcerer.resolveChronicleURI",
+        "valos_raem:expressor": [
+          "@$valos_sourcerer.resolveChronicleURI@@"
+        ],
         "rdfs:comment": "The chronicle URL of the event log that contain this potentially\nabsent sourcerable as is known by the current view of the world."
       },
       "url": {
@@ -2632,12 +2670,7 @@
           "owl:cardinality": 1
         },
         "valos_raem:expressor": [
-          "$valk.add$.@!$V.chronicleURI@",
-          [
-            "$.",
-            "#"
-          ],
-          "$.@!$V.id@"
+          "@!$valk.add:@!$V.chronicleURI@@:#:@!$V.id@@@@"
         ],
         "rdfs:comment": "The authoritative URL string of this sourcerable in the current view\nof the world. Always equivalent to a catenation of\n<valos:chronicleURI> \"#\" <valos:id>\nof this resource"
       },
@@ -2652,7 +2685,9 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos_raem:expressor": "$valos_sourcerer.resolveChronicleRoot",
+        "valos_raem:expressor": [
+          "@$valos_sourcerer.resolveChronicleRoot@@"
+        ],
         "rdfs:comment": "The chronicle root node of this sourcerable, ie. the nearest ancestor\n(possibly self) with a non-null valos:authorityURI."
       },
       "partitionURI": {
@@ -2739,7 +2774,9 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos_raem:expressor": "$valos_sourcerer.resolveCreatedAt",
+        "valos_raem:expressor": [
+          "@$valos_sourcerer.resolveCreatedAt@@"
+        ],
         "rdfs:comment": "The creation UNIX epoch time of this node. This is defined as the\nlog aspect timestamp of the CREATED event which impressed this node\ninto being."
       },
       "modifiedAt": {
@@ -2750,7 +2787,9 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "valos_raem:expressor": "$valos_sourcerer.resolveModifiedAt",
+        "valos_raem:expressor": [
+          "@$valos_sourcerer.resolveModifiedAt@@"
+        ],
         "rdfs:comment": "The latest modification UNIX epoch time of this node. This is defined\nas the log aspect timestamp of the most recent event with a direct\nimpression on this Media resource."
       },
       "partitionAuthorityURI": {

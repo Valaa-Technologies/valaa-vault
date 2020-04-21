@@ -101,9 +101,9 @@ for various valos fabric config files.`],
         "spread of a URI import followed by pick-array append",
 async () => lazyPatchRevelations(gatewayMock,
     [0], {
-      "!!!": [["$https.foobar.com%2Fpath"], ["-$",
-        [".$.fetchedField"],
-        ["@.$.fetchOptions@.$.input@@"],
+      "!!!": [["@$https.foobar.com%2Fpath"], [
+        ["@.:fetchedField"],
+        ["@.:fetchOptions@.:input@@"],
       ]],
     },
     undefined,
@@ -112,9 +112,9 @@ async () => lazyPatchRevelations(gatewayMock,
 () => [0, 1, "https://foobar.com/path.json", "last"]),
     "example#5": itExpects("non-evaluated spreader contents to be segmented but non-cemented",
 async () => lazyPatchRevelations(gatewayMock,
-    {}, { "!!!": ["@", { value: ["$expanded.but-unbound"] }] }),
+    {}, { "!!!": ["@@", [{ value: ["@$expanded.but-unbound"] }]] }),
         "toEqual",
-() => ({ value: ["$", "expanded", "but-unbound"] })),
+() => ({ value: ["@$expanded", "but-unbound"] })),
     "example#6": itExpects(
         "nested import & invoke spread to resolve all spreads",
 async () => expose(lazyPatchRevelations(gatewayMock, {}, {
@@ -126,22 +126,22 @@ async () => expose(lazyPatchRevelations(gatewayMock, {}, {
             "test-lib": {
               preset: 10, overridden: 10, sessionDuration: 0,
               view: { focus: "focus to be overwritten", nulled: "nulled to be overwritten" },
-              unboundAndUnsegmented: ["$un.bound"],
+              unboundAndUnsegmented: ["@$un.bound"],
             },
           },
         },
       },
       prefixes: {
         "/test/v0": {
-          "!!!": ["@", ["!$.test-lib"], ["!$valk.invoke$.callMe", {
+          "!!!": ["@@", ["@!:test-lib"], ["@!invoke:callMe", [{
             view: {
               focus: "valaa-aws://example.org/deployment?id=@$~raw.f0c5-f0c5@@",
               nulled: null,
             },
             identity: { "!!!": ["./config", "requireKey"] },
             sessionDuration: 86400,
-            unboundButSegmented: ["$also.unbound"],
-          }]],
+            unboundButSectioned: ["@$also.unbound"],
+          }]]],
           "test-lib": { overridden: 20 },
         },
       }
@@ -157,8 +157,8 @@ async () => expose(lazyPatchRevelations(gatewayMock, {}, {
           preset: 10, overridden: 20, sessionDuration: 86400,
           view: { focus: "valaa-aws://example.org/deployment?id=@$~raw.f0c5-f0c5@@", nulled: null },
           identity: "/site/revelation/config",
-          unboundAndUnsegmented: ["$un.bound"],
-          unboundButSegmented: ["$", "also", "unbound"],
+          unboundAndUnsegmented: ["@$un.bound"],
+          unboundButSectioned: ["@$also", "unbound"],
         }
       }
     }

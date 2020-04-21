@@ -49,6 +49,15 @@ describe("VPath to concrete VAKON valks", () => {
     random: {
       steps: ["§!random"],
     },
+    valk: {
+      stepsFor: {
+        invoke: ["§invoke"],
+        ref: ["§ref"],
+        new: ["§new"],
+        const: ["§$<-"],
+        nullable: false,
+      }
+    }
   };
 
   it("Cements simple VPaths into VAKON", () => {
@@ -56,7 +65,7 @@ describe("VPath to concrete VAKON valks", () => {
         .toEqual(["§->", ["§$", "scriptRoot"], ["§!random"]]);
     expect(VALK.fromVPath("@!invoke$.create$.@!$.body$.%24V$.target$.name@@@@").toVAKON())
         .toEqual([
-          "§invoke", "create",
+          "§invoke", ["§'", "create"],
           ["§->", ["§$", "body"], ["§..", "$V"], ["§..", "target"], ["§..", "name"]],
         ]);
   });
@@ -70,35 +79,85 @@ describe("VPath to concrete VAKON valks", () => {
             "@!invoke$.create$.event$.@!$.source@@$.@!$.body@.$.%24V@.$.target@.$.name@@@@")
         .toVAKON())
     .toEqual([
-      "§invoke", "create", "event",
+      "§invoke", ["§'", "create"], ["§'", "event"],
       ["§$", "source"],
       ["§->", ["§$", "body"], ["§..", "$V"], ["§..", "target"], ["§..", "name"]],
     ]);
+    expect(VALK.fromVPath(["@@", [
+      ["@!$valk.const:newResource", ["@!$valk.new", [["@!:Entity"], {
+        name: ["@!:request:body", "$V", "target", "name"],
+        owner: ["@!:routeRoot"],
+        properties: { name: ["@!:request:body", "$V", "target", "name"] },
+      }]]],
+      ["@!$valk.new", [["@!:Relation"], {
+        name: ["@!:listingName"], source: ["@!:routeRoot"], target: ["@!:newResource"],
+      }]],
+      ["@!$valk.new", [["@!:Relation"], {
+        name: ["@!:relationName"], source: ["@!:resource"], target: ["@!:newResource"],
+      }]],
+    ]], { context: testContext }).toVAKON())
+    .toEqual(["§->",
+      ["§$<-", "newResource",
+        ["§new", ["§$", "Entity"],
+          ["§{}",
+            ["name", ["§->",
+              ["§$", "request"], ["§..", "body"], ["§..", "$V"], ["§..", "target"], ["§..", "name"],
+            ]],
+            ["owner", ["§$", "routeRoot"]],
+            ["properties", ["§{}",
+              ["name", ["§->", ["§$", "request"],
+                ["§..", "body"], ["§..", "$V"], ["§..", "target"], ["§..", "name"],
+              ]],
+            ]],
+          ],
+        ],
+      ],
+      ["§new", ["§$", "Relation"],
+        ["§{}",
+          ["name", ["§$", "listingName"]],
+          ["source", ["§$", "routeRoot"]],
+          ["target", ["§$", "newResource"]]],
+      ],
+      ["§new", ["§$", "Relation"],
+        ["§{}",
+          ["name", ["§$", "relationName"]],
+          ["source", ["§$", "resource"]],
+          ["target", ["§$", "newResource"]],
+        ]
+      ]
+    ]);
   });
-  it("Cements object VPaths into VAKON while escaping nested vpaths", () => {
-    expect(VALK.fromVPath(["@", ["$.", "constant"]])
+  it("Cements VPath outlines into VAKON while escaping nested vpaths", () => {
+    expect(VALK.fromVPath(["@@", ["@$.", "constant"]])
         .toVAKON())
     .toEqual(["§'", "constant"]);
-    expect(VALK.fromVPath([{ val: "constant", val2: 10 }])
+    expect(VALK.fromVPath({ val: "constant", val2: 10 })
         .toVAKON())
     .toEqual(["§{}", ["val", "constant"], ["val2", 10]]);
-    expect(VALK.fromVPath([{ val: ["@"] }])
+    expect(VALK.fromVPath({ val: ["@$", "@"] })
         .toVAKON())
-    .toEqual(["§{}", ["val", ["§'", ["@"]]]]);
-    expect(VALK.fromVPath([{ val: ["@"], val3: [1, 2, 3], val2: null }])
+    .toEqual(["§{}", ["val", "@"]]);
+    expect(VALK.fromVPath({ val: "@", val3: [1, 2, 3], val2: null })
         .toVAKON())
     .toEqual(["§{}",
-        ["val", ["§'", ["@"]]],
+        ["val", "@"],
         ["val2", ["§'", null]],
-        ["val3", ["§[]", 1, 2, 3]]]);
+        ["val3", ["§[]", ["§'", 1], ["§'", 2], ["§'", 3]]]]);
+    expect(VALK.fromVPath(["@!:request:cookies", ["@!:identity:clientCookieName"]])
+        .toVAKON())
+    .toEqual(["§->",
+      ["§$", "request"],
+      ["§..", "cookies"],
+      ["§..", ["§->", ["§$", "identity"], ["§..", "clientCookieName"]]],
+    ]);
   });
   it("Cements complex embedded VPaths into VAKON", () => {
     expect(VALK.fromVPath([
-      "!invoke$.create$.event", ["!$.source"],
-        ["@!$.body@.$.%24V@@", [".$.target"], [".$.name"]],
+      "@!invoke$.create$.event", ["@!$.source"],
+        ["@!$.body@.$.%24V@", ["@.$.target"], ["@.$.name"]],
     ]).toVAKON())
     .toEqual([
-      "§invoke", "create", "event", ["§$", "source"],
+      "§invoke", ["§'", "create"], ["§'", "event"], ["§$", "source"],
       ["§->", ["§$", "body"], ["§..", "$V"], ["§..", "target"], ["§..", "name"]],
     ]);
   });

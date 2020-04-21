@@ -1,4 +1,4 @@
-import { segmentVPath } from "~/raem/VPath";
+import { disjoinVPathOutline } from "~/raem/VPath";
 import { wrapError, dumpify, dumpObject } from "~/tools";
 
 import { ObjectSchema, schemaRefOf, trySchemaNameOf } from "./types";
@@ -29,7 +29,7 @@ export function _setupRouteResourceConfig (route, resourceType) {
     schema: schemaRefOf(resourceType),
     gate: {
       ...valospace.gate,
-      projection: segmentVPath(valospace.gate.projection).slice(1),
+      projection: disjoinVPathOutline(valospace.gate.projection, "@@"),
     },
   };
 }

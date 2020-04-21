@@ -1,16 +1,17 @@
 // @flow
 
-import { segmentVPath, cementVPath } from "~/raem/VPath";
+import { disjoinVPathOutline, cementVPath } from "~/raem/VPath";
+// import { dumpObject } from "~/tools";
 
 export function _vakonpileVPath (vpath, runtime) {
-  const segmentedVPath = segmentVPath(vpath);
-  if ((segmentedVPath.length === 1) && (segmentedVPath[0] === "@")) return null;
-  const stack = { context: ruleContextLookup, contextState: runtime, isPluralHead: false };
-  const ret = cementVPath(segmentedVPath, stack);
-  if (!stack.isPluralHead || ((ret[ret.length - 1] || [])[0] === "§map")) return ret;
-  if (segmentedVPath[0] !== "@") return ["§->", ret, ["§map"]];
-  ret.push(["§map"]);
-  return ret;
+  const sections = disjoinVPathOutline(vpath, "@@");
+  if ((sections[0] === "@$") && !sections[1]) return null;
+  const stack = { context: contextRuleLookup, contextState: runtime, isPluralHead: false };
+  const track = cementVPath(sections, stack);
+  if (!stack.isPluralHead || ((track[track.length - 1] || [])[0] === "§map")) return track;
+  if (sections[0] !== "@@") return ["§->", track, ["§map"]];
+  track.push(["§map"]);
+  return track;
 }
 
 const valk = {
@@ -27,7 +28,7 @@ const valos = {
   steps: ["§."],
 };
 
-const ruleContextLookup = {
+const contextRuleLookup = {
   valk,
   valos,
   V: valos,

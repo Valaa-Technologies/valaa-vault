@@ -67,7 +67,7 @@ to determine the default interpretation of the Media.`,
     "rdfs:domain": "valos:Media",
     "rdfs:range": "xsd:nonNegativeInteger",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos_raem:expressor": "$valos_sourcerer.resolveBvobSize",
+    "valos_raem:expressor": ["@$valos_sourcerer.resolveBvobSize@@"],
     "rdfs:comment":
 `The number of octets in the of valos:content Bvob octet-stream.`,
   },

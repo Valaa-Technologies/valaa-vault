@@ -588,12 +588,12 @@ describe("Two paired harnesses emulating two gateways connected through event st
     const pairness = await createEngineOracleHarness({ verbosity: 0, pairedHarness: harness });
 
     const newVRef = await harness.runValoscript(vRef(testRootId), `
-      (new Entity({ owner: this, subResource: "@_:subEntity@@", properties: {
+      (new Entity({ owner: this, subResource: ["@_:subEntity@@"], properties: {
         thing: "the", over: "base",
       } })).$V.vref;
     `);
     expect(newVRef)
-        .toEqual(`valaa-test:?id=${testRootId}#@$~raw.test_chronicle@_:subEntity@@`);
+        .toEqual(`valaa-test:?id=${testRootId}#@$~raw.test_chronicle@_$.subEntity@@`);
 
     const { target, instance, isActive, targetVRef } = await pairness.runValoscript(
         vRef(testRootId), `

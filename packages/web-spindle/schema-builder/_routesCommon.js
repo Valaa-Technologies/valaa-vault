@@ -1,6 +1,6 @@
 // @flow
 
-import { segmentVKeyPath } from "~/raem/VPath";
+import { disjoinVPathOutline } from "~/raem/VPath";
 import { patchWith } from "~/tools";
 
 import { ObjectSchema, StringType, IdValOSType } from "./types";
@@ -43,7 +43,7 @@ export function _finalizeRoute (route, userConfig, globalRules) {
     if (route.config.rules[ruleName] === undefined) return undefined;
   }
   for (const [key, rule] of Object.entries(route.config.rules)) {
-    route.config.rules[key] = segmentVKeyPath("@", rule).slice(1);
+    route.config.rules[key] = disjoinVPathOutline(rule, "@@");
   }
   for (const ruleName of [].concat(
       route.config.requiredRules || [],

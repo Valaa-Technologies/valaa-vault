@@ -1,6 +1,6 @@
 const path = require("path");
 
-const { segmentVPath, cementVPath } = require("../raem/VPath");
+const { disjoinVPath, cementVPath } = require("../raem/VPath");
 
 const inProduction = require("../tools/inProduction").default;
 const resolveRevealOrigin = require("../tools/resolveRevealOrigin").default;
@@ -414,12 +414,17 @@ const revelationContext = {
 function _importURI (state, suffix, prefix) { return `<${prefix}://${suffix}>`; }
 
 function _cementSpreaderPath (spreader) {
-  const shortcutVPath = (Array.isArray(spreader) && spreader[0] === "@")
+  const vpath = (Array.isArray(spreader) && ((spreader[0] || "")[0] === "@"))
        ? spreader
-       : ["!"].concat(spreader);
-  const segmentedVPath = segmentVPath(shortcutVPath);
-  const cementedVPath = cementVPath(segmentedVPath, { context: revelationContext });
-  return cementedVPath;
+       : ["@!", spreader];
+  const sections = disjoinVPath(...vpath);
+  const track = cementVPath(sections, { context: revelationContext });
+  /*
+  console.log("cementSpreaderPath, vpath:", ...dumpObject(vpath),
+      "\n\tsections:", ...dumpObject(sections),
+      "\n\ttrack:", ...dumpObject(track));
+  */
+  return track;
 }
 
 function _markDelayed (func) {

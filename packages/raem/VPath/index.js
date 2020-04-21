@@ -1,35 +1,46 @@
-const { formVPath, formVGRID, formVerb, formParam, formParamValue } = require("./_formOps");
-const { segmentVPath, segmentVKeyPath } = require("./_segmentOps");
 const {
-  validateVPath, validateVKeyPath, validateFullVPath,
-  validateVRID, validateVerbs, validateVGRID,
-  validateFormatTerm, validateVerb, validateVerbType, validateVParam,
-  validateContextTerm, validateParamValueText
+  formVPath,
+  conjoinVPath, conjoinVPathSection,
+  disjoinVPath, disjoinVPathString, disjoinVPathOutline,
+} = require("./_sectionOps");
+const {
+  validateVPath, validateVPathSection, validateVKeyPath,
+  validateFullVPath, validateFullVPathSection,
+  validateVRID, validateVRIDSection, validateVVerbs, validateVVerbsSection,
+  validateVGRID, validateVGRIDSection, validateFormatTerm,
+  validateVVerb, validateVVerbSection, validateVerbType,
+  validateVParam, validateVParamSection, validateContextTerm, validateParamValueText
 } = require("./_validateOps");
-const { cementVPath, extendVAKON } = require("./_cementOps");
+const { cementVPath, extendTrack } = require("./_cementOps");
 const { coerceAsVRID } = require("./_coerceOps");
 
 module.exports = {
+  conjoinVPath,
+  conjoinVPathSection,
+  disjoinVPath,
+  disjoinVPathOutline,
+  disjoinVPathString,
   formVPath,
-  formVGRID,
-  formVerb,
-  formParam,
-  formParamValue,
   validateVPath,
+  validateVPathSection,
   validateVKeyPath,
   validateFullVPath,
+  validateFullVPathSection,
   validateVRID,
-  validateVerbs,
+  validateVRIDSection,
+  validateVVerbs,
+  validateVVerbsSection,
   validateVGRID,
+  validateVGRIDSection,
   validateFormatTerm,
-  validateVerb,
+  validateVVerb,
+  validateVVerbSection,
   validateVerbType,
   validateVParam,
+  validateVParamSection,
   validateContextTerm,
   validateParamValueText,
-  segmentVPath,
-  segmentVKeyPath,
   cementVPath,
-  extendVAKON,
+  extendTrack,
   coerceAsVRID,
 };

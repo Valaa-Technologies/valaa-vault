@@ -6,7 +6,7 @@ import { ValaaURI, naiveURI, hasScheme } from "~/raem/ValaaURI";
 import { vRef } from "~/raem/VRL";
 import { dumpObject } from "~/raem/VALK";
 import { getHostRef } from "~/raem/VALK/hostReference";
-import { formVPath, validateVRID, validateVerbs } from "~/raem/VPath";
+import { formVPath, validateVRID, validateVVerbs } from "~/raem/VPath";
 import { addConnectToChronicleToError } from "~/raem/tools/denormalized/partitions";
 
 import Discourse from "~/sourcerer/api/Discourse";
@@ -190,8 +190,8 @@ export default class FalseProphetDiscourse extends Discourse {
 
       let subResource = explicitSubResource;
       if (subResource) { // case a -> 9, e -> d
-        if (Array.isArray(subResource)) subResource = formVPath(...subResource);
-        else validateVerbs(subResource);
+        if (Array.isArray(subResource)) subResource = formVPath(subResource);
+        else validateVVerbs(subResource);
         if (subResource[1] === "$") {
           throw new Error("explicit subResource must not have a GRId as first step");
         }

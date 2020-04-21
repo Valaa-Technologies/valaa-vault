@@ -1,4 +1,4 @@
-const { segmentVPath } = require("~/raem/VPath");
+const { disjoinVPathOutline } = require("~/raem/VPath");
 const patchWith = require("~/tools/patchWith").default;
 
 const ObjectSchema = Symbol("Object-JSONSchema");
@@ -29,7 +29,7 @@ const DateTimeZoneExtendedISO8601Type = Object.freeze({ type: "string", format: 
 const IdValOSType = Object.freeze({
   type: "string",
   pattern: "^[a-zA-Z0-9\\-_.~]+$",
-  valospace: { reflection: [".$V.rawId"] },
+  valospace: { reflection: ["@.$V.rawId@@"] },
 });
 // const ReferenceValOSType = { type: "uri" };
 const ReferenceValOSType = Object.freeze({ type: "string" });
@@ -178,11 +178,11 @@ function _createRelationTypeTo (targetType, relationNameOrProjection, {
     ...relationProperties
 } = {}) {
   if (!targetType) throw new Error("targetType missing");
-  const reflection = segmentVPath((typeof relationNameOrProjection === "string")
-      ? ["-out", [":", relationNameOrProjection]]
-
-      : relationNameOrProjection
-  ).slice(1);
+  const reflection = disjoinVPathOutline(
+      (typeof relationNameOrProjection === "string")
+          ? ["@-out", ["@$", relationNameOrProjection]]
+          : relationNameOrProjection,
+      "@@");
   const ret = {
     [CollectionSchema]: collectionSchema && { ...collectionSchema },
     [ObjectSchema]: { ...objectSchema },
@@ -227,12 +227,12 @@ function exportSchemaOf (aType) {
   if (ret.valospace) {
     ret.valospace = { ...ret.valospace };
     if (ret.valospace.reflection) {
-      ret.valospace.reflection = segmentVPath(ret.valospace.reflection).slice(1);
+      ret.valospace.reflection = disjoinVPathOutline(ret.valospace.reflection, "@@");
     }
     if (ret.valospace.gate) {
       ret.valospace.gate = {
         ...ret.valospace.gate,
-        projection: segmentVPath(ret.valospace.gate.projection).slice(1),
+        projection: disjoinVPathOutline(ret.valospace.gate.projection, "@@"),
       };
     }
     if (ret.valospace.resourceType) {

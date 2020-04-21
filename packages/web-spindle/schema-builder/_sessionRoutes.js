@@ -11,12 +11,12 @@ export function sessionGETRoute (url, userConfig, globalRules) {
     rules: {
       grantExpirationDelay: 60,
       tokenExpirationDelay: 86400,
-      userAgentState: ["!$.request$.cookies", ["!$.identity$.clientCookieName"]],
-      authorizationGrant: ["!$.request$.query$.code"],
-      grantProviderState: ["!$.request$.query$.state"],
-      error: ["!$.request$.query$.error"],
-      errorDescription: ["!$.request$.query$.error_description"],
-      errorURI: ["!$.request$.query$.error_uri"],
+      userAgentState: ["@!:request:cookies", ["@!:identity:clientCookieName"]],
+      authorizationGrant: ["@!:request:query:code"],
+      grantProviderState: ["@!:request:query:state"],
+      error: ["@!:request:query:error"],
+      errorDescription: ["@!:request:query:error_description"],
+      errorURI: ["@!:request:query:error_uri"],
     },
   } };
   try {
@@ -55,8 +55,8 @@ export function sessionPOSTRoute (url, userConfig, globalRules) {
   const route = { url, category: "session", method: "POST", config: {
     rules: {
       refreshExpirationDelay: 7 * 86400,
-      clientCookie: ["!$.request$.cookies", ["!$.identity$.clientCookieName"]],
-      sessionCookie: ["!$.request$.cookies", ["!$.identity$.sessionCookieName"]],
+      clientCookie: ["@!:request:cookies", ["@!:identity:clientCookieName"]],
+      sessionCookie: ["@!:request:cookies", ["@!:identity:sessionCookieName"]],
     },
   } };
   try {
@@ -81,8 +81,8 @@ export function sessionPOSTRoute (url, userConfig, globalRules) {
 export function sessionDELETERoute (url, userConfig, globalRules) {
   const route = { url, category: "session", method: "DELETE", config: {
     rules: {
-      clientCookie: ["!$.request$.cookies", ["!$.identity$.clientCookieName"]],
-      sessionCookie: ["!$.request$.cookies", ["!$.identity$.sessionCookieName"]],
+      clientCookie: ["@!:request:cookies", ["@!:identity:clientCookieName"]],
+      sessionCookie: ["@!:request:cookies", ["@!:identity:sessionCookieName"]],
     },
   } };
   try {

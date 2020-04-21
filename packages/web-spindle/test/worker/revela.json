@@ -31,7 +31,7 @@
         }
       },
       "prefixes": {
-        "/rest-test/v0": { "!!!": ["@", ["!", "../index"], ["!$valk.invoke$.createConfig", {
+        "/rest-test/v0": { "!!!": ["@@", ["@!:../index"], ["@!invoke:createConfig", [{
           "view": {
             "name": "Web API Test",
             "verbosity": 0,
@@ -44,8 +44,8 @@
           },
           "sessionDuration": 3600,
           "rules": {
-            "routeRoot": ["@"],
-            "scriptRoot": ["$~u4.f3d306d9-79ac-4087-afbc-46f739226eb2"],
+            "routeRoot": ["@@"],
+            "scriptRoot": ["@$~u4.f3d306d9-79ac-4087-afbc-46f739226eb2@@"],
             "&ofResource": {
               "TestIndividual": { "listingName": "INDIVIDUAL" },
               "TestNewsItem": { "listingName": "NEWSITEM" },
@@ -54,11 +54,11 @@
             },
             "&ofRelation": {
               "interests": {
-                "routeRoot": ["$~u4.f3d306d9-79ac-4087-afbc-46f739226eb2"],
+                "routeRoot": ["@$~u4.f3d306d9-79ac-4087-afbc-46f739226eb2@@"],
                 "relationName": "INTEREST"
               },
               "tags": {
-                "routeRoot": ["$~u4.f3d306d9-79ac-4087-afbc-46f739226eb2"],
+                "routeRoot": ["@$~u4.f3d306d9-79ac-4087-afbc-46f739226eb2@@"],
                 "relationName": "TAG"
               },
               "owned/news": { "relationName": "NEWSITEM" },
@@ -67,14 +67,14 @@
             "&ofMethod": {
               "PATCH": {
                 "&ofRelation": {
-                  "offering": { "mappingPrototype": ["$~u4.f3d306d9-79ac-4087-afbc-46f739226eb2"] },
-                  "seeking": { "mappingPrototype": ["$~u4.f3d306d9-79ac-4087-afbc-46f739226eb2"] },
-                  "interests": { "mappingPrototype": ["$~u4.f3d306d9-79ac-4087-afbc-46f739226eb2"] }
+                  "offering": { "mappingPrototype": ["@$~u4.f3d306d9-79ac-4087-afbc-46f739226eb2@@"] },
+                  "seeking": { "mappingPrototype": ["@$~u4.f3d306d9-79ac-4087-afbc-46f739226eb2@@"] },
+                  "interests": { "mappingPrototype": ["@$~u4.f3d306d9-79ac-4087-afbc-46f739226eb2@@"] }
                 }
               }
             }
           }
-        }]]}
+        }]]]}
       }
     }
   }

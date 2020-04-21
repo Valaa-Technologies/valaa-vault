@@ -25,8 +25,8 @@ block as an rdf:Statement reification of hypertwinned triples.`,
 
   value: {
     "@type": "valos_raem:EventLoggedField",
-    "valos_raem:expressor": "$valos_raem.resolveVPath",
-    "valos_raem:impressor": "$valos_raem.impressViaVPath",
+    "valos_raem:expressor": ["@$valos_raem.resolveVPath@@"],
+    "valos_raem:impressor": ["@$valos_raem.impressViaVPath@@"],
     "rdfs:domain": "valos:ScopeProperty",
     "rdfs:range": ["xsd:string", "valos_raem:VPath"],
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
@@ -41,7 +41,7 @@ block as an rdf:Statement reification of hypertwinned triples.`,
     "rdfs:domain": "valos:ScopeProperty",
     "rdfs:range": "rdfs:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos_raem:expressor": "$valos_script.resolveTwinspace",
+    "valos_raem:expressor": ["@$valos_script.resolveTwinspace@@"],
     "rdfs:comment":
 `The twinspace of this ScopeProperty. Equates to the expanded prefix
 of the valos:name of this ScopeProperty using the context of this
@@ -56,7 +56,7 @@ the twinspace id of the scope resource for this twinspace.`,
     "rdfs:domain": "valos:ScopeProperty",
     "rdfs:range": "rdfs:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos_raem:expressor": "$valos_script.resolveTwinSubject",
+    "valos_raem:expressor": ["@$valos_script.resolveTwinSubject@@"],
     "rdfs:comment":
 `The subject of this ScopeProperty when interpreted as a reified
 rdf:Statement. Equates to the twinspace id of the scope resource using
@@ -69,7 +69,7 @@ the valos:twinspace of this ScopeProperty.`,
     "rdfs:domain": "valos:ScopeProperty",
     "rdfs:range": "rdfs:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos_raem:expressor": "$valos.name",
+    "valos_raem:expressor": ["@$valos.name@@"],
     "rdfs:comment":
 `The predicate of this ScopeProperty when interpreted as a reified
 rdf:Statement. Equates to the IRI expansion of valos:name of this
@@ -83,7 +83,7 @@ ScopeProperty using the context of this chronicle.`,
     "rdfs:domain": "valos:ScopeProperty",
     "rdfs:range": "rdfs:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos_raem:expressor": "$valos_script.resolveTwinObject",
+    "valos_raem:expressor": ["@$valos_script.resolveTwinObject@@"],
     "rdfs:comment":
 `The object of this ScopeProperty when interpreted as a reified
 rdf:Statement. If the valos:value refers to a scope which has this

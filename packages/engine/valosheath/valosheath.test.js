@@ -111,10 +111,10 @@ describe("transpileValoscriptBody with Engine scriptAPI", () => {
       const bodyText = `
           const parent = new Entity({ name: "parent", owner: this,
               properties: { position: { x: 10, y: 20 } } });
-          const ret = parent.$V.getSubResource("@_$.rel-1@@");
+          const ret = parent.$V.getSubResource(["@_:rel-1@@"]);
           new Relation({
             name: "myRelation",
-            owner: parent, subResource: "@_$.rel-1@@",
+            owner: parent, subResource: ["@_:rel-1@@"],
             properties: { position: { x: 1, y: 2 } },
           });
           ret;

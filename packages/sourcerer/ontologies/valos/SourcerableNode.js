@@ -43,7 +43,7 @@ be eventually locateable from anywhere.`,
     "rdfs:domain": "valos:SourcerableNode",
     "rdfs:range": "valos:SourceredNode",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos_raem:expressor": "$valos_sourcerer.resolveChronicleRoot",
+    "valos_raem:expressor": ["@$valos_sourcerer.resolveChronicleRoot@@"],
     "rdfs:comment":
 `The chronicle root node of this sourcerable (ie. the nearest ancestor,
 possibly this sourcerable itself self which has a non-null
@@ -55,7 +55,7 @@ valos:authorityURI).`,
     "rdfs:domain": "valos:SourcerableNode",
     "rdfs:range": "xsd:anyURI", // still a literal
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos_raem:expressor": "$valos_sourcerer.resolveChronicleURI",
+    "valos_raem:expressor": ["@$valos_sourcerer.resolveChronicleURI@@"],
     "rdfs:comment":
 `The chronicle URL of the event log that contain this potentially
 absent sourcerable as is known by the current view of the world.`,
@@ -66,7 +66,7 @@ absent sourcerable as is known by the current view of the world.`,
     "rdfs:domain": "valos:SourcerableNode",
     "rdfs:range": "xsd:anyURI", // still a literal
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
-    "valos_raem:expressor": ["$valk.add$.@!$V.chronicleURI@", ["$.", "#"], "$.@!$V.id@"],
+    "valos_raem:expressor": ["@!$valk.add:@!$V.chronicleURI@@:#:@!$V.id@@@@"],
     "rdfs:comment":
 `The authoritative URL string of this sourcerable in the current view
 of the world. Always equivalent to a catenation of
@@ -84,7 +84,7 @@ of this resource`,
     "rdfs:domain": "valos:SourcerableNode",
     "rdfs:range": "valos:SourceredNode",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos_raem:expressor": "$valos_sourcerer.resolveChronicleRoot",
+    "valos_raem:expressor": ["@$valos_sourcerer.resolveChronicleRoot@@"],
     "rdfs:comment":
 `The chronicle root node of this sourcerable, ie. the nearest ancestor
 (possibly self) with a non-null valos:authorityURI.`,

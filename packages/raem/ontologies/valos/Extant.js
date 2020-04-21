@@ -22,8 +22,8 @@ properties available and it can thus be manipulated.`,
 
   name: {
     "@type": "valos_raem:EventLoggedField",
-    "valos_raem:expressor": "$valos_raem.resolveVPath",
-    "valos_raem:impressor": "$valos_raem.impressViaVPath",
+    "valos_raem:expressor": ["@$valos_raem.resolveVPath@@"],
+    "valos_raem:impressor": ["@$valos_raem.impressViaVPath@@"],
     "rdfs:domain": "valos:Extant",
     "rdfs:range": ["xsd:string", "valos_raem:VParam"],
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },

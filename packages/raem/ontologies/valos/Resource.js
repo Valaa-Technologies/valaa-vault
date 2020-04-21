@@ -14,7 +14,7 @@ fields which are available even for unsourced bodies.`,
     "rdfs:domain": "valos:Resource",
     "rdfs:range": "xsd:string",
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
-    "valos_raem:expressor": "$valos_raem.resolveId",
+    "valos_raem:expressor": ["@$valos_raem.resolveId@@"],
     "rdfs:comment":
 `The immutable string representation of the VRID of this resource.`,
   },
@@ -36,7 +36,7 @@ fields which are available even for unsourced bodies.`,
     "rdfs:domain": "valos:Resource",
     "rdfs:range": "rdfs:List",
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
-    "valos_raem:expressor": "$valos_raem.resolveVRIDTransient",
+    "valos_raem:expressor": ["@$valos_raem.resolveVRIDTransient@@"],
     "rdfs:comment":
 `The immutable, segmented object representation of the VRID of this
 resource.`,
@@ -47,7 +47,7 @@ resource.`,
     "rdfs:domain": "valos:Resource",
     "rdfs:range": "xsd:string",
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
-    "valos_raem:expressor": "$valos_raem.resolveDominantTypeName",
+    "valos_raem:expressor": ["@$valos_raem.resolveDominantTypeName@@"],
     "rdfs:comment":
 `The dominant type name of this resource`,
   },
@@ -80,7 +80,7 @@ valos:prototype.`,
     "rdfs:domain": "valos:Resource",
     "rdfs:range": "valos:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos_raem:expressor": "$valos_raem.resolveOwnFieldsTransient",
+    "valos_raem:expressor": ["@$valos_raem.resolveOwnFieldsTransient@@"],
     "rdfs:comment":
 `A transient version of this object as if prototype was undefined.
 All property accesses will only return field values which are directly
@@ -119,7 +119,7 @@ direct valos:instancePrototype.`,
     "rdfs:domain": "valos:Resource",
     "rdfs:range": "valos:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos_raem:expressor": "$valos_raem.resolveGhostPrototype",
+    "valos_raem:expressor": ["@$valos_raem.resolveGhostPrototype@@"],
     "valos_raem:coupledField": "valos:ghosts",
     "rdfs:comment":
 `Ghost prototype of this ghost resource. The ghost prototype is the
@@ -175,7 +175,7 @@ for why immaterial ghosts are not listed.`,
     "rdfs:domain": "valos:Resource",
     "rdfs:range": "valos:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "valos_raem:expressor": "$valos_raem.resolveGhostHost",
+    "valos_raem:expressor": ["@$valos_raem.resolveGhostHost@@"],
     "rdfs:comment":
 `The instance resource which brought this ghost into being. This
 instance is equivalent to the innermost ancestor of this ghost which is

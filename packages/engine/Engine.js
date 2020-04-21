@@ -388,7 +388,7 @@ export default class Engine extends Cog {
       // cases 3, 7, b, f
       if (subResource) throw new Error("Can't have both explicit id and explicit subResource");
       if (Array.isArray(explicitId)) {
-        explicitId = formVPath(...explicitId);
+        explicitId = formVPath(explicitId);
         if (explicitId[1] !== "$") throw new Error("explicit VRID must have a GRId as first step");
       } else if (typeof explicitId !== "string") {
         throw new Error("explicit id must be either a string or a VPath steps array");

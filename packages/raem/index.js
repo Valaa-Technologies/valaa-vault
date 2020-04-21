@@ -33,8 +33,11 @@ export {
 } from "./VRL";
 export {
                                       formVPath,
-                                      segmentVPath,
-                                      segmentVKeyPath,
+                                      conjoinVPath,
+                                      conjoinVPathSection,
+                                      disjoinVPath,
+                                      disjoinVPathString,
+                                      disjoinVPathOutline,
                                       validateVPath,
                                       validateVKeyPath,
 } from "./VPath";

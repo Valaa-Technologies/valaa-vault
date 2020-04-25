@@ -59,8 +59,7 @@ function mapEagerly (
     startIndex = 0,
     results = []) {
   let index = null;
-  let wrap;
-  let entries;
+  let errorName, entries, entryHead, valueCandidate;
   const callback = (typeof callbacks === "function")
       ? callbacks
       : (e => thenChainEagerly(e, callbacks));
@@ -69,30 +68,29 @@ function mapEagerly (
       if ((entriesOrThenables == null) || (typeof entriesOrThenables.then !== "function")) {
         throw new Error("mapEagerly: array expected as first argument");
       }
-      wrap = new Error(`During mapEagerly.entriesOrThenables.catch`);
+      errorName = new Error(`During mapEagerly.entriesOrThenables.catch`);
       return entriesOrThenables.then(
           entries_ => mapEagerly(entries_, callback, onRejected, startIndex, results),
           errorOnMapEagerly);
     }
     entries = entriesOrThenables;
-    let valueCandidate;
     for (index = startIndex;
         index < entries.length;
         results[index++] = valueCandidate) {
-      const head = entries[index];
-      if ((head == null) || (typeof head.then !== "function")) {
+      entryHead = entries[index];
+      if ((entryHead == null) || (typeof entryHead.then !== "function")) {
         try {
-          valueCandidate = callback(head, index, entries);
+          valueCandidate = callback(entryHead, index, entries);
         } catch (error) {
-          wrap = new Error(getName("callback"));
+          errorName = new Error(getName("callback"));
           return errorOnMapEagerly(error);
         }
         if ((valueCandidate == null) || (typeof valueCandidate.then !== "function")) continue;
-        wrap = new Error(getName("callback thenable resolution"));
+        errorName = new Error(getName("callback thenable resolution"));
       } else {
         // eslint-disable-next-line no-loop-func
-        valueCandidate = head.then(resolvedHead => callback(resolvedHead, index, entries));
-        wrap = new Error(getName("head or callback promise resolution"));
+        valueCandidate = entryHead.then(resolvedHead => callback(resolvedHead, index, entries));
+        errorName = new Error(getName("head or callback promise resolution"));
       }
       return valueCandidate.then(
           value => { // eslint-disable-line no-loop-func
@@ -103,7 +101,7 @@ function mapEagerly (
     }
     return results;
   } catch (error) {
-    wrap = new Error(getName("handling"));
+    errorName = new Error(getName("handling"));
     return errorOnMapEagerly(error);
   }
   function getName (info) {
@@ -119,7 +117,8 @@ function mapEagerly (
             index, results, entries, callback, onRejected);
       }
     } catch (onRejectedError) { innerError = onRejectedError; }
-    throw wrapError(innerError, wrap,
+    throw wrapError(innerError, errorName,
+        "\n\tentry head:", ...dumpObject(entryHead),
         "\n\tmaybePromises:", ...dumpObject(entries || entriesOrThenables),
         "\n\tcurrent entry:", ...dumpObject((entries || entriesOrThenables || [])[index]));
   }
@@ -157,16 +156,17 @@ function thenChainEagerly (
           ? newHead
           : thenChainEagerly(newHead, functionChain, onRejected, index + 1)),
       error => {
-        const wrapped = wrapError(error, new Error(getName("thenable resolution")),
+        const wrapped = wrapError(error, new Error(getName("thenable")),
             "\n\thead:", ...dumpObject(head),
-            "\n\tcurrent function:", ...dumpObject(functionChain[index]),
+            "\n\tinitialValue:", ...dumpObject(initialValue),
             "\n\tfunctionChain:", ...dumpObject(functionChain));
         if (!onRejected) throw wrapped;
         return onRejected(wrapped, index, head, functionChain, onRejected);
       });
   function getName (info) {
-    return `During thenChainEagerly ${index === -1 ? "initial value" : `#${index}`} ${info} ${
-        !(onRejected && onRejected.name) ? " " : `(with ${onRejected.name})`}`;
+    const functionName = (functionChain[index] || "").name;
+    return `During ${`${functionName ? `${functionName}, as ` : ""
+      }thenChainEagerly ${index === -1 ? "initial value" : `step #${index}`}`} ${info}`;
   }
 }
 
@@ -244,8 +244,9 @@ function thisChainEagerly (
             functions, onRejected, functions.length);
       });
   function getName (info) {
-    return `During thenChainEagerly ${index === -1 ? "initial params" : `#${index}`} ${info} ${
-        !(onRejected && onRejected.name) ? "(no handler)" : `(with ${onRejected.name})`}`;
+    const functionName = (functions[index] || "").name;
+    return `During ${`${functionName ? `${functionName}, as ` : ""
+        }thisChainEagerly ${index === -1 ? "initial params" : `step #${index}`}`} ${info}`;
   }
 }
 

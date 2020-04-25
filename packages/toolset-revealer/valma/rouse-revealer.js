@@ -53,12 +53,14 @@ exports.builder = function builder (yargs) {
 exports.handler = async function handler (yargv) {
   const vlm = yargv.vlm;
   const contentBase = yargv["content-base"] || "";
-  if (contentBase || yargv["content-target"]) {
+  let contentSources = yargv["content-source"] || [];
+  if (!contentSources[0]) contentSources = [];
+  if ((contentBase || yargv["content-target"]) && contentSources.length) {
     const targetDir = vlm.path.join(contentBase, yargv["content-target"]);
     vlm.info("Creating and populating content directory",
         vlm.theme.path(targetDir), `from ${vlm.theme.path(String(yargv["content-source"]))}`);
     vlm.shell.mkdir("-p", targetDir);
-    (yargv["content-source"] || []).forEach(source =>
+    contentSources.forEach(source =>
         vlm.shell.cp("-R", vlm.path.join(source, "*"), targetDir));
   }
 

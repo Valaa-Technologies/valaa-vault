@@ -71,7 +71,7 @@ export default function createRootReducer ({
   };
   const reducerByActionType = mergeActionReducers(reducers, reducerContext);
   if (!reducerContext.parent) {
-    reducerContext.parent = new FabricEventTarget({ name: "Unnamed reducer" });
+    reducerContext.parent = new FabricEventTarget(console, reduceLogThreshold, "Unnamed reducer");
   }
 
   function mainReduce (state = Map(), story) {

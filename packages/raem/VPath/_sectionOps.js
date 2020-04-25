@@ -301,6 +301,9 @@ function _recurseIntoShorthandVParam (stack) {
   if (stack.lookahead === _vpathClass) {
     return _recurseIntoVPath(stack);
   }
+  if ((stack.lookahead === _eofClass) && stack.outlineSuffixes.length) {
+    return stack.outlineSuffixes.shift();
+  }
   throw new Error(`Invalid shorthand vparam-value char "${stack.vpath[stack.i]}" at pos ${stack.i
       }: expected vvalue (of vpath: "${stack.vpath}")`);
 }

@@ -94,6 +94,8 @@ export class FabricEventTarget {
     if (!parent) {
       this._parent = Object.create(console);
       this._parent.getVerbosity = () => 0;
+    } else if (!parent.warn) {
+      throw new Error("Invalid FabricEventTarget parent: not a logger object (no .warn specified)");
     }
   }
 

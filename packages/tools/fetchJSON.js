@@ -7,29 +7,32 @@ const { wrapError } = require("./wrapError");
 
 const _cache = {};
 
-exports.default = function fetchJSON (input, options) {
-  return _cache[input] || (_cache[input] = thenChainEagerly({ ...options }, [
-    function performFetch (innerOptions) {
+exports.default = function fetchJSON (input, options = {}) {
+  return _cache[input] || (_cache[input] = thenChainEagerly(input, [
+    function performFetch () {
       const fetch = getGlobal().fetch;
       if (!fetch) {
         throw new Error(`window/global.fetch is missing; if running in a non-browser ${
             ""}environment please execute through perspire gateway (or similar)`);
       }
       if (!input) throw new Error(`missing fetchJSON input`);
-      if (innerOptions.body && (typeof innerOptions.body === "object")) {
-        innerOptions.body = JSON.stringify(innerOptions.body);
-        innerOptions.headers = {
-          ...(innerOptions.headers || {}),
-          "Content-Type": "application/json",
-        };
-      }
-      return fetch(input, innerOptions);
+      return fetch(input, !options.body || (typeof options.body !== "object")
+          ? options
+          : {
+            ...options,
+            body: JSON.stringify(options.body),
+            headers: {
+              ...(options.headers || {}),
+              "Content-Type": "application/json",
+            },
+          },
+      );
     },
     function extractJSON (response) {
-      if (options) options.response = response;
+      options.response = response;
       if (response.status >= 400) {
         const error = new Error(`fetch response ${response.status} for ${
-          (options || {}).method || "GET"} ${input}: ${response.statusText}`);
+          options.method || "GET"} ${input}: ${response.statusText}`);
         error.response = response;
         throw error;
       }

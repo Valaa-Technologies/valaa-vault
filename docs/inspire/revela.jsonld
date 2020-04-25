@@ -46,9 +46,9 @@
     "revdoc:package": "@valos/inspire",
     "revdoc:prefix": "revela",
     "revdoc:prefixIRI": "https://valospace.org/inspire/revela#",
-    "revdoc:version": "0.35.0-rc.12",
+    "revdoc:version": "0.35.0-rc.13",
     "respecConfig": {
-      "subtitle": "0.35.0-rc.12",
+      "subtitle": "0.35.0-rc.13",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -172,7 +172,7 @@
                       {
                         "@type": "vdoc:CharacterData",
                         "vdoc:content": [
-                          " lazyPatchRevelations(gatewayMock, { a: [1] }, { a: [2] })"
+                          " lazyPatchRevelations(gatewayMock,\n    { a: [1] },\n    { a: [2] })"
                         ]
                       }
                     ]
@@ -209,7 +209,7 @@
                       {
                         "@type": "vdoc:CharacterData",
                         "vdoc:content": [
-                          " lazyPatchRevelations(gatewayMock, {}, { \"!!!\": \"./path\" })"
+                          " lazyPatchRevelations(gatewayMock,\n    {},\n    { \"!!!\": \"./path\" })"
                         ]
                       }
                     ]
@@ -222,7 +222,7 @@
                     {
                       "@type": "vdoc:CharacterData",
                       "vdoc:content": [
-                        " ({ requireKey: \"/site/revelation/path\", someField: 1 })"
+                        " ({ revealOrigin: \"/site/revelation/path\", someField: 1 })"
                       ]
                     }
                   ]
@@ -246,7 +246,7 @@
                       {
                         "@type": "vdoc:CharacterData",
                         "vdoc:content": [
-                          " lazyPatchRevelations(gatewayMock, \"\", {\n  \"!!!\": [\"/path\", \"requireKey\"],\n})"
+                          " lazyPatchRevelations(gatewayMock,\n    \"\",\n    { \"!!!\": [\"/path\", \"revealOrigin\"] })"
                         ]
                       }
                     ]
@@ -283,7 +283,7 @@
                       {
                         "@type": "vdoc:CharacterData",
                         "vdoc:content": [
-                          " lazyPatchRevelations(gatewayMock,\n    [0], {\n      \"!!!\": [[\"@$https.foobar.com%2Fpath\"], [\n        [\"@.:fetchedField\"],\n        [\"@.:fetchOptions@.:input@@\"],\n      ]],\n    },\n    undefined,\n    [\"last\"])"
+                          " lazyPatchRevelations(gatewayMock,\n    [0],\n    { \"!!!\": [\n      [\"@$https.foobar.com%2Fpath\"],\n      [[\"@.:fetchedField\"], [\"@.:options@.:revealOrigin@@\"]],\n    ] },\n    undefined,\n    [\"last\"])"
                         ]
                       }
                     ]
@@ -296,7 +296,7 @@
                     {
                       "@type": "vdoc:CharacterData",
                       "vdoc:content": [
-                        " [0, 1, \"https://foobar.com/path.json\", \"last\"]"
+                        " [0, 1, \"https://foobar.com/path\", \"last\"]"
                       ]
                     }
                   ]
@@ -320,7 +320,7 @@
                       {
                         "@type": "vdoc:CharacterData",
                         "vdoc:content": [
-                          " lazyPatchRevelations(gatewayMock,\n    {}, { \"!!!\": [\"@@\", [{ value: [\"@$expanded.but-unbound\"] }]] })"
+                          " lazyPatchRevelations(gatewayMock,\n    {},\n    { \"!!!\": [\"@@\", [{ value: [\"@$expanded.but-unbound\"] }]] })"
                         ]
                       }
                     ]
@@ -357,7 +357,7 @@
                       {
                         "@type": "vdoc:CharacterData",
                         "vdoc:content": [
-                          " expose(lazyPatchRevelations(gatewayMock, {}, {\n    out: {\n      \"!!!\": {\n        prefixes: {\n          \"/test/v0\": {\n            name: \"test\",\n            \"test-lib\": {\n              preset: 10, overridden: 10, sessionDuration: 0,\n              view: { focus: \"focus to be overwritten\", nulled: \"nulled to be overwritten\" },\n              unboundAndUnsegmented: [\"@$un.bound\"],\n            },\n          },\n        },\n      },\n      prefixes: {\n        \"/test/v0\": {\n          \"!!!\": [\"@@\", [\"@!:test-lib\"], [\"@!invoke:callMe\", [{\n            view: {\n              focus: \"valaa-aws://example.org/deployment?id=@$~raw.f0c5-f0c5@@\",\n              nulled: null,\n            },\n            identity: { \"!!!\": [\"./config\", \"requireKey\"] },\n            sessionDuration: 86400,\n            unboundButSectioned: [\"@$also.unbound\"],\n          }]]],\n          \"test-lib\": { overridden: 20 },\n        },\n      }\n    }\n  }))"
+                          " expose(lazyPatchRevelations(gatewayMock,\n    {},\n    {\n      out: {\n        \"!!!\": {\n          prefixes: {\n            \"/test/v0\": {\n              name: \"test\",\n              \"test-lib\": {\n                preset: 10, overridden: 10, sessionDuration: 0,\n                view: { focus: \"focus to be overwritten\", nulled: \"nulled to be overwritten\" },\n                unboundAndUnsegmented: [\"@$un.bound\"],\n              },\n            },\n          },\n        },\n        prefixes: {\n          \"/test/v0\": {\n            \"!!!\": [\"@@\", [\"@!:test-lib\"], [\"@!invoke:callMe\", [{\n              view: {\n                focus: \"valaa-aws://example.org/deployment?id=@$~raw.f0c5-f0c5@@\",\n                nulled: null,\n              },\n              identity: { \"!!!\": [\"./config\", \"revealOrigin\"] },\n              sessionDuration: 86400,\n              unboundButSectioned: [\"@$also.unbound\"],\n            }]]],\n            \"test-lib\": { overridden: 20 },\n          },\n        }\n      }\n    }))"
                         ]
                       }
                     ]

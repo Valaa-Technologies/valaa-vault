@@ -44,12 +44,12 @@
       "ONTOLOGY",
       "VALONAUT"
     ],
-    "revdoc:package": "@valos/kernel",
+    "revdoc:package": "@valos/kernel-vault",
     "revdoc:prefix": "valos",
     "revdoc:prefixIRI": "https://valospace.org/#",
-    "revdoc:version": "0.35.0-rc.11",
+    "revdoc:version": "0.35.0-rc.12",
     "respecConfig": {
-      "subtitle": "0.35.0-rc.11",
+      "subtitle": "0.35.0-rc.12",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -70,7 +70,7 @@
           "SBOM"
         ],
         "subProfiles": [],
-        "title": "@valos/kernel@0.35.0-rc.10 Software Bill of Materials",
+        "title": "@valos/kernel@0.35.0-rc.11 Software Bill of Materials",
         "abstract": {
           "@type": "vdoc:Chapter",
           "vdoc:content": [
@@ -117,7 +117,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.10"
+        "version": "0.35.0-rc.11"
       },
       "engine": {
         "@id": "https://valospace.org/engine",
@@ -190,7 +190,7 @@
           ]
         },
         "package": "@valos/engine",
-        "version": "0.35.0-rc.11"
+        "version": "0.35.0-rc.12"
       },
       "inspire": {
         "@id": "https://valospace.org/inspire",
@@ -263,7 +263,7 @@
           ]
         },
         "package": "@valos/inspire",
-        "version": "0.35.0-rc.11"
+        "version": "0.35.0-rc.12"
       },
       "inspire/revela": {
         "@id": "https://valospace.org/inspire/revela",
@@ -442,7 +442,7 @@
                           {
                             "@type": "vdoc:CharacterData",
                             "vdoc:content": [
-                              " lazyPatchRevelations(gatewayMock,\n    [0], {\n      \"!!!\": [[\"$https.foobar.com%2Fpath\"], [\"-$\",\n        [\".$.fetchedField\"],\n        [\"@.$.fetchOptions@.$.input@@\"],\n      ]],\n    },\n    undefined,\n    [\"last\"])"
+                              " lazyPatchRevelations(gatewayMock,\n    [0], {\n      \"!!!\": [[\"@$https.foobar.com%2Fpath\"], [\n        [\"@.:fetchedField\"],\n        [\"@.:fetchOptions@.:input@@\"],\n      ]],\n    },\n    undefined,\n    [\"last\"])"
                             ]
                           }
                         ]
@@ -479,7 +479,7 @@
                           {
                             "@type": "vdoc:CharacterData",
                             "vdoc:content": [
-                              " lazyPatchRevelations(gatewayMock,\n    {}, { \"!!!\": [\"@\", { value: [\"$expanded.but-unbound\"] }] })"
+                              " lazyPatchRevelations(gatewayMock,\n    {}, { \"!!!\": [\"@@\", [{ value: [\"@$expanded.but-unbound\"] }]] })"
                             ]
                           }
                         ]
@@ -492,7 +492,7 @@
                         {
                           "@type": "vdoc:CharacterData",
                           "vdoc:content": [
-                            " ({ value: [\"$\", \"expanded\", \"but-unbound\"] })"
+                            " ({ value: [\"@$expanded\", \"but-unbound\"] })"
                           ]
                         }
                       ]
@@ -516,7 +516,7 @@
                           {
                             "@type": "vdoc:CharacterData",
                             "vdoc:content": [
-                              " expose(lazyPatchRevelations(gatewayMock, {}, {\n    out: {\n      \"!!!\": {\n        prefixes: {\n          \"/test/v0\": {\n            name: \"test\",\n            \"test-lib\": {\n              preset: 10, overridden: 10, sessionDuration: 0,\n              view: { focus: \"focus to be overwritten\", nulled: \"nulled to be overwritten\" },\n              unboundAndUnsegmented: [\"$un.bound\"],\n            },\n          },\n        },\n      },\n      prefixes: {\n        \"/test/v0\": {\n          \"!!!\": [\"@\", [\"!$.test-lib\"], [\"!$valk.invoke$.callMe\", {\n            view: {\n              focus: \"valaa-aws://example.org/deployment?id=@$~raw.f0c5-f0c5@@\",\n              nulled: null,\n            },\n            identity: { \"!!!\": [\"./config\", \"requireKey\"] },\n            sessionDuration: 86400,\n            unboundButSegmented: [\"$also.unbound\"],\n          }]],\n          \"test-lib\": { overridden: 20 },\n        },\n      }\n    }\n  }))"
+                              " expose(lazyPatchRevelations(gatewayMock, {}, {\n    out: {\n      \"!!!\": {\n        prefixes: {\n          \"/test/v0\": {\n            name: \"test\",\n            \"test-lib\": {\n              preset: 10, overridden: 10, sessionDuration: 0,\n              view: { focus: \"focus to be overwritten\", nulled: \"nulled to be overwritten\" },\n              unboundAndUnsegmented: [\"@$un.bound\"],\n            },\n          },\n        },\n      },\n      prefixes: {\n        \"/test/v0\": {\n          \"!!!\": [\"@@\", [\"@!:test-lib\"], [\"@!invoke:callMe\", [{\n            view: {\n              focus: \"valaa-aws://example.org/deployment?id=@$~raw.f0c5-f0c5@@\",\n              nulled: null,\n            },\n            identity: { \"!!!\": [\"./config\", \"requireKey\"] },\n            sessionDuration: 86400,\n            unboundButSectioned: [\"@$also.unbound\"],\n          }]]],\n          \"test-lib\": { overridden: 20 },\n        },\n      }\n    }\n  }))"
                             ]
                           }
                         ]
@@ -529,7 +529,7 @@
                         {
                           "@type": "vdoc:CharacterData",
                           "vdoc:content": [
-                            " ({\n  out: {\n    prefixes: {\n      \"/test/v0\": {\n        name: \"test\",\n        \"test-lib\": {\n          preset: 10, overridden: 20, sessionDuration: 86400,\n          view: { focus: \"valaa-aws://example.org/deployment?id=@$~raw.f0c5-f0c5@@\", nulled: null },\n          identity: \"/site/revelation/config\",\n          unboundAndUnsegmented: [\"$un.bound\"],\n          unboundButSegmented: [\"$\", \"also\", \"unbound\"],\n        }\n      }\n    }\n  }\n})"
+                            " ({\n  out: {\n    prefixes: {\n      \"/test/v0\": {\n        name: \"test\",\n        \"test-lib\": {\n          preset: 10, overridden: 20, sessionDuration: 86400,\n          view: { focus: \"valaa-aws://example.org/deployment?id=@$~raw.f0c5-f0c5@@\", nulled: null },\n          identity: \"/site/revelation/config\",\n          unboundAndUnsegmented: [\"@$un.bound\"],\n          unboundButSectioned: [\"@$also\", \"unbound\"],\n        }\n      }\n    }\n  }\n})"
                           ]
                         }
                       ]
@@ -557,7 +557,7 @@
           ]
         },
         "package": "@valos/inspire",
-        "version": "0.35.0-rc.11"
+        "version": "0.35.0-rc.12"
       },
       "raem": {
         "@id": "https://valospace.org/raem",
@@ -676,7 +676,104 @@
           ]
         },
         "package": "@valos/raem",
-        "version": "0.35.0-rc.11"
+        "version": "0.35.0-rc.12"
+      },
+      "raem/VPath/VPath.JSON": {
+        "@id": "https://valospace.org/raem/VPath/VPath.JSON",
+        "tags": [],
+        "subProfiles": [],
+        "title": "VPath JSON representations",
+        "abstract": {
+          "@type": "vdoc:Chapter",
+          "vdoc:content": [
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                "VPath JSON is a JSON representation of VPath strings. It\nhas two formats: generic 'VPath outlines' and their strict subset\n'sectioned VPaths'."
+              ]
+            },
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                "Sectioned VPaths are the verbose, machine-processible canonical\nJSON 1-1 representation of VPath strings. Outlines are the more\nconcise, writable and readable but non-canonical format: many different\noutlines can have the same VPath meaning. The normalization of an\noutline into its canonical, sectioned VPath is called disjoining."
+              ]
+            },
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                "As sectioned VPaths are a subset of VPath outlines, a sectioned VPath\nalways disjoins into itself.\n"
+              ]
+            }
+          ]
+        },
+        "introduction": {
+          "@type": "vdoc:Chapter",
+          "vdoc:content": [
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                "VPath JSON is a JSON representation of a VPath string.\nDifferent VPath JSON objects can express the same VPath which allows\nthe most suitable representation to be chosen based on use case."
+              ]
+            },
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                "The canonical subset of VPath JSON (with 1-1 mapping to VPath strings)\nis called sectioned VPaths. These use a limited subset of JSON\nprimitives and are designed to be easily machine-processible."
+              ]
+            },
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                "Finally, the remaining, non-sectioned VPath JSON objects are called\nVPath outlines. Arbitrary JSON objects can be trivially escaped as\nVPath outline, allowing for generic JSON <-> VPath roundtripping.\nEdit me - this is the first payload chapter. Abstract and SOTD are\nessential ",
+                {
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    "ReSpec boilerplate"
+                  ],
+                  "vdoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
+                }
+              ]
+            },
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                "See ",
+                {
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    "ReVDoc tutorial"
+                  ],
+                  "vdoc:ref": "@valos/revdoc/tutorial"
+                },
+                " for\ninstructions on how to write revdoc source documents."
+              ]
+            },
+            {
+              "@type": "vdoc:Paragraph",
+              "vdoc:content": [
+                "See also ",
+                {
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    "ReVdoc specification"
+                  ],
+                  "vdoc:ref": "@valos/revdoc"
+                },
+                " and ",
+                {
+                  "@type": "vdoc:Reference",
+                  "vdoc:content": [
+                    "VDoc specification"
+                  ],
+                  "vdoc:ref": "@valos/vdoc"
+                },
+                " for reference documentation."
+              ]
+            }
+          ]
+        },
+        "package": "@valos/raem",
+        "version": "0.35.0-rc.12"
       },
       "raem/VPath/VPath": {
         "@id": "https://valospace.org/raem/VPath/VPath",
@@ -738,7 +835,7 @@
           ]
         },
         "package": "@valos/raem",
-        "version": "0.35.0-rc.11"
+        "version": "0.35.0-rc.12"
       },
       "revdoc": {
         "@id": "https://valospace.org/revdoc",
@@ -797,7 +894,7 @@
           ]
         },
         "package": "@valos/revdoc",
-        "version": "0.35.0-rc.11"
+        "version": "0.35.0-rc.12"
       },
       "revdoc/tutorial": {
         "@id": "https://valospace.org/revdoc/tutorial",
@@ -871,7 +968,7 @@
           ]
         },
         "package": "@valos/revdoc",
-        "version": "0.35.0-rc.11"
+        "version": "0.35.0-rc.12"
       },
       "sbomdoc": {
         "@id": "https://valospace.org/sbomdoc",
@@ -930,7 +1027,7 @@
           ]
         },
         "package": "@valos/sbomdoc",
-        "version": "0.35.0-rc.11"
+        "version": "0.35.0-rc.12"
       },
       "script": {
         "@id": "https://valospace.org/script",
@@ -983,7 +1080,7 @@
           ]
         },
         "package": "@valos/script",
-        "version": "0.35.0-rc.11"
+        "version": "0.35.0-rc.12"
       },
       "sourcerer": {
         "@id": "https://valospace.org/sourcerer",
@@ -1028,7 +1125,7 @@
           ]
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0-rc.11"
+        "version": "0.35.0-rc.12"
       },
       "sourcerer/valos-event-log": {
         "@id": "https://valospace.org/sourcerer/valos-event-log",
@@ -1058,7 +1155,7 @@
           ]
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0-rc.11"
+        "version": "0.35.0-rc.12"
       },
       "sourcerer/VState": {
         "@id": "https://valospace.org/sourcerer/VState",
@@ -1097,7 +1194,7 @@
           ]
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0-rc.11"
+        "version": "0.35.0-rc.12"
       },
       "twindoc": {
         "@id": "https://valospace.org/twindoc",
@@ -1178,7 +1275,7 @@
           ]
         },
         "package": "@valos/twindoc",
-        "version": "0.35.0-rc.11"
+        "version": "0.35.0-rc.12"
       },
       "type-vault/AssortedTutorials": {
         "@id": "https://valospace.org/type-vault/AssortedTutorials",
@@ -1197,7 +1294,7 @@
         },
         "introduction": {},
         "package": "@valos/type-vault",
-        "version": "0.35.0-rc.11"
+        "version": "0.35.0-rc.12"
       },
       "vdoc": {
         "@id": "https://valospace.org/vdoc",
@@ -1285,7 +1382,7 @@
           ]
         },
         "package": "@valos/vdoc",
-        "version": "0.35.0-rc.11"
+        "version": "0.35.0-rc.12"
       },
       "web-spindle": {
         "@id": "https://valospace.org/web-spindle",
@@ -1391,7 +1488,7 @@
           ]
         },
         "package": "@valos/web-spindle",
-        "version": "0.35.0-rc.11"
+        "version": "0.35.0-rc.12"
       },
       "web-spindle/schema-builder": {
         "@id": "https://valospace.org/web-spindle/schema-builder",
@@ -1520,7 +1617,7 @@
           ]
         },
         "package": "@valos/web-spindle",
-        "version": "0.35.0-rc.11"
+        "version": "0.35.0-rc.12"
       },
       "kernel": {
         "@id": "https://valospace.org/kernel",
@@ -1722,7 +1819,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.10"
+        "version": "0.35.0-rc.11"
       },
       "removed-from": {
         "@id": "https://valospace.org/removed-from",
@@ -1765,7 +1862,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.10"
+        "version": "0.35.0-rc.11"
       },
       "@valos/kernel": {
         "@id": "https://valospace.org/index",
@@ -1910,7 +2007,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.10"
+        "version": "0.35.0-rc.11"
       },
       "technician": {
         "@id": "https://valospace.org/technician",
@@ -1998,7 +2095,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.10"
+        "version": "0.35.0-rc.11"
       },
       "valonaut": {
         "@id": "https://valospace.org/valonaut",
@@ -2072,7 +2169,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.10"
+        "version": "0.35.0-rc.11"
       },
       "voyager": {
         "@id": "https://valospace.org/voyager",
@@ -2132,7 +2229,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.10"
+        "version": "0.35.0-rc.11"
       }
     },
     "prefixes": {

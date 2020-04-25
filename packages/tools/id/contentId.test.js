@@ -13,6 +13,8 @@ function toArrayBuffer (buf) {
   return ab;
 }
 
+const posixPath = path.posix || path;
+
 describe("contentHash module", () => {
   const testData = [
     /* eslint-disable max-len */
@@ -31,11 +33,11 @@ describe("contentHash module", () => {
 
   // Expected hashes generated using openssl dgst -sha512 [file]
   const testFiles = [
-    { path: path.join(__dirname, "test", "utf8.txt"), hash: "304f67430532c36b971cb51f315b2e9a304df457d66c63fd413ee0b71c1ee7468a09b3d821890b5b11d6fffef454af92299904fa6dcb081c71bb3d7e67e2c8ef" },
-    { path: path.join(__dirname, "test", "utf16be.txt"), hash: "afcf0c60d5e230ec82840a06fef7141731a7aa1a5681a15f06244d91d7b4922243afcc256f735dd693aaf156d28d51c9bb967cbf9e00f7b8d4c73f232c83f122" },
-    { path: path.join(__dirname, "test", "utf16le.txt"), hash: "38bb3c5fa65dfe4537c6e9c3fb85603756422ed62943d907945572095136d4238ac9c9449630769a9223d2d38a712bb346d84ca36dcbfe16e1bc16d9aa71dad9" },
-    { path: path.join(__dirname, "test", "image.png"), hash: "598ea3ab1028138652203d5288e9bc6d70242e6ea3e626e2ddabcee775e77cd30978a037f8815771ee834d532ae2baa2f1e425f095935572818c249b71ceb8f3" },
-    { path: path.join(__dirname, "test", "sound.mp3"), hash: "b386920757497b94d15e334d31582b8ea321b01258da59d2904035ae2c915b07d5d59d80eeecece5eb9ee90ae2e40a4116254e8c36cde1ab3ed28b867831dbbc" },
+    { path: posixPath.join(__dirname, "test", "utf8.txt"), hash: "304f67430532c36b971cb51f315b2e9a304df457d66c63fd413ee0b71c1ee7468a09b3d821890b5b11d6fffef454af92299904fa6dcb081c71bb3d7e67e2c8ef" },
+    { path: posixPath.join(__dirname, "test", "utf16be.txt"), hash: "afcf0c60d5e230ec82840a06fef7141731a7aa1a5681a15f06244d91d7b4922243afcc256f735dd693aaf156d28d51c9bb967cbf9e00f7b8d4c73f232c83f122" },
+    { path: posixPath.join(__dirname, "test", "utf16le.txt"), hash: "38bb3c5fa65dfe4537c6e9c3fb85603756422ed62943d907945572095136d4238ac9c9449630769a9223d2d38a712bb346d84ca36dcbfe16e1bc16d9aa71dad9" },
+    { path: posixPath.join(__dirname, "test", "image.png"), hash: "598ea3ab1028138652203d5288e9bc6d70242e6ea3e626e2ddabcee775e77cd30978a037f8815771ee834d532ae2baa2f1e425f095935572818c249b71ceb8f3" },
+    { path: posixPath.join(__dirname, "test", "sound.mp3"), hash: "b386920757497b94d15e334d31582b8ea321b01258da59d2904035ae2c915b07d5d59d80eeecece5eb9ee90ae2e40a4116254e8c36cde1ab3ed28b867831dbbc" },
     /* eslint-enable max-len */
   ];
 

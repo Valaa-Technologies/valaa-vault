@@ -44,6 +44,8 @@ const {
   dumpObject, inBrowser, invariantify, isPromise, FabricEventTarget, mapEagerly, thenChainEagerly,
 } = valosTools;
 
+const posixPath = path.posix || path;
+
 export default class Gateway extends FabricEventTarget {
   constructor (options: Object) {
     super(options.parent, options.verbosity, options.name);
@@ -67,6 +69,44 @@ export default class Gateway extends FabricEventTarget {
 
   static moduleMatcherString = "^((@[^@/]+\\/)?([^/]+))(\\/(.*))?$";
   static moduleMatcher = new RegExp(Gateway.moduleMatcherString);
+
+  reveal (reference, options = {}) {
+    let source = this.resolveRevealReference(reference, options.currentDir);
+    let ret;
+    if (!inBrowser() && !options.fetch && !source.match(/^[^/]*:/)) {
+      ret = this.require(source, options);
+      source = options.modulePath;
+    }
+    const sourceDir = path.dirname(source);
+    options.revealedDir = !sourceDir || (sourceDir.slice(-1) === "/") ? sourceDir : `${sourceDir}/`;
+    if (ret === undefined) {
+      const basename = path.basename(source);
+      const suffix = (basename === "") ? "index.json" : (basename === "index") ? ".json" : "";
+      ret = (suffix || (basename.slice(-5) === ".json") || (basename.slice(-3) === ".js"))
+          ? this.fetchJSON(`${source}${suffix}`, options.fetch) // fetch with no fallback
+          : this.fetchJSON(`${source}.json`, options.fetch)
+              .catch(() => this.fetchJSON(`${source}/index.json`, options.fetch)
+                  .then(directoryRevelation => {
+                    options.revealedDir = `${options.revealedDir}${basename}/`;
+                    return directoryRevelation;
+                  }));
+    }
+    return ret;
+  }
+
+  resolveRevealReference (reference, currentDir) {
+    if (reference[0] === ".") return posixPath.join(currentDir || this.revelationRoot, reference);
+    if (reference[0] === "/") return posixPath.join((this.siteRoot || ""), reference);
+    if ((reference[0] !== "<") || (reference[reference.length - 1] !== ">")) return reference;
+    const uri = reference.slice(1, -1);
+    if (uri[0] === "/") {
+      if (inBrowser()) return uri;
+      return posixPath.join(this.domainRoot || this.siteRoot, uri.slice(1));
+    }
+    if (uri.match(/^[^/]*:/)) return uri; // absolute-ref uri: global reference
+    // relative-path URI ref - revelation root relative ref
+    return posixPath.join(this.revelationRoot, uri);
+  }
 
   /**
    * valos.gateway.require is the entry point for ValOS fabric library
@@ -98,16 +138,7 @@ export default class Gateway extends FabricEventTarget {
     // require here.
     try {
       if (!inBrowser()) {
-        let modulePath;
-        if (options) {
-          modulePath = require.resolve(module);
-          const basename = path.basename(modulePath);
-          if ((basename === "index.js") || (basename === "index.json")) {
-            // TODO(iridian, 2020-01): Fix handling directories with package.json:main set
-            options.wasDirectory = true;
-          }
-        }
-        return require(modulePath || module);
+        return require(!options ? module : (options.modulePath = require.resolve(module)));
       }
 
       const parts = Gateway.moduleMatcher.exec(module);

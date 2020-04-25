@@ -23,7 +23,7 @@ export default class PerspireServer extends FabricEventTarget {
       domainRoot,
       revelationRoot: revelationRoot[0] === "/"
           ? revelationRoot
-          : path.join(siteRoot, revelationRoot),
+          : (path.posix || path).join(siteRoot, revelationRoot),
     };
 
     this.revelations = revelations || [];

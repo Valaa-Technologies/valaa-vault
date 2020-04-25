@@ -1,5 +1,5 @@
 {
-  "name": "@valos/kernel",
+  "name": "@valos/kernel-vault",
   "version": "0.35.0-rc.12",
   "valos": {
     "type": "vault",
@@ -30,11 +30,11 @@
   },
   "devDependencies": {
     "@cyclonedx/bom": "^0.2.6",
-    "@valos/inspire": "^0.35.0-rc.5",
-    "@valos/kernel": "^0.35.0-rc.5",
-    "@valos/toolset-revealer": "^0.35.0-rc.5",
-    "@valos/type-vault": "^0.35.0-rc.5",
-    "valma": "^0.35.0-rc.5",
+    "@valos/inspire": "^0.35.0-rc.12",
+    "@valos/kernel": "^0.35.0-rc.12",
+    "@valos/toolset-revealer": "^0.35.0-rc.12",
+    "@valos/type-vault": "^0.35.0-rc.12",
+    "valma": "^0.35.0-rc.12",
     "xml-js": "^1.6.11"
   },
   "dependencies": {}

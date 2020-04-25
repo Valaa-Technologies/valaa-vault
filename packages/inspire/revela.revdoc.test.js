@@ -1,3 +1,5 @@
+const path = require("path");
+
 const {
   extractee: {
     authors, em, ref, pkg,
@@ -19,22 +21,33 @@ const { name, version } = require("./package");
 const title = "revela.json format specification";
 const { itExpects, runTestDoc } = prepareTestDoc(title);
 
-const gatewayMock = Object.assign(new FabricEventTarget("revela.gateway.mock", 2), {
+const posixPath = path.posix || path;
+
+const gatewayMock = Object.assign(new FabricEventTarget(console, 2, "revela.gateway.mock"), {
   siteRoot: "/site",
   domainRoot: "/",
   revelationRoot: "/site/revelation/",
-  require (requireKey) {
-    return {
-      requireKey,
-      someField: 1,
-      callMe (p) { return ({ [requireKey]: p }); },
-    };
-  },
-  fetchJSON (input, options = {}) {
-    return Promise.resolve({
-      fetchOptions: { input, ...options },
-      fetchedField: 1,
-    });
+  reveal (origin, options) {
+    let ret, revealOrigin;
+    if ((origin[0] === "<") || options.fetch) {
+      revealOrigin = origin.slice(1, -1);
+      ret = Promise.resolve({
+        options: { revealOrigin, ...options.fetch },
+        fetchedField: 1,
+      });
+    } else {
+      revealOrigin = (origin[0] === "/") ? posixPath.join("/site", origin)
+          : (origin[0] === ".") ? posixPath.join(options.currentDir || "/site/revelation/", origin)
+          : origin;
+      ret = {
+        revealOrigin,
+        someField: 1,
+        callMe (p) { return ({ [revealOrigin]: p }); },
+      };
+    }
+    const originDir = path.dirname(revealOrigin);
+    options.revealedDir = `${originDir}${!originDir || originDir.slice(-1) === "/" ? "" : "/"}`;
+    return ret;
   },
 });
 
@@ -82,72 +95,80 @@ for various valos fabric config files.`],
     ],
     "example#1": itExpects(
         "trivial revelation patch",
-() => lazyPatchRevelations(gatewayMock, { a: [1] }, { a: [2] }),
-        "toEqual",
+() => lazyPatchRevelations(gatewayMock,
+    { a: [1] },
+    { a: [2] }),
+"toEqual",
 () => ({ a: [1, 2] })),
     "example#2": itExpects(
         "spread of a simple relative import",
-() => lazyPatchRevelations(gatewayMock, {}, { "!!!": "./path" }),
-        "toMatchObject",
-() => ({ requireKey: "/site/revelation/path", someField: 1 })),
+() => lazyPatchRevelations(gatewayMock,
+    {},
+    { "!!!": "./path" }),
+"toMatchObject",
+() => ({ revealOrigin: "/site/revelation/path", someField: 1 })),
     "example#3": itExpects(
         "spread of an explicit site root import followed by field access",
-() => lazyPatchRevelations(gatewayMock, "", {
-  "!!!": ["/path", "requireKey"],
-}),
-        "toEqual",
-"/site/path"),
+() => lazyPatchRevelations(gatewayMock,
+    "",
+    { "!!!": ["/path", "revealOrigin"] }),
+"toEqual",
+"/site/path",
+    ),
     "example#4": itExpects(
         "spread of a URI import followed by pick-array append",
 async () => lazyPatchRevelations(gatewayMock,
-    [0], {
-      "!!!": [["@$https.foobar.com%2Fpath"], [
-        ["@.:fetchedField"],
-        ["@.:fetchOptions@.:input@@"],
-      ]],
-    },
+    [0],
+    { "!!!": [
+      ["@$https.foobar.com%2Fpath"],
+      [["@.:fetchedField"], ["@.:options@.:revealOrigin@@"]],
+    ] },
     undefined,
     ["last"]),
-        "toEqual",
-() => [0, 1, "https://foobar.com/path.json", "last"]),
+"toEqual",
+() => [0, 1, "https://foobar.com/path", "last"]),
     "example#5": itExpects("non-evaluated spreader contents to be segmented but non-cemented",
 async () => lazyPatchRevelations(gatewayMock,
-    {}, { "!!!": ["@@", [{ value: ["@$expanded.but-unbound"] }]] }),
-        "toEqual",
-() => ({ value: ["@$expanded", "but-unbound"] })),
+    {},
+    { "!!!": ["@@", [{ value: ["@$expanded.but-unbound"] }]] }),
+"toEqual",
+() => ({ value: ["@$expanded", "but-unbound"] })
+    ),
     "example#6": itExpects(
         "nested import & invoke spread to resolve all spreads",
-async () => expose(lazyPatchRevelations(gatewayMock, {}, {
-    out: {
-      "!!!": {
-        prefixes: {
-          "/test/v0": {
-            name: "test",
-            "test-lib": {
-              preset: 10, overridden: 10, sessionDuration: 0,
-              view: { focus: "focus to be overwritten", nulled: "nulled to be overwritten" },
-              unboundAndUnsegmented: ["@$un.bound"],
+async () => expose(lazyPatchRevelations(gatewayMock,
+    {},
+    {
+      out: {
+        "!!!": {
+          prefixes: {
+            "/test/v0": {
+              name: "test",
+              "test-lib": {
+                preset: 10, overridden: 10, sessionDuration: 0,
+                view: { focus: "focus to be overwritten", nulled: "nulled to be overwritten" },
+                unboundAndUnsegmented: ["@$un.bound"],
+              },
             },
           },
         },
-      },
-      prefixes: {
-        "/test/v0": {
-          "!!!": ["@@", ["@!:test-lib"], ["@!invoke:callMe", [{
-            view: {
-              focus: "valaa-aws://example.org/deployment?id=@$~raw.f0c5-f0c5@@",
-              nulled: null,
-            },
-            identity: { "!!!": ["./config", "requireKey"] },
-            sessionDuration: 86400,
-            unboundButSectioned: ["@$also.unbound"],
-          }]]],
-          "test-lib": { overridden: 20 },
-        },
+        prefixes: {
+          "/test/v0": {
+            "!!!": ["@@", ["@!:test-lib"], ["@!invoke:callMe", [{
+              view: {
+                focus: "valaa-aws://example.org/deployment?id=@$~raw.f0c5-f0c5@@",
+                nulled: null,
+              },
+              identity: { "!!!": ["./config", "revealOrigin"] },
+              sessionDuration: 86400,
+              unboundButSectioned: ["@$also.unbound"],
+            }]]],
+            "test-lib": { overridden: 20 },
+          },
+        }
       }
-    }
-  })),
-        "toEqual",
+    })),
+"toEqual",
 () => ({
   out: {
     prefixes: {

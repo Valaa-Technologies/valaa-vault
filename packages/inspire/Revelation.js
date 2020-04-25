@@ -1,11 +1,6 @@
-const path = require("path");
-
 const { disjoinVPath, cementVPath } = require("../raem/VPath");
 
 const inProduction = require("../tools/inProduction").default;
-const resolveRevealOrigin = require("../tools/resolveRevealOrigin").default;
-// const trivialClone = require("../tools/trivialClone").default;
-const inBrowser = require("../gateway-api/inBrowser").default;
 const isPromise = require("../tools/isPromise").default;
 const patchWith = require("../tools/patchWith").default;
 const { mapEagerly, thenChainEagerly } = require("../tools/thenChainEagerly");
@@ -208,8 +203,9 @@ function reveal (mystery) {
 function expose (mystery) {
   // in-place deep reveal and replace object properties
   let revealedTrivialObject_;
-  return thenChainEagerly(reveal(mystery), [
-    revealed => {
+  return thenChainEagerly(mystery, [
+    reveal,
+    function _exposeRevealedValue (revealed) {
       if ((revealed == null) || (typeof revealed !== "object")) return revealed;
       if (!Array.isArray(revealed)) {
         if (Object.getPrototypeOf(revealed) !== Object.prototype) return revealed;
@@ -217,17 +213,23 @@ function expose (mystery) {
       }
       return mapEagerly(
           revealedTrivialObject_ ? Object.entries(revealedTrivialObject_) : revealed,
-          entry => {
+          function _revealEntryValues (entry) {
             const revealedValue = revealedTrivialObject_ ? entry[1] : entry;
-            return thenChainEagerly(expose(revealedValue), exposedValue => {
-              if (revealedTrivialObject_ && (revealedValue !== exposedValue)) {
-                revealedTrivialObject_[entry[0]] = exposedValue;
-              }
-              return exposedValue;
-            });
-          });
+            return thenChainEagerly(revealedValue, [
+              expose,
+              function _setParentPropertyToExposedValue (exposedValue) {
+                if (revealedTrivialObject_ && (revealedValue !== exposedValue)) {
+                  revealedTrivialObject_[entry[0]] = exposedValue;
+                }
+                return exposedValue;
+              },
+            ]);
+          },
+      );
     },
-    exposed => revealedTrivialObject_ || exposed,
+    function _maybeReturnTrivialExposedObject (exposed) {
+      return revealedTrivialObject_ || exposed;
+    },
   ]);
 }
 
@@ -275,7 +277,7 @@ function _patchRevelation (gateway, targetRevelation, patchRevelation) {
         const delayed = _delayIfAnyObscured([target, patch], [
           ([revealedTarget, revealedPatch]) =>
               this.extend(revealedTarget, revealedPatch, key, targetParent, patchParent),
-          extendResult => {
+          function _setParentPropertyAfterExtend (extendResult) {
             if (targetParent) targetParent[key] = extendResult;
             return extendResult;
           },
@@ -441,8 +443,10 @@ function _isObscured (candidate) {
 }
 
 function _valk (gateway, head, step) {
-  const delayed = _delayIfAnyObscured(head, revealedHead => _valk(gateway, revealedHead, step))
-      || _delayIfAnyObscured(step, revealedStep => this._valk(gateway, head, revealedStep));
+  const delayed = _delayIfAnyObscured(head,
+          function _revealHead (revealedHead) { return _valk(gateway, revealedHead, step); })
+      || _delayIfAnyObscured(step,
+          function _revealStep (revealedStep) { this._valk(gateway, head, revealedStep); });
   try {
     if (delayed !== undefined) return delayed;
     if ((step === null) || (step === undefined)) return head;
@@ -451,14 +455,19 @@ function _valk (gateway, head, step) {
       const ret = {};
       const keys = Object.keys(step);
       const values = keys.map(key => (ret[key] = _valk(gateway, head, step[key])));
-      return _delayIfAnyObscured(values, revealed => {
-        keys.forEach((key, index) => { ret[key] = revealed[index]; });
-        return ret;
-      }) || ret;
+      return _delayIfAnyObscured(
+          values,
+          function _revealPropertyValues (revealed) {
+            keys.forEach((key, index) => { ret[key] = revealed[index]; });
+            return ret;
+          },
+      ) || ret;
     }
     if ((typeof step[0] !== "string") || (step[0][0] !== "§")) {
       const ret = step.map(substep => _valk(gateway, head, substep));
-      return _delayIfAnyObscured(ret, revealed => revealed) || ret;
+      return _delayIfAnyObscured(ret,
+          function _revealArrayValues (revealed) { return revealed; },
+      ) || ret;
     }
     const opId = step[0];
     if (opId === "§'") return step[1];
@@ -469,10 +478,12 @@ function _valk (gateway, head, step) {
     if (opId === "§{}") {
       const ret = {};
       const values = step.slice(1).map(([key, value]) => (ret[key] = _tryLiteralOrValk(value)));
-      return _delayIfAnyObscured(values, revealed => {
-        for (let i = 1; i !== step.length; ++i) ret[step[i][0]] = revealed[i - 1];
-        return ret;
-      }) || ret;
+      return _delayIfAnyObscured(values,
+          function _revealObjectConstructor (revealed) {
+            for (let i = 1; i !== step.length; ++i) ret[step[i][0]] = revealed[i - 1];
+            return ret;
+          },
+      ) || ret;
     }
     if (opId === "§invoke") {
       return head[_tryLiteralOrValk(step[1])]
@@ -515,65 +526,41 @@ function _eagerReveal (gateway, step) {
     origin = options.url || options.input || options.path;
     pathOp = step.slice(2);
   }
-  try {
-    if (!options.url) {
-      origin = resolveRevealOrigin(
-          origin, gateway.siteRoot, gateway.revelationRoot, gateway.domainRoot, gateway.currentDir);
-    }
-    const relativeGateway = Object.create(gateway);
-    relativeGateway.currentDir = path.dirname(origin);
-    let maybeDirName = path.basename(origin);
-    if ((maybeDirName === "index") || (maybeDirName === "index.json")) maybeDirName = undefined;
-    const revealOptions = { fetch: options.fetch };
-
-    let revealing;
-    if (!inBrowser() && !revealOptions.fetch && !origin.match(/^[^/]*:/)) {
-      revealing = gateway.require(origin, revealOptions);
-    } else {
-      const basename = path.basename(origin);
-      revealing = (basename === "")
-              ? gateway.fetchJSON(`${origin}index.json`, revealOptions.fetch)
-          : ((basename.slice(-5) === ".json") || (basename.slice(-3) === ".js"))
-              ? gateway.fetchJSON(origin, revealOptions.fetch)
-              : gateway.fetchJSON(`${origin}.json`, revealOptions.fetch)
-                    .catch(() => gateway.fetchJSON(`${origin}/index.json`, revealOptions.fetch)
-                        .then(directoryRevelation => {
-                          revealOptions.wasDirectory = true;
-                          return directoryRevelation;
-                        }));
-    }
-
-    return thenChainEagerly(revealing, [
-      result => {
-        if (maybeDirName && revealOptions.wasDirectory) {
-          relativeGateway.currentDir = path.join(relativeGateway.currentDir, maybeDirName);
-        }
-        return _patchRevelation(relativeGateway, undefined, result);
-      },
-      revelation => (!pathOp.length
+  const relativeGateway = Object.create(gateway);
+  const revealOptions = { currentDir: gateway.evaluationDir, fetch: options.fetch };
+  return thenChainEagerly(origin, [
+    function _revealOrigin (origin_) {
+      return gateway.reveal(origin_, revealOptions);
+    },
+    function _patchOriginRevelation (result) {
+      relativeGateway.evaluationDir = revealOptions.revealedDir;
+      return _patchRevelation(relativeGateway, undefined, result);
+    },
+    function _valkOriginRevelationPathRemainder (revelation) {
+      return (!pathOp.length
           ? revelation
-          : _valk(relativeGateway, revelation, ["§->", ...pathOp])),
-    ]);
-  } catch (error) {
+          : _valk(relativeGateway, revelation, ["§->", ...pathOp]));
+    },
+  ], function _errorOnOriginRevealPatchValk (error) {
     throw gateway.wrapErrorEvent(error, 1,
-        `_reveal('${origin}')`,
-        "\n\tgateway.siteRoot:", gateway.siteRoot,
-        "\n\tgateway.revelationRoot:", gateway.revelationRoot,
-        "\n\tgateway.currentDir:", gateway.currentDir,
+        new Error(`_reveal("${origin}" from "${gateway.currentDir}")`),
+        "\n\trevealOptions:", ...dumpObject(revealOptions),
     );
-  }
+  });
 }
 
 function _delayIfAnyObscured (mystery, operations) {
   if (!_isObscured(mystery) && (!Array.isArray(mystery) || !mystery.find(_isObscured))) {
     return undefined;
   }
-  return _markDelayed(function _delayed () {
+  return _markDelayed(function _revealAnyDelayed () {
     return thenChainEagerly(mystery, [
       reveal,
-      revealedMystery => ((!Array.isArray(revealedMystery) || !revealedMystery.find(_isObscured))
-          ? revealedMystery
-          : mapEagerly(revealedMystery, reveal)),
+      function revealEntries (revealedMystery) {
+        return !Array.isArray(revealedMystery) || !revealedMystery.find(_isObscured)
+            ? revealedMystery
+            : mapEagerly(revealedMystery, reveal);
+      },
     ].concat(operations));
   });
 }

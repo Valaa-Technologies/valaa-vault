@@ -39,6 +39,9 @@ exports.builder = (yargs) => yargs.options({
   valos: {
     type: "object", description: "Initial package.json valos stanza.",
   },
+  repository: {
+    type: "string", description: "Initial repository of the package.",
+  },
   devDependencies: {
     type: "string", array: true,
     description: "List of initial devDependencies entries.",
@@ -62,7 +65,10 @@ exports.handler = async (yargv) => {
 
   if (!packageJSON) {
     return vlm.interact(["vlm -b init", {
-      breakdown: yargv.breakdown, devDependencies: yargv.devDependencies, valos: yargv.valos,
+      breakdown: yargv.breakdown,
+      valos: yargv.valos,
+      repository: yargv.repository,
+      devDependencies: yargv.devDependencies,
     }]);
   }
   if ((ret_.success !== false) && ((yargv.devDependencies || [])[0] !== false)) {
@@ -138,6 +144,7 @@ package configuration file for yarn (and also for npm, which yarn is
 "description": ${JSON.stringify(yargv.description || "")},
 "author": "${vaultConfig.author}",
 "license": "${vaultConfig.license}",
+"repository": ${JSON.stringify(yargv.repository || vaultConfig.repository || "")},
 "private": ${isPrivate ? "true" : "false"}${
 publishConfigLine}
 }`).to("package.json");

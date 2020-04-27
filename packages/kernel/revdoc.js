@@ -9,9 +9,8 @@ const {
 } = require("@valos/revdoc");
 const { domainHeaders } = require("@valos/type-vault");
 
-const { name, version } = require("./package");
+const { name, version, repository } = require("./package");
 const { summary, ontologies, documents } = require("./index");
-const { repository } = require("../../package");
 
 const { workspaces, types, toolsets, tools, commands } = summary;
 

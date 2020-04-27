@@ -89,6 +89,7 @@
       "@valos/kernel": {
         "version": "0.35.0-rc.13",
         "description": "@valos/kernel domain",
+        "homepage": "https://valospace.org/kernel",
         "license": "MIT"
       }
     },

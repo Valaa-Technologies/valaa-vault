@@ -10,6 +10,7 @@
   "license": "MIT",
   "author": "Valaa Technologies Ltd",
   "private": false,
+  "repository": "https://github.com/valaatech/kernel",
   "publishConfig": {
     "access": "public"
   },

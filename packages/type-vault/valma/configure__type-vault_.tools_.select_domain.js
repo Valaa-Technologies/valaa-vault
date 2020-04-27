@@ -29,6 +29,7 @@ exports.builder = (yargs) => yargs.options({
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
   const domain = vlm.getValOSConfig("domain");
+  const { repository } = vlm.getPackageConfig();
   const domainLocal = domain.split("/")[1];
   const domainWorkspacePath = vlm.path.join(process.cwd(), "packages", domainLocal);
   if (!vlm.shell.test("-d", domainWorkspacePath) &&
@@ -39,6 +40,7 @@ exports.handler = async (yargv) => {
     await vlm.invoke(`init`, {
       description: `The domain '${domain}'`,
       valos: { type: "domain", domain },
+      repository,
       devDependencies: false,
     });
     await vlm.interact([`vlm draft-command`, {

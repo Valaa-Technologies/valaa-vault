@@ -321,6 +321,10 @@ const _vlm = {
   },
 
   // Alias for console.log for unprocessed payload output directly to stdout
+  debug (...rest) {
+    console.debug(...rest);
+    return this;
+  },
   log (...rest) {
     console.log(...rest);
     return this;

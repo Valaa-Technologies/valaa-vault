@@ -318,7 +318,7 @@ function _patchRevelation (gateway, targetRevelation, patchRevelation) {
           if (((patchType === "array") && (patch[0] === "!!!"))
               || ((patchType === "object") && patch["!!!"])) return undefined;
           if ((typeof target === "object") && target[Deprecated]) {
-            gateway.warnEvent(target[Deprecated], "while patching", target, "with", patch);
+            gateway.debugEvent(target[Deprecated], "while patching", target, "with", patch);
             if (patchType !== "object") return patch;
           } else if (targetType !== patchType) {
             if ((patchType === "object") && Object.keys(patch).length === 0) {

@@ -101,7 +101,7 @@ function _mergeWithAbsentStub (bard: CreateBard, passage: Object, typeName?: str
 
 export function convertLegacyOwnerField (bard: CreateBard, initialState: Object) {
   if (!bard.passage.owner) return initialState;
-  throw bard.wrapErrorEvent(new Error(`\n\tDEPRECATED: ${bard.passage.type}.owner`),
+  throw bard.wrapErrorEvent(new Error(`\n\tPHASED OUT DEPRECATED: ${bard.passage.type}.owner`),
       `\n\tprefer: ${bard.passage.type}.initialState.owner`);
   /*
   const actualInitialState = initialState || {};

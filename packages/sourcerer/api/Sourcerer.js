@@ -195,8 +195,7 @@ export default class Sourcerer extends FabricEventTarget {
   }
 
   getFullConnections () : Map<string, Connection> {
-    this.warnEvent(
-        "DEPRECATED: prefer getActiveConnections instead of getFullConnections");
+    this.debugEvent("DEPRECATED: getFullConnections in favor of getActiveConnections");
     return this.getActiveConnections();
   }
 
@@ -212,8 +211,7 @@ export default class Sourcerer extends FabricEventTarget {
     return ret;
   }
   getPendingConnections () : Map<string, Connection> {
-    this.warnEvent(
-        "DEPRECATED: prefer getActivatingConnections instead of getPendingConnections");
+    this.debugEvent("DEPRECATED: getPendingConnections in favor of getActivatingConnections");
     return this.getActiveConnections();
   }
 

@@ -168,7 +168,7 @@ export default class EngineKuery extends ValoscriptKuery {
   }
 
   modifyPropertyReference (propertyName: string, targetModification: any, options: Object = {}) {
-    console.error("DEPRECATED: VALEK.modifyPropertyReference",
+    console.debug("DEPRECATED: VALEK.modifyPropertyReference",
         "\n\tprefer: VALEK.modifyPropertyTarget");
     return this.modifyPropertyTarget(propertyName, targetModification, options);
   }
@@ -228,7 +228,7 @@ export default class EngineKuery extends ValoscriptKuery {
   }
 
   blobContent (mediaVRL: ?any, remoteURL: ?any, options: Object = {}) {
-    console.error("DEPRECATED: VALEK.blobContent\n\tprefer: VALEK.bvobContent");
+    console.debug("DEPRECATED: VALEK.blobContent\n\tprefer: VALEK.bvobContent");
     return this.call(this._root.toMethod("bvobContent"), null, mediaVRL, remoteURL, options);
   }
 
@@ -253,7 +253,7 @@ export default class EngineKuery extends ValoscriptKuery {
   }
 
   prepareBlob (bvobContent: any, options: Kuery = {}) {
-    console.error("DEPRECATED: VALEK.prepareBlob\n\tprefer: VALEK.prepareBvob");
+    console.debug("DEPRECATED: VALEK.prepareBlob\n\tprefer: VALEK.prepareBvob");
     return this.call(this._root.toMethod("prepareBvob"), null, bvobContent, options);
   }
 

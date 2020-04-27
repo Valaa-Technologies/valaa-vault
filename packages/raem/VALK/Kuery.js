@@ -451,7 +451,7 @@ export default class Kuery {
   }
 
   refer (target: any, headType: ?string) {
-    console.error("DEPRECATED: VALK.refer\n\tprefer: VALEK.fromObject");
+    console.debug("DEPRECATED: VALK.refer\n\tprefer: VALEK.fromObject");
     return this.fromObject(target, headType);
   }
 
@@ -496,7 +496,7 @@ export default class Kuery {
   }
 
   field (name: string, headType: ?string): Kuery {
-    console.error("DEPRECATED: VALK.field\n\tprefer: VALK.toField");
+    console.debug("DEPRECATED: VALK.field\n\tprefer: VALK.toField");
     return this.toField(name, headType);
   }
 
@@ -514,7 +514,7 @@ export default class Kuery {
   }
 
   fields (...fieldNames: string[]): Kuery {
-    console.error("DEPRECATED: VALK.fields\n\tprefer: VALK.toFields");
+    console.debug("DEPRECATED: VALK.fields\n\tprefer: VALK.toFields");
     return this.toFields(...fieldNames);
   }
 
@@ -546,7 +546,7 @@ export default class Kuery {
   fromIndexValue (): Kuery { return this.fromScope("__index__"); }
 
   index (index: number): Kuery {
-    console.error("DEPRECATED: VALK.index\n\tprefer: VALK.toIndex");
+    console.debug("DEPRECATED: VALK.index\n\tprefer: VALK.toIndex");
     return this.toIndex(index);
   }
 
@@ -677,7 +677,7 @@ export default class Kuery {
   }
 
   scope (variableName: ?string = null): Kuery {
-    console.error("DEPRECATED: VALK.scope\n\tprefer: VALK.fromScope");
+    console.debug("DEPRECATED: VALK.scope\n\tprefer: VALK.fromScope");
     return this.fromScope(variableName);
   }
 

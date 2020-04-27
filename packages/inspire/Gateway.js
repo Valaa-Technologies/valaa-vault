@@ -414,6 +414,9 @@ export default class Gateway extends FabricEventTarget {
         rootScope.valos.identity = identity;
         rootScope.valos.view = {};
         rootScope.console = Object.assign(Object.create(engine), {
+          debug: function verboseDebugEvent (...rest) {
+            gateway.debugEvent(0, ...[].concat(...rest.map(_trimObjects)));
+          },
           info: function verboseInfoEvent (...rest) {
             gateway.infoEvent(0, ...[].concat(...rest.map(_trimObjects)));
           },
@@ -816,8 +819,11 @@ export default class Gateway extends FabricEventTarget {
   async _connectPrologueChronicles (prologue: Object) {
     let chronicles;
     try {
-      const rootChronicleURI = prologue.rootChronicleURI
+      let rootChronicleURI = prologue.rootChronicleURI
           && naiveURI.validateChronicleURI(await reveal(prologue.rootChronicleURI));
+      if (!rootChronicleURI && prologue.rootPartitionURI) {
+        rootChronicleURI = naiveURI.createPartitionURI(prologue.rootPartitionURI);
+      }
       this.clockEvent(1, `prologues.extract`, `Determining prologues and the root chronicle <${
         rootChronicleURI}>`);
       this._rootFocusURI = await reveal(prologue.rootFocusURI);

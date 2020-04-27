@@ -68,10 +68,11 @@ export class FabricEventLogger {
     if (!this.info) this.info = console.info.bind(console);
     if (!this.clock) this.clock = (inBrowser() ? console.log : console.warn).bind(console);
   }
+  debug: Function;
+  info: Function;
   log: Function;
   warn: Function;
   error: Function;
-  info: Function;
   clock: Function;
 }
 
@@ -122,6 +123,9 @@ export class FabricEventTarget {
     return `${this.constructor.name}(${!(opts || {}).raw ? this.getName() : this.getRawName()})`;
   }
 
+  debug (...rest: any[]) {
+    return (this._parent.debug || this._parent.log).apply(this._parent, rest);
+  }
   info (...rest: any[]) {
     return (this._parent.info || this._parent.log).apply(this._parent, rest);
   }
@@ -133,6 +137,11 @@ export class FabricEventTarget {
         .apply(this._parent, rest);
   }
 
+  debugEvent (firstPartOrMinVerbosity: number | any, ...rest: any[]) {
+    if (!_isVerboseEnough(firstPartOrMinVerbosity, this._verbosity, this)) return this;
+    return this._outputMessageEvent((this._parent || this).debug.bind(this._parent || this),
+        true, this._getMessageParts(firstPartOrMinVerbosity, rest));
+  }
   infoEvent (firstPartOrMinVerbosity: number | any, ...rest: any[]) {
     if (!_isVerboseEnough(firstPartOrMinVerbosity, this._verbosity, this)) return this;
     return this._outputMessageEvent((this._parent || this).info.bind(this._parent || this),
@@ -199,7 +208,7 @@ export class FabricEventTarget {
     let ret;
     if (!_isVerboseEnough(nameOrMinVerbosity, this._verbosity, this)) {
       wrapper.message = `${wrapper.verbosities ? `[${wrapper.verbosities.join("<")}] ` : ""
-        }Hidden error context by .${actualFunctionName}`;
+        }fabric error context hidden from .${actualFunctionName}`;
       ret = wrapError(error, wrapper);
     } else {
       wrapper.message = `${wrapper.verbosities ? `[${wrapper.verbosities.join(">=")}] ` : ""

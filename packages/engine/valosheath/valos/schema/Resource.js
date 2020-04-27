@@ -102,8 +102,8 @@ export default {
         return ret;
       } catch (error) {
         const ret = this.__callerValker__.run({}, VALEK.fromObject(id).nullable());
-        this.__callerValker__.errorEvent(
-            "\n\tDEPRECATED, SUBJECT TO CHANGE:",
+        this.__callerValker__.debugEvent(
+            "DEPRECATED, SUBJECT TO CHANGE:",
             "Resource.getActiveResource returns null if no active resource is found, for now",
             "\n\tprefer: Resource.tryActiveResource returning null",
             "\n\tchange: Resource.getActiveResource will throw if no active resource is found",

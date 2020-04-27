@@ -395,7 +395,7 @@ export default class Engine extends Cog {
       } else if (explicitId[0] === "@") {
         validateVRID(explicitId);
       } else {
-        this.warnEvent("DEPRECATED non-vpath format id:", explicitId,
+        this.debugEvent("DEPRECATED non-vpath format id:", explicitId,
             "\n\tcoerced as VRID:", coerceAsVRID(explicitId));
         explicitId = coerceAsVRID(explicitId);
       }

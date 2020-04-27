@@ -18,7 +18,7 @@ import type UIComponent from "./UIComponent";
  */
 export default function LENS (lookupLensNames: string[], ...directLenses: any[]) {
   return function lens (scope: any, component: UIComponent) {
-    console.error("DEPRECATED: LENS`", lookupLensNames.join("..."), "`",
+    console.debug("DEPRECATED: LENS`", lookupLensNames.join("..."), "`",
         "\n\tprefer: slot symbols found in valos.Lens.*");
     for (let i = 0; i !== lookupLensNames.length; ++i) {
       try {

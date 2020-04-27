@@ -40,7 +40,7 @@ function _prepareInitialState (valospaceType: Object, scope: ?Object, initialSta
     if (requireOwnerOperation && (initialOwner === undefined)
         && !(initialState && (initialState.authorityURI || initialState.partitionAuthorityURI))) {
       // throw new Error(`${requireOwnerOperation} initialState.owner required`);
-      console.error(`DEPRECATED behaviour: ${
+      console.debug(`DEPRECATED behaviour: ${
           requireOwnerOperation} ${valospaceType.name} initialState.owner required`);
       if (scope && (scope.self != null) && scope.self.this) {
         if (!initialState) initialState = {};

@@ -251,7 +251,7 @@ function validateReplacedWithinFields (command: Object) {
 }
 
 function validateSplicedFields (command: Object) {
-  console.error("DEPRECATED: SPLICED\n\tprefer: REPLACE_WITHIN",
+  console.debug("DEPRECATED: SPLICED\n\tprefer: REPLACE_WITHIN",
       "\n\tcommand:", ...dumpObject(command));
   invariantifyObject(command.splices, "SPLICED.splices", {
     elementInvariant: (value, key) => key && (typeof key === "string")

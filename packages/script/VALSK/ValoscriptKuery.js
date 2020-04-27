@@ -20,7 +20,7 @@ export default class ValoscriptKuery extends Kuery {
   fromThis () { return this.fromScope("this"); }
 
   withName (name: any, ...additionalConditions: Kuery[]) {
-    console.error("DEPRECATED: VALSK.withName\n\tprefer: VALEK.hasName");
+    console.debug("DEPRECATED: VALSK.withName\n\tprefer: VALEK.hasName");
     return this.hasName(name, ...additionalConditions);
   }
 
@@ -229,7 +229,7 @@ export default class ValoscriptKuery extends Kuery {
   }
 
   propertyReference (name: string, options: { optional?: boolean }) {
-    console.error("DEPRECATED: VALSK.propertyReference\n\tprefer: VALEK.propertyTarget");
+    console.debug("DEPRECATED: VALSK.propertyReference\n\tprefer: VALEK.propertyTarget");
     return this.propertyTarget(name, options);
   }
 
@@ -248,7 +248,7 @@ export default class ValoscriptKuery extends Kuery {
   }
 
   method (methodName: string) {
-    console.error("DEPRECATED: VALK.method\n\tprefer: VALK.toMethod");
+    console.debug("DEPRECATED: VALK.method\n\tprefer: VALK.toMethod");
     return this.toMethod(methodName);
   }
 

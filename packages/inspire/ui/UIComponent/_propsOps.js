@@ -61,7 +61,7 @@ export function _childProps (component: UIComponent, name: string,
   invariantify(parentUIContext, `childProps can only be called if getUIContext() is valid`);
   const nextOptions = { parentUIContext, name, ...options };
   if (nextOptions.hasOwnProperty("head")) {
-    console.error("DEPRECATED: props.head\n\tprefer: props.focus");
+    console.debug("DEPRECATED: props.head\n\tprefer: props.focus");
     nextOptions.focus = nextOptions.head;
     delete nextOptions.head;
   }

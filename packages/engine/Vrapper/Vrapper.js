@@ -1531,14 +1531,14 @@ export default class Vrapper extends Cog {
    */
   interpretContent (options: VALKOptions = {}) {
     if (options.mime) {
-      console.error("DEPRECATED: interpretContent.mime",
+      console.debug("DEPRECATED: interpretContent.mime",
           "\n\tprefer: interpretContent.contentType",
           "\n\tvalue:", options.mime);
       options.contentType = options.mime;
       delete options.mime;
     }
     if (options.mimeFallback) {
-      console.error("DEPRECATED: interpretContent.mimeFallback",
+      console.debug("DEPRECATED: interpretContent.mimeFallback",
           "\n\tprefer: interpretContent.fallbackContentType",
           "\n\tvalue:", options.mimeFallback);
       options.fallbackContentType = options.mimeFallback;

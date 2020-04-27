@@ -70,8 +70,8 @@ export function deserializeVRL (serializedRef: string | JSONIdData,
       } else if (!parts) {
         parts = serializedRef.match(oldRawIdRegExp);
         if (parts) {
-          console.warn(`Deprecated old-style valos raw id reference encountered: ${
-              serializedRef}`);
+          console.debug(`DEPRECATED: old-style valos raw id refs in favor of VPaths, got: "${
+              serializedRef}"`);
           parts.unshift(null, null);
           parts[1] = "urn:valos:";
         } else {

@@ -509,7 +509,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
       rootValue: function propertyLensNameGetter (focus: any, component: UIComponent,
           currentSlotName: string) {
         if (component.props.lensName) {
-          console.error("DEPRECATED: props.lensName\n\tprefer: props.lensProperty",
+          console.debug("DEPRECATED: props.lensName\n\tprefer: props.lensProperty",
               "\n\tlensName:", JSON.stringify(component.props.lensName),
               "\n\tin component:", component.debugId(), component);
         }

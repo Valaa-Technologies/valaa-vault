@@ -882,7 +882,7 @@ export function denoteValOSKueryFunction (description: any = "") {
 export function denoteDeprecatedValOSBuiltin (prefer: string, description: any = "") {
   return (callee: any) => {
     function deprecated (...rest: any[]) {
-      console.error("DEPRECATED: call to builtin operation", callee, "\n\tprefer:", prefer);
+      console.debug("DEPRECATED: call to builtin operation", callee, "\n\tprefer:", prefer);
       return callee.apply(this, rest);
     }
     deprecated._valkDeprecatedPrefer = prefer;

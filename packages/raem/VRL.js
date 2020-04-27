@@ -176,11 +176,11 @@ class VRL {
     return this;
   }
   isInactive (): ?boolean {
-    console.warn("VRL.isInactive DEPRECATED in favor of .isAbsent");
+    console.debug("DEPRECATED: VRL.isInactive in favor of .isAbsent");
     return this.isAbsent();
   }
   setInactive (value: boolean = true): ?boolean {
-    console.warn("VRL.setInactive DEPRECATED in favor of .setAbsent");
+    console.debug("DEPRECATED: VRL.setInactive in favor of .setAbsent");
     return this.setAbsent(value);
   }
 

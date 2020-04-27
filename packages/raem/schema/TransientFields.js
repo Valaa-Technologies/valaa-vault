@@ -61,13 +61,13 @@ export function transientFields (objectDescription: string = INTERFACE_DESCRIPTI
       ),
 
       ...generatedField("partition", Chronicle,
-          `Deprecated if favor of 'chronicleRoot'.`,
+          `DEPRECATED if favor of 'chronicleRoot'.`,
           chronicleRootResolver,
           { affiliatedType: "TransientFields" },
       ),
 
       ...generatedField("chronicle", Chronicle,
-          `Deprecated if favor of 'chronicleRoot'.`,
+          `DEPRECATED if favor of 'chronicleRoot'.`,
           chronicleRootResolver,
           { affiliatedType: "TransientFields" },
       ),

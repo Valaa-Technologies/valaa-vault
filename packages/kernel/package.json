@@ -1,6 +1,6 @@
 {
   "name": "@valos/kernel",
-  "version": "0.35.0-rc.13",
+  "version": "0.35.0-rc.14",
   "valos": {
     "type": "domain",
     "domain": "@valos/kernel",
@@ -29,9 +29,9 @@
     "_vlm__configure__domain_-valos_kernel": "valma/configure/domain__kernel.js"
   },
   "dependencies": {
-    "@valos/raem": "^0.35.0-rc.13",
-    "@valos/type-domain": "^0.35.0-rc.13",
-    "valma": "^0.35.0-rc.13"
+    "@valos/raem": "^0.35.0-rc.14",
+    "@valos/type-domain": "^0.35.0-rc.14",
+    "valma": "^0.35.0-rc.14"
   },
   "homepage": "https://valospace.org/kernel"
 }

@@ -1,6 +1,6 @@
 {
   "name": "@valos/type-vault",
-  "version": "0.35.0-rc.13",
+  "version": "0.35.0-rc.14",
   "valos": {
     "type": "toolset",
     "domain": "@valos/kernel",
@@ -59,7 +59,7 @@
     "jasmine-core": "^2.8.0",
     "jest": "^23.5.0",
     "lerna": "^3.4.0",
-    "valma": "^0.35.0-rc.13",
+    "valma": "^0.35.0-rc.14",
     "yalc": "^1.0.0-pre.35"
   }
 }

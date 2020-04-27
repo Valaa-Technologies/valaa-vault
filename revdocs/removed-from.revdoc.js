@@ -7,7 +7,7 @@ const {
   ontologyHeaders,
 } = require("@valos/revdoc");
 
-const { name, version } = require("../package");
+const { name, version } = require("../packages/kernel/package");
 const {
   ontologies: {
     valos_removed_from: { prefix, prefixIRI, prefixes, vocabulary, context },

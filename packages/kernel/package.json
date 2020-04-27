@@ -3,7 +3,8 @@
   "version": "0.35.0-rc.13",
   "valos": {
     "type": "domain",
-    "domain": "@valos/kernel"
+    "domain": "@valos/kernel",
+    "docs": "https://valospace.org/kernel"
   },
   "description": "@valos/kernel domain",
   "license": "MIT",
@@ -30,5 +31,6 @@
     "@valos/raem": "^0.35.0-rc.13",
     "@valos/type-domain": "^0.35.0-rc.13",
     "valma": "^0.35.0-rc.13"
-  }
+  },
+  "homepage": "https://valospace.org/kernel"
 }

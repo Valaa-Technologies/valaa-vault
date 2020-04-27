@@ -9,13 +9,14 @@ const {
 } = require("@valos/revdoc");
 const { domainHeaders } = require("@valos/type-vault");
 
-const { name, version, repository } = require("../package");
-const { summary, ontologies, documents } = require("../packages/kernel");
+const { name, version } = require("./package");
+const { summary, ontologies, documents } = require("./index");
+const { repository } = require("../../package");
 
 const { workspaces, types, toolsets, tools, commands } = summary;
 
 const {
-  valos_kernel: { prefix, prefixIRI, prefixes, vocabulary, context },
+  valos_kernel: { prefix, prefixIRI, prefixes, vocabulary, context } = { vocabulary: {} },
 } = ontologies;
 
 const roleDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "ROLE"], documents);

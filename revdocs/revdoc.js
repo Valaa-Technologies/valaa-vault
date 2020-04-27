@@ -9,11 +9,11 @@ const {
 } = require("@valos/revdoc");
 const { domainHeaders } = require("@valos/type-vault");
 
-const { name, version } = require("../package");
-const { documents } = require("../packages/kernel");
+const { name, version } = require("../packages/kernel/package");
 const {
+  documents,
   ontologies: {
-    valos: { prefix, prefixIRI, prefixes, vocabulary, context },
+    valos: { prefix, prefixIRI, prefixes, vocabulary, context } = { vocabulary: {} },
   },
 } = require("../packages/kernel");
 

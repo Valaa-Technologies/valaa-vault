@@ -16,7 +16,9 @@ const yargsParser = require("yargs-parser").detailed;
 const patchWith = require("@valos/tools/patchWith").default;
 const dumpify = require("@valos/tools/dumpify").default;
 const wrapErrorModule = require("@valos/tools/wrapError");
-const thenChainEagerly = require("@valos/tools/thenChainEagerly").thenChainEagerly;
+const {
+  thenChainEagerly, thisChainEagerly, thisChainReturn,
+} = require("@valos/tools/thenChainEagerly");
 
 cardinal.tomorrowNight = require("cardinal/themes/tomorrow-night");
 
@@ -476,6 +478,8 @@ const _vlm = {
   },
 
   thenChainEagerly,
+  thisChainEagerly,
+  thisChainReturn,
 
   // Implementation details
   _invoke,
@@ -1015,30 +1019,32 @@ function handler (vargv) {
   // builtin commands (which don't need forwarding).
   const isFullyBuiltin = _vlm.isCompleting || (vargv.help && (vargv.commandSelector === "$"));
   const contextVLM = vargv.vlm;
-
-  const needNPM = !isFullyBuiltin && (vargv.commandSelector !== "$")
-      && vargv["npm-config-env"] && !process.env.npm_package_name;
-  const needVLMPath = !isFullyBuiltin && !process.env.VLM_PATH;
-  const needForward = !isFullyBuiltin && needVLMPath;
+  if (!isFullyBuiltin) {
+    contextVLM.needNPM = (vargv.commandSelector !== "$") && vargv["npm-config-env"]
+        && !process.env.npm_package_name;
+    contextVLM.needVLMPath = !process.env.VLM_PATH;
+  }
 
   contextVLM.ifVerbose(1)
       .babble("phase 2, main:", "determine active commands, forwards, and do validations.",
-          "\n\tfullyBuiltin:", isFullyBuiltin, ", needNPM:", needNPM, ", needVLMPath:", needVLMPath,
-              ", needForward:", needForward);
+          "\n\tfullyBuiltin:", isFullyBuiltin,
+              ", needNPM:", contextVLM.needNPM,
+              ", needVLMPath:", contextVLM.needVLMPath);
 
   // Phase 2: Load pools and forward the request to some pool 'vlm' if
   // needed (if a more specific 'vlm' is found or if the node
   // environment or 'vlm' needs to be loaded)
-  const forwardPool = contextVLM._refreshActivePools((pool, poolHasVLM, specificEnoughVLMSeen) => {
+
+  const isVLMForwardPool = (pool, poolHasVLM, specificEnoughVLMSeen) => {
     const shouldForwardVLM = _vlm.vargv.forward && !isFullyBuiltin && poolHasVLM
-        && (specificEnoughVLMSeen ? needForward : vargv.promote);
+        && (specificEnoughVLMSeen ? contextVLM.needVLMPath : vargv.promote);
     contextVLM.ifVerbose(3)
         .babble(`evaluating pool ${pool.path} for VLM forward, result:`, shouldForwardVLM,
             ...(!shouldForwardVLM ? [] : [
               "\n\tvargv.forward:", _vlm.vargv.forward, ", vargv.promote:", _vlm.vargv.promote,
               "\n\tnot fully builtin command:", !isFullyBuiltin,
               "\n\tpool has 'vlm':", poolHasVLM, ", sufficient vlm seen:", specificEnoughVLMSeen,
-              "\n\tmissing env.VLM_PATH:", needVLMPath,
+              "\n\tmissing env.VLM_PATH:", contextVLM.needVLMPath,
             ]));
     if (!shouldForwardVLM) return undefined;
     Object.assign(process.env, {
@@ -1053,73 +1059,26 @@ function handler (vargv) {
       _: contextVLM.path.join(pool.path, "vlm"),
     });
     pool.vlmPath = path.join(pool.path, "vlm");
-    return pool;
-  });
+    return [pool];
+  };
 
-  if (forwardPool) {
-    const myRealVLM = fs.realpathSync(process.argv[1]);
-    const forwardRealVLM = fs.realpathSync(forwardPool.vlmPath);
-    process._vlmName = forwardPool.name;
-    process.argv[1] = forwardPool.vlmPath;
-    if (myRealVLM !== forwardRealVLM) {
-      contextVLM.ifVerbose(1)
-      .info(`forwarding to vlm in another pool via require('${
-              contextVLM.theme.path(forwardPool.vlmPath)}')`,
-          "\n\ttarget pool path:", contextVLM.theme.path(forwardPool.path),
-          "\n\ttarget vlm real path:", contextVLM.theme.path(forwardRealVLM),
-          "\n\tcurrent vlm real path:", contextVLM.theme.path(myRealVLM));
-      // Call is handled by a forward require to another valma.
-      require(forwardPool.vlmPath);
-      return undefined;
-    }
-    contextVLM.ifVerbose(1)
-    .info(`skipping forward to vlm in another pool because forward target is the same`,
-        "\n\ttarget vlm path symlink:", contextVLM.theme.path(forwardPool.vlmPath),
-        "\n\tlinks to current vlm real path:", contextVLM.theme.path(myRealVLM));
-  }
-
-  return thenChainEagerly(null, [
-    needNPM ? _loadNPMConfigVariables : () => null,
-    function _validateEnvironment () {
-      if (_vlm.isCompleting || vargv["bypass-validations"]) return;
-      contextVLM.ifVerbose(1)
-          .info("active pools:",
-              ...[].concat(...contextVLM._activePools.map(pool => Object.assign({}, pool, {
-                listing: contextVLM.verbosity < 3
-                    ? "<omitted due verbosity < 3>"
-                    : Array.isArray(pool.listing) && pool.listing.map(entry => entry.name)
-              }))),
-              "\n");
-
-      if (needVLMPath && !process.env.VLM_PATH) {
-        contextVLM.error("could not find 'vlm' in PATH or in any pool");
-        process.exit(-1);
-      }
-
-      if (!semver.satisfies(process.versions.node, nodeCheck)) {
-        contextVLM.warn(`your node version is old (${process.versions.node}):`,
-            "recommended to have at least", nodeCheck);
-      }
-
-      contextVLM._reloadPackageAndToolsetsConfigs();
-
-      if (!process.env.npm_config_user_agent) {
-        if (needNPM && contextVLM.packageConfig) {
-          contextVLM.warn("could not load NPM config environment variables");
-        }
-      } else {
-        const npmVersion = (process.env.npm_config_user_agent || "").match(/npm\/([^ ]*) /);
-        if (npmVersion && !semver.satisfies(npmVersion[1], npmCheck)) {
-          contextVLM.warn(`your npm version is old (${npmVersion[1]})`,
-              "recommended to have at least", npmCheck);
-        }
-      }
+  const chainRet = thisChainEagerly(contextVLM, [isVLMForwardPool], [
+    _refreshActivePools,
+    _maybeForwardToPoolVLM,
+    _loadNPMConfigVariables,
+    _validateEnvironment,
+    function _handlerInvoke () {
+      return [
+        this.invoke(this.vargv.commandSelector, this.vargv._, {
+          suppressOutermostEcho: true, processArgs: false, flushConfigWrites: !_vlm.isCompleting,
+        })
+      ];
     },
-    () => contextVLM.invoke(vargv.commandSelector, vargv._, {
-      suppressOutermostEcho: true, processArgs: false, flushConfigWrites: !_vlm.isCompleting,
-    }),
-    ret => !_vlm.isCompleting && ret,
+    function _handlerFinalize (ret) {
+      return !_vlm.isCompleting && thisChainReturn(ret);
+    },
   ]);
+  return chainRet;
   /*
   const subVLM = Object.create(contextVLM);
   subVLM.contextVargv = vargv;
@@ -1301,27 +1260,30 @@ function invoke (commandSelectorArg, args, options = {}) {
     this.echo(`${this.getContextIndexText()}>> ${invokeVLM.getContextIndexText()}${
         invokeVLM.theme.vlmCommand("vlm", selectorSingleQuotedIfWildcard, ...argv)}`);
   }
-  let echoResult;
-  try {
-    return thenChainEagerly(
-        invokeVLM._invoke(commandSelector, argv),
-        ret => {
-          echoResult = this._peekReturnValue(ret, 71);
-          return ret;
-        });
-  } catch (error) {
-    echoResult = this.theme.error("exception:", String(error));
-    throw error;
-  } finally {
+  return thisChainEagerly(invokeVLM, [commandSelector, argv], [
+    _invoke,
+    function _echoInvokeResult (ret) {
+      if (!options.suppressOutermostEcho) {
+        this.contextVLM.echo(`${this.contextVLM.getContextIndexText()}<< ${
+              this.getContextIndexText()}${
+              this.theme.vlmCommand("vlm", selectorSingleQuotedIfWildcard)}:`,
+            this._peekReturnValue(ret, 71));
+      }
+      if (options.flushConfigWrites) {
+        this._flushPendingConfigWrites();
+        this.contextVLM._reloadPackageAndToolsetsConfigs();
+      }
+      return thisChainReturn(ret);
+    },
+  ], function _errorOnInvokeCommand (error) {
     if (!options.suppressOutermostEcho) {
-      this.echo(`${this.getContextIndexText()}<< ${invokeVLM.getContextIndexText()}${
-          invokeVLM.theme.vlmCommand("vlm", selectorSingleQuotedIfWildcard)}:`, echoResult);
+      this.contextVLM.echo(`${this.contextVLM.getContextIndexText()}<< ${
+            this.getContextIndexText()}${
+            this.theme.vlmCommand("vlm", selectorSingleQuotedIfWildcard)}:`,
+          this.theme.error("exception:", String(error)));
     }
-    if (options.flushConfigWrites) {
-      invokeVLM._flushPendingConfigWrites();
-      this._reloadPackageAndToolsetsConfigs();
-    }
-  }
+    throw error;
+  });
 }
 
 function _peekReturnValue (value, clipLength) {
@@ -1401,10 +1363,10 @@ function _invoke (commandSelector_, argv) {
           "\n\t}");
 
   if (introspection) {
-    return introspection.builtinHelp
+    return [introspection.builtinHelp
         ? this._renderBuiltinHelp(introspection)
         : this._introspectCommands(introspection, activeCommands, commandGlob, isWildcardCommand,
-            contextVargv["enable-disabled"]);
+            contextVargv["enable-disabled"])];
   }
 
   if (!isWildcardCommand) {
@@ -1425,7 +1387,7 @@ function _invoke (commandSelector_, argv) {
           "\n\tactive commands:",
           ...Object.keys(activeCommands).map(c => this.theme.command(c)));
   globalVargs.help();
-  return _dispatchCommands.call(this, commandSelector, argv, activeCommands, isWildcardCommand);
+  return [_dispatchCommands.call(this, commandSelector, argv, activeCommands, isWildcardCommand)];
 }
 
 async function _dispatchCommands (commandSelector, argv, activeCommands, isWildcardCommand) {
@@ -1882,6 +1844,30 @@ ${module.introduction}
 `;
 }
 
+function _maybeForwardToPoolVLM (forwardPool) {
+  if (!forwardPool) return undefined;
+  const myRealVLM = fs.realpathSync(process.argv[1]);
+  const forwardRealVLM = fs.realpathSync(forwardPool.vlmPath);
+  process._vlmName = forwardPool.name;
+  process.argv[1] = forwardPool.vlmPath;
+  if (myRealVLM !== forwardRealVLM) {
+    this.ifVerbose(1)
+    .info(`forwarding to vlm in another pool via require('${
+          this.theme.path(forwardPool.vlmPath)}')`,
+        "\n\ttarget pool path:", this.theme.path(forwardPool.path),
+        "\n\ttarget vlm real path:", this.theme.path(forwardRealVLM),
+        "\n\tcurrent vlm real path:", this.theme.path(myRealVLM));
+    // Call is handled by a forward require to another valma.
+    require(forwardPool.vlmPath);
+    return thisChainReturn(undefined);
+  }
+  this.ifVerbose(1)
+  .info(`skipping forward to vlm in another pool because forward target is the same`,
+      "\n\ttarget vlm path symlink:", this.theme.path(forwardPool.vlmPath),
+      "\n\tlinks to current vlm real path:", this.theme.path(myRealVLM));
+  return undefined;
+}
+
 /**
  * Load all npm config variables to process.env as if running valma via 'npx -c'
  * FIXME(iridian): horribly broken.
@@ -1897,6 +1883,7 @@ async function _loadNPMConfigVariables () {
   Upside of current solution is that running "npm config list" is very fast, and can be optimized
   further too: npm can be programmatically invoked.
   */
+  if (!this.needNPM) return;
   if (_vlm.vargv["package-config-env"]) {
     _vlm.error("did not load npm_package_* variables (not implemented yet)");
   }
@@ -1917,6 +1904,42 @@ async function _loadNPMConfigVariables () {
     const value = npmConfig[npmVariable];
     process.env[`npm_config_${npmVariable.replace(/-/g, "_")}`] =
         typeof value === "string" ? value : "";
+  }
+}
+
+function _validateEnvironment () {
+  if (_vlm.isCompleting || this.vargv["bypass-validations"]) return;
+  this.ifVerbose(1)
+      .info("active pools:",
+          ...[].concat(...this._activePools.map(pool => Object.assign({}, pool, {
+            listing: this.verbosity < 3
+                ? "<omitted due verbosity < 3>"
+                : Array.isArray(pool.listing) && pool.listing.map(entry => entry.name)
+          }))),
+          "\n");
+
+  if (this.needVLMPath && !process.env.VLM_PATH) {
+    this.error("could not find 'vlm' in PATH or in any pool");
+    process.exit(-1);
+  }
+
+  if (!semver.satisfies(process.versions.node, nodeCheck)) {
+    this.warn(`your node version is old (${process.versions.node}):`,
+        "recommended to have at least", nodeCheck);
+  }
+
+  this._reloadPackageAndToolsetsConfigs();
+
+  if (!process.env.npm_config_user_agent) {
+    if (this.needNPM && this.packageConfig) {
+      this.warn("could not load NPM config environment variables");
+    }
+  } else {
+    const npmVersion = (process.env.npm_config_user_agent || "").match(/npm\/([^ ]*) /);
+    if (npmVersion && !semver.satisfies(npmVersion[1], npmCheck)) {
+      this.warn(`your npm version is old (${npmVersion[1]})`,
+          "recommended to have at least", npmCheck);
+    }
   }
 }
 

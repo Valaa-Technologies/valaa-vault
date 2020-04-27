@@ -14,7 +14,7 @@ import extractChronicleEvent0Dot2
     from "~/sourcerer/tools/event-version-0.2/extractPartitionEvent0Dot2";
 import IdentityManager from "~/sourcerer/FalseProphet/IdentityManager";
 
-import { dumpObject, mapEagerly, thenChainEagerly } from "~/tools";
+import { dumpObject, mapEagerly, thenChainEagerly, thisChainReturn } from "~/tools";
 
 import { Prophecy, _reviewRecomposedSchism } from "./_prophecyOps";
 import {
@@ -444,7 +444,7 @@ export default class FalseProphetConnection extends Connection {
     const ret = this.performChain([{ schism, reformation, purgedStories, newEvents }],
         "_reformHeresyChain", "_errorOnReformHeresy");
     // if ret is a promise return undefined to denote purge.
-    if (!Array.isArray(ret) || (ret[0] === false)) return undefined;
+    if (!Array.isArray(ret) || (ret === false)) return undefined;
     return ret;
   }
 
@@ -458,24 +458,24 @@ export default class FalseProphetConnection extends Connection {
     const meta = params.schism.meta || {};
     const operation = meta.operation;
     // No way to revise non-prophecy schisms: these come from elsewhere so not our job.
-    if (!operation) return false;
+    if (!operation) return thisChainReturn(false);
     const venue = operation._venues[this.getChronicleURI()];
     if (venue) {
       operation._persistedStory = null;
       venue.chronicling = null;
     }
     // First try to revise using the original chronicleEvents options.reformHeresy
+    // TODO(iridian, 2020-04): Review and revise or remove dead code
     if (operation._options.reformHeresy) {
-      return {
-        "": operation._options
-            .reformHeresy(params.schism, this, params.newEvents, params.purgedStories)
-                || false,
-      };
+      return thisChainReturn(
+          operation._options
+              .reformHeresy(params.schism, this, params.newEvents, params.purgedStories)
+          || false);
     }
     const progress = operation._progress;
     // Then if the schism is not a semantic schism try basic revise-recompose.
     if (progress.isSemanticSchism || (progress.isReformable === false)) {
-      return false;
+      return thisChainReturn(false);
     }
     progress.type = "reform";
     if (meta.transactor && meta.transactor.onreform) {
@@ -483,12 +483,12 @@ export default class FalseProphetConnection extends Connection {
     } else {
       progress.isSchismatic = false;
     }
-    if (progress.isSchismatic) return false;
+    if (progress.isSchismatic) return thisChainReturn(false);
     return [params, ...(progress._proceedWhenTruthy || [])];
   }
 
   _recomposeHeresy (params, ...proceedConditions) {
-    if (!params) return false;
+    if (!params) return thisChainReturn(false);
     const failingIndex = proceedConditions.findIndex(v => !v);
     if (failingIndex >= 0) {
       throw new Error(`Reformation aborted due to falsy proceed condition #${failingIndex}`);
@@ -498,13 +498,13 @@ export default class FalseProphetConnection extends Connection {
         || (Object.keys((recomposedProphecy.meta || {}).chronicles).length !== 1)) {
       // Recomposition failed, revision failed or a multi-chronicle command reformation
       // which is not supported (for now).
-      return false;
+      return thisChainReturn(false);
     }
     const recomposedCommand = getActionFromPassage(recomposedProphecy);
     if (!recomposedCommand.meta) throw new Error("recomposedCommand.meta missing");
     const recomposedChronicleCommand = this.extractChronicleEvent(recomposedCommand);
     // Can only revise commands belonging to the originating chronicle
-    if (!recomposedChronicleCommand) return false;
+    if (!recomposedChronicleCommand) return thisChainReturn(false);
 
     const operation = recomposedCommand.meta.operation = params.schism.meta.operation;
     operation._prophecy = recomposedProphecy;
@@ -526,7 +526,7 @@ export default class FalseProphetConnection extends Connection {
       if (!params.reformation.isComplete) return recomposedProphecies;
       this.getFalseProphet()._deliverStoriesToFollowers(recomposedProphecies);
     }
-    return false;
+    return thisChainReturn(false);
   }
 
   _errorOnReformHeresy (error, index, [{ schism, reformation, newEvents, purgedStories }]) {
@@ -538,12 +538,12 @@ export default class FalseProphetConnection extends Connection {
       const progress = schism.meta.operation.getErroringProgress(wrappedError, {
         oldProphecy: schism, isReformSchism: true,
       });
-      if (!transactor.dispatchAndDefaultActEvent(progress)) return false; // just prevents output
+      if (!transactor.dispatchAndDefaultActEvent(progress)) return thisChainReturn(false);
     }
     if (reformation.isComplete) {
       this.outputErrorEvent(wrappedError,
           "Exception caught when reforming heresy");
     }
-    return false;
+    return thisChainReturn(false);
   }
 }

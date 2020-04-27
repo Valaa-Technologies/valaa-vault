@@ -45,6 +45,7 @@ module.exports = {
   mapEagerly,
   thenChainEagerly,
   thisChainEagerly,
+  thisChainReturn,
   wrapOutputError,
 };
 
@@ -178,35 +179,38 @@ function thisChainEagerly (
     startIndex // : number
 ) {
   let index = startIndex || 0, params = initialParams;
-  let arrayPromise;
+  let paramsArrayWithPromise;
   for (;;) {
     if ((params == null) || (typeof params !== "object")) {
       params = (params === undefined) ? [] : [params];
     } else if (Array.isArray(params)) {
-      for (let i = 0; i !== params.length; ++i) {
+      let i = 0;
+      for (; i !== params.length; ++i) {
         if ((params[i] != null) && (typeof params[i].then === "function")) {
-          params = Promise.all(arrayPromise = params);
+          params = Promise.all(paramsArrayWithPromise = params);
           break;
         }
       }
-      if (typeof params.then === "function") break;
-    } else if (typeof params.then === "function") break;
-    else {
+      if (params.length === undefined) break;
+    } else if (typeof params.then === "function") {
+      break;
+    } else {
       const keys = Object.keys(params);
       if (keys.length !== 1) {
         throw new Error("thisChainEagerly redirection object must have exactly one field");
       }
-      const forward = keys[0];
-      params = params[forward];
-      let lookup = functions[forward];
-      if (typeof lookup === "number") index = lookup;
-      else if (typeof lookup === "function") index = Number(forward);
-      else {
-        lookup = !forward ? functions.length : functions.findIndex(f => (f.name === forward));
-        if (lookup === -1) {
-          throw new Error(`thisChainEagerly can't find rediction function with name '${forward}'`);
+      const forwardFunctionKey = keys[0];
+      params = params[forwardFunctionKey];
+      index = functions[forwardFunctionKey];
+      if (typeof index === "function") index = Number(forwardFunctionKey);
+      else if (typeof index !== "number") {
+        if (forwardFunctionKey === "") return params; // thisChainReturn directive
+        index = functions.findIndex(f => (f.name === forwardFunctionKey));
+        if (index === -1) {
+          throw new Error(
+              `thisChainEagerly can't find redirection function with name '${forwardFunctionKey}'`);
         }
-        index = functions[forward] = lookup;
+        functions[forwardFunctionKey] = index;
       }
       continue;
     }
@@ -214,6 +218,7 @@ function thisChainEagerly (
     const func = functions[index];
     if (!func) continue;
     try {
+      if ((typeof params === "object") && params.then) throw new Error("wtf");
       params = func.apply(this_, params);
       ++index;
     } catch (error) {
@@ -221,7 +226,9 @@ function thisChainEagerly (
           "\n\tthis:", ...dumpObject(this_),
           "\n\tparams:", ...dumpObject(params),
           "\n\tcurrent function:", ...dumpObject(func),
-          "\n\tfunctions:", ...dumpObject(functions));
+          "\n\tfunctions:", ...dumpObject(functions),
+          "\n\tonRejected:", ...dumpObject(onRejected),
+        );
       if (!onRejected) throw wrapped;
       params = onRejected.call(this_, wrapped, index, params, functions, onRejected);
       index = functions.length;
@@ -240,7 +247,8 @@ function thisChainEagerly (
         );
         if (!onRejected) throw wrapped;
         return thisChainEagerly(this_,
-            onRejected.call(this_, wrapped, index, arrayPromise || params, functions, onRejected),
+            onRejected.call(
+                this_, wrapped, index, paramsArrayWithPromise || params, functions, onRejected),
             functions, onRejected, functions.length);
       });
   function getName (info) {
@@ -248,6 +256,10 @@ function thisChainEagerly (
     return `During ${`${functionName ? `${functionName}, as ` : ""
         }thisChainEagerly ${index === -1 ? "initial params" : `step #${index}`}`} ${info}`;
   }
+}
+
+function thisChainReturn (result) {
+  return { "": result };
 }
 
 function wrapOutputError (callback, header, onError) {

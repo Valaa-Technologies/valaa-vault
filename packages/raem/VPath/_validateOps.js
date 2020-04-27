@@ -6,11 +6,12 @@ const {
 } = require("./_validateTerminalOps");
 
 module.exports = {
+  validateVPathString,
   validateVPath,
   validateVPathSection,
   validateVKeyPath,
-  validateFullVPath,
   validateFullVPathSection,
+  validateVRIDString,
   validateVRID,
   validateVRIDSection,
   validateVVerbs,
@@ -26,6 +27,21 @@ module.exports = {
   validateContextTerm,
   validateParamValueText,
 };
+
+
+function validateVPathString (vpath) {
+  if ((typeof vpath !== "string") || (vpath[0] !== "@")) {
+    throw new Error(`Invalid full vpath: must be a string beginning with "@"`);
+  }
+  return validateFullVPathSection(disjoinVPathString(vpath), vpath);
+}
+
+function validateVRIDString (vrid) {
+  if ((typeof vrid !== "string") || (vrid[0] !== "@")) {
+    throw new Error(`Invalid full vrid: must be a string beginning with "@"`);
+  }
+  return validateVRIDSection(disjoinVPathString(vrid), vrid);
+}
 
 function validateVPath (vpath) {
   return (typeof vpath !== "string")
@@ -62,12 +78,6 @@ function validateVPayloadEntrySection (section) {
 function validateVKeyPath (vkey, value) {
   disjoinVPathOutline(value, vkey);
   return value;
-}
-
-function validateFullVPath (vpath) {
-  return (typeof vpath !== "string")
-      ? validateFullVPathSection(vpath)
-      : validateFullVPathSection(disjoinVPathString(vpath), vpath);
 }
 
 function validateFullVPathSection (section, source) {

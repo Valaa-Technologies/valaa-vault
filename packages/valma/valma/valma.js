@@ -391,6 +391,8 @@ const _vlm = {
         if (error.stack) actualError.stack = error.stack;
       }
       outputError(actualError, `${this.getContextName()} panics: exception from ${context}`, {
+        debug: (msg, ...rest_) => console.error(this.theme.babble(msg), ...rest_),
+        info: (msg, ...rest_) => console.error(this.theme.info(msg), ...rest_),
         error: (msg, ...rest_) => console.error(this.theme.error(msg), ...rest_),
         warn: (msg, ...rest_) => console.warn(this.theme.warning(msg), ...rest_),
         log: (msg, ...rest_) => console.log(msg, ...rest_),

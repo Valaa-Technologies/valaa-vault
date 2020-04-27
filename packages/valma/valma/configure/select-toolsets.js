@@ -107,7 +107,10 @@ async function _configureSelections (
     grabbed.forEach(name => { configUpdate[name] = { inUse: true }; });
     ret.grabbed = grabbed;
   }
-  if (!reconfigure && !grabbed.length && !stowed.length) return ret;
+  if (!reconfigure && !grabbed.length && !stowed.length) {
+    vlm.info(`No ${type}s to configure: nothing grabbed or stowed and no --reconfigure given`);
+    return ret;
+  }
   if (!toolsetOfTool) {
     await vlm.updateToolsetsConfig(configUpdate);
   } else {

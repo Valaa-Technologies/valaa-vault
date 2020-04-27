@@ -1,4 +1,4 @@
-const { validateVRID } = require("./_validateOps");
+const { validateVRIDString } = require("./_validateOps");
 
 const _uuidv4Regex = /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i;
 
@@ -7,7 +7,7 @@ const _migrateLookup = {};
 export function coerceAsVRID (rawId) {
   let ret = _migrateLookup[rawId];
   if (!ret) {
-    if (rawId[0] === "@") ret = validateVRID(rawId);
+    if (rawId[0] === "@") ret = validateVRIDString(rawId);
     else if (!rawId) ret = "@@";
     else {
       let gridType;

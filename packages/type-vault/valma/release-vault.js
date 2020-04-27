@@ -94,8 +94,8 @@ exports.handler = async (yargv) => {
     ret.commit = { "...": { indexAfter: "preparation" } };
     await _commit(ret.preparation, ret.commit);
     vlm.info(`${ret.releaseDescription} commit phase`, ret.commit.success
-        ? vlm.theme.success("successful") : vlm.theme.failure("FAILED"),
-            "as a new version", vlm.theme.version(ret.commit.version));
+            ? vlm.theme.success("successful") : vlm.theme.failure("FAILED"),
+        "as a new version", vlm.theme.version(ret.commit.version));
     if (ret.commit.success) {
       ret.commit.hooks = await vlm.invoke(`.release-vault/.committed-hooks/{**/,}*`,
           [{ summary: ret.commit }]);
@@ -227,11 +227,13 @@ exports.handler = async (yargv) => {
       await vlm.delegate(`git add lerna.json`);
     }
     await vlm.delegate(`git add yarn.lock`);
-    await vlm.delegate(["git", "commit", "--allow-empty",
-      "-m", [`placeholder commit for assemble to amend`]]);
+    await vlm.delegate([
+      "git", "commit", "--allow-empty", "-m", [`placeholder commit for assemble to amend`],
+    ]);
 
     commit["vlm assemble-packages"] = await vlm.invoke("assemble-packages",
         Object.assign({ versioning: "amend" }, assembleDefault, yargv.assemble));
+
     commit.success = commit["vlm assemble-packages"].success;
     if (commit.success) {
       commit.version = commit["vlm assemble-packages"].version;

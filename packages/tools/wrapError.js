@@ -66,6 +66,7 @@ function wrapError (errorIn, ...contextDescriptions) {
   } else {
     contextError.tidyFrameList = contextDescriptions[0].stack.split("\n").slice(2);
     contextError.logger = contextDescriptions[0].logger;
+    contextError.verbosities = contextDescriptions[0].verbosities;
     contextDescriptions[0] = contextDescriptions[0].message;
   }
   const outermostError = error.errorContexts
@@ -184,34 +185,43 @@ function _clipFrameListToCurrentContext (innerError, outerError) {
 }
 
 function outputError (error, header = "Exception caught", logger = _globalLogger,
-    contextVerbosity = -2) {
+    contextVerbosity = 1) {
   (logger.errorEvent || logger.error).call(logger,
       `  ${header} (with ${(error.errorContexts || []).length} contexts):\n\n`,
       error.originalMessage || error.message, `\n `);
   if (error.customErrorHandler) {
     error.customErrorHandler(logger);
   }
-  if (error.originalError) {
-    logger.log((error.originalError.tidyFrameList || []).join("\n"));
-  } else {
-    logger.log(error.stack.split("\n").slice(1).join("\n"));
-  }
+  let traces = error.originalError
+      ? error.originalError.tidyFrameList || []
+      : error.stack.split("\n").slice(1);
   for (const context of (error.errorContexts || [])) {
     const contextLogger = context.logger || logger;
-    if (contextLogger.warnEvent) {
-      contextLogger.warnEvent(contextVerbosity, ...context.contextDescriptions.map(dumpifyObject));
+    let output;
+    const verbosities = context.verbosities || [0];
+    if (verbosities[1] === undefined) verbosities.unshift(contextVerbosity);
+    if (verbosities[0] >= verbosities[1]) {
+      logger.debug(traces.join("\n"));
+      output = contextLogger.warnEvent || contextLogger.warn;
     } else {
-      contextLogger.warn(...context.contextDescriptions.map(dumpifyObject));
+      logger.debug(`\t[${verbosities.join("<")}]`, traces.length, "fabric traces hidden");
+      output = contextLogger.infoEvent || contextLogger.info;
     }
-    logger.log((context.tidyFrameList || []).join("\n"));
+    output.apply(contextLogger, context.contextDescriptions.map(dumpifyObject));
+    traces = context.tidyFrameList || [];
   }
+  logger.debug(traces.join("\n"));
 }
 
 function outputCollapsedError (error, header = "Exception caught", logger = _globalLogger) {
   const collapsedContexts = [];
   const collapser = {
-    log: (...args) => collapsedContexts[collapsedContexts.length - 1].traces
+    debug: (...args) => collapsedContexts[collapsedContexts.length - 1].traces
         .push(...args[0].split("\n")),
+    // TODOO(iridian, 2020-04): Fix these: broken as outputError calls
+    // contextLogger, not logger that was given to it
+    info: (...args) => collapsedContexts.push({ context: args, traces: [] }),
+    log: (...args) => collapsedContexts.push({ context: args, traces: [] }),
     warn: (...args) => collapsedContexts.push({ context: args, traces: [] }),
     error: (...args) => collapsedContexts.push({ context: args, traces: [] }),
   };
@@ -335,6 +345,8 @@ function isIterable (candidate) {
 let _globalLogger = (typeof window !== "undefined") || !process
     ? console
     : {
+      debug (...params) { console.debug(...params.map(dumpifyObject)); },
+      info (...params) { console.info(...params.map(dumpifyObject)); },
       log (...params) { console.log(...params.map(dumpifyObject)); },
       warn (...params) { console.warn(...params.map(dumpifyObject)); },
       error (...params) { console.error(...params.map(dumpifyObject)); },

@@ -1,7 +1,7 @@
 // @flow
 
 import {
-  validateVPath, validateVPathSection, validateVRID,
+  validateVPath, validateVPathSection, validateVRIDString, validateVRID,
   formVPath,
   disjoinVPath, disjoinVPathOutline, disjoinVPathString,
 } from ".";
@@ -41,7 +41,9 @@ describe("VPath", () => {
           .toThrow(/Invalid verb-type.*doesn't match/);
       expect(() => validateVRID(
               "@!invoke$.create$.event$.@!$.source@@$.@!$.body@.$V.target@.$.name@@@@"))
-      .toThrow(/expected "@\$".*got "@!invoke"/);
+          .toThrow(/expected "@\$".*got "@!invoke"/);
+      expect(() => validateVRIDString("aaaabbbb-cccc-dddd-eeee-ffffffffffff"))
+          .toThrow(/must be a string beginning with "@"/);
     });
     it("validates fully disjoint VPaths", () => {
       expect(validateVPathSection(["@@", [["@$~raw", "0000"], ["@!random"]]]))
@@ -107,6 +109,8 @@ describe("VPath", () => {
           .toEqual(["@!invoke", ["create", ["@!", ["body", ["@$V", "target"], "name"]]]]);
       expect(disjoinVPathString("@$~raw.0000@!random@@"))
           .toEqual(["@@", [["@$~raw", "0000"], ["@!random"]]]);
+      expect(disjoinVPathString("12345678-90ab-cdef-fedc-ba0987654321"))
+          .toEqual(["@12345678-90ab-cdef-fedc-ba0987654321"]);
     });
     it("disjoins complex nested VPath strings", () => {
       expect(disjoinVPath(

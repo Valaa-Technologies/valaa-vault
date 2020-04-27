@@ -5,8 +5,8 @@ const {
 } = require("./_sectionOps");
 const {
   validateVPath, validateVPathSection, validateVKeyPath,
-  validateFullVPath, validateFullVPathSection,
-  validateVRID, validateVRIDSection, validateVVerbs, validateVVerbsSection,
+  validateVPathString, validateFullVPathSection,
+  validateVRIDString, validateVRID, validateVRIDSection, validateVVerbs, validateVVerbsSection,
   validateVGRID, validateVGRIDSection, validateFormatTerm,
   validateVVerb, validateVVerbSection, validateVerbType,
   validateVParam, validateVParamSection, validateContextTerm, validateParamValueText
@@ -21,11 +21,12 @@ module.exports = {
   disjoinVPathOutline,
   disjoinVPathString,
   formVPath,
+  validateVPathString,
   validateVPath,
   validateVPathSection,
   validateVKeyPath,
-  validateFullVPath,
   validateFullVPathSection,
+  validateVRIDString,
   validateVRID,
   validateVRIDSection,
   validateVVerbs,

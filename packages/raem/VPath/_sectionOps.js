@@ -178,9 +178,7 @@ function disjoinVPathString (vpath, stack = { i: -1 }) {
       throw new Error(`Can't section invalid vpath: expected string, got ${typeof vpath}`);
     }
     stack.vpath = vpath;
-    const firstOp = _advance(stack);
-    const ret = _classOps[stack.lookahead](stack);
-    if (_isVerbClass(firstOp) && !ret[1].length) return undefined;
+    const ret = _classOps[_advance(stack)](stack);
     if (stack.i !== vpath.length) {
       throw new Error(`Invalid VPath: expected eof at pos ${stack.i}, got: "${
           vpath[stack.i]}", of vpath: "${vpath}"`);
@@ -222,7 +220,7 @@ const _verbTypeMinClass = _dotClass;
 const _valueMinClass = _escapeClass;
 const _termMinClass = _vgridTypeClass;
 
-function _isVerbClass (classId) { return classId >= _vparamClass; }
+// function _isVerbClass (classId) { return classId >= _vparamClass; }
 const _className = [null, "eof", "vpath", "verb", "context term", "value"];
 
 const _classOps = [

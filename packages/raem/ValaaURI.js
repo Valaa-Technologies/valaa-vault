@@ -3,8 +3,9 @@
 import URLParse from "url-parse";
 
 import { invariantifyString } from "~/tools/invariantify";
-import { coerceAsVRID, validateVRID } from "~/raem/VPath";
+import { coerceAsVRID, validateVRIDString } from "~/raem/VPath";
 import { vdon } from "~/tools/vdon";
+import { wrapError } from "~/tools/wrapError";
 
 export const vdoc = vdon({ "...": { heading:
   "ValaaURI's refer to authorities, chronicles, resources and their sub-aspects",
@@ -81,47 +82,68 @@ export const naiveURI = {
   secondaryParamsPart: 15,
 
   validateChronicleURI: function validateNaiveChronicleURI (chronicleURI: string) {
-    const breakdown = chronicleURI.match(/^([^?#]*)\?id=([^/;=&#]*)([/;=&#].*)?$/);
-    if (!breakdown) throw new Error(`Malformed chronicleURI is not a naiveURI: <${chronicleURI}>`);
-    const [, authorityURI, chronicleVRID, rest] = breakdown;
-    if (!authorityURI || !authorityURI.match(genericURI.regex)) {
-      throw new Error(`Malformed chronicleURI authorityURI part is not a URI: <${authorityURI}>`);
+    let authorityURIPart, chronicleVRIDPart, invalidRemainderPart;
+    try {
+      const breakdown = chronicleURI.match(/^([^?#]*)\?id=([^/;=&#]*)([/;=&#].*)?$/);
+      if (!breakdown) {
+        throw new Error(`Malformed chronicleURI is not a naiveURI: <${chronicleURI}>`);
+      }
+      ([, authorityURIPart, chronicleVRIDPart, invalidRemainderPart] = breakdown);
+      if (!authorityURIPart || !authorityURIPart.match(genericURI.regex)) {
+        throw new Error(`Malformed chronicleURI authorityURI part is not a URI: <${
+            authorityURIPart}>`);
+      }
+      validateVRIDString(chronicleVRIDPart);
+      if (invalidRemainderPart) {
+        throw new Error(`Invalid chronicleURI; invalid chars after chronicleVRID: "${
+            invalidRemainderPart}"`);
+      }
+      return chronicleURI;
+    } catch (error) {
+      throw wrapError(error, new Error(`During validateChronicleURI(<${chronicleURI}>)`),
+          "\n\tauthorityURI part:", authorityURIPart,
+          "\n\tchronicleVRID part:", chronicleVRIDPart,
+          "\n\textraneous remainder:", invalidRemainderPart);
     }
-    validateVRID(chronicleVRID);
-    if (rest) throw new Error(`Invalid chronicleURI; chronicleVRID must be last, got: "${rest}"`);
-    return chronicleURI;
   },
   createChronicleURI: function createNaiveChronicleURI (
       authorityURI: string, chronicleVRID: string) {
-    if (typeof chronicleVRID !== "string") {
-      throw new Error("naiveURI.createChronicleURI.chronicleVRID missing");
+    try {
+      if (typeof chronicleVRID !== "string") {
+        throw new Error("naiveURI.createChronicleURI.chronicleVRID missing");
+      }
+      validateVRIDString(chronicleVRID);
+      const uriParts = authorityURI && authorityURI.match(genericURI.regex);
+      if (!uriParts) {
+        throw new Error(`naiveURI.createChronicleURI.authorityURI is not a well-formed URI: <${
+            authorityURI}>`);
+      }
+      if (uriParts[genericURI.queryPart]) {
+        throw new Error(`naiveURI.createChronicleURI.authorityURI must not have query part, got: <${
+            uriParts[genericURI.queryPart]}>`);
+      }
+      if (uriParts[genericURI.fragmentPart]) {
+        throw new Error(`naiveURI.createChronicleURI.authorityURI must not have fragment, got: <${
+            uriParts[genericURI.fragmentPart]}>`);
+      }
+      /*
+  `${chronicleURIParts[genericURI.protocolPart]}${
+      chronicleURIParts[genericURI.authorityPart] || ""}${
+      // https://tools.ietf.org/html/rfc3986#section-3.3
+      // If a URI contains an authority component, then the path
+      // component must either be empty or begin with a slash ("/") character.
+      chronicleURIParts[genericURI.pathPart]
+          || (chronicleURIParts[genericURI.authorityPart] ? "/" : "")}`,
+      */
+      return `${authorityURI
+        }${(!uriParts[genericURI.pathPart] && uriParts[genericURI.authorityPart]) ? "/" : ""
+        }?id=${chronicleVRID}`;
+    } catch (error) {
+      throw wrapError(error,
+          new Error(`During naiveURI.createChronicleURI(<${authorityURI}>, "${chronicleVRID}")`),
+          "\n\tauthorityURI:", authorityURI,
+          "\n\tchronicleVRID:", chronicleVRID);
     }
-    validateVRID(chronicleVRID);
-    const uriParts = authorityURI && authorityURI.match(genericURI.regex);
-    if (!uriParts) {
-      throw new Error(`naiveURI.createChronicleURI.authorityURI is not a well-formed URI: <${
-          authorityURI}>`);
-    }
-    if (uriParts[genericURI.queryPart]) {
-      throw new Error(`naiveURI.createChronicleURI.authorityURI must not have query part, got: <${
-          uriParts[genericURI.queryPart]}>`);
-    }
-    if (uriParts[genericURI.fragmentPart]) {
-      throw new Error(`naiveURI.createChronicleURI.authorityURI must not have fragment, got: <${
-          uriParts[genericURI.fragmentPart]}>`);
-    }
-    /*
-`${chronicleURIParts[genericURI.protocolPart]}${
-    chronicleURIParts[genericURI.authorityPart] || ""}${
-    // https://tools.ietf.org/html/rfc3986#section-3.3
-    // If a URI contains an authority component, then the path
-    // component must either be empty or begin with a slash ("/") character.
-    chronicleURIParts[genericURI.pathPart]
-        || (chronicleURIParts[genericURI.authorityPart] ? "/" : "")}`,
-    */
-    return `${authorityURI
-      }${(!uriParts[genericURI.pathPart] && uriParts[genericURI.authorityPart]) ? "/" : ""
-      }?id=${chronicleVRID}`;
   },
 
   createPartitionURI: function createNaivePartitionURI (

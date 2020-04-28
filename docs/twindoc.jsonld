@@ -45,9 +45,9 @@
     "revdoc:package": "@valos/twindoc",
     "revdoc:prefix": "twindoc",
     "revdoc:prefixIRI": "https://valospace.org/twindoc#",
-    "revdoc:version": "0.35.0-rc.14",
+    "revdoc:version": "0.35.0-rc.15",
     "respecConfig": {
-      "subtitle": "0.35.0-rc.14",
+      "subtitle": "0.35.0-rc.15",
       "specStatus": "unofficial",
       "editors": [
         {

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.15](https://github.com/valaatech/kernel/compare/v0.35.0-rc.14...v0.35.0-rc.15) (2020-04-28)
+
+
+### Bug Fixes
+
+* valma package reload ([037b964](https://github.com/valaatech/kernel/commit/037b9642361d0a07e4abc984a96a83b2e3c56516))
+
+
+
+
+
 # [0.35.0-rc.14](https://github.com/valaatech/kernel/compare/v0.35.0-rc.13...v0.35.0-rc.14) (2020-04-27)
 
 

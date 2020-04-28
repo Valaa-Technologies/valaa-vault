@@ -1,11 +1,11 @@
-const { disjoinVPath, cementVPath } = require("../raem/VPath");
+const { disjoinVPath, cementVPath } = require("@valos/raem/VPath");
 
-const inProduction = require("../tools/inProduction").default;
-const isPromise = require("../tools/isPromise").default;
-const patchWith = require("../tools/patchWith").default;
-const { mapEagerly, thenChainEagerly } = require("../tools/thenChainEagerly");
+const inProduction = require("@valos/tools/inProduction").default;
+const isPromise = require("@valos/tools/isPromise").default;
+const patchWith = require("@valos/tools/patchWith").default;
+const { mapEagerly, thenChainEagerly } = require("@valos/tools/thenChainEagerly");
 
-const { dumpObject, wrapError } = require("../tools/wrapError");
+const { dumpObject, wrapError } = require("@valos/tools/wrapError");
 
 // Revelation is a JSON configuration file in which all "!!!" keys and
 // their *spreader* string values denote require requests to other

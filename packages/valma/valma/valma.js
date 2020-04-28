@@ -1066,6 +1066,7 @@ function handler (vargv) {
     _refreshActivePools,
     _maybeForwardToPoolVLM,
     _loadNPMConfigVariables,
+    _reloadPackageAndToolsetsConfigs,
     _validateEnvironment,
     function _handlerInvoke () {
       return [
@@ -1927,8 +1928,6 @@ function _validateEnvironment () {
     this.warn(`your node version is old (${process.versions.node}):`,
         "recommended to have at least", nodeCheck);
   }
-
-  this._reloadPackageAndToolsetsConfigs();
 
   if (!process.env.npm_config_user_agent) {
     if (this.needNPM && this.packageConfig) {

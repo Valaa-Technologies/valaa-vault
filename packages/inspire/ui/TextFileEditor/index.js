@@ -99,10 +99,15 @@ export default class TextFileEditor extends MediaContentEditor {
   saveContent = async (text: string) => {
     const target = this.getFocus();
     if (!target) throw new Error(`TextfileEditor.saveContent called with '${typeof target}' focus`);
+    if (typeof text !== "string") {
+      throw new Error(
+          `Invalid text when saving TextFileEditor content, expected string, got ${typeof text}`);
+    }
     const discourse = target.acquireFabricator("save-text-content");
     try {
-      if ((this.props.confirmSave && !this.props.confirmSave(text, (this.state || {}).content))
-          || (this.state.content === text)) {
+      const oldText = (this.state || {}).content;
+      if ((text === oldText)
+          || (this.props.confirmSave && !this.props.confirmSave(text, oldText))) {
         return;
       }
       const createBvob = await target.prepareBvob(text, { discourse });

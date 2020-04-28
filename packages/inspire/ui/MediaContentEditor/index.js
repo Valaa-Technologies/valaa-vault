@@ -15,22 +15,24 @@ export default class MediaContentEditor extends UIComponent {
   static _defaultPresentation = () => unthunkRepeat(require("./presentation").default);
   bindFocusSubscriptions (focus: any, props: Object) {
     super.bindFocusSubscriptions(focus, props);
+    const editor = this;
     return thenChainEagerly(null, [
       this.bindLiveKuery.bind(this, `FileEditor_content`,
           focus, toTextPlainInterpretation,
           { asRepeathenable: true, scope: this.getUIContext() }),
-      this.onContentUpdate,
+      function _getUpdateValue (liveUpdate: LiveUpdate) {
+        return liveUpdate.value();
+      },
+      function _setEditorStateContent (content) {
+        editor.setState({ content });
+      },
     ], function errorOnMediaContentEditorSubscriptions (error) {
       throw wrapError(error,
-          new Error(`During ${this.debugId()
+          new Error(`During ${editor.debugId()
               }\n .bindFocusSubscriptions.FileEditor_content(), with:`),
           "\n\tfocus:", ...dumpObject(focus),
           "\n\tprops:", ...dumpObject(props),
-          "\n\tmediaEditor:", ...dumpObject(this));
-    }.bind(this));
-  }
-
-  onContentUpdate = async (liveUpdate: LiveUpdate) => {
-    this.setState({ content: await liveUpdate.value() });
+          "\n\tmediaEditor:", ...dumpObject(editor));
+    });
   }
 }

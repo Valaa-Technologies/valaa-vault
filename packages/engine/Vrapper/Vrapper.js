@@ -161,7 +161,7 @@ export default class Vrapper extends Cog {
   constructor (engine: ?Object, id: VRL, typeName: string, immediateRefresh?: [any, any]) {
     invariantifyId(id, "Vrapper.constructor.id");
     invariantifyString(typeName, "Vrapper.constructor.typeName");
-    super(engine, undefined, `Vrapper/${id.rawId()}:${typeName}`);
+    super(engine);
     this[HostRef] = id;
     this._setTypeName(typeName);
     if (typeName === "Blob" || !engine || !isResourceType(this.getTypeIntro())) {
@@ -413,7 +413,6 @@ export default class Vrapper extends Cog {
             : resolver.tryGoToTransient(
               ref, "TransientFields", true, false, true, "typeName").get("typeName"));
       }
-      this.setName(`Vrapper/${this.getRawId()}:${this._typeName}`);
       if (!this.isInactive()) {
         this.registerComplexHandlers(this._parent._storyHandlerRoot, resolver.state);
       }
@@ -600,6 +599,16 @@ export default class Vrapper extends Cog {
    */
   getRawId () { return this[HostRef].rawId(); }
 
+  /**
+   * Returns a short unique id which is stable only for this execution
+   * session.
+   *
+   * @memberof Vrapper
+   */
+  getBriefUnstableId () {
+    return this.getName();
+  }
+
   getTypeName (options: any) {
     if (this.isResource() && (!options || (options.require !== false))) this.requireActive(options);
     return this._typeName;
@@ -613,7 +622,23 @@ export default class Vrapper extends Cog {
     if (typeName === this._typeName) return;
     this._typeName = typeName;
     this._typeIntro = null;
+    const typeKey = Vrapper._typeKeys[typeName];
+    if (typeKey) {
+      this.setNameFromTypeInstanceCount(typeKey || typeName,
+          this.getRawId().split("@").map(e => e.slice(0, 14)).join("@"));
+    }
   }
+
+  static _typeKeys = {
+    Entity: "@+",
+    Relation: "@-",
+    Media: "@~",
+    ScopeProperty: "@.",
+    Blob: "@'",
+    Bvob: "@'",
+    InactiveResource: "@?",
+    InactiveScriptResource: "@?",
+  };
 
   setDebug (level: number) { this._debug = level; }
 
@@ -622,29 +647,23 @@ export default class Vrapper extends Cog {
       options.require = false;
       return debugId(this.getTransient(options) || this[HostRef], { short: true });
     }
-    if (!this.__debugId) {
-      this.__debugId = debugId(this._transient || this[HostRef]);
-    }
-    return `${this.constructor.name}(${
-        this._phase === ACTIVE ? "" : `${this._phase}: `}${this.__debugId})`;
+    return this._debugId || (this._debugId =
+        (this._phase === ACTIVE ? this.getName() : `(${this._phase})${this.getName()}`));
   }
 
   _refreshDebugId (transient: Transient, options: VALKOptions) {
-    if (!transient) return;
+    if (!transient || this._phase !== ACTIVE || this._typeName !== "Relation") return;
     let targetText;
-    if ((this._phase !== ACTIVE) || (this._typeName !== "Relation")) {
-      this.__debugId = debugId(transient, options);
+    const targetId = transient.get("target");
+    if (!targetId) targetText = "@$n@@";
+    else if (targetId.isAbsent()) {
+      targetText = `@?@@?+chronicle=${targetId.getChronicleURI()}`;
     } else {
-      const targetId = transient.get("target");
-      if (!targetId) targetText = "<null target>";
-      else if (targetId.isAbsent()) {
-        targetText = `<in absent '${targetId.getChronicleURI()}'>`;
-      } else {
-        const target = this.get("target", options);
-        targetText = (target && debugId(target, options)) || "<target not found>";
-      }
-      this.__debugId = `${debugId(transient)}->${targetText}`;
+      const target = this.get("target", options);
+      targetText = target ? target.getName() : "@@";
     }
+    this._debugId = undefined;
+    this._debugId = `${this.debugId()}/.O-${targetText}`;
   }
 
   getTransient (options: ?{

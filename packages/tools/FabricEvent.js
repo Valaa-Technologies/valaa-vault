@@ -105,13 +105,16 @@ export class FabricEventTarget {
   getName (): string {
     const name = this._name;
     if (name !== undefined) return name;
-    const typeName = this.constructor.name;
-    if (!_typeInstanceCounter[typeName]) _typeInstanceCounter[typeName] = 0;
-    return (this._name = `${this.constructor.name}#${++_typeInstanceCounter[typeName]}`);
+    return this.setNameFromTypeInstanceCount(this.constructor.name);
   }
   setName (name: any) { this._name = name; }
   getRawName (): string { return this._rawName || this.getName(); }
   setRawName (rawName: any) { this._rawName = rawName; }
+
+  setNameFromTypeInstanceCount (typeName, suffix = "") {
+    if (!_typeInstanceCounter[typeName]) _typeInstanceCounter[typeName] = 0;
+    return (this._name = `${typeName}:${++_typeInstanceCounter[typeName]}${suffix}`);
+  }
 
   getVerbosity () {
     const ret = this._verbosity;

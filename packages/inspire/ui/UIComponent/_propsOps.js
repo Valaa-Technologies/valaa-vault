@@ -37,7 +37,7 @@ export function uiComponentProps (
   }
   props.context = Object.assign(props.context || {}, options.context);
   if (!props.context.key) {
-    props.context.key = _createComponentKey(options.name || "",
+    props.context.key = createComponentKey(options.name || "",
         focus || getScopeValue(props.uiContext || props.parentUIContext, "focus"),
         options.index);
   }
@@ -45,11 +45,10 @@ export function uiComponentProps (
   return props;
 }
 
-export function _createComponentKey (name: string, focus: any, index?: any): string {
-  const uniqueId = (focus instanceof Vrapper) && focus.getRawId();
-  return uniqueId
-      ? `${name}-@${uniqueId.slice(0, 13)}`
-      : `${name}-#${typeof index !== "undefined" ? index : "-"}`;
+export function createComponentKey (parentKey: string, focus: any, index?: any): string {
+  return (focus instanceof Vrapper) ? `${focus.getBriefUnstableId()}<-${parentKey}`
+      : index !== undefined ? `[${index}]${parentKey}`
+      : `-${parentKey}`;
 }
 
 export function _childProps (component: UIComponent, name: string,

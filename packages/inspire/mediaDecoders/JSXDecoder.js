@@ -132,8 +132,10 @@ export default class JSXDecoder extends MediaDecoder {
           delete props_.class;
         }
         if (!props_.key) {
-          props_.key = `${typeof parentKey === "string" ? parentKey : "-kuery"}-${name}#${
-              (parentNameIndices[name] = (parentNameIndices[name] || 0) + 1) - 1}`;
+          const index = (parentNameIndices[name] = (parentNameIndices[name] || 0) + 1) - 1;
+          props_.key = `${name === "div" ? "d" : name === "span" ? "s" : name
+            }#${index
+            }/${typeof parentKey === "string" ? parentKey : "!"}`;
         }
         const hasComplexProps = Object.values(props_)
             .find((value => (value != null)

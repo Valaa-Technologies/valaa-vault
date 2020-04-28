@@ -400,7 +400,7 @@ export default class UIComponent extends React.Component {
     return presentationExpander(
         this,
         componentPath,
-        initial || { key: `-${componentPath}>` },
+        initial || { key: `<${componentPath}-` },
         extraContext,
         baseContext || this.getUIContext());
   }

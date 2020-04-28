@@ -97,9 +97,9 @@ export default class Connection extends Follower {
 
   _dumpEventIds (events) {
     return `[${
-      [].concat(events || []).map(event =>
-              `#${(event.aspects.log || {}).index}:${(event.aspects.command || {}).id}`
-          ).join(",")
+      [].concat(events || []).map(event => (!event ? "<no event>"
+          : !event.aspects ? "<no aspects>"
+          : `#${(event.aspects.log || {}).index}:${(event.aspects.command || {}).id}`)).join(",")
     }]`;
   }
 

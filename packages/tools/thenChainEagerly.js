@@ -218,7 +218,6 @@ function thisChainEagerly (
     const func = functions[index];
     if (!func) continue;
     try {
-      if ((typeof params === "object") && params.then) throw new Error("wtf");
       params = func.apply(this_, params);
       ++index;
     } catch (error) {

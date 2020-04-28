@@ -296,7 +296,7 @@ export default class Engine extends Cog {
                   this.outputErrorEvent(
                       localWrapError(this, error,
                           `${constructCommand.name}.activate ${vResource.debugId()}`),
-                      2,
+                      1,
                       `Exception caught during resource construction activate of ${
                         vResource.debugId()}`);
                 });
@@ -479,7 +479,7 @@ export default class Engine extends Cog {
         vProtagonist.triggerFilterHooks(purgeUpdate, this._currentPassageCounter);
       }
     }
-    this.logEvent(1, () => [
+    this.logEvent(2, () => [
       !purgedProtagonists ? "reciting" : "purging",
       stories.length, "stories in", tx && tx.debugId(), ":", ...dumpObject(stories),
     ]);
@@ -503,7 +503,7 @@ export default class Engine extends Cog {
             "Exception caught during Engine.receiveCommands recital");
       }
     }
-    this.logEvent(1, () => [
+    this.logEvent(2, () => [
       !purgedProtagonists ? "recited" : "purged", stories.length, "stories in", tx && tx.debugId(),
     ]);
     if (purgedProtagonists) return purgedProtagonists;
@@ -604,11 +604,11 @@ export default class Engine extends Cog {
   }: Object = {}) {
     let ret = this._pendingTransactions[groupName];
     if (ret) {
-      this.logEvent(1, () => [`obtained existing group transaction '${groupName}'`, ret.debugId()]);
+      this.logEvent(2, () => [`obtained existing group transaction '${groupName}'`, ret.debugId()]);
       finalizer.then(() => undefined);
     } else {
       ret = this._pendingTransactions[groupName] = this.discourse.acquireFabricator(groupName);
-      this.logEvent(1, () => [
+      this.logEvent(2, () => [
         `created new ${setAsGlobal ? "global " : ""}group transaction '${groupName}'`, ret.debugId()
       ]);
       if (setAsGlobal && (this.discourse.getRootDiscourse() === this.discourse)) {
@@ -617,7 +617,7 @@ export default class Engine extends Cog {
         this.discourse = ret;
       }
       finalizer.then(() => {
-        this.logEvent(1, () => [
+        this.logEvent(2, () => [
           `finalized ${
             !setAsGlobal ? "" : this.discourse === ret ? "still-global " : "no longer global "
           }group transaction '${groupName}'`,

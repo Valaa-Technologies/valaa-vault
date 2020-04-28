@@ -12,7 +12,7 @@ import debugId from "~/engine/debugId";
 import { arrayFromAny, isPromise, isSymbol, thenChainEagerly, wrapError } from "~/tools";
 
 import UIComponent, { isUIComponentElement } from "./UIComponent";
-import { uiComponentProps } from "./_propsOps";
+import { uiComponentProps, createComponentKey } from "./_propsOps";
 
 /* eslint-disable react/prop-types */
 
@@ -40,8 +40,7 @@ export function _renderFocusAsSequence (component: UIComponent,
   const parentKey = component.getKey() || "-";
   return arrayFromAny(foci).map((focus, arrayIndex) => {
     const key = keyFromFocus ? keyFromFocus(focus, arrayIndex)
-        : (focus instanceof Vrapper) ? `@${focus.getRawId().slice(0, 13)}<-${parentKey}`
-        : `[${typeof arrayIndex !== "undefined" ? arrayIndex : "-"}]${parentKey}`;
+        : createComponentKey(parentKey, focus, arrayIndex);
     const props = {
       ...entryProps,
       focus,
@@ -117,7 +116,7 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
       }
       if (lens instanceof Kuery) {
         // Delegates the kuery resolution to LiveProps.
-        subLensName = `kuery-${lensName}`;
+        subLensName = `§-${lensName}`;
         const delayed = thenChainEagerly(
             component.bindLiveKuery(subLensName, component.getUIContextValue("frame"), lens,
                 { asRepeathenable: true, scope: component.getUIContext() }),
@@ -145,10 +144,10 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
         }
         if (lens.hasInterface("Media")) {
           ret = _tryRenderMediaLens(component, lens, focus, lensName);
-          subLensName = `media-${lensName}`;
+          subLensName = `~-${lensName}`;
         } else {
           const valos = component.getValos();
-          subLensName = `delegate-lens-${lensName}`;
+          subLensName = `.-${lensName}`;
           ret = component.readSlotValue("delegatePropertyLens",
               valos.Lens.delegatePropertyLens, lens, true)(lens, component, lensName);
           if ((ret == null) || ((ret.delegate || [])[0] === valos.Lens.notLensResourceLens)) {
@@ -161,7 +160,7 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
         if (lens.delegate && (Object.keys(lens).length === 1)) {
           return _renderFirstAbleDelegate(component, lens.delegate, focus, lensName);
         }
-        subLensName = `-noscope-${lensName}`;
+        subLensName = `-no-${lensName}`;
         ret = React.createElement(_Valoscope, component.childProps(subLensName, {}, { ...lens }));
       } else if (isSymbol(lens)) {
         return component.renderSlotAsLens(lens, focus, undefined, lensName, onlyIfAble, onlyOnce);
@@ -328,8 +327,8 @@ function _tryWrapElementInLiveProps (component: UIComponent, element: Object, fo
       livePropsProps.liveProps = liveProps;
     }
     livePropsProps = uiComponentProps({
-      name: (typeof key === "string") ? `live-${key}`
-          : key ? `livekeyed-${lensName}`
+      name: (typeof key === "string") ? `!${key}`
+          : key ? `!.-${lensName}`
           : lensName,
       parentUIContext: component.getUIContext(),
     }, livePropsProps);

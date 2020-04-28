@@ -570,9 +570,7 @@ export default class Engine extends Cog {
     } catch (error) {
       throw errorOnReceiveCommands.call(this, error,
           new Error(`_recitePassage(${passage.type} ${
-            passage.vProtagonist ? passage.vProtagonist.debugId() : ""})`),
-          "\n\tstory.state:", ...dumpObject(story.state),
-          "\n\tstory.previousState:", ...dumpObject(story.previousState));
+            passage.vProtagonist ? passage.vProtagonist.debugId() : ""})`));
     }
     function errorOnReceiveCommands (error, operationName, ...extraContext) {
       return this.wrapErrorEvent(error, operationName,

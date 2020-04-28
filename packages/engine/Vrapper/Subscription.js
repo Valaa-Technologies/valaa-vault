@@ -359,7 +359,8 @@ export default class Subscription extends LiveUpdate {
       this.detachHooks();
       if (tryConnectToAbsentChroniclesAndThen(error, () => {
         this._invalidateState();
-        this.attachHooks(triggerBroadcast);
+        if (!this._attachedHooks) this.attachHooks(triggerBroadcast);
+        else if (triggerBroadcast !== false) this._triggerPostUpdate();
       })) return;
       const name = new Error(`attachLiveKueryHooks()`);
       throw this._emitter.wrapErrorEvent(error, 1, () => [

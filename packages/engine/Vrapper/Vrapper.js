@@ -416,7 +416,7 @@ export default class Vrapper extends Cog {
       if (!this.isInactive()) {
         this.registerComplexHandlers(this._parent._storyHandlerRoot, resolver.state);
       }
-      this._refreshDebugId(transient, { state: resolver.state });
+      this.debugId({ state: resolver.state, transient });
       if (this.hasInterface("Scope")) this._setUpScopeFeatures(resolver);
     } catch (error) {
       const wrappedError = this.wrapErrorEvent(error, 1,
@@ -621,7 +621,9 @@ export default class Vrapper extends Cog {
   _setTypeName (typeName: string) {
     if (typeName === this._typeName) return;
     this._typeName = typeName;
-    this._typeIntro = null;
+    if (this._typeIntro && !typeName.startsWith("Destroyed")) {
+      this._typeIntro = null;
+    }
     const typeKey = Vrapper._typeKeys[typeName];
     if (typeKey) {
       this.setNameFromTypeInstanceCount(typeKey || typeName,
@@ -633,11 +635,14 @@ export default class Vrapper extends Cog {
     Entity: "@+",
     Relation: "@-",
     Media: "@~",
+    Property: "@.",
     ScopeProperty: "@.",
     Blob: "@'",
     Bvob: "@'",
     InactiveResource: "@?",
     InactiveScriptResource: "@?",
+    DestroyedResource: "@X",
+    DestroyedScriptResource: "@X",
   };
 
   setDebug (level: number) { this._debug = level; }
@@ -647,24 +652,33 @@ export default class Vrapper extends Cog {
       options.require = false;
       return debugId(this.getTransient(options) || this[HostRef], { short: true });
     }
-    return this._debugId || (this._debugId =
-        (this._phase === ACTIVE ? this.getName() : `(${this._phase})${this.getName()}`));
+    if (this._debugId) return this._debugId;
+    let nameText;
+    const transient = (options && options.transient) || this._transient;
+    if (Vrapper._namedTypes[this.typeName]) {
+      nameText = transient && transient.get("name");
+      if (nameText === undefined) nameText = this.get("name", options);
+      if (nameText) nameText = `@.:${nameText}`;
+    }
+    let targetText;
+    if (this._typeName === "Relation") {
+      const targetId = transient && transient.get("target");
+      if (!targetId) targetText = "@$n@@";
+      else if (targetId.isAbsent()) {
+        targetText = `.O-@?@@?+chronicle=${targetId.getChronicleURI()}`;
+      } else {
+        const target = this.get("target", options);
+        targetText = `.O-${target ? target.getName() : "@@"}`;
+      }
+    }
+    return (this._debugId = `${
+      this._phase === ACTIVE ? "" : `(${this._phase})`}${
+      nameText || ""}${
+      this.getName().slice(0, -2)}${
+      targetText || ""}@@`);
   }
 
-  _refreshDebugId (transient: Transient, options: VALKOptions) {
-    if (!transient || this._phase !== ACTIVE || this._typeName !== "Relation") return;
-    let targetText;
-    const targetId = transient.get("target");
-    if (!targetId) targetText = "@$n@@";
-    else if (targetId.isAbsent()) {
-      targetText = `@?@@?+chronicle=${targetId.getChronicleURI()}`;
-    } else {
-      const target = this.get("target", options);
-      targetText = target ? target.getName() : "@@";
-    }
-    this._debugId = undefined;
-    this._debugId = `${this.debugId()}/.O-${targetText}`;
-  }
+  static _namedTypes = { Entity: true, Relation: true, Media: true };
 
   getTransient (options: ?{
     state?: Object, discourse?: Discourse, typeName?: string, mostMaterialized?: any,
@@ -722,7 +736,6 @@ export default class Vrapper extends Cog {
     } else if (this._transient) {
       this._transientStaledIn = state;
     } else throw new Error(`Must specify object with first _updateTransient call`);
-    if (!this.__debugId) this._refreshDebugId(this._transient, { state });
   }
 
   getSelfAsHead (singularTransient: any = this.getTransient()) {
@@ -1830,11 +1843,7 @@ export default class Vrapper extends Cog {
     }
     try {
       this._updateTransient(story.state);
-      if (passage.sets && passage.sets.name) {
-        this._refreshDebugId(
-            this.getTransient({ typeName: passage.typeName, state: story.state }),
-            { state: story.state });
-      }
+      if (passage.sets && passage.sets.name && this._debugId) this._debugId = null;
       if (passage.actualAdds) {
         for (const fieldName of passage.actualAdds.keys()) {
           this.notifyMODIFIEDHandlers(fieldName, passage, story);

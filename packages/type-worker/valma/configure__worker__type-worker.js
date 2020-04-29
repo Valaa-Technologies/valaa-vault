@@ -32,7 +32,7 @@ exports.handler = async (yargv) => {
   const templates = vlm.path.join(__dirname, "../templates/{.,}*");
   vlm.info("Copying missing worker config files", " from templates at:",
       vlm.theme.path(templates), "(will not clobber existing files)");
-  vlm.shell.cp("-n", templates, ".");
+  vlm.shell.cp("-nR", templates, ".");
   const toolsetConfigUpdate = { ...vlm.getToolsetConfig(vlm.toolset) };
   toolsetConfigUpdate.rootChronicleURI = yargv.rootChronicleURI;
   if (yargv.reconfigure || !(toolsetConfigUpdate.commands || {}).perspire) {

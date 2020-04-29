@@ -1,21 +1,22 @@
 {
-  "name": { "!!!": ["./package.json", "name"] },
-  "description": { "!!!": ["./package.json", "description"] },
+  "name": { "!!!": ["./package", "name"] },
+  "description": { "!!!": ["./package", "description"] },
   "valos": {
-    "type": "revelation"
+    "type": "revelation",
+    "domain": { "!!!": ["./package", "valos", "domain"] }
   },
   "gateway": {
-    "authorityConfigs": {
-      "!!!": "./authorityConfigs.json"
-    },
+    "authorityConfigs": { "!!!": "./revelation/authority-configs" },
     "verbosity": 1,
     "scribe": { "verbosity": 0 }
   },
   "prologue": {
     "rootChronicleURI": {
-      "!!!": ["./toolsets.json", "@valos/type-worker", "rootChronicleURI"]
+      "!!!": ["./toolsets", "@valos/type-worker", "serviceURI"]
     }
   },
-  "views": {},
-  "spindles": {}
+  "spindles": {
+    "@valos/web-spindle": { "!!!": "./revelation/web-spindle" }
+  },
+  "views": {}
 }

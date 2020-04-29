@@ -1,0 +1,27 @@
+{
+  "@valos/type-worker": {
+    "serviceURI": null,
+    "commands": {
+      "perspire": {
+        "options": {
+          "keepalive": 60,
+          "heartbeat": "worker-perspire-template",
+          "output": "dist/perspire/worker-view.html",
+          "spindles": [
+            "@valaatech/aws-scheme-spindle",
+            "@valos/web-spindle"
+          ]
+        }
+      }
+    }
+  },
+  "@valos/web-spindle": {
+    "address": "0.0.0.0",
+    "port": "8078",
+    "title": "openapi Example Title",
+    "serviceGETHandlerName": "handleGET",
+    "servicePUTHandlerName": "handlePUT",
+    "serviceDELETEHandlerName": "handleDELETE",
+    "servicePOSTHandlerName": "handlePOST"
+  }
+}

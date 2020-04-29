@@ -1,0 +1,115 @@
+{
+  "server": {
+    "port": { "!!!": ["../toolsets", "@valos/web-spindle", "port"] },
+    "address": { "!!!": ["../toolsets", "@valos/web-spindle", "address"] },
+    "verbosity": 1,
+    "fastify": {
+      "ignoreTrailingSlash": false,
+      "logger": true,
+      "pluginTimeout": 30000
+    }
+  },
+  "prefixes": {
+    "/": {
+      "view": {
+        "name": "web-spindle root view",
+        "verbosity": 1,
+        "focus": { "!!!": ["../toolsets", "@valos/type-worker", "serviceURI"] }
+      },
+      "sessionDuration": 86400,
+      "swaggerPrefix": "/openapi",
+      "openapi": {
+        "openapi": "3.0.2",
+        "info": {
+          "title": { "!!!": ["../toolsets", "@valos/web-spindle", "title"] },
+          "name": { "!!!": ["../package", "name"] },
+          "version": { "!!!": ["../package", "version"] },
+          "description": { "!!!": ["../package", "description"] }
+        },
+        "servers": [],
+        "externalDocs": {
+          "url": { "!!!": ["../package", "valos", "docs"] },
+          "description": "Find more info here"
+        },
+        "host": { "!!!": ["../toolsets", "@valos/web-spindle", "address"] },
+        "schemes": ["http", "https"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": [],
+        "securityDefinitions": { "apiKey": { "type": "apiKey", "name": "apiKey", "in": "header" } }
+      },
+      "rules": {
+        "routeRoot": ["@@"]
+      },
+      "routes": [{
+        "url": "*", "category": "bridge", "method": "GET",
+        "config": {
+          "rules": {
+            "options": { "request": ["@!:request"], "reply": ["@!:reply"] },
+            "response": [
+              "@!$valk.invoke:", { "!!!": ["../toolsets", "@valos/web-spindle", "serviceGETHandlerName"] },
+              ["@!:options"]
+            ]
+          },
+          "requiredRules": ["routeRoot"],
+          "runtimeRules": ["response"]
+        },
+        "schema": {
+          "description": "root GET-route bridge",
+          "response": { "200": { "type": "string" }, "404": { "type": "string" } }
+        }
+      }, {
+        "url": "*", "category": "bridge", "method": "PUT",
+        "config": {
+          "rules": {
+            "options": { "request": ["@!:request"], "reply": ["@!:reply"] },
+            "response": [
+              "@!$valk.invoke:", { "!!!": ["../toolsets", "@valos/web-spindle", "servicePUTHandlerName"] },
+              ["@!:options"]
+            ]
+          },
+          "requiredRules": ["routeRoot"],
+          "runtimeRules": ["response"]
+        },
+        "schema": {
+          "description": "root PUT-route bridge",
+          "response": { "200": { "type": "string" }, "404": { "type": "string" } }
+        }
+      }, {
+        "url": "*", "category": "bridge", "method": "DELETE",
+        "config": {
+          "rules": {
+            "options": { "request": ["@!:request"], "reply": ["@!:reply"] },
+            "response": [
+              "@!$valk.invoke:", { "!!!": ["../toolsets", "@valos/web-spindle", "serviceDELETEHandlerName"] },
+              ["@!:options"]
+            ]
+          },
+          "requiredRules": ["routeRoot"],
+          "runtimeRules": ["response"]
+        },
+        "schema": {
+          "description": "root DELETE-route bridge",
+          "response": { "200": { "type": "string" }, "404": { "type": "string" } }
+        }
+      }, {
+        "url": "*", "category": "bridge", "method": "POST",
+        "config": {
+          "rules": {
+            "options": { "request": ["@!:request"], "reply": ["@!:reply"] },
+            "response": [
+              "@!$valk.invoke:", { "!!!": ["../toolsets", "@valos/web-spindle", "servicePOSTHandlerName"] },
+              ["@!:options"]
+            ]
+          },
+          "requiredRules": ["routeRoot"],
+          "runtimeRules": ["response"]
+        },
+        "schema": {
+          "description": "root POST-route bridge",
+          "response": { "200": { "type": "string" }, "404": { "type": "string" } }
+        }
+      }]
+    }
+  }
+}

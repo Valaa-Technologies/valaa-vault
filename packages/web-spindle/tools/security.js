@@ -99,7 +99,7 @@ export function extractAuthorizationGrantContent (router, identity, authorizatio
   return burlaesgDecode(authorizationGrant, identity.clientSecret.slice(0, 30));
 }
 
-export function assembleSimpleSessionEnvelope (router, grantPayload) {
+export function assembleSessionEnvelope (router, grantPayload) {
   const {
     identityChronicle, identityPartition,
     claims: { email, preferred_username }, // eslint-disable-line camelcase

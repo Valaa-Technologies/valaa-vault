@@ -4,7 +4,7 @@ import crypto from "crypto";
 
 import type { PrefixRouter, Route } from "~/web-spindle/MapperService";
 import {
-  extractAuthorizationGrantContent, assembleSimpleSessionEnvelope, fillReplySessionAndClientCookies,
+  extractAuthorizationGrantContent, assembleSessionEnvelope, fillReplySessionAndClientCookies,
 } from "~/web-spindle/tools/security";
 
 import { dumpObject } from "~/tools/wrapError";
@@ -64,7 +64,8 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       ]);
       */
       const now = Math.floor(Date.now() / 1000);
-      const { assembleSessionEnvelope } = this.runtime.ruleResolvers;
+      const assembleResolver = this.runtime.ruleResolvers.assembleSessionEnvelope
+          || [_assembleSessionEnvelopeFromSimpleGrant.bind(router, now), true];
       return thenChainEagerly(scope.routeRoot, [
         () => {
           if (scope.error) {
@@ -73,28 +74,19 @@ export default function createProjector (router: PrefixRouter, route: Route) {
           if (!scope.userAgentState || (scope.userAgentState !== scope.grantProviderState)) {
             throw new Error("Inconsistent session authorization state");
           }
-          const { alg, payload } = scope.grantContent = extractAuthorizationGrantContent(
-              router, scope.identity, scope.authorizationGrant);
-          if (!(now < Number(payload.timeStamp) + scope.grantExpirationDelay)) {
-            reply.code(401);
-            reply.send("Session authorization request has expired");
-            throw new Error("Expired");
-          }
-          // TODO(iridian, 2020-04): Validate alg
-          router.logEvent(1, () => [
-            `Authorizing session with alg '${alg}' payload:`, payload,
-          ]);
-          return payload;
         },
-        grantPayload => (assembleSessionEnvelope
-            ? router.resolveToScope(
-                "sessionEnvelope", assembleSessionEnvelope, scope.routeRoot, valkOptions)
-            : (scope.sessionEnvelope = assembleSimpleSessionEnvelope(router, grantPayload))),
+        () => router.resolveToScope(
+            "sessionEnvelope", assembleResolver, scope.routeRoot, valkOptions),
         sessionEnvelope => {
           fillReplySessionAndClientCookies(router, reply, sessionEnvelope, {
-            identity: scope.identity, tokenExpirationDelay: scope.tokenExpirationDelay,
+            identity: scope.identity,
+            tokenExpirationDelay: scope.tokenExpirationDelay,
             clientRedirectPath: scope.clientRedirectPath,
-            now, iv: scope.grantContent.iv, nonce: scope.grantContent.payload.nonce,
+            now,
+            ...(!scope.grantContent ? {} : {
+              iv: scope.grantContent.iv,
+              nonce: scope.grantContent.payload.nonce,
+            }),
           });
           reply.code(302);
           reply.redirect(scope.clientRedirectPath);
@@ -110,4 +102,21 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       });
     },
   };
+}
+
+function _assembleSessionEnvelopeFromSimpleGrant (now, engine, head, valkOptions) {
+  const scope = valkOptions.scope;
+  const reply = scope.reply;
+  const { alg, payload } = scope.grantContent =
+      extractAuthorizationGrantContent(this, scope.identity, scope.authorizationGrant);
+  if (!(now < Number(payload.timeStamp) + scope.grantExpirationDelay)) {
+    reply.code(401);
+    reply.send("Session authorization request has expired");
+    throw new Error("Expired");
+  }
+  // TODO(iridian, 2020-04): Validate alg
+  this.logEvent(1, () => [
+    `Authorizing session with alg '${alg}' payload:`, payload,
+  ]);
+  return assembleSessionEnvelope(this, payload);
 }

@@ -36,7 +36,7 @@ export function _createProjectorRuntime (
     }
     let ruleVAKON, maybeStaticReference, resolveRule;
     try {
-      ruleVAKON = _vakonpileVPath(rule, runtime);
+      ruleVAKON = _vakonpileVPath(rule, runtime, null);
       if (ruleVAKON[0] === "§'" && !Array.isArray(ruleVAKON[1])) {
         scopePreparations[ruleName] = ruleVAKON[1];
         return;

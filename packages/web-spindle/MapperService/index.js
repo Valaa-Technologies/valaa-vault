@@ -215,7 +215,7 @@ export default class MapperService extends FabricEventTarget {
         }
       } catch (error) {
         throw this.wrapErrorEvent(error, 1,
-            new Error(`presolveRulesToScope(rulwrapErrorEventeName: '${ruleName}')`),
+            new Error(`presolveRulesToScope(ruleName: '${ruleName}')`),
             "\n\tresolveRule:", ...dumpObject(resolveRule),
             "\n\truntime:", ...dumpObject(runtime),
             "\n\tvalkOptions:", ...dumpObject(valkOptions),

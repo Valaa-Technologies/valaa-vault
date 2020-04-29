@@ -43,7 +43,7 @@ export function _finalizeRoute (route, userConfig, globalRules) {
     if (route.config.rules[ruleName] === undefined) return undefined;
   }
   for (const [key, rule] of Object.entries(route.config.rules)) {
-    route.config.rules[key] = disjoinVPathOutline(rule, "@@");
+    route.config.rules[key] = disjoinVPathOutline(rule);
   }
   for (const ruleName of [].concat(
       route.config.requiredRules || [],

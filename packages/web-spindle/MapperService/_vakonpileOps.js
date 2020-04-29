@@ -3,8 +3,8 @@
 import { disjoinVPathOutline, cementVPath } from "~/raem/VPath";
 // import { dumpObject } from "~/tools";
 
-export function _vakonpileVPath (vpath, runtime) {
-  const sections = disjoinVPathOutline(vpath, "@@");
+export function _vakonpileVPath (vpath, runtime, disjoinKey = "@@") {
+  const sections = disjoinVPathOutline(vpath, disjoinKey);
   if ((sections[0] === "@$") && !sections[1]) return null;
   const stack = { context: contextRuleLookup, contextState: runtime, isPluralHead: false };
   const track = cementVPath(sections, stack);

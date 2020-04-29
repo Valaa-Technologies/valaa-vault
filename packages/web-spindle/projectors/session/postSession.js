@@ -4,7 +4,7 @@ import crypto from "crypto";
 
 import type { PrefixRouter, Route } from "~/web-spindle/MapperService";
 import {
-  extractSessionPayload, extractClientToken, assembleSimpleSessionEnvelope,
+  extractSessionPayload, extractClientToken, assembleSessionEnvelope,
   fillReplySessionAndClientCookies,
 } from "~/web-spindle/tools/security";
 
@@ -98,9 +98,9 @@ export default function createProjector (router: PrefixRouter, route: Route) {
           return payload;
         },
         grantPayload => (refreshSessionEnvelope
-          ? router.resolveToScope(
-              "sessionEnvelope", refreshSessionEnvelope, scope.routeRoot, valkOptions)
-          : (scope.sessionEnvelope = assembleSimpleSessionEnvelope(router, grantPayload))),
+            ? router.resolveToScope(
+                "sessionEnvelope", refreshSessionEnvelope, scope.routeRoot, valkOptions)
+            : (scope.sessionEnvelope = assembleSessionEnvelope(router, grantPayload))),
         sessionEnvelope => {
           if (!sessionEnvelope) {
             if (!reply.statusCode) reply.code(403);

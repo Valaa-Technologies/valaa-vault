@@ -336,6 +336,10 @@ export default class Gateway extends FabricEventTarget {
         : this._createAndConnectViewToDOM(viewId, { ...this._hostComponents, ...viewConfig });
   }
 
+  getView (viewId) {
+    return this._views[viewId];
+  }
+
   _createAndConnectViewToDOM (viewId, {
     parent = this, verbosity,
     container, hostGlobal, createView,

@@ -25,6 +25,8 @@ const _isReadOnlyMethod = {
   OPTIONS: true,
 };
 
+export class SessionExpiredError extends Error {}
+
 export function verifySessionAuthorization (
     router, route, scope: Object, accessRoots: Vrapper, accessRootDescription: string) {
   try {
@@ -82,6 +84,11 @@ export function resolveScopeIdentityRoles (router, route, scope) {
   if (!identityChronicle) {
     return { "": true };
   }
+  if (Date.now() >= (Number(scope.sessionPayload.timeStamp) + router.getSessionDuration()) * 1000) {
+    const expired = new SessionExpiredError("Session expired but not properly handled");
+    expired.sessionPayload = scope.sessionPayload;
+    throw expired;
+  }
   const ret = router.getIdentityRoles(identityChronicle);
   const [, authorityURI, identityId] = identityChronicle.match(/^(.*)\?id=(.*)$/) || [];
   if (authorityURI) {
@@ -108,7 +115,7 @@ export function assembleSessionEnvelope (router, grantPayload) {
 }
 
 export function fillReplySessionAndClientCookies (router, reply, sessionEnvelope, {
-  identity, tokenExpirationDelay, clientRedirectPath, now, iv, nonce,
+  identity, tokenExpirationDelay, clientRedirectPath, now, iv, nonce, refreshRequestCookiesOf,
 }) {
   const {
     identityChronicle, sessionPayloadFields, clientClaimsFields, ...spuriousFields
@@ -126,14 +133,11 @@ export function fillReplySessionAndClientCookies (router, reply, sessionEnvelope
     timeStamp: now, nonce: nonce || "", identityChronicle, clientRedirectPath,
     ...(sessionPayloadFields || {}),
   };
-  reply.setCookie(
-      identity.sessionCookieName,
-      burlaesgEncode(
-          sessionPayload, identity.clientSecret.slice(0, 30), iv || generateBurlaesgIV()),
-      {
-        httpOnly: true, secure: true, maxAge: tokenExpirationDelay,
-        path: clientRedirectPath,
-      });
+  const sessionCookieText = burlaesgEncode(
+      sessionPayload, identity.clientSecret.slice(0, 30), iv || generateBurlaesgIV());
+  reply.setCookie(identity.sessionCookieName, sessionCookieText, {
+    httpOnly: true, secure: true, maxAge: tokenExpirationDelay, path: clientRedirectPath,
+  });
   const clientToken = {
     iss: identity.clientURI,
     sub: identityChronicle,
@@ -142,13 +146,26 @@ export function fillReplySessionAndClientCookies (router, reply, sessionEnvelope
     ...(clientClaimsFields || {}),
     // aud: "", nbf: "", jti: "",
   };
-  reply.setCookie(
-      identity.clientCookieName,
-      hs256JWTEncode(clientToken, identity.clientSecret),
-      {
-        httpOnly: false, secure: true, maxAge: tokenExpirationDelay,
-        path: clientRedirectPath,
-      });
+  const clientCookieText = hs256JWTEncode(clientToken, identity.clientSecret);
+  reply.setCookie(identity.clientCookieName, clientCookieText, {
+    httpOnly: false, secure: true, maxAge: tokenExpirationDelay, path: clientRedirectPath,
+  });
+  if (refreshRequestCookiesOf) {
+    // Refresh the cookies in the incoming request object (if given),
+    // so that its handler reattempt can succeed.
+    refreshRequestCookiesOf.cookies[identity.sessionCookieName] = sessionCookieText;
+    refreshRequestCookiesOf.cookies[identity.clientCookieName] = clientCookieText;
+  }
+}
+
+export function clearReplySessionAndClientCookies (router, reply, cookiePath) {
+  const identity = router.getIdentity();
+  reply.clearCookie(identity.getSessionCookieName(), {
+    httpOnly: true, secure: true, path: cookiePath || "/",
+  });
+  reply.clearCookie(identity.getClientCookieName(), {
+    httpOnly: false, secure: true, path: cookiePath || "/",
+  });
 }
 
 export function extractSessionPayload (router, sessionCookie) {
@@ -163,28 +180,6 @@ export function extractClientToken (router, clientCookie) {
   const ret = hs256JWTDecode(clientCookie, identity.clientSecret);
   if (!ret) throw new Error("client token without content");
   return ret;
-}
-
-export function fillReplyIfSessionExpired (router, reply, sessionPayload) {
-  const identity = router.getIdentity();
-  const { timeStamp, identityChronicle, clientRedirectPath } = sessionPayload;
-  if (Math.floor(Date.now() / 1000) < Number(timeStamp) + router.getSessionDuration()) return false;
-  router.logEvent(1, () => [
-    "Session expired:", Math.floor(Date.now() / 1000),
-        ">=", timeStamp, router.getSessionDuration(),
-    "\n\tpayload:", timeStamp, identityChronicle,
-  ]);
-  reply.clearCookie(identity.getSessionCookieName(), {
-    httpOnly: true, secure: true, path: clientRedirectPath || "/",
-  });
-  reply.clearCookie(identity.getClientCookieName(), {
-    httpOnly: false, secure: true, path: clientRedirectPath || "/",
-  });
-  // scope.reply.code(401);
-  // scope.reply.send("Session has expired, please refresh");
-  reply.code(302);
-  reply.redirect(clientRedirectPath || "/");
-  return true;
 }
 
 const accessFields = {

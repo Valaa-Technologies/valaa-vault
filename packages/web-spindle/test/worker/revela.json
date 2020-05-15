@@ -33,7 +33,7 @@
       "prefixes": {
         "/rest-test/v0": { "!!!": ["@@", ["@!:../index"], ["@!invoke:createConfig", [{
           "view": {
-            "name": "Web API Test",
+            "name": "web-api-test-view",
             "verbosity": 0,
             "engine": { "verbosity": 0, "discourse": { "verbosity": 0 } },
             "focus": "valaa-local:?id=@$~u4.f3d306d9-79ac-4087-afbc-46f739226eb2@@"
@@ -46,11 +46,12 @@
           "rules": {
             "routeRoot": ["@@"],
             "scriptRoot": ["@$~u4.f3d306d9-79ac-4087-afbc-46f739226eb2@@"],
+            "autoRefreshSession": true,
             "&ofResource": {
               "TestIndividual": { "listingName": "INDIVIDUAL" },
               "TestNewsItem": { "listingName": "NEWSITEM" },
               "TestService": { "listingName": "SERVICE" },
-              "TestTag": { "listingName": "TAG" }
+              "TestTag": { "listingName": "TAG", "autoRefreshSession": false }
             },
             "&ofRelation": {
               "interests": {

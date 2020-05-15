@@ -29,6 +29,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       if (!this.runtime.identity) {
         throw new Error("Cannot prepare session route POST: service identity not configured");
       }
+      router.setRefreshSessionProjector(this);
       this.runtime.scopePreparations.identity = Object.freeze({
         crypto,
         clientSecret: this.runtime.identity.clientSecret,
@@ -42,7 +43,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       return router.preloadRuntimeResources(this, this.runtime);
     },
 
-    handler (request, reply) {
+    handler (request, reply, isAutoRefreshSession) {
       router.infoEvent(1, () => [`${this.name}:`,
         "\n\trequest.params:", ...dumpObject(request.params),
         "\n\trequest.query:", ...dumpObject(request.query),
@@ -66,11 +67,11 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         reply.send("No session found");
         return true;
       }
-      const now = Math.floor(Date.now() / 1000);
+      const now = Date.now();
       const { refreshSessionEnvelope } = this.runtime.ruleResolvers;
       let timeStamp, nonce, identityChronicle, clientRedirectPath;
       return thenChainEagerly(scope.routeRoot, [
-        () => {
+        function _validateSessionPayload () {
           const {
             payload: { iss, sub, iat, exp, ...clientClaimsFields },
           } = extractClientToken(router, scope.clientCookie);
@@ -82,14 +83,12 @@ export default function createProjector (router: PrefixRouter, route: Route) {
             // Either implementation error or security vulnerability.
             router.errorEvent(0, "Inconsistent session and client cookies",
                 iat, sub, timeStamp, identityChronicle);
-            console.log(0, "Inconsistent session and client cookies",
-                iat, sub, timeStamp, identityChronicle);
+            reply.code(400);
             throw new Error("Invalid cookies");
           }
-          if (!(now < Number(timeStamp) + scope.refreshExpirationDelay)) {
+          if (!(now < (Number(timeStamp) + scope.refreshExpirationDelay) * 1000)) {
             reply.code(401);
-            reply.send("Session refresh window has expired");
-            throw new Error("Expired");
+            throw new Error("Session refresh window has expired");
           }
           const payload = { identityChronicle, claims: clientClaimsFields };
           router.logEvent(1, () => [
@@ -97,22 +96,28 @@ export default function createProjector (router: PrefixRouter, route: Route) {
           ]);
           return payload;
         },
-        grantPayload => (refreshSessionEnvelope
+        function _refreshSessionEnvelope (grantPayload) {
+          return refreshSessionEnvelope
             ? router.resolveToScope(
                 "sessionEnvelope", refreshSessionEnvelope, scope.routeRoot, valkOptions)
-            : (scope.sessionEnvelope = assembleSessionEnvelope(router, grantPayload))),
-        sessionEnvelope => {
+            : (scope.sessionEnvelope = assembleSessionEnvelope(router, grantPayload));
+        },
+        function _replyWithRefreshedSessionEnvelope (sessionEnvelope) {
           if (!sessionEnvelope) {
             if (!reply.statusCode) reply.code(403);
             reply.send("Session refresh rejected");
+            throw new Error("Expired");
           } else {
             fillReplySessionAndClientCookies(router, reply, sessionEnvelope, {
               identity: scope.identity, tokenExpirationDelay: scope.tokenExpirationDelay,
               clientRedirectPath,
-              now, iv: null, nonce,
+              now: Math.floor(now / 1000), iv: null, nonce,
+              refreshRequestCookiesOf: isAutoRefreshSession && request,
             });
-            reply.code(302);
-            reply.redirect(clientRedirectPath);
+            if (!isAutoRefreshSession) {
+              reply.code(302);
+              reply.redirect(clientRedirectPath);
+            }
           }
           return true;
         },

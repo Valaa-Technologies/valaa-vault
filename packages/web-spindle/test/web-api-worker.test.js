@@ -10,7 +10,7 @@ const revelationRoot = "./packages/web-spindle/test/worker";
 const expectedOutputHTML = `<html><head>${
   ""}<meta http-equiv="refresh" content="1"></head>${
   ""}<body><div id="perspire-gateway--main-container">${
-    ""}<div id="valos-gateway--@valos/web-spindle:view:/rest-test/v0--view-root">${
+    ""}<div id="valos-gateway--web-api-test-view--view-root">${
       ""}<div style="width: 100vw; height: 100vh;">${
         ""}<div><h1>Hello World!</h1><h2>Hello World! function</h2></div>${
       ""}</div>${
@@ -34,7 +34,7 @@ const adminChronicleURI = `valaa-local:?id=${testAdminId}`;
 const userChronicleURI = `valaa-local:?id=${testUserId}`;
 const randoChronicleURI = `valaa-local:?id=${testRandoId}`;
 
-let _server;
+let _server, _testView, _testRouter;
 let _vViewFocus, _vAuRoot, _vAdmin, _vUser/* , _vRando */;
 
 beforeAll(async () => {
@@ -45,8 +45,10 @@ beforeAll(async () => {
     revelations: [{ "!!!": "./revela.json" }],
   });
   await _server.initialize(["../web-spindle"]);
-  const view = await _server.createView("worker");
-  _vViewFocus = view.getFocus();
+  await _server.createView("worker");
+  _testView = _server.getGateway().getView("web-api-test-view");
+  _testRouter = _testView.prefixRouters["/rest-test/v0"];
+  _vViewFocus = _testView.getFocus();
 
   _vAuRoot = await _vViewFocus.doValoscript(
       `new Entity({ id, name: "test authority root", authorityURI: "valaa-local:" })`,
@@ -117,9 +119,8 @@ function _extractSessionClientCookie (incomingHeaders) {
 
 describe("Web API spindle worker", () => {
   it("runs a trivial local revelation which renders a proper html dump", async () => {
-    const server = await _server;
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    expect(server.getRootHTML())
+    expect(_server.getRootHTML())
         .toEqual(expectedOutputHTML);
 
     expect(_vAdmin.getURI())
@@ -129,8 +130,6 @@ describe("Web API spindle worker", () => {
   });
 
   it("performs a full resource methods session", async () => {
-    await _server;
-
     await expect(fetchJSON("http://127.0.0.1:7357/rest-test/v0/individuals",
             { method: "POST", body: { name: "unauthorized-without-session" } }))
         .rejects.toMatchObject({ message: /403/ });
@@ -210,8 +209,6 @@ describe("Web API spindle worker", () => {
   });
 
   it("performs a full mapping methods session", async () => {
-    await _server;
-
     const { cookie } = await _initiateTestSession(adminChronicleURI);
     const headers = { cookie };
 
@@ -333,8 +330,6 @@ describe("Web API spindle worker", () => {
   });
 
   it("refreshes and closes a session", async () => {
-    await _server;
-
     await expect(fetchJSON("http://127.0.0.1:7357/rest-test/v0/individuals",
             { method: "POST", body: { name: "unauthorized-without-session" } }))
         .rejects.toMatchObject({ message: /403/ });
@@ -355,7 +350,7 @@ describe("Web API spindle worker", () => {
         .toMatchObject({ $V: { id }, name: "testingividual", image: "testingividual", owned: {} });
 
     // wait so that the client cookie iat and exp timestamps have time to change.
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 1100));
 
     const refreshSessionRedirect = await fetch(`http://127.0.0.1:7357/rest-test/v0/session`, {
       method: "POST", headers, redirect: "manual",
@@ -385,14 +380,80 @@ describe("Web API spindle worker", () => {
     expect(refreshedClientToken.signature)
         .not.toEqual(clientToken.signature);
 
+    const initialCookie = headers.cookie;
     headers.cookie = refreshedCookie;
 
-    const otherPOST = await fetchJSON("http://127.0.0.1:7357/rest-test/v0/individuals",
-        { method: "POST", body: { name: "other" }, headers });
+    const previousDuration = _testRouter._sessionDuration;
+    _testRouter._sessionDuration = -3600;
+
+    try {
+      await fetchJSON("http://127.0.0.1:7357/rest-test/v0/tags",
+          { method: "POST", body: { name: "unrefreshing" }, headers, redirect: "manual" });
+    } catch (error) {
+      const expiredResponse = error.response;
+      expect(expiredResponse.status)
+          .toEqual(401);
+      const { sessionCookie: expiredSessionCookie, clientCookie: expiredClientCookie } =
+          _extractSessionClientCookie(expiredResponse.headers);
+      expect(expiredSessionCookie)
+          .toEqual("");
+      expect(expiredClientCookie)
+          .toEqual("");
+    }
+
+    // revert to initial cookie and a session duration short enough
+    // for it to have expired, but longer than 1s for the internal
+    // auto-refreshed cookie to be valid for the request retry even in
+    // marginal cases.
+
+    _testRouter._sessionDuration = 1.1;
+    headers.cookie = initialCookie;
+
+    const postIndividualOptions = { method: "POST", body: { name: "other" }, headers };
+
+    // first make a failed POST individual attempt with expired refresh delay
+    const refreshProjector = _testRouter.getProjectors({ method: "POST", category: "session" })[0];
+    const previousRefreshDelay = refreshProjector.runtime.scopeBase.refreshExpirationDelay;
+    refreshProjector.runtime.scopeBase.refreshExpirationDelay = 0;
+    await expect(fetchJSON("http://127.0.0.1:7357/rest-test/v0/individuals", postIndividualOptions))
+        .rejects
+        .toThrow();
+    expect(postIndividualOptions.response.status)
+        .toEqual(401);
+    expect(await postIndividualOptions.response.text())
+        .toEqual("Session refresh window has expired");
+    refreshProjector.runtime.scopeBase.refreshExpirationDelay = previousRefreshDelay;
+
+   // make successful POST individual including token refresh
+    const otherPOST = await fetchJSON(
+        "http://127.0.0.1:7357/rest-test/v0/individuals", postIndividualOptions);
     expect(otherPOST)
         .toMatchObject({ $V: { rel: "self" } });
     const otherHRef = otherPOST.$V.href;
     const otherId = otherHRef.match(/^\/rest-test\/v0\/individuals\/([@$.a-zA-Z0-9\-_~]*)$/)[1];
+
+    const { cookie: autoRefreshedCookie, clientCookie: autoRefreshedClientCookie } =
+        _extractSessionClientCookie(postIndividualOptions.response.headers);
+
+    expect(autoRefreshedCookie)
+        .not.toEqual(cookie);
+
+    const autoRefreshedClientToken = hs256JWTDecode(autoRefreshedClientCookie);
+    expect(autoRefreshedClientToken.header)
+        .toEqual(clientToken.header);
+    expect(autoRefreshedClientToken.payload.iss)
+        .toEqual(clientToken.payload.iss);
+    expect(autoRefreshedClientToken.payload.sub)
+        .toEqual(clientToken.payload.sub);
+    expect(autoRefreshedClientToken.payload.iat)
+        .not.toEqual(clientToken.payload.iat);
+    expect(autoRefreshedClientToken.payload.exp)
+        .not.toEqual(clientToken.payload.exp);
+    expect(autoRefreshedClientToken.signature)
+        .not.toEqual(clientToken.signature);
+
+    headers.cookie = autoRefreshedCookie;
+    _testRouter._sessionDuration = previousDuration;
 
     const otherGET = await fetchJSON(`http://127.0.0.1:7357${otherHRef}?fields=*`,
         { method: "GET", headers });

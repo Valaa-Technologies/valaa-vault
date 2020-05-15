@@ -2,6 +2,10 @@
 
 import { asyncConnectToChronicleIfAbsentAndRetry } from "~/raem/tools/denormalized/partitions";
 
+import {
+  SessionExpiredError, clearReplySessionAndClientCookies,
+} from "~/web-spindle/tools/security";
+
 import { dumpify, dumpObject, isPromise, outputError, thenChainEagerly } from "~/tools";
 
 const FastifySwaggerPlugin = require("fastify-swagger");
@@ -17,9 +21,11 @@ export function _createPrefixRouter (rootService, prefix, prefixConfig) {
   prefixRouter._identity = Object.assign(
       Object.create(rootService._identity || {}),
       identity || {});
+  prefixRouter._sessionDuration = sessionDuration;
 
   prefixRouter.getRoutePrefix = () => prefix;
-  prefixRouter.getSessionDuration = () => (sessionDuration || rootService.getSessionDuration());
+  prefixRouter.getSessionDuration = () =>
+      (prefixRouter._sessionDuration || rootService.getSessionDuration());
   prefixRouter.tryIdentity = () => prefixRouter._identity;
   prefixRouter.getIdentity = () => {
     if (!prefixRouter._identity) throw new Error("Router identity not configured");
@@ -136,39 +142,7 @@ function _attachProjectorFastifyRoutes (router) {
   router._projectors.forEach(projector => {
     let fastifyRoute;
     try {
-      projector.smartHandler = asyncConnectToChronicleIfAbsentAndRetry(
-          (request, reply) => thenChainEagerly(projector._whenReady, [
-            readiness => {
-              if (readiness === true) return projector.handler(request, reply);
-              throw (readiness || new Error("route failed to initialize"));
-            },
-            result => {
-              if (result !== true) {
-                const error = new Error("INTERNAL ERROR: invalid route handler return value");
-                throw router.wrapErrorEvent(error, 0,
-                    new Error(`handler return value validator`),
-                    "\n\treturn value:", ...dumpObject(result),
-                    "\n\tNote: projector.handler must explicitly call reply.code/send",
-                    "and return true or return a Promise which resolves to true.",
-                    "This ensures that exceptions are always caught and logged properly");
-              }
-            }
-          ]),
-          (error, request, reply) => {
-            reply.code(500);
-            reply.send(error.message);
-            outputError(
-                router.wrapErrorEvent(error, 1,
-                    new Error(`${projector.name}`),
-                    "\n\trequest.params:", ...dumpObject(request.params),
-                    "\n\trequest.query:", ...dumpObject(request.query),
-                    "\n\trequest.cookies:", ...dumpObject(Object.keys(request.cookies || {})),
-                    "\n\trequest.body:", ...dumpObject(request.body),
-                ),
-                `Exception caught during projector: ${projector.name}`,
-                router);
-          },
-      );
+      projector.smartHandler = _createSmartHandler(router, projector);
       fastifyRoute = { ...projector.route, handler: projector.smartHandler };
       router._fastify.route(fastifyRoute);
     } catch (error) {
@@ -180,10 +154,92 @@ function _attachProjectorFastifyRoutes (router) {
   });
 }
 
+function _createSmartHandler (router, projector) {
+  return asyncConnectToChronicleIfAbsentAndRetry(
+      (request, reply, ...rest) => thenChainEagerly(projector._whenReady, [
+        function _handleRequest (readiness) {
+          if (readiness === true) return projector.handler(request, reply, ...rest);
+          throw (readiness || new Error("Route failed to initialize"));
+        },
+        function _validateRequestResult (result) {
+          if (result !== true) {
+            const error = new Error("INTERNAL ERROR: invalid route handler return value");
+            throw router.wrapErrorEvent(error, 0,
+                new Error(`handler return value validator`),
+                "\n\treturn value:", ...dumpObject(result),
+                "\n\tNote: projector.handler must explicitly call reply.code/send",
+                "and return true or return a Promise which resolves to true.",
+                "This ensures that exceptions are always caught and logged properly");
+          }
+        },
+      ]),
+      (error, request, reply) => thenChainEagerly(null,
+          function _checkSessionExpiry () {
+            if (error instanceof SessionExpiredError) {
+              return _handleExpiredSessionRequest(error, request, reply);
+            }
+            throw error;
+          },
+          function _deliverError (actualError) {
+            if (!reply.statusCode) reply.code(500);
+            if (!reply.sent) reply.send(actualError.message);
+            if (!router.getVerbosity() && (reply.statusCode < 500)) {
+              router.warnEvent(`Exception caught during projector: ${projector.name}:`,
+                  reply.statusCode, actualError.message);
+            } else {
+              outputError(router.wrapErrorEvent(actualError,
+                      new Error(`${projector.name}`),
+                      "\n\trequest.params:", ...dumpObject(request.params),
+                      "\n\trequest.query:", ...dumpObject(request.query),
+                      "\n\trequest.cookies:", ...dumpObject(Object.keys(request.cookies || {})),
+                      "\n\trequest.body:", ...dumpObject(request.body),
+                      "\n\treply.statusCode:", reply.statusCode),
+                  `Exception caught during projector: ${projector.name}`,
+                  router);
+            }
+          }));
+  function _handleExpiredSessionRequest (expiryError, request, reply) {
+    const {
+      timeStamp, identityChronicle, clientRedirectPath, expiryRedirectPath,
+    } = expiryError.sessionPayload;
+    if (projector.runtime.scopeBase.autoRefreshSession) {
+      const refreshSessionProjector = router.getRefreshSessionProjector();
+      if (!refreshSessionProjector) {
+        throw new Error("Session auto-refresh requested but no refresh session route configured");
+      }
+      return thenChainEagerly(null, [
+        function _refreshSession () {
+          return refreshSessionProjector.handler(request, reply, true);
+        },
+        function _retryRequestWithRefreshedSession () {
+          return !reply.sent && projector.smartHandler(request, reply);
+        },
+      ]);
+    }
+    clearReplySessionAndClientCookies(router, reply, clientRedirectPath);
+    if (expiryRedirectPath) {
+      reply.code(303);
+      reply.redirect(expiryRedirectPath);
+    } else {
+      reply.code(401);
+      reply.send("Session has expired, please relogin");
+    }
+    router.logEvent(1, () => [
+      "Session expired (ms):", Date.now(),
+          ">=", timeStamp * 1000, router.getSessionDuration() * 1000,
+      "\n\tpayload:", timeStamp, identityChronicle,
+      "\n\treply code:", reply.statusCode,
+      ...(!expiryRedirectPath ? [] : ["\n\tredirect:", expiryRedirectPath]),
+    ]);
+    return undefined;
+  }
+}
+
 export async function _projectPrefixRoutesFromView (router, view, viewName) {
   router._view = view;
   router._engine = view.getEngine();
   router._viewName = viewName;
+  (view.prefixRouters || (view.prefixRouters = {}))[router.getRoutePrefix()] = router;
   router.infoEvent(1, () => [
     `${router.getRoutePrefix()}: projecting from view ${viewName}`,
   ]);

@@ -25,6 +25,8 @@ export default valosheath.exportSpindle({
     return this._service.start();
   },
 
+  getWebService () { return this._service; },
+
   async onGatewayTerminating () {
     return this._service.stop();
   },
@@ -33,9 +35,13 @@ export default valosheath.exportSpindle({
     const { dumpObject } = gateway.require("@valos/tools");
     try {
       const viewConfig = prefixConfig.view;
-      const viewName = (typeof viewConfig === "string") ? viewConfig
-          : (typeof viewConfig === "object") ? `${this.name}:view:${prefix}`
-          : "host";
+      const viewName = (
+              (typeof viewConfig === "string")
+                  ? viewConfig
+              : (typeof viewConfig !== "object")
+                  ? "host"
+              : viewConfig.name)
+          || `${this.name}:view:${prefix}`;
 
       this._prefixRouters[viewName] = this._service.createPrefixRouter(prefix, prefixConfig);
       if (typeof viewConfig === "object") {

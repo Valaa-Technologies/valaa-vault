@@ -21,6 +21,9 @@ import { _vakonpileVPath } from "./_vakonpileOps";
 
 const Fastify = require("fastify");
 
+// TODO(iridian, 2020-05): Extract PrefixRouter as a fully separate,
+// standalone class. Right now each PrefixRouter is prototypically
+// inherited from MapperService at runtime.
 export type PrefixRouter = MapperService;
 
 export default class MapperService extends FabricEventTarget {
@@ -125,6 +128,22 @@ export default class MapperService extends FabricEventTarget {
   isSessionAuthorizationEnabled () { return this._isSessionAuthorizationEnabled; }
   setSessionAuthorizationEnabled (value = true) { this._isSessionAuthorizationEnabled = value; }
 
+  getRefreshSessionProjector () { return this._refreshSessionProjector; }
+  setRefreshSessionProjector (projector) { this._refreshSessionProjector = projector; }
+
+
+  /**
+   * Attaches an initialized but routeless prefix router to its view
+   * which whose chronicles have been loaded.
+   *
+   * This is done because creation of view and prefix router could
+   * happen in either order.
+   *
+   * @param {*} view
+   * @param {*} viewName
+   * @returns
+   * @memberof MapperService
+   */
   async projectFromView (view, viewName) {
     try {
       return await _projectPrefixRoutesFromView(this, view, viewName);
@@ -165,6 +184,13 @@ export default class MapperService extends FabricEventTarget {
   }
 
   // Runtime ops
+
+  getProjectors (options = {}) {
+    return this._projectors.filter(projector =>
+        (!options.url || (options.url === projector.route.url))
+        && (!options.category || (options.category === projector.route.category))
+        && (!options.method || (options.method === projector.route.method)));
+  }
 
   createProjectorRuntime (projector, route) {
     const runtime = {};

@@ -36,7 +36,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         return true;
       }
       const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
-      if (_presolveRouteRequest(router, this.runtime, valkOptions)) {
+      if (!_presolveRouteRequest(router, this.runtime, valkOptions)) {
         return true;
       }
       const scope = valkOptions.scope;

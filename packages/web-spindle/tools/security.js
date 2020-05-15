@@ -28,7 +28,7 @@ const _isReadOnlyMethod = {
 export function verifySessionAuthorization (
     router, route, scope: Object, accessRoots: Vrapper, accessRootDescription: string) {
   try {
-    if (!router.isSessionAuthorizationEnabled()) return false;
+    if (!router.isSessionAuthorizationEnabled()) return true;
     let rights;
     for (const accessRoot of [].concat(accessRoots)) {
       rights = accessRoot.get(toRIGHTSFields);
@@ -37,10 +37,10 @@ export function verifySessionAuthorization (
     // const permissions = accessRoot.get(toPERMISSIONSFields);
     let identityRoles;
     if ((rights == null) || !rights.length) {
-      if (_isReadOnlyMethod[route.method]) return false;
+      if (_isReadOnlyMethod[route.method]) return true;
     } else {
-      identityRoles = resolveScopeIdentityRoles(router, route, scope);
-      if (identityRoles === null) return true;
+      identityRoles = scope.identityRoles
+          || (scope.identityRoles = resolveScopeIdentityRoles(router, route, scope));
       router.infoEvent(3, () => [
         `CHECKING ACCESS of ${accessRootDescription} via ${router._routeName(route)}:`,
         "\n\tby identity with roles:", JSON.stringify(identityRoles),
@@ -51,8 +51,8 @@ export function verifySessionAuthorization (
       ]);
       for (const right of rights) {
         if (!identityRoles[right.chronicle || ""]) continue;
-        if (_isReadOnlyMethod[route.method] && (right.read !== false)) return false;
-        if (right.write !== false) return false;
+        if (_isReadOnlyMethod[route.method] && (right.read !== false)) return true;
+        if (right.write !== false) return true;
       }
     }
     router.warnEvent(1, () => [
@@ -65,7 +65,7 @@ export function verifySessionAuthorization (
     ]);
     scope.reply.code(403);
     scope.reply.send("Forbidden");
-    return true;
+    return false;
   } catch (error) {
     throw router.wrapErrorEvent(error, 1, new Error("verifySessionAuthorization"),
         "\n\taccessRoots:", ...dumpObject(accessRoots));
@@ -73,26 +73,23 @@ export function verifySessionAuthorization (
 }
 
 export function resolveScopeIdentityRoles (router, route, scope) {
-  if (scope.identityRoles !== undefined) return scope.identityRoles;
   if (!scope.sessionPayload) {
-    const sessionCookie = scope.request.cookies[router.getIdentity().getSessionCookieName()];
+    const name = router.getIdentity().getSessionCookieName();
+    const sessionCookie = scope.request.cookies[name];
     if (sessionCookie) scope.sessionPayload = extractSessionPayload(router, sessionCookie);
   }
   const identityChronicle = (scope.sessionPayload || {}).identityChronicle;
   if (!identityChronicle) {
-    scope.identityRoles = { "": true };
-  } else if (fillReplyIfSessionExpired(router, scope.reply, scope.sessionPayload)) {
-    scope.identityRoles = null;
-  } else {
-    scope.identityRoles = router.getIdentityRoles(identityChronicle);
-    const [, authorityURI, identityId] = identityChronicle.match(/^(.*)\?id=(.*)$/) || [];
-    if (authorityURI) {
-      scope.sessionIdentity = vRef(identityId, undefined, undefined, identityChronicle)
-          .setAbsent();
-      scope.identityRoles[`${authorityURI}?id=@$~aur.${encodeURIComponent(authorityURI)}@@`] = true;
-    }
+    return { "": true };
   }
-  return scope.identityRoles;
+  const ret = router.getIdentityRoles(identityChronicle);
+  const [, authorityURI, identityId] = identityChronicle.match(/^(.*)\?id=(.*)$/) || [];
+  if (authorityURI) {
+    scope.sessionIdentity = vRef(identityId, undefined, undefined, identityChronicle)
+        .setAbsent();
+    ret[`${authorityURI}?id=@$~aur.${encodeURIComponent(authorityURI)}@@`] = true;
+  }
+  return ret;
 }
 
 export function extractAuthorizationGrantContent (router, identity, authorizationGrant) {

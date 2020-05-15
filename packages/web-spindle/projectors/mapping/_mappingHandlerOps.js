@@ -34,20 +34,20 @@ export function _createToMapping (router: PrefixRouter, route: Route, runtime) {
 
 export function _presolveMappingRouteRequest (
     router: PrefixRouter, runtime, valkOptions) {
-  if (_presolveResourceRouteRequest(router, runtime, valkOptions)) {
-    return true;
+  if (!_presolveResourceRouteRequest(router, runtime, valkOptions)) {
+    return false;
   }
   const scope = valkOptions.scope;
   if (scope.mappingName === undefined) throw new Error("mappingName missing from scope");
-  if (scope.target && _verifyResourceAuthorization(router,
+  if (scope.target && !_verifyResourceAuthorization(router,
       { method: "GET", category: "mapping", url: runtime.route.url },
       scope, scope.target, "route target resource")) {
-    return true;
+    return false;
   }
   scope.source = scope.resource.get(runtime.toMappingSource, Object.create(valkOptions));
   if (!scope.source) throw new Error("Could not resolve mapping source from resource");
   if (runtime.toMapping) {
     scope.mapping = scope.source.get(runtime.toMapping, Object.create(valkOptions));
   }
-  return false;
+  return true;
 }

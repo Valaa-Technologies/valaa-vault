@@ -28,7 +28,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         "\n\trequest.cookies:", ...dumpObject(Object.keys(request.cookies || {})),
       ]);
       const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
-      if (_presolveResourceRouteRequest(router, this.runtime, valkOptions)) {
+      if (!_presolveResourceRouteRequest(router, this.runtime, valkOptions)) {
         return true;
       }
       const scope = valkOptions.scope;

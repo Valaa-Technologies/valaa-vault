@@ -9,8 +9,8 @@ import { dumpObject } from "~/tools";
 export function _presolveRouteRequest (router, runtime, valkOptions, route = runtime.route) {
   const scope = valkOptions.scope;
   if ((valkOptions.scope.request !== null) // if there is no request, this is a preload request
-      && _verifyResourceAuthorization(router, route, scope, scope.routeRoot, "route root")) {
-    return true;
+      && !_verifyResourceAuthorization(router, route, scope, scope.routeRoot, "route root")) {
+    return false;
   }
   if (router.presolveRulesToScope(runtime, valkOptions)) {
     router.warnEvent(1, () => [
@@ -20,9 +20,9 @@ export function _presolveRouteRequest (router, runtime, valkOptions, route = run
       "\n\trequest.cookies:", ...dumpObject(Object.keys(scope.request.cookies || {})),
       "\n\trequest.body:", ...dumpObject(scope.request.body),
     ]);
-    return true;
+    return false;
   }
-  return false;
+  return true;
 }
 
 export function _verifyResourceAuthorization (router, route, scope, resource, resourceName) {

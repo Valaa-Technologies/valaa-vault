@@ -30,10 +30,10 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       ]);
       const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       const scope = valkOptions.scope;
-      if (_presolveMappingRouteRequest(router, this.runtime, valkOptions)) {
+      if (!_presolveMappingRouteRequest(router, this.runtime, valkOptions)) {
         return true;
       }
-      router.infoEvent(2, () => [`${this.name}:`,
+      router.infoEvent(1, () => [`${this.name}:`,
         "\n\trequest.body:", ...dumpObject(request.body),
         "\n\tresolvers:", ...dumpObject(this.runtime.ruleResolvers),
         "\n\tresource:", ...dumpObject(scope.resource),

@@ -23,7 +23,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
     async preload () {
       await router.preloadRuntimeResources(this, this.runtime);
       const preloadOptions = router.buildRuntimeVALKOptions(this, this.runtime, null, null);
-      if (_presolveRouteRequest(router, this.runtime, preloadOptions)) return;
+      if (!_presolveRouteRequest(router, this.runtime, preloadOptions)) return;
       // if runtime rules fail just skip preload
       let activations = [];
       this.runtime.subscription = preloadOptions.scope.routeRoot
@@ -53,7 +53,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       ]);
       const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
       const scope = valkOptions.scope;
-      if (_presolveRouteRequest(router, this.runtime, valkOptions)) {
+      if (!_presolveRouteRequest(router, this.runtime, valkOptions)) {
         return true;
       }
 

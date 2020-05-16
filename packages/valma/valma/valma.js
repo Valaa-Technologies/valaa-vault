@@ -52,7 +52,7 @@ const npmCheck = ">=5.0.0";
 
 const defaultPaths = {
   "pool-base": path.posix.resolve("."),
-  "pool-directories": ["valma.bin/", "node_modules/.bin/"],
+  "pool-subfolders": ["valma.bin/", "node_modules/.bin/"],
   "global-pool": process.env.VLM_GLOBAL_POOL || (shell.which("vlm") || "").slice(0, -3),
 };
 
@@ -795,9 +795,9 @@ module.exports = {
           type: "string", default: defaultPaths["pool-base"], global: false,
           description: "Initial pool base path for gathering pools through all parent paths.",
         },
-        "pool-directories": {
+        "pool-subfolders": {
           group: "Valma environment options:", array: true,
-          type: "string", default: defaultPaths["pool-directories"], global: false,
+          type: "string", default: defaultPaths["pool-subfolders"], global: false,
           description: "Pool directories are appended to current pool base to locate pools",
         },
         "global-pool": {
@@ -1609,40 +1609,59 @@ function _refreshAvailablePools () {
   }
   this._availablePools.push(...this._locateDependedPools(
       _poolBase,
-      _vlm.vargv["pool-directories"],
+      _vlm.vargv["pool-subfolders"],
       _poolBase === path.posix.resolve(".") ? "." : _poolBase));
   this._availablePools.push({ name: "global", path: _vlm.vargv["global-pool"] });
 }
 
-function _locateDependedPools (initialPoolBase, poolDirectories, relativePoolBase) {
-  // TODO(iridian): eventually make less singletony to allow for different sub-invokation
-  // current working diretory execution contexts (now fixed in the initial cwd)
+function _locateDependedPools (initialPoolBase, poolFolders, relativePoolBase) {
+  // TODO(iridian): eventually make this function less singleton-y to
+  // allow for different sub-invokations from different directories.
+  // Now the pools are searched fixed to the pools available in the
+  // initial current working directory (cwd).
   let pathBase = initialPoolBase, relativePathBase = relativePoolBase;
   const ret = [];
+  let poolsMissingNodeModules = !_vlm.vargv["bypass-validations"] && [];
   while (pathBase) {
-    poolDirectories.forEach(candidate => {
-      const poolPath = this.path.join(pathBase, candidate);
+    poolFolders.forEach(candidateFolderName => {
+      const poolPath = this.path.join(pathBase, candidateFolderName);
+      const dirName = pathBase.match(/([^/]*)\/?$/)[1];
+      const name = this.path.join(relativePathBase, "..", dirName);
+      const modulePackageJSONPath = candidateFolderName.startsWith("node_modules")
+          && this.path.join(pathBase, "package.json");
       if (shell.test("-d", poolPath)) {
-        const dirName = pathBase.match(/([^/]*)\/?$/)[1];
-        ret.push({
-          name: this.path.join(relativePathBase, "..", dirName), // `${dirName}/${candidate}`,
-          path: poolPath,
-        });
-        return;
-      }
-      const packageJsonPath = this.path.join(pathBase, "package.json");
-      if (!_vlm.vargv["bypass-validations"]
-          && candidate.match(/^node_modules/)
-          && shell.test("-f", packageJsonPath)) {
-        this.warn(`node_modules missing for ${packageJsonPath}!`,
-            "\n\tSome dependent commands will likely be missing.",
-            `Run '${this.theme.executable("yarn install")
-                }' to make dependent commands available.\n`);
+        const pool = { name, path: poolPath };
+        if (modulePackageJSONPath) {
+          try {
+            pool.packageConfig = require(modulePackageJSONPath);
+          } catch (error) {
+            throw wrapError(
+                new Error(`Could not load package.json for node_modules pool ${name}!`),
+                new Error(`_locateDependedPools("${initialPoolBase}")`),
+                "\n\tPool commands not loaded. Some dependent commands will likely be missing.",
+                "\n\tThis is irregular, node_modules should not be present without package.json.",
+                "\n\tload error:", ...dumpObject(error));
+          }
+          if (poolsMissingNodeModules
+              && ((pool.packageConfig.valos || {}).type === "vault")) {
+            poolsMissingNodeModules = [];
+          }
+        }
+        ret.push(pool);
+      } else if (poolsMissingNodeModules
+            && modulePackageJSONPath && shell.test("-f", modulePackageJSONPath)) {
+        poolsMissingNodeModules.push(name);
       }
     });
     if (pathBase === "/") break;
     pathBase = this.path.join(pathBase, "..");
     relativePathBase = this.path.join(relativePathBase, "..");
+  }
+  if ((poolsMissingNodeModules || []).length) {
+    this.warn(`Module pools are missing node_modules:`, poolsMissingNodeModules,
+        "\n\tSome dependent commands will likely be missing.",
+        `Run '${this.theme.executable("yarn install")
+            }' to make dependent commands available.\n`);
   }
   return ret;
 }

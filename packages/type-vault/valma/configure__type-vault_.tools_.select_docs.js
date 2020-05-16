@@ -33,8 +33,8 @@ exports.handler = (yargv) => {
   return {
     command: exports.command,
     devDependencies: {
-      "@cyclonedx/bom": true,
-      "xml-js": true,
+      "@cyclonedx/bom": "latest",
+      "xml-js": "latest",
       "@valos/vdoc": kernelVersionTag,
       "@valos/revdoc": kernelVersionTag,
       "@valos/sbomdoc": kernelVersionTag,

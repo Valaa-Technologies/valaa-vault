@@ -65,6 +65,7 @@ exports.handler = async (yargv) => {
   }
   const selectionResult = await vlm.configureToolSelection(yargv, toolsetConfig);
 
+  // TODO(iridian, 2020-05): This should probably be its own tool.
   const hadGit = vlm.shell.test("-d", ".git");
   if (!hadGit && await vlm.inquireConfirm("Initialize git repository?")) {
     await vlm.interact("git init");
@@ -98,5 +99,12 @@ exports.handler = async (yargv) => {
           config.version.split(".").slice(0, 2).join(".")}`);
     }
   }
-  return { command: exports.command, ...selectionResult };
+  return {
+    command: exports.command,
+    ...selectionResult,
+    devDependencies: {
+      ...(selectionResult.devDependencies || {}),
+      "@valos/kernel": vlm.domainVersionTag("@valos/kernel"),
+    },
+  };
 };

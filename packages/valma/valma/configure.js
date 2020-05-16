@@ -78,39 +78,15 @@ exports.handler = async (yargv) => {
 };
 
 exports.updateResultSideEffects = updateResultSideEffects;
-exports.yarnAddNewDevDependencies = yarnAddNewDevDependencies;
 
 async function updateResultSideEffects (vlm, ...results) {
   const resultBreakdown = {};
 
   const devDependencies = Object.assign({}, ...results.map(r => (r || {}).devDependencies || {}));
-  const newDevDependencies = await yarnAddNewDevDependencies(vlm, devDependencies);
+  const newDevDependencies = await vlm.addNewDevDependencies(devDependencies);
   if (newDevDependencies) resultBreakdown.newDevDependencies = newDevDependencies;
 
   results.forEach(r => (r || {}).toolsetsUpdate && vlm.updateToolsetsConfig(r.toolsetsUpdate));
   resultBreakdown.success = results.reduce((a, r) => a && ((r || {}).success !== false), true);
   return resultBreakdown;
-}
-
-async function yarnAddNewDevDependencies (
-    vlm, candidateDevDependencies, defaultTags = vlm.defaultTags) {
-  const { valos, dependencies, devDependencies } = vlm.packageConfig;
-  const newDevDependencies = Object.entries(candidateDevDependencies)
-      .filter(([name, newVersion]) => {
-        if (!newVersion) return false;
-        const currentVersion = (dependencies || {})[name] || (devDependencies || {})[name];
-        if (!currentVersion) return true;
-        if (newVersion === true) return false;
-        return newVersion !== currentVersion;
-      })
-      .map(([name, newVersion]) => {
-        const tag = (newVersion !== true) ? newVersion
-            : (Object.entries(defaultTags || {}).find(([namePrefix]) => name.startsWith(namePrefix))
-                || [null, ""])[1];
-        return !tag ? name : `${name}@${tag}`;
-      });
-  if (!newDevDependencies.length) return undefined;
-  await vlm.interact([`yarn add --dev${valos.type === "vault" ? [" -W"] : ""}`,
-      ...newDevDependencies]);
-  return newDevDependencies;
 }

@@ -160,6 +160,9 @@ const _vlm = {
   configureToolSelection,
   domainVersionTag,
 
+  defaultTags: {},
+  addNewDevDependencies,
+
   // Returns a list of available sub-command names which match the given command glob.
   listMatchingCommands,
   listAllMatchingCommands,
@@ -2470,11 +2473,68 @@ function createStandardToolsetOption (description) {
 }
 
 function domainVersionTag (domain) {
-  const packageJSON = require(`${domain}/package.json`);
-  const [, prerelease] = packageJSON.version.match(/[0-9]*\.[0-9]*\.[0-9]*(-prerelease)?/);
-  if (prerelease) return "prerelease";
-  return true; // means 'any'.
+  const packageJSON = require(`${domain}/package`);
+  const [, prerelease] = packageJSON.version.match(/[0-9]*\.[0-9]*\.[0-9]*(-prerelease|-rc)?/);
+  return prerelease
+      ? `>=${packageJSON.version}`
+      : `^{packageJSON.version}`;
 }
+
+
+/**
+ * Adds new dev dependencies to current workspace.
+ *
+ * Takes an object with package names as keys and either an explicit
+ * version string or 'true' (accepting any version) as value.
+ *
+ * If a package matching requested version already exists in either
+ * normal or dev dependency section no further action is made.
+ *
+ * If no existing package was found and the requested version is 'true'
+ * then the prefix map this.defaultTags is searched for an entry with
+ * the longest key that prefix matches the package name. The value of
+ * the entry is then used as the version tag in place of 'true'.
+ *
+ * @param {*} candidateDevDependencies
+ * @param {*} [defaultTags=this.defaultTags]
+ * @returns
+ */
+function addNewDevDependencies (candidateDevDependencies, defaultTags = this.defaultTags) {
+  const { valos, dependencies, devDependencies } = this.packageConfig;
+  let candidates = candidateDevDependencies;
+  if (typeof candidates === "string") candidates = candidates.split(" ");
+  if (Array.isArray(candidates)) {
+    candidates = candidates.reduce((a, e) => {
+      const [, name,, version] = e.match(/^(@?[^@]+)(@([^@]+))?$/);
+      a[name] = version || true;
+      return a;
+    }, {});
+  }
+  const newDevDependencies = Object.entries(candidateDevDependencies)
+      .filter(([name, newVersion]) => {
+        if (!newVersion) return false;
+        const currentVersion = (dependencies || {})[name] || (devDependencies || {})[name];
+        if (!currentVersion) return true;
+        if (newVersion === true) return false;
+        return newVersion !== currentVersion;
+      })
+      .map(([name, newVersion]) => {
+        let finalTag = newVersion;
+        if (newVersion === true) {
+          const longestPrefixMatch = Object.entries(defaultTags || {})
+              .filter(([prefixCandidate]) => name.startsWith(prefixCandidate))
+              .sort((a, b) => (b[0].length - a[0].length))[0];
+          finalTag = longestPrefixMatch ? longestPrefixMatch[1] : "";
+        }
+        return !finalTag ? name : `${name}@${finalTag}`;
+      });
+  if (!newDevDependencies.length) return undefined;
+  return thenChainEagerly(
+      this.interact(
+          [`yarn add --dev${valos.type === "vault" ? [" -W"] : ""}`, ...newDevDependencies]),
+      () => newDevDependencies);
+}
+
 
 function __deepFreeze (object) {
   if (typeof object !== "object" || !object) return;

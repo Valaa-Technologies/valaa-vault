@@ -228,7 +228,7 @@ available for the listings in following phases.
         vlm.info(`No devDependencies provided, skipping domain registration phase`);
       } else {
         try {
-          await vlm.interact(["yarn add -W --dev", answer.devDependencies]);
+          await vlm.addNewDevDependencies(answer.devDependencies.split);
         } catch (error) {
           vlm.speak();
           vlm.exception(error, vlm.theme.executable(yarnAdd, answer.devDependencies));

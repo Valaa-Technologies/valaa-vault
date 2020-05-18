@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.16](https://github.com/valaatech/kernel/compare/v0.35.0-rc.15...v0.35.0-rc.16) (2020-05-18)
+
+
+### Bug Fixes
+
+* **type-vault:** invalid tags with vlm configure --default-tags ([be23103](https://github.com/valaatech/kernel/commit/be23103822c792d59e79af4acf63bf3e7a7d2787))
+
+
+
+
+
 # [0.35.0-rc.15](https://github.com/valaatech/kernel/compare/v0.35.0-rc.14...v0.35.0-rc.15) (2020-04-28)
 
 **Note:** Version bump only for package @valos/type-vault

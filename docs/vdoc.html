@@ -7,7 +7,7 @@
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"subtitle":"0.35.0-rc.15","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"shortName":"vdoc","alternateFormats":[{"label":"VDoc","uri":"vdoc.jsonld"}]};
+      var respecConfig = {"subtitle":"0.35.0-rc.16","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"shortName":"vdoc","alternateFormats":[{"label":"VDoc","uri":"vdoc.jsonld"}]};
     </script>
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
@@ -634,7 +634,7 @@ of native source graph extractors.</span>
     } : {});
   }</td></tr>
         <tr class=" vdoc-nth-child-2n"><td>context</td><td>function context(newContextPath, contextBase) {
-    return _objectSpread({}, module.exports.cpath(newContextPath, contextBase), {
+    return _objectSpread(_objectSpread({}, module.exports.cpath(newContextPath, contextBase)), {}, {
       "@type": "vdoc:ContextBase"
     });
   }</td></tr>

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.16](https://github.com/valaatech/kernel/compare/v0.35.0-rc.15...v0.35.0-rc.16) (2020-05-18)
+
+
+### Features
+
+* Add web-spindle template project to type-worker ([8980747](https://github.com/valaatech/kernel/commit/8980747a6e3c9b767ee76023162a2c22b0028c14))
+
+
+
+
+
 # [0.35.0-rc.15](https://github.com/valaatech/kernel/compare/v0.35.0-rc.14...v0.35.0-rc.15) (2020-04-28)
 
 **Note:** Version bump only for package @valos/type-worker

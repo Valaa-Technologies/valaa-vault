@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.16](https://github.com/valaatech/kernel/compare/v0.35.0-rc.15...v0.35.0-rc.16) (2020-05-18)
+
+
+### Features
+
+* Add session auto refresh with route rule autoRefreshSession ([ef78f8f](https://github.com/valaatech/kernel/commit/ef78f8f584366bb5b76dadff8ffa557742062b4f))
+
+
+
+
+
 # [0.35.0-rc.15](https://github.com/valaatech/kernel/compare/v0.35.0-rc.14...v0.35.0-rc.15) (2020-04-28)
 
 

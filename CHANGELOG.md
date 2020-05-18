@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.16](https://github.com/valaatech/kernel/compare/v0.35.0-rc.15...v0.35.0-rc.16) (2020-05-18)
+
+
+### Bug Fixes
+
+* **kernel:** install missing webpack.config.js ([e5ed5c9](https://github.com/valaatech/kernel/commit/e5ed5c910ac416cd38ce2440367100dcfdc4bccf))
+* **type-vault:** invalid tags with vlm configure --default-tags ([be23103](https://github.com/valaatech/kernel/commit/be23103822c792d59e79af4acf63bf3e7a7d2787))
+* **valma:** Suppress missing node_modules warnings ([409614c](https://github.com/valaatech/kernel/commit/409614cac627510058f99b8bd7a87d160d838494))
+* web-api rule disjoin to null-type, getSession restructure ([563f649](https://github.com/valaatech/kernel/commit/563f6496082ca2b70627ba5fc9770f080d53a202))
+
+
+### Features
+
+* Add session auto refresh with route rule autoRefreshSession ([ef78f8f](https://github.com/valaatech/kernel/commit/ef78f8f584366bb5b76dadff8ffa557742062b4f))
+* Add web-spindle template project to type-worker ([8980747](https://github.com/valaatech/kernel/commit/8980747a6e3c9b767ee76023162a2c22b0028c14))
+
+
+
+
+
 # [0.35.0-rc.15](https://github.com/valaatech/kernel/compare/v0.35.0-rc.14...v0.35.0-rc.15) (2020-04-28)
 
 

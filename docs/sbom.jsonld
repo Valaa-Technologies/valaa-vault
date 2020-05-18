@@ -37,7 +37,7 @@
         "@type": "@id"
       }
     },
-    "dc:title": "@valos/kernel-vault@0.35.0-rc.14 Software Bill of Materials",
+    "dc:title": "@valos/kernel-vault@0.35.0-rc.15 Software Bill of Materials",
     "respecConfig": {
       "specStatus": "unofficial",
       "editors": [
@@ -89,7 +89,7 @@
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
             "This document was automatically generated on ",
-            "2020-04-28T20:42:03.187Z",
+            "2020-05-18T14:03:26.614Z",
             "."
           ]
         },
@@ -373,10 +373,10 @@
       {
         "type": "library",
         "name": "spdx-expression-parse",
-        "version": "3.0.0",
+        "version": "3.0.1",
         "description": "parse SPDX license expressions",
         "licenses": "MIT",
-        "purl": "pkg:npm/spdx-expression-parse@3.0.0",
+        "purl": "pkg:npm/spdx-expression-parse@3.0.1",
         "modified": false
       },
       {
@@ -510,40 +510,40 @@
         "type": "library",
         "group": "valos",
         "name": "inspire",
-        "version": "0.35.0-rc.15",
+        "version": "0.35.0-rc.16",
         "description": "ValOS Inspire application gateway",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/inspire@0.35.0-rc.15",
+        "purl": "pkg:npm/%40valos/inspire@0.35.0-rc.16",
         "modified": false
       },
       {
         "type": "library",
         "group": "valos",
         "name": "kernel",
-        "version": "0.35.0-rc.15",
+        "version": "0.35.0-rc.16",
         "description": "@valos/kernel domain",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/kernel@0.35.0-rc.15",
+        "purl": "pkg:npm/%40valos/kernel@0.35.0-rc.16",
         "modified": false
       },
       {
         "type": "library",
         "group": "valos",
         "name": "toolset-revealer",
-        "version": "0.35.0-rc.15",
+        "version": "0.35.0-rc.16",
         "description": "Tools for building revelations both for development and deployment purposes",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/toolset-revealer@0.35.0-rc.15",
+        "purl": "pkg:npm/%40valos/toolset-revealer@0.35.0-rc.16",
         "modified": false
       },
       {
         "type": "library",
         "group": "valos",
         "name": "type-vault",
-        "version": "0.35.0-rc.15",
+        "version": "0.35.0-rc.16",
         "description": "The ValOS 'vault' workspace type toolset",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/type-vault@0.35.0-rc.15",
+        "purl": "pkg:npm/%40valos/type-vault@0.35.0-rc.16",
         "modified": false
       },
       {
@@ -567,10 +567,10 @@
       {
         "type": "library",
         "name": "valma",
-        "version": "0.35.0-rc.15",
+        "version": "0.35.0-rc.16",
         "description": "A ValOS CLI tool for discovering and executing context-dependent command scripts",
         "licenses": "MIT",
-        "purl": "pkg:npm/valma@0.35.0-rc.15",
+        "purl": "pkg:npm/valma@0.35.0-rc.16",
         "modified": false
       },
       {
@@ -607,6 +607,15 @@
         "description": "Reactive Extensions for modern JavaScript",
         "licenses": "Apache-2.0",
         "purl": "pkg:npm/rxjs@5.5.12",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "name": "string-width",
+        "version": "2.1.1",
+        "description": "Get the visual width of a string - the number of columns required to display it",
+        "licenses": "MIT",
+        "purl": "pkg:npm/string-width@2.1.1",
         "modified": false
       },
       {
@@ -760,24 +769,6 @@
         "description": "Check if a path exists",
         "licenses": "MIT",
         "purl": "pkg:npm/path-exists@4.0.0",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "name": "get-caller-file",
-        "version": "2.0.5",
-        "description": "[![Build Status](https://travis-ci.org/stefanpenner/get-caller-file.svg?branch=master)](https://travis-ci.org/stefanpenner/get-caller-file) [![Build status](https://ci.appveyor.com/api/projects/status/ol2q94g1932cy14a/branch/master?svg=true)](https://ci.appveyor.com/project/embercli/get-caller-file/branch/master)",
-        "licenses": "ISC",
-        "purl": "pkg:npm/get-caller-file@2.0.5",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "name": "require-main-filename",
-        "version": "2.0.0",
-        "description": "shim for require.main.filename() that works in as many environments as possible",
-        "licenses": "ISC",
-        "purl": "pkg:npm/require-main-filename@2.0.0",
         "modified": false
       },
       {

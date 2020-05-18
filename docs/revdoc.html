@@ -7,7 +7,7 @@
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"subtitle":"0.35.0-rc.15","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"shortName":"revdoc","alternateFormats":[{"label":"VDoc","uri":"revdoc.jsonld"}]};
+      var respecConfig = {"subtitle":"0.35.0-rc.16","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"shortName":"revdoc","alternateFormats":[{"label":"VDoc","uri":"revdoc.jsonld"}]};
     </script>
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
@@ -186,19 +186,19 @@ primitives and specifies a ReSpec html emission transformation.</span>
   }</td></tr>
         <tr class=" vdoc-nth-child-2n"><td>abnf</td><td>function abnf(text) {
     // Add validation and maybe restructuring?
-    return _objectSpread({}, c("https://tools.ietf.org/html/rfc5234", text), {
+    return _objectSpread(_objectSpread({}, c("https://tools.ietf.org/html/rfc5234", text)), {}, {
       "@type": "revdoc:ABNF"
     });
   }</td></tr>
         <tr><td>jsonld</td><td>function jsonld(text) {
     // Add validation and maybe restructuring?
-    return _objectSpread({}, c("https://www.w3.org/TR/json-ld11/", text), {
+    return _objectSpread(_objectSpread({}, c("https://www.w3.org/TR/json-ld11/", text)), {}, {
       "@type": "revdoc:JSONLD"
     });
   }</td></tr>
         <tr class=" vdoc-nth-child-2n"><td>turtle</td><td>function turtle(text) {
     // Add validation and maybe restructuring?
-    return _objectSpread({}, c("https://www.w3.org/TR/turtle/", text), {
+    return _objectSpread(_objectSpread({}, c("https://www.w3.org/TR/turtle/", text)), {}, {
       "@type": "revdoc:Turtle"
     });
   }</td></tr>
@@ -235,12 +235,12 @@ primitives and specifies a ReSpec html emission transformation.</span>
       rest[_key3 - 1] = arguments[_key3];
     }
 
-    return _objectSpread({}, ref.apply(void 0, [em(packageName), packageName].concat(rest)), {
+    return _objectSpread(_objectSpread({}, ref.apply(void 0, [em(packageName), packageName].concat(rest))), {}, {
       "@type": "revdoc:Package"
     });
   }</td></tr>
         <tr class=" vdoc-nth-child-2n"><td>command</td><td>function command(commandName) {
-    return _objectSpread({}, cpath(commandName), {
+    return _objectSpread(_objectSpread({}, cpath(commandName)), {}, {
       "@type": "revdoc:Command"
     });
   }</td></tr>

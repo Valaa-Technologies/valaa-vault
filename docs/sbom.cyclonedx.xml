@@ -339,7 +339,7 @@
         </component>
         <component type="library">
             <name>spdx-expression-parse</name>
-            <version>3.0.0</version>
+            <version>3.0.1</version>
             <description>
                 <![CDATA[parse SPDX license expressions]]>
             </description>
@@ -348,7 +348,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/spdx-expression-parse@3.0.0</purl>
+            <purl>pkg:npm/spdx-expression-parse@3.0.1</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -551,7 +551,7 @@
         <component type="library">
             <group>valos</group>
             <name>inspire</name>
-            <version>0.35.0-rc.15</version>
+            <version>0.35.0-rc.16</version>
             <description>
                 <![CDATA[ValOS Inspire application gateway]]>
             </description>
@@ -560,13 +560,13 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/inspire@0.35.0-rc.15</purl>
+            <purl>pkg:npm/%40valos/inspire@0.35.0-rc.16</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <group>valos</group>
             <name>kernel</name>
-            <version>0.35.0-rc.15</version>
+            <version>0.35.0-rc.16</version>
             <description>
                 <![CDATA[@valos/kernel domain]]>
             </description>
@@ -575,13 +575,13 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/kernel@0.35.0-rc.15</purl>
+            <purl>pkg:npm/%40valos/kernel@0.35.0-rc.16</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <group>valos</group>
             <name>toolset-revealer</name>
-            <version>0.35.0-rc.15</version>
+            <version>0.35.0-rc.16</version>
             <description>
                 <![CDATA[Tools for building revelations both for development and deployment purposes]]>
             </description>
@@ -590,13 +590,13 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/toolset-revealer@0.35.0-rc.15</purl>
+            <purl>pkg:npm/%40valos/toolset-revealer@0.35.0-rc.16</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <group>valos</group>
             <name>type-vault</name>
-            <version>0.35.0-rc.15</version>
+            <version>0.35.0-rc.16</version>
             <description>
                 <![CDATA[The ValOS 'vault' workspace type toolset]]>
             </description>
@@ -605,7 +605,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/type-vault@0.35.0-rc.15</purl>
+            <purl>pkg:npm/%40valos/type-vault@0.35.0-rc.16</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -638,7 +638,7 @@
         </component>
         <component type="library">
             <name>valma</name>
-            <version>0.35.0-rc.15</version>
+            <version>0.35.0-rc.16</version>
             <description>
                 <![CDATA[A ValOS CLI tool for discovering and executing context-dependent command scripts]]>
             </description>
@@ -647,7 +647,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/valma@0.35.0-rc.15</purl>
+            <purl>pkg:npm/valma@0.35.0-rc.16</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -704,6 +704,20 @@
                 </license>
             </licenses>
             <purl>pkg:npm/rxjs@5.5.12</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>string-width</name>
+            <version>2.1.1</version>
+            <description>
+                <![CDATA[Get the visual width of a string - the number of columns required to display it]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/string-width@2.1.1</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -942,34 +956,6 @@
                 </license>
             </licenses>
             <purl>pkg:npm/path-exists@4.0.0</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>get-caller-file</name>
-            <version>2.0.5</version>
-            <description>
-                <![CDATA[[![Build Status](https://travis-ci.org/stefanpenner/get-caller-file.svg?branch=master)](https://travis-ci.org/stefanpenner/get-caller-file) [![Build status](https://ci.appveyor.com/api/projects/status/ol2q94g1932cy14a/branch/master?svg=true)](https://ci.appveyor.com/project/embercli/get-caller-file/branch/master)]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>ISC</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/get-caller-file@2.0.5</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>require-main-filename</name>
-            <version>2.0.0</version>
-            <description>
-                <![CDATA[shim for require.main.filename() that works in as many environments as possible]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>ISC</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/require-main-filename@2.0.0</purl>
             <modified>false</modified>
         </component>
         <component type="library">

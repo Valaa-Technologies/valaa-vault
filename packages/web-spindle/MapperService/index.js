@@ -92,10 +92,12 @@ export default class MapperService extends FabricEventTarget {
   start () {
     const wrap = new Error(`start()`);
     try {
+      if (this._listening) return;
+      this._listening = true;
       this.getRootFastify().listen(this._port, this._address || undefined,
           (error) => {
             if (error) throw error;
-            this.infoEvent(1, `listening @`, this.getRootFastify().server.address(),
+            this.infoEvent(0, `listening @`, this.getRootFastify().server.address(),
                 "prepared prefixes:",
                 ...[].concat(...Object.entries(this._prefixRouters).map(
                     ([prefix, { _config: { openapi: { info: { name, title, version } } } }]) =>
@@ -110,6 +112,8 @@ export default class MapperService extends FabricEventTarget {
 
   async stop () {
     try {
+      if (!this._listening) return undefined;
+      this._listening = false;
       return await this.getRootFastify().close();
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, new Error("stop()"),

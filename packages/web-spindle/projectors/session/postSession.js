@@ -4,8 +4,7 @@ import crypto from "crypto";
 
 import type { PrefixRouter, Route } from "~/web-spindle/MapperService";
 import {
-  extractSessionPayload, extractClientToken, assembleSessionEnvelope,
-  fillReplySessionAndClientCookies,
+  extractSessionPayload, extractClientToken, fillReplySessionAndClientCookies,
 } from "~/web-spindle/tools/security";
 
 import { dumpObject } from "~/tools/wrapError";
@@ -67,40 +66,33 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         reply.send("No session found");
         return true;
       }
-      const now = Date.now();
-      const { refreshSessionEnvelope } = this.runtime.ruleResolvers;
+      const nowMS = Date.now();
+      const refreshResolver = this.runtime.ruleResolvers.refreshSessionEnvelope
+          || [_refreshExistingSessionEnvelope.bind(router, nowMS), true];
       let timeStamp, nonce, identityChronicle, clientRedirectPath;
       return thenChainEagerly(scope.routeRoot, [
         function _validateSessionPayload () {
-          const {
-            payload: { iss, sub, iat, exp, ...clientClaimsFields },
-          } = extractClientToken(router, scope.clientCookie);
-          scope.clientClaims = clientClaimsFields;
-          ({
-            timeStamp, nonce, identityChronicle, clientRedirectPath,
-          } = scope.sessionPayload = extractSessionPayload(router, scope.sessionCookie));
-          if ((iat !== timeStamp) || (identityChronicle !== sub)) {
+          const { iat, sub }
+              = scope.clientClaims
+              = extractClientToken(router, scope.clientCookie).payload;
+          ({ timeStamp, nonce, identityChronicle, clientRedirectPath }
+              = scope.sessionPayload
+              = extractSessionPayload(router, scope.sessionCookie));
+          if ((iat !== timeStamp) || (sub !== identityChronicle)) {
             // Either implementation error or security vulnerability.
             router.errorEvent(0, "Inconsistent session and client cookies",
                 iat, sub, timeStamp, identityChronicle);
             reply.code(400);
             throw new Error("Invalid cookies");
           }
-          if (!(now < (Number(timeStamp) + scope.refreshExpirationDelay) * 1000)) {
+          if (!(nowMS < (Number(timeStamp) + scope.refreshExpirationDelay) * 1000)) {
             reply.code(401);
             throw new Error("Session refresh window has expired");
           }
-          const payload = { identityChronicle, claims: clientClaimsFields };
-          router.logEvent(1, () => [
-            `Refreshing session authorization with payload:`, payload,
-          ]);
-          return payload;
         },
-        function _refreshSessionEnvelope (grantPayload) {
-          return refreshSessionEnvelope
-            ? router.resolveToScope(
-                "sessionEnvelope", refreshSessionEnvelope, scope.routeRoot, valkOptions)
-            : (scope.sessionEnvelope = assembleSessionEnvelope(router, grantPayload));
+        function _refreshSessionEnvelope () {
+          return router.resolveToScope(
+              "sessionEnvelope", refreshResolver, scope.routeRoot, valkOptions);
         },
         function _replyWithRefreshedSessionEnvelope (sessionEnvelope) {
           if (!sessionEnvelope) {
@@ -109,9 +101,12 @@ export default function createProjector (router: PrefixRouter, route: Route) {
             throw new Error("Expired");
           } else {
             fillReplySessionAndClientCookies(router, reply, sessionEnvelope, {
-              identity: scope.identity, tokenExpirationDelay: scope.tokenExpirationDelay,
+              identity: scope.identity,
+              tokenExpirationDelay: scope.tokenExpirationDelay,
               clientRedirectPath,
-              now: Math.floor(now / 1000), iv: null, nonce,
+              now: Math.floor(nowMS / 1000),
+              iv: null,
+              nonce,
               refreshRequestCookiesOf: isAutoRefreshSession && request,
             });
             if (!isAutoRefreshSession) {
@@ -124,7 +119,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       ], error => {
         throw router.wrapErrorEvent(error, 1,
           new Error(`refreshSession(${scope.identity.clientURI})`),
-          "\n\tnow:", now,
+          "\n\tnow:", nowMS,
           "\n\ttimeStamp:", timeStamp,
           "\n\tidentityChronicle:", identityChronicle,
           "\n\tclientRedirectPath:", clientRedirectPath,
@@ -132,4 +127,17 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       });
     },
   };
+}
+
+function _refreshExistingSessionEnvelope (now, engine, head, valkOptions) {
+  const { iss, sub, iat, exp, ...clientClaimsFields }
+      = valkOptions.scope.clientClaims;
+  const { timeStamp, nonce, identityChronicle, clientRedirectPath, ...sessionPayloadFields }
+      = valkOptions.scope.sessionPayload;
+  this.logEvent(1, () => [
+    `Refreshing existing session:`,
+    `\n\t\tsessionPayloadFields:`, sessionPayloadFields,
+    `\n\t\tclientClaimsFields:`, clientClaimsFields,
+  ]);
+  return { identityChronicle, sessionPayloadFields, clientClaimsFields };
 }

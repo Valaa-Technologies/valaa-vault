@@ -4,7 +4,7 @@ import crypto from "crypto";
 
 import type { PrefixRouter, Route } from "~/web-spindle/MapperService";
 import {
-  extractAuthorizationGrantContent, assembleSessionEnvelope, fillReplySessionAndClientCookies,
+  extractAuthorizationGrantContent, fillReplySessionAndClientCookies,
 } from "~/web-spindle/tools/security";
 
 import { dumpObject } from "~/tools/wrapError";
@@ -118,5 +118,9 @@ function _assembleSessionEnvelopeFromSimpleGrant (now, engine, head, valkOptions
   this.logEvent(1, () => [
     `Authorizing session with alg '${alg}' payload:`, payload,
   ]);
-  return assembleSessionEnvelope(this, payload);
+  return {
+    identityChronicle: payload.identityChronicle || payload.identityPartition,
+    clientClaimsFields: payload.claims,
+    sessionPayloadFields: {},
+  };
 }

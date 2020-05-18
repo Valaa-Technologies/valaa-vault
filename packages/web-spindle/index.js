@@ -20,9 +20,8 @@ export default valosheath.exportSpindle({
       "restAPISpindle.onGatewayInitialized",
       `Adding routers for prefixes: '${Object.keys(prefixes).join("', '")}'`,
     ]);
-    await Promise.all(Object.entries(prefixes).map(async ([prefix, prefixConfig]) =>
+    return Promise.all(Object.entries(prefixes).map(async ([prefix, prefixConfig]) =>
         this._addPrefixRouter(gateway, prefix, await expose(prefixConfig))));
-    return this._service.start();
   },
 
   getWebService () { return this._service; },
@@ -68,8 +67,10 @@ export default valosheath.exportSpindle({
     }
   },
 
-  onViewAttached (view, viewName) {
+  async onViewAttached (view, viewName) {
+    if (!this._prefixRouters[viewName]) return undefined;
     return this._prefixRouters[viewName]
-        && this._prefixRouters[viewName].projectFromView(view, viewName);
+        .projectFromView(view, viewName)
+        .then(() => this._service.start());
   },
 });

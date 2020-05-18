@@ -103,17 +103,6 @@ export function extractAuthorizationGrantContent (router, identity, authorizatio
   return burlaesgDecode(authorizationGrant, identity.clientSecret.slice(0, 30));
 }
 
-export function assembleSessionEnvelope (router, grantPayload) {
-  const {
-    identityChronicle, identityPartition,
-    claims: { email, preferred_username }, // eslint-disable-line camelcase
-  } = grantPayload;
-  return {
-    identityChronicle: identityChronicle || identityPartition,
-    clientClaimsFields: { email, preferred_username },
-  };
-}
-
 export function fillReplySessionAndClientCookies (router, reply, sessionEnvelope, {
   identity, tokenExpirationDelay, clientRedirectPath, now, iv, nonce, refreshRequestCookiesOf,
 }) {

@@ -290,10 +290,11 @@ function _fillReplyFromMedia (router, vMedia, runtime, valkOptions, reply) {
 }
 
 function _fillReplyFromWebLens (router, vFocus, runtime, valkOptions) {
-  const lens = vFocus.get(["§..", "WEB_LENS"], Object.create(valkOptions));
+  const rootLens = vFocus.get(["§..", "WEB_ROOT_LENS"], Object.create(valkOptions));
+  const lens = rootLens || vFocus.get(["§..", "WEB_LENS"], Object.create(valkOptions));
   if (!lens) {
-    throw new Error(`No lens property 'WEB_LENS' found from response resource type: ${
-      vFocus.getTypeName(valkOptions)}`);
+    throw new Error(`No lens 'WEB_ROOT_LENS' nor 'WEB_LENS' found from response resource: ${
+        vFocus.debugId()}`);
   }
   const scope = valkOptions.scope;
   const name = String(scope.request.raw.url || "").split("?")[0];
@@ -307,11 +308,17 @@ function _fillReplyFromWebLens (router, vFocus, runtime, valkOptions) {
       viewName={name}
       uiScope={scope}
       contextLensProperty={["WEB_LENS", "LENS"]}
-      rootProps={{ focus: vFocus, lensProperty: ["WEB_LENS"] }}
+      rootProps={{ focus: vFocus, lensProperty: [rootLens ? "WEB_ROOT_LENS" : "WEB_LENS"] }}
     />
   );
+  const renderRoot = rootLens
+      ? reactRoot
+      : [
+        <head> <meta charset="utf-8" /> </head>,
+        <body> {reactRoot} </body>
+      ];
   return new Promise(resolve => {
-    ReactDOM.render(reactRoot, resultElement, () => {
+    ReactDOM.render(renderRoot, resultElement, () => {
       setTimeout(
           () => resolve(_fillReplyFromResponse(router, resultElement, runtime, valkOptions)),
           200);

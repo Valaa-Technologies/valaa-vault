@@ -14,7 +14,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
   return {
     requiredRules: [
       "routeRoot",
-      "refreshExpirationDelay", "tokenExpirationDelay",
+      "tokenExpirationDelay",
     ],
     runtimeRules: [
       "refreshSessionEnvelope",
@@ -85,7 +85,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
             reply.code(400);
             throw new Error("Invalid cookies");
           }
-          if (!(nowMS < (Number(timeStamp) + scope.refreshExpirationDelay) * 1000)) {
+          if (!(nowMS < (Number(timeStamp) + scope.tokenExpirationDelay) * 1000)) {
             reply.code(401);
             throw new Error("Session refresh window has expired");
           }

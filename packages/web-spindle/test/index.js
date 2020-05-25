@@ -62,7 +62,6 @@ exports.createConfig = function createConfig (options) {
       sessionPOSTRoute(`/session`, {
         name: "session",
         rules: {
-          refreshExpirationDelay: 86400 * 7,
           tokenExpirationDelay: 86400,
         },
       }, globalRules),

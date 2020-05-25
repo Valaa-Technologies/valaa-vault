@@ -413,8 +413,8 @@ describe("Web API spindle worker", () => {
 
     // first make a failed POST individual attempt with expired refresh delay
     const refreshProjector = _testRouter.getProjectors({ method: "POST", category: "session" })[0];
-    const previousRefreshDelay = refreshProjector.runtime.scopeBase.refreshExpirationDelay;
-    refreshProjector.runtime.scopeBase.refreshExpirationDelay = 0;
+    const previousRefreshDelay = refreshProjector.runtime.scopeBase.tokenExpirationDelay;
+    refreshProjector.runtime.scopeBase.tokenExpirationDelay = 0;
     await expect(fetchJSON("http://127.0.0.1:7357/rest-test/v0/individuals", postIndividualOptions))
         .rejects
         .toThrow();
@@ -422,7 +422,7 @@ describe("Web API spindle worker", () => {
         .toEqual(401);
     expect(await postIndividualOptions.response.text())
         .toEqual("Session refresh window has expired");
-    refreshProjector.runtime.scopeBase.refreshExpirationDelay = previousRefreshDelay;
+    refreshProjector.runtime.scopeBase.tokenExpirationDelay = previousRefreshDelay;
 
    // make successful POST individual including token refresh
     const otherPOST = await fetchJSON(

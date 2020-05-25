@@ -54,7 +54,7 @@ export function sessionGETRoute (url, userConfig, globalRules) {
 export function sessionPOSTRoute (url, userConfig, globalRules) {
   const route = { url, category: "session", method: "POST", config: {
     rules: {
-      refreshExpirationDelay: 7 * 86400,
+      tokenExpirationDelay: 7 * 86400,
       clientCookie: ["@!:request:cookies", ["@!:identity:clientCookieName"]],
       sessionCookie: ["@!:request:cookies", ["@!:identity:sessionCookieName"]],
     },

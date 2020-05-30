@@ -1,17 +1,17 @@
-#!/usr/bin/env vlm
+const { updateConfigureSideEffects } = require("valma");
 
 exports.command = "configure [toolsetGlob]";
 exports.describe = "Configure the current ValOS workspace and its toolsets";
 exports.introduction =
-`Allows grabbing and stowing of available toolsets and their tools and
-then invokes all in-use toolset configure commands.`;
+`Configures type and domain, selects and stows toolsets and their tools
+and then configures them.`;
 
 exports.disabled = (yargs) => !yargs.vlm.getValOSConfig()
     && "No package.json valos stanza found (run 'vlm init')";
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
-    description: "Reconfigure all config of this workspace.",
+    description: "Reconfigure all configurations of this workspace.",
   },
   "default-tags": {
     description: `Custom default package tags lookup (by package prefix) for new packages.`,
@@ -51,7 +51,7 @@ exports.handler = async (yargv) => {
     domain: !yargv.domain ? [] : [await vlm.invoke(`.configure/.domain/${valos.domain}`, rest)],
     type: !yargv.type ? [] : [await vlm.invoke(`.configure/.type/${valos.type}`, rest)],
   };
-  Object.assign(ret, await updateResultSideEffects(vlm, ret.domain[0], ret.type[0]));
+  Object.assign(ret, await updateConfigureSideEffects(vlm, ret.domain[0], ret.type[0]));
   if (ret.success === false) return ret;
 
   if (yargv.domain) {
@@ -60,33 +60,19 @@ exports.handler = async (yargv) => {
   if (yargv.type) {
     ret.type.push(...await vlm.invoke(`.configure/.type/.${valos.type}/**/*`, rest));
   }
-  Object.assign(ret, await updateResultSideEffects(
+  Object.assign(ret, await updateConfigureSideEffects(
       vlm, ...ret.domain.slice(1), ...ret.type.slice(1)));
   if (ret.success === false) return ret;
 
   if (!yargv.toolsetGlob) {
-    ret.selectToolsets = await vlm.invoke(`.configure/.select-toolsets`, rest);
+    ret.selectToolsets = await vlm.invoke(`select-toolsets`, rest);
     if (ret.selectToolsets.success === false) ret.success = false;
   } else {
     ret.toolsetsConfigures = await vlm.invoke(
         `.configure/{.domain/.${valos.domain}/,.type/.${valos.type}/,}.toolset/${
           yargv.toolsetGlob || ""}{*/**/,}*`,
         rest);
-    Object.assign(ret, await updateResultSideEffects(vlm, ...ret.toolsetsConfigures));
+    Object.assign(ret, await updateConfigureSideEffects(vlm, ...ret.toolsetsConfigures));
   }
   return yargv.breakdown || (ret.success === false) ? ret : { success: ret.success };
 };
-
-exports.updateResultSideEffects = updateResultSideEffects;
-
-async function updateResultSideEffects (vlm, ...results) {
-  const resultBreakdown = {};
-
-  const devDependencies = Object.assign({}, ...results.map(r => (r || {}).devDependencies || {}));
-  const newDevDependencies = await vlm.addNewDevDependencies(devDependencies);
-  if (newDevDependencies) resultBreakdown.newDevDependencies = newDevDependencies;
-
-  results.forEach(r => (r || {}).toolsetsUpdate && vlm.updateToolsetsConfig(r.toolsetsUpdate));
-  resultBreakdown.success = results.reduce((a, r) => a && ((r || {}).success !== false), true);
-  return resultBreakdown;
-}

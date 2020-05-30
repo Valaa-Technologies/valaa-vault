@@ -23,7 +23,6 @@ const {
 cardinal.tomorrowNight = require("cardinal/themes/tomorrow-night");
 
 const markdownify = require("../markdownify");
-const { buildSelectorOption, configureToolSelection } = require("./configure/select-toolsets");
 
 const wrapError = wrapErrorModule.wrapError;
 const outputError = wrapErrorModule.outputError;
@@ -154,10 +153,6 @@ const _vlm = {
   confirmToolsetExists,
   updateToolsetConfig,
   updateToolConfig,
-  createConfigureToolsetOptions,
-  createConfigureToolOptions,
-  createStandardToolsetOption,
-  configureToolSelection,
   domainVersionTag,
 
   defaultTags: {},
@@ -1476,7 +1471,6 @@ async function _dispatchCommands (commandSelector, argv, activeCommands, isWildc
             subVLM.echo(`${this.getContextIndexText()}>>* ${subVLM.getContextIndexText()}${
               subVLM.theme.vlmCommand("vlm", commandName, ...argv)}`);
           }
-          await subVLM._fillVargvInteractively();
           if (subVLM.toolset) {
             const requiresPath = ["commands", commandName, "requires"];
             const tool = subVLM.tool;
@@ -1518,6 +1512,7 @@ async function _dispatchCommands (commandSelector, argv, activeCommands, isWildc
           if (this.listMatchingCommands(preCommands).length) {
             await subVLM.invoke(preCommands);
           }
+          await subVLM._fillVargvInteractively();
           ret.push(await module.handler(subVLM.vargv));
           const postCommands = `${detailCommandPrefix}/.post/**/*`;
           if (this.listMatchingCommands(preCommands).length) {
@@ -2285,7 +2280,10 @@ async function _fillVargvInteractively () {
   const questions = [];
   for (const optionName of Object.keys(interactiveOptions)) {
     const option = interactiveOptions[optionName];
-    const question = Object.assign({}, option.interactive);
+    let questionOptions = option.interactive;
+    if (typeof questionOptions === "function") questionOptions = questionOptions();
+    questionOptions = await questionOptions;
+    const question = Object.assign({}, questionOptions);
     question.array = option.array;
     if (question.when !== "always") {
       if ((question.when === "if-undefined") && option.type === "boolean") {
@@ -2302,18 +2300,35 @@ async function _fillVargvInteractively () {
       question.message = option.description;
       if (question.array) question.message += " (comma-separated)";
     }
-    if (!question.choices && option.choices) question.choices = [...option.choices];
+    const choices = question.choicesPromise
+        ? await question.choicesPromise
+        : question.choices || option.choices;
+
+    if (choices) {
+      const maxLen = choices.reduce(
+          (maxLen_, c) => Math.max(maxLen_, String(_choiceName(c)).length),
+          0);
+      question.choices = await Promise.all(choices.map(async c => ((typeof c !== "object") ? c : {
+        ...c,
+        name: !c.description ? c.name : `${c.name.padEnd(maxLen)} - ${await c.description}`,
+        short: c.short || c.value,
+      })));
+    }
     if (option.default !== undefined) {
       if (!["list", "checkbox"].includes(question.type)) {
         question.default = option.default;
       } else {
         const oldChoices = [];
         (Array.isArray(option.default) ? option.default : [option.default]).forEach(default_ => {
-          if (!question.choices || !question.choices.includes(default_)) oldChoices.push(default_);
+          const defaultValue = _choiceValue(default_);
+          if (!question.choices
+              || (question.choices.find(c => _choiceValue(c) === defaultValue) === undefined)) {
+            oldChoices.push(default_);
+          }
         });
         question.choices = oldChoices.concat(question.choices || []);
         if (question.type === "list") {
-          question.default = question.choices.indexOf(option.default);
+          question.default = question.choices.findIndex(e => _choiceValue(e) === option.default);
         } else if (question.type === "checkbox") {
           question.default = option.default;
         }
@@ -2334,13 +2349,21 @@ async function _fillVargvInteractively () {
       if (question.array && (typeof answers[question.name] === "string")) {
         answers[question.name] = !answers[question.name] ? [] : answers[question.name].split(",");
       }
-    } while (question.confirm && !await question.confirm(answers[question.name], answers));
+    } while (question.confirm
+        && !await question.confirm(answers[question.name], answers, question.name));
   }
   // FIXME(iridian): handle de-hyphenations, camelcases etc. all other option variants.
   // Now only updating the verbatim option.
   return Object.assign(this.vargv, answers);
 }
 
+function _choiceValue (c) {
+  return (typeof c === "object") ? c.value : c;
+}
+
+function _choiceName (c) {
+  return (typeof c === "object") ? c.name : c;
+}
 
 function _reloadPackageAndToolsetsConfigs () {
   // TODO(iridian): Implement locally pending config writes. See _flushPendingConfigWrites
@@ -2457,39 +2480,6 @@ function updateToolConfig (toolsetName, toolName, updates) {
         typeof toolsetName}|${typeof toolName}|${typeof updates}`);
   }
   return this.updateToolsetsConfig({ [toolsetName]: { tools: { [toolName]: updates } } });
-}
-
-function createConfigureToolsetOptions (toolsetExports, { toolSelectorName = "tool" } = {}) {
-  return {
-    ...(!toolSelectorName ? {} : {
-      tools: buildSelectorOption(this, toolSelectorName),
-    }),
-    reconfigure: {
-      alias: "r", type: "boolean",
-      description: "Reconfigure all even already configured toolset and tool options.",
-    },
-  };
-}
-
-function createConfigureToolOptions (toolExports) {
-  return {
-    toolset: this.createStandardToolsetOption(`the toolset for which to ${toolExports.brief}`),
-    reconfigure: {
-      alias: "r", type: "boolean",
-      description: "Reconfigure all even already configured tool options.",
-    },
-  };
-}
-
-function createStandardToolsetOption (description) {
-  return {
-    type: "string", default: this.toolset,
-    description,
-    interactive: {
-      type: "input", when: "if-undefined",
-      confirm: value => this.confirmToolsetExists(value),
-    },
-  };
 }
 
 function domainVersionTag (domain) {

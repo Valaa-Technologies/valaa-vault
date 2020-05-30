@@ -3,8 +3,7 @@
   "version": "0.35.0-rc.16",
   "valos": {
     "type": "vault",
-    "domain": "@valos/kernel",
-    "workspacePrefix": "@valos/"
+    "domain": "@valos/kernel"
   },
   "description": "ValOS common infrastructure tools and libraries monorepository.",
   "license": "MIT",

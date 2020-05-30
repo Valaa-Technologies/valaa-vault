@@ -1,17 +1,18 @@
+const { createConfigureToolsetOptions } = require("valma");
+
 exports.vlm = { toolset: "@valos/web-spindle" };
 exports.command = ".configure/.@valos/type-worker/.tools/.select/@valos/web-spindle";
-exports.brief = "select 'web-spindle'";
-exports.describe = "Select the worker toolset 'web-spindle'";
+exports.brief = "select web-spindle";
+exports.describe = "Select web-spindle as worker tool";
 exports.introduction =
-`This spindle extends a perspire worker workspace with REST-style
-configurable and extensible web service.`;
+`Selects web-spindle as a worker tool.`;
 
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "worker")
     && `Workspace is not a worker`;
 exports.builder = (yargs) => {
-  const toolsetConfig = yargs.vlm.getToolsetConfig(yargs.vlm.toolset) || {};
+  const toolsetConfig = yargs.vlm.getToolsetConfig(exports.vlm.toolset) || {};
   return yargs.options({
-    ...yargs.vlm.createConfigureToolsetOptions(exports),
+    ...createConfigureToolsetOptions(yargs.vlm, exports),
     port: {
       type: "string", default: toolsetConfig.port || undefined,
       interactive: { type: "input", when: yargs.vlm.reconfigure ? "always" : "if-undefined" },

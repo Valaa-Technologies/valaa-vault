@@ -7,7 +7,7 @@
 .yalc
 coverage
 dist
-node_modules
+node_modules/
 temp
 yalc.lock
 dev

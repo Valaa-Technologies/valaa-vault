@@ -9,6 +9,6 @@ coverage
 dist
 dev
 env
-node_modules
+node_modules/
 temp
 yalc.lock

@@ -355,7 +355,7 @@ const _vlm = {
   // Echo the valma wildcard matchings, invokations and external executions back to the user.
   // As a diagnostic message outputs to stderr where available.
   echo (...rest) {
-    if (this.theme.echo) {
+    if (_shouldOutputMessage(this, "echo", "echos")) {
       console.warn(" ".repeat((this.taskDepth * 2) - 1), this.theme.echo(...rest));
     }
     return this;
@@ -372,7 +372,7 @@ const _vlm = {
   // 'vlm --help' but would very likely be the cause for a 'cannot find command' error.
   // As a diagnostic message outputs to stderr where available.
   warn (msg, ...rest) {
-    if (this.theme.warning) {
+    if (_shouldOutputMessage(this, "warning", "warnings")) {
       console.warn(this.theme.warning(`${this.getContextName()} warns:`, msg), ...rest);
     }
     return this;
@@ -381,7 +381,7 @@ const _vlm = {
   // but might still complete.
   // As a diagnostic message outputs to stderr where available.
   error (msg, ...rest) {
-    if (this.theme.error) {
+    if (_shouldOutputMessage(this, "error", "errors")) {
       console.error(this.theme.error(`${this.getContextName()} laments:`, msg), ...rest);
     }
     return this;
@@ -418,13 +418,13 @@ const _vlm = {
   // messages need to go to stderr so that they can be separated from payload output and work
   // correctly with piping in general.
   info (msg, ...rest) {
-    if (this.theme.info) {
+    if (_shouldOutputMessage(this, "info", "infos")) {
       console.warn(this.theme.info(`${this.getContextName()} informs:`, msg), ...rest);
     }
     return this;
   },
   clock (context, event, ...messages) {
-    if (this.theme.clock) {
+    if (_shouldOutputMessage(this, "clock", "infos")) { // there is no --clocks
       console.warn(this.theme.clock(`${context} clocks:`, event),
           ...messages.map(msg => ((typeof msg === "string") ? msg : dumpify(msg, { indent: 0 }))));
     }
@@ -453,7 +453,7 @@ const _vlm = {
     delete this.clockPreviousEvents;
   },
   instruct (msg, ...rest) {
-    if (this.theme.instruct) {
+    if (_shouldOutputMessage(this, "instruct", "instructs")) {
       console.warn(this.theme.instruct(`${this.getContextName()} instructs:`, msg), ...rest);
     }
     return this;
@@ -465,7 +465,7 @@ const _vlm = {
   // Babble is for messages which take only couple lines.
   // As diagnostic messages these output to stderr where available.
   babble (msg, ...rest) {
-    if (this.theme.babble) {
+    if (_shouldOutputMessage(this, "babble", "babbles")) {
       console.warn(this.theme.babble(`${this.getContextName()} babbles:`, msg), ...rest);
     }
     return this;
@@ -474,7 +474,7 @@ const _vlm = {
   // Expound messages can be arbitrarily immense.
   // As diagnostic messages these output to stderr where available.
   expound (msg, ...rest) {
-    if (this.theme.expound) {
+    if (_shouldOutputMessage(this, "expound", "expounds")) {
       console.warn(this.theme.expound(`${this.getContextName()} expounds:`, msg), ...rest);
     }
     return this;
@@ -651,6 +651,10 @@ const _renderers = {
 
 const _devMode = false;
 
+function _shouldOutputMessage (vlm, outputType, typeStateName) {
+  return !_vlm.isCompleting && vlm.theme[outputType] && vlm._state[typeStateName];
+}
+
 module.exports = {
   command: "vlm [--help] [-<flagchars>] [--<flag>...] [--<option>=<value>..] [commandSelector]",
   describe: "Dispatch a valma command to its command script",
@@ -700,10 +704,11 @@ module.exports = {
         s: {
           group: "Valma console options:",
           alias: theme.argument("silence"), type: "boolean", global: false,
-          description: "Silence all console output except errors and potential results.",
+          description: "Silence all console output except failures and potential results.",
           causes: [
-            "no-echos", "no-logs", "no-infos", "no-instructs", "no-warnings", "no-babbles",
-            "no-expounds"
+            "no-echos",
+            "no-logs", "no-errors", "no-infos", "no-warnings",
+            "no-instructs", "no-babbles", "no-expounds"
           ],
         },
         echos: {
@@ -715,6 +720,11 @@ module.exports = {
           group: "Valma console options:",
           type: "boolean", global: false, default: true,
           description: "Show log messages",
+        },
+        errors: {
+          group: "Valma console options:",
+          type: "boolean", global: false, default: true,
+          description: "Show error messages",
         },
         infos: {
           group: "Valma console options:",
@@ -928,20 +938,16 @@ module.exports.builder(globalVargs);
 _vlm.vargs = globalVargs;
 _vlm.argv = processArgv;
 _vlm.vargv = _vlm._parseUntilLastPositional(_vlm.argv, module.exports.command);
+_vlm._state = _vlm.vargv;
 
 _vlm.verbosity = _vlm.isCompleting ? 0 : _vlm.vargv.verbose;
 _vlm.interactive = _vlm.isCompleting ? 0 : _vlm.vargv.interactive;
-if (!_vlm.vargv.echos || _vlm.isCompleting) _vlm.echo = function noEcho () { return this; };
-else {
+
+if (_vlm.vargv.echos && !_vlm.isCompleting) {
   nextContextIndex = 0;
   _vlm.contextIndex = nextContextIndex++;
 }
-if (!_vlm.vargv.logs || _vlm.isCompleting) _vlm.log = function noLog () { return this; };
-if (!_vlm.vargv.infos || _vlm.isCompleting) _vlm.info = function noInfo () { return this; };
-if (!_vlm.vargv.instructs || _vlm.isCompleting) _vlm.instruct = function noIns () { return this; };
-if (!_vlm.vargv.warnings || _vlm.isCompleting) _vlm.warn = function noWarning () { return this; };
-if (!_vlm.vargv.babbles || _vlm.isCompleting) _vlm.babble = function noBabble () { return this; };
-if (!_vlm.vargv.expounds || _vlm.isCompleting) _vlm.expound = function noExpou () { return this; };
+
 if (_vlm.vargv.clock) _vlm.initializeClock();
 
 _vlm.ifVerbose(1)
@@ -985,16 +991,16 @@ _vlm._refreshAvailablePools();
 _vlm.ifVerbose(2)
     .expound("available pools:", _vlm._availablePools);
 
-let packageBase = process.cwd();
-while (packageBase && !_vlm.shell.test("-f", _vlm.path.join(packageBase, "package.json"))) {
-  packageBase = (packageBase === "/") ? "" : _vlm.path.join(packageBase, "..");
+let workspacePath = process.cwd();
+while (workspacePath && !_vlm.shell.test("-f", _vlm.path.join(workspacePath, "package.json"))) {
+  workspacePath = (workspacePath === "/") ? "" : _vlm.path.join(workspacePath, "..");
 }
 
-const packageConfigStatus = {
-  path: _vlm.path.join(packageBase || "./", "package.json"), updated: false,
+_vlm._packageConfigStatus = {
+  path: _vlm.path.join(workspacePath || "./", "package.json"), workspacePath, updated: false,
 };
-const toolsetsConfigStatus = {
-  path: _vlm.path.join(packageBase || "./", "toolsets.json"), updated: false,
+_vlm._toolsetsConfigStatus = {
+  path: _vlm.path.join(workspacePath || "./", "toolsets.json"), workspacePath, updated: false,
 };
 
 // Allow --vlm to override any implicit vlm modifications (ie. --vlm.verbosity=100 overrides -v)
@@ -1074,8 +1080,10 @@ function handler (vargv) {
     function _handlerInvoke () {
       return [
         this.invoke(this.vargv.commandSelector, this.vargv._, {
-          suppressOutermostEcho: true, processArgs: false, flushConfigWrites: !_vlm.isCompleting,
-        })
+          suppressOutermostEcho: true,
+          processArgs: false,
+          flushConfigWrites: !_vlm.isCompleting,
+        }),
       ];
     },
     function _handlerFinalize (ret) {
@@ -1128,11 +1136,13 @@ async function execute (args, options = {}) {
     return this.invoke(vargv.commandSelector, vargv._,
         { processArgs: false, flushConfigWrites: true, delegate: options.delegate });
   }
-  const executeVLM = Object.create(this);
-  ++executeVLM.taskDepth;
+  const executionVLM = Object.create(this);
+  ++executionVLM.taskDepth;
   return new Promise((resolve, failure) => {
-    this.echo(`${this.getContextIndexText()}>> ${executeVLM.getContextIndexText()}vlm @`,
-        `${this.theme.executable(...argv)}`);
+    const executorIndexText = this.getContextIndexText();
+    const executionIndexText = executionVLM.getContextIndexText();
+    executionVLM.echo(`${executorIndexText}>> ${executionIndexText}vlm @`,
+        `${executionVLM.theme.executable(...argv)}`);
     let maybeOutput, maybeDiagnostics;
     const _onDone = (error, code, signal) => Promise.resolve(maybeOutput)
         .then(async output => {
@@ -1168,19 +1178,22 @@ async function execute (args, options = {}) {
           if ((typeof diagnostics === "string") && diagnostics) {
             if (result instanceof Error) result.stderr = diagnostics;
             if (options.stderr !== "erroronly") {
-              this.echo(`${this.getContextIndexText()}// ${executeVLM.getContextIndexText()}$`,
-                  `${this.theme.executable(argv[0])}, diagnostics/stderr output (${
+              executionVLM.echo(
+                  `${executorIndexText}// ${executionIndexText}$`,
+                  `${executionVLM.theme.executable(argv[0])}, diagnostics/stderr output (${
                       diagnostics.length} chars):`);
-              const indent = " ".repeat((executeVLM.taskDepth * 2) - 1);
+              const indent = " ".repeat((executionVLM.taskDepth * 2) - 1);
               this.speak(indent, diagnostics.replace(/\n/g, `\n${indent} `));
             }
           }
-          this.echo(`${this.getContextIndexText()}<< ${executeVLM.getContextIndexText()}vlm @`,
-              `${this.theme.executable(argv[0])}:`, this._peekReturnValue(result, 71));
+          executionVLM.echo(
+              `${executorIndexText}<< ${executionIndexText}vlm @`,
+              `${executionVLM.theme.executable(argv[0])}:`,
+              executionVLM._peekReturnValue(result, 71));
           if (result instanceof Error) {
             result.stdout = processedOutput || output;
             throw wrapError(result,
-                new Error(`During vlm.execute(${this.theme.executable(...argv)})`),
+                new Error(`During vlm.execute(${executionVLM.theme.executable(...argv)})`),
                 "\n\toptions:", ...dumpObject(options),
             );
           }
@@ -1189,8 +1202,8 @@ async function execute (args, options = {}) {
         .then(resolve, failure);
 
     if (options.dryRun || ((options.dryRun !== false) && this.vargv && this.vargv["dry-run"])) {
-      executeVLM.echo("dry-run: skipping execution and returning:",
-          executeVLM.theme.blue(options.dryRunResult));
+      executionVLM.echo("dry-run: skipping execution and returning:",
+          executionVLM.theme.blue(options.dryRunResult));
       maybeOutput = options.dryRunResult;
       _onDone(null, 0);
     } else {
@@ -1201,7 +1214,7 @@ async function execute (args, options = {}) {
         detached: false,
         ...options.spawn,
       };
-      executeVLM.ifVerbose(3)
+      executionVLM.ifVerbose(3)
       .babble(`spawning child process "${argv[0]}" with options:`, spawnOptions);
       const finalArgv = !spawnOptions.shell ? argv
           : __processArgs(args, { shellEscapeChar: "'" });
@@ -1250,39 +1263,43 @@ function invoke (commandSelectorArg, args, options = {}) {
   if (!commandSelectorArg) {
     throw new Error(`vlm.invoke: commandSelector missing`);
   }
-  const invokeVLM = Object.create(this);
-  ++invokeVLM.taskDepth;
-  invokeVLM.contextVLM = this;
+  const invokationVLM = Object.create(this);
+  invokationVLM.contextVLM = this;
+  invokationVLM._state = Object.create(this._state);
+  ++invokationVLM.taskDepth;
+  const { processArgs, flushConfigWrites, suppressOutermostEcho, ...flagsOverrides } = options;
+  Object.assign(invokationVLM._state, flagsOverrides);
+
   // Remove everything after space so that exports.command can be given
   // as commandSelector as-is (these often have yargs usage arguments
   // after the command selector itself).
   const commandSelector = commandSelectorArg.split(" ")[0];
-  const argv = (options.processArgs !== false) ? __processArgs(args) : args;
+  const argv = (processArgs !== false) ? __processArgs(args) : args;
   const selectorSingleQuotedIfWildcard = __isWildcardCommand(commandSelector)
       ? `'${commandSelector}'` : commandSelector;
-  if (!options.suppressOutermostEcho) {
-    this.echo(`${this.getContextIndexText()}>> ${invokeVLM.getContextIndexText()}${
-        invokeVLM.theme.vlmCommand("vlm", selectorSingleQuotedIfWildcard, ...argv)}`);
+  const invokerIndexText = this.getContextIndexText();
+  const invokationIndexText = invokationVLM.getContextIndexText();
+  if (!suppressOutermostEcho) {
+    invokationVLM.echo(`${invokerIndexText}>> ${invokationIndexText}${
+        invokationVLM.theme.vlmCommand("vlm", selectorSingleQuotedIfWildcard, ...argv)}`);
   }
-  return thisChainEagerly(invokeVLM, [commandSelector, argv], [
+  return thisChainEagerly(invokationVLM, [commandSelector, argv], [
     _invoke,
     function _echoInvokeResult (ret) {
-      if (!options.suppressOutermostEcho) {
-        this.contextVLM.echo(`${this.contextVLM.getContextIndexText()}<< ${
-              this.getContextIndexText()}${
+      if (!suppressOutermostEcho) {
+        this.echo(`${invokerIndexText}<< ${invokationIndexText}${
               this.theme.vlmCommand("vlm", selectorSingleQuotedIfWildcard)}:`,
             this._peekReturnValue(ret, 71));
       }
-      if (options.flushConfigWrites) {
+      if (flushConfigWrites) {
         this._flushPendingConfigWrites();
         this.contextVLM._reloadPackageAndToolsetsConfigs();
       }
       return thisChainReturn(ret);
     },
   ], function _errorOnInvokeCommand (error) {
-    if (!options.suppressOutermostEcho) {
-      this.contextVLM.echo(`${this.contextVLM.getContextIndexText()}<< ${
-            this.getContextIndexText()}${
+    if (!suppressOutermostEcho) {
+      this.echo(`${invokerIndexText}<< ${invokationIndexText}${
             this.theme.vlmCommand("vlm", selectorSingleQuotedIfWildcard)}:`,
           this.theme.error("exception:", String(error)));
     }
@@ -1370,7 +1387,7 @@ function _invoke (commandSelector_, argv) {
     return [introspection.builtinHelp
         ? this._renderBuiltinHelp(introspection)
         : this._introspectCommands(introspection, activeCommands, commandGlob, isWildcardCommand,
-            contextVargv["enable-disabled"])];
+            this.contextVLM._state["enable-disabled"])];
   }
 
   if (!isWildcardCommand) {
@@ -1411,7 +1428,7 @@ async function _dispatchCommands (commandSelector, argv, activeCommands, isWildc
         continue;
       }
       if (!module) {
-        this.error(`missing symlink target for`, this.theme.command(commandName),
+        subVLM.error(`missing symlink target for`, subVLM.theme.command(commandName),
             "ignoring command script at", activeCommand.linkPath);
         continue;
       }
@@ -1423,8 +1440,8 @@ async function _dispatchCommands (commandSelector, argv, activeCommands, isWildc
         isExact: true, rawArgv: argv,
       });
 
-      this.ifVerbose(3)
-          .babble("parsed:", this.theme.command(commandName, ...argv),
+      subVLM.ifVerbose(3)
+          .babble("parsed:", subVLM.theme.command(commandName, ...argv),
               activeCommand.disabled ? `: disabled, ${activeCommand.disabled}` : ""
       ).ifVerbose(4)
           .expound("\tsubArgv:", JSON.stringify({ ...subVLM.vargv, vlm: "<hidden>" }))
@@ -1433,31 +1450,31 @@ async function _dispatchCommands (commandSelector, argv, activeCommands, isWildc
       if (subIntrospection) {
         ret = ret.concat(subIntrospection.builtinHelp
             ? activeCommand.vlm._renderBuiltinHelp(subIntrospection)
-            : this._introspectCommands(subIntrospection, { [commandName]: activeCommand },
-                commandSelector, isWildcardCommand, subVLM.vargv["enable-disabled"]));
-      } else if (isWildcardCommand && activeCommand.disabled) {
-        this.ifVerbose(1)
-            .info(`Skipping disabled command '${this.theme.command(commandName)}'`,
-                `during wildcard invokation (${activeCommand.disabled})`);
-        continue;
+            : subVLM._introspectCommands(subIntrospection, { [commandName]: activeCommand },
+                commandSelector, isWildcardCommand, subVLM._state["enable-disabled"]));
       } else if (activeCommand.broken) {
-        if (!_vlm.vargv["force-broken"]) {
-          this.warn(`Skipping invokation of broken command '${commandName}':`,
+        if (!_vlm._state["force-broken"]) {
+          subVLM.warn(`Skipping invokation of broken command '${commandName}':`,
               `${activeCommand.broken}`);
         } else {
           throw new Error(`Trying to invoke broken command '${commandName}': ${
               activeCommand.broken}`);
         }
         continue;
+      } else if (isWildcardCommand && activeCommand.disabled) {
+        subVLM.ifVerbose(1)
+            .info(`Skipping disabled command '${subVLM.theme.command(commandName)}'`,
+                `during wildcard invokation (${activeCommand.disabled})`);
+        continue;
       } else {
         if (activeCommand.disabled) {
-          this.warn(`Invoking a disabled command '${commandName}' explicitly`,
+          subVLM.warn(`Invoking a disabled command '${commandName}' explicitly`,
               `(${activeCommand.disabled})`);
         }
         try {
           if (isWildcardCommand) {
-            this.echo(`${this.getContextIndexText()}>>* ${subVLM.getContextIndexText()}${
-                this.theme.vlmCommand("vlm", commandName, ...argv)}`);
+            subVLM.echo(`${this.getContextIndexText()}>>* ${subVLM.getContextIndexText()}${
+              subVLM.theme.vlmCommand("vlm", commandName, ...argv)}`);
           }
           await subVLM._fillVargvInteractively();
           if (subVLM.toolset) {
@@ -1469,27 +1486,27 @@ async function _dispatchCommands (commandSelector, argv, activeCommands, isWildc
             let requireResult = true;
             for (let i = 0; requireResult && (i !== (requires || []).length); ++i) {
               const header = `tool${tool ? "Config" : "setConfig"}.requires[${i}] of ${
-                this.theme.command(commandName)}`;
+                subVLM.theme.command(commandName)}`;
               try {
-                this.echo(`${subVLM.getContextIndexText()}>>>? ${header}`, "via",
-                    ...(tool ? ["tool", this.theme.package(tool), "of"] : []),
-                    "toolset", this.theme.package(subVLM.toolset));
+                subVLM.echo(`${subVLM.getContextIndexText()}>>>? ${header}`, "via",
+                    ...(tool ? ["tool", subVLM.theme.package(tool), "of"] : []),
+                    "toolset", subVLM.theme.package(subVLM.toolset));
                 requireResult = await subVLM.execute(
                     requires[i], { onSuccess: true, onFailure: false });
               } catch (error) {
-                requireResult = this.error(`<exception>: ${String(error)}`);
+                requireResult = subVLM.error(`<exception>: ${String(error)}`);
                 throw error;
               } finally {
-                this.echo(`${subVLM.getContextIndexText()}<<<? ${header}:`,
-                    this._peekReturnValue(requireResult, 51));
+                subVLM.echo(`${subVLM.getContextIndexText()}<<<? ${header}:`,
+                subVLM._peekReturnValue(requireResult, 51));
               }
               if (typeof requireResult === "string" ? requireResult : !requireResult) {
-                const message = `'${this.theme.command(commandName)
-                    }' as it can't satisfy requires[${i}]: ${this.theme.executable(requires[i])}`;
+                const message = `'${subVLM.theme.command(commandName)
+                    }' as it can't satisfy requires[${i}]: ${subVLM.theme.executable(requires[i])}`;
                 if (!isWildcardCommand) {
                   throw new Error(`Failed command ${message}`);
                 }
-                this.error(`Skipping command ${message}`);
+                subVLM.error(`Skipping command ${message}`);
                 ret.push(`Skipped command ${message}`);
               }
             }
@@ -1507,13 +1524,13 @@ async function _dispatchCommands (commandSelector, argv, activeCommands, isWildc
             await subVLM.invoke(postCommands);
           }
         } finally {
-          if (this.echo && (commandName !== commandSelector)) {
+          if (subVLM.echo && (commandName !== commandSelector)) {
             let retValue = JSON.stringify(ret[ret.length - 1]);
             if (retValue === undefined) retValue = "undefined";
             if (isWildcardCommand) {
-              this.echo(`${this.getContextIndexText()}<<* ${subVLM.getContextIndexText()}${
-                  this.theme.vlmCommand("vlm", commandName)}:`,
-                  this._peekReturnValue(retValue, 40));
+              subVLM.echo(`${this.getContextIndexText()}<<* ${subVLM.getContextIndexText()}${
+                subVLM.theme.vlmCommand("vlm", commandName)}:`,
+                subVLM._peekReturnValue(retValue, 40));
             }
           }
         }
@@ -1523,7 +1540,8 @@ async function _dispatchCommands (commandSelector, argv, activeCommands, isWildc
   if (dryRunCommands) {
     this._introspectCommands(
         this.contextVLM._determineIntrospection(module, "", { isExact: false }),
-        dryRunCommands, commandSelector, isWildcardCommand, contextVargv["enable-disabled"]);
+        dryRunCommands, commandSelector, isWildcardCommand,
+        this.contextVLM._state["enable-disabled"]);
   }
   return isWildcardCommand ? ret : ret[0];
 }
@@ -1809,7 +1827,7 @@ function _selectActiveCommands (commandGlob, argv, introspection, isWildcardComm
 
       subVargs.usage(module.command.replace(exportedCommandName, "$0"), description);
       if (!activeCommand.disabled
-          || (activeCommand.broken ? this.vargv["force-broken"] : this.vargv["enable-disabled"])) {
+          || this._state[activeCommand.broken ? "force-broken" : "enable-disabled"]) {
         globalVargs.command(module.command, description,
             ...(!activeCommand.disabled && module.builder ? [module.builder] : []), () => {});
       } else {
@@ -2326,21 +2344,23 @@ async function _fillVargvInteractively () {
 
 function _reloadPackageAndToolsetsConfigs () {
   // TODO(iridian): Implement locally pending config writes. See _flushPendingConfigWrites
-  if (packageConfigStatus.path && shell.test("-f", packageConfigStatus.path)) {
+  if (_vlm._packageConfigStatus.path && shell.test("-f", _vlm._packageConfigStatus.path)) {
     try {
-      _vlm.packageConfig = JSON.parse(shell.head({ "-n": 1000000 }, packageConfigStatus.path));
+      _vlm.packageConfig = JSON.parse(
+          shell.head({ "-n": 1000000 }, _vlm._packageConfigStatus.path));
       __deepFreeze(_vlm.packageConfig);
     } catch (error) {
-      this.exception(error, `reading "${packageConfigStatus.path}"`);
+      this.exception(error, `reading "${_vlm._packageConfigStatus.path}"`);
       throw error;
     }
   }
-  if (toolsetsConfigStatus.path && shell.test("-f", toolsetsConfigStatus.path)) {
+  if (_vlm._toolsetsConfigStatus.path && shell.test("-f", _vlm._toolsetsConfigStatus.path)) {
     try {
-      _vlm.toolsetsConfig = JSON.parse(shell.head({ "-n": 1000000 }, toolsetsConfigStatus.path));
+      _vlm.toolsetsConfig = JSON.parse(
+          shell.head({ "-n": 1000000 }, _vlm._toolsetsConfigStatus.path));
       __deepFreeze(_vlm.toolsetsConfig);
     } catch (error) {
-      _vlm.exception(error, `reading "${packageConfigStatus.path}"`);
+      _vlm.exception(error, `reading "${_vlm._packageConfigStatus.path}"`);
       throw error;
     }
   }
@@ -2348,11 +2368,9 @@ function _reloadPackageAndToolsetsConfigs () {
 
 function getPackageConfig (...keys) { return this._getConfigAtPath(this.packageConfig, keys); }
 function getValOSConfig (...keys) {
-  const ret = this._getConfigAtPath(this.packageConfig, ["valos", ...keys]);
-  return ret !== undefined ? ret : this._getConfigAtPath(this.packageConfig, ["valaa", ...keys]);
+  return this._getConfigAtPath(this.packageConfig, ["valos", ...keys]);
 }
 function getToolsetsConfig (...keys) { return this._getConfigAtPath(this.toolsetsConfig, keys); }
-// function getValmaConfig (...keys) { return this._getConfigAtPath(this.toolsetsConfig, keys); }
 
 function _getConfigAtPath (root, keys) {
   return [].concat(...keys)
@@ -2372,7 +2390,7 @@ function updatePackageConfig (updates) {
   }
   const updatedConfig = __deepAssign(_vlm.packageConfig, updates);
   if (updatedConfig !== _vlm.packageConfig) {
-    packageConfigStatus.updated = true;
+    _vlm._packageConfigStatus.updated = true;
     _vlm.packageConfig = updatedConfig;
     _vlm.ifVerbose(1)
         .info("package.json updated:", updates);
@@ -2387,11 +2405,11 @@ function updateToolsetsConfig (updates) {
   }
   if (!_vlm.toolsetsConfig) {
     _vlm.toolsetsConfig = {};
-    toolsetsConfigStatus.updated = true;
+    _vlm._toolsetsConfigStatus.updated = true;
   }
   const updatedConfig = __deepAssign(_vlm.toolsetsConfig, updates);
   if (updatedConfig !== _vlm.toolsetsConfig) {
-    toolsetsConfigStatus.updated = true;
+    _vlm._toolsetsConfigStatus.updated = true;
     _vlm.toolsetsConfig = updatedConfig;
     _vlm.ifVerbose(1)
         .info("toolsets.json updated:", updates);
@@ -2443,7 +2461,9 @@ function updateToolConfig (toolsetName, toolName, updates) {
 
 function createConfigureToolsetOptions (toolsetExports, { toolSelectorName = "tool" } = {}) {
   return {
-    ...(!toolSelectorName ? {} : { tools: buildSelectorOption(this, toolSelectorName) }),
+    ...(!toolSelectorName ? {} : {
+      tools: buildSelectorOption(this, toolSelectorName),
+    }),
     reconfigure: {
       alias: "r", type: "boolean",
       description: "Reconfigure all even already configured toolset and tool options.",
@@ -2564,8 +2584,8 @@ function _flushPendingConfigWrites () {
   // but the resulting semantics are not clean and might result in inconsistent/partial config
   // writes. The config files could be stored in the local vlm contexts and selectively written only
   // when the command associated with a context successfully completes.
-  this._commitUpdates("toolsets.json", toolsetsConfigStatus, () => _vlm.toolsetsConfig);
-  this._commitUpdates("package.json", packageConfigStatus, () => {
+  this._commitUpdates("toolsets.json", _vlm._toolsetsConfigStatus, () => _vlm.toolsetsConfig);
+  this._commitUpdates("package.json", _vlm._packageConfigStatus, () => {
     const reorderedConfig = {};
     reorderedConfig.name = _vlm.packageConfig.name;
     reorderedConfig.version = _vlm.packageConfig.version;

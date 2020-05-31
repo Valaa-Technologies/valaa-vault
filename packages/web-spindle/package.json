@@ -24,5 +24,8 @@
   "devDependencies": {
     "@valos/inspire": "^0.35.0-rc.16"
   },
-  "homepage": "https://valospace.org/web-spindle"
+  "homepage": "https://valospace.org/web-spindle",
+  "bin": {
+    "_vlm__configure__toolset_-valos_web-spindle": "valma/configure_toolset__web-spindle.js"
+  }
 }

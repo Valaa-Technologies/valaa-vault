@@ -12,17 +12,12 @@ exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "worker")
 exports.builder = (yargs) => {
   const toolsetConfig = yargs.vlm.getToolsetConfig(yargs.vlm.toolset) || {};
   return yargs.options({
-    ...yargs.vlm.createConfigureToolsetOptions(exports),
-    rootChronicleURI: {
-      type: "string", default: toolsetConfig.rootChronicleURI || undefined,
+    serviceURI: {
+      type: "string", default: toolsetConfig.serviceURI || undefined,
       interactive: { type: "input", when: yargs.vlm.reconfigure ? "always" : "if-undefined" },
-      description: "The chronicle URI which perspire gateway loads and renders first",
+      description: "The service chronicle URI",
     },
-    spindles: {
-      type: "string", array: true,
-      default: (((toolsetConfig.commands || {}).perspire || {}).options || {}).spindles || [],
-      description: "List of spindles to require before gateway creation.",
-    },
+    ...createConfigureToolsetOptions(yargs.vlm, exports),
   });
 };
 
@@ -36,19 +31,20 @@ exports.handler = async (yargv) => {
       vlm.theme.path(templates), "(will not clobber existing files)");
   vlm.shell.cp("-nR", templates, ".");
   const toolsetConfigUpdate = { ...vlm.getToolsetConfig(vlm.toolset) };
-  toolsetConfigUpdate.rootChronicleURI = yargv.rootChronicleURI;
+  toolsetConfigUpdate.serviceURI = yargv.serviceURI;
   if (yargv.reconfigure || !(toolsetConfigUpdate.commands || {}).perspire) {
     toolsetConfigUpdate.commands = toolsetConfigUpdate.commands || {};
     toolsetConfigUpdate.commands.perspire = {
       options: {
         keepalive: 5,
         output: "dist/perspire/vdomSnapshot.html",
-        spindles: yargv.spindles,
+        spindles: [],
       }
     };
   }
   await vlm.updateToolsetConfig(vlm.toolset, toolsetConfigUpdate);
 
-  const selectionResult = await vlm.configureToolSelection(yargv, toolsetConfig);
+  const selectionResult = await configureToolSelection(
+      vlm, vlm.toolset, yargv.reconfigure, yargv.tools);
   return { command: exports.command, ...selectionResult };
 };

@@ -14,7 +14,8 @@
   },
   "bin": {
     "_vlm_compose-revelation": "valma/compose-revelation.js",
-    "_vlm_rouse-revealer": "valma/rouse-revealer.js"
+    "_vlm_rouse-revealer": "valma/rouse-revealer.js",
+    "_vlm__configure__toolset_-valos_toolset-revealer": "valma/configure_toolset__toolset-revealer.js"
   },
   "dependencies": {
     "@valos/type-toolset": ">=0.35.0-rc.16",

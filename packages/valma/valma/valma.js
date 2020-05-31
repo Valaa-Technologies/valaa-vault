@@ -2420,7 +2420,12 @@ function updatePackageConfig (updates) {
   }
 }
 
-function updateToolsetsConfig (updates) {
+function updateToolsetsConfig (updatesOrPath, maybeUpdates) {
+  const updates = !Array.isArray(updatesOrPath)
+      ? updatesOrPath
+      : updatesOrPath.reduceRight(
+          (innerUpdates, pathKey) => ({ [pathKey]: innerUpdates }),
+          maybeUpdates);
   // TODO(iridian): Implement locally pending config writes. See _flushPendingConfigWrites
   if (typeof updates !== "object" || !updates) {
     throw new Error(`Invalid arguments for updateToolsetsConfig, expexted object, got ${

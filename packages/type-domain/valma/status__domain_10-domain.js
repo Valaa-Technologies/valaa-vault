@@ -1,3 +1,5 @@
+const { createStandardStatusOptions } = require("@valos/type-toolset");
+
 exports.vlm = { toolset: "@valos/type-domain" };
 exports.command = ".status/.type/.domain/10-domain";
 exports.brief = "display 'type-domain' status";
@@ -7,10 +9,7 @@ exports.introduction = `${exports.describe}.`;
 exports.disabled = (yargs) => !yargs.vlm.getToolsetConfig(yargs.vlm.toolset, "inUse")
     && `Toolset '${yargs.vlm.toolset}' not in use`;
 exports.builder = (yargs) => yargs.options({
-  "include-tools": {
-    type: "boolean", default: true,
-    description: "Include tool status report breakdown in results",
-  },
+  ...createStandardStatusOptions(yargs.vlm, exports),
 });
 
 exports.handler = async (yargv) => {

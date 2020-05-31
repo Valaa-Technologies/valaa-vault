@@ -1,7 +1,7 @@
 const { listMatchingConfigurableChoices, inquireConfigurableName } = require("valma");
 
 exports.command = ".configure/.valos-stanza";
-exports.describe = "Configure valos stanza type and domain from the available options";
+exports.describe = "Configure valos stanza type and domain using available domains";
 exports.introduction = `${exports.describe}.
 
 Type determines the localized role and structure of this workspace.

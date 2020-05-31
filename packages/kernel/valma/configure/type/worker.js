@@ -1,5 +1,5 @@
 exports.command = ".configure/.type/worker";
-exports.describe = "Select 'worker' workspace type";
+exports.describe = "Execute perspire gateway as a Node.js process";
 exports.introduction =
 `A worker workspace is used to launch and manage a particular service
 process. The workspace files contain configuration and data used by the

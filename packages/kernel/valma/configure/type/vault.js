@@ -1,5 +1,5 @@
 exports.command = ".configure/.type/vault";
-exports.describe = "Select 'vault' workspace type";
+exports.describe = "Maintain many workspaces in a single version controlled mono-repository";
 exports.introduction =
 `A vault is a *monorepository* which contains multiple sub-workspaces
 of various types. Vaults are used to group packages with high cohesion

@@ -1,6 +1,6 @@
 exports.vlm = { toolset: "@valos/type-vault" };
 exports.command = ".configure/.type/.library/.select/@valos/type-vault/enable-babel";
-exports.describe = "Select the workspace to be transpiled using vault babel.config.js";
+exports.describe = "Transpile all package files using the vault babel.config.js";
 exports.introduction =
 `This toolset enables babel transpilation for a library workspace
 when 'vlm assemble-packages' is executed in the surrounding vault

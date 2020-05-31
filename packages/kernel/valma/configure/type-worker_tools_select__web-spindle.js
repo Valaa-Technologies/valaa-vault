@@ -3,7 +3,7 @@ const { createConfigureToolsetOptions } = require("@valos/type-toolset");
 exports.vlm = { toolset: "@valos/web-spindle" };
 exports.command = ".configure/.@valos/type-worker/.tools/.select/@valos/web-spindle";
 exports.brief = "select web-spindle";
-exports.describe = "Select web-spindle as worker tool";
+exports.describe = "Project http/s requests to valospace-fabric via a gateway plugin";
 exports.introduction =
 `Selects web-spindle as a worker tool.`;
 

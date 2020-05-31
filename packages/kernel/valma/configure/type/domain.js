@@ -1,5 +1,5 @@
 exports.command = ".configure/.type/domain";
-exports.describe = "Select 'domain' workspace type";
+exports.describe = "Curate a valos discovery domain of packages";
 exports.introduction =
 `A domain package provides a set of valma commands for defining and
 managing a ValOS domain. Specific domain workspaces then:

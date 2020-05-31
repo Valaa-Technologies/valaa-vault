@@ -3,7 +3,7 @@ const { createConfigureToolOptions } = require("@valos/type-toolset");
 exports.vlm = { toolset: "@valos/type-vault" };
 exports.command = ".configure/.@valos/type-vault/.tools/.select/domain";
 exports.brief = "select domain management";
-exports.describe = "Select domain management tool for a vault workspace";
+exports.describe = "Setup a type-domain package for curating the domain of this vault";
 exports.introduction =
 `This type-vault tool enables the domain management and (re)generation
 of docs/index.html domain summary revdoc document.`;

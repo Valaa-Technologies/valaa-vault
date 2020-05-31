@@ -1,7 +1,7 @@
 exports.vlm = { toolset: "@valos/toolset-revealer" };
 exports.command = ".configure/.select/@valos/toolset-revealer";
-exports.brief = "select 'toolset-revealer'";
-exports.describe = "Select the toolset 'toolset-revealer'";
+exports.brief = "select '@valos/toolset-revealer'";
+exports.describe = "Run 'vlm rouse-revealer' to serve local inspire sites with webpack-dev-server";
 exports.introduction =
 `This toolset enables valma command 'rouse-revealer' for deploying a
 local dev environment for inspire gateway revelations.

@@ -1,5 +1,5 @@
 exports.command = ".configure/.type/opspace";
-exports.describe = "Select 'opspace' workspace type";
+exports.describe = "Dev a singular but repeated Ops 'build-release' / 'deploy-release' task";
 exports.introduction =
 `An opspaces workspace is used to for configuring, deploying, updating,
 monitoring and diagnosing all types of live infrastructure resources.

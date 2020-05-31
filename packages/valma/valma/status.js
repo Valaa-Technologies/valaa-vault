@@ -1,6 +1,6 @@
 #!/usr/bin/env vlm
 exports.command = "status [toolsetGlob]";
-exports.describe = "Display the status of the current workspace";
+exports.describe = "Display the status of the current valos workspace";
 exports.introduction =
 `If toolsetGlob is specified the status is limited to status scripts
 matching '.status/*{toolsetGlob}*/**/*', otherwise all status scripts

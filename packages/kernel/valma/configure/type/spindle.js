@@ -1,5 +1,5 @@
 exports.command = ".configure/.type/spindle";
-exports.describe = "Select 'spindle' workspace type";
+exports.describe = "Develop a valos gateway plugin";
 exports.introduction =
 `A gateway spindle extends inspire and perspire gateways with various
 functionalities.

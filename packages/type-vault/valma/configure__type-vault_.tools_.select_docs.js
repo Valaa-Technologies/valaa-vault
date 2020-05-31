@@ -3,7 +3,7 @@ const { createConfigureToolOptions } = require("@valos/type-toolset");
 exports.vlm = { toolset: "@valos/type-vault" };
 exports.command = ".configure/.@valos/type-vault/.tools/.select/docs";
 exports.brief = "select docs generation";
-exports.describe = "Select /docs generation tool for a vault workspace";
+exports.describe = "Generate /docs html files from all vault revdocs files";
 exports.introduction =
 `This type-vault tool provides commands for (re)generating the /docs
 folder from document sources present in the local workspaces, notably

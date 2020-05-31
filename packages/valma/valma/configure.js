@@ -1,10 +1,10 @@
 const { updateConfigurableSideEffects } = require("valma");
 
 exports.command = "configure [toolsetGlob]";
-exports.describe = "Configure the current ValOS workspace and its toolsets";
+exports.describe = "Configure the current ValOS workspace type, domain and all configurables";
 exports.introduction =
-`Configures type and domain, selects and stows toolsets and their tools
-and then configures them.`;
+`Configures type and domain, selects and stows toolsets, tools and
+other  configurables and finally configures them.`;
 
 exports.disabled = (yargs) => !yargs.vlm.getValOSConfig()
     && "No package.json valos stanza found (run 'vlm init')";

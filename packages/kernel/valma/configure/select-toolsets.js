@@ -1,6 +1,7 @@
-const { createSelectionOption, configureToolsetSelections } = require("valma");
+const { createSelectConfigurablesOption } = require("valma");
+const { configureToolsetSelection } = require("@valos/type-toolset");
 
-exports.command = "select-toolsets";
+exports.command = ".configure/select-toolsets";
 exports.describe = "Select and stow toolsets from the set available toolsets";
 exports.introduction =
 `The set of available toolsets in a given package context is defined via
@@ -36,7 +37,7 @@ exports.disabled = (yargs) => {
       : !yargs.vlm.getToolsetsConfig() && "No toolsets.json found";
 };
 exports.builder = (yargs) => yargs.options({
-  toolsets: createSelectionOption(yargs.vlm, "toolset"),
+  toolsets: createSelectConfigurablesOption(yargs.vlm, "toolset", yargs.vlm.getToolsetsConfig()),
   add: {
     type: "string", array: true,
     description: "Add explicit toolsets to the selection (even if unavailable)",
@@ -47,14 +48,6 @@ exports.builder = (yargs) => yargs.options({
   },
 });
 
-exports.handler = async (yargv) => {
-  const vlm = yargv.vlm;
-  const toolsetsConfig = vlm.getToolsetsConfig();
-  if (!toolsetsConfig) return undefined;
-  return configureToolsetSelections(
-      vlm,
-      yargv.reconfigure,
-      (yargv.toolsets || []).concat(yargv.add || []),
-      toolsetsConfig,
-      yargv._);
-};
+exports.handler = async (yargv) =>
+    configureToolsetSelection(yargv.vlm, yargv.reconfigure,
+        (yargv.toolsets || []).concat(yargv.add || []), yargv._);

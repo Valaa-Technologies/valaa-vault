@@ -1,3 +1,5 @@
+const { createConfigureToolsetOptions, configureToolSelection } = require("@valos/type-toolset");
+
 exports.vlm = { toolset: "@valos/type-vault" };
 exports.command = ".configure/.type/.vault/@valos/type-vault";
 exports.brief = "configure 'type-vault'";
@@ -14,7 +16,7 @@ root from package @valos/type-vault directory templates/.*.`;
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "vault")
     && `Workspace is not a vault`;
 exports.builder = (yargs) => yargs.options({
-  ...yargs.vlm.createConfigureToolsetOptions(exports),
+  ...createConfigureToolsetOptions(yargs.vlm, exports),
 });
 
 exports.handler = async (yargv) => {
@@ -63,7 +65,8 @@ exports.handler = async (yargv) => {
     };
     vlm.shell.ShellString(JSON.stringify(lerna, null, 2)).to("./lerna.json");
   }
-  const selectionResult = await vlm.configureToolSelection(yargv, toolsetConfig);
+  const selectionResult = await configureToolSelection(
+      vlm, vlm.toolset, yargv.reconfigure, yargv.tools);
 
   // TODO(iridian, 2020-05): This should probably be its own tool.
   const hadGit = vlm.shell.test("-d", ".git");

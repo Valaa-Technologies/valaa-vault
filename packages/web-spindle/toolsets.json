@@ -1,1 +1,10 @@
-{}
+{
+  "@valos/type-toolset": {
+    "inUse": true,
+    "tools": {}
+  },
+  "@valos/type-spindle": {
+    "inUse": "always",
+    "tools": {}
+  }
+}

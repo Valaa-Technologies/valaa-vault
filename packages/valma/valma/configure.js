@@ -1,4 +1,4 @@
-const { updateConfigureSideEffects } = require("valma");
+const { updateConfigurableSideEffects } = require("valma");
 
 exports.command = "configure [toolsetGlob]";
 exports.describe = "Configure the current ValOS workspace and its toolsets";
@@ -51,7 +51,7 @@ exports.handler = async (yargv) => {
     domain: !yargv.domain ? [] : [await vlm.invoke(`.configure/.domain/${valos.domain}`, rest)],
     type: !yargv.type ? [] : [await vlm.invoke(`.configure/.type/${valos.type}`, rest)],
   };
-  Object.assign(ret, await updateConfigureSideEffects(vlm, ret.domain[0], ret.type[0]));
+  Object.assign(ret, await updateConfigurableSideEffects(vlm, ret.domain[0], ret.type[0]));
   if (ret.success === false) return ret;
 
   if (yargv.domain) {
@@ -60,19 +60,15 @@ exports.handler = async (yargv) => {
   if (yargv.type) {
     ret.type.push(...await vlm.invoke(`.configure/.type/.${valos.type}/**/*`, rest));
   }
-  Object.assign(ret, await updateConfigureSideEffects(
+  Object.assign(ret, await updateConfigurableSideEffects(
       vlm, ...ret.domain.slice(1), ...ret.type.slice(1)));
   if (ret.success === false) return ret;
 
-  if (!yargv.toolsetGlob) {
-    ret.selectToolsets = await vlm.invoke(`select-toolsets`, rest);
-    if (ret.selectToolsets.success === false) ret.success = false;
-  } else {
-    ret.toolsetsConfigures = await vlm.invoke(
-        `.configure/{.domain/.${valos.domain}/,.type/.${valos.type}/,}.toolset/${
-          yargv.toolsetGlob || ""}{*/**/,}*`,
-        rest);
-    Object.assign(ret, await updateConfigureSideEffects(vlm, ...ret.toolsetsConfigures));
-  }
-  return yargv.breakdown || (ret.success === false) ? ret : { success: ret.success };
+  ret.subConfigures = await vlm.invoke(
+      `.configure/{.domain/.${valos.domain}/,.type/.${valos.type}/,}${
+        ""}{,.toolset/,.toolset/${yargv.toolsetGlob || "*"}/**/}*`, rest);
+  Object.assign(ret, await updateConfigurableSideEffects(vlm, ...ret.subConfigures));
+  return (yargv.breakdown || (ret.success === false))
+      ? ret
+      : { success: ret.success };
 };

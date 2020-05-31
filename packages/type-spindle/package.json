@@ -15,5 +15,8 @@
   },
   "bin": {
     "_vlm__configure__type__spindle_-valos_type-spindle": "valma/configure__spindle__type-spindle.js"
+  },
+  "dependencies": {
+    "@valos/type-toolset": "^0.35.0-rc.16"
   }
 }

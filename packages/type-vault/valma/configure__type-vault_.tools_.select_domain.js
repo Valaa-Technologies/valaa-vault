@@ -1,3 +1,5 @@
+const { createConfigureToolOptions } = require("@valos/type-toolset");
+
 exports.vlm = { toolset: "@valos/type-vault" };
 exports.command = ".configure/.@valos/type-vault/.tools/.select/domain";
 exports.brief = "select domain management";
@@ -10,7 +12,7 @@ exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "vault")
     && `Workspace is not a vault`;
 
 exports.builder = (yargs) => yargs.options({
-  ...yargs.vlm.createConfigureToolOptions(exports),
+  ...createConfigureToolOptions(yargs.vlm, exports),
   "regenerate-on-release": {
     default: yargs.vlm.getToolConfig(yargs.vlm.toolset, "domain", "regenerateOnRelease"),
     description: "Regenerate domain summary revdoc on each vault (pre)release",

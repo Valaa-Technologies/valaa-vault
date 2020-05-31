@@ -1,3 +1,5 @@
+const { createConfigureToolsetOptions, configureToolSelection } = require("@valos/type-toolset");
+
 exports.vlm = { toolset: "@valos/type-worker" };
 exports.command = ".configure/.type/.worker/@valos/type-worker";
 exports.brief = "configure 'type-worker'";

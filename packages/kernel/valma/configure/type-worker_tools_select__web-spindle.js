@@ -1,4 +1,4 @@
-const { createConfigureToolsetOptions } = require("valma");
+const { createConfigureToolsetOptions } = require("@valos/type-toolset");
 
 exports.vlm = { toolset: "@valos/web-spindle" };
 exports.command = ".configure/.@valos/type-worker/.tools/.select/@valos/web-spindle";

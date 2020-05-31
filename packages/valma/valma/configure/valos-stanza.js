@@ -26,7 +26,7 @@ exports.builder = (yargs) => {
       interactive: async () => ({
         type: "list", when: vlm.reconfigure ? "always" : "if-undefined", pageSize: 10,
         choices: [].concat(
-            await listMatchingConfigurableChoices(vlm, ".type/*"),
+            await listMatchingConfigurableChoices(vlm, "type"),
             {
               name: "<custom type>", value: "<custom type>",
               description: "<enter custom type>",
@@ -40,7 +40,7 @@ exports.builder = (yargs) => {
       interactive: async () => ({
         type: "list", when: vlm.reconfigure ? "always" : "if-undefined", pageSize: 10,
         choices: [].concat(
-            await listMatchingConfigurableChoices(vlm, ".domain/@*/*"),
+            await listMatchingConfigurableChoices(vlm, "domain"),
             {
               name: "<unlisted>", value: "<unlisted>",
               description: "<enter the name of an existing but unlisted domain>",

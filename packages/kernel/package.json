@@ -15,6 +15,7 @@
     "access": "public"
   },
   "bin": {
+    "_vlm__configure_select-toolsets": "valma/configure/select-toolsets.js",
     "_vlm__configure__type_opspace": "valma/configure/type/opspace.js",
     "_vlm__configure__type_spindle": "valma/configure/type/spindle.js",
     "_vlm__configure__type_library": "valma/configure/type/library.js",
@@ -25,12 +26,14 @@
     "_vlm__configure__type_worker": "valma/configure/type/worker.js",
     "_vlm__configure__type_domain": "valma/configure/type/domain.js",
     "_vlm__configure__select_-valos_toolset-revealer": "valma/configure/select__toolset-revealer.js",
+    "_vlm__configure__select_-valos_type-toolset": "valma/configure/select__type-toolset.js",
     "_vlm__configure__-valos_type-worker__tools__select_-valos_web-spindle": "valma/configure/type-worker_tools_select__web-spindle.js",
     "_vlm__configure__domain_-valos_kernel": "valma/configure/domain__kernel.js"
   },
   "dependencies": {
     "@valos/raem": "^0.35.0-rc.16",
     "@valos/type-domain": "^0.35.0-rc.16",
+    "@valos/type-toolset": "^0.35.0-rc.16",
     "valma": "^0.35.0-rc.16"
   },
   "homepage": "https://valospace.org/kernel"

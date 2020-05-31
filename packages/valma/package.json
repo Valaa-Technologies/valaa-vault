@@ -20,7 +20,6 @@
     "_vlm_configure": "valma/configure.js",
     "_vlm_draft-command": "valma/draft-command.js",
     "_vlm_init": "valma/init.js",
-    "_vlm_select-toolsets": "valma/select-toolsets.js",
     "_vlm_status": "valma/status.js",
     "_vlm__configure__valos-stanza": "valma/configure/valos-stanza.js",
     "_vlm__status_10-header": "valma/status_10-header.js",

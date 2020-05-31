@@ -1,5 +1,8 @@
+const { createConfigureToolCommand, createStatusToolCommand } = require("@valos/type-toolset");
+const { createReleaseToolCommand } = require("@valos/type-opspace");
+
 exports.command = ".configure/.type/tool";
-exports.describe = "Select 'tool' workspace type";
+exports.describe = "'tool' workspace type is deprecated";
 exports.introduction =
 `Tools are a toolset implementation detail. A tool is similar to
 a toolset in that it can have its own workspace specific
@@ -40,18 +43,15 @@ exports.builder = (yargs) => yargs.options({
 });
 
 exports.handler = async (yargv) => {
-  const {
-    createConfigureCommand, createStatusSubCommand, createReleaseSubCommand
-  } = require("./toolset");
   const vlm = yargv.vlm;
   const simpleName = vlm.packageConfig.name.match(/([^/]*)$/)[1];
-  await createConfigureCommand(vlm, "tool", vlm.packageConfig.name, simpleName, yargv.brief);
+  await createConfigureToolCommand(vlm, vlm.packageConfig.name, simpleName, yargv.brief);
   if (await vlm.inquireConfirm("Create tool status sub-command skeleton?")) {
-    await createStatusSubCommand(vlm, "tool", vlm.packageConfig.name, simpleName, ".tool/");
+    await createStatusToolCommand(vlm, vlm.packageConfig.name, simpleName, ".tool/");
   }
   if (await vlm.inquireConfirm("Create tool build and deploy release sub-commands?")) {
-    await createReleaseSubCommand(vlm, "tool", vlm.packageConfig.name, simpleName, "build");
-    await createReleaseSubCommand(vlm, "tool", vlm.packageConfig.name, simpleName, "deploy");
+    await createReleaseToolCommand(vlm, vlm.packageConfig.name, simpleName, "build");
+    await createReleaseToolCommand(vlm, vlm.packageConfig.name, simpleName, "deploy");
   }
   return { success: true };
 };

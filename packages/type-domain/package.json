@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@valos/tools": "^0.35.0-rc.16",
+    "@valos/type-toolset": "^0.35.0-rc.16",
     "@valos/vdoc": "^0.35.0-rc.16"
   }
 }

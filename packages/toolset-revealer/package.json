@@ -1,10 +1,10 @@
 {
   "name": "@valos/toolset-revealer",
+  "version": "0.35.0-rc.16",
   "valos": {
     "type": "toolset",
     "domain": "@valos/kernel"
   },
-  "version": "0.35.0-rc.16",
   "description": "Tools for building revelations both for development and deployment purposes",
   "license": "MIT",
   "author": "Valaa Technologies Ltd",
@@ -17,6 +17,7 @@
     "_vlm_rouse-revealer": "valma/rouse-revealer.js"
   },
   "dependencies": {
+    "@valos/type-toolset": ">=0.35.0-rc.16",
     "autoprefixer": "^8.6.2",
     "compression-webpack-plugin": "^1.1.11",
     "css-loader": "^1.0.0",

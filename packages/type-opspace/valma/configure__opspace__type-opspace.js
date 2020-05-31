@@ -1,3 +1,5 @@
+const { createConfigureToolsetOptions, configureToolSelection } = require("@valos/type-toolset");
+
 exports.vlm = { toolset: "@valos/type-opspace" };
 exports.command = ".configure/.type/.opspace/@valos/type-opspace";
 exports.brief = "configure 'type-opspace'";
@@ -50,7 +52,7 @@ following strategy is used:
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "opspace")
     && `Workspace is not an opspace`;
 exports.builder = (yargs) => yargs.options({
-  ...yargs.vlm.createConfigureToolsetOptions(exports),
+  ...createConfigureToolsetOptions(yargs.vlm, exports),
 });
 
 exports.handler = async (yargv) => {
@@ -63,6 +65,7 @@ exports.handler = async (yargv) => {
       vlm.theme.path(templates), "(will not clobber existing files)");
   vlm.shell.cp("-n", templates, ".");
 
-  const selectionResult = await vlm.configureToolSelection(yargv, toolsetConfig);
+  const selectionResult = await configureToolSelection(
+      vlm, vlm.toolset, yargv.reconfigure, yargv.tools);
   return { success: true, command: exports.command, ...selectionResult };
 };

@@ -1,3 +1,5 @@
+const { createConfigureToolsetOptions, configureToolSelection } = require("@valos/type-toolset");
+
 exports.vlm = { toolset: "@valos/type-domain" };
 exports.command = ".configure/.type/.domain/@valos/type-domain";
 exports.brief = "configure 'type-domain'";
@@ -8,7 +10,7 @@ exports.introduction = `
 exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "domain")
     && `Workspace is not a domain`;
 exports.builder = (yargs) => yargs.options({
-  ...yargs.vlm.createConfigureToolsetOptions(exports),
+  ...createConfigureToolsetOptions(yargs.vlm, exports),
 });
 
 exports.handler = async (yargv) => {
@@ -23,6 +25,7 @@ exports.handler = async (yargv) => {
 
   const toolsetConfigUpdate = {}; // Construct a toolset config update or bail out.
   vlm.updateToolsetConfig(vlm.toolset, toolsetConfigUpdate);
-  const selectionResult = await vlm.configureToolSelection(yargv, toolsetConfig);
+  const selectionResult = await configureToolSelection(
+      vlm, vlm.toolset, yargv.reconfigure, yargv.tools);
   return { success: true, command: exports.command, ...selectionResult };
 };

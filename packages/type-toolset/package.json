@@ -1,0 +1,20 @@
+{
+  "name": "@valos/type-toolset",
+  "version": "0.35.0-rc.16",
+  "valos": {
+    "type": "toolset",
+    "domain": "@valos/kernel"
+  },
+  "description": "Valos toolset for valos type 'toolset'",
+  "author": "Valaa Technologies Ltd",
+  "license": "MIT",
+  "repository": "https://github.com/valaatech/kernel",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "index.js",
+  "bin": {
+    "_vlm__configure__toolset_-valos_type-toolset": "valma/configure_toolset__type-toolset.js"
+  }
+}

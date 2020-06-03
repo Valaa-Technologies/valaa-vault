@@ -37,7 +37,7 @@
         "@type": "@id"
       }
     },
-    "dc:title": "@valos/kernel-vault@0.35.0-rc.15 Software Bill of Materials",
+    "dc:title": "@valos/kernel-vault@0.35.0-rc.16 Software Bill of Materials",
     "respecConfig": {
       "specStatus": "unofficial",
       "editors": [
@@ -89,7 +89,7 @@
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
             "This document was automatically generated on ",
-            "2020-05-18T14:03:26.614Z",
+            "2020-06-03T08:32:39.045Z",
             "."
           ]
         },
@@ -364,10 +364,10 @@
       {
         "type": "library",
         "name": "spdx-correct",
-        "version": "3.1.0",
+        "version": "3.1.1",
         "description": "correct invalid SPDX expressions",
         "licenses": "Apache-2.0",
-        "purl": "pkg:npm/spdx-correct@3.1.0",
+        "purl": "pkg:npm/spdx-correct@3.1.1",
         "modified": false
       },
       {
@@ -510,148 +510,156 @@
         "type": "library",
         "group": "valos",
         "name": "inspire",
-        "version": "0.35.0-rc.16",
+        "version": "0.35.0-rc.17",
         "description": "ValOS Inspire application gateway",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/inspire@0.35.0-rc.16",
+        "purl": "pkg:npm/%40valos/inspire@0.35.0-rc.17",
         "modified": false
       },
       {
         "type": "library",
         "group": "valos",
         "name": "kernel",
-        "version": "0.35.0-rc.16",
+        "version": "0.35.0-rc.17",
         "description": "@valos/kernel domain",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/kernel@0.35.0-rc.16",
+        "purl": "pkg:npm/%40valos/kernel@0.35.0-rc.17",
         "modified": false
       },
       {
         "type": "library",
         "group": "valos",
         "name": "toolset-revealer",
-        "version": "0.35.0-rc.16",
+        "version": "0.35.0-rc.17",
         "description": "Tools for building revelations both for development and deployment purposes",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/toolset-revealer@0.35.0-rc.16",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "group": "valos",
-        "name": "type-vault",
-        "version": "0.35.0-rc.16",
-        "description": "The ValOS 'vault' workspace type toolset",
-        "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/type-vault@0.35.0-rc.16",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "name": "babel-core",
-        "version": "7.0.0-bridge.0",
-        "description": "A placeholder package that bridges babel-core to @babel/core.",
-        "licenses": "MIT",
-        "purl": "pkg:npm/babel-core@7.0.0-bridge.0",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "name": "babel-jest",
-        "version": "23.6.0",
-        "description": "Jest plugin to use babel for transformation.",
-        "licenses": "MIT",
-        "purl": "pkg:npm/babel-jest@23.6.0",
+        "purl": "pkg:npm/%40valos/toolset-revealer@0.35.0-rc.17",
         "modified": false
       },
       {
         "type": "library",
         "name": "valma",
-        "version": "0.35.0-rc.16",
+        "version": "0.35.0-rc.17",
         "description": "A ValOS CLI tool for discovering and executing context-dependent command scripts",
         "licenses": "MIT",
-        "purl": "pkg:npm/valma@0.35.0-rc.16",
+        "purl": "pkg:npm/valma@0.35.0-rc.17",
         "modified": false
       },
       {
         "type": "library",
         "name": "inquirer",
-        "version": "5.2.0",
+        "version": "7.1.0",
         "description": "A collection of common interactive command line user interfaces.",
         "licenses": "MIT",
-        "purl": "pkg:npm/inquirer@5.2.0",
+        "purl": "pkg:npm/inquirer@7.1.0",
         "modified": false
       },
       {
         "type": "library",
-        "name": "external-editor",
-        "version": "2.2.0",
-        "description": "Edit a string with the users preferred text editor using $VISUAL or $ENVIRONMENT",
+        "name": "ansi-escapes",
+        "version": "4.3.1",
+        "description": "ANSI escape codes for manipulating the terminal",
         "licenses": "MIT",
-        "purl": "pkg:npm/external-editor@2.2.0",
+        "purl": "pkg:npm/ansi-escapes@4.3.1",
         "modified": false
       },
       {
         "type": "library",
-        "name": "chardet",
-        "version": "0.4.2",
-        "description": "Character detector",
-        "licenses": "MIT",
-        "purl": "pkg:npm/chardet@0.4.2",
+        "name": "type-fest",
+        "version": "0.11.0",
+        "description": "A collection of essential TypeScript types",
+        "licenses": "[object Object]",
+        "purl": "pkg:npm/type-fest@0.11.0",
         "modified": false
       },
       {
         "type": "library",
-        "name": "rxjs",
-        "version": "5.5.12",
-        "description": "Reactive Extensions for modern JavaScript",
-        "licenses": "Apache-2.0",
-        "purl": "pkg:npm/rxjs@5.5.12",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "name": "string-width",
-        "version": "2.1.1",
-        "description": "Get the visual width of a string - the number of columns required to display it",
-        "licenses": "MIT",
-        "purl": "pkg:npm/string-width@2.1.1",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "name": "strip-ansi",
-        "version": "4.0.0",
-        "description": "Strip ANSI escape codes",
-        "licenses": "MIT",
-        "purl": "pkg:npm/strip-ansi@4.0.0",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "name": "ansi-regex",
+        "name": "chalk",
         "version": "3.0.0",
-        "description": "Regular expression for matching ANSI escape codes",
+        "description": "Terminal string styling done right",
         "licenses": "MIT",
-        "purl": "pkg:npm/ansi-regex@3.0.0",
+        "purl": "pkg:npm/chalk@3.0.0",
         "modified": false
       },
       {
         "type": "library",
-        "name": "yargs",
-        "version": "15.3.1",
-        "description": "yargs the modern, pirate-themed, successor to optimist.",
+        "name": "ansi-styles",
+        "version": "4.2.1",
+        "description": "ANSI escape codes for styling strings in the terminal",
         "licenses": "MIT",
-        "purl": "pkg:npm/yargs@15.3.1",
+        "purl": "pkg:npm/ansi-styles@4.2.1",
         "modified": false
       },
       {
         "type": "library",
-        "name": "cliui",
-        "version": "6.0.0",
-        "description": "easily create complex multi-column command-line-interfaces",
-        "licenses": "ISC",
-        "purl": "pkg:npm/cliui@6.0.0",
+        "name": "color-convert",
+        "version": "2.0.1",
+        "description": "Plain color conversion functions",
+        "licenses": "MIT",
+        "purl": "pkg:npm/color-convert@2.0.1",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "name": "color-name",
+        "version": "1.1.4",
+        "description": "A list of color names and its values",
+        "licenses": "MIT",
+        "purl": "pkg:npm/color-name@1.1.4",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "name": "supports-color",
+        "version": "7.1.0",
+        "description": "Detect whether a terminal supports color",
+        "licenses": "MIT",
+        "purl": "pkg:npm/supports-color@7.1.0",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "name": "has-flag",
+        "version": "4.0.0",
+        "description": "Check if argv has a specific flag",
+        "licenses": "MIT",
+        "purl": "pkg:npm/has-flag@4.0.0",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "name": "cli-cursor",
+        "version": "3.1.0",
+        "description": "Toggle the CLI cursor",
+        "licenses": "MIT",
+        "purl": "pkg:npm/cli-cursor@3.1.0",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "name": "restore-cursor",
+        "version": "3.1.0",
+        "description": "Gracefully restore the CLI cursor on exit",
+        "licenses": "MIT",
+        "purl": "pkg:npm/restore-cursor@3.1.0",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "name": "onetime",
+        "version": "5.1.0",
+        "description": "Ensure a function is only called once",
+        "licenses": "MIT",
+        "purl": "pkg:npm/onetime@5.1.0",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "name": "figures",
+        "version": "3.2.0",
+        "description": "Unicode symbols with Windows CMD fallbacks",
+        "licenses": "MIT",
+        "purl": "pkg:npm/figures@3.2.0",
         "modified": false
       },
       {
@@ -701,38 +709,29 @@
       },
       {
         "type": "library",
+        "name": "yargs",
+        "version": "15.3.1",
+        "description": "yargs the modern, pirate-themed, successor to optimist.",
+        "licenses": "MIT",
+        "purl": "pkg:npm/yargs@15.3.1",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "name": "cliui",
+        "version": "6.0.0",
+        "description": "easily create complex multi-column command-line-interfaces",
+        "licenses": "ISC",
+        "purl": "pkg:npm/cliui@6.0.0",
+        "modified": false
+      },
+      {
+        "type": "library",
         "name": "wrap-ansi",
         "version": "6.2.0",
         "description": "Wordwrap a string with ANSI escape codes",
         "licenses": "MIT",
         "purl": "pkg:npm/wrap-ansi@6.2.0",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "name": "ansi-styles",
-        "version": "4.2.1",
-        "description": "ANSI escape codes for styling strings in the terminal",
-        "licenses": "MIT",
-        "purl": "pkg:npm/ansi-styles@4.2.1",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "name": "color-convert",
-        "version": "2.0.1",
-        "description": "Plain color conversion functions",
-        "licenses": "MIT",
-        "purl": "pkg:npm/color-convert@2.0.1",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "name": "color-name",
-        "version": "1.1.4",
-        "description": "A list of color names and its values",
-        "licenses": "MIT",
-        "purl": "pkg:npm/color-name@1.1.4",
         "modified": false
       },
       {
@@ -778,6 +777,34 @@
         "description": "the mighty option parser used by yargs",
         "licenses": "ISC",
         "purl": "pkg:npm/yargs-parser@18.1.3",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "group": "valos",
+        "name": "type-vault",
+        "version": "0.35.0-rc.17",
+        "description": "The ValOS 'vault' workspace type toolset",
+        "licenses": "MIT",
+        "purl": "pkg:npm/%40valos/type-vault@0.35.0-rc.17",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "name": "babel-core",
+        "version": "7.0.0-bridge.0",
+        "description": "A placeholder package that bridges babel-core to @babel/core.",
+        "licenses": "MIT",
+        "purl": "pkg:npm/babel-core@7.0.0-bridge.0",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "name": "babel-jest",
+        "version": "23.6.0",
+        "description": "Jest plugin to use babel for transformation.",
+        "licenses": "MIT",
+        "purl": "pkg:npm/babel-jest@23.6.0",
         "modified": false
       }
     ],

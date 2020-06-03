@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.17](https://github.com/valaatech/kernel/compare/v0.35.0-rc.16...v0.35.0-rc.17) (2020-06-03)
+
+
+### Features
+
+* Major tool/set reorganization into new @valos/type-toolset ([6cf12d0](https://github.com/valaatech/kernel/commit/6cf12d039ead5ac19dc818edce0832446f51b7c3))
+* Streamline 'vlm init' /w type, domain and toolset choice descriptions ([8add032](https://github.com/valaatech/kernel/commit/8add03216091e43efae6cdcc043fb6cec327cc66))
+
+
+
+
+
 # [0.35.0-rc.16](https://github.com/valaatech/kernel/compare/v0.35.0-rc.15...v0.35.0-rc.16) (2020-05-18)
 
 

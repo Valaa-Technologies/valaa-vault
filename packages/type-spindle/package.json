@@ -1,6 +1,6 @@
 {
   "name": "@valos/type-spindle",
-  "version": "0.35.0-rc.16",
+  "version": "0.35.0-rc.17",
   "valos": {
     "type": "toolset",
     "domain": "@valos/kernel"
@@ -17,6 +17,6 @@
     "_vlm__configure__type__spindle_-valos_type-spindle": "valma/configure__spindle__type-spindle.js"
   },
   "dependencies": {
-    "@valos/type-toolset": "^0.35.0-rc.16"
+    "@valos/type-toolset": "^0.35.0-rc.17"
   }
 }

@@ -325,7 +325,7 @@
         </component>
         <component type="library">
             <name>spdx-correct</name>
-            <version>3.1.0</version>
+            <version>3.1.1</version>
             <description>
                 <![CDATA[correct invalid SPDX expressions]]>
             </description>
@@ -334,7 +334,7 @@
                     <id>Apache-2.0</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/spdx-correct@3.1.0</purl>
+            <purl>pkg:npm/spdx-correct@3.1.1</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -551,7 +551,7 @@
         <component type="library">
             <group>valos</group>
             <name>inspire</name>
-            <version>0.35.0-rc.16</version>
+            <version>0.35.0-rc.17</version>
             <description>
                 <![CDATA[ValOS Inspire application gateway]]>
             </description>
@@ -560,13 +560,13 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/inspire@0.35.0-rc.16</purl>
+            <purl>pkg:npm/%40valos/inspire@0.35.0-rc.17</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <group>valos</group>
             <name>kernel</name>
-            <version>0.35.0-rc.16</version>
+            <version>0.35.0-rc.17</version>
             <description>
                 <![CDATA[@valos/kernel domain]]>
             </description>
@@ -575,13 +575,13 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/kernel@0.35.0-rc.16</purl>
+            <purl>pkg:npm/%40valos/kernel@0.35.0-rc.17</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <group>valos</group>
             <name>toolset-revealer</name>
-            <version>0.35.0-rc.16</version>
+            <version>0.35.0-rc.17</version>
             <description>
                 <![CDATA[Tools for building revelations both for development and deployment purposes]]>
             </description>
@@ -590,55 +590,12 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/toolset-revealer@0.35.0-rc.16</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <group>valos</group>
-            <name>type-vault</name>
-            <version>0.35.0-rc.16</version>
-            <description>
-                <![CDATA[The ValOS 'vault' workspace type toolset]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/%40valos/type-vault@0.35.0-rc.16</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>babel-core</name>
-            <version>7.0.0-bridge.0</version>
-            <description>
-                <![CDATA[A placeholder package that bridges babel-core to @babel/core.]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/babel-core@7.0.0-bridge.0</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>babel-jest</name>
-            <version>23.6.0</version>
-            <description>
-                <![CDATA[Jest plugin to use babel for transformation.]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/babel-jest@23.6.0</purl>
+            <purl>pkg:npm/%40valos/toolset-revealer@0.35.0-rc.17</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <name>valma</name>
-            <version>0.35.0-rc.16</version>
+            <version>0.35.0-rc.17</version>
             <description>
                 <![CDATA[A ValOS CLI tool for discovering and executing context-dependent command scripts]]>
             </description>
@@ -647,12 +604,12 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/valma@0.35.0-rc.16</purl>
+            <purl>pkg:npm/valma@0.35.0-rc.17</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <name>inquirer</name>
-            <version>5.2.0</version>
+            <version>7.1.0</version>
             <description>
                 <![CDATA[A collection of common interactive command line user interfaces.]]>
             </description>
@@ -661,119 +618,175 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/inquirer@5.2.0</purl>
+            <purl>pkg:npm/inquirer@7.1.0</purl>
             <modified>false</modified>
         </component>
         <component type="library">
-            <name>external-editor</name>
-            <version>2.2.0</version>
+            <name>ansi-escapes</name>
+            <version>4.3.1</version>
             <description>
-                <![CDATA[Edit a string with the users preferred text editor using $VISUAL or $ENVIRONMENT]]>
+                <![CDATA[ANSI escape codes for manipulating the terminal]]>
             </description>
             <licenses>
                 <license>
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/external-editor@2.2.0</purl>
+            <purl>pkg:npm/ansi-escapes@4.3.1</purl>
             <modified>false</modified>
         </component>
         <component type="library">
-            <name>chardet</name>
-            <version>0.4.2</version>
+            <name>type-fest</name>
+            <version>0.11.0</version>
             <description>
-                <![CDATA[Character detector]]>
+                <![CDATA[A collection of essential TypeScript types]]>
             </description>
             <licenses>
                 <license>
-                    <id>MIT</id>
+                    <name>(MIT OR CC0-1.0)</name>
                 </license>
             </licenses>
-            <purl>pkg:npm/chardet@0.4.2</purl>
+            <purl>pkg:npm/type-fest@0.11.0</purl>
             <modified>false</modified>
         </component>
         <component type="library">
-            <name>rxjs</name>
-            <version>5.5.12</version>
-            <description>
-                <![CDATA[Reactive Extensions for modern JavaScript]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>Apache-2.0</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/rxjs@5.5.12</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>string-width</name>
-            <version>2.1.1</version>
-            <description>
-                <![CDATA[Get the visual width of a string - the number of columns required to display it]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/string-width@2.1.1</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>strip-ansi</name>
-            <version>4.0.0</version>
-            <description>
-                <![CDATA[Strip ANSI escape codes]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/strip-ansi@4.0.0</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>ansi-regex</name>
+            <name>chalk</name>
             <version>3.0.0</version>
             <description>
-                <![CDATA[Regular expression for matching ANSI escape codes]]>
+                <![CDATA[Terminal string styling done right]]>
             </description>
             <licenses>
                 <license>
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/ansi-regex@3.0.0</purl>
+            <purl>pkg:npm/chalk@3.0.0</purl>
             <modified>false</modified>
         </component>
         <component type="library">
-            <name>yargs</name>
-            <version>15.3.1</version>
+            <name>ansi-styles</name>
+            <version>4.2.1</version>
             <description>
-                <![CDATA[yargs the modern, pirate-themed, successor to optimist.]]>
+                <![CDATA[ANSI escape codes for styling strings in the terminal]]>
             </description>
             <licenses>
                 <license>
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/yargs@15.3.1</purl>
+            <purl>pkg:npm/ansi-styles@4.2.1</purl>
             <modified>false</modified>
         </component>
         <component type="library">
-            <name>cliui</name>
-            <version>6.0.0</version>
+            <name>color-convert</name>
+            <version>2.0.1</version>
             <description>
-                <![CDATA[easily create complex multi-column command-line-interfaces]]>
+                <![CDATA[Plain color conversion functions]]>
             </description>
             <licenses>
                 <license>
-                    <id>ISC</id>
+                    <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/cliui@6.0.0</purl>
+            <purl>pkg:npm/color-convert@2.0.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>color-name</name>
+            <version>1.1.4</version>
+            <description>
+                <![CDATA[A list of color names and its values]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/color-name@1.1.4</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>supports-color</name>
+            <version>7.1.0</version>
+            <description>
+                <![CDATA[Detect whether a terminal supports color]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/supports-color@7.1.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>has-flag</name>
+            <version>4.0.0</version>
+            <description>
+                <![CDATA[Check if argv has a specific flag]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/has-flag@4.0.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>cli-cursor</name>
+            <version>3.1.0</version>
+            <description>
+                <![CDATA[Toggle the CLI cursor]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/cli-cursor@3.1.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>restore-cursor</name>
+            <version>3.1.0</version>
+            <description>
+                <![CDATA[Gracefully restore the CLI cursor on exit]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/restore-cursor@3.1.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>onetime</name>
+            <version>5.1.0</version>
+            <description>
+                <![CDATA[Ensure a function is only called once]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/onetime@5.1.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>figures</name>
+            <version>3.2.0</version>
+            <description>
+                <![CDATA[Unicode symbols with Windows CMD fallbacks]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/figures@3.2.0</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -847,6 +860,34 @@
             <modified>false</modified>
         </component>
         <component type="library">
+            <name>yargs</name>
+            <version>15.3.1</version>
+            <description>
+                <![CDATA[yargs the modern, pirate-themed, successor to optimist.]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/yargs@15.3.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>cliui</name>
+            <version>6.0.0</version>
+            <description>
+                <![CDATA[easily create complex multi-column command-line-interfaces]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>ISC</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/cliui@6.0.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
             <name>wrap-ansi</name>
             <version>6.2.0</version>
             <description>
@@ -858,48 +899,6 @@
                 </license>
             </licenses>
             <purl>pkg:npm/wrap-ansi@6.2.0</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>ansi-styles</name>
-            <version>4.2.1</version>
-            <description>
-                <![CDATA[ANSI escape codes for styling strings in the terminal]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/ansi-styles@4.2.1</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>color-convert</name>
-            <version>2.0.1</version>
-            <description>
-                <![CDATA[Plain color conversion functions]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/color-convert@2.0.1</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>color-name</name>
-            <version>1.1.4</version>
-            <description>
-                <![CDATA[A list of color names and its values]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/color-name@1.1.4</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -970,6 +969,49 @@
                 </license>
             </licenses>
             <purl>pkg:npm/yargs-parser@18.1.3</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <group>valos</group>
+            <name>type-vault</name>
+            <version>0.35.0-rc.17</version>
+            <description>
+                <![CDATA[The ValOS 'vault' workspace type toolset]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/%40valos/type-vault@0.35.0-rc.17</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>babel-core</name>
+            <version>7.0.0-bridge.0</version>
+            <description>
+                <![CDATA[A placeholder package that bridges babel-core to @babel/core.]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/babel-core@7.0.0-bridge.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>babel-jest</name>
+            <version>23.6.0</version>
+            <description>
+                <![CDATA[Jest plugin to use babel for transformation.]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/babel-jest@23.6.0</purl>
             <modified>false</modified>
         </component>
     </components>

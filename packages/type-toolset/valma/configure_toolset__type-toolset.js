@@ -55,7 +55,7 @@ exports.builder = (yargs) => {
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
 
-  const toolsetConfig = vlm.getToolsetConfig(vlm.toolset) || {};
+  // const toolsetConfig = vlm.getToolsetConfig(vlm.toolset) || {};
   const toolsetConfigUpdate = {}; // Construct a toolset config update or bail out.
   vlm.updateToolsetConfig(vlm.toolset, toolsetConfigUpdate);
   const selectionResult = await configureToolSelection(

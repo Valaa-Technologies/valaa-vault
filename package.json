@@ -11,7 +11,9 @@
   "private": true,
   "repository": "https://github.com/valaatech/kernel",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "opspaces/*",
+    "workers/*"
   ],
   "scripts": {
     "vlm": "vlm ",

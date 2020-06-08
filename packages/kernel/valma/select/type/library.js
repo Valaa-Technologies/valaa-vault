@@ -10,8 +10,7 @@ a library cannot have workspace local configurations.
 Library workspaces are almost always published as a packages and
 typically reside in "packages/*" vault workspace directory.`;
 
-exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "library")
-    && `Workspace is not a library`;
+exports.disabled = () => false;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",
@@ -19,4 +18,8 @@ exports.builder = (yargs) => yargs.options({
   },
 });
 
-exports.handler = () => ({ success: true });
+exports.handler = (yargv) => ({
+  devDependencies: { "@valos/type-library": yargv.vlm.domainVersionTag("@valos/kernel") },
+  toolsetsUpdate: { "@valos/type-library": { inUse: "always" } },
+  success: true,
+});

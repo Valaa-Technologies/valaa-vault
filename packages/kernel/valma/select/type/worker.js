@@ -22,8 +22,7 @@ A worker workspace is fully agnostic to version control solutions:
   Sync workers shards can even push results back to the versioned
   repository if appropriate.`;
 
-exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "worker")
-    && `Workspace is not a worker`;
+exports.disabled = () => false;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",

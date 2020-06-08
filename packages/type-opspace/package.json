@@ -1,7 +1,7 @@
 {
   "name": "@valos/type-opspace",
   "valos": {
-    "type": "toolset",
+    "type": "type",
     "domain": "@valos/kernel"
   },
   "version": "0.35.0-rc.17",

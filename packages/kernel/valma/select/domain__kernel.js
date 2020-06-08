@@ -9,8 +9,7 @@ All packages in this namespace must have some open source license (MIT,
 BSD, GPL, ?) and be publicly available.
 `;
 
-exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("domain") !== undefined)
-    && `Workspace domain is already defined: '${yargs.vlm.getValOSConfig("domain")}')`;
+exports.disabled = () => false;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",

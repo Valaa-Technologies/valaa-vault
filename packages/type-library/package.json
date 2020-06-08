@@ -1,11 +1,11 @@
 {
-  "name": "@valos/type-toolset",
+  "name": "@valos/type-library",
   "version": "0.35.0-rc.17",
   "valos": {
     "type": "type",
     "domain": "@valos/kernel"
   },
-  "description": "Valos toolset for valos type 'toolset'",
+  "description": "The ValOS 'type' workspace type toolset",
   "author": "Valaa Technologies Ltd",
   "license": "MIT",
   "repository": "https://github.com/valaatech/kernel",
@@ -14,7 +14,10 @@
     "access": "public"
   },
   "main": "index.js",
+  "dependencies": {
+    "@valos/type-toolset": ">=0.35.0-rc.17"
+  },
   "bin": {
-    "_vlm__configure__toolsets_-valos_type-toolset": "valma/configure_toolsets__type-toolset.js"
+    "_vlm__configure__toolsets_-valos_type-library": "valma/configure_toolsets__type-library.js"
   }
 }

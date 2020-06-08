@@ -2,7 +2,7 @@
   "name": "@valos/type-vault",
   "version": "0.35.0-rc.17",
   "valos": {
-    "type": "toolset",
+    "type": "type",
     "domain": "@valos/kernel",
     "docs": "https://valospace.org/type-vault"
   },
@@ -22,7 +22,7 @@
     "_vlm_write-revdoc": "valma/write-revdoc.js",
     "_vlm_generate-domain-summary": "valma/generate-domain-summary.js",
     "_vlm__configure__toolsets_-valos_type-vault": "valma/configure_toolsets__type-vault.js",
-    "_vlm__configure__type__library__select_-valos_type-vault_enable-babel": "valma/configure_.type_.library_.select_@valos_type-vault_enable-babel.js",
+    "_vlm__select__tools__package_-valos_type-library_enable-babel": "valma/select_tools__type-library_enable-babel.js",
     "_vlm__select__tools__package_-valos_type-vault_docs": "valma/select_tools__type-vault_docs.js",
     "_vlm__select__tools__package_-valos_type-vault_domain": "valma/select_tools__type-vault_domain.js",
     "_vlm__release-vault__assembled-hooks_regenerate-docs": "valma/regenerate-docs.js",

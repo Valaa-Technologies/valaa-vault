@@ -2,7 +2,7 @@
   "name": "@valos/type-worker",
   "version": "0.35.0-rc.17",
   "valos": {
-    "type": "toolset",
+    "type": "type",
     "domain": "@valos/kernel"
   },
   "description": "The ValOS 'worker' workspace type toolset",

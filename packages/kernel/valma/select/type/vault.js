@@ -31,8 +31,7 @@ then valma will be able to list and configure any applicable toolsets
 and other workspaces for this package.
 `;
 
-exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "vault")
-    && `Workspace is not a vault`;
+exports.disabled = () => false;
 exports.builder = (yargs) => {
   const vlm = yargs.vlm;
   const current = (vlm.getPackageConfig("workspaces") || []).join(",");

@@ -18,8 +18,7 @@ available for the workspace and also allows these commands to manage
 their workspace-specific configurations.
 `;
 
-exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "toolset")
-    && `Workspace is not a toolset`;
+exports.disabled = () => false;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",

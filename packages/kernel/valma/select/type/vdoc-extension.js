@@ -7,8 +7,7 @@ workspace characteristics but has a specific structure and initial
 templates which is useful for VDoc extensions in specific.
 `;
 
-exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "vdoc-extension")
-    && `Workspace is not a vdoc-extension`;
+exports.disabled = () => false;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",

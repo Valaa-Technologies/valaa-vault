@@ -8,8 +8,7 @@ Opspaces rely heavily on various toolsets to get their job done.
 Opspaces rarily are published and packages and typically reside in
 "opspaces/*" vault workspace directory`;
 
-exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "opspace")
-    && `Workspace is not an opspace`;
+exports.disabled = () => false;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",

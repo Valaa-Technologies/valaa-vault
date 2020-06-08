@@ -20,15 +20,16 @@
     "_vlm__select__toolsets__type_worker_-valos_web-spindle": "valma/select/toolsets_type_worker__web-spindle.js",
     "_vlm__select__toolsets_-valos_toolset-revealer": "valma/select/toolsets__toolset-revealer.js",
     "_vlm__select__toolsets_-valos_type-toolset": "valma/select/toolsets__type-toolset.js",
+    "_vlm__select__type_domain": "valma/select/type/domain.js",
+    "_vlm__select__type_library": "valma/select/type/library.js",
     "_vlm__select__type_opspace": "valma/select/type/opspace.js",
     "_vlm__select__type_spindle": "valma/select/type/spindle.js",
-    "_vlm__select__type_library": "valma/select/type/library.js",
     "_vlm__select__type_tool": "valma/select/type/tool.js",
     "_vlm__select__type_toolset": "valma/select/type/toolset.js",
+    "_vlm__select__type_type": "valma/select/type/type.js",
     "_vlm__select__type_vault": "valma/select/type/vault.js",
     "_vlm__select__type_vdoc-extension": "valma/select/type/vdoc-extension.js",
-    "_vlm__select__type_worker": "valma/select/type/worker.js",
-    "_vlm__select__type_domain": "valma/select/type/domain.js"
+    "_vlm__select__type_worker": "valma/select/type/worker.js"
   },
   "dependencies": {
     "@valos/raem": "^0.35.0-rc.17",

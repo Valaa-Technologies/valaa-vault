@@ -15,8 +15,7 @@ particular spindle is configured for a perspire worker its
 configuration is typically placed as a tool the toolset.
 `;
 
-exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "spindle")
-    && `Workspace is not a spindle`;
+exports.disabled = () => false;
 exports.builder = (yargs) => yargs.options({
   reconfigure: {
     alias: "r", type: "boolean",

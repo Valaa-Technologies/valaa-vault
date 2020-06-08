@@ -1,5 +1,7 @@
 #!/usr/bin/env vlm
 
+const { updateConfigurableSideEffects } = require("valma");
+
 exports.command = "init";
 exports.describe = "Initialize the current directory as a ValOS workspace from scratch";
 exports.introduction = `
@@ -42,6 +44,9 @@ Defaults to surrounding vault namespace and then to the selected domain namespac
   description: {
     type: "string", description: "Initial description of the package.",
   },
+  "new-domain": {
+    type: "string", description: "The name of a new domain that this vault introduces.",
+  },
   valos: {
     type: "object", description: "Initial package.json valos stanza.",
   },
@@ -56,7 +61,9 @@ Defaults to surrounding vault namespace and then to the selected domain namespac
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
-  vlm.speak(exports.introduction.match(/[^\n]*\n(.*)/)[1]);
+  if (!yargv.valos) {
+    vlm.speak(exports.introduction.match(/[^\n]*\n(.*)/)[1]);
+  }
   const tellIfNoReconfigure = !yargv.reconfigure ? ["(no --reconfigure given)"] : [];
 
   let defaultTags = yargv["default-tags"];
@@ -69,64 +76,33 @@ exports.handler = async (yargv) => {
   } catch (error) { /* */ }
   const isInitial = !packageJSON;
   const ret_ = { success: true };
-  Object.assign(ret_, await _initPackageJSON(yargv.valos || {}));
-  if (ret_.success === false) return ret_;
   if (isInitial) {
+    Object.assign(ret_, await _createDefaultPackageJSON(yargv.valos || {}));
+    if (!ret_.success) return ret_;
+    Object.assign(ret_, await _initPackageJSON());
+    if (!ret_.success) return ret_;
     return vlm.interact(["vlm -b init", {
       breakdown: yargv.breakdown,
+      "new-domain": ret_.isNewDomain ? ret_.valos.domain : undefined,
       valos: ret_.valos,
       repository: yargv.repository,
       devDependencies: yargv.devDependencies,
       reconfigure: yargv.reconfigure,
     }]);
   }
+  if (yargv["new-domain"]) {
+    ret_.valos = { domain: yargv["new-domain"], type: "vault" };
+  }
   if ((ret_.success !== false) && ((yargv.devDependencies || [])[0] !== false)) {
     Object.assign(ret_, await _addInitialValmaDevDependencies(ret_.newDevDependencies));
   }
   if (ret_.success !== false) {
-    Object.assign(ret_, await _selectValOSTypeAndDomain(ret_.valos));
+    Object.assign(ret_, await _selectValOSTypeAndDomain(ret_.valos || yargv.valos));
   }
   if (ret_.success !== false) {
     Object.assign(ret_, await _configure(ret_.isNewDomain));
   }
   return yargv.breakdown || (ret_.success === false) ? ret_ : { success: ret_.success };
-
-  async function _initPackageJSON (explicitValos) {
-    while (yargv.reconfigure || !packageJSON) {
-      const choices = (packageJSON ? ["Bypass", "reconfigure"] : ["Initialize"])
-          .concat(["help", "quit"]);
-      const answer = await vlm.inquire([{
-        message: `${packageJSON ? "Reconfigure the existing" : "Initialize"
-            } package.json with 'yarn init'?`,
-        type: "list", name: "choice", default: choices[0], choices,
-      }]);
-      if (answer.choice === "Bypass") break;
-      if (answer.choice === "quit") return { success: false, reason: answer };
-      if (answer.choice === "help") {
-        vlm.speak();
-        vlm.info("workspace initialization",
-`This phase uses '${vlm.theme.executable("yarn init")}' to initialize
-package.json via a series of interactive questions.
-ValOS workspaces use yarn extensively for version, dependency and
-script management; ${vlm.theme.path("package.json")} is the central
-package configuration file for yarn (and also for npm, which yarn is
-  based on).
-`);
-        continue;
-      }
-      const ret = { success: true };
-      if (!packageJSON) {
-        Object.assign(ret, await _createDefaultPackageJSON(explicitValos));
-      }
-      if (!ret.success) return ret;
-      if (!(await vlm.interact("yarn init"))) {
-        return { success: false, reason: "failed to yarn init" };
-      }
-      return ret;
-    }
-    vlm.info(`Skipped '${vlm.theme.executable("yarn init")}'.`, ...tellIfNoReconfigure);
-    return { valos: explicitValos };
-  }
 
   async function _createDefaultPackageJSON (explicitValos) {
     let parentVaultConfig;
@@ -155,19 +131,22 @@ package configuration file for yarn (and also for npm, which yarn is
     };
     let namespace = yargv.namespace;
     const ret = { success: true, valos: { ...explicitValos } };
-    if (parentVaultConfig) {
+    if (yargv["new-domain"]) {
+      ret.valos.domain = yargv["new-domain"];
+      ret.valos.type = "vault";
+    } else if (parentVaultConfig) {
       if (!namespace) namespace = parentVaultConfig.name.match(/^((@[^/]+)\/)[^/]+$/)[2] || "";
+      const vaultDomain = parentVaultConfig.valos.domain;
+      if (!ret.valos.domain && await vlm.inquireConfirm(
+          `Set '${vaultDomain}' as the valos.domain (based on the vault domain)?`)) {
+        ret.valos.domain = vaultDomain;
+      }
       if (!ret.valos.type && vaultSubPath[0].endsWith("s") && (vaultSubPath[0] !== "packages")) {
         const typeCandidate = vaultSubPath[0].slice(0, -1);
         if (await vlm.inquireConfirm(
             `Set '${typeCandidate}' as the valos.type (based on the vault workspace directory)?`)) {
           ret.valos.type = typeCandidate;
         }
-      }
-      const vaultDomain = parentVaultConfig.valos.domain;
-      if (!ret.valos.domain && await vlm.inquireConfirm(
-          `Set '${vaultDomain}' as the valos.domain (based on the vault domain)?`)) {
-        ret.valos.domain = vaultDomain;
       }
     } else if (!ret.valos.type && await vlm.inquireConfirm(
         "Set 'vault' as the valos.type (workspace is outside a vault)?")) {
@@ -207,17 +186,45 @@ package configuration file for yarn (and also for npm, which yarn is
     return ret;
   }
 
+  async function _initPackageJSON () {
+    while (yargv.reconfigure || !packageJSON || isInitial) {
+      const choices = (packageJSON && !isInitial ? ["Bypass", "reconfigure"] : ["Initialize"])
+          .concat(["help", "quit"]);
+      const answer = await vlm.inquire([{
+        message: `${packageJSON && !isInitial ? "Reconfigure the existing" : "Initialize"
+            } package.json with 'yarn init'?`,
+        type: "list", name: "choice", default: choices[0], choices,
+      }]);
+      if (answer.choice === "Bypass") break;
+      if (answer.choice === "quit") return { success: false, reason: answer };
+      if (answer.choice === "help") {
+        vlm.speak();
+        vlm.info("workspace initialization",
+`This phase uses '${vlm.theme.executable("yarn init")}' to initialize
+package.json via a series of interactive questions.
+ValOS workspaces use yarn extensively for version, dependency and
+script management; ${vlm.theme.path("package.json")} is the central
+package configuration file for yarn (and also for npm, which yarn is
+  based on).
+`);
+        continue;
+      }
+      if (!(await vlm.interact("yarn init"))) {
+        return { success: false, reason: "failed to yarn init" };
+      }
+      return { success: true };
+    }
+    vlm.info(`Skipped '${vlm.theme.executable("yarn init")}'.`, ...tellIfNoReconfigure);
+    return {};
+  }
+
   async function _selectValOSTypeAndDomain (explicitValos) {
     let justConfigured = false;
-    const ret = {};
+    const ret = { success: false };
     while (yargv.reconfigure || !vlm.getValOSConfig() || justConfigured) {
       if (Object.keys(explicitValos || {}).length && (!vlm.getValOSConfig() || yargv.reconfigure)) {
-        if (explicitValos.type && explicitValos.domain) {
-          ret.valosStanza = { valos: explicitValos };
-          justConfigured = true;
-        } else {
-          await vlm.updatePackageConfig({ valos: explicitValos });
-        }
+        ret.valos = explicitValos;
+        justConfigured = true;
       }
       const choices = (justConfigured
                   ? ["Commit", "reconfigure"]
@@ -226,10 +233,12 @@ package configuration file for yarn (and also for npm, which yarn is
                   : ["Initialize"])
           .concat(["help", "quit"]);
       const answer = await vlm.inquire([{
-        message: !vlm.packageConfig.valos
-            ? "Initialize workspace valos stanza type and domain?"
-            : `${justConfigured ? "Commit" : "Reconfigure"
-                } valos stanza: ${JSON.stringify({ ...vlm.packageConfig.valos })}?`,
+        message:
+            justConfigured
+                ? `Commit valos stanza: ${JSON.stringify(ret.valos)}?`
+            : vlm.getValOSConfig()
+                ? `Reconfigure valos stanza: ${JSON.stringify({ ...vlm.getValOSConfig() })}?`
+            : "Initialize workspace valos stanza type and domain?",
         type: "list", name: "choice", default: choices[0], choices,
       }]);
       if (answer.choice === "Bypass") break;
@@ -241,10 +250,20 @@ package configuration file for yarn (and also for npm, which yarn is
         continue;
       }
       if (answer.choice === "Commit") {
-        return { valosCommit: await vlm.updatePackageConfig({ valos: ret.valos }) };
+        ret.commitValOS = await vlm.updatePackageConfig({ valos: ret.valos });
+        ret.select = {
+          domain: !yargv["new-domain"] && await vlm.invoke(`.select/.domain/${ret.valos.domain}`),
+          type: await vlm.invoke(`.select/.type/${ret.valos.type}`),
+        };
+        Object.assign(ret.select,
+            await updateConfigurableSideEffects(vlm, ret.select.domain, ret.select.type));
+        if (ret.select.success === false) return ret;
+        ret.success = true;
+        return ret;
       }
       vlm.reconfigure = yargv.reconfigure || (answer.choice === "reconfigure");
-      ret.valos = await vlm.invoke(".configure/.valos-stanza", { reconfigure: vlm.reconfigure });
+      Object.assign(ret,
+          await vlm.invoke(".configure/.valos-stanza", { reconfigure: vlm.reconfigure }));
       justConfigured = true;
     }
     vlm.info("Skipped configuring valos type and domain of this workspace.",
@@ -304,7 +323,7 @@ available for the listings in following phases.
     return {};
   }
 
-  async function _configure (isNewDomain) {
+  async function _configure () {
     while (true) { // eslint-disable-line no-constant-condition
       let toolsetsConfig;
       try {
@@ -332,7 +351,7 @@ available for the listings in following phases.
       }
       // init always reconfigures all configurations
       vlm.reconfigure = true;
-      return vlm.invoke("configure", { reconfigure: true, domain: !isNewDomain });
+      return vlm.invoke("configure", { reconfigure: true });
     }
     vlm.info("Skipped 'vlm configure'.", ...tellIfNoReconfigure);
     return {};

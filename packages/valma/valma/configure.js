@@ -1,4 +1,4 @@
-const { updateConfigurableSideEffects } = require("valma");
+const { updateConfigurableSideEffects, toSelectorGlob } = require("valma");
 
 exports.command = "configure [toolsetGlob]";
 exports.describe = "Configure the current ValOS workspace type, domain and all configurables";
@@ -15,14 +15,6 @@ exports.builder = (yargs) => yargs.options({
   },
   "default-tags": {
     description: `Custom default package tags lookup (by package prefix) for new packages.`,
-  },
-  domain: {
-    type: "boolean", default: true,
-    description: "(re)configure all domain settings.",
-  },
-  type: {
-    type: "boolean", default: true,
-    description: "(re)configure all type settings.",
   },
   breakdown: {
     type: "boolean", description: "Show full breakdown of the init process even if successful.",
@@ -44,15 +36,10 @@ exports.handler = async (yargv) => {
   if (typeof defaultTags === "string") defaultTags = { "": defaultTags };
   if (defaultTags) vlm.defaultTags = { ...(vlm.defaultTags || {}), ...defaultTags };
 
+  const ret = { success: false };
+
   const rest = [{ reconfigure: yargv.reconfigure }, ...yargv._];
 
-  const ret = {
-    success: false,
-    domain: !yargv.domain ? [] : [await vlm.invoke(`.configure/.domain/${valos.domain}`, rest)],
-    type: !yargv.type ? [] : [await vlm.invoke(`.configure/.type/${valos.type}`, rest)],
-  };
-  Object.assign(ret, await updateConfigurableSideEffects(vlm, ret.domain[0], ret.type[0]));
-  if (ret.success === false) return ret;
   const selectorGlob = toSelectorGlob({ domain, type, name });
   ret.toolsetConfigures = await vlm.invoke(
       `.configure/.toolsets/${selectorGlob}${yargv.toolsetGlob || "*"}/**/*`,

@@ -690,8 +690,8 @@ module.exports = {
         f: {
           group: "Valma command options:",
           type: "boolean", default: true, global: false,
-          alias: theme.argument("ignore-broken"),
-          description: "Force-skip broken commands in selections instead of throwing",
+          alias: theme.argument("force-broken"),
+          description: "Force-call broken commands in wildcard selections instead of skipping",
         },
         interactive: {
           group: "Valma console options:",
@@ -1453,6 +1453,9 @@ async function _dispatchCommands (commandSelector, argv, activeCommands, isWildc
         if (!_vlm._state["force-broken"]) {
           subVLM.warn(`Skipping invokation of broken command '${commandName}':`,
               `${activeCommand.broken}`);
+        } else if (activeCommand.broken instanceof Error) {
+          throw wrapError(activeCommand.broken,
+              new Error(`During force-invokation of a broken command '${commandName}'`));
         } else {
           throw new Error(`Trying to invoke broken command '${commandName}': ${
               activeCommand.broken}`);
@@ -2325,7 +2328,7 @@ Maybe change option.type to 'any' as it works with if-undefined?`);
       question.choices = await Promise.all(choices.map(async c => ((typeof c !== "object") ? c : {
         ...c,
         name: !c.description ? c.name : `${c.name.padEnd(maxLen)} - ${await c.description}`,
-        short: c.short || c.value,
+        short: c.short || c.name,
       })));
     }
     if (option.default !== undefined) {

@@ -119,7 +119,7 @@ function mapEagerly (
       }
     } catch (onRejectedError) { innerError = onRejectedError; }
     throw wrapError(innerError, errorName,
-        "\n\tentry head:", ...dumpObject(entryHead),
+        "\n\tentry head:", ...dumpObject(entryHead, { nest: 0 }),
         "\n\tmaybePromises:", ...dumpObject(entries || entriesOrThenables),
         "\n\tcurrent entry:", ...dumpObject((entries || entriesOrThenables || [])[index]));
   }
@@ -144,7 +144,7 @@ function thenChainEagerly (
       next = !func ? head : func(head);
     } catch (error) {
       const wrapped = wrapError(error, new Error(getName("callback")),
-          "\n\thead:", ...dumpObject(head),
+          "\n\thead:", ...dumpObject(head, { nest: 0 }),
           "\n\tcurrent function:", ...dumpObject(functionChain[index]),
           "\n\tfunctionChain:", ...dumpObject(functionChain));
       if (!onRejected) throw wrapped;
@@ -158,7 +158,7 @@ function thenChainEagerly (
           : thenChainEagerly(newHead, functionChain, onRejected, index + 1)),
       error => {
         const wrapped = wrapError(error, new Error(getName("thenable")),
-            "\n\thead:", ...dumpObject(head),
+            "\n\thead:", ...dumpObject(head, { nest: 0 }),
             "\n\tinitialValue:", ...dumpObject(initialValue),
             "\n\tfunctionChain:", ...dumpObject(functionChain));
         if (!onRejected) throw wrapped;
@@ -222,7 +222,7 @@ function thisChainEagerly (
       ++index;
     } catch (error) {
       const wrapped = wrapError(error, new Error(getName("callback")),
-          "\n\tthis:", ...dumpObject(this_),
+          "\n\tthis:", ...dumpObject(this_, { nest: 0 }),
           "\n\tparams:", ...dumpObject(params),
           "\n\tcurrent function:", ...dumpObject(func),
           "\n\tfunctions:", ...dumpObject(functions),
@@ -238,7 +238,7 @@ function thisChainEagerly (
       newParams => thisChainEagerly(this_, newParams, functions, onRejected, index + 1),
       error => {
         const wrapped = wrapError(error, new Error(getName("thenable resolution")),
-            "\n\tthis:", ...dumpObject(this_),
+            "\n\tthis:", ...dumpObject(this_, { nest: 0 }),
             "\n\tparams:", ...dumpObject(params),
             "\n\tcurrent function:", ...dumpObject(functions[index]),
             "\n\tfunctions:", ...dumpObject(functions),

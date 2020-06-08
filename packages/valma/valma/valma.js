@@ -131,6 +131,7 @@ const _vlm = {
   getValOSConfig,
   // getValmaConfig,
   getToolsetsConfig,
+  getToolsetPackageConfig,
 
   // Registers pending updates to the package.json config file (immediately updates
   // vlm.packageConfig) which are written to file only immediately before valma execution exits or
@@ -162,6 +163,7 @@ const _vlm = {
   listMatchingCommands,
   listAllMatchingCommands,
 
+  isGlob,
   filenameFromCommand,
   commandFromFilename,
 
@@ -1584,9 +1586,11 @@ function _parseUntilLastPositional (argv_, commandUsage, isBroken) {
 function __isDirectory (candidate) { return candidate.mode & 0x4000; }
 
 function __isWildcardCommand (commandSelector) {
-  return (commandSelector === "$")
-      || (commandSelector.indexOf("*") !== -1)
-      || (commandSelector.indexOf("{") !== -1);
+  return (commandSelector === "$") || isGlob(commandSelector);
+}
+
+function isGlob (maybeGlob) {
+  return (maybeGlob.indexOf("*") !== -1) || (maybeGlob.indexOf("{") !== -1);
 }
 
 function commandFromFilename (filename) {
@@ -2278,21 +2282,31 @@ async function _fillVargvInteractively () {
   }
   delete this.vargs.getOptions().interactive;
   const questions = [];
+  const answers = {};
+  for (const optionName of Object.keys(interactiveOptions)) {
+    answers[optionName] = this.vargv[optionName];
+  }
   for (const optionName of Object.keys(interactiveOptions)) {
     const option = interactiveOptions[optionName];
     let questionOptions = option.interactive;
-    if (typeof questionOptions === "function") questionOptions = questionOptions();
+    if (typeof questionOptions === "function") questionOptions = questionOptions(answers);
     questionOptions = await questionOptions;
     const question = Object.assign({}, questionOptions);
     question.array = option.array;
-    if (question.when !== "always") {
-      if ((question.when === "if-undefined") && option.type === "boolean") {
-        this.warn(`boolean option '${optionName}' interactive.when = "if-undefined" is degenerate.`,
-            "Boolean options default to false. Remove the option.type to have if-undefined work.");
-      }
-      if ((question.when !== "if-undefined") || (typeof this.vargv[optionName] !== "undefined")) {
+    switch (question.when) {
+      case "always":
+        break;
+      case "if-undefined":
+        if (option.type === "boolean") {
+          this.warn(
+`boolean option '${optionName}' interactive.when = "if-undefined" is
+degenerate as boolean options default to false.
+Maybe change option.type to 'any' as it works with if-undefined?`);
+        }
+        if (answers[optionName] !== undefined) continue;
+        break;
+      default:
         continue;
-      }
     }
     delete question.when;
     if (!question.name) question.name = optionName;
@@ -2342,7 +2356,6 @@ async function _fillVargvInteractively () {
     questions.push(question);
   }
   if (!Object.keys(questions).length) return this.vargv;
-  const answers = {};
   for (const question of questions) {
     do {
       Object.assign(answers, await this.inquire([question]));
@@ -2350,7 +2363,7 @@ async function _fillVargvInteractively () {
         answers[question.name] = !answers[question.name] ? [] : answers[question.name].split(",");
       }
     } while (question.confirm
-        && !await question.confirm(answers[question.name], answers, question.name));
+        && !await question.confirm(answers[question.name], answers, question));
   }
   // FIXME(iridian): handle de-hyphenations, camelcases etc. all other option variants.
   // Now only updating the verbatim option.
@@ -2394,6 +2407,9 @@ function getValOSConfig (...keys) {
   return this._getConfigAtPath(this.packageConfig, ["valos", ...keys]);
 }
 function getToolsetsConfig (...keys) { return this._getConfigAtPath(this.toolsetsConfig, keys); }
+function getToolsetPackageConfig (toolset) {
+  return require(this.path.join(toolset, "package"));
+}
 
 function _getConfigAtPath (root, keys) {
   return [].concat(...keys)
@@ -2579,17 +2595,16 @@ function _flushPendingConfigWrites () {
   // but the resulting semantics are not clean and might result in inconsistent/partial config
   // writes. The config files could be stored in the local vlm contexts and selectively written only
   // when the command associated with a context successfully completes.
-  this._commitUpdates("toolsets.json", _vlm._toolsetsConfigStatus, () => _vlm.toolsetsConfig);
-  this._commitUpdates("package.json", _vlm._packageConfigStatus, () => {
-    const reorderedConfig = {};
-    reorderedConfig.name = _vlm.packageConfig.name;
-    reorderedConfig.version = _vlm.packageConfig.version;
-    if (_vlm.packageConfig.valaa !== undefined) reorderedConfig.valaa = _vlm.packageConfig.valaa;
-    if (_vlm.packageConfig.valos !== undefined) reorderedConfig.valos = _vlm.packageConfig.valos;
-    Object.keys(_vlm.packageConfig).forEach(key => {
-      if (reorderedConfig[key] === undefined) reorderedConfig[key] = _vlm.packageConfig[key];
+  _commitUpdates(this, "toolsets.json", _vlm._toolsetsConfigStatus);
+  _commitUpdates(this, "package.json", _vlm._packageConfigStatus, currentContent => {
+    const reorderedContent = {};
+    reorderedContent.name = currentContent.name;
+    reorderedContent.version = currentContent.version;
+    if (currentContent.valos !== undefined) reorderedContent.valos = currentContent.valos;
+    Object.keys(currentContent).forEach(key => {
+      if (reorderedContent[key] === undefined) reorderedContent[key] = currentContent[key];
     });
-    return reorderedConfig;
+    return reorderedContent;
   });
 }
 

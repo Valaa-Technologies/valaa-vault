@@ -1,4 +1,4 @@
-exports.command = ".configure/.type/vdoc-extension";
+exports.command = ".select/.type/vdoc-extension";
 exports.describe = "Extend valos document spec with domain specific vocabulary and functionality";
 exports.introduction =
 `A vdoc-extension workspace contains the extension specification and

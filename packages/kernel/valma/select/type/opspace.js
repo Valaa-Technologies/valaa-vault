@@ -1,4 +1,4 @@
-exports.command = ".configure/.type/opspace";
+exports.command = ".select/.type/opspace";
 exports.describe = "Dev a singular but repeated Ops 'build-release' / 'deploy-release' task";
 exports.introduction =
 `An opspaces workspace is used to for configuring, deploying, updating,

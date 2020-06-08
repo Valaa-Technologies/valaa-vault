@@ -1,7 +1,7 @@
-const { createConfigureToolsetOptions, configureToolSelection } = require("@valos/type-toolset");
+const typeToolset = require("@valos/type-toolset");
 
 exports.vlm = { toolset: "@valos/type-opspace" };
-exports.command = ".configure/.type/.opspace/@valos/type-opspace";
+exports.command = ".configure/.toolsets/@valos/type-opspace";
 exports.brief = "configure 'type-opspace'";
 exports.describe = "Configure the 'type-opspace' toolset";
 exports.introduction = `${exports.describe}.
@@ -49,15 +49,14 @@ following strategy is used:
    deployments are initiated.
 `;
 
-exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "opspace")
-    && `Workspace is not an opspace`;
+exports.disabled = (yargs) => typeToolset.checkToolsetDisabled(yargs.vlm, exports);
 exports.builder = (yargs) => yargs.options({
-  ...createConfigureToolsetOptions(yargs.vlm, exports),
+  ...typeToolset.createConfigureToolsetOptions(yargs.vlm, exports),
 });
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
-  const toolsetConfig = vlm.getToolsetConfig(vlm.toolset);
+  const toolsetConfig = vlm.getToolsetConfig(exports.vlm.toolset);
   if (!toolsetConfig) return undefined;
 
   const templates = vlm.path.join(__dirname, "../templates/{.,}*");
@@ -65,7 +64,7 @@ exports.handler = async (yargv) => {
       vlm.theme.path(templates), "(will not clobber existing files)");
   vlm.shell.cp("-n", templates, ".");
 
-  const selectionResult = await configureToolSelection(
+  const selectionResult = await typeToolset.configureToolSelection(
       vlm, vlm.toolset, yargv.reconfigure, yargv.tools);
   return { success: true, command: exports.command, ...selectionResult };
 };

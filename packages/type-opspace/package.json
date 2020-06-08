@@ -14,7 +14,7 @@
   },
   "main": "index.js",
   "bin": {
-    "_vlm__configure__type__opspace_-valos_type-opspace": "valma/configure__opspace__type-opspace.js",
+    "_vlm__configure__toolsets_-valos_type-opspace": "valma/configure_toolsets__type-opspace.js",
     "_vlm__status__type__opspace_10-opspace": "valma/status__opspace_10-opspace.js",
     "_vlm_build-release": "valma/build-release.js",
     "_vlm_deploy-release": "valma/deploy-release.js"

@@ -1,13 +1,13 @@
-exports.command = ".configure/.type/domain";
+exports.command = ".select/.type/domain";
 exports.describe = "Curate a valos discovery domain of packages";
 exports.introduction =
 `A domain package provides a set of valma commands for defining and
 managing a ValOS domain. Specific domain workspaces then:
 1. shall provide domain package (de)registration via
    .configure/.<domain>/{,de}register-package
-2. can provide new workspace types via .configure/.type/*
+2. can provide new workspace types via .select/.type/*
 3. can provide new toolsets via
-   .configure/{,.type/.<type>/,.domain/.<domain>/}.toolset/**/*
+   .select/.toolsets/{,.domain/<domain>/}{,.type/<type>/}{,.package/<name>}/**/*
 
 Notably the package (de)registration should provide means for any new
 domain toolset packages to request the addition of their toolset

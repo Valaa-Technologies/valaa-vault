@@ -1,4 +1,4 @@
-exports.command = ".configure/.type/library";
+exports.command = ".select/.type/library";
 exports.describe = "Develop a publishable software components package";
 exports.introduction =
 `A library workspace contains arbitrary ES5 source code and exposes a

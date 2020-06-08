@@ -1,22 +1,21 @@
-const { createConfigureToolsetOptions, configureToolSelection } = require("@valos/type-toolset");
+const typeToolset = require("@valos/type-toolset");
 
 exports.vlm = { toolset: "@valos/type-spindle" };
-exports.command = ".configure/.type/.spindle/@valos/type-spindle";
+exports.command = ".configure/.toolsets/@valos/type-spindle";
 exports.brief = "configure 'type-spindle'";
 exports.describe = "Configure the 'type-spindle' toolset";
 exports.introduction = `${exports.describe}.
 
 `;
 
-exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "spindle")
-    && `Workspace is not a spindle`;
+exports.disabled = (yargs) => typeToolset.checkToolsetDisabled(yargs.vlm, exports);
 exports.builder = (yargs) => yargs.options({
-  ...createConfigureToolsetOptions(yargs.vlm, exports),
+  ...typeToolset.createConfigureToolsetOptions(yargs.vlm, exports),
 });
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
-  const toolsetConfig = vlm.getToolsetConfig(vlm.toolset);
+  const toolsetConfig = vlm.getToolsetConfig(exports.vlm.toolset);
   if (!toolsetConfig) return undefined;
 
   const templates = vlm.path.join(__dirname, "../templates/{.,}*");
@@ -31,7 +30,7 @@ exports.handler = async (yargv) => {
     }
   }
 
-  const selectionResult = await configureToolSelection(
+  const selectionResult = await typeToolset.configureToolSelection(
       vlm, vlm.toolset, yargv.reconfigure, yargv.tools);
   return { command: exports.command, devDependencies, ...selectionResult };
 };

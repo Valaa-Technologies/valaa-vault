@@ -1,97 +1,149 @@
-const { createStandardToolsetOption, createReleaseToolOptions } = require("@valos/type-toolset");
+const { toRestrictorPath, toSimpleRestrictor } = require("valma");
+const {
+  checkToolsetDisabled, checkToolDisabled, createToolToolsetOption,
+} = require("@valos/type-toolset");
 
 module.exports = {
-  createReleaseToolsetCommand,
-  createReleaseToolCommand,
-  createStandardBuildOptions,
-  createStandardDeployOptions,
+  checkToolsetDisabled, // forward exports
+  checkToolDisabled, // forward exports
+
+  draftBuildToolsetCommand,
+  draftBuildToolCommand,
+  draftDeployToolsetCommand,
+  draftDeployToolCommand,
+
+  createBuildToolsetOptions,
+  createBuildToolOptions,
+  createDeployToolsetOptions,
+  createDeployToolOptions,
+
   prepareToolsetBuild,
   prepareToolBuild,
   locateToolsetRelease,
   locateToolRelease,
 };
 
-function createReleaseToolsetCommand (vlm, name, simpleName, subName) {
-  return _createReleaseSubCommand(vlm, "toolset", name, simpleName, subName);
+function draftBuildToolsetCommand (vlm, name) {
+  return _draftReleaseSubCommand(vlm, "build", "toolset", name);
 }
 
-function createReleaseToolCommand (vlm, name, simpleName, subName) {
-  return _createReleaseSubCommand(vlm, "tool", name, simpleName, subName);
+function draftBuildToolCommand (vlm, name) {
+  return _draftReleaseSubCommand(vlm, "build", "tool", name);
 }
 
-function _createReleaseSubCommand (vlm, category, name, simpleName, subName) {
-  const isTool = (category === "tool") ? true : "";
-  const isBuild = (subName === "build");
+function draftDeployToolsetCommand (vlm, name) {
+  return _draftReleaseSubCommand(vlm, "deploy", "toolset", name);
+}
+
+function draftDeployToolCommand (vlm, name) {
+  return _draftReleaseSubCommand(vlm, "deploy", "tool", name);
+}
+
+function _draftReleaseSubCommand (vlm, primary, kind, name, restriction = {}) {
+  const simpleName = name.match(/([^/]*)$/)[1];
+  const isTool = (kind === "tool") ? true : "";
+  const capPrimary = `${primary[0].toUpperCase()}${primary.slice(1)}`;
+  const capKind = `${kind[0].toUpperCase()}${kind.slice(1)}`;
+  const isBuild = (primary === "build");
   return vlm.invoke("draft-command", [{
-    filename: `release-${subName}_${isTool && "tool_"}_${simpleName}.js`,
-    brief: `${isBuild ? "Build" : "Deploy"} a sub-release`,
+    filename: `release-${primary}_${kind}s${toSimpleRestrictor(restriction)}__${simpleName}.js`,
+    brief: `${capPrimary} a sub-release`,
     export: true,
-    header: `const opspace = require("@valos/type-opspace");\n`,
-    "exports-vlm": `{ ${category}: "${name}" }`,
-    describe: `${isBuild ? "Build" : "Deploy"} a sub-release of ${name}`,
+    confirm: true,
+    header:
+`const typeOpspace = require("@valos/type-opspace");
+
+`,
+    "exports-vlm": `{ ${kind}: "${name}" }`,
+    describe: `${capPrimary} a sub-release of ${name}`,
     introduction: isTool
         ?
-`This tool sub-release ${subName} command must be explicitly invoked by
+`This tool sub-release ${primary} command must be explicitly invoked by
 toolsets which use this tool.`
         :
 `When a release is being ${isBuild ? "built" : "deployed"
   } each active toolset must explicitly
-invoke the ${subName} commands of all of its ${subName}able tools.`,
+invoke the ${primary} commands of all of its ${primary}able tools.`,
 
-    disabled: isTool ? undefined :
-`(yargs) => !yargs.vlm.getToolsetConfig(yargs.vlm.toolset, "inUse")
-    && \`Toolset '\${yargs.vlm.toolset}' not in use\``,
-
+    disabled:
+`(yargs) => typeOpspace.check${capKind}Disabled(yargs.vlm, exports)`,
     builder:
 `(yargs) => yargs.options({
-  ...opspace.createStandard${isBuild ? "Build" : "Deploy"}Options(yargs.vlm, exports),
+  ...typeOpspace.create${capPrimary}${capKind}Options(yargs.vlm, exports),
 })`,
-
     handler: isBuild
-        ?
-`async (yargv) => {
-  const vlm = yargv.vlm;${isTool && `
-  const toolset = yargv.toolset;`}
-  const ${category}Version = yargv.overwrite ? undefined
-      : await vlm.invoke(exports.command, ["--version"]);
-  const { ${category}Config, ${category}ReleasePath } = opspace.prepareTool${
-      isTool ? "" : "set"}Build(yargv, ${isTool && "toolset, "}vlm.${category}, "${
-      simpleName}", ${category}Version);
-  if (!${category}Config) return { success: false };
+        ? _createBuildHandlerBody()
+        : _createDeployHandlerBody(),
+  }, `.release-${primary}/.${kind}s/${toRestrictorPath(restriction)}${name}`]);
 
-  vlm.shell.ShellString(${category}Version).to(vlm.path.join(${
-      category}ReleasePath, "version-hash"));
-  return { success: true, ${category}ReleasePath, ${category}Version };
-}`
-      :
-`async (yargv) => {
+  function _createBuildHandlerBody () {
+    return `async (yargv) => {
   const vlm = yargv.vlm;${isTool && `
   const toolset = yargv.toolset;`}
-  const { ${category}Config, ${category}ReleasePath } = opspace.locateTool${
-      isTool ? "" : "set"}Release(yargv, ${isTool && "toolset, "}vlm.${category}, "${simpleName}");
-  if (!${category}ReleasePath) return { success: false };
+  const ${kind}Version = yargv.overwrite ? undefined
+      : await vlm.invoke(exports.command, ["--version"]);
+  const { ${kind}Config, ${kind}ReleasePath } = typeOpspace.prepare${
+      capKind}Build(yargv, ${isTool && "toolset, "}vlm.${kind}, "${
+      simpleName}", ${kind}Version);
+  if (!${kind}Config) return { success: false };
+
+  vlm.shell.ShellString(${kind}Version).to(vlm.path.join(${
+      kind}ReleasePath, "version-hash"));
+  return { success: true, ${kind}ReleasePath, ${kind}Version };
+}`;
+  }
+
+  function _createDeployHandlerBody () {
+    return `async (yargv) => {
+  const vlm = yargv.vlm;${isTool && `
+  const toolset = yargv.toolset;`}
+  const { ${kind}Config, ${kind}ReleasePath } = typeOpspace.locate${
+      capKind}Release(yargv, ${isTool && "toolset, "}vlm.${kind}, "${simpleName}");
+  if (!${kind}ReleasePath) return { success: false };
 
   const deployedReleaseHash = await vlm.readFile(
-      vlm.path.join(${category}ReleasePath, "version-hash"));
+      vlm.path.join(${kind}ReleasePath, "version-hash"));
 
   ${isTool
-    ? "vlm.updateToolConfig(toolset, vlm.tool, { deployedReleaseHash });"
-    : "vlm.updateToolsetConfig(vlm.toolset, { deployedReleaseHash });"
+      ? "vlm.updateToolConfig(toolset, vlm.tool, { deployedReleaseHash });"
+      : "vlm.updateToolsetConfig(vlm.toolset, { deployedReleaseHash });"
   }
-  return { success: true, ${category}ReleasePath, deployedReleaseHash };
-}`,
-  }, `.release-${subName}/${isTool ? ".tool/" : ""}${name}`]);
+  return { success: true, ${kind}ReleasePath, deployedReleaseHash };
+}`;
+  }
 }
 
-function createStandardBuildOptions (vlm, exports) {
+function createBuildToolsetOptions (vlm, toolsetExports) {
   return {
-    ...createReleaseToolOptions(vlm, exports),
-    ...(!vlm.tool ? {} : {
-      toolset: createStandardToolsetOption(vlm, "The parent toolset of this tool build"),
-    }),
+    ..._createBuildOptions(vlm, "toolset", toolsetExports),
+  };
+}
+
+function createBuildToolOptions (vlm, toolExports) {
+  return {
+    toolset: createToolToolsetOption(vlm, toolExports.vlm.tool, "build"),
+    ..._createBuildOptions(vlm, "tool", toolExports),
+  };
+}
+
+function createDeployToolsetOptions (vlm, toolsetExports) {
+  return {
+    ..._createDeployOptions(vlm, "toolset", toolsetExports),
+  };
+}
+
+function createDeployToolOptions (vlm, toolExports) {
+  return {
+    toolset: createToolToolsetOption(vlm, toolExports.vlm.tool, "deploy"),
+    ..._createDeployOptions(vlm, "tool", toolExports),
+  };
+}
+
+function _createBuildOptions (vlm) {
+  return {
     target: {
       type: "string", default: vlm.releasePath,
-      description: "The target root release path of the whole build",
+      description: "The target path for the release build",
       interactive: { type: "input", when: "if-undefined" },
     },
     force: { alias: "f", type: "boolean", description: "Allow building already deployed releases" },
@@ -99,14 +151,14 @@ function createStandardBuildOptions (vlm, exports) {
   };
 }
 
-function createStandardDeployOptions (vlm, exports) {
+function _createDeployOptions (vlm) {
   return {
-    ...createReleaseToolOptions(vlm, exports),
     source: {
       type: "string", default: vlm.releasePath,
-      description: "The source root release path of the whole deployment",
+      description: "The source path of the built release",
       interactive: {
-        type: "input", when: "if-undefined", confirm: value => !!vlm.shell.test("-d", value),
+        type: "input", when: "if-undefined",
+        confirm: value => !!vlm.shell.test("-d", value),
       },
     },
   };

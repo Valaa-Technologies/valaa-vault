@@ -1,29 +1,28 @@
-const { createStandardStatusOptions } = require("@valos/type-toolset");
+const typeToolset = require("@valos/type-toolset");
 
 exports.vlm = { toolset: "@valos/type-domain" };
-exports.command = ".status/.type/.domain/10-domain";
+exports.command = ".status/.type/domain/10-domain";
 exports.brief = "display 'type-domain' status";
 exports.describe = "Display the toolset '@valos/type-domain' status of this workspace";
 exports.introduction = `${exports.describe}.`;
 
-exports.disabled = (yargs) => !yargs.vlm.getToolsetConfig(yargs.vlm.toolset, "inUse")
-    && `Toolset '${yargs.vlm.toolset}' not in use`;
+exports.disabled = (yargs) => typeToolset.checkToolsetDisabled(yargs.vlm, exports);
 exports.builder = (yargs) => yargs.options({
-  ...createStandardStatusOptions(yargs.vlm, exports),
+  ...typeToolset.createStatusToolsetOptions(yargs.vlm, exports),
 });
 
 exports.handler = async (yargv) => {
   const { extension } = require("@valos/vdoc");
   const patchWith = require("@valos/tools/patchWith").default;
   const vlm = yargv.vlm;
-  const toolsetConfig = vlm.getToolsetConfig(vlm.toolset);
+  const toolsetConfig = vlm.getToolsetConfig(exports.vlm.toolset);
   const warnings = [];
   const failures = [];
   const target = {};
   const underscoredToolset = vlm.toolset.replace(/[/@-]/g, "_");
   for (const [tool/* , toolConfig */] of Object.entries((toolsetConfig || {}).tools || {})) {
     const toolStatuses = await yargv.vlm.invoke(
-        `.status/.tool/${tool}*`, [{ toolset: vlm.toolset }]);
+        `.status/.tools/${tool}*`, [{ toolset: vlm.toolset }]);
     for (const results of [].concat(...(toolStatuses || []))) {
       if (yargv["include-tools"]) patchWith(target, results);
       const toolResult = results[`status_toolset_${underscoredToolset}_tools`][tool];

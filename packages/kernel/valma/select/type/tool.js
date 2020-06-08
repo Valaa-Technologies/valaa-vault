@@ -1,7 +1,4 @@
-const { createConfigureToolCommand, createStatusToolCommand } = require("@valos/type-toolset");
-const { createReleaseToolCommand } = require("@valos/type-opspace");
-
-exports.command = ".configure/.type/tool";
+exports.command = ".select/.type/tool";
 exports.describe = "'tool' workspace type is deprecated";
 exports.introduction =
 `Tools are a toolset implementation detail. A tool is similar to
@@ -37,21 +34,12 @@ exports.builder = (yargs) => yargs.options({
     alias: "r", type: "boolean",
     description: "Reconfigure all 'tool' configurations of this workspace.",
   },
-  brief: {
-    type: "string", description: "A brief two-three word description of this tool",
-  },
 });
 
-exports.handler = async (yargv) => {
-  const vlm = yargv.vlm;
-  const simpleName = vlm.packageConfig.name.match(/([^/]*)$/)[1];
-  await createConfigureToolCommand(vlm, vlm.packageConfig.name, simpleName, yargv.brief);
-  if (await vlm.inquireConfirm("Create tool status sub-command skeleton?")) {
-    await createStatusToolCommand(vlm, vlm.packageConfig.name, simpleName, ".tool/");
-  }
-  if (await vlm.inquireConfirm("Create tool build and deploy release sub-commands?")) {
-    await createReleaseToolCommand(vlm, vlm.packageConfig.name, simpleName, "build");
-    await createReleaseToolCommand(vlm, vlm.packageConfig.name, simpleName, "deploy");
-  }
-  return { success: true };
-};
+exports.handler = async (yargv) => ({
+  craftTool: await yargv.vlm.invoke("craft-tool", [
+    {},
+    yargv.vlm.getPackageConfig("name"),
+  ]),
+  success: true,
+});

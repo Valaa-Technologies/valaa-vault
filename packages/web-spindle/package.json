@@ -26,6 +26,6 @@
   },
   "homepage": "https://valospace.org/web-spindle",
   "bin": {
-    "_vlm__configure__toolset_-valos_web-spindle": "valma/configure_toolset__web-spindle.js"
+    "_vlm__configure__toolsets_-valos_web-spindle": "valma/configure_toolsets__web-spindle.js"
   }
 }

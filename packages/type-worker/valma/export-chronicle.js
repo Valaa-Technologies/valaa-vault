@@ -5,7 +5,7 @@ exports.brief = "export chronicle as files";
 exports.describe = "Exports given chronicle as file hierarchy under target directory";
 exports.introduction = `Uses perspire.`;
 
-exports.disabled = (yargs) => !yargs.vlm.packageConfig;
+exports.disabled = (yargs) => !yargs.vlm.getPackageConfig();
 exports.builder = (yargs) => yargs.options({
   revelation: {
     type: "object", default: null,

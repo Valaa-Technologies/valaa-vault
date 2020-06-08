@@ -1,4 +1,4 @@
-const { listMatchingConfigurableChoices, inquireConfigurableName } = require("valma");
+const { createChooseMatchingOption } = require("valma");
 
 exports.command = ".configure/.valos-stanza";
 exports.describe = "Configure valos stanza type and domain using available domains";
@@ -13,48 +13,46 @@ exports.disabled = (yargs) => yargs.vlm.getValOSConfig()
 
 exports.builder = (yargs) => {
   const vlm = yargs.vlm;
-  const valos = ((yargs.vlm._packageConfigStatus.workspacePath === process.cwd())
-          && vlm.getValOSConfig());
+  const currentPackage = (yargs.vlm._packageConfigStatus.workspacePath === process.cwd())
+      && vlm.getPackageConfig();
+  const currentValos = (currentPackage || {}).valos || {};
+  const selectorPackageConfig = currentPackage || vlm.getPackageConfig();
   return yargs.options({
+    domain: createChooseMatchingOption(vlm, ".select/.domain", selectorPackageConfig, {
+      default: currentValos.domain,
+      choiceBrief: "package.json:valos.domain",
+      selectorBrief: "the new workspace",
+      useAnswersReconfigure: true,
+      appendChoices: [
+        ...((!currentValos.type || (currentValos.type === "vault")) ? [{
+          name: "<create>", value: "<create>",
+          description: "<enter the name of a new domain this workspace introduces>",
+          confirm: false,
+        }] : []),
+        {
+          name: "<unlisted>", value: "<unlisted>",
+          description: "<enter the name of an existing but unlisted domain>",
+        },
+      ],
+      postConfirm: (choice, answers) => {
+        if (choice === "<create>") answers.isNewDomain = true;
+      },
+    }),
+    type: createChooseMatchingOption(vlm, ".select/.type", selectorPackageConfig, {
+      default: currentValos.type,
+      choiceBrief: "package.json:valos.type",
+      selectorBrief: "the new workspace",
+      useAnswersReconfigure: true,
+      prependChoices: [
+        {
+          name: "<custom>", value: "<custom>",
+          description: "<enter custom type>",
+        },
+      ],
+    }),
     reconfigure: {
       alias: "r", type: "boolean",
       description: "Reconfigure ValOS type and domain of this workspace.",
-    },
-    type: {
-      type: "string", default: valos.type,
-      description: "Select workspace package.json stanza valos.type",
-      interactive: async () => ({
-        type: "list", when: vlm.reconfigure ? "always" : "if-undefined", pageSize: 10,
-        choices: [].concat(
-            await listMatchingConfigurableChoices(vlm, "type"),
-            {
-              name: "<custom type>", value: "<custom type>",
-              description: "<enter custom type>",
-            }),
-        confirm: (...rest) => inquireConfigurableName(vlm, "type", "valos.type", ...rest),
-      }),
-    },
-    domain: {
-      type: "string", default: valos.domain,
-      description: "Select workspace package.json stanza valos.domain",
-      interactive: async () => ({
-        type: "list", when: vlm.reconfigure ? "always" : "if-undefined", pageSize: 10,
-        choices: [].concat(
-            await listMatchingConfigurableChoices(vlm, "domain"),
-            {
-              name: "<unlisted>", value: "<unlisted>",
-              description: "<enter the name of an existing but unlisted domain>",
-            },
-            ((!valos.type || (valos.type === "vault")) && {
-              name: "<create>", value: "<create>",
-              description: "<enter the name of a new domain this workspace introduces>",
-            }) || []),
-        confirm: (selection, answers, ...rest) => {
-          if (selection === "<create>") answers.isNewDomain = true;
-          return inquireConfigurableName(vlm,
-              "domain", "valos.domain", selection, answers, ...rest);
-        },
-      }),
     },
   });
 };

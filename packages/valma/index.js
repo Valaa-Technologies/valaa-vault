@@ -1,117 +1,15 @@
 module.exports = {
-  createSelectConfigurablesOption,
-  listMatchingConfigurableChoices,
-  inquireConfigurableName,
-  configureConfigurableSelection,
+  createChooseMatchingOption,
+  createSelectOfMatchingChoicesOption,
+  listMatchingChoices,
+  extractChoiceName,
+  toSelectorGlob,
+  toRestrictorPath,
+  toSimpleRestrictor,
+  inquireChoiceCommandName,
   updateConfigurableSideEffects,
 };
 
-function createSelectConfigurablesOption (
-    vlm, configurableKind, selectionConfig = {}, configurableGlob = "") {
-  const valos = vlm.packageConfig.valos || vlm.packageConfig.valaa;
-  const configuredNames = Object.keys(selectionConfig || {});
-  const inUseSelection = configuredNames
-      .filter(name => (selectionConfig[name] || {}).inUse === true);
-  return {
-    type: "string", default: inUseSelection,
-    interactive: async () => {
-      let choices = await listMatchingConfigurableChoices(
-          vlm, "select", `{.domain/.${valos.domain}/,.type/.${valos.type}/,}${configurableGlob}`);
-      choices.push(...configuredNames
-          .filter(configuredName => !choices.find(c => (c.name === configuredName)))
-          .map(name => ({
-            name, value: name, description: "has an existing toolset configuration",
-          })));
-      choices = choices.filter(c => (selectionConfig[c.value] || {}).inUse !== "always");
-      return { type: "checkbox", choices, when: choices.length ? "always" : "if-undefined" };
-    },
-    description: `Select ${configurableKind}s to use for '${vlm.toolset || valos.type}'`,
-  };
-}
-
-async function listMatchingConfigurableChoices (
-    vlm, configurableKind, invokeGlobInfix = "", nameSuffixRegExpToExclude = "") {
-  const results = await vlm.invoke(`.configure/${invokeGlobInfix}.${configurableKind}/**/*`,
-      ["--show-name", "--show-description"], { "enable-disabled": true });
-  return results.map(entry => {
-    const commandName = Object.keys(entry).find(k => k !== "...");
-    if (!commandName) return undefined;
-    const nameRegExp = `^\\.configure.*/\\.${configurableKind}/(.*)${nameSuffixRegExpToExclude}$`;
-    const name = (commandName.match(new RegExp(nameRegExp)) || [])[1];
-    if (name === undefined) {
-      throw new Error(`Could not match configurable name from command name "${
-          commandName}" using matcher "${nameRegExp}"`);
-    }
-    return !name ? undefined : { name, value: name, description: entry[commandName].description };
-  }).filter(n => n);
-}
-
-async function inquireConfigurableName (
-    vlm, configurableKind, prompt, selection, answers, answerKey) {
-  if (selection === "<none>") {
-    answers[answerKey] = undefined;
-  } else if (selection[0] === "<") {
-    answers[answerKey] = await vlm.inquireText(`Enter ${prompt}:`);
-  } else {
-    vlm.speak(await vlm.invoke(
-      `.configure/.${configurableKind}/${answers[answerKey]}`, ["--show-introduction"]));
-  }
-  return vlm.inquireConfirm(`Confirm ${prompt} selection: '${answers[answerKey]}'?`);
-}
-
-async function configureConfigurableSelection (
-    vlm, configurableKind, reconfigure, newSelection, selectionConfigPath = [],
-    configureGlob, configureArgs = []) {
-  const currentSelectionConfig = vlm.getToolsetsConfig(...selectionConfigPath) || {};
-
-  const valos = vlm.packageConfig.valos;
-  const configUpdate = {};
-  const ret = { success: true };
-  vlm.reconfigure = reconfigure;
-
-  const stowed = Object.keys(currentSelectionConfig)
-      .filter(name => (!newSelection.includes(name)
-          && (currentSelectionConfig[name].inUse === true)));
-  // TODO: add confirmation for configurations that are about to be eliminated with null
-  if (stowed.length) {
-    vlm.info(`Stowing ${configurableKind}s:`, vlm.theme.package(...stowed));
-    stowed.forEach(name => { configUpdate[name] = { inUse: false }; });
-    ret.stowed = stowed;
-  }
-  const selected = newSelection
-      .filter(name => !(currentSelectionConfig[name] || { inUse: false }).inUse);
-  if (selected.length) {
-    vlm.info(`Selecting ${configurableKind}s:`, vlm.theme.package(...selected));
-    selected.forEach(name => { configUpdate[name] = { inUse: true }; });
-    ret.selected = selected;
-  }
-  if (!reconfigure && !selected.length && !stowed.length) {
-    vlm.info(`No ${
-        configurableKind}s to configure: nothing selected or stowed and no --reconfigure given`);
-    return ret;
-  }
-  await vlm.updateToolsetsConfig(selectionConfigPath, configUpdate);
-  const configurableGlob = selectionConfigPath.length
-      ? `{,.${selectionConfigPath.join("/.")}/` : "";
-  let packageFilter = `{${selected.join(",")},}`;
-  if (selected.length) {
-    const sideEffects = ret[`${configurableKind}${reconfigure ? "Reselects" : "Selects"}`] =
-        await vlm.invoke(`.configure/{.domain/.${valos.domain}/,.type/.${valos.type}/,}${
-            configurableGlob}.select/${packageFilter}`);
-    Object.assign(ret, await updateConfigurableSideEffects(vlm, ...sideEffects));
-  }
-  if (!reconfigure) {
-    vlm.info(`Configuring the new ${configurableKind} selections:`);
-  } else {
-    vlm.info(`Reconfiguring all ${configurableKind}s:`);
-    packageFilter = "**/*";
-  }
-  ret[`${configurableKind}Configures`] = await vlm.invoke(
-      `.configure/{.domain/.${valos.domain}/,.type/.${valos.type}/,}${
-          configureGlob}${packageFilter}`,
-      [{ reconfigure: false }, ...configureArgs]);
-  return ret;
-}
 
 async function updateConfigurableSideEffects (vlm, ...results) {
   const resultBreakdown = {};
@@ -123,4 +21,134 @@ async function updateConfigurableSideEffects (vlm, ...results) {
   results.forEach(r => (r || {}).toolsetsUpdate && vlm.updateToolsetsConfig(r.toolsetsUpdate));
   resultBreakdown.success = results.reduce((a, r) => a && ((r || {}).success !== false), true);
   return resultBreakdown;
+}
+
+function createChooseMatchingOption (vlm, primaryPrefix, choosingPackageConfig, options) {
+  return _createChoicesOption(vlm, true, primaryPrefix, choosingPackageConfig, options);
+}
+
+function createSelectOfMatchingChoicesOption (vlm, primaryPrefix, selectorPackageConfig, options) {
+  return _createChoicesOption(vlm, false, primaryPrefix, selectorPackageConfig, options);
+}
+
+function _createChoicesOption (vlm, isSingular, primaryPrefix, selectorPackageConfig, {
+  choiceBrief, selectorBrief,
+  when, default: defaultAnswer, prependChoices, appendChoices, pageSize, filterChoices,
+  confirm, allowGlob, postConfirm, useAnswersReconfigure, enableDisabled,
+}) {
+  const { name, valos = {} } = selectorPackageConfig;
+  return {
+    type: "string",
+    default: defaultAnswer,
+    description: `${isSingular ? "Choose a" : "Pick"} ${
+        choiceBrief || `'${primaryPrefix}'`}${
+        isSingular ? "" : ` choices`} for ${
+        selectorBrief || `'${name}'`}`,
+    interactive: async (initialAnswers) => {
+      if (useAnswersReconfigure && !initialAnswers.reconfigure && (defaultAnswer !== undefined)) {
+        return {};
+      }
+      const domain = valos.domain;
+      let choices = await listMatchingChoices(
+          vlm, primaryPrefix, { name, domain, type: valos.type, enableDisabled });
+      choices.unshift(...(prependChoices || []).filter(candidate =>
+          choices.findIndex(existing => existing.value === candidate.value) === -1));
+      choices.push(...(appendChoices || []).filter(candidate =>
+          choices.findIndex(existing => existing.value === candidate.value) === -1));
+      if (filterChoices) {
+        choices = choices.filter(filterChoices);
+      }
+      return {
+        type: isSingular
+            ? "list"
+            : "checkbox",
+        when: when
+            || ((useAnswersReconfigure ? initialAnswers.reconfigure : choices.length)
+                ? "always" : "if-undefined"),
+        choices,
+        pageSize: pageSize || 10,
+        confirm: confirm || ((isSingular && (confirm !== false))
+            && (async (choiceValue, answers, question) => {
+          const ret = await inquireChoiceCommandName(vlm, primaryPrefix,
+              { prompt: choiceBrief, allowGlob, choiceValue, answers, question });
+          if (!ret) return ret;
+          if (postConfirm) postConfirm(choiceValue, answers, question);
+          return ret;
+        })),
+      };
+    },
+  };
+}
+
+async function listMatchingChoices (vlm, primaryPrefix, { domain, type, name, enableDisabled }) {
+  const results = await vlm.invoke(`${primaryPrefix}/${toSelectorGlob({ domain, type, name })}**/*`,
+      ["--show-name", "--show-description"], { "enable-disabled": enableDisabled });
+  // console.log("results:", results);
+  return results.map(entry => {
+    const commandName = Object.keys(entry).find(k => (k !== "..."));
+    if (!commandName) return undefined;
+    const choiceName = extractChoiceName(commandName, primaryPrefix);
+    if (choiceName === undefined) {
+      throw new Error(`Could not match choice name from command name '${
+          commandName}' with primary prefix '${primaryPrefix}'`);
+    }
+    return !choiceName ? undefined : {
+      name: choiceName, value: choiceName, description: entry[commandName].description,
+    };
+  }).filter(n => n);
+}
+
+function toSelectorGlob ({ domain, type, name }) {
+  return `${domain ? `{,.domain/${domain}/}` : ""
+      }${type ? `{,.type/${type}/}` : ""
+      }${name ? `{,.package/${name}/}` : ""}`;
+}
+
+function toRestrictorPath ({ domain, type, name }) {
+  return `${domain ? `.domain/${domain}/` : ""
+      }${type ? `.type/${type}/` : ""
+      }${name ? `.package/${name}/` : ""}`;
+}
+
+function toSimpleRestrictor ({ domain, type, name }) {
+  return `${domain ? `_domain_${domain.replace("@", "-").replace("/", "_")}` : ""
+      }${type ? `_type_${type.replace("@", "-").replace("/", "_")}` : ""
+      }${name ? `_package_${name.replace("@", "-").replace("/", "_")}` : ""}`;
+}
+
+const _domainEater = "(.domain/(@[^/]*/)?[^/]*/)?";
+const _typeEater = "(.type/(@[^/]*/)?[^/]*/)?";
+const _packageEater = "(.package/(@[^/]*/)?[^/]*/)?";
+const _extractChoiceName = new RegExp(`^/${_domainEater}${_typeEater}${_packageEater}([^.]*)$`);
+const _choiceIndex = 7;
+
+function extractChoiceName (choice, prefix) {
+  return (choice.slice(prefix.length).match(_extractChoiceName) || [])[_choiceIndex];
+}
+
+async function inquireChoiceCommandName (
+    vlm, primaryPrefix, { prompt, allowGlob, choiceValue, answers, question }) {
+  const choice = question.choices.find(candidate => (candidate.value === choiceValue));
+  if (choiceValue === undefined) {
+    answers[question.name] = undefined;
+  } else {
+    if (choiceValue[0] === "<") {
+      answers[question.name] = await vlm.inquireText(`Enter ${prompt || primaryPrefix}:`);
+    }
+    const isGlob = vlm.isGlob(answers[question.name]);
+    if (isGlob && !allowGlob) {
+      vlm.warn(`Glob values not allowed for '${question.name}'`);
+      return false;
+    }
+    if ((choice || {}).confirm !== false) {
+      vlm.speak(await vlm.invoke(
+        `${primaryPrefix}/${answers[question.name]}`,
+        isGlob
+            ? ["--show-name", "--show-description"]
+            : ["--show-introduction"]));
+    }
+  }
+  if ((choice || {}).confirm === false) return true;
+  return vlm.inquireConfirm(
+      `Confirm ${prompt || primaryPrefix} choice: '${answers[question.name]}'?`);
 }

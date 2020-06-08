@@ -12,7 +12,7 @@ In addition, dist/ can be removed with --dist in preparation for a clean slate p
 Be mindful that all of dist/ will be removed.
 yarn.lock can be removed with --yarn in preparation for persisted dependency updates.`;
 
-exports.disabled = (yargs) => !yargs.vlm.packageConfig && "No package.json found";
+exports.disabled = (yargs) => !yargs.vlm.getPackageConfig() && "No package.json found";
 exports.builder = (yargs) => {
   const vlm = yargs.vlm;
   return yargs.options({
@@ -24,13 +24,13 @@ exports.builder = (yargs) => {
       type: "boolean", default: true,
       description: "Execute all cleanup commands at innermost package root",
     },
-    lerna: {
-      type: "boolean", default: true,
-      description: `Execute '${vlm.theme.executable("lerna clean")}'`,
-    },
     yalc: {
       type: "boolean", default: true,
       description: `Execute '${vlm.theme.executable("yalc remove --all")}'`,
+    },
+    lerna: {
+      type: "boolean", default: true,
+      description: `Execute '${vlm.theme.executable("lerna clean")}'`,
     },
     node_modules: {
       type: "boolean", default: true,
@@ -60,13 +60,13 @@ exports.handler = async (yargv) => {
     throw new Error(`valma-clean-vault --at-root requested when not at package root ${
         ""}(TODO: implement the directory change for this option)`);
   }
-  if (yargv.lerna) {
-    await vlm.delegate(["lerna", "clean", { yes: true }]);
-    ret["lerna workspaces"] = "cleaned";
-  }
   if (yargv.yalc) {
     await vlm.delegate(["yalc", "remove", { all: true }]);
     ret["yalc dependencies"] = "removed";
+  }
+  if (yargv.lerna) {
+    await vlm.delegate(["lerna", "clean", { yes: true }]);
+    ret["lerna workspaces"] = "cleaned";
   }
   for (const key of Object.keys(ret)) ret[key] = await ret[key];
   if (yargv.node_modules && vlm.shell.test("-e", "node_modules")) {

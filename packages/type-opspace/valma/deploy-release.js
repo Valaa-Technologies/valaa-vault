@@ -1,13 +1,13 @@
-#!/usr/bin/env vlm
+const typeToolset = require("@valos/type-toolset");
 
-// 'deploy' first so tab-completion is instant. Everything else 'release' first so build and
-// deploy commands get listed next to each other.
 exports.vlm = { toolset: "@valos/type-opspace" };
 exports.command = "deploy-release [toolsetGlob]";
 exports.describe = "Deploy previously built releases to their deployment targets";
 exports.introduction =
 `This command is second part of the two-part deployment with
 build-release building the release.`;
+
+exports.disabled = (yargs) => typeToolset.checkToolsetDisabled(yargs.vlm, exports);
 
 exports.builder = (yargs) => yargs.options({
   source: {

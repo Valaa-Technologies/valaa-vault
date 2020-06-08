@@ -210,15 +210,18 @@ package configuration file for yarn (and also for npm, which yarn is
   async function _selectValOSTypeAndDomain (explicitValos) {
     let justConfigured = false;
     const ret = {};
-    while (yargv.reconfigure || !vlm.packageConfig.valos || justConfigured) {
-      if (Object.keys(explicitValos || {}).length
-          && (!vlm.packageConfig.valos || yargv.reconfigure)) {
-        await vlm.updatePackageConfig({ valos: explicitValos });
-        if (explicitValos.type && explicitValos.domain) justConfigured = true;
+    while (yargv.reconfigure || !vlm.getValOSConfig() || justConfigured) {
+      if (Object.keys(explicitValos || {}).length && (!vlm.getValOSConfig() || yargv.reconfigure)) {
+        if (explicitValos.type && explicitValos.domain) {
+          ret.valosStanza = { valos: explicitValos };
+          justConfigured = true;
+        } else {
+          await vlm.updatePackageConfig({ valos: explicitValos });
+        }
       }
       const choices = (justConfigured
                   ? ["Commit", "reconfigure"]
-              : vlm.packageConfig.valos
+              : vlm.getValOSConfig()
                   ? ["Bypass", "reconfigure"]
                   : ["Initialize"])
           .concat(["help", "quit"]);
@@ -253,11 +256,11 @@ package configuration file for yarn (and also for npm, which yarn is
     const yarnAdd = "yarn add --dev -W";
     const themedYarnAdd = vlm.theme.executable(yarnAdd);
     let wasError;
-    const wasInitial = !vlm.packageConfig.devDependencies;
+    const wasInitial = !vlm.getPackageConfig("devDependencies");
     while (yargv.reconfigure || wasInitial) {
-      const visibleDomains = await vlm.delegate("vlm -bePVO .configure/.domain/{,*/**/}*");
+      const visibleDomains = await vlm.delegate("vlm -bePVO .select/.domain/{,*/**/}*");
       vlm.info("Visible domains:\n", visibleDomains);
-      const choices = vlm.packageConfig.devDependencies
+      const choices = vlm.getPackageConfig("devDependencies")
           ? ["Bypass", "yes", "help", "quit"]
           : ["Yes", "bypass", "help", "quit"];
       let answer = await vlm.inquire([{

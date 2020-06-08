@@ -9,11 +9,11 @@ immediately available.
 With --import a existing exported script is copied for local editing
 and development.`;
 
-exports.disabled = (yargs) => !yargs.vlm.packageConfig && "No package.json found";
+exports.disabled = (yargs) => !yargs.vlm.getPackageConfig() && "No package.json found";
 exports.builder = (yargs) => yargs.options({
   filename: {
     type: "string",
-    description: "The new command skeleton filename in valma/ (leave empty for default)",
+    description: "The new command template filename in valma/ (leave empty for default)",
     interactive: { type: "input", when: "if-undefined" }
   },
   brief: {
@@ -27,12 +27,11 @@ exports.builder = (yargs) => yargs.options({
     type: "boolean",
     description: "Copy an existing, accessible command script as the new script",
   },
-  skeleton: {
-    type: "boolean", default: true,
-    description: "If true will only draft a minimal script skeleton",
+  template: {
+    type: "boolean", description: "Fill with template example content. False for bare-bones.",
   },
   header: {
-    type: "string", description: "Lines to place at the beginning of the script skeleton",
+    type: "string", description: "Lines to place at the beginning of the script template",
   },
   "exports-vlm": {
     type: "string", description: "Full exports.vlm source (as Object.assign-able object)",
@@ -52,6 +51,9 @@ exports.builder = (yargs) => yargs.options({
   handler: {
     type: "string", description: "Full exports.handler source (as function callback)",
   },
+  confirm: {
+    type: "boolean", description: "Confirm creation (do not ask interactively)",
+  },
 });
 
 exports.handler = async (yargv) => {
@@ -63,7 +65,7 @@ exports.handler = async (yargv) => {
   let verb = "already exports";
   const import_ = yargv.import;
   let local = !yargv.export;
-  while (!(vlm.packageConfig.bin || {})[commandFilename]) {
+  while (!vlm.getPackageConfig("bin", commandFilename)) {
     const choices = [import_ ? "Import" : local ? "Create" : "Export", "skip",
       local ? "export instead" : "local instead"
     ];
@@ -71,11 +73,13 @@ exports.handler = async (yargv) => {
     const linkMessage = local
         ? `'valma.bin/${commandFilename}'`
         : `'package.json':bin["${commandFilename}"]`;
-    const answer = await vlm.inquire([{
+    const answer = yargv.confirm
+        ? { choice: "yes" }
+        : await vlm.inquire([{
       message: `${import_ ? "Import" : local ? "Create" : "Export"
           } ${(yargv.brief && `'${yargv.brief}'`)
               || (import_ ? "an existing command" : local ? "a local command" : "a command")
-          } script ${import_ ? "copy" : yargv.skeleton ? "skeleton" : "template"
+          } script ${import_ ? "copy" : yargv.template ? "template" : "skeleton"
           } as ${linkMessage} -> '${scriptPath}'?`,
       type: "list", name: "choice", default: choices[0], choices,
     }]);
@@ -129,10 +133,10 @@ exports.handler = async (yargv) => {
   if (verb === "already exports") {
     vlm.warn(message);
     vlm.instruct("You can edit the existing command script at:",
-        vlm.theme.path(vlm.packageConfig.bin[commandFilename]));
+        vlm.theme.path(vlm.getPackageConfig("bin", commandFilename)));
   } else {
     vlm.info(message);
-    vlm.instruct(`You can edit the command ${yargv.skeleton ? "skeleton" : "template"} at:`,
+    vlm.instruct(`You can edit the command ${yargv.template ? "template" : "skeleton"} at:`,
         vlm.theme.path(scriptPath));
   }
   return { local, verb, [command]: scriptPath };
@@ -140,7 +144,7 @@ exports.handler = async (yargv) => {
 
 function _draftSource (command, yargv) {
   // Emit shebang only if the command is a top-level command.
-  const components = yargv.skeleton ? _draftSkeleton() : _draftExample();
+  const components = yargv.template ? _draftTemplate() : _draftSkeleton();
   return `${(command[0] === ".") || command.includes("/.") ? "" : "#!/usr/bin/env vlm\n\n"
 }${yargv.header || ""
 }${!yargv["exports-vlm"] ? "" : `exports.vlm = ${yargv["exports-vlm"]};\n`
@@ -158,7 +162,7 @@ exports.handler = ${yargv.handler || components.handler};
 
   function _draftSkeleton () {
     return {
-      disabled: "(yargs) => !yargs.vlm.packageConfig",
+      disabled: "(yargs) => !yargs.vlm.getPackageConfig()",
       builder:
 `(yargs) => {
   const vlm = yargs.vlm;
@@ -172,9 +176,9 @@ exports.handler = ${yargv.handler || components.handler};
     };
   }
 
-  function _draftExample () {
+  function _draftTemplate () {
     return {
-      disabled: "(yargs) => !yargs.vlm.packageConfig",
+      disabled: "(yargs) => !yargs.vlm.getPackageConfig()",
       builder:
 `(yargs) => {
   const vlm = yargs.vlm;
@@ -182,7 +186,7 @@ exports.handler = ${yargv.handler || components.handler};
     name: {
       // See https://github.com/yargs/yargs/blob/HEAD/docs/api.md for yargs options
       type: "string", description: "current package name",
-      default: vlm.packageConfig.name,
+      default: vlm.getPackageConfig("name"),
       // See https://github.com/SBoudrias/Inquirer.js/ about interactive attributes
       interactive: { type: "input", when: "if-undefined" },
     },

@@ -1,4 +1,4 @@
-exports.command = ".configure/.type/vault";
+exports.command = ".select/.type/vault";
 exports.describe = "Maintain many workspaces in a single version controlled mono-repository";
 exports.introduction =
 `A vault is a *monorepository* which contains multiple sub-workspaces

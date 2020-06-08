@@ -1,5 +1,7 @@
 #!/usr/bin/env vlm
 
+const { extractChoiceName } = require("valma");
+
 exports.vlm = { toolset: "@valos/type-vault" };
 exports.command = "generate-domain-summary";
 exports.brief = "generate domain summary";
@@ -41,18 +43,23 @@ exports.handler = async (yargv) => {
     const byType = workspaces[valos.type] || (workspaces[valos.type] = {});
     byType[name] = { version, description, homepage: homepage || valos.docs, license, repository };
   });
-  const types = await _invokeAndFilter("PVDI", ".configure/.type/*",
-      name => name.slice(".configure/.type/".length));
-  const toolsets = await _invokeAndFilter("PVDI", ".configure/{,.*/{,.*,**}/}.select/**/*",
-      name => name.match(/.select\/(.*)$/)[1]);
-  const tools = await _invokeAndFilter("PVDI", ".configure/{,.*/{,.*,**}/}.tools/.select/**/*",
-      name => name.match(/.configure\/\.(.*)\/.tools\/.select\/(.*)$/).slice(1, 3).join("#"));
+  const types = await _invokeAndFilter("PVDI",
+      ".select/.type/{,.domain/*/,.domain/@*/*/}*",
+      name => (extractChoiceName(name, ".select/.type") || "<invalid>"));
+  const allConstaints =
+      `{,.domain/*/,.domain/@*/*/}{,.type/*/,.type/@*/*/}{,.package/*/,.package/@*/*/}`;
+  const toolsets = await _invokeAndFilter("PVDI",
+      `.select/.toolsets/${allConstaints}**/*`,
+      name => (extractChoiceName(name, ".select/.toolsets") || "<invalid>"));
+  const tools = await _invokeAndFilter("PVDI",
+      `.select/.tools/${allConstaints}**/*`,
+      name => (extractChoiceName(name, ".select/.tools") || "<invalid>"));
   const commands = await _invokeAndFilter("PVDI", "*");
   const summary = { workspaces, types, toolsets, tools, commands };
   await vlm.shell.ShellString(JSON.stringify(summary, null, 2)).to(yargv["summary-target"]);
   await vlm.execute([`git add`, yargv["summary-target"]]);
   return {
-    domain: vlm.packageConfig.valos.domain,
+    domain: vlm.getValOSConfig("domain"),
     workspaces: Object.keys(workspaceIds),
     success: `Generated a summary of ${
       Object.keys(workspaceIds).length} workspaces of ${

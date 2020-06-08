@@ -15,6 +15,6 @@
   },
   "main": "index.js",
   "bin": {
-    "_vlm__configure__toolset_-valos_type-toolset": "valma/configure_toolset__type-toolset.js"
+    "_vlm__configure__toolsets_-valos_type-toolset": "valma/configure_toolsets__type-toolset.js"
   }
 }

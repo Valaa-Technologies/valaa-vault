@@ -1,12 +1,14 @@
+const typeToolset = require("@valos/type-toolset");
+
 exports.vlm = { toolset: "@valos/web-spindle" };
-exports.command = ".configure/.type/.worker/.select/@valos/web-spindle";
+exports.command = ".select/.toolsets/.type/worker/@valos/web-spindle";
 exports.brief = "select web-spindle";
 exports.describe = "Project http/s requests to valospace-fabric via a gateway plugin";
 exports.introduction =
-`Selects web-spindle as a worker tool.`;
+`Selects web-spindle as a worker toolset.`;
 
-exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "worker")
-    && `Workspace is not a worker`;
+exports.disabled = (yargs) => typeToolset.checkToolsetSelectorDisabled(yargs.vlm, exports,
+  { type: "worker" });
 exports.builder = (yargs) => yargs.options({});
 
 exports.handler = async (yargv) => ({

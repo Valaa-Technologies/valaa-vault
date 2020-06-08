@@ -1,11 +1,13 @@
+const typeToolset = require("@valos/type-toolset");
+
+exports.vlm = { toolset: "@valos/type-opspace" };
 exports.command = ".status/.type/.opspace/10-opspace";
 exports.brief = "display the domain status";
 exports.describe = "Display the opspace status";
 exports.introduction = `
 `;
 
-exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "opspace")
-    && `Workspace is not an opspace`;
+exports.disabled = (yargs) => typeToolset.checkToolsetDisabled(yargs.vlm, exports);
 exports.builder = (yargs) => yargs;
 
 exports.handler = (yargv) => {

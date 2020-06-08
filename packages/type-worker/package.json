@@ -17,7 +17,7 @@
     "_vlm_perspire": "valma/perspire.js",
     "_vlm_export-chronicle": "valma/export-chronicle.js",
     "_vlm_bundle-revelation": "valma/bundle-revelation.js",
-    "_vlm__configure__type__worker_-valos_type-worker": "valma/configure__worker__type-worker.js"
+    "_vlm__configure__toolsets_-valos_type-worker": "valma/configure_toolsets__type-worker.js"
   },
   "dependencies": {
     "@valos/inspire": "^0.35.0-rc.17",

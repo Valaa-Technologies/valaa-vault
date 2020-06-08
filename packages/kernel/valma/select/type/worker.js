@@ -1,4 +1,4 @@
-exports.command = ".configure/.type/worker";
+exports.command = ".select/.type/worker";
 exports.describe = "Execute perspire gateway as a Node.js process";
 exports.introduction =
 `A worker workspace is used to launch and manage a particular service

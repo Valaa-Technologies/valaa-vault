@@ -1,5 +1,6 @@
-#!/usr/bin/env vlm
+const typeToolset = require("@valos/type-toolset");
 
+exports.vlm = { toolset: "@valos/type-vault" };
 exports.command = "release-vault";
 exports.describe = "Prepare, commit and potentially publish a new release of vault packages";
 exports.introduction =
@@ -28,8 +29,7 @@ Will invoke valma command hooks between stages as per:
 const cleanDefault = Object.freeze({ yes: true, yarn: true, install: true, dist: true });
 const assembleDefault = Object.freeze({ "add-unchanged": true });
 
-exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "vault")
-    && `Workspace is not a vault`;
+exports.disabled = (yargs) => typeToolset.checkToolsetDisabled(yargs.vlm, exports);
 exports.builder = (yargs) => yargs.options({
   clean: {
     group: "Active options",

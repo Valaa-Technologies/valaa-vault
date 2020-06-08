@@ -1,4 +1,4 @@
-exports.command = ".configure/.domain/@valos/kernel";
+exports.command = ".select/.domain/@valos/kernel";
 exports.brief = "select @valos/kernel domain";
 exports.describe = "Contribute to Valaa Open System core components";
 exports.introduction =

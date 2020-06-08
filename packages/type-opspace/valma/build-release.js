@@ -1,7 +1,5 @@
-#!/usr/bin/env vlm
+const typeToolset = require("@valos/type-toolset");
 
-// 'build' first so tab-completion is instant. Everything else 'release' first so build and
-// deploy commands get listed next to each other.
 exports.vlm = { toolset: "@valos/type-opspace" };
 exports.command = "build-release [toolsetGlob]";
 exports.describe = "Build a new release of this opspace";
@@ -20,6 +18,8 @@ These sub-commands (which can be local opspace commands or commands
 provided by opspace toolset dependencies) then (re)build the actual
 build artifacts under the target path.
 `;
+
+exports.disabled = (yargs) => typeToolset.checkToolsetDisabled(yargs.vlm, exports);
 
 exports.builder = (yargs) => yargs.options({
   target: {

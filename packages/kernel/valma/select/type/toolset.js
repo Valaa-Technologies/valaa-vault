@@ -1,5 +1,5 @@
 exports.vlm = { toolset: "@valos/type-toolset" };
-exports.command = ".configure/.type/toolset";
+exports.command = ".select/.type/toolset";
 exports.brief = "select type toolset";
 exports.describe = "Construct a collection of valma tools that other workspaces can select and use";
 exports.introduction =

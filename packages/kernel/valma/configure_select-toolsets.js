@@ -1,5 +1,4 @@
-const { createSelectConfigurablesOption } = require("valma");
-const { configureToolsetSelection } = require("@valos/type-toolset");
+const { createSelectToolsetsOption, configureToolsetSelection } = require("@valos/type-toolset");
 
 exports.command = ".configure/select-toolsets";
 exports.describe = "Select and stow toolsets from the set available toolsets";
@@ -8,7 +7,7 @@ exports.introduction =
 the set of all valma toolset configuration commands at that package
 root directory as:
 
-vlm -N '.configure/{,.type/.<type>/,.domain/.<domain>/}.select/**/*'
+vlm -N '.select/.toolsets/{,.domain/<domain>/}{,.type/<type>/,}{,.package/<name>}/**/*'
 
 When a toolset is selected to be in use it is always added as a direct
 devDependency for the package if it is not already.
@@ -36,8 +35,9 @@ exports.disabled = (yargs) => {
       : !valos.domain ? "No package.json valos.domain stanza found"
       : !yargs.vlm.getToolsetsConfig() && "No toolsets.json found";
 };
+
 exports.builder = (yargs) => yargs.options({
-  toolsets: createSelectConfigurablesOption(yargs.vlm, "toolset", yargs.vlm.getToolsetsConfig()),
+  toolsets: createSelectToolsetsOption(yargs.vlm, exports),
   add: {
     type: "string", array: true,
     description: "Add explicit toolsets to the selection (even if unavailable)",

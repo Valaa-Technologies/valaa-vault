@@ -9,7 +9,7 @@ Preloads their event logs and media contents using vlm export-chronicle.
 Bundles these back into revelation files and adds them into prologue
 chronicleVLogs, chronicleMediaInfos, bvobInfos and bvobBuffers sections.`;
 
-exports.disabled = (yargs) => !yargs.vlm.packageConfig;
+exports.disabled = (yargs) => !yargs.vlm.getPackageConfig();
 exports.builder = (yargs) => yargs.options({
   "chronicles-dir": {
     type: "string", default: "./revelation/chronicles",

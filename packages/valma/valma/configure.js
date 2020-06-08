@@ -32,8 +32,8 @@ exports.builder = (yargs) => yargs.options({
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
   vlm.reconfigure = yargv.reconfigure;
-  const valos = vlm.getValOSConfig();
-  if (!valos || !valos.type || !valos.domain) {
+  const { name, valos: { domain, type } = {} } = vlm.getPackageConfig();
+  if (!name || !type || !domain) {
     throw new Error("vlm configure: current directory is not a valos workspace; "
         + "no package.json with valos stanza with both type and domain set"
         + "(maybe run 'vlm init' to initialize?)");
@@ -53,21 +53,17 @@ exports.handler = async (yargv) => {
   };
   Object.assign(ret, await updateConfigurableSideEffects(vlm, ret.domain[0], ret.type[0]));
   if (ret.success === false) return ret;
+  const selectorGlob = toSelectorGlob({ domain, type, name });
+  ret.toolsetConfigures = await vlm.invoke(
+      `.configure/.toolsets/${selectorGlob}${yargv.toolsetGlob || "*"}/**/*`,
+      rest);
+  Object.assign(ret, await updateConfigurableSideEffects(vlm, ...ret.toolsetConfigures));
 
-  if (yargv.domain) {
-    ret.domain.push(...await vlm.invoke(`.configure/.domain/.${valos.domain}/**/*`, rest));
+  if (!yargv.toolsetGlob) {
+    ret.mainConfigures = await vlm.invoke(`.configure/${selectorGlob}**/*`, rest);
+    Object.assign(ret, await updateConfigurableSideEffects(vlm, ...ret.mainConfigures));
+    if (ret.success === false) return ret;
   }
-  if (yargv.type) {
-    ret.type.push(...await vlm.invoke(`.configure/.type/.${valos.type}/**/*`, rest));
-  }
-  Object.assign(ret, await updateConfigurableSideEffects(
-      vlm, ...ret.domain.slice(1), ...ret.type.slice(1)));
-  if (ret.success === false) return ret;
-
-  ret.subConfigures = await vlm.invoke(
-      `.configure/{.domain/.${valos.domain}/,.type/.${valos.type}/,}${
-        ""}{,.toolset/,.toolset/${yargv.toolsetGlob || "*"}/**/}*`, rest);
-  Object.assign(ret, await updateConfigurableSideEffects(vlm, ...ret.subConfigures));
   return (yargv.breakdown || (ret.success === false))
       ? ret
       : { success: ret.success };

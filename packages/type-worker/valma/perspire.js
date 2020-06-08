@@ -4,7 +4,7 @@ exports.command = "perspire [revelation-path] [additional-revelation-paths..]";
 exports.describe = "Launch a headless worker gateway for virtual DOM ValOS computation jobs";
 exports.introduction = ``;
 
-exports.disabled = (yargs) => !yargs.vlm.packageConfig && "No package.json found";
+exports.disabled = (yargs) => !yargs.vlm.getPackageConfig() && "No package.json found";
 exports.builder = (yargs) => yargs.option({
   spindles: {
     group: "Worker options:",

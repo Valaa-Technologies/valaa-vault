@@ -1,22 +1,23 @@
-const { createConfigureToolOptions } = require("@valos/type-toolset");
+const typeToolset = require("@valos/type-toolset");
 
-exports.vlm = { toolset: "@valos/type-vault" };
-exports.command = ".configure/.@valos/type-vault/.tools/.select/domain";
+exports.vlm = { toolset: "@valos/type-vault", tool: "domain" };
+exports.command = ".select/.tools/.package/@valos/type-vault/domain";
 exports.brief = "select domain management";
 exports.describe = "Setup a type-domain package for curating the domain of this vault";
 exports.introduction =
 `This type-vault tool enables the domain management and (re)generation
 of docs/index.html domain summary revdoc document.`;
 
-exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "vault")
-    && `Workspace is not a vault`;
+exports.disabled = (yargs) => typeToolset.checkToolSelectorDisabled(yargs.vlm, exports,
+    { name: exports.vlm.toolset });
 
 exports.builder = (yargs) => yargs.options({
-  ...createConfigureToolOptions(yargs.vlm, exports),
   "regenerate-on-release": {
     default: yargs.vlm.getToolConfig(yargs.vlm.toolset, "domain", "regenerateOnRelease"),
     description: "Regenerate domain summary revdoc on each vault (pre)release",
-    interactive: { type: "confirm", when: yargs.vlm.reconfigure ? "always" : "if-undefined" },
+    interactive: answers => ({
+      type: "confirm", when: answers.reconfigure ? "always" : "if-undefined",
+    }),
   },
   "summary-target": {
     type: "string",
@@ -24,8 +25,11 @@ exports.builder = (yargs) => yargs.options({
         || `packages/${yargs.vlm.getValOSConfig("domain")
             .split(yargs.vlm.getValOSConfig("prefix") || "/")[1] || "REPLACEME"}/summary.json`,
     description: "Target domain summary JSON path",
-    interactive: { type: "confirm", when: yargs.vlm.reconfigure ? "always" : "if-undefined" },
+    interactive: answers => ({
+      type: "confirm", when: answers.reconfigure ? "always" : "if-undefined",
+    }),
   },
+  ...typeToolset.createConfigureToolOptions(yargs.vlm, exports),
 });
 
 exports.handler = async (yargv) => {
@@ -46,9 +50,9 @@ exports.handler = async (yargv) => {
       devDependencies: false,
     });
     await vlm.interact([`vlm draft-command`, {
-      filename: `configure_domain__${domainLocal}.js`,
+      filename: `select_domain__${domainLocal}.js`,
       export: true,
-      skeleton: true,
+      template: false,
       brief: `select ${domain} domain`,
       describe: `Configure ${domain} domain for this workspace.`,
       introduction: ``,
@@ -63,7 +67,7 @@ exports.handler = async (yargv) => {
   },
 })`,
       handler: `() => ({ success: true })`,
-    }, `.configure/.domain/${domain}`]);
+    }, `.select/.domain/${domain}`]);
     vlm.shell.popd();
   }
   return {

@@ -1,7 +1,7 @@
-const { createConfigureToolOptions } = require("@valos/type-toolset");
+const typeToolset = require("@valos/type-toolset");
 
-exports.vlm = { toolset: "@valos/type-vault" };
-exports.command = ".configure/.@valos/type-vault/.tools/.select/docs";
+exports.vlm = { toolset: "@valos/type-vault", tool: "docs" };
+exports.command = ".select/.tools/.package/@valos/type-vault/docs";
 exports.brief = "select docs generation";
 exports.describe = "Generate /docs html files from all vault revdocs files";
 exports.introduction =
@@ -11,22 +11,26 @@ all revdoc documents matching glob '*.revdoc{,.test}.js'.
 Additionally this tool can be configured to regenerate all docs on
 (pre)release time.`;
 
-exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "vault")
-    && `Workspace is not a vault`;
+exports.disabled = (yargs) => typeToolset.checkToolSelectorDisabled(yargs.vlm, exports,
+    { name: exports.vlm.toolset });
 
 exports.builder = (yargs) => yargs.options({
-  ...createConfigureToolOptions(yargs.vlm, exports),
   "regenerate-on-release": {
     default: yargs.vlm.getToolConfig(yargs.vlm.toolset, "docs", "regenerateOnRelease"),
     description: "Regenerate software bill of materials on each (pre)release",
-    interactive: { type: "confirm", when: yargs.vlm.reconfigure ? "always" : "if-undefined" },
+    interactive: answers => ({
+      type: "confirm", when: answers.reconfigure ? "always" : "if-undefined",
+    }),
   },
   "docs-base-iri": {
     type: "string",
     default: yargs.vlm.getToolConfig(yargs.vlm.toolset, "docs", "docsBaseIRI"),
     description: "The public base IRI of the final published vault documents",
-    interactive: { type: "input", when: yargs.vlm.reconfigure ? "always" : "if-undefined" },
+    interactive: answers => ({
+      type: "input", when: answers.reconfigure ? "always" : "if-undefined",
+    }),
   },
+  ...typeToolset.createConfigureToolOptions(yargs.vlm, exports),
 });
 
 exports.handler = (yargv) => {

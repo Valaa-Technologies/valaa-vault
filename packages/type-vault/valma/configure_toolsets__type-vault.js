@@ -1,7 +1,7 @@
-const { createConfigureToolsetOptions, configureToolSelection } = require("@valos/type-toolset");
+const typeToolset = require("@valos/type-toolset");
 
 exports.vlm = { toolset: "@valos/type-vault" };
-exports.command = ".configure/.type/.vault/@valos/type-vault";
+exports.command = ".configure/.toolsets/@valos/type-vault";
 exports.brief = "configure 'type-vault'";
 exports.describe = "Configure the 'type-vault' toolset";
 exports.introduction = `${exports.describe}.
@@ -11,17 +11,14 @@ Adds valma commands 'assemble-packages' and 'publish-packages'.
 Copies vault monorepo config file templates to this vault workspace
 root from package @valos/type-vault directory templates/.*.`;
 
-// Example template which displays the command name itself and package name where it is ran
-// Only enabled inside package
-exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "vault")
-    && `Workspace is not a vault`;
+exports.disabled = (yargs) => typeToolset.checkToolsetDisabled(yargs.vlm, exports);
 exports.builder = (yargs) => yargs.options({
-  ...createConfigureToolsetOptions(yargs.vlm, exports),
+  ...typeToolset.createConfigureToolsetOptions(yargs.vlm, exports),
 });
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
-  const toolsetConfig = vlm.getToolsetConfig(vlm.toolset);
+  const toolsetConfig = vlm.getToolsetConfig(exports.vlm.toolset);
   if (!toolsetConfig) return undefined;
 
   const templates = vlm.path.join(__dirname, "../templates/{.,}*");
@@ -65,7 +62,7 @@ exports.handler = async (yargv) => {
     };
     vlm.shell.ShellString(JSON.stringify(lerna, null, 2)).to("./lerna.json");
   }
-  const selectionResult = await configureToolSelection(
+  const selectionResult = await typeToolset.configureToolSelection(
       vlm, vlm.toolset, yargv.reconfigure, yargv.tools);
 
   // TODO(iridian, 2020-05): This should probably be its own tool.

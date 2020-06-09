@@ -17,10 +17,6 @@ exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
   const toolsetConfig = vlm.getToolsetConfig(exports.vlm.toolset) || {};
 
-  const templates = vlm.path.join(require.resolve(exports.vlm.toolset), "./templates/{.,}*");
-  vlm.info("Copying revealer template files from ", vlm.theme.path(templates),
-      "(will not clobber existing files)");
-  vlm.shell.cp("-n", templates, ".");
   vlm.instruct(`! Edit ${vlm.theme.path("webpack.config.js")
       } to configure webpack entry and output locations.`);
 

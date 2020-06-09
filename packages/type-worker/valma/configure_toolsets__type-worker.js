@@ -31,14 +31,17 @@ exports.handler = async (yargv) => {
   vlm.info("Copying missing worker config files", " from templates at:",
       vlm.theme.path(templates), "(will not clobber existing files)");
   vlm.shell.cp("-nR", templates, ".");
-  const toolsetConfigUpdate = { ...toolsetConfig };
-  toolsetConfigUpdate.serviceURI = yargv.serviceURI;
+  const toolsetConfigUpdate = {
+    ...toolsetConfig,
+    serviceURI: yargv.serviceURI,
+  };
   if (yargv.reconfigure || !(toolsetConfigUpdate.commands || {}).perspire) {
     toolsetConfigUpdate.commands = toolsetConfigUpdate.commands || {};
     toolsetConfigUpdate.commands.perspire = {
       options: {
-        keepalive: 5,
-        output: "dist/perspire/vdomSnapshot.html",
+        keepalive: 60,
+        heartbeat: "worker-perspire-template",
+        output: "dist/perspire/worker-view.html",
         spindles: [],
       }
     };
@@ -47,5 +50,9 @@ exports.handler = async (yargv) => {
 
   const selectionResult = await typeToolset.configureToolSelection(
       vlm, vlm.toolset, yargv.reconfigure, yargv.tools);
-  return { command: exports.command, ...selectionResult };
+  return {
+    command: exports.command,
+    success: true,
+    ...selectionResult,
+  };
 };

@@ -37,9 +37,27 @@ exports.builder = (yargs) => {
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
   const toolsetConfig = vlm.getToolsetConfig(exports.vlm.toolset);
-  const toolsetConfigUpdate = { ...toolsetConfig };
-  toolsetConfigUpdate.port = yargv.port;
-  toolsetConfigUpdate.address = yargv.address;
+  const toolsetConfigUpdate = {
+    ...toolsetConfig,
+    port: yargv.port,
+    address: yargv.address,
+  };
+  if (toolsetConfigUpdate.title === undefined) {
+    // TOOD(iridian, 2020-06): Make these conditional on user
+    // selecting the copy-template-files tool
+    Object.assign(toolsetConfigUpdate, {
+      title: "openapi Example Title",
+      serviceGETHandlerName: "handleGET",
+      servicePUTHandlerName: "handlePUT",
+      serviceDELETEHandlerName: "handleDELETE",
+      servicePOSTHandlerName: "handlePOST",
+    });
+    await vlm.updateFileConfig("./revela.json", {
+      spindles: {
+        "@valos/web-spindle": { "!!!": "./revelation_web-spindle" },
+      },
+    });
+  }
   vlm.updateToolsetConfig(vlm.toolset, toolsetConfigUpdate);
 
   await require("@valos/type-worker")
@@ -47,5 +65,9 @@ exports.handler = async (yargv) => {
 
   const selectionResult = await typeToolset.configureToolSelection(
       vlm, vlm.toolset, yargv.reconfigure, yargv.tools);
-  return { success: true, ...selectionResult };
+
+  return {
+    ...selectionResult,
+    success: true,
+  };
 };

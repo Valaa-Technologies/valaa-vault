@@ -6,7 +6,7 @@
     "domain": { "!!!": ["./package", "valos", "domain"] }
   },
   "gateway": {
-    "authorityConfigs": { "!!!": "./revelation/authority-configs" },
+    "authorityConfigs": { "!!!": "./revelation_authority-configs" },
     "verbosity": 1,
     "scribe": { "verbosity": 0 }
   },
@@ -15,8 +15,6 @@
       "!!!": ["./toolsets", "@valos/type-worker", "serviceURI"]
     }
   },
-  "spindles": {
-    "@valos/web-spindle": { "!!!": "./revelation/web-spindle" }
-  },
+  "spindles": {},
   "views": {}
 }

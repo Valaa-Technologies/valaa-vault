@@ -257,10 +257,10 @@ function checkToolsetSelectorDisabled (vlm, { vlm: { toolset } }, restriction) {
 }
 
 function checkToolSelectorDisabled (vlm, { vlm: { tool, toolset } }, restriction) {
+  if (!(vlm.toolset || toolset)) return `Tools must have a context-vlm.toolset specified`;
   if (!restriction) return false;
   const { domain, type, name } = restriction;
-  const selector = !(vlm.toolset || toolset) ? {}
-      : vlm.getToolsetPackageConfig(vlm.toolset || toolset);
+  const selector = vlm.getToolsetPackageConfig(vlm.toolset || toolset);
   return domain && ((selector.valos || {}).domain !== domain)
           ? `Tool '${tool}' only selectable for domain '${domain}' toolsets`
       : type && ((selector.valos || {}).type !== type)
@@ -360,7 +360,7 @@ function createSelectToolsOption (vlm, { vlm: { toolset } }) {
 }
 
 function _createSelectToolsOrToolsetsOption (vlm, primaryGlob,
-    choiceBrief, selectorBrief, selectorPackageConfig, selectionConfig = {}) {
+    choiceBrief, selectorBrief, selectorPackageConfig, selectionConfig = {}, choicesOptions = {}) {
   const configuredNames = Object.keys(selectionConfig || {});
   return createSelectOfMatchingChoicesOption(vlm, primaryGlob, selectorPackageConfig, {
     choiceBrief,
@@ -375,6 +375,7 @@ function _createSelectToolsOrToolsetsOption (vlm, primaryGlob,
           description: "<a configured selection which is not otherwise found>",
         })),
     filterChoices: c => ((selectionConfig[c.value] || {}).inUse !== "always"),
+    ...choicesOptions,
   });
 }
 

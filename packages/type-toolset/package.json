@@ -15,6 +15,7 @@
   },
   "main": "index.js",
   "bin": {
-    "_vlm__configure__toolsets_-valos_type-toolset": "valma/configure_toolsets__type-toolset.js"
+    "_vlm__configure__toolsets_-valos_type-toolset": "valma/configure_toolsets__type-toolset.js",
+    "_vlm_craft-tool": "valma/_vlm_craft-tool.js"
   }
 }

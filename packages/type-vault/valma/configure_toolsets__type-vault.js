@@ -21,10 +21,6 @@ exports.handler = async (yargv) => {
   const toolsetConfig = vlm.getToolsetConfig(exports.vlm.toolset);
   if (!toolsetConfig) return undefined;
 
-  const templates = vlm.path.join(__dirname, "../templates/{.,}*");
-  vlm.info("Copying vault template files from ", vlm.theme.path(templates),
-      "(will not clobber existing files)");
-  vlm.shell.cp("-n", templates, ".");
   const hardcodedVDONFiles = ["README", "STYLE"];
   for (const vdonFile of hardcodedVDONFiles) {
     vlm.shell

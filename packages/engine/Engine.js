@@ -89,7 +89,7 @@ export default class Engine extends Cog {
     this._rootScope[entryName] = value;
   }
 
-  getIdentityManager () { return this._rootScope.identity; }
+  getIdentityManager () { return this._rootScope.valos.identity; }
 
   run (head: any, kuery: Kuery, options: VALKOptions = {}) {
     if (options.scope === undefined) options.scope = this.getLexicalScope();

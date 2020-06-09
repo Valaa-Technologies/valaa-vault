@@ -32,7 +32,7 @@ export default class IdentityManager extends FabricEventTarget {
             `Can't determine the authority of identity chronicle: <${identityChronicleURI}>`);
       }
       this._activeIdentities[identityChronicleURI] = options;
-      return true;
+      return options;
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, new Error("identity.add"),
           "\n\tidentityChronicleURI:", ...dumpObject(identityChronicleURI));

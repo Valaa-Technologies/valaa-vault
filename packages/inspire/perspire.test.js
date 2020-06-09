@@ -27,7 +27,11 @@ describe("testing perspire", () => {
         }],
       });
       await server.initialize();
-      await server.createView("worker");
+      const workerView = await server.createView("worker");
+      expect(workerView.getEngine().getIdentityManager()
+              .add("valaa-local:?id=@$~raw.dummy-user@@")
+              .authority.getAuthorityURI())
+          .toEqual("valaa-local:");
       // This wait should be removeable: however as it stands the
       // creation of frame chronicles will cause an asynchronous delay
       // in creation of UI tree, which the above await doesn't catch.

@@ -16,22 +16,19 @@ exports.builder = (yargs) => yargs.options({
 });
 
 exports.handler = async (yargv) => {
+  const { toSelectorGlob } = require("valma");
   const vlm = yargv.echos ? yargv.vlm
       : Object.assign(Object.create(yargv.vlm), { echo: function noEcho () { return this; } });
-  if (!vlm.packageConfig) {
+  const { name, valos: { domain, type } = {} } = vlm.getPackageConfig() || { name: null };
+  if (name == null) {
     vlm.error("Current directory is not a workspace;", vlm.theme.path("package.json"),
         "doesn't exist or is not valid.");
     return false;
   }
-  const valos = vlm.packageConfig.valos || vlm.packageConfig.valaa;
   const subCommandGlob = yargv.toolsetGlob ? `*${yargv.toolsetGlob}*/**/*` : "**/*";
-  const pendingSubCommandInvokations = [
-    !(valos && valos.domain) ? [] :
-        vlm.invoke(`.status/.domain/.${valos.domain}/${subCommandGlob}`, yargv._),
-    !(valos && valos.type) ? [] :
-        vlm.invoke(`.status/.type/.${valos.type}/${subCommandGlob}`, yargv._),
-    vlm.invoke(`.status/${subCommandGlob}`, yargv._),
-  ];
+  const pendingSubCommandInvokations = vlm.invoke(
+      `.status/${toSelectorGlob({ domain, type, name })}${subCommandGlob}`,
+      yargv._);
   const resolveds = [].concat(...await Promise.all(pendingSubCommandInvokations))
       .filter(e => e && (typeof e === "object"));
   const patchWith = require("@valos/tools/patchWith").default;

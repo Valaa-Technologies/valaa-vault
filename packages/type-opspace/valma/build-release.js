@@ -40,25 +40,25 @@ exports.builder = (yargs) => yargs.options({
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
-  const packageConfig = vlm.packageConfig;
+  const { name, version } = vlm.getPackageConfig();
   const releasePath = yargv.target;
 
   if (!yargv.overwrite && vlm.shell.test("-d", releasePath)) {
-    if (packageConfig.version.indexOf("-prerelease") !== -1) {
+    if (version.indexOf("-prerelease") !== -1) {
       vlm.warn("Removing an existing prerelease build target:", vlm.theme.path(releasePath),
       // Carefully refers to how overwrite will remove target even for non-prerelease builds
           `(carefully provide '${vlm.theme.argument("--overwrite")}' to prevent remove)`);
       vlm.shell.rm("-rf", releasePath);
     } else {
       throw new Error(`build-release: existing build for non-prerelease version ${
-        packageConfig.version} found at ${vlm.theme.path(releasePath)}. Bump the version number?`);
+        version} found at ${vlm.theme.path(releasePath)}. Bump the version number?`);
     }
   }
 
   vlm.shell.mkdir("-p", releasePath);
 
-  vlm.info("Building version", vlm.theme.version(packageConfig.version), "of",
-      vlm.theme.package(packageConfig.name), "into", vlm.theme.path(releasePath));
+  vlm.info("Building version", vlm.theme.version(version), "of", vlm.theme.package(name), "into",
+      vlm.theme.path(releasePath));
 
   vlm.releasePath = releasePath;
 

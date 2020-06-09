@@ -23,22 +23,21 @@ exports.builder = (yargs) => yargs.options({
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
-  const packageConfig = vlm.packageConfig;
+  const { name, version } = vlm.getPackageConfig();
   const releasePath = yargv.source;
 
-  if (!yargv.prerelease && (packageConfig.version.indexOf("-prerelease") !== -1)) {
+  if (!yargv.prerelease && (version.indexOf("-prerelease") !== -1)) {
     throw new Error(`deploy-release: cannot deploy a release with a '-prerelease' version${
         ""} (provide '--prerelease' option to override).`);
   }
 
   if (!vlm.shell.test("-d", releasePath)) {
     throw new Error(`deploy-release: cannot find a release build for version '${
-        vlm.theme.version(packageConfig.version)}' version in "${
-          vlm.theme.path(releasePath)}".`);
+        vlm.theme.version(version)}' version in "${vlm.theme.path(releasePath)}".`);
   }
 
-  vlm.info(`Deploying ${vlm.theme.package(packageConfig.name)}@${
-      vlm.theme.version(packageConfig.version)}`, "from", vlm.theme.path(releasePath));
+  vlm.info(`Deploying ${vlm.theme.package(name)}@${vlm.theme.version(version)}`,
+      "from", vlm.theme.path(releasePath));
 
   vlm.releasePath = yargv.source;
 

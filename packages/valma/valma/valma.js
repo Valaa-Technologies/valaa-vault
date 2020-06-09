@@ -121,31 +121,29 @@ const _vlm = {
 
   cwd: process.cwd(),
 
-  // Immutable contents of package.json (contains pending updates as well)
-  packageConfig: undefined,
-
-  // Immutable contents of toolsets.json (contains pending updates as well)
-  toolsetsConfig: undefined,
-
   getPackageConfig,
   getValOSConfig,
   // getValmaConfig,
   getToolsetsConfig,
   getToolsetPackageConfig,
 
-  // Registers pending updates to the package.json config file (immediately updates
-  // vlm.packageConfig) which are written to file only immediately before valma execution exits or
+  // Registers pending updates to the package.json config file (and
+  // immediately updates vlm._packageConfigStatus.content) which are
+  // written to file only immediately before valma execution exits or
   // an external command is about to be executed.
-  // TODO(iridian): Improve the flush semantics, maybe to flush-on-subcommand-success - now it's
-  // just silly.
+  // TODO(iridian): Improve the flush semantics, maybe to
+  // flush-on-subcommand-success - now it's just silly.
   updatePackageConfig,
 
-  // Registers pending updates to the toolsets.json config file (immediately updates
-  // vlm.toolsetsConfig) which are written to file only immediately before valma execution exits or
+  // Registers pending updates to the toolsets.json config file (and
+  // immediately updates vlm._toolsetsConfigStatus.content) which are
+  // written to file only immediately before valma execution exits or
   // an external command is about to be executed.
-  // TODO(iridian): Improve the flush semantics, maybe to flush-on-subcommand-success - now it's
-  // just silly.
+  // TODO(iridian): Improve the flush semantics, maybe to
+  // flush-on-subcommand-success - now it's just silly.
   updateToolsetsConfig,
+
+  updateFileConfig,
 
   // TODO(iridian): These should eventually be in a separate library. Fundamentally valma shouldn't
   // know about toolsets. OTOH valma type and the toolset scripts are part of valma package, so...
@@ -499,7 +497,6 @@ const _vlm = {
   _reloadPackageAndToolsetsConfigs,
   _getConfigAtPath,
   _flushPendingConfigWrites,
-  _commitUpdates,
 };
 
 globalVargs.vlm = _vlm;
@@ -930,6 +927,19 @@ const processArgv = _vlm.isCompleting ? process.argv.slice(4) : process.argv.sli
 
 let nextContextIndex;
 
+let workspacePath = process.cwd();
+while (workspacePath && !_vlm.shell.test("-f", _vlm.path.join(workspacePath, "package.json"))) {
+  workspacePath = (workspacePath === "/") ? "" : _vlm.path.join(workspacePath, "..");
+}
+
+_vlm._packageConfigStatus = {
+  path: _vlm.path.join(workspacePath || "./", "package.json"), workspacePath, updated: false,
+};
+
+_vlm._toolsetsConfigStatus = {
+  path: _vlm.path.join(workspacePath || "./", "toolsets.json"), workspacePath, updated: false,
+};
+
 __addUniversalOptions(globalVargs, { strict: !_vlm.isCompleting, hidden: false });
 module.exports.builder(globalVargs);
 _vlm.vargs = globalVargs;
@@ -987,18 +997,6 @@ _vlm._refreshAvailablePools();
 
 _vlm.ifVerbose(2)
     .expound("available pools:", _vlm._availablePools);
-
-let workspacePath = process.cwd();
-while (workspacePath && !_vlm.shell.test("-f", _vlm.path.join(workspacePath, "package.json"))) {
-  workspacePath = (workspacePath === "/") ? "" : _vlm.path.join(workspacePath, "..");
-}
-
-_vlm._packageConfigStatus = {
-  path: _vlm.path.join(workspacePath || "./", "package.json"), workspacePath, updated: false,
-};
-_vlm._toolsetsConfigStatus = {
-  path: _vlm.path.join(workspacePath || "./", "toolsets.json"), workspacePath, updated: false,
-};
 
 // Allow --vlm to override any implicit vlm modifications (ie. --vlm.verbosity=100 overrides -v)
 if (_vlm.vargv.vlmOption) {
@@ -1656,7 +1654,7 @@ function _locateDependedPools (initialPoolBase, poolFolders, relativePoolBase) {
         const pool = { name, path: poolPath };
         if (modulePackageJSONPath) {
           try {
-            pool.packageConfig = require(modulePackageJSONPath);
+            pool.moduleConfig = require(modulePackageJSONPath);
           } catch (error) {
             throw wrapError(
                 new Error(`Could not load package.json for node_modules pool ${name}!`),
@@ -1665,8 +1663,7 @@ function _locateDependedPools (initialPoolBase, poolFolders, relativePoolBase) {
                 "\n\tThis is irregular, node_modules should not be present without package.json.",
                 "\n\tload error:", ...dumpObject(error));
           }
-          if (poolsMissingNodeModules
-              && ((pool.packageConfig.valos || {}).type === "vault")) {
+          if (poolsMissingNodeModules && ((pool.moduleConfig.valos || {}).type === "vault")) {
             poolsMissingNodeModules = [];
           }
         }
@@ -1972,7 +1969,7 @@ function _validateEnvironment () {
   }
 
   if (!process.env.npm_config_user_agent) {
-    if (this.needNPM && this.packageConfig) {
+    if (this.needNPM && this.getPackageConfig()) {
       this.warn("could not load NPM config environment variables");
     }
   } else {
@@ -2383,33 +2380,31 @@ function _choiceName (c) {
 
 function _reloadPackageAndToolsetsConfigs () {
   // TODO(iridian): Implement locally pending config writes. See _flushPendingConfigWrites
-  if (_vlm._packageConfigStatus.path && shell.test("-f", _vlm._packageConfigStatus.path)) {
+  _reloadFileConfig(_vlm._packageConfigStatus);
+  _reloadFileConfig(_vlm._toolsetsConfigStatus);
+}
+
+function _reloadFileConfig (configStatus) {
+  if (configStatus.path && shell.test("-f", configStatus.path)) {
     try {
-      _vlm.packageConfig = JSON.parse(
-          shell.head({ "-n": 1000000 }, _vlm._packageConfigStatus.path));
-      __deepFreeze(_vlm.packageConfig);
+      configStatus.content = JSON.parse(shell.head({ "-n": 1000000 }, configStatus.path));
+      __deepFreeze(configStatus.content);
     } catch (error) {
-      this.exception(error, `reading "${_vlm._packageConfigStatus.path}"`);
-      throw error;
-    }
-  }
-  if (_vlm._toolsetsConfigStatus.path && shell.test("-f", _vlm._toolsetsConfigStatus.path)) {
-    try {
-      _vlm.toolsetsConfig = JSON.parse(
-          shell.head({ "-n": 1000000 }, _vlm._toolsetsConfigStatus.path));
-      __deepFreeze(_vlm.toolsetsConfig);
-    } catch (error) {
-      _vlm.exception(error, `reading "${_vlm._packageConfigStatus.path}"`);
+      this.exception(error, `reading "${configStatus.path}"`);
       throw error;
     }
   }
 }
 
-function getPackageConfig (...keys) { return this._getConfigAtPath(this.packageConfig, keys); }
-function getValOSConfig (...keys) {
-  return this._getConfigAtPath(this.packageConfig, ["valos", ...keys]);
+function getPackageConfig (...keys) {
+  return this._getConfigAtPath(this._packageConfigStatus.content, keys);
 }
-function getToolsetsConfig (...keys) { return this._getConfigAtPath(this.toolsetsConfig, keys); }
+function getValOSConfig (...keys) {
+  return this._getConfigAtPath(this._packageConfigStatus.content, ["valos", ...keys]);
+}
+function getToolsetsConfig (...keys) {
+  return this._getConfigAtPath(this._toolsetsConfigStatus.content, keys);
+}
 function getToolsetPackageConfig (toolset) {
   return require(this.path.join(toolset, "package"));
 }
@@ -2421,46 +2416,49 @@ function _getConfigAtPath (root, keys) {
           root);
 }
 
-function updatePackageConfig (updates) {
-  // TODO(iridian): Implement locally pending config writes. See _flushPendingConfigWrites
-  if (typeof updates !== "object" || !updates) {
-    throw new Error(`Invalid arguments for updatePackageConfig, expexted object, got ${
-        typeof update}`);
-  }
-  if (!_vlm.packageConfig) {
+function updatePackageConfig (updatesOrPath, maybeUpdates) {
+  if (!_vlm._packageConfigStatus.content) {
     throw new Error("vlm.updatePackageConfig: cannot update package.json as it doesn't exist");
   }
-  const updatedConfig = __deepAssign(_vlm.packageConfig, updates);
-  if (updatedConfig !== _vlm.packageConfig) {
-    _vlm._packageConfigStatus.updated = true;
-    _vlm.packageConfig = updatedConfig;
-    _vlm.ifVerbose(1)
-        .info("package.json updated:", updates);
-  }
+  return _updateConfig(_vlm, _vlm._packageConfigStatus, updatesOrPath, maybeUpdates);
 }
 
 function updateToolsetsConfig (updatesOrPath, maybeUpdates) {
-  const updates = !Array.isArray(updatesOrPath)
+  if (!_vlm._toolsetsConfigStatus.content) {
+    _vlm._toolsetsConfigStatus.content = {};
+    _vlm._toolsetsConfigStatus.updated = true;
+  }
+  return _updateConfig(_vlm, _vlm._toolsetsConfigStatus, updatesOrPath, maybeUpdates);
+}
+
+function updateFileConfig (workspaceFile, updatesOrPath, maybeUpdates) {
+  const fileConfigStatus = { path: this.path.join(process.cwd(), workspaceFile) };
+  _reloadFileConfig(fileConfigStatus);
+  _updateConfig(this, fileConfigStatus, updatesOrPath, maybeUpdates);
+  _commitUpdates(this, workspaceFile, fileConfigStatus);
+}
+
+function _updateConfig (vlm, configStatus, updatesOrPath, maybeUpdates) {
+  const updates = _nestUpdatesInsidePath(updatesOrPath, maybeUpdates);
+  // TODO(iridian): Implement locally pending config writes. See _flushPendingConfigWrites
+  if (typeof updates !== "object" || !updates) {
+    throw new Error(`Invalid arguments for config update: expexted object, got ${typeof update}`);
+  }
+  const updatedConfig = __deepAssign(configStatus.content, updates);
+  if (updatedConfig !== configStatus.content) {
+    configStatus.updated = true;
+    configStatus.content = updatedConfig;
+    vlm.ifVerbose(1)
+        .info(`config file updated:`, configStatus.path);
+  }
+}
+
+function _nestUpdatesInsidePath (updatesOrPath, maybeUpdates) {
+  return !Array.isArray(updatesOrPath)
       ? updatesOrPath
       : updatesOrPath.reduceRight(
           (innerUpdates, pathKey) => ({ [pathKey]: innerUpdates }),
           maybeUpdates);
-  // TODO(iridian): Implement locally pending config writes. See _flushPendingConfigWrites
-  if (typeof updates !== "object" || !updates) {
-    throw new Error(`Invalid arguments for updateToolsetsConfig, expexted object, got ${
-        typeof update}`);
-  }
-  if (!_vlm.toolsetsConfig) {
-    _vlm.toolsetsConfig = {};
-    _vlm._toolsetsConfigStatus.updated = true;
-  }
-  const updatedConfig = __deepAssign(_vlm.toolsetsConfig, updates);
-  if (updatedConfig !== _vlm.toolsetsConfig) {
-    _vlm._toolsetsConfigStatus.updated = true;
-    _vlm.toolsetsConfig = updatedConfig;
-    _vlm.ifVerbose(1)
-        .info("toolsets.json updated:", updates);
-  }
 }
 
 // Toolset vlm functions
@@ -2534,7 +2532,7 @@ function domainVersionTag (domain) {
  * @returns
  */
 function addNewDevDependencies (candidateDevDependencies, defaultTags = this.defaultTags) {
-  const { valos, dependencies, devDependencies } = this.packageConfig;
+  const { valos, dependencies, devDependencies } = this.getPackageConfig();
   let candidates = candidateDevDependencies;
   if (typeof candidates === "string") candidates = candidates.split(" ");
   if (Array.isArray(candidates)) {
@@ -2611,16 +2609,16 @@ function _flushPendingConfigWrites () {
   });
 }
 
-function _commitUpdates (filename, configStatus, createUpdatedConfig) {
+function _commitUpdates (vlm, filename, configStatus, createUpdatedContent = (content => content)) {
   // TODO(iridian): Implement locally pending config writes. See _flushPendingConfigWrites
   if (!configStatus.updated) return;
   if (_vlm.vargv && _vlm.vargv["dry-run"]) {
-    this.info(`commit '${filename}' updates --dry-run:`, "not committing queued updates to file");
+    vlm.info(`commit '${filename}' updates --dry-run:`, "not committing queued updates to file");
     return;
   }
-  const configString = JSON.stringify(createUpdatedConfig(), null, 2);
+  const configString = JSON.stringify(createUpdatedContent(configStatus.content), null, 2);
   shell.ShellString(`${configString}\n`).to(configStatus.path);
-  this.ifVerbose(1)
+  vlm.ifVerbose(1)
       .info(`committed '${filename}' updates to file:`);
   configStatus.updated = false;
 }
@@ -2656,7 +2654,7 @@ function __createVargs (args, cwd = process.cwd()) {
       optionState.causes[opt] = attributes.causes;
     }
     const subVLM = this.vlm;
-    const toolset = subVLM && (subVLM.toolset || (_vlm.packageConfig || {}).name);
+    const toolset = subVLM && (subVLM.toolset || (_vlm._packageConfigStatus.content || {}).name);
     if (toolset) {
       const subPath = ["commands", subVLM.contextCommand, "options", opt];
       let default_ = subVLM.tool && subVLM.getToolConfig(toolset, subVLM.tool, ...subPath);

@@ -11,7 +11,7 @@ exports.builder = (yargs) => yargs;
 
 exports.handler = (yargv) => {
   const vlm = yargv.vlm;
-  const config = yargv.vlm.packageConfig;
+  const config = yargv.vlm.getPackageConfig();
   const valos = config && (config.valos || config.valaa);
   if (!valos || !valos.type || !valos.domain) {
     vlm.warn(

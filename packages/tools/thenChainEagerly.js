@@ -166,8 +166,8 @@ function thenChainEagerly (
       });
   function getName (info) {
     const functionName = (functionChain[index] || "").name;
-    return `During ${`${functionName ? `${functionName}, as ` : ""
-      }thenChainEagerly ${index === -1 ? "initial value" : `step #${index}`}`} ${info}`;
+    return `During ${`${functionName ? `${functionName} (as ` : ""
+      }thenChainEagerly ${index === -1 ? "initial value" : `step #${index}`}`} ${info})`;
   }
 }
 
@@ -197,14 +197,18 @@ function thisChainEagerly (
     } else {
       const keys = Object.keys(params);
       if (keys.length !== 1) {
-        throw new Error("thisChainEagerly redirection object must have exactly one field");
+        onThisChainError(
+            new Error("thisChainEagerly redirection object must have exactly one field"),
+            new Error(getName("param redirection")), functions[index]);
       }
       const forwardFunctionKey = keys[0];
       params = params[forwardFunctionKey];
       index = functions[forwardFunctionKey];
       if (typeof index === "function") index = Number(forwardFunctionKey);
       else if (typeof index !== "number") {
-        if (forwardFunctionKey === "") return params; // thisChainReturn directive
+        if (forwardFunctionKey === "") {
+          return params; // thisChainReturn directive
+        }
         index = functions.findIndex(f => (f.name === forwardFunctionKey));
         if (index === -1) {
           throw new Error(
@@ -214,46 +218,45 @@ function thisChainEagerly (
       }
       continue;
     }
-    if (index >= functions.length) return params;
+    if (index >= functions.length) {
+      return params;
+    }
     const func = functions[index];
     if (!func) continue;
     try {
       params = func.apply(this_, params);
       ++index;
     } catch (error) {
-      const wrapped = wrapError(error, new Error(getName("callback")),
-          "\n\tthis:", ...dumpObject(this_, { nest: 0 }),
-          "\n\tparams:", ...dumpObject(params),
-          "\n\tcurrent function:", ...dumpObject(func),
-          "\n\tfunctions:", ...dumpObject(functions),
-          "\n\tonRejected:", ...dumpObject(onRejected),
-        );
-      if (!onRejected) throw wrapped;
-      params = onRejected.call(this_, wrapped, index, params, functions, onRejected);
+      paramsArrayWithPromise = null;
+      params = onThisChainError(error, new Error(getName("callback")), func, onRejected);
       index = functions.length;
     }
   }
   --index;
-  return params.then(
+  const ret = params.then(
       newParams => thisChainEagerly(this_, newParams, functions, onRejected, index + 1),
       error => {
-        const wrapped = wrapError(error, new Error(getName("thenable resolution")),
-            "\n\tthis:", ...dumpObject(this_, { nest: 0 }),
-            "\n\tparams:", ...dumpObject(params),
-            "\n\tcurrent function:", ...dumpObject(functions[index]),
-            "\n\tfunctions:", ...dumpObject(functions),
-            "\n\tonRejected:", ...dumpObject(onRejected),
-        );
-        if (!onRejected) throw wrapped;
-        return thisChainEagerly(this_,
-            onRejected.call(
-                this_, wrapped, index, paramsArrayWithPromise || params, functions, onRejected),
-            functions, onRejected, functions.length);
+        const retry = onThisChainError(
+            error, new Error(getName("thenable resolution")), functions[index], onRejected);
+        return thisChainEagerly(this_, retry, functions, onRejected, functions.length);
       });
+  return ret;
   function getName (info) {
     const functionName = (functions[index] || "").name;
-    return `During ${`${functionName ? `${functionName}, as ` : ""
-        }thisChainEagerly ${index === -1 ? "initial params" : `step #${index}`}`} ${info}`;
+    return `During ${`${functionName ? `${functionName} (as ` : ""
+        }thisChainEagerly ${index === -1 ? "initial params" : `step #${index}`}`} ${info})`;
+  }
+  function onThisChainError (error, errorName, currentFunction, maybeOnRejected) {
+    const wrapped = wrapError(error, errorName,
+        "\n\tthis:", ...dumpObject(this_, { nest: 0 }),
+        "\n\tparams:", ...dumpObject(params),
+        "\n\tcurrent function:", ...dumpObject(currentFunction),
+        "\n\tfunctions:", ...dumpObject(functions),
+        "\n\tonRejected:", ...dumpObject(onRejected),
+    );
+    if (!maybeOnRejected) throw wrapped;
+    return maybeOnRejected.call(
+        this_, wrapped, index, paramsArrayWithPromise || params, functions, maybeOnRejected);
   }
 }
 

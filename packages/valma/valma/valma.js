@@ -313,7 +313,7 @@ const _vlm = {
     if (this.verbosity < minimumVerbosity) {
       return {
         ifVerbose: hush, log: hush, echo: hush, warn: hush, error: hush, exception: hush,
-        info: hush, babble: hush, expound: hush,
+        info: hush, babble: hush, expound: hush, clock: hush,
       };
     }
     if (callback) callback.call(this);
@@ -481,11 +481,7 @@ const _vlm = {
 
   // Implementation details
   _invoke,
-  _peekReturnValue,
   _parseUntilLastPositional,
-  _refreshAvailablePools,
-  _locateDependedPools,
-  _refreshActivePools,
   _availablePools: [],
   _activePools: [],
   _selectActiveCommands,
@@ -494,7 +490,6 @@ const _vlm = {
   _introspectCommands,
   _introspectPool,
   _fillVargvInteractively,
-  _reloadPackageAndToolsetsConfigs,
   _getConfigAtPath,
   _flushPendingConfigWrites,
 };
@@ -978,6 +973,7 @@ _vlm.ifVerbose(1)
 // Its parent directory is made the initial "file" pool.
 let _poolBase = _vlm.vargv["pool-base"];
 let _filePoolPath;
+let _callForwardedToPool;
 
 if (!_vlm.vargv.commandSelector) {
   _vlm.vargv.commandSelector = (_vlm.vargv.list || _vlm.isCompleting) ? "*" : "$";
@@ -993,7 +989,7 @@ if (_vlm.vargv.list) {
   // properly specified and separated from list
   _vlm.vargv["dry-run"] = true;
 }
-_vlm._refreshAvailablePools();
+_refreshAvailablePools.call(_vlm);
 
 _vlm.ifVerbose(2)
     .expound("available pools:", _vlm._availablePools);
@@ -1004,11 +1000,15 @@ if (_vlm.vargv.vlmOption) {
 }
 
 process.on("SIGINT", () => {
-  _vlm.exception("killing all child processes", "SIGINT interrupt handler");
+  if (!_callForwardedToPool) {
+    _vlm.exception("killing all child processes", "SIGINT interrupt handler");
+  }
   setTimeout(() => process.exit(-1));
 });
 process.on("SIGTERM", () => {
-  _vlm.exception("killing all child processes", "SIGTERM interrupt handler");
+  if (!_callForwardedToPool) {
+    _vlm.exception("killing all child processes", "SIGTERM interrupt handler");
+  }
   setTimeout(() => process.exit(-1));
 });
 
@@ -1075,7 +1075,7 @@ function handler (vargv) {
     function _handlerInvoke () {
       return [
         this.invoke(this.vargv.commandSelector, this.vargv._, {
-          suppressOutermostEcho: true,
+          suppressEcho: true,
           processArgs: false,
           flushConfigWrites: !_vlm.isCompleting,
         }),
@@ -1121,128 +1121,161 @@ function handler (vargv) {
  * @param {*} [spawnOptions={}]
  * @returns
  */
-async function execute (args, options = {}) {
+function execute (args, options = {}) {
   this._flushPendingConfigWrites();
-  this._refreshActivePools();
+  _refreshActivePools.call(this);
   const argv = __processArgs(args);
   if ((argv[0] === "vlm") && !Object.keys(options).length) {
+    // TODO(iridian, 2020-06): invoke now in principle supports options
+    // forwarding via _state flags. The above constraint on not having
+    // options in order to do the in-process-forward could be thus
+    // removed after some formalizing.
     argv.shift();
     const vargv = this._parseUntilLastPositional(argv, module.exports.command);
     return this.invoke(vargv.commandSelector, vargv._,
         { processArgs: false, flushConfigWrites: true, delegate: options.delegate });
   }
+  const isDryRun = options.dryRun
+      || ((options.dryRun !== false) && this.vargv && this.vargv["dry-run"]);
   const executionVLM = Object.create(this);
   ++executionVLM.taskDepth;
-  return new Promise((resolve, failure) => {
-    const executorIndexText = this.getContextIndexText();
-    const executionIndexText = executionVLM.getContextIndexText();
-    executionVLM.echo(`${executorIndexText}>> ${executionIndexText}vlm @`,
-        `${executionVLM.theme.executable(...argv)}`);
-    let maybeOutput, maybeDiagnostics;
-    const _onDone = (error, code, signal) => Promise.resolve(maybeOutput)
-        .then(async output => {
-          const diagnostics = await maybeDiagnostics;
-          let result;
-          let processedOutput = output;
-          try {
-            if (error) {
-              result = error;
-            } else if (code || signal) {
-              if (options.onFailure !== undefined) {
-                result = (typeof options.onFailure !== "function") ? options.onFailure
-                    : options.onFailure(code, signal);
-              } else {
-                result = (typeof diagnostics === "string") && (options.stderr === "erroronly")
-                    ? new Error(diagnostics.split("\n")[0])
-                    : new Error(`received ${signal ? "signal" : "code"} ${signal || code}`);
-                result.code = code;
-                result.signal = signal;
-              }
-            } else {
-              if (options.stdout === "json") processedOutput = JSON.parse(output);
-              this._refreshAvailablePools();
-              this._refreshActivePools();
-              this._reloadPackageAndToolsetsConfigs();
-              result = (options.onSuccess === undefined) ? processedOutput
-                  : (typeof options.onSuccess !== "function") ? options.onSuccess
-                  : options.onSuccess(processedOutput);
-            }
-          } catch (parseError) {
-            result = parseError;
-          }
-          if ((typeof diagnostics === "string") && diagnostics) {
-            if (result instanceof Error) result.stderr = diagnostics;
-            if (options.stderr !== "erroronly") {
-              executionVLM.echo(
-                  `${executorIndexText}// ${executionIndexText}$`,
-                  `${executionVLM.theme.executable(argv[0])}, diagnostics/stderr output (${
-                      diagnostics.length} chars):`);
-              const indent = " ".repeat((executionVLM.taskDepth * 2) - 1);
-              this.speak(indent, diagnostics.replace(/\n/g, `\n${indent} `));
-            }
-          }
-          executionVLM.echo(
-              `${executorIndexText}<< ${executionIndexText}vlm @`,
-              `${executionVLM.theme.executable(argv[0])}:`,
-              executionVLM._peekReturnValue(result, 71));
-          if (result instanceof Error) {
-            result.stdout = processedOutput || output;
-            throw wrapError(result,
-                new Error(`During vlm.execute(${executionVLM.theme.executable(...argv)})`),
-                "\n\toptions:", ...dumpObject(options),
-            );
-          }
-          return result;
-        })
-        .then(resolve, failure);
-
-    if (options.dryRun || ((options.dryRun !== false) && this.vargv && this.vargv["dry-run"])) {
-      executionVLM.echo("dry-run: skipping execution and returning:",
-          executionVLM.theme.blue(options.dryRunResult));
-      maybeOutput = options.dryRunResult;
-      _onDone(null, 0);
-    } else {
-      const spawnOptions = {
+  const executorIndexText = this.getContextIndexText();
+  const executionIndexText = executionVLM.getContextIndexText();
+  return thisChainEagerly(executionVLM, [], [
+    function _preExecute () {
+      this.echo(`${executorIndexText}>> ${executionIndexText}vlm @`,
+          `${this.theme.executable(...argv)}`);
+      if (isDryRun) {
+        this.echo("dry-run: skipping execution and returning:",
+        this.theme.blue(options.dryRunResult));
+        return {
+          _postExecute: [null, 0, undefined, options.dryRunResult],
+        };
+      }
+      return [{
         stdio: options.delegate
             ? ["ignore", "pipe", "pipe"]
             : [0, options.asTTY ? 1 : "pipe", 2],
         detached: false,
         ...options.spawn,
-      };
-      executionVLM.ifVerbose(3)
-      .babble(`spawning child process "${argv[0]}" with options:`, spawnOptions);
-      const finalArgv = !spawnOptions.shell ? argv
-          : __processArgs(args, { shellEscapeChar: "'" });
+      }];
+    },
+    function _spawnExecuteProcess (spawnOptions) {
+      return new Promise(resolveToOnExecuteDone => {
+        this.ifVerbose(3)
+            .babble(`spawning child process "${argv[0]}" with options:`, spawnOptions);
+        const finalArgv = !spawnOptions.shell ? argv
+            : __processArgs(args, { shellEscapeChar: "'" });
 
-      const subProcess = childProcess.spawn(finalArgv[0], finalArgv.slice(1), spawnOptions);
-      subProcess.on("exit", (code, signal) => _onDone(null, code, signal));
-      subProcess.on("error", _onDone);
-      if (options.onProcess) options.onProcess(subProcess);
-      process.on("SIGINT", () => {
-        this.warn(`vlm killing pid ${subProcess.pid} / ${process.getgid()}:`,
-            this.theme.green(...argv));
-        process.kill(-subProcess.pid, "SIGTERM");
-        process.kill(-subProcess.pid, "SIGKILL");
+        const subProcess = childProcess.spawn(finalArgv[0], finalArgv.slice(1), spawnOptions);
+        const stdout = !options.asTTY && _readStreamContent(subProcess.stdout);
+        // TODO(iridian): Implement stderr.isTTY faking on the child process side,
+        // so that client scripts emit colors
+        const stderr = options.delegate && _readStreamContent(subProcess.stderr);
+        subProcess.on("exit",
+            (code, signal) => resolveToOnExecuteDone([null, code, signal, stdout, stderr]));
+        subProcess.on("error",
+            error => resolveToOnExecuteDone([error, undefined, undefined, stdout, stderr]));
+        if (options.onProcess) options.onProcess(subProcess);
+        process.on("SIGINT", () => {
+          _vlm.warn(`vlm (pid ${process.getgid()}) killing pid ${subProcess.pid}:`,
+              _vlm.theme.green(...argv));
+          process.kill(-subProcess.pid, "SIGTERM");
+          process.kill(-subProcess.pid, "SIGKILL");
+        });
+        process.on("SIGTERM", () => {
+          _vlm.warn(`vlm (pid ${process.getgid()}) killing pid ${subProcess.pid}:`,
+              _vlm.theme.green(...argv));
+          process.kill(-subProcess.pid, "SIGTERM");
+          process.kill(-subProcess.pid, "SIGKILL");
+        });
       });
-      process.on("SIGTERM", () => {
-        this.warn(`vlm killing pid ${subProcess.pid} / ${process.getgid()}:`,
-            this.theme.green(...argv));
-        process.kill(-subProcess.pid, "SIGTERM");
-        process.kill(-subProcess.pid, "SIGKILL");
-      });
-
-      // TODO(iridian): Implement stderr.isTTY faking on the child process side, so that client
-      // scripts emit colors
-      const _readStreamContent = (stream) => new Promise(resolve_ => {
-        let contentBuffer = "";
-        stream.on("data", (chunk) => { contentBuffer += chunk; });
-        stream.on("end", () => { resolve_(contentBuffer); });
-        stream.on("error", _onDone);
-      });
-
-      if (!options.asTTY) maybeOutput = _readStreamContent(subProcess.stdout);
-      if (options.delegate) maybeDiagnostics = _readStreamContent(subProcess.stderr);
+    },
+    function _postExecute (error, code, signal, stdout, stderr) {
+      let result;
+      let output = stdout;
+      if (error) {
+        result = error;
+      } else if (code || signal) {
+        if (options.onFailure !== undefined) {
+          result = (typeof options.onFailure !== "function")
+              ? options.onFailure
+              : options.onFailure(code, signal);
+        } else {
+          result = (typeof stderr === "string") && (options.stderr === "erroronly")
+              ? new Error(stderr.split("\n")[0])
+              : new Error(`received ${signal ? "signal" : "code"} ${signal || code}`);
+          result.code = code;
+          result.signal = signal;
+        }
+      } else {
+        if (options.stdout === "json") {
+          try {
+            output = JSON.parse(stdout);
+          } catch (parseError) {
+            result = wrapError(parseError, new Error("During JSON.parse(executeStdOut)"));
+          }
+        }
+        _refreshAvailablePools.call(this);
+        _refreshActivePools.call(this);
+        _reloadPackageAndToolsetsConfigs();
+        result = (options.onSuccess === undefined) ? output
+            : (typeof options.onSuccess !== "function") ? options.onSuccess
+            : options.onSuccess(output);
+      }
+      if ((typeof stderr === "string") && stderr) {
+        if (result instanceof Error) result.stderr = stderr;
+        if (options.stderr !== "erroronly") {
+          this.echo(
+              `${executorIndexText}// ${executionIndexText}$`,
+              `${this.theme.executable(argv[0])}, diagnostics/stderr output (${
+                  stderr.length} chars):`);
+          const indent = " ".repeat((this.taskDepth * 2) - 1);
+          this.speak(indent, stderr.replace(/\n/g, `\n${indent} `));
+        }
+      }
+      this.echo(
+          `${executorIndexText}<< ${executionIndexText}vlm @`,
+          `${this.theme.executable(argv[0])}:`,
+          _peekReturnValue(this, result, 71));
+      if (result instanceof Error) {
+        result.stdout = output || stdout;
+        throw result;
+      }
+      return thisChainReturn(result);
     }
+  ], function _onExecuteError (error) {
+    this.echo(`${executorIndexText}<< ${executionIndexText}vlm @`,
+        `${this.theme.executable(argv[0])}:`,
+        this.theme.error("exception:", String(error)));
+    return _inquireErrorForRetry(this, error,
+        `Exception received from execute. Retry '${this.theme.executable(argv[0])}'?`,
+        () => ({ _preExecute: [] }),
+        innerError => wrapError(innerError,
+            new Error(`During vlm.execute(${this.theme.executable(...argv)})`),
+            "\n\toptions:", ...dumpObject(options)));
+  });
+}
+
+function _readStreamContent (stream) {
+  return new Promise((resolve, reject) => {
+    if (!stream.readable) reject(new Error("stream not readable"));
+    else {
+      let contentBuffer = "";
+      stream.on("data", (chunk) => { contentBuffer += chunk; });
+      stream.on("end", () => { resolve(contentBuffer); });
+      stream.on("error", () => reject);
+    }
+  });
+}
+
+function _inquireErrorForRetry (vlm, error, prompt, onRetry, onError) {
+  if (error.valmaRetry === false) throw error;
+  return vlm.inquireConfirm(prompt).then(retry => {
+    if (retry) return onRetry();
+    const outerError = !onError ? error : onError(error);
+    outerError.valmaRetry = false;
+    throw outerError;
   });
 }
 
@@ -1259,10 +1292,10 @@ function invoke (commandSelectorArg, args, options = {}) {
     throw new Error(`vlm.invoke: commandSelector missing`);
   }
   const invokationVLM = Object.create(this);
+  ++invokationVLM.taskDepth;
   invokationVLM.contextVLM = this;
   invokationVLM._state = Object.create(this._state);
-  ++invokationVLM.taskDepth;
-  const { processArgs, flushConfigWrites, suppressOutermostEcho, ...flagsOverrides } = options;
+  const { processArgs, flushConfigWrites, suppressEcho, ...flagsOverrides } = options;
   Object.assign(invokationVLM._state, flagsOverrides);
 
   // Remove everything after space so that exports.command can be given
@@ -1270,39 +1303,48 @@ function invoke (commandSelectorArg, args, options = {}) {
   // after the command selector itself).
   const commandSelector = commandSelectorArg.split(" ")[0];
   const argv = (processArgs !== false) ? __processArgs(args) : args;
-  const selectorSingleQuotedIfWildcard = __isWildcardCommand(commandSelector)
-      ? `'${commandSelector}'` : commandSelector;
+
   const invokerIndexText = this.getContextIndexText();
   const invokationIndexText = invokationVLM.getContextIndexText();
-  if (!suppressOutermostEcho) {
-    invokationVLM.echo(`${invokerIndexText}>> ${invokationIndexText}${
-        invokationVLM.theme.vlmCommand("vlm", selectorSingleQuotedIfWildcard, ...argv)}`);
-  }
-  return thisChainEagerly(invokationVLM, [commandSelector, argv], [
+
+  return thisChainEagerly(invokationVLM, [], [
+    function _preInvoke () {
+      if (!suppressEcho) {
+        this.echo(`${invokerIndexText}>> ${invokationIndexText}${
+            this.theme.vlmCommand("vlm", _getSelectorText(), ...argv)}`);
+      }
+      return [commandSelector, argv];
+    },
     _invoke,
-    function _echoInvokeResult (ret) {
-      if (!suppressOutermostEcho) {
+    function _postInvoke (result) {
+      if (!suppressEcho) {
         this.echo(`${invokerIndexText}<< ${invokationIndexText}${
-              this.theme.vlmCommand("vlm", selectorSingleQuotedIfWildcard)}:`,
-            this._peekReturnValue(ret, 71));
+              this.theme.vlmCommand("vlm", _getSelectorText())}:`,
+            _peekReturnValue(this, result, 71));
       }
       if (flushConfigWrites) {
         this._flushPendingConfigWrites();
-        this.contextVLM._reloadPackageAndToolsetsConfigs();
+        _reloadPackageAndToolsetsConfigs();
       }
-      return thisChainReturn(ret);
+      return thisChainReturn(result);
     },
-  ], function _errorOnInvokeCommand (error) {
-    if (!suppressOutermostEcho) {
+  ], function _onInvokeError (error) {
+    if (!suppressEcho) {
       this.echo(`${invokerIndexText}<< ${invokationIndexText}${
-            this.theme.vlmCommand("vlm", selectorSingleQuotedIfWildcard)}:`,
+            this.theme.vlmCommand("vlm", _getSelectorText())}:`,
           this.theme.error("exception:", String(error)));
     }
-    throw error;
+    return _inquireErrorForRetry(this, error,
+        `Exception received from invoke. Retry '${
+            this.theme.vlmCommand("vlm", _getSelectorText())}'?`,
+        () => ({ _preInvoke: [] }));
   });
+  function _getSelectorText () {
+    return __isWildcardCommand(commandSelector) ? `'${commandSelector}'` : commandSelector;
+  }
 }
 
-function _peekReturnValue (value, clipLength) {
+function _peekReturnValue (vlm, value, clipLength) {
   let ret;
   if ((typeof value === "object") && value && !Array.isArray(value)
       && Object.getPrototypeOf(value) !== Object.prototype) {
@@ -1319,7 +1361,7 @@ function _peekReturnValue (value, clipLength) {
   } else {
     ret = dumpify(value);
   }
-  return this.theme.return(ret.length <= clipLength ? ret : `${ret.slice(0, clipLength)}...`);
+  return vlm.theme.return(ret.length <= clipLength ? ret : `${ret.slice(0, clipLength)}...`);
 }
 
 function _invoke (commandSelector_, argv) {
@@ -1495,7 +1537,7 @@ async function _dispatchCommands (commandSelector, argv, activeCommands, isWildc
                 throw error;
               } finally {
                 subVLM.echo(`${subVLM.getContextIndexText()}<<<? ${header}:`,
-                subVLM._peekReturnValue(requireResult, 51));
+                _peekReturnValue(subVLM, requireResult, 51));
               }
               if (typeof requireResult === "string" ? requireResult : !requireResult) {
                 const message = `'${subVLM.theme.command(commandName)
@@ -1528,7 +1570,7 @@ async function _dispatchCommands (commandSelector, argv, activeCommands, isWildc
             if (isWildcardCommand) {
               subVLM.echo(`${this.getContextIndexText()}<<* ${subVLM.getContextIndexText()}${
                 subVLM.theme.vlmCommand("vlm", commandName)}:`,
-                subVLM._peekReturnValue(retValue, 40));
+                _peekReturnValue(subVLM, retValue, 40));
             }
           }
         }
@@ -1628,7 +1670,7 @@ function _refreshAvailablePools () {
   if (_filePoolPath) {
     this._availablePools.push({ name: "file", path: _filePoolPath });
   }
-  this._availablePools.push(...this._locateDependedPools(
+  this._availablePools.push(..._locateDependedPools.call(this,
       _poolBase,
       _vlm.vargv["pool-subfolders"],
       _poolBase === path.posix.resolve(".") ? "." : _poolBase));
@@ -1898,6 +1940,7 @@ function _maybeForwardToPoolVLM (forwardPool) {
         "\n\ttarget vlm real path:", this.theme.path(forwardRealVLM),
         "\n\tcurrent vlm real path:", this.theme.path(myRealVLM));
     // Call is handled by a forward require to another valma.
+    _callForwardedToPool = forwardPool;
     require(forwardPool.vlmPath);
     return thisChainReturn(undefined);
   }
@@ -2717,9 +2760,14 @@ function __createVargs (args, cwd = process.cwd()) {
 #    #  #    #     #    #    #
 */
 
+const _nodeKeepaliveInterval = setInterval(() => {
+  _vlm.ifVerbose(1).clock("valma", "valma.keepalive", {});
+}, 10000);
+
 thenChainEagerly(_vlm.vargv, [
       vargv => module.exports.handler(vargv),
       result => {
+        clearInterval(_nodeKeepaliveInterval);
         if (result !== undefined) {
           _vlm.result(result);
           process.exit(0);
@@ -2727,6 +2775,7 @@ thenChainEagerly(_vlm.vargv, [
       },
     ],
     error => {
+      clearInterval(_nodeKeepaliveInterval);
       if (error !== undefined) {
         _vlm.exception(
             ((error == null) || !(error instanceof Error))

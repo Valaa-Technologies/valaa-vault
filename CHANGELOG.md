@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.18](https://github.com/valaatech/kernel/compare/v0.35.0-rc.17...v0.35.0-rc.18) (2020-06-10)
+
+
+### Bug Fixes
+
+* Gateway does not send identity properly ([3ffe05d](https://github.com/valaatech/kernel/commit/3ffe05d2cb99999b687a4358af296c6a468de256))
+
+
+### Features
+
+* Add 'tool' type and a type-library toolset ([88e50ad](https://github.com/valaatech/kernel/commit/88e50ad2544f143506ddf1e7ebc6fcd0aad9e172))
+* Add "vlm craft-tool", use it to create "copy-template-files" ([8048f50](https://github.com/valaatech/kernel/commit/8048f50ec7ebb8985abe46a186b8828cbe3985f8))
+* Add valma failure retry base functionality ([636deb4](https://github.com/valaatech/kernel/commit/636deb444a24f47d85aa8a6ac4d679133e9c765e))
+* add vlm.updateFileConifg ([e600711](https://github.com/valaatech/kernel/commit/e600711a4ff2db65b472f6ea687df2598af0915b))
+
+
+
+
+
 # [0.35.0-rc.17](https://github.com/valaatech/kernel/compare/v0.35.0-rc.16...v0.35.0-rc.17) (2020-06-03)
 
 

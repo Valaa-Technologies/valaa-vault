@@ -261,6 +261,7 @@ function checkToolSelectorDisabled (vlm, { vlm: { tool, toolset } }, restriction
   if (!restriction) return false;
   const { domain, type, name } = restriction;
   const selector = vlm.getToolsetPackageConfig(vlm.toolset || toolset);
+  if (!selector) return `Toolset '${vlm.toolset || toolset}' not found for tool '${tool}'`;
   return domain && ((selector.valos || {}).domain !== domain)
           ? `Tool '${tool}' only selectable for domain '${domain}' toolsets`
       : type && ((selector.valos || {}).type !== type)
@@ -361,7 +362,8 @@ function createSelectToolsOption (vlm, { vlm: { toolset } }) {
 
 function _createSelectToolsOrToolsetsOption (vlm, primaryGlob,
     choiceBrief, selectorBrief, selectorPackageConfig, selectionConfig = {}, choicesOptions = {}) {
-  const configuredNames = Object.keys(selectionConfig || {});
+  const configuredNames = Object.keys(selectionConfig);
+  if (!selectorPackageConfig) throw new Error(`Selector config not found for ${selectorBrief}`);
   return createSelectOfMatchingChoicesOption(vlm, primaryGlob, selectorPackageConfig, {
     choiceBrief,
     selectorBrief,
@@ -405,7 +407,7 @@ function configureToolSelection (vlm, toolset, reconfigure, selection, rest) {
 async function configureConfigurableSelection (vlm, kind, reconfigure, selection,
     selectorName, selectorConfig, selectionConfigPath = [], configureArgs = []) {
   const currentSelectionConfig = vlm.getToolsetsConfig(...selectionConfigPath) || {};
-
+  if (!selectorConfig) throw new Error(`Selector config not found for ${selectorName}`);
   const { name, valos: { domain, type } = {} } = selectorConfig;
   const configUpdate = {};
   const ret = { success: true };

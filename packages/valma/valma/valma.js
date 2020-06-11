@@ -1249,7 +1249,7 @@ function execute (args, options = {}) {
         `${this.theme.executable(argv[0])}:`,
         this.theme.error("exception:", String(error)));
     return _inquireErrorForRetry(this, error,
-        `Exception received from execute. Retry '${this.theme.executable(argv[0])}'?`,
+        `Exception received from execute. Retry '${this.theme.executable(...argv)}'?`,
         () => ({ _preExecute: [] }),
         innerError => wrapError(innerError,
             new Error(`During vlm.execute(${this.theme.executable(...argv)})`),
@@ -1336,7 +1336,7 @@ function invoke (commandSelectorArg, args, options = {}) {
     }
     return _inquireErrorForRetry(this, error,
         `Exception received from invoke. Retry '${
-            this.theme.vlmCommand("vlm", _getSelectorText())}'?`,
+            this.theme.vlmCommand("vlm", _getSelectorText(), ...argv)}'?`,
         () => ({ _preInvoke: [] }));
   });
   function _getSelectorText () {
@@ -2449,7 +2449,11 @@ function getToolsetsConfig (...keys) {
   return this._getConfigAtPath(this._toolsetsConfigStatus.content, keys);
 }
 function getToolsetPackageConfig (toolset) {
-  return require(this.path.join(toolset, "package"));
+  try {
+    return require(this.path.join(toolset, "package"));
+  } catch (error) {
+    return undefined;
+  }
 }
 
 function _getConfigAtPath (root, keys) {

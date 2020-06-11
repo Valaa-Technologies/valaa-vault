@@ -54,11 +54,12 @@ exports.handler = async (yargv) => {
       export: true,
       template: false,
       brief: `select ${domain} domain`,
-      describe: `Configure ${domain} domain for this workspace.`,
-      introduction: ``,
+      describe: `[Edit a single-line domain description that'll be visible in vlm init selectors]`,
+      introduction:
+`[Edit a longer description that is shown to an ops user once they have
+preliminarily selected the domain during 'vlm init']`,
 
-      disabled: `(yargs) => yargs.vlm.getValOSConfig("domain") !== undefined
-      && \`Workspace domain is already defined: '\${yargs.vlm.getValOSConfig("domain")}')\``,
+      disabled: `(yargs) => false`,
 
       builder: `(yargs) => yargs.options({
   reconfigure: {

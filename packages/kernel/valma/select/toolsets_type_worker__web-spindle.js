@@ -8,7 +8,7 @@ exports.introduction =
 `Selects web-spindle as a worker toolset.`;
 
 exports.disabled = (yargs) => typeToolset.checkToolsetSelectorDisabled(yargs.vlm, exports,
-  { type: "worker" });
+    { type: "worker" });
 exports.builder = (yargs) => yargs.options({});
 
 exports.handler = async (yargv) => ({

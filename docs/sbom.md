@@ -1,3 +1,3 @@
-# @valos/kernel-vault@0.35.0-rc.17 Software Bill of Materials
+# @valos/kernel-vault@0.35.0-rc.18 Software Bill of Materials
 
 Markdown VDoc extension not implemented yet.

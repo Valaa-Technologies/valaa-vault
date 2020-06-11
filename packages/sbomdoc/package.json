@@ -1,6 +1,6 @@
 {
   "name": "@valos/sbomdoc",
-  "version": "0.35.0-rc.18",
+  "version": "0.35.0-rc.19",
   "valos": {
     "type": "vdoc-extension",
     "domain": "@valos/kernel",

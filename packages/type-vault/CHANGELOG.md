@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.19](https://github.com/valaatech/kernel/compare/v0.35.0-rc.18...v0.35.0-rc.19) (2020-06-11)
+
+
+### Bug Fixes
+
+* Ignore valma from babel, add logging to vlm tool/set selectors ([ff00866](https://github.com/valaatech/kernel/commit/ff008666041ac322f10285d78ca607bf2ee14ebc))
+
+
+
+
+
 # [0.35.0-rc.18](https://github.com/valaatech/kernel/compare/v0.35.0-rc.17...v0.35.0-rc.18) (2020-06-10)
 
 

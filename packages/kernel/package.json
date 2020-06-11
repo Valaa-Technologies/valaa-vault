@@ -1,6 +1,6 @@
 {
   "name": "@valos/kernel",
-  "version": "0.35.0-rc.18",
+  "version": "0.35.0-rc.19",
   "valos": {
     "type": "domain",
     "domain": "@valos/kernel",
@@ -33,10 +33,10 @@
     "_vlm__select__type_worker": "valma/select/type/worker.js"
   },
   "dependencies": {
-    "@valos/raem": "^0.35.0-rc.18",
-    "@valos/type-domain": "^0.35.0-rc.18",
-    "@valos/type-toolset": "^0.35.0-rc.18",
-    "valma": "^0.35.0-rc.18"
+    "@valos/raem": "^0.35.0-rc.19",
+    "@valos/type-domain": "^0.35.0-rc.19",
+    "@valos/type-toolset": "^0.35.0-rc.19",
+    "valma": "^0.35.0-rc.19"
   },
   "homepage": "https://valospace.org/kernel"
 }

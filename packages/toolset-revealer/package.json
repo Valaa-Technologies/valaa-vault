@@ -1,6 +1,6 @@
 {
   "name": "@valos/toolset-revealer",
-  "version": "0.35.0-rc.18",
+  "version": "0.35.0-rc.19",
   "valos": {
     "type": "toolset",
     "domain": "@valos/kernel"
@@ -18,7 +18,7 @@
     "_vlm__configure__toolsets_-valos_toolset-revealer": "valma/configure_toolsets__toolset-revealer.js"
   },
   "dependencies": {
-    "@valos/type-toolset": "^0.35.0-rc.18",
+    "@valos/type-toolset": "^0.35.0-rc.19",
     "autoprefixer": "^8.6.2",
     "compression-webpack-plugin": "^1.1.11",
     "css-loader": "^1.0.0",

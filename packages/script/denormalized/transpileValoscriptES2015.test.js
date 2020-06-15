@@ -42,6 +42,24 @@ function evaluateProgram (extracommandBlocks = [], head, programKuery: Kuery, sc
 }
 
 describe("ValoscriptECMAScript2015", () => {
+  describe("Generic syntax", () => {
+    it("resolves empty body into undefined", () => {
+      const bodyKuery = transpileValoscriptBody("");
+      const result = evaluateProgram([], {}, bodyKuery, {});
+      expect(result).toBeUndefined();
+    });
+    it("resolves a standalone comment into undefined", () => {
+      const bodyKuery = transpileValoscriptBody("/* comment */");
+      const result = evaluateProgram([], {}, bodyKuery, {});
+      expect(result).toBeUndefined();
+    });
+    it("resolves a comment with content into content", () => {
+      const bodyKuery = transpileValoscriptBody("/* comment */10");
+      const result = evaluateProgram([], {}, bodyKuery, {});
+      expect(result).toBe(10);
+    });
+  });
+
 // testing templateLiterals has problems because transpileValoscript uses template literals
 // test function cannot be tested properly. every nested template literal has been tested with
 // external program by putting it to "console.log(`<nest>`);" and having a long manual inspection.

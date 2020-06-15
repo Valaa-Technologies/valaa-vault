@@ -270,6 +270,7 @@ function visitNode (traverse, object, path, state) {
           && typeof child.value === "string"
           && child.value.match(/^[ \t]*[\r\n][ \t\r\n]*$/)));
 
+  let lastRenderableIndex;
   if (children.length) {
     if (!attributes.length) {
       if (secondArg) {
@@ -277,7 +278,6 @@ function visitNode (traverse, object, path, state) {
       }
       utils.append("null", state);
     }
-    let lastRenderableIndex;
 
     children.forEach((child, index) => {
       if (child.type !== Syntax.JSXExpressionContainer ||
@@ -290,7 +290,7 @@ function visitNode (traverse, object, path, state) {
       utils.append(", ", state);
     }
 
-    if (arrayChildren && children.length) {
+    if (arrayChildren && (lastRenderableIndex !== undefined)) {
       utils.append("[", state);
     }
 
@@ -325,7 +325,7 @@ function visitNode (traverse, object, path, state) {
     utils.move(closingEl.range[1], state);
   }
 
-  if (arrayChildren && children.length) {
+  if (arrayChildren && (lastRenderableIndex !== undefined)) {
     utils.append("]", state);
   }
 

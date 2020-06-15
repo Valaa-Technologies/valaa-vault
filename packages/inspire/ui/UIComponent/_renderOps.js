@@ -201,23 +201,27 @@ function _tryRenderMediaLens (component: UIComponent, media: any, focus: any) {
   const options = { fallbackContentType: "text/vsx" };
   const ret = thenChainEagerly(null, [
     media.interpretContent.bind(media, options),
-    function postProcessInterpretedMediaContent (content) {
+    function postProcessInterpretedMediaContent (contentInterpretation) {
       let error;
-      if (typeof content !== "object") {
-        if (content !== undefined) return content;
-        error = new Error(`Media interpretation is undefined`);
-      } else if (content.__esModule) {
-        if (content.default !== undefined) return content.default;
-        error = new Error(`Can't find default export from module Media '${media.debugId()}'`);
-      } else if (Array.isArray(content)
-          || (Object.getPrototypeOf(content) === Object.prototype)
-          || React.isValidElement(content)) {
-        return content;
-      } else if (content instanceof Error) {
-        error = content;
+      const info = options.mediaInfo || media.resolveMediaInfo();
+      if (typeof contentInterpretation !== "object") {
+        if (contentInterpretation !== undefined) return contentInterpretation;
+        if (!info.contentHash) throw new Error(`Media '${info.name}' $V.content is missing`);
+        error = new Error(
+            `Media '${info.name}' interpretation as '${info.contentType}' resolves into undefined`);
+      } else if (contentInterpretation.__esModule) {
+        if (contentInterpretation.default !== undefined) return contentInterpretation.default;
+        error = new Error(`Can't find default export from module Media '${info.name}'`);
+      } else if (Array.isArray(contentInterpretation)
+          || (Object.getPrototypeOf(contentInterpretation) === Object.prototype)
+          || React.isValidElement(contentInterpretation)) {
+        return contentInterpretation;
+      } else if (contentInterpretation instanceof Error) {
+        error = contentInterpretation;
       } else {
-        error = new Error(`Media interpretation is a complex type ${
-          (content.constructor || {}).name || "<unnamed>"}`);
+        error = new Error(`Media '${info.name}' interpretation as '${
+            info.contentType}' resolves into a complex type ${
+            (contentInterpretation.constructor || {}).name || "<unnamed>"}`);
       }
       error.slotName = "unrenderableMediaInterpretationLens";
       throw error;

@@ -1350,7 +1350,8 @@ export default class Vrapper extends Cog {
               .get(mostMaterializedTransient);
       if (interpretationsByMime) {
         const contentType = options.contentType || options.mime
-            || (mediaInfo = this.resolveMediaInfo(Object.create(options))).contentType;
+            || (options.mediaInfo = mediaInfo = this.resolveMediaInfo(Object.create(options)))
+                .contentType;
         const cachedInterpretation = contentType && interpretationsByMime[contentType];
         if (cachedInterpretation
             && (contentType || !options.fallbackContentType

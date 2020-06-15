@@ -8,11 +8,12 @@ import {
   ValoscriptNew, valoscriptInterfacePrototype, valoscriptTypePrototype, valoscriptResourcePrototype,
 } from "~/script";
 
-import { addNamespaceField, addNamespaceFieldAlias } from "~/engine/valosheath/namespace";
 import {
   createHostPrototypeFieldDescriptor, createHostFunctionDescriptor, createHostSymbolDescriptor,
   PrototypeFieldDescriptorsTag, TypeFieldDescriptorsTag, PropertyDescriptorsTag,
 } from "~/engine/valosheath/hostDescriptors";
+
+import { getValosheathNamespace } from "~/engine/valosheath/namespace";
 
 import { dumpObject, wrapError } from "~/tools";
 
@@ -20,23 +21,26 @@ import { dumpObject, wrapError } from "~/tools";
 
 export const OwnerDefaultCouplingTag = Symbol("valos.OwnerDefaultCoupling");
 
-export default function enfoldSchemaSheath (global: Object, valos: Object, hostDescriptors: Object,
-    schema: GraphQLSchema, schemaTypeSheaths: Object) {
-  _injectTypeSheath(global, valos, hostDescriptors, schema, schemaTypeSheaths,
+export default function enfoldSchemaSheath (global: Object, valosheath: Object,
+    primaryNamespace, hostDescriptors: Object, schema: GraphQLSchema, schemaTypeSheaths: Object) {
+  _injectTypeSheath(global, valosheath, primaryNamespace, hostDescriptors,
+      schema, schemaTypeSheaths,
       "TransientFields", schemaTypeSheaths.TransientFields);
-  _injectTypeSheath(global, valos, hostDescriptors, schema, schemaTypeSheaths,
+  _injectTypeSheath(global, valosheath, primaryNamespace, hostDescriptors,
+      schema, schemaTypeSheaths,
       "Discoverable", schemaTypeSheaths.Discoverable);
-  addNamespaceField(valos, "valos", "name", valos.Discoverable.nameAlias);
-  addNamespaceField(valos, "valos", "prototype", valos.Discoverable.prototypeAlias);
+  primaryNamespace.addSymbolField("name", valosheath.Discoverable.nameAlias);
+  primaryNamespace.addSymbolField("prototype", valosheath.Discoverable.prototypeAlias);
   Object.entries(schemaTypeSheaths).forEach(entry => {
-    _injectTypeSheath(global, valos, hostDescriptors, schema, schemaTypeSheaths, ...entry);
+    _injectTypeSheath(global, valosheath, primaryNamespace, hostDescriptors,
+          schema, schemaTypeSheaths, ...entry);
   });
   // Future deprecations
   // TODO(iridian, 2019-04): Deprecate and remove
-  valos.Blob = valos.Bvob;
-  valos.ResourceStub = valos.TransientFields;
-  valos.Partition = valos.Chronicle;
-  // valos.Chronicle = valos.Partition;
+  valosheath.Blob = valosheath.Bvob;
+  valosheath.ResourceStub = valosheath.TransientFields;
+  valosheath.Partition = valosheath.Chronicle;
+  // valosheath.Chronicle = valosheath.Partition;
 }
 
 /**
@@ -49,17 +53,18 @@ export default function enfoldSchemaSheath (global: Object, valos: Object, hostD
  * @param {Object} valos
  * @param {GraphQLSchema} schema
  */
-function _injectTypeSheath (global: Object, target: Object, hostDescriptors: Map<any, Object>,
-    schema: GraphQLSchema, schemaTypeSheaths, typeName, typeSheath) {
+function _injectTypeSheath (global: Object, valosheath: Object, primaryNamespace,
+    hostDescriptors: Map<any, Object>, schema: GraphQLSchema, schemaTypeSheaths,
+    typeName, typeSheath) {
   let valospaceType, typeIntro;
   try {
-    if (target[typeName]) return target[typeName];
+    if (!typeSheath) throw new Error(`TypeSheath missing for type name '${typeName}'`);
+    if (valosheath[typeName]) return valosheath[typeName];
     typeIntro = schema.getType(typeSheath.schemaTypeName || typeName);
       if (!typeIntro) {
       throw new Error(`No schema type introspection found for type sheath '${
           typeSheath.schemaTypeName || typeName}'`);
     }
-
     valospaceType = _createValospaceType();
     _addOwnSheathSymbolsAndFields();
 
@@ -73,7 +78,7 @@ function _injectTypeSheath (global: Object, target: Object, hostDescriptors: Map
 
     _inheritPropertiesAndDescriptors(valospaceType);
 
-    target[typeName] = valospaceType;
+    valosheath[typeName] = valospaceType;
     if (typeSheath.isGlobal) global[typeName] = valospaceType;
     return valospaceType;
   } catch (error) {
@@ -109,11 +114,13 @@ function _injectTypeSheath (global: Object, target: Object, hostDescriptors: Map
           `a Symbol for accessing host field '${valospaceType.name}.${symbolName
             }' via property lookup from a ValOS Resource instance,${
             ""} given the instance implements the host type '${valospaceType.name}'`);
-      addNamespaceFieldAlias(target, "valos", symbolName, symbol);
+      primaryNamespace.addSymbolField(symbolName, symbol);
     }
-    for (const [abbreviation, namespace] of Object.entries(typeSheath.namespaces || {})) {
-      valospaceType[PrototypeFieldDescriptorsTag][`$${abbreviation}`] = Object.freeze({
-        isHostField: true, enumerable: false, configurable: false, namespace,
+    for (const [key, prefix] of Object.entries(typeSheath.namespaceAccessors || {})) {
+      const accessor = `$${key}`;
+      valospaceType[PrototypeFieldDescriptorsTag][accessor] = Object.freeze({
+        isHostField: true, enumerable: false, configurable: false,
+        accessor, namespace: getValosheathNamespace(valosheath, prefix),
       });
     }
     for (const field of Object.keys(typeSheath.typeFields || {})
@@ -138,8 +145,8 @@ function _injectTypeSheath (global: Object, target: Object, hostDescriptors: Map
   function _prepareSchemaInterfaces () {
     return getTypeInterfaces(typeIntro).map(intro => {
       const interfaceSheath = schemaTypeSheaths[intro.name];
-      return interfaceSheath && _injectTypeSheath(
-          global, target, hostDescriptors, schema, schemaTypeSheaths, intro.name, interfaceSheath);
+      return interfaceSheath && _injectTypeSheath(global, valosheath, primaryNamespace,
+          hostDescriptors, schema, schemaTypeSheaths, intro.name, interfaceSheath);
     }).filter(notNull => notNull);
   }
 
@@ -174,7 +181,7 @@ function _injectTypeSheath (global: Object, target: Object, hostDescriptors: Map
     fieldDescriptorBase.writable = resolvedAlias.isWritable;
     fieldDescriptorBase.kuery = resolvedAlias.fieldName;
 
-    addNamespaceFieldAlias(target, "valos", fieldName, fieldSymbol);
+    primaryNamespace.addSymbolField(fieldName, fieldSymbol);
 
     valospaceType[PrototypeFieldDescriptorsTag][fieldSymbol] =
         createHostPrototypeFieldDescriptor(fieldDescriptorBase);

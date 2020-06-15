@@ -1,12 +1,13 @@
 // @flow
 
-import { addNamespaceFieldAlias } from "~/engine/valosheath/namespace";
+import { getValosheathNamespace } from "~/engine/valosheath/namespace";
 
 import injectLensObjects from "./injectLensObjects";
 
 export default function extendValOSWithInspire (scope: Object, hostDescriptors: any) {
-  const valos = scope.valos || (scope.Valaa = scope.valos = {});
-  valos.Lens = injectLensObjects(valos, scope, hostDescriptors);
-  Object.getOwnPropertyNames(valos.Lens).forEach(lensName =>
-      addNamespaceFieldAlias(valos, "valos", lensName, valos.Lens[lensName]));
+  const valosheath = scope.valos || (scope.Valaa = scope.valos = {});
+  valosheath.Lens = injectLensObjects(valosheath, scope, hostDescriptors);
+  const primaryNamespace = getValosheathNamespace(valosheath, "valos");
+  Object.getOwnPropertyNames(valosheath.Lens).forEach(lensName =>
+      primaryNamespace.addSymbolField(lensName, valosheath.Lens[lensName]));
 }

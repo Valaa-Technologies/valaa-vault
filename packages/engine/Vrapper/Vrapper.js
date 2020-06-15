@@ -1053,6 +1053,7 @@ export default class Vrapper extends Cog {
     if (vProperty) {
       return vProperty.extractValue(options, this);
     }
+    // TODO(iridian, 2020-06): All namespace handling should be moved to engineSteppers.
     const typePrototype = this._parent.getValospaceTypePrototype(typeName);
     const fieldDescriptor = typePrototype[PropertyDescriptorsTag][propertyName];
 
@@ -1060,10 +1061,11 @@ export default class Vrapper extends Cog {
       if (fieldDescriptor.isHostField) {
         const namespace = fieldDescriptor.namespace;
         if (namespace) {
+          const accessor = fieldDescriptor.accessor;
           // console.log("hostref", fieldDescriptor, fieldDescriptor.isHostField, namespace);
-          return ((this._namespaceProxies || (this._namespaceProxies = {}))[namespace]
-              || (this._namespaceProxies[namespace]
-                  = this._parent.getRootScope().valos.$valosNamespace._createProxy(this)));
+          return ((this._namespaceProxies || (this._namespaceProxies = {}))[accessor]
+              || (this._namespaceProxies[accessor] =
+                  namespace.createProxyTo(this, accessor)));
         }
         const ret = this.get(fieldDescriptor.kuery, options);
         // console.log("hostref", fieldDescriptor.kuery, ret);

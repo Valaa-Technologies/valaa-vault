@@ -2,8 +2,8 @@
 
 export default {
   schemaTypeName: "TransientFields",
-  namespaces: {
-    V: "@valos"
+  namespaceAccessors: {
+    V: "valos",
   },
   symbols: {},
   typeFields: {},

@@ -10,7 +10,7 @@ import valoscriptSteppers from "~/script/VALSK/valoscriptSteppers";
 import { isNativeIdentifier, getNativeIdentifierValue } from "~/script";
 
 import getImplicitCallable from "~/engine/Vrapper/getImplicitCallable";
-import { NamespaceInterfaceTag } from "~/engine/valosheath/namespace";
+import { tryNamespaceFieldSymbolOrPropertyName } from "~/engine/valosheath/namespace";
 
 // import { createNativeIdentifier } from "~/script/denormalized/nativeIdentifier";
 
@@ -142,7 +142,7 @@ function _engineIdentifierOrPropertyValue (steppers: Object, valker: Valker, hea
   let eContainer = (container === undefined)
       ? (isGetProperty ? head : scope)
       : tryFullLiteral(valker, head, container, scope);
-  let ePropertyName = (typeof propertyName !== "object") || isSymbol(propertyName)
+  const ePropertyName = (typeof propertyName !== "object") || isSymbol(propertyName)
       ? propertyName
       : tryLiteral(valker, head, propertyName, scope);
   try {
@@ -150,16 +150,9 @@ function _engineIdentifierOrPropertyValue (steppers: Object, valker: Valker, hea
       eContainer = valker.tryUnpack(eContainer, true);
     } else if (isHostRef(eContainer)) {
       const vContainer = tryUnpackedHostValue(eContainer) || valker.unpack(eContainer);
-      const namespace = eContainer[NamespaceInterfaceTag];
-      if (namespace) {
-        const symbol = namespace._namespaceFields[ePropertyName];
-        if (!symbol) {
-          throw new Error(`Namespace ${namespace.name} interface doesn't implement field ${
-              ePropertyName}`);
-        }
-        ePropertyName = symbol;
-      }
-      return valker.tryPack(vContainer.propertyValue(ePropertyName, { discourse: valker }));
+      return valker.tryPack(vContainer.propertyValue(
+          tryNamespaceFieldSymbolOrPropertyName(eContainer, ePropertyName),
+          { discourse: valker }));
     }
     const property = eContainer[ePropertyName];
     if (isGetProperty) return valker.tryPack(property);

@@ -825,7 +825,9 @@ export default class Gateway extends FabricEventTarget {
     try {
       let rootChronicleURI = prologue.rootChronicleURI
           && naiveURI.validateChronicleURI(await reveal(prologue.rootChronicleURI));
-      if (!rootChronicleURI && prologue.rootPartitionURI) {
+      if (prologue.rootPartitionURI) {
+        this.errorEvent("DEPRECATED: prologue.rootPartitionURI used to override rootChronicleURI",
+            "\n\tthis is probably due to ?partition= query param; use ?chronicle= instead.");
         rootChronicleURI = naiveURI.createPartitionURI(prologue.rootPartitionURI);
       }
       this.clockEvent(1, `prologues.extract`, `Determining prologues and the root chronicle <${

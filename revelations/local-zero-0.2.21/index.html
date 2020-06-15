@@ -30,7 +30,8 @@
               verbosity: 1,
             },
             prologue: {
-              rootChronicleURI: valos.getURIQueryField(document.location, "partition"),
+              rootChronicleURI: valos.getURIQueryField(document.location, "chronicle"),
+              rootPartitionURI: valos.getURIQueryField(document.location, "partition"),
             },
           }
       ).then(function (gateway) {

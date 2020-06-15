@@ -884,7 +884,9 @@ export function parseMemberExpression (transpiler: Transpiler, ast: MemberExpres
   if (options.leftSideRole === "delete") {
     return () => transpiler.VALK().deleteProperty(propertyName, object);
   }
-  return object.propertyValue(propertyName);
+  const toProperty = transpiler.VALK().propertyValue(propertyName);
+  transpiler.addSourceKueryInfo(toProperty, ast.property);
+  return object.to(toProperty);
 }
 
 function propertyNameKueryFromMember (transpiler: Transpiler, ast: MemberExpression,
@@ -968,8 +970,9 @@ export function makeComponentsForCallExpression (transpiler: Transpiler, ast: Ca
     this_ = transpiler.VALK().fromScope();
   } else {
     stem = transpiler.kueryFromAst(ast.callee.object, options);
-    callee = transpiler.VALK().propertyValue(
-            propertyNameKueryFromMember(transpiler, ast.callee, options));
+    const calleeName = propertyNameKueryFromMember(transpiler, ast.callee, options);
+    callee = transpiler.VALK().propertyValue(calleeName);
+    transpiler.addSourceKueryInfo(callee, ast.callee.property || ast.callee);
     this_ = transpiler.VALK().head();
   }
   return { stem, callee, this_ };

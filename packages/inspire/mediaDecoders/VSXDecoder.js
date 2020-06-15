@@ -1,6 +1,6 @@
 // @flow
 
-import { addStackFrameToError } from "~/raem/VALK/StackTrace";
+import { addSourceEntryInfo, addStackFrameToError } from "~/raem/VALK/StackTrace";
 
 import JSXDecoder from "~/inspire/mediaDecoders/JSXDecoder";
 import VALEK from "~/engine/VALEK";
@@ -48,14 +48,15 @@ export default class VSXDecoder extends JSXDecoder {
           sourceInfo.phaseBase}`;
       return super._addKuerySourceInfo(kuery, sourceInfo, start, end);
     } catch (error) {
-      const sourceDummy = {};
-      sourceInfo.sourceMap.set(sourceDummy, { loc: { start, end } });
       const origin = new Error(`_transpileEmbeddedValoscript(${sourceInfo.phaseBase})`);
       throw addStackFrameToError(
           this.wrapErrorEvent(error, 1, origin, "\n\tsourceInfo:", sourceInfo),
-          sourceDummy, sourceInfo, origin);
+          addSourceEntryInfo(sourceInfo, {}, { loc: { start, end } }),
+          sourceInfo, origin);
     } finally {
-      for (const entry of sourceInfo.sourceMap) topLevelSourceInfo.sourceMap.set(...entry);
+      for (const [entrySource, entryInfo] of sourceInfo.sourceMap) {
+        addSourceEntryInfo(topLevelSourceInfo, entrySource, entryInfo);
+      }
     }
   }
 }

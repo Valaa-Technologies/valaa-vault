@@ -669,8 +669,7 @@ function _advance (valker: Valker, head: any, scope: ?Object, pathStep: BuiltinS
     }
     return stepHead;
   } catch (error) {
-    const initialStackFrameSourceInfo = !error.originalError && !error.sourceStackFrames
-        && valker[SourceInfoTag];
+    const initialStackFrameSourceInfo = !error.sourceStackFrames && valker[SourceInfoTag];
     if (initialStackFrameSourceInfo) {
       addStackFrameToError(error, step, initialStackFrameSourceInfo, "runtime", valker);
     }

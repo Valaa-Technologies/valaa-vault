@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import { addStackFrameToError, SourceInfoTag } from "~/raem/VALK/StackTrace";
+import { addSourceEntryInfo, addStackFrameToError, SourceInfoTag } from "~/raem/VALK/StackTrace";
 
 import VALEK, { Kuery, EngineKuery, VS } from "~/engine/VALEK";
 
@@ -45,9 +45,7 @@ export default class JSXDecoder extends MediaDecoder {
           start: { line: error.lineNumber - 1, column: error.column - 1 }, // 3?
           end: { line: error.lineNumber - 1, column: error.column },
         };
-        const sourceDummy = {};
-        sourceInfo.sourceMap.set(sourceDummy, { loc });
-        throw addStackFrameToError(error, sourceDummy, sourceInfo);
+        throw addStackFrameToError(error, addSourceEntryInfo(sourceInfo, {}, { loc }), sourceInfo);
       }
       return this._decodeIntoIntegrator(sourceInfo, sourceInfo.jsxTransformedSource);
     } catch (error) {
@@ -95,9 +93,9 @@ export default class JSXDecoder extends MediaDecoder {
         start: { line: error.lineNumber, column: error.column - 1 }, // 3?
         end: { line: error.lineNumber, column: error.column },
       };
-      const sourceDummy = {};
-      sourceInfo.sourceMap.set(sourceDummy, { loc });
-      throw addStackFrameToError(wrappedError, sourceDummy, sourceInfo);
+      throw addStackFrameToError(wrappedError,
+          addSourceEntryInfo(sourceInfo, {}, { loc }),
+          sourceInfo);
     }
   }
 
@@ -204,7 +202,7 @@ export default class JSXDecoder extends MediaDecoder {
     }
     const sourceInfo: any = embeddedContent[SourceInfoTag];
     if (!sourceInfo) {
-      outerSourceInfo.sourceMap.set(embeddedContent.toVAKON(), { loc: { start, end, } });
+      addSourceEntryInfo(outerSourceInfo, embeddedContent.toVAKON(), { loc: { start, end, } });
     } else {
       for (const [key, entry] of sourceInfo.sourceMap) {
         const loc = { start: { ...entry.loc.start }, end: { ...entry.loc.end } };
@@ -214,7 +212,7 @@ export default class JSXDecoder extends MediaDecoder {
         if (loc.end.line === 1) loc.end.column += start.column + this.constructor.columnOffset;
         loc.start.line += start.line - 1;
         loc.end.line += start.line - 1;
-        outerSourceInfo.sourceMap.set(key, { ...entry, loc });
+        addSourceEntryInfo(outerSourceInfo, key, { ...entry, loc });
       }
     }
     embeddedContent[SourceInfoTag] = outerSourceInfo;

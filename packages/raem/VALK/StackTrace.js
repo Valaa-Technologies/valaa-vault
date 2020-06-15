@@ -20,6 +20,19 @@ type VALKStackTrace = Array<VALKStackFrame>;
 
 export const SourceInfoTag = Symbol("VALK.SourceInfo");
 
+export function getSourceEntryInfo (sourceInfo, entrySource) {
+  return sourceInfo && sourceInfo.sourceMap.get(entrySource);
+}
+
+export function addSourceEntryInfo (sourceInfo, entrySource, entryInfo) {
+  if (sourceInfo) {
+  // if (!sourceInfo.sourceMap.get(entrySource)) {
+    sourceInfo.sourceMap.set(entrySource, entryInfo);
+  // }
+  }
+  return entrySource;
+}
+
 export function addStackFrameToError (error: Error, sourceObject: Object,
     sourceInfo: Object, origin: any = sourceInfo.phase, discourse: Object): Error {
   if (!sourceInfo || (error == null) || (typeof error !== "object")) return error;

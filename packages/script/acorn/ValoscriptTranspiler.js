@@ -4,7 +4,9 @@ import { parse } from "acorn";
 import type { Node } from "~/script/acorn/es5/grammar";
 
 import { Kuery, dumpObject } from "~/raem/VALK";
-import { addStackFrameToError, SourceInfoTag } from "~/raem/VALK/StackTrace";
+import {
+  getSourceEntryInfo, addSourceEntryInfo, addStackFrameToError, SourceInfoTag,
+} from "~/raem/VALK/StackTrace";
 import { isBuiltinStep, getBuiltinStepName, getBuiltinStepArguments }
     from "~/raem/VALK/raemSteppers";
 
@@ -88,9 +90,9 @@ export default class ValoscriptTranspiler extends FabricEventTarget {
             .concat(sourceLines.slice(error.loc.line)).join("\n");
         const sourceInfo = actualTranspiler._sourceInfo;
         if (sourceInfo) {
-          const parseDummy = {};
-          sourceInfo.sourceMap.set(parseDummy, { loc: { start: error.loc } });
-          addStackFrameToError(error, parseDummy, sourceInfo);
+          addStackFrameToError(error,
+              addSourceEntryInfo(sourceInfo, {}, { loc: { start: error.loc } }),
+              sourceInfo);
         }
       }
       throw actualTranspiler.wrapErrorEvent(error, 1, `transpileKueryFromText`,
@@ -163,11 +165,11 @@ export default class ValoscriptTranspiler extends FabricEventTarget {
       result = rule(this, ast, options);
       if (this._sourceInfo) {
         if (result instanceof Kuery) {
-          this._recurseToSourceMap(result.toVAKON(), ast, true);
+          this.addSourceKueryInfo(result, ast);
         } else if (Array.isArray(result)) {
           for (const entry of result) {
-            if (entry[0] instanceof Kuery) this._recurseToSourceMap(entry[0].toVAKON(), ast, true);
-            if (entry[1] instanceof Kuery) this._recurseToSourceMap(entry[1].toVAKON(), ast, true);
+            if (entry[0] instanceof Kuery) this.addSourceKueryInfo(entry[0], ast);
+            if (entry[1] instanceof Kuery) this.addSourceKueryInfo(entry[1], ast);
           }
         }
       }
@@ -180,9 +182,9 @@ export default class ValoscriptTranspiler extends FabricEventTarget {
       // If no sourceInfo, or the parse error stack already has an entry (user only cares about the
       // innermost transpilation error: no call stacks here), skip the rest
       if (!this._sourceInfo || wrappedError.sourceStackFrames) throw wrappedError;
-      const sourceDummy = {};
-      this._sourceInfo.sourceMap.set(sourceDummy, { ...ast });
-      throw addStackFrameToError(wrappedError, sourceDummy, this._sourceInfo);
+      throw addStackFrameToError(wrappedError,
+          addSourceEntryInfo(this._sourceInfo, {}, { ...ast }),
+          this._sourceInfo);
     } finally {
       if (indent !== undefined) {
         this.log(`\n${" ".repeat(indent)}: ${type}, result:`, JSON.stringify(result, null, 0));
@@ -191,24 +193,28 @@ export default class ValoscriptTranspiler extends FabricEventTarget {
     }
   }
 
-  _recurseToSourceMap (vakon: any, parentAst: Node, rootAst: boolean = false) {
+  addSourceKueryInfo (kuery: Kuery, ast) {
+    return this._recurseToSourceMap(kuery.toVAKON(), ast, true);
+  }
+
+  _recurseToSourceMap (vakon: any, parentAst: Node, rootAst: boolean) {
     if (typeof vakon !== "object") return undefined;
-    const entry = this._sourceInfo.sourceMap.get(vakon);
+    const entry = getSourceEntryInfo(this._sourceInfo, vakon);
     if (entry) return entry;
     // Check if one and only one sub-entry has a source-info entry. If
     // so, we expand it to be the sourceinfo for this vakon and all its
     // sub-entries. Otherwise we inherit our parent.
     const existingSubEntryAsts = Array.isArray(vakon)
-        ? vakon.map(subVAKON => this._recurseToSourceMap(subVAKON, null))
+        ? vakon.map(subVAKON => this._recurseToSourceMap(subVAKON, null, false))
             .filter(subEntry => !!subEntry)
         : [];
     const actualAst = rootAst || (existingSubEntryAsts.length !== 1)
         ? parentAst
         : existingSubEntryAsts[0];
     if (!parentAst) return actualAst; // This is just the pre-process run.
-    this._sourceInfo.sourceMap.set(vakon, { ...actualAst });
+    addSourceEntryInfo(this._sourceInfo, vakon, { ...actualAst });
     if (Array.isArray(vakon)) {
-      vakon.forEach(subVAKON => this._recurseToSourceMap(subVAKON, actualAst));
+      vakon.forEach(subVAKON => this._recurseToSourceMap(subVAKON, actualAst, false));
     }
     return actualAst;
   }

@@ -38,7 +38,7 @@ import { debugObject, isSymbol, outputError } from "~/tools";
  * @extends {LiveUpdate}
  */
 export default class Subscription extends LiveUpdate {
-  // _valkOptions: VALKOptions;
+  // _liveOptions: VALKOptions;
   // _fieldName: string; // defined in LiveUpdate
   _liveHead: ?any;
   _liveKuery: ?Kuery;
@@ -86,11 +86,11 @@ export default class Subscription extends LiveUpdate {
   initializeKuery (liveKuery: any, liveHead: any = this._emitter) {
     this._liveKuery = liveKuery;
     this._liveHead = liveHead;
-    // this._valkOptions.noSideEffects = true; // TODO(iridian): Implement this in Valker.
+    // this._liveOptions.noSideEffects = true; // TODO(iridian): Implement this in Valker.
     if (liveKuery instanceof Kuery) {
       this._liveKueryObject = liveKuery;
       this._liveKuery = liveKuery.toVAKON();
-      this._valkOptions.sourceInfo = liveKuery[SourceInfoTag];
+      this._liveOptions.sourceInfo = liveKuery[SourceInfoTag];
     }
     return this;
   }
@@ -108,7 +108,7 @@ export default class Subscription extends LiveUpdate {
     const scopeAccessKeys = (this._liveKueryObject || {})[ScopeAccessKeysTag];
     if (!scopeAccessKeys || !scopeAccessKeys.length) return true;
     const candidateScope = options.scope;
-    const ownScope = this._valkOptions.scope;
+    const ownScope = this._liveOptions.scope;
     if (!candidateScope || !ownScope) {
       console.log(
           !scopeAccessKeys ? "no scope access info for:"
@@ -142,7 +142,7 @@ export default class Subscription extends LiveUpdate {
   // Value section
 
   _refreshState () {
-    const options = this._valkOptions;
+    const options = this._liveOptions;
     if ((options.discourse === null)
         || (options.discourse && !options.discourse.isActiveFabricator())) {
       options.discourse = this._obtainDiscourse
@@ -155,8 +155,8 @@ export default class Subscription extends LiveUpdate {
   }
 
   _invalidateState () {
-    if (this._valkOptions.state) this._valkOptions.state = null;
-    if (this._valkOptions.discourse) this._valkOptions.discourse = null;
+    if (this._liveOptions.state) this._liveOptions.state = null;
+    if (this._liveOptions.discourse) this._liveOptions.discourse = null;
   }
 
   _resolveValue (): ?any {
@@ -164,14 +164,14 @@ export default class Subscription extends LiveUpdate {
     if (this._fieldName !== undefined) return super._resolveValue();
     if (this._liveKuery !== undefined) {
       try {
-        return this.getDiscourse().run(this._liveHead, this._liveKuery, this._valkOptions);
+        return this.getDiscourse().run(this._liveHead, this._liveKuery, this._liveOptions);
       } catch (error) {
         this._invalidateState();
         const connecting = tryConnectToAbsentChroniclesAndThen(error, () => this._resolveValue());
         if (connecting) return connecting;
         throw error;
       } finally {
-        if (this._valkOptions.discourse !== undefined) this._valkOptions.discourse = null;
+        if (this._liveOptions.discourse !== undefined) this._liveOptions.discourse = null;
       }
     }
     throw new Error(`Cannot resolve value: ${this._fieldFilter !== undefined
@@ -258,11 +258,11 @@ export default class Subscription extends LiveUpdate {
     if (!this._listeners.size) return;
     let prestate, state;
     try {
-      prestate = this._valkOptions.state;
+      prestate = this._liveOptions.state;
       if (this._attachedHooks) throw new Error("Hooks are already attached");
       this._attachedHooks = new Map();
       if (triggerBroadcast !== false) this._refreshState();
-      state = this._valkOptions.state;
+      state = this._liveOptions.state;
       if (this._fieldFilter !== undefined) {
         this.attachFilterHook(this._emitter, this._fieldFilter, false);
       } else if (this._liveKuery !== undefined) {
@@ -280,19 +280,19 @@ export default class Subscription extends LiveUpdate {
         "\n\temitter:", this._emitter,
         ...(this._liveKuery === undefined ? [
           "\n\tfilter:", this._fieldFilter || this._fieldName,
-          "\n\tstate:", ...dumpObject(this._valkOptions.state),
+          "\n\tstate:", ...dumpObject(this._liveOptions.state),
           "\n\tstate was:", ...dumpObject(state),
           "\n\tstate prestate:", ...dumpObject(prestate),
         ] : [
           "\n\thead:", ...dumpObject(this._liveHead),
           "\n\tkuery:", ...dumpKuery(this._liveKuery),
-          "\n\toptions:", ...dumpObject(this._valkOptions),
+          "\n\toptions:", ...dumpObject(this._liveOptions),
         ]),
         "\n\tsubscription:", ...dumpObject(this),
       ]);
-      if (this._valkOptions.sourceInfo) {
+      if (this._liveOptions.sourceInfo) {
         addStackFrameToError(wrappedError, this._liveKuery,
-            this._valkOptions.sourceInfo, name, this._valkOptions.discourse);
+            this._liveOptions.sourceInfo, name, this._liveOptions.discourse);
       }
       throw wrappedError;
     }
@@ -318,8 +318,8 @@ export default class Subscription extends LiveUpdate {
       if (this._seenPassageCounter >= passageCounter) return;
       this._seenPassageCounter = passageCounter;
     }
-    this._valkOptions.state = state;
-    this._valkOptions.previousState = previousState;
+    this._liveOptions.state = state;
+    this._liveOptions.previousState = previousState;
     const refreshed = this.refreshValue();
     if (refreshed) this._broadcastUpdate(this, passageCounter);
   }
@@ -345,10 +345,10 @@ export default class Subscription extends LiveUpdate {
   }
 
   attachLiveKueryHooks (triggerBroadcast: ?boolean) {
-    const options: any = Object.create(this._valkOptions);
+    const options: any = Object.create(this._liveOptions);
     let scope;
     try {
-      options.scope = this._valkOptions.scope ? Object.create(this._valkOptions.scope) : {};
+      options.scope = this._liveOptions.scope ? Object.create(this._liveOptions.scope) : {};
       options.steppers = Object.create(liveKuerySteppers);
       options.steppers.kuerySubscription = this;
       this._value = this.getDiscourse().run(this._liveHead, this._liveKuery, options);
@@ -398,13 +398,13 @@ export default class Subscription extends LiveUpdate {
     console.log("triggerKueryUpdate", this.debugId(),
         "\n\tstructural/update:", isStructural, fieldUpdate.debugId(),
         "\n\tpassageCounters:", passageCounter, this._seenPassageCounter,
-        "\n\t:", !this._obtainDiscourse, !!this._valkOptions.state,
-            this._valkOptions.state === fieldUpdate.getState());
+        "\n\t:", !this._obtainDiscourse, !!this._liveOptions.state,
+            this._liveOptions.state === fieldUpdate.getState());
     */
     if (!this._obtainDiscourse) {
       const newState = fieldUpdate.getState();
-      if (this._valkOptions.state === newState) return;
-      this._valkOptions.state = newState;
+      if (this._liveOptions.state === newState) return;
+      this._liveOptions.state = newState;
     }
     if (isStructural === false) {
       // TODO(iridian, 2019-03): Some of the field handlers are now

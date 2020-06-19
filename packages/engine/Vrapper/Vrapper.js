@@ -368,7 +368,6 @@ export default class Vrapper extends Cog {
       this._phase = this[HostRef].isGhost() ? INACTIVE : IMMATERIAL;
       return this;
     }
-    this._updateTransient(resolver.state, transient);
     const id = transient.get("id");
     if (!id.getChronicleURI() && !id.isGhost() && (this._typeName !== "Blob")) {
       if (id.isAbsent()) return this;
@@ -547,7 +546,6 @@ export default class Vrapper extends Cog {
       throw this.wrapErrorEvent(error, 1, wrapper,
           "\n\toptions:", ...dumpObject(options),
           "\n\tthis[HostRef]:", this[HostRef],
-          "\n\tthis._transient:", this._transient,
           "\n\tchronicleURI:", chronicleURI,
           "\n\tthis:", ...dumpObject(this));
     }
@@ -573,12 +571,6 @@ export default class Vrapper extends Cog {
   }
 
   hasField (fieldName: string): boolean { return !!this.getFieldIntro(fieldName); }
-
-  outputStatus (/* output */) {
-    // Perhaps some debug-level stuff for switching these on and off? By default these would be a
-    // lot of spam.
-    // output.log(`${this.name}:`, this.getTransient().toJS());
-  }
 
   /**
    * Returns the fully qualified id data structure of this resource. This structure contains the
@@ -654,22 +646,20 @@ export default class Vrapper extends Cog {
 
   debugId (options?: any) {
     if (options && options.short) {
-      options.require = false;
-      return debugId(this.getTransient(options) || this[HostRef], { short: true });
+      return debugId(this[HostRef], { short: true });
     }
-    if (this._debugId) return this._debugId;
+    if (this._debugId && (!options || !options.transient)) return this._debugId;
     let nameText;
     const innerOptions = !options ? {} : Object.create(options);
     innerOptions.scope = {};
-    const transient = (options && options.transient) || this._transient;
     if (Vrapper._namedTypes[this.typeName]) {
-      nameText = transient && transient.get("name");
+      nameText = (options || {}).transient && (options || {}).transient.get("name");
       if (nameText === undefined) nameText = this.get("name", innerOptions);
       if (nameText) nameText = `@.:${nameText}`;
     }
     let targetText;
     if (this._typeName === "Relation") {
-      const targetId = transient && transient.get("target");
+      const targetId = (options || {}).transient && (options || {}).transient.get("target");
       if (!targetId) targetText = "@$n@@";
       else if (targetId.isAbsent()) {
         targetText = `.O-@?@@?+chronicle=${targetId.getChronicleURI()}`;
@@ -687,32 +677,25 @@ export default class Vrapper extends Cog {
 
   static _namedTypes = { Entity: true, Relation: true, Media: true };
 
-  getTransient (options: ?{
+  getTransient (options: {
     state?: Object, discourse?: Discourse, typeName?: string, mostMaterialized?: any,
     withOwnField?: string,
-  } = {}) {
-    const explicitState = options.state
+  }) {
+    const state = options.state
         || (options.discourse ? options.discourse.getState()
             : options.withOwnField ? this._parent.discourse.getState()
             : undefined);
-    const state = explicitState || this._transientStaledIn;
-    let ret = !state && this._transient;
-    if (!ret) {
+    const typeName = options.typeName || this.getTypeName(options);
+    let ret = state && state.getIn([typeName, this.getRawId()]);
+    if (!ret || (options.withOwnField && !ret.has(options.withOwnField))) {
       const discourse = options.discourse || this._parent.discourse;
-      const typeName = options.typeName || this.getTypeName(options);
-      ret = state.getIn([typeName, this.getRawId()]);
-      if (!ret || (options.withOwnField && !ret.has(options.withOwnField))) {
-        let resolver = discourse;
-        if (discourse.state !== state) {
-          resolver = Object.create(discourse);
-          resolver.state = state;
-        }
-        ret = resolver.tryGoToTransient(this[HostRef], typeName,
-            options.require, false, options.mostMaterialized, options.withOwnField);
+      let resolver = discourse;
+      if (state && (discourse.state !== state)) {
+        resolver = Object.create(discourse);
+        resolver.state = state;
       }
-      if (ret && !explicitState) {
-        this._updateTransient(null, ret);
-      }
+      ret = resolver.tryGoToTransient(this[HostRef], typeName,
+          options.require, false, options.mostMaterialized, options.withOwnField);
     }
     return ret;
   }
@@ -730,19 +713,6 @@ export default class Vrapper extends Cog {
     this.requireActive({ state: innerDiscourse.getState() });
     return innerDiscourse.chronicleEvent(
         createMaterializeGhostAction(innerDiscourse, this[HostRef], this._typeName));
-  }
-
-  _updateTransient (state: ?Object, object: ?Object) {
-    // TODO(iridian): Storing the transient in the vrapper is silly and useless premature
-    // optimization. With the transactions it can't really be used anyway, so yeah. Get rid of it
-    // and just store the id VRL in the Vrapper.
-    if (object) {
-      invariantifyObject(object, "Vrapper._updateTransient.object", { instanceof: Transient });
-      this._transient = object;
-      this._transientStaledIn = null;
-    } else if (this._transient) {
-      this._transientStaledIn = state;
-    } else throw new Error(`Must specify object with first _updateTransient call`);
   }
 
   getValospaceScope (options: ?Object) {
@@ -815,8 +785,10 @@ export default class Vrapper extends Cog {
     const discourse = options.discourse;
     if (this._phase === ACTIVE) {
       options.scope = (options.scope !== undefined)
-          ? Object.create(options.scope)
-          : this.getValospaceScope(options);
+              ? Object.create(options.scope)
+          : (typeof kuery !== "string")
+              ? this.getValospaceScope(options)
+          : {};
       if (discourse && discourse._steppers.kuerySubscription
           && !options.state && !(kuery instanceof Kuery)) {
         return discourse.tryUnpack(Object.create(discourse)
@@ -1726,7 +1698,7 @@ export default class Vrapper extends Cog {
     const idHandlers = targetEventHandlers.get("rawId");
     // Add primary vrapper entry
     let currentRawId = this.getRawId();
-    let currentObject = this.getTransient();
+    let currentObject = this.getTransient({ state });
     let ghostPath = currentObject.get("id").getGhostPath();
     const listenedRawIds = [];
     try {
@@ -1842,7 +1814,6 @@ export default class Vrapper extends Cog {
   }
 
   onEventCREATED (passage: Passage, story: Story) {
-    this._updateTransient(story.state);
     if (this._resolveCreated) this._resolveCreated();
     if (this._fieldSubscriptions) {
       const transient = this.getTransient({ typeName: passage.typeName, state: story.state });
@@ -1857,7 +1828,6 @@ export default class Vrapper extends Cog {
       console.log(`${this.debugId()}.onEventMODIFIED()`, story, this);
     }
     try {
-      this._updateTransient(story.state);
       if (passage.sets && passage.sets.name && this._debugId) this._debugId = null;
       if (passage.actualAdds) {
         for (const fieldName of passage.actualAdds.keys()) {

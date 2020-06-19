@@ -12,22 +12,22 @@ const _unsetValue = Symbol("LiveUpdate.UnsetValue");
 
 export default class LiveUpdate {
   _emitter: Vrapper;
-  _valkOptions: ?Object;
+  _liveOptions: ?Object;
   _value: ?any;
   _fieldName: string;
   _passage: ?Passage;
 
-  constructor (emitter: Vrapper, valkOptions: ?VALKOptions) {
+  constructor (emitter: Vrapper, liveOptions: ?VALKOptions) {
     this._emitter = emitter;
-    this._valkOptions = !valkOptions ? {} : { ...valkOptions };
+    this._liveOptions = !liveOptions ? {} : Object.create(liveOptions);
   }
 
   debugId (): string { return `${this.constructor.name}(field: ${this._fieldName})`; }
 
   getEmitter (): Vrapper { return this._emitter; }
-  getOptions (): ?VALKOptions { return this._valkOptions; }
-  getDiscourse () { return this._valkOptions.discourse || this._emitter.getEngine().discourse; }
-  getState (): Object { return this._valkOptions.state || this.getDiscourse().getState(); }
+  getOptions (): ?VALKOptions { return this._liveOptions; }
+  getDiscourse () { return this._liveOptions.discourse || this._emitter.getEngine().discourse; }
+  getState (): Object { return this._liveOptions.state || this.getDiscourse().getState(); }
   getJSState (): Object { return this.getState().toJS(); }
   value (): ?any {
     return (this._value !== _unsetValue) ? this._value : (this._value = this._resolveValue());
@@ -55,8 +55,8 @@ export default class LiveUpdate {
   fieldName (): string { return this._fieldName; }
   getPassage (): ?Story { return this._passage; }
   previousStateOptions (extraOptions: ?Object): VALKOptions {
-    const ret = Object.create(this._valkOptions);
-    ret.state = this._passage ? this._passage.previousState : this._valkOptions.previousState;
+    const ret = Object.create(this._liveOptions);
+    ret.state = this._passage ? this._passage.previousState : this._liveOptions.previousState;
     if (extraOptions) Object.assign(ret, extraOptions);
     return ret;
   }
@@ -68,7 +68,7 @@ export default class LiveUpdate {
 
   _resolveValue (): ?any {
     // TODO(iridian): The non-pure kueries should be replaced with pure kueries?
-    return this._emitter.do(this._fieldName, Object.create(this._valkOptions));
+    return this._emitter.do(this._fieldName, Object.create(this._liveOptions));
   }
 
   /*

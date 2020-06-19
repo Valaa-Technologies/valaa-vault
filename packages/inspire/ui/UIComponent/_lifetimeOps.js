@@ -131,11 +131,12 @@ function _updateFocus (component: UIComponent, newProps: Object, oldProps: Objec
 function _createContextAndSetFocus (
     component: UIComponent, newFocus: any, newProps: Object, oldProps: Object) {
   const parentUIContext = (oldProps || {}).parentUIContext || newProps.parentUIContext;
-  const uiContext = newProps.uiContext
-      || component.state.uiContext
-      || Object.create(parentUIContext);
-  const currentDepthSlot = component.getValos().Lens.currentRenderDepth;
-  uiContext[currentDepthSlot] = (parentUIContext[currentDepthSlot] || 0) + 1;
+  let uiContext = newProps.uiContext || component.state.uiContext;
+  if (!uiContext) {
+    uiContext = Object.create(parentUIContext);
+    uiContext.context = uiContext;
+  }
+
   if (newProps.context) {
     for (const name of Object.getOwnPropertyNames(newProps.context)) {
       setScopeValue(uiContext, name, newProps.context[name]);
@@ -144,29 +145,32 @@ function _createContextAndSetFocus (
       setScopeValue(uiContext, symbol, newProps.context[symbol]);
     }
   }
-  uiContext.reactComponent = component;
-  if (component.state.uiContext !== uiContext) {
-    component.setState({ uiContext }, _attachSubscribersWhenDone);
-  } else {
+
+  if (component.state.uiContext === uiContext) {
     _attachSubscribersWhenDone();
     if (oldProps) component.forceUpdate();
+  } else {
+    uiContext.reactComponent = component;
+    const currentDepthSlot = component.getValos().Lens.currentRenderDepth;
+    uiContext[currentDepthSlot] = (parentUIContext[currentDepthSlot] || 0) + 1;
+    component.setState({ uiContext }, _attachSubscribersWhenDone);
   }
   function _attachSubscribersWhenDone () {
     if (newFocus === undefined) return;
     thenChainEagerly(newFocus, [
-      resolvedNewFocus => {
+      function _updateContextFocus (resolvedNewFocus) {
         setScopeValue(uiContext, "focus", resolvedNewFocus);
         setScopeValue(uiContext, "head", resolvedNewFocus);
         const isResource = (newFocus instanceof Vrapper) && newFocus.isResource();
         return isResource && (newFocus.activate() || true);
       },
-      (isResource) => {
-        if (!isResource) return component;
+      function _validateResourceFocusIsActive (isResource) {
+        if (!isResource) return true;
         if (newFocus.isActive()) {
           // If some later update has updated focus prevent subscriber
           // attach and let the later update handle it instead.
-          if (newFocus !== getScopeValue(uiContext, "focus")) return undefined;
-          return component;
+          if (newFocus !== getScopeValue(uiContext, "focus")) return false;
+          return true;
         }
         let error;
         if (newFocus.isInactive() || newFocus.isActivating()) {
@@ -185,7 +189,9 @@ function _createContextAndSetFocus (
         }
         throw error;
       },
-      component_ => component_ && _initiateSubscriptions(component, newFocus, newProps),
+      function _initiateFocusSubscriptions (shouldInitiate) {
+        if (shouldInitiate) _initiateSubscriptions(component, newFocus, newProps);
+      },
     ], function errorOnCreateContextAndSetFocus (error) {
       component.enableError(
           wrapError(error, new Error(`createContextAndSetFocus()`),

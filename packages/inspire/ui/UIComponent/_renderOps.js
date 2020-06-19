@@ -289,8 +289,8 @@ function _tryWrapElementInLiveProps (component: UIComponent, element: Object, fo
       }
     }
     if (ref && (ref instanceof Kuery)) {
-      // Rewrite ref kuery as refKuery so that LiveProps can evaluate it.
-      _obtainLiveElementProps().refKuery =
+      // Rewrite ref kuery as onRefKuery so that LiveProps can evaluate it.
+      _obtainLiveElementProps().onRefKuery =
           _postProcessProp(ref, livePropLookup, liveProps, "ref", component);
       delete elementProps.ref;
     }

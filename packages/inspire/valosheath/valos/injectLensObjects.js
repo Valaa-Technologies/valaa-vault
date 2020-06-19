@@ -195,7 +195,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
     rootValue: function renderFocusPropertyKeys (focus: any) {
       return (!focus || (typeof focus !== "object")
           ? undefined
-          : Object.keys(!(focus instanceof Vrapper) ? focus : focus.getLexicalScope()));
+          : Object.keys(!(focus instanceof Vrapper) ? focus : focus.getValospaceScope()));
     },
   }));
 
@@ -509,45 +509,59 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
       rootValue: function propertyLensNameGetter (focus: any, component: UIComponent,
           currentSlotName: string) {
         if (component.props.lensName) {
-          console.debug("DEPRECATED: props.lensName\n\tprefer: props.lensProperty",
+          console.warn("DEPRECATED: props.lensName\n\tprefer: props.lensProperty",
               "\n\tlensName:", JSON.stringify(component.props.lensName),
               "\n\tin component:", component.debugId(), component);
         }
-        const lensPropertyNames = [].concat(
+        const scope = focus.tryValospaceScope();
+        const specificLensValue = _tryAndBindPropertyLiveKuery(
             component.props[specificLensPropertySlotName]
                 || component.getUIContextValue(slotSymbol)
-                || component.context[specificLensPropertySlotName] || [],
-            component.props.lensName || [], // Deprecated.
+                || component.context[specificLensPropertySlotName]);
+        if (specificLensValue !== undefined) return specificLensValue;
+
+        const legacyLensNameValue = _tryAndBindPropertyLiveKuery(component.props.lensName);
+        if (legacyLensNameValue !== undefined) return legacyLensNameValue;
+
+        const genericLensValue = _tryAndBindPropertyLiveKuery(
             component.props.lensProperty
-                || component.getUIContextValue(valos.Lens.lensProperty)
-                || component.context.lensProperty || []);
-        const focusLexicalScope = focus.getLexicalScope();
-        for (const propertyName of lensPropertyNames) {
-          let vProperty;
-          if (focusLexicalScope.hasOwnProperty(propertyName)) {
-            vProperty = focusLexicalScope[propertyName];
-          } else {
-            vProperty = focus.get(VALEK.property(propertyName));
-          }
-          if (vProperty) {
-            component.bindLiveKuery(
-                `props_${specificLensPropertySlotName}_${currentSlotName}`, vProperty, "value", {
-                  scope: component.getUIContext(),
-                  onUpdate: function updateLensPropertyComponent () { component.forceUpdate(); },
-                  updateImmediately: false,
-                });
-            const propertyValue = vProperty.extractValue();
-            if (propertyValue !== undefined) return propertyValue;
-          }
-        }
+                  || component.getUIContextValue(valos.Lens.lensProperty)
+                  || component.context.lensProperty);
+        if (genericLensValue !== undefined) return genericLensValue;
         /*
         console.error("Can't find resource lens props:", specificLensPropertySlotName, slotSymbol,
-            "\n\tnames:", lensPropertyNames,
+            "\n\tnotFoundName:", notFoundName, valos.Lens[notFoundName],
             "\n\tcomponent:", component,
             "\n\tfocus:", focus);
         */
+
         if (!notFoundName) return null;
         return { delegate: [valos.Lens[notFoundName]] };
+
+        function _tryAndBindPropertyLiveKuery (propertyName) {
+          if (!propertyName) return undefined;
+          if (Array.isArray(propertyName)) {
+            for (const name of propertyName) {
+              const ret = _tryAndBindPropertyLiveKuery(name);
+              if (ret !== undefined) return ret;
+            }
+            return undefined;
+          }
+          let vProperty;
+          if (scope.hasOwnProperty(propertyName)) {
+            vProperty = scope[propertyName];
+          } else {
+            vProperty = focus.step(VALEK.property(propertyName));
+          }
+          if (!vProperty) return undefined;
+          component.bindLiveKuery(
+              `props_${specificLensPropertySlotName}_${currentSlotName}`, vProperty, "value", {
+                scope: component.getUIContext(),
+                onUpdate: function updateLensPropertyComponent () { component.forceUpdate(); },
+                updateImmediately: false,
+              });
+          return vProperty.extractValue();
+        }
       },
     }));
   }
@@ -591,7 +605,21 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
     },
   }));
 
-  _createLensPropertySlots("instanceLensProperty", ["INSTANCE_LENS"], "instancePropertyLens");
+  _createLensPropertySlots("instanceLensProperty", ["INSTANCE_LENS"], "instancePropertyLens",
+      "mediaInstanceLens");
+
+  createSlotSymbol("mediaInstanceLens", () => ({
+    type: "Lens",
+    description: `Slot for viewing an instance lens of a Media which
+        doesn't define INSTANCE_LENS.
+
+        @focus {Object} focus  the active Resource focus.`,
+    isEnabled: (focus, component) =>
+        (component.props.instanceLensPrototype.getTypeName() === "Media"),
+    rootValue: function renderMediaInstance (focus, component) {
+      return component.props.instanceLensPrototype;
+    },
+  }));
 
   createSlotSymbol("instanceLensPrototype", () => ({
     type: "Resource",
@@ -1354,8 +1382,8 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
       <div {..._lensMessageLoadingFailedProps}>
         <div {..._message}>
           Resource {focusDescriptionLens} cannot be used as a lens.
-          This is because it is not a valid lens Media file and
-          it does not have a lens property that is listed in either
+          This is because it is not a valid lens Media file nor does it
+          have a lens property that is listed in either
           %27delegateLensProperty%27 or %27lensProperty%27 slots.
         </div>
         <div>

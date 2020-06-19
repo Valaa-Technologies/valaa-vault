@@ -2155,6 +2155,9 @@ export default class Vrapper extends Cog {
         this._defineProperty(decodeURIComponent(structuralName), vActualAdd);
         return;
       }
+
+      // console.debug("Non-structural property seen:", propertyRawId);
+
       const nameSub = this._scopeNameSubs[propertyRawId] = vActualAdd
           .obtainSubscription("name", { state: fieldUpdate.getState(), scope: null });
       nameSub.addListenerCallback(this, `Vrapper_properties_name`, nameUpdate => {

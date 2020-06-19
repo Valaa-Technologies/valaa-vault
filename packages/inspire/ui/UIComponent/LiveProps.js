@@ -20,28 +20,54 @@ import {
 
 import { _wrapElementInLiveProps } from "./_renderOps";
 
+const _isReservedPropsName = {
+  key: true,
+  elementKey: true,
+  children: true,
+  style: true,
+  styleSheet: true,
+  focus: true,
+  array: true,
+  frame: true,
+  context: true,
+  className: true,
+  lens: true,
+  lensProperty: true,
+  focusLensProperty: true,
+  delegateLensProperty: true,
+  instanceLensProperty: true,
+  instanceLensPrototype: true,
+  // all names which begin with "on" and are followed by an uppercase letter
+  // all names which end with "Lens"
+};
+
 /* eslint-disable react/prop-types */
 
 /**
- * An UIComponent which wraps another element of given props.elementType and manages its live props.
+ * An UIComponent which wraps another element of given
+ * props.elementType and manages its live props.
  *
- * Live props are passed into LiveProps through props.liveProps (a map of string kuery key
- * to live kuery). LiveProps keeps track of these kueries (valked from
- * parentUIContext.focus) and maintains their current values in corresponding map of kuery key to
- * current value.
+ * Live props are passed into LiveProps through props.liveProps (a map
+ * of string kuery key to live kuery). LiveProps keeps track of these
+ * kueries (valked from parentUIContext.focus) and maintains their
+ * current values in corresponding map of kuery key to current value.
  *
- * When rendering the element, props.elementProps are pre-processed and props values which are
- * callback functions will be called with the live value map and the return values used as the final
- * prop value that is passed to the element. This roughly mimics following JSX:
+ * When rendering the element, props.elementProps are pre-processed and
+ * props values which are callback functions will be called with the
+ * live value map and the return values used as the final
+ * prop value that is passed to the element. This roughly mimics
+ * following JSX:
  *
  * <props.elementType {...processedProps}>{this.props.children}</props.elementType>
  *
- * The element can be any element, even another UIComponent; however such an UIComponent won't
- * receive any special treatment and will need to receive its props through props.elementProps.
+ * The element can be any element, even another UIComponent; however
+ * such an UIComponent won't receive any special treatment and will
+ * need to receive its props through props.elementProps.
  *
- * Note: as LiveProps is an UIComponent it can be passed the normal UIComponent props like
- * props.uiContext or props.parentUIContext and props.kuery: however the resulting local
- * uiContext.focus will not affect the live props and is only used for the children (if any).
+ * Note: as LiveProps is an UIComponent it can be passed the normal
+ * UIComponent props like props.uiContext or props.parentUIContext and
+ * props.kuery: however the resulting local uiContext.focus will not
+ * affect the live props and is only used for the children (if any).
  *
  * @export
  * @class LiveProps
@@ -55,12 +81,12 @@ export default class LiveProps extends UIComponent {
     elementType: PropTypes.any.isRequired,
     elementProps: PropTypes.object.isRequired,
     liveProps: PropTypes.object, // Must be Map
-    refKuery: PropTypes.instanceOf(Kuery),
+    onRefKuery: PropTypes.instanceOf(Kuery),
   }
   static noPostProcess = {
     ...UIComponent.noPostProcess,
     liveProps: true,
-    refKuery: true,
+    onRefKuery: true,
   }
 
   constructor (props: any, context: any) {
@@ -191,63 +217,74 @@ export default class LiveProps extends UIComponent {
       }
     }
 
-    let newProps = { ...this.props.elementProps };
+    let newProps = {};
     let pendingProps;
-    for (const name of Object.keys(this.props.elementProps)) {
-      const prop = this.props.elementProps[name];
+    let elementType = this.props.elementType;
+    const isValoscope = (elementType === Valoscope);
+
+    for (let [name, prop] of Object.entries(this.props.elementProps)) {
       if ((typeof prop === "function") && prop.kueryId) {
-        newProps[name] = prop(this.state.livePropValues);
-        if (((name.slice(0, 2) === "on") || (name === "refKuery"))
-            && (typeof newProps[name] !== "function")) {
-          newProps[name] = getImplicitCallable(newProps[name], `props.${name}`,
-              { synchronous: undefined });
+        prop = prop(this.state.livePropValues);
+      }
+      if (isPromise(prop)) {
+        (pendingProps || (pendingProps = [])).push([name, prop]);
+      }
+      if (pendingProps) continue;
+      if (!_isReservedPropsName[name]) {
+        if (name.startsWith("on") && (!isValoscope || (name[2] === name[2].toUpperCase()))) {
+          if (typeof prop !== "function") {
+            prop = getImplicitCallable(prop, `props.${name}`, { synchronous: undefined });
+          }
+          if (name === "onRefKuery") {
+            name = "ref";
+          }
+        } else if (isValoscope && !name.endsWith("Lens")) {
+          (newProps.context || (newProps.context = {}))[name] = prop;
+          continue;
         }
+      } else if (name === "className") {
+        prop = this.refreshClassName(focus, prop);
+      } else if (name === "delegate") {
+        if (Object.keys(this.props.elementProps).length === 1) {
+          return this.renderFirstEnabledDelegate(prop, undefined, "delegate");
+        }
+      } else if (name === "context" && newProps.context) {
+        Object.assign(newProps.context, prop);
+        continue;
       }
-      if (name === "className") {
-        newProps[name] = this.refreshClassName(focus, newProps[name]);
+      if (typeof prop === "function") {
+        prop = this._wrapInValOSExceptionProcessor(prop, name);
       }
-      if (isPromise(newProps[name])) (pendingProps || (pendingProps = {}))[name] = newProps[name];
+      newProps[name] = prop;
     }
     if (pendingProps) {
-      const pendingPropsNames = Object.keys(pendingProps);
-      const ret = Promise.all(pendingPropsNames.map(name => pendingProps[name])).then((values) => {
+      const ret = Promise.all(pendingProps.map(entry => entry[1])).then(resolvedProps => {
         this.setState((prevState) => ({
-          livePropValues: pendingPropsNames.reduce((newLivePropsValues, name, index) =>
-                  newLivePropsValues.set(name, values[index]),
+          livePropValues: pendingProps.reduce((newLivePropsValues, [name], index) =>
+                  newLivePropsValues.set(name, resolvedProps[index]),
               prevState.livePropValues || OrderedMap())
         }));
       });
       ret.operationInfo = {
         slotName: "pendingPropsLens", focus: pendingProps,
-        onError: { slotName: "failedPropsLens", propsNames: pendingPropsNames },
+        onError: { slotName: "failedPropsLens", propsNames: pendingProps.map(([name]) => name) },
       };
       return ret;
     }
-
-    if (newProps.refKuery) {
-      newProps.ref = newProps.refKuery;
-      delete newProps.refKuery;
-    }
-    for (const propName of Object.getOwnPropertyNames(newProps)) {
-      if (typeof newProps[propName] === "function") {
-        newProps[propName] = this._wrapInValOSExceptionProcessor(newProps[propName], propName);
+    let children = arrayFromAny(this.props.children);
+    if (!isValoscope) {
+      const valoscopeProps = newProps.valoscope || newProps.vScope || newProps.valaaScope;
+      if (valoscopeProps) {
+        const subProps = newProps;
+        newProps = valoscopeProps;
+        delete subProps.valoscope;
+        delete subProps.vScope;
+        delete subProps.valaaScope;
+        elementType = Valoscope;
+        children = [React.createElement(elementType, subProps, ...children)];
       }
     }
-    let children = arrayFromAny(this.props.children);
-    let elementType = this.props.elementType;
-    const valoscopeProps = newProps.valoscope || newProps.vScope || newProps.valaaScope;
-    if (valoscopeProps) {
-      const subProps = newProps;
-      newProps = valoscopeProps;
-      delete subProps.valoscope;
-      delete subProps.vScope;
-      delete subProps.valaaScope;
-      elementType = Valoscope;
-      children = [React.createElement(elementType, subProps, ...children)];
-    }
     let ret;
-    if (newProps.delegate && (Object.keys(newProps).length === 1)) {
-      ret = this.renderFirstEnabledDelegate(newProps.delegate, undefined, "delegate");
     /* Only enable this section for debugging React key warnings; it will break react elsewhere
     if (elementType === Valoscope) {
       elementType = class DebugValoscope extends Valoscope {};
@@ -258,7 +295,7 @@ export default class LiveProps extends UIComponent {
     /* */
     // eslint-disable-next-line
     // */
-    } else if (!elementType.isUIComponent || !newProps.hasOwnProperty("array")) {
+    if (!elementType.isUIComponent || !newProps.hasOwnProperty("array")) {
       if (!newProps.key) newProps.key = newProps.elementKey || this.getUIContextValue("key");
       const inter = React.createElement(elementType, newProps, ...children);
       ret = _wrapElementInLiveProps(this, inter, focus, "focus");

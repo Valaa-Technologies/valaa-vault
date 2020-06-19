@@ -66,7 +66,7 @@ export default class EngineTestHarness extends SourcererTestHarness {
 
   runValoscript (self: any, valoscriptBody: string,
       extendScope: Object = {}, options: Object = {}) {
-    options.scope = Object.create(this.engine.getLexicalScope());
+    options.scope = Object.create(this.engine.getRootScope());
     return super.runValoscript(self, valoscriptBody, extendScope, options);
   }
 }

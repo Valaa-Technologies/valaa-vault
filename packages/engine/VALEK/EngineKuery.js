@@ -20,7 +20,7 @@ export default class EngineKuery extends ValoscriptKuery {
 
   fromObject (object: any, headType: ?string) {
     return object instanceof Vrapper
-        ? super.fromObject(object.getId(), object.getTypeName())
+        ? super.fromObject(object.getVRef(), object.getTypeName())
         : super.fromObject(object, headType);
   }
 

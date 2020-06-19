@@ -54,12 +54,11 @@ export default class LiveUpdate {
 
   fieldName (): string { return this._fieldName; }
   getPassage (): ?Story { return this._passage; }
-  previousStateOptions (extraOptions: Object = {}): VALKOptions {
-    return {
-      ...this._valkOptions,
-      state: this._passage ? this._passage.previousState : this._valkOptions.previousState,
-      ...extraOptions,
-    };
+  previousStateOptions (extraOptions: ?Object): VALKOptions {
+    const ret = Object.create(this._valkOptions);
+    ret.state = this._passage ? this._passage.previousState : this._valkOptions.previousState;
+    if (extraOptions) Object.assign(ret, extraOptions);
+    return ret;
   }
   clearPassageTemporaries () {
     this._passage = null;
@@ -69,7 +68,7 @@ export default class LiveUpdate {
 
   _resolveValue (): ?any {
     // TODO(iridian): The non-pure kueries should be replaced with pure kueries?
-    return this._emitter.do(this._fieldName, this._valkOptions);
+    return this._emitter.do(this._fieldName, Object.create(this._valkOptions));
   }
 
   /*

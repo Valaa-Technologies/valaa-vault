@@ -3,7 +3,7 @@
 import { GraphQLObjectType, isAbstractType } from "graphql/type";
 import { Iterable } from "immutable";
 
-import VALK, { packedSingular } from "~/raem/VALK";
+import VALK from "~/raem/VALK";
 import type { VALKOptions } from "~/raem/VALK"; // eslint-disable-line no-duplicate-imports
 import type { Passage, Story } from "~/raem/redux/Bard";
 import { getHostRef, HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
@@ -29,6 +29,7 @@ import isResourceType from "~/raem/tools/graphql/isResourceType";
 import isAbsentTypeName from "~/raem/tools/graphql/isAbsentTypeName";
 
 import { ValoscriptPrimitiveKind /* , NativeIdentifierTag */ } from "~/script";
+import { transpileValoscriptBody } from "~/script/transpileValoscript";
 
 import { Discourse, Connection } from "~/sourcerer";
 import { ChronicleEventResult } from "~/sourcerer/api/types";
@@ -205,13 +206,14 @@ export default class Vrapper extends Cog {
   }
 
   toJSON () {
-    return this.getId().toJSON();
+    return this[HostRef].toJSON();
   }
 
   toString () { return this.debugId(); }
 
-  prototypeChainString () {
-    const prototypeIdData = this.getTransient().get("prototype");
+  /*
+  prototypeChainString (options) {
+    const prototypeIdData = this.getTransient(options).get("prototype");
     if (!prototypeIdData) return "";
     const coupledField = tryCoupledFieldFrom(prototypeIdData);
     return `'${this.getRawId("id")}'${
@@ -222,6 +224,7 @@ export default class Vrapper extends Cog {
         : ""
         }${this.get("prototype").prototypeChainString()}`;
   }
+  */
 
   getSchema () {
     return this._parent.discourse.schema;
@@ -416,8 +419,11 @@ export default class Vrapper extends Cog {
       if (!this.isInactive()) {
         this.registerComplexHandlers(this._parent._storyHandlerRoot, resolver.state);
       }
-      this.debugId({ state: resolver.state, transient });
-      if (this.hasInterface("Scope")) this._setUpScopeFeatures(resolver);
+      const options = { state: resolver.state, transient };
+      this.debugId(options);
+      if (this._scopeOwnerSub === null) {
+        this._setUpScopeFeatures(options);
+      }
     } catch (error) {
       const wrappedError = this.wrapErrorEvent(error, 1,
           new Error("_postActivate()"),
@@ -580,9 +586,8 @@ export default class Vrapper extends Cog {
    *
    * @returns
    */
-  getId (options?: VALKOptions): VRL {
-    const transient = options ? this.getTransient(options) : this._transient;
-    return transient ? transient.get("id") : this[HostRef];
+  getVRef (): VRL {
+    return this[HostRef];
   }
 
   getURI (): string {
@@ -654,10 +659,12 @@ export default class Vrapper extends Cog {
     }
     if (this._debugId) return this._debugId;
     let nameText;
+    const innerOptions = !options ? {} : Object.create(options);
+    innerOptions.scope = {};
     const transient = (options && options.transient) || this._transient;
     if (Vrapper._namedTypes[this.typeName]) {
       nameText = transient && transient.get("name");
-      if (nameText === undefined) nameText = this.get("name", options);
+      if (nameText === undefined) nameText = this.get("name", innerOptions);
       if (nameText) nameText = `@.:${nameText}`;
     }
     let targetText;
@@ -667,7 +674,7 @@ export default class Vrapper extends Cog {
       else if (targetId.isAbsent()) {
         targetText = `.O-@?@@?+chronicle=${targetId.getChronicleURI()}`;
       } else {
-        const target = this.get("target", options);
+        const target = this.get("target", innerOptions);
         targetText = `.O-${target ? target.getName() : "@@"}`;
       }
     }
@@ -715,14 +722,14 @@ export default class Vrapper extends Cog {
   isMaterialized (discourse: ?Discourse) {
     const state = (discourse || this._parent.discourse).getState();
     this.requireActive({ state });
-    return isMaterialized(state, this.getId());
+    return isMaterialized(state, this[HostRef]);
   }
 
   materialize (discourse: ?Discourse): ChronicleEventResult {
     const innerDiscourse = (discourse || this._parent.discourse);
     this.requireActive({ state: innerDiscourse.getState() });
     return innerDiscourse.chronicleEvent(
-        createMaterializeGhostAction(innerDiscourse, this.getId(), this._typeName));
+        createMaterializeGhostAction(innerDiscourse, this[HostRef], this._typeName));
   }
 
   _updateTransient (state: ?Object, object: ?Object) {
@@ -738,42 +745,23 @@ export default class Vrapper extends Cog {
     } else throw new Error(`Must specify object with first _updateTransient call`);
   }
 
-  getSelfAsHead (singularTransient: any = this.getTransient()) {
-    return packedSingular(singularTransient, this._typeName || "TransientFields");
+  getValospaceScope (options: ?Object) {
+    return this._valospaceScope || this._initializeScopes(options)._valospaceScope;
   }
 
-  getLexicalScope (createIfMissing: boolean) {
-    if (!this._lexicalScope) {
-      if (!createIfMissing) {
-        this.requireActive();
-        return this._parent.getLexicalScope();
-      }
-      this._initializeScopes(this._parent);
-    }
-    return this._lexicalScope;
+  tryValospaceScope () {
+    return this._valospaceScope;
   }
 
-  getNativeScope (createIfMissing: boolean) {
-    if (!this._nativeScope) {
-      if (!createIfMissing) {
-        this.requireActive();
-        return this._parent.getNativeScope();
-      }
-      this._initializeScopes(this._parent);
-    }
-    return this._nativeScope;
+  getFabricScope (options: ?Object) {
+    return this._fabricScope || this._initializeScopes(options)._fabricScope;
   }
 
-  _initializeScopes (parent: Object) {
-    this._lexicalScope = Object.create(parent.getLexicalScope(true));
-    this._nativeScope = Object.create(parent.getNativeScope(true));
-  }
-
-  getHostGlobal () {
+  getHostGlobal (options) {
     this.requireActive();
     if (!this._hostGlobal) {
       this._hostGlobal = createModuleGlobal();
-      this._hostGlobal.valos = this._hostGlobal.Valaa = this._nativeScope;
+      this._hostGlobal.valos = this._hostGlobal.Valaa = this.getFabricScope(options);
     }
     return this._hostGlobal;
   }
@@ -790,18 +778,35 @@ export default class Vrapper extends Cog {
 /*
  * Running a live kuery through the Vrapper will make an implicit activate() call.
  */
-
-  get (kuery: any, options: VALKOptions = {}) {
-    options.pure = true;
-    return this.do(kuery, options);
-  }
-
-  do (kuery: any, options: VALKOptions = {}) {
+  doValoscript (valoscriptBody: string, extendScope, options: VALKOptions = {}) {
+    let valoscriptKuery;
     try {
-      return this.run(this[HostRef], kuery, options);
+      options.discourse = this._parent.discourse.acquireFabricator("do-body");
+      options.scope = options.mutableScope ||
+          Object.create((options.scope !== undefined)
+              ? options.scope
+              : this.getValospaceScope(options));
+      if (extendScope) Object.assign(options.scope, extendScope);
+      valoscriptKuery = (typeof valoscriptBody !== "string"
+          ? valoscriptBody
+          : (options.kuery = transpileValoscriptBody(valoscriptBody, {
+            verbosity: options.verbosity || 0,
+            customVALK: VALEK,
+            sourceInfo: options.sourceInfo,
+          })));
+      const ret = this.run(this[HostRef], valoscriptKuery, options);
+      if (options.discourse) {
+        const result = options.discourse.releaseFabricator();
+        if (result) {
+          return thenChainEagerly(
+              (options.awaitResult || (r => r.getPersistedEvent()))(result),
+              () => ret);
+        }
+      }
+      return ret;
     } catch (error) {
-      throw this.wrapErrorEvent(error, 1, "do",
-          "\n\tkuery:", ...dumpKuery(kuery),
+      throw this.wrapErrorEvent(error, 1, "doValoscript",
+          "\n\tvaloscript:", ...dumpObject({ valoscriptBody }),
           "\n\toptions:", ...dumpObject(options));
     }
   }
@@ -809,16 +814,21 @@ export default class Vrapper extends Cog {
   run (head: any, kuery: Kuery, options: VALKOptions = {}) {
     const discourse = options.discourse;
     if (this._phase === ACTIVE) {
-      if (options.scope === undefined) options.scope = this.getLexicalScope();
+      options.scope = (options.scope !== undefined)
+          ? Object.create(options.scope)
+          : this.getValospaceScope(options);
       if (discourse && discourse._steppers.kuerySubscription
           && !options.state && !(kuery instanceof Kuery)) {
         return discourse.tryUnpack(Object.create(discourse)
             .advance(discourse.tryPack(head), kuery, options.scope));
       }
-    } else if (!discourse && !options.state && this.isResource()) {
-      this.requireActive();
+    } else {
+      if (!discourse && !options.state && this.isResource()) {
+        this.requireActive();
+      }
+      options.scope = (options.scope !== undefined) ? Object.create(options.scope) : {};
     }
-    return super.run(head, kuery, options);
+    return this.getEngine().discourse.run(head, kuery, options);
   }
 
 
@@ -915,7 +925,7 @@ export default class Vrapper extends Cog {
   _primeTransactionAndOptionsAndId (options: VALKOptions): { discourse: Discourse, id: VRL } {
     const discourse = options.discourse || this._parent.discourse;
     this.requireActive(options);
-    let id = discourse.bindObjectId(this.getId(), this._typeName);
+    let id = discourse.bindObjectId(this[HostRef], this._typeName);
     options.head = this;
     let chronicleURI = id.getChronicleURI();
     if (!chronicleURI && id.isGhost()) {
@@ -970,14 +980,16 @@ export default class Vrapper extends Cog {
     if (initialState.owner === undefined
         && !((typeName === "Relation") && initialState.source)
         && !initialState.authorityURI && !initialState.partitionAuthorityURI) {
-      initialState.owner = this.get("owner", Object.create(options));
+      const innerOptions = Object.create(options);
+      innerOptions.scope = null;
+      initialState.owner = this.get("owner", innerOptions);
     }
     return this.create(typeName, initialState, options);
   }
 
   destroy (options: { discourse?: Discourse } = {}) {
     this.requireActive(options);
-    return (options.discourse || this._parent.discourse).destroy({ id: this.getId(options) });
+    return (options.discourse || this._parent.discourse).destroy({ id: this[HostRef] });
   }
 
   /**
@@ -1021,7 +1033,7 @@ export default class Vrapper extends Cog {
       }
       const createOptions = { ...options, head: this };
       if (typeName === "Property") {
-        initialState.owner = this.getId().coupleWith(fieldName);
+        initialState.owner = this[HostRef].coupleWith(fieldName);
       }
       const vFieldValue = this._parent.create(typeName, initialState, createOptions);
       if (typeName !== "Property") {
@@ -1078,15 +1090,15 @@ export default class Vrapper extends Cog {
 
   _getProperty (propertyName: string | Symbol, options: VALKOptions) {
     if (typeof propertyName !== "string") return undefined;
-    const ret = this._lexicalScope && this._lexicalScope.hasOwnProperty(propertyName)
+    const ret = this._valospaceScope && this._valospaceScope.hasOwnProperty(propertyName)
     // FIXME(iridian): If a property gets renamed inside a transaction
     // and a new property gets created with (or renamed to) the same
-    // name we get a cache issue here: _lexicalScope only updates on
+    // name we get a cache issue here: _valospaceScope only updates on
     // actual Engine events which have not yet landed. Similar issues
     // might arise with heresy rollbacks.
-        && this._lexicalScope[propertyName];
+        && this._valospaceScope[propertyName];
     if (ret && !ret.isImmaterial()) return ret;
-    // New properties which don't exist in _lexicalScope still work as
+    // New properties which don't exist in _valospaceScope still work as
     // they get kueried here.
     return this.get(VALEK.property(propertyName), options);
   }
@@ -1104,7 +1116,7 @@ export default class Vrapper extends Cog {
       return vProperty.alterValue(actualAlterationVAKON, options, this);
     }
     const alterationOptions = Object.create(options);
-    alterationOptions.scope = this.getLexicalScope();
+    alterationOptions.scope = this.getValospaceScope(alterationOptions);
     const hostType = this._parent.getRootScope().valos[typeName];
     const fieldDescriptor = hostType.prototype[PropertyDescriptorsTag][propertyName];
     let ret;
@@ -1120,7 +1132,7 @@ export default class Vrapper extends Cog {
       options.head = this;
       ret = this.run(0, ["§->", ["§void"], actualAlterationVAKON], alterationOptions);
       this._parent.create("Property", {
-        owner: this.getId().coupleWith("properties"),
+        owner: this[HostRef].coupleWith("properties"),
         name: propertyName,
         value: expressionFromProperty(ret, propertyName),
       }, options);
@@ -1230,7 +1242,7 @@ export default class Vrapper extends Cog {
             : state.getIn([valueType, valueEntry.rawId(), fieldName]);
         if ((vakon == null) || (typeof vakon !== "object")) return vakon;
         const vOwner = vExplicitOwner || this.get("owner", Object.create(options)) || this;
-        options.scope = vOwner.getLexicalScope();
+        options.scope = vOwner.getValospaceScope(options);
         // TODO(iridian): We could add a flag to KueryExpression to denote that the evaluated value
         // of the KueryExpression can be cached. However as this is mostly a perf thing (when
         // KueryExpression is used to implement method imports) with semantic implications (if the
@@ -1312,7 +1324,7 @@ export default class Vrapper extends Cog {
       mediaInfo.contentType = `${mediaInfo.type}/${mediaInfo.subtype}`;
     }
     */
-    mediaInfo.mediaVRL = this.getId(options);
+    mediaInfo.mediaVRL = this.getVRef();
     return mediaInfo;
   }
 
@@ -1404,7 +1416,7 @@ export default class Vrapper extends Cog {
     }
     function errorOnObtainMediaInterpretation (error) {
       const wrapped = vrapper.wrapErrorEvent(error, 1, wrap,
-        "\n\tid:", vrapper.getId(options).toString(),
+        "\n\tid:", vrapper[HostRef].toString(),
         "\n\toptions:", ...dumpObject(options),
         "\n\tvExplicitOwner:", ...dumpObject(vExplicitOwner),
         "\n\tmediaInfo:", ...dumpObject(mediaInfo),
@@ -1457,9 +1469,9 @@ export default class Vrapper extends Cog {
       }
       const currentValue = this.extractValue(options, vExplicitOwner);
       const vOwner = vExplicitOwner || this.get("owner", Object.create(options));
-      invariantify(!vOwner || vOwner.getLexicalScope,
+      invariantify(!vOwner || vOwner.getValospaceScope,
           "property owner (if defined) must be a Vrapper");
-      options.scope = (vOwner || this).getLexicalScope();
+      options.scope = (vOwner || this).getValospaceScope(options);
       const newValue = this.run(currentValue, alterationVAKON, Object.create(options));
       this.setField("value", expressionFromProperty(newValue, this), options);
       if (typeof newValue !== "object") {
@@ -2075,55 +2087,79 @@ export default class Vrapper extends Cog {
       name,
       intro: this.getFieldIntro(name),
       sourceTransient: vIdOwner.getTransient(options),
-      elevationInstanceId: this.getId(options),
+      elevationInstanceId: this[HostRef],
     });
   }
 
   static infiniteLoopTester = Symbol("InfiniteLoopTest");
 
-  _setUpScopeFeatures (resolver: Object) {
-    // Refers all Scope.properties:Property objects in this._lexicalScope to enable scoped script
-    // access which uses the owner._lexicalScope as the scope prototype if one exists.
-    this._scopeOwnerSub = this.obtainSubscription("owner", { state: resolver.getState() });
+  _initializeScopes (options) {
+    if (this.isActive()) {
+      this._setUpScopeFeatures(options);
+    } else {
+      this._scopeOwnerSub = null;
+      this._valospaceScope = Object.create(null);
+      this._fabricScope = Object.create(null);
+    }
+    // TODO(iridian, 2019-01) 'this' is critical but very dubious.
+    // When a valoscript top-level module lambda function accesses
+    // the global 'this' identifier it will resolve to the
+    // _valospaceScope.this of the context resource.
+    // This is very hard to debug as there is no abstraction layer
+    // between: valoscript transpiler will omit code for 'this' access
+    // for lambda functions expecting that 'this' is found in the
+    // scope.
+    // TODO(iridian, 2019-03): Requiring 'this' to be provided by
+    // this code is likely a bug. See TODO note in parseRules:108.
+    this._valospaceScope.this = this;
+    this._valospaceScope.self = this._valospaceScope;
+    this._fabricScope.this = this;
+    return this;
+  }
+
+  _setUpScopeFeatures (options: Object = {}) {
+    if (!this.hasInterface("Scope")) {
+      this._scopeOwnerSub = undefined;
+      this._valospaceScope = {};
+      this._fabricScope = {};
+      return;
+    }
+
+    // Refers all Scope.properties:Property objects in this._valospaceScope to enable scoped script
+    // access which uses the owner._valospaceScope as the scope prototype if one exists.
+    const subcriptionOptions = {
+      state: options.state || (options.discourse || this._parent.discourse).getState(),
+      scope: null,
+    };
+    this._scopeOwnerSub = this.obtainSubscription("owner", subcriptionOptions);
     this._scopeOwnerSub.addListenerCallback(this, `Vrapper_scope_owner`, (ownerUpdate) => {
-      const parent = ownerUpdate.value() || this._parent;
-      if (!this._lexicalScope) {
-        this._initializeScopes(parent);
-      } else {
+      const owner = ownerUpdate.value() || this._parent;
+      const ownerSpaceScope = owner.getValospaceScope(Object.create(ownerUpdate.getOptions()));
+      if (!this._valospaceScope) {
+        this._valospaceScope = Object.create(ownerSpaceScope);
+        this._fabricScope = Object.create(owner.getFabricScope());
+      } else if (Object.getPrototypeOf(this._valospaceScope) !== ownerSpaceScope) {
         const dummy = {};
-        this._lexicalScope[Vrapper.infiniteLoopTester] = dummy;
-        const parentScope = parent.getLexicalScope(true);
-        const loopedDummy = parentScope[Vrapper.infiniteLoopTester];
-        delete this._lexicalScope[Vrapper.infiniteLoopTester];
+        this._valospaceScope[Vrapper.infiniteLoopTester] = dummy;
+        const loopedDummy = ownerSpaceScope[Vrapper.infiniteLoopTester];
+        delete this._valospaceScope[Vrapper.infiniteLoopTester];
         if (dummy === loopedDummy) {
           this.errorEvent("INTERNAL ERROR: Vrapper.owner listener detected cyclic owner loop:",
               "\n\tself:", ...dumpObject(this),
-              "\n\tparent:", ...dumpObject(parent));
+              "\n\tparent:", ...dumpObject(owner));
         } else {
-          Object.setPrototypeOf(this._lexicalScope, parentScope);
-          Object.setPrototypeOf(this._nativeScope, parent.getNativeScope(true));
+          Object.setPrototypeOf(this._valospaceScope, ownerSpaceScope);
+          Object.setPrototypeOf(this._fabricScope, owner.getFabricScope());
         }
       }
-      // TODO(iridian, 2019-01) 'this' is critical but very dubious.
-      // When a valoscript top-level module lambda function accesses
-      // the global 'this' identifier it will resolve to the
-      // _lexicalScope.this of the context resource.
-      // This is very hard to debug as there is no abstraction layer
-      // between: valoscript transpiler will omit code for 'this' access
-      // for lambda functions expecting that 'this' is found in the
-      // scope.
-      // TODO(iridian, 2019-03): Requiring 'this' to be provided by
-      // this code is likely a bug. See TODO note in parseRules:108.
-      this._lexicalScope.this = this;
-      this._lexicalScope.self = this._lexicalScope;
     });
-    if (!this._lexicalScope) {
+    if (!this._valospaceScope) {
       throw this.wrapErrorEvent(new Error("Vrapper owner is not immediately available"), 1,
           "_setUpScopeFeatures",
           "\n\tthis:", ...dumpObject(this));
     }
     this._scopeNameSubs = {};
-    this._scopeSub = this.obtainSubscription("properties", { state: resolver.getState() });
+    this._scopeSub = this.obtainSubscription("properties", subcriptionOptions);
     this._scopeSub.addListenerCallback(
         this, `Vrapper_properties`, this._onPropertiesUpdate.bind(this));
   }
@@ -2133,13 +2169,13 @@ export default class Vrapper extends Cog {
       // TODO(iridian): Perf opt: this uselessly creates a
       // subscription in each Property Vrapper. We could just as
       // well have a cog which tracks Property.name and value changes
-      // and updates thee owning Scope Vrapper._lexicalScope's.
+      // and updates thee owning Scope Vrapper._valospaceScope's.
       // Specifically: it is the call to actualAdds() which does this.
       // TODO(iridian, 2019-03): Property renames are going to be
       // disabled very shortly. This whole sequence can be dropped.
       const propertyRawId = vActualAdd.getRawId();
-      /*
-      const structuralName = (propertyRawId.match(/\.$\.(.*)$/) || [])[1];
+
+      const structuralName = (propertyRawId.match(/\.$\.([^@]*)@@$/) || [])[1];
       if (structuralName) {
         if ((structuralName === "this") || (structuralName === "self")) {
           this.warnEvent(`Structural property name '${
@@ -2149,9 +2185,8 @@ export default class Vrapper extends Cog {
         this._defineProperty(decodeURIComponent(structuralName), vActualAdd);
         return;
       }
-      */
       const nameSub = this._scopeNameSubs[propertyRawId] = vActualAdd
-          .obtainSubscription("name", { state: fieldUpdate.getState() });
+          .obtainSubscription("name", { state: fieldUpdate.getState(), scope: null });
       nameSub.addListenerCallback(this, `Vrapper_properties_name`, nameUpdate => {
         const newName = nameUpdate.value();
         if ((newName === "this") || (newName === "self")) {
@@ -2161,17 +2196,17 @@ export default class Vrapper extends Cog {
         }
         const passage = nameUpdate.getPassage();
         if (passage && !isCreatedLike(passage)) {
-          for (const propertyName of Object.keys(this._lexicalScope)) {
-            if (this._lexicalScope[propertyName] === vActualAdd) {
-              delete this._lexicalScope[propertyName];
-              delete this._nativeScope[propertyName];
+          for (const propertyName of Object.keys(this._valospaceScope)) {
+            if (this._valospaceScope[propertyName] === vActualAdd) {
+              delete this._valospaceScope[propertyName];
+              delete this._fabricScope[propertyName];
               break;
             }
           }
         }
         if (!newName) return;
-        if (this._lexicalScope.hasOwnProperty(newName)) { // eslint-disable-line
-          if (vActualAdd === this._lexicalScope[newName]) return;
+        if (this._valospaceScope.hasOwnProperty(newName)) { // eslint-disable-line
+          if (vActualAdd === this._valospaceScope[newName]) return;
           console.warn(`Overriding existing Property '${newName}' in Scope ${this.debugId()}`);
           /*
           throw this.wrapErrorEvent(
@@ -2179,7 +2214,7 @@ export default class Vrapper extends Cog {
               1,
               new Error(`onPropertiesUpdate in Scope ${this.debugId()}`),
               "\n\tnew value:", ...dumpObject(vActualAdd),
-              "\n\tprevious value:", ...dumpObject(this._lexicalScope[newName]),
+              "\n\tprevious value:", ...dumpObject(this._valospaceScope[newName]),
               "\n\tfull Scope object:", ...dumpObject(this),
               new Error().stack);
           */
@@ -2196,21 +2231,23 @@ export default class Vrapper extends Cog {
         delete this._scopeNameSubs[removedRawId];
       }
       const propertyName = vActualRemove.get("name", fieldUpdate.previousStateOptions());
-      if (this._lexicalScope[propertyName].getRawId() === removedRawId) {
-        delete this._lexicalScope[propertyName];
-        delete this._nativeScope[propertyName];
+      const property = this._valospaceScope.hasOwnProperty(propertyName)
+          && this._valospaceScope[propertyName];
+      if (property && (property.getRawId() === removedRawId)) {
+        delete this._valospaceScope[propertyName];
+        delete this._fabricScope[propertyName];
       }
     });
   }
 
   _defineProperty (name: string, vProperty) {
-    this._lexicalScope[name] = vProperty;
-    Object.defineProperty(this._nativeScope, name, {
+    this._valospaceScope[name] = vProperty;
+    Object.defineProperty(this._fabricScope, name, {
       configurable: true,
       enumerable: true,
       get: () => vProperty.extractValue(undefined, this),
       set: (value) => vProperty
-          .setField("value", expressionFromProperty(value, name), { scope: this._lexicalScope }),
+          .setField("value", expressionFromProperty(value, name), { scope: this._valospaceScope }),
     });
   }
 }

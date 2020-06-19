@@ -77,11 +77,11 @@ describe("Chronicle load ordering and inactive resource handling", () => {
     await pairness.receiveTruthsFrom(laterConnection, { verbosity: 0, asNarrateResults: true });
     await pairedLaterConnection.asActiveConnection();
 
-    const componentId = componentGhost.getId();
+    const componentId = componentGhost.getVRef();
     const pairedComponent = pairness.run(componentId, null);
     expect(componentId.rawId())
-        .toEqual(pairedComponent.getId().rawId());
-    expect(componentId !== pairedComponent.getId())
+        .toEqual(pairedComponent.getVRef().rawId());
+    expect(componentId !== pairedComponent.getVRef())
         .toBeTruthy();
     expect(pairness.runValoscript(pairedComponent, `
       this.num;

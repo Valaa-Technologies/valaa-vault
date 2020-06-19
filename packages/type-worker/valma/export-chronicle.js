@@ -50,7 +50,7 @@ exports.handler = (yargv) => {
         const expate = { // EXPort stATE
           vlm,
           view,
-          chronicleURI: vRoot.getId().getChronicleURI(),
+          chronicleURI: vRoot.getVRef().getChronicleURI(),
           targetDir: exportOptions.targetDir,
           bvobInfos: {},
           bvobBuffers: exportOptions.bvobBuffers ? {} : undefined,
@@ -178,7 +178,7 @@ async function _exportStateOf (
 
 function _serialize (value) {
   if (typeof value !== "object" || (value === null)) return value;
-  if (value.getId) return value.getId().toString();
+  if (value.getVRef) return value.getVRef().toString();
   if (Array.isArray(value)) return value.map(_serialize);
   if (Object.getPrototypeOf(value) === Object.prototype) {
     return Object.entries(value).reduce((o, [k, v]) => { o[k] = _serialize(v); return o; }, {});

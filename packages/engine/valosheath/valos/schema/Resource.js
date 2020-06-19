@@ -82,7 +82,7 @@ export default {
           ""} 'listeners'`
     )(function setOwnerOf (
           resource, owner, coupledField = this[OwnerDefaultCouplingTag] || "unnamedOwnlings") {
-      return this.setFieldOf(resource, "owner", owner.getId().coupleWith(coupledField));
+      return this.setFieldOf(resource, "owner", owner.getVRef().coupleWith(coupledField));
     }),
 
     getActiveResource: denoteValOSBuiltinWithSignature(
@@ -233,7 +233,7 @@ export default {
           ""} this resource as either 'unnamedOwnlings', 'properties', 'relations' or 'listeners'`
     )(function setOwner (owner, coupledField
         = (this.constructor && this.constructor[OwnerDefaultCouplingTag]) || "unnamedOwnlings") {
-      return this.setField("owner", owner.getId().coupleWith(coupledField),
+      return this.setField("owner", owner.getVRef().coupleWith(coupledField),
           { discourse: this.__callerValker__ });
     }),
 

@@ -349,7 +349,7 @@ describe("Vrapper", () => {
           .toEqual(false);
       checkVrapperSets(vChildGhost, {
         expectFields: { name: "childName" },
-        targetId: vChildGhost.getId(),
+        targetId: vChildGhost.getVRef(),
         sets: { name: "harambe" },
         expectUpdates: { name: "harambe" },
       });
@@ -611,8 +611,8 @@ describe("Vrapper", () => {
     ],
   };
 
-  describe("lexical scope - basic accesses", () => {
-    it("reads Scope property values through the Scope's lexicalScope kuery", () => {
+  describe("valospace scope - basic accesses", () => {
+    it("reads property values through valospace scope", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
       ]);
@@ -622,7 +622,7 @@ describe("Vrapper", () => {
           .toEqual("testOwned.secondField");
     });
 
-    it("accesses grand-parent Scope properties through lexicalScope", () => {
+    it("accesses grand-parent properties through valospace scope", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
       ]);
@@ -639,7 +639,7 @@ describe("Vrapper", () => {
     });
   });
 
-  describe("lexical scope - renaming and ownership changes", () => {
+  describe("valospace scope - renaming and ownership changes", () => {
     it("most recent property with a name overrides its sibling", () => {
       const oldWarn = console.warn;
       console.warn = jest.fn(); // eslint-disable-line
@@ -647,13 +647,15 @@ describe("Vrapper", () => {
         transactionA,
         createAInstance,
         basicProperties,
-        created({ id: ["test-conflictingTestField"], typeName: "Property", initialState: {
-          owner: vRef("test", "properties"),
-          name: "testField",
-          value: { typeName: "Literal", value: "testOwned.conflictingTestField" },
-        }, }),
       ]);
-      expect(console.warn.mock.calls.length).toBe(2);
+      testScriptyThings().test.getValospaceScope(); // trigger property listeners
+      harness.chronicleEvent(
+          created({ id: ["test-conflictingTestField"], typeName: "Property", initialState: {
+            owner: vRef("test", "properties"),
+            name: "testField",
+            value: { typeName: "Literal", value: "testOwned.conflictingTestField" },
+          }, }));
+      expect(console.warn.mock.calls.length).toBe(1);
       expect(console.warn.mock.calls[0][0])
           .toBe(`Overriding existing Property 'testField' in Scope Vrapper:2@@`);
       console.warn = oldWarn;

@@ -72,24 +72,27 @@ export default class VALKConsole extends UIComponent {
       color: "gray",
     }];
     try {
+      const engine = this.context.engine;
       const selectionIds = [];
-      const selection = this.context.engine.getVrappers(selectionIds);
+      const selection = engine.getVrappers(selectionIds);
       const evalScope = {
         VALK: VALEK,
         scope: this.getUIContext(),
         focus: !selection || !selection.length ? this.getFocus()
             : selection.length === 1 ? selection[0]
             : selection,
-        vrapper: this.context.engine.getVrapper.bind(this.context.engine),
-        vrappers: this.context.engine.getVrappers.bind(this.context.engine),
+        vrapper: engine.getVrapper.bind(engine),
+        vrappers: engine.getVrappers.bind(engine),
         fields: this.fields,
       };
       let evalResult = notThatSafeEval(evalScope, `return ${this.state.cmd}`);
       if (evalResult instanceof VRL) {
-        evalResult = this.context.engine.getVrapper(evalResult);
+        evalResult = engine.getVrapper(evalResult);
       }
       const txt = (evalResult instanceof Vrapper)
-          ? `${evalResult.debugId()}:\n${dumpify(evalResult.getTransient(), { indent: 2 })}`
+          ? `${evalResult.debugId()}:\n${
+            dumpify(evalResult.getTransient({ discourse: engine.discourse }), { indent: 2 })
+          }`
           : dumpify(evalResult, { indent: 2 });
       result = [{ txt, color: "white" }];
       newValue = "";

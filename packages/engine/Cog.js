@@ -4,12 +4,10 @@ import { Discourse } from "~/sourcerer";
 
 import type { VALKOptions } from "~/raem";
 
-import { transpileValoscriptBody } from "~/script/transpileValoscript";
-
 import VALEK, { Kuery, dumpKuery } from "~/engine/VALEK";
 import Subscription from "~/engine/Vrapper/Subscription";
 
-import { FabricEventTarget, wrapError, dumpObject, thenChainEagerly } from "~/tools";
+import { FabricEventTarget, wrapError, dumpObject } from "~/tools";
 
 
 /**
@@ -28,40 +26,30 @@ export default class Cog extends FabricEventTarget {
    * get - runs the kuery against current engine entry chronicle as
    *       head and returns results.
    */
-  get (kuery: any, options: VALKOptions) {
-    return this.run(this.getSelfAsHead(), kuery, options);
-  }
-  do (kuery: Kuery, options: VALKOptions) {
-    return this.run(this.getSelfAsHead(), kuery, options);
-  }
-
-  doValoscript (valoscriptBody: string, extendScope = {}, options: VALKOptions = {}) {
-    options.discourse = this.getEngine().discourse.acquireFabricator("do-body");
-    if (!options.scope) options.scope = Object.create(this.getLexicalScope());
-    Object.assign(options.scope, extendScope);
-    const valoscriptKuery = (typeof valoscriptBody !== "string"
-        ? valoscriptBody
-        : (options.kuery = transpileValoscriptBody(valoscriptBody, {
-          verbosity: options.verbosity || 0,
-          customVALK: VALEK,
-          sourceInfo: options.sourceInfo,
-        })));
-    const ret = this.do(valoscriptKuery, options);
-    if (options.discourse) {
-      const result = options.discourse.releaseFabricator();
-      if (result) {
-        return thenChainEagerly(
-            (options.awaitResult || (r => r.getPersistedEvent()))(result),
-            () => ret);
-      }
-    }
-    return ret;
-  }
-
-  run (head: any, kuery: Kuery, options: any = {}) {
+  get (kuery: any, options: VALKOptions = {}) {
     try {
-      options.scope = options.mutableScope ||
-          (options.scope ? Object.create(options.scope) : {});
+      options.pure = true;
+      return this.run(this.getVRef(), kuery, options);
+    } catch (error) {
+      throw this.wrapErrorEvent(error, 1, "get",
+          "\n\tkuery:", ...dumpKuery(kuery),
+          "\n\toptions:", ...dumpObject(options));
+    }
+  }
+
+  do (kuery: any, options: VALKOptions = {}) {
+    try {
+      return this.run(this.getVRef(), kuery, options);
+    } catch (error) {
+      throw this.wrapErrorEvent(error, 1, "do",
+          "\n\tkuery:", ...dumpKuery(kuery),
+          "\n\toptions:", ...dumpObject(options));
+    }
+  }
+
+  run (head: any, kuery: Kuery, options: VALKOptions = {}) {
+    try {
+      options.scope = options.scope ? Object.create(options.scope) : {};
       return this.getEngine().discourse.run(head, kuery, options);
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, () => [
@@ -84,12 +72,12 @@ export default class Cog extends FabricEventTarget {
 
   // Implementation
 
-  outputStatus (output) {
-    output.log(`${this.getName()}: exists`);
+  getVRef () {
+    throw this.wrapErrorEvent(new Error(`not implemented`), "getVRef()");
   }
 
-  getSelfAsHead () {
-    throw this.wrapErrorEvent(new Error(`not implemented`), "getSelfAsHead()");
+  outputStatus (output) {
+    output.log(`${this.getName()}: exists`);
   }
 
   registerHandlers (target, handler =

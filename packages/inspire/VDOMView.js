@@ -35,8 +35,8 @@ export default class VDOMView extends Cog {
     return this._rootElement.outerHTML;
   }
 
-  getSelfAsHead () {
-    return this._vFocus.getSelfAsHead();
+  getVRef () {
+    return this._vFocus.getVRef();
   }
 
   run (head: any, kuery: Object, options: Object) {

@@ -109,7 +109,7 @@ export function parseProgram (transpiler: Transpiler, ast: Program, options: Obj
   // should probably come after the kueryFromAst(body) has evaluated.
   // But how does the current system work?
   // Note: I think it doesn't: the main pathway of VSX arrow functions
-  // works because 'this' gets set in Vrapper._lexicalScope explicitly
+  // works because 'this' gets set in Vrapper._valospaceScope explicitly
   // but this is why kuery properties don't work.
   if (topLevelOptions.scopeAccesses.this) {
     (globals || (globals = {})).this = ["§->", null];

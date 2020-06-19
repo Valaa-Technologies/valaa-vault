@@ -765,7 +765,7 @@ describe("Property assignment with scope as this and existing fields", () => {
 describe("Property assignment to existing Entity Property's and lexical scope", () => {
   const args = [
     valoscriptBlock.concat(createCreatorProperties),
-    () => ({ this_: entities().creator, scope: entities().creator.getLexicalScope() }),
+    () => ({ this_: entities().creator, scope: entities().creator.getValospaceScope() }),
   ];
   testPropertyByExpressionAssignments(...args);
   testStatementOperations(...args);

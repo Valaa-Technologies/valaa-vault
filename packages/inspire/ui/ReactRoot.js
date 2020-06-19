@@ -145,7 +145,7 @@ export default class ReactRoot extends React.Component {
   }
 
   async _createRootContext (vRootFocus: Vrapper, viewName: string, customUIScope: Object) {
-    const rootContext = Object.create(customUIScope || vRootFocus.getEngine().getLexicalScope());
+    const rootContext = Object.create(customUIScope || vRootFocus.getEngine().getRootScope());
     const valos = rootContext.valos;
     rootContext.frame = await this._obtainUIRootFrame(
         rootContext[valos.Lens.shadowLensAuthority], vRootFocus, viewName);

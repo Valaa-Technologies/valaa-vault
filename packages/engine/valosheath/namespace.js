@@ -64,7 +64,7 @@ export function addValosheathNamespace (valosheath, valosheathName: string, desc
     },
     createProxyTo (vResource: Vrapper, accessor: string) {
       const ret = Object.create(proxyPrototypeFields);
-      ret[HostRef] = vResource.getId();
+      ret[HostRef] = vResource.getVRef();
       ret[UnpackedHostValue] = vResource;
       ret[AccessorNameTag] = accessor;
       return ret;

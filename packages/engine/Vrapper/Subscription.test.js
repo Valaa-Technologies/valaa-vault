@@ -13,7 +13,7 @@ function idOf (candidate: any) {
     throw new Error(`Expected Vrapper, got ${
         ((typeof candidate === "object") && candidate.constructor.name) || typeof candidate}`);
   }
-  return candidate.getId();
+  return candidate.getVRef();
 }
 
 describe("Subscription", () => {
@@ -63,7 +63,8 @@ describe("Subscription", () => {
     });
 
     it("is called on first step content change: matching removal on filtered array", () => {
-      setUpPropertyTargetTestHarness("template", { verbosity: 0, claimBaseBlock: true });
+      setUpPropertyTargetTestHarness("creator-prototype", { verbosity: 0, claimBaseBlock: true });
+      expect(liveCallback.mock.calls.length).toBe(1);
       properties()["creator-prototype"].destroy();
       expect(liveCallback.mock.calls.length).toBe(2);
       expect(idOf(liveCallback.mock.calls[1][0].value()))

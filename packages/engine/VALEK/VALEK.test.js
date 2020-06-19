@@ -27,7 +27,7 @@ describe("VALEK extensions", () => {
       }).fromScope();
       const scope = entities().creator.do(toCreation);
       expect(scope.root.toJSON())
-          .toEqual(entities().creator.getId().toJSON());
+          .toEqual(entities().creator.getVRef().toJSON());
       expect(scope.article.get("name"))
           .toEqual("article-0-name");
       expect(entities().test.get(

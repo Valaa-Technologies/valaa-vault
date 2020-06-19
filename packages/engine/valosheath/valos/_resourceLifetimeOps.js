@@ -44,7 +44,7 @@ function _prepareInitialState (valospaceType: Object, scope: ?Object, initialSta
           requireOwnerOperation} ${valospaceType.name} initialState.owner required`);
       if (scope && (scope.self != null) && scope.self.this) {
         if (!initialState) initialState = {};
-        initialState.owner = scope.self.this.getId()
+        initialState.owner = scope.self.this.getVRef()
             .coupleWith(valospaceType[OwnerDefaultCouplingTag]);
       }
     }

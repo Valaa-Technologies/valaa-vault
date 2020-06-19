@@ -62,17 +62,18 @@ function _integrateKuery (moduleKuery: Kuery, vScope: Vrapper, mediaInfo: MediaI
     options: VALKOptions = {}) {
   const scopeName = vScope.hasInterface("Discoverable")
       && vScope.get("name", Object.create(options));
-  const scopeDescriptor = scopeName ? `in Scope "${scopeName}"` : "in unnamed Scope";
+  const scopeDescriptor = scopeName ? `in Scope '${scopeName}'` : "in unnamed Scope";
   const sourceInfo = moduleKuery[SourceInfoTag] && {
     ...moduleKuery[SourceInfoTag],
     phase: `valoscript module "${mediaInfo.name}" integration ${scopeDescriptor}`,
   };
-  options.scope = Object.create(vScope.getLexicalScope());
+  options.scope = Object.create(vScope.getValospaceScope(options));
   const moduleExports = addExportsContainerToScope(options.scope);
   options.scope.require = _require.bind(null, vScope, options);
   const moduleResult = vScope.get(moduleKuery, Object.create(options));
-  // Any function captures by the vScope.get will hold the Valker and thus sourceInfo, and use its
-  // phase information during subsequent calls. Update it to "runtime".
+  // Any function captures by the vScope.get will hold the Valker and
+  // thus sourceInfo, and use its phase information during subsequent
+  // calls. Update it to "runtime".
   sourceInfo.phase = `VALK runtime (within VS module "${mediaInfo.name}" ${scopeDescriptor})`;
   if (!Object.keys(moduleExports).length) {
     // TODO(iridian): This feels a bit shady, maybe the transpileValoscriptModule could tell us

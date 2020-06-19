@@ -3,6 +3,7 @@ import { Iterable } from "immutable";
 import { isIdData } from "~/raem/VRL";
 import { Kuery } from "~/raem/VALK";
 import Vrapper from "~/engine/Vrapper";
+import { HostRef } from "~/raem/VALK/hostReference";
 
 import { invariantifyObject } from "~/tools/invariantify";
 import { dumpObject, wrapError } from "~/tools/wrapError";
@@ -67,7 +68,8 @@ export default function universalizeCommandData (object: ?any, options:
 }
 
 function tryIdFromObject (object: any) {
-  if (object instanceof Vrapper) return object.getId();
+  const hostRef = object[HostRef];
+  if (hostRef) return hostRef;
   if (Iterable.isKeyed(object)) return object.get("id");
   if (isIdData(object)) return object;
   return undefined;

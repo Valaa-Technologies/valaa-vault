@@ -22,7 +22,7 @@ export default class PerspireView extends VDOMView {
   runInteractive () {
     const vFocus = this.getFocus();
     if (!vFocus) throw new Error("view focus missing for interactive");
-    const mutableScope = Object.create(vFocus.getLexicalScope());
+    const mutableScope = Object.create(vFocus.getValospaceScope());
 
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
     let externalExit = false;

@@ -2,6 +2,7 @@
 
 import { Iterable } from "immutable";
 import type { Passage, Story, VALKOptions } from "~/raem";
+import { packedSingular } from "~/raem/VALK";
 
 import VALEK, { Kuery, dumpObject, rootScopeSelf, engineSteppers } from "~/engine/VALEK";
 
@@ -56,7 +57,9 @@ export default class Engine extends Cog {
     });
     ret.setHostValuePacker(packFromHost);
     function packFromHost (value) {
-      if (value instanceof Vrapper) return value.getSelfAsHead(value.getId());
+      if (value instanceof Vrapper) {
+        return packedSingular(value.getVRef(), value._typeName || "TransientFields");
+      }
       if (Array.isArray(value)) return value.map(packFromHost);
       return value;
     }
@@ -71,14 +74,12 @@ export default class Engine extends Cog {
 
   debugId () { return `${super.debugId()}->${this.discourse.debugId()}`; }
 
-  getSelfAsHead () {
-    return this._engineChronicleId ? vRef(this._engineChronicleId) : {};
-  }
+  getVRef () { return this._engineChronicleId ? vRef(this._engineChronicleId) : {}; }
   getSourcerer () { return this._sourcerer; }
 
   getRootScope () { return this._rootScope; }
-  getLexicalScope () { return this.getRootScope(); }
-  getNativeScope () { return this.getRootScope(); }
+  getValospaceScope () { return this.getRootScope(); }
+  getFabricScope () { return this.getRootScope(); }
   getHostDescriptors () { return this._hostDescriptors; }
   getHostObjectDescriptor (objectKey: any) { return this._hostDescriptors.get(objectKey); }
 
@@ -92,7 +93,7 @@ export default class Engine extends Cog {
   getIdentityManager () { return this._rootScope.valos.identity; }
 
   run (head: any, kuery: Kuery, options: VALKOptions = {}) {
-    if (options.scope === undefined) options.scope = this.getLexicalScope();
+    if (options.scope === undefined) options.scope = this.getRootScope();
     return super.run(head, kuery, options);
   }
 
@@ -332,7 +333,7 @@ export default class Engine extends Cog {
   }
 
   _extractProperties (initialState: Object, head: Object) {
-    if (!head.getLexicalScope() || !initialState ||
+    if (!initialState ||
         (typeof initialState.properties !== "object") ||
         initialState.properties === null ||
         Array.isArray(initialState.properties)) {

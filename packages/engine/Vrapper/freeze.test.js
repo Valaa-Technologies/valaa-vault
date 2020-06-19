@@ -88,8 +88,8 @@ describe("Chronicle freezing", () => {
     await harness.chronicleEvent(freezeEventFor("test_entity")).getPremiereStory();
     expect(() => entities().test_entity.setField("owner", entities().late_entity))
         .not.toThrow();
-    expect(entities().test_entity.get("owner").getId())
-        .toEqual(entities().late_entity.getId());
+    expect(entities().test_entity.get("owner").getVRef())
+        .toEqual(entities().late_entity.getVRef());
     expect(() => entities().test_entity.alterProperty("prop",
             VALEK.fromValue("Changed string")))
         .toThrow(/Cannot modify frozen.*test_entity/);

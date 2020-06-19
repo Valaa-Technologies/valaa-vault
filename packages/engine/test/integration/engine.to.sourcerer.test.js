@@ -46,10 +46,10 @@ describe("Media handling", () => {
         .toEqual(1);
     expect(vMedias.length + vEntities.length)
         .toEqual(vTestRoot.get(["§.", "unnamedOwnlings"]).length);
-    expect(media.getId().toJSON())
-        .toEqual(vTestRoot.get(["§..", "text"]).getId().toJSON());
-    expect(vMedias[0].getId().toJSON())
-        .toEqual(media.getId().toJSON());
+    expect(media.getVRef().toJSON())
+        .toEqual(vTestRoot.get(["§..", "text"]).getVRef().toJSON());
+    expect(vMedias[0].getVRef().toJSON())
+        .toEqual(media.getVRef().toJSON());
     expect(testConnectionBackend.getPreparation(exampleContentHash))
         .toBeTruthy();
     expect(media.get("content"))
@@ -58,10 +58,10 @@ describe("Media handling", () => {
         .toEqual(existingChroniclingCount + 1);
     testConnectionBackend.addPrepareBvobResult({ contentHash: exampleContentHash });
     const { bvobId } = await contentUpdateStarted;
-    expect(bvobId.getId().rawId())
+    expect(bvobId.getVRef().rawId())
         .toEqual(exampleContentId);
-    expect(bvobId.getId().toJSON())
-        .toEqual(media.get("content").getId().toJSON());
+    expect(bvobId.getVRef().toJSON())
+        .toEqual(media.get("content").getVRef().toJSON());
     expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 2);
 
@@ -97,16 +97,16 @@ describe("Media handling", () => {
       });
     `, { exampleBuffer, console });
     await newMediaPersist;
-    expect(media.getId().toJSON())
-        .toEqual(entities()[testRootId].get(["§..", "text"]).getId().toJSON());
+    expect(media.getVRef().toJSON())
+        .toEqual(entities()[testRootId].get(["§..", "text"]).getVRef().toJSON());
     expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 1);
     // local bvob persisted internally but not remotely
     const { bvobId, bvobComposed, bvobPersisted } = await contentUpdateStarted;
-    expect(bvobId.getId().rawId())
+    expect(bvobId.getVRef().rawId())
         .toEqual(exampleContentId);
-    expect(bvobId.getId().toJSON())
-        .toEqual(media.get("content").getId().toJSON());
+    expect(bvobId.getVRef().toJSON())
+        .toEqual(media.get("content").getVRef().toJSON());
     const bvobComposedEvent = await bvobComposed;
 
     expect(await media.extractValue())

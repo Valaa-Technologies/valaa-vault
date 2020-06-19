@@ -44,12 +44,12 @@ describe("scheme valosheath", () => {
     `;
     const bodyKuery = transpileValoscriptTestBody(bodyText);
     const myEntity = entities().creator.do(bodyKuery);
-    const scope = myEntity.getLexicalScope().valos;
+    const scope = myEntity.getValospaceScope().valos;
     const relatableGetRelationsSymbol = scope.Relatable.getRelations;
     expect(relatableGetRelationsSymbol)
         .toBeTruthy();
     expect(relatableGetRelationsSymbol)
-        .toEqual(myEntity.getLexicalScope().valos.Entity.getRelations);
+        .toEqual(myEntity.getValospaceScope().valos.Entity.getRelations);
     const prototypeGetRelations = scope.Entity.prototype[relatableGetRelationsSymbol];
     expect(prototypeGetRelations)
         .toBeTruthy();
@@ -61,7 +61,7 @@ describe("scheme valosheath", () => {
     `;
     const bodyKuery = transpileValoscriptTestBody(bodyText);
     const myEntity = entities().creator.do(bodyKuery);
-    const scope = myEntity.getLexicalScope().valos;
+    const scope = myEntity.getValospaceScope().valos;
     const relationTarget = scope.Relation.target;
     expect(relationTarget)
         .toBeTruthy();

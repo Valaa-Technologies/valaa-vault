@@ -32,7 +32,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       }
       const { fields } = request.query;
       return thenChainEagerly(scope.resource, [
-        vResource => vResource.get(this.toResponseContent, { scope, verbosity: 0 }),
+        vResource => vResource.step(this.toResponseContent, { scope, verbosity: 0 }),
         (fields) && (responseContent => router
             .pickResultFields(valkOptions, responseContent, fields, route.schema.response[200])),
         responseContent => router

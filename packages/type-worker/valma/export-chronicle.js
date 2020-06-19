@@ -40,7 +40,7 @@ exports.handler = (yargv) => {
         view.warnEvent("job entry");
         const vlm = _hacklm;
         const vRoot = view.getFocus();
-        if (vRoot !== vRoot.get("chronicleRoot")) {
+        if (vRoot !== vRoot.step("chronicleRoot")) {
           throw new Error("chronicle-uri refers to non-root resource");
         }
         const exportOptions = view.getViewConfig().exportChronicleOptions;
@@ -210,7 +210,7 @@ async function _exportRelationsOf (expate, restate, vRelations) {
 async function _exportMediasOf (expate, restate, vMedias) {
   for (const vMedia of vMedias) {
     const subRestate = _getSubRestate(restate, vMedia, "~");
-    const vContent = vMedia.get("content");
+    const vContent = vMedia.step("content");
     const subParts = subRestate.structuredParts || [`${subRestate.verb}@${subRestate.vgrid}`];
     if (vContent) {
       const fileName = subRestate.trivialName
@@ -238,7 +238,7 @@ async function _exportMediasOf (expate, restate, vMedias) {
 }
 
 function _getSubRestate (restate, vSubResource, verbType) {
-  const name = vSubResource.get(["§.", "name"]);
+  const name = vSubResource.step(["§.", "name"]);
   let trivialName = name;
   if (trivialName.match(_reservedCharRegex)) trivialName = undefined;
   if (trivialName) {

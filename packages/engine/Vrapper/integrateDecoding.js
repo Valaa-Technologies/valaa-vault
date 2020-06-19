@@ -61,7 +61,7 @@ function _integrateNative (native: Function, vScope: Vrapper, mediaInfo: MediaIn
 function _integrateKuery (moduleKuery: Kuery, vScope: Vrapper, mediaInfo: MediaInfo,
     options: VALKOptions = {}) {
   const scopeName = vScope.hasInterface("Discoverable")
-      && vScope.get("name", Object.create(options));
+      && vScope.step("name", Object.create(options));
   const scopeDescriptor = scopeName ? `in Scope '${scopeName}'` : "in unnamed Scope";
   const sourceInfo = moduleKuery[SourceInfoTag] && {
     ...moduleKuery[SourceInfoTag],
@@ -70,7 +70,7 @@ function _integrateKuery (moduleKuery: Kuery, vScope: Vrapper, mediaInfo: MediaI
   options.scope = Object.create(vScope.getValospaceScope(options));
   const moduleExports = addExportsContainerToScope(options.scope);
   options.scope.require = _require.bind(null, vScope, options);
-  const moduleResult = vScope.get(moduleKuery, Object.create(options));
+  const moduleResult = vScope.step(moduleKuery, Object.create(options));
   // Any function captures by the vScope.get will hold the Valker and
   // thus sourceInfo, and use its phase information during subsequent
   // calls. Update it to "runtime".
@@ -92,7 +92,7 @@ function _require (vScope: Vrapper, options: Object, importPath: string) {
     steps = importPath.split("/");
     const scopeKey = steps[0];
     if ((scopeKey !== ".") && (scopeKey !== "..")) {
-      nextHead = head.get(VALEK.identifierValue(scopeKey), Object.create(options));
+      nextHead = head.step(VALEK.identifierValue(scopeKey), Object.create(options));
       if (steps.length === 1) {
         return (nextHead instanceof Vrapper)
             ? nextHead.extractValue(options)
@@ -109,13 +109,13 @@ function _require (vScope: Vrapper, options: Object, importPath: string) {
       const ownlingName = steps[i];
       if (ownlingName === ".") continue;
       if (ownlingName === "..") {
-        nextHead = head.get(VALEK.toField("owner"), Object.create(options));
+        nextHead = head.step(VALEK.toField("owner"), Object.create(options));
         if (!(nextHead instanceof Vrapper)) {
           throw new Error(`Could not find an owner Resource at import step '..' (with path "${
               steps.slice(i).join("/")}" still remaining)`);
         }
       } else {
-        nextHead = head.get(VALEK.toField("unnamedOwnlings")
+        nextHead = head.step(VALEK.toField("unnamedOwnlings")
                 .filter(VALEK.isOfType("Entity").and(VALEK.hasName(ownlingName))).toIndex(0),
             Object.create(options));
         if (!(nextHead instanceof Vrapper)) {
@@ -126,13 +126,13 @@ function _require (vScope: Vrapper, options: Object, importPath: string) {
       head = nextHead;
     }
     const mediaOrPropertyName = steps[steps.length - 1];
-    nextHead = head.get(VALEK.toField("unnamedOwnlings")
+    nextHead = head.step(VALEK.toField("unnamedOwnlings")
             .filter(VALEK.isOfType("Media").and(VALEK.hasName(mediaOrPropertyName))).toIndex(0),
         Object.create(options));
     if (nextHead) {
       return nextHead.extractValue(Object.create(options), head);
     }
-    nextHead = head.get(VALEK.propertyValue(mediaOrPropertyName), Object.create(options));
+    nextHead = head.step(VALEK.propertyValue(mediaOrPropertyName), Object.create(options));
     if ((nextHead instanceof Vrapper)
         && (nextHead.getTypeName(Object.create(options)) === "Media")) {
       // can't provide head as explicit owner as the property might refer outside of the head.

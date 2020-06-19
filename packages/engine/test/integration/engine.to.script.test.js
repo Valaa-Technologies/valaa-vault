@@ -73,7 +73,7 @@ describe("Manipulating existing variables", () => {
     const updatedCounter = entities().creator.do(bodyKuery, { verbosity: 0 });
     expect(updatedCounter)
         .toEqual(75);
-    expect(entities().creator.get(VALEK.propertyLiteral("counter")))
+    expect(entities().creator.step(VALEK.propertyLiteral("counter")))
         .toEqual(75);
   });
 });
@@ -145,7 +145,7 @@ describe("delete operator", () => {
     const updatedCounter = entities().creator.do(bodyKuery, { verbosity: 0 });
     expect(updatedCounter)
         .toEqual(75);
-    expect(entities().creator.get(VALEK.propertyLiteral("counter")))
+    expect(entities().creator.step(VALEK.propertyLiteral("counter")))
         .toEqual(75);
   });
 
@@ -796,8 +796,8 @@ describe("Regression tests", () => {
     const sorted = entities().creator.do(bodyKuery, { verbosity: 0 });
     expect(sorted.length)
         .toEqual(2);
-    expect(sorted[0].get("name")).toEqual("bar");
-    expect(sorted[1].get("name")).toEqual("foo");
+    expect(sorted[0].step("name")).toEqual("bar");
+    expect(sorted[1].step("name")).toEqual("foo");
   });
   it("sorts an array containing Property resources by using localCompare comparator", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
@@ -812,11 +812,11 @@ describe("Regression tests", () => {
     const { original, sorted } = entities().creator.do(bodyKuery, { verbosity: 0 });
     expect(original.length)
         .toEqual(2);
-    expect(original[0].get("name")).toEqual("foo");
-    expect(original[1].get("name")).toEqual("bar");
+    expect(original[0].step("name")).toEqual("foo");
+    expect(original[1].step("name")).toEqual("bar");
     expect(sorted.length)
         .toEqual(2);
-    expect(sorted[0].get("name")).toEqual("bar");
-    expect(sorted[1].get("name")).toEqual("foo");
+    expect(sorted[0].step("name")).toEqual("bar");
+    expect(sorted[1].step("name")).toEqual("foo");
   });
 });

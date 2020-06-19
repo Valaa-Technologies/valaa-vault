@@ -19,7 +19,7 @@ export default class InspireView extends VDOMView {
   }
 
   _setTitle (titleKuery) {
-    const newTitle = this._vFocus.get(titleKuery);
+    const newTitle = this._vFocus.step(titleKuery);
     if (typeof newTitle === "string") document.title = newTitle;
     else {
       this.warnEvent(1, () => [

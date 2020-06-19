@@ -51,9 +51,9 @@ describe("Chronicle load ordering and inactive resource handling", () => {
       });
       ({ Prototype, component: Prototype.c });
     `);
-    expect(Prototype.get("owner"))
+    expect(Prototype.step("owner"))
         .toEqual(vLaterRoot);
-    expect(component.get("owner"))
+    expect(component.step("owner"))
         .toEqual(Prototype);
     const componentGhost = await harness.runValoscript(harness.createds.Entity[testRootId], `
       const instance = new Prototype({ owner: this });
@@ -64,7 +64,7 @@ describe("Chronicle load ordering and inactive resource handling", () => {
     `, { Prototype }, { awaitResult: (result) => result.getPremiereStory() });
     expect(componentGhost.propertyValue("num"))
         .toEqual(10);
-    expect(componentGhost.get("prototype"))
+    expect(componentGhost.step("prototype"))
         .toEqual(component);
 
     const pairness = await createEngineOracleHarness({ verbosity: 0, pairedHarness: harness });

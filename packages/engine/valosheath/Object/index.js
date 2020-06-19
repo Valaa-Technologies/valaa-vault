@@ -129,7 +129,7 @@ export default function extendObject (scope: Object, hostDescriptors: Map<any, O
 
   function getPrototypeOfWithResource (vResource: Vrapper) {
     const options = this.__callerValker__ && { discourse: this.__callerValker__ };
-    const ret = vResource.get("prototype", options);
+    const ret = vResource.step("prototype", options);
     if (ret) return ret;
     return valos[vResource.getTypeName(options)].prototype;
   }
@@ -148,8 +148,8 @@ export default function extendObject (scope: Object, hostDescriptors: Map<any, O
       for (const source of rest) {
         if (!(source instanceof Vrapper)) Object.assign(combinedSources, source);
         else {
-          for (const property of source.get("properties", options)) {
-            combinedSources[property.get("name", options)] = property.extractValue(options);
+          for (const property of source.step("properties", options)) {
+            combinedSources[property.step("name", options)] = property.extractValue(options);
           }
         }
       }
@@ -170,26 +170,26 @@ export default function extendObject (scope: Object, hostDescriptors: Map<any, O
       .filter(VALEK.isImmaterial().not()).map(VALEK.to("name"));
   function keysWithResource (vResource: Vrapper) {
     if (!vResource.hasInterface("Scope")) return [];
-    return vResource.get(toValOSKeys, { discourse: this.__callerValker__ });
+    return vResource.step(toValOSKeys, { discourse: this.__callerValker__ });
   }
 
   const toValOSValues = VALEK.to("properties")
       .filter(VALEK.isImmaterial().not()).map(VALEK.extractValue());
   function valuesWithResource (vResource: Vrapper) {
     if (!vResource.hasInterface("Scope")) return [];
-    return vResource.get(toValOSValues, { discourse: this.__callerValker__ });
+    return vResource.step(toValOSValues, { discourse: this.__callerValker__ });
   }
 
   const toEntriesWithResource = VALEK.to("properties")
       .filter(VALEK.isImmaterial().not()).map(VALEK.array(VALEK.to("name"), VALEK.extractValue()));
   function entriesWithResource (vResource: Vrapper) {
     if (!vResource.hasInterface("Scope")) return [];
-    return vResource.get(toEntriesWithResource, { discourse: this.__callerValker__ });
+    return vResource.step(toEntriesWithResource, { discourse: this.__callerValker__ });
   }
 
 
   function isFrozenWithResource (vResource: Vrapper) {
-    return vResource.get("isFrozen", { discourse: this.__callerValker__ });
+    return vResource.step("isFrozen", { discourse: this.__callerValker__ });
   }
 
   function freezeWithResource (vResource: Vrapper) {
@@ -199,7 +199,7 @@ export default function extendObject (scope: Object, hostDescriptors: Map<any, O
 
   function isSealedWithResource (vResource: Vrapper) {
     // TODO(iridian): This only works as long as sealWithResource is not implemented.
-    return vResource.get("isFrozen", { discourse: this.__callerValker__ });
+    return vResource.step("isFrozen", { discourse: this.__callerValker__ });
   }
 
   function sealWithResource (/* vResource: Vrapper */) {
@@ -208,7 +208,7 @@ export default function extendObject (scope: Object, hostDescriptors: Map<any, O
 
   function isExtensibleWithResource (vResource: Vrapper) {
     // TODO(iridian): This only works as long as preventExtensionsWithResource is not implemented.
-    return !vResource.get("isFrozen", { discourse: this.__callerValker__ });
+    return !vResource.step("isFrozen", { discourse: this.__callerValker__ });
   }
 
   function preventExtensionsWithResource (/* vResource: Vrapper */) {
@@ -334,9 +334,9 @@ export default function extendObject (scope: Object, hostDescriptors: Map<any, O
       if (transient.get("properties")) {
         // TODO(iridian): This could be done with one query, but
         // passing extractValue.vExplicitOwner is a bit tricky.
-        const properties = vResource.get(toOwnProperties, options);
+        const properties = vResource.step(toOwnProperties, options);
         for (const vProperty of properties) {
-          ret[vProperty.get("name", options)] =
+          ret[vProperty.step("name", options)] =
               createHostPropertyDescriptorFromProperty(vProperty, vResource, options);
         }
       }
@@ -358,7 +358,7 @@ export default function extendObject (scope: Object, hostDescriptors: Map<any, O
   const toOwnPropertyNames = toOwnProperties.map(VALEK.toField("name"));
   function getOwnPropertyNamesWithResource (vResource: Vrapper) {
     if (!vResource.hasInterface("Scope")) return [];
-    return vResource.get(toOwnPropertyNames, { discourse: this.__callerValker__ });
+    return vResource.step(toOwnPropertyNames, { discourse: this.__callerValker__ });
   }
 
   function getOwnPropertyNamesWithBuiltin (valospaceType: Object) {

@@ -84,7 +84,7 @@ export default {
     )(function setRelations (name, newRelations: any[]) {
       try {
         return this.replaceWithinField("relations",
-            this.get(VALEK.relations(name), { discourse: this.__callerValker__ }),
+            this.step(VALEK.relations(name), { discourse: this.__callerValker__ }),
             newRelations, { discourse: this.__callerValker__ });
       } catch (error) {
         throw wrapError(error, `During ${this.constructor.name}\n .setRelations('${name}'), with:`,
@@ -125,7 +125,7 @@ export default {
     )(function setIncomingRelations (name, newIncomingRelations: any[]) {
       try {
         return this.replaceWithinField("incomingRelations",
-            this.get(VALEK.incomingRelations(name), { discourse: this.__callerValker__ }),
+            this.step(VALEK.incomingRelations(name), { discourse: this.__callerValker__ }),
             newIncomingRelations, { discourse: this.__callerValker__ });
       } catch (error) {
         throw wrapError(error, `During ${this.constructor.name}\n .setIncomingRelations('${name

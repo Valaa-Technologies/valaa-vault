@@ -28,11 +28,11 @@ describe("VALEK extensions", () => {
       const scope = entities().creator.do(toCreation);
       expect(scope.root.toJSON())
           .toEqual(entities().creator.getVRef().toJSON());
-      expect(scope.article.get("name"))
+      expect(scope.article.step("name"))
           .toEqual("article-0-name");
-      expect(entities().test.get(
+      expect(entities().test.step(
           VALEK.to("unnamedOwnlings").find(VALEK.hasName("article-0-name"))))
-          .toEqual(harness.engine.getVrapperByRawId(scope.article.get("rawId")));
+          .toEqual(harness.engine.getVrapperByRawId(scope.article.step("rawId")));
     });
   });
 
@@ -40,25 +40,25 @@ describe("VALEK extensions", () => {
     it("throws on non-optional propertyTarget access when actual data is a Literal", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
       expectVrapper("creator");
-      expect(() => entities().creator.get(VALEK.propertyTarget("counter")))
+      expect(() => entities().creator.step(VALEK.propertyTarget("counter")))
           .toThrow(/Schema introspection missing for field 'Literal.reference'/);
     });
     it("returns null non-optional propertyTarget access when actual data is a Literal", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
       expectVrapper("creator");
-      expect(entities().creator.get(VALEK.propertyTarget("counter", { optional: true })))
+      expect(entities().creator.step(VALEK.propertyTarget("counter", { optional: true })))
           .toEqual(undefined);
     });
     it("throws on non-optional propertyLiteral access when actual data is an Identifier", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
       expectVrapper("creator");
-      expect(() => entities().creator.get(VALEK.propertyLiteral("template")))
+      expect(() => entities().creator.step(VALEK.propertyLiteral("template")))
           .toThrow(/Schema introspection missing for field 'Identifier.value'/);
     });
     it("returns null non-optional propertyLiteral access when actual data is a Identifier", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
       expectVrapper("creator");
-      expect(entities().creator.get(VALEK.propertyLiteral("template", { optional: true })))
+      expect(entities().creator.step(VALEK.propertyLiteral("template", { optional: true })))
           .toEqual(undefined);
     });
   });

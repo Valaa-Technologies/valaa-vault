@@ -32,7 +32,7 @@ export default class ExpressionFieldEditor extends FieldEditor {
       //     values (once you took into consideration the props passed and parent classes' code)
       //     but it doesn't seem to be triggered often. Should anything here break, just assume I
       //     had no idea I was doing and redo this bit. (thiago)
-      const vakon = rawValue.get(VALEK.evalk(VALEK.to("asVAKON")));
+      const vakon = rawValue.step(VALEK.evalk(VALEK.to("asVAKON")));
       return vakon;
     }
     if (rawValue instanceof Object) {

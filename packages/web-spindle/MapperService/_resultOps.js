@@ -290,8 +290,8 @@ function _fillReplyFromMedia (router, vMedia, runtime, valkOptions, reply) {
 }
 
 function _fillReplyFromWebLens (router, vFocus, runtime, valkOptions) {
-  const rootLens = vFocus.get(["§..", "WEB_ROOT_LENS"], Object.create(valkOptions));
-  const lens = rootLens || vFocus.get(["§..", "WEB_LENS"], Object.create(valkOptions));
+  const rootLens = vFocus.step(["§..", "WEB_ROOT_LENS"], Object.create(valkOptions));
+  const lens = rootLens || vFocus.step(["§..", "WEB_LENS"], Object.create(valkOptions));
   if (!lens) {
     throw new Error(`No lens 'WEB_ROOT_LENS' nor 'WEB_LENS' found from response resource: ${
         vFocus.debugId()}`);

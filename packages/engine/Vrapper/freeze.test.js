@@ -59,9 +59,9 @@ describe("Chronicle freezing", () => {
 
   it("allows freezing a chronicle", async () => {
     harness = await createEngineOracleHarness({ claimBaseBlock: false }, [transactionA]);
-    expect(entities()[testRootId].get("isFrozen")).toBeFalsy();
+    expect(entities()[testRootId].step("isFrozen")).toBeFalsy();
     await harness.chronicleEvent(freezeEventFor(testRootId)).getPremiereStory();
-    expect(entities()[testRootId].get("isFrozen")).toBeTruthy();
+    expect(entities()[testRootId].step("isFrozen")).toBeTruthy();
     expect(harness.testConnection.isFrozenConnection()).toBeTruthy();
   });
 
@@ -88,7 +88,7 @@ describe("Chronicle freezing", () => {
     await harness.chronicleEvent(freezeEventFor("test_entity")).getPremiereStory();
     expect(() => entities().test_entity.setField("owner", entities().late_entity))
         .not.toThrow();
-    expect(entities().test_entity.get("owner").getVRef())
+    expect(entities().test_entity.step("owner").getVRef())
         .toEqual(entities().late_entity.getVRef());
     expect(() => entities().test_entity.alterProperty("prop",
             VALEK.fromValue("Changed string")))

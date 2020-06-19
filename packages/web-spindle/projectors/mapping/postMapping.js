@@ -82,7 +82,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         (/* persistedEvent */) => {
           reply.code(201);
           return router.fillReplyFromResponse(
-              [scope.resource, scope.mappingName, scope.mapping.get("target")],
+              [scope.resource, scope.mappingName, scope.mapping.step("target")],
               this.runtime, valkOptions);
         },
       ], (error) => {

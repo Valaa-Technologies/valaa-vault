@@ -40,19 +40,19 @@ describe("Media handling", () => {
       this.text = media;
       ({ media, contentUpdateStarted });
     `, { exampleBuffer, console }, { awaitResult: (result) => result.getComposedEvent() });
-    const vMedias = vTestRoot.get(["§.", "medias"]);
-    const vEntities = vTestRoot.get(["§.", "entities"]);
+    const vMedias = vTestRoot.step(["§.", "medias"]);
+    const vEntities = vTestRoot.step(["§.", "entities"]);
     expect(vMedias.length)
         .toEqual(1);
     expect(vMedias.length + vEntities.length)
-        .toEqual(vTestRoot.get(["§.", "unnamedOwnlings"]).length);
+        .toEqual(vTestRoot.step(["§.", "unnamedOwnlings"]).length);
     expect(media.getVRef().toJSON())
-        .toEqual(vTestRoot.get(["§..", "text"]).getVRef().toJSON());
+        .toEqual(vTestRoot.step(["§..", "text"]).getVRef().toJSON());
     expect(vMedias[0].getVRef().toJSON())
         .toEqual(media.getVRef().toJSON());
     expect(testConnectionBackend.getPreparation(exampleContentHash))
         .toBeTruthy();
-    expect(media.get("content"))
+    expect(media.step("content"))
         .toBeFalsy();
     expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 1);
@@ -61,7 +61,7 @@ describe("Media handling", () => {
     expect(bvobId.getVRef().rawId())
         .toEqual(exampleContentId);
     expect(bvobId.getVRef().toJSON())
-        .toEqual(media.get("content").getVRef().toJSON());
+        .toEqual(media.step("content").getVRef().toJSON());
     expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 2);
 
@@ -98,7 +98,7 @@ describe("Media handling", () => {
     `, { exampleBuffer, console });
     await newMediaPersist;
     expect(media.getVRef().toJSON())
-        .toEqual(entities()[testRootId].get(["§..", "text"]).getVRef().toJSON());
+        .toEqual(entities()[testRootId].step(["§..", "text"]).getVRef().toJSON());
     expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 1);
     // local bvob persisted internally but not remotely
@@ -106,7 +106,7 @@ describe("Media handling", () => {
     expect(bvobId.getVRef().rawId())
         .toEqual(exampleContentId);
     expect(bvobId.getVRef().toJSON())
-        .toEqual(media.get("content").getVRef().toJSON());
+        .toEqual(media.step("content").getVRef().toJSON());
     const bvobComposedEvent = await bvobComposed;
 
     expect(await media.extractValue())
@@ -359,7 +359,7 @@ describe("Media handling", () => {
         mediaType: { type: "application", subtype: "octet-stream" },
       })`, {},
     );
-    expect(undefinedMedia.get("content"))
+    expect(undefinedMedia.step("content"))
         .toBeNull();
     expect(undefinedMedia.interpretContent({ synchronous: true }))
         .toBeUndefined();
@@ -373,7 +373,7 @@ describe("Media handling", () => {
         .obtainSubscription("content")
         .addListenerCallback(harness, "test", liveUpdate => resolve({
           liveUpdate,
-          bvobId: contentMedia.get("content"),
+          bvobId: contentMedia.step("content"),
           content: contentMedia.interpretContent({ synchronous: true, contentType: "text/plain" }),
         }), false);
     const { contentMedia, createdProcess } = await harness.runValoscript(vRef(testRootId), `
@@ -399,7 +399,7 @@ describe("Media handling", () => {
     expect(createdUpdate.content)
         .toEqual(initialContent);
 
-    expect(contentMedia.get("content").getRawId())
+    expect(contentMedia.step("content").getRawId())
         .toEqual(initialContentId);
     expect(contentMedia.interpretContent({ synchronous: true, contentType: "text/plain" }))
         .toEqual(initialContent);
@@ -429,7 +429,7 @@ describe("Media handling", () => {
     expect(modifiedUpdate.content)
         .toEqual(updateContent);
 
-    expect(undefinedMedia.get("content").getRawId())
+    expect(undefinedMedia.step("content").getRawId())
         .toEqual(updateContentId);
     expect(undefinedMedia.interpretContent({ synchronous: true, contentType: "text/plain" }))
         .toEqual(updateContent);
@@ -454,7 +454,7 @@ describe("Media handling", () => {
     expect(modifiedAgainUpdate.content)
         .toEqual(updateContent);
 
-    expect(contentMedia.get("content").getRawId())
+    expect(contentMedia.step("content").getRawId())
         .toEqual(updateContentId);
     expect(contentMedia.interpretContent({ synchronous: true, contentType: "text/plain" }))
         .toEqual(updateContent);

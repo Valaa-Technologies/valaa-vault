@@ -15,11 +15,11 @@ export default {
     [ValoscriptNew]: newResource,
     [ValoscriptInstantiate]: instantiateResource,
     getSourceOf: denoteDeprecatedValOSBuiltin("[Relation.source]")(
-        function getSourceOf (relation) { return relation.get("source"); }), // eslint-disable-line
+        function getSourceOf (relation) { return relation.step("source"); }), // eslint-disable-line
     setSourceOf: denoteDeprecatedValOSBuiltin("[Relation.source] = newSource")(
         function setSourceOf (relation, newSource) { relation.setField("source", newSource); }),  // eslint-disable-line
     getTargetOf: denoteDeprecatedValOSBuiltin("[Relation.target]")(
-        function getTargetOf (relation) { return relation.get("target"); }),  // eslint-disable-line
+        function getTargetOf (relation) { return relation.step("target"); }),  // eslint-disable-line
     setTargetOf: denoteDeprecatedValOSBuiltin("[Relation.target] = newSource")(
         function setTargetOf (relation, newTarget) { relation.setField("target", newTarget); }), // eslint-disable-line
   },

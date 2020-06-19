@@ -729,8 +729,8 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
           const initialState = {
             id: frameRawId,
             name: `FRAME-${lensName}=>${
-                prototype ? prototype.get("name") || prototypePart : "Entity"}->${
-                (vFocus && vFocus.hasInterface("Scope") && vFocus.get("name")) || focusPart}`,
+                prototype ? prototype.step("name") || prototypePart : "Entity"}->${
+                (vFocus && vFocus.hasInterface("Scope") && vFocus.step("name")) || focusPart}`,
           };
           if (lensAuthorityURI) initialState.authorityURI = lensAuthorityURI;
           else initialState.owner = owner;

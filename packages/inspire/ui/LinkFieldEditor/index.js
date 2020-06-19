@@ -109,15 +109,15 @@ export default class LinkFieldEditor extends UIComponent {
               value = updateValue.value;
               break;
             case "Identifier":
-              value = this.getFocus().get(VALEK.to(this.props.fieldName)
+              value = this.getFocus().step(VALEK.to(this.props.fieldName)
                   .to("reference", "Identifier"));
               break;
             case "Entity":
-              value = this.getFocus().get(VALEK.to(this.props.fieldName).to("id", "Resource"));
+              value = this.getFocus().step(VALEK.to(this.props.fieldName).to("id", "Resource"));
               break;
             default:
               if (updateValue.hasInterface("Discoverable")) {
-                value = this.getFocus().get(VALEK.to(this.props.fieldName));
+                value = this.getFocus().step(VALEK.to(this.props.fieldName));
               } else {
                 throw new Error(`Cannot determine LinkFieldEditor target value because it is not ${
                     ""}an Identifier, Entity or Discoverable: got ${typeName}`);
@@ -139,7 +139,7 @@ export default class LinkFieldEditor extends UIComponent {
 
     this.entryMap = {};
     for (const entry of entries) {
-      const key = `${entry.get("typeName")} ${entry.get("name")}`;
+      const key = `${entry.step("typeName")} ${entry.step("name")}`;
       this.entryMap[key] = entry;
     }
 
@@ -173,7 +173,7 @@ export default class LinkFieldEditor extends UIComponent {
     if (this.state.value) {
       const value = this.state.value;
       if (!value.isActive()) return `<${value.getPhase()} '${value.getRawId()}'>`;
-      return `${value.get("typeName")} ${value.get("name")}`;
+      return `${value.step("typeName")} ${value.step("name")}`;
     }
     return "null";
   }

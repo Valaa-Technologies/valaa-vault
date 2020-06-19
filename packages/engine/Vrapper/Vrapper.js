@@ -222,7 +222,7 @@ export default class Vrapper extends Cog {
         : coupledField === "materializedGhosts" ? "<-|>"
         : coupledField === null ? "-|>" // immaterialized ghost
         : ""
-        }${this.get("prototype").prototypeChainString()}`;
+        }${this.step("prototype").prototypeChainString()}`;
   }
   */
 
@@ -654,7 +654,7 @@ export default class Vrapper extends Cog {
     innerOptions.scope = {};
     if (Vrapper._namedTypes[this.typeName]) {
       nameText = (options || {}).transient && (options || {}).transient.get("name");
-      if (nameText === undefined) nameText = this.get("name", innerOptions);
+      if (nameText === undefined) nameText = this.step("name", innerOptions);
       if (nameText) nameText = `@.:${nameText}`;
     }
     let targetText;
@@ -664,7 +664,7 @@ export default class Vrapper extends Cog {
       else if (targetId.isAbsent()) {
         targetText = `.O-@?@@?+chronicle=${targetId.getChronicleURI()}`;
       } else {
-        const target = this.get("target", innerOptions);
+        const target = this.step("target", innerOptions);
         targetText = `.O-${target ? target.getName() : "@@"}`;
       }
     }
@@ -954,7 +954,7 @@ export default class Vrapper extends Cog {
         && !initialState.authorityURI && !initialState.partitionAuthorityURI) {
       const innerOptions = Object.create(options);
       innerOptions.scope = null;
-      initialState.owner = this.get("owner", innerOptions);
+      initialState.owner = this.step("owner", innerOptions);
     }
     return this.create(typeName, initialState, options);
   }
@@ -1051,7 +1051,7 @@ export default class Vrapper extends Cog {
               || (this._namespaceProxies[accessor] =
                   namespace.createProxyTo(this, accessor)));
         }
-        const ret = this.get(fieldDescriptor.kuery, options);
+        const ret = this.step(fieldDescriptor.kuery, options);
         // console.log("hostref", fieldDescriptor.kuery, ret);
         return ret;
       }
@@ -1072,7 +1072,7 @@ export default class Vrapper extends Cog {
     if (ret && !ret.isImmaterial()) return ret;
     // New properties which don't exist in _valospaceScope still work as
     // they get kueried here.
-    return this.get(VALEK.property(propertyName), options);
+    return this.step(VALEK.property(propertyName), options);
   }
 
   alterProperty (propertyName: any, alterationVAKON: Object, options: VALKOptions = {}) {
@@ -1095,7 +1095,7 @@ export default class Vrapper extends Cog {
     const writableFieldName = (fieldDescriptor != null) && fieldDescriptor.writableFieldName;
     if (writableFieldName) {
       ret = this._preProcessNewReference(
-          this.get(["§->", writableFieldName, actualAlterationVAKON], alterationOptions),
+          this.step(["§->", writableFieldName, actualAlterationVAKON], alterationOptions),
           fieldDescriptor, hostType);
       // TODO(iridian): Make this solution semantically consistent host field access.
       // Now stupidly trying to setField even if the field is not a primaryField.
@@ -1213,14 +1213,14 @@ export default class Vrapper extends Cog {
             ? dataFieldValue(valueEntry, fieldName)
             : state.getIn([valueType, valueEntry.rawId(), fieldName]);
         if ((vakon == null) || (typeof vakon !== "object")) return vakon;
-        const vOwner = vExplicitOwner || this.get("owner", Object.create(options)) || this;
+        const vOwner = vExplicitOwner || this.step("owner", Object.create(options)) || this;
         options.scope = vOwner.getValospaceScope(options);
         // TODO(iridian): We could add a flag to KueryExpression to denote that the evaluated value
         // of the KueryExpression can be cached. However as this is mostly a perf thing (when
         // KueryExpression is used to implement method imports) with semantic implications (if the
         // VAKON path actually changes, this function will return stale values), this is quite the
         // low priority.
-        return vOwner.get(vakon, options);
+        return vOwner.step(vakon, options);
       } else {
         throw new Error(
             `Vrapper(${this.debugId()}).extractValue: unsupported value type '${valueType}'`);
@@ -1244,7 +1244,7 @@ export default class Vrapper extends Cog {
   _extractPointerValue (options: VALKOptions = {}, vExplicitOwner: ?Vrapper,
       valueEntry: Transient) {
     this.requireActive(options);
-    const target = this.get(Vrapper.toValueReference, Object.create(options));
+    const target = this.step(Vrapper.toValueReference, Object.create(options));
     if (!target) {
       console.warn(`Vrapper(${this.debugId()
           }).extractValue: Cannot resolve pointed resource from Property.value:`, valueEntry);
@@ -1268,7 +1268,7 @@ export default class Vrapper extends Cog {
   /* (re-)assigns options.mediaInfo */
   resolveMediaInfo (options: VALKOptions = {}) {
     const mediaInfo = Object.assign({},
-        options.mediaInfo || this.get(Vrapper.toMediaInfoFields, options));
+        options.mediaInfo || this.step(Vrapper.toMediaInfoFields, options));
     /*
     function _setMediaInfoTypeAndSubtype (contentType) {
       const split = contentType.split("/");
@@ -1348,7 +1348,7 @@ export default class Vrapper extends Cog {
       options.mediaInfo = mediaInfo || (mediaInfo = this.resolveMediaInfo(Object.create(options)));
       let decodedContent = options.decodedContent;
       if (decodedContent === undefined) {
-        const name = this.get("name", options);
+        const name = this.step("name", options);
         wrap = new Error(`_obtainMediaInterpretation('${name}').connection.decodeMediaContent(as ${
           String(mediaInfo && mediaInfo.contentType)})`);
         decodedContent = this._withActiveConnectionChainEagerly(Object.create(options), [
@@ -1371,9 +1371,9 @@ export default class Vrapper extends Cog {
         // else: decodedContent is synchronously available and synchronous !== false.
         // Proceed to integration.
       }
-      let vScope = vExplicitOwner || this.get("owner", Object.create(options));
+      let vScope = vExplicitOwner || this.step("owner", Object.create(options));
       while (vScope && !vScope.hasInterface("Scope")) {
-        vScope = vScope.get("owner", Object.create(options));
+        vScope = vScope.step("owner", Object.create(options));
       }
       if (!vScope) vScope = this;
       const interpretation = this._parent._integrateDecoding(decodedContent, vScope, mediaInfo,
@@ -1382,7 +1382,7 @@ export default class Vrapper extends Cog {
       return interpretation;
     } catch (error) {
       _setInterPretationByMimeCacheEntry(error);
-      wrap = new Error(`_obtainMediaInterpretation('${this.get("name", options)}' as ${
+      wrap = new Error(`_obtainMediaInterpretation('${this.step("name", options)}' as ${
           String((mediaInfo || {}).contentType)})`);
       return errorOnObtainMediaInterpretation(error);
     }
@@ -1422,7 +1422,7 @@ export default class Vrapper extends Cog {
     // Expect mediaType tag to be formatted like this
     // "tag:" authorityName "," YYYY-MM-DD-date ":" specific [ "#" fragment ]
     // e.g. tag:valaa.com,2017-07-21-date:mediaType#text/plain
-    for (const tag of this.get("tags")) {
+    for (const tag of this.step("tags")) {
       const specificWithFragment = tag.tagURI.split(":")[2];
       if (!specificWithFragment) continue;
       const [specific, contentType] = specificWithFragment.split("#");
@@ -1440,7 +1440,7 @@ export default class Vrapper extends Cog {
         throw new Error("Non-Property values cannot be modified");
       }
       const currentValue = this.extractValue(options, vExplicitOwner);
-      const vOwner = vExplicitOwner || this.get("owner", Object.create(options));
+      const vOwner = vExplicitOwner || this.step("owner", Object.create(options));
       invariantify(!vOwner || vOwner.getValospaceScope,
           "property owner (if defined) must be a Vrapper");
       options.scope = (vOwner || this).getValospaceScope(options);
@@ -1606,7 +1606,7 @@ export default class Vrapper extends Cog {
     try {
       this.requireActive(options);
       if (this.hasInterface("Media")) {
-        mediaInfo = this.get(Vrapper.toMediaPrepareBvobInfoFields, Object.create(options));
+        mediaInfo = this.step(Vrapper.toMediaPrepareBvobInfoFields, Object.create(options));
       }
       return this._withActiveConnectionChainEagerly(Object.create(options), [
         connection => connection.prepareBvob(content, mediaInfo),
@@ -1687,7 +1687,7 @@ export default class Vrapper extends Cog {
    * @param {array<string>} fieldNames
    * @returns
    */
-  fields (...fieldNames: any[]) { return this.get(VALEK.select(fieldNames)); }
+  fields (...fieldNames: any[]) { return this.step(VALEK.select(fieldNames)); }
 
   registerHandlers (targetEventHandlers: Object) {
     this.setIdSubHandler(targetEventHandlers.get("rawId"), this.getRawId(), null,
@@ -2200,7 +2200,7 @@ export default class Vrapper extends Cog {
         subscription.removeListenerCallback(this, "Vrapper_properties_name");
         delete this._scopeNameSubs[removedRawId];
       }
-      const propertyName = vActualRemove.get("name", fieldUpdate.previousStateOptions());
+      const propertyName = vActualRemove.step("name", fieldUpdate.previousStateOptions());
       const property = this._valospaceScope.hasOwnProperty(propertyName)
           && this._valospaceScope[propertyName];
       if (property && (property.getRawId() === removedRawId)) {

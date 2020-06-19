@@ -10,7 +10,7 @@ export function _updateResource (router, vResource, patch,
     throw new Error("Target resource missing when trying to PATCH fields");
   }
   const vTarget = !toPatchTarget ? vResource
-      : vResource.get(toPatchTarget, { discourse, scope });
+      : vResource.step(toPatchTarget, { discourse, scope });
   const options = { discourse, scope };
   _recursiveUpdate(vTarget, patch, options,
       (patchValosFields === false) ? null : undefined);
@@ -28,7 +28,7 @@ function _recursiveUpdate (vScope, patch, options, isValOSFields) {
     } else {
       const currentValue = !isValOSFields
           ? vScope.propertyValue(propertyName, Object.create(options))
-          : vScope.get(propertyName, Object.create(options));
+          : vScope.step(propertyName, Object.create(options));
       if (currentValue instanceof Vrapper) {
         if ((value == null) || (typeof value !== "object")) {
           throw new Error(`Cannot overwrite a structural property '${propertyName

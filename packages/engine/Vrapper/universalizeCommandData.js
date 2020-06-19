@@ -22,7 +22,7 @@ export default function universalizeCommandData (object: ?any, options:
       invariantifyObject(options.head,
           "universalizeCommandData.kueryOptions: { head } (when initialState contains a Kuery)",
               { instanceof: Vrapper });
-      return universalizeCommandData(options.head.get(object, Object.create(options)), options);
+      return universalizeCommandData(options.head.step(object, Object.create(options)), options);
     }
 
     if (Array.isArray(object)) {

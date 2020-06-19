@@ -33,10 +33,10 @@ export function verifySessionAuthorization (
     if (!router.isSessionAuthorizationEnabled()) return true;
     let rights;
     for (const accessRoot of [].concat(accessRoots)) {
-      rights = accessRoot.get(toRIGHTSFields);
+      rights = accessRoot.step(toRIGHTSFields);
       if ((rights != null) && rights.length) break;
     }
-    // const permissions = accessRoot.get(toPERMISSIONSFields);
+    // const permissions = accessRoot.step(toPERMISSIONSFields);
     let identityRoles;
     if ((rights == null) || !rights.length) {
       if (_isReadOnlyMethod[route.method]) return true;

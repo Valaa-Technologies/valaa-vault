@@ -61,44 +61,44 @@ describe("Engine bug tests", async () => {
     const noUnpackEngine = Object.create(harness.engine.discourse);
     noUnpackEngine.setHostValueUnpacker(null);
 
-    expect(foo.get(VALEK.to("properties")).length)
+    expect(foo.step(VALEK.to("properties")).length)
         .toEqual(4);
-    expect(fooInst.get(VALEK.to("properties")).length)
+    expect(fooInst.step(VALEK.to("properties")).length)
         .toEqual(4);
 
-    expect(foo.get(VALEK.propertyValue("Ten")))
+    expect(foo.step(VALEK.propertyValue("Ten")))
         .toEqual(10);
-    expect(fooInst.get(VALEK.propertyValue("Ten")))
+    expect(fooInst.step(VALEK.propertyValue("Ten")))
         .toEqual(10);
-    expect(fooInst.get(VALEK.property("Ten")))
-        .not.toBe(foo.get(VALEK.property("Ten")));
+    expect(fooInst.step(VALEK.property("Ten")))
+        .not.toBe(foo.step(VALEK.property("Ten")));
     expect(noUnpackEngine.run(fooInst, VALEK.property("Ten").to("value")))
         .toBe(noUnpackEngine.run(foo, VALEK.property("Ten").to("value")));
 
-    expect(foo.get(VALEK.propertyValue("BarPtr")))
+    expect(foo.step(VALEK.propertyValue("BarPtr")))
         .toBe(entities().Bar);
-    expect(fooInst.get(VALEK.propertyValue("BarPtr")))
+    expect(fooInst.step(VALEK.propertyValue("BarPtr")))
         .toBe(entities().Bar);
-    expect(fooInst.get(VALEK.property("BarPtr")))
-        .not.toBe(foo.get(VALEK.property("BarPtr")));
+    expect(fooInst.step(VALEK.property("BarPtr")))
+        .not.toBe(foo.step(VALEK.property("BarPtr")));
     expect(noUnpackEngine.run(fooInst, VALEK.property("BarPtr").to("value")))
         .toEqual(noUnpackEngine.run(foo, VALEK.property("BarPtr").to("value")));
 
-    expect(foo.get(VALEK.propertyValue("SelfPtr")))
+    expect(foo.step(VALEK.propertyValue("SelfPtr")))
         .toBe(foo);
-    expect(fooInst.get(VALEK.propertyValue("SelfPtr")))
+    expect(fooInst.step(VALEK.propertyValue("SelfPtr")))
         .toBe(fooInst);
-    expect(fooInst.get(VALEK.property("SelfPtr")))
-        .not.toBe(foo.get(VALEK.property("SelfPtr")));
+    expect(fooInst.step(VALEK.property("SelfPtr")))
+        .not.toBe(foo.step(VALEK.property("SelfPtr")));
     expect(noUnpackEngine.run(fooInst, VALEK.property("SelfPtr").to("value")).toJS())
         .not.toEqual(noUnpackEngine.run(foo, VALEK.property("SelfPtr").to("value")).toJS());
 
-    expect(foo.get(VALEK.propertyValue("ChildPtr")))
+    expect(foo.step(VALEK.propertyValue("ChildPtr")))
         .toBe(entities().FooChild);
-    expect(fooInst.get(VALEK.propertyValue("ChildPtr")))
-        .toBe(fooInst.get(VALEK.to("unnamedOwnlings").toIndex(0)));
-    expect(fooInst.get(VALEK.property("ChildPtr")))
-        .not.toBe(foo.get(VALEK.property("ChildPtr")));
+    expect(fooInst.step(VALEK.propertyValue("ChildPtr")))
+        .toBe(fooInst.step(VALEK.to("unnamedOwnlings").toIndex(0)));
+    expect(fooInst.step(VALEK.property("ChildPtr")))
+        .not.toBe(foo.step(VALEK.property("ChildPtr")));
     expect(noUnpackEngine.run(fooInst, VALEK.property("ChildPtr").to("value")).toJS())
         .not.toEqual(noUnpackEngine.run(foo, VALEK.property("ChildPtr").to("value")).toJS());
   });
@@ -119,12 +119,12 @@ describe("Engine bug tests", async () => {
     `;
     const moduleKuery = transpileValoscriptBody(bodyText, { customVALK: VALEK });
     const ownlingPrototypeDestroyer = entities().test.do(moduleKuery);
-    expect(entities().test.get("unnamedOwnlings").length)
+    expect(entities().test.step("unnamedOwnlings").length)
         .toEqual(3);
     expect(harness.engine.tryVrapper("ownling_prototype"))
         .toBeTruthy();
     ownlingPrototypeDestroyer();
-    expect(entities().test.get("unnamedOwnlings").length)
+    expect(entities().test.step("unnamedOwnlings").length)
         .toEqual(2);
     expect(harness.engine.tryVrapper("ownling_prototype"))
         .toBeFalsy();

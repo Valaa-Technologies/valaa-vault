@@ -50,11 +50,11 @@ const createAInstance
 const createMedia = {
   type: "TRANSACTED",
   actions: [
-    created({ id: ["theContent"], typeName: "Blob" }),
+    created({ id: ["@$~bvob.theContent@@"], typeName: "Blob" }),
     created({ id: ["theMedia"], typeName: "Media", initialState: {
       owner: ["child"],
       name: "mediaName",
-      content: ["theContent"],
+      content: ["@$~bvob.theContent@@"],
     }, }),
   ],
 };
@@ -70,14 +70,14 @@ describe("Vrapper", () => {
   const expectVrapper = rawId => { expect(harness.engine.tryVrapper(rawId)).toBeTruthy(); };
 
   const touchField = (vrapper, field) => {
-    const value = vrapper.get(field);
+    const value = vrapper.step(field);
     vrapper.setField(field, `touched_${value}`);
   };
 
   const checkVrapperSets = (observedVrapper, { expectFields, targetId, sets, expectUpdates }) => {
     const updatedValues = {};
     for (const key of Object.keys(expectFields)) {
-      expect(observedVrapper.get(key))
+      expect(observedVrapper.step(key))
           .toEqual(expectFields[key]);
     }
     for (const key of Object.keys(sets || {})) {
@@ -106,7 +106,7 @@ describe("Vrapper", () => {
         transactionA, createAInstance,
       ]);
       expectVrapper("test");
-      const vChild = testScriptyThings().test.get(["§->", "children", 0]);
+      const vChild = testScriptyThings().test.step(["§->", "children", 0]);
       expect(vChild instanceof Vrapper)
           .toEqual(true);
       expect(vChild)
@@ -118,9 +118,9 @@ describe("Vrapper", () => {
         transactionA, createAInstance,
       ]);
       touchField(testScriptyThings().test, "name");
-      expect(testScriptyThings().test.get("name"))
+      expect(testScriptyThings().test.step("name"))
           .toEqual("touched_testName");
-      expect(harness.engine.getVrapperByRawId("test").get("name"))
+      expect(harness.engine.getVrapperByRawId("test").step("name"))
           .toEqual("touched_testName");
     });
 
@@ -135,7 +135,7 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      const vChildGhost = testScriptyThings()["test+1"].get(["§->", "children", 0]);
+      const vChildGhost = testScriptyThings()["test+1"].step(["§->", "children", 0]);
       expect(vChildGhost instanceof Vrapper)
           .toEqual(true);
       const expectedChildGhostRawId = createGhostRawId("@$~raw.child@@", "@$~raw.test%2B1@@");
@@ -157,7 +157,7 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance,
       ]);
-      const result = testScriptyThings()["test+1"].get(["§->", "children", 0]);
+      const result = testScriptyThings()["test+1"].step(["§->", "children", 0]);
       expect(result)
           .toEqual(getGhostVrapperById("@$~raw.child@@", "@$~raw.test%2B1@@"));
     });
@@ -218,9 +218,9 @@ describe("Vrapper", () => {
         testVrapper.getEngine()._integrateDecoding = mockIntegrateDecoding;
         testVrapper.interpretContent = (() => "");
         testVrapper.hasInterface = () => true;
-        testVrapper.get = function get (kuery) {
+        testVrapper.step = function step (kuery) {
           if (kuery === Vrapper.toMediaInfoFields) return ({ ...testVrapperMediaInfo });
-          return Vrapper.prototype.get.call(this, kuery);
+          return Vrapper.prototype.step.call(this, kuery);
         };
       });
 
@@ -484,10 +484,10 @@ describe("Vrapper", () => {
         transactionA, createAInstance,
       ]);
       const childGhost = testScriptyThings().child.getGhostIn(testScriptyThings()["test+1"]);
-      expect(testScriptyThings().child.get("children").length)
+      expect(testScriptyThings().child.step("children").length)
           .toEqual(2);
       harness.engine.create("TestScriptyThing", { parent: childGhost, name: "guest" });
-      expect(testScriptyThings().child.get("children").length)
+      expect(testScriptyThings().child.step("children").length)
           .toEqual(2);
     });
 
@@ -498,13 +498,13 @@ describe("Vrapper", () => {
       const childGhost = testScriptyThings().child.getGhostIn(testScriptyThings()["test+1"]);
       const grandChildGhost = testScriptyThings().grandChild.getGhostIn(
           testScriptyThings()["test+1"]);
-      expect(childGhost.get(["§->", "children", 0]))
+      expect(childGhost.step(["§->", "children", 0]))
           .toEqual(grandChildGhost);
       const vGuest = harness.engine.create("TestScriptyThing",
           { parent: childGhost, name: "guest" });
-      expect(vGuest.get("parent"))
+      expect(vGuest.step("parent"))
           .toEqual(childGhost);
-      const childGhostChildren = childGhost.get("children");
+      const childGhostChildren = childGhost.step("children");
       expect(childGhostChildren.length)
           .toEqual(3);
       expect(childGhostChildren[0])
@@ -577,8 +577,8 @@ describe("Vrapper", () => {
       ]);
       const top = entities().top;
       const recurseKuery = VALEK.recurseMaterializedFieldResources(["unnamedOwnlings"]);
-      const filtered = top.get(recurseKuery.filter(VALEK.isTruthy()));
-      const unfiltered = top.get(recurseKuery);
+      const filtered = top.step(recurseKuery.filter(VALEK.isTruthy()));
+      const unfiltered = top.step(recurseKuery);
 
       expect(filtered[0] instanceof Vrapper).toEqual(true);
       expect(unfiltered[0] instanceof Vrapper).not.toEqual(false); // <-- differentiate jest output
@@ -616,9 +616,9 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
       ]);
-      expect(testScriptyThings().test.get(VALEK.fromScope("testField").toValueLiteral()))
+      expect(testScriptyThings().test.step(VALEK.fromScope("testField").toValueLiteral()))
           .toEqual("testOwned.testField");
-      expect(testScriptyThings().test.get(VALEK.fromScope("secondField").toValueLiteral()))
+      expect(testScriptyThings().test.step(VALEK.fromScope("secondField").toValueLiteral()))
           .toEqual("testOwned.secondField");
     });
 
@@ -626,7 +626,7 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
       ]);
-      expect(testScriptyThings().grandChild.get(VALEK.fromScope("secondField").toValueLiteral()))
+      expect(testScriptyThings().grandChild.step(VALEK.fromScope("secondField").toValueLiteral()))
           .toEqual("testOwned.secondField");
     });
 
@@ -634,7 +634,7 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
       ]);
-      expect(testScriptyThings().grandChild.get(VALEK.fromScope("testField").toValueLiteral()))
+      expect(testScriptyThings().grandChild.step(VALEK.fromScope("testField").toValueLiteral()))
           .toEqual("grandChildOwned.testField");
     });
   });
@@ -659,7 +659,7 @@ describe("Vrapper", () => {
       expect(console.warn.mock.calls[0][0])
           .toBe(`Overriding existing Property 'testField' in Scope Vrapper:2@@`);
       console.warn = oldWarn;
-      expect(testScriptyThings().test.get(VALEK.fromScope("testField").toValueLiteral()))
+      expect(testScriptyThings().test.step(VALEK.fromScope("testField").toValueLiteral()))
           .toEqual("testOwned.conflictingTestField");
     });
 
@@ -667,14 +667,14 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
       ]);
-      testScriptyThings().test.get(VALEK.property("testField"))
+      testScriptyThings().test.step(VALEK.property("testField"))
           .setField("name", "renamedField");
-      expect(testScriptyThings().test.get(VALEK.fromScope("renamedField").toValueLiteral()))
+      expect(testScriptyThings().test.step(VALEK.fromScope("renamedField").toValueLiteral()))
           .toEqual("testOwned.testField");
-      expect(testScriptyThings().grandChild.get(
+      expect(testScriptyThings().grandChild.step(
               VALEK.fromScope("renamedField").toValueLiteral()))
           .toEqual("testOwned.testField");
-      expect(testScriptyThings().grandChild.get(VALEK.fromScope("testField").toValueLiteral()))
+      expect(testScriptyThings().grandChild.step(VALEK.fromScope("testField").toValueLiteral()))
           .toEqual("grandChildOwned.testField");
     });
 
@@ -682,12 +682,12 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
       ]);
-      expect(testScriptyThings().test.get(VALEK.fromScope("testField").toValueLiteral()))
+      expect(testScriptyThings().test.step(VALEK.fromScope("testField").toValueLiteral()))
           .toEqual("testOwned.testField");
-      testScriptyThings().test.get(VALEK.property("testField"))
+      testScriptyThings().test.step(VALEK.property("testField"))
           .setField("name", "renamedField");
       expect(() => testScriptyThings().test
-              .get(VALEK.fromScope("testField").toValueLiteral(), { verbosity: 0 }))
+              .step(VALEK.fromScope("testField").toValueLiteral(), { verbosity: 0 }))
           .toThrow(/Valk path step head unpacks to 'undefined' at notNull assertion/);
     });
 
@@ -696,11 +696,11 @@ describe("Vrapper", () => {
         transactionA, createAInstance, basicProperties,
       ]);
       const vTest = testScriptyThings().test;
-      expect(vTest.get(VALEK.fromScope("testField").toValueLiteral()))
+      expect(vTest.step(VALEK.fromScope("testField").toValueLiteral()))
           .toEqual("testOwned.testField");
-      await vTest.get(VALEK.property("testField"))
+      await vTest.step(VALEK.property("testField"))
           .destroy().getPremiereStory();
-      expect(() => vTest.get(VALEK.fromScope("testField").toValueLiteral(), { verbosity: 0 }))
+      expect(() => vTest.step(VALEK.fromScope("testField").toValueLiteral(), { verbosity: 0 }))
           .toThrow(/Valk path step head unpacks to 'undefined' at notNull assertion/);
     });
 
@@ -711,24 +711,24 @@ describe("Vrapper", () => {
       testScriptyThings().greatGrandChild.emplaceAddToField("properties", {
         name: "ggField", value: { typeName: "Literal", value: "ggChildOwned.ggField" }
       });
-      expect(testScriptyThings().greatGrandChild.get(
+      expect(testScriptyThings().greatGrandChild.step(
               VALEK.fromScope("ggField").toValueLiteral()))
           .toEqual("ggChildOwned.ggField");
-      expect(testScriptyThings().greatGrandChild.get(
+      expect(testScriptyThings().greatGrandChild.step(
               VALEK.fromScope("testField").toValueLiteral()))
           .toEqual("grandChildOwned.testField");
-      expect(() => testScriptyThings().greatGrandChild.get(
+      expect(() => testScriptyThings().greatGrandChild.step(
               VALEK.fromScope("siblingField").toValueLiteral()))
           .toThrow(/Valk path step head unpacks to 'undefined' at notNull assertion/);
       testScriptyThings().greatGrandChild.setField(
           "parent", testScriptyThings().grandSibling);
-      expect(testScriptyThings().greatGrandChild.get(
+      expect(testScriptyThings().greatGrandChild.step(
               VALEK.fromScope("ggField").toValueLiteral()))
           .toEqual("ggChildOwned.ggField");
-      expect(testScriptyThings().greatGrandChild.get(
+      expect(testScriptyThings().greatGrandChild.step(
               VALEK.fromScope("testField").toValueLiteral()))
           .toEqual("testOwned.testField");
-      expect(testScriptyThings().greatGrandChild.get(
+      expect(testScriptyThings().greatGrandChild.step(
               VALEK.fromScope("siblingField").toValueLiteral()))
           .toEqual("grandSiblingOwned.siblingField");
     });
@@ -742,7 +742,7 @@ describe("Vrapper", () => {
           value: { typeName: "Literal", value: "testOwned.namelessField" },
         }, }),
       ]);
-      expect(() => testScriptyThings().test.get(VALEK.fromScope("").toValueLiteral()))
+      expect(() => testScriptyThings().test.step(VALEK.fromScope("").toValueLiteral()))
           .toThrow(/Valk path step head unpacks to 'undefined' at notNull assertion/);
     });
   });

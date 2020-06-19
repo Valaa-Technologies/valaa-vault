@@ -58,7 +58,7 @@ export default {
         "returns the value of the host field with given *fieldName* of the given *resource*"
     )(function getFieldOf (resource, fieldVAKON) {
       try {
-        return resource.get(fieldVAKON, { discourse: this.__callerValker__ });
+        return resource.step(fieldVAKON, { discourse: this.__callerValker__ });
       } catch (error) {
         throw wrapError(error, `During ${this.constructor.name}\n .getFieldOf, with:`,
             "\n\tresource:", ...dumpObject(resource));

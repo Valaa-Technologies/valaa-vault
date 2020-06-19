@@ -469,7 +469,7 @@ export default class UIComponent extends React.Component {
    *
    * Basic fields: `${componentName}.${fieldNameOnHead}.${_subscribedFieldName}`
    *   example: "EditorNode.editTarget.name"
-   *     starts from this.getFocus(), goes to focus.get("editTarget"),
+   *     starts from this.getFocus(), goes to focus.step("editTarget"),
    *     subscribes for "name" on it
    *
    * Properties: `${componentName}['${propertyName}']`

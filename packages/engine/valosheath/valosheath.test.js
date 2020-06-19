@@ -77,11 +77,11 @@ describe("transpileValoscriptBody with Engine scriptAPI", () => {
       `;
       const bodyKuery = transpileValoscriptTestBody(bodyText);
       const myEntity = entities().creator.do(bodyKuery);
-      expect(myEntity.get("name"))
+      expect(myEntity.step("name"))
           .toEqual("myEntity");
-      expect(myEntity.get(VALEK.propertyLiteral("foo")))
+      expect(myEntity.step(VALEK.propertyLiteral("foo")))
           .toEqual(10);
-      expect(entities().creator.get(
+      expect(entities().creator.step(
               VALEK.to("unnamedOwnlings").filter(VALEK.hasName("myEntity")).to(0)))
           .toEqual(myEntity);
     });
@@ -95,14 +95,14 @@ describe("transpileValoscriptBody with Engine scriptAPI", () => {
       `;
       const bodyKuery = transpileValoscriptTestBody(bodyText);
       const myRelation = entities().creator.do(bodyKuery);
-      expect(myRelation.get("name"))
+      expect(myRelation.step("name"))
           .toEqual("myRelation");
-      expect(myRelation.get(VALEK.propertyLiteral("position")))
+      expect(myRelation.step(VALEK.propertyLiteral("position")))
           .toEqual({ x: 1, y: 2 });
-      const MyTypeEntity = myRelation.get("owner");
-      expect(MyTypeEntity.get("name"))
+      const MyTypeEntity = myRelation.step("owner");
+      expect(MyTypeEntity.step("name"))
           .toEqual("parent");
-      expect(MyTypeEntity.get(VALEK.relations("myRelation").to(0)))
+      expect(MyTypeEntity.step(VALEK.relations("myRelation").to(0)))
           .toEqual(myRelation);
     });
     it("adds with 'new' a structured sub-Relation to an existing Entity", () => {
@@ -121,14 +121,14 @@ describe("transpileValoscriptBody with Engine scriptAPI", () => {
       `;
       const bodyKuery = transpileValoscriptTestBody(bodyText);
       const myRelation = entities().creator.do(bodyKuery);
-      expect(myRelation.get("name"))
+      expect(myRelation.step("name"))
           .toEqual("myRelation");
-      expect(myRelation.get(VALEK.propertyLiteral("position")))
+      expect(myRelation.step(VALEK.propertyLiteral("position")))
           .toEqual({ x: 1, y: 2 });
-      const MyTypeEntity = myRelation.get("owner");
-      expect(MyTypeEntity.get("name"))
+      const MyTypeEntity = myRelation.step("owner");
+      expect(MyTypeEntity.step("name"))
           .toEqual("parent");
-      expect(MyTypeEntity.get(VALEK.relations("myRelation").to(0)))
+      expect(MyTypeEntity.step(VALEK.relations("myRelation").to(0)))
           .toEqual(myRelation);
       })();
     });
@@ -143,7 +143,7 @@ describe("transpileValoscriptBody with Engine scriptAPI", () => {
       const [parent, position] = entities().creator.do(bodyKuery);
       expect(position)
           .toEqual({ x: 11, y: 22 });
-      expect(parent.get(VALEK.propertyLiteral("position")))
+      expect(parent.step(VALEK.propertyLiteral("position")))
           .toEqual({ x: 11, y: 22 });
     });
     it("instantiates with 'new' an Entity which has ownlings", () => {
@@ -169,37 +169,37 @@ describe("transpileValoscriptBody with Engine scriptAPI", () => {
 
       const instance = entities().creator.do(bodyKuery);
 
-      expect(instance.get("name"))
+      expect(instance.step("name"))
           .toEqual("instance");
-      expect(instance.get(VALEK.propertyLiteral("position")))
+      expect(instance.step(VALEK.propertyLiteral("position")))
           .toEqual({ x: 100, y: 200 });
 
-      const MyTypeEntity = instance.get("prototype");
-      expect(MyTypeEntity.get("name"))
+      const MyTypeEntity = instance.step("prototype");
+      expect(MyTypeEntity.step("name"))
           .toEqual("MyType");
-      expect(MyTypeEntity.get(VALEK.to("instances").to(0)))
+      expect(MyTypeEntity.step(VALEK.to("instances").to(0)))
           .toEqual(instance);
-      expect(MyTypeEntity.get(VALEK.propertyLiteral("position")))
+      expect(MyTypeEntity.step(VALEK.propertyLiteral("position")))
           .toEqual({ x: 11, y: 22 });
 
-      const MyTypeRelation = MyTypeEntity.get(VALEK.relations("myTypeRelation").to(0));
-      expect(MyTypeRelation.get("name"))
+      const MyTypeRelation = MyTypeEntity.step(VALEK.relations("myTypeRelation").to(0));
+      expect(MyTypeRelation.step("name"))
           .toEqual("myTypeRelation");
-      expect(MyTypeRelation.get(VALEK.propertyLiteral("orientation")))
+      expect(MyTypeRelation.step(VALEK.propertyLiteral("orientation")))
           .toEqual({ a: 90 });
-      expect(MyTypeRelation.get(VALEK.to("target").propertyLiteral("payload")))
+      expect(MyTypeRelation.step(VALEK.to("target").propertyLiteral("payload")))
           .toEqual("data");
 
-      const instanceRelation = instance.get(VALEK.relations("myTypeRelation").to(0));
-      expect(instanceRelation.get("name"))
+      const instanceRelation = instance.step(VALEK.relations("myTypeRelation").to(0));
+      expect(instanceRelation.step("name"))
           .toEqual("myTypeRelation");
-      expect(instanceRelation.get(VALEK.propertyLiteral("orientation")))
+      expect(instanceRelation.step(VALEK.propertyLiteral("orientation")))
           .toEqual({ a: 180 });
-      expect(instanceRelation.get(VALEK.to("target").propertyLiteral("payload")))
+      expect(instanceRelation.step(VALEK.to("target").propertyLiteral("payload")))
           .toEqual("data");
-      expect(MyTypeRelation.get(VALEK.to("target").propertyLiteral("secondPayload")))
+      expect(MyTypeRelation.step(VALEK.to("target").propertyLiteral("secondPayload")))
           .toEqual("more data");
-      expect(instanceRelation.get(VALEK.to("target").propertyLiteral("secondPayload")))
+      expect(instanceRelation.step(VALEK.to("target").propertyLiteral("secondPayload")))
           .toEqual("more data");
       })();
     });
@@ -600,13 +600,13 @@ describe("transpileValoscriptBody with Engine scriptAPI", () => {
           .toEqual({ first: 11, second: 2, fourth: 4 });
       expect(dupProps)
           .toEqual({ first: 1, second: -2, third: -3 });
-      expect(owner.get("owner").getRawId())
+      expect(owner.step("owner").getRawId())
           .toBe(entities().test.getRawId());
-      expect(orig.get("owner").getRawId())
+      expect(orig.step("owner").getRawId())
           .toBe(owner.getRawId());
-      expect(dup.get("owner").getRawId())
+      expect(dup.step("owner").getRawId())
           .toBe(owner.getRawId());
-      expect(entities().test.get("unnamedOwnlings").length)
+      expect(entities().test.step("unnamedOwnlings").length)
           .toEqual(4);
     });
   });
@@ -620,12 +620,12 @@ describe("Bug 0000090 tests", () => {
     `;
     const bodyKuery = transpileValoscriptTestBody(bodyText);
     const entityCreator = entities().test.do(bodyKuery);
-    expect(entities().test.get("unnamedOwnlings").length)
+    expect(entities().test.step("unnamedOwnlings").length)
         .toEqual(3);
     const newEntity = entityCreator();
-    expect(newEntity.get("owner").getRawId())
+    expect(newEntity.step("owner").getRawId())
         .toBe(entities().test.getRawId());
-    expect(entities().test.get("unnamedOwnlings").length)
+    expect(entities().test.step("unnamedOwnlings").length)
         .toEqual(4);
   });
 
@@ -637,12 +637,12 @@ describe("Bug 0000090 tests", () => {
     `;
     const bodyKuery = transpileValoscriptTestBody(bodyText);
     const instantiator = entities().creator.do(bodyKuery);
-    expect(entities().creator.get("unnamedOwnlings").length)
+    expect(entities().creator.step("unnamedOwnlings").length)
         .toEqual(0);
     const newEntity = instantiator();
-    expect(newEntity.get("owner").getRawId())
+    expect(newEntity.step("owner").getRawId())
         .toBe(entities().creator.getRawId());
-    expect(entities().creator.get("unnamedOwnlings").length)
+    expect(entities().creator.step("unnamedOwnlings").length)
         .toEqual(1);
   });
 
@@ -653,12 +653,12 @@ describe("Bug 0000090 tests", () => {
     `;
     const bodyKuery = transpileValoscriptTestBody(bodyText);
     const entityCreator = entities().test.do(bodyKuery);
-    expect(entities().test.get("unnamedOwnlings").length)
+    expect(entities().test.step("unnamedOwnlings").length)
         .toEqual(3);
     const newEntity = entityCreator();
-    expect(newEntity.get("owner").getRawId())
+    expect(newEntity.step("owner").getRawId())
         .toBe(entities().test.getRawId());
-    expect(entities().test.get("unnamedOwnlings").length)
+    expect(entities().test.step("unnamedOwnlings").length)
         .toEqual(4);
   });
 });

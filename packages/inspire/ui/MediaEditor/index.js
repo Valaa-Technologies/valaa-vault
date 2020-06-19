@@ -11,15 +11,15 @@ import { mediaTypeFromFilename } from "~/tools/MediaTypeData";
 export default class MediaEditor extends UIComponent {
   static _defaultPresentation = () => unthunkRepeat(require("./presentation").default);
   preRenderFocus (focus: any) {
-    const mediaType = focus.get(
+    const mediaType = focus.step(
             VALEK.to("mediaType").nullable().select(["type", "subtype", "contentType"]))
-        || mediaTypeFromFilename(focus.get("name"));
-    if (!mediaType) return <p>Cannot determine media type for file {`'${focus.get("name")}'`}</p>;
+        || mediaTypeFromFilename(focus.step("name"));
+    if (!mediaType) return <p>Cannot determine media type for file {`'${focus.step("name")}'`}</p>;
     if (!_isTextMediaType(mediaType)) {
       return (
         <p>
           Non-text/unrecognized media type &quot;{mediaType.contentType}&quot;
-          for file {`'${focus.get("name")}'`}
+          for file {`'${focus.step("name")}'`}
         </p>
       );
     }

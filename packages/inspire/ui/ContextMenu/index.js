@@ -22,12 +22,12 @@ export default class ValaaContextMenu extends UIComponent {
   }
 
   getItems (focus: any) {
-    const itemRelations = focus.get(VALEK.relations(ItemRelation));
+    const itemRelations = focus.step(VALEK.relations(ItemRelation));
     return itemRelations.map((item, index) => {
-      if (item.get(VALEK.relations(ItemRelation)).length) {
+      if (item.step(VALEK.relations(ItemRelation)).length) {
         return (
           <SubMenu
-            title={item.get(VALEK.propertyValue("label"))}
+            title={item.step(VALEK.propertyValue("label"))}
             className={this.props.menuClass}
             // TODO(iridian): Legacy code, should remove once no longer needed by zero
             key={index} // eslint-disable-line react/no-array-index-key
@@ -42,7 +42,7 @@ export default class ValaaContextMenu extends UIComponent {
           attributes={{ className: this.props.itemClass }}
           key={index} // eslint-disable-line react/no-array-index-key
         >
-          {item.get(VALEK.propertyValue("label"))}
+          {item.step(VALEK.propertyValue("label"))}
         </MenuItem>
       );
     });
@@ -53,7 +53,7 @@ export default class ValaaContextMenu extends UIComponent {
   }
 
   makeClickCallback = (item: Vrapper) => {
-    const callback = getImplicitCallable(item.get(VALEK.propertyValue("onClick")),
+    const callback = getImplicitCallable(item.step(VALEK.propertyValue("onClick")),
         "contextMenu.makeCallback.callback");
     if (!callback) return undefined;
     return (event, data, target) => callback(event.nativeEvent, data, target);

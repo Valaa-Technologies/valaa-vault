@@ -70,7 +70,7 @@ export default class UIContext extends UIComponent {
   }
 
   outputDiagnostic (fallbackLensText: ?string, lensPropertyNotFoundLens: any) {
-    const lensProperty = this.getFocus().get(
+    const lensProperty = this.getFocus().step(
         VALEK.propertyLiteral("DEFAULT_LENS_NAME", { optional: true })
             .or(VALEK.propertyLiteral("JSX_UI_PROPERTY_NAME", { optional: true })));
     console.warn(`${this.constructor.name}/UIContext(${this.debugId()}) context configuration:`,
@@ -79,7 +79,7 @@ export default class UIContext extends UIComponent {
             ? ["\n\tlensProperty (from DEFAULT_LENS_NAME/JSX_UI_PROPERTY_NAME):", lensProperty]
             : ["\n\tlensProperty (inherited from parent context):", this.context.lensProperty]),
         ...(fallbackLensText
-            ? [`\n\tusing custom jsxUIDefaultMedia '${this.vJSXUIDefaultMedia.get("name")
+            ? [`\n\tusing custom jsxUIDefaultMedia '${this.vJSXUIDefaultMedia.step("name")
                 }' as child fallback Lens:`, lensPropertyNotFoundLens, "\n", fallbackLensText]
             : [`\n\tforwarding fallback Lens from parent context:`, lensPropertyNotFoundLens]),
     );
@@ -89,7 +89,7 @@ export default class UIContext extends UIComponent {
     return {
       lensProperty:
           (this.getFocus().isActive()
-              && this.getFocus().get(VALEK.propertyLiteral("DEFAULT_LENS_NAME", { optional: true })
+              && this.getFocus().step(VALEK.propertyLiteral("DEFAULT_LENS_NAME", { optional: true })
                   .or(VALEK.propertyLiteral("JSX_UI_PROPERTY_NAME", { optional: true }))))
           || this.context.lensProperty,
       lensPropertyNotFoundLens: this.state.lensPropertyNotFoundLens,

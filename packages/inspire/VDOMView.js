@@ -139,7 +139,7 @@ export default class VDOMView extends Cog {
           : lens;
     }
     this.warnEvent(1, () => [
-      `preAttach(): view '${vFocus.get("name")}' focus set:`, ret.focus.debugId(),
+      `preAttach(): view '${vFocus.step("name")}' focus set:`, ret.focus.debugId(),
     ]);
     return ret;
   }

@@ -3,10 +3,6 @@
 import React from "react";
 
 import { denoteValOSBuiltinWithSignature } from "~/raem/VALK";
-import { naiveURI } from "~/raem/ValaaURI";
-import derivedId from "~/raem/tools/derivedId";
-
-import type { Connection } from "~/sourcerer";
 
 import Vrapper from "~/engine/Vrapper";
 import debugId from "~/engine/debugId";
@@ -630,6 +626,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
         any of its child components.`,
   }));
 
+  /*
   createSlotSymbol("obtainScopeFrame", () => ({
     type: "(prototype: Resource, owner: Resource, focus: any, lensName: string): Resource",
     description: `Returns an existing or creates a new Resource or object to be
@@ -790,6 +787,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
       ]);
     }
   }));
+*/
 
   createSlotSymbol("lensAuthorityProperty", () => ({
     type: "(string)",

@@ -159,14 +159,14 @@ export default class JSXDecoder extends MediaDecoder {
         if (actualType.isUIComponent && !props_.elementKey) props_.elementKey = props_.key;
         return (integrationHostGlobal: Object, mediaInfo: Object) => {
           try {
-            const lexicalScope = integrationHostGlobal.valos;
+            const valospaceScope = integrationHostGlobal.valos;
             const actualProps = (!hasComplexProps && !isInstanceLensType) ? props_ : { ...props_ };
             if (isInstanceLensType) {
               actualProps.instanceLensPrototype =
-                  VALEK.fromValue(lexicalScope).propertyValue(type);
-              if (!lexicalScope[type]) {
+                  VALEK.fromValue(valospaceScope).propertyValue(type);
+              if (!valospaceScope[type]) {
                 throw new Error(
-                    `Cannot find instance lens prototype '${type}' from integration scope`);
+                    `Cannot find instancee lens prototype '${type}' from integration scope`);
               }
             }
             const actualChildren = !hasComplexChildren ? firstPassChildren

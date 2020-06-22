@@ -1,14 +1,17 @@
 // @flow
 import PropTypes from "prop-types";
 
+import { naiveURI } from "~/raem/ValaaURI";
 import { tryUnpackedHostValue } from "~/raem/VALK/hostReference";
+
+import type { Connection } from "~/sourcerer";
 
 import VALEK from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
 
 import UIComponent from "~/inspire/ui/UIComponent";
 
-import { thenChainEagerly } from "~/tools";
+import { thisChainEagerly } from "~/tools";
 
 /**
  * Valoscope performs a semantically rich, context-aware render of its local UI focus according to
@@ -111,30 +114,27 @@ export default class Valoscope extends UIComponent {
 
   bindFocusSubscriptions (focus: any, props: Object) {
     super.bindFocusSubscriptions(focus, props);
-    const valos = this.getValos();
-    this.setUIContextValue(valos.Lens.scopeChildren, props.children);
-    const vOwner = this.getParentUIContextValue(valos.Lens.scopeFrameResource);
-    const obtainScopeFrame = this.getUIContextValue(valos.Lens.obtainScopeFrame);
-    const key = this.getKey();
-    thenChainEagerly(
-        obtainScopeFrame(props.instanceLensPrototype, vOwner, focus, key, this), [
-          (scopeFrame) => {
-            this.setUIContextValue("frame", scopeFrame);
-            if (scopeFrame === undefined) return undefined;
-            if ((typeof key === "string") && (key[0] !== "-") && (vOwner != null)
-                && (vOwner instanceof Vrapper) && vOwner.hasInterface("Scope")
-                && (vOwner.propertyValue(key) !== scopeFrame)) {
-              // TODO(iridian): This is initial non-rigorous prototype functionality:
-              // The owner[key] value remains set even after the components get detached.
-              vOwner.alterProperty(key, VALEK.fromValue(scopeFrame));
-            }
-            const vScopeFrame = tryUnpackedHostValue(scopeFrame);
-            if (vScopeFrame) this.setUIContextValue(valos.Lens.scopeFrameResource, vScopeFrame);
-            return vScopeFrame || scopeFrame;
-          },
-          (scopeFrame) => this.setState({ scopeFrame }),
-        ],
-        (error) => this.enableError(error));
+    const Lens = this.getValos().Lens;
+    this.setUIContextValue(Lens.scopeChildren, props.children);
+    const vPrototype = props.instanceLensPrototype;
+    return thisChainEagerly({
+          component: this,
+          engine: this.context.engine,
+          Lens,
+          vOwner: this.getParentUIContextValue(Lens.scopeFrameResource),
+          key: this.getKey(),
+          vPrototype,
+          focus,
+          vLens: (props.lens instanceof Vrapper) && props.lens,
+          lensAuthorityProperty: this.getUIContextValue(Lens.lensAuthorityProperty),
+          isInteresting: vPrototype
+              || ((focus instanceof Vrapper)
+                  && (focus.getRawId() === "@$~u4.aae6c506-9d68-4d4b-b32b-5edf0fa014be@@")),
+        },
+        [vPrototype && vPrototype.activate()],
+        _scopeFrameChain,
+        (error) => { throw this.enableError(error); }
+    );
   }
 
   renderLoaded (focus: any) {
@@ -145,3 +145,196 @@ export default class Valoscope extends UIComponent {
     return this.renderLens(focus, null, "focus");
   }
 }
+
+const _scopeFrameChain = [
+  function _processFramePrototypeAndFocus () {
+    if ((this.vPrototype != null) && this.vPrototype.hasInterface("Scope")) {
+      const prototypeLensAuthorityURI = this.vPrototype.propertyValue(this.lensAuthorityProperty);
+      if (prototypeLensAuthorityURI !== undefined) {
+        if (this.isInteresting) {
+          console.log("interesting frame prototypeLensAuthorityURI",
+              this.lensAuthorityProperty, prototypeLensAuthorityURI);
+        }
+        this.rootFrameAuthorityURI = prototypeLensAuthorityURI;
+      }
+    }
+    if (!(this.focus instanceof Vrapper)) return undefined;
+    this.vFocus = this.focus;
+    this.vFocus.requireActive(); // focus should always be activated by Valoscope itself
+
+    const currentShadowedFocus = this.component.getParentUIContextValue(this.Lens.shadowedFocus);
+    if (this.vFocus === currentShadowedFocus) return undefined;
+
+    if (this.vFocus.hasInterface("Scope")) {
+      const focusLensAuthorityURI = this.vFocus.propertyValue(this.lensAuthorityProperty);
+      if (focusLensAuthorityURI !== undefined) {
+        return focusLensAuthorityURI;
+      }
+    }
+
+    if (this.vFocus.isChronicleRoot()) {
+      const contextShadowLensAuthorityURI =
+          this.component.getUIContextValue(this.Lens.shadowLensAuthority);
+      if (contextShadowLensAuthorityURI !== undefined) {
+        return contextShadowLensAuthorityURI;
+      }
+    }
+    return undefined;
+  },
+
+  function _constructIdAndCheckForExistingFrame (rootFrameAuthorityURI) {
+    const isTransitory = (rootFrameAuthorityURI || this.vOwner.getConnection().getAuthorityURI())
+        === "valaa-memory:";
+    function _getSubscriptId (vResource) {
+      if (!isTransitory) return vResource.getRawId().slice(0, -2);
+      const brief = vResource.getBriefUnstableId();
+      return `@${brief[1]}$.${brief.slice(3, brief.indexOf("@", 4))}`;
+    }
+    const structuralPart = this.frameKey
+        ? `@_$.${encodeURIComponent(this.frameKey)}`
+        : `@_$V.owner${_getSubscriptId(this.vOwner)}@_$.${encodeURIComponent(this.key)}`;
+    const prototypePart = this.vPrototype ? `@_$V.proto${_getSubscriptId(this.vPrototype)}` : "";
+    const focusPart = this.vFocus ? `@_$V.focus${_getSubscriptId(this.vFocus)}` : "";
+    const lensPart = this.vLens ? `@_$V.lens${_getSubscriptId(this.vLens)}` : "";
+    this.frameId = `@$~V.frames${structuralPart}${prototypePart}${focusPart}${lensPart}@@`;
+    // "postLoadProperties" and "options" are optional arguments
+    const vFrame = this.engine.tryVrapper(this.frameId, { optional: true });
+    if (vFrame !== undefined) return { _assignScopeFrameExternals: [vFrame] };
+    if (!rootFrameAuthorityURI
+        || (prototypePart && !this.vPrototype.hasInterface("Chronicle"))) {
+      return { _createFrame: [] };
+    }
+    return [rootFrameAuthorityURI];
+  },
+
+  function _sourcifyRootFrameChronicle (rootFrameAuthorityURI) {
+    this.rootFrameAuthorityURI = rootFrameAuthorityURI;
+    const chronicleURI = naiveURI.createChronicleURI(rootFrameAuthorityURI, this.frameId);
+    const discourse = this.discourse
+        || (this.discourse = this.engine.getActiveGlobalOrNewLocalEventGroupTransaction());
+    return [discourse.acquireConnection(chronicleURI).asActiveConnection()];
+  },
+
+  function _obtainRootFrame (rootFrameConnection: Connection) {
+    const vRootFrame = this.engine.tryVrapper(this.frameId, { optional: true });
+    if (vRootFrame) return { _assignScopeFrameExternals: [vRootFrame] };
+    return [];
+  },
+
+  function _createFrame () {
+    if (!this.rootFrameAuthorityURI && !this.vOwner) {
+      throw new Error(`Cannot obtain scope frame: neither root frame authorityURI ${
+          ""}nor non-root frame owner could be determined`);
+    }
+    const initialState = { id: this.frameId, name: this.frameId };
+    if (this.rootFrameAuthorityURI) {
+      initialState.authorityURI = this.rootFrameAuthorityURI;
+      initialState.owner = null;
+    } else {
+      initialState.owner = this.vOwner;
+    }
+    const discourse = this.discourse
+        || (this.discourse = this.engine.getActiveGlobalOrNewLocalEventGroupTransaction());
+    // TODO(iridian, 2019-01): Determine whether getPremiereStory
+    // is the desired semantics here. It waits until the
+    // resource creation narration has completed (ie. engine
+    // has received and resolved the recital): this might be
+    // unnecessarily long.
+    // OTOH: TransactionState.chronicleEvents.results only
+    // support getPremiereStory so whatever semantics is
+    // desired it needs to be implemented.
+    // const options = { discourse, awaitResult: result => result.getPremiereStory() };
+    const options = { discourse, awaitResult: result => result.getComposedStory() };
+    const vScopeFrame = (this.vPrototype != null)
+        ? this.vPrototype.instantiate(initialState, options)
+        : this.engine.create("Entity", initialState, options);
+    if (!this.rootFrameAuthorityURI || !this.vFocus) {
+      return { _assignScopeFrameExternals: [vScopeFrame] };
+    }
+    return [vScopeFrame];
+  },
+
+  function _assignShadowLensContextvalues (vScopeFrame) {
+    if (this.isInteresting) {
+      console.log("interesting frame _updateRootFrameShadows",
+          this.rootFrameAuthorityURI, vScopeFrame,
+          "\n\tof component:", this.component,
+          "\n\twith focus:", this.vFocus);
+    }
+    this.component.setUIContextValue(this.Lens.shadowedFocus, this.vFocus);
+    this.component.setUIContextValue(this.Lens.shadowLensChronicleRoot,
+        this.rootFrameAuthorityURI ? vScopeFrame : null);
+    return [vScopeFrame];
+  },
+
+  function _assignScopeFrameExternals (scopeFrame) {
+    this.component.setUIContextValue("frame", scopeFrame);
+    if (scopeFrame === undefined) return undefined;
+    if ((typeof this.key === "string") && (this.key[0] !== "-")
+        && (this.vOwner != null)
+        // && (this.vOwner instanceof Vrapper) && this.vOwner.hasInterface("Scope")
+        && (this.vOwner.propertyValue(this.key) !== scopeFrame)) {
+      // TODO(iridian): This is initial non-rigorous prototype functionality:
+      // The owner[key] value remains set even after the components get detached.
+      this.vOwner.alterProperty(this.key, VALEK.fromValue(scopeFrame));
+    }
+    const vScopeFrame = tryUnpackedHostValue(scopeFrame);
+    if (vScopeFrame) this.component.setUIContextValue(this.Lens.scopeFrameResource, vScopeFrame);
+    return [vScopeFrame || scopeFrame];
+  },
+
+  function _setScopeFrameState (scopeFrame) {
+    return [this.component.setState({ scopeFrame })];
+  },
+];
+
+/*
+const _description =
+`Returns an existing or creates a new Resource or object to be used as
+the scope frame for a Valoscope component. This scope frame is then
+made available as 'frame' to its child lenses via context. By default
+creates a valos Resource as follows:
+1. A *derived id* for the Resource will be derived using rules
+  described below. If a Resource by that id exists that Resource will
+  be used as-is.
+  Otherwise a new Resource is created with that id.
+2. If defined the *prototype* is used as part of the id derivation and
+  the possible new Resource will use the prototype as its
+  Resource.instancePrototype. Additionally if the prototype has a lens
+  authority property its value will be defined as the *lens authority*.
+  Otherwise (if prototype is undefined) a new Entity is created.
+3. If defined the *owner* is used as part of the id derivation.
+4. If *focus* is a singular Resource its id is used as part of the id
+  derivation. Then if lens authority is not yet defined and if the
+  focus has a lens authority property its value will is defined as the
+  lens authority. Alternatively, if the focus is a chronicle root then
+  valos.shadowLensAuthority is defined as the lens authority.
+  Otherwise (focus is not a singular Resource) focus is not used in id
+  derivation.
+5. If the lens authority is defined and is not falsy it's used as the
+  Chronicle.authorityURI of the possible new Resource.
+  Otherwise if the *owner* is defined it's used as Resource.owner for
+  the possible new Resource.
+  Otherwise no scope frame is obtained and frame is set to null.
+  Note that even if a new chronicle is created for a Resource (in which
+  case it will not be given an owner) the owner id and lens name are
+  used as part of the id derivation.
+6. If the component has a custom key then it will be used as part of
+  the id derivation. Additionally if the surrounding context defines a
+  non-falsy 'frame' then the obtained scope frame that is obtained is
+  also assigned to 'frame[key]'.
+  Otherwise an autogenerated key which accounts for the relative
+  position of the component inside its lens definition file is used as
+  part of the id derivation.
+7. A scope frame is *elidable* if
+  1. its component has an autogenerated key,
+  2. its child lenses don't refer to 'frame', and
+  3. each of its immediately descendant Valoscope child
+      components is either elidable itself or has
+      an autogenerated key and defines lens authority.
+  An implementation may skip the creation of an elidable scope frame.
+  This is true even if it would have side effects that are visible
+  elsewhere (ie. a scope frame creation can be elided even if it would
+  be created into a remote authority).
+`;
+*/

@@ -681,7 +681,7 @@ module.exports = {
         },
         f: {
           group: "Valma command options:",
-          type: "boolean", default: true, global: false,
+          type: "boolean", global: false,
           alias: theme.argument("force-broken"),
           description: "Force-call broken commands in wildcard selections instead of skipping",
         },
@@ -1490,7 +1490,7 @@ async function _dispatchCommands (commandSelector, argv, activeCommands, isWildc
             : subVLM._introspectCommands(subIntrospection, { [commandName]: activeCommand },
                 commandSelector, isWildcardCommand, subVLM._state["enable-disabled"]));
       } else if (activeCommand.broken) {
-        if (!_vlm._state["force-broken"]) {
+        if (!isWildcardCommand && !_vlm._state["force-broken"]) {
           subVLM.warn(`Skipping invokation of broken command '${commandName}':`,
               `${activeCommand.broken}`);
         } else if (activeCommand.broken instanceof Error) {

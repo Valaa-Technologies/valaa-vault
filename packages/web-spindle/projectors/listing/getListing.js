@@ -33,7 +33,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
             const newActivations = [];
             for (const newEntry of update.actualAdds()) {
               const activation = newEntry && newEntry.activate();
-              if (activation) newActivations.push(activation);
+              if (activation !== newEntry) newActivations.push(activation);
             }
             router.infoEvent(1, () => [
               "route listing", router._routeName(route),

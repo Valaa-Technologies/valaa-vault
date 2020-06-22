@@ -445,7 +445,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
     // TODO(iridian, 2019-03): Is this actually correct? Semantically
     // activating the lens inside isEnabled is fishy.
     // Maybe this was intended to be refreshPhase instead?
-    isEnabled: (focus?: Vrapper) => (focus instanceof Vrapper) && (focus.activate() || true),
+    isEnabled: (focus?: Vrapper) => (focus instanceof Vrapper) && focus.activate(),
     rootValue: ({ delegate: [
       valos.Lens.activeLens,
       valos.Lens.activatingLens,
@@ -547,12 +547,9 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
             }
             return undefined;
           }
-          let vProperty;
-          if (scope.hasOwnProperty(propertyName)) {
-            vProperty = scope[propertyName];
-          } else {
-            vProperty = focus.step(VALEK.property(propertyName));
-          }
+          const vProperty = (scope && scope.hasOwnProperty(propertyName))
+              ? scope[propertyName]
+              : focus.step(VALEK.property(propertyName));
           if (!vProperty) return undefined;
           component.bindLiveKuery(
               `props_${specificLensPropertySlotName}_${currentSlotName}`, vProperty, "value", {
@@ -1253,7 +1250,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
     rootValue: ({ delegate: [
       (focus, component) => {
         const activation = focus.activate();
-        if (activation) activation.then(() => component.forceUpdate());
+        if (activation !== focus) activation.then(() => component.forceUpdate());
         return undefined;
       },
       loadingLens,

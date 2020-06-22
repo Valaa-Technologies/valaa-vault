@@ -133,14 +133,14 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
         // ret = React.createElement(UIComponent,
         //    component.childProps(subLensName, {}, { delegate: [lens] }));
       } else if (lens instanceof Vrapper) {
-        const blocker = lens.activate();
-        if (blocker) {
-          blocker.operationInfo = Object.assign(blocker.operationInfo || {}, {
+        const activation = lens.activate();
+        if (activation !== lens) {
+          activation.operationInfo = Object.assign(activation.operationInfo || {}, {
             slotName: "pendingActivationLens", focus: lens,
             onError: { slotName: "failedActivationLens", resource: lens },
           });
           // Ensure that re-render is triggered by top level _render
-          return blocker.then(() => undefined);
+          return activation.then(() => undefined);
         }
         if (lens.hasInterface("Media")) {
           ret = _tryRenderMediaLens(component, lens, focus, lensName);

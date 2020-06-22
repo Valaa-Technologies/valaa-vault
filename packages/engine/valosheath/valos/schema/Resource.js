@@ -44,7 +44,7 @@ export default {
         ""}activating all Resource's in the prototype chain. Returns a Promise which resolves ${
         ""}once all corresponding chronicles have completed their first narration`
     )(function activate (resource) {
-      return Promise.resolve(resource.activate() || resource);
+      return Promise.resolve(resource.activate());
     }),
 
     isActive: denoteValOSBuiltinWithSignature(

@@ -250,20 +250,22 @@ export default class Vrapper extends Cog {
 
 
   /**
+   * Initiate the activation of this resource by sourcifying all
+   * chronicles of the resource and its prototypes.
+   *
    * Returns a newly initiated or an already existing activation
-   * process if the current phase is Inactive or Activating. Returns
-   * falsy if already Active.
+   * process promise if the current phase is Inactive or Activating.
    * Otherwise the resource itself is inactivateable and throws.
    *
    * @param {Object} [state]
-   * @returns
+   * @returns this if already active, otherwise an activation process promise to this
    *
    * @memberof Vrapper
    */
   activate (options?: Object) {
     let blocker = (options && options.initialBlocker)
         || this.refreshPhase(options && options.state);
-    if (!blocker) return undefined;
+    if (!blocker) return this;
     if (this._activationProcess) return this._activationProcess;
     if (this._phase !== INACTIVE
         && !(this._phase === IMMATERIAL && options && options.allowImmaterial)) {
@@ -451,11 +453,17 @@ export default class Vrapper extends Cog {
    */
   requireActive (options?: VALKOptions) {
     if (this._phase === ACTIVE) return;
-    const blocker = (options && options.activate)
-        ? this.activate(options)
-        : this.refreshPhase(options && options.state);
+    const blocker = this.refreshPhase(options && options.state);
+    if (!blocker) return;
+    if (options && options.activate) {
+      // triggers activation, something which refresh doesn't do
+      options.blocker = blocker;
+      this.activate(options);
+    }
     const phase = this._phase;
-    if (!blocker || (options && options.allowActivating && (phase === ACTIVATING))) return;
+    if (options && options.allowActivating && (phase === ACTIVATING)) {
+      return;
+    }
     if (this.isImmaterial() && options) {
       // TODO(iridian): While this takes care of the situation where
       // a Resource is destroyed in the main line but not destroyed in
@@ -484,12 +492,9 @@ export default class Vrapper extends Cog {
     throw this.wrapErrorEvent(error, 1, "requireActive",
         "\n\toptions:", ...dumpObject(options),
         "\n\tphase was:", phase,
-        "\n\tactivation blocker is",
-            (blocker === this) ? "this object itself" : "some prototype of this",
         "\n\tthis[HostRef]:", ...dumpObject(this[HostRef]),
         "\n\tthis._connection:", ...dumpObject(this._connection),
         "\n\tblocker:", ...dumpObject(blocker),
-        "\n\tblocker._connection:", ...dumpObject(blocker._connection),
         "\n\tthis:", ...dumpObject(this));
   }
 
@@ -652,7 +657,7 @@ export default class Vrapper extends Cog {
     let nameText;
     const innerOptions = !options ? {} : Object.create(options);
     innerOptions.scope = {};
-    if (Vrapper._namedTypes[this.typeName]) {
+    if (Vrapper._namedTypes[this._typeName]) {
       nameText = (options || {}).transient && (options || {}).transient.get("name");
       if (nameText === undefined) nameText = this.step("name", innerOptions);
       if (nameText) nameText = `@.:${nameText}`;

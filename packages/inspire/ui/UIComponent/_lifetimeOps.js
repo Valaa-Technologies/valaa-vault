@@ -162,7 +162,7 @@ function _createContextAndSetFocus (
         setScopeValue(uiContext, "focus", resolvedNewFocus);
         setScopeValue(uiContext, "head", resolvedNewFocus);
         const isResource = (newFocus instanceof Vrapper) && newFocus.isResource();
-        return isResource && (newFocus.activate() || true);
+        return isResource && newFocus.activate();
       },
       function _validateResourceFocusIsActive (isResource) {
         if (!isResource) return true;

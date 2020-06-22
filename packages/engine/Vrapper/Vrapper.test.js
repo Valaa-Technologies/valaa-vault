@@ -616,9 +616,23 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
       ]);
-      expect(testScriptyThings().test.step(VALEK.fromScope("testField").toValueLiteral()))
+      const test = testScriptyThings().test;
+      expect(test.step(VALEK.fromScope("testField").toValueLiteral()))
           .toEqual("testOwned.testField");
-      expect(testScriptyThings().test.step(VALEK.fromScope("secondField").toValueLiteral()))
+      expect(test.getFabricScope().testField)
+          .toEqual("testOwned.testField");
+      expect(test.step(VALEK.fromScope("secondField").toValueLiteral()))
+          .toEqual("testOwned.secondField");
+      expect(test.getFabricScope().secondField)
+          .toEqual("testOwned.secondField");
+      const testInstance = testScriptyThings().test;
+      expect(testInstance.step(VALEK.fromScope("testField").toValueLiteral()))
+          .toEqual("testOwned.testField");
+      expect(testInstance.getFabricScope().testField)
+          .toEqual("testOwned.testField");
+      expect(testInstance.step(VALEK.fromScope("secondField").toValueLiteral()))
+          .toEqual("testOwned.secondField");
+      expect(testInstance.getFabricScope().secondField)
           .toEqual("testOwned.secondField");
     });
 
@@ -626,15 +640,36 @@ describe("Vrapper", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
       ]);
-      expect(testScriptyThings().grandChild.step(VALEK.fromScope("secondField").toValueLiteral()))
+      const grandChild = testScriptyThings().grandChild;
+      expect(grandChild.step(VALEK.fromScope("secondField").toValueLiteral()))
+          .toEqual("testOwned.secondField");
+      expect(grandChild.getFabricScope().secondField)
+          .toEqual("testOwned.secondField");
+      const grandChildGhost = grandChild.getGhostIn(testScriptyThings()["test+1"]);
+      expect(grandChildGhost)
+          .not.toEqual(grandChild);
+      expect(grandChildGhost.step("prototype"))
+          .toEqual(grandChild);
+      expect(grandChildGhost.step(VALEK.fromScope("secondField").toValueLiteral()))
+          .toEqual("testOwned.secondField");
+      expect(grandChildGhost.getFabricScope().secondField)
           .toEqual("testOwned.secondField");
     });
 
-    it("accesses overridden grand-parent Scope property through lexicalScope", () => {
+    it("accesses overridden grand-parent Scope property through valospace scope", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: false }, [
         transactionA, createAInstance, basicProperties,
       ]);
-      expect(testScriptyThings().grandChild.step(VALEK.fromScope("testField").toValueLiteral()))
+      const grandChild = testScriptyThings().grandChild;
+      expect(grandChild.step(VALEK.fromScope("testField").toValueLiteral()))
+          .toEqual("grandChildOwned.testField");
+      expect(grandChild.getFabricScope().testField)
+          .toEqual("grandChildOwned.testField");
+      const grandChildGhost = testScriptyThings().grandChild
+          .getGhostIn(testScriptyThings()["test+1"]);
+      expect(grandChildGhost.step(VALEK.fromScope("testField").toValueLiteral()))
+          .toEqual("grandChildOwned.testField");
+      expect(grandChildGhost.getFabricScope().testField)
           .toEqual("grandChildOwned.testField");
     });
   });

@@ -93,11 +93,11 @@ export async function _preloadRuntimeResources (router: PrefixRouter, projector,
         "; activating", runtime.staticResources.length, "static rule resources and root",
         vRouteRoot.debugId()]);
     const rootActivation = vRouteRoot.activate();
-    if (rootActivation) await rootActivation;
+    if (rootActivation !== vRouteRoot) await rootActivation;
     const activations = runtime.staticResources
         .map(staticResource => router.getEngine()
             .getVrapper(staticResource, { contextChronicleURI: null }).activate())
-        .filter(e => e);
+        .filter(e => !(e instanceof Vrapper));
     await Promise.all(activations);
     router.infoEvent(1, () => ["Done preloading projector:", router._projectorName(projector),
         (rootActivation

@@ -1,7 +1,7 @@
 {
   "server": {
-    "port": { "!!!": ["../toolsets", "@valos/web-spindle", "port"] },
-    "address": { "!!!": ["../toolsets", "@valos/web-spindle", "address"] },
+    "port": { "!!!": ["./toolsets", "@valos/web-spindle", "port"] },
+    "address": { "!!!": ["./toolsets", "@valos/web-spindle", "address"] },
     "verbosity": 1,
     "fastify": {
       "ignoreTrailingSlash": false,
@@ -14,41 +14,38 @@
       "view": {
         "name": "web-spindle root view",
         "verbosity": 1,
-        "focus": { "!!!": ["../toolsets", "@valos/type-worker", "serviceURI"] }
+        "focus": { "!!!": ["./toolsets", "@valos/type-worker", "serviceURI"] }
       },
       "sessionDuration": 86400,
       "swaggerPrefix": "/openapi",
       "openapi": {
         "openapi": "3.0.2",
         "info": {
-          "title": { "!!!": ["../toolsets", "@valos/web-spindle", "title"] },
-          "name": { "!!!": ["../package", "name"] },
-          "version": { "!!!": ["../package", "version"] },
-          "description": { "!!!": ["../package", "description"] }
+          "title": { "!!!": ["./toolsets", "@valos/web-spindle", "title"] },
+          "name": { "!!!": ["./package", "name"] },
+          "version": { "!!!": ["./package", "version"] },
+          "description": { "!!!": ["./package", "description"] }
         },
         "servers": [],
         "externalDocs": {
-          "url": { "!!!": ["../package", "valos", "docs"] },
+          "url": { "!!!": ["./package", "valos", "docs"] },
           "description": "Find more info here"
         },
-        "host": { "!!!": ["../toolsets", "@valos/web-spindle", "address"] },
+        "host": { "!!!": ["./toolsets", "@valos/web-spindle", "address"] },
         "schemes": ["http", "https"],
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "tags": [],
         "securityDefinitions": { "apiKey": { "type": "apiKey", "name": "apiKey", "in": "header" } }
       },
-      "rules": {
-        "routeRoot": ["@@"]
-      },
       "routes": [{
         "url": "*", "category": "bridge", "method": "GET",
         "config": {
           "rules": {
-            "options": { "request": ["@!:request"], "reply": ["@!:reply"] },
+            "routeRoot": ["@@"],
             "response": [
-              "@!$valk.invoke:", { "!!!": ["../toolsets", "@valos/web-spindle", "serviceGETHandlerName"] },
-              ["@!:options"]
+              "@!$valk.invoke:", { "!!!": ["./toolsets", "@valos/web-spindle", "serviceGETHandlerName"] },
+              [{ "request": ["@!:request"], "reply": ["@!:reply"] }]
             ]
           },
           "requiredRules": ["routeRoot"],
@@ -62,10 +59,10 @@
         "url": "*", "category": "bridge", "method": "PUT",
         "config": {
           "rules": {
-            "options": { "request": ["@!:request"], "reply": ["@!:reply"] },
+            "routeRoot": ["@@"],
             "response": [
-              "@!$valk.invoke:", { "!!!": ["../toolsets", "@valos/web-spindle", "servicePUTHandlerName"] },
-              ["@!:options"]
+              "@!$valk.invoke:", { "!!!": ["./toolsets", "@valos/web-spindle", "servicePUTHandlerName"] },
+              [{ "request": ["@!:request"], "reply": ["@!:reply"] }]
             ]
           },
           "requiredRules": ["routeRoot"],
@@ -79,10 +76,10 @@
         "url": "*", "category": "bridge", "method": "DELETE",
         "config": {
           "rules": {
-            "options": { "request": ["@!:request"], "reply": ["@!:reply"] },
+            "routeRoot": ["@@"],
             "response": [
-              "@!$valk.invoke:", { "!!!": ["../toolsets", "@valos/web-spindle", "serviceDELETEHandlerName"] },
-              ["@!:options"]
+              "@!$valk.invoke:", { "!!!": ["./toolsets", "@valos/web-spindle", "serviceDELETEHandlerName"] },
+              [{ "request": ["@!:request"], "reply": ["@!:reply"] }]
             ]
           },
           "requiredRules": ["routeRoot"],
@@ -96,10 +93,10 @@
         "url": "*", "category": "bridge", "method": "POST",
         "config": {
           "rules": {
-            "options": { "request": ["@!:request"], "reply": ["@!:reply"] },
+            "routeRoot": ["@@"],
             "response": [
-              "@!$valk.invoke:", { "!!!": ["../toolsets", "@valos/web-spindle", "servicePOSTHandlerName"] },
-              ["@!:options"]
+              "@!$valk.invoke:", { "!!!": ["./toolsets", "@valos/web-spindle", "servicePOSTHandlerName"] },
+              [{ "request": ["@!:request"], "reply": ["@!:reply"] }]
             ]
           },
           "requiredRules": ["routeRoot"],

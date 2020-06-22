@@ -145,7 +145,6 @@ function thenChainEagerly (
     } catch (error) {
       const wrapped = wrapError(error, new Error(getName("callback")),
           "\n\thead:", ...dumpObject(head, { nest: 0 }),
-          "\n\tcurrent function:", ...dumpObject(functionChain[index]),
           "\n\tfunctionChain:", ...dumpObject(functionChain));
       if (!onRejected) throw wrapped;
       next = onRejected(wrapped, index, head, functionChain, onRejected);
@@ -197,9 +196,10 @@ function thisChainEagerly (
     } else {
       const keys = Object.keys(params);
       if (keys.length !== 1) {
+        --index;
         onThisChainError(
-            new Error("thisChainEagerly redirection object must have exactly one field"),
-            new Error(getName("param redirection")), functions[index]);
+            new Error("thisChainEagerly params redirection object must have exactly one field"),
+            new Error(getName("param redirection")));
       }
       const forwardFunctionKey = keys[0];
       params = params[forwardFunctionKey];
@@ -228,7 +228,7 @@ function thisChainEagerly (
       ++index;
     } catch (error) {
       paramsArrayWithPromise = null;
-      params = onThisChainError(error, new Error(getName("callback")), func, onRejected);
+      params = onThisChainError(error, new Error(getName("callback")), onRejected);
       index = functions.length;
     }
   }
@@ -237,7 +237,7 @@ function thisChainEagerly (
       newParams => thisChainEagerly(this_, newParams, functions, onRejected, index + 1),
       error => {
         const retry = onThisChainError(
-            error, new Error(getName("thenable resolution")), functions[index], onRejected);
+            error, new Error(getName("thenable resolution")), onRejected);
         return thisChainEagerly(this_, retry, functions, onRejected, functions.length);
       });
   return ret;
@@ -246,11 +246,10 @@ function thisChainEagerly (
     return `During ${`${functionName ? `${functionName} (as ` : ""
         }thisChainEagerly ${index === -1 ? "initial params" : `step #${index}`}`} ${info})`;
   }
-  function onThisChainError (error, errorName, currentFunction, maybeOnRejected) {
+  function onThisChainError (error, errorName, maybeOnRejected) {
     const wrapped = wrapError(error, errorName,
         "\n\tthis:", ...dumpObject(this_, { nest: 0 }),
         "\n\tparams:", ...dumpObject(params),
-        "\n\tcurrent function:", ...dumpObject(currentFunction),
         "\n\tfunctions:", ...dumpObject(functions),
         "\n\tonRejected:", ...dumpObject(onRejected),
     );

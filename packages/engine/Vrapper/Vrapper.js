@@ -414,8 +414,8 @@ export default class Vrapper extends Cog {
         }
         this._setTypeName((newTypeName && !isAbsentTypeName(newTypeName))
             ? newTypeName
-            : resolver.tryGoToTransient(
-              ref, "TransientFields", true, false, true, "typeName").get("typeName"));
+            : resolver.tryGoToMostMaterializedTransient(
+              ref, "TransientFields", true, false, "typeName").get("typeName"));
       }
       if (!this.isInactive()) {
         this.registerComplexHandlers(this._parent._storyHandlerRoot, resolver.state);
@@ -683,24 +683,25 @@ export default class Vrapper extends Cog {
   static _namedTypes = { Entity: true, Relation: true, Media: true };
 
   getTransient (options: {
-    state?: Object, discourse?: Discourse, typeName?: string, mostMaterialized?: any,
-    withOwnField?: string,
+    state?: Object, discourse?: Discourse, typeName?: string, mostMaterializedField?: any,
   }) {
     const state = options.state
         || (options.discourse ? options.discourse.getState()
-            : options.withOwnField ? this._parent.discourse.getState()
+            : options.mostMaterializedField ? this._parent.discourse.getState()
             : undefined);
     const typeName = options.typeName || this.getTypeName(options);
     let ret = state && state.getIn([typeName, this.getRawId()]);
-    if (!ret || (options.withOwnField && !ret.has(options.withOwnField))) {
+    if (!ret || (options.mostMaterializedField && !ret.has(options.mostMaterializedField))) {
       const discourse = options.discourse || this._parent.discourse;
       let resolver = discourse;
       if (state && (discourse.state !== state)) {
         resolver = Object.create(discourse);
         resolver.state = state;
       }
-      ret = resolver.tryGoToTransient(this[HostRef], typeName,
-          options.require, false, options.mostMaterialized, options.withOwnField);
+      ret = options.mostMaterializedField
+          ? resolver.tryGoToMostMaterializedTransient(
+              this[HostRef], typeName, options.require, false, options.mostMaterializedField)
+          : resolver.tryGoToTransient(this[HostRef], typeName, options.require, false);
     }
     return ret;
   }
@@ -1324,7 +1325,7 @@ export default class Vrapper extends Cog {
         kuerySubscription.attachFilterHook(this, true, true);
       }
       mostMaterializedTransient = this.getTransient(Object.assign(Object.create(options), {
-        mostMaterialized: true, require: false, withOwnField: "content",
+        require: false, mostMaterializedField: "content",
       }));
       if (!mostMaterializedTransient) return undefined;
 

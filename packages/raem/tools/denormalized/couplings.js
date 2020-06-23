@@ -126,8 +126,8 @@ export function addCouplingPassages (bard: Bard, fieldIntro, remote: IdData, cou
           throw new Error(`Can't find affiliated type for an absent remote reference coupled to '${
               coupledField}'`);
         }
-        remoteTransient = Object.create(bard)
-            .tryGoToTransient(remoteRef, "TransientFields", true, false, true, "typeName");
+        remoteTransient = Object.create(bard).tryGoToMostMaterializedTransient(
+            remoteRef, "TransientFields", true, false, "typeName");
         remoteType = bard.schema.getType((remoteTransient && remoteTransient.get("typeName"))
             || bard.schema.absentType.name);
       }

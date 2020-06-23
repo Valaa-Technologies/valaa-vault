@@ -238,7 +238,7 @@ export default class Resolver extends FabricEventTarget {
    * @memberof Resolver
    */
   tryGoToTransient (objectId: VRL, typeName: string, require: ?boolean,
-      nonGhostLookup: ?boolean, onlyMostMaterialized?: any, withOwnField?: string) {
+      nonGhostLookup: ?boolean, _mostMaterializedWithField?: string) {
     try {
       if (typeof typeName !== "string") {
         invariantifyString(typeName, "tryGoToTransient.typeName");
@@ -252,12 +252,17 @@ export default class Resolver extends FabricEventTarget {
         return (this.objectTransient = null);
       }
       return this.tryGoToTransientOfRawId(objectId.rawId(), typeName, require,
-          !nonGhostLookup && objectId.tryGhostPath(), onlyMostMaterialized, withOwnField, objectId);
+          !nonGhostLookup && objectId.tryGhostPath(), objectId, _mostMaterializedWithField);
     } catch (error) {
       throw this.wrapErrorEvent(error, 2, "tryGoToTransient",
           "\n\tid:", ...dumpObject(objectId), ":", typeName,
           "\n\trequire:", require, ", nonGhostLookup:", nonGhostLookup);
     }
+  }
+
+  tryGoToMostMaterializedTransient (objectId: VRL, typeName: string, require: ?boolean,
+      nonGhostLookup: ?boolean, withOwnField: string) {
+    return this.tryGoToTransient(objectId, typeName, require, nonGhostLookup, withOwnField);
   }
 
   goToTransientOfRawId (rawId: RawId, typeName?: string, ghostPath?: GhostPath) {
@@ -277,26 +282,27 @@ export default class Resolver extends FabricEventTarget {
    * @memberof Resolver
    */
   tryGoToTransientOfRawId (rawId: RawId, typeName?: string, require?: boolean = false,
-      ghostPath?: GhostPath, onlyMostMaterialized?: any, withOwnField?: string, objectId?: VRL) {
+      ghostPath?: GhostPath, objectId?: VRL, _mostMaterializedWithField?: string) {
     try {
       if (typeName) this.objectTypeName = typeName;
       this.objectTransient = this.tryStateTransient(rawId, this.objectTypeName);
-      if (this.objectTransient
-          && (!withOwnField || this._hasOwnField(this.objectTransient, withOwnField))) {
+      if (this.objectTransient && (!_mostMaterializedWithField
+          || this._hasOwnField(this.objectTransient, _mostMaterializedWithField))) {
         this.objectId = this.objectTransient.get("id");
       } else if ((this.objectTypeName === "Blob") || (objectId && objectId.isAbsent())) {
         // Blob and absent resources are given an id-transient
         this.objectId = objectId || (new VRL()).initNSS(rawId);
         if (this.objectTypeName !== "Blob") this.objectTypeName = this.schema.absentType.name;
         this.objectTransient = createIdTransient(this.objectId);
-      } else if ((!withOwnField && (!ghostPath || !ghostPath.isGhost()))
-          || !this.goToMostInheritedMaterializedTransient(ghostPath,
-              typeName || this.objectTypeName, require, withOwnField, this.objectTransient)) {
+      } else if ((!_mostMaterializedWithField && (!ghostPath || !ghostPath.isGhost()))
+          || !this.goToMostInheritedMaterializedTransient(
+              ghostPath, typeName || this.objectTypeName, require, _mostMaterializedWithField,
+              this.objectTransient)) {
         // A missing concrete resource or a ghost resource with its
         // base prototype fully in an absent chronicle.
         this.objectId = null;
         this.objectTransient = null;
-      } else if (onlyMostMaterialized || withOwnField) {
+      } else if (_mostMaterializedWithField) {
         // A most inherited materialized transient or withOwnField was
         // found but as its id naturally is different from the rawId
         // that was requested, we clear objectId to denote that.

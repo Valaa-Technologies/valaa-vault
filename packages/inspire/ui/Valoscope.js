@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import { naiveURI } from "~/raem/ValaaURI";
 import { tryUnpackedHostValue } from "~/raem/VALK/hostReference";
 
-import type { Connection } from "~/sourcerer";
+// import type { Connection } from "~/sourcerer";
 
 import VALEK from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
@@ -127,9 +127,6 @@ export default class Valoscope extends UIComponent {
           focus,
           vLens: (props.lens instanceof Vrapper) && props.lens,
           lensAuthorityProperty: this.getUIContextValue(Lens.lensAuthorityProperty),
-          isInteresting: vPrototype
-              || ((focus instanceof Vrapper)
-                  && (focus.getRawId() === "@$~u4.aae6c506-9d68-4d4b-b32b-5edf0fa014be@@")),
         },
         [vPrototype && vPrototype.activate()],
         _scopeFrameChain,
@@ -151,10 +148,6 @@ const _scopeFrameChain = [
     if ((this.vPrototype != null) && this.vPrototype.hasInterface("Scope")) {
       const prototypeLensAuthorityURI = this.vPrototype.propertyValue(this.lensAuthorityProperty);
       if (prototypeLensAuthorityURI !== undefined) {
-        if (this.isInteresting) {
-          console.log("interesting frame prototypeLensAuthorityURI",
-              this.lensAuthorityProperty, prototypeLensAuthorityURI);
-        }
         this.rootFrameAuthorityURI = prototypeLensAuthorityURI;
       }
     }
@@ -197,9 +190,11 @@ const _scopeFrameChain = [
     const focusPart = this.vFocus ? `@_$V.focus${_getSubscriptId(this.vFocus)}` : "";
     const lensPart = this.vLens ? `@_$V.lens${_getSubscriptId(this.vLens)}` : "";
     this.frameId = `@$~V.frames${structuralPart}${prototypePart}${focusPart}${lensPart}@@`;
-    // "postLoadProperties" and "options" are optional arguments
+
     const vFrame = this.engine.tryVrapper(this.frameId, { optional: true });
-    if (vFrame !== undefined) return { _assignScopeFrameExternals: [vFrame] };
+    if (vFrame !== undefined) {
+      return { _assignScopeFrameExternals: [vFrame] };
+    }
     if (!rootFrameAuthorityURI
         || (prototypePart && !this.vPrototype.hasInterface("Chronicle"))) {
       return { _createFrame: [] };
@@ -215,7 +210,7 @@ const _scopeFrameChain = [
     return [discourse.acquireConnection(chronicleURI).asActiveConnection()];
   },
 
-  function _obtainRootFrame (rootFrameConnection: Connection) {
+  function _obtainRootFrame (/* rootFrameConnection: Connection */) {
     const vRootFrame = this.engine.tryVrapper(this.frameId, { optional: true });
     if (vRootFrame) return { _assignScopeFrameExternals: [vRootFrame] };
     return [];
@@ -235,6 +230,11 @@ const _scopeFrameChain = [
     }
     const discourse = this.discourse
         || (this.discourse = this.engine.getActiveGlobalOrNewLocalEventGroupTransaction());
+    /*
+    discourse = engine.obtainGroupTransaction("receive-events", {
+      finalizer: Promise.resolve(),
+    });
+    */
     // TODO(iridian, 2019-01): Determine whether getPremiereStory
     // is the desired semantics here. It waits until the
     // resource creation narration has completed (ie. engine
@@ -255,12 +255,6 @@ const _scopeFrameChain = [
   },
 
   function _assignShadowLensContextvalues (vScopeFrame) {
-    if (this.isInteresting) {
-      console.log("interesting frame _updateRootFrameShadows",
-          this.rootFrameAuthorityURI, vScopeFrame,
-          "\n\tof component:", this.component,
-          "\n\twith focus:", this.vFocus);
-    }
     this.component.setUIContextValue(this.Lens.shadowedFocus, this.vFocus);
     this.component.setUIContextValue(this.Lens.shadowLensChronicleRoot,
         this.rootFrameAuthorityURI ? vScopeFrame : null);

@@ -332,7 +332,7 @@ export default class Engine extends Cog {
     }
   }
 
-  _extractProperties (initialState: Object, head: Object) {
+  _extractProperties (initialState: Object /* , head: Object */) {
     if (!initialState ||
         (typeof initialState.properties !== "object") ||
         initialState.properties === null ||

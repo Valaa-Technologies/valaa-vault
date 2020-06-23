@@ -9,7 +9,7 @@ import type { Passage, Story } from "~/raem/redux/Bard";
 import { getHostRef, HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
 
 import { addedTo, fieldsSet, isCreatedLike, removedFrom, replacedWithin } from "~/raem/events";
-import VRL, { vRef, invariantifyId, getRawIdFrom, tryCoupledFieldFrom } from "~/raem/VRL";
+import VRL, { vRef, invariantifyId, getRawIdFrom } from "~/raem/VRL";
 import { naiveURI } from "~/raem/ValaaURI";
 import { formVPath } from "~/raem/VPath";
 
@@ -1167,7 +1167,7 @@ export default class Vrapper extends Cog {
         case "Property":
           return this.extractPropertyValue(options, vExplicitOwner);
         case "Media":
-          return this._obtainMediaInterpretation(options, vExplicitOwner, typeName);
+          return this._obtainMediaInterpretation(options, vExplicitOwner);
         default:
       }
       return this;
@@ -1259,7 +1259,7 @@ export default class Vrapper extends Cog {
     return { ret: target, valueEntry };
   }
 
-  _mediaInterpretations: WeakMap<Object, { [contentType: string]: Object }>;
+  _mediaIntegrations: WeakMap<Object, { [contentType: string]: Object }>;
 
   static toMediaInfoFields = VALK.fromVAKON({
     // bvobId: ["§->", "content", false, "contentHash"],
@@ -1306,20 +1306,13 @@ export default class Vrapper extends Cog {
     return mediaInfo;
   }
 
-  _obtainMediaInterpretation (options: VALKOptions, vExplicitOwner: ?Vrapper, typeName: ?string) {
+  _obtainMediaInterpretation (options: VALKOptions, vIntegrationScope: ?Vrapper) {
     let mediaInfo;
     let mostMaterializedTransient;
     let wrap;
-    const vrapper = this;
+    let vScope = vIntegrationScope;
     let interpretationsByMime;
     try {
-      const activeTypeName = typeName || this.getTypeName(options);
-      if (activeTypeName !== "Media") {
-        invariantify(this.hasInterface("Media"),
-            "Vrapper._obtainMediaInterpretation only available for objects with Media interface",
-            "\n\ttype:", activeTypeName,
-            "\n\tobject:", this);
-      }
       const kuerySubscription = options.discourse && options.discourse._steppers.kuerySubscription;
       if (kuerySubscription) {
         kuerySubscription.attachFilterHook(this, true, true);
@@ -1329,14 +1322,30 @@ export default class Vrapper extends Cog {
       }));
       if (!mostMaterializedTransient) return undefined;
 
-      // Integrations are cached by transient and thus flushed if it changes via adding or removing
-      // of properties, change of mediaType etc. This does _not_ include the change of Media
-      // property values themselves as they don't affect the Media transient itself. The change of
-      // decoders will also not refresh the caches.
+      if (!vScope) {
+        vScope = this.step("owner", Object.create(options)) || this;
+        // while (vScope && !vScope.hasInterface("Scope")) {
+        //  vScope = vScope.step("owner", Object.create(options));
+        // }
+      }
+
+      // Integrations are cached by the combination of
+      // 1. most derived media transient with a materialized "content" field, plus
+      // 2. the decoding mediaType, inside
+      // 3. the media integration scope.
+      // If any
+      // This means that should any direct fabric values of the Media
+      // change, including the "content" field value then the cache
+      // entry becomes stale: WeakMap will discard such entries once
+      // the Transient is collected.
+      // Note that this does _not_ include the change of Media
+      // property values themselves as they don't affect the Media
+      // transient itself. The change of decoders will also not refresh
+      // the caches.
       // TODO(iridian): Re-evaluate this if ever we end up having Media properties affect the
       // interpretation. In that case the change of a property should flush this cache.
       interpretationsByMime =
-          (this._mediaInterpretations || (this._mediaInterpretations = new WeakMap()))
+          (vScope._mediaIntegrations || (vScope._mediaIntegrations = new WeakMap()))
               .get(mostMaterializedTransient);
       if (interpretationsByMime) {
         const contentType = options.contentType || options.mime
@@ -1359,9 +1368,9 @@ export default class Vrapper extends Cog {
           String(mediaInfo && mediaInfo.contentType)})`);
         decodedContent = this._withActiveConnectionChainEagerly(Object.create(options), [
           connection => connection.decodeMediaContent(mediaInfo),
-        ], function errorOnDecodeMediaContent (error) {
+        ], (error) => {
           _setInterPretationByMimeCacheEntry(error);
-          return errorOnObtainMediaInterpretation(error);
+          return errorOnObtainMediaInterpretation.call(this, error);
         });
         if ((options.synchronous === true) && isPromise(decodedContent)) {
           throw new Error(`Media interpretation not immediately available for '${
@@ -1371,17 +1380,12 @@ export default class Vrapper extends Cog {
           return (async () => {
             options.decodedContent = await decodedContent;
             options.synchronous = true;
-            return this._obtainMediaInterpretation(options, vExplicitOwner, activeTypeName);
+            return this._obtainMediaInterpretation(options, vIntegrationScope);
           })();
         }
         // else: decodedContent is synchronously available and synchronous !== false.
         // Proceed to integration.
       }
-      let vScope = vExplicitOwner || this.step("owner", Object.create(options));
-      while (vScope && !vScope.hasInterface("Scope")) {
-        vScope = vScope.step("owner", Object.create(options));
-      }
-      if (!vScope) vScope = this;
       const interpretation = this._parent._integrateDecoding(decodedContent, vScope, mediaInfo,
           options);
       _setInterPretationByMimeCacheEntry(interpretation);
@@ -1390,26 +1394,24 @@ export default class Vrapper extends Cog {
       _setInterPretationByMimeCacheEntry(error);
       wrap = new Error(`_obtainMediaInterpretation('${this.step("name", options)}' as ${
           String((mediaInfo || {}).contentType)})`);
-      return errorOnObtainMediaInterpretation(error);
+      return errorOnObtainMediaInterpretation.call(this, error);
     }
     function errorOnObtainMediaInterpretation (error) {
-      const wrapped = vrapper.wrapErrorEvent(error, 1, wrap,
-        "\n\tid:", vrapper[HostRef].toString(),
+      const wrapped = this.wrapErrorEvent(error, 1, wrap,
+        "\n\tid:", this[HostRef].toString(),
         "\n\toptions:", ...dumpObject(options),
-        "\n\tvExplicitOwner:", ...dumpObject(vExplicitOwner),
+        "\n\tvIntegrationScope:", ...dumpObject(vIntegrationScope),
         "\n\tmediaInfo:", ...dumpObject(mediaInfo),
         "\n\tmostMaterializedTransient:", ...dumpObject(mostMaterializedTransient),
         "\n\tconnection.isActive:", ...dumpObject(
-          vrapper._connection && vrapper._connection.isActive()),
-        "\n\tvrapper:", ...dumpObject(vrapper),
+            this._connection && this._connection.isActive()),
       );
       throw wrapped;
     }
     function _setInterPretationByMimeCacheEntry (interpretation: any) {
       if (!(mediaInfo || {}).contentType || !mostMaterializedTransient) return;
       if (!interpretationsByMime) {
-        vrapper._mediaInterpretations
-            .set(mostMaterializedTransient, interpretationsByMime = {});
+        vScope._mediaIntegrations.set(mostMaterializedTransient, interpretationsByMime = {});
       }
       interpretationsByMime[mediaInfo.contentType] = interpretation;
       if (!options.mediaInfo && !options.contentType
@@ -1555,6 +1557,12 @@ export default class Vrapper extends Cog {
    * @memberof Vrapper
    */
   interpretContent (options: VALKOptions = {}) {
+    if (this.getTypeName(options) !== "Media") {
+      invariantify(this.hasInterface("Media"),
+          "Vrapper.interpretContent only available for objects with Media interface",
+          "\n\ttype:", this.getTypeName(options),
+          "\n\tobject:", this);
+    }
     if (options.mime) {
       console.debug("DEPRECATED: interpretContent.mime",
           "\n\tprefer: interpretContent.contentType",
@@ -1569,7 +1577,16 @@ export default class Vrapper extends Cog {
       options.fallbackContentType = options.mimeFallback;
       delete options.mimeFallback;
     }
-    return this._obtainMediaInterpretation(options);
+    let vIntegrationScope;
+    if (options.vInterpreterProperty) {
+      const discourse = options.discourse || this._parent.discourse;
+      const ghostPath = options.vInterpreterProperty[HostRef].tryGhostPath();
+      const baseProperty = !ghostPath
+          ? options.vInterpreterProperty
+          : this._parent.getVrapper([ghostPath.rootRawId()]);
+      vIntegrationScope = baseProperty.step("owner", { discourse });
+    }
+    return this._obtainMediaInterpretation(options, vIntegrationScope);
   }
 
   static toMediaPrepareBvobInfoFields = VALK.fromVAKON({

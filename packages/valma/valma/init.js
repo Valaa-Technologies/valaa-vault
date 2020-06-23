@@ -120,15 +120,6 @@ exports.handler = async (yargv) => {
       }
       parentVaultConfig = undefined;
     }
-    packageJSON = {
-      name: vlm.path.basename(workspacePath),
-      version: (parentVaultConfig || {}).version || "0.1.0",
-      description: yargv.description || "",
-      author: (parentVaultConfig || {}).author || "",
-      license: (parentVaultConfig || {}).license || "",
-      repository: yargv.repository || (parentVaultConfig || {}).repository || "",
-      private: true,
-    };
     let namespace = yargv.namespace;
     const ret = { success: true, valos: { ...explicitValos } };
     if (yargv["new-domain"]) {
@@ -154,6 +145,16 @@ exports.handler = async (yargv) => {
     }
     Object.assign(ret, await vlm.invoke(".configure/.valos-stanza", ret.valos));
     if (!ret.success) return ret;
+
+    packageJSON = {
+      name: vlm.path.basename(workspacePath),
+      version: (parentVaultConfig || {}).version || "0.1.0",
+      description: yargv.description || "",
+      author: (parentVaultConfig || {}).author || "",
+      license: (parentVaultConfig || {}).license || "",
+      repository: yargv.repository || (parentVaultConfig || {}).repository || "",
+      private: true,
+    };
     if (!ret.isNewDomain) {
       ret.newDevDependencies = [ret.valos.domain];
     } else {
@@ -167,13 +168,13 @@ exports.handler = async (yargv) => {
     if (namespace) {
       packageJSON.name = `${namespace}/${packageJSON.name}`;
     }
-    if (ret.valos.type === "vault") {
-      packageJSON.name = `${packageJSON.name}-vault`;
+    if ((ret.valos.type === "vault")
+        || !(await vlm.inquireConfirm(`Is this workspace published to a package repository?`))) {
+      packageJSON.private = true;
+      if (!packageJSON.name.endsWith(`-${ret.valos.type}`)) {
+        packageJSON.name = `${packageJSON.name}-${ret.valos.type}`;
+      }
     } else {
-      packageJSON.private = !(await vlm.inquireConfirm(
-          `Is this workspace published to a package repository?`));
-    }
-    if (!packageJSON.private) {
       packageJSON.publishConfig = {
         access: (await vlm.inquireConfirm(
                 "Is this a 'public' published package ('n' for 'restricted')?"))

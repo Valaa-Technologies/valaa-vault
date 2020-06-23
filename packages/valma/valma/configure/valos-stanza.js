@@ -8,8 +8,12 @@ Type determines the localized role and structure of this workspace.
 Domain defines the context and the overall purpose of this workspace.
 Both affect the available toolsets for the workspace.`;
 
-exports.disabled = (yargs) => yargs.vlm.getValOSConfig()
-    && (yargs.vlm._packageConfigStatus.workspacePath === process.cwd()) && "Already configured";
+exports.disabled = (yargs) =>
+    ((yargs.vlm._packageConfigStatus.workspacePath !== process.cwd())
+        ? "Current directory is not a workspace (no package.json)"
+    : yargs.vlm.getValOSConfig()
+        ? "Valos stanza is already configured"
+    : undefined);
 
 exports.builder = (yargs) => {
   const vlm = yargs.vlm;

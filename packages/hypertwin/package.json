@@ -1,6 +1,6 @@
 {
   "name": "@valos/hypertwin",
-  "version": "0.35.0-rc.19",
+  "version": "0.35.0-rc.20",
   "valos": {
     "type": "library",
     "domain": "@valos/kernel"

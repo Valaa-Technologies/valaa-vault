@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.20](https://github.com/valaatech/kernel/compare/v0.35.0-rc.19...v0.35.0-rc.20) (2020-06-28)
+
+
+### Bug Fixes
+
+* Return grandparent scopes to getLexicalScope ([de09ba7](https://github.com/valaatech/kernel/commit/de09ba798b84992118a1c39edc991420f0fb3d91))
+
+
+
+
+
 # [0.35.0-rc.19](https://github.com/valaatech/kernel/compare/v0.35.0-rc.18...v0.35.0-rc.19) (2020-06-11)
 
 **Note:** Version bump only for package @valos/web-spindle

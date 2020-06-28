@@ -1,6 +1,6 @@
 {
   "name": "@valos/type-worker",
-  "version": "0.35.0-rc.19",
+  "version": "0.35.0-rc.20",
   "valos": {
     "type": "type",
     "domain": "@valos/kernel"
@@ -20,7 +20,7 @@
     "_vlm__configure__toolsets_-valos_type-worker": "valma/configure_toolsets__type-worker.js"
   },
   "dependencies": {
-    "@valos/inspire": "^0.35.0-rc.19",
-    "@valos/type-toolset": "^0.35.0-rc.19"
+    "@valos/inspire": "^0.35.0-rc.20",
+    "@valos/type-toolset": "^0.35.0-rc.20"
   }
 }

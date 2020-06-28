@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.20](https://github.com/valaatech/kernel/compare/v0.35.0-rc.19...v0.35.0-rc.20) (2020-06-28)
+
+
+### Bug Fixes
+
+* Make vlm --no-force-broken the default ([4f7924b](https://github.com/valaatech/kernel/commit/4f7924bfd5330293a8174fe03a05805925929e06))
+
+
+### Features
+
+* Add default workspace name type suffix suggestion: -{type} ([bf95570](https://github.com/valaatech/kernel/commit/bf95570b2e07672d39b009b7c1d096e8d11ee654))
+
+
+
+
+
 # [0.35.0-rc.19](https://github.com/valaatech/kernel/compare/v0.35.0-rc.18...v0.35.0-rc.19) (2020-06-11)
 
 

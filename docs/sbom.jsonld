@@ -37,7 +37,7 @@
         "@type": "@id"
       }
     },
-    "dc:title": "@valos/kernel-vault@0.35.0-rc.18 Software Bill of Materials",
+    "dc:title": "@valos/kernel-vault@0.35.0-rc.19 Software Bill of Materials",
     "respecConfig": {
       "specStatus": "unofficial",
       "editors": [
@@ -89,7 +89,7 @@
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
             "This document was automatically generated on ",
-            "2020-06-11T21:36:04.351Z",
+            "2020-06-28T23:16:05.590Z",
             "."
           ]
         },
@@ -509,49 +509,49 @@
       {
         "type": "library",
         "group": "valos",
-        "name": "kernel",
-        "version": "0.35.0-rc.19",
-        "description": "@valos/kernel domain",
-        "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/kernel@0.35.0-rc.19",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "group": "valos",
         "name": "inspire",
-        "version": "0.35.0-rc.19",
+        "version": "0.35.0-rc.20",
         "description": "ValOS Inspire application gateway",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/inspire@0.35.0-rc.19",
+        "purl": "pkg:npm/%40valos/inspire@0.35.0-rc.20",
         "modified": false
       },
       {
         "type": "library",
         "group": "valos",
         "name": "toolset-revealer",
-        "version": "0.35.0-rc.19",
+        "version": "0.35.0-rc.20",
         "description": "Tools for building revelations both for development and deployment purposes",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/toolset-revealer@0.35.0-rc.19",
+        "purl": "pkg:npm/%40valos/toolset-revealer@0.35.0-rc.20",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "group": "valos",
+        "name": "kernel",
+        "version": "0.35.0-rc.20",
+        "description": "@valos/kernel domain",
+        "licenses": "MIT",
+        "purl": "pkg:npm/%40valos/kernel@0.35.0-rc.20",
         "modified": false
       },
       {
         "type": "library",
         "name": "valma",
-        "version": "0.35.0-rc.19",
+        "version": "0.35.0-rc.20",
         "description": "A ValOS CLI tool for discovering and executing context-dependent command scripts",
         "licenses": "MIT",
-        "purl": "pkg:npm/valma@0.35.0-rc.19",
+        "purl": "pkg:npm/valma@0.35.0-rc.20",
         "modified": false
       },
       {
         "type": "library",
         "name": "inquirer",
-        "version": "7.1.0",
+        "version": "7.2.0",
         "description": "A collection of common interactive command line user interfaces.",
         "licenses": "MIT",
-        "purl": "pkg:npm/inquirer@7.1.0",
+        "purl": "pkg:npm/inquirer@7.2.0",
         "modified": false
       },
       {
@@ -772,21 +772,21 @@
       },
       {
         "type": "library",
-        "name": "yargs-parser",
-        "version": "18.1.3",
-        "description": "the mighty option parser used by yargs",
+        "name": "require-main-filename",
+        "version": "2.0.0",
+        "description": "shim for require.main.filename() that works in as many environments as possible",
         "licenses": "ISC",
-        "purl": "pkg:npm/yargs-parser@18.1.3",
+        "purl": "pkg:npm/require-main-filename@2.0.0",
         "modified": false
       },
       {
         "type": "library",
         "group": "valos",
         "name": "type-vault",
-        "version": "0.35.0-rc.19",
+        "version": "0.35.0-rc.20",
         "description": "The ValOS 'vault' workspace type toolset",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/type-vault@0.35.0-rc.19",
+        "purl": "pkg:npm/%40valos/type-vault@0.35.0-rc.20",
         "modified": false
       },
       {

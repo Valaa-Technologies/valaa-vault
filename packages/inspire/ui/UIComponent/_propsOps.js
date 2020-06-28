@@ -18,7 +18,7 @@ type UIComponentPropsOptions = {
 };
 export function uiComponentProps (
     options: UIComponentPropsOptions = {},
-    props?: Object = {},
+    targetProps?: Object = {},
 ) {
   const focus = options.hasOwnProperty("focus") ? options.focus : options.head;
   invariantify((typeof focus !== "undefined")
@@ -27,22 +27,22 @@ export function uiComponentProps (
   if (options.uiContext) {
     invariantify(!options.parentUIContext && !options.kuery && (typeof focus === "undefined"),
         "uiComponentProps.focus and .kuery must be undefined when .uiContext is defined");
-    props.uiContext = options.uiContext;
+    targetProps.uiContext = options.uiContext;
   } else {
     invariantifyObject(options.parentUIContext,
         "uiComponentProps.parentUIContext (when no .uiContext is given)", { allowEmpty: true });
-    props.parentUIContext = options.parentUIContext;
-    if (typeof focus !== "undefined") props.focus = focus;
-    if (typeof options.kuery !== "undefined") props.kuery = options.kuery;
+    targetProps.parentUIContext = options.parentUIContext;
+    if (typeof focus !== "undefined") targetProps.focus = focus;
+    if (typeof options.kuery !== "undefined") targetProps.kuery = options.kuery;
   }
-  props.context = Object.assign(props.context || {}, options.context);
-  if (!props.context.key) {
-    props.context.key = createComponentKey(options.name || "",
-        focus || getScopeValue(props.uiContext || props.parentUIContext, "focus"),
+  targetProps.context = Object.assign(targetProps.context || {}, options.context);
+  if (!targetProps.context.key) {
+    targetProps.context.key = createComponentKey(options.name || "",
+        focus || getScopeValue(targetProps.uiContext || targetProps.parentUIContext, "focus"),
         options.index);
   }
-  props.key = props.context.key;
-  return props;
+  targetProps.key = targetProps.context.key;
+  return targetProps;
 }
 
 export function createComponentKey (parentKey: string, focus: any, index?: any): string {

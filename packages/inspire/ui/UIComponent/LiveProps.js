@@ -18,7 +18,11 @@ import {
   arrayFromAny, patchWith, dumpObject, isPromise, thenChainEagerly, wrapError,
 } from "~/tools";
 
-import { _wrapElementInLiveProps } from "./_renderOps";
+import {
+  wrapElementInLiveProps, tryCreateLivePropsProps, LivePropsPropsTag,
+} from "./_livePropsOps";
+
+export { wrapElementInLiveProps, tryCreateLivePropsProps, LivePropsPropsTag };
 
 const _isReservedPropsName = {
   key: true,
@@ -298,7 +302,7 @@ export default class LiveProps extends UIComponent {
     if (!elementType.isUIComponent || !newProps.hasOwnProperty("array")) {
       if (!newProps.key) newProps.key = newProps.elementKey || this.getUIContextValue("key");
       const inter = React.createElement(elementType, newProps, ...children);
-      ret = _wrapElementInLiveProps(this, inter, focus, "focus");
+      ret = wrapElementInLiveProps(this, inter, focus, "focus");
     } else {
       const array = newProps.array;
       if ((array == null) || (typeof array[Symbol.iterator] !== "function")) {

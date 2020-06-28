@@ -132,7 +132,7 @@ export function tryCreateLivePropsProps (elementType, props, ref) {
       }
     }
     if (ref && (ref instanceof Kuery)) {
-      // Rewrite ref kuery as onRefKuery so that LiveProps can evaluate it.
+      // Rewrite ref kuery as onRef so that LiveProps can evaluate it.
       _obtainLiveElementProps().onRef =
           _postProcessProp(ref, livePropLookup, liveProps, "ref");
       delete elementProps.ref;

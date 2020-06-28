@@ -49,7 +49,7 @@ export function _renderFocusAsSequence (component: UIComponent,
       parentUIContext,
       context: { ...(entryProps.context || {}), forIndex: arrayIndex, arrayIndex },
       key,
-      lensId: key,
+      globalId: key,
     };
     return wrapElementInLiveProps(
         component,

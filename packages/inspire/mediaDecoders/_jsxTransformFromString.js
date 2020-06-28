@@ -214,13 +214,16 @@ function visitNode (traverse, object, path, state) {
       isLast = attributes[index + 1].type === Syntax.JSXSpreadAttribute;
     }
 
+    /* JSX does not support namespace attributes but VSX does
     if (attr.name.namespace) {
       throw new Error(
         "Namespace attributes not supported. JSX is not XML."
       );
     }
-
-    const name = attr.name.name;
+    */
+    const name = !attr.name.namespace
+        ? attr.name.name
+        : `$${attr.name.namespace.name}.${attr.name.name.name}`;
 
     utils.catchup(attr.range[0], state, trimLeft);
 

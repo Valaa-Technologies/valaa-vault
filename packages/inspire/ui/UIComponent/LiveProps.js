@@ -26,7 +26,7 @@ export { wrapElementInLiveProps, tryCreateLivePropsProps, LivePropsPropsTag };
 
 const _isReservedPropsName = {
   key: true,
-  elementKey: true,
+  globalId: true,
   children: true,
   style: true,
   styleSheet: true,
@@ -85,12 +85,12 @@ export default class LiveProps extends UIComponent {
     elementType: PropTypes.any.isRequired,
     elementProps: PropTypes.object.isRequired,
     liveProps: PropTypes.object, // Must be Map
-    onRefKuery: PropTypes.instanceOf(Kuery),
+    onRef: PropTypes.instanceOf(Kuery),
   }
   static noPostProcess = {
     ...UIComponent.noPostProcess,
     liveProps: true,
-    onRefKuery: true,
+    onRef: true,
   }
 
   constructor (props: any, context: any) {
@@ -234,17 +234,25 @@ export default class LiveProps extends UIComponent {
         (pendingProps || (pendingProps = [])).push([name, prop]);
       }
       if (pendingProps) continue;
-      if (!_isReservedPropsName[name]) {
+      if (name[0] === "$") {
+        const propsContext = (newProps.context || (newProps.context = {}));
+        if (name.startsWith("$P.") || name.startsWith("$C.")) {
+          propsContext[name.slice(3)] = prop;
+        } else {
+          const index = name.indexOf(".");
+          if (index === -1) throw new Error(`Namespace props is missing separator: '${name}'`);
+          const namespace = name.slice(0, index);
+          (propsContext[namespace] || (propsContext[namespace] = {}))[name.slice(index + 1)] = prop;
+        }
+        continue;
+      } else if (!_isReservedPropsName[name]) {
         if (name.startsWith("on") && (!isValoscope || (name[2] === name[2].toUpperCase()))) {
           if (typeof prop !== "function") {
             prop = getImplicitCallable(prop, `props.${name}`, { synchronous: undefined });
           }
-          if (name === "onRefKuery") {
+          if (name === "onRef") {
             name = "ref";
           }
-        } else if (isValoscope && !name.endsWith("Lens")) {
-          (newProps.context || (newProps.context = {}))[name] = prop;
-          continue;
         }
       } else if (name === "className") {
         prop = this.refreshClassName(focus, prop);
@@ -300,7 +308,7 @@ export default class LiveProps extends UIComponent {
     // eslint-disable-next-line
     // */
     if (!elementType.isUIComponent || !newProps.hasOwnProperty("array")) {
-      if (!newProps.key) newProps.key = newProps.elementKey || this.getUIContextValue("key");
+      if (!newProps.key) newProps.key = newProps.globalId || this.getUIContextValue("key");
       const inter = React.createElement(elementType, newProps, ...children);
       ret = wrapElementInLiveProps(this, inter, focus, "focus");
     } else {

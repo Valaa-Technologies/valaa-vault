@@ -107,7 +107,7 @@ export default class UIComponent extends React.Component {
     // otherwise parentUIContext.focus is taken as the focus and kuery is live-tracked against it.
     // If kuery is not given, parentUIContext.focus is used directly.
     uiContext: PropTypes.object,
-    elementKey: PropTypes.string,
+    globalId: PropTypes.string,
     parentUIContext: PropTypes.object,
     focus: PropTypes.any,
     kuery: PropTypes.instanceOf(Kuery),
@@ -347,7 +347,7 @@ export default class UIComponent extends React.Component {
   }
 
   getKey () {
-    return this.props.elementKey || this.getUIContextValue("key");
+    return this.props.globalId || this.getUIContextValue("key");
   }
 
   readSlotValue (slotName: string, slotSymbol: Symbol, focus: any, onlyIfAble?: boolean,
@@ -433,7 +433,7 @@ export default class UIComponent extends React.Component {
     }
   }
 
-  static _debugIdExcludedPropsKeys = ["focus", "elementKey", "parentUIContext"];
+  static _debugIdExcludedPropsKeys = ["focus", "globalId", "parentUIContext"];
 
   debugId (options: ?Object) {
     const keyString = this.getUIContext() && this.getUIContext().hasOwnProperty("key") // eslint-disable-line
@@ -706,7 +706,7 @@ export default class UIComponent extends React.Component {
         }
 
         if (ret === undefined) return null;
-        mainValidationFaults = _validateElement(this, ret);
+        mainValidationFaults = _validateElement(ret);
 
         // Main return line
         if (mainValidationFaults === undefined) return ret;
@@ -751,7 +751,7 @@ export default class UIComponent extends React.Component {
           Promise.resolve(true).then(() => { this._errorObject = undefined; });
         }
       }
-      internalErrorValidationFaults = _validateElement(this, ret);
+      internalErrorValidationFaults = _validateElement(ret);
       if (internalErrorValidationFaults) {
         throw new Error("Error rendering itself contains validation faults");
       }

@@ -16,7 +16,6 @@
   "bin": {
     "_vlm_assemble-packages": "valma/assemble-packages.js",
     "_vlm_publish-packages": "valma/publish-packages.js",
-    "_vlm_clean-vault": "valma/clean-vault.js",
     "_vlm_release-vault": "valma/release-vault.js",
     "_vlm_regenerate-docs": "valma/regenerate-docs.js",
     "_vlm_write-revdoc": "valma/write-revdoc.js",

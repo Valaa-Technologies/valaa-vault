@@ -12,7 +12,8 @@ In addition, dist/ can be removed with --dist in preparation for a clean slate p
 Be mindful that all of dist/ will be removed.
 yarn.lock can be removed with --yarn in preparation for persisted dependency updates.`;
 
-exports.disabled = (yargs) => !yargs.vlm.getPackageConfig() && "No package.json found";
+exports.disabled = (yargs) => (yargs.vlm.getValOSConfig("type") !== "vault")
+    && "Workspace is not a vault";
 exports.builder = (yargs) => {
   const vlm = yargs.vlm;
   return yargs.options({

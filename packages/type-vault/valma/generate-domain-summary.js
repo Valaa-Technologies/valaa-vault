@@ -47,7 +47,7 @@ exports.handler = async (yargv) => {
       ".select/.type/{,.domain/*/,.domain/@*/*/}*",
       name => (extractChoiceName(name, ".select/.type") || "<invalid>"));
   const allConstaints =
-      `{,.domain/*/,.domain/@*/*/}{,.type/*/,.type/@*/*/}{,.package/*/,.package/@*/*/}`;
+      `{,.domain/*/,.domain/@*/*/}{,.type/*/,.type/@*/*/}{,.workspace/*/,.workspace/@*/*/}`;
   const toolsets = await _invokeAndFilter("PVDI",
       `.select/.toolsets/${allConstaints}**/*`,
       name => (extractChoiceName(name, ".select/.toolsets") || "<invalid>"));

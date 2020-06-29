@@ -40,7 +40,7 @@ exports.builder = (yargs) => yargs.options({
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
-  const { name, version } = vlm.getPackageConfig();
+  const { name, version, valos: { domain, type } } = vlm.getPackageConfig();
   const releasePath = yargv.target;
 
   if (!yargv.overwrite && vlm.shell.test("-d", releasePath)) {
@@ -62,6 +62,8 @@ exports.handler = async (yargv) => {
 
   vlm.releasePath = releasePath;
 
-  return vlm.invoke(`.release-build/${yargv.toolsetGlob || "**/*"}`,
+  return vlm.invoke(`.release-build/.toolsets/${
+      typeToolset.selectorGlobFrom({ domain, type, workspace: name })}${
+      yargv.toolsetGlob || "**/*"}`,
       [{ target: releasePath, force: yargv.force }, ...yargv._]);
 };

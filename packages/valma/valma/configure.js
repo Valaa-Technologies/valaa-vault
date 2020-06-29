@@ -1,4 +1,4 @@
-const { updateConfigurableSideEffects, toSelectorGlob } = require("valma");
+const { updateConfigurableSideEffects, selectorGlobFrom } = require("valma");
 
 exports.command = "configure [toolsetGlob]";
 exports.describe = "Configure the current ValOS workspace type, domain and all configurables";
@@ -40,7 +40,7 @@ exports.handler = async (yargv) => {
 
   const rest = [{ reconfigure: yargv.reconfigure }, ...yargv._];
 
-  const selectorGlob = toSelectorGlob({ domain, type, name });
+  const selectorGlob = selectorGlobFrom({ domain, type, name });
   ret.toolsetConfigures = await vlm.invoke(
       `.configure/.toolsets/${selectorGlob}${yargv.toolsetGlob || "*"}/**/*`,
       rest);

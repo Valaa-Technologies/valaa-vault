@@ -1,4 +1,4 @@
-const { toRestrictorPath, toSimpleRestrictor } = require("valma");
+const { restrictorPathFrom, simpleRestrictorFrom } = require("valma");
 const {
   checkToolsetDisabled, checkToolDisabled, createToolToolsetOption,
 } = require("@valos/type-toolset");
@@ -39,14 +39,14 @@ function draftDeployToolCommand (vlm, name) {
   return _draftReleaseSubCommand(vlm, "deploy", "tool", name);
 }
 
-function _draftReleaseSubCommand (vlm, primary, kind, name, restriction = {}) {
+function _draftReleaseSubCommand (vlm, primary, kind, name, restrictor = {}) {
   const simpleName = name.match(/([^/]*)$/)[1];
   const isTool = (kind === "tool") ? true : "";
   const capPrimary = `${primary[0].toUpperCase()}${primary.slice(1)}`;
   const capKind = `${kind[0].toUpperCase()}${kind.slice(1)}`;
   const isBuild = (primary === "build");
   return vlm.invoke("draft-command", [{
-    filename: `release-${primary}_${kind}s${toSimpleRestrictor(restriction)}__${simpleName}.js`,
+    filename: `release-${primary}_${kind}s${simpleRestrictorFrom(restrictor)}__${simpleName}.js`,
     brief: `${capPrimary} a sub-release`,
     export: true,
     confirm: true,
@@ -74,7 +74,7 @@ invoke the ${primary} commands of all of its ${primary}able tools.`,
     handler: isBuild
         ? _createBuildHandlerBody()
         : _createDeployHandlerBody(),
-  }, `.release-${primary}/.${kind}s/${toRestrictorPath(restriction)}${name}`]);
+  }, `.release-${primary}/.${kind}s/${restrictorPathFrom(restrictor)}${name}`]);
 
   function _createBuildHandlerBody () {
     return `async (yargv) => {

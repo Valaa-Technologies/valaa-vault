@@ -1,6 +1,6 @@
 const {
   updateConfigurableSideEffects,
-  createSelectOfMatchingChoicesOption, toSelectorGlob, toRestrictorPath, toSimpleRestrictor,
+  createSelectOfMatchingChoicesOption, selectorGlobFrom, restrictorPathFrom, simpleRestrictorFrom,
 } = require("valma");
 
 module.exports = {
@@ -25,23 +25,27 @@ module.exports = {
   configureToolsetSelection,
   configureToolSelection,
   createToolToolsetOption,
+
+  selectorGlobFrom,
+  restrictorPathFrom,
+  simpleRestrictorFrom,
 };
 
-function draftSelectToolsetCommand (vlm, name, restriction, draftOptions) {
-  return _draftSelectCommand(vlm, "toolset", name, restriction, draftOptions);
+function draftSelectToolsetCommand (vlm, name, restrictor, draftOptions) {
+  return _draftSelectCommand(vlm, "toolset", name, restrictor, draftOptions);
 }
 
-function draftSelectToolCommand (vlm, name, restriction, draftOptions) {
-  return _draftSelectCommand(vlm, "tool", name, restriction, draftOptions);
+function draftSelectToolCommand (vlm, name, restrictor, draftOptions) {
+  return _draftSelectCommand(vlm, "tool", name, restrictor, draftOptions);
 }
 
-function _draftSelectCommand (vlm, kind, name, restriction, draftOptions) {
+function _draftSelectCommand (vlm, kind, name, restrictor, draftOptions) {
   const distributionDomain = vlm.getValOSConfig("domain");
   const simpleName = name.match(/([^/]*)$/)[1];
   const capsKind = `${kind[0].toUpperCase()}${kind.slice(1)}`;
   return vlm.invoke("draft-command", [
     {
-      filename: `select_${kind}s${toSimpleRestrictor(restriction)}__${simpleName}.js`,
+      filename: `select_${kind}s${simpleRestrictorFrom(restrictor)}__${simpleName}.js`,
       export: true,
       template: false,
       confirm: true,
@@ -59,14 +63,14 @@ function _draftSelectCommand (vlm, kind, name, restriction, draftOptions) {
 [Once finalized this command should be transferred to the domain
 package '${distributionDomain}'. Once transferred then all workspaces
 that use that domain can select '${name}' as a toolset via
-'vlm configure' given that all selection restriction conditions are
+'vlm configure' given that all selection restrictor conditions are
 satisfied.]
 
 [This introduction text can be seen during the selection process.]
 `,
       disabled:
 `(yargs) => typeToolset.check${capsKind}SelectorDisabled(yargs.vlm, exports,
-    ${JSON.stringify(restriction)})`,
+    ${JSON.stringify(restrictor)})`,
 
       builder: `(yargs) => yargs.options({})`,
       handler:
@@ -80,12 +84,12 @@ satisfied.]
 })`,
       ...draftOptions,
     },
-    `.select/.${kind}s/${toRestrictorPath(restriction)}${name}`,
+    `.select/.${kind}s/${restrictorPathFrom(restrictor)}${name}`,
   ]);
 }
 
-function draftConfigureToolsetCommand (vlm, name, restriction, draftOptions) {
-  return _draftConfigureCommand(vlm, "toolset", name, restriction, {
+function draftConfigureToolsetCommand (vlm, name, restrictor, draftOptions) {
+  return _draftConfigureCommand(vlm, "toolset", name, restrictor, {
     introduction:
 `As a toolset this script is automatically called by configure.`,
     handler:
@@ -103,8 +107,8 @@ function draftConfigureToolsetCommand (vlm, name, restriction, draftOptions) {
   });
 }
 
-function createConfigureToolCommand (vlm, name, restriction, draftOptions) {
-  return _draftConfigureCommand(vlm, "tool", name, restriction, {
+function createConfigureToolCommand (vlm, name, restrictor, draftOptions) {
+  return _draftConfigureCommand(vlm, "tool", name, restrictor, {
     introduction:
 `As a tool this script is not automatically called. The parent
 toolset or tool which uses this tool must explicit invoke this command.`,
@@ -120,12 +124,12 @@ toolset or tool which uses this tool must explicit invoke this command.`,
   });
 }
 
-function _draftConfigureCommand (vlm, kind, name, restriction, draftOptions) {
+function _draftConfigureCommand (vlm, kind, name, restrictor, draftOptions) {
   const simpleName = name.match(/([^/]*)$/)[1];
   const capsKind = `${kind[0].toUpperCase()}${kind.slice(1)}`;
   return vlm.invoke("draft-command", [
     {
-      filename: `configure_${kind}s${toSimpleRestrictor(restriction)}__${simpleName}.js`,
+      filename: `configure_${kind}s${simpleRestrictorFrom(restrictor)}__${simpleName}.js`,
       export: true,
       template: false,
       confirm: true,
@@ -145,32 +149,32 @@ function _draftConfigureCommand (vlm, kind, name, restriction, draftOptions) {
 })`,
       ...draftOptions,
     },
-    `.configure/.${kind}s/${toRestrictorPath(restriction)}${name}`,
+    `.configure/.${kind}s/${restrictorPathFrom(restrictor)}${name}`,
   ]);
 }
 
-function draftStatusToolsetCommand (vlm, name, restriction, draftOptions) {
-  return _draftStatusSubCommand(vlm, "toolset", name, restriction, {
+function draftStatusToolsetCommand (vlm, name, restrictor, draftOptions) {
+  return _draftStatusSubCommand(vlm, "toolset", name, restrictor, {
     describe: `Display the toolset '${name}' status of this workspace`,
     handler: _createToolsetStatusHandlerBody(name),
     ...draftOptions,
   });
 }
 
-function createStatusToolCommand (vlm, name, restriction, draftOptions) {
-  return _draftStatusSubCommand(vlm, "tool", name, restriction, {
+function createStatusToolCommand (vlm, name, restrictor, draftOptions) {
+  return _draftStatusSubCommand(vlm, "tool", name, restrictor, {
     describe: `Display tool '${name}' status of the requested toolset of this workspace`,
     handler: _createToolStatusHandlerBody(name),
     ...draftOptions,
   });
 }
 
-function _draftStatusSubCommand (vlm, kind, name, restriction, draftOptions) {
+function _draftStatusSubCommand (vlm, kind, name, restrictor, draftOptions) {
   const simpleName = name.match(/([^/]*)$/)[1];
   const capsKind = `${kind[0].toUpperCase()}${kind.slice(1)}`;
   return vlm.invoke("draft-command", [
     {
-      filename: `status_${kind}s${toSimpleRestrictor(restriction)}__${simpleName}.js`,
+      filename: `status_${kind}s${simpleRestrictorFrom(restrictor)}__${simpleName}.js`,
       export: true,
       confirm: true,
       header:
@@ -191,7 +195,7 @@ function _draftStatusSubCommand (vlm, kind, name, restriction, draftOptions) {
 })`,
       ...draftOptions,
     },
-    `.status/.${kind}s/${toRestrictorPath(restriction)}${name}`,
+    `.status/.${kind}s/${restrictorPathFrom(restrictor)}${name}`,
   ]);
 }
 
@@ -243,31 +247,31 @@ function _createToolStatusHandlerBody (name) {
 }`;
 }
 
-function checkToolsetSelectorDisabled (vlm, { vlm: { toolset } }, restriction) {
-  if (!restriction) return false;
-  const { domain, type, name } = restriction;
+function checkToolsetSelectorDisabled (vlm, { vlm: { toolset } }, restrictor) {
+  if (!restrictor) return false;
+  const { domain, type, workspace } = restrictor;
   const selector = vlm.getPackageConfig() || {};
   return domain && ((selector.valos || {}).domain !== domain)
           ? `Toolset '${toolset}' only selectable by domain '${domain}' workspaces`
       : type && ((selector.valos || {}).type !== type)
           ? `Toolset '${toolset}' only selectable by '${type}' workspaces`
-      : name && (selector.name !== name)
-          ? `Toolset '${toolset}' only selectable by workspace '${name}'`
+      : workspace && (selector.name !== workspace)
+          ? `Toolset '${toolset}' only selectable by workspace '${workspace}'`
       : false;
 }
 
-function checkToolSelectorDisabled (vlm, { vlm: { tool, toolset } }, restriction) {
+function checkToolSelectorDisabled (vlm, { vlm: { tool, toolset } }, restrictor) {
   if (!(vlm.toolset || toolset)) return `Tools must have a context-vlm.toolset specified`;
-  if (!restriction) return false;
-  const { domain, type, name } = restriction;
+  if (!restrictor) return false;
+  const { domain, type, workspace } = restrictor;
   const selector = vlm.getToolsetPackageConfig(vlm.toolset || toolset);
   if (!selector) return `Toolset '${vlm.toolset || toolset}' not found for tool '${tool}'`;
   return domain && ((selector.valos || {}).domain !== domain)
           ? `Tool '${tool}' only selectable for domain '${domain}' toolsets`
       : type && ((selector.valos || {}).type !== type)
           ? `Tool '${tool}' only selectable for '${type}' toolsets`
-      : name && (selector.name !== name)
-          ? `Tool '${tool}' only selectable for toolset '${name}'`
+      : workspace && (selector.name !== workspace)
+          ? `Tool '${tool}' only selectable for toolset '${workspace}'`
       : false;
 }
 
@@ -436,7 +440,7 @@ async function configureConfigurableSelection (vlm, kind, reconfigure, selection
         "nothing selected or stowed and no --reconfigure given");
     return ret;
   }
-  const kindAndSelectorGlob = `.${kind}s/${toSelectorGlob({ domain, type, name })}`;
+  const kindAndSelectorGlob = `.${kind}s/${selectorGlobFrom({ domain, type, name })}`;
   const packages = reconfigure ? selection : newlySelected;
   if (packages.length) {
     const packageFilter = (packages.length === 1) ? packages[0] : `{${packages.join(",")}}`;

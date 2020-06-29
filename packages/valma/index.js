@@ -3,9 +3,9 @@ module.exports = {
   createSelectOfMatchingChoicesOption,
   listMatchingChoices,
   extractChoiceName,
-  toSelectorGlob,
-  toRestrictorPath,
-  toSimpleRestrictor,
+  selectorGlobFrom,
+  restrictorPathFrom,
+  simpleRestrictorFrom,
   inquireChoiceCommandName,
   updateConfigurableSideEffects,
 };
@@ -81,7 +81,7 @@ function _createChoicesOption (vlm, isSingular, primaryPrefix, selectorPackageCo
 }
 
 async function listMatchingChoices (vlm, primaryPrefix, { domain, type, name, enableDisabled }) {
-  const results = await vlm.invoke(`${primaryPrefix}/${toSelectorGlob({ domain, type, name })}**/*`,
+  const results = await vlm.invoke(`${primaryPrefix}/${selectorGlobFrom({ domain, type, name })}**/*`,
       ["--show-name", "--show-description"], { "enable-disabled": enableDisabled });
   // console.log("results:", results);
   return results.map(entry => {
@@ -98,28 +98,28 @@ async function listMatchingChoices (vlm, primaryPrefix, { domain, type, name, en
   }).filter(n => n);
 }
 
-function toSelectorGlob ({ domain, type, name }) {
+function selectorGlobFrom ({ domain, type, workspace }) {
   return `${domain ? `{,.domain/${domain}/}` : ""
       }${type ? `{,.type/${type}/}` : ""
-      }${name ? `{,.package/${name}/}` : ""}`;
+      }${workspace ? `{,.workspace/${workspace}/}` : ""}`;
 }
 
-function toRestrictorPath ({ domain, type, name }) {
+function restrictorPathFrom ({ domain, type, workspace }) {
   return `${domain ? `.domain/${domain}/` : ""
       }${type ? `.type/${type}/` : ""
-      }${name ? `.package/${name}/` : ""}`;
+      }${workspace ? `.workspace/${workspace}/` : ""}`;
 }
 
-function toSimpleRestrictor ({ domain, type, name }) {
+function simpleRestrictorFrom ({ domain, type, workspace }) {
   return `${domain ? `_domain_${domain.replace("@", "-").replace("/", "_")}` : ""
       }${type ? `_type_${type.replace("@", "-").replace("/", "_")}` : ""
-      }${name ? `_package_${name.replace("@", "-").replace("/", "_")}` : ""}`;
+      }${workspace ? `_workspace_${workspace.replace("@", "-").replace("/", "_")}` : ""}`;
 }
 
 const _domainEater = "(.domain/(@[^/]*/)?[^/]*/)?";
 const _typeEater = "(.type/(@[^/]*/)?[^/]*/)?";
-const _packageEater = "(.package/(@[^/]*/)?[^/]*/)?";
-const _extractChoiceName = new RegExp(`^/${_domainEater}${_typeEater}${_packageEater}([^.]*)$`);
+const _workspaceEater = "(.workspace/(@[^/]*/)?[^/]*/)?";
+const _extractChoiceName = new RegExp(`^/${_domainEater}${_typeEater}${_workspaceEater}([^.]*)$`);
 const _choiceIndex = 7;
 
 function extractChoiceName (choice, prefix) {

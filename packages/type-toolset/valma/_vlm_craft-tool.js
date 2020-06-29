@@ -9,15 +9,16 @@ exports.describe = "Craft a new tool and its commands into this workspace";
 exports.introduction =
 `Creates new selector, configure, status and/or release sub-commands
 into the current workspace with the given tool name and toolset
-restriction.
+restrictor.
 
 The tool name is either a flat string or a namespaced package name. If
 no tool name is given the current workspace name is used by default.
 
-The toolset restriction is the name of a specific toolset package.
+The toolset restrictor is a combination of type, domain and/or
+workspace name that is matched against the toolset package.
 If the tool is crafted into a toolset workspace (ie. one which has
 @valos/type-toolset selected as a toolset) then this toolset is used as
-the restriction by default.
+the restrictor by default.
 
 
 Tools are smallest building block of valma commands. Unlike toolsets
@@ -29,16 +30,17 @@ a genuinely light-weight implementation detail and an integration glue.
 1. After a tool sub-command is crafted and exported by a package, and
 2. the corresponding primary command (select, status etc.) is invoked
 3. inside some workspace that can see the exported tool sub-command, and
-4. that uses a toolset matching restriction of the tool sub-command,
+4. that uses a toolset matching the restrictor of the tool sub-command,
 5. then the tool sub-command is invoked, using
 6. the toolset configuration tool subsection from that workspace.
 
-A complex toolset restriction allows enabling the tool to all toolsets
+A complex toolset restrictor allows enabling the tool to all toolsets
 of a specific domain and/or to all toolsets of a specific type (as not
 all toolsets have 'toolset' as their type, ie. 'web-spindle' and 'type'
 are two examples of such types).
 
-The placement of tool commands is not tied to the toolset restriction.
+The placement of tool command scripts themselves is not tied to the
+toolset restrictor.
 The typical case has a toolset to export its own tools also, but
 it might just as well be that some package is specifically created to
 act as a tool for some existing toolset. Here then the craft-tool is
@@ -121,15 +123,15 @@ exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
 
   const toolName = yargv.toolName;
-  const restriction = { domain: yargv.domain, type: yargv.type, name: yargv.toolset };
+  const restrictor = { domain: yargv.domain, type: yargv.type, workspace: yargv.toolset };
   if (yargv.selectable) {
-    await draftSelectToolCommand(vlm, toolName, restriction, { describe: yargv.describe });
+    await draftSelectToolCommand(vlm, toolName, restrictor, { describe: yargv.describe });
   }
   if (yargv.configurable) {
-    await createConfigureToolCommand(vlm, toolName, restriction);
+    await createConfigureToolCommand(vlm, toolName, restrictor);
   }
   if (yargv.statusable) {
-    await createStatusToolCommand(vlm, toolName, restriction);
+    await createStatusToolCommand(vlm, toolName, restrictor);
   }
   if (yargv.releasable) {
     if (!typeOpspace) {
@@ -137,8 +139,8 @@ exports.handler = async (yargv) => {
         ""} in current workspace context`);
     }
     const { draftBuildToolCommand, draftDeployToolCommand } = typeOpspace;
-    await draftBuildToolCommand(vlm, toolName, restriction);
-    await draftDeployToolCommand(vlm, toolName, restriction);
+    await draftBuildToolCommand(vlm, toolName, restrictor);
+    await draftDeployToolCommand(vlm, toolName, restrictor);
   }
   return { success: true };
 };

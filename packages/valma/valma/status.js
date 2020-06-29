@@ -16,7 +16,7 @@ exports.builder = (yargs) => yargs.options({
 });
 
 exports.handler = async (yargv) => {
-  const { toSelectorGlob } = require("valma");
+  const { selectorGlobFrom } = require("valma");
   const vlm = yargv.echos ? yargv.vlm
       : Object.assign(Object.create(yargv.vlm), { echo: function noEcho () { return this; } });
   const { name, valos: { domain, type } = {} } = vlm.getPackageConfig() || { name: null };
@@ -27,7 +27,7 @@ exports.handler = async (yargv) => {
   }
   const subCommandGlob = yargv.toolsetGlob ? `*${yargv.toolsetGlob}*/**/*` : "**/*";
   const pendingSubCommandInvokations = vlm.invoke(
-      `.status/${toSelectorGlob({ domain, type, name })}${subCommandGlob}`,
+      `.status/${selectorGlobFrom({ domain, type, name })}${subCommandGlob}`,
       yargv._);
   const resolveds = [].concat(...await Promise.all(pendingSubCommandInvokations))
       .filter(e => e && (typeof e === "object"));

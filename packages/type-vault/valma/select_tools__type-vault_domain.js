@@ -1,7 +1,7 @@
 const typeToolset = require("@valos/type-toolset");
 
 exports.vlm = { toolset: "@valos/type-vault", tool: "domain" };
-exports.command = ".select/.tools/.package/@valos/type-vault/domain";
+exports.command = ".select/.tools/.workspace/@valos/type-vault/domain";
 exports.brief = "select domain management";
 exports.describe = "Setup a type-domain package for curating the domain of this vault";
 exports.introduction =
@@ -9,7 +9,7 @@ exports.introduction =
 of docs/index.html domain summary revdoc document.`;
 
 exports.disabled = (yargs) => typeToolset.checkToolSelectorDisabled(yargs.vlm, exports,
-    { name: exports.vlm.toolset });
+    { workspace: exports.vlm.toolset });
 
 exports.builder = (yargs) => yargs.options({
   "regenerate-on-release": {

@@ -1,7 +1,7 @@
 const typeToolset = require("@valos/type-toolset");
 
 exports.vlm = { toolset: "@valos/type-vault", tool: "docs" };
-exports.command = ".select/.tools/.package/@valos/type-vault/docs";
+exports.command = ".select/.tools/.workspace/@valos/type-vault/docs";
 exports.brief = "select docs generation";
 exports.describe = "Generate /docs html files from all vault revdocs files";
 exports.introduction =
@@ -12,7 +12,7 @@ Additionally this tool can be configured to regenerate all docs on
 (pre)release time.`;
 
 exports.disabled = (yargs) => typeToolset.checkToolSelectorDisabled(yargs.vlm, exports,
-    { name: exports.vlm.toolset });
+    { workspace: exports.vlm.toolset });
 
 exports.builder = (yargs) => yargs.options({
   "regenerate-on-release": {

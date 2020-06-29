@@ -7,7 +7,7 @@ exports.introduction =
 the set of all valma toolset configuration commands at that package
 root directory as:
 
-vlm -N '.select/.toolsets/{,.domain/<domain>/}{,.type/<type>/,}{,.package/<name>}/**/*'
+vlm -N '.select/.toolsets/{,.domain/<domain>/}{,.type/<type>/,}{,.workspace/<name>}/**/*'
 
 When a toolset is selected to be in use it is always added as a direct
 devDependency for the package if it is not already.

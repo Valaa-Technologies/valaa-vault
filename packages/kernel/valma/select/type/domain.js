@@ -7,7 +7,7 @@ managing a ValOS domain. Specific domain workspaces then:
    .configure/.<domain>/{,de}register-package
 2. can provide new workspace types via .select/.type/*
 3. can provide new toolsets via
-   .select/.toolsets/{,.domain/<domain>/}{,.type/<type>/}{,.package/<name>}/**/*
+   .select/.toolsets/{,.domain/<domain>/}{,.type/<type>/}{,.workspace/<name>}/**/*
 
 Notably the package (de)registration should provide means for any new
 domain toolset packages to request the addition of their toolset

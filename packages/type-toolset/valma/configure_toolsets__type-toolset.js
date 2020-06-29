@@ -26,7 +26,7 @@ exports.builder = (yargs) => {
   }
   return yargs.options({
     "restrict-domain": createChooseMatchingOption(vlm, ".select/.domain", vlm.getPackageConfig(), {
-      choiceBrief: `toolset valos.domain restriction`,
+      choiceBrief: `toolset valos.domain restrictor`,
       enableDisabled: true,
       prependChoices: [
         {
@@ -36,13 +36,13 @@ exports.builder = (yargs) => {
         },
         {
           name: "<custom glob>", value: "<custom glob>",
-          description: "<enter a custom glob domain restriction>",
+          description: "<enter a custom glob domain restrictor>",
         },
       ],
       allowGlob: true,
     }),
     "restrict-type": createChooseMatchingOption(vlm, ".select/.type", vlm.getPackageConfig(), {
-      choiceBrief: `toolset valos.type restriction`,
+      choiceBrief: `toolset valos.type restrictor`,
       enableDisabled: true,
       prependChoices: [
         {
@@ -52,7 +52,7 @@ exports.builder = (yargs) => {
         },
         {
           name: "<custom glob>", value: "<custom glob>",
-          description: "<enter a custom glob type restriction>",
+          description: "<enter a custom glob type restrictor>",
         },
       ],
       allowGlob: true,
@@ -129,15 +129,15 @@ exports.handler = async (yargv) => {
   if (!(ret.tools || {}).success) return { ...ret, success: false };
 
   const toolsetName = vlm.getPackageConfig("name");
-  const restriction = { type: yargv["restrict-type"], domain: yargv["restrict-domain"] };
+  const restrictor = { type: yargv["restrict-type"], domain: yargv["restrict-domain"] };
   if (yargv.selectable) {
-    await draftSelectToolsetCommand(vlm, toolsetName, restriction, { describe: yargv.describe });
+    await draftSelectToolsetCommand(vlm, toolsetName, restrictor, { describe: yargv.describe });
   }
   if (yargv.configurable) {
-    await draftConfigureToolsetCommand(vlm, toolsetName, restriction);
+    await draftConfigureToolsetCommand(vlm, toolsetName, restrictor);
   }
   if (yargv.statusable) {
-    await draftStatusToolsetCommand(vlm, toolsetName, restriction);
+    await draftStatusToolsetCommand(vlm, toolsetName, restrictor);
   }
   if (yargv.releasable) {
     // TODO(iridian, 2020-05): There are some dependency issues here.
@@ -148,8 +148,8 @@ exports.handler = async (yargv) => {
         ""} in current workspace context`);
     }
     const { draftBuildToolsetCommand, draftDeployToolsetCommand } = typeOpspace;
-    await draftBuildToolsetCommand(vlm, toolsetName, restriction);
-    await draftDeployToolsetCommand(vlm, toolsetName, restriction);
+    await draftBuildToolsetCommand(vlm, toolsetName, restrictor);
+    await draftDeployToolsetCommand(vlm, toolsetName, restrictor);
   }
   return ret;
 };

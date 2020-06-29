@@ -23,7 +23,7 @@ exports.builder = (yargs) => yargs.options({
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
-  const { name, version } = vlm.getPackageConfig();
+  const { name, version, valos: { domain, type } } = vlm.getPackageConfig();
   const releasePath = yargv.source;
 
   if (!yargv.prerelease && (version.indexOf("-prerelease") !== -1)) {
@@ -41,6 +41,10 @@ exports.handler = async (yargv) => {
 
   vlm.releasePath = yargv.source;
 
-  return [].concat(...[].concat(await vlm.invoke(`.release-deploy/${yargv.toolsetGlob || "**/*"}`,
-      [{ source: releasePath }, ...yargv._]))).filter(e => (e !== undefined));
+  return [].concat(...[].concat(
+      await vlm.invoke(`.release-deploy/.toolsets/${
+          typeToolset.selectorGlobFrom({ domain, type, workspace: name })}${
+          yargv.toolsetGlob || "**/*"}`,
+          [{ source: releasePath }, ...yargv._])
+  )).filter(e => (e !== undefined));
 };

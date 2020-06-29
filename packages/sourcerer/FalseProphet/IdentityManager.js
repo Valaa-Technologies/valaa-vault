@@ -8,14 +8,17 @@ const identityPrototypeMethods = require("~/gateway-api/identity");
 
 export default class IdentityManager extends FabricEventTarget {
   constructor (options: {
-    parent: Object, verbosity: ?number, name: ?string,
-    sourcerer: FalseProphet, clientURI: string, sessionURI: string,
+    parent: Object, verbosity: ?number, name: ?string, sourcerer: FalseProphet,
+    clientURI: string, sessionURI: string, add: ?Object,
   }) {
     super(options.parent, options.verbosity, options.name);
+    this._sourcerer = options.sourcerer;
     this.clientURI = options.clientURI;
     this.sessionURI = options.sessionURI;
-    this._sourcerer = options.sourcerer;
     this._activeIdentities = {};
+    for (const [identityChronicleURI, identityOptions] of Object.entries(options.add || {})) {
+      this.add(identityChronicleURI, identityOptions);
+    }
   }
 
   list () { return Object.keys(this._activeIdentities); }

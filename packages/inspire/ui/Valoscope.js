@@ -10,6 +10,7 @@ import VALEK from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
 
 import UIComponent from "~/inspire/ui/UIComponent";
+import Lens from "~/inspire/ui/Lens";
 
 import { thisChainEagerly } from "~/tools";
 
@@ -114,7 +115,6 @@ export default class Valoscope extends UIComponent {
 
   bindFocusSubscriptions (focus: any, props: Object) {
     super.bindFocusSubscriptions(focus, props);
-    const Lens = this.getValos().Lens;
     this.setUIContextValue(Lens.scopeChildren, props.children);
     const vPrototype = props.instanceLensPrototype;
     return thisChainEagerly({
@@ -155,7 +155,7 @@ const _scopeFrameChain = [
     this.vFocus = this.focus;
     this.vFocus.requireActive(); // focus should always be activated by Valoscope itself
 
-    const currentShadowedFocus = this.component.getParentUIContextValue(this.Lens.shadowedFocus);
+    const currentShadowedFocus = this.component.getParentUIContextValue(Lens.shadowedFocus);
     if (this.vFocus === currentShadowedFocus) return undefined;
 
     if (this.vFocus.hasInterface("Scope")) {
@@ -167,7 +167,7 @@ const _scopeFrameChain = [
 
     if (this.vFocus.isChronicleRoot()) {
       const contextShadowLensAuthorityURI =
-          this.component.getUIContextValue(this.Lens.shadowLensAuthority);
+          this.component.getUIContextValue(Lens.shadowLensAuthority);
       if (contextShadowLensAuthorityURI !== undefined) {
         return contextShadowLensAuthorityURI;
       }
@@ -255,8 +255,8 @@ const _scopeFrameChain = [
   },
 
   function _assignShadowLensContextvalues (vScopeFrame) {
-    this.component.setUIContextValue(this.Lens.shadowedFocus, this.vFocus);
-    this.component.setUIContextValue(this.Lens.shadowLensChronicleRoot,
+    this.component.setUIContextValue(Lens.shadowedFocus, this.vFocus);
+    this.component.setUIContextValue(Lens.shadowLensChronicleRoot,
         this.rootFrameAuthorityURI ? vScopeFrame : null);
     return [vScopeFrame];
   },
@@ -273,7 +273,7 @@ const _scopeFrameChain = [
       this.vOwner.alterProperty(this.key, VALEK.fromValue(scopeFrame));
     }
     const vScopeFrame = tryUnpackedHostValue(scopeFrame);
-    if (vScopeFrame) this.component.setUIContextValue(this.Lens.scopeFrameResource, vScopeFrame);
+    if (vScopeFrame) this.component.setUIContextValue(Lens.scopeFrameResource, vScopeFrame);
     return [vScopeFrame || scopeFrame];
   },
 

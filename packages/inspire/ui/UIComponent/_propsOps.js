@@ -6,6 +6,8 @@ import { SourceInfoTag } from "~/raem/VALK/StackTrace";
 
 import Vrapper from "~/engine/Vrapper";
 
+import Lens from "~/inspire/ui/Lens";
+
 import { invariantifyObject, wrapError } from "~/tools";
 
 import type UIComponent from "./UIComponent";
@@ -33,8 +35,12 @@ export function _childProps (component: UIComponent, name: string, targetProps: 
 }
 
 export function _checkForInfiniteRenderRecursion (component: UIComponent) {
-  if (!component.state.uiContext || !component.state.uiContext.focus) return false;
   let context = component.state.uiContext;
+  if (!context || !context.focus) return false;
+  const depth = context[Lens.currentRenderDepth];
+  if ((depth !== undefined) && (depth < context[Lens.infiniteRecursionCheckWaterlineDepth])) {
+    return false;
+  }
   const newFocus = component.getFocus();
   const newKey = component.getUIContextValue("key");
   // eslint-disable-next-line

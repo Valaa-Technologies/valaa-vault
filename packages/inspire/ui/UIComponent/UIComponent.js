@@ -9,6 +9,8 @@ import { Subscription, LiveUpdate } from "~/engine/Vrapper";
 import debugId from "~/engine/debugId";
 import { Kuery, dumpKuery, dumpObject } from "~/engine/VALEK";
 
+import Lens from "~/inspire/ui/Lens";
+
 import { arrayFromAny, invariantify, isPromise, outputError, wrapError }
     from "~/tools";
 
@@ -590,12 +592,11 @@ export default class UIComponent extends React.Component {
   tryRenderSlotAsLens (slot: string | Symbol, focus: any = this.tryFocus(),
       rootSlotName_?: string, lensName: ?string, onlyIfAble?: boolean, onlyOnce?: boolean):
           void | null | string | React.Element<any> | [] | Promise<any> {
-    const valosLens = this.getValos().Lens;
     let slotValue, ret; // eslint-disable-line
-    const slotName = typeof slot === "string" ? slot : valosLens[slot];
-    const slotSymbol = typeof slot !== "string" ? slot : valosLens[slot];
+    const slotName = typeof slot === "string" ? slot : Lens[slot];
+    const slotSymbol = typeof slot !== "string" ? slot : Lens[slot];
     const rootSlotName = rootSlotName_ || slotName;
-    const slotAssembly = this.getUIContextValue(this.getValos().Lens.slotAssembly) || [];
+    const slotAssembly = this.getUIContextValue(Lens.slotAssembly) || [];
     const assemblyLength = slotAssembly.length;
     slotAssembly.push(slotName);
     try {
@@ -625,9 +626,10 @@ export default class UIComponent extends React.Component {
     this._pendingRenderValue = undefined;
     let mainValidationFaults;
     let latestRenderedLensSlot;
-    if (this.state.uiContext) this.setUIContextValue(this.getValos().Lens.slotAssembly, []);
+    if (this.state.uiContext) this.setUIContextValue(Lens.slotAssembly, []);
     try {
-      const renderNormally = (ret === undefined) && !this._errorObject
+      const renderNormally = (ret === undefined)
+          && !this._errorObject
           && !_checkForInfiniteRenderRecursion(this);
       if (renderNormally) {
         // TODO(iridian): Fix this uggo hack where ui-context content is updated at render.
@@ -716,8 +718,7 @@ export default class UIComponent extends React.Component {
         let isSticky = errorObject.isSticky;
         if (isSticky === undefined) {
           const engine = this.context.engine;
-          const errorDescriptor = engine.getHostObjectDescriptor(
-              engine.getRootScope().valos.Lens[errorSlotName]);
+          const errorDescriptor = engine.getHostObjectDescriptor(Lens[errorSlotName]);
           isSticky = (errorDescriptor || {}).isStickyError;
         }
         if (!isSticky) {

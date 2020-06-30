@@ -10,6 +10,7 @@ import Vrapper, { getImplicitMediaInterpretation } from "~/engine/Vrapper";
 
 import { VSSStyleSheetSymbol } from "~/inspire/ui/UIComponent";
 import { unthunkRepeat } from "~/inspire/ui/thunk";
+import Lens from "~/inspire/ui/Lens";
 import Valoscope from "~/inspire/ui/Valoscope";
 import { VS } from "~/engine/VALEK";
 
@@ -148,10 +149,9 @@ export default class ReactRoot extends React.Component {
 
   async _createRootContext (vRootFocus: Vrapper, viewName: string, customUIScope: Object) {
     const rootContext = Object.create(customUIScope || vRootFocus.getEngine().getRootScope());
-    const valos = rootContext.valos;
     rootContext.frame = await this._obtainUIRootFrame(
-        rootContext[valos.Lens.shadowLensAuthority], vRootFocus, viewName);
-    rootContext[valos.Lens.scopeFrameResource] = rootContext.frame;
+        rootContext[Lens.shadowLensAuthority], vRootFocus, viewName);
+    rootContext[Lens.scopeFrameResource] = rootContext.frame;
     rootContext.VSS = this._createVSS(vRootFocus.getEngine());
     rootContext.VS = VS;
     return rootContext;

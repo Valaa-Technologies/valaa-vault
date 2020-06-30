@@ -11,6 +11,8 @@ import debugId from "~/engine/debugId";
 import { arrayFromAny, isPromise, isSymbol, thenChainEagerly, thisChainEagerly } from "~/tools";
 
 import UIComponent from "./UIComponent";
+import Lens from "~/inspire/ui/Lens";
+
 import { createComponentKey } from "./_propsOps";
 
 import { wrapElementInLiveProps, tryWrapElementInLiveProps } from "./_livePropsOps";
@@ -152,11 +154,10 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
           ret = _tryRenderMediaLens(component, lens, focus, lensName, vInterpreterProperty);
           subLensName = `~-${lensName}`;
         } else {
-          const valos = component.getValos();
           subLensName = `<-${lensName}`;
           ret = component.readSlotValue("delegatePropertyLens",
-              valos.Lens.delegatePropertyLens, lens, true)(lens, component, lensName);
-          if ((ret == null) || ((ret.delegate || [])[0] === valos.Lens.notLensResourceLens)) {
+              Lens.delegatePropertyLens, lens, true)(lens, component, lensName);
+          if ((ret == null) || ((ret.delegate || [])[0] === Lens.notLensResourceLens)) {
             return component.renderSlotAsLens("notLensResourceLens", lens, undefined, subLensName);
           }
         }

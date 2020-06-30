@@ -6,6 +6,8 @@ import Vrapper from "~/engine/Vrapper";
 import { invariantify, thenChainEagerly, wrapError } from "~/tools";
 
 import type UIComponent from "./UIComponent";
+import Lens from "~/inspire/ui/Lens";
+
 import { getScopeValue, setScopeValue } from "./scopeValue";
 
 import { _comparePropsOrState } from "./_propsOps";
@@ -132,6 +134,7 @@ function _createContextAndSetFocus (
   if (!uiContext) {
     uiContext = Object.create(parentUIContext);
     uiContext.context = uiContext;
+    uiContext[Lens.currentRenderDepth] = (parentUIContext[Lens.currentRenderDepth] || 0) + 1;
   }
 
   if (newProps.context) {
@@ -148,10 +151,9 @@ function _createContextAndSetFocus (
     if (oldProps) component.forceUpdate();
   } else {
     uiContext.reactComponent = component;
-    const currentDepthSlot = component.getValos().Lens.currentRenderDepth;
-    uiContext[currentDepthSlot] = (parentUIContext[currentDepthSlot] || 0) + 1;
     component.setState({ uiContext }, _attachSubscribersWhenDone);
   }
+
   function _attachSubscribersWhenDone () {
     if (newFocus === undefined) return;
     thenChainEagerly(newFocus, [

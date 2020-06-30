@@ -2,14 +2,12 @@
 import React from "react";
 import VALEK from "~/engine/VALEK";
 import UIComponent from "~/inspire/ui/UIComponent";
-import { unthunkRepeat } from "~/inspire/ui/thunk";
 
 import TextFileEditor from "~/inspire/ui/TextFileEditor";
 
 import { mediaTypeFromFilename } from "~/tools/MediaTypeData";
 
 export default class MediaEditor extends UIComponent {
-  static _defaultPresentation = () => unthunkRepeat(require("./presentation").default);
   preRenderFocus (focus: any) {
     const mediaType = focus.step(
             VALEK.to("mediaType").nullable().select(["type", "subtype", "contentType"]))
@@ -24,8 +22,8 @@ export default class MediaEditor extends UIComponent {
       );
     }
     return (
-      <div {...this.presentation("root")}>
-        <TextFileEditor {...this.childProps("textFileEditor")} />
+      <div style={{ width: "100%", height: "100%" }}>
+        <TextFileEditor {...this.childProps("textFileEditor", {})} />
       </div>
     );
   }

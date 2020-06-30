@@ -9,7 +9,3 @@ export function isThunk (candidate) {
 export function isReactComponent (candidate) {
   return candidate && candidate.$$typeof;
 }
-
-export function isExpandable (candidate) {
-  return candidate && (typeof candidate === "object") && !isReactComponent(candidate);
-}

@@ -6,7 +6,8 @@ import { OrderedMap } from "immutable";
 import { Kuery } from "~/raem/VALK";
 
 import UIComponent, { isUIComponentElement } from "./UIComponent";
-import { uiComponentProps } from "./_propsOps";
+import { createComponentKey } from "./_propsOps";
+import { getScopeValue } from "./scopeValue";
 
 import { arrayFromAny, isPromise, wrapError } from "~/tools";
 
@@ -39,12 +40,12 @@ export function tryWrapElementInLiveProps (
   if ((element.type === LiveProps)
       || LiveProps.isPrototypeOf(element.type)) return undefined;
   const { type: elementType, props, ref, key } = element;
-  let livePropsProps = element[LivePropsPropsTag];
-  if (livePropsProps === undefined) {
-    livePropsProps = tryCreateLivePropsProps(elementType, props, ref);
+  let livePropsPropsTemplate = element[LivePropsPropsTag];
+  if (livePropsPropsTemplate === undefined) {
+    livePropsPropsTemplate = tryCreateLivePropsProps(elementType, props, ref);
   }
   try {
-    if (livePropsProps) {
+    if (livePropsPropsTemplate) {
       // console.log("tryWrapElementInLiveProps LiveWrapper for", elementType.name, wrapperProps);
       /* Only enable this section for debugging React key warnings; it
       will break react elsewhere
@@ -53,22 +54,27 @@ export function tryWrapElementInLiveProps (
         value: `LiveProps_${livePropsProps.key}`,
       });
       // */
-      return React.createElement(
-          LiveProps,
-          uiComponentProps({
-            name: (typeof key === "string") ? `!${key}`
-                : key ? `!.-${lensName}`
-                : lensName,
-            parentUIContext: component.getUIContext(),
-          }, { ...livePropsProps }),
-          ...arrayFromAny(props.children));
+      const parentUIContext = component.getUIContext();
+      const livePropsProps = {
+        ...livePropsPropsTemplate,
+        parentUIContext,
+        context: {
+          key: createComponentKey(
+              (typeof key === "string") ? `!${key}`
+                  : key ? `!.-${lensName}`
+                  : lensName,
+              getScopeValue(parentUIContext, "focus")), // shouldn't this be 'focus' directly?
+        },
+      };
+      livePropsProps.key = livePropsProps.context.key;
+      return React.createElement(LiveProps, livePropsProps, ...arrayFromAny(props.children));
     }
     // Element has no live props.
     let parentUIContext;
     let children;
     if (isUIComponentElement(element)) {
       const hasUIContext = props.uiContext || props.parentUIContext;
-      // If an UIComponent element doesn't have a UIContext then the
+      // If an UIComponent element doesn't have a uiContext then the
       // current component context is provided as the parentUIContext
       // for the child component component.
       if (!hasUIContext) parentUIContext = component.getUIContext();

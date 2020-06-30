@@ -17,13 +17,11 @@ import VALEK from "~/engine/VALEK";
 
 import { mediaTypeFromFilename } from "~/tools/MediaTypeData";
 
-import { unthunkRepeat } from "~/inspire/ui/thunk";
 import MediaContentEditor from "~/inspire/ui/MediaContentEditor";
 
 import { beaumpify } from "~/tools";
 
 export default class TextFileEditor extends MediaContentEditor {
-  static _defaultPresentation = () => unthunkRepeat(require("./presentation").default);
   static propTypes = {
     ...MediaContentEditor.propTypes,
     confirmSave: PropTypes.func,

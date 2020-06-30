@@ -5,7 +5,7 @@ import { createNativeIdentifier, isNativeIdentifier, getNativeIdentifierValue }
     from "~/script";
 
 export function getScopeValue (scope: Object, name: string | Symbol) {
-  if (typeof scope === "undefined") return undefined;
+  if (scope === undefined) return undefined;
   const value = scope[name];
   return isNativeIdentifier(value) ? getNativeIdentifierValue(value) : value;
 }

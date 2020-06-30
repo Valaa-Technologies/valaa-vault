@@ -2,14 +2,12 @@
 import PropTypes from "prop-types";
 
 import UIComponent from "~/inspire/ui/UIComponent";
-import { unthunkRepeat } from "~/inspire/ui/thunk";
 import type LiveUpdate from "~/engine/Vrapper/LiveUpdate";
 import VALEK from "~/engine/VALEK";
 
 import { dumpObject, thenChainEagerly, wrapError } from "~/tools";
 
 export default class FieldEditor extends UIComponent {
-  static _defaultPresentation = () => unthunkRepeat(require("./presentation").default);
   static propTypes = {
     ...UIComponent.propTypes,
     fieldName: PropTypes.string

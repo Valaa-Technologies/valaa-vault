@@ -134,7 +134,7 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
             });
         if (ret === undefined) ret = delayed || null;
         // ret = React.createElement(UIComponent,
-        //    component.childProps(subLensName, {}, { delegate: [lens] }));
+        //    component.childProps(subLensName, { delegate: [lens] }));
       } else if (lens instanceof Vrapper) {
         const activation = lens.activate();
         if (activation !== lens) {
@@ -163,11 +163,12 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
       } else if (Array.isArray(lens)) {
         return _tryRenderLensArray(component, lens, focus, lensName);
       } else if (Object.getPrototypeOf(lens) === Object.prototype) {
+        // noscope lens
         if (lens.delegate && (Object.keys(lens).length === 1)) {
           return _renderFirstAbleDelegate(component, lens.delegate, focus, lensName);
         }
         subLensName = `-ns-${lensName}`;
-        ret = React.createElement(_Valoscope, component.childProps(subLensName, {}, { ...lens }));
+        ret = React.createElement(_Valoscope, component.childProps(subLensName, { ...lens }));
       } else if (isSymbol(lens)) {
         return component.renderSlotAsLens(lens, focus, undefined, lensName, onlyIfAble, onlyOnce);
       } else {

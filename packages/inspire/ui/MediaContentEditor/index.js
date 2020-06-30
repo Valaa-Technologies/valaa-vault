@@ -1,6 +1,5 @@
 // @flow
 import UIComponent from "~/inspire/ui/UIComponent";
-import { unthunkRepeat } from "~/inspire/ui/thunk";
 import type { LiveUpdate } from "~/engine/Vrapper";
 import VALEK from "~/engine/VALEK";
 
@@ -12,7 +11,6 @@ const toTextPlainInterpretation =
     });
 
 export default class MediaContentEditor extends UIComponent {
-  static _defaultPresentation = () => unthunkRepeat(require("./presentation").default);
   bindFocusSubscriptions (focus: any, props: Object) {
     super.bindFocusSubscriptions(focus, props);
     const editor = this;

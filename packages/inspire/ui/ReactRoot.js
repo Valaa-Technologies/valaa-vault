@@ -8,7 +8,7 @@ import derivedId from "~/raem/tools/derivedId";
 
 import Vrapper, { getImplicitMediaInterpretation } from "~/engine/Vrapper";
 
-import { uiComponentProps, VSSStyleSheetSymbol } from "~/inspire/ui/UIComponent";
+import { VSSStyleSheetSymbol } from "~/inspire/ui/UIComponent";
 import { unthunkRepeat } from "~/inspire/ui/thunk";
 import Valoscope from "~/inspire/ui/Valoscope";
 import { VS } from "~/engine/VALEK";
@@ -27,17 +27,19 @@ export default class ReactRoot extends React.Component {
     viewName: PropTypes.string,
     children: PropTypes.object,
     contextLensProperty: PropTypes.arrayOf(PropTypes.string),
-    uiScope: PropTypes.object,
+    rootUIScope: PropTypes.object,
     rootProps: PropTypes.object,
   };
 
   static childContextTypes = {
     engine: PropTypes.object,
+
+    lensProperty: PropTypes.arrayOf(PropTypes.string),
+    lensPropertyNotFoundLens: PropTypes.any,
+
     css: PropTypes.func,
     getVSSSheet: PropTypes.func,
     releaseVssSheets: PropTypes.func,
-    lensProperty: PropTypes.arrayOf(PropTypes.string),
-    lensPropertyNotFoundLens: PropTypes.any,
   };
 
   constructor (props, context) {
@@ -45,7 +47,7 @@ export default class ReactRoot extends React.Component {
     this.cssRoot = {};
     const vRootFocus = (props.rootProps || {}).focus;
     if (vRootFocus) {
-      this._createRootContext(vRootFocus, props.viewName, props.uiScope)
+      this._createRootContext(vRootFocus, props.viewName, props.rootUIScope)
       .then(rootContext => {
         this._rootContext = rootContext;
         this.forceUpdate();
@@ -243,10 +245,12 @@ export default class ReactRoot extends React.Component {
   render () {
     const vFocus = (this.props.rootProps || {}).focus;
     if (!vFocus || !this._rootContext) return null;
-    const valoscopeProps = uiComponentProps(
-        { name: "root", parentUIContext: this._rootContext },
-        { ...(this.props.rootProps || {}) });
-
+    const valoscopeProps = {
+      ...(this.props.rootProps || {}),
+      parentUIContext: this._rootContext,
+      context: { key: "-root" },
+      key: "-root",
+    };
     const valoscope = <Valoscope {...valoscopeProps}>{this.props.children}</Valoscope>;
     return this.props.isRoot
         ? valoscope

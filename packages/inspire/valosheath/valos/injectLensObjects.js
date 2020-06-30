@@ -403,7 +403,7 @@ export default function injectLensObjects (valos: Object, rootScope: Object,
     isEnabled: (focus) => (focus === undefined),
     rootValue: ({ delegate: [
       valos.Lens.instrument(
-          (u, component) => (component.props.kuery || component.props.focus),
+          (u, component) => (component.props.focus),
           valos.Lens.pendingFocusLens),
     ] }),
   }));

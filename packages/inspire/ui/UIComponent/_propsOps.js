@@ -3,47 +3,13 @@ import React from "react";
 import isEqual from "lodash.isequal";
 
 import { SourceInfoTag } from "~/raem/VALK/StackTrace";
-import { Kuery } from "~/raem/VALK";
 
 import Vrapper from "~/engine/Vrapper";
 
-import { invariantify, invariantifyObject, wrapError } from "~/tools";
+import { invariantifyObject, wrapError } from "~/tools";
 
 import type UIComponent from "./UIComponent";
 import { getScopeValue } from "./scopeValue";
-
-type UIComponentPropsOptions = {
-  name?: string, index?: any, uiContext?: Object,
-  parentUIContext?: Object, focus?: any, head?: any, kuery?: any
-};
-export function uiComponentProps (
-    options: UIComponentPropsOptions = {},
-    targetProps?: Object = {},
-) {
-  const focus = options.hasOwnProperty("focus") ? options.focus : options.head;
-  invariantify((typeof focus !== "undefined")
-      || (!options.hasOwnProperty("focus") && !options.hasOwnProperty("head")),
-      "uiComponentProps.focus value must not be undefined if 'focus' is a key in the props");
-  if (options.uiContext) {
-    invariantify(!options.parentUIContext && !options.kuery && (typeof focus === "undefined"),
-        "uiComponentProps.focus and .kuery must be undefined when .uiContext is defined");
-    targetProps.uiContext = options.uiContext;
-  } else {
-    invariantifyObject(options.parentUIContext,
-        "uiComponentProps.parentUIContext (when no .uiContext is given)", { allowEmpty: true });
-    targetProps.parentUIContext = options.parentUIContext;
-    if (typeof focus !== "undefined") targetProps.focus = focus;
-    if (typeof options.kuery !== "undefined") targetProps.kuery = options.kuery;
-  }
-  targetProps.context = Object.assign(targetProps.context || {}, options.context);
-  if (!targetProps.context.key) {
-    targetProps.context.key = createComponentKey(options.name || "",
-        focus || getScopeValue(targetProps.uiContext || targetProps.parentUIContext, "focus"),
-        options.index);
-  }
-  targetProps.key = targetProps.context.key;
-  return targetProps;
-}
 
 export function createComponentKey (parentKey: string, focus: any, index?: any): string {
   return (focus instanceof Vrapper) ? `${focus.getBriefUnstableId()}<-${parentKey}`
@@ -51,22 +17,19 @@ export function createComponentKey (parentKey: string, focus: any, index?: any):
       : `-${parentKey}`;
 }
 
-export function _childProps (component: UIComponent, name: string,
-    options: { index?: any, kuery?: Kuery, head?: any, focus?: any, context?: Object },
-    initialProps: Object,
-) {
-  const parentUIContext = component.getUIContext();
-  invariantify(!options.uiContext, `childProps.options.uiContext must be undefined`);
-  invariantify(parentUIContext, `childProps can only be called if getUIContext() is valid`);
-  const nextOptions = { parentUIContext, name, ...options };
-  if (nextOptions.hasOwnProperty("head")) {
-    console.debug("DEPRECATED: props.head\n\tprefer: props.focus");
-    nextOptions.focus = nextOptions.head;
-    delete nextOptions.head;
+export function _childProps (component: UIComponent, name: string, targetProps: Object) {
+  targetProps.parentUIContext = component.getUIContext();
+  if (!targetProps.parentUIContext) {
+    invariantifyObject(targetProps.parentUIContext,
+      "uiComponentProps.parentUIContext (when no .uiContext is given)", { allowEmpty: true });
   }
-  invariantify((typeof nextOptions.focus !== "undefined") || (!nextOptions.hasOwnProperty("focus")),
-      "childProps.focus must not be undefined if it is specified as an option");
-  return uiComponentProps(nextOptions, initialProps);
+  targetProps.context = targetProps.context || {};
+  if (!targetProps.context.key) {
+    targetProps.context.key = createComponentKey(name || "",
+        getScopeValue(targetProps.uiContext || targetProps.parentUIContext, "focus"));
+  }
+  targetProps.key = targetProps.context.key;
+  return targetProps;
 }
 
 export function _checkForInfiniteRenderRecursion (component: UIComponent) {

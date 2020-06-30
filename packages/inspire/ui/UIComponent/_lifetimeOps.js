@@ -1,7 +1,7 @@
 // @flow
 
-import { dumpKuery, dumpObject } from "~/engine/VALEK";
-import Vrapper, { LiveUpdate } from "~/engine/Vrapper";
+import { dumpObject } from "~/engine/VALEK";
+import Vrapper from "~/engine/Vrapper";
 
 import { invariantify, thenChainEagerly, wrapError } from "~/tools";
 
@@ -9,7 +9,7 @@ import type UIComponent from "./UIComponent";
 import { getScopeValue, setScopeValue } from "./scopeValue";
 
 import { _comparePropsOrState } from "./_propsOps";
-import { _initiateSubscriptions, _finalizeUnbindSubscribersExcept } from "./_subscriberOps";
+import { _initiateSubscriptions } from "./_subscriberOps";
 
 // const _timings = {};
 
@@ -43,7 +43,6 @@ export function _componentWillReceiveProps (component: UIComponent, nextProps: O
       || (component._activeParentFocus !== nextActiveParentFocus)
       || (nextProps.focus !== oldProps.focus)
       || (nextProps.head !== oldProps.head)
-      || (nextProps.kuery !== oldProps.kuery)
       || _comparePropsOrState(nextProps.context, oldProps.context, "shallow")
       || _comparePropsOrState(nextProps.locals, oldProps.locals, "shallow");
   // _addTiming(component, "componentWillReceiveProps.check", start, shouldUpdateFocus);
@@ -73,9 +72,7 @@ function _updateFocus (component: UIComponent, newProps: Object, oldProps: Objec
     console.warn(component.debugId(), "._updateFocus",
         "\n\tnew props.uiContext:", newProps.uiContext,
         "\n\tnew props.parentUIContext:", newProps.parentUIContext,
-        "\n\tnew props.head:", newProps.head,
         "\n\tnew props.focus:", newProps.focus,
-        "\n\tnew props.kuery:", ...dumpKuery(newProps.kuery));
     // */
     const newUIContext = newProps.uiContext;
 
@@ -95,10 +92,10 @@ function _updateFocus (component: UIComponent, newProps: Object, oldProps: Objec
             ? getScopeValue(scope, "focus")
             : getScopeValue(scope, "head");
     if (focus === undefined) return;
-    if (newProps.kuery === undefined) {
-      _createContextAndSetFocus(component, focus, newProps, oldProps);
-      return;
-    }
+    if (newProps.kuery !== undefined) throw new Error("props.kuery no longer supported");
+    _createContextAndSetFocus(component, focus, newProps, oldProps);
+    return;
+    /*
     if (!newProps.parentUIContext) {
       invariantify(newProps.parentUIContext, `if ${component.constructor.name
       }.props.kuery is specified then ...parentUIContext must also be specified`);
@@ -115,13 +112,13 @@ function _updateFocus (component: UIComponent, newProps: Object, oldProps: Objec
             component, liveUpdate.value(), newProps, component.props || oldProps);
       },
     });
+    */
   } catch (error) {
     throw wrapError(error, `During ${component.debugId()}\n ._updateFocus:`,
         "\n\tnew props:", newProps,
         ...(newProps.uiContext ? ["\n\tnew props.uiContext:", newProps.uiContext] : []),
         ...(newProps.parentUIContext
             ? ["\n\tnew props.parentUIContext:", newProps.parentUIContext] : []),
-        ...(newProps.kuery ? ["\n\tnew props.kuery:", ...dumpKuery(newProps.kuery)] : []),
         "\n\told props:", oldProps,
         "\n\tstate:", component.state,
     );

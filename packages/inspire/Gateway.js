@@ -29,7 +29,7 @@ import extendValosheathWithEngine from "~/engine/valosheath";
 
 import InspireView from "~/inspire/InspireView";
 
-import { registerVidgets } from "~/inspire/ui";
+// import { registerVidgets } from "~/inspire/ui";
 import { Revelation, reveal, expose } from "~/inspire/Revelation";
 import extendValosheathWithInspire from "~/inspire/valosheath";
 
@@ -237,7 +237,7 @@ export default class Gateway extends FabricEventTarget {
           = await this._connectPrologueChronicles(this.prologue));
 
       this.clockEvent(1, `vidgets.register`, `Registering builtin Inspire vidgets`);
-      registerVidgets();
+      // registerVidgets();
       const spindleNames = Object.keys(this._attachedSpindles);
       this.clockEvent(1, `initialized`, "Gateway initialized");
       this._isInitialized = true;

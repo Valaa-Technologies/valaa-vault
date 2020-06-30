@@ -1,13 +1,11 @@
 // @flow
 import React from "react";
 
-import { unthunkRepeat } from "~/inspire/ui/thunk";
 import UIComponent from "~/inspire/ui/UIComponent";
 
 import { beaumpify } from "~/tools";
 
 export default class GatewayStatus extends UIComponent {
-  static _defaultPresentation = () => unthunkRepeat(require("./presentation").default);
   bindFocusSubscriptions (focus: any, props: Object) {
     super.bindFocusSubscriptions(focus, props);
     const inspireGateway = this.getValos().gateway;
@@ -26,9 +24,14 @@ export default class GatewayStatus extends UIComponent {
 
   preRenderFocus () {
     return (
-      <div {...this.presentation("root")}>
+      <div style={{ position: "fixed", left: "120px", top: "0px", zIndex: 10000 }}>
         <span // eslint-disable-line jsx-a11y/click-events-have-key-events
-          {...this.presentation("totalCommandCount", { extraContext: this.state })}
+          style={{
+            fontSize: (this.state.totalCommandCount <= 1
+                ? "40px" : `${80 + this.state.totalCommandCount}px`),
+            color: (this.state.totalCommandCount === 0
+                ? "green" : this.state.totalCommandCount === 1 ? "yellow" : "red")
+          }}
           onClick={this.props.toggle}
         >
           {this.state.totalCommandCount}

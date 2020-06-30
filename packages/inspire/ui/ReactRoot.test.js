@@ -1,6 +1,6 @@
 import ReactRoot from "~/inspire/ui/ReactRoot";
 // mocks
-describe("UIContext", () => {
+describe("ReactRoot", () => {
   let testRoot;
   beforeEach(() => {
     testRoot = new ReactRoot({}, { releaseVssSheets: jest.fn() });

@@ -9,13 +9,10 @@ import { Subscription, LiveUpdate } from "~/engine/Vrapper";
 import debugId from "~/engine/debugId";
 import { Kuery, dumpKuery, dumpObject } from "~/engine/VALEK";
 
-import { unthunkRepeat } from "~/inspire/ui/thunk";
-
 import { arrayFromAny, invariantify, isPromise, outputError, wrapError }
     from "~/tools";
 
 import { clearScopeValue, getScopeValue, setScopeValue } from "./scopeValue";
-import { presentationExpander } from "./presentationHelpers";
 
 import {
   _enableError, _toggleError, _clearError,
@@ -44,7 +41,6 @@ export function isUIComponentElement (element: any) {
 const _propertyNames = PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]);
 
 export default class UIComponent extends React.Component {
-  static _defaultPresentation = () => unthunkRepeat(require("./presentation").default);
   static mainLensSlotName = "uiComponentLens";
 
   static isUIComponent = true;
@@ -99,7 +95,6 @@ export default class UIComponent extends React.Component {
 
   static propTypes = {
     children: PropTypes.any, // children can also be a singular element.
-    _presentation: PropTypes.any, // TODO(iridian, 2018-12): Get rid of the presentation layer.
     style: PropTypes.object,
     styleSheet: PropTypes.any,
     // If no uiContext nor parentUIContext the component is disabled. Only one of these two can be
@@ -165,7 +160,6 @@ export default class UIComponent extends React.Component {
 
 
   static propsCompareModesOnComponentUpdate = {
-    _presentation: "ignore",
     uiContext: "shallow",
     parentUIContext: "shallow",
     focus: "shallow",
@@ -283,14 +277,12 @@ export default class UIComponent extends React.Component {
   getValos () { return this.context.engine.getRootScope().valos; }
 
   getStyle () {
-    return Object.assign({},
-        (this.constructor._defaultPresentation().root || {}).style || {},
+    return Object.assign({ display: "inline-block" },
         this.style || {},
         this.props.style || {});
   }
 
   static propsCompareModesOnComponentUpdate = {
-    _presentation: "ignore",
     reactComponent: "ignore",
   }
 
@@ -390,21 +382,6 @@ export default class UIComponent extends React.Component {
   _subscriptions: Object;
   style: Object;
 
-  rawPresentation () {
-    return this.props._presentation || this.constructor._defaultPresentation();
-  }
-
-  // Returns a fully expanded presentation map or entry at componentPath
-  presentation (componentPath: any, { initial, extraContext = {}, baseContext }:
-      { initial?: Object, extraContext?: Object, baseContext?: Object } = {}) {
-    return presentationExpander(
-        this,
-        componentPath,
-        initial || { key: `<${componentPath}-` },
-        extraContext,
-        baseContext || this.getUIContext());
-  }
-
   /**
    * Returns comprehensive props for a child element. Fetches and expands the presentation using
    * given 'name', as per presentation, using scope as extra context
@@ -418,15 +395,11 @@ export default class UIComponent extends React.Component {
    * @param {any} name
    * @param {any} { index, head, kuery }
    */
-  childProps (name: string, options:
-      { index?: any, kuery?: Kuery, head?: any, focus?: any, context?: Object } = {},
-      initialProps: Object = this.presentation(name, { extraContext: options.context })) {
+  childProps (name: string, targetProps) {
     try {
-      return _childProps(this, name, options, initialProps);
+      return _childProps(this, name, targetProps);
     } catch (error) {
       throw wrapError(error, `During ${this.debugId()}\n .childProps(${name}), with:`,
-          "\n\toptions:", options,
-          "\n\tkey:", options.context && options.context.key,
           "\n\tprops:", this.props,
           "\n\tstate:", this.state,
           "\n\trawPresentation:", this.rawPresentation());

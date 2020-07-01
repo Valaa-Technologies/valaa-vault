@@ -45,6 +45,7 @@ module.exports = {
   mapEagerly,
   thenChainEagerly,
   thisChainEagerly,
+  thisChainRedirect,
   thisChainReturn,
   wrapOutputError,
 };
@@ -170,6 +171,8 @@ function thenChainEagerly (
   }
 }
 
+const _redirectionPrototype = { target: null, params: null };
+
 function thisChainEagerly (
     this_, // : any,
     initialParams, // : any,
@@ -178,59 +181,54 @@ function thisChainEagerly (
     startIndex // : number
 ) {
   let index = startIndex || 0, params = initialParams;
-  let paramsArrayWithPromise;
+  let paramsArray;
   for (;;) {
-    if ((params == null) || (typeof params !== "object")) {
-      params = (params === undefined) ? [] : [params];
-    } else if (Array.isArray(params)) {
-      let i = 0;
-      for (; i !== params.length; ++i) {
-        if ((params[i] != null) && (typeof params[i].then === "function")) {
-          params = Promise.all(paramsArrayWithPromise = params);
-          break;
+    if ((typeof params === "object") && (params != null)) {
+      if (Array.isArray(params)) {
+        let i = 0;
+        paramsArray = params;
+        for (; i !== params.length; ++i) {
+          if ((params[i] != null) && (typeof params[i].then === "function")) {
+            params = Promise.all(params);
+            break;
+          }
         }
-      }
-      if (params.length === undefined) break;
-    } else if (typeof params.then === "function") {
-      break;
-    } else {
-      const keys = Object.keys(params);
-      if (keys.length !== 1) {
-        --index;
-        onThisChainError(
-            new Error("thisChainEagerly params redirection object must have exactly one field"),
-            new Error(getName("param redirection")));
-      }
-      const forwardFunctionKey = keys[0];
-      params = params[forwardFunctionKey];
-      index = functions[forwardFunctionKey];
-      if (typeof index === "function") index = Number(forwardFunctionKey);
-      else if (typeof index !== "number") {
-        if (forwardFunctionKey === "") {
-          return params; // thisChainReturn directive
+        if (params.length === undefined) break; // promise
+      } else if (Object.getPrototypeOf(params) === _redirectionPrototype) {
+        const target = params.target;
+        params = params.params;
+        index = functions[target];
+        if (typeof index === "function") index = Number(target);
+        else if (typeof index !== "number") {
+          if (!target) {
+            return params; // return directive
+          }
+          index = functions.findIndex(f => (f.name === target));
+          if (index === -1) {
+            throw new Error(`thisChainEagerly can't find redirection function with name '${target}'`);
+          }
+          functions[target] = index;
         }
-        index = functions.findIndex(f => (f.name === forwardFunctionKey));
-        if (index === -1) {
-          throw new Error(
-              `thisChainEagerly can't find redirection function with name '${forwardFunctionKey}'`);
-        }
-        functions[forwardFunctionKey] = index;
-      }
-      continue;
-    }
-    if (index >= functions.length) {
-      return params;
+        continue;
+      } else if (typeof params.then === "function") {
+        break;
+      } // else any other object
     }
     const func = functions[index];
-    if (!func) continue;
+    if (!func) {
+      if (index < functions.length) continue;
+      return params;
+    }
     try {
-      params = func.apply(this_, params);
+      params = paramsArray
+          ? func.apply(this_, paramsArray)
+          : func.call(this_, params);
       ++index;
     } catch (error) {
-      paramsArrayWithPromise = null;
       params = onThisChainError(error, new Error(getName("callback")), onRejected);
       index = functions.length;
     }
+    paramsArray = null;
   }
   --index;
   const ret = params.then(
@@ -255,12 +253,21 @@ function thisChainEagerly (
     );
     if (!maybeOnRejected) throw wrapped;
     return maybeOnRejected.call(
-        this_, wrapped, index, paramsArrayWithPromise || params, functions, maybeOnRejected);
+        this_, wrapped, index, paramsArray || params, functions, maybeOnRejected);
   }
 }
 
-function thisChainReturn (result) {
-  return { "": result };
+function thisChainRedirect (targetNameOrIndex, params) {
+  const ret = Object.create(_redirectionPrototype);
+  ret.target = targetNameOrIndex;
+  ret.params = params;
+  return ret;
+}
+
+function thisChainReturn (returnValue) {
+  const ret = Object.create(_redirectionPrototype);
+  ret.params = returnValue;
+  return ret;
 }
 
 function wrapOutputError (callback, header, onError) {

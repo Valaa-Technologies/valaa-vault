@@ -17,7 +17,7 @@ const patchWith = require("@valos/tools/patchWith").default;
 const dumpify = require("@valos/tools/dumpify").default;
 const wrapErrorModule = require("@valos/tools/wrapError");
 const {
-  thenChainEagerly, thisChainEagerly, thisChainReturn,
+  thenChainEagerly, thisChainEagerly, thisChainRedirect, thisChainReturn,
 } = require("@valos/tools/thenChainEagerly");
 
 cardinal.tomorrowNight = require("cardinal/themes/tomorrow-night");
@@ -477,6 +477,7 @@ const _vlm = {
 
   thenChainEagerly,
   thisChainEagerly,
+  thisChainRedirect,
   thisChainReturn,
 
   // Implementation details
@@ -1073,16 +1074,14 @@ function handler (vargv) {
     _reloadPackageAndToolsetsConfigs,
     _validateEnvironment,
     function _handlerInvoke () {
-      return [
-        this.invoke(this.vargv.commandSelector, this.vargv._, {
-          suppressEcho: true,
-          processArgs: false,
-          flushConfigWrites: !_vlm.isCompleting,
-        }),
-      ];
+      return this.invoke(this.vargv.commandSelector, this.vargv._, {
+        suppressEcho: true,
+        processArgs: false,
+        flushConfigWrites: !_vlm.isCompleting,
+      });
     },
     function _handlerFinalize (ret) {
-      return !_vlm.isCompleting && thisChainReturn(ret);
+      return !_vlm.isCompleting && ret;
     },
   ]);
   return chainRet;
@@ -1148,17 +1147,15 @@ function execute (args, options = {}) {
       if (isDryRun) {
         this.echo("dry-run: skipping execution and returning:",
         this.theme.blue(options.dryRunResult));
-        return {
-          _postExecute: [null, 0, undefined, options.dryRunResult],
-        };
+        return thisChainRedirect("_postExecute", [null, 0, undefined, options.dryRunResult]);
       }
-      return [{
+      return {
         stdio: options.delegate
             ? ["ignore", "pipe", "pipe"]
             : [0, options.asTTY ? 1 : "pipe", 2],
         detached: false,
         ...options.spawn,
-      }];
+      };
     },
     function _spawnExecuteProcess (spawnOptions) {
       return new Promise(resolveToOnExecuteDone => {

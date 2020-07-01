@@ -12,7 +12,7 @@ import Vrapper from "~/engine/Vrapper";
 import UIComponent from "~/inspire/ui/UIComponent";
 import Lens from "~/inspire/ui/Lens";
 
-import { thisChainEagerly } from "~/tools";
+import { thisChainEagerly, thisChainRedirect } from "~/tools";
 
 /**
  * Valoscope performs a semantically rich, context-aware render of its local UI focus according to
@@ -128,7 +128,7 @@ export default class Valoscope extends UIComponent {
           vLens: (props.lens instanceof Vrapper) && props.lens,
           lensAuthorityProperty: this.getUIContextValue(Lens.lensAuthorityProperty),
         },
-        [vPrototype && vPrototype.activate()],
+        vPrototype && vPrototype.activate(),
         _scopeFrameChain,
         (error) => { throw this.enableError(error); }
     );
@@ -193,13 +193,13 @@ const _scopeFrameChain = [
 
     const vFrame = this.engine.tryVrapper(this.frameId, { optional: true });
     if (vFrame !== undefined) {
-      return { _assignScopeFrameExternals: [vFrame] };
+      return thisChainRedirect("_assignScopeFrameExternals", vFrame);
     }
     if (!rootFrameAuthorityURI
         || (prototypePart && !this.vPrototype.hasInterface("Chronicle"))) {
-      return { _createFrame: [] };
+      return thisChainRedirect("_createFrame");
     }
-    return [rootFrameAuthorityURI];
+    return rootFrameAuthorityURI;
   },
 
   function _sourcifyRootFrameChronicle (rootFrameAuthorityURI) {
@@ -207,13 +207,13 @@ const _scopeFrameChain = [
     const chronicleURI = naiveURI.createChronicleURI(rootFrameAuthorityURI, this.frameId);
     const discourse = this.discourse
         || (this.discourse = this.engine.getActiveGlobalOrNewLocalEventGroupTransaction());
-    return [discourse.acquireConnection(chronicleURI).asActiveConnection()];
+    return discourse.acquireConnection(chronicleURI).asActiveConnection();
   },
 
   function _obtainRootFrame (/* rootFrameConnection: Connection */) {
     const vRootFrame = this.engine.tryVrapper(this.frameId, { optional: true });
-    if (vRootFrame) return { _assignScopeFrameExternals: [vRootFrame] };
-    return [];
+    if (vRootFrame) return thisChainRedirect("_assignScopeFrameExternals", vRootFrame);
+    return undefined;
   },
 
   function _createFrame () {
@@ -249,16 +249,16 @@ const _scopeFrameChain = [
         ? this.vPrototype.instantiate(initialState, options)
         : this.engine.create("Entity", initialState, options);
     if (!this.rootFrameAuthorityURI || !this.vFocus) {
-      return { _assignScopeFrameExternals: [vScopeFrame] };
+      return thisChainRedirect("_assignScopeFrameExternals", vScopeFrame);
     }
-    return [vScopeFrame];
+    return vScopeFrame;
   },
 
   function _assignShadowLensContextvalues (vScopeFrame) {
     this.component.setUIContextValue(Lens.shadowedFocus, this.vFocus);
     this.component.setUIContextValue(Lens.shadowLensChronicleRoot,
         this.rootFrameAuthorityURI ? vScopeFrame : null);
-    return [vScopeFrame];
+    return vScopeFrame;
   },
 
   function _assignScopeFrameExternals (scopeFrame) {
@@ -274,7 +274,7 @@ const _scopeFrameChain = [
     }
     const vScopeFrame = tryUnpackedHostValue(scopeFrame);
     if (vScopeFrame) this.component.setUIContextValue(Lens.scopeFrameResource, vScopeFrame);
-    return [vScopeFrame || scopeFrame];
+    return vScopeFrame || scopeFrame;
   },
 
   function _setScopeFrameState (scopeFrame) {

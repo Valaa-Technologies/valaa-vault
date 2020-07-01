@@ -11,7 +11,9 @@ import { ChronicleEventResult, Connection, ProphecyChronicleRequest, ProphecyEve
 import { tryAspect } from "~/sourcerer/tools/EventAspects";
 import { FabricatorEvent } from "~/sourcerer/api/Fabricator";
 
-import { dumpObject, isPromise, outputError, thenChainEagerly, mapEagerly } from "~/tools";
+import {
+  dumpObject, isPromise, outputError, thenChainEagerly, thisChainRedirect, mapEagerly,
+} from "~/tools";
 
 import FalseProphet from "./FalseProphet";
 import { _composeRecitalStoryFromEvent, _purgeLatestRecitedStory } from "./_recitalOps";
@@ -546,9 +548,8 @@ class ProphecyOperation extends ProphecyEventResult {
     if (!truth) {
       const actualTruthProcesses = truthProcesses || [];
       if (venue.chronicling !== venue.currentChronicling) {
-        return { // retry
-          0: [venue, venue.currentChronicling = venue.chronicling, []],
-        };
+        // retry
+        return thisChainRedirect(0, [venue, venue.currentChronicling = venue.chronicling, []]);
       }
       Promise.all(actualTruthProcesses).then(([chronicled, received]) => {
         venue.connection.errorEvent(
@@ -571,7 +572,7 @@ class ProphecyOperation extends ProphecyEventResult {
     if ((!this._progress || !this._progress.isSchismatic)
         && (venue.chronicling !== venue.currentChronicling)) {
       // retry
-      return { 0: [venue, venue.currentChronicling = venue.chronicling] };
+      return thisChainRedirect(0, [venue, venue.currentChronicling = venue.chronicling]);
     }
     venue.rejectionReason = error;
     throw error;

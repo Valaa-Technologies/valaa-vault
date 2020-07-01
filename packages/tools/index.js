@@ -46,6 +46,7 @@ export const SimpleData = require("./SimpleData").default;
 
 export const thenChainEagerly = require("./thenChainEagerly").thenChainEagerly;
 export const thisChainEagerly = require("./thenChainEagerly").thisChainEagerly;
+export const thisChainRedirect = require("./thenChainEagerly").thisChainRedirect;
 export const thisChainReturn = require("./thenChainEagerly").thisChainReturn;
 export const mapEagerly = require("./thenChainEagerly").mapEagerly;
 export const wrapOutputError = require("./thenChainEagerly").wrapOutputError;

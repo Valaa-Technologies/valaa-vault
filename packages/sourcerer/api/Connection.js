@@ -132,14 +132,16 @@ export default class Connection extends Follower {
     const wrap = new Error("connect()");
     if (this._activeConnection) return this._activeConnection;
     this.warnEvent(1, () => [
-      "\n\tBegun connecting with options", ...dumpObject(options), ...dumpObject(this)
+      "\n\tBegun sourcery with options", ...dumpObject(options), ...dumpObject(this)
     ]);
     return (this._activeConnection = thenChainEagerly(null,
-        this.addChainClockers(1, "connection.connect.ops", [
-      function _doConnect () { return connection._doConnect(Object.create(options)); },
-      function _postProcess (connectResults) {
+        this.addChainClockers(2, "connection.connect.ops", [
+      function _doConnect () {
+        return connection._doConnect(Object.create(options));
+      },
+      function _postProcess (sourceryResults) {
         if (options.narrateOptions !== false) {
-          const actionCount = Object.values(connectResults).reduce(
+          const actionCount = Object.values(sourceryResults).reduce(
               (s, log) => s + (Array.isArray(log) ? log.length : 0),
               options.eventIdBegin || 0);
           if (!actionCount && (options.newChronicle === false)) {
@@ -150,20 +152,20 @@ export default class Connection extends Follower {
               connection.getChronicleURI()}'`);
           }
           if ((options.requireLatestMediaContents !== false)
-              && (connectResults.mediaRetrievalStatus
+              && (sourceryResults.mediaRetrievalStatus
                   || { latestFailures: [] }).latestFailures.length) {
             // FIXME(iridian): This error temporarily demoted to log error
             connection.outputErrorEvent(
                 new Error(`Failed to connect to chronicle: encountered ${
-                  connectResults.mediaRetrievalStatus.latestFailures.length
+                  sourceryResults.mediaRetrievalStatus.latestFailures.length
                     } latest media content retrieval failures (and ${
                     ""}options.requireLatestMediaContents does not equal false).`),
                 "Exception logged when connecting to chronicle");
           }
         }
         connection.warnEvent(1, () => [
-          "\n\tDone connecting with results:", ...dumpObject(connectResults),
-          "\n\tstatus:", ...dumpObject(connection.getStatus()),
+          "\n\tSourcered with results:", ...dumpObject(sourceryResults),
+          "\n\tconnection status:", ...dumpObject(connection.getStatus()),
         ]);
         return (connection._activeConnection = connection);
       },
@@ -185,7 +187,7 @@ export default class Connection extends Follower {
     this.setUpstreamConnection(this.getSourcerer()._upstream
         .acquireConnection(this.getChronicleURI(), options));
     const connection = this;
-    return thenChainEagerly(null, this.addChainClockers(1, "connection.doConnect.ops", [
+    return thenChainEagerly(null, this.addChainClockers(2, "connection.doConnect.ops", [
       function _waitActiveUpstream () {
         return connection._upstreamConnection.asActiveConnection();
       },

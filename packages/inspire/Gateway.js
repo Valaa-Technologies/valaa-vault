@@ -354,7 +354,7 @@ export default class Gateway extends FabricEventTarget {
     let viewConfig;
     let identity;
     const gateway = this;
-    this._views[viewId] = thenChainEagerly(view, view.addChainClockers(1, "view.create.ops", [
+    this._views[viewId] = thenChainEagerly(view, view.addChainClockers(2, "view.create.ops", [
       async function _createViewOptions () {
         const views = (await expose(gateway.revelation.views)) || {};
 // TODO(iridian, 2020-01): Streamline the view parameterization hodgepodge

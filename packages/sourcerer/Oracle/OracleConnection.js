@@ -53,7 +53,7 @@ export default class OracleConnection extends Connection {
           receiveTruths: this.getReceiveTruths(options.receiveTruths),
         }));
     const connection = this;
-    return thenChainEagerly(null, this.addChainClockers(1, "oracle.doConnect.ops", [
+    return thenChainEagerly(null, this.addChainClockers(2, "oracle.doConnect.ops", [
       function _waitForActiveUpstream () {
         return connection._upstreamConnection.asActiveConnection();
       },

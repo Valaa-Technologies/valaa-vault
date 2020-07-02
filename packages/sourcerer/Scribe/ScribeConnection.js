@@ -98,7 +98,7 @@ export default class ScribeConnection extends Connection {
     // connection isn't, as long as there are any events in the local
     // cache and thus optimistic narration is possible.
     const connection = this;
-    return thenChainEagerly(this, this.addChainClockers(1, "scribe.doConnect.ops", [
+    return thenChainEagerly(this, this.addChainClockers(2, "scribe.doConnect.ops", [
       ...(!this.isLocallyPersisted() ? [] : [
         _initializeConnectionIndexedDB,
         _readMediaEntries,

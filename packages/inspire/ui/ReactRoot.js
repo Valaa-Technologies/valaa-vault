@@ -15,7 +15,7 @@ import Valoscope from "~/inspire/ui/Valoscope";
 import { VS } from "~/engine/VALEK";
 
 import {
-  dumpObject, invariantifyString, traverse, wrapError, outputError, valosHash,
+  dumpObject, invariantifyString, traverse, wrapError, outputError, valosHash, thenChainEagerly,
 } from "~/tools";
 
 jss.setup(preset());
@@ -28,15 +28,15 @@ export default class ReactRoot extends React.Component {
     viewName: PropTypes.string,
     children: PropTypes.object,
     contextLensProperty: PropTypes.arrayOf(PropTypes.string),
-    rootUIScope: PropTypes.object,
+    rootUIContext: PropTypes.object,
     rootProps: PropTypes.object,
   };
 
   static childContextTypes = {
     engine: PropTypes.object,
 
-    lensProperty: PropTypes.arrayOf(PropTypes.string),
-    lensPropertyNotFoundLens: PropTypes.any,
+    // lensProperty: PropTypes.arrayOf(PropTypes.string),
+    // lensPropertyNotFoundLens: PropTypes.any,
 
     css: PropTypes.func,
     getVSSSheet: PropTypes.func,
@@ -47,14 +47,19 @@ export default class ReactRoot extends React.Component {
     super(props, context);
     this.cssRoot = {};
     const vRootFocus = (props.rootProps || {}).focus;
+    this._rootContext = this._createRootContext(vRootFocus, props.rootUIContext);
+    this._rootContext[Lens.lensProperty] = this.props.contextLensProperty;
     if (vRootFocus) {
-      this._createRootContext(vRootFocus, props.viewName, props.rootUIScope)
-      .then(rootContext => {
-        this._rootContext = rootContext;
-        this.forceUpdate();
-      }, failure => {
-        outputError(failure, "Exception caught during ReactRoot._createRootContext");
-        throw failure;
+      thenChainEagerly(this._obtainUIRootFrame(
+          this._rootContext[Lens.shadowLensAuthority], vRootFocus, props.viewName), [
+        frame => {
+          this._rootContext.frame = frame;
+          this._rootContext[Lens.scopeFrameResource] = frame;
+          this.forceUpdate();
+        },
+      ], error => {
+        outputError(error, "Exception caught during ReactRoot._createRootContext");
+        throw error;
       });
     }
   }
@@ -73,7 +78,6 @@ export default class ReactRoot extends React.Component {
         .join(" "),
       getVSSSheet: this.getVSSSheet,
       releaseVssSheets: this.releaseVssSheets,
-      lensProperty: this.props.contextLensProperty,
     };
   }
 
@@ -147,11 +151,8 @@ export default class ReactRoot extends React.Component {
     }
   }
 
-  async _createRootContext (vRootFocus: Vrapper, viewName: string, customUIScope: Object) {
+  _createRootContext (vRootFocus: Vrapper, customUIScope: Object) {
     const rootContext = Object.create(customUIScope || vRootFocus.getEngine().getRootScope());
-    rootContext.frame = await this._obtainUIRootFrame(
-        rootContext[Lens.shadowLensAuthority], vRootFocus, viewName);
-    rootContext[Lens.scopeFrameResource] = rootContext.frame;
     rootContext.VSS = this._createVSS(vRootFocus.getEngine());
     rootContext.VS = VS;
     return rootContext;
@@ -244,7 +245,7 @@ export default class ReactRoot extends React.Component {
 
   render () {
     const vFocus = (this.props.rootProps || {}).focus;
-    if (!vFocus || !this._rootContext) return null;
+    if (!vFocus || !this._rootContext.frame) return null;
     const valoscopeProps = {
       ...(this.props.rootProps || {}),
       parentUIContext: this._rootContext,

@@ -103,10 +103,12 @@ import { thisChainEagerly, thisChainRedirect } from "~/tools";
 export default class Valoscope extends UIComponent {
   static mainLensSlotName = "valoscopeLens";
 
+  /*
   static propTypes = {
     ...UIComponent.propTypes,
     lensName: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
   };
+  */
 
   static contextTypes = {
     ...UIComponent.contextTypes,
@@ -117,18 +119,18 @@ export default class Valoscope extends UIComponent {
     super.bindFocusSubscriptions(focus, props);
     this.setUIContextValue(Lens.scopeChildren, props.children);
     const vPrototype = props.instanceLensPrototype;
+    const vLens = (props.lens instanceof Vrapper) && props.lens;
     return thisChainEagerly({
           component: this,
           engine: this.context.engine,
-          Lens,
           vOwner: this.getParentUIContextValue(Lens.scopeFrameResource),
           key: this.getKey(),
+          frameKey: undefined, // TODO(iridian, 2020-07): Implement for new roots.
           vPrototype,
           focus,
-          vLens: (props.lens instanceof Vrapper) && props.lens,
-          lensAuthorityProperty: this.getUIContextValue(Lens.lensAuthorityProperty),
+          vLens,
         },
-        vPrototype && vPrototype.activate(),
+        [vPrototype && vPrototype.activate(), vLens && vLens.activate()],
         _scopeFrameChain,
         (error) => { throw this.enableError(error); }
     );
@@ -145,8 +147,10 @@ export default class Valoscope extends UIComponent {
 
 const _scopeFrameChain = [
   function _processFramePrototypeAndFocus () {
+    let lensAuthorityProperty;
     if ((this.vPrototype != null) && this.vPrototype.hasInterface("Scope")) {
-      const prototypeLensAuthorityURI = this.vPrototype.propertyValue(this.lensAuthorityProperty);
+      const prototypeLensAuthorityURI = this.vPrototype.propertyValue(
+          (lensAuthorityProperty = this.component.getUIContextValue(Lens.lensAuthorityProperty)));
       if (prototypeLensAuthorityURI !== undefined) {
         this.rootFrameAuthorityURI = prototypeLensAuthorityURI;
       }
@@ -159,7 +163,8 @@ const _scopeFrameChain = [
     if (this.vFocus === currentShadowedFocus) return undefined;
 
     if (this.vFocus.hasInterface("Scope")) {
-      const focusLensAuthorityURI = this.vFocus.propertyValue(this.lensAuthorityProperty);
+      const focusLensAuthorityURI = this.vFocus.propertyValue(lensAuthorityProperty
+          || this.component.getUIContextValue(Lens.lensAuthorityProperty));
       if (focusLensAuthorityURI !== undefined) {
         return focusLensAuthorityURI;
       }

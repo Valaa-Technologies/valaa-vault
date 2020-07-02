@@ -48,12 +48,14 @@ export default class UIComponent extends React.Component {
   static isUIComponent = true;
 
   static contextTypes = {
-    css: PropTypes.func,
-    styleSheet: PropTypes.any,
-    getVSSSheet: PropTypes.func,
-    releaseVssSheets: PropTypes.func,
     engine: PropTypes.object,
 
+    css: PropTypes.func,
+    // styleSheet: PropTypes.any,
+    getVSSSheet: PropTypes.func,
+    releaseVssSheets: PropTypes.func,
+
+    /*
     loadingLens: PropTypes.any,
     loadingFailedLens: PropTypes.any,
     internalErrorLens: PropTypes.any,
@@ -93,24 +95,26 @@ export default class UIComponent extends React.Component {
     pendingChildrenLens: PropTypes.any,
     failedChildrenLens: PropTypes.any,
     lensPropertyNotFoundLens: PropTypes.any,
+    */
   }
 
   static propTypes = {
     children: PropTypes.any, // children can also be a singular element.
-    style: PropTypes.object,
-    styleSheet: PropTypes.any,
     // If no uiContext nor parentUIContext the component is disabled. Only one of these two can be
     // given at the same time: if uiContext is given uiContext.focus is used directly,
     // otherwise parentUIContext.focus is taken as the focus and kuery is live-tracked against it.
     // If kuery is not given, parentUIContext.focus is used directly.
     uiContext: PropTypes.object,
-    globalId: PropTypes.string,
     parentUIContext: PropTypes.object,
     focus: PropTypes.any,
-    kuery: PropTypes.instanceOf(Kuery),
-    head: PropTypes.any, // obsolete alias for focus.
-    locals: PropTypes.object,
+    globalId: PropTypes.string,
     context: PropTypes.object,
+
+    style: PropTypes.object,
+    styleSheet: PropTypes.any,
+
+    // kuery: PropTypes.instanceOf(Kuery),
+    // head: PropTypes.any, // obsolete alias for focus.
 
     delegate: PropTypes.arrayOf(PropTypes.any),
 

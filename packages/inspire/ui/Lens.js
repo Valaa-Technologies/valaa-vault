@@ -512,25 +512,29 @@ If still no suitable lens can be found delegates the viewing to '${notFoundName 
       isEnabled: (focus?: Vrapper) => focus && focus.hasInterface("Scope"),
       rootValue: function propertyLensNameGetter (focus: any, component: UIComponent,
           /* currentSlotName: string */) {
+        /*
         if (component.props.lensName) {
           console.warn("DEPRECATED: props.lensName\n\tprefer: props.lensProperty",
               "\n\tlensName:", JSON.stringify(component.props.lensName),
               "\n\tin component:", component.debugId(), component);
         }
+        */
         const scope = focus.tryValospaceScope();
         const specificLensValue = _tryAndBindPropertyLiveKuery(
             component.props[specificLensPropertySlotName]
                 || component.getUIContextValue(slotSymbol)
-                || component.context[specificLensPropertySlotName]);
+                // || component.context[specificLensPropertySlotName]
+        );
         if (specificLensValue !== undefined) return specificLensValue;
 
-        const legacyLensNameValue = _tryAndBindPropertyLiveKuery(component.props.lensName);
-        if (legacyLensNameValue !== undefined) return legacyLensNameValue;
+        // const legacyLensNameValue = _tryAndBindPropertyLiveKuery(component.props.lensName);
+        // if (legacyLensNameValue !== undefined) return legacyLensNameValue;
 
         const genericLensValue = _tryAndBindPropertyLiveKuery(
             component.props.lensProperty
                   || component.getUIContextValue(ret.lensProperty)
-                  || component.context.lensProperty);
+                  // || component.context.lensProperty
+        );
         if (genericLensValue !== undefined) return genericLensValue;
         /*
         console.error("Can't find resource lens props:", specificLensPropertySlotName, slotSymbol,

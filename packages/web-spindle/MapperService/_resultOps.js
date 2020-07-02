@@ -306,7 +306,7 @@ function _fillReplyFromWebLens (router, vFocus, runtime, valkOptions) {
     <ReactRoot
       isRoot
       viewName={name}
-      rootUIScope={scope}
+      rootUIContext={scope}
       contextLensProperty={["WEB_LENS", "LENS"]}
       rootProps={{ focus: vFocus, lensProperty: [rootLens ? "WEB_ROOT_LENS" : "WEB_LENS"] }}
     />

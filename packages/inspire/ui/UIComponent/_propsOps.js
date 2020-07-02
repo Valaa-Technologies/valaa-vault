@@ -35,30 +35,30 @@ export function _childProps (component: UIComponent, name: string, targetProps: 
 }
 
 export function _checkForInfiniteRenderRecursion (component: UIComponent) {
-  let context = component.state.uiContext;
-  if (!context || !context.focus) return false;
-  const depth = context[Lens.currentRenderDepth];
-  if ((depth !== undefined) && (depth < context[Lens.infiniteRecursionCheckWaterlineDepth])) {
+  let uiContext = component.state.uiContext;
+  if (!uiContext || !uiContext.focus) return false;
+  const depth = uiContext[Lens.currentRenderDepth];
+  if ((depth !== undefined) && (depth < uiContext[Lens.infiniteRecursionCheckWaterlineDepth])) {
     return false;
   }
   const newFocus = component.getFocus();
-  const newKey = component.getUIContextValue("key");
+  const newKey = component.getKey();
   // eslint-disable-next-line
-  while ((context = Object.getPrototypeOf(context))) {
-    if (context.key !== newKey || !context.reactComponent
-        || (context.reactComponent.constructor !== component.constructor)) {
+  while ((uiContext = Object.getPrototypeOf(uiContext))) {
+    if (!uiContext.reactComponent || (uiContext.reactComponent.getKey() !== newKey)
+        || (uiContext.reactComponent.constructor !== component.constructor)) {
       continue;
     }
-    if (context.focus !== newFocus) {
+    if (uiContext.focus !== newFocus) {
       continue;
     }
-    if (_comparePropsOrState(context.reactComponent.props, component.props, "onelevelshallow",
+    if (_comparePropsOrState(uiContext.reactComponent.props, component.props, "onelevelshallow",
         component.constructor.propsCompareModesOnComponentUpdate, "props")) {
       continue;
     }
     console.log("Infinite render recursion match found in component", component,
             component.state.uiContext,
-        "\n\tancestor props:", context.reactComponent.props,
+        "\n\tancestor props:", uiContext.reactComponent.props,
         "\n\telement props:", component.props);
     const currentContext = Object.assign(
         Object.create(Object.getPrototypeOf(component.state.uiContext)),
@@ -70,9 +70,9 @@ export function _checkForInfiniteRenderRecursion (component: UIComponent) {
         "\n\tnew candidate focus:", newFocus && newFocus.debugId(), newFocus,
         "\n\tnew candidate key:", newKey,
         "\n\tnew candidate props:", component.props,
-        "\n\tidentical ancestor UI context:", context,
-        "\n\tidentical ancestor focus:", context.focus.debugId(), context.focus,
-        "\n\tidentical ancestor props:", context.reactComponent.props,
+        "\n\tidentical ancestor UI context:", uiContext,
+        "\n\tidentical ancestor focus:", uiContext.focus.debugId(), uiContext.focus,
+        "\n\tidentical ancestor props:", uiContext.reactComponent.props,
     );
     component.enableError(error, "UIComponent._checkForInfiniteRenderRecursion");
     return true;

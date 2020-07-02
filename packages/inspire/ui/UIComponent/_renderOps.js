@@ -244,7 +244,7 @@ function _tryRenderMediaLens (
 
 const _renderMediaLensChain = [
   function _interpretMediaContent () {
-    return [this.lens.interpretContent(this.options)];
+    return this.lens.interpretContent(this.options);
   },
   function _postProcessInterpretedMediaContent (contentInterpretation) {
     let error;
@@ -260,7 +260,7 @@ const _renderMediaLensChain = [
     } else if (Array.isArray(contentInterpretation)
         || (Object.getPrototypeOf(contentInterpretation) === Object.prototype)
         || React.isValidElement(contentInterpretation)) {
-      return [contentInterpretation];
+      return contentInterpretation;
     } else if (contentInterpretation instanceof Error) {
       error = contentInterpretation;
     } else {

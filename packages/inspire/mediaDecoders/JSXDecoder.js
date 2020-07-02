@@ -157,7 +157,6 @@ export default class JSXDecoder extends MediaDecoder {
   }
 
   _createKeyedElement (sourceInfo, type, props, restChildren, parentKey, parentChildrenMeta) {
-    const props_ = props || {};
     let actualType = type;
     let name;
     let isInstanceLensType = false;
@@ -279,12 +278,19 @@ export default class JSXDecoder extends MediaDecoder {
       isComponentType) {
     /* eslint-disable prefer-const */
     let {
-      focus, array,
+      focus, head, array,
       key, elementKey: globalId, class: className, ref: onRef,
       vScope, valoscope, valaaScope,
       ...restProps
     } = props || {};
 
+    if (head !== undefined) {
+      if (focus !== undefined) {
+        throw new Error("Cannot provide both head and focus; use only focus (head is deprecated)");
+      }
+      this.warnEvent(`head is DEPRECATED in favor of focus`);
+      focus = head;
+    }
     if (isInstanceLensType) {
       if (key) this.warnEvent(`key is DEPRECATED in favor of $L.key (got ${key})`);
       if (globalId) {

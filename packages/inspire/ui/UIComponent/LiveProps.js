@@ -15,7 +15,7 @@ import Valoscope from "~/inspire/ui/Valoscope";
 import UIComponent from "~/inspire/ui/UIComponent";
 
 import {
-  arrayFromAny, patchWith, dumpObject, isPromise, thenChainEagerly, wrapError,
+  arrayFromAny, patchWith, dumpObject, isPromise, thisChainEagerly, wrapError,
 } from "~/tools";
 
 import {
@@ -100,50 +100,22 @@ export default class LiveProps extends UIComponent {
   bindFocusSubscriptions (focus: any, props: Object) {
     super.bindFocusSubscriptions(focus, props);
     // Live props are always based on the parent focus.
-    // Now uselessly reattaching listeners if the local focus changes.
     let frame = this.getUIContextValue("frame");
     if (frame === undefined) frame = {};
-    let livePropValues = OrderedMap();
-    (Object.keys(props.liveProps) || []).forEach(kueryId => {
-      const bindingSlot = `LiveProps_propskuery_${kueryId}`;
-      const kuery = props.liveProps[kueryId];
-      thenChainEagerly(null, [
-        this.bindLiveKuery.bind(this, bindingSlot, frame, kuery,
-            { asRepeathenable: true, scope: this.getUIContext() }),
-        (liveUpdate: LiveUpdate) => {
-          const update = value => {
-            const current = livePropValues || this.state.livePropValues || OrderedMap();
-            if ((value === current.get(kueryId))
-                && ((value !== undefined) || current.has(kueryId))) {
-              return;
-            }
-            this.setState((prevState) => ({
-              livePropValues: (prevState.livePropValues || OrderedMap()).set(kueryId, value),
-            }));
-          };
-          const maybePromise = liveUpdate.value();
-          if (livePropValues) livePropValues = livePropValues.set(kueryId, maybePromise);
-          if (isPromise(maybePromise)) maybePromise.then(update);
-          else if (!livePropValues) update(maybePromise);
-        },
-      ], this._errorOnBindFocusSubscriptions.bind(this, bindingSlot, kuery));
-    });
+    this._immediateLivePropValues = OrderedMap();
+    for (const [kueryId, kuery] of (Object.entries(props.liveProps) || [])) {
+      thisChainEagerly(
+          { component: this, kueryId, kuery },
+          [frame],
+          _subscriptionUpdateChain,
+          _errorOnBindFocusSubscriptions);
+    }
     this.setState(prev => {
-      const ret = { livePropValues: (prev.livePropValues || OrderedMap()).merge(livePropValues) };
-      livePropValues = undefined;
-      return ret;
+      const livePropValues = (prev.livePropValues || OrderedMap())
+          .merge(this._immediateLivePropValues);
+      this._immediateLivePropValues = undefined;
+      return { livePropValues };
     });
-  }
-
-  _errorOnBindFocusSubscriptions (bindingSlot, kuery, error) {
-    this.enableError(wrapError(error,
-            new Error(`bindFocusSubscriptions('${bindingSlot}')`),
-            "\n\tuiContext:", ...dumpObject(this.state.uiContext),
-            "\n\tfocus:", ...dumpObject(this.tryFocus()),
-            "\n\tkuery:", ...dumpObject(kuery),
-            "\n\tstate:", ...dumpObject(this.state),
-            "\n\tprops:", ...dumpObject(this.props)),
-        `Exception caught during LiveProps.bindFocusSubscriptions('${bindingSlot}')`);
   }
 
   unbindSubscriptions () {
@@ -350,4 +322,51 @@ export default class LiveProps extends UIComponent {
     Object.defineProperty(ret, "name", { value: `handleExceptionsOf_${name}` });
     return ret;
   }
+}
+
+const _subscriptionUpdateChain = [
+  _bindRepeathenableLiveKuery,
+  _resolveLiveUpdate,
+];
+
+function _bindRepeathenableLiveKuery (frame) {
+  return this.component.bindLiveKuery(this.kueryId, frame, this.kuery,
+        { asRepeathenable: true, scope: this.component.getUIContext() });
+}
+
+function _resolveLiveUpdate (liveUpdate: LiveUpdate) {
+  const maybePromise = liveUpdate.value();
+  const immediateLivePropValues = this.component._immediateLivePropValues;
+  if (immediateLivePropValues) {
+    this.component._immediateLivePropValues =
+        immediateLivePropValues.set(this.kueryId, maybePromise);
+  }
+  if (isPromise(maybePromise)) {
+    maybePromise.then(resolvedValue =>
+        _triggerNonInitialSubscriptionUpdate(this, resolvedValue));
+  } else if (!immediateLivePropValues) {
+    _triggerNonInitialSubscriptionUpdate(this, maybePromise);
+  }
+}
+
+function _triggerNonInitialSubscriptionUpdate ({ component, kueryId }, value) {
+  const current = component.state.livePropValues || OrderedMap();
+  if ((value !== current.get(kueryId))
+      || ((value === undefined) && !current.has(kueryId))) {
+    component.setState((prevState) => ({
+      livePropValues: (prevState.livePropValues || OrderedMap())
+          .set(kueryId, value),
+    }));
+  }
+}
+
+function _errorOnBindFocusSubscriptions (error) {
+  this.component.enableError(wrapError(error,
+          new Error(`bindFocusSubscriptions('${this.kueryId}')`),
+          "\n\tuiContext:", ...dumpObject(this.component.state.uiContext),
+          "\n\tfocus:", ...dumpObject(this.component.tryFocus()),
+          "\n\tkuery:", ...dumpObject(this.kuery),
+          "\n\tstate:", ...dumpObject(this.component.state),
+          "\n\tprops:", ...dumpObject(this.component.props)),
+      `Exception caught during LiveProps.bindFocusSubscriptions('${this.kueryId}')`);
 }

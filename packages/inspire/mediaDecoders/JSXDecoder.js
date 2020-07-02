@@ -6,7 +6,7 @@ import { addSourceEntryInfo, addStackFrameToError, SourceInfoTag } from "~/raem/
 
 import VALEK, { Kuery, EngineKuery, VS } from "~/engine/VALEK";
 
-import { LENS } from "~/inspire/ui/UIComponent";
+import UIComponent, { LENS } from "~/inspire/ui/UIComponent";
 import LivePropsPropsTag, { tryCreateLivePropsProps } from "~/inspire/ui/UIComponent/LiveProps";
 import vidgets from "~/inspire/ui";
 import Valoscope from "~/inspire/ui/Valoscope";
@@ -152,7 +152,7 @@ export default class JSXDecoder extends MediaDecoder {
 
   _createChildrenMeta () {
     return {
-      hasFunctions: false, hasKueries: false, nameIndices: {}, scopeAccesses: {},
+      hasFunctions: false, hasKueries: false, nameIndices: {}, scopeAccesses: {}, count: 0,
     };
   }
 
@@ -169,12 +169,23 @@ export default class JSXDecoder extends MediaDecoder {
         actualType = vidgets[type] || Valoscope;
       }
     }
+
     let isComponentType = actualType.isUIComponent;
+    const children = [].concat(...restChildren);
+    if (isComponentType && (actualType === UIComponent)) {
+      if ((!props || (Object.keys(props).length === 0)) && (children.length === 1)) {
+        const child = children[0];
+        return _extractMetaOfValueInto((typeof child !== "function")
+                ? child
+                : child(parentKey, parentChildrenMeta),
+            parentChildrenMeta);
+      }
+    }
 
     const propsByNamespace = this._createPropsByNamespace(
         props, parentKey, parentChildrenMeta, name, isInstanceLensType, isComponentType);
 
-    const propsMeta = { hasFunctions: false, hasKueries: false };
+    const propsMeta = { hasFunctions: false, hasKueries: false, count: 0 };
     const childrenMeta = this._createChildrenMeta();
 
     function _extractMetaOfValueInto (value, meta) {
@@ -187,6 +198,7 @@ export default class JSXDecoder extends MediaDecoder {
           Object.assign(meta.scopeAccesses || (meta.scopeAccesses = {}), scopeAccesses);
         }
       }
+      ++meta.count;
       return value;
     }
 
@@ -203,7 +215,7 @@ export default class JSXDecoder extends MediaDecoder {
       throw new Error("internal error: propsMeta.hasFunctions should always be falsy");
     }
 
-    const decodedChildren = [].concat(...restChildren).map((child: any) => {
+    const decodedChildren = children.map((child: any) => {
       const childWithKey = (typeof child !== "function")
           ? child
           : child(isComponentType ? "" : propsByNamespace.L.key, childrenMeta);
@@ -220,8 +232,8 @@ export default class JSXDecoder extends MediaDecoder {
       }
       return this._injectSourceInfoAndLivePropsTags(
           !decodedChildren.length
-              ? React.createElement(actualType, props_)
-              : React.createElement(actualType, props_, decodedChildren),
+              ? React.createElement(actualType, decodedProps)
+              : React.createElement(actualType, decodedProps, decodedChildren),
           sourceInfo);
     }
 

@@ -226,41 +226,40 @@ describe("Vrapper", () => {
 
       it("should use appropriate media type based on the following rule order: " +
          "from options.mediaType > from media itself > from name extension", () => {
+        const vIntegrationScope = testVrapper;
         testVrapper.addToField("tags", {
           typeName: "Tag",
           tagURI: "tag:valaa.com,2017-07-21-date:mediaType#application/javascript"
         });
         testVrapper._obtainMediaInterpretation({
           decodedContent: "", mediaInfo: { contentType: "application/javascript" },
-        }, testVrapper);
+          vIntegrationScope,
+        });
         expect(mediaTypeUsed.contentType).toEqual("application/javascript");
 
-        testVrapper._obtainMediaInterpretation({ decodedContent: "", contentType: "text/plain" },
-            testVrapper);
+        testVrapper._obtainMediaInterpretation(
+            { decodedContent: "", contentType: "text/plain", vIntegrationScope });
         expect(mediaTypeUsed.contentType).toEqual("text/plain");
 
-        testVrapper._obtainMediaInterpretation({ decodedContent: "" }, testVrapper);
+        testVrapper._obtainMediaInterpretation({ decodedContent: "", vIntegrationScope });
         expect(mediaTypeUsed.contentType).toEqual("meta/data");
 
         testVrapper._obtainMediaInterpretation(
-            { decodedContent: "", fallbackContentType: "fall/back" },
-            testVrapper);
+            { decodedContent: "", fallbackContentType: "fall/back", vIntegrationScope });
         expect(mediaTypeUsed.contentType).toEqual("meta/data");
 
         testVrapperMediaInfo.contentType = "";
-        testVrapper._obtainMediaInterpretation({ decodedContent: "" }, testVrapper);
+        testVrapper._obtainMediaInterpretation({ decodedContent: "", vIntegrationScope });
         expect(mediaTypeUsed.contentType).toEqual("application/valoscript");
         testVrapper._obtainMediaInterpretation(
-            { decodedContent: "", fallbackContentType: "fall/back" },
-            testVrapper);
+            { decodedContent: "", fallbackContentType: "fall/back", vIntegrationScope });
         expect(mediaTypeUsed.contentType).toEqual("application/valoscript");
 
         testVrapperMediaInfo.name = "file";
-        testVrapper._obtainMediaInterpretation({ decodedContent: "" }, testVrapper);
+        testVrapper._obtainMediaInterpretation({ decodedContent: "", vIntegrationScope });
         expect(mediaTypeUsed.contentType).toEqual("application/octet-stream");
         testVrapper._obtainMediaInterpretation(
-            { decodedContent: "", fallbackContentType: "fall/back" },
-            testVrapper);
+            { decodedContent: "", fallbackContentType: "fall/back", vIntegrationScope });
         expect(mediaTypeUsed.contentType).toEqual("fall/back");
       });
     });

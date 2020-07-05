@@ -224,8 +224,17 @@ function _tryRenderMediaLens (
       updateImmediately: false,
     });
   }
+  let vIntegrationScope;
+  if (vInterpreterProperty) {
+    const discourse = component.context.engine.discourse;
+    const ghostPath = vInterpreterProperty.getVRef().tryGhostPath();
+    const baseProperty = !ghostPath ? vInterpreterProperty
+        : this._parent.getVrapper([ghostPath.rootRawId()]);
+    vIntegrationScope = baseProperty.step("owner", { discourse });
+  }
+
   const ret = thisChainEagerly(
-      { lens: media, options: { fallbackContentType: "text/vsx", vInterpreterProperty } },
+      { component, media, options: { fallbackContentType: "text/vsx", vIntegrationScope } },
       null,
       _renderMediaLensChain,
       function errorOnRenderMediaLens (error) {
@@ -244,11 +253,11 @@ function _tryRenderMediaLens (
 
 const _renderMediaLensChain = [
   function _interpretMediaContent () {
-    return this.lens.interpretContent(this.options);
+    return this.media.interpretContent(this.options);
   },
   function _postProcessInterpretedMediaContent (contentInterpretation) {
     let error;
-    const info = this.options.mediaInfo || this.lens.resolveMediaInfo();
+    const info = this.options.mediaInfo || this.media.resolveMediaInfo();
     if (typeof contentInterpretation !== "object") {
       if (contentInterpretation !== undefined) return contentInterpretation;
       if (!info.contentHash) throw new Error(`Media '${info.name}' $V.content is missing`);
@@ -258,8 +267,16 @@ const _renderMediaLensChain = [
       if (contentInterpretation.default !== undefined) return contentInterpretation.default;
       error = new Error(`Can't find default export from module Media '${info.name}'`);
     } else if (Array.isArray(contentInterpretation)
-        || (Object.getPrototypeOf(contentInterpretation) === Object.prototype)
-        || React.isValidElement(contentInterpretation)) {
+        || (Object.getPrototypeOf(contentInterpretation) === Object.prototype)) {
+      return contentInterpretation;
+    } else if (React.isValidElement(contentInterpretation)) {
+      // FIXME(iridian, 2020-07): This is a kludge which breaks at
+      // corner-cases. Notably, if a VSX lens contains one or more
+      // sub-elements which resolve to Media's, then those medias will
+      // here set the top-level ui context integration scope resource
+      // and thus will conflict with each other.
+      this.component.setUIContextValue(
+          Lens.integrationScopeResource, this.options.vIntegrationScope);
       return contentInterpretation;
     } else if (contentInterpretation instanceof Error) {
       error = contentInterpretation;

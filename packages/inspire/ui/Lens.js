@@ -624,10 +624,18 @@ INSTANCE_LENS property.
     },
   }));
 
-  createSlotSymbol("instanceLensPrototype", () => ({
+  createSlotSymbol("scopeFrameResource", () => ({
     type: "Resource",
     description:
-`Lens frame prototype Resource. Only valid when given as component props.`,
+`Current innermost enclosing scope frame which is also a Resource. Used
+as the owner for any scope frames created for any of its child components.`,
+  }));
+
+  createSlotSymbol("integrationScopeResource", () => ({
+    type: "Resource",
+    description:
+`The integration scope resource of the source Media for the currently
+rendered element.`,
   }));
 
   createSlotSymbol("scopeFrameResource", () => ({

@@ -1167,7 +1167,8 @@ export default class Vrapper extends Cog {
         case "Property":
           return this.extractPropertyValue(options, vExplicitOwner);
         case "Media":
-          return this._obtainMediaInterpretation(options, vExplicitOwner);
+          options.vIntegrationScope = vExplicitOwner;
+          return this._obtainMediaInterpretation(options);
         default:
       }
       return this;
@@ -1306,11 +1307,11 @@ export default class Vrapper extends Cog {
     return mediaInfo;
   }
 
-  _obtainMediaInterpretation (options: VALKOptions, vIntegrationScope: ?Vrapper) {
+  _obtainMediaInterpretation (options: VALKOptions) {
     let mediaInfo;
     let mostMaterializedTransient;
     let wrap;
-    let vScope = vIntegrationScope;
+    let vScope = options.vIntegrationScope;
     let interpretationsByMime;
     try {
       const kuerySubscription = options.discourse && options.discourse._steppers.kuerySubscription;
@@ -1380,7 +1381,7 @@ export default class Vrapper extends Cog {
           return (async () => {
             options.decodedContent = await decodedContent;
             options.synchronous = true;
-            return this._obtainMediaInterpretation(options, vIntegrationScope);
+            return this._obtainMediaInterpretation(options);
           })();
         }
         // else: decodedContent is synchronously available and synchronous !== false.
@@ -1400,7 +1401,7 @@ export default class Vrapper extends Cog {
       const wrapped = this.wrapErrorEvent(error, 1, wrap,
         "\n\tid:", this[HostRef].toString(),
         "\n\toptions:", ...dumpObject(options),
-        "\n\tvIntegrationScope:", ...dumpObject(vIntegrationScope),
+        "\n\tvIntegrationScope:", ...dumpObject(options.vIntegrationScope),
         "\n\tmediaInfo:", ...dumpObject(mediaInfo),
         "\n\tmostMaterializedTransient:", ...dumpObject(mostMaterializedTransient),
         "\n\tconnection.isActive:", ...dumpObject(
@@ -1577,16 +1578,7 @@ export default class Vrapper extends Cog {
       options.fallbackContentType = options.mimeFallback;
       delete options.mimeFallback;
     }
-    let vIntegrationScope;
-    if (options.vInterpreterProperty) {
-      const discourse = options.discourse || this._parent.discourse;
-      const ghostPath = options.vInterpreterProperty[HostRef].tryGhostPath();
-      const baseProperty = !ghostPath
-          ? options.vInterpreterProperty
-          : this._parent.getVrapper([ghostPath.rootRawId()]);
-      vIntegrationScope = baseProperty.step("owner", { discourse });
-    }
-    return this._obtainMediaInterpretation(options, vIntegrationScope);
+    return this._obtainMediaInterpretation(options);
   }
 
   static toMediaPrepareBvobInfoFields = VALK.fromVAKON({

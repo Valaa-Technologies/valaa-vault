@@ -57,7 +57,7 @@ export function tryWrapElementInLiveProps (
       const parentUIContext = component.getUIContext();
       const livePropsProps = {
         ...livePropsPropsTemplate,
-        parentUIContext,
+        // parentUIContext,
         context: {
           key: createComponentKey(
               (typeof key === "string") ? `!${key}`
@@ -70,17 +70,18 @@ export function tryWrapElementInLiveProps (
       return React.createElement(LiveProps, livePropsProps, ...arrayFromAny(props.children));
     }
     // Element has no live props.
-    let parentUIContext;
+    // let parentUIContext;
     let children;
     if (isUIComponentElement(element)) {
-      const hasUIContext = props.uiContext || props.parentUIContext;
-      // If an UIComponent element doesn't have a uiContext then the
-      // current component context is provided as the parentUIContext
-      // for the child component component.
-      if (!hasUIContext) parentUIContext = component.getUIContext();
+      // const hasUIContext = props.parentUIContext;
+      // If an UIComponent element isn't provided a parentUIContext
+      // explicitly then the current component context is provided as
+      // the parentUIContext.
+      // if (!hasUIContext) parentUIContext = component.getUIContext();
       // Otherwise if the UIComponent has a key no pre-processing
       // is required now. UIComponent does its own post-processing.
-      else if (key || !lensName) return undefined;
+      // else
+      if (key || !lensName) return undefined;
     } else {
       // non-UIComponent sans live props has its children directly rendered.
       children = component.tryRenderLensSequence(props.children, focus, lensName);
@@ -96,7 +97,7 @@ export function tryWrapElementInLiveProps (
     const newProps = { ...props };
     if (ref) newProps.ref = ref;
     delete newProps.children;
-    if (parentUIContext) newProps.parentUIContext = parentUIContext;
+    // if (parentUIContext) newProps.parentUIContext = parentUIContext;
     if (key || lensName) newProps.key = key || lensName;
     return React.createElement(
         elementType,

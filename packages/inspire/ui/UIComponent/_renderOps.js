@@ -39,7 +39,7 @@ export function _renderFocusAsSequence (component: UIComponent,
   // Wraps the focus entries EntryElement, which is UIComponent by default.
   // Rendering a sequence focus can't be just a foci.map(_renderFocus) because individual entries
   // might have pending kueries or content downloads.
-  const parentUIContext = component.getUIContext();
+  // const parentUIContext = component.getUIContext();
   const parentKey = component.getKey() || "-";
   return arrayFromAny(foci).map((focus, arrayIndex) => {
     const key = keyFromFocus
@@ -48,7 +48,7 @@ export function _renderFocusAsSequence (component: UIComponent,
     const props = {
       ...entryProps,
       focus,
-      parentUIContext,
+      // parentUIContext,
       context: { ...(entryProps.context || {}), forIndex: arrayIndex, arrayIndex },
       key,
       globalId: key,

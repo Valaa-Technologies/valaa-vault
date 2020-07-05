@@ -110,10 +110,6 @@ export default class Valoscope extends UIComponent {
   };
   */
 
-  static contextTypes = {
-    ...UIComponent.contextTypes,
-    engine: PropTypes.object,
-  };
 
   bindFocusSubscriptions (focus: any, props: Object) {
     super.bindFocusSubscriptions(focus, props);
@@ -283,7 +279,8 @@ const _scopeFrameChain = [
   },
 
   function _setScopeFrameState (scopeFrame) {
-    return [this.component.setState({ scopeFrame })];
+    this.component.setState({ scopeFrame });
+    return false; // prevent force-update
   },
 ];
 

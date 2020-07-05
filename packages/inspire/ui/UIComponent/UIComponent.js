@@ -49,6 +49,7 @@ export default class UIComponent extends React.Component {
 
   static contextTypes = {
     engine: PropTypes.object,
+    parentUIContext: PropTypes.object,
 
     css: PropTypes.func,
     // styleSheet: PropTypes.any,
@@ -100,12 +101,7 @@ export default class UIComponent extends React.Component {
 
   static propTypes = {
     children: PropTypes.any, // children can also be a singular element.
-    // If no uiContext nor parentUIContext the component is disabled. Only one of these two can be
-    // given at the same time: if uiContext is given uiContext.focus is used directly,
-    // otherwise parentUIContext.focus is taken as the focus and kuery is live-tracked against it.
-    // If kuery is not given, parentUIContext.focus is used directly.
-    uiContext: PropTypes.object,
-    parentUIContext: PropTypes.object,
+    // parentUIContext: PropTypes.object, // If no parentUIContext the component is disabled.
     focus: PropTypes.any,
     globalId: PropTypes.string,
     context: PropTypes.object,
@@ -159,6 +155,10 @@ export default class UIComponent extends React.Component {
     lensPropertyNotFoundLens: PropTypes.any,
   }
 
+  static childContextTypes = {
+    parentUIContext: PropTypes.object,
+  };
+
   static noPostProcess = {
     children: true,
     kuery: true,
@@ -166,8 +166,7 @@ export default class UIComponent extends React.Component {
 
 
   static propsCompareModesOnComponentUpdate = {
-    uiContext: "shallow",
-    parentUIContext: "shallow",
+    // parentUIContext: "shallow",
     focus: "shallow",
     head: "shallow",
     locals: "shallow",
@@ -178,18 +177,22 @@ export default class UIComponent extends React.Component {
 
   constructor (props: any, context: any, extraState: Object) {
     super(props, context);
-    invariantify(!(props.uiContext && props.parentUIContext),
-        `only either ${this.constructor.name
-            }.props.uiContext or ...parentUIContext can be defined at the same time`);
-    invariantify(this.constructor.contextTypes.css,
-        `${this.constructor.name}.contextTypes is missing css, ${
-        ""}: did you forget to inherit super contextTypes somewhere? ${
-        ""} (like: static ContextTypes = { ...Super.contextTypes, ...)`);
-    this.state = { error: undefined, errorHidden: false, ...(extraState || {}) };
+    const uiContext = Object.create(context.parentUIContext);
+    uiContext.context = uiContext;
+    uiContext.reactComponent = this;
+    uiContext[Lens.currentRenderDepth] = context.parentUIContext[Lens.currentRenderDepth] + 1;
+
+    this.state = {
+      error: undefined,
+      errorHidden: false,
+      uiContext,
+      ...(extraState || {}),
+    };
+
     this._subscriptions = {};
     this._isConstructing = true;
     try {
-      _componentConstructed(this, props);
+      _componentConstructed(this, props, context);
     } catch (error) {
       this.enableError(wrapError(error,
               new Error(`During ${this.debugId()})\n .constructor(), with:`),
@@ -199,6 +202,12 @@ export default class UIComponent extends React.Component {
           ), "UIComponent.constructor");
     }
     this._isConstructing = false;
+  }
+
+  getChildContext () {
+    return {
+      parentUIContext: this.state.uiContext,
+    };
   }
 
   state: Object;
@@ -514,6 +523,7 @@ export default class UIComponent extends React.Component {
    */
   bindFocusSubscriptions (focus: any, props: Object) { // eslint-disable-line no-unused-vars
     this._areSubscriptionsBound = true;
+    return true; // force-update by default
   }
 
   unbindSubscriptions (/* focus: ?Vrapper */) {

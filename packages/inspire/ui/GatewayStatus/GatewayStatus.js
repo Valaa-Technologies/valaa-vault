@@ -7,13 +7,14 @@ import { beaumpify } from "~/tools";
 
 export default class GatewayStatus extends UIComponent {
   bindFocusSubscriptions (focus: any, props: Object) {
-    super.bindFocusSubscriptions(focus, props);
+    const ret = super.bindFocusSubscriptions(focus, props);
     const inspireGateway = this.getValos().gateway;
     if (inspireGateway) {
       inspireGateway.setCommandCountListener(this,
           (totalCommandCount: number, chronicleCommandCounts: Object) =>
               this.setState({ totalCommandCount, chronicleCommandCounts }));
     }
+    return ret;
   }
 
   unbindSubscriptions () {

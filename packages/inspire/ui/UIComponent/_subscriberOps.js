@@ -7,10 +7,11 @@ import { invariantify } from "~/tools";
 import UIComponent from "./UIComponent";
 
 export function _initiateSubscriptions (component: UIComponent, focus: any, props: Object) {
-  if (!component || component._areSubscriptionsBound) return;
-  component.bindFocusSubscriptions(focus, props);
+  if (!component || component._areSubscriptionsBound) return false;
+  const shouldForceUpdate = component.bindFocusSubscriptions(focus, props);
   invariantify(component._areSubscriptionsBound, `${component.constructor.name
       }().super.bindFocusSubscriptions not called from derived bindFocusSubscriptions`);
+  return shouldForceUpdate;
 }
 
 export function _finalizeUnbindSubscriptions (component: UIComponent, /* focus: ?Vrapper */) {

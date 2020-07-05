@@ -22,6 +22,7 @@ export default class FieldEditor extends UIComponent {
           { asRepeathenable: true, scope: this.getUIContext() }),
       function updateFieldEditorValue (liveUpdate: LiveUpdate) {
         fieldEditor.setState({ value: liveUpdate.value() });
+        return false; // don't force-update
       },
     ], function errorOnFieldEditorSubscription (error) {
       throw wrapError(error, `During ${

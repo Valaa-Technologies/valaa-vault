@@ -20,11 +20,13 @@ export function createComponentKey (parentKey: string, focus: any, index?: any):
 }
 
 export function _childProps (component: UIComponent, name: string, targetProps: Object) {
+  /*
   targetProps.parentUIContext = component.getUIContext();
   if (!targetProps.parentUIContext) {
     invariantifyObject(targetProps.parentUIContext,
-      "uiComponentProps.parentUIContext (when no .uiContext is given)", { allowEmpty: true });
+        "uiComponentProps.parentUIContext", { allowEmpty: true });
   }
+  */
   targetProps.context = targetProps.context || {};
   if (!targetProps.context.key) {
     targetProps.context.key = createComponentKey(name || "",

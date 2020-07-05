@@ -3,10 +3,9 @@
 import { dumpObject } from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
 
-import { invariantify, thenChainEagerly, wrapError } from "~/tools";
+import { thenChainEagerly, wrapError } from "~/tools";
 
 import type UIComponent from "./UIComponent";
-import Lens from "~/inspire/ui/Lens";
 
 import { getScopeValue, setScopeValue } from "./scopeValue";
 
@@ -15,192 +14,139 @@ import { _initiateSubscriptions } from "./_subscriberOps";
 
 // const _timings = {};
 
-// function _addTiming (/* component, name, start, ...rest */) {
-  /*
-  return;
+/*
+function _addTiming (component, name, start, options) {
   const duration = performance.now() - start;
   const timing = _timings[name] || (_timings[name] = { total: 0, count: 0 });
   timing.total += duration;
   ++timing.count;
-  console.log(component.constructor.name, component.getKey(), name, ...rest,
-      "duration:", duration, "count:", timing.count, "total:", timing.total);
-  */
-// }
+  console.log(component.constructor.name, component.getKey(), name,
+      "duration:", duration, "count:", timing.count, "total:", timing.total,
+      ...(options ? ["\n\toptions:", options] : []),
+  );
+}
+*/
 
-export function _componentConstructed (component: UIComponent, props: Object) {
+export function _componentConstructed (component: UIComponent, props: Object, context: Object) {
   // const start = performance.now();
-  component._activeParentFocus = _getActiveParentFocus(props);
-  _updateFocus(component, props);
-  // _addTiming(component, "componentWillMount.updateFocus", start);
+  component._activeParentFocus = _getActiveParentFocus(props, context);
+  _tryUpdateUIContext(component, props.context);
+  _updateFocus(component, props, context);
+  // _addTiming(component, "componentConstructed.updateFocus", start, { props, context });
 }
 
 export function _componentWillReceiveProps (component: UIComponent, nextProps: Object,
     nextContext: Object, forceReattachListeners: ?boolean) {
   // const start = performance.now();
-  const nextActiveParentFocus = _getActiveParentFocus(nextProps);
+  const nextActiveParentFocus = _getActiveParentFocus(nextProps, nextContext);
   const oldProps = component.props;
   const shouldUpdateFocus = (forceReattachListeners === true)
-      || (nextProps.uiContext !== oldProps.uiContext)
-      || (nextProps.parentUIContext !== oldProps.parentUIContext)
       || (component._activeParentFocus !== nextActiveParentFocus)
-      || (nextProps.focus !== oldProps.focus)
-      || (nextProps.head !== oldProps.head)
-      || _comparePropsOrState(nextProps.context, oldProps.context, "shallow")
-      || _comparePropsOrState(nextProps.locals, oldProps.locals, "shallow");
-  // _addTiming(component, "componentWillReceiveProps.check", start, shouldUpdateFocus);
+      || (nextProps.focus !== oldProps.focus);
+  // _addTiming(component, "componentWillReceiveProps.check", start,
+  //    { shouldUpdateUIContext, shouldUpdateFocus });
+  // const startUpdate = performance.now();
+  _tryUpdateUIContext(component, nextProps.context, !shouldUpdateFocus && oldProps.context);
   if (shouldUpdateFocus) {
     component._activeParentFocus = nextActiveParentFocus;
-    // const startUpdate = performance.now();
-    component.unbindSubscriptions();
     component._errorObject = null;
-    _updateFocus(component, nextProps, oldProps);
-    // _addTiming(component, "componentWillReceiveProps.updateFocus", startUpdate);
+    _updateFocus(component, nextProps, nextContext, oldProps, forceReattachListeners);
   }
+  // _addTiming(component, "componentWillReceiveProps.updateFocus", startUpdate);
 }
 
 // If there is no local props focus, we track parent focus changes for props updates.
-function _getActiveParentFocus (props: Object) {
-  if (props.hasOwnProperty("focus") || props.hasOwnProperty("head") || !props.parentUIContext) {
-    return undefined;
-  }
-  return props.parentUIContext.hasOwnProperty("focus")
-      ? getScopeValue(props.parentUIContext, "focus")
-      : getScopeValue(props.parentUIContext, "head");
+function _getActiveParentFocus (props: Object, context: Object) {
+  if (props.hasOwnProperty("focus") || !context.parentUIContext) return undefined;
+  return getScopeValue(context.parentUIContext, "focus");
 }
 
-function _updateFocus (component: UIComponent, newProps: Object, oldProps: Object) {
-  try {
-    /*
-    console.warn(component.debugId(), "._updateFocus",
-        "\n\tnew props.uiContext:", newProps.uiContext,
-        "\n\tnew props.parentUIContext:", newProps.parentUIContext,
-        "\n\tnew props.focus:", newProps.focus,
-    // */
-    const newUIContext = newProps.uiContext;
-
-    if (newUIContext && newProps.parentUIContext) {
-      invariantify(!(newUIContext && newProps.parentUIContext),
-      `only either ${component.constructor.name
-          }.props.uiContext or ...parentUIContext can be defined at the same time`);
-    }
-
-    const scope = newUIContext || newProps.parentUIContext;
-    if (!scope) return;
-    const focus = newProps.hasOwnProperty("focus")
-            ? newProps.focus
-        : newProps.hasOwnProperty("head")
-            ? newProps.head
-        : (getScopeValue(scope, "focus") !== undefined)
-            ? getScopeValue(scope, "focus")
-            : getScopeValue(scope, "head");
-    if (focus === undefined) return;
-    if (newProps.kuery !== undefined) throw new Error("props.kuery no longer supported");
-    _createContextAndSetFocus(component, focus, newProps, oldProps);
+function _tryUpdateUIContext (component, propsContext, oldPropsContext) {
+  if (!propsContext
+      || (oldPropsContext && !_comparePropsOrState(propsContext, oldPropsContext, "shallow"))) {
     return;
-    /*
-    if (!newProps.parentUIContext) {
-      invariantify(newProps.parentUIContext, `if ${component.constructor.name
-      }.props.kuery is specified then ...parentUIContext must also be specified`);
-    }
-    if (component.state.uiContext) {
-      component.setUIContextValue("focus", undefined);
-      // component.setUIContextValue("head", undefined);
-    }
-    component.bindLiveKuery("UIComponent_focus", focus, newProps.kuery, {
-      scope,
-      onUpdate: function updateFocusDependents (liveUpdate: LiveUpdate) {
-        _finalizeUnbindSubscribersExcept(component, "UIComponent.focus");
-        _createContextAndSetFocus(
-            component, liveUpdate.value(), newProps, component.props || oldProps);
-      },
-    });
-    */
-  } catch (error) {
-    throw wrapError(error, `During ${component.debugId()}\n ._updateFocus:`,
-        "\n\tnew props:", newProps,
-        ...(newProps.uiContext ? ["\n\tnew props.uiContext:", newProps.uiContext] : []),
-        ...(newProps.parentUIContext
-            ? ["\n\tnew props.parentUIContext:", newProps.parentUIContext] : []),
-        "\n\told props:", oldProps,
-        "\n\tstate:", component.state,
-    );
+  }
+  const uiContext = component.state.uiContext;
+  for (const name of Object.getOwnPropertyNames(propsContext)) {
+    setScopeValue(uiContext, name, propsContext[name]);
+  }
+  for (const symbol of Object.getOwnPropertySymbols(propsContext)) {
+    setScopeValue(uiContext, symbol, propsContext[symbol]);
   }
 }
 
-function _createContextAndSetFocus (
-    component: UIComponent, newFocus: any, newProps: Object, oldProps: Object) {
-  const parentUIContext = (oldProps || {}).parentUIContext || newProps.parentUIContext;
-  let uiContext = newProps.uiContext || component.state.uiContext;
-  if (!uiContext) {
-    uiContext = Object.create(parentUIContext);
-    uiContext.context = uiContext;
-    uiContext[Lens.currentRenderDepth] = (parentUIContext[Lens.currentRenderDepth] || 0) + 1;
-  }
-
-  if (newProps.context) {
-    for (const name of Object.getOwnPropertyNames(newProps.context)) {
-      setScopeValue(uiContext, name, newProps.context[name]);
-    }
-    for (const symbol of Object.getOwnPropertySymbols(newProps.context)) {
-      setScopeValue(uiContext, symbol, newProps.context[symbol]);
-    }
-  }
-
-  if (component.state.uiContext === uiContext) {
-    _attachSubscribersWhenDone();
-    if (oldProps) component.forceUpdate();
-  } else {
-    uiContext.reactComponent = component;
-    component.setState({ uiContext }, _attachSubscribersWhenDone);
-  }
-
-  function _attachSubscribersWhenDone () {
-    if (newFocus === undefined) return;
-    thenChainEagerly(newFocus, [
-      function _updateContextFocus (resolvedNewFocus) {
-        setScopeValue(uiContext, "focus", resolvedNewFocus);
-        setScopeValue(uiContext, "head", resolvedNewFocus);
-        const isResource = (newFocus instanceof Vrapper) && newFocus.isResource();
-        return isResource && newFocus.activate();
-      },
-      function _validateResourceFocusIsActive (isResource) {
-        if (!isResource) return true;
-        if (newFocus.isActive()) {
-          // If some later update has updated focus prevent subscriber
-          // attach and let the later update handle it instead.
-          if (newFocus !== getScopeValue(uiContext, "focus")) return false;
-          return true;
+function _updateFocus (component: UIComponent, newProps: Object, newContext: Object,
+    oldProps: Object, forceReattachListeners: ?boolean) {
+  /*
+  console.log(component.debugId(), "._updateFocus",
+      "\n\tnew context.parentUIContext:", newContext.parentUIContext,
+      "\n\tnew props.focus:", newProps.focus);
+  // */
+  const parentUIContext = newContext.parentUIContext;
+  if (!parentUIContext) return;
+  let newFocus = newProps.hasOwnProperty("focus")
+      ? newProps.focus
+      : getScopeValue(parentUIContext, "focus");
+  if (newProps.kuery !== undefined) throw new Error("props.kuery no longer supported");
+  const uiContext = component.state.uiContext;
+  const oldFocus = getScopeValue(uiContext, "focus");
+  thenChainEagerly(newFocus, [
+    function _updateContextFocus (resolvedNewFocus) {
+      // console.log(component.debugId(), "_updateContextFocus", resolvedNewFocus);
+      newFocus = resolvedNewFocus;
+      setScopeValue(uiContext, "focus", newFocus);
+      setScopeValue(uiContext, "head", newFocus);
+      return (newFocus instanceof Vrapper)
+          && newFocus.isResource()
+          && newFocus.activate();
+    },
+    function _validateResourceFocusIsActive (isResource) {
+      // console.log(component.debugId(), "_validateResourceFocusIsActive", isResource);
+      if (!isResource || newFocus.isActive()) return;
+      let error;
+      if (newFocus.isInactive() || newFocus.isActivating()) {
+        error = new Error(`Resource ${newFocus.debugId()} did not activate properly; ${
+          ""} expected focus status to be 'Active', got '${newFocus.getPhase()}' instead`);
+        error.slotName = newFocus.isInactive() ? "inactiveLens" : "activatingLens";
+      } else if (newFocus.isImmaterial()) {
+        error = new Error(`Resource ${newFocus.debugId()} has been destroyed`);
+        error.slotName = "destroyedLens";
+      } else if (newFocus.isUnavailable()) {
+        error = new Error(`Resource ${newFocus.debugId()} is unavailable`);
+        error.slotName = "unavailableLens";
+      } else {
+        error = new Error(`Resource ${newFocus.debugId()} has unrecognized phase '${
+          newFocus.getPhase()}'`);
+      }
+      throw error;
+    },
+    function _reinitiateFocusSubscriptions () {
+      if (component._areSubscriptionsBound) {
+        if ((!forceReattachListeners && (oldFocus === newFocus))
+        // If some later update has updated focus prevent subscriber
+        // (re)attach and let the later update handle it instead.
+            || (getScopeValue(uiContext, "focus") !== newFocus)) {
+          return false;
         }
-        let error;
-        if (newFocus.isInactive() || newFocus.isActivating()) {
-          error = new Error(`Resource ${newFocus.debugId()} did not activate properly; ${
-            ""} expected focus status to be 'Active', got '${newFocus.getPhase()}' instead`);
-          error.slotName = newFocus.isInactive() ? "inactiveLens" : "activatingLens";
-        } else if (newFocus.isImmaterial()) {
-          error = new Error(`Resource ${newFocus.debugId()} has been destroyed`);
-          error.slotName = "destroyedLens";
-        } else if (newFocus.isUnavailable()) {
-          error = new Error(`Resource ${newFocus.debugId()} is unavailable`);
-          error.slotName = "unavailableLens";
-        } else {
-          error = new Error(`Resource ${newFocus.debugId()} has unrecognized phase '${
-            newFocus.getPhase()}'`);
-        }
-        throw error;
-      },
-      function _initiateFocusSubscriptions (shouldInitiate) {
-        if (shouldInitiate) _initiateSubscriptions(component, newFocus, newProps);
-      },
-    ], function errorOnCreateContextAndSetFocus (error) {
-      component.enableError(
-          wrapError(error, new Error(`createContextAndSetFocus()`),
-              "\n\tnew focus:", ...dumpObject(newFocus),
-              "\n\tnew props:", ...dumpObject(newProps),
-              "\n\tnew uiContext:", ...dumpObject(uiContext),
-              "\n\tcomponent:", ...dumpObject(component)),
-          "UIComponent._createContextAndSetFocus");
-    });
-  }
+        component.unbindSubscriptions();
+      }
+      if (newFocus === undefined) return true;
+      return _initiateSubscriptions(component, newFocus, newProps);
+    },
+    function _update (shouldUpdate) {
+      // console.log(component.debugId(), "_update", shouldUpdate);
+      if ((shouldUpdate !== false) && oldProps) {
+        component.forceUpdate();
+      }
+    },
+  ], function errorOnCreateContextAndSetFocus (error) {
+    component.enableError(
+        wrapError(error, new Error(`_updateFocus()`),
+            "\n\tnew focus:", ...dumpObject(newFocus),
+            "\n\tnew props:", ...dumpObject(newProps),
+            "\n\tcomponent:", ...dumpObject(component)),
+        "UIComponent._updateFocus");
+  });
 }
 
 export function _shouldComponentUpdate (component: UIComponent, nextProps: Object,
@@ -210,7 +156,8 @@ export function _shouldComponentUpdate (component: UIComponent, nextProps: Objec
           component.constructor.propsCompareModesOnComponentUpdate, "props")
       || _comparePropsOrState(component.state, nextState, "deep",
           component.constructor.stateCompareModesOnComponentUpdate, "state");
-  // _addTiming(component, "shouldComponentUpdate.check", start, ret);
+  // _addTiming(component, "shouldComponentUpdate.check", start,
+  //    { ret, component, nextProps, nextState, nextContext });
   return ret;
 }
 

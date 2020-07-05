@@ -34,6 +34,7 @@ export default class ReactRoot extends React.Component {
 
   static childContextTypes = {
     engine: PropTypes.object,
+    parentUIContext: PropTypes.object,
 
     // lensProperty: PropTypes.arrayOf(PropTypes.string),
     // lensPropertyNotFoundLens: PropTypes.any,
@@ -48,6 +49,9 @@ export default class ReactRoot extends React.Component {
     this.cssRoot = {};
     const vRootFocus = (props.rootProps || {}).focus;
     this._rootContext = this._createRootContext(vRootFocus, props.rootUIContext);
+    this._rootContext.context = this._rootContext;
+    this._rootContext.reactComponent = this;
+    this._rootContext[Lens.currentRenderDepth] = 0;
     this._rootContext[Lens.lensProperty] = this.props.contextLensProperty;
     if (vRootFocus) {
       thenChainEagerly(this._obtainUIRootFrame(
@@ -68,6 +72,7 @@ export default class ReactRoot extends React.Component {
     const focus = (this.props.rootProps || {}).focus;
     return {
       engine: focus && focus.getEngine(),
+      parentUIContext: this._rootContext,
       css: (...cssClassPaths: string[]) =>
         cssClassPaths.map(cssClassPath => {
           const className = traverse(this.cssRoot, cssClassPath);

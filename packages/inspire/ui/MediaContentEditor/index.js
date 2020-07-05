@@ -23,6 +23,7 @@ export default class MediaContentEditor extends UIComponent {
       },
       function _setEditorStateContent (content) {
         editor.setState({ content });
+        return false; // prevent force-update
       },
     ], function errorOnMediaContentEditorSubscriptions (error) {
       throw wrapError(error,

@@ -69,8 +69,8 @@ const _isReservedPropsName = {
  * need to receive its props through props.elementProps.
  *
  * Note: as LiveProps is an UIComponent it can be passed the normal
- * UIComponent props like props.uiContext or props.parentUIContext and
- * props.kuery: however the resulting local uiContext.focus will not
+ * UIComponent props like props.parentUIContext: however the resulting
+ * local uiContext.focus will not
  * affect the live props and is only used for the children (if any).
  *
  * @export
@@ -116,6 +116,7 @@ export default class LiveProps extends UIComponent {
       this._immediateLivePropValues = undefined;
       return { livePropValues };
     });
+    return false;
   }
 
   unbindSubscriptions () {
@@ -142,7 +143,7 @@ export default class LiveProps extends UIComponent {
     // cannot be explicitly passed any props.
     // These slot props should probably be passed to LiveProps inside props, though...
     return super.readSlotValue(slotName, slotSymbol, focus, onlyIfAble,
-        ((this.props.parentUIContext || {}).reactComponent || this).props);
+        ((this.context.parentUIContext || {}).reactComponent || this).props);
   }
 
   refreshClassName (focus: any, value: any) {

@@ -3,26 +3,24 @@
 import React from "react";
 
 import { Kuery } from "~/raem/VALK";
-import { IsLiveTag } from "~/engine/VALEK";
 
 import UIComponent, { isUIComponentElement } from "./UIComponent";
-import { createComponentKey } from "./_propsOps";
-import { getScopeValue } from "./scopeValue";
 
 import { arrayFromAny, isPromise, wrapError } from "~/tools";
 
 export const LivePropsPropsTag = Symbol("LiveProps.props");
 
 export function wrapElementInLiveProps (component: UIComponent, element: Object, focus: any,
-    name?: string) {
-  const ret = tryWrapElementInLiveProps(component, element, focus, name);
+    hierarchyKey?: string) {
+  const ret = tryWrapElementInLiveProps(component, element, focus, hierarchyKey);
   return (ret !== undefined) ? ret : element;
 }
 
 let _LiveProps;
 
 /**
- * If no name is provided then it means the component doesn't necessarily need one.
+ * If no hierarchyKey is provided then it means the component doesn't
+ * necessarily need one.
  *
  * @export
  * @param {UIComponent} component
@@ -59,50 +57,56 @@ export function tryWrapElementInLiveProps (
       // */
       return React.createElement(...livePropsArgs, ...arrayFromAny(element.props.children));
     }
+    return tryPostRenderElement(component, element, focus, hierarchyKey);
     // Element has no live props.
     // let parentUIContext;
-    let children;
-    if (isUIComponentElement(element)) {
-      // const hasUIContext = props.parentUIContext;
-      // If an UIComponent element isn't provided a parentUIContext
-      // explicitly then the current component context is provided as
-      // the parentUIContext.
-      // if (!hasUIContext) parentUIContext = component.getUIContext();
-      // Otherwise if the UIComponent has a key no pre-processing
-      // is required now. UIComponent does its own post-processing.
-      // else
-      if (key || !lensName) return undefined;
-    } else {
-      // non-UIComponent sans live props has its children directly rendered.
-      children = component.tryRenderLensSequence(props.children, focus, lensName);
-      if ((key || !lensName) && (children === undefined)) return undefined;
-      if (isPromise(children)) {
-        children.operationInfo = Object.assign(children.operationInfo || {}, {
-          slotName: "pendingChildrenLens", focus: props.children,
-          onError: { slotName: "failedChildrenLens", children: props.children },
-        });
-        return children;
-      }
-    }
-    const newProps = { ...props };
-    if (ref) newProps.ref = ref;
-    delete newProps.children;
-    // if (parentUIContext) newProps.parentUIContext = parentUIContext;
-    if (key || lensName) newProps.key = key || lensName;
-    return React.createElement(
-        elementType,
-        newProps,
-        ...(children || arrayFromAny(props.children)));
   } catch (error) {
     throw wrapError(error, `During ${component.debugId()}\n .tryWrapElementInLiveProps(`,
-            typeof elementType === "function" ? elementType.name : elementType, `), with:`,
-        "\n\telement.props:", props,
-        "\n\telement.props.children:", props && props.children,
+            typeof element.type === "function" ? element.type.name : element.type, `), with:`,
+        "\n\telement.props:", element.props,
+        "\n\telement.props.children:", element.props && element.props.children,
     );
   }
 }
 
-export function tryCreateLivePropsArgs (elementType, props, key, ref, component, lensName) {
+export function postRenderElement (component, element, focus, hierarchyKey) {
+  const ret = tryPostRenderElement(component, element, focus, hierarchyKey);
+  return (ret !== undefined) ? ret : element;
+}
+
+export function tryPostRenderElement (component, element, focus, hierarchyKey) {
+  let processedProps;
+  if (isUIComponentElement(element)) {
+    // const hasUIContext = props.parentUIContext;
+    // If an UIComponent element isn't provided a parentUIContext
+    // explicitly then the current component context is provided as
+    // the parentUIContext.
+    // if (!hasUIContext) parentUIContext = component.getUIContext();
+    // Otherwise if the UIComponent has a key no pre-processing
+    // is required now. UIComponent does its own post-processing.
+    // else
+    if (element.key || !element.hierarchyKey) return undefined;
+    processedProps = { ...element.props, key: hierarchyKey };
+  } else {
+    // non-UIComponent sans live props has its children directly rendered.
+    const children = component.tryRenderLensSequence(element.props.children, focus, hierarchyKey);
+    if (children === undefined) {
+      if (element.key || !hierarchyKey) return undefined;
+      processedProps = { ...element.props, key: hierarchyKey };
+    } else if (isPromise(children)) {
+      children.operationInfo = Object.assign(children.operationInfo || {}, {
+        slotName: "pendingChildrenLens", focus: element.props.children,
+        onError: { slotName: "failedChildrenLens", children: element.props.children },
+      });
+      return children;
+    } else {
+      processedProps = { ...element.props, key: element.key || hierarchyKey, children };
+    }
+  }
+  if (element.ref) processedProps.ref = element.ref;
+  return React.createElement(element.type, processedProps);
+  // ...(children || arrayFromAny(props.children)));
+}
 
 const _genericLivePropsBehaviors = {
   children: false, // ignore
@@ -151,6 +155,7 @@ export function tryCreateLivePropsArgs (elementType, propsSeq, hierarchyKey) {
       delete propsKueries.currentIndex;
       livePropsProps.propsKueriesSeq = [...Object.entries(propsKueries)];
     }
+    livePropsProps.hierarchyKey = hierarchyKey;
     return [LiveProps, livePropsProps];
   } catch (error) {
     throw wrapError(error, `During _createLivePropsProps(`,

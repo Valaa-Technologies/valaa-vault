@@ -92,7 +92,7 @@ export default class JSXDecoder extends MediaDecoder {
       // as custom user provided keys. For example lens instances use custom keys to store
       // themselves inside parent instance owner properties.
       const rootChildrenMeta = this._createChildrenMeta();
-      const integrator = rootElementBindKeys(`-${sourceInfo.mediaName}`, rootChildrenMeta);
+      const integrator = rootElementBindKeys(`@~:${sourceInfo.mediaName}`, rootChildrenMeta);
       sourceInfo.phase = `run phase of ${sourceInfo.phaseBase}`;
       return integrator;
     } catch (error) {
@@ -185,33 +185,34 @@ export default class JSXDecoder extends MediaDecoder {
         actualType = vidgets[type] || Valoscope;
       }
     }
-    const isComponentElement = actualType.isUIComponent;
-
     const children = [].concat(...restChildren);
     if ((actualType === UIComponent)
         && (!props || (Object.keys(props).length === 0)) && (children.length === 1)) {
       return _maybeRecurseWithKey(children[0], parentKey, parentChildrenMeta);
     }
+    const elementPrefix = name === "div" ? "d" : name === "span" ? "s" : name;
     const elementIndex = (parentChildrenMeta.nameIndices[name] =
       (parentChildrenMeta.nameIndices[name] || 0) + 1) - 1;
-    const lexicalKey = `${typeof parentKey === "string" ? parentKey : "!"}@${
-        name === "div" ? "d" : name === "span" ? "s" : name}#${elementIndex}`;
+    const elementKey = `${elementPrefix}#${elementIndex}`;
+    const lexicalName = `${parentKey || ""}@${elementKey}`;
 
     let decodedType = actualType;
     let decodedProps;
     let propsMeta;
     if (props) {
-      propsMeta = this._createPropsMeta(props, name, isInstanceLens, isComponentElement);
+      propsMeta = this._createPropsMeta(
+          props, name, isInstanceLens, actualType.isUIComponent, lexicalName);
       ([decodedType, decodedProps] =
-          tryCreateLivePropsArgs(actualType, propsMeta.decodedElementProps)
-              || [actualType, propsMeta.decodedElementProps]);
+          tryCreateLivePropsArgs(
+              actualType, Object.entries(propsMeta.decodedElementProps), lexicalName)
+          || [actualType, propsMeta.decodedElementProps]);
     }
     if (parentChildrenMeta.totalCount > 1) {
       if (!decodedProps) decodedProps = {};
-      if (!decodedProps.key) decodedProps.key = lexicalKey;
+      if (!decodedProps.key) decodedProps.key = elementKey;
     }
 
-    const childrenMeta = this._createChildrenMeta(children, isComponentElement ? "" : lexicalKey);
+    const childrenMeta = this._createChildrenMeta(children, lexicalName);
     const decodedChildrenArgs = !childrenMeta.decodedChildren ? [] : [childrenMeta.decodedChildren];
 
     if (!childrenMeta.hasIntegrators) {
@@ -288,7 +289,7 @@ export default class JSXDecoder extends MediaDecoder {
     return ret;
   }
 
-  _createPropsMeta (parsedProps, elementName, isInstanceLens, isComponentLens) {
+  _createPropsMeta (parsedProps, elementName, isInstanceLens, isComponentLens, lexicalName) {
     const ret = {
       hasIntegrators: false, hasKueries: false, totalCount: 0,
       scopeAccesses: {}, byNamespace: {}, decodedElementProps: {}, integrateableKueries: [],
@@ -314,6 +315,8 @@ export default class JSXDecoder extends MediaDecoder {
       ["focus", "$lens:focus"],
       ["head", "$lens:focus", true],
       ["array", "$lens:array"],
+      ["key", "$lens:key"],
+      ["elementKey", "$lens:id", true],
       ["class", !isComponentLens ? "className" : "class", false],
       ["valoscope", "$lens:valoscope", true, "direct lens:<property> notation"],
       ["vScope", "$lens:valoscope", true, "direct lens:<property> notation"],
@@ -323,12 +326,12 @@ export default class JSXDecoder extends MediaDecoder {
       if (parsedProps[attrName] === undefined) continue;
       if (shouldWarn || ((shouldWarn !== false) && (!isComponentLens || isInstanceLens))) {
         this.debugEvent(`DEPRECATED: non-namespaced attribute '${attrName}' in favor of ${
-            warnMessage || aliasOf.slice(1)} (in ${elementName} "${lexicalKey}")`);
+            warnMessage || aliasOf.slice(1)} (in ${elementName} "${lexicalName}")`);
       }
       if (restAttrs[aliasOf] !== undefined) {
         throw new Error(`Attribute conflict found; the deprecated non-namespaced attribute '${
             attrName}' would alias to ${aliasOf.slice(1)} which has an existing value "${
-            restAttrs[aliasOf]}" (in ${elementName} "${lexicalKey}")`);
+            restAttrs[aliasOf]}" (in ${elementName} "${lexicalName}")`);
       }
       ++ret.totalCount;
       restAttrs[aliasOf] = parsedProps[attrName];

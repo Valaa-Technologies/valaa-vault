@@ -86,6 +86,8 @@ export default class ReactRoot extends React.Component {
     };
   }
 
+  getKey () { return "-root"; }
+
   componentDidMount () { // eslint-disable-line
     this._initializeVSSSheetManager();
   }

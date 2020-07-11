@@ -8,32 +8,19 @@ import Vrapper from "~/engine/Vrapper";
 
 import Lens from "~/inspire/ui/Lens";
 
-import { invariantifyObject, wrapError } from "~/tools";
+import { wrapError } from "~/tools";
 
 import type UIComponent from "./UIComponent";
-import { getScopeValue } from "./scopeValue";
 
-export function createComponentKey (parentKey: string, focus: any, index?: any): string {
-  return (focus instanceof Vrapper) ? `${focus.getBriefUnstableId()}<-${parentKey}`
-      : index !== undefined ? `[${index}]${parentKey}`
-      : `-${parentKey}`;
-}
-
-export function _childProps (component: UIComponent, name: string, targetProps: Object) {
-  /*
-  targetProps.parentUIContext = component.getUIContext();
-  if (!targetProps.parentUIContext) {
-    invariantifyObject(targetProps.parentUIContext,
-        "uiComponentProps.parentUIContext", { allowEmpty: true });
-  }
-  */
-  targetProps.context = targetProps.context || {};
-  if (!targetProps.context.key) {
-    targetProps.context.key = createComponentKey(name || "",
-        getScopeValue(targetProps.uiContext || targetProps.parentUIContext, "focus"));
-  }
-  targetProps.key = targetProps.context.key;
-  return targetProps;
+/*
+ * Create a dynamic key based on the focus if it is a resource,
+ * if not, based on the position if it is given, otherwise a fixed
+ * value.
+ */
+export function createDynamicKey (focus, index) {
+  return (focus instanceof Vrapper) ? focus.getBriefUnstableId()
+      : (index !== undefined) ? String(index)
+      : "unfocused";
 }
 
 export function _checkForInfiniteRenderRecursion (component: UIComponent) {

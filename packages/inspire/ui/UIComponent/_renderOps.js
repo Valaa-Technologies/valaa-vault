@@ -13,8 +13,7 @@ import { arrayFromAny, isPromise, isSymbol, thenChainEagerly, thisChainEagerly }
 import UIComponent from "./UIComponent";
 import Lens from "~/inspire/ui/Lens";
 
-import { createComponentKey } from "./_propsOps";
-
+import { createDynamicKey } from "./_propsOps";
 import { wrapElementInLiveProps, tryWrapElementInLiveProps } from "./_livePropsOps";
 
 /* eslint-disable react/prop-types */
@@ -34,24 +33,18 @@ export function _renderFirstAbleDelegate (
 
 export function _renderFocusAsSequence (component: UIComponent,
     foci: any[], EntryElement: Object, entryProps: Object,
-    keyFromFocus?: (focus: any, index: number) => string,
+    keyFromFocus: (focus: any, index: number) => string,
 ): [] {
   // Wraps the focus entries EntryElement, which is UIComponent by default.
   // Rendering a sequence focus can't be just a foci.map(_renderFocus) because individual entries
   // might have pending kueries or content downloads.
   // const parentUIContext = component.getUIContext();
-  const parentKey = component.getKey() || "-";
   return arrayFromAny(foci).map((focus, arrayIndex) => {
-    const key = keyFromFocus
-        ? keyFromFocus(focus, arrayIndex)
-        : createComponentKey(parentKey, focus, arrayIndex);
     const props = {
       ...entryProps,
       focus,
-      // parentUIContext,
       context: { ...(entryProps.context || {}), forIndex: arrayIndex, arrayIndex },
-      key,
-      globalId: key,
+      key: keyFromFocus(focus, arrayIndex),
     };
     return wrapElementInLiveProps(
         component,
@@ -70,7 +63,7 @@ export function _renderFocus (component: UIComponent,
   const ret = component.tryRenderLens(preRendered, focus, "focus");
   if (ret !== undefined) return ret;
   if (typeof preRendered === "object") return preRendered;
-  const key = component.getUIContextValue("key");
+  const key = component.getKey();
   if (key) return <span key={key}>{preRendered}</span>;
   return <span>{preRendered}</span>;
 }
@@ -82,7 +75,7 @@ export function _tryRenderLensArray (component: UIComponent,
   let hasPromise;
   for (let i = 0; i !== lensArray.length; ++i) {
     const processedEntry = component.tryRenderLens(
-        lensArray[i], focus, `#${String(i)}-${lensName || ""}`);
+        lensArray[i], focus, `[${String(i)}]<-${lensName || ""}`);
     if (processedEntry !== undefined) {
       if (isPromise(processedEntry)) hasPromise = true;
       if (!ret) ret = lensArray.slice(0, i);
@@ -108,7 +101,7 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
       return null;
     case "function": {
       const contextThis = component.getUIContextValue("component");
-      subLensName = `${lens.name}-${lensName}`;
+      subLensName = `${lens.name}()<-${lensName}`;
       ret = lens.call(contextThis, focus, component, lensName);
       break;
     }
@@ -156,9 +149,9 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
         }
         if (lens.getTypeName() === "Media") {
           ret = _tryRenderMediaLens(component, lens, focus, lensName, vInterpreterProperty);
-          subLensName = `~-${lensName}`;
+          subLensName = `~<-${lensName}`;
         } else {
-          subLensName = `<-${lensName}`;
+          subLensName = `<<-${lensName}`;
           ret = component.readSlotValue("delegatePropertyLens",
               Lens.delegatePropertyLens, lens, true)(lens, component, lensName);
           if ((ret == null) || ((ret.delegate || [])[0] === Lens.notLensResourceLens)) {
@@ -172,8 +165,10 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
         if (lens.delegate && (Object.keys(lens).length === 1)) {
           return _renderFirstAbleDelegate(component, lens.delegate, focus, lensName);
         }
-        subLensName = `-ns-${lensName}`;
-        ret = React.createElement(_Valoscope, component.childProps(subLensName, { ...lens }));
+        subLensName = `{}<-${lensName}`;
+        const subProps = { ...lens };
+        if (!subProps.key) subProps.key = createDynamicKey(component.getUIContextValue("focus"));
+        ret = React.createElement(_Valoscope, subProps);
       } else if (isSymbol(lens)) {
         return component.renderSlotAsLens(lens, focus, undefined, lensName, onlyIfAble, onlyOnce);
       } else {
@@ -195,9 +190,9 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
 }
 
 function _tryRenderPropertyLens (component, vProperty, focus, lensName) {
-  const bindingSlot = `UIComponent_property_${lensName}`;
-  if (!component.getBoundSubscription(bindingSlot)) {
-    component.bindLiveKuery(bindingSlot, vProperty, "value", {
+  const subName = `.<-${lensName}`;
+  if (!component.getBoundSubscription(subName)) {
+    component.bindLiveKuery(subName, vProperty, "value", {
       scope: component.getUIContext(),
       onUpdate: function onLensPropertyValueUpdate () {
         if (component.tryFocus() !== focus) return false;
@@ -208,12 +203,12 @@ function _tryRenderPropertyLens (component, vProperty, focus, lensName) {
     });
   }
   return _tryRenderLens(
-      component, vProperty.extractValue(), focus, `.-${lensName}`, undefined, undefined, vProperty);
+      component, vProperty.extractValue(), focus, subName, undefined, undefined, vProperty);
 }
 
 function _tryRenderMediaLens (
     component: UIComponent, media: any, focus: any, lensName, vInterpreterProperty: ?Vrapper) {
-  const bindingSlot = `UIComponent_media_${media.getRawId()}`;
+  const bindingSlot = media.getRawId();
   if (!component.getBoundSubscription(bindingSlot)) {
     component.bindLiveKuery(bindingSlot, media, VALEK.toMediaContentField(), {
       onUpdate: function onMediaContentUpdate () {
@@ -230,13 +225,12 @@ function _tryRenderMediaLens (
   }
   let vIntegrationScope;
   if (vInterpreterProperty) {
-    const discourse = component.context.engine.discourse;
+    const engine = component.context.engine;
     const ghostPath = vInterpreterProperty.getVRef().tryGhostPath();
     const baseProperty = !ghostPath ? vInterpreterProperty
-        : this._parent.getVrapper([ghostPath.rootRawId()]);
-    vIntegrationScope = baseProperty.step("owner", { discourse });
+        : engine.getVrapper([ghostPath.rootRawId()]);
+    vIntegrationScope = baseProperty.step("owner", { discourse: engine.discourse });
   }
-
   const ret = thisChainEagerly(
       { component, media, options: { fallbackContentType: "text/vsx", vIntegrationScope } },
       null,

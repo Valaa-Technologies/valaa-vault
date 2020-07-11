@@ -1,6 +1,4 @@
 // @flow
-import PropTypes from "prop-types";
-
 import { naiveURI } from "~/raem/ValaaURI";
 import { tryUnpackedHostValue } from "~/raem/VALK/hostReference";
 
@@ -103,13 +101,6 @@ import { thisChainEagerly, thisChainRedirect } from "~/tools";
 export default class Valoscope extends UIComponent {
   static mainLensSlotName = "valoscopeLens";
 
-  /*
-  static propTypes = {
-    ...UIComponent.propTypes,
-    lensName: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
-  };
-  */
-
 
   bindFocusSubscriptions (focus: any, props: Object) {
     super.bindFocusSubscriptions(focus, props);
@@ -133,11 +124,10 @@ export default class Valoscope extends UIComponent {
   }
 
   renderLoaded (focus: any) {
-    if (Array.isArray(focus)) {
-      return this.renderFocusAsSequence(focus, this.props.forEach, Valoscope);
-    }
-    // Render using current focus as the lens and null as the focus.
-    return this.renderLens(focus, null, "focus");
+    return Array.isArray(focus)
+        ? this.renderFocusAsSequence(focus, this.props.forEach, Valoscope)
+        // Render using current focus as the lens with null as the focus.
+        : this.renderLens(focus, null, "focus");
   }
 }
 

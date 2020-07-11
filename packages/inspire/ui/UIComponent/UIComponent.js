@@ -5,9 +5,9 @@ import PropTypes from "prop-types";
 
 import { tryConnectToAbsentChroniclesAndThen } from "~/raem/tools/denormalized/partitions";
 
-import { Subscription, LiveUpdate } from "~/engine/Vrapper";
+import Vrapper, { Subscription, LiveUpdate } from "~/engine/Vrapper";
 import debugId from "~/engine/debugId";
-import { Kuery, dumpKuery, dumpObject } from "~/engine/VALEK";
+import { dumpKuery, dumpObject } from "~/engine/VALEK";
 
 import Lens from "~/inspire/ui/Lens";
 
@@ -23,7 +23,8 @@ import {
   _componentConstructed, _componentWillReceiveProps, _shouldComponentUpdate, _componentWillUnmount,
 } from "./_lifetimeOps";
 import {
-  _childProps, _checkForInfiniteRenderRecursion,
+  // _childProps,
+  _checkForInfiniteRenderRecursion,
 } from "./_propsOps";
 import {
   _renderFocus, _renderFocusAsSequence, _renderFirstAbleDelegate,
@@ -288,13 +289,7 @@ export default class UIComponent extends React.Component {
 
   // Public API
 
-  getValos () { return this.context.engine.getRootScope().valos; }
-
-  getStyle () {
-    return Object.assign({ display: "inline-block" },
-        this.style || {},
-        this.props.style || {});
-  }
+  // getValos () { return this.context.engine.getRootScope().valos; }
 
   static propsCompareModesOnComponentUpdate = {
     reactComponent: "ignore",
@@ -305,14 +300,14 @@ export default class UIComponent extends React.Component {
    */
   getFocus (state: Object = this.state) {
     const ret = this.tryFocus(state);
-    invariantify(typeof ret !== "undefined", `${this.constructor.name
+    invariantify(ret !== undefined, `${this.constructor.name
         }.getFocus() called when component is disabled (focus/head is undefined)`);
     return ret;
   }
 
   tryFocus (state: Object = this.state) {
     const ret = getScopeValue(state.uiContext, "focus");
-    return (typeof ret !== "undefined")
+    return (ret !== undefined)
         ? ret
         : getScopeValue(state.uiContext, "head");
   }
@@ -353,7 +348,7 @@ export default class UIComponent extends React.Component {
   }
 
   getKey () {
-    return this.props.globalId || this.getUIContextValue("key");
+    return this.props.globalId || this.context.parentUIContext.reactComponent.getKey();
   }
 
   readSlotValue (slotName: string, slotSymbol: Symbol, focus: any, onlyIfAble?: boolean,
@@ -394,55 +389,21 @@ export default class UIComponent extends React.Component {
   }
 
   _subscriptions: Object;
-  style: Object;
 
-  /**
-   * Returns comprehensive props for a child element. Fetches and expands the presentation using
-   * given 'name', as per presentation, using scope as extra context
-   *
-   * Includes:
-   * key (generated)
-   * head ()
-   * scope ()
-   * kuery (null)
-   *
-   * @param {any} name
-   * @param {any} { index, head, kuery }
-   */
-  childProps (name: string, targetProps) {
-    try {
-      return _childProps(this, name, targetProps);
-    } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .childProps(${name}), with:`,
-          "\n\tprops:", this.props,
-          "\n\tstate:", this.state,
-          "\n\trawPresentation:", this.rawPresentation());
-    }
-  }
-
-  static _debugIdExcludedPropsKeys = ["focus", "globalId", "parentUIContext"];
+  static _debugIdExcludedPropsKeys = ["focus", "hierarchyKey", "globalId"/* , "parentUIContext" */];
 
   debugId (options: ?Object) {
-    const keyString = this.getUIContext() && this.getUIContext().hasOwnProperty("key") // eslint-disable-line
-            ? `key: '${this.getUIContext().key}'`
-        : (this.props.context && this.props.context.key)
-            ? `key: '${this.props.context.key}'`
-        : ((this.state || {}).uiContext || {}).key
-            ? `key: '${this.state.uiContext.key}'`
-        : "no key";
+    const keyString = this.getKey() || "no key";
     let focus = this.getUIContextValue("focus");
-    if (typeof focus === "undefined") focus = this.getUIContextValue("head");
-    return `<${this.constructor.name}
-  key="${keyString}"
-  focus={${Array.isArray(focus)
+    if (focus === undefined) focus = this.getUIContextValue("head");
+    return `<${this.constructor.name} key="${keyString}" focus={${Array.isArray(focus)
       ? `[${focus.map(entry => debugId(entry, { short: true, ...options })).join(", ")}]`
       : debugId(focus, { short: true, ...options })}}${
         Object.entries(this.props)
             .filter(([key]) => !UIComponent._debugIdExcludedPropsKeys.includes(key))
-            .map(([key, value]) => `
-  ${key}=${!value || typeof value !== "object" ? JSON.stringify(value)
-      : Array.isArray(value) ? "[...]" : "{...}"}`)}
-/>`;
+            .map(([key, value]) => `${key}=${
+                !value || typeof value !== "object" ? JSON.stringify(value)
+      : Array.isArray(value) ? "[...]" : "{...}"}`)} />`;
   }
 
   /**
@@ -569,8 +530,7 @@ export default class UIComponent extends React.Component {
       [] | Promise<any[]> {
     const array = arrayFromAny(sequence !== null ? sequence : undefined);
     const ret = _tryRenderLensArray(this, array, focus, lensName);
-    return (typeof ret !== "undefined") ? ret
-        : array;
+    return (ret !== undefined) ? ret : array;
   }
 
   tryRenderLensSequence (sequence: any, focus: any = this.tryFocus(), lensName: ?string):
@@ -583,10 +543,14 @@ export default class UIComponent extends React.Component {
     return _renderFocus(this, focus);
   }
 
-  renderFocusAsSequence (foci: any[], EntryElement: Object = UIComponent, entryProps: Object = {},
-      keyFromFocus?: (focus: any, index: number) => string
+  renderFocusAsSequence (foci: any[], EntryElement: Object = UIComponent,
+      entryProps: Object = {}, keyFromFocus: (focus: any, index: number) => string,
   ): [] {
-    return _renderFocusAsSequence(this, foci, EntryElement, entryProps, keyFromFocus);
+    return _renderFocusAsSequence(this, foci, EntryElement, entryProps,
+        keyFromFocus
+            || ((focus, index) => ((focus instanceof Vrapper)
+                ? `${focus.getBriefUnstableId()}<-${this.getKey() || "-"}`
+                : `[${index}]${this.getKey() || "-"}`)));
   }
 
   // defaults to null
@@ -617,7 +581,7 @@ export default class UIComponent extends React.Component {
       if (!slotName) throw new Error(`No valos.Lens slot name for '${String(slotSymbol)}'`);
       slotValue = this.readSlotValue(slotName, slotSymbol, focus, onlyIfAble);
       ret = slotValue && this.renderLens(
-          slotValue, focus, `${rootSlotName}-${lensName || ""}`, undefined, onlyOnce);
+          slotValue, focus, `[${rootSlotName}]<-${lensName || ""}`, undefined, onlyOnce);
       return ret;
     } catch (error) {
       throw wrapError(error, `During ${this.debugId()}\n .renderSlotAsLens(${

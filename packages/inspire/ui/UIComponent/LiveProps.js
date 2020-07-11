@@ -17,13 +17,14 @@ import {
   arrayFromAny, patchWith, dumpObject, isPromise, thisChainEagerly, thisChainReturn, wrapError,
 } from "~/tools";
 
-import { wrapElementInLiveProps, tryCreateLivePropsArgs, LivePropsPropsTag }
-    from "./_livePropsOps";
+import { tryCreateLivePropsArgs, LivePropsPropsTag, postRenderElement } from "./_livePropsOps";
+import { createDynamicKey } from "./_propsOps";
 
-export { wrapElementInLiveProps, tryCreateLivePropsArgs, LivePropsPropsTag };
+export { tryCreateLivePropsArgs, LivePropsPropsTag };
 
 const _isReservedPropsName = {
   key: true,
+  hierarchyKey: true,
   globalId: true,
   children: true,
   style: true,
@@ -80,6 +81,7 @@ export default class LiveProps extends UIComponent {
 
   static propTypes = {
     ...UIComponent.propTypes,
+    hierarchyKey: PropTypes.string,
     elementType: PropTypes.any.isRequired,
     elementPropsSeq: PropTypes.arrayOf(PropTypes.any).isRequired,
     propsKueriesSeq: PropTypes.arrayOf(PropTypes.any),
@@ -91,6 +93,9 @@ export default class LiveProps extends UIComponent {
     onRef: false,
   }
 
+  getKey () {
+    return this.props.globalId || this.props.hierarchyKey
+        || this.context.parentUIContext.reactComponent.getKey();
   }
 
   bindFocusSubscriptions (focus: any, props: Object) {
@@ -170,20 +175,21 @@ export default class LiveProps extends UIComponent {
     if (elementType === Valoscope) {
       elementType = class DebugValoscope extends Valoscope {};
       Object.defineProperty(elementType, "name", {
-        value: `Valoscope_${newProps.className || ""}${this.getUIContextValue("key")}`,
+        value: `Valoscope_${innerProps.className || ""}${this.getKey()}`,
       });
     }
     /* */
     const finalProps = stateLive.outerProps || stateLive.innerProps;
+    const createKey = (typeof finalProps.key === "function" ? finalProps.key : createDynamicKey);
     if (stateLive.array) {
       if (!Array.isArray(stateLive.array)) {
         return this.renderSlotAsLens("arrayNotIterableLens", stateLive.array);
       }
       if (children.length) finalProps.children = children;
-      return this.renderFocusAsSequence(stateLive.array, finalType, finalProps);
+      return this.renderFocusAsSequence(stateLive.array, finalType, finalProps, createKey);
     }
-    return wrapElementInLiveProps(
-        this, React.createElement(finalType, finalProps, ...children), focus, "focus");
+    if (typeof finalProps.key !== "string") finalProps.key = createKey(focus);
+    return postRenderElement(this, React.createElement(finalType, finalProps, ...children), focus);
   }
 }
 

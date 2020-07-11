@@ -627,22 +627,31 @@ INSTANCE_LENS property.
   createSlotSymbol("scopeFrameResource", () => ({
     type: "Resource",
     description:
-`Current innermost enclosing scope frame which is also a Resource. Used
-as the owner for any scope frames created for any of its child components.`,
+`Slot which contains the current innermost enclosing scope frame which
+is also a Resource. Used as the owner for any scope frames created for
+any of its child components.`,
   }));
 
   createSlotSymbol("integrationScopeResource", () => ({
     type: "Resource",
     description:
-`The integration scope resource of the source Media for the currently
-rendered element.`,
+`Slot which contains the integration scope resource of the innermost
+Media that is used a source for render elements.`,
+  }));
+
+  createSlotSymbol("static", () => ({
+    type: "(true | undefined)",
+    description:
+`Attribute which disables live kueries for other non-namespaced
+attributes. Namespaced attributes are always live.`,
   }));
 
   createSlotSymbol("scopeFrameResource", () => ({
     type: "Resource",
     description:
-`Current innermost enclosing scope frame which is also a Resource. Used
-as the owner for any scope frames created for any of its child components.`,
+`Slot which contains the current innermost enclosing scope frame which
+is also a Resource. Used as the owner for any scope frames created for
+any of its child components.`,
   }));
 
   createSlotSymbol("lensAuthorityProperty", () => ({

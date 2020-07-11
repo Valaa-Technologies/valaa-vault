@@ -159,11 +159,10 @@ export default class UIComponent extends React.Component {
     parentUIContext: PropTypes.object,
   };
 
-  static noPostProcess = {
-    children: true,
-    kuery: true,
+  static livePropsBehaviors = {
+    children: false,
+    kuery: false,
   }
-
 
   static propsCompareModesOnComponentUpdate = {
     // parentUIContext: "shallow",

@@ -5,6 +5,8 @@ import { Kuery } from "~/raem/VALK";
 import Vrapper from "~/engine/Vrapper";
 import { ValoscriptKuery, pointer as _pointer, literal } from "~/script/VALSK";
 
+export const IsLiveTag = Symbol("VALEK.IsLive");
+
 export function pointer (target: Kuery | Vrapper) {
   if (!(target instanceof Vrapper)) return _pointer(target);
   return { typeName: "Identifier", reference: target };

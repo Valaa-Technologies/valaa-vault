@@ -1,9 +1,9 @@
 // @flow
 
 import React from "react";
-import { OrderedMap } from "immutable";
 
 import { Kuery } from "~/raem/VALK";
+import { IsLiveTag } from "~/engine/VALEK";
 
 import UIComponent, { isUIComponentElement } from "./UIComponent";
 import { createComponentKey } from "./_propsOps";
@@ -31,7 +31,7 @@ let _LiveProps;
  * @returns
  */
 export function tryWrapElementInLiveProps (
-    component: UIComponent, element: Object, focus: any, lensName?: string) {
+    component: UIComponent, element: Object, focus: any, hierarchyKey?: string) {
   // TODO(iridian, 2020-06): This whole setup should be implemented in
   // JSXDecoder also, then deprecated here, and finally removed from
   // here.
@@ -39,13 +39,16 @@ export function tryWrapElementInLiveProps (
 
   if ((element.type === LiveProps)
       || LiveProps.isPrototypeOf(element.type)) return undefined;
-  const { type: elementType, props, ref, key } = element;
-  let livePropsPropsTemplate = element[LivePropsPropsTag];
-  if (livePropsPropsTemplate === undefined) {
-    livePropsPropsTemplate = tryCreateLivePropsProps(elementType, props, ref);
-  }
+  let livePropsArgs = element[LivePropsPropsTag];
   try {
-    if (livePropsPropsTemplate) {
+    if (livePropsArgs === undefined) {
+      let extendedProps;
+      if (element.key) (extendedProps = []).push(["key", element.key]);
+      if (element.ref) (extendedProps || (extendedProps = [])).push(["$on.ref", element.ref]);
+      livePropsArgs = tryCreateLivePropsArgs(
+          element.type, extendedProps || Object.entries(element.props), hierarchyKey);
+    }
+    if (livePropsArgs) {
       // console.log("tryWrapElementInLiveProps LiveWrapper for", elementType.name, wrapperProps);
       /* Only enable this section for debugging React key warnings; it
       will break react elsewhere
@@ -54,20 +57,7 @@ export function tryWrapElementInLiveProps (
         value: `LiveProps_${livePropsProps.key}`,
       });
       // */
-      const parentUIContext = component.getUIContext();
-      const livePropsProps = {
-        ...livePropsPropsTemplate,
-        // parentUIContext,
-        context: {
-          key: createComponentKey(
-              (typeof key === "string") ? `!${key}`
-                  : key ? `!.-${lensName}`
-                  : lensName,
-              getScopeValue(parentUIContext, "focus")), // shouldn't this be 'focus' directly?
-        },
-      };
-      livePropsProps.key = livePropsProps.context.key;
-      return React.createElement(LiveProps, livePropsProps, ...arrayFromAny(props.children));
+      return React.createElement(...livePropsArgs, ...arrayFromAny(element.props.children));
     }
     // Element has no live props.
     // let parentUIContext;
@@ -112,85 +102,92 @@ export function tryWrapElementInLiveProps (
   }
 }
 
-export function tryCreateLivePropsProps (elementType, props, ref) {
-  let elementProps;
-  const liveProps = { currentIndex: 0 };
+export function tryCreateLivePropsArgs (elementType, props, key, ref, component, lensName) {
+
+const _genericLivePropsBehaviors = {
+  children: false, // ignore
+  ref: "$on:ref",
+  valoscope: true, // always trigger liveprops handling
+  array: UIComponent,
+};
+
+export function tryCreateLivePropsArgs (elementType, propsSeq, hierarchyKey) {
+  const LiveProps = _LiveProps || (_LiveProps = require("./LiveProps").default);
+
+  const propsKueries = { currentIndex: 0 };
   // TODO(iridian, 2020-06): Fix this ridiculously useless deduplication
   // idea (of my own). Both coders themselves as well as the live kuery
   // system itself will deduplicate any live props there might be.
-  const livePropLookup = new Map(); // deduplicate identical kueries
-  function _obtainLiveElementProps () {
-    if (!elementProps) {
-      elementProps = { ...props };
-      if (ref) elementProps.ref = ref;
-    }
-    return elementProps;
-  }
+  const kueryDeduper = new Map();
+  let kueryProps;
+  const livePropsBehaviors = elementType.livePropsBehaviors || _genericLivePropsBehaviors;
   try {
-    for (const propName of Object.keys(props)) {
-      if ((propName === "children")
-          || (elementType.noPostProcess && elementType.noPostProcess[propName])) continue;
-      const newProp = _postProcessProp(props[propName], livePropLookup, liveProps, propName);
+    for (const [propName, propValue] of propsSeq) {
+      let actualName = propName;
+      const behavior = livePropsBehaviors[propName];
+      if (behavior !== undefined) {
+        if (typeof behavior === "boolean") {
+          if (behavior === false) continue;
+        } else if (typeof behavior === "string") {
+          actualName = behavior;
+        } else if (behavior === UIComponent) {
+          if (!elementType.isUIComponent) continue;
+        }
+        kueryProps = {};
+      }
+      const newProp = _postProcessProp(propValue, propsKueries, actualName, kueryDeduper);
       if (newProp !== undefined) {
-        _obtainLiveElementProps()[propName] = newProp;
-      } else if ((propName === "valoscope")
-          || ((propName === "array") && elementType.isUIComponent)) {
-        _obtainLiveElementProps();
+        (kueryProps || (kueryProps = {}))[actualName] = newProp;
       }
     }
-    if (ref && (ref instanceof Kuery)) {
-      // Rewrite ref kuery as onRef so that LiveProps can evaluate it.
-      _obtainLiveElementProps().onRef =
-          _postProcessProp(ref, livePropLookup, liveProps, "ref");
-      delete elementProps.ref;
+    if (!kueryProps) return undefined;
+    const livePropsProps = { elementType, elementPropsSeq: [...Object.entries(kueryProps)] };
+    for (const [propName, propValue] of propsSeq) {
+      if (kueryProps[propName] === undefined) {
+        livePropsProps.elementPropsSeq.push([propName, propValue]);
+      }
     }
-    if (!elementProps) return undefined;
-    const ret = { elementType, elementProps };
-    if (liveProps.currentIndex) {
-      delete liveProps.currentIndex;
-      ret.liveProps = liveProps;
+    if (propsKueries.currentIndex) {
+      delete propsKueries.currentIndex;
+      livePropsProps.propsKueriesSeq = [...Object.entries(propsKueries)];
     }
-    return ret;
+    return [LiveProps, livePropsProps];
   } catch (error) {
     throw wrapError(error, `During _createLivePropsProps(`,
             typeof elementType === "function" ? elementType.name : elementType, `), with:`,
-        "\n\telement.props:", props,
-        "\n\telement.props.children:", props && props.children,
+        "\n\telement.props:", propsSeq,
     );
   }
 }
 
 /**
- * Converts all VALK kuery objects in properties into kuery placeholder callback functions and
- * adds the kueries as entries to the new liveProps prop.
- * The kuery placeholder callback takes a livePropValues object which is a map from kueryId to a
- * value and returns from it the value corresponding to the kuery.
+ * Converts all VALK kuery objects in properties into kuery placeholder
+ * callback functions and adds the kueries as entries to the new
+ * propsKueries prop.
+ * The kuery placeholder callback takes a kueryValues object which is
+ * a map from kueryId to a value and returns from it the value
+ * corresponding to the kuery.
  *
  * @param {*} prop
- * @param {Object} livePropLookup
- * @param {Object} liveProps
+ * @param {Object} propsKueries
+ * @param {Object} name
+ * @param {Object} kueryDeduper
  * @returns
  *
  * @memberof UIComponent
  */
-function _postProcessProp (prop: any, livePropLookup: Object, liveProps: Object, name: string) {
+function _postProcessProp (prop: any, propsKueries: Object, name: string, kueryDeduper: Object,
+    parentFetchedKueryNames: ?Array) {
   if ((typeof prop !== "object") || (prop === null)) return undefined;
   if (prop instanceof Kuery) {
-    let ret = livePropLookup.get(prop.kueryId());
-    if (ret === undefined) {
-      const liveKueryName = `props#${liveProps.currentIndex++}.${name}`;
-      liveProps[liveKueryName] = prop;
-      ret = function fetchLiveProp (livePropValues: OrderedMap) {
-        try {
-          return livePropValues.get(liveKueryName);
-        } catch (error) {
-          throw wrapError(error, `During fetchLiveProp(${liveKueryName}), with:`,
-              "\n\tkueryId:", ret.kueryId,
-              "\n\tname:", name);
-        }
-      };
-      ret.kueryId = prop.kueryId();
-      livePropLookup.set(prop.kueryId(), ret);
+    let ret = kueryDeduper.get(prop.kueryId());
+    if (!ret) {
+      const kueryName = `props.${name}#${propsKueries.currentIndex++}`;
+      propsKueries[kueryName] = prop;
+      ret = _createFetchKueryProp(kueryName);
+      ret.fetchedKueryNames = [kueryName];
+      if (parentFetchedKueryNames) parentFetchedKueryNames.push(kueryName);
+      kueryDeduper.set(prop.kueryId(), ret);
     }
     return ret;
   }
@@ -200,18 +197,30 @@ function _postProcessProp (prop: any, livePropLookup: Object, liveProps: Object,
     return undefined;
   }
   let modifications: any;
+  const fetchedKueryNames = parentFetchedKueryNames || [];
   for (const key of Object.keys(prop)) {
-    const postProcessedValue = _postProcessProp(prop[key], livePropLookup, liveProps, name);
-    if (typeof postProcessedValue !== "undefined") {
+    const postProcessedValue = _postProcessProp(
+        prop[key], propsKueries, name, kueryDeduper, fetchedKueryNames);
+    if (postProcessedValue !== undefined) {
       (modifications || (modifications = new Map())).set(key, postProcessedValue);
     }
   }
   if (!modifications) return undefined;
-  const ret = (livePropValues: OrderedMap) => {
+  const ret = (kueryValues: Object) => {
     const innerRet = Array.isArray(prop) ? [...prop] : { ...prop };
-    modifications.forEach((value: any, key: any) => { innerRet[key] = value(livePropValues); });
+    modifications.forEach((value: any, key: any) => { innerRet[key] = value(kueryValues); });
     return innerRet;
   };
-  ret.kueryId = true;
+  ret.fetchedKueryNames = fetchedKueryNames;
   return ret;
+}
+
+function _createFetchKueryProp (kueryName: string) {
+  return function _fetchKueryProp (kueryValues: Object) {
+    try {
+      return kueryValues[kueryName];
+    } catch (error) {
+      throw wrapError(error, `During _fetchKueryProp(${kueryName})`);
+    }
+  };
 }

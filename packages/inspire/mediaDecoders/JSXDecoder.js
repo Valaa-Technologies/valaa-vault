@@ -4,12 +4,13 @@ import React from "react";
 
 import { addSourceEntryInfo, addStackFrameToError, SourceInfoTag } from "~/raem/VALK/StackTrace";
 
-import VALEK, { Kuery, EngineKuery, VS } from "~/engine/VALEK";
+import VALEK, { Kuery, EngineKuery, VS, IsLiveTag } from "~/engine/VALEK";
 
 import UIComponent, { LENS } from "~/inspire/ui/UIComponent";
-import LivePropsPropsTag, { tryCreateLivePropsProps } from "~/inspire/ui/UIComponent/LiveProps";
+import { LivePropsPropsTag, tryCreateLivePropsArgs } from "~/inspire/ui/UIComponent/LiveProps";
 import vidgets from "~/inspire/ui";
 import Valoscope from "~/inspire/ui/Valoscope";
+import Lens from "~/inspire/ui/Lens";
 import _jsxTransformFromString from "~/inspire/mediaDecoders/_jsxTransformFromString";
 
 import { ScopeAccessesTag } from "~/script/VALSK";
@@ -17,6 +18,7 @@ import { ScopeAccessesTag } from "~/script/VALSK";
 import MediaDecoder from "~/tools/MediaDecoder";
 import notThatSafeEval from "~/tools/notThatSafeEval";
 import { dumpObject } from "~/tools";
+import LiveProps from "../ui/UIComponent/LiveProps";
 
 export default class JSXDecoder extends MediaDecoder {
   static mediaTypes = [
@@ -24,6 +26,11 @@ export default class JSXDecoder extends MediaDecoder {
   ];
 
   static columnOffset = 0;
+
+  constructor (options) {
+    super(options);
+    this._gatewayDiscourse = options.gateway.discourse;
+  }
 
   decode (buffer: ArrayBuffer, { chronicleName, mediaName }: Object = {}): any {
     if (!buffer) return null;
@@ -114,10 +121,24 @@ export default class JSXDecoder extends MediaDecoder {
         this._addKuerySourceInfo(embeddedContent, sourceInfo,
             { line: startLine, column: startColumn }, { line: endLine, column: endColumn }),
       spread: (...rest) => Object.assign(...rest),
-      createElement: (type, props, ...restChildren) =>
-          (parentKey: string, parentChildrenMeta: Object) =>
-              this._createKeyedElement(
-                  sourceInfo, type, props, restChildren, parentKey, parentChildrenMeta),
+      createElement: (type, props, ...restChildren) => {
+        const self = this;
+        _recurseWithKeys._isKeyRecurser = true;
+        return _recurseWithKeys;
+        function _recurseWithKeys (parentKey: string, parentChildrenMeta: Object) {
+          try {
+            return self._createKeyedElement(
+              sourceInfo, type, props, restChildren, parentKey, parentChildrenMeta);
+          } catch (error) {
+            throw self.wrapErrorEvent(error, 0, () => [
+              new Error(`_createKeyedElement(${parentKey})`),
+              "\n\ttype:", ...dumpObject(type),
+              "\n\tprops:", ...dumpObject(props),
+              "\n\trestChildren:", ...dumpObject(restChildren),
+            ]);
+          }
+        }
+      },
     };
   }
 
@@ -150,206 +171,247 @@ export default class JSXDecoder extends MediaDecoder {
     return embeddedContent;
   }
 
-  _createChildrenMeta () {
-    return {
-      hasFunctions: false, hasKueries: false, nameIndices: {}, scopeAccesses: {}, count: 0,
-    };
-  }
-
   _createKeyedElement (sourceInfo, type, props, restChildren, parentKey, parentChildrenMeta) {
     let actualType = type;
     let name;
-    let isInstanceLensType = false;
-    if (typeof type !== "string") name = type.name; // builtin react components
-    else { // lowercase = builtin elements, uppercase = vidgets and instance lenses
-      name = type;
+    let isInstanceLens = false;
+    if (typeof type !== "string") {
+      name = type.name; // builtin react components
+    } else {
+      name = type; // lowercase names are builtin elements
       if (type[0] !== type[0].toLowerCase()) {
-        isInstanceLensType = !vidgets[type];
+        // uppercase are vidgets and instance lenses, always ui components
+        isInstanceLens = !vidgets[type];
         actualType = vidgets[type] || Valoscope;
       }
     }
+    const isComponentElement = actualType.isUIComponent;
 
-    let isComponentType = actualType.isUIComponent;
     const children = [].concat(...restChildren);
-    if (isComponentType && (actualType === UIComponent)) {
-      if ((!props || (Object.keys(props).length === 0)) && (children.length === 1)) {
-        const child = children[0];
-        return _extractMetaOfValueInto((typeof child !== "function")
-                ? child
-                : child(parentKey, parentChildrenMeta),
-            parentChildrenMeta);
-      }
+    if ((actualType === UIComponent)
+        && (!props || (Object.keys(props).length === 0)) && (children.length === 1)) {
+      return _maybeRecurseWithKey(children[0], parentKey, parentChildrenMeta);
+    }
+    const elementIndex = (parentChildrenMeta.nameIndices[name] =
+      (parentChildrenMeta.nameIndices[name] || 0) + 1) - 1;
+    const lexicalKey = `${typeof parentKey === "string" ? parentKey : "!"}@${
+        name === "div" ? "d" : name === "span" ? "s" : name}#${elementIndex}`;
+
+    let decodedType = actualType;
+    let decodedProps;
+    let propsMeta;
+    if (props) {
+      propsMeta = this._createPropsMeta(props, name, isInstanceLens, isComponentElement);
+      ([decodedType, decodedProps] =
+          tryCreateLivePropsArgs(actualType, propsMeta.decodedElementProps)
+              || [actualType, propsMeta.decodedElementProps]);
+    }
+    if (parentChildrenMeta.totalCount > 1) {
+      if (!decodedProps) decodedProps = {};
+      if (!decodedProps.key) decodedProps.key = lexicalKey;
     }
 
-    const propsByNamespace = this._createPropsByNamespace(
-        props, parentKey, parentChildrenMeta, name, isInstanceLensType, isComponentType);
+    const childrenMeta = this._createChildrenMeta(children, isComponentElement ? "" : lexicalKey);
+    const decodedChildrenArgs = !childrenMeta.decodedChildren ? [] : [childrenMeta.decodedChildren];
 
-    const propsMeta = { hasFunctions: false, hasKueries: false, count: 0 };
-    const childrenMeta = this._createChildrenMeta();
-
-    function _extractMetaOfValueInto (value, meta) {
-      if (typeof value === "function") {
-        meta.hasFunctions = true;
-      } else if (value instanceof Kuery) {
-        meta.hasKueries = true;
-        const scopeAccesses = value[ScopeAccessesTag];
-        if (scopeAccesses) {
-          Object.assign(meta.scopeAccesses || (meta.scopeAccesses = {}), scopeAccesses);
-        }
-      }
-      ++meta.count;
-      return value;
-    }
-
-    const decodedProps = {};
-    for (const [namespace, propsTarget] of Object.entries(propsByNamespace)) {
-      if (!namespace) continue;
-      for (const [propName, propValue] of Object.entries(propsTarget)) {
-        if (propValue === undefined) continue;
-        const encodedName = namespace === "L" ? propName : `$${namespace}.${propName}`;
-        decodedProps[encodedName] = _extractMetaOfValueInto(propValue, propsMeta);
-      }
-    }
-    if (propsMeta.hasFunctions) {
-      throw new Error("internal error: propsMeta.hasFunctions should always be falsy");
-    }
-
-    const decodedChildren = children.map((child: any) => {
-      const childWithKey = (typeof child !== "function")
-          ? child
-          : child(isComponentType ? "" : propsByNamespace.L.key, childrenMeta);
-      return _extractMetaOfValueInto(childWithKey, childrenMeta);
-    });
-    if (propsMeta.hasKueries) {
-      isComponentType = true;
-    }
-    if (!isComponentType && !childrenMeta.hasFunctions) {
+    if (!childrenMeta.hasIntegrators) {
       if (childrenMeta.hasKueries) {
         parentChildrenMeta.hasKueries = true;
         Object.assign(parentChildrenMeta.scopeAccesses
             || (parentChildrenMeta.scopeAccesses = {}), childrenMeta.scopeAccesses);
       }
-      return this._injectSourceInfoAndLivePropsTags(
-          !decodedChildren.length
-              ? React.createElement(actualType, decodedProps)
-              : React.createElement(actualType, decodedProps, decodedChildren),
+      return _injectSourceInfoTag(
+          React.createElement(decodedType, decodedProps, ...decodedChildrenArgs),
           sourceInfo);
     }
 
-    return (integrationHostGlobal: Object, mediaInfo: Object) => {
+    function _elementIntegrator (integrationHostGlobal: Object) {
       try {
         const integrationFabricScope = integrationHostGlobal.valos;
-        let integratedProps = decodedProps;
-        if (isInstanceLensType) {
-          integratedProps = {
-            ...decodedProps,
-            instanceLensPrototype: VALEK.fromValue(integrationFabricScope).propertyValue(type),
-          };
-          const vIntegrator = integrationFabricScope.this;
+        let integratedProps;
+        const vIntegrator = integrationFabricScope.this;
+        /*
+        if (isInstanceLens) {
+          integratedProps.instanceLensPrototype =
+              VALEK.fromValue(integrationFabricScope).propertyValue(type);
           if (!integrationFabricScope[type]) {
             throw new Error(`Cannot find lens instance prototype by name '${type
                 }' from integration scope of ${vIntegrator.debugId()}`);
           }
-        } else if (propsMeta.hasFunctions) {
-          integratedProps = { ...decodedProps };
         }
-        const element = !decodedChildren.length
-                ? React.createElement(actualType, integratedProps)
-            : !childrenMeta.hasFunctions
-                ? React.createElement(actualType, integratedProps, decodedChildren)
-                : React.createElement(actualType, integratedProps, decodedChildren
-                    .map(child => (typeof child !== "function"
-                        ? child
-                        : child(integrationHostGlobal, mediaInfo))));
-        return this._injectSourceInfoAndLivePropsTags(
-            element,
-            sourceInfo,
-            tryCreateLivePropsProps(actualType, integratedProps /* , onRef */));
+        */
+        const integrateableKueries = propsMeta && propsMeta.integrateableKueries;
+        if (integrateableKueries) {
+          integratedProps = { ...decodedProps };
+          if (decodedType === LiveProps) {
+            integratedProps.elementPropsSeq = [...decodedProps.elementPropsSeq];
+            for (const [propName, propKuery] of integrateableKueries) {
+              integratedProps.elementPropsSeq.push([propName, vIntegrator.step(propKuery)]);
+            }
+          } else {
+            for (const [propName, propKuery] of integrateableKueries) {
+              integratedProps[propName] = vIntegrator.step(propKuery);
+            }
+          }
+        }
+        const integratedChildrenArgs = !childrenMeta.hasIntegrators
+            ? decodedChildrenArgs
+            : [decodedChildrenArgs[0].map(child =>
+                _maybeIntegrate(child, integrationHostGlobal))];
+        return _injectSourceInfoTag(
+            React.createElement(
+                decodedType,
+                integratedProps || decodedProps,
+                ...integratedChildrenArgs),
+            sourceInfo);
       } catch (error) {
         throw this.wrapErrorEvent(error, 1, () => [
           `createDecodeScope/${sourceInfo.mediaName} integration`,
           "\n\tintegrationHostGlobal:", ...dumpObject(integrationHostGlobal),
         ]);
       }
-    };
+    }
+    _elementIntegrator._isIntegrator = true;
+    return _elementIntegrator;
   }
 
-  _createPropsByNamespace (props, parentKey, parentChildrenMeta, name, isInstanceLensType,
-      isComponentType) {
-    /* eslint-disable prefer-const */
-    let {
-      focus, head, array,
-      key, elementKey: globalId, class: className, ref: onRef,
-      vScope, valoscope, valaaScope,
-      ...restProps
-    } = props || {};
-
-    if (head !== undefined) {
-      if (focus !== undefined) {
-        throw new Error("Cannot provide both head and focus; use only focus (head is deprecated)");
-      }
-      this.warnEvent(`head is DEPRECATED in favor of focus`);
-      focus = head;
-    }
-    if (isInstanceLensType) {
-      if (key) this.warnEvent(`key is DEPRECATED in favor of $L.key (got ${key})`);
-      if (globalId) {
-        this.warnEvent(`elementKey is DEPRECATED in favor of $L.globalId (got ${globalId})`);
-      }
-      if (onRef) this.warnEvent(`ref is DEPRECATED in favor of $L.onRef (got ${onRef})`);
-    }
-    if (vScope || valoscope || valaaScope) {
-      this.warnEvent(`Element props 'vScope', 'valoscope' and 'valaaScope' are DEPRECATED${
-          ""} in favor of direct $L.<propname> notation`);
-      valoscope = valoscope || vScope || valaaScope;
-    }
-    if (key) {
-      if (key instanceof Kuery) {
-        globalId = key;
-        key = undefined; // key is used by react in LiveProps before a kuery can be resolved.
-      } else if (isComponentType) {
-        globalId = key;
-      }
-    }
-    if (key === undefined) {
-      const index = (parentChildrenMeta.nameIndices[name] =
-            (parentChildrenMeta.nameIndices[name] || 0) + 1) - 1;
-      key = `${name === "div" ? "d" : name === "span" ? "s" : name
-        }#${index}<${typeof parentKey === "string" ? parentKey : "!"}`;
-    }
-
-    const lensProps = { focus, array, globalId, key, className, valoscope, onRef };
-    const paramProps = {};
-    const contextProps = {};
+  _createChildrenMeta (children, parentKey) {
     const ret = {
-      "": isInstanceLensType ? paramProps : lensProps,
-      L: lensProps,
-      C: contextProps,
-      P: paramProps,
+      hasIntegrators: false, hasKueries: false, totalCount: (children && children.length) || 0,
+      scopeAccesses: {}, nameIndices: {},
     };
-    for (const [propName, propValue] of Object.entries(restProps)) {
-      if (!isInstanceLensType && (propName[0] === "$")) {
-        throw new Error(`Props name can't begin with '$', got: '${propName}'`);
-      }
-      const [, namespace, property] = propName.match(/^\$([^.]+)\.(.*)$/)
-          || [null, "", propName];
-      const namespaceProps = ret[namespace] || (ret[namespace] = {});
-      if (namespaceProps[property] !== undefined) {
-        this.warnEvent(
-            `Overriding existing ${namespace ? `namespace '${namespace}' ` : "non-namespaced"
-            } prop '${property}' (likely as a result of two aliased props)`);
-      }
-      namespaceProps[property] = propValue;
-    }
+    ret.decodedChildren = children && children.length && children.map(child =>
+        _extractMetaOfValueInto(
+            _maybeRecurseWithKey(child, parentKey, ret),
+            ret,
+            this._gatewayDiscourse));
     return ret;
   }
 
-  _injectSourceInfoAndLivePropsTags (elementWOSourceInfo, sourceInfo, livePropsProps = null) {
-    const ret = Object.create( // unfreeze-hack so that we can write the tags
-        Object.getPrototypeOf(elementWOSourceInfo),
-        Object.getOwnPropertyDescriptors(elementWOSourceInfo));
-    ret[SourceInfoTag] = sourceInfo;
-    ret[LivePropsPropsTag] = livePropsProps;
+  _createPropsMeta (parsedProps, elementName, isInstanceLens, isComponentLens) {
+    const ret = {
+      hasIntegrators: false, hasKueries: false, totalCount: 0,
+      scopeAccesses: {}, byNamespace: {}, decodedElementProps: {}, integrateableKueries: [],
+    };
+
+    /* eslint-disable prefer-const */
+    let {                                        // E  C  I
+      key,                                       // ?     WL
+      class: class_,                             // D  L  A
+      focus, head, array, ref,                   // WL L  WL
+      elementKey,                                // WL WL WL
+      vScope, valoscope, valaaScope,             // WL WL WL
+      ...restAttrs
+    } = parsedProps || {};
+
+    if (isInstanceLens) {
+      restAttrs["$lens:instanceLensPrototype"] = _instanceLensPrototypeKueries[elementName]
+          || (_instanceLensPrototypeKueries[elementName] =
+              VALEK.fromScope(Lens.integrationScopeResource).propertyValue(elementName));
+    }
+
+    for (const [attrName, aliasOf, shouldWarn, warnMessage] of [
+      ["focus", "$lens:focus"],
+      ["head", "$lens:focus", true],
+      ["array", "$lens:array"],
+      ["class", !isComponentLens ? "className" : "class", false],
+      ["valoscope", "$lens:valoscope", true, "direct lens:<property> notation"],
+      ["vScope", "$lens:valoscope", true, "direct lens:<property> notation"],
+      ["valaaScope", "$lens:valoscope", true, "direct lens:<property> notation"],
+      ["ref", "$on:ref", true],
+    ]) {
+      if (parsedProps[attrName] === undefined) continue;
+      if (shouldWarn || ((shouldWarn !== false) && (!isComponentLens || isInstanceLens))) {
+        this.debugEvent(`DEPRECATED: non-namespaced attribute '${attrName}' in favor of ${
+            warnMessage || aliasOf.slice(1)} (in ${elementName} "${lexicalKey}")`);
+      }
+      if (restAttrs[aliasOf] !== undefined) {
+        throw new Error(`Attribute conflict found; the deprecated non-namespaced attribute '${
+            attrName}' would alias to ${aliasOf.slice(1)} which has an existing value "${
+            restAttrs[aliasOf]}" (in ${elementName} "${lexicalKey}")`);
+      }
+      ++ret.totalCount;
+      restAttrs[aliasOf] = parsedProps[attrName];
+    }
+
+    const defaultNamespace = !isComponentLens ? "element" : !isInstanceLens ? "lens" : "attr";
+    const flattenedNamespace = !isComponentLens ? "element" : "lens";
+    for (const [givenName, attr] of Object.entries(restAttrs)) {
+      let [, namespace, name] = givenName.match(/^\$([^.]+):(.*)$/)
+          || [null, defaultNamespace, givenName];
+      const isLiveKuery = namespace.startsWith("live.") ? true
+          : namespace.startsWith("static.") ? false
+          : undefined;
+      if (isLiveKuery !== undefined) namespace = namespace.slice(isLiveKuery ? 5 : 7);
+      const namespaceAttrs = ret.byNamespace[namespace] || (ret.byNamespace[namespace] = {});
+      if (namespaceAttrs[name] !== undefined) {
+        this.warnEvent(`Overriding existing attribute ${namespace}:${name
+            } value by given attribute '${givenName}' (likely as a result of two aliased props)`);
+      }
+      const decodedValue = namespaceAttrs[name] =
+          _extractMetaOfValueInto(attr, ret, this._gatewayDiscourse, isLiveKuery);
+      const propName = (namespace === flattenedNamespace) ? name : `$${namespace}.${name}`;
+      if ((typeof decodedValue === "function") && decodedValue._isIntegrator) {
+        ret.integrateableKueries.push([propName, decodedValue]);
+      } else {
+        ret.decodedElementProps[propName] = decodedValue;
+      }
+    }
     return ret;
   }
+}
+
+export const integrationFabricScopeTag = Symbol("integrationFabricScope");
+const _instanceLensPrototypeKueries = {};
+
+function _extractMetaOfValueInto (value, meta, gatewayDiscourse, isLiveIfKuery) {
+  let ret = value;
+  if (value instanceof Kuery) {
+    const scopeAccesses = ret[ScopeAccessesTag];
+    if (!scopeAccesses && gatewayDiscourse) {
+      ret = gatewayDiscourse.run(null, ret);
+      if ((typeof ret === "object") && (ret != null)) {
+        Object.freeze(ret);
+      }
+    } else {
+      Object.assign(meta.scopeAccesses || (meta.scopeAccesses = {}), scopeAccesses);
+      if (false) {
+        ret = function _kueryIntegrator (integrationHostGlobal) {
+          return integrationHostGlobal.valos.this.step(ret);
+        };
+        ret._isIntegrator = true;
+      } else {
+        meta.hasKueries = true;
+        if (isLiveIfKuery !== undefined) {
+          ret = Object.create(Object.getPrototypeOf(ret), Object.getOwnPropertyDescriptors(ret));
+          ret[IsLiveTag] = isLiveIfKuery;
+        }
+      }
+    }
+  }
+  if (typeof ret === "function") {
+    if (ret._isIntegrator) meta.hasIntegrators = true;
+  }
+  return ret;
+}
+
+function _maybeIntegrate (maybeIntegrator, integrationHostGlobal, mediaInfo) {
+  return (typeof maybeIntegrator === "function") && maybeIntegrator._isIntegrator
+      ? maybeIntegrator(integrationHostGlobal, mediaInfo)
+      : maybeIntegrator;
+}
+
+function _maybeRecurseWithKey (maybeRecurser, parentKey, parentChildrenMeta) {
+  return (typeof maybeRecurser === "function") && maybeRecurser._isKeyRecurser
+      ? maybeRecurser(parentKey, parentChildrenMeta)
+      : maybeRecurser;
+}
+
+function _injectSourceInfoTag (elementWOSourceInfo, sourceInfo) {
+  const ret = Object.create( // unfreeze-hack so that we can write the tags
+      Object.getPrototypeOf(elementWOSourceInfo),
+      Object.getOwnPropertyDescriptors(elementWOSourceInfo));
+  ret[SourceInfoTag] = sourceInfo;
+  ret[LivePropsPropsTag] = null;
+  return ret;
 }

@@ -2,27 +2,25 @@
 
 import React from "react";
 import PropTypes from "prop-types";
-import { OrderedMap } from "immutable";
 
 import { tryConnectToAbsentChroniclesAndThen } from "~/raem/tools/denormalized/partitions";
 import { Kuery } from "~/raem/VALK";
 
 import Vrapper, { LiveUpdate, getImplicitCallable } from "~/engine/Vrapper";
-import VALEK from "~/engine/VALEK";
+import VALEK, { IsLiveTag } from "~/engine/VALEK";
 import getImplicitMediaInterpretation from "~/engine/Vrapper/getImplicitMediaInterpretation";
 
 import Valoscope from "~/inspire/ui/Valoscope";
 import UIComponent from "~/inspire/ui/UIComponent";
 
 import {
-  arrayFromAny, patchWith, dumpObject, isPromise, thisChainEagerly, wrapError,
+  arrayFromAny, patchWith, dumpObject, isPromise, thisChainEagerly, thisChainReturn, wrapError,
 } from "~/tools";
 
-import {
-  wrapElementInLiveProps, tryCreateLivePropsProps, LivePropsPropsTag,
-} from "./_livePropsOps";
+import { wrapElementInLiveProps, tryCreateLivePropsArgs, LivePropsPropsTag }
+    from "./_livePropsOps";
 
-export { wrapElementInLiveProps, tryCreateLivePropsProps, LivePropsPropsTag };
+export { wrapElementInLiveProps, tryCreateLivePropsArgs, LivePropsPropsTag };
 
 const _isReservedPropsName = {
   key: true,
@@ -45,18 +43,18 @@ const _isReservedPropsName = {
   // all names which end with "Lens"
 };
 
-/* eslint-disable react/prop-types */
+/* eslint-disable react/prop-types, complexity */
 
 /**
  * An UIComponent which wraps another element of given
  * props.elementType and manages its live props.
  *
- * Live props are passed into LiveProps through props.liveProps (a map
- * of string kuery key to live kuery). LiveProps keeps track of these
+ * Live props are passed into LiveProps through props.propsKueriesSeq
+ * (an array of kuery key - live kuery pairs). LiveProps keeps track of these
  * kueries (valked from parentUIContext.focus) and maintains their
  * current values in corresponding map of kuery key to current value.
  *
- * When rendering the element, props.elementProps are pre-processed and
+ * When rendering the element, props.elementPropsSeq are pre-processed and
  * props values which are callback functions will be called with the
  * live value map and the return values used as the final
  * prop value that is passed to the element. This roughly mimics
@@ -66,7 +64,7 @@ const _isReservedPropsName = {
  *
  * The element can be any element, even another UIComponent; however
  * such an UIComponent won't receive any special treatment and will
- * need to receive its props through props.elementProps.
+ * need to receive its props through props.elementPropsSeq.
  *
  * Note: as LiveProps is an UIComponent it can be passed the normal
  * UIComponent props like props.parentUIContext: however the resulting
@@ -83,56 +81,54 @@ export default class LiveProps extends UIComponent {
   static propTypes = {
     ...UIComponent.propTypes,
     elementType: PropTypes.any.isRequired,
-    elementProps: PropTypes.object.isRequired,
-    liveProps: PropTypes.object, // Must be Map
+    elementPropsSeq: PropTypes.arrayOf(PropTypes.any).isRequired,
+    propsKueriesSeq: PropTypes.arrayOf(PropTypes.any),
     onRef: PropTypes.instanceOf(Kuery),
   }
-  static noPostProcess = {
-    ...UIComponent.noPostProcess,
-    liveProps: true,
-    onRef: true,
+  static livePropsBehaviors = {
+    ...UIComponent.livePropsBehaviors,
+    propsKueriesSeq: false,
+    onRef: false,
   }
 
-  constructor (props: any, context: any) {
-    super(props, context, { livePropValues: null });
   }
 
   bindFocusSubscriptions (focus: any, props: Object) {
     super.bindFocusSubscriptions(focus, props);
     // Live props are always based on the parent focus.
-    let frame = this.getUIContextValue("frame");
-    if (frame === undefined) frame = {};
-    this._immediateLivePropValues = OrderedMap();
-    for (const [kueryId, kuery] of (Object.entries(props.liveProps) || [])) {
-      thisChainEagerly(
-          { component: this, kueryId, kuery },
-          [frame],
-          _subscriptionUpdateChain,
+    const live = _createStateLive(this, props);
+    const kueryStates = {};
+    for (const [kueryName, kuery] of (props.propsKueriesSeq || [])) {
+      const propState = kueryStates[kueryName] = Object.create(live);
+      propState.kueryName = kueryName;
+      propState.kuery = kuery;
+      thisChainEagerly(propState, this.getUIContext(),
+          (kuery[IsLiveTag] === false)
+              ? _staticKueryPropChain
+              : _liveKueryPropChain,
           _errorOnBindFocusSubscriptions);
     }
-    this.setState(prev => {
-      const livePropValues = (prev.livePropValues || OrderedMap())
-          .merge(this._immediateLivePropValues);
-      this._immediateLivePropValues = undefined;
-      return { livePropValues };
-    });
+    _initializeElementPropsToLive(this, live, kueryStates);
+    // stateLive.ongoingKueries = _refreshOngoingKueries(
+    //    this, immediateKueryValues, Object.keys(props.propsKueriesSeq));
+    this.setState({ live });
     return false;
   }
 
   unbindSubscriptions () {
     super.unbindSubscriptions();
-    this.setState({ livePropValues: null });
+    this.state.live.isUnbound = true;
   }
 
   shouldComponentUpdate (nextProps: Object, nextState: Object) {
-    if (nextState.livePropValues !== this.state.livePropValues) return true;
+    if (nextState.live !== this.state.live) return true;
     if (nextProps !== this.props) return true;
     return false;
   }
 
   UNSAFE_componentWillReceiveProps (nextProps: Object, nextContext: Object) { // eslint-disable-line
     super.UNSAFE_componentWillReceiveProps(nextProps, nextContext,
-        nextProps.liveProps !== this.props.liveProps);
+        nextProps.propsKueriesSeq !== this.props.propsKueriesSeq);
   }
 
   _currentSheetContent: ?Object;
@@ -146,130 +142,30 @@ export default class LiveProps extends UIComponent {
         ((this.context.parentUIContext || {}).reactComponent || this).props);
   }
 
-  refreshClassName (focus: any, value: any) {
-    if ((value == null) || !(value instanceof Vrapper)) return value;
-    const bindingSlot = `props_className_content`;
-    if (value.hasInterface("Media") && !this.getBoundSubscription(bindingSlot)) {
-      this.bindLiveKuery(bindingSlot, value, VALEK.toMediaContentField(), {
-        onUpdate: function updateClassContent () {
-          if (this.tryFocus() !== focus) return false;
-          return this.forceUpdate() || undefined;
-        }.bind(this),
-        updateImmediately: false,
-      });
-    }
-    const sheetContent = getImplicitMediaInterpretation(value, bindingSlot, {
-      fallbackContentType: "text/css",
-      synchronous: undefined,
-      discourse: this.context.engine.discourse,
-    });
-    if ((sheetContent == null) || isPromise(sheetContent)) return sheetContent;
-    if (this._currentSheetContent !== sheetContent) {
-      if (this._currentSheetContent) this.context.releaseVssSheets(this);
-      this._currentSheetContent = sheetContent;
-      const sheet = {};
-      if (sheetContent.html) patchWith(sheet, sheetContent.html);
-      if (sheetContent.body) patchWith(sheet, sheetContent.body);
-      for (const [selector, styles] of Object.entries(sheetContent)) {
-        if ((selector !== "body") && (selector !== "html")) {
-          sheet[`& .${selector}`] = styles;
-        }
-      }
-      this._currentSheetObject = this.context.getVSSSheet({ sheet }, this);
-    }
-    return this._currentSheetObject.classes.sheet;
-  }
-
   renderLoaded (focus: any) {
-    if (this.props.liveProps) {
-      const unfinishedKueries = [];
-      const livePropValues = this.state.livePropValues || OrderedMap();
-      for (const kueryId of Object.keys(this.props.liveProps)) {
-        if (!livePropValues.has(kueryId)) {
-          unfinishedKueries.push({ [kueryId]: this.props.liveProps[kueryId] });
-        }
-      }
-      if (unfinishedKueries.length) {
-        return this.renderSlotAsLens("kueryingPropsLens", unfinishedKueries);
-      }
+    const stateLive = this.state.live;
+    if (!stateLive) return this.renderSlotAsLens("loadingLens");
+    /*
+    if (stateLive.ongoingKueries) {
+      return this.renderSlotAsLens("kueryingPropsLens", stateLive.ongoingKueries);
+    }
+    */
+
+    if (stateLive.delegate !== undefined) {
+      return this.renderFirstEnabledDelegate(stateLive.delegate, undefined, "delegate");
+    }
+    const pendingPropNames = stateLive.pendingProps && _refreshPendingProps(stateLive);
+    if (pendingPropNames) {
+      return this.renderSlotAsLens("pendingPropsLens", pendingPropNames);
     }
 
-    let newProps = {};
-    let pendingProps;
-    let elementType = this.props.elementType;
-    const isValoscope = (elementType === Valoscope);
-
-    for (let [name, prop] of Object.entries(this.props.elementProps)) {
-      if ((typeof prop === "function") && prop.kueryId) {
-        prop = prop(this.state.livePropValues);
-      }
-      if (isPromise(prop)) {
-        (pendingProps || (pendingProps = [])).push([name, prop]);
-      }
-      if (pendingProps) continue;
-      if (name[0] === "$") {
-        const propsContext = (newProps.context || (newProps.context = {}));
-        if (name.startsWith("$P.") || name.startsWith("$C.")) {
-          propsContext[name.slice(3)] = prop;
-        } else {
-          const index = name.indexOf(".");
-          if (index === -1) throw new Error(`Namespace props is missing separator: '${name}'`);
-          const namespace = name.slice(0, index);
-          (propsContext[namespace] || (propsContext[namespace] = {}))[name.slice(index + 1)] = prop;
-        }
-        continue;
-      } else if (!_isReservedPropsName[name]) {
-        if (name.startsWith("on") && (!isValoscope || (name[2] === name[2].toUpperCase()))) {
-          if (typeof prop !== "function") {
-            prop = getImplicitCallable(prop, `props.${name}`, { synchronous: undefined });
-          }
-          if (name === "onRef") {
-            name = "ref";
-          }
-        }
-      } else if (name === "className") {
-        prop = this.refreshClassName(focus, prop);
-      } else if (name === "delegate") {
-        if (Object.keys(this.props.elementProps).length === 1) {
-          return this.renderFirstEnabledDelegate(prop, undefined, "delegate");
-        }
-      } else if (name === "context" && newProps.context) {
-        Object.assign(newProps.context, prop);
-        continue;
-      }
-      if (typeof prop === "function") {
-        prop = this._wrapInValOSExceptionProcessor(prop, name);
-      }
-      newProps[name] = prop;
-    }
-    if (pendingProps) {
-      const ret = Promise.all(pendingProps.map(entry => entry[1])).then(resolvedProps => {
-        this.setState((prevState) => ({
-          livePropValues: pendingProps.reduce((newLivePropsValues, [name], index) =>
-                  newLivePropsValues.set(name, resolvedProps[index]),
-              prevState.livePropValues || OrderedMap())
-        }));
-      });
-      ret.operationInfo = {
-        slotName: "pendingPropsLens", focus: pendingProps,
-        onError: { slotName: "failedPropsLens", propsNames: pendingProps.map(([name]) => name) },
-      };
-      return ret;
-    }
+    let finalType = this.props.elementType;
     let children = arrayFromAny(this.props.children);
-    if (!isValoscope) {
-      const valoscopeProps = newProps.valoscope || newProps.vScope || newProps.valaaScope;
-      if (valoscopeProps) {
-        const subProps = newProps;
-        newProps = valoscopeProps;
-        delete subProps.valoscope;
-        delete subProps.vScope;
-        delete subProps.valaaScope;
-        elementType = Valoscope;
-        children = [React.createElement(elementType, subProps, ...children)];
-      }
+    if (stateLive.outerProps) {
+      finalType = Valoscope;
+      children = [React.createElement(this.props.elementType, stateLive.innerProps, ...children)];
     }
-    let ret;
+
     /* Only enable this section for debugging React key warnings; it will break react elsewhere
     if (elementType === Valoscope) {
       elementType = class DebugValoscope extends Valoscope {};
@@ -278,96 +174,249 @@ export default class LiveProps extends UIComponent {
       });
     }
     /* */
-    // eslint-disable-next-line
-    // */
-    if (!elementType.isUIComponent || !newProps.hasOwnProperty("array")) {
-      if (!newProps.key) newProps.key = newProps.globalId || this.getUIContextValue("key");
-      const inter = React.createElement(elementType, newProps, ...children);
-      ret = wrapElementInLiveProps(this, inter, focus, "focus");
-    } else {
-      const array = newProps.array;
-      if ((array == null) || (typeof array[Symbol.iterator] !== "function")) {
-        ret = this.renderSlotAsLens("arrayNotIterableLens", array);
-      } else {
-        delete newProps.array;
-        if (children.length) newProps.children = children;
-        ret = this.renderFocusAsSequence(
-            Array.isArray(array) ? array : [...array], elementType, newProps);
+    const finalProps = stateLive.outerProps || stateLive.innerProps;
+    if (stateLive.array) {
+      if (!Array.isArray(stateLive.array)) {
+        return this.renderSlotAsLens("arrayNotIterableLens", stateLive.array);
       }
+      if (children.length) finalProps.children = children;
+      return this.renderFocusAsSequence(stateLive.array, finalType, finalProps);
     }
-    return ret;
-  }
-
-  _wrapInValOSExceptionProcessor (callback: Function, name: string) {
-    const component = this;
-    const ret = function handleCallbackExceptions (...args: any[]) {
-      try {
-        return callback.call(this, ...args);
-      } catch (error) {
-        const absentChronicleSourcings = tryConnectToAbsentChroniclesAndThen(error,
-            () => handleCallbackExceptions(...args));
-        if (absentChronicleSourcings) return absentChronicleSourcings;
-        const finalError = wrapError(error,
-            new Error(`props.${name} valospace callback`),
-            "\n\targs:", args,
-            "\n\tcontext:", component.state.uiContext,
-            "\n\tstate:", component.state,
-            "\n\tprops:", component.props,
-        );
-
-        component.enableError(finalError,
-            "Exception caught during LiveProps.handleCallbackExceptions");
-      }
-      return undefined;
-    };
-    Object.defineProperty(ret, "name", { value: `handleExceptionsOf_${name}` });
-    return ret;
+    return wrapElementInLiveProps(
+        this, React.createElement(finalType, finalProps, ...children), focus, "focus");
   }
 }
 
-const _subscriptionUpdateChain = [
-  _bindRepeathenableLiveKuery,
-  _resolveLiveUpdate,
+function _createStateLive (component, props) {
+  return {
+    component,
+    isValoscope: props.elementType === Valoscope,
+    frame: component.getUIContextValue("frame") || {},
+    kueryValues: {},
+    pendingProps: null,
+    innerProps: {},
+  };
+}
+
+const _liveKueryPropChain = [
+  function _bindRepeathenableLiveKuery (scope) {
+    return this.component.bindLiveKuery(this.kueryName, this.frame, this.kuery,
+            { asRepeathenable: true, scope });
+  },
+  function _extractLiveUpdateValue (liveUpdate: LiveUpdate) {
+    return [liveUpdate.value()];
+  },
+  _registerUpdatedKueryValue,
 ];
 
-function _bindRepeathenableLiveKuery (frame) {
-  return this.component.bindLiveKuery(this.kueryId, frame, this.kuery,
-        { asRepeathenable: true, scope: this.component.getUIContext() });
-}
+const _staticKueryPropChain = [
+  function _runImmediateKuery (scope) {
+    return [(this.frame instanceof Vrapper)
+        ? this.frame.step(this.kuery, { scope })
+        : this.component.context.engine.run(this.frame, this.kuery, { scope })];
+  },
+  _registerUpdatedKueryValue,
+];
 
-function _resolveLiveUpdate (liveUpdate: LiveUpdate) {
-  const maybePromise = liveUpdate.value();
-  const immediateLivePropValues = this.component._immediateLivePropValues;
-  if (immediateLivePropValues) {
-    this.component._immediateLivePropValues =
-        immediateLivePropValues.set(this.kueryId, maybePromise);
+function _registerUpdatedKueryValue (kueryValue) {
+  if (this.isUnbound) return thisChainReturn(false); // return false to detach subscription
+  const kueryValues = this.kueryValues;
+  const previousValue = kueryValues[this.kueryName];
+  kueryValues[this.kueryName] = kueryValue;
+  // no dependentProps means initial binding phase
+  if (!this.dependentProps || (previousValue === kueryValue)) return undefined;
+  for (const [propName, propFetcher] of this.dependentProps) {
+    _registerNewElementPropValue(this.component, this, propName, propFetcher(kueryValues));
   }
-  if (isPromise(maybePromise)) {
-    maybePromise.then(resolvedValue =>
-        _triggerNonInitialSubscriptionUpdate(this, resolvedValue));
-  } else if (!immediateLivePropValues) {
-    _triggerNonInitialSubscriptionUpdate(this, maybePromise);
-  }
-}
-
-function _triggerNonInitialSubscriptionUpdate ({ component, kueryId }, value) {
-  const current = component.state.livePropValues || OrderedMap();
-  if ((value !== current.get(kueryId))
-      || ((value === undefined) && !current.has(kueryId))) {
-    component.setState((prevState) => ({
-      livePropValues: (prevState.livePropValues || OrderedMap())
-          .set(kueryId, value),
-    }));
-  }
+  this.component.forceUpdate();
+  return undefined;
 }
 
 function _errorOnBindFocusSubscriptions (error) {
   this.component.enableError(wrapError(error,
-          new Error(`bindFocusSubscriptions('${this.kueryId}')`),
+          new Error(`_liveKueryPropChain('${this.kueryName}')`),
           "\n\tuiContext:", ...dumpObject(this.component.state.uiContext),
           "\n\tfocus:", ...dumpObject(this.component.tryFocus()),
           "\n\tkuery:", ...dumpObject(this.kuery),
           "\n\tstate:", ...dumpObject(this.component.state),
           "\n\tprops:", ...dumpObject(this.component.props)),
-      `Exception caught during LiveProps.bindFocusSubscriptions('${this.kueryId}')`);
+      `Exception caught during LiveProps._liveKueryPropChain('${this.kueryName}')`);
+}
+
+function _initializeElementPropsToLive (component, stateLive, kueryStates) {
+  const kueryValues = stateLive.kueryValues;
+  for (const [propName, propValue] of component.props.elementPropsSeq) {
+    let newValue = propValue;
+    if ((typeof newValue === "function") && newValue.fetchedKueryNames) {
+      let isPending;
+      for (const kueryName of newValue.fetchedKueryNames) {
+        if (!kueryValues.hasOwnProperty(kueryName)) isPending = true;
+        (kueryStates[kueryName].dependentProps || (kueryStates[kueryName].dependentProps = []))
+            .push([propName, newValue]);
+      }
+      if (isPending) {
+        (stateLive.pendingProps || (stateLive.pendingProps = []))
+            .push([propName, newValue.fetchedKueryNames]);
+        continue;
+      }
+      newValue = newValue(kueryValues);
+    }
+    _registerNewElementPropValue(component, stateLive, propName, newValue);
+  }
+}
+
+function _registerNewElementPropValue (component, stateLive, propName, propValue) {
+  try {
+    let newValue = propValue;
+    if (isPromise(newValue)) {
+      throw new Error("INTERNAL ERROR: _registerNewElementPropValue should never see promises");
+    }
+    let newName = propName;
+    if (newName[0] === "$") {
+      const index = newName.indexOf(".");
+      if (index === -1) {
+        throw new Error(`$-prefixed attribute is missing a '.'-separator: '${newName}'`);
+      }
+      const namespace = newName.slice(1, index);
+      const name = newName.slice(index + 1);
+      if (namespace === "context") {
+        component.state.uiContext[name] = newValue;
+        return;
+      }
+      if (namespace === "lens") {
+        if (!stateLive.isValoscope) {
+          (stateLive.outerProps || (stateLive.outerProps = {}))[name] = newValue;
+          return;
+        }
+        newName = name;
+      } else if (namespace === "on") {
+        if (name === "ref") {
+          newName = "ref";
+        } else {
+          throw new Error(`Unrecognized 'on'-namespace callback attribute: '${newName}'`);
+        }
+        if (typeof newValue !== "function") {
+          newValue = getImplicitCallable(
+              newValue, `props.on:${newName}`, { synchronous: undefined });
+        }
+      } else {
+        throw new Error(`Unrecognized namespace '${namespace}' in attribute '${newName}'`);
+      }
+    } else if (!_isReservedPropsName[newName]) {
+      if (newName.startsWith("on")
+          && (!stateLive.isValoscope || (newName[2] === newName[2].toUpperCase()))) {
+        if (typeof newValue !== "function") {
+          newValue = getImplicitCallable(
+              newValue, `props.${newName}`, { synchronous: undefined });
+        }
+        if (newName === "onRef") {
+          newName = "ref";
+        }
+      }
+      if (typeof newValue === "function") {
+        newValue = _wrapInValOSExceptionProcessor(component, newValue, newName);
+      }
+    } else if (newName === "context") {
+      Object.assign(component.state.uiContext, newValue);
+      return;
+    } else if ((newName === "class") || (newName === "className")) {
+      if (!stateLive.isValoscope) newName = "className";
+      newValue = _refreshClassName(component, focus, newValue);
+    } else if (newName === "delegate") {
+      if (component.props.elementPropsSeq.length === 1) {
+        stateLive.delegate = newValue;
+        return;
+      }
+    } else if (newName === "valoscope" || newName === "vScope" || newName === "valaaScope") {
+      Object.assign(stateLive.isValoscope
+              ? stateLive.innerProps
+              : stateLive.outerProps || (stateLive.outerProps = {}),
+          newValue || {});
+      return;
+    } else if (newName === "array") {
+      // elementType.isUIComponent; ???
+      stateLive.array = !Array.isArray(newValue)
+              && (typeof newValue[Symbol.iterator] === "function")
+          ? [...newValue]
+          : newValue;
+      return;
+    }
+    stateLive.innerProps[newName] = newValue;
+  } catch (error) {
+    throw wrapError(error, new Error(`_registerNewElementPropValue('${propName}')`),
+        "\n\tvalue:", ...dumpObject(propValue),
+        "\n\tstateLive:", ...dumpObject(stateLive),
+        "\n\tcomponent:", ...dumpObject(component));
+  }
+}
+
+
+function _refreshPendingProps (stateLive) {
+  const kueryValues = stateLive.kueryValues;
+  stateLive.pendingProps = stateLive.pendingProps.filter(([, fetchedKueryNames]) => {
+    for (const kueryName of fetchedKueryNames) {
+      if (!kueryValues.hasOwnProperty(kueryName)) return true;
+    }
+    return false;
+  });
+  if (stateLive.pendingProps.length) return stateLive.pendingProps.map(([name]) => name);
+  stateLive.pendingProps = null;
+  return undefined;
+}
+
+function _refreshClassName (component, focus, value) {
+  if ((value == null) || !(value instanceof Vrapper)) return value;
+  const bindingSlot = `props_className_content`;
+  if (value.hasInterface("Media") && !component.getBoundSubscription(bindingSlot)) {
+    component.bindLiveKuery(bindingSlot, value, VALEK.toMediaContentField(), {
+      onUpdate: function updateClassContent () {
+        if (component.tryFocus() !== focus) return false;
+        return component.forceUpdate() || undefined;
+      },
+      updateImmediately: false,
+    });
+  }
+  const sheetContent = getImplicitMediaInterpretation(value, bindingSlot, {
+    fallbackContentType: "text/css",
+    synchronous: undefined,
+    discourse: component.context.engine.discourse,
+  });
+  if ((sheetContent == null) || isPromise(sheetContent)) return sheetContent;
+  if (component._currentSheetContent !== sheetContent) {
+    if (component._currentSheetContent) component.context.releaseVssSheets(component);
+    component._currentSheetContent = sheetContent;
+    const sheet = {};
+    if (sheetContent.html) patchWith(sheet, sheetContent.html);
+    if (sheetContent.body) patchWith(sheet, sheetContent.body);
+    for (const [selector, styles] of Object.entries(sheetContent)) {
+      if ((selector !== "body") && (selector !== "html")) {
+        sheet[`& .${selector}`] = styles;
+      }
+    }
+    component._currentSheetObject = component.context.getVSSSheet({ sheet }, component);
+  }
+  return component._currentSheetObject.classes.sheet;
+}
+
+function _wrapInValOSExceptionProcessor (component: LiveProps, callback: Function, name: string) {
+  const ret = function handleCallbackExceptions (...args: any[]) {
+    try {
+      return callback.call(this, ...args);
+    } catch (error) {
+      const absentChronicleSourcings = tryConnectToAbsentChroniclesAndThen(error,
+          () => handleCallbackExceptions(...args));
+      if (absentChronicleSourcings) return absentChronicleSourcings;
+      const finalError = wrapError(error,
+          new Error(`props.${name} valospace callback`),
+          "\n\targs:", args,
+          "\n\tcontext:", ...dumpObject(component.state.uiContext),
+          "\n\tcomponent:", ...dumpObject(component),
+      );
+      component.enableError(finalError,
+          "Exception caught during LiveProps.handleCallbackExceptions");
+    }
+    return undefined;
+  };
+  Object.defineProperty(ret, "name", { value: `handleExceptionsOf_${name}` });
+  return ret;
 }

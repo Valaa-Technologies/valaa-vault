@@ -2,8 +2,8 @@
 
 import { Kuery } from "~/raem/VALK";
 
-export const ScopeAccessesTag = Symbol("VALSK.ExternalScopeAccess");
-export const ScopeAccessKeysTag = Symbol("VALSK.ExternalScopeAccessKeys");
+export const ScopeAccessesTag = Symbol("VALSK.ScopeAccesses");
+export const ScopeAccessKeysTag = Symbol("VALSK.ScopeAccessKeys");
 
 export default class ValoscriptKuery extends Kuery {
   /**

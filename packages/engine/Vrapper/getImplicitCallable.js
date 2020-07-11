@@ -8,5 +8,5 @@ export default function getImplicitCallable (calleeCandidate: any, roleName: str
   const ret = getImplicitMediaInterpretation(calleeCandidate, roleName, options);
   if (typeof ret === "function") return ret;
   if ((typeof ret === "object") && (typeof ret.default === "function")) return ret.default;
-  throw new Error(`Can't convert ${typeof ret} callee to a function for ${roleName}`);
+  throw new Error(`Can't convert callee of type '${typeof ret}' to a function for ${roleName}`);
 }

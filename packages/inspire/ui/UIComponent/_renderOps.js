@@ -14,7 +14,7 @@ import UIComponent from "./UIComponent";
 import Lens from "~/inspire/ui/Lens";
 
 import { createDynamicKey } from "./_propsOps";
-import { wrapElementInLiveProps, tryWrapElementInLiveProps } from "./_livePropsOps";
+import { wrapElementInValens, tryWrapElementInValens } from "./_valensOps";
 
 /* eslint-disable react/prop-types */
 
@@ -46,7 +46,7 @@ export function _renderFocusAsSequence (component: UIComponent,
       context: { ...(entryProps.context || {}), forIndex: arrayIndex, arrayIndex },
       key: keyFromFocus(focus, arrayIndex),
     };
-    return wrapElementInLiveProps(
+    return wrapElementInValens(
         component,
         React.createElement(EntryElement, props, ...arrayFromAny(component.props.children)),
         focus, props.key);
@@ -110,7 +110,7 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
         return undefined;
       }
       if (React.isValidElement(lens)) {
-        return tryWrapElementInLiveProps(component, lens, focus, lensName);
+        return tryWrapElementInValens(component, lens, focus, lensName);
       }
       if (lens instanceof Kuery) {
         subLensName = `§<-${lensName}`;
@@ -182,7 +182,7 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
   return thenChainEagerly(ret, resolvedRet => {
     if (resolvedRet === undefined) return undefined;
     if (React.isValidElement(resolvedRet)) {
-      return wrapElementInLiveProps(component, resolvedRet, focus, subLensName);
+      return wrapElementInValens(component, resolvedRet, focus, subLensName);
     }
     if (onlyOnce) return resolvedRet;
     return component.renderLens(resolvedRet, focus, subLensName);

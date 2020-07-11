@@ -8,15 +8,15 @@ import UIComponent, { isUIComponentElement } from "./UIComponent";
 
 import { arrayFromAny, isPromise, wrapError } from "~/tools";
 
-export const LivePropsPropsTag = Symbol("LiveProps.props");
+export const ValensPropsTag = Symbol("Valens.props");
 
-export function wrapElementInLiveProps (component: UIComponent, element: Object, focus: any,
+export function wrapElementInValens (component: UIComponent, element: Object, focus: any,
     hierarchyKey?: string) {
-  const ret = tryWrapElementInLiveProps(component, element, focus, hierarchyKey);
+  const ret = tryWrapElementInValens(component, element, focus, hierarchyKey);
   return (ret !== undefined) ? ret : element;
 }
 
-let _LiveProps;
+let _Valens;
 
 /**
  * If no hierarchyKey is provided then it means the component doesn't
@@ -28,40 +28,40 @@ let _LiveProps;
  * @param {string} [name]
  * @returns
  */
-export function tryWrapElementInLiveProps (
+export function tryWrapElementInValens (
     component: UIComponent, element: Object, focus: any, hierarchyKey?: string) {
   // TODO(iridian, 2020-06): This whole setup should be implemented in
   // JSXDecoder also, then deprecated here, and finally removed from
   // here.
-  const LiveProps = _LiveProps || (_LiveProps = require("./LiveProps").default);
+  const Valens = _Valens || (_Valens = require("./Valens").default);
 
-  if ((element.type === LiveProps)
-      || LiveProps.isPrototypeOf(element.type)) return undefined;
-  let livePropsArgs = element[LivePropsPropsTag];
+  if ((element.type === Valens)
+      || Valens.isPrototypeOf(element.type)) return undefined;
+  let valensArgs = element[ValensPropsTag];
   try {
-    if (livePropsArgs === undefined) {
+    if (valensArgs === undefined) {
       let extendedProps;
       if (element.key) (extendedProps = []).push(["key", element.key]);
       if (element.ref) (extendedProps || (extendedProps = [])).push(["$on.ref", element.ref]);
-      livePropsArgs = tryCreateLivePropsArgs(
+      valensArgs = tryCreateValensArgs(
           element.type, extendedProps || Object.entries(element.props), hierarchyKey);
     }
-    if (livePropsArgs) {
-      // console.log("tryWrapElementInLiveProps LiveWrapper for", elementType.name, wrapperProps);
+    if (valensArgs) {
+      // console.log("tryWrapElementInValens LiveWrapper for", elementType.name, wrapperProps);
       /* Only enable this section for debugging React key warnings; it
       will break react elsewhere
-      const DebugLiveProps = class DebugLiveProps extends LiveProps {};
-      Object.defineProperty(DebugLiveProps, "name", {
-        value: `LiveProps_${livePropsProps.key}`,
+      const DebugValens = class DebugValens extends Valens {};
+      Object.defineProperty(DebugValens, "name", {
+        value: `Valens_${valensProps.key}`,
       });
       // */
-      return React.createElement(...livePropsArgs, ...arrayFromAny(element.props.children));
+      return React.createElement(...valensArgs, ...arrayFromAny(element.props.children));
     }
     return tryPostRenderElement(component, element, focus, hierarchyKey);
     // Element has no live props.
     // let parentUIContext;
   } catch (error) {
-    throw wrapError(error, `During ${component.debugId()}\n .tryWrapElementInLiveProps(`,
+    throw wrapError(error, `During ${component.debugId()}\n .tryWrapElementInValens(`,
             typeof element.type === "function" ? element.type.name : element.type, `), with:`,
         "\n\telement.props:", element.props,
         "\n\telement.props.children:", element.props && element.props.children,
@@ -108,15 +108,15 @@ export function tryPostRenderElement (component, element, focus, hierarchyKey) {
   // ...(children || arrayFromAny(props.children)));
 }
 
-const _genericLivePropsBehaviors = {
+const _genericValensPropsBehaviors = {
   children: false, // ignore
   ref: "$on:ref",
-  valoscope: true, // always trigger liveprops handling
+  valoscope: true, // always trigger valens handling
   array: UIComponent,
 };
 
-export function tryCreateLivePropsArgs (elementType, propsSeq, hierarchyKey) {
-  const LiveProps = _LiveProps || (_LiveProps = require("./LiveProps").default);
+export function tryCreateValensArgs (elementType, propsSeq, hierarchyKey) {
+  const Valens = _Valens || (_Valens = require("./Valens").default);
 
   const propsKueries = { currentIndex: 0 };
   // TODO(iridian, 2020-06): Fix this ridiculously useless deduplication
@@ -124,11 +124,11 @@ export function tryCreateLivePropsArgs (elementType, propsSeq, hierarchyKey) {
   // system itself will deduplicate any live props there might be.
   const kueryDeduper = new Map();
   let kueryProps;
-  const livePropsBehaviors = elementType.livePropsBehaviors || _genericLivePropsBehaviors;
+  const valensPropsBehaviors = elementType.valensPropsBehaviors || _genericValensPropsBehaviors;
   try {
     for (const [propName, propValue] of propsSeq) {
       let actualName = propName;
-      const behavior = livePropsBehaviors[propName];
+      const behavior = valensPropsBehaviors[propName];
       if (behavior !== undefined) {
         if (typeof behavior === "boolean") {
           if (behavior === false) continue;
@@ -145,20 +145,20 @@ export function tryCreateLivePropsArgs (elementType, propsSeq, hierarchyKey) {
       }
     }
     if (!kueryProps) return undefined;
-    const livePropsProps = { elementType, elementPropsSeq: [...Object.entries(kueryProps)] };
+    const valensProps = { elementType, elementPropsSeq: [...Object.entries(kueryProps)] };
     for (const [propName, propValue] of propsSeq) {
       if (kueryProps[propName] === undefined) {
-        livePropsProps.elementPropsSeq.push([propName, propValue]);
+        valensProps.elementPropsSeq.push([propName, propValue]);
       }
     }
     if (propsKueries.currentIndex) {
       delete propsKueries.currentIndex;
-      livePropsProps.propsKueriesSeq = [...Object.entries(propsKueries)];
+      valensProps.propsKueriesSeq = [...Object.entries(propsKueries)];
     }
-    livePropsProps.hierarchyKey = hierarchyKey;
-    return [LiveProps, livePropsProps];
+    valensProps.hierarchyKey = hierarchyKey;
+    return [Valens, valensProps];
   } catch (error) {
-    throw wrapError(error, `During _createLivePropsProps(`,
+    throw wrapError(error, `During _createValensProps(`,
             typeof elementType === "function" ? elementType.name : elementType, `), with:`,
         "\n\telement.props:", propsSeq,
     );

@@ -160,7 +160,7 @@ export default class UIComponent extends React.Component {
     parentUIContext: PropTypes.object,
   };
 
-  static livePropsBehaviors = {
+  static valensPropsBehaviors = {
     children: false,
     kuery: false,
   }

@@ -7,7 +7,7 @@ import { addSourceEntryInfo, addStackFrameToError, SourceInfoTag } from "~/raem/
 import VALEK, { Kuery, EngineKuery, VS, IsLiveTag } from "~/engine/VALEK";
 
 import UIComponent, { LENS } from "~/inspire/ui/UIComponent";
-import { LivePropsPropsTag, tryCreateLivePropsArgs } from "~/inspire/ui/UIComponent/LiveProps";
+import { ValensPropsTag, tryCreateValensArgs } from "~/inspire/ui/UIComponent/Valens";
 import vidgets from "~/inspire/ui";
 import Valoscope from "~/inspire/ui/Valoscope";
 import Lens from "~/inspire/ui/Lens";
@@ -18,7 +18,7 @@ import { ScopeAccessesTag } from "~/script/VALSK";
 import MediaDecoder from "~/tools/MediaDecoder";
 import notThatSafeEval from "~/tools/notThatSafeEval";
 import { dumpObject } from "~/tools";
-import LiveProps from "../ui/UIComponent/LiveProps";
+import Valens from "../ui/UIComponent/Valens";
 
 export default class JSXDecoder extends MediaDecoder {
   static mediaTypes = [
@@ -203,7 +203,7 @@ export default class JSXDecoder extends MediaDecoder {
       propsMeta = this._createPropsMeta(
           props, name, isInstanceLens, actualType.isUIComponent, lexicalName);
       ([decodedType, decodedProps] =
-          tryCreateLivePropsArgs(
+          tryCreateValensArgs(
               actualType, Object.entries(propsMeta.decodedElementProps), lexicalName)
           || [actualType, propsMeta.decodedElementProps]);
     }
@@ -244,7 +244,7 @@ export default class JSXDecoder extends MediaDecoder {
         const integrateableKueries = propsMeta && propsMeta.integrateableKueries;
         if (integrateableKueries) {
           integratedProps = { ...decodedProps };
-          if (decodedType === LiveProps) {
+          if (decodedType === Valens) {
             integratedProps.elementPropsSeq = [...decodedProps.elementPropsSeq];
             for (const [propName, propKuery] of integrateableKueries) {
               integratedProps.elementPropsSeq.push([propName, vIntegrator.step(propKuery)]);
@@ -415,6 +415,6 @@ function _injectSourceInfoTag (elementWOSourceInfo, sourceInfo) {
       Object.getPrototypeOf(elementWOSourceInfo),
       Object.getOwnPropertyDescriptors(elementWOSourceInfo));
   ret[SourceInfoTag] = sourceInfo;
-  ret[LivePropsPropsTag] = null;
+  ret[ValensPropsTag] = null;
   return ret;
 }

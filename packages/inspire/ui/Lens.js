@@ -334,11 +334,11 @@ below) based on the current dynamic state and/or value of the focus.
     ]) }),
   }));
 
-  createSlotSymbol("livePropsLens", () => ({
+  createSlotSymbol("valensLens", () => ({
     type: "Lens",
     description:
-`Slot for viewing the focus via the LiveProps lens slot sequence.
-LiveProps is a built-in fabric component which wraps a UI component
+`Slot for viewing the focus via the Valens lens slot sequence.
+Valens is a built-in fabric component which wraps a UI component
 and subscribes to sourcerer event updates that affect the props of that
 component. It then triggers the dynamic update of the wrapped UI
 component in response to such events.

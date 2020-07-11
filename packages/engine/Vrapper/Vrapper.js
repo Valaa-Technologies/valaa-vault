@@ -1565,16 +1565,14 @@ export default class Vrapper extends Cog {
           "\n\tobject:", this);
     }
     if (options.mime) {
-      console.debug("DEPRECATED: interpretContent.mime",
-          "\n\tprefer: interpretContent.contentType",
-          "\n\tvalue:", options.mime);
+      console.debug("DEPRECATED: interpretContent.mime in favor of interpretContent.contentType",
+          "(with value:", options.mime, ")");
       options.contentType = options.mime;
       delete options.mime;
     }
     if (options.mimeFallback) {
-      console.debug("DEPRECATED: interpretContent.mimeFallback",
-          "\n\tprefer: interpretContent.fallbackContentType",
-          "\n\tvalue:", options.mimeFallback);
+      console.debug("DEPRECATED: interpretContent.mimeFallback in favor of",
+          "interpretContent.fallbackContentType (with value:", options.mimeFallback, ")");
       options.fallbackContentType = options.mimeFallback;
       delete options.mimeFallback;
     }

@@ -17,10 +17,10 @@ import {
   arrayFromAny, patchWith, dumpObject, isPromise, thisChainEagerly, thisChainReturn, wrapError,
 } from "~/tools";
 
-import { tryCreateLivePropsArgs, LivePropsPropsTag, postRenderElement } from "./_livePropsOps";
+import { tryCreateValensArgs, ValensPropsTag, postRenderElement } from "./_valensOps";
 import { createDynamicKey } from "./_propsOps";
 
-export { tryCreateLivePropsArgs, LivePropsPropsTag };
+export { tryCreateValensArgs, ValensPropsTag };
 
 const _isReservedPropsName = {
   key: true,
@@ -50,8 +50,8 @@ const _isReservedPropsName = {
  * An UIComponent which wraps another element of given
  * props.elementType and manages its live props.
  *
- * Live props are passed into LiveProps through props.propsKueriesSeq
- * (an array of kuery key - live kuery pairs). LiveProps keeps track of these
+ * Live props are passed into Valens through props.propsKueriesSeq
+ * (an array of kuery key - live kuery pairs). Valens keeps track of these
  * kueries (valked from parentUIContext.focus) and maintains their
  * current values in corresponding map of kuery key to current value.
  *
@@ -67,17 +67,17 @@ const _isReservedPropsName = {
  * such an UIComponent won't receive any special treatment and will
  * need to receive its props through props.elementPropsSeq.
  *
- * Note: as LiveProps is an UIComponent it can be passed the normal
+ * Note: as Valens is an UIComponent it can be passed the normal
  * UIComponent props like props.parentUIContext: however the resulting
  * local uiContext.focus will not
  * affect the live props and is only used for the children (if any).
  *
  * @export
- * @class LiveProps
+ * @class Valens
  * @extends {UIComponent}
  */
-export default class LiveProps extends UIComponent {
-  static mainLensSlotName = "livePropsLens";
+export default class Valens extends UIComponent {
+  static mainLensSlotName = "valensLens";
 
   static propTypes = {
     ...UIComponent.propTypes,
@@ -87,8 +87,8 @@ export default class LiveProps extends UIComponent {
     propsKueriesSeq: PropTypes.arrayOf(PropTypes.any),
     onRef: PropTypes.instanceOf(Kuery),
   }
-  static livePropsBehaviors = {
-    ...UIComponent.livePropsBehaviors,
+  static valensPropsBehaviors = {
+    ...UIComponent.valensPropsBehaviors,
     propsKueriesSeq: false,
     onRef: false,
   }
@@ -140,9 +140,9 @@ export default class LiveProps extends UIComponent {
   _currentSheetObject: ?Object;
 
   readSlotValue (slotName: string, slotSymbol: Symbol, focus: any, onlyIfAble?: boolean) {
-    // Use the props slots of the parent component because LiveProps
+    // Use the props slots of the parent component because Valens
     // cannot be explicitly passed any props.
-    // These slot props should probably be passed to LiveProps inside props, though...
+    // These slot props should probably be passed to Valens inside props, though...
     return super.readSlotValue(slotName, slotSymbol, focus, onlyIfAble,
         ((this.context.parentUIContext || {}).reactComponent || this).props);
   }
@@ -246,7 +246,7 @@ function _errorOnBindFocusSubscriptions (error) {
           "\n\tkuery:", ...dumpObject(this.kuery),
           "\n\tstate:", ...dumpObject(this.component.state),
           "\n\tprops:", ...dumpObject(this.component.props)),
-      `Exception caught during LiveProps._liveKueryPropChain('${this.kueryName}')`);
+      `Exception caught during Valens._liveKueryPropChain('${this.kueryName}')`);
 }
 
 function _initializeElementPropsToLive (component, stateLive, kueryStates) {
@@ -276,6 +276,28 @@ function _registerNewElementPropValue (component, stateLive, propName, propValue
     let newValue = propValue;
     if (isPromise(newValue)) {
       throw new Error("INTERNAL ERROR: _registerNewElementPropValue should never see promises");
+      /*
+          const pendingProps = [...Object.entries(stateLive.pendingProps)];
+          const ret = Promise.all(pendingProps.map(([, value]) => value)).then(resolvedValues => {
+            this.setState((prevState) => {
+              const kueryValues = { ...prevState.kueryValues };
+              for (let i = 0; i !== pendingProps.length; ++i) {
+                const propName = pendingProps[i][0];
+                kueryValues[propName] = resolvedValues[i];
+                delete stateLive.pendingProps[propName];
+              }
+              if (!Object.keys(stateLive.pendingProps).length) stateLive.pendingProps = null;
+              return { kueryValues };
+            });
+          });
+          ret.operationInfo = {
+            slotName: "pendingPropsLens", focus: ,
+            onError: { slotName: "failedPropsLens", propsNames: Object.keys(stateLive.pendingProps) },
+          };
+          return ret;
+      (stateLive.pendingProps || (stateLive.pendingProps = {}))[propName] = newValue;
+      return;
+      */
     }
     let newName = propName;
     if (newName[0] === "$") {
@@ -308,6 +330,15 @@ function _registerNewElementPropValue (component, stateLive, propName, propValue
       } else {
         throw new Error(`Unrecognized namespace '${namespace}' in attribute '${newName}'`);
       }
+      /*
+              const attrs = innerProps.attrs || (innerProps.attrs = {});
+      if (newName.startsWith("$A.")) {
+        attrs[newName.slice(3)] = newValue;
+      } else {
+        (attrs[namespace] || (attrs[namespace] = {}))[newName.slice(index + 1)] = newValue;
+      }
+      return;
+      */
     } else if (!_isReservedPropsName[newName]) {
       if (newName.startsWith("on")
           && (!stateLive.isValoscope || (newName[2] === newName[2].toUpperCase()))) {
@@ -356,6 +387,15 @@ function _registerNewElementPropValue (component, stateLive, propName, propValue
   }
 }
 
+/*
+function _refreshOngoingKueries (component, kueryValues, ongoingKueries) {
+  if (!ongoingKueries || !ongoingKueries.length) return ongoingKueries;
+  const ret = ongoingKueries.filter(kueryName => !kueryValues.hasOwnProperty(kueryName));
+  return !ret.length ? null
+      : (ret.length < ongoingKueries) ? ret
+      : ongoingKueries; // no change
+}
+*/
 
 function _refreshPendingProps (stateLive) {
   const kueryValues = stateLive.kueryValues;
@@ -404,7 +444,7 @@ function _refreshClassName (component, focus, value) {
   return component._currentSheetObject.classes.sheet;
 }
 
-function _wrapInValOSExceptionProcessor (component: LiveProps, callback: Function, name: string) {
+function _wrapInValOSExceptionProcessor (component: Valens, callback: Function, name: string) {
   const ret = function handleCallbackExceptions (...args: any[]) {
     try {
       return callback.call(this, ...args);
@@ -419,7 +459,7 @@ function _wrapInValOSExceptionProcessor (component: LiveProps, callback: Functio
           "\n\tcomponent:", ...dumpObject(component),
       );
       component.enableError(finalError,
-          "Exception caught during LiveProps.handleCallbackExceptions");
+          "Exception caught during Valens.handleCallbackExceptions");
     }
     return undefined;
   };

@@ -120,21 +120,25 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
         return tryWrapElementInLiveProps(component, lens, focus, lensName);
       }
       if (lens instanceof Kuery) {
-        // Delegates the kuery resolution to LiveProps.
-        subLensName = `§-${lensName}`;
-        const delayed = thenChainEagerly(
-            component.bindLiveKuery(subLensName, component.getUIContextValue("frame"), lens,
-                { asRepeathenable: true, scope: component.getUIContext() }),
-            update => {
-              let newLensValue = update.value();
-              if (newLensValue === undefined) newLensValue = null;
-              if (ret === undefined) {
-                ret = newLensValue;
-              } else if (ret !== newLensValue) {
-                component.forceUpdate();
-              }
-            });
-        if (ret === undefined) ret = delayed || null;
+        subLensName = `§<-${lensName}`;
+        const options = { asRepeathenable: "reuse", scope: component.getUIContext() };
+        const initialRepeathenable = component.bindLiveKuery(
+            subLensName, component.getUIContextValue("frame"), lens, options);
+        const repeathenableState = options.repeathenableState;
+        if (initialRepeathenable) {
+          repeathenableState.chain = thenChainEagerly(
+              initialRepeathenable,
+              update => {
+                let newLensValue = update.value();
+                if (newLensValue === undefined) newLensValue = null;
+                if (repeathenableState.currentValue === newLensValue) return;
+                if (repeathenableState.currentValue !== undefined) component.forceUpdate();
+                repeathenableState.currentValue = newLensValue;
+              },
+          );
+        }
+        ret = repeathenableState.currentValue;
+        if (ret === undefined) ret = repeathenableState.chain || null;
         // ret = React.createElement(UIComponent,
         //    component.childProps(subLensName, { delegate: [lens] }));
       } else if (lens instanceof Vrapper) {

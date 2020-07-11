@@ -32,18 +32,38 @@ export function _finalizeUnbindSubscribersExcept (component: UIComponent, except
 export function _bindLiveKuery (component: UIComponent, bindingSlot: string,
   head: any, kuery: any, options: Object,
 ) {
-  component.unbindSubscription(bindingSlot, { require: false });
-  if (head === undefined) return undefined;
-  const engine = component.context.engine;
-  if (!options.onUpdate && !options.asRepeathenable) {
-    throw new Error("bindLiveKuery.options must specify either onUpdate or asRepeathenable");
+  if (options.asRepeathenable === "reuse") {
+    const existingSubscription = component._subscriptions[bindingSlot];
+    if (existingSubscription) {
+      const repeathenableState = existingSubscription.repeathenableState;
+      if (repeathenableState && (repeathenableState.kuery === kuery)) {
+        options.repeathenableState = existingSubscription.repeathenableState;
+        return undefined;
+      }
+      _removeSubscriptions(component, existingSubscription, bindingSlot);
+      component._subscriptions[bindingSlot] = undefined;
+    }
+    options.repeathenableState = { kuery };
+  } else {
+    component.unbindSubscription(bindingSlot, { require: false });
+    if (head === undefined) return undefined;
+    if (!options.onUpdate && !options.asRepeathenable) {
+      throw new Error("bindLiveKuery.options must specify either onUpdate or asRepeathenable");
+    }
   }
+  const engine = component.context.engine;
   const subscription = (head instanceof Vrapper ? head : engine)
       .obtainSubscription(
           kuery, options, engine.getActiveGlobalOrNewLocalEventGroupTransaction, head);
-  component._subscriptions[bindingSlot] = subscription;
-  return subscription.addListenerCallback(component, bindingSlot,
-      options.onUpdate, options.updateImmediately, options.asRepeathenable);
+  if (!options.repeathenableState) {
+    component._subscriptions[bindingSlot] = subscription;
+  } else {
+    (component._subscriptions[bindingSlot] = [subscription]).repeathenableState
+        = options.repeathenableState;
+  }
+  return subscription
+      .addListenerCallback(component, bindingSlot, options.onUpdate, options.updateImmediately,
+          options.asRepeathenable);
 }
 
 export function _getBoundSubscription (component: UIComponent, bindingSlot: string) {

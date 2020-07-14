@@ -653,7 +653,7 @@ export default class Vrapper extends Cog {
     if (options && options.short) {
       return debugId(this[HostRef], { short: true });
     }
-    if (this._debugId && (!options || !options.transient)) return this._debugId;
+    if (this.__name && (!options || !options.transient)) return this.__name;
     let nameText;
     const innerOptions = !options ? {} : Object.create(options);
     innerOptions.scope = {};
@@ -673,7 +673,7 @@ export default class Vrapper extends Cog {
         targetText = `.O-${target ? target.getName() : "@@"}`;
       }
     }
-    return (this._debugId = `${
+    return (this.__name = `${
       this._phase === ACTIVE ? "" : `(${this._phase})`}${
       nameText || ""}${
       this.getName().slice(0, -2)}${
@@ -1841,7 +1841,7 @@ export default class Vrapper extends Cog {
       console.log(`${this.debugId()}.onEventMODIFIED()`, story, this);
     }
     try {
-      if (passage.sets && passage.sets.name && this._debugId) this._debugId = null;
+      if (passage.sets && passage.sets.name && this.__name) this.__name = null;
       if (passage.actualAdds) {
         for (const fieldName of passage.actualAdds.keys()) {
           this.notifyMODIFIEDHandlers(fieldName, passage, story);

@@ -22,7 +22,7 @@ export default class VSXDecoder extends JSXDecoder {
       sourceInfo.kueries = [];
       ret.transformExpressionText = (embeddedSource: any, start: any = {}, end: any = {}) => {
         sourceInfo.kueries.push(
-            this._transpileEmbeddedValoscript(embeddedSource, sourceInfo, start, end));
+            this._transpileEmbeddedValoscript(embeddedSource, sourceInfo, { start, end }));
         return `__kueries[${sourceInfo.kueries.length - 1}]`;
       };
     }
@@ -35,23 +35,22 @@ export default class VSXDecoder extends JSXDecoder {
     return ret;
   }
 
-  _transpileEmbeddedValoscript (embeddedSource: string, topLevelSourceInfo: Object, start: Object,
-      end: Object) {
+  _transpileEmbeddedValoscript (embeddedSource: string, topLevelSourceInfo: Object, loc: Object) {
     const sourceInfo = Object.create(topLevelSourceInfo);
     try {
-      sourceInfo.phase = `inline VS transpilation at ${start.line}:${start.column} in ${
+      sourceInfo.phase = `inline VS transpilation at ${loc.start.line}:${loc.start.column} in ${
           sourceInfo.phaseBase}`;
       sourceInfo.sourceMap = new Map();
       const kuery = transpileValoscriptBody(`(${embeddedSource})`,
           { customVALK: VALEK, sourceInfo, cache: this._transpilationCache });
-      sourceInfo.phase = `inline VS run at ${start.line}:${start.column} in ${
+      sourceInfo.phase = `inline VS run at ${loc.start.line}:${loc.start.column} in ${
           sourceInfo.phaseBase}`;
-      return super._addKuerySourceInfo(kuery, sourceInfo, start, end);
+      return super._addKuerySourceInfo(kuery, sourceInfo, loc);
     } catch (error) {
       const origin = new Error(`_transpileEmbeddedValoscript(${sourceInfo.phaseBase})`);
       throw addStackFrameToError(
           this.wrapErrorEvent(error, 1, origin, "\n\tsourceInfo:", sourceInfo),
-          addSourceEntryInfo(sourceInfo, {}, { loc: { start, end } }),
+          addSourceEntryInfo(sourceInfo, {}, { loc }),
           sourceInfo, origin);
     } finally {
       for (const [entrySource, entryInfo] of sourceInfo.sourceMap) {

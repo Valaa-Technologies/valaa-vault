@@ -160,7 +160,7 @@ export default class ReactRoot extends React.Component {
 
   _createRootContext (vRootFocus: Vrapper, customUIScope: Object) {
     const rootContext = Object.create(customUIScope || vRootFocus.getEngine().getRootScope());
-    rootContext.VSS = this._createVSS(vRootFocus.getEngine());
+    rootContext.VSS = this._createVSS(vRootFocus && vRootFocus.getEngine());
     rootContext.VS = VS;
     return rootContext;
   }

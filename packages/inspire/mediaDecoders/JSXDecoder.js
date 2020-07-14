@@ -92,6 +92,7 @@ export default class JSXDecoder extends MediaDecoder {
       // as custom user provided keys. For example lens instances use custom keys to store
       // themselves inside parent instance owner properties.
       const rootChildrenMeta = this._createChildrenMeta();
+      delete sourceInfo.currentLoc;
       const integrator = rootElementBindKeys(`@~:${sourceInfo.mediaName}`, rootChildrenMeta);
       sourceInfo.phase = `run phase of ${sourceInfo.phaseBase}`;
       return integrator;
@@ -117,18 +118,24 @@ export default class JSXDecoder extends MediaDecoder {
       VALK: VALEK,
       kuery: (kuery: EngineKuery = VALEK.head()) =>
           ({ kuery: (kuery instanceof Kuery) ? kuery : VALEK.to(kuery) }),
-      addSourceInfo: (embeddedContent, startLine, startColumn, endLine, endColumn) =>
-        this._addKuerySourceInfo(embeddedContent, sourceInfo,
-            { line: startLine, column: startColumn }, { line: endLine, column: endColumn }),
+      addSourceInfo: (embeddedContent, startLine, startColumn, endLine, endColumn) => {
+        sourceInfo.currentLoc = {
+          start: { line: startLine, column: startColumn },
+          end: { line: endLine, column: endColumn },
+        };
+        return this._addKuerySourceInfo(
+            embeddedContent, sourceInfo, sourceInfo.currentLoc);
+      },
       spread: (...rest) => Object.assign(...rest),
       createElement: (type, props, ...restChildren) => {
         const self = this;
+        const loc = sourceInfo.currentLoc || { start: {} }; // does not work yet
         _recurseWithKeys._isKeyRecurser = true;
         return _recurseWithKeys;
         function _recurseWithKeys (parentKey: string, parentChildrenMeta: Object) {
           try {
             return self._createKeyedElement(
-              sourceInfo, type, props, restChildren, parentKey, parentChildrenMeta);
+              sourceInfo, loc, type, props, restChildren, parentKey, parentChildrenMeta);
           } catch (error) {
             throw self.wrapErrorEvent(error, 0, () => [
               new Error(`_createKeyedElement(${parentKey})`),
@@ -142,36 +149,38 @@ export default class JSXDecoder extends MediaDecoder {
     };
   }
 
-  _addKuerySourceInfo (embeddedContent: any, outerSourceInfo: Object, start: Object, end: Object) {
+  _addKuerySourceInfo (embeddedContent: any, outerSourceInfo: Object, loc: Object) {
     if (typeof embeddedContent !== "object" || embeddedContent === null) return embeddedContent;
     if (!(embeddedContent instanceof Kuery)) {
       const entries = Array.isArray(embeddedContent) ? embeddedContent
           : (Object.getPrototypeOf(embeddedContent) === Object.prototype)
               ? Object.values(embeddedContent)
               : [];
-      entries.forEach(entry => this._addKuerySourceInfo(entry, outerSourceInfo, start, end));
+      entries.forEach(entry => this._addKuerySourceInfo(entry, outerSourceInfo, loc));
       return embeddedContent;
     }
     const sourceInfo: any = embeddedContent[SourceInfoTag];
     if (!sourceInfo) {
-      addSourceEntryInfo(outerSourceInfo, embeddedContent.toVAKON(), { loc: { start, end, } });
+      addSourceEntryInfo(outerSourceInfo, embeddedContent.toVAKON(), { loc: { ...loc } });
     } else {
       for (const [key, entry] of sourceInfo.sourceMap) {
-        const loc = { start: { ...entry.loc.start }, end: { ...entry.loc.end } };
-        if (loc.start.line === 1) {
-          loc.start.column += start.column + this.constructor.columnOffset;
+        const subLoc = { start: { ...entry.loc.start }, end: { ...entry.loc.end } };
+        if (subLoc.start.line === 1) {
+          subLoc.start.column += loc.start.column + this.constructor.columnOffset;
         }
-        if (loc.end.line === 1) loc.end.column += start.column + this.constructor.columnOffset;
-        loc.start.line += start.line - 1;
-        loc.end.line += start.line - 1;
-        addSourceEntryInfo(outerSourceInfo, key, { ...entry, loc });
+        if (subLoc.end.line === 1) {
+          subLoc.end.column += loc.start.column + this.constructor.columnOffset;
+        }
+        subLoc.start.line += loc.start.line - 1;
+        subLoc.end.line += loc.start.line - 1;
+        addSourceEntryInfo(outerSourceInfo, key, { ...entry, loc: subLoc });
       }
     }
     embeddedContent[SourceInfoTag] = outerSourceInfo;
     return embeddedContent;
   }
 
-  _createKeyedElement (sourceInfo, type, props, restChildren, parentKey, parentChildrenMeta) {
+  _createKeyedElement (sourceInfo, loc, type, props, restChildren, parentKey, parentChildrenMeta) {
     let actualType = type;
     let name;
     let isInstanceLens = false;
@@ -201,7 +210,7 @@ export default class JSXDecoder extends MediaDecoder {
     let propsMeta;
     if (props) {
       propsMeta = this._createPropsMeta(
-          props, name, isInstanceLens, actualType.isUIComponent, lexicalName);
+          sourceInfo, loc, props, name, isInstanceLens, actualType.isUIComponent, lexicalName);
       ([decodedType, decodedProps] =
           tryCreateValensArgs(
               actualType, Object.entries(propsMeta.decodedElementProps), lexicalName)
@@ -289,56 +298,59 @@ export default class JSXDecoder extends MediaDecoder {
     return ret;
   }
 
-  _createPropsMeta (parsedProps, elementName, isInstanceLens, isComponentLens, lexicalName) {
+  _createPropsMeta (
+      sourceInfo, loc, parsedProps, elementName, isInstanceLens, isComponentLens, lexicalName) {
     const ret = {
       hasIntegrators: false, hasKueries: false, totalCount: 0,
       scopeAccesses: {}, byNamespace: {}, decodedElementProps: {}, integrateableKueries: [],
     };
 
     /* eslint-disable prefer-const */
-    let {                                        // E  C  I
-      key,                                       // ?     WL
-      class: class_,                             // D  L  A
-      focus, head, array, ref,                   // WL L  WL
-      elementKey,                                // WL WL WL
-      vScope, valoscope, valaaScope,             // WL WL WL
+    let {                                           // E  C  I
+      key,                                          // ?     WL
+      class: class_,                                // D  L  A
+      focus, head, array, ref, styleSheet, context, // WL L  WL
+      elementKey,                                   // WL WL WL
+      vScope, valoscope, valaaScope,                // WL WL WL
       ...restAttrs
     } = parsedProps || {};
 
     if (isInstanceLens) {
-      restAttrs["$lens:instanceLensPrototype"] = _instanceLensPrototypeKueries[elementName]
+      restAttrs["$Lens:instanceLensPrototype"] = _instanceLensPrototypeKueries[elementName]
           || (_instanceLensPrototypeKueries[elementName] =
               VALEK.fromScope(Lens.integrationScopeResource).propertyValue(elementName));
     }
 
     for (const [attrName, aliasOf, shouldWarn, warnMessage] of [
-      ["focus", "$lens:focus"],
-      ["head", "$lens:focus", true],
-      ["array", "$lens:array"],
-      ["key", "$lens:key"],
-      ["elementKey", "$lens:id", true],
+      ["focus", "$Lens:focus"],
+      ["head", "$Lens:focus", true],
+      ["array", "$Lens:array"],
+      ["key", "$Lens:key"],
+      ["context", "$Lens:context"],
+      ["elementKey", "$Lens:frameId", true],
       ["class", !isComponentLens ? "className" : "class", false],
-      ["valoscope", "$lens:valoscope", true, "direct lens:<property> notation"],
-      ["vScope", "$lens:valoscope", true, "direct lens:<property> notation"],
-      ["valaaScope", "$lens:valoscope", true, "direct lens:<property> notation"],
-      ["ref", "$on:ref", true],
+      ["styleSheet", "$Lens:styleSheet"],
+      ["valoscope", "$Lens:valoscope", true, "direct Lens:<property> notation"],
+      ["vScope", "$Lens:valoscope", true, "direct Lens:<property> notation"],
+      ["valaaScope", "$Lens:valoscope", true, "direct Lens:<property> notation"],
+      ["ref", "$On:ref", true],
     ]) {
       if (parsedProps[attrName] === undefined) continue;
       if (shouldWarn || ((shouldWarn !== false) && (!isComponentLens || isInstanceLens))) {
         this.debugEvent(`DEPRECATED: non-namespaced attribute '${attrName}' in favor of ${
-            warnMessage || aliasOf.slice(1)} (in ${elementName} "${lexicalName}")`);
+            warnMessage || aliasOf.slice(1)} (in ${elementName} at ${lexicalName})`);
       }
       if (restAttrs[aliasOf] !== undefined) {
         throw new Error(`Attribute conflict found; the deprecated non-namespaced attribute '${
             attrName}' would alias to ${aliasOf.slice(1)} which has an existing value "${
-            restAttrs[aliasOf]}" (in ${elementName} "${lexicalName}")`);
+            restAttrs[aliasOf]}" (in ${elementName} at ${lexicalName})`);
       }
       ++ret.totalCount;
       restAttrs[aliasOf] = parsedProps[attrName];
     }
 
-    const defaultNamespace = !isComponentLens ? "element" : !isInstanceLens ? "lens" : "attr";
-    const flattenedNamespace = !isComponentLens ? "element" : "lens";
+    const defaultNamespace = !isComponentLens ? "Element" : !isInstanceLens ? "Lens" : "Frame";
+    const flattenedNamespace = !isComponentLens ? "Element" : "Lens";
     for (const [givenName, attr] of Object.entries(restAttrs)) {
       let [, namespace, name] = givenName.match(/^\$([^.]+):(.*)$/)
           || [null, defaultNamespace, givenName];
@@ -348,8 +360,9 @@ export default class JSXDecoder extends MediaDecoder {
       if (isLiveKuery !== undefined) namespace = namespace.slice(isLiveKuery ? 5 : 7);
       const namespaceAttrs = ret.byNamespace[namespace] || (ret.byNamespace[namespace] = {});
       if (namespaceAttrs[name] !== undefined) {
-        this.warnEvent(`Overriding existing attribute ${namespace}:${name
-            } value by given attribute '${givenName}' (likely as a result of two aliased props)`);
+        this.debugEvent(`Overriding existing value of attribute ${namespace}:${name
+            } by given attribute '${givenName
+            }' (likely as a result of two aliased props, in ${elementName} at ${lexicalName})`);
       }
       const decodedValue = namespaceAttrs[name] =
           _extractMetaOfValueInto(attr, ret, this._gatewayDiscourse, isLiveKuery);

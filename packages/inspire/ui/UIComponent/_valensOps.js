@@ -40,11 +40,8 @@ export function tryWrapElementInValens (
   let valensArgs = element[ValensPropsTag];
   try {
     if (valensArgs === undefined) {
-      let extendedProps;
-      if (element.key) (extendedProps = []).push(["key", element.key]);
-      if (element.ref) (extendedProps || (extendedProps = [])).push(["$on.ref", element.ref]);
       valensArgs = tryCreateValensArgs(
-          element.type, extendedProps || Object.entries(element.props), hierarchyKey);
+          element.type, Object.entries(element.props), hierarchyKey, element.key, element.ref);
     }
     if (valensArgs) {
       // console.log("tryWrapElementInValens LiveWrapper for", elementType.name, wrapperProps);
@@ -110,12 +107,12 @@ export function tryPostRenderElement (component, element, focus, hierarchyKey) {
 
 const _genericValensPropsBehaviors = {
   children: false, // ignore
-  ref: "$on:ref",
   valoscope: true, // always trigger valens handling
-  array: UIComponent,
+  array: 0,
+  // focus: 1,
 };
 
-export function tryCreateValensArgs (elementType, propsSeq, hierarchyKey) {
+export function tryCreateValensArgs (elementType, propsSeq, hierarchyKey, elementKey, elementRef) {
   const Valens = _Valens || (_Valens = require("./Valens").default);
 
   const propsKueries = { currentIndex: 0 };
@@ -134,8 +131,10 @@ export function tryCreateValensArgs (elementType, propsSeq, hierarchyKey) {
           if (behavior === false) continue;
         } else if (typeof behavior === "string") {
           actualName = behavior;
-        } else if (behavior === UIComponent) {
+        } else if (behavior === 0) {
           if (!elementType.isUIComponent) continue;
+        } else if (behavior === 1) {
+          if (elementType.isUIComponent) continue;
         }
         kueryProps = {};
       }
@@ -144,6 +143,10 @@ export function tryCreateValensArgs (elementType, propsSeq, hierarchyKey) {
         (kueryProps || (kueryProps = {}))[actualName] = newProp;
       }
     }
+    const keyProp = elementKey && _postProcessProp(elementKey, propsKueries, "key", kueryDeduper);
+    if (keyProp) (kueryProps || (kueryProps = {})).key = keyProp;
+    const refProp = elementRef && _postProcessProp(elementRef, propsKueries, "$On.ref", kueryDeduper);
+    if (refProp) (kueryProps || (kueryProps = {}))["$On.ref"] = refProp;
     if (!kueryProps) return undefined;
     const valensProps = { elementType, elementPropsSeq: [...Object.entries(kueryProps)] };
     for (const [propName, propValue] of propsSeq) {

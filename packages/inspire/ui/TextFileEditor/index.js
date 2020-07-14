@@ -75,7 +75,7 @@ export default class TextFileEditor extends MediaContentEditor {
   }
 
   componentDidUpdate (prevProps, prevState) {
-    if (prevState.content === undefined) {
+    if ((prevState.content === undefined) && this.editor) {
       const undoManager = this.editor.getSession().getUndoManager();
       undoManager.reset();
       this.editor.getSession().setUndoManager(undoManager);

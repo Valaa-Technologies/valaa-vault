@@ -3,7 +3,7 @@ import ReactRoot from "~/inspire/ui/ReactRoot";
 describe("ReactRoot", () => {
   let testRoot;
   beforeEach(() => {
-    testRoot = new ReactRoot({}, { releaseVssSheets: jest.fn() });
+    testRoot = new ReactRoot({ rootUIContext: {} }, { releaseVssSheets: jest.fn() });
   });
 
   describe("jss integration", () => {

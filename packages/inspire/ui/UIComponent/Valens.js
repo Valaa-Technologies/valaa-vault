@@ -4,7 +4,6 @@ import React from "react";
 import PropTypes from "prop-types";
 
 import { tryConnectToAbsentChroniclesAndThen } from "~/raem/tools/denormalized/partitions";
-import { Kuery } from "~/raem/VALK";
 
 import Vrapper, { LiveUpdate, getImplicitCallable } from "~/engine/Vrapper";
 import VALEK, { IsLiveTag } from "~/engine/VALEK";
@@ -94,7 +93,7 @@ export default class Valens extends UIComponent {
   }
 
   getKey () {
-    return this.props.globalId || this.props.hierarchyKey
+    return this.props.frameId || this.props.hierarchyKey
         || this.context.parentUIContext.reactComponent.getKey();
   }
 

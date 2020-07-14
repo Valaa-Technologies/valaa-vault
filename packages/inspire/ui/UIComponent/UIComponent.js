@@ -57,47 +57,6 @@ export default class UIComponent extends React.Component {
     getVSSSheet: PropTypes.func,
     releaseVssSheets: PropTypes.func,
 
-    /*
-    loadingLens: PropTypes.any,
-    loadingFailedLens: PropTypes.any,
-    internalErrorLens: PropTypes.any,
-
-    pendingLens: PropTypes.any,
-    failedLens: PropTypes.any,
-
-    disabledLens: PropTypes.any,
-    nullLens: PropTypes.any,
-    undefinedLens: PropTypes.any,
-    lens: PropTypes.any,
-
-    pendingConnectionsLens: PropTypes.any,
-    failedConnectionsLens: PropTypes.any,
-    pendingActivationLens: PropTypes.any,
-    failedActivationLens: PropTypes.any,
-    pendingMediaInterpretationLens: PropTypes.any,
-    failedMediaInterpretationLens: PropTypes.any,
-    unrenderableMediaInterpretationLens: PropTypes.any,
-    mediaInterpretationErrorLens: PropTypes.any,
-
-    resourceLens: PropTypes.any,
-    activeLens: PropTypes.any,
-    inactiveLens: PropTypes.any,
-    unavailableLens: PropTypes.any,
-    destroyedLens: PropTypes.any,
-
-    lensProperty: _propertyNames,
-    focusLensProperty: _propertyNames,
-    delegateLensProperty: _propertyNames,
-    instanceLensProperty: _propertyNames,
-
-    pendingFocusLens: PropTypes.any,
-    kueryingPropsLens: PropTypes.any,
-    pendingPropsLens: PropTypes.any,
-    failedPropsLens: PropTypes.any,
-    pendingChildrenLens: PropTypes.any,
-    failedChildrenLens: PropTypes.any,
-    lensPropertyNotFoundLens: PropTypes.any,
-    */
   }
 
   static propTypes = {
@@ -169,7 +128,6 @@ export default class UIComponent extends React.Component {
     // parentUIContext: "shallow",
     focus: "shallow",
     head: "shallow",
-    locals: "shallow",
     context: "shallow",
   }
 
@@ -367,7 +325,7 @@ export default class UIComponent extends React.Component {
       assignee = props[slotName];
       if (assignee === undefined) {
         if (props.hasOwnProperty(slotName)) {
-          throw new Error(`Render role props.${slotName} is provided but its value is undefined`);
+          throw new Error(`Attribute slot '${slotName}' value must not be undefined`);
         }
         assignee = this.getUIContextValue(slotSymbol);
         if (assignee === undefined) {
@@ -390,7 +348,7 @@ export default class UIComponent extends React.Component {
 
   _subscriptions: Object;
 
-  static _debugIdExcludedPropsKeys = ["focus", "hierarchyKey", "globalId"/* , "parentUIContext" */];
+  static _debugIdExcludedPropsKeys = ["focus", "hierarchyKey", "frameId"];
 
   debugId (options: ?Object) {
     const keyString = this.getKey() || "no key";

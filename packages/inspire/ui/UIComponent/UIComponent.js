@@ -31,9 +31,6 @@ import {
   _tryRenderLens, _tryRenderLensArray, _validateElement,
 } from "./_renderOps";
 import {
-  VSSStyleSheetSymbol,
-} from "./_styleOps";
-import {
   _finalizeUnbindSubscriptions, _getBoundSubscription, _unbindSubscription, _bindLiveKuery
 } from "./_subscriberOps";
 
@@ -53,21 +50,18 @@ export default class UIComponent extends React.Component {
     parentUIContext: PropTypes.object,
 
     css: PropTypes.func,
-    // styleSheet: PropTypes.any,
     getVSSSheet: PropTypes.func,
     releaseVssSheets: PropTypes.func,
-
   }
 
   static propTypes = {
     children: PropTypes.any, // children can also be a singular element.
     // parentUIContext: PropTypes.object, // If no parentUIContext the component is disabled.
     focus: PropTypes.any,
-    globalId: PropTypes.string,
+    frameId: PropTypes.string,
     context: PropTypes.object,
 
     style: PropTypes.object,
-    styleSheet: PropTypes.any,
 
     // kuery: PropTypes.instanceOf(Kuery),
     // head: PropTypes.any, // obsolete alias for focus.
@@ -76,12 +70,10 @@ export default class UIComponent extends React.Component {
 
     loadingLens: PropTypes.any,
     loadingFailedLens: PropTypes.any,
-    internalErrorLens: PropTypes.any,
 
     pendingLens: PropTypes.any,
     failedLens: PropTypes.any,
 
-    disabledLens: PropTypes.any,
     nullLens: PropTypes.any,
     undefinedLens: PropTypes.any,
     lens: PropTypes.any,
@@ -97,6 +89,7 @@ export default class UIComponent extends React.Component {
 
     resourceLens: PropTypes.any,
     activeLens: PropTypes.any,
+    activatingLens: PropTypes.any,
     inactiveLens: PropTypes.any,
     unavailableLens: PropTypes.any,
     destroyedLens: PropTypes.any,
@@ -107,9 +100,11 @@ export default class UIComponent extends React.Component {
     instanceLensProperty: _propertyNames,
 
     pendingFocusLens: PropTypes.any,
+
     kueryingPropsLens: PropTypes.any,
     pendingPropsLens: PropTypes.any,
     failedPropsLens: PropTypes.any,
+
     pendingChildrenLens: PropTypes.any,
     failedChildrenLens: PropTypes.any,
     lensPropertyNotFoundLens: PropTypes.any,
@@ -125,7 +120,6 @@ export default class UIComponent extends React.Component {
   }
 
   static propsCompareModesOnComponentUpdate = {
-    // parentUIContext: "shallow",
     focus: "shallow",
     head: "shallow",
     context: "shallow",
@@ -306,7 +300,7 @@ export default class UIComponent extends React.Component {
   }
 
   getKey () {
-    return this.props.globalId || this.context.parentUIContext.reactComponent.getKey();
+    return this.props.frameId || this.context.parentUIContext.reactComponent.getKey();
   }
 
   readSlotValue (slotName: string, slotSymbol: Symbol, focus: any, onlyIfAble?: boolean,
@@ -314,10 +308,14 @@ export default class UIComponent extends React.Component {
     void | null | string | React.Element<any> | [] | Promise<any> {
     if (onlyIfAble) {
       const descriptor = this.context.engine.getHostObjectDescriptor(slotSymbol);
-      if (descriptor
-          && (typeof descriptor.isEnabled === "function")
-          && !descriptor.isEnabled(focus, this)) {
-        return undefined;
+      if (descriptor) {
+        if ((typeof descriptor.isEnabled === "function") && !descriptor.isEnabled(focus, this)) {
+          return undefined;
+        }
+        const value = descriptor.value;
+        if (value !== undefined) {
+          return (typeof value !== "function") ? value : value(focus, this);
+        }
       }
     }
     let assignee;
@@ -501,14 +499,19 @@ export default class UIComponent extends React.Component {
     return _renderFocus(this, focus);
   }
 
-  renderFocusAsSequence (foci: any[], EntryElement: Object = UIComponent,
-      entryProps: Object = {}, keyFromFocus: (focus: any, index: number) => string,
+  renderFocusAsSequence (foci: any[], EntryElement: Object = UIComponent, entryProps: Object,
+      entryChildren: ?Array,
+      keyFromFocus: (focus: any, index: number) => string,
+      renderRejection: ?(focus: any, index: number) => undefined | any,
+      onlyPostRender: ?Boolean,
   ): [] {
-    return _renderFocusAsSequence(this, foci, EntryElement, entryProps,
+    return _renderFocusAsSequence(this, foci, EntryElement, entryProps, entryChildren,
         keyFromFocus
             || ((focus, index) => ((focus instanceof Vrapper)
                 ? `${focus.getBriefUnstableId()}<-${this.getKey() || "-"}`
-                : `[${index}]${this.getKey() || "-"}`)));
+                : `[${index}]${this.getKey() || "-"}`)),
+        renderRejection,
+        onlyPostRender);
   }
 
   // defaults to null
@@ -568,11 +571,6 @@ export default class UIComponent extends React.Component {
           && !_checkForInfiniteRenderRecursion(this);
       if (renderNormally) {
         // TODO(iridian): Fix this uggo hack where ui-context content is updated at render.
-        if (this.props.hasOwnProperty("styleSheet")) {
-          this.setUIContextValue(VSSStyleSheetSymbol, this.props.styleSheet);
-        } else {
-          this.clearUIContextValue(VSSStyleSheetSymbol);
-        }
         try {
           // Render the main lens delegate sequence.
           latestRenderedLensSlot = this.constructor.mainLensSlotName;

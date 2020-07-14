@@ -8,13 +8,15 @@ import Vrapper from "~/engine/Vrapper";
 import VALEK from "~/engine/VALEK";
 import debugId from "~/engine/debugId";
 
-import { arrayFromAny, isPromise, isSymbol, thenChainEagerly, thisChainEagerly } from "~/tools";
+import {
+  arrayFromAny, iterableFromAny, isPromise, isSymbol, thenChainEagerly, thisChainEagerly,
+} from "~/tools";
 
 import UIComponent from "./UIComponent";
 import Lens from "~/inspire/ui/Lens";
 
 import { createDynamicKey } from "./_propsOps";
-import { wrapElementInValens, tryWrapElementInValens } from "./_valensOps";
+import { wrapElementInValens, tryWrapElementInValens, postRenderElement } from "./_valensOps";
 
 /* eslint-disable react/prop-types */
 
@@ -32,25 +34,38 @@ export function _renderFirstAbleDelegate (
 }
 
 export function _renderFocusAsSequence (component: UIComponent,
-    foci: any[], EntryElement: Object, entryProps: Object,
+    foci: any[], EntryElement: Object, entryPropsTemplate: Object, entryChildren: ?Array,
     keyFromFocus: (focus: any, index: number) => string,
+    renderRejection: ?(focus: any, index: number) => undefined | any,
+    onlyPostRender: ?Boolean,
 ): [] {
   // Wraps the focus entries EntryElement, which is UIComponent by default.
   // Rendering a sequence focus can't be just a foci.map(_renderFocus) because individual entries
   // might have pending kueries or content downloads.
   // const parentUIContext = component.getUIContext();
-  return arrayFromAny(foci).map((focus, arrayIndex) => {
-    const props = {
-      ...entryProps,
-      focus,
-      context: { ...(entryProps.context || {}), forIndex: arrayIndex, arrayIndex },
-      key: keyFromFocus(focus, arrayIndex),
-    };
-    return wrapElementInValens(
-        component,
-        React.createElement(EntryElement, props, ...arrayFromAny(component.props.children)),
-        focus, props.key);
-  });
+  let arrayIndex = 0;
+  const source = iterableFromAny(foci);
+  const ret = new Array(source.length || 0);
+  for (const focus of source) {
+    const rejection = renderRejection && renderRejection(focus, arrayIndex);
+    if (rejection !== undefined) ret[arrayIndex] = rejection;
+    else {
+      const key = keyFromFocus(focus, arrayIndex);
+      const entryProps = {
+        ...entryPropsTemplate,
+        focus,
+        context: { ...(entryPropsTemplate.context || {}), forIndex: arrayIndex, arrayIndex },
+        key,
+      };
+      if (entryChildren !== undefined) entryProps.children = entryChildren;
+      const element = React.createElement(EntryElement, entryProps);
+      ret[arrayIndex] = onlyPostRender
+          ? postRenderElement(component, element, focus, key)
+          : wrapElementInValens(component, element, focus, key);
+    }
+    ++arrayIndex;
+  }
+  return ret;
 }
 
 export function _renderFocus (component: UIComponent,

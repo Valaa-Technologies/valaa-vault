@@ -13,35 +13,14 @@ import Valoscope from "~/inspire/ui/Valoscope";
 import UIComponent from "~/inspire/ui/UIComponent";
 
 import {
-  arrayFromAny, patchWith, dumpObject, isPromise, thisChainEagerly, thisChainReturn, wrapError,
+  patchWith, dumpObject, isPromise, thisChainEagerly, thisChainReturn, wrapError
 } from "~/tools";
 
 import { tryCreateValensArgs, ValensPropsTag, postRenderElement } from "./_valensOps";
 import { createDynamicKey } from "./_propsOps";
+import { VSSStyleSheetSymbol } from "./_styleOps";
 
 export { tryCreateValensArgs, ValensPropsTag };
-
-const _isReservedPropsName = {
-  key: true,
-  hierarchyKey: true,
-  globalId: true,
-  children: true,
-  style: true,
-  styleSheet: true,
-  focus: true,
-  array: true,
-  frame: true,
-  context: true,
-  className: true,
-  lens: true,
-  lensProperty: true,
-  focusLensProperty: true,
-  delegateLensProperty: true,
-  instanceLensProperty: true,
-  instanceLensPrototype: true,
-  // all names which begin with "on" and are followed by an uppercase letter
-  // all names which end with "Lens"
-};
 
 /* eslint-disable react/prop-types, complexity */
 
@@ -84,12 +63,10 @@ export default class Valens extends UIComponent {
     elementType: PropTypes.any.isRequired,
     elementPropsSeq: PropTypes.arrayOf(PropTypes.any).isRequired,
     propsKueriesSeq: PropTypes.arrayOf(PropTypes.any),
-    onRef: PropTypes.instanceOf(Kuery),
   }
   static valensPropsBehaviors = {
     ...UIComponent.valensPropsBehaviors,
     propsKueriesSeq: false,
-    onRef: false,
   }
 
   getKey () {
@@ -112,7 +89,7 @@ export default class Valens extends UIComponent {
               : _liveKueryPropChain,
           _errorOnBindFocusSubscriptions);
     }
-    _initializeElementPropsToLive(this, live, kueryStates);
+    _initializeElementPropsToLive(this, props, live, kueryStates);
     // stateLive.ongoingKueries = _refreshOngoingKueries(
     //    this, immediateKueryValues, Object.keys(props.propsKueriesSeq));
     this.setState({ live });
@@ -121,7 +98,8 @@ export default class Valens extends UIComponent {
 
   unbindSubscriptions () {
     super.unbindSubscriptions();
-    this.state.live.isUnbound = true;
+    if (this.state.live) this.state.live.isUnbound = true;
+    this.setState({ live: null });
   }
 
   shouldComponentUpdate (nextProps: Object, nextState: Object) {
@@ -164,42 +142,57 @@ export default class Valens extends UIComponent {
     }
 
     let finalType = this.props.elementType;
-    let children = arrayFromAny(this.props.children);
-    if (stateLive.outerProps) {
+    let children = this.props.children;
+
+    if (stateLive.valoscopeProps) {
       finalType = Valoscope;
-      children = [React.createElement(this.props.elementType, stateLive.innerProps, ...children)];
+      children = stateLive.valoscopeChildren;
+      if (!children) {
+        stateLive.elementProps.children = this.props.children;
+        children = stateLive.valoscopeChildren =
+            [React.createElement(this.props.elementType, stateLive.elementProps)];
+      }
     }
 
     /* Only enable this section for debugging React key warnings; it will break react elsewhere
     if (elementType === Valoscope) {
       elementType = class DebugValoscope extends Valoscope {};
       Object.defineProperty(elementType, "name", {
-        value: `Valoscope_${innerProps.className || ""}${this.getKey()}`,
+        value: `Valoscope_${stateLive.elementProps.className || ""}${this.getKey()}`,
       });
     }
     /* */
-    const finalProps = stateLive.outerProps || stateLive.innerProps;
+    const finalProps = stateLive.valoscopeProps || stateLive.elementProps;
+    finalProps.children = children;
     const createKey = (typeof finalProps.key === "function" ? finalProps.key : createDynamicKey);
     if (stateLive.array) {
       if (!Array.isArray(stateLive.array)) {
         return this.renderSlotAsLens("arrayNotIterableLens", stateLive.array);
       }
-      if (children.length) finalProps.children = children;
-      return this.renderFocusAsSequence(stateLive.array, finalType, finalProps, createKey);
+      return this.renderFocusAsSequence(stateLive.array, finalType, finalProps, undefined,
+          createKey, stateLive.renderRejection, true);
     }
+    const rejection = stateLive.renderRejection && stateLive.renderRejection(focus);
+    if (rejection !== undefined) return rejection;
     if (typeof finalProps.key !== "string") finalProps.key = createKey(focus);
-    return postRenderElement(this, React.createElement(finalType, finalProps, ...children), focus);
+    return postRenderElement(this, React.createElement(finalType, finalProps), focus);
   }
 }
 
 function _createStateLive (component, props) {
+  const isValoscope = props.elementType === Valoscope;
   return {
     component,
-    isValoscope: props.elementType === Valoscope,
+    isValoscope,
     frame: component.getUIContextValue("frame") || {},
     kueryValues: {},
+    recorders: isValoscope
+            ? _valoscopeRecorders
+        : props.elementType.isUIComponent
+            ? _componentRecorders
+            : _elementRecorders,
     pendingProps: null,
-    innerProps: {},
+    elementProps: {},
   };
 }
 
@@ -211,7 +204,7 @@ const _liveKueryPropChain = [
   function _extractLiveUpdateValue (liveUpdate: LiveUpdate) {
     return [liveUpdate.value()];
   },
-  _registerUpdatedKueryValue,
+  _recordUpdatedKueryValue,
 ];
 
 const _staticKueryPropChain = [
@@ -220,20 +213,25 @@ const _staticKueryPropChain = [
         ? this.frame.step(this.kuery, { scope })
         : this.component.context.engine.run(this.frame, this.kuery, { scope })];
   },
-  _registerUpdatedKueryValue,
+  _recordUpdatedKueryValue,
 ];
 
-function _registerUpdatedKueryValue (kueryValue) {
-  if (this.isUnbound) return thisChainReturn(false); // return false to detach subscription
-  const kueryValues = this.kueryValues;
-  const previousValue = kueryValues[this.kueryName];
-  kueryValues[this.kueryName] = kueryValue;
+function _recordUpdatedKueryValue (newKueryValue) {
+  const stateLive = Object.getPrototypeOf(this);
+  if (stateLive.isUnbound) return thisChainReturn(false); // return false to detach subscription
+  const kueryValues = stateLive.kueryValues;
+  const previousKueryValue = kueryValues[this.kueryName];
+  kueryValues[this.kueryName] = newKueryValue;
   // no dependentProps means initial binding phase
-  if (!this.dependentProps || (previousValue === kueryValue)) return undefined;
+  if (!this.dependentProps || (newKueryValue === previousKueryValue)) return undefined;
+  let update;
   for (const [propName, propFetcher] of this.dependentProps) {
-    _registerNewElementPropValue(this.component, this, propName, propFetcher(kueryValues));
+    if (!(stateLive.recorders[propName] || _recordNewGenericPropValue)(
+        stateLive, propFetcher(kueryValues), propName, stateLive.component)) {
+      update = true;
+    }
   }
-  this.component.forceUpdate();
+  if (update) stateLive.component.forceUpdate();
   return undefined;
 }
 
@@ -248,9 +246,9 @@ function _errorOnBindFocusSubscriptions (error) {
       `Exception caught during Valens._liveKueryPropChain('${this.kueryName}')`);
 }
 
-function _initializeElementPropsToLive (component, stateLive, kueryStates) {
+function _initializeElementPropsToLive (component, props, stateLive, kueryStates) {
   const kueryValues = stateLive.kueryValues;
-  for (const [propName, propValue] of component.props.elementPropsSeq) {
+  for (const [propName, propValue] of props.elementPropsSeq) {
     let newValue = propValue;
     if ((typeof newValue === "function") && newValue.fetchedKueryNames) {
       let isPending;
@@ -266,125 +264,244 @@ function _initializeElementPropsToLive (component, stateLive, kueryStates) {
       }
       newValue = newValue(kueryValues);
     }
-    _registerNewElementPropValue(component, stateLive, propName, newValue);
+    (stateLive.recorders[propName] || _recordNewGenericPropValue)(
+        stateLive, newValue, propName, component);
   }
 }
 
-function _registerNewElementPropValue (component, stateLive, propName, propValue) {
+function _recordNewGenericPropValue (stateLive, propValue, propName, component) {
   try {
-    let newValue = propValue;
-    if (isPromise(newValue)) {
-      throw new Error("INTERNAL ERROR: _registerNewElementPropValue should never see promises");
-      /*
-          const pendingProps = [...Object.entries(stateLive.pendingProps)];
-          const ret = Promise.all(pendingProps.map(([, value]) => value)).then(resolvedValues => {
-            this.setState((prevState) => {
-              const kueryValues = { ...prevState.kueryValues };
-              for (let i = 0; i !== pendingProps.length; ++i) {
-                const propName = pendingProps[i][0];
-                kueryValues[propName] = resolvedValues[i];
-                delete stateLive.pendingProps[propName];
-              }
-              if (!Object.keys(stateLive.pendingProps).length) stateLive.pendingProps = null;
-              return { kueryValues };
-            });
-          });
-          ret.operationInfo = {
-            slotName: "pendingPropsLens", focus: ,
-            onError: { slotName: "failedPropsLens", propsNames: Object.keys(stateLive.pendingProps) },
-          };
-          return ret;
-      (stateLive.pendingProps || (stateLive.pendingProps = {}))[propName] = newValue;
-      return;
-      */
+    let newName = propName, newValue = propValue;
+    if (isPromise(propValue)) {
+      throw new Error("INTERNAL ERROR: _recordNewGenericPropValue should never see promises");
     }
-    let newName = propName;
-    if (newName[0] === "$") {
-      const index = newName.indexOf(".");
+    if (propName[0] === "$") {
+      const index = propName.indexOf(".");
       if (index === -1) {
-        throw new Error(`$-prefixed attribute is missing a '.'-separator: '${newName}'`);
+        throw new Error(`Namespaced attribute is missing the '.'-separator: '${propName}'`);
       }
-      const namespace = newName.slice(1, index);
-      const name = newName.slice(index + 1);
-      if (namespace === "context") {
-        component.state.uiContext[name] = newValue;
-        return;
+      const namespace = propName.slice(1, index);
+      const name = propName.slice(index + 1);
+      if (namespace === "Context") {
+        component.state.uiContext[name] = propValue;
+        return false;
       }
-      if (namespace === "lens") {
+      if (namespace === "On") {
+        if (propValue && typeof propValue !== "function") {
+          newValue = getImplicitCallable(
+              propValue, `props.${propName}`, { synchronous: undefined });
+        }
+        newName = `on${name[0].toUpperCase()}${name.slice(1)}`;
+      } else {
+        throw new Error(`Unrecognized attribute ${propName}`);
+      }
+      /*
+      if (namespace === "Lens") {
         if (!stateLive.isValoscope) {
-          (stateLive.outerProps || (stateLive.outerProps = {}))[name] = newValue;
+          (stateLive.valoscopeProps || (stateLive.valoscopeProps = {}))[name] = propValue;
           return;
         }
         newName = name;
-      } else if (namespace === "on") {
-        if (name === "ref") {
-          newName = "ref";
-        } else {
-          throw new Error(`Unrecognized 'on'-namespace callback attribute: '${newName}'`);
-        }
-        if (typeof newValue !== "function") {
-          newValue = getImplicitCallable(
-              newValue, `props.on:${newName}`, { synchronous: undefined });
-        }
-      } else {
-        throw new Error(`Unrecognized namespace '${namespace}' in attribute '${newName}'`);
       }
-      /*
-              const attrs = innerProps.attrs || (innerProps.attrs = {});
-      if (newName.startsWith("$A.")) {
-        attrs[newName.slice(3)] = newValue;
-      } else {
-        (attrs[namespace] || (attrs[namespace] = {}))[newName.slice(index + 1)] = newValue;
-      }
-      return;
       */
-    } else if (!_isReservedPropsName[newName]) {
-      if (newName.startsWith("on")
-          && (!stateLive.isValoscope || (newName[2] === newName[2].toUpperCase()))) {
-        if (typeof newValue !== "function") {
-          newValue = getImplicitCallable(
-              newValue, `props.${newName}`, { synchronous: undefined });
-        }
-        if (newName === "onRef") {
-          newName = "ref";
-        }
+    } else if (propName.startsWith("on")
+        && (!stateLive.isValoscope || (propName[2] === propName[2].toUpperCase()))) {
+      /*
+      console.debug(`DEPRECATED: React-style camelcase event handler '${propName}', prefer 'On:${
+          propName[2].toLowerCase()}${propName.slice(3)} (in ${
+          component.props.hierarchyKey})`);
+      */
+      if (propValue && typeof propValue !== "function") {
+        newValue = getImplicitCallable(
+            propValue, `props.${propName}`, { synchronous: undefined });
       }
-      if (typeof newValue === "function") {
-        newValue = _wrapInValOSExceptionProcessor(component, newValue, newName);
-      }
-    } else if (newName === "context") {
-      Object.assign(component.state.uiContext, newValue);
-      return;
-    } else if ((newName === "class") || (newName === "className")) {
-      if (!stateLive.isValoscope) newName = "className";
-      newValue = _refreshClassName(component, focus, newValue);
-    } else if (newName === "delegate") {
-      if (component.props.elementPropsSeq.length === 1) {
-        stateLive.delegate = newValue;
-        return;
-      }
-    } else if (newName === "valoscope" || newName === "vScope" || newName === "valaaScope") {
-      Object.assign(stateLive.isValoscope
-              ? stateLive.innerProps
-              : stateLive.outerProps || (stateLive.outerProps = {}),
-          newValue || {});
-      return;
-    } else if (newName === "array") {
-      // elementType.isUIComponent; ???
-      stateLive.array = !Array.isArray(newValue)
-              && (typeof newValue[Symbol.iterator] === "function")
-          ? [...newValue]
-          : newValue;
-      return;
     }
-    stateLive.innerProps[newName] = newValue;
+    if (typeof newValue === "function") {
+      newValue = _wrapInValOSExceptionProcessor(component, newValue, newName);
+    }
+    if (stateLive.elementProps[newName] === newValue) return true;
+    stateLive.elementProps[newName] = newValue;
+    if (stateLive.valoscopeProps) stateLive.valoscopeChildren = null;
+    return false;
   } catch (error) {
-    throw wrapError(error, new Error(`_registerNewElementPropValue('${propName}')`),
+    throw wrapError(error, new Error(`_recordNewGenericPropValue('${propName}')`),
         "\n\tvalue:", ...dumpObject(propValue),
         "\n\tstateLive:", ...dumpObject(stateLive),
         "\n\tcomponent:", ...dumpObject(component));
   }
 }
+
+// These props have namespace Lens and are available to all elements
+// and components, but they are resolved by the valens and do not
+// appear on the contained element.
+const _valensRecorderProps = {
+  key: "key",
+  children: "children",
+  styleSheet (stateLive, newValue) {
+    if (newValue) {
+      stateLive.component.setUIContextValue(VSSStyleSheetSymbol, newValue);
+    } else {
+      stateLive.component.clearUIContextValue(VSSStyleSheetSymbol);
+    }
+  },
+  if: function if_ (stateLive, newValue) {
+    const oldValue = stateLive.if;
+    if (newValue === oldValue) return true;
+    stateLive.if = newValue;
+    stateLive.renderRejection =
+          !newValue
+              ? (newValue !== undefined)
+                  && (focus => stateLive.component.renderLens(stateLive.else, focus))
+          : (typeof newValue !== "function")
+              ? (stateLive.then === undefined)
+                  ? undefined
+                  : (focus => stateLive.component.renderLens(stateLive.then, focus))
+          : function _checkAndRenderRejection (focus, index) {
+            const condition = newValue(focus, index);
+            return !condition
+                    ? stateLive.component.renderLens(stateLive.else, focus)
+                : stateLive.then !== undefined
+                    ? stateLive.component.renderLens(stateLive.then, focus)
+                : undefined;
+          };
+    return !newValue === !oldValue;
+  },
+  else: function else_ (stateLive, newValue) {
+    stateLive.else = newValue;
+    return stateLive.if;
+  },
+  then: function then_ (stateLive, newValue) {
+    stateLive.then = newValue;
+    return !stateLive.if;
+  },
+  context (stateLive, newValue) {
+    Object.assign(stateLive.component.state.uiContext, newValue);
+  },
+};
+
+// These props have namespace Lens and are allowed on all elements.
+// However their presence on non-valoscope elements triggers the
+// emission of an intermediate valoscope to which they are assigned.
+const _emitValoscopeRecorderProps = {
+  focus: "focus",
+  array (stateLive, newValue) {
+    stateLive.array = !Array.isArray(newValue)
+            && (typeof newValue[Symbol.iterator] === "function")
+        ? [...newValue]
+        : newValue;
+  },
+  frameId: "frameId",
+  frame: "frame",
+  lens: "lens",
+  lensProperty: "lensProperty",
+  focusLensProperty: "focusLensProperty",
+  delegateLensProperty: "delegateLensProperty",
+  instanceLensProperty: "instanceLensProperty",
+  instanceLensPrototype: "instanceLensPrototype",
+
+  valoscope (stateLive, newValue) {
+    Object.assign(
+        stateLive.valoscopeProps || _emitValoscope(stateLive),
+        newValue || {});
+  },
+};
+
+// These props have namespace Lens and are allowed only on valoscope
+// elements.
+const _valoscopeRecorderProps = {
+  hierarchyKey: "hierarchyKey",
+  delegate (stateLive, newValue) {
+    if (stateLive.component.props.elementPropsSeq.length !== 1) {
+      throw new Error("'delegate' attribute must always be the only attribute");
+    }
+    stateLive.delegate = newValue;
+  },
+  valoscope (stateLive, newValue) { // overrides the _emitValoscopeRecorderProps.valoscope version
+    Object.assign(stateLive.elementProps, newValue || {});
+  },
+};
+
+// These props have namespace Element and are only available for
+// non-component elements.
+const _elementRecorderProps = {
+  "$On.ref": function ref (stateLive, newValue) {
+    stateLive.elementProps.ref = (newValue === "function")
+        ? newValue
+        : getImplicitCallable(newValue, `props.$On.ref`, { synchronous: undefined });
+    if (stateLive.valoscopeProps) stateLive.valoscopeChildren = null;
+  },
+  class: _className,
+  className: _className,
+  style: "style",
+  styleSheet: "styleSheet",
+};
+
+function _className (stateLive, newValue) {
+  stateLive.elementProps.className = _refreshClassName(stateLive.component, newValue);
+  if (stateLive.valoscopeProps) stateLive.valoscopeChildren = null;
+}
+
+function _createRecorder (propName, propRecorderValue, namespace) {
+  return [
+    (!namespace || (propName[0] === "$"))
+        ? propName
+        : `$${namespace}.${propName}`,
+    (typeof propRecorderValue !== "string")
+        ? propRecorderValue
+        : function _recordProp (stateLive, propValue) {
+          stateLive.elementProps[propRecorderValue] = propValue;
+          if (stateLive.valoscopeProps) stateLive.valoscopeChildren = null;
+        },
+  ];
+}
+
+function _createEmitRecorder (propName, propRecorderValue, namespace) {
+  return [
+    (!namespace || (propName[0] === "$"))
+        ? propName
+        : `$${namespace}.${propName}`,
+    (typeof propRecorderValue !== "string")
+        ? function _recordValoscopeProp (stateLive, propValue) {
+          if (!stateLive.valoscopeProps) _emitValoscope(stateLive);
+          propRecorderValue(stateLive, propValue);
+        }
+        : function _recordValoscopeProp (stateLive, propValue) {
+          (stateLive.valoscopeProps || _emitValoscope(stateLive))[propRecorderValue] = propValue;
+        },
+  ];
+}
+
+function _emitValoscope (stateLive) {
+  return stateLive.valoscopeProps = {};
+}
+
+const _valoscopeRecorders = Object.fromEntries([
+  ...Object.entries(_valensRecorderProps).map(([k, v]) => _createRecorder(k, v, "Lens")),
+  ...Object.entries(_valensRecorderProps).map(([k, v]) => _createRecorder(k, v)),
+
+  ...Object.entries(_emitValoscopeRecorderProps).map(([k, v]) => _createRecorder(k, v, "Lens")),
+  ...Object.entries(_emitValoscopeRecorderProps).map(([k, v]) => _createRecorder(k, v)),
+
+  ...Object.entries(_valoscopeRecorderProps).map(([k, v]) => _createRecorder(k, v, "Lens")),
+  ...Object.entries(_valoscopeRecorderProps).map(([k, v]) => _createRecorder(k, v)),
+]);
+
+const _componentRecorders = Object.fromEntries([
+  ...Object.entries(_valensRecorderProps).map(([k, v]) => _createRecorder(k, v, "Lens")),
+  ...Object.entries(_valensRecorderProps).map(([k, v]) => _createRecorder(k, v)),
+
+  ...Object.entries(_emitValoscopeRecorderProps).map(([k, v]) => _createEmitRecorder(k, v, "Lens")),
+  ...Object.entries(_emitValoscopeRecorderProps).map(([k, v]) => _createEmitRecorder(k, v)),
+]);
+
+const _elementRecorders = Object.fromEntries([
+  ...Object.entries(_valensRecorderProps).map(([k, v]) => _createRecorder(k, v, "Lens")),
+
+  ...Object.entries(_emitValoscopeRecorderProps).map(([k, v]) => _createEmitRecorder(k, v, "Lens")),
+
+  ...Object.entries(_elementRecorderProps).map(([k, v]) => _createRecorder(k, v, "Element")),
+  ...Object.entries(_elementRecorderProps).map(([k, v]) => _createRecorder(k, v)),
+]);
 
 /*
 function _refreshOngoingKueries (component, kueryValues, ongoingKueries) {
@@ -409,7 +526,7 @@ function _refreshPendingProps (stateLive) {
   return undefined;
 }
 
-function _refreshClassName (component, focus, value) {
+function _refreshClassName (component, value, focus = component.tryFocus()) {
   if ((value == null) || !(value instanceof Vrapper)) return value;
   const bindingSlot = `props_className_content`;
   if (value.hasInterface("Media") && !component.getBoundSubscription(bindingSlot)) {

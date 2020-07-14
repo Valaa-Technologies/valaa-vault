@@ -7,18 +7,20 @@ export default function injectLensObjects (
   valos.Lens = Lens;
   const lensDescriptors = {};
   for (const [slotName, createLensParameters] of Object.entries(descriptorOptions)) {
-    const { value, type, description, isEnabled, rootValue } = createLensParameters();
+    const { type, description, isEnabled, lens, defaultLens } = createLensParameters();
     const descriptor = {
       valos: true, symbol: true,
-      value, type, description,
+      value: lens, type, description,
       writable: false, enumerable: true, configurable: false,
     };
-    if (isEnabled !== undefined) {
-      Object.assign(descriptor, { slotName: true, isEnabled });
+    if (isEnabled) {
+      Object.assign(descriptor, { slotName: true, isEnabled, defaultLens });
     }
     lensDescriptors[slotName] = Object.freeze(descriptor);
     hostDescriptors.set(Lens[slotName], descriptor);
-    if (rootValue) rootScope[Lens[slotName]] = Object.freeze(rootValue);
+    if (defaultLens || lens) {
+      rootScope[Lens[slotName]] = Object.freeze(defaultLens || lens);
+    }
   }
   hostDescriptors.set(Lens, lensDescriptors);
   return Lens;

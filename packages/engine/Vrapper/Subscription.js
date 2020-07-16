@@ -97,9 +97,9 @@ export default class Subscription extends LiveUpdate {
 
   debugId (): string {
     return `${this.constructor.name}(${
-      this._fieldName ? `field: ${this._fieldName}`
-          : this._fieldFilter ? `filter: ${debugObject(this._fieldName)}`
-          : `kuery: ${debugObject(this._liveKuery)}`
+      this._fieldName ? `field: ${String(this._fieldName)}`
+          : this._fieldFilter ? `filter: ${String(debugObject(this._fieldName))}`
+          : `kuery: ${dumpKuery(this._liveKuery)[1]}`
     })`;
   }
 
@@ -346,7 +346,6 @@ export default class Subscription extends LiveUpdate {
 
   attachLiveKueryHooks (triggerBroadcast: ?boolean) {
     const options: any = Object.create(this._liveOptions);
-    let scope;
     try {
       options.scope = this._liveOptions.scope ? Object.create(this._liveOptions.scope) : {};
       options.steppers = Object.create(liveKuerySteppers);
@@ -367,7 +366,7 @@ export default class Subscription extends LiveUpdate {
         name,
         "\n\thead:", ...dumpObject(this._liveHead),
         "\n\tkuery:", ...dumpKuery(this._liveKuery),
-        "\n\tscope:", ...dumpObject(scope),
+        "\n\tscope:", ...dumpObject(options.scope),
         "\n\toptions.state:", ...dumpObject(options.state && options.state.toJS()),
       ]);
     } finally {

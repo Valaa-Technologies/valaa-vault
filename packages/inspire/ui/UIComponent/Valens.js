@@ -4,9 +4,10 @@ import React from "react";
 import PropTypes from "prop-types";
 
 import { tryConnectToAbsentChroniclesAndThen } from "~/raem/tools/denormalized/partitions";
+import { SourceInfoTag } from "~/raem/VALK/StackTrace";
 
 import Vrapper, { LiveUpdate, getImplicitCallable } from "~/engine/Vrapper";
-import VALEK, { IsLiveTag } from "~/engine/VALEK";
+import VALEK, { IsLiveTag, toVAKONTag } from "~/engine/VALEK";
 import getImplicitMediaInterpretation from "~/engine/Vrapper/getImplicitMediaInterpretation";
 
 import Valoscope from "~/inspire/ui/Valoscope";
@@ -70,8 +71,7 @@ export default class Valens extends UIComponent {
   }
 
   getKey () {
-    return this.props.frameId || this.props.hierarchyKey
-        || this.context.parentUIContext.reactComponent.getKey();
+    return this.props.hierarchyKey || this.context.parentUIContext.reactComponent.getKey();
   }
 
   bindFocusSubscriptions (focus: any, props: Object) {
@@ -317,7 +317,7 @@ function _recordNewGenericPropValue (stateLive, propValue, propName, component) 
       }
     }
     if (typeof newValue === "function") {
-      newValue = _wrapInValOSExceptionProcessor(component, newValue, newName);
+      newValue = _valensWrapCallback(component, newValue, newName);
     }
     if (stateLive.elementProps[newName] === newValue) return true;
     stateLive.elementProps[newName] = newValue;
@@ -390,8 +390,8 @@ const _emitValoscopeRecorderProps = {
         ? [...newValue]
         : newValue;
   },
-  frameId: "frameId",
-  frame: "frame",
+  frameKey: "frameKey",
+
   lens: "lens",
   lensProperty: "lensProperty",
   focusLensProperty: "focusLensProperty",
@@ -409,7 +409,6 @@ const _emitValoscopeRecorderProps = {
 // These props have namespace Lens and are allowed only on valoscope
 // elements.
 const _valoscopeRecorderProps = {
-  hierarchyKey: "hierarchyKey",
   delegate (stateLive, newValue) {
     if (stateLive.component.props.elementPropsSeq.length !== 1) {
       throw new Error("'delegate' attribute must always be the only attribute");
@@ -560,25 +559,37 @@ function _refreshClassName (component, value, focus = component.tryFocus()) {
   return component._currentSheetObject.classes.sheet;
 }
 
-function _wrapInValOSExceptionProcessor (component: Valens, callback: Function, name: string) {
-  const ret = function handleCallbackExceptions (...args: any[]) {
+function _valensWrapCallback (component: Valens, callback: Function, name: string) {
+  const isVCall = callback._isVCall;
+  const callName = !isVCall ? `valensExtCall_${name}` : `valensVCall_${name}`;
+  const ret = function _valensCall (...args: any[]) {
     try {
-      return callback.call(this, ...args);
+      let eThis = this;
+      if (isVCall && ((this == null) || !this.__callerValker__)) {
+        eThis = !this ? {} : Object.create(this);
+        eThis.__callerValker__ = component.context.engine.discourse;
+        eThis.__callerScope__ = component.getUIContext();
+      }
+      return callback.apply(eThis, args);
     } catch (error) {
       const absentChronicleSourcings = tryConnectToAbsentChroniclesAndThen(error,
-          () => handleCallbackExceptions(...args));
+          () => ret.apply(this, args));
       if (absentChronicleSourcings) return absentChronicleSourcings;
       const finalError = wrapError(error,
-          new Error(`props.${name} valospace callback`),
+          new Error(`attribute ${name} call in ${component.props.hierarchyKey}`),
           "\n\targs:", args,
           "\n\tcontext:", ...dumpObject(component.state.uiContext),
           "\n\tcomponent:", ...dumpObject(component),
       );
-      component.enableError(finalError,
-          "Exception caught during Valens.handleCallbackExceptions");
+      component.enableError(finalError, `Exception caught during '${callName}'`);
     }
     return undefined;
   };
-  Object.defineProperty(ret, "name", { value: `handleExceptionsOf_${name}` });
+  Object.defineProperty(ret, "name", { value: callName });
+  if (isVCall) {
+    ret._isVCall = true;
+    ret[toVAKONTag] = callback[toVAKONTag];
+    ret[SourceInfoTag] = callback[SourceInfoTag];
+    }
   return ret;
 }

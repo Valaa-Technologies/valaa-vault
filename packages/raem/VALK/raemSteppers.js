@@ -197,7 +197,7 @@ export default {
           capturedVAKON, "as evaluatee JSON:", capturedVAKON.toJS());
       capturedVAKON = capturedVAKON.toJS();
     }
-    return _createCaller(
+    return _createVCall(
         valker,
         capturedVAKON,
         valker[SourceInfoTag],
@@ -816,15 +816,15 @@ function _headOrScopeSet (valker: Valker, target: any, head: any, scope: ?Object
 }
 
 
-export const toVAKON = Symbol("ValOS.toVAKON");
+export const toVAKONTag = Symbol("ValOS.toVAKON");
 
-export function isValOSFunction (callerCandidate: any) { return callerCandidate[toVAKON]; }
+export function isValOSFunction (callerCandidate: any) { return callerCandidate[toVAKONTag]; }
 
 export function denoteValOSBuiltin (description: any = "") {
-  return (callee: any) => {
-    callee._valkThunk = true;
-    callee._valkDescription = description;
-    return callee;
+  return (vbcall: any) => {
+    vbcall._isVCall = true;
+    vbcall._valkDescription = description;
+    return vbcall;
   };
 }
 
@@ -853,7 +853,7 @@ export function denoteValOSBuiltinWithSignature (description: any = "") {
  */
 export function denoteValOSKueryFunction (description: any = "") {
   return (createKuery: any) => {
-    function callee (...args: any[]) {
+    function vkall (...args: any[]) {
       try {
         const vakon = createKuery(...args);
         if (vakon instanceof Kuery) {
@@ -870,11 +870,11 @@ export function denoteValOSKueryFunction (description: any = "") {
         ]);
       }
     }
-    callee._valkThunk = true;
-    callee._valkCreateKuery = createKuery;
-    const text = callee.toString();
-    callee._valkDescription = description + text.slice(8, text.indexOf(" {"));
-    return callee;
+    vkall._isVCall = true;
+    vkall._valkCreateKuery = createKuery;
+    const text = vkall.toString();
+    vkall._valkDescription = description + text.slice(8, text.indexOf(" {"));
+    return vkall;
   };
 }
 
@@ -889,9 +889,9 @@ export function denoteDeprecatedValOSBuiltin (prefer: string, description: any =
   };
 }
 
-function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object,
+function _createVCall (capturingValker: Valker, vakon: any, sourceInfo: ?Object,
     capturedScope: any, forwardSteppersStepName: ?string) {
-  const caller = function caller () {
+  const vcall = function vcall () {
     const scope = Object.create(capturedScope);
     scope.arguments = Array.prototype.slice.call(arguments);
     let activeTransaction;
@@ -965,7 +965,7 @@ function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object
       opName = `call/${valkCaller ? "advance" : "run"}${contextText}`;
       if (!valkCaller) {
         const absentChronicleSourcing = tryConnectToAbsentChroniclesAndThen(
-          advanceError, () => caller.apply(this, arguments));
+          advanceError, () => vcall.apply(this, arguments));
         if (absentChronicleSourcing) return absentChronicleSourcing;
       }
     }
@@ -987,11 +987,11 @@ function _createCaller (capturingValker: Valker, vakon: any, sourceInfo: ?Object
     if (sourceInfo) addStackFrameToError(wrap, vakon, sourceInfo, opName, transaction);
     throw wrap;
   };
-  caller._valkThunk = true;
-  caller[toVAKON] = vakon;
-  caller[SourceInfoTag] = sourceInfo;
-  caller._capturedScope = capturedScope;
-  return caller;
+  vcall._isVCall = true;
+  vcall[toVAKONTag] = vakon;
+  vcall[SourceInfoTag] = sourceInfo;
+  vcall._capturedScope = capturedScope;
+  return vcall;
 }
 
 export function callOrApply (steppers: Object, valker: Valker, head: any, scope: ?Object,
@@ -1023,7 +1023,7 @@ export function callOrApply (steppers: Object, valker: Valker, head: any, scope:
           ? scope : tryUnpackLiteral(valker, head, step[2], scope);
       eThis = (eThis[UnpackedHostValue] && tryUnpackedHostValue(eThis)) || eThis;
     }
-    if (eCallee._valkThunk) {
+    if (eCallee._isVCall) {
       if (eThis == null) {
         eThis = { __callerValker__: valker, __callerScope__: scope };
       } else if ((typeof eThis === "object") || (typeof eThis === "function")) {
@@ -1060,7 +1060,7 @@ export function callOrApply (steppers: Object, valker: Valker, head: any, scope:
   function onError (error) {
     return valker.wrapErrorEvent(error, 1, `builtin.${opName}`,
         "\n\thead:", ...dumpObject(head),
-        "\n\tcallee (is valk):", (eCallee != null) && eCallee._valkThunk, ...dumpObject(eCallee),
+        "\n\tcallee (is vcall):", (eCallee != null) && eCallee._isVCall, ...dumpObject(eCallee),
         "(via kuery:", ...dumpKuery(step[1]), ")",
         "\n\tthis:", ...dumpObject(eThis),
         "(via kuery:", ...dumpKuery(step[2]), ")",

@@ -665,21 +665,15 @@ If still no suitable lens can be found delegates the viewing to '${notFoundName 
         }
         */
         const scope = focus.tryValospaceScope();
-        const specificLensValue = _tryAndBindPropertyLiveKuery(
-            component.props[specificLensPropertySlotName]
-                || component.getUIContextValue(slotSymbol)
-                // || component.context[specificLensPropertySlotName]
-        );
+        const options = { scope };
+        const specificNames = component.props[specificLensPropertySlotName]
+            || component.getUIContextValue(slotSymbol);
+        const specificLensValue = specificNames ? _lookupPropertyBy(specificNames) : undefined;
         if (specificLensValue !== undefined) return specificLensValue;
 
-        // const legacyLensNameValue = _tryAndBindPropertyLiveKuery(component.props.lensName);
-        // if (legacyLensNameValue !== undefined) return legacyLensNameValue;
-
-        const genericLensValue = _tryAndBindPropertyLiveKuery(
-            component.props.lensProperty
-                  || component.getUIContextValue(ret.lensProperty)
-                  // || component.context.lensProperty
-        );
+        const genericNames = component.props.lensProperty
+            || component.getUIContextValue(ret.lensProperty);
+        const genericLensValue = genericNames ? _lookupPropertyBy(genericNames) : undefined;
         if (genericLensValue !== undefined) return genericLensValue;
         /*
         console.error("Can't find resource lens props:", specificLensPropertySlotName, slotSymbol,
@@ -691,23 +685,27 @@ If still no suitable lens can be found delegates the viewing to '${notFoundName 
         if (!notFoundName) return null;
         return { delegate: [ret[notFoundName]] };
 
-        function _tryAndBindPropertyLiveKuery (propertyName) {
-          if (!propertyName) return undefined;
-          if (Array.isArray(propertyName)) {
-            for (const name of propertyName) {
-              const vProperty = (scope && scope.hasOwnProperty(name))
-                  ? scope[name]
-                  : focus.step(VALEK.property(propertyName));
-              if (vProperty !== undefined) return vProperty;
-            }
-            return undefined;
+        function _lookupPropertyBy (propertyNames) {
+          if (!Array.isArray(propertyNames)) {
+            return (scope && scope.hasOwnProperty(propertyNames))
+                ? scope[propertyNames] : _stepForProperty(focus, propertyNames, options);
           }
-          return (scope && scope.hasOwnProperty(propertyName))
-              ? scope[propertyName]
-              : focus.step(VALEK.property(propertyName));
+          for (const name of propertyNames) {
+            const vProperty = (scope && scope.hasOwnProperty(name))
+                ? scope[name] : _stepForProperty(focus, name, options);
+            if (vProperty !== undefined) return vProperty;
+          }
+          return undefined;
         }
       },
     }));
+  }
+
+  const _propertyKueries = {};
+  function _stepForProperty (focus, propertyName, options) {
+    const kuery = _propertyKueries[propertyName]
+        || (_propertyKueries[propertyName] = VALEK.property(propertyName));
+    return focus.step(kuery, options);
   }
 
   // Valoscope

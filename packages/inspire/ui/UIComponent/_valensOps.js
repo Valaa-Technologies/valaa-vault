@@ -55,8 +55,6 @@ export function tryWrapElementInValens (
       return React.createElement(...valensArgs, ...arrayFromAny(element.props.children));
     }
     return tryPostRenderElement(component, element, focus, hierarchyKey);
-    // Element has no live props.
-    // let parentUIContext;
   } catch (error) {
     throw wrapError(error, `During ${component.debugId()}\n .tryWrapElementInValens(`,
             typeof element.type === "function" ? element.type.name : element.type, `), with:`,
@@ -82,7 +80,7 @@ export function tryPostRenderElement (component, element, focus, hierarchyKey) {
     // Otherwise if the UIComponent has a key no pre-processing
     // is required now. UIComponent does its own post-processing.
     // else
-    if (element.key || !element.hierarchyKey) return undefined;
+    if (element.key || !hierarchyKey) return undefined;
     processedProps = { ...element.props, key: hierarchyKey };
   } else {
     // non-UIComponent sans live props has its children directly rendered.
@@ -143,9 +141,11 @@ export function tryCreateValensArgs (elementType, propsSeq, hierarchyKey, elemen
         (kueryProps || (kueryProps = {}))[actualName] = newProp;
       }
     }
-    const keyProp = elementKey && _postProcessProp(elementKey, propsKueries, "key", kueryDeduper);
+    const keyProp = elementKey
+        && _postProcessProp(elementKey, propsKueries, "key", kueryDeduper);
     if (keyProp) (kueryProps || (kueryProps = {})).key = keyProp;
-    const refProp = elementRef && _postProcessProp(elementRef, propsKueries, "$On.ref", kueryDeduper);
+    const refProp = elementRef
+        && _postProcessProp(elementRef, propsKueries, "$On.ref", kueryDeduper);
     if (refProp) (kueryProps || (kueryProps = {}))["$On.ref"] = refProp;
     if (!kueryProps) return undefined;
     const valensProps = { elementType, elementPropsSeq: [...Object.entries(kueryProps)] };

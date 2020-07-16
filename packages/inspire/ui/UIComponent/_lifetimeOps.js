@@ -152,13 +152,15 @@ function _updateFocus (component: UIComponent, newProps: Object, newContext: Obj
 export function _shouldComponentUpdate (component: UIComponent, nextProps: Object,
     nextState: Object, nextContext: Object): boolean { // eslint-disable-line
   // const start = performance.now();
-  const ret = _comparePropsOrState(component.props, nextProps, "deep",
-          component.constructor.propsCompareModesOnComponentUpdate, "props")
-      || _comparePropsOrState(component.state, nextState, "deep",
-          component.constructor.stateCompareModesOnComponentUpdate, "state");
+  let mismatch = _comparePropsOrState(component.props, nextProps, "deep",
+      component.constructor.propsCompareModesOnComponentUpdate, "props");
+  if (mismatch) return `props.${mismatch}`;
+  mismatch = _comparePropsOrState(component.state, nextState, "deep",
+      component.constructor.stateCompareModesOnComponentUpdate, "state");
+  if (mismatch) return `state.${mismatch}`;
   // _addTiming(component, "shouldComponentUpdate.check", start,
   //    { ret, component, nextProps, nextState, nextContext });
-  return ret;
+  return false;
 }
 
 export function _componentWillUnmount (component: UIComponent) {

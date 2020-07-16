@@ -22,7 +22,7 @@ export type { VALKOptions } from "./Valker";
 export {
   default as raemSteppers,
   isValOSFunction,
-  toVAKON,
+  toVAKONTag,
   denoteValOSBuiltin,
   denoteValOSBuiltinWithSignature,
   denoteDeprecatedValOSBuiltin,

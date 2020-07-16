@@ -51,7 +51,7 @@ export default function extendObject (scope: Object, hostDescriptors: Map<any, O
     };
     Object.defineProperty(ret, "name", { value: `valoscript_Object_${objectOperation.name}` });
     ret._valkDescription = description;
-    ret._valkThunk = true;
+    ret._isVCall = true;
     return ret;
   }
 
@@ -72,7 +72,7 @@ export default function extendObject (scope: Object, hostDescriptors: Map<any, O
       return dispatchers[arg0Kind || arg1Kind || ""].apply(this, arguments);
     };
     ret._valkDescription = description;
-    ret._valkThunk = true;
+    ret._isVCall = true;
     return ret;
   }
 
@@ -164,7 +164,7 @@ export default function extendObject (scope: Object, hostDescriptors: Map<any, O
     return target;
   }
   assignValOS._valkDescription = "";
-  assignValOS._valkThunk = true;
+  assignValOS._isVCall = true;
 
   const toValOSKeys = VALEK.to("properties")
       .filter(VALEK.isImmaterial().not()).map(VALEK.to("name"));

@@ -13,7 +13,7 @@ import Valoscope from "~/inspire/ui/Valoscope";
 import Lens from "~/inspire/ui/Lens";
 import _jsxTransformFromString from "~/inspire/mediaDecoders/_jsxTransformFromString";
 
-import { ScopeAccessesTag } from "~/script/VALSK";
+import { ScopeAccessesTag, ScopeAccessKeysTag } from "~/script/VALSK";
 
 import MediaDecoder from "~/tools/MediaDecoder";
 import notThatSafeEval from "~/tools/notThatSafeEval";
@@ -316,9 +316,7 @@ export default class JSXDecoder extends MediaDecoder {
     } = parsedProps || {};
 
     if (isInstanceLens) {
-      restAttrs["$Lens:instanceLensPrototype"] = _instanceLensPrototypeKueries[elementName]
-          || (_instanceLensPrototypeKueries[elementName] =
-              VALEK.fromScope(Lens.integrationScopeResource).propertyValue(elementName));
+      restAttrs["$Lens:instanceLensPrototype"] = _getInstanceLensPrototypeKuery(elementName);
     }
 
     for (const [attrName, aliasOf, shouldWarn, warnMessage] of [
@@ -327,7 +325,7 @@ export default class JSXDecoder extends MediaDecoder {
       ["array", "$Lens:array"],
       ["key", "$Lens:key"],
       ["context", "$Lens:context"],
-      ["elementKey", "$Lens:frameId", true],
+      ["elementKey", "$Lens:frameKey", true],
       ["class", !isComponentLens ? "className" : "class", false],
       ["styleSheet", "$Lens:styleSheet"],
       ["valoscope", "$Lens:valoscope", true, "direct Lens:<property> notation"],
@@ -379,6 +377,17 @@ export default class JSXDecoder extends MediaDecoder {
 
 export const integrationFabricScopeTag = Symbol("integrationFabricScope");
 const _instanceLensPrototypeKueries = {};
+
+function _getInstanceLensPrototypeKuery (elementName) {
+  let ret = _instanceLensPrototypeKueries[elementName];
+  if (!ret) {
+    ret = _instanceLensPrototypeKueries[elementName] =
+        VALEK.fromScope(Lens.integrationScopeResource).propertyValue(elementName);
+    ret[ScopeAccessesTag] = { integrationScopeResource: "read" };
+    ret[ScopeAccessKeysTag] = ["integrationScopeResource"];
+  }
+  return ret;
+}
 
 function _extractMetaOfValueInto (value, meta, gatewayDiscourse, isLiveIfKuery) {
   let ret = value;

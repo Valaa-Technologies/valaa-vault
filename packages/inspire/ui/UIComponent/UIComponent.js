@@ -56,9 +56,8 @@ export default class UIComponent extends React.Component {
 
   static propTypes = {
     children: PropTypes.any, // children can also be a singular element.
-    // parentUIContext: PropTypes.object, // If no parentUIContext the component is disabled.
+
     focus: PropTypes.any,
-    frameId: PropTypes.string,
     context: PropTypes.object,
 
     style: PropTypes.object,
@@ -116,13 +115,14 @@ export default class UIComponent extends React.Component {
 
   static valensPropsBehaviors = {
     children: false,
-    kuery: false,
   }
 
   static propsCompareModesOnComponentUpdate = {
+    children: "shallow",
     focus: "shallow",
     head: "shallow",
-    context: "shallow",
+    context: "onelevelshallow",
+    reactComponent: "ignore",
   }
 
   static stateCompareModesOnComponentUpdate = {}
@@ -243,10 +243,6 @@ export default class UIComponent extends React.Component {
 
   // getValos () { return this.context.engine.getRootScope().valos; }
 
-  static propsCompareModesOnComponentUpdate = {
-    reactComponent: "ignore",
-  }
-
   /**
    * Returns the current focus of this UI component or throws if this component is disabled.
    */
@@ -300,7 +296,7 @@ export default class UIComponent extends React.Component {
   }
 
   getKey () {
-    return this.props.frameId || this.context.parentUIContext.reactComponent.getKey();
+    return this.context.parentUIContext.reactComponent.getKey();
   }
 
   readSlotValue (slotName: string, slotSymbol: Symbol, focus: any, onlyIfAble?: boolean,
@@ -346,7 +342,7 @@ export default class UIComponent extends React.Component {
 
   _subscriptions: Object;
 
-  static _debugIdExcludedPropsKeys = ["focus", "hierarchyKey", "frameId"];
+  static _debugIdExcludedPropsKeys = ["focus", "hierarchyKey", "frameKey"];
 
   debugId (options: ?Object) {
     const keyString = this.getKey() || "no key";
@@ -530,7 +526,7 @@ export default class UIComponent extends React.Component {
   tryRenderSlotAsLens (slot: string | Symbol, focus: any = this.tryFocus(),
       rootSlotName_?: string, lensName: ?string, onlyIfAble?: boolean, onlyOnce?: boolean):
           void | null | string | React.Element<any> | [] | Promise<any> {
-    let slotValue, ret; // eslint-disable-line
+    let slotValue, ret = null; // eslint-disable-line
     const slotName = typeof slot === "string" ? slot : Lens[slot];
     const slotSymbol = typeof slot !== "string" ? slot : Lens[slot];
     const rootSlotName = rootSlotName_ || slotName;
@@ -551,7 +547,9 @@ export default class UIComponent extends React.Component {
           "\n\tslot value:", slotValue,
           "\n\trootSlotName:", rootSlotName);
     } finally {
-      if (assemblyLength < slotAssembly.length) slotAssembly.splice(assemblyLength);
+      if ((ret == null) && (assemblyLength < slotAssembly.length)) {
+        slotAssembly.splice(assemblyLength);
+      }
     }
   }
 

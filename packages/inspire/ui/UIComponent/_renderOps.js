@@ -137,11 +137,12 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
           repeathenableState.chain = thenChainEagerly(
               initialRepeathenable,
               update => {
-                let newLensValue = update.value();
-                if (newLensValue === undefined) newLensValue = null;
-                if (repeathenableState.currentValue === newLensValue) return;
-                if (repeathenableState.currentValue !== undefined) component.forceUpdate();
-                repeathenableState.currentValue = newLensValue;
+                let newValue = update.value();
+                const oldValue = repeathenableState.currentValue;
+                if (newValue === undefined) newValue = null;
+                if (newValue === oldValue) return;
+                repeathenableState.currentValue = newValue;
+                if (oldValue !== undefined) component.forceUpdate();
               },
           );
         }
@@ -280,9 +281,8 @@ const _renderMediaLensChain = [
       if (contentInterpretation.default !== undefined) return contentInterpretation.default;
       error = new Error(`Can't find default export from module Media '${info.name}'`);
     } else if (Array.isArray(contentInterpretation)
-        || (Object.getPrototypeOf(contentInterpretation) === Object.prototype)) {
-      return contentInterpretation;
-    } else if (React.isValidElement(contentInterpretation)) {
+        || (Object.getPrototypeOf(contentInterpretation) === Object.prototype)
+        || React.isValidElement(contentInterpretation)) {
       // FIXME(iridian, 2020-07): This is a kludge which breaks at
       // corner-cases. Notably, if a VSX lens contains one or more
       // sub-elements which resolve to Media's, then those medias will

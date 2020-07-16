@@ -329,7 +329,10 @@ export default class TransactionState {
   }
 
   finalizeTransactor () {
-    if (!this._transacted) this._transacted = true; // prevent lazyInit in order to make tx inactive
+    if (!this._transacted) {
+      // Nothing to commit. Prevent lazyInit in order to make tx inactive
+      this._transacted = true;
+    }
     // If the transaction has not yet been explicitly committed or discarded, commit it now.
     if (this._finalCommand === undefined) this.commit();
     return this._commitChronicleResult;

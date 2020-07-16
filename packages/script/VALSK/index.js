@@ -19,7 +19,7 @@ export {
   dumpKuery,
   dumpObject,
   isValOSFunction,
-  toVAKON,
+  toVAKONTag,
 } from "~/raem/VALK";
 
 export {

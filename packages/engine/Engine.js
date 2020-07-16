@@ -208,131 +208,106 @@ export default class Engine extends Cog {
   }
 
   create (typeName: string, initialState: Object, options: Object): Vrapper {
-    return this._constructWith(created,
-        { initialState, typeName },
-        options,
-        () => ({ typeName }),
-        (constructParams, id, evaluatedInitialState) => {
-          constructParams.id = id;
-          constructParams.initialState = evaluatedInitialState;
-        });
+    return this._constructWith(
+        created, initialState, typeName, { typeName }, options);
   }
 
   duplicate (duplicateOf: Vrapper, initialState: Object, options: Object): Vrapper {
-    return this._constructWith(duplicated,
-        { initialState, typeName: duplicateOf.getTypeName() },
-        options,
-        (innerOptions) => ({ duplicateOf: universalizeCommandData(duplicateOf, innerOptions) }),
-        (constructParams, id, evaluatedInitialState) => {
-          constructParams.id = id;
-          constructParams.initialState = evaluatedInitialState;
-        });
+    return this._constructWith(
+        duplicated, initialState, duplicateOf.getTypeName(), { duplicateOf }, options);
   }
 
-  recombine (duplicationDirectives: Object, options: Object): Vrapper[] {
-    return this._constructWith(recombined,
-        duplicationDirectives,
-        options,
-        () => ({ actions: [] }),
-        (constructParams, id, evaluatedInitialState, directive, innerOptions) => {
-          constructParams.actions.push(duplicated({
-            id,
-            duplicateOf: universalizeCommandData(directive.duplicateOf, innerOptions),
-            initialState: evaluatedInitialState,
-          }));
-        });
-  }
-
-  _constructWith (
-      constructCommand: (Object) => Command,
-      directives: Object,
-      options: Object = {},
-      createConstructParams: Object,
-      addToConstructParams: Function,
+  _constructWith (constructCommand: (Object) => Command, initialState, typeName,
+      constructParams: Object, options: Object = {},
   ) {
-    let constructParams;
-    let result;
-    let ret;
-    const isRecombine = Array.isArray(directives);
-    const directiveArray = isRecombine ? directives : [directives];
-    const extractedProperties = [];
-    let discourse;
+    let discourse, extractedProperties, chronicling, ret;
     try {
-      discourse = (options.discourse || this.discourse).acquireFabricator("construct");
-      options.discourse = discourse;
+      options.discourse = discourse =
+          (options.discourse || this.discourse).acquireFabricator("construct");
       if (!options.head) options.head = this;
-      constructParams = createConstructParams(options);
-
-      for (const directive of directiveArray) {
-        extractedProperties.push(this._extractProperties(directive.initialState, options.head));
-        addToConstructParams(constructParams,
-            this._resolveIdForConstructDirective(directive, options),
-            universalizeCommandData(directive.initialState, options),
-            directive,
-            options);
+      if (constructParams.duplicateOf) {
+        constructParams.duplicateOf = universalizeCommandData(constructParams.duplicateOf, options);
       }
+      extractedProperties = this._extractProperties(initialState);
+      constructParams.id = this._assignConstructDirectiveId({ initialState, typeName }, options);
+      constructParams.initialState = universalizeCommandData(initialState, options);
 
-      result = discourse.chronicleEvent(constructCommand(constructParams));
+      chronicling = discourse.chronicleEvent(constructCommand(constructParams));
 
       // FIXME(iridian): If the transaction fails the Vrapper will
       // contain inconsistent data until the next actual update on it.
 
-      ret = directiveArray.map((directive, index) => {
-        if ((directive.initialState || {}).partitionAuthorityURI) {
-          // Create chronicle(s) before the transaction is committed
-          // (and thus before the commands leave upstream).
-          discourse
-              .acquireConnection(directive.id.getChronicleURI(), { newChronicle: true })
-              .asActiveConnection();
-        }
-        const resultPassage = !isRecombine ? result.story : result.story.passages[index];
-        const vResource = this.getVrapper(resultPassage.id, { discourse });
-        if (vResource.isResource()) {
-          if (resultPassage.typeName) vResource._setTypeName(resultPassage.typeName);
-          const state = discourse.getState();
-          const initialBlocker = vResource.refreshPhase(state);
-          if (initialBlocker) {
-            Promise.resolve(vResource.activate({ state, allowImmaterial: true, initialBlocker }))
-                .then(undefined, (error) => {
-                  this.outputErrorEvent(
-                      localWrapError(this, error,
-                          `${constructCommand.name}.activate ${vResource.debugId()}`),
-                      1,
-                      `Exception caught during resource construction activate of ${
-                        vResource.debugId()}`);
-                });
-          }
-        }
-        if (extractedProperties[index]) {
-          this._updateProperties(vResource, extractedProperties[index], { discourse });
-        }
-        return vResource;
-      });
-      const vRet = isRecombine ? ret : ret[0];
+      const vRet = this._postConstructResource(discourse, constructParams.id,
+          constructParams.initialState, chronicling.story, extractedProperties, localWrapError);
       discourse.releaseFabricator();
       discourse = null;
       return !options.awaitResult ? vRet
-          : thenChainEagerly(options.awaitResult(result, vRet), () => vRet);
+          : thenChainEagerly(options.awaitResult(chronicling, vRet), () => vRet);
     } catch (error) {
       if (discourse) discourse.releaseFabricator({ rollback: error });
       throw localWrapError(this, error, `${constructCommand.name}()`);
     }
     function localWrapError (self, error, operationName) {
       return self.wrapErrorEvent(error, operationName,
-          "\n\tdirectives:", ...dumpObject(directives),
-          ...(!directives.initialState ? []
-              : ["\n\tinitialState:", ...dumpObject(directives.initialState)]),
+          "\n\tinitialState:", ...dumpObject(initialState),
           "\n\toptions:", ...dumpObject(options),
           "\n\tconstruct params:", ...dumpObject(constructParams),
           "\n\textractedProperties:", ...dumpObject(extractedProperties),
-          "\n\tclaim result:", ...dumpObject(result),
-          "\n\tclaim event:", ...dumpObject((result || {}).event),
+          "\n\tchronicling result:", ...dumpObject(chronicling),
+          "\n\tchronicling event:", ...dumpObject((chronicling || {}).event),
           "\n\tret:", ...dumpObject(ret),
       );
     }
   }
 
-  _extractProperties (initialState: Object /* , head: Object */) {
+  recombine (duplicationDirectives: Object, options: Object = {}) {
+    const recombinedParams = { actions: [] };
+    let discourse, chronicling, ret;
+    const extractedProperties = [];
+    try {
+      options.discourse = discourse =
+          (options.discourse || this.discourse).acquireFabricator("recombine");
+      if (!options.head) options.head = this;
+
+      for (const directive of duplicationDirectives) {
+        extractedProperties.push(this._extractProperties(directive.initialState));
+        recombinedParams.actions.push(duplicated({
+          id: this._assignConstructDirectiveId(directive, options),
+          duplicateOf: universalizeCommandData(directive.duplicateOf, options),
+          initialState: universalizeCommandData(directive.initialState, options),
+        }));
+      }
+
+      chronicling = discourse.chronicleEvent(recombined(recombinedParams));
+
+      // FIXME(iridian): If the transaction fails the Vrapper will
+      // contain inconsistent data until the next actual update on it.
+
+      ret = duplicationDirectives.map((directive, index) =>
+          this._updateResourceThing(discourse, directive.id, directive.initialState,
+            chronicling.story.passages[index], extractedProperties[index], localWrapError));
+      discourse.releaseFabricator();
+      discourse = null;
+      return !options.awaitResult ? ret
+          : thenChainEagerly(options.awaitResult(chronicling, ret), () => ret);
+    } catch (error) {
+      if (discourse) discourse.releaseFabricator({ rollback: error });
+      throw localWrapError(this, error, `recombined()`);
+    }
+    function localWrapError (self, error, operationName) {
+      return self.wrapErrorEvent(error, operationName,
+          "\n\tduplication directives:", ...dumpObject(duplicationDirectives),
+          "\n\toptions:", ...dumpObject(options),
+          "\n\trecombined params:", ...dumpObject(recombinedParams),
+          "\n\textractedProperties:", ...dumpObject(extractedProperties),
+          "\n\tchronicling result:", ...dumpObject(chronicling),
+          "\n\tchronicling event:", ...dumpObject((chronicling || {}).event),
+          "\n\tret:", ...dumpObject(ret),
+      );
+    }
+  }
+
+  _extractProperties (initialState: Object) {
     if (!initialState ||
         (typeof initialState.properties !== "object") ||
         initialState.properties === null ||
@@ -344,25 +319,38 @@ export default class Engine extends Cog {
     return ret;
   }
 
-  _updateProperties (target: Vrapper, properties: Object, options: VALKOptions) {
-    for (const propertyName of Object.keys(properties)) {
-      const kuery = VALEK.fromValue(properties[propertyName]);
-      try {
-        target.alterProperty(propertyName, kuery, Object.create(options));
-      } catch (error) {
-        const name = new Error(`constructWith._updateProperties(${propertyName})`);
-        throw this.wrapErrorEvent(error, 1, () => [
-          name,
-          "\n\tobject:", ...dumpObject(target),
-          "\n\tvalue:", ...dumpObject(properties[propertyName]),
-          "\n\talter value kuery:", ...dumpObject(kuery),
-          "\n\toptions:", ...dumpObject(options),
-        ]);
+  _postConstructResource (
+      discourse, id, initialState, resultPassage, extractedProperties, localWrapError) {
+    if ((initialState || {}).partitionAuthorityURI) {
+      // Create chronicle(s) before the transaction is committed
+      // (and thus before the commands leave upstream).
+      discourse
+          .acquireConnection(id.getChronicleURI(), { newChronicle: true })
+          .asActiveConnection();
+    }
+    const vResource = this.getVrapper(resultPassage.id, { discourse });
+    if (vResource.isResource()) {
+      if (resultPassage.typeName) vResource._setTypeName(resultPassage.typeName);
+      const state = discourse.getState();
+      const initialBlocker = vResource.refreshPhase(state);
+      if (initialBlocker) {
+        Promise.resolve(vResource.activate({ state, allowImmaterial: true, initialBlocker }))
+            .then(undefined, (error) => {
+              this.outputErrorEvent(
+                  localWrapError(this, error, `_construct.activate ${vResource.debugId()}`),
+                  1,
+                  `Exception caught during resource construction activate of ${
+                      vResource.debugId()}`);
+            });
       }
     }
+    if (extractedProperties) {
+      vResource.updateProperties(extractedProperties, { discourse });
+    }
+    return vResource;
   }
 
-  _resolveIdForConstructDirective (directive, options: VALKOptions) {
+  _assignConstructDirectiveId (directive, options: VALKOptions) {
     const discourse = options.discourse;
     const initialState = directive.initialState || {};
 
@@ -457,9 +445,9 @@ export default class Engine extends Cog {
 
   receiveCommands (stories: Command[], purgedRecital: ?StoryRecital, purgedProtagonists: ?Set) {
     const recitalReactionPromises = !purgedProtagonists && [];
-    const finalizer = { then (finalize) { this.finalize = finalize; } };
+    const finalizeTrigger = { then (finalizeCallback) { this.thenCallback = finalizeCallback; } };
     const tx = !purgedProtagonists
-        && this.obtainGroupTransaction("local-events", { setAsGlobal: true, finalizer });
+        && this.obtainGroupTransaction("local-events", { setAsGlobal: true, finalizeTrigger });
     // TODO(iridian, 2019-03): Mark UI-transactions as local-only. It
     // is acceptable that UI operations manage in-memory/local state
     // but remote updates should be explicitly performed in
@@ -508,7 +496,7 @@ export default class Engine extends Cog {
       !purgedProtagonists ? "recited" : "purged", stories.length, "stories in", tx && tx.debugId(),
     ]);
     if (purgedProtagonists) return purgedProtagonists;
-    finalizer.finalize(true);
+    finalizeTrigger.thenCallback(true);
     return recitalReactionPromises.length ? recitalReactionPromises : undefined;
   }
 
@@ -599,12 +587,12 @@ export default class Engine extends Cog {
 
   obtainGroupTransaction (groupName: string, {
     setAsGlobal = false,
-    finalizer = Promise.resolve(true),
+    finalizeTrigger = Promise.resolve(true),
   }: Object = {}) {
     let ret = this._pendingTransactions[groupName];
     if (ret) {
       this.logEvent(2, () => [`obtained existing group transaction '${groupName}'`, ret.debugId()]);
-      finalizer.then(() => undefined);
+      finalizeTrigger.then(() => undefined);
     } else {
       ret = this._pendingTransactions[groupName] = this.discourse.acquireFabricator(groupName);
       this.logEvent(2, () => [
@@ -615,7 +603,7 @@ export default class Engine extends Cog {
         // set this transaction as the global one.
         this.discourse = ret;
       }
-      finalizer.then(() => {
+      finalizeTrigger.then(() => {
         this.logEvent(2, () => [
           `finalized ${
             !setAsGlobal ? "" : this.discourse === ret ? "still-global " : "no longer global "

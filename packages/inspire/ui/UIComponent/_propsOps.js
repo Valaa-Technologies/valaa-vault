@@ -3,6 +3,7 @@ import React from "react";
 import isEqual from "lodash.isequal";
 
 import { SourceInfoTag } from "~/raem/VALK/StackTrace";
+import { HostRef } from "~/raem/VALK/hostReference";
 
 import Vrapper from "~/engine/Vrapper";
 
@@ -84,7 +85,7 @@ export function _comparePropsOrState (leftObject: any, rightObject: any, default
           leftKeys.length, rightKeys.length, leftKeys, rightKeys);
     }
     */
-    return true;
+    return "length";
   }
   for (const key of leftKeys) {
     if (!rightObject.hasOwnProperty(key)) {
@@ -93,7 +94,7 @@ export function _comparePropsOrState (leftObject: any, rightObject: any, default
         console.info(type, "right side missing key:", key);
       }
       */
-      return true;
+      return key;
     }
     const entryMode = entryCompares[key] || defaultEntryCompare;
     if (entryMode === "ignore") continue;
@@ -101,26 +102,26 @@ export function _comparePropsOrState (leftObject: any, rightObject: any, default
     const right = rightObject[key];
     const _isSubSimplyEqual = _isSimplyEqual(left, right);
     if (_isSubSimplyEqual === true) continue;
-    if (_isSubSimplyEqual === false) return true;
+    if (_isSubSimplyEqual === false) return key;
     if (entryMode === "shallow") {
       /*
       if (verbosity) {
         console.info(type, "shallow objects differ:", key, left, right);
       }
       */
-      return true;
+      return key;
     }
     if (entryMode === "onelevelshallow") {
-      if (!_comparePropsOrState(left, right, "shallow", entryCompares, undefined, verbosity)) {
-        continue;
-      }
+      const subMismatch =
+          _comparePropsOrState(left, right, "shallow", entryCompares, undefined, verbosity);
+      if (!subMismatch) continue;
 
       /*
       if (verbosity) {
         console.info(type, "onelevelshallow objects differ:", key, left, right);
       }
       */
-      return true;
+      return `${key}.${subMismatch}`;
     }
     if (!isEqual(left, right)) {
       /*
@@ -128,7 +129,7 @@ export function _comparePropsOrState (leftObject: any, rightObject: any, default
         console.info(type, "deep objects differ:", key, left, right);
       }
       */
-      return true;
+      return key;
     }
   }
   return false;
@@ -139,6 +140,8 @@ function _isSimplyEqual (left, right) {
   if (typeof left !== typeof right) return false;
   if (typeof left === "function") return (left.name === right.name);
   if ((typeof left !== "object") || (left === null) || (right === null)) return false;
+  const leftRef = left[HostRef];
+  if (leftRef) return leftRef === right[HostRef];
   const isLeftReactElement = React.isValidElement(left);
   if (isLeftReactElement !== React.isValidElement(right)) return false;
   if (isLeftReactElement) {

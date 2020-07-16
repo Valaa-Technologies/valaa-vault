@@ -5,7 +5,7 @@ import { denoteDeprecatedValOSBuiltin, denoteValOSBuiltinWithSignature } from "~
 
 
 import { valoscriptInterfacePrototype, ValoscriptPrimitiveKind } from "~/script";
-import { toVAKON } from "~/script/VALSK";
+import { toVAKONTag } from "~/script/VALSK";
 import VALEK from "~/engine/VALEK";
 
 import type { Discourse } from "~/sourcerer/api/types";
@@ -17,7 +17,7 @@ import * as tools from "~/tools";
 export default function enfoldGatewaySheath (valos: Object, rootDiscourse: Discourse) {
   Object.assign(valos, {
     beautify: tools.dumpify,
-    toVAKON,
+    toVAKONTag,
     Primitive: ValoscriptPrimitiveKind,
     Lens: null,
     tools,

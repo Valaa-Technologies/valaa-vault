@@ -1629,14 +1629,14 @@ export default class Vrapper extends Cog {
             throw new Error(`Invalid contentHash '${typeof contentHash}', truthy string expected`);
           }
           const engine = this._parent;
-          function ret (innerOptions: VALKOptions = Object.create(options)) {
+          function _vCreateBvob (innerOptions: VALKOptions = Object.create(options)) {
             innerOptions.id = contentHash;
             const callerValker = this && this.__callerValker__;
             if (callerValker) innerOptions.discourse = callerValker;
             return engine.create("Blob", undefined, innerOptions);
           }
-          ret._valkThunk = true;
-          return ret;
+          _vCreateBvob._isVCall = true;
+          return _vCreateBvob;
         },
       ], errorOnPrepareBvob);
     } catch (error) { return errorOnPrepareBvob(error); }

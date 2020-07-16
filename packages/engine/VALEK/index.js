@@ -1,7 +1,7 @@
 // @flow
 
 import { transpileValoscript, isNativeIdentifier, getNativeIdentifierValue } from "~/script";
-import { dumpObject as _dumpObject, Kuery, ValoscriptKuery, isValOSFunction, toVAKON }
+import { dumpObject as _dumpObject, Kuery, ValoscriptKuery, isValOSFunction, toVAKONTag }
     from "~/script/VALSK";
 
 import Vrapper from "~/engine/Vrapper";
@@ -32,7 +32,7 @@ export {
   dumpScope,
   dumpKuery,
   isValOSFunction,
-  toVAKON,
+  toVAKONTag,
 } from "~/script/VALSK";
 
 export { default as engineSteppers } from "./engineSteppers";
@@ -168,7 +168,7 @@ export function VS (texts: string[], ...variables: any[]): Kuery {
 export function extractFunctionVAKON (caller: any) {
   if (caller._persistedVAKON === undefined) {
     const lifts = {};
-    let vakon = caller[toVAKON];
+    let vakon = caller[toVAKONTag];
     if (!vakon) {
       throw new Error(`Cannot extract function VAKON from non-valoscript function ${caller.name}`);
     }

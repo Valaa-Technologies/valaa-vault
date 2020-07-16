@@ -1,4 +1,7 @@
 // @flow
+
+import PropTypes from "prop-types";
+
 import { naiveURI } from "~/raem/ValaaURI";
 import { tryUnpackedHostValue } from "~/raem/VALK/hostReference";
 
@@ -101,26 +104,50 @@ import { thisChainEagerly, thisChainRedirect } from "~/tools";
 export default class Valoscope extends UIComponent {
   static mainLensSlotName = "valoscopeLens";
 
+  static propTypes = {
+    ...UIComponent.propTypes,
+
+    frameKey: PropTypes.string,
+    instanceLensPrototype: PropTypes.any,
+  };
+
+  shouldComponentUpdate (nextProps: Object, nextState: Object) {
+    let ret;
+    if (nextProps.children !== this.props.children) {
+      // FIXME(iridian, 2020-07): Ugly hack: duplicate code with line
+      // 130 below. children handling should probably be moved to
+      // Valens. Like all of Valoscope handling tbf.
+      this.setUIContextValue(Lens.scopeChildren, nextProps.children);
+      ret = "props.children";
+    }
+    if (!ret) ret = super.shouldComponentUpdate(nextProps, nextState);
+    return ret;
+  }
 
   bindFocusSubscriptions (focus: any, props: Object) {
     super.bindFocusSubscriptions(focus, props);
     this.setUIContextValue(Lens.scopeChildren, props.children);
     const vPrototype = props.instanceLensPrototype;
     const vLens = (props.lens instanceof Vrapper) && props.lens;
-    return thisChainEagerly({
-          component: this,
-          engine: this.context.engine,
-          vOwner: this.getParentUIContextValue(Lens.scopeFrameResource),
-          key: this.getKey(),
-          frameKey: undefined, // TODO(iridian, 2020-07): Implement for new roots.
-          vPrototype,
-          focus,
-          vLens,
-        },
-        [vPrototype && vPrototype.activate(), vLens && vLens.activate()],
+    const frameSelf = {
+      component: this,
+      focus,
+      props,
+      engine: this.context.engine,
+      vOwner: this.getParentUIContextValue(Lens.scopeFrameResource),
+      key: this.getKey(),
+      vPrototype,
+      vLens,
+    };
+    return thisChainEagerly(frameSelf,
+        [vPrototype && vPrototype.activate(), vLens && vLens.activate(), props.frameKey],
         _scopeFrameChain,
-        (error) => { throw this.enableError(error); }
+        (error) => { throw this.enableError(error); },
     );
+  }
+
+  getKey () {
+    return this.state.frameKey || this.context.parentUIContext.reactComponent.getKey();
   }
 
   renderLoaded (focus: any) {
@@ -174,8 +201,12 @@ const _scopeFrameChain = [
       const brief = vResource.getBriefUnstableId();
       return `@${brief[1]}$.${brief.slice(3, brief.indexOf("@", 4))}`;
     }
-    const structuralPart = this.frameKey
-        ? `@_$.${encodeURIComponent(this.frameKey)}`
+    let frameKey = this.props.frameKey;
+    if (typeof frameKey === "function") {
+      frameKey = frameKey(this.vOwner, this.vPrototype, this.vFocus, this.vLens);
+    }
+    const structuralPart = (frameKey !== undefined)
+        ? `@_$.${encodeURIComponent(frameKey)}`
         : `@_$V.owner${_getSubscriptId(this.vOwner)}@_$.${encodeURIComponent(this.key)}`;
     const prototypePart = this.vPrototype ? `@_$V.proto${_getSubscriptId(this.vPrototype)}` : "";
     const focusPart = this.vFocus ? `@_$V.focus${_getSubscriptId(this.vFocus)}` : "";
@@ -223,7 +254,7 @@ const _scopeFrameChain = [
         || (this.discourse = this.engine.getActiveGlobalOrNewLocalEventGroupTransaction());
     /*
     discourse = engine.obtainGroupTransaction("receive-events", {
-      finalizer: Promise.resolve(),
+      finalizeTrigger: Promise.resolve(),
     });
     */
     // TODO(iridian, 2019-01): Determine whether getPremiereStory

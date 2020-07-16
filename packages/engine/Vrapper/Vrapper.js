@@ -1118,6 +1118,24 @@ export default class Vrapper extends Cog {
     return ret;
   }
 
+  updateProperties (propertyUpdates: (Object | Array[]), options: Object) {
+    let name, value, kuery;
+    try {
+      for ([name, value] of Array.isArray(propertyUpdates)
+          ? propertyUpdates
+          : Object.entries(propertyUpdates)) {
+        this.alterProperty(name, (kuery = VALEK.fromValue(value)), Object.create(options));
+      }
+    } catch (error) {
+      throw this.wrapErrorEvent(error, 1, () => [
+        new Error(`updateProperty(${name})`),
+        "\n\tresource:", ...dumpObject(this),
+        "\n\tproperty value:", ...dumpObject(value),
+        "\n\talter value kuery:", ...dumpObject(kuery),
+      ]);
+    }
+  }
+
   _preProcessNewReference (newValue: VRL, fieldPrototypeEntry: Object, hostType: Object) {
     if (fieldPrototypeEntry.fieldName === "owner"
         && !((newValue instanceof VRL) && newValue.getCoupledField())) {

@@ -108,6 +108,7 @@ export default class Valoscope extends UIComponent {
     ...UIComponent.propTypes,
 
     frameKey: PropTypes.string,
+    frameOverrides: PropTypes.arrayOf(PropTypes.any),
     instanceLensPrototype: PropTypes.any,
   };
 
@@ -119,6 +120,11 @@ export default class Valoscope extends UIComponent {
       // Valens. Like all of Valoscope handling tbf.
       this.setUIContextValue(Lens.scopeChildren, nextProps.children);
       ret = "props.children";
+    }
+    if (nextProps.frameOverrides
+        && (nextState.scopeFrame !== undefined)
+        && _integrateFramePropertyDiffs(this, nextState.scopeFrame, nextProps.frameOverrides)) {
+      ret = "props.frameOverrides";
     }
     if (!ret) ret = super.shouldComponentUpdate(nextProps, nextState);
     return ret;
@@ -138,6 +144,7 @@ export default class Valoscope extends UIComponent {
       key: this.getKey(),
       vPrototype,
       vLens,
+      frameOverrides: props.frameOverrides,
     };
     return thisChainEagerly(frameSelf,
         [vPrototype && vPrototype.activate(), vLens && vLens.activate(), props.frameKey],
@@ -250,6 +257,11 @@ const _scopeFrameChain = [
     } else {
       initialState.owner = this.vOwner;
     }
+    if (this.frameOverrides) {
+      initialState.properties = { ...this.frameOverrides };
+      this.component._currentOverrides = this.frameOverrides;
+      this.frameOverrides = null;
+    }
     const discourse = this.discourse
         || (this.discourse = this.engine.getActiveGlobalOrNewLocalEventGroupTransaction());
     /*
@@ -296,6 +308,10 @@ const _scopeFrameChain = [
     }
     const vScopeFrame = tryUnpackedHostValue(scopeFrame);
     if (vScopeFrame) this.component.setUIContextValue(Lens.scopeFrameResource, vScopeFrame);
+    if (this.frameOverrides) {
+      _integrateFramePropertyDiffs(
+          this.component, vScopeFrame, this.frameOverrides, this.discourse);
+    }
     return vScopeFrame || scopeFrame;
   },
 
@@ -304,6 +320,25 @@ const _scopeFrameChain = [
     return false; // prevent force-update
   },
 ];
+
+function _integrateFramePropertyDiffs (component, frame, frameOverrides, discourse) {
+  const currentOverrides = component._currentOverrides || {};
+  if (currentOverrides === frameOverrides) return false;
+  const updateTarget = (frame instanceof Vrapper) ? {} : frame;
+  for (const [key, value] of Object.entries(frameOverrides)) {
+    if (currentOverrides[key] === frameOverrides[key]) continue;
+    updateTarget[key] = value;
+  }
+  if (updateTarget === frame) return true;
+  console.log("updating frame properties:", updateTarget, frame);
+  frame.updateProperties(updateTarget, {
+    // eslint-disable-next-line no-param-reassign
+    discourse: discourse ||
+        component.context.engine.getActiveGlobalOrNewLocalEventGroupTransaction(),
+  });
+  component._currentOverrides = frameOverrides;
+  return false; // let live kuery system handle updates
+}
 
 /*
 const _description =

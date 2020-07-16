@@ -123,6 +123,7 @@ export default class UIComponent extends React.Component {
     head: "shallow",
     context: "onelevelshallow",
     reactComponent: "ignore",
+    frameOverrides: "ignore",
   }
 
   static stateCompareModesOnComponentUpdate = {}

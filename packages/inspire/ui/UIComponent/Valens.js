@@ -144,6 +144,8 @@ export default class Valens extends UIComponent {
     let finalType = this.props.elementType;
     let children = this.props.children;
 
+    if (stateLive.frameOverrides) stateLive.frameOverrides = null;
+
     if (stateLive.valoscopeProps) {
       finalType = Valoscope;
       children = stateLive.valoscopeChildren;
@@ -292,6 +294,15 @@ function _recordNewGenericPropValue (stateLive, propValue, propName, component) 
               propValue, `props.${propName}`, { synchronous: undefined });
         }
         newName = `on${name[0].toUpperCase()}${name.slice(1)}`;
+      } else if (namespace === "Frame") {
+        if (!stateLive.frameOverrides) {
+          const targetProps = stateLive.isValoscope
+              ? stateLive.elementProps
+              : stateLive.valoscopeProps || _emitValoscope(stateLive);
+          stateLive.frameOverrides = targetProps.frameOverrides = { ...targetProps.frameOverrides };
+        }
+        stateLive.frameOverrides[name] = propValue;
+        return false;
       } else {
         throw new Error(`Unrecognized attribute ${propName}`);
       }
@@ -409,6 +420,7 @@ const _emitValoscopeRecorderProps = {
 // These props have namespace Lens and are allowed only on valoscope
 // elements.
 const _valoscopeRecorderProps = {
+  frameOverrides: "frameOverrides",
   delegate (stateLive, newValue) {
     if (stateLive.component.props.elementPropsSeq.length !== 1) {
       throw new Error("'delegate' attribute must always be the only attribute");

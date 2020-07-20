@@ -45,10 +45,8 @@ export const fabricatorOps = {
       ret = Object.create(this);
       const transactorState = ret._transactorState = new TransactionState(ret, name);
       ret._fabricatorName = `${name}#${++transactionCounter}`;
-      this.logEvent(1, () => [
-        "acquired NEW TX", name, ":",
-        "\n\tdiscourse:", ...dumpObject(ret),
-        "\n\ttransaction:", ...dumpObject(transactorState),
+      this.warnEvent(1, () => [
+        "ACQUIRED NEW TX", name, ":", ...dumpObject(transactorState),
       ]);
     } else {
       ret = this._transactorState.createFabricator(this, name);
@@ -87,6 +85,10 @@ export const fabricatorOps = {
     if (this._parentFabricator) {
       return this._parentFabricator.releaseFabricator();
     }
+    this.logEvent(1, () => [
+      transactorState._transacted ? "COMMITTING" : "discarding empty", "TX",
+      transactorState.name, ":", ...dumpObject(transactorState),
+    ]);
     return transactorState.finalizeTransactor();
   },
 };

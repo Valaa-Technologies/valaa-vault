@@ -205,7 +205,8 @@ function thisChainEagerly (
           }
           index = functions.findIndex(f => (f.name === target));
           if (index === -1) {
-            throw new Error(`thisChainEagerly can't find redirection function with name '${target}'`);
+            throw new Error(
+                `thisChainEagerly can't find redirection function with name '${target}'`);
           }
           functions[target] = index;
         }

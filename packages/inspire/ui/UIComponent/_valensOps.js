@@ -145,8 +145,8 @@ export function tryCreateValensArgs (elementType, propsSeq, hierarchyKey, elemen
         && _postProcessProp(elementKey, propsKueries, "key", kueryDeduper);
     if (keyProp) (kueryProps || (kueryProps = {})).key = keyProp;
     const refProp = elementRef
-        && _postProcessProp(elementRef, propsKueries, "$On.ref", kueryDeduper);
-    if (refProp) (kueryProps || (kueryProps = {}))["$On.ref"] = refProp;
+        && _postProcessProp(elementRef, propsKueries, "$Lens.ref", kueryDeduper);
+    if (refProp) (kueryProps || (kueryProps = {}))["$Lens.ref"] = refProp;
     if (!kueryProps) return undefined;
     const valensProps = { elementType, elementPropsSeq: [...Object.entries(kueryProps)] };
     for (const [propName, propValue] of propsSeq) {

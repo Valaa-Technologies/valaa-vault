@@ -81,7 +81,8 @@ function _createChoicesOption (vlm, isSingular, primaryPrefix, selectorPackageCo
 }
 
 async function listMatchingChoices (vlm, primaryPrefix, { domain, type, name, enableDisabled }) {
-  const results = await vlm.invoke(`${primaryPrefix}/${selectorGlobFrom({ domain, type, name })}**/*`,
+  const results = await vlm.invoke(
+      `${primaryPrefix}/${selectorGlobFrom({ domain, type, name })}**/*`,
       ["--show-name", "--show-description"], { "enable-disabled": enableDisabled });
   // console.log("results:", results);
   return results.map(entry => {

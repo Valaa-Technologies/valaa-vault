@@ -16,7 +16,7 @@ export { OwnerDefaultCouplingTag };
  */
 export default function extendValOS (scope: any, hostDescriptors: any, rootDiscourse: Discourse) {
   const valosheath = scope.valos || (scope.Valaa = scope.valos = {});
-  enfoldGatewaySheath(valosheath, rootDiscourse);
+  enfoldGatewaySheath(valosheath, hostDescriptors, rootDiscourse);
   if (rootDiscourse.schema) {
     const primaryNamespace = addValosheathNamespace(valosheath, "valos", {
       preferredPrefix: "valos",

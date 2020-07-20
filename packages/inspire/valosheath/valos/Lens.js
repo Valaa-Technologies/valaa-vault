@@ -7,33 +7,57 @@ import { denoteValOSBuiltinWithSignature } from "~/raem/VALK";
 import Vrapper from "~/engine/Vrapper";
 import debugId from "~/engine/debugId";
 import VALEK, { dumpObject } from "~/engine/VALEK";
+import { defineName } from "~/engine/valosheath";
 
 import type UIComponent from "~/inspire/ui/UIComponent";
 
 import { dumpify, messageFromError, thenChainEagerly, wrapError } from "~/tools";
 
-type LensParameters = {
-  tags: string[],
-  type: string,
-  description: string,
-  isEnabled: ?boolean,
-  lens: ?(boolean | (focus: any, component: UIComponent) => boolean | Symbol),
-  defaultLens: any,
-  isStickyError: ?boolean,
+export const namespace = {
+  preferredPrefix: "Lens",
+  namespaceURI: "https://valospace.org/inspire/Lens#",
+  description:
+`The ValOS inspire Lens namespace contains names used by the inspire UI
+layer.
+
+There are three key tags which in combination describe these names;
+the titular 'Lens' and two 'slot' tags: 'Attribute' and 'Context'.
+
+- 'Lens' denotes a name that can be used in lens definitions to display
+  content
+- 'Attribute' denotes a name that is available as an element attribute
+  and affects that element only.
+- 'Context' denotes a name that identifies a context variable. These
+  variables affects all child elements.
+
+When a lens name is also an attribute and/or a context name it is called
+a lens slot. A lens slot is a variable which can be assigned a lens as
+a value; this lens value can then be referred to by using the slot name
+in lens medias.
+
+The semantic meaning of the lens namespace entries is then a
+combination of:
+1. Inspire engine identifying the values provided by valonaut to
+   display and customize the UI behavior and invoke valonaut callbacks.
+2. Valonaut referring to default implementations that are provided by
+   inspire engine for some lens names.
+
+There are two additional lesser tags:
+- 'Primary' denotes the most commonly used lens names
+- 'Internal' denotes a lens name that is not intended to be used
+  directly but has relevant internal semantics and is thus documented.
+`,
+  nameSymbols: {},
+  nameDefinitions: {},
 };
 
-export const descriptorOptions: { [string]: () => LensParameters } = {};
+export default _createSymbols();
 
-export default _createLensObjects();
+function _createSymbols () {
+  const ret = namespace.nameSymbols;
 
-function _createLensObjects () {
-  const ret = {};
-
-  function _createSymbol (name: string, createLensParameters: Object) {
-    descriptorOptions[name] = createLensParameters;
-    ret[name] = Symbol(name);
-    ret[ret[name]] = name;
-    return ret[name];
+  function _defineName (name: string, createLensParameters: Object) {
+    return defineName(name, namespace, createLensParameters, { slotName: true });
   }
 
   const _lensMessageLoadingProps = {
@@ -80,7 +104,7 @@ lens are shown as the output of the instrument lens itself.`
 
   // Primary slots
 
-  _createSymbol("focus", () => ({
+  _defineName("focus", () => ({
     tags: ["Primary", "Attribute", "Lens"],
     type: "any",
     description:
@@ -94,7 +118,7 @@ model-view-controller design pattern. The concept 'lens' corresponds to
 `,
   }));
 
-  _createSymbol("lens", () => ({
+  _defineName("lens", () => ({
     tags: ["Primary", "Attribute", "Lens"],
     type: "Lens",
     description:
@@ -115,7 +139,7 @@ to 'model', and the various components roughly correspond to 'controller'.
 
   // View control slots
 
-  _createSymbol("array", () => ({
+  _defineName("array", () => ({
     tags: ["Attribute"],
     type: "any[] | null",
     description:
@@ -134,7 +158,7 @@ per update irrespective of the array length (even if it is 0).
 .`,
   }));
 
-  _createSymbol("if", () => ({
+  _defineName("if", () => ({
     tags: ["Attribute", "Lens"],
     type: "any | (focus) => boolean",
     description:
@@ -159,7 +183,7 @@ If the condition is falsy the focus is viewed using lens from slot
       }
       return !condition; // if falsy condition, enable lens
     },
-    lens (focus: any, component: UIComponent) {
+    value (focus: any, component: UIComponent) {
       // if then is undefined we only get here if condition is falsy.
       const then_ = component.props.then;
       if (then_ !== undefined) {
@@ -172,7 +196,7 @@ If the condition is falsy the focus is viewed using lens from slot
     },
   }));
 
-  _createSymbol("then", () => ({
+  _defineName("then", () => ({
     tags: ["Attribute", "Lens"],
     type: "Lens",
     description:
@@ -183,7 +207,7 @@ By default delegates viewing to the Valoscope lens chain.
 `,
   }));
 
-  _createSymbol("else", () => ({
+  _defineName("else", () => ({
     tags: ["Attribute", "Lens"],
     type: "Lens",
     description:
@@ -196,7 +220,7 @@ By default displays null.
 
   // Primitive lenses
 
-  const slotAssembly = _createSymbol("slotAssembly", () => ({
+  const slotAssembly = _defineName("slotAssembly", () => ({
     tags: ["Lens"],
     type: "string[]",
     description:
@@ -207,19 +231,19 @@ By default displays null.
       slotAssembly,
       slotNames => slotNames.slice(0, -1).reverse().join(" <| "));
 
-  const componentChildrenLens = _createSymbol("componentChildrenLens", () => ({
+  const componentChildrenLens = _defineName("componentChildrenLens", () => ({
     tags: ["Lens"],
     type: "Lens",
     description:
 `Lens that shows the child elements of the current parent component.`,
-    isEnabled: (u: any, component: UIComponent) => {
+    isEnabled (u: any, component: UIComponent) {
       const children = component.props.children;
       return Array.isArray(children) ? children.length : children != null;
     },
-    lens (focus: any, component: UIComponent) { return component.props.children; },
+    value (focus: any, component: UIComponent) { return component.props.children; },
   }));
 
-  const parentComponentLens = _createSymbol("parentComponentLens", () => ({
+  const parentComponentLens = _defineName("parentComponentLens", () => ({
     tags: ["Lens"],
     type: "UIComponent",
     description:
@@ -227,10 +251,10 @@ By default displays null.
 is not renderable this slot must be used in an instrument before some
 other slot (such as 'focusDetailLens').`,
     isEnabled: true,
-    lens (focus: any, component: UIComponent) { return component; },
+    value (focus: any, component: UIComponent) { return component; },
   }));
 
-  const focusDescriptionLens = _createSymbol("focusDescriptionLens", () => ({
+  const focusDescriptionLens = _defineName("focusDescriptionLens", () => ({
     tags: ["Lens"],
     type: "Lens",
     description:
@@ -238,7 +262,7 @@ other slot (such as 'focusDetailLens').`,
 
     @focus {any} focus  the focus to describe.`,
     isEnabled: true,
-    lens: function renderFocusDescription (focus: any, component: UIComponent) {
+    value: function renderFocusDescription (focus: any, component: UIComponent) {
       switch (typeof focus) {
         case "string":
           return `"${focus.length <= 30 ? focus : `${focus.slice(0, 27)}...`}"`;
@@ -261,7 +285,7 @@ other slot (such as 'focusDetailLens').`,
     },
   }));
 
-  const focusDetailLens = _createSymbol("focusDetailLens", () => ({
+  const focusDetailLens = _defineName("focusDetailLens", () => ({
     tags: ["Lens"],
     type: "Lens",
     description:
@@ -270,12 +294,12 @@ the focus.
 
     @focus {any} focus  the focus to describe.`,
     isEnabled: true,
-    lens: function renderFocusDetail (focus: any) {
+    value: function renderFocusDetail (focus: any) {
       return debugId(focus);
     }
   }));
 
-  const focusDumpLens = _createSymbol("focusDumpLens", () => ({
+  const focusDumpLens = _defineName("focusDumpLens", () => ({
     tags: ["Lens"],
     type: "Lens",
     description:
@@ -284,12 +308,12 @@ Replaces circular/duplicates with tags.
 
     @focus {any} focus  the focus to dump.`,
     isEnabled: true,
-    lens: function renderFocusDump (focus: any) {
+    value: function renderFocusDump (focus: any) {
       return dumpify(focus, { indent: 2 });
     },
   }));
 
-  _createSymbol("focusPropertyKeysLens", () => ({
+  _defineName("focusPropertyKeysLens", () => ({
     tags: ["Lens"],
     type: "Lens",
     description:
@@ -298,14 +322,14 @@ resource (using Object.keys).
 
     @focus {object | Resource} focus  the focus to describe.`,
     isEnabled: (focus) => focus && (typeof focus === "object"),
-    lens: function renderFocusPropertyKeys (focus: any) {
+    value: function renderFocusPropertyKeys (focus: any) {
       return (!focus || (typeof focus !== "object")
           ? undefined
           : Object.keys(!(focus instanceof Vrapper) ? focus : focus.getValospaceScope()));
     },
   }));
 
-  const toggleableErrorDetailLens = _createSymbol("toggleableErrorDetailLens", () => ({
+  const toggleableErrorDetailLens = _defineName("toggleableErrorDetailLens", () => ({
     tags: ["Context", "Lens"],
     type: "Lens",
     description:
@@ -316,7 +340,7 @@ The default lens on this slot renders Show and Hide buttons.
 
     @focus {string|Error} error  the failure description or exception object`,
     isEnabled: true,
-    defaultLens: function renderToggleableErrorDetail (failure: any, component: UIComponent) {
+    defaultValue: function renderToggleableErrorDetail (failure: any, component: UIComponent) {
       return ([
         <button onClick={() => component.toggleError()}>
           {component.state.errorHidden ? "Show" : "Hide"}
@@ -333,7 +357,7 @@ The default lens on this slot renders Show and Hide buttons.
     },
   }));
 
-  _createSymbol("internalErrorLens", () => ({
+  _defineName("internalErrorLens", () => ({
     tags: ["Context", "Lens"],
     type: "Lens",
     description:
@@ -344,7 +368,7 @@ By default renders the yelling-red screen.
 
     @focus {string|Error} error  the failure description or exception object`,
     isEnabled: true,
-    defaultLens: function renderInternalFailure () {
+    defaultValue: function renderInternalFailure () {
       return (
         <div {..._lensMessageInternalFailureProps}>
           Render Error: Component has internal error(s).
@@ -354,7 +378,7 @@ By default renders the yelling-red screen.
     },
   }));
 
-  const currentRenderDepth = _createSymbol("currentRenderDepth", () => ({
+  const currentRenderDepth = _defineName("currentRenderDepth", () => ({
     tags: ["Context", "Lens"],
     type: "number",
     description:
@@ -362,28 +386,28 @@ By default renders the yelling-red screen.
 between this component and the root (inclusive). If the value of this
 slot is explicitly set it is used as the new base value for all nested
 child components of this component.`,
-    defaultLens: 0,
+    defaultValue: 0,
   }));
 
-  _createSymbol("infiniteRecursionCheckWaterlineDepth", () => ({
+  _defineName("infiniteRecursionCheckWaterlineDepth", () => ({
     tags: ["Context", "Lens"],
     type: "number",
     description:
 `Slot which contains the minimum currentRenderDepth for checking for
 infinite render recursion.`,
-    defaultLens: 150,
+    defaultValue: 150,
   }));
 
-  const maximumRenderDepth = _createSymbol("maximumRenderDepth", () => ({
+  const maximumRenderDepth = _defineName("maximumRenderDepth", () => ({
     tags: ["Context", "Lens"],
     type: "number",
     description:
 `Slot which contains for the maximum allowed value for
 currentRenderDepth.`,
-    defaultLens: 200,
+    defaultValue: 200,
   }));
 
-  const maximumRenderDepthExceededLens = _createSymbol("maximumRenderDepthExceededLens", () => ({
+  const maximumRenderDepthExceededLens = _defineName("maximumRenderDepthExceededLens", () => ({
     tags: ["Context", "Lens"],
     type: "Lens",
     description:
@@ -394,7 +418,7 @@ is greater than the slot value of 'maximumRenderDepth'.
     isEnabled: (u, component) =>
       (component.getUIContextValue(currentRenderDepth) >
           component.getUIContextValue(maximumRenderDepth)),
-    defaultLens:
+    defaultValue:
       <div {..._lensMessageInternalFailureProps}>
         <div {..._message}>
             Maximum render depth ({maximumRenderDepth}) exceeded.
@@ -413,7 +437,7 @@ is greater than the slot value of 'maximumRenderDepth'.
 
   // User-definable catch-all lenses
 
-  const loadingLens = _createSymbol("loadingLens", () => ({
+  const loadingLens = _defineName("loadingLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description:
@@ -428,7 +452,7 @@ own default lens.
     @focus {Object} component  an object description of the dependency being loaded`,
   }));
 
-  const loadingFailedLens = _createSymbol("loadingFailedLens", () => ({
+  const loadingFailedLens = _defineName("loadingFailedLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description:
@@ -446,7 +470,7 @@ using their own default lens.
 
   // Main component lifecycle lens
 
-  _createSymbol("valoscopeLens", () => ({
+  _defineName("valoscopeLens", () => ({
     tags: ["Internal", "Lens"],
     type: "Lens",
     description:
@@ -459,7 +483,7 @@ below) based on the current dynamic state and/or value of the focus.
 
     @focus {any} focus  the focus of the component`,
     isEnabled: true,
-    lens: ({ delegate: Object.freeze([
+    value: ({ delegate: Object.freeze([
       ret.firstEnabledDelegateLens,
       ret.if,
       ret.disabledLens,
@@ -475,7 +499,7 @@ below) based on the current dynamic state and/or value of the focus.
     ]) }),
   }));
 
-  _createSymbol("valensLens", () => ({
+  _defineName("valensLens", () => ({
     tags: ["Internal", "Lens"],
     type: "Lens",
     description:
@@ -488,7 +512,7 @@ component in response to such events.
 
     @focus {any} focus  the focus of the component`,
     isEnabled: true,
-    lens: ({ delegate: Object.freeze([
+    value: ({ delegate: Object.freeze([
       ret.firstEnabledDelegateLens,
       ret.disabledLens,
       ret.undefinedLens,
@@ -496,7 +520,7 @@ component in response to such events.
     ]) }),
   }));
 
-  _createSymbol("uiComponentLens", () => ({
+  _defineName("uiComponentLens", () => ({
     tags: ["Internal", "Lens"],
     type: "Lens",
     description:
@@ -509,7 +533,7 @@ implementation.
 
     @focus {string|Error|Object} focus  the focus of the component`,
     isEnabled: true,
-    lens: ({ delegate: [
+    value: ({ delegate: [
       ret.firstEnabledDelegateLens,
       ret.disabledLens,
       ret.undefinedLens,
@@ -518,7 +542,7 @@ implementation.
   }));
 
 
-  _createSymbol("firstEnabledDelegateLens", () => ({
+  _defineName("firstEnabledDelegateLens", () => ({
     tags: ["Internal", "Lens"],
     type: "Lens",
     description:
@@ -527,12 +551,12 @@ in the $Lens.delegate of the current fabric component.
 
     @focus {string|Error|Object} focus  the focus of the component`,
     isEnabled: (u, component) => (component.props.delegate !== undefined),
-    lens: function renderFirstEnabledDelegate (focus, component, lensName = "delegate") {
+    value: function renderFirstEnabledDelegate (focus, component, lensName = "delegate") {
       return component.renderFirstEnabledDelegate(component.props.delegate, focus, lensName);
     }
   }));
 
-  _createSymbol("loadedLens", () => ({
+  _defineName("loadedLens", () => ({
     tags: ["Internal", "Lens"],
     type: "Lens",
     description:
@@ -541,36 +565,36 @@ fabric method of the current component.
 
     @focus {string|Error|Object} focus  the focus of the component`,
     isEnabled: true,
-    lens: function renderLoaded (focus, component) {
+    value: function renderLoaded (focus, component) {
       return component.renderLoaded(focus);
     },
   }));
 
   // Content lenses
 
-  _createSymbol("undefinedLens", () => ({
+  _defineName("undefinedLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description:
 `Slot for viewing an undefined focus.`,
     isEnabled: (focus) => (focus === undefined),
-    defaultLens: ({ delegate: [
+    defaultValue: ({ delegate: [
       ret.instrument(
           (u, component) => (component.props.focus),
           ret.pendingFocusLens),
     ] }),
   }));
 
-  _createSymbol("nullLens", () => ({
+  _defineName("nullLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description:
 `Slot for viewing a null focus.`,
     isEnabled: (focus) => (focus === null),
-    defaultLens: "",
+    defaultValue: "",
   }));
 
-  _createSymbol("resourceLens", () => ({
+  _defineName("resourceLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description:
@@ -586,7 +610,7 @@ Note: This lens slot will initiate the activation of the focus!
     // activating the lens inside isEnabled is fishy.
     // Maybe this was intended to be refreshPhase instead?
     isEnabled: (focus?: Vrapper) => (focus instanceof Vrapper) && focus.activate(),
-    defaultLens: ({ delegate: [
+    defaultValue: ({ delegate: [
       ret.activeLens,
       ret.activatingLens,
       ret.inactiveLens,
@@ -595,7 +619,7 @@ Note: This lens slot will initiate the activation of the focus!
     ] }),
   }));
 
-  _createSymbol("activeLens", () => ({
+  _defineName("activeLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description:
@@ -605,10 +629,10 @@ The default lens delegates showing to focusPropertyLens.
 
     @focus {Object} focus  the active Resource focus.`,
     isEnabled: (focus?: Vrapper) => focus && focus.isActive(),
-    defaultLens: ret.focusPropertyLens,
+    defaultValue: ret.focusPropertyLens,
   }));
 
-  _createSymbol("lensProperty", () => ({
+  _defineName("lensProperty", () => ({
     tags: ["Attribute", "Context"],
     type: "(string | string[])",
     description:
@@ -623,9 +647,9 @@ property name.`,
   _createLensPropertySlots("delegateLensProperty", ["DELEGATE_LENS"],
       "delegatePropertyLens", "notLensResourceLens");
 
-  function _createLensPropertySlots (specificLensPropertySlotName, defaultLensProperties,
+  function _createLensPropertySlots (specificLensPropertySlotName, defaultValueProperties,
       propertyLensName, notFoundName) {
-    const slotSymbol = _createSymbol(specificLensPropertySlotName, () => ({
+    const slotSymbol = _defineName(specificLensPropertySlotName, () => ({
       tags: ["Attribute", "Context"],
       type: "(string | string[])",
       description:
@@ -634,10 +658,10 @@ Resource focus when resolving the *${propertyLensName}* lens. Can be an
 array of property names in which case they are searched in order and
 the first property with not-undefined value is selected.`,
       isEnabled: undefined,
-      defaultLens: defaultLensProperties,
+      defaultValue: defaultValueProperties,
     }));
 
-    _createSymbol(propertyLensName, () => ({
+    _defineName(propertyLensName, () => ({
       tags: ["Internal", "Lens"],
       type: "Lens",
       description:
@@ -655,7 +679,7 @@ If still no suitable lens can be found delegates the viewing to '${notFoundName 
 
     @focus {Object} focus  the Resource to search the lens from.`,
       isEnabled: (focus?: Vrapper) => focus && focus.hasInterface("Scope"),
-      lens: function propertyLensNameGetter (focus: any, component: UIComponent,
+      value: function propertyLensNameGetter (focus: any, component: UIComponent,
           /* currentSlotName: string */) {
         /*
         if (component.props.lensName) {
@@ -710,7 +734,7 @@ If still no suitable lens can be found delegates the viewing to '${notFoundName 
 
   // Valoscope
 
-  _createSymbol("scopeChildren", () => ({
+  _defineName("scopeChildren", () => ({
     tags: ["Internal", "Lens"],
     type: "any",
     description:
@@ -735,18 +759,18 @@ some media there are three notably different looking use cases.
 
   // Instance lenses
 
-  _createSymbol("unframedLens", () => ({
+  _defineName("unframedLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description:
 `Slot for viewing a Valoscope which has not yet loaded its lens frame.`,
     isEnabled: (focus, component) => !component.state || (component.state.scopeFrame === undefined),
-    defaultLens: function renderUnframed () {
+    defaultValue: function renderUnframed () {
       return "<Loading frame...>";
     },
   }));
 
-  _createSymbol("instanceLens", () => ({
+  _defineName("instanceLens", () => ({
     tags: ["Internal", "Lens"],
     type: "Lens",
     description:
@@ -760,7 +784,7 @@ delegates the viewing to the lens(es) specified by the scopeFrame
 instance prototype.
 `,
     isEnabled: (focus, component) => component.props.instanceLensPrototype,
-    lens: function renderInstance (focus, component, currentSlotName) {
+    value: function renderInstance (focus, component, currentSlotName) {
       return thenChainEagerly(
           component.state.scopeFrame, [
             (scopeFrame => {
@@ -778,7 +802,7 @@ instance prototype.
   _createLensPropertySlots("instanceLensProperty", ["INSTANCE_LENS"], "instancePropertyLens",
       "mediaInstanceLens");
 
-  _createSymbol("mediaInstanceLens", () => ({
+  _defineName("mediaInstanceLens", () => ({
     tags: ["Internal", "Lens"],
     type: "Lens",
     description:
@@ -788,12 +812,12 @@ specify a lens property at all.
     @focus {Object} focus  the active Resource focus.`,
     isEnabled: (focus, component) =>
         (component.props.instanceLensPrototype.getTypeName() === "Media"),
-    lens: function renderMediaInstance (focus, component) {
+    value: function renderMediaInstance (focus, component) {
       return component.props.instanceLensPrototype;
     },
   }));
 
-  _createSymbol("scopeFrameResource", () => ({
+  _defineName("scopeFrameResource", () => ({
     tags: ["Internal", "Context"],
     type: "Resource",
     description:
@@ -803,7 +827,7 @@ components of the current component will use this scope frame resource
 as their owner.`,
   }));
 
-  _createSymbol("lensAuthorityProperty", () => ({
+  _defineName("lensAuthorityProperty", () => ({
     tags: ["Context"],
     type: "(string)",
     description:
@@ -817,10 +841,10 @@ If the chronicle didn't already exist new lens chronicle is created in
 that authority URI with a new scope frame resource as its chronicle
 root.`,
     isEnabled: undefined,
-    defaultLens: "LENS_AUTHORITY",
+    defaultValue: "LENS_AUTHORITY",
   }));
 
-  _createSymbol("shadowLensChronicleRoot", () => ({
+  _defineName("shadowLensChronicleRoot", () => ({
     tags: ["Internal", "Context"],
     type: "(Resource | null)",
     description:
@@ -832,7 +856,7 @@ lens frames for a particular focus resource. This focused resource is
 stored in slot 'shadowedFocus'.`,
   }));
 
-  _createSymbol("shadowedFocus", () => ({
+  _defineName("shadowedFocus", () => ({
     tags: ["Internal", "Context"],
     type: "(Resource | null)",
     description:
@@ -843,7 +867,7 @@ focus is already being shadowed in which case no new shadow chronicle
 will be created.`,
   }));
 
-  _createSymbol("shadowLensAuthority", () => ({
+  _defineName("shadowLensAuthority", () => ({
     tags: ["Internal", "Context"],
     type: "(string | null)",
     description:
@@ -852,10 +876,10 @@ frames which have a chronicle root Resource as their focus. Used when a
 lens authority is not explicitly provided via property stored
 'lensAuthorityProperty' of the instance or of the focus.`,
     isEnabled: undefined,
-    defaultLens: "valaa-memory:",
+    defaultValue: "valaa-memory:",
   }));
 
-  _createSymbol("integrationScopeResource", () => ({
+  _defineName("integrationScopeResource", () => ({
     tags: ["Context"],
     type: "Resource",
     description:
@@ -878,7 +902,7 @@ Media that is used as source for render elements.`,
     </div>,
   ];
 
-  _createSymbol("disabledLens", () => ({
+  _defineName("disabledLens", () => ({
     tags: ["Internal", "Context", "Lens"],
     type: "Lens",
     description:
@@ -886,7 +910,7 @@ Media that is used as source for render elements.`,
 
     @focus {string|Error|Object} reason  a description of why the component is disabled.`,
     isEnabled: (u, component) => ((component.state || {}).uiContext === undefined),
-    defaultLens: ({ delegate: [
+    defaultValue: ({ delegate: [
       loadingFailedLens,
       <div {..._lensMessageLoadingFailedProps}>
         <div {..._message}>Component is disabled; focus and context are not available.</div>
@@ -899,7 +923,7 @@ Media that is used as source for render elements.`,
     ] }),
   }));
 
-  _createSymbol("pendingLens", () => ({
+  _defineName("pendingLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description:
@@ -909,7 +933,7 @@ pending promise. If the lens placed to this slot returns a promise then
 
     @focus {Object} dependency  a description object of the pending dependency.`,
     isEnabled: true,
-    defaultLens: ({ delegate: [
+    defaultValue: ({ delegate: [
       loadingLens,
       <div {..._lensMessageLoadingProps}>
         <div {..._message}>Waiting for a pending dependency Promise to resolve.</div>
@@ -922,7 +946,7 @@ pending promise. If the lens placed to this slot returns a promise then
     ] }),
   }));
 
-  _createSymbol("failedLens", () => ({
+  _defineName("failedLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description:
@@ -930,7 +954,7 @@ pending promise. If the lens placed to this slot returns a promise then
 
     @focus {string|Error|Object} reason  a description of why the lens Promise failed.`,
     isEnabled: true,
-    defaultLens: ({ delegate: [
+    defaultValue: ({ delegate: [
       loadingFailedLens,
       <div {..._lensMessageInternalFailureProps}>
         <div {..._message}>
@@ -948,7 +972,7 @@ pending promise. If the lens placed to this slot returns a promise then
     ] }),
   }));
 
-  _createSymbol("pendingConnectionsLens", () => ({
+  _defineName("pendingConnectionsLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description:
@@ -957,7 +981,7 @@ being acquired.
 
     @focus {Object[]} connections  the chronicle connection(s) that are being acquired.`,
     isEnabled: true,
-    defaultLens: ({ delegate: [
+    defaultValue: ({ delegate: [
       loadingLens,
       <div {..._lensMessageLoadingProps}>
         <div {..._message}>Acquiring chronicle connection(s).</div>
@@ -970,7 +994,7 @@ being acquired.
     ] }),
   }));
 
-  _createSymbol("failedConnectionsLens", () => ({
+  _defineName("failedConnectionsLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description:
@@ -978,7 +1002,7 @@ being acquired.
 
     @focus {string|Error|Object} reason  a description of why the connection failed.`,
     isEnabled: true,
-    defaultLens: ({ delegate: [
+    defaultValue: ({ delegate: [
       loadingFailedLens,
       <div {..._lensMessageInternalFailureProps}>
         <div {..._message}>
@@ -996,7 +1020,7 @@ being acquired.
     ] }),
   }));
 
-  _createSymbol("pendingActivationLens", () => ({
+  _defineName("pendingActivationLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description:
@@ -1005,7 +1029,7 @@ activation.
 
     @focus {Object[]} resource  the resource that is being activated.`,
     isEnabled: true,
-    defaultLens: ({ delegate: [
+    defaultValue: ({ delegate: [
       loadingLens,
       <div {..._lensMessageLoadingProps}>
         <div {..._message}>Activating resource.</div>
@@ -1018,7 +1042,7 @@ activation.
     ] }),
   }));
 
-  _createSymbol("failedActivationLens", () => ({
+  _defineName("failedActivationLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description:
@@ -1026,7 +1050,7 @@ activation.
 
     @focus {string|Error|Object} reason  a description of why the resource activation failed.`,
     isEnabled: true,
-    defaultLens: ({ delegate: [
+    defaultValue: ({ delegate: [
       loadingFailedLens,
       <div {..._lensMessageInternalFailureProps}>
         <div {..._message}>
@@ -1044,7 +1068,7 @@ activation.
     ] }),
   }));
 
-  _createSymbol("inactiveLens", () => ({
+  _defineName("inactiveLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description:
@@ -1052,7 +1076,7 @@ activation.
 
     @focus {Object} focus  the inactive Resource focus.`,
     isEnabled: (focus?: Vrapper) => focus && focus.isInactive(),
-    defaultLens: ({ delegate: [
+    defaultValue: ({ delegate: [
       loadingFailedLens,
       <div {..._lensMessageLoadingFailedProps}>
         <div {..._message}>Focus {focusDescriptionLens} is inactive.</div>
@@ -1065,7 +1089,7 @@ activation.
     ] }),
   }));
 
-  _createSymbol("pendingMediaInterpretationLens", () => ({
+  _defineName("pendingMediaInterpretationLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description:
@@ -1074,7 +1098,7 @@ interpreted (ie. downloaded, decoded and integrated).
 
     @focus {Media} media  the Media being interpreted.`,
     isEnabled: true,
-    defaultLens: ({ delegate: [
+    defaultValue: ({ delegate: [
       loadingLens,
       <div {..._lensMessageLoadingProps}>
         <div {..._message}>Downloading dependency {focusDetailLens}.</div>
@@ -1087,7 +1111,7 @@ interpreted (ie. downloaded, decoded and integrated).
     ] }),
   }));
 
-  _createSymbol("failedMediaInterpretationLens", () => ({
+  _defineName("failedMediaInterpretationLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description:
@@ -1096,7 +1120,7 @@ interpretation could not be rendered.
 
     @focus {string|Error|Object} reason  interpretation render failure reason.`,
     isEnabled: true,
-    defaultLens: ({ delegate: [
+    defaultValue: ({ delegate: [
       loadingFailedLens,
       <div {..._lensMessageLoadingFailedProps}>
         <div {..._message}>
@@ -1120,7 +1144,7 @@ interpretation could not be rendered.
     ] }),
   }));
 
-  _createSymbol("unrenderableMediaInterpretationLens", () => ({
+  _defineName("unrenderableMediaInterpretationLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description:
@@ -1130,10 +1154,10 @@ an undefined value).
 
     @focus {string|Error|Object} reason  interpretation render failure reason.`,
     isEnabled: true,
-    defaultLens: ret.failedMediaInterpretationLens,
+    defaultValue: ret.failedMediaInterpretationLens,
   }));
 
-  _createSymbol("mediaInterpretationErrorLens", () => ({
+  _defineName("mediaInterpretationErrorLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description:
@@ -1142,10 +1166,10 @@ interpretation.
 
     @focus {string|Error|Object} reason  interpretation error.`,
     isEnabled: true,
-    defaultLens: ret.failedMediaInterpretationLens,
+    defaultValue: ret.failedMediaInterpretationLens,
   }));
 
-  _createSymbol("pendingFocusLens", () => ({
+  _defineName("pendingFocusLens", () => ({
     tags: ["Context", "Lens"],
     type: "Lens",
     description:
@@ -1153,7 +1177,7 @@ interpretation.
 
     @focus {Object} focus  the focus kuery.`,
     isEnabled: (focus) => (focus === undefined),
-    defaultLens: ({ delegate: [
+    defaultValue: ({ delegate: [
       loadingLens,
       <div {..._lensMessageLoadingProps}>
         <div {..._message}>Waiting for focus kuery to complete.</div>
@@ -1166,7 +1190,7 @@ interpretation.
     ] }),
   }));
 
-  _createSymbol("kueryingPropsLens", () => ({
+  _defineName("kueryingPropsLens", () => ({
     tags: ["Context", "Lens"],
     type: "Lens",
     description:
@@ -1174,7 +1198,7 @@ interpretation.
 
     @focus {Object} props  the unfinished props kueries.`,
     isEnabled: true,
-    defaultLens: ({ delegate: [
+    defaultValue: ({ delegate: [
       loadingLens,
       <div {..._lensMessageLoadingProps}>
         <div {..._message}>Waiting for props kueries to complete.</div>
@@ -1187,7 +1211,7 @@ interpretation.
     ] }),
   }));
 
-  _createSymbol("pendingPropsLens", () => ({
+  _defineName("pendingPropsLens", () => ({
     tags: ["Context", "Lens"],
     type: "Lens",
     description:
@@ -1195,7 +1219,7 @@ interpretation.
 
     @focus {Object} props  the pending props Promises.`,
     isEnabled: true,
-    defaultLens: ({ delegate: [
+    defaultValue: ({ delegate: [
       loadingLens,
       <div {..._lensMessageLoadingProps}>
         <div {..._message}>Waiting for pending props Promise(s) to resolve.</div>
@@ -1208,7 +1232,7 @@ interpretation.
     ] }),
   }));
 
-  _createSymbol("failedPropsLens", () => ({
+  _defineName("failedPropsLens", () => ({
     tags: ["Context", "Lens"],
     type: "Lens",
     description:
@@ -1217,7 +1241,7 @@ interpretation.
     @focus {string|Error|Object} reason  props Promise failure reason.`,
     isEnabled: true,
     // TODO(iridian, 2019-02): Limit the props names to only the failing props.
-    defaultLens: ({ delegate: [
+    defaultValue: ({ delegate: [
       loadingFailedLens,
       <div {..._lensMessageInternalFailureProps}>
         <div {..._message}>
@@ -1235,7 +1259,7 @@ interpretation.
     ] }),
   }));
 
-  _createSymbol("pendingChildrenLens", () => ({
+  _defineName("pendingChildrenLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description:
@@ -1243,7 +1267,7 @@ interpretation.
 
     @focus {Object} children  the pending children Promise.`,
     isEnabled: true,
-    defaultLens: ({ delegate: [
+    defaultValue: ({ delegate: [
       loadingLens,
       <div {..._lensMessageLoadingProps}>
         <div {..._message}>  Waiting for a pending children Promise to resolve.</div>
@@ -1256,7 +1280,7 @@ interpretation.
     ] }),
   }));
 
-  _createSymbol("failedChildrenLens", () => ({
+  _defineName("failedChildrenLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description:
@@ -1265,7 +1289,7 @@ interpretation.
     @focus {string|Error|Object} reason  child Promise failure reason.`,
     isEnabled: true,
     // TODO(iridian, 2019-02): Add a grand-child path description to the errors.
-    defaultLens: ({ delegate: [
+    defaultValue: ({ delegate: [
       loadingFailedLens,
       <div {..._lensMessageInternalFailureProps}>
         <div {..._message}>
@@ -1283,7 +1307,7 @@ interpretation.
     ] }),
   }));
 
-  _createSymbol("activatingLens", () => ({
+  _defineName("activatingLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description:
@@ -1291,7 +1315,7 @@ interpretation.
 
     @focus {Object} focus  the activating Resource focus.`,
     isEnabled: (focus?: Vrapper) => focus && focus.isActivating(),
-    defaultLens: ({ delegate: [
+    defaultValue: ({ delegate: [
       (focus, component) => {
         const activation = focus.activate();
         if (activation !== focus) activation.then(() => component.forceUpdate());
@@ -1309,7 +1333,7 @@ interpretation.
     ] }),
   }));
 
-  _createSymbol("inactiveLens", () => ({
+  _defineName("inactiveLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description:
@@ -1317,7 +1341,7 @@ interpretation.
 
     @focus {Object} focus  the inactive Resource focus.`,
     isEnabled: (focus?: Vrapper) => focus && focus.isInactive(),
-    defaultLens: ({ delegate: [
+    defaultValue: ({ delegate: [
       loadingFailedLens,
       <div {..._lensMessageLoadingFailedProps}>
         <div {..._message}>Focus {focusDescriptionLens} is inactive.</div>
@@ -1330,7 +1354,7 @@ interpretation.
     ] }),
   }));
 
-  _createSymbol("unavailableLens", () => ({
+  _defineName("unavailableLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description:
@@ -1338,7 +1362,7 @@ interpretation.
 
     @focus {Object} focus  the unavailable Resource focus.`,
     isEnabled: (focus?: Vrapper) => focus && focus.isUnavailable(),
-    defaultLens: ({ delegate: [
+    defaultValue: ({ delegate: [
       loadingFailedLens,
       <div {..._lensMessageLoadingFailedProps}>
         <div {..._message}>Focus {focusDescriptionLens} is unavailable.</div>
@@ -1351,7 +1375,7 @@ interpretation.
     ] }),
   }));
 
-  _createSymbol("destroyedLens", () => ({
+  _defineName("destroyedLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description:
@@ -1359,7 +1383,7 @@ interpretation.
 
     @focus {Object} focus  the destroyed Resource focus.`,
     isEnabled: (focus?: Vrapper) => focus && (focus.isImmaterial() && !focus.isGhost()),
-    defaultLens: ({ delegate: [
+    defaultValue: ({ delegate: [
       loadingFailedLens,
       <div {..._lensMessageLoadingFailedProps}>
         <div {..._message}>Focus {focusDescriptionLens} has been destroyed.</div>
@@ -1372,7 +1396,7 @@ interpretation.
     ] }),
   }));
 
-  _createSymbol("lensPropertyNotFoundLens", () => ({
+  _defineName("lensPropertyNotFoundLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description:
@@ -1381,7 +1405,7 @@ not have a requested lens property.
 
     @focus {Object} focus  the active Resource focus.`,
     isEnabled: true,
-    defaultLens: ({ delegate: [
+    defaultValue: ({ delegate: [
       loadingFailedLens,
       <div {..._lensMessageLoadingFailedProps}>
         <div {..._message}>
@@ -1420,7 +1444,7 @@ not have a requested lens property.
     ] }),
   }));
 
-  _createSymbol("notLensResourceLens", () => ({
+  _defineName("notLensResourceLens", () => ({
     tags: ["Context", "Lens"],
     type: "Lens",
     description:
@@ -1428,7 +1452,7 @@ not have a requested lens property.
 
     @focus {Object} nonLensResource  the non-lens-able Resource.`,
     isEnabled: true,
-    defaultLens: ({ delegate: [
+    defaultValue: ({ delegate: [
       loadingFailedLens,
       <div {..._lensMessageLoadingFailedProps}>
         <div {..._message}>
@@ -1470,7 +1494,7 @@ not have a requested lens property.
     ] }),
   }));
 
-  _createSymbol("arrayNotIterableLens", () => ({
+  _defineName("arrayNotIterableLens", () => ({
     tags: ["Context", "Lens"],
     type: "Lens",
     description:
@@ -1478,7 +1502,7 @@ not have a requested lens property.
 
     @focus {Object} nonArray  the non-iterable value.`,
     isEnabled: true,
-    defaultLens: ({ delegate: [
+    defaultValue: ({ delegate: [
       loadingFailedLens,
       <div {..._lensMessageLoadingFailedProps}>
         <div {..._message}>props.array {focusDescriptionLens} is not an iterable.</div>
@@ -1491,7 +1515,7 @@ not have a requested lens property.
     ] }),
   }));
 
-  _createSymbol("invalidElementLens", () => ({
+  _defineName("invalidElementLens", () => ({
     tags: ["Context", "Lens"],
     type: "Lens",
     description:
@@ -1499,7 +1523,7 @@ not have a requested lens property.
 
     @focus {Object} description  string or object description.`,
     isEnabled: true,
-    defaultLens: ({ delegate: [
+    defaultValue: ({ delegate: [
       loadingFailedLens,
       <div {..._lensMessageLoadingFailedProps}>
         <div {..._message}>

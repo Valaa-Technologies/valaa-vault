@@ -9,7 +9,7 @@ import Vrapper, { Subscription, LiveUpdate } from "~/engine/Vrapper";
 import debugId from "~/engine/debugId";
 import { dumpKuery, dumpObject } from "~/engine/VALEK";
 
-import Lens from "~/inspire/ui/Lens";
+import Lens from "~/inspire/valosheath/valos/Lens";
 
 import { arrayFromAny, invariantify, isPromise, outputError, wrapError }
     from "~/tools";
@@ -649,9 +649,8 @@ export default class UIComponent extends React.Component {
         ret = failure;
         let isSticky = errorObject.isSticky;
         if (isSticky === undefined) {
-          const engine = this.context.engine;
-          const errorDescriptor = engine.getHostObjectDescriptor(Lens[errorSlotName]);
-          isSticky = (errorDescriptor || {}).isStickyError;
+          isSticky = (this.context.engine.getHostObjectDescriptor(Lens[errorSlotName]) || {})
+              .isStickyError;
         }
         if (!isSticky) {
           Promise.resolve(true).then(() => { this._errorObject = undefined; });

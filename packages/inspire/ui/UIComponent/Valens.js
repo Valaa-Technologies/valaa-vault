@@ -200,6 +200,7 @@ function _createStateLive (component, props) {
 
 const _liveKueryPropChain = [
   function _bindRepeathenableLiveKuery (scope) {
+    if (!scope) throw new Error("Scope missing");
     return this.component.bindLiveKuery(this.kueryName, this.frame, this.kuery,
             { asRepeathenable: true, scope });
   },
@@ -289,10 +290,7 @@ function _recordNewGenericPropValue (stateLive, propValue, propName, component) 
         return false;
       }
       if (namespace === "On") {
-        if (propValue && typeof propValue !== "function") {
-          newValue = getImplicitCallable(
-              propValue, `props.${propName}`, { synchronous: undefined });
-        }
+        newValue = _valensWrapCallback(component, propValue, propName);
         newName = `on${name[0].toUpperCase()}${name.slice(1)}`;
       } else if (namespace === "Frame") {
         if (!stateLive.frameOverrides) {
@@ -322,13 +320,7 @@ function _recordNewGenericPropValue (stateLive, propValue, propName, component) 
           propName[2].toLowerCase()}${propName.slice(3)} (in ${
           component.props.hierarchyKey})`);
       */
-      if (propValue && typeof propValue !== "function") {
-        newValue = getImplicitCallable(
-            propValue, `props.${propName}`, { synchronous: undefined });
-      }
-    }
-    if (typeof newValue === "function") {
-      newValue = _valensWrapCallback(component, newValue, newName);
+      newValue = _valensWrapCallback(component, propValue, propName);
     }
     if (stateLive.elementProps[newName] === newValue) return true;
     stateLive.elementProps[newName] = newValue;
@@ -344,10 +336,14 @@ function _recordNewGenericPropValue (stateLive, propValue, propName, component) 
 
 // These props have namespace Lens and are available to all elements
 // and components, but they are resolved by the valens and do not
-// appear on the contained element.
+// by default appear on the contained element.
 const _valensRecorderProps = {
   key: "key",
   children: "children",
+  ref (stateLive, newValue) {
+    stateLive.elementProps.ref = _valensWrapCallback(stateLive.component, newValue, "$Lens.ref");
+    if (stateLive.valoscopeProps) stateLive.valoscopeChildren = null;
+  },
   styleSheet (stateLive, newValue) {
     if (newValue) {
       stateLive.component.setUIContextValue(VSSStyleSheetSymbol, newValue);
@@ -435,12 +431,6 @@ const _valoscopeRecorderProps = {
 // These props have namespace Element and are only available for
 // non-component elements.
 const _elementRecorderProps = {
-  "$On.ref": function ref (stateLive, newValue) {
-    stateLive.elementProps.ref = (newValue === "function")
-        ? newValue
-        : getImplicitCallable(newValue, `props.$On.ref`, { synchronous: undefined });
-    if (stateLive.valoscopeProps) stateLive.valoscopeChildren = null;
-  },
   class: _className,
   className: _className,
   style: "style",
@@ -571,9 +561,13 @@ function _refreshClassName (component, value, focus = component.tryFocus()) {
   return component._currentSheetObject.classes.sheet;
 }
 
-function _valensWrapCallback (component: Valens, callback: Function, name: string) {
+function _valensWrapCallback (component: Valens, callback_: Function, name: string) {
+  if (!callback_) return callback_;
+  const callback = (callback_ === "function") ? callback_
+      : getImplicitCallable(callback_, name, { synchronous: undefined });
   const isVCall = callback._isVCall;
   const callName = !isVCall ? `valensExtCall_${name}` : `valensVCall_${name}`;
+
   const ret = function _valensCall (...args: any[]) {
     try {
       let eThis = this;

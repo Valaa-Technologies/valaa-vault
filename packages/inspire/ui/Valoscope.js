@@ -11,7 +11,7 @@ import VALEK from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
 
 import UIComponent from "~/inspire/ui/UIComponent";
-import Lens from "~/inspire/ui/Lens";
+import Lens from "~/inspire/valosheath/valos/Lens";
 
 import { thisChainEagerly, thisChainRedirect } from "~/tools";
 

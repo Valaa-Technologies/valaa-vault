@@ -10,7 +10,7 @@ import UIComponent, { LENS } from "~/inspire/ui/UIComponent";
 import { ValensPropsTag, tryCreateValensArgs } from "~/inspire/ui/UIComponent/Valens";
 import vidgets from "~/inspire/ui";
 import Valoscope from "~/inspire/ui/Valoscope";
-import Lens from "~/inspire/ui/Lens";
+import Lens from "~/inspire/valosheath/valos/Lens";
 import _jsxTransformFromString from "~/inspire/mediaDecoders/_jsxTransformFromString";
 
 import { ScopeAccessesTag, ScopeAccessKeysTag } from "~/script/VALSK";
@@ -331,7 +331,7 @@ export default class JSXDecoder extends MediaDecoder {
       ["valoscope", "$Lens:valoscope", true, "direct Lens:<property> notation"],
       ["vScope", "$Lens:valoscope", true, "direct Lens:<property> notation"],
       ["valaaScope", "$Lens:valoscope", true, "direct Lens:<property> notation"],
-      ["ref", "$On:ref", true],
+      ["ref", "$Lens:ref", true],
     ]) {
       if (parsedProps[attrName] === undefined) continue;
       if (shouldWarn || ((shouldWarn !== false) && (!isComponentLens || isInstanceLens))) {

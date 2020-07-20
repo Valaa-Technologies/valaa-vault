@@ -3,7 +3,6 @@
 import { vRef } from "~/raem/VRL";
 import { denoteDeprecatedValOSBuiltin, denoteValOSBuiltinWithSignature } from "~/raem/VALK";
 
-
 import { valoscriptInterfacePrototype, ValoscriptPrimitiveKind } from "~/script";
 import { toVAKONTag } from "~/script/VALSK";
 import VALEK from "~/engine/VALEK";
@@ -14,13 +13,31 @@ import * as tools from "~/tools";
 
 /* eslint-disable prefer-arrow-callback */
 
-export default function enfoldGatewaySheath (valos: Object, rootDiscourse: Discourse) {
+export default function enfoldGatewaySheath (
+    valos: Object, hostDescriptors, rootDiscourse: Discourse) {
   Object.assign(valos, {
     beautify: tools.dumpify,
     toVAKONTag,
     Primitive: ValoscriptPrimitiveKind,
     Lens: null,
     tools,
+  });
+
+  valos.describe = denoteValOSBuiltinWithSignature(
+`returns a description of a valos fabric primitive symbol,
+function or a resource.`,
+  )(function describe (primitive) {
+    if (primitive == null) return undefined;
+    const hostDescriptor = hostDescriptors.get(primitive);
+    if (hostDescriptor) return hostDescriptor;
+    if (primitive._valkDescription) {
+      return {
+        valos: true, vcall: true,
+        type: "Function", // TODO(iridian, 2020-07): infer the actual type from signature
+        description: primitive._valkDescription,
+      };
+    }
+    return undefined;
   });
 
   valos.vrefer = denoteValOSBuiltinWithSignature(

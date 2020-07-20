@@ -10,6 +10,60 @@ import type Vrapper from "~/engine/Vrapper";
 
 import { isSymbol } from "~/tools";
 
+export type NameDefinition = {
+  tags: string[],
+  description: string,
+  type: string,
+  value: any,
+  defaultValue: any,
+};
+
+export type Namespace = {
+  preferredPrefix: string,
+  namespaceURI: string,
+  description: string,
+  nameSymbols: { [name: string | Symbol]: Symbol | string },
+  nameDefinitions: { [name: string]: NameDefinition },
+};
+
+export function defineName (name: string, namespace: Namespace,
+    createNameParameters: Object, commonNameParameters: Object = {}) {
+  namespace.nameDefinitions[name] = () => ({
+    ...createNameParameters(),
+    ...commonNameParameters,
+  });
+  namespace.nameSymbols[name] = Symbol(`$${namespace.preferredPrefix}.${name}`);
+  namespace.nameSymbols[namespace.nameSymbols[name]] = name; // Symbol -> name reverse lookup
+  return namespace.nameSymbols[name];
+}
+
+export function integrateNamespace (
+    namespace: Namespace, rootScope: Object, hostDescriptors: Object) {
+  const { preferredPrefix, namespaceURI, description, nameSymbols, nameDefinitions } = namespace;
+  const names = {};
+  rootScope[`$${preferredPrefix}`] = nameSymbols;
+  hostDescriptors.set(nameSymbols, {
+    writable: false, enumerable: true, configurable: false,
+    valos: true, namespace: true, description, preferredPrefix, namespaceURI,
+    names,
+  });
+  for (const [nameSuffix, createDefinition] of Object.entries(nameDefinitions)) {
+    const { value, defaultValue, ...rest } = createDefinition();
+    const entryDescriptor = names[nameSuffix] = Object.freeze({
+      writable: false, enumerable: true, configurable: false,
+      valos: true, symbol: true,
+      uri: `${namespaceURI}${nameSuffix}`,
+      value, defaultValue,
+      ...rest,
+    });
+    if (defaultValue || value) {
+      rootScope[nameSymbols[nameSuffix]] = Object.freeze(defaultValue || value);
+    }
+    hostDescriptors.set(nameSymbols[nameSuffix], entryDescriptor);
+  }
+  return nameSymbols;
+}
+
 export const NamespaceInterfaceTag = Symbol("NamespaceInterface");
 export const AccessorNameTag = Symbol("NamespaceAccessor");
 

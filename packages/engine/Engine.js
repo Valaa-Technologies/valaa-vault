@@ -4,7 +4,7 @@ import { Iterable } from "immutable";
 import type { Passage, Story, VALKOptions } from "~/raem";
 import { packedSingular } from "~/raem/VALK";
 
-import VALEK, { Kuery, dumpObject, rootScopeSelf, engineSteppers } from "~/engine/VALEK";
+import { Kuery, dumpObject, rootScopeSelf, engineSteppers } from "~/engine/VALEK";
 
 import { Command, created, duplicated, recombined, isCreatedLike } from "~/raem/events";
 
@@ -81,7 +81,7 @@ export default class Engine extends Cog {
   getValospaceScope () { return this.getRootScope(); }
   getFabricScope () { return this.getRootScope(); }
   getHostDescriptors () { return this._hostDescriptors; }
-  getHostObjectDescriptor (objectKey: any) { return this._hostDescriptors.get(objectKey); }
+  getHostObjectDescriptor (hostObjectId: any) { return this._hostDescriptors.get(hostObjectId); }
 
   getValospaceTypePrototype (typeName: string) {
     return (this._rootScope.valos[typeName] || {}).prototype;

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.21](https://github.com/valaatech/kernel/compare/v0.35.0-rc.20...v0.35.0-rc.21) (2020-07-20)
+
+
+### Features
+
+* Add "live." and "static." vsx attribute namespace prefix options ([7ecf361](https://github.com/valaatech/kernel/commit/7ecf36153167d07cf689e62ba4af9fb732039c3f))
+
+
+
+
+
 # [0.35.0-rc.20](https://github.com/valaatech/kernel/compare/v0.35.0-rc.19...v0.35.0-rc.20) (2020-06-28)
 
 

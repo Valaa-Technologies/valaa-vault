@@ -1,6 +1,6 @@
 {
   "name": "valma",
-  "version": "0.35.0-rc.20",
+  "version": "0.35.0-rc.21",
   "valos": {
     "type": "toolset",
     "domain": "@valos/kernel"
@@ -27,7 +27,7 @@
     "_vlm_-": "valma/execute.js"
   },
   "dependencies": {
-    "@valos/tools": "^0.35.0-rc.20",
+    "@valos/tools": "^0.35.0-rc.21",
     "cardinal": "^2.1.1",
     "colors": "1.3.0",
     "glob-to-regexp": "^0.4.0",

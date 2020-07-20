@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.21](https://github.com/valaatech/kernel/compare/v0.35.0-rc.20...v0.35.0-rc.21) (2020-07-20)
+
+
+### Features
+
+* Introduce thisChainRedirect - allows chain object return values ([ebb602c](https://github.com/valaatech/kernel/commit/ebb602c0df055a1a852aa2506ccf43a835f2889f))
+* valos.describe ([90b1d58](https://github.com/valaatech/kernel/commit/90b1d5893217c9889f2e0637fd03bd17e88cc6dd))
+
+
+
+
+
 # [0.35.0-rc.20](https://github.com/valaatech/kernel/compare/v0.35.0-rc.19...v0.35.0-rc.20) (2020-06-28)
 
 **Note:** Version bump only for package @valos/tools

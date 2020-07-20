@@ -551,7 +551,7 @@
         <component type="library">
             <group>valos</group>
             <name>inspire</name>
-            <version>0.35.0-rc.20</version>
+            <version>0.35.0-rc.21</version>
             <description>
                 <![CDATA[ValOS Inspire application gateway]]>
             </description>
@@ -560,28 +560,13 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/inspire@0.35.0-rc.20</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <group>valos</group>
-            <name>toolset-revealer</name>
-            <version>0.35.0-rc.20</version>
-            <description>
-                <![CDATA[Tools for building revelations both for development and deployment purposes]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/%40valos/toolset-revealer@0.35.0-rc.20</purl>
+            <purl>pkg:npm/%40valos/inspire@0.35.0-rc.21</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <group>valos</group>
             <name>kernel</name>
-            <version>0.35.0-rc.20</version>
+            <version>0.35.0-rc.21</version>
             <description>
                 <![CDATA[@valos/kernel domain]]>
             </description>
@@ -590,12 +575,27 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/kernel@0.35.0-rc.20</purl>
+            <purl>pkg:npm/%40valos/kernel@0.35.0-rc.21</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <group>valos</group>
+            <name>toolset-revealer</name>
+            <version>0.35.0-rc.21</version>
+            <description>
+                <![CDATA[Tools for building revelations both for development and deployment purposes]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/%40valos/toolset-revealer@0.35.0-rc.21</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <name>valma</name>
-            <version>0.35.0-rc.20</version>
+            <version>0.35.0-rc.21</version>
             <description>
                 <![CDATA[A ValOS CLI tool for discovering and executing context-dependent command scripts]]>
             </description>
@@ -604,12 +604,12 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/valma@0.35.0-rc.20</purl>
+            <purl>pkg:npm/valma@0.35.0-rc.21</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <name>inquirer</name>
-            <version>7.2.0</version>
+            <version>7.3.2</version>
             <description>
                 <![CDATA[A collection of common interactive command line user interfaces.]]>
             </description>
@@ -618,7 +618,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/inquirer@7.2.0</purl>
+            <purl>pkg:npm/inquirer@7.3.2</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -651,7 +651,7 @@
         </component>
         <component type="library">
             <name>chalk</name>
-            <version>3.0.0</version>
+            <version>4.1.0</version>
             <description>
                 <![CDATA[Terminal string styling done right]]>
             </description>
@@ -660,7 +660,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/chalk@3.0.0</purl>
+            <purl>pkg:npm/chalk@4.1.0</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -776,6 +776,20 @@
             <modified>false</modified>
         </component>
         <component type="library">
+            <name>cli-width</name>
+            <version>3.0.0</version>
+            <description>
+                <![CDATA[Get stdout window width, with two fallbacks, tty and then a default.]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>ISC</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/cli-width@3.0.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
             <name>figures</name>
             <version>3.2.0</version>
             <description>
@@ -861,7 +875,7 @@
         </component>
         <component type="library">
             <name>yargs</name>
-            <version>15.3.1</version>
+            <version>15.4.1</version>
             <description>
                 <![CDATA[yargs the modern, pirate-themed, successor to optimist.]]>
             </description>
@@ -870,7 +884,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/yargs@15.3.1</purl>
+            <purl>pkg:npm/yargs@15.4.1</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -974,7 +988,7 @@
         <component type="library">
             <group>valos</group>
             <name>type-vault</name>
-            <version>0.35.0-rc.20</version>
+            <version>0.35.0-rc.21</version>
             <description>
                 <![CDATA[The ValOS 'vault' workspace type toolset]]>
             </description>
@@ -983,7 +997,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/type-vault@0.35.0-rc.20</purl>
+            <purl>pkg:npm/%40valos/type-vault@0.35.0-rc.21</purl>
             <modified>false</modified>
         </component>
         <component type="library">

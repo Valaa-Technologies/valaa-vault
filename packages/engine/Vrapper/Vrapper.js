@@ -628,8 +628,7 @@ export default class Vrapper extends Cog {
     }
     const typeKey = Vrapper._typeKeys[typeName];
     if (typeKey) {
-      this.setNameFromTypeInstanceCount(typeKey || typeName,
-          this.getRawId().split("@").map(e => e.slice(0, 14)).join("@"));
+      this.setNameFromTypeInstanceCount(typeKey || typeName);
     }
   }
 
@@ -677,6 +676,7 @@ export default class Vrapper extends Cog {
       this._phase === ACTIVE ? "" : `(${this._phase})`}${
       nameText || ""}${
       this.getName().slice(0, -2)}${
+      this.getRawId().slice(0, -2)}${
       targetText || ""}@@`);
   }
 

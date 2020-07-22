@@ -175,8 +175,8 @@ If the condition is falsy the focus is viewed using lens from slot
 'else' which presents null.
 .`,
     isEnabled (focus: any, component: UIComponent) {
+      if (!component.props.hasOwnProperty("if")) return false;
       let condition = component.props.if;
-      if (condition === undefined) return false;
       if (component.props.then !== undefined) return true;
       if (typeof condition === "function") {
         condition = condition(focus);
@@ -768,6 +768,13 @@ some media there are three notably different looking use cases.
     defaultValue: function renderUnframed () {
       return "<Loading frame...>";
     },
+  }));
+
+  _defineName("instanceLensPrototype", () => ({
+    tags: ["Attribute"],
+    type: "Resource",
+    description:
+`Attribute slot for an instance lens frame prototype resource.`,
   }));
 
   _defineName("instanceLens", () => ({

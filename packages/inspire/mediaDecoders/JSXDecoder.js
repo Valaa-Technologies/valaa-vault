@@ -196,8 +196,10 @@ export default class JSXDecoder extends MediaDecoder {
     }
     const children = [].concat(...restChildren);
     if ((actualType === UIComponent)
-        && (!props || (Object.keys(props).length === 0)) && (children.length === 1)) {
-      return _maybeRecurseWithKey(children[0], parentKey, parentChildrenMeta);
+        && (children.length === 1)
+        && (!props || (Object.keys(props).length === 0))) {
+      const shortCircuit = _maybeRecurseWithKey(children[0], parentKey, parentChildrenMeta);
+      if (React.isValidElement(shortCircuit)) return shortCircuit;
     }
     const elementPrefix = name === "div" ? "d" : name === "span" ? "s" : name;
     const elementIndex = (parentChildrenMeta.nameIndices[name] =
@@ -208,9 +210,9 @@ export default class JSXDecoder extends MediaDecoder {
     let decodedType = actualType;
     let decodedProps;
     let propsMeta;
-    if (props) {
-      propsMeta = this._createPropsMeta(
-          sourceInfo, loc, props, name, isInstanceLens, actualType.isUIComponent, lexicalName);
+    if (props || isInstanceLens) {
+      propsMeta = this._createPropsMeta(sourceInfo, loc, props || {}, name,
+          isInstanceLens, actualType.isUIComponent, lexicalName);
       ([decodedType, decodedProps] =
           tryCreateValensArgs(
               actualType, Object.entries(propsMeta.decodedElementProps), lexicalName)
@@ -313,9 +315,10 @@ export default class JSXDecoder extends MediaDecoder {
       elementKey,                                   // WL WL WL
       vScope, valoscope, valaaScope,                // WL WL WL
       ...restAttrs
-    } = parsedProps || {};
+    } = parsedProps;
 
     if (isInstanceLens) {
+      ++ret.totalCount;
       restAttrs["$Lens:instanceLensPrototype"] = _getInstanceLensPrototypeKuery(elementName);
     }
 

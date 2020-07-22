@@ -30,7 +30,7 @@ function _addTiming (component, name, start, options) {
 export function _componentConstructed (component: UIComponent, props: Object, context: Object) {
   // const start = performance.now();
   component._activeParentFocus = _getActiveParentFocus(props, context);
-  _tryUpdateUIContext(component, props.context);
+  _tryUpdateUIContext(component, props, props.context);
   _updateFocus(component, props, context);
   // _addTiming(component, "componentConstructed.updateFocus", start, { props, context });
 }
@@ -46,7 +46,7 @@ export function _componentWillReceiveProps (component: UIComponent, nextProps: O
   // _addTiming(component, "componentWillReceiveProps.check", start,
   //    { shouldUpdateUIContext, shouldUpdateFocus });
   // const startUpdate = performance.now();
-  _tryUpdateUIContext(component, nextProps.context, !shouldUpdateFocus && oldProps.context);
+  _tryUpdateUIContext(component, nextProps, !shouldUpdateFocus && oldProps.context);
   if (shouldUpdateFocus) {
     component._activeParentFocus = nextActiveParentFocus;
     component._errorObject = null;
@@ -61,12 +61,13 @@ function _getActiveParentFocus (props: Object, context: Object) {
   return getScopeValue(context.parentUIContext, "focus");
 }
 
-function _tryUpdateUIContext (component, propsContext, oldPropsContext) {
+function _tryUpdateUIContext (component, nextProps, oldPropsContext) {
+  const uiContext = component.state.uiContext;
+  const propsContext = nextProps.context;
   if (!propsContext
       || (oldPropsContext && !_comparePropsOrState(propsContext, oldPropsContext, "shallow"))) {
     return;
   }
-  const uiContext = component.state.uiContext;
   for (const name of Object.getOwnPropertyNames(propsContext)) {
     setScopeValue(uiContext, name, propsContext[name]);
   }

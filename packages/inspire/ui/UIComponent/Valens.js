@@ -136,16 +136,21 @@ export default class Valens extends UIComponent {
     if (stateLive.delegate !== undefined) {
       return this.renderFirstEnabledDelegate(stateLive.delegate, undefined, "delegate");
     }
-    const pendingPropNames = stateLive.pendingProps && _refreshPendingProps(stateLive);
-    if (pendingPropNames) {
-      return this.renderSlotAsLens("pendingPropsLens", pendingPropNames);
+    if (stateLive.pendingProps) {
+      const pendingPropNames = _refreshPendingProps(stateLive);
+      if (pendingPropNames) {
+        return this.renderSlotAsLens("pendingPropsLens", pendingPropNames);
+      }
     }
 
     let finalType = this.props.elementType;
     let children = this.props.children;
 
-    if (stateLive.frameOverrides) stateLive.frameOverrides = null;
-
+    if (stateLive.frameOverrides) {
+      // Denote that frame overrides object has been rendered and that
+      // any new frame updates should create a new override object
+      stateLive.frameOverrides = null;
+    }
     if (stateLive.valoscopeProps) {
       finalType = Valoscope;
       children = stateLive.valoscopeChildren;
@@ -353,12 +358,13 @@ const _valensRecorderProps = {
   },
   if: function if_ (stateLive, newValue) {
     const oldValue = stateLive.if;
-    if (newValue === oldValue) return true;
+    if (newValue === oldValue && ((oldValue !== undefined) || stateLive.hasOwnProperty("if"))) {
+      return true;
+    }
     stateLive.if = newValue;
     stateLive.renderRejection =
           !newValue
-              ? (newValue !== undefined)
-                  && (focus => stateLive.component.renderLens(stateLive.else, focus))
+              ? (focus => stateLive.component.renderLens(stateLive.else, focus))
           : (typeof newValue !== "function")
               ? (stateLive.then === undefined)
                   ? undefined

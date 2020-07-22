@@ -12,13 +12,13 @@ import getImplicitMediaInterpretation from "~/engine/Vrapper/getImplicitMediaInt
 
 import Valoscope from "~/inspire/ui/Valoscope";
 import UIComponent from "~/inspire/ui/UIComponent";
+import Lens from "~/inspire/valosheath/valos/Lens";
 
 import {
   patchWith, dumpObject, isPromise, thisChainEagerly, thisChainReturn, wrapError
 } from "~/tools";
 
 import { tryCreateValensArgs, ValensPropsTag, postRenderElement } from "./_valensOps";
-import { createDynamicKey } from "./_propsOps";
 import { VSSStyleSheetSymbol } from "./_styleOps";
 
 export { tryCreateValensArgs, ValensPropsTag };
@@ -170,18 +170,21 @@ export default class Valens extends UIComponent {
     }
     /* */
     const finalProps = stateLive.valoscopeProps || stateLive.elementProps;
+    if (!stateLive.createKey) {
+      _valensRecorderProps.key(stateLive);
+    }
     finalProps.children = children;
-    const createKey = (typeof finalProps.key === "function" ? finalProps.key : createDynamicKey);
+
     if (stateLive.array) {
       if (!Array.isArray(stateLive.array)) {
         return this.renderSlotAsLens("arrayNotIterableLens", stateLive.array);
       }
       return this.renderFocusAsSequence(stateLive.array, finalType, finalProps, undefined,
-          createKey, stateLive.renderRejection, true);
+          stateLive.createKey, stateLive.renderRejection, true);
     }
     const rejection = stateLive.renderRejection && stateLive.renderRejection(focus);
     if (rejection !== undefined) return rejection;
-    if (typeof finalProps.key !== "string") finalProps.key = createKey(focus);
+    finalProps.key = stateLive.createKey(focus, null, finalProps);
     return postRenderElement(this, React.createElement(finalType, finalProps), focus);
   }
 }
@@ -343,7 +346,31 @@ function _recordNewGenericPropValue (stateLive, propValue, propName, component) 
 // and components, but they are resolved by the valens and do not
 // by default appear on the contained element.
 const _valensRecorderProps = {
-  key: "key",
+  key (stateLive, newValue) {
+    let keyPrefix = stateLive.component.getUIContextValue(Lens.frameKeyPrefix) || "";
+    if (keyPrefix) keyPrefix = `${keyPrefix}_`;
+    if (typeof newValue === "function") {
+      stateLive.createKey = function _createExplicitKey (focus_, arrayIndex, entryProps) {
+        return (entryProps.frameKey = newValue(focus_, arrayIndex, keyPrefix));
+      };
+    } else if (newValue != null) {
+      const staticFrameKey = `${keyPrefix}${newValue}`;
+      stateLive.createKey = function _createSharedArrayKey (focus_, arrayIndex, entryProps) {
+        if (arrayIndex == null) {
+          return (entryProps.frameKey = staticFrameKey);
+        }
+        entryProps.sharedFrameKey = staticFrameKey;
+        if (arrayIndex) delete entryProps.frameOverrides;
+        return String(arrayIndex);
+      };
+    } else {
+      stateLive.createKey = function _createImplicitKey (focus_, arrayIndex, entryProps) {
+        const key = (focus_ instanceof Vrapper) ? focus_.getBriefUnstableId() : String(arrayIndex);
+        entryProps.implicitFrameKey = `${keyPrefix}${key}`;
+        return key;
+      };
+    }
+  },
   children: "children",
   ref (stateLive, newValue) {
     stateLive.elementProps.ref = _valensWrapCallback(stateLive.component, newValue, "$Lens.ref");

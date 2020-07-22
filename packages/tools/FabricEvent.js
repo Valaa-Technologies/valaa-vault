@@ -113,7 +113,7 @@ export class FabricEventTarget {
 
   setNameFromTypeInstanceCount (typeName, suffix = "") {
     if (!_typeInstanceCounter[typeName]) _typeInstanceCounter[typeName] = 0;
-    return (this._name = `${typeName}:${++_typeInstanceCounter[typeName]}${suffix}`);
+    return (this._name = `${typeName}$.${++_typeInstanceCounter[typeName]}${suffix}`);
   }
 
   getVerbosity () {

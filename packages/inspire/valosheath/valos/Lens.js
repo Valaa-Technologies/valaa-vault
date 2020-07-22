@@ -118,6 +118,93 @@ model-view-controller design pattern. The concept 'lens' corresponds to
 `,
   }));
 
+  _defineName("array", () => ({
+    tags: ["Primary", "Attribute"],
+    type: "any[] | null",
+    description:
+`Attribute slot which contains a sequence of focus values or resources
+that should be viewed by an 'arra spread' of duplicates of this element.
+
+Once the focused array and all the attributes of the component are
+activated and live tracked the component is spread as in-place
+duplicates. One duplicate component is created for each entry and the
+entry value is set as the 'focus' attribute for the duplicate.
+
+If there are no array entries then the component is removed for view
+altogether.
+
+If the attributes have any side-effects they are always evaluated once
+per update irrespective of the array length (even if 0).
+.`,
+  }));
+
+  _defineName("arrayIndex", () => ({
+    tags: ["Context"],
+    type: "number | null",
+    description:
+`Context slot which contains the index of the nearest containing entry
+element within an array element spread, or null if there is none.
+.`,
+  }));
+
+  _defineName("key", () => ({
+    tags: ["Primary", "Attribute"],
+    type: "string | (focus: string, index: ?number, keyPrefix: ?string) => string",
+    description:
+`Attribute slot which is used to compute a frame key string for the
+element that is used to identify its frame resource. In trivial cases
+the frame key is the key attribute string value directly.
+
+The frame key is relative to the closest containing parent frame and
+thus does not need to be globally unique.
+
+The frame key is made part of the id of a frame resource if an element
+has one. If so a 'frame key property' with name equal to the frame key
+is added to the containing frame and is set to point to this element
+frame.
+Note that the frame key property will not be added for frames without
+explicit key attribute.
+
+If two child elements within the same parent frame are explicitly
+constructed to have the same frame key then they will share the same
+frame resource as well.
+
+The key attribute can also be a callback. It is called with an active
+focus as its first argument and the return value is then used as the
+frame key of the element. This allows the frame key to be computed
+based on arbitrary focus contents.
+
+If an element with key attribute also contains a Lens:array attribute
+then the key attribute value is used to determine the frame key of each
+array entry element that results from the array spread. If the key
+attribute is a callback then the position of the element in the spread
+is given as the second argument.
+
+If an element with key attribute does not have a frame then instead of
+using the key as frame key it is set as the current 'keyPrefix'
+which then applies to all nested children of that element. If a current
+keyPrefix exists, the key is appended to it using "_" as separator.
+A frame key of an element with non-empty keyPrefix is computed by
+appending the child element key attribute string to the keyPrefix; the
+keyPrefix is then cleared for its nested children.
+
+If a key attribute is a callback then the current keyPrefix is given as
+a third argument and the returned value is set as the frame key if
+the element has a frame. Otherwise the returned value replaces the
+current keyPrefix for the nested children of that element.
+
+Last but not least: if the key attribute of an array spread is a string
+then all array entries will share the same frame. This allows for array
+elements with differing focus to easily share state.
+To prevent nested accidental frame key conflicts the position of each
+entry is then added as the initial keyPrefix for the children of that
+entry.
+Note: this is in fact the only way for array entries to share a frame
+directly as array spread key callbacks must always return unique frame
+keys.
+`
+  }));
+
   _defineName("lens", () => ({
     tags: ["Primary", "Attribute", "Lens"],
     type: "Lens",
@@ -138,25 +225,6 @@ to 'model', and the various components roughly correspond to 'controller'.
   }));
 
   // View control slots
-
-  _defineName("array", () => ({
-    tags: ["Attribute"],
-    type: "any[] | null",
-    description:
-`Attribute slot which contains a focused sequence of values/resources
-that should be viewed by duplicates of the component.
-
-Once the focused array and all the attributes of the component are
-activated and live tracked the component is duplicated in-place. One
-duplicate component is created for each entry and the entry value is
-set as the 'focus' attribute for the duplicate.
-
-If there are no array entries then the component is removed.
-
-If the attributes have any side-effects they are always evaluated once
-per update irrespective of the array length (even if it is 0).
-.`,
-  }));
 
   _defineName("if", () => ({
     tags: ["Attribute", "Lens"],
@@ -832,6 +900,14 @@ specify a lens property at all.
 is also a Resource. Any scope frames that are created by the child
 components of the current component will use this scope frame resource
 as their owner.`,
+  }));
+
+  _defineName("frameKeyPrefix", () => ({
+    tags: ["Internal", "Context"],
+    type: "string",
+    description:
+`Slot which contains the frame key prefix from the current innermost
+enclosing scope frame.`,
   }));
 
   _defineName("lensAuthorityProperty", () => ({

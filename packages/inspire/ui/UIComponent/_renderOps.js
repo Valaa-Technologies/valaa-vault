@@ -35,7 +35,7 @@ export function _renderFirstAbleDelegate (
 
 export function _renderFocusAsSequence (component: UIComponent,
     foci: any[], EntryElement: Object, entryPropsTemplate: Object, entryChildren: ?Array,
-    keyFromFocus: (focus: any, index: number) => string,
+    keyFromFocus: (focus: any, index: number, entryProps: ?Object) => string,
     renderRejection: ?(focus: any, index: number) => undefined | any,
     onlyPostRender: ?Boolean,
 ): [] {
@@ -46,22 +46,18 @@ export function _renderFocusAsSequence (component: UIComponent,
   let arrayIndex = 0;
   const source = iterableFromAny(foci);
   const ret = new Array(source.length || 0);
+
   for (const focus of source) {
     const rejection = renderRejection && renderRejection(focus, arrayIndex);
     if (rejection !== undefined) ret[arrayIndex] = rejection;
     else {
-      const key = keyFromFocus(focus, arrayIndex);
-      const entryProps = {
-        ...entryPropsTemplate,
-        focus,
-        context: { ...(entryPropsTemplate.context || {}), forIndex: arrayIndex, arrayIndex },
-        key,
-      };
+      const entryProps = { ...entryPropsTemplate, focus, arrayIndex };
+      entryProps.key = keyFromFocus(focus, arrayIndex, entryProps);
       if (entryChildren !== undefined) entryProps.children = entryChildren;
       const element = React.createElement(EntryElement, entryProps);
       ret[arrayIndex] = onlyPostRender
-          ? postRenderElement(component, element, focus, key)
-          : wrapElementInValens(component, element, focus, key);
+          ? postRenderElement(component, element, focus, entryProps.key)
+          : wrapElementInValens(component, element, focus, entryProps.key);
     }
     ++arrayIndex;
   }

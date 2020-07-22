@@ -5,6 +5,8 @@ import Vrapper from "~/engine/Vrapper";
 
 import { thenChainEagerly, wrapError } from "~/tools";
 
+import Lens from "~/inspire/valosheath/valos/Lens";
+
 import type UIComponent from "./UIComponent";
 
 import { getScopeValue, setScopeValue } from "./scopeValue";
@@ -62,7 +64,9 @@ function _getActiveParentFocus (props: Object, context: Object) {
 }
 
 function _tryUpdateUIContext (component, nextProps, oldPropsContext) {
+  const arrayIndex = nextProps.arrayIndex;
   const uiContext = component.state.uiContext;
+  if (arrayIndex !== undefined) setScopeValue(uiContext, Lens.arrayIndex, arrayIndex);
   const propsContext = nextProps.context;
   if (!propsContext
       || (oldPropsContext && !_comparePropsOrState(propsContext, oldPropsContext, "shallow"))) {

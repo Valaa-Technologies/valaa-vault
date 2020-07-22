@@ -7,7 +7,6 @@ import { tryUnpackedHostValue } from "~/raem/VALK/hostReference";
 
 // import type { Connection } from "~/sourcerer";
 
-import VALEK from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
 
 import UIComponent from "~/inspire/ui/UIComponent";
@@ -108,7 +107,9 @@ export default class Valoscope extends UIComponent {
     ...UIComponent.propTypes,
 
     frameKey: PropTypes.string,
-    frameOverrides: PropTypes.arrayOf(PropTypes.any),
+    sharedFrameKey: PropTypes.string,
+    implicitFrameKey: PropTypes.string,
+    frameOverrides: PropTypes.object,
     instanceLensPrototype: PropTypes.any,
   };
 
@@ -136,14 +137,8 @@ export default class Valoscope extends UIComponent {
     const vPrototype = props.instanceLensPrototype;
     const vLens = (props.lens instanceof Vrapper) && props.lens;
     const frameSelf = {
-      component: this,
-      focus,
-      props,
-      engine: this.context.engine,
-      vOwner: this.getParentUIContextValue(Lens.scopeFrameResource),
-      key: this.getKey(),
-      vPrototype,
-      vLens,
+      component: this, focus, props, engine: this.context.engine,
+      vOwner: this.getParentUIContextValue(Lens.scopeFrameResource), vPrototype, vLens,
       frameOverrides: props.frameOverrides,
     };
     return thisChainEagerly(frameSelf,
@@ -151,10 +146,6 @@ export default class Valoscope extends UIComponent {
         _scopeFrameChain,
         (error) => { throw this.enableError(error); },
     );
-  }
-
-  getKey () {
-    return this.state.frameKey || this.context.parentUIContext.reactComponent.getKey();
   }
 
   renderLoaded (focus: any) {
@@ -204,28 +195,27 @@ const _scopeFrameChain = [
     const isTransitory = (rootFrameAuthorityURI || this.vOwner.getConnection().getAuthorityURI())
         === "valaa-memory:";
     function _getSubscriptId (vResource) {
-      if (!isTransitory) return vResource.getRawId().slice(0, -2);
-      const brief = vResource.getBriefUnstableId();
-      return `@${brief[1]}$.${brief.slice(3, brief.indexOf("@", 4))}`;
+      return isTransitory ? vResource.getBriefUnstableId() : vResource.getRawId().slice(0, -2);
     }
-    let frameKey = this.props.frameKey;
-    if (typeof frameKey === "function") {
-      frameKey = frameKey(this.vOwner, this.vPrototype, this.vFocus, this.vLens);
-    }
-    const structuralPart = (frameKey !== undefined)
-        ? `@_$.${encodeURIComponent(frameKey)}`
-        : `@_$V.owner${_getSubscriptId(this.vOwner)}@_$.${encodeURIComponent(this.key)}`;
-    const prototypePart = this.vPrototype ? `@_$V.proto${_getSubscriptId(this.vPrototype)}` : "";
-    const focusPart = this.vFocus ? `@_$V.focus${_getSubscriptId(this.vFocus)}` : "";
-    const lensPart = this.vLens ? `@_$V.lens${_getSubscriptId(this.vLens)}` : "";
-    this.frameId = `@$~V.frames${structuralPart}${prototypePart}${focusPart}${lensPart}@@`;
+    const ownerPart = `@_$V.owner${_getSubscriptId(this.vOwner)}`;
+    const props = this.component.props;
+    const frameKey = props.frameKey || props.sharedFrameKey || props.implicitFrameKey;
+    this.component.setUIContextValue(
+        Lens.frameKeyPrefix, !props.sharedFrameKey ? null : String(props.arrayIndex));
+    // const prototypePart = this.vPrototype ? `@_$V.proto${_getSubscriptId(this.vPrototype)}` : "";
+    const hierarchyPart = frameKey
+        ? `@.${frameKey}`
+        : `@_$.${encodeURIComponent(this.component.getKey())}${
+            this.vFocus ? `@_$V.focus${_getSubscriptId(this.vFocus)}` : ""}`;
+    const lensPart = this.vLens ? `@_$L.lens${_getSubscriptId(this.vLens)}` : "";
+    this.frameId = `@$~V.frames${ownerPart}${hierarchyPart}${lensPart}@@`;
 
     const vFrame = this.engine.tryVrapper(this.frameId, { optional: true });
     if (vFrame !== undefined) {
       return thisChainRedirect("_assignScopeFrameExternals", vFrame);
     }
     if (!rootFrameAuthorityURI
-        || (prototypePart && !this.vPrototype.hasInterface("Chronicle"))) {
+        || (this.vPrototype && !this.vPrototype.hasInterface("Chronicle"))) {
       return thisChainRedirect("_createFrame");
     }
     return rootFrameAuthorityURI;
@@ -298,13 +288,12 @@ const _scopeFrameChain = [
   function _assignScopeFrameExternals (scopeFrame) {
     this.component.setUIContextValue("frame", scopeFrame);
     if (scopeFrame === undefined) return undefined;
-    if ((typeof this.key === "string") && (this.key[0] !== "-")
-        && (this.vOwner != null)
-        // && (this.vOwner instanceof Vrapper) && this.vOwner.hasInterface("Scope")
-        && (this.vOwner.propertyValue(this.key) !== scopeFrame)) {
+    const explicitFrameKey = this.component.props.frameKey || this.component.props.sharedFrameKey;
+    if (explicitFrameKey && (this.vOwner != null)
+        && (this.vOwner.propertyValue(explicitFrameKey) !== scopeFrame)) {
       // TODO(iridian): This is initial non-rigorous prototype functionality:
       // The owner[key] value remains set even after the components get detached.
-      this.vOwner.alterProperty(this.key, VALEK.fromValue(scopeFrame));
+      this.vOwner.alterProperty(explicitFrameKey, [`§vrl`, scopeFrame.getVRef().toJSON()]);
     }
     const vScopeFrame = tryUnpackedHostValue(scopeFrame);
     if (vScopeFrame) this.component.setUIContextValue(Lens.scopeFrameResource, vScopeFrame);
@@ -330,7 +319,6 @@ function _integrateFramePropertyDiffs (component, frame, frameOverrides, discour
     updateTarget[key] = value;
   }
   if (updateTarget === frame) return true;
-  console.log("updating frame properties:", updateTarget, frame);
   frame.updateProperties(updateTarget, {
     // eslint-disable-next-line no-param-reassign
     discourse: discourse ||

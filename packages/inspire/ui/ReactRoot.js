@@ -52,6 +52,7 @@ export default class ReactRoot extends React.Component {
     this._rootContext.context = this._rootContext;
     this._rootContext.reactComponent = this;
     this._rootContext[Lens.currentRenderDepth] = 0;
+    this._rootContext[Lens.arrayIndex] = null;
     this._rootContext[Lens.lensProperty] = this.props.contextLensProperty;
     if (vRootFocus) {
       thenChainEagerly(this._obtainUIRootFrame(

@@ -60,6 +60,8 @@ export default class UIComponent extends React.Component {
     focus: PropTypes.any,
     context: PropTypes.object,
 
+    arrayIndex: PropTypes.number,
+
     style: PropTypes.object,
 
     // kuery: PropTypes.instanceOf(Kuery),

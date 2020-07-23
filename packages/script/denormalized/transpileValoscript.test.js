@@ -65,7 +65,7 @@ describe("valoscript", () => {
           var temp = 1;
           temp;
       `);
-      expect(bodyKuery[ScopeAccessesTag]).toEqual({});
+      expect(bodyKuery[ScopeAccessesTag]).toEqual(null);
       const scope = {};
       const { temp, closure } = evaluateProgram([], scope,
           bodyKuery.select({ temp: VALSK.head(), closure: VALSK.fromScope() }), scope);
@@ -192,7 +192,7 @@ describe("valoscript", () => {
           function returnMillion () { return 1000000; }
           returnMillion();
       `);
-      expect(bodyKuery[ScopeAccessesTag]).toEqual({});
+      expect(bodyKuery[ScopeAccessesTag]).toEqual(null);
       expect(evaluateProgram([], {}, bodyKuery, {}, { verbosity: 0 }))
           .toEqual(1000000);
     });
@@ -202,7 +202,7 @@ describe("valoscript", () => {
           function funcWithParam (param) { return param + 20; }
           funcWithParam(100);
       `);
-      expect(bodyKuery[ScopeAccessesTag]).toEqual({});
+      expect(bodyKuery[ScopeAccessesTag]).toEqual(null);
       expect(evaluateProgram([], {}, bodyKuery, {}, { verbosity: 0 }))
           .toEqual(120);
     });
@@ -212,7 +212,7 @@ describe("valoscript", () => {
           function paramPlusDefaulted (defaulted = 10) { return defaulted + 5; }
           paramPlusDefaulted(30) + paramPlusDefaulted();
       `);
-      expect(bodyKuery[ScopeAccessesTag]).toEqual({});
+      expect(bodyKuery[ScopeAccessesTag]).toEqual(null);
       expect(evaluateProgram([], {}, bodyKuery, {}, { verbosity: 0 }))
           .toEqual(50);
     });
@@ -224,7 +224,7 @@ describe("valoscript", () => {
           const constVar = 6;
           val => val + varVar + letVar + constVar
       `);
-      expect(bodyKuery[ScopeAccessesTag]).toEqual({});
+      expect(bodyKuery[ScopeAccessesTag]).toEqual(null);
       expect(evaluateProgram([], {}, bodyKuery, {}, { verbosity: 0 })(1))
           .toEqual(11);
     });
@@ -238,7 +238,7 @@ describe("valoscript", () => {
           }
           callCallback(value => value + callCallback(12));
       `);
-      expect(bodyKuery[ScopeAccessesTag]).toEqual({});
+      expect(bodyKuery[ScopeAccessesTag]).toEqual(null);
       expect(evaluateProgram([], {}, bodyKuery, {}, { verbosity: 0 }))
           .toEqual(22);
     });
@@ -248,7 +248,7 @@ describe("valoscript", () => {
           var value = 0;
           () => (value += 7);
       `);
-      expect(bodyKuery[ScopeAccessesTag]).toEqual({});
+      expect(bodyKuery[ScopeAccessesTag]).toEqual(null);
       const callback = evaluateProgram([], {}, bodyKuery, {}, { verbosity: 0 });
       expect(callback())
           .toEqual(7);
@@ -266,7 +266,7 @@ describe("valoscript", () => {
           [grabClosure, () => ++value];
       `;
       const bodyKuery = transpileValoscriptBody(bodyText);
-      expect(bodyKuery[ScopeAccessesTag]).toEqual({});
+      expect(bodyKuery[ScopeAccessesTag]).toEqual(null);
       const [grabClosure, incValue] = evaluateProgram([], {}, bodyKuery, {}, { verbosity: 0 });
       expect(incValue())
           .toEqual(1);
@@ -287,7 +287,7 @@ describe("valoscript", () => {
           accessThisField;
       `;
       const bodyKuery = transpileValoscriptBody(bodyText);
-      expect(bodyKuery[ScopeAccessesTag]).toEqual({});
+      expect(bodyKuery[ScopeAccessesTag]).toEqual(null);
       const programThis = { myField: 0 };
       const accessMyField = evaluateProgram([], programThis, bodyKuery, {}, { verbosity: 0 });
       expect(accessMyField())
@@ -308,7 +308,7 @@ describe("valoscript", () => {
           accessThisField;
       `;
       const bodyKuery = transpileValoscriptBody(bodyText);
-      expect(bodyKuery[ScopeAccessesTag]).toEqual({});
+      expect(bodyKuery[ScopeAccessesTag]).toEqual(null);
       const programThis = { myField: 0 };
       const accessMyFieldFunc = evaluateProgram([], programThis, bodyKuery, {}, { verbosity: 0 });
       const firstAccessMyField = accessMyFieldFunc();
@@ -356,7 +356,7 @@ describe("valoscript", () => {
         [whileTest, scopeSum];
       `;
       const bodyKuery = transpileValoscriptBody(bodyText);
-      expect(bodyKuery[ScopeAccessesTag]).toEqual({});
+      expect(bodyKuery[ScopeAccessesTag]).toEqual(null);
       const [whileTest, scopeSum] = evaluateProgram([], {}, bodyKuery, {}, { verbosity: 0 });
       expect(whileTest())
           .toEqual(10);
@@ -381,7 +381,7 @@ describe("valoscript", () => {
         [whileTest, scopeSum];
       `;
       const bodyKuery = transpileValoscriptBody(bodyText);
-      expect(bodyKuery[ScopeAccessesTag]).toEqual({});
+      expect(bodyKuery[ScopeAccessesTag]).toEqual(null);
       const [whileTest, scopeSum] = evaluateProgram([], {}, bodyKuery, {}, { verbosity: 0 });
       expect(whileTest())
           .toEqual(10);
@@ -407,7 +407,7 @@ describe("valoscript", () => {
         [whileTest, scopeSum];
       `;
       const bodyKuery = transpileValoscriptBody(bodyText);
-      expect(bodyKuery[ScopeAccessesTag]).toEqual({});
+      expect(bodyKuery[ScopeAccessesTag]).toEqual(null);
       const [whileTest, scopeSum] = evaluateProgram([], {}, bodyKuery, {}, { verbosity: 0 });
       expect(whileTest())
           .toEqual(5);
@@ -436,7 +436,7 @@ describe("valoscript", () => {
         [whileTest, scopeSum];
       `;
       const bodyKuery = transpileValoscriptBody(bodyText);
-      expect(bodyKuery[ScopeAccessesTag]).toEqual({});
+      expect(bodyKuery[ScopeAccessesTag]).toEqual(null);
       const [whileTest, scopeSum] = evaluateProgram([], {}, bodyKuery, {}, { verbosity: 0 });
       expect(whileTest())
           .toEqual(5);

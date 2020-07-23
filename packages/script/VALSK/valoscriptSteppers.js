@@ -337,7 +337,7 @@ function _new (valker: Valker, head: any, scope: ?Object, newOp: any) {
       return valker.pack(Type[ValoscriptNew](valker, scope, ...eArgs));
     }
     if (isHostRef(eType)) {
-      const valospaceType = scope.valos[Type.getTypeName({ discourse: valker })];
+      const valospaceType = Type.getValosheathType({ discourse: valker });
       return valker.pack(valospaceType[ValoscriptInstantiate](valker, scope, Type, ...eArgs));
     }
     throw new Error(`'new': cannot create object of type '${typeof Type

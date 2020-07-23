@@ -780,24 +780,19 @@ If still no suitable lens can be found delegates the viewing to '${notFoundName 
         function _lookupPropertyBy (propertyNames) {
           if (!Array.isArray(propertyNames)) {
             return (scope && scope.hasOwnProperty(propertyNames))
-                ? scope[propertyNames] : _stepForProperty(focus, propertyNames, options);
+                ? scope[propertyNames]
+                : focus.step(Vrapper.getPropertyKuery(propertyNames), options);
           }
           for (const name of propertyNames) {
             const vProperty = (scope && scope.hasOwnProperty(name))
-                ? scope[name] : _stepForProperty(focus, name, options);
+                ? scope[name]
+                : focus.step(Vrapper.getPropertyKuery(name), options);
             if (vProperty !== undefined) return vProperty;
           }
           return undefined;
         }
       },
     }));
-  }
-
-  const _propertyKueries = {};
-  function _stepForProperty (focus, propertyName, options) {
-    const kuery = _propertyKueries[propertyName]
-        || (_propertyKueries[propertyName] = VALEK.property(propertyName));
-    return focus.step(kuery, options);
   }
 
   // Valoscope

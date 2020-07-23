@@ -46,6 +46,10 @@ export default class ValoscriptTranspiler extends FabricEventTarget {
             { scopeAccesses, contextRuleOverrides: {} });
         kuery[ScopeAccessesTag] = scopeAccesses;
         kuery[ScopeAccessKeysTag] = Object.keys(scopeAccesses);
+        if (!kuery[ScopeAccessKeysTag].length) {
+          kuery[ScopeAccessesTag] = null;
+          kuery[ScopeAccessKeysTag] = null;
+        }
         if (options.sourceInfo) kuery[SourceInfoTag] = options.sourceInfo;
         if (!cache) return kuery;
 

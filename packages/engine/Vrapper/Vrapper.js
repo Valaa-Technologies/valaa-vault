@@ -30,6 +30,7 @@ import isAbsentTypeName from "~/raem/tools/graphql/isAbsentTypeName";
 
 import { ValoscriptPrimitiveKind /* , NativeIdentifierTag */ } from "~/script";
 import { transpileValoscriptBody } from "~/script/transpileValoscript";
+import { ScopeAccessesTag, ScopeAccessKeysTag } from "~/script/VALSK";
 
 import { Discourse, Connection } from "~/sourcerer";
 import { ChronicleEventResult } from "~/sourcerer/api/types";
@@ -620,6 +621,10 @@ export default class Vrapper extends Cog {
     return this._typeName;
   }
 
+  getValosheathType (options) {
+    return this._parent.getRootScope().valos[this.getTypeName(options)];
+  }
+
   _setTypeName (typeName: string) {
     if (typeName === this._typeName) return;
     this._typeName = typeName;
@@ -795,9 +800,9 @@ export default class Vrapper extends Cog {
     if (this._phase === ACTIVE) {
       options.scope = (options.scope !== undefined)
               ? Object.create(options.scope)
-          : (typeof kuery !== "string")
+          : ((typeof kuery === "object") && (kuery[ScopeAccessKeysTag] !== null))
               ? this.getValospaceScope(options)
-          : {};
+          : { this: this };
       if (discourse && discourse._steppers.kuerySubscription
           && !options.state && !(kuery instanceof Kuery)) {
         return discourse.tryUnpack(Object.create(discourse)
@@ -1071,6 +1076,17 @@ export default class Vrapper extends Cog {
     return typePrototype[propertyName];
   }
 
+  static _propertyKueries = Object.create(null);
+  static getPropertyKuery (propertyName) {
+    let ret = Vrapper._propertyKueries[propertyName];
+    if (!ret) {
+      ret = Vrapper._propertyKueries[propertyName] = VALEK.property(propertyName);
+      ret[ScopeAccessesTag] = null;
+      ret[ScopeAccessKeysTag] = null;
+    }
+    return ret;
+  }
+
   _getProperty (propertyName: string | Symbol, options: VALKOptions) {
     if (typeof propertyName !== "string") return undefined;
     const ret = this._valospaceScope && this._valospaceScope.hasOwnProperty(propertyName)
@@ -1083,7 +1099,7 @@ export default class Vrapper extends Cog {
     if (ret && !ret.isImmaterial()) return ret;
     // New properties which don't exist in _valospaceScope still work as
     // they get kueried here.
-    return this.step(VALEK.property(propertyName), options);
+    return this.step(Vrapper.getPropertyKuery(propertyName), options);
   }
 
   alterProperty (propertyName: any, alterationVAKON: Object, options: VALKOptions = {}) {

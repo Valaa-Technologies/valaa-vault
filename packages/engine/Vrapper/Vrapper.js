@@ -557,6 +557,20 @@ export default class Vrapper extends Cog {
     }
   }
 
+  getChronicleURI (options: ?Object) {
+    const vref = this[HostRef];
+    let chronicleURI = vref.getChronicleURI();
+    if (!chronicleURI && vref.isGhost()) {
+      chronicleURI = ((options && options.discourse) || this._parent.discourse)
+          .bindObjectId([vref.getGhostPath().headHostRawId()], "Resource")
+          .getChronicleURI();
+      if (!chronicleURI) {
+        throw new Error("INTERNAL ERROR: could not determine resource chronicle");
+      }
+    }
+    return chronicleURI;
+  }
+
   _withActiveConnectionChainEagerly (options: VALKOptions,
       chainOperations: ((prev: any) => any)[], onError?: Function) {
     return thenChainEagerly(
@@ -1102,11 +1116,60 @@ export default class Vrapper extends Cog {
     return this.step(Vrapper.getPropertyKuery(propertyName), options);
   }
 
-  alterProperty (propertyName: any, alterationVAKON: Object, options: VALKOptions = {}) {
+  updateProperties (propertyUpdates: (Object | Array[]), options: Object) {
+    let key, value, name, nameValue, kuery;
+    try {
+      for ([key, value] of Array.isArray(propertyUpdates)
+          ? propertyUpdates
+          : Object.entries(propertyUpdates)) {
+        if (key[0] !== "$") {
+          this.updateProperty(key, value, options);
+        } else {
+          for ([name, nameValue] of Object.entries(value)) {
+            this.updateProperty(`@.${key}.${encodeURIComponent(name)}@@`, nameValue, options);
+          }
+          name = null;
+        }
+      }
+    } catch (error) {
+      const errorName = new Error(`updateProperty(${name || key})`);
+      throw this.wrapErrorEvent(error, 1, () => [
+        errorName,
+        "\n\tresource:", ...dumpObject(this),
+        "\n\tproperty value:", ...dumpObject(value),
+        "\n\talter value kuery:", ...dumpObject(kuery),
+      ]);
+    }
+  }
+
+  updateProperty (propertyName: any, newValue: Object, options: VALKOptions = {},
+      vProperty = this._getProperty(propertyName, Object.create(options))) {
+    if (newValue instanceof Kuery) {
+      return this.alterProperty(propertyName, newValue, Object.create(options), vProperty);
+    }
+    const discourse = options.discourse || this._parent.discourse;
+    if (!options.chronicleURI) options.chronicleURI = this.getChronicleURI();
+    const value = universalizeCommandData(expressionFromProperty(newValue, propertyName), options);
+    if (vProperty) {
+      return discourse.chronicleEvent({
+        type: "FIELDS_SET", typeName: "Property",
+        id: discourse.bindObjectId(vProperty[HostRef], "Property"),
+        sets: { value },
+      });
+    }
+    const event = {
+      type: "CREATED", typeName: "Property",
+      initialState: { owner: this[HostRef].coupleWith("properties"), name: propertyName, value },
+    };
+    discourse.assignNewVRID(event, String(options.chronicleURI), undefined, undefined);
+    return discourse.chronicleEvent(event);
+  }
+
+  alterProperty (propertyName: any, alterationVAKON: Object, options: VALKOptions = {},
+      vProperty = this._getProperty(propertyName, Object.create(options))) {
     // If lexicalScope is undefined then this resource doesn't implement Scope, which is required
     // for propertyValue.
     const typeName = this.getTypeName(options);
-    const vProperty = this._getProperty(propertyName, Object.create(options));
     const actualAlterationVAKON =
         (typeof alterationVAKON === "object" && typeof alterationVAKON.toVAKON === "function")
             ? alterationVAKON.toVAKON()
@@ -1139,20 +1202,27 @@ export default class Vrapper extends Cog {
     return ret;
   }
 
-  updateProperties (propertyUpdates: (Object | Array[]), options: Object) {
-    let name, value, kuery;
+  alterValue (alterationVAKON: Kuery, options: VALKOptions = {}, vExplicitOwner: ?Vrapper) {
     try {
-      for ([name, value] of Array.isArray(propertyUpdates)
-          ? propertyUpdates
-          : Object.entries(propertyUpdates)) {
-        this.alterProperty(name, (kuery = VALEK.fromValue(value)), Object.create(options));
+      this.requireActive(options);
+      if (this._typeName !== "Property") {
+        throw new Error("Non-Property values cannot be modified");
       }
+      const currentValue = this.extractValue(options, vExplicitOwner);
+      const vOwner = vExplicitOwner || this.step("owner", Object.create(options));
+      invariantify(!vOwner || vOwner.getValospaceScope,
+          "property owner (if defined) must be a Vrapper");
+      options.scope = (vOwner || this).getValospaceScope(options);
+      const newValue = this.run(currentValue, alterationVAKON, Object.create(options));
+      this.setField("value", expressionFromProperty(newValue, this), options);
+      if (typeof newValue !== "object") {
+        // TODO(iridian): Could set the cachedExtractvalueEntry for non-object types.
+      }
+      return newValue;
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, () => [
-        new Error(`updateProperty(${name})`),
-        "\n\tresource:", ...dumpObject(this),
-        "\n\tproperty value:", ...dumpObject(value),
-        "\n\talter value kuery:", ...dumpObject(kuery),
+        `alterValue()`,
+        "\n\talterationVAKON:", dumpify(alterationVAKON),
       ]);
     }
   }
@@ -1479,31 +1549,6 @@ export default class Vrapper extends Cog {
       break;
     }
     return ret;
-  }
-
-  alterValue (alterationVAKON: Kuery, options: VALKOptions = {}, vExplicitOwner: ?Vrapper) {
-    try {
-      this.requireActive(options);
-      if (this._typeName !== "Property") {
-        throw new Error("Non-Property values cannot be modified");
-      }
-      const currentValue = this.extractValue(options, vExplicitOwner);
-      const vOwner = vExplicitOwner || this.step("owner", Object.create(options));
-      invariantify(!vOwner || vOwner.getValospaceScope,
-          "property owner (if defined) must be a Vrapper");
-      options.scope = (vOwner || this).getValospaceScope(options);
-      const newValue = this.run(currentValue, alterationVAKON, Object.create(options));
-      this.setField("value", expressionFromProperty(newValue, this), options);
-      if (typeof newValue !== "object") {
-        // TODO(iridian): Could set the cachedExtractvalueEntry for non-object types.
-      }
-      return newValue;
-    } catch (error) {
-      throw this.wrapErrorEvent(error, 1, () => [
-        `alterValue()`,
-        "\n\talterationVAKON:", dumpify(alterationVAKON),
-      ]);
-    }
   }
 
   // Bvob and Media content management

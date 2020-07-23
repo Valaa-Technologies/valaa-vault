@@ -21,7 +21,7 @@ function _recursiveUpdate (vScope, patch, options, isValOSFields) {
   Object.entries(patch).forEach(([propertyName, value]) => {
     if (value === undefined) return;
     if (propertyName === "$V") {
-      if (isValOSFields === null) return; // disabled
+      if (isValOSFields === null) return; // explicitly disabled
       _recursiveUpdate(vScope, value, options, true);
     } else if (Array.isArray(value)) {
       throw new Error("Batch mapping PATCH not implemented yet");
@@ -41,7 +41,7 @@ function _recursiveUpdate (vScope, patch, options, isValOSFields) {
             ? Object.assign(currentValue, value)
             : value;
         if (!isValOSFields) {
-          vScope.alterProperty(propertyName, VALEK.fromValue(newValue), Object.create(options));
+          vScope.updateProperty(propertyName, newValue, options);
         } else {
           vScope.setField(propertyName, newValue, Object.create(options));
         }

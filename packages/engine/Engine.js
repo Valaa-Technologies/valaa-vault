@@ -357,8 +357,7 @@ export default class Engine extends Cog {
     const subResource = options.subResource || initialState.subResource;
     delete initialState.subResource;
     if (initialState.partitionAuthorityURI) {
-      initialState.authorityURI = initialState.partitionAuthorityURI;
-      delete initialState.partitionAuthorityURI;
+      throw new Error("partitionAuthorityURI is deprecated");
     }
     const authorityURI = initialState.authorityURI;
     /* Allowed combinations of id, sub, owner, aur

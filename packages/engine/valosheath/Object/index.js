@@ -140,26 +140,33 @@ export default function extendObject (scope: Object, hostDescriptors: Map<any, O
 
   function assignValOS (target: any, ...rest: any[]) {
     const options = { discourse: this.__callerValker__ };
-    let combinedSources;
-    if (rest.length === 1 && !(rest[0] instanceof Vrapper)) {
-      combinedSources = rest[0];
-    } else {
-      combinedSources = {};
-      for (const source of rest) {
-        if (!(source instanceof Vrapper)) Object.assign(combinedSources, source);
-        else {
-          for (const property of source.step("properties", options)) {
-            combinedSources[property.step("name", options)] = property.extractValue(options);
+    let discourse, releaseOpts;
+    try {
+      let combinedSources;
+      if (rest.length === 1 && !(rest[0] instanceof Vrapper)) {
+        combinedSources = rest[0];
+      } else {
+        combinedSources = {};
+        for (const source of rest) {
+          if (!(source instanceof Vrapper)) Object.assign(combinedSources, source);
+          else {
+            const subOptions = Object.create(options);
+            for (const property of source.step("properties", subOptions)) {
+              combinedSources[property.step("name", subOptions)] = property.extractValue(subOptions);
+            }
           }
         }
       }
-    }
-    if (!(target instanceof Vrapper)) {
-      return Object.assign(target, combinedSources);
-    }
-    for (const propertyName in combinedSources) { // eslint-disable-line
-      target.alterProperty(propertyName, VALEK.fromValue(combinedSources[propertyName]),
-          Object.create(options));
+      if (!(target instanceof Vrapper)) {
+        return Object.assign(target, combinedSources);
+      }
+      discourse = options.discourse = options.discourse.acquireFabricator("Object.assign");
+      target.updateProperties(combinedSources, options);
+    } catch (error) {
+      releaseOpts = { rollback: error };
+      throw error;
+    } finally {
+      if (discourse) options.discourse.releaseFabricator(releaseOpts);
     }
     return target;
   }

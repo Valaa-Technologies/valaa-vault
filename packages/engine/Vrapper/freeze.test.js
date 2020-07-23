@@ -76,7 +76,7 @@ describe("Chronicle freezing", () => {
   it("prevents modifying properties of a frozen Entity", async () => {
     harness = await createEngineOracleHarness({ claimBaseBlock: false }, [transactionA]);
     await harness.chronicleEvent(freezeEventFor("test_entity")).getPremiereStory();
-    expect(() => entities().test_entity.alterProperty("prop", VALEK.fromValue("Changed string")))
+    expect(() => entities().test_entity.updateProperty("prop", "Changed string"))
         .toThrow(/Cannot modify frozen.*test_entity/);
     expect(entities().test_entity.propertyValue("prop"))
         .toEqual("This is some string");
@@ -90,8 +90,7 @@ describe("Chronicle freezing", () => {
         .not.toThrow();
     expect(entities().test_entity.step("owner").getVRef())
         .toEqual(entities().late_entity.getVRef());
-    expect(() => entities().test_entity.alterProperty("prop",
-            VALEK.fromValue("Changed string")))
+    expect(() => entities().test_entity.updateProperty("prop", "Changed string"))
         .toThrow(/Cannot modify frozen.*test_entity/);
   });
 

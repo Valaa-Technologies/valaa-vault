@@ -87,7 +87,7 @@ export function expressionFromProperty (value: any, property: any, descriptor: ?
               String(property)}' encountered a non-valospace function at sub-property ${key}': ${
                 clonee.name}`);
         }
-        return ["§capture", ["§'", extractFunctionVAKON(clonee)]];
+        return ["§capture", ["§'", extractFunctionVAKON(clonee)], undefined, "literal"];
       }
       /*
       if (cloneeDescriptor && (typeof cloneeDescriptor.get === "function")) {

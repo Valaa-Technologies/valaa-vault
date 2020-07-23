@@ -134,9 +134,11 @@ export default class OracleConnection extends Connection {
               if (buffer === undefined) return undefined;
               mediaInfo.buffer = buffer;
               if (!decoder) return buffer;
-              const name = mediaInfo.name ? `'${mediaInfo.name}'` : `unnamed media`;
-              const decoding = decoder.decode(buffer,
-                  { mediaName: name, chronicleName: connection.getName(), contentHash });
+              const decoding = decoder.decode(buffer, {
+                contentHash,
+                mediaName: mediaInfo.name || `<unnamed>`,
+                chronicleName: connection.getName(),
+              });
               if (mediaInfo.decodingCache) mediaInfo.decodingCache.set(decoder, decoding);
               return decoding;
             },

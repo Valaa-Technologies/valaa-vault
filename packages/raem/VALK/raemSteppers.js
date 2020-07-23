@@ -187,7 +187,7 @@ export default {
     return ["§'", eValue];
   },
   "§capture": function capture (valker: Valker, head: any, scope: ?Object,
-      [, evaluatee, forwardSteppersStepName, customScope]: BuiltinStep) {
+      [, evaluatee, forwardSteppersStepName, captureName, customScope]: BuiltinStep) {
     let capturedVAKON = typeof evaluatee !== "object"
         ? evaluatee
         : tryLiteral(valker, head, evaluatee, scope);
@@ -201,12 +201,13 @@ export default {
         valker,
         capturedVAKON,
         valker[SourceInfoTag],
+        forwardSteppersStepName && tryFullLiteral(valker, head, forwardSteppersStepName, scope),
+        captureName && tryFullLiteral(valker, head, captureName, scope),
         ((customScope === undefined)
                 ? scope
                 : tryLiteral(valker, head, customScope, scope))
             || null,
-        forwardSteppersStepName
-            && tryFullLiteral(valker, head, forwardSteppersStepName, scope));
+        );
   },
   "§evalk": function evalk (valker: Valker, head: any, scope: ?Object,
       [, evaluatee]: BuiltinStep) {
@@ -890,7 +891,7 @@ export function denoteDeprecatedValOSBuiltin (prefer: string, description: any =
 }
 
 function _createVCall (capturingValker: Valker, vakon: any, sourceInfo: ?Object,
-    capturedScope: any, forwardSteppersStepName: ?string) {
+    forwardSteppersStepName: ?string, captureName: ?string, capturedScope: any) {
   const vcall = function vcall () {
     const scope = Object.create(capturedScope);
     scope.arguments = Array.prototype.slice.call(arguments);
@@ -899,7 +900,7 @@ function _createVCall (capturingValker: Valker, vakon: any, sourceInfo: ?Object,
     // FalseProphetDiscourse transaction internal details.
     // Both valk §capture/§call and the Transactor/Fabricator systems
     // should probably be moved to @valos/script.
-    if (capturingValker._transactorState !== undefined) {
+    if (capturingValker._transaction !== undefined) {
       if (capturingValker.isActiveFabricator()) {
         activeTransaction = capturingValker;
       } else {
@@ -922,12 +923,12 @@ function _createVCall (capturingValker: Valker, vakon: any, sourceInfo: ?Object,
     const valkCaller = head && head.__callerValker__;
     try {
       if (valkCaller) {
-        transaction = valkCaller.acquireFabricator("valkcall-capture");
+        transaction = valkCaller.acquireFabricator(`valkcall-${captureName || "capture"}`);
       } else {
         // Direct caller is not valk context: this is a callback thunk
         // that is being called by fabric/javascript code.
         if (!head) head = capturedScope.this || {};
-        transaction = capturingValker.acquireFabricator("extcall-capture");
+        transaction = capturingValker.acquireFabricator(`extcall-${captureName || "capture"}`);
         head = transaction.tryPack(head);
       }
       if (sourceInfo) transaction[SourceInfoTag] = sourceInfo;

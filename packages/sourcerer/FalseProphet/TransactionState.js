@@ -21,7 +21,7 @@ export const fabricatorOps = {
   ...fabricatorMixinOps,
 
   isActiveFabricator () {
-    return !!this._activeFabricators;
+    return this._finalizedFabricatorCount < this._fabricatorCount;
   },
 
   /**
@@ -41,33 +41,39 @@ export const fabricatorOps = {
    */
   acquireFabricator (name: string): FalseProphetDiscourse & Fabricator {
     let ret;
-    if (!this._transactorState) {
+    if (!this._transaction) {
       ret = Object.create(this);
-      const transactorState = ret._transactorState = new TransactionState(ret, name);
-      ret._fabricatorName = `${name}#${++transactionCounter}`;
+      ret._fabricatorName = `#${++transactionCounter}:${name}`;
+      const transactorState = ret._transaction = new TransactionState(ret, name);
       this.warnEvent(1, () => [
-        "ACQUIRED NEW TX", name, ":", ...dumpObject(transactorState),
+        "BEGUN TRANSACTION", ret._fabricatorName, ":", ...dumpObject(transactorState),
       ]);
     } else {
-      ret = this._transactorState.createFabricator(this, name);
+      const fabricatorName = `${this._fabricatorName}/#${this._fabricatorCount}:${name}`;
+      ret = this._transaction.createFabricator(this, name);
+      ret._fabricatorName  = fabricatorName;
       this.logEvent(1, () => [
-        "acquired fabricator", name, ":", {
-          discourse: dumpObject(ret), transaction: dumpObject(ret._transactorState),
+        "acquired fabricator", ret._fabricatorName, ":", {
+          discourse: dumpObject(ret), transaction: dumpObject(ret._transaction),
         },
       ]);
-      ret._fabricatorName = `${this._fabricatorName}/${this._activeFabricators}`;
     }
-    ret._activeFabricators = 1;
+    ret._fabricatorCount = 1;
+    ret._finalizedFabricatorCount = 0;
     return ret;
   },
 
   releaseFabricator (options: ?{ abort: any, rollback: any }) {
-    const transactorState = this._transactorState;
+    const transactorState = this._transaction;
     if (!transactorState) {
       throw new Error("Invalid call to releaseFabricator from outside Fabricator");
     }
     this.logEvent(1, () => [
-      "released fabricator", name, ":",
+      (options || {}).abort ? "ABORTING"
+          : (options || {}).rollback ? "rolling back"
+          : (this._finalizedFabricatorCount + 1 < this._fabricatorCount) ? "releasing on"
+          : "finalizing",
+      this._parentFabricator ? "fabricator" : "TRANSACTION", this._fabricatorName, ":",
       "\n\tdiscourse:", ...dumpObject(this.getRootDiscourse()),
       "\n\ttransactor:", ...dumpObject(transactorState._transactor),
       "\n\tfabricator:", ...dumpObject(this),
@@ -81,13 +87,13 @@ export const fabricatorOps = {
             options.rollback.message || options.rollback);
       }
     }
-    if (--this._activeFabricators) return false;
+    if (++this._finalizedFabricatorCount < this._fabricatorCount) return false;
     if (this._parentFabricator) {
       return this._parentFabricator.releaseFabricator();
     }
     this.logEvent(1, () => [
-      transactorState._transacted ? "COMMITTING" : "discarding empty", "TX",
-      transactorState.name, ":", ...dumpObject(transactorState),
+      transactorState._transacted ? "COMMITTING" : "DISCARDING", "TRANSACTION",
+      this._fabricatorName, ":", ...dumpObject(transactorState),
     ]);
     return transactorState.finalizeTransactor();
   },
@@ -167,15 +173,15 @@ export default class TransactionState {
   createFabricator (nestingFabricator: Fabricator) {
     if (!this._transacted) this._lazyInit();
     let parentFabricator = nestingFabricator;
-    while (!parentFabricator.hasOwnProperty("_activeFabricators")) {
+    while (!parentFabricator.hasOwnProperty("_fabricatorCount")) {
       parentFabricator = Object.getPrototypeOf(parentFabricator);
     }
-    const parentFabricatorCount = parentFabricator._activeFabricators;
-    if (!parentFabricatorCount) {
+    const parentFabricatorCount = parentFabricator._fabricatorCount;
+    if (parentFabricatorCount === parentFabricator._finalizedFabricatorCount) {
       throw new Error(`Cannot nest a transaction for an already-finalized parent transaction: ${
           parentFabricator._fabricatorName}`);
     }
-    parentFabricator._activeFabricators = parentFabricatorCount + 1;
+    parentFabricator._fabricatorCount = parentFabricatorCount + 1;
     const nestedFabricator = Object.create(nestingFabricator);
     nestedFabricator._parentFabricator = parentFabricator;
     nestedFabricator._firstActionIndex = this._actions.length;

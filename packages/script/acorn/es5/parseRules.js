@@ -714,7 +714,9 @@ export function parseFunctionHelper (transpiler: Transpiler, ast: FunctionExpres
       .to("return").nullable().to("result");
   return transpiler.VALK().capture(
       transpiler.VALK().fromValue(captivePath.toVAKON()),
-      transpiler.VALK().fromValue("§nonlive"));
+      transpiler.VALK().fromValue("§nonlive"),
+      transpiler.VALK().fromValue(String(ast.id)),
+  );
 }
 
 export function scopeSettersFromParamDeclarators (transpiler: Transpiler,

@@ -27,18 +27,25 @@ export function duplicateResource (discourse: Discourse, scope: ?Object,
 function _prepareInitialState (valospaceType: Object, scope: ?Object, initialState_: ?Object,
     requireOwnerOperation: ?string) {
   let initialState = initialState_;
-  if ((initialState != null) && (typeof initialState !== "object")) {
-    throw new Error(`new.initialState must be undefined or an object, got ${typeof initialState}`);
-  }
-
-  // TODO(iridian): Check for non-allowed fields.
-  const initialOwner = initialState
-      && ((initialState.owner !== undefined)
+  let initialOwner;
+  if (initialState != null) {
+    if (typeof initialState !== "object") {
+      throw new Error(`new.initialState must be nully or an object, got ${typeof initialState}`);
+    } else {
+      initialOwner = (initialState.owner !== undefined)
           ? initialState.owner
-          : _tryOwnerAlias(valospaceType, initialState));
+          : _tryOwnerAlias(valospaceType, initialState);
+      if (initialState.partitionAuthorityURI) {
+        console.debug("DEPRECATED: partitionAuthorityURI in favor of authorityURI");
+        initialState.authorityURI = initialState.partitionAuthorityURI;
+        delete initialState.partitionAuthorityURI;
+      }
+    }
+  }
+  // TODO(iridian): Check for non-allowed fields.
   if (!initialOwner) {
     if (requireOwnerOperation && (initialOwner === undefined)
-        && !(initialState && (initialState.authorityURI || initialState.partitionAuthorityURI))) {
+        && !(initialState && initialState.authorityURI)) {
       // throw new Error(`${requireOwnerOperation} initialState.owner required`);
       console.debug(`DEPRECATED behaviour: ${
           requireOwnerOperation} ${valospaceType.name} initialState.owner required`);

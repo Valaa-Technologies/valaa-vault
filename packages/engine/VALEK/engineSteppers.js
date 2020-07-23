@@ -151,9 +151,8 @@ function _engineIdentifierOrPropertyValue (steppers: Object, valker: Valker, hea
       eContainer = valker.tryUnpack(eContainer, true);
     } else if (isHostRef(eContainer)) {
       const vContainer = tryUnpackedHostValue(eContainer) || valker.unpack(eContainer);
-      return valker.tryPack(vContainer.propertyValue(
-          tryNamespaceFieldSymbolOrPropertyName(eContainer, ePropertyName),
-          { discourse: valker }));
+      const nameOrSymbol = tryNamespaceFieldSymbolOrPropertyName(eContainer, ePropertyName);
+      return valker.tryPack(vContainer.propertyValue(nameOrSymbol, { discourse: valker }));
     }
     const property = eContainer[ePropertyName];
     if (isGetProperty) return valker.tryPack(property);

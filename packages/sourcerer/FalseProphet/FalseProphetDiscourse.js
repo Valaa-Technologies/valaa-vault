@@ -28,7 +28,7 @@ import valosUUID from "~/tools/id/valosUUID";
 
 export default class FalseProphetDiscourse extends Discourse {
   _falseProphet: FalseProphet;
-  _transactorState: ?TransactionState = null;
+  _transaction: ?TransactionState = null;
   _assignCommandId: (command: Command, discourse: FalseProphetDiscourse) => string;
 
   constructor (options: {
@@ -52,13 +52,14 @@ export default class FalseProphetDiscourse extends Discourse {
   }
 
   debugId (): string {
-    return `${this.constructor.name}(${this._transactorState
-            ? (this._fabricatorName || "stub-transactional") : "non-transactional"
+    return `${this.constructor.name}(${this._transaction
+            ? (this._fabricatorName || "stub-transactional")
+            : "non-transactional"
         }: #${this.state[StoryIndexTag]}/${this.state[PassageIndexTag]})`;
   }
 
   getRootDiscourse () { return this._rootDiscourse; }
-  getTransactor () { return this._transactorState && this._transactorState._transactor; }
+  getTransactor () { return this._transaction && this._transaction._transactor; }
   getIdentityManager () { return this.getFollower().getIdentityManager(); }
 
   setAssignCommandId (assignCommandId) {
@@ -91,7 +92,7 @@ export default class FalseProphetDiscourse extends Discourse {
   chronicleEvents (events: EventBase[], options: ChronicleOptions = {}):
       ChroniclePropheciesRequest {
     this.logEvent(1, () => ["chronicling", events.length, "events:", events]);
-    if (this._transactorState) return this._transactorState.chronicleEvents(events, options);
+    if (this._transaction) return this._transaction.chronicleEvents(events, options);
     try {
       options.discourse = this;
       const ret = this._falseProphet.chronicleEvents(
@@ -182,7 +183,7 @@ export default class FalseProphetDiscourse extends Discourse {
       explicitRawId?: string, explicitSubResource?: string | Array) {
     try {
       if (!chronicleURI) throw new Error("assignNewVRID.chronicleURI missing");
-      const root = this._transactorState ? this._transactorState.obtainRootEvent() : targetAction;
+      const root = this._transaction ? this._transaction.obtainRootEvent() : targetAction;
       if (!tryAspect(root, "command").id) this._assignCommandId(root, this);
       const chronicles = (root.meta || (root.meta = {})).chronicles || (root.meta.chronicles = {});
       const chronicle = chronicles[chronicleURI] || (chronicles[chronicleURI] = {});
@@ -210,7 +211,8 @@ export default class FalseProphetDiscourse extends Discourse {
       if (subResource) {
         let parentVRID = getHostRef(
             targetAction.initialState.owner || targetAction.initialState.source,
-            `${targetAction.type}.Property.initialState.owner`).rawId();
+            `${targetAction.type}.Property.initialState.owner`,
+        ).rawId();
         if (parentVRID[0] !== "@") parentVRID = upgradeVRIDTo0Dot3(parentVRID);
         resourceVRID = `${parentVRID.slice(0, -2)}${subResource}`;
         /*
@@ -269,7 +271,7 @@ export default class FalseProphetDiscourse extends Discourse {
 
   assignNewChronicleRootId (targetAction: EventBase, authorityURI: string,
       explicitChronicleRootVRID?: string) {
-    const root = this._transactorState ? this._transactorState.obtainRootEvent() : targetAction;
+    const root = this._transaction ? this._transaction.obtainRootEvent() : targetAction;
     if (!tryAspect(root, "command").id) this._assignCommandId(root, this);
     const chronicleRootVRID = explicitChronicleRootVRID
         || createChronicleRootVRID0Dot3(root.aspects.command.id, authorityURI);

@@ -1047,14 +1047,13 @@ export default class Kuery {
    *
    * @memberof Kuery
    */
-  capture (toIntermediateVAKON: any, toForwardSteppersStepName: ?any, toScope: ?any) {
-    return this._addExpression("§capture", [
-      this._root.to(toIntermediateVAKON),
-      ...(toForwardSteppersStepName !== undefined ? [this._root.to(toForwardSteppersStepName)]
-          : toScope !== undefined ? [this._root.void()]
-          : []),
-      ...(toScope !== undefined ? [this._root.to(toScope)] : [])
-    ]);
+  capture (toIntermediateVAKON: any, toForwardSteppersStepName: ?any, toName: ?any, toScope: ?any) {
+    const exargs = [this._root.to(toIntermediateVAKON)];
+    if (toForwardSteppersStepName) exargs[1] = this._root.to(toForwardSteppersStepName);
+    if (toName) exargs[2] = this._root.to(toName);
+    if (toScope) exargs[3] = this._root.to(toScope);
+    for (let i = exargs.length; --i;) if (exargs[i] === undefined) exargs[i] = this._root.void();
+    return this._addExpression("§capture", exargs);
   }
 
   /**

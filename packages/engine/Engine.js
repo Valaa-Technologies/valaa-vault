@@ -207,51 +207,49 @@ export default class Engine extends Cog {
     return { reference, vResource };
   }
 
-  create (typeName: string, initialState: Object, options: Object): Vrapper {
-    return this._constructWith(
-        created, initialState, typeName, { typeName }, options);
-  }
-
   duplicate (duplicateOf: Vrapper, initialState: Object, options: Object): Vrapper {
-    return this._constructWith(
-        duplicated, initialState, duplicateOf.getTypeName(), { duplicateOf }, options);
+    return this.create(duplicateOf.getTypeName(), initialState, options, duplicateOf);
   }
 
-  _constructWith (constructCommand: (Object) => Command, initialState, typeName,
-      constructParams: Object, options: Object = {},
-  ) {
-    let discourse, extractedProperties, chronicling, ret;
+  create (typeName, initialState, options: Object = {}, duplicateOf: ?Object) {
+    let discourse, releaseOpts, extractedProperties, chronicling, ret;
+    const name = `${duplicateOf ? "duplicate-" : "new-"}${typeName}`;
+    const action = {};
     try {
-      options.discourse = discourse =
-          (options.discourse || this.discourse).acquireFabricator("construct");
+      options.discourse = discourse = (options.discourse || this.discourse)
+          .acquireFabricator(name);
       if (!options.head) options.head = this;
-      if (constructParams.duplicateOf) {
-        constructParams.duplicateOf = universalizeCommandData(constructParams.duplicateOf, options);
+      if (!duplicateOf) {
+        action.typeName = typeName;
+      } else {
+        action.duplicateOf = universalizeCommandData(duplicateOf, options);
       }
       extractedProperties = this._extractProperties(initialState);
-      constructParams.id = this._assignConstructDirectiveId({ initialState, typeName }, options);
-      constructParams.initialState = universalizeCommandData(initialState, options);
+      action.id = this._assignConstructDirectiveId({ initialState, typeName }, options);
+      action.initialState = universalizeCommandData(initialState, options);
 
-      chronicling = discourse.chronicleEvent(constructCommand(constructParams));
+      chronicling = discourse.chronicleEvent(
+          !duplicateOf ? created(action) : duplicated(action));
 
       // FIXME(iridian): If the transaction fails the Vrapper will
       // contain inconsistent data until the next actual update on it.
 
-      const vRet = this._postConstructResource(discourse, constructParams.id,
-          constructParams.initialState, chronicling.story, extractedProperties, localWrapError);
-      discourse.releaseFabricator();
-      discourse = null;
-      return !options.awaitResult ? vRet
-          : thenChainEagerly(options.awaitResult(chronicling, vRet), () => vRet);
+      ret = this._postConstructResource(discourse, action.id,
+          action.initialState, chronicling.story, extractedProperties, localWrapError);
     } catch (error) {
-      if (discourse) discourse.releaseFabricator({ rollback: error });
-      throw localWrapError(this, error, `${constructCommand.name}()`);
+      releaseOpts = { rollback: error };
+      throw localWrapError(this, error, name);
+    } finally {
+      discourse.releaseFabricator(releaseOpts);
     }
+    return !options.awaitResult ? ret
+        : thenChainEagerly(options.awaitResult(chronicling, ret), () => ret);
+
     function localWrapError (self, error, operationName) {
       return self.wrapErrorEvent(error, operationName,
           "\n\tinitialState:", ...dumpObject(initialState),
           "\n\toptions:", ...dumpObject(options),
-          "\n\tconstruct params:", ...dumpObject(constructParams),
+          "\n\taction:", ...dumpObject(action),
           "\n\textractedProperties:", ...dumpObject(extractedProperties),
           "\n\tchronicling result:", ...dumpObject(chronicling),
           "\n\tchronicling event:", ...dumpObject((chronicling || {}).event),
@@ -262,11 +260,11 @@ export default class Engine extends Cog {
 
   recombine (duplicationDirectives: Object, options: Object = {}) {
     const recombinedParams = { actions: [] };
-    let discourse, chronicling, ret;
+    let discourse, releaseOpts, chronicling, ret;
     const extractedProperties = [];
     try {
-      options.discourse = discourse =
-          (options.discourse || this.discourse).acquireFabricator("recombine");
+      options.discourse = discourse = (options.discourse || this.discourse)
+          .acquireFabricator(`recombine-${duplicationDirectives.length}`);
       if (!options.head) options.head = this;
 
       for (const directive of duplicationDirectives) {
@@ -286,14 +284,14 @@ export default class Engine extends Cog {
       ret = duplicationDirectives.map((directive, index) =>
           this._updateResourceThing(discourse, directive.id, directive.initialState,
             chronicling.story.passages[index], extractedProperties[index], localWrapError));
-      discourse.releaseFabricator();
-      discourse = null;
-      return !options.awaitResult ? ret
-          : thenChainEagerly(options.awaitResult(chronicling, ret), () => ret);
     } catch (error) {
-      if (discourse) discourse.releaseFabricator({ rollback: error });
+      releaseOpts = { rollback: error };
       throw localWrapError(this, error, `recombined()`);
+    } finally {
+      discourse.releaseFabricator(releaseOpts);
     }
+    return !options.awaitResult ? ret
+          : thenChainEagerly(options.awaitResult(chronicling, ret), () => ret);
     function localWrapError (self, error, operationName) {
       return self.wrapErrorEvent(error, operationName,
           "\n\tduplication directives:", ...dumpObject(duplicationDirectives),
@@ -321,7 +319,7 @@ export default class Engine extends Cog {
 
   _postConstructResource (
       discourse, id, initialState, resultPassage, extractedProperties, localWrapError) {
-    if ((initialState || {}).partitionAuthorityURI) {
+    if ((initialState || {}).authorityURI) {
       // Create chronicle(s) before the transaction is committed
       // (and thus before the commands leave upstream).
       discourse
@@ -358,11 +356,11 @@ export default class Engine extends Cog {
     delete initialState.id;
     const subResource = options.subResource || initialState.subResource;
     delete initialState.subResource;
-    if (initialState.authorityURI) {
-      initialState.partitionAuthorityURI = initialState.authorityURI;
-      delete initialState.authorityURI;
+    if (initialState.partitionAuthorityURI) {
+      initialState.authorityURI = initialState.partitionAuthorityURI;
+      delete initialState.partitionAuthorityURI;
     }
-    const authorityURI = initialState.partitionAuthorityURI;
+    const authorityURI = initialState.authorityURI;
     /* Allowed combinations of id, sub, owner, aur
       0:              : no, must have owner or be chronicle root
       1: id,          : no, must have owner or be chronicle root

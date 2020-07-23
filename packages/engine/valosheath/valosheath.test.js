@@ -32,8 +32,12 @@ const entities = () => harness.createds.Entity;
 // const properties = () => harness.createds.Property;
 // const relations = () => harness.createds.Relation;
 
-function transpileValoscriptTestBody (bodyText: string) {
-  return transpileValoscriptBody(bodyText, { customVALK: VALEK });
+function transpileValoscriptTestBody (bodyText: string, mediaName: ?string = "test media") {
+  return transpileValoscriptBody(bodyText, { customVALK: VALEK, sourceInfo: {
+    chronicleName: "", mediaName, source: bodyText,
+    phaseBase: `'${mediaName}' as application/valoscript`,
+    phase: "test valoscript transpilation", sourceMap: new Map(),
+  } });
 }
 
 describe("scheme valosheath", () => {
@@ -107,7 +111,6 @@ describe("transpileValoscriptBody with Engine scriptAPI", () => {
     });
     it("adds with 'new' a structured sub-Relation to an existing Entity", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
-      harness.interceptErrors(() => {
       const bodyText = `
           const parent = new Entity({ name: "parent", owner: this,
               properties: { position: { x: 10, y: 20 } } });
@@ -130,7 +133,6 @@ describe("transpileValoscriptBody with Engine scriptAPI", () => {
           .toEqual("parent");
       expect(MyTypeEntity.step(VALEK.relations("myRelation").to(0)))
           .toEqual(myRelation);
-      })();
     });
     it("modifies existing Entity property", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);

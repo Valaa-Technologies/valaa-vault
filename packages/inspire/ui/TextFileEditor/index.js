@@ -101,8 +101,9 @@ export default class TextFileEditor extends MediaContentEditor {
       throw new Error(
           `Invalid text when saving TextFileEditor content, expected string, got ${typeof text}`);
     }
-    const discourse = target.acquireFabricator("save-text-content");
+    let discourse, releaseOpts;
     try {
+      discourse = target.acquireFabricator("save-text-content");
       const oldText = (this.state || {}).content;
       if ((text === oldText)
           || (this.props.confirmSave && !this.props.confirmSave(text, oldText))) {
@@ -110,12 +111,11 @@ export default class TextFileEditor extends MediaContentEditor {
       }
       const createBvob = await target.prepareBvob(text, { discourse });
       target.setField("content", createBvob(), { discourse });
-      discourse.releaseFabricator();
     } catch (error) {
-      if (discourse.isCommittable && discourse.isCommittable()) {
-        discourse.releaseFabricator({ rollback: error });
-      }
+      releaseOpts = { rollback: error };
       throw error;
+    } finally {
+      discourse.releaseFabricator(releaseOpts);
     }
   }
 

@@ -6,7 +6,7 @@ import { Iterable } from "immutable";
 import VALK from "~/raem/VALK";
 import type { VALKOptions } from "~/raem/VALK"; // eslint-disable-line no-duplicate-imports
 import type { Passage, Story } from "~/raem/redux/Bard";
-import { getHostRef, HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
+import { getHostRef, tryHostRef, HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
 
 import { addedTo, fieldsSet, isCreatedLike, removedFrom, replacedWithin } from "~/raem/events";
 import VRL, { vRef, invariantifyId, getRawIdFrom } from "~/raem/VRL";
@@ -755,9 +755,10 @@ export default class Vrapper extends Cog {
  * Running a live kuery through the Vrapper will make an implicit activate() call.
  */
   doValoscript (valoscriptBody: string, extendScope, options: VALKOptions = {}) {
-    let valoscriptKuery;
+    let valoscriptKuery, discourse, releaseOpts;
     try {
-      options.discourse = this._parent.discourse.acquireFabricator("do-body");
+      discourse = options.discourse = (options.discourse || this._parent.discourse)
+          .acquireFabricator("do-vs");
       options.scope = options.mutableScope ||
           Object.create((options.scope !== undefined)
               ? options.scope
@@ -771,8 +772,9 @@ export default class Vrapper extends Cog {
             sourceInfo: options.sourceInfo,
           })));
       const ret = this.run(this[HostRef], valoscriptKuery, options);
-      if (options.discourse) {
-        const result = options.discourse.releaseFabricator();
+      if (discourse) {
+        const result = discourse.releaseFabricator();
+        discourse = null;
         if (result) {
           return thenChainEagerly(
               (options.awaitResult || (r => r.getPersistedEvent()))(result),
@@ -781,6 +783,7 @@ export default class Vrapper extends Cog {
       }
       return ret;
     } catch (error) {
+      if (discourse) discourse.releaseFabricator({ rollback: error });
       throw this.wrapErrorEvent(error, 1, "doValoscript",
           "\n\tvaloscript:", ...dumpObject({ valoscriptBody }),
           "\n\toptions:", ...dumpObject(options));
@@ -994,9 +997,10 @@ export default class Vrapper extends Cog {
       VALKOptions = {}) {
     this.requireActive(options);
     let typeName = options.typeName;
-    let discourse;
+    let discourse, releaseOpts;
     try {
-      discourse = (options.discourse || this._parent.discourse).acquireFabricator("emplace");
+      discourse = (options.discourse || this._parent.discourse)
+          .acquireFabricator(`emplace-${fieldName}`);
       options.discourse = discourse;
       if (!typeName) {
         const fieldIntro = this.getTypeIntro().getFields()[fieldName];
@@ -1018,10 +1022,9 @@ export default class Vrapper extends Cog {
         if (isSet) this.setField(fieldName, vFieldValue, options);
         else this.addToField(fieldName, vFieldValue, options);
       }
-      discourse.releaseFabricator();
       return vFieldValue;
     } catch (error) {
-      discourse.releaseFabricator({ rollback: error });
+      releaseOpts = { rollback: error };
       throw this.wrapErrorEvent(error, 1,
           `emplace${isSet ? "SetField" : "AddToField"}(${fieldName})`,
           "\n\tfield name:", fieldName,
@@ -1029,6 +1032,8 @@ export default class Vrapper extends Cog {
           "\n\toptions.typeName:", options.typeName,
           "\n\tdeduced type:", typeName,
       );
+    } finally {
+      discourse.releaseFabricator(releaseOpts);
     }
   }
 

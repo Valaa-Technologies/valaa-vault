@@ -167,8 +167,9 @@ export function parseArrowFunctionExpression (transpiler: Transpiler, ast: Arrow
           transpiler.VALK().fromThis(),
           paramDeclarations,
           body).toVAKON()),
-      // transpiler.VALK().fromValue("§nonlive"),
-    );
+      undefined, // transpiler.VALK().fromValue("§nonlive"),
+      transpiler.VALK().fromValue("lambda"),
+  );
 }
 
 export interface YieldExpression extends es5.Expression {

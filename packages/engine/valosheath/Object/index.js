@@ -152,7 +152,8 @@ export default function extendObject (scope: Object, hostDescriptors: Map<any, O
           else {
             const subOptions = Object.create(options);
             for (const property of source.step("properties", subOptions)) {
-              combinedSources[property.step("name", subOptions)] = property.extractValue(subOptions);
+              combinedSources[property.step("name", subOptions)] =
+                  property.extractValue(subOptions);
             }
           }
         }
@@ -247,7 +248,7 @@ export default function extendObject (scope: Object, hostDescriptors: Map<any, O
       } else {
         // Define a Scope property
         const value = expressionFromProperty(descriptor.value, property, descriptor);
-        const vProperty = vResource._getProperty(property, options);
+        const vProperty = vResource.getPropertyResource(property, options);
         if (vProperty) {
           vProperty.setField("value", value, options);
         } else {
@@ -289,7 +290,7 @@ export default function extendObject (scope: Object, hostDescriptors: Map<any, O
     const descriptorBase = valospaceType.prototype[PropertyDescriptorsTag][property];
     if (!descriptorBase) {
       if (!vResource.hasInterface("Scope")) return undefined;
-      const vProperty = vResource._getProperty(property, options);
+      const vProperty = vResource.getPropertyResource(property, options);
       if (!vProperty || !vProperty.isMaterialized()) return undefined;
       return createHostPropertyDescriptorFromProperty(vProperty, vResource, options);
     }

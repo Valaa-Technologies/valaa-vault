@@ -291,15 +291,15 @@ const _scopeFrameChain = [
     const explicitFrameKey = this.component.props.frameKey || this.component.props.sharedFrameKey;
     if (explicitFrameKey && (this.vOwner != null)
         && (this.vOwner.propertyValue(explicitFrameKey) !== scopeFrame)) {
-      // TODO(iridian): This is initial non-rigorous prototype functionality:
+      // TODO(iridian): This is initial, non-rigorous prototype functionality:
       // The owner[key] value remains set even after the components get detached.
-      this.vOwner.alterProperty(explicitFrameKey, [`§vrl`, scopeFrame.getVRef().toJSON()]);
+      discourse = this.component.context.engine.getActiveGlobalOrNewLocalEventGroupTransaction();
+      this.vOwner.updateProperty(explicitFrameKey, scopeFrame, { discourse });
     }
     const vScopeFrame = tryUnpackedHostValue(scopeFrame);
     if (vScopeFrame) this.component.setUIContextValue(Lens.scopeFrameResource, vScopeFrame);
     if (this.frameOverrides) {
-      _integrateFramePropertyDiffs(
-          this.component, vScopeFrame, this.frameOverrides, this.discourse);
+      _integrateFramePropertyDiffs(this.component, vScopeFrame, this.frameOverrides, discourse);
     }
     return vScopeFrame || scopeFrame;
   },

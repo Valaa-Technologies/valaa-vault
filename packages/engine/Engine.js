@@ -12,6 +12,7 @@ import VRL, { vRef, IdData, getRawIdFrom } from "~/raem/VRL";
 import { tryHostRef } from "~/raem/VALK/hostReference";
 import { getActionFromPassage } from "~/raem/redux/Bard";
 import { formVPath, coerceAsVRID, validateVRID } from "~/raem/VPath";
+import { naiveURI } from "~/raem/ValaaURI";
 
 import Transient, { createTransient, getTransientTypeName } from "~/raem/state/Transient";
 import layoutByObjectField from "~/raem/tools/denormalized/layoutByObjectField";
@@ -28,6 +29,7 @@ import LiveUpdate from "~/engine/Vrapper/LiveUpdate";
 import Subscription from "~/engine/Vrapper/Subscription";
 
 import { thenChainEagerly } from "~/tools";
+import { getHostRef } from "../raem/VALK/hostReference";
 
 export default class Engine extends Cog {
   constructor ({ name, parent, sourcerer, timeDilation = 1.0, verbosity, discourse }: Object) {
@@ -197,21 +199,20 @@ export default class Engine extends Cog {
   }
 
   async activateResource (resourceURI: string) {
-    const reference = this.discourse.obtainReference(resourceURI);
+    const vref = this.discourse.obtainReference(resourceURI);
     const connection = await this.discourse
-        .acquireConnection(reference.getChronicleURI())
+        .acquireConnection(vref.getChronicleURI())
         .asActiveConnection();
-    const vResource = await this.getVrapperByRawId(
-        reference.rawId() || connection.getChronicleId());
+    const vResource = await this.getVrapperByRawId(vref.rawId() || connection.getChronicleId());
     await vResource.activate();
-    return { reference, vResource };
+    return { reference: vref, vResource };
   }
 
   duplicate (duplicateOf: Vrapper, initialState: Object, options: Object): Vrapper {
     return this.create(duplicateOf.getTypeName(), initialState, options, duplicateOf);
   }
 
-  create (typeName, initialState, options: Object = {}, duplicateOf: ?Object) {
+  create (typeName, initialState, options: Object = {}, duplicateOf: ?Vrapper) {
     let discourse, releaseOpts, extractedProperties, chronicling, ret;
     const name = `${duplicateOf ? "duplicate-" : "new-"}${typeName}`;
     const action = {};
@@ -343,7 +344,8 @@ export default class Engine extends Cog {
       }
     }
     if (extractedProperties) {
-      vResource.updateProperties(extractedProperties, { discourse });
+      const updateExisting = (initialState.instancePrototype || initialState.prototype);
+      vResource.updateProperties(extractedProperties, { discourse, updateExisting });
     }
     return vResource;
   }
@@ -386,7 +388,7 @@ export default class Engine extends Cog {
         explicitId = coerceAsVRID(explicitId);
       }
     }
-    let owner = initialState.owner || initialState.source;
+    const owner = initialState.owner || initialState.source;
     if (!owner) {
       if (subResource) throw new Error("Can't have subResource without owner"); // cases 2, 6
       if (authorityURI) { // cases 4, 5
@@ -407,21 +409,38 @@ export default class Engine extends Cog {
       e:     sub, auri, owner: future (with multi-chronicle tx), structured id, owner as sub parent
       f: id, sub, auri, owner: no, both owner and explicit id can't be the sub parent
     */
-    if (!(owner instanceof VRL)) {
-      owner = universalizeCommandData(owner, options);
-      if (!(owner instanceof VRL)) throw new Error("new resource owner must be a valid resource");
-    }
-    let chronicleURI = owner.getChronicleURI();
-    if (!chronicleURI && owner.isGhost()) {
-      chronicleURI = discourse
-          .bindObjectId([owner.getGhostPath().headHostRawId()], "Resource")
-          .getChronicleURI();
-      if (!chronicleURI) {
+    const chronicleURI = this.getChronicleURIOf(getHostRef(owner), discourse);
+    // cases 8, 9, a, c, d, e
+    return discourse.assignNewVRID(directive, String(chronicleURI), explicitId, subResource);
+  }
+
+  getChronicleURIOf (vref, discourse, require) {
+    let chronicleURI = vref.getChronicleURI();
+    if (!chronicleURI && vref.isGhost()) {
+      const nonGhostOwnerRawId = vref.getGhostPath().headHostRawId() || vref.rawId();
+      const transient = (discourse || this.discourse)
+          .tryGoToTransientOfRawId(nonGhostOwnerRawId, "Resource");
+      if (transient) {
+        chronicleURI = transient && transient.get("id").getChronicleURI();
+        if (!chronicleURI) {
+          const authorityURI = transient.get("authorityURI")
+              || transient.get("partitionAuthorityURI");
+          chronicleURI = authorityURI
+              && naiveURI.createChronicleURI(authorityURI, transient.get("id").rawId());
+        }
+      }
+      /*
+      {
+        chronicleURI = (discourse || this.discourse)
+            .bindObjectId([vref.getGhostPath().headHostRawId()], "Resource")
+            .getChronicleURI();
+      }
+      */
+      if ((require !== false) && !chronicleURI) {
         throw new Error("INTERNAL ERROR: could not determine new resource chronicle");
       }
     }
-    // cases 8, 9, a, c, d, e
-    return discourse.assignNewVRID(directive, String(chronicleURI), explicitId, subResource);
+    return chronicleURI;
   }
 
   outputStatus (output = console) {

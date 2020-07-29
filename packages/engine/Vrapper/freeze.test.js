@@ -4,10 +4,6 @@ import { vRef } from "~/raem/VRL";
 import { naiveURI } from "~/raem/ValaaURI";
 
 import { created, transacted, fieldsSet } from "~/raem/events/index";
-// import { createGhostRawId } from "~/raem/state/GhostPath";
-
-import VALEK from "~/engine/VALEK";
-// import Vrapper from "~/engine/Vrapper";
 
 import EngineTestHarness, { testRootId, createEngineOracleHarness }
     from "~/engine/test/EngineTestHarness";

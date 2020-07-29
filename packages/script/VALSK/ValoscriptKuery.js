@@ -6,6 +6,12 @@ export const ScopeAccessesTag = Symbol("VALSK.ScopeAccesses");
 export const ScopeAccessKeysTag = Symbol("VALSK.ScopeAccessKeys");
 
 export default class ValoscriptKuery extends Kuery {
+  setScopeAccesses (scopeAccesses) {
+    const accessKeys = !scopeAccesses ? [] : Object.keys(scopeAccesses);
+    this[ScopeAccessesTag] = accessKeys.length ? scopeAccesses : null;
+    this[ScopeAccessKeysTag] = accessKeys.length ? accessKeys : null;
+    return this;
+  }
   /**
    * Do-step which valks the statement steps, discards their results while keeping the head as the
    * current head. Updates the valking state of the valker after each statement.

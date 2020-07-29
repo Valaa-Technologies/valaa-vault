@@ -272,3 +272,5 @@ export default class EngineKuery extends ValoscriptKuery {
         null, fieldNames, options);
   }
 }
+
+export const VALEK = new EngineKuery();

@@ -3,10 +3,9 @@
 import { GraphQLObjectType, isAbstractType } from "graphql/type";
 import { Iterable } from "immutable";
 
-import VALK from "~/raem/VALK";
 import type { VALKOptions } from "~/raem/VALK"; // eslint-disable-line no-duplicate-imports
 import type { Passage, Story } from "~/raem/redux/Bard";
-import { getHostRef, tryHostRef, HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
+import { getHostRef, HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
 
 import { addedTo, fieldsSet, isCreatedLike, removedFrom, replacedWithin } from "~/raem/events";
 import VRL, { vRef, invariantifyId, getRawIdFrom } from "~/raem/VRL";
@@ -30,14 +29,15 @@ import isAbsentTypeName from "~/raem/tools/graphql/isAbsentTypeName";
 
 import { ValoscriptPrimitiveKind /* , NativeIdentifierTag */ } from "~/script";
 import { transpileValoscriptBody } from "~/script/transpileValoscript";
-import { ScopeAccessesTag, ScopeAccessKeysTag } from "~/script/VALSK";
+import { ScopeAccessesTag } from "~/script/VALSK";
 
 import { Discourse, Connection } from "~/sourcerer";
 import { ChronicleEventResult } from "~/sourcerer/api/types";
 
 import { createModuleGlobal } from "~/tools/mediaDecoders/JavaScriptDecoder";
 
-import VALEK, { Valker, Kuery, dumpKuery, expressionFromProperty } from "~/engine/VALEK";
+import { VALEK } from "~/engine/VALEK/EngineKuery";
+import { Valker, Kuery, dumpKuery, expressionFromProperty } from "~/engine/VALEK";
 
 import Cog, { extractMagicMemberEventHandlers } from "~/engine/Cog";
 import debugId from "~/engine/debugId";
@@ -511,13 +511,15 @@ export default class Vrapper extends Cog {
           = { require: true }): ?Connection {
     if (this._connection) return this._connection;
     let chronicleURI;
-    let nonGhostOwnerRawId;
+    // let nonGhostOwnerRawId;
     try {
       if (!this.isResource()) {
         throw new Error(`Non-resource Vrapper's cannot have chronicle connections`);
       }
-      chronicleURI = this[HostRef].getChronicleURI();
       const discourse = options.discourse || this._parent.discourse;
+      chronicleURI = this[HostRef].getChronicleURI()
+          || this._parent.getChronicleURIOf(this[HostRef], discourse, false);
+      /*
       if (!chronicleURI) {
         nonGhostOwnerRawId = this[HostRef].getGhostPath().headHostRawId() || this[HostRef].rawId();
         const transient = discourse.tryGoToTransientOfRawId(nonGhostOwnerRawId, "Resource");
@@ -528,9 +530,11 @@ export default class Vrapper extends Cog {
                 || transient.get("partitionAuthorityURI");
             chronicleURI = authorityURI
                 && naiveURI.createChronicleURI(authorityURI, transient.get("id").rawId());
+            console.warn("Created chronicle URI during connection acquire", chronicleURI);
           }
         }
       }
+      */
       this._connection = chronicleURI
           && discourse.acquireConnection(chronicleURI, {
             newChronicle: false, newConnection: options.newConnection, require: options.require,
@@ -740,8 +744,11 @@ export default class Vrapper extends Cog {
         createMaterializeGhostAction(innerDiscourse, this[HostRef], this._typeName));
   }
 
-  getValospaceScope (options: ?Object) {
-    return this._valospaceScope || this._initializeScopes(options)._valospaceScope;
+  getValospaceScope (options: ?Object, kuery /* , origin */) {
+    return this._valospaceScope
+        || ((kuery != null) && ((typeof kuery !== "object") || (kuery[ScopeAccessesTag] === null))
+            ? { this: this }
+            : this._initializeScopes(options)._valospaceScope);
   }
 
   tryValospaceScope () {
@@ -774,15 +781,10 @@ export default class Vrapper extends Cog {
  * Running a live kuery through the Vrapper will make an implicit activate() call.
  */
   doValoscript (valoscriptBody: string, extendScope, options: VALKOptions = {}) {
-    let valoscriptKuery, discourse, releaseOpts;
+    let valoscriptKuery, discourse;
     try {
       discourse = options.discourse = (options.discourse || this._parent.discourse)
           .acquireFabricator("do-vs");
-      options.scope = options.mutableScope ||
-          Object.create((options.scope !== undefined)
-              ? options.scope
-              : this.getValospaceScope(options));
-      if (extendScope) Object.assign(options.scope, extendScope);
       valoscriptKuery = (typeof valoscriptBody !== "string"
           ? valoscriptBody
           : (options.kuery = transpileValoscriptBody(valoscriptBody, {
@@ -790,6 +792,11 @@ export default class Vrapper extends Cog {
             customVALK: VALEK,
             sourceInfo: options.sourceInfo,
           })));
+      options.scope = options.mutableScope ||
+          Object.create((options.scope !== undefined)
+              ? options.scope
+              : this.getValospaceScope(options, valoscriptKuery, "doValoscript"));
+      if (extendScope) Object.assign(options.scope, extendScope);
       const ret = this.run(this[HostRef], valoscriptKuery, options);
       if (discourse) {
         const result = discourse.releaseFabricator();
@@ -814,9 +821,7 @@ export default class Vrapper extends Cog {
     if (this._phase === ACTIVE) {
       options.scope = (options.scope !== undefined)
               ? Object.create(options.scope)
-          : ((typeof kuery === "object") && (kuery[ScopeAccessKeysTag] !== null))
-              ? this.getValospaceScope(options)
-          : { this: this };
+          : this.getValospaceScope(options, kuery, "run");
       if (discourse && discourse._steppers.kuerySubscription
           && !options.state && !(kuery instanceof Kuery)) {
         return discourse.tryUnpack(Object.create(discourse)
@@ -925,12 +930,12 @@ export default class Vrapper extends Cog {
   _primeTransactionAndOptionsAndId (options: VALKOptions): { discourse: Discourse, id: VRL } {
     const discourse = options.discourse || this._parent.discourse;
     this.requireActive(options);
-    let id = discourse.bindObjectId(this[HostRef], this._typeName);
+    const vref = this[HostRef];
+    let id = discourse.bindObjectId(vref, this._typeName);
     options.head = this;
     let chronicleURI = id.getChronicleURI();
-    if (!chronicleURI && id.isGhost()) {
-      chronicleURI = discourse.bindObjectId([id.getGhostPath().headHostRawId()], "Resource")
-          .getChronicleURI();
+    if (!chronicleURI) {
+      chronicleURI = this._parent.getChronicleURIOf(vref, discourse);
       id = id.immutateWithChronicleURI(chronicleURI);
     }
     options.chronicleURI = chronicleURI;
@@ -1063,7 +1068,7 @@ export default class Vrapper extends Cog {
   propertyValue (propertyName: string | Symbol, options: VALKOptions = {}) {
     // eslint-disable-next-line
     const typeName = this.getTypeName(options);
-    const vProperty = this._getProperty(propertyName, Object.create(options));
+    const vProperty = this.getPropertyResource(propertyName, Object.create(options));
     if (vProperty) {
       return vProperty.extractValue(options, this);
     }
@@ -1092,28 +1097,26 @@ export default class Vrapper extends Cog {
 
   static _propertyKueries = Object.create(null);
   static getPropertyKuery (propertyName) {
-    let ret = Vrapper._propertyKueries[propertyName];
-    if (!ret) {
-      ret = Vrapper._propertyKueries[propertyName] = VALEK.property(propertyName);
-      ret[ScopeAccessesTag] = null;
-      ret[ScopeAccessKeysTag] = null;
-    }
-    return ret;
+    return Vrapper._propertyKueries[propertyName]
+        || (Vrapper._propertyKueries[propertyName] =
+            VALEK.property(propertyName).setScopeAccesses(null));
   }
 
-  _getProperty (propertyName: string | Symbol, options: VALKOptions) {
+  getPropertyResource (propertyName: string | Symbol, options: VALKOptions) {
     if (typeof propertyName !== "string") return undefined;
-    const ret = this._valospaceScope && this._valospaceScope.hasOwnProperty(propertyName)
+    const ret = (this._propscope && this._propscope[propertyName])
+        || (this._valospaceScope && this._valospaceScope.hasOwnProperty(propertyName)
     // FIXME(iridian): If a property gets renamed inside a transaction
     // and a new property gets created with (or renamed to) the same
     // name we get a cache issue here: _valospaceScope only updates on
     // actual Engine events which have not yet landed. Similar issues
     // might arise with heresy rollbacks.
-        && this._valospaceScope[propertyName];
+            && this._valospaceScope[propertyName]);
     if (ret && !ret.isImmaterial()) return ret;
     // New properties which don't exist in _valospaceScope still work as
     // they get kueried here.
-    return this.step(Vrapper.getPropertyKuery(propertyName), options);
+    return (this._valospaceScope || this._propscope || (this._propscope = Object.create(null))
+        )[propertyName] = this.step(Vrapper.getPropertyKuery(propertyName), options);
   }
 
   updateProperties (propertyUpdates: (Object | Array[]), options: Object) {
@@ -1123,11 +1126,14 @@ export default class Vrapper extends Cog {
           ? propertyUpdates
           : Object.entries(propertyUpdates)) {
         if (key[0] !== "$") {
-          this.updateProperty(key, value, options);
+          this.updateProperty(key, value, options,
+              (options.updateExisting === false) ? null : undefined);
         } else {
           for ([name, nameValue] of Object.entries(value)) {
-            this.updateProperty(`@.${key}.${encodeURIComponent(name)}@@`, nameValue, options);
+            this.updateProperty(`@.${key}.${encodeURIComponent(name)}@@`,
+                nameValue, options, (options.updateExisting === false) ? null : undefined);
           }
+
           name = null;
         }
       }
@@ -1143,12 +1149,14 @@ export default class Vrapper extends Cog {
   }
 
   updateProperty (propertyName: any, newValue: Object, options: VALKOptions = {},
-      vProperty = this._getProperty(propertyName, Object.create(options))) {
+      vProperty = this.getPropertyResource(propertyName, Object.create(options))) {
     if (newValue instanceof Kuery) {
       return this.alterProperty(propertyName, newValue, Object.create(options), vProperty);
     }
     const discourse = options.discourse || this._parent.discourse;
-    if (!options.chronicleURI) options.chronicleURI = this.getChronicleURI();
+    if (!options.chronicleURI) {
+      options.chronicleURI = this._parent.getChronicleURIOf(this[HostRef], discourse);
+    }
     const value = universalizeCommandData(expressionFromProperty(newValue, propertyName), options);
     if (vProperty) {
       return discourse.chronicleEvent({
@@ -1166,7 +1174,7 @@ export default class Vrapper extends Cog {
   }
 
   alterProperty (propertyName: any, alterationVAKON: Object, options: VALKOptions = {},
-      vProperty = this._getProperty(propertyName, Object.create(options))) {
+      vProperty = this.getPropertyResource(propertyName, Object.create(options))) {
     // If lexicalScope is undefined then this resource doesn't implement Scope, which is required
     // for propertyValue.
     const typeName = this.getTypeName(options);
@@ -1178,7 +1186,8 @@ export default class Vrapper extends Cog {
       return vProperty.alterValue(actualAlterationVAKON, options, this);
     }
     const alterationOptions = Object.create(options);
-    alterationOptions.scope = this.getValospaceScope(alterationOptions);
+    alterationOptions.scope = this.getValospaceScope(
+        alterationOptions, alterationVAKON, propertyName);
     const hostType = this._parent.getRootScope().valos[typeName];
     const fieldDescriptor = hostType.prototype[PropertyDescriptorsTag][propertyName];
     let ret;
@@ -1212,7 +1221,7 @@ export default class Vrapper extends Cog {
       const vOwner = vExplicitOwner || this.step("owner", Object.create(options));
       invariantify(!vOwner || vOwner.getValospaceScope,
           "property owner (if defined) must be a Vrapper");
-      options.scope = (vOwner || this).getValospaceScope(options);
+      options.scope = (vOwner || this).getValospaceScope(options, alterationVAKON, "alterValue");
       const newValue = this.run(currentValue, alterationVAKON, Object.create(options));
       this.setField("value", expressionFromProperty(newValue, this), options);
       if (typeof newValue !== "object") {
@@ -1240,7 +1249,7 @@ export default class Vrapper extends Cog {
 
   deleteProperty (propertyName: any, options: VALKOptions = {}) {
     this.requireActive(options);
-    const vProperty = this._getProperty(propertyName, Object.create(options));
+    const vProperty = this.getPropertyResource(propertyName, Object.create(options));
     if (vProperty) {
       // TODO: check for configurability and return false if this value is non-configurable (and
       // thus it cannot be deleted)
@@ -1330,7 +1339,7 @@ export default class Vrapper extends Cog {
             : state.getIn([valueType, valueEntry.rawId(), fieldName]);
         if ((vakon == null) || (typeof vakon !== "object")) return vakon;
         const vOwner = vExplicitOwner || this.step("owner", Object.create(options)) || this;
-        options.scope = vOwner.getValospaceScope(options);
+        options.scope = vOwner.getValospaceScope(options, vakon, "extractValue");
         // TODO(iridian): We could add a flag to KueryExpression to denote that the evaluated value
         // of the KueryExpression can be cached. However as this is mostly a perf thing (when
         // KueryExpression is used to implement method imports) with semantic implications (if the
@@ -1355,7 +1364,7 @@ export default class Vrapper extends Cog {
     }
   }
 
-  static toValueReference = VALK.fromVAKON(["§->", "value", "reference"]);
+  static toValueReference = VALEK.fromVAKON(["§->", "value", "reference"]).setScopeAccesses(null);
 
   _extractPointerValue (options: VALKOptions = {}, vExplicitOwner: ?Vrapper,
       valueEntry: Transient) {
@@ -1371,7 +1380,7 @@ export default class Vrapper extends Cog {
 
   _mediaIntegrations: WeakMap<Object, { [contentType: string]: Object }>;
 
-  static toMediaInfoFields = VALK.fromVAKON({
+  static toMediaInfoFields = VALEK.fromVAKON({
     // bvobId: ["§->", "content", false, "contentHash"],
     contentHash: ["§->", "content", false, "contentHash"],
     name: ["§->", "name"],
@@ -1379,7 +1388,7 @@ export default class Vrapper extends Cog {
     contentType: ["§->", "mediaType", false, "contentType"],
     // type: ["§->", "mediaType", false, "type"],
     // subtype: ["§->", "mediaType", false, "subtype"],
-  });
+  }).setScopeAccesses(null);
 
   /* (re-)assigns options.mediaInfo */
   resolveMediaInfo (options: VALKOptions = {}) {
@@ -1663,10 +1672,10 @@ export default class Vrapper extends Cog {
     return this._obtainMediaInterpretation(options);
   }
 
-  static toMediaPrepareBvobInfoFields = VALK.fromVAKON({
+  static toMediaPrepareBvobInfoFields = VALEK.fromVAKON({
     name: ["§->", "name"],
     contentType: ["§->", "mediaType", false, "contentType"],
-  });
+  }).setScopeAccesses(null);
 
   /**
    * Prepares given content for use within the chronicle of this
@@ -2165,7 +2174,8 @@ export default class Vrapper extends Cog {
       this._setUpScopeFeatures(options);
     } else {
       this._scopeOwnerSub = null;
-      this._valospaceScope = Object.create(null);
+      this._valospaceScope = this._propscope || Object.create(null);
+      if (this._propscope) this._propscope = null;
       this._fabricScope = Object.create(null);
     }
     // TODO(iridian, 2019-01) 'this' is critical but very dubious.
@@ -2201,9 +2211,16 @@ export default class Vrapper extends Cog {
     this._scopeOwnerSub = this.obtainSubscription("owner", subcriptionOptions);
     this._scopeOwnerSub.addListenerCallback(this, `Vrapper_scope_owner`, (ownerUpdate) => {
       const owner = ownerUpdate.value() || this._parent;
-      const ownerSpaceScope = owner.getValospaceScope(Object.create(ownerUpdate.getOptions()));
+      const ownerSpaceScope = owner.getValospaceScope(
+          Object.create(ownerUpdate.getOptions()), undefined, "child");
       if (!this._valospaceScope) {
-        this._valospaceScope = Object.create(ownerSpaceScope);
+        if (this._propscope) {
+          this._valospaceScope = this._propscope;
+          Object.setPrototypeOf(this._valospaceScope, ownerSpaceScope);
+          this._propscope = null;
+        } else {
+          this._valospaceScope = Object.create(ownerSpaceScope);
+        }
         this._fabricScope = Object.create(owner.getFabricScope());
       } else if (Object.getPrototypeOf(this._valospaceScope) !== ownerSpaceScope) {
         const dummy = {};
@@ -2276,8 +2293,11 @@ export default class Vrapper extends Cog {
         }
         if (!newName) return;
         if (this._valospaceScope.hasOwnProperty(newName)) { // eslint-disable-line
-          if (vActualAdd === this._valospaceScope[newName]) return;
-          console.warn(`Overriding existing Property '${newName}' in Scope ${this.debugId()}`);
+          const current = this._valospaceScope[newName];
+          if ((current === undefined) || (vActualAdd === current)) return;
+          console.warn(`Overriding existing Property '${newName}' in Scope ${this.debugId()}`,
+              "\nhave:", String(current),
+              "\ngot:", String(vActualAdd));
           /*
           throw this.wrapErrorEvent(
               new Error(`Overriding existing Property '${newName}'`),

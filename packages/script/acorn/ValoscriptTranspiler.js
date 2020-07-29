@@ -11,7 +11,6 @@ import { isBuiltinStep, getBuiltinStepName, getBuiltinStepArguments }
     from "~/raem/VALK/raemSteppers";
 
 import Language from "~/script/acorn/Language";
-import { ScopeAccessesTag, ScopeAccessKeysTag } from "~/script/VALSK";
 
 import { invariantify, invariantifyObject, FabricEventTarget } from "~/tools";
 
@@ -42,14 +41,9 @@ export default class ValoscriptTranspiler extends FabricEventTarget {
       if (!cacheEntry) {
         ast = parse(source, actualTranspiler.acornParseOptions);
         const scopeAccesses = {};
-        const kuery = actualTranspiler.kueryFromAst(ast,
-            { scopeAccesses, contextRuleOverrides: {} });
-        kuery[ScopeAccessesTag] = scopeAccesses;
-        kuery[ScopeAccessKeysTag] = Object.keys(scopeAccesses);
-        if (!kuery[ScopeAccessKeysTag].length) {
-          kuery[ScopeAccessesTag] = null;
-          kuery[ScopeAccessKeysTag] = null;
-        }
+        const kuery = actualTranspiler
+            .kueryFromAst(ast, { scopeAccesses, contextRuleOverrides: {} })
+            .setScopeAccesses(scopeAccesses);
         if (options.sourceInfo) kuery[SourceInfoTag] = options.sourceInfo;
         if (!cache) return kuery;
 

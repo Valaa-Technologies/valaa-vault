@@ -8,6 +8,9 @@ import UIComponent from "~/inspire/ui/UIComponent";
 import VALEK from "~/engine/VALEK";
 
 const ItemRelation: string = "Valaa_ContextMenu_Item";
+const toItemRelations = VALEK.relations(ItemRelation).setScopeAccesses(null);
+const toLabel = VALEK.propertyValue("label").setScopeAccesses(null);
+const toOnClick = VALEK.propertyValue("onClick").setScopeAccesses(null);
 
 export default class ValaaContextMenu extends UIComponent {
   preRenderFocus (focus: any) {
@@ -22,12 +25,12 @@ export default class ValaaContextMenu extends UIComponent {
   }
 
   getItems (focus: any) {
-    const itemRelations = focus.step(VALEK.relations(ItemRelation));
+    const itemRelations = focus.step(toItemRelations);
     return itemRelations.map((item, index) => {
-      if (item.step(VALEK.relations(ItemRelation)).length) {
+      if (item.step(toItemRelations).length) {
         return (
           <SubMenu
-            title={item.step(VALEK.propertyValue("label"))}
+            title={item.step(toLabel)}
             className={this.props.menuClass}
             // TODO(iridian): Legacy code, should remove once no longer needed by zero
             key={index} // eslint-disable-line react/no-array-index-key
@@ -42,7 +45,7 @@ export default class ValaaContextMenu extends UIComponent {
           attributes={{ className: this.props.itemClass }}
           key={index} // eslint-disable-line react/no-array-index-key
         >
-          {item.step(VALEK.propertyValue("label"))}
+          {item.step(toLabel)}
         </MenuItem>
       );
     });
@@ -53,7 +56,7 @@ export default class ValaaContextMenu extends UIComponent {
   }
 
   makeClickCallback = (item: Vrapper) => {
-    const callback = getImplicitCallable(item.step(VALEK.propertyValue("onClick")),
+    const callback = getImplicitCallable(item.step(toOnClick),
         "contextMenu.makeCallback.callback");
     if (!callback) return undefined;
     return (event, data, target) => callback(event.nativeEvent, data, target);

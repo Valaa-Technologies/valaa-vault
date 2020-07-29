@@ -1,6 +1,5 @@
 // @flow
 
-import VALEK from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
 
 export function _updateResource (router, vResource, patch,

@@ -11,10 +11,8 @@ import { tryHostRef } from "~/raem/VALK/hostReference";
 import { debugObjectType, inBrowser, wrapError } from "~/tools";
 import trivialClone from "~/tools/trivialClone";
 
-import EngineKuery, { IsLiveTag, pointer, literal } from "./EngineKuery";
+import EngineKuery, { VALEK, IsLiveTag, pointer, literal } from "./EngineKuery";
 
-
-const VALEK = new EngineKuery();
 export default VALEK;
 
 export {

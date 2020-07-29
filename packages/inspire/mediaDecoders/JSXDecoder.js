@@ -13,7 +13,7 @@ import Valoscope from "~/inspire/ui/Valoscope";
 import Lens from "~/inspire/valosheath/valos/Lens";
 import _jsxTransformFromString from "~/inspire/mediaDecoders/_jsxTransformFromString";
 
-import { ScopeAccessesTag, ScopeAccessKeysTag } from "~/script/VALSK";
+import { ScopeAccessesTag } from "~/script/VALSK";
 
 import MediaDecoder from "~/tools/MediaDecoder";
 import notThatSafeEval from "~/tools/notThatSafeEval";
@@ -385,9 +385,9 @@ function _getInstanceLensPrototypeKuery (elementName) {
   let ret = _instanceLensPrototypeKueries[elementName];
   if (!ret) {
     ret = _instanceLensPrototypeKueries[elementName] =
-        VALEK.fromScope(Lens.integrationScopeResource).propertyValue(elementName);
-    ret[ScopeAccessesTag] = { integrationScopeResource: "read" };
-    ret[ScopeAccessKeysTag] = ["integrationScopeResource"];
+        VALEK.fromScope(Lens.integrationScopeResource)
+            .propertyValue(elementName)
+            .setScopeAccesses({ integrationScopeResource: "read" });
   }
   return ret;
 }

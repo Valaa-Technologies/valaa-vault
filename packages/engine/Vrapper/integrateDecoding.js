@@ -67,7 +67,7 @@ function _integrateKuery (moduleKuery: Kuery, vScope: Vrapper, mediaInfo: MediaI
     ...moduleKuery[SourceInfoTag],
     phase: `valoscript module "${mediaInfo.name}" integration ${scopeDescriptor}`,
   };
-  options.scope = Object.create(vScope.getValospaceScope(options));
+  options.scope = Object.create(vScope.getValospaceScope(options, moduleKuery, "integrateKuery"));
   const moduleExports = addExportsContainerToScope(options.scope);
   options.scope.require = _require.bind(null, vScope, options);
   const moduleResult = vScope.step(moduleKuery, Object.create(options));

@@ -6,7 +6,7 @@ import { denoteValOSBuiltinWithSignature } from "~/raem/VALK";
 
 import Vrapper from "~/engine/Vrapper";
 import debugId from "~/engine/debugId";
-import VALEK, { dumpObject } from "~/engine/VALEK";
+import { dumpObject } from "~/engine/VALEK";
 import { defineName } from "~/engine/valosheath";
 
 import type UIComponent from "~/inspire/ui/UIComponent";

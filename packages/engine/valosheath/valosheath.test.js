@@ -506,30 +506,35 @@ describe("transpileValoscriptBody with Engine scriptAPI", () => {
     it("Object.getOwnPropertySymbols", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
       const bodyText = `
-          const properties = { a: 1, b: 2, d: this };
-          const entity = new Entity({ name: "entity", owner: this, properties });
+          const properties = { a: 1, b: 2, c: 3, d: this };
+          const Base = new Entity({ name: "entity", owner: this, properties });
           const overriddenProperties = Object.create(properties);
-          Object.assign(overriddenProperties, { a: 3, c: 4 });
-          const instance = new entity({ owner: this, properties: overriddenProperties });
+          Object.assign(overriddenProperties, { c: 33, e: 4 });
+          --overriddenProperties.b;
+          --overriddenProperties.c;
+          const instance = new Base({ owner: this, properties: overriddenProperties });
           ({
-            valos: valos,
+            valos, instance,
+            b: instance.b,
+            c: instance.c,
             propertiesSymbols: Object.getOwnPropertySymbols(properties),
-            entitySymbols: Object.getOwnPropertySymbols(entity),
+            entitySymbols: Object.getOwnPropertySymbols(Base),
             overriddenPropertiesSymbols: Object.getOwnPropertySymbols(overriddenProperties),
             instanceSymbols: Object.getOwnPropertySymbols(instance),
           });
       `;
       const bodyKuery = transpileValoscriptTestBody(bodyText);
-      const symbols = entities().creator.do(bodyKuery);
-      const valos = symbols.valos;
+      const { valos, instance, b, c, ...rest } = entities().creator.do(bodyKuery);
+      expect(b).toEqual(1);
+      expect(c).toEqual(32);
       const symbolSorter = (left, right) =>
           (left.toString() < right.toString() ? -1 : left.toString() > right.toString() ? 1 : 0);
-      expect(symbols.propertiesSymbols.sort(symbolSorter)).toEqual([]);
-      expect(symbols.entitySymbols.sort(symbolSorter)).toEqual([
+      expect(rest.propertiesSymbols.sort(symbolSorter)).toEqual([]);
+      expect(rest.entitySymbols.sort(symbolSorter)).toEqual([
         valos.name, valos.Resource.owner, valos.Scope.properties, valos.TransientFields.instances,
       ]);
-      expect(symbols.overriddenPropertiesSymbols.sort(symbolSorter)).toEqual([]);
-      expect(symbols.instanceSymbols.sort(symbolSorter)).toEqual([
+      expect(rest.overriddenPropertiesSymbols.sort(symbolSorter)).toEqual([]);
+      expect(rest.instanceSymbols.sort(symbolSorter)).toEqual([
         valos.Resource.owner, valos.Scope.properties, valos.TransientFields.ghostOwnlings,
         valos.prototype,
       ]);

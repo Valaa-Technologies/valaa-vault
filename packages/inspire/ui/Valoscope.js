@@ -106,8 +106,10 @@ export default class Valoscope extends UIComponent {
   static propTypes = {
     ...UIComponent.propTypes,
 
+    frameOwner: PropTypes.object,
+    frameAuthority: PropTypes.string,
     frameKey: PropTypes.string,
-    sharedFrameKey: PropTypes.string,
+    sharedArrayFrameKey: PropTypes.string,
     implicitFrameKey: PropTypes.string,
     frameOverrides: PropTypes.object,
     instanceLensPrototype: PropTypes.any,
@@ -116,8 +118,8 @@ export default class Valoscope extends UIComponent {
   shouldComponentUpdate (nextProps: Object, nextState: Object) {
     let ret;
     if (nextProps.children !== this.props.children) {
-      // FIXME(iridian, 2020-07): Ugly hack: duplicate code with line
-      // 130 below. children handling should probably be moved to
+      // FIXME(iridian, 2020-07): Ugly hack: duplicate code with code
+      // below. children handling should probably be moved to
       // Valens. Like all of Valoscope handling tbf.
       this.setUIContextValue(Lens.scopeChildren, nextProps.children);
       ret = "props.children";
@@ -138,7 +140,10 @@ export default class Valoscope extends UIComponent {
     const vLens = (props.lens instanceof Vrapper) && props.lens;
     const frameSelf = {
       component: this, focus, props, engine: this.context.engine,
-      vOwner: this.getParentUIContextValue(Lens.scopeFrameResource), vPrototype, vLens,
+      vOwner: (props.frameOwner !== undefined)
+          ? props.frameOwner
+          : this.getParentUIContextValue(Lens.scopeFrameResource),
+      vPrototype, vLens,
       frameOverrides: props.frameOverrides,
     };
     return thisChainEagerly(frameSelf,
@@ -158,55 +163,70 @@ export default class Valoscope extends UIComponent {
 
 const _scopeFrameChain = [
   function _processFramePrototypeAndFocus () {
-    let lensAuthorityProperty;
+    let frameAuthorityProperty;
+
+    const propsFrameAuthority = this.component.props.frameAuthority;
+    if (propsFrameAuthority !== undefined) return propsFrameAuthority;
+
     if ((this.vPrototype != null) && this.vPrototype.hasInterface("Scope")) {
-      const prototypeLensAuthorityURI = this.vPrototype.propertyValue(
-          (lensAuthorityProperty = this.component.getUIContextValue(Lens.lensAuthorityProperty)));
-      if (prototypeLensAuthorityURI !== undefined) {
-        this.rootFrameAuthorityURI = prototypeLensAuthorityURI;
+      const prototypeFrameAuthorityURI = this.vPrototype.propertyValue(
+          (frameAuthorityProperty = this.component.getUIContextValue(Lens.frameAuthorityProperty)));
+      if (prototypeFrameAuthorityURI !== undefined) {
+        return prototypeFrameAuthorityURI;
       }
     }
     if (!(this.focus instanceof Vrapper)) return undefined;
     this.vFocus = this.focus;
     this.vFocus.requireActive(); // focus should always be activated by Valoscope itself
 
-    const currentShadowedFocus = this.component.getParentUIContextValue(Lens.shadowedFocus);
+    const currentShadowedFocus = this.component.getParentUIContextValue(Lens.frameRootFocus);
     if (this.vFocus === currentShadowedFocus) return undefined;
 
     if (this.vFocus.hasInterface("Scope")) {
-      const focusLensAuthorityURI = this.vFocus.propertyValue(lensAuthorityProperty
-          || this.component.getUIContextValue(Lens.lensAuthorityProperty));
-      if (focusLensAuthorityURI !== undefined) {
-        return focusLensAuthorityURI;
+      const focusFrameAuthorityURI = this.vFocus.propertyValue(frameAuthorityProperty
+          || this.component.getUIContextValue(Lens.frameAuthorityProperty));
+      if (focusFrameAuthorityURI !== undefined) {
+        return focusFrameAuthorityURI;
       }
     }
 
     if (this.vFocus.isChronicleRoot()) {
-      const contextShadowLensAuthorityURI =
-          this.component.getUIContextValue(Lens.shadowLensAuthority);
-      if (contextShadowLensAuthorityURI !== undefined) {
-        return contextShadowLensAuthorityURI;
+      const contextFrameAuthorityURI =
+          this.component.getUIContextValue(Lens.frameAuthority);
+      if (contextFrameAuthorityURI !== undefined) {
+        return contextFrameAuthorityURI;
       }
     }
     return undefined;
   },
 
   function _constructIdAndCheckForExistingFrame (rootFrameAuthorityURI) {
-    const isTransitory = (rootFrameAuthorityURI || this.vOwner.getConnection().getAuthorityURI())
+    const isTransitory = (rootFrameAuthorityURI
+            || (this.vOwner ? this.vOwner.getConnection().getAuthorityURI() : "valaa-memory:"))
         === "valaa-memory:";
     function _getSubscriptId (vResource) {
-      return isTransitory ? vResource.getBriefUnstableId() : vResource.getRawId().slice(0, -2);
+      return isTransitory
+          ? vResource.getBriefUnstableId()
+          : vResource.getRawId().slice(0, -2);
     }
-    const ownerPart = `@_$V.owner${_getSubscriptId(this.vOwner)}`;
+    const ownerPart = this.vOwner ? `@_$V.owner${_getSubscriptId(this.vOwner)}` : "";
     const props = this.component.props;
-    const frameKey = props.frameKey || props.sharedFrameKey || props.implicitFrameKey;
-    this.component.setUIContextValue(
-        Lens.frameKeyPrefix, !props.sharedFrameKey ? null : String(props.arrayIndex));
+    let hierarchyPart;
+    const explicitFrameKey = props.frameKey || props.sharedArrayFrameKey;
+    if (explicitFrameKey) {
+      hierarchyPart = `@.$.${this.explicitFrameKey = explicitFrameKey}`;
+      this.component.setUIContextValue(Lens.frameKeyPrefix,
+          props.sharedArrayFrameKey ? String(props.arrayIndex) : null);
+    } else {
+      const keyPrefix = this.component.getParentUIContextValue(Lens.frameKeyPrefix);
+      hierarchyPart = `${
+          keyPrefix != null ? `@_$L.${keyPrefix}` : ""}${
+          this.vFocus ? `@_$V.focus${_getSubscriptId(this.vFocus)}`
+              : props.arrayIndex != null ? `_(${props.arrayIndex})`
+              : ""}`;
+      this.component.setUIContextValue(Lens.frameKeyPrefix, null);
+    }
     // const prototypePart = this.vPrototype ? `@_$V.proto${_getSubscriptId(this.vPrototype)}` : "";
-    const hierarchyPart = frameKey
-        ? `@.${frameKey}`
-        : `@_$.${encodeURIComponent(this.component.getKey())}${
-            this.vFocus ? `@_$V.focus${_getSubscriptId(this.vFocus)}` : ""}`;
     const lensPart = this.vLens ? `@_$L.lens${_getSubscriptId(this.vLens)}` : "";
     this.frameId = `@$~V.frames${ownerPart}${hierarchyPart}${lensPart}@@`;
 
@@ -224,9 +244,7 @@ const _scopeFrameChain = [
   function _sourcifyRootFrameChronicle (rootFrameAuthorityURI) {
     this.rootFrameAuthorityURI = rootFrameAuthorityURI;
     const chronicleURI = naiveURI.createChronicleURI(rootFrameAuthorityURI, this.frameId);
-    const discourse = this.discourse
-        || (this.discourse = this.engine.getActiveGlobalOrNewLocalEventGroupTransaction());
-    return discourse.acquireConnection(chronicleURI).asActiveConnection();
+    return this.engine.discourse.acquireConnection(chronicleURI).asActiveConnection();
   },
 
   function _obtainRootFrame (/* rootFrameConnection: Connection */) {
@@ -252,8 +270,6 @@ const _scopeFrameChain = [
       this.component._currentOverrides = this.frameOverrides;
       this.frameOverrides = null;
     }
-    const discourse = this.discourse
-        || (this.discourse = this.engine.getActiveGlobalOrNewLocalEventGroupTransaction());
     /*
     discourse = engine.obtainGroupTransaction("receive-events", {
       finalizeTrigger: Promise.resolve(),
@@ -268,7 +284,10 @@ const _scopeFrameChain = [
     // support getPremiereStory so whatever semantics is
     // desired it needs to be implemented.
     // const options = { discourse, awaitResult: result => result.getPremiereStory() };
-    const options = { discourse, awaitResult: result => result.getComposedStory() };
+    const options = {
+      discourse: this.engine.getActiveGlobalOrNewLocalEventGroupTransaction(),
+      awaitResult: result => result.getComposedStory(),
+    };
     const vScopeFrame = (this.vPrototype != null)
         ? this.vPrototype.instantiate(initialState, options)
         : this.engine.create("Entity", initialState, options);
@@ -279,17 +298,17 @@ const _scopeFrameChain = [
   },
 
   function _assignShadowLensContextvalues (vScopeFrame) {
-    this.component.setUIContextValue(Lens.shadowedFocus, this.vFocus);
-    this.component.setUIContextValue(Lens.shadowLensChronicleRoot,
-        this.rootFrameAuthorityURI ? vScopeFrame : null);
+    this.component.setUIContextValue(Lens.frameRootFocus, this.vFocus);
+    this.component.setUIContextValue(Lens.frameRoot, vScopeFrame);
     return vScopeFrame;
   },
 
   function _assignScopeFrameExternals (scopeFrame) {
     this.component.setUIContextValue("frame", scopeFrame);
     if (scopeFrame === undefined) return undefined;
-    const explicitFrameKey = this.component.props.frameKey || this.component.props.sharedFrameKey;
-    if (explicitFrameKey && (this.vOwner != null)
+    const explicitFrameKey = this.explicitFrameKey;
+    let discourse;
+    if (this.explicitFrameKey && (this.vOwner != null)
         && (this.vOwner.propertyValue(explicitFrameKey) !== scopeFrame)) {
       // TODO(iridian): This is initial, non-rigorous prototype functionality:
       // The owner[key] value remains set even after the components get detached.
@@ -348,7 +367,7 @@ creates a valos Resource as follows:
   derivation. Then if lens authority is not yet defined and if the
   focus has a lens authority property its value will is defined as the
   lens authority. Alternatively, if the focus is a chronicle root then
-  valos.shadowLensAuthority is defined as the lens authority.
+  valos.frameAuthority is defined as the lens authority.
   Otherwise (focus is not a singular Resource) focus is not used in id
   derivation.
 5. If the lens authority is defined and is not falsy it's used as the

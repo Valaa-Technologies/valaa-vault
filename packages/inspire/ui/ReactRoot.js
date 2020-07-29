@@ -56,7 +56,7 @@ export default class ReactRoot extends React.Component {
     this._rootContext[Lens.lensProperty] = this.props.contextLensProperty;
     if (vRootFocus) {
       thenChainEagerly(this._obtainUIRootFrame(
-          this._rootContext[Lens.shadowLensAuthority], vRootFocus, props.viewName), [
+          this._rootContext[Lens.frameAuthority], vRootFocus, props.viewName), [
         frame => {
           this._rootContext.frame = frame;
           this._rootContext[Lens.scopeFrameResource] = frame;

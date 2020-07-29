@@ -18,8 +18,9 @@ import {
   patchWith, dumpObject, isPromise, thisChainEagerly, thisChainReturn, wrapError
 } from "~/tools";
 
-import { tryCreateValensArgs, ValensPropsTag, postRenderElement } from "./_valensOps";
+import { createDynamicKey } from "./_propsOps";
 import { VSSStyleSheetSymbol } from "./_styleOps";
+import { tryCreateValensArgs, ValensPropsTag, postRenderElement } from "./_valensOps";
 
 export { tryCreateValensArgs, ValensPropsTag };
 
@@ -347,27 +348,27 @@ function _recordNewGenericPropValue (stateLive, propValue, propName, component) 
 // by default appear on the contained element.
 const _valensRecorderProps = {
   key (stateLive, newValue) {
-    let keyPrefix = stateLive.component.getUIContextValue(Lens.frameKeyPrefix) || "";
+    let keyPrefix = stateLive.component.getParentUIContextValue(Lens.frameKeyPrefix) || "";
     if (keyPrefix) keyPrefix = `${keyPrefix}_`;
+    if (newValue == null) {
+      stateLive.createKey = createDynamicKey;
+      stateLive.component.setUIContextValue(Lens.frameKeyPrefix,
+          `${keyPrefix}${stateLive.component.props.hierarchyKey}`);
+      return;
+    }
     if (typeof newValue === "function") {
       stateLive.createKey = function _createExplicitKey (focus_, arrayIndex, entryProps) {
         return (entryProps.frameKey = newValue(focus_, arrayIndex, keyPrefix));
       };
-    } else if (newValue != null) {
+    } else {
       const staticFrameKey = `${keyPrefix}${newValue}`;
-      stateLive.createKey = function _createSharedArrayKey (focus_, arrayIndex, entryProps) {
+      stateLive.createKey = function _createSharedKey (focus_, arrayIndex, entryProps) {
         if (arrayIndex == null) {
           return (entryProps.frameKey = staticFrameKey);
         }
-        entryProps.sharedFrameKey = staticFrameKey;
+        entryProps.sharedArrayFrameKey = staticFrameKey;
         if (arrayIndex) delete entryProps.frameOverrides;
         return String(arrayIndex);
-      };
-    } else {
-      stateLive.createKey = function _createImplicitKey (focus_, arrayIndex, entryProps) {
-        const key = (focus_ instanceof Vrapper) ? focus_.getBriefUnstableId() : String(arrayIndex);
-        entryProps.implicitFrameKey = `${keyPrefix}${key}`;
-        return key;
       };
     }
   },

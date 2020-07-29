@@ -905,11 +905,61 @@ as their owner.`,
 enclosing scope frame.`,
   }));
 
-  _defineName("lensAuthorityProperty", () => ({
+  _defineName("frameKeyPrefix", () => ({
+    tags: ["Internal", "Context"],
+    type: "string",
+    description:
+`Slot which contains the frame key prefix from the current innermost
+enclosing scope frame.`,
+  }));
+
+  _defineName("frameOwner", () => ({
+    tags: ["Attribute"],
+    type: "(string | null)",
+    description:
+`Attribute slot which contains an explicit owner for a frame resource
+or null. Null owner is only allowed for frame chronicle roots.
+Setting the owner explicitly has the a consequence that the frame id
+of the element becomes dependent of the new owner, detaching the frame
+id of the dynamic UI element hierarchy.
+
+Setting owner to null makes the frame id to behave like a global
+identifier, so that elements with the same frame id will share the
+same frame across the application. With implicit frame keys this can
+cause unintended ambiguities as the frame key is still computed
+relative the current parent frame.
+`
+  }));
+
+
+  _defineName("frameAuthority", () => ({
+    tags: ["Attribute", "Context"],
+    type: "(string | null)",
+    description:
+`Slot which contains a frame authority URI which is used for creating
+new frame chronicles.
+
+If a frameAuthority attribute slot is set this will trigger the
+creation of a new frame chronicle, using the element frame as its root
+resource. If the attribute slot is set to null no new frame chronicle
+is  created irrespective of other configurations; the frame is placed
+inside the current frame chronicle as normal.
+
+Conversely the frameAuthority context slot is read and used for a new
+frame chronicle when no explicit frame authority can be found. This
+most typically happens if the focused resource belongs to a different
+chronicle than the current frame chronicle root focus resource (which
+is stored in 'frameRootFocus'). If the context slot value is null then
+this implicit chronicle creation is disabled.`,
+    isEnabled: undefined,
+    defaultValue: "valaa-memory:",
+  }));
+
+  _defineName("frameAuthorityProperty", () => ({
     tags: ["Context"],
     type: "(string)",
     description:
-`Slot which contains the property name that is used when searching a
+`Slot which contains the _property name_ that is used when searching a
 resource for an authority URI string.
 
 This property will be searched for from a lens instance prototype or
@@ -919,42 +969,32 @@ If the chronicle didn't already exist new lens chronicle is created in
 that authority URI with a new scope frame resource as its chronicle
 root.`,
     isEnabled: undefined,
-    defaultValue: "LENS_AUTHORITY",
+    defaultValue: ["FRAME_AUTHORITY", "LENS_AUTHORITY"],
   }));
 
-  _defineName("shadowLensChronicleRoot", () => ({
+  _defineName("frameRoot", () => ({
     tags: ["Internal", "Context"],
     type: "(Resource | null)",
     description:
-`Slot which contains the resource that is the root resource of the
-current shadow lens chronicle.
+`Slot which contains root resource of the current frame chronicle.
 
-A shadow lens chronicle is the chronicle which was created to contain
-lens frames for a particular focus resource. This focused resource is
-stored in slot 'shadowedFocus'.`,
+This root resource is a frame of some element that was set up to create
+a new chronicle for its frame. This can happen either explicitly via
+an attribute or a property field on instance prototype or focus, or
+implicitly when a focused resource is a root of a regular chronicle
+(such that is different from the current frameRootFocus chronicle).
+Such a focused resource is stored in slot 'frameRootFocus'.`,
   }));
 
-  _defineName("shadowedFocus", () => ({
+  _defineName("frameRootFocus", () => ({
     tags: ["Internal", "Context"],
     type: "(Resource | null)",
     description:
-`Slot which contains a resource that is currently shadowed by a shadow
-lens chronicle (the root resource of this chronicle is stored in slot
-'shadowLensChronicleRoot'). This slot is used to detect if a particular
-focus is already being shadowed in which case no new shadow chronicle
-will be created.`,
-  }));
-
-  _defineName("shadowLensAuthority", () => ({
-    tags: ["Internal", "Context"],
-    type: "(string | null)",
-    description:
-`Slot which contains the default lens authority URI for those scope
-frames which have a chronicle root Resource as their focus. Used when a
-lens authority is not explicitly provided via property stored
-'lensAuthorityProperty' of the instance or of the focus.`,
-    isEnabled: undefined,
-    defaultValue: "valaa-memory:",
+`Slot which contains the resource that is the focus of the element
+which created the current frame chronicle (whose root resource is
+stored in the slot 'frameRoot'). This slot is primarily used to prevent
+the creation of new frame chronicles for each sub-element that focus
+the same regular chronicle root resource.`,
   }));
 
   _defineName("integrationScopeResource", () => ({

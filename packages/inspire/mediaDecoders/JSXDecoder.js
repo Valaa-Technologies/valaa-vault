@@ -93,7 +93,8 @@ export default class JSXDecoder extends MediaDecoder {
       // themselves inside parent instance owner properties.
       const rootChildrenMeta = this._createChildrenMeta();
       delete sourceInfo.currentLoc;
-      const integrator = rootElementBindKeys(`@~:${sourceInfo.mediaName}`, rootChildrenMeta);
+      const integrator = rootElementBindKeys(
+          encodeURIComponent(sourceInfo.mediaName), rootChildrenMeta);
       sourceInfo.phase = `run phase of ${sourceInfo.phaseBase}`;
       return integrator;
     } catch (error) {
@@ -180,6 +181,14 @@ export default class JSXDecoder extends MediaDecoder {
     return embeddedContent;
   }
 
+  static _nameAbbreviations = {
+    div: "d",
+    span: "s",
+    UIComponent: "UIC",
+    Valoscope: "VSC",
+    Valens: "VLE",
+  };
+
   _createKeyedElement (sourceInfo, loc, type, props, restChildren, parentKey, parentChildrenMeta) {
     let actualType = type;
     let name;
@@ -201,11 +210,11 @@ export default class JSXDecoder extends MediaDecoder {
       const shortCircuit = _maybeRecurseWithKey(children[0], parentKey, parentChildrenMeta);
       if (React.isValidElement(shortCircuit)) return shortCircuit;
     }
-    const elementPrefix = name === "div" ? "d" : name === "span" ? "s" : name;
+    const elementPrefix = JSXDecoder._nameAbbreviations[name] || name;
     const elementIndex = (parentChildrenMeta.nameIndices[name] =
       (parentChildrenMeta.nameIndices[name] || 0) + 1) - 1;
-    const elementKey = `${elementPrefix}#${elementIndex}`;
-    const lexicalName = `${parentKey || ""}@${elementKey}`;
+    const elementKey = `${elementPrefix}(${elementIndex})`;
+    const lexicalName = `${parentKey || ""}-${elementKey}`;
 
     let decodedType = actualType;
     let decodedProps;

@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.22](https://github.com/valaatech/kernel/compare/v0.35.0-rc.21...v0.35.0-rc.22) (2020-07-29)
+
+
+### Bug Fixes
+
+* vsx decoding issues ([8e939b9](https://github.com/valaatech/kernel/commit/8e939b9421708e0a755d158d4a0640e2d3252921))
+
+
+### Features
+
+* Add 'this' keyword for lens medias for referencing the Media itself ([110b3b2](https://github.com/valaatech/kernel/commit/110b3b289854c872602597b68167b03f42059556))
+* Add simplified Vrapper..updateProperties for resource creation ([e641775](https://github.com/valaatech/kernel/commit/e641775422415936a13f427336476af631cdad25))
+* Formalize Lens.key with clean (if not so simple) semantics ([96d10f7](https://github.com/valaatech/kernel/commit/96d10f7341e0b8aad824075250eea178dae0383e))
+
+
+
+
+
 # [0.35.0-rc.21](https://github.com/valaatech/kernel/compare/v0.35.0-rc.20...v0.35.0-rc.21) (2020-07-20)
 
 

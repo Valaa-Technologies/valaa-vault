@@ -37,7 +37,7 @@
         "@type": "@id"
       }
     },
-    "dc:title": "@valos/kernel-vault@0.35.0-rc.20 Software Bill of Materials",
+    "dc:title": "@valos/kernel-vault@0.35.0-rc.21 Software Bill of Materials",
     "respecConfig": {
       "specStatus": "unofficial",
       "editors": [
@@ -89,7 +89,7 @@
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
             "This document was automatically generated on ",
-            "2020-07-20T09:09:22.783Z",
+            "2020-07-29T08:58:33.064Z",
             "."
           ]
         },
@@ -219,15 +219,6 @@
       },
       {
         "type": "library",
-        "name": "figgy-pudding",
-        "version": "3.5.2",
-        "description": "Delicious, festive, cascading config/opts definitions",
-        "licenses": "ISC",
-        "purl": "pkg:npm/figgy-pudding@3.5.2",
-        "modified": false
-      },
-      {
-        "type": "library",
         "name": "fs.realpath",
         "version": "1.0.0",
         "description": "Use node's fs.realpath, but fall back to the JS implementation if the native one fails",
@@ -296,6 +287,15 @@
         "description": "A drop-in replacement for fs, making various improvements.",
         "licenses": "ISC",
         "purl": "pkg:npm/graceful-fs@4.2.4",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "name": "figgy-pudding",
+        "version": "3.5.2",
+        "description": "Delicious, festive, cascading config/opts definitions",
+        "licenses": "ISC",
+        "purl": "pkg:npm/figgy-pudding@3.5.2",
         "modified": false
       },
       {
@@ -510,48 +510,48 @@
         "type": "library",
         "group": "valos",
         "name": "inspire",
-        "version": "0.35.0-rc.21",
+        "version": "0.35.0-rc.22",
         "description": "ValOS Inspire application gateway",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/inspire@0.35.0-rc.21",
+        "purl": "pkg:npm/%40valos/inspire@0.35.0-rc.22",
         "modified": false
       },
       {
         "type": "library",
         "group": "valos",
         "name": "kernel",
-        "version": "0.35.0-rc.21",
+        "version": "0.35.0-rc.22",
         "description": "@valos/kernel domain",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/kernel@0.35.0-rc.21",
+        "purl": "pkg:npm/%40valos/kernel@0.35.0-rc.22",
         "modified": false
       },
       {
         "type": "library",
         "group": "valos",
         "name": "toolset-revealer",
-        "version": "0.35.0-rc.21",
+        "version": "0.35.0-rc.22",
         "description": "Tools for building revelations both for development and deployment purposes",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/toolset-revealer@0.35.0-rc.21",
+        "purl": "pkg:npm/%40valos/toolset-revealer@0.35.0-rc.22",
         "modified": false
       },
       {
         "type": "library",
         "name": "valma",
-        "version": "0.35.0-rc.21",
+        "version": "0.35.0-rc.22",
         "description": "A ValOS CLI tool for discovering and executing context-dependent command scripts",
         "licenses": "MIT",
-        "purl": "pkg:npm/valma@0.35.0-rc.21",
+        "purl": "pkg:npm/valma@0.35.0-rc.22",
         "modified": false
       },
       {
         "type": "library",
         "name": "inquirer",
-        "version": "7.3.2",
+        "version": "7.3.3",
         "description": "A collection of common interactive command line user interfaces.",
         "licenses": "MIT",
-        "purl": "pkg:npm/inquirer@7.3.2",
+        "purl": "pkg:npm/inquirer@7.3.3",
         "modified": false
       },
       {
@@ -792,10 +792,10 @@
         "type": "library",
         "group": "valos",
         "name": "type-vault",
-        "version": "0.35.0-rc.21",
+        "version": "0.35.0-rc.22",
         "description": "The ValOS 'vault' workspace type toolset",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/type-vault@0.35.0-rc.21",
+        "purl": "pkg:npm/%40valos/type-vault@0.35.0-rc.22",
         "modified": false
       },
       {

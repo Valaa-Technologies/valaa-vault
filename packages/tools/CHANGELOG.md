@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.22](https://github.com/valaatech/kernel/compare/v0.35.0-rc.21...v0.35.0-rc.22) (2020-07-29)
+
+
+### Features
+
+* Formalize Lens.key with clean (if not so simple) semantics ([96d10f7](https://github.com/valaatech/kernel/commit/96d10f7341e0b8aad824075250eea178dae0383e))
+
+
+
+
+
 # [0.35.0-rc.21](https://github.com/valaatech/kernel/compare/v0.35.0-rc.20...v0.35.0-rc.21) (2020-07-20)
 
 

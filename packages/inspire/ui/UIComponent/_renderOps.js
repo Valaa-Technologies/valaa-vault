@@ -286,6 +286,7 @@ const _renderMediaLensChain = [
       // and thus will conflict with each other.
       this.component.setUIContextValue(
           Lens.integrationScopeResource, this.options.vIntegrationScope);
+      this.component.setUIContextValue("this", this.media);
       return contentInterpretation;
     } else if (contentInterpretation instanceof Error) {
       error = contentInterpretation;

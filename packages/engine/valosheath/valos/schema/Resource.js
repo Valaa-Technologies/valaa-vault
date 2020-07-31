@@ -6,6 +6,8 @@ import {
 import type { VRL } from "~/raem/VRL";
 import derivedId from "~/raem/tools/derivedId";
 
+import { qualifiedSymbol } from "~/script";
+
 import VALEK from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
 
@@ -16,22 +18,22 @@ import { OwnerDefaultCouplingTag } from "~/engine/valosheath/valos/enfoldSchemaS
 import { dumpObject, wrapError } from "~/tools";
 
 const symbols = {
-  getField: Symbol("Resource.getField"),
-  getFieldCoupling: Symbol("Resource.getFieldCoupling"),
-  setField: Symbol("Resource.setField"),
-  addToField: Symbol("Resource.addToField"),
-  removeFromField: Symbol("Resource.removeFromField"),
-  replaceWithinField: Symbol("Resource.replaceWithinField"),
-  setOwner: Symbol("Resource.setOwner"),
-  getEntity: Symbol("Resource.getEntity"),
-  getMedia: Symbol("Resource.getMedia"),
-  getSubResource: Symbol("Resource.getSubResource"),
-  createDerivedId: Symbol("Resource.createDerivedId"),
-  hasInterface: Symbol("Resource.hasInterface"),
-  instantiate: Symbol("Resource.instantiate"),
-  duplicate: Symbol("Resource.duplicate"),
-  prepareBlob: Symbol("Resource.prepareBlob"),
-  prepareBvob: Symbol("Resource.prepareBvob"),
+  getField: qualifiedSymbol("V", "getField"),
+  getFieldCoupling: qualifiedSymbol("V", "getFieldCoupling"),
+  setField: qualifiedSymbol("V", "setField"),
+  addToField: qualifiedSymbol("V", "addToField"),
+  removeFromField: qualifiedSymbol("V", "removeFromField"),
+  replaceWithinField: qualifiedSymbol("V", "replaceWithinField"),
+  setOwner: qualifiedSymbol("V", "setOwner"),
+  getEntity: qualifiedSymbol("V", "getEntity"),
+  getMedia: qualifiedSymbol("V", "getMedia"),
+  getSubResource: qualifiedSymbol("V", "getSubResource"),
+  createDerivedId: qualifiedSymbol("V", "createDerivedId"),
+  hasInterface: qualifiedSymbol("V", "hasInterface"),
+  instantiate: qualifiedSymbol("V", "instantiate"),
+  duplicate: qualifiedSymbol("V", "duplicate"),
+  prepareBlob: qualifiedSymbol("V", "prepareBlob"),
+  prepareBvob: qualifiedSymbol("V", "prepareBvob"),
 };
 
 export default {

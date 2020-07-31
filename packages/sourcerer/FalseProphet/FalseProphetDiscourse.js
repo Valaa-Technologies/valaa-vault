@@ -9,6 +9,8 @@ import { getHostRef } from "~/raem/VALK/hostReference";
 import { formVPath, validateVRID, validateVVerbs } from "~/raem/VPath";
 import { addConnectToChronicleToError } from "~/raem/tools/denormalized/partitions";
 
+import { qualifiedNameOf } from "~/script";
+
 import Discourse from "~/sourcerer/api/Discourse";
 import type Connection from "~/sourcerer/api/Connection";
 import type { ChronicleOptions, ChroniclePropheciesRequest, ConnectOptions, ProphecyEventResult }

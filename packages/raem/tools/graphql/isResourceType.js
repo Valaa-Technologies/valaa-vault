@@ -3,7 +3,7 @@ import { GraphQLObjectType, getNamedType } from "graphql/type";
 
 export default function isResourceType (typeIntro: GraphQLObjectType) {
   let ret = typeIntro.__isValOSResource;
-  if (typeof ret === "undefined") {
+  if (ret === undefined) {
     let value = false;
     const intro = getNamedType(typeIntro);
     // Note! The _typeConfig is implementation specific dependency on graphql internal

@@ -313,7 +313,7 @@ const _scopeFrameChain = [
       // TODO(iridian): This is initial, non-rigorous prototype functionality:
       // The owner[key] value remains set even after the components get detached.
       discourse = this.component.context.engine.getActiveGlobalOrNewLocalEventGroupTransaction();
-      this.vOwner.updateProperty(explicitFrameKey, scopeFrame, { discourse });
+      this.vOwner.assignProperty(explicitFrameKey, scopeFrame, { discourse });
     }
     const vScopeFrame = tryUnpackedHostValue(scopeFrame);
     if (vScopeFrame) this.component.setUIContextValue(Lens.scopeFrameResource, vScopeFrame);
@@ -338,7 +338,7 @@ function _integrateFramePropertyDiffs (component, frame, frameOverrides, discour
     updateTarget[key] = value;
   }
   if (updateTarget === frame) return true;
-  frame.updateProperties(updateTarget, {
+  frame.assignProperties(updateTarget, {
     // eslint-disable-next-line no-param-reassign
     discourse: discourse ||
         component.context.engine.getActiveGlobalOrNewLocalEventGroupTransaction(),

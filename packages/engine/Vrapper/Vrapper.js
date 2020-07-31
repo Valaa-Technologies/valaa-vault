@@ -27,7 +27,7 @@ import { AbsentChroniclesError, addConnectToChronicleToError }
 import isResourceType from "~/raem/tools/graphql/isResourceType";
 import isAbsentTypeName from "~/raem/tools/graphql/isAbsentTypeName";
 
-import { ValoscriptPrimitiveKind /* , NativeIdentifierTag */ } from "~/script";
+import { ValoscriptPrimitiveKind, qualifiedNameOf /* , NativeIdentifierTag */ } from "~/script";
 import { transpileValoscriptBody } from "~/script/transpileValoscript";
 import { ScopeAccessesTag } from "~/script/VALSK";
 
@@ -1067,43 +1067,52 @@ export default class Vrapper extends Cog {
 
   propertyValue (propertyName: string | Symbol, options: VALKOptions = {}) {
     // eslint-disable-next-line
-    const typeName = this.getTypeName(options);
-    const vProperty = this.getPropertyResource(propertyName, Object.create(options));
-    if (vProperty) {
-      return vProperty.extractValue(options, this);
+    let typePrototype, fieldDescriptor;
+    if (typeof propertyName !== "string" || (propertyName[0] === "$")) {
+      typePrototype = this.getValospaceType(options).prototype;
+      fieldDescriptor = typePrototype[PropertyDescriptorsTag][propertyName];
     }
-    // TODO(iridian, 2020-06): All namespace handling should be moved to engineSteppers.
-    const typePrototype = this._parent.getValospaceTypePrototype(typeName);
-    const fieldDescriptor = typePrototype[PropertyDescriptorsTag][propertyName];
-
-    if (fieldDescriptor != null) {
-      if (fieldDescriptor.isHostField) {
-        const namespace = fieldDescriptor.namespace;
-        if (namespace) {
-          const accessor = fieldDescriptor.accessor;
-          // console.log("hostref", fieldDescriptor, fieldDescriptor.isHostField, namespace);
-          return ((this._namespaceProxies || (this._namespaceProxies = {}))[accessor]
-              || (this._namespaceProxies[accessor] =
-                  namespace.createProxyTo(this, accessor)));
-        }
-        const ret = this.step(fieldDescriptor.kuery, options);
-        // console.log("hostref", fieldDescriptor.kuery, ret);
-        return ret;
+    if (fieldDescriptor == null) {
+      const vProperty = this.getPropertyResource(propertyName, Object.create(options));
+      // console.log("vProp:", propertyName, String(vProperty), vProperty._type.name);
+      return vProperty
+          ? vProperty.extractValue(options, this)
+          : (typePrototype || this.getValospaceType(options).prototype)[propertyName];
+    }
+    if (fieldDescriptor.isHostField) {
+      const namespace = fieldDescriptor.namespace;
+      if (namespace) {
+        const accessor = fieldDescriptor.accessor;
+        // console.log("hostref", fieldDescriptor, fieldDescriptor.isHostField, namespace);
+        return ((this._namespaceProxies || (this._namespaceProxies = {}))[accessor]
+            || (this._namespaceProxies[accessor] =
+                namespace.createProxyTo(this, accessor)));
       }
-      if (fieldDescriptor.value !== undefined) return fieldDescriptor.value;
+      // console.log("hostref", fieldDescriptor.kuery, ret);
+      return this.step(fieldDescriptor.kuery, options);
     }
-    return typePrototype[propertyName];
+    return (fieldDescriptor.value !== undefined)
+        ? fieldDescriptor.value
+        : typePrototype[propertyName];
   }
 
   static _propertyKueries = Object.create(null);
   static getPropertyKuery (propertyName) {
-    return Vrapper._propertyKueries[propertyName]
-        || (Vrapper._propertyKueries[propertyName] =
-            VALEK.property(propertyName).setScopeAccesses(null));
+    let ret = Vrapper._propertyKueries[propertyName];
+    if (!ret) {
+      let propertyNameString = propertyName;
+      if (typeof propertyName !== "string") {
+        if (!isSymbol(propertyName)) return undefined;
+        const qualifiedName = qualifiedNameOf(propertyName);
+        if (qualifiedName) propertyNameString = qualifiedName[3];
+      }
+      ret = VALEK.property(propertyNameString).setScopeAccesses(null);
+      Vrapper._propertyKueries[propertyName] = ret;
+    }
+    return ret;
   }
 
   getPropertyResource (propertyName: string | Symbol, options: VALKOptions) {
-    if (typeof propertyName !== "string") return undefined;
     const ret = (this._propscope && this._propscope[propertyName])
         || (this._valospaceScope && this._valospaceScope.hasOwnProperty(propertyName)
     // FIXME(iridian): If a property gets renamed inside a transaction
@@ -1113,32 +1122,43 @@ export default class Vrapper extends Cog {
     // might arise with heresy rollbacks.
             && this._valospaceScope[propertyName]);
     if (ret && !ret.isImmaterial()) return ret;
+    const toProperty = Vrapper.getPropertyKuery(propertyName);
+    if (!toProperty) return undefined;
+    const propertyCache = this._valospaceScope || this._propscope
+        || (this._propscope = Object.create(null));
     // New properties which don't exist in _valospaceScope still work as
     // they get kueried here.
-    return (this._valospaceScope || this._propscope || (this._propscope = Object.create(null))
-        )[propertyName] = this.step(Vrapper.getPropertyKuery(propertyName), options);
+    return (propertyCache[propertyName] = this.step(toProperty, options));
   }
 
-  updateProperties (propertyUpdates: (Object | Array[]), options: Object) {
-    let key, value, name, nameValue, kuery;
+  assignProperties (propertyUpdates: Object, options: Object) {
+    let key, value, kuery;
+    const vPropertyDummy = (options.updateExisting === false) ? null : undefined;
     try {
+      for ([key, value] of Object.entries(propertyUpdates)) {
+        this.assignProperty(key, value, options, vPropertyDummy);
+      }
+      for (key of Object.getOwnPropertySymbols(propertyUpdates)) {
+        this.assignProperty(key, propertyUpdates[key], options, vPropertyDummy);
+      }
+      /*
       for ([key, value] of Array.isArray(propertyUpdates)
           ? propertyUpdates
           : Object.entries(propertyUpdates)) {
         if (key[0] !== "$") {
-          this.updateProperty(key, value, options,
+          this.assignProperty(key, value, options,
               (options.updateExisting === false) ? null : undefined);
         } else {
           for ([name, nameValue] of Object.entries(value)) {
-            this.updateProperty(`@.${key}.${encodeURIComponent(name)}@@`,
+            this.assignProperty(`@.${key}.${encodeURIComponent(name)}@@`,
                 nameValue, options, (options.updateExisting === false) ? null : undefined);
           }
-
           name = null;
         }
       }
+      */
     } catch (error) {
-      const errorName = new Error(`updateProperty(${name || key})`);
+      const errorName = new Error(`assignProperty(${String(key)})`);
       throw this.wrapErrorEvent(error, 1, () => [
         errorName,
         "\n\tresource:", ...dumpObject(this),
@@ -1148,7 +1168,7 @@ export default class Vrapper extends Cog {
     }
   }
 
-  updateProperty (propertyName: any, newValue: Object, options: VALKOptions = {},
+  assignProperty (propertyName: string | Symbol, newValue: Object, options: VALKOptions = {},
       vProperty = this.getPropertyResource(propertyName, Object.create(options))) {
     if (newValue instanceof Kuery) {
       return this.alterProperty(propertyName, newValue, Object.create(options), vProperty);
@@ -1169,7 +1189,7 @@ export default class Vrapper extends Cog {
       type: "CREATED", typeName: "Property",
       initialState: { owner: this[HostRef].coupleWith("properties"), name: propertyName, value },
     };
-    discourse.assignNewVRID(event, String(options.chronicleURI), undefined, undefined);
+    discourse.assignNewVRID(event, String(options.chronicleURI));
     return discourse.chronicleEvent(event);
   }
 

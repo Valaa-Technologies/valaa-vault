@@ -10,6 +10,7 @@ import type { BuiltinStep } from "~/raem/VALK/raemSteppers";
 import { createNativeIdentifier, isNativeIdentifier, getNativeIdentifierValue,
   setNativeIdentifierValue,
 } from "~/script/denormalized/nativeIdentifier";
+import { qualifiedSymbol } from "~/script/denormalized/namespaceSymbols";
 
 const isSymbol = require("~/tools/isSymbol").default;
 
@@ -278,7 +279,7 @@ function _deleteIdentifierOrProperty (steppers: Object, valker: Valker, head: an
 
 // TODO(iridian): clarify the relationship between raem/VALK/hostReference.HostRef and
 // ValoscriptPrimitiveKind. ValoscriptPrimitiveKind might be an alias for it.
-export const ValoscriptPrimitiveKind = Symbol("Valoscript.PrimitiveKind");
+export const ValoscriptPrimitiveKind = qualifiedSymbol("Valoscript", "PrimitiveKind");
 export const valoscriptPrimitivePrototype = {
   [ValoscriptPrimitiveKind]: null, // must be overridden
 };
@@ -288,7 +289,7 @@ export const valoscriptInterfacePrototype = Object.assign(
   [ValoscriptPrimitiveKind]: "Interface",
 });
 
-export const ValoscriptNew = Symbol("valos.constructor");
+export const ValoscriptNew = qualifiedSymbol("Valoscript", "constructor");
 export const valoscriptTypePrototype = Object.assign(Object.create(valoscriptPrimitivePrototype), {
   [ValoscriptPrimitiveKind]: "Type",
   [ValoscriptNew] () {
@@ -297,7 +298,7 @@ export const valoscriptTypePrototype = Object.assign(Object.create(valoscriptPri
   },
 });
 
-export const ValoscriptInstantiate = Symbol("valos.instantiate");
+export const ValoscriptInstantiate = qualifiedSymbol("Valoscript", "instantiate");
 
 export const valoscriptResourcePrototype = Object.assign(
     Object.create(valoscriptPrimitivePrototype), {

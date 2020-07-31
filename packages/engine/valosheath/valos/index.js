@@ -19,7 +19,7 @@ export default function extendValOS (scope: any, hostDescriptors: any, rootDisco
   enfoldGatewaySheath(valosheath, hostDescriptors, rootDiscourse);
   if (rootDiscourse.schema) {
     const primaryNamespace = addValosheathNamespace(valosheath, "valos", {
-      preferredPrefix: "valos",
+      preferredPrefix: "V",
       namespaceURI: "https://valospace.org/#",
     });
     enfoldSchemaSheath(scope, valosheath, primaryNamespace, hostDescriptors,

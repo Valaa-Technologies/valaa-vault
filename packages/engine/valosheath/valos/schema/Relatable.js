@@ -3,17 +3,19 @@
 import { denoteDeprecatedValOSBuiltin, denoteValOSBuiltinWithSignature, denoteValOSKueryFunction }
     from "~/raem/VALK";
 
+import { qualifiedSymbol } from "~/script";
+
 import VALEK, { extractFunctionVAKON } from "~/engine/VALEK";
 
 import { dumpObject, wrapError } from "~/tools";
 
 const symbols = {
-  getRelations: Symbol("Relatable.getRelations"),
-  getRelationsTargets: Symbol("Relatable.getRelationTargets"),
-  setRelations: Symbol("Relatable.setRelations"),
-  getIncomingRelations: Symbol("Relatable.getIncomingRelations"),
-  getIncomingRelationsSources: Symbol("Relatable.getIncomingRelationSources"),
-  setIncomingRelations: Symbol("Relatable.setIncomingRelations"),
+  getRelations: qualifiedSymbol("V", "getRelations"),
+  getRelationsTargets: qualifiedSymbol("V", "getRelationTargets"),
+  setRelations: qualifiedSymbol("V", "setRelations"),
+  getIncomingRelations: qualifiedSymbol("V", "getIncomingRelations"),
+  getIncomingRelationsSources: qualifiedSymbol("V", "getIncomingRelationSources"),
+  setIncomingRelations: qualifiedSymbol("V", "setIncomingRelations"),
 };
 
 export default {

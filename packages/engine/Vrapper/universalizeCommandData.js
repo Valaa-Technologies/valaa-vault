@@ -2,19 +2,29 @@
 import { Iterable } from "immutable";
 import { isIdData } from "~/raem/VRL";
 import { Kuery } from "~/raem/VALK";
-import Vrapper from "~/engine/Vrapper";
 import { HostRef } from "~/raem/VALK/hostReference";
 
-import { invariantifyObject } from "~/tools/invariantify";
-import { dumpObject, wrapError } from "~/tools/wrapError";
+import { qualifiedNameOf } from "~/script";
+
+import Vrapper from "~/engine/Vrapper";
+
+import { dumpObject, invariantifyObject, isSymbol, wrapError } from "~/tools";
 
 export default function universalizeCommandData (object: ?any, options:
     { head?: Vrapper, discourse?: Object, scope?: Object, chronicleURI?: string } = {}) {
   let id, connectedId;
   try {
-    if ((typeof object !== "object") || (object === null)) {
+    if ((object === null) || ((typeof object !== "object") && (typeof object !== "symbol"))) {
       // Literal
       return object;
+    }
+
+    if (isSymbol(object)) {
+      const qualifiedName = qualifiedNameOf(object)
+      if (qualifiedName) {
+        return qualifiedName[3];
+      }
+      throw new Error(`Cannot universalize unrecognized symbol ${String(object)}`);
     }
 
     if (object instanceof Kuery) {

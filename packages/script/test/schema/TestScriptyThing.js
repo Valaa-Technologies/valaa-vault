@@ -93,9 +93,6 @@ const TestScriptyThing = new GraphQLObjectType({
     ...primaryField("music", new GraphQLList(Sprite),
         "Referenced abstract denoted music Sprite's in the testing chronicle",
     ),
-
-    ...primaryField("mediaType", MediaType,
-    `The media type of this test chronicle`),
   }),
 });
 

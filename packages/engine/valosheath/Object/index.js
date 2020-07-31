@@ -162,7 +162,7 @@ export default function extendObject (scope: Object, hostDescriptors: Map<any, O
         return Object.assign(target, combinedSources);
       }
       discourse = options.discourse = options.discourse.acquireFabricator("Object.assign");
-      target.updateProperties(combinedSources, options);
+      target.assignProperties(combinedSources, options);
     } catch (error) {
       releaseOpts = { rollback: error };
       throw error;

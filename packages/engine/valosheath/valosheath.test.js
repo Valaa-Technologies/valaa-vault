@@ -3,7 +3,7 @@
 import { created } from "~/raem/events";
 import { vRef } from "~/raem/VRL";
 
-import { transpileValoscriptBody } from "~/script";
+import { transpileValoscriptBody, qualifiedSymbol } from "~/script";
 
 import { createEngineTestHarness } from "~/engine/test/EngineTestHarness";
 import VALEK, { pointer } from "~/engine/VALEK";
@@ -581,6 +581,51 @@ describe("transpileValoscriptBody with Engine scriptAPI", () => {
       expect(lots).toEqual(60);
     });
 
+describe("namespaced resource $V.names", () => {
+  it("creates a new Entity with a namespaced name and property", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyText = `
+        new Entity({ name: $ns1.myEntity, owner: this, properties: { [$ns2.foo]: 10 } });
+    `;
+    const bodyKuery = transpileValoscriptTestBody(bodyText);
+    const myEntity = entities().creator.do(bodyKuery);
+    expect(myEntity.step("name"))
+        .toEqual("@$ns1.myEntity@@");
+    expect(myEntity.step("prefix"))
+        .toEqual("ns1");
+    expect(myEntity.step("localPart"))
+        .toEqual("myEntity");
+    expect(myEntity.getPropertyResource(qualifiedSymbol("ns2", "foo")).getRawId())
+        .toMatch(/@\.\$ns2\.foo@@/);
+    expect(myEntity.step(VALEK.propertyLiteral("@$ns2.foo@@")))
+        .toEqual(10);
+    expect(myEntity.propertyValue(qualifiedSymbol("ns2", "foo")))
+        .toEqual(10);
+    expect(entities().creator.step(
+            VALEK.to("unnamedOwnlings").filter(VALEK.hasName("@$ns1.myEntity@@")).to(0)))
+        .toEqual(myEntity);
+  });
+  it("handles Object.assign roundtrip from native object to ValOS resource and back", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyText = `
+        const properties = { a: 1, [$V.name]: "newname", [$nss.foo]: "propfoo" };
+        const Base = new Entity({
+          owner: this, name: "basename",
+          properties: { [$nss.foo]: "nssfoo", [$base.foo]: "basefoo" },
+        });
+        const midway = new Base({ owner: this });
+        Object.assign(midway, properties);
+        const plain = Object.assign({}, midway);
+        const target = new Entity({ owner: this, name: "oldname", [$nss.foo]: "targetfoo" });
+        Object.assign(target, midway);
+        [properties, Base, midway, plain, target];
+    `;
+    const bodyKuery = transpileValoscriptTestBody(bodyText);
+    const [properties, Base, midway, plain, target] = entities().creator.do(bodyKuery);
+    const BaseFooTag = qualifiedSymbol("base", "foo");
+    const NSSFooTag = qualifiedSymbol("nss", "foo");
+    expect(properties).toMatchObject({
+      a: 1, [qualifiedSymbol("V", "name")]: "newname", [NSSFooTag]: "propfoo",
     it("duplicates an entity with valoscript function", () => {
       harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
       const bodyText = `
@@ -616,6 +661,20 @@ describe("transpileValoscriptBody with Engine scriptAPI", () => {
       expect(entities().test.step("unnamedOwnlings").length)
           .toEqual(4);
     });
+    expect(Base.propertyValue(qualifiedSymbol("V", "name"))).toEqual("basename");
+    expect(midway.step("name")).toEqual("newname");
+    expect(midway.propertyValue(qualifiedSymbol("V", "name"))).toEqual("newname");
+    expect(midway.propertyValue("a")).toEqual(1);
+    expect(midway.propertyValue(BaseFooTag)).toEqual("basefoo");
+    expect(midway.propertyValue(NSSFooTag)).toEqual("propfoo");
+    expect(plain).toEqual({ a: 1, "@$base.foo@@": "basefoo", "@$nss.foo@@": "propfoo" });
+    expect(plain).not.toBe(properties);
+    // native fields not assigned (?)
+    expect(target.step("name")).toEqual("oldname");
+    expect(target.propertyValue(qualifiedSymbol("V", "name"))).toEqual("oldname");
+    expect(target.propertyValue("a")).toEqual(1);
+    expect(target.propertyValue(BaseFooTag)).toEqual("basefoo");
+    expect(target.propertyValue(NSSFooTag)).toEqual("propfoo");
   });
 });
 

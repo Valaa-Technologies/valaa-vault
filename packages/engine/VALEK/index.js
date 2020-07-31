@@ -1,8 +1,10 @@
 // @flow
 
-import { transpileValoscript, isNativeIdentifier, getNativeIdentifierValue } from "~/script";
-import { dumpObject as _dumpObject, Kuery, ValoscriptKuery, isValOSFunction, toVAKONTag }
-    from "~/script/VALSK";
+import { transpileValoscript, isNativeIdentifier, getNativeIdentifierValue, qualifiedSymbol }
+    from "~/script";
+import {
+  dumpObject as _dumpObject, Kuery, ValoscriptKuery, isValOSFunction, toVAKONTag,
+} from "~/script/VALSK";
 
 import Vrapper from "~/engine/Vrapper";
 
@@ -40,7 +42,7 @@ export function dumpObject (value: mixed) {
   return _dumpObject(value);
 }
 
-export const rootScopeSelf = Symbol("rootScope.self");
+export const rootScopeSelf = qualifiedSymbol("VALEK", "rootScopeSelf");
 
 export function kueryExpression (kuery: Kuery | any) {
   return {
@@ -53,19 +55,19 @@ export function kueryExpression (kuery: Kuery | any) {
 // seems like a worse choice by the day. Biggest issue of all is that for Data pointers
 // there is no referential integrity yet. We can't avoid the setField, but we could
 // avoid toExpressionKuery and the typeof/Resource-condition below
-export function expressionFromProperty (value: any, property: any, descriptor: ?Object) {
+export function expressionFromProperty (value: any, propertyName: any, descriptor: ?Object) {
   if (value === undefined) {
     if (!descriptor || descriptor.hasOwnProperty("value")) return null;
     if (!descriptor.get) {
       throw new Error(`Must specify either descriptor.value or descriptor.get${
-        ""} when defining valospace property '${String(property)}'`);
+        ""} when defining valospace property '${propertyName}'`);
     }
     const vakon = isValOSFunction(descriptor.get) ? extractFunctionVAKON(descriptor.get)
         : (descriptor.get instanceof Kuery) ? descriptor.get.toVAKON()
         : undefined;
     if (vakon === undefined) {
       throw new Error(`descriptor.get must be either VAKON kuery or a liveable function${
-        ""} when defining valospace property '${String(property)}'`);
+        ""} when defining valospace property '${propertyName}'`);
     }
     return { typeName: "KueryExpression", vakon };
   }
@@ -82,7 +84,7 @@ export function expressionFromProperty (value: any, property: any, descriptor: ?
       if (typeof clonee === "function") {
         if (!isValOSFunction(clonee)) {
           throw new Error(`While universalizing into valospace resource property '${
-              String(property)}' encountered a non-valospace function at sub-property ${key}': ${
+            propertyName}' encountered a non-valospace function at sub-property ${key}': ${
                 clonee.name}`);
         }
         return ["§capture", ["§'", extractFunctionVAKON(clonee)], undefined, "literal"];
@@ -91,7 +93,7 @@ export function expressionFromProperty (value: any, property: any, descriptor: ?
       if (cloneeDescriptor && (typeof cloneeDescriptor.get === "function")) {
         if (!isValOSFunction(cloneeDescriptor.get)) {
           throw new Error(`While universalizing into valospace resource property '${
-              String(property)}' encountered a non-valospace getter for sub-property ${key}': ${
+              propertyName}' encountered a non-valospace getter for sub-property ${key}': ${
                 cloneeDescriptor.get.name}`);
         }
         cloneeDescriptor.enumerable = true;

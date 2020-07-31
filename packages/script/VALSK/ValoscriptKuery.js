@@ -1,9 +1,10 @@
 // @flow
 
 import { Kuery } from "~/raem/VALK";
+import { qualifiedSymbol } from "~/script/denormalized/namespaceSymbols";
 
-export const ScopeAccessesTag = Symbol("VALSK.ScopeAccesses");
-export const ScopeAccessKeysTag = Symbol("VALSK.ScopeAccessKeys");
+export const ScopeAccessesTag = qualifiedSymbol("VALSK", "ScopeAccesses");
+export const ScopeAccessKeysTag = qualifiedSymbol("VALSK", "ScopeAccessKeys");
 
 export default class ValoscriptKuery extends Kuery {
   setScopeAccesses (scopeAccesses) {

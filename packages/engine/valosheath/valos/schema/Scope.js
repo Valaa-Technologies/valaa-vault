@@ -4,14 +4,14 @@ import {
   denoteValOSBuiltinWithSignature, denoteDeprecatedValOSBuiltin, denoteValOSKueryFunction,
 } from "~/raem/VALK";
 
-import { createNativeIdentifier } from "~/script";
+import { createNativeIdentifier, qualifiedSymbol } from "~/script";
 
 import VALEK from "~/engine/VALEK";
 
 const symbols = {
-  getProperty: Symbol("Scope.getProperty"),
-  getAssociatedNativeGlobal: Symbol("Scope.getAssociatedNativeGlobal"),
-  getHostGlobal: Symbol("Scope.getHostGlobal"),
+  getProperty: qualifiedSymbol("V", "getProperty"),
+  getAssociatedNativeGlobal: qualifiedSymbol("V", "getAssociatedNativeGlobal"),
+  getHostGlobal: qualifiedSymbol("V", "getHostGlobal"),
 };
 
 export default {

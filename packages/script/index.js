@@ -18,6 +18,10 @@ export {
                                       transpileValoscriptModule,
 } from "./transpileValoscript";
 export {
+                                      qualifiedSymbol,
+                                      qualifiedNameOf,
+} from "./denormalized/namespaceSymbols";
+export {
                            default as addExportsContainerToScope
 } from "./denormalized/addExportsContainerToScope";
 export {

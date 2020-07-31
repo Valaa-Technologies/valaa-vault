@@ -3,6 +3,7 @@
 import { HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
 import Transient from "~/raem/state/Transient";
 
+import { qualifiedSymbol } from "~/script";
 
 // import debugId from "~/engine/debugId";
 import { Valker } from "~/engine/VALEK";
@@ -32,8 +33,8 @@ export function defineName (name: string, namespace: Namespace,
     ...createNameParameters(),
     ...commonNameParameters,
   });
-  namespace.nameSymbols[name] = Symbol(`$${namespace.preferredPrefix}.${name}`);
-  namespace.nameSymbols[namespace.nameSymbols[name]] = name; // Symbol -> name reverse lookup
+  const symbol = namespace.nameSymbols[name] = qualifiedSymbol(namespace.preferredPrefix, name);
+  namespace.nameSymbols[symbol] = name; // Symbol -> name reverse lookup
   return namespace.nameSymbols[name];
 }
 

@@ -2,7 +2,7 @@
 
 import { denoteValOSKueryFunction } from "~/raem/VALK";
 
-import { ValoscriptNew, ValoscriptInstantiate } from "~/script";
+import { ValoscriptNew, ValoscriptInstantiate, qualifiedSymbol } from "~/script";
 
 import VALEK from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
@@ -10,11 +10,11 @@ import Vrapper from "~/engine/Vrapper";
 import { newResource, instantiateResource } from "~/engine/valosheath/valos/_resourceLifetimeOps";
 
 const symbols = {
-  interpretContent: Symbol("Media.interpretContent"),
-  readContent: Symbol("Media.readContent"),
-  immediateContent: Symbol("Media.immediateContent"),
-  getURL: Symbol("Media.getURL"),
-  immediateURL: Symbol("Media.immediateURL"),
+  interpretContent: qualifiedSymbol("V", "interpretContent"),
+  readContent: qualifiedSymbol("V", "readContent"),
+  immediateContent: qualifiedSymbol("V", "immediateContent"),
+  getURL: qualifiedSymbol("V", "getURL"),
+  immediateURL: qualifiedSymbol("V", "immediateURL"),
 };
 
 export default {

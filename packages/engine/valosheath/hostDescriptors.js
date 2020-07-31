@@ -1,5 +1,8 @@
 // $flow
 
+import { qualifiedSymbol } from "~/script";
+
+
 /*
  * Note on semantics:
  * 'native' in valoscript context has the corresponding semantics to
@@ -13,9 +16,10 @@
  * scope, DOM, execution engine builtin operations, etc.)
  */
 
-export const PropertyDescriptorsTag = Symbol("valos.PropertyDescriptors");
-export const TypeFieldDescriptorsTag = Symbol("valos.TypeFieldDescriptors");
-export const PrototypeFieldDescriptorsTag = Symbol("valos.PrototypeFieldDescriptors");
+export const PropertyDescriptorsTag = qualifiedSymbol("Valosheath", "PropertyDescriptors");
+export const TypeFieldDescriptorsTag = qualifiedSymbol("Valosheath", "TypeFieldDescriptors");
+export const PrototypeFieldDescriptorsTag =
+    qualifiedSymbol("Valosheath", "PrototypeFieldDescriptors");
 
 export function createHostPrototypeFieldDescriptor (field: Object) {
   return Object.freeze({

@@ -2,6 +2,7 @@
 
 /* eslint-disable max-len */
 import Transpiler from "~/script/acorn/ValoscriptTranspiler";
+import { qualifiedSymbol } from "~/script/denormalized/namespaceSymbols";
 import { Kuery } from "~/script/VALSK";
 
 import { dumpObject } from "~/tools";
@@ -48,6 +49,9 @@ export function parseIdentifier (transpiler: Transpiler, ast: Identifier,
   }
   if (options.leftSideRole === "delete") {
     return () => transpiler.VALK().deleteIdentifier(ast.name);
+  }
+  if ((options.leftSideRole === "member") && (ast.name[0] === "$")) {
+    return ast.name.slice(1);
   }
   transpiler.addScopeAccess(options.scopeAccesses, ast.name, "read");
   return transpiler.VALK().identifierValue(ast.name);
@@ -876,15 +880,24 @@ export interface MemberExpression extends Expression {
 // a static (`a.b`) member expression and `property` is an `Identifier`.
 export function parseMemberExpression (transpiler: Transpiler, ast: MemberExpression,
     options: Object): Kuery {
-  const optionsWOLeftsideRole = { ...options, leftSideRole: "" };
-  const object = transpiler.kueryFromAst(ast.object, optionsWOLeftsideRole);
+  const optionsWOLeftsideRole = { ...options, leftSideRole: "member" };
+  const object = transpiler.parseAst(ast.object, optionsWOLeftsideRole, ast.object.type);
   const propertyName = propertyNameKueryFromMember(transpiler, ast, optionsWOLeftsideRole);
   if (options.leftSideRole === "modify") {
+    if (typeof object === "string") {
+      throw new Error(`Cannot modify qualified name $${object}.${propertyName}`);
+    }
     return (toValueAlterationVAKON: Kuery) =>
         transpiler.VALK().alterProperty(propertyName, toValueAlterationVAKON, object);
   }
   if (options.leftSideRole === "delete") {
+    if (typeof object === "string") {
+      throw new Error(`Cannot delete qualified name $${object}.${propertyName}`);
+    }
     return () => transpiler.VALK().deleteProperty(propertyName, object);
+  }
+  if (typeof object === "string") {
+    return transpiler.VALK().fromValue(qualifiedSymbol(object, propertyName));
   }
   const toProperty = transpiler.VALK().propertyValue(propertyName);
   transpiler.addSourceKueryInfo(toProperty, ast.property);

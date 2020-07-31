@@ -345,7 +345,7 @@ export default class Engine extends Cog {
     }
     if (extractedProperties) {
       const updateExisting = (initialState.instancePrototype || initialState.prototype);
-      vResource.updateProperties(extractedProperties, { discourse, updateExisting });
+      vResource.assignProperties(extractedProperties, { discourse, updateExisting });
     }
     return vResource;
   }

@@ -2,10 +2,12 @@
 
 import { denoteDeprecatedValOSBuiltin, denoteValOSKueryFunction } from "~/raem/VALK";
 
+import { qualifiedSymbol } from "~/script";
+
 import VALEK, { extractFunctionVAKON } from "~/engine/VALEK";
 
 const symbols = {
-  getTags: Symbol("Discoverable.getTags"),
+  getTags: qualifiedSymbol("V", "getTags"),
 };
 
 export default {

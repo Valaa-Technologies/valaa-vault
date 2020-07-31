@@ -40,7 +40,7 @@ function _recursiveUpdate (vScope, patch, options, isValOSFields) {
             ? Object.assign(currentValue, value)
             : value;
         if (!isValOSFields) {
-          vScope.updateProperty(propertyName, newValue, options);
+          vScope.assignProperty(propertyName, newValue, options);
         } else {
           vScope.setField(propertyName, newValue, Object.create(options));
         }

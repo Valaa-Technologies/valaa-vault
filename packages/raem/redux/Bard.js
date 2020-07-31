@@ -430,8 +430,8 @@ function _createDeserializeLeafValue (fieldInfo) {
   }
   return (serialized) => {
     if ((typeof serialized !== "object") || (serialized === null)) return serialized;
-    throw new Error(`Cannot deserialize value for leaf field ${fieldInfo.name
-      }: expected primitive, got ${debugObjectType(serialized)}`);
+    throw new Error(`Cannot deserialize value for leaf field '${fieldInfo.name
+      }': expected primitive, got ${debugObjectType(serialized)}`);
   };
 }
 

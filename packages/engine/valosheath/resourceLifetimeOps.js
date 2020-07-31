@@ -4,7 +4,7 @@ import { getHostRef } from "~/raem/VALK/hostReference";
 
 import Discourse from "~/sourcerer";
 
-import { OwnerDefaultCouplingTag } from "~/engine/valosheath/valos/enfoldSchemaSheath";
+import { OwnerDefaultCouplingTag } from "~/engine/valosheath/enfoldSchemaSheath";
 
 export function newResource (discourse: Discourse, scope: ?Object, initialState: ?Object) {
   const actualInitialState = _prepareInitialState(this, scope, initialState, "new");

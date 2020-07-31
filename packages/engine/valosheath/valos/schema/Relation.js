@@ -4,8 +4,8 @@ import { denoteDeprecatedValOSBuiltin } from "~/raem/VALK";
 
 import { ValoscriptNew, ValoscriptInstantiate } from "~/script";
 
-import { newResource, instantiateResource } from "~/engine/valosheath/valos/_resourceLifetimeOps";
-import { OwnerDefaultCouplingTag } from "~/engine/valosheath/valos/enfoldSchemaSheath";
+import { newResource, instantiateResource } from "~/engine/valosheath/resourceLifetimeOps";
+import { OwnerDefaultCouplingTag } from "~/engine/valosheath/enfoldSchemaSheath";
 
 export default {
   isGlobal: true,

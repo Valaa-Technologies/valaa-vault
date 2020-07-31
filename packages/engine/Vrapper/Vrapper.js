@@ -7,7 +7,9 @@ import type { VALKOptions } from "~/raem/VALK"; // eslint-disable-line no-duplic
 import type { Passage, Story } from "~/raem/redux/Bard";
 import { getHostRef, HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
 
-import { addedTo, fieldsSet, isCreatedLike, removedFrom, replacedWithin } from "~/raem/events";
+import {
+  addedTo, destroyed, fieldsSet, isCreatedLike, removedFrom, replacedWithin,
+} from "~/raem/events";
 import VRL, { vRef, invariantifyId, getRawIdFrom } from "~/raem/VRL";
 import { naiveURI } from "~/raem/ValaaURI";
 import { formVPath } from "~/raem/VPath";
@@ -24,7 +26,6 @@ import { createGhostVRLInInstance, isMaterialized, createMaterializeGhostAction 
 import { AbsentChroniclesError, addConnectToChronicleToError }
     from "~/raem/tools/denormalized/partitions";
 
-import isResourceType from "~/raem/tools/graphql/isResourceType";
 import isAbsentTypeName from "~/raem/tools/graphql/isAbsentTypeName";
 
 import { ValoscriptPrimitiveKind, qualifiedNameOf /* , NativeIdentifierTag */ } from "~/script";
@@ -45,11 +46,12 @@ import LiveUpdate from "~/engine/Vrapper/LiveUpdate";
 import Subscription from "~/engine/Vrapper/Subscription";
 import universalizeCommandData from "~/engine/Vrapper/universalizeCommandData";
 
-import { OwnerDefaultCouplingTag, PropertyDescriptorsTag } from "~/engine/valosheath";
+import {
+  OwnerDefaultCouplingTag, TypeIntroTag, FieldsIntroTag, IsResourceTag, PropertyDescriptorsTag,
+} from "~/engine/valosheath";
 
 import { arrayFromAny, iterableFromAny, dumpify, dumpObject,
-  invariantify, invariantifyObject, invariantifyString,
-  isPromise, isSymbol, thenChainEagerly,
+  invariantify, invariantifyObject, isPromise, isSymbol, thenChainEagerly,
 } from "~/tools";
 import { mediaTypeFromFilename } from "~/tools/MediaTypeData";
 
@@ -160,13 +162,13 @@ function isNonActivateablePhase (candidate: string) {
  * @extends {Cog}
  */
 export default class Vrapper extends Cog {
-  constructor (engine: ?Object, id: VRL, typeName: string, immediateRefresh?: [any, any]) {
-    invariantifyId(id, "Vrapper.constructor.id");
-    invariantifyString(typeName, "Vrapper.constructor.typeName");
+  constructor (engine: ?Object, id: VRL, type: Object, immediateRefresh?: [any, any]) {
+    if (!id) invariantifyId(id, "Vrapper.constructor.id");
+    if (!type) invariantifyObject(type, "Vrapper.constructor.type");
     super(engine);
     this[HostRef] = id;
-    this._setTypeName(typeName);
-    if (typeName === "Blob" || !engine || !isResourceType(this.getTypeIntro())) {
+    this._setType(type);
+    if (!engine || !type[IsResourceTag]) {
       this._phase = NONRESOURCE;
       return;
     }
@@ -184,6 +186,15 @@ export default class Vrapper extends Cog {
       ]);
     } else if (immediateRefresh) {
       this.refreshPhase(...immediateRefresh);
+    }
+  }
+
+  _setType (type: Object) {
+    if (type === this._type) return;
+    this._type = type;
+    const typeKey = Vrapper._typeKeys[type.name];
+    if (typeKey) {
+      this.setNameFromTypeInstanceCount(typeKey || type.name);
     }
   }
 
@@ -212,43 +223,13 @@ export default class Vrapper extends Cog {
 
   toString () { return this.debugId(); }
 
-  /*
-  prototypeChainString (options) {
-    const prototypeIdData = this.getTransient(options).get("prototype");
-    if (!prototypeIdData) return "";
-    const coupledField = tryCoupledFieldFrom(prototypeIdData);
-    return `'${this.getRawId("id")}'${
-        coupledField === "inheritors" ? "<==>"
-        : coupledField === "instances" ? "<=|>"
-        : coupledField === "materializedGhosts" ? "<-|>"
-        : coupledField === null ? "-|>" // immaterialized ghost
-        : ""
-        }${this.step("prototype").prototypeChainString()}`;
-  }
-  */
+  getValospaceType () { return this._type; }
 
-  getSchema () {
-    return this._parent.discourse.schema;
-  }
+  getTypeIntro () { return this._type[TypeIntroTag]; }
 
-  getTypeIntro () {
-    if (!this._typeIntro && this._parent) {
-      const intro = this.getSchema().getType(this._typeName);
-      if (!intro) throw new Error(`Could not find schema type for '${this._typeName}'`);
-      else if (!intro.getInterfaces) {
-        throw new Error(`Interface type '${this._typeName}' cannot be used as Vrapper type`);
-      }
-      this._typeIntro = intro;
-    }
-    return this._typeIntro;
-  }
+  getFieldIntros () { return this._type[FieldsIntroTag]; }
 
-  getValospaceType () {
-    return this._parent.getRootScope().valos[this.getTypeName()];
-  }
-
-  getFieldIntro (fieldName: string): Object { return this.getTypeIntro().getFields()[fieldName]; }
-
+  getFieldIntro (fieldName: string): Object { return this._type[FieldsIntroTag][fieldName]; }
 
   /**
    * Initiate the activation of this resource by sourcifying all
@@ -366,13 +347,13 @@ export default class Vrapper extends Cog {
     }
     const resolver = this._parent.discourse.maybeForkWithState(refreshingState);
     const transient = refreshingTransient
-        || resolver.tryGoToTransient(this[HostRef], this._typeName);
+        || resolver.tryGoToTransient(this[HostRef], this._type.name);
     if (!transient) {
       this._phase = this[HostRef].isGhost() ? INACTIVE : IMMATERIAL;
       return this;
     }
     const id = transient.get("id");
-    if (!id.getChronicleURI() && !id.isGhost() && (this._typeName !== "Blob")) {
+    if (!id.getChronicleURI() && !id.isGhost() && (this._type.name !== "Blob")) {
       if (id.isAbsent()) return this;
       throw new Error(`Cannot update an active non-ghost Vrapper id with no chronicleURI: <${
           id}>, (current id: <${this[HostRef]}>)`);
@@ -407,16 +388,19 @@ export default class Vrapper extends Cog {
 
   _postActivate (resolver: Object, transient: Transient, newTypeName: string) {
     try {
-      if (!this._typeName || isAbsentTypeName(this._typeName)) {
+      if (!this._type || isAbsentTypeName(this._type.name)) {
         const ref = this[HostRef];
         if (ref.isAbsent()) {
           this.warnEvent("Activating id explicitly! Should have been activated by reducers");
           ref.setAbsent(false);
         }
-        this._setTypeName((newTypeName && !isAbsentTypeName(newTypeName))
-            ? newTypeName
-            : resolver.tryGoToMostMaterializedTransient(
-              ref, "TransientFields", true, false, "typeName").get("typeName"));
+        let typeName = newTypeName;
+        if (!typeName || isAbsentTypeName(typeName)) {
+          typeName = resolver
+              .tryGoToMostMaterializedTransient(ref, "TransientFields", true, false, "typeName")
+              .get("typeName");
+        }
+        this._setType(this._parent.getValospaceType(typeName) || { name: typeName });
       }
       if (!this.isInactive()) {
         this.registerComplexHandlers(this._parent._storyHandlerRoot, resolver.state);
@@ -477,7 +461,7 @@ export default class Vrapper extends Cog {
       const resolver = options.discourse
           || (!options.state && this._parent.discourse)
           || Object.create(this._parent.discourse).setState(options.state);
-      if (resolver.tryGoToTransient(this[HostRef], this._typeName)) return;
+      if (resolver.tryGoToTransient(this[HostRef], this._type.name)) return;
     }
     const error =
         !this.isResource() ?
@@ -632,27 +616,11 @@ export default class Vrapper extends Cog {
 
   getTypeName (options: any) {
     if (this.isResource() && (!options || (options.require !== false))) this.requireActive(options);
-    return this._typeName;
+    return this._type.name;
   }
 
   tryTypeName () {
-    return this._typeName;
-  }
-
-  getValosheathType (options) {
-    return this._parent.getRootScope().valos[this.getTypeName(options)];
-  }
-
-  _setTypeName (typeName: string) {
-    if (typeName === this._typeName) return;
-    this._typeName = typeName;
-    if (this._typeIntro && !typeName.startsWith("Destroyed")) {
-      this._typeIntro = null;
-    }
-    const typeKey = Vrapper._typeKeys[typeName];
-    if (typeKey) {
-      this.setNameFromTypeInstanceCount(typeKey || typeName);
-    }
+    return (this._type || "").name;
   }
 
   static _typeKeys = {
@@ -679,13 +647,13 @@ export default class Vrapper extends Cog {
     let nameText;
     const innerOptions = !options ? {} : Object.create(options);
     innerOptions.scope = {};
-    if (Vrapper._namedTypes[this._typeName]) {
+    if (Vrapper._namedTypes[(this._type || "").name]) {
       nameText = (options || {}).transient && (options || {}).transient.get("name");
       if (nameText === undefined) nameText = this.step("name", innerOptions);
       if (nameText) nameText = `@.:${nameText}`;
     }
     let targetText;
-    if (this._typeName === "Relation") {
+    if ((this._type || "").name === "Relation") {
       const targetId = (options || {}).transient && (options || {}).transient.get("target");
       if (!targetId) targetText = "@$n@@";
       else if (targetId.isAbsent()) {
@@ -712,7 +680,7 @@ export default class Vrapper extends Cog {
         || (options.discourse ? options.discourse.getState()
             : options.mostMaterializedField ? this._parent.discourse.getState()
             : undefined);
-    const typeName = options.typeName || this.getTypeName(options);
+    const typeName = options.typeName || this._type.name;
     let ret = state && state.getIn([typeName, this.getRawId()]);
     if (!ret || (options.mostMaterializedField && !ret.has(options.mostMaterializedField))) {
       const discourse = options.discourse || this._parent.discourse;
@@ -741,7 +709,7 @@ export default class Vrapper extends Cog {
     const innerDiscourse = (discourse || this._parent.discourse);
     this.requireActive({ state: innerDiscourse.getState() });
     return innerDiscourse.chronicleEvent(
-        createMaterializeGhostAction(innerDiscourse, this[HostRef], this._typeName));
+        createMaterializeGhostAction(innerDiscourse, this[HostRef], this._type.name));
   }
 
   getValospaceScope (options: ?Object, kuery /* , origin */) {
@@ -842,7 +810,7 @@ export default class Vrapper extends Cog {
     try {
       const { discourse, id } = this._primeTransactionAndOptionsAndId(options);
       commandValue = universalizeCommandData(value, options);
-      return discourse.chronicleEvent(fieldsSet({ id, typeName: this._typeName,
+      return discourse.chronicleEvent(fieldsSet({ id, typeName: this._type.name,
         sets: { [fieldName]: commandValue },
       }));
     } catch (error) {
@@ -860,7 +828,7 @@ export default class Vrapper extends Cog {
     try {
       const { discourse, id } = this._primeTransactionAndOptionsAndId(options);
       commandValue = universalizeCommandData(value, options);
-      return discourse.chronicleEvent(addedTo({ id, typeName: this._typeName,
+      return discourse.chronicleEvent(addedTo({ id, typeName: this._type.name,
         adds: { [fieldName]: arrayFromAny(commandValue || undefined) },
       }));
     } catch (error) {
@@ -878,7 +846,7 @@ export default class Vrapper extends Cog {
     try {
       const { discourse, id } = this._primeTransactionAndOptionsAndId(options);
       commandValue = universalizeCommandData(value, options);
-      return discourse.chronicleEvent(removedFrom({ id, typeName: this._typeName,
+      return discourse.chronicleEvent(removedFrom({ id, typeName: this._type.name,
         removes: { [fieldName]: (commandValue === null) ? null : arrayFromAny(commandValue) },
       }));
     } catch (error) {
@@ -909,7 +877,7 @@ export default class Vrapper extends Cog {
       universalAddedValues = arrayFromAny(
           universalizeCommandData(withValues, options)
               || undefined);
-      return discourse.chronicleEvent(replacedWithin({ id, typeName: this._typeName,
+      return discourse.chronicleEvent(replacedWithin({ id, typeName: this._type.name,
         removes: { [fieldName]: universalRemovedValues },
         adds: { [fieldName]: universalAddedValues },
       }));
@@ -931,7 +899,7 @@ export default class Vrapper extends Cog {
     const discourse = options.discourse || this._parent.discourse;
     this.requireActive(options);
     const vref = this[HostRef];
-    let id = discourse.bindObjectId(vref, this._typeName);
+    let id = discourse.bindObjectId(vref, this._type.name);
     options.head = this;
     let chronicleURI = id.getChronicleURI();
     if (!chronicleURI) {
@@ -980,7 +948,7 @@ export default class Vrapper extends Cog {
    * @memberof Vrapper
    */
   instantiate (initialState: Object = {}, options: VALKOptions = {}): Vrapper {
-    const typeName = this.getTypeName(options);
+    const typeName = this._type.name;
     initialState.instancePrototype = this;
     if (initialState.owner === undefined
         && !((typeName === "Relation") && initialState.source)
@@ -994,7 +962,8 @@ export default class Vrapper extends Cog {
 
   destroy (options: { discourse?: Discourse } = {}) {
     this.requireActive(options);
-    return (options.discourse || this._parent.discourse).destroy({ id: this[HostRef] });
+    return (options.discourse || this._parent.discourse)
+        .chronicleEvent(destroyed({ id: this[HostRef] }), {});
   }
 
   /**
@@ -1067,17 +1036,16 @@ export default class Vrapper extends Cog {
 
   propertyValue (propertyName: string | Symbol, options: VALKOptions = {}) {
     // eslint-disable-next-line
-    let typePrototype, fieldDescriptor;
+    let fieldDescriptor;
     if (typeof propertyName !== "string" || (propertyName[0] === "$")) {
-      typePrototype = this.getValospaceType(options).prototype;
-      fieldDescriptor = typePrototype[PropertyDescriptorsTag][propertyName];
+      fieldDescriptor = this._type.prototype[PropertyDescriptorsTag][propertyName];
     }
     if (fieldDescriptor == null) {
       const vProperty = this.getPropertyResource(propertyName, Object.create(options));
       // console.log("vProp:", propertyName, String(vProperty), vProperty._type.name);
       return vProperty
           ? vProperty.extractValue(options, this)
-          : (typePrototype || this.getValospaceType(options).prototype)[propertyName];
+          : this._type.prototype[propertyName];
     }
     if (fieldDescriptor.isHostField) {
       const namespace = fieldDescriptor.namespace;
@@ -1093,7 +1061,7 @@ export default class Vrapper extends Cog {
     }
     return (fieldDescriptor.value !== undefined)
         ? fieldDescriptor.value
-        : typePrototype[propertyName];
+        : this._type.prototype[propertyName];
   }
 
   static _propertyKueries = Object.create(null);
@@ -1133,30 +1101,13 @@ export default class Vrapper extends Cog {
 
   assignProperties (propertyUpdates: Object, options: Object) {
     let key, value, kuery;
-    const vPropertyDummy = (options.updateExisting === false) ? null : undefined;
     try {
       for ([key, value] of Object.entries(propertyUpdates)) {
-        this.assignProperty(key, value, options, vPropertyDummy);
+        this.assignProperty(key, value, options);
       }
       for (key of Object.getOwnPropertySymbols(propertyUpdates)) {
-        this.assignProperty(key, propertyUpdates[key], options, vPropertyDummy);
+        this.assignProperty(key, propertyUpdates[key], options);
       }
-      /*
-      for ([key, value] of Array.isArray(propertyUpdates)
-          ? propertyUpdates
-          : Object.entries(propertyUpdates)) {
-        if (key[0] !== "$") {
-          this.assignProperty(key, value, options,
-              (options.updateExisting === false) ? null : undefined);
-        } else {
-          for ([name, nameValue] of Object.entries(value)) {
-            this.assignProperty(`@.${key}.${encodeURIComponent(name)}@@`,
-                nameValue, options, (options.updateExisting === false) ? null : undefined);
-          }
-          name = null;
-        }
-      }
-      */
     } catch (error) {
       const errorName = new Error(`assignProperty(${String(key)})`);
       throw this.wrapErrorEvent(error, 1, () => [
@@ -1168,8 +1119,7 @@ export default class Vrapper extends Cog {
     }
   }
 
-  assignProperty (propertyName: string | Symbol, newValue: Object, options: VALKOptions = {},
-      vProperty = this.getPropertyResource(propertyName, Object.create(options))) {
+  assignProperty (propertyName: string | Symbol, newValue: Object, options: VALKOptions = {}) {
     if (newValue instanceof Kuery) {
       return this.alterProperty(propertyName, newValue, Object.create(options), vProperty);
     }
@@ -1177,7 +1127,22 @@ export default class Vrapper extends Cog {
     if (!options.chronicleURI) {
       options.chronicleURI = this._parent.getChronicleURIOf(this[HostRef], discourse);
     }
+    if (typeof propertyName !== "string") {
+      const fieldDescriptor = this._type.prototype[PropertyDescriptorsTag][propertyName];
+      const writableFieldName = (fieldDescriptor || "").writableFieldName;
+      if (writableFieldName) {
+        return discourse.chronicleEvent({
+          type: "FIELDS_SET", typeName: this._type.name,
+          id: discourse.bindObjectId(this[HostRef], this._type.name),
+          sets: { [writableFieldName]: universalizeCommandData(newValue, propertyName) },
+        });
+      }
+    }
+    let vProperty;
     const value = universalizeCommandData(expressionFromProperty(newValue, propertyName), options);
+    if (options.updateExisting !== false) {
+      vProperty = this.getPropertyResource(propertyName, Object.create(options));
+    }
     if (vProperty) {
       return discourse.chronicleEvent({
         type: "FIELDS_SET", typeName: "Property",
@@ -1197,7 +1162,6 @@ export default class Vrapper extends Cog {
       vProperty = this.getPropertyResource(propertyName, Object.create(options))) {
     // If lexicalScope is undefined then this resource doesn't implement Scope, which is required
     // for propertyValue.
-    const typeName = this.getTypeName(options);
     const actualAlterationVAKON =
         (typeof alterationVAKON === "object" && typeof alterationVAKON.toVAKON === "function")
             ? alterationVAKON.toVAKON()
@@ -1208,14 +1172,13 @@ export default class Vrapper extends Cog {
     const alterationOptions = Object.create(options);
     alterationOptions.scope = this.getValospaceScope(
         alterationOptions, alterationVAKON, propertyName);
-    const hostType = this._parent.getRootScope().valos[typeName];
-    const fieldDescriptor = hostType.prototype[PropertyDescriptorsTag][propertyName];
+    const fieldDescriptor = this._type.prototype[PropertyDescriptorsTag][propertyName];
     let ret;
     const writableFieldName = (fieldDescriptor != null) && fieldDescriptor.writableFieldName;
     if (writableFieldName) {
       ret = this._preProcessNewReference(
           this.step(["§->", writableFieldName, actualAlterationVAKON], alterationOptions),
-          fieldDescriptor, hostType);
+          fieldDescriptor, this._type);
       // TODO(iridian): Make this solution semantically consistent host field access.
       // Now stupidly trying to setField even if the field is not a primaryField.
       this.setField(writableFieldName, ret, options);
@@ -1234,7 +1197,7 @@ export default class Vrapper extends Cog {
   alterValue (alterationVAKON: Kuery, options: VALKOptions = {}, vExplicitOwner: ?Vrapper) {
     try {
       this.requireActive(options);
-      if (this._typeName !== "Property") {
+      if (this._type.name !== "Property") {
         throw new Error("Non-Property values cannot be modified");
       }
       const currentValue = this.extractValue(options, vExplicitOwner);
@@ -1594,10 +1557,12 @@ export default class Vrapper extends Cog {
    */
   bvobContent (): ArrayBuffer {
     try {
-      invariantify(this._typeName === "Blob",
-          "Vrapper.bvobContent only available for objects of Bvob type",
-          "\n\ttype:", this._typeName,
-          "\n\tobject:", this);
+      if (this._type.name !== "Blob") {
+        invariantify(this._type.name === "Blob",
+            "Vrapper.bvobContent only available for objects of Bvob type",
+            "\n\ttype:", this._type.name,
+            "\n\tobject:", this);
+      }
       const buffer = this._parent.getSourcerer().tryGetCachedBvobContent(this.getRawId());
       if (typeof buffer !== "undefined") return buffer;
       throw new Error(`Cannot locate Bvob buffer directly from caches (with id '${
@@ -1630,10 +1595,12 @@ export default class Vrapper extends Cog {
     const wrap = new Error("mediaURL");
     try {
       this.requireActive(options);
-      invariantify(this.hasInterface("Media"),
-          "Vrapper.mediaURL only available for objects with Media interface",
-          "\n\ttype:", this._typeName,
-          "\n\tobject:", this);
+      if (this._type.name !== "Media") {
+        invariantify(this.hasInterface("Media"),
+            "Vrapper.mediaURL only available for objects with Media interface",
+            "\n\ttype:", this._type.name,
+            "\n\tobject:", this);
+      }
       mediaInfo = this.resolveMediaInfo(Object.create(options));
       const ret = this._withActiveConnectionChainEagerly(Object.create(options), [
         connection => connection.getMediaURL(mediaInfo),
@@ -1671,10 +1638,10 @@ export default class Vrapper extends Cog {
    * @memberof Vrapper
    */
   interpretContent (options: VALKOptions = {}) {
-    if (this.getTypeName(options) !== "Media") {
+    if (this._type.name !== "Media") {
       invariantify(this.hasInterface("Media"),
           "Vrapper.interpretContent only available for objects with Media interface",
-          "\n\ttype:", this.getTypeName(options),
+          "\n\ttype:", this._type.name,
           "\n\tobject:", this);
     }
     if (options.mime) {
@@ -1782,7 +1749,7 @@ export default class Vrapper extends Cog {
         || (options.discourse && options.discourse.getState())
         || this._parent.discourse.getState();
     this._accumulateMaterializedFieldResources(state,
-        state.getIn([this.getTypeName(), this.getRawId()]), fieldNames, ret);
+        state.getIn([this._type.name, this.getRawId()]), fieldNames, ret);
     return [...(ret.values())];
   }
 
@@ -1816,8 +1783,8 @@ export default class Vrapper extends Cog {
   fields (...fieldNames: any[]) { return this.step(VALEK.select(fieldNames)); }
 
   registerHandlers (targetEventHandlers: Object) {
-    this.setIdSubHandler(targetEventHandlers.get("rawId"), this.getRawId(), null,
-        [this, getVrapperEventHandlers()]);
+    this.setIdSubHandler(
+        targetEventHandlers.get("rawId"), this.getRawId(), null, [this, getVrapperEventHandlers()]);
   }
 
   registerComplexHandlers (targetEventHandlers: Object, state: Object) {
@@ -1828,8 +1795,8 @@ export default class Vrapper extends Cog {
     let ghostPath = currentObject.get("id").getGhostPath();
     const listenedRawIds = [];
     try {
-      const table = state.get(this._typeName);
-      invariantify(table, `type '${this._typeName}' table missing`);
+      const table = state.get(this._type.name);
+      invariantify(table, `type '${this._type.name}' table missing`);
       do {
         // Alternate walking down ghostpaths and prototypes: for ghost paths we might not have
         // actually materialized objects and on the other hand prototypes can only be found from
@@ -1844,7 +1811,7 @@ export default class Vrapper extends Cog {
           currentObject = table.get(currentRawId);
           if (!currentObject) {
             this.errorEvent(`\n\tregisterComplexHandlers(): cannot find currentObject for "${
-                currentRawId}":${this._typeName}: live notifications will likely be broken`);
+                currentRawId}":${this._type.name}: live notifications will likely be broken`);
             break;
           } else {
             const prototypeRef = currentObject.get("prototype");
@@ -2365,15 +2332,15 @@ export default class Vrapper extends Cog {
 Vrapper.prototype[ValoscriptPrimitiveKind] = "Vrapper";
 Vrapper.prototype[UnpackedHostValue] = null;
 
-let vrapperEventHandlers;
+let _vrapperEventHandlers;
 
 function getVrapperEventHandlers () {
-  if (!vrapperEventHandlers) {
-    vrapperEventHandlers = new Map();
-    const prototype = new Vrapper(null, vRef("dummy"), "Dummy");
-    extractMagicMemberEventHandlers(vrapperEventHandlers, prototype, null);
+  if (!_vrapperEventHandlers) {
+    _vrapperEventHandlers = new Map();
+    const prototype = new Vrapper(null, vRef("dummy"), { name: "Dummy" });
+    extractMagicMemberEventHandlers(_vrapperEventHandlers, prototype, null);
   }
-  return vrapperEventHandlers;
+  return _vrapperEventHandlers;
 }
 
 const applicatorCreators = {

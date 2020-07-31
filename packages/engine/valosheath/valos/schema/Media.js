@@ -7,7 +7,7 @@ import { ValoscriptNew, ValoscriptInstantiate, qualifiedSymbol } from "~/script"
 import VALEK from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
 
-import { newResource, instantiateResource } from "~/engine/valosheath/valos/_resourceLifetimeOps";
+import { newResource, instantiateResource } from "~/engine/valosheath/resourceLifetimeOps";
 
 const symbols = {
   interpretContent: qualifiedSymbol("V", "interpretContent"),

@@ -3,6 +3,7 @@
 import extendObject from "~/engine/valosheath/Object";
 import extendValos, { OwnerDefaultCouplingTag } from "~/engine/valosheath/valos";
 import {
+  TypeIntroTag, FieldsIntroTag, IsResourceTag,
   PropertyDescriptorsTag, TypeFieldDescriptorsTag, PrototypeFieldDescriptorsTag,
 } from "~/engine/valosheath/hostDescriptors";
 import type { NameDefinition } from "~/engine/valosheath/namespace";
@@ -15,8 +16,8 @@ import globalEcmaScriptBuiltinObjects from "./globalEcmaScriptBuiltinObjects";
 import globalValoscriptBuiltinObjects from "./globalValoscriptBuiltinObjects";
 
 export {
-  OwnerDefaultCouplingTag, PropertyDescriptorsTag, TypeFieldDescriptorsTag,
-  PrototypeFieldDescriptorsTag,
+  OwnerDefaultCouplingTag, TypeIntroTag, FieldsIntroTag, IsResourceTag,
+  PropertyDescriptorsTag, TypeFieldDescriptorsTag, PrototypeFieldDescriptorsTag,
   defineName, integrateNamespace, getValosheathNamespace,
 };
 export type { NameDefinition };

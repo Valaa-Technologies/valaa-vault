@@ -11,7 +11,7 @@ import { Command, created, duplicated, recombined, isCreatedLike } from "~/raem/
 import VRL, { vRef, IdData, getRawIdFrom } from "~/raem/VRL";
 import { tryHostRef } from "~/raem/VALK/hostReference";
 import { getActionFromPassage } from "~/raem/redux/Bard";
-import { formVPath, coerceAsVRID, validateVRID } from "~/raem/VPath";
+import { formVPath, coerceAsVRID, validateVRID, validateVVerbs } from "~/raem/VPath";
 import { naiveURI } from "~/raem/ValaaURI";
 
 import Transient, { createTransient, getTransientTypeName } from "~/raem/state/Transient";
@@ -60,7 +60,7 @@ export default class Engine extends Cog {
     ret.setHostValuePacker(packFromHost);
     function packFromHost (value) {
       if (value instanceof Vrapper) {
-        return packedSingular(value.getVRef(), value._typeName || "TransientFields");
+        return packedSingular(value.getVRef(), value._type.name || "TransientFields");
       }
       if (Array.isArray(value)) return value.map(packFromHost);
       return value;
@@ -84,10 +84,8 @@ export default class Engine extends Cog {
   getFabricScope () { return this.getRootScope(); }
   getHostDescriptors () { return this._hostDescriptors; }
   getHostObjectDescriptor (hostObjectId: any) { return this._hostDescriptors.get(hostObjectId); }
+  getValospaceType (typeName) { return this._rootScope.valos[typeName]; }
 
-  getValospaceTypePrototype (typeName: string) {
-    return (this._rootScope.valos[typeName] || {}).prototype;
-  }
   setRootScopeEntry (entryName: string, value: any) {
     this._rootScope[entryName] = value;
   }
@@ -143,10 +141,14 @@ export default class Engine extends Cog {
    * @returns
    */
   getVrapper (idData: IdData | Vrapper, options: VALKOptions = {}, explicitTransient: Transient) {
-    if (idData instanceof Vrapper) return idData;
-    const vExisting = this.tryVrapper(idData);
-    if (vExisting) return vExisting;
-    let typeName;
+    const vExisting = (idData instanceof Vrapper) ? idData : this.tryVrapper(idData);
+    let typeName = options.typeName;
+    if (vExisting) {
+      if (typeName && (typeName !== vExisting._type.name)) {
+        vExisting._setType(this.getValospaceType(typeName));
+      }
+      return vExisting;
+    }
     let transient;
     const discourse = options.discourse || this.discourse;
     const state = options.state || discourse.getState();
@@ -157,7 +159,7 @@ export default class Engine extends Cog {
         transient = explicitTransient;
       } else {
         const rawId = id.rawId();
-        typeName = state.getIn(["TransientFields", rawId]);
+        if (!typeName) typeName = state.getIn(["TransientFields", rawId]);
         if (typeName) {
           transient = state.getIn([typeName, rawId]);
         } else if (!id.isGhost()) {
@@ -174,7 +176,8 @@ export default class Engine extends Cog {
           }
         }
       }
-      return new Vrapper(this, transient.get("id"), typeName, [state, transient]);
+      return new Vrapper(this,
+          transient.get("id"), this.getValospaceType(typeName), [state, transient]);
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, () => [
         `getVrapper(${idData})`,
@@ -327,9 +330,9 @@ export default class Engine extends Cog {
           .acquireConnection(id.getChronicleURI(), { newChronicle: true })
           .asActiveConnection();
     }
-    const vResource = this.getVrapper(resultPassage.id, { discourse });
+    const vResource = this.getVrapper(
+        resultPassage.id, { discourse, typeName: resultPassage.typeName });
     if (vResource.isResource()) {
-      if (resultPassage.typeName) vResource._setTypeName(resultPassage.typeName);
       const state = discourse.getState();
       const initialBlocker = vResource.refreshPhase(state);
       if (initialBlocker) {
@@ -356,7 +359,7 @@ export default class Engine extends Cog {
 
     let explicitId = options.id || initialState.id;
     delete initialState.id;
-    const subResource = options.subResource || initialState.subResource;
+    let subResource = options.subResource || initialState.subResource;
     delete initialState.subResource;
     if (initialState.partitionAuthorityURI) {
       throw new Error("partitionAuthorityURI is deprecated");
@@ -371,6 +374,7 @@ export default class Engine extends Cog {
       5: id,      auri: yes, explicit chronicle root id
       6:     sub, auri: no, sub parent must exist
       7: id, sub, auri: no, sub parent must be the owner
+      // cases 8-f listed below
      */
     if (explicitId) {
       // cases 3, 7, b, f
@@ -411,6 +415,14 @@ export default class Engine extends Cog {
     */
     const chronicleURI = this.getChronicleURIOf(getHostRef(owner), discourse);
     // cases 8, 9, a, c, d, e
+    // naiveURI.validateChronicleURI(chronicleURI);
+    if (subResource) { // case a -> 9, e -> d
+      if (Array.isArray(subResource)) subResource = formVPath(subResource);
+      else validateVVerbs(subResource);
+      if (subResource[1] === "$") {
+        throw new Error("explicit subResource must not have a GRId as first step");
+      }
+    }
     return discourse.assignNewVRID(directive, String(chronicleURI), explicitId, subResource);
   }
 
@@ -541,8 +553,11 @@ export default class Engine extends Cog {
           }
           if (isCreatedLike(passage)) {
             if (!passage.vProtagonist) {
-              passage.vProtagonist = new Vrapper(this, passage.id, passage.typeName);
-            } else passage.vProtagonist._setTypeName(passage.typeName);
+              passage.vProtagonist = new Vrapper(
+                  this, passage.id, this.getValospaceType(passage.typeName));
+            } else if (passage.vProtagonist._type.name !== passage.typeName) {
+              passage.vProtagonist._setType(this.getValospaceType(passage.typeName));
+            }
             if (passage.vProtagonist.isResource()) {
               const blocker = passage.vProtagonist.refreshPhase(story.state);
               if (blocker !== undefined) {
@@ -575,7 +590,7 @@ export default class Engine extends Cog {
     } catch (error) {
       throw errorOnReceiveCommands.call(this, error,
           new Error(`_recitePassage(${passage.type} ${
-            passage.vProtagonist ? passage.vProtagonist.debugId() : ""})`));
+            passage.vProtagonist ? passage.vProtagonist.debugId() : passage.typeName})`));
     }
     function errorOnReceiveCommands (error, operationName, ...extraContext) {
       return this.wrapErrorEvent(error, operationName,

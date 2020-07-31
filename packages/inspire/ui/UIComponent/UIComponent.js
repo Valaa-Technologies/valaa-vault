@@ -244,8 +244,6 @@ export default class UIComponent extends React.Component {
 
   // Public API
 
-  // getValos () { return this.context.engine.getRootScope().valos; }
-
   /**
    * Returns the current focus of this UI component or throws if this component is disabled.
    */

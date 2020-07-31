@@ -151,9 +151,9 @@ export default function extendObject (scope: Object, hostDescriptors: Map<any, O
           if (!(source instanceof Vrapper)) Object.assign(combinedSources, source);
           else {
             const subOptions = Object.create(options);
-            for (const property of source.step("properties", subOptions)) {
-              combinedSources[property.step("name", subOptions)] =
-                  property.extractValue(subOptions);
+            for (const vProperty of source.step("properties", subOptions)) {
+              combinedSources[vProperty.step("name", subOptions)] =
+                  vProperty.extractValue(subOptions);
             }
           }
         }
@@ -227,40 +227,40 @@ export default function extendObject (scope: Object, hostDescriptors: Map<any, O
     throw new Error("definePropertiesWithResource not implemented");
   }
 
-  function definePropertyWithResource (vResource: Vrapper, property: string | Symbol,
+  function definePropertyWithResource (vResource: Vrapper, propertyName: string | Symbol,
       descriptor: Object) {
     const options = { discourse: this.__callerValker__ };
     const valospaceType = valos[vResource.getTypeName(options)];
-    const fieldDescriptor = valospaceType.prototype[PropertyDescriptorsTag][property];
+    const fieldDescriptor = valospaceType.prototype[PropertyDescriptorsTag][propertyName];
     try {
       if ((fieldDescriptor != null) && fieldDescriptor.writableFieldName) {
         // Define a native field value
         // TODO(iridian): handle other descriptor parameters (at least check they're valid).
         if (!descriptor.hasOwnProperty("value")) {
           throw new Error(`descriptor.value is missing when trying to define a native field '${
-              String(property)}'`);
+              String(propertyName)}'`);
         }
         vResource.setField(fieldDescriptor.writableFieldName, descriptor.value,
             { discourse: this.__callerValker__ });
       } else if (!vResource.hasInterface("Scope")) {
-        throw new Error(`Cannot define valospace property '${String(property)
+        throw new Error(`Cannot define valospace property '${String(propertyName)
             }' for an object which doesn't implement Scope`);
       } else {
         // Define a Scope property
-        const value = expressionFromProperty(descriptor.value, property, descriptor);
-        const vProperty = vResource.getPropertyResource(property, options);
+        const value = expressionFromProperty(descriptor.value, propertyName, descriptor);
+        const vProperty = vResource.getPropertyResource(propertyName, options);
         if (vProperty) {
           vProperty.setField("value", value, options);
         } else {
-          vResource.emplaceAddToField("properties", { name: property, value }, options);
+          vResource.emplaceAddToField("properties", { name: propertyName, value }, options);
         }
       }
       return vResource;
     } catch (error) {
       throw vResource.wrapErrorEvent(error, 1, () => [
-        `defineProperty(${String(property)})`,
+        `defineProperty(${String(propertyName)})`,
         "\n\tresource:", ...dumpObject(vResource),
-        "\n\tproperty:", String(property),
+        "\n\tproperty:", String(propertyName),
         "\n\tdescriptor:", ...dumpObject(descriptor),
       ]);
     }
@@ -284,18 +284,21 @@ export default function extendObject (scope: Object, hostDescriptors: Map<any, O
     return { ...descriptorBase, value: valospaceValue[property] };
   }
 
-  function getOwnPropertyDescriptorWithResource (vResource: Vrapper, property: string | Symbol) {
+  function getOwnPropertyDescriptorWithResource (
+      vResource: Vrapper, propertyName: string | Symbol) {
     const options = { discourse: this.__callerValker__ };
     const valospaceType = valos[vResource.getTypeName(options)];
-    const descriptorBase = valospaceType.prototype[PropertyDescriptorsTag][property];
+    const descriptorBase = valospaceType.prototype[PropertyDescriptorsTag][propertyName];
     if (!descriptorBase) {
       if (!vResource.hasInterface("Scope")) return undefined;
-      const vProperty = vResource.getPropertyResource(property, options);
+      const vProperty = vResource.getPropertyResource(propertyName, options);
       if (!vProperty || !vProperty.isMaterialized()) return undefined;
       return createHostPropertyDescriptorFromProperty(vProperty, vResource, options);
     }
     const writableFieldName = descriptorBase.writableFieldName;
-    if (!writableFieldName) return { ...descriptorBase, value: valospaceType.prototype[property] };
+    if (!writableFieldName) {
+      return { ...descriptorBase, value: valospaceType.prototype[propertyName] };
+    }
     const transient = vResource.getTransient(options);
     const value = transient.get(writableFieldName);
     if ((value === undefined) && !transient.has(writableFieldName)) return undefined;

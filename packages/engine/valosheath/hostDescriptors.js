@@ -16,6 +16,9 @@ import { qualifiedSymbol } from "~/script";
  * scope, DOM, execution engine builtin operations, etc.)
  */
 
+export const TypeIntroTag = qualifiedSymbol("Valosheath", "TypeIntro");
+export const FieldsIntroTag = qualifiedSymbol("Valosheath", "FieldsIntro");
+export const IsResourceTag = qualifiedSymbol("Valosheath", "IsResource");
 export const PropertyDescriptorsTag = qualifiedSymbol("Valosheath", "PropertyDescriptors");
 export const TypeFieldDescriptorsTag = qualifiedSymbol("Valosheath", "TypeFieldDescriptors");
 export const PrototypeFieldDescriptorsTag =

@@ -67,39 +67,4 @@ export default class Discourse extends Valker {
     throw new Error(
         `${this.constructor.name}/Discourse.acquireFabricator(${name}) not implemented`);
   }
-
-  /**
-   * create - Creates an object and returns a Promise to a the newly created object.
-   * If inside transaction the promise resolves immediately to optimistic content,
-   * if outside transaction the promise will wait for the result.
-   *
-   * @param  {type} typeName  description
-   * @param  {type} owner         target owner to create the resource for
-   * @param  {type} duplicateOf   duplicate source resource to copy owned fields from
-   * @param  {type} initialState  overriding initial properties (over duplicate)
-   * @param  {type} id            description
-   * @returns {ProphecyEventResult} returns the ChronicleEventResults of the chronicling
-   */
-  create ({ typeName, initialState, id }): ProphecyEventResult { // eslint-disable-line
-    throw new Error(`${this.constructor.name}/Discourse.create not implemented`);
-  }
-
-  /**
-   * duplicate - alias for create which asserts that duplicate is specified and extracts the owner
-   * from it.
-   */
-  duplicate ({ duplicateOf, initialState, id }): ProphecyEventResult { // eslint-disable-line
-    throw new Error(`${this.constructor.name}/Discourse.duplicate not implemented`);
-  }
-
-  /**
-   * destroy - Destroys a resource
-   *
-   * @param  {type} id           description
-   * @param  {type} typeName     description
-   * @returns {ProphecyEventResult} returns the ChronicleEventResults of the chronicling
-   */
-  destroy ({ id, typeName }): ProphecyEventResult { // eslint-disable-line
-    throw new Error(`${this.constructor.name}/Discourse.destroy not implemented`);
-  }
 }

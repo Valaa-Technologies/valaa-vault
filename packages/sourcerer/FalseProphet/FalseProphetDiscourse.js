@@ -1,12 +1,11 @@
 // @flow
 
-import { Action, Command, created, duplicated, destroyed, EventBase } from "~/raem/events";
+import { Action, Command, /* created, duplicated, destroyed, */ EventBase } from "~/raem/events";
 import { StoryIndexTag, PassageIndexTag } from "~/raem/redux/Bard";
 import { ValaaURI, naiveURI, hasScheme } from "~/raem/ValaaURI";
 import { vRef } from "~/raem/VRL";
 import { dumpObject } from "~/raem/VALK";
 import { getHostRef } from "~/raem/VALK/hostReference";
-import { formVPath, validateVRID, validateVVerbs } from "~/raem/VPath";
 import { addConnectToChronicleToError } from "~/raem/tools/denormalized/partitions";
 
 import { qualifiedNameOf } from "~/script";
@@ -25,7 +24,9 @@ import createVRID0Dot3, { upgradeVRIDTo0Dot3, createChronicleRootVRID0Dot3 }
 import FalseProphet from "~/sourcerer/FalseProphet";
 import TransactionState, { fabricatorOps } from "~/sourcerer/FalseProphet/TransactionState";
 
-import { invariantify, invariantifyObject, thenChainEagerly, trivialClone } from "~/tools";
+import {
+  invariantify, invariantifyObject, isSymbol, thenChainEagerly, trivialClone,
+} from "~/tools";
 import valosUUID from "~/tools/id/valosUUID";
 
 export default class FalseProphetDiscourse extends Discourse {
@@ -163,26 +164,9 @@ export default class FalseProphetDiscourse extends Discourse {
     return this.getFollower().receiveTruths(truthEvents);
   }
 
-  create ({ typeName, initialState, id }: Object): ProphecyEventResult {
-    const command = created({ id, typeName, initialState });
-    if (!command.id) command.id = this.assignNewVRID(command);
-    return this.chronicleEvent(command, {});
-  }
-
-  duplicate ({
-    duplicateOf, initialState, id,
-  }: Object): ProphecyEventResult {
-    const command = duplicated({ id, duplicateOf, initialState });
-    if (!command.id) command.id = this.assignNewVRID(command);
-    return this.chronicleEvent(command, {});
-  }
-
-  destroy ({ id }: Object): ProphecyEventResult {
-    return this.chronicleEvent(destroyed({ id }), {});
-  }
-
   assignNewVRID (targetAction: EventBase, chronicleURI: string,
-      explicitRawId?: string, explicitSubResource?: string | Array) {
+      explicitRawId?: string, subVPath_?: string) {
+    let subVPath = subVPath_;
     try {
       if (!chronicleURI) throw new Error("assignNewVRID.chronicleURI missing");
       const root = this._transaction ? this._transaction.obtainRootEvent() : targetAction;
@@ -191,32 +175,34 @@ export default class FalseProphetDiscourse extends Discourse {
       const chronicle = chronicles[chronicleURI] || (chronicles[chronicleURI] = {});
       if (!chronicle.createIndex) chronicle.createIndex = 0;
 
-      let subResource = explicitSubResource;
-      if (subResource) { // case a -> 9, e -> d
-        if (Array.isArray(subResource)) subResource = formVPath(subResource);
-        else validateVVerbs(subResource);
-        if (subResource[1] === "$") {
-          throw new Error("explicit subResource must not have a GRId as first step");
+      let resourceVRID;
+
+      if (!subVPath && (targetAction.typeName === "Property")) {
+        const propertyName = targetAction.initialState.name;
+        if (!propertyName) {
+          throw new Error(`${targetAction.type}.initialState.name is required for a Property`);
         }
-      } else if (!explicitRawId) {
-        if (targetAction.typeName === "Property") {
-          const propertyName = targetAction.initialState.name;
-          if (!propertyName) {
-            throw new Error(`${targetAction.type
-                }.Property.initialState.name required for Property id secondary part`);
+        if (typeof propertyName === "string") {
+          subVPath = `@.$.${encodeURIComponent(propertyName)}@@`;
+        } else {
+          const qualifiedName = qualifiedNameOf(propertyName);
+          if (!qualifiedName) {
+            throw new Error(isSymbol(propertyName)
+                ? `Property name symbol ${propertyName} is not a qualified name symbol`
+                : `Property name must be a string or symbol, got '${typeof propertyName}'`);
           }
-          subResource = `@.$.${encodeURIComponent(propertyName)}@@`;
+          targetAction.initialState.name = qualifiedName[3];
+          subVPath = qualifiedName[4];
         }
       }
 
-      let resourceVRID;
-      if (subResource) {
+      if (subVPath) {
         let parentVRID = getHostRef(
             targetAction.initialState.owner || targetAction.initialState.source,
-            `${targetAction.type}.Property.initialState.owner`,
+            `Property.initialState.owner`,
         ).rawId();
         if (parentVRID[0] !== "@") parentVRID = upgradeVRIDTo0Dot3(parentVRID);
-        resourceVRID = `${parentVRID.slice(0, -2)}${subResource}`;
+        resourceVRID = `${parentVRID.slice(0, -2)}${subVPath}`;
         /*
         resourceRawId = ((ownerRawId[0] !== "@") || (ownerRawId.slice(-2) !== "@@"))
             ? `${ownerRawId}@.$.${encodeURIComponent(propertyName)}`
@@ -226,7 +212,7 @@ export default class FalseProphetDiscourse extends Discourse {
         resourceVRID = createVRID0Dot3(
             root.aspects.command.id, chronicleURI, chronicle.createIndex++);
       } else if (explicitRawId[0] === "@") {
-        resourceVRID = validateVRID(explicitRawId);
+        resourceVRID = explicitRawId;
       } else {
         if (!hasScheme(chronicleURI, "valaa-memory")) {
           this.errorEvent(`a non-VPath assignNewVRID.explicitRawId was explicitly provided${
@@ -235,8 +221,7 @@ export default class FalseProphetDiscourse extends Discourse {
               "\n\texplicitRawId:", explicitRawId,
               "\n\tchronicleURI:", chronicleURI);
         }
-        return (targetAction.id = vRef(explicitRawId, undefined, undefined,
-            naiveURI.validateChronicleURI(chronicleURI)));
+        return (targetAction.id = vRef(explicitRawId, undefined, undefined, chronicleURI));
       }
       targetAction.id = vRef(resourceVRID, undefined, undefined, chronicleURI);
       /*
@@ -252,7 +237,7 @@ export default class FalseProphetDiscourse extends Discourse {
           "\n\ttargetAction:", ...dumpObject(targetAction),
           "\n\tchronicleURI:", ...dumpObject(chronicleURI),
           "\n\texplicitRawId:", ...dumpObject(explicitRawId),
-          "\n\texplicitSubResource:", ...dumpObject(explicitSubResource),
+          "\n\tsubVPath:", ...dumpObject(subVPath),
       );
     }
   }

@@ -2,12 +2,12 @@
 
 import type { Discourse } from "~/sourcerer/api/types";
 
-import schemaTypeSheaths from "./schema";
-
-import enfoldGatewaySheath from "./enfoldGatewaySheath";
-import enfoldSchemaSheath, { OwnerDefaultCouplingTag } from "./enfoldSchemaSheath";
-
+import enfoldGatewaySheath from "~/engine/valosheath/enfoldGatewaySheath";
+import enfoldSchemaSheath, { injectTypeSheath, OwnerDefaultCouplingTag }
+    from "~/engine/valosheath/enfoldSchemaSheath";
 import { addValosheathNamespace } from "~/engine/valosheath/namespace";
+
+import schemaTypeSheaths from "./schema";
 
 export { OwnerDefaultCouplingTag };
 
@@ -22,8 +22,24 @@ export default function extendValOS (scope: any, hostDescriptors: any, rootDisco
       preferredPrefix: "V",
       namespaceURI: "https://valospace.org/#",
     });
+    injectTypeSheath(global, valosheath, primaryNamespace, hostDescriptors,
+        rootDiscourse.schema, schemaTypeSheaths,
+        "TransientFields", schemaTypeSheaths.TransientFields);
+    injectTypeSheath(global, valosheath, primaryNamespace, hostDescriptors,
+        rootDiscourse.schema, schemaTypeSheaths,
+        "Discoverable", schemaTypeSheaths.Discoverable);
+    // primaryNamespace.addSymbolField("name", valosheath.Discoverable.nameAlias);
+    // primaryNamespace.addSymbolField("prototype", valosheath.Discoverable.prototypeAlias);
+
     enfoldSchemaSheath(scope, valosheath, primaryNamespace, hostDescriptors,
         rootDiscourse.getSchema(), schemaTypeSheaths);
+
+    // Future deprecations
+    // TODO(iridian, 2019-04): Deprecate and remove
+    valosheath.Blob = valosheath.Bvob;
+    valosheath.ResourceStub = valosheath.TransientFields;
+    valosheath.Partition = valosheath.Chronicle;
+    // valosheath.Chronicle = valosheath.Partition;
   }
   return valosheath;
 }

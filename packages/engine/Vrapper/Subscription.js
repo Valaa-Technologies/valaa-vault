@@ -430,7 +430,7 @@ export default class Subscription extends LiveUpdate {
       onUpdate(this, passageCounter);
       return;
     }
-    const fieldIntros = this._emitter.getTypeIntro().getFields();
+    const fieldIntros = this._emitter.getFieldIntros();
     for (const [fieldName, intro] of Object.entries(fieldIntros)) {
       if (!intro.isGenerated && ((this._fieldFilter === true) || this._fieldFilter(intro))) {
         this._fieldName = fieldName;

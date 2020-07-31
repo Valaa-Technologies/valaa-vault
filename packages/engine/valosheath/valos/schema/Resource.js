@@ -12,8 +12,8 @@ import VALEK from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
 
 import { duplicateResource, instantiateResource }
-    from "~/engine/valosheath/valos/_resourceLifetimeOps";
-import { OwnerDefaultCouplingTag } from "~/engine/valosheath/valos/enfoldSchemaSheath";
+    from "~/engine/valosheath/resourceLifetimeOps";
+import { OwnerDefaultCouplingTag } from "~/engine/valosheath/enfoldSchemaSheath";
 
 import { dumpObject, wrapError } from "~/tools";
 

@@ -2,14 +2,17 @@
 
 import { GraphQLSchema } from "graphql/type";
 
+import isResourceType from "~/raem/tools/graphql/isResourceType";
 import getTypeInterfaces from "~/raem/tools/graphql/getTypeInterfaces";
 
 import {
   ValoscriptNew, valoscriptInterfacePrototype, valoscriptTypePrototype, valoscriptResourcePrototype,
+  qualifiedSymbol,
 } from "~/script";
 
 import {
   createHostPrototypeFieldDescriptor, createHostFunctionDescriptor, createHostSymbolDescriptor,
+  TypeIntroTag, FieldsIntroTag, IsResourceTag,
   PrototypeFieldDescriptorsTag, TypeFieldDescriptorsTag, PropertyDescriptorsTag,
 } from "~/engine/valosheath/hostDescriptors";
 
@@ -19,28 +22,14 @@ import { dumpObject, wrapError } from "~/tools";
 
 /* eslint-disable prefer-arrow-callback */
 
-export const OwnerDefaultCouplingTag = Symbol("valos.OwnerDefaultCoupling");
+export const OwnerDefaultCouplingTag = qualifiedSymbol("Valosheath", "OwnerDefaultCoupling");
 
 export default function enfoldSchemaSheath (global: Object, valosheath: Object,
     primaryNamespace, hostDescriptors: Object, schema: GraphQLSchema, schemaTypeSheaths: Object) {
-  _injectTypeSheath(global, valosheath, primaryNamespace, hostDescriptors,
-      schema, schemaTypeSheaths,
-      "TransientFields", schemaTypeSheaths.TransientFields);
-  _injectTypeSheath(global, valosheath, primaryNamespace, hostDescriptors,
-      schema, schemaTypeSheaths,
-      "Discoverable", schemaTypeSheaths.Discoverable);
-  primaryNamespace.addSymbolField("name", valosheath.Discoverable.nameAlias);
-  primaryNamespace.addSymbolField("prototype", valosheath.Discoverable.prototypeAlias);
   Object.entries(schemaTypeSheaths).forEach(entry => {
-    _injectTypeSheath(global, valosheath, primaryNamespace, hostDescriptors,
+    injectTypeSheath(global, valosheath, primaryNamespace, hostDescriptors,
           schema, schemaTypeSheaths, ...entry);
   });
-  // Future deprecations
-  // TODO(iridian, 2019-04): Deprecate and remove
-  valosheath.Blob = valosheath.Bvob;
-  valosheath.ResourceStub = valosheath.TransientFields;
-  valosheath.Partition = valosheath.Chronicle;
-  // valosheath.Chronicle = valosheath.Partition;
 }
 
 /**
@@ -53,36 +42,39 @@ export default function enfoldSchemaSheath (global: Object, valosheath: Object,
  * @param {Object} valos
  * @param {GraphQLSchema} schema
  */
-function _injectTypeSheath (global: Object, valosheath: Object, primaryNamespace,
+export function injectTypeSheath (global: Object, valosheath: Object, primaryNamespace,
     hostDescriptors: Map<any, Object>, schema: GraphQLSchema, schemaTypeSheaths,
     typeName, typeSheath) {
-  let valospaceType, typeIntro;
+  let valospaceType, typeIntro, fieldsIntro;
   try {
     if (!typeSheath) throw new Error(`TypeSheath missing for type name '${typeName}'`);
     if (valosheath[typeName]) return valosheath[typeName];
     typeIntro = schema.getType(typeSheath.schemaTypeName || typeName);
-      if (!typeIntro) {
+    if (!typeIntro) {
       throw new Error(`No schema type introspection found for type sheath '${
           typeSheath.schemaTypeName || typeName}'`);
     }
+    fieldsIntro = typeIntro.getFields();
     valospaceType = _createValospaceType();
     _addOwnSheathSymbolsAndFields();
 
     valospaceType.interfaces = _prepareSchemaInterfaces();
 
-    Object.entries(typeIntro.getFields())
+    Object.entries(fieldsIntro)
         .forEach(_addOwnSchemaFieldSymbolAndDescriptor);
 
+    // Fill properties inherited from interfaces
     [...valospaceType.interfaces].reverse()
-        .forEach(_inheritPropertiesAndDescriptors);
+        .forEach(_fillPropertiesAndDescriptorsFrom);
 
-    _inheritPropertiesAndDescriptors(valospaceType);
+    // Fill own properties
+    _fillPropertiesAndDescriptorsFrom(valospaceType);
 
     valosheath[typeName] = valospaceType;
     if (typeSheath.isGlobal) global[typeName] = valospaceType;
     return valospaceType;
   } catch (error) {
-    throw wrapError(error, new Error(`_injectTypeSheath(${typeName})`),
+    throw wrapError(error, new Error(`injectTypeSheath(${typeName})`),
         "\n\tschema:", ...dumpObject(schema),
         "\n\tsheathTypes:", ...dumpObject(schemaTypeSheaths),
         "\n\ttypeSheath:", ...dumpObject(typeSheath),
@@ -98,6 +90,9 @@ function _injectTypeSheath (global: Object, valosheath: Object, primaryNamespace
     }
     ret.name = typeName;
     ret.prototype = Object.create(valoscriptResourcePrototype);
+    ret[TypeIntroTag] = typeIntro;
+    ret[FieldsIntroTag] = fieldsIntro;
+    ret[IsResourceTag] = (typeName !== "Blob") && isResourceType(typeIntro);
     ret[TypeFieldDescriptorsTag] = {};
     ret[PrototypeFieldDescriptorsTag] = {};
     Object.defineProperty(ret, PropertyDescriptorsTag,
@@ -145,25 +140,30 @@ function _injectTypeSheath (global: Object, valosheath: Object, primaryNamespace
   function _prepareSchemaInterfaces () {
     return getTypeInterfaces(typeIntro).map(intro => {
       const interfaceSheath = schemaTypeSheaths[intro.name];
-      return interfaceSheath && _injectTypeSheath(global, valosheath, primaryNamespace,
+      return interfaceSheath && injectTypeSheath(global, valosheath, primaryNamespace,
           hostDescriptors, schema, schemaTypeSheaths, intro.name, interfaceSheath);
     }).filter(notNull => notNull);
   }
 
   function _addOwnSchemaFieldSymbolAndDescriptor ([fieldName: string, fieldIntro: Object]) {
-    if (valospaceType[fieldName]) return;
-    if ((fieldName === "id") || (fieldName === "name") || (fieldName === "prototype")) {
-      valospaceType[fieldName] = schemaTypeSheaths.TransientFields[fieldName];
-      return;
+    const fieldSymbol = qualifiedSymbol(primaryNamespace.preferredPrefix, fieldName);
+    if (valospaceType[PrototypeFieldDescriptorsTag][fieldSymbol]) return;
+
+    if (fieldName === "id") {
+      if (typeName !== "TransientFields") return;
+    } else if ((fieldName !== "name") && (fieldName !== "prototype")) {
+      valospaceType[fieldName] = fieldSymbol;
     }
+    // console.log("field:", fieldName, String(fieldSymbol), typeName);
     for (const interfaceType of valospaceType.interfaces) {
-      const maybeSymbol = interfaceType[fieldName];
-      if (((interfaceType[PrototypeFieldDescriptorsTag] || {})[maybeSymbol] || {}).isHostField) {
-        valospaceType[fieldName] = maybeSymbol;
+      const interfaceProtoDescs = interfaceType[PrototypeFieldDescriptorsTag];
+      // console.log("interface:", interfaceType.name, (interfaceProtoDescs || {})[fieldSymbol]);
+      if (((interfaceProtoDescs || {})[fieldSymbol] || {}).isHostField) {
         return;
       }
     }
-    const fieldSymbol = valospaceType[fieldName] = Symbol(`${valospaceType.name}.${fieldName}`);
+    primaryNamespace.addSymbolField(fieldName, fieldSymbol);
+
     const fieldDescriptorBase: any = { ...fieldIntro };
     fieldDescriptorBase.isHostField = true;
     // host fields are only discoverable via the field Symbols in the host type object.
@@ -171,7 +171,7 @@ function _injectTypeSheath (global: Object, valosheath: Object, primaryNamespace
     fieldDescriptorBase.configurable = false;
     let resolvedAlias: any = fieldIntro;
     if (!resolvedAlias.filterTypeName) {
-      while (resolvedAlias.alias) resolvedAlias = typeIntro.getFields()[resolvedAlias.alias];
+      while (resolvedAlias.alias) resolvedAlias = fieldsIntro[resolvedAlias.alias];
       if (resolvedAlias.isWritable) {
         fieldDescriptorBase.writableFieldName = resolvedAlias.fieldName;
       }
@@ -181,13 +181,11 @@ function _injectTypeSheath (global: Object, valosheath: Object, primaryNamespace
     fieldDescriptorBase.writable = resolvedAlias.isWritable;
     fieldDescriptorBase.kuery = resolvedAlias.fieldName;
 
-    primaryNamespace.addSymbolField(fieldName, fieldSymbol);
-
     valospaceType[PrototypeFieldDescriptorsTag][fieldSymbol] =
         createHostPrototypeFieldDescriptor(fieldDescriptorBase);
   }
 
-  function _inheritPropertiesAndDescriptors (sourceType) {
+  function _fillPropertiesAndDescriptorsFrom (sourceType) {
     for (const field of Object.keys(sourceType[TypeFieldDescriptorsTag])
         .concat(Object.getOwnPropertySymbols(sourceType[TypeFieldDescriptorsTag]))) {
       valospaceType[field] = sourceType[field];

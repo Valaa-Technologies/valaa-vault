@@ -72,514 +72,551 @@ describe("scheme valosheath", () => {
   });
 });
 
-describe("transpileValoscriptBody with Engine scriptAPI", () => {
-  describe("Creating and instancing with 'new' keyword", () => {
-    it("creates with 'new' a new Entity", () => {
-      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
-      const bodyText = `
-          new Entity({ name: "myEntity", owner: this, properties: { foo: 10 } });
-      `;
-      const bodyKuery = transpileValoscriptTestBody(bodyText);
-      const myEntity = entities().creator.do(bodyKuery);
-      expect(myEntity.step("name"))
-          .toEqual("myEntity");
-      expect(myEntity.step(VALEK.propertyLiteral("foo")))
-          .toEqual(10);
-      expect(entities().creator.step(
-              VALEK.to("unnamedOwnlings").filter(VALEK.hasName("myEntity")).to(0)))
-          .toEqual(myEntity);
-    });
-    it("adds with 'new' a child Relation to an existing Entity", () => {
-      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
-      const bodyText = `
-          const parent = new Entity({ name: "parent", owner: this,
-              properties: { position: { x: 10, y: 20 } } });
-          new Relation({ name: "myRelation", owner: parent,
-              properties: { position: { x: 1, y: 2 } } });
-      `;
-      const bodyKuery = transpileValoscriptTestBody(bodyText);
-      const myRelation = entities().creator.do(bodyKuery);
-      expect(myRelation.step("name"))
-          .toEqual("myRelation");
-      expect(myRelation.step(VALEK.propertyLiteral("position")))
-          .toEqual({ x: 1, y: 2 });
-      const MyTypeEntity = myRelation.step("owner");
-      expect(MyTypeEntity.step("name"))
-          .toEqual("parent");
-      expect(MyTypeEntity.step(VALEK.relations("myRelation").to(0)))
-          .toEqual(myRelation);
-    });
-    it("adds with 'new' a structured sub-Relation to an existing Entity", () => {
-      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
-      const bodyText = `
-          const parent = new Entity({ name: "parent", owner: this,
-              properties: { position: { x: 10, y: 20 } } });
-          const ret = parent.$V.getSubResource(["@_:rel-1@@"]);
-          new Relation({
-            name: "myRelation",
-            owner: parent, subResource: ["@_:rel-1@@"],
-            properties: { position: { x: 1, y: 2 } },
-          });
-          ret;
-      `;
-      const bodyKuery = transpileValoscriptTestBody(bodyText);
-      const myRelation = entities().creator.do(bodyKuery);
-      expect(myRelation.step("name"))
-          .toEqual("myRelation");
-      expect(myRelation.step(VALEK.propertyLiteral("position")))
-          .toEqual({ x: 1, y: 2 });
-      const MyTypeEntity = myRelation.step("owner");
-      expect(MyTypeEntity.step("name"))
-          .toEqual("parent");
-      expect(MyTypeEntity.step(VALEK.relations("myRelation").to(0)))
-          .toEqual(myRelation);
-    });
-    it("modifies existing Entity property", () => {
-      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
-      const bodyText = `
-          const parent = new Entity({ name: "parent", owner: this,
-              properties: { position: { x: 10, y: 20 } } });
-          [parent, parent.position = { x: 11, y: 22 }];
-      `;
-      const bodyKuery = transpileValoscriptTestBody(bodyText);
-      const [parent, position] = entities().creator.do(bodyKuery);
-      expect(position)
-          .toEqual({ x: 11, y: 22 });
-      expect(parent.step(VALEK.propertyLiteral("position")))
-          .toEqual({ x: 11, y: 22 });
-    });
-    it("instantiates with 'new' an Entity which has ownlings", () => {
-      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
-      const bodyText = `
-          const MyType = new Entity({ name: "MyType", owner: this,
-              properties: { position: { x: 10, y: 20 } } });
-          const target = new Entity({ name: "targetOfRelation", owner: this });
-          const relation = new Relation({ name: "myTypeRelation", owner: MyType, target: target,
-              properties: { position: { x: 1, y: 2 } } });
-          const instance = new MyType({ name: "instance", owner: this,
-              properties: { position: { x: 100, y: 200 } } });
-          MyType.position = { x: 11, y: 22 };
-          relation.orientation = { a: 90 };
-          target.payload = "data";
-          const instanceRelation = instance[Entity.getRelations]("myTypeRelation")[0];
-          instanceRelation.orientation = { a: 180 };
-          instanceRelation[Relation.target].secondPayload = "more data";
-          instance;
-      `;
-      harness.interceptErrors(() => {
-      const bodyKuery = transpileValoscriptTestBody(bodyText);
-
-      const instance = entities().creator.do(bodyKuery);
-
-      expect(instance.step("name"))
-          .toEqual("instance");
-      expect(instance.step(VALEK.propertyLiteral("position")))
-          .toEqual({ x: 100, y: 200 });
-
-      const MyTypeEntity = instance.step("prototype");
-      expect(MyTypeEntity.step("name"))
-          .toEqual("MyType");
-      expect(MyTypeEntity.step(VALEK.to("instances").to(0)))
-          .toEqual(instance);
-      expect(MyTypeEntity.step(VALEK.propertyLiteral("position")))
-          .toEqual({ x: 11, y: 22 });
-
-      const MyTypeRelation = MyTypeEntity.step(VALEK.relations("myTypeRelation").to(0));
-      expect(MyTypeRelation.step("name"))
-          .toEqual("myTypeRelation");
-      expect(MyTypeRelation.step(VALEK.propertyLiteral("orientation")))
-          .toEqual({ a: 90 });
-      expect(MyTypeRelation.step(VALEK.to("target").propertyLiteral("payload")))
-          .toEqual("data");
-
-      const instanceRelation = instance.step(VALEK.relations("myTypeRelation").to(0));
-      expect(instanceRelation.step("name"))
-          .toEqual("myTypeRelation");
-      expect(instanceRelation.step(VALEK.propertyLiteral("orientation")))
-          .toEqual({ a: 180 });
-      expect(instanceRelation.step(VALEK.to("target").propertyLiteral("payload")))
-          .toEqual("data");
-      expect(MyTypeRelation.step(VALEK.to("target").propertyLiteral("secondPayload")))
-          .toEqual("more data");
-      expect(instanceRelation.step(VALEK.to("target").propertyLiteral("secondPayload")))
-          .toEqual("more data");
-      })();
-    });
-    it("returns the result of an expression with properties correctly", () => {
-      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
-      const bodyText = `
-          const entity = new Entity({ name: "theEntity", owner: this,
-              properties: { numbers: { a: 1, b: 2 } } });
-          entity.numbers.a + entity.numbers.b;
-      `;
-      const bodyKuery = transpileValoscriptTestBody(bodyText);
-      const number = entities().creator.do(bodyKuery);
-      expect(number).toEqual(3);
-    });
-    it("accesses array values using a number for index correctly", () => {
-      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
-      const bodyText = `
-          const values = [3,4,5,6,7,8];
-          values[3];
-      `;
-      const bodyKuery = transpileValoscriptTestBody(bodyText);
-      const number = entities().creator.do(bodyKuery);
-      expect(number).toEqual(6);
-    });
-    it("accesses array values using an expression with properties correctly", () => {
-      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
-      const bodyText = `
-          const entity = new Entity({ name: "theEntity", owner: this,
-              properties: { numbers: { a: 1, b: 2 } } });
-          const values = [3,4,5,6,7,8];
-          [entity.numbers.a + entity.numbers.b, values[entity.numbers.a + entity.numbers.b]];
-      `;
-      const bodyKuery = transpileValoscriptTestBody(bodyText);
-      const [index, result] = entities().creator.do(bodyKuery);
-      expect(index).toEqual(3);
-      expect(result).toEqual(6);
-    });
-    it("Accesses properties inside a function correctly", () => {
-      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
-      const bodyText = `
-          const entity = new Entity({ name: "entity", owner: this,
-              properties: { numbers: { a: 1, b: 2 } } });
-          function f () {
-              return 400 + g(entity.numbers.a + 1, entity.numbers.b);
-          };
-          function g (a, b) {
-              return 40 + a + b;
-          }
-          4000 + f();
-      `;
-      const bodyKuery = transpileValoscriptTestBody(bodyText);
-      const number = entities().creator.do(bodyKuery);
-      expect(number).toEqual(4444);
-    });
-    it("Handles 'this' accessor in arrow functions correctly", () => {
-      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
-      const bodyText = `
-          this.a = 1;
-          this.b = 2;
-          const f = () => 400 + g(this.a + 1, this.b);
-          const g = (a, b) => 40 + a + b;
-          4000 + f();
-      `;
-      const bodyKuery = transpileValoscriptTestBody(bodyText);
-      const number = entities().creator.do(bodyKuery);
-      expect(number).toEqual(4444);
-    });
-    it("Accesses to non-declared properties in a transient Entity resolves to undefined", () => {
-      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
-      const bodyText = `
-          function functionA () {
-            const foo = new Entity({ name: "foo", owner: this });
-            if (foo.bar !== undefined) return "very much not ok";
-            else return functionB(foo);
-          }
-          function functionB (foo) {
-            if (foo.bar !== undefined) return "not ok";
-            else return "ok";
-          }
-          functionA.call(this);
-      `;
-      const bodyKuery = transpileValoscriptTestBody(bodyText);
-      const result = entities().creator.do(bodyKuery);
-      expect(result).toEqual("ok");
-    });
+describe("Creating and instancing with 'new' keyword", () => {
+  it("creates with 'new' a new Entity", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyText = `
+        new Entity({ name: "myEntity", owner: this, properties: { foo: 10 } });
+    `;
+    const bodyKuery = transpileValoscriptTestBody(bodyText);
+    const myEntity = entities().creator.do(bodyKuery);
+    expect(myEntity.step("name"))
+        .toEqual("myEntity");
+    expect(myEntity.step(VALEK.propertyLiteral("foo")))
+        .toEqual(10);
+    expect(entities().creator.step(
+            VALEK.to("unnamedOwnlings").filter(VALEK.hasName("myEntity")).to(0)))
+        .toEqual(myEntity);
   });
-  describe("Object.* decorator tests", () => {
-    it("handles Object.assign roundtrip from native object to ValOS resource and back", () => {
-      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
-      const bodyText = `
-          const target = new Entity({ owner: this });
-          const properties = { a: 1, target: target };
-          const midway = new Entity({ owner: this });
-          Object.assign(midway, properties);
-          const result = Object.assign({}, midway);
-          [target, properties, midway, result];
-      `;
-      const bodyKuery = transpileValoscriptTestBody(bodyText);
-      const [target, properties, midway, result] = entities().creator.do(bodyKuery);
-      expect(properties).toEqual({ a: 1, target });
-      expect(harness.engine.run(midway, ["§..", "a"])).toEqual(1);
-      expect(harness.engine.run(midway, ["§..", "target"])).toEqual(target);
-      expect(result).toEqual({ a: 1, target });
-      expect(result).not.toBe(properties);
-    });
-    it("handles more complex Object.assign between native and ValOS resources", () => {
-      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
-      const bodyText = `
-          const Proto = new Entity({ owner: this });
-          const protownling = new Entity({ owner: Proto });
-          Object.assign(Proto, { a: "baseA" }, { b: protownling });
-          const protoProps = {};
-          Object.assign(protoProps, Proto);
-          Object.assign(protoProps.b, { ownP: "ownP" });
-          const instance = new Proto({ owner: this, properties: {
-            a: "instanceA", c: "instanceC",
-          } });
-          const source = new Relation({ owner: this, properties: {
-            a: "relationA", d: "relationD",
-          } });
-          const nativeTarget = {};
-          Object.assign(nativeTarget, { d: "nativeD", e: "nativeE", }, source);
-          Object.assign(instance, source, { d: "nativeD", e: "nativeE", });
-          [
-            protownling,
-            nativeTarget,
-            Object.assign({}, Proto),
-            Object.assign({}, source),
-            instance,
-            Object.assign({}, instance),
-          ];
-      `;
-      const bodyKuery = transpileValoscriptTestBody(bodyText);
-      const [protownling, nativeProps, protoProps, sourceProps, instance, instanceProps]
-          = entities().creator.do(bodyKuery);
-      expect(nativeProps)
-          .toEqual({ a: "relationA", d: "relationD", e: "nativeE" });
-      expect(protoProps)
-          .toEqual({ a: "baseA", b: protownling });
-      expect(sourceProps)
-          .toEqual({ a: "relationA", d: "relationD" });
-      expect(instanceProps)
-          .toEqual({
-            a: "relationA", b: protownling.getGhostIn(instance),
-            c: "instanceC", d: "nativeD", e: "nativeE",
-          });
-    });
-    it("Sums the values of all properties in an entity using Object.keys", () => {
-      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
-      const bodyText = `
-          const properties = { a: 1, b: 2, c: 3, d: 4 };
-          const propertiesTotal = Object.keys(properties).reduce((t, v) => t + properties[v], 0);
-          const entity = new Entity({ name: "entity", owner: this, properties });
-          const total = Object.keys(entity).reduce((t, v) => t + entity[v], 0);
-          [propertiesTotal, total];
-      `;
-      const bodyKuery = transpileValoscriptTestBody(bodyText);
-      const [propertiesTotal, number] = entities().creator.do(bodyKuery);
-      expect(propertiesTotal).toEqual(1 + 2 + 3 + 4);
-      expect(number).toEqual(1 + 2 + 3 + 4);
-    });
-    it("Sums the values of all properties in an entity using Object.values", () => {
-      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
-      const bodyText = `
-          const properties = { a: 2, b: 3, c: 4, d: 5 };
-          const propertiesTotal = Object.values(properties).reduce((t, v) => t + v, 0);
-          const entity = new Entity({ name: "entity", owner: this, properties });
-          const total = Object.values(entity).reduce((t, v) => t + v, 0);
-          [propertiesTotal, total];
-      `;
-      const bodyKuery = transpileValoscriptTestBody(bodyText);
-      const [propertiesTotal, number] = entities().creator.do(bodyKuery);
-      expect(propertiesTotal).toEqual(2 + 3 + 4 + 5);
-      expect(number).toEqual(2 + 3 + 4 + 5);
-    });
-    it("Sums the values of all properties in an entity using Object.entries", () => {
-      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
-      const bodyText = `
-          const properties = { a: 3, b: 4, c: 5, d: 6 };
-          const propertiesTotal = Object.entries(properties).reduce(
-              (t, v) => [((t[0][v[0]] = -v[1]), t[0]), t[1] + v[1]], [{}, 0]);
-          const entity = new Entity({ name: "entity", owner: this, properties });
-          const total = Object.entries(entity).reduce(
-              (t, v) => [((t[0][v[0]] = -v[1]), t[0]), t[1] + v[1]], [{}, 0]);
-          [propertiesTotal, total];
-      `;
-      const bodyKuery = transpileValoscriptTestBody(bodyText);
-      const [[propertiesInverseObject, propertiesTotal], [entityInverseObject, total]] =
-          entities().creator.do(bodyKuery);
-      expect(propertiesInverseObject).toEqual({ a: -3, b: -4, c: -5, d: -6 });
-      expect(propertiesTotal).toEqual(3 + 4 + 5 + 6);
-      expect(entityInverseObject).toEqual({ a: -3, b: -4, c: -5, d: -6 });
-      expect(total).toEqual(3 + 4 + 5 + 6);
-    });
-    it("Object.getOwnPropertyDescriptor", () => {
-      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
-      const bodyText = `
-          const properties = { a: 1, b: 2, d: this };
-          const entity = new Entity({ name: "entity", owner: this, properties });
-          const overriddenProperties = Object.create(properties);
-          Object.assign(overriddenProperties, { a: 3, c: 4 });
-          const instance = new entity({ owner: this, properties: overriddenProperties });
-          ({
-            propertyA: Object.getOwnPropertyDescriptor(properties, "a"),
-            propertyB: Object.getOwnPropertyDescriptor(properties, "b"),
-            propertyC: Object.getOwnPropertyDescriptor(properties, "c"),
-            propertyD: Object.getOwnPropertyDescriptor(properties, "d"),
-            entityId: Object.getOwnPropertyDescriptor(entity, Resource.id),
-            entityOwner: Object.getOwnPropertyDescriptor(entity, Resource.owner),
-            entityName: Object.getOwnPropertyDescriptor(entity, valos.name),
-            entityA: Object.getOwnPropertyDescriptor(entity, "a"),
-            entityB: Object.getOwnPropertyDescriptor(entity, "b"),
-            entityC: Object.getOwnPropertyDescriptor(entity, "c"),
-            entityD: Object.getOwnPropertyDescriptor(entity, "d"),
-            overriddenPropertyA: Object.getOwnPropertyDescriptor(overriddenProperties, "a"),
-            overriddenPropertyB: Object.getOwnPropertyDescriptor(overriddenProperties, "b"),
-            overriddenPropertyC: Object.getOwnPropertyDescriptor(overriddenProperties, "c"),
-            overriddenPropertyD: Object.getOwnPropertyDescriptor(overriddenProperties, "d"),
-            instanceId: Object.getOwnPropertyDescriptor(instance, Resource.id),
-            instanceOwner: Object.getOwnPropertyDescriptor(instance, Resource.owner),
-            instanceName: Object.getOwnPropertyDescriptor(instance, valos.name),
-            instanceA: Object.getOwnPropertyDescriptor(instance, "a"),
-            instanceB: Object.getOwnPropertyDescriptor(instance, "b"),
-            instanceC: Object.getOwnPropertyDescriptor(instance, "c"),
-            instanceD: Object.getOwnPropertyDescriptor(instance, "d"),
-          });
-      `;
-      const bodyKuery = transpileValoscriptTestBody(bodyText);
-      const descriptors = entities().creator.do(bodyKuery);
-      function objectPropertyDescriptor (value: any, object: ?Object = {}) {
-        return {
-          value,
-          writable: true, enumerable: true, configurable: true,
-          ...object,
+  it("adds with 'new' a child Relation to an existing Entity", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyText = `
+        const parent = new Entity({ name: "parent", owner: this,
+            properties: { position: { x: 10, y: 20 } } });
+        new Relation({ name: "myRelation", owner: parent,
+            properties: { position: { x: 1, y: 2 } } });
+    `;
+    const bodyKuery = transpileValoscriptTestBody(bodyText);
+    const myRelation = entities().creator.do(bodyKuery);
+    expect(myRelation.step("name"))
+        .toEqual("myRelation");
+    expect(myRelation.step(VALEK.propertyLiteral("position")))
+        .toEqual({ x: 1, y: 2 });
+    const MyTypeEntity = myRelation.step("owner");
+    expect(MyTypeEntity.step("name"))
+        .toEqual("parent");
+    expect(MyTypeEntity.step(VALEK.relations("myRelation").to(0)))
+        .toEqual(myRelation);
+  });
+  it("adds with 'new' a structured sub-Relation to an existing Entity", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyText = `
+        const parent = new Entity({ name: "parent", owner: this,
+            properties: { position: { x: 10, y: 20 } } });
+        const ret = parent.$V.getSubResource(["@_:rel-1@@"]);
+        new Relation({
+          name: "myRelation",
+          owner: parent, subResource: ["@_:rel-1@@"],
+          properties: { position: { x: 1, y: 2 } },
+        });
+        ret;
+    `;
+    const bodyKuery = transpileValoscriptTestBody(bodyText);
+    const myRelation = entities().creator.do(bodyKuery);
+    expect(myRelation.step("name"))
+        .toEqual("myRelation");
+    expect(myRelation.step(VALEK.propertyLiteral("position")))
+        .toEqual({ x: 1, y: 2 });
+    const MyTypeEntity = myRelation.step("owner");
+    expect(MyTypeEntity.step("name"))
+        .toEqual("parent");
+    expect(MyTypeEntity.step(VALEK.relations("myRelation").to(0)))
+        .toEqual(myRelation);
+  });
+  it("modifies existing Entity property", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyText = `
+        const parent = new Entity({ name: "parent", owner: this,
+            properties: { position: { x: 10, y: 20 } } });
+        [parent, parent.position = { x: 11, y: 22 }];
+    `;
+    const bodyKuery = transpileValoscriptTestBody(bodyText);
+    const [parent, position] = entities().creator.do(bodyKuery);
+    expect(position)
+        .toEqual({ x: 11, y: 22 });
+    expect(parent.step(VALEK.propertyLiteral("position")))
+        .toEqual({ x: 11, y: 22 });
+  });
+  it("instantiates with 'new' an Entity which has ownlings", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyText = `
+        const MyType = new Entity({ name: "MyType", owner: this,
+            properties: { position: { x: 10, y: 20 } } });
+        const target = new Entity({ name: "targetOfRelation", owner: this });
+        const relation = new Relation({ name: "myTypeRelation", owner: MyType, target: target,
+            properties: { position: { x: 1, y: 2 } } });
+        const instance = new MyType({ name: "instance", owner: this,
+            properties: { position: { x: 100, y: 200 } } });
+        MyType.position = { x: 11, y: 22 };
+        relation.orientation = { a: 90 };
+        target.payload = "data";
+        const instanceRelation = instance[Entity.getRelations]("myTypeRelation")[0];
+        instanceRelation.orientation = { a: 180 };
+        instanceRelation[Relation.target].secondPayload = "more data";
+        instance;
+    `;
+    const bodyKuery = transpileValoscriptTestBody(bodyText);
+
+    const instance = entities().creator.do(bodyKuery);
+
+    expect(instance.step("name"))
+        .toEqual("instance");
+    expect(instance.step(VALEK.propertyLiteral("position")))
+        .toEqual({ x: 100, y: 200 });
+
+    const MyTypeEntity = instance.step("prototype");
+    expect(MyTypeEntity.step("name"))
+        .toEqual("MyType");
+    expect(MyTypeEntity.step(VALEK.to("instances").to(0)))
+        .toEqual(instance);
+    expect(MyTypeEntity.step(VALEK.propertyLiteral("position")))
+        .toEqual({ x: 11, y: 22 });
+
+    const MyTypeRelation = MyTypeEntity.step(VALEK.relations("myTypeRelation").to(0));
+    expect(MyTypeRelation.step("name"))
+        .toEqual("myTypeRelation");
+    expect(MyTypeRelation.step(VALEK.propertyLiteral("orientation")))
+        .toEqual({ a: 90 });
+    expect(MyTypeRelation.step(VALEK.to("target").propertyLiteral("payload")))
+        .toEqual("data");
+
+    const instanceRelation = instance.step(VALEK.relations("myTypeRelation").to(0));
+    expect(instanceRelation.step("name"))
+        .toEqual("myTypeRelation");
+    expect(instanceRelation.step(VALEK.propertyLiteral("orientation")))
+        .toEqual({ a: 180 });
+    expect(instanceRelation.step(VALEK.to("target").propertyLiteral("payload")))
+        .toEqual("data");
+    expect(MyTypeRelation.step(VALEK.to("target").propertyLiteral("secondPayload")))
+        .toEqual("more data");
+    expect(instanceRelation.step(VALEK.to("target").propertyLiteral("secondPayload")))
+        .toEqual("more data");
+  });
+  it("returns the result of an expression with properties correctly", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyText = `
+        const entity = new Entity({ name: "theEntity", owner: this,
+            properties: { numbers: { a: 1, b: 2 } } });
+        entity.numbers.a + entity.numbers.b;
+    `;
+    const bodyKuery = transpileValoscriptTestBody(bodyText);
+    const number = entities().creator.do(bodyKuery);
+    expect(number).toEqual(3);
+  });
+  it("accesses array values using a number for index correctly", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyText = `
+        const values = [3,4,5,6,7,8];
+        values[3];
+    `;
+    const bodyKuery = transpileValoscriptTestBody(bodyText);
+    const number = entities().creator.do(bodyKuery);
+    expect(number).toEqual(6);
+  });
+  it("accesses array values using an expression with properties correctly", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyText = `
+        const entity = new Entity({ name: "theEntity", owner: this,
+            properties: { numbers: { a: 1, b: 2 } } });
+        const values = [3,4,5,6,7,8];
+        [entity.numbers.a + entity.numbers.b, values[entity.numbers.a + entity.numbers.b]];
+    `;
+    const bodyKuery = transpileValoscriptTestBody(bodyText);
+    const [index, result] = entities().creator.do(bodyKuery);
+    expect(index).toEqual(3);
+    expect(result).toEqual(6);
+  });
+  it("Accesses properties inside a function correctly", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyText = `
+        const entity = new Entity({ name: "entity", owner: this,
+            properties: { numbers: { a: 1, b: 2 } } });
+        function f () {
+            return 400 + g(entity.numbers.a + 1, entity.numbers.b);
         };
-      }
-      function resourcePropertyDescriptor (value: any, object: ?Object = {}) {
-        return {
-          value, valos: true, property: true, persisted: true,
-          writable: true, enumerable: true, configurable: true,
-          ...object,
-        };
-      }
-      function hostFieldDescriptor (value: any, object: ?Object = {}) {
-        return {
-          value, valos: true, host: true, persisted: true,
-          writable: true, enumerable: false, configurable: false,
-          ...object,
-        };
-      }
-      expect(descriptors.propertyA).toMatchObject(objectPropertyDescriptor(1));
-      expect(descriptors.propertyB).toMatchObject(objectPropertyDescriptor(2));
-      expect(descriptors.propertyC).toEqual(undefined);
-      expect(descriptors.propertyD.value).toBe(entities().creator);
-      expect(descriptors.entityId).toEqual(undefined);
-          // .toMatchObject(hostFieldDescriptor(undefined,
-          //     { name: "id", persisted: undefined, writable: undefined }));
-      expect(descriptors.entityOwner.value).toBe(entities().creator);
-      expect(descriptors.entityName).toMatchObject(hostFieldDescriptor("entity"));
-      expect(descriptors.entityA).toMatchObject(resourcePropertyDescriptor(1));
-      expect(descriptors.entityB).toMatchObject(resourcePropertyDescriptor(2));
-      expect(descriptors.entityC).toEqual(undefined);
-      expect(descriptors.entityD.value).toEqual(entities().creator);
-      expect(descriptors.overriddenPropertyA).toMatchObject(objectPropertyDescriptor(3));
-      expect(descriptors.overriddenPropertyB).toEqual(undefined);
-      expect(descriptors.overriddenPropertyC).toMatchObject(objectPropertyDescriptor(4));
-      expect(descriptors.overriddenPropertyD).toEqual(undefined);
-      expect(descriptors.instanceId).toEqual(undefined);
-          // .toMatchObject(hostFieldDescriptor(undefined,
-          //     { name: "id", persisted: undefined, writable: undefined }));
-      expect(descriptors.instanceOwner.value).toBe(entities().creator);
-      expect(descriptors.instanceName).toEqual(undefined);
-      expect(descriptors.instanceA).toMatchObject(resourcePropertyDescriptor(3));
-      expect(descriptors.instanceB).toEqual(undefined);
-      expect(descriptors.instanceC).toMatchObject(resourcePropertyDescriptor(4));
-      expect(descriptors.instanceD).toEqual(undefined);
-    });
-    it("Object.getOwnPropertyNames", () => {
-      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
-      const bodyText = `
-          const properties = { a: 1, b: 2, d: this };
-          const entity = new Entity({ name: "entity", owner: this, properties });
-          const overriddenProperties = Object.create(properties);
-          Object.assign(overriddenProperties, { a: 3, c: 4 });
-          const instance = new entity({ owner: this, properties: overriddenProperties });
-          ({
-            entity: Object.assign({}, entity),
-            instance: Object.assign({}, instance),
-            propertiesNames: Object.getOwnPropertyNames(properties),
-            entityNames: Object.getOwnPropertyNames(entity),
-            overriddenPropertiesNames: Object.getOwnPropertyNames(overriddenProperties),
-            instanceNames: Object.getOwnPropertyNames(instance),
+        function g (a, b) {
+            return 40 + a + b;
+        }
+        4000 + f();
+    `;
+    const bodyKuery = transpileValoscriptTestBody(bodyText);
+    const number = entities().creator.do(bodyKuery);
+    expect(number).toEqual(4444);
+  });
+  it("Handles 'this' accessor in arrow functions correctly", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyText = `
+        this.a = 1;
+        this.b = 2;
+        const f = () => 400 + g(this.a + 1, this.b);
+        const g = (a, b) => 40 + a + b;
+        4000 + f();
+    `;
+    const bodyKuery = transpileValoscriptTestBody(bodyText);
+    const number = entities().creator.do(bodyKuery);
+    expect(number).toEqual(4444);
+  });
+  it("Accesses to non-declared properties in a transient Entity resolves to undefined", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyText = `
+        function functionA () {
+          const foo = new Entity({ name: "foo", owner: this });
+          if (foo.bar !== undefined) return "very much not ok";
+          else return functionB(foo);
+        }
+        function functionB (foo) {
+          if (foo.bar !== undefined) return "not ok";
+          else return "ok";
+        }
+        functionA.call(this);
+    `;
+    const bodyKuery = transpileValoscriptTestBody(bodyText);
+    const result = entities().creator.do(bodyKuery);
+    expect(result).toEqual("ok");
+  });
+});
+
+describe("Object.* decorator tests", () => {
+  it("handles Object.assign roundtrip from native object to ValOS resource and back", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyText = `
+        const target = new Entity({ owner: this });
+        const properties = { a: 1, target: target };
+        const midway = new Entity({ owner: this });
+        Object.assign(midway, properties);
+        const result = Object.assign({}, midway);
+        [target, properties, midway, result];
+    `;
+    const bodyKuery = transpileValoscriptTestBody(bodyText);
+    const [target, properties, midway, result] = entities().creator.do(bodyKuery);
+    expect(properties).toEqual({ a: 1, target });
+    expect(harness.engine.run(midway, ["§..", "a"])).toEqual(1);
+    expect(harness.engine.run(midway, ["§..", "target"])).toEqual(target);
+    expect(result).toEqual({ a: 1, target });
+    expect(result).not.toBe(properties);
+  });
+  it("handles more complex Object.assign between native and ValOS resources", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyText = `
+        const Proto = new Entity({ owner: this });
+        const protownling = new Entity({ owner: Proto });
+        Object.assign(Proto, { a: "baseA" }, { b: protownling });
+        const protoProps = {};
+        Object.assign(protoProps, Proto);
+        Object.assign(protoProps.b, { ownP: "ownP" });
+        const instance = new Proto({ owner: this, properties: {
+          a: "instanceA", c: "instanceC",
+        } });
+        const source = new Relation({ owner: this, properties: {
+          a: "relationA", d: "relationD",
+        } });
+        const nativeTarget = {};
+        Object.assign(nativeTarget, { d: "nativeD", e: "nativeE", }, source);
+        Object.assign(instance, source, { d: "nativeD", e: "nativeE", });
+        [
+          protownling,
+          nativeTarget,
+          Object.assign({}, Proto),
+          Object.assign({}, source),
+          instance,
+          Object.assign({}, instance),
+        ];
+    `;
+    const bodyKuery = transpileValoscriptTestBody(bodyText);
+    const [protownling, nativeProps, protoProps, sourceProps, instance, instanceProps]
+        = entities().creator.do(bodyKuery);
+    expect(nativeProps)
+        .toEqual({ a: "relationA", d: "relationD", e: "nativeE" });
+    expect(protoProps)
+        .toEqual({ a: "baseA", b: protownling });
+    expect(sourceProps)
+        .toEqual({ a: "relationA", d: "relationD" });
+    expect(instanceProps)
+        .toEqual({
+          a: "relationA", b: protownling.getGhostIn(instance),
+          c: "instanceC", d: "nativeD", e: "nativeE",
+        });
+  });
+  it("Sums the values of all properties in an entity using Object.keys", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyText = `
+        const properties = { a: 1, b: 2, c: 3, d: 4 };
+        const propertiesTotal = Object.keys(properties).reduce((t, v) => t + properties[v], 0);
+        const entity = new Entity({ name: "entity", owner: this, properties });
+        const total = Object.keys(entity).reduce((t, v) => t + entity[v], 0);
+        [propertiesTotal, total];
+    `;
+    const bodyKuery = transpileValoscriptTestBody(bodyText);
+    const [propertiesTotal, number] = entities().creator.do(bodyKuery);
+    expect(propertiesTotal).toEqual(1 + 2 + 3 + 4);
+    expect(number).toEqual(1 + 2 + 3 + 4);
+  });
+  it("Sums the values of all properties in an entity using Object.values", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyText = `
+        const properties = { a: 2, b: 3, c: 4, d: 5 };
+        const propertiesTotal = Object.values(properties).reduce((t, v) => t + v, 0);
+        const entity = new Entity({ name: "entity", owner: this, properties });
+        const total = Object.values(entity).reduce((t, v) => t + v, 0);
+        [propertiesTotal, total];
+    `;
+    const bodyKuery = transpileValoscriptTestBody(bodyText);
+    const [propertiesTotal, number] = entities().creator.do(bodyKuery);
+    expect(propertiesTotal).toEqual(2 + 3 + 4 + 5);
+    expect(number).toEqual(2 + 3 + 4 + 5);
+  });
+  it("Sums the values of all properties in an entity using Object.entries", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyText = `
+        const properties = { a: 3, b: 4, c: 5, d: 6 };
+        const propertiesTotal = Object.entries(properties).reduce(
+            (t, v) => [((t[0][v[0]] = -v[1]), t[0]), t[1] + v[1]], [{}, 0]);
+        const entity = new Entity({ name: "entity", owner: this, properties });
+        const total = Object.entries(entity).reduce(
+            (t, v) => [((t[0][v[0]] = -v[1]), t[0]), t[1] + v[1]], [{}, 0]);
+        [propertiesTotal, total];
+    `;
+    const bodyKuery = transpileValoscriptTestBody(bodyText);
+    const [[propertiesInverseObject, propertiesTotal], [entityInverseObject, total]] =
+        entities().creator.do(bodyKuery);
+    expect(propertiesInverseObject).toEqual({ a: -3, b: -4, c: -5, d: -6 });
+    expect(propertiesTotal).toEqual(3 + 4 + 5 + 6);
+    expect(entityInverseObject).toEqual({ a: -3, b: -4, c: -5, d: -6 });
+    expect(total).toEqual(3 + 4 + 5 + 6);
+  });
+  it("Object.getOwnPropertyDescriptor", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyText = `
+        const properties = { a: 1, b: 2, d: this };
+        const entity = new Entity({ name: "entity", owner: this, properties });
+        const overriddenProperties = Object.create(properties);
+        Object.assign(overriddenProperties, { a: 3, c: 4 });
+        const instance = new entity({ owner: this, properties: overriddenProperties });
+        ({
+          propertyA: Object.getOwnPropertyDescriptor(properties, "a"),
+          propertyB: Object.getOwnPropertyDescriptor(properties, "b"),
+          propertyC: Object.getOwnPropertyDescriptor(properties, "c"),
+          propertyD: Object.getOwnPropertyDescriptor(properties, "d"),
+          entityId: Object.getOwnPropertyDescriptor(entity, valos.Resource.id),
+          entityOwner: Object.getOwnPropertyDescriptor(entity, valos.Resource.owner),
+          entityName: Object.getOwnPropertyDescriptor(entity, valos.name),
+          entityA: Object.getOwnPropertyDescriptor(entity, "a"),
+          entityB: Object.getOwnPropertyDescriptor(entity, "b"),
+          entityC: Object.getOwnPropertyDescriptor(entity, "c"),
+          entityD: Object.getOwnPropertyDescriptor(entity, "d"),
+          overriddenPropertyA: Object.getOwnPropertyDescriptor(overriddenProperties, "a"),
+          overriddenPropertyB: Object.getOwnPropertyDescriptor(overriddenProperties, "b"),
+          overriddenPropertyC: Object.getOwnPropertyDescriptor(overriddenProperties, "c"),
+          overriddenPropertyD: Object.getOwnPropertyDescriptor(overriddenProperties, "d"),
+          instanceId: Object.getOwnPropertyDescriptor(instance, valos.Resource.id),
+          instanceOwner: Object.getOwnPropertyDescriptor(instance, valos.Resource.owner),
+          instanceName: Object.getOwnPropertyDescriptor(instance, valos.name),
+          instanceA: Object.getOwnPropertyDescriptor(instance, "a"),
+          instanceB: Object.getOwnPropertyDescriptor(instance, "b"),
+          instanceC: Object.getOwnPropertyDescriptor(instance, "c"),
+          instanceD: Object.getOwnPropertyDescriptor(instance, "d"),
+        });
+    `;
+    const bodyKuery = transpileValoscriptTestBody(bodyText);
+
+    const descriptors = entities().creator.do(bodyKuery);
+    function objectPropertyDescriptor (value: any, object: ?Object = {}) {
+      return {
+        value,
+        writable: true, enumerable: true, configurable: true,
+        ...object,
+      };
+    }
+    function resourcePropertyDescriptor (value: any, object: ?Object = {}) {
+      return {
+        value, valos: true, property: true, persisted: true,
+        writable: true, enumerable: true, configurable: true,
+        ...object,
+      };
+    }
+    function hostFieldDescriptor (value: any, object: ?Object = {}) {
+      return {
+        value, valos: true, host: true, persisted: true,
+        writable: true, enumerable: false, configurable: false,
+        ...object,
+      };
+    }
+    expect(descriptors.propertyA).toMatchObject(objectPropertyDescriptor(1));
+    expect(descriptors.propertyB).toMatchObject(objectPropertyDescriptor(2));
+    expect(descriptors.propertyC).toEqual(undefined);
+    expect(descriptors.propertyD.value).toBe(entities().creator);
+    expect(descriptors.entityId).toEqual(undefined);
+        // .toMatchObject(hostFieldDescriptor(undefined,
+        //     { name: "id", persisted: undefined, writable: undefined }));
+    expect(descriptors.entityOwner.value).toBe(entities().creator);
+    expect(descriptors.entityName).toMatchObject(hostFieldDescriptor("entity"));
+    expect(descriptors.entityA).toMatchObject(resourcePropertyDescriptor(1));
+    expect(descriptors.entityB).toMatchObject(resourcePropertyDescriptor(2));
+    expect(descriptors.entityC).toEqual(undefined);
+    expect(descriptors.entityD.value).toEqual(entities().creator);
+    expect(descriptors.overriddenPropertyA).toMatchObject(objectPropertyDescriptor(3));
+    expect(descriptors.overriddenPropertyB).toEqual(undefined);
+    expect(descriptors.overriddenPropertyC).toMatchObject(objectPropertyDescriptor(4));
+    expect(descriptors.overriddenPropertyD).toEqual(undefined);
+    expect(descriptors.instanceId).toEqual(undefined);
+        // .toMatchObject(hostFieldDescriptor(undefined,
+        //     { name: "id", persisted: undefined, writable: undefined }));
+    expect(descriptors.instanceOwner.value).toBe(entities().creator);
+    expect(descriptors.instanceName).toEqual(undefined);
+    expect(descriptors.instanceA).toMatchObject(resourcePropertyDescriptor(3));
+    expect(descriptors.instanceB).toEqual(undefined);
+    expect(descriptors.instanceC).toMatchObject(resourcePropertyDescriptor(4));
+    expect(descriptors.instanceD).toEqual(undefined);
+  });
+  it("Object.getOwnPropertyNames", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyText = `
+        const properties = { a: 1, b: 2, d: this };
+        const entity = new Entity({ name: "entity", owner: this, properties });
+        const overriddenProperties = Object.create(properties);
+        Object.assign(overriddenProperties, { a: 3, c: 4 });
+        const instance = new entity({ owner: this, properties: overriddenProperties });
+        ({
+          entity: Object.assign({}, entity),
+          instance: Object.assign({}, instance),
+          propertiesNames: Object.getOwnPropertyNames(properties),
+          entityNames: Object.getOwnPropertyNames(entity),
+          overriddenPropertiesNames: Object.getOwnPropertyNames(overriddenProperties),
+          instanceNames: Object.getOwnPropertyNames(instance),
+        });
+    `;
+    const bodyKuery = transpileValoscriptTestBody(bodyText);
+    const names = entities().creator.do(bodyKuery);
+    expect(names.propertiesNames.sort()).toEqual(["a", "b", "d"]);
+    expect(names.entityNames.sort()).toEqual(["a", "b", "d"]);
+    expect(names.overriddenPropertiesNames.sort()).toEqual(["a", "c"]);
+    expect(names.instanceNames.sort()).toEqual(["a", "c"]);
+  });
+  it("Object.getOwnPropertySymbols", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyText = `
+        const properties = { a: 1, b: 2, c: 3, d: this };
+        const Base = new Entity({ name: "entity", owner: this, properties });
+        const overriddenProperties = Object.create(properties);
+        Object.assign(overriddenProperties, { c: 33, e: 4 });
+        --overriddenProperties.b;
+        --overriddenProperties.c;
+        const instance = new Base({ owner: this, properties: overriddenProperties });
+        ({
+          valos, instance,
+          b: instance.b,
+          c: instance.c,
+          propertiesSymbols: Object.getOwnPropertySymbols(properties),
+          entitySymbols: Object.getOwnPropertySymbols(Base),
+          overriddenPropertiesSymbols: Object.getOwnPropertySymbols(overriddenProperties),
+          instanceSymbols: Object.getOwnPropertySymbols(instance),
+        });
+    `;
+    const bodyKuery = transpileValoscriptTestBody(bodyText);
+    const { valos, instance, b, c, ...rest } = entities().creator.do(bodyKuery);
+    expect(b).toEqual(1);
+    expect(c).toEqual(32);
+    const symbolSorter = (left, right) =>
+        (left.toString() < right.toString() ? -1 : left.toString() > right.toString() ? 1 : 0);
+    expect(rest.propertiesSymbols.sort(symbolSorter)).toEqual([]);
+    expect(rest.entitySymbols.sort(symbolSorter)).toEqual([
+      valos.TransientFields.instances, valos.nameAlias, valos.Resource.owner,
+      valos.Scope.properties,
+    ]);
+    expect(rest.overriddenPropertiesSymbols.sort(symbolSorter)).toEqual([]);
+    expect(rest.instanceSymbols.sort(symbolSorter)).toEqual([
+      valos.TransientFields.ghostOwnlings, valos.Resource.owner, valos.Scope.properties,
+      valos.prototypeAlias,
+    ]);
+  });
+  it("Object.defineProperty", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyText = `
+        const properties = { a: 1, b: 2, d: this };
+        const entity = new Entity({ name: "entity", owner: this, properties });
+
+        Object.defineProperty(entity, "a_plus_b",
+            { get: function () { return this.a + this.b; } });
+
+        const three = entity.a_plus_b;
+        entity.a = 10;
+        const twelve = entity.a_plus_b;
+        const scopeValue = { number: 20 };
+
+        Object.defineProperty(entity, "scope_plus_b",
+            { get: function () { return scopeValue.number + this.b; } });
+
+        const twentytwo = entity.scope_plus_b;
+        scopeValue.number = 40;
+        const still22 = entity.scope_plus_b;
+
+        Object.defineProperty(entity, "lots",
+            { get: function () { return this.a + entity.a + scopeValue.number; } });
+
+        const lots = entity.lots;
+        ({
+          three: three,
+          twelve: twelve,
+          twentytwo: twentytwo,
+          still22: still22,
+          lots: lots,
+        });
+    `;
+    const bodyKuery = transpileValoscriptTestBody(bodyText);
+    const { three, twelve, twentytwo, still22, lots } = entities().creator.do(bodyKuery);
+    expect(three).toEqual(3);
+    expect(twelve).toEqual(12);
+    expect(twentytwo).toEqual(22);
+    expect(still22).toEqual(22);
+    expect(lots).toEqual(60);
+  });
+
+  it("duplicates an entity with valoscript function", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
+    const bodyText = `
+        () => {
+          const owner = new Entity({ owner: this });
+          const orig = new Entity({
+            name: "origame", owner, properties: { first: 1, second: 2 },
           });
-      `;
-      const bodyKuery = transpileValoscriptTestBody(bodyText);
-      const names = entities().creator.do(bodyKuery);
-      expect(names.propertiesNames.sort()).toEqual(["a", "b", "d"]);
-      expect(names.entityNames.sort()).toEqual(["a", "b", "d"]);
-      expect(names.overriddenPropertiesNames.sort()).toEqual(["a", "c"]);
-      expect(names.instanceNames.sort()).toEqual(["a", "c"]);
-    });
-    it("Object.getOwnPropertySymbols", () => {
-      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
-      const bodyText = `
-          const properties = { a: 1, b: 2, c: 3, d: this };
-          const Base = new Entity({ name: "entity", owner: this, properties });
-          const overriddenProperties = Object.create(properties);
-          Object.assign(overriddenProperties, { c: 33, e: 4 });
-          --overriddenProperties.b;
-          --overriddenProperties.c;
-          const instance = new Base({ owner: this, properties: overriddenProperties });
-          ({
-            valos, instance,
-            b: instance.b,
-            c: instance.c,
-            propertiesSymbols: Object.getOwnPropertySymbols(properties),
-            entitySymbols: Object.getOwnPropertySymbols(Base),
-            overriddenPropertiesSymbols: Object.getOwnPropertySymbols(overriddenProperties),
-            instanceSymbols: Object.getOwnPropertySymbols(instance),
-          });
-      `;
-      const bodyKuery = transpileValoscriptTestBody(bodyText);
-      const { valos, instance, b, c, ...rest } = entities().creator.do(bodyKuery);
-      expect(b).toEqual(1);
-      expect(c).toEqual(32);
-      const symbolSorter = (left, right) =>
-          (left.toString() < right.toString() ? -1 : left.toString() > right.toString() ? 1 : 0);
-      expect(rest.propertiesSymbols.sort(symbolSorter)).toEqual([]);
-      expect(rest.entitySymbols.sort(symbolSorter)).toEqual([
-        valos.name, valos.Resource.owner, valos.Scope.properties, valos.TransientFields.instances,
-      ]);
-      expect(rest.overriddenPropertiesSymbols.sort(symbolSorter)).toEqual([]);
-      expect(rest.instanceSymbols.sort(symbolSorter)).toEqual([
-        valos.Resource.owner, valos.Scope.properties, valos.TransientFields.ghostOwnlings,
-        valos.prototype,
-      ]);
-    });
-    it("Object.defineProperty", () => {
-      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
-      const bodyText = `
-          const properties = { a: 1, b: 2, d: this };
-          const entity = new Entity({ name: "entity", owner: this, properties });
-
-          Object.defineProperty(entity, "a_plus_b",
-              { get: function () { return this.a + this.b; } });
-
-          const three = entity.a_plus_b;
-          entity.a = 10;
-          const twelve = entity.a_plus_b;
-          const scopeValue = { number: 20 };
-
-          Object.defineProperty(entity, "scope_plus_b",
-              { get: function () { return scopeValue.number + this.b; } });
-
-          const twentytwo = entity.scope_plus_b;
-          scopeValue.number = 40;
-          const still22 = entity.scope_plus_b;
-
-          Object.defineProperty(entity, "lots",
-              { get: function () { return this.a + entity.a + scopeValue.number; } });
-
-          const lots = entity.lots;
-          ({
-            three: three,
-            twelve: twelve,
-            twentytwo: twentytwo,
-            still22: still22,
-            lots: lots,
-          });
-      `;
-      const bodyKuery = transpileValoscriptTestBody(bodyText);
-      const { three, twelve, twentytwo, still22, lots } = entities().creator.do(bodyKuery);
-      expect(three).toEqual(3);
-      expect(twelve).toEqual(12);
-      expect(twentytwo).toEqual(22);
-      expect(still22).toEqual(22);
-      expect(lots).toEqual(60);
-    });
+          const dup = orig.$V.duplicate();
+          orig.first = 11;
+          dup.second = -2;
+          dup.third = -3;
+          orig.fourth = 4;
+          return {
+            owner,
+            orig, origProps: Object.assign({}, orig),
+            dup, dupProps: Object.assign({}, dup),
+          };
+        }
+    `;
+    const bodyKuery = transpileValoscriptTestBody(bodyText);
+    const { owner, orig, origProps, dup, dupProps } = entities().test.do(bodyKuery, {})();
+    expect(origProps)
+        .toEqual({ first: 11, second: 2, fourth: 4 });
+    expect(dupProps)
+        .toEqual({ first: 1, second: -2, third: -3 });
+    expect(owner.step("owner").getRawId())
+        .toBe(entities().test.getRawId());
+    expect(orig.step("owner").getRawId())
+        .toBe(owner.getRawId());
+    expect(dup.step("owner").getRawId())
+        .toBe(owner.getRawId());
+    expect(entities().test.step("unnamedOwnlings").length)
+        .toEqual(4);
+  });
+});
 
 describe("namespaced resource $V.names", () => {
   it("creates a new Entity with a namespaced name and property", () => {
@@ -626,40 +663,6 @@ describe("namespaced resource $V.names", () => {
     const NSSFooTag = qualifiedSymbol("nss", "foo");
     expect(properties).toMatchObject({
       a: 1, [qualifiedSymbol("V", "name")]: "newname", [NSSFooTag]: "propfoo",
-    it("duplicates an entity with valoscript function", () => {
-      harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
-      const bodyText = `
-          () => {
-            const owner = new Entity({ owner: this });
-            const orig = new Entity({
-              name: "origame", owner, properties: { first: 1, second: 2 },
-            });
-            const dup = orig.$V.duplicate();
-            orig.first = 11;
-            dup.second = -2;
-            dup.third = -3;
-            orig.fourth = 4;
-            return {
-              owner,
-              orig, origProps: Object.assign({}, orig),
-              dup, dupProps: Object.assign({}, dup),
-            };
-          }
-      `;
-      const bodyKuery = transpileValoscriptTestBody(bodyText);
-      const { owner, orig, origProps, dup, dupProps } = entities().test.do(bodyKuery, {})();
-      expect(origProps)
-          .toEqual({ first: 11, second: 2, fourth: 4 });
-      expect(dupProps)
-          .toEqual({ first: 1, second: -2, third: -3 });
-      expect(owner.step("owner").getRawId())
-          .toBe(entities().test.getRawId());
-      expect(orig.step("owner").getRawId())
-          .toBe(owner.getRawId());
-      expect(dup.step("owner").getRawId())
-          .toBe(owner.getRawId());
-      expect(entities().test.step("unnamedOwnlings").length)
-          .toEqual(4);
     });
     expect(Base.propertyValue(qualifiedSymbol("V", "name"))).toEqual("basename");
     expect(midway.step("name")).toEqual("newname");

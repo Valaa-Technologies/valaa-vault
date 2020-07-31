@@ -128,7 +128,7 @@ export default class LiveUpdate {
       if (adds && adds.length) {
         const ids = this._emitter._tryElevateFieldValueFrom(
             passage.state, this._fieldName, adds, passage.vProtagonist);
-        return this._emitter.getEngine().getVrappers(ids, passage);
+        return this._emitter.getEngine().getVrappers(ids, { state: passage.state });
       }
     }
     return undefined;

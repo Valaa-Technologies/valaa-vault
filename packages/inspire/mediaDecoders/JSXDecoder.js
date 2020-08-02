@@ -43,7 +43,7 @@ export default class JSXDecoder extends MediaDecoder {
     };
     try {
       const originalSource = this.stringFromBuffer(buffer);
-      sourceInfo.source = `<UIComponent>\n${originalSource}\n</UIComponent>`;
+      sourceInfo.source = `<UIComponent>${originalSource}</UIComponent>`;
       sourceInfo.phase = `decode-jsx-transform phase of ${sourceInfo.phaseBase}`;
       try {
         sourceInfo.jsxTransformedSource = _jsxTransformFromString(sourceInfo.source,

@@ -267,12 +267,7 @@ function visitNode (traverse, object, path, state) {
     utils.append(")", state);
   }
 
-  // filter out whitespace
-  const children = object.children.filter((child) =>
-      !(child.type === Syntax.Literal
-          && typeof child.value === "string"
-          && child.value.match(/^[ \t]*[\r\n][ \t\r\n]*$/)));
-
+  const children = object.children;
   let lastRenderableIndex;
   if (children.length) {
     if (!attributes.length) {
@@ -359,66 +354,18 @@ visitNode.test = (object/* , path, state */) => object.type === Syntax.JSXElemen
  * @param {Number} end
  * @private
  */
-function renderJSXLiteral (object, isLast, state, start, end) {
+function renderJSXLiteral (object, isLast, state) {
   /* eslint-enable max-len */
-  const lines = object.value.split(/\r\n|\n|\r/);
-
-  if (start) {
-    utils.append(start, state);
+  const tokens = object.value.split(/[ \t\r\n]+/);
+  if (!tokens[0] && !tokens[1]) {
+    if (tokens.length === 2) {
+      utils.append("' '", state);
+      if (!isLast) utils.append(", ", state);
+    } else if (isLast) utils.append("''", state);
+  } else {
+    utils.append(JSON.stringify(tokens.join(" ")), state);
+    if (!isLast) utils.append(", ", state);
   }
-
-  let lastNonEmptyLine = 0;
-
-  lines.forEach((line, index) => {
-    if (line.match(/[^ \t]/)) {
-      lastNonEmptyLine = index;
-    }
-  });
-
-  lines.forEach((line, index) => {
-    const isFirstLine = index === 0;
-    const isLastLine = index === lines.length - 1;
-    const isLastNonEmptyLine = index === lastNonEmptyLine;
-
-    // replace rendered whitespace tabs with spaces
-    let trimmedLine = line.replace(/\t/g, " ");
-
-    // trim whitespace touching a newline
-    if (!isFirstLine) {
-      trimmedLine = trimmedLine.replace(/^[ ]+/, "");
-    }
-    if (!isLastLine) {
-      trimmedLine = trimmedLine.replace(/[ ]+$/, "");
-    }
-
-    if (!isFirstLine) {
-      utils.append(line.match(/^[ \t]*/)[0], state);
-    }
-
-    if (trimmedLine || isLastNonEmptyLine) {
-      utils.append(
-        JSON.stringify(trimmedLine) + (!isLastNonEmptyLine ? ` + ' ' +` : ""), state);
-
-      if (isLastNonEmptyLine) {
-        if (end) {
-          utils.append(end, state);
-        }
-        if (!isLast) {
-          utils.append(", ", state);
-        }
-      }
-
-      // only restore tail whitespace if line had literals
-      if (trimmedLine && !isLastLine) {
-        utils.append(line.match(/[ \t]*$/)[0], state);
-      }
-    }
-
-    if (!isLastLine) {
-      utils.append("\n", state);
-    }
-  });
-
   utils.move(object.range[1], state);
 }
 

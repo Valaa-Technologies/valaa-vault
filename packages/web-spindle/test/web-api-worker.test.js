@@ -12,11 +12,11 @@ const expectedOutputHTML = `<html><head>${
   ""}<body><div id="perspire-gateway--main-container">${
     ""}<div id="valos-gateway--web-api-test-view--view-root">${
       ""}<div style="width: 100vw; height: 100vh;">${
-        ""}<div><h1>Hello World!</h1><h2>Hello World! function</h2></div>${
+        ""}<div> <h1>Hello World!</h1> <h2>Hello World! function</h2> </div>${
       ""}</div>${
     ""}</div>${
     ""}<div id="perspire-gateway--worker-view"><div style="width: 100vw; height: 100vh;">${
-      ""}<div><h1>Hello World!</h1><h2>Hello World! function</h2></div>${
+      ""}<div> <h1>Hello World!</h1> <h2>Hello World! function</h2> </div>${
     ""}</div></div>${
   ""}</div></body></html>`;
 

@@ -4,7 +4,7 @@ import React from "react";
 
 import { addSourceEntryInfo, addStackFrameToError, SourceInfoTag } from "~/raem/VALK/StackTrace";
 
-import VALEK, { Kuery, EngineKuery, VS, IsLiveTag } from "~/engine/VALEK";
+import VALEK, { Kuery, EngineKuery, VS, IsLiveTag, engineSteppers } from "~/engine/VALEK";
 
 import UIComponent, { LENS } from "~/inspire/ui/UIComponent";
 import { ValensPropsTag, tryCreateValensArgs } from "~/inspire/ui/UIComponent/Valens";
@@ -13,7 +13,7 @@ import Valoscope from "~/inspire/ui/Valoscope";
 import Lens from "~/inspire/valosheath/valos/Lens";
 import _jsxTransformFromString from "~/inspire/mediaDecoders/_jsxTransformFromString";
 
-import { ScopeAccessesTag } from "~/script/VALSK";
+import { ScopeAccessesTag, ScopeAccessKeysTag } from "~/script/VALSK";
 
 import MediaDecoder from "~/tools/MediaDecoder";
 import notThatSafeEval from "~/tools/notThatSafeEval";
@@ -29,7 +29,10 @@ export default class JSXDecoder extends MediaDecoder {
 
   constructor (options) {
     super(options);
-    this._gatewayDiscourse = options.gateway.discourse;
+    this._globalEngineDiscourse = options.gateway.discourse
+        && Object.create(options.gateway.discourse);
+    this._globalEngineDiscourse.setSteppers(engineSteppers);
+    this._globalEngineDiscourse._rootDiscourse = this._globalEngineDiscourse;
   }
 
   decode (buffer: ArrayBuffer, { chronicleName, mediaName }: Object = {}): any {
@@ -305,7 +308,7 @@ export default class JSXDecoder extends MediaDecoder {
         _extractMetaOfValueInto(
             _maybeRecurseWithKey(child, parentKey, ret),
             ret,
-            this._gatewayDiscourse));
+            this._globalEngineDiscourse));
     return ret;
   }
 
@@ -375,7 +378,7 @@ export default class JSXDecoder extends MediaDecoder {
             }' (likely as a result of two aliased props, in ${elementName} at ${lexicalName})`);
       }
       const decodedValue = namespaceAttrs[name] =
-          _extractMetaOfValueInto(attr, ret, this._gatewayDiscourse, isLiveKuery);
+          _extractMetaOfValueInto(attr, ret, this._globalEngineDiscourse, isLiveKuery);
       const propName = (namespace === flattenedNamespace) ? name : `$${namespace}.${name}`;
       if ((typeof decodedValue === "function") && decodedValue._isIntegrator) {
         ret.integrateableKueries.push([propName, decodedValue]);
@@ -401,18 +404,35 @@ function _getInstanceLensPrototypeKuery (elementName) {
   return ret;
 }
 
-function _extractMetaOfValueInto (value, meta, gatewayDiscourse, isLiveIfKuery) {
+const _scopeAccessLevels = {
+  this: 1,
+  window: 1,
+  global: 1,
+  valos: 1,
+  Valaa: 1,
+  console: 1,
+  Array: 1,
+  Object: 1,
+};
+
+function _extractMetaOfValueInto (value, meta, globalEngineDiscourse, isLiveIfKuery) {
   let ret = value;
   if (value instanceof Kuery) {
-    const scopeAccesses = ret[ScopeAccessesTag];
-    if (!scopeAccesses && gatewayDiscourse) {
-      ret = gatewayDiscourse.run(null, ret);
+    const accesses = ret[ScopeAccessKeysTag];
+    let accessLevel = accesses === undefined ? 0 : 2;
+    for (const access of (accesses || [])) {
+      if ((_scopeAccessLevels[access] || 0) < accessLevel) {
+        accessLevel = _scopeAccessLevels[access] || 0;
+      }
+    }
+    if (accessLevel === 2) {
+      ret = globalEngineDiscourse.run(null, ret);
       if ((typeof ret === "object") && (ret != null)) {
         Object.freeze(ret);
       }
     } else {
-      Object.assign(meta.scopeAccesses || (meta.scopeAccesses = {}), scopeAccesses);
-      if (false) {
+      Object.assign(meta.scopeAccesses || (meta.scopeAccesses = {}), ret[ScopeAccessesTag]);
+      if (accessLevel === 1) {
         ret = function _kueryIntegrator (integrationHostGlobal) {
           return integrationHostGlobal.valos.this.step(ret);
         };

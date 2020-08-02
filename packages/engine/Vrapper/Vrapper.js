@@ -1039,6 +1039,7 @@ export default class Vrapper extends Cog {
     let fieldDescriptor;
     if (typeof propertyName !== "string" || (propertyName[0] === "$")) {
       fieldDescriptor = this._type.prototype[PropertyDescriptorsTag][propertyName];
+      if (!fieldDescriptor) this.requireActive();
     }
     if (fieldDescriptor == null) {
       const vProperty = this.getPropertyResource(propertyName, Object.create(options));

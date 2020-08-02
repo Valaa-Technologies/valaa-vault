@@ -362,7 +362,7 @@ export default class Subscription extends LiveUpdate {
         else if (triggerBroadcast !== false) this._triggerPostUpdate();
       })) return;
       const name = new Error(`attachLiveKueryHooks()`);
-      throw this._emitter.wrapErrorEvent(error, 1, () => [
+      throw this._emitter.wrapErrorEvent(error, 2, () => [
         name,
         "\n\thead:", ...dumpObject(this._liveHead),
         "\n\tkuery:", ...dumpKuery(this._liveKuery),

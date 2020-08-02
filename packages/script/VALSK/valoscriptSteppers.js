@@ -130,7 +130,8 @@ function _getIdentifierOrPropertyValue (steppers: Object, valker: Valker, head: 
       actualError = new Error(`Cannot use a value with type '${typeof ePropertyName}' as ${
           isGetProperty ? "property" : "identifier"} name`);
     }
-    throw valker.wrapErrorEvent(actualError, 1, isGetProperty ? "getProperty" : "getIdentifier",
+    throw valker.wrapErrorEvent(actualError, 1,
+        isGetProperty ? `valoscript§../getProperty` : `valoscript§$$/getIdentifier`,
         "\n\thead:", ...dumpObject(head),
         "\n\tcontainer:", ...dumpObject(eContainer),
         "(via kuery:", ...dumpKuery(container), ")",
@@ -204,7 +205,7 @@ function _alterIdentifierOrPropertyValue (steppers: Object, valker: Valker, head
         "\n\talterationVAKON run:", eAlterationVAKON);
     */
     throw valker.wrapErrorEvent(actualError, 1,
-        isAlterProperty ? "alterProperty" : "alterIdentifier",
+        isAlterProperty ? "valoscript§..<-/alterProperty" : "valoscript§$$<-/alterIdentifier",
         "\n\thead:", ...dumpObject(head),
         "\n\tcontainer:", ...dumpObject(eContainer),
         "(via kuery:", ...dumpKuery(container), ")",
@@ -267,7 +268,9 @@ function _deleteIdentifierOrProperty (steppers: Object, valker: Valker, head: an
       }
     }
     throw valker.wrapErrorEvent(actualError, 1,
-        isPropertyNotIdentifier ? "deleteProperty" : "deleteIdentifier",
+        isPropertyNotIdentifier
+            ? "valoscript§delete../deleteProperty"
+            : "valoscript§delete$$/deleteIdentifier",
         "\n\thead:", ...dumpObject(head),
         "\n\tcontainer:", ...dumpObject(eContainer),
         "(via kuery:", ...dumpKuery(container), ")",
@@ -346,7 +349,7 @@ function _new (valker: Valker, head: any, scope: ?Object, newOp: any) {
         ""} ValOS object creation or a ValOS Resource for instantiation`);
   } catch (error) {
     throw valker.wrapErrorEvent(error, 1, () => [
-      `§new`,
+      `valoscript§new`,
       "\n\tType:", ...dumpObject(Type),
       "\n\targs:", ...dumpObject(eArgs),
     ]);

@@ -49,7 +49,7 @@ function callableOf (valker: Valker, head: any, scope: ?Object,
         `Can't convert callee with type '${typeof eCandidate}' to a function for ${roleName}`);
   } catch (error) {
     throw valker.wrapErrorEvent(error, 2, () => [
-      `§callableof`,
+      `engine§callableof`,
       "\n\thead:", ...dumpObject(head),
       "\n\tcallee candidate:", ...dumpObject(eCandidate),
     ]);
@@ -82,7 +82,7 @@ function argumentOf (valker: Valker, head: any /* , scope: ?Object,
     return head;
   } catch (error) {
     throw valker.wrapErrorEvent(error, 2, () => [
-      `§argumentOf`,
+      `engine§argumentOf`,
       "\n\thead:", ...dumpObject(head),
       "\n\tcallee candidate:", ...dumpObject(eHostValue),
     ]);
@@ -126,7 +126,7 @@ function toMethod (valker: Valker, head: any, scope: ?Object, [, callableName]: 
     throw valker.wrapErrorEvent(
         new Error("Can't find host object or it is missing member .getVALKMethod"),
         1, () => [
-          `§method(${callableName})`,
+          `engine§method(${callableName})`,
           "\n\thead:", ...dumpObject(head),
           "\n\thostValue:", ...dumpObject(actualHostHead),
         ],
@@ -177,7 +177,8 @@ function _engineIdentifierOrPropertyValue (steppers: Object, valker: Valker, hea
       actualError = new Error(`Cannot use a value with type '${typeof ePropertyName}' as ${
           isGetProperty ? "property" : "identifier"} name`);
     }
-    throw valker.wrapErrorEvent(actualError, 1, isGetProperty ? "getProperty" : "getIdentifier",
+    throw valker.wrapErrorEvent(actualError, 1,
+        isGetProperty ? "engine§../getProperty" : "engine§$$/getIdentifier",
         "\n\thead:", ...dumpObject(head),
         "\n\tcontainer:", ...dumpObject(eContainer),
         "(via kuery:", ...dumpKuery(container), ")",

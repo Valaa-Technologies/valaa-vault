@@ -22,10 +22,10 @@ export default function extendValOS (scope: any, hostDescriptors: any, rootDisco
       preferredPrefix: "V",
       namespaceURI: "https://valospace.org/#",
     });
-    injectTypeSheath(global, valosheath, primaryNamespace, hostDescriptors,
+    injectTypeSheath(scope, valosheath, primaryNamespace, hostDescriptors,
         rootDiscourse.schema, schemaTypeSheaths,
         "TransientFields", schemaTypeSheaths.TransientFields);
-    injectTypeSheath(global, valosheath, primaryNamespace, hostDescriptors,
+    injectTypeSheath(scope, valosheath, primaryNamespace, hostDescriptors,
         rootDiscourse.schema, schemaTypeSheaths,
         "Discoverable", schemaTypeSheaths.Discoverable);
     // primaryNamespace.addSymbolField("name", valosheath.Discoverable.nameAlias);

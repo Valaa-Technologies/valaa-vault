@@ -24,10 +24,10 @@ import { dumpObject, wrapError } from "~/tools";
 
 export const OwnerDefaultCouplingTag = qualifiedSymbol("Valosheath", "OwnerDefaultCoupling");
 
-export default function enfoldSchemaSheath (global: Object, valosheath: Object,
+export default function enfoldSchemaSheath (scope: Object, valosheath: Object,
     primaryNamespace, hostDescriptors: Object, schema: GraphQLSchema, schemaTypeSheaths: Object) {
   Object.entries(schemaTypeSheaths).forEach(entry => {
-    injectTypeSheath(global, valosheath, primaryNamespace, hostDescriptors,
+    injectTypeSheath(scope, valosheath, primaryNamespace, hostDescriptors,
           schema, schemaTypeSheaths, ...entry);
   });
 }
@@ -42,7 +42,7 @@ export default function enfoldSchemaSheath (global: Object, valosheath: Object,
  * @param {Object} valos
  * @param {GraphQLSchema} schema
  */
-export function injectTypeSheath (global: Object, valosheath: Object, primaryNamespace,
+export function injectTypeSheath (scope: Object, valosheath: Object, primaryNamespace,
     hostDescriptors: Map<any, Object>, schema: GraphQLSchema, schemaTypeSheaths,
     typeName, typeSheath) {
   let valospaceType, typeIntro, fieldsIntro;
@@ -71,7 +71,7 @@ export function injectTypeSheath (global: Object, valosheath: Object, primaryNam
     _fillPropertiesAndDescriptorsFrom(valospaceType);
 
     valosheath[typeName] = valospaceType;
-    if (typeSheath.isGlobal) global[typeName] = valospaceType;
+    if (typeSheath.isGlobal) scope[typeName] = valospaceType;
     return valospaceType;
   } catch (error) {
     throw wrapError(error, new Error(`injectTypeSheath(${typeName})`),
@@ -140,7 +140,7 @@ export function injectTypeSheath (global: Object, valosheath: Object, primaryNam
   function _prepareSchemaInterfaces () {
     return getTypeInterfaces(typeIntro).map(intro => {
       const interfaceSheath = schemaTypeSheaths[intro.name];
-      return interfaceSheath && injectTypeSheath(global, valosheath, primaryNamespace,
+      return interfaceSheath && injectTypeSheath(scope, valosheath, primaryNamespace,
           hostDescriptors, schema, schemaTypeSheaths, intro.name, interfaceSheath);
     }).filter(notNull => notNull);
   }

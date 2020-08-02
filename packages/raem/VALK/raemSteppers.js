@@ -85,7 +85,7 @@ export default {
       }
     } catch (error) {
       throw valker.wrapErrorEvent(error, 1, () => [
-        `§@/statement(#${index})`,
+        `raem§@/statement(#${index})`,
         "\n\thead:", ...dumpObject(head),
         "\n\tstatement:", dumpify(statementsStep[index + 1]),
       ]);
@@ -674,8 +674,8 @@ function _advance (valker: Valker, head: any, scope: ?Object, pathStep: BuiltinS
     if (initialStackFrameSourceInfo) {
       addStackFrameToError(error, step, initialStackFrameSourceInfo, "runtime", valker);
     }
-    const name = new Error(`_advance(step #${index}: ${type})`);
-    throw valker.wrapErrorEvent(error, 1, () => [name,
+    const name = new Error(`raem§->/_advance#${index}: ${type}`);
+    throw valker.wrapErrorEvent(error, 2, () => [name,
       "\n\tstep head:", ...dumpObject(stepHead),
       "\n\tstep:", type, ...dumpKuery(step),
       "\n\tpath head:", ...dumpObject(head),
@@ -701,7 +701,7 @@ function _map (valker: Valker, head: any, scope: ?Object, mapStep: any, nonFinal
       ret.push(valker.tryUnpack(result, true));
     } catch (error) {
       throw valker.wrapErrorEvent(error, 1, () => [
-        `§map/entry#${index}`,
+        `raem§map/#${index}`,
         "\n\tmap head", ...dumpObject(sequence),
         "\n\tmap step:", ...dumpKuery(mapStep),
         `\n\tentry #${index} head:`, ...dumpObject(entryHead),
@@ -729,7 +729,7 @@ function _filter (valker: Valker, head: any, scope: ?Object, filterStep: any,
       if (result) ret.push(isPackedSequence ? valker.tryUnpack(entry, true) : entry);
     } catch (error) {
       throw valker.wrapErrorEvent(error, 1, () => [
-        `§filter/entry#${index}`,
+        `raem§filter/#${index}`,
         "\n\tfilter head:", ...dumpObject(sequence),
         "\n\tfilter step:", ...dumpKuery(filterStep),
         `\n\tentry #${index} head:`, ...dumpObject(entryHead),
@@ -958,12 +958,12 @@ function _createVCall (capturingValker: Valker, vakon: any, sourceInfo: ?Object,
         : " (external non-transactional caller)";
     let opName;
     if (!transaction) {
-      opName = `call/acquireFabricator ${contextText}`;
+      opName = `raem§call/acquireFabricator ${contextText}`;
     } else if (transactionError) {
-      opName = `call/releaseFabricator ${
+      opName = `raem§call/releaseFabricator ${
           advanceError ? "({ rollback: true })" : "()"}${contextText}`;
     } else {
-      opName = `call/${valkCaller ? "advance" : "run"}${contextText}`;
+      opName = `raem§call/${valkCaller ? "advance" : "run"}${contextText}`;
       if (!valkCaller) {
         const absentChronicleSourcing = tryConnectToAbsentChroniclesAndThen(
           advanceError, () => vcall.apply(this, arguments));
@@ -1059,7 +1059,7 @@ export function callOrApply (steppers: Object, valker: Valker, head: any, scope:
     throw onError(error);
   }
   function onError (error) {
-    return valker.wrapErrorEvent(error, 1, `builtin.${opName}`,
+    return valker.wrapErrorEvent(error, 1, `raem${opName}`,
         "\n\thead:", ...dumpObject(head),
         "\n\tcallee (is vcall):", (eCallee != null) && eCallee._isVCall, ...dumpObject(eCallee),
         "(via kuery:", ...dumpKuery(step[1]), ")",

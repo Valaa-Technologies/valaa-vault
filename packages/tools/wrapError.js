@@ -51,7 +51,7 @@ function dumpifyObject (value) {
  * @param {any} contextDescription
  * @returns
  */
-function wrapError (errorIn, ...contextDescriptions) {
+function wrapError (errorIn, contextName, ...contextDescriptions) {
   const error = _tryCooperativeError(errorIn) || new Error(errorIn);
   if (!error.stack) error.stack = (new Error("dummy").stack);
   if ((typeof error !== "object") || !error || (typeof error.message !== "string")) {
@@ -61,25 +61,26 @@ function wrapError (errorIn, ...contextDescriptions) {
   }
   const originalMessage = error.originalMessage || error.message;
   const contextError = new Error("", error.fileName, error.lineNumber);
-  if (!(contextDescriptions[0] instanceof Error)) {
+  if (!(contextName instanceof Error)) {
+    contextError.name = contextName;
     contextError.tidyFrameList = contextError.stack.split("\n").slice(3);
   } else {
-    contextError.tidyFrameList = contextDescriptions[0].stack.split("\n").slice(2);
-    contextError.logger = contextDescriptions[0].logger;
-    contextError.verbosities = contextDescriptions[0].verbosities;
-    contextDescriptions[0] = contextDescriptions[0].message;
+    contextError.name = contextName.message;
+    contextError.tidyFrameList = contextName.stack.split("\n").slice(2);
+    contextError.logger = contextName.logger;
+    contextError.verbosities = contextName.verbosities;
   }
   const outermostError = error.errorContexts
       ? error.errorContexts[error.errorContexts.length - 1]
       : error;
   const clippedFrameList = _clipFrameListToCurrentContext(outermostError, contextError);
-  const myTraceAndContext = `${clippedFrameList.join("\n")}
-${contextDescriptions.map(debugObjectHard).join(" ")}`;
-  const allTraceAndContext = `${error.allTraceAndContext || ""}
-${myTraceAndContext}`;
-  contextError.message = `${originalMessage}\n${allTraceAndContext}`;
+  // const myTraceAndContext = `${clippedFrameList.join("\n")}
+  // ${contextDescriptions.map(debugObjectHard).join(" ")}`;
+  // const allTraceAndContext = `${error.allTraceAndContext || ""}
+  // ${myTraceAndContext}`;
+  contextError.message = errorIn.message; // `${originalMessage}\n${allTraceAndContext}`;
   contextError.clippedFrameList = clippedFrameList;
-  contextError.allTraceAndContext = allTraceAndContext;
+  // contextError.allTraceAndContext = allTraceAndContext;
   contextError.originalError = error.originalError || error;
   contextError.originalMessage = originalMessage;
   contextError.contextDescriptions = contextDescriptions;
@@ -197,18 +198,29 @@ function outputError (error, header = "Exception caught", logger = _globalLogger
       : error.stack.split("\n").slice(1);
   for (const context of (error.errorContexts || [])) {
     const contextLogger = context.logger || logger;
-    let output;
     const verbosities = context.verbosities || [0];
     if (verbosities[1] === undefined) verbosities.unshift(contextVerbosity);
-    if (verbosities[0] >= verbosities[1]) {
+    const excess = verbosities[0] - verbosities[1];
+    if (excess >= 0) {
       logger.debug(traces.join("\n"));
-      output = contextLogger.warnEvent || contextLogger.warn;
+      traces = [];
+      const warn = (contextLogger.warnEvent || contextLogger.warn).bind(contextLogger);
+      warn(`[${verbosities.join(">=")}] error context by:\n  ${context.name}`,
+          ...context.contextDescriptions.map(dumpifyObject));
+    } else if (excess >= -1) {
+      logger.debug(`\t[${verbosities.join("<")}]`, { traces }, `collapsed fabric traces`);
+      traces = [];
+      const lines = [];
+      for (const entry of context.contextDescriptions) {
+        if (entry[0] === "\n" || !lines.length) lines.push([]);
+        lines[lines.length - 1].push(entry);
+      }
+      const info = (contextLogger.infoEvent || contextLogger.info).bind(contextLogger);
+      info(`[${verbosities.join("<")}] collapsed error context by ${context.name}:`, lines);
     } else {
-      logger.debug(`\t[${verbosities.join("<")}]`, traces.length, "fabric traces hidden");
-      output = contextLogger.infoEvent || contextLogger.info;
+      traces.push(`  [${verbosities.join("<<")}] hidden error context by ${context.name}`);
     }
-    output.apply(contextLogger, context.contextDescriptions.map(dumpifyObject));
-    traces = context.tidyFrameList || [];
+    traces.push(...(context.tidyFrameList || []));
   }
   logger.debug(traces.join("\n"));
 }

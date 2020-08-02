@@ -141,32 +141,32 @@ export class FabricEventTarget {
   }
 
   debugEvent (firstPartOrMinVerbosity: number | any, ...rest: any[]) {
-    if (!_isVerboseEnough(firstPartOrMinVerbosity, this._verbosity, this)) return this;
+    if (_verbosityExcess(firstPartOrMinVerbosity, this._verbosity, this) < 0) return this;
     return this._outputMessageEvent((this._parent || this).debug.bind(this._parent || this),
         true, this._getMessageParts(firstPartOrMinVerbosity, rest));
   }
   infoEvent (firstPartOrMinVerbosity: number | any, ...rest: any[]) {
-    if (!_isVerboseEnough(firstPartOrMinVerbosity, this._verbosity, this)) return this;
+    if (_verbosityExcess(firstPartOrMinVerbosity, this._verbosity, this) < 0) return this;
     return this._outputMessageEvent((this._parent || this).info.bind(this._parent || this),
         true, this._getMessageParts(firstPartOrMinVerbosity, rest));
   }
   logEvent (firstPartOrMinVerbosity: number | any, ...rest: any[]) {
-    if (!_isVerboseEnough(firstPartOrMinVerbosity, this._verbosity, this)) return this;
+    if (_verbosityExcess(firstPartOrMinVerbosity, this._verbosity, this) < 0) return this;
     return this._outputMessageEvent((this._parent || this).log.bind(this._parent || this),
         true, this._getMessageParts(firstPartOrMinVerbosity, rest));
   }
   warnEvent (firstPartOrMinVerbosity: number | any, ...rest: any[]) {
-    if (!_isVerboseEnough(firstPartOrMinVerbosity, this._verbosity, this)) return this;
+    if (_verbosityExcess(firstPartOrMinVerbosity, this._verbosity, this) < 0) return this;
     return this._outputMessageEvent((this._parent || this).warn.bind(this._parent || this),
         true, this._getMessageParts(firstPartOrMinVerbosity, rest));
   }
   errorEvent (firstPartOrMinVerbosity: number | any, ...rest: any[]) {
-    if (!_isVerboseEnough(firstPartOrMinVerbosity, this._verbosity, this)) return this;
+    if (_verbosityExcess(firstPartOrMinVerbosity, this._verbosity, this) < 0) return this;
     return this._outputMessageEvent((this._parent || this).error.bind(this._parent || this),
         true, this._getMessageParts(firstPartOrMinVerbosity, rest));
   }
   clockEvent (firstPartOrMinVerbosity: number | any, ...rest: any[]) {
-    if (!_isVerboseEnough(firstPartOrMinVerbosity, this._verbosity, this)) return this;
+    if (_verbosityExcess(firstPartOrMinVerbosity, this._verbosity, this) < 0) return this;
     return this._outputMessageEvent(this.clock.bind(this),
         false, this._getMessageParts(firstPartOrMinVerbosity, rest));
   }
@@ -190,6 +190,8 @@ export class FabricEventTarget {
   }
 
   wrapErrorEvent (error: Error, nameOrMinVerbosity: Error | string | number, ...contexts_: any[]) {
+    const excess = _verbosityExcess(nameOrMinVerbosity, this._verbosity, this);
+    if (excess <= -3) return error; // no wrap.
     const [functionName, ...contexts] = this._getMessageParts(nameOrMinVerbosity, contexts_);
     const actualFunctionName = functionName instanceof Error ? functionName.message : functionName;
     if (error.hasOwnProperty("functionName")
@@ -199,7 +201,7 @@ export class FabricEventTarget {
       // functionName in the same context.
       return error;
     }
-    const wrapper = (functionName instanceof Error) ? functionName : new Error("");
+    const wrapper = (functionName instanceof Error) ? functionName : new Error(actualFunctionName);
     if (!wrapper.tidyFrameList) {
       wrapper.tidyFrameList = wrapper.stack.split("\n")
           .slice((functionName instanceof Error) ? 2 : 3);
@@ -208,23 +210,14 @@ export class FabricEventTarget {
     if (typeof nameOrMinVerbosity === "number") {
       wrapper.verbosities = [this.getVerbosity(), nameOrMinVerbosity];
     }
-    let ret;
-    if (!_isVerboseEnough(nameOrMinVerbosity, this._verbosity, this)) {
-      wrapper.message = `${wrapper.verbosities ? `[${wrapper.verbosities.join("<")}] ` : ""
-        }fabric error context hidden from .${actualFunctionName}`;
-      ret = wrapError(error, wrapper);
-    } else {
-      wrapper.message = `${wrapper.verbosities ? `[${wrapper.verbosities.join(">=")}] ` : ""
-        }Error context by \n  ${actualFunctionName}${contexts.length ? ", with:" : ""}`;
-      ret = wrapError(error, wrapper, ...contexts);
-    }
+    const ret = wrapError(error, wrapper, ...contexts);
     ret.functionName = actualFunctionName;
     ret.contextObject = this;
     return ret;
   }
 
   outputErrorEvent (error: Error, firstMessageOrMinVerbosity, ...restMessages) {
-    return (!_isVerboseEnough(firstMessageOrMinVerbosity, this._verbosity, this)
+    return (!_verbosityExcess(firstMessageOrMinVerbosity, this._verbosity, this)
             ? outputCollapsedError
             : outputError)(
         error,
@@ -385,9 +378,9 @@ export class FabricEventTarget {
 
 FabricEventTarget.prototype[FabricEventTypesTag] = {};
 
-function _isVerboseEnough (maybeMinVerbosity, verbosity, eventTarget) {
-  return (typeof maybeMinVerbosity !== "number")
-      || (maybeMinVerbosity <= (verbosity !== undefined ? verbosity : eventTarget.getVerbosity()));
+function _verbosityExcess (maybeMinVerbosity, verbosity, eventTarget) {
+  return (typeof maybeMinVerbosity !== "number") ? 0
+      : (verbosity !== undefined ? verbosity : eventTarget.getVerbosity()) - maybeMinVerbosity;
 }
 
 function _createListener (type, callback, options) {

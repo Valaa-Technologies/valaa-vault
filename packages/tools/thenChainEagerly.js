@@ -70,7 +70,7 @@ function mapEagerly (
       if ((entriesOrThenables == null) || (typeof entriesOrThenables.then !== "function")) {
         throw new Error("mapEagerly: array expected as first argument");
       }
-      errorName = new Error(`During mapEagerly.entriesOrThenables.catch`);
+      errorName = new Error(`mapEagerly.entriesOrThenables.catch`);
       return entriesOrThenables.then(
           entries_ => mapEagerly(entries_, callback, onRejected, startIndex, results),
           errorOnMapEagerly);
@@ -107,7 +107,7 @@ function mapEagerly (
     return errorOnMapEagerly(error);
   }
   function getName (info) {
-    return `During mapEagerly step #${index} ${info} ${
+    return `mapEagerly step #${index} ${info} ${
         !(onRejected && onRejected.name) ? " " : `(with ${onRejected.name})`}`;
   }
   function errorOnMapEagerly (error) {
@@ -166,7 +166,7 @@ function thenChainEagerly (
       });
   function getName (info) {
     const functionName = (functionChain[index] || "").name;
-    return `During ${`${functionName ? `${functionName} (as ` : ""
+    return `${`${functionName ? `${functionName} (as ` : ""
       }thenChainEagerly ${index === -1 ? "initial value" : `step #${index}`}`} ${info})`;
   }
 }

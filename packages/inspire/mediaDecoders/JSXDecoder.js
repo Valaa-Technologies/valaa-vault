@@ -238,7 +238,7 @@ export default class JSXDecoder extends MediaDecoder {
     const childrenMeta = this._createChildrenMeta(children, lexicalName);
     const decodedChildrenArgs = !childrenMeta.decodedChildren ? [] : [childrenMeta.decodedChildren];
 
-    if (!childrenMeta.hasIntegrators) {
+    if (!childrenMeta.hasIntegrators && !(propsMeta || "").hasIntegrators) {
       if (childrenMeta.hasKueries) {
         parentChildrenMeta.hasKueries = true;
         Object.assign(parentChildrenMeta.scopeAccesses
@@ -248,12 +248,9 @@ export default class JSXDecoder extends MediaDecoder {
           React.createElement(decodedType, decodedProps, ...decodedChildrenArgs),
           sourceInfo);
     }
-
+    const self = this;
     function _elementIntegrator (integrationHostGlobal: Object) {
       try {
-        const integrationFabricScope = integrationHostGlobal.valos;
-        let integratedProps;
-        const vIntegrator = integrationFabricScope.this;
         /*
         if (isInstanceLens) {
           integratedProps.instanceLensPrototype =
@@ -264,17 +261,19 @@ export default class JSXDecoder extends MediaDecoder {
           }
         }
         */
-        const integrateableKueries = propsMeta && propsMeta.integrateableKueries;
-        if (integrateableKueries) {
+        let integratedProps = decodedProps;
+        const propsIntegrators = propsMeta && propsMeta.propsIntegrators;
+        if ((propsIntegrators || []).length) {
           integratedProps = { ...decodedProps };
           if (decodedType === Valens) {
             integratedProps.elementPropsSeq = [...decodedProps.elementPropsSeq];
-            for (const [propName, propKuery] of integrateableKueries) {
-              integratedProps.elementPropsSeq.push([propName, vIntegrator.step(propKuery)]);
+            for (const [propName, kueryIntegrator] of propsIntegrators) {
+              integratedProps.elementPropsSeq
+                  .push([propName, kueryIntegrator(integrationHostGlobal)]);
             }
           } else {
-            for (const [propName, propKuery] of integrateableKueries) {
-              integratedProps[propName] = vIntegrator.step(propKuery);
+            for (const [propName, kueryIntegrator] of propsIntegrators) {
+              integratedProps[propName] = kueryIntegrator(integrationHostGlobal);
             }
           }
         }
@@ -283,13 +282,10 @@ export default class JSXDecoder extends MediaDecoder {
             : [decodedChildrenArgs[0].map(child =>
                 _maybeIntegrate(child, integrationHostGlobal))];
         return _injectSourceInfoTag(
-            React.createElement(
-                decodedType,
-                integratedProps || decodedProps,
-                ...integratedChildrenArgs),
+            React.createElement(decodedType, integratedProps, ...integratedChildrenArgs),
             sourceInfo);
       } catch (error) {
-        throw this.wrapErrorEvent(error, 1, () => [
+        throw self.wrapErrorEvent(error, 1, () => [
           `createDecodeScope/${sourceInfo.mediaName} integration`,
           "\n\tintegrationHostGlobal:", ...dumpObject(integrationHostGlobal),
         ]);
@@ -316,7 +312,7 @@ export default class JSXDecoder extends MediaDecoder {
       sourceInfo, loc, parsedProps, elementName, isInstanceLens, isComponentLens, lexicalName) {
     const ret = {
       hasIntegrators: false, hasKueries: false, totalCount: 0,
-      scopeAccesses: {}, byNamespace: {}, decodedElementProps: {}, integrateableKueries: [],
+      scopeAccesses: {}, byNamespace: {}, decodedElementProps: {}, propsIntegrators: [],
     };
 
     /* eslint-disable prefer-const */
@@ -381,7 +377,7 @@ export default class JSXDecoder extends MediaDecoder {
           _extractMetaOfValueInto(attr, ret, this._globalEngineDiscourse, isLiveKuery);
       const propName = (namespace === flattenedNamespace) ? name : `$${namespace}.${name}`;
       if ((typeof decodedValue === "function") && decodedValue._isIntegrator) {
-        ret.integrateableKueries.push([propName, decodedValue]);
+        ret.propsIntegrators.push([propName, decodedValue]);
       } else {
         ret.decodedElementProps[propName] = decodedValue;
       }
@@ -390,7 +386,6 @@ export default class JSXDecoder extends MediaDecoder {
   }
 }
 
-export const integrationFabricScopeTag = Symbol("integrationFabricScope");
 const _instanceLensPrototypeKueries = {};
 
 function _getInstanceLensPrototypeKuery (elementName) {
@@ -434,7 +429,7 @@ function _extractMetaOfValueInto (value, meta, globalEngineDiscourse, isLiveIfKu
       Object.assign(meta.scopeAccesses || (meta.scopeAccesses = {}), ret[ScopeAccessesTag]);
       if (accessLevel === 1) {
         ret = function _kueryIntegrator (integrationHostGlobal) {
-          return integrationHostGlobal.valos.this.step(ret);
+          return integrationHostGlobal.valos.this.step(value);
         };
         ret._isIntegrator = true;
       } else {

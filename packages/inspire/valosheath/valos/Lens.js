@@ -747,7 +747,7 @@ If still no suitable lens can be found delegates the viewing to '${notFoundName 
 
     @focus {Object} focus  the Resource to search the lens from.`,
       isEnabled: (focus?: Vrapper) => focus && focus.hasInterface("Scope"),
-      value: function propertyLensNameGetter (focus: any, component: UIComponent,
+      value: function getLensProperty (focus: any, component: UIComponent,
           /* currentSlotName: string */) {
         /*
         if (component.props.lensName) {

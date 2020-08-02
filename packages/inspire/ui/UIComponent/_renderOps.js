@@ -164,8 +164,8 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
           subLensName = `~<-${lensName}`;
         } else {
           subLensName = `<<-${lensName}`;
-          ret = component.readSlotValue("delegatePropertyLens",
-              Lens.delegatePropertyLens, lens, true)(lens, component, lensName);
+          ret = component.readSlotValue(
+              "delegatePropertyLens", Lens.delegatePropertyLens, lens, true);
           if ((ret == null) || ((ret.delegate || [])[0] === Lens.notLensResourceLens)) {
             return component.renderSlotAsLens("notLensResourceLens", lens, undefined, subLensName);
           }
@@ -284,9 +284,11 @@ const _renderMediaLensChain = [
       // sub-elements which resolve to Media's, then those medias will
       // here set the top-level ui context integration scope resource
       // and thus will conflict with each other.
-      this.component.setUIContextValue(
-          Lens.integrationScopeResource, this.options.vIntegrationScope);
       this.component.setUIContextValue("this", this.media);
+      if (this.options.vIntegrationScope) {
+        this.component.setUIContextValue(
+            Lens.integrationScopeResource, this.options.vIntegrationScope);
+      }
       return contentInterpretation;
     } else if (contentInterpretation instanceof Error) {
       error = contentInterpretation;

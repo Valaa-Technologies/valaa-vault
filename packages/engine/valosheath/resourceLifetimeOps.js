@@ -24,13 +24,14 @@ export function duplicateResource (discourse: Discourse, scope: ?Object,
       _prepareInitialState(this, scope, initialState, false), { discourse });
 }
 
-function _prepareInitialState (valospaceType: Object, scope: ?Object, initialState_: ?Object,
+function _prepareInitialState (valospaceType: Object, scope: ?Object, initialState: ?Object,
     requireOwnerOperation: ?string) {
-  let initialState = initialState_;
   let initialOwner;
   if (initialState != null) {
     if (typeof initialState !== "object") {
-      throw new Error(`new.initialState must be nully or an object, got ${typeof initialState}`);
+      throw new Error(`"new ${valospaceType.name
+          }" must be given an options object or null as the single argument, got ${
+          typeof initialState}`);
     } else {
       initialOwner = (initialState.owner !== undefined)
           ? initialState.owner
@@ -46,18 +47,12 @@ function _prepareInitialState (valospaceType: Object, scope: ?Object, initialSta
   if (!initialOwner) {
     if (requireOwnerOperation && (initialOwner === undefined)
         && !(initialState && initialState.authorityURI)) {
-      // throw new Error(`${requireOwnerOperation} initialState.owner required`);
-      console.debug(`DEPRECATED behaviour: ${
-          requireOwnerOperation} ${valospaceType.name} initialState.owner required`);
-      if (scope && (scope.self != null) && scope.self.this) {
-        if (!initialState) initialState = {};
-        initialState.owner = scope.self.this.getVRef()
-            .coupleWith(valospaceType[OwnerDefaultCouplingTag]);
-      }
+      throw new Error(`"${requireOwnerOperation} ${valospaceType.name
+          }" options must contain 'owner' or 'authorityURI' (for chronicle roots)`);
     }
   } else if (typeof initialOwner !== "object") {
-    throw new Error(`${requireOwnerOperation || "duplicate"
-        } initialState.owner must be a Resource, got '${typeof initialOwner}'`);
+    throw new Error(`"${requireOwnerOperation || "duplicate"
+        }${valospaceType.name}" options owner must be a Resource, got '${typeof initialOwner}'`);
   } else if ((initialState.owner !== undefined) && valospaceType[OwnerDefaultCouplingTag]) {
     initialState.owner =
         getHostRef(initialState.owner, `${requireOwnerOperation || "duplicate"} initialState.owner`)
@@ -67,5 +62,5 @@ function _prepareInitialState (valospaceType: Object, scope: ?Object, initialSta
 }
 
 function _tryOwnerAlias (valospaceType: Object, initialState: Object) {
-  return (valospaceType.name === "Relation") && initialState.source;
+  return (valospaceType.name === "Relation") ? initialState.source : undefined;
 }

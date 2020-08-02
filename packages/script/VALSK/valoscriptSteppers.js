@@ -336,8 +336,7 @@ function _new (valker: Valker, head: any, scope: ?Object, newOp: any) {
     if (typeof Type === "function") {
       return valker.pack(new Type(...eArgs));
     }
-    const constructor = (Type != null) && Type[ValoscriptNew];
-    if (constructor) {
+    if ((Type != null) && Type[ValoscriptNew]) {
       return valker.pack(Type[ValoscriptNew](valker, scope, ...eArgs));
     }
     if (isHostRef(eType)) {

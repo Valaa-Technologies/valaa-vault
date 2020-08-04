@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.23](https://github.com/valaatech/kernel/compare/v0.35.0-rc.22...v0.35.0-rc.23) (2020-08-04)
+
+**Note:** Version bump only for package @valos/twindoc
+
+
+
+
+
 # [0.35.0-rc.22](https://github.com/valaatech/kernel/compare/v0.35.0-rc.21...v0.35.0-rc.22) (2020-07-29)
 
 **Note:** Version bump only for package @valos/twindoc

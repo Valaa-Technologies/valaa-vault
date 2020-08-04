@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.23](https://github.com/valaatech/kernel/compare/v0.35.0-rc.22...v0.35.0-rc.23) (2020-08-04)
+
+
+### Bug Fixes
+
+* **683:** Line breaks don't get properly added... ([0dd086a](https://github.com/valaatech/kernel/commit/0dd086a18f0d5848356d9438ea7d36b82919a8ff))
+
+
+### Features
+
+* qualified symbols as "$foo.bar" to valoscript ([568b080](https://github.com/valaatech/kernel/commit/568b08047967bee3b235a2781f3a61c5c0c20261))
+
+
+
+
+
 # [0.35.0-rc.22](https://github.com/valaatech/kernel/compare/v0.35.0-rc.21...v0.35.0-rc.22) (2020-07-29)
 
 

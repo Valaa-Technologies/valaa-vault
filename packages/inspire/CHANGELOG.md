@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.23](https://github.com/valaatech/kernel/compare/v0.35.0-rc.22...v0.35.0-rc.23) (2020-08-04)
+
+
+### Bug Fixes
+
+* Qualified symbol valoscript loose comparisons ([7a4c5dc](https://github.com/valaatech/kernel/commit/7a4c5dc64aaced61e12762f81fe389ed77eed6bf))
+* **683:** Line breaks don't get properly added... ([0dd086a](https://github.com/valaatech/kernel/commit/0dd086a18f0d5848356d9438ea7d36b82919a8ff))
+* **687:** Then-lens fails on firts load and VSX change ([c2b03b7](https://github.com/valaatech/kernel/commit/c2b03b77f402af039023624c926afbb972f484cb))
+* **688:** If-lens fails in some conditions ([d8e56f4](https://github.com/valaatech/kernel/commit/d8e56f43cd46cde01c09d592df5f48373b8adf25))
+* **689:** Recursive instance lenses fail to get assigned properties ([85306ca](https://github.com/valaatech/kernel/commit/85306ca2f8a42389f11ab78950e3c7f055ff0315))
+
+
+### Features
+
+* $Lens.(offset|limit|sort|reverse|endOffset|elementIndex) ([2f9456c](https://github.com/valaatech/kernel/commit/2f9456cb4b648932fd25f1ec4c343d44569dcccc))
+* qualified symbols as "$foo.bar" to valoscript ([568b080](https://github.com/valaatech/kernel/commit/568b08047967bee3b235a2781f3a61c5c0c20261))
+
+
+
+
+
 # [0.35.0-rc.22](https://github.com/valaatech/kernel/compare/v0.35.0-rc.21...v0.35.0-rc.22) (2020-07-29)
 
 

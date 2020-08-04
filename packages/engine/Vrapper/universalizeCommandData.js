@@ -1,10 +1,9 @@
 // @flow
 import { Iterable } from "immutable";
 import { isIdData } from "~/raem/VRL";
+import { qualifiedNameOf } from "~/raem/tools/namespaceSymbols";
 import { Kuery } from "~/raem/VALK";
 import { HostRef } from "~/raem/VALK/hostReference";
-
-import { qualifiedNameOf } from "~/script";
 
 import Vrapper from "~/engine/Vrapper";
 
@@ -20,7 +19,7 @@ export default function universalizeCommandData (object: ?any, options:
     }
 
     if (isSymbol(object)) {
-      const qualifiedName = qualifiedNameOf(object)
+      const qualifiedName = qualifiedNameOf(object);
       if (qualifiedName) {
         return qualifiedName[3];
       }

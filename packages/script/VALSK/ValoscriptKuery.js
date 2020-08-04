@@ -1,7 +1,7 @@
 // @flow
 
 import { Kuery } from "~/raem/VALK";
-import { qualifiedSymbol } from "~/script/denormalized/namespaceSymbols";
+import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
 
 export const ScopeAccessesTag = qualifiedSymbol("VALSK", "ScopeAccesses");
 export const ScopeAccessKeysTag = qualifiedSymbol("VALSK", "ScopeAccessKeys");
@@ -33,7 +33,7 @@ export default class ValoscriptKuery extends Kuery {
 
   hasName (name: any, ...additionalConditions: Kuery[]) {
     const ret = (name !== undefined)
-        ? this._root.to("name").equalTo(name)
+        ? this._root.to("name").looseEqualTo(name)
         : this._root;
     return additionalConditions.length
         ? ret.and(...additionalConditions)

@@ -25,10 +25,11 @@ import { createGhostVRLInInstance, isMaterialized, createMaterializeGhostAction 
     from "~/raem/tools/denormalized/ghost";
 import { AbsentChroniclesError, addConnectToChronicleToError }
     from "~/raem/tools/denormalized/partitions";
+import { qualifiedNameOf } from "~/raem/tools/namespaceSymbols";
 
 import isAbsentTypeName from "~/raem/tools/graphql/isAbsentTypeName";
 
-import { ValoscriptPrimitiveKind, qualifiedNameOf /* , NativeIdentifierTag */ } from "~/script";
+import { ValoscriptPrimitiveKind, /* , NativeIdentifierTag */ } from "~/script";
 import { transpileValoscriptBody } from "~/script/transpileValoscript";
 import { ScopeAccessesTag } from "~/script/VALSK";
 

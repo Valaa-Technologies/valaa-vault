@@ -3,6 +3,7 @@
 import { Iterable, OrderedMap } from "immutable";
 
 import VRL from "~/raem/VRL";
+import { qualifiedNameOf } from "~/raem/tools/namespaceSymbols";
 
 import { elevateFieldRawSequence } from "~/raem/state/FieldInfo";
 import Transient, { PrototypeOfImmaterialTag } from "~/raem/state/Transient";
@@ -328,25 +329,35 @@ export default {
   },
   "§==": function looseEqualTo (valker: Valker, head: any, scope: ?Object,
       [, left, right]: BuiltinStep) {
-    const eLeft = (typeof left !== "object") ? left : tryUnpackLiteral(valker, head, left, scope);
-    const eRight = typeof right !== "object" ? right : tryUnpackLiteral(valker, head, right, scope);
+    let eLeft = (typeof left !== "object") ? left : tryUnpackLiteral(valker, head, left, scope);
+    let eRight = typeof right !== "object" ? right : tryUnpackLiteral(valker, head, right, scope);
+    if (eLeft == eRight) return true; // eslint-disable-line
     if (eLeft && eRight) {
       const eLeftRef = tryHostRef(eLeft);
       if (eLeftRef) return eLeftRef.equals(eRight);
       const eRightRef = tryHostRef(eRight);
       if (eRightRef) return eRightRef.equals(eLeft);
+      const eLeftName = qualifiedNameOf(eLeft);
+      if (eLeftName) eLeft = eLeftName[3];
+      const eRightName = qualifiedNameOf(eRight);
+      if (eRightName) eRight = eRightName[3];
     }
     return eLeft == eRight; // eslint-disable-line
   },
   "§!=": function looseNotEqualTo (valker: Valker, head: any, scope: ?Object,
       [, left, right]: BuiltinStep) {
-    const eLeft = (typeof left !== "object") ? left : tryUnpackLiteral(valker, head, left, scope);
-    const eRight = typeof right !== "object" ? right : tryUnpackLiteral(valker, head, right, scope);
+    let eLeft = (typeof left !== "object") ? left : tryUnpackLiteral(valker, head, left, scope);
+    let eRight = typeof right !== "object" ? right : tryUnpackLiteral(valker, head, right, scope);
+    if (eLeft == eRight) return false; // eslint-disable-line
     if (eLeft && eRight) {
       const eLeftRef = tryHostRef(eLeft);
       if (eLeftRef) return !eLeftRef.equals(eRight);
       const eRightRef = tryHostRef(eRight);
       if (eRightRef) return !eRightRef.equals(eLeft);
+      const eLeftName = qualifiedNameOf(eLeft);
+      if (eLeftName) eLeft = eLeftName[3];
+      const eRightName = qualifiedNameOf(eRight);
+      if (eRightName) eRight = eRightName[3];
     }
     return eLeft != eRight; // eslint-disable-line
   },

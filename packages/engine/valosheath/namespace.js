@@ -2,8 +2,7 @@
 
 import { HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
 import Transient from "~/raem/state/Transient";
-
-import { qualifiedSymbol } from "~/script";
+import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
 
 // import debugId from "~/engine/debugId";
 import { Valker } from "~/engine/VALEK";

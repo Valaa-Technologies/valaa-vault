@@ -2,8 +2,9 @@
 
 import { created } from "~/raem/events";
 import { vRef } from "~/raem/VRL";
+import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
 
-import { transpileValoscriptBody, qualifiedSymbol } from "~/script";
+import { transpileValoscriptBody } from "~/script";
 
 import { createEngineTestHarness } from "~/engine/test/EngineTestHarness";
 import VALEK, { pointer } from "~/engine/VALEK";
@@ -678,6 +679,35 @@ describe("namespaced resource $V.names", () => {
     expect(target.propertyValue("a")).toEqual(1);
     expect(target.propertyValue(BaseFooTag)).toEqual("basefoo");
     expect(target.propertyValue(NSSFooTag)).toEqual("propfoo");
+  });
+  it("matches namespaced symbol Relation names", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const bodyText = `
+        new Relation({ name: $ns1.myRelation1, source: this, properties: { [$prop.foo]: 10 } });
+        new Relation({ name: $ns1.myRelation2, source: this, properties: { [$prop.foo]: 11 } });
+        new Relation({ name: $ns2.myRelation1, source: this, properties: { [$prop.foo]: 12 } });
+        new Relation({ name: $ns2.myRelation2, source: this, properties: { [$prop.foo]: 13 } });
+        new Relation({ name: $ns1.myRelation1, source: this, properties: { [$prop.foo]: 14 } });
+        new Relation({ name: $ns1.myRelation2, source: this, properties: { [$prop.foo]: 15 } });
+        new Relation({ name: $ns2.myRelation1, source: this, properties: { [$prop.foo]: 16 } });
+        new Relation({ name: $ns2.myRelation2, source: this, properties: { [$prop.foo]: 17 } });
+        [
+          this.$V.getRelations($ns1.myRelation1),
+          this.$V.getRelations($ns1.myRelation2),
+          this.$V.getRelations("@$ns2.myRelation1@@"),
+          this.$V.getRelations("@$ns2.myRelation2@@"),
+        ];
+    `;
+    const bodyKuery = transpileValoscriptTestBody(bodyText);
+    const [ns1r1, ns1r2, ns2r1, ns2r2] = entities().creator.do(bodyKuery);
+    expect(ns1r1.length).toEqual(2);
+    expect(ns1r2.length).toEqual(2);
+    expect(ns2r1.length).toEqual(2);
+    expect(ns2r2.length).toEqual(2);
+    expect(ns1r1.map(r => r.propertyValue(qualifiedSymbol("prop", "foo")))).toEqual([10, 14]);
+    expect(ns1r2.map(r => r.propertyValue(qualifiedSymbol("prop", "foo")))).toEqual([11, 15]);
+    expect(ns2r1.map(r => r.propertyValue("@$prop.foo@@"))).toEqual([12, 16]);
+    expect(ns2r2.map(r => r.propertyValue("@$prop.foo@@"))).toEqual([13, 17]);
   });
 });
 

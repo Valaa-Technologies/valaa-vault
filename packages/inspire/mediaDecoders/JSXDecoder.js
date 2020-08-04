@@ -7,7 +7,7 @@ import { addSourceEntryInfo, addStackFrameToError, SourceInfoTag } from "~/raem/
 import VALEK, { Kuery, EngineKuery, VS, IsLiveTag, engineSteppers } from "~/engine/VALEK";
 
 import UIComponent, { LENS } from "~/inspire/ui/UIComponent";
-import { ValensPropsTag, tryCreateValensArgs } from "~/inspire/ui/UIComponent/Valens";
+import Valens, { ValensPropsTag, tryCreateValensArgs } from "~/inspire/ui/UIComponent/Valens";
 import vidgets from "~/inspire/ui";
 import Valoscope from "~/inspire/ui/Valoscope";
 import Lens from "~/inspire/valosheath/valos/Lens";
@@ -17,8 +17,7 @@ import { ScopeAccessesTag, ScopeAccessKeysTag } from "~/script/VALSK";
 
 import MediaDecoder from "~/tools/MediaDecoder";
 import notThatSafeEval from "~/tools/notThatSafeEval";
-import { dumpObject } from "~/tools";
-import Valens from "../ui/UIComponent/Valens";
+import { dumpObject, isSymbol } from "~/tools";
 
 export default class JSXDecoder extends MediaDecoder {
   static mediaTypes = [
@@ -55,8 +54,8 @@ export default class JSXDecoder extends MediaDecoder {
         if (!error.column || !error.lineNumber) throw error;
         sourceInfo.source = originalSource;
         const loc = {
-          start: { line: error.lineNumber - 1, column: error.column - 1 }, // 3?
-          end: { line: error.lineNumber - 1, column: error.column },
+          start: { line: error.lineNumber, column: error.column }, // 3?
+          end: { line: error.lineNumber, column: error.column + 1 },
         };
         throw addStackFrameToError(error, addSourceEntryInfo(sourceInfo, {}, { loc }), sourceInfo);
       }

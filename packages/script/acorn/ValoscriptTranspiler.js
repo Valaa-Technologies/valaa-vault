@@ -12,7 +12,7 @@ import { isBuiltinStep, getBuiltinStepName, getBuiltinStepArguments }
 
 import Language from "~/script/acorn/Language";
 
-import { invariantify, invariantifyObject, FabricEventTarget } from "~/tools";
+import { invariantify, invariantifyObject, isSymbol, FabricEventTarget } from "~/tools";
 
 export default class ValoscriptTranspiler extends FabricEventTarget {
   language: Language;
@@ -47,7 +47,8 @@ export default class ValoscriptTranspiler extends FabricEventTarget {
         if (options.sourceInfo) kuery[SourceInfoTag] = options.sourceInfo;
         if (!cache) return kuery;
 
-        const kueryText = JSON.stringify(kuery.toVAKON(), null, 0);
+        const kueryText = JSON.stringify(kuery.toVAKON(),
+            (key, value) => (isSymbol(value) ? String(value) : value), 0);
         cacheEntry = cache.byKueryText && cache.byKueryText[kueryText];
         if (!cacheEntry) {
           cacheEntry = {

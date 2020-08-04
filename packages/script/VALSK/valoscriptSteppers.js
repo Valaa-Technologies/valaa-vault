@@ -6,11 +6,11 @@ import raemSteppers, {
 } from "~/raem/VALK/raemSteppers";
 /* eslint-disable no-duplicate-imports */
 import type { BuiltinStep } from "~/raem/VALK/raemSteppers";
+import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
 
 import { createNativeIdentifier, isNativeIdentifier, getNativeIdentifierValue,
   setNativeIdentifierValue,
 } from "~/script/denormalized/nativeIdentifier";
-import { qualifiedSymbol } from "~/script/denormalized/namespaceSymbols";
 
 const isSymbol = require("~/tools/isSymbol").default;
 

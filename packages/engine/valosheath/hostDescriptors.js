@@ -1,6 +1,6 @@
 // $flow
 
-import { qualifiedSymbol } from "~/script";
+import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
 
 
 /*

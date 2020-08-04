@@ -4,10 +4,10 @@ import { GraphQLSchema } from "graphql/type";
 
 import isResourceType from "~/raem/tools/graphql/isResourceType";
 import getTypeInterfaces from "~/raem/tools/graphql/getTypeInterfaces";
+import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
 
 import {
   ValoscriptNew, valoscriptInterfacePrototype, valoscriptTypePrototype, valoscriptResourcePrototype,
-  qualifiedSymbol,
 } from "~/script";
 
 import {

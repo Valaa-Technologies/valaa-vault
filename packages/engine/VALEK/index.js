@@ -1,6 +1,8 @@
 // @flow
 
-import { transpileValoscript, isNativeIdentifier, getNativeIdentifierValue, qualifiedSymbol }
+import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
+
+import { transpileValoscript, isNativeIdentifier, getNativeIdentifierValue }
     from "~/script";
 import {
   dumpObject as _dumpObject, Kuery, ValoscriptKuery, isValOSFunction, toVAKONTag,

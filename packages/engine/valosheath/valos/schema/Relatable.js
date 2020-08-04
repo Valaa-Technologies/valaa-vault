@@ -2,8 +2,7 @@
 
 import { denoteDeprecatedValOSBuiltin, denoteValOSBuiltinWithSignature, denoteValOSKueryFunction }
     from "~/raem/VALK";
-
-import { qualifiedSymbol } from "~/script";
+import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
 
 import VALEK, { extractFunctionVAKON } from "~/engine/VALEK";
 

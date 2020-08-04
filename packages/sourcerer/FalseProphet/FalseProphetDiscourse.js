@@ -2,13 +2,12 @@
 
 import { Action, Command, /* created, duplicated, destroyed, */ EventBase } from "~/raem/events";
 import { StoryIndexTag, PassageIndexTag } from "~/raem/redux/Bard";
+import { qualifiedNameOf } from "~/raem/tools/namespaceSymbols";
 import { ValaaURI, naiveURI, hasScheme } from "~/raem/ValaaURI";
 import { vRef } from "~/raem/VRL";
 import { dumpObject } from "~/raem/VALK";
 import { getHostRef } from "~/raem/VALK/hostReference";
 import { addConnectToChronicleToError } from "~/raem/tools/denormalized/partitions";
-
-import { qualifiedNameOf } from "~/script";
 
 import Discourse from "~/sourcerer/api/Discourse";
 import type Connection from "~/sourcerer/api/Connection";

@@ -3,8 +3,9 @@
 import {
   denoteValOSBuiltinWithSignature, denoteDeprecatedValOSBuiltin, denoteValOSKueryFunction,
 } from "~/raem/VALK";
+import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
 
-import { createNativeIdentifier, qualifiedSymbol } from "~/script";
+import { createNativeIdentifier } from "~/script";
 
 import VALEK from "~/engine/VALEK";
 

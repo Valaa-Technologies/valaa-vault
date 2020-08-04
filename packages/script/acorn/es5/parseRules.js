@@ -2,7 +2,7 @@
 
 /* eslint-disable max-len */
 import Transpiler from "~/script/acorn/ValoscriptTranspiler";
-import { qualifiedSymbol } from "~/script/denormalized/namespaceSymbols";
+import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
 import { Kuery } from "~/script/VALSK";
 
 import { dumpObject } from "~/tools";

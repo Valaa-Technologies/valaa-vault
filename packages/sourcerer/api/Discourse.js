@@ -1,7 +1,5 @@
 import Valker from "~/raem/VALK/Valker";
 
-import type { ProphecyEventResult } from "~/sourcerer/api/types";
-
 /**
  * Discourse is a fancy name for a two-directional communication
  * channel between a single Sourcerer and a single Follower.

@@ -66,7 +66,11 @@ function _getActiveParentFocus (props: Object, context: Object) {
 function _tryUpdateUIContext (component, nextProps, oldPropsContext) {
   const arrayIndex = nextProps.arrayIndex;
   const uiContext = component.state.uiContext;
-  if (arrayIndex !== undefined) setScopeValue(uiContext, Lens.arrayIndex, arrayIndex);
+  if (arrayIndex !== undefined) {
+    setScopeValue(uiContext, Lens.arrayIndex, arrayIndex);
+    setScopeValue(uiContext, Lens.elementIndex,
+        nextProps.elementIndex !== undefined ? nextProps.elementIndex : arrayIndex);
+  }
   const propsContext = nextProps.context;
   if (!propsContext
       || (oldPropsContext && !_comparePropsOrState(propsContext, oldPropsContext, "shallow"))) {

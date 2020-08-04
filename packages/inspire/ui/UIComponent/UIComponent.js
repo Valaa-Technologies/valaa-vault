@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 
 import { tryConnectToAbsentChroniclesAndThen } from "~/raem/tools/denormalized/partitions";
 
-import Vrapper, { Subscription, LiveUpdate } from "~/engine/Vrapper";
+import { Subscription, LiveUpdate } from "~/engine/Vrapper";
 import debugId from "~/engine/debugId";
 import { dumpKuery, dumpObject } from "~/engine/VALEK";
 
@@ -61,6 +61,7 @@ export default class UIComponent extends React.Component {
     context: PropTypes.object,
 
     arrayIndex: PropTypes.number,
+    elementIndex: PropTypes.number,
 
     style: PropTypes.object,
 
@@ -496,19 +497,18 @@ export default class UIComponent extends React.Component {
     return _renderFocus(this, focus);
   }
 
-  renderFocusAsSequence (foci: any[], EntryElement: Object = UIComponent, entryProps: Object,
-      entryChildren: ?Array,
-      keyFromFocus: (focus: any, index: number) => string,
-      renderRejection: ?(focus: any, index: number) => undefined | any,
-      onlyPostRender: ?Boolean,
+  renderFocusAsSequence (
+      foci: any[], EntryElement: Object = UIComponent, entryProps: Object, entryChildren: Array,
+      options: {
+        keyFromFocus: ?(focus: any, index: number) => string,
+        renderRejection?: (focus: any, index: number) => undefined | any,
+        sortCompare?: (lFocus: any, rFocus: any, lProps: Object, rProps: Object) => number,
+        offset?: number,
+        limit?: number,
+        onlyPostRender?: Boolean,
+      }
   ): [] {
-    return _renderFocusAsSequence(this, foci, EntryElement, entryProps, entryChildren,
-        keyFromFocus
-            || ((focus, index) => ((focus instanceof Vrapper)
-                ? `${focus.getBriefUnstableId()}<-${this.getKey() || "-"}`
-                : `[${index}]${this.getKey() || "-"}`)),
-        renderRejection,
-        onlyPostRender);
+    return _renderFocusAsSequence(this, foci, EntryElement, entryProps, entryChildren, options);
   }
 
   // defaults to null

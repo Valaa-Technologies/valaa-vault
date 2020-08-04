@@ -57,7 +57,7 @@ export function _checkForInfiniteRenderRecursion (component: UIComponent) {
         `Exception caught in ${
             component.debugId()})\n ._checkForInfiniteRenderRecursion(), with:`,
         "\n\tcurrent component UI context:", currentContext,
-        "\n\tnew candidate focus:", newFocus && newFocus.debugId(), newFocus,
+        "\n\tnew candidate focus:", String(newFocus),
         "\n\tnew candidate key:", newKey,
         "\n\tnew candidate props:", component.props,
         "\n\tidentical ancestor UI context:", uiContext,

@@ -35,34 +35,97 @@ export function _renderFirstAbleDelegate (
 
 export function _renderFocusAsSequence (component: UIComponent,
     foci: any[], EntryElement: Object, entryPropsTemplate: Object, entryChildren: ?Array,
-    keyFromFocus: (focus: any, index: number, entryProps: ?Object) => string,
-    renderRejection: ?(focus: any, index: number) => undefined | any,
-    onlyPostRender: ?Boolean,
+    options: {
+      keyFromFocus: (focus: any, index: number, entryProps: ?Object) => string,
+      renderRejection?: (focus: any, index: number) => undefined | any,
+      offset?: number,
+      limit?: number,
+      sort?: (leftFocus: any, rightFocus: any, leftAttrs: Object, rightAttrs: Object) => number,
+      onlyPostRender?: Boolean,
+      setEndOffset?: Boolean,
+    } = {},
 ): [] {
   // Wraps the focus entries EntryElement, which is UIComponent by default.
   // Rendering a sequence focus can't be just a foci.map(_renderFocus) because individual entries
   // might have pending kueries or content downloads.
   // const parentUIContext = component.getUIContext();
-  let arrayIndex = 0;
-  const source = iterableFromAny(foci);
-  const ret = new Array(source.length || 0);
+  let arrayIndex = 0, targetIndex = 0;
+  const sourceArray = iterableFromAny(foci);
+  const ret = new Array(sourceArray.length || 0);
 
-  for (const focus of source) {
-    const rejection = renderRejection && renderRejection(focus, arrayIndex);
-    if (rejection !== undefined) ret[arrayIndex] = rejection;
+  const keyFromFocus = options.keyFromFocus;
+  for (const entryFocus of sourceArray) {
+    if (arrayIndex >= (options.offset || 0)) {
+      const rejection = options.renderRejection && options.renderRejection(entryFocus, arrayIndex);
+      if (rejection === undefined) {
+        const entryProps = { ...entryPropsTemplate, focus: entryFocus, arrayIndex };
+        entryProps.key = !keyFromFocus ? String(arrayIndex)
+            : keyFromFocus(entryFocus, arrayIndex, entryProps);
+        if (entryChildren !== undefined) entryProps.children = entryChildren;
+        ret[targetIndex++] = [entryProps, entryFocus];
+      } else if (rejection !== null) {
+        ret[targetIndex++] = [{ arrayIndex }, entryFocus, rejection];
+      }
+    }
+    ++arrayIndex;
+    if ((options.limit !== undefined) && (targetIndex >= options.limit)) break;
+  }
+  if (options.sort) {
+    ret.sort((typeof options.sort === "function")
+        ? !options.reverse
+            ? (l, r) => options.sort(l[1], r[1], l[0], r[0])
+            : (l, r) => -options.sort(l[1], r[1], l[0], r[0])
+        : !options.reverse
+            ? _forwardCompares[options.sort] || _forwardCompares[Lens.key]
+            : _reverseCompares[options.sort] || _reverseCompares[Lens.key]);
+  }
+  if (options.setEndOffset) {
+    component.setUIContextValue(Lens.endOffset, arrayIndex);
+  }
+  ret.length = targetIndex;
+  while (targetIndex--) {
+    const [entryProps, focus, preRendered] = ret[targetIndex];
+    if (preRendered) ret[targetIndex] = preRendered;
     else {
-      const entryProps = { ...entryPropsTemplate, focus, arrayIndex };
-      entryProps.key = keyFromFocus(focus, arrayIndex, entryProps);
-      if (entryChildren !== undefined) entryProps.children = entryChildren;
+      if (targetIndex !== entryProps.arrayIndex) {
+        entryProps.elementIndex = targetIndex;
+      }
       const element = React.createElement(EntryElement, entryProps);
-      ret[arrayIndex] = onlyPostRender
+      ret[targetIndex] = options.onlyPostRender
           ? postRenderElement(component, element, focus, entryProps.key)
           : wrapElementInValens(component, element, focus, entryProps.key);
     }
-    ++arrayIndex;
   }
   return ret;
 }
+
+const _forwardCompares = {
+  [Lens.key] (l, r) {
+    return (l[0].key || "").localeCompare(r[0].key || "");
+  },
+  [Lens.arrayIndex] (l, r) {
+    return (l[0].arrayIndex || 0) - (r[0].arrayIndex || 0);
+  },
+  /*
+  [Lens.focus] (l, r) {
+    return (l[0].arrayIndex || 0) - (r[0].arrayIndex || 0);
+  },
+  */
+};
+
+const _reverseCompares = {
+  [Lens.key] (l, r) {
+    return -(l[0].key || "").localeCompare(r[0].key || "");
+  },
+  [Lens.arrayIndex] (l, r) {
+    return (r[0].arrayIndex || 0) - (l[0].arrayIndex || 0);
+  },
+  /*
+  [Lens.focus] (l, r) {
+    return (l[0].arrayIndex || 0) - (r[0].arrayIndex || 0);
+  },
+  */
+};
 
 export function _renderFocus (component: UIComponent,
     focus: any

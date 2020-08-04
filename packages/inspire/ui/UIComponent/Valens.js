@@ -15,10 +15,9 @@ import UIComponent from "~/inspire/ui/UIComponent";
 import Lens from "~/inspire/valosheath/valos/Lens";
 
 import {
-  patchWith, dumpObject, isPromise, thisChainEagerly, thisChainReturn, wrapError
+  patchWith, dumpObject, isPromise, isSymbol, thisChainEagerly, thisChainReturn, wrapError
 } from "~/tools";
 
-import { createDynamicKey } from "./_propsOps";
 import { VSSStyleSheetSymbol } from "./_styleOps";
 import { tryCreateValensArgs, ValensPropsTag, postRenderElement } from "./_valensOps";
 
@@ -171,7 +170,7 @@ export default class Valens extends UIComponent {
     }
     /* */
     const finalProps = stateLive.valoscopeProps || stateLive.elementProps;
-    if (!stateLive.createKey) {
+    if (!stateLive.keyFromFocus) {
       _valensRecorderProps.key(stateLive);
     }
     finalProps.children = children;
@@ -185,11 +184,11 @@ export default class Valens extends UIComponent {
         return this.renderSlotAsLens("arrayNotIterableLens", stateLive.array);
       }
       return this.renderFocusAsSequence(stateLive.array, finalType, finalProps, undefined,
-          stateLive.createKey, stateLive.renderRejection, true);
+          stateLive); // Note: stateLive has been designed to be used as options object here
     }
     const rejection = stateLive.renderRejection && stateLive.renderRejection(focus);
     if (rejection !== undefined) return rejection;
-    finalProps.key = stateLive.createKey(focus, null, finalProps);
+    finalProps.key = stateLive.keyFromFocus(focus, null, finalProps);
     return postRenderElement(this, React.createElement(finalType, finalProps), focus);
   }
 }
@@ -354,19 +353,9 @@ const _valensRecorderProps = {
   key (stateLive, newValue) {
     let keyPrefix = stateLive.component.getParentUIContextValue(Lens.frameKeyPrefix) || "";
     if (keyPrefix) keyPrefix = `${keyPrefix}_`;
-    if (newValue == null) {
-      stateLive.createKey = createDynamicKey;
-      stateLive.component.setUIContextValue(Lens.frameKeyPrefix,
-          `${keyPrefix}${stateLive.component.props.hierarchyKey}`);
-      return;
-    }
-    if (typeof newValue === "function") {
-      stateLive.createKey = function _createExplicitKey (focus_, arrayIndex, entryProps) {
-        return (entryProps.frameKey = newValue(focus_, arrayIndex, keyPrefix));
-      };
-    } else {
+    if (typeof newValue === "string") {
       const staticFrameKey = `${keyPrefix}${newValue}`;
-      stateLive.createKey = function _createSharedKey (focus_, arrayIndex, entryProps) {
+      stateLive.keyFromFocus = function _createSharedKey (focus_, arrayIndex, entryProps) {
         if (arrayIndex == null) {
           return (entryProps.frameKey = staticFrameKey);
         }
@@ -374,6 +363,27 @@ const _valensRecorderProps = {
         if (arrayIndex) delete entryProps.frameOverrides;
         return String(arrayIndex);
       };
+    } else if (typeof newValue === "function") {
+      stateLive.keyFromFocus = function _createExplicitKey (focus_, arrayIndex, entryProps) {
+        return (entryProps.frameKey = newValue(focus_, arrayIndex, keyPrefix));
+      };
+    } else if ((newValue == null) || isSymbol(newValue)) {
+      let keyFromFocus = _keyFromFocusBySymbol[newValue || Lens.key];
+      if (keyFromFocus) {
+        stateLive.keyFromFocus = keyFromFocus.bind(stateLive.component);
+      } else {
+        keyFromFocus = stateLive.component.getParentUIContextValue(newValue);
+        if (typeof keyFromFocus !== "function") {
+          throw new Error(`Invalid $Lens.key value '${String(newValue)
+              }': does not resolve to valid key callback, got '${typeof keyFromFocus}'`);
+        }
+        stateLive.keyFromFocus = keyFromFocus;
+      }
+      stateLive.component.setUIContextValue(Lens.frameKeyPrefix,
+          `${keyPrefix}${stateLive.component.props.hierarchyKey}`);
+    } else {
+      throw new Error(`Invalid $Lens.key: expected callback, symbol, string or nully, got '${
+          typeof newValue}'`);
     }
   },
   children: "children",
@@ -387,6 +397,11 @@ const _valensRecorderProps = {
     } else {
       stateLive.component.clearUIContextValue(VSSStyleSheetSymbol);
     }
+  },
+  offset (stateLive, newValue) {
+    if (stateLive.offset === newValue) return true;
+    stateLive.offset = newValue;
+    return false;
   },
   if: function if_ (stateLive, newValue) {
     const oldValue = stateLive.if;
@@ -405,11 +420,46 @@ const _valensRecorderProps = {
     stateLive.then = newValue;
     return !stateLive.if;
   },
+  limit (stateLive, newValue) {
+    if (stateLive.limit === newValue) return true;
+    stateLive.limit = newValue;
+    return false;
+  },
+  sort (stateLive, newValue) {
+    if (stateLive.sort === newValue) return true;
+    stateLive.sort = newValue;
+    return false;
+  },
+  reverse (stateLive, newValue) {
+    if (stateLive.reverse === newValue) return true;
+    stateLive.reverse = newValue;
+    return false;
+  },
   context (stateLive, newValue) {
     Object.assign(stateLive.component.state.uiContext, newValue);
   },
 };
 
+const _keyFromFocusBySymbol = {
+  [Lens.key] (focus, index) {
+    return `${this.getKey()}${
+      index != null ? `@$i.${index}` : ""}
+      focus instanceof Vrapper ? focus.getBriefUnstableId() : ""}`;
+  },
+  [Lens.focus] (focus, index) {
+    if (!(focus instanceof Vrapper)) {
+      if (index != null) {
+        throw new Error(`Cannot create $Lens.key={$Lens.focus
+            } from non-resoure entry at $Lens.array[${index}]`);
+      }
+      return "@$.non-resource";
+    }
+    return `${this.getKey()}${focus.getBriefUnstableId()}`;
+  },
+  [Lens.arrayIndex] (focus, index) {
+    return `${this.getKey()}@$i.${index || -1}`;
+  },
+};
 
 function _createRenderRejection (stateLive) {
   return !stateLive.if
@@ -438,6 +488,9 @@ const _emitValoscopeRecorderProps = {
             && (typeof newValue[Symbol.iterator] === "function")
         ? [...newValue]
         : newValue;
+    // enable stateLive as renderFocusAsSequence options object
+    stateLive.onlyPostRender = true;
+    stateLive.setEndOffset = true;
   },
   frameKey: "frameKey",
 

@@ -136,7 +136,14 @@ export default class Valoscope extends UIComponent {
   bindFocusSubscriptions (focus: any, props: Object) {
     super.bindFocusSubscriptions(focus, props);
     this.setUIContextValue(Lens.scopeChildren, props.children);
-    const vPrototype = props.instanceLensPrototype;
+    let vPrototype;
+    if (props.hasOwnProperty("instanceLensPrototype")) {
+      vPrototype = props.instanceLensPrototype;
+      if (!(vPrototype instanceof Vrapper)) {
+        throw new Error(
+            `Invalid instanceLensPrototype: must be a valid resource, got '${typeof vPrototype}'`);
+      }
+    }
     const vLens = (props.lens instanceof Vrapper) && props.lens;
     const frameSelf = {
       component: this, focus, props, engine: this.context.engine,

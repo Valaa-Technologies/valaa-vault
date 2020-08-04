@@ -16,7 +16,6 @@ import Resource from "~/raem/schema/Resource";
 
 import SemVer from "~/raem/schema/SemVer";
 import Sprite from "~/raem/schema/Sprite";
-import MediaType from "~/raem/schema/MediaType";
 
 import TestDataGlue from "~/raem/test/schema/TestDataGlue";
 import TestGlue from "~/raem/test/schema/TestGlue";

@@ -17,7 +17,7 @@ import { ScopeAccessesTag, ScopeAccessKeysTag } from "~/script/VALSK";
 
 import MediaDecoder from "~/tools/MediaDecoder";
 import notThatSafeEval from "~/tools/notThatSafeEval";
-import { dumpObject, isSymbol } from "~/tools";
+import { dumpObject } from "~/tools";
 
 export default class JSXDecoder extends MediaDecoder {
   static mediaTypes = [

@@ -23,12 +23,9 @@ export default class ForEach extends UIComponent {
 
   renderLoaded (focus: any) {
     const renderedChildren = this.renderFocusAsSequence(
-        focus,
-        this.props.EntryUIComponent,
-        this.props.entryProps || {},
-        this.props.children,
-        this.props.entryKeys && ((entry, index) => (this.props.entryKeys[index] || "")),
-    );
+        focus, this.props.EntryUIComponent, this.props.entryProps || {}, this.props.children, {
+      keyFromFocus: this.props.entryKeys && ((entry, index) => (this.props.entryKeys[index] || "")),
+    });
     if (!this.props.RootElement && !this.props.rootProps) return renderedChildren;
     return this.renderLens(
         React.createElement(

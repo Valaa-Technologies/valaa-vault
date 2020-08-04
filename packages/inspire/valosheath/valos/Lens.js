@@ -138,15 +138,6 @@ per update irrespective of the array length (even if 0).
 .`,
   }));
 
-  _defineName("arrayIndex", () => ({
-    tags: ["Context"],
-    type: "number | null",
-    description:
-`Context slot which contains the index of the nearest containing entry
-element within an array element spread, or null if there is none.
-.`,
-  }));
-
   _defineName("key", () => ({
     tags: ["Primary", "Attribute"],
     type: "string | (focus: string, index: ?number, keyPrefix: ?string) => string",
@@ -284,6 +275,82 @@ check.
 
 By default displays null.
 `,
+  }));
+
+  _defineName("offset", () => ({
+    tags: ["Attribute"],
+    type: "number | null",
+    description:
+`Offset to the first source array entry to begin spreading elements
+from.
+.`,
+  }));
+
+  _defineName("limit", () => ({
+    tags: ["Attribute"],
+    type: "number | null",
+    description:
+`Maximum number of elements to spread out. This limit is applied after
+the offset and filtering (see $Lens.if) but before sorting (see
+$Lens.sort).`,
+  }));
+
+  _defineName("arrayIndex", () => ({
+    tags: ["Context"],
+    type: "number | null",
+    description:
+`Context slot which contains the source array index of the nearest
+containing entry element within an array element spread, or null if
+there is none.
+
+This is the location of the element focus in the $Lens.array before any
+filtering and sorting. By default $Lens.arrayIndex is also used as part
+of the default key generation (see $Lens.key).
+.`,
+  }));
+
+  _defineName("endOffset", () => ({
+    tags: ["Context"],
+    type: "number | null",
+    description:
+`The offset to the first source array entry that is not visible after
+$Lens.limit has been met.
+.`,
+  }));
+
+  _defineName("elementIndex", () => ({
+    tags: ["Context"],
+    type: "number | null",
+    description:
+`Context slot which contains the final index of the nearest containing
+entry element within an array element spread, or null if there is none.
+
+This is the index of the final position of the element after filtering
+(see $Lens.if) and sorting (see $Lens.sort).
+.`,
+  }));
+
+  _defineName("sort", () => ({
+    tags: ["Attribute"],
+    type: "(leftFocus, rightFocus, leftAttributes, rightAttributes) => number | Symbol | null",
+    description:
+`The compare function for sorting the array spread elements. This sort
+is performed after offset, if-filtering and limits are resolved.
+Changes to the sort operation maintains element identities and doesn't
+trigger element view refreshes.
+
+Note: if sorting that happens before offsets and filtering is needed
+this can be done using regular means, ie. by sorting the expression
+that is passed as $Lens.array. This will not maintain identities,
+however.
+`,
+  }));
+
+  _defineName("reverse", () => ({
+    tags: ["Attribute"],
+    type: "boolean",
+    description:
+`Reverse the $Lens.sort order.`,
   }));
 
   // Primitive lenses

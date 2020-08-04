@@ -176,6 +176,10 @@ export default class Valens extends UIComponent {
     }
     finalProps.children = children;
 
+    if (stateLive.renderRejection === null) {
+      stateLive.renderRejection = _createRenderRejection(stateLive);
+    }
+
     if (stateLive.array) {
       if (!Array.isArray(stateLive.array)) {
         return this.renderSlotAsLens("arrayNotIterableLens", stateLive.array);
@@ -390,21 +394,7 @@ const _valensRecorderProps = {
       return true;
     }
     stateLive.if = newValue;
-    stateLive.renderRejection =
-          !newValue
-              ? (focus => stateLive.component.renderLens(stateLive.else, focus))
-          : (typeof newValue !== "function")
-              ? (stateLive.then === undefined)
-                  ? undefined
-                  : (focus => stateLive.component.renderLens(stateLive.then, focus))
-          : function _checkAndRenderRejection (focus, index) {
-            const condition = newValue(focus, index);
-            return !condition
-                    ? stateLive.component.renderLens(stateLive.else, focus)
-                : stateLive.then !== undefined
-                    ? stateLive.component.renderLens(stateLive.then, focus)
-                : undefined;
-          };
+    stateLive.renderRejection = null;
     return !newValue === !oldValue;
   },
   else: function else_ (stateLive, newValue) {
@@ -419,6 +409,24 @@ const _valensRecorderProps = {
     Object.assign(stateLive.component.state.uiContext, newValue);
   },
 };
+
+
+function _createRenderRejection (stateLive) {
+  return !stateLive.if
+          ? (focus => stateLive.component.renderLens(stateLive.else, focus))
+      : (typeof stateLive.if !== "function")
+          ? ((stateLive.then === undefined)
+              ? undefined
+              : (focus => stateLive.component.renderLens(stateLive.then, focus)))
+      : function _checkAndRenderRejection (focus, index) {
+        const condition = stateLive.if(focus, index);
+        return !condition
+                ? stateLive.component.renderLens(stateLive.else, focus)
+            : stateLive.then !== undefined
+                ? stateLive.component.renderLens(stateLive.then, focus)
+            : undefined;
+      };
+}
 
 // These props have namespace Lens and are allowed on all elements.
 // However their presence on non-valoscope elements triggers the

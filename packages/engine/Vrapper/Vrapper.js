@@ -348,7 +348,7 @@ export default class Vrapper extends Cog {
     }
     const resolver = this._parent.discourse.maybeForkWithState(refreshingState);
     const transient = refreshingTransient
-        || resolver.tryGoToTransient(this[HostRef], this._type.name);
+        || resolver.tryGoToTransient(this[HostRef], "TransientFields" /* this._type.name */);
     if (!transient) {
       this._phase = this[HostRef].isGhost() ? INACTIVE : IMMATERIAL;
       return this;
@@ -366,7 +366,7 @@ export default class Vrapper extends Cog {
       if (id.isAbsent()) return this;
     } else if (!newTypeName ? id.isAbsent() : isAbsentTypeName(newTypeName)) {
       this._phase = IMMATERIAL;
-      return this;
+      if (!id.isGhost()) return this;
     }
     let prototypeId = transient.get("prototype");
     if (!prototypeId) {
@@ -650,7 +650,7 @@ export default class Vrapper extends Cog {
     innerOptions.scope = {};
     if (Vrapper._namedTypes[(this._type || "").name]) {
       nameText = (options || {}).transient && (options || {}).transient.get("name");
-      if (nameText === undefined) nameText = this.step("name", innerOptions);
+      if (nameText === undefined && this.isActive()) nameText = this.step("name", innerOptions);
       if (nameText) nameText = `@.:${nameText}`;
     }
     let targetText;
@@ -1037,19 +1037,16 @@ export default class Vrapper extends Cog {
 
   propertyValue (propertyName: string | Symbol, options: VALKOptions = {}) {
     // eslint-disable-next-line
-    let fieldDescriptor;
-    if (typeof propertyName !== "string" || (propertyName[0] === "$")) {
-      fieldDescriptor = this._type.prototype[PropertyDescriptorsTag][propertyName];
-      if (!fieldDescriptor) this.requireActive();
-    }
+    let vProperty = (this._propscope || {}).hasOwnProperty(propertyName)
+        && this._propscope[propertyName];
+    if (vProperty) return vProperty.extractValue(options, this);
+    const fieldDescriptor = this._type.prototype[PropertyDescriptorsTag][propertyName];
     if (fieldDescriptor == null) {
-      const vProperty = this.getPropertyResource(propertyName, Object.create(options));
+      this.requireActive();
+      vProperty = this.getPropertyResource(propertyName, Object.create(options), null);
       // console.log("vProp:", propertyName, String(vProperty), vProperty._type.name);
-      return vProperty
-          ? vProperty.extractValue(options, this)
-          : this._type.prototype[propertyName];
-    }
-    if (fieldDescriptor.isHostField) {
+      if (vProperty) return vProperty.extractValue(options, this);
+    } else if (fieldDescriptor.isHostField) {
       const namespace = fieldDescriptor.namespace;
       if (namespace) {
         const accessor = fieldDescriptor.accessor;
@@ -1060,10 +1057,10 @@ export default class Vrapper extends Cog {
       }
       // console.log("hostref", fieldDescriptor.kuery, ret);
       return this.step(fieldDescriptor.kuery, options);
+    } else if (fieldDescriptor.value !== undefined) {
+      return fieldDescriptor.value;
     }
-    return (fieldDescriptor.value !== undefined)
-        ? fieldDescriptor.value
-        : this._type.prototype[propertyName];
+    return this._type.prototype[propertyName];
   }
 
   static _propertyKueries = Object.create(null);
@@ -1082,20 +1079,17 @@ export default class Vrapper extends Cog {
     return ret;
   }
 
-  getPropertyResource (propertyName: string | Symbol, options: VALKOptions) {
-    const ret = (this._propscope && this._propscope[propertyName])
-        || (this._valospaceScope && this._valospaceScope.hasOwnProperty(propertyName)
+  getPropertyResource (propertyName: string | Symbol, options: VALKOptions,
+      ret = (this._propscope || {}).hasOwnProperty(propertyName) && this._propscope[propertyName]) {
     // FIXME(iridian): If a property gets renamed inside a transaction
     // and a new property gets created with (or renamed to) the same
     // name we get a cache issue here: _valospaceScope only updates on
     // actual Engine events which have not yet landed. Similar issues
     // might arise with heresy rollbacks.
-            && this._valospaceScope[propertyName]);
     if (ret && !ret.isImmaterial()) return ret;
     const toProperty = Vrapper.getPropertyKuery(propertyName);
     if (!toProperty) return undefined;
-    const propertyCache = this._valospaceScope || this._propscope
-        || (this._propscope = Object.create(null));
+    const propertyCache = this._propscope || (this._propscope = {});
     // New properties which don't exist in _valospaceScope still work as
     // they get kueried here.
     return (propertyCache[propertyName] = this.step(toProperty, options));
@@ -2163,8 +2157,7 @@ export default class Vrapper extends Cog {
       this._setUpScopeFeatures(options);
     } else {
       this._scopeOwnerSub = null;
-      this._valospaceScope = this._propscope || Object.create(null);
-      if (this._propscope) this._propscope = null;
+      this._valospaceScope = this._propscope || (this._propscope = {});
       this._fabricScope = Object.create(null);
     }
     // TODO(iridian, 2019-01) 'this' is critical but very dubious.
@@ -2203,13 +2196,9 @@ export default class Vrapper extends Cog {
       const ownerSpaceScope = owner.getValospaceScope(
           Object.create(ownerUpdate.getOptions()), undefined, "child");
       if (!this._valospaceScope) {
-        if (this._propscope) {
-          this._valospaceScope = this._propscope;
-          Object.setPrototypeOf(this._valospaceScope, ownerSpaceScope);
-          this._propscope = null;
-        } else {
-          this._valospaceScope = Object.create(ownerSpaceScope);
-        }
+        if (!this._propscope) this._propscope = Object.create(ownerSpaceScope);
+        else Object.setPrototypeOf(this._propscope, ownerSpaceScope);
+        this._valospaceScope = this._propscope;
         this._fabricScope = Object.create(owner.getFabricScope());
       } else if (Object.getPrototypeOf(this._valospaceScope) !== ownerSpaceScope) {
         const dummy = {};

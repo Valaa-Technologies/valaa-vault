@@ -30,6 +30,10 @@ export default class ValoscriptTranspiler extends FabricEventTarget {
 
   VALK () { return this._VALK; }
 
+  getProgramName () {
+    return (this._sourceInfo || "").mediaName || "unknown.vs";
+  }
+
   transpileKueryFromText (source: string, options: Object = {}): Kuery {
     const actualTranspiler = Object.create(this);
     actualTranspiler._indent = options.verbosity || undefined;

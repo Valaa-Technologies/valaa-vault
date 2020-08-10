@@ -102,6 +102,7 @@ export function parseProgram (transpiler: Transpiler, ast: Program, options: Obj
     contextRuleOverrides: programContextRuleOverrides,
     scopeAccesses: {},
     surroundingFunction: {
+      name: transpiler.getProgramName(),
       topLevel: true,
       requireControlLooping: false,
     },
@@ -686,10 +687,12 @@ export function parseFunctionExpression (transpiler: Transpiler, ast: FunctionEx
 
 export function parseFunctionHelper (transpiler: Transpiler, ast: FunctionExpression,
     options: Object): Kuery {
+  const name = ast.id || `${(options.surroundingFunction || "").name || "-"}/=>`;
   const functionOptions = {
     ...options,
     scopeAccesses: {},
     surroundingFunction: {
+      name,
       topLevel: false,
       hoists: [],
       requireControlLooping: false,
@@ -719,7 +722,7 @@ export function parseFunctionHelper (transpiler: Transpiler, ast: FunctionExpres
   return transpiler.VALK().capture(
       transpiler.VALK().fromValue(captivePath.toVAKON()),
       transpiler.VALK().fromValue("§nonlive"),
-      transpiler.VALK().fromValue(String(ast.id)),
+      transpiler.VALK().fromValue(String(name)),
   );
 }
 

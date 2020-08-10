@@ -43,15 +43,29 @@ export function _composeRecitalStoryFromEvent (falseProphet: FalseProphet, event
 
   const previousState = falseProphet._corpus.getState();
 
-  let story = (transactionState && transactionState._tryFastForwardOnCorpus(falseProphet._corpus));
-  if (!story) {
-    // If no transaction or transaction is not a fast-forward, do a regular dispatch
-    if (transactionState) {
-      falseProphet.warnEvent(1, () => [
-          `Committing a diverged transaction '${transactionState.name}' normally:`,
-          "\n\trestrictedTransacted:", ...dumpObject(event)]);
+  let story, dump;
+  if (transactionState) {
+    story = transactionState._tryFastForwardOnCorpus(falseProphet._corpus);
+    if (!story) {
+      dump = true;
+      falseProphet.warnEvent(2, () => [
+        `Rebasing a branched transaction '${transactionState.name}' as a regular new event:`,
+        "\n\tevent:", ...dumpObject(event),
+      ]);
+    } else {
+      falseProphet.warnEvent(2, () => [
+        `Committing a main line transaction '${transactionState.name}' as fast-forwarded event:`,
+        "\n\tevent:", ...dumpObject(event),
+        ...dumpObject(story),
+    ]);
     }
-    story = falseProphet._corpus.dispatch(event, dispatchDescription);
+  }
+  if (!story) story = falseProphet._corpus.dispatch(event, dispatchDescription);
+  if (dump) {
+    falseProphet.warnEvent(1, () => [
+      `Rebased a branched transaction '${transactionState.name}' as a regular new event:`,
+      "\n\tstory:", ...dumpObject(story),
+    ]);
   }
   story.timed = timed;
   if (dispatchDescription.slice(0, 8) === "prophecy") story.isProphecy = true;

@@ -998,7 +998,6 @@ relative the current parent frame.
 `
   }));
 
-
   _defineName("frameAuthority", () => ({
     tags: ["Attribute", "Context"],
     type: "(string | null)",

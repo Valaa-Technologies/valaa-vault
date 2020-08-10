@@ -152,10 +152,11 @@ export function parseArrowFunctionExpression (transpiler: Transpiler, ast: Arrow
       omitThisFromScope: true,
     });
   }
+  const name = ast.id || `${(options.surroundingFunction || "").name}/=>`;
   const functionOptions = {
     ...options,
     scopeAccesses: {},
-    surroundingFunction: { topLevel: false, hoists: [] },
+    surroundingFunction: { name, topLevel: false, hoists: [] },
     contextRuleOverrides: { ...options.contextRuleOverrides, ...es5.functionContextRuleOverrides },
     headIsThis: true,
   };
@@ -168,7 +169,7 @@ export function parseArrowFunctionExpression (transpiler: Transpiler, ast: Arrow
           paramDeclarations,
           body).toVAKON()),
       undefined, // transpiler.VALK().fromValue("§nonlive"),
-      transpiler.VALK().fromValue("lambda"),
+      transpiler.VALK().fromValue(String(name)),
   );
 }
 

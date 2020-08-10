@@ -934,7 +934,7 @@ function _createVCall (capturingValker: Valker, vakon: any, sourceInfo: ?Object,
     const valkCaller = head && head.__callerValker__;
     try {
       if (valkCaller) {
-        transaction = valkCaller.acquireFabricator(`valkcall-${captureName || "capture"}`);
+        transaction = valkCaller.acquireFabricator(`vcall-${captureName || "capture"}`);
       } else {
         // Direct caller is not valk context: this is a callback thunk
         // that is being called by fabric/javascript code.

@@ -216,7 +216,7 @@ export default class Engine extends Cog {
   }
 
   create (typeName, initialState, options: Object = {}, duplicateOf: ?Vrapper) {
-    let discourse, releaseOpts, extractedProperties, chronicling, ret;
+    let discourse, releaseOpts, extractedProperties, ret;
     const name = `${duplicateOf ? "duplicate-" : "new-"}${typeName}`;
     const action = {};
     try {
@@ -232,22 +232,19 @@ export default class Engine extends Cog {
       action.id = this._assignConstructDirectiveId({ initialState, typeName }, options);
       action.initialState = universalizeCommandData(initialState, options);
 
-      chronicling = discourse.chronicleEvent(
+      options.chronicling = discourse.chronicleEvent(
           !duplicateOf ? created(action) : duplicated(action));
 
-      // FIXME(iridian): If the transaction fails the Vrapper will
-      // contain inconsistent data until the next actual update on it.
-
       ret = this._postConstructResource(discourse, action.id,
-          action.initialState, chronicling.story, extractedProperties, localWrapError);
+          action.initialState, options.chronicling.story, extractedProperties, localWrapError);
     } catch (error) {
       releaseOpts = { rollback: error };
       throw localWrapError(this, error, name);
     } finally {
-      discourse.releaseFabricator(releaseOpts);
+      if (discourse) discourse.releaseFabricator(releaseOpts);
     }
     return !options.awaitResult ? ret
-        : thenChainEagerly(options.awaitResult(chronicling, ret), () => ret);
+        : thenChainEagerly(options.awaitResult(options.chronicling, ret), () => ret);
 
     function localWrapError (self, error, operationName) {
       return self.wrapErrorEvent(error, operationName,
@@ -255,8 +252,8 @@ export default class Engine extends Cog {
           "\n\toptions:", ...dumpObject(options),
           "\n\taction:", ...dumpObject(action),
           "\n\textractedProperties:", ...dumpObject(extractedProperties),
-          "\n\tchronicling result:", ...dumpObject(chronicling),
-          "\n\tchronicling event:", ...dumpObject((chronicling || {}).event),
+          "\n\tchronicling result:", ...dumpObject(options.chronicling),
+          "\n\tchronicling event:", ...dumpObject((options.chronicling || {}).event),
           "\n\tret:", ...dumpObject(ret),
       );
     }
@@ -330,6 +327,8 @@ export default class Engine extends Cog {
           .acquireConnection(id.getChronicleURI(), { newChronicle: true })
           .asActiveConnection();
     }
+    // FIXME(iridian): If the transaction fails the Vrapper will
+    // contain inconsistent data until the next actual update on it.
     const vResource = this.getVrapper(
         resultPassage.id, { discourse, typeName: resultPassage.typeName });
     if (vResource.isResource()) {
@@ -347,8 +346,9 @@ export default class Engine extends Cog {
       }
     }
     if (extractedProperties) {
-      const updateExisting = (initialState.instancePrototype || initialState.prototype);
-      vResource.assignProperties(extractedProperties, { discourse, updateExisting });
+      vResource.assignProperties(extractedProperties, {
+        discourse, updateExisting: !!(initialState.instancePrototype || initialState.prototype),
+      });
     }
     return vResource;
   }
@@ -473,9 +473,10 @@ export default class Engine extends Cog {
 
   receiveCommands (stories: Command[], purgedRecital: ?StoryRecital, purgedProtagonists: ?Set) {
     const recitalReactionPromises = !purgedProtagonists && [];
-    const finalizeTrigger = { then (finalizeCallback) { this.thenCallback = finalizeCallback; } };
+    let finalizeReceiveCommandsTransaction;
+    const finalizeTrigger = { then (callback) { finalizeReceiveCommandsTransaction = callback; } };
     const tx = !purgedProtagonists
-        && this.obtainGroupTransaction("local-events", { setAsGlobal: true, finalizeTrigger });
+        && this.obtainGroupTransaction("receiveCommands", finalizeTrigger);
     // TODO(iridian, 2019-03): Mark UI-transactions as local-only. It
     // is acceptable that UI operations manage in-memory/local state
     // but remote updates should be explicitly performed in
@@ -524,14 +525,14 @@ export default class Engine extends Cog {
       !purgedProtagonists ? "recited" : "purged", stories.length, "stories in", tx && tx.debugId(),
     ]);
     if (purgedProtagonists) return purgedProtagonists;
-    finalizeTrigger.thenCallback(true);
+    finalizeReceiveCommandsTransaction(true);
     return recitalReactionPromises.length ? recitalReactionPromises : undefined;
   }
 
   _recitePassage (passage: Passage, story: Story, recitalReactionPromises, purges: ?Set) {
     passage.timedness = story.timed ? "Timed" : "Timeless";
     passage._counter = ++this._currentPassageCounter;
-    if (this.getVerbosity() || story.timed) {
+    if (this.getVerbosity()) {
       // eslint-disable-next-line
       const { parentPassage, passages, type, state, previousState, next, prev, ...rest } = passage;
       this.logEvent(passage !== story ? 3 : 2, () => [
@@ -540,7 +541,7 @@ export default class Engine extends Cog {
         this._eventTypeString(passage), ...[passage.typeName].filter(p => p), String(passage.id),
         (story.timed ? `@ ${story.timed.startTime || "|"}->${story.timed.time}:` : ":"),
         "\n\taction:", ...dumpObject(getActionFromPassage(passage)),
-        "\n\tpassage:", ...dumpObject(rest),
+        "\n\tpassage:", ...dumpObject(passage),
       ]);
     }
     try {
@@ -616,44 +617,56 @@ export default class Engine extends Cog {
 
   _pendingTransactions = {};
 
-  obtainGroupTransaction (groupName: string, {
-    setAsGlobal = false,
-    finalizeTrigger = Promise.resolve(true),
-  }: Object = {}) {
+  obtainGroupTransaction (groupName: string, finalizeTrigger?: () => any) {
     let ret = this._pendingTransactions[groupName];
     if (ret) {
       this.logEvent(2, () => [`obtained existing group transaction '${groupName}'`, ret.debugId()]);
-      finalizeTrigger.then(() => undefined);
+      if (finalizeTrigger) finalizeTrigger.then(() => undefined);
     } else {
-      ret = this._pendingTransactions[groupName] = this.discourse.acquireFabricator(groupName);
-      this.logEvent(2, () => [
-        `created new ${setAsGlobal ? "global " : ""}group transaction '${groupName}'`, ret.debugId()
-      ]);
-      if (setAsGlobal && (this.discourse.getRootDiscourse() === this.discourse)) {
-        // If there is no current transaction as the global discourse
-        // set this transaction as the global one.
-        this.discourse = ret;
+      if (this.discourse.groupName) {
+        this._releaseGroupTransaction(this.discourse, `superseded by ${groupName}`);
       }
-      finalizeTrigger.then(() => {
-        this.logEvent(2, () => [
-          `finalized ${
-            !setAsGlobal ? "" : this.discourse === ret ? "still-global " : "no longer global "
-          }group transaction '${groupName}'`,
-          ret.debugId(),
-        ]);
-        delete this._pendingTransactions[groupName];
-        // If the global discourse is us, revert it back to the root discourse.
-        if (this.discourse === ret) this.discourse = ret.getRootDiscourse();
-        ret.releaseFabricator();
-      });
+      ret = this._pendingTransactions[groupName] =
+          this.discourse.acquireFabricator(`group-${groupName}`);
+      ret.groupName = groupName;
+      const isGlobal = this.trySetAsGlobalDiscourse(ret);
+      this.logEvent(2, () => [
+        `created new`, isGlobal ? "global " : "", `group transaction '${groupName}'`, ret.debugId(),
+      ]);
+      (finalizeTrigger || Promise.resolve(true))
+          .then(() => this._releaseGroupTransaction(ret, "finalized"));
     }
     return ret;
   }
 
-  getActiveGlobalOrNewLocalEventGroupTransaction = () =>
+  _releaseGroupTransaction (groupTransaction, reason) {
+    if (!groupTransaction.groupName) return;
+    const isGlobal = this.discourse === groupTransaction;
+    if (isGlobal) {
+      this.discourse = groupTransaction.getRootDiscourse();
+      this.logEvent(0, () => [
+        `relinguished global group transaction '${groupTransaction.groupName}':`, reason,
+      ]);
+    }
+    delete this._pendingTransactions[groupTransaction.groupName];
+    groupTransaction.groupName = null;
+    groupTransaction.releaseFabricator();
+  }
+
+  trySetAsGlobalDiscourse (discourse) {
+    if (this.discourse !== this.discourse.getRootDiscourse()) return false;
+    this.discourse = discourse;
+    return true;
+  }
+
+  resetGlobalDiscourseIfEqualTo (discourse) {
+    if (this.discourse === discourse) this.discourse = discourse.getRootDiscourse();
+  }
+
+  getSubscriptionTransaction = () =>
       ((this.discourse !== this.discourse.getRootDiscourse())
           ? this.discourse
-          : this.obtainGroupTransaction("local-events", { setAsGlobal: true, }))
+          : this.obtainGroupTransaction("subscription"));
 
   receiveTruths () {}
 

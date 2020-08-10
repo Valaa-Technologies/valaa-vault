@@ -44,18 +44,18 @@ export const fabricatorOps = {
     if (!this._transaction) {
       ret = Object.create(this);
       ret._fabricatorName = `#${++transactionCounter}:${name}`;
-      const transactorState = ret._transaction = new TransactionState(ret, name);
-      this.warnEvent(1, () => [
-        "BEGUN TRANSACTION", ret._fabricatorName, ":", ...dumpObject(transactorState),
+      ret._transaction = new TransactionState(ret, ret._fabricatorName);
+      this.logEvent(1, () => [
+        "\nBEGUN TRANSACTION", ret._fabricatorName, ":",
+        { fabricator: ret, transaction: ret._transaction },
       ]);
     } else {
       const fabricatorName = `${this._fabricatorName}/#${this._fabricatorCount}:${name}`;
       ret = this._transaction.createFabricator(this, name);
       ret._fabricatorName  = fabricatorName;
       this.logEvent(1, () => [
-        "acquired fabricator", ret._fabricatorName, ":", {
-          discourse: dumpObject(ret), transaction: dumpObject(ret._transaction),
-        },
+        "  ===>>>>   acquired fabricator", ret._fabricatorName, ":",
+        { fabricator: ret, transaction: ret._transaction },
       ]);
     }
     ret._fabricatorCount = 1;
@@ -64,26 +64,23 @@ export const fabricatorOps = {
   },
 
   releaseFabricator (options: ?{ abort: any, rollback: any }) {
-    const transactorState = this._transaction;
-    if (!transactorState) {
+    const transaction = this._transaction;
+    if (!transaction) {
       throw new Error("Invalid call to releaseFabricator from outside Fabricator");
     }
     this.logEvent(1, () => [
-      (options || {}).abort ? "ABORTING"
-          : (options || {}).rollback ? "rolling back"
+      (options || {}).abort ? "  <<<<====   ABORTING"
+          : (options || {}).rollback ? "  <<<<====   rolling back"
           : (this._finalizedFabricatorCount + 1 < this._fabricatorCount) ? "releasing on"
-          : "finalizing",
+          : "  <<<<====  finalizing",
       this._parentFabricator ? "fabricator" : "TRANSACTION", this._fabricatorName, ":",
-      "\n\tdiscourse:", ...dumpObject(this.getRootDiscourse()),
-      "\n\ttransactor:", ...dumpObject(transactorState._transactor),
-      "\n\tfabricator:", ...dumpObject(this),
-      "\n\toptions:", ...dumpObject(options),
+      { fabricator: this, transaction, options },
     ]);
     if (options) {
       if (options.abort) {
-        transactorState.markAsAborting(options.abort.message || options.abort);
+        transaction.markAsAborting(options.abort.message || options.abort);
       } else if (options.rollback) {
-        transactorState.rollbackFabricator(this,
+        transaction.rollbackFabricator(this,
             options.rollback.message || options.rollback);
       }
     }
@@ -92,10 +89,10 @@ export const fabricatorOps = {
       return this._parentFabricator.releaseFabricator();
     }
     this.logEvent(1, () => [
-      transactorState._transacted ? "COMMITTING" : "DISCARDING", "TRANSACTION",
-      this._fabricatorName, ":", ...dumpObject(transactorState),
+      transaction._transacted ? "\nCOMMITTING" : "\nDISCARDING", "TRANSACTION",
+      this._fabricatorName, ":", { fabricator: this, transaction },
     ]);
-    return transactorState.finalizeTransactor();
+    return transaction.finalizeTransactor();
   },
 };
 

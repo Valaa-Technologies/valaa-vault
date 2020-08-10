@@ -53,8 +53,7 @@ export function _bindLiveKuery (component: UIComponent, bindingSlot: string,
   }
   const engine = component.context.engine;
   const subscription = (head instanceof Vrapper ? head : engine)
-      .obtainSubscription(
-          kuery, options, engine.getActiveGlobalOrNewLocalEventGroupTransaction, head);
+      .obtainSubscription(kuery, options, engine.getSubscriptionTransaction, head);
   if (!options.repeathenableState) {
     component._subscriptions[bindingSlot] = subscription;
   } else {

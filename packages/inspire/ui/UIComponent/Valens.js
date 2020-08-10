@@ -656,33 +656,39 @@ function _refreshClassName (component, value, focus = component.tryFocus()) {
   return component._currentSheetObject.classes.sheet;
 }
 
-function _valensWrapCallback (component: Valens, callback_: Function, name: string) {
+function _valensWrapCallback (component: Valens, callback_: Function, attributeName: string) {
   if (!callback_) return callback_;
   const callback = (callback_ === "function") ? callback_
-      : getImplicitCallable(callback_, name, { synchronous: undefined });
+      : getImplicitCallable(callback_, attributeName, { synchronous: undefined });
   const isVCall = callback._isVCall;
-  const callName = !isVCall ? `valensExtCall_${name}` : `valensVCall_${name}`;
+  const callName = !isVCall ? `valensExtCall_${attributeName}` : `valensVCall_${attributeName}`;
 
   const ret = function _valensCall (...args: any[]) {
+    let fabricator, releaseOpts;
     try {
       let eThis = this;
-      if (isVCall && ((this == null) || !this.__callerValker__)) {
+      if (isVCall) {
         eThis = !this ? {} : Object.create(this);
-        eThis.__callerValker__ = component.context.engine.discourse;
+        fabricator = eThis.__callerValker__ =
+            (eThis.__callerValker__ || component.context.engine.discourse)
+                .acquireFabricator(attributeName);
         eThis.__callerScope__ = component.getUIContext();
       }
       return callback.apply(eThis, args);
     } catch (error) {
+      releaseOpts = { rollback: error };
       const absentChronicleSourcings = tryConnectToAbsentChroniclesAndThen(error,
           () => ret.apply(this, args));
       if (absentChronicleSourcings) return absentChronicleSourcings;
       const finalError = wrapError(error,
-          new Error(`attribute ${name} call in ${component.props.hierarchyKey}`),
+          new Error(`attribute ${attributeName} call in ${component.props.hierarchyKey}`),
           "\n\targs:", args,
           "\n\tcontext:", ...dumpObject(component.state.uiContext),
           "\n\tcomponent:", ...dumpObject(component),
       );
       component.enableError(finalError, `Exception caught during '${callName}'`);
+    } finally {
+      if (fabricator) fabricator.releaseFabricator(releaseOpts);
     }
     return undefined;
   };

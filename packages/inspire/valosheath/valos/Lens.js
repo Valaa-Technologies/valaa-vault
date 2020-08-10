@@ -972,14 +972,6 @@ as their owner.`,
 enclosing scope frame.`,
   }));
 
-  _defineName("frameKeyPrefix", () => ({
-    tags: ["Internal", "Context"],
-    type: "string",
-    description:
-`Slot which contains the frame key prefix from the current innermost
-enclosing scope frame.`,
-  }));
-
   _defineName("frameOwner", () => ({
     tags: ["Attribute"],
     type: "(string | null)",

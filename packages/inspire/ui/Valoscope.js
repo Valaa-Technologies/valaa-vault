@@ -3,7 +3,6 @@
 import PropTypes from "prop-types";
 
 import { naiveURI } from "~/raem/ValaaURI";
-import { tryUnpackedHostValue } from "~/raem/VALK/hostReference";
 
 // import type { Connection } from "~/sourcerer";
 
@@ -109,7 +108,7 @@ export default class Valoscope extends UIComponent {
     frameOwner: PropTypes.object,
     frameAuthority: PropTypes.string,
     frameKey: PropTypes.string,
-    sharedArrayFrameKey: PropTypes.string,
+    staticFrameKey: PropTypes.string,
     implicitFrameKey: PropTypes.string,
     frameOverrides: PropTypes.object,
     instanceLensPrototype: PropTypes.any,
@@ -124,10 +123,20 @@ export default class Valoscope extends UIComponent {
       this.setUIContextValue(Lens.scopeChildren, nextProps.children);
       ret = "props.children";
     }
-    if (nextProps.frameOverrides
-        && (nextState.scopeFrame !== undefined)
-        && _integrateFramePropertyDiffs(this, nextState.scopeFrame, nextProps.frameOverrides)) {
-      ret = "props.frameOverrides";
+    if (nextProps.frameOverrides && (nextState.scopeFrame !== undefined)) {
+      const frameSelf = { component: this, frameOverrides: nextProps.frameOverrides };
+      let releaseOpts;
+      try {
+        if (_integrateFramePropertyDiffs(frameSelf, nextState.scopeFrame)) {
+          ret = "props.frameOverrides";
+        }
+      } catch (error) {
+        releaseOpts = { rollback: error };
+        this.enableError(error);
+        ret = "props.frameOverrides.error";
+      } finally {
+        if (frameSelf.discourse) frameSelf.discourse.releaseFabricator(releaseOpts);
+      }
     }
     if (!ret) ret = super.shouldComponentUpdate(nextProps, nextState);
     return ret;
@@ -156,7 +165,13 @@ export default class Valoscope extends UIComponent {
     return thisChainEagerly(frameSelf,
         [vPrototype && vPrototype.activate(), vLens && vLens.activate(), props.frameKey],
         _scopeFrameChain,
-        (error) => { throw this.enableError(error); },
+        (error) => {
+          if (frameSelf.discourse) {
+            frameSelf.discourse.releaseFabricator({ rollback: error });
+            frameSelf.discourse = null;
+          }
+          throw this.enableError(error);
+        },
     );
   }
 
@@ -208,7 +223,7 @@ const _scopeFrameChain = [
   },
 
   function _constructIdAndCheckForExistingFrame (rootFrameAuthorityURI) {
-    const isTransitory = (rootFrameAuthorityURI
+    const isTransitory = this.isTransitory = (rootFrameAuthorityURI
             || (this.vOwner ? this.vOwner.getConnection().getAuthorityURI() : "valaa-memory:"))
         === "valaa-memory:";
     function _getSubscriptId (vResource) {
@@ -216,30 +231,29 @@ const _scopeFrameChain = [
           ? vResource.getBriefUnstableId()
           : vResource.getRawId().slice(0, -2);
     }
-    const ownerPart = this.vOwner ? `@_$V.owner${_getSubscriptId(this.vOwner)}` : "";
+    const ownerPart = this.vOwner ? _getSubscriptId(this.vOwner) : "";
     const props = this.component.props;
     let hierarchyPart;
-    const explicitFrameKey = props.frameKey || props.sharedArrayFrameKey;
-    if (explicitFrameKey) {
-      hierarchyPart = `@.$.${this.explicitFrameKey = explicitFrameKey}`;
-      this.component.setUIContextValue(Lens.frameKeyPrefix,
-          props.sharedArrayFrameKey ? String(props.arrayIndex) : null);
+    const frameKey = props.frameKey || props.staticFrameKey;
+    if (frameKey) {
+      hierarchyPart = `@.$.${frameKey}`;
     } else {
       const keyPrefix = this.component.getParentUIContextValue(Lens.frameKeyPrefix);
       hierarchyPart = `${
-          keyPrefix != null ? `@_$L.${keyPrefix}` : ""}${
-          this.vFocus ? `@_$V.focus${_getSubscriptId(this.vFocus)}`
+          keyPrefix ? `@_$.${keyPrefix}` : ""}${
+          this.vFocus ? `@_$L.focus${_getSubscriptId(this.vFocus)}`
               : props.arrayIndex != null ? `_(${props.arrayIndex})`
               : ""}`;
-      this.component.setUIContextValue(Lens.frameKeyPrefix, null);
     }
+    this.component.setUIContextValue(Lens.frameKeyPrefix,
+        !props.staticFrameKey || (props.arrayIndex == null) ? "" : String(props.arrayIndex));
     // const prototypePart = this.vPrototype ? `@_$V.proto${_getSubscriptId(this.vPrototype)}` : "";
     const lensPart = this.vLens ? `@_$L.lens${_getSubscriptId(this.vLens)}` : "";
     this.frameId = `@$~V.frames${ownerPart}${hierarchyPart}${lensPart}@@`;
 
     const vFrame = this.engine.tryVrapper(this.frameId, { optional: true });
     if (vFrame !== undefined) {
-      return thisChainRedirect("_assignScopeFrameExternals", vFrame);
+      return thisChainRedirect("_finalizeScopeFrame", vFrame);
     }
     if (!rootFrameAuthorityURI
         || (this.vPrototype && !this.vPrototype.hasInterface("Chronicle"))) {
@@ -256,7 +270,9 @@ const _scopeFrameChain = [
 
   function _obtainRootFrame (/* rootFrameConnection: Connection */) {
     const vRootFrame = this.engine.tryVrapper(this.frameId, { optional: true });
-    if (vRootFrame) return thisChainRedirect("_assignScopeFrameExternals", vRootFrame);
+    if (vRootFrame) {
+      return thisChainRedirect("_finalizeScopeFrame", vRootFrame);
+    }
     return undefined;
   },
 
@@ -277,80 +293,65 @@ const _scopeFrameChain = [
       this.component._currentOverrides = this.frameOverrides;
       this.frameOverrides = null;
     }
-    /*
-    discourse = engine.obtainGroupTransaction("receive-events", {
-      finalizeTrigger: Promise.resolve(),
-    });
-    */
-    // TODO(iridian, 2019-01): Determine whether getPremiereStory
-    // is the desired semantics here. It waits until the
-    // resource creation narration has completed (ie. engine
-    // has received and resolved the recital): this might be
-    // unnecessarily long.
-    // OTOH: TransactionState.chronicleEvents.results only
-    // support getPremiereStory so whatever semantics is
-    // desired it needs to be implemented.
-    // const options = { discourse, awaitResult: result => result.getPremiereStory() };
     const options = {
-      discourse: this.engine.getActiveGlobalOrNewLocalEventGroupTransaction(),
-      awaitResult: result => result.getComposedStory(),
+      discourse: this.discourse = this.engine
+          .obtainGroupTransaction("frame").acquireFabricator("createFrame"),
     };
     const vScopeFrame = (this.vPrototype != null)
         ? this.vPrototype.instantiate(initialState, options)
         : this.engine.create("Entity", initialState, options);
-    if (!this.rootFrameAuthorityURI || !this.vFocus) {
-      return thisChainRedirect("_assignScopeFrameExternals", vScopeFrame);
+    this.chronicling = options.chronicling;
+    if (this.rootFrameAuthorityURI && this.vFocus) {
+      this.component.setUIContextValue(Lens.frameRootFocus, this.vFocus);
+      this.component.setUIContextValue(Lens.frameRoot, vScopeFrame);
     }
     return vScopeFrame;
   },
-
-  function _assignShadowLensContextvalues (vScopeFrame) {
-    this.component.setUIContextValue(Lens.frameRootFocus, this.vFocus);
-    this.component.setUIContextValue(Lens.frameRoot, vScopeFrame);
-    return vScopeFrame;
-  },
-
-  function _assignScopeFrameExternals (scopeFrame) {
-    this.component.setUIContextValue("frame", scopeFrame);
-    if (scopeFrame === undefined) return undefined;
-    const explicitFrameKey = this.explicitFrameKey;
-    let discourse;
-    if (this.explicitFrameKey && (this.vOwner != null)
-        && (this.vOwner.propertyValue(explicitFrameKey) !== scopeFrame)) {
+  function _finalizeScopeFrame (vScopeFrame) {
+    this.component.setUIContextValue("frame", vScopeFrame);
+    this.component.setUIContextValue(Lens.scopeFrameResource, vScopeFrame);
+    const engine = this.component.context.engine;
+    const staticFrameKey = this.component.props.staticFrameKey;
+    const vParent = this.vOwner || this.component.getParentUIContextValue(Lens.scopeFrameResource);
+    if (staticFrameKey && vParent && (vParent.propertyValue(staticFrameKey) !== vScopeFrame)) {
       // TODO(iridian): This is initial, non-rigorous prototype functionality:
       // The owner[key] value remains set even after the components get detached.
-      discourse = this.component.context.engine.getActiveGlobalOrNewLocalEventGroupTransaction();
-      this.vOwner.assignProperty(explicitFrameKey, scopeFrame, { discourse });
+      vParent.assignProperty(staticFrameKey, vScopeFrame, {
+        discourse: this.discourse || (this.discourse =
+            engine.obtainGroupTransaction("frame").acquireFabricator("setOwnerFrameKey")),
+      });
     }
-    const vScopeFrame = tryUnpackedHostValue(scopeFrame);
-    if (vScopeFrame) this.component.setUIContextValue(Lens.scopeFrameResource, vScopeFrame);
-    if (this.frameOverrides) {
-      _integrateFramePropertyDiffs(this.component, vScopeFrame, this.frameOverrides, discourse);
+    if (this.frameOverrides) _integrateFramePropertyDiffs(this, vScopeFrame);
+    const discourse = this.discourse;
+    if (discourse) {
+      this.discourse = null;
+      const result = discourse.releaseFabricator();
+      if (!this.isTransitory && (result || this.chronicling)) {
+        return [vScopeFrame, (result || this.chronicling).getPersistedEvent()];
+      }
     }
-    return vScopeFrame || scopeFrame;
+    return vScopeFrame;
   },
-
   function _setScopeFrameState (scopeFrame) {
     this.component.setState({ scopeFrame });
-    return false; // prevent force-update
+    return false;
   },
 ];
 
-function _integrateFramePropertyDiffs (component, frame, frameOverrides, discourse) {
-  const currentOverrides = component._currentOverrides || {};
-  if (currentOverrides === frameOverrides) return false;
-  const updateTarget = (frame instanceof Vrapper) ? {} : frame;
-  for (const [key, value] of Object.entries(frameOverrides)) {
-    if (currentOverrides[key] === frameOverrides[key]) continue;
+function _integrateFramePropertyDiffs (frameSelf, scopeFrame) {
+  const currentOverrides = frameSelf.component._currentOverrides || {};
+  if (currentOverrides === frameSelf.frameOverrides) return false;
+  const updateTarget = (scopeFrame instanceof Vrapper) ? {} : scopeFrame;
+  for (const [key, value] of Object.entries(frameSelf.frameOverrides)) {
+    if (currentOverrides[key] === frameSelf.frameOverrides[key]) continue;
     updateTarget[key] = value;
   }
-  if (updateTarget === frame) return true;
-  frame.assignProperties(updateTarget, {
-    // eslint-disable-next-line no-param-reassign
-    discourse: discourse ||
-        component.context.engine.getActiveGlobalOrNewLocalEventGroupTransaction(),
+  if (updateTarget === scopeFrame) return true; // frame is an object, refresh immediately
+  scopeFrame.assignProperties(updateTarget, {
+    discourse: frameSelf.discourse || (frameSelf.discourse =
+          scopeFrame.getEngine().obtainGroupTransaction("frame").acquireFabricator("frameDiffs")),
   });
-  component._currentOverrides = frameOverrides;
+  frameSelf.component._currentOverrides = frameSelf.frameOverrides;
   return false; // let live kuery system handle updates
 }
 

@@ -71,7 +71,14 @@ export default class Valens extends UIComponent {
   }
 
   getKey () {
-    return this.props.hierarchyKey || this.context.parentUIContext.reactComponent.getKey();
+    return this._key || this.getPrefixedHierarchyKey();
+  }
+
+  getPrefixedHierarchyKey () {
+    const keyPrefix = this.getParentUIContextValue(Lens.frameKeyPrefix) || "";
+    return (this._key = (!keyPrefix
+        ? this.props.hierarchyKey
+        : `${keyPrefix}_${this.props.hierarchyKey}`));
   }
 
   bindFocusSubscriptions (focus: any, props: Object) {
@@ -330,7 +337,7 @@ function _recordNewGenericPropValue (stateLive, propValue, propName, component) 
       /*
       console.debug(`DEPRECATED: React-style camelcase event handler '${propName}', prefer 'On:${
           propName[2].toLowerCase()}${propName.slice(3)} (in ${
-          component.props.hierarchyKey})`);
+          component.getKey()})`);
       */
       newValue = _valensWrapCallback(component, propValue, propName);
     }
@@ -351,39 +358,29 @@ function _recordNewGenericPropValue (stateLive, propValue, propName, component) 
 // by default appear on the contained element.
 const _valensRecorderProps = {
   key (stateLive, newValue) {
-    let keyPrefix = stateLive.component.getParentUIContextValue(Lens.frameKeyPrefix) || "";
-    if (keyPrefix) keyPrefix = `${keyPrefix}_`;
-    if (typeof newValue === "string") {
-      const staticFrameKey = `${keyPrefix}${newValue}`;
-      stateLive.keyFromFocus = function _createSharedKey (focus_, arrayIndex, entryProps) {
-        if (arrayIndex == null) {
-          return (entryProps.frameKey = staticFrameKey);
-        }
-        entryProps.sharedArrayFrameKey = staticFrameKey;
-        if (arrayIndex) delete entryProps.frameOverrides;
-        return String(arrayIndex);
+    const component = stateLive.component;
+    let keyOp;
+    if (typeof newValue === "function") {
+      const keyPrefix = component.getParentUIContextValue(Lens.frameKeyPrefix) || "";
+      stateLive.keyFromFocus = function _createCustomKey (focus, arrayIndex, entryProps) {
+        return (entryProps.frameKey = newValue(focus, arrayIndex, keyPrefix));
       };
-    } else if (typeof newValue === "function") {
-      stateLive.keyFromFocus = function _createExplicitKey (focus_, arrayIndex, entryProps) {
-        return (entryProps.frameKey = newValue(focus_, arrayIndex, keyPrefix));
-      };
-    } else if ((newValue == null) || isSymbol(newValue)) {
-      let keyFromFocus = _keyFromFocusBySymbol[newValue || Lens.key];
-      if (keyFromFocus) {
-        stateLive.keyFromFocus = keyFromFocus.bind(stateLive.component);
-      } else {
-        keyFromFocus = stateLive.component.getParentUIContextValue(newValue);
-        if (typeof keyFromFocus !== "function") {
-          throw new Error(`Invalid $Lens.key value '${String(newValue)
-              }': does not resolve to valid key callback, got '${typeof keyFromFocus}'`);
-        }
-        stateLive.keyFromFocus = keyFromFocus;
+    } else if (typeof newValue === "string") {
+      const keyPrefix = component.getParentUIContextValue(Lens.frameKeyPrefix) || "";
+      stateLive.keyFromFocus = _keyFromFocusOps
+          .createStaticKey.bind(null, !keyPrefix ? newValue : `${keyPrefix}_${newValue}`);
+    } else if ((keyOp = _keyFromFocusOps[newValue || Lens.key])) { // eslint-disable-line
+      stateLive.keyFromFocus = keyOp.bind(component, component.getKey());
+    } else if (isSymbol(newValue)) {
+      const keyFromFocus = component.getParentUIContextValue(newValue);
+      if (typeof keyFromFocus !== "function") {
+        throw new Error(`Invalid $Lens.key value '${String(newValue)
+            }': does not resolve to valid key callback, got '${typeof keyFromFocus}'`);
       }
-      stateLive.component.setUIContextValue(Lens.frameKeyPrefix,
-          `${keyPrefix}${stateLive.component.props.hierarchyKey}`);
+      stateLive.keyFromFocus = keyFromFocus;
     } else {
       throw new Error(`Invalid $Lens.key: expected callback, symbol, string or nully, got '${
-          typeof newValue}'`);
+        typeof newValue}'`);
     }
   },
   children: "children",
@@ -440,24 +437,32 @@ const _valensRecorderProps = {
   },
 };
 
-const _keyFromFocusBySymbol = {
-  [Lens.key] (focus, index) {
-    return `${this.getKey()}${
-      index != null ? `@$i.${index}` : ""}
-      focus instanceof Vrapper ? focus.getBriefUnstableId() : ""}`;
+const _keyFromFocusOps = {
+  createStaticKey (keyPrefix, focus, arrayIndex, entryProps) {
+    entryProps.staticFrameKey = keyPrefix;
+    if (arrayIndex == null) return keyPrefix;
+    if (arrayIndex) delete entryProps.frameOverrides; // kludge: apply frame overrides only once
+    return String(arrayIndex);
   },
-  [Lens.focus] (focus, index) {
-    if (!(focus instanceof Vrapper)) {
-      if (index != null) {
-        throw new Error(`Cannot create $Lens.key={$Lens.focus
-            } from non-resoure entry at $Lens.array[${index}]`);
-      }
-      return "@$.non-resource";
+  [Lens.key] (keyPrefix, focus, arrayIndex, entryProps) {
+    const key = `${arrayIndex != null ? `@_$i.${arrayIndex}` : ""}${
+        focus instanceof Vrapper ? focus.getBriefUnstableId() : ""}`;
+    entryProps.frameKey = `${keyPrefix}${key}`;
+    return key;
+  },
+  [Lens.focus] (keyPrefix, focus, arrayIndex, entryProps) {
+    const key = (focus instanceof Vrapper) ? focus.getBriefUnstableId()
+        : (arrayIndex == null) && "@_$.non-resource";
+    if (!key) {
+      throw new Error(`Cannot create $Lens.key={$Lens.focus
+          } from non-resoure entry at $Lens.array[${arrayIndex}]`);
     }
-    return `${this.getKey()}${focus.getBriefUnstableId()}`;
+    entryProps.frameKey = `${keyPrefix}${key}`;
+    return key;
   },
-  [Lens.arrayIndex] (focus, index) {
-    return `${this.getKey()}@$i.${index || -1}`;
+  [Lens.arrayIndex] (keyPrefix, focus, arrayIndex, entryProps) {
+    entryProps.frameKey = `${keyPrefix}@_$i.${arrayIndex}`;
+    return String(arrayIndex);
   },
 };
 
@@ -681,7 +686,7 @@ function _valensWrapCallback (component: Valens, callback_: Function, attributeN
           () => ret.apply(this, args));
       if (absentChronicleSourcings) return absentChronicleSourcings;
       const finalError = wrapError(error,
-          new Error(`attribute ${attributeName} call in ${component.props.hierarchyKey}`),
+          new Error(`attribute ${attributeName} call in ${component.getKey()}`),
           "\n\targs:", args,
           "\n\tcontext:", ...dumpObject(component.state.uiContext),
           "\n\tcomponent:", ...dumpObject(component),

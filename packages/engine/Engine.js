@@ -644,7 +644,7 @@ export default class Engine extends Cog {
     const isGlobal = this.discourse === groupTransaction;
     if (isGlobal) {
       this.discourse = groupTransaction.getRootDiscourse();
-      this.logEvent(0, () => [
+      this.logEvent(2, () => [
         `relinguished global group transaction '${groupTransaction.groupName}':`, reason,
       ]);
     }

@@ -187,6 +187,7 @@ export default class JSXDecoder extends MediaDecoder {
     div: "d",
     span: "s",
     UIComponent: "UIC",
+    ValaaScope: "VSC",
     Valoscope: "VSC",
     Valens: "VLE",
   };
@@ -224,17 +225,21 @@ export default class JSXDecoder extends MediaDecoder {
     if (props || isInstanceLens) {
       propsMeta = this._createPropsMeta(sourceInfo, loc, props || {}, name,
           isInstanceLens, actualType.isUIComponent, lexicalName);
-      ([decodedType, decodedProps] =
-          tryCreateValensArgs(
-              actualType, Object.entries(propsMeta.decodedElementProps), lexicalName)
+      ([decodedType, decodedProps] = tryCreateValensArgs(
+              actualType, Object.entries(propsMeta.decodedElementProps),
+              lexicalName.slice((parentChildrenMeta.nearestFramedParentKey.length || -1) + 1))
           || [actualType, propsMeta.decodedElementProps]);
     }
+
     if (parentChildrenMeta.totalCount > 1) {
       if (!decodedProps) decodedProps = {};
       if (!decodedProps.key) decodedProps.key = elementKey;
     }
 
-    const childrenMeta = this._createChildrenMeta(children, lexicalName);
+    const childrenMeta = this._createChildrenMeta(children, lexicalName,
+        (actualType === Valoscope) || (propsMeta || "").isFramed
+            ? lexicalName
+            : parentChildrenMeta.nearestFramedParentKey);
     const decodedChildrenArgs = !childrenMeta.decodedChildren ? [] : [childrenMeta.decodedChildren];
 
     if (!childrenMeta.hasIntegrators && !(propsMeta || "").hasIntegrators) {
@@ -294,10 +299,10 @@ export default class JSXDecoder extends MediaDecoder {
     return _elementIntegrator;
   }
 
-  _createChildrenMeta (children, parentKey) {
+  _createChildrenMeta (children, parentKey, nearestFramedParentKey = "") {
     const ret = {
       hasIntegrators: false, hasKueries: false, totalCount: (children && children.length) || 0,
-      scopeAccesses: {}, nameIndices: {},
+      scopeAccesses: {}, nameIndices: {}, nearestFramedParentKey,
     };
     ret.decodedChildren = children && children.length && children.map(child =>
         _extractMetaOfValueInto(
@@ -312,6 +317,7 @@ export default class JSXDecoder extends MediaDecoder {
     const ret = {
       hasIntegrators: false, hasKueries: false, totalCount: 0,
       scopeAccesses: {}, byNamespace: {}, decodedElementProps: {}, propsIntegrators: [],
+      isFramed: elementName === "Valoscope" || isInstanceLens,
     };
 
     /* eslint-disable prefer-const */
@@ -367,6 +373,7 @@ export default class JSXDecoder extends MediaDecoder {
           : undefined;
       if (isLiveKuery !== undefined) namespace = namespace.slice(isLiveKuery ? 5 : 7);
       const namespaceAttrs = ret.byNamespace[namespace] || (ret.byNamespace[namespace] = {});
+      if (namespace === "Lens" && _valoscopeAttributes[name]) ret.isFramed = true;
       if (namespaceAttrs[name] !== undefined) {
         this.debugEvent(`Overriding existing value of attribute ${namespace}:${name
             } by given attribute '${givenName
@@ -384,6 +391,16 @@ export default class JSXDecoder extends MediaDecoder {
     return ret;
   }
 }
+
+const _valoscopeAttributes = {
+  valoscope: true,
+  lens: true,
+  lensProperty: true,
+  focusLensProperty: true,
+  delegateLensProperty: true,
+  instanceLensProperty: true,
+  instanceLensPrototype: true,
+};
 
 const _instanceLensPrototypeKueries = {};
 

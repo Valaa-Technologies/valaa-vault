@@ -5,10 +5,12 @@ const getGlobal = require("../gateway-api/getGlobal").default;
 const { thenChainEagerly } = require("./thenChainEagerly");
 const { wrapError } = require("./wrapError");
 
-const _cache = {};
+const _getCache = {};
 
 exports.default = function fetchJSON (input, options = {}) {
-  return _cache[input] || (_cache[input] = thenChainEagerly(input, [
+  const method = (options.method || "GET").toUpperCase();
+  if ((method === "GET") && _getCache[input]) return _getCache[input];
+  const fetchOperation = thenChainEagerly(input, [
     function performFetch () {
       const fetch = getGlobal().fetch;
       if (!fetch) {
@@ -31,8 +33,8 @@ exports.default = function fetchJSON (input, options = {}) {
     function extractJSON (response) {
       options.response = response;
       if (response.status >= 400) {
-        const error = new Error(`fetch response ${response.status} for ${
-          options.method || "GET"} ${input}: ${response.statusText}`);
+        const error = new Error(
+            `fetch response ${response.status} for ${method} ${input}: ${response.statusText}`);
         error.response = response;
         throw error;
       }
@@ -41,15 +43,17 @@ exports.default = function fetchJSON (input, options = {}) {
           : response.json();
     },
     function clearCache (json) {
-      delete _cache[input];
+      if (method === "GET") delete _getCache[input];
       return json;
     },
   ], function errorOnFetchJSON (error) {
-    delete _cache[input];
+    if (method === "GET") delete _getCache[input];
     throw wrapError(error, `During fetchJSON(${input}), with:`,
         "\n\toptions:", options,
     );
-  }));
+  });
+  if (method === "GET") _getCache[input] = fetchOperation;
+  return fetchOperation;
 };
 
 exports.fetch = function fetch (...rest) {

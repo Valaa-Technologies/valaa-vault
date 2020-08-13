@@ -106,14 +106,14 @@ non-empty array of sections or values.`],
       ["@!min", [           // second step: compute the min of
         10,                 // a whole number >= Number.MIN_SAFE_INTEGER, <= Number.MAX_SAFE_INTEGER
         ["@!max", [         // and the max of
-          ["@$f", "2.5"], // a fractional number
+          ["@$d", "2.5"],   // a double-precision fractional number
           ["@@"],           // and the 'head' ie. the result of first step random computation
         ]],
       ]],
     ]],
 ),
 "toEqual",
-"@!random@!min$f.10$.@!max$f.2.5$.@@@@@@",
+"@!random@!min$d.10$.@!max$d.2.5$.@@@@@@",
     ),
     "#1": [`
 During sectioning (be it from a vpath string or from an outline) all
@@ -129,9 +129,9 @@ as the payload are replaced with the payload section itself.`],
 ],
 ``],
     "example#1": itExpects("elides degenerate vpath elements during sectioning",
-() => disjoinVPathString("@!random@!min$f.10$.@!max$f.2.5$.@@@@@@"),
+() => disjoinVPathString("@!random@!min$d.10$.@!max$d.2.5$.@@@@@@"),
 "toEqual",
-["@@", [["@!random"], ["@!min", [10, ["@!max", [["@$f", "2.5"], ["@@"]]]]]]]
+["@@", [["@!random"], ["@!min", [10, ["@!max", [["@$d", "2.5"], ["@@"]]]]]]]
     ),
   },
   "chapter#vpath_json_outline>2;VPath JSON outlines": {

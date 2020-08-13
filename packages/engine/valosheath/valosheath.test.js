@@ -114,10 +114,10 @@ describe("Creating and instancing with 'new' keyword", () => {
     const bodyText = `
         const parent = new Entity({ name: "parent", owner: this,
             properties: { position: { x: 10, y: 20 } } });
-        const ret = parent.$V.getSubResource(["@_:rel-1@@"]);
+        const ret = parent.$V.getSubResource(["@-:rel:1@@"]);
         new Relation({
           name: "myRelation",
-          owner: parent, subResource: ["@_:rel-1@@"],
+          owner: parent, subResource: ["@-:rel:1@@"],
           properties: { position: { x: 1, y: 2 } },
         });
         ret;
@@ -134,6 +134,46 @@ describe("Creating and instancing with 'new' keyword", () => {
     expect(MyTypeEntity.step(VALEK.relations("myRelation").to(0)))
         .toEqual(myRelation);
   });
+  it("construct sub-resources with obtainSubResource", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
+    const [subEnt, nuuEnt, subRel1, subRel2] = entities().creator.doValoscript(`
+        const ToThing = new Relation({ name: "ToThing", owner: this,
+          properties: { position: { x: 10, y: 20 } }
+        });
+        const parent = new Entity({ name: "parent", owner: this });
+        const subEnt = new Entity({ owner: parent, subResource: ["@+$foo.existing@@"] });
+        const primer = (initialState, section, index) => {
+          if (index === 2) {
+            initialState.instancePrototype = ToThing;
+            if (section[1][1] === 2) {
+              initialState.properties.position = { x: 1, y: 2 };
+            }
+          }
+        };
+        const relInst1 = parent.$V.obtainSubResource(
+            ["@+$foo.existing@+$foo.nuu@-$foo.toThings$d.1@@"], primer);
+        const relInst2 = parent.$V.obtainSubResource(
+            [["@+", $foo.existing], ["@+", $foo.nuu], ["@-", $foo.toThings, 2]], primer);
+        [subEnt, subEnt[$foo.nuu], relInst1, relInst2];
+    `, { console });
+    expect(subEnt.propertyValue(qualifiedSymbol("foo", "nuu")))
+        .toEqual(nuuEnt);
+    expect(subEnt.propertyValue("@$foo.nuu@@"))
+        .toEqual(nuuEnt);
+    expect(subRel1.step("name"))
+        .toEqual("@$foo.toThings@@");
+    expect(subRel1.step(VALEK.propertyLiteral("position")))
+        .toEqual({ x: 10, y: 20 });
+    expect(subRel2.step(VALEK.propertyLiteral("position")))
+        .toEqual({ x: 1, y: 2 });
+    expect(subRel1.step("owner"))
+        .toEqual(nuuEnt);
+    expect(subRel2.step("owner"))
+        .toEqual(nuuEnt);
+    expect(nuuEnt.step(VALEK.relations(qualifiedSymbol("foo", "toThings"))))
+        .toEqual([subRel1, subRel2]);
+  });
+
   it("modifies existing Entity property", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
     const bodyText = `

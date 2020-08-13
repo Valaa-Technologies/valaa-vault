@@ -419,7 +419,7 @@ function _cementSpreaderPath (spreader) {
   const vpath = (Array.isArray(spreader) && ((spreader[0] || "")[0] === "@"))
        ? spreader
        : ["@!", spreader];
-  const sections = disjoinVPath(...vpath);
+  const sections = disjoinVPath(vpath);
   const track = cementVPath(sections, { context: revelationContext });
   /*
   console.log("cementSpreaderPath, vpath:", ...dumpObject(vpath),

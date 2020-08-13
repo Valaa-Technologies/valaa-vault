@@ -212,7 +212,7 @@ function outputError (error, header = "Exception caught", logger = _globalLogger
       traces = [];
       const lines = [];
       for (const entry of context.contextDescriptions) {
-        if (entry[0] === "\n" || !lines.length) lines.push([]);
+        if (!entry || entry[0] === "\n" || !lines.length) lines.push([]);
         lines[lines.length - 1].push(entry);
       }
       const info = (contextLogger.infoEvent || contextLogger.info).bind(contextLogger);

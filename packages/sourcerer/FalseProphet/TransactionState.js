@@ -47,7 +47,7 @@ export const fabricatorOps = {
       ret._transaction = new TransactionState(ret, ret._fabricatorName);
       this.logEvent(1, () => [
         "\nBEGUN TRANSACTION", ret._fabricatorName, ":",
-        { fabricator: ret, transaction: ret._transaction },
+        ...dumpObject({ fabricator: ret, transaction: ret._transaction }),
       ]);
     } else {
       const fabricatorName = `${this._fabricatorName}/#${this._fabricatorCount}:${name}`;
@@ -55,7 +55,7 @@ export const fabricatorOps = {
       ret._fabricatorName  = fabricatorName;
       this.logEvent(1, () => [
         "  ===>>>>   acquired fabricator", ret._fabricatorName, ":",
-        { fabricator: ret, transaction: ret._transaction },
+        ...dumpObject({ fabricator: ret, transaction: ret._transaction }),
       ]);
     }
     ret._fabricatorCount = 1;
@@ -74,7 +74,7 @@ export const fabricatorOps = {
           : (this._finalizedFabricatorCount + 1 < this._fabricatorCount) ? "releasing on"
           : "  <<<<====  finalizing",
       this._parentFabricator ? "fabricator" : "TRANSACTION", this._fabricatorName, ":",
-      { fabricator: this, transaction, options },
+      ...dumpObject({ fabricator: this, transaction, options }),
     ]);
     if (options) {
       if (options.abort) {
@@ -90,7 +90,7 @@ export const fabricatorOps = {
     }
     this.logEvent(1, () => [
       transaction._transacted ? "\nCOMMITTING" : "\nDISCARDING", "TRANSACTION",
-      this._fabricatorName, ":", { fabricator: this, transaction },
+      this._fabricatorName, ":", ...dumpObject({ fabricator: this, transaction }),
     ]);
     return transaction.finalizeTransactor();
   },

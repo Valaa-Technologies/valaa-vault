@@ -41,7 +41,8 @@ function or a resource.`,
   });
 
   valos.vrefer = denoteValOSBuiltinWithSignature(
-      `returns a resource referred to by the given vref parameters.`
+`returns a valos resource locator built from the given *authorityURI*,
+*chronicleVRID* and *resourceVRID* parts.`
   )(function vrefer (authorityURI_, chronicleVRID_, resourceVRID_) {
     let resourceVRID, chronicleURI;
     if (resourceVRID_ !== undefined) {

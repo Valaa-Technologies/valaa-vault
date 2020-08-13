@@ -1,4 +1,5 @@
-const { dumpObject, wrapError } = require("../../tools/wrapError");
+const { dumpObject, wrapError } = require("~/tools/wrapError");
+
 const { disjoinVPathOutline, disjoinVPathString } = require("./_sectionOps");
 
 const {

@@ -195,13 +195,13 @@ describe("VPath", () => {
           ]]);
     });
     it("disjoins already disjoint VPaths correctly", () => {
-      expect(disjoinVPath(["@-out$.TAGS"], ["@.$V.target"]))
+      expect(disjoinVPath([["@-out$.TAGS"], ["@.$V.target"]]))
           .toEqual(["@@", [["@-out", ["TAGS"]], ["@.", [["@$V", "target"]]]]]);
       expect(disjoinVPath(["@@", [["@-out", ["TAGS"]], ["@.", [["@$V", "target"]]]]]))
           .toEqual(["@@", [["@-out", ["TAGS"]], ["@.", [["@$V", "target"]]]]]);
-      expect(disjoinVPath(["@-out", ["@$", "TAGS"]], ["@.", ["@$V", "target"]]))
+      expect(disjoinVPath([["@-out", ["@$", "TAGS"]], ["@.", ["@$V", "target"]]]))
           .toEqual(["@@", [["@-out", ["TAGS"]], ["@.", [["@$V", "target"]]]]]);
-      expect(disjoinVPath(["@.$V.owner"], ["@.$V.rawId"]))
+      expect(disjoinVPath([["@.$V.owner"], ["@.$V.rawId"]]))
           .toEqual(["@@", [["@.", [["@$V", "owner"]]], ["@.", [["@$V", "rawId"]]]]]);
     });
     it("Doesn't disjoin into spurious fields", () => {

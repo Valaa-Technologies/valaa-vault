@@ -12,7 +12,7 @@ import {
 } from "~/raem/events";
 import VRL, { vRef, invariantifyId, getRawIdFrom } from "~/raem/VRL";
 import { naiveURI } from "~/raem/ValaaURI";
-import { formVPath } from "~/raem/VPath";
+import { disjoinVPath, formVPath } from "~/raem/VPath";
 
 import dataFieldValue from "~/raem/tools/denormalized/dataFieldValue";
 
@@ -418,7 +418,6 @@ export default class Vrapper extends Cog {
           "\n\tid.getChronicleURI:", ...dumpObject(this[HostRef].getChronicleURI()),
           "\n\ttransient:", ...dumpObject(transient.toJS()),
           "\n\tconnection:", ...dumpObject(this._connection),
-          "\n\tthis:", ...dumpObject(this),
           "\n\tresolver.state:", ...dumpObject(resolver.state.toJS()),
           "\n\tengine.discourse.state:", ...dumpObject(this._parent.discourse.getState().toJS()));
       // throw wrappedError;
@@ -624,6 +623,12 @@ export default class Vrapper extends Cog {
     return (this._type || "").name;
   }
 
+  static _keyTypes = {
+    "@+": "Entity",
+    "@-": "Relation",
+    "@~": "Media",
+  };
+
   static _typeKeys = {
     Entity: "@+",
     Relation: "@-",
@@ -650,7 +655,11 @@ export default class Vrapper extends Cog {
     innerOptions.scope = {};
     if (Vrapper._namedTypes[(this._type || "").name]) {
       nameText = (options || {}).transient && (options || {}).transient.get("name");
-      if (nameText === undefined && this.isActive()) nameText = this.step("name", innerOptions);
+      if (nameText === undefined && this.isActive()) {
+        try {
+          nameText = this.step("name", innerOptions);
+        } catch (error) {} // eslint-disable-line no-empty
+      }
       if (nameText) nameText = `@.:${nameText}`;
     }
     let targetText;
@@ -1859,7 +1868,6 @@ export default class Vrapper extends Cog {
     if (!handlersById.size) idHandlers.delete(id);
   }
 
-
 /**
  * Returns or finds an existing chronicle proxy of this object in the
  * given chronicle.
@@ -1891,15 +1899,77 @@ export default class Vrapper extends Cog {
     return this._parent.getVrapper(ghostVRL, { state });
   }
 
-  getSubResource (subPath, options: { contextChronicleURI: string, discourse: ?Discourse } = {}) {
+  getSubResource (subId, options: { contextChronicleURI: string, discourse: ?Discourse } = {}) {
     this.requireActive(options);
     if (!options.contextChronicleURI) {
       options.contextChronicleURI = this.getConnection().getChronicleURI(options);
     }
-    const subVRID = formVPath(this[HostRef].vrid(), subPath);
-    return this._parent.tryVrapper(subVRID, options)
-        || vRef(subVRID, undefined, undefined, options.contextChronicleURI)
+    const vrid = formVPath(this[HostRef].vrid(), subId);
+    return this._parent.tryVrapper(vrid, options)
+        || vRef(vrid, undefined, undefined, options.contextChronicleURI)
             .setAbsent();
+  }
+
+  obtainSubResource (subId, options: {
+    extendInitialState: Function, contextChronicleURI: string, discourse: ?Discourse,
+  } = {}) {
+    this.requireActive(options);
+    if (!options.contextChronicleURI) {
+      options.contextChronicleURI = this.getConnection().getChronicleURI(options);
+    }
+    const sections = disjoinVPath(subId);
+    if (sections[0] !== "@@") return this._obtainSubResource(sections, 0, options);
+    return sections[1].reduce((r, subSection, index) =>
+        r._obtainSubResource(subSection, index, Object.create(options)), this);
+  }
+
+  _obtainSubResource (subSection, index, options) {
+    const subRef = this[HostRef].getSubRef(subSection);
+    let vSubResource = this._parent.tryVrapper(subRef, Object.create(options));
+    if (!vSubResource) {
+      const type = subSection[0];
+      const payload = subSection[1];
+      const typeName = Vrapper._keyTypes[type];
+      if (!typeName) {
+        throw new Error(`Unobtainable sub-resource section #${index}: unrecognized type '${type}'`);
+      }
+      const initialState = { id: subRef, properties: {} };
+      if (typeName !== "Relation") initialState.owner = this;
+      else initialState.source = this;
+      this._fillSubResourceName(payload[0], initialState, index);
+      if (options.extendInitialState) {
+        options.extendInitialState.call(
+            { __callerValker__: options.discourse }, initialState, subSection, index);
+      }
+      vSubResource = this._parent.create(typeName, initialState, Object.create(options));
+      if (initialState.name && (typeName === "Entity")) {
+        this.assignProperty(initialState.name, vSubResource, options);
+      }
+    }
+    return vSubResource;
+  }
+
+  _fillSubResourceName (stepParam, initialState, sectionIndex) {
+    if (typeof stepParam === "string") {
+      initialState.name = stepParam;
+      return true;
+    }
+    if (stepParam[0] === "@$n") return false;
+    const name = stepParam[1];
+    if (stepParam[0] === "@$d") {
+      initialState.name = String(name);
+    } else if (typeof name !== "string") {
+      throw new Error(`Invalid sub-resource section #${sectionIndex
+          } name, expected string, got: '${typeof name}'`);
+    } else if (stepParam[0] === "@$") {
+      initialState.name = name;
+    } else if (stepParam[0] === "@$V") {
+      throw new Error(`Unobtainable sub-resource section #${sectionIndex
+          }: valos namespace vparams not supported`);
+    } else {
+      initialState.name = `${stepParam[0]}.${encodeURIComponent(name)}@@`;
+    }
+    return true;
   }
 
   onEventCREATED (passage: Passage, story: Story) {

@@ -9,9 +9,9 @@ export function qualifiedSymbol (prefix, localPart) {
   if (!symbol) {
     const qualifiedName = `$${prefix}.${encodeURIComponent(localPart)}`;
     symbol = namespace[localPart] = Symbol(qualifiedName);
-    _symbolToQualifiedName[symbol] = [
+    _symbolToQualifiedName[symbol] = Object.freeze([
       prefix, localPart, qualifiedName, `@${qualifiedName}@@`, `@.${qualifiedName}@@`,
-    ];
+    ]);
   }
   return symbol;
 }

@@ -131,13 +131,13 @@ describe("VPath to concrete VAKON valks", () => {
     expect(VALK.fromVPath(["@@", ["@$.", "constant"]])
         .toVAKON())
     .toEqual(["§'", "constant"]);
-    expect(VALK.fromVPath({ val: "constant", val2: 10 })
+    expect(VALK.fromVPath([{ val: "constant", val2: 10 }])
         .toVAKON())
     .toEqual(["§{}", ["val", "constant"], ["val2", 10]]);
-    expect(VALK.fromVPath({ val: ["@$", "@"] })
+    expect(VALK.fromVPath([{ val: ["@$", "@"] }])
         .toVAKON())
     .toEqual(["§{}", ["val", "@"]]);
-    expect(VALK.fromVPath({ val: "@", val3: [1, 2, 3], val2: null })
+    expect(VALK.fromVPath([{ val: "@", val3: [1, 2, 3], val2: null }])
         .toVAKON())
     .toEqual(["§{}",
         ["val", "@"],

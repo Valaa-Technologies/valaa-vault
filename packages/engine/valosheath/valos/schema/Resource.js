@@ -27,6 +27,7 @@ const symbols = {
   getEntity: qualifiedSymbol("V", "getEntity"),
   getMedia: qualifiedSymbol("V", "getMedia"),
   getSubResource: qualifiedSymbol("V", "getSubResource"),
+  obtainSubResource: qualifiedSymbol("V", "obtainSubResource"),
   createDerivedId: qualifiedSymbol("V", "createDerivedId"),
   hasInterface: qualifiedSymbol("V", "hasInterface"),
   instantiate: qualifiedSymbol("V", "instantiate"),
@@ -253,10 +254,38 @@ export default {
     }),
 
     [symbols.getSubResource]: denoteValOSBuiltinWithSignature(
-`returns the structured sub-resource accessed from this resource via
-the given *subPath*.`
-    )(function getSubResource (subPath, explicitChronicleURI) {
-      return Vrapper.prototype.getSubResource.call(this, subPath, {
+`returns a reference to the structured sub-resource reached from this
+resource via the given *subId* VPath.
+
+This call does not create any resources. If the sub-resource does not
+exist the reference will be immaterial. See $V.obtainSubResource.`
+    )(function getSubResource (subId, explicitChronicleURI) {
+      return Vrapper.prototype.getSubResource.call(this, subId, {
+        contextChronicleURI: explicitChronicleURI, discourse: this.__callerValker__,
+      });
+    }),
+
+    [symbols.obtainSubResource]: denoteValOSBuiltinWithSignature(
+`returns an existing or creates a new structured sub-resource that is
+reached from this resource via the given *subId* VPath.
+
+This call will create all resources traversed by the subId VPath if
+they don't exist. The properties and fields for the created resources
+properties are determined to satisfy the semantic constraints of the
+subId elements. This typically means at least the resource type and its
+$V.owner and $V.name but can be arbitrarily complex.
+
+If the optional second argument *extendInitialState* is given it
+will be called for each new resource for adding custom fields to the
+initial state. This call is given *initialState* and *index* to the
+subId step as arguments. The *initialState* can be inspected and
+mutated in-place and will be passed to the internal resource creation
+call. It also contains the pre-determined fields and properties as
+immutable values that can be inspected.
+`
+    )(function obtainSubResource (subId, extendInitialState, explicitChronicleURI) {
+      return Vrapper.prototype.obtainSubResource.call(this, subId, {
+        extendInitialState,
         contextChronicleURI: explicitChronicleURI, discourse: this.__callerValker__,
       });
     }),

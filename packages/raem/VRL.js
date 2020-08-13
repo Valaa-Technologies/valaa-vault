@@ -5,7 +5,7 @@ import ValaaURI, { naiveURI } from "~/raem/ValaaURI";
 import GhostPath, { JSONGhostPath, ghostPathFromJSON } from "~/raem/state/GhostPath";
 
 import { HostRef, tryHostRef } from "~/raem/VALK/hostReference";
-import { coerceAsVRID } from "~/raem/VPath";
+import { coerceAsVRID, conjoinVPathSection } from "~/raem/VPath";
 
 import { debugObjectType, dumpObject, wrapError } from "~/tools/wrapError";
 import invariantify, { invariantifyString } from "~/tools/invariantify";
@@ -117,6 +117,18 @@ class VRL {
 
   rawId (): RawId { return this._nss; }
   vrid (): string { return this._vrid || (this._vrid = coerceAsVRID(this._nss)); }
+
+  getSubRef (subSection) {
+    const step = (typeof subSection === "string") ? subSection : conjoinVPathSection(subSection);
+    if (step[0] !== "@") {
+      throw new Error(`subSection must be verb type (non-'@@', non-'@$'), got: '${subSection[0]}'`);
+    }
+    const ret = this._sub && this._sub[step];
+    if (ret) return ret;
+    const nss = `${this.vrid().slice(0, -2)}${step}@@`;
+    return ((this._sub || (this._sub = {}))[step] = Object.create(Object.getPrototypeOf(this))
+        .initNSS(nss));
+  }
 
   typeof (): string { return "Resource"; }
 

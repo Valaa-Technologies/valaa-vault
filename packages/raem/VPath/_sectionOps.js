@@ -1,5 +1,7 @@
-const { dumpObject, wrapError } = require("../../tools/wrapError");
-const isSymbol = require("../../tools/isSymbol").default;
+const { qualifiedNameOf } = require("~/raem/tools/namespaceSymbols");
+
+const { dumpObject, wrapError } = require("~/tools/wrapError");
+const isSymbol = require("~/tools/isSymbol").default;
 
 const {
   validateVerbType, validateContextTerm, validateParamValueText, validateOutlineParamValueText
@@ -23,34 +25,41 @@ function formVPath (...steps) {
 
 function conjoinVPath (section) {
   const ret = conjoinVPathSection(section);
-  return (section[0] === "@@")
-          ? ret
-      : (ret[0] !== "$")
-          ? `${ret}@@`
-          : `@${ret}@@`;
+  return ret[0] !== "$" ? `${ret}@@` : `@${ret}@@`;
 }
 
-function disjoinVPath (...vpaths) {
-  const ret = (vpaths.length === 1) && (typeof vpaths[0] === "string")
-      ? disjoinVPathString(vpaths[0])
-      : disjoinVPathOutline(vpaths, "@@");
-  // console.log("disjoinVPath(", ...[].concat(vpaths.map(dumpObject)), "):", ...dumpObject(ret));
+function disjoinVPath (vpath: string | Array) {
+  const ret = (typeof vpath === "string")
+      ? disjoinVPathString(vpath)
+      : disjoinVPathOutline(vpath, "@@");
+  // console.log("disjoinVPath(", ...dumpObject(vpath), ":", ...dumpObject(ret));
   return ret;
 }
 
+/**
+ * Return a vpath section string.
+ * A vpath section string for non-vparam sections is equal to the full
+ * vpath string without the cap string "@@" at the end.
+ * A vpath section string for vparam sections is the same but also
+ * without the leading "@".
+ */
 function conjoinVPathSection (section) {
-  let type, payload;
+  let type = section[0];
+  const payload = section[1];
   try {
-    ([type, payload] = section);
     if (type[1] === "$") {
       return (payload === undefined) ? type.slice(1)
           : `${type.slice(1)}.${typeof payload === "string"
               ? encodeURIComponent(payload)
               : conjoinVPath(payload)}`;
     }
-    const isStepSection = (type !== "@@");
-    const elements = (payload === undefined) ? "" : payload.map(entry => {
-      let differentiator = "$", entryString;
+    if (type === "@@") type = "";
+    if (payload === undefined) return type;
+    const retParts = Array(payload.length + 1);
+    retParts[0] = type;
+    for (let i = 0; i !== payload.length; ++i) {
+      const entry = payload[i];
+      let entryString;
       if (typeof entry === "string") {
         entryString = `$.${encodeURIComponent(entry)}`;
       } else if (entry === true) {
@@ -59,37 +68,35 @@ function conjoinVPathSection (section) {
         entryString = "$f";
       } else if (entry === null) {
         entryString = "$n";
-      } else if (Array.isArray(entry)) {
-        differentiator = entry[0][1];
-        entryString = conjoinVPathSection(entry);
       } else if ((typeof entry === "number") && Number.isInteger(entry)) {
-        entryString = `$f.${String(entry)}`;
-      } else {
+        entryString = `$d.${String(entry)}`;
+      } else if (!Array.isArray(entry)) {
         throw new Error(`Invalid vpath section payload entry: type ${typeof entry
             } not allowed ${typeof entry === "number" ? "(value is not an integer)" : ""}`);
+      } else {
+        const differentiator = entry[0][1];
+        entryString = conjoinVPathSection(entry);
+        if (differentiator !== "$") {
+          retParts[i + 1] = type
+                  ? `$.${entryString}@@`  // verbs and vpaths must be embedded and capped in verbs
+              : differentiator === "@"
+                  ? `@$.${entryString}@@` // vpaths must be prefixed, embedded and capped in vpaths
+                  : entryString;          // verbs can be used as-is in vpaths
+          continue;
+        }
       }
-      // console.log("conjoin", section, isStepSection,
-      //    "\n\tentry:", entry, differentiator, entryString);
-      return isStepSection
-      // vstep entries ie. vparams always have "$"-prefix
-          ? (differentiator === "$")
-              ? entryString
-              : `$.${entryString}${(differentiator !== "@") ? "@@" : ""}`
-      // vpath entries ie. verbs always have "@"-prefix
-          : (differentiator === "$")
-              ? `@${entryString}`
-          : (differentiator === "@")
-              ? `@$.${entryString}`
-              : entryString;
-    }).join("");
-    return isStepSection ? `${type}${elements}` : `${elements}@@`;
+      retParts[i + 1] = type
+          ? entryString        // vparams can be used as-is in verbs
+          : `@${entryString}`; // vparams (ie. vgrids) need to be prefixed in vpaths
+    }
+    return retParts.join("");
   } catch (error) {
     let actualError = error;
     if (!Array.isArray(section)) {
       actualError = new Error("Section is not an array");
     } else if ((type[1] !== "$") && (section[1] !== undefined) && !Array.isArray(section[1])) {
       actualError = new Error(
-        `${type === "@@" ? "vpath" : "vstep"} section payload is not undefined or an array`);
+        `${type ? "vpath" : "vstep"} section payload is not undefined or an array`);
     }
     throw wrapError(actualError, new Error(`During conjoinVPathSection(${type})`),
         "\n\tsection:", ...dumpObject(section));
@@ -114,8 +121,14 @@ function disjoinVPathOutline (value, vkey) {
       break;
     case "symbol":
     case "object": // eslint-disable-line no-fallthrough
-      if (value === null) break; // TODO(iridian, 2020-04): Add support for namespace symbols
-      if (isSymbol(value)) throw new Error("Symbol to namespace/suffix not implemented yet");
+      if (value === null) break;
+      if (isSymbol(value)) {
+        const qualifiedName = qualifiedNameOf(value);
+        if (!qualifiedName) {
+          throw new Error(`Unrecognized non-namespace symbol: ${String(qualifiedName)}`);
+        }
+        return [`@$${qualifiedName[0]}`, qualifiedName[1]];
+      }
       if (Array.isArray(value)) {
         const first = value[0];
         if ((typeof first === "string") && (first[0] === "@")) {
@@ -337,7 +350,7 @@ function _recurseIntoVParam (stack) {
     }
   }
   if (!segmentType) return value;
-  if (segmentType === "@$f" && value.match(/^-?([1-9][0-9]*|0)$/)) {
+  if (segmentType === "@$d" && value.match(/^-?([1-9][0-9]*|0)$/)) {
     const maybeSafe = Number.parseInt(value, 10);
     if ((maybeSafe >= Number.MIN_SAFE_INTEGER) && (maybeSafe <= Number.MAX_SAFE_INTEGER)) {
       return maybeSafe;

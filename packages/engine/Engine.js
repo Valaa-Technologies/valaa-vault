@@ -382,6 +382,8 @@ export default class Engine extends Cog {
       if (Array.isArray(explicitId)) {
         explicitId = formVPath(explicitId);
         if (explicitId[1] !== "$") throw new Error("explicit VRID must have a GRId as first step");
+      } else if (explicitId instanceof VRL) {
+        return directive.id = explicitId;
       } else if (typeof explicitId !== "string") {
         throw new Error("explicit id must be either a string or a VPath steps array");
       } else if (explicitId[0] === "@") {

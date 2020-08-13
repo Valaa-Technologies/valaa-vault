@@ -1,4 +1,4 @@
-const { dumpObject, wrapError } = require("../../tools/wrapError");
+const { dumpObject, wrapError } = require("~/tools/wrapError");
 
 module.exports = { cementVPath, extendTrack };
 

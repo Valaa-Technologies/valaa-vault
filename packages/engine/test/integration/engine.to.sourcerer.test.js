@@ -472,7 +472,8 @@ describe("Two paired harnesses emulating two gateways connected through event st
       this.val = "yo";
     `)).toEqual("yo");
 
-    await pairness.receiveTruthsFrom(harness);
+    expect(await pairness.receiveTruthsFrom(harness))
+        .toEqual(1);
 
     expect(pairness.runValoscript(vRef(testRootId), `
       this.val;
@@ -490,7 +491,8 @@ describe("Two paired harnesses emulating two gateways connected through event st
       this.thing.$V.name;
     `)).toEqual("thingie");
 
-    await pairness.receiveTruthsFrom(harness);
+    expect(await pairness.receiveTruthsFrom(harness))
+        .toEqual(1);
 
     expect(pairness.runValoscript(vRef(testRootId), `
       [this.thing.$V.name, this.thing.val];
@@ -515,7 +517,8 @@ describe("Two paired harnesses emulating two gateways connected through event st
       ];
     `)).toEqual(["thingie", "yoyo", undefined, "local but not universal"]);
 
-    await pairness.receiveTruthsFrom(harness, { verbosity: 0 });
+    expect(await pairness.receiveTruthsFrom(harness, { verbosity: 0 }))
+        .toEqual(1);
 
     expect(pairness.runValoscript(vRef(testRootId), `
       [
@@ -560,7 +563,8 @@ describe("Two paired harnesses emulating two gateways connected through event st
         .toEqual([12, 12, 2, 16, 18, 18, -2, -18]);
     // expect(values[values.length - 1].call({ increment: 3 }))
     //    .toEqual(23); // this works but it's a pita to await for getComposedEvent
-    await pairness.receiveTruthsFrom(harness, { verbosity: 0 });
+    expect(await pairness.receiveTruthsFrom(harness, { verbosity: 0 }))
+        .toEqual(1);
 
     const pairedValues = await pairness.runValoscript(vRef(testRootId), `
       const values = [this.obj.callbackEntity.result];
@@ -574,8 +578,10 @@ describe("Two paired harnesses emulating two gateways connected through event st
         .toEqual([18, 20, 20, undefined /* -1 */, -20]);
     // See VALEK/index.js:94 for missing getter universalization
 
-    await harness.receiveTruthsFrom(harness, { clearUpstreamEntries: true });
-    await harness.receiveTruthsFrom(pairness, { clearUpstreamEntries: true });
+    expect(await harness.receiveTruthsFrom(harness, { clearUpstreamEntries: true }))
+        .toEqual(1);
+    expect(await harness.receiveTruthsFrom(pairness, { clearUpstreamEntries: true }))
+        .toEqual(1);
 
     expect(await harness.runValoscript(vRef(testRootId), `this.obj.callbackEntity.result`))
         .toEqual(20);
@@ -615,7 +621,8 @@ describe("Two paired harnesses emulating two gateways connected through event st
     expect(instance.getPhase())
         .toEqual("Activating");
 
-    await pairness.receiveTruthsFrom(harness);
+    expect(await pairness.receiveTruthsFrom(harness, { verbosity: 0 }))
+        .toEqual(1);
 
     expect(target.getPhase())
         .toEqual("Active");

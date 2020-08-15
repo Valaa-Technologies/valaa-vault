@@ -687,12 +687,14 @@ describe("Disjoint clients using paired harnesses", () => {
       aspects: { version: "0.2", log: {}, command: { id: "cid-1" } },
     }));
     await result.getPersistedEvent();
-    await pairness.receiveTruthsFrom(harness);
+    expect(await pairness.receiveTruthsFrom(harness, { verbosity: 0 }))
+        .toEqual(1);
     expect(scribeConnection.getFirstCommandEventId())
         .toEqual(1);
     expect(pairedConnection.getUpstreamConnection().getFirstCommandEventId())
         .toEqual(2);
-    await harness.receiveTruthsFrom(harness, { clearUpstreamEntries: true });
+    expect(await harness.receiveTruthsFrom(harness, { clearUpstreamEntries: true }))
+        .toEqual(1);
     expect(scribeConnection.getFirstCommandEventId())
         .toEqual(2);
   });
@@ -720,11 +722,15 @@ describe("Disjoint clients using paired harnesses", () => {
     expect(pairedResult.getCommandOf(harness.testChronicleURI).aspects.log.index)
         .toEqual(1);
     // Make paired harness commands into truths first.
-    await harness.receiveTruthsFrom(pairness, { clearReceiverUpstreamEntries: true });
-    await pairness.receiveTruthsFrom(pairness, { clearReceiverUpstreamEntries: true });
+    expect(await harness.receiveTruthsFrom(pairness, { clearReceiverUpstreamEntries: true }))
+        .toEqual(1);
+    expect(await pairness.receiveTruthsFrom(pairness, { clearReceiverUpstreamEntries: true }))
+        .toEqual(1);
     // Re-send reordered commands by harness.
-    await pairness.receiveTruthsFrom(harness);
-    await harness.receiveTruthsFrom(harness, { clearReceiverUpstreamEntries: true });
+    expect(await pairness.receiveTruthsFrom(harness, { verbosity: 0 }))
+        .toEqual(2);
+    expect(await harness.receiveTruthsFrom(harness, { clearReceiverUpstreamEntries: true }))
+        .toEqual(2);
     expect(immutableIs(harness.corpus.getState(), pairness.corpus.getState()))
         .toEqual(true);
     expect(harness.run(vRef(testRootId), ["§->", "unnamedOwnlings", ["§map", "name"]]))

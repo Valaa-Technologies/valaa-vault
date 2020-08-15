@@ -61,10 +61,9 @@ export function initializeAspects (root, newAspects = {}) {
 
 export function obtainAspect (root: Object, aspectName: string) {
   if (!root.aspects) throw new Error("root.aspects missing");
-  const aspects = root.aspects || (root.aspects = new EventAspects());
-  const existingAspect = aspects[aspectName];
+  const existingAspect = root.aspects[aspectName];
   if (existingAspect) return existingAspect;
-  return (aspects[aspectName] = {});
+  return (root.aspects[aspectName] = {});
 }
 
 const emptyAspect = Object.freeze({});

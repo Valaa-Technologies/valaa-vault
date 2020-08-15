@@ -53,32 +53,37 @@ export function kueryExpression (kuery: Kuery | any) {
   };
 }
 
+export function expressionFromDescriptor (descriptor: Object, propertyName) {
+  if (descriptor.value !== undefined) {
+    return expressionFromProperty(descriptor.value, propertyName);
+  }
+  if (!descriptor || descriptor.hasOwnProperty("value")) return null;
+  if (!descriptor.get) {
+    throw new Error(`Must specify either descriptor.value or descriptor.get${
+      ""} when defining valospace property '${propertyName}'`);
+  }
+  const vakon = isValOSFunction(descriptor.get) ? extractFunctionVAKON(descriptor.get)
+      : (descriptor.get instanceof Kuery) ? descriptor.get.toVAKON()
+      : undefined;
+  if (vakon === undefined) {
+    throw new Error(`descriptor.get must be either VAKON kuery or a liveable function${
+      ""} when defining valospace property '${propertyName}'`);
+  }
+  return { typeName: "KueryExpression", vakon };
+}
+
 // TODO(iridian): Having an Expression to be the type of the the property value
 // seems like a worse choice by the day. Biggest issue of all is that for Data pointers
 // there is no referential integrity yet. We can't avoid the setField, but we could
 // avoid toExpressionKuery and the typeof/Resource-condition below
-export function expressionFromProperty (value: any, propertyName: any, descriptor: ?Object) {
-  if (value === undefined) {
-    if (!descriptor || descriptor.hasOwnProperty("value")) return null;
-    if (!descriptor.get) {
-      throw new Error(`Must specify either descriptor.value or descriptor.get${
-        ""} when defining valospace property '${propertyName}'`);
-    }
-    const vakon = isValOSFunction(descriptor.get) ? extractFunctionVAKON(descriptor.get)
-        : (descriptor.get instanceof Kuery) ? descriptor.get.toVAKON()
-        : undefined;
-    if (vakon === undefined) {
-      throw new Error(`descriptor.get must be either VAKON kuery or a liveable function${
-        ""} when defining valospace property '${propertyName}'`);
-    }
-    return { typeName: "KueryExpression", vakon };
-  }
+export function expressionFromProperty (value: any, propertyName: any) {
+  if (value === undefined) return null;
   if (value instanceof Kuery) {
     return { typeName: "KueryExpression", vakon: value.toVAKON() };
   }
-  const ref = tryHostRef(value);
-  if (ref) {
-    return { typeName: "Identifier", reference: ref.toJSON() };
+  const reference = tryHostRef(value);
+  if (reference) {
+    return { typeName: "Identifier", reference };
   }
   const ret = {
     typeName: "Literal",

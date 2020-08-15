@@ -7,8 +7,9 @@ import { tryUnpackedHostValue } from "~/raem/VALK/hostReference";
 import { isHostRef, tryLiteral, tryFullLiteral, tryUnpackLiteral } from "~/raem/VALK/raemSteppers";
 
 import valoscriptSteppers from "~/script/VALSK/valoscriptSteppers";
-import { isNativeIdentifier, getNativeIdentifierValue } from "~/script";
+import { isNativeIdentifier, getNativeIdentifierValue, setNativeIdentifierValue } from "~/script";
 
+import { expressionFromProperty } from "~/engine/VALEK";
 import getImplicitCallable from "~/engine/Vrapper/getImplicitCallable";
 import { tryNamespaceFieldSymbolOrPropertyName } from "~/engine/valosheath/namespace";
 
@@ -28,6 +29,26 @@ const engineSteppers = Object.assign(Object.create(valoscriptSteppers), {
   "§..": function _propertyValue (valker: Valker, head: any, scope: ?Object, getPropertyOp: any) {
     return _engineIdentifierOrPropertyValue(this,
         valker, head, scope, getPropertyOp[1], getPropertyOp[2], true);
+  },
+  "§$$<-": function _assignIdentifier (valker: Valker, head: any, scope: ?Object,
+      assignIdentifierOp: any) {
+    return _engineAssignIdentifierOrPropertyValue(this,
+        valker, head, scope, assignIdentifierOp, false);
+  },
+  "§..<-": function _assignProperty (valker: Valker, head: any, scope: ?Object,
+      assignPropertyOp: any) {
+    return _engineAssignIdentifierOrPropertyValue(this,
+        valker, head, scope, assignPropertyOp, true);
+  },
+  "§$$<->": function _alterIdentifier (valker: Valker, head: any, scope: ?Object,
+      alterIdentifierOp: any) {
+    return _engineAlterIdentifierOrPropertyValue(this,
+        valker, head, scope, alterIdentifierOp, false);
+  },
+  "§..<->": function _alterProperty (valker: Valker, head: any, scope: ?Object,
+      alterPropertyOp: any) {
+    return _engineAlterIdentifierOrPropertyValue(this,
+        valker, head, scope, alterPropertyOp, true);
   },
 });
 
@@ -184,6 +205,148 @@ function _engineIdentifierOrPropertyValue (steppers: Object, valker: Valker, hea
         "(via kuery:", ...dumpKuery(container), ")",
         "\n\tpropertyName:", ...dumpObject(ePropertyName),
         "(via kuery:", ...dumpKuery(propertyName), ")",
+    );
+  }
+}
+
+function _engineAssignIdentifierOrPropertyValue (steppers: Object, valker: Valker, head: any,
+    scope: ?Object, [, propertyName, value, container]: any, isAssignProperty: ?boolean) {
+  let eContainer: Object;
+  let ePropertyName;
+  let eValue;
+  try {
+    eContainer = (container === undefined)
+        ? (isAssignProperty ? head : scope)
+        : tryFullLiteral(valker, head, container, scope);
+    ePropertyName = typeof propertyName !== "object" ? propertyName
+        : tryLiteral(valker, head, propertyName, scope);
+    eValue = typeof value !== "object" ? value
+        : tryUnpackLiteral(valker, head, value, scope);
+    if (isHostRef(eContainer)) {
+      if (eContainer._sequence) {
+        throw new Error(`Modifying host sequence entries via index assignment not implemented yet`);
+      }
+      const vContainer = tryUnpackedHostValue(eContainer) || valker.unpack(eContainer);
+      const nameOrSymbol = tryNamespaceFieldSymbolOrPropertyName(eContainer, ePropertyName);
+      vContainer.assignProperty(nameOrSymbol, eValue, { discourse: valker });
+      return valker.tryPack(eValue);
+    }
+    const property = eContainer[ePropertyName];
+    if (isAssignProperty) {
+      eContainer[ePropertyName] = eValue;
+      return valker.tryPack(eValue);
+    }
+    if ((typeof property === "object") && (property !== null)) {
+      if (isNativeIdentifier(property)) {
+        setNativeIdentifierValue(property, eValue);
+        return valker.tryPack(eValue);
+      }
+      if ((typeof property.setField === "function") && isHostRef(valker.tryPack(property))) {
+        property.setField("value", expressionFromProperty(eValue, "value"), { discourse: valker });
+        return valker.tryPack(eValue);
+      }
+    }
+    throw new Error(`Cannot modify read-only or non-existent scope identifier '${
+        ePropertyName}' (with current value '${property}')`);
+  } catch (error) {
+    let actualError = error;
+    // These are here as a performance optimization. The invariantifications are not cheap
+    // and can be performed as a reaction to javascript native exception thrown on
+    // eContainer[ePropertyName] line
+    if (!error.originalError) {
+      if ((typeof eContainer !== "object") || (eContainer === null)) {
+        actualError = new Error(`Cannot modify ${isAssignProperty ? "property" : "identifier"} '${
+            String(ePropertyName)}' of ${
+            isAssignProperty ? "non-object" : "non-scope"} value '${String(eContainer)}'`);
+      } else if ((typeof ePropertyName !== "string") && !isSymbol(ePropertyName)) {
+        actualError = new Error(`Cannot use a value with type '${typeof ePropertyName}' as ${
+            isAssignProperty ? "property" : "identifier"} name when modifying`);
+      }
+    }
+    throw valker.wrapErrorEvent(actualError, 1,
+        isAssignProperty ? "valoscript§..<-/assignProperty" : "valoscript§$$<-/assignIdentifier",
+        "\n\thead:", ...dumpObject(head),
+        "\n\tcontainer:", ...dumpObject(eContainer),
+        "(via kuery:", ...dumpKuery(container), ")",
+        "\n\tpropertyName:", ...dumpObject(ePropertyName),
+        "(via kuery:", ...dumpKuery(propertyName), ")",
+        "\n\tvalue:", ...dumpObject(eValue),
+        "(via kuery:", ...dumpKuery(value), ")",
+    );
+  }
+}
+
+function _engineAlterIdentifierOrPropertyValue (steppers: Object, valker: Valker, head: any,
+    scope: ?Object, [, propertyName, alterationVAKON, container]: any, isAlterProperty: ?boolean) {
+  let eContainer: Object;
+  let ePropertyName;
+  let eAlterationVAKON;
+  try {
+    eContainer = (container === undefined)
+        ? (isAlterProperty ? head : scope)
+        : tryFullLiteral(valker, head, container, scope);
+    ePropertyName = typeof propertyName !== "object" ? propertyName
+        : tryLiteral(valker, head, propertyName, scope);
+    eAlterationVAKON = typeof alterationVAKON !== "object" ? alterationVAKON
+        : tryLiteral(valker, head, alterationVAKON, scope);
+    if (isHostRef(eContainer)) {
+      if (eContainer._sequence) {
+        throw new Error(`Modifying host sequence entries via index assignment not implemented yet`);
+      }
+      const vContainer = tryUnpackedHostValue(eContainer) || valker.unpack(eContainer);
+      const nameOrSymbol = tryNamespaceFieldSymbolOrPropertyName(eContainer, ePropertyName);
+      return valker.tryPack(vContainer.alterProperty(
+          nameOrSymbol, eAlterationVAKON, { discourse: valker }));
+    }
+    const property = eContainer[ePropertyName];
+    if (isAlterProperty) {
+      const packedNewValue = valker.advance(valker.pack(property), eAlterationVAKON, scope);
+      eContainer[ePropertyName] = valker.tryUnpack(packedNewValue, true);
+      return packedNewValue;
+    }
+    if ((typeof property === "object") && (property !== null)) {
+      if (isNativeIdentifier(property)) {
+        const packedNewValue = valker.advance(
+            valker.tryPack(getNativeIdentifierValue(property)), eAlterationVAKON, scope);
+        setNativeIdentifierValue(property, valker.tryUnpack(packedNewValue, true));
+        return packedNewValue;
+      }
+      if ((typeof property.alterValue === "function") && isHostRef(valker.tryPack(property))) {
+        return valker.tryPack(
+            property.alterValue(eAlterationVAKON, { discourse: valker }, eContainer.this));
+      }
+    }
+    throw new Error(`Cannot modify read-only or non-existent scope identifier '${
+        ePropertyName}' (with current value '${property}')`);
+  } catch (error) {
+    let actualError = error;
+    // These are here as a performance optimization. The invariantifications are not cheap
+    // and can be performed as a reaction to javascript native exception thrown on
+    // eContainer[ePropertyName] line
+    if (!error.originalError) {
+      if ((typeof eContainer !== "object") || (eContainer === null)) {
+        actualError = new Error(`Cannot modify ${isAlterProperty ? "property" : "identifier"} '${
+            String(ePropertyName)}' of ${
+            isAlterProperty ? "non-object" : "non-scope"} value '${String(eContainer)}'`);
+      } else if ((typeof ePropertyName !== "string") && !isSymbol(ePropertyName)) {
+        actualError = new Error(`Cannot use a value with type '${typeof ePropertyName}' as ${
+            isAlterProperty ? "property" : "identifier"} name when modifying`);
+      }
+    }
+    /*
+    invariantifyObject(eAlterationVAKON, "alterProperty.alterationVAKON after valking", {},
+        "\n\talterationVAKON:", ...dumpKuery(alterationVAKON),
+        "\n\talterationVAKON run:", eAlterationVAKON);
+    */
+    throw valker.wrapErrorEvent(actualError, 1,
+        isAlterProperty ? "valoscript§..<->/alterProperty" : "valoscript§$$<->/alterIdentifier",
+        "\n\thead:", ...dumpObject(head),
+        "\n\tcontainer:", ...dumpObject(eContainer),
+        "(via kuery:", ...dumpKuery(container), ")",
+        "\n\tpropertyName:", ...dumpObject(ePropertyName),
+        "(via kuery:", ...dumpKuery(propertyName), ")",
+        "\n\talterationVAKON:", ...dumpObject(eAlterationVAKON),
+        "(via kuery:", ...dumpKuery(alterationVAKON), ")",
     );
   }
 }

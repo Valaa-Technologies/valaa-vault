@@ -238,11 +238,14 @@ export default class SourcererTestHarness extends ScriptTestHarness {
     authorizeTruth = (i => i),
     asNarrateResults = false,
   } = {}) {
+    let ret = 0;
     for (const connection of ((source instanceof Connection)
         ? [source]
         : Object.values((source instanceof Sourcerer ? source : source.sourcerer)._connections))) {
       const testSourceBackend = this.tryGetTestAuthorityConnection(connection);
-      if (!testSourceBackend) continue;
+      if (!testSourceBackend) {
+        throw new Error(`Can't find source connection: ${connection.getName()}`);
+      }
       const chronicleURI = testSourceBackend.getChronicleURI();
       const receiver = this.oracle._connections[chronicleURI];
       if (!receiver) {
@@ -262,12 +265,14 @@ export default class SourcererTestHarness extends ScriptTestHarness {
       if (verbosity) {
         receiver.warnEvent("Receiving truths:", dumpify(truths, { indent: 2 }));
       }
+      ret += truths.length;
       if (asNarrateResults) {
         receiverBackend.addNarrateResults({ eventIdBegin: truths[0].aspects.log.index }, truths);
       } else {
         await Promise.all(await receiverBackend.getReceiveTruths()(truths));
       }
     }
+    return ret;
   }
 
   tryGetTestAuthorityConnection (connection): Connection {

@@ -37,11 +37,12 @@ describe("Chronicle load ordering and inactive resource handling", () => {
     // this test.
     await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
     let vLaterRoot;
+    // Create a prototype to a separate chronicle
     const creation = harness.engine.create("Entity",
         { authorityURI: String(harness.testAuthorityURI) },
         { awaitResult (result, vRet) { vLaterRoot = vRet; return result.getPremiereStory(); } });
-    const laterConnection = vLaterRoot.getConnection();
-    harness.tryGetTestAuthorityConnection(laterConnection)
+    const baseChronicle = vLaterRoot.getConnection();
+    harness.tryGetTestAuthorityConnection(baseChronicle)
         .addNarrateResults({ eventIdBegin: 0 }, []);
     await creation;
     const { Prototype, component } = await harness.runValoscript(vLaterRoot, `
@@ -55,6 +56,7 @@ describe("Chronicle load ordering and inactive resource handling", () => {
         .toEqual(vLaterRoot);
     expect(component.step("owner"))
         .toEqual(Prototype);
+    // Create a instance to the primary test chronicle
     const componentGhost = await harness.runValoscript(harness.createds.Entity[testRootId], `
       const instance = new Prototype({ owner: this });
       const componentGhost = instance.c;
@@ -70,12 +72,16 @@ describe("Chronicle load ordering and inactive resource handling", () => {
     const pairness = await createEngineOracleHarness({ verbosity: 0, pairedHarness: harness });
     await pairness.sourcerer.acquireConnection(harness.testChronicleURI)
         .asActiveConnection();
-    await pairness.receiveTruthsFrom(harness.testConnection, { verbosity: 0 });
+    expect(await pairness
+        .receiveTruthsFrom(harness.testConnection, { verbosity: 0 }))
+        .toEqual(1);
 
-    const pairedLaterConnection = pairness.sourcerer
-        .acquireConnection(laterConnection.getChronicleURI());
-    await pairness.receiveTruthsFrom(laterConnection, { verbosity: 0, asNarrateResults: true });
-    await pairedLaterConnection.asActiveConnection();
+    const pairedBaseConnection = pairness.sourcerer
+        .acquireConnection(baseChronicle.getChronicleURI());
+    expect(await pairness
+        .receiveTruthsFrom(baseChronicle, { verbosity: 0, asNarrateResults: true }))
+        .toEqual(2);
+    await pairedBaseConnection.asActiveConnection();
 
     const componentId = componentGhost.getVRef();
     const pairedComponent = pairness.run(componentId, null);
@@ -85,8 +91,8 @@ describe("Chronicle load ordering and inactive resource handling", () => {
         .toBeTruthy();
     expect(pairness.runValoscript(pairedComponent, `
       this.num;
-    `)).toEqual(10);
-    // await pairness.sourcerer.acquireConnection(laterConnection.getChronicleURI())
+    `, { verbosity: 0 })).toEqual(10);
+    // await pairness.sourcerer.acquireConnection(baseChronicle.getChronicleURI())
     //    .asActiveConnection();
     /*
 

@@ -168,12 +168,6 @@ export default class FalseProphetDiscourse extends Discourse {
     let subVPath = subVPath_;
     try {
       if (!chronicleURI) throw new Error("assignNewVRID.chronicleURI missing");
-      const root = this._transaction ? this._transaction.obtainRootEvent() : targetAction;
-      if (!tryAspect(root, "command").id) this._assignCommandId(root, this);
-      const chronicles = (root.meta || (root.meta = {})).chronicles || (root.meta.chronicles = {});
-      const chronicle = chronicles[chronicleURI] || (chronicles[chronicleURI] = {});
-      if (!chronicle.createIndex) chronicle.createIndex = 0;
-
       let resourceVRID;
 
       if (!subVPath && (targetAction.typeName === "Property")) {
@@ -207,7 +201,16 @@ export default class FalseProphetDiscourse extends Discourse {
             ? `${ownerRawId}@.$.${encodeURIComponent(propertyName)}`
             : `${ownerRawId.slice(0, -1)}.$.${encodeURIComponent(propertyName)}@@`;
         */
-      } else if (!explicitRawId) {
+        return (targetAction.id = vRef(resourceVRID, undefined, undefined, chronicleURI));
+      }
+
+      const root = this._transaction ? this._transaction.obtainRootEvent() : targetAction;
+      if (!tryAspect(root, "command").id) this._assignCommandId(root, this);
+      const chronicles = (root.meta || (root.meta = {})).chronicles || (root.meta.chronicles = {});
+      const chronicle = chronicles[chronicleURI] || (chronicles[chronicleURI] = {});
+      if (!chronicle.createIndex) chronicle.createIndex = 0;
+
+      if (!explicitRawId) {
         resourceVRID = createVRID0Dot3(
             root.aspects.command.id, chronicleURI, chronicle.createIndex++);
       } else if (explicitRawId[0] === "@") {

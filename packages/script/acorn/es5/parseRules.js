@@ -36,16 +36,21 @@ export interface Identifier extends Expression, Pattern {
 export function parseIdentifier (transpiler: Transpiler, ast: Identifier,
     options: Object): Kuery {
   if (options.leftSideRole === "pattern") {
-    transpiler.addScopeAccess(options.scopeAccesses, ast.name, "pattern");
+    transpiler.addScopeAccess(options.scopeAccesses, ast.name, "define");
     return [[ast.name, !options.leftSideMutable
         ? transpiler.VALK().createConstIdentifier(options.initializer)
         : transpiler.VALK().createLetIdentifier(options.initializer)
     ]];
   }
-  if (options.leftSideRole === "modify") {
-    transpiler.addScopeAccess(options.scopeAccesses, ast.name, "modify");
+  if (options.leftSideRole === "alter") {
+    transpiler.addScopeAccess(options.scopeAccesses, ast.name, "alter");
     return (toValueAlterationVAKON: Kuery) =>
-        transpiler.VALK().alterIdentifier(ast.name, toValueAlterationVAKON);
+        transpiler.VALK().alterIdentifierValue(ast.name, toValueAlterationVAKON);
+  }
+  if (options.leftSideRole === "assign") {
+    transpiler.addScopeAccess(options.scopeAccesses, ast.name, "assign");
+    return (toValue: Kuery) =>
+        transpiler.VALK().assignIdentifierValue(ast.name, toValue);
   }
   if (options.leftSideRole === "delete") {
     return () => transpiler.VALK().deleteIdentifier(ast.name);
@@ -703,8 +708,8 @@ export function parseFunctionHelper (transpiler: Transpiler, ast: FunctionExpres
   const body = transpiler.kueryFromAst(ast.body, functionOptions);
   let controlHeader = transpiler.VALK();
   if (!options.omitThisFromScope) {
-    transpiler.addScopeAccess(functionOptions.scopeAccesses, "this", "hoist");
-    transpiler.addScopeAccess(functionOptions.scopeAccesses, "arguments", "hoist");
+    transpiler.addScopeAccess(functionOptions.scopeAccesses, "this", "define");
+    transpiler.addScopeAccess(functionOptions.scopeAccesses, "arguments", "define");
     controlHeader = controlHeader.setScopeValues({ this: transpiler.VALK().head() });
   }
 
@@ -733,7 +738,7 @@ export function scopeSettersFromParamDeclarators (transpiler: Transpiler,
       transpiler.patternSettersFromAst(pattern,
           { ...options, initializer: transpiler.VALK().fromScope("arguments").toIndex(index) })));
   if (rest) {
-    transpiler.addScopeAccess(options.scopeAccesses, rest.name, "hoist");
+    transpiler.addScopeAccess(options.scopeAccesses, rest.name, "define");
     setters.push([rest.name, params.length
         ? transpiler.VALK().fromScope("arguments").call("slice", null, params.length)
         : transpiler.VALK().fromScope("arguments")
@@ -783,7 +788,7 @@ export type UpdateOperator = "++" | "--";
 export function parseUpdateExpression (transpiler: Transpiler, ast: UpdateExpression,
     options: Object): Kuery {
   const createModifierKuery =
-      transpiler.modifierFromAst(ast.argument, { ...options, leftSideRole: "modify" });
+      transpiler.modifierFromAst(ast.argument, { ...options, leftSideRole: "alter" });
   if (typeof createModifierKuery !== "function") {
     throw transpiler.parseError(ast, options,
         `'${ast.operator}' argument must be a left hand side value`);
@@ -838,22 +843,25 @@ export type AssignmentOperator = "=" | "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" 
 // An assignment operator token.
 export function parseAssignmentExpression (transpiler: Transpiler, ast: AssignmentExpression,
     options: Object): Kuery {
-  const createModifierKuery =
-      transpiler.modifierFromAst(ast.left, { ...options, leftSideRole: "modify" });
+  const toRightSideValue = transpiler.kueryFromAst(ast.right, options);
+  if (ast.operator === "=") {
+    return transpiler.modifierFromAst(
+        ast.left, { ...options, leftSideRole: "assign" })(toRightSideValue);
+  }
+  const createModifierKuery = transpiler.modifierFromAst(
+      ast.left, { ...options, leftSideRole: "alter" });
   if (typeof createModifierKuery !== "function") {
     throw transpiler.parseError(ast, options,
         "AssignmentExpression.ast.left must be a left hand side value");
   }
   const operatorLookupName = VALK_ALTERATION_OPS[ast.operator];
-  if (typeof operatorLookupName === "undefined") {
+  if (operatorLookupName === undefined) {
     throw transpiler.parseError(ast, options, `Unhandled assignment operator ${ast.operator}`);
   }
-  const rightSideVAKON =
-      transpiler.VALK().expression("§'", transpiler.kueryFromAst(ast.right, options));
-  const toAlterationVAKON = (ast.operator === "=")
-      ? rightSideVAKON
-      : transpiler.VALK().expression(operatorLookupName, ["§'", ["§->", null]], rightSideVAKON);
-  return createModifierKuery(toAlterationVAKON);
+  return createModifierKuery(transpiler.VALK().expression(
+      operatorLookupName,
+      ["§'", ["§->", null]],
+      transpiler.VALK().expression("§'", toRightSideValue)));
 }
 
 export interface LogicalExpression extends Expression {
@@ -886,21 +894,21 @@ export function parseMemberExpression (transpiler: Transpiler, ast: MemberExpres
   const optionsWOLeftsideRole = { ...options, leftSideRole: "member" };
   const object = transpiler.parseAst(ast.object, optionsWOLeftsideRole, ast.object.type);
   const propertyName = propertyNameKueryFromMember(transpiler, ast, optionsWOLeftsideRole);
-  if (options.leftSideRole === "modify") {
-    if (typeof object === "string") {
-      throw new Error(`Cannot modify qualified name $${object}.${propertyName}`);
+  if (typeof object === "string") {
+    if (["assign", "alter", "delete"].includes(options.leftSideRole)) {
+      throw new Error(`Cannot ${options.leftSideRole} qualified name $${object}.${propertyName}`);
     }
+    return transpiler.VALK().fromValue(qualifiedSymbol(object, propertyName));
+  }
+  if (options.leftSideRole === "assign") {
+    return (toValue: Kuery) => transpiler.VALK().assignPropertyValue(propertyName, toValue, object);
+  }
+  if (options.leftSideRole === "alter") {
     return (toValueAlterationVAKON: Kuery) =>
-        transpiler.VALK().alterProperty(propertyName, toValueAlterationVAKON, object);
+        transpiler.VALK().alterPropertyValue(propertyName, toValueAlterationVAKON, object);
   }
   if (options.leftSideRole === "delete") {
-    if (typeof object === "string") {
-      throw new Error(`Cannot delete qualified name $${object}.${propertyName}`);
-    }
     return () => transpiler.VALK().deleteProperty(propertyName, object);
-  }
-  if (typeof object === "string") {
-    return transpiler.VALK().fromValue(qualifiedSymbol(object, propertyName));
   }
   const toProperty = transpiler.VALK().propertyValue(propertyName);
   transpiler.addSourceKueryInfo(toProperty, ast.property);

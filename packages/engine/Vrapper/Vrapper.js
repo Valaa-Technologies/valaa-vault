@@ -1113,6 +1113,7 @@ export default class Vrapper extends Cog {
       for (key of Object.getOwnPropertySymbols(propertyUpdates)) {
         this.assignProperty(key, propertyUpdates[key], options);
       }
+      return this;
     } catch (error) {
       const errorName = new Error(`assignProperty(${String(key)})`);
       throw this.wrapErrorEvent(error, 1, () => [
@@ -1126,7 +1127,7 @@ export default class Vrapper extends Cog {
 
   assignProperty (propertyName: string | Symbol, newValue: Object, options: VALKOptions = {}) {
     if (newValue instanceof Kuery) {
-      return this.alterProperty(propertyName, newValue, Object.create(options), vProperty);
+      return this.alterProperty(propertyName, newValue, Object.create(options));
     }
     const discourse = options.discourse || this._parent.discourse;
     if (!options.chronicleURI) {
@@ -1136,31 +1137,34 @@ export default class Vrapper extends Cog {
       const fieldDescriptor = this._type.prototype[PropertyDescriptorsTag][propertyName];
       const writableFieldName = (fieldDescriptor || "").writableFieldName;
       if (writableFieldName) {
-        return discourse.chronicleEvent({
+        const value = universalizeCommandData(newValue, options);
+        discourse.chronicleEvent({
           type: "FIELDS_SET", typeName: this._type.name,
           id: discourse.bindObjectId(this[HostRef], this._type.name),
-          sets: { [writableFieldName]: universalizeCommandData(newValue, propertyName) },
+          sets: { [writableFieldName]: value },
         });
+        return newValue;
       }
     }
-    let vProperty;
     const value = universalizeCommandData(expressionFromProperty(newValue, propertyName), options);
     if (options.updateExisting !== false) {
-      vProperty = this.getPropertyResource(propertyName, Object.create(options));
-    }
-    if (vProperty) {
-      return discourse.chronicleEvent({
-        type: "FIELDS_SET", typeName: "Property",
-        id: discourse.bindObjectId(vProperty[HostRef], "Property"),
-        sets: { value },
-      });
+      const vProperty = this.getPropertyResource(propertyName, Object.create(options));
+      if (vProperty) {
+        discourse.chronicleEvent({
+          type: "FIELDS_SET", typeName: "Property",
+          id: discourse.bindObjectId(vProperty[HostRef], "Property"),
+          sets: { value },
+        });
+        return newValue;
+      }
     }
     const event = {
       type: "CREATED", typeName: "Property",
       initialState: { owner: this[HostRef].coupleWith("properties"), name: propertyName, value },
     };
     discourse.assignNewVRID(event, String(options.chronicleURI));
-    return discourse.chronicleEvent(event);
+    discourse.chronicleEvent(event);
+    return newValue;
   }
 
   alterProperty (propertyName: any, alterationVAKON: Object, options: VALKOptions = {},
@@ -1181,9 +1185,9 @@ export default class Vrapper extends Cog {
     let ret;
     const writableFieldName = (fieldDescriptor != null) && fieldDescriptor.writableFieldName;
     if (writableFieldName) {
-      ret = this._preProcessNewReference(
-          this.step(["§->", writableFieldName, actualAlterationVAKON], alterationOptions),
-          fieldDescriptor, this._type);
+      const newValue = this.step(
+          ["§->", writableFieldName, actualAlterationVAKON], alterationOptions);
+      ret = this._preProcessNewReference(newValue, fieldDescriptor, this._type);
       // TODO(iridian): Make this solution semantically consistent host field access.
       // Now stupidly trying to setField even if the field is not a primaryField.
       this.setField(writableFieldName, ret, options);
@@ -1211,7 +1215,7 @@ export default class Vrapper extends Cog {
           "property owner (if defined) must be a Vrapper");
       options.scope = (vOwner || this).getValospaceScope(options, alterationVAKON, "alterValue");
       const newValue = this.run(currentValue, alterationVAKON, Object.create(options));
-      this.setField("value", expressionFromProperty(newValue, this), options);
+      this.setField("value", expressionFromProperty(newValue, "value"), options);
       if (typeof newValue !== "object") {
         // TODO(iridian): Could set the cachedExtractvalueEntry for non-object types.
       }

@@ -4,7 +4,7 @@ import { PartialRemovesTag } from "~/raem/state/partialSequences";
 
 import { ValoscriptPrimitiveKind } from "~/script";
 
-import VALEK, { expressionFromProperty } from "~/engine/VALEK";
+import VALEK, { expressionFromDescriptor } from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
 import {
   createHostMaterializedFieldDescriptor, createHostPropertyDescriptor,
@@ -247,7 +247,7 @@ export default function extendObject (scope: Object, hostDescriptors: Map<any, O
             }' for an object which doesn't implement Scope`);
       } else {
         // Define a Scope property
-        const value = expressionFromProperty(descriptor.value, propertyName, descriptor);
+        const value = expressionFromDescriptor(descriptor, propertyName);
         const vProperty = vResource.getPropertyResource(propertyName, options);
         if (vProperty) {
           vProperty.setField("value", value, options);

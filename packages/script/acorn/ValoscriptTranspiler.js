@@ -307,18 +307,20 @@ export default class ValoscriptTranspiler extends FabricEventTarget {
   }
 
   addScopeAccess (scopeAccesses: Object, name: string, type: string) {
-    const currentType = scopeAccesses[name];
-    if (!currentType
-        || (currentType === "read")
-        || ((currentType === "modify") && (type !== "read"))
-        || ((type !== "read") && (type !== "modify"))) {
-      scopeAccesses[name] = type;
+    let newType = type;
+    switch (scopeAccesses[name]) {
+      case "define": return;
+      case "alter": if ((type === "read") || (type === "assign")) return; break;
+      case "assign": if (type === "read") newType = "alter"; break;
+      case "read": if (type === "assign") newType = "alter"; break;
+      default: break;
     }
+    scopeAccesses[name] = newType;
   }
 
   exposeOuterScopeAccesses (innerScopeAccesses, outerScopeAccesses) {
     Object.entries(innerScopeAccesses).forEach(([name, type]) => {
-      if ((type === "read") || (type === "modify")) {
+      if ((type === "read") || (type === "assign") || (type === "alter")) {
         this.addScopeAccess(outerScopeAccesses, name, type);
       }
     });

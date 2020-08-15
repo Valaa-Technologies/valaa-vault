@@ -17,6 +17,8 @@ export default Object.assign(Object.create(engineSteppers), {
   "§while": _throwUnimplementedLiveKueryError,
   "§$$<-": _throwMutationLiveKueryError,
   "§..<-": _throwMutationLiveKueryError,
+  "§$$<->": _throwMutationLiveKueryError,
+  "§..<->": _throwMutationLiveKueryError,
   "§delete$$": _throwMutationLiveKueryError,
   "§delete..": _throwMutationLiveKueryError,
 });

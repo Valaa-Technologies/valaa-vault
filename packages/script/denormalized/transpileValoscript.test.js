@@ -139,7 +139,7 @@ describe("valoscript", () => {
           temp = this.age;
       `);
       const head = { age: 35 };
-      expect(bodyKuery[ScopeAccessesTag]).toEqual({ temp: "modify", this: "read" });
+      expect(bodyKuery[ScopeAccessesTag]).toEqual({ temp: "assign", this: "read" });
       const scope = { temp: createNativeIdentifier(10) };
 
       const temp = evaluateProgram([], head, bodyKuery, scope, { verbosity: 0 });
@@ -155,7 +155,7 @@ describe("valoscript", () => {
           temp += this.age;
       `);
       const head = { age: 35 };
-      expect(bodyKuery[ScopeAccessesTag]).toEqual({ temp: "modify", this: "read" });
+      expect(bodyKuery[ScopeAccessesTag]).toEqual({ temp: "alter", this: "read" });
       const scope = { temp: createNativeIdentifier(10) };
 
       const temp = evaluateProgram([], head, bodyKuery, scope);
@@ -173,7 +173,7 @@ describe("valoscript", () => {
           temp = this.age - 5;
       `);
       const head = { age: 35 };
-      expect(bodyKuery[ScopeAccessesTag]).toEqual({ temp: "modify", this: "read" });
+      expect(bodyKuery[ScopeAccessesTag]).toEqual({ temp: "assign", this: "read" });
       const scope = { temp: createNativeIdentifier(10) };
 
       const temp = evaluateProgram([], head, bodyKuery, scope, { verbosity: 0 });

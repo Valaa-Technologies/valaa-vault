@@ -87,7 +87,7 @@ export default class ValoscriptKuery extends Kuery {
   propertyValue (propertyName: any, toContainer: ?any) {
     return this._addExpression("§..", [
       propertyName,
-      ...(typeof toContainer !== "undefined" ? [this._root.to(toContainer)] : [])
+      ...(toContainer !== undefined ? [this._root.to(toContainer)] : [])
     ]);
   }
 
@@ -107,7 +107,23 @@ export default class ValoscriptKuery extends Kuery {
   identifierValue (identifierName: any, toScope: ?any) {
     return this._addExpression("§$$", [
       identifierName,
-      ...(typeof toScope !== "undefined" ? [this._root.to(toScope)] : [])
+      ...(toScope !== undefined ? [this._root.to(toScope)] : [])
+    ]);
+  }
+
+  assignPropertyValue (propertyName: any, toValue: any, toContainer: ?any) {
+    return this._addExpression("§..<-", [
+      propertyName,
+      this._root.to(toValue),
+      ...(toContainer === undefined ? [] : [this._root.to(toContainer)]),
+    ]);
+  }
+
+  assignIdentifierValue (identifierName: any, toValue: any, toScope: ?any) {
+    return this._addExpression("§$$<-", [
+      identifierName,
+      this._root.to(toValue),
+      ...(toScope === undefined ? [] : [this._root.to(toScope)]),
     ]);
   }
 
@@ -117,8 +133,8 @@ export default class ValoscriptKuery extends Kuery {
    * propertyValue calls will return the altered value. The altered value is then set as the new
    * head.
    *
-   * A host object update is performed using "alterProperty" with toPropertyName, toAlterationVAKON
-   * and the options as arguments.
+   * A host object update is performed using "alterPropertyValue" with toPropertyName,
+   * toAlterationVAKON and the options as arguments.
    *
    * @param {*} container
    * @param {*} toPropertyName
@@ -127,19 +143,19 @@ export default class ValoscriptKuery extends Kuery {
    * @param {any} Object
    * @returns
    */
-  alterProperty (propertyName: any, toAlterationVAKON: any, toContainer: ?any) {
-    return this._addExpression("§..<-", [
+  alterPropertyValue (propertyName: any, toAlterationVAKON: any, toContainer: ?any) {
+    return this._addExpression("§..<->", [
       propertyName,
       this._root.to(toAlterationVAKON),
-      ...(typeof toContainer === "undefined" ? [] : [this._root.to(toContainer)]),
+      ...(toContainer === undefined ? [] : [this._root.to(toContainer)]),
     ]);
   }
 
-  alterIdentifier (identifierName: any, toAlterationVAKON: any, toScope: ?any) {
-    return this._addExpression("§$$<-", [
+  alterIdentifierValue (identifierName: any, toAlterationVAKON: any, toScope: ?any) {
+    return this._addExpression("§$$<->", [
       identifierName,
       this._root.to(toAlterationVAKON),
-      ...(typeof toScope === "undefined" ? [] : [this._root.to(toScope)]),
+      ...(toScope === undefined ? [] : [this._root.to(toScope)]),
     ]);
   }
 
@@ -157,7 +173,7 @@ export default class ValoscriptKuery extends Kuery {
   deleteProperty (propertyName: any, toContainer: ?any) {
     return this._addExpression("§delete..", [
       propertyName,
-      ...(typeof toContainer === "undefined" ? [] : [this._root.to(toContainer)]),
+      ...(toContainer === undefined ? [] : [this._root.to(toContainer)]),
     ]);
   }
 
@@ -179,7 +195,7 @@ export default class ValoscriptKuery extends Kuery {
   deleteIdentifier (identifierName: any, toScope: ?any) {
     return this._addExpression("§delete$$", [
       identifierName,
-      ...(typeof toScope === "undefined" ? [] : [this._root.to(toScope)]),
+      ...(toScope === undefined ? [] : [this._root.to(toScope)]),
     ]);
   }
 
@@ -272,7 +288,7 @@ export default class ValoscriptKuery extends Kuery {
   while (toTest: any, toStep: ?any) {
     return this._addExpression("§while", [
       this._root.to(toTest),
-      ...(typeof toStep !== "undefined" ? [this._root.to(toStep)] : []),
+      ...(toStep !== undefined ? [this._root.to(toStep)] : []),
     ]);
   }
 }

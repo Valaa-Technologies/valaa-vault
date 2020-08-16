@@ -205,6 +205,7 @@ export default class FalseProphetDiscourse extends Discourse {
       const root = this._transaction ? this._transaction.obtainRootEvent() : targetAction;
       if (!tryAspect(root, "command").id) this._assignCommandId(root, this);
       const chronicles = (root.meta || (root.meta = {})).chronicles || (root.meta.chronicles = {});
+
       const chronicle = chronicles[chronicleURI] || (chronicles[chronicleURI] = {});
       if (!chronicle.createIndex) chronicle.createIndex = 0;
 
@@ -260,10 +261,14 @@ export default class FalseProphetDiscourse extends Discourse {
       explicitChronicleRootVRID?: string) {
     const root = this._transaction ? this._transaction.obtainRootEvent() : targetAction;
     if (!tryAspect(root, "command").id) this._assignCommandId(root, this);
+    const chronicles = (root.meta || (root.meta = {})).chronicles || (root.meta.chronicles = {});
+
     const chronicleRootVRID = explicitChronicleRootVRID
-        || createChronicleRootVRID0Dot3(root.aspects.command.id, authorityURI);
-    targetAction.id = vRef(chronicleRootVRID, undefined, undefined,
-        naiveURI.createChronicleURI(authorityURI, chronicleRootVRID));
+        || createChronicleRootVRID0Dot3(
+            root.aspects.command.id, authorityURI, Object.keys(chronicles).length);
+    const chronicleURI = naiveURI.createChronicleURI(authorityURI, chronicleRootVRID);
+    targetAction.id = vRef(chronicleRootVRID, undefined, undefined, chronicleURI);
+    chronicles[chronicleURI] = {};
     /*
     console.log("assignNewChronicleRootId", String(targetAction.id), authorityURI,
         explicitChronicleRootVRID, "\n\ttargetAction:", ...dumpObject(targetAction));

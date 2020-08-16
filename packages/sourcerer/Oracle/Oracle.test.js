@@ -44,11 +44,11 @@ describe("Oracle", () => {
 
     const commandsUpToFreeze = [freezeChronicleEvent];
     for (const command of commandsUpToFreeze) {
-      await harness.chronicleEvent(command).getPremiereStory();
+      await harness.chronicleTestEvent(command).getPremiereStory();
     }
 
     // Attempt to run an action post-freeze and expect complaints
-    expect(() => harness.chronicleEvent(lateCommand))
+    expect(() => harness.chronicleTestEvent(lateCommand))
         .toThrow(/Cannot modify frozen.*@\$~raw.test_chronicle@@/);
   });
 });

@@ -332,8 +332,9 @@ export default class Bard extends Resolver {
     if (!reference) return reference;
     if (!this.event.meta.isBeingUniversalized) {
       // Downstream reduction
-      reference = this.obtainReference(reference, this.event.meta.chronicleURI);
-      if (!reference.getChronicleURI() && !this.event.meta.chronicleURI) {
+      const chronicleURI = _getChronicleURI(this.passage) || this.event.meta.chronicleURI || null;
+      reference = this.obtainReference(reference, chronicleURI);
+      if (!reference.getChronicleURI() && !chronicleURI) {
         throw new Error(`INTERNAL ERROR: Cannot correlate downstream event reference (field '${
             propertyName}') because root action is missing meta.chronicleURI`);
       }
@@ -414,9 +415,7 @@ export default class Bard extends Resolver {
 }
 
 function _obtainSingularDeserializer (fieldInfo) {
-  const ret = fieldInfo._valosSingularDeserializer;
-  if (ret) return ret;
-  return (fieldInfo._valosSingularDeserializer =
+  return fieldInfo._valosSingularDeserializer || (fieldInfo._valosSingularDeserializer =
       fieldInfo.intro.isLeaf
           ? _createDeserializeLeafValue(fieldInfo)
       : fieldInfo.intro.isResource
@@ -438,16 +437,23 @@ function _createDeserializeLeafValue (fieldInfo) {
 function _createResourceVRLDeserializer (fieldInfo) {
   function deserializeResourceVRL (serialized, bard) {
     if (!serialized) return null;
-    const resourceId = bard.bindFieldVRL(
-        serialized, fieldInfo, bard.event.meta.chronicleURI || null);
+    let resourceId = bard.bindFieldVRL(
+        serialized, fieldInfo, _getChronicleURI(bard.passage || bard.event));
     // Non-ghosts have the correct chronicleURI in the Resource.id itself
-    if (resourceId.getChronicleURI() || !resourceId.isGhost()) return resourceId;
-    // Ghosts have the correct chronicleURI in the host Resource.id
-    const ghostPath = resourceId.getGhostPath();
-    const hostId = bard.bindObjectId([ghostPath.headHostRawId()], "Resource");
-    return resourceId.immutateWithChronicleURI(hostId.getChronicleURI());
+    if (!resourceId.getChronicleURI() && resourceId.isGhost()) {
+      // Ghosts have the correct chronicleURI in the host Resource.id
+      const ghostPath = resourceId.getGhostPath();
+      const hostId = bard.bindObjectId([ghostPath.headHostRawId()], "Resource");
+      resourceId = resourceId.immutateWithChronicleURI(hostId.getChronicleURI());
+    }
+    return resourceId;
   }
   return deserializeResourceVRL;
+}
+
+function _getChronicleURI (passage) {
+  return !passage ? null
+      : ((passage.meta || "").chronicleURI || _getChronicleURI(passage.parentPassage));
 }
 
 function _createSingularDataDeserializer (fieldInfo) {
@@ -461,7 +467,7 @@ function _createSingularDataDeserializer (fieldInfo) {
         return bard.bindObjectId(
             (typeof dat === "string") ? [data] : data,
             concreteTypeName || "Data",
-            bard.event.meta.chronicleURI || null);
+            _getChronicleURI(bard.passage || bard.event));
       }
       const typeName = concreteTypeName || data.typeName;
       if (!typeName) {

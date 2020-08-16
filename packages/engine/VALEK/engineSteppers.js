@@ -187,7 +187,7 @@ function _engineIdentifierOrPropertyValue (steppers: Object, valker: Valker, hea
         isNativeIdentifier(property)
             ? getNativeIdentifierValue(property)
         : ((property._type || "").name === "Property") && isHostRef(valker.tryPack(property))
-            ? property.extractValue({ discourse: valker }, eContainer.this)
+            ? property.extractPropertyValue({ discourse: valker }, eContainer.this)
             : property);
   } catch (error) {
     let actualError = error;

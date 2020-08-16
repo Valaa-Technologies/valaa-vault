@@ -25,7 +25,6 @@ import { StoryRecital } from "~/sourcerer/FalseProphet/StoryRecital";
 import Cog, { executeHandlers } from "~/engine/Cog";
 import Motor from "~/engine/Motor";
 import Vrapper from "~/engine/Vrapper";
-import universalizeCommandData from "~/engine/Vrapper/universalizeCommandData";
 import integrateDecoding from "~/engine/Vrapper/integrateDecoding";
 import LiveUpdate from "~/engine/Vrapper/LiveUpdate";
 import Subscription from "~/engine/Vrapper/Subscription";
@@ -220,24 +219,19 @@ export default class Engine extends Cog {
   create (typeName, initialState, options: Object = {}, duplicateOf: ?Vrapper) {
     let discourse, releaseOpts, extractedProperties, ret;
     const name = `${duplicateOf ? "duplicate-" : "new-"}${typeName}`;
-    const action = {};
+    const action = !duplicateOf
+        ? { type: "CREATED", typeName }
+        : { type: "DUPLICATED", duplicateOf };
     try {
       options.discourse = discourse = (options.discourse || this.discourse)
           .acquireFabricator(name);
-      if (!options.head) options.head = this;
-      if (!duplicateOf) {
-        action.typeName = typeName;
-      } else {
-        action.duplicateOf = universalizeCommandData(duplicateOf, options);
-      }
       extractedProperties = this._extractProperties(initialState);
-      action.id = this._assignConstructDirectiveId({ initialState, typeName }, options);
-      action.initialState = universalizeCommandData(initialState, options);
+      const id = action.id = this._assignConstructDirectiveId({ initialState, typeName }, options);
+      if (initialState) action.initialState = initialState;
 
-      options.chronicling = discourse.chronicleEvent(
-          !duplicateOf ? created(action) : duplicated(action));
+      options.chronicling = discourse.chronicleEvent(action);
 
-      ret = this._postConstructResource(discourse, action.id,
+      ret = this._postConstructResource(discourse, id,
           action.initialState, options.chronicling.story, extractedProperties, localWrapError);
     } catch (error) {
       releaseOpts = { rollback: error };
@@ -262,24 +256,23 @@ export default class Engine extends Cog {
   }
 
   recombine (duplicationDirectives: Object, options: Object = {}) {
-    const recombinedParams = { actions: [] };
+    const recombinedEvent = { type: "RECOMBINED", actions: [] };
     let discourse, releaseOpts, chronicling, ret;
     const extractedProperties = [];
     try {
       options.discourse = discourse = (options.discourse || this.discourse)
           .acquireFabricator(`recombine-${duplicationDirectives.length}`);
-      if (!options.head) options.head = this;
 
       for (const directive of duplicationDirectives) {
         extractedProperties.push(this._extractProperties(directive.initialState));
-        recombinedParams.actions.push(duplicated({
+        recombinedEvent.actions.push(duplicated({
           id: this._assignConstructDirectiveId(directive, options),
-          duplicateOf: universalizeCommandData(directive.duplicateOf, options),
-          initialState: universalizeCommandData(directive.initialState, options),
+          duplicateOf: directive.duplicateOf,
+          initialState: directive.initialState,
         }));
       }
 
-      chronicling = discourse.chronicleEvent(recombined(recombinedParams));
+      chronicling = discourse.chronicleEvent(recombinedEvent);
 
       // FIXME(iridian): If the transaction fails the Vrapper will
       // contain inconsistent data until the next actual update on it.
@@ -299,7 +292,7 @@ export default class Engine extends Cog {
       return self.wrapErrorEvent(error, operationName,
           "\n\tduplication directives:", ...dumpObject(duplicationDirectives),
           "\n\toptions:", ...dumpObject(options),
-          "\n\trecombined params:", ...dumpObject(recombinedParams),
+          "\n\trecombined:", ...dumpObject(recombinedEvent),
           "\n\textractedProperties:", ...dumpObject(extractedProperties),
           "\n\tchronicling result:", ...dumpObject(chronicling),
           "\n\tchronicling event:", ...dumpObject((chronicling || {}).event),

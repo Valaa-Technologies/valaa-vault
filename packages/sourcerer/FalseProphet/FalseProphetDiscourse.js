@@ -1,6 +1,6 @@
 // @flow
 
-import { Action, Command, /* created, duplicated, destroyed, */ EventBase } from "~/raem/events";
+import { Command, /* created, duplicated, destroyed, */ EventBase } from "~/raem/events";
 import { StoryIndexTag, PassageIndexTag } from "~/raem/redux/Bard";
 import { qualifiedNameOf } from "~/raem/tools/namespaceSymbols";
 import { ValaaURI, naiveURI, hasScheme } from "~/raem/ValaaURI";
@@ -23,8 +23,9 @@ import createVRID0Dot3, { upgradeVRIDTo0Dot3, createChronicleRootVRID0Dot3 }
 import FalseProphet from "~/sourcerer/FalseProphet";
 import TransactionState, { fabricatorOps } from "~/sourcerer/FalseProphet/TransactionState";
 
+import { _universalizeAction } from "./_universalizationOps";
 import {
-  invariantify, invariantifyObject, isSymbol, thenChainEagerly, trivialClone,
+  invariantify, invariantifyObject, isSymbol, thenChainEagerly,
 } from "~/tools";
 import valosUUID from "~/tools/id/valosUUID";
 
@@ -98,7 +99,7 @@ export default class FalseProphetDiscourse extends Discourse {
     try {
       options.discourse = this;
       const ret = this._falseProphet.chronicleEvents(
-          events.map(event => this._universalizeEvent(event)), options);
+          events.map(event => this._universalizeEvent(event, options.chronicleURI)), options);
 
       ret.eventResults.forEach(eventResult => {
         const getPremiereStory = eventResult.getPremiereStory;
@@ -121,18 +122,15 @@ export default class FalseProphetDiscourse extends Discourse {
     return this.chronicleEvents([event], options).eventResults[0];
   }
 
-  _universalizeEvent (event: EventBase): EventBase {
-    const ret = initializeAspects(this._universalizeAction(event), { version: EVENT_VERSION });
+  _universalizeEvent (event: EventBase, chronicleURI: ?string): EventBase {
+    _universalizeAction(event, this, chronicleURI);
+    const ret = initializeAspects(event, { version: EVENT_VERSION });
     if (!ret.meta) ret.meta = {};
     // This communicates with @valos/raem reducers somewhat awkwardly.
     ret.meta.isBeingUniversalized = true;
     if (!tryAspect(ret, "command").id) this._assignCommandId(ret, this);
     obtainAspect(ret, "command").timeStamp = Date.now();
     return ret;
-  }
-
-  _universalizeAction (action: Action): Action {
-    return trivialClone(action);
   }
 
   _implicitlySyncingConnections: Object;

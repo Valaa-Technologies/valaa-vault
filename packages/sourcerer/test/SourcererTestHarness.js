@@ -29,7 +29,7 @@ import * as ToolsDecoders from "~/tools/mediaDecoders";
 import { thenChainEagerly, mapEagerly } from "~/tools/thenChainEagerly";
 import { getDatabaseAPI } from "~/tools/indexedDB/getInMemoryDatabaseAPI";
 import { openDB } from "~/tools/html5/InMemoryIndexedDBUtils";
-import { dumpify, dumpObject, isPromise, wrapError } from "~/tools";
+import { dumpify, dumpObject, isPromise, trivialClone, wrapError } from "~/tools";
 
 export const testAuthorityURI = "valaa-test:";
 export const testRootId = "@$~raw.test_chronicle@@";
@@ -44,7 +44,7 @@ export function createSourcererTestHarness (options: Object, ...commandBlocks: a
     sourcererOptions => createScriptTestHarness(sourcererOptions),
     harness => {
       commandBlocks.forEach(commands => {
-        harness.chronicleEvents(commands).eventResults.forEach((result, index) => {
+        harness.chronicleTestEvents(commands).eventResults.forEach((result, index) => {
           if (isPromise((result.getTruthEvent || result.getTruthStory).call(result))) {
             throw new Error(`command #${index} getTruthEvent resolves into a Promise.${
                 ""} Use the asynchronous createSourcererOracleHarness instead.`);
@@ -99,7 +99,7 @@ export function createSourcererOracleHarness (options: Object, ...commandBlocks:
         }
       });
       return mapEagerly(commandBlocks,
-          commands => mapEagerly(harness.chronicleEvents(commands).eventResults,
+          commands => mapEagerly(harness.chronicleTestEvents(commands).eventResults,
               combinedOptions.awaitResult || (result => result.getPersistedStory())));
     },
     () => harness,
@@ -111,7 +111,7 @@ export function createSourcererOracleHarness (options: Object, ...commandBlocks:
   });
 }
 
-export const createdTestChronicleEntity = created({
+export const createTestChronicleEntityCreated = () => created({
   id: [testRootId], typeName: "Entity",
   initialState: {
     name: "Automatic Test Chronicle Root",
@@ -162,7 +162,7 @@ export default class SourcererTestHarness extends ScriptTestHarness {
             // entity as a response to the initial narrate request.
             const testBackend = this.tryGetTestAuthorityConnection(testConnection);
             testBackend.addNarrateResults({ eventIdBegin: 0 }, [{
-              ...createdTestChronicleEntity,
+              ...createTestChronicleEntityCreated(),
               aspects: { version: "0.2", log: { index: 0 }, command: { id: "rid-0" } },
             }]);
           }
@@ -172,7 +172,8 @@ export default class SourcererTestHarness extends ScriptTestHarness {
           // For non-remotes we chronicle the root entity explicitly.
         () => {
           if (hasRemoteTestBackend) return undefined;
-          const result = this.chronicleEvent(createdTestChronicleEntity, { isTruth: true });
+          const result = this.chronicleTestEvent(
+                createTestChronicleEntityCreated(), { isTruth: true });
           return result.getPremiereStory();
         },
       ],
@@ -180,8 +181,8 @@ export default class SourcererTestHarness extends ScriptTestHarness {
     );
   }
 
-  chronicleEvents (events: EventBase[], ...rest: any) {
-    return this.chronicler.chronicleEvents(events, ...rest);
+  chronicleTestEvents (events: EventBase[], ...rest: any) {
+    return this.chronicler.chronicleEvents(events.map(e => trivialClone(e)), ...rest);
   }
 
   createCorpus (corpusOptions: Object = {}) {

@@ -86,7 +86,7 @@ describe("Vrapper", () => {
             updatedValues[key] = update.value();
           }, false);
     }
-    harness.chronicleEvent({ type: "FIELDS_SET", id: targetId,
+    harness.chronicleTestEvent({ type: "FIELDS_SET", id: targetId,
       typeName: "TestScriptyThing",
       sets,
     });
@@ -363,7 +363,7 @@ describe("Vrapper", () => {
       let modCalled = false;
       testScriptyThings().child.obtainSubscription("children")
           .addListenerCallback(harness, "test", () => { modCalled = true; }, false);
-      harness.chronicleEvent(destroyed({ type: "DESTROYED", id: ["grandChild"] }));
+      harness.chronicleTestEvent(destroyed({ type: "DESTROYED", id: ["grandChild"] }));
       // children modified subscriber should have been called when the sub-event to remove
       // grandChild from the children list was reduced
       expect(modCalled).toEqual(true);
@@ -683,7 +683,7 @@ describe("Vrapper", () => {
         basicProperties,
       ]);
       testScriptyThings().test.getValospaceScope(); // trigger property listeners
-      harness.chronicleEvent(
+      harness.chronicleTestEvent(
           created({ id: ["test-conflictingTestField"], typeName: "Property", initialState: {
             owner: vRef("test", "properties"),
             name: "testField",

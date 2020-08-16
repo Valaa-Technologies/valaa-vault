@@ -12,6 +12,8 @@ import Fabricator, { fabricatorEventTypes, fabricatorMixinOps }
 import type Transactor from "~/sourcerer/api/Transactor";
 import type FalseProphetDiscourse from "~/sourcerer/FalseProphet/FalseProphetDiscourse";
 
+import { _universalizeAction } from "./_universalizationOps";
+
 import { dumpObject } from "~/tools";
 
 let transactionCounter = 0;
@@ -189,7 +191,7 @@ export default class TransactionState {
     return this._stateBefore === previousState;
   }
 
-  chronicleEvents (events: EventBase[] /* , options: Object = {} */): ChronicleRequest {
+  chronicleEvents (events: EventBase[], options: Object = {}): ChronicleRequest {
     try {
       if (!this._transacted) this._lazyInit();
       else if (this._finalCommand !== undefined) {
@@ -205,7 +207,10 @@ export default class TransactionState {
       // universal TRANSACTED. This is an awkward way to incrementally
       // construct the transacted.
       // Maybe javascript generators could somehow be useful here?
-      this._transacted.actions = events.map(action => this._transactor._universalizeAction(action));
+      for (const event of events) {
+        _universalizeAction(event, this._transactor, options.chronicleURI);
+      }
+      this._transacted.actions = events;
       const transactionStory = this._transactor._corpus.dispatch(
           this._transacted, this._transactionDescription);
       // Only alter transaction internals after the dispatch has

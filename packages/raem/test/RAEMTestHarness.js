@@ -35,7 +35,7 @@ export function createRAEMTestHarness (options: Object, ...commandBlocks: any) {
         ...[].concat(...commandBlocks.map(events => [
           () => events,
           (eventsAsHead) => mapEagerly(
-              harness.chronicleEvents(eventsAsHead).eventResults,
+              harness.chronicleTestEvents(eventsAsHead).eventResults,
               result => (
                   result.getPersistedStory
                       ? result.getPersistedStory()
@@ -104,7 +104,7 @@ export default class RAEMTestHarness extends FabricEventTarget {
    *
    * @memberof RAEMTestHarness
    */
-  chronicleEvents (events: EventBase[]) {
+  chronicleTestEvents (events: EventBase[]) {
     try {
       return {
         eventResults: events.map(event_ => {
@@ -124,8 +124,8 @@ export default class RAEMTestHarness extends FabricEventTarget {
           "\n\tevents:", ...dumpObject(events));
     }
   }
-  chronicleEvent (event: EventBase, options: ?Object) {
-    return this.chronicleEvents([event], options).eventResults[0];
+  chronicleTestEvent (event: EventBase, options: ?Object) {
+    return this.chronicleTestEvents([event], options).eventResults[0];
   }
 
   createCorpus (corpusOptions: Object = {}) {

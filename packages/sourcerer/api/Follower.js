@@ -36,6 +36,7 @@ export default class Follower extends FabricEventTarget {
 
   /**
    * Record events into the upstream.
+   * Takes ownership of the *events* (ie. can mutate them).
    *
    * @param {ChronicleOptions} [options={}]
    * @returns {Promise<Object>}

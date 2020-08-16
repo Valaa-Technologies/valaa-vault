@@ -69,8 +69,9 @@ class VRL {
   // chronicle: ?ValaaURI ?
   _f: ?string; // urn f-component ie. fragment
 
-  initNSS (nss: string) {
+  initNSS (nss: string, vrid: ?string) {
     if (nss) this._initPart("_nss", (nss[0] === "@") ? nss : coerceAsVRID(nss));
+    if (vrid) this._vrid = vrid;
     return this;
   }
   initQueryComponent (query: Object) { return this._initPart("_q", query); }
@@ -127,7 +128,7 @@ class VRL {
     if (ret) return ret;
     const nss = `${this.vrid().slice(0, -2)}${step}@@`;
     return ((this._sub || (this._sub = {}))[step] = Object.create(Object.getPrototypeOf(this))
-        .initNSS(nss));
+        .initNSS(nss, nss));
   }
 
   typeof (): string { return "Resource"; }
@@ -328,22 +329,18 @@ export function isIdData (value: any): boolean {
   return (typeof value === "string") || (value instanceof VRL);
 }
 
-export function isJSONIdData (value: any): boolean {
-  return Array.isArray(value) && (typeof value[0] === "string");
-}
-
 export function invariantifyId (candidate: any, name: string = "id",
     { value, valueInvariant, allowNull, allowUndefined, suffix = "" }: Object = {},
     ...additionalContextInformation: any) {
-  if (((isIdData(candidate) || isJSONIdData(candidate))
-          && (typeof value === "undefined" || (candidate === value))
+  if (((isIdData(candidate) || (Array.isArray(candidate) && (typeof candidate[0] === "string")))
+          && ((value === undefined) || (candidate === value))
           && (!valueInvariant || valueInvariant(candidate)))
-      || ((typeof candidate === "undefined") && allowUndefined)
+      || ((candidate === undefined) && allowUndefined)
       || (candidate === null && allowNull)) return true;
 
   return invariantify(false,
       `'${name}' must be a valid id-data${
-          typeof value !== "undefined" ? ` with exact value '${value}'` : ""}${
+          value !== undefined ? ` with exact value '${value}'` : ""}${
           valueInvariant ? " obeying given value invariant" : ""}${
           allowNull ? ", or null" : ""}${allowUndefined ? ", or undefined" : ""}${
           suffix}`,
@@ -356,14 +353,14 @@ export function invariantifyTypeName (candidate: ?string, name: string = "typeNa
     { value, valueInvariant, allowNull, allowUndefined, suffix = "" }: Object = {},
     ...additionalContextInformation: any) {
   if ((typeof candidate === "string" && (candidate.length)
-          && (typeof value === "undefined" || (candidate === value))
+          && ((value === undefined) || (candidate === value))
           && (!valueInvariant || valueInvariant(candidate)))
-      || ((typeof candidate === "undefined") && allowUndefined)
+      || ((candidate === undefined) && allowUndefined)
       || (candidate === null && allowNull)) return true;
 
   return invariantify(false,
       `'${name}' must be a valid type field name${
-          typeof value !== "undefined" ? ` with exact value '${value}'` : ""}${
+          value !== undefined ? ` with exact value '${value}'` : ""}${
           valueInvariant ? " obeying given value invariant" : ""}${
           allowNull ? ", or null" : ""}${allowUndefined ? ", or undefined" : ""}${
           suffix}`,

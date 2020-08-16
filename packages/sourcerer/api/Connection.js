@@ -267,7 +267,9 @@ export default class Connection extends Follower {
 
   /**
    * Record events into the upstream.
+   * Takes ownership of the *events* (ie. can mutate them).
    *
+   * @param {EventBase[]} [events={}]
    * @param {ChronicleOptions} [options={}]
    * @returns {Promise<Object>}
    * @memberof Connection

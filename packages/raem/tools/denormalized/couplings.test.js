@@ -59,16 +59,16 @@ describe("Couplings", () => {
 
   it("denies cyclic ownership", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
-    expect(() => harness.chronicleEvent(fieldsSet({ id: ["A_grandparent"], typeName: "TestThing",
+    expect(() => harness.chronicleTestEvent(fieldsSet({ id: ["A_grandparent"], typeName: "TestThing",
       sets: { owner: vRef("A_grandparent") },
     }))).toThrow(/Cyclic ownership not allowed.*parent/);
-    expect(() => harness.chronicleEvent(fieldsSet({ id: ["A_grandparent"], typeName: "TestThing",
+    expect(() => harness.chronicleTestEvent(fieldsSet({ id: ["A_grandparent"], typeName: "TestThing",
       sets: { owner: vRef("A_parent") },
     }))).toThrow(/Cyclic ownership not allowed.*grandparent/);
-    expect(() => harness.chronicleEvent(fieldsSet({ id: ["A_grandparent"], typeName: "TestThing",
+    expect(() => harness.chronicleTestEvent(fieldsSet({ id: ["A_grandparent"], typeName: "TestThing",
       sets: { owner: vRef("A_child1") },
     }))).toThrow(/Cyclic ownership not allowed.*grandgrandparent/);
-    expect(() => harness.chronicleEvent(fieldsSet({ id: ["A_child1"], typeName: "TestThing",
+    expect(() => harness.chronicleTestEvent(fieldsSet({ id: ["A_child1"], typeName: "TestThing",
       sets: { owner: vRef("A_child2") },
     }))).not.toThrow();
   });
@@ -311,7 +311,7 @@ describe("Couplings", () => {
         .toEqual("targetGlues");
     expect(harness.run(vRef("A_child1"), "targetGlues"))
         .toEqual([vRef("A_childGlue")]);
-    harness.chronicleEvent(fieldsSet({ id: ["A_childGlue"], typeName: "TestGlue",
+    harness.chronicleTestEvent(fieldsSet({ id: ["A_childGlue"], typeName: "TestGlue",
       sets: { source: ["A_child2"] },
     }));
     expect(harness.run(vRef("A_childGlue"), "source"))
@@ -326,7 +326,7 @@ describe("Couplings", () => {
 
   it("updates previous source children when source is changed through owner", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGlueA);
-    harness.chronicleEvent(fieldsSet({ id: ["A_childGlue"], typeName: "TestGlue",
+    harness.chronicleTestEvent(fieldsSet({ id: ["A_childGlue"], typeName: "TestGlue",
       sets: { owner: vRef("A_child2", "targetGlues") },
     }));
     expect(harness.run(vRef("A_childGlue"), "source"))
@@ -343,7 +343,7 @@ describe("Couplings", () => {
 
   it("updates binding fields when owner/source are altered several times in various ways", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createGlueA);
-    harness.chronicleEvent(fieldsSet({ id: ["A_childGlue"], typeName: "TestGlue",
+    harness.chronicleTestEvent(fieldsSet({ id: ["A_childGlue"], typeName: "TestGlue",
       sets: { owner: vRef("A_child2") },
     }));
     expect(harness.run(vRef("A_childGlue"), ["§coupling", ["§->", "owner"]]))
@@ -358,7 +358,7 @@ describe("Couplings", () => {
         .toEqual([]);
     expect(harness.run(vRef("A_child2"), "unnamedOwnlings"))
         .toEqual([vRef("A_childGlue")]);
-    harness.chronicleEvent(fieldsSet({ id: ["A_childGlue"], typeName: "TestGlue",
+    harness.chronicleTestEvent(fieldsSet({ id: ["A_childGlue"], typeName: "TestGlue",
       sets: { owner: vRef("A_child1") },
     }));
     expect(harness.run(vRef("A_childGlue"), ["§coupling", ["§->", "owner"]]))
@@ -375,7 +375,7 @@ describe("Couplings", () => {
         .toEqual([]);
     expect(harness.run(vRef("A_child2"), "targetGlues"))
         .toEqual([]);
-    harness.chronicleEvent(fieldsSet({ id: ["A_childGlue"], typeName: "TestGlue",
+    harness.chronicleTestEvent(fieldsSet({ id: ["A_childGlue"], typeName: "TestGlue",
       sets: { source: vRef("A_child2") },
     }));
     expect(harness.run(vRef("A_childGlue"), "source"))
@@ -402,7 +402,7 @@ describe("Couplings", () => {
     expect(harness.run(vRef("A_child1"), "targetGlues"))
         .toEqual([childGlue]);
     const parent1 = vRef("A_parent#1");
-    harness.chronicleEvent(created({ id: parent1, typeName: "TestThing", initialState: {
+    harness.chronicleTestEvent(created({ id: parent1, typeName: "TestThing", initialState: {
       owner: vRef("A_grandparent"),
       instancePrototype: vRef("A_parent"),
     } }));
@@ -415,7 +415,7 @@ describe("Couplings", () => {
         .toEqual([glueInParent1.rawId()]);
 
     const glue1InParent1 = vRef("A_childGlueInParent#1_#1");
-    harness.chronicleEvent(created({ id: glue1InParent1, typeName: "TestGlue", initialState: {
+    harness.chronicleTestEvent(created({ id: glue1InParent1, typeName: "TestGlue", initialState: {
       owner: childAInParent1,
       instancePrototype: glueInParent1,
     } }));
@@ -426,7 +426,7 @@ describe("Couplings", () => {
     expect(harness.run(childAInParent1, "unnamedOwnlings").map(entry => entry.rawId()))
         .toEqual([glue1InParent1.rawId()]);
 
-    harness.chronicleEvent(fieldsSet({ id: glue1InParent1, typeName: "TestGlue",
+    harness.chronicleTestEvent(fieldsSet({ id: glue1InParent1, typeName: "TestGlue",
       sets: { source: childBInParent1 },
     }));
     expect(harness.run(glue1InParent1, ["§coupling", ["§->", "owner"]]))
@@ -447,7 +447,7 @@ describe("Couplings", () => {
     const childGlue = vRef("A_childGlue");
     expect(harness.run(childGlue, ["§coupling", ["§->", "owner"]]))
         .toEqual("targetGlues");
-    harness.chronicleEvent(fieldsSet({ id: childGlue, typeName: "TestGlue",
+    harness.chronicleTestEvent(fieldsSet({ id: childGlue, typeName: "TestGlue",
       sets: { owner: ["A_child1"] },
     }));
     expect(harness.run(childGlue, ["§coupling", ["§->", "owner"]]))
@@ -456,7 +456,7 @@ describe("Couplings", () => {
         .toEqual([]);
     expect(harness.run(vRef("A_child1"), "unnamedOwnlings").map(entry => entry.rawId()))
         .toEqual(["@$~raw.A_childGlue@@"]);
-    harness.chronicleEvent(fieldsSet({ id: childGlue, typeName: "TestGlue",
+    harness.chronicleTestEvent(fieldsSet({ id: childGlue, typeName: "TestGlue",
       sets: { owner: vRef("A_child1", "unnamedOwnlings") },
     }));
     expect(harness.run(childGlue, ["§coupling", ["§->", "owner"]]))
@@ -500,7 +500,7 @@ describe("Couplings", () => {
     expect(harness.run(child2InInstance, "unnamedOwnlings").map(entry => entry.rawId()))
         .toEqual([]);
 
-    harness.chronicleEvent(fieldsSet({ id: child1InInstance, typeName: "TestThing",
+    harness.chronicleTestEvent(fieldsSet({ id: child1InInstance, typeName: "TestThing",
       sets: { parent: child2InInstance },
     }));
     expect(harness.run(child1InInstance, "owner").rawId())
@@ -516,7 +516,7 @@ describe("Couplings", () => {
     expect(harness.run(child2InInstance, "unnamedOwnlings").map(entry => entry.rawId()))
         .toEqual([]);
 
-    harness.chronicleEvent(fieldsSet({ id: child1InInstance, typeName: "TestThing",
+    harness.chronicleTestEvent(fieldsSet({ id: child1InInstance, typeName: "TestThing",
       sets: { owner: parentInInstance },
     }));
     expect(harness.run(child1InInstance, "owner").rawId())
@@ -532,7 +532,7 @@ describe("Couplings", () => {
     expect(harness.run(child2InInstance, "unnamedOwnlings").map(entry => entry.rawId()))
         .toEqual([]);
 
-    harness.chronicleEvent(fieldsSet({ id: child1InInstance, typeName: "TestThing",
+    harness.chronicleTestEvent(fieldsSet({ id: child1InInstance, typeName: "TestThing",
       sets: { owner: child2InInstance },
     }));
     expect(harness.run(child1InInstance, "owner").rawId())
@@ -548,7 +548,7 @@ describe("Couplings", () => {
     expect(harness.run(child2InInstance, "unnamedOwnlings").map(entry => entry.rawId()))
         .toEqual([child1InInstance.rawId()]);
 
-    harness.chronicleEvent(fieldsSet({ id: child1InInstance, typeName: "TestThing",
+    harness.chronicleTestEvent(fieldsSet({ id: child1InInstance, typeName: "TestThing",
       sets: { owner: parentInInstance.coupleWith("children") },
     }));
 

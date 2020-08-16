@@ -153,7 +153,7 @@ export default function extendObject (scope: Object, hostDescriptors: Map<any, O
             const subOptions = Object.create(options);
             for (const vProperty of source.step("properties", subOptions)) {
               combinedSources[vProperty.step("name", subOptions)] =
-                  vProperty.extractValue(subOptions);
+                  vProperty.extractPropertyValue(subOptions, source);
             }
           }
         }

@@ -4,6 +4,7 @@ import {
   validateVPath, validateVPathSection, validateVRIDString, validateVRID,
   formVPath,
   disjoinVPath, disjoinVPathOutline, disjoinVPathString,
+  conjoinVPath,
 } from ".";
 import { wrapOutputError } from "~/tools/thenChainEagerly";
 
@@ -18,6 +19,8 @@ describe("VPath", () => {
           .toBeTruthy();
       expect(() => validateVPath("@$~raw.@@"))
           .toThrow(/closing "@"/);
+      expect(validateVPath("@-$.F$focus.@+$.1@@@@"))
+          .toBeTruthy();
       expect(validateVPath("@!invoke$.create$.@!$.body$V.target$.name@@@@"))
           .toBeTruthy();
       expect(validateVPath("@$~raw.0000@$foo@@"))
@@ -33,6 +36,8 @@ describe("VPath", () => {
           .toThrow(/expected "@\$".*got "@!"/);
       expect(validateVRID("@$~raw.0000@@"))
           .toBeTruthy();
+      expect(() => validateVRID("@-$.F$focus.@+$.1@@@@"))
+          .toThrow(/expected "@\$" as section type, got "@-"/);
       expect(() => validateVRID("@!invoke$.create$.@!$.body$V.target$.name@@@@"))
           .toThrow(/expected "@\$".*got "@!invoke"/);
       expect(() => validateVRID("@$~raw.0000@$foo@@"))
@@ -62,6 +67,9 @@ describe("VPath", () => {
           .toThrow(/Invalid vverb.*non-empty/);
       expect(validateVPathSection(
           ["@!invoke", ["create", ["@!", ["body", ["@$V", "target"], "name"]]]]
+      )).toBeTruthy();
+      expect(validateVPathSection(
+        ["@-", ["F", ["@$focus", ["@+", ["1"]]]]]
       )).toBeTruthy();
       expect(validateVPathSection(
           ["@!invoke", ["create", "event",
@@ -101,6 +109,8 @@ describe("VPath", () => {
           .toEqual(["@!", [["@$a_1__b"]]]);
       expect(disjoinVPathString("@$~b.c@@"))
           .toEqual(["@$~b", "c"]);
+      expect(disjoinVPathString("@-$.F$focus.@+$.1@@@@"))
+          .toEqual(["@-", ["F", ["@$focus", ["@+", ["1"]]]]]);
       expect(disjoinVPathString("@!$.scriptRoot@!random@@"))
           .toEqual(["@@", [["@!", ["scriptRoot"]], ["@!random"]]]);
       expect(disjoinVPathString("@$~u4.aaaabbbb-cccc-dddd-eeee-ffffffffffff@@"))
@@ -155,6 +165,10 @@ describe("VPath", () => {
           .toEqual(["@!", ["a"]]);
       expect(() => disjoinVPathOutline(["@@", ["@!", ["@$."]]]))
           .toThrow(/Invalid vparam/);
+      expect(disjoinVPathOutline(["@@", ["@$a", ["@$~raw.b"]]]))
+          .toEqual(["@$a", ["@$~raw", "b"]]);
+      expect(conjoinVPath(disjoinVPathOutline(["@@", ["@$a", ["@$~raw.b"]]])))
+          .toEqual("@$a.@$~raw.b@@@@");
       expect(disjoinVPathOutline(["@!invoke$.create$.event",
         ["@!$.source"],
         ["@!$.body@!$.%24V@", ["@!$.target"], ["@!$.name"]],

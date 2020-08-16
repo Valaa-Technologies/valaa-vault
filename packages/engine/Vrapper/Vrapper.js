@@ -45,7 +45,6 @@ import Cog, { extractMagicMemberEventHandlers } from "~/engine/Cog";
 import debugId from "~/engine/debugId";
 import LiveUpdate from "~/engine/Vrapper/LiveUpdate";
 import Subscription from "~/engine/Vrapper/Subscription";
-import universalizeCommandData from "~/engine/Vrapper/universalizeCommandData";
 
 import {
   OwnerDefaultCouplingTag, TypeIntroTag, FieldsIntroTag, IsResourceTag, PropertyDescriptorsTag,
@@ -816,54 +815,45 @@ export default class Vrapper extends Cog {
 
 
   setField (fieldName: string, value: any, options: VALKOptions = {}) {
-    let commandValue;
     try {
-      const { discourse, id } = this._primeTransactionAndOptionsAndId(options);
-      commandValue = universalizeCommandData(value, options);
-      return discourse.chronicleEvent(fieldsSet({ id, typeName: this._type.name,
-        sets: { [fieldName]: commandValue },
-      }));
+      return this._primeIdAndChronicleEvent({
+        type: "FIELDS_SET", typeName: this._type.name,
+        sets: { [fieldName]: value },
+      }, options);
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, `setField(${fieldName})`,
           "\n\tfield name:", fieldName,
           "\n\tnew value:", ...dumpObject(value),
-          "\n\tnew value (after universalization):", ...dumpObject(commandValue),
           "\n\toptions:", ...dumpObject(options),
       );
     }
   }
 
   addToField (fieldName: string, value: any, options: VALKOptions = {}) {
-    let commandValue;
     try {
-      const { discourse, id } = this._primeTransactionAndOptionsAndId(options);
-      commandValue = universalizeCommandData(value, options);
-      return discourse.chronicleEvent(addedTo({ id, typeName: this._type.name,
-        adds: { [fieldName]: arrayFromAny(commandValue || undefined) },
-      }));
+      return this._primeIdAndChronicleEvent({
+        type: "ADDED_TO", typeName: this._type.name,
+        adds: { [fieldName]: arrayFromAny(value || undefined) },
+      }, options);
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, `addToField(${fieldName})`,
           "\n\tfield name:", fieldName,
           "\n\tnew value:", ...dumpObject(value),
-          "\n\tnew value (after universalization):", ...dumpObject(commandValue),
           "\n\toptions:", ...dumpObject(options),
       );
     }
   }
 
   removeFromField (fieldName: string, value: any, options: VALKOptions = {}) {
-    let commandValue;
     try {
-      const { discourse, id } = this._primeTransactionAndOptionsAndId(options);
-      commandValue = universalizeCommandData(value, options);
-      return discourse.chronicleEvent(removedFrom({ id, typeName: this._type.name,
-        removes: { [fieldName]: (commandValue === null) ? null : arrayFromAny(commandValue) },
-      }));
+      return this._primeIdAndChronicleEvent({
+        type: "REMOVED_FROM", typeName: this._type.name,
+        removes: { [fieldName]: (value === null) ? null : arrayFromAny(value) },
+      }, options);
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, `removeFromField(${fieldName})`,
           "\n\tfield name:", fieldName,
           "\n\tremoved value:", ...dumpObject(value),
-          "\n\tremoved value (after universalization):", ...dumpObject(commandValue),
           "\n\toptions:", ...dumpObject(options),
       );
     }
@@ -875,49 +865,40 @@ export default class Vrapper extends Cog {
 
   replaceWithinField (fieldName: string, replacedValues: any[], withValues: any[],
       options: VALKOptions = {}) {
-    let universalRemovedValues;
-    let universalAddedValues;
-    const addedValues = new Set(withValues);
+    let removedValues, addedValues;
+    const withSet = new Set(withValues);
     try {
-      const { discourse, id } = this._primeTransactionAndOptionsAndId(options);
-      universalRemovedValues = arrayFromAny(
-          universalizeCommandData(
-                  replacedValues.filter(replacedValue => !addedValues.has(replacedValue)), options)
-              || undefined);
-      universalAddedValues = arrayFromAny(
-          universalizeCommandData(withValues, options)
-              || undefined);
-      return discourse.chronicleEvent(replacedWithin({ id, typeName: this._type.name,
-        removes: { [fieldName]: universalRemovedValues },
-        adds: { [fieldName]: universalAddedValues },
-      }));
+      removedValues = arrayFromAny(
+          replacedValues.filter(replacedValue => !withSet.has(replacedValue)) || undefined);
+      addedValues = arrayFromAny(withValues || undefined);
+      return this._primeIdAndChronicleEvent({
+        type: "REPLACED_WITHIN", typeName: this._type.name,
+        removes: { [fieldName]: removedValues }, adds: { [fieldName]: addedValues },
+      }, options);
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, `replaceInField(${fieldName})`,
           "\n\tfield name:", fieldName,
           "\n\treplaced values:", ...dumpObject(replacedValues),
-          "\n\tremoved values (after universalization):",
-              ...dumpObject(universalRemovedValues),
           "\n\twith values:", ...dumpObject(addedValues),
-          "\n\tadded values (after universalization):",
-              ...dumpObject(universalAddedValues),
+          "\n\tremoved values:", ...dumpObject(removedValues),
+          "\n\tadded values:", ...dumpObject(addedValues),
           "\n\toptions:", ...dumpObject(options),
       );
     }
   }
 
-  _primeTransactionAndOptionsAndId (options: VALKOptions): { discourse: Discourse, id: VRL } {
+  _primeIdAndChronicleEvent (event: Object, options: VALKOptions): Object {
     const discourse = options.discourse || this._parent.discourse;
     this.requireActive(options);
     const vref = this[HostRef];
-    let id = discourse.bindObjectId(vref, this._type.name);
-    options.head = this;
-    let chronicleURI = id.getChronicleURI();
+    event.id = discourse.bindObjectId(vref, this._type.name);
+    let chronicleURI = event.id.getChronicleURI();
     if (!chronicleURI) {
       chronicleURI = this._parent.getChronicleURIOf(vref, discourse);
-      id = id.immutateWithChronicleURI(chronicleURI);
+      event.id = event.id.immutateWithChronicleURI(chronicleURI);
     }
     options.chronicleURI = chronicleURI;
-    return { discourse, id };
+    return discourse.chronicleEvent(event, options);
   }
 
   /**
@@ -938,13 +919,11 @@ export default class Vrapper extends Cog {
       initialState.owner = getHostRef(initialState.owner, "create.initialState.owner")
           .coupleWith(options.coupledField);
     }
-    options.head = this;
     return this._parent.create(typeName, initialState, options);
   }
 
   duplicate (initialState: Object, options: VALKOptions = {}): Vrapper {
     this.requireActive(options);
-    options.head = this;
     return this._parent.duplicate(this, initialState, options);
   }
 
@@ -1016,11 +995,11 @@ export default class Vrapper extends Cog {
         }
         typeName = type.name;
       }
-      const createOptions = { ...options, head: this };
       if (typeName === "Property") {
         initialState.owner = this[HostRef].coupleWith(fieldName);
       }
-      const vFieldValue = this._parent.create(typeName, initialState, createOptions);
+      // const createOptions = { ...options, head: this };
+      const vFieldValue = this._parent.create(typeName, initialState, Object.create(options));
       if (typeName !== "Property") {
         if (isSet) this.setField(fieldName, vFieldValue, options);
         else this.addToField(fieldName, vFieldValue, options);
@@ -1048,13 +1027,13 @@ export default class Vrapper extends Cog {
     // eslint-disable-next-line
     let vProperty = (this._propscope || {}).hasOwnProperty(propertyName)
         && this._propscope[propertyName];
-    if (vProperty) return vProperty.extractValue(options, this);
+    if (vProperty) return vProperty.extractPropertyValue(options, this);
     const fieldDescriptor = this._type.prototype[PropertyDescriptorsTag][propertyName];
     if (fieldDescriptor == null) {
       this.requireActive();
       vProperty = this.getPropertyResource(propertyName, Object.create(options), null);
       // console.log("vProp:", propertyName, String(vProperty), vProperty._type.name);
-      if (vProperty) return vProperty.extractValue(options, this);
+      if (vProperty) return vProperty.extractPropertyValue(options, this);
     } else if (fieldDescriptor.isHostField) {
       const namespace = fieldDescriptor.namespace;
       if (namespace) {
@@ -1137,16 +1116,15 @@ export default class Vrapper extends Cog {
       const fieldDescriptor = this._type.prototype[PropertyDescriptorsTag][propertyName];
       const writableFieldName = (fieldDescriptor || "").writableFieldName;
       if (writableFieldName) {
-        const value = universalizeCommandData(newValue, options);
         discourse.chronicleEvent({
           type: "FIELDS_SET", typeName: this._type.name,
           id: discourse.bindObjectId(this[HostRef], this._type.name),
-          sets: { [writableFieldName]: value },
+          sets: { [writableFieldName]: newValue },
         });
         return newValue;
       }
     }
-    const value = universalizeCommandData(valueExpression(newValue, propertyName), options);
+    const value = valueExpression(newValue, propertyName);
     if (options.updateExisting !== false) {
       const vProperty = this.getPropertyResource(propertyName, Object.create(options));
       if (vProperty) {
@@ -1192,7 +1170,6 @@ export default class Vrapper extends Cog {
       // Now stupidly trying to setField even if the field is not a primaryField.
       this.setField(writableFieldName, ret, options);
     } else {
-      options.head = this;
       ret = this.run(0, ["§->", ["§void"], actualAlterationVAKON], alterationOptions);
       this._parent.create("Property", {
         owner: this[HostRef].coupleWith("properties"),
@@ -1209,7 +1186,7 @@ export default class Vrapper extends Cog {
       if (this._type.name !== "Property") {
         throw new Error("Non-Property values cannot be modified");
       }
-      const currentValue = this.extractValue(options, vExplicitOwner);
+      const currentValue = this.extractPropertyValue(options, vExplicitOwner);
       const vOwner = vExplicitOwner || this.step("owner", Object.create(options));
       invariantify(!vOwner || vOwner.getValospaceScope,
           "property owner (if defined) must be a Vrapper");
@@ -1289,7 +1266,8 @@ export default class Vrapper extends Cog {
     }
   }
 
-  extractPropertyValue (options: VALKOptions, vExplicitOwner: ?Vrapper, explicitValueEntry?: any) {
+  extractPropertyValue (
+      options: VALKOptions = {}, vExplicitOwner: ?Vrapper, explicitValueEntry?: any) {
     let valueEntry;
     let ret;
     try {
@@ -2387,7 +2365,7 @@ export default class Vrapper extends Cog {
     Object.defineProperty(this._fabricScope, name, {
       configurable: true,
       enumerable: true,
-      get: () => vProperty.extractValue(undefined, this),
+      get: () => vProperty.extractPropertyValue(undefined, this),
       set: (value) => vProperty
           .setField("value", valueExpression(value, name), { scope: this._valospaceScope }),
     });

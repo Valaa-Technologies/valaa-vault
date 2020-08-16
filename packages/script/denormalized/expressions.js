@@ -4,9 +4,6 @@ import VALSK, { Kuery, isValOSFunction, toVAKONTag } from "~/script/VALSK";
 
 import { tryHostRef } from "~/raem/VALK/hostReference";
 
-import { debugObjectType } from "~/tools";
-import trivialClone from "~/tools/trivialClone";
-
 import { isNativeIdentifier, getNativeIdentifierValue } from "./nativeIdentifier";
 
 export const rootScopeSelf = qualifiedSymbol("VALSK", "rootScopeSelf");
@@ -30,51 +27,12 @@ export function descriptorExpression (descriptor: Object, propertyName) {
   return { typeName: "KueryExpression", vakon };
 }
 
-export function valueExpression (value: any, propertyName: any) {
+export function valueExpression (value: any) {
   if (value === undefined) return null;
   if (value instanceof Kuery) return { typeName: "KueryExpression", vakon: value.toVAKON() };
   const reference = tryHostRef(value);
   if (reference) return { typeName: "Identifier", reference };
-  const ret = {
-    typeName: "Literal",
-    value: trivialClone(value, (clonee, key, object, cloneeDescriptor, recurseClone) => {
-      if (typeof clonee === "function") {
-        if (!isValOSFunction(clonee)) {
-          throw new Error(`While universalizing into valospace resource property '${
-            propertyName}' encountered a non-valospace function at sub-property ${key}': ${
-                clonee.name}`);
-        }
-        return ["§capture", ["§'", extractFunctionVAKON(clonee)], undefined, "literal"];
-      }
-      /*
-      if (cloneeDescriptor && (typeof cloneeDescriptor.get === "function")) {
-        if (!isValOSFunction(cloneeDescriptor.get)) {
-          throw new Error(`While universalizing into valospace resource property '${
-              propertyName}' encountered a non-valospace getter for sub-property ${key}': ${
-                cloneeDescriptor.get.name}`);
-        }
-        cloneeDescriptor.enumerable = true;
-        cloneeDescriptor.configurable = true;
-        // This doesn't work because the kuery property vakon gets
-        // evaluated when the property is read. Instead the construct
-        // should introduce a getter to the object that is currently
-        // being constructed. But there's no support for that yet.
-        return extractFunctionVAKON(cloneeDescriptor.get);
-      }
-      */
-      if ((clonee == null) || (typeof clonee !== "object")) return clonee;
-      if (Array.isArray(clonee)) {
-        const ret_ = clonee.map(recurseClone);
-        if ((typeof ret_[0] === "string") && ret_[0][0] === "§") ret_[0] = ["§'", ret_[0]];
-        return ret_;
-      }
-      if (Object.getPrototypeOf(clonee) === Object.prototype) return undefined;
-      if (clonee instanceof Kuery) return clonee.toVAKON();
-      const cloneeRef = tryHostRef(clonee);
-      if (cloneeRef) return ["§vrl", cloneeRef.toJSON()];
-      throw new Error(`Cannot universalize non-trivial value ${debugObjectType(value)}`);
-    }),
-  };
+  const ret = { typeName: "Literal", value };
   return ret;
 }
 

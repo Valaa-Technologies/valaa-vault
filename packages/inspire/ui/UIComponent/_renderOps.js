@@ -278,7 +278,7 @@ function _tryRenderPropertyLens (component, vProperty, focus, lensName) {
     });
   }
   return _tryRenderLens(
-      component, vProperty.extractValue(), focus, subName, undefined, undefined, vProperty);
+      component, vProperty.extractPropertyValue(), focus, subName, undefined, undefined, vProperty);
 }
 
 function _tryRenderMediaLens (

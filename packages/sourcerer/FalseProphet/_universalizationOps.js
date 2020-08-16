@@ -1,11 +1,18 @@
 // @flow
 
+import { Iterable } from "immutable";
+
+import VRL, { JSONIdData, tryChronicleURIFrom } from "~/raem/VRL";
+import { qualifiedNameOf } from "~/raem/tools/namespaceSymbols";
 import { naiveURI } from "~/raem/ValaaURI";
-import VRL, { /* vRef, */ JSONIdData } from "~/raem/VRL";
+import { Kuery, isValOSFunction } from "~/raem/VALK";
+import { HostRef, tryHostRef } from "~/raem/VALK/hostReference";
 import GhostPath, { ghostPathFromJSON } from "~/raem/state/GhostPath";
 // import { coerceAsVRID } from "~/raem/VPath";
 
-import { dumpObject, debugObjectType, wrapError } from "~/tools/wrapError";
+import { extractFunctionVAKON } from "~/script";
+
+import { dumpObject, debugObjectType, isSymbol, trivialClone, wrapError } from "~/tools";
 
 import FalseProphet from "./FalseProphet";
 
@@ -179,3 +186,146 @@ _initializeHostValue (vref: [RawId, ?string, ?GhostPath]) {
   if (this[PackedHostValue][2]) this.connectGhostPath(this[PackedHostValue][2]);
 }
 */
+
+export function _universalizeAction (action: ?any, discourse, contextChronicleURI) {
+  let id, connectedId;
+  const chronicleURI = (action.meta || "").chronicleURI
+      || (action.id && tryChronicleURIFrom(action.id))
+      || contextChronicleURI;
+  for (const [key, value] of Object.entries(action)) {
+    switch (key) {
+      case "actions":
+        for (const subAction of value) {
+          _universalizeAction(subAction, discourse, chronicleURI);
+        }
+        break;
+      case "id":
+      case "duplicateOf":
+        action[key] = tryHostRef(value) || value;
+        break;
+      case "preOverrides":
+      case "initialState":
+      case "sets":
+      case "adds":
+      case "removes":
+        _universalizeResourceState(value);
+        break;
+      /*
+      case "id":
+      case "type": case "meta": case "aspects":
+      case "typeName":
+      case "time": case "startTime": case "interpolation": case "extrapolation":
+      */
+      default: break;
+    }
+  }
+  function _universalizeResourceState (resourceState) {
+    for (const [key, entry] of Object.entries(resourceState)) {
+      if (key === "value") {
+        if (!entry) continue;
+        if (entry.typeName === "Literal") {
+          entry.value = _universalizePropertyLiteralValue(entry.value, action.id);
+          continue;
+        }
+      }
+      const newEntry = _universalizeValue(entry);
+      if (newEntry !== undefined) resourceState[key] = newEntry;
+    }
+  }
+  function _universalizeValue (value) {
+    try {
+      if ((value == null) || ((typeof value !== "object") && (typeof value !== "symbol"))) {
+        return undefined;
+      }
+      if (isSymbol(value)) {
+        const qualifiedName = qualifiedNameOf(value);
+        if (qualifiedName) {
+          return qualifiedName[3];
+        }
+        throw new Error(`Cannot universalize unrecognized symbol ${String(value)}`);
+      }
+      if (value instanceof Kuery) throw new Error("Kueries not allowed in actions");
+      if (Array.isArray(value)) {
+        for (let i = 0; i !== value.length; ++i) {
+          const entry = _universalizeValue(value[i]);
+          if (entry !== undefined) value[i] = entry;
+        }
+        return undefined;
+      }
+
+      id = tryHostRef(value);
+      if (id) {
+        if (id === value) return undefined;
+        // ValOS reference
+        connectedId = discourse.bindFieldVRL(id, {}, null);
+        const connectedChronicleURI = connectedId.getChronicleURI();
+        if (connectedChronicleURI) {
+          if (connectedChronicleURI === contextChronicleURI) {
+            return connectedId.immutateWithChronicleURI();
+          }
+        } else if (connectedId.isGhost()) {
+          const ghostChronicleURI = discourse
+              .bindObjectId([id.getGhostPath().headHostRawId()], "Resource")
+              .getChronicleURI();
+          if (ghostChronicleURI !== contextChronicleURI) {
+            return connectedId.immutateWithChronicleURI(connectedChronicleURI);
+          }
+        }
+        return connectedId;
+      }
+      // Data object
+      if (Object.getPrototypeOf(value) !== Object.prototype) {
+        throw new Error(`Object is not a plain data object, got: ${Object.constructor.name}`);
+      }
+      for (const [key, entry] of Object.entries(value)) {
+        const newEntry = _universalizeValue(entry);
+        if (newEntry !== undefined) value[key] = newEntry;
+      }
+      return undefined;
+    } catch (error) {
+      throw wrapError(error, `During _universalizeAction(`, value, `), with:`,
+          "\n\tid:", ...dumpObject(id),
+          "\n\tconnectedId:", ...dumpObject(connectedId));
+    }
+  }
+}
+
+function _universalizePropertyLiteralValue (value, propertyName) {
+  return trivialClone(value, (clonee, key, object, cloneeDescriptor, recurseClone) => {
+    if (typeof clonee === "function") {
+      if (!isValOSFunction(clonee)) {
+        throw new Error(`While universalizing into valospace resource property '${
+          propertyName}' encountered a non-valospace function at sub-property ${key}': ${
+              clonee.name}`);
+      }
+      return ["§capture", ["§'", extractFunctionVAKON(clonee)], undefined, "literal"];
+    }
+    /*
+    if (cloneeDescriptor && (typeof cloneeDescriptor.get === "function")) {
+      if (!isValOSFunction(cloneeDescriptor.get)) {
+        throw new Error(`While universalizing into valospace resource property '${
+            propertyName}' encountered a non-valospace getter for sub-property ${key}': ${
+              cloneeDescriptor.get.name}`);
+      }
+      cloneeDescriptor.enumerable = true;
+      cloneeDescriptor.configurable = true;
+      // This doesn't work because the kuery property vakon gets
+      // evaluated when the property is read. Instead the construct
+      // should introduce a getter to the object that is currently
+      // being constructed. But there's no support for that yet.
+      return extractFunctionVAKON(cloneeDescriptor.get);
+    }
+    */
+    if ((clonee == null) || (typeof clonee !== "object")) return clonee;
+    if (Array.isArray(clonee)) {
+      const ret_ = clonee.map(recurseClone);
+      if ((typeof ret_[0] === "string") && ret_[0][0] === "§") ret_[0] = ["§'", ret_[0]];
+      return ret_;
+    }
+    if (Object.getPrototypeOf(clonee) === Object.prototype) return undefined;
+    if (clonee instanceof Kuery) return clonee.toVAKON();
+    const cloneeRef = tryHostRef(clonee);
+    if (cloneeRef) return ["§vrl", cloneeRef.toJSON()];
+    throw new Error(`Cannot universalize non-trivial value ${debugObjectType(value)}`);
+  });
+}

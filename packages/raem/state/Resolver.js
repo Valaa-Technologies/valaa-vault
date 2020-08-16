@@ -130,8 +130,7 @@ export default class Resolver extends FabricEventTarget {
    * @param {any} [{ coupledField, defaultCoupledField }={}]    accepts a fieldInfo structure
    * @returns
    */
-  bindFieldVRL (fieldRef: VRL | JSONIdData, fieldInfo: FieldInfo,
-      contextChronicleURI?: ValaaURI) {
+  bindFieldVRL (fieldRef: VRL | JSONIdData, fieldInfo: FieldInfo, contextChronicleURI?: ValaaURI) {
     const coupledField = fieldInfo.coupledField
         || tryCoupledFieldFrom(fieldRef)
         || fieldInfo.defaultCoupledField;

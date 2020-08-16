@@ -256,10 +256,10 @@ function validateVParamSection (section, source) {
     if (contextTerm !== "@$") validateContextTerm(contextTerm.slice(2));
     if (paramValue !== undefined && (typeof paramValue !== "string")) {
       if (Array.isArray(paramValue)) {
-        validateFullVPathSection(paramValue);
+        validateVPathSection(paramValue);
       } else {
         throw new Error(`Invalid vparam:${
-          ""} param-value must be undefined, string or an array containing a section full vpath`);
+          ""} param-value must be undefined, string or an array containing a vpath section`);
       }
     }
     return source || section;

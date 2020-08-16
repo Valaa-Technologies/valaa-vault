@@ -17,26 +17,24 @@ import { openDB, getFromDB, getKeysFromDB, expectStoredInDB }
 
 const sharedURI = "valos-shared-content";
 
-afterEach(async () => {
-  await clearAllScribeDatabases();
-});
+let simpleCommand, followupTransaction, simpleEntityTemplate, simpleCommandList;
 
-describe("Scribe", () => {
-  const simpleCommand = initializeAspects(created({
+beforeEach(() => {
+  simpleCommand = initializeAspects(created({
     id: ["some-entity"], typeName: "Entity",
   }), { version: "0.2", command: { id: "cid-0" }, log: { index: 0 } });
 
-  const followupTransaction = initializeAspects(transacted({
+  followupTransaction = initializeAspects(transacted({
     actions: [
       created({ id: ["some-relation"], typeName: "Relation" }),
       created({ id: ["some-other-entity"], typeName: "Entity" }),
     ],
   }), { version: "0.2", command: { id: "cid-1" }, log: { index: 1 } });
 
-  const simpleEntityTemplate = {
+  simpleEntityTemplate = {
     typeName: "Entity", initialState: { owner: [testRootId] },
   };
-  const simpleCommandList = [
+  simpleCommandList = [
     created({ id: ["Entity-A"], ...simpleEntityTemplate }),
     created({ id: ["Entity-B"], ...simpleEntityTemplate }),
     created({ id: ["Entity-C"], ...simpleEntityTemplate }),
@@ -47,6 +45,13 @@ describe("Scribe", () => {
   simpleCommandList.forEach((event, index) => {
     initializeAspects(event, { version: "0.2", command: { id: `cid-2-${index}` }, log: { index } });
   });
+});
+
+afterEach(async () => {
+  await clearAllScribeDatabases();
+});
+
+describe("Scribe", () => {
 
   it("stores truths/commands in the database", async () => {
     const scribe = await createScribe(createTestMockSourcerer({ isRemoteAuthority: true }));

@@ -3,6 +3,8 @@
 import PropTypes from "prop-types";
 
 import { naiveURI } from "~/raem/ValaaURI";
+import { conjoinVPathSection, disjoinVPathOutline } from "~/raem/VPath";
+import { vRef } from "~/raem/VRL";
 
 // import type { Connection } from "~/sourcerer";
 
@@ -228,43 +230,52 @@ const _scopeFrameChain = [
         === "valaa-memory:";
     function _getSubscriptId (vResource) {
       return isTransitory
-          ? vResource.getBriefUnstableId()
-          : vResource.getRawId().slice(0, -2);
+          ? `${vResource.getBriefUnstableId()}@@`
+          : vResource.getRawId();
     }
-    const ownerPart = this.vOwner ? _getSubscriptId(this.vOwner) : "";
     const props = this.component.props;
-    let hierarchyPart;
     const frameKey = props.frameKey || props.staticFrameKey;
+    const frameOutline = [];
     if (frameKey) {
-      hierarchyPart = `@.$.${frameKey}`;
+      frameOutline.push(`@-:FR:${frameKey}`);
+      this.component.setUIContextValue(Lens.frameStepPrefix,
+          !props.staticFrameKey || (props.arrayIndex == null) ? "" : String(props.arrayIndex));
     } else {
-      const keyPrefix = this.component.getParentUIContextValue(Lens.frameKeyPrefix);
-      hierarchyPart = `${
-          keyPrefix ? `@_$.${keyPrefix}` : ""}${
-          this.vFocus ? `@_$L.focus${_getSubscriptId(this.vFocus)}`
-              : props.arrayIndex != null ? `_(${props.arrayIndex})`
-              : ""}`;
+      const stepPrefix = this.component.getParentUIContextValue(Lens.frameStepPrefix);
+      frameOutline.push(`@-:FR${stepPrefix ? `:${stepPrefix}}` : ""}`);
+      if (this.vFocus) frameOutline.push(["@$focus", [_getSubscriptId(this.vFocus)]]);
+      if (props.arrayIndex) frameOutline.push(props.arrayIndex);
+      if (this.vLens) frameOutline.push(["@$lens", [_getSubscriptId(this.vLens)]]);
+      this.component.setUIContextValue(Lens.frameStepPrefix, "");
     }
-    this.component.setUIContextValue(Lens.frameKeyPrefix,
-        !props.staticFrameKey || (props.arrayIndex == null) ? "" : String(props.arrayIndex));
     // const prototypePart = this.vPrototype ? `@_$V.proto${_getSubscriptId(this.vPrototype)}` : "";
-    const lensPart = this.vLens ? `@_$L.lens${_getSubscriptId(this.vLens)}` : "";
-    this.frameId = `@$~V.frames${ownerPart}${hierarchyPart}${lensPart}@@`;
-
-    const vFrame = this.engine.tryVrapper(this.frameId, { optional: true });
+    const frameSection = disjoinVPathOutline(frameOutline, "@@");
+    const frameStep = conjoinVPathSection(frameSection);
+    if (rootFrameAuthorityURI && (isTransitory || !this.vOwner)) {
+      this.frameId = `@$~V.frames${
+          this.vOwner ? this.vOwner.getBriefUnstableId() : ""}${frameStep}@@`;
+    } else if (rootFrameAuthorityURI || this.vOwner) {
+      this.frameRef = this.vOwner.getVRef().getSubRef(frameStep);
+      // console.log("frameRef:", this.frameRef.rawId());
+      this.frameId = this.frameRef.vrid();
+    } else {
+      throw new Error("Frame is missing both owner and authorityURI");
+    }
+    const vFrame = this.engine.tryVrapper(this.frameRef || this.frameId, { optional: true });
     if (vFrame !== undefined) {
+      this.frameRef = vFrame.getVRef();
       return thisChainRedirect("_finalizeScopeFrame", vFrame);
     }
-    if (!rootFrameAuthorityURI
-        || (this.vPrototype && !this.vPrototype.hasInterface("Chronicle"))) {
+    if (!rootFrameAuthorityURI || (this.vPrototype && !this.vPrototype.hasInterface("Chronicle"))) {
       return thisChainRedirect("_createFrame");
     }
-    return rootFrameAuthorityURI;
-  },
-
-  function _sourcifyRootFrameChronicle (rootFrameAuthorityURI) {
     this.rootFrameAuthorityURI = rootFrameAuthorityURI;
     const chronicleURI = naiveURI.createChronicleURI(rootFrameAuthorityURI, this.frameId);
+    if (this.frameRef) {
+      this.frameRef = this.frameRef.immutateWithChronicleURI(chronicleURI);
+    } else {
+      this.frameRef = vRef(this.frameId, undefined, undefined, chronicleURI);
+    }
     return this.engine.discourse.acquireConnection(chronicleURI).asActiveConnection();
   },
 
@@ -281,7 +292,7 @@ const _scopeFrameChain = [
       throw new Error(`Cannot obtain scope frame: neither root frame authorityURI ${
           ""}nor non-root frame owner could be determined`);
     }
-    const initialState = { id: this.frameId, name: this.frameId };
+    const initialState = { id: this.frameRef, name: this.frameId };
     if (this.rootFrameAuthorityURI) {
       initialState.authorityURI = this.rootFrameAuthorityURI;
       initialState.owner = null;

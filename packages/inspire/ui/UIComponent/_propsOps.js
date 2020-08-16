@@ -9,7 +9,7 @@ import Vrapper from "~/engine/Vrapper";
 
 import Lens from "~/inspire/valosheath/valos/Lens";
 
-import { wrapError } from "~/tools";
+import { dumpObject, wrapError } from "~/tools";
 
 import type UIComponent from "./UIComponent";
 
@@ -56,13 +56,13 @@ export function _checkForInfiniteRenderRecursion (component: UIComponent) {
     const error = wrapError(new Error("Infinite component render recursion detected"),
         `Exception caught in ${
             component.debugId()})\n ._checkForInfiniteRenderRecursion(), with:`,
-        "\n\tcurrent component UI context:", currentContext,
-        "\n\tnew candidate focus:", String(newFocus),
+        "\n\tcurrent component UI context:", ...dumpObject(currentContext),
+        "\n\tnew candidate focus:", ...dumpObject(newFocus),
         "\n\tnew candidate key:", newKey,
-        "\n\tnew candidate props:", component.props,
-        "\n\tidentical ancestor UI context:", uiContext,
-        "\n\tidentical ancestor focus:", uiContext.focus.debugId(), uiContext.focus,
-        "\n\tidentical ancestor props:", uiContext.reactComponent.props,
+        "\n\tnew candidate props:", dumpObject(component.props),
+        "\n\tidentical ancestor UI context:", dumpObject(uiContext),
+        "\n\tidentical ancestor focus:", ...dumpObject(uiContext.focus),
+        "\n\tidentical ancestor props:", ...dumpObject(uiContext.reactComponent.props),
     );
     component.enableError(error, "UIComponent._checkForInfiniteRenderRecursion");
     return true;

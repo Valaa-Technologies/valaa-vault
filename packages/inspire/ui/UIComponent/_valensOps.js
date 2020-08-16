@@ -106,7 +106,10 @@ export function tryPostRenderElement (component, element, focus, hierarchyKey) {
 const _genericValensPropsBehaviors = {
   children: false, // ignore
   valoscope: true, // always trigger valens handling
-  array: 0,
+  "$Lens.valoscope": true, // always trigger valens handling
+  "$Lens.ref": true,
+  "$Lens.key": true,
+  array: 0, // ignore for components (?)
   // focus: 1,
 };
 
@@ -134,7 +137,7 @@ export function tryCreateValensArgs (elementType, propsSeq, hierarchyKey, elemen
         } else if (behavior === 1) {
           if (elementType.isUIComponent) continue;
         }
-        kueryProps = {};
+        if (!kueryProps) kueryProps = {};
       }
       const newProp = _postProcessProp(propValue, propsKueries, actualName, kueryDeduper);
       if (newProp !== undefined) {

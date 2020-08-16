@@ -964,12 +964,12 @@ components of the current component will use this scope frame resource
 as their owner.`,
   }));
 
-  _defineName("frameKeyPrefix", () => ({
+  _defineName("frameStepPrefix", () => ({
     tags: ["Internal", "Context"],
     type: "string",
     description:
-`Slot which contains the frame key prefix from the current innermost
-enclosing scope frame.`,
+`Slot which contains the frame vpath step prefix from the current
+innermost enclosing scope frame.`,
   }));
 
   _defineName("frameOwner", () => ({

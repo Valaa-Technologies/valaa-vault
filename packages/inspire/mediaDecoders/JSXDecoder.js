@@ -217,18 +217,21 @@ export default class JSXDecoder extends MediaDecoder {
     const elementIndex = (parentChildrenMeta.nameIndices[name] =
       (parentChildrenMeta.nameIndices[name] || 0) + 1) - 1;
     const elementKey = `${elementPrefix}(${elementIndex})`;
-    const lexicalName = `${parentKey || ""}-${elementKey}`;
+    const sourceKey = `${parentKey || ""}-${elementKey}`;
 
     let decodedType = actualType;
     let decodedProps;
     let propsMeta;
     if (props || isInstanceLens) {
-      propsMeta = this._createPropsMeta(sourceInfo, loc, props || {}, name,
-          isInstanceLens, actualType.isUIComponent, lexicalName);
+      propsMeta = this._createPropsMeta(
+          sourceInfo, loc, props || {}, name, isInstanceLens, actualType.isUIComponent, sourceKey);
       ([decodedType, decodedProps] = tryCreateValensArgs(
               actualType, Object.entries(propsMeta.decodedElementProps),
-              lexicalName.slice((parentChildrenMeta.nearestFramedParentKey.length || -1) + 1))
+              sourceKey.slice((parentChildrenMeta.nearestFramedParentKey.length || -1) + 1))
           || [actualType, propsMeta.decodedElementProps]);
+      if (decodedType === Valens) {
+        decodedProps.sourceKey = sourceKey; // this is for debugging purposes mostly
+      }
     }
 
     if (parentChildrenMeta.totalCount > 1) {
@@ -236,9 +239,9 @@ export default class JSXDecoder extends MediaDecoder {
       if (!decodedProps.key) decodedProps.key = elementKey;
     }
 
-    const childrenMeta = this._createChildrenMeta(children, lexicalName,
+    const childrenMeta = this._createChildrenMeta(children, sourceKey,
         (actualType === Valoscope) || (propsMeta || "").isFramed
-            ? lexicalName
+            ? sourceKey
             : parentChildrenMeta.nearestFramedParentKey);
     const decodedChildrenArgs = !childrenMeta.decodedChildren ? [] : [childrenMeta.decodedChildren];
 
@@ -313,7 +316,7 @@ export default class JSXDecoder extends MediaDecoder {
   }
 
   _createPropsMeta (
-      sourceInfo, loc, parsedProps, elementName, isInstanceLens, isComponentLens, lexicalName) {
+      sourceInfo, loc, parsedProps, elementName, isInstanceLens, isComponentLens, sourceKey) {
     const ret = {
       hasIntegrators: false, hasKueries: false, totalCount: 0,
       scopeAccesses: {}, byNamespace: {}, decodedElementProps: {}, propsIntegrators: [],
@@ -352,12 +355,12 @@ export default class JSXDecoder extends MediaDecoder {
       if (parsedProps[attrName] === undefined) continue;
       if (shouldWarn || ((shouldWarn !== false) && (!isComponentLens || isInstanceLens))) {
         this.debugEvent(`DEPRECATED: non-namespaced attribute '${attrName}' in favor of ${
-            warnMessage || aliasOf.slice(1)} (in ${elementName} at ${lexicalName})`);
+            warnMessage || aliasOf.slice(1)} (in ${elementName} at ${sourceKey})`);
       }
       if (restAttrs[aliasOf] !== undefined) {
         throw new Error(`Attribute conflict found; the deprecated non-namespaced attribute '${
             attrName}' would alias to ${aliasOf.slice(1)} which has an existing value "${
-            restAttrs[aliasOf]}" (in ${elementName} at ${lexicalName})`);
+            restAttrs[aliasOf]}" (in ${elementName} at ${sourceKey})`);
       }
       ++ret.totalCount;
       restAttrs[aliasOf] = parsedProps[attrName];
@@ -377,7 +380,7 @@ export default class JSXDecoder extends MediaDecoder {
       if (namespaceAttrs[name] !== undefined) {
         this.debugEvent(`Overriding existing value of attribute ${namespace}:${name
             } by given attribute '${givenName
-            }' (likely as a result of two aliased props, in ${elementName} at ${lexicalName})`);
+            }' (likely as a result of two aliased props, in ${elementName} at ${sourceKey})`);
       }
       const decodedValue = namespaceAttrs[name] =
           _extractMetaOfValueInto(attr, ret, this._globalEngineDiscourse, isLiveKuery);
@@ -394,6 +397,7 @@ export default class JSXDecoder extends MediaDecoder {
 
 const _valoscopeAttributes = {
   valoscope: true,
+  key: true,
   lens: true,
   lensProperty: true,
   focusLensProperty: true,

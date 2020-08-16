@@ -60,6 +60,7 @@ export default class Valens extends UIComponent {
 
   static propTypes = {
     ...UIComponent.propTypes,
+    sourceKey: PropTypes.string,
     hierarchyKey: PropTypes.string,
     elementType: PropTypes.any.isRequired,
     elementPropsSeq: PropTypes.arrayOf(PropTypes.any).isRequired,
@@ -75,10 +76,10 @@ export default class Valens extends UIComponent {
   }
 
   getPrefixedHierarchyKey () {
-    const keyPrefix = this.getParentUIContextValue(Lens.frameKeyPrefix) || "";
+    const keyPrefix = this.getParentUIContextValue(Lens.frameStepPrefix) || "";
     return (this._key = (!keyPrefix
         ? this.props.hierarchyKey
-        : `${keyPrefix}_${this.props.hierarchyKey}`));
+        : `${keyPrefix}:${this.props.hierarchyKey}`));
   }
 
   bindFocusSubscriptions (focus: any, props: Object) {
@@ -178,7 +179,7 @@ export default class Valens extends UIComponent {
     /* */
     const finalProps = stateLive.valoscopeProps || stateLive.elementProps;
     if (!stateLive.keyFromFocus) {
-      _valensRecorderProps.key(stateLive);
+      _valensRecorderProps.key(stateLive, (finalType === Valoscope) ? Lens.key : LensElementKey);
     }
     finalProps.children = children;
 
@@ -358,18 +359,20 @@ function _recordNewGenericPropValue (stateLive, propValue, propName, component) 
 // by default appear on the contained element.
 const _valensRecorderProps = {
   key (stateLive, newValue) {
+    if (!newValue) return;
     const component = stateLive.component;
     let keyOp;
+    if (!stateLive.valoscopeProps) _emitValoscope(stateLive);
     if (typeof newValue === "function") {
-      const keyPrefix = component.getParentUIContextValue(Lens.frameKeyPrefix) || "";
+      const stepPrefix = component.getParentUIContextValue(Lens.frameStepPrefix) || "";
       stateLive.keyFromFocus = function _createCustomKey (focus, arrayIndex, entryProps) {
-        return (entryProps.frameKey = newValue(focus, arrayIndex, keyPrefix));
+        return (entryProps.frameKey = newValue(focus, arrayIndex, stepPrefix));
       };
     } else if (typeof newValue === "string") {
-      const keyPrefix = component.getParentUIContextValue(Lens.frameKeyPrefix) || "";
+      const stepPrefix = component.getParentUIContextValue(Lens.frameStepPrefix) || "";
       stateLive.keyFromFocus = _keyFromFocusOps
-          .createStaticKey.bind(null, !keyPrefix ? newValue : `${keyPrefix}_${newValue}`);
-    } else if ((keyOp = _keyFromFocusOps[newValue || Lens.key])) { // eslint-disable-line
+          .createStaticKey.bind(null, !stepPrefix ? newValue : `${stepPrefix}:${newValue}`);
+    } else if ((keyOp = _keyFromFocusOps[newValue])) { // eslint-disable-line
       stateLive.keyFromFocus = keyOp.bind(component, component.getKey());
     } else if (isSymbol(newValue)) {
       const keyFromFocus = component.getParentUIContextValue(newValue);
@@ -437,6 +440,8 @@ const _valensRecorderProps = {
   },
 };
 
+const LensElementKey = Symbol("LensElementKey");
+
 const _keyFromFocusOps = {
   createStaticKey (keyPrefix, focus, arrayIndex, entryProps) {
     entryProps.staticFrameKey = keyPrefix;
@@ -444,15 +449,19 @@ const _keyFromFocusOps = {
     if (arrayIndex) delete entryProps.frameOverrides; // kludge: apply frame overrides only once
     return String(arrayIndex);
   },
+  [LensElementKey] (keyPrefix, focus, arrayIndex) {
+    return `${arrayIndex != null ? `$d.${arrayIndex}` : ""}${
+        focus instanceof Vrapper ? `$focus.${focus.getBriefUnstableId()}@@` : ""}`;
+  },
   [Lens.key] (keyPrefix, focus, arrayIndex, entryProps) {
-    const key = `${arrayIndex != null ? `@_$i.${arrayIndex}` : ""}${
-        focus instanceof Vrapper ? focus.getBriefUnstableId() : ""}`;
+    const key = `${arrayIndex != null ? `$d.${arrayIndex}` : ""}${
+        focus instanceof Vrapper ? `$focus.${focus.getBriefUnstableId()}@@` : ""}`;
     entryProps.frameKey = `${keyPrefix}${key}`;
     return key;
   },
   [Lens.focus] (keyPrefix, focus, arrayIndex, entryProps) {
-    const key = (focus instanceof Vrapper) ? focus.getBriefUnstableId()
-        : (arrayIndex == null) && "@_$.non-resource";
+    const key = (focus instanceof Vrapper) ? `$focus.${focus.getBriefUnstableId()}@@`
+        : (arrayIndex == null) && "$.non_resource";
     if (!key) {
       throw new Error(`Cannot create $Lens.key={$Lens.focus
           } from non-resoure entry at $Lens.array[${arrayIndex}]`);
@@ -461,7 +470,7 @@ const _keyFromFocusOps = {
     return key;
   },
   [Lens.arrayIndex] (keyPrefix, focus, arrayIndex, entryProps) {
-    entryProps.frameKey = `${keyPrefix}@_$i.${arrayIndex}`;
+    entryProps.frameKey = `${keyPrefix}$d.${arrayIndex}`;
     return String(arrayIndex);
   },
 };

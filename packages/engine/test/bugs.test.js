@@ -4,9 +4,9 @@ import { vRef } from "~/raem/VRL";
 
 import { testRootId, createEngineTestHarness, createEngineOracleHarness }
     from "~/engine/test/EngineTestHarness";
-import VALEK, { literal, pointer } from "~/engine/VALEK";
+import VALEK from "~/engine/VALEK";
 
-import { transpileValoscriptBody } from "~/script";
+import { valueExpression, transpileValoscriptBody } from "~/script";
 
 let harness: { createds: Object, engine: Object, sourcerer: Object, testEntities: Object };
 afterEach(() => { harness = null; }); // eslint-disable-line no-undef
@@ -24,12 +24,12 @@ describe("Engine bug tests", async () => {
       created({ id: ["FooTen"], typeName: "Property", initialState: {
         name: "Ten",
         owner: vRef("Foo", "properties"),
-        value: literal(10),
+        value: valueExpression(10),
       }, }),
       created({ id: ["FooSelfPtr"], typeName: "Property", initialState: {
         name: "SelfPtr",
         owner: vRef("Foo", "properties"),
-        value: pointer(vRef("Foo")),
+        value: valueExpression(vRef("Foo")),
       }, }),
       created({ id: ["FooChild"], typeName: "Entity", initialState: {
         name: "Child",
@@ -38,7 +38,7 @@ describe("Engine bug tests", async () => {
       created({ id: ["FooChildPtr"], typeName: "Property", initialState: {
         name: "ChildPtr",
         owner: vRef("Foo", "properties"),
-        value: pointer(vRef("FooChild")),
+        value: valueExpression(vRef("FooChild")),
       }, }),
       created({ id: ["Bar"], typeName: "Entity", initialState: {
         owner: [testRootId],
@@ -47,7 +47,7 @@ describe("Engine bug tests", async () => {
       created({ id: ["FooBarPtr"], typeName: "Property", initialState: {
         name: "BarPtr",
         owner: vRef("Foo", "properties"),
-        value: pointer(vRef("Bar")),
+        value: valueExpression(vRef("Bar")),
       }, }),
     ];
 

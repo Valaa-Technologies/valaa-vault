@@ -28,6 +28,12 @@ export {
                                       setNativeIdentifierValue,
 } from "./denormalized/nativeIdentifier";
 export {
+                                      descriptorExpression,
+                                      valueExpression,
+                                      extractFunctionVAKON,
+                                      rootScopeSelf,
+} from "./denormalized/expressions";
+export {
                                       ValoscriptNew,
                                       ValoscriptInstantiate,
                                       ValoscriptPrimitiveKind,

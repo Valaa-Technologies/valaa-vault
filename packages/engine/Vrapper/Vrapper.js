@@ -29,7 +29,7 @@ import { qualifiedNameOf } from "~/raem/tools/namespaceSymbols";
 
 import isAbsentTypeName from "~/raem/tools/graphql/isAbsentTypeName";
 
-import { ValoscriptPrimitiveKind, /* , NativeIdentifierTag */ } from "~/script";
+import { valueExpression, ValoscriptPrimitiveKind } from "~/script";
 import { transpileValoscriptBody } from "~/script/transpileValoscript";
 import { ScopeAccessesTag } from "~/script/VALSK";
 
@@ -39,7 +39,7 @@ import { ChronicleEventResult } from "~/sourcerer/api/types";
 import { createModuleGlobal } from "~/tools/mediaDecoders/JavaScriptDecoder";
 
 import { VALEK } from "~/engine/VALEK/EngineKuery";
-import { Valker, Kuery, dumpKuery, expressionFromProperty } from "~/engine/VALEK";
+import { Valker, Kuery, dumpKuery } from "~/engine/VALEK";
 
 import Cog, { extractMagicMemberEventHandlers } from "~/engine/Cog";
 import debugId from "~/engine/debugId";
@@ -1146,7 +1146,7 @@ export default class Vrapper extends Cog {
         return newValue;
       }
     }
-    const value = universalizeCommandData(expressionFromProperty(newValue, propertyName), options);
+    const value = universalizeCommandData(valueExpression(newValue, propertyName), options);
     if (options.updateExisting !== false) {
       const vProperty = this.getPropertyResource(propertyName, Object.create(options));
       if (vProperty) {
@@ -1197,7 +1197,7 @@ export default class Vrapper extends Cog {
       this._parent.create("Property", {
         owner: this[HostRef].coupleWith("properties"),
         name: propertyName,
-        value: expressionFromProperty(ret, propertyName),
+        value: valueExpression(ret, propertyName),
       }, options);
     }
     return ret;
@@ -1215,7 +1215,7 @@ export default class Vrapper extends Cog {
           "property owner (if defined) must be a Vrapper");
       options.scope = (vOwner || this).getValospaceScope(options, alterationVAKON, "alterValue");
       const newValue = this.run(currentValue, alterationVAKON, Object.create(options));
-      this.setField("value", expressionFromProperty(newValue, "value"), options);
+      this.setField("value", valueExpression(newValue, "value"), options);
       if (typeof newValue !== "object") {
         // TODO(iridian): Could set the cachedExtractvalueEntry for non-object types.
       }
@@ -2389,7 +2389,7 @@ export default class Vrapper extends Cog {
       enumerable: true,
       get: () => vProperty.extractValue(undefined, this),
       set: (value) => vProperty
-          .setField("value", expressionFromProperty(value, name), { scope: this._valospaceScope }),
+          .setField("value", valueExpression(value, name), { scope: this._valospaceScope }),
     });
   }
 }

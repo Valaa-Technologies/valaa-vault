@@ -4,10 +4,10 @@ import { created } from "~/raem/events";
 import { vRef } from "~/raem/VRL";
 
 import { evaluateTestProgram } from "~/script/test/ScriptTestHarness";
-import { transpileValoscriptBody } from "~/script";
+import { transpileValoscriptBody, valueExpression } from "~/script";
 import { createNativeIdentifier, getNativeIdentifierValue }
     from "~/script/denormalized/nativeIdentifier";
-import VALSK, { Kuery, literal, pointer, ScopeAccessesTag } from "~/script/VALSK";
+import VALSK, { Kuery, ScopeAccessesTag } from "~/script/VALSK";
 
 const createBlockA = [
   created({ id: ["A_parent"], typeName: "TestScriptyThing" }),
@@ -16,16 +16,16 @@ const createBlockA = [
   }, }),
   created({ id: ["test-myFunc"], typeName: "Property", initialState: {
     name: "myFunc", owner: vRef("A_test", "properties"),
-    value: literal(VALSK.doStatements(VALSK.apply(
-        VALSK.fromScope("propertyCallback").notNull(), VALSK.fromScope("this"))).toJSON()),
+    value: valueExpression(VALSK.doStatements(VALSK.apply(
+        VALSK.fromScope("propertyCallback").notNull(), VALSK.fromScope("this")))),
   }, }),
   created({ id: ["test-age"], typeName: "Property", initialState: {
     name: "age", owner: vRef("A_test", "properties"),
-    value: literal(35),
+    value: valueExpression(35),
   }, }),
   created({ id: ["test-myParent"], typeName: "Property", initialState: {
     name: "myParent", owner: vRef("A_test", "properties"),
-    value: pointer(vRef("A_parent")),
+    value: valueExpression(vRef("A_parent")),
   }, }),
 ];
 
@@ -620,13 +620,6 @@ describe("valoscript", () => {
     it("should escape to VALK for complex lookups", () => {
       expect(transpileValoscriptBody("this.$to('foo').$to('bar')")).toEqual(
         VALSK.fromThis().to("foo").to("bar")
-      );
-    });
-
-    it("should escape to VALK for complex lookups within assignments", () => {
-      expect(transpileValoscriptBody("this.$to('foo').$to('bar').prop = 10")).toEqual(
-        VALSK.fromThis().to("foo").to("bar")
-            .createOrUpdateProperty("prop", literalValue(VALSK.fromValue(10)), { scope: {} })
       );
     });
   });

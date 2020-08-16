@@ -2,8 +2,8 @@
 
 import { denoteDeprecatedValOSBuiltin, denoteValOSKueryFunction } from "~/raem/VALK";
 import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
-
-import VALEK, { extractFunctionVAKON } from "~/engine/VALEK";
+import { extractFunctionVAKON } from "~/script";
+import VALEK from "~/engine/VALEK";
 
 const symbols = {
   getTags: qualifiedSymbol("V", "getTags"),

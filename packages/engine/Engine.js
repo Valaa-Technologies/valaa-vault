@@ -4,7 +4,9 @@ import { Iterable } from "immutable";
 import type { Passage, Story, VALKOptions } from "~/raem";
 import { packedSingular } from "~/raem/VALK";
 
-import { Kuery, dumpObject, rootScopeSelf, engineSteppers } from "~/engine/VALEK";
+import { rootScopeSelf } from "~/script";
+
+import { Kuery, dumpObject, engineSteppers } from "~/engine/VALEK";
 
 import { Command, created, duplicated, recombined, isCreatedLike } from "~/raem/events";
 

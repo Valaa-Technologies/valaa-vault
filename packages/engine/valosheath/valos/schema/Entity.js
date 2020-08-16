@@ -1,7 +1,7 @@
 // @flow
 
-import VALEK, { extractFunctionVAKON } from "~/engine/VALEK";
-import { ValoscriptNew, ValoscriptInstantiate } from "~/script";
+import VALEK from "~/engine/VALEK";
+import { extractFunctionVAKON, ValoscriptNew, ValoscriptInstantiate } from "~/script";
 
 import { newResource, instantiateResource } from "~/engine/valosheath/resourceLifetimeOps";
 

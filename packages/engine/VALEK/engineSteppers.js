@@ -7,9 +7,10 @@ import { tryUnpackedHostValue } from "~/raem/VALK/hostReference";
 import { isHostRef, tryLiteral, tryFullLiteral, tryUnpackLiteral } from "~/raem/VALK/raemSteppers";
 
 import valoscriptSteppers from "~/script/VALSK/valoscriptSteppers";
-import { isNativeIdentifier, getNativeIdentifierValue, setNativeIdentifierValue } from "~/script";
+import {
+  isNativeIdentifier, getNativeIdentifierValue, setNativeIdentifierValue, valueExpression,
+} from "~/script";
 
-import { expressionFromProperty } from "~/engine/VALEK";
 import getImplicitCallable from "~/engine/Vrapper/getImplicitCallable";
 import { tryNamespaceFieldSymbolOrPropertyName } from "~/engine/valosheath/namespace";
 
@@ -242,7 +243,7 @@ function _engineAssignIdentifierOrPropertyValue (steppers: Object, valker: Valke
         return valker.tryPack(eValue);
       }
       if ((typeof property.setField === "function") && isHostRef(valker.tryPack(property))) {
-        property.setField("value", expressionFromProperty(eValue, "value"), { discourse: valker });
+        property.setField("value", valueExpression(eValue, "value"), { discourse: valker });
         return valker.tryPack(eValue);
       }
     }

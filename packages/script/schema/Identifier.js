@@ -11,8 +11,6 @@ import Discoverable from "~/raem/schema/Discoverable";
 import LiteralValue from "~/raem/schema/LiteralValue";
 import Tag from "~/raem/schema/Tag";
 
-import { invariantifyId } from "~/raem/VRL";
-
 import Expression, { expressionInterface } from "./Expression";
 
 const OBJECT_DESCRIPTION = "identifier";
@@ -23,18 +21,6 @@ const OBJECT_DESCRIPTION = "identifier";
 // (which doesn't even need to be an identifier of any shape as this is just an Expression which
 // can be used directly as a parameter to other Expression's).
 // FIXME(iridian): While at it, rename 'reference' to 'target'.
-
-/**
- * Returns an expanded Identifier with given target.
- *
- * @export
- * @param null target
- * @returns
- */
-export function identifier (target) {
-  invariantifyId(target, "reference.target", { allowNull: true });
-  return { typeName: "Identifier", reference: target };
-}
 
 export default new GraphQLObjectType({
   name: "Identifier",

@@ -2,7 +2,8 @@
 
 import { created } from "~/raem/events";
 
-import VALEK, { Kuery, pointer, literal } from "~/engine/VALEK";
+import { valueExpression } from "~/script";
+import VALEK, { Kuery } from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";
 
 import { createEngineTestHarness, testRootId } from "~/engine/test/EngineTestHarness";
@@ -55,7 +56,7 @@ describe("Subscription", () => {
       expect(idOf(liveCallback.mock.calls[0][0].value()))
           .toBe(undefined);
       entities().creator.emplaceAddToField("properties", {
-        name: "template_matching", value: pointer(entities().ownling),
+        name: "template_matching", value: valueExpression(entities().ownling),
       });
       expect(liveCallback.mock.calls.length).toBe(2);
       expect(idOf(liveCallback.mock.calls[1][0].value()))
@@ -97,7 +98,7 @@ describe("Subscription", () => {
 
     it("is called on the last step content change: property value is set to a new pointer", () => {
       setUpPropertyTargetTestHarness("template", { verbosity: 0, claimBaseBlock: true });
-      properties()["creator-prototype"].setField("value", pointer(entities().ownling));
+      properties()["creator-prototype"].setField("value", valueExpression(entities().ownling));
       expect(liveCallback.mock.calls.length).toBe(2);
       expect(idOf(liveCallback.mock.calls[1][0].value()))
           .toBe(idOf(entities().ownling));
@@ -107,7 +108,7 @@ describe("Subscription", () => {
       setUpPropertyTargetTestHarness("template_matching", { verbosity: 0, claimBaseBlock: true });
       expect(liveCallback.mock.calls.length).toBe(1);
 
-      properties()["creator-prototype"].setField("value", pointer(entities().test));
+      properties()["creator-prototype"].setField("value", valueExpression(entities().test));
       expect(liveCallback.mock.calls.length).toBe(1);
 
       properties()["creator-prototype"].setField("name", "template_matching");
@@ -115,7 +116,7 @@ describe("Subscription", () => {
       expect(idOf(liveCallback.mock.calls[1][0].value()))
           .toBe(idOf(entities().test));
 
-      properties()["creator-prototype"].setField("value", pointer(entities().ownling));
+      properties()["creator-prototype"].setField("value", valueExpression(entities().ownling));
       expect(liveCallback.mock.calls.length).toBe(3);
       expect(idOf(liveCallback.mock.calls[2][0].value()))
           .toBe(idOf(entities().ownling));
@@ -125,7 +126,7 @@ describe("Subscription", () => {
       setUpPropertyTargetTestHarness("template", { verbosity: 0, claimBaseBlock: true });
       expect(liveCallback.mock.calls.length).toBe(1);
 
-      properties()["creator-prototype"].setField("value", pointer(entities().test));
+      properties()["creator-prototype"].setField("value", valueExpression(entities().test));
       expect(liveCallback.mock.calls.length).toBe(2);
       expect(idOf(liveCallback.mock.calls[1][0].value()))
           .toBe(idOf(entities().test));
@@ -135,7 +136,7 @@ describe("Subscription", () => {
       expect(liveCallback.mock.calls[2][0].value())
           .toBe(undefined);
 
-      properties()["creator-prototype"].setField("value", pointer(entities().ownling));
+      properties()["creator-prototype"].setField("value", valueExpression(entities().ownling));
       expect(liveCallback.mock.calls.length).toBe(3);
     });
   });
@@ -155,7 +156,7 @@ describe("Subscription", () => {
       expect(liveCallback.mock.calls.length).toBe(1);
       expect(liveCallback.mock.calls[0][0].value()).toEqual(10);
 
-      properties()["ownling-counter"].setField("value", literal(1));
+      properties()["ownling-counter"].setField("value", valueExpression(1));
 
       expect(liveCallback.mock.calls.length).toBe(2);
       expect(liveCallback.mock.calls[1][0].value()).toEqual(1);
@@ -167,7 +168,7 @@ describe("Subscription", () => {
       expect(liveCallback.mock.calls.length).toBe(1);
       expect(liveCallback.mock.calls[0][0].value()).toEqual(17);
 
-      properties()["ownling-counter"].setField("value", literal(1));
+      properties()["ownling-counter"].setField("value", valueExpression(1));
 
       expect(liveCallback.mock.calls.length).toBe(2);
       expect(liveCallback.mock.calls[1][0].value()).toEqual(8);

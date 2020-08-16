@@ -3,19 +3,20 @@
 import { created } from "~/raem/events";
 import { vRef } from "~/raem/VRL";
 
-import { createNativeIdentifier, getNativeIdentifierValue, transpileValoscriptBody }
-    from "~/script";
+import {
+  createNativeIdentifier, getNativeIdentifierValue, transpileValoscriptBody, valueExpression
+} from "~/script";
 
 import Vrapper from "~/engine/Vrapper";
 import { createEngineTestHarness } from "~/engine/test/EngineTestHarness";
 import { clearAllScribeDatabases } from "~/sourcerer/test/SourcererTestHarness";
-import VALEK, { Kuery, literal, pointer } from "~/engine/VALEK";
+import VALEK, { Kuery } from "~/engine/VALEK";
 
 const valoscriptBlock = [
   created({ id: ["creator-myFunc"], typeName: "Property", initialState: {
     name: "myFunc", owner: vRef("creator", "properties"),
-    value: literal(VALEK.doStatements(VALEK.apply(
-        VALEK.fromScope("propertyCallback").notNull(), VALEK.fromScope("this"))).toJSON()),
+    value: valueExpression(VALEK.doStatements(VALEK.apply(
+        VALEK.fromScope("propertyCallback").notNull(), VALEK.fromScope("this")))),
   }, }),
 ];
 
@@ -685,12 +686,12 @@ const createCreatorProperties = [
   created({ id: ["creator-startsAsTen"], typeName: "Property", initialState: {
     name: "startsAsTen",
     owner: vRef("creator", "properties"),
-    value: literal(10),
+    value: valueExpression(10),
   }, }),
   created({ id: ["creator-startsToOwnling"], typeName: "Property", initialState: {
     name: "startsToOwnling",
     owner: vRef("creator", "properties"),
-    value: pointer(vRef("ownling")),
+    value: valueExpression(vRef("ownling")),
   }, }),
   created({ id: ["creator-startsAsUndefined"], typeName: "Property", initialState: {
     name: "startsAsUndefined",

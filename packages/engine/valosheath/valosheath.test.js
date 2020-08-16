@@ -4,10 +4,10 @@ import { created } from "~/raem/events";
 import { vRef } from "~/raem/VRL";
 import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
 
-import { transpileValoscriptBody } from "~/script";
+import { valueExpression, transpileValoscriptBody } from "~/script";
 
 import { createEngineTestHarness } from "~/engine/test/EngineTestHarness";
-import VALEK, { pointer } from "~/engine/VALEK";
+import VALEK from "~/engine/VALEK";
 
 const valoscriptBlock = [
   created({ id: ["creator-myStatement"], typeName: "Entity", initialState: {
@@ -18,11 +18,11 @@ const valoscriptBlock = [
   }, }),
   created({ id: ["creator-pointerTo-myStatement"], typeName: "Property", initialState: {
     name: "toMyStatement", owner: vRef("creator", "properties"),
-    value: pointer(["creator-myStatement"]),
+    value: valueExpression(vRef("creator-myStatement")),
   }, }),
   created({ id: ["creator-pointerTo-myFunction"], typeName: "Property", initialState: {
     name: "toMyFunction", owner: vRef("creator", "properties"),
-    value: pointer(["creator-myFunction"]),
+    value: valueExpression(vRef("creator-myFunction")),
   }, }),
 ];
 

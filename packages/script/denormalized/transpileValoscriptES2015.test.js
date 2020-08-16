@@ -7,8 +7,8 @@ import { evaluateTestProgram } from "~/script/test/ScriptTestHarness";
 import { transpileValoscriptBody, transpileValoscriptModule }
     from "~/script/transpileValoscript";
 import addExportsContainerToScope from "~/script/denormalized/addExportsContainerToScope";
-import { getNativeIdentifierValue } from "~/script";
-import VALSK, { Kuery, literal, pointer } from "~/script/VALSK";
+import { getNativeIdentifierValue, valueExpression } from "~/script";
+import VALSK, { Kuery } from "~/script/VALSK";
 
 const createBlockA = [
   created({ id: ["A_parent"], typeName: "TestScriptyThing" }),
@@ -17,16 +17,16 @@ const createBlockA = [
   }, }),
   created({ id: ["test-myFunc"], typeName: "Property", initialState: {
     name: "myFunc", owner: vRef("A_test", "properties"),
-    value: literal(VALSK.doStatements(VALSK.apply(
-        VALSK.fromScope("propertyCallback").notNull(), VALSK.fromScope("this"))).toJSON()),
+    value: valueExpression(VALSK.doStatements(VALSK.apply(
+        VALSK.fromScope("propertyCallback").notNull(), VALSK.fromScope("this")))),
   }, }),
   created({ id: ["test-age"], typeName: "Property", initialState: {
     name: "age", owner: vRef("A_test", "properties"),
-    value: literal(35),
+    value: valueExpression(35),
   }, }),
   created({ id: ["test-myParent"], typeName: "Property", initialState: {
     name: "myParent", owner: vRef("A_test", "properties"),
-    value: pointer(vRef("A_parent")),
+    value: valueExpression(vRef("A_parent")),
   }, }),
 ];
 

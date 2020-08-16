@@ -2,7 +2,8 @@
 
 import { created } from "~/raem/events";
 import { vRef } from "~/raem/VRL";
-import VALEK, { literal, pointer, kueryExpression } from "~/engine/VALEK";
+import { valueExpression } from "~/script";
+import VALEK from "~/engine/VALEK";
 import { testRootId } from "~/sourcerer/test/SourcererTestHarness";
 
 export default [{
@@ -27,27 +28,27 @@ export default [{
     created({ id: ["creator-counter"], typeName: "Property", initialState: {
       name: "counter",
       owner: vRef("creator", "properties"),
-      value: literal(0),
+      value: valueExpression(0),
     }, }),
     created({ id: ["creator-prototype"], typeName: "Property", initialState: {
       name: "template",
       owner: vRef("creator", "properties"),
-      value: pointer(["ownling_prototype"]),
+      value: valueExpression(vRef("ownling_prototype")),
     }, }),
     created({ id: ["ownling-counter"], typeName: "Property", initialState: {
       name: "ownling_counter",
       owner: vRef("ownling", "properties"),
-      value: literal(10),
+      value: valueExpression(10),
     }, }),
     created({ id: ["ownling-counter_plus_seven"], typeName: "Property", initialState: {
       name: "ownling_counter_plus_seven",
       owner: vRef("ownling", "properties"),
-      value: kueryExpression(VALEK.propertyValue("ownling_counter").add(7)),
+      value: valueExpression(VALEK.propertyValue("ownling_counter").add(7)),
     }, }),
     created({ id: ["creator-ownling"], typeName: "Property", initialState: {
       name: "pointer_to_ownling",
       owner: vRef("creator", "properties"),
-      value: pointer(["ownling"]),
+      value: valueExpression(vRef("ownling")),
     }, }),
     created({ id: ["test+1"], typeName: "Entity", initialState: {
       name: "testInstance",

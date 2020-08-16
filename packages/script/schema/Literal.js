@@ -11,30 +11,9 @@ import Data from "~/raem/schema/Data";
 import LiteralValue from "~/raem/schema/LiteralValue";
 import Tag from "~/raem/schema/Tag";
 
-import invariantify from "~/tools/invariantify";
-
 import Expression, { expressionInterface } from "./Expression";
 
 const OBJECT_DESCRIPTION = "literal";
-
-/**
- * Returns an expanded Literal with given literal value.
- *
- * @export
- * @param null value
- */
-export function literal (value: any) {
-  invariantify((typeof value !== "undefined") && (typeof value !== "function"),
-      `literal.value must be a valid JSON object, got ${typeof value}`);
-  if (value && (typeof value === "object")) {
-    const proto = Object.getPrototypeOf(value);
-    invariantify((proto === Object.prototype) || (proto === Array.prototype),
-        "if literal.value is an object it must a plain Object or Array, got", value);
-    // TODO(iridian): Contents of the containers are not validated.
-  }
-  // TODO(iridian): either fill or remove the "type" field.
-  return { typeName: "Literal", value };
-}
 
 // FIXME(iridian): Add proper support for JS types, now output is always strings.
 export default new GraphQLObjectType({

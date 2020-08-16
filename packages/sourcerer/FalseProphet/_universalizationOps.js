@@ -224,7 +224,9 @@ export function _universalizeAction (action: ?any, discourse, contextChronicleUR
       if (key === "value") {
         if (!entry) continue;
         if (entry.typeName === "Literal") {
-          entry.value = _universalizePropertyLiteralValue(entry.value, action.id);
+          if (!chronicleURI || !chronicleURI.startsWith("valaa-memory:")) {
+            entry.value = _universalizePropertyLiteralValue(entry.value, action.id);
+          }
           continue;
         }
       }

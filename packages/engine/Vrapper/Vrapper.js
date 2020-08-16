@@ -1308,6 +1308,9 @@ export default class Vrapper extends Cog {
             ? dataFieldValue(valueEntry, fieldName)
             : state.getIn([valueType, valueEntry.rawId(), fieldName]);
         if ((vakon == null) || (typeof vakon !== "object")) return vakon;
+        const chronicleURI = this._parent.getChronicleURIOf(
+            this[HostRef], options.discourse || this._parent.discourse, true);
+        if (chronicleURI.startsWith("valaa-memory:")) return vakon;
         const vOwner = vExplicitOwner || this.step("owner", Object.create(options)) || this;
         options.scope = vOwner.getValospaceScope(options, vakon, "extractValue");
         // TODO(iridian): We could add a flag to KueryExpression to denote that the evaluated value

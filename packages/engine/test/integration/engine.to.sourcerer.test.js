@@ -649,6 +649,103 @@ describe("Two paired harnesses emulating two gateways connected through event st
     expect(itprop.getRawId())
         .toEqual(`${instanceId.slice(0, -2)}@.$.thing@@`);
   });
+  it("copies valaa-test property object values on assignment", async () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
+    const {
+      val, mem1, snapval, mem2, valself, equivalences,
+    } = await harness.runValoscript(vRef(testRootId), `
+      const val = { num: 10, nest: { sharednum: 20 }, self: this };
+      val.self = this;
+      val.nest.sharednum = ++(val.num);
+      val.nest.ownnum = ++(val.num);
+      const mem1 = new Entity({ authorityURI: "valaa-test:", properties: { val } });
+      const snapval = mem1.val;
+      snapval.self = mem1;
+      val.nest.sharednum = snapval.num++;
+      snapval.nest.ownnum = ++(val.num);
+      const mem2 = new Entity({ authorityURI: "valaa-test:" });
+      mem2.val = snapval;
+      mem2.val.self = mem2;
+      val.nest.sharednum = mem2.val.num++;
+      mem2.val.nest.ownnum = ++(val.num);
+      ({
+        val, mem1, snapval, mem2, valself: val.self,
+        equivalences: [mem1.val, snapval, mem2.val].map(e => (e === val)),
+      });
+    `);
+    const mem1val = mem1.propertyValue("val");
+    const mem2val = mem2.propertyValue("val");
+    expect(equivalences)
+        .toEqual([false, false, false]);
+    expect([mem1val, snapval, mem2val].map(e => (e === val)))
+        .toEqual([false, false, false]);
+    expect(val)
+        .toMatchObject({ num: 14, nest: { sharednum: 14, ownnum: 12 } });
+    expect(val.self.getVRef().vrid())
+        .toBe(testRootId);
+    expect(valself.getVRef().vrid())
+        .toBe(testRootId);
+    expect(mem1val)
+        .not.toBe(val);
+    expect(mem1val)
+        .toMatchObject({ num: 12, nest: { sharednum: 11, ownnum: 12 } });
+    expect(mem1val.self.getVRef().vrid())
+        .toBe(testRootId);
+    expect(snapval)
+        .not.toBe(mem1val);
+    expect(snapval)
+        .toMatchObject({ num: 13, nest: { sharednum: 11, ownnum: 13 } });
+    expect(snapval.self)
+        .toBe(mem1);
+    // mem2val does not get updated by the last statements
+    expect(mem2val)
+        .toEqual(snapval); // so equal to snapval in content...
+    expect(mem2val)
+        .not.toBe(snapval); // ...but not in identity
+    expect(mem2val)
+        .toMatchObject({ num: 13, nest: { sharednum: 11, ownnum: 13 } });
+    expect(mem2val.self)
+        .toBe(mem1);
+  });
+  it("shares valaa-memory property object values", async () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
+    await harness.interceptErrors(async () => {
+    const {
+      val, mem1, snapval, mem2, valself, equivalences,
+    } = await harness.runValoscript(vRef(testRootId), `
+      const val = { num: 10, nest: { sharednum: 20 }, self: this };
+      val.self = this;
+      val.nest.sharednum = ++(val.num);
+      val.nest.ownnum = ++(val.num);
+      const mem1 = new Entity({ authorityURI: "valaa-memory:", properties: { val } });
+      const snapval = mem1.val;
+      snapval.self = mem1;
+      val.nest.sharednum = snapval.num++;
+      snapval.nest.ownnum = ++(val.num);
+      const mem2 = new Entity({ authorityURI: "valaa-memory:" });
+      mem2.val = snapval;
+      mem2.val.self = mem2;
+      val.nest.sharednum = mem2.val.num++;
+      mem2.val.nest.ownnum = ++(val.num);
+      ({
+        val, mem1, snapval, mem2, valself: val.self,
+        equivalences: [mem1.val, snapval, mem2.val].map(e => (e === val)),
+      });
+    `);
+    const mem1val = mem1.propertyValue("val");
+    const mem2val = mem2.propertyValue("val");
+    expect(equivalences)
+        .toEqual([true, true, true]);
+    expect([mem1val, snapval, mem2val].map(e => (e === val)))
+        .toEqual([true, true, true]);
+    expect(val)
+        .toMatchObject({ num: 16, nest: { sharednum: 15, ownnum: 16 } });
+    expect(val.self)
+        .toBe(mem2);
+    expect(valself)
+        .toBe(mem2);
+    })();
+  });
 });
 
 describe("Regressions", () => {

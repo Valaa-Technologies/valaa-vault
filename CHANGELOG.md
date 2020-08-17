@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.25](https://github.com/valaatech/kernel/compare/v0.35.0-rc.24...v0.35.0-rc.25) (2020-08-17)
+
+
+### Bug Fixes
+
+* a Vrapper activation sequencing issue ([d28e4ae](https://github.com/valaatech/kernel/commit/d28e4ae76e6579711aab5c0ae35f82d3c5bd97ff))
+* Multiple chronicle creation in same transaction ([429ce4c](https://github.com/valaatech/kernel/commit/429ce4c8eb8a5359652de570bcc95c572233334a))
+* Structured sub-Property id generation from namespaced name ([e81ce9e](https://github.com/valaatech/kernel/commit/e81ce9e269750bf5e6a7370fb126fb0de0fcb218))
+* **653:** Multi-chronicle operations leave some commands stuck in command queue ([0af00fa](https://github.com/valaatech/kernel/commit/0af00fadabedcdf726adbfa453ec2058f44d48a0))
+
+
+### Features
+
+* $V.obtainSubResource ([5567940](https://github.com/valaatech/kernel/commit/5567940559c8807e03efa1d3add83841bacb06da))
+* Native 'valaa-memory:' property values ([d5d0521](https://github.com/valaatech/kernel/commit/d5d05218b60c575e582deebaef000653b943dc0a))
+* top-level 'require' access to spindle..valospaceRequirables ([833c971](https://github.com/valaatech/kernel/commit/833c9710fb15b81ab8410a260ef5c58422fa539d))
+
+
+
+
+
 # [0.35.0-rc.24](https://github.com/valaatech/kernel/compare/v0.35.0-rc.23...v0.35.0-rc.24) (2020-08-10)
 
 **Note:** Version bump only for package @valos/kernel-vault

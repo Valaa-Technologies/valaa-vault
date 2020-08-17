@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.25](https://github.com/valaatech/kernel/compare/v0.35.0-rc.24...v0.35.0-rc.25) (2020-08-17)
+
+
+### Bug Fixes
+
+* **653:** Multi-chronicle operations leave some commands stuck in command queue ([0af00fa](https://github.com/valaatech/kernel/commit/0af00fadabedcdf726adbfa453ec2058f44d48a0))
+
+
+### Features
+
+* $V.obtainSubResource ([5567940](https://github.com/valaatech/kernel/commit/5567940559c8807e03efa1d3add83841bacb06da))
+
+
+
+
+
 # [0.35.0-rc.24](https://github.com/valaatech/kernel/compare/v0.35.0-rc.23...v0.35.0-rc.24) (2020-08-10)
 
 **Note:** Version bump only for package @valos/tools

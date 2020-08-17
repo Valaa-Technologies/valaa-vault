@@ -237,7 +237,7 @@
                       {
                         "@type": "vdoc:CharacterData",
                         "vdoc:content": [
-                          " conjoinVPath(\n    [\"@@\", [                // declare two-step path\n      [\"@!random\"],         // first step: compute a random value\n      [\"@!min\", [           // second step: compute the min of\n        10,                 // a whole number >= Number.MIN_SAFE_INTEGER, <= Number.MAX_SAFE_INTEGER\n        [\"@!max\", [         // and the max of\n          [\"@$f\", \"2.5\"], // a fractional number\n          [\"@@\"],           // and the 'head' ie. the result of first step random computation\n        ]],\n      ]],\n    ]],\n)"
+                          " conjoinVPath(\n    [\"@@\", [                // declare two-step path\n      [\"@!random\"],         // first step: compute a random value\n      [\"@!min\", [           // second step: compute the min of\n        10,                 // a whole number >= Number.MIN_SAFE_INTEGER, <= Number.MAX_SAFE_INTEGER\n        [\"@!max\", [         // and the max of\n          [\"@$d\", \"2.5\"],   // a double-precision fractional number\n          [\"@@\"],           // and the 'head' ie. the result of first step random computation\n        ]],\n      ]],\n    ]],\n)"
                         ]
                       }
                     ]
@@ -250,7 +250,7 @@
                     {
                       "@type": "vdoc:CharacterData",
                       "vdoc:content": [
-                        "\"@!random@!min$f.10$.@!max$f.2.5$.@@@@@@\""
+                        "\"@!random@!min$d.10$.@!max$d.2.5$.@@@@@@\""
                       ]
                     }
                   ]
@@ -291,7 +291,7 @@
                       {
                         "@type": "vdoc:CharacterData",
                         "vdoc:content": [
-                          " disjoinVPathString(\"@!random@!min$f.10$.@!max$f.2.5$.@@@@@@\")"
+                          " disjoinVPathString(\"@!random@!min$d.10$.@!max$d.2.5$.@@@@@@\")"
                         ]
                       }
                     ]
@@ -304,7 +304,7 @@
                     {
                       "@type": "vdoc:CharacterData",
                       "vdoc:content": [
-                        "[\n  \"@@\",\n  [\n    [\n      \"@!random\"\n    ],\n    [\n      \"@!min\",\n      [\n        10,\n        [\n          \"@!max\",\n          [\n            [\n              \"@$f\",\n              \"2.5\"\n            ],\n            [\n              \"@@\"\n            ]\n          ]\n        ]\n      ]\n    ]\n  ]\n]"
+                        "[\n  \"@@\",\n  [\n    [\n      \"@!random\"\n    ],\n    [\n      \"@!min\",\n      [\n        10,\n        [\n          \"@!max\",\n          [\n            [\n              \"@$d\",\n              \"2.5\"\n            ],\n            [\n              \"@@\"\n            ]\n          ]\n        ]\n      ]\n    ]\n  ]\n]"
                       ]
                     }
                   ]

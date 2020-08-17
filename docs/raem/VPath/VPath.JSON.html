@@ -83,13 +83,13 @@ non-empty array of sections or values.</span>
       [&#x22;@!min&#x22;, [           // second step: compute the min of
         10,                 // a whole number &#x3E;= Number.MIN_SAFE_INTEGER, &#x3C;= Number.MAX_SAFE_INTEGER
         [&#x22;@!max&#x22;, [         // and the max of
-          [&#x22;@$f&#x22;, &#x22;2.5&#x22;], // a fractional number
+          [&#x22;@$d&#x22;, &#x22;2.5&#x22;],   // a double-precision fractional number
           [&#x22;@@&#x22;],           // and the &#x27;head&#x27; ie. the result of first step random computation
         ]],
       ]],
     ]],
 )</span>
-</code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node">&#x22;@!random@!min$f.10$.@!max$f.2.5$.@@@@@@&#x22;</span>
+</code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node">&#x22;@!random@!min$d.10$.@!max$d.2.5$.@@@@@@&#x22;</span>
 </code></pre></blockquote></span>
 </p></div></span>
 
@@ -104,7 +104,7 @@ as the payload are replaced with the payload section itself.</span>
 <blockquote class="vdoc type-revdoc-example">
     <span class="vdoc type-vdoc-node">
     <h3>elides degenerate vpath elements during sectioning</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> disjoinVPathString(&#x22;@!random@!min$f.10$.@!max$f.2.5$.@@@@@@&#x22;)</span>
+<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> disjoinVPathString(&#x22;@!random@!min$d.10$.@!max$d.2.5$.@@@@@@&#x22;)</span>
 </code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node">[
   &#x22;@@&#x22;,
   [
@@ -119,7 +119,7 @@ as the payload are replaced with the payload section itself.</span>
           &#x22;@!max&#x22;,
           [
             [
-              &#x22;@$f&#x22;,
+              &#x22;@$d&#x22;,
               &#x22;2.5&#x22;
             ],
             [

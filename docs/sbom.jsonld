@@ -37,7 +37,7 @@
         "@type": "@id"
       }
     },
-    "dc:title": "@valos/kernel-vault@0.35.0-rc.23 Software Bill of Materials",
+    "dc:title": "@valos/kernel-vault@0.35.0-rc.24 Software Bill of Materials",
     "respecConfig": {
       "specStatus": "unofficial",
       "editors": [
@@ -89,7 +89,7 @@
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
             "This document was automatically generated on ",
-            "2020-08-10T11:28:07.840Z",
+            "2020-08-17T17:11:02.342Z",
             "."
           ]
         },
@@ -426,6 +426,15 @@
       },
       {
         "type": "library",
+        "name": "read-installed",
+        "version": "4.0.3",
+        "description": "Read all the installed packages in a folder, and return a tree structure with all the data.",
+        "licenses": "ISC",
+        "purl": "pkg:npm/read-installed@4.0.3",
+        "modified": false
+      },
+      {
+        "type": "library",
         "name": "read-package-json",
         "version": "2.1.1",
         "description": "The thing npm uses to read package.json files with semantics and defaults and validation",
@@ -444,15 +453,6 @@
       },
       {
         "type": "library",
-        "name": "sax",
-        "version": "1.2.4",
-        "description": "An evented streaming XML parser in JavaScript",
-        "licenses": "ISC",
-        "purl": "pkg:npm/sax@1.2.4",
-        "modified": false
-      },
-      {
-        "type": "library",
         "name": "slide",
         "version": "1.1.6",
         "description": "A flow control lib small enough to fit on in a slide presentation. Derived live at Oak.JS",
@@ -462,20 +462,20 @@
       },
       {
         "type": "library",
-        "name": "read-installed",
-        "version": "4.0.3",
-        "description": "Read all the installed packages in a folder, and return a tree structure with all the data.",
-        "licenses": "ISC",
-        "purl": "pkg:npm/read-installed@4.0.3",
-        "modified": false
-      },
-      {
-        "type": "library",
         "name": "util-extend",
         "version": "1.0.3",
         "description": "Node's internal object extension function",
         "licenses": "MIT",
         "purl": "pkg:npm/util-extend@1.0.3",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "name": "sax",
+        "version": "1.2.4",
+        "description": "An evented streaming XML parser in JavaScript",
+        "licenses": "ISC",
+        "purl": "pkg:npm/sax@1.2.4",
         "modified": false
       },
       {
@@ -510,39 +510,39 @@
         "type": "library",
         "group": "valos",
         "name": "inspire",
-        "version": "0.35.0-rc.24",
+        "version": "0.35.0-rc.25",
         "description": "ValOS Inspire application gateway",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/inspire@0.35.0-rc.24",
+        "purl": "pkg:npm/%40valos/inspire@0.35.0-rc.25",
         "modified": false
       },
       {
         "type": "library",
         "group": "valos",
         "name": "kernel",
-        "version": "0.35.0-rc.24",
+        "version": "0.35.0-rc.25",
         "description": "@valos/kernel domain",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/kernel@0.35.0-rc.24",
+        "purl": "pkg:npm/%40valos/kernel@0.35.0-rc.25",
         "modified": false
       },
       {
         "type": "library",
         "group": "valos",
         "name": "toolset-revealer",
-        "version": "0.35.0-rc.24",
+        "version": "0.35.0-rc.25",
         "description": "Tools for building revelations both for development and deployment purposes",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/toolset-revealer@0.35.0-rc.24",
+        "purl": "pkg:npm/%40valos/toolset-revealer@0.35.0-rc.25",
         "modified": false
       },
       {
         "type": "library",
         "name": "valma",
-        "version": "0.35.0-rc.24",
+        "version": "0.35.0-rc.25",
         "description": "A ValOS CLI tool for discovering and executing context-dependent command scripts",
         "licenses": "MIT",
-        "purl": "pkg:npm/valma@0.35.0-rc.24",
+        "purl": "pkg:npm/valma@0.35.0-rc.25",
         "modified": false
       },
       {
@@ -792,10 +792,10 @@
         "type": "library",
         "group": "valos",
         "name": "type-vault",
-        "version": "0.35.0-rc.24",
+        "version": "0.35.0-rc.25",
         "description": "The ValOS 'vault' workspace type toolset",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/type-vault@0.35.0-rc.24",
+        "purl": "pkg:npm/%40valos/type-vault@0.35.0-rc.25",
         "modified": false
       },
       {

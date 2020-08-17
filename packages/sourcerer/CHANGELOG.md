@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.25](https://github.com/valaatech/kernel/compare/v0.35.0-rc.24...v0.35.0-rc.25) (2020-08-17)
+
+
+### Bug Fixes
+
+* Multiple chronicle creation in same transaction ([429ce4c](https://github.com/valaatech/kernel/commit/429ce4c8eb8a5359652de570bcc95c572233334a))
+* Structured sub-Property id generation from namespaced name ([e81ce9e](https://github.com/valaatech/kernel/commit/e81ce9e269750bf5e6a7370fb126fb0de0fcb218))
+
+
+### Features
+
+* $V.obtainSubResource ([5567940](https://github.com/valaatech/kernel/commit/5567940559c8807e03efa1d3add83841bacb06da))
+* Native 'valaa-memory:' property values ([d5d0521](https://github.com/valaatech/kernel/commit/d5d05218b60c575e582deebaef000653b943dc0a))
+
+
+
+
+
 # [0.35.0-rc.24](https://github.com/valaatech/kernel/compare/v0.35.0-rc.23...v0.35.0-rc.24) (2020-08-10)
 
 **Note:** Version bump only for package @valos/sourcerer

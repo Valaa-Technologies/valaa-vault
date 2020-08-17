@@ -1,4 +1,4 @@
-const { qualifiedNameOf } = require("~/raem/tools/namespaceSymbols");
+const { qualifiedNamesOf } = require("~/raem/tools/namespaceSymbols");
 
 const { dumpObject, wrapError } = require("~/tools/wrapError");
 const isSymbol = require("~/tools/isSymbol").default;
@@ -123,7 +123,7 @@ function disjoinVPathOutline (value, vkey) {
     case "object": // eslint-disable-line no-fallthrough
       if (value === null) break;
       if (isSymbol(value)) {
-        const qualifiedName = qualifiedNameOf(value);
+        const qualifiedName = qualifiedNamesOf(value);
         if (!qualifiedName) {
           throw new Error(`Unrecognized non-namespace symbol: ${String(qualifiedName)}`);
         }

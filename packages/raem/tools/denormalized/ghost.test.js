@@ -179,7 +179,8 @@ describe("Ghost materialization and immaterialization", () => {
     setUp({ verbosity: 0, commands: [...createGrandlingInstance, ...createRootInstanceInstance] });
     const grandlingInRoot1 = _ghostVRL(vRef("grandling-1"), root1Id, "@$~raw.root@@");
     const grandlingInRoot11 = _ghostVRL(grandlingInRoot1, root11Id, root1Id);
-    harness.chronicleTestEvent(createMaterializeGhostAction(harness.getValker(), grandlingInRoot11));
+    harness.chronicleTestEvent(
+        createMaterializeGhostAction(harness.getValker(), grandlingInRoot11));
     assertMaterialized(grandlingInRoot11);
     assertMaterialized(grandlingInRoot1);
   });
@@ -207,13 +208,16 @@ describe("Ghost materialization and immaterialization", () => {
   it("Immaterialization should not immaterialize ownlings", () => {
     setUp({ verbosity: 0, commands: [] });
     assertImmaterialized(getGhostGrandling());
-    harness.chronicleTestEvent(createMaterializeGhostAction(harness.getValker(), getGhostGrandling()));
+    harness.chronicleTestEvent(
+        createMaterializeGhostAction(harness.getValker(), getGhostGrandling()));
     assertMaterialized(getGhostGrandling());
     assertImmaterialized(getGhostOwnling());
-    harness.chronicleTestEvent(createMaterializeGhostAction(harness.getValker(), getGhostOwnling()));
+    harness.chronicleTestEvent(
+        createMaterializeGhostAction(harness.getValker(), getGhostOwnling()));
     assertMaterialized(getGhostOwnling());
 
-    harness.chronicleTestEvent(createImmaterializeGhostAction(harness.getValker(), getGhostOwnling()));
+    harness.chronicleTestEvent(
+        createImmaterializeGhostAction(harness.getValker(), getGhostOwnling()));
 
     assertImmaterialized(getGhostOwnling());
     assertMaterialized(getGhostGrandling());
@@ -364,7 +368,8 @@ describe("Mixing references across instantiation boundaries", () => {
     setUp({ verbosity: 0 });
     const ownlingInRoot1VRL =
         createGhostVRLInInstance(vRef("ownling"), getTestChronicle(root1Id));
-    harness.chronicleTestEvent(created({ id: ["ownlingIn1-1"], typeName: "TestThing", initialState: {
+    harness.chronicleTestEvent(created({
+      id: ["ownlingIn1-1"], typeName: "TestThing", initialState: {
       parent: [root1Id],
       instancePrototype: ownlingInRoot1VRL,
     } }));

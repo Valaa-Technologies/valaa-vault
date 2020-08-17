@@ -52,7 +52,6 @@ afterEach(async () => {
 });
 
 describe("Scribe", () => {
-
   it("stores truths/commands in the database", async () => {
     const scribe = await createScribe(createTestMockSourcerer({ isRemoteAuthority: true }));
 

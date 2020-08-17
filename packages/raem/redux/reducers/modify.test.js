@@ -89,7 +89,8 @@ describe("MODIFIED action class", () => {
 
     it("adds and traverses non-expanded VRL Data", () => {
       const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
-      const dataGlue = harness.chronicleTestEvent(created({ id: vRef("glue1"), typeName: "TestDataGlue",
+      const dataGlue = harness.chronicleTestEvent(created({
+        id: vRef("glue1"), typeName: "TestDataGlue",
         initialState: { source: ["A_child1"], target: ["A_child2"] },
       })).getTruthEvent();
       harness.chronicleTestEvent(addedTo({ id: ["A_child1"], typeName: "TestThing",

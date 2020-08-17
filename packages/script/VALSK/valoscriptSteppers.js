@@ -122,7 +122,7 @@ function _getIdentifierOrPropertyValue (steppers: Object, valker: Valker, head: 
     if (isGetProperty) return valker.tryPack(property);
     if ((property === undefined) && !allowUndefinedIdentifier
         && !(ePropertyName in eContainer)) {
-      throw new Error(`Cannot find identifier '${ePropertyName}' in scope`);
+      throw new Error(`Cannot find identifier '${String(ePropertyName)}' in scope`);
     }
     if ((typeof property !== "object") || (property === null)) return property;
     return valker.tryPack(
@@ -291,7 +291,7 @@ function _deleteIdentifierOrProperty (steppers: Object, valker: Valker, head: an
     }
     if (isPropertyNotIdentifier) {
       if (delete eContainer[ePropertyName]) return true;
-      throw new SyntaxError(`Cannot delete non-configurable property '${ePropertyName}'`);
+      throw new SyntaxError(`Cannot delete non-configurable property '${String(ePropertyName)}'`);
     }
     const property = eContainer[ePropertyName];
     if ((typeof property === "object") && (property !== null)) {
@@ -304,8 +304,8 @@ function _deleteIdentifierOrProperty (steppers: Object, valker: Valker, head: an
         return true;
       }
     }
-    throw new SyntaxError(`Cannot delete non-existent (or immutable) identifier '${ePropertyName
-        }' from scope`);
+    throw new SyntaxError(`Cannot delete non-existent (or immutable) identifier '${
+        String(ePropertyName)}' from scope`);
   } catch (error) {
     let actualError = error;
     if (!error.originalError) {

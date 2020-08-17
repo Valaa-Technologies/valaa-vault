@@ -59,13 +59,16 @@ describe("Couplings", () => {
 
   it("denies cyclic ownership", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
-    expect(() => harness.chronicleTestEvent(fieldsSet({ id: ["A_grandparent"], typeName: "TestThing",
+    expect(() => harness.chronicleTestEvent(fieldsSet({
+      id: ["A_grandparent"], typeName: "TestThing",
       sets: { owner: vRef("A_grandparent") },
     }))).toThrow(/Cyclic ownership not allowed.*parent/);
-    expect(() => harness.chronicleTestEvent(fieldsSet({ id: ["A_grandparent"], typeName: "TestThing",
+    expect(() => harness.chronicleTestEvent(fieldsSet({
+      id: ["A_grandparent"], typeName: "TestThing",
       sets: { owner: vRef("A_parent") },
     }))).toThrow(/Cyclic ownership not allowed.*grandparent/);
-    expect(() => harness.chronicleTestEvent(fieldsSet({ id: ["A_grandparent"], typeName: "TestThing",
+    expect(() => harness.chronicleTestEvent(fieldsSet({
+      id: ["A_grandparent"], typeName: "TestThing",
       sets: { owner: vRef("A_child1") },
     }))).toThrow(/Cyclic ownership not allowed.*grandgrandparent/);
     expect(() => harness.chronicleTestEvent(fieldsSet({ id: ["A_child1"], typeName: "TestThing",

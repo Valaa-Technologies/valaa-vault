@@ -180,7 +180,7 @@ function _engineIdentifierOrPropertyValue (steppers: Object, valker: Valker, hea
     if (isGetProperty) return valker.tryPack(property);
     if ((property === undefined) && !allowUndefinedIdentifier
         && !(ePropertyName in eContainer)) {
-      throw new Error(`Cannot find identifier '${ePropertyName}' in scope`);
+      throw new Error(`Cannot find identifier '${String(ePropertyName)}' in scope`);
     }
     if ((typeof property !== "object") || (property === null)) return property;
     return valker.tryPack(

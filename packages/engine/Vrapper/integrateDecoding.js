@@ -103,7 +103,8 @@ function _require (vScope: Vrapper, options: Object, importPath: string) {
     }
     const scopeKey = steps[0];
     if ((scopeKey !== ".") && (scopeKey !== "..")) {
-      nextHead = head.step(VALEK.identifierValue(scopeKey), Object.create(options));
+      const scope = head.getValospaceScope();
+      nextHead = scope[scopeKey];
       if (nextHead === undefined) {
         return vScope.getEngine().valosRequire(importPath);
       }

@@ -1,10 +1,13 @@
 /* global describe expect it */
 
 import { vRef } from "~/raem/VRL";
+import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
+
+import { testRootId, clearAllScribeDatabases } from "~/sourcerer/test/SourcererTestHarness";
 
 import { createEngineTestHarness, createEngineOracleHarness }
     from "~/engine/test/EngineTestHarness";
-import { testRootId, clearAllScribeDatabases } from "~/sourcerer/test/SourcererTestHarness";
+
 import { arrayBufferFromUTF8String } from "~/tools/textEncoding";
 import { contentHashFromArrayBuffer } from "~/tools";
 
@@ -487,16 +490,28 @@ describe("Two paired harnesses emulating two gateways connected through event st
     const pairness = await createEngineOracleHarness({ verbosity: 0, pairedHarness: harness });
 
     expect(await harness.runValoscript(vRef(testRootId), `
-      this.thing = new Entity({ owner: this, name: "thingie", properties: { val: "yoyo" } });
+      this.thing = new Entity({ owner: this, name: "thingie",
+        properties: { val: "yoyo", "@$foo.bar@@": "oyoy" },
+      });
       this.thing.$V.name;
     `)).toEqual("thingie");
 
     expect(await pairness.receiveTruthsFrom(harness))
         .toEqual(1);
 
-    expect(pairness.runValoscript(vRef(testRootId), `
-      [this.thing.$V.name, this.thing.val];
-    `)).toEqual(["thingie", "yoyo"]);
+    const { thing, names } = pairness.runValoscript(vRef(testRootId), `
+      ({ thing: this.thing, names: [this.thing.$V.name, this.thing.val, this.thing[$foo.bar]] });
+    `);
+    expect(names)
+        .toEqual(["thingie", "yoyo", "oyoy"]);
+    expect(thing.getValospaceScope()[qualifiedSymbol("foo", "bar")].getVRef().vrid())
+        .toEqual(thing.getVRef().getSubRef("@.$foo.bar").vrid());
+    expect(thing.getValospaceScope()["@$foo.bar@@"].getVRef().vrid())
+        .toEqual(thing.getVRef().getSubRef("@.$foo.bar").vrid());
+    expect(thing.propertyValue("@$foo.bar@@"))
+        .toEqual("oyoy");
+    expect(thing.propertyValue(qualifiedSymbol("foo", "bar")))
+        .toEqual("oyoy");
   });
 
   it("passes a complex property with a Resource reference to paired client", async () => {

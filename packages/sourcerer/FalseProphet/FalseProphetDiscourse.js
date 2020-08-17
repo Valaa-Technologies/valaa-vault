@@ -2,7 +2,7 @@
 
 import { Command, /* created, duplicated, destroyed, */ EventBase } from "~/raem/events";
 import { StoryIndexTag, PassageIndexTag } from "~/raem/redux/Bard";
-import { qualifiedNameOf } from "~/raem/tools/namespaceSymbols";
+import { qualifiedNamesOf } from "~/raem/tools/namespaceSymbols";
 import { ValaaURI, naiveURI, hasScheme } from "~/raem/ValaaURI";
 import { vRef } from "~/raem/VRL";
 import { dumpObject } from "~/raem/VALK";
@@ -173,17 +173,17 @@ export default class FalseProphetDiscourse extends Discourse {
         if (!propertyName) {
           throw new Error(`${targetAction.type}.initialState.name is required for a Property`);
         }
-        if (typeof propertyName === "string") {
+        const qualifiedNames = qualifiedNamesOf(propertyName);
+        if (qualifiedNames) {
+          targetAction.initialState.name = qualifiedNames[3];
+          subVPath = qualifiedNames[4];
+        } else if (typeof propertyName === "string") {
+            // && ((propertyName[0] !== "@") || !propertyName.endsWith("@@"))
           subVPath = `@.$.${encodeURIComponent(propertyName)}@@`;
         } else {
-          const qualifiedName = qualifiedNameOf(propertyName);
-          if (!qualifiedName) {
-            throw new Error(isSymbol(propertyName)
-                ? `Property name symbol ${propertyName} is not a qualified name symbol`
-                : `Property name must be a string or symbol, got '${typeof propertyName}'`);
-          }
-          targetAction.initialState.name = qualifiedName[3];
-          subVPath = qualifiedName[4];
+          throw new Error(isSymbol(propertyName)
+              ? `Property name symbol ${propertyName} is not a qualified name symbol`
+              : `Property name must be a non-vpath string or symbol, got '${typeof propertyName}'`);
         }
       }
 

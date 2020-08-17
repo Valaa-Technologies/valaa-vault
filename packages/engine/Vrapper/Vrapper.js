@@ -23,7 +23,7 @@ import { createGhostVRLInInstance, isMaterialized, createMaterializeGhostAction 
     from "~/raem/tools/denormalized/ghost";
 import { AbsentChroniclesError, addConnectToChronicleToError }
     from "~/raem/tools/denormalized/partitions";
-import { qualifiedNameOf } from "~/raem/tools/namespaceSymbols";
+import { qualifiedNamesOf, qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
 
 import isAbsentTypeName from "~/raem/tools/graphql/isAbsentTypeName";
 
@@ -1056,7 +1056,7 @@ export default class Vrapper extends Cog {
       let propertyNameString = propertyName;
       if (typeof propertyName !== "string") {
         if (!isSymbol(propertyName)) return undefined;
-        const qualifiedName = qualifiedNameOf(propertyName);
+        const qualifiedName = qualifiedNamesOf(propertyName);
         if (qualifiedName) propertyNameString = qualifiedName[3];
       }
       ret = VALEK.property(propertyNameString).setScopeAccesses(null);
@@ -2279,6 +2279,8 @@ export default class Vrapper extends Cog {
         this, `Vrapper_properties`, this._onPropertiesUpdate.bind(this));
   }
 
+  static _subPropertyMatcher = /(@\.\$([^.]*)\.([^@]*)@@)$/;
+
   _onPropertiesUpdate (fieldUpdate: LiveUpdate) {
     fieldUpdate.actualAdds().forEach(vActualAdd => {
       // TODO(iridian): Perf opt: this uselessly creates a
@@ -2289,15 +2291,22 @@ export default class Vrapper extends Cog {
       // TODO(iridian, 2019-03): Property renames are going to be
       // disabled very shortly. This whole sequence can be dropped.
       const propertyRawId = vActualAdd.getRawId();
-
-      const structuralName = (propertyRawId.match(/\.$\.([^@]*)@@$/) || [])[1];
-      if (structuralName) {
-        if ((structuralName === "this") || (structuralName === "self")) {
-          this.warnEvent(`Structural property name '${
-              structuralName}' is a reserved word and is omitted from scope`);
-          return;
+      const subPropertyMatch = propertyRawId.match(Vrapper._subPropertyMatcher);
+      if (subPropertyMatch) {
+        const namespace = subPropertyMatch[2];
+        const name = decodeURIComponent(subPropertyMatch[3]);
+        if (!namespace) {
+          if ((name === "this") || (name === "self")) {
+            this.warnEvent(`Structural property name '${
+                name}' is a reserved word and is omitted from scope`);
+            return;
+          }
+          this._defineProperty(name, vActualAdd);
+        } else {
+          const nameSymbol = qualifiedSymbol(namespace, name);
+          this._defineProperty(nameSymbol, vActualAdd);
+          this._defineProperty(qualifiedNamesOf(nameSymbol)[3], vActualAdd);
         }
-        this._defineProperty(decodeURIComponent(structuralName), vActualAdd);
         return;
       }
 
@@ -2368,7 +2377,7 @@ export default class Vrapper extends Cog {
       enumerable: true,
       get: () => vProperty.extractPropertyValue(undefined, this),
       set: (value) => vProperty
-          .setField("value", valueExpression(value, name), { scope: this._valospaceScope }),
+          .setField("value", valueExpression(value), { scope: this._valospaceScope }),
     });
   }
 }

@@ -1,12 +1,10 @@
 // @flow
 
-import { Iterable } from "immutable";
-
 import VRL, { JSONIdData, tryChronicleURIFrom } from "~/raem/VRL";
-import { qualifiedNameOf } from "~/raem/tools/namespaceSymbols";
+import { qualifiedNamesOf } from "~/raem/tools/namespaceSymbols";
 import { naiveURI } from "~/raem/ValaaURI";
 import { Kuery, isValOSFunction } from "~/raem/VALK";
-import { HostRef, tryHostRef } from "~/raem/VALK/hostReference";
+import { tryHostRef } from "~/raem/VALK/hostReference";
 import GhostPath, { ghostPathFromJSON } from "~/raem/state/GhostPath";
 // import { coerceAsVRID } from "~/raem/VPath";
 
@@ -240,7 +238,7 @@ export function _universalizeAction (action: ?any, discourse, contextChronicleUR
         return undefined;
       }
       if (isSymbol(value)) {
-        const qualifiedName = qualifiedNameOf(value);
+        const qualifiedName = qualifiedNamesOf(value);
         if (qualifiedName) {
           return qualifiedName[3];
         }

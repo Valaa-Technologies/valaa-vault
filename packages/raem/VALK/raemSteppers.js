@@ -3,7 +3,7 @@
 import { Iterable, OrderedMap } from "immutable";
 
 import VRL from "~/raem/VRL";
-import { qualifiedNameOf } from "~/raem/tools/namespaceSymbols";
+import { qualifiedNamesOf } from "~/raem/tools/namespaceSymbols";
 
 import { elevateFieldRawSequence } from "~/raem/state/FieldInfo";
 import Transient, { PrototypeOfImmaterialTag } from "~/raem/state/Transient";
@@ -337,9 +337,9 @@ export default {
       if (eLeftRef) return eLeftRef.equals(eRight);
       const eRightRef = tryHostRef(eRight);
       if (eRightRef) return eRightRef.equals(eLeft);
-      const eLeftName = qualifiedNameOf(eLeft);
+      const eLeftName = qualifiedNamesOf(eLeft);
       if (eLeftName) eLeft = eLeftName[3];
-      const eRightName = qualifiedNameOf(eRight);
+      const eRightName = qualifiedNamesOf(eRight);
       if (eRightName) eRight = eRightName[3];
     }
     return eLeft == eRight; // eslint-disable-line
@@ -354,9 +354,9 @@ export default {
       if (eLeftRef) return !eLeftRef.equals(eRight);
       const eRightRef = tryHostRef(eRight);
       if (eRightRef) return !eRightRef.equals(eLeft);
-      const eLeftName = qualifiedNameOf(eLeft);
+      const eLeftName = qualifiedNamesOf(eLeft);
       if (eLeftName) eLeft = eLeftName[3];
-      const eRightName = qualifiedNameOf(eRight);
+      const eRightName = qualifiedNamesOf(eRight);
       if (eRightName) eRight = eRightName[3];
     }
     return eLeft != eRight; // eslint-disable-line

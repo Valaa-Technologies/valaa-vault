@@ -50,7 +50,7 @@ export {
 } from "./ValaaURI";
 export {
                                       qualifiedSymbol,
-                                      qualifiedNameOf,
+                                      qualifiedNamesOf,
 } from "./tools/namespaceSymbols";
 export {
                            default as VALK

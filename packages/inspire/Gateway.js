@@ -18,7 +18,7 @@ import createValidateEventMiddleware from "~/raem/redux/middleware/validateEvent
 import createProcessCommandIdMiddleware from "~/raem/redux/middleware/processCommandId";
 import { createBardMiddleware } from "~/raem/redux/Bard";
 import Corpus from "~/raem/Corpus";
-import { qualifiedNameOf } from "~/raem/tools/namespaceSymbols";
+import { qualifiedNamesOf } from "~/raem/tools/namespaceSymbols";
 
 import upgradeEventTo0Dot2 from "~/sourcerer/tools/event-version-0.2/upgradeEventTo0Dot2";
 import EVENT_VERSION from "~/sourcerer/tools/EVENT_VERSION";
@@ -151,7 +151,7 @@ export default class Gateway extends FabricEventTarget {
     try {
       let moduleName = module, namespace, library, subPath, parts;
       if (isSymbol(module)) {
-        const qualifiedName = qualifiedNameOf(module);
+        const qualifiedName = qualifiedNamesOf(module);
         if (!qualifiedName) {
           throw new Error(`Unrecognized valos.require module: symbol '${
                 String(module)}' is not a namespace symbol`);

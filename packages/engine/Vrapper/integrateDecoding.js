@@ -2,6 +2,7 @@
 
 import type { VALKOptions } from "~/raem/VALK";
 import { SourceInfoTag } from "~/raem/VALK/StackTrace";
+import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
 
 import { addExportsContainerToScope } from "~/script";
 
@@ -10,7 +11,7 @@ import { MediaInfo } from "~/sourcerer/api/types";
 import Vrapper from "~/engine/Vrapper";
 import VALEK, { Kuery } from "~/engine/VALEK";
 
-import { dumpObject } from "~/tools";
+import { dumpObject, isSymbol } from "~/tools";
 
 /**
  * Integrates the given context-free, shared decoding of some Media into the runtime context
@@ -89,10 +90,23 @@ function _require (vScope: Vrapper, options: Object, importPath: string) {
   let nextHead;
   let i = 0;
   try {
-    steps = importPath.split("/");
+    if (isSymbol(importPath)) steps = [importPath];
+    else {
+      steps = importPath.split("/");
+      if (importPath[0] === "@") {
+        if (importPath.length === 1) {
+          throw new Error(`Invalid namespaced require module: '${
+              importPath}' is missing name part (separated by '/')`);
+        }
+        steps.splice(0, 2, qualifiedSymbol(steps[0].slice(1), steps[1]));
+      }
+    }
     const scopeKey = steps[0];
     if ((scopeKey !== ".") && (scopeKey !== "..")) {
       nextHead = head.step(VALEK.identifierValue(scopeKey), Object.create(options));
+      if (nextHead === undefined) {
+        return vScope.getEngine().valosRequire(importPath);
+      }
       if (steps.length === 1) {
         return (nextHead instanceof Vrapper)
             ? nextHead.extractValue(options)
@@ -100,7 +114,7 @@ function _require (vScope: Vrapper, options: Object, importPath: string) {
       }
       if (!(nextHead instanceof Vrapper)) {
         throw new Error(`Could not find a Resource at initial import scope lookup for '${
-            scopeKey}' (with path "${steps.slice(1).join("/")}" still remaining)`);
+            String(scopeKey)}' (with path "${steps.slice(1).join("/")}" still remaining)`);
       }
       head = nextHead;
       i = 1;

@@ -7,9 +7,7 @@ import type { VALKOptions } from "~/raem/VALK"; // eslint-disable-line no-duplic
 import type { Passage, Story } from "~/raem/redux/Bard";
 import { getHostRef, HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
 
-import {
-  addedTo, destroyed, fieldsSet, isCreatedLike, removedFrom, replacedWithin,
-} from "~/raem/events";
+import { destroyed, isCreatedLike } from "~/raem/events";
 import VRL, { vRef, invariantifyId, getRawIdFrom } from "~/raem/VRL";
 import { naiveURI } from "~/raem/ValaaURI";
 import { disjoinVPath, formVPath } from "~/raem/VPath";

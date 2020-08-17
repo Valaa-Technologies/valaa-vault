@@ -10,7 +10,7 @@ export default valosheath.exportSpindle({
   name: "@valos/web-spindle",
 
   async onGatewayInitialized (gateway, { server, prefixes }) {
-    const { expose } = gateway.require("@valos/inspire");
+    const { expose } = gateway.valosRequire("@valos/inspire");
     if (!server) throw new Error(`${this.name} revelation server section missing`);
     if (!prefixes) throw new Error(`${this.name} revelation prefixes section missing`);
     this._prefixRouters = {};
@@ -31,7 +31,7 @@ export default valosheath.exportSpindle({
   },
 
   async _addPrefixRouter (gateway, prefix, prefixConfig) {
-    const { dumpObject } = gateway.require("@valos/tools");
+    const { dumpObject } = gateway.valosRequire("@valos/tools");
     try {
       const viewConfig = prefixConfig.view;
       const viewName = (

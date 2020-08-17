@@ -63,7 +63,7 @@ export default (valosheath.createGateway = async function createGateway (
       push (spindlePrototype) { delayedSpindlePrototypes.push(spindlePrototype); }
     };
 
-    valosheath.require = ret.require.bind(ret);
+    valosheath.require = ret.valosRequire.bind(ret);
 
     ret.clockEvent(1, `gateway.revelations`, `Preparing revelations in environment (${
         String(process.env.NODE_ENV)})`);

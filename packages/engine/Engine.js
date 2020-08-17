@@ -111,6 +111,10 @@ export default class Engine extends Cog {
     }
   }
 
+  valosRequire (module: string | symbol) {
+    return this._parent._parent.valosRequire(module);
+  }
+
   /**
    * Returns an existing Vrapper: does not return a Vrapper for non-instantiated ghost.
    * Use getVrapper with options = { optional: true } for that.

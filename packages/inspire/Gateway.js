@@ -5,12 +5,12 @@ import path from "path";
 
 import { Map as ImmutableMap } from "immutable";
 
-import * as valosRaem from "~/raem";
-import * as valosTools from "~/tools";
-import * as valosScript from "~/script";
-import * as valosSourcerer from "~/sourcerer";
 import * as valosEngine from "~/engine";
 import * as valosInspire from "~/inspire";
+import * as valosRaem from "~/raem";
+import * as valosScript from "~/script";
+import * as valosSourcerer from "~/sourcerer";
+import * as valosTools from "~/tools";
 
 import { naiveURI } from "~/raem/ValaaURI";
 import createRootReducer from "~/raem/tools/createRootReducer";
@@ -18,6 +18,7 @@ import createValidateEventMiddleware from "~/raem/redux/middleware/validateEvent
 import createProcessCommandIdMiddleware from "~/raem/redux/middleware/processCommandId";
 import { createBardMiddleware } from "~/raem/redux/Bard";
 import Corpus from "~/raem/Corpus";
+import { qualifiedNameOf } from "~/raem/tools/namespaceSymbols";
 
 import upgradeEventTo0Dot2 from "~/sourcerer/tools/event-version-0.2/upgradeEventTo0Dot2";
 import EVENT_VERSION from "~/sourcerer/tools/EVENT_VERSION";
@@ -41,7 +42,8 @@ const patchWith = require("@valos/tools/patchWith").default;
 
 const { AuthorityNexus, FalseProphet, Oracle, Sourcerer, Scribe } = valosSourcerer;
 const {
-  dumpObject, inBrowser, invariantify, isPromise, FabricEventTarget, mapEagerly, thenChainEagerly,
+  dumpObject, inBrowser, invariantify, isSymbol, isPromise, FabricEventTarget, mapEagerly,
+  thenChainEagerly,
 } = valosTools;
 
 const posixPath = path.posix || path;
@@ -60,6 +62,14 @@ export default class Gateway extends FabricEventTarget {
     this.revelationRoot = options.revelationRoot;
     this.domainRoot = options.domainRoot;
     this._pendingViews = [];
+    this._valospaceRequirables = {
+      "@valos/engine": { "": valosEngine },
+      "@valos/inspire": { "": valosInspire },
+      "@valos/raem": { "": valosRaem },
+      "@valos/script": { "": valosScript },
+      "@valos/sourcerer": { "": valosSourcerer },
+      "@valos/tools": { "": valosTools },
+    };
   }
 
   callRevelation (Type: Function | any) {
@@ -67,14 +77,11 @@ export default class Gateway extends FabricEventTarget {
     return new Type({ parent: this, gateway: this });
   }
 
-  static moduleMatcherString = "^((@[^@/]+\\/)?([^/]+))(\\/(.*))?$";
-  static moduleMatcher = new RegExp(Gateway.moduleMatcherString);
-
   reveal (reference, options = {}) {
     let source = this.resolveRevealReference(reference, options.currentDir);
     let ret;
     if (!inBrowser() && !options.fetch && !source.match(/^[^/]*:/)) {
-      ret = this.require(source, options);
+      ret = this.valosRequire(source, options);
       source = options.modulePath;
     }
     const sourceDir = path.dirname(source);
@@ -108,23 +115,28 @@ export default class Gateway extends FabricEventTarget {
     return posixPath.join(this.revelationRoot, uri);
   }
 
+  static _moduleMatcherString = "^(((@[^@/]+)\\/)?([^/]+))(\\/(.*))?$";
+  static _moduleMatcher = new RegExp(Gateway._moduleMatcherString);
+
+  require (module: string | symbol, options: Object) {
+    console.debug(`valos.gateway.require("${module
+        }") is DEPRECATED in favor of require("${module}") or valos.gateway.valosRequire`);
+    return this.valosRequire(module, options);
+  }
+
   /**
-   * valos.gateway.require is the entry point for ValOS fabric library
+   * valos.require is the entry point for ValOS fabric library
    * imports from inside spindles.
    *
    * @param {string} module
    * @returns
    * @memberof Gateway
    */
-  require (module: string, options: Object) {
+  valosRequire (module: string | symbol, options: Object) {
     // TODO(iridian, 2018-12): fabric library version semver
     //   compatibility checking against spindle package.json dependencies
-    // TODO(iridian, 2018-12): spindle-sourced library registration
-    //   system for webpack environments
     // TODO(iridian, 2018-12): correlate require semantics with import
     //   semantics
-    // TODO(iridian, 2018-12): evaluate making require contents
-    //   available as the default require from within valospace
 
     // TODO(iridian): This issues a webpack warning but is not an
     // actual fault; require will never be called in webpack context
@@ -137,46 +149,40 @@ export default class Gateway extends FabricEventTarget {
     // paths for various platform-specific functionalities like the
     // require here.
     try {
+      let moduleName = module, namespace, library, subPath, parts;
+      if (isSymbol(module)) {
+        const qualifiedName = qualifiedNameOf(module);
+        if (!qualifiedName) {
+          throw new Error(`Unrecognized valos.require module: symbol '${
+                String(module)}' is not a namespace symbol`);
+        }
+        namespace = `@${qualifiedName[0]}`;
+        library = qualifiedName[1];
+        subPath = "";
+        moduleName = `${namespace}/${library}`;
+      } else if ((parts = Gateway._moduleMatcher.exec(moduleName))) { // eslint-disable-line
+        namespace = parts[3] || "";
+        library = parts[4];
+        subPath = parts[5] || "";
+      } else if (inBrowser()) {
+          throw new Error(`Invalid valos.require module: "${
+            moduleName}" doesn't match regex /${Gateway._moduleMatcherString}/)`);
+      }
       if (!inBrowser()) {
-        return require(!options ? module : (options.modulePath = require.resolve(module)));
+        return require(!options ? moduleName : (options.modulePath = require.resolve(moduleName)));
       }
-
-      const parts = Gateway.moduleMatcher.exec(module);
-      if (!parts) {
-        throw new Error(`Invalid valos.require module: "${module
-            }" doesn't match regex /${Gateway.moduleMatcherString}/)`);
+      moduleName = !namespace ? library : `${namespace}/${library}`;
+      const requiredModule = this._valospaceRequirables[moduleName];
+      if (!requiredModule) {
+        throw new Error(`Unrecognized valos.require module: '${moduleName}'`);
       }
-      const scope = parts[2];
-      const library = parts[3];
-      const subPath = parts[4];
-      let ret;
-      if (scope === "@valos/") {
-        // Each of these must be explicitly require'd, so that
-        // 1. webpack knows to pack the library sources to the bundle
-        // 2. the require is still only performed when actually needed as
-        //    not all ValOS sub-modules need to be loaded at startup.
-        // TODO(iridian, 2018-12):
-        //    The above point 2. is a bit moot as there are a lot of
-        //    top-level library index.js imports in ValOS libs; all the
-        //    library content is imported via their index.js anyway.
-        //    When timing is right all the ValOS internal imports should
-        //    be replaced with most specific imports possible.
-        if (library === "engine") ret = valosEngine;
-        else if (library === "inspire") ret = valosInspire;
-        else if (library === "sourcerer") ret = valosSourcerer;
-        else if (library === "raem") ret = valosRaem;
-        else if (library === "script") ret = valosScript;
-        else if (library === "tools") ret = valosTools;
-        else throw new Error(`Unrecognized valos.require @valos library: '${library}'`);
-      } else if (scope) throw new Error(`Unrecognized valos.require scope: '${scope}'`);
-      else throw new Error(`Unrecognized valos.require library: '${library}'`);
-      if (subPath) {
-        throw new Error(`Unsupported valos.require sub-path: "${subPath
-            }" (only top level library require's supported for now)`);
+      if (!requiredModule.hasOwnProperty(subPath || "")) {
+        throw new Error(`Unavailable valos.require module '${moduleName}' ${
+            !subPath ? `top-level entry path` : `sub-path: '${subPath}'`}`);
       }
-      return ret;
+      return requiredModule[subPath || ""];
     } catch (error) {
-      throw this.wrapErrorEvent(error, new Error(`require("${module}")`),
+      throw this.wrapErrorEvent(error, new Error(`valos.require("${String(module)}")`),
           "\n\toptions:", ...dumpObject(options));
     }
   }
@@ -782,6 +788,18 @@ export default class Gateway extends FabricEventTarget {
   _attachSpindle (name: string, spindle: Object) {
     try {
       this._attachedSpindles[name] = spindle;
+      for (let [moduleName, subPathLookup] of Object.entries(spindle.valospaceRequirables || {})) {
+        if (!moduleName.endsWith("/")) {
+          subPathLookup = { "": subPathLookup };
+        } else {
+          moduleName = moduleName.slice(0, -1);
+        }
+        if (this._valospaceRequirables[moduleName] !== undefined) {
+          throw new Error(`valos requirable module '${
+              moduleName}' already defined (when trying to attach spindle '${name}')`);
+        }
+        this._valospaceRequirables[moduleName] = subPathLookup;
+      }
       for (const schemeModule of Object.values(spindle.schemeModules || {})) {
         const called = this.callRevelation(schemeModule);
         this.authorityNexus.addSchemeModule(called);

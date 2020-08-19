@@ -92,9 +92,7 @@ export default class Valens extends UIComponent {
       propState.kueryName = kueryName;
       propState.kuery = kuery;
       thisChainEagerly(propState, this.getUIContext(),
-          (kuery[IsLiveTag] === false)
-              ? _staticKueryPropChain
-              : _liveKueryPropChain,
+          (kuery[IsLiveTag] === false) ? _staticKueryPropChain : _liveKueryPropChain,
           _errorOnBindFocusSubscriptions);
     }
     _initializeElementPropsToLive(this, props, live, kueryStates);
@@ -151,21 +149,27 @@ export default class Valens extends UIComponent {
       }
     }
 
-    let finalType = this.props.elementType;
-    let children = this.props.children;
+    let outerType = this.props.elementType;
+    let outerChildren = this.props.children;
 
     if (stateLive.frameOverrides) {
       // Denote that frame overrides object has been rendered and that
       // any new frame updates should create a new override object
       stateLive.frameOverrides = null;
     }
-    if (stateLive.valoscopeProps) {
-      finalType = Valoscope;
-      children = stateLive.valoscopeChildren;
-      if (!children) {
-        stateLive.elementProps.children = this.props.children;
-        children = stateLive.valoscopeChildren =
-            [React.createElement(this.props.elementType, stateLive.elementProps)];
+    let outerProps;
+    if (!stateLive.valoscopeProps) {
+      outerProps = stateLive.elementProps;
+    } else {
+      outerProps = stateLive.valoscopeProps;
+      if (stateLive.elementProps) {
+        outerType = Valoscope;
+        outerChildren = stateLive.valoscopeChildren;
+        if (!outerChildren) {
+          stateLive.elementProps.children = this.props.children;
+          outerChildren = stateLive.valoscopeChildren =
+              [React.createElement(this.props.elementType, stateLive.elementProps)];
+        }
       }
     }
 
@@ -177,11 +181,10 @@ export default class Valens extends UIComponent {
       });
     }
     /* */
-    const finalProps = stateLive.valoscopeProps || stateLive.elementProps;
     if (!stateLive.keyFromFocus) {
-      _valensRecorderProps.key(stateLive, (finalType === Valoscope) ? Lens.key : LensElementKey);
+      _valensRecorderProps.key(stateLive, (outerType === Valoscope) ? Lens.key : LensElementKey);
     }
-    finalProps.children = children;
+    outerProps.children = outerChildren;
 
     if (stateLive.renderRejection === null) {
       stateLive.renderRejection = _createRenderRejection(stateLive);
@@ -191,31 +194,37 @@ export default class Valens extends UIComponent {
       if (!Array.isArray(stateLive.array)) {
         return this.renderSlotAsLens("arrayNotIterableLens", stateLive.array);
       }
-      return this.renderFocusAsSequence(stateLive.array, finalType, finalProps, undefined,
+      return this.renderFocusAsSequence(stateLive.array, outerType, outerProps, undefined,
           stateLive); // Note: stateLive has been designed to be used as options object here
     }
     const rejection = stateLive.renderRejection && stateLive.renderRejection(focus);
     if (rejection !== undefined) return rejection;
-    finalProps.key = stateLive.keyFromFocus(focus, null, finalProps);
-    return postRenderElement(this, React.createElement(finalType, finalProps), focus);
+    outerProps.key = stateLive.keyFromFocus(focus, null, outerProps);
+    return postRenderElement(this, React.createElement(outerType, outerProps), focus);
   }
 }
 
 function _createStateLive (component, props) {
-  const isValoscope = props.elementType === Valoscope;
-  return {
+  const ret = {
     component,
-    isValoscope,
     frame: component.getUIContextValue("frame") || {},
     kueryValues: {},
-    recorders: isValoscope
-            ? _valoscopeRecorders
-        : props.elementType.isUIComponent
-            ? _componentRecorders
-            : _elementRecorders,
     pendingProps: null,
-    elementProps: {},
   };
+  if (props.elementType === Valoscope) {
+    _obtainValoscopeProps(ret);
+    ret.recorders = _valoscopeRecorders;
+  } else {
+    ret.elementProps = {};
+    ret.recorders = props.elementType.isUIComponent
+        ? _componentRecorders
+        : _elementRecorders;
+  }
+  return ret;
+}
+
+function _obtainValoscopeProps (stateLive) {
+  return stateLive.valoscopeProps || (stateLive.valoscopeProps = {});
 }
 
 const _liveKueryPropChain = [
@@ -314,9 +323,7 @@ function _recordNewGenericPropValue (stateLive, propValue, propName, component) 
         newName = `on${name[0].toUpperCase()}${name.slice(1)}`;
       } else if (namespace === "Frame") {
         if (!stateLive.frameOverrides) {
-          const targetProps = stateLive.isValoscope
-              ? stateLive.elementProps
-              : stateLive.valoscopeProps || _emitValoscope(stateLive);
+          const targetProps = _obtainValoscopeProps(stateLive);
           stateLive.frameOverrides = targetProps.frameOverrides = { ...targetProps.frameOverrides };
         }
         stateLive.frameOverrides[name] = propValue;
@@ -324,17 +331,8 @@ function _recordNewGenericPropValue (stateLive, propValue, propName, component) 
       } else {
         throw new Error(`Unrecognized attribute ${propName}`);
       }
-      /*
-      if (namespace === "Lens") {
-        if (!stateLive.isValoscope) {
-          (stateLive.valoscopeProps || (stateLive.valoscopeProps = {}))[name] = propValue;
-          return;
-        }
-        newName = name;
-      }
-      */
     } else if (propName.startsWith("on")
-        && (!stateLive.isValoscope || (propName[2] === propName[2].toUpperCase()))) {
+        && (stateLive.elementProps || (propName[2] === propName[2].toUpperCase()))) {
       /*
       console.debug(`DEPRECATED: React-style camelcase event handler '${propName}', prefer 'On:${
           propName[2].toLowerCase()}${propName.slice(3)} (in ${
@@ -342,8 +340,9 @@ function _recordNewGenericPropValue (stateLive, propValue, propName, component) 
       */
       newValue = _valensWrapCallback(component, propValue, propName);
     }
-    if (stateLive.elementProps[newName] === newValue) return true;
-    stateLive.elementProps[newName] = newValue;
+    const targetProps = stateLive.elementProps || stateLive.valoscopeProps;
+    if (targetProps[newName] === newValue) return true;
+    targetProps[newName] = newValue;
     if (stateLive.valoscopeProps) stateLive.valoscopeChildren = null;
     return false;
   } catch (error) {
@@ -362,7 +361,7 @@ const _valensRecorderProps = {
     if (!newValue) return;
     const component = stateLive.component;
     let keyOp;
-    if (!stateLive.valoscopeProps) _emitValoscope(stateLive);
+    _obtainValoscopeProps(stateLive);
     if (typeof newValue === "function") {
       const stepPrefix = component.getParentUIContextValue(Lens.frameStepPrefix) || "";
       stateLive.keyFromFocus = function _createCustomKey (focus, arrayIndex, entryProps) {
@@ -388,7 +387,8 @@ const _valensRecorderProps = {
   },
   children: "children",
   ref (stateLive, newValue) {
-    stateLive.elementProps.ref = _valensWrapCallback(stateLive.component, newValue, "$Lens.ref");
+    (stateLive.valoscopeProps || stateLive.elementProps).ref =
+        _valensWrapCallback(stateLive.component, newValue, "$Lens.ref");
     if (stateLive.valoscopeProps) stateLive.valoscopeChildren = null;
   },
   styleSheet (stateLive, newValue) {
@@ -516,9 +516,7 @@ const _emitValoscopeRecorderProps = {
   instanceLensPrototype: "instanceLensPrototype",
 
   valoscope (stateLive, newValue) {
-    Object.assign(
-        stateLive.valoscopeProps || _emitValoscope(stateLive),
-        newValue || {});
+    Object.assign(_obtainValoscopeProps(stateLive), newValue || {});
   },
 };
 
@@ -532,12 +530,9 @@ const _valoscopeRecorderProps = {
     }
     stateLive.delegate = newValue;
   },
-  valoscope (stateLive, newValue) { // overrides the _emitValoscopeRecorderProps.valoscope version
-    Object.assign(stateLive.elementProps, newValue || {});
-  },
 };
 
-// These props have namespace Element and are only available for
+// These props have namespace HTML and are only available for
 // non-component elements.
 const _elementRecorderProps = {
   class: _className,
@@ -559,7 +554,7 @@ function _createRecorder (propName, propRecorderValue, namespace) {
     (typeof propRecorderValue !== "string")
         ? propRecorderValue
         : function _recordProp (stateLive, propValue) {
-          stateLive.elementProps[propRecorderValue] = propValue;
+          (stateLive.elementProps || stateLive.valoscopeProps)[propRecorderValue] = propValue;
           if (stateLive.valoscopeProps) stateLive.valoscopeChildren = null;
         },
   ];
@@ -572,17 +567,13 @@ function _createEmitRecorder (propName, propRecorderValue, namespace) {
         : `$${namespace}.${propName}`,
     (typeof propRecorderValue !== "string")
         ? function _recordValoscopeProp (stateLive, propValue) {
-          if (!stateLive.valoscopeProps) _emitValoscope(stateLive);
+          _obtainValoscopeProps(stateLive);
           propRecorderValue(stateLive, propValue);
         }
         : function _recordValoscopeProp (stateLive, propValue) {
-          (stateLive.valoscopeProps || _emitValoscope(stateLive))[propRecorderValue] = propValue;
+          _obtainValoscopeProps(stateLive)[propRecorderValue] = propValue;
         },
   ];
-}
-
-function _emitValoscope (stateLive) {
-  return stateLive.valoscopeProps = {};
 }
 
 const _valoscopeRecorders = Object.fromEntries([
@@ -609,7 +600,7 @@ const _elementRecorders = Object.fromEntries([
 
   ...Object.entries(_emitValoscopeRecorderProps).map(([k, v]) => _createEmitRecorder(k, v, "Lens")),
 
-  ...Object.entries(_elementRecorderProps).map(([k, v]) => _createRecorder(k, v, "Element")),
+  ...Object.entries(_elementRecorderProps).map(([k, v]) => _createRecorder(k, v, "HTML")),
   ...Object.entries(_elementRecorderProps).map(([k, v]) => _createRecorder(k, v)),
 ]);
 

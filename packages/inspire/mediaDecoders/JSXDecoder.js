@@ -240,10 +240,9 @@ export default class JSXDecoder extends MediaDecoder {
     }
 
     const childrenMeta = this._createChildrenMeta(children, sourceKey,
-        (actualType === Valoscope) || (propsMeta || "").isFramed
+        (actualType === Valoscope) || (propsMeta || "").hasFrame
             ? sourceKey
             : parentChildrenMeta.nearestFramedParentKey);
-    const decodedChildrenArgs = !childrenMeta.decodedChildren ? [] : [childrenMeta.decodedChildren];
 
     if (!childrenMeta.hasIntegrators && !(propsMeta || "").hasIntegrators) {
       if (childrenMeta.hasKueries) {
@@ -252,7 +251,7 @@ export default class JSXDecoder extends MediaDecoder {
             || (parentChildrenMeta.scopeAccesses = {}), childrenMeta.scopeAccesses);
       }
       return _injectSourceInfoTag(
-          React.createElement(decodedType, decodedProps, ...decodedChildrenArgs),
+          React.createElement(decodedType, decodedProps, ...childrenMeta.decodedChildren),
           sourceInfo);
     }
     const self = this;
@@ -284,12 +283,12 @@ export default class JSXDecoder extends MediaDecoder {
             }
           }
         }
-        const integratedChildrenArgs = !childrenMeta.hasIntegrators
-            ? decodedChildrenArgs
-            : [decodedChildrenArgs[0].map(child =>
-                _maybeIntegrate(child, integrationHostGlobal))];
+        const integratedChildren = !childrenMeta.hasIntegrators
+            ? childrenMeta.decodedChildren
+            : childrenMeta.decodedChildren.map(child =>
+                _maybeIntegrate(child, integrationHostGlobal));
         return _injectSourceInfoTag(
-            React.createElement(decodedType, integratedProps, ...integratedChildrenArgs),
+            React.createElement(decodedType, integratedProps, ...integratedChildren),
             sourceInfo);
       } catch (error) {
         throw self.wrapErrorEvent(error, 1, () => [
@@ -307,7 +306,7 @@ export default class JSXDecoder extends MediaDecoder {
       hasIntegrators: false, hasKueries: false, totalCount: (children && children.length) || 0,
       scopeAccesses: {}, nameIndices: {}, nearestFramedParentKey,
     };
-    ret.decodedChildren = children && children.length && children.map(child =>
+    ret.decodedChildren = (children || []).map(child =>
         _extractMetaOfValueInto(
             _maybeRecurseWithKey(child, parentKey, ret),
             ret,
@@ -320,7 +319,7 @@ export default class JSXDecoder extends MediaDecoder {
     const ret = {
       hasIntegrators: false, hasKueries: false, totalCount: 0,
       scopeAccesses: {}, byNamespace: {}, decodedElementProps: {}, propsIntegrators: [],
-      isFramed: elementName === "Valoscope" || isInstanceLens,
+      hasFrame: elementName === "Valoscope" || isInstanceLens,
     };
 
     /* eslint-disable prefer-const */
@@ -335,22 +334,22 @@ export default class JSXDecoder extends MediaDecoder {
 
     if (isInstanceLens) {
       ++ret.totalCount;
-      restAttrs["$Lens:instanceLensPrototype"] = _getInstanceLensPrototypeKuery(elementName);
+      restAttrs["$Lens.instanceLensPrototype"] = _getInstanceLensPrototypeKuery(elementName);
     }
 
     for (const [attrName, aliasOf, shouldWarn, warnMessage] of [
-      ["focus", "$Lens:focus"],
-      ["head", "$Lens:focus", true],
-      ["array", "$Lens:array"],
-      ["key", "$Lens:key"],
-      ["context", "$Lens:context"],
-      ["elementKey", "$Lens:frameKey", true],
+      ["key", "$Lens.key"],
       ["class", !isComponentLens ? "className" : "class", false],
-      ["styleSheet", "$Lens:styleSheet"],
-      ["valoscope", "$Lens:valoscope", true, "direct Lens:<property> notation"],
-      ["vScope", "$Lens:valoscope", true, "direct Lens:<property> notation"],
-      ["valaaScope", "$Lens:valoscope", true, "direct Lens:<property> notation"],
-      ["ref", "$Lens:ref", true],
+      ["focus", "$Lens.focus"],
+      ["head", "$Lens.focus", true],
+      ["array", "$Lens.array"],
+      ["ref", "$Lens.ref", true],
+      ["styleSheet", "$Lens.styleSheet"],
+      ["context", "$Lens.context"],
+      ["elementKey", "$Lens.frameKey", true],
+      ["valoscope", "$Lens.valoscope", true, "direct Lens:<property> notation"],
+      ["vScope", "$Lens.valoscope", true, "direct Lens:<property> notation"],
+      ["valaaScope", "$Lens.valoscope", true, "direct Lens:<property> notation"],
     ]) {
       if (parsedProps[attrName] === undefined) continue;
       if (shouldWarn || ((shouldWarn !== false) && (!isComponentLens || isInstanceLens))) {
@@ -366,20 +365,27 @@ export default class JSXDecoder extends MediaDecoder {
       restAttrs[aliasOf] = parsedProps[attrName];
     }
 
-    const defaultNamespace = !isComponentLens ? "Element" : !isInstanceLens ? "Lens" : "Frame";
-    const flattenedNamespace = !isComponentLens ? "Element" : "Lens";
+    const staticKueriesByDefault = restAttrs["$Lens.static"]
+        || (isComponentLens && !isInstanceLens && restAttrs.static);
+
+    const defaultNamespace = !isComponentLens ? "HTML" : !isInstanceLens ? "Lens" : "Frame";
+    const flattenedNamespace = !isComponentLens ? "HTML" : "Lens";
     for (const [givenName, attr] of Object.entries(restAttrs)) {
-      let [, namespace, name] = givenName.match(/^\$([^.]+):(.*)$/)
+      let [, namespace, name] = givenName.match(/^\$([^.]+)\.(.*)$/)
           || [null, defaultNamespace, givenName];
-      const isLiveKuery = namespace.startsWith("live.") ? true
-          : namespace.startsWith("static.") ? false
+      let isLiveKuery = namespace.startsWith("live-") ? true
+          : namespace.startsWith("static-") ? false
           : undefined;
       if (isLiveKuery !== undefined) namespace = namespace.slice(isLiveKuery ? 5 : 7);
+      else if (staticKueriesByDefault) isLiveKuery = false;
+      if (namespace === "Lens") {
+        if (name === "static") continue;
+        if (_valoscopeAttributes[name]) ret.hasFrame = true;
+      }
       const namespaceAttrs = ret.byNamespace[namespace] || (ret.byNamespace[namespace] = {});
-      if (namespace === "Lens" && _valoscopeAttributes[name]) ret.isFramed = true;
       if (namespaceAttrs[name] !== undefined) {
         this.debugEvent(`Overriding existing value of attribute ${namespace}:${name
-            } by given attribute '${givenName
+            } by given attribute '${namespace}:${name
             }' (likely as a result of two aliased props, in ${elementName} at ${sourceKey})`);
       }
       const decodedValue = namespaceAttrs[name] =

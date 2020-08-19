@@ -223,7 +223,7 @@ function visitNode (traverse, object, path, state) {
     */
     const name = !attr.name.namespace
         ? attr.name.name
-        : `$${attr.name.namespace.name}:${attr.name.name.name}`;
+        : `$${attr.name.namespace.name}.${attr.name.name.name}`;
 
     utils.catchup(attr.range[0], state, trimLeft);
 

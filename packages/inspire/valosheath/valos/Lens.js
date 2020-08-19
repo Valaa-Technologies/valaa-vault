@@ -378,6 +378,24 @@ however.
     value (focus: any, component: UIComponent) { return component.props.children; },
   }));
 
+  _defineName("static", () => ({
+    tags: ["Attribute"],
+    type: "boolean",
+    description:
+`Make all component attributes non-live by default.
+
+An attribute can still selectively be made live by prefixing its
+namespace with 'live-' (ie. an attribute with implicit namepace must
+have its namespace be explicitly given: 'Lens:' for Valoscopes,
+'Frame:' for instance lens frame attributes and 'HTML:' for generic
+html attributes)
+
+Alternatively this attribute can be omitted and attributes can be
+selectively made static by prefixing their namespace with 'static-'
+like above.
+`,
+  }));
+
   const parentComponentLens = _defineName("parentComponentLens", () => ({
     tags: ["Lens"],
     type: "UIComponent",

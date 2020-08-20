@@ -210,8 +210,10 @@ export default class JSXDecoder extends MediaDecoder {
     if ((actualType === UIComponent)
         && (children.length === 1)
         && (!props || (Object.keys(props).length === 0))) {
-      const shortCircuit = _maybeRecurseWithKey(children[0], parentKey, parentChildrenMeta);
-      if (React.isValidElement(shortCircuit)) return shortCircuit;
+      const candidate = _maybeRecurseWithKey(children[0], parentKey, parentChildrenMeta);
+      if (candidate != null || candidate._isIntegrator || React.isValidElement(candidate)) {
+        return candidate;
+      }
     }
     const elementPrefix = JSXDecoder._nameAbbreviations[name] || name;
     const elementIndex = (parentChildrenMeta.nameIndices[name] =
@@ -226,7 +228,7 @@ export default class JSXDecoder extends MediaDecoder {
       propsMeta = this._createPropsMeta(
           sourceInfo, loc, props || {}, name, isInstanceLens, actualType.isUIComponent, sourceKey);
       ([decodedType, decodedProps] = tryCreateValensArgs(
-              actualType, Object.entries(propsMeta.decodedElementProps),
+              actualType, propsMeta.decodedElementProps,
               sourceKey.slice((parentChildrenMeta.nearestFramedParentKey.length || -1) + 1))
           || [actualType, propsMeta.decodedElementProps]);
       if (decodedType === Valens) {
@@ -257,30 +259,19 @@ export default class JSXDecoder extends MediaDecoder {
     const self = this;
     function _elementIntegrator (integrationHostGlobal: Object) {
       try {
-        /*
-        if (isInstanceLens) {
-          integratedProps.instanceLensPrototype =
-              VALEK.fromValue(integrationFabricScope).propertyValue(type);
-          if (!integrationFabricScope[type]) {
-            throw new Error(`Cannot find lens instance prototype by name '${type
-                }' from integration scope of ${vIntegrator.debugId()}`);
-          }
-        }
-        */
         let integratedProps = decodedProps;
-        const propsIntegrators = propsMeta && propsMeta.propsIntegrators;
-        if ((propsIntegrators || []).length) {
-          integratedProps = { ...decodedProps };
+        if (propsMeta && propsMeta.hasIntegrators) {
+          integratedProps = {};
+          for (const [propName, prop] of Object.entries(decodedProps)) {
+            integratedProps[propName] = (typeof prop === "function") && prop._isIntegrator
+                ? prop(integrationHostGlobal)
+                : prop;
+          }
           if (decodedType === Valens) {
-            integratedProps.elementPropsSeq = [...decodedProps.elementPropsSeq];
-            for (const [propName, kueryIntegrator] of propsIntegrators) {
-              integratedProps.elementPropsSeq
-                  .push([propName, kueryIntegrator(integrationHostGlobal)]);
-            }
-          } else {
-            for (const [propName, kueryIntegrator] of propsIntegrators) {
-              integratedProps[propName] = kueryIntegrator(integrationHostGlobal);
-            }
+            integratedProps.elementPropsSeq = decodedProps.elementPropsSeq
+                .map(e => (((typeof e[1] === "function") && e[1]._isIntegrator)
+                    ? [e[0], e[1](integrationHostGlobal)]
+                    : e));
           }
         }
         const integratedChildren = !childrenMeta.hasIntegrators
@@ -337,7 +328,7 @@ export default class JSXDecoder extends MediaDecoder {
       restAttrs["$Lens.instanceLensPrototype"] = _getInstanceLensPrototypeKuery(elementName);
     }
 
-    for (const [attrName, aliasOf, shouldWarn, warnMessage] of [
+    for (const [attrName, aliasOf, shouldWarn, warning] of [
       ["key", "$Lens.key"],
       ["class", !isComponentLens ? "className" : "class", false],
       ["focus", "$Lens.focus"],
@@ -354,7 +345,7 @@ export default class JSXDecoder extends MediaDecoder {
       if (parsedProps[attrName] === undefined) continue;
       if (shouldWarn || ((shouldWarn !== false) && (!isComponentLens || isInstanceLens))) {
         this.debugEvent(`DEPRECATED: non-namespaced attribute '${attrName}' in favor of ${
-            warnMessage || aliasOf.slice(1)} (in ${elementName} at ${sourceKey})`);
+            warning || aliasOf.slice(1).replace(".", ":")} (in ${elementName} at ${sourceKey})`);
       }
       if (restAttrs[aliasOf] !== undefined) {
         throw new Error(`Attribute conflict found; the deprecated non-namespaced attribute '${
@@ -391,11 +382,7 @@ export default class JSXDecoder extends MediaDecoder {
       const decodedValue = namespaceAttrs[name] =
           _extractMetaOfValueInto(attr, ret, this._globalEngineDiscourse, isLiveKuery);
       const propName = (namespace === flattenedNamespace) ? name : `$${namespace}.${name}`;
-      if ((typeof decodedValue === "function") && decodedValue._isIntegrator) {
-        ret.propsIntegrators.push([propName, decodedValue]);
-      } else {
-        ret.decodedElementProps[propName] = decodedValue;
-      }
+      ret.decodedElementProps[propName] = decodedValue;
     }
     return ret;
   }

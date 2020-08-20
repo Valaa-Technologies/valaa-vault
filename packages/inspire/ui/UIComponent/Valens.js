@@ -66,10 +66,6 @@ export default class Valens extends UIComponent {
     elementPropsSeq: PropTypes.arrayOf(PropTypes.any).isRequired,
     propsKueriesSeq: PropTypes.arrayOf(PropTypes.any),
   }
-  static valensPropsBehaviors = {
-    ...UIComponent.valensPropsBehaviors,
-    propsKueriesSeq: false,
-  }
 
   getKey () {
     return this._key || this.getPrefixedHierarchyKey();
@@ -133,11 +129,6 @@ export default class Valens extends UIComponent {
   renderLoaded (focus: any) {
     const stateLive = this.state.live;
     if (!stateLive) return this.renderSlotAsLens("loadingLens");
-    /*
-    if (stateLive.ongoingKueries) {
-      return this.renderSlotAsLens("kueryingPropsLens", stateLive.ongoingKueries);
-    }
-    */
 
     if (stateLive.delegate !== undefined) {
       return this.renderFirstEnabledDelegate(stateLive.delegate, undefined, "delegate");
@@ -145,7 +136,7 @@ export default class Valens extends UIComponent {
     if (stateLive.pendingProps) {
       const pendingPropNames = _refreshPendingProps(stateLive);
       if (pendingPropNames) {
-        return this.renderSlotAsLens("pendingPropsLens", pendingPropNames);
+        return this.renderSlotAsLens("pendingAttributesLens", pendingPropNames);
       }
     }
 
@@ -282,16 +273,15 @@ function _initializeElementPropsToLive (component, props, stateLive, kueryStates
   const kueryValues = stateLive.kueryValues;
   for (const [propName, propValue] of props.elementPropsSeq) {
     let newValue = propValue;
-    if ((typeof newValue === "function") && newValue.fetchedKueryNames) {
+    if ((typeof newValue === "function") && newValue.kueryName) {
       let isPending;
-      for (const kueryName of newValue.fetchedKueryNames) {
-        if (!kueryValues.hasOwnProperty(kueryName)) isPending = true;
-        (kueryStates[kueryName].dependentProps || (kueryStates[kueryName].dependentProps = []))
-            .push([propName, newValue]);
-      }
+      if (!kueryValues.hasOwnProperty(newValue.kueryName)) isPending = true;
+      (kueryStates[newValue.kueryName].dependentProps
+              || (kueryStates[newValue.kueryName].dependentProps = []))
+          .push([propName, newValue]);
       if (isPending) {
         (stateLive.pendingProps || (stateLive.pendingProps = []))
-            .push([propName, newValue.fetchedKueryNames]);
+            .push([propName, newValue.kueryName]);
         continue;
       }
       newValue = newValue(kueryValues);
@@ -616,12 +606,8 @@ function _refreshOngoingKueries (component, kueryValues, ongoingKueries) {
 
 function _refreshPendingProps (stateLive) {
   const kueryValues = stateLive.kueryValues;
-  stateLive.pendingProps = stateLive.pendingProps.filter(([, fetchedKueryNames]) => {
-    for (const kueryName of fetchedKueryNames) {
-      if (!kueryValues.hasOwnProperty(kueryName)) return true;
-    }
-    return false;
-  });
+  stateLive.pendingProps = stateLive.pendingProps
+      .filter(([, kueryName]) => !kueryValues.hasOwnProperty(kueryName));
   if (stateLive.pendingProps.length) return stateLive.pendingProps.map(([name]) => name);
   stateLive.pendingProps = null;
   return undefined;

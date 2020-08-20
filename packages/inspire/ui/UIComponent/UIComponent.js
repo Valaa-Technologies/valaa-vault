@@ -24,7 +24,7 @@ import {
 } from "./_lifetimeOps";
 import {
   // _childProps,
-  _checkForInfiniteRenderRecursion,
+  _hasRenderDepthFailures,
 } from "./_propsOps";
 import {
   _renderFocus, _renderFocusAsSequence, _renderFirstAbleDelegate,
@@ -74,20 +74,28 @@ export default class UIComponent extends React.Component {
     loadingFailedLens: PropTypes.any,
 
     pendingLens: PropTypes.any,
-    failedLens: PropTypes.any,
+    rejectedLens: PropTypes.any,
+
+    pendingPromiseLens: PropTypes.any,
+    rejectedPromiseLens: PropTypes.any,
 
     nullLens: PropTypes.any,
     undefinedLens: PropTypes.any,
     lens: PropTypes.any,
 
-    pendingConnectionsLens: PropTypes.any,
-    failedConnectionsLens: PropTypes.any,
-    pendingActivationLens: PropTypes.any,
-    failedActivationLens: PropTypes.any,
-    pendingMediaInterpretationLens: PropTypes.any,
-    failedMediaInterpretationLens: PropTypes.any,
-    unrenderableMediaInterpretationLens: PropTypes.any,
-    mediaInterpretationErrorLens: PropTypes.any,
+    pendingChroniclesLens: PropTypes.any,
+    rejectedChroniclesLens: PropTypes.any,
+
+    pendingFocusLens: PropTypes.any,
+    rejectedFocusLens: PropTypes.any,
+
+    pendingFrameLens: PropTypes.any,
+    rejectedFrameLens: PropTypes.any,
+
+    pendingMediaLens: PropTypes.any,
+    rejectedMediaLens: PropTypes.any,
+    uninterpretableMediaLens: PropTypes.any,
+    unrenderableInterpretationLens: PropTypes.any,
 
     resourceLens: PropTypes.any,
     activeLens: PropTypes.any,
@@ -101,24 +109,17 @@ export default class UIComponent extends React.Component {
     delegateLensProperty: _propertyNames,
     instanceLensProperty: _propertyNames,
 
-    pendingFocusLens: PropTypes.any,
+    pendingAttributesLens: PropTypes.any,
+    rejectedAttributesLens: PropTypes.any,
 
-    kueryingPropsLens: PropTypes.any,
-    pendingPropsLens: PropTypes.any,
-    failedPropsLens: PropTypes.any,
-
-    pendingChildrenLens: PropTypes.any,
-    failedChildrenLens: PropTypes.any,
+    pendingElementsLens: PropTypes.any,
+    rejectedElementsLens: PropTypes.any,
     lensPropertyNotFoundLens: PropTypes.any,
   }
 
   static childContextTypes = {
     parentUIContext: PropTypes.object,
   };
-
-  static valensPropsBehaviors = {
-    children: false,
-  }
 
   static propsCompareModesOnComponentUpdate = {
     children: "shallow",
@@ -136,7 +137,15 @@ export default class UIComponent extends React.Component {
     const uiContext = Object.create(context.parentUIContext);
     uiContext.context = uiContext;
     uiContext.reactComponent = this;
-    uiContext[Lens.currentRenderDepth] = context.parentUIContext[Lens.currentRenderDepth] + 1;
+    const renderDepth = uiContext[Lens.currentRenderDepth] =
+        context.parentUIContext[Lens.currentRenderDepth] + 1;
+    const maximumRenderDepth = uiContext[Lens.maximumRenderDepth];
+    if ((maximumRenderDepth !== undefined) && (renderDepth > maximumRenderDepth + 10)) {
+      // This error denotes a secondary failure in the UIComponent..render
+      // error handling code itself which checks for the max depth.
+      throw new Error(
+          `INTERNAL ERROR: max depth greatly exceeded ${renderDepth} > ${maximumRenderDepth} + 10`);
+    }
 
     this.state = {
       error: undefined,
@@ -567,7 +576,7 @@ export default class UIComponent extends React.Component {
     try {
       const renderNormally = (ret === undefined)
           && !this._errorObject
-          && !_checkForInfiniteRenderRecursion(this);
+          && (!_hasRenderDepthFailures(this) || (ret = undefined));
       if (renderNormally) {
         // TODO(iridian): Fix this uggo hack where ui-context content is updated at render.
         try {
@@ -579,15 +588,15 @@ export default class UIComponent extends React.Component {
           if (!tryConnectToAbsentChroniclesAndThen(error, () => this.forceUpdate())) {
             throw error;
           }
-          latestRenderedLensSlot = "pendingConnectionsLens";
+          latestRenderedLensSlot = "pendingChroniclesLens";
           ret = this.tryRenderSlotAsLens(latestRenderedLensSlot,
               (error.originalError || error).absentChronicleURIs.map(entry => String(entry)));
         }
         // Try to handle pending promises.
         if (isPromise(ret)) {
           const operationInfo = ret.operationInfo || {
-            slotName: "pendingLens", focus: { render: ret, latestRenderedLensSlot },
-            onError: { slotName: "failedLens", lens: { render: ret } },
+            slotName: "pendingPromiseLens", focus: { render: ret, latestRenderedLensSlot },
+            onError: { slotName: "rejectedPromiseLens", lens: { render: ret } },
           };
           ret.then(renderValue => {
             this._pendingRenderValue = renderValue;
@@ -605,9 +614,10 @@ export default class UIComponent extends React.Component {
           latestRenderedLensSlot = operationInfo.slotName;
           ret = this.tryRenderSlotAsLens(latestRenderedLensSlot, operationInfo.focus);
           if (isPromise(ret)) {
-            throw wrapError(new Error("Invalid render result: 'pendingLens' returned a promise"),
-                new Error(`During ${this.debugId()}\n .render().ret.pendingLens, with:`),
-                "\n\tpendingLens ret:", dumpObject(ret),
+            throw wrapError(
+                new Error("Invalid render result: 'pendingPromiseLens' returned a promise"),
+                new Error(`During ${this.debugId()}\n .render().ret.pendingPromiseLens, with:`),
+                "\n\tpendingPromiseLens ret:", dumpObject(ret),
                 "\n\tcomponent:", dumpObject(this));
           }
         }
@@ -616,7 +626,9 @@ export default class UIComponent extends React.Component {
         mainValidationFaults = _validateElement(ret);
 
         // Main return line
-        if (mainValidationFaults === undefined) return ret;
+        if (mainValidationFaults === undefined) {
+          return ret;
+        }
 
         console.error(`Validation faults on render result of '${latestRenderedLensSlot}' by`,
                 this.debugId(),

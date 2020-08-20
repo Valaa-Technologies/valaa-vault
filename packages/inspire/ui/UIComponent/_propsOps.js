@@ -9,7 +9,7 @@ import Vrapper from "~/engine/Vrapper";
 
 import Lens from "~/inspire/valosheath/valos/Lens";
 
-import { dumpObject, wrapError } from "~/tools";
+import { wrapError } from "~/tools";
 
 import type UIComponent from "./UIComponent";
 
@@ -24,50 +24,65 @@ export function createDynamicKey (focus, index) {
       : "unfocused";
 }
 
-export function _checkForInfiniteRenderRecursion (component: UIComponent) {
+export function _hasRenderDepthFailures (component: UIComponent) {
   let uiContext = component.state.uiContext;
   if (!uiContext || !uiContext.focus) return false;
   const depth = uiContext[Lens.currentRenderDepth];
   if ((depth !== undefined) && (depth < uiContext[Lens.infiniteRecursionCheckWaterlineDepth])) {
     return false;
   }
-  const newFocus = component.getFocus();
-  const newKey = component.getKey();
-  // eslint-disable-next-line
-  while ((uiContext = Object.getPrototypeOf(uiContext))) {
-    if (!uiContext.reactComponent || (uiContext.reactComponent.getKey() !== newKey)
-        || (uiContext.reactComponent.constructor !== component.constructor)) {
-      continue;
+  let error;
+  if (depth >= uiContext[Lens.maximumRenderDepth]) {
+    error = new Error(
+        `$Lens.currentRenderDepth (${depth}) exceeds $Lens.maximumRenderDepth (${
+            uiContext[Lens.maximumRenderDepth]}).`);
+  } else {
+    const newFocus = component.getFocus();
+    const newKey = component.getKey();
+    // eslint-disable-next-line
+    while ((uiContext = Object.getPrototypeOf(uiContext))) {
+      if (!uiContext.reactComponent || (uiContext.reactComponent.getKey() !== newKey)
+          || (uiContext.reactComponent.constructor !== component.constructor)) {
+        continue;
+      }
+      if (uiContext.focus !== newFocus) {
+        continue;
+      }
+      if (_comparePropsOrState(uiContext.reactComponent.props, component.props, "onelevelshallow",
+          component.constructor.propsCompareModesOnComponentUpdate, "props")) {
+        continue;
+      }
+      console.log("Infinite render recursion match found in component", component,
+              component.state.uiContext,
+          "\n\tancestor props:", uiContext.reactComponent.props,
+          "\n\telement props:", component.props);
+      error = new Error("Infinite component render recursion detected");
+      break;
     }
-    if (uiContext.focus !== newFocus) {
-      continue;
-    }
-    if (_comparePropsOrState(uiContext.reactComponent.props, component.props, "onelevelshallow",
-        component.constructor.propsCompareModesOnComponentUpdate, "props")) {
-      continue;
-    }
-    console.log("Infinite render recursion match found in component", component,
-            component.state.uiContext,
-        "\n\tancestor props:", uiContext.reactComponent.props,
-        "\n\telement props:", component.props);
-    const currentContext = Object.assign(
-        Object.create(Object.getPrototypeOf(component.state.uiContext)),
-        component.state.uiContext);
-    const error = wrapError(new Error("Infinite component render recursion detected"),
-        `Exception caught in ${
-            component.debugId()})\n ._checkForInfiniteRenderRecursion(), with:`,
-        "\n\tcurrent component UI context:", ...dumpObject(currentContext),
-        "\n\tnew candidate focus:", ...dumpObject(newFocus),
-        "\n\tnew candidate key:", newKey,
-        "\n\tnew candidate props:", dumpObject(component.props),
-        "\n\tidentical ancestor UI context:", dumpObject(uiContext),
-        "\n\tidentical ancestor focus:", ...dumpObject(uiContext.focus),
-        "\n\tidentical ancestor props:", ...dumpObject(uiContext.reactComponent.props),
-    );
-    component.enableError(error, "UIComponent._checkForInfiniteRenderRecursion");
-    return true;
   }
-  return false;
+  if (!error) return false;
+  const logLines = [
+    "\n\tcomponent:", component,
+    "\n\tcomponent focus:", component.getFocus(),
+    "\n\tcomponent key:", component.getKey(),
+    "\n\tcomponent props:", component.props,
+    "\n\tcomponent uiContext snapshot:", Object.assign(
+        Object.create(Object.getPrototypeOf(component.state.uiContext)),
+        component.state.uiContext),
+    ...((uiContext === component.state.uiContext) ? [] : [
+      "\n\trecurring ancestor:", uiContext.reactComponent,
+      "\n\trecurring ancestor focus:", uiContext.reactComponent.getKey(),
+      "\n\trecurring ancestor key:", uiContext.reactComponent.getKey(),
+      "\n\trecurring ancestor props:", uiContext.reactComponent.props,
+      "\n\trecurring ancestor uiContext:", uiContext,
+    ]),
+  ];
+  console.log("Maximum render depth exceeded in component", ...logLines);
+  component.enableError(wrapError(error,
+      `Exception caught in ${component.debugId()})\n ._hasRenderDepthFailures(), with:`,
+      ...logLines,
+  ), "UIComponent._hasRenderDepthFailures");
+  return true;
 }
 
 export function _comparePropsOrState (leftObject: any, rightObject: any, defaultEntryCompare: any,

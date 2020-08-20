@@ -215,6 +215,36 @@ to 'model', and the various components roughly correspond to 'controller'.
     isEnabled: true,
   }));
 
+  const loadingLens = _defineName("loadingLens", () => ({
+    tags: ["Primary", "Attribute", "Context", "Lens", "Loading"],
+    type: "Lens",
+    description:
+`A catch-all slot for viewing a description of a dependency which is
+still being loaded.
+
+This slot has no default lens.
+If a lens is placed into this slot then all the other loading slots
+will by default delegate viewing to that lens instead of using their
+own default lens.
+
+    @focus {Object} component  an object description of the dependency being loaded`,
+  }));
+
+  const loadingFailedLens = _defineName("loadingFailedLens", () => ({
+    tags: ["Primary", "Attribute", "Context", "Lens", "Loading", "Failure"],
+    type: "Lens",
+    description:
+`A catch-all slot for viewing a description of a dependency which has
+failed to load.
+
+This slot has no default lens.
+If a lens is placed into this slot then all the other loading failure
+slots will by default delegate viewing to that lens instead of using
+their own default lens.
+
+    @focus {string|Error|Object} reason  the explanation of the loading failure`,
+  }));
+
   // View control slots
 
   _defineName("if", () => ({
@@ -355,22 +385,38 @@ however.
 
   // Primitive lenses
 
-  const slotAssembly = _defineName("slotAssembly", () => ({
-    tags: ["Lens"],
-    type: "string[]",
+  _defineName("scopeChildren", () => ({
+    tags: ["Internal", "Lens"],
+    type: "any",
     description:
-`Lens that shows the lens slot assembly that is used by the component.`,
-  }));
+`Lens for viewing the focus using the child element(s) of the innermost
+enclosing Valoscope component. This includes also the implicit
+Valoscopes such as instance components.
 
-  const niceActiveSlotNames = ret.instrument(
-      slotAssembly,
-      slotNames => slotNames.slice(0, -1).reverse().join(" <| "));
+Depending on the exact location of where the $Lens.scopeChilren
+lens reference appears inside some text media there are three notably
+different looking use cases.
+
+1. When this lens is used as an attribute value of a valoscope element:
+  the reference resolves to the direct lexical child elements of
+  the valoscope as they are appear in the media text itself.
+2. When this lens is used as an element without there being any
+  enclosing valoscope elements in the same media text: this reference
+  resolves to the lexical children of an external valoscope that is
+  using this media as a lens.
+3. When this lens is used as an element so that there exists an
+  enclosing valoscope element in the same media text: this reference
+  resolves to the lexical children of that valoscope element just
+  like in the first case. However as this includes the reference itself
+  this easily results in infinite recursion and should be avoided.
+`
+  }));
 
   const componentChildrenLens = _defineName("componentChildrenLens", () => ({
     tags: ["Lens"],
     type: "Lens",
     description:
-`Lens that shows the child elements of the current parent component.`,
+`Lens that shows the child elements of the immediate parent component.`,
     isEnabled (u: any, component: UIComponent) {
       const children = component.props.children;
       return Array.isArray(children) ? children.length : children != null;
@@ -395,6 +441,17 @@ selectively made static by prefixing their namespace with 'static-'
 like above.
 `,
   }));
+
+  const slotAssembly = _defineName("slotAssembly", () => ({
+    tags: ["Lens"],
+    type: "string[]",
+    description:
+`Lens that shows the lens slot assembly that is used by the component.`,
+  }));
+
+  const niceActiveSlotNames = ret.instrument(
+      slotAssembly,
+      slotNames => slotNames.slice(0, -1).reverse().join(" <| "));
 
   const parentComponentLens = _defineName("parentComponentLens", () => ({
     tags: ["Lens"],
@@ -511,12 +568,12 @@ The default lens on this slot renders Show and Hide buttons.
   }));
 
   _defineName("internalErrorLens", () => ({
-    tags: ["Context", "Lens"],
+    tags: ["Internal", "Context", "Lens", "Failure", "Error"],
     type: "Lens",
     description:
-`A catch-all Slot for viewing the focused internal error, such as an
-unhandled exception or a constraint violation like 'pendingLens'
-resulting in a promise.
+`A catch-all Slot for viewing an internal error, such as an
+unhandled exception or a constraint violation such as 'pendingPromiseLens'
+resulting in a promise itself.
 By default renders the yelling-red screen.
 
     @focus {string|Error} error  the failure description or exception object`,
@@ -561,7 +618,7 @@ currentRenderDepth.`,
   }));
 
   const maximumRenderDepthExceededLens = _defineName("maximumRenderDepthExceededLens", () => ({
-    tags: ["Context", "Lens"],
+    tags: ["Context", "Lens", "Failure"],
     type: "Lens",
     description:
 `Slot for viewing the focus if the slot value of 'currentRenderDepth'
@@ -574,7 +631,8 @@ is greater than the slot value of 'maximumRenderDepth'.
     defaultValue:
       <div {..._lensMessageInternalFailureProps}>
         <div {..._message}>
-            Maximum render depth ({maximumRenderDepth}) exceeded.
+          $Lens.currentRenderDepth ({currentRenderDepth}) exceeds
+          $Lens.meximumRenderDepth ({maximumRenderDepth}).
         </div>
         <div {..._parameter}>
           <span {..._key}>currentRenderDepth:</span>
@@ -588,40 +646,7 @@ is greater than the slot value of 'maximumRenderDepth'.
       </div>,
   }));
 
-  // User-definable catch-all lenses
-
-  const loadingLens = _defineName("loadingLens", () => ({
-    tags: ["Attribute", "Context", "Lens"],
-    type: "Lens",
-    description:
-`A catch-all slot for viewing a description of a dependency which is
-still being loaded.
-
-This slot has no default lens.
-Place a lens to this slot to have all the *default* implementations of
-all other loading -like slots be delegated to it instead of using their
-own default lens.
-
-    @focus {Object} component  an object description of the dependency being loaded`,
-  }));
-
-  const loadingFailedLens = _defineName("loadingFailedLens", () => ({
-    tags: ["Attribute", "Context", "Lens"],
-    type: "Lens",
-    description:
-`A catch-all slot for viewing a description of a dependency which has
-failed to load.
-
-This slot has no default lens.
-Place a lens to this slot to have all the *default* implementations of
-all other loading-failed -like slots be delegated to it instead of
-using their own default lens.
-
-    @focus {string|Error|Object} reason  the explanation of the loading failure`,
-  }));
-
-
-  // Main component lifecycle lens
+  // Valoscope and Valens
 
   _defineName("valoscopeLens", () => ({
     tags: ["Internal", "Lens"],
@@ -880,31 +905,6 @@ If still no suitable lens can be found delegates the viewing to '${notFoundName 
     }));
   }
 
-  // Valoscope
-
-  _defineName("scopeChildren", () => ({
-    tags: ["Internal", "Lens"],
-    type: "any",
-    description:
-`Lens for viewing the focus using the child element(s) of the innermost
-enclosing Valoscope component.
-
-Depending on the exact location of the reference to this slot inside
-some media there are three notably different looking use cases.
-
-1. When this lens is used as an attribute slot value of some valoscope
-  element then this lens refers to the direct child elements of that
-  valoscope as they are specified in the same lens media.
-2. When this lens is used as an element inside a lens media without any
-  enclosing valoscope elements then this lens refers to the child
-  elements of the external valoscope which is using the lens media.
-3. When this lens is used as an element inside a lens media which does
-  have an enclosing valoscope element then just like in case one this
-  lens refers to the child elements of that element.
-  This easily results in strange recursion and should be avoided.
-`
-  }));
-
   // Instance lenses
 
   _defineName("unframedLens", () => ({
@@ -1097,7 +1097,7 @@ Media that is used as source for render elements.`,
   ];
 
   _defineName("disabledLens", () => ({
-    tags: ["Internal", "Context", "Lens"],
+    tags: ["Internal", "Context", "Lens", "Loading", "Failure"],
     type: "Lens",
     description:
 `Slot for viewing an explicitly disabled component.
@@ -1117,8 +1117,38 @@ Media that is used as source for render elements.`,
     ] }),
   }));
 
-  _defineName("pendingLens", () => ({
-    tags: ["Attribute", "Context", "Lens"],
+  const pendingLens = _defineName("pendingLens", () => ({
+    tags: ["Primary", "Attribute", "Context", "Lens", "Loading"],
+    type: "Lens",
+    description:
+`A catch-all slot for viewing a description of a pending operation.
+
+This slot delegates to loadingLens but has no default lens.
+If a lens is placed into this slot then all the other pending slots
+will by default delegate viewing to that lens instead of using their
+own default lens.
+
+    @focus {Object} component  an object description of the dependency being loaded`,
+    defaultValue: loadingLens,
+  }));
+
+  const rejectedLens = _defineName("rejectedLens", () => ({
+    tags: ["Primary", "Attribute", "Context", "Lens", "Loading", "Failure"],
+    type: "Lens",
+    description:
+`A catch-all slot for viewing a pending operation which was rejected.
+
+This slot has no default lens.
+If a lens is placed into this slot then all the other rejection slots
+will by default delegate viewing to that lens instead of using their
+own default lens.
+
+    @focus {Error} reason  the pending operation rejection error`,
+    defaultValue: loadingFailedLens,
+  }));
+
+  _defineName("pendingPromiseLens", () => ({
+    tags: ["Attribute", "Context", "Lens", "Loading"],
     type: "Lens",
     description:
 `Slot for viewing a description of a generic dependency which is a
@@ -1128,9 +1158,9 @@ pending promise. If the lens placed to this slot returns a promise then
     @focus {Object} dependency  a description object of the pending dependency.`,
     isEnabled: true,
     defaultValue: ({ delegate: [
-      loadingLens,
+      pendingLens,
       <div {..._lensMessageLoadingProps}>
-        <div {..._message}>Waiting for a pending dependency Promise to resolve.</div>
+        <div {..._message}>Waiting for a pending operation to resolve.</div>
         <div {..._parameter}>
           <span {..._key}>Dependency:</span>
           <span {..._value}>{focusDetailLens}</span>
@@ -1140,16 +1170,16 @@ pending promise. If the lens placed to this slot returns a promise then
     ] }),
   }));
 
-  _defineName("failedLens", () => ({
-    tags: ["Attribute", "Context", "Lens"],
+  _defineName("rejectedPromiseLens", () => ({
+    tags: ["Attribute", "Context", "Lens", "Loading", "Failure", "Error"],
     type: "Lens",
     description:
-`Slot for viewing a generic lens Promise failure.
+`Slot for viewing a generic pending operation rejection error.
 
-    @focus {string|Error|Object} reason  a description of why the lens Promise failed.`,
+    @focus {Error} reason  operation rejection error.`,
     isEnabled: true,
     defaultValue: ({ delegate: [
-      loadingFailedLens,
+      rejectedLens,
       <div {..._lensMessageInternalFailureProps}>
         <div {..._message}>
           Render Error: Lens Promise failed.
@@ -1166,17 +1196,16 @@ pending promise. If the lens placed to this slot returns a promise then
     ] }),
   }));
 
-  _defineName("pendingConnectionsLens", () => ({
-    tags: ["Attribute", "Context", "Lens"],
+  _defineName("pendingChroniclesLens", () => ({
+    tags: ["Attribute", "Context", "Lens", "Loading"],
     type: "Lens",
     description:
-`Slot for viewing a description of chronicle connection(s) that are
-being acquired.
+`Slot for viewing descriptions of the chronicles that are being sourcered.
 
-    @focus {Object[]} connections  the chronicle connection(s) that are being acquired.`,
+    @focus {Object[]} chronicles  the chronicles that are being sourcered.`,
     isEnabled: true,
     defaultValue: ({ delegate: [
-      loadingLens,
+      pendingLens,
       <div {..._lensMessageLoadingProps}>
         <div {..._message}>Acquiring chronicle connection(s).</div>
         <div {..._parameter}>
@@ -1188,16 +1217,16 @@ being acquired.
     ] }),
   }));
 
-  _defineName("failedConnectionsLens", () => ({
-    tags: ["Attribute", "Context", "Lens"],
+  _defineName("rejectedChroniclesLens", () => ({
+    tags: ["Attribute", "Context", "Lens", "Loading", "Failure", "Error"],
     type: "Lens",
     description:
-`Slot for viewing chronicle connection failure(s).
+`Slot for viewing chronicle sourcery failure(s).
 
-    @focus {string|Error|Object} reason  a description of why the connection failed.`,
+    @focus {Error} reason  a chronicle sourcery rejection error.`,
     isEnabled: true,
     defaultValue: ({ delegate: [
-      loadingFailedLens,
+      rejectedLens,
       <div {..._lensMessageInternalFailureProps}>
         <div {..._message}>
           Render Error: Optimistic Chronicle connection failed.
@@ -1214,21 +1243,69 @@ being acquired.
     ] }),
   }));
 
-  _defineName("pendingActivationLens", () => ({
-    tags: ["Attribute", "Context", "Lens"],
+  _defineName("pendingAttributesLens", () => ({
+    tags: ["Context", "Lens", "Loading"],
+    type: "Lens",
+    description:
+`Slot for viewing the description of attributes which are pending resolution.
+
+    @focus {Object} props  the pending attributes.`,
+    isEnabled: true,
+    defaultValue: ({ delegate: [
+      pendingLens,
+      <div {..._lensMessageLoadingProps}>
+        <div {..._message}>Waiting for pending attributes to resolve.</div>
+        <div {..._parameter}>
+          <span {..._key}>Attributes:</span>
+          <span {..._value}>{focusDetailLens}</span>
+        </div>
+        {commonMessageRows}
+      </div>
+    ] }),
+  }));
+
+  _defineName("rejectedAttributesLens", () => ({
+    tags: ["Context", "Lens", "Loading", "Failure", "Error"],
+    type: "Lens",
+    description:
+`Slot for viewing an attribute loading rejection error.
+
+    @focus {string|Error|Object} reason  attribute rejection error.`,
+    isEnabled: true,
+    // TODO(iridian, 2019-02): Limit the props names to only the failing props.
+    defaultValue: ({ delegate: [
+      rejectedLens,
+      <div {..._lensMessageInternalFailureProps}>
+        <div {..._message}>
+          Render Error: attributes rejected.
+          {toggleableErrorDetailLens}
+        </div>
+        <div {..._parameter}>
+          <span {..._key}>Attribute (all) names:</span>
+          <span {..._value}>
+            {ret.instrument(error => error.propsNames, focusDetailLens)}
+          </span>
+        </div>
+        {commonMessageRows}
+      </div>
+    ] }),
+  }));
+
+  _defineName("pendingFocusLens", () => ({
+    tags: ["Attribute", "Context", "Lens", "Loading"],
     type: "Lens",
     description:
 `Slot for viewing a description of the focused resource that is pending
 activation.
 
-    @focus {Object[]} resource  the resource that is being activated.`,
+    @focus {Object[]} focus  the component focus that is being activated.`,
     isEnabled: true,
     defaultValue: ({ delegate: [
-      loadingLens,
+      pendingLens,
       <div {..._lensMessageLoadingProps}>
         <div {..._message}>Activating resource.</div>
         <div {..._parameter}>
-          <span {..._key}>Resource:</span>
+          <span {..._key}>Focus:</span>
           <span {..._value}>{focusDescriptionLens}</span>
         </div>
         {commonMessageRows}
@@ -1236,23 +1313,71 @@ activation.
     ] }),
   }));
 
-  _defineName("failedActivationLens", () => ({
-    tags: ["Attribute", "Context", "Lens"],
+  _defineName("rejectedFocusLens", () => ({
+    tags: ["Attribute", "Context", "Lens", "Loading", "Failure", "Error"],
     type: "Lens",
     description:
-`Slot for viewing resource activation failure(s).
+`Slot for viewing an the rejection of a focus activation.
 
-    @focus {string|Error|Object} reason  a description of why the resource activation failed.`,
+    @focus {Error} reason  the focus activation error.`,
     isEnabled: true,
     defaultValue: ({ delegate: [
-      loadingFailedLens,
+      rejectedLens,
       <div {..._lensMessageInternalFailureProps}>
         <div {..._message}>
           Render Error: Resource activation failed.
           {toggleableErrorDetailLens}
         </div>
         <div {..._parameter}>
-          <span {..._key}>Resource:</span>
+          <span {..._key}>Focus:</span>
+          <span {..._value}>
+            {ret.instrument(error => error.resource, focusDescriptionLens)}
+          </span>
+        </div>
+        {commonMessageRows}
+      </div>
+    ] }),
+  }));
+
+
+  _defineName("pendingFrameLens", () => ({
+    tags: ["Attribute", "Context", "Lens", "Loading"],
+    type: "Lens",
+    description:
+`Slot for viewing a description of the frame resource that is being created.
+
+    @focus {Object[]} frame  the valoscope frame that is being created.`,
+    isEnabled: true,
+    defaultValue: ({ delegate: [
+      pendingLens,
+      <div {..._lensMessageLoadingProps}>
+        <div {..._message}>Activating frame.</div>
+        <div {..._parameter}>
+          <span {..._key}>Frame:</span>
+          <span {..._value}>{focusDescriptionLens}</span>
+        </div>
+        {commonMessageRows}
+      </div>
+    ] }),
+  }));
+
+  _defineName("rejectedFrameLens", () => ({
+    tags: ["Attribute", "Context", "Lens", "Loading", "Failure", "Error"],
+    type: "Lens",
+    description:
+`Slot for viewing the rejection of a frame creation.
+
+    @focus {Error} reason  the frame creation error.`,
+    isEnabled: true,
+    defaultValue: ({ delegate: [
+      rejectedLens,
+      <div {..._lensMessageInternalFailureProps}>
+        <div {..._message}>
+          Render Error: Frame activation failed.
+          {toggleableErrorDetailLens}
+        </div>
+        <div {..._parameter}>
+          <span {..._key}>Frame:</span>
           <span {..._value}>
             {ret.instrument(error => error.resource, focusDescriptionLens)}
           </span>
@@ -1263,7 +1388,7 @@ activation.
   }));
 
   _defineName("inactiveLens", () => ({
-    tags: ["Attribute", "Context", "Lens"],
+    tags: ["Attribute", "Context", "Lens", "Loading", "Failure"],
     type: "Lens",
     description:
 `Slot for viewing a focused inactive Resource.
@@ -1283,17 +1408,18 @@ activation.
     ] }),
   }));
 
-  _defineName("pendingMediaInterpretationLens", () => ({
-    tags: ["Attribute", "Context", "Lens"],
+  _defineName("pendingMediaLens", () => ({
+    tags: ["Attribute", "Context", "Lens", "Loading"],
     type: "Lens",
     description:
-`Slot for viewing a description of a focused Media which is being
-interpreted (ie. downloaded, decoded and integrated).
+`Slot for viewing a description of a Media that is about to be used as
+the lens to view the current focus but which is still being interpreted
+(ie. downloaded, decoded and integrated).
 
     @focus {Media} media  the Media being interpreted.`,
     isEnabled: true,
     defaultValue: ({ delegate: [
-      loadingLens,
+      pendingLens,
       <div {..._lensMessageLoadingProps}>
         <div {..._message}>Downloading dependency {focusDetailLens}.</div>
         <div {..._parameter}>
@@ -1305,17 +1431,17 @@ interpreted (ie. downloaded, decoded and integrated).
     ] }),
   }));
 
-  _defineName("failedMediaInterpretationLens", () => ({
-    tags: ["Attribute", "Context", "Lens"],
+  _defineName("rejectedMediaLens", () => ({
+    tags: ["Attribute", "Context", "Lens", "Loading", "Failure", "Error"],
     type: "Lens",
     description:
-`Slot for viewing the focused failure on why a particular media
-interpretation could not be rendered.
+`Slot for viewing an error encountered during an attempt to use a Media
+as a lens to view the current focus.
 
-    @focus {string|Error|Object} reason  interpretation render failure reason.`,
+    @focus {Error} reason  interpretation or viewing error.`,
     isEnabled: true,
     defaultValue: ({ delegate: [
-      loadingFailedLens,
+      rejectedLens,
       <div {..._lensMessageLoadingFailedProps}>
         <div {..._message}>
           Render Error: Failed to render Media interpretation.
@@ -1338,128 +1464,38 @@ interpretation could not be rendered.
     ] }),
   }));
 
-  _defineName("unrenderableMediaInterpretationLens", () => ({
-    tags: ["Attribute", "Context", "Lens"],
+  _defineName("uninterpretableMediaLens", () => ({
+    tags: ["Attribute", "Context", "Lens", "Loading", "Failure", "Error"],
     type: "Lens",
     description:
-`Slot for viewing a focused media with an interpretation that cannot or
-should not be rendered (such as octet stream, complex native object or
-an undefined value).
-
-    @focus {string|Error|Object} reason  interpretation render failure reason.`,
-    isEnabled: true,
-    defaultValue: ret.failedMediaInterpretationLens,
-  }));
-
-  _defineName("mediaInterpretationErrorLens", () => ({
-    tags: ["Attribute", "Context", "Lens"],
-    type: "Lens",
-    description:
-`Slot for viewing a focused error that was encountered during media
+`Slot for viewing an error that was encountered during media
 interpretation.
 
-    @focus {string|Error|Object} reason  interpretation error.`,
+    @focus {Error} reason  interpretation error.`,
     isEnabled: true,
-    defaultValue: ret.failedMediaInterpretationLens,
+    defaultValue: ret.rejectedMediaLens,
   }));
 
-  _defineName("pendingFocusLens", () => ({
-    tags: ["Context", "Lens"],
+  _defineName("unrenderableInterpretationLens", () => ({
+    tags: ["Attribute", "Context", "Lens", "Loading", "Failure", "Error"],
     type: "Lens",
     description:
-`Slot for viewing a component with an unfinished focus kuery.
+`Slot for viewing an error raised by an unrenderable media
+interpretation such as octet stream, complex native object or
+an undefined value.
 
-    @focus {Object} focus  the focus kuery.`,
-    isEnabled: (focus) => (focus === undefined),
-    defaultValue: ({ delegate: [
-      loadingLens,
-      <div {..._lensMessageLoadingProps}>
-        <div {..._message}>Waiting for focus kuery to complete.</div>
-        <div {..._parameter}>
-          <span {..._key}>Focus:</span>
-          <span {..._value}>{focusDetailLens}</span>
-        </div>
-        {commonMessageRows}
-      </div>
-    ] }),
-  }));
-
-  _defineName("kueryingPropsLens", () => ({
-    tags: ["Context", "Lens"],
-    type: "Lens",
-    description:
-`Slot for viewing a description of one or more unfinished props kueries.
-
-    @focus {Object} props  the unfinished props kueries.`,
+    @focus {Error} reason  interpretation viewing error.`,
     isEnabled: true,
-    defaultValue: ({ delegate: [
-      loadingLens,
-      <div {..._lensMessageLoadingProps}>
-        <div {..._message}>Waiting for props kueries to complete.</div>
-        <div {..._parameter}>
-          <span {..._key}>Props kueries:</span>
-          <span {..._value}>{focusDetailLens}</span>
-        </div>
-        {commonMessageRows}
-      </div>
-    ] }),
+    defaultValue: ret.rejectedMediaLens,
   }));
 
-  _defineName("pendingPropsLens", () => ({
-    tags: ["Context", "Lens"],
+  _defineName("pendingElementsLens", () => ({
+    tags: ["Attribute", "Context", "Lens", "Loading"],
     type: "Lens",
     description:
-`Slot for viewing the description of props which are pending Promises.
+`Slot for viewing a description of pending child elements Promise.
 
-    @focus {Object} props  the pending props Promises.`,
-    isEnabled: true,
-    defaultValue: ({ delegate: [
-      loadingLens,
-      <div {..._lensMessageLoadingProps}>
-        <div {..._message}>Waiting for pending props Promise(s) to resolve.</div>
-        <div {..._parameter}>
-          <span {..._key}>Props promises:</span>
-          <span {..._value}>{focusDetailLens}</span>
-        </div>
-        {commonMessageRows}
-      </div>
-    ] }),
-  }));
-
-  _defineName("failedPropsLens", () => ({
-    tags: ["Context", "Lens"],
-    type: "Lens",
-    description:
-`Slot for viewing a props Promise failure.
-
-    @focus {string|Error|Object} reason  props Promise failure reason.`,
-    isEnabled: true,
-    // TODO(iridian, 2019-02): Limit the props names to only the failing props.
-    defaultValue: ({ delegate: [
-      loadingFailedLens,
-      <div {..._lensMessageInternalFailureProps}>
-        <div {..._message}>
-          Render Error: props Promise failure.
-          {toggleableErrorDetailLens}
-        </div>
-        <div {..._parameter}>
-          <span {..._key}>Props (all) names:</span>
-          <span {..._value}>
-            {ret.instrument(error => error.propsNames, focusDetailLens)}
-          </span>
-        </div>
-        {commonMessageRows}
-      </div>
-    ] }),
-  }));
-
-  _defineName("pendingChildrenLens", () => ({
-    tags: ["Attribute", "Context", "Lens"],
-    type: "Lens",
-    description:
-`Slot for viewing a description of pending children Promise.
-
-    @focus {Object} children  the pending children Promise.`,
+    @focus {Object} children  the pending child elements Promise.`,
     isEnabled: true,
     defaultValue: ({ delegate: [
       loadingLens,
@@ -1474,13 +1510,13 @@ interpretation.
     ] }),
   }));
 
-  _defineName("failedChildrenLens", () => ({
-    tags: ["Attribute", "Context", "Lens"],
+  _defineName("rejectedElementsLens", () => ({
+    tags: ["Attribute", "Context", "Lens", "Loading", "Failure"],
     type: "Lens",
     description:
-`Slot for viewing a child Promise failure.
+`Slot for viewing an element rendering rejection error.
 
-    @focus {string|Error|Object} reason  child Promise failure reason.`,
+    @focus {string|Error|Object} reason  element rejection error.`,
     isEnabled: true,
     // TODO(iridian, 2019-02): Add a grand-child path description to the errors.
     defaultValue: ({ delegate: [
@@ -1502,7 +1538,7 @@ interpretation.
   }));
 
   _defineName("activatingLens", () => ({
-    tags: ["Attribute", "Context", "Lens"],
+    tags: ["Attribute", "Context", "Lens", "Loading"],
     type: "Lens",
     description:
 `Slot for viewing an activating Resource.
@@ -1528,7 +1564,7 @@ interpretation.
   }));
 
   _defineName("inactiveLens", () => ({
-    tags: ["Attribute", "Context", "Lens"],
+    tags: ["Attribute", "Context", "Lens", "Loading", "Failure"],
     type: "Lens",
     description:
 `Slot for viewing an inactive Resource.
@@ -1549,7 +1585,7 @@ interpretation.
   }));
 
   _defineName("unavailableLens", () => ({
-    tags: ["Attribute", "Context", "Lens"],
+    tags: ["Attribute", "Context", "Lens", "Loading", "Failure"],
     type: "Lens",
     description:
 `Slot for viewing an unavailable Resource.
@@ -1570,7 +1606,7 @@ interpretation.
   }));
 
   _defineName("destroyedLens", () => ({
-    tags: ["Attribute", "Context", "Lens"],
+    tags: ["Attribute", "Context", "Lens", "Loading", "Failure"],
     type: "Lens",
     description:
 `Slot for viewing a destroyed Resource.
@@ -1591,7 +1627,7 @@ interpretation.
   }));
 
   _defineName("lensPropertyNotFoundLens", () => ({
-    tags: ["Attribute", "Context", "Lens"],
+    tags: ["Attribute", "Context", "Lens", "Loading", "Failure"],
     type: "Lens",
     description:
 `Slot for viewing a description of an active Resource focus which does
@@ -1639,7 +1675,7 @@ not have a requested lens property.
   }));
 
   _defineName("notLensResourceLens", () => ({
-    tags: ["Context", "Lens"],
+    tags: ["Context", "Lens", "Loading", "Failure"],
     type: "Lens",
     description:
 `Slot for viewing a Resource which cannot be used as a lens.
@@ -1689,7 +1725,7 @@ not have a requested lens property.
   }));
 
   _defineName("arrayNotIterableLens", () => ({
-    tags: ["Context", "Lens"],
+    tags: ["Context", "Lens", "Loading", "Failure"],
     type: "Lens",
     description:
 `Slot for viewing a valoscope $Lens.array which is not an iterable.
@@ -1710,7 +1746,7 @@ not have a requested lens property.
   }));
 
   _defineName("invalidElementLens", () => ({
-    tags: ["Context", "Lens"],
+    tags: ["Context", "Lens", "Loading", "Failure"],
     type: "Lens",
     description:
 `Slot for viewing an a description of an invalid UI element.

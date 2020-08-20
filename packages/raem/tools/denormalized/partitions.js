@@ -79,8 +79,8 @@ export function connectToAbsentChroniclesAndThen (error, callback, explicitConne
           : absentChronicleURI) // a promise for an already existing connection process
   )).then(() => callback());
   ret.operationInfo = {
-    slotName: "pendingConnectionsLens", focus: original.absentChronicleURIs,
-    onError: { slotName: "failedConnectionsLens", chronicles: original.absentChronicleURIs },
+    slotName: "pendingChroniclesLens", focus: original.absentChronicleURIs,
+    onError: { slotName: "rejectedChroniclesLens", chronicles: original.absentChronicleURIs },
   };
   return ret;
 }

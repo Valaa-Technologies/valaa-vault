@@ -213,8 +213,8 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
         const activation = lens.activate();
         if (activation !== lens) {
           activation.operationInfo = Object.assign(activation.operationInfo || {}, {
-            slotName: "pendingActivationLens", focus: lens,
-            onError: { slotName: "failedActivationLens", resource: lens },
+            slotName: "pendingFocusLens", focus: lens,
+            onError: { slotName: "rejectedFocusLens", resource: lens },
           });
           // Ensure that re-render is triggered by top level _render
           return activation.then(() => undefined);
@@ -311,14 +311,14 @@ function _tryRenderMediaLens (
       null,
       _renderMediaLensChain,
       function errorOnRenderMediaLens (error) {
-        if (!error.slotName) error.slotName = "mediaInterpretationErrorLens";
+        if (!error.slotName) error.slotName = "uninterpretableMediaLens";
         error.media = media;
         error.mediaInfo = this.mediaInfo;
         throw error;
       });
   if (isPromise(ret)) {
     ret.operationInfo = Object.assign(ret.operationInfo || {}, {
-      slotName: "pendingMediaInterpretationLens", focus: media,
+      slotName: "pendingMediaLens", focus: media,
     });
   }
   return ret;
@@ -360,7 +360,7 @@ const _renderMediaLensChain = [
           info.contentType}' resolves into a complex type ${
           (contentInterpretation.constructor || {}).name || "<unnamed>"}`);
     }
-    error.slotName = "unrenderableMediaInterpretationLens";
+    error.slotName = "unrenderableInterpretationLens";
     throw error;
   },
 ];

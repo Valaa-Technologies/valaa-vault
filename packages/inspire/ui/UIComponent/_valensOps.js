@@ -5,6 +5,7 @@ import React from "react";
 import { Kuery } from "~/raem/VALK";
 
 import UIComponent, { isUIComponentElement } from "./UIComponent";
+import { _valensRecorderProps, _emitValoscopeRecorderProps } from "./_liveOps";
 
 import { arrayFromAny, dumpObject, isPromise, wrapError } from "~/tools";
 
@@ -126,20 +127,21 @@ export function tryCreateValensArgs (
     );
   }
   function _evaluateProp (propName, propValue) {
+    let actualName = propName, actualValue = propValue;
     const behavior = propValensBehaviors[propName];
-    if (behavior === false) return undefined; // drop from props altogether
+    if (typeof behavior === "boolean") {
+      if (behavior && valensProps) {
+        // keep as valens props if present
+        if (propName.startsWith("$Lens.")) actualName = actualName.slice(6);
+        valensProps[actualName] = propValue;
+      }
+      return undefined;
+    }
     if (!valensProps) {
       if ((behavior === undefined) && !(propValue instanceof Kuery)) return undefined;
       valensProps = { hierarchyKey, elementType, elementPropsSeq: [] };
       rerunAfterPriming = true;
       return true; // rerun all props from beginning
-    }
-    let actualName = propName, actualValue = propValue;
-    if (behavior === true) {
-      // keep directly as valens prop
-      if (actualName.startsWith("$Lens.")) actualName = actualName.slice(6);
-      valensProps[actualName] = propValue;
-      return undefined;
     }
     if (typeof behavior === "string") actualName = behavior;
     if (propValue instanceof Kuery) {
@@ -153,21 +155,41 @@ export function tryCreateValensArgs (
   }
 }
 
-const _nonComponentPropValensBehaviors = {
-  children: false, // drop
-  "$Lens.ref": "$Lens.ref",
-  "$Lens.key": "$Lens.key",
-  "$Lens.valoscope": "$Lens.valoscope",
+const _valoscopePropValensBehaviors = {
+  children: false,
+  delayed: true,
+  ...Object.fromEntries([
+    ...Object.keys(_valensRecorderProps).map(name => [`$Lens.${name}`, `$Lens.${name}`]),
+    ...Object.keys(_valensRecorderProps).map(name => [name, `$Lens.${name}`]),
+  ]),
+  key: undefined,
+  ref: undefined,
+  // "$Lens.key": undefined,
+  // "$Lens.ref": undefined,
 };
 
 const _uiComponentPropValensBehaviors = {
   children: false,
-  valoscope: "$Lens.valoscope",
-  "$Lens.valoscope": "$Lens.valoscope",
+  delayed: true,
+  ...Object.fromEntries([
+    ...Object.keys(_valensRecorderProps).map(name => [`$Lens.${name}`, `$Lens.${name}`]),
+    ...Object.keys(_valensRecorderProps).map(name => [name, `$Lens.${name}`]),
+    ...Object.keys(_emitValoscopeRecorderProps).map(name => [`$Lens.${name}`, `$Lens.${name}`]),
+    ...Object.keys(_emitValoscopeRecorderProps).map(name => [name, `$Lens.${name}`]),
+  ]),
+  key: undefined, // only if live
+  ref: undefined, // only if live
+  focus: undefined, // only if live
+  // "$Lens.focus": "$Lens.focus",
 };
 
-const _valoscopePropValensBehaviors = {
-  children: false,
+const _nonComponentPropValensBehaviors = {
+  children: false, // drop
+  "$Lens.delayed": true,
+  ...Object.fromEntries([
+    ...Object.keys(_valensRecorderProps).map(name => [`$Lens.${name}`, `$Lens.${name}`]),
+    ...Object.keys(_emitValoscopeRecorderProps).map(name => [`$Lens.${name}`, `$Lens.${name}`]),
+  ]),
 };
 
 const _kueryPropFetchers = {};

@@ -99,7 +99,7 @@ function _updateFocus (component: UIComponent, newProps: Object, newContext: Obj
   if (newProps.kuery !== undefined) throw new Error("props.kuery no longer supported");
   const uiContext = component.state.uiContext;
   const oldFocus = getScopeValue(uiContext, "focus");
-  thenChainEagerly(newFocus, [
+  thenChainEagerly(component.maybeDelayed(Lens.pendingFocusLens, newFocus), [
     function _updateContextFocus (resolvedNewFocus) {
       // console.log(component.debugId(), "_updateContextFocus", resolvedNewFocus);
       newFocus = resolvedNewFocus;

@@ -308,7 +308,7 @@ function _tryRenderMediaLens (
   }
   const ret = thisChainEagerly(
       { component, media, options: { fallbackContentType: "text/vsx", vIntegrationScope } },
-      null,
+      component.maybeDelayed(Lens.pendingMediaLens),
       _renderMediaLensChain,
       function errorOnRenderMediaLens (error) {
         if (!error.slotName) error.slotName = "uninterpretableMediaLens";

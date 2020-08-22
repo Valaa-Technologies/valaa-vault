@@ -19,12 +19,14 @@ import { VSSStyleSheetSymbol } from "./_styleOps";
 export function _bindLiveSubscriptions (component, focus, props) {
   const live = _createStateLive(component, props);
   const kueryStates = {};
+  const maybeDelayedContext = component.maybeDelayed(
+      Lens.pendingAttributesLens, component.getUIContext());
   for (const [kueryName, kuery] of (props.propsKueriesSeq || [])) {
     const propState = kueryStates[kueryName] = Object.create(live);
     propState.kueryName = kueryName;
     propState.kuery = kuery;
     thisChainEagerly(propState,
-        component.getUIContext(),
+        maybeDelayedContext,
         (kuery[IsLiveTag] === false)
             ? _staticKueryPropChain
             : _liveKueryPropChain,
@@ -58,6 +60,7 @@ function _createStateLive (component, props) {
   } else if (props.elementType.isUIComponent) {
     ret.elementProps = {};
     ret.recorders = _componentRecorders;
+    if (props.delayed) ret.elementProps.delayed = props.delayed;
   } else {
     ret.elementProps = {};
     ret.recorders = _elementRecorders;
@@ -184,6 +187,9 @@ function _obtainValoscopeProps (stateLive) {
   let ret = stateLive.valoscopeProps;
   if (!ret) {
     ret = stateLive.valoscopeProps = {};
+    if (stateLive.component.props.delayed) {
+      ret.delayed = stateLive.component.props.delayed;
+    }
   }
   return ret;
 }

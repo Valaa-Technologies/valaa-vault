@@ -167,7 +167,11 @@ export default class Valoscope extends UIComponent {
       frameOverrides: props.frameOverrides,
     };
     return thisChainEagerly(frameSelf,
-        [vPrototype && vPrototype.activate(), vLens && vLens.activate(), props.frameKey],
+        [
+          vPrototype && vPrototype.activate(),
+          vLens && vLens.activate(),
+          this.maybeDelayed(Lens.pendingFrameLens, props.frameKey),
+        ],
         _scopeFrameChain,
         (error) => {
           if (frameSelf.discourse) {

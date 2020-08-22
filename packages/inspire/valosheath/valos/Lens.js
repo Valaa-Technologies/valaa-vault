@@ -1243,6 +1243,34 @@ pending promise. If the lens placed to this slot returns a promise then
     ] }),
   }));
 
+  _defineName("delayed", () => ({
+    tags: ["Attribute"],
+    type: "boolean | Symbol[]",
+    description:
+`Trigger asynchronous viewing for the component by surrounding its
+internal rendering stages inside promises.
+
+By default inspire will render all components synchronously. This is
+to avoid needlessly displaying loading lenses that would only be
+very briefly available and also for slight performance benefits.
+Occasionaly computing large datasets will take a long time to compute.
+
+Making a component delayed will surround the individual rendering stages
+of the component inside promises to improve responsiveness.
+Each stage is identified by their pending lens slot which they will
+also display when they are pending:
+
+1. $Lens.pendingAttributesLens during the attribute resolution stage
+2. $Lens.pendingFocusLens during the focus activation stage
+3. $Lens.pendingFrameLens during the frame resolution stage (for Valoscope components)
+4. $Lens.pendingMediaLens during the main lens media interpretation stage (ie. not for elements)
+5. $Lens.pendingElementsLens during the final element rendering stage
+
+Optionally, the delayed attribute can be given an array of only some of
+the above pending slot names to make selectively delayed.
+`,
+  }));
+
   _defineName("pendingAttributesLens", () => ({
     tags: ["Context", "Lens", "Loading"],
     type: "Lens",
@@ -1500,7 +1528,7 @@ an undefined value.
     defaultValue: ({ delegate: [
       loadingLens,
       <div {..._lensMessageLoadingProps}>
-        <div {..._message}>  Waiting for a pending children Promise to resolve.</div>
+        <div {..._message}>  Waiting for pending elements to resolve.</div>
         <div {..._parameter}>
           <span {..._key}>Children:</span>
           <span {..._value}>{focusDetailLens}</span>

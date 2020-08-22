@@ -71,6 +71,8 @@ export default class UIComponent extends React.Component {
 
     delegate: PropTypes.arrayOf(PropTypes.any),
 
+    delayed: PropTypes.any,
+
     loadingLens: PropTypes.any,
     loadingFailedLens: PropTypes.any,
 
@@ -256,6 +258,15 @@ export default class UIComponent extends React.Component {
   }
 
   // Public API
+
+  maybeDelayed (delayingLensName, value) {
+    const delayed = this.props.delayed;
+    return delayed && (delayed === true
+          || (delayed === delayingLensName)
+          || (Array.isArray(delayed) && delayed.includes(delayingLensName)))
+        ? new Promise(resolve => setTimeout(() => resolve(value), 0))
+        : value;
+  }
 
   /**
    * Returns the current focus of this UI component or throws if this component is disabled.
@@ -600,7 +611,7 @@ export default class UIComponent extends React.Component {
       if (this.state.uiContext) this.setUIContextValue(Lens.slotAssembly, []);
       const chainHead = this._stickyErrorObject
           || _checkForRenderDepthFailure(this)
-          || this.state.rerenderings || 0;
+          || this.maybeDelayed(Lens.pendingElementsLens, this.state.rerenderings || 0);
       const chainResult = thisChainEagerly(
           this,
           chainHead,

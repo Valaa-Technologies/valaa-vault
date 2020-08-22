@@ -102,6 +102,7 @@ import { thisChainEagerly, thisChainRedirect } from "~/tools";
  * @extends {UIComponent}
  */
 export default class Valoscope extends UIComponent {
+  static isValoscope = true;
   static mainLensSlotName = "valoscopeLens";
 
   static propTypes = {
@@ -140,7 +141,8 @@ export default class Valoscope extends UIComponent {
         if (frameSelf.discourse) frameSelf.discourse.releaseFabricator(releaseOpts);
       }
     }
-    if (!ret) ret = super.shouldComponentUpdate(nextProps, nextState);
+    if (ret) this._cachedRendering = undefined;
+    else ret = super.shouldComponentUpdate(nextProps, nextState);
     return ret;
   }
 
@@ -344,7 +346,7 @@ const _scopeFrameChain = [
     return vScopeFrame;
   },
   function _setScopeFrameState (scopeFrame) {
-    this.component.setState({ scopeFrame });
+    this.component.rerender("frame", { scopeFrame });
     return false;
   },
 ];

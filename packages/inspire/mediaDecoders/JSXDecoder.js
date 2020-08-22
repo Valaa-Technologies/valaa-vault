@@ -309,7 +309,7 @@ export default class JSXDecoder extends MediaDecoder {
       sourceInfo, loc, parsedProps, elementName, isInstanceLens, isComponentLens, sourceKey) {
     const ret = {
       hasIntegrators: false, hasKueries: false, totalCount: 0,
-      scopeAccesses: {}, byNamespace: {}, decodedElementProps: {}, propsIntegrators: [],
+      scopeAccesses: {}, byNamespace: {}, decodedElementProps: {},
       hasFrame: elementName === "Valoscope" || isInstanceLens,
     };
 

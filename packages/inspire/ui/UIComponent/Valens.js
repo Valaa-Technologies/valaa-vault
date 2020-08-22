@@ -56,6 +56,7 @@ export { tryCreateValensArgs, ValensPropsTag };
  * @extends {UIComponent}
  */
 export default class Valens extends UIComponent {
+  static isValens = true;
   static mainLensSlotName = "valensLens";
 
   static propTypes = {
@@ -105,8 +106,11 @@ export default class Valens extends UIComponent {
   }
 
   shouldComponentUpdate (nextProps: Object, nextState: Object) {
-    if (nextState.live !== this.state.live) return true;
-    if (nextProps !== this.props) return true;
+    if (nextState.rerenderings !== this.state.rerenderings) return true;
+    if ((nextState.live !== this.state.live) || (nextProps !== this.props)) {
+      this._cachedRendering = undefined;
+      return true;
+    }
     return false;
   }
 
@@ -141,6 +145,9 @@ export default class Valens extends UIComponent {
     }
 
     let outerType = this.props.elementType;
+    if (outerType === Valens) {
+      throw new Error("INTERNAL ERROR: Valens..props.elementType 'Valens' disallowed");
+    }
     let outerChildren = this.props.children;
 
     if (stateLive.frameOverrides) {
@@ -159,7 +166,7 @@ export default class Valens extends UIComponent {
         if (!outerChildren) {
           stateLive.elementProps.children = this.props.children;
           outerChildren = stateLive.valoscopeChildren =
-              [React.createElement(this.props.elementType, stateLive.elementProps)];
+              React.createElement(this.props.elementType, stateLive.elementProps);
         }
       }
     }

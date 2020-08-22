@@ -51,7 +51,7 @@ export function _componentWillReceiveProps (component: UIComponent, nextProps: O
   _tryUpdateUIContext(component, nextProps, !shouldUpdateFocus && oldProps.context);
   if (shouldUpdateFocus) {
     component._activeParentFocus = nextActiveParentFocus;
-    component._errorObject = null;
+    component._stickyErrorObject = null;
     _updateFocus(component, nextProps, nextContext, oldProps, forceReattachListeners);
   }
   // _addTiming(component, "componentWillReceiveProps.updateFocus", startUpdate);
@@ -143,9 +143,8 @@ function _updateFocus (component: UIComponent, newProps: Object, newContext: Obj
       return _initiateSubscriptions(component, newFocus, newProps);
     },
     function _update (shouldUpdate) {
-      // console.log(component.debugId(), "_update", shouldUpdate);
       if ((shouldUpdate !== false) && oldProps) {
-        component.forceUpdate();
+        component.flushAndRerender("focus");
       }
     },
   ], function errorOnCreateContextAndSetFocus (error) {

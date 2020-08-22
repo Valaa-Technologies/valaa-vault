@@ -24,19 +24,21 @@ export function createDynamicKey (focus, index) {
       : "unfocused";
 }
 
-export function _hasRenderDepthFailures (component: UIComponent) {
+export function _checkForRenderDepthFailure (component: UIComponent) {
   let uiContext = component.state.uiContext;
   if (!uiContext || !uiContext.focus) return false;
   const depth = uiContext[Lens.currentRenderDepth];
-  if ((depth !== undefined) && (depth < uiContext[Lens.infiniteRecursionCheckWaterlineDepth])) {
-    return false;
-  }
   let error;
-  if (depth >= uiContext[Lens.maximumRenderDepth]) {
-    error = new Error(
-        `$Lens.currentRenderDepth (${depth}) exceeds $Lens.maximumRenderDepth (${
-            uiContext[Lens.maximumRenderDepth]}).`);
-  } else {
+  if (depth !== undefined) {
+    if (depth > uiContext[Lens.maximumRenderDepth]) {
+      error = new Error(
+          `$Lens.currentRenderDepth (${depth}) exceeds $Lens.maximumRenderDepth (${
+              uiContext[Lens.maximumRenderDepth]}).`);
+    } else if (depth < uiContext[Lens.infiniteRecursionCheckWaterlineDepth]) {
+      return false;
+    }
+  }
+  if (!error) {
     const newFocus = component.getFocus();
     const newKey = component.getKey();
     // eslint-disable-next-line
@@ -78,11 +80,9 @@ export function _hasRenderDepthFailures (component: UIComponent) {
     ]),
   ];
   console.log("Maximum render depth exceeded in component", ...logLines);
-  component.enableError(wrapError(error,
-      `Exception caught in ${component.debugId()})\n ._hasRenderDepthFailures(), with:`,
-      ...logLines,
-  ), "UIComponent._hasRenderDepthFailures");
-  return true;
+  return wrapError(error,
+      `Exception caught in ${component.debugId()})\n ._checkForRenderDepthFailure(), with:`,
+      ...logLines);
 }
 
 export function _comparePropsOrState (leftObject: any, rightObject: any, defaultEntryCompare: any,

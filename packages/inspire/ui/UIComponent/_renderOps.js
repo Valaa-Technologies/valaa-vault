@@ -201,7 +201,7 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
                 if (newValue === undefined) newValue = null;
                 if (newValue === oldValue) return;
                 repeathenableState.currentValue = newValue;
-                if (oldValue !== undefined) component.forceUpdate();
+                if (oldValue !== undefined) component.rerender(subLensName);
               },
           );
         }
@@ -265,20 +265,20 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
 }
 
 function _tryRenderPropertyLens (component, vProperty, focus, lensName) {
-  const subName = `.<-${lensName}`;
-  if (!component.getBoundSubscription(subName)) {
-    component.bindLiveKuery(subName, vProperty, "value", {
+  const subLensName = `.<-${lensName}`;
+  if (!component.getBoundSubscription(subLensName)) {
+    component.bindLiveKuery(subLensName, vProperty, "value", {
       scope: component.getUIContext(),
       onUpdate: function onLensPropertyValueUpdate () {
         if (component.tryFocus() !== focus) return false;
-        component.forceUpdate();
+        component.rerender(subLensName);
         return undefined;
       },
       updateImmediately: false,
     });
   }
-  return _tryRenderLens(
-      component, vProperty.extractPropertyValue(), focus, subName, undefined, undefined, vProperty);
+  return _tryRenderLens(component, vProperty.extractPropertyValue(),
+      focus, subLensName, undefined, undefined, vProperty);
 }
 
 function _tryRenderMediaLens (
@@ -292,7 +292,7 @@ function _tryRenderMediaLens (
         // should refresh anyway whenever the focus changes. Nevertheless
         // return before triggering forceupdate as we're obsolete.
         if (component.tryFocus() !== focus) return false;
-        component.forceUpdate();
+        component.rerender(bindingSlot);
         return undefined;
       },
       updateImmediately: false,

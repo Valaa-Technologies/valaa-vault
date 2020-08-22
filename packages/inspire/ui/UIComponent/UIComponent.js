@@ -11,8 +11,9 @@ import { dumpKuery, dumpObject } from "~/engine/VALEK";
 
 import Lens from "~/inspire/valosheath/valos/Lens";
 
-import { arrayFromAny, invariantify, isPromise, outputError, wrapError }
-    from "~/tools";
+import {
+  arrayFromAny, invariantify, isPromise, outputError, thisChainEagerly, thisChainReturn, wrapError,
+} from "~/tools";
 
 import { clearScopeValue, getScopeValue, setScopeValue } from "./scopeValue";
 
@@ -24,7 +25,7 @@ import {
 } from "./_lifetimeOps";
 import {
   // _childProps,
-  _hasRenderDepthFailures,
+  _checkForRenderDepthFailure,
 } from "./_propsOps";
 import {
   _renderFocus, _renderFocusAsSequence, _renderFirstAbleDelegate,
@@ -197,7 +198,9 @@ export default class UIComponent extends React.Component {
 
   shouldComponentUpdate (nextProps: Object, nextState: Object, nextContext: Object): boolean {
     try {
-      return _shouldComponentUpdate(this, nextProps, nextState, nextContext);
+      const ret = _shouldComponentUpdate(this, nextProps, nextState, nextContext);
+      if (ret) this._cachedRendering = undefined;
+      return ret;
     } catch (error) {
       this.enableError(wrapError(error,
               new Error(`During ${this.debugId()})\n .shouldComponentUpdate(), with:`),
@@ -458,8 +461,6 @@ export default class UIComponent extends React.Component {
 
   // Helpers
 
-  _errorObject: ?any;
-
   enableError (error: string | Error, outputHeader: ?string) {
     const ret = _enableError(this, error);
     if (outputHeader) outputError(error, `Exception caught in ${outputHeader}`);
@@ -566,154 +567,205 @@ export default class UIComponent extends React.Component {
   static thirdPassErrorElement =
       <div>Error caught while rendering error, see console for more details</div>;
 
+  flushAndRerender (cause: string, stateUpdates, explicitRenderResult) {
+    this._cachedRenderResult = explicitRenderResult;
+    this._cachedRendering = (explicitRenderResult === undefined)
+        ? undefined
+        : (this.state.rerenderings || 0) + 1;
+    this.rerender(cause, (stateUpdates !== null) ? stateUpdates : undefined);
+  }
+
+  rerender (cause: string, stateUpdates) {
+    if (stateUpdates === null) {
+      this.forceUpdate();
+    } else {
+      this.setState({ rerenderings: (this.state.rerenderings || 0) + 1, ...(stateUpdates || {}) });
+    }
+  }
+
+  static _counter = 0;
+
+  static _renderChain = [
+    UIComponent.prototype._renderMainLensSlot,
+    UIComponent.prototype._validateRenderResult,
+  ];
+
   render (): null | string | React.Element<any> | [] {
-    let firstPassError;
-    let ret = this._pendingRenderValue;
-    this._pendingRenderValue = undefined;
-    let mainValidationFaults;
-    let latestRenderedLensSlot;
-    if (this.state.uiContext) this.setUIContextValue(Lens.slotAssembly, []);
+    let ret;
     try {
-      const renderNormally = (ret === undefined)
-          && !this._errorObject
-          && (!_hasRenderDepthFailures(this) || (ret = undefined));
-      if (renderNormally) {
-        // TODO(iridian): Fix this uggo hack where ui-context content is updated at render.
-        try {
-          // Render the main lens delegate sequence.
-          latestRenderedLensSlot = this.constructor.mainLensSlotName;
-          ret = this.tryRenderSlotAsLens(latestRenderedLensSlot);
-        } catch (error) {
-          // Try to connect to absent chronicles.
-          if (!tryConnectToAbsentChroniclesAndThen(error, () => this.forceUpdate())) {
-            throw error;
-          }
-          latestRenderedLensSlot = "pendingChroniclesLens";
-          ret = this.tryRenderSlotAsLens(latestRenderedLensSlot,
-              (error.originalError || error).absentChronicleURIs.map(entry => String(entry)));
+      if ((this._cachedRendering !== undefined)
+          && (this._cachedRendering === this.state.rerenderings)) {
+        return this._cachedRenderResult;
+      }
+      if (this.state.uiContext) this.setUIContextValue(Lens.slotAssembly, []);
+      const chainHead = this._stickyErrorObject
+          || _checkForRenderDepthFailure(this)
+          || this.state.rerenderings || 0;
+      const chainResult = thisChainEagerly(
+          this,
+          chainHead,
+          UIComponent._renderChain,
+          UIComponent.prototype._errorOnRenderChain);
+      if (typeof chainResult === "number") {
+        ret = this._cachedRenderResult; // newly set by chain
+        if (ret === undefined) {
+          throw new Error(`INTERNAL ERROR: render chain returned ${chainResult
+              } directly but didn't set _cachedRenderResult`);
         }
-        // Try to handle pending promises.
-        if (isPromise(ret)) {
-          const operationInfo = ret.operationInfo || {
-            slotName: "pendingPromiseLens", focus: { render: ret, latestRenderedLensSlot },
-            onError: { slotName: "rejectedPromiseLens", lens: { render: ret } },
+      } else { // chainResult is a promise
+        chainResult.then(successfulRendering => {
+          if (successfulRendering >= 0) {
+            this._cachedRendering = successfulRendering;
+            this.rerender("elements", null);
+          }
+        }).catch(error => {
+          this.flushAndRerender("elements", undefined,
+              this._renderSecondaryError(
+                  new Error(`INTERNAL ERROR: ${this.constructor.name
+                      }..render main elements chain rendering threw while it shouldn't`),
+                  error));
+        });
+
+        if (this._cachedRenderResult !== undefined) {
+          // Keep showing current result until refresh.
+          // Maybe add a timer that will trigger pending lens rendering after a while?
+          ret = this._cachedRenderResult;
+        } else {
+          const operationInfo = chainResult.operationInfo || {
+            slotName: "pendingElementsLens", focus: {
+              render: chainResult, latestRenderedLensSlot: this.constructor.mainLensSlotName,
+            },
+            onError: { slotName: "rejectedElementsLens", lens: { render: chainResult } },
           };
-          ret.then(renderValue => {
-            this._pendingRenderValue = renderValue;
-            this.forceUpdate();
-          }).catch(error => {
-            if (operationInfo.onError) Object.assign(error, operationInfo.onError);
-            this.enableError(wrapError(error,
-                    new Error(`During ${this.debugId()}\n .render().result.catch`),
-                    "\n\tuiContext:", this.state.uiContext,
-                    "\n\tfocus:", this.tryFocus(),
-                    "\n\tstate:", this.state,
-                    "\n\tprops:", this.props,
-                ), "UIComponent.render.result.catch");
-          });
-          latestRenderedLensSlot = operationInfo.slotName;
-          ret = this.tryRenderSlotAsLens(latestRenderedLensSlot, operationInfo.focus);
-          if (isPromise(ret)) {
+          ret = this.tryRenderSlotAsLens(operationInfo.slotName, operationInfo.focus);
+          if ((ret === undefined) || isPromise(ret)) {
             throw wrapError(
-                new Error("Invalid render result: 'pendingPromiseLens' returned a promise"),
-                new Error(`During ${this.debugId()}\n .render().ret.pendingPromiseLens, with:`),
-                "\n\tpendingPromiseLens ret:", dumpObject(ret),
-                "\n\tcomponent:", dumpObject(this));
+                new Error(
+                    `Invalid render result: slot '${operationInfo.slotName}' renders into ${
+                      ret === undefined ? "undefined": "a promise"}`),
+                new Error(`During ${this.debugId()}\n .render().ret.pendingElementsLens, with:`),
+                "\n\treturned promise:", ...dumpObject(ret),
+                "\n\toperation:", ...dumpObject(operationInfo),
+                "\n\tcomponent:", ...dumpObject(this));
           }
         }
-
-        if (ret === undefined) return null;
-        mainValidationFaults = _validateElement(ret);
-
-        // Main return line
-        if (mainValidationFaults === undefined) {
-          return ret;
-        }
-
-        console.error(`Validation faults on render result of '${latestRenderedLensSlot}' by`,
-                this.debugId(),
-            "\n\tfaults:", mainValidationFaults,
-            "\n\tcomponent:", this,
-            "\n\tfailing render result:", ret);
-        ret = this.renderSlotAsLens("invalidElementLens",
-            "see console log for 'Validation faults' details");
       }
     } catch (error) {
-      firstPassError = error;
-    }
-
-    let internalErrorValidationFaults;
-    try {
-      if (firstPassError) {
-        this.enableError(wrapError(firstPassError,
-                new Error(`During ${this.debugId()}\n .render()`),
-                "\n\tuiContext:", this.state.uiContext,
-                "\n\tfocus:", this.tryFocus(),
-                "\n\tstate:", this.state,
-                "\n\tprops:", this.props,
-            ), "Exception caught in UIComponent.render");
-      }
-      if (ret === undefined) {
-        const errorObject = this._errorObject || "<render result undefined>";
-        const errorSlotName = errorObject.slotName || "internalErrorLens";
-        const failure: any = this.renderSlotAsLens(errorSlotName, errorObject);
-        if (isPromise(failure)) throw new Error(`${errorSlotName} returned a promise`);
-        ret = failure;
-        let isSticky = errorObject.isSticky;
-        if (isSticky === undefined) {
-          isSticky = (this.context.engine.getHostObjectDescriptor(Lens[errorSlotName]) || {})
-              .isStickyError;
-        }
-        if (!isSticky) {
-          Promise.resolve(true).then(() => { this._errorObject = undefined; });
-        }
-      }
-      internalErrorValidationFaults = _validateElement(ret);
-      if (internalErrorValidationFaults) {
-        throw new Error("Error rendering itself contains validation faults");
-      }
-    } catch (secondPassError) {
-      // Exercise in defensive programming. We should never get here, really,, but there's nothing
-      // more infurating and factually blocking for the user than react white screen of death.
-      // Of all react hooks .render() is most vulnerable to these from user actions, so we fall back
-      // to simpler error messages to deny exceptions from leaving while still trying to provide
-      // useful feedback for diagnostics & debugging purposes.
-      try {
-        outputError(wrapError(secondPassError,
-            `INTERNAL ERROR: Exception caught in ${this.constructor.name
-                }.render() second pass,`,
-            ...(!internalErrorValidationFaults ? []
-                : ["\n\terror contains validation faults:", internalErrorValidationFaults]
-            ),
-            ...(firstPassError
-                    ? ["\n\twhile rendering firstPassError:", firstPassError]
-                : this._errorObject
-                    ? ["\n\twhile rendering existing error status:", this._errorObject]
-                : ["\n\twhile rendering main render validation fault:", mainValidationFaults]
-            ),
-            "\n\tin component:", this));
-        ret = (
-          <div>
-            Exception caught while trying to render error:
-            {String(secondPassError)}, see console for more details
-          </div>
-        );
-      } catch (thirdPassError) {
-        try {
-          console.error("INTERNAL ERROR: Exception caught on render() third pass:", thirdPassError,
-              "\n\twhile rendering secondPassError:", secondPassError,
-              "\n\tfirstPassError:", firstPassError,
-              "\n\texisting error:", this._errorObject,
-              "\n\tin component:", this);
-          ret = UIComponent.thirdPassErrorElement;
-        } catch (fourthPassError) {
-          console.warn("INTERNAL ERROR: Exception caught on render() fourth pass:", fourthPassError,
-              "\n\tGiving up, rendering null.",
-              "\n\tYou can ask iridian for candy if you ever genuinely encounter this.");
-          ret = null;
-        }
-      }
+      ret = this._cachedRenderResult = this._renderSecondaryError(
+          new Error(`INTERNAL ERROR: ${this.constructor.name
+              }..render main elements chain rendering threw while it shouldn't`),
+          error);
     }
     return ret;
+  }
+
+  _renderMainLensSlot (errorOrThisRendering) {
+    if (errorOrThisRendering instanceof Error) throw errorOrThisRendering;
+    if ((this._cachedRendering !== undefined) && (errorOrThisRendering <= this._cachedRendering)) {
+      // Some other call already started main lens slot rendering before this chain call.
+      return thisChainReturn(-1);
+    }
+    return [
+      // take ownership of this rendering instance
+      this._cachedRendering = (this.state.rerenderings || 0),
+      this.tryRenderSlotAsLens(this.constructor.mainLensSlotName),
+    ];
+  }
+
+  _validateRenderResult (thisRendering, renderResult) {
+    if (thisRendering < (this._cachedRendering || 0)) {
+      // Some later rerender call finished before this chain call. Discard all.
+      return -1;
+    }
+    if (renderResult === undefined) {
+      this._cachedRenderResult = null;
+    } else {
+      const mainValidationFaults = _validateElement(renderResult);
+      if (mainValidationFaults !== undefined) {
+        throw wrapError(
+            new Error(`Validation faults on render result`),
+            new Error(`During ${this.debugId()
+                }\n .render().renderSlotAsLens('${this.constructor.mainLensSlotName}')`),
+            "\n\tfaults:", ...dumpObject(mainValidationFaults),
+            "\n\tfailing render result:", ...dumpObject(renderResult),
+            "\n\tcomponent:", ...dumpObject(this),
+        );
+      }
+      this._cachedRenderResult = renderResult;
+    }
+    return thisRendering;
+  }
+
+  _errorOnRenderChain (error = "", index, params) {
+    const thisRendering = Array.isArray(params) ? params[0] : (this.state.rerenderings || 0);
+    if (thisRendering < (this._cachedRendering || 0)) return -1;
+    // Try to connect to absent chronicles.
+    try {
+      this._cachedRendering = thisRendering;
+      if (tryConnectToAbsentChroniclesAndThen(error, () => this.flushAndRerender("sourcery"))) {
+        this._cachedRenderResult = this.tryRenderSlotAsLens("pendingChroniclesLens",
+            (error.originalError || error).absentChronicleURIs.map(entry => String(entry)));
+      } else {
+        const errorSlotName = error.slotName || "internalErrorLens";
+        const errorResult = this.renderSlotAsLens(errorSlotName, error);
+        if (isPromise(errorResult)) throw new Error(`${errorSlotName} returned a promise`);
+        const errorResultValidationFaults = _validateElement(errorResult);
+        if (errorResultValidationFaults) {
+          throw wrapError(
+              new Error("Error rendering itself contains validation faults"),
+              new Error(`During ${this.debugId()
+                  }\n .render()._errorOnRenderChain("${error.message}")`),
+              "\n\tfaults:", ...dumpObject(errorResultValidationFaults),
+              "\n\tfailing error result:", ...dumpObject(errorResult),
+              "\n\tcomponent:", ...dumpObject(this));
+        }
+        if ((error.isSticky !== undefined)
+            ? error.isSticky
+            : (this.context.engine.getHostObjectDescriptor(Lens[errorSlotName]) || {})
+                .isStickyError) {
+          this._stickyErrorObject = error;
+        }
+        this._cachedRenderResult = errorResult || null;
+      }
+    } catch (secondaryError) {
+      this._cachedRenderResult = this._renderSecondaryError(secondaryError, error);
+    }
+    return thisRendering;
+  }
+
+  _renderSecondaryError (secondaryError, primaryError) {
+    // Exercise in defensive programming. During valospace development
+    // we should never get here really. But edge cases happena and
+    // during fabric development especially this function serves as a
+    // stop-gap measure to ensure that something useful gets rendered.
+    try {
+      outputError(wrapError(secondaryError,
+          `INTERNAL ERROR: Exception caught in ${this.constructor.name
+              }.render() second pass,`,
+          "\n\twhile rendering primary error:", ...dumpObject(primaryError),
+          "\n\tin component:", ...dumpObject(this)));
+      return (
+        <div>
+          Exception caught while trying to render error:
+          {String(secondaryError)}, see console for more details
+        </div>
+      );
+    } catch (tertiaryError) {
+      try {
+        console.error(
+            "INTERNAL ERROR: Exception caught on render() third pass:",
+            ...dumpObject(tertiaryError),
+            "\n\twhile rendering secondary error:", ...dumpObject(secondaryError),
+            "\n\tprimary error:", ...dumpObject(primaryError),
+            "\n\tin component:", ...dumpObject(this));
+        return UIComponent.thirdPassErrorElement || null;
+      } catch (quaternaryError) {
+        console.warn(
+            "INTERNAL ERROR: Exception caught on render() fourth pass:", String(quaternaryError),
+            "\n\tGiving up, rendering null.",
+            "\n\tYou can ask iridian for candy if you ever genuinely encounter this.");
+        return null;
+      }
+    }
   }
 }

@@ -1548,7 +1548,7 @@ an undefined value.
     defaultValue: ({ delegate: [
       (focus, component) => {
         const activation = focus.activate();
-        if (activation !== focus) activation.then(() => component.forceUpdate());
+        if (activation !== focus) activation.then(() => component.flushAndRerender("activated"));
         return undefined;
       },
       loadingLens,

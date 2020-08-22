@@ -3,6 +3,7 @@
 import Bvob from "./Bvob.js";
 import Chronicle from "./Chronicle.js";
 import Describable from "./Describable.js";
+import DestroyedScriptResource from "./DestroyedScriptResource.js";
 import Discoverable from "./Discoverable.js";
 import Entity from "./Entity.js";
 import InactiveScriptResource from "./InactiveScriptResource.js";
@@ -19,6 +20,7 @@ export default {
   Bvob,
   Chronicle,
   Describable,
+  DestroyedScriptResource,
   Discoverable,
   InactiveScriptResource,
   Entity,

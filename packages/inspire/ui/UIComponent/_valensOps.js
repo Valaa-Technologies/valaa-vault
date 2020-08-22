@@ -16,7 +16,7 @@ export function wrapElementInValens (component: UIComponent, element: Object, fo
   return (ret !== undefined) ? ret : element;
 }
 
-let _Valens, _Valoscope;
+let _Valens;
 
 /**
  * If no hierarchyKey is provided then it means the component doesn't
@@ -33,10 +33,7 @@ export function tryWrapElementInValens (
   // TODO(iridian, 2020-06): This whole setup should be implemented in
   // JSXDecoder also, then deprecated here, and finally removed from
   // here.
-  const Valens = _Valens || (_Valens = require("./Valens").default);
-
-  if ((element.type === Valens)
-      || Valens.isPrototypeOf(element.type)) return undefined;
+  if (element.type.isValens) return undefined;
   let valensArgs = element[ValensPropsTag];
   try {
     if (valensArgs === undefined) {
@@ -105,12 +102,11 @@ export function tryPostRenderElement (component, element, focus, hierarchyKey) {
 export function tryCreateValensArgs (
     elementType, elementProps, hierarchyKey, elementKey, elementRef) {
   const Valens = _Valens || (_Valens = require("./Valens").default);
-  const Valoscope = _Valoscope || (_Valoscope = require("../Valoscope").default);
-  if (elementType === Valens) return undefined;
+  if (elementType.isValens) return undefined;
   let valensProps, rerunAfterPriming, currentIndex = 0;
   const propValensBehaviors = !elementType.isUIComponent
           ? _nonComponentPropValensBehaviors
-      : (elementType === Valoscope)
+      : (elementType.isValoscope)
           ? _valoscopePropValensBehaviors
       : _uiComponentPropValensBehaviors;
   try {
@@ -147,7 +143,7 @@ export function tryCreateValensArgs (
     }
     if (typeof behavior === "string") actualName = behavior;
     if (propValue instanceof Kuery) {
-      const kueryName = `props.${name}#${currentIndex++}`;
+      const kueryName = `props.${propName}#${currentIndex++}`;
       (valensProps.propsKueriesSeq || (valensProps.propsKueriesSeq = []))
           .push([kueryName, propValue]);
       actualValue = _obtainFetchKueryProp(kueryName);

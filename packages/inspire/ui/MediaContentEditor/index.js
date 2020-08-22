@@ -22,7 +22,7 @@ export default class MediaContentEditor extends UIComponent {
         return liveUpdate.value();
       },
       function _setEditorStateContent (content) {
-        editor.setState({ content });
+        editor.flushAndRerender("mediaContent", { content });
         return false; // prevent force-update
       },
     ], function errorOnMediaContentEditorSubscriptions (error) {

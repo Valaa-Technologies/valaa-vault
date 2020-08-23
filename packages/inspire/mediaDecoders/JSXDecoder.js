@@ -329,7 +329,8 @@ export default class JSXDecoder extends MediaDecoder {
     }
 
     for (const [attrName, aliasOf, shouldWarn, warning] of [
-      ["key", "$Lens.key"],
+      ["key", "$Lens.frame"],
+      ["elementKey", "$Lens.frame", true],
       ["class", !isComponentLens ? "className" : "class", false],
       ["focus", "$Lens.focus"],
       ["head", "$Lens.focus", true],
@@ -337,7 +338,6 @@ export default class JSXDecoder extends MediaDecoder {
       ["ref", "$Lens.ref", true],
       ["styleSheet", "$Lens.styleSheet"],
       ["context", "$Lens.context"],
-      ["elementKey", "$Lens.frameKey", true],
       ["valoscope", "$Lens.valoscope", true, "direct Lens:<property> notation"],
       ["vScope", "$Lens.valoscope", true, "direct Lens:<property> notation"],
       ["valaaScope", "$Lens.valoscope", true, "direct Lens:<property> notation"],
@@ -369,7 +369,8 @@ export default class JSXDecoder extends MediaDecoder {
           : undefined;
       if (isLiveKuery !== undefined) namespace = namespace.slice(isLiveKuery ? 5 : 7);
       else if (staticKueriesByDefault) isLiveKuery = false;
-      if (namespace === "Lens") {
+      if (namespace === "Frame") ret.hasFrame = true;
+      else if (namespace === "Lens") {
         if (name === "static") continue;
         if (_valoscopeAttributes[name]) ret.hasFrame = true;
       }
@@ -390,7 +391,7 @@ export default class JSXDecoder extends MediaDecoder {
 
 const _valoscopeAttributes = {
   valoscope: true,
-  key: true,
+  frame: true,
   lens: true,
   lensProperty: true,
   focusLensProperty: true,

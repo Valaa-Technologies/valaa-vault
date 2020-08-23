@@ -47,7 +47,7 @@ export const fabricatorOps = {
       ret = Object.create(this);
       ret._fabricatorName = `#${++transactionCounter}:${name}`;
       ret._transaction = new TransactionState(ret, ret._fabricatorName);
-      this.logEvent(1, () => [
+      this.logEvent(2, () => [
         "\nBEGUN TRANSACTION", ret._fabricatorName, ":",
         ...dumpObject({ fabricator: ret, transaction: ret._transaction }),
       ]);
@@ -55,7 +55,7 @@ export const fabricatorOps = {
       const fabricatorName = `${this._fabricatorName}/#${this._fabricatorCount}:${name}`;
       ret = this._transaction.createFabricator(this, name);
       ret._fabricatorName  = fabricatorName;
-      this.logEvent(1, () => [
+      this.logEvent(2, () => [
         "  ===>>>>   acquired fabricator", ret._fabricatorName, ":",
         ...dumpObject({ fabricator: ret, transaction: ret._transaction }),
       ]);
@@ -70,7 +70,7 @@ export const fabricatorOps = {
     if (!transaction) {
       throw new Error("Invalid call to releaseFabricator from outside Fabricator");
     }
-    this.logEvent(1, () => [
+    this.logEvent(2, () => [
       (options || {}).abort ? "  <<<<====   ABORTING"
           : (options || {}).rollback ? "  <<<<====   rolling back"
           : (this._finalizedFabricatorCount + 1 < this._fabricatorCount) ? "releasing on"
@@ -90,7 +90,7 @@ export const fabricatorOps = {
     if (this._parentFabricator) {
       return this._parentFabricator.releaseFabricator();
     }
-    this.logEvent(1, () => [
+    this.logEvent(2, () => [
       transaction._transacted ? "\nCOMMITTING" : "\nDISCARDING", "TRANSACTION",
       this._fabricatorName, ":", ...dumpObject({ fabricator: this, transaction }),
     ]);

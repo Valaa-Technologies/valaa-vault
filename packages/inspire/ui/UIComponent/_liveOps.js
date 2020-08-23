@@ -198,7 +198,7 @@ function _obtainValoscopeProps (stateLive) {
 // and components, but they are resolved by the valens and do not
 // by default appear on the contained element.
 export const _valensRecorderProps = {
-  key: recordKey,
+  frame: recordFrameKey,
   // children: "children",
   ref (stateLive, newValue) {
     (stateLive.elementProps || stateLive.valoscopeProps).ref =
@@ -303,7 +303,7 @@ const _elementRecorderProps = {
   styleSheet: "styleSheet",
 };
 
-export function recordKey (stateLive, newValue) {
+export function recordFrameKey (stateLive, newValue) {
   if (!newValue) return;
   const component = stateLive.component;
   let keyOp;
@@ -322,12 +322,12 @@ export function recordKey (stateLive, newValue) {
   } else if (isSymbol(newValue)) {
     const keyFromFocus = component.getParentUIContextValue(newValue);
     if (typeof keyFromFocus !== "function") {
-      throw new Error(`Invalid $Lens.key value '${String(newValue)
-          }': does not resolve to valid key callback, got '${typeof keyFromFocus}'`);
+      throw new Error(`Invalid $Lens.frame namespaced value '${String(newValue)
+          }': does not resolve to valid frame key callback, got '${typeof keyFromFocus}'`);
     }
     stateLive.keyFromFocus = keyFromFocus;
   } else {
-    throw new Error(`Invalid $Lens.key: expected callback, symbol, string or nully, got '${
+    throw new Error(`Invalid $Lens.frame: expected callback, symbol, string or nully, got '${
       typeof newValue}'`);
   }
 }
@@ -345,21 +345,21 @@ const _keyFromFocusOps = {
     return `${arrayIndex != null ? `$d.${arrayIndex}` : ""}${
         focus instanceof Vrapper ? `$focus.${focus.getBriefUnstableId()}@@` : ""}`;
   },
-  [Lens.key] (keyPrefix, focus, arrayIndex, entryProps) {
-    const key = `${arrayIndex != null ? `$d.${arrayIndex}` : ""}${
+  [Lens.frame] (keyPrefix, focus, arrayIndex, entryProps) {
+    const keySuffix = `${arrayIndex != null ? `$d.${arrayIndex}` : ""}${
         focus instanceof Vrapper ? `$focus.${focus.getBriefUnstableId()}@@` : ""}`;
-    entryProps.frameKey = `${keyPrefix}${key}`;
-    return key;
+    entryProps.frameKey = `${keyPrefix}${keySuffix}`;
+    return keySuffix;
   },
   [Lens.focus] (keyPrefix, focus, arrayIndex, entryProps) {
-    const key = (focus instanceof Vrapper) ? `$focus.${focus.getBriefUnstableId()}@@`
+    const keySuffix = (focus instanceof Vrapper) ? `$focus.${focus.getBriefUnstableId()}@@`
         : (arrayIndex == null) && "$.non_resource";
-    if (!key) {
-      throw new Error(`Cannot create $Lens.key={$Lens.focus
+    if (!keySuffix) {
+      throw new Error(`Cannot create $Lens.frame={$Lens.focus
           } from non-resoure entry at $Lens.array[${arrayIndex}]`);
     }
-    entryProps.frameKey = `${keyPrefix}${key}`;
-    return key;
+    entryProps.frameKey = `${keyPrefix}${keySuffix}`;
+    return keySuffix;
   },
   [Lens.arrayIndex] (keyPrefix, focus, arrayIndex, entryProps) {
     entryProps.frameKey = `${keyPrefix}$d.${arrayIndex}`;

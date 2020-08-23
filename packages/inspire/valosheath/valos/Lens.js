@@ -138,69 +138,73 @@ per update irrespective of the array length (even if 0).
 .`,
   }));
 
-  _defineName("key", () => ({
-    tags: ["Primary", "Attribute"],
+  _defineName("frame", () => ({
+    tags: ["Primary", "Valoscope", "Attribute"],
     type: "string | (focus: string, index: ?number, keyPrefix: ?string) => string",
     description:
 `Attribute slot which is used to compute a frame key string for the
 element that is used to identify its frame resource. In trivial cases
-the frame key is the key attribute string value directly.
+the frame key is the frame attribute string value directly.
 
 The frame key is relative to the closest containing parent frame and
 thus does not need to be globally unique.
 
 The frame key is made part of the id of a frame resource if an element
-has one. If so a 'frame key property' with name equal to the frame key
-is added to the containing frame and is set to point to this element
-frame.
+has one. If so a 'frame key property' with name equal to the frame
+attribute value is added to the containing frame and is set to point to
+this element frame.
 Note that the frame key property will not be added for frames without
-explicit key attribute.
+a static string frame attribute.
 
 If two child elements within the same parent frame are explicitly
 constructed to have the same frame key then they will share the same
 frame resource as well.
 
-The key attribute can also be a callback. It is called with an active
+The frame attribute can also be a callback. It is called with an active
 focus as its first argument and the return value is then used as the
 frame key of the element. This allows the frame key to be computed
 based on arbitrary focus contents.
 
-If an element with key attribute also contains a Lens:array attribute
-then the key attribute value is used to determine the frame key of each
-array entry element that results from the array spread. If the key
-attribute is a callback then the position of the element in the spread
-is given as the second argument.
+If an element with frame attribute also contains a Lens:array attribute
+then the frame attribute value is used to determine the frame key of
+each array entry element that results from the array spread. If the
+frame attribute is a callback then the position of the element in the
+spread is given as the second argument.
 
-If an element with key attribute does not have a frame then instead of
-using the key as frame key it is set as the current 'keyPrefix'
+If an element with a frame attribute does not have a frame then instead
+of using the key as frame key it is set as the current 'keyPrefix'
 which then applies to all nested children of that element. If a current
 keyPrefix exists, the key is appended to it using "_" as separator.
 A frame key of an element with non-empty keyPrefix is computed by
 appending the child element key attribute string to the keyPrefix; the
 keyPrefix is then cleared for its nested children.
 
-If a key attribute is a callback then the current keyPrefix is given as
-a third argument and the returned value is set as the frame key if
+If a frame attribute is a callback then the current keyPrefix is given
+as a third argument and the returned value is set as the frame key if
 the element has a frame. Otherwise the returned value replaces the
 current keyPrefix for the nested children of that element.
 
-Last but not least: if the key attribute of an array spread is a string
-then all array entries will share the same frame. This allows for array
-elements with differing focus to easily share state.
-To prevent nested accidental frame key conflicts the position of each
+Last but not least: if the frame attribute of an array spread is a
+string then all array entries will share the same frame. This allows
+for array elements with differing focus to easily share state.
+To prevent accidental nested frame key conflicts the position of each
 entry is then added as the initial keyPrefix for the children of that
 entry.
 Note: this is in fact the only way for array entries to share a frame
-directly as array spread key callbacks must always return unique frame
-keys.
+directly. Array spread frame callback functions must always return
+unique frame keys.
 `
   }));
 
   _defineName("lens", () => ({
-    tags: ["Primary", "Attribute", "Lens"],
+    tags: ["Primary", "Valoscope", "Attribute", "Lens"],
     type: "Lens",
     description:
 `Attribute slot for viewing the valid focus of a fully loaded component.
+
+If $Lens.lens is specified as an attribute for a non-valoscope element
+then the element will be wrapped inside an implicit Valoscope
+(including a new frame).
 
 This slot can only be provided as a component attribute and is checked
 only after focus and all other attributes are activated and only if the
@@ -335,7 +339,7 @@ there is none.
 
 This is the location of the element focus in the $Lens.array before any
 filtering and sorting. By default $Lens.arrayIndex is also used as part
-of the default key generation (see $Lens.key).
+of the implicit frame key generation (see $Lens.frame).
 .`,
   }));
 
@@ -811,13 +815,18 @@ The default lens delegates showing to focusPropertyLens.
   }));
 
   _defineName("lensProperty", () => ({
-    tags: ["Attribute", "Context"],
+    tags: ["Valoscope", "Attribute", "Context"],
     type: "(string | string[])",
     description:
 `Slot which contains the property name (or an array of names) that is
 looked up from a focused Resource in order to view that Resource itself.
 This slot is used by all lens property lenses as the default fallback
-property name.`,
+property name.
+
+If $Lens.lensProperty is specified as an attribute for a non-valoscope
+element then the element will be wrapped inside an implicit Valoscope
+(including a new frame).
+`,
   }));
 
   _createLensPropertySlots("focusLensProperty", ["FOCUS_LENS"],
@@ -828,13 +837,18 @@ property name.`,
   function _createLensPropertySlots (specificLensPropertySlotName, defaultValueProperties,
       propertyLensName, notFoundName) {
     const slotSymbol = _defineName(specificLensPropertySlotName, () => ({
-      tags: ["Attribute", "Context"],
+      tags: ["Valoscope", "Attribute", "Context"],
       type: "(string | string[])",
       description:
 `Slot which contains the property name that is searched from the
 Resource focus when resolving the *${propertyLensName}* lens. Can be an
 array of property names in which case they are searched in order and
-the first property with not-undefined value is selected.`,
+the first property with not-undefined value is selected.
+
+If $Lens.${specificLensPropertySlotName} is specified as an attribute for a non-valoscope
+element then the element will be wrapped inside an implicit Valoscope
+(including a new frame).
+`,
       isEnabled: undefined,
       defaultValue: defaultValueProperties,
     }));
@@ -919,10 +933,15 @@ If still no suitable lens can be found delegates the viewing to '${notFoundName 
   }));
 
   _defineName("instanceLensPrototype", () => ({
-    tags: ["Attribute"],
+    tags: ["Valoscope", "Attribute"],
     type: "Resource",
     description:
-`Attribute slot for an instance lens frame prototype resource.`,
+`Attribute slot for an instance lens frame prototype resource.
+
+If $Lens.instanceLensPrototype is specified as an attribute for a
+non-valoscope element then the element will be wrapped inside an
+implicit Valoscope which handles the frame creation.
+`,
   }));
 
   _defineName("instanceLens", () => ({

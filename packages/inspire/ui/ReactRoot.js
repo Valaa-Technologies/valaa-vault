@@ -258,8 +258,7 @@ export default class ReactRoot extends React.Component {
     const rootscopeProps = {
       ...(this.props.rootProps || {}),
       parentUIContext: this._rootContext,
-      context: { key: "-root" },
-      key: "-root",
+      frameKey: "root",
     };
     const valoscope = <Valoscope {...rootscopeProps}>{this.props.children}</Valoscope>;
     return this.props.isRoot

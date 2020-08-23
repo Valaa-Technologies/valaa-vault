@@ -76,8 +76,8 @@ export function _renderFocusAsSequence (component: UIComponent,
             ? (l, r) => options.sort(l[1], r[1], l[0], r[0])
             : (l, r) => -options.sort(l[1], r[1], l[0], r[0])
         : !options.reverse
-            ? _forwardCompares[options.sort] || _forwardCompares[Lens.key]
-            : _reverseCompares[options.sort] || _reverseCompares[Lens.key]);
+            ? _forwardCompares[options.sort] || _forwardCompares[Lens.frame]
+            : _reverseCompares[options.sort] || _reverseCompares[Lens.frame]);
   }
   if (options.setEndOffset) {
     component.setUIContextValue(Lens.endOffset, arrayIndex);
@@ -100,7 +100,7 @@ export function _renderFocusAsSequence (component: UIComponent,
 }
 
 const _forwardCompares = {
-  [Lens.key] (l, r) {
+  [Lens.frame] (l, r) {
     return (l[0].key || "").localeCompare(r[0].key || "");
   },
   [Lens.arrayIndex] (l, r) {
@@ -114,7 +114,7 @@ const _forwardCompares = {
 };
 
 const _reverseCompares = {
-  [Lens.key] (l, r) {
+  [Lens.frame] (l, r) {
     return -(l[0].key || "").localeCompare(r[0].key || "");
   },
   [Lens.arrayIndex] (l, r) {
@@ -384,7 +384,7 @@ function _recurseValidateElements (element: any) {
     };
   }
   const ret = {};
-  if (element.key === undefined) ret.keyFault = "key missing";
+  if (element.key === undefined) ret.keyFault = "key present but undefined";
   if ((typeof element.type !== "string") && (typeof element.type !== "function")
       && ((typeof element.type !== "object") || !(element.type instanceof React.Component))) {
     ret.typeFault = `type must be string, function or React.Component, got ${

@@ -164,7 +164,7 @@ const _valoscopePropValensBehaviors = {
   ]),
   key: undefined,
   ref: undefined,
-  // "$Lens.key": undefined,
+  // "$Lens.frame": undefined,
   // "$Lens.ref": undefined,
 };
 

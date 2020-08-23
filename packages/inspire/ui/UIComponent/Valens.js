@@ -8,7 +8,7 @@ import UIComponent from "~/inspire/ui/UIComponent";
 import Lens from "~/inspire/valosheath/valos/Lens";
 
 import { tryCreateValensArgs, ValensPropsTag, postRenderElement } from "./_valensOps";
-import { _bindLiveSubscriptions, recordKey, LensElementKey } from "./_liveOps";
+import { _bindLiveSubscriptions, recordFrameKey, LensElementKey } from "./_liveOps";
 
 export { tryCreateValensArgs, ValensPropsTag };
 
@@ -156,7 +156,7 @@ export default class Valens extends UIComponent {
     }
     /* */
     if (!stateLive.keyFromFocus) {
-      recordKey(stateLive, (outerType === Valoscope) ? Lens.key : LensElementKey);
+      recordFrameKey(stateLive, (outerType === Valoscope) ? Lens.frame : LensElementKey);
     }
     outerProps.children = outerChildren;
 

@@ -653,7 +653,7 @@ export default class UIComponent extends React.Component {
             throw wrapError(
                 new Error(
                     `Invalid render result: slot '${operationInfo.slotName}' renders into ${
-                      ret === undefined ? "undefined": "a promise"}`),
+                      ret === undefined ? "undefined" : "a promise"}`),
                 new Error(`During ${this.debugId()}\n .render().ret.pendingElementsLens, with:`),
                 "\n\treturned promise:", ...dumpObject(ret),
                 "\n\toperation:", ...dumpObject(operationInfo),
@@ -738,6 +738,16 @@ export default class UIComponent extends React.Component {
         }
         this._cachedRenderResult = errorResult || null;
       }
+      /*
+          if (operationInfo.onError) Object.assign(error, operationInfo.onError);
+          this.enableError(wrapError(error,
+                  new Error(`During ${this.debugId()}\n .render().result.catch`),
+                  "\n\tuiContext:", this.state.uiContext,
+                  "\n\tfocus:", this.tryFocus(),
+                  "\n\tstate:", this.state,
+                  "\n\tprops:", this.props,
+              ), "UIComponent.render.result.catch");
+      */
     } catch (secondaryError) {
       this._cachedRenderResult = this._renderSecondaryError(secondaryError, error);
     }

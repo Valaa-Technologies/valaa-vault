@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.26](https://github.com/valaatech/kernel/compare/v0.35.0-rc.25...v0.35.0-rc.26) (2020-08-23)
+
+**Note:** Version bump only for package @valos/toolset-revealer
+
+
+
+
+
 # [0.35.0-rc.25](https://github.com/valaatech/kernel/compare/v0.35.0-rc.24...v0.35.0-rc.25) (2020-08-17)
 
 **Note:** Version bump only for package @valos/toolset-revealer

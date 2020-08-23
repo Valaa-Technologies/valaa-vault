@@ -37,7 +37,7 @@
         "@type": "@id"
       }
     },
-    "dc:title": "@valos/kernel-vault@0.35.0-rc.24 Software Bill of Materials",
+    "dc:title": "@valos/kernel-vault@0.35.0-rc.25 Software Bill of Materials",
     "respecConfig": {
       "specStatus": "unofficial",
       "editors": [
@@ -89,7 +89,7 @@
           "@type": "vdoc:Paragraph",
           "vdoc:content": [
             "This document was automatically generated on ",
-            "2020-08-17T17:11:02.342Z",
+            "2020-08-23T15:38:20.509Z",
             "."
           ]
         },
@@ -309,11 +309,11 @@
       },
       {
         "type": "library",
-        "name": "json-parse-better-errors",
-        "version": "1.0.2",
+        "name": "json-parse-even-better-errors",
+        "version": "2.3.0",
         "description": "JSON.parse with context information on error",
         "licenses": "MIT",
-        "purl": "pkg:npm/json-parse-better-errors@1.0.2",
+        "purl": "pkg:npm/json-parse-even-better-errors@2.3.0",
         "modified": false
       },
       {
@@ -436,10 +436,10 @@
       {
         "type": "library",
         "name": "read-package-json",
-        "version": "2.1.1",
+        "version": "2.1.2",
         "description": "The thing npm uses to read package.json files with semantics and defaults and validation",
         "licenses": "ISC",
-        "purl": "pkg:npm/read-package-json@2.1.1",
+        "purl": "pkg:npm/read-package-json@2.1.2",
         "modified": false
       },
       {
@@ -510,39 +510,39 @@
         "type": "library",
         "group": "valos",
         "name": "inspire",
-        "version": "0.35.0-rc.25",
+        "version": "0.35.0-rc.26",
         "description": "ValOS Inspire application gateway",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/inspire@0.35.0-rc.25",
+        "purl": "pkg:npm/%40valos/inspire@0.35.0-rc.26",
         "modified": false
       },
       {
         "type": "library",
         "group": "valos",
         "name": "kernel",
-        "version": "0.35.0-rc.25",
+        "version": "0.35.0-rc.26",
         "description": "@valos/kernel domain",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/kernel@0.35.0-rc.25",
+        "purl": "pkg:npm/%40valos/kernel@0.35.0-rc.26",
         "modified": false
       },
       {
         "type": "library",
         "group": "valos",
         "name": "toolset-revealer",
-        "version": "0.35.0-rc.25",
+        "version": "0.35.0-rc.26",
         "description": "Tools for building revelations both for development and deployment purposes",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/toolset-revealer@0.35.0-rc.25",
+        "purl": "pkg:npm/%40valos/toolset-revealer@0.35.0-rc.26",
         "modified": false
       },
       {
         "type": "library",
         "name": "valma",
-        "version": "0.35.0-rc.25",
+        "version": "0.35.0-rc.26",
         "description": "A ValOS CLI tool for discovering and executing context-dependent command scripts",
         "licenses": "MIT",
-        "purl": "pkg:npm/valma@0.35.0-rc.25",
+        "purl": "pkg:npm/valma@0.35.0-rc.26",
         "modified": false
       },
       {
@@ -792,10 +792,10 @@
         "type": "library",
         "group": "valos",
         "name": "type-vault",
-        "version": "0.35.0-rc.25",
+        "version": "0.35.0-rc.26",
         "description": "The ValOS 'vault' workspace type toolset",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/type-vault@0.35.0-rc.25",
+        "purl": "pkg:npm/%40valos/type-vault@0.35.0-rc.26",
         "modified": false
       },
       {

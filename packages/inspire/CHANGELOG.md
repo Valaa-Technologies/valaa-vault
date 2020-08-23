@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.26](https://github.com/valaatech/kernel/compare/v0.35.0-rc.25...v0.35.0-rc.26) (2020-08-23)
+
+
+### Features
+
+* $Lens.delayed for incremental UI component loading ([f2eda2b](https://github.com/valaatech/kernel/commit/f2eda2b3e6f397622f5029729beab884be421121))
+* Lens.static and 'static-' namespace prefix for non-live attributes ([1ce8d63](https://github.com/valaatech/kernel/commit/1ce8d63f15689fecf2a14900853b1b26cbc00b5a))
+
+
+
+
+
 # [0.35.0-rc.25](https://github.com/valaatech/kernel/compare/v0.35.0-rc.24...v0.35.0-rc.25) (2020-08-17)
 
 

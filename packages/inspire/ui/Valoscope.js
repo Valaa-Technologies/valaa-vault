@@ -123,7 +123,7 @@ export default class Valoscope extends UIComponent {
       // FIXME(iridian, 2020-07): Ugly hack: duplicate code with code
       // below. children handling should probably be moved to
       // Valens. Like all of Valoscope handling tbf.
-      this.setUIContextValue(Lens.scopeChildren, nextProps.children);
+      this.setUIContextValue(Lens.children, nextProps.children);
       ret = "props.children";
     }
     if (nextProps.frameOverrides && (nextState.scopeFrame !== undefined)) {
@@ -148,7 +148,7 @@ export default class Valoscope extends UIComponent {
 
   bindFocusSubscriptions (focus: any, props: Object) {
     super.bindFocusSubscriptions(focus, props);
-    this.setUIContextValue(Lens.scopeChildren, props.children);
+    this.setUIContextValue(Lens.children, props.children);
     let vPrototype;
     if (props.hasOwnProperty("instanceLensPrototype")) {
       vPrototype = props.instanceLensPrototype;

@@ -10,7 +10,7 @@ import UIComponent, { LENS } from "~/inspire/ui/UIComponent";
 import Valens, { ValensPropsTag, tryCreateValensArgs } from "~/inspire/ui/UIComponent/Valens";
 import vidgets from "~/inspire/ui";
 import Valoscope from "~/inspire/ui/Valoscope";
-import Lens from "~/inspire/valosheath/valos/Lens";
+import Lens, { namespace as LensNamespace } from "~/inspire/valosheath/valos/Lens";
 import _jsxTransformFromString from "~/inspire/mediaDecoders/_jsxTransformFromString";
 
 import { ScopeAccessesTag, ScopeAccessKeysTag } from "~/script/VALSK";
@@ -211,7 +211,7 @@ export default class JSXDecoder extends MediaDecoder {
         && (children.length === 1)
         && (!props || (Object.keys(props).length === 0))) {
       const candidate = _maybeRecurseWithKey(children[0], parentKey, parentChildrenMeta);
-      if (candidate != null || candidate._isIntegrator || React.isValidElement(candidate)) {
+      if (candidate == null || candidate._isElementIntegrator || React.isValidElement(candidate)) {
         return candidate;
       }
     }
@@ -289,6 +289,7 @@ export default class JSXDecoder extends MediaDecoder {
       }
     }
     _elementIntegrator._isIntegrator = true;
+    _elementIntegrator._isElementIntegrator = true;
     return _elementIntegrator;
   }
 
@@ -305,6 +306,23 @@ export default class JSXDecoder extends MediaDecoder {
     return ret;
   }
 
+  static _migrationDirectives = {
+    class: ["className"],
+    key: ["$Lens.frame"],
+    elementKey: ["$Lens.frame", "warn"],
+    focus: ["$Lens.focus"],
+    head: ["$Lens.focus", "warn"],
+    array: ["$Lens.array"],
+    ref: ["$Lens.ref", "warn"],
+    styleSheet: ["$Lens.styleSheet"],
+    context: ["$Lens.context"],
+    valoscope: ["$Lens.valoscope", "warn", "direct Lens:<property> notation"],
+    vScope: ["$Lens.valoscope", "warn", "direct Lens:<property> notation"],
+    valaaScope: ["$Lens.valoscope", "warn", "direct Lens:<property> notation"],
+    ...Object.fromEntries(Object.entries(LensNamespace.deprecatedNames)
+        .map(([deprecated, favored]) => [deprecated, [`$Lens.${favored}`, "warn"]])),
+  };
+
   _createPropsMeta (
       sourceInfo, loc, parsedProps, elementName, isInstanceLens, isComponentLens, sourceKey) {
     const ret = {
@@ -314,6 +332,7 @@ export default class JSXDecoder extends MediaDecoder {
     };
 
     /* eslint-disable prefer-const */
+    /*
     let {                                           // E  C  I
       key,                                          // ?     WL
       class: class_,                                // D  L  A
@@ -322,48 +341,37 @@ export default class JSXDecoder extends MediaDecoder {
       vScope, valoscope, valaaScope,                // WL WL WL
       ...restAttrs
     } = parsedProps;
+    */
 
     if (isInstanceLens) {
       ++ret.totalCount;
-      restAttrs["$Lens.instanceLensPrototype"] = _getInstanceLensPrototypeKuery(elementName);
+      parsedProps["$Lens.instanceLensPrototype"] = _getInstanceLensPrototypeKuery(elementName);
     }
 
-    for (const [attrName, aliasOf, shouldWarn, warning] of [
-      ["key", "$Lens.frame"],
-      ["elementKey", "$Lens.frame", true],
-      ["class", !isComponentLens ? "className" : "class", false],
-      ["focus", "$Lens.focus"],
-      ["head", "$Lens.focus", true],
-      ["array", "$Lens.array"],
-      ["ref", "$Lens.ref", true],
-      ["styleSheet", "$Lens.styleSheet"],
-      ["context", "$Lens.context"],
-      ["valoscope", "$Lens.valoscope", true, "direct Lens:<property> notation"],
-      ["vScope", "$Lens.valoscope", true, "direct Lens:<property> notation"],
-      ["valaaScope", "$Lens.valoscope", true, "direct Lens:<property> notation"],
-    ]) {
-      if (parsedProps[attrName] === undefined) continue;
-      if (shouldWarn || ((shouldWarn !== false) && (!isComponentLens || isInstanceLens))) {
-        this.debugEvent(`DEPRECATED: non-namespaced attribute '${attrName}' in favor of ${
-            warning || aliasOf.slice(1).replace(".", ":")} (in ${elementName} at ${sourceKey})`);
-      }
-      if (restAttrs[aliasOf] !== undefined) {
-        throw new Error(`Attribute conflict found; the deprecated non-namespaced attribute '${
-            attrName}' would alias to ${aliasOf.slice(1)} which has an existing value "${
-            restAttrs[aliasOf]}" (in ${elementName} at ${sourceKey})`);
-      }
-      ++ret.totalCount;
-      restAttrs[aliasOf] = parsedProps[attrName];
-    }
-
-    const staticKueriesByDefault = restAttrs["$Lens.static"]
-        || (isComponentLens && !isInstanceLens && restAttrs.static);
-
+    const staticKueriesByDefault = parsedProps["$Lens.static"]
+        || (isComponentLens && !isInstanceLens && parsedProps.static);
     const defaultNamespace = !isComponentLens ? "HTML" : !isInstanceLens ? "Lens" : "Frame";
     const flattenedNamespace = !isComponentLens ? "HTML" : "Lens";
-    for (const [givenName, attr] of Object.entries(restAttrs)) {
-      let [, namespace, name] = givenName.match(/^\$([^.]+)\.(.*)$/)
-          || [null, defaultNamespace, givenName];
+
+    for (let [attrName, attr] of Object.entries(parsedProps)) {
+      const migration = JSXDecoder._migrationDirectives[attrName];
+      if (migration && (migration[0].startsWith("$Lens") || isComponentLens)) {
+        let [aliasOf, shouldWarn, warning] = migration;
+        if ((shouldWarn === "warn")
+            || ((shouldWarn === undefined) && (!isComponentLens || isInstanceLens))) {
+          this.debugEvent(`DEPRECATED: non-namespaced attribute '${attrName}' in favor of ${
+              warning || aliasOf.slice(1).replace(".", ":")} (in ${elementName} at ${sourceKey})`);
+        }
+        if (parsedProps[aliasOf] !== undefined) {
+          throw new Error(`Attribute conflict found; the deprecated attribute '${
+              attrName}' would alias to ${aliasOf.slice(1)} which has an existing value "${
+              parsedProps[aliasOf]}" (in ${elementName} at ${sourceKey})`);
+        }
+        attrName = aliasOf;
+      }
+
+      let [, namespace, name] = attrName.match(/^\$([^.]+)\.(.*)$/)
+          || [null, defaultNamespace, attrName];
       let isLiveKuery = namespace.startsWith("live-") ? true
           : namespace.startsWith("static-") ? false
           : undefined;
@@ -374,6 +382,7 @@ export default class JSXDecoder extends MediaDecoder {
         if (name === "static") continue;
         if (_valoscopeAttributes[name]) ret.hasFrame = true;
       }
+      ++ret.totalCount;
       const namespaceAttrs = ret.byNamespace[namespace] || (ret.byNamespace[namespace] = {});
       if (namespaceAttrs[name] !== undefined) {
         this.debugEvent(`Overriding existing value of attribute ${namespace}:${name

@@ -2,19 +2,34 @@
 const _symbolToQualifiedName = {};
 
 const _namespaces = {};
+const _deprecatedNamespaces = {};
 
 export function qualifiedSymbol (prefix, localPart) {
   const namespace = _namespaces[prefix] || (_namespaces[prefix] = {});
   let symbol = namespace[localPart];
   if (!symbol) {
-    const qualifiedName = `$${prefix}.${encodeURIComponent(localPart)}`;
-    symbol = namespace[localPart] = Symbol(qualifiedName);
-    const vpathName = `@${qualifiedName}@@`;
-    _symbolToQualifiedName[vpathName] = _symbolToQualifiedName[symbol] = Object.freeze([
-      prefix, localPart, qualifiedName, vpathName, `@.${qualifiedName}@@`,
-    ]);
+    const deprecationForward = (_deprecatedNamespaces[prefix] || "")[localPart];
+    if (deprecationForward) {
+      console.warn(`DEPRECATED: qualified symbol $${prefix}.${localPart
+          } is deprecated in favor of ${qualifiedNamesOf(deprecationForward)[2]}`);
+      symbol = deprecationForward;
+    } else {
+      const qualifiedName = `$${prefix}.${encodeURIComponent(localPart)}`;
+      symbol = Symbol(qualifiedName);
+      const vpathName = `@${qualifiedName}@@`;
+      _symbolToQualifiedName[vpathName] = _symbolToQualifiedName[symbol] = Object.freeze([
+        prefix, localPart, qualifiedName, vpathName, `@.${qualifiedName}@@`,
+      ]);
+    }
+    namespace[localPart] = symbol;
   }
   return symbol;
+}
+
+export function deprecateSymbolInFavorOf (deprecatedPrefix, deprecatedLocalPart, favoredSymbol) {
+  const namespace = _deprecatedNamespaces[deprecatedPrefix]
+      || (_deprecatedNamespaces[deprecatedPrefix] = {});
+  return (namespace[deprecatedLocalPart] = favoredSymbol);
 }
 
 export function qualifiedNamesOf (symbol) {

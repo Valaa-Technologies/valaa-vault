@@ -49,6 +49,25 @@ There are two additional lesser tags:
 `,
   nameSymbols: {},
   nameDefinitions: {},
+  deprecatedNames: {
+    scopeChildren: "children",
+    fallbackLens: "loadingLens",
+    delayedLens: "loadingLens",
+    failedLens: "rejectedLens",
+    pendingConnectionsLens: "pendingChroniclesLens",
+    failedConnectionsLens: "rejectedChroniclesLens",
+    pendingPropsLens: "pendingAttributesLens",
+    kueryingPropsLens: "pendingAttributesLens",
+    failedPropsLens: "rejectedAttributesLens",
+    pendingActivationLens: "pendingFocusLens",
+    failedActivationLens: "rejectedFocusLens",
+    pendingChildrenLens: "pendingElementsLens",
+    failedChildrenLens: "rejectedElementsLens",
+    pendingMediaInterpretationLens: "pendingMediaLens",
+    failedMediaInterpretationLens: "rejectedMediaLens",
+    mediaInterpretationErrorLens: "uninterpretableMediaLens",
+    unrenderableMediaInterpretationLens: "unrenderableInterpretationLens",
+  },
 };
 
 export default _createSymbols();
@@ -389,17 +408,18 @@ however.
 
   // Primitive lenses
 
-  _defineName("scopeChildren", () => ({
+  _defineName("children", () => ({
     tags: ["Internal", "Lens"],
     type: "any",
     description:
-`Lens for viewing the focus using the child element(s) of the innermost
-enclosing Valoscope component. This includes also the implicit
-Valoscopes such as instance components.
+`Lens for viewing the focus using the child element(s) of the nearest
+surrounding Valoscope component. This includes also the implicit
+Valoscopes such as instance lenses as well as those emitted by
+attributes like $Lens.frame.
 
-Depending on the exact location of where the $Lens.scopeChilren
-lens reference appears inside some text media there are three notably
-different looking use cases.
+Depending on the exact location of where the $Lens.children lens
+reference appears (ie. the location inside some text media) there are
+three notably different looking use cases.
 
 1. When this lens is used as an attribute value of a valoscope element:
   the reference resolves to the direct lexical child elements of
@@ -1540,16 +1560,16 @@ an undefined value.
     tags: ["Attribute", "Context", "Lens", "Loading"],
     type: "Lens",
     description:
-`Slot for viewing a description of pending child elements Promise.
+`Slot for viewing a description of pending elements Promise.
 
-    @focus {Object} children  the pending child elements Promise.`,
+    @focus {Object} elements  the pending elements Promise.`,
     isEnabled: true,
     defaultValue: ({ delegate: [
       loadingLens,
       <div {..._lensMessageLoadingProps}>
         <div {..._message}>  Waiting for pending elements to resolve.</div>
         <div {..._parameter}>
-          <span {..._key}>Children:</span>
+          <span {..._key}>Elements:</span>
           <span {..._value}>{focusDetailLens}</span>
         </div>
         {commonMessageRows}
@@ -1570,11 +1590,11 @@ an undefined value.
       loadingFailedLens,
       <div {..._lensMessageInternalFailureProps}>
         <div {..._message}>
-          Render Error: Child Promise failure.
+          Render Error: Elements Promise failure.
           {toggleableErrorDetailLens}
         </div>
         <div {..._parameter}>
-          <span {..._key}>Children:</span>
+          <span {..._key}>Elements:</span>
           <span {..._value}>
             {ret.instrument(error => error.children, focusDetailLens)}
           </span>

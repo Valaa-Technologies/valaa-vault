@@ -2,7 +2,7 @@
 
 import { HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
 import Transient from "~/raem/state/Transient";
-import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
+import { qualifiedSymbol, deprecateSymbolInFavorOf } from "~/raem/tools/namespaceSymbols";
 
 // import debugId from "~/engine/debugId";
 import { Valker } from "~/engine/VALEK";
@@ -39,7 +39,10 @@ export function defineName (name: string, namespace: Namespace,
 
 export function integrateNamespace (
     namespace: Namespace, rootScope: Object, hostDescriptors: Object) {
-  const { preferredPrefix, namespaceURI, description, nameSymbols, nameDefinitions } = namespace;
+  const {
+    preferredPrefix, namespaceURI, description,
+    nameSymbols, nameDefinitions, deprecatedNames,
+  } = namespace;
   const names = {};
   rootScope[`$${preferredPrefix}`] = nameSymbols;
   hostDescriptors.set(nameSymbols, {
@@ -60,6 +63,10 @@ export function integrateNamespace (
       rootScope[nameSymbols[nameSuffix]] = Object.freeze(defaultValue || value);
     }
     hostDescriptors.set(nameSymbols[nameSuffix], entryDescriptor);
+  }
+  for (const [deprecatedName, inFavorOfName] of Object.entries(deprecatedNames || {})) {
+    const favoredSymbol = qualifiedSymbol(preferredPrefix, inFavorOfName);
+    deprecateSymbolInFavorOf(preferredPrefix, deprecatedName, favoredSymbol);
   }
   return nameSymbols;
 }

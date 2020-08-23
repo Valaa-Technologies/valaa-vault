@@ -717,6 +717,14 @@ export default class UIComponent extends React.Component {
         this._cachedRenderResult = this.tryRenderSlotAsLens("pendingChroniclesLens",
             (error.originalError || error).absentChronicleURIs.map(entry => String(entry)));
       } else {
+        // if (operationInfo.onError) Object.assign(error, operationInfo.onError);
+        outputError(wrapError(error,
+                new Error(`During ${this.debugId()}\n .render().result.catch`),
+                "\n\tuiContext:", ...dumpObject(this.state.uiContext),
+                "\n\tfocus:", ...dumpObject(this.tryFocus()),
+                "\n\tcomponent:", ...dumpObject(this),
+            ), `${this.constructor.name}..render`);
+
         const errorSlotName = error.slotName || "internalErrorLens";
         const errorResult = this.renderSlotAsLens(errorSlotName, error);
         if (isPromise(errorResult)) throw new Error(`${errorSlotName} returned a promise`);
@@ -738,16 +746,6 @@ export default class UIComponent extends React.Component {
         }
         this._cachedRenderResult = errorResult || null;
       }
-      /*
-          if (operationInfo.onError) Object.assign(error, operationInfo.onError);
-          this.enableError(wrapError(error,
-                  new Error(`During ${this.debugId()}\n .render().result.catch`),
-                  "\n\tuiContext:", this.state.uiContext,
-                  "\n\tfocus:", this.tryFocus(),
-                  "\n\tstate:", this.state,
-                  "\n\tprops:", this.props,
-              ), "UIComponent.render.result.catch");
-      */
     } catch (secondaryError) {
       this._cachedRenderResult = this._renderSecondaryError(secondaryError, error);
     }

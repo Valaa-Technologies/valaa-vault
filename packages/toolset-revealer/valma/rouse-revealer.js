@@ -28,6 +28,10 @@ exports.builder = function builder (yargs) {
       type: "string", default: "0.0.0.0",
       description: "The local ip where the server will be bound"
     },
+    check: {
+      type: "boolean", default: true,
+      description: "if false, webpack-dev-server --disable-host-check option"
+    },
     inline: {
       type: "boolean", default: true,
       description: "webpack-dev-server --inline option"
@@ -74,6 +78,7 @@ exports.handler = async function handler (yargv) {
     "webpack-dev-server",
     yargv.inline && "--inline",
     yargv.progress && "--progress",
+    !yargv.check && "--disable-host-check",
     yargv.open && "--open",
     ...((typeof yargv.open === "string") ? ["--open-page", yargv.open] : []),
     "--host", yargv.host,

@@ -1,22 +1,26 @@
 const webpack = require("webpack");
 const autoprefixer = require("autoprefixer");
 
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
 const CompressionPlugin = require("compression-webpack-plugin");
 const vdocorate = require("@valos/tools/vdon").vdocorate;
 
-// TODO(iridian): Figure out the clean and correct way to set up prod configuration; merely
-// running 'webpack -p' is not sufficient to enable isProduction, as -p only enables
-// NODE_ENV = 'production' for the source files not for webpack.config.js itself.
-// See https://github.com/webpack/webpack/issues/2537 . Possible solution Candidates involve
-// splitting the config to separate webpack.dev/prod/commin.config.js, or having some other way to
-// signal production build (there are arguments that NODE_ENV is supposed to describe the execution
-// environment, not the requested build and these two should not be conflated. I've no strong
-// opinion on this yet).
-// FIXME(iridian): On further attempts both -p as well as NODE_ENV=production break the actual
-// builds later on down the line.
-// So as it stands now a production build can be triggered manually by running
-// `TARGET_ENV=production webpack`
+// TODO(iridian): Figure out the clean and correct way to set up prod
+// configuration; merely running 'webpack -p' is not sufficient to
+// enable isProduction, as -p only enables
+// NODE_ENV = 'production' for the source files not for webpack.config.js
+// itself.
+// See https://github.com/webpack/webpack/issues/2537 .
+// Possible solution candidates involve splitting the config to
+// separate webpack.dev/prod/commin.config.js, or having some other way
+// to signal production build (there are arguments that NODE_ENV is
+// supposed to describe the execution environment, not the requested
+// build and these two should not be conflated. I've no strong opinion
+// on this yet).
+// FIXME(iridian): On further attempts both -p as well as
+// NODE_ENV=production break the actual builds later on down the line.
+// So as it stands now a production build can be triggered manually by
+// running `TARGET_ENV=production webpack`
 
 const isProduction = (process.env.TARGET_ENV === "production");
 const isLocal = (process.env.TARGET_ENV === "local");
@@ -43,47 +47,52 @@ module.exports = vdocorate({ "...": { heading:
 })({
   mode: isProduction ? "production" : "development",
   context: process.cwd(),
-  devtool: "source-map",
+  devtool: isLocal || !isProduction ? "source-map"
+      : "hidden-source-map",
 
-  entry: [`src/index.js`],
+  entry: [`index.js`],
   output: {
+    filename: "main.js",
     path: `dist/revealer`,
     publicPath: "/",
-    filename: "main.js",
   },
   devServer: {
-    disableHostCheck: true,
     compress: true,
   },
   node: {
-    fs: "empty",
+    // fs: "empty",
+  },
+  resolve: {
+    alias: {
+      path: "path-browserify",
+    },
   },
 
   optimization: {
     minimize: !isLocal,
     minimizer: [
-      new UglifyJsPlugin({
+      new TerserPlugin({
         parallel: true,
         sourceMap: !isProduction,
-        uglifyOptions: {
-          ecma: 5,
-          warnings: false,
-          parse: {},
+        terserOptions: {
           compress: false, // isProduction && { keep_fnames: true, },
           mangle: false, // isProduction && { keep_fnames: true, },
-          output: {
-            comments: false,
-            beautify: false,
-          },
-          toplevel: false,
-          nameCache: null,
-          ie8: false,
-          safari10: false,
+          output: { comments: false, beautify: false },
           keep_fnames: true,
+          // mangle: true, // Note `mangle.properties` is `false` by default.
+          warnings: false, // what's this?
+          ecma: 5, // default
+          parse: {}, // default
+          module: false, // default
+          keep_classnames: undefined, // default
+          toplevel: false, // default
+          nameCache: null, // default
+          ie8: false, // default
+          safari10: false, // default
         },
       }),
       new CompressionPlugin({
-        asset: "[path].gz[query]",
+        filename: "[path].gz[query]",
         algorithm: "gzip",
         test: /\.js$|\.css$|\.html$/,
         threshold: 10240,
@@ -93,10 +102,13 @@ module.exports = vdocorate({ "...": { heading:
   },
 
   plugins: [
-    // Silences a console warning due to amdefine/require, coming through jstransform dependency.
-    // In principle jstransform dependency should be eliminated in favor of babel jsx tools (as
-    // esprima-fb is deprecated) but in practice VSX transformation relies on the custom
-    // modifications of the locally expanded jsx-transform
+    // Silences a console warning due to amdefine/require that comes
+    // through jstransform dependency.
+    // In principle jstransform dependency should be eliminated in
+    // favor of babel jsx tools (as the esprima-fb package that
+    // jstransform depends on is deprecated) but in practice th
+    // custom VSX transformation relies on local modifications to
+    // jsx-transform code in _jsxTransformFromString.js
     new webpack.ContextReplacementPlugin(/source-map/, /$^/),
   ],
   module: {
@@ -108,9 +120,10 @@ module.exports = vdocorate({ "...": { heading:
           {
             loader: "css-loader",
             options: {
-              modules: true,
+              modules: {
+                localIdentName: "[name]__[local]",
+              },
               importLoaders: 1,
-              localIdentName: "[name]__[local]",
             },
           },
           {

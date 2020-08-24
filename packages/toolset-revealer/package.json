@@ -20,15 +20,16 @@
   "dependencies": {
     "@valos/type-toolset": "^0.35.0-rc.27",
     "autoprefixer": "^8.6.2",
-    "compression-webpack-plugin": "^1.1.11",
-    "css-loader": "^1.0.0",
+    "buffer": "^5.6.0",
+    "compression-webpack-plugin": "^5.0.1",
+    "css-loader": "^4.2.2",
+    "path-browserify": "^1.0.1",
     "postcss-loader": "^2.1.6",
-    "style-loader": "^0.21.0",
-    "uglify-js": "^3.4.9",
-    "uglifyjs-webpack-plugin": "^2.1.1",
-    "webpack": "^4.28.2",
+    "style-loader": "^1.2.1",
+    "terser-webpack-plugin": "^4.1.0",
+    "webpack": "^5.0.0-beta.28",
     "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.14"
+    "webpack-dev-server": "^3.11.0"
   },
   "peerDependencies": {
     "@valos/inspire": "^0.35.0-prerelease.6"

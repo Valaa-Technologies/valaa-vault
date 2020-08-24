@@ -1,6 +1,6 @@
 // @flow
 
-import JSSHA from "jssha";
+import JSSHA from "jssha/src/sha256";
 
 import { coerceAsVRID } from "~/raem/VPath";
 

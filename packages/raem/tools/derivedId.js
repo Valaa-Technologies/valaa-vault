@@ -1,6 +1,6 @@
 // @flow
 
-import crypto from "crypto";
+import JSSHA from "jssha";
 
 import { coerceAsVRID } from "~/raem/VPath";
 
@@ -10,11 +10,12 @@ import { coerceAsVRID } from "~/raem/VPath";
 // dependent on an algorithm (besides determinism): when reducing the DUPLICATED as a command,
 // accumulate a list of ids in the top-level command. Sub-sequent executions shall then fetch the
 // ids from there in order.
+
 export default function derivedId (id, derivationName, contextId = "") {
   if (contextId[0] !== "@") {
-    const hash = crypto.createHash("sha256");
-    hash.update(id + derivationName + contextId, "ascii");
-    return hash.digest("base64");
+    const sha = new JSSHA("SHA-256", "TEXT", { encoding: "UTF8" });
+    sha.update(id + derivationName + contextId);
+    return sha.getHash("B64");
   }
   return derivedVRID(coerceAsVRID(id), derivationName, contextId);
 }

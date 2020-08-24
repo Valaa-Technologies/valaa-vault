@@ -9,7 +9,6 @@ import { tryAspect } from "~/sourcerer/tools/EventAspects";
 import { DelayedQueue, dumpObject, invariantifyString, mapEagerly, thenChainEagerly, vdon }
     from "~/tools";
 import { encodeDataURI } from "~/tools/html5/dataURI";
-import { bufferAndContentHashFromNative } from "~/tools/textEncoding";
 
 import Scribe from "./Scribe";
 import ScribeConnection from "./ScribeConnection";
@@ -65,23 +64,23 @@ export function _preCacheBvob (scribe: Scribe, contentHash: string, newInfo: Bvo
 
 const defaultRetries = 3;
 
-export function _prepareBvob (connection: ScribeConnection, content: any,
+export function _prepareBvob (connection: ScribeConnection, content: any, buffer, contentHash,
     mediaInfo: MediaInfo = {}, onError: Function) {
-  const { buffer, contentHash } = bufferAndContentHashFromNative(content, mediaInfo);
-  const expectedContentHash = mediaInfo && mediaInfo.contentHash;
-  const mediaName = mediaInfo && (mediaInfo.name ? `"${mediaInfo.name}"` : expectedContentHash);
-  if (expectedContentHash && (expectedContentHash !== contentHash)) {
+  if (!mediaInfo.contentHash) {
+    mediaInfo.contentHash = contentHash;
+  } else if (mediaInfo.contentHash !== contentHash) {
     connection.errorEvent(
         `\n\tINTERNAL ERROR: contentHash mismatch when preparing bvob for Media '${
             mediaInfo.name}', CONTENT IS NOT PERSISTED`,
-        "\n\tactual content hash:", contentHash,
-        "\n\texpected contentHash:", expectedContentHash,
-        "\n\tmediaInfo:", ...dumpObject(mediaInfo),
-        "\n\tcontent:", ...dumpObject({ content }),
+        "\n\tactual content sha512 hash:", contentHash,
+        "\n\tbased on content:", ...dumpObject({ content }),
+        "\n\texpected contentHash:", mediaInfo.contentHash,
+        "\n\tbased on mediaInfo:", ...dumpObject(mediaInfo),
     );
     return {};
   }
-  mediaInfo.contentHash = contentHash;
+
+  const mediaName = mediaInfo && (mediaInfo.name ? `"${mediaInfo.name}"` : contentHash);
 
   const pendingBvobInfo = connection._pendingBvobLookup[contentHash]
       || (connection._pendingBvobLookup[contentHash] = {});

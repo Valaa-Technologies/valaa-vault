@@ -1,8 +1,9 @@
 import path from "path";
 import fs from "fs";
 
-import { contentHashFromUCS2String } from "~/tools/textEncoding";
-import { contentHashFromArrayBuffer, contentHashFromNativeStream } from "./contentId";
+import {
+  contentHashFromUCS2String, contentHashFromArrayBuffer, contentHashFromNativeStream,
+} from "./contentId";
 
 function toArrayBuffer (buf) {
   const ab = new ArrayBuffer(buf.length);
@@ -41,11 +42,6 @@ describe("contentHash module", () => {
     /* eslint-enable max-len */
   ];
 
-  // Set these env variables to test using a big file.
-  const bigFiles = (process.env.VALOS_TEST_BIG_FILE && process.env.VALOS_TEST_BIG_FILE_HASH) ? [
-    { path: process.env.VALOS_TEST_BIG_FILE, hash: process.env.VALOS_TEST_BIG_FILE_HASH }
-  ] : null;
-
   describe("Synchronous id generation", () => {
     for (const td of testData) {
       it(`Given input string ${td.msg}, it should calculate ${td.hash}`, () => {
@@ -62,6 +58,11 @@ describe("contentHash module", () => {
 
     // node will OOM if you try to sync hash a big file, so no bigFiles here!
   });
+
+  // Set these env variables to test using a big file.
+  const bigFiles = (process.env.VALOS_TEST_BIG_FILE && process.env.VALOS_TEST_BIG_FILE_HASH) ? [
+    { path: process.env.VALOS_TEST_BIG_FILE, hash: process.env.VALOS_TEST_BIG_FILE_HASH }
+  ] : null;
 
   describe("Asynchronous id generation", () => {
     for (const tf of testFiles) {

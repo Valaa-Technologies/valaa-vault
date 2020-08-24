@@ -14,6 +14,7 @@ import { deserializeVRL } from "~/sourcerer/FalseProphet";
 import { DelayedQueue, dumpObject, thenChainEagerly } from "~/tools";
 
 import type IndexedDBWrapper from "~/tools/html5/IndexedDBWrapper";
+import { bufferAndContentHashFromNative } from "~/tools/id/contentId";
 
 import {
   MediaEntry, _prepareBvob, _determineEventMediaPreOps, _requestMediaContents
@@ -313,8 +314,10 @@ export default class ScribeConnection extends Connection {
     const wrap = new Error(`prepareBvob(${
         mediaInfo && mediaInfo.name ? `of Media "${mediaInfo.name}"` : typeof content})`);
     try {
-      // if (mediaInfo) mediaInfo.bvobId = mediaInfo.contentHash; // DEPRECATING(2020-01)
-      return _prepareBvob(this, content, mediaInfo, errorOnPrepareBvob);
+      return thenChainEagerly(
+          bufferAndContentHashFromNative(content, mediaInfo),
+          ({ buffer, contentHash }) =>
+              _prepareBvob(this, content, buffer, contentHash, mediaInfo, errorOnPrepareBvob));
     } catch (error) { return errorOnPrepareBvob(error); }
     function errorOnPrepareBvob (error) {
       throw connection.wrapErrorEvent(error, 1, wrap,

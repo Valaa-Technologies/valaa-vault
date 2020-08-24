@@ -283,7 +283,7 @@ function _readMediaContent (connection: ScribeConnection, mediaInfo: MediaInfo) 
       connection.requestMediaContents([actualMediaInfo]),
       results => results[0],
       (error) => {
-        throw this.wrapErrorEvent(error, 1, `_readMediaContent(${mediaInfo.name})`,
+        throw connection.wrapErrorEvent(error, 1, `_readMediaContent(${mediaInfo.name})`,
             "\n\tmediaInfo:", ...dumpObject(mediaInfo));
       },
   );

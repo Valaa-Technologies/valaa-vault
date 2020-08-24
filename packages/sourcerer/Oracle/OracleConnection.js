@@ -93,7 +93,6 @@ export default class OracleConnection extends Connection {
           mediaInfo.name || `unnamed media`}"]`);
       try {
         const contentHash = mediaInfo.contentHash;
-        // mediaInfo.bvobId = contentHash; // DEPRECATING(2020-01)
         if (!contentHash) {
           if (!mediaInfo.sourceURL) return undefined;
           const sourceURI = mediaInfo.sourceURL;

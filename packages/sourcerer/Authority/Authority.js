@@ -26,6 +26,8 @@ export default class Authority extends Sourcerer {
 
   getAuthorityURI (): ValaaURI { return this._authorityURI; }
 
+  getAuthorityConfig () { return this._authorityConfig; }
+
   isLocallyPersisted () { return this._authorityConfig.isLocallyPersisted; }
   isPrimaryAuthority () { return this._authorityConfig.isPrimaryAuthority; }
   isRemoteAuthority () { return this._authorityConfig.isRemoteAuthority; }

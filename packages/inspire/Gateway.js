@@ -235,6 +235,10 @@ export default class Gateway extends FabricEventTarget {
       this.spindleRevelations = (await expose(this.revelation.spindles)) || {};
       await this.attachSpindles(this.gatewayRevelation.spindlePrototypes);
 
+      // Attach so-far unattached spindles which have revelation configurations
+      await this.attachSpindles(Object.keys(this.spindleRevelations),
+          { skipIfAlreadyAttached: true });
+
       this.prologue = await reveal(this.revelation.prologue);
 
       // Locate entry point event log (prologue), make it optimally available through scribe,
@@ -758,28 +762,49 @@ export default class Gateway extends FabricEventTarget {
     return this.attachSpindles([spindlePrototype]);
   }
 
-  async attachSpindles (spindlePrototypes_: (Promise<Object> | Object)[]) {
+  async attachSpindles (spindleModules_: (Promise<Object> | Object)[],
+      options: { skipIfAlreadyAttached: boolean } = {}) {
     this.clockEvent(1, `spindles.obtain`,
-        `Obtaining ${spindlePrototypes_.length} spindle prototypes`);
-    const spindlePrototypes = await Promise.all(spindlePrototypes_);
+        `Obtaining ${spindleModules_.length} spindle modules`);
+    const spindleModules = await Promise.all(spindleModules_ || []);
     const newSpindleLookup = {};
     const spindleNames = [];
-    await Promise.all(spindlePrototypes.map(async spindlePrototype => {
-      if (newSpindleLookup[spindlePrototype.name]) {
-        this.errorEvent(`Spindle '${spindlePrototype.name}' already being added:`,
-            newSpindleLookup[spindlePrototype.name],
-            "\n\tskipping adding a new duplicate:", ...dumpObject(spindlePrototype));
-      }
-      if (this._attachedSpindles[spindlePrototype.name]) {
-        throw new Error(`Spindle '${spindlePrototype.name}' already attached`);
-      }
-      spindleNames.push(spindlePrototype.name);
-      const spindleRevelation = this.spindleRevelations[spindlePrototype.name];
-      newSpindleLookup[spindlePrototype.name] = spindlePrototype.attachSpawn
-          ? spindlePrototype.attachSpawn(this, spindleRevelation)
-          : Object.assign(Object.create(spindlePrototype),
-              { gateway: this, revelation: spindleRevelation });
-    }));
+    await Promise.all((spindleModules || [])
+        .map(module_ => {
+          let module = module_;
+          if (module.default) module = module.default;
+          if ((module || "").hasOwnProperty("name")) return [module.name, module];
+          if (options.skipIfAlreadyAttached && this._attachedSpindles[module]) return [module];
+          const requiredModule = (this.valosRequire(module) || "").default;
+          if (!requiredModule) {
+            throw new Error(`Failed spindle module require("${String(module)
+                }"): exports.default missing`);
+          }
+          if (!isSymbol(module) && (requiredModule.name !== module)) {
+            throw new Error(`Failed spindle module require("${String(module)
+                }"): exports.default.name ("${String(requiredModule.name)
+                }") differs from the required module name`);
+          }
+          return [requiredModule.name, requiredModule];
+        })
+        .map(async ([spindleName, spindlePrototype]) => {
+          if (!spindlePrototype) return null;
+          if (newSpindleLookup[spindleName]) {
+            this.errorEvent(`Spindle '${spindleName}' already being added:`,
+                newSpindleLookup[spindleName],
+                "\n\tskipping adding a new duplicate:", ...dumpObject(spindlePrototype));
+          }
+          if (this._attachedSpindles[spindleName]) {
+            if (options.skipIfAlreadyAttached) return null;
+            throw new Error(`Spindle '${spindleName}' already attached`);
+          }
+          spindleNames.push(spindleName);
+          const spindleRevelation = this.spindleRevelations[spindleName];
+          return (newSpindleLookup[spindleName] = spindlePrototype.attachSpawn
+              ? spindlePrototype.attachSpawn(this, spindleRevelation)
+              : Object.assign(Object.create(spindlePrototype),
+                  { gateway: this, revelation: spindleRevelation }));
+        }));
     this.clockEvent(1, `spindles.attach`, `Attaching ${spindleNames.length} spindles:`,
         spindleNames.join(", "));
     for (const name of spindleNames) await this._attachSpindle(name, newSpindleLookup[name]);

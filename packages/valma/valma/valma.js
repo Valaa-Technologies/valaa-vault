@@ -836,7 +836,7 @@ function __addUniversalOptions (vargs_,
       .option(_postProcess({
         v: {
           alias: "verbose",
-          group: "Universal options:", count: true, global,
+          group: "Universal options:", default: null, count: true, global,
           description: "Be noisy. -vv... -> be more noisy.",
         },
         h: {
@@ -943,7 +943,7 @@ _vlm.argv = processArgv;
 _vlm.vargv = _vlm._parseUntilLastPositional(_vlm.argv, module.exports.command);
 _vlm._state = _vlm.vargv;
 
-_vlm.verbosity = _vlm.isCompleting ? 0 : _vlm.vargv.verbose;
+_vlm.verbosity = _vlm.isCompleting || (_vlm.vargv.verbose == null) ? 0 : _vlm.vargv.verbose;
 _vlm.interactive = _vlm.isCompleting ? 0 : _vlm.vargv.interactive;
 
 if (_vlm.vargv.echos && !_vlm.isCompleting) {
@@ -1469,7 +1469,9 @@ async function _dispatchCommands (commandSelector, argv, activeCommands, isWildc
 
       const subVLM = activeCommand.vlm;
       subVLM.vargv = subVLM._parseUntilLastPositional(argv, module.command, activeCommand.broken);
-      if (subVLM.vargv.verbose !== undefined) subVLM.verbosity = subVLM.vargv.verbose;
+      if (subVLM.vargv.verbose != null) {
+        subVLM.verbosity = subVLM.vargv.verbose;
+      }
       const subIntrospection = subVLM._determineIntrospection(module, commandName, {
         isExact: true, rawArgv: argv,
       });

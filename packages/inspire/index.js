@@ -77,8 +77,8 @@ export default (valosheath.createGateway = async function createGateway (
         ret,
         {},
         revelationTemplate,
-        ...revelations,
-        spindlesRevelation);
+        spindlesRevelation,
+        ...revelations);
 
     ret.clockEvent(1, `gateway.initialize`, `Initializing gateway`);
     await ret.initialize(combinedRevelation);
@@ -89,7 +89,7 @@ export default (valosheath.createGateway = async function createGateway (
     ret.clockEvent(1, `gateway.spindles.delayed.attach`, `Attaching ${
         delayedSpindlePrototypes.length} delayed second stage spindles`);
     while (delayedSpindlePrototypes.length) {
-      await ret.attachSpindles(delayedSpindlePrototypes.splice(0));
+      await ret.attachSpindles(delayedSpindlePrototypes.splice(0), { skipIfAlreadyAttached: true });
     }
     valosheath.spindlePrototypes = {
       push (spindlePrototype) { ret.attachSpindle(spindlePrototype); },

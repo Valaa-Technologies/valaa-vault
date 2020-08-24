@@ -250,7 +250,7 @@ function _obtainWorker (vlm, yargv) {
             }
             return { "!!!": maybeRelativePath };
           }),
-          { gateway: { verbosity: vlm.verbosity } },
+          ...(vlm.verbosity ? [{ gateway: { verbosity: vlm.verbosity } }] : []),
           yargv.revelation || {},
         ],
       });

@@ -18,7 +18,6 @@ export default {
     runtime: "",
 
     verbosity: 0,
-    spindlePrototypes: arrayOf(spindlePrototype()),
 
     authorityConfigs: dictionaryOf(authorityConfig()),
     scribe: { verbosity: 0 },
@@ -26,7 +25,10 @@ export default {
     reducer: { verbosity: 0 },
     corpus: { verbosity: 0 },
     falseProphet: { verbosity: 0 },
+
+    spindlePrototypes: arrayOf(spindlePrototype()),
   },
+  spindles: dictionaryOf(spindleConfig()),
   prologue: {
     endpoint: "",
     rootChronicleURI: "",
@@ -41,7 +43,6 @@ export default {
     blobBuffers: dictionaryOf(blobBuffer()), // deprecated
   },
   views: dictionaryOf(viewConfig()),
-  spindles: dictionaryOf(spindleConfig())
 };
 
 function spindlePrototype () {

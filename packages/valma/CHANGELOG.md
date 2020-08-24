@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.27](https://github.com/valaatech/kernel/compare/v0.35.0-rc.26...v0.35.0-rc.27) (2020-08-24)
+
+
+### Features
+
+* revelation.spindles auto-valosRequire if not attached yet ([1139744](https://github.com/valaatech/kernel/commit/11397447dd8b5f30c0bae2c230d1372859ae14ae))
+
+
+
+
+
 # [0.35.0-rc.26](https://github.com/valaatech/kernel/compare/v0.35.0-rc.25...v0.35.0-rc.26) (2020-08-23)
 
 **Note:** Version bump only for package valma

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.27](https://github.com/valaatech/kernel/compare/v0.35.0-rc.26...v0.35.0-rc.27) (2020-08-24)
+
+
+### Features
+
+* Add deprecation support for namespace symbols and Lenses in specific ([dc48e56](https://github.com/valaatech/kernel/commit/dc48e562f1df7f3714ed935b6d575e7fb1f11879))
+
+
+
+
+
 # [0.35.0-rc.26](https://github.com/valaatech/kernel/compare/v0.35.0-rc.25...v0.35.0-rc.26) (2020-08-23)
 
 **Note:** Version bump only for package @valos/raem

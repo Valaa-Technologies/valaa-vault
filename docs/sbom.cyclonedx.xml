@@ -226,20 +226,6 @@
             <modified>false</modified>
         </component>
         <component type="library">
-            <name>hosted-git-info</name>
-            <version>2.8.8</version>
-            <description>
-                <![CDATA[Provides metadata and conversions from repository urls for Github, Bitbucket and Gitlab]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>ISC</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/hosted-git-info@2.8.8</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
             <name>json-parse-even-better-errors</name>
             <version>2.3.0</version>
             <description>
@@ -265,6 +251,20 @@
                 </license>
             </licenses>
             <purl>pkg:npm/normalize-package-data@2.5.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>hosted-git-info</name>
+            <version>2.8.8</version>
+            <description>
+                <![CDATA[Provides metadata and conversions from repository urls for Github, Bitbucket and Gitlab]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>ISC</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/hosted-git-info@2.8.8</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -551,7 +551,7 @@
         <component type="library">
             <group>valos</group>
             <name>inspire</name>
-            <version>0.35.0-rc.26</version>
+            <version>0.35.0-rc.27</version>
             <description>
                 <![CDATA[ValOS Inspire application gateway]]>
             </description>
@@ -560,13 +560,13 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/inspire@0.35.0-rc.26</purl>
+            <purl>pkg:npm/%40valos/inspire@0.35.0-rc.27</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <group>valos</group>
             <name>kernel</name>
-            <version>0.35.0-rc.26</version>
+            <version>0.35.0-rc.27</version>
             <description>
                 <![CDATA[@valos/kernel domain]]>
             </description>
@@ -575,13 +575,13 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/kernel@0.35.0-rc.26</purl>
+            <purl>pkg:npm/%40valos/kernel@0.35.0-rc.27</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <group>valos</group>
             <name>toolset-revealer</name>
-            <version>0.35.0-rc.26</version>
+            <version>0.35.0-rc.27</version>
             <description>
                 <![CDATA[Tools for building revelations both for development and deployment purposes]]>
             </description>
@@ -590,12 +590,12 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/toolset-revealer@0.35.0-rc.26</purl>
+            <purl>pkg:npm/%40valos/toolset-revealer@0.35.0-rc.27</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <name>valma</name>
-            <version>0.35.0-rc.26</version>
+            <version>0.35.0-rc.27</version>
             <description>
                 <![CDATA[A ValOS CLI tool for discovering and executing context-dependent command scripts]]>
             </description>
@@ -604,7 +604,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/valma@0.35.0-rc.26</purl>
+            <purl>pkg:npm/valma@0.35.0-rc.27</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -988,7 +988,7 @@
         <component type="library">
             <group>valos</group>
             <name>type-vault</name>
-            <version>0.35.0-rc.26</version>
+            <version>0.35.0-rc.27</version>
             <description>
                 <![CDATA[The ValOS 'vault' workspace type toolset]]>
             </description>
@@ -997,7 +997,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/type-vault@0.35.0-rc.26</purl>
+            <purl>pkg:npm/%40valos/type-vault@0.35.0-rc.27</purl>
             <modified>false</modified>
         </component>
         <component type="library">

@@ -47,7 +47,7 @@
     "revdoc:package": "@valos/script",
     "revdoc:prefix": "valos_script",
     "revdoc:prefixIRI": "https://valospace.org/script#",
-    "revdoc:version": "0.35.0-rc.26",
+    "revdoc:version": "0.35.0-rc.27",
     "respecConfig": {
       "specStatus": "unofficial",
       "editors": [

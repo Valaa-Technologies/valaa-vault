@@ -47,9 +47,9 @@
     "revdoc:package": "@valos/kernel",
     "revdoc:prefix": "valos",
     "revdoc:prefixIRI": "https://valospace.org/#",
-    "revdoc:version": "0.35.0-rc.27",
+    "revdoc:version": "0.35.0-rc.28",
     "respecConfig": {
-      "subtitle": "0.35.0-rc.27",
+      "subtitle": "0.35.0-rc.28",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -70,7 +70,7 @@
           "SBOM"
         ],
         "subProfiles": [],
-        "title": "@valos/kernel-vault@0.35.0-rc.26 Software Bill of Materials",
+        "title": "@valos/kernel-vault@0.35.0-rc.27 Software Bill of Materials",
         "abstract": {
           "@type": "vdoc:Chapter",
           "vdoc:content": [
@@ -117,7 +117,7 @@
           ]
         },
         "package": "@valos/kernel-vault",
-        "version": "0.35.0-rc.26"
+        "version": "0.35.0-rc.27"
       },
       "engine": {
         "@id": "https://valospace.org/engine",
@@ -190,7 +190,7 @@
           ]
         },
         "package": "@valos/engine",
-        "version": "0.35.0-rc.27"
+        "version": "0.35.0-rc.28"
       },
       "inspire": {
         "@id": "https://valospace.org/inspire",
@@ -263,7 +263,7 @@
           ]
         },
         "package": "@valos/inspire",
-        "version": "0.35.0-rc.27"
+        "version": "0.35.0-rc.28"
       },
       "inspire/revela": {
         "@id": "https://valospace.org/inspire/revela",
@@ -557,7 +557,7 @@
           ]
         },
         "package": "@valos/inspire",
-        "version": "0.35.0-rc.27"
+        "version": "0.35.0-rc.28"
       },
       "kernel": {
         "@id": "https://valospace.org/kernel",
@@ -759,7 +759,7 @@
           ]
         },
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.27"
+        "version": "0.35.0-rc.28"
       },
       "raem": {
         "@id": "https://valospace.org/raem",
@@ -878,7 +878,7 @@
           ]
         },
         "package": "@valos/raem",
-        "version": "0.35.0-rc.27"
+        "version": "0.35.0-rc.28"
       },
       "raem/VPath/VPath.JSON": {
         "@id": "https://valospace.org/raem/VPath/VPath.JSON",
@@ -975,7 +975,7 @@
           ]
         },
         "package": "@valos/raem",
-        "version": "0.35.0-rc.27"
+        "version": "0.35.0-rc.28"
       },
       "raem/VPath/VPath": {
         "@id": "https://valospace.org/raem/VPath/VPath",
@@ -1037,7 +1037,7 @@
           ]
         },
         "package": "@valos/raem",
-        "version": "0.35.0-rc.27"
+        "version": "0.35.0-rc.28"
       },
       "revdoc": {
         "@id": "https://valospace.org/revdoc",
@@ -1096,7 +1096,7 @@
           ]
         },
         "package": "@valos/revdoc",
-        "version": "0.35.0-rc.27"
+        "version": "0.35.0-rc.28"
       },
       "revdoc/tutorial": {
         "@id": "https://valospace.org/revdoc/tutorial",
@@ -1170,7 +1170,7 @@
           ]
         },
         "package": "@valos/revdoc",
-        "version": "0.35.0-rc.27"
+        "version": "0.35.0-rc.28"
       },
       "sbomdoc": {
         "@id": "https://valospace.org/sbomdoc",
@@ -1229,7 +1229,7 @@
           ]
         },
         "package": "@valos/sbomdoc",
-        "version": "0.35.0-rc.27"
+        "version": "0.35.0-rc.28"
       },
       "script": {
         "@id": "https://valospace.org/script",
@@ -1282,7 +1282,7 @@
           ]
         },
         "package": "@valos/script",
-        "version": "0.35.0-rc.27"
+        "version": "0.35.0-rc.28"
       },
       "sourcerer": {
         "@id": "https://valospace.org/sourcerer",
@@ -1327,7 +1327,7 @@
           ]
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0-rc.27"
+        "version": "0.35.0-rc.28"
       },
       "sourcerer/valos-event-log": {
         "@id": "https://valospace.org/sourcerer/valos-event-log",
@@ -1357,7 +1357,7 @@
           ]
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0-rc.27"
+        "version": "0.35.0-rc.28"
       },
       "sourcerer/VState": {
         "@id": "https://valospace.org/sourcerer/VState",
@@ -1396,7 +1396,7 @@
           ]
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0-rc.27"
+        "version": "0.35.0-rc.28"
       },
       "twindoc": {
         "@id": "https://valospace.org/twindoc",
@@ -1477,7 +1477,7 @@
           ]
         },
         "package": "@valos/twindoc",
-        "version": "0.35.0-rc.27"
+        "version": "0.35.0-rc.28"
       },
       "type-vault/AssortedTutorials": {
         "@id": "https://valospace.org/type-vault/AssortedTutorials",
@@ -1496,7 +1496,7 @@
         },
         "introduction": {},
         "package": "@valos/type-vault",
-        "version": "0.35.0-rc.27"
+        "version": "0.35.0-rc.28"
       },
       "vdoc": {
         "@id": "https://valospace.org/vdoc",
@@ -1584,7 +1584,7 @@
           ]
         },
         "package": "@valos/vdoc",
-        "version": "0.35.0-rc.27"
+        "version": "0.35.0-rc.28"
       },
       "web-spindle": {
         "@id": "https://valospace.org/web-spindle",
@@ -1690,7 +1690,7 @@
           ]
         },
         "package": "@valos/web-spindle",
-        "version": "0.35.0-rc.27"
+        "version": "0.35.0-rc.28"
       },
       "web-spindle/schema-builder": {
         "@id": "https://valospace.org/web-spindle/schema-builder",
@@ -1819,7 +1819,7 @@
           ]
         },
         "package": "@valos/web-spindle",
-        "version": "0.35.0-rc.27"
+        "version": "0.35.0-rc.28"
       },
       "removed-from": {
         "@id": "https://valospace.org/removed-from",
@@ -1862,7 +1862,7 @@
           ]
         },
         "package": "@valos/kernel-vault",
-        "version": "0.35.0-rc.26"
+        "version": "0.35.0-rc.27"
       },
       "@valos/kernel-vault": {
         "@id": "https://valospace.org/index",
@@ -2007,7 +2007,7 @@
           ]
         },
         "package": "@valos/kernel-vault",
-        "version": "0.35.0-rc.26"
+        "version": "0.35.0-rc.27"
       },
       "technician": {
         "@id": "https://valospace.org/technician",
@@ -2095,7 +2095,7 @@
           ]
         },
         "package": "@valos/kernel-vault",
-        "version": "0.35.0-rc.26"
+        "version": "0.35.0-rc.27"
       },
       "valonaut": {
         "@id": "https://valospace.org/valonaut",
@@ -2169,7 +2169,7 @@
           ]
         },
         "package": "@valos/kernel-vault",
-        "version": "0.35.0-rc.26"
+        "version": "0.35.0-rc.27"
       },
       "voyager": {
         "@id": "https://valospace.org/voyager",
@@ -2229,7 +2229,7 @@
           ]
         },
         "package": "@valos/kernel-vault",
-        "version": "0.35.0-rc.26"
+        "version": "0.35.0-rc.27"
       }
     },
     "prefixes": {

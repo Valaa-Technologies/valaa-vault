@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.29](https://github.com/valaatech/kernel/compare/v0.35.0-rc.28...v0.35.0-rc.29) (2020-08-27)
+
+
+### Bug Fixes
+
+* Add revealer peer dependency, revelationRoot for file routes ([26ed0e6](https://github.com/valaatech/kernel/commit/26ed0e6dae41130ef26389922c2cbffe0dcaed90))
+
+
+
+
+
 # [0.35.0-rc.28](https://github.com/valaatech/kernel/compare/v0.35.0-rc.27...v0.35.0-rc.28) (2020-08-25)
 
 **Note:** Version bump only for package @valos/kernel-vault

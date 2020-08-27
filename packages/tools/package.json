@@ -1,6 +1,6 @@
 {
   "name": "@valos/tools",
-  "version": "0.35.0-rc.28",
+  "version": "0.35.0-rc.29",
   "description": "ValOS Tools API",
   "license": "MIT",
   "author": "Valaa Technologies Ltd",
@@ -16,7 +16,7 @@
   "dependencies": {
     "@babel/runtime": ">7.0.0-rc",
     "@babel/runtime-corejs2": ">7.0.0-rc",
-    "@valos/gateway-api": "^0.35.0-rc.28",
+    "@valos/gateway-api": "^0.35.0-rc.29",
     "fake-indexeddb": "^2.0.3",
     "immutable": "~3.7.4",
     "jssha": "^2.3.1",

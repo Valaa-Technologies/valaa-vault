@@ -48,6 +48,10 @@ const {
 
 const posixPath = path.posix || path;
 
+function _excludeFilename (pathString) {
+  return pathString.endsWith(path.sep) ? pathString : path.dirname(pathString);
+}
+
 export default class Gateway extends FabricEventTarget {
   constructor (options: Object) {
     super(options.parent, options.verbosity, options.name);
@@ -59,7 +63,7 @@ export default class Gateway extends FabricEventTarget {
       throw new Error("Required gateway.options.revelationRoot is undefined");
     }
     this.siteRoot = options.siteRoot;
-    this.revelationRoot = options.revelationRoot;
+    this.revelationRoot = _excludeFilename(options.revelationRoot);
     this.domainRoot = options.domainRoot;
     this._pendingViews = [];
     this._valospaceRequirables = {
@@ -85,6 +89,7 @@ export default class Gateway extends FabricEventTarget {
       source = options.modulePath;
     }
     const sourceDir = path.dirname(source);
+
     options.revealedDir = !sourceDir || (sourceDir.slice(-1) === "/") ? sourceDir : `${sourceDir}/`;
     if (ret === undefined) {
       const basename = path.basename(source);
@@ -102,7 +107,9 @@ export default class Gateway extends FabricEventTarget {
   }
 
   resolveRevealReference (reference, currentDir) {
-    if (reference[0] === ".") return posixPath.join(currentDir || this.revelationRoot, reference);
+    if (reference[0] === ".") {
+      return posixPath.join(_excludeFilename(currentDir || this.revelationRoot), reference);
+    }
     if (reference[0] === "/") return posixPath.join((this.siteRoot || ""), reference);
     if ((reference[0] !== "<") || (reference[reference.length - 1] !== ">")) return reference;
     const uri = reference.slice(1, -1);

@@ -6,7 +6,7 @@ import fetchJSON, { fetch } from "~/tools/fetchJSON";
 
 import { burlaesgEncode, hs256JWTDecode } from "~/web-spindle/tools/security";
 
-const revelationRoot = "./packages/web-spindle/test/worker";
+const revelationRoot = "./packages/web-spindle/test/worker/";
 const expectedOutputHTML = `<html><head>${
   ""}<meta http-equiv="refresh" content="1"></head>${
   ""}<body><div id="perspire-gateway--main-container">${

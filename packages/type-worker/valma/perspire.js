@@ -222,7 +222,7 @@ function _obtainWorker (vlm, yargv) {
     () => {
       let revelationRoot = yargv["revelation-root"];
       if (revelationRoot === undefined) {
-        revelationRoot = vlm.path.dirname(revelationPath);
+        revelationRoot = `${vlm.path.dirname(revelationPath)}${vlm.path.sep}`;
         revelationPath = vlm.path.basename(revelationPath);
       } else {
         revelationPath = vlm.path.resolve(revelationPath);

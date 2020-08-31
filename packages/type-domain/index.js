@@ -14,12 +14,12 @@ function exportDomainAggregateOntologiesFromDocuments (domainName, documents) {
     try {
       // Maybe source from the document vdocstate?
       const ontologies = require(`${document.package}/ontologies`);
-      for (const [prefix, source] of Object.entries(ontologies)) {
-        const current = preOntologies[prefix]
-            || (preOntologies[prefix] = { prefix, prefixIRI: source.prefixIRI });
+      for (const [preferredPrefix, source] of Object.entries(ontologies)) {
+        const current = preOntologies[preferredPrefix] || (preOntologies[preferredPrefix] =
+            { preferredPrefix, baseIRI: source.baseIRI });
         try {
-          if (current.prefix !== prefix) throw new Error("prefix mismatch");
-          if (current.prefixIRI !== source.prefixIRI) throw new Error("prefixIRI mismatch");
+          if (current.preferredPrefix !== preferredPrefix) throw new Error("prefix mismatch");
+          if (current.baseIRI !== source.baseIRI) throw new Error("baseIRI mismatch");
           for (const section of ["prefixes", "vocabulary", "context"]) {
             const target = current[section] || (current[section] = {});
             for (const [key, aggregateValue] of Object.entries(source[section] || {})) {
@@ -39,7 +39,7 @@ function exportDomainAggregateOntologiesFromDocuments (domainName, documents) {
         } catch (error) {
           throw wrapError(error,
               new Error(`During exportDomainAggregateOntologiesFromDocuments.ontology(prefix: ${
-                  prefix})`),
+                  preferredPrefix})`),
               "\n\tsource:", ...dumpObject(source),
               "\n\tcurrent document:", current.mostRecentDocument["@id"],
                   current.mostRecentDocument["dc:title"]
@@ -55,7 +55,8 @@ function exportDomainAggregateOntologiesFromDocuments (domainName, documents) {
     }
   });
   return Object.values(preOntologies).reduce(
-      (exports, { prefix, prefixIRI, prefixes, vocabulary, ...rest }) =>
-          Object.assign(exports, extendOntology(prefix, prefixIRI, prefixes, vocabulary, rest)),
+      (exports, { preferredPrefix, baseIRI, prefixes, vocabulary, ...rest }) =>
+          Object.assign(exports,
+              extendOntology(preferredPrefix, baseIRI, prefixes, vocabulary, rest)),
       {});
 }

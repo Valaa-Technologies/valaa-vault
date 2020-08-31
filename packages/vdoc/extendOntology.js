@@ -1,12 +1,16 @@
-module.exports = function extendOntology (prefix, prefixIRI, prefixes = {}, vocabulary = {}, {
-  extractionRules = {}, context = {},
-} = {}) {
+module.exports = function extendOntology (
+    preferredPrefix, baseIRI, prefixes = {}, vocabulary = {}, {
+      extractionRules = {}, context = {},
+    } = {}) {
   // TODO(iridian, 2019-08): Validate the ontology parameters.
   const moreContext = {};
   Object.entries(vocabulary).forEach(([idSuffix, definition]) => {
     let term;
     function defineContextTerm () {
-      if (!term) moreContext[`${prefix}:${idSuffix}`] = term = { "@id": `${prefixIRI}${idSuffix}` };
+      if (!term) {
+        moreContext[`${preferredPrefix}:${idSuffix}`] = term =
+          { "@id": `${baseIRI}${idSuffix}` };
+      }
       return term;
     }
     const range = definition["rdfs:range"];
@@ -19,12 +23,12 @@ module.exports = function extendOntology (prefix, prefixIRI, prefixes = {}, voca
     }
   });
   return {
-    [prefix]: {
-      prefix,
-      prefixIRI,
+    [preferredPrefix]: {
+      preferredPrefix,
+      baseIRI,
       prefixes: {
         ...prefixes,
-        [prefix]: prefixIRI,
+        [preferredPrefix]: baseIRI,
       },
       vocabulary,
       extractionRules,

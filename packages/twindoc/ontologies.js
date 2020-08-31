@@ -1,5 +1,5 @@
 const { extendOntology } = require("@valos/vdoc");
 
-module.exports = extendOntology("twindoc", "https://valospace.org/twindoc#", {}, {}, {
+module.exports = extendOntology("VTwindoc", "https://valospace.org/twindoc/0#", {}, {}, {
   extractionRules: {},
 });

@@ -20,7 +20,7 @@ export default function extendValOS (scope: any, hostDescriptors: any, rootDisco
   if (rootDiscourse.schema) {
     const primaryNamespace = addValosheathNamespace(valosheath, "valos", {
       preferredPrefix: "V",
-      namespaceURI: "https://valospace.org/#",
+      baseIRI: "https://valospace.org/0#",
     });
     injectTypeSheath(scope, valosheath, primaryNamespace, hostDescriptors,
         rootDiscourse.schema, schemaTypeSheaths,

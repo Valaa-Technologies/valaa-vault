@@ -15,7 +15,7 @@ import { dumpify, messageFromError, thenChainEagerly, wrapError } from "~/tools"
 
 export const namespace = {
   preferredPrefix: "Lens",
-  namespaceURI: "https://valospace.org/inspire/Lens#",
+  baseIRI: "https://valospace.org/inspire/Lens/0#",
   description:
 `The ValOS inspire Lens namespace contains names used by the inspire UI
 layer.

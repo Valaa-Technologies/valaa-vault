@@ -3,13 +3,13 @@ const { wrapError, dumpObject } = require("@valos/tools/wrapError");
 
 module.exports = {
   html: {
-    "vdoc:Document": emitReVDocHTML,
-    "revdoc:Document": emitReVDocHTML,
-    "vdoc:Chapter": emitReVDocChapter,
-    "vdoc:Reference": emitReVDocReference,
-    "revdoc:Invokation": emitReVDocInvokation,
-    "revdoc:Command": emitReVDocCommand,
-    "revdoc:Example": emitReVDocExample,
+    "VDoc:Document": emitReVDocHTML,
+    "VRevdoc:Document": emitReVDocHTML,
+    "VDoc:Chapter": emitReVDocChapter,
+    "VDoc:Reference": emitReVDocReference,
+    "VRevdoc:Invokation": emitReVDocInvokation,
+    "VRevdoc:Command": emitReVDocCommand,
+    "VRevdoc:Example": emitReVDocExample,
   },
 };
 
@@ -30,27 +30,27 @@ function emitReVDocHTML (node, emission, stack) {
     `).join()}
   </head>
   <body class="vdoc vdoc-body">
-    ${stack.emitNode(node["vdoc:content"], "")}
+    ${stack.emitNode(node["VDoc:content"], "")}
   </body>
 </html>
 `;
 }
 
 function emitReVDocChapter (node, emission, stack) {
-  return vdocExtension.emitters.html["vdoc:Chapter"](Object.assign({}, node, {
-    "vdoc:element": "section",
-    "vdoc:content": (node["vdoc:content"] || []).map(e => ((typeof e !== "string")
+  return vdocExtension.emitters.html["VDoc:Chapter"](Object.assign({}, node, {
+    "VDoc:element": "section",
+    "VDoc:content": (node["VDoc:content"] || []).map(e => ((typeof e !== "string")
         ? e
-        : { "@type": "vdoc:Node", "vdoc:element": "span", "vdoc:content": [e] })),
+        : { "@type": "VDoc:Node", "VDoc:element": "span", "VDoc:content": [e] })),
   }), emission, stack);
 }
 
 function emitReVDocReference (node, emission, stack) {
   try {
     let node_ = node;
-    let ref = node_["vdoc:ref"];
+    let ref = node_["VDoc:ref"];
     if ((ref != null) && (typeof ref !== "string")) {
-      node_ = { ...node, "vdoc:ref": ref = stack.emitNode(node_["vdoc:ref"], "") };
+      node_ = { ...node, "VDoc:ref": ref = stack.emitNode(node_["VDoc:ref"], "") };
     }
     const refParts = ref.match(/^(@[^/#]*)\/([^/#]*)\/?(#?.*)?$/);
     if (refParts) {
@@ -66,13 +66,13 @@ function emitReVDocReference (node, emission, stack) {
       const docsBase = (packageJSON.valos || {}).docs || packageName;
       const subPath = refParts[3] || "";
       node_ = Object.assign({}, node, {
-        "vdoc:ref": (!refParts[3] || (subPath[0] === "#")
+        "VDoc:ref": (!refParts[3] || (subPath[0] === "#")
                 || (docsBase[docsBase.length - 1] === "/"))
             ? `${docsBase}${refParts[3] || ""}`
             : `${docsBase}/${refParts[3]}`,
       });
     }
-    return vdocExtension.emitters.html["vdoc:Reference"](node_, emission, stack);
+    return vdocExtension.emitters.html["VDoc:Reference"](node_, emission, stack);
   } catch (error) {
     throw wrapError(error, new Error("During emitReVDocReference, with:"),
         "\n\tnode:", ...dumpObject(node, { nest: true }));
@@ -81,19 +81,19 @@ function emitReVDocReference (node, emission, stack) {
 
 function emitReVDocInvokation (node, emission, stack) {
   return `${emission}<code>${
-    stack.emitNode({ ...node, "@type": "vdoc:Node" }, "")
+    stack.emitNode({ ...node, "@type": "VDoc:Node" }, "")
   }</code>`;
 }
 
 function emitReVDocCommand (node, emission, stack) {
   return `${emission}<strong><em class="vdoc type-revdoc-command">${
-    stack.emitNode({ ...node, "@type": "vdoc:Node" }, "")
+    stack.emitNode({ ...node, "@type": "VDoc:Node" }, "")
   }</em></strong>`;
 }
 
 function emitReVDocExample (node, emission, stack) {
   return `${emission}
 <blockquote class="vdoc type-revdoc-example">
-    ${stack.emitNode({ ...node, "@type": "vdoc:Node" }, "")}
+    ${stack.emitNode({ ...node, "@type": "VDoc:Node" }, "")}
 </blockquote>`;
 }

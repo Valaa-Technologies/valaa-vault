@@ -1,7 +1,7 @@
 module.exports = {
   html: {
-    "vdoc:Document": emitSBoMDocHTML,
-    "sbomdoc:Document": emitSBoMDocHTML,
+    "VDoc:Document": emitSBoMDocHTML,
+    "VSbomdoc:Document": emitSBoMDocHTML,
   },
 };
 
@@ -13,7 +13,7 @@ function emitSBoMDocHTML (node, emission, stack) {
     <title>${stack.emitNode(node["dc:title"], "")}</title>
   </head>
   <body>
-    ${stack.emitNode(node["vdoc:content"], "")}
+    ${stack.emitNode(node["VDoc:content"], "")}
   </body>
 </html>
 `;

@@ -5,7 +5,7 @@ const {
 
 module.exports = {
   "dc:title": `"I am a ValOS technician, I want to enable valonauts and expand valospace"`,
-  "vdoc:tags": ["PRIMARY", "ROLE"],
+  "VDoc:tags": ["PRIMARY", "ROLE"],
   subProfiles: [
     "contributor", "developer", "administrator", "devops", "hacker", "etc",
   ],
@@ -254,9 +254,9 @@ blockquote(em("valos-vault-4.1.2"), `: utility must explicitly define
       ],
       "table#1": {
   /* eslint-disable comma-spacing, max-len */
-        "vdoc:headers":
+        "VDoc:headers":
 ["Utility"    , "Tool"          , "Payload"                    , "Providers"   , "Consumed via"      , "Upstream", "Configuration" , "Modified via"        , "Produced via"       , "Authority"  , "Distributed via"],
-        "vdoc:entries": [
+        "VDoc:entries": [
 ["files"      , "`git`"         , "files in `./*`"             , "github.com"  , "`git clone`"       , "N/A"     , "`.git/*`"      , "`branch` `commit`"   , "`git push` & PR"    , "human"      , "merge PR to & `git push master`"],
 ["packages"   , "`vlm`, `yarn`" , "files in `/node_modules/..`", "npmjs.com"   , "`depend` `require`", "`files`" , "`package.json`", "ups. `src/*` `bin/*`", "upstream"           , "hybrid"     , "`assemble-packages` `publish-packages`"],
 ["authorities", "`vlm`"         , "APIs, site & gateway files" , "IaaS, custom", "browsers, various" , "`files`" , "upstream *"    , "upstream *"          , "upstream"           , "hybrid"     , "`build-release` `deploy-release`"],

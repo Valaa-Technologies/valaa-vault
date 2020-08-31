@@ -6,7 +6,7 @@ const extractee = require("./extractee");
 module.exports = {
   extension: {
     extends: [],
-    ontology: require("./ontologies").vdoc,
+    ontology: require("./ontologies").VDoc,
     extractors: require("./extractors"),
     emitters: require("./emitters"),
     extractee,
@@ -64,7 +64,7 @@ function extract (sourceGraphs, {
       },
     });
   } catch (error) {
-    throw wrapError(error, new Error(`During extract("${(this.ontology || {}).prefix}")`),
+    throw wrapError(error, new Error(`During extract("${(this.ontology || {}).preferredPrefix}")`),
         "\n\tdocumentIRI:", documentIRI,
         "\n\textensions:", ...dumpObject(extensions),
         "\n\tsourceGraphs:", ...dumpObject(sourceGraphs));
@@ -90,7 +90,7 @@ function emit (vdocState, formatName, options) {
         if (newEmission !== undefined) return newEmission;
         if (!subClassOf) {
           const [prefix, ontologyType] = type.split(":");
-          if (prefix === extension.ontology.prefix) {
+          if (prefix === extension.ontology.preferredPrefix) {
             subClassOf = (extension.ontology.vocabulary[ontologyType] || {})["rdfs:subClassOf"];
           }
         }

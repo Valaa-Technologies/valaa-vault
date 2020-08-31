@@ -9,18 +9,18 @@ const {
 } = require("@valos/revdoc");
 
 const {
-  valos_raem: { prefix, prefixIRI, prefixes, vocabulary, context },
+  VModel: { preferredPrefix, baseIRI, prefixes, vocabulary, context },
  } = require("./ontologies");
 
 const { name, version, description } = require("./package");
 
 module.exports = {
   "dc:title": description,
-  "vdoc:tags": ["PRIMARY", "INTRODUCTORY", "ONTOLOGY", "LIBRARY"],
-  "revdoc:package": name,
-  "revdoc:prefix": prefix,
-  "revdoc:prefixIRI": prefixIRI,
-  "revdoc:version": version,
+  "VDoc:tags": ["PRIMARY", "INTRODUCTORY", "ONTOLOGY", "LIBRARY"],
+  "VRevdoc:package": name,
+  "VRevdoc:preferredPrefix": preferredPrefix,
+  "VRevdoc:baseIRI": baseIRI,
+  "VRevdoc:version": version,
   respecConfig: {
     subtitle: version,
     specStatus: "unofficial",
@@ -198,7 +198,7 @@ operations.`,
     },
   },
   "chapter#ontology>8": {
-    "dc:title": [`library `, em(name), ` ontology, prefix `, em(prefix)],
+    "dc:title": [`library `, em(name), ` ontology, preferred prefix `, em(preferredPrefix)],
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
     "data#context": context,
@@ -212,61 +212,68 @@ directly to the @valos/kernel namespace.`,
       "table#>0;prefixes": ontologyHeaders.prefixes,
     },
     "chapter#section_classes>2": {
-      "dc:title":
-          [em(prefix), ` `, ref("valos_kernel:Class", "@valos/kernel#Class"), ` vocabulary`],
+      "dc:title": [
+em(preferredPrefix), ` `, ref("VKernel:Class", "@valos/kernel#Class"), " vocabulary",
+      ],
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": ontologyHeaders.classes,
-        "vdoc:entries": filterKeysWithAnyOf("@type", "valos_kernel:Class", vocabulary),
+        "VDoc:headers": ontologyHeaders.classes,
+        "VDoc:entries": filterKeysWithAnyOf("@type", "VKernel:Class", vocabulary),
       },
     },
     "chapter#section_properties>3": {
-      "dc:title":
-          [em(prefix), ` `, ref("valos_kernel:Property", "@valos/kernel#Property"), ` vocabulary`],
+      "dc:title": [
+em(preferredPrefix), ` `, ref("VKernel:Property", "@valos/kernel#Property"), " vocabulary",
+      ],
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": ontologyHeaders.properties,
-        "vdoc:entries": filterKeysWithAnyOf("@type", "valos_kernel:Property", vocabulary),
+        "VDoc:headers": ontologyHeaders.properties,
+        "VDoc:entries": filterKeysWithAnyOf("@type", "VKernel:Property", vocabulary),
       },
     },
     "chapter#section_types>4": {
-      "dc:title": [em(prefix), ` `, ref("valos_raem:Type", "@valos/raem#Type"), ` vocabulary`],
+      "dc:title": [
+em(preferredPrefix), ` `, ref("VModel:Type", "@valos/raem#Type"), " vocabulary",
+      ],
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": ontologyHeaders.types,
-        "vdoc:entries": filterKeysWithAnyOf("@type", "valos_raem:Type", vocabulary),
+        "VDoc:headers": ontologyHeaders.types,
+        "VDoc:entries": filterKeysWithAnyOf("@type", "VModel:Type", vocabulary),
       },
     },
     "chapter#section_fields>5": {
-      "dc:title": [em(prefix), ` `, ref("valos_raem:Field", "@valos/raem#Field"), ` vocabulary`],
+      "dc:title": [
+em(preferredPrefix), ` `, ref("VModel:Field", "@valos/raem#Field"), " vocabulary",
+      ],
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": ontologyHeaders.fields,
-        "vdoc:entries": filterKeysWithAnyOf("@type", valosRaemFieldClasses, vocabulary),
+        "VDoc:headers": ontologyHeaders.fields,
+        "VDoc:entries": filterKeysWithAnyOf("@type", valosRaemFieldClasses, vocabulary),
       },
     },
     "chapter#section_resolvers>6": {
-      "dc:title":
-          [em(prefix), ` `, ref("valos_raem:Resolver", "@valos/raem#Resolver"), ` vocabulary`],
+      "dc:title": [
+em(preferredPrefix), ` `, ref("VModel:Resolver", "@valos/raem#Resolver"), " vocabulary",
+      ],
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": ontologyHeaders.verbs,
-        "vdoc:entries": filterKeysWithAnyOf("@type", "valos_raem:Resolver", vocabulary),
+        "VDoc:headers": ontologyHeaders.verbs,
+        "VDoc:entries": filterKeysWithAnyOf("@type", "VModel:Resolver", vocabulary),
       },
     },
     "chapter#section_vocabulary_other>8": {
-      "dc:title": [em(prefix), ` remaining vocabulary`],
+      "dc:title": [em(preferredPrefix), ` remaining vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": ontologyHeaders.vocabularyOther,
-        "vdoc:entries": filterKeysWithNoneOf("@type", [
-          "valos_kernel:Class", "valos_kernel:Property",
-          "valos_raem:Type", ...valosRaemFieldClasses, "valos_raem:Resolver",
+        "VDoc:headers": ontologyHeaders.vocabularyOther,
+        "VDoc:entries": filterKeysWithNoneOf("@type", [
+          "VKernel:Class", "VKernel:Property",
+          "VModel:Type", ...valosRaemFieldClasses, "VModel:Resolver",
         ], vocabulary),
       },
     },
     "chapter#section_context>9": {
-      "dc:title": [em(prefix), ` JSON-LD context term definitions`],
+      "dc:title": [em(preferredPrefix), ` JSON-LD context term definitions`],
       "#0": [],
       "table#>0;context": ontologyHeaders.context,
     },

@@ -38,7 +38,7 @@ when it is expanded as triples.
       jsonld(
 `[{
   "@context": [{
-    "$V": "https://valospace.org/#",
+    "$V": "https://valospace.org/0#",
     "@vocab": "urn:valos:.$.",
 
     "/.S": { "@id": "$V:subject", "@type": "@id" },
@@ -71,7 +71,7 @@ when it is expanded as triples.
     "/.S---": { "@id": "$V:connectedSource", "@type": "@id" },
     "/.O---": { "@id": "$V:connectedTarget", "@type": "@id" },
 
-    "--$V": "https://valospace.org/removed-from#",
+    "--$V": "https://valospace.org/removed-from/0#",
     "--/.": { "@id": "--$V:properties", "@type": "@id" },
     "--/+": { "@id": "--$V:entities", "@type": "@id" },
     "--/~": { "@id": "--$V:medias", "@type": "@id" },
@@ -82,8 +82,8 @@ when it is expanded as triples.
     "$~u4": { "@id": "urn:valos:$~u4.", "@prefix": true },
     "$~plt": { "@id": "urn:valos:$~plt.", "@prefix": true },
 
-    "$valos_sourcerer": "https://valospace.org/sourcerer#",
-    "/hasGlobal": { "@id": "$valos_sourcerer:hasGlobal", "@container": "@type" },
+    "$VSourcerer": "https://valospace.org/sourcerer/0#",
+    "/hasGlobal": { "@id": "$VSourcerer:hasGlobal", "@container": "@type" },
   }, {
     "$pot": "https://oftrust/#",
     "$pot_hypertwin": "https://pot.hypertwin.valospace.org/#",

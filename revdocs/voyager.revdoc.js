@@ -5,7 +5,7 @@ const {
 
 module.exports = {
   "dc:title": `"I am a ValOS voyager, I want to discover ValOS and enlighten others"`,
-  "vdoc:tags": ["PRIMARY", "ROLE"],
+  "VDoc:tags": ["PRIMARY", "ROLE"],
   subProfiles: [
     "enthusiast", "entrepreneur", "evangelist", "investor", "business_owner",
     "sales_rep", "etc"

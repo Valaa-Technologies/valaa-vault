@@ -4,7 +4,7 @@ module.exports = {
   extension: {
     ...vdoc.extension,
     extends: [vdoc.extension],
-    ontology: require("./ontologies").twindoc,
+    ontology: require("./ontologies").VTwindoc,
     extractors: require("./extractors"),
     emitters: require("./emitters"),
     extractee: {},

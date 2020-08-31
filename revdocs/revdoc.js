@@ -13,7 +13,7 @@ const { name, version } = require("../packages/kernel/package");
 const {
   documents,
   ontologies: {
-    valos: { prefix, prefixIRI, prefixes, vocabulary, context } = { vocabulary: {} },
+    V: { preferredPrefix, baseIRI, prefixes, vocabulary, context } = { vocabulary: {} },
   },
 } = require("../packages/kernel");
 
@@ -21,11 +21,11 @@ const roleDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "ROLE"], documents
 
 module.exports = {
   "dc:title": "Valospace reference",
-  "vdoc:tags": ["PRIMARY", "INTRODUCTION", "ONTOLOGY", "VALONAUT"],
-  "revdoc:package": name,
-  "revdoc:prefix": prefix,
-  "revdoc:prefixIRI": prefixIRI,
-  "revdoc:version": version,
+  "VDoc:tags": ["PRIMARY", "INTRODUCTION", "ONTOLOGY", "VALONAUT"],
+  "VRevdoc:package": name,
+  "VRevdoc:preferredPrefix": preferredPrefix,
+  "VRevdoc:baseIRI": baseIRI,
+  "VRevdoc:version": version,
   respecConfig: {
     subtitle: version,
     specStatus: "unofficial",
@@ -59,43 +59,47 @@ directed for more experienced valonauts. Check out the brief description
 and introductions of the other roles as well.`,
     ],
     "table#>0;documents": {
-      "vdoc:headers": domainHeaders.roles,
-      "vdoc:entries": roleDocuments,
+      "VDoc:headers": domainHeaders.roles,
+      "VDoc:entries": roleDocuments,
     },
   },
-  [`chapter#ontology>8;Valospace ontology, prefix ${prefixIRI}, preferred label '${prefix}'`]: {
+  [`chapter#ontology>8;Valospace ontology '${preferredPrefix}'`]: {
     "#section_ontology_abstract>0": [
 `Valospace ontology provides vocabulary and definitions of the primary
 ValOS resources.`
     ],
     "chapter#section_prefixes>1": {
-      "dc:title": [em(prefix), ` IRI prefixes`],
+      "dc:title": [em(preferredPrefix), ` IRI prefixes`],
       "#0": [],
       "table#>0;prefixes": ontologyHeaders.prefixes,
     },
     "chapter#section_types>4": {
-      "dc:title": [em(prefix), ` `, ref("valos_raem:Type", "@valos/raem#Type"), ` vocabulary`],
+      "dc:title": [
+em(preferredPrefix), ` `, ref("VModel:Type", "@valos/raem#Type"), " vocabulary",
+      ],
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": ontologyHeaders.types,
-        "vdoc:entries": filterKeysWithAnyOf("@type", "valos_raem:Type", vocabulary),
+        "VDoc:headers": ontologyHeaders.types,
+        "VDoc:entries": filterKeysWithAnyOf("@type", "VModel:Type", vocabulary),
       },
     },
     "chapter#section_fields>5": {
-      "dc:title": [em(prefix), ` `, ref("valos_raem:Field", "@valos/raem#Field"), ` vocabulary`],
+      "dc:title": [
+em(preferredPrefix), ` `, ref("VModel:Field", "@valos/raem#Field"), " vocabulary",
+      ],
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": ontologyHeaders.fields,
-        "vdoc:entries": filterKeysWithAnyOf("@type", valosRaemFieldClasses, vocabulary),
+        "VDoc:headers": ontologyHeaders.fields,
+        "VDoc:entries": filterKeysWithAnyOf("@type", valosRaemFieldClasses, vocabulary),
       },
     },
     "chapter#section_vocabulary_other>8": {
-      "dc:title": [em(prefix), ` remaining vocabulary`],
+      "dc:title": [em(preferredPrefix), ` remaining vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": ontologyHeaders.vocabularyOther,
-        "vdoc:entries": filterKeysWithNoneOf("@type", [
-          "valos_raem:Type", "valos_kernel:Property", ...valosRaemFieldClasses,
+        "VDoc:headers": ontologyHeaders.vocabularyOther,
+        "VDoc:entries": filterKeysWithNoneOf("@type", [
+          "VModel:Type", "VKernel:Property", ...valosRaemFieldClasses,
         ], vocabulary),
       },
     },

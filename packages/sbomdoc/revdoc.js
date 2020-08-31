@@ -8,15 +8,15 @@ const {
 
 const { name, version, description } = require("./package");
 
-const { prefix, prefixIRI, prefixes, vocabulary, context, extractionRules } = ontology;
+const { preferredPrefix, baseIRI, prefixes, vocabulary, context, extractionRules } = ontology;
 
 module.exports = {
   "dc:title": description,
-  "vdoc:tags": ["PRIMARY", "ONTOLOGY"],
-  "revdoc:package": name,
-  "revdoc:prefix": prefix,
-  "revdoc:prefixIRI": prefixIRI,
-  "revdoc:version": version,
+  "VDoc:tags": ["PRIMARY", "ONTOLOGY"],
+  "VRevdoc:package": name,
+  "VRevdoc:preferredPrefix": preferredPrefix,
+  "VRevdoc:baseIRI": baseIRI,
+  "VRevdoc:version": version,
   respecConfig: {
     subtitle: version,
     specStatus: "unofficial",
@@ -63,28 +63,32 @@ tailored for representing CycloneDX SBoM analysis semantic content.`
       "table#>0;prefixes": ontologyHeaders.prefixes,
     },
     "chapter#section_classes>2": {
-      "dc:title": [em(prefix), ` `, ref("vdoc:Class", "@valos/vdoc#Class"), ` vocabulary`],
+      "dc:title": [
+em(preferredPrefix), ` `, ref("VDoc:Class", "@valos/vdoc#Class"), " vocabulary",
+      ],
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": ontologyHeaders.classes,
-        "vdoc:entries": filterKeysWithAnyOf("@type", "vdoc:Class", vocabulary),
+        "VDoc:headers": ontologyHeaders.classes,
+        "VDoc:entries": filterKeysWithAnyOf("@type", "VDoc:Class", vocabulary),
       },
     },
     "chapter#section_properties>3": {
-      "dc:title": [em(prefix), ` `, ref("vdoc:Property", "@valos/vdoc#Property"), ` vocabulary`],
+      "dc:title": [
+em(preferredPrefix), ` `, ref("VDoc:Property", "@valos/vdoc#Property"), " vocabulary",
+      ],
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": ontologyHeaders.properties,
-        "vdoc:entries": filterKeysWithAnyOf("@type", "vdoc:Property", vocabulary),
+        "VDoc:headers": ontologyHeaders.properties,
+        "VDoc:entries": filterKeysWithAnyOf("@type", "VDoc:Property", vocabulary),
       },
     },
     "chapter#section_vocabulary_other>8": {
-      "dc:title": [em(prefix), ` remaining vocabulary`],
+      "dc:title": [em(preferredPrefix), ` remaining vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": ontologyHeaders.vocabularyOther,
-        "vdoc:entries": filterKeysWithNoneOf(
-            "@type", ["vdoc:Class", "vdoc:Property"], vocabulary),
+        "VDoc:headers": ontologyHeaders.vocabularyOther,
+        "VDoc:entries": filterKeysWithNoneOf(
+            "@type", ["VDoc:Class", "VDoc:Property"], vocabulary),
       },
     },
     "chapter#section_context>9;SBoMDoc JSON-LD context term definitions": {
@@ -110,7 +114,7 @@ tailored for representing CycloneDX SBoM analysis semantic content.`
     "chapter#emission_rules>3;SBoMDoc emission rules": {
       "#0": [
         `ReVDoc provides html emission rules for `,
-        { "vdoc:words": Object.keys(emitters.html) },
+        { "VDoc:words": Object.keys(emitters.html) },
       ],
     },
   },

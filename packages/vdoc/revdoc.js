@@ -8,15 +8,15 @@ const {
 
 const { name, version, description } = require("./package");
 
-const { prefix, prefixIRI, prefixes, vocabulary, context, extractionRules } = ontology;
+const { preferredPrefix, baseIRI, prefixes, vocabulary, context, extractionRules } = ontology;
 
 module.exports = {
   "dc:title": description,
-  "vdoc:tags": ["PRIMARY", "ONTOLOGY"],
-  "revdoc:package": name,
-  "revdoc:prefix": prefix,
-  "revdoc:prefixIRI": prefixIRI,
-  "revdoc:version": version,
+  "VDoc:tags": ["PRIMARY", "ONTOLOGY"],
+  "VRevdoc:package": name,
+  "VRevdoc:preferredPrefix": preferredPrefix,
+  "VRevdoc:baseIRI": baseIRI,
+  "VRevdoc:version": version,
   respecConfig: {
     subtitle: version,
     specStatus: "unofficial",
@@ -260,7 +260,7 @@ during transformations.`,
       "#0": [
 `VDoc extension ontology is the combination of the extension`,
 { "numbered#": [
-  `namespace preferred prefix and its associated prefixIRI`,
+  `namespace preferred prefix and its associated baseIRI`,
   `depended ontologies with their prefix definitions`,
   `extension RDF vocabulary`,
   `JSON-LD context term definitions`,
@@ -278,7 +278,7 @@ define all the semantics of that particular document itself.`
       "chapter#extension_vocabulary>2": {
         "#0": [
 `A collection of RDF classes, properties and other names, all
-of which have the ontology prefixIRI as a prefix.`,
+of which have the ontology baseIRI as a prefix.`,
         ],
       },
       "chapter#extension_context>3": {
@@ -368,50 +368,55 @@ meanings outside the document structure itself.`,
       "table#>0;prefixes": ontologyHeaders.prefixes,
     },
     "chapter#section_classes>2": {
-      "dc:title": [em(prefix), ` `, ref("vdoc:Class", "@valos/vdoc#Class"), ` vocabulary`],
+      "dc:title": [
+em(preferredPrefix), ` `, ref("VDoc:Class", "@valos/vdoc#Class"), " vocabulary",
+      ],
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": ontologyHeaders.classes,
-        "vdoc:entries": filterKeysWithAnyOf("@type", "vdoc:Class", vocabulary),
+        "VDoc:headers": ontologyHeaders.classes,
+        "VDoc:entries": filterKeysWithAnyOf("@type", "VDoc:Class", vocabulary),
       },
     },
     "chapter#section_properties>3": {
-      "dc:title": [em(prefix), ` `, ref("vdoc:Property", "@valos/vdoc#Property"), ` vocabulary`],
+      "dc:title": [
+em(preferredPrefix), ` `, ref("VDoc:Property", "@valos/vdoc#Property"), " vocabulary",
+      ],
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": ontologyHeaders.properties,
-        "vdoc:entries": filterKeysWithAnyOf("@type", "vdoc:Property", vocabulary),
+        "VDoc:headers": ontologyHeaders.properties,
+        "VDoc:entries": filterKeysWithAnyOf("@type", "VDoc:Property", vocabulary),
       },
     },
     "chapter#section_html_element_properties>4": {
-      "dc:title":
-          [em(prefix), ` `, ref("vdoc:HTMLElementProperty", "#HTMLElementProperty"), ` vocabulary`],
+      "dc:title": [
+em(preferredPrefix), ` `, ref("VDoc:HTMLElementProperty", "#HTMLElementProperty"), " vocabulary",
+      ],
       "#0": [
-`Properties instanced from `, ref("vdoc:HTMLElementProperty", "#HTMLElementProperty"), `
+`Properties instanced from `, ref("VDoc:HTMLElementProperty", "#HTMLElementProperty"), `
 inherit HTML5 element semantics directly. Only those HTMl5 elements
 with structural semantic meaning are exposed via VDoc core ontology.`,
       ],
       "table#>0;vocabulary": {
-        "vdoc:headers": {
+        "VDoc:headers": {
           ...ontologyHeaders.properties,
           "header#1;rdfs:subPropertyOf": undefined,
           "header#1": {
-            "vdoc:content": ["HTML5 element"],
-            "vdoc:cell": ref(
-                { "vdoc:selectField": "vdoc:elementName" },
-                { "vdoc:selectField": "vdoc:elementSpec" }),
+            "VDoc:content": ["HTML5 element"],
+            "VDoc:cell": ref(
+                { "VDoc:selectField": "VDoc:elementName" },
+                { "VDoc:selectField": "VDoc:elementSpec" }),
           },
         },
-        "vdoc:entries": filterKeysWithAnyOf("@type", "vdoc:HTMLElementProperty", vocabulary),
+        "VDoc:entries": filterKeysWithAnyOf("@type", "VDoc:HTMLElementProperty", vocabulary),
       },
     },
     "chapter#section_vocabulary_other>8": {
-      "dc:title": [em(prefix), ` remaining vocabulary`],
+      "dc:title": [em(preferredPrefix), ` remaining vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": ontologyHeaders.vocabularyOther,
-        "vdoc:entries": filterKeysWithNoneOf(
-            "@type", ["vdoc:Class", "vdoc:Property", "vdoc:HTMLElementProperty"], vocabulary),
+        "VDoc:headers": ontologyHeaders.vocabularyOther,
+        "VDoc:entries": filterKeysWithNoneOf(
+            "@type", ["VDoc:Class", "VDoc:Property", "VDoc:HTMLElementProperty"], vocabulary),
       },
     },
     "chapter#section_context>9;VDoc Core JSON-LD context term definitions": {
@@ -448,7 +453,7 @@ dfn("extraction rules", "#extraction_rules"), `.`,
     "chapter#emission_rules>3;VDoc Core emission rules": {
       "#0": [
         `ReVDoc provides html emission rules for `,
-        { "vdoc:words": Object.keys(emitters.html) },
+        { "VDoc:words": Object.keys(emitters.html) },
       ],
     },
   }

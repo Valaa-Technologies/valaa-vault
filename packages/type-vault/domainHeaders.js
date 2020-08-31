@@ -2,122 +2,122 @@ const { extractee: { ref, em, strong } } = require("@valos/revdoc");
 
 const documents = {
   "header#0": {
-    "vdoc:cell": strong(ref("vdoc:selectKey")),
-    "vdoc:content": ["Name"],
+    "VDoc:cell": strong(ref("VDoc:selectKey")),
+    "VDoc:content": ["Name"],
   },
   /*
   "header#0": {
-    "vdoc:cell": { "@type": "vdoc:TemplateSelector",
-      "vdoc:content": ["vdoc:selectKey"],
-      "vdoc:ref": "vdoc:ref",
+    "VDoc:cell": { "@type": "VDoc:TemplateSelector",
+      "VDoc:content": ["VDoc:selectKey"],
+      "VDoc:ref": "VDoc:ref",
     },
-    "vdoc:content": ["id"],
+    "VDoc:content": ["id"],
   },
   */
   "header#1;package": "Package",
   "header#2;version": "Version",
   "header#3": {
-    "vdoc:cell": { "vdoc:words": { "vdoc:selectField": "tags" } },
-    "vdoc:content": ["Tags"],
+    "VDoc:cell": { "VDoc:words": { "VDoc:selectField": "tags" } },
+    "VDoc:content": ["Tags"],
   },
 };
 
 const titledDocuments = {
   ...documents,
   "header#8;title": {
-    "vdoc:content": em("Title:"),
-    "vdoc:wide": true,
+    "VDoc:content": em("Title:"),
+    "VDoc:wide": true,
   },
 };
 
 const roles =  {
   "header#0": {
-    "vdoc:cell": strong(ref("vdoc:selectKey")),
-    "vdoc:content": ["Your role:"],
+    "VDoc:cell": strong(ref("VDoc:selectKey")),
+    "VDoc:content": ["Your role:"],
   },
   "header#1": {
-    "vdoc:cell": strong(em(
-        ref({ "vdoc:selectField": "title" }, ["vdoc:selectKey", "#introduction"]))),
-    "vdoc:content": ["Your answer..."],
+    "VDoc:cell": strong(em(
+        ref({ "VDoc:selectField": "title" }, ["VDoc:selectKey", "#introduction"]))),
+    "VDoc:content": ["Your answer..."],
   },
   "header#8;introduction": {
-    "vdoc:content": em("Introduction:"),
-    "vdoc:wide": true,
-    "vdoc:tall": true,
+    "VDoc:content": em("Introduction:"),
+    "VDoc:wide": true,
+    "VDoc:tall": true,
   },
   "header#9": {
-    "vdoc:content": em("Aliases:"),
-    "vdoc:wide": true,
-    "vdoc:cell": em(ref(
-        { "vdoc:words": { "vdoc:selectField": "subProfiles" } },
-        ["vdoc:selectKey", "#section_profiles"])),
+    "VDoc:content": em("Aliases:"),
+    "VDoc:wide": true,
+    "VDoc:cell": em(ref(
+        { "VDoc:words": { "VDoc:selectField": "subProfiles" } },
+        ["VDoc:selectKey", "#section_profiles"])),
   },
 };
 
 const introductionDocuments =  {
   ...documents,
   "header#8": {
-    "vdoc:content": em("Title:"),
-    "vdoc:cell": ref({ "vdoc:selectField": "title" }, ["vdoc:selectKey", "#introduction"]),
-    "vdoc:wide": true,
+    "VDoc:content": em("Title:"),
+    "VDoc:cell": ref({ "VDoc:selectField": "title" }, ["VDoc:selectKey", "#introduction"]),
+    "VDoc:wide": true,
   },
   "header#9;introduction": {
-    "vdoc:content": em("Introduction:"),
-    "vdoc:wide": true,
-    "vdoc:tall": true,
+    "VDoc:content": em("Introduction:"),
+    "VDoc:wide": true,
+    "VDoc:tall": true,
   },
 };
 
 const apiReferenceDocuments = {
   ...documents,
   "header#8": {
-    "vdoc:content": em("Title:"),
-    "vdoc:cell": ref({ "vdoc:selectField": "title" }, ["vdoc:selectKey", "#apiAbstract"]),
-    "vdoc:wide": true,
+    "VDoc:content": em("Title:"),
+    "VDoc:cell": ref({ "VDoc:selectField": "title" }, ["VDoc:selectKey", "#apiAbstract"]),
+    "VDoc:wide": true,
   },
   "header#9;apiAbstract": {
-    "vdoc:content": em("API abstract:"),
-    "vdoc:wide": true,
-    "vdoc:tall": true,
+    "VDoc:content": em("API abstract:"),
+    "VDoc:wide": true,
+    "VDoc:tall": true,
   },
 };
 
 const ontologyDocuments = {
   ...documents,
   "header#8": {
-    "vdoc:content": em("Title:"),
-    "vdoc:cell": ref({ "vdoc:selectField": "title" }, ["vdoc:selectKey", "#ontology"]),
-    "vdoc:wide": true,
+    "VDoc:content": em("Title:"),
+    "VDoc:cell": ref({ "VDoc:selectField": "title" }, ["VDoc:selectKey", "#ontology"]),
+    "VDoc:wide": true,
   },
   "header#9;ontologyAbstract": {
-    "vdoc:content": em("Ontology abstract:"),
-    "vdoc:wide": true,
-    "vdoc:tall": true,
+    "VDoc:content": em("Ontology abstract:"),
+    "VDoc:wide": true,
+    "VDoc:tall": true,
   },
 };
 
 const primaryDocuments = {
   ...documents,
   "header#8": {
-    "vdoc:content": em("Title:"),
-    "vdoc:cell": ref({ "vdoc:selectField": "title" }, ["vdoc:selectKey", "#abstract"]),
-    "vdoc:wide": true,
+    "VDoc:content": em("Title:"),
+    "VDoc:cell": ref({ "VDoc:selectField": "title" }, ["VDoc:selectKey", "#abstract"]),
+    "VDoc:wide": true,
   },
   "header#9;abstract": {
-    "vdoc:content": em("Abstract:"),
-    "vdoc:wide": true,
-    "vdoc:tall": true,
+    "VDoc:content": em("Abstract:"),
+    "VDoc:wide": true,
+    "VDoc:tall": true,
   },
 };
 
 const summary = {
   "header#0": {
-    "vdoc:cell": strong(ref("vdoc:selectKey")),
-    "vdoc:content": ["Name"],
+    "VDoc:cell": strong(ref("VDoc:selectKey")),
+    "VDoc:content": ["Name"],
   },
   "header#9;introduction": {
-    "vdoc:content": em("Introduction:"),
-    "vdoc:wide": true,
+    "VDoc:content": em("Introduction:"),
+    "VDoc:wide": true,
   },
 };
 
@@ -142,8 +142,8 @@ const tools = {
 const commands = {
   ...summary,
   "header#8;description": {
-    "vdoc:content": em("Description:"),
-    "vdoc:wide": true,
+    "VDoc:content": em("Description:"),
+    "VDoc:wide": true,
   },
 };
 
@@ -152,8 +152,8 @@ const workspaces = {
   "header#1;version": "Version",
   "header#2;license": "License",
   "header#8;description": {
-    "vdoc:content": em("Description:"),
-    "vdoc:wide": true,
+    "VDoc:content": em("Description:"),
+    "VDoc:wide": true,
   },
 };
 

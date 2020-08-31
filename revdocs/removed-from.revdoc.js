@@ -10,16 +10,16 @@ const {
 const { name, version } = require("../packages/kernel/package");
 const {
   ontologies: {
-    valos_removed_from: { prefix, prefixIRI, prefixes, vocabulary, context },
+    VRemovedFrom: { preferredPrefix, baseIRI, prefixes, vocabulary, context },
   },
 } = require("../packages/kernel");
 
 module.exports = {
   "dc:title": `${name} removed-from field reference`,
-  "vdoc:tags": ["ONTOLOGY", "TECHNICIAN"],
-  "revdoc:package": name,
-  "revdoc:prefix": prefix,
-  "revdoc:prefixIRI": prefixIRI,
+  "VDoc:tags": ["ONTOLOGY", "TECHNICIAN"],
+  "VRevdoc:package": name,
+  "VRevdoc:preferredPrefix": preferredPrefix,
+  "VRevdoc:baseIRI": baseIRI,
   respecConfig: {
     subtitle: version,
     specStatus: "unofficial",
@@ -51,30 +51,32 @@ removed from them, f.ex. for expressing removals from ghost fields
 which are empty as they inherit their entries from the prototype.`,
     ],
   },
-  [`chapter#ontology>8;Valospace ontology, prefix ${prefixIRI}, preferred label '${prefix}'`]: {
+  [`chapter#ontology>8;Valospace ontology '${preferredPrefix}'`]: {
     "#section_ontology_abstract>0": [
 `Valospace removed-from ontology provides vocabulary and definitions of
 the primary ValOS resources removed-from fields.`
     ],
     "chapter#section_prefixes>1": {
-      "dc:title": [em(prefix), ` IRI prefixes`],
+      "dc:title": [em(preferredPrefix), ` IRI prefixes`],
       "#0": [],
       "table#>0;prefixes": ontologyHeaders.prefixes,
     },
     "chapter#section_fields>5": {
-      "dc:title": [em(prefix), ` `, ref("valos_raem:Field", "@valos/raem#Field"), ` vocabulary`],
+      "dc:title": [
+em(preferredPrefix), ` `, ref("VModel:Field", "@valos/raem#Field"), " vocabulary",
+      ],
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": ontologyHeaders.fields,
-        "vdoc:entries": filterKeysWithAnyOf("@type", valosRaemFieldClasses, vocabulary),
+        "VDoc:headers": ontologyHeaders.fields,
+        "VDoc:entries": filterKeysWithAnyOf("@type", valosRaemFieldClasses, vocabulary),
       },
     },
     "chapter#section_vocabulary_other>8": {
-      "dc:title": [em(prefix), ` remaining vocabulary`],
+      "dc:title": [em(preferredPrefix), ` remaining vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
-        "vdoc:headers": ontologyHeaders.vocabularyOther,
-        "vdoc:entries": filterKeysWithNoneOf("@type", [...valosRaemFieldClasses], vocabulary),
+        "VDoc:headers": ontologyHeaders.vocabularyOther,
+        "VDoc:entries": filterKeysWithNoneOf("@type", [...valosRaemFieldClasses], vocabulary),
       },
     },
     "chapter#section_context>9;JSON-LD context term definitions": {

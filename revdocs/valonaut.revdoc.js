@@ -5,7 +5,7 @@ const {
 
 module.exports = {
   "dc:title": `"I am a valonaut, I want to create and share interactive content"`,
-  "vdoc:tags": ["PRIMARY", "ROLE"],
+  "VDoc:tags": ["PRIMARY", "ROLE"],
   subProfiles: [
     "everyone", "personal", "student", "prototypist", "etc",
   ],

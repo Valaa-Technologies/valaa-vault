@@ -4,7 +4,7 @@ const { outputError } = require("@valos/tools/wrapError");
 
 module.exports = {
   /**
-   * Construct a revdoc:ABNF element.
+   * Construct a VRevdoc:ABNF element.
    *
    * @param {*} text
    * @param {*} rest
@@ -12,13 +12,13 @@ module.exports = {
    */
   example () {
     return {
-      "@type": "revdoc:Example",
-      "vdoc:content": [].slice.call(arguments), // eslint-disable-line prefer-rest-params
+      "@type": "VRevdoc:Example",
+      "VDoc:content": [].slice.call(arguments), // eslint-disable-line prefer-rest-params
     };
   },
 
   /**
-   * Construct a revdoc:ABNF element.
+   * Construct a VRevdoc:ABNF element.
    *
    * @param {*} text
    * @param {*} rest
@@ -30,12 +30,12 @@ module.exports = {
       // TODO(iridian, 2019-08): Figure out if there's any sense in
       // providing language identifiers for non-natural languages.
       ...c("https://tools.ietf.org/html/rfc5234", text),
-      "@type": "revdoc:ABNF",
+      "@type": "VRevdoc:ABNF",
     };
   },
 
   /**
-   * Construct a revdoc:JSONLD element.
+   * Construct a VRevdoc:JSONLD element.
    *
    * @param {*} text
    * @param {*} rest
@@ -47,12 +47,12 @@ module.exports = {
       // TODO(iridian, 2019-08): Figure out if there's any sense in
       // providing language identifiers for non-natural languages.
       ...c("https://www.w3.org/TR/json-ld11/", text),
-      "@type": "revdoc:JSONLD",
+      "@type": "VRevdoc:JSONLD",
     };
   },
 
   /**
-   * Construct a revdoc:ABNF element.
+   * Construct a VRevdoc:ABNF element.
    *
    * @param {*} text
    * @param {*} rest
@@ -64,7 +64,7 @@ module.exports = {
       // TODO(iridian, 2019-08): Figure out if there's any sense in
       // providing language identifiers for non-natural languages.
       ...c("https://www.w3.org/TR/turtle/", text),
-      "@type": "revdoc:Turtle",
+      "@type": "VRevdoc:Turtle",
     };
   },
 
@@ -90,7 +90,7 @@ module.exports = {
   },
 
   /**
-   * Construct revdoc:dfn element.
+   * Construct VRevdoc:dfn element.
    *
    * @param {*} text
    * @param {*} definitionId
@@ -99,13 +99,13 @@ module.exports = {
    */
   dfn (text, definitionId, ...explanation) {
     return aggregate({
-      "revdoc:dfn": definitionId,
-      "vdoc:content": [strong(ref(text, definitionId))],
-    }, "vdoc:content", ...explanation);
+      "VRevdoc:dfn": definitionId,
+      "VDoc:content": [strong(ref(text, definitionId))],
+    }, "VDoc:content", ...explanation);
   },
 
   /**
-   * Construct revdoc:Package reference element.
+   * Construct VRevdoc:Package reference element.
    *
    * @param {*} packageName
    * @param {*} rest
@@ -114,12 +114,12 @@ module.exports = {
   pkg (packageName, ...rest) {
     return {
       ...ref(em(packageName), packageName, ...rest),
-      "@type": "revdoc:Package",
+      "@type": "VRevdoc:Package",
     };
   },
 
   /**
-   * Construct revdoc:Command reference element.
+   * Construct VRevdoc:Command reference element.
    *
    * @param {*} packageName
    * @param {*} rest
@@ -128,14 +128,14 @@ module.exports = {
   command (commandName) {
     return {
       ...cpath(commandName),
-      "@type": "revdoc:Command",
+      "@type": "VRevdoc:Command",
     };
   },
 
   /**
-   * Construct revdoc:Invokation element.
+   * Construct VRevdoc:Invokation element.
    * Splits and spreads parts strings by whitespaces and if the first
-   * part is a string wraps it in a revdoc:Command if it is a string.
+   * part is a string wraps it in a VRevdoc:Command if it is a string.
    *
    *
    * @param {*} parts
@@ -143,8 +143,8 @@ module.exports = {
    */
   invokation (...parts) {
     return {
-      "@type": "revdoc:Invokation",
-      "vdoc:words": [].concat(...parts.map(
+      "@type": "VRevdoc:Invokation",
+      "VDoc:words": [].concat(...parts.map(
               part => (typeof part !== "string" ? [part] : part.split(/(\s+)/))))
           .filter(w => (typeof w !== "string") || !w.match(/^\s+$/))
           .map((w, i) => ((i || typeof w !== "string") ? w : module.exports.command(w))),
@@ -152,7 +152,7 @@ module.exports = {
   },
 
   /**
-   * Construct revdoc:CommandLineInteraction rows element.
+   * Construct VRevdoc:CommandLineInteraction rows element.
    *
    * @param {*} rows
    * @returns
@@ -164,15 +164,15 @@ module.exports = {
     let currentContext = "";
     const contextedRows = [];
     for (const row of commandedRows) {
-      if ((row != null) && (row["@type"] === "vdoc:ContextBase")) {
+      if ((row != null) && (row["@type"] === "VDoc:ContextBase")) {
         currentContext = row;
       } else {
         contextedRows.push([currentContext, "$ ", row]);
       }
     }
     return {
-      "@type": "revdoc:CommandLineInteraction",
-      "vdoc:entries": contextedRows,
+      "@type": "VRevdoc:CommandLineInteraction",
+      "VDoc:entries": contextedRows,
     };
   },
 
@@ -192,9 +192,9 @@ module.exports = {
   },
 
   valosRaemFieldClasses: [
-    "valos_raem:Field",
-    "valos_raem:ExpressedField", "valos_raem:EventLoggedField", "valos_raem:CoupledField",
-    "valos_raem:GeneratedField", "valos_raem:TransientField", "valos_raem:AliasField",
+    "VModel:Field",
+    "VModel:ExpressedField", "VModel:EventLoggedField", "VModel:CoupledField",
+    "VModel:GeneratedField", "VModel:TransientField", "VModel:AliasField",
   ],
 
   filterKeysWithFieldReduction,

@@ -1,20 +1,20 @@
 const { extendOntology } = require("@valos/vdoc");
 
 module.exports = {
-  createRemovedFromOntology (prefix, prefixIRI, sourceOntology) {
+  createRemovedFromOntology (preferredPrefix, baseIRI, sourceOntology) {
     const vocabulary = {};
     Object.entries((sourceOntology || {}).vocabulary || {}).forEach(([key, definition]) => {
       if (definition["rdfs:range"] === "rdfs:List"
-          && ((definition["@type"] === "valos_raem:EventLoggedField")
-              || (definition["@type"] === "valos_raem:CoupledField"))) {
+          && ((definition["@type"] === "VModel:EventLoggedField")
+              || (definition["@type"] === "VModel:CoupledField"))) {
         vocabulary[key] = {
-          "@type": "valos_raem:GeneratedField",
+          "@type": "VModel:GeneratedField",
           "rdfs:domain": definition["rdfs:domain"],
           "rdfs:range": "rdfs:List",
-          "rdfs:comment": `removed-from entries of field ${sourceOntology.prefix}:${key}.`,
+          "rdfs:comment": `removed-from entries of field ${sourceOntology.preferredPrefix}:${key}.`,
         };
       }
     });
-    return extendOntology(prefix, prefixIRI, (sourceOntology || {}).prefixes, vocabulary);
+    return extendOntology(preferredPrefix, baseIRI, (sourceOntology || {}).prefixes, vocabulary);
   },
 };

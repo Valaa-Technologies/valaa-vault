@@ -30,7 +30,7 @@ module.exports = {
   aggregate,
 
   /**
-   * Construct vdoc:CharacterData node
+   * Construct VDoc:CharacterData node
    *
    * @param {string} [language]
    * @param {string} characters
@@ -39,40 +39,40 @@ module.exports = {
    */
   c (languageOrCharacters, charactersOrOptions, options) {
     return {
-      "@type": "vdoc:CharacterData",
+      "@type": "VDoc:CharacterData",
       ...(typeof charactersOrOptions === "string" ? {
-        "vdoc:language": languageOrCharacters,
-        "vdoc:content": [charactersOrOptions],
+        "VDoc:language": languageOrCharacters,
+        "VDoc:content": [charactersOrOptions],
         ...(options || {}),
       } : {
-        "vdoc:content": [languageOrCharacters],
+        "VDoc:content": [languageOrCharacters],
         ...(charactersOrOptions || {}),
       }),
     };
   },
 
   /**
-   * Construct vdoc:BulletList node
+   * Construct VDoc:BulletList node
    *
    * @param {*} entries
    * @returns
    */
   bulleted () {
-    return { "@type": "vdoc:BulletList", "vdoc:entries": [].slice.call(arguments) };
+    return { "@type": "VDoc:BulletList", "VDoc:entries": [].slice.call(arguments) };
   },
 
   /**
-   * Construct vdoc:NumberedList node
+   * Construct VDoc:NumberedList node
    *
    * @param {*} entries
    * @returns
    */
   numbered () {
-    return { "@type": "vdoc:NumberedList", "vdoc:entries": [].slice.call(arguments) };
+    return { "@type": "VDoc:NumberedList", "VDoc:entries": [].slice.call(arguments) };
   },
 
   /**
-   * Construct vdoc:Reference node
+   * Construct VDoc:Reference node
    *
    * @param {*} text
    * @param {*} [ref_=text]
@@ -80,8 +80,8 @@ module.exports = {
    */
   ref (text, ref_ = text) {
     return aggregate({
-      "@type": "vdoc:Reference", "vdoc:content": [text], "vdoc:ref": ref_,
-    }, "vdoc:content", ...[].slice.call(arguments, 2));
+      "@type": "VDoc:Reference", "VDoc:content": [text], "VDoc:ref": ref_,
+    }, "VDoc:content", ...[].slice.call(arguments, 2));
   },
 
   identifize (str) {
@@ -89,7 +89,7 @@ module.exports = {
   },
 
   /**
-   * Construct vdoc:ContextPath node
+   * Construct VDoc:ContextPath node
    *
    * @param {*} contextPath
    * @param {*} contextBase
@@ -97,16 +97,16 @@ module.exports = {
    */
   cpath (contextPath, contextBase) {
     return {
-      "@type": "vdoc:ContextPath",
-      "vdoc:content": [contextPath],
+      "@type": "VDoc:ContextPath",
+      "VDoc:content": [contextPath],
       ...(contextBase !== undefined ? {
-        "vdoc:context": contextBase,
+        "VDoc:context": contextBase,
       } : {}),
     };
   },
 
   /**
-   * Construct vdoc:ContextBase node
+   * Construct VDoc:ContextBase node
    *
    * @param {*} newContextPath
    * @param {*} contextBase
@@ -115,66 +115,66 @@ module.exports = {
   context (newContextPath, contextBase) {
     return {
       ...module.exports.cpath(newContextPath, contextBase),
-      "@type": "vdoc:ContextBase",
+      "@type": "VDoc:ContextBase",
     };
   },
 
   /**
-   * Construct a node with vdoc:em property, making node content
+   * Construct a node with VDoc:em property, making node content
    * <em>emphasised</em> (as per html5 'em')
    *
    * @param {*} entries
    * @returns
    */
-  em () { return _htmlElement({ "vdoc:em": true }, arguments); },
+  em () { return _htmlElement({ "VDoc:em": true }, arguments); },
 
   /**
-   * Construct a node with vdoc:strong property, making node content
+   * Construct a node with VDoc:strong property, making node content
    * <strong>strong</strong> (as per html5 'strong')
    *
    * @param {*} entries
    * @returns
    */
-  strong () { return _htmlElement({ "vdoc:strong": true }, arguments); },
+  strong () { return _htmlElement({ "VDoc:strong": true }, arguments); },
 
   /**
-   * Construct a node with vdoc:ins property, marking node content
+   * Construct a node with VDoc:ins property, marking node content
    * <ins>as a new insertion</ins> (as per html5 'ins')
    *
    * @param {*} entries
    * @returns
    */
-  ins () { return _htmlElement({ "vdoc:ins": true }, arguments); },
+  ins () { return _htmlElement({ "VDoc:ins": true }, arguments); },
 
   /**
-   * Construct a node with vdoc:del property, marking node content
+   * Construct a node with VDoc:del property, marking node content
    * <del>as deleted</del> (as per html5 'del')
    *
    * @param {*} entries
    * @returns
    */
-  del () { return _htmlElement({ "vdoc:del": true }, arguments); },
+  del () { return _htmlElement({ "VDoc:del": true }, arguments); },
 
   /**
-   * Construct a node with vdoc:quote property, making node content
+   * Construct a node with VDoc:quote property, making node content
    * <q>quoted</q> (as per html5 'q')
    *
    * @param {*} entries
    * @returns
    */
-  quote () { return _htmlElement({ "vdoc:quote": true }, arguments); },
+  quote () { return _htmlElement({ "VDoc:quote": true }, arguments); },
 
   /**
-   * Construct a node with vdoc:blockquote property, making node content
+   * Construct a node with VDoc:blockquote property, making node content
    * <blockquote>blockquoted</blockquote> (as per html5 'blockquote')
    *
    * @param {*} entries
    * @returns
    */
-  blockquote () { return _htmlElement({ "vdoc:blockquote": true }, arguments); },
+  blockquote () { return _htmlElement({ "VDoc:blockquote": true }, arguments); },
 };
 
 function _htmlElement (htmlNode, args) {
-  return aggregate(aggregate(htmlNode, "vdoc:content", [].slice.call(args)),
-      { "@type": "vdoc:Node" });
+  return aggregate(aggregate(htmlNode, "VDoc:content", [].slice.call(args)),
+      { "@type": "VDoc:Node" });
 }

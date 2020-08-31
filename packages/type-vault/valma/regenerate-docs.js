@@ -62,7 +62,7 @@ exports.handler = async (yargv) => {
   function _addDocumentToListing (documentPath, vdocState, { tags = [], ...rest }) {
     listing[documentPath] = {
       "@id": vdocState[0]["@id"],
-      tags: (vdocState[0]["vdoc:tags"] || []).concat(...tags)
+      tags: (vdocState[0]["VDoc:tags"] || []).concat(...tags)
           .filter((v, i, a) => a.indexOf(v) === i),
       subProfiles: (vdocState[0].subProfiles || []),
       title: vdocState[0]["dc:title"] || documentPath,

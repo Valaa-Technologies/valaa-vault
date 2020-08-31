@@ -6,17 +6,16 @@ const prefixes = {
   xsd: "http://www.w3.org/2001/XMLSchema#",
   owl: "http://www.w3.org/2002/07/owl#",
   dc: "http://purl.org/dc/elements/1.1/",
-  valos_kernel: "https://valospace.org/kernel#",
+  V: "https://valospace.org/0#",
+  VKernel: "https://valospace.org/kernel/0#",
+  VModel: "https://valospace.org/raem/0#",
+  VValk: "https://valospace.org/valk/0#",
 };
 
 module.exports = {
-  ...extendOntology("valos_kernel", "https://valospace.org/kernel#", prefixes,
-      require("./valos_kernel")),
-  ...extendOntology("valos_valk", "https://valospace.org/valk#", prefixes, require("./valos_valk")),
-  ...extendOntology("valos_raem", "https://valospace.org/raem#", prefixes, require("./valos_raem")),
-  ...extendOntology("valos", "https://valospace.org/#", prefixes, require("./valos"), {
-    context: {
-      restriction: { "@reverse": "owl:onProperty" },
-    },
-  }),
+  ...extendOntology("VKernel", prefixes.VKernel, prefixes, require("./VKernel")),
+  ...extendOntology("VValk", prefixes.VValk, prefixes, require("./VValk")),
+  ...extendOntology("VModel", prefixes.VModel, prefixes, require("./VModel")),
+  ...extendOntology("V", prefixes.V, prefixes, require("./V"),
+      { context: { restriction: { "@reverse": "owl:onProperty" } } }),
 };

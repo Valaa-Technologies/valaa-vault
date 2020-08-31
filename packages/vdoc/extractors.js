@@ -44,13 +44,13 @@ module.exports = {
         }
       } else {
         // console.log("pre-post-process:", ruleName, key);
-        node["vdoc:pre_body"] = rule.body;
+        node["VDoc:pre_body"] = rule.body;
         this.extend(node, patch);
-        delete node["vdoc:pre_body"];
+        delete node["VDoc:pre_body"];
       }
       if (rule.owner) {
-        const preOwnees = (targetObject["vdoc:pre_ownees"]
-            || (targetObject["vdoc:pre_ownees"] = {}));
+        const preOwnees = (targetObject["VDoc:pre_ownees"]
+            || (targetObject["VDoc:pre_ownees"] = {}));
         (preOwnees[rule.owner] || (preOwnees[rule.owner] = [])).push([
           (orderId && `${orderId}\uFFFF`) || (orderElement && (Number(orderElement) + 0.5))
               || resourceId || (elementId && Number(elementId)),
@@ -61,13 +61,13 @@ module.exports = {
     },
     postExtend (target) {
       if ((target == null) || (target === this.returnUndefined)) return target;
-      const unorderedOwnees = target["vdoc:pre_ownees"];
+      const unorderedOwnees = target["VDoc:pre_ownees"];
       if (unorderedOwnees) {
         for (const [owningProperty, ownees] of Object.entries(unorderedOwnees)) {
-          target[target["vdoc:pre_body"] || owningProperty] =
+          target[target["VDoc:pre_body"] || owningProperty] =
               [].concat(...ownees.sort(_compareWithOrderQualifier).map(e => e[1]));
         }
-        delete target["vdoc:pre_ownees"];
+        delete target["VDoc:pre_ownees"];
       }
       return target;
     },
@@ -76,15 +76,15 @@ module.exports = {
 
 function _extendWithArrayPatch (extender, rule, arrayPatch) {
   const ret = extender.extend([], arrayPatch);
-  if (rule.body === "vdoc:content") {
+  if (rule.body === "VDoc:content") {
     const body = _splitNewlineWhitespaceSections(ret, rule.paragraphize);
     const onlyEntry = !Array.isArray(body) ? body : (body.length === 1) ? body[0] : undefined;
     return [].concat(
-        (onlyEntry || {})["vdoc:content"] && (Object.keys(onlyEntry).length === 1)
-            ? onlyEntry["vdoc:content"]
+        (onlyEntry || {})["VDoc:content"] && (Object.keys(onlyEntry).length === 1)
+            ? onlyEntry["VDoc:content"]
             : body);
   }
-  if (rule.body === "vdoc:entries") {
+  if (rule.body === "VDoc:entries") {
     return ret.map(_splitNewlineWhitespaceSections, rule.paragraphize);
   }
   return ret;
@@ -108,8 +108,8 @@ function _splitNewlineWhitespaceSections (values = [], alwaysParagraphize) {
   function flushCurrent () {
     if (currentParagraph.length) {
       result.push({
-        "@type": "vdoc:Paragraph",
-        "vdoc:content": currentParagraph,
+        "@type": "VDoc:Paragraph",
+        "VDoc:content": currentParagraph,
       });
       currentParagraph = [];
     }

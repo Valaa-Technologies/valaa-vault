@@ -8,7 +8,7 @@ module.exports = {
     ...vdoc.extension,
     ...revdoc.extension,
     extends: [revdoc.extension, vdoc.extension],
-    ontology: require("./ontologies").sbomdoc,
+    ontology: require("./ontologies").VSbomdoc,
     extractors: {},
     emitters: require("./emitters"),
     extractee,

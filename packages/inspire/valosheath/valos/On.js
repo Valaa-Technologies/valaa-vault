@@ -4,7 +4,7 @@ import { defineName } from "~/engine/valosheath";
 
 export const namespace = {
   preferredPrefix: "On",
-  namespaceURI: "https://valospace.org/inspire/On#",
+  baseIRI: "https://valospace.org/inspire/On/0#",
   description:
 `The ValOS inspire On namespace contains event callback names used by
 the inspire UI layer.

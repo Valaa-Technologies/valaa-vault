@@ -20,7 +20,7 @@ export type NameDefinition = {
 
 export type Namespace = {
   preferredPrefix: string,
-  namespaceURI: string,
+  baseIRI: string,
   description: string,
   nameSymbols: { [name: string | Symbol]: Symbol | string },
   nameDefinitions: { [name: string]: NameDefinition },
@@ -40,14 +40,14 @@ export function defineName (name: string, namespace: Namespace,
 export function integrateNamespace (
     namespace: Namespace, rootScope: Object, hostDescriptors: Object) {
   const {
-    preferredPrefix, namespaceURI, description,
+    preferredPrefix, baseIRI, description,
     nameSymbols, nameDefinitions, deprecatedNames,
   } = namespace;
   const names = {};
   rootScope[`$${preferredPrefix}`] = nameSymbols;
   hostDescriptors.set(nameSymbols, {
     writable: false, enumerable: true, configurable: false,
-    valos: true, namespace: true, description, preferredPrefix, namespaceURI,
+    valos: true, namespace: true, description, preferredPrefix, baseIRI,
     names,
   });
   for (const [nameSuffix, createDefinition] of Object.entries(nameDefinitions)) {
@@ -55,7 +55,7 @@ export function integrateNamespace (
     const entryDescriptor = names[nameSuffix] = Object.freeze({
       writable: false, enumerable: true, configurable: false,
       valos: true, symbol: true,
-      uri: `${namespaceURI}${nameSuffix}`,
+      uri: `${baseIRI}${nameSuffix}`,
       value, defaultValue,
       ...rest,
     });
@@ -82,7 +82,7 @@ export function addValosheathNamespace (valosheath, valosheathName: string, desc
   const valosheathKey = `$${valosheathName}Namespace`;
   if (valosheath[valosheathKey]) {
     throw new Error(`Valosheath namespace alias '${valosheathName}' already exists to <${
-        valosheath[valosheathKey].namespaceURI}>`);
+        valosheath[valosheathKey].baseIRI}>`);
   }
   const proxyPrototypeFields = {
     tryTypeName () { return this[UnpackedHostValue].tryTypeName(); },
@@ -95,7 +95,7 @@ export function addValosheathNamespace (valosheath, valosheathName: string, desc
   const namespaceInterface = proxyPrototypeFields[NamespaceInterfaceTag] = {
     valosheathName,
     valosheathKey,
-    ...descriptor, // prefix, namespaceURI
+    ...descriptor, // preferredPrefix, baseIRI
     addSymbolField (fieldName: string, symbol: ?Symbol) {
       if (!isSymbol(symbol)) return;
       if (valosheath[fieldName] !== undefined) {
@@ -140,5 +140,5 @@ export function tryNamespaceFieldSymbolOrPropertyName (container, fieldName) {
   const symbol = container[fieldName];
   if (symbol) return symbol;
   throw new Error(`Namespace property ${container[AccessorNameTag]}.${fieldName
-      } not defined by namespace <${namespaceInterface.namespaceURI}>`);
+      } not defined by namespace <${namespaceInterface.baseIRI}>`);
 }

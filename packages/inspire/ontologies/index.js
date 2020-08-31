@@ -6,9 +6,9 @@ const prefixes = {
   xsd: "http://www.w3.org/2001/XMLSchema#",
   owl: "http://www.w3.org/2002/07/owl#",
   dc: "http://purl.org/dc/elements/1.1/",
-  revela: "https://valospace.org/inspire/revela#",
+  VRevela: "https://valospace.org/inspire/revela/0#",
 };
 
 module.exports = {
-  ...extendOntology("revela", prefixes.revela, prefixes, require("./revela")),
+  ...extendOntology("VRevela", prefixes.VRevela, prefixes, require("./VRevela")),
 };

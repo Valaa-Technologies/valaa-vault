@@ -1,27 +1,27 @@
 const { extractee: { em, ref, strong } } = require("@valos/vdoc");
 
 const prefixes = {
-  "header#0;vdoc:selectKey": "Prefix",
-  "header#1;vdoc:selectValue": "IRI",
+  "header#0;VDoc:selectKey": "Prefix",
+  "header#1;VDoc:selectValue": "IRI",
 };
 
 const vocabulary = {
   "header#0": {
-    "vdoc:content": ["rdfs:label"],
-    "vdoc:cell": {
-      "vdoc:resourceId": "vdoc:selectKey",
-      ...ref(em("vdoc:selectKey"), ["#", "vdoc:selectKey"]),
+    "VDoc:content": ["rdfs:label"],
+    "VDoc:cell": {
+      "VDoc:resourceId": "VDoc:selectKey",
+      ...ref(em("VDoc:selectKey"), ["#", "VDoc:selectKey"]),
     },
   },
   "header#9;rdfs:comment": {
-    "vdoc:content": em("rdfs:comment"),
-    "vdoc:wide": true,
+    "VDoc:content": em("rdfs:comment"),
+    "VDoc:wide": true,
   },
 };
 
 const context = {
-  "header#0;vdoc:selectKey": "Term",
-  "header#1;vdoc:selectValue": "Definition",
+  "header#0;VDoc:selectKey": "Term",
+  "header#1;VDoc:selectValue": "Definition",
   "header#2;@id": "@id",
   "header#3;@type": "@type",
   "header#4;@container": "@container",
@@ -30,8 +30,8 @@ const context = {
 const classes = {
   ...vocabulary,
   "header#1": {
-    "vdoc:content": ["rdfs:subClassOf"],
-    "vdoc:cell": { "vdoc:words": { "vdoc:selectField": "rdfs:subClassOf" } },
+    "VDoc:content": ["rdfs:subClassOf"],
+    "VDoc:cell": { "VDoc:words": { "VDoc:selectField": "rdfs:subClassOf" } },
   },
 };
 
@@ -49,12 +49,12 @@ const elements = {
 const types = {
   ...vocabulary,
   "header#1": {
-    "vdoc:content": ["revdoc:brief"],
-    "vdoc:cell": strong({ "vdoc:selectField": "revdoc:brief" }),
+    "VDoc:content": ["VRevdoc:brief"],
+    "VDoc:cell": strong({ "VDoc:selectField": "VRevdoc:brief" }),
   },
   "header#2": {
-    "vdoc:content": ["rdfs:subClassOf"],
-    "vdoc:cell": { "vdoc:words": { "vdoc:selectField": "rdfs:subClassOf" } },
+    "VDoc:content": ["rdfs:subClassOf"],
+    "VDoc:cell": { "VDoc:words": { "VDoc:selectField": "rdfs:subClassOf" } },
   },
 };
 
@@ -64,7 +64,7 @@ const fields = {
   "header#2;rdfs:range": "rdfs:range",
   "header#3;@type": "rdf:type",
   "header#4;rdfs:subPropertyOf": "rdfs:subPropertyOf",
-  "header#5;valos_raem:coupledField": "valos_raem:coupledField",
+  "header#5;VModel:coupledField": "VModel:coupledField",
 };
 
 const verbs = {
@@ -77,13 +77,13 @@ const vocabularyOther = {
   ...vocabulary,
   "header#1;@type": "rdf:type",
   "header#2": {
-    "vdoc:content": ["rdfs:subClassOf"],
-    "vdoc:cell": { "vdoc:words": { "vdoc:selectField": "rdfs:subClassOf" } },
+    "VDoc:content": ["rdfs:subClassOf"],
+    "VDoc:cell": { "VDoc:words": { "VDoc:selectField": "rdfs:subClassOf" } },
   },
 };
 
 const extractionRules = {
-  "header#0;vdoc:selectKey": "Rule name",
+  "header#0;VDoc:selectKey": "Rule name",
   "header#1;range": "Inter-node rdf:type",
   "header#2;owner": "Owner property",
   "header#3;body": "Body property",
@@ -92,8 +92,8 @@ const extractionRules = {
 };
 
 const extractee = {
-  "header#0;vdoc:selectKey": "API identifier",
-  "header#1;vdoc:selectValue": "rdf:type",
+  "header#0;VDoc:selectKey": "API identifier",
+  "header#1;VDoc:selectValue": "rdf:type",
 };
 
 module.exports = {

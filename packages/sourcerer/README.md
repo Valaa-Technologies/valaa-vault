@@ -44,7 +44,7 @@ browser specific.
 
 - depends: `@valos/script`, `IndexedDB`, `AWS IoT/S3/DynamoDB`
 - exports: `FalseProphet`, `Connection`, `SourcererContentAPI`
-- valosheath: `SourceredNode`, `Entity`, `Media`, `Relation`,
+- valospace: `SourceredNode`, `Entity`, `Media`, `Relation`,
 - concepts: `ACID`, `authorities`, `pub-sub`, `offline readiness`
 
 ### 1.1. Note on naming and of the importance of history

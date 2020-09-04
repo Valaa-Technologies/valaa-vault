@@ -1,4 +1,4 @@
-const { extendOntology } = require("@valos/vdoc");
+const extendOntology = require("@valos/vdoc/extendOntology");
 const { dumpObject, wrapError } = require("@valos/tools/wrapError");
 
 module.exports = {
@@ -6,7 +6,7 @@ module.exports = {
 };
 
 function exportDomainAggregateOntologiesFromDocuments (domainName, documents) {
-  const preOntologies = {};
+  const aggregatedOntologies = {};
   Object.values(documents).forEach(document => {
     if (document.package === domainName
         || (document.package === `${domainName}-vault`)
@@ -14,33 +14,39 @@ function exportDomainAggregateOntologiesFromDocuments (domainName, documents) {
     try {
       // Maybe source from the document vdocstate?
       const ontologies = require(`${document.package}/ontologies`);
-      for (const [preferredPrefix, source] of Object.entries(ontologies)) {
-        const current = preOntologies[preferredPrefix] || (preOntologies[preferredPrefix] =
-            { preferredPrefix, baseIRI: source.baseIRI });
+      for (const [preferredPrefix, extender] of Object.entries(ontologies)) {
+        const current = aggregatedOntologies[preferredPrefix]
+            || (aggregatedOntologies[preferredPrefix] =
+                { preferredPrefix, baseIRI: extender.baseIRI });
         try {
-          if (current.preferredPrefix !== preferredPrefix) throw new Error("prefix mismatch");
-          if (current.baseIRI !== source.baseIRI) throw new Error("baseIRI mismatch");
-          for (const section of ["prefixes", "vocabulary", "context"]) {
+          if (current.preferredPrefix !== preferredPrefix) {
+            throw new Error("preferredPrefix mismatch");
+          }
+          if (current.baseIRI !== extender.baseIRI) throw new Error("baseIRI mismatch");
+          if (!current.ontologyDescription) {
+            current.ontologyDescription = extender.ontologyDescription;
+          }
+          for (const section of ["prefixes", "vocabulary", "context", "extractionRules"]) {
             const target = current[section] || (current[section] = {});
-            for (const [key, aggregateValue] of Object.entries(source[section] || {})) {
+            for (const [key, extenderValue] of Object.entries(extender[section] || {})) {
               const currentValue = target[key];
               if (currentValue === undefined) {
-                target[key] = aggregateValue;
-              } else if (JSON.stringify(aggregateValue) !== JSON.stringify(currentValue)) {
+                target[key] = extenderValue;
+              } else if (JSON.stringify(extenderValue) !== JSON.stringify(currentValue)) {
                   throw wrapError(new Error(`Ontology aggregation mismatch for '${key
-                          }': source value and current value string serializations differ`),
+                          }': extender value and current value string serializations differ`),
                       new Error(`During section '${section}' aggregation`),
                       "\n\tcurrentValue:", JSON.stringify(currentValue),
-                      "\n\taggregateValue:", JSON.stringify(aggregateValue));
+                      "\n\textenderValue:", JSON.stringify(extenderValue));
               }
             }
           }
           current.mostRecentDocument = document;
         } catch (error) {
           throw wrapError(error,
-              new Error(`During exportDomainAggregateOntologiesFromDocuments.ontology(prefix: ${
+              new Error(`During exportDomainAggregateOntologiesFromDocuments.extender(prefix: ${
                   preferredPrefix})`),
-              "\n\tsource:", ...dumpObject(source),
+              "\n\textender:", ...dumpObject(extender),
               "\n\tcurrent document:", current.mostRecentDocument["@id"],
                   current.mostRecentDocument["dc:title"]
           );
@@ -54,9 +60,7 @@ function exportDomainAggregateOntologiesFromDocuments (domainName, documents) {
           "\n\tdocument package:", document.package, document.version);
     }
   });
-  return Object.values(preOntologies).reduce(
-      (exports, { preferredPrefix, baseIRI, prefixes, vocabulary, ...rest }) =>
-          Object.assign(exports,
-              extendOntology(preferredPrefix, baseIRI, prefixes, vocabulary, rest)),
+  return Object.values(aggregatedOntologies).reduce((exports, { vocabulary, ...base }) =>
+          Object.assign(exports, extendOntology(vocabulary, { base })),
       {});
 }

@@ -45,6 +45,8 @@ function emitReVDocChapter (node, emission, stack) {
   }), emission, stack);
 }
 
+const _referencePackageMatcher = /^(@[^/#]*)\/([^/#]*)\/?(#?.*)?$/;
+
 function emitReVDocReference (node, emission, stack) {
   try {
     let node_ = node;
@@ -52,7 +54,7 @@ function emitReVDocReference (node, emission, stack) {
     if ((ref != null) && (typeof ref !== "string")) {
       node_ = { ...node, "VDoc:ref": ref = stack.emitNode(node_["VDoc:ref"], "") };
     }
-    const refParts = ref.match(/^(@[^/#]*)\/([^/#]*)\/?(#?.*)?$/);
+    const refParts = (ref || "").match(_referencePackageMatcher);
     if (refParts) {
       const packageName = (refParts[1] === "@")
           ? refParts[2]

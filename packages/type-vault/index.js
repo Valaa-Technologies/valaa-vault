@@ -1,5 +1,5 @@
-const domainHeaders = require("./domainHeaders");
+const domainColumns = require("./domainColumns");
 
 module.exports = {
-  domainHeaders,
+  domainColumns,
 };

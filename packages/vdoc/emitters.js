@@ -141,25 +141,25 @@ function emitNumberedListHTML (node, emission, stack) {
 function emitTableHTML (node, emission, stack) {
   const cellDatas = [];
   const wideRowContents = [];
-  const headerTexts = [];
-  let headers = node["VDoc:headers"];
-  if (!headers) {
-    throw new Error("VDoc:Table is missing headers");
+  const columnHeaderTexts = [];
+  let columns = node["VDoc:columns"];
+  if (!columns) {
+    throw new Error("VDoc:Table is missing columns");
   }
-  if (!Array.isArray(headers)) {
-    if (headers["VDoc:entries"]) headers = headers["VDoc:entries"];
-    else throw new Error("VDoc:Table VDoc:headers is not an array nor doesn't have VDoc:entries");
+  if (!Array.isArray(columns)) {
+    if (columns["VDoc:entries"]) columns = columns["VDoc:entries"];
+    else throw new Error("VDoc:Table VDoc:columns is not an array nor doesn't have VDoc:entries");
   }
-  for (const header of headers) {
+  for (const column of columns) {
     const cellData = {
-      headerText: stack.emitNode(header["VDoc:content"], ""),
-      cell: header["VDoc:cell"],
+      headerText: stack.emitNode(column["VDoc:content"], ""),
+      cell: column["VDoc:cell"],
     };
-    if (header["VDoc:wide"]) {
+    if (column["VDoc:wide"]) {
       wideRowContents.push(cellData);
     } else {
       cellDatas.push(cellData);
-      headerTexts.push(`<th${nodeAttributes(header)}>${cellData.headerText}</th>`);
+      columnHeaderTexts.push(`<th${nodeAttributes(column)}>${cellData.headerText}</th>`);
     }
   }
   const entryTexts = [];
@@ -186,14 +186,14 @@ function emitTableHTML (node, emission, stack) {
     for (const { headerText, cell } of wideRowContents) {
       const instance = _instantiateCell(cell, entryKey, entryData);
       entryTexts.push(`<tr class="vdoc vdoc-wide${rowNthNess}"><td>${headerText
-        }</td><td colspan=${headers.length - 1 || 1
+        }</td><td colspan=${columns.length - 1 || 1
         }>${(typeof instance !== "object") ? instance : stack.emitNode(instance, "")}</td></tr>`);
     }
   });
   return `${emission}
     <table${nodeAttributes(node)}>
       <thead>
-        ${headerTexts.join(`
+        ${columnHeaderTexts.join(`
         `)}
       </thead>
       <tbody>

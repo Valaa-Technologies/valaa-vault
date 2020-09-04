@@ -3,12 +3,15 @@
 const { extension: { ontology, extractee } } = require("@valos/twindoc");
 const {
   extractee: { authors, em, ref, pkg, /* dfn, */ filterKeysWithAnyOf, filterKeysWithNoneOf },
-  ontologyHeaders,
+  ontologyColumns,
 } = require("@valos/revdoc");
 
 const { name, description, version } = require("./package");
 
-const { preferredPrefix, baseIRI, prefixes, vocabulary, context, extractionRules } = ontology;
+const {
+  preferredPrefix, baseIRI, ontologyDescription,
+  prefixes, vocabulary, context, extractionRules,
+} = ontology;
 
 module.exports = {
   "dc:title": description,
@@ -74,33 +77,25 @@ partial primary sources.`,
     "data#vocabulary": vocabulary,
     "data#context": context,
     "#section_ontology_abstract>0": {
-      "#0": [
-`TwinDoc ontology provides vocabulary for defining hypertwin mappings
-and configurations; actual hypertwin content is represented using the
-valos core ontologies and possible extension content ontologies.`,
-      ],
+      "#0": [ontologyDescription || ""],
     },
     "chapter#section_prefixes>1;TwinDoc IRI prefixes": {
       "#0": [],
-      "table#>0;prefixes": ontologyHeaders.prefixes,
+      "table#>0;prefixes": ontologyColumns.prefixes,
     },
     "chapter#section_classes>2": {
-      "dc:title": [
-em(preferredPrefix), ` `, ref("VDoc:Class", "@valos/vdoc#Class"), " vocabulary",
-      ],
+      "dc:title": [em(preferredPrefix), ` `, ref("VDoc classes", "@valos/vdoc#Class")],
       "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.classes,
+        "VDoc:columns": ontologyColumns.classes,
         "VDoc:entries": filterKeysWithAnyOf("@type", "VDoc:Class", vocabulary),
       },
     },
     "chapter#section_properties>3": {
-      "dc:title": [
-em(preferredPrefix), ` `, ref("VDoc:Property", "@valos/vdoc#Property"), " vocabulary",
-      ],
+      "dc:title": [em(preferredPrefix), ` `, ref("VDoc properties", "@valos/vdoc#Property")],
       "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.properties,
+        "VDoc:columns": ontologyColumns.properties,
         "VDoc:entries": filterKeysWithAnyOf("@type", "VDoc:Property", vocabulary),
       },
     },
@@ -108,25 +103,25 @@ em(preferredPrefix), ` `, ref("VDoc:Property", "@valos/vdoc#Property"), " vocabu
       "dc:title": [em(preferredPrefix), ` remaining vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.vocabularyOther,
+        "VDoc:columns": ontologyColumns.vocabularyOther,
         "VDoc:entries": filterKeysWithNoneOf(
             "@type", ["VDoc:Class", "VDoc:Property"], vocabulary),
       },
     },
     "chapter#section_context>9;TwinDoc JSON-LD context term definitions": {
       "#0": [],
-      "table#>0;context": ontologyHeaders.context,
+      "table#>0;context": ontologyColumns.context,
     },
   },
   "chapter#transformations>9;TwinDoc transformations": {
     "chapter#extraction_rules>0;TwinDoc extraction rules": {
       "#0": [],
-      "table#>0;extraction_rules_data": ontologyHeaders.extractionRules,
+      "table#>0;extraction_rules_data": ontologyColumns.extractionRules,
       "data#extraction_rules_data": extractionRules,
     },
     "chapter#extractee_api>1;TwinDoc extractee API": {
       "#0": [],
-      "table#>0;extractee_api_lookup": ontologyHeaders.extractee,
+      "table#>0;extractee_api_lookup": ontologyColumns.extractee,
       "data#extractee_api_lookup": extractee,
     },
     "chapter#emission_output>2;TwinDoc emission output": {

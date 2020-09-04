@@ -3,12 +3,14 @@
 const {
   extension: { ontology, extractee, emitters },
   extractee: { authors, em, ref, /* dfn, */ pkg, filterKeysWithAnyOf, filterKeysWithNoneOf },
-  ontologyHeaders,
+  ontologyColumns,
 } = require("@valos/revdoc");
 
 const { name, version, description } = require("./package");
 
-const { preferredPrefix, baseIRI, prefixes, vocabulary, context, extractionRules } = ontology;
+const {
+  preferredPrefix, baseIRI, ontologyDescription, prefixes, vocabulary, context, extractionRules,
+} = ontology;
 
 module.exports = {
   "dc:title": description,
@@ -49,31 +51,24 @@ npm package.`,
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
     "data#context": context,
-    "#section_ontology_abstract>0": [
-`ReVDoc ontology provides vocabulary and definitions which are tailored
-for emitting ReSpec html output documents.`
-    ],
+    "#section_ontology_abstract>0": [ontologyDescription || ""],
     "chapter#section_prefixes>1;ReVDoc IRI prefixes": {
       "#0": [],
-      "table#>0;prefixes": ontologyHeaders.prefixes,
+      "table#>0;prefixes": ontologyColumns.prefixes,
     },
     "chapter#section_classes>2": {
-      "dc:title": [
-em(preferredPrefix), ` `, ref("VDoc:Class", "@valos/vdoc#Class"), " vocabulary",
-      ],
+      "dc:title": [em(preferredPrefix), ` `, ref("VDoc classes", "@valos/vdoc#Class")],
       "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.classes,
+        "VDoc:columns": ontologyColumns.classes,
         "VDoc:entries": filterKeysWithAnyOf("@type", "VDoc:Class", vocabulary),
       },
     },
     "chapter#section_properties>3": {
-      "dc:title": [
-em(preferredPrefix), ` `, ref("VDoc:Property", "@valos/vdoc#Property"), " vocabulary",
-      ],
+      "dc:title": [em(preferredPrefix), ` `, ref("VDoc properties", "@valos/vdoc#Property")],
       "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.properties,
+        "VDoc:columns": ontologyColumns.properties,
         "VDoc:entries": filterKeysWithAnyOf("@type", "VDoc:Property", vocabulary),
       },
     },
@@ -81,14 +76,14 @@ em(preferredPrefix), ` `, ref("VDoc:Property", "@valos/vdoc#Property"), " vocabu
       "dc:title": [em(preferredPrefix), ` remaining vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.vocabularyOther,
+        "VDoc:columns": ontologyColumns.vocabularyOther,
         "VDoc:entries": filterKeysWithNoneOf(
             "@type", ["VDoc:Class", "VDoc:Property"], vocabulary),
       },
     },
     "chapter#section_context>9;ReVDoc JSON-LD context term definitions": {
       "#0": [],
-      "table#>0;context": ontologyHeaders.context,
+      "table#>0;context": ontologyColumns.context,
     },
   },
   "chapter#transformations>9:ReVDoc transformations": {
@@ -98,12 +93,12 @@ primitives and specifies a ReSpec html emission transformation.`,
     ],
     "chapter#extraction_rules>0;ReVDoc extraction rules": {
       "#0": [],
-      "table#>0;extraction_rules_data": ontologyHeaders.extractionRules,
+      "table#>0;extraction_rules_data": ontologyColumns.extractionRules,
       "data#extraction_rules_data": extractionRules,
     },
     "chapter#extractee_api>1;ReVDoc extractee API": {
       "#0": [],
-      "table#>0;extractee_api_lookup": ontologyHeaders.extractee,
+      "table#>0;extractee_api_lookup": ontologyColumns.extractee,
       "data#extractee_api_lookup": extractee,
     },
     "chapter#emission_output>2;ReVDoc emission output": {

@@ -5,9 +5,9 @@ const {
     filterKeysWithAnyOf, filterKeysWithAllOf, filterKeysWithNoneOf,
     valosRaemFieldClasses,
   },
-  ontologyHeaders,
+  ontologyColumns,
 } = require("@valos/revdoc");
-const { domainHeaders } = require("@valos/type-vault");
+const { domainColumns } = require("@valos/type-vault");
 
 const { name, version, repository } = require("./package");
 const { summary, ontologies, documents } = require("./index");
@@ -16,7 +16,7 @@ const { workspaces, types, toolsets, tools, commands } = summary;
 
 const {
   VKernel: {
-    preferredPrefix, baseIRI, prefixes, vocabulary, context,
+    preferredPrefix, baseIRI, ontologyDescription, prefixes, vocabulary, context,
   } = { vocabulary: {} },
 } = ontologies;
 
@@ -85,7 +85,7 @@ with the ValOS ecosystem, most notable of which is `,
 ref([em("vlm"), ` the command line script invoker`], "@/valma"), `.`,
     ],
     "table#>0;documents": {
-      "VDoc:headers": domainHeaders.roles,
+      "VDoc:columns": domainColumns.roles,
       "VDoc:entries": roleDocuments,
     },
   },
@@ -96,28 +96,28 @@ ref([em("vlm"), ` the command line script invoker`], "@/valma"), `.`,
     "chapter#section_introduction_documents>0;Introduction documents": {
       "#0": [],
       "table#>0;documents": {
-        "VDoc:headers": domainHeaders.introductionDocuments,
+        "VDoc:columns": domainColumns.introductionDocuments,
         "VDoc:entries": introductionDocuments,
       },
     },
     "chapter#section_api_reference_documents>1;API reference documents": {
       "#0": [],
       "table#>0;documents": {
-        "VDoc:headers": domainHeaders.apiReferenceDocuments,
+        "VDoc:columns": domainColumns.apiReferenceDocuments,
         "VDoc:entries": apiReferenceDocuments,
       },
     },
     "chapter#section_ontology_documents>2;Ontology documents": {
       "#0": [],
       "table#>0;documents": {
-        "VDoc:headers": domainHeaders.ontologyDocuments,
+        "VDoc:columns": domainColumns.ontologyDocuments,
         "VDoc:entries": ontologyDocuments,
       },
     },
     "chapter#section_other_primary_documents>3;Other primary documents": {
       "#0": [],
       "table#>0;documents": {
-        "VDoc:headers": domainHeaders.primaryDocuments,
+        "VDoc:columns": domainColumns.primaryDocuments,
         "VDoc:entries": otherPrimaryDocuments,
       },
     },
@@ -131,27 +131,27 @@ ref([em("vlm"), ` the command line script invoker`], "@/valma"), `.`,
       "#0": [
         `This domain introduces the following `, ref("workspace types", "@/valma#type"), ".",
       ],
-      "table#>0;types": domainHeaders.types,
+      "table#>0;types": domainColumns.types,
     },
     [`chapter#section_new_toolsets>1;Workspace toolsets, ${
         Object.keys(toolsets).length} new`]: {
       "#0": [
         `This domain introduces the following `, ref("workspace toolsets", "@/valma#toolset"), ":",
       ],
-      "table#>0;toolsets": domainHeaders.toolsets,
+      "table#>0;toolsets": domainColumns.toolsets,
     },
     [`chapter#section_new_tools>2;Workspace tools, ${Object.keys(tools).length} new`]: {
       "#0": [
         `This domain introduces the following `, ref("workspace tools", "@/valma#tool"), ":",
       ],
-      "table#>0;tools": domainHeaders.tools,
+      "table#>0;tools": domainColumns.tools,
     },
     [`chapter#section_new_commands>3;Valma commands, ${Object.keys(commands).length} new`]: {
       "#0": [
         `This domain introduces the following top-level `,
         ref("valma commands", "@/valma#command"), ":",
       ],
-      "table#>0;commands": domainHeaders.commands,
+      "table#>0;commands": domainColumns.commands,
     },
     ...Object.entries(workspaces).map(([type, typeWorkspaces], index) => ({
       [`chapter#section_new_${identifize(type)}_workspaces>${4 + index
@@ -162,11 +162,11 @@ ref([em("vlm"), ` the command line script invoker`], "@/valma"), `.`,
 This domain introduces the following `, type, ` `, ref("workspaces", "@/valma#workspace"), `.`,
         ],
         [`data#${identifize(type)}_workspaces`]: typeWorkspaces,
-        [`table#>0;${identifize(type)}_workspaces`]: domainHeaders.workspaces,
+        [`table#>0;${identifize(type)}_workspaces`]: domainColumns.workspaces,
         /*
         ...Object.entries(subWorkspaces).map(([name, entry]) => ({
           [`chapter#${identifize(name)}>${index};${name}`]: {
-            [`table#>0;${identifize(name)}_workspaces`]: domainHeaders.workspaces,
+            [`table#>0;${identifize(name)}_workspaces`]: domainColumns.workspaces,
           }
         })).reduce((a, t) => Object.assign(a, t), {}),
         */
@@ -174,10 +174,7 @@ This domain introduces the following `, type, ` `, ref("workspaces", "@/valma#wo
     })).reduce((a, t) => Object.assign(a, t), {}),
   },
   [`chapter#ontology>8;${name} domain root ontology`]: {
-    "#section_ontology_abstract>0": [
-`@valos/kernel ontology provides vocabulary and definitions of the
-ValOS core concepts.`
-    ],
+    "#section_ontology_abstract>0": [ontologyDescription || ""],
     "#0": [
 `All labels have implicit IRI prefix "${baseIRI}" (with preferred
 prefix "${preferredPrefix}:")`,
@@ -185,55 +182,45 @@ prefix "${preferredPrefix}:")`,
     "chapter#section_prefixes>1": {
       "dc:title": [em(preferredPrefix), ` IRI prefixes`],
       "#0": [],
-      "table#>0;prefixes": ontologyHeaders.prefixes,
+      "table#>0;prefixes": ontologyColumns.prefixes,
     },
     "chapter#section_classes>2": {
-      "dc:title": [
-em(preferredPrefix), ` `, ref("VKernel:Class", "@valos/kernel#Class"), " vocabulary",
-      ],
+      "dc:title": [em(preferredPrefix), " ", ref("fabric classes", "@valos/kernel#Class")],
       "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.classes,
+        "VDoc:columns": ontologyColumns.classes,
         "VDoc:entries": filterKeysWithAnyOf("@type", "VKernel:Class", vocabulary),
       },
     },
     "chapter#section_properties>3": {
-      "dc:title": [
-em(preferredPrefix), ` `, ref("VKernel:Property", "@valos/kernel#Property"), " vocabulary",
-      ],
+      "dc:title": [em(preferredPrefix), " ", ref("fabric properties", "@valos/kernel#Property")],
       "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.properties,
+        "VDoc:columns": ontologyColumns.properties,
         "VDoc:entries": filterKeysWithAnyOf("@type", "VKernel:Property", vocabulary),
       },
     },
     "chapter#section_types>4": {
-      "dc:title": [
-em(preferredPrefix), ` `, ref("VModel:Type", "@valos/raem#Type"), " vocabulary",
-      ],
+      "dc:title": [em(preferredPrefix), " ", ref("valospace resource types", "@valos/raem#Type")],
       "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.types,
+        "VDoc:columns": ontologyColumns.types,
         "VDoc:entries": filterKeysWithAnyOf("@type", "VModel:Type", vocabulary),
       },
     },
     "chapter#section_fields>5": {
-      "dc:title": [
-em(preferredPrefix), ` `, ref("VModel:Field", "@valos/raem#Field"), " vocabulary",
-      ],
+      "dc:title": [em(preferredPrefix), " ", ref("valospace fields", "@valos/raem#Field")],
       "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.fields,
+        "VDoc:columns": ontologyColumns.fields,
         "VDoc:entries": filterKeysWithAnyOf("@type", valosRaemFieldClasses, vocabulary),
       },
     },
     "chapter#section_resolvers>6": {
-      "dc:title": [
-em(preferredPrefix), ` `, ref("VModel:Resolver", "@valos/raem#Resolver"), " vocabulary",
-      ],
+      "dc:title": [em(preferredPrefix), " ", ref("field resolvers", "@valos/raem#Resolver")],
       "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.verbs,
+        "VDoc:columns": ontologyColumns.verbs,
         "VDoc:entries": filterKeysWithAnyOf("@type", "VModel:Resolver", vocabulary),
       },
     },
@@ -241,7 +228,7 @@ em(preferredPrefix), ` `, ref("VModel:Resolver", "@valos/raem#Resolver"), " voca
       "dc:title": [em(preferredPrefix), ` remaining vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.vocabularyOther,
+        "VDoc:columns": ontologyColumns.vocabularyOther,
         "VDoc:entries": filterKeysWithNoneOf("@type", [
           "VKernel:Class", "VKernel:Property",
           "VModel:Type", ...valosRaemFieldClasses, "VModel:Resolver",
@@ -250,7 +237,7 @@ em(preferredPrefix), ` `, ref("VModel:Resolver", "@valos/raem#Resolver"), " voca
     },
     [`chapter#section_context>9;JSON-LD context term definitions`]: {
       "#0": [],
-      "table#>0;context": ontologyHeaders.context,
+      "table#>0;context": ontologyColumns.context,
     },
   },
   "chapter#section_hierarchy>9;Component hierarchy": {

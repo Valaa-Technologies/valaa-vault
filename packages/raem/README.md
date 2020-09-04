@@ -43,7 +43,7 @@ This library provides:
 
 - depends: `@ValOS/tools`, `immutable`
 - exports: `Corpus`, `Command`, `VALK`, `Valker`, `RAEMContentAPI`
-- valosheath: `Resource`, `TransientFields`, `Bvob`, `Chronicle`
+- valospace: `Resource`, `TransientFields`, `Bvob`, `Chronicle`
 - concepts: `ghost instancing`, `chronicles`, `couplings`
 
 

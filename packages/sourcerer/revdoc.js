@@ -4,11 +4,11 @@ const {
     c, authors, em, pkg, ref,
     filterKeysWithAnyOf, filterKeysWithNoneOf, valosRaemFieldClasses,
   },
-  ontologyHeaders,
+  ontologyColumns,
 } = require("@valos/revdoc");
 
 const {
-  VSourcerer: { preferredPrefix, baseIRI, prefixes, vocabulary, context },
+  VSourcerer: { preferredPrefix, baseIRI, ontologyDescription, prefixes, vocabulary, context },
 } = require("./ontologies");
 
 const { name, version, description } = require("./package");
@@ -48,62 +48,49 @@ c("ValOS event streams"), `.`,
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
     "data#context": context,
-    "#section_ontology_abstract>0": [
-`${name} ontology specifies the Valospace core types and
-properties directly to the @valos/kernel namespace. `,
-    ],
+    "#section_ontology_abstract>0": [ontologyDescription || ""],
     "chapter#section_prefixes>1": {
       "dc:title": [em(name), ` IRI prefixes`],
       "#0": [],
-      "table#>0;prefixes": ontologyHeaders.prefixes,
+      "table#>0;prefixes": ontologyColumns.prefixes,
     },
     "chapter#section_classes>2": {
-      "dc:title": [
-em(preferredPrefix), ` `, ref("VKernel:Class", "@valos/kernel#Class"), " vocabulary",
-      ],
+      "dc:title": [em(preferredPrefix), " ", ref("fabric classes", "@valos/kernel#Class")],
       "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.classes,
+        "VDoc:columns": ontologyColumns.classes,
         "VDoc:entries": filterKeysWithAnyOf("@type", "VKernel:Class", vocabulary),
       },
     },
     "chapter#section_properties>3": {
-      "dc:title": [
-em(preferredPrefix), ` `, ref("VKernel:Property", "@valos/kernel#Property"), " vocabulary",
-      ],
+      "dc:title": [em(preferredPrefix), " ", ref("fabric properties", "@valos/kernel#Property")],
       "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.properties,
+        "VDoc:columns": ontologyColumns.properties,
         "VDoc:entries": filterKeysWithAnyOf("@type", "VKernel:Property", vocabulary),
       },
     },
     "chapter#section_types>4": {
-      "dc:title": [
-em(preferredPrefix), ` `, ref("VModel:Type", "@valos/raem#Type"), " vocabulary",
-      ],
+      "dc:title": [em(preferredPrefix), " ", ref("valospace resource types", "@valos/raem#Type")],
       "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.types,
+        "VDoc:columns": ontologyColumns.types,
         "VDoc:entries": filterKeysWithAnyOf("@type", "VModel:Type", vocabulary),
       },
     },
     "chapter#section_fields>5": {
-      "dc:title": [
-em(preferredPrefix), ` `, ref("VModel:Field", "@valos/raem#Field"), " vocabulary",
-      ],
+      "dc:title": [em(preferredPrefix), " ", ref("valospace fields", "@valos/raem#Field")],
       "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.fields,
+        "VDoc:columns": ontologyColumns.fields,
         "VDoc:entries": filterKeysWithAnyOf("@type", valosRaemFieldClasses, vocabulary),
       },
     },
     "chapter#section_resolvers>6": {
-      "dc:title": [
-em(preferredPrefix), ` `, ref("VModel:Resolver", "@valos/raem#Resolver"), " vocabulary",
-      ],
+      "dc:title": [em(preferredPrefix), " ", ref("field resolvers", "@valos/raem#Resolver")],
       "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.verbs,
+        "VDoc:columns": ontologyColumns.verbs,
         "VDoc:entries": filterKeysWithAnyOf("@type", "VModel:Resolver", vocabulary),
       },
     },
@@ -111,7 +98,7 @@ em(preferredPrefix), ` `, ref("VModel:Resolver", "@valos/raem#Resolver"), " voca
       "dc:title": [em(preferredPrefix), ` remaining vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.vocabularyOther,
+        "VDoc:columns": ontologyColumns.vocabularyOther,
         "VDoc:entries": filterKeysWithNoneOf("@type", [
           "VKernel:Class", "VKernel:Property",
           "VModel:Type", ...valosRaemFieldClasses, "VModel:Resolver",
@@ -121,7 +108,7 @@ em(preferredPrefix), ` `, ref("VModel:Resolver", "@valos/raem#Resolver"), " voca
     "chapter#section_context>9": {
       "dc:title": [em(preferredPrefix), ` JSON-LD context term definitions`],
       "#0": [],
-      "table#>0;context": ontologyHeaders.context,
+      "table#>0;context": ontologyColumns.context,
     },
   },
 };

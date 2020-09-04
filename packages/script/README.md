@@ -8,5 +8,5 @@ transpiling into VALK kueries as an intermediate language.
 
 - depends: `@valos/raem`, `acorn`
 - exports: `transpileValoscript`, `VALSK`, `ScriptContentAPI`
-- valosheath: `Scope`, `Property`
+- valospace: `Scope`, `Property`
 - concepts: `ECMAScript2015`, `scope`, `transpilation`

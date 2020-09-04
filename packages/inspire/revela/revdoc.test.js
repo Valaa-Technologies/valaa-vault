@@ -5,18 +5,18 @@ const {
     authors, em, ref, pkg,
     filterKeysWithAnyOf, filterKeysWithNoneOf, prepareTestDoc,
   },
-  ontologyHeaders,
+  ontologyColumns,
 } = require("@valos/revdoc");
 
-const { FabricEventTarget } = require("@valos/tools");
+const { FabricEventTarget } = require("@valos/tools/FabricEvent");
 
-const { lazyPatchRevelations, expose } = require("./Revelation");
+const { lazyPatchRevelations, expose } = require("../Revelation");
 
 const {
-  VRevela: { preferredPrefix, baseIRI, prefixes, vocabulary, context },
- } = require("./ontologies");
+  VRevela: { preferredPrefix, baseIRI, ontologyDescription, prefixes, vocabulary, context },
+ } = require("../ontologies");
 
-const { name, version } = require("./package");
+const { name, version } = require("../package");
 
 const title = "revela.json format specification";
 const { itExpects, runTestDoc } = prepareTestDoc(title);
@@ -191,13 +191,11 @@ async () => expose(lazyPatchRevelations(gatewayMock,
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
     "data#context": context,
-    "#section_ontology_abstract>0": [
-em(preferredPrefix), ` ontology specifies the verbs specific to revela.json files.`,
-    ],
+    "#section_ontology_abstract>0": [ontologyDescription || ""],
     "chapter#section_prefixes>1": {
       "dc:title": [em(preferredPrefix), ` IRI prefixes`],
       "#0": [],
-      "table#>0;prefixes": ontologyHeaders.prefixes,
+      "table#>0;prefixes": ontologyColumns.prefixes,
     },
     "chapter#section_verbs>6": {
       "dc:title": [
@@ -205,7 +203,7 @@ em(preferredPrefix), ` `, ref("VModel:Verb", "@valos/raem#Verb"), " vocabulary",
       ],
       "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.verbs,
+        "VDoc:columns": ontologyColumns.verbs,
         "VDoc:entries": filterKeysWithAnyOf("@type", "VModel:Verb", vocabulary),
       },
     },
@@ -213,7 +211,7 @@ em(preferredPrefix), ` `, ref("VModel:Verb", "@valos/raem#Verb"), " vocabulary",
       "dc:title": [em(preferredPrefix), ` remaining vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.vocabularyOther,
+        "VDoc:columns": ontologyColumns.vocabularyOther,
         "VDoc:entries": filterKeysWithNoneOf("@type", [
           "VModel:Verb",
         ], vocabulary),

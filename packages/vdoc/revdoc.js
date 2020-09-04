@@ -3,12 +3,14 @@
 const { extension: { ontology, extractee, emitters } } = require("@valos/vdoc");
 const {
   extractee: { authors, ref, dfn, em, pkg, filterKeysWithAnyOf, filterKeysWithNoneOf },
-  ontologyHeaders,
+  ontologyColumns,
 } = require("@valos/revdoc");
 
 const { name, version, description } = require("./package");
 
-const { preferredPrefix, baseIRI, prefixes, vocabulary, context, extractionRules } = ontology;
+const {
+  preferredPrefix, baseIRI, ontologyDescription, prefixes, vocabulary, context, extractionRules,
+} = ontology;
 
 module.exports = {
   "dc:title": description,
@@ -353,37 +355,24 @@ introduction of new extensions easier.`
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
     "data#context": context,
-    "#section_ontology_abstract>0": [
-`VDoc core ontology specifies the vocabulary for the human facing
-document structure by means of primitives which are sufficiently
-common and meaningful across all types of documents. These primitives
-include constructs such as chapters, titles, lists, tables,
-cross-references, etc.
-
-VDoc core ontology explicitly does not specify any semantic
-meanings outside the document structure itself.`,
-    ],
+    "#section_ontology_abstract>0": [ontologyDescription || ""],
     "chapter#section_prefixes>1;VDoc Core IRI prefixes": {
       "#0": [],
-      "table#>0;prefixes": ontologyHeaders.prefixes,
+      "table#>0;prefixes": ontologyColumns.prefixes,
     },
     "chapter#section_classes>2": {
-      "dc:title": [
-em(preferredPrefix), ` `, ref("VDoc:Class", "@valos/vdoc#Class"), " vocabulary",
-      ],
+      "dc:title": [em(preferredPrefix), ` `, ref("VDoc classes", "@valos/vdoc#Class")],
       "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.classes,
+        "VDoc:columns": ontologyColumns.classes,
         "VDoc:entries": filterKeysWithAnyOf("@type", "VDoc:Class", vocabulary),
       },
     },
     "chapter#section_properties>3": {
-      "dc:title": [
-em(preferredPrefix), ` `, ref("VDoc:Property", "@valos/vdoc#Property"), " vocabulary",
-      ],
+      "dc:title": [em(preferredPrefix), ` `, ref("VDoc properties", "@valos/vdoc#Property")],
       "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.properties,
+        "VDoc:columns": ontologyColumns.properties,
         "VDoc:entries": filterKeysWithAnyOf("@type", "VDoc:Property", vocabulary),
       },
     },
@@ -397,10 +386,10 @@ inherit HTML5 element semantics directly. Only those HTMl5 elements
 with structural semantic meaning are exposed via VDoc core ontology.`,
       ],
       "table#>0;vocabulary": {
-        "VDoc:headers": {
-          ...ontologyHeaders.properties,
-          "header#1;rdfs:subPropertyOf": undefined,
-          "header#1": {
+        "VDoc:columns": {
+          ...ontologyColumns.properties,
+          "column#1;rdfs:subPropertyOf": undefined,
+          "column#1": {
             "VDoc:content": ["HTML5 element"],
             "VDoc:cell": ref(
                 { "VDoc:selectField": "VDoc:elementName" },
@@ -414,14 +403,14 @@ with structural semantic meaning are exposed via VDoc core ontology.`,
       "dc:title": [em(preferredPrefix), ` remaining vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.vocabularyOther,
+        "VDoc:columns": ontologyColumns.vocabularyOther,
         "VDoc:entries": filterKeysWithNoneOf(
             "@type", ["VDoc:Class", "VDoc:Property", "VDoc:HTMLElementProperty"], vocabulary),
       },
     },
     "chapter#section_context>9;VDoc Core JSON-LD context term definitions": {
       "#0": [],
-      "table#>0;context": ontologyHeaders.context,
+      "table#>0;context": ontologyColumns.context,
     },
   },
   "chapter#transformations>9;VDoc Core transformations": {
@@ -441,11 +430,11 @@ dfn("extraction rules", "#extraction_rules"), `.`,
     ],
     "chapter#extraction_rules>0;VDoc Core extraction rules": {
       "#0": [],
-      "table#>0;extraction_rules_lookup": ontologyHeaders.extractionRules,
+      "table#>0;extraction_rules_lookup": ontologyColumns.extractionRules,
     },
     "chapter#extractee_api>1;VDoc Core extractee API": {
       "#0": [],
-      "table#>0;extractee_api_lookup": ontologyHeaders.extractee,
+      "table#>0;extractee_api_lookup": ontologyColumns.extractee,
     },
     "chapter#emission_output>2;VDoc Core emission output": {
       "#0": [],

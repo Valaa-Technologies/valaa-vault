@@ -20,14 +20,14 @@ module.exports = {
   },
   sbomTables: {
     components: {
-      "header#0;name": "Name",
-      "header#1;group": "Group",
-      "header#2;type": "Type",
-      "header#3;version": "Version",
-      "header#4;modified": "Modified",
-      "header#5;licenses": "Licenses",
-      "header#6;purl": "PURL",
-      "header#7;description": "Description",
+      "column#0;name": "Name",
+      "column#1;group": "Group",
+      "column#2;type": "Type",
+      "column#3;version": "Version",
+      "column#4;modified": "Modified",
+      "column#5;licenses": "Licenses",
+      "column#6;purl": "PURL",
+      "column#7;description": "Description",
     },
   },
 };

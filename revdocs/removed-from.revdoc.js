@@ -4,13 +4,13 @@ const {
     authors, em, pkg, ref,
     filterKeysWithAnyOf, filterKeysWithNoneOf, valosRaemFieldClasses,
   },
-  ontologyHeaders,
+  ontologyColumns,
 } = require("@valos/revdoc");
 
 const { name, version } = require("../packages/kernel/package");
 const {
   ontologies: {
-    VRemovedFrom: { preferredPrefix, baseIRI, prefixes, vocabulary, context },
+    VRemovedFrom: { preferredPrefix, baseIRI, ontologyDescription, prefixes, vocabulary, context },
   },
 } = require("../packages/kernel");
 
@@ -52,22 +52,17 @@ which are empty as they inherit their entries from the prototype.`,
     ],
   },
   [`chapter#ontology>8;Valospace ontology '${preferredPrefix}'`]: {
-    "#section_ontology_abstract>0": [
-`Valospace removed-from ontology provides vocabulary and definitions of
-the primary ValOS resources removed-from fields.`
-    ],
+    "#section_ontology_abstract>0": [ontologyDescription || ""],
     "chapter#section_prefixes>1": {
       "dc:title": [em(preferredPrefix), ` IRI prefixes`],
       "#0": [],
-      "table#>0;prefixes": ontologyHeaders.prefixes,
+      "table#>0;prefixes": ontologyColumns.prefixes,
     },
     "chapter#section_fields>5": {
-      "dc:title": [
-em(preferredPrefix), ` `, ref("VModel:Field", "@valos/raem#Field"), " vocabulary",
-      ],
+      "dc:title": [em(preferredPrefix), " ", ref("valospace fields", "@valos/raem#Field")],
       "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.fields,
+        "VDoc:columns": ontologyColumns.fields,
         "VDoc:entries": filterKeysWithAnyOf("@type", valosRaemFieldClasses, vocabulary),
       },
     },
@@ -75,13 +70,13 @@ em(preferredPrefix), ` `, ref("VModel:Field", "@valos/raem#Field"), " vocabulary
       "dc:title": [em(preferredPrefix), ` remaining vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.vocabularyOther,
+        "VDoc:columns": ontologyColumns.vocabularyOther,
         "VDoc:entries": filterKeysWithNoneOf("@type", [...valosRaemFieldClasses], vocabulary),
       },
     },
     "chapter#section_context>9;JSON-LD context term definitions": {
       "#0": [],
-      "table#>0;context": ontologyHeaders.context,
+      "table#>0;context": ontologyColumns.context,
     },
   },
 };

@@ -254,7 +254,7 @@ blockquote(em("valos-vault-4.1.2"), `: utility must explicitly define
       ],
       "table#1": {
   /* eslint-disable comma-spacing, max-len */
-        "VDoc:headers":
+        "VDoc:columns":
 ["Utility"    , "Tool"          , "Payload"                    , "Providers"   , "Consumed via"      , "Upstream", "Configuration" , "Modified via"        , "Produced via"       , "Authority"  , "Distributed via"],
         "VDoc:entries": [
 ["files"      , "`git`"         , "files in `./*`"             , "github.com"  , "`git clone`"       , "N/A"     , "`.git/*`"      , "`branch` `commit`"   , "`git push` & PR"    , "human"      , "merge PR to & `git push master`"],

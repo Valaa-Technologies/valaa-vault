@@ -1,12 +1,12 @@
 const { extractee: { ref, em, strong } } = require("@valos/revdoc");
 
 const documents = {
-  "header#0": {
+  "column#0": {
     "VDoc:cell": strong(ref("VDoc:selectKey")),
     "VDoc:content": ["Name"],
   },
   /*
-  "header#0": {
+  "column#0": {
     "VDoc:cell": { "@type": "VDoc:TemplateSelector",
       "VDoc:content": ["VDoc:selectKey"],
       "VDoc:ref": "VDoc:ref",
@@ -14,9 +14,9 @@ const documents = {
     "VDoc:content": ["id"],
   },
   */
-  "header#1;package": "Package",
-  "header#2;version": "Version",
-  "header#3": {
+  "column#1;package": "Package",
+  "column#2;version": "Version",
+  "column#3": {
     "VDoc:cell": { "VDoc:words": { "VDoc:selectField": "tags" } },
     "VDoc:content": ["Tags"],
   },
@@ -24,28 +24,28 @@ const documents = {
 
 const titledDocuments = {
   ...documents,
-  "header#8;title": {
+  "column#8;title": {
     "VDoc:content": em("Title:"),
     "VDoc:wide": true,
   },
 };
 
 const roles =  {
-  "header#0": {
+  "column#0": {
     "VDoc:cell": strong(ref("VDoc:selectKey")),
     "VDoc:content": ["Your role:"],
   },
-  "header#1": {
+  "column#1": {
     "VDoc:cell": strong(em(
         ref({ "VDoc:selectField": "title" }, ["VDoc:selectKey", "#introduction"]))),
     "VDoc:content": ["Your answer..."],
   },
-  "header#8;introduction": {
+  "column#8;introduction": {
     "VDoc:content": em("Introduction:"),
     "VDoc:wide": true,
     "VDoc:tall": true,
   },
-  "header#9": {
+  "column#9": {
     "VDoc:content": em("Aliases:"),
     "VDoc:wide": true,
     "VDoc:cell": em(ref(
@@ -56,12 +56,12 @@ const roles =  {
 
 const introductionDocuments =  {
   ...documents,
-  "header#8": {
+  "column#8": {
     "VDoc:content": em("Title:"),
     "VDoc:cell": ref({ "VDoc:selectField": "title" }, ["VDoc:selectKey", "#introduction"]),
     "VDoc:wide": true,
   },
-  "header#9;introduction": {
+  "column#9;introduction": {
     "VDoc:content": em("Introduction:"),
     "VDoc:wide": true,
     "VDoc:tall": true,
@@ -70,12 +70,12 @@ const introductionDocuments =  {
 
 const apiReferenceDocuments = {
   ...documents,
-  "header#8": {
+  "column#8": {
     "VDoc:content": em("Title:"),
     "VDoc:cell": ref({ "VDoc:selectField": "title" }, ["VDoc:selectKey", "#apiAbstract"]),
     "VDoc:wide": true,
   },
-  "header#9;apiAbstract": {
+  "column#9;apiAbstract": {
     "VDoc:content": em("API abstract:"),
     "VDoc:wide": true,
     "VDoc:tall": true,
@@ -84,12 +84,12 @@ const apiReferenceDocuments = {
 
 const ontologyDocuments = {
   ...documents,
-  "header#8": {
+  "column#8": {
     "VDoc:content": em("Title:"),
     "VDoc:cell": ref({ "VDoc:selectField": "title" }, ["VDoc:selectKey", "#ontology"]),
     "VDoc:wide": true,
   },
-  "header#9;ontologyAbstract": {
+  "column#9;ontologyAbstract": {
     "VDoc:content": em("Ontology abstract:"),
     "VDoc:wide": true,
     "VDoc:tall": true,
@@ -98,12 +98,12 @@ const ontologyDocuments = {
 
 const primaryDocuments = {
   ...documents,
-  "header#8": {
+  "column#8": {
     "VDoc:content": em("Title:"),
     "VDoc:cell": ref({ "VDoc:selectField": "title" }, ["VDoc:selectKey", "#abstract"]),
     "VDoc:wide": true,
   },
-  "header#9;abstract": {
+  "column#9;abstract": {
     "VDoc:content": em("Abstract:"),
     "VDoc:wide": true,
     "VDoc:tall": true,
@@ -111,11 +111,11 @@ const primaryDocuments = {
 };
 
 const summary = {
-  "header#0": {
+  "column#0": {
     "VDoc:cell": strong(ref("VDoc:selectKey")),
     "VDoc:content": ["Name"],
   },
-  "header#9;introduction": {
+  "column#9;introduction": {
     "VDoc:content": em("Introduction:"),
     "VDoc:wide": true,
   },
@@ -123,8 +123,8 @@ const summary = {
 
 const commandSourced = {
   ...summary,
-  "header#1;package": "Package",
-  "header#2;version": "Version",
+  "column#1;package": "Package",
+  "column#2;version": "Version",
 };
 
 const types = {
@@ -141,7 +141,7 @@ const tools = {
 
 const commands = {
   ...summary,
-  "header#8;description": {
+  "column#8;description": {
     "VDoc:content": em("Description:"),
     "VDoc:wide": true,
   },
@@ -149,9 +149,9 @@ const commands = {
 
 const workspaces = {
   ...summary,
-  "header#1;version": "Version",
-  "header#2;license": "License",
-  "header#8;description": {
+  "column#1;version": "Version",
+  "column#2;license": "License",
+  "column#8;description": {
     "VDoc:content": em("Description:"),
     "VDoc:wide": true,
   },

@@ -5,15 +5,17 @@ const {
     filterKeysWithAnyOf, filterKeysWithAllOf, filterKeysWithNoneOf,
     valosRaemFieldClasses,
   },
-  ontologyHeaders,
+  ontologyColumns,
 } = require("@valos/revdoc");
-const { domainHeaders } = require("@valos/type-vault");
+const { domainColumns } = require("@valos/type-vault");
 
 const { name, version } = require("../packages/kernel/package");
 const {
   documents,
   ontologies: {
-    V: { preferredPrefix, baseIRI, prefixes, vocabulary, context } = { vocabulary: {} },
+    V: {
+      preferredPrefix, baseIRI, ontologyDescription, prefixes, vocabulary, context,
+    } = { vocabulary: {} },
   },
 } = require("../packages/kernel");
 
@@ -59,53 +61,125 @@ directed for more experienced valonauts. Check out the brief description
 and introductions of the other roles as well.`,
     ],
     "table#>0;documents": {
-      "VDoc:headers": domainHeaders.roles,
+      "VDoc:columns": domainColumns.roles,
       "VDoc:entries": roleDocuments,
     },
   },
   [`chapter#ontology>8;Valospace ontology '${preferredPrefix}'`]: {
-    "#section_ontology_abstract>0": [
-`Valospace ontology provides vocabulary and definitions of the primary
-ValOS resources.`
-    ],
+    "#section_ontology_abstract>0": [ontologyDescription || ""],
     "chapter#section_prefixes>1": {
       "dc:title": [em(preferredPrefix), ` IRI prefixes`],
       "#0": [],
-      "table#>0;prefixes": ontologyHeaders.prefixes,
+      "table#>0;prefixes": ontologyColumns.prefixes,
     },
-    "chapter#section_types>4": {
-      "dc:title": [
-em(preferredPrefix), ` `, ref("VModel:Type", "@valos/raem#Type"), " vocabulary",
+    "chapter#section_types>2": {
+      "dc:title": [em(preferredPrefix), " ", ref("valospace resource types", "@valos/raem#Type")],
+      "#0": [
+`This section defines all valospace resource types introduced by the
+@valos/kernel packages. Any instance of a resource type is always
+recorded in an event log.`,
       ],
-      "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.types,
+        "VDoc:columns": ontologyColumns.types,
         "VDoc:entries": filterKeysWithAnyOf("@type", "VModel:Type", vocabulary),
       },
     },
-    "chapter#section_fields>5": {
-      "dc:title": [
-em(preferredPrefix), ` `, ref("VModel:Field", "@valos/raem#Field"), " vocabulary",
+    "chapter#section_classes>3": {
+      "dc:title": [em(preferredPrefix), " ", ref("valosheath classes", "@valos/kernel#Class")],
+      "#0": [
+`This section describes all valosheath classes introduced by the
+@valos/kernel packages. These classes are provided for scripts by the
+@valos/engine and their instances are not recorded in event logs.`,
       ],
-      "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.fields,
+        "VDoc:columns": ontologyColumns.classes,
+        "VDoc:entries": filterKeysWithAnyOf("@type", "VKernel:Class", vocabulary),
+      },
+    },
+    "chapter#section_fields>4": {
+      "dc:title": [em(preferredPrefix), " ", ref("valospace fields", "@valos/raem#Field")],
+      "#0": [
+`This section defines all valospace resource fields introduced by the
+@valos/kernel packages. The values of these fields are either directly
+recorded in or indirectly resolved from event log(s).`,
+      ],
+      "table#>0;vocabulary": {
+        "VDoc:columns": ontologyColumns.fields,
         "VDoc:entries": filterKeysWithAnyOf("@type", valosRaemFieldClasses, vocabulary),
+      },
+    },
+    "chapter#section_properties>5": {
+      "dc:title": [
+        em(preferredPrefix), " ", ref("valosheath properties", "@valos/engine#Property"),
+      ],
+      "#0": [
+`This section describes all valosheath properties introduced by the
+@valos/kernel packages. These properties are provided for scripts by
+the @valos/engine and their values are not recorded in event logs.`,
+      ],
+      "table#>0;vocabulary": {
+        "VDoc:columns": ontologyColumns.properties,
+        "VDoc:entries": filterKeysWithAnyOf("@type", "VEngine:Property", vocabulary),
+      },
+    },
+    "chapter#section_methods>6": {
+      "dc:title": [
+        em(preferredPrefix), " ", ref("valosheath methods", "@valos/engine#Method"),
+      ],
+      "#0": [
+`This section describes all valosheath methods introduced by the
+@valos/kernel packages. `,
+      ],
+      "table#>0;vocabulary": {
+        "VDoc:columns": ontologyColumns.methods,
+        "VDoc:entries": filterKeysWithAnyOf("@type", "VEngine:Method", vocabulary),
+      },
+    },
+    "chapter#section_object_properties>7": {
+      "dc:title": [
+        em(preferredPrefix), " ",
+        ref("valosheath object properties", "@valos/engine#ObjectProperty"),
+      ],
+      "#0": [
+`This section describes all valosheath object properties introduced by
+the @valos/kernel packages. This includes direct properties on type and
+class objects themselves. These properties are provided for scripts by
+the  @valos/engine and their values are not recorded in event logs.`,
+      ],
+      "table#>0;vocabulary": {
+        "VDoc:columns": ontologyColumns.objectProperties,
+        "VDoc:entries": filterKeysWithAnyOf("@type", "VEngine:ObjectProperty", vocabulary),
+      },
+    },
+    "chapter#section_object_methods>8": {
+      "dc:title": [
+        em(preferredPrefix), " ", ref("valosheath object methods", "@valos/engine#ObjectMethod"),
+      ],
+      "#0": [
+`This section describes all valosheath object methods introduced by the
+@valos/kernel packages. This includes direct methods on the type and
+class objects themselves. These properties are provided for scripts by
+the @valos/engine and their values are not recorded in event logs.`,
+      ],
+      "table#>0;vocabulary": {
+        "VDoc:columns": ontologyColumns.objectMethods,
+        "VDoc:entries": filterKeysWithAnyOf("@type", "VEngine:ObjectMethod", vocabulary),
       },
     },
     "chapter#section_vocabulary_other>8": {
       "dc:title": [em(preferredPrefix), ` remaining vocabulary`],
       "#0": [],
       "table#>0;vocabulary": {
-        "VDoc:headers": ontologyHeaders.vocabularyOther,
+        "VDoc:columns": ontologyColumns.vocabularyOther,
         "VDoc:entries": filterKeysWithNoneOf("@type", [
           "VModel:Type", "VKernel:Property", ...valosRaemFieldClasses,
+          "VEngine:Property", "VEngine:Method", "VEngine:ObjectProperty", "VEngine:ObjectMethod",
         ], vocabulary),
       },
     },
     [`chapter#section_context>9;JSON-LD context term definitions`]: {
       "#0": [],
-      "table#>0;context": ontologyHeaders.context,
+      "table#>0;context": ontologyColumns.context,
     },
   },
 };

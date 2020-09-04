@@ -1,4 +1,17 @@
 module.exports = {
+  "@context": {
+    VKernel: "https://valospace.org/kernel/0#",
+    VModel: "https://valospace.org/raem/0#",
+    restriction: { "@reverse": "owl:onProperty" },
+  },
+  ontology: { "@type": "owl:Ontology",
+    "rdfs:label": "VScript",
+    "rdf:about": "https://valospace.org/script/0#",
+    "rdfs:comment":
+`VScript ontology specifies the vocabulary for Valoscript execution
+primitives.`,
+  },
+
   resolveTwinspace: {
     "@type": "VModel:Resolver",
     "VRevdoc:brief": "resolve twinspace",

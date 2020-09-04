@@ -1,4 +1,16 @@
 module.exports = {
+  "@context": {
+    VKernel: "https://valospace.org/kernel/0#",
+    restriction: { "@reverse": "owl:onProperty" },
+  },
+  ontology: { "@type": "owl:Ontology",
+    "rdfs:label": "VModel",
+    "rdf:about": "https://valospace.org/raem/0#",
+    "rdfs:comment":
+`VModel ie. Valos Resources and Events Model ontology provides
+vocabulary and definitions for the resources that form the fabric of
+valospace.`,
+  },
   ...require("./resources"),
   ...require("./events"),
 

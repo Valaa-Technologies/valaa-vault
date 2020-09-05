@@ -16,7 +16,7 @@ module.exports = function extendOntology (statements,
     const inferredContext = {};
     Object.entries(vocabulary).forEach(([idSuffix, definition]) => {
       let term;
-      const id = `${baseIRI}${idSuffix}`;
+      const id = `#${idSuffix}`;
       function _expressTermInContext () {
         if (!term) {
           inferredContext[`${preferredPrefix}:${idSuffix}`] = term = { "@id": id };
@@ -30,6 +30,52 @@ module.exports = function extendOntology (statements,
           && (range !== "rdfs:Literal")
           && (range !== "rdfs:Resource")) {
         _expressTermInContext()["@type"] = "@id";
+      }
+      let label = idSuffix;
+      switch (definition["@type"]) {
+        case "VModel:Type":
+        case "VKernel:Class":
+          label = `${preferredPrefix}:${idSuffix}`;
+          break;
+        case "VModel:Field":
+        case "VModel:ExpressedField":
+        case "VModel:EventLoggedField":
+        case "VModel:CoupledField":
+        case "VModel:GeneratedField":
+        case "VModel:TransientField":
+        case "VModel:AliasField":
+          label = `$${preferredPrefix}.${idSuffix}`;
+          _addInferredIndex("VEngine:domainOfField", "rdfs:domain");
+          break;
+        case "VEngine:Property":
+          label = `$${preferredPrefix}.${idSuffix}`;
+          _addInferredIndex("VEngine:domainOfProperty", "rdfs:domain");
+          break;
+        case "VEngine:Method":
+          label = `prototype.$${preferredPrefix}.${idSuffix}`;
+          _addInferredIndex("VEngine:domainOfMethod", "rdfs:domain");
+          break;
+        case "VEngine:ObjectProperty":
+          label = `$${preferredPrefix}.${idSuffix}`;
+          _addInferredIndex("VEngine:hasProperty", "rdf:subject");
+          break;
+        case "VEngine:ObjectMethod":
+          label = `$${preferredPrefix}.${idSuffix}`;
+          _addInferredIndex("VEngine:hasMethod", "rdf:subject");
+          break;
+        default:
+          break;
+      }
+      if (!definition["rdfs:label"] && label) definition["rdfs:label"] = label;
+      function _addInferredIndex (indexProperty, indexIdProperty) {
+        if (typeof definition[indexIdProperty] !== "string") return;
+        const [indexPrefix, indexName] = definition[indexIdProperty].split(":");
+        if (indexPrefix !== preferredPrefix) return;
+        const indexDefinition = vocabulary[indexName];
+        if (!indexDefinition) return;
+        const values = indexDefinition[indexProperty] || (indexDefinition[indexProperty] = []);
+        if (values.find(({ "@id": existingId }) => (existingId === id))) return;
+        values.push({ "@id": id, "rdfs:label": label });
       }
     });
     return {

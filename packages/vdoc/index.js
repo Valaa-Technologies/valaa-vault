@@ -38,6 +38,11 @@ function extract (sourceGraphs, {
                     extension.ontology.prefixes,
                     extension.ontology.context);
               }
+              for (const [term, termDefinition] of Object.entries(patch["@context"] || {})) {
+                if (typeof termDefinition === "string" && !root["@context"][term]) {
+                  root["@context"][term] = termDefinition;
+                }
+              }
             }
             return this.extend(root, patch);
           }

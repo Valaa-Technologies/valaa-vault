@@ -137,6 +137,12 @@ module.exports = {
    */
   strong () { return _htmlElement({ "VDoc:strong": true }, arguments); },
 
+  heading (levelOrNode) {
+    const isAutoLeveled = (typeof levelOrNode !== "number");
+    return _htmlElement({ "VDoc:heading": isAutoLeveled ? true : levelOrNode },
+        isAutoLeveled ? arguments : [].slice.call(arguments, 1));
+  },
+
   /**
    * Construct a node with VDoc:ins property, marking node content
    * <ins>as a new insertion</ins> (as per html5 'ins')

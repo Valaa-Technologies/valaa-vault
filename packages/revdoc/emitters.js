@@ -49,10 +49,10 @@ const _referencePackageMatcher = /^(@[^/#]*)\/([^/#]*)\/?(#?.*)?$/;
 
 function emitReVDocReference (node, emission, stack) {
   try {
+    let ref = node["VDoc:ref"];
     let node_ = node;
-    let ref = node_["VDoc:ref"];
     if ((ref != null) && (typeof ref !== "string")) {
-      node_ = { ...node, "VDoc:ref": ref = stack.emitNode(node_["VDoc:ref"], "") };
+      ref = stack.emitNode(ref, "");
     }
     const refParts = (ref || "").match(_referencePackageMatcher);
     if (refParts) {
@@ -67,12 +67,24 @@ function emitReVDocReference (node, emission, stack) {
       }
       const docsBase = (packageJSON.valos || {}).docs || packageName;
       const subPath = refParts[3] || "";
-      node_ = Object.assign({}, node, {
-        "VDoc:ref": (!refParts[3] || (subPath[0] === "#")
-                || (docsBase[docsBase.length - 1] === "/"))
-            ? `${docsBase}${refParts[3] || ""}`
-            : `${docsBase}/${refParts[3]}`,
-      });
+      ref = (!refParts[3] || (subPath[0] === "#")
+              || (docsBase[docsBase.length - 1] === "/"))
+          ? `${docsBase}${refParts[3] || ""}`
+          : `${docsBase}/${refParts[3]}`;
+    } else {
+      const [prefix, ...suffixes] = (ref || "").split(":");
+      const contextEntry = !suffixes.length ? undefined : stack.document["@context"][prefix];
+      if (contextEntry != null) {
+        const expansion = (typeof contextEntry === "string") ? contextEntry : contextEntry["@id"];
+        if (expansion != null) {
+          ref = `${expansion}${suffixes.join(":")}`; // TODO: unescape suffix escapes
+        } else {
+          console.log("Unable to expand reference:", ref, "from context entry:", contextEntry);
+        }
+      }
+    }
+    if (ref !== node["VDoc:ref"]) {
+      node_ = Object.assign({}, node, { "VDoc:ref": ref || null });
     }
     return vdocExtension.emitters.html["VDoc:Reference"](node_, emission, stack);
   } catch (error) {

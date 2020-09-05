@@ -22,6 +22,10 @@ const {
 const roleDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "ROLE"], documents);
 
 module.exports = {
+  "@context": {
+    ...prefixes,
+    ...context,
+  },
   "dc:title": "Valospace reference",
   "VDoc:tags": ["PRIMARY", "INTRODUCTION", "ONTOLOGY", "VALONAUT"],
   "VRevdoc:package": name,

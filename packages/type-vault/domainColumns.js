@@ -1,9 +1,9 @@
-const { extractee: { ref, em, strong } } = require("@valos/revdoc");
+const { extractee: { em, heading, ref, strong } } = require("@valos/revdoc");
 
 const documents = {
   "column#0": {
-    "VDoc:cell": strong(ref("VDoc:selectKey")),
     "VDoc:content": ["Name"],
+    "VDoc:cell": strong(ref("VDoc:selectKey")),
   },
   /*
   "column#0": {
@@ -17,8 +17,8 @@ const documents = {
   "column#1;package": "Package",
   "column#2;version": "Version",
   "column#3": {
-    "VDoc:cell": { "VDoc:words": { "VDoc:selectField": "tags" } },
     "VDoc:content": ["Tags"],
+    "VDoc:cell": { "VDoc:words": { "VDoc:selectField": "tags" } },
   },
 };
 
@@ -32,13 +32,13 @@ const titledDocuments = {
 
 const roles =  {
   "column#0": {
-    "VDoc:cell": strong(ref("VDoc:selectKey")),
     "VDoc:content": ["Your role:"],
+    "VDoc:cell": heading(strong(ref("VDoc:selectKey"))),
   },
   "column#1": {
+    "VDoc:content": ["Your answer..."],
     "VDoc:cell": strong(em(
         ref({ "VDoc:selectField": "title" }, ["VDoc:selectKey", "#introduction"]))),
-    "VDoc:content": ["Your answer..."],
   },
   "column#8;introduction": {
     "VDoc:content": em("Introduction:"),

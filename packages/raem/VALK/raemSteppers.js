@@ -832,38 +832,56 @@ export const toVAKONTag = Symbol("ValOS.toVAKON");
 
 export function isValOSFunction (callerCandidate: any) { return callerCandidate[toVAKONTag]; }
 
-export function denoteValOSBuiltin (description: any = "") {
+export function denoteValOSBuiltin (signature, description: any = "", deprecation) {
   return (vbcall: any) => {
     vbcall._isVCall = true;
-    vbcall._valkDescription = description;
+    if (signature) vbcall._valkSignature = signature;
+    setCallableDescription(vbcall, description);
+    setCallableDeprecation(vbcall, deprecation);
     return vbcall;
   };
 }
 
-export function denoteValOSBuiltinWithSignature (description: any = "") {
+export function denoteValOSCallable (description: any = "", deprecation: string | Array) {
   return (callee: Function, calleeBody: Function = callee) => {
     const text = calleeBody.toString();
-    return denoteValOSBuiltin(description + text.slice(8, text.indexOf(" {")))(callee);
+    return denoteValOSBuiltin(text.slice(8, text.indexOf(" {")), description, deprecation)(callee);
+  };
+}
+
+export function denoteDeprecatedValOSCallable (description: any = "", deprecation: string | Array) {
+  return (callee: any) => {
+    function deprecatedFunction (...rest: any[]) {
+      console.debug("DEPRECATED: call to builtin operation", callee,
+          "\n\t", deprecatedFunction._valkDeprecation);
+      return callee.apply(this, rest);
+    }
+    return denoteValOSCallable(description, deprecation)(deprecatedFunction, callee);
   };
 }
 
 /**
  * Creates a decorator for specifying a ValOS kuery function.
- * Kuery function is a convenience construct for defining builtin functions in terms of Kuery VAKON.
- * A notable convenience aspect of Kuery functions that they accept /already evaluated/ values as
- * arguments and the VAKON they return ephemeral: it is immediately evaluated and discarded.
+ * Kuery function is a convenience construct for defining builtin
+ * functions in terms of Kuery VAKON. A notable convenience aspect of
+ * Kuery functions that they accept /already evaluated/ values as
+ * arguments and the VAKON they return ephemeral: it is immediately
+ * evaluated and discarded.
  *
- * While this quirk is not most performant in itself (ephemeral VAKON created runtime on every
- * call, it allows for flexibility. Most notably the ephemeral VAKON is fully live, and because the
- * already evaluated arguments can be inspected the ephemeral VAKON can be minimal and fine-tuned.
- * In addition because the ephemeral VAKON is discarded after use and thus never persisted, it is
- * transparent to outside and can be freely changed (as long as semantics).
+ * While this quirk is not most performant in itself (ephemeral VAKON
+ * created runtime on every call, it allows for flexibility. Most
+ * notably the ephemeral VAKON is fully live, and because the already
+ * evaluated arguments can be inspected the ephemeral VAKON can be
+ * minimal and fine-tuned. In addition because the ephemeral VAKON is
+ * discarded after use and thus never persisted, it is transparent to
+ * outside and can be freely changed (as long as its semantics are
+ * preserved).
  *
  * @export
  * @param {*} [description=""]
  * @returns
  */
-export function denoteValOSKueryFunction (description: any = "") {
+export function denoteValOSKueryFunction (description: any = "", deprecation) {
   return (createKuery: any) => {
     function vkall (...args: any[]) {
       try {
@@ -882,23 +900,29 @@ export function denoteValOSKueryFunction (description: any = "") {
         ]);
       }
     }
-    vkall._isVCall = true;
     vkall._valkCreateKuery = createKuery;
-    const text = vkall.toString();
-    vkall._valkDescription = description + text.slice(8, text.indexOf(" {"));
-    return vkall;
+    return denoteValOSCallable(description, deprecation)(vkall, createKuery);
   };
 }
 
-export function denoteDeprecatedValOSBuiltin (prefer: string, description: any = "") {
-  return (callee: any) => {
-    function deprecated (...rest: any[]) {
-      console.debug("DEPRECATED: call to builtin operation", callee, "\n\tprefer:", prefer);
-      return callee.apply(this, rest);
-    }
-    deprecated._valkDeprecatedPrefer = prefer;
-    return denoteValOSBuiltinWithSignature(description)(deprecated, callee);
-  };
+export function setCallableDescription (callable, description: string | [string, string]) {
+  if (!description) return;
+  if (!Array.isArray(description)) {
+    callable._valkDescription = description;
+  } else {
+    callable._valkDescription = description[0];
+    callable._valkIntroduction = description.slice(1);
+  }
+}
+
+export function setCallableDeprecation (callable, deprecation: string | [string, string]) {
+  if (!deprecation) return;
+  if (!Array.isArray(deprecation)) {
+    callable._valkDeprecation = deprecation;
+  } else {
+    callable._valkDeprecation = `${deprecation[0]}, prefer: ${deprecation[1]}`;
+    callable._valkDeprecatedPrefer = deprecation[1];
+  }
 }
 
 function _createVCall (capturingValker: Valker, vakon: any, sourceInfo: ?Object,

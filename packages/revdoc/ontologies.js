@@ -88,5 +88,10 @@ for emitting ReSpec html output documents.`,
       "rdfs:range": "rdfs:Literal",
       "rdfs:comment": "A semver string",
     },
+    introduction: { "@type": "VDoc:Property",
+      "rdfs:domain": "VDoc:Node",
+      "rdfs:range": "rdfs:Literal",
+      "rdfs:comment": "VRevdoc introduction section",
+    },
   };
 }

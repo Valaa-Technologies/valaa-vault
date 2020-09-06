@@ -1,6 +1,6 @@
 // @flow
 
-import { denoteValOSBuiltinWithSignature } from "~/raem/VALK";
+import { denoteValOSCallable } from "~/raem/VALK";
 
 import globalHTML5BuiltinObjects from "./globalHTML5BuiltinObjects";
 import extendValOSWithInspire from "./valos";
@@ -27,7 +27,7 @@ export default function extendValosheathWithInspire (scope: Object,
   scope.valos.InspireGateway = scope.valos.GatewayConfig = {
     RemoteAuthorityURI,
     LocalAuthorityURI: "valaa-local:",
-    getPartitionIndexEntity: denoteValOSBuiltinWithSignature(
+    getPartitionIndexEntity: denoteValOSCallable(
       `Returns the chronicle corresponding to the chronicle index.`
     )(getChronicleIndexEntityCall),
   };

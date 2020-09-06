@@ -1,8 +1,8 @@
 
-const _symbolToQualifiedName = {};
+const _symbolToQualifiedName = Object.create(null);
 
-const _namespaces = {};
-const _deprecatedNamespaces = {};
+const _namespaces = Object.create(null);
+const _deprecatedNamespaces = Object.create(null);
 
 export function qualifiedSymbol (prefix, localPart) {
   const namespace = _namespaces[prefix] || (_namespaces[prefix] = {});
@@ -35,7 +35,9 @@ export function deprecateSymbolInFavorOf (deprecatedPrefix, deprecatedLocalPart,
 export function qualifiedNamesOf (symbol) {
   const ret = _symbolToQualifiedName[symbol];
   if (ret || (typeof symbol !== "string")
-      || !symbol.startsWith("@$") || !symbol.endsWith("@@")) return ret;
+      || !symbol.startsWith("@$") || !symbol.endsWith("@@")) {
+    return ret;
+  }
   const dotIndex = symbol.indexOf(".");
   if (dotIndex === -1) return undefined;
   const namespace = symbol.slice(2, dotIndex);

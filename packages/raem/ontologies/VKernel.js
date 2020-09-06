@@ -21,4 +21,10 @@ ontologies.`,
 `The class of properties which are defined by the ValOS kernel domain
 ontologies.`,
   },
+  deprecatedInFavorOf: { "@type": "VKernel:Property",
+    "rdfs:domain": "rdfs:Resource",
+    "rdfs:range": "xsd:string",
+    "rdfs:comment":
+`The preferred resource in favor of the subject resource.`,
+  },
 };

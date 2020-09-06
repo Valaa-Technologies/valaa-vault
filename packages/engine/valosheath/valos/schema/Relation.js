@@ -1,6 +1,6 @@
 // @flow
 
-import { denoteDeprecatedValOSBuiltin } from "~/raem/VALK";
+// import { denoteDeprecatedValOSCallable } from "~/raem/VALK";
 
 import { ValoscriptNew, ValoscriptInstantiate } from "~/script";
 
@@ -14,14 +14,16 @@ export default {
     [OwnerDefaultCouplingTag]: "relations",
     [ValoscriptNew]: newResource,
     [ValoscriptInstantiate]: instantiateResource,
-    getSourceOf: denoteDeprecatedValOSBuiltin("[Relation.source]")(
+    /*
+    getSourceOf: denoteDeprecatedValOSCallable("", ["DEPRECATED", "V:source"])(
         function getSourceOf (relation) { return relation.step("source"); }), // eslint-disable-line
-    setSourceOf: denoteDeprecatedValOSBuiltin("[Relation.source] = newSource")(
-        function setSourceOf (relation, newSource) { relation.setField("source", newSource); }),  // eslint-disable-line
-    getTargetOf: denoteDeprecatedValOSBuiltin("[Relation.target]")(
-        function getTargetOf (relation) { return relation.step("target"); }),  // eslint-disable-line
-    setTargetOf: denoteDeprecatedValOSBuiltin("[Relation.target] = newSource")(
-        function setTargetOf (relation, newTarget) { relation.setField("target", newTarget); }), // eslint-disable-line
+    setSourceOf: denoteDeprecatedValOSCallable("", ["DEPRECATED", "V:source = value"])(
+        function setSourceOf (relation, newSource) { relation.setField("source", newSource); }),
+    getTargetOf: denoteDeprecatedValOSCallable("", ["DEPRECATED", "V:target"])(
+        function getTargetOf (relation) { return relation.step("target"); }),
+    setTargetOf: denoteDeprecatedValOSCallable("", ["DEPRECATED", "V:target = value"])(
+        function setTargetOf (relation, newTarget) { relation.setField("target", newTarget); }),
+    */
   },
   prototypeFields: {},
 };

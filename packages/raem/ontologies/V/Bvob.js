@@ -5,8 +5,19 @@ module.exports = {
     "rdfs:subClassOf": "V:Resource",
     "rdfs:comment":
 `The dominant type class of resources which are immutably associated
-with an octet-stream of fixed length. Bvob resources have a hash of
-that octet-stream, prefixed with the hash algorithm, as their VGRID.`
+with an octet-stream of fixed length.`,
+    "VRevdoc:introduction":
+`Bvob resource id is the hash of the octet-stream prefixed with the
+hash algorithm, as their VGRID.
+
+Unlike any other valospace resources, Bvobs are shared, not owned on
+the object level. Multiple Bvob's with the same id can be CREATED in
+many chronicles (or in fact, even in the same chronicle).
+
+Conversely a Bvob cannot be destroyed but only released by nulling all
+references to it. Once a chronicle has no references to a specific Bvob
+the authority is allowed to free the octet-stream resources associated
+with.`
   },
   // and have a valid base64-url encoded 240-bit SHAKE256 hash of that
   // octet-streamprefixed with "hashV240:" as their VGRID.`,

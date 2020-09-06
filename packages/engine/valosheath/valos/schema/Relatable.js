@@ -1,6 +1,6 @@
 // @flow
 
-import { denoteDeprecatedValOSBuiltin, denoteValOSBuiltinWithSignature, denoteValOSKueryFunction }
+import { denoteValOSCallable, denoteValOSKueryFunction, denoteDeprecatedValOSCallable }
     from "~/raem/VALK";
 import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
 
@@ -23,12 +23,15 @@ export default {
   isGlobal: true,
   symbols,
   typeFields: {
-    getRelationsOf: denoteDeprecatedValOSBuiltin(
-        "[Relatable.getRelations](name, ...additionalConditions)",
-        `returns an array which contains all Relation objects which have given *name*, have given ${
-            ""} *relatable* as their host *Relation.source* field value and which fullfill all ${
-            ""} constaints of given additionalConditions`
-    )(function getRelationsOf (relatable, name, ...additionalConditions) {
+    getRelationsOf: denoteDeprecatedValOSCallable([
+`Returns an array which contains all Relation objects of given
+*relatable* which have the given *name*`,
+`Returned relation objects have given *relatable* as their host
+*Relation.source* field value and which fullfill all constaints of
+given additionalConditions`,
+    ], [
+      "DEPRECATED", "V:getRelations",
+    ])(function getRelationsOf (relatable, name, ...additionalConditions) {
       try {
         return this.getFieldOf(relatable,
             VALEK.relations(name,
@@ -42,12 +45,14 @@ export default {
             "\n\tadditionalConditions:", additionalConditions);
       }
     }),
-    getIncomingRelationsOf: denoteDeprecatedValOSBuiltin(
-        "[Relatable.getIncomingRelations](name, ...additionalConditions)",
-        `returns an array which contains all Relation objects which have given *name*, have *this*${
-            ""} relatable as their host *Relation.target* field value and which fullfill all ${
-            ""} constaints of given additionalConditions`
-    )(function getIncomingRelationsOf (entity, name, ...additionalConditions) {
+    getIncomingRelationsOf: denoteDeprecatedValOSCallable([
+`Returns an array which contains all Relation objects which have the
+given *name*`,
+`have *this* relatable as their host *Relation.target* field value and
+which fullfill all constaints of given additionalConditions`,
+    ], [
+      "DEPRECATED", "V:getIncomingRelations",
+    ])(function getIncomingRelationsOf (entity, name, ...additionalConditions) {
       return this.getFieldOf(entity,
           VALEK.incomingRelations(name,
               ...additionalConditions.map(condition =>
@@ -55,36 +60,42 @@ export default {
     }),
   },
   prototypeFields: {
-    [symbols.getRelations]: denoteValOSKueryFunction(
-        `returns an array which contains all outgoing (connected or not) *Relation* resources${
-            ""} which have the given *name* as their *Describable.name*${
-            ""} and which satisfy all constraints of the optionally given *additionalConditions*.${
-            ""} Outgoing relations are listed in *Relatable.relations*${
-            ""} and they all have *this* *Relatable* as their *Relation.source*.${
-            ""} Note: all matching relations are selected, even those in unconnected chronicles.`
-    )(function getRelations (name, ...additionalConditions) {
+    [symbols.getRelations]: denoteValOSKueryFunction([
+`Returns an array of all outgoing relations with the given *name* as
+their V:name.`,
+`Outgoing relations are all V:Relation resources owned by *this*
+V:Relatable in its V:relations and which have *this* as their V:source.
+
+If no *name* is given returns all outgoing relations.
+
+Note: all matching relations are selected, even those in unconnected
+chronicles.`,
+    ])(function getRelations (name, ...additionalConditions) {
       return VALEK.relations(name,
           ...additionalConditions.map(condition =>
               VALEK.fromVAKON(extractFunctionVAKON(condition)))
       ).toVAKON();
     }),
-    [symbols.getRelationsTargets]: denoteValOSKueryFunction(
-        `returns an array which contains all *Relation.target* *Relatable* resources of the ${
-            ""} selected outgoing *Relation* resources.${
-            ""} This selection is defined identically to *Relatable.getRelations*${
-            ""} using the given *name* and the optionally given *additionalConditions*.`
-    )(function getRelationsTargets (name, ...additionalConditions) {
+    [symbols.getRelationsTargets]: denoteValOSKueryFunction([
+`Returns an array of all the V:target resources of those outgoing
+relations which have the given *name* as their V:name.`,
+`This method is identical to V:getRelations except that the
+returned array contains the V:target resources instead of the relations
+themselves.`,
+    ])(function getRelationsTargets (name, ...additionalConditions) {
       return VALEK.relationTargets(name,
           ...additionalConditions.map(condition =>
               VALEK.fromVAKON(extractFunctionVAKON(condition)))
       ).toVAKON();
     }),
-    [symbols.setRelations]: denoteValOSBuiltinWithSignature(
-        `Replaces all relations with given *name* with relations in given *newRelations* sequence.${
-            ""} This can be used to reorder the relations, as even if no entries are actually${
-            ""} removed or added (if the new set has the same entries as the existing set), their${
-            ""} order will be changed to match the order in the new sequence.`
-    )(function setRelations (name, newRelations: any[]) {
+    [symbols.setRelations]: denoteValOSCallable([
+`Replaces all relations with given *name* with relations in given
+*newRelations* sequence.`,
+`This can be used to reorder the relations, as even if no entries are
+actually removed or added (if the new set has the same entries as the
+existing set), their order will be changed to match the order in the
+new sequence.`,
+    ])(function setRelations (name, newRelations: any[]) {
       try {
         return this.replaceWithinField("relations",
             this.step(VALEK.relations(name), { discourse: this.__callerValker__ }),
@@ -94,38 +105,40 @@ export default {
             "\n\tnewRelations:", ...dumpObject(newRelations));
       }
     }),
-    [symbols.getIncomingRelations]: denoteValOSKueryFunction(
-        `returns an array which contains all incoming, connected *Relation* resources${
-            ""} which have the given *name* as their *Describable.name*${
-            ""} and which satisfy all constraints of the optionally given *additionalConditions*.${
-            ""} Incoming relations are listed in *Relatable.incomingRelations*${
-            ""} and they all have *this* *Relatable* as their *Relation.target*.${
-            ""} Note: only relations inside connected chronicles are listed${
-            ""} (even though some might be inactive, f.ex. if they have an inactive prototype).`
-    )(function getIncomingRelations (name, ...additionalConditions) {
+    [symbols.getIncomingRelations]: denoteValOSKueryFunction([
+`Returns an array of all incoming, connected relations with the given
+*name* as their V:name.`,
+`Incoming relations are all V:Relation resources that appear in the
+V:incomingRelations and which have *this* as their V:target.
+
+Note: only relations inside connected chronicles are listed (even
+though some might be inactive, f.ex. if they have an inactive prototype).`,
+    ])(function getIncomingRelations (name, ...additionalConditions) {
       return VALEK.incomingRelations(name,
           ...additionalConditions.map(condition =>
               VALEK.fromVAKON(extractFunctionVAKON(condition)))
       ).toVAKON();
     }),
-    [symbols.getIncomingRelationsSources]: denoteValOSKueryFunction(
-        `returns an array which contains all *Relation.source* *Relatable* resources of the ${
-            ""} selected incoming *Relation* resources.${
-            ""} This selection is defined identically to *Relatable.getIncomingRelations*${
-            ""} using the given *name* and the optionally given *additionalConditions*.`
-    )(function getIncomingRelationsSources (name, ...additionalConditions) {
+    [symbols.getIncomingRelationsSources]: denoteValOSKueryFunction([
+`Returns an array of all V:source resources of those incoming relations
+which have the given *name* as their V:name`,
+`This method is identical to V:getIncomingRelations except that the
+returned array contains V:source resources instead of the relations
+themselves.`,
+    ])(function getIncomingRelationsSources (name, ...additionalConditions) {
       return VALEK.incomingRelationSources(name,
           ...additionalConditions.map(condition =>
               VALEK.fromVAKON(extractFunctionVAKON(condition)))
       ).toVAKON();
     }),
-    [symbols.setIncomingRelations]: denoteValOSBuiltinWithSignature(
-        `Replaces all incoming relations with given *name* with relations in given${
-            ""} *newIncomingRelations* sequence.${
-            ""} This can be used to reorder the relations, as even if no entries are actually${
-            ""} removed or added (if the new set has the same entries as the existing set), their${
-            ""} order will be changed to match the order in the new sequence.`
-    )(function setIncomingRelations (name, newIncomingRelations: any[]) {
+    [symbols.setIncomingRelations]: denoteValOSCallable([
+`Replaces all incoming relations with given *name* with relations in
+given *newIncomingRelations* sequence.`,
+`This can be used to reorder the relations, as even if no entries are
+actually removed or added (if the new set has the same entries as the
+existing set), their order will be changed to match the order in the
+new sequence.`,
+    ])(function setIncomingRelations (name, newIncomingRelations: any[]) {
       try {
         return this.replaceWithinField("incomingRelations",
             this.step(VALEK.incomingRelations(name), { discourse: this.__callerValker__ }),

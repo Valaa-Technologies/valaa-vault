@@ -1,12 +1,12 @@
 const { extractee: { em, heading, ref, strong } } = require("@valos/revdoc");
 
 const documents = {
-  "column#0": {
+  "column#00": {
     "VDoc:content": ["Name"],
     "VDoc:cell": strong(ref("VDoc:selectKey")),
   },
   /*
-  "column#0": {
+  "column#00": {
     "VDoc:cell": { "@type": "VDoc:TemplateSelector",
       "VDoc:content": ["VDoc:selectKey"],
       "VDoc:ref": "VDoc:ref",
@@ -14,9 +14,9 @@ const documents = {
     "VDoc:content": ["id"],
   },
   */
-  "column#1;package": "Package",
-  "column#2;version": "Version",
-  "column#3": {
+  "column#01;package": "Package",
+  "column#02;version": "Version",
+  "column#03": {
     "VDoc:content": ["Tags"],
     "VDoc:cell": { "VDoc:words": { "VDoc:selectField": "tags" } },
   },
@@ -24,28 +24,28 @@ const documents = {
 
 const titledDocuments = {
   ...documents,
-  "column#8;title": {
+  "column#08;title": {
     "VDoc:content": em("Title:"),
     "VDoc:wide": true,
   },
 };
 
 const roles =  {
-  "column#0": {
+  "column#00": {
     "VDoc:content": ["Your role:"],
     "VDoc:cell": heading(strong(ref("VDoc:selectKey"))),
   },
-  "column#1": {
+  "column#01": {
     "VDoc:content": ["Your answer..."],
     "VDoc:cell": strong(em(
         ref({ "VDoc:selectField": "title" }, ["VDoc:selectKey", "#introduction"]))),
   },
-  "column#8;introduction": {
+  "column#08;introduction": {
     "VDoc:content": em("Introduction:"),
     "VDoc:wide": true,
     "VDoc:tall": true,
   },
-  "column#9": {
+  "column#09": {
     "VDoc:content": em("Aliases:"),
     "VDoc:wide": true,
     "VDoc:cell": em(ref(
@@ -56,12 +56,12 @@ const roles =  {
 
 const introductionDocuments =  {
   ...documents,
-  "column#8": {
+  "column#08": {
     "VDoc:content": em("Title:"),
     "VDoc:cell": ref({ "VDoc:selectField": "title" }, ["VDoc:selectKey", "#introduction"]),
     "VDoc:wide": true,
   },
-  "column#9;introduction": {
+  "column#09;introduction": {
     "VDoc:content": em("Introduction:"),
     "VDoc:wide": true,
     "VDoc:tall": true,
@@ -70,12 +70,12 @@ const introductionDocuments =  {
 
 const apiReferenceDocuments = {
   ...documents,
-  "column#8": {
+  "column#08": {
     "VDoc:content": em("Title:"),
     "VDoc:cell": ref({ "VDoc:selectField": "title" }, ["VDoc:selectKey", "#apiAbstract"]),
     "VDoc:wide": true,
   },
-  "column#9;apiAbstract": {
+  "column#09;apiAbstract": {
     "VDoc:content": em("API abstract:"),
     "VDoc:wide": true,
     "VDoc:tall": true,
@@ -84,12 +84,12 @@ const apiReferenceDocuments = {
 
 const ontologyDocuments = {
   ...documents,
-  "column#8": {
+  "column#08": {
     "VDoc:content": em("Title:"),
     "VDoc:cell": ref({ "VDoc:selectField": "title" }, ["VDoc:selectKey", "#ontology"]),
     "VDoc:wide": true,
   },
-  "column#9;ontologyAbstract": {
+  "column#09;ontologyAbstract": {
     "VDoc:content": em("Ontology abstract:"),
     "VDoc:wide": true,
     "VDoc:tall": true,
@@ -111,11 +111,11 @@ const primaryDocuments = {
 };
 
 const summary = {
-  "column#0": {
+  "column#00": {
     "VDoc:cell": strong(ref("VDoc:selectKey")),
     "VDoc:content": ["Name"],
   },
-  "column#9;introduction": {
+  "column#09;introduction": {
     "VDoc:content": em("Introduction:"),
     "VDoc:wide": true,
   },
@@ -123,8 +123,8 @@ const summary = {
 
 const commandSourced = {
   ...summary,
-  "column#1;package": "Package",
-  "column#2;version": "Version",
+  "column#01;package": "Package",
+  "column#02;version": "Version",
 };
 
 const types = {
@@ -141,7 +141,7 @@ const tools = {
 
 const commands = {
   ...summary,
-  "column#8;description": {
+  "column#08;description": {
     "VDoc:content": em("Description:"),
     "VDoc:wide": true,
   },
@@ -149,9 +149,9 @@ const commands = {
 
 const workspaces = {
   ...summary,
-  "column#1;version": "Version",
-  "column#2;license": "License",
-  "column#8;description": {
+  "column#01;version": "Version",
+  "column#02;license": "License",
+  "column#08;description": {
     "VDoc:content": em("Description:"),
     "VDoc:wide": true,
   },

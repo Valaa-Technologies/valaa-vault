@@ -388,8 +388,8 @@ with structural semantic meaning are exposed via VDoc core ontology.`,
       "table#>0;vocabulary": {
         "VDoc:columns": {
           ...ontologyColumns.properties,
-          "column#1;rdfs:subPropertyOf": undefined,
-          "column#1": {
+          "column#01;rdfs:subPropertyOf": undefined,
+          "column#01": {
             "VDoc:content": ["HTML5 element"],
             "VDoc:cell": ref(
                 { "VDoc:selectField": "VDoc:elementName" },

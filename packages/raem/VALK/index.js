@@ -24,9 +24,9 @@ export {
   isValOSFunction,
   toVAKONTag,
   denoteValOSBuiltin,
-  denoteValOSBuiltinWithSignature,
-  denoteDeprecatedValOSBuiltin,
+  denoteValOSCallable,
   denoteValOSKueryFunction,
+  denoteDeprecatedValOSCallable,
 } from "./raemSteppers";
 export type {
   BuiltinStep,

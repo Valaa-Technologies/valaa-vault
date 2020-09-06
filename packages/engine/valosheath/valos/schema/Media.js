@@ -12,7 +12,7 @@ import { newResource, instantiateResource } from "~/engine/valosheath/resourceLi
 
 const symbols = {
   interpretContent: qualifiedSymbol("V", "interpretContent"),
-  readContent: qualifiedSymbol("V", "readContent"),
+  // readContent: qualifiedSymbol("V", "readContent"),
   immediateContent: qualifiedSymbol("V", "immediateContent"),
   getURL: qualifiedSymbol("V", "getURL"),
   immediateURL: qualifiedSymbol("V", "immediateURL"),
@@ -26,21 +26,25 @@ export default {
     [ValoscriptInstantiate]: instantiateResource,
   },
   prototypeFields: {
-    [symbols.immediateContent]: denoteValOSKueryFunction(
-        `returns the Media content if it is immediately available,${
-        ""} otherwise throws an error. This error can be a missing${
-        ""} connection error which triggers an implicit${
-        ""} connection process.${
-        ""} See Media.interpretContent for more details.`
-    )(function immediateContent (options: any) {
+    [symbols.immediateContent]: denoteValOSKueryFunction([
+`Returns Media content if immediately available or throws otherwise.`,
+`Media content is immediately available if its has been downloaded and
+marked as in-memory cacheable.
+
+The thrown error can be a missing connection error which triggers an
+implicit connection process.
+
+See V:interpretContent for more details.`,
+    ])(function immediateContent (options: any) {
       return VALEK.interpretContent({
         synchronous: true,
         mediaInfo: Vrapper.toMediaInfoFields,
         ...(options || {}),
       }).toVAKON();
     }),
+    /*
     [symbols.readContent]: denoteValOSKueryFunction(
-        `returns a promise to the Media content.`
+`Returns a promise to a Media content interpretation.`,
     )(function readContent (options: any) {
       const ret = VALEK.interpretContent({
         synchronous: false,
@@ -49,15 +53,18 @@ export default {
       }).toVAKON();
       return ret;
     }),
-    [symbols.interpretContent]: denoteValOSKueryFunction(
-        `returns a promise to an interpretation of the Media content${
-        ""} with a particular media type. This media type is${
-        ""} determined by the first valid entry from the list:${
-        ""} 1. options.contentType argument of this call${
-        ""} 2. Media.mediaType field of this Media resource${
-        ""} 3. inferred from the Media name extension${
-        ""} 4. options.fallbackContentType of this call`
-    )(function interpretContent (options: any) {
+    */
+    [symbols.interpretContent]: denoteValOSKueryFunction([
+`Returns a promise to a Media content interpretation as optionally
+given *options.contentType*.`,
+`The default contentType if determined as follows:`,
+      { "numbered#": [
+[`options.contentType argument of this call`],
+[`Media.mediaType field of this Media resource`],
+[`inferred from the Media name extension`],
+[`options.fallbackContentType of this call`],
+      ] },
+    ])(function interpretContent (options: any) {
       const ret = VALEK.interpretContent({
         synchronous: false,
         mediaInfo: Vrapper.toMediaInfoFields,
@@ -65,27 +72,33 @@ export default {
       }).toVAKON();
       return ret;
     }),
-    [symbols.immediateURL]: denoteValOSKueryFunction(
-        `returns a Media URL to access the Media content if one is${
-        ""} is immediately available, otherwise throws an error.${
-        ""} This error can be a missing connection error${
-        ""} which triggers an implicit connection process.${
-        ""} See Media.getURL for more details.`
-    )(function immediateURL (options: any) {
+    [symbols.immediateURL]: denoteValOSKueryFunction([
+`Returns a Media content download URL if immediately available or throws an error otherwise.`,
+`The returned URL can be used to fetch an online resource in the local
+context.
+
+This URL is only temporarily valid. The expiration time is defined by
+the chronicle behaviors and its backend implementation.
+
+The error can be a missing connection error which triggers an
+implicit connection process.
+
+See V:getURL for more details.`,
+    ])(function immediateURL (options: any) {
       return VALEK.mediaURL({
         synchronous: true,
         mediaInfo: Vrapper.toMediaInfoFields,
         ...(options || {}),
       }).toVAKON();
     }),
-    [symbols.getURL]: denoteValOSKueryFunction(
-        `returns a promise to a transient Media URL which can be used${
-        ""} to retrieve the Media content in a presentation context.
-        ""} By default this URL is only guaranteed to be usable for${
-        ""} a limited period of time and only in the current${
-        ""} presentation context (ie. current HTML render context or${
-        ""} similar).`
-    )(function getURL (options: any) {
+    [symbols.getURL]: denoteValOSKueryFunction([
+`Returns a promise to a Media content download URL.`,
+`The resolved URL can be used to fetch the Media content in the local
+context.
+
+This URL is only temporarily valid. The expiration time is defined by
+the chronicle behaviors and its backend implementation.`,
+    ])(function getURL (options: any) {
       return VALEK.mediaURL({
         synchronous: false,
         mediaInfo: Vrapper.toMediaInfoFields,

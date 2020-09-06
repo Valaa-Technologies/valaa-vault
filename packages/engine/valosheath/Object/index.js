@@ -1,6 +1,7 @@
 // @flow
 
 import { PartialRemovesTag } from "~/raem/state/partialSequences";
+import { setCallableDescription } from "~/raem/VALK/raemSteppers";
 
 import { descriptorExpression, ValoscriptPrimitiveKind } from "~/script";
 
@@ -34,7 +35,7 @@ export default function extendObject (scope: Object, hostDescriptors: Map<any, O
   };
   scope.Object.prototype = Object.prototype;
 
-  function _createArg0Dispatcher (description: string,
+  function _createArg0Dispatcher (description: string | Array,
       objectOperation: () => any,
       valosOperation,
       valosTypeOperation = objectOperation,
@@ -50,7 +51,8 @@ export default function extendObject (scope: Object, hostDescriptors: Map<any, O
           .apply(this, arguments);
     };
     Object.defineProperty(ret, "name", { value: `valoscript_Object_${objectOperation.name}` });
-    ret._valkDescription = description;
+
+    setCallableDescription(ret, description);
     ret._isVCall = true;
     return ret;
   }
@@ -71,7 +73,7 @@ export default function extendObject (scope: Object, hostDescriptors: Map<any, O
       const arg1Kind = (arguments[1] != null) && arguments[1][ValoscriptPrimitiveKind];
       return dispatchers[arg0Kind || arg1Kind || ""].apply(this, arguments);
     };
-    ret._valkDescription = description;
+    setCallableDescription(ret, description);
     ret._isVCall = true;
     return ret;
   }
@@ -171,7 +173,7 @@ export default function extendObject (scope: Object, hostDescriptors: Map<any, O
     }
     return target;
   }
-  assignValOS._valkDescription = "";
+  setCallableDescription(assignValOS, "valospace resource aware Object.assign");
   assignValOS._isVCall = true;
 
   const toValOSKeys = VALEK.to("properties")

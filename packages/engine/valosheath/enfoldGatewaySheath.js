@@ -1,7 +1,7 @@
 // @flow
 
 import { vRef } from "~/raem/VRL";
-import { denoteDeprecatedValOSBuiltin, denoteValOSBuiltinWithSignature } from "~/raem/VALK";
+import { denoteValOSCallable, denoteDeprecatedValOSCallable } from "~/raem/VALK";
 
 import { valoscriptInterfacePrototype, ValoscriptPrimitiveKind } from "~/script";
 import { toVAKONTag } from "~/script/VALSK";
@@ -23,8 +23,8 @@ export default function enfoldGatewaySheath (
     tools,
   });
 
-  valos.describe = denoteValOSBuiltinWithSignature(
-`returns a description of a valos fabric primitive symbol,
+  valos.describe = denoteValOSCallable(
+`Returns a description of a valos fabric primitive symbol,
 function or a resource.`,
   )(function describe (primitive) {
     if (primitive == null) return undefined;
@@ -40,8 +40,8 @@ function or a resource.`,
     return undefined;
   });
 
-  valos.vrefer = denoteValOSBuiltinWithSignature(
-`returns a valos resource locator built from the given *authorityURI*,
+  valos.vrefer = denoteValOSCallable(
+`Returns a valos resource locator built from the given *authorityURI*,
 *chronicleVRID* and *resourceVRID* parts.`
   )(function vrefer (authorityURI_, chronicleVRID_, resourceVRID_) {
     let resourceVRID, chronicleURI;
@@ -66,35 +66,35 @@ function or a resource.`,
   valos.Discourse = Object.assign(Object.create(valoscriptInterfacePrototype), {
     name: "Discourse",
 
-    getContextDiscourse: denoteDeprecatedValOSBuiltin(
-        "valos.getFrame",
-        `returns the discourse of the current execution context. If the
-        execution context is not transactional the discourse is the
-        top-level discourse between engine and the upstream false
-        prophet. Otherwise the discourse is a transaction-specific
-        discourse which is valid only until the transaction is
-        finalized. A transaction discourse has its state isolated both
-        from other transactions as well as from events coming
-        downstream until it is committed.`
-    )(function getContextDiscourse () {
+    getContextDiscourse: denoteDeprecatedValOSCallable([
+`Returns the discourse of the current execution context.`,
+`If the execution context is not transactional the discourse is the
+top-level discourse between engine and the upstream false prophet.
+Otherwise the discourse is a transaction-specific discourse which is
+valid only until the transaction is finalized. A transaction discourse
+has its state isolated both from other transactions as well as from
+events coming downstream until it is committed.`,
+    ], [
+      "DEPRECATED", "valos.getFrame",
+    ])(function getContextDiscourse () {
       return this && this.__callerValker__;
     }),
   });
 
-  valos.getRootDiscourse = denoteValOSBuiltinWithSignature(
-      `returns the root discourse of this global execution context.
-      This discourse is non-transactional and its lifetime is tied to
-      the global execution context.`
-  )(function getRootDiscourse () { return rootDiscourse; });
+  valos.getRootDiscourse = denoteValOSCallable([
+`Returns the root discourse of this global execution context`,
+`This discourse is non-transactional and its lifetime is tied to
+the global execution context.`,
+  ])(function getRootDiscourse () { return rootDiscourse; });
 
-  valos.getFabricator = denoteValOSBuiltinWithSignature(
-      `returns the current fabricator.`
+  valos.getFabricator = denoteValOSCallable(
+`Returns the current fabricator.`
   )(function getFrame () {
     return this && this.__callerValker__;
   });
 
-  valos.getTransactor = denoteValOSBuiltinWithSignature(
-      `returns the current transactor.`
+  valos.getTransactor = denoteValOSCallable(
+`Returns the current transactor.`
   )(function getTransactor () {
     return this && this.__callerValker__ && this.__callerValker__.getTransactor();
   });

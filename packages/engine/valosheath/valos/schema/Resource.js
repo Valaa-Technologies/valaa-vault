@@ -357,7 +357,7 @@ three values.`,
     )(function hasInterface (interfaceName: Vrapper) {
       return Vrapper.prototype.hasInterface.call(this, interfaceName);
     }),
-    // TODO(iridian): Deprecate this in favor of the Symbol version [Resource.hasInterface]
+    /*
     hasInterface: denoteDeprecatedValOSCallable(
 `Returns true if *this* resource implements the host interface *interfaceName*`,
         ["DEPRECATED", "V:hasInterface"],
@@ -365,8 +365,6 @@ three values.`,
       if (this instanceof Vrapper) return this.hasInterface(interfaceName);
       return interfaceName.hasInterface(interfaceNameLegacy);
     }),
-
-    /*
     [symbols.prepareBlob]: denoteDeprecatedValOSBuiltin(
         "Returns a promise to a Bvob creator callback. See Resource.prepareBvob.",
         ["DEPRECATED", "V:prepareBvob"],

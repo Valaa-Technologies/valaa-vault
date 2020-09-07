@@ -1,17 +1,19 @@
+const isSymbol = require("~/tools/isSymbol").default;
 
 const _symbolToQualifiedName = Object.create(null);
 
 const _namespaces = Object.create(null);
 const _deprecatedNamespaces = Object.create(null);
+const _null = Object.create(null);
 
 export function qualifiedSymbol (prefix, localPart) {
-  const namespace = _namespaces[prefix] || (_namespaces[prefix] = {});
+  const namespace = _namespaces[prefix] || (_namespaces[prefix] = Object.create(null));
   let symbol = namespace[localPart];
   if (!symbol) {
-    const deprecationForward = (_deprecatedNamespaces[prefix] || "")[localPart];
+    const deprecationForward = (_deprecatedNamespaces[prefix] || _null)[localPart];
     if (deprecationForward) {
       console.warn(`DEPRECATED: qualified symbol $${prefix}.${localPart
-          } is deprecated in favor of ${qualifiedNamesOf(deprecationForward)[2]}`);
+          } is deprecated in favor of ${(qualifiedNamesOf(deprecationForward) || [])[2]}`);
       symbol = deprecationForward;
     } else {
       const qualifiedName = `$${prefix}.${encodeURIComponent(localPart)}`;
@@ -27,8 +29,11 @@ export function qualifiedSymbol (prefix, localPart) {
 }
 
 export function deprecateSymbolInFavorOf (deprecatedPrefix, deprecatedLocalPart, favoredSymbol) {
+  if (!isSymbol(favoredSymbol)) {
+    throw new Error(`favoredSymbol is not a symbol: ${String(favoredSymbol)}`);
+  }
   const namespace = _deprecatedNamespaces[deprecatedPrefix]
-      || (_deprecatedNamespaces[deprecatedPrefix] = {});
+      || (_deprecatedNamespaces[deprecatedPrefix] = Object.create(null));
   return (namespace[deprecatedLocalPart] = favoredSymbol);
 }
 

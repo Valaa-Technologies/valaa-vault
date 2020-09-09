@@ -40,20 +40,22 @@ function emitNodeHTML (node, emission, stack) {
     const elem = "h3";
     body += `\n    <${elem}>${selfRef || ""}${stack.emitNode(node["dc:title"], "")}</${elem}>\n`;
   }
-  let content = node["VDoc:content"];
-  if (content === undefined) {
-    const sequence = node["VDoc:words"] || node["VDoc:entries"];
-    if (sequence) {
-      const mapper = node["VDoc:map"];
-      const separator = node["VDoc:words"] ? " " : null;
-      content = [].concat(...[].concat(sequence)).map((entry, index) => {
-        const text = !mapper ? entry : _instantiateTemplate(mapper, index, entry);
-        return !index ? [text] : [separator, text];
-      });
-    }
-    if ((content === undefined) && node["@id"]) {
-      content = stack.document[node["@id"]];
-    }
+  let content;
+  const sequence = node["VDoc:words"] || node["VDoc:entries"];
+  if (sequence) {
+    const mapper = node["VDoc:map"];
+    const separator = node["VDoc:separator"] || (node["VDoc:words"] ? " " : undefined);
+    content = [].concat(...((sequence == null ? []
+        : typeof sequence !== "object" ? [[null, sequence]]
+        : Object.entries(!Array.isArray(sequence) ? sequence : [].concat(...sequence)))
+    .map(([key, entry]) => {
+      const text = !mapper ? entry : _instantiateTemplate(mapper, key, entry);
+      return !key || (separator === undefined) ? [text] : [separator, text];
+    })));
+  } else if (node["VDoc:content"] !== undefined) {
+    content = node["VDoc:content"];
+  } else if (node["@id"]) {
+    content = stack.document[node["@id"]];
   }
   if (content) {
     body += stack.emitNode(content, "");
@@ -80,6 +82,8 @@ function emitNodeHTML (node, emission, stack) {
   <${elem}${attributes}>${body}
   </${elem}>\n`;
     }
+  } else if (node["VDoc:elidable"]) {
+    return emission;
   }
   return `${emission}${body}`;
 }
@@ -142,7 +146,9 @@ function emitBulletListHTML (node, emission, stack) {
   for (const entry of (node["VDoc:entries"] || [])) {
     lis += `      <li>${stack.emitNode(entry, "")}</li>\n`;
   }
-  return `${emission}\n    <ul>\n${lis}    </ul>\n`;
+  return (!lis && node["VDoc:elidable"])
+      ? emission
+      : `${emission}\n    <ul>\n${lis}    </ul>\n`;
 }
 
 function emitNumberedListHTML (node, emission, stack) {
@@ -150,12 +156,13 @@ function emitNumberedListHTML (node, emission, stack) {
   for (const entry of (node["VDoc:entries"] || [])) {
     lis += `      <li>${stack.emitNode(entry, "")}</li>\n`;
   }
-  return `${emission}\n    <ol>\n${lis}    </ol>\n`;
+  return (!lis && node["VDoc:elidable"])
+      ? emission
+      : `${emission}\n    <ol>\n${lis}    </ol>\n`;
 }
 
 function emitTableHTML (node, emission, stack) {
-  const cellDatas = [];
-  const wideRowContents = [];
+  const entryRowTemplates = [];
   const columnHeaderTexts = [];
   let columns = node["VDoc:columns"];
   if (!columns) {
@@ -165,16 +172,31 @@ function emitTableHTML (node, emission, stack) {
     if (columns["VDoc:entries"]) columns = columns["VDoc:entries"];
     else throw new Error("VDoc:Table VDoc:columns is not an array nor doesn't have VDoc:entries");
   }
+  let cellRowTemplates;
   for (const column of columns) {
-    const cellData = {
-      headerText: stack.emitNode(column["VDoc:content"], ""),
-      cell: column["VDoc:cell"],
+    const headerCell = {
+      ...column, "@type": "VDoc:Node", "VDoc:cell": undefined, "VDoc:wide": undefined,
     };
+    let cellTemplate = column["VDoc:cell"];
+    if (typeof cellTemplate === "string") {
+      cellTemplate = { "@type": "VDoc:Node", "VDoc:content": cellTemplate.startsWith("VDoc:select")
+          ? cellTemplate
+          : { "VDoc:selectField": cellTemplate },
+      };
+    }
     if (column["VDoc:wide"]) {
-      wideRowContents.push(cellData);
+      entryRowTemplates.push([
+        ...(headerCell["VDoc:content"] || headerCell["VDoc:words"] || headerCell["VDoc:entries"]
+            ?  [headerCell] : []),
+        { "VDoc:wide": true, ...cellTemplate },
+      ]);
     } else {
-      cellDatas.push(cellData);
-      columnHeaderTexts.push(`<th${nodeAttributes(column)}>${cellData.headerText}</th>`);
+      if (!cellRowTemplates) {
+        entryRowTemplates.push(cellRowTemplates = []);
+      }
+      const headerText = stack.emitNode(headerCell, "");
+      cellRowTemplates.push(cellTemplate);
+      columnHeaderTexts.push(`<th${nodeAttributes(column)}>${headerText}</th>`);
     }
   }
   const entryTexts = [];
@@ -186,23 +208,32 @@ function emitTableHTML (node, emission, stack) {
           (!lookup || (typeof entry === "object") ? [index, entry] : [entry, lookup[entry]]));
   entries.forEach(([entryKey, entryData], entryIndex) => {
     if (entryKey === "@id") return;
-    let entryText = "";
-    const rowNthNess = entryIndex % 2 ? "" : " vdoc-nth-child-2n";
-    let id;
-    for (const { cell } of cellDatas) {
-      const instance = _instantiateTemplate(cell, entryKey, entryData);
-      if (instance["VDoc:resourceId"]) id = instance["VDoc:resourceId"];
-      entryText += `<td>${
-        (typeof instance !== "object") ? instance : stack.emitNode(instance, "")}</td>`;
-    }
-    entryTexts.push(`<tr${id ? ` id="${id}"` : ""}${rowNthNess && ` class="${rowNthNess}"`}>${
-      entryText
-    }</tr>`);
-    for (const { headerText, cell } of wideRowContents) {
-      const instance = _instantiateTemplate(cell, entryKey, entryData);
-      entryTexts.push(`<tr class="vdoc vdoc-wide${rowNthNess}"><td>${headerText
-        }</td><td colspan=${columns.length - 1 || 1
-        }>${(typeof instance !== "object") ? instance : stack.emitNode(instance, "")}</td></tr>`);
+    const alternatingRowHighlight = entryIndex % 2 ? "" : " vdoc-nth-child-2n";
+    for (const cellTemplates of entryRowTemplates) {
+      let rowText = "";
+      let idText = "";
+      let wideness;
+      let elideRow;
+      for (let i = 0; i !== cellTemplates.length; ++i) {
+        const cellTemplate = cellTemplates[i];
+        const cell = _instantiateTemplate(cellTemplate, entryKey, entryData);
+        if (cell["VDoc:resourceId"]) idText = ` id="${cell["VDoc:resourceId"]}"`;
+        const cellText = (typeof cell !== "object") ? cell : stack.emitNode(cell, "");
+        let colspan = cell["VDoc:wide"];
+        if (colspan && (typeof colspan !== "number")) {
+          if (!cellText && (cell || "")["VDoc:elidable"]) {
+            elideRow = true;
+            break;
+          }
+          wideness = " vdoc-wide";
+          colspan = columnHeaderTexts.length - i;
+        }
+        rowText += `<td${colspan ? ` colspan=${colspan}` : ""}>${cellText}</td>`;
+      }
+      if (!elideRow) {
+        const class_ = `${wideness}${alternatingRowHighlight}`;
+        entryTexts.push(`<tr${idText}${class_ && ` class="vdoc${class_}"`}>${rowText}</tr>`);
+      }
     }
   });
   return `${emission}
@@ -219,17 +250,19 @@ function emitTableHTML (node, emission, stack) {
 `;
 }
 
-function _instantiateTemplate (cell, entryKey, entryData) {
+function _instantiateTemplate (template, entryKey, entryData) {
+  if (template === undefined) return entryData;
+  if (template === null) return null;
   const select = {
     "VDoc:selectKey": entryKey,
     "VDoc:selectValue": entryData,
   };
   let entry;
-  if (typeof cell === "string") {
-    entry = select[cell];
-    if (entry === undefined) entry = (entryData == null) ? undefined : entryData[cell];
+  if (typeof template === "string") {
+    entry = select[template];
+    if (entry === undefined) entry = (entryData == null) ? undefined : entryData[template];
   } else {
-    entry = patchWith({}, cell, {
+    entry = patchWith({}, template, {
       preExtend (tgt, patch, key) {
         if ((key === "VDoc:map") || (key === "VDoc:cell")) return patch;
         if (typeof patch === "string") {
@@ -238,8 +271,8 @@ function _instantiateTemplate (cell, entryKey, entryData) {
         if ((patch != null) && patch["VDoc:selectField"]) {
           const ret = (entryData == null) ? undefined : entryData[patch["VDoc:selectField"]];
           if (ret === undefined) {
-            console.log(`Can't select field '${patch["VDoc:selectField"]}' from entry with key '${
-                entryKey}'`);
+            // console.log(`Can't select field '${patch["VDoc:selectField"]
+            //     }' from entry with key '${entryKey}'`);
           }
           return ret !== undefined ? ret : null;
         }

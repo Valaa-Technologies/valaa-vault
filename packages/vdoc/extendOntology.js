@@ -31,11 +31,10 @@ module.exports = function extendOntology (statements,
           && (range !== "rdfs:Resource")) {
         _expressTermInContext()["@type"] = "@id";
       }
-      let label = idSuffix;
+      let label;
       switch (definition["@type"]) {
         case "VModel:Type":
         case "VKernel:Class":
-          label = `${preferredPrefix}:${idSuffix}`;
           break;
         case "VModel:Field":
         case "VModel:ExpressedField":
@@ -43,39 +42,41 @@ module.exports = function extendOntology (statements,
         case "VModel:CoupledField":
         case "VModel:GeneratedField":
         case "VModel:TransientField":
-        case "VModel:AliasField":
+        case "VModel:AliasField": {
           label = `$${preferredPrefix}.${idSuffix}`;
-          _addInferredIndex("VEngine:domainOfField", "rdfs:domain");
+          _addInferredIndex("VEngine:domainOfField", "rdfs:domain",
+              definition["VRevdoc:indexLabel"] || `.${label}`);
           break;
+        }
         case "VEngine:Property":
-          label = `$${preferredPrefix}.${idSuffix}`;
-          _addInferredIndex("VEngine:domainOfProperty", "rdfs:domain");
+          _addInferredIndex("VEngine:domainOfProperty", "rdfs:domain",
+              definition["VRevdoc:indexLabel"]);
           break;
         case "VEngine:Method":
-          label = `prototype.$${preferredPrefix}.${idSuffix}`;
-          _addInferredIndex("VEngine:domainOfMethod", "rdfs:domain");
+          _addInferredIndex("VEngine:domainOfMethod", "rdfs:domain",
+              definition["VRevdoc:indexLabel"]);
           break;
         case "VEngine:ObjectProperty":
-          label = `$${preferredPrefix}.${idSuffix}`;
-          _addInferredIndex("VEngine:hasProperty", "rdf:subject");
+          _addInferredIndex("VEngine:hasProperty", "rdf:subject",
+              definition["VRevdoc:indexLabel"]);
           break;
         case "VEngine:ObjectMethod":
-          label = `$${preferredPrefix}.${idSuffix}`;
-          _addInferredIndex("VEngine:hasMethod", "rdf:subject");
+          _addInferredIndex("VEngine:hasMethod", "rdf:subject",
+              definition["VRevdoc:indexLabel"]);
           break;
         default:
           break;
       }
-      if (!definition["rdfs:label"] && label) definition["rdfs:label"] = label;
-      function _addInferredIndex (indexProperty, indexIdProperty) {
-        if (typeof definition[indexIdProperty] !== "string") return;
+      if (!definition["rdfs:label"] && label) definition["rdfs:label"] = [label];
+      function _addInferredIndex (indexProperty, indexIdProperty, indexLabel) {
+        if (!indexLabel || (typeof definition[indexIdProperty] !== "string")) return;
         const [indexPrefix, indexName] = definition[indexIdProperty].split(":");
         if (indexPrefix !== preferredPrefix) return;
         const indexDefinition = vocabulary[indexName];
         if (!indexDefinition) return;
         const values = indexDefinition[indexProperty] || (indexDefinition[indexProperty] = []);
         if (values.find(({ "@id": existingId }) => (existingId === id))) return;
-        values.push({ "@id": id, "rdfs:label": label });
+        values.push({ "@id": id, "VRevdoc:indexLabel": indexLabel });
       }
     });
     return {

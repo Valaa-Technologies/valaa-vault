@@ -10,6 +10,7 @@ module.exports = {
     "VRevdoc:Invokation": emitReVDocInvokation,
     "VRevdoc:Command": emitReVDocCommand,
     "VRevdoc:Example": emitReVDocExample,
+    "VRevdoc:Tooltip": emitReVDocTooltip,
   },
 };
 
@@ -110,4 +111,13 @@ function emitReVDocExample (node, emission, stack) {
 <blockquote class="vdoc type-revdoc-example">
     ${stack.emitNode({ ...node, "@type": "VDoc:Node" }, "")}
 </blockquote>`;
+}
+
+function emitReVDocTooltip (node, emission, stack) {
+  return `${emission}<div class="vdoc type-revdoc-tooltip">
+    ${stack.emitNode({ ...node, "@type": "VDoc:Node" }, "")}
+    <span class="vdoc type-revdoc-tooltip-content">
+        ${stack.emitNode(node["VRevdoc:tooltipContent"], "")}
+    </span>
+</div>`;
 }

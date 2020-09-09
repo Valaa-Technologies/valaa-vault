@@ -1,19 +1,22 @@
 const extendOntology = require("@valos/vdoc/extendOntology");
 const { dumpObject, wrapError } = require("@valos/tools/wrapError");
+const patchWith = require("@valos/tools/patchWith").default;
 
 module.exports = {
   exportDomainAggregateOntologiesFromDocuments,
 };
 
 function exportDomainAggregateOntologiesFromDocuments (domainName, documents) {
-  const aggregatedOntologies = {};
+  const aggregatedOntologies = Object.create(null);
+  const alreadyAggregated = Object.create(null);
   Object.values(documents).forEach(document => {
-    if (document.package === domainName
+    if (alreadyAggregated[document.package] || document.package === domainName
         || (document.package === `${domainName}-vault`)
         || !(document.tags || []).includes("ONTOLOGY")) return;
     try {
       // Maybe source from the document vdocstate?
       const ontologies = require(`${document.package}/ontologies`);
+      alreadyAggregated[document.package] = true;
       for (const [preferredPrefix, extender] of Object.entries(ontologies)) {
         const current = aggregatedOntologies[preferredPrefix]
             || (aggregatedOntologies[preferredPrefix] =
@@ -27,19 +30,19 @@ function exportDomainAggregateOntologiesFromDocuments (domainName, documents) {
             current.ontologyDescription = extender.ontologyDescription;
           }
           for (const section of ["prefixes", "vocabulary", "context", "extractionRules"]) {
-            const target = current[section] || (current[section] = {});
-            for (const [key, extenderValue] of Object.entries(extender[section] || {})) {
-              const currentValue = target[key];
-              if (currentValue === undefined) {
-                target[key] = extenderValue;
-              } else if (JSON.stringify(extenderValue) !== JSON.stringify(currentValue)) {
-                  throw wrapError(new Error(`Ontology aggregation mismatch for '${key
-                          }': extender value and current value string serializations differ`),
-                      new Error(`During section '${section}' aggregation`),
-                      "\n\tcurrentValue:", JSON.stringify(currentValue),
-                      "\n\textenderValue:", JSON.stringify(extenderValue));
-              }
-            }
+            current[section] = patchWith(current[section] || {}, extender[section], {
+              keyPath: [],
+              preExtend (currentValue, extenderValue) {
+                if (currentValue === extenderValue || (typeof currentValue === "object")
+                    || (currentValue == null) || (extenderValue === undefined)) return undefined;
+                throw wrapError(new Error(`Ontology aggregation mismatch for '${
+                        this.keyPath.join(".")
+                        }': extender value and current value string serializations differ`),
+                    new Error(`During section '${section}' aggregation`),
+                    "\n\tcurrentValue:", JSON.stringify(currentValue),
+                    "\n\textenderValue:", JSON.stringify(extenderValue));
+              },
+            });
           }
           current.mostRecentDocument = document;
         } catch (error) {
@@ -47,8 +50,8 @@ function exportDomainAggregateOntologiesFromDocuments (domainName, documents) {
               new Error(`During exportDomainAggregateOntologiesFromDocuments.extender(prefix: ${
                   preferredPrefix})`),
               "\n\textender:", ...dumpObject(extender),
-              "\n\tcurrent document:", current.mostRecentDocument["@id"],
-                  current.mostRecentDocument["dc:title"]
+              "\n\tcurrent document:", (current.mostRecentDocument || {})["@id"],
+              (current.mostRecentDocument || {})["dc:title"]
           );
         }
       }

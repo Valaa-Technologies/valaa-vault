@@ -16,7 +16,7 @@ const { name, version, description } = require("./package");
 
 module.exports = {
   "dc:title": description,
-  "VDoc:tags": ["PRIMARY", "INTRODUCTORY", "ONTOLOGY", "LIBRARY"],
+  "VDoc:tags": ["PRIMARY", "INTRODUCTORY", "WORKSPACE", "ONTOLOGY"],
   "VRevdoc:package": name,
   "VRevdoc:preferredPrefix": preferredPrefix,
   "VRevdoc:baseIRI": baseIRI,

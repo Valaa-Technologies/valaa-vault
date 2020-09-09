@@ -1,7 +1,7 @@
 module.exports = {
   UnsourceredNode: {
     "@type": "VModel:Type",
-    "VRevdoc:brief": "absent, sourceable node type",
+    "VRevdoc:brief": "absent, sourcerable node type",
     "rdfs:subClassOf": ["V:Resource", "V:SourcerableNode"],
     "rdfs:comment":
 `The dominant type class of absent but sourcerable valospace nodes. An

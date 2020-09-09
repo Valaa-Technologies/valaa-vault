@@ -1,7 +1,7 @@
 
 const {
   extractee: {
-    authors, em, pkg, ref,
+    authors, em, strong, pkg, ref,
     filterKeysWithAnyOf, filterKeysWithAllOf, filterKeysWithNoneOf,
     valosRaemFieldClasses,
   },
@@ -19,14 +19,16 @@ const {
   },
 } = require("../packages/kernel");
 
-const roleDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "ROLE"], documents);
+const roleDocuments = Object.fromEntries(
+    filterKeysWithAllOf("tags", ["PRIMARY", "ROLE"], documents)
+    .map(key => [key, documents[key]]));
 
 module.exports = {
   "@context": {
     ...prefixes,
     ...context,
   },
-  "dc:title": "Valospace reference",
+  "dc:title": "Valos introduction and valospace API reference",
   "VDoc:tags": ["PRIMARY", "INTRODUCTION", "ONTOLOGY", "VALONAUT"],
   "VRevdoc:package": name,
   "VRevdoc:preferredPrefix": preferredPrefix,
@@ -45,8 +47,36 @@ module.exports = {
   "data#context": context,
 
   "chapter#abstract>0": {
-    "#0": [
-`Overview of the valospace APIs and ontologies.`,
+    "#0": [{
+      "@type": "VRevdoc:Tooltip",
+      "VDoc:content": em(
+          strong(`'Valos extends boundlessly across the valospace-time fabric.'`),
+          " (...in progress(tm))"
+      ),
+      "VRevdoc:tooltipContent": [[
+strong("-> Vertically"), `: as a full application development solution
+valos radically simplifies the semantic web technology stack.`, null,
+strong("-> Horizontally"), `: as a global, de-centralized ecosystem
+valos eases cross-organization interfacing.`, null,
+strong("-> In depth"), `: with its unified resource model valos blurs
+the boundary between frontends and backends.`, null,
+strong("-> Temporally"), `: valos unifies document state and change updates
+into seamless event stream *chronicles*.`,
+      ]],
+    },
+    null,
+`In other words, valos is a bit ambitious and a lot to take in at once.
+
+To address this the first part of this document provides separate
+introduction paths into valos for a software developer
+(referred to as `, em(ref("a valonaut", "/valonaut")), `), for a
+systems operator (as `, em(ref("a technician", "/technician")), `) and
+for a project manager (as `, em(ref("a voyager", "/voyager")), `).
+
+Choosing the most familiar path helps you to get hands-on the quickest.
+
+The second part of this document is the `, ref("valospace"),
+` API reference and is aimed for valonauts for repeat viewing.`,
     ],
   },
   "chapter#sotd>1": {
@@ -57,16 +87,27 @@ module.exports = {
     ],
   },
   "chapter#introduction>2": {
-    "dc:title": em(`"Greetings, I am Valma, the ValOS Mediator. Who are you?"`),
+    "dc:title": `First valosteps to the three primary valos roles`,
     "#0": [
-`ValOS ecosystem revolves around various roles. This document is
-a reference document of valospace systems and structures and is
-directed for more experienced valonauts. Check out the brief description
-and introductions of the other roles as well.`,
+`The three traditional roles of application developer, systems operator
+and project manager have their own unique characteristics in valos
+ecosystem and are called valonaut, technician and voyager respectively.
+
+Each role has a detailed (editor's note: eventually) how-to guide which
+are linked and briefly introduced below. The roles support each other
+and the guides reflect this. The hands-on introduction section of each
+guide also gives a high-level overview of the rest.`,
     ],
-    "table#>0;documents": {
-      "VDoc:columns": domainColumns.roles,
+    "#1": {
       "VDoc:entries": roleDocuments,
+      "VDoc:map": {
+        "chapter#0": {
+          "dc:title": em(
+              ref(["How do ", { "VDoc:selectField": "title" }, "?"],
+              ["VDoc:selectKey", "#introduction"])),
+          "VDoc:content": [{ "VDoc:selectField": "introduction" }],
+        },
+      },
     },
   },
   [`chapter#ontology>8;Valospace ontology '${preferredPrefix}'`]: {

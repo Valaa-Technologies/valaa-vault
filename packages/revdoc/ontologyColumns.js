@@ -7,19 +7,41 @@ const prefixes = {
 
 const vocabulary = {
   "column#00": {
-    "VDoc:content": ["rdfs:label"],
+    "VDoc:content": null,
+    "VDoc:wide": true,
     "VDoc:cell": {
       "VDoc:resourceId": "VDoc:selectKey",
-      ...heading(ref(em({ "VDoc:selectField": "rdfs:label" }), ["#", "VDoc:selectKey"])),
+      ...heading(em({
+        "VDoc:words": [
+          strong(ref(["#", "VDoc:selectKey"])),
+          {
+            "VDoc:entries": { "VDoc:selectField": "rdfs:label" },
+            "VDoc:elidable": true,
+            "VDoc:map": ref("VDoc:selectValue", "VEngine:valosheath"),
+          },
+        ],
+      })),
     },
   },
-  "column#10;rdfs:comment": {
-    "VDoc:content": em(ref("rdfs:comment")),
+  "column#01": {
+    "VDoc:content": em(strong("DEPRECATED"), " in favor of:"),
+    "VDoc:wide": true,
+    "VDoc:cell": {
+      "VDoc:entries": { "VDoc:selectField": "VRevdoc:deprecatedInFavorOf" },
+      "VDoc:elidable": true,
+      "VDoc:map": ref("VDoc:selectValue"),
+    },
+  },
+  "column#11;rdfs:comment": {
+    "VDoc:content": em(ref("description", "rdfs:comment")),
     "VDoc:wide": true,
   },
   "column#20;VRevdoc:introduction": {
-    "VDoc:content": em(ref("VRevdoc:introduction")),
+    "VDoc:content": em(ref("introduction", "VRevdoc:introduction")),
     "VDoc:wide": true,
+    "VDoc:collapsed": true,
+    "VDoc:elidable": true,
+  },
 };
 
 const context = {
@@ -39,29 +61,75 @@ function _simpleReferenceCell (selectedFieldName) {
 
 const _instanceFieldCell = {
   "VDoc:words": { "VDoc:selectField": "VEngine:domainOfField" },
-  "VDoc:map": ref({ "VDoc:selectField": "rdfs:label" }, { "VDoc:selectField": "@id" }),
+  "VDoc:elidable": true,
+  "VDoc:map": ref({ "VDoc:selectField": "VRevdoc:indexLabel" }, { "VDoc:selectField": "@id" }),
 };
+const _instancePropertyCell = {
+  "VDoc:words": { "VDoc:selectField": "VEngine:domainOfProperty" },
+  "VDoc:elidable": true,
+  "VDoc:map": ref({ "VDoc:selectField": "VRevdoc:indexLabel" }, { "VDoc:selectField": "@id" }),
+};
+const _instanceMethodCell = {
+  "VDoc:words": { "VDoc:selectField": "VEngine:domainOfMethod" },
+  "VDoc:elidable": true,
+  "VDoc:map": ref({ "VDoc:selectField": "VRevdoc:indexLabel" }, { "VDoc:selectField": "@id" }),
+};
+const _objectPropertyCell = {
+  "VDoc:words": { "VDoc:selectField": "VEngine:hasProperty" },
+  "VDoc:elidable": true,
+  "VDoc:map": ref({ "VDoc:selectField": "VRevdoc:indexLabel" }, { "VDoc:selectField": "@id" }),
+};
+const _objectMethodCell = {
+  "VDoc:words": { "VDoc:selectField": "VEngine:hasMethod" },
+  "VDoc:elidable": true,
+  "VDoc:map": ref({ "VDoc:selectField": "VRevdoc:indexLabel" }, { "VDoc:selectField": "@id" }),
+};
+
 const classes = {
   ...vocabulary,
-  "column#01": {
+  "column#02": {
     "VDoc:content": ["rdfs:subClassOf"],
     "VDoc:cell": {
       "VDoc:words": { "VDoc:selectField": "rdfs:subClassOf" },
       "VDoc:map": ref("VDoc:selectValue"),
     },
   },
+  "column#13": {
+    "VDoc:content": ref("instance properties", "VEngine:Property"),
+    "VDoc:wide": true,
+    "VDoc:cell": _instancePropertyCell,
+  },
+  "column#14": {
+    "VDoc:content": ref("instance methods", "VEngine:Method"),
+    "VDoc:wide": true,
+    "VDoc:cell": _instanceMethodCell,
+  },
+  "column#15": {
+    "VDoc:content": ref("class properties", "VEngine:ObjectProperty"),
+    "VDoc:wide": true,
+    "VDoc:cell": _objectPropertyCell,
+  },
+  "column#16": {
+    "VDoc:content": ref("class methods", "VEngine:ObjectMethod"),
+    "VDoc:wide": true,
+    "VDoc:cell": _objectMethodCell,
+  },
 };
 
 const properties = {
   ...vocabulary,
-  "column#01": {
+  "column#03": {
     "VDoc:content": ["rdfs:domain"],
     "VDoc:cell": _simpleReferenceCell("rdfs:domain"),
   },
-  "column#02": {
+  "column#04": {
     "VDoc:content": ["rdfs:range"],
     "VDoc:cell": _simpleReferenceCell("rdfs:range"),
   },
+};
+
+const methods = {
+  ...properties,
 };
 
 const elements = {
@@ -70,32 +138,52 @@ const elements = {
 
 const types = {
   ...vocabulary,
-  "column#01": {
+  "column#02": {
     "VDoc:content": ["VRevdoc:brief"],
     "VDoc:cell": strong({ "VDoc:selectField": "VRevdoc:brief" }),
   },
-  "column#02": {
+  "column#03": {
     "VDoc:content": ["rdfs:subClassOf"],
     "VDoc:cell": _simpleReferenceCell("rdfs:subClassOf"),
   },
-  "column#11": {
+  "column#14": {
     "VDoc:content": ref("instance fields", "@valos/raem#Field"),
     "VDoc:wide": true,
     "VDoc:cell": _instanceFieldCell,
+  },
+  "column#15": {
+    "VDoc:content": ref("instance properties", "VEngine:Property"),
+    "VDoc:wide": true,
+    "VDoc:cell": _instancePropertyCell,
+  },
+  "column#16": {
+    "VDoc:content": ref("instance methods", "VEngine:Method"),
+    "VDoc:wide": true,
+    "VDoc:cell": _instanceMethodCell,
+  },
+  "column#17": {
+    "VDoc:content": ref("type object properties", "VEngine:ObjectProperty"),
+    "VDoc:wide": true,
+    "VDoc:cell": _objectPropertyCell,
+  },
+  "column#18": {
+    "VDoc:content": ref("type object methods", "VEngine:ObjectMethod"),
+    "VDoc:wide": true,
+    "VDoc:cell": _objectMethodCell,
   },
 };
 
 const fields = {
   ...properties,
-  "column#03": {
+  "column#05": {
     "VDoc:content": "rdf:type",
     "VDoc:cell": _simpleReferenceCell("@type"),
   },
-  "column#04": {
+  "column#06": {
     "VDoc:content": "rdfs:subPropertyOf",
     "VDoc:cell": _simpleReferenceCell("rdfs:subPropertyOf"),
   },
-  "column#05": {
+  "column#07": {
     "VDoc:content": "VModel:coupledField",
     "VDoc:cell": _simpleReferenceCell("VModel:coupledField"),
   },
@@ -103,7 +191,7 @@ const fields = {
 
 const verbs = {
   ...vocabulary,
-  "column#01": {
+  "column#03": {
     "VDoc:content": "rdf:type",
     "VDoc:cell": _simpleReferenceCell("@type"),
   },
@@ -112,50 +200,56 @@ const verbs = {
 
 const globals = {
   ...vocabulary,
-  "column#01": {
+  "column#03": {
     "VDoc:content": "rdf:type",
     "VDoc:cell": _simpleReferenceCell("@type"),
   },
-  "column#02;comment": "Comment",
-  /*
-  "column#11": {
-    "VDoc:content": ref("prototype properties", "@valos/engine#Property"),
+  "column#04;comment": "Comment",
+  "column#14": {
+    "VDoc:content": ref("prototype properties", "VEngine:Property"),
     "VDoc:wide": true,
     "VDoc:cell": _instancePropertyCell,
   },
-  "column#12": {
-    "VDoc:content": ref("prototype methods", "@valos/engine#Method"),
+  "column#15": {
+    "VDoc:content": ref("prototype methods", "VEngine:Method"),
     "VDoc:wide": true,
     "VDoc:cell": _instanceMethodCell,
   },
-  "column#13": {
-    "VDoc:content": ref("object properties", "@valos/engine#ObjectProperty"),
+  "column#16": {
+    "VDoc:content": ref("object properties", "VEngine:ObjectProperty"),
     "VDoc:wide": true,
     "VDoc:cell": _objectPropertyCell,
   },
-  "column#14": {
-    "VDoc:content": ref("object methods", "@valos/engine#ObjectMethod"),
+  "column#17": {
+    "VDoc:content": ref("object methods", "VEngine:ObjectMethod"),
     "VDoc:wide": true,
     "VDoc:cell": _objectMethodCell,
   },
-  */
 };
 
 const objectProperties = {
   ...properties,
+  "column#03": {
+    "VDoc:content": ["rdf:subject"],
+    "VDoc:cell": _simpleReferenceCell("rdf:subject"),
+  },
 };
 
 const objectMethods = {
   ...methods,
+  "column#03": {
+    "VDoc:content": ["rdf:subject"],
+    "VDoc:cell": _simpleReferenceCell("rdf:subject"),
+  },
 };
 
 const vocabularyOther = {
   ...vocabulary,
-  "column#01": {
+  "column#03": {
     "VDoc:content": "rdf:type",
     "VDoc:cell": _simpleReferenceCell("@type"),
   },
-  "column#02": {
+  "column#04": {
     "VDoc:content": ["rdfs:subClassOf"],
     "VDoc:cell": {
       "VDoc:words": { "VDoc:selectField": "rdfs:subClassOf" },
@@ -184,10 +278,15 @@ module.exports = {
   vocabulary,
   classes,
   properties,
+  methods,
   elements,
   types,
   fields,
   verbs,
+  globals,
+  objectProperties,
+  objectMethods,
+
   vocabularyOther,
 
   extractionRules,

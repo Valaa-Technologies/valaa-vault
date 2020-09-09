@@ -1,10 +1,10 @@
 
 const {
-  extractee: { authors, ref, pkg },
+  extractee: { authors, strong, ref, pkg },
 } = require("@valos/revdoc");
 
 module.exports = {
-  "dc:title": `"I am a valonaut, I want to create and share interactive content"`,
+  "dc:title": [strong("Valonauts"), ` develop valospace apps for users`],
   "VDoc:tags": ["PRIMARY", "ROLE"],
   subProfiles: [
     "everyone", "personal", "student", "prototypist", "etc",

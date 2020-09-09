@@ -1,10 +1,10 @@
 
 const {
-  extractee: { authors, blockquote, dfn, em, ref, command, pkg },
+  extractee: { authors, blockquote, dfn, em, strong, ref, command, pkg },
 } = require("@valos/revdoc");
 
 module.exports = {
-  "dc:title": `"I am a ValOS technician, I want to enable valonauts and expand valospace"`,
+  "dc:title": [strong("Technicians"), ` deploy and maintain the valos fabric infrastructure`],
   "VDoc:tags": ["PRIMARY", "ROLE"],
   subProfiles: [
     "contributor", "developer", "administrator", "devops", "hacker", "etc",

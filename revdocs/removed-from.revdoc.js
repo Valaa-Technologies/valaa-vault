@@ -15,6 +15,10 @@ const {
 } = require("../packages/kernel");
 
 module.exports = {
+  "@context": {
+    ...prefixes,
+    ...context,
+  },
   "dc:title": `${name} removed-from field reference`,
   "VDoc:tags": ["ONTOLOGY", "TECHNICIAN"],
   "VRevdoc:package": name,

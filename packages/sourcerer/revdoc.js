@@ -14,6 +14,10 @@ const {
 const { name, version, description } = require("./package");
 
 module.exports = {
+  "@context": {
+    ...prefixes,
+    ...context,
+  },
   "dc:title": description,
   "VDoc:tags": ["PRIMARY", "INTRODUCTORY", "WORKSPACE", "ONTOLOGY"],
   "VRevdoc:package": name,

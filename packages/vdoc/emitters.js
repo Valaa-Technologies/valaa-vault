@@ -177,18 +177,25 @@ function emitTableHTML (node, emission, stack) {
     const headerCell = {
       ...column, "@type": "VDoc:Node", "VDoc:cell": undefined, "VDoc:wide": undefined,
     };
-    let cellTemplate = column["VDoc:cell"];
-    if (typeof cellTemplate === "string") {
-      cellTemplate = { "@type": "VDoc:Node", "VDoc:content": cellTemplate.startsWith("VDoc:select")
-          ? cellTemplate
-          : { "VDoc:selectField": cellTemplate },
-      };
-    }
+    const cellTemplate = ((typeof column["VDoc:cell"] === "object")
+            && !column["VDoc:cell"]["VDoc:selectField"])
+        ? { ...column["VDoc:cell"] }
+        : {
+          "@type": "VDoc:Node",
+          "VDoc:content": (typeof column["VDoc:cell"] !== "string")
+                  || (column["VDoc:cell"].startsWith("VDoc:select"))
+              ? column["VDoc:cell"]
+              : { "VDoc:selectField": column["VDoc:cell"] },
+        };
     if (column["VDoc:wide"]) {
+      cellTemplate["VDoc:wide"] = true;
+      if (cellTemplate["VDoc:elidable"] === undefined) {
+        cellTemplate["VDoc:elidable"] = column["VDoc:elidable"];
+      }
       entryRowTemplates.push([
         ...(headerCell["VDoc:content"] || headerCell["VDoc:words"] || headerCell["VDoc:entries"]
             ?  [headerCell] : []),
-        { "VDoc:wide": true, ...cellTemplate },
+        cellTemplate,
       ]);
     } else {
       if (!cellRowTemplates) {
@@ -212,7 +219,7 @@ function emitTableHTML (node, emission, stack) {
     for (const cellTemplates of entryRowTemplates) {
       let rowText = "";
       let idText = "";
-      let wideness;
+      let wideness = "";
       let elideRow;
       for (let i = 0; i !== cellTemplates.length; ++i) {
         const cellTemplate = cellTemplates[i];

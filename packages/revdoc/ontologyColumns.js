@@ -11,16 +11,16 @@ const vocabulary = {
     "VDoc:wide": true,
     "VDoc:cell": {
       "VDoc:resourceId": "VDoc:selectKey",
-      ...heading(em({
+      ...heading({
         "VDoc:words": [
-          strong(ref(["#", "VDoc:selectKey"])),
+          strong(em(ref(["#", "VDoc:selectKey"]))),
           {
-            "VDoc:entries": { "VDoc:selectField": "rdfs:label" },
+            "VDoc:words": { "VDoc:selectField": "rdfs:label" },
             "VDoc:elidable": true,
             "VDoc:map": ref("VDoc:selectValue", "VEngine:valosheath"),
           },
         ],
-      })),
+      }),
     },
   },
   "column#01": {
@@ -93,6 +93,10 @@ const classes = {
       "VDoc:words": { "VDoc:selectField": "rdfs:subClassOf" },
       "VDoc:map": ref("VDoc:selectValue"),
     },
+  },
+  "column#11;rdfs:comment": {
+    ...vocabulary["column#11;rdfs:comment"],
+    "VDoc:wide": false,
   },
   "column#13": {
     "VDoc:content": ref("instance properties", "VEngine:Property"),

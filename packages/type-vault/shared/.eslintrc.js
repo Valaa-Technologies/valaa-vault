@@ -78,6 +78,7 @@ module.exports = {
     "no-plusplus": 0,
     "no-prototype-builtins": 0, // We're using meta operations relatively commonly
     "no-loop-func": 0, // var is disallowed, so this is less of a problem.
+    "no-inner-declarations": 0, // come on now... probably gonna move away from this preset
     "object-property-newline": 0,
     "one-var": 0, // 'let foo, bar, baz;' for pre-declaring variables outside try-blocks so that they are available for debug output in catch-blocks
     "one-var-declaration-per-line": 0, // same as above

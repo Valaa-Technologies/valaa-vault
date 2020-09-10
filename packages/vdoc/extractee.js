@@ -37,17 +37,12 @@ module.exports = {
    * @param {Object} [options]
    * @returns
    */
-  c (languageOrCharacters, charactersOrOptions, options) {
+  c (text, { language, ...options } = {}) {
     return {
       "@type": "VDoc:CharacterData",
-      ...(typeof charactersOrOptions === "string" ? {
-        "VDoc:language": languageOrCharacters,
-        "VDoc:content": [charactersOrOptions],
-        ...(options || {}),
-      } : {
-        "VDoc:content": [languageOrCharacters],
-        ...(charactersOrOptions || {}),
-      }),
+      "VDoc:content": Array.isArray(text) ? text : [text],
+      ...(language && { "VDoc:language": language }),
+      ...(options || {}),
     };
   },
 
@@ -162,13 +157,13 @@ module.exports = {
   del () { return _htmlElement({ "VDoc:del": true }, arguments); },
 
   /**
-   * Construct a node with VDoc:quote property, making node content
+   * Construct a node with VDoc:q property, making node content
    * <q>quoted</q> (as per html5 'q')
    *
    * @param {*} entries
    * @returns
    */
-  quote () { return _htmlElement({ "VDoc:quote": true }, arguments); },
+  q () { return _htmlElement({ "VDoc:q": true }, arguments); },
 
   /**
    * Construct a node with VDoc:blockquote property, making node content

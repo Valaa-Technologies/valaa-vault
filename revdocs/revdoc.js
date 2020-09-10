@@ -20,7 +20,8 @@ const {
 } = require("../packages/kernel");
 
 const roleDocuments = Object.fromEntries(
-    filterKeysWithAllOf("tags", ["PRIMARY", "ROLE"], documents)
+    // filterKeysWithAllOf("tags", ["PRIMARY", "ROLE"], documents)
+    ["valonaut", "technician", "voyager"]
     .map(key => [key, documents[key]]));
 
 module.exports = {
@@ -130,7 +131,7 @@ recorded in an event log.`,
       },
     },
     "chapter#section_classes>3": {
-      "dc:title": [em(preferredPrefix), " ", ref("valosheath classes", "@valos/kernel#Class")],
+      "dc:title": [em(preferredPrefix), " ", ref("valosheath classes", "@valos/engine#Class")],
       "#0": [
 `This section describes all valosheath classes introduced by the
 @valos/kernel packages. These classes are provided for scripts by the
@@ -138,7 +139,7 @@ recorded in an event log.`,
       ],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.classes,
-        "VDoc:entries": filterKeysWithAnyOf("@type", "VKernel:Class", vocabulary),
+        "VDoc:entries": filterKeysWithAnyOf("@type", "VEngine:Class", vocabulary),
       },
     },
     "chapter#section_fields>4": {
@@ -217,7 +218,8 @@ the @valos/engine and their values are not recorded in event logs.`,
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.vocabularyOther,
         "VDoc:entries": filterKeysWithNoneOf("@type", [
-          "VModel:Type", "VKernel:Property", ...valosRaemFieldClasses,
+          "VModel:Type", ...valosRaemFieldClasses,
+          "VEngine:Class",
           "VEngine:Property", "VEngine:Method", "VEngine:ObjectProperty", "VEngine:ObjectMethod",
         ], vocabulary),
       },

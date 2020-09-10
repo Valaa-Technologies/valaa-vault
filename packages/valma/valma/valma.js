@@ -2432,7 +2432,7 @@ function _reloadFileConfig (configStatus) {
       configStatus.content = JSON.parse(shell.head({ "-n": 1000000 }, configStatus.path));
       __deepFreeze(configStatus.content);
     } catch (error) {
-      this.exception(error, `reading "${configStatus.path}"`);
+      _vlm.exception(error, `reading "${configStatus.path}"`);
       throw error;
     }
   }
@@ -2723,9 +2723,9 @@ function __createVargs (args, cwd = process.cwd()) {
   ret.parse = function valmaParse (...rest) {
     const vargv = baseParse.apply(this, rest);
     const options = this.getOptions();
-    let effects = [];
+    let allConsequences = [];
     for (const cause of Object.keys(options.causes || {})) {
-      effects = effects.concat(_consequences(vargv[cause], options.causes[cause]));
+      allConsequences = allConsequences.concat(_consequences(vargv[cause], options.causes[cause]));
     }
     function _consequences (reason, causes) {
       if (!reason) return [];
@@ -2735,12 +2735,14 @@ function __createVargs (args, cwd = process.cwd()) {
       }
       return [];
     }
-    if (effects.length) {
-      const { argv } = yargsParser(effects, { ...options });
+    if (allConsequences.length) {
+      const { argv } = yargsParser(allConsequences, { ...options });
       for (const effect of Object.keys(argv)) {
         const defaultValue = options.default[effect];
-        if (effect !== "_" && (argv[effect] !== vargv[effect]) && (argv[effect] !== defaultValue)
-            && (argv[effect] || (defaultValue !== undefined))) {
+        if ((effect !== "_")
+            && (argv[effect] !== vargv[effect])
+            && (argv[effect] !== defaultValue)
+            && ((argv[effect] !== undefined) || (defaultValue !== undefined))) {
           if (defaultValue && (vargv[effect] !== defaultValue)) {
             throw new Error(`Conflicting effect '${effect}' has its default value '${defaultValue
                 }' explicitly set to '${vargv[effect]}' and caused to '${argv[effect]}'`);

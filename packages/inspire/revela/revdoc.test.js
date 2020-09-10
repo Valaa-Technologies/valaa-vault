@@ -52,6 +52,10 @@ const gatewayMock = Object.assign(new FabricEventTarget(console, 2, "revela.gate
 });
 
 module.exports = {
+  "@context": {
+    ...prefixes,
+    ...context,
+  },
   "dc:title": title,
   "VDoc:tags": ["INTRODUCTORY", "ONTOLOGY", "TESTDOC"],
   "VRevdoc:package": name,

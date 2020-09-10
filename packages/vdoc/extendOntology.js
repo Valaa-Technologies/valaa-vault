@@ -33,9 +33,6 @@ module.exports = function extendOntology (statements,
       }
       let label;
       switch (definition["@type"]) {
-        case "VModel:Type":
-        case "VKernel:Class":
-          break;
         case "VModel:Field":
         case "VModel:ExpressedField":
         case "VModel:EventLoggedField":
@@ -49,28 +46,34 @@ module.exports = function extendOntology (statements,
           break;
         }
         case "VEngine:Property":
-          _addInferredIndex("VEngine:domainOfProperty", "rdfs:domain",
+          _addInferredIndex("VEngine:domainOfProperty", definition["rdfs:domain"],
               definition["VRevdoc:indexLabel"]);
           break;
         case "VEngine:Method":
-          _addInferredIndex("VEngine:domainOfMethod", "rdfs:domain",
+          _addInferredIndex("VEngine:domainOfMethod", definition["rdfs:domain"],
               definition["VRevdoc:indexLabel"]);
           break;
         case "VEngine:ObjectProperty":
-          _addInferredIndex("VEngine:hasProperty", "rdf:subject",
+          _addInferredIndex("VEngine:hasProperty", definition["rdf:subject"],
               definition["VRevdoc:indexLabel"]);
           break;
         case "VEngine:ObjectMethod":
-          _addInferredIndex("VEngine:hasMethod", "rdf:subject",
+          _addInferredIndex("VEngine:hasMethod", definition["rdf:subject"],
               definition["VRevdoc:indexLabel"]);
           break;
         default:
           break;
       }
       if (!definition["rdfs:label"] && label) definition["rdfs:label"] = [label];
-      function _addInferredIndex (indexProperty, indexIdProperty, indexLabel) {
-        if (!indexLabel || (typeof definition[indexIdProperty] !== "string")) return;
-        const [indexPrefix, indexName] = definition[indexIdProperty].split(":");
+      function _addInferredIndex (indexProperty, indexNames, indexLabel) {
+        if (!indexNames || !indexLabel) return;
+        if (Array.isArray(indexNames)) {
+          indexNames.forEach((indexName, index) => _addInferredIndex(
+              indexProperty, indexName,
+              Array.isArray(indexLabel) ? indexLabel[index] : indexLabel));
+          return;
+        }
+        const [indexPrefix, indexName] = indexNames.split(":");
         if (indexPrefix !== preferredPrefix) return;
         const indexDefinition = vocabulary[indexName];
         if (!indexDefinition) return;

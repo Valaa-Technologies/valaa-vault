@@ -15,6 +15,10 @@ const {
 const { name, version, description } = require("./package");
 
 module.exports = {
+  "@context": {
+    ...prefixes,
+    ...context,
+  },
   "dc:title": description,
   "VDoc:tags": ["PRIMARY", "INTRODUCTORY", "WORKSPACE", "ONTOLOGY"],
   "VRevdoc:package": name,
@@ -50,7 +54,7 @@ transactions. Valoscript retains ECMAScript 5 syntax and semantics.`,
     ],
   },
   "chapter#ontology>8": {
-    "dc:title": [`library `, em(name), ` ontology, preferred prefix `, em(preferredPrefix)],
+    "dc:title": ["The ", em(preferredPrefix), " namespace of the library ", pkg(name), " ontology"],
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
     "data#context": context,

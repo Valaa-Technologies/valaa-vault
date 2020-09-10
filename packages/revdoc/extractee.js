@@ -29,7 +29,7 @@ module.exports = {
     return {
       // TODO(iridian, 2019-08): Figure out if there's any sense in
       // providing language identifiers for non-natural languages.
-      ...c("https://tools.ietf.org/html/rfc5234", text),
+      ...c(text, { language: "https://tools.ietf.org/html/rfc5234" }),
       "@type": "VRevdoc:ABNF",
     };
   },
@@ -46,7 +46,7 @@ module.exports = {
     return {
       // TODO(iridian, 2019-08): Figure out if there's any sense in
       // providing language identifiers for non-natural languages.
-      ...c("https://www.w3.org/TR/json-ld11/", text),
+      ...c(text, { language: "https://www.w3.org/TR/json-ld11/" }),
       "@type": "VRevdoc:JSONLD",
     };
   },
@@ -63,7 +63,7 @@ module.exports = {
     return {
       // TODO(iridian, 2019-08): Figure out if there's any sense in
       // providing language identifiers for non-natural languages.
-      ...c("https://www.w3.org/TR/turtle/", text),
+      ...c(text, { language: "https://www.w3.org/TR/turtle/" }),
       "@type": "VRevdoc:Turtle",
     };
   },

@@ -31,6 +31,10 @@ const otherPrimaryDocuments = filterKeysWithAllOf("tags", "PRIMARY", documents)
         && !ontologyDocuments.includes(key));
 
 module.exports = {
+  "@context": {
+    ...prefixes,
+    ...context,
+  },
   "dc:title": `${name} domain content reference`,
   "VDoc:tags": ["PRIMARY", "DOMAIN", "ONTOLOGY", "TECHNICIAN"],
   "VRevdoc:package": name,

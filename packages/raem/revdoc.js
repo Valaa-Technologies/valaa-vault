@@ -2,7 +2,7 @@
 const {
   extractee: {
     c, em, ref,
-    authors, quote, pkg,
+    authors, q, pkg,
     filterKeysWithAnyOf, filterKeysWithNoneOf, valosRaemFieldClasses,
   },
   ontologyColumns,
@@ -15,6 +15,10 @@ const {
 const { name, version, description } = require("./package");
 
 module.exports = {
+  "@context": {
+    ...prefixes,
+    ...context,
+  },
   "dc:title": description,
   "VDoc:tags": ["PRIMARY", "INTRODUCTORY", "WORKSPACE", "ONTOLOGY"],
   "VRevdoc:package": name,
@@ -48,12 +52,12 @@ systems.`,
 for the fundamental `, c(`ValOS Resources`), " and ", c(`ValOS Events`), `
 systems.
 
-`, quote([
+`, q([
   `A ValOS Resource `, c(`resource`), ` represents a well-defined part of
   the world. It has a well-defined state at each particular moment in time.`,
 ]), `
 
-`, quote([
+`, q([
   `A ValOS Event `, c(`event`), ` represents a dynamic change to a
   resource by describing the change from previous to subsequent resource
   states at a particular time.`,
@@ -198,7 +202,7 @@ operations.`,
     },
   },
   "chapter#ontology>8": {
-    "dc:title": [`library `, em(name), ` ontology, preferred prefix `, em(preferredPrefix)],
+    "dc:title": ["The ", em(preferredPrefix), " namespace of the library ", pkg(name), " ontology"],
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
     "data#context": context,

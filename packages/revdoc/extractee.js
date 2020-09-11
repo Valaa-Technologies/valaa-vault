@@ -68,6 +68,16 @@ module.exports = {
     };
   },
 
+  vsx (text) {
+    // Add validation and maybe restructuring?
+    return {
+      // TODO(iridian, 2019-08): Figure out if there's any sense in
+      // providing language identifiers for non-natural languages.
+      ...c(text, { language: "https://valospace.org/inspire/Lens/0#VSX" }),
+      "@type": "VRevdoc:VSX",
+    };
+  },
+
   /**
    * Construct ReSpec authors section based on the @valos/type-vault
    * valma configuration of the current working directory.

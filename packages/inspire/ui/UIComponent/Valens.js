@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 
 import Valoscope from "~/inspire/ui/Valoscope";
 import UIComponent from "~/inspire/ui/UIComponent";
-import Lens from "~/inspire/valosheath/valos/Lens";
+import Lens from "~/inspire/Lens";
 
 import { tryCreateValensArgs, ValensPropsTag, postRenderElement } from "./_valensOps";
 import { _bindLiveSubscriptions, recordFrameKey, LensElementKey } from "./_liveOps";

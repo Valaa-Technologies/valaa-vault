@@ -8,7 +8,7 @@ import VALEK, { toVAKONTag, IsLiveTag } from "~/engine/VALEK";
 
 import getImplicitMediaInterpretation from "~/engine/Vrapper/getImplicitMediaInterpretation";
 
-import Lens from "~/inspire/valosheath/valos/Lens";
+import Lens from "~/inspire/Lens";
 
 import {
   dumpObject, patchWith, isPromise, isSymbol, thisChainEagerly, thisChainReturn, wrapError

@@ -1,6 +1,6 @@
 // @flow
 
-import { defineName } from "~/engine/valosheath";
+import { defineName, buildOntologyNamespace } from "~/engine/valosheath";
 
 export const namespace = {
   preferredPrefix: "On",
@@ -19,6 +19,33 @@ argument.
 };
 
 export default _createSymbols();
+
+export const ontology = buildOntologyNamespace(namespace, (tags, definitionDomain) => {
+      const labels = [];
+      const componentType = tags.includes("Valoscope") ? "Lens:Valoscope"
+          : tags.includes("Attribute") ? "Lens:Element"
+          : null;
+      if (componentType) {
+        definitionDomain.push(componentType);
+        labels.push([`On:${name}`, `On:${name}`]);
+      }
+      if (tags.includes("Context")) {
+        definitionDomain.push("Lens:UIContext");
+        labels.push([`context[$On.${name}]`, `$On.${name}`]);
+      }
+      if (!componentType && tags.includes("On")) {
+        labels.push([`On:${name}`]);
+      }
+      return labels;
+    }, {
+      "@context": {
+        V: "https://valospace.org/0#",
+        VKernel: "https://valospace.org/kernel/0#",
+        VEngine: "https://valospace.org/engine/0#",
+        Lens: "https://valospace.org/inspire/Lens/0#",
+        restriction: { "@reverse": "owl:onProperty" },
+      },
+    });
 
 function _createSymbols () {
   const ret = namespace.nameSymbols;

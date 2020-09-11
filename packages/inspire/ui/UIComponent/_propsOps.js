@@ -7,7 +7,7 @@ import { HostRef } from "~/raem/VALK/hostReference";
 
 import Vrapper from "~/engine/Vrapper";
 
-import Lens from "~/inspire/valosheath/valos/Lens";
+import Lens from "~/inspire/Lens";
 
 import { wrapError } from "~/tools";
 

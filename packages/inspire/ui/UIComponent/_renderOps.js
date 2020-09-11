@@ -13,7 +13,7 @@ import {
 } from "~/tools";
 
 import UIComponent from "./UIComponent";
-import Lens from "~/inspire/valosheath/valos/Lens";
+import Lens from "~/inspire/Lens";
 
 import { createDynamicKey } from "./_propsOps";
 import { wrapElementInValens, tryWrapElementInValens, postRenderElement } from "./_valensOps";

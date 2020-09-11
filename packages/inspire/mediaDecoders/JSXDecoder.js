@@ -10,7 +10,7 @@ import UIComponent, { LENS } from "~/inspire/ui/UIComponent";
 import Valens, { ValensPropsTag, tryCreateValensArgs } from "~/inspire/ui/UIComponent/Valens";
 import vidgets from "~/inspire/ui";
 import Valoscope from "~/inspire/ui/Valoscope";
-import Lens, { namespace as LensNamespace } from "~/inspire/valosheath/valos/Lens";
+import Lens, { namespace as LensNamespace } from "~/inspire/Lens";
 import _jsxTransformFromString from "~/inspire/mediaDecoders/_jsxTransformFromString";
 
 import { ScopeAccessesTag, ScopeAccessKeysTag } from "~/script/VALSK";

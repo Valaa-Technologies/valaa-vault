@@ -5,7 +5,7 @@ import Vrapper from "~/engine/Vrapper";
 
 import { thenChainEagerly, wrapError } from "~/tools";
 
-import Lens from "~/inspire/valosheath/valos/Lens";
+import Lens from "~/inspire/Lens";
 
 import type UIComponent from "./UIComponent";
 

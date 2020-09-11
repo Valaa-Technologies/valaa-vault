@@ -11,7 +11,7 @@ import { vRef } from "~/raem/VRL";
 import Vrapper from "~/engine/Vrapper";
 
 import UIComponent from "~/inspire/ui/UIComponent";
-import Lens from "~/inspire/valosheath/valos/Lens";
+import Lens from "~/inspire/Lens";
 
 import { thisChainEagerly, thisChainRedirect } from "~/tools";
 

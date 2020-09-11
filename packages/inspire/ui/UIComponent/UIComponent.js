@@ -9,7 +9,7 @@ import { Subscription, LiveUpdate } from "~/engine/Vrapper";
 import debugId from "~/engine/debugId";
 import { dumpKuery, dumpObject } from "~/engine/VALEK";
 
-import Lens from "~/inspire/valosheath/valos/Lens";
+import Lens from "~/inspire/Lens";
 
 import {
   arrayFromAny, invariantify, isPromise, outputError, thisChainEagerly, thisChainReturn, wrapError,

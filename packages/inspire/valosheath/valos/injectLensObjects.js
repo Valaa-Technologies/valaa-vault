@@ -1,6 +1,6 @@
 // @flow
 
-import Lens, { descriptorOptions } from "~/inspire/valosheath/valos/Lens";
+import Lens, { descriptorOptions } from "~/inspire/Lens";
 
 export default function injectLensObjects (
     valos: Object, rootScope: Object, hostDescriptors: Object) {

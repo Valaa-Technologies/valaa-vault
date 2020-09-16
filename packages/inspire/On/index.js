@@ -1,59 +1,50 @@
-// @flow
+const { ref } = require("@valos/revdoc/extractee");
 
-import { defineName, buildOntologyNamespace } from "~/engine/valosheath";
+const defineName = require("@valos/engine/valosheath/defineName");
 
-export const namespace = {
+module.exports = {
+  domain: "@valos/kernel",
   preferredPrefix: "On",
   baseIRI: "https://valospace.org/inspire/On/0#",
-  description:
+  namespaceModules: {
+    VKernel: "@valos/kernel/VKernel",
+    V: "@valos/kernel/V",
+    VEngine: "@valos/engine/VEngine",
+    Lens: "@valos/inspire/Lens",
+    On: "@valos/inspire/On",
+  },
+  description: [
 `The ValOS inspire On namespace contains event callback names used by
-the inspire UI layer.
-
-The namespace inherits all HTML5 event names verbatim as name suffixes
+the inspire UI layer.`,
+null,
+`The namespace inherits all HTML5 event names verbatim as name suffixes
 but also adds new valos-specific event callback names. Like HTML5
 events these callbacks are called with a synthetic event as their first
-argument.
-`,
-  nameSymbols: {},
-  nameDefinitions: {},
+argument.`,
+  ],
+  definitions: {},
+  symbols: {},
+  processTags (tags, definitionDomain) {
+    const labels = [];
+    const componentType = tags.includes("Valoscope") ? "Lens:Valoscope"
+        : tags.includes("Attribute") ? "Lens:Element"
+        : null;
+    if (componentType) {
+      definitionDomain.push(componentType);
+      labels.push([`On:${name}`, `On:${name}`]);
+    }
+    return labels;
+  },
 };
 
-export default _createSymbols();
-
-export const ontology = buildOntologyNamespace(namespace, (tags, definitionDomain) => {
-      const labels = [];
-      const componentType = tags.includes("Valoscope") ? "Lens:Valoscope"
-          : tags.includes("Attribute") ? "Lens:Element"
-          : null;
-      if (componentType) {
-        definitionDomain.push(componentType);
-        labels.push([`On:${name}`, `On:${name}`]);
-      }
-      if (tags.includes("Context")) {
-        definitionDomain.push("Lens:UIContext");
-        labels.push([`context[$On.${name}]`, `$On.${name}`]);
-      }
-      if (!componentType && tags.includes("On")) {
-        labels.push([`On:${name}`]);
-      }
-      return labels;
-    }, {
-      "@context": {
-        V: "https://valospace.org/0#",
-        VKernel: "https://valospace.org/kernel/0#",
-        VEngine: "https://valospace.org/engine/0#",
-        Lens: "https://valospace.org/inspire/Lens/0#",
-        restriction: { "@reverse": "owl:onProperty" },
-      },
-    });
+Object.defineProperty(module.exports, "__esModule", { value: true });
+module.exports.default = _createSymbols();
 
 function _createSymbols () {
-  const ret = namespace.nameSymbols;
-
-  function _defineName (name: string, createNameParameters: Object) {
-    return defineName(name, namespace, createNameParameters);
+  const ret = module.exports.symbols;
+  function _defineName (name, createNameParameters) {
+    return defineName(name, module.exports, createNameParameters);
   }
-
   _defineName("frameactive", () => ({
     tags: ["Attribute", "Event"],
     type: "EventHandler",

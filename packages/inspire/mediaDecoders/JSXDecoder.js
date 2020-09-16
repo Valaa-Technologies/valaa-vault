@@ -10,7 +10,7 @@ import UIComponent, { LENS } from "~/inspire/ui/UIComponent";
 import Valens, { ValensPropsTag, tryCreateValensArgs } from "~/inspire/ui/UIComponent/Valens";
 import vidgets from "~/inspire/ui";
 import Valoscope from "~/inspire/ui/Valoscope";
-import Lens, { namespace as LensNamespace } from "~/inspire/Lens";
+import Lens, { deprecatedNames } from "~/inspire/Lens";
 import _jsxTransformFromString from "~/inspire/mediaDecoders/_jsxTransformFromString";
 
 import { ScopeAccessesTag, ScopeAccessKeysTag } from "~/script/VALSK";
@@ -319,7 +319,7 @@ export default class JSXDecoder extends MediaDecoder {
     valoscope: ["$Lens.valoscope", "warn", "direct Lens:<property> notation"],
     vScope: ["$Lens.valoscope", "warn", "direct Lens:<property> notation"],
     valaaScope: ["$Lens.valoscope", "warn", "direct Lens:<property> notation"],
-    ...Object.fromEntries(Object.entries(LensNamespace.deprecatedNames)
+    ...Object.fromEntries(Object.entries(deprecatedNames)
         .map(([deprecated, favored]) => [deprecated, [`$Lens.${favored}`, "warn"]])),
   };
 

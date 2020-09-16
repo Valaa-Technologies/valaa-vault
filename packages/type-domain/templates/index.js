@@ -1,5 +1,5 @@
 module.exports = {
   summary: require("./summary"),
-  ontologies: require("./ontologies"),
+  ontology: require("./ontology"),
   documents: require("./documents"),
 };

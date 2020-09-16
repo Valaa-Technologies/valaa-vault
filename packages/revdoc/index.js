@@ -5,7 +5,7 @@ module.exports = {
   extension: {
     ...vdoc.extension,
     extends: [vdoc.extension],
-    ontology: require("./ontologies").VRevdoc,
+    getNamespace: () => require("./ontology").VRevdoc,
     extractors: require("./extractors"),
     emitters: require("./emitters"),
     extractee,
@@ -15,4 +15,5 @@ module.exports = {
     ...extractee,
   },
   ontologyColumns: require("./ontologyColumns"),
+  ...require("./ontologyNamespace"),
 };

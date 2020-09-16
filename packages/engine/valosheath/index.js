@@ -8,7 +8,7 @@ import {
 } from "~/engine/valosheath/hostDescriptors";
 import type { NameDefinition } from "~/engine/valosheath/namespace";
 import {
-  defineName, buildOntologyNamespace, integrateNamespace, getValosheathNamespace,
+  defineName, defineValosheathNamespace, integrateNamespace, getValosheathNamespace,
 } from "~/engine/valosheath/namespace";
 import type { Discourse } from "~/sourcerer/api/types";
 
@@ -18,7 +18,7 @@ import globalValoscriptBuiltinObjects from "./globalValoscriptBuiltinObjects";
 export {
   OwnerDefaultCouplingTag, TypeIntroTag, FieldsIntroTag, IsResourceTag,
   PropertyDescriptorsTag, TypeFieldDescriptorsTag, PrototypeFieldDescriptorsTag,
-  defineName, buildOntologyNamespace, integrateNamespace, getValosheathNamespace,
+  defineName, defineValosheathNamespace, integrateNamespace, getValosheathNamespace,
 };
 export type { NameDefinition };
 

@@ -71,6 +71,12 @@ exports.handler = async (yargv) => {
           { ...vdocState[0].introduction || {}, "dc:title": undefined }),
       ..._embedSection("apiAbstract", vdocState[0].section_api_abstract),
       ..._embedSection("ontologyAbstract", vdocState[0].section_ontology_abstract),
+      ...(vdocState[0]["VRevdoc:preferredPrefix"] && {
+        "VRevdoc:preferredPrefix": vdocState[0]["VRevdoc:preferredPrefix"],
+        "VRevdoc:baseIRI": vdocState[0]["VRevdoc:baseIRI"],
+        "VRevdoc:referencedModules": vdocState[0]["VRevdoc:referencedModules"],
+        "VRevdoc:extenderModules": vdocState[0]["VRevdoc:extenderModules"],
+      }),
       ...rest,
     };
   }
@@ -185,6 +191,17 @@ exports.handler = async (yargv) => {
       const revdocState = extension.extract(revdocSource, {
         documentIRI: _combineIRI(docsBaseIRI, targetDocPath, targetDocName),
       });
+      const referencedModules = revdocState[0]["VRevdoc:referencedModules"];
+      if (referencedModules && yargv["alternate-root"]) {
+        for (const [referencePrefix, referredModule] of Object.entries(referencedModules)) {
+          const alternateModulePath =
+              vlm.path.join(process.cwd(), yargv["alternate-root"], referredModule);
+          if (vlm.shell.test("-f", vlm.path.join(alternateModulePath, "index.js"))
+              || vlm.shell.test("-f", `${alternateModulePath}.js`)) {
+            referencedModules[referencePrefix] = alternateModulePath;
+          }
+        }
+      }
       const revdocHTML = await emitHTML(revdocState);
       const targetDir = vlm.path.join("docs", targetDocPath);
       await vlm.shell.mkdir("-p", targetDir);

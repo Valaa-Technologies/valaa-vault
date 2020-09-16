@@ -8,7 +8,7 @@ module.exports = {
     ...vdoc.extension,
     ...revdoc.extension,
     extends: [revdoc.extension, vdoc.extension],
-    ontology: require("./ontologies").VSbomdoc,
+    getNamespace: () => require("./ontology").VSbomdoc,
     extractors: {},
     emitters: require("./emitters"),
     extractee,

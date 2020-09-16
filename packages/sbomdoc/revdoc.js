@@ -1,28 +1,31 @@
 // @flow
 
-const { extension: { ontology, extractee, emitters } } = require("@valos/sbomdoc");
+const { extension: { extractee, emitters } } = require("@valos/sbomdoc");
 const {
   extractee: { authors, em, ref, /* dfn, */ pkg, filterKeysWithAnyOf, filterKeysWithNoneOf },
-  ontologyColumns,
+  ontologyColumns, revdocOntologyProperties,
 } = require("@valos/revdoc");
 
 const { name, version, description } = require("./package");
 
 const {
-  preferredPrefix, baseIRI, ontologyDescription, prefixes, vocabulary, context, extractionRules,
-} = ontology;
+  VSbomdoc: {
+    preferredPrefix, baseIRI, description: namespaceDescription,
+    prefixes, context, referencedModules, vocabulary, extractionRules,
+  },
+  ...remainingOntology
+} = require("./ontology");
 
 module.exports = {
-  "@context": {
-    ...prefixes,
-    ...context,
-  },
+  "@context": { ...prefixes, ...context },
   "dc:title": description,
   "VDoc:tags": ["PRIMARY", "ONTOLOGY"],
   "VRevdoc:package": name,
+  "VRevdoc:version": version,
   "VRevdoc:preferredPrefix": preferredPrefix,
   "VRevdoc:baseIRI": baseIRI,
-  "VRevdoc:version": version,
+  ...revdocOntologyProperties({ prefixes, context, referencedModules }, remainingOntology),
+
   respecConfig: {
     subtitle: version,
     specStatus: "unofficial",
@@ -51,7 +54,7 @@ npm package.`,
   },
   "chapter#introduction>2": {
     "#0": [
-`SBoMDoc is a VDoc extension which uses CycloneDX namespaces and can
+`VSbomdoc is a VDoc extension which uses CycloneDX namespaces and can
 emit BOM documents in various formats.`,
     ],
   },
@@ -61,7 +64,7 @@ emit BOM documents in various formats.`,
     "data#vocabulary": vocabulary,
     "data#context": context,
     "#section_ontology_abstract>0": [ontologyDescription || ""],
-    "chapter#section_prefixes>1;SBoMDoc IRI prefixes": {
+    "chapter#section_prefixes>1;VSbomdoc IRI prefixes": {
       "#0": [],
       "table#>0;prefixes": ontologyColumns.prefixes,
     },
@@ -90,27 +93,27 @@ emit BOM documents in various formats.`,
             "@type", ["VDoc:Class", "VDoc:Property"], vocabulary),
       },
     },
-    "chapter#section_context>9;SBoMDoc JSON-LD context term definitions": {
+    "chapter#section_context>9;VSbomdoc JSON-LD context term definitions": {
       "#0": [],
       "table#>0;context": ontologyColumns.context,
     },
   },
-  "chapter#transformations>9;SBoMDoc transformations": {
+  "chapter#transformations>9;VSbomdoc transformations": {
     "#0": [],
-    "chapter#extraction_rules>0;SBoMDoc extraction rules": {
+    "chapter#extraction_rules>0;VSbomdoc extraction rules": {
       "#0": [],
       "table#>0;extraction_rules_data": ontologyColumns.extractionRules,
       "data#extraction_rules_data": extractionRules,
     },
-    "chapter#extractee_api>1;SBoMDoc extractee API": {
+    "chapter#extractee_api>1;VSbomdoc extractee API": {
       "#0": [],
       "table#>0;extractee_api_lookup": ontologyColumns.extractee,
       "data#extractee_api_lookup": extractee,
     },
-    "chapter#emission_output>2;SBoMDoc emission output": {
+    "chapter#emission_output>2;VSbomdoc emission output": {
       "#0": [],
     },
-    "chapter#emission_rules>3;SBoMDoc emission rules": {
+    "chapter#emission_rules>3;VSbomdoc emission rules": {
       "#0": [
         `ReVDoc provides html emission rules for `,
         { "VDoc:words": Object.keys(emitters.html) },

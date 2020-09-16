@@ -1,29 +1,30 @@
 // @flow
 
-const { extension: { ontology, extractee } } = require("@valos/twindoc");
+const { extension: { extractee } } = require("@valos/twindoc");
 const {
   extractee: { authors, em, ref, pkg, /* dfn, */ filterKeysWithAnyOf, filterKeysWithNoneOf },
-  ontologyColumns,
+  ontologyColumns, revdocOntologyProperties,
 } = require("@valos/revdoc");
 
 const { name, description, version } = require("./package");
 
 const {
-  preferredPrefix, baseIRI, ontologyDescription,
-  prefixes, vocabulary, context, extractionRules,
-} = ontology;
+  VTwindoc: {
+    preferredPrefix, baseIRI, description: namespaceDescription,
+    prefixes, context, referencedModules, vocabulary, extractionRules,
+  },
+  ...remainingOntology
+} = require("./ontology");
 
 module.exports = {
-  "@context": {
-    ...prefixes,
-    ...context,
-  },
   "dc:title": description,
   "VDoc:tags": ["PRIMARY", "ONTOLOGY"],
   "VRevdoc:package": name,
+  "VRevdoc:version": version,
   "VRevdoc:preferredPrefix": preferredPrefix,
   "VRevdoc:baseIRI": baseIRI,
-  "VRevdoc:version": version,
+  ...revdocOntologyProperties({ prefixes, context, referencedModules }, remainingOntology),
+
   respecConfig: {
     subtitle: version,
     specStatus: "unofficial",
@@ -33,11 +34,11 @@ module.exports = {
   },
   "chapter#abstract>0": {
     "#0": [
-`This document specifies TwinDoc, a `, ref("VDoc extension", "@valos/vdoc#extension"), `
+`This document specifies VTwindoc, a `, ref("VDoc extension", "@valos/vdoc#extension"), `
 which specifies an isomorphism and synchronization transformations
 between VDoc documents and valospace resources.
 
-More specifically TwinDoc allows for the serialization and
+More specifically VTwindoc allows for the serialization and
 deserialization of an arbitrary selection of valospace resources
 into a VDoc document array and back even if the source resources
 are not a representation of a VDoc document nor use any VDoc core
@@ -58,7 +59,7 @@ npm package.`,
   },
   "chapter#introduction>2": {
     "#0": [
-`TwinDoc provides both full isomorphic synchronization as well as
+`VTwindoc provides both full isomorphic synchronization as well as
 incremental, additive updates between VDoc documents and valospace
 resources.
 The fully isomoprhic extraction and emission transformations to
@@ -68,7 +69,7 @@ valospace resources provide lossless roundtrips to both directions:`,
   `extract + emit: a roundtrip starting from valospace into VDocState back into valospace`,
 ], }, `
 
-TwinDoc also specifies incremental transformations which are given
+VTwindoc also specifies incremental transformations which are given
 a diff base in addition to the source and which compute a diffset and
 then merge the resulting diffset to the pre-existing transformation
 target. This not only gives performance advantages but also makes it
@@ -77,13 +78,16 @@ partial primary sources.`,
     ],
   },
   "chapter#ontology>8;TwinDoc ontology": {
+    "dc:title": [
+      "The ", em("VTwindoc"), " fabric namespace of the library ontology of ", pkg(name),
+    ],
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
     "data#context": context,
     "#section_ontology_abstract>0": {
-      "#0": [ontologyDescription || ""],
+      "#0": [namespaceDescription || ""],
     },
-    "chapter#section_prefixes>1;TwinDoc IRI prefixes": {
+    "chapter#section_prefixes>1;VTwindoc IRI prefixes": {
       "#0": [],
       "table#>0;prefixes": ontologyColumns.prefixes,
     },
@@ -112,30 +116,30 @@ partial primary sources.`,
             "@type", ["VDoc:Class", "VDoc:Property"], vocabulary),
       },
     },
-    "chapter#section_context>9;TwinDoc JSON-LD context term definitions": {
+    "chapter#section_context>9;VTwindoc JSON-LD context term definitions": {
       "#0": [],
       "table#>0;context": ontologyColumns.context,
     },
   },
-  "chapter#transformations>9;TwinDoc transformations": {
-    "chapter#extraction_rules>0;TwinDoc extraction rules": {
+  "chapter#transformations>9;VTwindoc transformations": {
+    "chapter#extraction_rules>0;VTwindoc extraction rules": {
       "#0": [],
       "table#>0;extraction_rules_data": ontologyColumns.extractionRules,
       "data#extraction_rules_data": extractionRules,
     },
-    "chapter#extractee_api>1;TwinDoc extractee API": {
+    "chapter#extractee_api>1;VTwindoc extractee API": {
       "#0": [],
       "table#>0;extractee_api_lookup": ontologyColumns.extractee,
       "data#extractee_api_lookup": extractee,
     },
-    "chapter#emission_output>2;TwinDoc emission output": {
+    "chapter#emission_output>2;VTwindoc emission output": {
       "#0": [
-        `TwinDoc emits event log updates into valospace resources.`,
+        `VTwindoc emits event log updates into valospace resources.`,
         pkg("@valos/hypertwin"), ` provides tools which implement this
         transformation using the gateway API.`,
       ],
     },
-    "chapter#emission_rules>3;TwinDoc emission rules": {
+    "chapter#emission_rules>3;VTwindoc emission rules": {
       "#0": [],
     },
   },

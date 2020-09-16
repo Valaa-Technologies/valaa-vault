@@ -1,11 +1,11 @@
 
 const {
-  ontologyColumns,
   extractee: {
     em, ref,
     authors, pkg,
-    filterKeysWithAnyOf, filterKeysWithNoneOf, valosRaemFieldClasses,
+    filterKeysWithAnyOf, filterKeysWithNoneOf,
   },
+  ontologyColumns, revdocOntologyProperties,
 } = require("@valos/revdoc");
 
 const { name, version, description } = require("./../package");
@@ -13,22 +13,20 @@ const { name, version, description } = require("./../package");
 const title = `The valospace 'undefined' namespace reference`;
 const {
   On: {
-    preferredPrefix, baseIRI, ontologyDescription, prefixes, vocabulary, context,
+    preferredPrefix, baseIRI, description: namespaceDescription,
+    prefixes, context, referencedModules, vocabulary,
   },
-} = require("./../ontologies");
+  ...remainingOntology
+} = require("../ontology");
 
 module.exports = {
-  "VDoc:tags": ["VALOSHEATH", "ONTOLOGY"],
-  "@context": {
-    ...prefixes,
-    ...context,
-  },
-
   "dc:title": title,
+  "VDoc:tags": ["VALOSHEATH", "ONTOLOGY"],
   "VRevdoc:package": name,
   "VRevdoc:version": version,
   "VRevdoc:preferredPrefix": preferredPrefix,
   "VRevdoc:baseIRI": baseIRI,
+  ...revdocOntologyProperties({ prefixes, context, referencedModules }, remainingOntology),
 
   respecConfig: {
     specStatus: "unofficial",
@@ -64,7 +62,7 @@ ref("VDoc specification", "@valos/vdoc"), ` for reference documentation.`,
   },
   "chapter#section_valosheath>8": {
     "dc:title": [
-      "The ", em(preferredPrefix), " valosheath namespace of the library ", pkg(name), " ontology",
+      "The ", em(preferredPrefix), " valosheath namespace of the library ontology of ", pkg(name),
     ],
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,

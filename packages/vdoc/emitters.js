@@ -1,6 +1,5 @@
 const patchWith = require("@valos/tools/patchWith").default;
 const htmlEntities = require("he");
-const { VDoc } = require("./ontologies");
 
 module.exports = {
   html: {
@@ -28,9 +27,16 @@ function emitValueHTML (value, emission) {
   return `${emission}${htmlEntities.encode(value)}`;
 }
 
-const htmlElements = Object.entries(VDoc.vocabulary)
-    .filter(([, entry]) => entry["VDoc:elementName"])
-    .reduce((a, [vdocName, entry]) => { a[`VDoc:${vdocName}`] = entry; return a; }, {});
+let _htmlElements;
+
+function _getHTMLElement (elementName) {
+  if (!_htmlElements) {
+    _htmlElements = Object.entries(require("./ontology").VDoc.vocabulary)
+        .filter(([, entry]) => entry["VDoc:elementName"])
+        .reduce((a, [vdocName, entry]) => { a[`VDoc:${vdocName}`] = entry; return a; }, {});
+  }
+  return _htmlElements[elementName];
+}
 
 function emitNodeHTML (node, emission, stack) {
   let body = "";
@@ -58,10 +64,11 @@ function emitNodeHTML (node, emission, stack) {
     content = stack.document[node["@id"]];
   }
   if (content) {
-    body += stack.emitNode(content, "");
+    const contentText = stack.emitNode(content, "");
+    body += contentText;
     let openers = "", closers = "";
     Object.entries(node).forEach(([key, value]) => {
-      const elem = (htmlElements[key] || {})["VDoc:elementName"];
+      const elem = (_getHTMLElement(key) || {})["VDoc:elementName"];
       if (elem) {
         if (value) {
           openers += `<${elem}>`;

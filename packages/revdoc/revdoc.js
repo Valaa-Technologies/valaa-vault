@@ -1,28 +1,30 @@
 // @flow
 
 const {
-  extension: { ontology, extractee, emitters },
+  extension: { extractee, emitters },
   extractee: { authors, em, ref, /* dfn, */ pkg, filterKeysWithAnyOf, filterKeysWithNoneOf },
-  ontologyColumns,
+  ontologyColumns, revdocOntologyProperties,
 } = require("@valos/revdoc");
 
 const { name, version, description } = require("./package");
 
 const {
-  preferredPrefix, baseIRI, ontologyDescription, prefixes, vocabulary, context, extractionRules,
-} = ontology;
+  VRevdoc: {
+    preferredPrefix, baseIRI, description: namespaceDescription,
+    prefixes, context, referencedModules, vocabulary, extractionRules,
+  },
+  ...remainingOntology
+} = require("./ontology");
 
 module.exports = {
-  "@context": {
-    ...prefixes,
-    ...context,
-  },
   "dc:title": description,
   "VDoc:tags": ["PRIMARY", "ONTOLOGY"],
   "VRevdoc:package": name,
+  "VRevdoc:version": version,
   "VRevdoc:preferredPrefix": preferredPrefix,
   "VRevdoc:baseIRI": baseIRI,
-  "VRevdoc:version": version,
+  ...revdocOntologyProperties({ prefixes, context, referencedModules }, remainingOntology),
+
   respecConfig: {
     subtitle: version,
     specStatus: "unofficial",
@@ -32,7 +34,7 @@ module.exports = {
   },
   "chapter#abstract>0": {
     "#0": [
-`This document specifies ReVDoc, a `, ref("VDoc extension", "@valos/vdoc#extension"), `
+`This document specifies VRevdoc, a `, ref("VDoc extension", "@valos/vdoc#extension"), `
 for extracting and emitting `, ref("ReSpec documents", "https://github.com/w3c/respec"), `.`,
     ],
   },
@@ -49,14 +51,14 @@ npm package.`,
   },
   "chapter#introduction>2": {
     "#0":
-`ReVDoc is a VDoc extension which can produce ReSpec documents.`
+`VRevdoc is a VDoc extension which can produce ReSpec documents.`
   },
   "chapter#ontology>8;ReVDoc ontology": {
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
     "data#context": context,
     "#section_ontology_abstract>0": [ontologyDescription || ""],
-    "chapter#section_prefixes>1;ReVDoc IRI prefixes": {
+    "chapter#section_prefixes>1;VRevdoc IRI prefixes": {
       "#0": [],
       "table#>0;prefixes": ontologyColumns.prefixes,
     },
@@ -85,34 +87,34 @@ npm package.`,
             "@type", ["VDoc:Class", "VDoc:Property"], vocabulary),
       },
     },
-    "chapter#section_context>9;ReVDoc JSON-LD context term definitions": {
+    "chapter#section_context>9;VRevdoc JSON-LD context term definitions": {
       "#0": [],
       "table#>0;context": ontologyColumns.context,
     },
   },
-  "chapter#transformations>9:ReVDoc transformations": {
+  "chapter#transformations>9:VRevdoc transformations": {
     "#0": [
-`ReVDoc lightly extends basic VDoc extraction with some ReSpec specific
+`VRevdoc lightly extends basic VDoc extraction with some ReSpec specific
 primitives and specifies a ReSpec html emission transformation.`,
     ],
-    "chapter#extraction_rules>0;ReVDoc extraction rules": {
+    "chapter#extraction_rules>0;VRevdoc extraction rules": {
       "#0": [],
       "table#>0;extraction_rules_data": ontologyColumns.extractionRules,
       "data#extraction_rules_data": extractionRules,
     },
-    "chapter#extractee_api>1;ReVDoc extractee API": {
+    "chapter#extractee_api>1;VRevdoc extractee API": {
       "#0": [],
       "table#>0;extractee_api_lookup": ontologyColumns.extractee,
       "data#extractee_api_lookup": extractee,
     },
-    "chapter#emission_output>2;ReVDoc emission output": {
+    "chapter#emission_output>2;VRevdoc emission output": {
       "#0": [
-`ReVDoc emits html which makes use of ReSpec primitives.`,
+`VRevdoc emits html which makes use of ReSpec primitives.`,
       ],
     },
-    "chapter#emission_rules>3;ReVDoc emission rules": {
+    "chapter#emission_rules>3;VRevdoc emission rules": {
       "#0": [
-`ReVDoc provides html emission rules for `, { "VDoc:words": Object.keys(emitters.html) },
+`VRevdoc provides html emission rules for `, { "VDoc:words": Object.keys(emitters.html) },
       ],
     },
   },

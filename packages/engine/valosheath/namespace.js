@@ -2,15 +2,16 @@
 
 import { HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
 import Transient from "~/raem/state/Transient";
-import {
-  qualifiedNamesOf, qualifiedSymbol, deprecateSymbolInFavorOf,
-} from "~/raem/tools/namespaceSymbols";
+import { qualifiedSymbol, deprecateSymbolInFavorOf } from "~/raem/tools/namespaceSymbols";
 
 // import debugId from "~/engine/debugId";
 import { Valker } from "~/engine/VALEK";
 import type Vrapper from "~/engine/Vrapper";
 
-import { dumpify, isSymbol } from "~/tools";
+import { isSymbol } from "~/tools";
+
+export const defineName = require("./defineName");
+export const defineValosheathNamespace = require("./defineValosheathNamespace");
 
 export type NameDefinition = {
   tags: string[],
@@ -24,35 +25,24 @@ export type Namespace = {
   preferredPrefix: string,
   baseIRI: string,
   description: string,
-  nameSymbols: { [name: string | Symbol]: Symbol | string },
-  nameDefinitions: { [name: string]: NameDefinition },
+  symbols: { [name: string | Symbol]: Symbol | string },
+  definitions: { [name: string]: NameDefinition },
 };
-
-export function defineName (name: string, namespace: Namespace,
-    createNameParameters: Object, commonNameParameters: Object = {}) {
-  namespace.nameDefinitions[name] = () => ({
-    ...createNameParameters(),
-    ...commonNameParameters,
-  });
-  const symbol = namespace.nameSymbols[name] = qualifiedSymbol(namespace.preferredPrefix, name);
-  namespace.nameSymbols[symbol] = name; // Symbol -> name reverse lookup
-  return namespace.nameSymbols[name];
-}
 
 export function integrateNamespace (
     namespace: Namespace, rootScope: Object, hostDescriptors: Object) {
   const {
     preferredPrefix, baseIRI, description,
-    nameSymbols, nameDefinitions, deprecatedNames,
+    symbols, definitions, deprecatedNames,
   } = namespace;
   const names = {};
-  rootScope[`$${preferredPrefix}`] = nameSymbols;
-  hostDescriptors.set(nameSymbols, {
+  rootScope[`$${preferredPrefix}`] = symbols;
+  hostDescriptors.set(symbols, {
     writable: false, enumerable: true, configurable: false,
     valos: true, namespace: true, description, preferredPrefix, baseIRI,
     names,
   });
-  for (const [nameSuffix, createDefinition] of Object.entries(nameDefinitions)) {
+  for (const [nameSuffix, createDefinition] of Object.entries(definitions)) {
     const { value, defaultValue, ...rest } = createDefinition();
     const entryDescriptor = names[nameSuffix] = Object.freeze({
       writable: false, enumerable: true, configurable: false,
@@ -62,82 +52,15 @@ export function integrateNamespace (
       ...rest,
     });
     if (defaultValue || value) {
-      rootScope[nameSymbols[nameSuffix]] = Object.freeze(defaultValue || value);
+      rootScope[symbols[nameSuffix]] = Object.freeze(defaultValue || value);
     }
-    hostDescriptors.set(nameSymbols[nameSuffix], entryDescriptor);
+    hostDescriptors.set(symbols[nameSuffix], entryDescriptor);
   }
   for (const [deprecatedName, inFavorOfName] of Object.entries(deprecatedNames || {})) {
     const favoredSymbol = qualifiedSymbol(preferredPrefix, inFavorOfName);
     deprecateSymbolInFavorOf(preferredPrefix, deprecatedName, favoredSymbol);
   }
-  return nameSymbols;
-}
-
-export function buildOntologyNamespace (
-    namespace: Namespace, processTags, initialDefinitions: Object) {
-      initialDefinitions.ontology = { "@type": "owl:Ontology",
-    "rdfs:label": namespace.preferredPrefix,
-    "rdf:about": namespace.baseIRI,
-    "rdfs:comment": namespace.description,
-  };
-
-  for (const [name, createParameters] of Object.entries(namespace.nameDefinitions)) {
-    const { tags, type, description, value, defaultValue } = createParameters();
-    const termDefinition = { "@type": "VEngine:Property", tags };
-    if (value !== undefined) termDefinition.value = _valueText(value);
-    if (defaultValue !== undefined) termDefinition.defaultValue = _valueText(defaultValue);
-    function _addLabel (label, indexLabel) {
-      (termDefinition["rdfs:label"] || (termDefinition["rdfs:label"] = []))
-          .push(label);
-      if (indexLabel) {
-        (termDefinition["VRevdoc:indexLabel"] || (termDefinition["VRevdoc:indexLabel"] = []))
-            .push(indexLabel);
-      }
-    }
-    const domain = [];
-    if (tags) {
-      termDefinition.tags = tags;
-      if (processTags) {
-        for (const [label, indexLabel] of (processTags(name, tags, domain) || [])) {
-          _addLabel(label, indexLabel);
-        }
-      }
-    }
-    termDefinition["rdfs:domain"] = !domain.length ? "rdfs:Resource"
-        : (domain.length === 1) ? domain[0]
-        : domain;
-    const range = [];
-    if (type) {
-      if (type.includes("number")) range.push("xsd:integer");
-      if (type.includes("boolean")) range.push("xsd:boolean");
-      if (type.includes("string")) range.push("xsd:string");
-    }
-    termDefinition["rdfs:range"] = !range.length ? "rdfs:Resource"
-        : (range.length === 1) ? range[0]
-        : range;
-    if (description) {
-      if (!Array.isArray(description)) {
-        termDefinition["rdfs:comment"] = description;
-      } else {
-        termDefinition["rdfs:comment"] = description[0];
-        termDefinition["VRevdoc:introduction"] = description.slice(1);
-      }
-    }
-    initialDefinitions[name] = termDefinition;
-  }
-
-  return initialDefinitions;
-
-  function _valueText (value) {
-    if ((value == null) || (typeof value !== "object")) {
-      const qualifiedNames = qualifiedNamesOf(value);
-      if (qualifiedNames) return qualifiedNames[2];
-      return dumpify(value);
-    }
-    if (Array.isArray(value)) return `[${value.map(_valueText).join(", ")}]`;
-    if (value.delegate) return _valueText(value.delegate);
-    return `<${(value.constructor || "").name || "Object"}>`;
-  }
+  return symbols;
 }
 
 export const NamespaceInterfaceTag = Symbol("NamespaceInterface");

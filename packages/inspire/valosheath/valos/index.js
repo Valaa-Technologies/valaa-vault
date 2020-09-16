@@ -4,8 +4,8 @@ import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
 
 import { getValosheathNamespace, integrateNamespace } from "~/engine/valosheath";
 
-import { namespace as LensNamespace } from "~/inspire/Lens";
-import { namespace as OnNamespace } from "~/inspire/On";
+import * as LensNamespace from "~/inspire/Lens";
+import * as OnNamespace from "~/inspire/On";
 
 export default function extendValOSWithInspire (rootScope: Object, hostDescriptors: any) {
   const valosheath = rootScope.valos || (rootScope.Valaa = rootScope.valos = {});

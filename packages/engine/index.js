@@ -6,7 +6,6 @@ export const valosheath = require("~/gateway-api/valosheath").default;
 
 export default valosheath.exportSpindle({ name: "@valos/engine", ContentAPI });
 
-
 export {
                                       ContentAPI,
                         ContentAPI as EngineContentAPI,

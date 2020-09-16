@@ -1,12 +1,12 @@
 // @flow
 
-import Lens, { descriptorOptions } from "~/inspire/Lens";
+import Lens, { definitions } from "~/inspire/Lens";
 
 export default function injectLensObjects (
     valos: Object, rootScope: Object, hostDescriptors: Object) {
   valos.Lens = Lens;
   const lensDescriptors = {};
-  for (const [slotName, createLensParameters] of Object.entries(descriptorOptions)) {
+  for (const [slotName, createLensParameters] of Object.entries(definitions)) {
     const { type, description, isEnabled, lens, defaultLens } = createLensParameters();
     const descriptor = {
       valos: true, symbol: true,

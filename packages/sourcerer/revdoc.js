@@ -4,26 +4,29 @@ const {
     c, authors, em, pkg, ref,
     filterKeysWithAnyOf, filterKeysWithNoneOf, valosRaemFieldClasses,
   },
-  ontologyColumns,
+  ontologyColumns, revdocOntologyProperties,
 } = require("@valos/revdoc");
 
 const {
-  VSourcerer: { preferredPrefix, baseIRI, ontologyDescription, prefixes, vocabulary, context },
-} = require("./ontologies");
+  VSourcerer: {
+    preferredPrefix, baseIRI, description: namespaceDescription,
+    prefixes, context, referencedModules, vocabulary,
+  },
+  ...remainingOntology
+} = require("./ontology");
 
 const { name, version, description } = require("./package");
 
 module.exports = {
-  "@context": {
-    ...prefixes,
-    ...context,
-  },
+  "@context": { ...prefixes, ...context },
   "dc:title": description,
   "VDoc:tags": ["PRIMARY", "INTRODUCTORY", "WORKSPACE", "ONTOLOGY"],
   "VRevdoc:package": name,
+  "VRevdoc:version": version,
   "VRevdoc:preferredPrefix": preferredPrefix,
   "VRevdoc:baseIRI": baseIRI,
-  "VRevdoc:version": version,
+  ...revdocOntologyProperties({ prefixes, context, referencedModules }, remainingOntology),
+
   respecConfig: {
     specStatus: "unofficial",
     editors: authors("iridian"),
@@ -48,7 +51,9 @@ c("ValOS event streams"), `.`,
     "#0": [],
   },
   "chapter#ontology>8": {
-    "dc:title": [`library `, em(name), ` ontology, preferred prefix `, em(preferredPrefix)],
+    "dc:title": [
+      "The ", em(preferredPrefix), " valospace namespace of the library ontology of ", em(name),
+    ],
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
     "data#context": context,

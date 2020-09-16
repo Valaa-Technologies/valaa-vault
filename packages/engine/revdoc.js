@@ -1,31 +1,32 @@
 
 const {
-  ontologyColumns,
   extractee: {
-    c, em, ref, cli, command, cpath, bulleted,
+    em, ref,
     authors, pkg,
     filterKeysWithAnyOf, filterKeysWithNoneOf, valosRaemFieldClasses,
   },
+  ontologyColumns, revdocOntologyProperties,
 } = require("@valos/revdoc");
 
 const { name, version, description, valos: { type } = {} } = require("./package");
 
 const title = `${name} ${type} workspace`;
 const {
-  VEngine: { preferredPrefix, baseIRI, ontologyDescription, prefixes, vocabulary, context },
-} = require("./ontologies");
+  VEngine: {
+    preferredPrefix, baseIRI, description: namespaceDescription,
+    prefixes, context, referencedModules, vocabulary,
+  },
+  ...remainingOntology
+} = require("./ontology");
 
 module.exports = {
-  "@context": {
-    ...prefixes,
-    ...context,
-  },
   "VDoc:tags": ["WORKSPACE", "ONTOLOGY"],
   "dc:title": title,
   "VRevdoc:package": name,
   "VRevdoc:version": version,
   "VRevdoc:preferredPrefix": preferredPrefix,
   "VRevdoc:baseIRI": baseIRI,
+  ...revdocOntologyProperties({ prefixes, context, referencedModules }, remainingOntology),
 
   respecConfig: {
     specStatus: "unofficial",
@@ -59,13 +60,14 @@ ref("VDoc specification", "@valos/vdoc"), ` for reference documentation.`,
     ],
   },
   "chapter#ontology>8": {
-    "dc:title": ["The ", em(preferredPrefix), " namespace of the library ", pkg(name), " ontology"],
+    "dc:title": [
+      "The ", em(preferredPrefix), " fabric namespace of the library ontology of ", pkg(name),
+    ],
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
     "data#context": context,
     "#section_ontology_abstract>0": [
-      ontologyDescription,
-"[Describe the VEngine ontology here. Remove unnecessary sections below.]",
+      namespaceDescription,
     ],
     "chapter#section_prefixes>1": {
       "dc:title": [em(name), " IRI prefixes"],
@@ -75,7 +77,7 @@ ref("VDoc specification", "@valos/vdoc"), ` for reference documentation.`,
     "chapter#section_classes>2": {
       "dc:title": [em(preferredPrefix), " ", ref("fabric classes", "@valos/kernel#Class")],
       "#0": [
-"This section describes fabric classes introduced by the 'VEngine' ontology",
+"This section describes fabric classes introduced by the 'VEngine' namespace",
       ],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.classes,
@@ -85,7 +87,7 @@ ref("VDoc specification", "@valos/vdoc"), ` for reference documentation.`,
     "chapter#section_properties>3": {
       "dc:title": [em(preferredPrefix), " ", ref("fabric properties", "@valos/kernel#Property")],
       "#0": [
-"This section describes fabric properties introduced by the 'VEngine' ontology",
+"This section describes fabric properties introduced by the 'VEngine' namespace",
       ],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.properties,
@@ -97,7 +99,7 @@ ref("VDoc specification", "@valos/vdoc"), ` for reference documentation.`,
         em(preferredPrefix), " ", ref("valosheath methods", "@valos/engine#Method"),
       ],
       "#0": [
-"This section describes fabric methods introduced by the 'VEngine' ontology",
+"This section describes fabric methods introduced by the 'VEngine' namespace",
       ],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.methods,
@@ -107,7 +109,7 @@ ref("VDoc specification", "@valos/vdoc"), ` for reference documentation.`,
     "chapter#section_resolvers>5": {
       "dc:title": [em(preferredPrefix), " ", ref("field resolvers", "@valos/raem#Resolver")],
       "#0": [
-"This section describes valospace-to-fabric resolvers introduced by the 'VEngine' ontology",
+"This section describes valospace-to-fabric resolvers introduced by the 'VEngine' namespace",
       ],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.verbs,
@@ -119,7 +121,7 @@ ref("VDoc specification", "@valos/vdoc"), ` for reference documentation.`,
         em(preferredPrefix), " ", ref("valosheath globals", "@valos/engine#Global"),
       ],
       "#0": [
-"This section describes valosheath global objects introduced by the 'VEngine' ontology",
+"This section describes valosheath global objects introduced by the 'VEngine' namespace",
       ],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.globals,

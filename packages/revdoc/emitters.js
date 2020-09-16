@@ -1,5 +1,6 @@
 const { extension: vdocExtension } = require("@valos/vdoc");
 const { wrapError, dumpObject } = require("@valos/tools/wrapError");
+const { obtainFullVocabulary } = require("@valos/revdoc/ontologyNamespace");
 
 module.exports = {
   html: {

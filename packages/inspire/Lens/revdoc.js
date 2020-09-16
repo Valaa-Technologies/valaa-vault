@@ -1,31 +1,32 @@
 
 const {
-  ontologyColumns,
   extractee: {
     em, ref, vsx, authors, pkg, filterKeysWithAnyOf, filterKeysWithNoneOf,
   },
+  ontologyColumns, revdocOntologyProperties,
 } = require("@valos/revdoc");
 
 const { tag } = require("@valos/inspire/Lens");
 
 const { name, version, description } = require("../package");
 
-const title = "Lens ontology";
+const title = "Lens namespace";
 const {
-  Lens: { preferredPrefix, baseIRI, ontologyDescription, prefixes, vocabulary, context },
-} = require("../ontologies");
+  Lens: {
+    preferredPrefix, baseIRI, description: namespaceDescription,
+    prefixes, context, referencedModules, vocabulary,
+  },
+  ...remainingOntology
+} = require("../ontology");
 
 module.exports = {
-  "@context": {
-    ...prefixes,
-    ...context,
-  },
   "VDoc:tags": ["ONTOLOGY"],
   "dc:title": title,
   "VRevdoc:package": name,
   "VRevdoc:version": version,
   "VRevdoc:preferredPrefix": preferredPrefix,
   "VRevdoc:baseIRI": baseIRI,
+  ...revdocOntologyProperties({ prefixes, context, referencedModules }, remainingOntology),
 
   respecConfig: {
     specStatus: "unofficial",
@@ -124,12 +125,14 @@ references are implicit ones by the inspire UI engine internals.`,
     ],
   },
   "chapter#ontology>8": {
-    "dc:title": ["The ", em(preferredPrefix), " namespace of the library ", pkg(name), " ontology"],
+    "dc:title": [
+      "The ", em(preferredPrefix), " valosheath namespace of the library ontology of ", pkg(name),
+    ],
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
     "data#context": context,
     "#section_ontology_abstract>0": [
-      ontologyDescription || "",
+      namespaceDescription || "",
     ],
     "chapter#section_prefixes>1": {
       "dc:title": [em(name), " IRI prefixes"],

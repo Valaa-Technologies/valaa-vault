@@ -1,28 +1,30 @@
 // @flow
 
-const { extension: { ontology, extractee, emitters } } = require("@valos/vdoc");
+const { extension: { extractee, emitters } } = require("@valos/vdoc");
 const {
   extractee: { authors, ref, dfn, em, pkg, filterKeysWithAnyOf, filterKeysWithNoneOf },
-  ontologyColumns,
+  ontologyColumns, revdocOntologyProperties,
 } = require("@valos/revdoc");
 
 const { name, version, description } = require("./package");
 
 const {
-  preferredPrefix, baseIRI, ontologyDescription, prefixes, vocabulary, context, extractionRules,
-} = ontology;
+  VDoc: {
+    preferredPrefix, baseIRI, description: namespaceDescription,
+    prefixes, context, referencedModules, vocabulary, extractionRules,
+  },
+  ...remainingOntology
+} = require("./ontology");
 
 module.exports = {
-  "@context": {
-    ...prefixes,
-    ...context,
-  },
   "dc:title": description,
-  "VDoc:tags": ["PRIMARY", "ONTOLOGY"],
+  "VDoc:tags": ["PRIMARY", "FABRIC", "WORKSPACE", "ONTOLOGY"],
   "VRevdoc:package": name,
+  "VRevdoc:version": version,
   "VRevdoc:preferredPrefix": preferredPrefix,
   "VRevdoc:baseIRI": baseIRI,
-  "VRevdoc:version": version,
+  ...revdocOntologyProperties({ prefixes, context, referencedModules }, remainingOntology),
+
   respecConfig: {
     subtitle: version,
     specStatus: "unofficial",

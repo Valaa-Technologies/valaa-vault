@@ -6,7 +6,7 @@ const extractee = require("./extractee");
 module.exports = {
   extension: {
     extends: [],
-    ontology: require("./ontologies").VDoc,
+    getNamespace: () => require("./ontology").VDoc,
     extractors: require("./extractors"),
     emitters: require("./emitters"),
     extractee,
@@ -14,7 +14,6 @@ module.exports = {
     emit,
   },
   extractee,
-  extendOntology: require("./extendOntology"),
 };
 
 function extract (sourceGraphs, {
@@ -24,8 +23,8 @@ function extract (sourceGraphs, {
   try {
     return patchWith(vdocState, [].concat(sourceGraphs), {
       keyPath: [],
-      extractionRules: extensions.reduce((a, { ontology }) =>
-          Object.assign(a, ontology.extractionRules || {}), {}),
+      extractionRules: extensions.reduce((a, { getNamespace }) =>
+          Object.assign(a, getNamespace().extractionRules || {}), {}),
       preExtend (innerTarget, patch, key, targetObject, patchObject) {
         if (this.keyPath.length === 1) {
           if (!innerTarget) {
@@ -34,9 +33,8 @@ function extract (sourceGraphs, {
             if (!omitContext) {
               root["@context"] = { "@base": `${documentIRI || ""}#` };
               for (const extension of extensions) {
-                Object.assign(root["@context"],
-                    extension.ontology.prefixes,
-                    extension.ontology.context);
+                const namespace = extension.getNamespace();
+                Object.assign(root["@context"], namespace.prefixes, namespace.context);
               }
               for (const [term, termDefinition] of Object.entries(patch["@context"] || {})) {
                 if (typeof termDefinition === "string" && !root["@context"][term]) {
@@ -69,7 +67,8 @@ function extract (sourceGraphs, {
       },
     });
   } catch (error) {
-    throw wrapError(error, new Error(`During extract("${(this.ontology || {}).preferredPrefix}")`),
+    throw wrapError(error,
+        new Error(`During extract("${(this.getNamespace() || {}).preferredPrefix}")`),
         "\n\tdocumentIRI:", documentIRI,
         "\n\textensions:", ...dumpObject(extensions),
         "\n\tsourceGraphs:", ...dumpObject(sourceGraphs));
@@ -95,8 +94,9 @@ function emit (vdocState, formatName, options) {
         if (newEmission !== undefined) return newEmission;
         if (!subClassOf) {
           const [prefix, ontologyType] = type.split(":");
-          if (prefix === extension.ontology.preferredPrefix) {
-            subClassOf = (extension.ontology.vocabulary[ontologyType] || {})["rdfs:subClassOf"];
+          const namespace = extension.getNamespace();
+          if (prefix === namespace.preferredPrefix) {
+            subClassOf = (namespace.vocabulary[ontologyType] || {})["rdfs:subClassOf"];
           }
         }
       }

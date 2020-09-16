@@ -1,22 +1,21 @@
 
 const {
   extractee: {
-    authors, em, strong, pkg, ref,
-    filterKeysWithAnyOf, filterKeysWithAllOf, filterKeysWithNoneOf,
+    authors, em, strong, pkg, ref, tooltip,
+    filterKeysWithAnyOf, filterKeysWithNoneOf,
     valosRaemFieldClasses,
   },
-  ontologyColumns,
+  ontologyColumns, revdocOntologyProperties,
 } = require("@valos/revdoc");
 const { domainColumns } = require("@valos/type-vault");
 
 const { name, version } = require("../packages/kernel/package");
 const {
-  documents,
-  ontologies: {
-    V: {
-      preferredPrefix, baseIRI, ontologyDescription, prefixes, vocabulary, context,
-    } = { vocabulary: {} },
+  V: {
+    preferredPrefix, baseIRI, description: namespaceDescription,
+    prefixes, context, referencedModules, vocabulary,
   },
+  ...remainingOntology
 } = require("../packages/kernel");
 
 const roleDocuments = Object.fromEntries(
@@ -25,16 +24,14 @@ const roleDocuments = Object.fromEntries(
     .map(key => [key, documents[key]]));
 
 module.exports = {
-  "@context": {
-    ...prefixes,
-    ...context,
-  },
   "dc:title": "Valos introduction and valospace API reference",
   "VDoc:tags": ["PRIMARY", "INTRODUCTION", "ONTOLOGY", "VALONAUT"],
   "VRevdoc:package": name,
+  "VRevdoc:version": version,
   "VRevdoc:preferredPrefix": preferredPrefix,
   "VRevdoc:baseIRI": baseIRI,
-  "VRevdoc:version": version,
+  ...revdocOntologyProperties({ prefixes, context, referencedModules }, remainingOntology),
+
   respecConfig: {
     subtitle: version,
     specStatus: "unofficial",
@@ -113,6 +110,9 @@ guide also gives a high-level overview of the rest.`,
   },
   [`chapter#ontology>8;Valospace ontology '${preferredPrefix}'`]: {
     "#section_ontology_abstract>0": [ontologyDescription || ""],
+    "dc:title": [
+      "The ", em(preferredPrefix), " valospace namespace",
+    ],
     "chapter#section_prefixes>1": {
       "dc:title": [em(preferredPrefix), ` IRI prefixes`],
       "#0": [],

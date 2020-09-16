@@ -1,8 +1,11 @@
-const { extractee: { aggregate, blockquote, c, cpath, em, ref, strong } } = require("@valos/vdoc");
-
+const vdocExtractee = require("@valos/vdoc/extractee");
 const { outputError } = require("@valos/tools/wrapError");
 
+const { aggregate, blockquote, c, cpath, em, ref, strong } = vdocExtractee;
+
 module.exports = {
+  ...vdocExtractee,
+
   /**
    * Construct a VRevdoc:ABNF element.
    *

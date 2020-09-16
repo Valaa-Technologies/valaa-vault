@@ -1,3 +1,5 @@
+Object.defineProperty(exports, "__esModule", { value: true });
+
 const isSymbol = require("@valos/tools/isSymbol").default;
 
 /**

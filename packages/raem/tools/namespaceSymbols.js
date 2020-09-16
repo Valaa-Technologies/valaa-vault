@@ -6,7 +6,13 @@ const _namespaces = Object.create(null);
 const _deprecatedNamespaces = Object.create(null);
 const _null = Object.create(null);
 
-export function qualifiedSymbol (prefix, localPart) {
+module.exports = {
+  qualifiedSymbol,
+  deprecateSymbolInFavorOf,
+  qualifiedNamesOf,
+};
+
+function qualifiedSymbol (prefix, localPart) {
   const namespace = _namespaces[prefix] || (_namespaces[prefix] = Object.create(null));
   let symbol = namespace[localPart];
   if (!symbol) {
@@ -28,7 +34,7 @@ export function qualifiedSymbol (prefix, localPart) {
   return symbol;
 }
 
-export function deprecateSymbolInFavorOf (deprecatedPrefix, deprecatedLocalPart, favoredSymbol) {
+function deprecateSymbolInFavorOf (deprecatedPrefix, deprecatedLocalPart, favoredSymbol) {
   if (!isSymbol(favoredSymbol)) {
     throw new Error(`favoredSymbol is not a symbol: ${String(favoredSymbol)}`);
   }
@@ -37,7 +43,7 @@ export function deprecateSymbolInFavorOf (deprecatedPrefix, deprecatedLocalPart,
   return (namespace[deprecatedLocalPart] = favoredSymbol);
 }
 
-export function qualifiedNamesOf (symbol) {
+function qualifiedNamesOf (symbol) {
   const ret = _symbolToQualifiedName[symbol];
   if (ret || (typeof symbol !== "string")
       || !symbol.startsWith("@$") || !symbol.endsWith("@@")) {

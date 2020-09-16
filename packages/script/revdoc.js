@@ -5,26 +5,28 @@ const {
     authors, pkg,
     filterKeysWithAnyOf, filterKeysWithNoneOf, valosRaemFieldClasses
   },
-  ontologyColumns,
+  ontologyColumns, revdocOntologyProperties,
 } = require("@valos/revdoc");
 
 const {
-  VScript: { preferredPrefix, baseIRI, ontologyDescription, prefixes, vocabulary, context },
- } = require("./ontologies");
+  VScript: {
+    preferredPrefix, baseIRI, description: namespaceDescription,
+    prefixes, context, referencedModules, vocabulary,
+  },
+  ...remainingOntology
+} = require("./ontology");
 
 const { name, version, description } = require("./package");
 
 module.exports = {
-  "@context": {
-    ...prefixes,
-    ...context,
-  },
   "dc:title": description,
   "VDoc:tags": ["PRIMARY", "INTRODUCTORY", "WORKSPACE", "ONTOLOGY"],
   "VRevdoc:package": name,
+  "VRevdoc:version": version,
   "VRevdoc:preferredPrefix": preferredPrefix,
   "VRevdoc:baseIRI": baseIRI,
-  "VRevdoc:version": version,
+  ...revdocOntologyProperties({ prefixes, context, referencedModules }, remainingOntology),
+
   respecConfig: {
     specStatus: "unofficial",
     editors: authors("iridian"),
@@ -54,7 +56,9 @@ transactions. Valoscript retains ECMAScript 5 syntax and semantics.`,
     ],
   },
   "chapter#ontology>8": {
-    "dc:title": ["The ", em(preferredPrefix), " namespace of the library ", pkg(name), " ontology"],
+    "dc:title": [
+      "The ", em(preferredPrefix), " valospace namespace of the library ontology of ", pkg(name),
+    ],
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
     "data#context": context,

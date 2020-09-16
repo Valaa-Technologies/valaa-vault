@@ -5,26 +5,28 @@ const {
     authors, q, pkg,
     filterKeysWithAnyOf, filterKeysWithNoneOf, valosRaemFieldClasses,
   },
-  ontologyColumns,
+  ontologyColumns, revdocOntologyProperties,
 } = require("@valos/revdoc");
 
 const {
-  VModel: { preferredPrefix, baseIRI, ontologyDescription, prefixes, vocabulary, context },
- } = require("./ontologies");
+  VModel: {
+    preferredPrefix, baseIRI, description: namespaceDescription,
+    prefixes, context, referencedModules, vocabulary,
+  },
+  ...remainingOntology
+ } = require("./ontology");
 
 const { name, version, description } = require("./package");
 
 module.exports = {
-  "@context": {
-    ...prefixes,
-    ...context,
-  },
   "dc:title": description,
   "VDoc:tags": ["PRIMARY", "INTRODUCTORY", "WORKSPACE", "ONTOLOGY"],
   "VRevdoc:package": name,
+  "VRevdoc:version": version,
   "VRevdoc:preferredPrefix": preferredPrefix,
   "VRevdoc:baseIRI": baseIRI,
-  "VRevdoc:version": version,
+  ...revdocOntologyProperties({ prefixes, context, referencedModules }, remainingOntology),
+
   respecConfig: {
     subtitle: version,
     specStatus: "unofficial",

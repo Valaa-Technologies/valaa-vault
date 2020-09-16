@@ -5,20 +5,22 @@ const {
     filterKeysWithAnyOf, filterKeysWithAllOf, filterKeysWithNoneOf,
     valosRaemFieldClasses,
   },
-  ontologyColumns,
+  ontologyColumns, revdocOntologyProperties,
 } = require("@valos/revdoc");
 const { domainColumns } = require("@valos/type-vault");
 
 const { name, version, repository } = require("./package");
-const { summary, ontologies, documents } = require("./index");
+const { summary, documents } = require("./index");
 
 const { workspaces, types, toolsets, tools, commands } = summary;
 
 const {
   VKernel: {
-    preferredPrefix, baseIRI, ontologyDescription, prefixes, vocabulary, context,
+    preferredPrefix, baseIRI, description: namespaceDescription,
+    prefixes, context, referencedModules, vocabulary,
   } = { vocabulary: {} },
-} = ontologies;
+  ...remainingOntology
+} = require("./ontology");
 
 const roleDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "ROLE"], documents);
 const introductionDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "INTRODUCTORY"], documents);
@@ -31,16 +33,14 @@ const otherPrimaryDocuments = filterKeysWithAllOf("tags", "PRIMARY", documents)
         && !ontologyDocuments.includes(key));
 
 module.exports = {
-  "@context": {
-    ...prefixes,
-    ...context,
-  },
   "dc:title": `${name} domain content reference`,
   "VDoc:tags": ["PRIMARY", "DOMAIN", "ONTOLOGY", "TECHNICIAN"],
   "VRevdoc:package": name,
+  "VRevdoc:version": version,
   "VRevdoc:preferredPrefix": preferredPrefix,
   "VRevdoc:baseIRI": baseIRI,
-  "VRevdoc:version": version,
+  ...revdocOntologyProperties({ prefixes, context, referencedModules }, remainingOntology),
+
   respecConfig: {
     subtitle: version,
     specStatus: "unofficial",
@@ -93,7 +93,7 @@ ref([em("vlm"), ` the command line script invoker`], "@/valma"), `.`,
       "VDoc:entries": roleDocuments,
     },
   },
-  "chapter#section_documentation>3;Documentation": {
+  "chapter#section_documentation>3;Primary documentation": {
     "#0": [
 `This domain provides the following primary documents:`,
     ],
@@ -178,7 +178,7 @@ This domain introduces the following `, type, ` `, ref("workspaces", "@/valma#wo
     })).reduce((a, t) => Object.assign(a, t), {}),
   },
   [`chapter#ontology>8;${name} domain root ontology`]: {
-    "#section_ontology_abstract>0": [ontologyDescription || ""],
+    "#section_fabric_abstract>0": [namespaceDescription || ""],
     "#0": [
 `All labels have implicit IRI prefix "${baseIRI}" (with preferred
 prefix "${preferredPrefix}:")`,

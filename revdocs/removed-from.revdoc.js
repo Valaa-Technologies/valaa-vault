@@ -4,26 +4,27 @@ const {
     authors, em, pkg, ref,
     filterKeysWithAnyOf, filterKeysWithNoneOf, valosRaemFieldClasses,
   },
-  ontologyColumns,
+  ontologyColumns, revdocOntologyProperties,
 } = require("@valos/revdoc");
 
 const { name, version } = require("../packages/kernel/package");
 const {
-  ontologies: {
-    VRemovedFrom: { preferredPrefix, baseIRI, ontologyDescription, prefixes, vocabulary, context },
+  VRemovedFrom: {
+    preferredPrefix, baseIRI, description: namespaceDescription,
+    prefixes, context, referencedModules, vocabulary,
   },
+  ...remainingOntology
 } = require("../packages/kernel");
 
 module.exports = {
-  "@context": {
-    ...prefixes,
-    ...context,
-  },
   "dc:title": `${name} removed-from field reference`,
-  "VDoc:tags": ["ONTOLOGY", "TECHNICIAN"],
+  "VDoc:tags": ["VALOSPACE", "ONTOLOGY", "TECHNICIAN"],
   "VRevdoc:package": name,
+  "VRevdoc:version": version,
   "VRevdoc:preferredPrefix": preferredPrefix,
   "VRevdoc:baseIRI": baseIRI,
+  ...revdocOntologyProperties({ prefixes, context, referencedModules }, remainingOntology),
+
   respecConfig: {
     subtitle: version,
     specStatus: "unofficial",
@@ -57,6 +58,9 @@ which are empty as they inherit their entries from the prototype.`,
   },
   [`chapter#ontology>8;Valospace ontology '${preferredPrefix}'`]: {
     "#section_ontology_abstract>0": [ontologyDescription || ""],
+    "dc:title": [
+      "The ", em(preferredPrefix), " valospace namespace",
+    ],
     "chapter#section_prefixes>1": {
       "dc:title": [em(preferredPrefix), ` IRI prefixes`],
       "#0": [],

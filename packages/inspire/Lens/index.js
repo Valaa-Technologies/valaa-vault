@@ -7,25 +7,79 @@ import { denoteValOSCallable } from "~/raem/VALK";
 import Vrapper from "~/engine/Vrapper";
 import debugId from "~/engine/debugId";
 import { dumpObject } from "~/engine/VALEK";
-import { defineName, buildOntologyNamespace } from "~/engine/valosheath";
-
-import type UIComponent from "~/inspire/ui/UIComponent";
-
-import { extractee } from "~/revdoc";
 
 import { dumpify, messageFromError, thenChainEagerly, wrapError } from "~/tools";
 
-const { c, em, q, ref, vsx } = extractee;
+const defineName = require("@valos/engine/valosheath/defineName");
+const { extractee: { em, ref, vsx } } = require("@valos/revdoc");
 
-export function tag (tagName, ...rest) { return [em(tagName), ...rest]; }
+function tag (tagName, ...rest) { return [em(tagName), ...rest]; }
 
-export const namespace = {
+module.exports = {
+  domain: "@valos/kernel",
   preferredPrefix: "Lens",
   baseIRI: "https://valospace.org/inspire/Lens/0#",
+  namespaceModules: {
+    VKernel: "@valos/kernel/VKernel",
+    V: "@valos/kernel/V",
+    VEngine: "@valos/engine/VEngine",
+    Lens: "@valos/inspire/Lens",
+    On: "@valos/inspire/On",
+  },
   description: [
 `The 'Lens' namespace defines the primary valospace UI component
 vocabulary. This vocabulary is the API between the UI code written by
 a valonaut and the @valos/inspire UI engine.`,
+    ..._createIntroduction(),
+  ],
+  vocabulary: _createBaseVocabulary(),
+  definitions: {},
+  symbols: {},
+  deprecatedNames: {
+    scopeChildren: "children",
+    fallbackLens: "loadingLens",
+    delayedLens: "loadingLens",
+    failedLens: "rejectedLens",
+    pendingConnectionsLens: "pendingChroniclesLens",
+    failedConnectionsLens: "rejectedChroniclesLens",
+    pendingPropsLens: "pendingAttributesLens",
+    kueryingPropsLens: "pendingAttributesLens",
+    failedPropsLens: "rejectedAttributesLens",
+    pendingActivationLens: "pendingFocusLens",
+    failedActivationLens: "rejectedFocusLens",
+    pendingChildrenLens: "pendingElementsLens",
+    failedChildrenLens: "rejectedElementsLens",
+    pendingMediaInterpretationLens: "pendingMediaLens",
+    failedMediaInterpretationLens: "rejectedMediaLens",
+    mediaInterpretationErrorLens: "uninterpretableMediaLens",
+    unrenderableMediaInterpretationLens: "unrenderableInterpretationLens",
+  },
+  processTags (name, tags, definitionDomain) {
+    const labels = [];
+    const componentType = tags.includes("Valoscope") ? "Lens:Valoscope"
+        : tags.includes("Attribute") ? "Lens:Element"
+        : null;
+    if (componentType) {
+      definitionDomain.push(componentType);
+      labels.push([`Lens:${name}`, `Lens:${name}`]);
+    }
+    if (tags.includes("Context")) {
+      definitionDomain.push("Lens:UIContext");
+      labels.push([`context[$Lens.${name}]`, `$Lens.${name}`]);
+    }
+    if (!componentType && tags.includes("Lens")) {
+      labels.push([`Lens:${name}`]);
+    }
+    return labels;
+  },
+  tag,
+};
+
+Object.defineProperty(module.exports, "__esModule", { value: true });
+module.exports.default = _createSymbols();
+
+function _createIntroduction () {
+  return [
 `Roughly speaking the Lens namespace terms are:`,
     { "bulleted#1": [
 [`used by the Inspire engine to identify an attribute value given to
@@ -60,124 +114,77 @@ There are also auxiliary tags:`,
   from valospace but has relevant internal semantics and is thus
   documented.`],
     ] },
-  ],
-  nameSymbols: {},
-  nameDefinitions: {},
-  deprecatedNames: {
-    scopeChildren: "children",
-    fallbackLens: "loadingLens",
-    delayedLens: "loadingLens",
-    failedLens: "rejectedLens",
-    pendingConnectionsLens: "pendingChroniclesLens",
-    failedConnectionsLens: "rejectedChroniclesLens",
-    pendingPropsLens: "pendingAttributesLens",
-    kueryingPropsLens: "pendingAttributesLens",
-    failedPropsLens: "rejectedAttributesLens",
-    pendingActivationLens: "pendingFocusLens",
-    failedActivationLens: "rejectedFocusLens",
-    pendingChildrenLens: "pendingElementsLens",
-    failedChildrenLens: "rejectedElementsLens",
-    pendingMediaInterpretationLens: "pendingMediaLens",
-    failedMediaInterpretationLens: "rejectedMediaLens",
-    mediaInterpretationErrorLens: "uninterpretableMediaLens",
-    unrenderableMediaInterpretationLens: "unrenderableInterpretationLens",
-  },
-};
+  ];
+}
 
-export default _createSymbols();
-
-export const ontology = buildOntologyNamespace(
-    namespace,
-    (name, tags, definitionDomain) => {
-      const labels = [];
-      const componentType = tags.includes("Valoscope") ? "Lens:Valoscope"
-          : tags.includes("Attribute") ? "Lens:Element"
-          : null;
-      if (componentType) {
-        definitionDomain.push(componentType);
-        labels.push([`Lens:${name}`, `Lens:${name}`]);
-      }
-      if (tags.includes("Context")) {
-        definitionDomain.push("Lens:UIContext");
-        labels.push([`context[$Lens.${name}]`, `$Lens.${name}`]);
-      }
-      if (!componentType && tags.includes("Lens")) {
-        labels.push([`Lens:${name}`]);
-      }
-      return labels;
-    }, {
-      "@context": {
-        V: "https://valospace.org/0#",
-        VKernel: "https://valospace.org/kernel/0#",
-        VEngine: "https://valospace.org/engine/0#",
-        On: "https://valospace.org/inspire/On/0#",
-        restriction: { "@reverse": "owl:onProperty" },
-      },
-      Node: { "@type": "VEngine:Class",
-        "rdfs:comment":
+function _createBaseVocabulary () {
+  return {
+    Node: { "@type": "VEngine:Class",
+      "rdfs:comment":
 `The class of UI resources which represent a user interface building
 block.`,
-        "VRevdoc:introduction": [
+      "VRevdoc:introduction": [
 `This class roughly corresponds to `,
 ref("DOM Node interface", "https://developer.mozilla.org/en-US/docs/Web/API/Node"),
 `. However as @valos/inspire uses a shadow DOM this correspondence does
 not imply prototypical inheritance for any valospace classes.`
-        ],
-      },
-      Element: { "@type": "VEngine:Class",
-        "rdfs:subClassOf": "Lens:Node",
-        "rdfs:comment":
+      ],
+    },
+    Element: { "@type": "VEngine:Class",
+      "rdfs:subClassOf": "Lens:Node",
+      "rdfs:comment":
 `The class of UI resources which represent any user interface element.`,
-      },
-      DOMElement: { "@type": "VEngine:Class",
-      "rdfs:label": [vsx(["<", em("lowercase-html-element-name"), " />"])],
-      "rdfs:subClassOf": "Lens:Element",
-        "rdfs:comment":
+    },
+    DOMElement: { "@type": "VEngine:Class",
+    "rdfs:label": [vsx(["<", em("lowercase-html-element-name"), " />"])],
+    "rdfs:subClassOf": "Lens:Element",
+      "rdfs:comment":
 `The class of UI resources which represent DOM elements.`,
-      },
-      Component: { "@type": "VEngine:Class",
-        "rdfs:subClassOf": "Lens:Element",
-        "rdfs:comment":
+    },
+    Component: { "@type": "VEngine:Class",
+      "rdfs:subClassOf": "Lens:Element",
+      "rdfs:comment":
 `The class of UI resources which represent @valos/inspire user
 interface components.`,
-      },
-      Valoscope: { "@type": "VEngine:Class",
-        "rdfs:label": [vsx("<Valoscope />")],
-        "rdfs:subClassOf": "Lens:Component",
-        "rdfs:comment":
+    },
+    Valoscope: { "@type": "VEngine:Class",
+      "rdfs:label": [vsx("<Valoscope />")],
+      "rdfs:subClassOf": "Lens:Component",
+      "rdfs:comment":
 `The class of valos UI components that interact with valospace resources.`,
-        "VRevdoc:introduction": [
+      "VRevdoc:introduction": [
 `The `, em("Lens:"), `-prefix can be omitted for Valoscope attributes`,
-        ],
-      },
-      InstanceComponent: { "@type": "VEngine:Class",
-      "rdfs:label": [vsx(["<", em("Uppercase-frame-prototype-identifier"), " />"])],
-      "rdfs:subClassOf": "Lens:Valoscope",
-        "rdfs:comment":
+      ],
+    },
+    InstanceComponent: { "@type": "VEngine:Class",
+    "rdfs:label": [vsx(["<", em("Uppercase-frame-prototype-identifier"), " />"])],
+    "rdfs:subClassOf": "Lens:Valoscope",
+      "rdfs:comment":
 `The class of valos UI components which instantiate their frame from a
 valospace resource.`,
-        "VRevdoc:introduction": [
+      "VRevdoc:introduction": [
 `The `, em("Frame:"), `-prefix can be omitted for InstanceComponent
 attributes, whereas `, em("Lens:"), `-prefix must be specified.`,
-        ],
-      },
-      UIContext: { "@type": "VEngine:Class",
-        "rdfs:subClassOf": "rdfs:Class",
-        "rdfs:comment":
+      ],
+    },
+    UIContext: { "@type": "VEngine:Class",
+      "rdfs:subClassOf": "rdfs:Class",
+      "rdfs:comment":
 `The class of resource which represent in-memory context variable
 scopes.`,
-        "VRevdoc:introduction": [
+      "VRevdoc:introduction": [
 `intended for persistent UI key-value associations that apply to all
 nested components.`,
-        ],
-      },
-    });
+      ],
+    },
+  };
+}
 
 function _createSymbols () {
-  const ret = namespace.nameSymbols;
+  const ret = module.exports.symbols;
 
   function _defineName (name: string, createLensParameters: Object) {
-    return defineName(name, namespace, createLensParameters, { slotName: true });
+    return defineName(name, module.exports, createLensParameters, { slotName: true });
   }
 
   const _lensMessageLoadingProps = {
@@ -208,7 +215,7 @@ the focus of subLens2 and so on until the final results of the last
 lens are shown as the output of the instrument lens itself.`,
   // eslint-disable-next-line
   ])(function instrument (...lenses) {
-    return (focus: any, component: UIComponent, lensName: string) => {
+    return (focus: any, component, lensName: string) => {
       try {
         return lenses.reduce((refraction, lens) =>
             component.renderLens(lens, refraction, lensName, undefined, true), focus);
@@ -399,7 +406,7 @@ null,
 If the condition is falsy the focus is displayed using lens from slot
 'else' which presents null.`,
     ],
-    isEnabled (focus: any, component: UIComponent) {
+    isEnabled (focus: any, component) {
       if (!component.props.hasOwnProperty("if")) return false;
       let condition = component.props.if;
       if (component.props.then !== undefined) return true;
@@ -408,7 +415,7 @@ If the condition is falsy the focus is displayed using lens from slot
       }
       return !condition; // if falsy condition, enable lens
     },
-    value (focus: any, component: UIComponent) {
+    value (focus: any, component) {
       // if then is undefined we only get here if condition is falsy.
       const then_ = component.props.then;
       if (then_ !== undefined) {
@@ -560,11 +567,11 @@ three notably different looking use cases.`,
     description: [
 `Lens that displays the child elements of the immediate parent component.`,
     ],
-    isEnabled (u: any, component: UIComponent) {
+    isEnabled (u: any, component) {
       const children = component.props.children;
       return Array.isArray(children) ? children.length : children != null;
     },
-    value (focus: any, component: UIComponent) { return component.props.children; },
+    value (focus: any, component) { return component.props.children; },
   }));
 
   _defineName("static", () => ({
@@ -607,7 +614,7 @@ is not renderable this slot must be used in an instrument before some
 other slot (such as 'focusDetailLens').`,
     ],
     isEnabled: true,
-    value (focus: any, component: UIComponent) { return component; },
+    value (focus: any, component) { return component; },
   }));
 
   const focusDescriptionLens = _defineName("focusDescriptionLens", () => ({
@@ -619,7 +626,7 @@ null,
 `    @focus {any} focus  the focus to describe.`,
     ],
     isEnabled: true,
-    value: function renderFocusDescription (focus: any, component: UIComponent) {
+    value: function renderFocusDescription (focus: any, component) {
       switch (typeof focus) {
         case "string":
           return `"${focus.length <= 30 ? focus : `${focus.slice(0, 27)}...`}"`;
@@ -703,7 +710,7 @@ null,
     @focus {string|Error} error  the failure description or exception object`,
     ],
     isEnabled: true,
-    defaultValue: function renderToggleableErrorDetail (failure: any, component: UIComponent) {
+    defaultValue: function renderToggleableErrorDetail (failure: any, component) {
       return ([
         <button onClick={() => component.toggleError()}>
           {component.state.errorHidden ? "Show" : "Hide"}
@@ -1041,8 +1048,7 @@ null,
 `    @focus {Object} focus  the Resource to search the lens from.`,
       ],
       isEnabled: (focus?: Vrapper) => focus && focus.hasInterface("Scope"),
-      value: function getLensProperty (focus: any, component: UIComponent,
-          /* currentSlotName: string */) {
+      value: function getLensProperty (focus: any, component, /* currentSlotName: string */) {
         /*
         if (component.props.lensName) {
           console.warn("DEPRECATED: props.lensName\n\tprefer: props.lensProperty",

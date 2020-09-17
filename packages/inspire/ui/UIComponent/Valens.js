@@ -5,10 +5,11 @@ import PropTypes from "prop-types";
 
 import Valoscope from "~/inspire/ui/Valoscope";
 import UIComponent from "~/inspire/ui/UIComponent";
-import Lens from "~/inspire/Lens";
 
 import { tryCreateValensArgs, ValensPropsTag, postRenderElement } from "./_valensOps";
 import { _bindLiveSubscriptions, recordFrameKey, LensElementKey } from "./_liveOps";
+
+const { symbols: Lens } = require("~/inspire/Lens");
 
 export { tryCreateValensArgs, ValensPropsTag };
 

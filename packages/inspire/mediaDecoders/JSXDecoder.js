@@ -10,7 +10,6 @@ import UIComponent, { LENS } from "~/inspire/ui/UIComponent";
 import Valens, { ValensPropsTag, tryCreateValensArgs } from "~/inspire/ui/UIComponent/Valens";
 import vidgets from "~/inspire/ui";
 import Valoscope from "~/inspire/ui/Valoscope";
-import Lens, { deprecatedNames } from "~/inspire/Lens";
 import _jsxTransformFromString from "~/inspire/mediaDecoders/_jsxTransformFromString";
 
 import { ScopeAccessesTag, ScopeAccessKeysTag } from "~/script/VALSK";
@@ -18,6 +17,8 @@ import { ScopeAccessesTag, ScopeAccessKeysTag } from "~/script/VALSK";
 import MediaDecoder from "~/tools/MediaDecoder";
 import notThatSafeEval from "~/tools/notThatSafeEval";
 import { dumpObject } from "~/tools";
+
+const { symbols: Lens, deprecatedNames } = require("~/inspire/Lens");
 
 export default class JSXDecoder extends MediaDecoder {
   static mediaTypes = [

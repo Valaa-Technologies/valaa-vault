@@ -1,6 +1,7 @@
 const { ref } = require("@valos/revdoc/extractee");
 
 const defineName = require("@valos/engine/valosheath/defineName");
+const resolveNamespaceDefinitions = require("@valos/engine/valosheath/resolveNamespaceDefinitions");
 
 module.exports = {
   domain: "@valos/kernel",
@@ -37,8 +38,8 @@ argument.`,
   },
 };
 
-Object.defineProperty(module.exports, "__esModule", { value: true });
-module.exports.default = _createSymbols();
+_createSymbols();
+resolveNamespaceDefinitions(module.exports);
 
 function _createSymbols () {
   const ret = module.exports.symbols;

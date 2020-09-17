@@ -7,11 +7,11 @@ import { HostRef } from "~/raem/VALK/hostReference";
 
 import Vrapper from "~/engine/Vrapper";
 
-import Lens from "~/inspire/Lens";
-
 import { wrapError } from "~/tools";
 
 import type UIComponent from "./UIComponent";
+
+const { symbols: Lens } = require("~/inspire/Lens");
 
 /*
  * Create a dynamic key based on the focus if it is a resource,

@@ -1,17 +1,14 @@
-// @flow
+const React = require("react");
 
-import React from "react";
-
-import { denoteValOSCallable } from "~/raem/VALK";
-
-import Vrapper from "~/engine/Vrapper";
-import debugId from "~/engine/debugId";
-import { dumpObject } from "~/engine/VALEK";
-
-import { dumpify, messageFromError, thenChainEagerly, wrapError } from "~/tools";
-
+const resolveNamespaceDefinitions = require("@valos/engine/valosheath/resolveNamespaceDefinitions");
 const defineName = require("@valos/engine/valosheath/defineName");
-const { extractee: { em, ref, vsx } } = require("@valos/revdoc");
+const { em, ref, vsx } = require("@valos/revdoc/extractee");
+
+const { denoteValOSCallable } = require("~/raem/VALK");
+const Vrapper = require("~/engine/Vrapper").default;
+const debugId = require("~/engine/debugId").default;
+const { dumpObject } = require("~/engine/VALEK");
+const { dumpify, messageFromError, thenChainEagerly, wrapError } = require("~/tools");
 
 function tag (tagName, ...rest) { return [em(tagName), ...rest]; }
 
@@ -75,8 +72,8 @@ a valonaut and the @valos/inspire UI engine.`,
   tag,
 };
 
-Object.defineProperty(module.exports, "__esModule", { value: true });
-module.exports.default = _createSymbols();
+_createSymbols();
+resolveNamespaceDefinitions(module.exports);
 
 function _createIntroduction () {
   return [

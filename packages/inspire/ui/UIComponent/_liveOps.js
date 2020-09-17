@@ -8,13 +8,13 @@ import VALEK, { toVAKONTag, IsLiveTag } from "~/engine/VALEK";
 
 import getImplicitMediaInterpretation from "~/engine/Vrapper/getImplicitMediaInterpretation";
 
-import Lens from "~/inspire/Lens";
-
 import {
   dumpObject, patchWith, isPromise, isSymbol, thisChainEagerly, thisChainReturn, wrapError
 } from "~/tools";
 
 import { VSSStyleSheetSymbol } from "./_styleOps";
+
+const { symbols: Lens } = require("~/inspire/Lens");
 
 export function _bindLiveSubscriptions (component, focus, props) {
   const live = _createStateLive(component, props);

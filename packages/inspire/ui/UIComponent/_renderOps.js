@@ -13,10 +13,11 @@ import {
 } from "~/tools";
 
 import UIComponent from "./UIComponent";
-import Lens from "~/inspire/Lens";
 
 import { createDynamicKey } from "./_propsOps";
 import { wrapElementInValens, tryWrapElementInValens, postRenderElement } from "./_valensOps";
+
+const { symbols: Lens } = require("~/inspire/Lens");
 
 /* eslint-disable react/prop-types */
 

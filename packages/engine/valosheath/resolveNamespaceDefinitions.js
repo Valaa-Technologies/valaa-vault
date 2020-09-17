@@ -1,8 +1,7 @@
 const { qualifiedNamesOf } = require("@valos/raem/tools/namespaceSymbols");
-const { defineNamespace } = require("@valos/revdoc");
 const dumpify = require("@valos/tools/dumpify").default;
 
-module.exports = function defineValosheathNamespace (namespace) {
+module.exports = function resolveNamespaceDefinitions (namespace) {
   if (!namespace.vocabulary) namespace.vocabulary = {};
 
   for (const [name, createParameters] of Object.entries(namespace.definitions)) {
@@ -49,7 +48,7 @@ module.exports = function defineValosheathNamespace (namespace) {
     }
     namespace.vocabulary[name] = termDefinition;
   }
-  return defineNamespace(namespace);
+  return namespace;
 
   function _valueText (value) {
     if ((value == null) || (typeof value !== "object")) {

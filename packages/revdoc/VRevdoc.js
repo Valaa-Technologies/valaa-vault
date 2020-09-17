@@ -20,7 +20,7 @@ tailored for emitting ReSpec html output documents.`,
       comment: "Example node",
     },
   },
-}
+};
 
 function _createRevdocVocabulary () {
   return {

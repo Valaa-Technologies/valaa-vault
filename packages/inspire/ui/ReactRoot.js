@@ -10,13 +10,14 @@ import Vrapper, { getImplicitMediaInterpretation } from "~/engine/Vrapper";
 
 import { VSSStyleSheetSymbol } from "~/inspire/ui/UIComponent";
 import { unthunkRepeat } from "~/inspire/ui/thunk";
-import Lens from "~/inspire/Lens";
 import Valoscope from "~/inspire/ui/Valoscope";
 import { VS } from "~/engine/VALEK";
 
 import {
   dumpObject, invariantifyString, traverse, wrapError, outputError, valosHash, thenChainEagerly,
 } from "~/tools";
+
+const { symbols: Lens } = require("~/inspire/Lens");
 
 jss.setup(preset());
 

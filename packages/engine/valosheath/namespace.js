@@ -11,7 +11,6 @@ import type Vrapper from "~/engine/Vrapper";
 import { isSymbol } from "~/tools";
 
 export const defineName = require("./defineName");
-export const defineValosheathNamespace = require("./defineValosheathNamespace");
 
 export type NameDefinition = {
   tags: string[],

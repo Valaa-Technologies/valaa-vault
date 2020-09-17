@@ -9,8 +9,6 @@ import { Subscription, LiveUpdate } from "~/engine/Vrapper";
 import debugId from "~/engine/debugId";
 import { dumpKuery, dumpObject } from "~/engine/VALEK";
 
-import Lens from "~/inspire/Lens";
-
 import {
   arrayFromAny, invariantify, isPromise, outputError, thisChainEagerly, thisChainReturn, wrapError,
 } from "~/tools";
@@ -34,6 +32,8 @@ import {
 import {
   _finalizeUnbindSubscriptions, _getBoundSubscription, _unbindSubscription, _bindLiveKuery
 } from "./_subscriberOps";
+
+const { symbols: Lens } = require("~/inspire/Lens");
 
 export function isUIComponentElement (element: any) {
   return (typeof element.type === "function") && element.type.isUIComponent;

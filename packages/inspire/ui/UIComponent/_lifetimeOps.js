@@ -5,14 +5,14 @@ import Vrapper from "~/engine/Vrapper";
 
 import { thenChainEagerly, wrapError } from "~/tools";
 
-import Lens from "~/inspire/Lens";
-
 import type UIComponent from "./UIComponent";
 
 import { getScopeValue, setScopeValue } from "./scopeValue";
 
 import { _comparePropsOrState } from "./_propsOps";
 import { _initiateSubscriptions } from "./_subscriberOps";
+
+const { symbols: Lens } = require("~/inspire/Lens");
 
 // const _timings = {};
 

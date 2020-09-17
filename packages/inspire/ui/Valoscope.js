@@ -11,9 +11,10 @@ import { vRef } from "~/raem/VRL";
 import Vrapper from "~/engine/Vrapper";
 
 import UIComponent from "~/inspire/ui/UIComponent";
-import Lens from "~/inspire/Lens";
 
 import { thisChainEagerly, thisChainRedirect } from "~/tools";
+
+const { symbols: Lens } = require("~/inspire/Lens");
 
 /**
  * Valoscope performs a semantically rich, context-aware render of its local UI focus according to

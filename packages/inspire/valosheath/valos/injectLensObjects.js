@@ -1,6 +1,6 @@
 // @flow
 
-import Lens, { definitions } from "~/inspire/Lens";
+const { symbols: Lens, definitions } = require("~/inspire/Lens");
 
 export default function injectLensObjects (
     valos: Object, rootScope: Object, hostDescriptors: Object) {

@@ -7,7 +7,6 @@ const {
   },
   ontologyColumns, revdocOntologyProperties,
 } = require("@valos/revdoc");
-const { domainColumns } = require("@valos/type-vault");
 
 const { name, version } = require("../dist/packages/@valos/kernel/package");
 const { documents } = require("../dist/packages/@valos/kernel");
@@ -109,11 +108,11 @@ guide also gives a high-level overview of the rest.`,
       },
     },
   },
-  [`chapter#ontology>8;Valospace ontology '${preferredPrefix}'`]: {
-    "#section_ontology_abstract>0": [ontologyDescription || ""],
+  "chapter#section_valospace>8": {
     "dc:title": [
       "The ", em(preferredPrefix), " valospace namespace",
     ],
+    "#section_valospace_abstract>0": [namespaceDescription || ""],
     "chapter#section_prefixes>1": {
       "dc:title": [em(preferredPrefix), ` IRI prefixes`],
       "#0": [],

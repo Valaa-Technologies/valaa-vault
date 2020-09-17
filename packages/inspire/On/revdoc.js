@@ -67,8 +67,8 @@ ref("VDoc specification", "@valos/vdoc"), ` for reference documentation.`,
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
     "data#context": context,
-    "#section_ontology_abstract>0": [
-      ontologyDescription || "",
+    "#section_valosheath_abstract>0": [
+      namespaceDescription || "",
     ],
     "chapter#section_prefixes>1": {
       "dc:title": [em(name), " IRI prefixes"],

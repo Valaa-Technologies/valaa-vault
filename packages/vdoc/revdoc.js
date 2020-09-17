@@ -357,11 +357,11 @@ introduction of new extensions easier.`
       },
     },
   },
-  "chapter#ontology>8;VDoc Core ontology": {
+  "chapter#section_fabric>8;VDoc Core namespace": {
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
     "data#context": context,
-    "#section_ontology_abstract>0": [ontologyDescription || ""],
+    "#section_fabric_abstract>0": [namespaceDescription || ""],
     "chapter#section_prefixes>1;VDoc Core IRI prefixes": {
       "#0": [],
       "table#>0;prefixes": ontologyColumns.prefixes,

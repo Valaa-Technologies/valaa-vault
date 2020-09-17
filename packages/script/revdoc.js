@@ -20,7 +20,7 @@ const { name, version, description } = require("./package");
 
 module.exports = {
   "dc:title": description,
-  "VDoc:tags": ["PRIMARY", "INTRODUCTORY", "WORKSPACE", "ONTOLOGY"],
+  "VDoc:tags": ["PRIMARY", "INTRODUCTORY", "VALOSPACE", "WORKSPACE", "ONTOLOGY"],
   "VRevdoc:package": name,
   "VRevdoc:version": version,
   "VRevdoc:preferredPrefix": preferredPrefix,
@@ -55,14 +55,14 @@ modification side-effects and groups all such side effects into
 transactions. Valoscript retains ECMAScript 5 syntax and semantics.`,
     ],
   },
-  "chapter#ontology>8": {
+  "chapter#section_valospace>8": {
     "dc:title": [
       "The ", em(preferredPrefix), " valospace namespace of the library ontology of ", pkg(name),
     ],
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
     "data#context": context,
-    "#section_ontology_abstract>0": [ontologyDescription || ""],
+    "#section_valospace_abstract>0": [namespaceDescription || ""],
     "chapter#section_prefixes>1": {
       "dc:title": [em(name), ` IRI prefixes`],
       "#0": [],

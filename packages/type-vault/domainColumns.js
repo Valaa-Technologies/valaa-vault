@@ -68,29 +68,43 @@ const introductionDocuments =  {
   },
 };
 
-const apiReferenceDocuments = {
+const valospaceDocuments = {
   ...documents,
   "column#08": {
     "VDoc:content": em("Title:"),
-    "VDoc:cell": ref({ "VDoc:selectField": "title" }, ["VDoc:selectKey", "#apiAbstract"]),
+    "VDoc:cell": ref({ "VDoc:selectField": "title" }, ["VDoc:selectKey", "#valospaceAbstract"]),
     "VDoc:wide": true,
   },
-  "column#09;apiAbstract": {
-    "VDoc:content": em("API abstract:"),
+  "column#09;valospaceAbstract": {
+    "VDoc:content": em("Valospace abstract:"),
     "VDoc:wide": true,
     "VDoc:tall": true,
   },
 };
 
-const ontologyDocuments = {
+const valosheathDocuments = {
   ...documents,
   "column#08": {
     "VDoc:content": em("Title:"),
-    "VDoc:cell": ref({ "VDoc:selectField": "title" }, ["VDoc:selectKey", "#ontology"]),
+    "VDoc:cell": ref({ "VDoc:selectField": "title" }, ["VDoc:selectKey", "#valosheathAbstract"]),
     "VDoc:wide": true,
   },
-  "column#09;ontologyAbstract": {
-    "VDoc:content": em("Ontology abstract:"),
+  "column#09;valosheathAbstract": {
+    "VDoc:content": em("Valosheath abstract:"),
+    "VDoc:wide": true,
+    "VDoc:tall": true,
+  },
+};
+
+const fabricDocuments = {
+  ...documents,
+  "column#08": {
+    "VDoc:content": em("Title:"),
+    "VDoc:cell": ref({ "VDoc:selectField": "title" }, ["VDoc:selectKey", "#fabricAbstract"]),
+    "VDoc:wide": true,
+  },
+  "column#09;fabricAbstract": {
+    "VDoc:content": em("Fabric abstract:"),
     "VDoc:wide": true,
     "VDoc:tall": true,
   },
@@ -161,8 +175,9 @@ module.exports = {
   roles,
   documents: titledDocuments,
   introductionDocuments,
-  apiReferenceDocuments,
-  ontologyDocuments,
+  valospaceDocuments,
+  valosheathDocuments,
+  fabricDocuments,
   primaryDocuments,
   summary,
   commandSourced,

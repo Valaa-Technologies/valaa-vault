@@ -56,11 +56,11 @@ removed from them, f.ex. for expressing removals from ghost fields
 which are empty as they inherit their entries from the prototype.`,
     ],
   },
-  [`chapter#ontology>8;Valospace ontology '${preferredPrefix}'`]: {
-    "#section_ontology_abstract>0": [ontologyDescription || ""],
+  "chapter#section_valospace>8": {
     "dc:title": [
       "The ", em(preferredPrefix), " valospace namespace",
     ],
+    "#section_valospace_abstract>0": [namespaceDescription || ""],
     "chapter#section_prefixes>1": {
       "dc:title": [em(preferredPrefix), ` IRI prefixes`],
       "#0": [],

@@ -20,7 +20,7 @@ const { name, version, description } = require("./package");
 module.exports = {
   "@context": { ...prefixes, ...context },
   "dc:title": description,
-  "VDoc:tags": ["PRIMARY", "INTRODUCTORY", "WORKSPACE", "ONTOLOGY"],
+  "VDoc:tags": ["PRIMARY", "INTRODUCTORY", "VALOSPACE", "WORKSPACE", "ONTOLOGY"],
   "VRevdoc:package": name,
   "VRevdoc:version": version,
   "VRevdoc:preferredPrefix": preferredPrefix,
@@ -50,14 +50,14 @@ c("ValOS event streams"), `.`,
   "chapter#introduction>2": {
     "#0": [],
   },
-  "chapter#ontology>8": {
+  "chapter#section_valospace>8": {
     "dc:title": [
       "The ", em(preferredPrefix), " valospace namespace of the library ontology of ", em(name),
     ],
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
     "data#context": context,
-    "#section_ontology_abstract>0": [ontologyDescription || ""],
+    "#section_valospace_abstract>0": [namespaceDescription || ""],
     "chapter#section_prefixes>1": {
       "dc:title": [em(name), ` IRI prefixes`],
       "#0": [],

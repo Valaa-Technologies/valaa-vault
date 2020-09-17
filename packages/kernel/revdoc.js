@@ -24,13 +24,15 @@ const {
 
 const roleDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "ROLE"], documents);
 const introductionDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "INTRODUCTORY"], documents);
-const apiReferenceDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "API"], documents);
-const ontologyDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "ONTOLOGY"], documents);
+const valospaceDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "VALOSPACE"], documents);
+const valosheathDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "VALOSHEATH"], documents);
+const fabricDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "FABRIC"], documents);
 const otherPrimaryDocuments = filterKeysWithAllOf("tags", "PRIMARY", documents)
     .filter(key => !roleDocuments.includes(key)
         && !introductionDocuments.includes(key)
-        && !apiReferenceDocuments.includes(key)
-        && !ontologyDocuments.includes(key));
+        && !valospaceDocuments.includes(key)
+        && !valosheathDocuments.includes(key)
+        && !fabricDocuments.includes(key));
 
 module.exports = {
   "dc:title": `${name} domain content reference`,
@@ -104,18 +106,25 @@ ref([em("vlm"), ` the command line script invoker`], "@/valma"), `.`,
         "VDoc:entries": introductionDocuments,
       },
     },
-    "chapter#section_api_reference_documents>1;API reference documents": {
+    "chapter#section_valospace_documents>1;Valospace documents": {
       "#0": [],
       "table#>0;documents": {
-        "VDoc:columns": domainColumns.apiReferenceDocuments,
-        "VDoc:entries": apiReferenceDocuments,
+        "VDoc:columns": domainColumns.valospaceDocuments,
+        "VDoc:entries": valospaceDocuments,
       },
     },
-    "chapter#section_ontology_documents>2;Ontology documents": {
+    "chapter#section_valosheath_documents>1;Valosheath documents": {
       "#0": [],
       "table#>0;documents": {
-        "VDoc:columns": domainColumns.ontologyDocuments,
-        "VDoc:entries": ontologyDocuments,
+        "VDoc:columns": domainColumns.valosheathDocuments,
+        "VDoc:entries": valosheathDocuments,
+      },
+    },
+    "chapter#section_ontology_documents>2;Fabric documents": {
+      "#0": [],
+      "table#>0;documents": {
+        "VDoc:columns": domainColumns.fabricDocuments,
+        "VDoc:entries": fabricDocuments,
       },
     },
     "chapter#section_other_primary_documents>3;Other primary documents": {
@@ -177,7 +186,7 @@ This domain introduces the following `, type, ` `, ref("workspaces", "@/valma#wo
       },
     })).reduce((a, t) => Object.assign(a, t), {}),
   },
-  [`chapter#ontology>8;${name} domain root ontology`]: {
+  [`chapter#section_fabric>8;${name} domain root ontology`]: {
     "#section_fabric_abstract>0": [namespaceDescription || ""],
     "#0": [
 `All labels have implicit IRI prefix "${baseIRI}" (with preferred

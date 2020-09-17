@@ -19,7 +19,7 @@ const {
 module.exports = {
   "@context": { ...prefixes, ...context },
   "dc:title": description,
-  "VDoc:tags": ["PRIMARY", "ONTOLOGY"],
+  "VDoc:tags": ["PRIMARY", "FABRIC", "WORKSPACE", "ONTOLOGY"],
   "VRevdoc:package": name,
   "VRevdoc:version": version,
   "VRevdoc:preferredPrefix": preferredPrefix,
@@ -58,7 +58,7 @@ npm package.`,
 emit BOM documents in various formats.`,
     ],
   },
-  "chapter#ontology>8;SBoMDoc ontology": {
+  "chapter#section_fabric>8": {
     "dc:title": [
       "The ", em("VSbomdoc"), " fabric namespace of the library ontology of ", pkg(name),
     ],
@@ -66,7 +66,7 @@ emit BOM documents in various formats.`,
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
     "data#context": context,
-    "#section_ontology_abstract>0": [ontologyDescription || ""],
+    "#section_fabric_abstract>0": [namespaceDescription || ""],
     "chapter#section_prefixes>1;VSbomdoc IRI prefixes": {
       "#0": [],
       "table#>0;prefixes": ontologyColumns.prefixes,

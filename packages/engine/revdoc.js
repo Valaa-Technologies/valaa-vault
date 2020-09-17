@@ -20,8 +20,8 @@ const {
 } = require("./ontology");
 
 module.exports = {
-  "VDoc:tags": ["WORKSPACE", "ONTOLOGY"],
   "dc:title": title,
+  "VDoc:tags": ["FABRIC", "WORKSPACE", "ONTOLOGY"],
   "VRevdoc:package": name,
   "VRevdoc:version": version,
   "VRevdoc:preferredPrefix": preferredPrefix,
@@ -59,14 +59,14 @@ See also `, ref("ReVdoc specification", "@valos/revdoc"), ` and `,
 ref("VDoc specification", "@valos/vdoc"), ` for reference documentation.`,
     ],
   },
-  "chapter#ontology>8": {
+  "chapter#section_fabric>8": {
     "dc:title": [
       "The ", em(preferredPrefix), " fabric namespace of the library ontology of ", pkg(name),
     ],
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
     "data#context": context,
-    "#section_ontology_abstract>0": [
+    "#section_fabric_abstract>0": [
       namespaceDescription,
     ],
     "chapter#section_prefixes>1": {

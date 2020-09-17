@@ -18,7 +18,7 @@ const {
 
 module.exports = {
   "dc:title": description,
-  "VDoc:tags": ["PRIMARY", "ONTOLOGY"],
+  "VDoc:tags": ["PRIMARY", "FABRIC", "WORKSPACE", "ONTOLOGY"],
   "VRevdoc:package": name,
   "VRevdoc:version": version,
   "VRevdoc:preferredPrefix": preferredPrefix,
@@ -77,14 +77,14 @@ possible to have the final document be a combination of several
 partial primary sources.`,
     ],
   },
-  "chapter#ontology>8;TwinDoc ontology": {
+  "chapter#section_fabric>8": {
     "dc:title": [
       "The ", em("VTwindoc"), " fabric namespace of the library ontology of ", pkg(name),
     ],
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
     "data#context": context,
-    "#section_ontology_abstract>0": {
+    "#section_fabric_abstract>0": {
       "#0": [namespaceDescription || ""],
     },
     "chapter#section_prefixes>1;VTwindoc IRI prefixes": {

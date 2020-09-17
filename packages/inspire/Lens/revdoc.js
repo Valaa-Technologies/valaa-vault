@@ -20,8 +20,8 @@ const {
 } = require("../ontology");
 
 module.exports = {
-  "VDoc:tags": ["ONTOLOGY"],
   "dc:title": title,
+  "VDoc:tags": ["VALOSHEATH", "ONTOLOGY"],
   "VRevdoc:package": name,
   "VRevdoc:version": version,
   "VRevdoc:preferredPrefix": preferredPrefix,
@@ -89,7 +89,7 @@ as the `, ref([em("On:click"), " HTML5 event handler name"], "On:click"), `)
 are defined by other documents.`,
       ]
     },
-    "chapter#valoscope>2": {
+    "chapter#section_valoscope>2": {
       "dc:title": [
 `Valoscope `, ref(em("focus"), "Lens:focus"), ` sees into valospace that is in `,
 ref(em("lens"), "Lens:lens")
@@ -124,14 +124,14 @@ from within lens medias by their term name, most of their actual
 references are implicit ones by the inspire UI engine internals.`,
     ],
   },
-  "chapter#ontology>8": {
+  "chapter#section_valosheath>8": {
     "dc:title": [
       "The ", em(preferredPrefix), " valosheath namespace of the library ontology of ", pkg(name),
     ],
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
     "data#context": context,
-    "#section_ontology_abstract>0": [
+    "#section_valosheath_abstract>0": [
       namespaceDescription || "",
     ],
     "chapter#section_prefixes>1": {

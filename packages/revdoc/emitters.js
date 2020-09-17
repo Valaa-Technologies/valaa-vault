@@ -1,5 +1,6 @@
 const { extension: vdocExtension } = require("@valos/vdoc");
 const { wrapError, dumpObject } = require("@valos/tools/wrapError");
+const { tooltip } = require("@valos/revdoc/extractee");
 const { obtainFullVocabulary } = require("@valos/revdoc/ontologyNamespace");
 
 module.exports = {
@@ -69,10 +70,9 @@ function emitReVDocReference (node, emission, stack) {
       }
       const docsBase = (packageJSON.valos || {}).docs || packageName;
       const subPath = refParts[3] || "";
-      ref = (!refParts[3] || (subPath[0] === "#")
-              || (docsBase[docsBase.length - 1] === "/"))
-          ? `${docsBase}${refParts[3] || ""}`
-          : `${docsBase}/${refParts[3]}`;
+      ref = (!subPath || (subPath[0] === "#") || (docsBase[docsBase.length - 1] === "/"))
+          ? `${docsBase}${subPath}`
+          : `${docsBase}/${subPath}`;
     } else {
       const [prefix, ...suffixes] = (ref || "").split(":");
       const contextEntry = !suffixes.length ? undefined : stack.document["@context"][prefix];
@@ -81,14 +81,33 @@ function emitReVDocReference (node, emission, stack) {
         if (expansion != null) {
           ref = `${expansion}${suffixes.join(":")}`; // TODO: unescape suffix escapes
         } else {
-          console.log("Unable to expand reference:", ref, "from context entry:", contextEntry);
+          stack.error("Unable to expand reference:", ref, "from @context entry:", contextEntry);
         }
+      } else if (suffixes.length && (prefix[0] === "V") && prefix[1].toLowerCase() !== prefix[1]) {
+        stack.error(`Can't find valos namespace '${prefix}' definition in @context`,
+            `when trying to resolve reference`, ref);
       }
     }
     if (ref !== node["VDoc:ref"]) {
       node_ = Object.assign({}, node, { "VDoc:ref": ref || null });
     }
-    return vdocExtension.emitters.html["VDoc:Reference"](node_, emission, stack);
+    const refIndex = ref.indexOf("#") + 1;
+    const refBase = ref.slice(0, refIndex);
+    const referencedModule = (stack.document["VRevdoc:referencedModules"] || {})[refBase];
+    if (referencedModule) {
+      const term = ref.slice(refIndex);
+      const definition = obtainFullVocabulary(referencedModule)[term];
+      if (!definition) {
+        stack.error(
+            `Can't find term '${term}' definition in module "${referencedModule}" vocabulary`,
+            `when trying to resolve namespaced reference ${node["VDoc:ref"]}`);
+      } else if (definition["rdfs:comment"]) {
+        if (node === node_) node_ = { ...node };
+        node_["VDoc:content"] = [tooltip(node_["VDoc:content"], definition["rdfs:comment"])];
+      }
+    }
+    const ret = vdocExtension.emitters.html["VDoc:Reference"](node_, emission, stack);
+    return ret;
   } catch (error) {
     throw wrapError(error, new Error("During emitReVDocReference, with:"),
         "\n\tnode:", ...dumpObject(node, { nest: true }));
@@ -115,10 +134,10 @@ function emitReVDocExample (node, emission, stack) {
 }
 
 function emitReVDocTooltip (node, emission, stack) {
-  return `${emission}<div class="vdoc type-revdoc-tooltip">
+  return `${emission}<span class="vdoc type-revdoc-tooltip">
     ${stack.emitNode({ ...node, "@type": "VDoc:Node" }, "")}
     <span class="vdoc type-revdoc-tooltip-content">
         ${stack.emitNode(node["VRevdoc:tooltipContent"], "")}
     </span>
-</div>`;
+</span>`;
 }

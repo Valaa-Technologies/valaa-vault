@@ -75,7 +75,7 @@ ref("VDoc specification", "@valos/vdoc"), ` for reference documentation.`,
       "table#>0;prefixes": ontologyColumns.prefixes,
     },
     "chapter#section_classes>2": {
-      "dc:title": [em(preferredPrefix), " ", ref("fabric classes", "@valos/kernel#Class")],
+      "dc:title": [em(preferredPrefix), " ", ref("fabric classes", "VKernel:Class")],
       "#0": [
 "This section describes fabric classes introduced by the 'VEngine' namespace",
       ],
@@ -85,7 +85,7 @@ ref("VDoc specification", "@valos/vdoc"), ` for reference documentation.`,
       },
     },
     "chapter#section_properties>3": {
-      "dc:title": [em(preferredPrefix), " ", ref("fabric properties", "@valos/kernel#Property")],
+      "dc:title": [em(preferredPrefix), " ", ref("fabric properties", "VKernel:Property")],
       "#0": [
 "This section describes fabric properties introduced by the 'VEngine' namespace",
       ],
@@ -96,7 +96,7 @@ ref("VDoc specification", "@valos/vdoc"), ` for reference documentation.`,
     },
     "chapter#section_methods>4": {
       "dc:title": [
-        em(preferredPrefix), " ", ref("valosheath methods", "@valos/engine#Method"),
+        em(preferredPrefix), " ", ref("valosheath methods", "VEngine:Method"),
       ],
       "#0": [
 "This section describes fabric methods introduced by the 'VEngine' namespace",
@@ -107,7 +107,7 @@ ref("VDoc specification", "@valos/vdoc"), ` for reference documentation.`,
       },
     },
     "chapter#section_resolvers>5": {
-      "dc:title": [em(preferredPrefix), " ", ref("field resolvers", "@valos/raem#Resolver")],
+      "dc:title": [em(preferredPrefix), " ", ref("field resolvers", "VModel:Resolver")],
       "#0": [
 "This section describes valospace-to-fabric resolvers introduced by the 'VEngine' namespace",
       ],
@@ -118,7 +118,7 @@ ref("VDoc specification", "@valos/vdoc"), ` for reference documentation.`,
     },
     "chapter#section_globals>7": {
       "dc:title": [
-        em(preferredPrefix), " ", ref("valosheath globals", "@valos/engine#Global"),
+        em(preferredPrefix), " ", ref("valosheath globals", "VEngine:Global"),
       ],
       "#0": [
 "This section describes valosheath global objects introduced by the 'VEngine' namespace",

@@ -9,14 +9,15 @@ const {
 } = require("@valos/revdoc");
 const { domainColumns } = require("@valos/type-vault");
 
-const { name, version } = require("../packages/kernel/package");
+const { name, version } = require("../dist/packages/@valos/kernel/package");
+const { documents } = require("../dist/packages/@valos/kernel");
 const {
   V: {
     preferredPrefix, baseIRI, description: namespaceDescription,
     prefixes, context, referencedModules, vocabulary,
   },
   ...remainingOntology
-} = require("../packages/kernel");
+} = require("../dist/packages/@valos/kernel/ontology");
 
 const roleDocuments = Object.fromEntries(
     // filterKeysWithAllOf("tags", ["PRIMARY", "ROLE"], documents)
@@ -45,23 +46,23 @@ module.exports = {
   "data#context": context,
 
   "chapter#abstract>0": {
-    "#0": [{
-      "@type": "VRevdoc:Tooltip",
-      "VDoc:content": em(
-          strong(`'Valos extends boundlessly across the valospace-time fabric.'`),
-          " (...in progress(tm))"
-      ),
-      "VRevdoc:tooltipContent": [[
+    "#0": [
+      [tooltip(
+          em(strong(`'Valos extends boundlessly across the valospace-time fabric.'`),
+              " (...in progress(tm))"),
+          [
 strong("-> Vertically"), `: as a full application development solution
-valos radically simplifies the semantic web technology stack.`, null,
+valos radically simplifies the semantic web technology stack.`,
+null,
 strong("-> Horizontally"), `: as a global, de-centralized ecosystem
-valos eases cross-organization interfacing.`, null,
+valos eases cross-organization interfacing.`,
+null,
 strong("-> In depth"), `: with its unified resource model valos blurs
-the boundary between frontends and backends.`, null,
-strong("-> Temporally"), `: valos unifies document state and change updates
-into seamless event stream *chronicles*.`,
-      ]],
-    },
+the boundary between frontends and backends.`,
+null,
+strong("-> Temporally"), `: valos unifies document state and change
+updates into seamless event stream *chronicles*.`,
+          ])],
     null,
 `In other words, valos is a bit ambitious and a lot to take in at once.
 
@@ -119,7 +120,7 @@ guide also gives a high-level overview of the rest.`,
       "table#>0;prefixes": ontologyColumns.prefixes,
     },
     "chapter#section_types>2": {
-      "dc:title": [em(preferredPrefix), " ", ref("valospace resource types", "@valos/raem#Type")],
+      "dc:title": [em(preferredPrefix), " ", ref("valospace resource types", "VModel:Type")],
       "#0": [
 `This section defines all valospace resource types introduced by the
 @valos/kernel packages. Any instance of a resource type is always
@@ -131,7 +132,7 @@ recorded in an event log.`,
       },
     },
     "chapter#section_classes>3": {
-      "dc:title": [em(preferredPrefix), " ", ref("valosheath classes", "@valos/engine#Class")],
+      "dc:title": [em(preferredPrefix), " ", ref("valosheath classes", "VEngine:Class")],
       "#0": [
 `This section describes all valosheath classes introduced by the
 @valos/kernel packages. These classes are provided for scripts by the
@@ -143,7 +144,7 @@ recorded in an event log.`,
       },
     },
     "chapter#section_fields>4": {
-      "dc:title": [em(preferredPrefix), " ", ref("valospace fields", "@valos/raem#Field")],
+      "dc:title": [em(preferredPrefix), " ", ref("valospace fields", "VModel:Field")],
       "#0": [
 `This section defines all valospace resource fields introduced by the
 @valos/kernel packages. The values of these fields are either directly
@@ -156,7 +157,7 @@ recorded in or indirectly resolved from event log(s).`,
     },
     "chapter#section_properties>5": {
       "dc:title": [
-        em(preferredPrefix), " ", ref("valosheath properties", "@valos/engine#Property"),
+        em(preferredPrefix), " ", ref("valosheath properties", "VEngine:Property"),
       ],
       "#0": [
 `This section describes all valosheath properties introduced by the
@@ -170,7 +171,7 @@ the @valos/engine and their values are not recorded in event logs.`,
     },
     "chapter#section_methods>6": {
       "dc:title": [
-        em(preferredPrefix), " ", ref("valosheath methods", "@valos/engine#Method"),
+        em(preferredPrefix), " ", ref("valosheath methods", "VEngine:Method"),
       ],
       "#0": [
 `This section describes all valosheath methods introduced by the
@@ -184,7 +185,7 @@ the @valos/engine and their values are not recorded in event logs.`,
     "chapter#section_object_properties>7": {
       "dc:title": [
         em(preferredPrefix), " ",
-        ref("valosheath object properties", "@valos/engine#ObjectProperty"),
+        ref("valosheath object properties", "VEngine:ObjectProperty"),
       ],
       "#0": [
 `This section describes all valosheath object properties introduced by
@@ -199,7 +200,7 @@ the  @valos/engine and their values are not recorded in event logs.`,
     },
     "chapter#section_object_methods>8": {
       "dc:title": [
-        em(preferredPrefix), " ", ref("valosheath object methods", "@valos/engine#ObjectMethod"),
+        em(preferredPrefix), " ", ref("valosheath object methods", "VEngine:ObjectMethod"),
       ],
       "#0": [
 `This section describes all valosheath object methods introduced by the

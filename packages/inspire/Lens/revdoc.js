@@ -71,9 +71,9 @@ end-user as an interactive web application.`,
       "#0": [
 `The VSX text uses a html-like declarative syntax with two key extensions:`,
         { "numbered#0": [
-[ref("Embedded live valoscript:", "Lens:valoscript"),
+[ref("Embedded live valoscript:", "@valos/inspire/Lens#section_valoscript"),
   vsx(`<div On:click={() => focus.msg = " world!"}>Hello{focus.msg || ""}</div>`)],
-[ref("Valoscope UI component:", "Lens:valoscope"), vsx(
+[ref("Valoscope UI component:", "@valos/inspire/Lens#section_valoscope"), vsx(
 `<Valoscope if={app.isLoggedIn(context.identity)}
   lens={app.main}
   else={app.login}
@@ -96,25 +96,25 @@ ref(em("lens"), "Lens:lens")
       ],
       "#0": [],
     },
-    "chapter#valoscript>3;Embedded valoscript provides live UI interactions": {
+    "chapter#section_valoscript>3;Embedded valoscript provides live UI interactions": {
       "#0": [],
     },
-    "chapter#lens_properties>4;Resources render themselves with a LENS property": {
-      "#0": [],
-    },
-  },
-  "chapter#term_qualities>4;Term qualities": {
-    "chapter#element_attributes>0;Element attributes": {
-      "#0": [],
-    },
-    "chapter#context_variables>1;Context variables": {
-      "#0": [],
-    },
-    "chapter#lens_term>2;Lenses": {
+    "chapter#section_lens_properties>4;Resources render themselves with a LENS property": {
       "#0": [],
     },
   },
-  "chapter#slots>7;Lens slots": {
+  "chapter#section_term_qualities>4;Term qualities": {
+    "chapter#section_element_attributes>0;Element attributes": {
+      "#0": [],
+    },
+    "chapter#section_context_variables>1;Context variables": {
+      "#0": [],
+    },
+    "chapter#section_lens_terms>2;Lenses": {
+      "#0": [],
+    },
+  },
+  "chapter#section_slots>7;Lens slots": {
     "#0": [
 `A lens slot is any term which has a `, tag("Lens", "-tag"), ` and also
 either `, tag("Attribute"), " or ", tag("Context"), ` tags. A slot can
@@ -140,7 +140,7 @@ references are implicit ones by the inspire UI engine internals.`,
       "table#>0;prefixes": ontologyColumns.prefixes,
     },
     "chapter#section_classes>2": {
-      "dc:title": [em(preferredPrefix), " ", ref("valosheath classes", "@valos/engine#Class")],
+      "dc:title": [em(preferredPrefix), " ", ref("valosheath classes", "VEngine:Class")],
       "#0": [
 `This section describes valosheath classes of the 'Lens' namespace.`,
       ],
@@ -151,7 +151,7 @@ references are implicit ones by the inspire UI engine internals.`,
     },
     "chapter#section_properties>3": {
       "dc:title": [
-        em(preferredPrefix), " ", ref("valosheath properties", "@valos/engine#Property"),
+        em(preferredPrefix), " ", ref("valosheath properties", "VEngine:Property"),
       ],
       "#0": [
 `This section describes all valosheath properties of the 'Lens'

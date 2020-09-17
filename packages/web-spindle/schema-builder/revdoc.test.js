@@ -214,7 +214,7 @@ inside out to get the appropriate JSON schema layout.`
 The extension is a nested merge and can accept multiple base types.
 
 Here we extend a string type with a valospace reflection path to the
-field `, ref("@valos/kernel#name"), `.`,
+field `, ref("VKernel:name"), `.`,
       ],
       "example#example_schema_extension>2": itExpects(
           "expanded schema of an extended string", [
@@ -286,13 +286,13 @@ type => exportSchemaOf(type),
     },
     "chapter#mapping_schemas>4;Mapping schemas": {
       "#0": [
-`A mapping is group of `, ref("relations", "@valos/kernel#Relation"),
+`A mapping is group of `, ref("relations", "VKernel:Relation"),
 ` originating from a resource with a common name. The mapping relations
 can have properties and can be referred from the Web API also
 individually: their identity (ie. 'primary key') of is the unique
-combination of the mapping `, ref("source", "@valos/kernel#source"),
-` resource and mapping `, ref("name", "@valos/kernel#name"), ` plus the
-individual`, ref("target", "@valos/kernel#target"), ` resource.
+combination of the mapping `, ref("source", "VKernel:source"),
+` resource and mapping `, ref("name", "VKernel:name"), ` plus the
+individual`, ref("target", "VKernel:target"), ` resource.
 
 The mappings in valospace are defined by a reflection to a set of
 relations. Here `, em("mappingToMany"), ` defines a mapping 'tags'

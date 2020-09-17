@@ -4,6 +4,7 @@ module.exports = {
   baseIRI: "https://valospace.org/revela/0#",
   namespaceModules: {
     VKernel: "@valos/kernel/VKernel",
+    VModel: "@valos/raem/VModel",
     VRevela: "@valos/inspire/VRevela",
   },
   description:

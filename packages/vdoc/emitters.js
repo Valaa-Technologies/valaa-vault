@@ -84,7 +84,8 @@ function emitNodeHTML (node, emission, stack) {
 
     const attributes = nodeAttributes(node);
     if (node["VDoc:element"] || attributes) {
-      const elem = node["VDoc:element"] || (node["VDoc:entries"] ? "div" : "span");
+      const elem = node["VDoc:element"]
+          || ((node["@type"] === "VDoc:Paragraph") || node["VDoc:entries"] ? "div" : "span");
       body = (elem === "span") ? `<${elem}${attributes}>${body}</${elem}>\n` : `
   <${elem}${attributes}>${body}
   </${elem}>\n`;

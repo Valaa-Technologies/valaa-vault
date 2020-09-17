@@ -172,7 +172,7 @@ const _returnUndefined = Symbol("returnUndefined");
 /* eslint-disable complexity */
 
 function extend (target_, patch_, keyInParent, targetParent, patchParent, skipSpread = false) {
-  let ret;
+  let ret, phase = ".preExtend";
   try {
     if (this.keyPath && (keyInParent !== undefined)) this.keyPath.push(keyInParent);
     ret = this.preExtend
@@ -183,6 +183,7 @@ function extend (target_, patch_, keyInParent, targetParent, patchParent, skipSp
       else if (patch_ === null) ret = null;
       else if (patch_ === target_) throw new Error("Cannot extend to self");
       else if (Array.isArray(patch_)) {
+        phase = ".array";
         const isSpreader = !skipSpread && (patch_[0] === this.spreaderKey) && this.spreaderKey;
         if (isSpreader /* || ((ret !== undefined) && !Array.isArray(ret)) */) {
           // FIXME(iridian, 2019-11): this path should not be taken when this.concatArrays is false
@@ -198,6 +199,7 @@ function extend (target_, patch_, keyInParent, targetParent, patchParent, skipSp
           }
         }
       } else if (Object.getPrototypeOf(patch_) !== Object.prototype) {
+        phase = ".complex";
         switch (this.complexPatch) {
           case "overwrite": return patch_;
           case "patch": return undefined;
@@ -210,6 +212,7 @@ function extend (target_, patch_, keyInParent, targetParent, patchParent, skipSp
         }
       } else if (!skipSpread && this.spreaderKey
           && patch_[this.spreaderKey] && patch_.hasOwnProperty(this.spreaderKey)) {
+        phase = ".spread";
         if (!_setRetFromSpreadAndMaybeBail(this, patch_[this.spreaderKey])
             && Object.keys(patch_).length > 1) {
           const src = !this.preExtend ? patch_ : { ...patch_ };
@@ -217,6 +220,7 @@ function extend (target_, patch_, keyInParent, targetParent, patchParent, skipSp
           ret = this.extend(ret, src, keyInParent, targetParent, patchParent, true);
         }
       } else {
+        phase = ".object";
         const targetIsArray = Array.isArray(ret);
         const keys = Object.keys(patch_);
         if (this.patchSymbols) {
@@ -239,18 +243,19 @@ function extend (target_, patch_, keyInParent, targetParent, patchParent, skipSp
       }
     }
     if (this.postExtend) {
+      phase = ".postExtend";
       ret = this.postExtend(ret, patch_, keyInParent, targetParent, patchParent, this);
     }
-    if (this.keyPath && (keyInParent !== undefined)) this.keyPath.pop();
     return ret === _returnUndefined ? undefined : ret;
   } catch (error) {
-    throw wrapError(error, new Error(`patchWith.extend(${(this.keyPath || []).join(" | ")})`),
-      "\n\ttarget_:", ...dumpObject(target_),
-      "\n\tpatch_:", ...dumpObject(patch_),
-      "\n\tkeyInParent:", ...dumpObject(keyInParent),
-      "\n\ttargetParent:", ...dumpObject(targetParent),
-      "\n\tpatchParent:", ...dumpObject(patchParent),
+    throw wrapError(error,
+        new Error(`patchWith.extend(keyPath: ${(this.keyPath || []).join(" | ")})${phase}`),
+        "\n\tkeyInParent:", ...dumpObject(keyInParent),
+        "\n\ttarget_:", ...dumpObject(target_),
+        "\n\tpatch_:", ...dumpObject(patch_),
     );
+  } finally {
+    if (this.keyPath && (keyInParent !== undefined)) this.keyPath.pop();
   }
 
   function _setRetFromSpreadAndMaybeBail (stack, spreaderValue) {

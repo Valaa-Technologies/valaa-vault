@@ -46,23 +46,31 @@ function _createSymbols () {
     return defineName(name, module.exports, createNameParameters);
   }
   _defineName("frameactive", () => ({
-    tags: ["Attribute", "Event"],
+    tags: ["Attribute", "Inspire", "Event"],
     type: "EventHandler",
     description:
 `The ValOS frame of the element is active`,
   }));
 
   _defineName("framepropertychange", () => ({
-    tags: ["Attribute", "Event"],
+    tags: ["Attribute", "Inspire", "Event"],
     type: "EventHandler",
-    description: `A ValOS frame property has changed`,
+    description:
+`A ValOS frame property has changed`,
   }));
 
   _defineName("focuspropertychange", () => ({
-    tags: ["Attribute", "Event"],
+    tags: ["Attribute", "Inspire", "Event"],
     type: "EventHandler",
-    description: `A ValOS focus property has changed`,
+    description:
+`A ValOS focus property has changed`,
   }));
 
+  _defineName("click", () => ({
+    tags: ["Attribute", "HTML5", "Event"],
+    type: "EventHandler",
+    description:
+ref("The HTML5 'click' event", "https://w3c.github.io/uievents/#event-type-click"),
+  }));
   return ret;
 }

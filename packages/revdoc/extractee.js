@@ -76,7 +76,7 @@ module.exports = {
     return {
       // TODO(iridian, 2019-08): Figure out if there's any sense in
       // providing language identifiers for non-natural languages.
-      ...c(text, { language: "https://valospace.org/inspire/Lens/0#VSX" }),
+      ...c(text, { language: "https://valospace.org/inspire/Lens/#VSX" }),
       "@type": "VRevdoc:VSX",
     };
   },
@@ -186,6 +186,14 @@ module.exports = {
     return {
       "@type": "VRevdoc:CommandLineInteraction",
       "VDoc:entries": contextedRows,
+    };
+  },
+
+  tooltip (content, tooltipContent) {
+    return {
+      "@type": "VRevdoc:Tooltip",
+      "VDoc:content": Array.isArray(content) ? content : [content],
+      "VRevdoc:tooltipContent": tooltipContent,
     };
   },
 

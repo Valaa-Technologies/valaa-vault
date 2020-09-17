@@ -151,7 +151,7 @@ const types = {
     "VDoc:cell": _simpleReferenceCell("rdfs:subClassOf"),
   },
   "column#14": {
-    "VDoc:content": ref("instance fields", "@valos/raem#Field"),
+    "VDoc:content": ref("instance fields", "VModel:Field"),
     "VDoc:wide": true,
     "VDoc:cell": _instanceFieldCell,
   },

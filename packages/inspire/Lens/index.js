@@ -95,16 +95,16 @@ The 'Lens' terms are marked with tags which describe their qualities.
 There are three primary tags:`,
     { "bulleted#2": [
 [ref(tag("Attribute"), "#Attribute"), ` tagged terms identify an `,
-  ref("element attribute", "Lens:element_attributes"),
+  ref("element attribute", "@valos/inspire/Lens#section_element_attributes"),
   `. These attributes affect only the element itself.`],
 [ref(tag("Context"), "#Context"), ` tagged terms identify a `,
-  ref(em("context variable"), "Lens:context_variables"),
+  ref(em("context variable"), "@valos/inspire/Lens#section_context_variables"),
   `. Context variables of an element affect all of its child elements.`],
-[ref(tag("Lens"), "Lens:lens_terms"), ` denotes a term that
-  can be used in VSX element bodies to display content`],
+[ref(tag("Lens"), "@valos/inspire/Lens#section_lens_terms"), ` denotes
+  a term that can be used in VSX element bodies to display content`],
     ] },
 tag("Lens", "-terms"), ` which are also tagged with either `, tag("Attribute"),
-` or `, tag("Context"), ` are known as `, ref("lens slots", "Lens:lens_slots"),
+` or `, tag("Context"), ` are known as `, ref("lens slots", "@valos/inspire/Lens#lens_slots"),
 `.
 
 There are also auxiliary tags:`,

@@ -13,6 +13,7 @@ const semver = require("semver");
 const shell = require("shelljs");
 const yargs = require("yargs/yargs");
 const yargsParser = require("yargs-parser").detailed;
+
 const patchWith = require("@valos/tools/patchWith").default;
 const dumpify = require("@valos/tools/dumpify").default;
 const wrapErrorModule = require("@valos/tools/wrapError");

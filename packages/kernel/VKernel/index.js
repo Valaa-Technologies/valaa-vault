@@ -4,6 +4,8 @@ module.exports = {
   baseIRI: "https://valospace.org/kernel/0#",
   namespaceModules: {
     VKernel: "@valos/kernel/VKernel",
+    VModel: "@valos/raem/VModel",
+    VEngine: "@valos/engine/VEngine",
   },
   description:
 `The 'VKernel' namespace provides the vocabulary for valos fabric core

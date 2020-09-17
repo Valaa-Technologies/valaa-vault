@@ -50,7 +50,7 @@ for valoscript, the valospace ECMAScript dialect.`,
     "#0": [
 `Valoscript extends ECMAScript 5 object model transparently for
 manipulating valospace resources. The valoscript interpreter creates `,
-ref("events", "@valos/raem#event"), ` from all valospace resource
+ref("events", "VModel:Event"), ` from all valospace resource
 modification side-effects and groups all such side effects into
 transactions. Valoscript retains ECMAScript 5 syntax and semantics.`,
     ],
@@ -69,7 +69,7 @@ transactions. Valoscript retains ECMAScript 5 syntax and semantics.`,
       "table#>0;prefixes": ontologyColumns.prefixes,
     },
     "chapter#section_classes>2": {
-      "dc:title": [em(preferredPrefix), " ", ref("fabric classes", "@valos/kernel#Class")],
+      "dc:title": [em(preferredPrefix), " ", ref("fabric classes", "VKernel:Class")],
       "#0": [],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.classes,
@@ -77,7 +77,7 @@ transactions. Valoscript retains ECMAScript 5 syntax and semantics.`,
       },
     },
     "chapter#section_properties>3": {
-      "dc:title": [em(preferredPrefix), " ", ref("fabric properties", "@valos/kernel#Property")],
+      "dc:title": [em(preferredPrefix), " ", ref("fabric properties", "VKernel:Property")],
       "#0": [],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.properties,
@@ -85,7 +85,7 @@ transactions. Valoscript retains ECMAScript 5 syntax and semantics.`,
       },
     },
     "chapter#section_types>4": {
-      "dc:title": [em(preferredPrefix), " ", ref("valospace resource types", "@valos/raem#Type")],
+      "dc:title": [em(preferredPrefix), " ", ref("valospace resource types", "VModel:Type")],
       "#0": [],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.types,
@@ -93,7 +93,7 @@ transactions. Valoscript retains ECMAScript 5 syntax and semantics.`,
       },
     },
     "chapter#section_fields>5": {
-      "dc:title": [em(preferredPrefix), " ", ref("valospace fields", "@valos/raem#Field")],
+      "dc:title": [em(preferredPrefix), " ", ref("valospace fields", "VModel:Field")],
       "#0": [],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.fields,
@@ -101,7 +101,7 @@ transactions. Valoscript retains ECMAScript 5 syntax and semantics.`,
       },
     },
     "chapter#section_resolvers>6": {
-      "dc:title": [em(preferredPrefix), " ", ref("field resolvers", "@valos/raem#Resolver")],
+      "dc:title": [em(preferredPrefix), " ", ref("field resolvers", "VModel:Resolver")],
       "#0": [],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.verbs,

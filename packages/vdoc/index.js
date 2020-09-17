@@ -46,6 +46,7 @@ function extract (sourceGraphs, {
           }
           this.documentNode = innerTarget;
         }
+        if (innerTarget === patch) return innerTarget;
         for (const extension of extensions) {
           const preExtend = (extension.extractors.native || {}).preExtend;
           if (!preExtend) continue;
@@ -79,6 +80,14 @@ function emit (vdocState, formatName, options) {
   if (options.extensions === undefined) options.extensions = [this, ...this.extends];
   if (options.document === undefined) options.document = vdocState[0];
   if (options.vdocState === undefined) options.vdocState = vdocState;
+  const logger = options.logger;
+  if (logger) {
+    options.debug = logger.debug.bind(logger);
+    options.info = logger.info.bind(logger);
+    options.log = logger.log.bind(logger);
+    options.warn = logger.warn.bind(logger);
+    options.error = logger.error.bind(logger);
+  }
   options.emitNode = function emitNode (node, target, explicitType) {
     const type = explicitType
         || ((node == null) && "null")

@@ -7,6 +7,20 @@ module.exports = {
 particular event message lifetime phase.`,
   },
 
+  CommandAspect: { "@type": "VKernel:Class",
+    "rdfs:subClassOf": "VSourcerer:EventAspect",
+    "VRevdoc:brief": "gateway command aspect",
+    "rdfs:comment":
+`The class of gateway-provided command properties of an event.`,
+  },
+
+  LogAspect: { "@type": "VKernel:Class",
+    "rdfs:subClassOf": "VSourcerer:EventAspect",
+    "VRevdoc:brief": "authority truth aspect",
+    "rdfs:comment":
+`The class of authority-provided truth properties of an event.`,
+  },
+
   EventAspects: {
     "@type": "VKernel:Class",
     "VRevdoc:brief": "context-free container of event aspects",

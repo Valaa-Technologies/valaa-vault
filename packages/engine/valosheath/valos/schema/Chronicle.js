@@ -20,7 +20,7 @@ export default {
 `Returns an existing, fully active connection to the chronicle with
 given *chronicleURI*, undefined otherwise`,
     ], [
-      "DEPRECATED", `V:Chronicle.tryConnection.`
+      "DEPRECATED", `V:Chronicle.tryConnection`
     ])(function tryPartitionConnection (chronicleURI) {
       const ret = this.__callerValker__
           .acquireConnection(chronicleURI, { require: false, newConnection: false });

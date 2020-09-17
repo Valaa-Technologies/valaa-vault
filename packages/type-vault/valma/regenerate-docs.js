@@ -21,13 +21,13 @@ exports.builder = (yargs) => yargs.options({
     type: "boolean", default: true,
     description: "Generate Software Bill of Materials documents",
   },
-  "alternate-root": {
+  "assembly-root": {
     type: "string", default: "dist/packages",
-    description: "Alternate doc source root to search for processed docs versions.",
+    description: "Assembled package root directory to forward the regenerate call to",
   },
   revdocs: {
-    default: true,
-    description: "Generate revdocs from all vault **/*revdoc*.js files",
+    type: "string", array: true, default: ["revdocs", "packages/", "opspaces/", "workers/"],
+    description: "Folders to scan and generate revdocs from for all matching **/*revdoc*.js files",
   },
   stylesheets: {
     type: "string", array: true,
@@ -44,16 +44,25 @@ exports.builder = (yargs) => yargs.options({
   },
 });
 
-const revdocRegex =
-    /^(revdocs|packages\/|opspaces\/|workers\/)([^/]*)\/(.*\/)?(([^/]*)\.)?revdoc(.test)?\.js/;
-
 exports.handler = async (yargv) => {
+  const vlm = yargv.vlm;
+  if (yargv["assembly-root"] && !yargv.alreadyForwarded) {
+    const regenerateForwardPath = vlm.path.join(process.cwd(),
+        yargv["assembly-root"], "@valos", "type-vault", "valma", "regenerate-docs");
+    try {
+      const packagedRegenerate = require(regenerateForwardPath);
+      yargv.alreadyForwarded = true;
+      return packagedRegenerate.handler(yargv);
+    } catch (error) {
+      vlm.warn("--assembly-root requested but no regenerate-docs forward found at:",
+          vlm.theme.path(regenerateForwardPath));
+    }
+  }
+
   const convert = require("xml-js");
   const patchWith = require("@valos/tools/patchWith").default;
-  const { sbomTables, extractee: { ref, authors }, extension }
-      = require("@valos/sbomdoc");
+  const { sbomTables, extractee: { ref, authors }, extension } = require("@valos/sbomdoc");
 
-  const vlm = yargv.vlm;
   const config = vlm.getPackageConfig();
   const toolset = vlm.getToolsetConfig(exports.vlm.toolset);
   const vaultDocsConfig = vlm.getToolConfig("@valos/type-vault", "docs") || {};
@@ -69,8 +78,9 @@ exports.handler = async (yargv) => {
       ..._embedSection("abstract", vdocState[0].abstract),
       ..._embedSection("introduction",
           { ...vdocState[0].introduction || {}, "dc:title": undefined }),
-      ..._embedSection("apiAbstract", vdocState[0].section_api_abstract),
-      ..._embedSection("ontologyAbstract", vdocState[0].section_ontology_abstract),
+      ..._embedSection("valospaceAbstract", vdocState[0].section_valospace_abstract),
+      ..._embedSection("valosheathAbstract", vdocState[0].section_valosheath_abstract),
+      ..._embedSection("fabricAbstract", vdocState[0].section_fabric_abstract),
       ...(vdocState[0]["VRevdoc:preferredPrefix"] && {
         "VRevdoc:preferredPrefix": vdocState[0]["VRevdoc:preferredPrefix"],
         "VRevdoc:baseIRI": vdocState[0]["VRevdoc:baseIRI"],
@@ -97,8 +107,12 @@ exports.handler = async (yargv) => {
   }
 
   if (yargv.revdocs) {
+    const scannedFolders = yargv.revdocs.map(e => e.replace("/", "\\/")).join("|");
+    const revdocRegex = new RegExp(
+        `^(${scannedFolders})([^/]*)\\/(.*\\/)?(([^/]*)\\.)?revdoc(.test)?\\.js`);
     const packageRevdocPaths = [...(vlm.shell.find("-l",
-        "{revdocs,packages,opspaces,workers}/**/{,*.}revdoc{,.test}.js") || [])];
+        `{${yargv.revdocs.map(e => e.replace("/", "")).join(",")}}/**/{,*.}revdoc{,.test}.js`)
+            || [])];
     for (const revdocPath of packageRevdocPaths) {
       try {
         const [, workspaceBase, workspaceName, docDir,, docName] = revdocPath.match(revdocRegex);
@@ -117,8 +131,8 @@ exports.handler = async (yargv) => {
           }
         }
         let sourcePath = revdocPath;
-        if (yargv["alternate-root"] && (workspaceBase === "packages/")) {
-          const babelifiedPath = vlm.path.join(yargv["alternate-root"],
+        if (yargv["assembly-root"] && (workspaceBase === "packages/")) {
+          const babelifiedPath = vlm.path.join(yargv["assembly-root"],
               config.valos.domain.match(/^([^/]*)/)[1], revdocPath.replace(/^packages\//, ""));
           if (vlm.shell.test("-f", vlm.path.join(process.cwd(), babelifiedPath))) {
             sourcePath = babelifiedPath;
@@ -192,16 +206,17 @@ exports.handler = async (yargv) => {
         documentIRI: _combineIRI(docsBaseIRI, targetDocPath, targetDocName),
       });
       const referencedModules = revdocState[0]["VRevdoc:referencedModules"];
-      if (referencedModules && yargv["alternate-root"]) {
+      if (referencedModules && yargv["assembly-root"]) {
         for (const [referencePrefix, referredModule] of Object.entries(referencedModules)) {
           const alternateModulePath =
-              vlm.path.join(process.cwd(), yargv["alternate-root"], referredModule);
+              vlm.path.join(process.cwd(), yargv["assembly-root"], referredModule);
           if (vlm.shell.test("-f", vlm.path.join(alternateModulePath, "index.js"))
               || vlm.shell.test("-f", `${alternateModulePath}.js`)) {
             referencedModules[referencePrefix] = alternateModulePath;
           }
         }
       }
+      vlm.ifVerbose(1).info("Regenerating revdoc at", vlm.theme.path(revdocPath));
       const revdocHTML = await emitHTML(revdocState);
       const targetDir = vlm.path.join("docs", targetDocPath);
       await vlm.shell.mkdir("-p", targetDir);
@@ -294,9 +309,10 @@ to define the content of this section.`,
     return extension.extract(sbomSource, { documentIRI: `${docsBaseIRI || ""}sbom` });
   }
 
-  async function emitHTML (sbomDocState) {
-    const sbomhtml = extension.emit(sbomDocState, "html", {
+  async function emitHTML (vdocState) {
+    const sbomhtml = extension.emit(vdocState, "html", {
       revdoc: { stylesheets: yargv.stylesheets },
+      logger: vlm,
     });
     return sbomhtml;
   }

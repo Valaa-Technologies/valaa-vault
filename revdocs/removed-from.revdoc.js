@@ -14,7 +14,7 @@ const {
     prefixes, context, referencedModules, vocabulary,
   },
   ...remainingOntology
-} = require("../packages/kernel");
+} = require("../dist/packages/@valos/kernel/ontology");
 
 module.exports = {
   "dc:title": `${name} removed-from field reference`,
@@ -67,7 +67,7 @@ which are empty as they inherit their entries from the prototype.`,
       "table#>0;prefixes": ontologyColumns.prefixes,
     },
     "chapter#section_fields>5": {
-      "dc:title": [em(preferredPrefix), " ", ref("valospace fields", "@valos/raem#Field")],
+      "dc:title": [em(preferredPrefix), " ", ref("valospace fields", "VModel:Field")],
       "#0": [],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.fields,

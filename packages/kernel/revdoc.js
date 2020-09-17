@@ -189,7 +189,7 @@ prefix "${preferredPrefix}:")`,
       "table#>0;prefixes": ontologyColumns.prefixes,
     },
     "chapter#section_classes>2": {
-      "dc:title": [em(preferredPrefix), " ", ref("fabric classes", "@valos/kernel#Class")],
+      "dc:title": [em(preferredPrefix), " ", ref("fabric classes", "VKernel:Class")],
       "#0": [],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.classes,
@@ -197,7 +197,7 @@ prefix "${preferredPrefix}:")`,
       },
     },
     "chapter#section_properties>3": {
-      "dc:title": [em(preferredPrefix), " ", ref("fabric properties", "@valos/kernel#Property")],
+      "dc:title": [em(preferredPrefix), " ", ref("fabric properties", "VKernel:Property")],
       "#0": [],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.properties,
@@ -205,7 +205,7 @@ prefix "${preferredPrefix}:")`,
       },
     },
     "chapter#section_types>4": {
-      "dc:title": [em(preferredPrefix), " ", ref("valospace resource types", "@valos/raem#Type")],
+      "dc:title": [em(preferredPrefix), " ", ref("valospace resource types", "VModel:Type")],
       "#0": [],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.types,
@@ -213,7 +213,7 @@ prefix "${preferredPrefix}:")`,
       },
     },
     "chapter#section_fields>5": {
-      "dc:title": [em(preferredPrefix), " ", ref("valospace fields", "@valos/raem#Field")],
+      "dc:title": [em(preferredPrefix), " ", ref("valospace fields", "VModel:Field")],
       "#0": [],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.fields,
@@ -221,7 +221,7 @@ prefix "${preferredPrefix}:")`,
       },
     },
     "chapter#section_resolvers>6": {
-      "dc:title": [em(preferredPrefix), " ", ref("field resolvers", "@valos/raem#Resolver")],
+      "dc:title": [em(preferredPrefix), " ", ref("field resolvers", "VModel:Resolver")],
       "#0": [],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.verbs,

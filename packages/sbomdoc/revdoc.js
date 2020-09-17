@@ -59,6 +59,9 @@ emit BOM documents in various formats.`,
     ],
   },
   "chapter#ontology>8;SBoMDoc ontology": {
+    "dc:title": [
+      "The ", em("VSbomdoc"), " fabric namespace of the library ontology of ", pkg(name),
+    ],
     "#0": [],
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
@@ -69,7 +72,7 @@ emit BOM documents in various formats.`,
       "table#>0;prefixes": ontologyColumns.prefixes,
     },
     "chapter#section_classes>2": {
-      "dc:title": [em(preferredPrefix), ` `, ref("VDoc classes", "@valos/vdoc#Class")],
+      "dc:title": [em(preferredPrefix), ` `, ref("VDoc classes", "VDoc:Class")],
       "#0": [],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.classes,
@@ -77,7 +80,7 @@ emit BOM documents in various formats.`,
       },
     },
     "chapter#section_properties>3": {
-      "dc:title": [em(preferredPrefix), ` `, ref("VDoc properties", "@valos/vdoc#Property")],
+      "dc:title": [em(preferredPrefix), ` `, ref("VDoc properties", "VDoc:Property")],
       "#0": [],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.properties,

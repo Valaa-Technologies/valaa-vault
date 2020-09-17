@@ -18,7 +18,7 @@ const {
 
 module.exports = {
   "dc:title": description,
-  "VDoc:tags": ["PRIMARY", "ONTOLOGY"],
+  "VDoc:tags": ["PRIMARY", "FABRIC", "WORKSPACE", "ONTOLOGY"],
   "VRevdoc:package": name,
   "VRevdoc:version": version,
   "VRevdoc:preferredPrefix": preferredPrefix,
@@ -53,17 +53,18 @@ npm package.`,
     "#0":
 `VRevdoc is a VDoc extension which can produce ReSpec documents.`
   },
-  "chapter#ontology>8;ReVDoc ontology": {
+  "chapter#section_fabric>8": {
+    "dc:title": ["The ", em("VRevdoc"), " fabric namespace of the library ontology of ", pkg(name)],
     "data#prefixes": prefixes,
     "data#vocabulary": vocabulary,
     "data#context": context,
-    "#section_ontology_abstract>0": [ontologyDescription || ""],
+    "#section_fabric_abstract>0": [namespaceDescription || ""],
     "chapter#section_prefixes>1;VRevdoc IRI prefixes": {
       "#0": [],
       "table#>0;prefixes": ontologyColumns.prefixes,
     },
     "chapter#section_classes>2": {
-      "dc:title": [em(preferredPrefix), ` `, ref("VDoc classes", "@valos/vdoc#Class")],
+      "dc:title": [em(preferredPrefix), ` `, ref("VDoc classes", "VDoc:Class")],
       "#0": [],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.classes,
@@ -71,7 +72,7 @@ npm package.`,
       },
     },
     "chapter#section_properties>3": {
-      "dc:title": [em(preferredPrefix), ` `, ref("VDoc properties", "@valos/vdoc#Property")],
+      "dc:title": [em(preferredPrefix), ` `, ref("VDoc properties", "VDoc:Property")],
       "#0": [],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.properties,

@@ -367,7 +367,7 @@ introduction of new extensions easier.`
       "table#>0;prefixes": ontologyColumns.prefixes,
     },
     "chapter#section_classes>2": {
-      "dc:title": [em(preferredPrefix), ` `, ref("VDoc classes", "@valos/vdoc#Class")],
+      "dc:title": [em(preferredPrefix), ` `, ref("VDoc classes", "VDoc:Class")],
       "#0": [],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.classes,
@@ -375,7 +375,7 @@ introduction of new extensions easier.`
       },
     },
     "chapter#section_properties>3": {
-      "dc:title": [em(preferredPrefix), ` `, ref("VDoc properties", "@valos/vdoc#Property")],
+      "dc:title": [em(preferredPrefix), ` `, ref("VDoc properties", "VDoc:Property")],
       "#0": [],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.properties,

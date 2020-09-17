@@ -881,15 +881,33 @@ export function denoteDeprecatedValOSCallable (description: any = "", deprecatio
  * @param {*} [description=""]
  * @returns
  */
-export function denoteValOSKueryFunction (description: any = "", deprecation) {
+export function denoteValOSKueryFunction (
+    description: any = "", { deprecation, cachingArguments } = {},
+) {
+  // FIXME(iridian, 2020-09): evaluate and actually implement the LRU. Current does not invalidate.
+  let _vakonShouldBeLRUCache;
   return (createKuery: any) => {
     function vkall (...args: any[]) {
       try {
-        const vakon = createKuery(...args);
-        if (vakon instanceof Kuery) {
-          throw new Error(`INTERNAL ERROR: builtin kuery function '${createKuery.name
-              }' returns a VALK Kuery object and not VAKON${
-              ""} (did you forget a '.toVAKON()' from the return value?)`);
+        let vakon;
+        if (args.length === cachingArguments) {
+          if (cachingArguments === 0) vakon = _vakonShouldBeLRUCache;
+          else if (cachingArguments === 1) vakon = _vakonShouldBeLRUCache[args[0]];
+        }
+        if (vakon === undefined) {
+          vakon = createKuery(...args);
+          if (vakon instanceof Kuery) {
+            throw new Error(`INTERNAL ERROR: builtin kuery function '${createKuery.name
+                }' returns a VALK Kuery object and not VAKON${
+                ""} (did you forget a '.toVAKON()' from the return value?)`);
+          }
+          if (args.length === cachingArguments) {
+            if (cachingArguments === 0) _vakonShouldBeLRUCache = vakon;
+            else if (cachingArguments === 1) {
+              (_vakonShouldBeLRUCache
+                  || (_vakonShouldBeLRUCache = Object.create(null)))[args[0]] = vakon;
+            }
+          }
         }
         return this.get(vakon, { discourse: this.__callerValker__ });
       } catch (error) {

@@ -35,7 +35,9 @@ The thrown error can be a missing connection error which triggers an
 implicit connection process.
 
 See V:interpretContent for more details.`,
-    ])(function immediateContent (options: any) {
+        ],
+        { cache: 0 },
+    )(function immediateContent (options: any) {
       return VALEK.interpretContent({
         synchronous: true,
         mediaInfo: Vrapper.toMediaInfoFields,
@@ -58,13 +60,15 @@ See V:interpretContent for more details.`,
 `Returns a promise to a Media content interpretation as optionally
 given *options.contentType*.`,
 `The default contentType if determined as follows:`,
-      { "numbered#": [
+          { "numbered#": [
 [`options.contentType argument of this call`],
 [`Media.mediaType field of this Media resource`],
 [`inferred from the Media name extension`],
 [`options.fallbackContentType of this call`],
-      ] },
-    ])(function interpretContent (options: any) {
+          ] },
+        ],
+        { cachingArguments: 0 },
+    )(function interpretContent (options: any) {
       const ret = VALEK.interpretContent({
         synchronous: false,
         mediaInfo: Vrapper.toMediaInfoFields,
@@ -84,7 +88,9 @@ The error can be a missing connection error which triggers an
 implicit connection process.
 
 See V:getURL for more details.`,
-    ])(function immediateURL (options: any) {
+        ],
+        { cachingArguments: 0 },
+    )(function immediateURL (options: any) {
       return VALEK.mediaURL({
         synchronous: true,
         mediaInfo: Vrapper.toMediaInfoFields,
@@ -98,7 +104,9 @@ context.
 
 This URL is only temporarily valid. The expiration time is defined by
 the chronicle behaviors and its backend implementation.`,
-    ])(function getURL (options: any) {
+        ],
+        { cachingArguments: 0 },
+    )(function getURL (options: any) {
       return VALEK.mediaURL({
         synchronous: false,
         mediaInfo: Vrapper.toMediaInfoFields,

@@ -189,7 +189,8 @@ multi-chronicle commands between said chronicles is possible).`,
   prototypeFields: {
     hasOwnProperty: denoteValOSKueryFunction(
 `Returns true if this resource has the given *propertyName* as its own
-locally materialized property, false otherwise.`
+locally materialized property, false otherwise.`,
+        { cachingArguments: 1 },
     )(function hasOwnProperty (propertyName: string | Symbol) {
       // TODO(iridian, 2020-09): Implement field support using qualified symbols.
       return VALEK.or(
@@ -223,7 +224,10 @@ field access.`,
 *fieldName* of *this* Resource`,
 "",
         ],
-        `EXPERIMENTAL: this is an internal API with no alternative.`,
+        {
+          deprecation: `EXPERIMENTAL: this is an internal API with no alternative.`,
+          cachingArguments: 1,
+        }
     )(function getFieldCoupling (fieldName: any) {
       return VALEK.toField(fieldName).coupling().toVAKON();
     }),
@@ -274,14 +278,16 @@ resource as either 'unnamedOwnlings', 'properties', 'relations' or 'listeners'`,
     }),
 
     [symbols.getEntity]: denoteValOSKueryFunction(
-`Returns the first owned Entity with the given *name*.`
+`Returns the first owned Entity with the given *name*.`,
+        { cachingArguments: 1 },
     )(function getEntity (name: string) {
       return VALEK.toField("unnamedOwnlings")
           .filter(VALEK.isOfType("Entity").and(VALEK.hasName(name))).toIndex(0).toVAKON();
     }),
 
     [symbols.getMedia]: denoteValOSKueryFunction(
-`Returns the first owned Media with the given *name*.`
+`Returns the first owned Media with the given *name*.`,
+        { cachingArguments: 1 },
     )(function getMedia (name: string) {
       return VALEK.toField("unnamedOwnlings")
           .filter(VALEK.isOfType("Media").and(VALEK.hasName(name))).toIndex(0).toVAKON();

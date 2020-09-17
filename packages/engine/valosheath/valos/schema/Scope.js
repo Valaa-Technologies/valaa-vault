@@ -42,9 +42,8 @@ operations with name equal to the key of the scope lookup.`
     [symbols.getProperty]: denoteValOSKueryFunction([
 `Returns the Property object with the given name in this Scope.`,
 `This Property object is an internal detail of @valos/engine.`,
-    ], [
-      "DEPRECATED", "Object.getOwnPropertyDescriptor",
-    ],
+        ],
+        { deprecation: ["DEPRECATED", "Object.getOwnPropertyDescriptor"] },
     )(function getProperty (name) {
       return VALEK.property(name).toVAKON();
     }),

@@ -70,7 +70,9 @@ If no *name* is given returns all outgoing relations.
 
 Note: all matching relations are selected, even those in unconnected
 chronicles.`,
-    ])(function getRelations (name, ...additionalConditions) {
+        ],
+        { cachingArguments: 1 },
+    )(function getRelations (name, ...additionalConditions) {
       return VALEK.relations(name,
           ...additionalConditions.map(condition =>
               VALEK.fromVAKON(extractFunctionVAKON(condition)))
@@ -82,7 +84,9 @@ relations which have the given *name* as their V:name.`,
 `This method is identical to V:getRelations except that the
 returned array contains the V:target resources instead of the relations
 themselves.`,
-    ])(function getRelationsTargets (name, ...additionalConditions) {
+        ],
+        { cachingArguments: 1 },
+    )(function getRelationsTargets (name, ...additionalConditions) {
       return VALEK.relationTargets(name,
           ...additionalConditions.map(condition =>
               VALEK.fromVAKON(extractFunctionVAKON(condition)))
@@ -113,7 +117,9 @@ V:incomingRelations and which have *this* as their V:target.
 
 Note: only relations inside connected chronicles are listed (even
 though some might be inactive, f.ex. if they have an inactive prototype).`,
-    ])(function getIncomingRelations (name, ...additionalConditions) {
+        ],
+        { cachingArguments: 1 },
+    )(function getIncomingRelations (name, ...additionalConditions) {
       return VALEK.incomingRelations(name,
           ...additionalConditions.map(condition =>
               VALEK.fromVAKON(extractFunctionVAKON(condition)))
@@ -125,7 +131,9 @@ which have the given *name* as their V:name`,
 `This method is identical to V:getIncomingRelations except that the
 returned array contains V:source resources instead of the relations
 themselves.`,
-    ])(function getIncomingRelationsSources (name, ...additionalConditions) {
+        ],
+        { cachingArguments: 1 },
+    )(function getIncomingRelationsSources (name, ...additionalConditions) {
       return VALEK.incomingRelationSources(name,
           ...additionalConditions.map(condition =>
               VALEK.fromVAKON(extractFunctionVAKON(condition)))

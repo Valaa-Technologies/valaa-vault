@@ -2,43 +2,62 @@
   {
     "@id": "https://valospace.org/voyager",
     "@context": {
-      "@base": "https://valospace.org/voyager#",
-      "sbomdoc": "https://valospace.org/sbomdoc#",
-      "revdoc": "https://valospace.org/revdoc#",
+      "@base": "https://valospace.org/vdoc/0#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
       "xsd": "http://www.w3.org/2001/XMLSchema#",
       "owl": "http://www.w3.org/2002/07/owl#",
       "dc": "http://purl.org/dc/elements/1.1/",
-      "vdoc": "https://valospace.org/vdoc#",
-      "vdoc:content": {
-        "@id": "https://valospace.org/vdoc#content",
+      "VSbomdoc": "https://valospace.org/sbomdoc/0#",
+      "VKernel": "https://valospace.org/kernel/0#",
+      "VDoc": "https://valospace.org/vdoc/0#",
+      "VRevdoc": "https://valospace.org/revdoc/0#",
+      "restriction": {
+        "@reverse": "owl:onProperty"
+      },
+      "VRevdoc:tooltipContent": {
+        "@id": "#tooltipContent",
+        "@type": "@id"
+      },
+      "VDoc:content": {
+        "@id": "#content",
         "@container": "@list",
         "@type": "@id"
       },
-      "vdoc:words": {
-        "@id": "https://valospace.org/vdoc#words",
+      "VDoc:entries": {
+        "@id": "#entries",
         "@container": "@list",
         "@type": "@id"
       },
-      "vdoc:entries": {
-        "@id": "https://valospace.org/vdoc#entries",
+      "VDoc:words": {
+        "@id": "#words",
         "@container": "@list",
         "@type": "@id"
       },
-      "vdoc:headers": {
-        "@id": "https://valospace.org/vdoc#headers",
+      "VDoc:columns": {
+        "@id": "#columns",
         "@container": "@list",
         "@type": "@id"
       },
-      "vdoc:cell": {
-        "@id": "https://valospace.org/vdoc#cell",
-        "@container": "@list",
+      "VDoc:map": {
+        "@id": "#map",
+        "@type": "@id"
+      },
+      "VDoc:cell": {
+        "@id": "#cell",
         "@type": "@id"
       }
     },
-    "dc:title": "\"I am a ValOS voyager, I want to discover ValOS and enlighten others\"",
-    "vdoc:tags": [
+    "dc:title": [
+      {
+        "VDoc:strong": true,
+        "VDoc:content": [
+          "Voyagers"
+        ]
+      },
+      " understand valos capabilities in order to make decisions"
+    ],
+    "VDoc:tags": [
       "PRIMARY",
       "ROLE"
     ],
@@ -65,11 +84,11 @@
     },
     "abstract": {
       "@id": "abstract",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "This document is the first introduction for ValOS voyagers - the first\nadopters, entrepreneurs and evangelists - to the ValOS ecosystem, its\nphilosophy and its ultimate goals."
           ]
         }
@@ -77,36 +96,36 @@
     },
     "sotd": {
       "@id": "sotd",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "This document is part of the vault workspace ",
             {
-              "@type": "revdoc:Package",
-              "vdoc:content": [
+              "@type": "VRevdoc:Package",
+              "VDoc:content": [
                 {
-                  "vdoc:em": true,
-                  "vdoc:content": [
+                  "VDoc:em": true,
+                  "VDoc:content": [
                     "@valos/kernel"
                   ]
                 }
               ],
-              "vdoc:ref": "@valos/kernel"
+              "VDoc:ref": "@valos/kernel"
             },
             "\n(of domain ",
             {
-              "@type": "revdoc:Package",
-              "vdoc:content": [
+              "@type": "VRevdoc:Package",
+              "VDoc:content": [
                 {
-                  "vdoc:em": true,
-                  "vdoc:content": [
+                  "VDoc:em": true,
+                  "VDoc:content": [
                     "@valos/kernel"
                   ]
                 }
               ],
-              "vdoc:ref": "@valos/kernel"
+              "VDoc:ref": "@valos/kernel"
             },
             ") which has the description:\n`ValOS common infrastructure tools and libraries monorepository`."
           ]
@@ -116,15 +135,15 @@
     "introduction": {
       "@id": "introduction",
       "dc:title": "How do I discover opportunities and enlighten others?",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "As a voyager you have stakes that matter. Whether you were to\ninvest on a ValOS collaborator as a financier, to adopt ValOS as\ntechnology as an executive or just to commit your personal time and\nenergy on a ValOS project you need to ",
             {
-              "vdoc:em": true,
-              "vdoc:content": [
+              "VDoc:em": true,
+              "VDoc:content": [
                 "see"
               ]
             },
@@ -132,14 +151,14 @@
           ]
         },
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "To make sound decisions and to position yourself proactively you\nneed to understand the big picture and philosophy of the ValOS\necosystem. Only then you can enlighten others."
           ]
         },
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "You use tailored but real-world ValOS demo setups to illustrate\nhow ValOS a solution could be configured to meet the needs at hand.\nYour audience can be your customer, your team or even just\nyourself."
           ]
         }
@@ -148,11 +167,11 @@
     "section_profiles": {
       "@id": "section_profiles",
       "dc:title": "Voyager profiles",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "Voyager is generic orientation. There are various voyager sub-profiles\nwith their own documents briefly detailed here."
           ]
         },
@@ -182,62 +201,62 @@
     "enthusiast": {
       "@id": "enthusiast",
       "dc:title": "How enthusiasts impress themselves and others",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": []
+      "@type": "VDoc:Chapter",
+      "VDoc:content": []
     },
     "entrepreneur": {
       "@id": "entrepreneur",
       "dc:title": "How entrepreneurs search for uncharted business opportunities",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": []
+      "@type": "VDoc:Chapter",
+      "VDoc:content": []
     },
     "evangelist": {
       "@id": "evangelist",
       "dc:title": "How evangelists enlighten about new innovations",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": []
+      "@type": "VDoc:Chapter",
+      "VDoc:content": []
     },
     "investor": {
       "@id": "investor",
       "dc:title": "How investors perform due diligence",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": []
+      "@type": "VDoc:Chapter",
+      "VDoc:content": []
     },
     "business_owner": {
       "@id": "business_owner",
       "dc:title": "How business owners understand the consequences of their choices",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": []
+      "@type": "VDoc:Chapter",
+      "VDoc:content": []
     },
     "sales_rep": {
       "@id": "sales_rep",
       "dc:title": "How sales representatives identify solutions to customer needs",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": []
+      "@type": "VDoc:Chapter",
+      "VDoc:content": []
     },
     "etc": {
       "@id": "etc",
       "dc:title": "How to add new profiles",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "Create a ",
             {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
                 "PR in github"
               ],
-              "vdoc:ref": "https://help.github.com/en/articles/about-pull-requests"
+              "VDoc:ref": "https://help.github.com/en/articles/about-pull-requests"
             },
             "\nagainst @valos/kernel/revdocs/valonaut.revdoc.js"
           ]
         }
       ]
     },
-    "@type": "revdoc:Document",
-    "vdoc:content": [
+    "@type": "VRevdoc:Document",
+    "VDoc:content": [
       {
         "@id": "abstract"
       },

@@ -2,52 +2,91 @@
   {
     "@id": "https://valospace.org/sourcerer",
     "@context": {
-      "@base": "https://valospace.org/sourcerer#",
-      "sbomdoc": "https://valospace.org/sbomdoc#",
-      "revdoc": "https://valospace.org/revdoc#",
+      "@base": "https://valospace.org/sourcerer/0#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
       "xsd": "http://www.w3.org/2001/XMLSchema#",
       "owl": "http://www.w3.org/2002/07/owl#",
       "dc": "http://purl.org/dc/elements/1.1/",
-      "vdoc": "https://valospace.org/vdoc#",
-      "vdoc:content": {
-        "@id": "https://valospace.org/vdoc#content",
+      "VSbomdoc": "https://valospace.org/sbomdoc/0#",
+      "VKernel": "https://valospace.org/kernel/0#",
+      "VDoc": "https://valospace.org/vdoc/0#",
+      "VRevdoc": "https://valospace.org/revdoc/0#",
+      "restriction": {
+        "@reverse": "owl:onProperty"
+      },
+      "VRevdoc:tooltipContent": {
+        "@id": "#tooltipContent",
+        "@type": "@id"
+      },
+      "VDoc:content": {
+        "@id": "#content",
         "@container": "@list",
         "@type": "@id"
       },
-      "vdoc:words": {
-        "@id": "https://valospace.org/vdoc#words",
+      "VDoc:entries": {
+        "@id": "#entries",
         "@container": "@list",
         "@type": "@id"
       },
-      "vdoc:entries": {
-        "@id": "https://valospace.org/vdoc#entries",
+      "VDoc:words": {
+        "@id": "#words",
         "@container": "@list",
         "@type": "@id"
       },
-      "vdoc:headers": {
-        "@id": "https://valospace.org/vdoc#headers",
+      "VDoc:columns": {
+        "@id": "#columns",
         "@container": "@list",
         "@type": "@id"
       },
-      "vdoc:cell": {
-        "@id": "https://valospace.org/vdoc#cell",
-        "@container": "@list",
+      "VDoc:map": {
+        "@id": "#map",
+        "@type": "@id"
+      },
+      "VDoc:cell": {
+        "@id": "#cell",
+        "@type": "@id"
+      },
+      "VEngine": "https://valospace.org/engine/0#",
+      "VSourcerer": "https://valospace.org/sourcerer/0#",
+      "VModel": "https://valospace.org/raem/0#",
+      "aspects": {
+        "@reverse": "VSourcerer:event"
+      },
+      "VSourcerer:event": {
+        "@id": "#event",
+        "@type": "@id"
+      },
+      "VSourcerer:command": {
+        "@id": "#command",
+        "@type": "@id"
+      },
+      "VSourcerer:log": {
+        "@id": "#log",
         "@type": "@id"
       }
     },
     "dc:title": "ValOS Sourcerer API, schema",
-    "vdoc:tags": [
+    "VDoc:tags": [
       "PRIMARY",
       "INTRODUCTORY",
-      "ONTOLOGY",
-      "LIBRARY"
+      "VALOSPACE",
+      "WORKSPACE",
+      "ONTOLOGY"
     ],
-    "revdoc:package": "@valos/sourcerer",
-    "revdoc:prefix": "valos_sourcerer",
-    "revdoc:prefixIRI": "https://valospace.org/sourcerer#",
-    "revdoc:version": "0.35.0-rc.29",
+    "VRevdoc:package": "@valos/sourcerer",
+    "VRevdoc:version": "0.35.0-rc.30",
+    "VRevdoc:preferredPrefix": "VSourcerer",
+    "VRevdoc:baseIRI": "https://valospace.org/sourcerer/0#",
+    "VRevdoc:referencedModules": {
+      "https://valospace.org/engine/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/engine/VEngine",
+      "https://valospace.org/kernel/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/kernel/VKernel",
+      "https://valospace.org/raem/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/raem/VModel",
+      "https://valospace.org/sourcerer/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/sourcerer/VSourcerer"
+    },
+    "VRevdoc:extenderModules": {
+      "https://valospace.org/0#": "@valos/sourcerer/V"
+    },
     "respecConfig": {
       "specStatus": "unofficial",
       "editors": [
@@ -62,15 +101,15 @@
     },
     "abstract": {
       "@id": "abstract",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "This library provides the definitions and reference implementation\nof the ValOS sourcerer architecture which is used to route ",
             {
-              "@type": "vdoc:CharacterData",
-              "vdoc:content": [
+              "@type": "VDoc:CharacterData",
+              "VDoc:content": [
                 "ValOS event streams"
               ]
             },
@@ -81,36 +120,36 @@
     },
     "sotd": {
       "@id": "sotd",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "This document is part of the library workspace ",
             {
-              "@type": "revdoc:Package",
-              "vdoc:content": [
+              "@type": "VRevdoc:Package",
+              "VDoc:content": [
                 {
-                  "vdoc:em": true,
-                  "vdoc:content": [
+                  "VDoc:em": true,
+                  "VDoc:content": [
                     "@valos/sourcerer"
                   ]
                 }
               ],
-              "vdoc:ref": "@valos/sourcerer"
+              "VDoc:ref": "@valos/sourcerer"
             },
             "\n(of domain ",
             {
-              "@type": "revdoc:Package",
-              "vdoc:content": [
+              "@type": "VRevdoc:Package",
+              "VDoc:content": [
                 {
-                  "vdoc:em": true,
-                  "vdoc:content": [
+                  "VDoc:em": true,
+                  "VDoc:content": [
                     "@valos/kernel"
                   ]
                 }
               ],
-              "vdoc:ref": "@valos/kernel"
+              "VDoc:ref": "@valos/kernel"
             },
             ") which has the description:\n`ValOS Sourcerer API, schema`"
           ]
@@ -119,31 +158,31 @@
     },
     "introduction": {
       "@id": "introduction",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": []
+      "@type": "VDoc:Chapter",
+      "VDoc:content": []
     },
-    "ontology": {
-      "@id": "ontology",
-      "@type": "vdoc:Chapter",
+    "section_valospace": {
+      "@id": "section_valospace",
+      "@type": "VDoc:Chapter",
       "dc:title": [
-        "library ",
+        "The ",
         {
-          "vdoc:em": true,
-          "vdoc:content": [
-            "@valos/sourcerer"
+          "VDoc:em": true,
+          "VDoc:content": [
+            "VSourcerer"
           ]
         },
-        " ontology, prefix ",
+        " valospace namespace of the library ontology of ",
         {
-          "vdoc:em": true,
-          "vdoc:content": [
-            "valos_sourcerer"
+          "VDoc:em": true,
+          "VDoc:content": [
+            "@valos/sourcerer"
           ]
         }
       ],
-      "vdoc:content": [
+      "VDoc:content": [
         {
-          "@id": "section_ontology_abstract"
+          "@id": "section_valospace_abstract"
         },
         {
           "@id": "section_prefixes"
@@ -178,25 +217,37 @@
       "xsd": "http://www.w3.org/2001/XMLSchema#",
       "owl": "http://www.w3.org/2002/07/owl#",
       "dc": "http://purl.org/dc/elements/1.1/",
-      "valos_kernel": "https://valospace.org/kernel#",
-      "valos_raem": "https://valospace.org/raem#",
-      "valos_sourcerer": "https://valospace.org/sourcerer#"
+      "VSourcerer": "https://valospace.org/sourcerer/0#",
+      "VKernel": "https://valospace.org/kernel/0#",
+      "VModel": "https://valospace.org/raem/0#"
     },
     "vocabulary": {
       "@id": "vocabulary",
       "EventAspect": {
-        "@type": "valos_kernel:Class",
-        "revdoc:brief": "contextual event aspect",
+        "@type": "VKernel:Class",
+        "VRevdoc:brief": "contextual event aspect",
         "rdfs:comment": "The class of resources which contain contextual attributes of a\nparticular event message lifetime phase."
       },
+      "CommandAspect": {
+        "@type": "VKernel:Class",
+        "rdfs:subClassOf": "VSourcerer:EventAspect",
+        "VRevdoc:brief": "gateway command aspect",
+        "rdfs:comment": "The class of gateway-provided command properties of an event."
+      },
+      "LogAspect": {
+        "@type": "VKernel:Class",
+        "rdfs:subClassOf": "VSourcerer:EventAspect",
+        "VRevdoc:brief": "authority truth aspect",
+        "rdfs:comment": "The class of authority-provided truth properties of an event."
+      },
       "EventAspects": {
-        "@type": "valos_kernel:Class",
-        "revdoc:brief": "context-free container of event aspects",
+        "@type": "VKernel:Class",
+        "VRevdoc:brief": "context-free container of event aspects",
         "rdfs:comment": "The class of resources which provide context-free container of all\ndifferent aspects of event message lifetime as it travels through the\nValOS sourcing streams. These properties are grouped to different\ncontextual and/or functional aspects."
       },
       "version": {
-        "@type": "valos_kernel:Property",
-        "rdfs:domain": "valos_sourcerer:EventAspects",
+        "@type": "VKernel:Property",
+        "rdfs:domain": "VSourcerer:EventAspects",
         "rdfs:range": "xsd:string",
         "restriction": {
           "@type": "owl:Restriction",
@@ -205,9 +256,9 @@
         "rdfs:comment": "The aspect version string. The version number of this specification is \"0.3\""
       },
       "event": {
-        "@type": "valos_kernel:Property",
-        "rdfs:domain": "valos_sourcerer:EventAspects",
-        "rdfs:range": "valos_raem:Event",
+        "@type": "VKernel:Property",
+        "rdfs:domain": "VSourcerer:EventAspects",
+        "rdfs:range": "VModel:Event",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
@@ -215,9 +266,9 @@
         "rdfs:comment": "The aspect which contains the raem model event payload."
       },
       "command": {
-        "@type": "valos_kernel:Property",
-        "rdfs:domain": "valos_sourcerer:EventAspects",
-        "rdfs:range": "valos_sourcerer:CommandAspect",
+        "@type": "VKernel:Property",
+        "rdfs:domain": "VSourcerer:EventAspects",
+        "rdfs:range": "VSourcerer:CommandAspect",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
@@ -225,9 +276,9 @@
         "rdfs:comment": "The aspect which contains the client-generated command properties."
       },
       "log": {
-        "@type": "valos_kernel:Property",
-        "rdfs:domain": "valos_sourcerer:EventAspects",
-        "rdfs:range": "valos_sourcerer:LogAspect",
+        "@type": "VKernel:Property",
+        "rdfs:domain": "VSourcerer:EventAspects",
+        "rdfs:range": "VSourcerer:LogAspect",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
@@ -235,83 +286,87 @@
         "rdfs:comment": "The aspect which contains the authority-confirmed event log properties."
       },
       "resolveChronicleRoot": {
-        "@type": "valos_raem:Resolver",
-        "revdoc:brief": "resolve chronicle root",
+        "@type": "VModel:Resolver",
+        "VRevdoc:brief": "resolve chronicle root",
         "rdfs:comment": "resolve chronicle root of the resource"
       },
       "resolveChronicleURI": {
-        "@type": "valos_raem:Resolver",
-        "revdoc:brief": "resolve chronicle URI",
+        "@type": "VModel:Resolver",
+        "VRevdoc:brief": "resolve chronicle URI",
         "rdfs:comment": "resolve chronicle URI of the resource"
       },
       "resolveModifiedAt": {
-        "@type": "valos_raem:Resolver",
-        "revdoc:brief": "resolve modification timestamp",
+        "@type": "VModel:Resolver",
+        "VRevdoc:brief": "resolve modification timestamp",
         "rdfs:comment": "resolve modification timestamp of the resource"
       },
       "resolveCreatedAt": {
-        "@type": "valos_raem:Resolver",
-        "revdoc:brief": "resolve creation timestamp",
+        "@type": "VModel:Resolver",
+        "VRevdoc:brief": "resolve creation timestamp",
         "rdfs:comment": "resolve creation timestamp of the resource"
       }
     },
     "context": {
       "@id": "context",
+      "restriction": {
+        "@reverse": "owl:onProperty"
+      },
       "aspects": {
-        "@reverse": "valos_sourcerer:event"
+        "@reverse": "VSourcerer:event"
       },
-      "valos_sourcerer:event": {
-        "@id": "https://valospace.org/sourcerer#event",
+      "@base": "https://valospace.org/sourcerer/0#",
+      "VSourcerer:event": {
+        "@id": "#event",
         "@type": "@id"
       },
-      "valos_sourcerer:command": {
-        "@id": "https://valospace.org/sourcerer#command",
+      "VSourcerer:command": {
+        "@id": "#command",
         "@type": "@id"
       },
-      "valos_sourcerer:log": {
-        "@id": "https://valospace.org/sourcerer#log",
+      "VSourcerer:log": {
+        "@id": "#log",
         "@type": "@id"
       }
     },
-    "section_ontology_abstract": {
-      "@id": "section_ontology_abstract",
-      "vdoc:content": [
+    "section_valospace_abstract": {
+      "@id": "section_valospace_abstract",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
-            "@valos/sourcerer ontology specifies the Valospace core types and\nproperties directly to the @valos/kernel namespace. "
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "'VSourcerer' namespace provides vocabulary for describing and defining\nchronicle behaviors and event contents."
           ]
         }
       ]
     },
     "section_prefixes": {
       "@id": "section_prefixes",
-      "@type": "vdoc:Chapter",
+      "@type": "VDoc:Chapter",
       "dc:title": [
         {
-          "vdoc:em": true,
-          "vdoc:content": [
+          "VDoc:em": true,
+          "VDoc:content": [
             "@valos/sourcerer"
           ]
         },
         " IRI prefixes"
       ],
-      "vdoc:content": [
+      "VDoc:content": [
         {
-          "vdoc:lookup": "prefixes",
-          "@type": "vdoc:Table",
-          "vdoc:headers": [
+          "VDoc:lookup": "prefixes",
+          "@type": "VDoc:Table",
+          "VDoc:columns": [
             {
-              "vdoc:cell": "vdoc:selectKey",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
+              "VDoc:cell": "VDoc:selectKey",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
                 "Prefix"
               ]
             },
             {
-              "vdoc:cell": "vdoc:selectValue",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
+              "VDoc:cell": "VDoc:selectValue",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
                 "IRI"
               ]
             }
@@ -321,78 +376,281 @@
     },
     "section_classes": {
       "@id": "section_classes",
-      "@type": "vdoc:Chapter",
+      "@type": "VDoc:Chapter",
       "dc:title": [
         {
-          "vdoc:em": true,
-          "vdoc:content": [
-            "valos_sourcerer"
+          "VDoc:em": true,
+          "VDoc:content": [
+            "VSourcerer"
           ]
         },
         " ",
         {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "valos_kernel:Class"
+          "@type": "VDoc:Reference",
+          "VDoc:content": [
+            "fabric classes"
           ],
-          "vdoc:ref": "@valos/kernel#Class"
-        },
-        " vocabulary"
+          "VDoc:ref": "VKernel:Class"
+        }
       ],
-      "vdoc:content": [
+      "VDoc:content": [
         {
-          "vdoc:lookup": "vocabulary",
-          "@type": "vdoc:Table",
-          "vdoc:headers": {
-            "vdoc:entries": [
+          "VDoc:lookup": "vocabulary",
+          "@type": "VDoc:Table",
+          "VDoc:columns": {
+            "VDoc:entries": [
               {
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:label"
-                ],
-                "vdoc:cell": {
-                  "vdoc:resourceId": "vdoc:selectKey",
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
+                "@type": "VDoc:Header",
+                "VDoc:content": null,
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:resourceId": "VDoc:selectKey",
+                  "VDoc:heading": true,
+                  "VDoc:content": [
                     {
-                      "vdoc:em": true,
-                      "vdoc:content": [
-                        "vdoc:selectKey"
+                      "VDoc:words": [
+                        {
+                          "VDoc:strong": true,
+                          "VDoc:content": [
+                            {
+                              "VDoc:em": true,
+                              "VDoc:content": [
+                                {
+                                  "@type": "VDoc:Reference",
+                                  "VDoc:content": [
+                                    [
+                                      "#",
+                                      "VDoc:selectKey"
+                                    ]
+                                  ],
+                                  "VDoc:ref": [
+                                    "#",
+                                    "VDoc:selectKey"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "VDoc:words": {
+                            "VDoc:selectField": "rdfs:label"
+                          },
+                          "VDoc:elidable": true,
+                          "VDoc:map": {
+                            "@type": "VDoc:Reference",
+                            "VDoc:content": [
+                              "VDoc:selectValue"
+                            ],
+                            "VDoc:ref": "VEngine:valosheath"
+                          }
+                        }
                       ]
                     }
-                  ],
-                  "vdoc:ref": [
-                    "#",
-                    "vdoc:selectKey"
                   ]
                 }
               },
               {
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:subClassOf"
-                ],
-                "vdoc:cell": {
-                  "vdoc:words": {
-                    "vdoc:selectField": "rdfs:subClassOf"
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:strong": true,
+                      "VDoc:content": [
+                        "DEPRECATED"
+                      ]
+                    },
+                    " in favor of:"
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:entries": {
+                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
                   }
                 }
               },
               {
-                "vdoc:cell": "rdfs:comment",
-                "@type": "vdoc:Header",
-                "vdoc:content": {
-                  "vdoc:em": true,
-                  "vdoc:content": [
-                    "rdfs:comment"
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "rdfs:subClassOf"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:subClassOf"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "VDoc:cell": "rdfs:comment",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "description"
+                      ],
+                      "VDoc:ref": "rdfs:comment"
+                    }
                   ]
                 },
-                "vdoc:wide": true
+                "VDoc:wide": false
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "instance properties"
+                  ],
+                  "VDoc:ref": "VEngine:Property"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:domainOfProperty"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "instance methods"
+                  ],
+                  "VDoc:ref": "VEngine:Method"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:domainOfMethod"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "class properties"
+                  ],
+                  "VDoc:ref": "VEngine:ObjectProperty"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:hasProperty"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "class methods"
+                  ],
+                  "VDoc:ref": "VEngine:ObjectMethod"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:hasMethod"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
+              },
+              {
+                "VDoc:cell": "VRevdoc:introduction",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "introduction"
+                      ],
+                      "VDoc:ref": "VRevdoc:introduction"
+                    }
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:collapsed": true,
+                "VDoc:elidable": true
               }
             ]
           },
-          "vdoc:entries": [
+          "VDoc:entries": [
             "EventAspect",
+            "CommandAspect",
+            "LogAspect",
             "EventAspects"
           ]
         }
@@ -400,87 +658,184 @@
     },
     "section_properties": {
       "@id": "section_properties",
-      "@type": "vdoc:Chapter",
+      "@type": "VDoc:Chapter",
       "dc:title": [
         {
-          "vdoc:em": true,
-          "vdoc:content": [
-            "valos_sourcerer"
+          "VDoc:em": true,
+          "VDoc:content": [
+            "VSourcerer"
           ]
         },
         " ",
         {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "valos_kernel:Property"
+          "@type": "VDoc:Reference",
+          "VDoc:content": [
+            "fabric properties"
           ],
-          "vdoc:ref": "@valos/kernel#Property"
-        },
-        " vocabulary"
+          "VDoc:ref": "VKernel:Property"
+        }
       ],
-      "vdoc:content": [
+      "VDoc:content": [
         {
-          "vdoc:lookup": "vocabulary",
-          "@type": "vdoc:Table",
-          "vdoc:headers": {
-            "vdoc:entries": [
+          "VDoc:lookup": "vocabulary",
+          "@type": "VDoc:Table",
+          "VDoc:columns": {
+            "VDoc:entries": [
               {
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:label"
-                ],
-                "vdoc:cell": {
-                  "vdoc:resourceId": "vdoc:selectKey",
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
+                "@type": "VDoc:Header",
+                "VDoc:content": null,
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:resourceId": "VDoc:selectKey",
+                  "VDoc:heading": true,
+                  "VDoc:content": [
                     {
-                      "vdoc:em": true,
-                      "vdoc:content": [
-                        "vdoc:selectKey"
+                      "VDoc:words": [
+                        {
+                          "VDoc:strong": true,
+                          "VDoc:content": [
+                            {
+                              "VDoc:em": true,
+                              "VDoc:content": [
+                                {
+                                  "@type": "VDoc:Reference",
+                                  "VDoc:content": [
+                                    [
+                                      "#",
+                                      "VDoc:selectKey"
+                                    ]
+                                  ],
+                                  "VDoc:ref": [
+                                    "#",
+                                    "VDoc:selectKey"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "VDoc:words": {
+                            "VDoc:selectField": "rdfs:label"
+                          },
+                          "VDoc:elidable": true,
+                          "VDoc:map": {
+                            "@type": "VDoc:Reference",
+                            "VDoc:content": [
+                              "VDoc:selectValue"
+                            ],
+                            "VDoc:ref": "VEngine:valosheath"
+                          }
+                        }
                       ]
                     }
-                  ],
-                  "vdoc:ref": [
-                    "#",
-                    "vdoc:selectKey"
                   ]
                 }
               },
               {
-                "vdoc:cell": "rdfs:subPropertyOf",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:subPropertyOf"
-                ]
-              },
-              {
-                "vdoc:cell": "rdfs:domain",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:domain"
-                ]
-              },
-              {
-                "vdoc:cell": "rdfs:range",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:range"
-                ]
-              },
-              {
-                "vdoc:cell": "rdfs:comment",
-                "@type": "vdoc:Header",
-                "vdoc:content": {
-                  "vdoc:em": true,
-                  "vdoc:content": [
-                    "rdfs:comment"
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:strong": true,
+                      "VDoc:content": [
+                        "DEPRECATED"
+                      ]
+                    },
+                    " in favor of:"
                   ]
                 },
-                "vdoc:wide": true
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:entries": {
+                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "rdfs:domain"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:domain"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "rdfs:range"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:range"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "VDoc:cell": "rdfs:comment",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "description"
+                      ],
+                      "VDoc:ref": "rdfs:comment"
+                    }
+                  ]
+                },
+                "VDoc:wide": true
+              },
+              {
+                "VDoc:cell": "VRevdoc:introduction",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "introduction"
+                      ],
+                      "VDoc:ref": "VRevdoc:introduction"
+                    }
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:collapsed": true,
+                "VDoc:elidable": true
               }
             ]
           },
-          "vdoc:entries": [
+          "VDoc:entries": [
             "version",
             "event",
             "command",
@@ -491,270 +846,721 @@
     },
     "section_types": {
       "@id": "section_types",
-      "@type": "vdoc:Chapter",
+      "@type": "VDoc:Chapter",
       "dc:title": [
         {
-          "vdoc:em": true,
-          "vdoc:content": [
-            "valos_sourcerer"
+          "VDoc:em": true,
+          "VDoc:content": [
+            "VSourcerer"
           ]
         },
         " ",
         {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "valos_raem:Type"
+          "@type": "VDoc:Reference",
+          "VDoc:content": [
+            "valospace resource types"
           ],
-          "vdoc:ref": "@valos/raem#Type"
-        },
-        " vocabulary"
+          "VDoc:ref": "VModel:Type"
+        }
       ],
-      "vdoc:content": [
+      "VDoc:content": [
         {
-          "vdoc:lookup": "vocabulary",
-          "@type": "vdoc:Table",
-          "vdoc:headers": {
-            "vdoc:entries": [
+          "VDoc:lookup": "vocabulary",
+          "@type": "VDoc:Table",
+          "VDoc:columns": {
+            "VDoc:entries": [
               {
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:label"
-                ],
-                "vdoc:cell": {
-                  "vdoc:resourceId": "vdoc:selectKey",
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
+                "@type": "VDoc:Header",
+                "VDoc:content": null,
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:resourceId": "VDoc:selectKey",
+                  "VDoc:heading": true,
+                  "VDoc:content": [
                     {
-                      "vdoc:em": true,
-                      "vdoc:content": [
-                        "vdoc:selectKey"
+                      "VDoc:words": [
+                        {
+                          "VDoc:strong": true,
+                          "VDoc:content": [
+                            {
+                              "VDoc:em": true,
+                              "VDoc:content": [
+                                {
+                                  "@type": "VDoc:Reference",
+                                  "VDoc:content": [
+                                    [
+                                      "#",
+                                      "VDoc:selectKey"
+                                    ]
+                                  ],
+                                  "VDoc:ref": [
+                                    "#",
+                                    "VDoc:selectKey"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "VDoc:words": {
+                            "VDoc:selectField": "rdfs:label"
+                          },
+                          "VDoc:elidable": true,
+                          "VDoc:map": {
+                            "@type": "VDoc:Reference",
+                            "VDoc:content": [
+                              "VDoc:selectValue"
+                            ],
+                            "VDoc:ref": "VEngine:valosheath"
+                          }
+                        }
                       ]
                     }
-                  ],
-                  "vdoc:ref": [
-                    "#",
-                    "vdoc:selectKey"
                   ]
                 }
               },
               {
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "revdoc:brief"
-                ],
-                "vdoc:cell": {
-                  "vdoc:strong": true,
-                  "vdoc:content": [
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
                     {
-                      "vdoc:selectField": "revdoc:brief"
-                    }
+                      "VDoc:strong": true,
+                      "VDoc:content": [
+                        "DEPRECATED"
+                      ]
+                    },
+                    " in favor of:"
                   ]
-                }
-              },
-              {
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:subClassOf"
-                ],
-                "vdoc:cell": {
-                  "vdoc:words": {
-                    "vdoc:selectField": "rdfs:subClassOf"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:entries": {
+                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
                   }
                 }
               },
               {
-                "vdoc:cell": "rdfs:comment",
-                "@type": "vdoc:Header",
-                "vdoc:content": {
-                  "vdoc:em": true,
-                  "vdoc:content": [
-                    "rdfs:comment"
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "VRevdoc:brief"
+                ],
+                "VDoc:cell": {
+                  "VDoc:strong": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:selectField": "VRevdoc:brief"
+                    }
+                  ]
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "rdfs:subClassOf"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:subClassOf"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "VDoc:cell": "rdfs:comment",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "description"
+                      ],
+                      "VDoc:ref": "rdfs:comment"
+                    }
                   ]
                 },
-                "vdoc:wide": true
+                "VDoc:wide": true
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "instance fields"
+                  ],
+                  "VDoc:ref": "VModel:Field"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:domainOfField"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "instance properties"
+                  ],
+                  "VDoc:ref": "VEngine:Property"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:domainOfProperty"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "instance methods"
+                  ],
+                  "VDoc:ref": "VEngine:Method"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:domainOfMethod"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "type object properties"
+                  ],
+                  "VDoc:ref": "VEngine:ObjectProperty"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:hasProperty"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "type object methods"
+                  ],
+                  "VDoc:ref": "VEngine:ObjectMethod"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:hasMethod"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
+              },
+              {
+                "VDoc:cell": "VRevdoc:introduction",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "introduction"
+                      ],
+                      "VDoc:ref": "VRevdoc:introduction"
+                    }
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:collapsed": true,
+                "VDoc:elidable": true
               }
             ]
           },
-          "vdoc:entries": []
+          "VDoc:entries": []
         }
       ]
     },
     "section_fields": {
       "@id": "section_fields",
-      "@type": "vdoc:Chapter",
+      "@type": "VDoc:Chapter",
       "dc:title": [
         {
-          "vdoc:em": true,
-          "vdoc:content": [
-            "valos_sourcerer"
+          "VDoc:em": true,
+          "VDoc:content": [
+            "VSourcerer"
           ]
         },
         " ",
         {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "valos_raem:Field"
+          "@type": "VDoc:Reference",
+          "VDoc:content": [
+            "valospace fields"
           ],
-          "vdoc:ref": "@valos/raem#Field"
-        },
-        " vocabulary"
+          "VDoc:ref": "VModel:Field"
+        }
       ],
-      "vdoc:content": [
+      "VDoc:content": [
         {
-          "vdoc:lookup": "vocabulary",
-          "@type": "vdoc:Table",
-          "vdoc:headers": {
-            "vdoc:entries": [
+          "VDoc:lookup": "vocabulary",
+          "@type": "VDoc:Table",
+          "VDoc:columns": {
+            "VDoc:entries": [
               {
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:label"
-                ],
-                "vdoc:cell": {
-                  "vdoc:resourceId": "vdoc:selectKey",
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
+                "@type": "VDoc:Header",
+                "VDoc:content": null,
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:resourceId": "VDoc:selectKey",
+                  "VDoc:heading": true,
+                  "VDoc:content": [
                     {
-                      "vdoc:em": true,
-                      "vdoc:content": [
-                        "vdoc:selectKey"
+                      "VDoc:words": [
+                        {
+                          "VDoc:strong": true,
+                          "VDoc:content": [
+                            {
+                              "VDoc:em": true,
+                              "VDoc:content": [
+                                {
+                                  "@type": "VDoc:Reference",
+                                  "VDoc:content": [
+                                    [
+                                      "#",
+                                      "VDoc:selectKey"
+                                    ]
+                                  ],
+                                  "VDoc:ref": [
+                                    "#",
+                                    "VDoc:selectKey"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "VDoc:words": {
+                            "VDoc:selectField": "rdfs:label"
+                          },
+                          "VDoc:elidable": true,
+                          "VDoc:map": {
+                            "@type": "VDoc:Reference",
+                            "VDoc:content": [
+                              "VDoc:selectValue"
+                            ],
+                            "VDoc:ref": "VEngine:valosheath"
+                          }
+                        }
                       ]
                     }
-                  ],
-                  "vdoc:ref": [
-                    "#",
-                    "vdoc:selectKey"
                   ]
                 }
               },
               {
-                "vdoc:cell": "rdfs:domain",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:domain"
-                ]
-              },
-              {
-                "vdoc:cell": "rdfs:range",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:range"
-                ]
-              },
-              {
-                "vdoc:cell": "@type",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdf:type"
-                ]
-              },
-              {
-                "vdoc:cell": "rdfs:subPropertyOf",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:subPropertyOf"
-                ]
-              },
-              {
-                "vdoc:cell": "valos_raem:coupledField",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "valos_raem:coupledField"
-                ]
-              },
-              {
-                "vdoc:cell": "rdfs:comment",
-                "@type": "vdoc:Header",
-                "vdoc:content": {
-                  "vdoc:em": true,
-                  "vdoc:content": [
-                    "rdfs:comment"
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:strong": true,
+                      "VDoc:content": [
+                        "DEPRECATED"
+                      ]
+                    },
+                    " in favor of:"
                   ]
                 },
-                "vdoc:wide": true
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:entries": {
+                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "rdfs:domain"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:domain"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "rdfs:range"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:range"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": "rdf:type",
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "@type"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": "rdfs:subPropertyOf",
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:subPropertyOf"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": "VModel:coupledField",
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VModel:coupledField"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "VDoc:cell": "rdfs:comment",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "description"
+                      ],
+                      "VDoc:ref": "rdfs:comment"
+                    }
+                  ]
+                },
+                "VDoc:wide": true
+              },
+              {
+                "VDoc:cell": "VRevdoc:introduction",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "introduction"
+                      ],
+                      "VDoc:ref": "VRevdoc:introduction"
+                    }
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:collapsed": true,
+                "VDoc:elidable": true
               }
             ]
           },
-          "vdoc:entries": []
+          "VDoc:entries": []
         }
       ]
     },
     "section_resolvers": {
       "@id": "section_resolvers",
-      "@type": "vdoc:Chapter",
+      "@type": "VDoc:Chapter",
       "dc:title": [
         {
-          "vdoc:em": true,
-          "vdoc:content": [
-            "valos_sourcerer"
+          "VDoc:em": true,
+          "VDoc:content": [
+            "VSourcerer"
           ]
         },
         " ",
         {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "valos_raem:Resolver"
+          "@type": "VDoc:Reference",
+          "VDoc:content": [
+            "field resolvers"
           ],
-          "vdoc:ref": "@valos/raem#Resolver"
-        },
-        " vocabulary"
+          "VDoc:ref": "VModel:Resolver"
+        }
       ],
-      "vdoc:content": [
+      "VDoc:content": [
         {
-          "vdoc:lookup": "vocabulary",
-          "@type": "vdoc:Table",
-          "vdoc:headers": {
-            "vdoc:entries": [
+          "VDoc:lookup": "vocabulary",
+          "@type": "VDoc:Table",
+          "VDoc:columns": {
+            "VDoc:entries": [
               {
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:label"
-                ],
-                "vdoc:cell": {
-                  "vdoc:resourceId": "vdoc:selectKey",
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
+                "@type": "VDoc:Header",
+                "VDoc:content": null,
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:resourceId": "VDoc:selectKey",
+                  "VDoc:heading": true,
+                  "VDoc:content": [
                     {
-                      "vdoc:em": true,
-                      "vdoc:content": [
-                        "vdoc:selectKey"
+                      "VDoc:words": [
+                        {
+                          "VDoc:strong": true,
+                          "VDoc:content": [
+                            {
+                              "VDoc:em": true,
+                              "VDoc:content": [
+                                {
+                                  "@type": "VDoc:Reference",
+                                  "VDoc:content": [
+                                    [
+                                      "#",
+                                      "VDoc:selectKey"
+                                    ]
+                                  ],
+                                  "VDoc:ref": [
+                                    "#",
+                                    "VDoc:selectKey"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "VDoc:words": {
+                            "VDoc:selectField": "rdfs:label"
+                          },
+                          "VDoc:elidable": true,
+                          "VDoc:map": {
+                            "@type": "VDoc:Reference",
+                            "VDoc:content": [
+                              "VDoc:selectValue"
+                            ],
+                            "VDoc:ref": "VEngine:valosheath"
+                          }
+                        }
                       ]
                     }
-                  ],
-                  "vdoc:ref": [
-                    "#",
-                    "vdoc:selectKey"
                   ]
                 }
               },
               {
-                "vdoc:cell": "@type",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdf:type"
-                ]
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:strong": true,
+                      "VDoc:content": [
+                        "DEPRECATED"
+                      ]
+                    },
+                    " in favor of:"
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:entries": {
+                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
               },
               {
-                "vdoc:cell": "comment",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
+                "VDoc:cell": "comment",
+                "@type": "VDoc:Header",
+                "VDoc:content": [
                   "Comment"
                 ]
               },
               {
-                "vdoc:cell": "rdfs:comment",
-                "@type": "vdoc:Header",
-                "vdoc:content": {
-                  "vdoc:em": true,
-                  "vdoc:content": [
-                    "rdfs:comment"
+                "@type": "VDoc:Header",
+                "VDoc:content": "rdf:type",
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "@type"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "VDoc:cell": "rdfs:comment",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "description"
+                      ],
+                      "VDoc:ref": "rdfs:comment"
+                    }
                   ]
                 },
-                "vdoc:wide": true
+                "VDoc:wide": true
+              },
+              {
+                "VDoc:cell": "VRevdoc:introduction",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "introduction"
+                      ],
+                      "VDoc:ref": "VRevdoc:introduction"
+                    }
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:collapsed": true,
+                "VDoc:elidable": true
               }
             ]
           },
-          "vdoc:entries": [
+          "VDoc:entries": [
             "resolveChronicleRoot",
             "resolveChronicleURI",
             "resolveModifiedAt",
@@ -765,128 +1571,227 @@
     },
     "section_vocabulary_other": {
       "@id": "section_vocabulary_other",
-      "@type": "vdoc:Chapter",
+      "@type": "VDoc:Chapter",
       "dc:title": [
         {
-          "vdoc:em": true,
-          "vdoc:content": [
-            "valos_sourcerer"
+          "VDoc:em": true,
+          "VDoc:content": [
+            "VSourcerer"
           ]
         },
         " remaining vocabulary"
       ],
-      "vdoc:content": [
+      "VDoc:content": [
         {
-          "vdoc:lookup": "vocabulary",
-          "@type": "vdoc:Table",
-          "vdoc:headers": {
-            "vdoc:entries": [
+          "VDoc:lookup": "vocabulary",
+          "@type": "VDoc:Table",
+          "VDoc:columns": {
+            "VDoc:entries": [
               {
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:label"
-                ],
-                "vdoc:cell": {
-                  "vdoc:resourceId": "vdoc:selectKey",
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
+                "@type": "VDoc:Header",
+                "VDoc:content": null,
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:resourceId": "VDoc:selectKey",
+                  "VDoc:heading": true,
+                  "VDoc:content": [
                     {
-                      "vdoc:em": true,
-                      "vdoc:content": [
-                        "vdoc:selectKey"
+                      "VDoc:words": [
+                        {
+                          "VDoc:strong": true,
+                          "VDoc:content": [
+                            {
+                              "VDoc:em": true,
+                              "VDoc:content": [
+                                {
+                                  "@type": "VDoc:Reference",
+                                  "VDoc:content": [
+                                    [
+                                      "#",
+                                      "VDoc:selectKey"
+                                    ]
+                                  ],
+                                  "VDoc:ref": [
+                                    "#",
+                                    "VDoc:selectKey"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "VDoc:words": {
+                            "VDoc:selectField": "rdfs:label"
+                          },
+                          "VDoc:elidable": true,
+                          "VDoc:map": {
+                            "@type": "VDoc:Reference",
+                            "VDoc:content": [
+                              "VDoc:selectValue"
+                            ],
+                            "VDoc:ref": "VEngine:valosheath"
+                          }
+                        }
                       ]
                     }
-                  ],
-                  "vdoc:ref": [
-                    "#",
-                    "vdoc:selectKey"
                   ]
                 }
               },
               {
-                "vdoc:cell": "@type",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdf:type"
-                ]
-              },
-              {
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:subClassOf"
-                ],
-                "vdoc:cell": {
-                  "vdoc:words": {
-                    "vdoc:selectField": "rdfs:subClassOf"
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:strong": true,
+                      "VDoc:content": [
+                        "DEPRECATED"
+                      ]
+                    },
+                    " in favor of:"
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:entries": {
+                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
                   }
                 }
               },
               {
-                "vdoc:cell": "rdfs:comment",
-                "@type": "vdoc:Header",
-                "vdoc:content": {
-                  "vdoc:em": true,
-                  "vdoc:content": [
-                    "rdfs:comment"
+                "@type": "VDoc:Header",
+                "VDoc:content": "rdf:type",
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "@type"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "rdfs:subClassOf"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:subClassOf"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "VDoc:cell": "rdfs:comment",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "description"
+                      ],
+                      "VDoc:ref": "rdfs:comment"
+                    }
                   ]
                 },
-                "vdoc:wide": true
+                "VDoc:wide": true
+              },
+              {
+                "VDoc:cell": "VRevdoc:introduction",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "introduction"
+                      ],
+                      "VDoc:ref": "VRevdoc:introduction"
+                    }
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:collapsed": true,
+                "VDoc:elidable": true
               }
             ]
           },
-          "vdoc:entries": []
+          "VDoc:entries": []
         }
       ]
     },
     "section_context": {
       "@id": "section_context",
-      "@type": "vdoc:Chapter",
+      "@type": "VDoc:Chapter",
       "dc:title": [
         {
-          "vdoc:em": true,
-          "vdoc:content": [
-            "valos_sourcerer"
+          "VDoc:em": true,
+          "VDoc:content": [
+            "VSourcerer"
           ]
         },
         " JSON-LD context term definitions"
       ],
-      "vdoc:content": [
+      "VDoc:content": [
         {
-          "vdoc:lookup": "context",
-          "@type": "vdoc:Table",
-          "vdoc:headers": [
+          "VDoc:lookup": "context",
+          "@type": "VDoc:Table",
+          "VDoc:columns": [
             {
-              "vdoc:cell": "vdoc:selectKey",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
+              "VDoc:cell": "VDoc:selectKey",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
                 "Term"
               ]
             },
             {
-              "vdoc:cell": "vdoc:selectValue",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
+              "VDoc:cell": "VDoc:selectValue",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
                 "Definition"
               ]
             },
             {
-              "vdoc:cell": "@id",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
+              "VDoc:cell": "@id",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
                 "@id"
               ]
             },
             {
-              "vdoc:cell": "@type",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
+              "VDoc:cell": "@type",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
                 "@type"
               ]
             },
             {
-              "vdoc:cell": "@container",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
+              "VDoc:cell": "@container",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
                 "@container"
               ]
             }
@@ -894,8 +1799,8 @@
         }
       ]
     },
-    "@type": "revdoc:Document",
-    "vdoc:content": [
+    "@type": "VRevdoc:Document",
+    "VDoc:content": [
       {
         "@id": "abstract"
       },
@@ -906,7 +1811,7 @@
         "@id": "introduction"
       },
       {
-        "@id": "ontology"
+        "@id": "section_valospace"
       }
     ]
   }

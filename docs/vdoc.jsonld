@@ -2,52 +2,72 @@
   {
     "@id": "https://valospace.org/vdoc",
     "@context": {
-      "@base": "https://valospace.org/vdoc#",
-      "sbomdoc": "https://valospace.org/sbomdoc#",
-      "revdoc": "https://valospace.org/revdoc#",
+      "@base": "https://valospace.org/vdoc/0#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
       "xsd": "http://www.w3.org/2001/XMLSchema#",
       "owl": "http://www.w3.org/2002/07/owl#",
       "dc": "http://purl.org/dc/elements/1.1/",
-      "vdoc": "https://valospace.org/vdoc#",
-      "vdoc:content": {
-        "@id": "https://valospace.org/vdoc#content",
+      "VSbomdoc": "https://valospace.org/sbomdoc/0#",
+      "VKernel": "https://valospace.org/kernel/0#",
+      "VDoc": "https://valospace.org/vdoc/0#",
+      "VRevdoc": "https://valospace.org/revdoc/0#",
+      "restriction": {
+        "@reverse": "owl:onProperty"
+      },
+      "VRevdoc:tooltipContent": {
+        "@id": "#tooltipContent",
+        "@type": "@id"
+      },
+      "VDoc:content": {
+        "@id": "#content",
         "@container": "@list",
         "@type": "@id"
       },
-      "vdoc:words": {
-        "@id": "https://valospace.org/vdoc#words",
+      "VDoc:entries": {
+        "@id": "#entries",
         "@container": "@list",
         "@type": "@id"
       },
-      "vdoc:entries": {
-        "@id": "https://valospace.org/vdoc#entries",
+      "VDoc:words": {
+        "@id": "#words",
         "@container": "@list",
         "@type": "@id"
       },
-      "vdoc:headers": {
-        "@id": "https://valospace.org/vdoc#headers",
+      "VDoc:columns": {
+        "@id": "#columns",
         "@container": "@list",
         "@type": "@id"
       },
-      "vdoc:cell": {
-        "@id": "https://valospace.org/vdoc#cell",
-        "@container": "@list",
+      "VDoc:map": {
+        "@id": "#map",
         "@type": "@id"
-      }
+      },
+      "VDoc:cell": {
+        "@id": "#cell",
+        "@type": "@id"
+      },
+      "VEngine": "https://valospace.org/engine/0#"
     },
     "dc:title": "VDoc - ValOS document interchange specification",
-    "vdoc:tags": [
+    "VDoc:tags": [
       "PRIMARY",
+      "FABRIC",
+      "WORKSPACE",
       "ONTOLOGY"
     ],
-    "revdoc:package": "@valos/vdoc",
-    "revdoc:prefix": "vdoc",
-    "revdoc:prefixIRI": "https://valospace.org/vdoc#",
-    "revdoc:version": "0.35.0-rc.29",
+    "VRevdoc:package": "@valos/vdoc",
+    "VRevdoc:version": "0.35.0-rc.30",
+    "VRevdoc:preferredPrefix": "VDoc",
+    "VRevdoc:baseIRI": "https://valospace.org/vdoc/0#",
+    "VRevdoc:referencedModules": {
+      "https://valospace.org/engine/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/engine/VEngine",
+      "https://valospace.org/kernel/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/kernel/VKernel",
+      "https://valospace.org/vdoc/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/vdoc/VDoc"
+    },
+    "VRevdoc:extenderModules": {},
     "respecConfig": {
-      "subtitle": "0.35.0-rc.29",
+      "subtitle": "0.35.0-rc.30",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -66,18 +86,18 @@
     },
     "abstract": {
       "@id": "abstract",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "This document specifies VDoc, a ",
             {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
                 "a JSON-LD"
               ],
-              "vdoc:ref": "https://www.w3.org/TR/json-ld11/"
+              "VDoc:ref": "https://www.w3.org/TR/json-ld11/"
             },
             "-based documentation\nhuman-machine-valospace interchange format."
           ]
@@ -86,43 +106,43 @@
     },
     "sotd": {
       "@id": "sotd",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "This document has not been reviewed. This is a draft document and may\nbe updated, replaced or obsoleted by other documents at any time."
           ]
         },
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "This document is part of the ",
             {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
                 "ValOS core specification"
               ],
-              "vdoc:ref": "@valos/kernel"
+              "VDoc:ref": "@valos/kernel"
             },
             "."
           ]
         },
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "The format is implemented and supported by ",
             {
-              "@type": "revdoc:Package",
-              "vdoc:content": [
+              "@type": "VRevdoc:Package",
+              "VDoc:content": [
                 {
-                  "vdoc:em": true,
-                  "vdoc:content": [
+                  "VDoc:em": true,
+                  "VDoc:content": [
                     "@valos/vdoc"
                   ]
                 }
               ],
-              "vdoc:ref": "@valos/vdoc"
+              "VDoc:ref": "@valos/vdoc"
             },
             " npm package."
           ]
@@ -132,23 +152,23 @@
     "introduction": {
       "@id": "introduction",
       "dc:title": "Introduction",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             {
-              "revdoc:dfn": "#vdoc",
-              "vdoc:content": [
+              "VRevdoc:dfn": "#vdoc",
+              "VDoc:content": [
                 {
-                  "vdoc:strong": true,
-                  "vdoc:content": [
+                  "VDoc:strong": true,
+                  "VDoc:content": [
                     {
-                      "@type": "vdoc:Reference",
-                      "vdoc:content": [
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
                         "VDoc"
                       ],
-                      "vdoc:ref": "#vdoc"
+                      "VDoc:ref": "#vdoc"
                     }
                   ]
                 },
@@ -158,15 +178,15 @@
           ]
         },
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "Motivation for this specification is to provide the foundation for\ndocument ",
             {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
                 "Valospace hypertwins"
               ],
-              "vdoc:ref": "@valos/hypertwin"
+              "VDoc:ref": "@valos/hypertwin"
             },
             " by\nsupporting the ValOS resources as an emission target. This allows all\nkinds of documents to be accessible from within Valospace with minimal\nadditional tooling.\nThis is not made an explicit design goal unto itself; instead the\ndesign goals are chosen to be generic in a way that satisfies this goal\nas the original author believes this leads to better design."
           ]
@@ -176,11 +196,11 @@
     "goals_and_non_goals": {
       "@id": "goals_and_non_goals",
       "dc:title": "Goals and non-goals",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "VDoc design goals are:"
           ]
         },
@@ -188,8 +208,8 @@
           "@id": "design_goals"
         },
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "Design non-goals are:"
           ]
         },
@@ -197,29 +217,29 @@
           "@id": "design_non_goals"
         },
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "To satisfy the goals VDoc chooses ",
             {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
                 "JSON-LD 1.1"
               ],
-              "vdoc:ref": "https://www.w3.org/TR/json-ld11/"
+              "VDoc:ref": "https://www.w3.org/TR/json-ld11/"
             },
             " as the primary interchange format and as a consequence RDF as\nthe underlying document object model."
           ]
         },
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "Additionally VDoc provides extensibility via custom ",
             {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
                 "VDoc extensions"
               ],
-              "vdoc:ref": "#extension"
+              "VDoc:ref": "#extension"
             },
             " which can introduce\ndomain-specific namespaces and ontologies, extraction and emission\ntransformation operations and document output formats."
           ]
@@ -228,8 +248,8 @@
     },
     "design_goals": {
       "@id": "design_goals",
-      "@type": "vdoc:NumberedList",
-      "vdoc:entries": [
+      "@type": "VDoc:NumberedList",
+      "VDoc:entries": [
         {
           "@id": "robustly_writable"
         },
@@ -246,10 +266,10 @@
     },
     "robustly_writable": {
       "@id": "robustly_writable",
-      "vdoc:content": [
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "Manual writing VDoc should be robust and must rely on minimal\nnumber of intuitive rules. The more there is to remember the\nhigher the threshold to writing docs."
           ]
         }
@@ -257,10 +277,10 @@
     },
     "programmatically_manipulable": {
       "@id": "programmatically_manipulable",
-      "vdoc:content": [
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "VDoc should be programmatically manipulable with minimal\nboilerplate. Complex array and other wrapper nestings make\nintrospection and comprehension harder for a less than\ndedicated developer."
           ]
         }
@@ -268,10 +288,10 @@
     },
     "semantically_modeled": {
       "@id": "semantically_modeled",
-      "vdoc:content": [
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "VDoc should have semantic structure with a globally\nreferenceable underlying model. Documents should be combinable\nand allowed to evolve; identifying document parts by their\nposition in a document is brittle."
           ]
         }
@@ -279,10 +299,10 @@
     },
     "contextually_extensible": {
       "@id": "contextually_extensible",
-      "vdoc:content": [
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "VDoc should be contextually extensible. Formats often have\ndetails which resist universalization but must still be\naccessible during document emission."
           ]
         }
@@ -290,8 +310,8 @@
     },
     "design_non_goals": {
       "@id": "design_non_goals",
-      "@type": "vdoc:NumberedList",
-      "vdoc:entries": [
+      "@type": "VDoc:NumberedList",
+      "VDoc:entries": [
         {
           "@id": "no_unified_ontology"
         },
@@ -302,10 +322,10 @@
     },
     "no_unified_ontology": {
       "@id": "no_unified_ontology",
-      "vdoc:content": [
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "VDoc does not attempt at providing a unified ontology.\nDocumentation formats are contextual and often evolve. Common\nstructures may be represented in unified manner using existing\nontologies where possible but providing an interchange ontology\nis outside the scope of this document."
           ]
         }
@@ -313,10 +333,10 @@
     },
     "no_complete_model": {
       "@id": "no_complete_model",
-      "vdoc:content": [
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "Documentation formats are contextual. Not all information\nneeds to survive the roundtrip via the underlying unified\nmodel and back. As a corollary a specific format generator can\nknow about other formats explicitly and consume their\ncontextual data."
           ]
         }
@@ -325,11 +345,11 @@
     "document_flow": {
       "@id": "document_flow",
       "dc:title": "Document phases and transformations",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "VDoc defines the central document flow in terms of three\ndocument phases:"
           ]
         },
@@ -337,8 +357,8 @@
           "@id": "document_phases"
         },
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "VDoc defines two transformations between the phases:"
           ]
         },
@@ -346,31 +366,31 @@
           "@id": "document_transformations"
         },
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "In addition to these phases and transformations VDoc makes use of ",
             {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
                 "JSON-LD 1.1 format"
               ],
-              "vdoc:ref": "https://www.w3.org/TR/json-ld11/"
+              "VDoc:ref": "https://www.w3.org/TR/json-ld11/"
             },
             ", its ",
             {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
                 "API and algorithms"
               ],
-              "vdoc:ref": "https://www.w3.org/TR/json-ld11-api/"
+              "VDoc:ref": "https://www.w3.org/TR/json-ld11-api/"
             },
             " and (maybe) ",
             {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
                 "its framing"
               ],
-              "vdoc:ref": "https://www.w3.org/TR/json-ld11-framing/"
+              "VDoc:ref": "https://www.w3.org/TR/json-ld11-framing/"
             },
             " for providing a mapping from VDocState to RDF model."
           ]
@@ -379,31 +399,31 @@
     },
     "document_phases": {
       "@id": "document_phases",
-      "@type": "vdoc:NumberedList",
-      "vdoc:entries": [
+      "@type": "VDoc:NumberedList",
+      "VDoc:entries": [
         [
           {
-            "revdoc:dfn": "#source_graph",
-            "vdoc:content": [
+            "VRevdoc:dfn": "#source_graph",
+            "VDoc:content": [
               {
-                "vdoc:strong": true,
-                "vdoc:content": [
+                "VDoc:strong": true,
+                "VDoc:content": [
                   {
-                    "@type": "vdoc:Reference",
-                    "vdoc:content": [
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
                       "Source graph"
                     ],
-                    "vdoc:ref": "#source_graph"
+                    "VDoc:ref": "#source_graph"
                   }
                 ]
               },
               " is a cyclic graph of\n  native objects with some of its sub-graphs matching some of the ",
               {
-                "@type": "vdoc:Reference",
-                "vdoc:content": [
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
                   "VDoc extraction rules"
                 ],
-                "vdoc:ref": "#extension_extraction_rules"
+                "VDoc:ref": "#extension_extraction_rules"
               },
               "."
             ]
@@ -411,20 +431,20 @@
           " It can be manually hand-written, programmatically generated\nor even dynamically introspected."
         ],
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             {
-              "revdoc:dfn": "#vdocstate",
-              "vdoc:content": [
+              "VRevdoc:dfn": "#vdocstate",
+              "VDoc:content": [
                 {
-                  "vdoc:strong": true,
-                  "vdoc:content": [
+                  "VDoc:strong": true,
+                  "VDoc:content": [
                     {
-                      "@type": "vdoc:Reference",
-                      "vdoc:content": [
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
                         "VDocState"
                       ],
-                      "vdoc:ref": "#vdocstate"
+                      "VDoc:ref": "#vdocstate"
                     }
                   ]
                 },
@@ -434,30 +454,30 @@
           ]
         },
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             {
-              "revdoc:dfn": "#extension_output",
-              "vdoc:content": [
+              "VRevdoc:dfn": "#extension_output",
+              "VDoc:content": [
                 {
-                  "vdoc:strong": true,
-                  "vdoc:content": [
+                  "VDoc:strong": true,
+                  "VDoc:content": [
                     {
-                      "@type": "vdoc:Reference",
-                      "vdoc:content": [
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
                         "Emission output"
                       ],
-                      "vdoc:ref": "#extension_output"
+                      "VDoc:ref": "#extension_output"
                     }
                   ]
                 },
                 " is a format specific\n  output that is produced by ",
                 {
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
                     "emission"
                   ],
-                  "vdoc:ref": "#emission"
+                  "VDoc:ref": "#emission"
                 },
                 " from a VDocState and format specific set of emission parameters."
               ]
@@ -468,31 +488,31 @@
     },
     "document_transformations": {
       "@id": "document_transformations",
-      "@type": "vdoc:NumberedList",
-      "vdoc:entries": [
+      "@type": "VDoc:NumberedList",
+      "VDoc:entries": [
         [
           {
-            "revdoc:dfn": "#extraction",
-            "vdoc:content": [
+            "VRevdoc:dfn": "#extraction",
+            "VDoc:content": [
               {
-                "vdoc:strong": true,
-                "vdoc:content": [
+                "VDoc:strong": true,
+                "VDoc:content": [
                   {
-                    "@type": "vdoc:Reference",
-                    "vdoc:content": [
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
                       "Extraction"
                     ],
-                    "vdoc:ref": "#extraction"
+                    "VDoc:ref": "#extraction"
                   }
                 ]
               },
               " transforms a source graph into\n  a VDocState by applying the idempotent ",
               {
-                "@type": "vdoc:Reference",
-                "vdoc:content": [
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
                   "VDoc extraction rules"
                 ],
-                "vdoc:ref": "#extension_extraction_rules"
+                "VDoc:ref": "#extension_extraction_rules"
               },
               " until the output no longer changes."
             ]
@@ -500,30 +520,30 @@
           "Due to idempotence the source graph can wildly different or\narbitrarily close to the resulting VDocState; in fact a VDocState is\nalways its own source graph."
         ],
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             {
-              "revdoc:dfn": "#emission",
-              "vdoc:content": [
+              "VRevdoc:dfn": "#emission",
+              "VDoc:content": [
                 {
-                  "vdoc:strong": true,
-                  "vdoc:content": [
+                  "VDoc:strong": true,
+                  "VDoc:content": [
                     {
-                      "@type": "vdoc:Reference",
-                      "vdoc:content": [
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
                         "Emission"
                       ],
-                      "vdoc:ref": "#emission"
+                      "VDoc:ref": "#emission"
                     }
                   ]
                 },
                 " is a format specific transformation\n  which emits the ",
                 {
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
                     "format specific output"
                   ],
-                  "vdoc:ref": "#output_format"
+                  "VDoc:ref": "#output_format"
                 },
                 " from VDocState."
               ]
@@ -535,11 +555,11 @@
     "vdocstate": {
       "@id": "vdocstate",
       "dc:title": "VDocState - primary interchange format",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "\nVDocState is a VState JSON-LD document with a well-formed tree structure\nconsisting of three types of nodes, corresponding to the first, second\nand remaining levels of the tree:"
           ]
         },
@@ -547,21 +567,21 @@
           "@id": "node_types"
         },
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "There can be multiple first-level document nodes in a single\nVDocState (as per JSON-LD). ",
             {
-              "revdoc:dfn": "#root_node",
-              "vdoc:content": [
+              "VRevdoc:dfn": "#root_node",
+              "VDoc:content": [
                 {
-                  "vdoc:strong": true,
-                  "vdoc:content": [
+                  "VDoc:strong": true,
+                  "VDoc:content": [
                     {
-                      "@type": "vdoc:Reference",
-                      "vdoc:content": [
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
                         "The tree root node"
                       ],
-                      "vdoc:ref": "#root_node"
+                      "VDoc:ref": "#root_node"
                     }
                   ]
                 },
@@ -586,39 +606,39 @@
     },
     "node_types": {
       "@id": "node_types",
-      "@type": "vdoc:NumberedList",
-      "vdoc:entries": [
+      "@type": "VDoc:NumberedList",
+      "VDoc:entries": [
         [
           {
-            "revdoc:dfn": "#document_node",
-            "vdoc:content": [
+            "VRevdoc:dfn": "#document_node",
+            "VDoc:content": [
               {
-                "vdoc:strong": true,
-                "vdoc:content": [
+                "VDoc:strong": true,
+                "VDoc:content": [
                   {
-                    "@type": "vdoc:Reference",
-                    "vdoc:content": [
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
                       "Document node"
                     ],
-                    "vdoc:ref": "#document_node"
+                    "VDoc:ref": "#document_node"
                   }
                 ]
               },
               " is an always-first-level\n  node identified by a ",
               {
-                "@type": "vdoc:Reference",
-                "vdoc:content": [
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
                   "a global document IRI"
                 ],
-                "vdoc:ref": "#document_iri"
+                "VDoc:ref": "#document_iri"
               },
               "as its ",
               {
-                "@type": "vdoc:Reference",
-                "vdoc:content": [
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
                   "JSON-LD @id"
                 ],
-                "vdoc:ref": "https://www.w3.org/TR/json-ld11/#node-identifiers"
+                "VDoc:ref": "https://www.w3.org/TR/json-ld11/#node-identifiers"
               },
               "."
             ]
@@ -626,30 +646,30 @@
           " Links to document nodes in bold and italics."
         ],
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             {
-              "revdoc:dfn": "#resource_node",
-              "vdoc:content": [
+              "VRevdoc:dfn": "#resource_node",
+              "VDoc:content": [
                 {
-                  "vdoc:strong": true,
-                  "vdoc:content": [
+                  "VDoc:strong": true,
+                  "VDoc:content": [
                     {
-                      "@type": "vdoc:Reference",
-                      "vdoc:content": [
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
                         "Resource node"
                       ],
-                      "vdoc:ref": "#resource_node"
+                      "VDoc:ref": "#resource_node"
                     }
                   ]
                 },
                 " is an always-second-level\n  node which is directly accessible from the first-level document\n  via its document relative ",
                 {
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
                     "resource identifier"
                   ],
-                  "vdoc:ref": "#resource_id"
+                  "VDoc:ref": "#resource_id"
                 },
                 "as the dictionary key."
               ]
@@ -658,30 +678,30 @@
           ]
         },
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             {
-              "revdoc:dfn": "#element_node",
-              "vdoc:content": [
+              "VRevdoc:dfn": "#element_node",
+              "VDoc:content": [
                 {
-                  "vdoc:strong": true,
-                  "vdoc:content": [
+                  "VDoc:strong": true,
+                  "VDoc:content": [
                     {
-                      "@type": "vdoc:Reference",
-                      "vdoc:content": [
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
                         "Element node"
                       ],
-                      "vdoc:ref": "#element_node"
+                      "VDoc:ref": "#element_node"
                     }
                   ]
                 },
                 " is a third-or-more-level\n  node. It might be anonymous and lacks a stable and unique\n  identifiers. It MAY have a locally unique identifier. If the\n  element node and all its parent element nodes have locally\n  unique identifier then the ordered set of those identifiers\n  can be considered a document local unique identifier of the\n  element node, similar to ",
                 {
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
                     "the resource identifier"
                   ],
-                  "vdoc:ref": "#resource_id"
+                  "VDoc:ref": "#resource_id"
                 }
               ]
             }
@@ -692,11 +712,11 @@
     "node_keys": {
       "@id": "node_keys",
       "dc:title": "Node keys",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "\nThe keys of the VDocState nodes have four categories depending on whether\nthe key is an IRI or not and whether an IRI key has semantics defined\nVDoc or extension format specifications:"
           ]
         },
@@ -707,21 +727,21 @@
     },
     "node_key_categories": {
       "@id": "node_key_categories",
-      "@type": "vdoc:NumberedList",
-      "vdoc:entries": [
+      "@type": "VDoc:NumberedList",
+      "VDoc:entries": [
         [
           {
-            "revdoc:dfn": "#vdoc_key",
-            "vdoc:content": [
+            "VRevdoc:dfn": "#vdoc_key",
+            "VDoc:content": [
               {
-                "vdoc:strong": true,
-                "vdoc:content": [
+                "VDoc:strong": true,
+                "VDoc:content": [
                   {
-                    "@type": "vdoc:Reference",
-                    "vdoc:content": [
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
                       "VDoc node key"
                     ],
-                    "vdoc:ref": "#vdoc_key"
+                    "VDoc:ref": "#vdoc_key"
                   }
                 ]
               },
@@ -730,20 +750,20 @@
           }
         ],
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             {
-              "revdoc:dfn": "#extension_key",
-              "vdoc:content": [
+              "VRevdoc:dfn": "#extension_key",
+              "VDoc:content": [
                 {
-                  "vdoc:strong": true,
-                  "vdoc:content": [
+                  "VDoc:strong": true,
+                  "VDoc:content": [
                     {
-                      "@type": "vdoc:Reference",
-                      "vdoc:content": [
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
                         "Extension node key"
                       ],
-                      "vdoc:ref": "#extension_key"
+                      "VDoc:ref": "#extension_key"
                     }
                   ]
                 },
@@ -753,20 +773,20 @@
           ]
         },
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             {
-              "revdoc:dfn": "#generic_key",
-              "vdoc:content": [
+              "VRevdoc:dfn": "#generic_key",
+              "VDoc:content": [
                 {
-                  "vdoc:strong": true,
-                  "vdoc:content": [
+                  "VDoc:strong": true,
+                  "VDoc:content": [
                     {
-                      "@type": "vdoc:Reference",
-                      "vdoc:content": [
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
                         "Generic IRI key"
                       ],
-                      "vdoc:ref": "#generic_key"
+                      "VDoc:ref": "#generic_key"
                     }
                   ]
                 },
@@ -776,20 +796,20 @@
           ]
         },
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             {
-              "revdoc:dfn": "#identifier_key",
-              "vdoc:content": [
+              "VRevdoc:dfn": "#identifier_key",
+              "VDoc:content": [
                 {
-                  "vdoc:strong": true,
-                  "vdoc:content": [
+                  "VDoc:strong": true,
+                  "VDoc:content": [
                     {
-                      "@type": "vdoc:Reference",
-                      "vdoc:content": [
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
                         "Identifier key"
                       ],
-                      "vdoc:ref": "#identifier_key"
+                      "VDoc:ref": "#identifier_key"
                     }
                   ]
                 },
@@ -803,23 +823,23 @@
     "document_node": {
       "@id": "document_node",
       "dc:title": "Document nodes",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             {
-              "revdoc:dfn": "#document_iri",
-              "vdoc:content": [
+              "VRevdoc:dfn": "#document_iri",
+              "VDoc:content": [
                 {
-                  "vdoc:strong": true,
-                  "vdoc:content": [
+                  "VDoc:strong": true,
+                  "VDoc:content": [
                     {
-                      "@type": "vdoc:Reference",
-                      "vdoc:content": [
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
                         "The document IRI"
                       ],
-                      "vdoc:ref": "#document_iri"
+                      "VDoc:ref": "#document_iri"
                     }
                   ]
                 },
@@ -828,11 +848,11 @@
             },
             "All ",
             {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
                 "identifier keys"
               ],
-              "vdoc:ref": "#identifier_key"
+              "VDoc:ref": "#identifier_key"
             },
             " of a\ndocument node must have a resource node as their value."
           ]
@@ -842,23 +862,23 @@
     "resource_node": {
       "@id": "resource_node",
       "dc:title": "Resource nodes",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             {
-              "revdoc:dfn": "#resource_id",
-              "vdoc:content": [
+              "VRevdoc:dfn": "#resource_id",
+              "VDoc:content": [
                 {
-                  "vdoc:strong": true,
-                  "vdoc:content": [
+                  "VDoc:strong": true,
+                  "VDoc:content": [
                     {
-                      "@type": "vdoc:Reference",
-                      "vdoc:content": [
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
                         "The resource identifier"
                       ],
-                      "vdoc:ref": "#resource_id"
+                      "VDoc:ref": "#resource_id"
                     }
                   ]
                 },
@@ -867,11 +887,11 @@
             },
             "When the resource identifier is appended to ",
             {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
                 "the document IRI"
               ],
-              "vdoc:ref": "#document_iri"
+              "VDoc:ref": "#document_iri"
             },
             " as an IRI fragment part the resource node has a stable,\nglobal identity over time."
           ]
@@ -881,11 +901,11 @@
     "element_node": {
       "@id": "element_node",
       "dc:title": "Element nodes",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "Element nodes are structural document building blocks which\nlack a stable identity even within the document."
           ]
         }
@@ -894,8 +914,8 @@
     "transformations_spec": {
       "@id": "transformations_spec",
       "dc:title": "Transformations convert documents to and from VDocState",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
           "@id": "extraction_transformation"
         },
@@ -907,29 +927,29 @@
     "extraction_transformation": {
       "@id": "extraction_transformation",
       "dc:title": "Extraction transforms source graphs into VDocState",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": []
+      "@type": "VDoc:Chapter",
+      "VDoc:content": []
     },
     "emission_transformation": {
       "@id": "emission_transformation",
       "dc:title": "Emission transforms VDocState into output targets",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": []
+      "@type": "VDoc:Chapter",
+      "VDoc:content": []
     },
     "extension": {
       "@id": "extension",
       "dc:title": "Extensions provide new ontologies and transformations",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "A VDoc extension is a specification which can extend the VDoc\nspecification in different ways in the different transformation\nstages. An extension has two main parts; the extension ontology\nintroduces new vocabulary for the VDoc interchange format itself\nand the extension transformations introduces new algorithms for\nextracting and emitting said vocabulary."
           ]
         },
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "Multiple VDoc extensions can co-exist; extensions must be\nspecified in a manner that a VDoc document itself and all\ntransformation operations are well-defined and deterministic even\nif multiple extensions are used at the same time. There are two\nprimary mechanisms to reach this goal: global dns-registration\nbased ontology base IRI's and and extension ordering primacy\nduring transformations."
           ]
         },
@@ -944,35 +964,35 @@
     "extension_ontology": {
       "@id": "extension_ontology",
       "dc:title": "VDoc extension ontology",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "VDoc extension ontology is the combination of the extension",
             {
-              "vdoc:content": [
+              "VDoc:content": [
                 {
-                  "@type": "vdoc:NumberedList",
-                  "vdoc:entries": [
+                  "@type": "VDoc:NumberedList",
+                  "VDoc:entries": [
                     [
-                      "namespace preferred prefix and its associated prefixIRI"
+                      "namespace preferred prefix and its associated baseIRI"
                     ],
                     {
-                      "@type": "vdoc:Paragraph",
-                      "vdoc:content": [
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
                         "depended ontologies with their prefix definitions"
                       ]
                     },
                     {
-                      "@type": "vdoc:Paragraph",
-                      "vdoc:content": [
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
                         "extension RDF vocabulary"
                       ]
                     },
                     {
-                      "@type": "vdoc:Paragraph",
-                      "vdoc:content": [
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
                         "JSON-LD context term definitions"
                       ]
                     }
@@ -996,11 +1016,11 @@
     },
     "extension_prefixes": {
       "@id": "extension_prefixes",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "Mappings from short, document-local strings into a globally unique IRIs."
           ]
         }
@@ -1008,23 +1028,23 @@
     },
     "extension_vocabulary": {
       "@id": "extension_vocabulary",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
-            "A collection of RDF classes, properties and other names, all\nof which have the ontology prefixIRI as a prefix."
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "A collection of RDF classes, properties and other names, all\nof which have the ontology baseIRI as a prefix."
           ]
         }
       ]
     },
     "extension_context": {
       "@id": "extension_context",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "A collection of JSON-LD context term definitions."
           ]
         }
@@ -1033,11 +1053,11 @@
     "extension_transformations": {
       "@id": "extension_transformations",
       "dc:title": "VDoc extension transformations: extraction and emission",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "An extension can specify an arbitrary number of extraction and\nemission transformation algorithms and rules from various source graphs\nvia the VDoc interchange format into various output formats."
           ]
         },
@@ -1058,30 +1078,30 @@
     "extension_extraction_rules": {
       "@id": "extension_extraction_rules",
       "dc:title": "Extraction transformation rules",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "Extraction rules specify how a source graph is interpreted as\nmutations (usually additions) to a given target VDocState document.\nAn extraction rule consists of two parts:",
             {
-              "vdoc:content": [
+              "VDoc:content": [
                 {
-                  "@type": "vdoc:BulletList",
-                  "vdoc:entries": [
+                  "@type": "VDoc:BulletList",
+                  "VDoc:entries": [
                     [
                       {
-                        "revdoc:dfn": "#extraction_key_pattern",
-                        "vdoc:content": [
+                        "VRevdoc:dfn": "#extraction_key_pattern",
+                        "VDoc:content": [
                           {
-                            "vdoc:strong": true,
-                            "vdoc:content": [
+                            "VDoc:strong": true,
+                            "VDoc:content": [
                               {
-                                "@type": "vdoc:Reference",
-                                "vdoc:content": [
+                                "@type": "VDoc:Reference",
+                                "VDoc:content": [
                                   "key pattern matcher"
                                 ],
-                                "vdoc:ref": "#extraction_key_pattern"
+                                "VDoc:ref": "#extraction_key_pattern"
                               }
                             ]
                           },
@@ -1090,30 +1110,30 @@
                       }
                     ],
                     {
-                      "@type": "vdoc:Paragraph",
-                      "vdoc:content": [
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
                         {
-                          "revdoc:dfn": "#extraction_action",
-                          "vdoc:content": [
+                          "VRevdoc:dfn": "#extraction_action",
+                          "VDoc:content": [
                             {
-                              "vdoc:strong": true,
-                              "vdoc:content": [
+                              "VDoc:strong": true,
+                              "VDoc:content": [
                                 {
-                                  "@type": "vdoc:Reference",
-                                  "vdoc:content": [
+                                  "@type": "VDoc:Reference",
+                                  "VDoc:content": [
                                     "extraction action"
                                   ],
-                                  "vdoc:ref": "#extraction_action"
+                                  "VDoc:ref": "#extraction_action"
                                 }
                               ]
                             },
                             " specifies\n    how the extraction rule parameters and ",
                             {
-                              "@type": "vdoc:Reference",
-                              "vdoc:content": [
+                              "@type": "VDoc:Reference",
+                              "VDoc:content": [
                                 "extraction context"
                               ],
-                              "vdoc:ref": "extraction context"
+                              "VDoc:ref": "extraction context"
                             },
                             " is interpreted as a set of mutations on the current\n    target VDocState document node"
                           ]
@@ -1125,69 +1145,69 @@
               ]
             },
             {
-              "revdoc:dfn": "#extraction_context",
-              "vdoc:content": [
+              "VRevdoc:dfn": "#extraction_context",
+              "VDoc:content": [
                 {
-                  "vdoc:strong": true,
-                  "vdoc:content": [
+                  "VDoc:strong": true,
+                  "VDoc:content": [
                     {
-                      "@type": "vdoc:Reference",
-                      "vdoc:content": [
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
                         "Extraction context"
                       ],
-                      "vdoc:ref": "#extraction_context"
+                      "VDoc:ref": "#extraction_context"
                     }
                   ]
                 },
                 " is\n    defined as a collection of ",
                 {
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
                     "rule key"
                   ],
-                  "vdoc:ref": "rule key"
+                  "VDoc:ref": "rule key"
                 },
                 ", ",
                 {
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
                     "source graph parent node"
                   ],
-                  "vdoc:ref": "source graph parent node"
+                  "VDoc:ref": "source graph parent node"
                 },
                 ", ",
                 {
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
                     "source graph node value"
                   ],
-                  "vdoc:ref": "source graph node value"
+                  "VDoc:ref": "source graph node value"
                 },
                 ", ",
                 {
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
                     "target document parent node"
                   ],
-                  "vdoc:ref": "target document parent node"
+                  "VDoc:ref": "target document parent node"
                 },
                 " and ",
                 {
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
                     "target document value"
                   ],
-                  "vdoc:ref": "target document value"
+                  "VDoc:ref": "target document value"
                 }
               ]
             },
             "Typical extraction rule creates a new Node, adds it to target document\nparent (directly or as a reference depending on the ",
             {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
                 "Node type"
               ],
-              "vdoc:ref": "#node_type"
+              "VDoc:ref": "#node_type"
             },
             ") and adds the source node value to\nsome specific property of the new Node."
           ]
@@ -1197,37 +1217,37 @@
     "extension_extractee_apis": {
       "@id": "extension_extractee_apis",
       "dc:title": "Extraction extractee tool APIs",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "An extension MAY specify an extractee API as a collection\nof ",
             {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
                 "WebIDL interfaces"
               ],
-              "vdoc:ref": "https://www.w3.org/TR/WebIDL-1/"
+              "VDoc:ref": "https://www.w3.org/TR/WebIDL-1/"
             },
             " for\nconstructing of extension extraction source graphs. By doing this the\nnative implementations gain the benefits of integrated toolchains:",
             {
-              "vdoc:content": [
+              "VDoc:content": [
                 {
-                  "@type": "vdoc:BulletList",
-                  "vdoc:entries": [
+                  "@type": "VDoc:BulletList",
+                  "VDoc:entries": [
                     [
                       "Improved discoverability via integrated documentation and code\n  completion"
                     ],
                     {
-                      "@type": "vdoc:Paragraph",
-                      "vdoc:content": [
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
                         "Implicitly well-formed primitives and structures where\n  possible, validation of input where not"
                       ]
                     },
                     {
-                      "@type": "vdoc:Paragraph",
-                      "vdoc:content": [
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
                         "Improved readability of the document in contexts where the\n  primary document source graph is expressed in native code"
                       ]
                     }
@@ -1243,22 +1263,22 @@
     "extension_output": {
       "@id": "extension_output",
       "dc:title": "Emission outputs",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": []
+      "@type": "VDoc:Chapter",
+      "VDoc:content": []
     },
     "extension_emission": {
       "@id": "extension_emission",
       "dc:title": "Emission transformation",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": []
+      "@type": "VDoc:Chapter",
+      "VDoc:content": []
     },
-    "ontology": {
-      "@id": "ontology",
-      "dc:title": "VDoc Core ontology",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+    "section_fabric": {
+      "@id": "section_fabric",
+      "dc:title": "VDoc Core namespace",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@id": "section_ontology_abstract"
+          "@id": "section_fabric_abstract"
         },
         {
           "@id": "section_prefixes"
@@ -1287,267 +1307,296 @@
       "xsd": "http://www.w3.org/2001/XMLSchema#",
       "owl": "http://www.w3.org/2002/07/owl#",
       "dc": "http://purl.org/dc/elements/1.1/",
-      "vdoc": "https://valospace.org/vdoc#"
+      "VDoc": "https://valospace.org/vdoc/0#",
+      "VKernel": "https://valospace.org/kernel/0#"
     },
     "vocabulary": {
       "@id": "vocabulary",
       "Class": {
         "@type": [
-          "vdoc:Class",
-          "valos_kernel:Class"
+          "VDoc:Class",
+          "VKernel:Class"
         ],
         "rdfs:subClassOf": "rdfs:Class",
         "rdfs:comment": "The class of classes which are defined by vdoc or a vdoc extension"
       },
       "Property": {
         "@type": [
-          "vdoc:Class",
-          "valos_kernel:Class"
+          "VDoc:Class",
+          "VKernel:Class"
         ],
         "rdfs:subClassOf": "rdf:Property",
         "rdfs:comment": "The class of properties which are defined by vdoc or a vdoc extension"
       },
       "Node": {
-        "@type": "vdoc:Class",
+        "@type": "VDoc:Class",
         "rdfs:comment": "A document tree Node"
       },
       "resourceId": {
-        "@type": "vdoc:Property",
-        "rdfs:domain": "vdoc:Node",
+        "@type": "VDoc:Property",
+        "rdfs:domain": "VDoc:Node",
         "rdfs:range": "xsd:string",
         "rdfs:comment": "The resource identifier of a resource node"
       },
       "content": {
-        "@type": "vdoc:Property",
-        "rdfs:domain": "vdoc:Node",
+        "@type": "VDoc:Property",
+        "rdfs:domain": "VDoc:Node",
         "rdfs:range": "rdfs:List",
         "rdfs:comment": "The primary visible content of a Node"
       },
-      "words": {
-        "@type": "vdoc:Property",
-        "rdfs:subPropertyOf": "vdoc:content",
-        "rdfs:domain": "vdoc:Node",
-        "rdfs:range": "rdfs:List",
-        "rdfs:comment": "A visible list of visually separate words"
-      },
       "entries": {
-        "@type": "vdoc:Property",
-        "rdfs:subPropertyOf": "vdoc:content",
-        "rdfs:domain": "vdoc:Node",
+        "@type": "VDoc:Property",
+        "rdfs:subPropertyOf": "VDoc:content",
+        "rdfs:domain": "VDoc:Node",
         "rdfs:range": "rdfs:List",
         "rdfs:comment": "A visible list of vertically or horizontally segmented entries"
       },
+      "words": {
+        "@type": "VDoc:Property",
+        "rdfs:subPropertyOf": "VDoc:entries",
+        "rdfs:domain": "VDoc:Node",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "A visible list of visually separate words"
+      },
       "lookup": {
-        "@type": "vdoc:Property",
-        "rdfs:domain": "vdoc:Node",
+        "@type": "VDoc:Property",
+        "rdfs:domain": "VDoc:Node",
         "rdfs:range": "rdfs:Resource",
         "rdfs:comment": "A reference to a lookup structure for string literal entries"
       },
       "wide": {
-        "@type": "vdoc:Property",
-        "rdfs:domain": "vdoc:Node",
+        "@type": "VDoc:Property",
+        "rdfs:domain": "VDoc:Node",
         "rdfs:range": "rdfs:Resource",
-        "rdfs:comment": "Marks the node content as being wide"
+        "rdfs:comment": "Node content is wide"
       },
       "tall": {
-        "@type": "vdoc:Property",
-        "rdfs:domain": "vdoc:Node",
+        "@type": "VDoc:Property",
+        "rdfs:domain": "VDoc:Node",
         "rdfs:range": "rdfs:Resource",
-        "rdfs:comment": "Marks the node content as being tall"
+        "rdfs:comment": "Node content is tall"
+      },
+      "heading": {
+        "@type": "VDoc:Property",
+        "rdfs:domain": "VDoc:Node",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Node content is a heading. An explicit number value denotes increasingly smaller headings"
+      },
+      "collapsed": {
+        "@type": "VDoc:Property",
+        "rdfs:domain": "VDoc:Node",
+        "rdfs:range": "xsd:boolean",
+        "rdfs:comment": "Node content is collapsed but expandable. If false, content is expanded but collapsible"
+      },
+      "elidable": {
+        "@type": "VDoc:Property",
+        "rdfs:domain": "VDoc:Node",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Node should be hidden if its VDoc:content is empty"
       },
       "Chapter": {
-        "@type": "vdoc:Class",
-        "rdfs:subClassOf": "vdoc:Node",
+        "@type": "VDoc:Class",
+        "rdfs:subClassOf": "VDoc:Node",
         "rdfs:comment": "A titled, possibly numbered chapter document node"
       },
       "Paragraph": {
-        "@type": "vdoc:Class",
-        "rdfs:subClassOf": "vdoc:Node",
+        "@type": "VDoc:Class",
+        "rdfs:subClassOf": "VDoc:Node",
         "rdfs:comment": "A vertically segmented paragraph document node"
       },
       "BulletList": {
-        "@type": "vdoc:Class",
-        "rdfs:subClassOf": "vdoc:Node",
+        "@type": "VDoc:Class",
+        "rdfs:subClassOf": "VDoc:Node",
         "rdfs:comment": "A bullet list document node"
       },
       "NumberedList": {
-        "@type": "vdoc:Class",
-        "rdfs:subClassOf": "vdoc:Node",
+        "@type": "VDoc:Class",
+        "rdfs:subClassOf": "VDoc:Node",
         "rdfs:comment": "A numbered list document node"
       },
       "Table": {
-        "@type": "vdoc:Class",
-        "rdfs:subClassOf": "vdoc:Node",
+        "@type": "VDoc:Class",
+        "rdfs:subClassOf": "VDoc:Node",
         "rdfs:comment": "A two-dimensional table document node"
       },
       "Header": {
-        "@type": "vdoc:Class",
-        "rdfs:subClassOf": "vdoc:Node",
+        "@type": "VDoc:Class",
+        "rdfs:subClassOf": "VDoc:Node",
         "rdfs:comment": "A table cross-entry-section header node"
       },
-      "headers": {
-        "@type": "vdoc:Property",
-        "rdfs:domain": "vdoc:Table",
+      "columns": {
+        "@type": "VDoc:Property",
+        "rdfs:domain": "VDoc:Table",
         "rdfs:range": "rdfs:List",
-        "rdfs:comment": "A list of table cross-entry-section headers"
+        "rdfs:comment": "A list of table cross-entry-section columns"
+      },
+      "map": {
+        "@type": "VDoc:Property",
+        "rdfs:domain": "VDoc:Node",
+        "rdfs:range": "VDoc:Node",
+        "rdfs:comment": "The content selector template mapped onto all entries of this node"
       },
       "cell": {
-        "@type": "vdoc:Property",
-        "rdfs:domain": "vdoc:Header",
-        "rdfs:range": "rdfs:List",
-        "rdfs:comment": "The template for building cell content using content selectors"
+        "@type": "VDoc:Property",
+        "rdfs:domain": "VDoc:Header",
+        "rdfs:range": "VDoc:Node",
+        "rdfs:comment": "The content selector template mapped onto current entry for this column"
       },
       "ContentSelector": {
-        "@type": "vdoc:Class",
+        "@type": "VDoc:Class",
         "rdfs:comment": "The class of selectors with explicit meaning for selecting content"
       },
       "selectKey": {
-        "@type": "vdoc:ContentSelector",
-        "rdfs:comment": "A content selector literal denoting the entry lookup key"
+        "@type": "VDoc:ContentSelector",
+        "rdfs:comment": "A content selector literal denoting the lookup key or index of the entry"
       },
       "selectValue": {
-        "@type": "vdoc:ContentSelector",
-        "rdfs:comment": "A content selector literal denoting the whole entry value"
+        "@type": "VDoc:ContentSelector",
+        "rdfs:comment": "A content selector literal denoting the value of the entry"
       },
       "selectField": {
-        "@type": "vdoc:Property",
+        "@type": "VDoc:Property",
         "rdfs:domain": "rdfs:Resource",
         "rdfs:range": "rdfs:Literal",
         "rdfs:comment": "A content selector for the entry field denoted by the object of this triple"
       },
       "CharacterData": {
-        "@type": "vdoc:Class",
-        "rdfs:subClassOf": "vdoc:Node",
+        "@type": "VDoc:Class",
+        "rdfs:subClassOf": "VDoc:Node",
         "rdfs:comment": "A character data document node"
       },
       "language": {
-        "@type": "vdoc:Property",
-        "rdfs:domain": "vdoc:CharacterData",
+        "@type": "VDoc:Property",
+        "rdfs:domain": "VDoc:CharacterData",
         "rdfs:range": "rdfs:Resource",
         "rdfs:comment": "The language of the character data content"
       },
       "Reference": {
-        "@type": "vdoc:Class",
-        "rdfs:subClassOf": "vdoc:Node",
+        "@type": "VDoc:Class",
+        "rdfs:subClassOf": "VDoc:Node",
         "rdfs:comment": "A reference document node"
       },
       "ContextPath": {
-        "@type": "vdoc:Class",
-        "rdfs:subClassOf": "vdoc:Node",
+        "@type": "VDoc:Class",
+        "rdfs:subClassOf": "VDoc:Node",
         "rdfs:comment": "A context-based path document node"
       },
       "context": {
-        "@type": "vdoc:Property",
-        "rdfs:domain": "vdoc:ContextPath",
+        "@type": "VDoc:Property",
+        "rdfs:domain": "VDoc:ContextPath",
         "rdfs:range": "rdfs:Resource",
         "rdfs:comment": "Non-visible context base (absolute or relative to current base)"
       },
       "ContextBase": {
-        "@type": "vdoc:Class",
-        "rdfs:subClassOf": "vdoc:ContextPath",
+        "@type": "VDoc:Class",
+        "rdfs:subClassOf": "VDoc:ContextPath",
         "rdfs:comment": "A context base setting document node"
       },
       "HTMLElementProperty": {
-        "@type": "vdoc:Class",
-        "rdfs:subClassOf": "vdoc:Property",
-        "rdfs:comment": "The class of vdoc properties which directly inherit the semantics of a specific HTML5 element"
+        "@type": "VDoc:Class",
+        "rdfs:subClassOf": "VDoc:Property",
+        "rdfs:comment": "The class of vdoc properties which directly inherit the semantics of\na specific HTML5 element"
       },
       "elementName": {
-        "@type": "vdoc:Property",
-        "rdfs:domain": "vdoc:HTMLElementProperty",
+        "@type": "VDoc:Property",
+        "rdfs:domain": "VDoc:HTMLElementProperty",
         "rdfs:range": "xsd:string",
         "rdfs:comment": "The name of the html element associated with this property"
       },
       "em": {
-        "@type": "vdoc:HTMLElementProperty",
-        "rdfs:domain": "vdoc:Node",
+        "@type": "VDoc:HTMLElementProperty",
+        "rdfs:domain": "VDoc:Node",
         "rdfs:range": "rdfs:Resource",
-        "vdoc:elementName": "em",
-        "vdoc:elementSpec": "https://html.spec.whatwg.org/multipage/text-level-semantics.html#the-em-element",
+        "VDoc:elementName": "em",
+        "VDoc:elementSpec": "https://html.spec.whatwg.org/multipage/text-level-semantics.html#the-em-element",
         "rdfs:comment": "Node content is <em>emphasised</em>"
       },
       "strong": {
-        "@type": "vdoc:HTMLElementProperty",
-        "rdfs:domain": "vdoc:Node",
+        "@type": "VDoc:HTMLElementProperty",
+        "rdfs:domain": "VDoc:Node",
         "rdfs:range": "rdfs:Resource",
-        "vdoc:elementName": "strong",
-        "vdoc:elementSpec": "https://html.spec.whatwg.org/multipage/text-level-semantics.html#the-strong-element",
+        "VDoc:elementName": "strong",
+        "VDoc:elementSpec": "https://html.spec.whatwg.org/multipage/text-level-semantics.html#the-strong-element",
         "rdfs:comment": "Node content is <strong>strong</strong>"
       },
       "ins": {
-        "@type": "vdoc:HTMLElementProperty",
-        "rdfs:domain": "vdoc:Node",
+        "@type": "VDoc:HTMLElementProperty",
+        "rdfs:domain": "VDoc:Node",
         "rdfs:range": "rdfs:Resource",
-        "vdoc:elementName": "ins",
-        "vdoc:elementSpec": "https://html.spec.whatwg.org/multipage/edits.html#the-ins-element",
+        "VDoc:elementName": "ins",
+        "VDoc:elementSpec": "https://html.spec.whatwg.org/multipage/edits.html#the-ins-element",
         "rdfs:comment": "Node content is an <ins>insertion</ins>"
       },
       "del": {
-        "@type": "vdoc:HTMLElementProperty",
-        "rdfs:domain": "vdoc:Node",
+        "@type": "VDoc:HTMLElementProperty",
+        "rdfs:domain": "VDoc:Node",
         "rdfs:range": "rdfs:Resource",
-        "vdoc:elementName": "del",
-        "vdoc:elementSpec": "https://html.spec.whatwg.org/multipage/edits.html#the-del-element",
+        "VDoc:elementName": "del",
+        "VDoc:elementSpec": "https://html.spec.whatwg.org/multipage/edits.html#the-del-element",
         "rdfs:comment": "Node content is <del>deleted</del>"
       },
-      "quote": {
-        "@type": "vdoc:HTMLElementProperty",
-        "rdfs:domain": "vdoc:Node",
+      "q": {
+        "@type": "VDoc:HTMLElementProperty",
+        "rdfs:domain": "VDoc:Node",
         "rdfs:range": "rdfs:Resource",
-        "vdoc:elementName": "quote",
-        "vdoc:elementSpec": "https://html.spec.whatwg.org/multipage/text-level-semantics.html#the-q-element",
+        "VDoc:elementName": "q",
+        "VDoc:elementSpec": "https://html.spec.whatwg.org/multipage/text-level-semantics.html#the-q-element",
         "rdfs:comment": "Node content is <q>quoted</q>"
       },
       "blockquote": {
-        "@type": "vdoc:HTMLElementProperty",
-        "rdfs:domain": "vdoc:Node",
+        "@type": "VDoc:HTMLElementProperty",
+        "rdfs:domain": "VDoc:Node",
         "rdfs:range": "rdfs:Resource",
-        "vdoc:elementName": "blockquote",
-        "vdoc:elementSpec": "https://html.spec.whatwg.org/multipage/grouping-content.html#the-blockquote-element",
+        "VDoc:elementName": "blockquote",
+        "VDoc:elementSpec": "https://html.spec.whatwg.org/multipage/grouping-content.html#the-blockquote-element",
         "rdfs:comment": "Node content is <blockquote>block quoted</blockquote>"
       }
     },
     "context": {
       "@id": "context",
-      "vdoc:content": {
-        "@id": "https://valospace.org/vdoc#content",
+      "restriction": {
+        "@reverse": "owl:onProperty"
+      },
+      "@base": "https://valospace.org/vdoc/0#",
+      "VDoc:content": {
+        "@id": "#content",
         "@container": "@list",
         "@type": "@id"
       },
-      "vdoc:words": {
-        "@id": "https://valospace.org/vdoc#words",
+      "VDoc:entries": {
+        "@id": "#entries",
         "@container": "@list",
         "@type": "@id"
       },
-      "vdoc:entries": {
-        "@id": "https://valospace.org/vdoc#entries",
+      "VDoc:words": {
+        "@id": "#words",
         "@container": "@list",
         "@type": "@id"
       },
-      "vdoc:headers": {
-        "@id": "https://valospace.org/vdoc#headers",
+      "VDoc:columns": {
+        "@id": "#columns",
         "@container": "@list",
         "@type": "@id"
       },
-      "vdoc:cell": {
-        "@id": "https://valospace.org/vdoc#cell",
-        "@container": "@list",
+      "VDoc:map": {
+        "@id": "#map",
+        "@type": "@id"
+      },
+      "VDoc:cell": {
+        "@id": "#cell",
         "@type": "@id"
       }
     },
-    "section_ontology_abstract": {
-      "@id": "section_ontology_abstract",
-      "vdoc:content": [
+    "section_fabric_abstract": {
+      "@id": "section_fabric_abstract",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
-            "VDoc core ontology specifies the vocabulary for the human facing\ndocument structure by means of primitives which are sufficiently\ncommon and meaningful across all types of documents. These primitives\ninclude constructs such as chapters, titles, lists, tables,\ncross-references, etc."
-          ]
-        },
-        {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
-            "VDoc core ontology explicitly does not specify any semantic\nmeanings outside the document structure itself."
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            [
+              "'VDoc' namespace specifies the vocabulary for the human facing\ndocument structure of the valos document interchange format.",
+              "Human facing structure includes primitives such as chapters, titles,\nlists, tables, cross-references etc.: primitives which are sufficiently\ncommon and meaningful across all types of documents.\n\nVDoc core ontology explicitly does not specify any semantic meanings\noutside the document structure itself."
+            ]
           ]
         }
       ]
@@ -1555,23 +1604,23 @@
     "section_prefixes": {
       "@id": "section_prefixes",
       "dc:title": "VDoc Core IRI prefixes",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "vdoc:lookup": "prefixes",
-          "@type": "vdoc:Table",
-          "vdoc:headers": [
+          "VDoc:lookup": "prefixes",
+          "@type": "VDoc:Table",
+          "VDoc:columns": [
             {
-              "vdoc:cell": "vdoc:selectKey",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
+              "VDoc:cell": "VDoc:selectKey",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
                 "Prefix"
               ]
             },
             {
-              "vdoc:cell": "vdoc:selectValue",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
+              "VDoc:cell": "VDoc:selectValue",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
                 "IRI"
               ]
             }
@@ -1581,77 +1630,278 @@
     },
     "section_classes": {
       "@id": "section_classes",
-      "@type": "vdoc:Chapter",
+      "@type": "VDoc:Chapter",
       "dc:title": [
         {
-          "vdoc:em": true,
-          "vdoc:content": [
-            "vdoc"
+          "VDoc:em": true,
+          "VDoc:content": [
+            "VDoc"
           ]
         },
         " ",
         {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "vdoc:Class"
+          "@type": "VDoc:Reference",
+          "VDoc:content": [
+            "VDoc classes"
           ],
-          "vdoc:ref": "@valos/vdoc#Class"
-        },
-        " vocabulary"
+          "VDoc:ref": "VDoc:Class"
+        }
       ],
-      "vdoc:content": [
+      "VDoc:content": [
         {
-          "vdoc:lookup": "vocabulary",
-          "@type": "vdoc:Table",
-          "vdoc:headers": {
-            "vdoc:entries": [
+          "VDoc:lookup": "vocabulary",
+          "@type": "VDoc:Table",
+          "VDoc:columns": {
+            "VDoc:entries": [
               {
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:label"
-                ],
-                "vdoc:cell": {
-                  "vdoc:resourceId": "vdoc:selectKey",
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
+                "@type": "VDoc:Header",
+                "VDoc:content": null,
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:resourceId": "VDoc:selectKey",
+                  "VDoc:heading": true,
+                  "VDoc:content": [
                     {
-                      "vdoc:em": true,
-                      "vdoc:content": [
-                        "vdoc:selectKey"
+                      "VDoc:words": [
+                        {
+                          "VDoc:strong": true,
+                          "VDoc:content": [
+                            {
+                              "VDoc:em": true,
+                              "VDoc:content": [
+                                {
+                                  "@type": "VDoc:Reference",
+                                  "VDoc:content": [
+                                    [
+                                      "#",
+                                      "VDoc:selectKey"
+                                    ]
+                                  ],
+                                  "VDoc:ref": [
+                                    "#",
+                                    "VDoc:selectKey"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "VDoc:words": {
+                            "VDoc:selectField": "rdfs:label"
+                          },
+                          "VDoc:elidable": true,
+                          "VDoc:map": {
+                            "@type": "VDoc:Reference",
+                            "VDoc:content": [
+                              "VDoc:selectValue"
+                            ],
+                            "VDoc:ref": "VEngine:valosheath"
+                          }
+                        }
                       ]
                     }
-                  ],
-                  "vdoc:ref": [
-                    "#",
-                    "vdoc:selectKey"
                   ]
                 }
               },
               {
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:subClassOf"
-                ],
-                "vdoc:cell": {
-                  "vdoc:words": {
-                    "vdoc:selectField": "rdfs:subClassOf"
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:strong": true,
+                      "VDoc:content": [
+                        "DEPRECATED"
+                      ]
+                    },
+                    " in favor of:"
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:entries": {
+                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
                   }
                 }
               },
               {
-                "vdoc:cell": "rdfs:comment",
-                "@type": "vdoc:Header",
-                "vdoc:content": {
-                  "vdoc:em": true,
-                  "vdoc:content": [
-                    "rdfs:comment"
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "rdfs:subClassOf"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:subClassOf"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "VDoc:cell": "rdfs:comment",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "description"
+                      ],
+                      "VDoc:ref": "rdfs:comment"
+                    }
                   ]
                 },
-                "vdoc:wide": true
+                "VDoc:wide": false
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "instance properties"
+                  ],
+                  "VDoc:ref": "VEngine:Property"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:domainOfProperty"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "instance methods"
+                  ],
+                  "VDoc:ref": "VEngine:Method"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:domainOfMethod"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "class properties"
+                  ],
+                  "VDoc:ref": "VEngine:ObjectProperty"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:hasProperty"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "class methods"
+                  ],
+                  "VDoc:ref": "VEngine:ObjectMethod"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:hasMethod"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
+              },
+              {
+                "VDoc:cell": "VRevdoc:introduction",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "introduction"
+                      ],
+                      "VDoc:ref": "VRevdoc:introduction"
+                    }
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:collapsed": true,
+                "VDoc:elidable": true
               }
             ]
           },
-          "vdoc:entries": [
+          "VDoc:entries": [
             "Class",
             "Property",
             "Node",
@@ -1673,95 +1923,196 @@
     },
     "section_properties": {
       "@id": "section_properties",
-      "@type": "vdoc:Chapter",
+      "@type": "VDoc:Chapter",
       "dc:title": [
         {
-          "vdoc:em": true,
-          "vdoc:content": [
-            "vdoc"
+          "VDoc:em": true,
+          "VDoc:content": [
+            "VDoc"
           ]
         },
         " ",
         {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "vdoc:Property"
+          "@type": "VDoc:Reference",
+          "VDoc:content": [
+            "VDoc properties"
           ],
-          "vdoc:ref": "@valos/vdoc#Property"
-        },
-        " vocabulary"
+          "VDoc:ref": "VDoc:Property"
+        }
       ],
-      "vdoc:content": [
+      "VDoc:content": [
         {
-          "vdoc:lookup": "vocabulary",
-          "@type": "vdoc:Table",
-          "vdoc:headers": {
-            "vdoc:entries": [
+          "VDoc:lookup": "vocabulary",
+          "@type": "VDoc:Table",
+          "VDoc:columns": {
+            "VDoc:entries": [
               {
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:label"
-                ],
-                "vdoc:cell": {
-                  "vdoc:resourceId": "vdoc:selectKey",
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
+                "@type": "VDoc:Header",
+                "VDoc:content": null,
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:resourceId": "VDoc:selectKey",
+                  "VDoc:heading": true,
+                  "VDoc:content": [
                     {
-                      "vdoc:em": true,
-                      "vdoc:content": [
-                        "vdoc:selectKey"
+                      "VDoc:words": [
+                        {
+                          "VDoc:strong": true,
+                          "VDoc:content": [
+                            {
+                              "VDoc:em": true,
+                              "VDoc:content": [
+                                {
+                                  "@type": "VDoc:Reference",
+                                  "VDoc:content": [
+                                    [
+                                      "#",
+                                      "VDoc:selectKey"
+                                    ]
+                                  ],
+                                  "VDoc:ref": [
+                                    "#",
+                                    "VDoc:selectKey"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "VDoc:words": {
+                            "VDoc:selectField": "rdfs:label"
+                          },
+                          "VDoc:elidable": true,
+                          "VDoc:map": {
+                            "@type": "VDoc:Reference",
+                            "VDoc:content": [
+                              "VDoc:selectValue"
+                            ],
+                            "VDoc:ref": "VEngine:valosheath"
+                          }
+                        }
                       ]
                     }
-                  ],
-                  "vdoc:ref": [
-                    "#",
-                    "vdoc:selectKey"
                   ]
                 }
               },
               {
-                "vdoc:cell": "rdfs:subPropertyOf",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:subPropertyOf"
-                ]
-              },
-              {
-                "vdoc:cell": "rdfs:domain",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:domain"
-                ]
-              },
-              {
-                "vdoc:cell": "rdfs:range",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:range"
-                ]
-              },
-              {
-                "vdoc:cell": "rdfs:comment",
-                "@type": "vdoc:Header",
-                "vdoc:content": {
-                  "vdoc:em": true,
-                  "vdoc:content": [
-                    "rdfs:comment"
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:strong": true,
+                      "VDoc:content": [
+                        "DEPRECATED"
+                      ]
+                    },
+                    " in favor of:"
                   ]
                 },
-                "vdoc:wide": true
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:entries": {
+                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "rdfs:domain"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:domain"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "rdfs:range"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:range"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "VDoc:cell": "rdfs:comment",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "description"
+                      ],
+                      "VDoc:ref": "rdfs:comment"
+                    }
+                  ]
+                },
+                "VDoc:wide": true
+              },
+              {
+                "VDoc:cell": "VRevdoc:introduction",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "introduction"
+                      ],
+                      "VDoc:ref": "VRevdoc:introduction"
+                    }
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:collapsed": true,
+                "VDoc:elidable": true
               }
             ]
           },
-          "vdoc:entries": [
+          "VDoc:entries": [
             "resourceId",
             "content",
-            "words",
             "entries",
+            "words",
             "lookup",
             "wide",
             "tall",
-            "headers",
+            "heading",
+            "collapsed",
+            "elidable",
+            "columns",
+            "map",
             "cell",
             "selectField",
             "language",
@@ -1773,121 +2124,192 @@
     },
     "section_html_element_properties": {
       "@id": "section_html_element_properties",
-      "@type": "vdoc:Chapter",
+      "@type": "VDoc:Chapter",
       "dc:title": [
         {
-          "vdoc:em": true,
-          "vdoc:content": [
-            "vdoc"
+          "VDoc:em": true,
+          "VDoc:content": [
+            "VDoc"
           ]
         },
         " ",
         {
-          "@type": "vdoc:Reference",
-          "vdoc:content": [
-            "vdoc:HTMLElementProperty"
+          "@type": "VDoc:Reference",
+          "VDoc:content": [
+            "VDoc:HTMLElementProperty"
           ],
-          "vdoc:ref": "#HTMLElementProperty"
+          "VDoc:ref": "#HTMLElementProperty"
         },
         " vocabulary"
       ],
-      "vdoc:content": [
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "Properties instanced from ",
             {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
-                "vdoc:HTMLElementProperty"
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "VDoc:HTMLElementProperty"
               ],
-              "vdoc:ref": "#HTMLElementProperty"
+              "VDoc:ref": "#HTMLElementProperty"
             },
             "\ninherit HTML5 element semantics directly. Only those HTMl5 elements\nwith structural semantic meaning are exposed via VDoc core ontology."
           ]
         },
         {
-          "vdoc:lookup": "vocabulary",
-          "@type": "vdoc:Table",
-          "vdoc:headers": {
-            "vdoc:entries": [
+          "VDoc:lookup": "vocabulary",
+          "@type": "VDoc:Table",
+          "VDoc:columns": {
+            "VDoc:entries": [
               {
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:label"
-                ],
-                "vdoc:cell": {
-                  "vdoc:resourceId": "vdoc:selectKey",
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
+                "@type": "VDoc:Header",
+                "VDoc:content": null,
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:resourceId": "VDoc:selectKey",
+                  "VDoc:heading": true,
+                  "VDoc:content": [
                     {
-                      "vdoc:em": true,
-                      "vdoc:content": [
-                        "vdoc:selectKey"
+                      "VDoc:words": [
+                        {
+                          "VDoc:strong": true,
+                          "VDoc:content": [
+                            {
+                              "VDoc:em": true,
+                              "VDoc:content": [
+                                {
+                                  "@type": "VDoc:Reference",
+                                  "VDoc:content": [
+                                    [
+                                      "#",
+                                      "VDoc:selectKey"
+                                    ]
+                                  ],
+                                  "VDoc:ref": [
+                                    "#",
+                                    "VDoc:selectKey"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "VDoc:words": {
+                            "VDoc:selectField": "rdfs:label"
+                          },
+                          "VDoc:elidable": true,
+                          "VDoc:map": {
+                            "@type": "VDoc:Reference",
+                            "VDoc:content": [
+                              "VDoc:selectValue"
+                            ],
+                            "VDoc:ref": "VEngine:valosheath"
+                          }
+                        }
                       ]
                     }
-                  ],
-                  "vdoc:ref": [
-                    "#",
-                    "vdoc:selectKey"
                   ]
                 }
               },
               {
-                "vdoc:cell": "rdfs:subPropertyOf",
-                "@type": "vdoc:Header",
-                "vdoc:content": []
-              },
-              {
-                "@type": "vdoc:Header",
-                "vdoc:content": [
+                "@type": "VDoc:Header",
+                "VDoc:content": [
                   "HTML5 element"
                 ],
-                "vdoc:cell": {
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
+                "VDoc:cell": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
                     {
-                      "vdoc:selectField": "vdoc:elementName"
+                      "VDoc:selectField": "VDoc:elementName"
                     }
                   ],
-                  "vdoc:ref": {
-                    "vdoc:selectField": "vdoc:elementSpec"
+                  "VDoc:ref": {
+                    "VDoc:selectField": "VDoc:elementSpec"
                   }
                 }
               },
               {
-                "vdoc:cell": "rdfs:domain",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
+                "@type": "VDoc:Header",
+                "VDoc:content": [
                   "rdfs:domain"
-                ]
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:domain"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
               },
               {
-                "vdoc:cell": "rdfs:range",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
+                "@type": "VDoc:Header",
+                "VDoc:content": [
                   "rdfs:range"
-                ]
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:range"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
               },
               {
-                "vdoc:cell": "rdfs:comment",
-                "@type": "vdoc:Header",
-                "vdoc:content": {
-                  "vdoc:em": true,
-                  "vdoc:content": [
-                    "rdfs:comment"
+                "VDoc:cell": "rdfs:comment",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "description"
+                      ],
+                      "VDoc:ref": "rdfs:comment"
+                    }
                   ]
                 },
-                "vdoc:wide": true
+                "VDoc:wide": true
+              },
+              {
+                "VDoc:cell": "VRevdoc:introduction",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "introduction"
+                      ],
+                      "VDoc:ref": "VRevdoc:introduction"
+                    }
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:collapsed": true,
+                "VDoc:elidable": true
               }
             ]
           },
-          "vdoc:entries": [
+          "VDoc:entries": [
             "em",
             "strong",
             "ins",
             "del",
-            "quote",
+            "q",
             "blockquote"
           ]
         }
@@ -1895,76 +2317,175 @@
     },
     "section_vocabulary_other": {
       "@id": "section_vocabulary_other",
-      "@type": "vdoc:Chapter",
+      "@type": "VDoc:Chapter",
       "dc:title": [
         {
-          "vdoc:em": true,
-          "vdoc:content": [
-            "vdoc"
+          "VDoc:em": true,
+          "VDoc:content": [
+            "VDoc"
           ]
         },
         " remaining vocabulary"
       ],
-      "vdoc:content": [
+      "VDoc:content": [
         {
-          "vdoc:lookup": "vocabulary",
-          "@type": "vdoc:Table",
-          "vdoc:headers": {
-            "vdoc:entries": [
+          "VDoc:lookup": "vocabulary",
+          "@type": "VDoc:Table",
+          "VDoc:columns": {
+            "VDoc:entries": [
               {
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:label"
-                ],
-                "vdoc:cell": {
-                  "vdoc:resourceId": "vdoc:selectKey",
-                  "@type": "vdoc:Reference",
-                  "vdoc:content": [
+                "@type": "VDoc:Header",
+                "VDoc:content": null,
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:resourceId": "VDoc:selectKey",
+                  "VDoc:heading": true,
+                  "VDoc:content": [
                     {
-                      "vdoc:em": true,
-                      "vdoc:content": [
-                        "vdoc:selectKey"
+                      "VDoc:words": [
+                        {
+                          "VDoc:strong": true,
+                          "VDoc:content": [
+                            {
+                              "VDoc:em": true,
+                              "VDoc:content": [
+                                {
+                                  "@type": "VDoc:Reference",
+                                  "VDoc:content": [
+                                    [
+                                      "#",
+                                      "VDoc:selectKey"
+                                    ]
+                                  ],
+                                  "VDoc:ref": [
+                                    "#",
+                                    "VDoc:selectKey"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "VDoc:words": {
+                            "VDoc:selectField": "rdfs:label"
+                          },
+                          "VDoc:elidable": true,
+                          "VDoc:map": {
+                            "@type": "VDoc:Reference",
+                            "VDoc:content": [
+                              "VDoc:selectValue"
+                            ],
+                            "VDoc:ref": "VEngine:valosheath"
+                          }
+                        }
                       ]
                     }
-                  ],
-                  "vdoc:ref": [
-                    "#",
-                    "vdoc:selectKey"
                   ]
                 }
               },
               {
-                "vdoc:cell": "@type",
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdf:type"
-                ]
-              },
-              {
-                "@type": "vdoc:Header",
-                "vdoc:content": [
-                  "rdfs:subClassOf"
-                ],
-                "vdoc:cell": {
-                  "vdoc:words": {
-                    "vdoc:selectField": "rdfs:subClassOf"
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:strong": true,
+                      "VDoc:content": [
+                        "DEPRECATED"
+                      ]
+                    },
+                    " in favor of:"
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:entries": {
+                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
                   }
                 }
               },
               {
-                "vdoc:cell": "rdfs:comment",
-                "@type": "vdoc:Header",
-                "vdoc:content": {
-                  "vdoc:em": true,
-                  "vdoc:content": [
-                    "rdfs:comment"
+                "@type": "VDoc:Header",
+                "VDoc:content": "rdf:type",
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "@type"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "rdfs:subClassOf"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:subClassOf"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "VDoc:cell": "rdfs:comment",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "description"
+                      ],
+                      "VDoc:ref": "rdfs:comment"
+                    }
                   ]
                 },
-                "vdoc:wide": true
+                "VDoc:wide": true
+              },
+              {
+                "VDoc:cell": "VRevdoc:introduction",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "introduction"
+                      ],
+                      "VDoc:ref": "VRevdoc:introduction"
+                    }
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:collapsed": true,
+                "VDoc:elidable": true
               }
             ]
           },
-          "vdoc:entries": [
+          "VDoc:entries": [
             "selectKey",
             "selectValue"
           ]
@@ -1974,44 +2495,44 @@
     "section_context": {
       "@id": "section_context",
       "dc:title": "VDoc Core JSON-LD context term definitions",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "vdoc:lookup": "context",
-          "@type": "vdoc:Table",
-          "vdoc:headers": [
+          "VDoc:lookup": "context",
+          "@type": "VDoc:Table",
+          "VDoc:columns": [
             {
-              "vdoc:cell": "vdoc:selectKey",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
+              "VDoc:cell": "VDoc:selectKey",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
                 "Term"
               ]
             },
             {
-              "vdoc:cell": "vdoc:selectValue",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
+              "VDoc:cell": "VDoc:selectValue",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
                 "Definition"
               ]
             },
             {
-              "vdoc:cell": "@id",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
+              "VDoc:cell": "@id",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
                 "@id"
               ]
             },
             {
-              "vdoc:cell": "@type",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
+              "VDoc:cell": "@type",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
                 "@type"
               ]
             },
             {
-              "vdoc:cell": "@container",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
+              "VDoc:cell": "@container",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
                 "@container"
               ]
             }
@@ -2022,24 +2543,24 @@
     "transformations": {
       "@id": "transformations",
       "dc:title": "VDoc Core transformations",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "VDoc defines a single extraction transformation from a native\njavascript source graph. To support this VDoc defines an ",
             {
-              "revdoc:dfn": "#extractee_api",
-              "vdoc:content": [
+              "VRevdoc:dfn": "#extractee_api",
+              "VDoc:content": [
                 {
-                  "vdoc:strong": true,
-                  "vdoc:content": [
+                  "VDoc:strong": true,
+                  "VDoc:content": [
                     {
-                      "@type": "vdoc:Reference",
-                      "vdoc:content": [
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
                         "extractee API"
                       ],
-                      "vdoc:ref": "#extractee_api"
+                      "VDoc:ref": "#extractee_api"
                     }
                   ]
                 }
@@ -2049,21 +2570,21 @@
           ]
         },
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "The extraction transformation is based around two basic mechanisms: ",
             {
-              "revdoc:dfn": "#array_composition",
-              "vdoc:content": [
+              "VRevdoc:dfn": "#array_composition",
+              "VDoc:content": [
                 {
-                  "vdoc:strong": true,
-                  "vdoc:content": [
+                  "VDoc:strong": true,
+                  "VDoc:content": [
                     {
-                      "@type": "vdoc:Reference",
-                      "vdoc:content": [
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
                         "array composition"
                       ],
-                      "vdoc:ref": "#array_composition"
+                      "VDoc:ref": "#array_composition"
                     }
                   ]
                 }
@@ -2071,17 +2592,17 @@
             },
             " and ",
             {
-              "revdoc:dfn": "#extraction_rules",
-              "vdoc:content": [
+              "VRevdoc:dfn": "#extraction_rules",
+              "VDoc:content": [
                 {
-                  "vdoc:strong": true,
-                  "vdoc:content": [
+                  "VDoc:strong": true,
+                  "VDoc:content": [
                     {
-                      "@type": "vdoc:Reference",
-                      "vdoc:content": [
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
                         "extraction rules"
                       ],
-                      "vdoc:ref": "#extraction_rules"
+                      "VDoc:ref": "#extraction_rules"
                     }
                   ]
                 }
@@ -2108,54 +2629,54 @@
       "@id": "extraction_rules_lookup",
       "": {
         "comment": "Basic Node",
-        "owner": "vdoc:content",
-        "body": "vdoc:content",
+        "owner": "VDoc:content",
+        "body": "VDoc:content",
         "paragraphize": true
       },
       "chapter": {
-        "range": "vdoc:Chapter",
-        "owner": "vdoc:content",
-        "body": "vdoc:content",
+        "range": "VDoc:Chapter",
+        "owner": "VDoc:content",
+        "body": "VDoc:content",
         "rest": "dc:title",
         "comment": "Numbered, titled chapter"
       },
       "p": {
-        "range": "vdoc:Paragraph",
-        "owner": "vdoc:content",
-        "body": "vdoc:content",
+        "range": "VDoc:Paragraph",
+        "owner": "VDoc:content",
+        "body": "VDoc:content",
         "comment": "Vertically segmented paragraph"
       },
       "c": {
-        "range": "vdoc:CharacterData",
-        "owner": "vdoc:content",
-        "body": "vdoc:content",
-        "rest": "vdoc:language",
+        "range": "VDoc:CharacterData",
+        "owner": "VDoc:content",
+        "body": "VDoc:content",
+        "rest": "VDoc:language",
         "comment": "Character data"
       },
       "bulleted": {
-        "range": "vdoc:BulletList",
-        "owner": "vdoc:content",
-        "body": "vdoc:entries",
+        "range": "VDoc:BulletList",
+        "owner": "VDoc:content",
+        "body": "VDoc:entries",
         "comment": "Bulleted list"
       },
       "numbered": {
-        "range": "vdoc:NumberedList",
-        "owner": "vdoc:content",
-        "body": "vdoc:entries",
+        "range": "VDoc:NumberedList",
+        "owner": "VDoc:content",
+        "body": "VDoc:entries",
         "comment": "Numbered list"
       },
       "table": {
-        "range": "vdoc:Table",
-        "owner": "vdoc:content",
-        "body": "vdoc:headers",
-        "rest": "vdoc:lookup",
+        "range": "VDoc:Table",
+        "owner": "VDoc:content",
+        "body": "VDoc:columns",
+        "rest": "VDoc:lookup",
         "comment": "Table"
       },
-      "header": {
-        "range": "vdoc:Header",
-        "owner": "vdoc:entries",
-        "body": "vdoc:content",
-        "rest": "vdoc:cell",
+      "column": {
+        "range": "VDoc:Header",
+        "owner": "VDoc:entries",
+        "body": "VDoc:content",
+        "rest": "VDoc:cell",
         "comment": "Header"
       },
       "data": {
@@ -2171,51 +2692,51 @@
     "extraction_rules": {
       "@id": "extraction_rules",
       "dc:title": "VDoc Core extraction rules",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "vdoc:lookup": "extraction_rules_lookup",
-          "@type": "vdoc:Table",
-          "vdoc:headers": [
+          "VDoc:lookup": "extraction_rules_lookup",
+          "@type": "VDoc:Table",
+          "VDoc:columns": [
             {
-              "vdoc:cell": "vdoc:selectKey",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
+              "VDoc:cell": "VDoc:selectKey",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
                 "Rule name"
               ]
             },
             {
-              "vdoc:cell": "range",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
+              "VDoc:cell": "range",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
                 "Inter-node rdf:type"
               ]
             },
             {
-              "vdoc:cell": "owner",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
+              "VDoc:cell": "owner",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
                 "Owner property"
               ]
             },
             {
-              "vdoc:cell": "body",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
+              "VDoc:cell": "body",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
                 "Body property"
               ]
             },
             {
-              "vdoc:cell": "rest",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
+              "VDoc:cell": "rest",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
                 "';rest' property"
               ]
             },
             {
-              "vdoc:cell": "comment",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
+              "VDoc:cell": "comment",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
                 "Comment"
               ]
             }
@@ -2226,23 +2747,23 @@
     "extractee_api": {
       "@id": "extractee_api",
       "dc:title": "VDoc Core extractee API",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "vdoc:lookup": "extractee_api_lookup",
-          "@type": "vdoc:Table",
-          "vdoc:headers": [
+          "VDoc:lookup": "extractee_api_lookup",
+          "@type": "VDoc:Table",
+          "VDoc:columns": [
             {
-              "vdoc:cell": "vdoc:selectKey",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
+              "VDoc:cell": "VDoc:selectKey",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
                 "API identifier"
               ]
             },
             {
-              "vdoc:cell": "vdoc:selectValue",
-              "@type": "vdoc:Header",
-              "vdoc:content": [
+              "VDoc:cell": "VDoc:selectValue",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
                 "rdf:type"
               ]
             }
@@ -2253,41 +2774,41 @@
     "emission_output": {
       "@id": "emission_output",
       "dc:title": "VDoc Core emission output",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": []
+      "@type": "VDoc:Chapter",
+      "VDoc:content": []
     },
     "emission_rules": {
       "@id": "emission_rules",
       "dc:title": "VDoc Core emission rules",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "ReVDoc provides html emission rules for ",
             {
-              "vdoc:words": [
+              "VDoc:words": [
                 "null",
                 "string",
                 "number",
                 "array",
                 "object",
-                "vdoc:Node",
-                "vdoc:Chapter",
-                "vdoc:Paragraph",
-                "vdoc:BulletList",
-                "vdoc:NumberedList",
-                "vdoc:Table",
-                "vdoc:Reference",
-                "vdoc:CharacterData"
+                "VDoc:Node",
+                "VDoc:Chapter",
+                "VDoc:Paragraph",
+                "VDoc:BulletList",
+                "VDoc:NumberedList",
+                "VDoc:Table",
+                "VDoc:Reference",
+                "VDoc:CharacterData"
               ]
             }
           ]
         }
       ]
     },
-    "@type": "revdoc:Document",
-    "vdoc:content": [
+    "@type": "VRevdoc:Document",
+    "VDoc:content": [
       {
         "@id": "abstract"
       },
@@ -2313,7 +2834,7 @@
         "@id": "extension"
       },
       {
-        "@id": "ontology"
+        "@id": "section_fabric"
       },
       {
         "@id": "transformations"

@@ -2,38 +2,49 @@
   {
     "@id": "https://valospace.org/revdoc/tutorial",
     "@context": {
-      "@base": "https://valospace.org/revdoc/tutorial#",
-      "sbomdoc": "https://valospace.org/sbomdoc#",
-      "revdoc": "https://valospace.org/revdoc#",
+      "@base": "https://valospace.org/vdoc/0#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
       "xsd": "http://www.w3.org/2001/XMLSchema#",
       "owl": "http://www.w3.org/2002/07/owl#",
       "dc": "http://purl.org/dc/elements/1.1/",
-      "vdoc": "https://valospace.org/vdoc#",
-      "vdoc:content": {
-        "@id": "https://valospace.org/vdoc#content",
+      "VSbomdoc": "https://valospace.org/sbomdoc/0#",
+      "VKernel": "https://valospace.org/kernel/0#",
+      "VDoc": "https://valospace.org/vdoc/0#",
+      "VRevdoc": "https://valospace.org/revdoc/0#",
+      "restriction": {
+        "@reverse": "owl:onProperty"
+      },
+      "VRevdoc:tooltipContent": {
+        "@id": "#tooltipContent",
+        "@type": "@id"
+      },
+      "VDoc:content": {
+        "@id": "#content",
         "@container": "@list",
         "@type": "@id"
       },
-      "vdoc:words": {
-        "@id": "https://valospace.org/vdoc#words",
+      "VDoc:entries": {
+        "@id": "#entries",
         "@container": "@list",
         "@type": "@id"
       },
-      "vdoc:entries": {
-        "@id": "https://valospace.org/vdoc#entries",
+      "VDoc:words": {
+        "@id": "#words",
         "@container": "@list",
         "@type": "@id"
       },
-      "vdoc:headers": {
-        "@id": "https://valospace.org/vdoc#headers",
+      "VDoc:columns": {
+        "@id": "#columns",
         "@container": "@list",
         "@type": "@id"
       },
-      "vdoc:cell": {
-        "@id": "https://valospace.org/vdoc#cell",
-        "@container": "@list",
+      "VDoc:map": {
+        "@id": "#map",
+        "@type": "@id"
+      },
+      "VDoc:cell": {
+        "@id": "#cell",
         "@type": "@id"
       }
     },
@@ -52,11 +63,11 @@
     },
     "abstract": {
       "@id": "abstract",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "This document is a revdoc template document 'tutorial' created by\nwrite-revdoc."
           ]
         }
@@ -64,23 +75,23 @@
     },
     "sotd": {
       "@id": "sotd",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "This document is part of the library workspace ",
             {
-              "@type": "revdoc:Package",
-              "vdoc:content": [
+              "@type": "VRevdoc:Package",
+              "VDoc:content": [
                 {
-                  "vdoc:em": true,
-                  "vdoc:content": [
+                  "VDoc:em": true,
+                  "VDoc:content": [
                     "@valos/revdoc"
                   ]
                 }
               ],
-              "vdoc:ref": "@valos/revdoc"
+              "VDoc:ref": "@valos/revdoc"
             }
           ]
         }
@@ -88,62 +99,62 @@
     },
     "introduction": {
       "@id": "introduction",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "Edit me - this is the first payload chapter. Abstract and SOTD are\nessential ",
             {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
                 "ReSpec boilerplate"
               ],
-              "vdoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
+              "VDoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
             },
             "."
           ]
         },
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "See ",
             {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
                 "ReVDoc tutorial"
               ],
-              "vdoc:ref": "@valos/revdoc/tutorial"
+              "VDoc:ref": "@valos/revdoc/tutorial"
             },
             " for\ninstructions on how to write revdoc source documents."
           ]
         },
         {
-          "@type": "vdoc:Paragraph",
-          "vdoc:content": [
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
             "See also ",
             {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
                 "ReVdoc specification"
               ],
-              "vdoc:ref": "@valos/revdoc"
+              "VDoc:ref": "@valos/revdoc"
             },
             " and ",
             {
-              "@type": "vdoc:Reference",
-              "vdoc:content": [
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
                 "VDoc specification"
               ],
-              "vdoc:ref": "@valos/vdoc"
+              "VDoc:ref": "@valos/vdoc"
             },
             " for reference documentation."
           ]
         }
       ]
     },
-    "@type": "revdoc:Document",
-    "vdoc:content": [
+    "@type": "VRevdoc:Document",
+    "VDoc:content": [
       {
         "@id": "abstract"
       },

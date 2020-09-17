@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>revela.json format specification</title>
+    <script
+     src='https://www.w3.org/Tools/respec/respec-w3c-common'
+     class='remove'></script>
+    <script class='remove'>
+      var respecConfig = {"subtitle":"0.35.0-rc.29","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"revela"};
+    </script>
+    <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
+    
+  </head>
+  <body class="vdoc vdoc-body">
+    
+  <section id="abstract" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">revela.json (pronounced: <em>revelation</em>) is a JSON
+configuration file in which all &#x22;!!!&#x22; key values (<em>spreads</em>)
+are evaluated and their results then spread and merged on top of the
+surrounding object.</span>
+</p></div><div><p><span class="vdoc type-vdoc-paragraph">The evaluation allows for VPath operations, most notably importing
+relative config files and accessing their subsections. Together the
+evaluation, spread and merge allow for fine-grained <a href="https://en.wikipedia.org/wiki/Don%27t_repeat_yourself" class="vdoc type-vdoc-reference">DRY</a>
+for various valos fabric config files.</span>
+</p></div>
+  </section>
+
+  <section id="sotd" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">This document is part of the library workspace <a href="https://valospace.org/inspire" class="vdoc type-vrevdoc-package"><em>@valos/inspire</em></a>
+(of domain <a href="https://valospace.org/kernel" class="vdoc type-vrevdoc-package"><em>@valos/kernel</em></a>) which has the description:
+&#x60;ValOS Inspire application gateway&#x60;.</span>
+</p></div>
+  </section>
+
+  <section id="introduction" class="vdoc type-vdoc-chapter">
+<blockquote class="vdoc type-revdoc-example">
+    <span class="vdoc type-vdoc-node">
+    <h3>trivial revelation patch</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> lazyPatchRevelations(gatewayMock,
+    { a: [1] },
+    { a: [2] })</span>
+</code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node"> ({ a: [1, 2] })</span>
+</code></pre></blockquote></span>
+</p></div></span>
+
+</blockquote>
+<blockquote class="vdoc type-revdoc-example">
+    <span class="vdoc type-vdoc-node">
+    <h3>spread of a simple relative import</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> lazyPatchRevelations(gatewayMock,
+    {},
+    { &#x22;!!!&#x22;: &#x22;./path&#x22; })</span>
+</code></pre></blockquote>toMatchObject<blockquote><pre><code><span class="vdoc type-vdoc-node"> ({ revealOrigin: &#x22;/site/revelation/path&#x22;, someField: 1 })</span>
+</code></pre></blockquote></span>
+</p></div></span>
+
+</blockquote>
+<blockquote class="vdoc type-revdoc-example">
+    <span class="vdoc type-vdoc-node">
+    <h3>spread of an explicit site root import followed by field access</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> lazyPatchRevelations(gatewayMock,
+    &#x22;&#x22;,
+    { &#x22;!!!&#x22;: [&#x22;/path&#x22;, &#x22;revealOrigin&#x22;] })</span>
+</code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node">&#x22;/site/path&#x22;</span>
+</code></pre></blockquote></span>
+</p></div></span>
+
+</blockquote>
+<blockquote class="vdoc type-revdoc-example">
+    <span class="vdoc type-vdoc-node">
+    <h3>spread of a URI import followed by pick-array append</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> lazyPatchRevelations(gatewayMock,
+    [0],
+    { &#x22;!!!&#x22;: [
+      [&#x22;@$https.foobar.com%2Fpath&#x22;],
+      [[&#x22;@.:fetchedField&#x22;], [&#x22;@.:options@.:revealOrigin@@&#x22;]],
+    ] },
+    undefined,
+    [&#x22;last&#x22;])</span>
+</code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node"> [0, 1, &#x22;https://foobar.com/path&#x22;, &#x22;last&#x22;]</span>
+</code></pre></blockquote></span>
+</p></div></span>
+
+</blockquote>
+<blockquote class="vdoc type-revdoc-example">
+    <span class="vdoc type-vdoc-node">
+    <h3>non-evaluated spreader contents to be segmented but non-cemented</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> lazyPatchRevelations(gatewayMock,
+    {},
+    { &#x22;!!!&#x22;: [&#x22;@@&#x22;, [{ value: [&#x22;@$expanded.but-unbound&#x22;] }]] })</span>
+</code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node"> ({ value: [&#x22;@$expanded&#x22;, &#x22;but-unbound&#x22;] })</span>
+</code></pre></blockquote></span>
+</p></div></span>
+
+</blockquote>
+<blockquote class="vdoc type-revdoc-example">
+    <span class="vdoc type-vdoc-node">
+    <h3>nested import &#x26; invoke spread to resolve all spreads</h3>
+<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> expose(lazyPatchRevelations(gatewayMock,
+    {},
+    {
+      out: {
+        &#x22;!!!&#x22;: {
+          prefixes: {
+            &#x22;/test/v0&#x22;: {
+              name: &#x22;test&#x22;,
+              &#x22;test-lib&#x22;: {
+                preset: 10, overridden: 10, sessionDuration: 0,
+                view: { focus: &#x22;focus to be overwritten&#x22;, nulled: &#x22;nulled to be overwritten&#x22; },
+                unboundAndUnsegmented: [&#x22;@$un.bound&#x22;],
+              },
+            },
+          },
+        },
+        prefixes: {
+          &#x22;/test/v0&#x22;: {
+            &#x22;!!!&#x22;: [&#x22;@@&#x22;, [&#x22;@!:test-lib&#x22;], [&#x22;@!invoke:callMe&#x22;, [{
+              view: {
+                focus: &#x22;valaa-aws://example.org/deployment?id=@$~raw.f0c5-f0c5@@&#x22;,
+                nulled: null,
+              },
+              identity: { &#x22;!!!&#x22;: [&#x22;./config&#x22;, &#x22;revealOrigin&#x22;] },
+              sessionDuration: 86400,
+              unboundButSectioned: [&#x22;@$also.unbound&#x22;],
+            }]]],
+            &#x22;test-lib&#x22;: { overridden: 20 },
+          },
+        }
+      }
+    }))</span>
+</code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node"> ({
+  out: {
+    prefixes: {
+      &#x22;/test/v0&#x22;: {
+        name: &#x22;test&#x22;,
+        &#x22;test-lib&#x22;: {
+          preset: 10, overridden: 20, sessionDuration: 86400,
+          view: { focus: &#x22;valaa-aws://example.org/deployment?id=@$~raw.f0c5-f0c5@@&#x22;, nulled: null },
+          identity: &#x22;/site/revelation/config&#x22;,
+          unboundAndUnsegmented: [&#x22;@$un.bound&#x22;],
+          unboundButSectioned: [&#x22;@$also&#x22;, &#x22;unbound&#x22;],
+        }
+      }
+    }
+  }
+})</span>
+</code></pre></blockquote></span>
+</p></div></span>
+
+</blockquote>
+  </section>
+
+  <section id="section_fabric" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_fabric">§ </a>The <em>VRevela</em> fabric namespace of the library ontology of <a href="https://valospace.org/inspire" class="vdoc type-vrevdoc-package"><em>@valos/inspire</em></a></h3>
+<div><p><span class="vdoc type-vdoc-paragraph">&#x27;VRevela&#x27; namespace provides the vocabulary for revela.json
+configuration files.</span>
+</p></div>
+  <section id="section_prefixes" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_prefixes">§ </a><em>VRevela</em> IRI prefixes</h3>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">Prefix</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">IRI</span>
+</th>
+      </thead>
+      <tbody>
+        <tr><td><span class="vdoc type-vdoc-node">rdf</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/1999/02/22-rdf-syntax-ns#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">rdfs</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/2000/01/rdf-schema#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">xsd</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/2001/XMLSchema#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">owl</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/2002/07/owl#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">dc</span>
+</td><td><span class="vdoc type-vdoc-node">http://purl.org/dc/elements/1.1/</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VRevela</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/revela/0#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">VKernel</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/kernel/0#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">revela</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/revela/0#</span>
+</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_verbs" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_verbs">§ </a><em>VRevela</em> <a href="VModel:Verb" class="vdoc type-vdoc-reference">VModel:Verb</a> vocabulary</h3>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">Comment</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdf:type</span>
+</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_vocabulary_other">§ </a><em>VRevela</em> remaining vocabulary</h3>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdf:type</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:subClassOf</span>
+</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  </section>
+
+  </body>
+</html>

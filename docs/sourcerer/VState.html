@@ -14,31 +14,39 @@
   </head>
   <body class="vdoc vdoc-body">
     
-  <section id="abstract" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">ValOS state format specification for serializing valospace state into
-a JSON-LD document with a well-defined underlying semantic ontology.</span>
+  <section id="abstract" class="vdoc type-vdoc-chapter"><div><p>
+  <div class="vdoc type-vdoc-paragraph">ValOS state format specification for serializing valospace state into
+a JSON-LD document with a well-defined underlying semantic ontology.
+  </div>
 </p></div>
   </section>
 
-  <section id="sotd" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">This document is a stub of a specification and only contains a single
-example that is used as the model for the specification.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">This document is part of the library workspace <a href="https://valospace.org/sourcerer" class="vdoc type-revdoc-package"><em>@valos/sourcerer</em></a>
-(of domain <a href="https://valospace.org/kernel" class="vdoc type-revdoc-package"><em>@valos/kernel</em></a>) which has the description:
-&#x60;ValOS Sourcerer API, schema&#x60;</span>
+  <section id="sotd" class="vdoc type-vdoc-chapter"><div><p>
+  <div class="vdoc type-vdoc-paragraph">This document is a stub of a specification and only contains a single
+example that is used as the model for the specification.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">This document is part of the library workspace <a href="https://valospace.org/sourcerer" class="vdoc type-vrevdoc-package"><em>@valos/sourcerer</em></a>
+(of domain <a href="https://valospace.org/kernel" class="vdoc type-vrevdoc-package"><em>@valos/kernel</em></a>) which has the description:
+&#x60;ValOS Sourcerer API, schema&#x60;
+  </div>
 </p></div>
   </section>
 
   <section id="introduction" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#introduction">§ </a>Valospace state JSON-LD serialization</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">JSON-LD is the primary state format. Some of this information is lost
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">JSON-LD is the primary state format. Some of this information is lost
 when it is expanded as triples.
-</span>
+
+  </div>
 </p></div>
 <blockquote class="vdoc type-revdoc-example">
     <span id="state_example" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#state_example">§ </a>An example of state JSON-LD serialization</h3>
 <pre><code><span class="vdoc type-vdoc-node">[{
   &#x22;@context&#x22;: [{
-    &#x22;$V&#x22;: &#x22;https://valospace.org/#&#x22;,
+    &#x22;$V&#x22;: &#x22;https://valospace.org/0#&#x22;,
     &#x22;@vocab&#x22;: &#x22;urn:valos:.$.&#x22;,
 
     &#x22;/.S&#x22;: { &#x22;@id&#x22;: &#x22;$V:subject&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
@@ -71,7 +79,7 @@ when it is expanded as triples.
     &#x22;/.S---&#x22;: { &#x22;@id&#x22;: &#x22;$V:connectedSource&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
     &#x22;/.O---&#x22;: { &#x22;@id&#x22;: &#x22;$V:connectedTarget&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
 
-    &#x22;--$V&#x22;: &#x22;https://valospace.org/removed-from#&#x22;,
+    &#x22;--$V&#x22;: &#x22;https://valospace.org/removed-from/0#&#x22;,
     &#x22;--/.&#x22;: { &#x22;@id&#x22;: &#x22;--$V:properties&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
     &#x22;--/+&#x22;: { &#x22;@id&#x22;: &#x22;--$V:entities&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
     &#x22;--/~&#x22;: { &#x22;@id&#x22;: &#x22;--$V:medias&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
@@ -82,8 +90,8 @@ when it is expanded as triples.
     &#x22;$~u4&#x22;: { &#x22;@id&#x22;: &#x22;urn:valos:$~u4.&#x22;, &#x22;@prefix&#x22;: true },
     &#x22;$~plt&#x22;: { &#x22;@id&#x22;: &#x22;urn:valos:$~plt.&#x22;, &#x22;@prefix&#x22;: true },
 
-    &#x22;$valos_sourcerer&#x22;: &#x22;https://valospace.org/sourcerer#&#x22;,
-    &#x22;/hasGlobal&#x22;: { &#x22;@id&#x22;: &#x22;$valos_sourcerer:hasGlobal&#x22;, &#x22;@container&#x22;: &#x22;@type&#x22; },
+    &#x22;$VSourcerer&#x22;: &#x22;https://valospace.org/sourcerer/0#&#x22;,
+    &#x22;/hasGlobal&#x22;: { &#x22;@id&#x22;: &#x22;$VSourcerer:hasGlobal&#x22;, &#x22;@container&#x22;: &#x22;@type&#x22; },
   }, {
     &#x22;$pot&#x22;: &#x22;https://oftrust/#&#x22;,
     &#x22;$pot_hypertwin&#x22;: &#x22;https://pot.hypertwin.valospace.org/#&#x22;,
@@ -158,8 +166,10 @@ when it is expanded as triples.
 }]</span>
 </code></pre></span>
 
-</blockquote><div><p><span class="vdoc type-vdoc-paragraph">
-TODO.</span>
+</blockquote><div><p>
+  <div class="vdoc type-vdoc-paragraph">
+TODO.
+  </div>
 </p></div>
   </section>
 

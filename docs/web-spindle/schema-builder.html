@@ -14,50 +14,68 @@
   </head>
   <body class="vdoc vdoc-body">
     
-  <section id="abstract" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">Schema builder is a javascript library for exporting a site
+  <section id="abstract" class="vdoc type-vdoc-chapter"><div><p>
+  <div class="vdoc type-vdoc-paragraph">Schema builder is a javascript library for exporting a site
 configuration that can be consumed by the Web API spindle. This config
 is a fully declarative <a href="http://json-schema.org/" class="vdoc type-vdoc-reference">JSON schema</a>-based format which not just describes the external API routes and
-types but also defines their valospace projections using embedded <a href="https://valospace.org/raem/VPath" class="vdoc type-vdoc-reference">VPath</a>.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">This library is primarily intended to be used from inside a
+types but also defines their valospace projections using embedded <a href="https://valospace.org/raem/VPath" class="vdoc type-vdoc-reference">VPath</a>.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">This library is primarily intended to be used from inside a
 <em>spindle configuration library</em> which is invoked from inside
 a <a href="https://valospace.org/inspire/revela" class="vdoc type-vdoc-reference">revela.json</a> gateway to emit
-the JSON configuration.</span>
+the JSON configuration.
+  </div>
 </p></div>
   </section>
 
-  <section id="sotd" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">At the time of writing this document has triple responsibilities of
+  <section id="sotd" class="vdoc type-vdoc-chapter"><div><p>
+  <div class="vdoc type-vdoc-paragraph">At the time of writing this document has triple responsibilities of
 being the authoritative format description both for schema-builder
 itself and for the JSON schema format that Web API spindle consumes,
-as well as being the testdoc for these formats.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">Eventually the Web API spindle specification should be extracted to
-a separate document, and full test suites should be introduced.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">This document is part of the spindle workspace <a href="https://valospace.org/web-spindle" class="vdoc type-revdoc-package"><em>@valos/web-spindle</em></a>
-(of domain <a href="https://valospace.org/kernel" class="vdoc type-revdoc-package"><em>@valos/kernel</em></a>) which has the description:
-&#x60;A spindle for structured ValOS Web APIs&#x60;.</span>
+as well as being the testdoc for these formats.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">Eventually the Web API spindle specification should be extracted to
+a separate document, and full test suites should be introduced.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">This document is part of the spindle workspace <a href="https://valospace.org/web-spindle" class="vdoc type-vrevdoc-package"><em>@valos/web-spindle</em></a>
+(of domain <a href="https://valospace.org/kernel" class="vdoc type-vrevdoc-package"><em>@valos/kernel</em></a>) which has the description:
+&#x60;A spindle for structured ValOS Web APIs&#x60;.
+  </div>
 </p></div>
   </section>
 
   <section id="introduction" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#introduction">§ </a>Routes, types, and projections</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">The four schema builder concepts are:</span>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">The four schema builder concepts are:
+  </div>
 </p></div>
     <ul>
       <li><a href="#section_site_configuration" class="vdoc type-vdoc-reference">Site configuration</a> is the
   JSON output of this library, consumable by Web API spindle.</li>
-      <li><div><p><span class="vdoc type-vdoc-paragraph"><a href="#section_schemas" class="vdoc type-vdoc-reference">Type and property schemas</a> describe
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph"><a href="#section_schemas" class="vdoc type-vdoc-reference">Type and property schemas</a> describe
   layouts of Web API and valospace resources and properties. These are
   used for GET result body contents, POST, PATCH and PUT request body
   fields. When exported in the site configuration these are transformed
-  into shared schema objects.</span>
+  into shared schema objects.
+  </div>
 </p></div></li>
-      <li><div><p><span class="vdoc type-vdoc-paragraph"><a href="#section_routes" class="vdoc type-vdoc-reference">Routes definitions</a> are the traditional
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph"><a href="#section_routes" class="vdoc type-vdoc-reference">Routes definitions</a> are the traditional
   tool to define the request entry points and to descrbibe their
   parameters. Routes tie into valospace resources via gate projections
-  which are embedded inside primary type schemas.</span>
+  which are embedded inside primary type schemas.
+  </div>
 </p></div></li>
-      <li><div><p><span class="vdoc type-vdoc-paragraph"><a href="#section_projections" class="vdoc type-vdoc-reference">Projections and reflections</a> are <a href="https://valospace.org/raem/VPath" class="vdoc type-vdoc-reference">VPaths</a> that are embedded in the gates
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph"><a href="#section_projections" class="vdoc type-vdoc-reference">Projections and reflections</a> are <a href="https://valospace.org/raem/VPath" class="vdoc type-vdoc-reference">VPaths</a> that are embedded in the gates
   and types respectively and which define paths into and between
-  valospace resources, respectively</span>
+  valospace resources, respectively
+  </div>
 </p></div></li>
     </ul>
 
@@ -65,10 +83,12 @@ a separate document, and full test suites should be introduced.</span>
 
   <section id="section_site_configuration" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#section_site_configuration">§ </a>Site configuration</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">Site configuration is the JSON output of this library. It can be
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">Site configuration is the JSON output of this library. It can be
 directly assigned as the prefix configuration of the Web API spindle
 section of some gateway revela.json. This config contains sections for
-the other building blocks.</span>
+the other building blocks.
+  </div>
 </p></div>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_test_global_rules" class="vdoc type-vdoc-node"><blockquote>
@@ -160,17 +180,20 @@ the other building blocks.</span>
 
   <section id="section_schemas" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#section_schemas">§ </a>Type and property schemas</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">The main building block of schema-builder is object type schema. In
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">The main building block of schema-builder is object type schema. In
 JSON schema all object properties are listed under &#x27;properties&#x27; field
 and all meta fields are outermost fields. Schema builder format for
 objects lists fields on the outside and properties inside the symbol
 field &#x60;[ObjectSchema]&#x60;. The schema expansion will then flip the type
-inside out to get the appropriate JSON schema layout.</span>
+inside out to get the appropriate JSON schema layout.
+  </div>
 </p></div>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_simple_object" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_simple_object">§ </a>expanded schema of simple object type</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> exportSchemaOf({
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> exportSchemaOf({
   [ObjectSchema]: {
     description: &#x22;simple object type&#x22;,
     valospace: {
@@ -187,21 +210,27 @@ inside out to get the appropriate JSON schema layout.</span>
   },
   properties: { name: { type: &#x22;string&#x22; } },
 })</span>
-</code></pre></blockquote></span>
+</code></pre></blockquote>
+  </div>
 </p></div></span>
 
 </blockquote>
   <section id="extending_schemas" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#extending_schemas">§ </a>Extending schemas</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">The schemas can also be extended using <em>extendType</em>.
-The extension is a nested merge and can accept multiple base types.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">Here we extend a string type with a valospace reflection path to the
-field <a href="https://valospace.org/kernel#name" class="vdoc type-vdoc-reference">@valos/kernel#name</a>.</span>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">The schemas can also be extended using <em>extendType</em>.
+The extension is a nested merge and can accept multiple base types.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">Here we extend a string type with a valospace reflection path to the
+field <a href="https://valospace.org/kernel/0#name" class="vdoc type-vdoc-reference">VKernel:name</a>.
+  </div>
 </p></div>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_schema_extension" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_schema_extension">§ </a>expanded schema of an extended string</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> extendType(StringType, { valospace: { reflection: [&#x22;@.$V.name@@&#x22;] } })</span>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> extendType(StringType, { valospace: { reflection: [&#x22;@.$V.name@@&#x22;] } })</span>
 </code></pre></blockquote>via<blockquote><pre><code><span class="vdoc type-vdoc-node"> exportSchemaOf(type)</span>
 </code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node"> ({
   type: &#x22;string&#x22;,
@@ -209,7 +238,8 @@ field <a href="https://valospace.org/kernel#name" class="vdoc type-vdoc-referenc
     reflection: [&#x22;@.&#x22;, [[&#x22;@$V&#x22;, &#x22;name&#x22;]]],
   },
 })</span>
-</code></pre></blockquote></span>
+</code></pre></blockquote>
+  </div>
 </p></div></span>
 
 </blockquote>
@@ -217,10 +247,13 @@ field <a href="https://valospace.org/kernel#name" class="vdoc type-vdoc-referenc
 
   <section id="resource_type_schemas" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#resource_type_schemas">§ </a>Shared resource type schemas</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">Valospace resources can be named in addition to providing them base
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">Valospace resources can be named in addition to providing them base
 types they extend. A resource that is given a valospace gate are
-primary resources which can be directly reached through <a href="#routes" class="vdoc type-vdoc-reference">routes</a> via their projection path.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">Schema builder provides a builtin object type &#x60;ResourceType&#x60;
+primary resources which can be directly reached through <a href="#routes" class="vdoc type-vdoc-reference">routes</a> via their projection path.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">Schema builder provides a builtin object type &#x60;ResourceType&#x60;
 for valospace resources with following JSON schema:<blockquote><pre><code><span class="vdoc type-vdoc-node">{
   &#x22;$V&#x22;: {
     &#x22;id&#x22;: {
@@ -236,12 +269,14 @@ for valospace resources with following JSON schema:<blockquote><pre><code><span 
 }</span>
 </code></pre></blockquote>
 This type contains the basic valospace selector under the key $V
-which contains the resource &#x27;id&#x27; field.</span>
+which contains the resource &#x27;id&#x27; field.
+  </div>
 </p></div>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_named_resources" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_named_resources">§ </a>expanded schema of a named resource</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> namedResourceType(&#x22;TestTag&#x22;, [], {
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> namedResourceType(&#x22;TestTag&#x22;, [], {
   [ObjectSchema]: {
     description: &#x22;Test Tag resource&#x22;,
     valospace: {
@@ -277,7 +312,8 @@ which contains the resource &#x27;id&#x27; field.</span>
     name: { summary: &#x22;Tag name&#x22;, type: &#x22;string&#x22; },
   },
 })</span>
-</code></pre></blockquote></span>
+</code></pre></blockquote>
+  </div>
 </p></div></span>
 
 </blockquote>
@@ -285,19 +321,23 @@ which contains the resource &#x27;id&#x27; field.</span>
 
   <section id="resource_type_references" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#resource_type_references">§ </a>Automatic substitution of shared type references</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">The resource types are shared and can be referred to by their name
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">The resource types are shared and can be referred to by their name
 with a &#x27;#&#x27;-suffix in the JSON schema. Schema builder does this
-automatically during schema generation.</span>
+automatically during schema generation.
+  </div>
 </p></div>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_named_schema_reference" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_named_schema_reference">§ </a>expanded schema of a named type reference</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> ({ tag: TestTagType })</span>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> ({ tag: TestTagType })</span>
 </code></pre></blockquote>via<blockquote><pre><code><span class="vdoc type-vdoc-node"> exportSchemaOf(type)</span>
 </code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node">{
   &#x22;tag&#x22;: &#x22;TestTag#&#x22;
 }</span>
-</code></pre></blockquote></span>
+</code></pre></blockquote>
+  </div>
 </p></div></span>
 
 </blockquote>
@@ -305,20 +345,25 @@ automatically during schema generation.</span>
 
   <section id="mapping_schemas" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#mapping_schemas">§ </a>Mapping schemas</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">A mapping is group of <a href="https://valospace.org/kernel#Relation" class="vdoc type-vdoc-reference">relations</a> originating from a resource with a common name. The mapping relations
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">A mapping is group of <a href="https://valospace.org/kernel/0#Relation" class="vdoc type-vdoc-reference">relations</a> originating from a resource with a common name. The mapping relations
 can have properties and can be referred from the Web API also
 individually: their identity (ie. &#x27;primary key&#x27;) of is the unique
-combination of the mapping <a href="https://valospace.org/kernel#source" class="vdoc type-vdoc-reference">source</a> resource and mapping <a href="https://valospace.org/kernel#name" class="vdoc type-vdoc-reference">name</a> plus the
-individual<a href="https://valospace.org/kernel#target" class="vdoc type-vdoc-reference">target</a> resource.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">The mappings in valospace are defined by a reflection to a set of
+combination of the mapping <a href="https://valospace.org/kernel/0#source" class="vdoc type-vdoc-reference">source</a> resource and mapping <a href="https://valospace.org/kernel/0#name" class="vdoc type-vdoc-reference">name</a> plus the
+individual<a href="https://valospace.org/kernel/0#target" class="vdoc type-vdoc-reference">target</a> resource.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">The mappings in valospace are defined by a reflection to a set of
 relations. Here <em>mappingToMany</em> defines a mapping &#x27;tags&#x27;
 into outgoing TAGS relations with a mapping property &#x27;highlight&#x27; and
-where the target resource is a Tag type defined earlier.</span>
+where the target resource is a Tag type defined earlier.
+  </div>
 </p></div>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_mapping" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_mapping">§ </a>expanded schema of a mapping property</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> mappingToManyOf(&#x22;tags&#x22;, TestTagType,
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> mappingToManyOf(&#x22;tags&#x22;, TestTagType,
     [&#x22;@-out:TAG&#x22;],
     { highlight: BooleanType })</span>
 </code></pre></blockquote>via<blockquote><pre><code><span class="vdoc type-vdoc-node"> exportSchemaOf(type)</span>
@@ -345,7 +390,8 @@ where the target resource is a Tag type defined earlier.</span>
     },
   },
 })</span>
-</code></pre></blockquote></span>
+</code></pre></blockquote>
+  </div>
 </p></div></span>
 
 </blockquote>
@@ -353,12 +399,15 @@ where the target resource is a Tag type defined earlier.</span>
 
   <section id="complex_resource_type5" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#complex_resource_type5">§ </a>Putting a complex resource type together</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">A complex example which puts all together.</span>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">A complex example which puts all together.
+  </div>
 </p></div>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_complex_resource_type" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_complex_resource_type">§ </a>expanded schema of a complex resource type</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> namedResourceType(
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> namedResourceType(
     &#x22;TestIndividual&#x22;, exports.TestProfileType, {
   [ObjectSchema]: {
     description: &#x22;Test Individual resource&#x22;,
@@ -488,7 +537,8 @@ where the target resource is a Tag type defined earlier.</span>
     visible: { type: &#x22;boolean&#x22; },
   },
 })</span>
-</code></pre></blockquote></span>
+</code></pre></blockquote>
+  </div>
 </p></div></span>
 
 </blockquote>
@@ -498,11 +548,15 @@ where the target resource is a Tag type defined earlier.</span>
 
   <section id="section_routes" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#section_routes">§ </a>Route definitions</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">Routes are exported as JSON object that is subsequently provided as a <a href="https://www.fastify.io/docs/latest/Routes/" class="vdoc type-vdoc-reference">fastify route options object</a>.</span>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">Routes are exported as JSON object that is subsequently provided as a <a href="https://www.fastify.io/docs/latest/Routes/" class="vdoc type-vdoc-reference">fastify route options object</a>.
+  </div>
 </p></div>
   <section id="route_testdoc_examples" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#route_testdoc_examples">§ </a>Route testdoc examples</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">Route testdoc examples share the following data:</span>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">Route testdoc examples share the following data:
+  </div>
 </p></div>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_route_common" class="vdoc type-vdoc-node"><blockquote>
@@ -516,25 +570,32 @@ where the target resource is a Tag type defined earlier.</span>
   })</span>
 </code></pre></blockquote></span>
 
-</blockquote><div><p><span class="vdoc type-vdoc-paragraph">Of note is the &#x60;globalRules&#x60; section, which is a JSON construct that
-is sourced from configuration files.</span>
+</blockquote><div><p>
+  <div class="vdoc type-vdoc-paragraph">Of note is the &#x60;globalRules&#x60; section, which is a JSON construct that
+is sourced from configuration files.
+  </div>
 </p></div>
   </section>
 
   <section id="route_basic_get" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#route_basic_get">§ </a>Basic GET resource route</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">Simple resource-GET route retrieves a primary TestIndividualType resource
-based on an id string given as a route parameter.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">The route defines the reflection rule &#x60;resource&#x60; which converts
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">Simple resource-GET route retrieves a primary TestIndividualType resource
+based on an id string given as a route parameter.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">The route defines the reflection rule &#x60;resource&#x60; which converts
 the id string into a valospace resource id. The resource-GET handler (a
 built-in component of the Web API spindle) then uses this id to pick
 the correct resource from the set of resources located by the
-TestIndividualType gate projection.</span>
+TestIndividualType gate projection.
+  </div>
 </p></div>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_route_get_resource" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_route_get_resource">§ </a>route of a simple resource GET</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> resourceGETRoute(&#x60;/${gate.name}/:resourceId&#x60;, {
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> resourceGETRoute(&#x60;/${gate.name}/:resourceId&#x60;, {
   rules: {
     routeRoot: null,
     resource: [&#x22;@!ref&#x22;, [&#x22;@!:request:params:resourceId&#x22;]],
@@ -577,7 +638,8 @@ TestIndividualType gate projection.</span>
     },
   },
 })</span>
-</code></pre></blockquote></span>
+</code></pre></blockquote>
+  </div>
 </p></div></span>
 
 </blockquote>
@@ -585,13 +647,16 @@ TestIndividualType gate projection.</span>
 
   <section id="route_complex_post_mapping" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#route_complex_post_mapping">§ </a>Complex POST mapping route</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">Complex mapping-POST route which adds a new tags mapping to a primary
-thing.</span>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">Complex mapping-POST route which adds a new tags mapping to a primary
+thing.
+  </div>
 </p></div>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_route_post_mapping" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_route_post_mapping">§ </a>route of a complex POST mapping</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> mappingPOSTRoute(&#x60;/${gate.name}/:resourceId/${mappingName}&#x60;, {
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> mappingPOSTRoute(&#x60;/${gate.name}/:resourceId/${mappingName}&#x60;, {
   enabledWithRules: [&#x22;relationName&#x22;],
   rules: {
     resource: [&#x22;@!ref&#x22;, [&#x22;@!:request:params:resourceId&#x22;]],
@@ -706,7 +771,8 @@ containing the mapping.&#x60;,
     },
   },
 })</span>
-</code></pre></blockquote></span>
+</code></pre></blockquote>
+  </div>
 </p></div></span>
 
 </blockquote>
@@ -716,13 +782,17 @@ containing the mapping.&#x60;,
 
   <section id="section_projections" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#section_projections">§ </a>Projection and reflection VPaths</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">Projections and reflections are <a href="https://valospace.org/raem/VPath" class="vdoc type-vdoc-reference">VPaths</a>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">Projections and reflections are <a href="https://valospace.org/raem/VPath" class="vdoc type-vdoc-reference">VPaths</a>
 which are present primary type &#x60;valospace.gate.projection&#x60; fields and
-in type and property &#x60;valospace.reflection&#x60; fields.</span>
+in type and property &#x60;valospace.reflection&#x60; fields.
+  </div>
 </p></div>
   <section id="projections_testdoc_examples" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#projections_testdoc_examples">§ </a>Projections examples</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">Projections testdoc examples share the following data:</span>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">Projections testdoc examples share the following data:
+  </div>
 </p></div>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_projections_common" class="vdoc type-vdoc-node"><blockquote>
@@ -734,7 +804,8 @@ in type and property &#x60;valospace.reflection&#x60; fields.</span>
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_extended_resource_type" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_extended_resource_type">§ </a>expanded schema of an extended resource type</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> namedResourceType(&#x22;TestNewsItem&#x22;, exports.TestThingType, {
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> namedResourceType(&#x22;TestNewsItem&#x22;, exports.TestThingType, {
   [ObjectSchema]: {
     description: &#x22;Test News Item resource&#x22;,
     valospace: {
@@ -821,7 +892,8 @@ in type and property &#x60;valospace.reflection&#x60; fields.</span>
       },
     },
   })</span>
-</code></pre></blockquote></span>
+</code></pre></blockquote>
+  </div>
 </p></div></span>
 
 </blockquote>

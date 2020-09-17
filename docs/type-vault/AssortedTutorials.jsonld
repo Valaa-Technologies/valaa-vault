@@ -2,43 +2,54 @@
   {
     "@id": "https://valospace.org/type-vault/AssortedTutorials",
     "@context": {
-      "@base": "https://valospace.org/type-vault/AssortedTutorials#",
-      "sbomdoc": "https://valospace.org/sbomdoc#",
-      "revdoc": "https://valospace.org/revdoc#",
+      "@base": "https://valospace.org/vdoc/0#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
       "xsd": "http://www.w3.org/2001/XMLSchema#",
       "owl": "http://www.w3.org/2002/07/owl#",
       "dc": "http://purl.org/dc/elements/1.1/",
-      "vdoc": "https://valospace.org/vdoc#",
-      "vdoc:content": {
-        "@id": "https://valospace.org/vdoc#content",
+      "VSbomdoc": "https://valospace.org/sbomdoc/0#",
+      "VKernel": "https://valospace.org/kernel/0#",
+      "VDoc": "https://valospace.org/vdoc/0#",
+      "VRevdoc": "https://valospace.org/revdoc/0#",
+      "restriction": {
+        "@reverse": "owl:onProperty"
+      },
+      "VRevdoc:tooltipContent": {
+        "@id": "#tooltipContent",
+        "@type": "@id"
+      },
+      "VDoc:content": {
+        "@id": "#content",
         "@container": "@list",
         "@type": "@id"
       },
-      "vdoc:words": {
-        "@id": "https://valospace.org/vdoc#words",
+      "VDoc:entries": {
+        "@id": "#entries",
         "@container": "@list",
         "@type": "@id"
       },
-      "vdoc:entries": {
-        "@id": "https://valospace.org/vdoc#entries",
+      "VDoc:words": {
+        "@id": "#words",
         "@container": "@list",
         "@type": "@id"
       },
-      "vdoc:headers": {
-        "@id": "https://valospace.org/vdoc#headers",
+      "VDoc:columns": {
+        "@id": "#columns",
         "@container": "@list",
         "@type": "@id"
       },
-      "vdoc:cell": {
-        "@id": "https://valospace.org/vdoc#cell",
-        "@container": "@list",
+      "VDoc:map": {
+        "@id": "#map",
+        "@type": "@id"
+      },
+      "VDoc:cell": {
+        "@id": "#cell",
         "@type": "@id"
       }
     },
     "dc:title": "Assorted tutorials",
-    "vdoc:tags": [
+    "VDoc:tags": [
       "PRIMARY",
       "HOW_TO"
     ],
@@ -56,41 +67,41 @@
     },
     "abstract": {
       "@id": "abstract",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         "This document is a collection of tutorials and possibly other notes",
         " created by Jaradacl based on the tasks given. (During first few days at least)"
       ]
     },
     "sotd": {
       "@id": "sotd",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         "This document is part of the toolset workspace ",
         {
-          "@type": "revdoc:Package",
-          "vdoc:content": [
+          "@type": "VRevdoc:Package",
+          "VDoc:content": [
             {
-              "vdoc:em": true,
-              "vdoc:content": [
+              "VDoc:em": true,
+              "VDoc:content": [
                 "@valos/type-vault"
               ]
             }
           ],
-          "vdoc:ref": "@valos/type-vault"
+          "VDoc:ref": "@valos/type-vault"
         },
         " (of domain ",
         {
-          "@type": "revdoc:Package",
-          "vdoc:content": [
+          "@type": "VRevdoc:Package",
+          "VDoc:content": [
             {
-              "vdoc:em": true,
-              "vdoc:content": [
+              "VDoc:em": true,
+              "VDoc:content": [
                 "@valos/kernel"
               ]
             }
           ],
-          "vdoc:ref": "@valos/kernel"
+          "VDoc:ref": "@valos/kernel"
         },
         ") which is ",
         "A valma toolset for managing valos vault monorepository workspaces"
@@ -99,33 +110,33 @@
     "how_to_create_revdoc": {
       "@id": "how_to_create_revdoc",
       "dc:title": "How to create RevDoc",
-      "@type": "vdoc:Chapter",
-      "vdoc:content": [
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
         "This is a step-by-step guide on how to create RevDoc using cli.",
         {
-          "vdoc:content": [
+          "VDoc:content": [
             {
-              "@type": "vdoc:NumberedList",
-              "vdoc:entries": [
+              "@type": "VDoc:NumberedList",
+              "VDoc:entries": [
                 [
                   "Ensure you have python installed."
                 ],
                 {
-                  "@type": "vdoc:Paragraph",
-                  "vdoc:content": [
+                  "@type": "VDoc:Paragraph",
+                  "VDoc:content": [
                     "Navigate to the folder you want your revdoc.js to reside and run the following command: ",
                     {
-                      "@type": "revdoc:CommandLineInteraction",
-                      "vdoc:entries": [
+                      "@type": "VRevdoc:CommandLineInteraction",
+                      "VDoc:entries": [
                         [
                           "",
                           "$ ",
                           {
-                            "@type": "revdoc:Invokation",
-                            "vdoc:words": [
+                            "@type": "VRevdoc:Invokation",
+                            "VDoc:words": [
                               {
-                                "@type": "revdoc:Command",
-                                "vdoc:content": [
+                                "@type": "VRevdoc:Command",
+                                "VDoc:content": [
                                   "vlm"
                                 ]
                               },
@@ -141,32 +152,32 @@
                   ]
                 },
                 {
-                  "@type": "vdoc:Paragraph",
-                  "vdoc:content": [
+                  "@type": "VDoc:Paragraph",
+                  "VDoc:content": [
                     "You will now be asked the following information: ",
                     {
-                      "vdoc:content": [
+                      "VDoc:content": [
                         {
-                          "@type": "vdoc:BulletList",
-                          "vdoc:entries": [
+                          "@type": "VDoc:BulletList",
+                          "VDoc:entries": [
                             [
                               "Title of the document: This is human-readable title of the document."
                             ],
                             {
-                              "@type": "vdoc:Paragraph",
-                              "vdoc:content": [
+                              "@type": "VDoc:Paragraph",
+                              "VDoc:content": [
                                 "ReSpec short name"
                               ]
                             },
                             {
-                              "@type": "vdoc:Paragraph",
-                              "vdoc:content": [
+                              "@type": "VDoc:Paragraph",
+                              "VDoc:content": [
                                 "Document editors: Comma-separated value of the editors of your document."
                               ]
                             },
                             {
-                              "@type": "vdoc:Paragraph",
-                              "vdoc:content": [
+                              "@type": "VDoc:Paragraph",
+                              "VDoc:content": [
                                 "Document authors: Comma-separated value of the authors of your document."
                               ]
                             }
@@ -177,21 +188,21 @@
                   ]
                 },
                 {
-                  "@type": "vdoc:Paragraph",
-                  "vdoc:content": [
+                  "@type": "VDoc:Paragraph",
+                  "VDoc:content": [
                     "Next navigate to the root of your project and run the following command ",
                     {
-                      "@type": "revdoc:CommandLineInteraction",
-                      "vdoc:entries": [
+                      "@type": "VRevdoc:CommandLineInteraction",
+                      "VDoc:entries": [
                         [
                           "",
                           "$ ",
                           {
-                            "@type": "revdoc:Invokation",
-                            "vdoc:words": [
+                            "@type": "VRevdoc:Invokation",
+                            "VDoc:words": [
                               {
-                                "@type": "revdoc:Command",
-                                "vdoc:content": [
+                                "@type": "VRevdoc:Command",
+                                "VDoc:content": [
                                   "vlm"
                                 ]
                               },
@@ -205,21 +216,21 @@
                   ]
                 },
                 {
-                  "@type": "vdoc:Paragraph",
-                  "vdoc:content": [
+                  "@type": "VDoc:Paragraph",
+                  "VDoc:content": [
                     "Now run the following command ",
                     {
-                      "@type": "revdoc:CommandLineInteraction",
-                      "vdoc:entries": [
+                      "@type": "VRevdoc:CommandLineInteraction",
+                      "VDoc:entries": [
                         [
                           "",
                           "$ ",
                           {
-                            "@type": "revdoc:Invokation",
-                            "vdoc:words": [
+                            "@type": "VRevdoc:Invokation",
+                            "VDoc:words": [
                               {
-                                "@type": "revdoc:Command",
-                                "vdoc:content": [
+                                "@type": "VRevdoc:Command",
+                                "VDoc:content": [
                                   "python"
                                 ]
                               },
@@ -233,14 +244,14 @@
                   ]
                 },
                 {
-                  "@type": "vdoc:Paragraph",
-                  "vdoc:content": [
+                  "@type": "VDoc:Paragraph",
+                  "VDoc:content": [
                     "Open browser and navigate to the localhost in the port you just opened. (8000 by default)"
                   ]
                 },
                 {
-                  "@type": "vdoc:Paragraph",
-                  "vdoc:content": [
+                  "@type": "VDoc:Paragraph",
+                  "VDoc:content": [
                     "Your HTML and VDocState files can now be found ",
                     "under docs/ in the same path as where you saved your RevDoc file; ",
                     "for example if you saved your RevDoc under packages/type-vault ",
@@ -253,8 +264,8 @@
         }
       ]
     },
-    "@type": "revdoc:Document",
-    "vdoc:content": [
+    "@type": "VRevdoc:Document",
+    "VDoc:content": [
       {
         "@id": "abstract"
       },

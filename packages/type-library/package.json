@@ -1,6 +1,6 @@
 {
   "name": "@valos/type-library",
-  "version": "0.35.0-rc.29",
+  "version": "0.35.0-rc.30",
   "valos": {
     "type": "type",
     "domain": "@valos/kernel"
@@ -15,7 +15,7 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@valos/type-toolset": "^0.35.0-rc.29"
+    "@valos/type-toolset": "^0.35.0-rc.30"
   },
   "bin": {
     "_vlm__configure__toolsets_-valos_type-library": "valma/configure_toolsets__type-library.js"

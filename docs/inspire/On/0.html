@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>The valospace &#x27;undefined&#x27; namespace reference</title>
+    <script
+     src='https://www.w3.org/Tools/respec/respec-w3c-common'
+     class='remove'></script>
+    <script class='remove'>
+      var respecConfig = {"specStatus":"unofficial","shortName":"onNamespace","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}]};
+    </script>
+    <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
+    
+  </head>
+  <body class="vdoc vdoc-body">
+    
+  <section id="abstract" class="vdoc type-vdoc-chapter"><div><p>
+  <div class="vdoc type-vdoc-paragraph">This document is a revdoc template document &#x27;onNamespace&#x27; created by
+write-revdoc.
+  </div>
+</p></div>
+  </section>
+
+  <section id="sotd" class="vdoc type-vdoc-chapter"><div><p>
+  <div class="vdoc type-vdoc-paragraph">This document is part of the library workspace <a href="https://valospace.org/inspire" class="vdoc type-vrevdoc-package"><em>@valos/inspire</em></a>
+(of domain <a href="https://valospace.org/kernel" class="vdoc type-vrevdoc-package"><em>@valos/kernel</em></a>) which has the description:
+&#x60;ValOS Inspire application gateway&#x60;.
+  </div>
+</p></div>
+  </section>
+
+  <section id="introduction" class="vdoc type-vdoc-chapter"><div><p>
+  <div class="vdoc type-vdoc-paragraph">Edit me - this is the first payload chapter. Abstract and SOTD are
+essential <a href="https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate" class="vdoc type-vdoc-reference">ReSpec boilerplate</a>
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">See <a href="https://valospace.org/revdoc/tutorial" class="vdoc type-vdoc-reference">ReVDoc tutorial</a> for
+instructions on how to write revdoc source documents.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">See also <a href="https://valospace.org/revdoc" class="vdoc type-vdoc-reference">ReVdoc specification</a> and <a href="https://valospace.org/vdoc" class="vdoc type-vdoc-reference">VDoc specification</a> for reference documentation.
+  </div>
+</p></div>
+  </section>
+
+  <section id="section_valosheath" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_valosheath">§ </a>The <em>On</em> valosheath namespace of the library ontology of <a href="https://valospace.org/inspire" class="vdoc type-vrevdoc-package"><em>@valos/inspire</em></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">      <p>The ValOS inspire On namespace contains event callback names used by
+the inspire UI layer.</p>
+      <p>The namespace inherits all HTML5 event names verbatim as name suffixes
+but also adds new valos-specific event callback names. Like HTML5
+events these callbacks are called with a synthetic event as their first
+argument.</p>
+
+  </div>
+</p></div>
+  <section id="section_prefixes" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_prefixes">§ </a><em>@valos/inspire</em> IRI prefixes</h3>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">Prefix</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">IRI</span>
+</th>
+      </thead>
+      <tbody>
+        <tr><td><span class="vdoc type-vdoc-node">rdf</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/1999/02/22-rdf-syntax-ns#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">rdfs</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/2000/01/rdf-schema#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">xsd</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/2001/XMLSchema#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">owl</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/2002/07/owl#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">dc</span>
+</td><td><span class="vdoc type-vdoc-node">http://purl.org/dc/elements/1.1/</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">On</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/inspire/On/0#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">VKernel</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/kernel/0#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">V</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/0#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">VEngine</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/engine/0#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">Lens</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/inspire/Lens/0#</span>
+</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_classes" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_classes">§ </a><em>On</em> <a href="https://valospace.org/engine/0#Class" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">valosheath classes</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all valosheath type prototype properties.
+    </span>
+</span></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">This section describes valosheath classes introduced by the &#x27;On&#x27; namespace
+  </div>
+</p></div>
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:subClassOf</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_properties" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_properties">§ </a><em>On</em> <a href="https://valospace.org/engine/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">valosheath properties</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all valosheath type prototype properties.
+    </span>
+</span></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">This section describes valosheath properties introduced by the &#x27;On&#x27; namespace
+  </div>
+</p></div>
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:domain</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:range</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">tags</span>
+</th>
+      </thead>
+      <tbody>
+        <tr id="frameactive" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#frameactive" class="vdoc type-vdoc-reference">#frameactive</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Attribute</em> <em>Inspire</em> <em>Event</em></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">The ValOS frame of the element is active</span>
+</td></tr>
+        <tr id="framepropertychange" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#framepropertychange" class="vdoc type-vdoc-reference">#framepropertychange</a></em></strong> </h3></td></tr>
+        <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Attribute</em> <em>Inspire</em> <em>Event</em></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">A ValOS frame property has changed</span>
+</td></tr>
+        <tr id="focuspropertychange" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#focuspropertychange" class="vdoc type-vdoc-reference">#focuspropertychange</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Attribute</em> <em>Inspire</em> <em>Event</em></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">A ValOS focus property has changed</span>
+</td></tr>
+        <tr id="click" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#click" class="vdoc type-vdoc-reference">#click</a></em></strong> </h3></td></tr>
+        <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Attribute</em> <em>HTML5</em> <em>Event</em></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node"><a href="https://w3c.github.io/uievents/#event-type-click" class="vdoc type-vdoc-reference">The HTML5 &#x27;click&#x27; event</a></span>
+</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_methods" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_methods">§ </a><em>On</em> <a href="https://valospace.org/engine/0#Method" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">valosheath methods</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all valosheath type prototype methods.
+    </span>
+</span></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">This section describes valosheath methods introduced by the &#x27;On&#x27; namespace
+  </div>
+</p></div>
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:domain</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:range</span>
+</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_globals" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_globals">§ </a><em>On</em> <a href="https://valospace.org/engine/0#Global" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">valosheath globals</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all valosheath global resources.
+    </span>
+</span></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">This section describes valosheath global objects introduced by the &#x27;On&#x27; namespace
+  </div>
+</p></div>
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdf:type</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">Comment</span>
+</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_vocabulary_other">§ </a><em>On</em> remaining vocabulary terms</h3>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdf:type</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:subClassOf</span>
+</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  </section>
+
+  </body>
+</html>

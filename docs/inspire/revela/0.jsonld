@@ -1,0 +1,856 @@
+[
+  {
+    "@id": "https://valospace.org/inspire/revela/0",
+    "@context": {
+      "@base": "https://valospace.org/revela/0#",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "VSbomdoc": "https://valospace.org/sbomdoc/0#",
+      "VKernel": "https://valospace.org/kernel/0#",
+      "VDoc": "https://valospace.org/vdoc/0#",
+      "VRevdoc": "https://valospace.org/revdoc/0#",
+      "restriction": {
+        "@reverse": "owl:onProperty"
+      },
+      "VRevdoc:tooltipContent": {
+        "@id": "#tooltipContent",
+        "@type": "@id"
+      },
+      "VDoc:content": {
+        "@id": "#content",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VDoc:entries": {
+        "@id": "#entries",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VDoc:words": {
+        "@id": "#words",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VDoc:columns": {
+        "@id": "#columns",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VDoc:map": {
+        "@id": "#map",
+        "@type": "@id"
+      },
+      "VDoc:cell": {
+        "@id": "#cell",
+        "@type": "@id"
+      },
+      "VRevela": "https://valospace.org/revela/0#",
+      "revela": "https://valospace.org/revela/0#"
+    },
+    "dc:title": "revela.json format specification",
+    "VDoc:tags": [
+      "INTRODUCTORY",
+      "FABRIC",
+      "ONTOLOGY",
+      "TESTDOC"
+    ],
+    "VRevdoc:package": "@valos/inspire",
+    "VRevdoc:preferredPrefix": "VRevela",
+    "VRevdoc:baseIRI": "https://valospace.org/revela/0#",
+    "VRevdoc:version": "0.35.0-rc.29",
+    "VRevdoc:referencedModules": {
+      "https://valospace.org/kernel/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/kernel/VKernel",
+      "https://valospace.org/revela/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/inspire/revela"
+    },
+    "VRevdoc:extenderModules": {},
+    "respecConfig": {
+      "subtitle": "0.35.0-rc.29",
+      "specStatus": "unofficial",
+      "editors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ],
+      "authors": [],
+      "shortName": "revela"
+    },
+    "prefixes": {
+      "@id": "prefixes",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "VRevela": "https://valospace.org/revela/0#",
+      "VKernel": "https://valospace.org/kernel/0#",
+      "revela": "https://valospace.org/revela/0#"
+    },
+    "vocabulary": {
+      "@id": "vocabulary"
+    },
+    "context": {
+      "@id": "context",
+      "restriction": {
+        "@reverse": "owl:onProperty"
+      },
+      "@base": "https://valospace.org/revela/0#"
+    },
+    "abstract": {
+      "@id": "abstract",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "revela.json (pronounced: ",
+            {
+              "VDoc:em": true,
+              "VDoc:content": [
+                "revelation"
+              ]
+            },
+            ") is a JSON\nconfiguration file in which all \"!!!\" key values (",
+            {
+              "VDoc:em": true,
+              "VDoc:content": [
+                "spreads"
+              ]
+            },
+            ")\nare evaluated and their results then spread and merged on top of the\nsurrounding object."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "The evaluation allows for VPath operations, most notably importing\nrelative config files and accessing their subsections. Together the\nevaluation, spread and merge allow for fine-grained ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "DRY"
+              ],
+              "VDoc:ref": "https://en.wikipedia.org/wiki/Don%27t_repeat_yourself"
+            },
+            "\nfor various valos fabric config files."
+          ]
+        }
+      ]
+    },
+    "sotd": {
+      "@id": "sotd",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "This document is part of the library workspace ",
+            {
+              "@type": "VRevdoc:Package",
+              "VDoc:content": [
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "@valos/inspire"
+                  ]
+                }
+              ],
+              "VDoc:ref": "@valos/inspire"
+            },
+            "\n(of domain ",
+            {
+              "@type": "VRevdoc:Package",
+              "VDoc:content": [
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "@valos/kernel"
+                  ]
+                }
+              ],
+              "VDoc:ref": "@valos/kernel"
+            },
+            ") which has the description:\n`ValOS Inspire application gateway`."
+          ]
+        }
+      ]
+    },
+    "introduction": {
+      "@id": "introduction",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VRevdoc:Example",
+          "dc:title": "trivial revelation patch",
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                [
+                  "we expect",
+                  {
+                    "VDoc:blockquote": true,
+                    "VDoc:content": [
+                      {
+                        "@type": "VDoc:CharacterData",
+                        "VDoc:content": [
+                          " lazyPatchRevelations(gatewayMock,\n    { a: [1] },\n    { a: [2] })"
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "toEqual",
+                {
+                  "VDoc:blockquote": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:CharacterData",
+                      "VDoc:content": [
+                        " ({ a: [1, 2] })"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "@type": "VRevdoc:Example",
+          "dc:title": "spread of a simple relative import",
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                [
+                  "we expect",
+                  {
+                    "VDoc:blockquote": true,
+                    "VDoc:content": [
+                      {
+                        "@type": "VDoc:CharacterData",
+                        "VDoc:content": [
+                          " lazyPatchRevelations(gatewayMock,\n    {},\n    { \"!!!\": \"./path\" })"
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "toMatchObject",
+                {
+                  "VDoc:blockquote": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:CharacterData",
+                      "VDoc:content": [
+                        " ({ revealOrigin: \"/site/revelation/path\", someField: 1 })"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "@type": "VRevdoc:Example",
+          "dc:title": "spread of an explicit site root import followed by field access",
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                [
+                  "we expect",
+                  {
+                    "VDoc:blockquote": true,
+                    "VDoc:content": [
+                      {
+                        "@type": "VDoc:CharacterData",
+                        "VDoc:content": [
+                          " lazyPatchRevelations(gatewayMock,\n    \"\",\n    { \"!!!\": [\"/path\", \"revealOrigin\"] })"
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "toEqual",
+                {
+                  "VDoc:blockquote": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:CharacterData",
+                      "VDoc:content": [
+                        "\"/site/path\""
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "@type": "VRevdoc:Example",
+          "dc:title": "spread of a URI import followed by pick-array append",
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                [
+                  "we expect",
+                  {
+                    "VDoc:blockquote": true,
+                    "VDoc:content": [
+                      {
+                        "@type": "VDoc:CharacterData",
+                        "VDoc:content": [
+                          " lazyPatchRevelations(gatewayMock,\n    [0],\n    { \"!!!\": [\n      [\"@$https.foobar.com%2Fpath\"],\n      [[\"@.:fetchedField\"], [\"@.:options@.:revealOrigin@@\"]],\n    ] },\n    undefined,\n    [\"last\"])"
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "toEqual",
+                {
+                  "VDoc:blockquote": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:CharacterData",
+                      "VDoc:content": [
+                        " [0, 1, \"https://foobar.com/path\", \"last\"]"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "@type": "VRevdoc:Example",
+          "dc:title": "non-evaluated spreader contents to be segmented but non-cemented",
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                [
+                  "we expect",
+                  {
+                    "VDoc:blockquote": true,
+                    "VDoc:content": [
+                      {
+                        "@type": "VDoc:CharacterData",
+                        "VDoc:content": [
+                          " lazyPatchRevelations(gatewayMock,\n    {},\n    { \"!!!\": [\"@@\", [{ value: [\"@$expanded.but-unbound\"] }]] })"
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "toEqual",
+                {
+                  "VDoc:blockquote": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:CharacterData",
+                      "VDoc:content": [
+                        " ({ value: [\"@$expanded\", \"but-unbound\"] })"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "@type": "VRevdoc:Example",
+          "dc:title": "nested import & invoke spread to resolve all spreads",
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                [
+                  "we expect",
+                  {
+                    "VDoc:blockquote": true,
+                    "VDoc:content": [
+                      {
+                        "@type": "VDoc:CharacterData",
+                        "VDoc:content": [
+                          " expose(lazyPatchRevelations(gatewayMock,\n    {},\n    {\n      out: {\n        \"!!!\": {\n          prefixes: {\n            \"/test/v0\": {\n              name: \"test\",\n              \"test-lib\": {\n                preset: 10, overridden: 10, sessionDuration: 0,\n                view: { focus: \"focus to be overwritten\", nulled: \"nulled to be overwritten\" },\n                unboundAndUnsegmented: [\"@$un.bound\"],\n              },\n            },\n          },\n        },\n        prefixes: {\n          \"/test/v0\": {\n            \"!!!\": [\"@@\", [\"@!:test-lib\"], [\"@!invoke:callMe\", [{\n              view: {\n                focus: \"valaa-aws://example.org/deployment?id=@$~raw.f0c5-f0c5@@\",\n                nulled: null,\n              },\n              identity: { \"!!!\": [\"./config\", \"revealOrigin\"] },\n              sessionDuration: 86400,\n              unboundButSectioned: [\"@$also.unbound\"],\n            }]]],\n            \"test-lib\": { overridden: 20 },\n          },\n        }\n      }\n    }))"
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "toEqual",
+                {
+                  "VDoc:blockquote": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:CharacterData",
+                      "VDoc:content": [
+                        " ({\n  out: {\n    prefixes: {\n      \"/test/v0\": {\n        name: \"test\",\n        \"test-lib\": {\n          preset: 10, overridden: 20, sessionDuration: 86400,\n          view: { focus: \"valaa-aws://example.org/deployment?id=@$~raw.f0c5-f0c5@@\", nulled: null },\n          identity: \"/site/revelation/config\",\n          unboundAndUnsegmented: [\"@$un.bound\"],\n          unboundButSectioned: [\"@$also\", \"unbound\"],\n        }\n      }\n    }\n  }\n})"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "section_fabric": {
+      "@id": "section_fabric",
+      "@type": "VDoc:Chapter",
+      "dc:title": [
+        "The ",
+        {
+          "VDoc:em": true,
+          "VDoc:content": [
+            "VRevela"
+          ]
+        },
+        " fabric namespace of the library ontology of ",
+        {
+          "@type": "VRevdoc:Package",
+          "VDoc:content": [
+            {
+              "VDoc:em": true,
+              "VDoc:content": [
+                "@valos/inspire"
+              ]
+            }
+          ],
+          "VDoc:ref": "@valos/inspire"
+        }
+      ],
+      "VDoc:content": [
+        {
+          "@id": "section_fabric_abstract"
+        },
+        {
+          "@id": "section_prefixes"
+        },
+        {
+          "@id": "section_verbs"
+        },
+        {
+          "@id": "section_vocabulary_other"
+        }
+      ]
+    },
+    "section_fabric_abstract": {
+      "@id": "section_fabric_abstract",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "'VRevela' namespace provides the vocabulary for revela.json\nconfiguration files."
+          ]
+        }
+      ]
+    },
+    "section_prefixes": {
+      "@id": "section_prefixes",
+      "@type": "VDoc:Chapter",
+      "dc:title": [
+        {
+          "VDoc:em": true,
+          "VDoc:content": [
+            "VRevela"
+          ]
+        },
+        " IRI prefixes"
+      ],
+      "VDoc:content": [
+        {
+          "VDoc:lookup": "prefixes",
+          "@type": "VDoc:Table",
+          "VDoc:columns": [
+            {
+              "VDoc:cell": "VDoc:selectKey",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
+                "Prefix"
+              ]
+            },
+            {
+              "VDoc:cell": "VDoc:selectValue",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
+                "IRI"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "section_verbs": {
+      "@id": "section_verbs",
+      "@type": "VDoc:Chapter",
+      "dc:title": [
+        {
+          "VDoc:em": true,
+          "VDoc:content": [
+            "VRevela"
+          ]
+        },
+        " ",
+        {
+          "@type": "VDoc:Reference",
+          "VDoc:content": [
+            "VModel:Verb"
+          ],
+          "VDoc:ref": "VModel:Verb"
+        },
+        " vocabulary"
+      ],
+      "VDoc:content": [
+        {
+          "VDoc:lookup": "vocabulary",
+          "@type": "VDoc:Table",
+          "VDoc:columns": {
+            "VDoc:entries": [
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": null,
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:resourceId": "VDoc:selectKey",
+                  "VDoc:heading": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:words": [
+                        {
+                          "VDoc:strong": true,
+                          "VDoc:content": [
+                            {
+                              "VDoc:em": true,
+                              "VDoc:content": [
+                                {
+                                  "@type": "VDoc:Reference",
+                                  "VDoc:content": [
+                                    [
+                                      "#",
+                                      "VDoc:selectKey"
+                                    ]
+                                  ],
+                                  "VDoc:ref": [
+                                    "#",
+                                    "VDoc:selectKey"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "VDoc:words": {
+                            "VDoc:selectField": "rdfs:label"
+                          },
+                          "VDoc:elidable": true,
+                          "VDoc:map": {
+                            "@type": "VDoc:Reference",
+                            "VDoc:content": [
+                              "VDoc:selectValue"
+                            ],
+                            "VDoc:ref": "VEngine:valosheath"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:strong": true,
+                      "VDoc:content": [
+                        "DEPRECATED"
+                      ]
+                    },
+                    " in favor of:"
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:entries": {
+                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "VDoc:cell": "comment",
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "Comment"
+                ]
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": "rdf:type",
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "@type"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "VDoc:cell": "rdfs:comment",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "description"
+                      ],
+                      "VDoc:ref": "rdfs:comment"
+                    }
+                  ]
+                },
+                "VDoc:wide": true
+              },
+              {
+                "VDoc:cell": "VRevdoc:introduction",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "introduction"
+                      ],
+                      "VDoc:ref": "VRevdoc:introduction"
+                    }
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:collapsed": true,
+                "VDoc:elidable": true
+              }
+            ]
+          },
+          "VDoc:entries": []
+        }
+      ]
+    },
+    "section_vocabulary_other": {
+      "@id": "section_vocabulary_other",
+      "@type": "VDoc:Chapter",
+      "dc:title": [
+        {
+          "VDoc:em": true,
+          "VDoc:content": [
+            "VRevela"
+          ]
+        },
+        " remaining vocabulary"
+      ],
+      "VDoc:content": [
+        {
+          "VDoc:lookup": "vocabulary",
+          "@type": "VDoc:Table",
+          "VDoc:columns": {
+            "VDoc:entries": [
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": null,
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:resourceId": "VDoc:selectKey",
+                  "VDoc:heading": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:words": [
+                        {
+                          "VDoc:strong": true,
+                          "VDoc:content": [
+                            {
+                              "VDoc:em": true,
+                              "VDoc:content": [
+                                {
+                                  "@type": "VDoc:Reference",
+                                  "VDoc:content": [
+                                    [
+                                      "#",
+                                      "VDoc:selectKey"
+                                    ]
+                                  ],
+                                  "VDoc:ref": [
+                                    "#",
+                                    "VDoc:selectKey"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "VDoc:words": {
+                            "VDoc:selectField": "rdfs:label"
+                          },
+                          "VDoc:elidable": true,
+                          "VDoc:map": {
+                            "@type": "VDoc:Reference",
+                            "VDoc:content": [
+                              "VDoc:selectValue"
+                            ],
+                            "VDoc:ref": "VEngine:valosheath"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:strong": true,
+                      "VDoc:content": [
+                        "DEPRECATED"
+                      ]
+                    },
+                    " in favor of:"
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:entries": {
+                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": "rdf:type",
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "@type"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "rdfs:subClassOf"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:subClassOf"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "VDoc:cell": "rdfs:comment",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "description"
+                      ],
+                      "VDoc:ref": "rdfs:comment"
+                    }
+                  ]
+                },
+                "VDoc:wide": true
+              },
+              {
+                "VDoc:cell": "VRevdoc:introduction",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "introduction"
+                      ],
+                      "VDoc:ref": "VRevdoc:introduction"
+                    }
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:collapsed": true,
+                "VDoc:elidable": true
+              }
+            ]
+          },
+          "VDoc:entries": []
+        }
+      ]
+    },
+    "@type": "VRevdoc:Document",
+    "VDoc:content": [
+      {
+        "@id": "abstract"
+      },
+      {
+        "@id": "sotd"
+      },
+      {
+        "@id": "introduction"
+      },
+      {
+        "@id": "section_fabric"
+      }
+    ]
+  }
+]

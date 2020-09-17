@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.30](https://github.com/valaatech/kernel/compare/v0.35.0-rc.29...v0.35.0-rc.30) (2020-09-17)
+
+**Note:** Version bump only for package @valos/type-worker
+
+
+
+
+
 # [0.35.0-rc.29](https://github.com/valaatech/kernel/compare/v0.35.0-rc.28...v0.35.0-rc.29) (2020-08-27)
 
 

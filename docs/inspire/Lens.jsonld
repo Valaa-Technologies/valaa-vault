@@ -1,0 +1,4508 @@
+[
+  {
+    "@id": "https://valospace.org/inspire/Lens",
+    "@context": {
+      "@base": "https://valospace.org/inspire/Lens/0#",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "VSbomdoc": "https://valospace.org/sbomdoc/0#",
+      "VKernel": "https://valospace.org/kernel/0#",
+      "VDoc": "https://valospace.org/vdoc/0#",
+      "VRevdoc": "https://valospace.org/revdoc/0#",
+      "restriction": {
+        "@reverse": "owl:onProperty"
+      },
+      "VRevdoc:tooltipContent": {
+        "@id": "#tooltipContent",
+        "@type": "@id"
+      },
+      "VDoc:content": {
+        "@id": "#content",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VDoc:entries": {
+        "@id": "#entries",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VDoc:words": {
+        "@id": "#words",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VDoc:columns": {
+        "@id": "#columns",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VDoc:map": {
+        "@id": "#map",
+        "@type": "@id"
+      },
+      "VDoc:cell": {
+        "@id": "#cell",
+        "@type": "@id"
+      },
+      "VEngine": "https://valospace.org/engine/0#",
+      "Lens": "https://valospace.org/inspire/Lens/0#",
+      "V": "https://valospace.org/0#",
+      "On": "https://valospace.org/inspire/On/0#",
+      "Lens:frame": {
+        "@id": "#frame",
+        "@type": "@id"
+      }
+    },
+    "dc:title": "Lens namespace",
+    "VDoc:tags": [
+      "VALOSHEATH",
+      "ONTOLOGY"
+    ],
+    "VRevdoc:package": "@valos/inspire",
+    "VRevdoc:version": "0.35.0-rc.30",
+    "VRevdoc:preferredPrefix": "Lens",
+    "VRevdoc:baseIRI": "https://valospace.org/inspire/Lens/0#",
+    "VRevdoc:referencedModules": {
+      "https://valospace.org/engine/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/engine/VEngine",
+      "https://valospace.org/kernel/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/kernel/VKernel",
+      "https://valospace.org/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/kernel/V",
+      "https://valospace.org/inspire/Lens/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/inspire/Lens",
+      "https://valospace.org/inspire/On/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/inspire/On"
+    },
+    "VRevdoc:extenderModules": {},
+    "respecConfig": {
+      "specStatus": "unofficial",
+      "shortName": "lensNamespace",
+      "editors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ],
+      "authors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ]
+    },
+    "abstract": {
+      "@id": "abstract",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "This document describes how the ",
+            {
+              "@type": "VRevdoc:Package",
+              "VDoc:content": [
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "@valos/inspire"
+                  ]
+                }
+              ],
+              "VDoc:ref": "@valos/inspire"
+            },
+            " gateway\nrenders valospace user interfaces and also contains the 'Lens'\nnamespace API reference."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "See the ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "'On' namespace reference"
+              ],
+              "VDoc:ref": "@valos/inspire/On"
+            },
+            " for\nhow to access the HTML5 events API from valospace."
+          ]
+        }
+      ]
+    },
+    "sotd": {
+      "@id": "sotd",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "This document is part of the library workspace ",
+            {
+              "@type": "VRevdoc:Package",
+              "VDoc:content": [
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "@valos/inspire"
+                  ]
+                }
+              ],
+              "VDoc:ref": "@valos/inspire"
+            },
+            "\n(of domain ",
+            {
+              "@type": "VRevdoc:Package",
+              "VDoc:content": [
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "@valos/kernel"
+                  ]
+                }
+              ],
+              "VDoc:ref": "@valos/kernel"
+            },
+            ") which has the description:\n`ValOS Inspire application gateway`."
+          ]
+        }
+      ]
+    },
+    "introduction": {
+      "@id": "introduction",
+      "dc:title": "Application UI is fully defined inside valospace",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "A valos inspire application UI is written as ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "VSX text content"
+              ],
+              "VDoc:ref": "#vsx"
+            },
+            " that is stored inside ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "valospace medias"
+              ],
+              "VDoc:ref": "V:Media"
+            },
+            ".\nThese media are in turn are referenced by ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "LENS properties"
+                  ]
+                }
+              ],
+              "VDoc:ref": "#lens_properties"
+            },
+            "\nof valospace resources."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "The application root resource has such a LENS property referencing the\napplication landing page VSX media. When this root resource is given as\nan entry point to the end-user @valos/inspire gateway it will load all\nnecessary application valospace resources. Using these resources and\ntheir medias the gateway presents the application user interface to the\nend-user as an interactive web application."
+          ]
+        }
+      ]
+    },
+    "main": {
+      "@id": "main",
+      "dc:title": "The main @valos/inspire user interface concepts",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@id": "vsx"
+        },
+        {
+          "@id": "section_valoscope"
+        },
+        {
+          "@id": "section_valoscript"
+        },
+        {
+          "@id": "section_lens_properties"
+        }
+      ]
+    },
+    "vsx": {
+      "@id": "vsx",
+      "dc:title": "VSX medias declare the UI structure",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "The VSX text uses a html-like declarative syntax with two key extensions:",
+            {
+              "VDoc:content": [
+                {
+                  "@type": "VDoc:NumberedList",
+                  "VDoc:entries": [
+                    [
+                      {
+                        "@type": "VDoc:Reference",
+                        "VDoc:content": [
+                          "Embedded live valoscript:"
+                        ],
+                        "VDoc:ref": "@valos/inspire/Lens#section_valoscript"
+                      },
+                      {
+                        "@type": "VRevdoc:VSX",
+                        "VDoc:content": [
+                          "<div On:click={() => focus.msg = \" world!\"}>Hello{focus.msg || \"\"}</div>"
+                        ],
+                        "VDoc:language": "https://valospace.org/inspire/Lens/#VSX"
+                      }
+                    ],
+                    {
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
+                        {
+                          "@type": "VDoc:Reference",
+                          "VDoc:content": [
+                            "Valoscope UI component:"
+                          ],
+                          "VDoc:ref": "@valos/inspire/Lens#section_valoscope"
+                        },
+                        {
+                          "@type": "VRevdoc:VSX",
+                          "VDoc:content": [
+                            "<Valoscope if={app.isLoggedIn(context.identity)}\n  lens={app.main}\n  else={app.login}\n/>"
+                          ],
+                          "VDoc:language": "https://valospace.org/inspire/Lens/#VSX"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "The 'Lens' namespace vocabulary consists of terms that interface with\nthe @valos/inspire UI engine itself (like the ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "focus"
+                  ]
+                }
+              ],
+              "VDoc:ref": "Lens:focus"
+            },
+            ", ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "if"
+                  ]
+                }
+              ],
+              "VDoc:ref": "Lens:if"
+            },
+            " and ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "lens"
+                  ]
+                }
+              ],
+              "VDoc:ref": "Lens:lens"
+            },
+            " in the above examples)."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "Other valospace vocabularies that communicate with other systems (such\nas the ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                [
+                  {
+                    "VDoc:em": true,
+                    "VDoc:content": [
+                      "On:click"
+                    ]
+                  },
+                  " HTML5 event handler name"
+                ]
+              ],
+              "VDoc:ref": "On:click"
+            },
+            ")\nare defined by other documents."
+          ]
+        }
+      ]
+    },
+    "section_valoscope": {
+      "@id": "section_valoscope",
+      "@type": "VDoc:Chapter",
+      "dc:title": [
+        "Valoscope ",
+        {
+          "@type": "VDoc:Reference",
+          "VDoc:content": [
+            {
+              "VDoc:em": true,
+              "VDoc:content": [
+                "focus"
+              ]
+            }
+          ],
+          "VDoc:ref": "Lens:focus"
+        },
+        " sees into valospace that is in ",
+        {
+          "@type": "VDoc:Reference",
+          "VDoc:content": [
+            {
+              "VDoc:em": true,
+              "VDoc:content": [
+                "lens"
+              ]
+            }
+          ],
+          "VDoc:ref": "Lens:lens"
+        }
+      ],
+      "VDoc:content": []
+    },
+    "section_valoscript": {
+      "@id": "section_valoscript",
+      "dc:title": "Embedded valoscript provides live UI interactions",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": []
+    },
+    "section_lens_properties": {
+      "@id": "section_lens_properties",
+      "dc:title": "Resources render themselves with a LENS property",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": []
+    },
+    "section_term_qualities": {
+      "@id": "section_term_qualities",
+      "dc:title": "Term qualities",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@id": "section_element_attributes"
+        },
+        {
+          "@id": "section_context_variables"
+        },
+        {
+          "@id": "section_lens_terms"
+        }
+      ]
+    },
+    "section_element_attributes": {
+      "@id": "section_element_attributes",
+      "dc:title": "Element attributes",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": []
+    },
+    "section_context_variables": {
+      "@id": "section_context_variables",
+      "dc:title": "Context variables",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": []
+    },
+    "section_lens_terms": {
+      "@id": "section_lens_terms",
+      "dc:title": "Lenses",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": []
+    },
+    "section_slots": {
+      "@id": "section_slots",
+      "dc:title": "Lens slots",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "A lens slot is any term which has a ",
+            [
+              {
+                "VDoc:em": true,
+                "VDoc:content": [
+                  "Lens"
+                ]
+              },
+              "-tag"
+            ],
+            " and also\neither ",
+            [
+              {
+                "VDoc:em": true,
+                "VDoc:content": [
+                  "Attribute"
+                ]
+              }
+            ],
+            " or ",
+            [
+              {
+                "VDoc:em": true,
+                "VDoc:content": [
+                  "Context"
+                ]
+              }
+            ],
+            " tags. A slot can\nbe thought of as an internal variable which can be assigned (or ",
+            {
+              "VDoc:em": true,
+              "VDoc:content": [
+                "slotted"
+              ]
+            },
+            ") some lens as a value. While lens slots can be explicitly referred to\nfrom within lens medias by their term name, most of their actual\nreferences are implicit ones by the inspire UI engine internals."
+          ]
+        }
+      ]
+    },
+    "section_valosheath": {
+      "@id": "section_valosheath",
+      "@type": "VDoc:Chapter",
+      "dc:title": [
+        "The ",
+        {
+          "VDoc:em": true,
+          "VDoc:content": [
+            "Lens"
+          ]
+        },
+        " valosheath namespace of the library ontology of ",
+        {
+          "@type": "VRevdoc:Package",
+          "VDoc:content": [
+            {
+              "VDoc:em": true,
+              "VDoc:content": [
+                "@valos/inspire"
+              ]
+            }
+          ],
+          "VDoc:ref": "@valos/inspire"
+        }
+      ],
+      "VDoc:content": [
+        {
+          "@id": "section_valosheath_abstract"
+        },
+        {
+          "@id": "section_prefixes"
+        },
+        {
+          "@id": "section_classes"
+        },
+        {
+          "@id": "section_properties"
+        },
+        {
+          "@id": "section_methods"
+        },
+        {
+          "@id": "section_vocabulary_other"
+        }
+      ]
+    },
+    "prefixes": {
+      "@id": "prefixes",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "Lens": "https://valospace.org/inspire/Lens/0#",
+      "VKernel": "https://valospace.org/kernel/0#",
+      "V": "https://valospace.org/0#",
+      "VEngine": "https://valospace.org/engine/0#",
+      "On": "https://valospace.org/inspire/On/0#"
+    },
+    "vocabulary": {
+      "@id": "vocabulary",
+      "Node": {
+        "@type": "VEngine:Class",
+        "rdfs:comment": "The class of UI resources which represent a user interface building\nblock.",
+        "VRevdoc:introduction": [
+          "This class roughly corresponds to ",
+          {
+            "@type": "VDoc:Reference",
+            "VDoc:content": [
+              "DOM Node interface"
+            ],
+            "VDoc:ref": "https://developer.mozilla.org/en-US/docs/Web/API/Node"
+          },
+          ". However as @valos/inspire uses a shadow DOM this correspondence does\nnot imply prototypical inheritance for any valospace classes."
+        ]
+      },
+      "Element": {
+        "@type": "VEngine:Class",
+        "rdfs:subClassOf": "Lens:Node",
+        "rdfs:comment": "The class of UI resources which represent any user interface element.",
+        "VEngine:domainOfProperty": [
+          {
+            "@id": "#focus",
+            "VRevdoc:indexLabel": [
+              "Lens:focus"
+            ]
+          },
+          {
+            "@id": "#array",
+            "VRevdoc:indexLabel": [
+              "Lens:array"
+            ]
+          },
+          {
+            "@id": "#loadingLens",
+            "VRevdoc:indexLabel": "Lens:loadingLens"
+          },
+          {
+            "@id": "#loadingFailedLens",
+            "VRevdoc:indexLabel": "Lens:loadingFailedLens"
+          },
+          {
+            "@id": "#if",
+            "VRevdoc:indexLabel": [
+              "Lens:if"
+            ]
+          },
+          {
+            "@id": "#then",
+            "VRevdoc:indexLabel": [
+              "Lens:then"
+            ]
+          },
+          {
+            "@id": "#else",
+            "VRevdoc:indexLabel": [
+              "Lens:else"
+            ]
+          },
+          {
+            "@id": "#offset",
+            "VRevdoc:indexLabel": [
+              "Lens:offset"
+            ]
+          },
+          {
+            "@id": "#limit",
+            "VRevdoc:indexLabel": [
+              "Lens:limit"
+            ]
+          },
+          {
+            "@id": "#sort",
+            "VRevdoc:indexLabel": [
+              "Lens:sort"
+            ]
+          },
+          {
+            "@id": "#reverse",
+            "VRevdoc:indexLabel": [
+              "Lens:reverse"
+            ]
+          },
+          {
+            "@id": "#static",
+            "VRevdoc:indexLabel": [
+              "Lens:static"
+            ]
+          },
+          {
+            "@id": "#undefinedLens",
+            "VRevdoc:indexLabel": "Lens:undefinedLens"
+          },
+          {
+            "@id": "#nullLens",
+            "VRevdoc:indexLabel": "Lens:nullLens"
+          },
+          {
+            "@id": "#resourceLens",
+            "VRevdoc:indexLabel": "Lens:resourceLens"
+          },
+          {
+            "@id": "#activeLens",
+            "VRevdoc:indexLabel": "Lens:activeLens"
+          },
+          {
+            "@id": "#unframedLens",
+            "VRevdoc:indexLabel": "Lens:unframedLens"
+          },
+          {
+            "@id": "#frameOwner",
+            "VRevdoc:indexLabel": [
+              "Lens:frameOwner"
+            ]
+          },
+          {
+            "@id": "#frameAuthority",
+            "VRevdoc:indexLabel": "Lens:frameAuthority"
+          },
+          {
+            "@id": "#pendingLens",
+            "VRevdoc:indexLabel": "Lens:pendingLens"
+          },
+          {
+            "@id": "#rejectedLens",
+            "VRevdoc:indexLabel": "Lens:rejectedLens"
+          },
+          {
+            "@id": "#pendingPromiseLens",
+            "VRevdoc:indexLabel": "Lens:pendingPromiseLens"
+          },
+          {
+            "@id": "#rejectedPromiseLens",
+            "VRevdoc:indexLabel": "Lens:rejectedPromiseLens"
+          },
+          {
+            "@id": "#pendingChroniclesLens",
+            "VRevdoc:indexLabel": "Lens:pendingChroniclesLens"
+          },
+          {
+            "@id": "#rejectedChroniclesLens",
+            "VRevdoc:indexLabel": "Lens:rejectedChroniclesLens"
+          },
+          {
+            "@id": "#delayed",
+            "VRevdoc:indexLabel": [
+              "Lens:delayed"
+            ]
+          },
+          {
+            "@id": "#pendingFocusLens",
+            "VRevdoc:indexLabel": "Lens:pendingFocusLens"
+          },
+          {
+            "@id": "#rejectedFocusLens",
+            "VRevdoc:indexLabel": "Lens:rejectedFocusLens"
+          },
+          {
+            "@id": "#pendingFrameLens",
+            "VRevdoc:indexLabel": "Lens:pendingFrameLens"
+          },
+          {
+            "@id": "#rejectedFrameLens",
+            "VRevdoc:indexLabel": "Lens:rejectedFrameLens"
+          },
+          {
+            "@id": "#inactiveLens",
+            "VRevdoc:indexLabel": "Lens:inactiveLens"
+          },
+          {
+            "@id": "#pendingMediaLens",
+            "VRevdoc:indexLabel": "Lens:pendingMediaLens"
+          },
+          {
+            "@id": "#rejectedMediaLens",
+            "VRevdoc:indexLabel": "Lens:rejectedMediaLens"
+          },
+          {
+            "@id": "#uninterpretableMediaLens",
+            "VRevdoc:indexLabel": "Lens:uninterpretableMediaLens"
+          },
+          {
+            "@id": "#unrenderableInterpretationLens",
+            "VRevdoc:indexLabel": "Lens:unrenderableInterpretationLens"
+          },
+          {
+            "@id": "#pendingElementsLens",
+            "VRevdoc:indexLabel": "Lens:pendingElementsLens"
+          },
+          {
+            "@id": "#rejectedElementsLens",
+            "VRevdoc:indexLabel": "Lens:rejectedElementsLens"
+          },
+          {
+            "@id": "#activatingLens",
+            "VRevdoc:indexLabel": "Lens:activatingLens"
+          },
+          {
+            "@id": "#unavailableLens",
+            "VRevdoc:indexLabel": "Lens:unavailableLens"
+          },
+          {
+            "@id": "#destroyedLens",
+            "VRevdoc:indexLabel": "Lens:destroyedLens"
+          },
+          {
+            "@id": "#lensPropertyNotFoundLens",
+            "VRevdoc:indexLabel": "Lens:lensPropertyNotFoundLens"
+          }
+        ]
+      },
+      "DOMElement": {
+        "@type": "VEngine:Class",
+        "rdfs:label": [
+          {
+            "@type": "VRevdoc:VSX",
+            "VDoc:content": [
+              "<",
+              {
+                "VDoc:em": true,
+                "VDoc:content": [
+                  "lowercase-html-element-name"
+                ]
+              },
+              " />"
+            ],
+            "VDoc:language": "https://valospace.org/inspire/Lens/#VSX"
+          }
+        ],
+        "rdfs:subClassOf": "Lens:Element",
+        "rdfs:comment": "The class of UI resources which represent DOM elements."
+      },
+      "Component": {
+        "@type": "VEngine:Class",
+        "rdfs:subClassOf": "Lens:Element",
+        "rdfs:comment": "The class of UI resources which represent @valos/inspire user\ninterface components."
+      },
+      "Valoscope": {
+        "@type": "VEngine:Class",
+        "rdfs:label": [
+          {
+            "@type": "VRevdoc:VSX",
+            "VDoc:content": [
+              "<Valoscope />"
+            ],
+            "VDoc:language": "https://valospace.org/inspire/Lens/#VSX"
+          }
+        ],
+        "rdfs:subClassOf": "Lens:Component",
+        "rdfs:comment": "The class of valos UI components that interact with valospace resources.",
+        "VRevdoc:introduction": [
+          "The ",
+          {
+            "VDoc:em": true,
+            "VDoc:content": [
+              "Lens:"
+            ]
+          },
+          "-prefix can be omitted for Valoscope attributes"
+        ],
+        "VEngine:domainOfProperty": [
+          {
+            "@id": "#frame",
+            "VRevdoc:indexLabel": [
+              "Lens:frame"
+            ]
+          },
+          {
+            "@id": "#lens",
+            "VRevdoc:indexLabel": [
+              "Lens:lens"
+            ]
+          },
+          {
+            "@id": "#lensProperty",
+            "VRevdoc:indexLabel": "Lens:lensProperty"
+          },
+          {
+            "@id": "#focusLensProperty",
+            "VRevdoc:indexLabel": "Lens:focusLensProperty"
+          },
+          {
+            "@id": "#delegateLensProperty",
+            "VRevdoc:indexLabel": "Lens:delegateLensProperty"
+          },
+          {
+            "@id": "#instanceLensPrototype",
+            "VRevdoc:indexLabel": [
+              "Lens:instanceLensPrototype"
+            ]
+          },
+          {
+            "@id": "#instanceLensProperty",
+            "VRevdoc:indexLabel": "Lens:instanceLensProperty"
+          }
+        ]
+      },
+      "InstanceComponent": {
+        "@type": "VEngine:Class",
+        "rdfs:label": [
+          {
+            "@type": "VRevdoc:VSX",
+            "VDoc:content": [
+              "<",
+              {
+                "VDoc:em": true,
+                "VDoc:content": [
+                  "Uppercase-frame-prototype-identifier"
+                ]
+              },
+              " />"
+            ],
+            "VDoc:language": "https://valospace.org/inspire/Lens/#VSX"
+          }
+        ],
+        "rdfs:subClassOf": "Lens:Valoscope",
+        "rdfs:comment": "The class of valos UI components which instantiate their frame from a\nvalospace resource.",
+        "VRevdoc:introduction": [
+          "The ",
+          {
+            "VDoc:em": true,
+            "VDoc:content": [
+              "Frame:"
+            ]
+          },
+          "-prefix can be omitted for InstanceComponent\nattributes, whereas ",
+          {
+            "VDoc:em": true,
+            "VDoc:content": [
+              "Lens:"
+            ]
+          },
+          "-prefix must be specified."
+        ]
+      },
+      "UIContext": {
+        "@type": "VEngine:Class",
+        "rdfs:subClassOf": "rdfs:Class",
+        "rdfs:comment": "The class of resource which represent in-memory context variable\nscopes.",
+        "VRevdoc:introduction": [
+          "intended for persistent UI key-value associations that apply to all\nnested components."
+        ],
+        "VEngine:domainOfProperty": [
+          {
+            "@id": "#loadingLens",
+            "VRevdoc:indexLabel": "$Lens.loadingLens"
+          },
+          {
+            "@id": "#loadingFailedLens",
+            "VRevdoc:indexLabel": "$Lens.loadingFailedLens"
+          },
+          {
+            "@id": "#arrayIndex",
+            "VRevdoc:indexLabel": [
+              "$Lens.arrayIndex"
+            ]
+          },
+          {
+            "@id": "#endOffset",
+            "VRevdoc:indexLabel": [
+              "$Lens.endOffset"
+            ]
+          },
+          {
+            "@id": "#elementIndex",
+            "VRevdoc:indexLabel": [
+              "$Lens.elementIndex"
+            ]
+          },
+          {
+            "@id": "#toggleableErrorDetailLens",
+            "VRevdoc:indexLabel": [
+              "$Lens.toggleableErrorDetailLens"
+            ]
+          },
+          {
+            "@id": "#internalErrorLens",
+            "VRevdoc:indexLabel": [
+              "$Lens.internalErrorLens"
+            ]
+          },
+          {
+            "@id": "#currentRenderDepth",
+            "VRevdoc:indexLabel": [
+              "$Lens.currentRenderDepth"
+            ]
+          },
+          {
+            "@id": "#infiniteRecursionCheckWaterlineDepth",
+            "VRevdoc:indexLabel": [
+              "$Lens.infiniteRecursionCheckWaterlineDepth"
+            ]
+          },
+          {
+            "@id": "#maximumRenderDepth",
+            "VRevdoc:indexLabel": [
+              "$Lens.maximumRenderDepth"
+            ]
+          },
+          {
+            "@id": "#maximumRenderDepthExceededLens",
+            "VRevdoc:indexLabel": [
+              "$Lens.maximumRenderDepthExceededLens"
+            ]
+          },
+          {
+            "@id": "#undefinedLens",
+            "VRevdoc:indexLabel": "$Lens.undefinedLens"
+          },
+          {
+            "@id": "#nullLens",
+            "VRevdoc:indexLabel": "$Lens.nullLens"
+          },
+          {
+            "@id": "#resourceLens",
+            "VRevdoc:indexLabel": "$Lens.resourceLens"
+          },
+          {
+            "@id": "#activeLens",
+            "VRevdoc:indexLabel": "$Lens.activeLens"
+          },
+          {
+            "@id": "#lensProperty",
+            "VRevdoc:indexLabel": "$Lens.lensProperty"
+          },
+          {
+            "@id": "#focusLensProperty",
+            "VRevdoc:indexLabel": "$Lens.focusLensProperty"
+          },
+          {
+            "@id": "#delegateLensProperty",
+            "VRevdoc:indexLabel": "$Lens.delegateLensProperty"
+          },
+          {
+            "@id": "#unframedLens",
+            "VRevdoc:indexLabel": "$Lens.unframedLens"
+          },
+          {
+            "@id": "#instanceLensProperty",
+            "VRevdoc:indexLabel": "$Lens.instanceLensProperty"
+          },
+          {
+            "@id": "#scopeFrameResource",
+            "VRevdoc:indexLabel": [
+              "$Lens.scopeFrameResource"
+            ]
+          },
+          {
+            "@id": "#frameStepPrefix",
+            "VRevdoc:indexLabel": [
+              "$Lens.frameStepPrefix"
+            ]
+          },
+          {
+            "@id": "#frameAuthority",
+            "VRevdoc:indexLabel": "$Lens.frameAuthority"
+          },
+          {
+            "@id": "#frameAuthorityProperty",
+            "VRevdoc:indexLabel": [
+              "$Lens.frameAuthorityProperty"
+            ]
+          },
+          {
+            "@id": "#frameRoot",
+            "VRevdoc:indexLabel": [
+              "$Lens.frameRoot"
+            ]
+          },
+          {
+            "@id": "#frameRootFocus",
+            "VRevdoc:indexLabel": [
+              "$Lens.frameRootFocus"
+            ]
+          },
+          {
+            "@id": "#integrationScopeResource",
+            "VRevdoc:indexLabel": [
+              "$Lens.integrationScopeResource"
+            ]
+          },
+          {
+            "@id": "#disabledLens",
+            "VRevdoc:indexLabel": [
+              "$Lens.disabledLens"
+            ]
+          },
+          {
+            "@id": "#pendingLens",
+            "VRevdoc:indexLabel": "$Lens.pendingLens"
+          },
+          {
+            "@id": "#rejectedLens",
+            "VRevdoc:indexLabel": "$Lens.rejectedLens"
+          },
+          {
+            "@id": "#pendingPromiseLens",
+            "VRevdoc:indexLabel": "$Lens.pendingPromiseLens"
+          },
+          {
+            "@id": "#rejectedPromiseLens",
+            "VRevdoc:indexLabel": "$Lens.rejectedPromiseLens"
+          },
+          {
+            "@id": "#pendingChroniclesLens",
+            "VRevdoc:indexLabel": "$Lens.pendingChroniclesLens"
+          },
+          {
+            "@id": "#rejectedChroniclesLens",
+            "VRevdoc:indexLabel": "$Lens.rejectedChroniclesLens"
+          },
+          {
+            "@id": "#pendingAttributesLens",
+            "VRevdoc:indexLabel": [
+              "$Lens.pendingAttributesLens"
+            ]
+          },
+          {
+            "@id": "#rejectedAttributesLens",
+            "VRevdoc:indexLabel": [
+              "$Lens.rejectedAttributesLens"
+            ]
+          },
+          {
+            "@id": "#pendingFocusLens",
+            "VRevdoc:indexLabel": "$Lens.pendingFocusLens"
+          },
+          {
+            "@id": "#rejectedFocusLens",
+            "VRevdoc:indexLabel": "$Lens.rejectedFocusLens"
+          },
+          {
+            "@id": "#pendingFrameLens",
+            "VRevdoc:indexLabel": "$Lens.pendingFrameLens"
+          },
+          {
+            "@id": "#rejectedFrameLens",
+            "VRevdoc:indexLabel": "$Lens.rejectedFrameLens"
+          },
+          {
+            "@id": "#inactiveLens",
+            "VRevdoc:indexLabel": "$Lens.inactiveLens"
+          },
+          {
+            "@id": "#pendingMediaLens",
+            "VRevdoc:indexLabel": "$Lens.pendingMediaLens"
+          },
+          {
+            "@id": "#rejectedMediaLens",
+            "VRevdoc:indexLabel": "$Lens.rejectedMediaLens"
+          },
+          {
+            "@id": "#uninterpretableMediaLens",
+            "VRevdoc:indexLabel": "$Lens.uninterpretableMediaLens"
+          },
+          {
+            "@id": "#unrenderableInterpretationLens",
+            "VRevdoc:indexLabel": "$Lens.unrenderableInterpretationLens"
+          },
+          {
+            "@id": "#pendingElementsLens",
+            "VRevdoc:indexLabel": "$Lens.pendingElementsLens"
+          },
+          {
+            "@id": "#rejectedElementsLens",
+            "VRevdoc:indexLabel": "$Lens.rejectedElementsLens"
+          },
+          {
+            "@id": "#activatingLens",
+            "VRevdoc:indexLabel": "$Lens.activatingLens"
+          },
+          {
+            "@id": "#unavailableLens",
+            "VRevdoc:indexLabel": "$Lens.unavailableLens"
+          },
+          {
+            "@id": "#destroyedLens",
+            "VRevdoc:indexLabel": "$Lens.destroyedLens"
+          },
+          {
+            "@id": "#lensPropertyNotFoundLens",
+            "VRevdoc:indexLabel": "$Lens.lensPropertyNotFoundLens"
+          },
+          {
+            "@id": "#notLensResourceLens",
+            "VRevdoc:indexLabel": [
+              "$Lens.notLensResourceLens"
+            ]
+          },
+          {
+            "@id": "#arrayNotIterableLens",
+            "VRevdoc:indexLabel": [
+              "$Lens.arrayNotIterableLens"
+            ]
+          },
+          {
+            "@id": "#invalidElementLens",
+            "VRevdoc:indexLabel": [
+              "$Lens.invalidElementLens"
+            ]
+          }
+        ]
+      },
+      "focus": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Primary",
+          "Attribute",
+          "Lens"
+        ],
+        "rdfs:label": [
+          "Lens:focus"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:focus"
+        ],
+        "rdfs:domain": "Lens:Element",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Attribute slot which contains the main content that is displayed by\nthe component.",
+        "VRevdoc:introduction": [
+          null,
+          "The focus can be any value but is often a valospace resource. There is\na lot of semantic sugar for focus resources to support valospace\nintegration.",
+          null,
+          "This is the value that most other lenses will be inspecting when\ndisplaying their content.",
+          null,
+          "Semantically the concept 'focus' corresponds to the model of the\nmodel-view-controller design pattern. The concept 'lens' corresponds to\n'view', and the various components roughly correspond to 'controller'."
+        ]
+      },
+      "array": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Primary",
+          "Attribute"
+        ],
+        "rdfs:label": [
+          "Lens:array"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:array"
+        ],
+        "rdfs:domain": "Lens:Element",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Attribute slot which contains a sequence of focus values or resources\nthat should are displayed using an 'array spread' duplicates of this\nelement.",
+        "VRevdoc:introduction": [
+          null,
+          "Once the focused array and all the attributes of the component are\nactivated and live tracked the component is spread as in-place\nduplicates. One duplicate component is created for each entry and the\nentry value is set as the 'focus' attribute for the duplicate.",
+          null,
+          "If there are no array entries then the component is removed for view\naltogether.",
+          null,
+          "If the attributes have any side-effects they are always evaluated once\nper update irrespective of the array length (even if 0)."
+        ]
+      },
+      "frame": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Primary",
+          "Valoscope",
+          "Attribute"
+        ],
+        "rdfs:label": [
+          "Lens:frame"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:frame"
+        ],
+        "rdfs:domain": "Lens:Valoscope",
+        "rdfs:range": [
+          "xsd:integer",
+          "xsd:string"
+        ],
+        "rdfs:comment": "Attribute slot which is used to compute a frame key string for the\nelement that is used to identify its frame resource.",
+        "VRevdoc:introduction": [
+          null,
+          "In trivial cases the frame key is the frame attribute string value\ndirectly.",
+          null,
+          "The frame key is relative to the closest containing parent frame and\nthus does not need to be globally unique.",
+          null,
+          "The frame key is made part of the id of a frame resource if an element\nhas one. If so a 'frame key property' with name equal to the frame\nattribute value is added to the containing frame and is set to point to\nthis element frame.\nNote that the frame key property will not be added for frames without\na static string frame attribute.",
+          null,
+          "If two child elements within the same parent frame are explicitly\nconstructed to have the same frame key then they will share the same\nframe resource as well.",
+          null,
+          "The frame attribute can also be a callback. It is called with an active\nfocus as its first argument and the return value is then used as the\nframe key of the element. This allows the frame key to be computed\nbased on arbitrary focus contents.",
+          null,
+          "If an element with frame attribute also contains a Lens:array attribute\nthen the frame attribute value is used to determine the frame key of\neach array entry element that results from the array spread. If the\nframe attribute is a callback then the position of the element in the\nspread is given as the second argument.",
+          null,
+          "If an element with a frame attribute does not have a frame then instead\nof using the key as frame key it is set as the current 'keyPrefix'\nwhich then applies to all nested children of that element. If a current\nkeyPrefix exists, the key is appended to it using \"_\" as separator.\nA frame key of an element with non-empty keyPrefix is computed by\nappending the child element key attribute string to the keyPrefix; the\nkeyPrefix is then cleared for its nested children.",
+          null,
+          "If a frame attribute is a callback then the current keyPrefix is given\nas a third argument and the returned value is set as the frame key if\nthe element has a frame. Otherwise the returned value replaces the\ncurrent keyPrefix for the nested children of that element.",
+          null,
+          "Last but not least: if the frame attribute of an array spread is a\nstring then all array entries will share the same frame. This allows\nfor array elements with differing focus to easily share state.\nTo prevent accidental nested frame key conflicts the position of each\nentry is then added as the initial keyPrefix for the children of that\nentry.",
+          null,
+          "Note: this is in fact the only way for array entries to share a frame\ndirectly. Array spread frame callback functions must always return\nunique frame keys."
+        ]
+      },
+      "lens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Primary",
+          "Valoscope",
+          "Attribute",
+          "Lens"
+        ],
+        "rdfs:label": [
+          "Lens:lens"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:lens"
+        ],
+        "rdfs:domain": "Lens:Valoscope",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Attribute slot for displaying the valid focus of a fully loaded component.",
+        "VRevdoc:introduction": [
+          null,
+          "If $Lens.lens is specified as an attribute for a non-valoscope element\nthen the element will be wrapped inside an implicit Valoscope\n(including a new frame).",
+          null,
+          "This slot can only be provided as a component attribute and is checked\nonly after focus and all other attributes are activated and only if the\nfocus is valid. The focus is valid if it is not a resource or if it is\nan active Resource (ie. not unavailable or destroyed).",
+          null,
+          "Semantically the concept 'lens' corresponds to the view of the\nmodel-view-controller design pattern. The concept 'focus' corresponds\nto 'model', and the various components roughly correspond to 'controller'.\n\n    @focus {Object} focus  the focus of the component."
+        ]
+      },
+      "loadingLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Primary",
+          "Attribute",
+          "Context",
+          "Lens",
+          "Loading"
+        ],
+        "rdfs:label": [
+          "Lens:loadingLens",
+          "context[$Lens.loadingLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:loadingLens",
+          "$Lens.loadingLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "A catch-all slot for displaying a description of a dependency which is\nstill being loaded.",
+        "VRevdoc:introduction": [
+          null,
+          "This slot has no default lens.\nIf a lens is placed into this slot then all the other loading slots\nwill by default delegate displaying to that lens instead of using their\nown default lens.\n\n    @focus {Object} component  an object description of the dependency being loaded"
+        ]
+      },
+      "loadingFailedLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Primary",
+          "Attribute",
+          "Context",
+          "Lens",
+          "Loading",
+          "Failure"
+        ],
+        "rdfs:label": [
+          "Lens:loadingFailedLens",
+          "context[$Lens.loadingFailedLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:loadingFailedLens",
+          "$Lens.loadingFailedLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "A catch-all slot for displaying a description of a dependency which has\nfailed to load.",
+        "VRevdoc:introduction": [
+          null,
+          "This slot has no default lens.\nIf a lens is placed into this slot then all the other loading failure\nslots will by default delegate displaying to that lens instead of using\ntheir own default lens.\n\n    @focus {string|Error|Object} reason  the explanation of the loading failure"
+        ]
+      },
+      "if": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Lens"
+        ],
+        "value": "\"<function value()>\"",
+        "rdfs:label": [
+          "Lens:if"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:if"
+        ],
+        "rdfs:domain": "Lens:Element",
+        "rdfs:range": "xsd:boolean",
+        "rdfs:comment": "Attribute slot which contains a condition on whether to view the focus\nusing this component.",
+        "VRevdoc:introduction": [
+          null,
+          "If the slot contains a callback it is called with 'focus' as the first\nargument and the return value is used as the condition. Otherwise the\nslot  value is used directly.",
+          null,
+          "If the condition is truthy the focus is displayed with lens from slot\n'then' (which by default renders the rest of the component normally).\nIf the condition is falsy the focus is displayed using lens from slot\n'else' which presents null."
+        ]
+      },
+      "then": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Lens"
+        ],
+        "rdfs:label": [
+          "Lens:then"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:then"
+        ],
+        "rdfs:domain": "Lens:Element",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Attribute slot with which to view the focus after a truthy condition\ncheck.",
+        "VRevdoc:introduction": [
+          null,
+          "By default delegates displaying to the Valoscope lens chain."
+        ]
+      },
+      "else": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Lens"
+        ],
+        "rdfs:label": [
+          "Lens:else"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:else"
+        ],
+        "rdfs:domain": "Lens:Element",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Attribute slot with which to view the focus after a falsy condition\ncheck.",
+        "VRevdoc:introduction": [
+          null,
+          "By default displays null."
+        ]
+      },
+      "offset": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute"
+        ],
+        "rdfs:label": [
+          "Lens:offset"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:offset"
+        ],
+        "rdfs:domain": "Lens:Element",
+        "rdfs:range": "xsd:integer",
+        "rdfs:comment": "Offset to the first source array entry to begin spreading elements\nfrom.",
+        "VRevdoc:introduction": []
+      },
+      "limit": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute"
+        ],
+        "rdfs:label": [
+          "Lens:limit"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:limit"
+        ],
+        "rdfs:domain": "Lens:Element",
+        "rdfs:range": "xsd:integer",
+        "rdfs:comment": "Maximum number of elements to spread out at once.",
+        "VRevdoc:introduction": [
+          null,
+          "This limit is applied after the offset and filtering (see $Lens.if)\nbut before sorting (see $Lens.sort)."
+        ]
+      },
+      "arrayIndex": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Context"
+        ],
+        "rdfs:label": [
+          "context[$Lens.arrayIndex]"
+        ],
+        "VRevdoc:indexLabel": [
+          "$Lens.arrayIndex"
+        ],
+        "rdfs:domain": "Lens:UIContext",
+        "rdfs:range": "xsd:integer",
+        "rdfs:comment": "Context slot which contains the source array index of the nearest\ncontaining entry element within an array element spread, or null if\nthere is none.",
+        "VRevdoc:introduction": [
+          null,
+          "This is the location of the element focus in the $Lens.array before any\nfiltering and sorting. By default $Lens.arrayIndex is also used as part\nof the implicit frame key generation (see $Lens.frame)."
+        ]
+      },
+      "endOffset": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Context"
+        ],
+        "rdfs:label": [
+          "context[$Lens.endOffset]"
+        ],
+        "VRevdoc:indexLabel": [
+          "$Lens.endOffset"
+        ],
+        "rdfs:domain": "Lens:UIContext",
+        "rdfs:range": "xsd:integer",
+        "rdfs:comment": "The offset to the first source array entry that is not visible after\n$Lens.limit has been met.",
+        "VRevdoc:introduction": []
+      },
+      "elementIndex": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Context"
+        ],
+        "rdfs:label": [
+          "context[$Lens.elementIndex]"
+        ],
+        "VRevdoc:indexLabel": [
+          "$Lens.elementIndex"
+        ],
+        "rdfs:domain": "Lens:UIContext",
+        "rdfs:range": "xsd:integer",
+        "rdfs:comment": "Context slot which contains the final index of the nearest containing\nentry element within an array element spread, or null if there is none.",
+        "VRevdoc:introduction": [
+          null,
+          "This is the index of the final position of the element after filtering\n(see $Lens.if) and sorting (see $Lens.sort)."
+        ]
+      },
+      "sort": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute"
+        ],
+        "rdfs:label": [
+          "Lens:sort"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:sort"
+        ],
+        "rdfs:domain": "Lens:Element",
+        "rdfs:range": "xsd:integer",
+        "rdfs:comment": "The compare function for sorting the array spread elements.",
+        "VRevdoc:introduction": [
+          null,
+          "This sort is performed after offset, if-filtering and limits are resolved.\nChanges to the sort operation maintains element identities and doesn't\ntrigger element view refreshes.",
+          null,
+          "Note: if sorting that happens before offsets and filtering is needed\nthis can be done using regular means, ie. by sorting the expression\nthat is passed as $Lens.array. This will not maintain identities,\nhowever."
+        ]
+      },
+      "reverse": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute"
+        ],
+        "rdfs:label": [
+          "Lens:reverse"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:reverse"
+        ],
+        "rdfs:domain": "Lens:Element",
+        "rdfs:range": "xsd:boolean",
+        "rdfs:comment": "Reverse the $Lens.sort order."
+      },
+      "children": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Internal",
+          "Lens"
+        ],
+        "rdfs:label": [
+          "Lens:children"
+        ],
+        "rdfs:domain": "rdfs:Resource",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Lens for displaying the focus using the child element(s) of the nearest\nsurrounding Valoscope component.",
+        "VRevdoc:introduction": [
+          null,
+          "The neartest surrounding Valoscope can be an implicit Valoscope such\nas an instance lens or one emitted by attributes like $Lens.frame.",
+          null,
+          "Depending on the exact location of where the $Lens.children lens\nreference appears (ie. the location inside some text media) there are\nthree notably different looking use cases.",
+          {
+            "VDoc:content": [
+              {
+                "@type": "VDoc:NumberedList",
+                "VDoc:entries": [
+                  [
+                    "When this lens is used as an attribute value of a valoscope element:\n  the reference resolves to the direct lexical child elements of\n  the valoscope as they are appear in the media text itself."
+                  ],
+                  {
+                    "@type": "VDoc:Paragraph",
+                    "VDoc:content": [
+                      "When this lens is used as an element without there being any\n  enclosing valoscope elements in the same media text: this reference\n  resolves to the lexical children of an external valoscope that is\n  using this media as a lens."
+                    ]
+                  },
+                  {
+                    "@type": "VDoc:Paragraph",
+                    "VDoc:content": [
+                      "When this lens is used as an element so that there exists an\n  enclosing valoscope element in the same media text: this reference\n  resolves to the lexical children of that valoscope element just\n  like in the first case. However as this includes the reference itself\n  this easily results in infinite recursion and should be avoided."
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "componentChildrenLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Lens"
+        ],
+        "value": "\"<function value()>\"",
+        "rdfs:label": [
+          "Lens:componentChildrenLens"
+        ],
+        "rdfs:domain": "rdfs:Resource",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Lens that displays the child elements of the immediate parent component.",
+        "VRevdoc:introduction": []
+      },
+      "static": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute"
+        ],
+        "rdfs:label": [
+          "Lens:static"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:static"
+        ],
+        "rdfs:domain": "Lens:Element",
+        "rdfs:range": "xsd:boolean",
+        "rdfs:comment": "Lens attribute to declare all component attributes non-live by default.",
+        "VRevdoc:introduction": [
+          null,
+          "An attribute can still selectively be made live by prefixing its\nnamespace with 'live-' (ie. an attribute with implicit namepace must\nhave its namespace be explicitly given: 'Lens:' for Valoscopes,\n'Frame:' for instance lens frame attributes and 'HTML:' for generic\nhtml attributes).",
+          null,
+          "Alternatively this attribute can be omitted and attributes can be\nselectively made static by prefixing their namespace with 'static-'\nlike above."
+        ]
+      },
+      "slotAssembly": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Lens"
+        ],
+        "rdfs:label": [
+          "Lens:slotAssembly"
+        ],
+        "rdfs:domain": "rdfs:Resource",
+        "rdfs:range": "xsd:string",
+        "rdfs:comment": "Lens that displays the lens slot assembly that is used by the component."
+      },
+      "parentComponentLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Lens"
+        ],
+        "value": "\"<function value()>\"",
+        "rdfs:label": [
+          "Lens:parentComponentLens"
+        ],
+        "rdfs:domain": "rdfs:Resource",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Lens that displays the current parent component.",
+        "VRevdoc:introduction": [
+          null,
+          "As the component itself\nis not renderable this slot must be used in an instrument before some\nother slot (such as 'focusDetailLens')."
+        ]
+      },
+      "focusDescriptionLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Lens"
+        ],
+        "value": "\"<function renderFocusDescription()>\"",
+        "rdfs:label": [
+          "Lens:focusDescriptionLens"
+        ],
+        "rdfs:domain": "rdfs:Resource",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Lens that displays an introspective description of the focus.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {any} focus  the focus to describe."
+        ]
+      },
+      "focusDetailLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Lens"
+        ],
+        "value": "\"<function renderFocusDetail()>\"",
+        "rdfs:label": [
+          "Lens:focusDetailLens"
+        ],
+        "rdfs:domain": "rdfs:Resource",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Lens that displays a detailed, developer-oriented debug introspection of\nthe focus.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {any} focus  the focus to describe."
+        ]
+      },
+      "focusDumpLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Lens"
+        ],
+        "value": "\"<function renderFocusDump()>\"",
+        "rdfs:label": [
+          "Lens:focusDumpLens"
+        ],
+        "rdfs:domain": "rdfs:Resource",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Lens that displays a full string dump of the focus.",
+        "VRevdoc:introduction": [
+          null,
+          "Replaces circular/duplicates with tags.\n\n    @focus {any} focus  the focus to dump."
+        ]
+      },
+      "focusPropertyKeysLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Lens"
+        ],
+        "value": "\"<function renderFocusPropertyKeys()>\"",
+        "rdfs:label": [
+          "Lens:focusPropertyKeysLens"
+        ],
+        "rdfs:domain": "rdfs:Resource",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Lens that displays the list of property keys of the focus.",
+        "VRevdoc:introduction": [
+          null,
+          "Uses the semantics of Object.keys to construct the list.\n\n    @focus {object | Resource} focus  the focus to describe."
+        ]
+      },
+      "toggleableErrorDetailLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Context",
+          "Lens"
+        ],
+        "defaultValue": "\"<function renderToggleableErrorDetail()>\"",
+        "rdfs:label": [
+          "context[$Lens.toggleableErrorDetailLens]",
+          "Lens:toggleableErrorDetailLens"
+        ],
+        "VRevdoc:indexLabel": [
+          "$Lens.toggleableErrorDetailLens"
+        ],
+        "rdfs:domain": "Lens:UIContext",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "A catch-all slot for displaying a detailed, toggleable view of the\nfocused error.",
+        "VRevdoc:introduction": [
+          null,
+          "The default lens on this slot renders Show and Hide buttons.\n\n    @focus {string|Error} error  the failure description or exception object"
+        ]
+      },
+      "internalErrorLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Internal",
+          "Context",
+          "Lens",
+          "Failure",
+          "Error"
+        ],
+        "defaultValue": "\"<function renderInternalFailure()>\"",
+        "rdfs:label": [
+          "context[$Lens.internalErrorLens]",
+          "Lens:internalErrorLens"
+        ],
+        "VRevdoc:indexLabel": [
+          "$Lens.internalErrorLens"
+        ],
+        "rdfs:domain": "Lens:UIContext",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "A catch-all Slot for displaying an internal error.",
+        "VRevdoc:introduction": [
+          null,
+          "Internal errors are f.ex. unhandled exceptions or a constraint\nviolation such as 'pendingPromiseLens' resulting in a promise itself.",
+          null,
+          "By default renders the yelling-red screen.",
+          null,
+          "    @focus {string|Error} error  the failure description or exception object"
+        ]
+      },
+      "currentRenderDepth": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Context",
+          "Lens"
+        ],
+        "defaultValue": "0",
+        "rdfs:label": [
+          "context[$Lens.currentRenderDepth]",
+          "Lens:currentRenderDepth"
+        ],
+        "VRevdoc:indexLabel": [
+          "$Lens.currentRenderDepth"
+        ],
+        "rdfs:domain": "Lens:UIContext",
+        "rdfs:range": "xsd:integer",
+        "rdfs:comment": "Slot which contains the number of ancestor components that exist\nbetween this component and the root (inclusive).",
+        "VRevdoc:introduction": [
+          null,
+          "If the value of this slot is explicitly set it is used as the new base\nvalue for all nested child components of this component."
+        ]
+      },
+      "infiniteRecursionCheckWaterlineDepth": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Context",
+          "Lens"
+        ],
+        "defaultValue": "150",
+        "rdfs:label": [
+          "context[$Lens.infiniteRecursionCheckWaterlineDepth]",
+          "Lens:infiniteRecursionCheckWaterlineDepth"
+        ],
+        "VRevdoc:indexLabel": [
+          "$Lens.infiniteRecursionCheckWaterlineDepth"
+        ],
+        "rdfs:domain": "Lens:UIContext",
+        "rdfs:range": "xsd:integer",
+        "rdfs:comment": "Slot which contains the minimum currentRenderDepth for checking for\ninfinite render recursion.",
+        "VRevdoc:introduction": []
+      },
+      "maximumRenderDepth": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Context",
+          "Lens"
+        ],
+        "defaultValue": "200",
+        "rdfs:label": [
+          "context[$Lens.maximumRenderDepth]",
+          "Lens:maximumRenderDepth"
+        ],
+        "VRevdoc:indexLabel": [
+          "$Lens.maximumRenderDepth"
+        ],
+        "rdfs:domain": "Lens:UIContext",
+        "rdfs:range": "xsd:integer",
+        "rdfs:comment": "Slot which contains for the maximum allowed value for currentRenderDepth.",
+        "VRevdoc:introduction": []
+      },
+      "maximumRenderDepthExceededLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Context",
+          "Lens",
+          "Failure"
+        ],
+        "defaultValue": "<Object>",
+        "rdfs:label": [
+          "context[$Lens.maximumRenderDepthExceededLens]",
+          "Lens:maximumRenderDepthExceededLens"
+        ],
+        "VRevdoc:indexLabel": [
+          "$Lens.maximumRenderDepthExceededLens"
+        ],
+        "rdfs:domain": "Lens:UIContext",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying the focus if the slot value of 'currentRenderDepth'\nis greater than the slot value of 'maximumRenderDepth'.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {Object} focus  currently focused value."
+        ]
+      },
+      "valoscopeLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Internal",
+          "Lens"
+        ],
+        "value": "[$Lens.firstEnabledDelegateLens, $Lens.if, $Lens.disabledLens, $Lens.unframedLens, $Lens.maximumRenderDepthExceededLens, $Lens.instanceLens, $Lens.undefinedLens, $Lens.lens, $Lens.nullLens, $Lens.componentChildrenLens, $Lens.resourceLens, $Lens.loadedLens]",
+        "rdfs:label": [
+          "Lens:valoscopeLens"
+        ],
+        "rdfs:domain": "rdfs:Resource",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Internal lens for showing the focus via the Valoscope lens slot\nsequence.",
+        "VRevdoc:introduction": [
+          null,
+          "Valoscope is a built-in fabric component which searches the first\nenabled lens in the particular sequence of slots (which is defined\nbelow) based on the current dynamic state and/or value of the focus.",
+          null,
+          "    @focus {any} focus  the focus of the component"
+        ]
+      },
+      "valensLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Internal",
+          "Lens"
+        ],
+        "value": "[$Lens.firstEnabledDelegateLens, $Lens.disabledLens, $Lens.undefinedLens, $Lens.loadedLens]",
+        "rdfs:label": [
+          "Lens:valensLens"
+        ],
+        "rdfs:domain": "rdfs:Resource",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Internal lens for displaying the focus via the Valens lens slot sequence.",
+        "VRevdoc:introduction": [
+          null,
+          "Valens is a built-in fabric component which wraps a UI component\nand subscribes to sourcerer event updates that affect the props of that\ncomponent. It then triggers the dynamic update of the wrapped UI\ncomponent in response to such events.",
+          null,
+          "    @focus {any} focus  the focus of the component"
+        ]
+      },
+      "uiComponentLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Internal",
+          "Lens"
+        ],
+        "value": "[$Lens.firstEnabledDelegateLens, $Lens.disabledLens, $Lens.undefinedLens, $Lens.loadedLens]",
+        "rdfs:label": [
+          "Lens:uiComponentLens"
+        ],
+        "rdfs:domain": "rdfs:Resource",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Internal lens for displaying the focus via the UIComponent lens slot\nsequence.",
+        "VRevdoc:introduction": [
+          null,
+          "UIComponent is a built-in fabric component base class which is\nresponsible for connecting the lens system into the underlying React\nimplementation.",
+          null,
+          "    @focus {string|Error|Object} focus  the focus of the component"
+        ]
+      },
+      "firstEnabledDelegateLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Internal",
+          "Lens"
+        ],
+        "value": "\"<function renderFirstEnabledDelegate()>\"",
+        "rdfs:label": [
+          "Lens:firstEnabledDelegateLens"
+        ],
+        "rdfs:domain": "rdfs:Resource",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Internal lens for displaying the focus via the first enabled lens listed\nin the $Lens.delegate of the current fabric component.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {string|Error|Object} focus  the focus of the component"
+        ]
+      },
+      "loadedLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Internal",
+          "Lens"
+        ],
+        "value": "\"<function renderLoaded()>\"",
+        "rdfs:label": [
+          "Lens:loadedLens"
+        ],
+        "rdfs:domain": "rdfs:Resource",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Internal lens for displaying the focus by calling the .renderLoaded\nfabric method of the current component.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {string|Error|Object} focus  the focus of the component"
+        ]
+      },
+      "undefinedLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Context",
+          "Lens"
+        ],
+        "defaultValue": "[\"<function ()>\"]",
+        "rdfs:label": [
+          "Lens:undefinedLens",
+          "context[$Lens.undefinedLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:undefinedLens",
+          "$Lens.undefinedLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying an undefined focus.",
+        "VRevdoc:introduction": []
+      },
+      "nullLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Context",
+          "Lens"
+        ],
+        "defaultValue": "\"\"",
+        "rdfs:label": [
+          "Lens:nullLens",
+          "context[$Lens.nullLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:nullLens",
+          "$Lens.nullLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying a null focus.",
+        "VRevdoc:introduction": []
+      },
+      "resourceLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Context",
+          "Lens"
+        ],
+        "defaultValue": "[$Lens.activeLens, $Lens.activatingLens, $Lens.inactiveLens, $Lens.destroyedLens, $Lens.unavailableLens]",
+        "rdfs:label": [
+          "Lens:resourceLens",
+          "context[$Lens.resourceLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:resourceLens",
+          "$Lens.resourceLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying the focused Resource based on its activation phase.",
+        "VRevdoc:introduction": [
+          null,
+          "The default lens delegates the displaying to a lens slot based on whether\nthe focus is is inactive, activating, active, destroyer or unavailable.",
+          null,
+          "Note: This lens slot will initiate the activation of the focus!",
+          null,
+          "    @focus {Resource} focus  the Resource focus."
+        ]
+      },
+      "activeLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Context",
+          "Lens"
+        ],
+        "defaultValue": "$Lens.focusPropertyLens",
+        "rdfs:label": [
+          "Lens:activeLens",
+          "context[$Lens.activeLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:activeLens",
+          "$Lens.activeLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying an active focused Resource.",
+        "VRevdoc:introduction": [
+          null,
+          "The default lens delegates showing to focusPropertyLens.",
+          null,
+          "    @focus {Object} focus  the active Resource focus."
+        ]
+      },
+      "lensProperty": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Valoscope",
+          "Attribute",
+          "Context"
+        ],
+        "rdfs:label": [
+          "Lens:lensProperty",
+          "context[$Lens.lensProperty]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:lensProperty",
+          "$Lens.lensProperty"
+        ],
+        "rdfs:domain": [
+          "Lens:Valoscope",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "xsd:string",
+        "rdfs:comment": "Slot which contains the property name (or an array of names) that is\nlooked up from a focused Resource for displaying the Resource itself.",
+        "VRevdoc:introduction": [
+          null,
+          "This slot is used by all lens property lenses as the default fallback\nproperty name.",
+          null,
+          "If $Lens.lensProperty is specified as an attribute for a non-valoscope\nelement then the element will be wrapped inside an implicit Valoscope\n(including a new frame)."
+        ]
+      },
+      "focusLensProperty": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Valoscope",
+          "Attribute",
+          "Context"
+        ],
+        "defaultValue": "[\"FOCUS_LENS\"]",
+        "rdfs:label": [
+          "Lens:focusLensProperty",
+          "context[$Lens.focusLensProperty]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:focusLensProperty",
+          "$Lens.focusLensProperty"
+        ],
+        "rdfs:domain": [
+          "Lens:Valoscope",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "xsd:string",
+        "rdfs:comment": "Slot which contains the property name that is searched from the\nResource focus when resolving the *focusPropertyLens* lens.",
+        "VRevdoc:introduction": [
+          null,
+          "Can be an array of property names in which case they are searched in\norder and the first property with not-undefined value is selected.",
+          null,
+          "If $Lens.focusLensProperty is specified as an attribute\nfor a non-valoscope element then the element will be wrapped inside an\nimplicit Valoscope (including a new frame)."
+        ]
+      },
+      "focusPropertyLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Internal",
+          "Lens"
+        ],
+        "value": "\"<function getLensProperty()>\"",
+        "rdfs:label": [
+          "Lens:focusPropertyLens"
+        ],
+        "rdfs:domain": "rdfs:Resource",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Internal slot for displaying the focused Resource via a *property lens*\nread from the focus Resource itself.",
+        "VRevdoc:introduction": [
+          null,
+          "By default searches the focused Resource for a specific lens property\nnamed in slot 'focusLensProperty'.",
+          null,
+          "If no specific lens property is found then the generic lens property\nname which is defined in slot 'lensProperty' is searched.",
+          null,
+          "If a property name slot contains an array of strings then these are\nsearched in the order they are defined from the focus Resource.",
+          null,
+          "If still no suitable lens can be found delegates the displaying to 'lensPropertyNotFoundLens'.",
+          null,
+          "    @focus {Object} focus  the Resource to search the lens from."
+        ]
+      },
+      "delegateLensProperty": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Valoscope",
+          "Attribute",
+          "Context"
+        ],
+        "defaultValue": "[\"DELEGATE_LENS\"]",
+        "rdfs:label": [
+          "Lens:delegateLensProperty",
+          "context[$Lens.delegateLensProperty]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:delegateLensProperty",
+          "$Lens.delegateLensProperty"
+        ],
+        "rdfs:domain": [
+          "Lens:Valoscope",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "xsd:string",
+        "rdfs:comment": "Slot which contains the property name that is searched from the\nResource focus when resolving the *delegatePropertyLens* lens.",
+        "VRevdoc:introduction": [
+          null,
+          "Can be an array of property names in which case they are searched in\norder and the first property with not-undefined value is selected.",
+          null,
+          "If $Lens.delegateLensProperty is specified as an attribute\nfor a non-valoscope element then the element will be wrapped inside an\nimplicit Valoscope (including a new frame)."
+        ]
+      },
+      "delegatePropertyLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Internal",
+          "Lens"
+        ],
+        "value": "\"<function getLensProperty()>\"",
+        "rdfs:label": [
+          "Lens:delegatePropertyLens"
+        ],
+        "rdfs:domain": "rdfs:Resource",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Internal slot for displaying the focused Resource via a *property lens*\nread from the focus Resource itself.",
+        "VRevdoc:introduction": [
+          null,
+          "By default searches the focused Resource for a specific lens property\nnamed in slot 'delegateLensProperty'.",
+          null,
+          "If no specific lens property is found then the generic lens property\nname which is defined in slot 'lensProperty' is searched.",
+          null,
+          "If a property name slot contains an array of strings then these are\nsearched in the order they are defined from the focus Resource.",
+          null,
+          "If still no suitable lens can be found delegates the displaying to 'notLensResourceLens'.",
+          null,
+          "    @focus {Object} focus  the Resource to search the lens from."
+        ]
+      },
+      "unframedLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Context",
+          "Lens"
+        ],
+        "defaultValue": "\"<function renderUnframed()>\"",
+        "rdfs:label": [
+          "Lens:unframedLens",
+          "context[$Lens.unframedLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:unframedLens",
+          "$Lens.unframedLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying a Valoscope which has not yet loaded its lens frame."
+      },
+      "instanceLensPrototype": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Valoscope",
+          "Attribute"
+        ],
+        "rdfs:label": [
+          "Lens:instanceLensPrototype"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:instanceLensPrototype"
+        ],
+        "rdfs:domain": "Lens:Valoscope",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Attribute slot for an instance lens frame prototype resource.",
+        "VRevdoc:introduction": [
+          null,
+          "If $Lens.instanceLensPrototype is specified as an attribute for a\nnon-valoscope element then the element will be wrapped inside an\nimplicit Valoscope which handles the frame creation."
+        ]
+      },
+      "instanceLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Internal",
+          "Lens"
+        ],
+        "value": "\"<function renderInstance()>\"",
+        "rdfs:label": [
+          "Lens:instanceLens"
+        ],
+        "rdfs:domain": "rdfs:Resource",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Internal slot for displaying the focus through an instance Valoscope (ie.\none which has the attribute 'instanceLensPrototype' defined).",
+        "VRevdoc:introduction": [
+          null,
+          "Awaits for the scopeFrame promise to resolve and then searches the\nthe focus for instance lens property and if found delegates the displaying\nto it. If no instance lens property is found from the focus then\ndelegates the displaying to the lens(es) specified by the scopeFrame\ninstance prototype."
+        ]
+      },
+      "instanceLensProperty": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Valoscope",
+          "Attribute",
+          "Context"
+        ],
+        "defaultValue": "[\"INSTANCE_LENS\"]",
+        "rdfs:label": [
+          "Lens:instanceLensProperty",
+          "context[$Lens.instanceLensProperty]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:instanceLensProperty",
+          "$Lens.instanceLensProperty"
+        ],
+        "rdfs:domain": [
+          "Lens:Valoscope",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "xsd:string",
+        "rdfs:comment": "Slot which contains the property name that is searched from the\nResource focus when resolving the *instancePropertyLens* lens.",
+        "VRevdoc:introduction": [
+          null,
+          "Can be an array of property names in which case they are searched in\norder and the first property with not-undefined value is selected.",
+          null,
+          "If $Lens.instanceLensProperty is specified as an attribute\nfor a non-valoscope element then the element will be wrapped inside an\nimplicit Valoscope (including a new frame)."
+        ]
+      },
+      "instancePropertyLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Internal",
+          "Lens"
+        ],
+        "value": "\"<function getLensProperty()>\"",
+        "rdfs:label": [
+          "Lens:instancePropertyLens"
+        ],
+        "rdfs:domain": "rdfs:Resource",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Internal slot for displaying the focused Resource via a *property lens*\nread from the focus Resource itself.",
+        "VRevdoc:introduction": [
+          null,
+          "By default searches the focused Resource for a specific lens property\nnamed in slot 'instanceLensProperty'.",
+          null,
+          "If no specific lens property is found then the generic lens property\nname which is defined in slot 'lensProperty' is searched.",
+          null,
+          "If a property name slot contains an array of strings then these are\nsearched in the order they are defined from the focus Resource.",
+          null,
+          "If still no suitable lens can be found delegates the displaying to 'mediaInstanceLens'.",
+          null,
+          "    @focus {Object} focus  the Resource to search the lens from."
+        ]
+      },
+      "mediaInstanceLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Internal",
+          "Lens"
+        ],
+        "value": "\"<function renderMediaInstance()>\"",
+        "rdfs:label": [
+          "Lens:mediaInstanceLens"
+        ],
+        "rdfs:domain": "rdfs:Resource",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Internal slot for displaying an instance lens of a Media which doesn't\nspecify a lens property at all.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {Object} focus  the active Resource focus."
+        ]
+      },
+      "scopeFrameResource": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Internal",
+          "Context"
+        ],
+        "rdfs:label": [
+          "context[$Lens.scopeFrameResource]"
+        ],
+        "VRevdoc:indexLabel": [
+          "$Lens.scopeFrameResource"
+        ],
+        "rdfs:domain": "Lens:UIContext",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot which contains the current innermost enclosing scope frame that\nis also a Resource.",
+        "VRevdoc:introduction": [
+          null,
+          "Any scope frames that are created by the child components of the\ncurrent component will use this scope frame resource as their owner."
+        ]
+      },
+      "frameStepPrefix": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Internal",
+          "Context"
+        ],
+        "rdfs:label": [
+          "context[$Lens.frameStepPrefix]"
+        ],
+        "VRevdoc:indexLabel": [
+          "$Lens.frameStepPrefix"
+        ],
+        "rdfs:domain": "Lens:UIContext",
+        "rdfs:range": "xsd:string",
+        "rdfs:comment": "Slot which contains the frame vpath step prefix from the current\ninnermost enclosing scope frame.",
+        "VRevdoc:introduction": []
+      },
+      "frameOwner": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute"
+        ],
+        "rdfs:label": [
+          "Lens:frameOwner"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:frameOwner"
+        ],
+        "rdfs:domain": "Lens:Element",
+        "rdfs:range": "xsd:string",
+        "rdfs:comment": "Attribute slot which contains an explicit owner for a frame resource\nor null.",
+        "VRevdoc:introduction": [
+          null,
+          "Null owner is only allowed for frame chronicle roots.",
+          null,
+          "Setting the owner explicitly has the a consequence that the frame id\nof the element becomes dependent of the new owner, detaching the frame\nid of the dynamic UI element hierarchy.",
+          null,
+          "Setting owner to null makes the frame id to behave like a global\nidentifier, so that elements with the same frame id will share the\nsame frame across the application. With implicit frame keys this can\ncause unintended ambiguities as the frame key is still computed\nrelative the current parent frame."
+        ]
+      },
+      "frameAuthority": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Context"
+        ],
+        "defaultValue": "\"valaa-memory:\"",
+        "rdfs:label": [
+          "Lens:frameAuthority",
+          "context[$Lens.frameAuthority]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:frameAuthority",
+          "$Lens.frameAuthority"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "xsd:string",
+        "rdfs:comment": "Slot which contains a frame authority URI which is used for creating\nnew frame chronicles.",
+        "VRevdoc:introduction": [
+          null,
+          "If a frameAuthority attribute slot is set this will trigger the\ncreation of a new frame chronicle, using the element frame as its root\nresource. If the attribute slot is set to null no new frame chronicle\nis  created irrespective of other configurations; the frame is placed\ninside the current frame chronicle as normal.",
+          null,
+          "Conversely the frameAuthority context slot is read and used for a new\nframe chronicle when no explicit frame authority can be found. This\nmost typically happens if the focused resource belongs to a different\nchronicle than the current frame chronicle root focus resource (which\nis stored in 'frameRootFocus'). If the context slot value is null then\nthis implicit chronicle creation is disabled."
+        ]
+      },
+      "frameAuthorityProperty": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Context"
+        ],
+        "defaultValue": "[\"FRAME_AUTHORITY\", \"LENS_AUTHORITY\"]",
+        "rdfs:label": [
+          "context[$Lens.frameAuthorityProperty]"
+        ],
+        "VRevdoc:indexLabel": [
+          "$Lens.frameAuthorityProperty"
+        ],
+        "rdfs:domain": "Lens:UIContext",
+        "rdfs:range": "xsd:string",
+        "rdfs:comment": "Slot which contains the _property name_ that is used when searching a\nresource for an authority URI string.",
+        "VRevdoc:introduction": [
+          null,
+          "This property will be searched for from a lens instance prototype or\na Resource focus when obtaining a lens frame.",
+          null,
+          "If found the authority URI will be used for the lens chronicle.\nIf the chronicle didn't already exist new lens chronicle is created in\nthat authority URI with a new scope frame resource as its chronicle\nroot."
+        ]
+      },
+      "frameRoot": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Internal",
+          "Context"
+        ],
+        "rdfs:label": [
+          "context[$Lens.frameRoot]"
+        ],
+        "VRevdoc:indexLabel": [
+          "$Lens.frameRoot"
+        ],
+        "rdfs:domain": "Lens:UIContext",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot which contains root resource of the current frame chronicle.",
+        "VRevdoc:introduction": [
+          null,
+          "This root resource is a frame of some element that was set up to create\na new chronicle for its frame. This can happen either explicitly via\nan attribute or a property field on instance prototype or focus, or\nimplicitly when a focused resource is a root of a regular chronicle\n(such that is different from the current frameRootFocus chronicle).\nSuch a focused resource is stored in slot 'frameRootFocus'."
+        ]
+      },
+      "frameRootFocus": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Internal",
+          "Context"
+        ],
+        "rdfs:label": [
+          "context[$Lens.frameRootFocus]"
+        ],
+        "VRevdoc:indexLabel": [
+          "$Lens.frameRootFocus"
+        ],
+        "rdfs:domain": "Lens:UIContext",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot which contains the resource that is the focus of the element\nwhich created the current frame chronicle.",
+        "VRevdoc:introduction": [
+          null,
+          "The root of the frame chronicle is stored in the slot 'frameRoot'.",
+          null,
+          "This slot is primarily used to prevent\nthe creation of new frame chronicles for each sub-element that focus\nthe same regular chronicle root resource."
+        ]
+      },
+      "integrationScopeResource": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Context"
+        ],
+        "rdfs:label": [
+          "context[$Lens.integrationScopeResource]"
+        ],
+        "VRevdoc:indexLabel": [
+          "$Lens.integrationScopeResource"
+        ],
+        "rdfs:domain": "Lens:UIContext",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot which contains the integration scope resource of the innermost\nMedia that is used as source for render elements.",
+        "VRevdoc:introduction": []
+      },
+      "disabledLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Internal",
+          "Context",
+          "Lens",
+          "Loading",
+          "Failure"
+        ],
+        "defaultValue": "[$Lens.loadingFailedLens, <Object>]",
+        "rdfs:label": [
+          "context[$Lens.disabledLens]",
+          "Lens:disabledLens"
+        ],
+        "VRevdoc:indexLabel": [
+          "$Lens.disabledLens"
+        ],
+        "rdfs:domain": "Lens:UIContext",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying an explicitly disabled component.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {string|Error|Object} reason  a description of why the component is disabled."
+        ]
+      },
+      "pendingLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Primary",
+          "Attribute",
+          "Context",
+          "Lens",
+          "Loading"
+        ],
+        "defaultValue": "$Lens.loadingLens",
+        "rdfs:label": [
+          "Lens:pendingLens",
+          "context[$Lens.pendingLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:pendingLens",
+          "$Lens.pendingLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "A catch-all slot for displaying a description of a pending operation.",
+        "VRevdoc:introduction": [
+          null,
+          "This slot delegates to loadingLens but has no default lens.\nIf a lens is placed into this slot then all the other pending slots\nwill by default delegate displaying to that lens instead of using their\nown default lens.",
+          null,
+          "    @focus {Object} component  an object description of the dependency being loaded"
+        ]
+      },
+      "rejectedLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Primary",
+          "Attribute",
+          "Context",
+          "Lens",
+          "Loading",
+          "Failure"
+        ],
+        "defaultValue": "$Lens.loadingFailedLens",
+        "rdfs:label": [
+          "Lens:rejectedLens",
+          "context[$Lens.rejectedLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:rejectedLens",
+          "$Lens.rejectedLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "A catch-all slot for displaying a pending operation which was rejected.",
+        "VRevdoc:introduction": [
+          null,
+          "This slot has no default lens.",
+          null,
+          "If a lens is placed into this slot then all the other rejection slots\nwill by default delegate displaying to that lens instead of using their\nown default lens.",
+          null,
+          "    @focus {Error} reason  the pending operation rejection error"
+        ]
+      },
+      "pendingPromiseLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Context",
+          "Lens",
+          "Loading"
+        ],
+        "defaultValue": "[$Lens.pendingLens, <Object>]",
+        "rdfs:label": [
+          "Lens:pendingPromiseLens",
+          "context[$Lens.pendingPromiseLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:pendingPromiseLens",
+          "$Lens.pendingPromiseLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying a description of a generic dependency which is a\npending promise.",
+        "VRevdoc:introduction": [
+          null,
+          "If the lens placed to this slot returns a promise then\n'internalErrorLens' is displayed instead.",
+          null,
+          "    @focus {Object} dependency  a description object of the pending dependency."
+        ]
+      },
+      "rejectedPromiseLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Context",
+          "Lens",
+          "Loading",
+          "Failure",
+          "Error"
+        ],
+        "defaultValue": "[$Lens.rejectedLens, <Object>]",
+        "rdfs:label": [
+          "Lens:rejectedPromiseLens",
+          "context[$Lens.rejectedPromiseLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:rejectedPromiseLens",
+          "$Lens.rejectedPromiseLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying a generic pending operation rejection error.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {Error} reason  operation rejection error."
+        ]
+      },
+      "pendingChroniclesLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Context",
+          "Lens",
+          "Loading"
+        ],
+        "defaultValue": "[$Lens.pendingLens, <Object>]",
+        "rdfs:label": [
+          "Lens:pendingChroniclesLens",
+          "context[$Lens.pendingChroniclesLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:pendingChroniclesLens",
+          "$Lens.pendingChroniclesLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying descriptions of the chronicles that are being sourcered.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {Object[]} chronicles  the chronicles that are being sourcered."
+        ]
+      },
+      "rejectedChroniclesLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Context",
+          "Lens",
+          "Loading",
+          "Failure",
+          "Error"
+        ],
+        "defaultValue": "[$Lens.rejectedLens, <Object>]",
+        "rdfs:label": [
+          "Lens:rejectedChroniclesLens",
+          "context[$Lens.rejectedChroniclesLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:rejectedChroniclesLens",
+          "$Lens.rejectedChroniclesLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying chronicle sourcery failure(s).",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {Error} reason  a chronicle sourcery rejection error."
+        ]
+      },
+      "delayed": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute"
+        ],
+        "rdfs:label": [
+          "Lens:delayed"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:delayed"
+        ],
+        "rdfs:domain": "Lens:Element",
+        "rdfs:range": "xsd:boolean",
+        "rdfs:comment": "Trigger asynchronous displaying for the component by surrounding its\ninternal rendering stages inside promises.",
+        "VRevdoc:introduction": [
+          null,
+          "By default inspire will render all components synchronously. This is\nto avoid needlessly displaying loading lenses that would only be\nvery briefly available and also for slight performance benefits.\nOccasionaly computing large datasets will take a long time to compute.",
+          null,
+          "Making a component delayed will surround the individual rendering stages\nof the component inside promises to improve responsiveness.\nEach stage is identified by their pending lens slot which they will\nalso display when they are pending:",
+          {
+            "VDoc:content": [
+              {
+                "@type": "VDoc:NumberedList",
+                "VDoc:entries": [
+                  [
+                    "$Lens.pendingAttributesLens during the attribute resolution stage"
+                  ],
+                  {
+                    "@type": "VDoc:Paragraph",
+                    "VDoc:content": [
+                      "$Lens.pendingFocusLens during the focus activation stage"
+                    ]
+                  },
+                  {
+                    "@type": "VDoc:Paragraph",
+                    "VDoc:content": [
+                      "$Lens.pendingFrameLens during the frame resolution stage (for Valoscope components)"
+                    ]
+                  },
+                  {
+                    "@type": "VDoc:Paragraph",
+                    "VDoc:content": [
+                      "$Lens.pendingMediaLens during the main lens media interpretation stage (ie. not for elements)"
+                    ]
+                  },
+                  {
+                    "@type": "VDoc:Paragraph",
+                    "VDoc:content": [
+                      "$Lens.pendingElementsLens during the final element rendering stage"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "Optionally, the delayed attribute can be given an array of only some of\nthe above pending slot names to make selectively delayed."
+        ]
+      },
+      "pendingAttributesLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Context",
+          "Lens",
+          "Loading"
+        ],
+        "defaultValue": "[$Lens.pendingLens, <Object>]",
+        "rdfs:label": [
+          "context[$Lens.pendingAttributesLens]",
+          "Lens:pendingAttributesLens"
+        ],
+        "VRevdoc:indexLabel": [
+          "$Lens.pendingAttributesLens"
+        ],
+        "rdfs:domain": "Lens:UIContext",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying the description of attributes which are pending resolution.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {Object} props  the pending attributes."
+        ]
+      },
+      "rejectedAttributesLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Context",
+          "Lens",
+          "Loading",
+          "Failure",
+          "Error"
+        ],
+        "defaultValue": "[$Lens.rejectedLens, <Object>]",
+        "rdfs:label": [
+          "context[$Lens.rejectedAttributesLens]",
+          "Lens:rejectedAttributesLens"
+        ],
+        "VRevdoc:indexLabel": [
+          "$Lens.rejectedAttributesLens"
+        ],
+        "rdfs:domain": "Lens:UIContext",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying an attribute loading rejection error.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {string|Error|Object} reason  attribute rejection error."
+        ]
+      },
+      "pendingFocusLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Context",
+          "Lens",
+          "Loading"
+        ],
+        "defaultValue": "[$Lens.pendingLens, <Object>]",
+        "rdfs:label": [
+          "Lens:pendingFocusLens",
+          "context[$Lens.pendingFocusLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:pendingFocusLens",
+          "$Lens.pendingFocusLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying a description of the focused resource that is pending\nactivation.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {Object[]} focus  the component focus that is being activated."
+        ]
+      },
+      "rejectedFocusLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Context",
+          "Lens",
+          "Loading",
+          "Failure",
+          "Error"
+        ],
+        "defaultValue": "[$Lens.rejectedLens, <Object>]",
+        "rdfs:label": [
+          "Lens:rejectedFocusLens",
+          "context[$Lens.rejectedFocusLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:rejectedFocusLens",
+          "$Lens.rejectedFocusLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying an the rejection of a focus activation.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {Error} reason  the focus activation error."
+        ]
+      },
+      "pendingFrameLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Context",
+          "Lens",
+          "Loading"
+        ],
+        "defaultValue": "[$Lens.pendingLens, <Object>]",
+        "rdfs:label": [
+          "Lens:pendingFrameLens",
+          "context[$Lens.pendingFrameLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:pendingFrameLens",
+          "$Lens.pendingFrameLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying a description of the frame resource that is being created.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {Object[]} frame  the valoscope frame that is being created."
+        ]
+      },
+      "rejectedFrameLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Context",
+          "Lens",
+          "Loading",
+          "Failure",
+          "Error"
+        ],
+        "defaultValue": "[$Lens.rejectedLens, <Object>]",
+        "rdfs:label": [
+          "Lens:rejectedFrameLens",
+          "context[$Lens.rejectedFrameLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:rejectedFrameLens",
+          "$Lens.rejectedFrameLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying the rejection of a frame creation.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {Error} reason  the frame creation error."
+        ]
+      },
+      "inactiveLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Context",
+          "Lens",
+          "Loading",
+          "Failure"
+        ],
+        "defaultValue": "[$Lens.loadingFailedLens, <Object>]",
+        "rdfs:label": [
+          "Lens:inactiveLens",
+          "context[$Lens.inactiveLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:inactiveLens",
+          "$Lens.inactiveLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying an inactive Resource.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {Object} focus  the inactive Resource focus."
+        ]
+      },
+      "pendingMediaLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Context",
+          "Lens",
+          "Loading"
+        ],
+        "defaultValue": "[$Lens.pendingLens, <Object>]",
+        "rdfs:label": [
+          "Lens:pendingMediaLens",
+          "context[$Lens.pendingMediaLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:pendingMediaLens",
+          "$Lens.pendingMediaLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying a description of a Media that is about to be used as\nthe lens to view the current focus but which is still being interpreted\n(ie. downloaded, decoded and integrated).",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {Media} media  the Media being interpreted."
+        ]
+      },
+      "rejectedMediaLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Context",
+          "Lens",
+          "Loading",
+          "Failure",
+          "Error"
+        ],
+        "defaultValue": "[$Lens.rejectedLens, <Object>]",
+        "rdfs:label": [
+          "Lens:rejectedMediaLens",
+          "context[$Lens.rejectedMediaLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:rejectedMediaLens",
+          "$Lens.rejectedMediaLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying an error encountered during an attempt to use a Media\nas a lens to view the current focus.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {Error} reason  interpretation or displaying error."
+        ]
+      },
+      "uninterpretableMediaLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Context",
+          "Lens",
+          "Loading",
+          "Failure",
+          "Error"
+        ],
+        "defaultValue": "$Lens.rejectedMediaLens",
+        "rdfs:label": [
+          "Lens:uninterpretableMediaLens",
+          "context[$Lens.uninterpretableMediaLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:uninterpretableMediaLens",
+          "$Lens.uninterpretableMediaLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying an error that was encountered during media\ninterpretation.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {Error} reason  interpretation error."
+        ]
+      },
+      "unrenderableInterpretationLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Context",
+          "Lens",
+          "Loading",
+          "Failure",
+          "Error"
+        ],
+        "defaultValue": "$Lens.rejectedMediaLens",
+        "rdfs:label": [
+          "Lens:unrenderableInterpretationLens",
+          "context[$Lens.unrenderableInterpretationLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:unrenderableInterpretationLens",
+          "$Lens.unrenderableInterpretationLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying an error raised by an unrenderable media\ninterpretation.",
+        "VRevdoc:introduction": [
+          null,
+          "Unrenderable interpretations are values such as octet stream, complex\nnative objects or the undefined value.",
+          null,
+          "    @focus {Error} reason  interpretation displaying error."
+        ]
+      },
+      "pendingElementsLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Context",
+          "Lens",
+          "Loading"
+        ],
+        "defaultValue": "[$Lens.loadingLens, <Object>]",
+        "rdfs:label": [
+          "Lens:pendingElementsLens",
+          "context[$Lens.pendingElementsLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:pendingElementsLens",
+          "$Lens.pendingElementsLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying a description of pending elements Promise.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {Object} elements  the pending elements Promise."
+        ]
+      },
+      "rejectedElementsLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Context",
+          "Lens",
+          "Loading",
+          "Failure"
+        ],
+        "defaultValue": "[$Lens.loadingFailedLens, <Object>]",
+        "rdfs:label": [
+          "Lens:rejectedElementsLens",
+          "context[$Lens.rejectedElementsLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:rejectedElementsLens",
+          "$Lens.rejectedElementsLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying an element rendering rejection error.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {string|Error|Object} reason  element rejection error."
+        ]
+      },
+      "activatingLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Context",
+          "Lens",
+          "Loading"
+        ],
+        "defaultValue": "[\"<function ()>\", $Lens.loadingLens, <Object>]",
+        "rdfs:label": [
+          "Lens:activatingLens",
+          "context[$Lens.activatingLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:activatingLens",
+          "$Lens.activatingLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying an activating Resource.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {Object} focus  the activating Resource focus."
+        ]
+      },
+      "unavailableLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Context",
+          "Lens",
+          "Loading",
+          "Failure"
+        ],
+        "defaultValue": "[$Lens.loadingFailedLens, <Object>]",
+        "rdfs:label": [
+          "Lens:unavailableLens",
+          "context[$Lens.unavailableLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:unavailableLens",
+          "$Lens.unavailableLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying an unavailable Resource.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {Object} focus  the unavailable Resource focus."
+        ]
+      },
+      "destroyedLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Context",
+          "Lens",
+          "Loading",
+          "Failure"
+        ],
+        "defaultValue": "[$Lens.loadingFailedLens, <Object>]",
+        "rdfs:label": [
+          "Lens:destroyedLens",
+          "context[$Lens.destroyedLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:destroyedLens",
+          "$Lens.destroyedLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying a destroyed Resource.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {Object} focus  the destroyed Resource focus."
+        ]
+      },
+      "lensPropertyNotFoundLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "Context",
+          "Lens",
+          "Loading",
+          "Failure"
+        ],
+        "defaultValue": "[$Lens.loadingFailedLens, <Object>]",
+        "rdfs:label": [
+          "Lens:lensPropertyNotFoundLens",
+          "context[$Lens.lensPropertyNotFoundLens]"
+        ],
+        "VRevdoc:indexLabel": [
+          "Lens:lensPropertyNotFoundLens",
+          "$Lens.lensPropertyNotFoundLens"
+        ],
+        "rdfs:domain": [
+          "Lens:Element",
+          "Lens:UIContext"
+        ],
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying a description of an active Resource focus which does\nnot have a requested lens property.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {Object} focus  the active Resource focus."
+        ]
+      },
+      "notLensResourceLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Context",
+          "Lens",
+          "Loading",
+          "Failure"
+        ],
+        "defaultValue": "[$Lens.loadingFailedLens, <Object>]",
+        "rdfs:label": [
+          "context[$Lens.notLensResourceLens]",
+          "Lens:notLensResourceLens"
+        ],
+        "VRevdoc:indexLabel": [
+          "$Lens.notLensResourceLens"
+        ],
+        "rdfs:domain": "Lens:UIContext",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying a Resource which cannot be used as a lens.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {Object} nonLensResource  the non-lens-able Resource."
+        ]
+      },
+      "arrayNotIterableLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Context",
+          "Lens",
+          "Loading",
+          "Failure"
+        ],
+        "defaultValue": "[$Lens.loadingFailedLens, <Object>]",
+        "rdfs:label": [
+          "context[$Lens.arrayNotIterableLens]",
+          "Lens:arrayNotIterableLens"
+        ],
+        "VRevdoc:indexLabel": [
+          "$Lens.arrayNotIterableLens"
+        ],
+        "rdfs:domain": "Lens:UIContext",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying a valoscope $Lens.array which is not an iterable.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {Object} nonArray  the non-iterable value."
+        ]
+      },
+      "invalidElementLens": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Context",
+          "Lens",
+          "Loading",
+          "Failure"
+        ],
+        "defaultValue": "[$Lens.loadingFailedLens, <Object>]",
+        "rdfs:label": [
+          "context[$Lens.invalidElementLens]",
+          "Lens:invalidElementLens"
+        ],
+        "VRevdoc:indexLabel": [
+          "$Lens.invalidElementLens"
+        ],
+        "rdfs:domain": "Lens:UIContext",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Slot for displaying an a description of an invalid UI element.",
+        "VRevdoc:introduction": [
+          null,
+          "    @focus {Object} description  string or object description."
+        ]
+      }
+    },
+    "context": {
+      "@id": "context",
+      "@base": "https://valospace.org/inspire/Lens/0#",
+      "Lens:frame": {
+        "@id": "#frame",
+        "@type": "@id"
+      }
+    },
+    "section_valosheath_abstract": {
+      "@id": "section_valosheath_abstract",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            [
+              "The 'Lens' namespace defines the primary valospace UI component\nvocabulary. This vocabulary is the API between the UI code written by\na valonaut and the @valos/inspire UI engine.",
+              "Roughly speaking the Lens namespace terms are:",
+              {
+                "VDoc:content": [
+                  {
+                    "@type": "VDoc:BulletList",
+                    "VDoc:entries": [
+                      [
+                        "used by the Inspire engine to identify an attribute value given to\n  a UI element by the valonaut. Engine then uses this to either display\n  and customize the UI behavior or to invoke callbacks written by the\n  valonaut."
+                      ],
+                      {
+                        "@type": "VDoc:Paragraph",
+                        "VDoc:content": [
+                          "used by the valonaut to instruct an UI element to use an value or\n  default implementation that is provided by the inspire engine and\n  is identified by the term."
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "\n\nThe 'Lens' terms are marked with tags which describe their qualities.\nThere are three primary tags:",
+              {
+                "VDoc:content": [
+                  {
+                    "@type": "VDoc:BulletList",
+                    "VDoc:entries": [
+                      [
+                        {
+                          "@type": "VDoc:Reference",
+                          "VDoc:content": [
+                            [
+                              {
+                                "VDoc:em": true,
+                                "VDoc:content": [
+                                  "Attribute"
+                                ]
+                              }
+                            ]
+                          ],
+                          "VDoc:ref": "#Attribute"
+                        },
+                        " tagged terms identify an ",
+                        {
+                          "@type": "VDoc:Reference",
+                          "VDoc:content": [
+                            "element attribute"
+                          ],
+                          "VDoc:ref": "@valos/inspire/Lens#section_element_attributes"
+                        },
+                        ". These attributes affect only the element itself."
+                      ],
+                      {
+                        "@type": "VDoc:Paragraph",
+                        "VDoc:content": [
+                          {
+                            "@type": "VDoc:Reference",
+                            "VDoc:content": [
+                              [
+                                {
+                                  "VDoc:em": true,
+                                  "VDoc:content": [
+                                    "Context"
+                                  ]
+                                }
+                              ]
+                            ],
+                            "VDoc:ref": "#Context"
+                          },
+                          " tagged terms identify a ",
+                          {
+                            "@type": "VDoc:Reference",
+                            "VDoc:content": [
+                              {
+                                "VDoc:em": true,
+                                "VDoc:content": [
+                                  "context variable"
+                                ]
+                              }
+                            ],
+                            "VDoc:ref": "@valos/inspire/Lens#section_context_variables"
+                          },
+                          ". Context variables of an element affect all of its child elements."
+                        ]
+                      },
+                      {
+                        "@type": "VDoc:Paragraph",
+                        "VDoc:content": [
+                          {
+                            "@type": "VDoc:Reference",
+                            "VDoc:content": [
+                              [
+                                {
+                                  "VDoc:em": true,
+                                  "VDoc:content": [
+                                    "Lens"
+                                  ]
+                                }
+                              ]
+                            ],
+                            "VDoc:ref": "@valos/inspire/Lens#section_lens_terms"
+                          },
+                          " denotes\n  a term that can be used in VSX element bodies to display content"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              [
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "Lens"
+                  ]
+                },
+                "-terms"
+              ],
+              " which are also tagged with either ",
+              [
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "Attribute"
+                  ]
+                }
+              ],
+              " or ",
+              [
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "Context"
+                  ]
+                }
+              ],
+              " are known as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "lens slots"
+                ],
+                "VDoc:ref": "@valos/inspire/Lens#lens_slots"
+              },
+              ".\n\nThere are also auxiliary tags:",
+              {
+                "VDoc:content": [
+                  {
+                    "@type": "VDoc:BulletList",
+                    "VDoc:entries": [
+                      [
+                        "'Primary' denotes the most commonly used terms"
+                      ],
+                      {
+                        "@type": "VDoc:Paragraph",
+                        "VDoc:content": [
+                          "'Internal' denotes a term that is not intended to be used directly\n  from valospace but has relevant internal semantics and is thus\n  documented."
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          ]
+        }
+      ]
+    },
+    "section_prefixes": {
+      "@id": "section_prefixes",
+      "@type": "VDoc:Chapter",
+      "dc:title": [
+        {
+          "VDoc:em": true,
+          "VDoc:content": [
+            "@valos/inspire"
+          ]
+        },
+        " IRI prefixes"
+      ],
+      "VDoc:content": [
+        {
+          "VDoc:lookup": "prefixes",
+          "@type": "VDoc:Table",
+          "VDoc:columns": [
+            {
+              "VDoc:cell": "VDoc:selectKey",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
+                "Prefix"
+              ]
+            },
+            {
+              "VDoc:cell": "VDoc:selectValue",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
+                "IRI"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "section_classes": {
+      "@id": "section_classes",
+      "@type": "VDoc:Chapter",
+      "dc:title": [
+        {
+          "VDoc:em": true,
+          "VDoc:content": [
+            "Lens"
+          ]
+        },
+        " ",
+        {
+          "@type": "VDoc:Reference",
+          "VDoc:content": [
+            "valosheath classes"
+          ],
+          "VDoc:ref": "VEngine:Class"
+        }
+      ],
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "This section describes valosheath classes of the 'Lens' namespace."
+          ]
+        },
+        {
+          "VDoc:lookup": "vocabulary",
+          "@type": "VDoc:Table",
+          "VDoc:columns": {
+            "VDoc:entries": [
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": null,
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:resourceId": "VDoc:selectKey",
+                  "VDoc:heading": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:words": [
+                        {
+                          "VDoc:strong": true,
+                          "VDoc:content": [
+                            {
+                              "VDoc:em": true,
+                              "VDoc:content": [
+                                {
+                                  "@type": "VDoc:Reference",
+                                  "VDoc:content": [
+                                    [
+                                      "#",
+                                      "VDoc:selectKey"
+                                    ]
+                                  ],
+                                  "VDoc:ref": [
+                                    "#",
+                                    "VDoc:selectKey"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "VDoc:words": {
+                            "VDoc:selectField": "rdfs:label"
+                          },
+                          "VDoc:elidable": true,
+                          "VDoc:map": {
+                            "@type": "VDoc:Reference",
+                            "VDoc:content": [
+                              "VDoc:selectValue"
+                            ],
+                            "VDoc:ref": "VEngine:valosheath"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:strong": true,
+                      "VDoc:content": [
+                        "DEPRECATED"
+                      ]
+                    },
+                    " in favor of:"
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:entries": {
+                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "rdfs:subClassOf"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:subClassOf"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "VDoc:cell": "rdfs:comment",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "description"
+                      ],
+                      "VDoc:ref": "rdfs:comment"
+                    }
+                  ]
+                },
+                "VDoc:wide": false
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "instance properties"
+                  ],
+                  "VDoc:ref": "VEngine:Property"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:domainOfProperty"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "instance methods"
+                  ],
+                  "VDoc:ref": "VEngine:Method"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:domainOfMethod"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "class properties"
+                  ],
+                  "VDoc:ref": "VEngine:ObjectProperty"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:hasProperty"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "class methods"
+                  ],
+                  "VDoc:ref": "VEngine:ObjectMethod"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:hasMethod"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
+              },
+              {
+                "VDoc:cell": "VRevdoc:introduction",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "introduction"
+                      ],
+                      "VDoc:ref": "VRevdoc:introduction"
+                    }
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:collapsed": true,
+                "VDoc:elidable": true
+              }
+            ]
+          },
+          "VDoc:entries": [
+            "Node",
+            "Element",
+            "DOMElement",
+            "Component",
+            "Valoscope",
+            "InstanceComponent",
+            "UIContext"
+          ]
+        }
+      ]
+    },
+    "section_properties": {
+      "@id": "section_properties",
+      "@type": "VDoc:Chapter",
+      "dc:title": [
+        {
+          "VDoc:em": true,
+          "VDoc:content": [
+            "Lens"
+          ]
+        },
+        " ",
+        {
+          "@type": "VDoc:Reference",
+          "VDoc:content": [
+            "valosheath properties"
+          ],
+          "VDoc:ref": "VEngine:Property"
+        }
+      ],
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "This section describes all valosheath properties of the 'Lens'\nnamespace."
+          ]
+        },
+        {
+          "VDoc:lookup": "vocabulary",
+          "@type": "VDoc:Table",
+          "VDoc:columns": {
+            "VDoc:entries": [
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": null,
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:resourceId": "VDoc:selectKey",
+                  "VDoc:heading": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:words": [
+                        {
+                          "VDoc:strong": true,
+                          "VDoc:content": [
+                            {
+                              "VDoc:em": true,
+                              "VDoc:content": [
+                                {
+                                  "@type": "VDoc:Reference",
+                                  "VDoc:content": [
+                                    [
+                                      "#",
+                                      "VDoc:selectKey"
+                                    ]
+                                  ],
+                                  "VDoc:ref": [
+                                    "#",
+                                    "VDoc:selectKey"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "VDoc:words": {
+                            "VDoc:selectField": "rdfs:label"
+                          },
+                          "VDoc:elidable": true,
+                          "VDoc:map": {
+                            "@type": "VDoc:Reference",
+                            "VDoc:content": [
+                              "VDoc:selectValue"
+                            ],
+                            "VDoc:ref": "VEngine:valosheath"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:strong": true,
+                      "VDoc:content": [
+                        "DEPRECATED"
+                      ]
+                    },
+                    " in favor of:"
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:entries": {
+                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "rdfs:domain"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:domain"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "rdfs:range"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:range"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "tags"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "tags"
+                  },
+                  "VDoc:map": {
+                    "VDoc:em": true,
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ]
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  {
+                    "VDoc:em": true,
+                    "VDoc:content": [
+                      "value"
+                    ]
+                  }
+                ],
+                "VDoc:wide": true,
+                "VDoc:elidable": true,
+                "VDoc:cell": {
+                  "VDoc:selectField": "value"
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  {
+                    "VDoc:em": true,
+                    "VDoc:content": [
+                      "default value"
+                    ]
+                  }
+                ],
+                "VDoc:wide": true,
+                "VDoc:elidable": true,
+                "VDoc:cell": {
+                  "VDoc:selectField": "defaultValue"
+                }
+              },
+              {
+                "VDoc:cell": "rdfs:comment",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "description"
+                      ],
+                      "VDoc:ref": "rdfs:comment"
+                    }
+                  ]
+                },
+                "VDoc:wide": true
+              },
+              {
+                "VDoc:cell": "VRevdoc:introduction",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "introduction"
+                      ],
+                      "VDoc:ref": "VRevdoc:introduction"
+                    }
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:collapsed": true,
+                "VDoc:elidable": true
+              }
+            ]
+          },
+          "VDoc:entries": [
+            "focus",
+            "array",
+            "frame",
+            "lens",
+            "loadingLens",
+            "loadingFailedLens",
+            "if",
+            "then",
+            "else",
+            "offset",
+            "limit",
+            "arrayIndex",
+            "endOffset",
+            "elementIndex",
+            "sort",
+            "reverse",
+            "children",
+            "componentChildrenLens",
+            "static",
+            "slotAssembly",
+            "parentComponentLens",
+            "focusDescriptionLens",
+            "focusDetailLens",
+            "focusDumpLens",
+            "focusPropertyKeysLens",
+            "toggleableErrorDetailLens",
+            "internalErrorLens",
+            "currentRenderDepth",
+            "infiniteRecursionCheckWaterlineDepth",
+            "maximumRenderDepth",
+            "maximumRenderDepthExceededLens",
+            "valoscopeLens",
+            "valensLens",
+            "uiComponentLens",
+            "firstEnabledDelegateLens",
+            "loadedLens",
+            "undefinedLens",
+            "nullLens",
+            "resourceLens",
+            "activeLens",
+            "lensProperty",
+            "focusLensProperty",
+            "focusPropertyLens",
+            "delegateLensProperty",
+            "delegatePropertyLens",
+            "unframedLens",
+            "instanceLensPrototype",
+            "instanceLens",
+            "instanceLensProperty",
+            "instancePropertyLens",
+            "mediaInstanceLens",
+            "scopeFrameResource",
+            "frameStepPrefix",
+            "frameOwner",
+            "frameAuthority",
+            "frameAuthorityProperty",
+            "frameRoot",
+            "frameRootFocus",
+            "integrationScopeResource",
+            "disabledLens",
+            "pendingLens",
+            "rejectedLens",
+            "pendingPromiseLens",
+            "rejectedPromiseLens",
+            "pendingChroniclesLens",
+            "rejectedChroniclesLens",
+            "delayed",
+            "pendingAttributesLens",
+            "rejectedAttributesLens",
+            "pendingFocusLens",
+            "rejectedFocusLens",
+            "pendingFrameLens",
+            "rejectedFrameLens",
+            "inactiveLens",
+            "pendingMediaLens",
+            "rejectedMediaLens",
+            "uninterpretableMediaLens",
+            "unrenderableInterpretationLens",
+            "pendingElementsLens",
+            "rejectedElementsLens",
+            "activatingLens",
+            "unavailableLens",
+            "destroyedLens",
+            "lensPropertyNotFoundLens",
+            "notLensResourceLens",
+            "arrayNotIterableLens",
+            "invalidElementLens"
+          ]
+        }
+      ]
+    },
+    "section_methods": {
+      "@id": "section_methods",
+      "@type": "VDoc:Chapter",
+      "dc:title": [
+        {
+          "VDoc:em": true,
+          "VDoc:content": [
+            "Lens"
+          ]
+        },
+        " ",
+        {
+          "@type": "VDoc:Reference",
+          "VDoc:content": [
+            "valosheath methods"
+          ],
+          "VDoc:ref": "VEngine:Method"
+        }
+      ],
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "This section describes valosheath methods introduced by the 'Lens' namespace"
+          ]
+        },
+        {
+          "VDoc:lookup": "vocabulary",
+          "@type": "VDoc:Table",
+          "VDoc:columns": {
+            "VDoc:entries": [
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": null,
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:resourceId": "VDoc:selectKey",
+                  "VDoc:heading": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:words": [
+                        {
+                          "VDoc:strong": true,
+                          "VDoc:content": [
+                            {
+                              "VDoc:em": true,
+                              "VDoc:content": [
+                                {
+                                  "@type": "VDoc:Reference",
+                                  "VDoc:content": [
+                                    [
+                                      "#",
+                                      "VDoc:selectKey"
+                                    ]
+                                  ],
+                                  "VDoc:ref": [
+                                    "#",
+                                    "VDoc:selectKey"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "VDoc:words": {
+                            "VDoc:selectField": "rdfs:label"
+                          },
+                          "VDoc:elidable": true,
+                          "VDoc:map": {
+                            "@type": "VDoc:Reference",
+                            "VDoc:content": [
+                              "VDoc:selectValue"
+                            ],
+                            "VDoc:ref": "VEngine:valosheath"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:strong": true,
+                      "VDoc:content": [
+                        "DEPRECATED"
+                      ]
+                    },
+                    " in favor of:"
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:entries": {
+                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "rdfs:domain"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:domain"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "rdfs:range"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:range"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "VDoc:cell": "rdfs:comment",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "description"
+                      ],
+                      "VDoc:ref": "rdfs:comment"
+                    }
+                  ]
+                },
+                "VDoc:wide": true
+              },
+              {
+                "VDoc:cell": "VRevdoc:introduction",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "introduction"
+                      ],
+                      "VDoc:ref": "VRevdoc:introduction"
+                    }
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:collapsed": true,
+                "VDoc:elidable": true
+              }
+            ]
+          },
+          "VDoc:entries": []
+        }
+      ]
+    },
+    "section_vocabulary_other": {
+      "@id": "section_vocabulary_other",
+      "@type": "VDoc:Chapter",
+      "dc:title": [
+        {
+          "VDoc:em": true,
+          "VDoc:content": [
+            "Lens"
+          ]
+        },
+        " remaining vocabulary names"
+      ],
+      "VDoc:content": [
+        {
+          "VDoc:lookup": "vocabulary",
+          "@type": "VDoc:Table",
+          "VDoc:columns": {
+            "VDoc:entries": [
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": null,
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:resourceId": "VDoc:selectKey",
+                  "VDoc:heading": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:words": [
+                        {
+                          "VDoc:strong": true,
+                          "VDoc:content": [
+                            {
+                              "VDoc:em": true,
+                              "VDoc:content": [
+                                {
+                                  "@type": "VDoc:Reference",
+                                  "VDoc:content": [
+                                    [
+                                      "#",
+                                      "VDoc:selectKey"
+                                    ]
+                                  ],
+                                  "VDoc:ref": [
+                                    "#",
+                                    "VDoc:selectKey"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "VDoc:words": {
+                            "VDoc:selectField": "rdfs:label"
+                          },
+                          "VDoc:elidable": true,
+                          "VDoc:map": {
+                            "@type": "VDoc:Reference",
+                            "VDoc:content": [
+                              "VDoc:selectValue"
+                            ],
+                            "VDoc:ref": "VEngine:valosheath"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:strong": true,
+                      "VDoc:content": [
+                        "DEPRECATED"
+                      ]
+                    },
+                    " in favor of:"
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:entries": {
+                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": "rdf:type",
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "@type"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "rdfs:subClassOf"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:subClassOf"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "VDoc:cell": "rdfs:comment",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "description"
+                      ],
+                      "VDoc:ref": "rdfs:comment"
+                    }
+                  ]
+                },
+                "VDoc:wide": true
+              },
+              {
+                "VDoc:cell": "VRevdoc:introduction",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "introduction"
+                      ],
+                      "VDoc:ref": "VRevdoc:introduction"
+                    }
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:collapsed": true,
+                "VDoc:elidable": true
+              }
+            ]
+          },
+          "VDoc:entries": []
+        }
+      ]
+    },
+    "@type": "VRevdoc:Document",
+    "VDoc:content": [
+      {
+        "@id": "abstract"
+      },
+      {
+        "@id": "sotd"
+      },
+      {
+        "@id": "introduction"
+      },
+      {
+        "@id": "main"
+      },
+      {
+        "@id": "section_term_qualities"
+      },
+      {
+        "@id": "section_slots"
+      },
+      {
+        "@id": "section_valosheath"
+      }
+    ]
+  }
+]

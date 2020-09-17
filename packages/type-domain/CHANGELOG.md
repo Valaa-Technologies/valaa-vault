@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.30](https://github.com/valaatech/kernel/compare/v0.35.0-rc.29...v0.35.0-rc.30) (2020-09-17)
+
+
+### Features
+
+* VRevdoc:Tooltip, VDoc:elidable, indexLabel, deprecatedInFavorOf ([b126296](https://github.com/valaatech/kernel/commit/b126296562562470dd1f4779f43b08c9f34482a2))
+
+
+
+
+
 # [0.35.0-rc.29](https://github.com/valaatech/kernel/compare/v0.35.0-rc.28...v0.35.0-rc.29) (2020-08-27)
 
 **Note:** Version bump only for package @valos/type-domain

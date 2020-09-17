@@ -2,36 +2,361 @@
 <html>
   <head>
     <meta charset='utf-8'>
-    <title>@valos/engine</title>
+    <title>@valos/engine library workspace</title>
     <script
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"engine"};
+      var respecConfig = {"specStatus":"unofficial","shortName":"engine","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}]};
     </script>
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
   </head>
   <body class="vdoc vdoc-body">
     
-  <section id="abstract" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">This document is a revdoc template document &#x27;engine&#x27; created by
-write-revdoc.</span>
+  <section id="abstract" class="vdoc type-vdoc-chapter"><div><p>
+  <div class="vdoc type-vdoc-paragraph">ValOS Engine API and Schema
+  </div>
 </p></div>
   </section>
 
-  <section id="sotd" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">This document is part of the library workspace <a href="https://valospace.org/engine" class="vdoc type-revdoc-package"><em>@valos/engine</em></a>
-(of domain <a href="https://valospace.org/kernel" class="vdoc type-revdoc-package"><em>@valos/kernel</em></a>) which has the description:
-&#x60;ValOS Engine API and Schema&#x60;</span>
+  <section id="sotd" class="vdoc type-vdoc-chapter"><div><p>
+  <div class="vdoc type-vdoc-paragraph">This document is part of the library workspace <a href="https://valospace.org/engine" class="vdoc type-vrevdoc-package"><em>@valos/engine</em></a>
+(of domain <a href="https://valospace.org/kernel" class="vdoc type-vrevdoc-package"><em>@valos/kernel</em></a>) which has the description:
+&#x60;ValOS Engine API and Schema&#x60;.
+  </div>
 </p></div>
   </section>
 
-  <section id="introduction" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">Edit me - this is the first payload chapter. Abstract and SOTD are
-essential <a href="https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate" class="vdoc type-vdoc-reference">ReSpec boilerplate</a></span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">See <a href="https://valospace.org/revdoc/tutorial" class="vdoc type-vdoc-reference">ReVDoc tutorial</a> for
-instructions on how to write revdoc source documents.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">See also <a href="https://valospace.org/revdoc" class="vdoc type-vdoc-reference">ReVdoc specification</a> and <a href="https://valospace.org/vdoc" class="vdoc type-vdoc-reference">VDoc specification</a> for reference
-documentation.</span>
+  <section id="introduction" class="vdoc type-vdoc-chapter"><div><p>
+  <div class="vdoc type-vdoc-paragraph">Edit me - this is the first payload chapter. Abstract and SOTD are
+essential <a href="https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate" class="vdoc type-vdoc-reference">ReSpec boilerplate</a>
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">See <a href="https://valospace.org/revdoc/tutorial" class="vdoc type-vdoc-reference">ReVDoc tutorial</a> for
+instructions on how to write revdoc source documents.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">See also <a href="https://valospace.org/revdoc" class="vdoc type-vdoc-reference">ReVdoc specification</a> and <a href="https://valospace.org/vdoc" class="vdoc type-vdoc-reference">VDoc specification</a> for reference documentation.
+  </div>
 </p></div>
+  </section>
+
+  <section id="section_fabric" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_fabric">§ </a>The <em>VEngine</em> fabric namespace of the library ontology of <a href="https://valospace.org/engine" class="vdoc type-vrevdoc-package"><em>@valos/engine</em></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">&#x27;VEngine&#x27; namespace provides vocabulary for describing and defining
+the valosheath and its types, objects, properties, methods and constants.
+  </div>
+</p></div>
+  <section id="section_prefixes" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_prefixes">§ </a><em>@valos/engine</em> IRI prefixes</h3>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">Prefix</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">IRI</span>
+</th>
+      </thead>
+      <tbody>
+        <tr><td><span class="vdoc type-vdoc-node">rdf</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/1999/02/22-rdf-syntax-ns#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">rdfs</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/2000/01/rdf-schema#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">xsd</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/2001/XMLSchema#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">owl</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/2002/07/owl#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">dc</span>
+</td><td><span class="vdoc type-vdoc-node">http://purl.org/dc/elements/1.1/</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VEngine</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/engine/0#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">VKernel</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/kernel/0#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VModel</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/raem/0#</span>
+</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_classes" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_classes">§ </a><em>VEngine</em> <a href="https://valospace.org/kernel/0#Class" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">fabric classes</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of classes which are defined by the ValOS kernel domain
+ontologies.
+    </span>
+</span></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">This section describes fabric classes introduced by the &#x27;VEngine&#x27; namespace
+  </div>
+</p></div>
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:subClassOf</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</th>
+      </thead>
+      <tbody>
+        <tr id="Class" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#Class" class="vdoc type-vdoc-reference">#Class</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/kernel/0#Class" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VKernel:Class</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of classes which are defined by the ValOS kernel domain
+ontologies.
+    </span>
+</span></a></td><td><span class="vdoc type-vdoc-node">The class of all valosheath type prototype properties.</span>
+</td></tr>
+        <tr id="Property" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#Property" class="vdoc type-vdoc-reference">#Property</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/kernel/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VKernel:Property</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of properties which are defined by the ValOS kernel domain
+ontologies.
+    </span>
+</span></a></td><td><span class="vdoc type-vdoc-node">The class of all valosheath type prototype properties.</span>
+</td></tr>
+        <tr id="Method" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#Method" class="vdoc type-vdoc-reference">#Method</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/kernel/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VKernel:Property</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of properties which are defined by the ValOS kernel domain
+ontologies.
+    </span>
+</span></a></td><td><span class="vdoc type-vdoc-node">The class of all valosheath type prototype methods.</span>
+</td></tr>
+        <tr id="Global" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#Global" class="vdoc type-vdoc-reference">#Global</a></em></strong> </h3></td></tr>
+        <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><span class="vdoc type-vdoc-node">The class of all valosheath global resources.</span>
+</td></tr>
+        <tr id="ObjectProperty" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#ObjectProperty" class="vdoc type-vdoc-reference">#ObjectProperty</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property" class="vdoc type-vdoc-reference">rdf:Property</a></td><td><span class="vdoc type-vdoc-node">The class of all valosheath object properties.</span>
+</td></tr>
+        <tr id="ObjectMethod" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#ObjectMethod" class="vdoc type-vdoc-reference">#ObjectMethod</a></em></strong> </h3></td></tr>
+        <tr><td><a href="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property" class="vdoc type-vdoc-reference">rdf:Property</a></td><td><span class="vdoc type-vdoc-node">The class of all valosheath object methods.</span>
+</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_properties" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_properties">§ </a><em>VEngine</em> <a href="https://valospace.org/kernel/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">fabric properties</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of properties which are defined by the ValOS kernel domain
+ontologies.
+    </span>
+</span></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">This section describes fabric properties introduced by the &#x27;VEngine&#x27; namespace
+  </div>
+</p></div>
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:domain</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:range</span>
+</th>
+      </thead>
+      <tbody>
+        <tr id="domainOfField" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#domainOfField" class="vdoc type-vdoc-reference">#domainOfField</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/raem/0#Type" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VModel:Type</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all valospace types. The instances of valospace types
+are called valospace resources and are the main valos ecosystem
+building block.Only valospace resources can appear as a subject in valospace resource
+and event triple graphs.
+    </span>
+</span></a></td><td><a href="https://valospace.org/raem/0#Field" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VModel:Field</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all valospace resource field identifiers.Only the instances of this class can appear as the predicate in
+valospace triple graphs. All valospace fields have VModel:Type or one
+of its sub-classes as their rdf:domain.
+    </span>
+</span></a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The VModel:Field individuals which have this VModel:Type as their rdfs:domain.</span>
+</td></tr>
+        <tr id="domainOfProperty" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#domainOfProperty" class="vdoc type-vdoc-reference">#domainOfProperty</a></em></strong> </h3></td></tr>
+        <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Class" class="vdoc type-vdoc-reference">rdfs:Class</a></td><td><a href="https://valospace.org/kernel/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VKernel:Property</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of properties which are defined by the ValOS kernel domain
+ontologies.
+    </span>
+</span></a></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The VKernel:Property individuals which have this rdfs:Class as their rdfs:domain.</span>
+</td></tr>
+        <tr id="domainOfMethod" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#domainOfMethod" class="vdoc type-vdoc-reference">#domainOfMethod</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Class" class="vdoc type-vdoc-reference">rdfs:Class</a></td><td><a href="https://valospace.org/engine/0#Method" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VEngine:Method</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all valosheath type prototype methods.
+    </span>
+</span></a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The VEngine:Method individuals which have this rdfs:Class as their rdfs:domain.</span>
+</td></tr>
+        <tr id="hasProperty" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#hasProperty" class="vdoc type-vdoc-reference">#hasProperty</a></em></strong> </h3></td></tr>
+        <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Class" class="vdoc type-vdoc-reference">rdfs:Class</a></td><td><a href="https://valospace.org/engine/0#ObjectProperty" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VEngine:ObjectProperty</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all valosheath object properties.
+    </span>
+</span></a></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The VEngine:ObjectProperty individuals which have this rdfs:Class as their rdfs:domain.</span>
+</td></tr>
+        <tr id="hasMethod" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#hasMethod" class="vdoc type-vdoc-reference">#hasMethod</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Class" class="vdoc type-vdoc-reference">rdfs:Class</a></td><td><a href="https://valospace.org/engine/0#ObjectMethod" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VEngine:ObjectMethod</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all valosheath object methods.
+    </span>
+</span></a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The VEngine:ObjectMethod individuals which have this rdfs:Class as their rdfs:domain.</span>
+</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_methods" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_methods">§ </a><em>VEngine</em> <a href="https://valospace.org/engine/0#Method" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">valosheath methods</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all valosheath type prototype methods.
+    </span>
+</span></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">This section describes fabric methods introduced by the &#x27;VEngine&#x27; namespace
+  </div>
+</p></div>
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:domain</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:range</span>
+</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_resolvers" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_resolvers">§ </a><em>VEngine</em> <a href="https://valospace.org/raem/0#Resolver" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">field resolvers</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all resolver names. Resolvers are verbs which are used
+for resolving generated properties.
+
+    </span>
+</span></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">This section describes valospace-to-fabric resolvers introduced by the &#x27;VEngine&#x27; namespace
+  </div>
+</p></div>
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">Comment</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdf:type</span>
+</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_globals" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_globals">§ </a><em>VEngine</em> <a href="https://valospace.org/engine/0#Global" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">valosheath globals</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all valosheath global resources.
+    </span>
+</span></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">This section describes valosheath global objects introduced by the &#x27;VEngine&#x27; namespace
+  </div>
+</p></div>
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdf:type</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">Comment</span>
+</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_vocabulary_other">§ </a><em>VEngine</em> remaining vocabulary names</h3>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdf:type</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:subClassOf</span>
+</th>
+      </thead>
+      <tbody>
+        <tr id="valosheath" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#valosheath" class="vdoc type-vdoc-reference">#valosheath</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/kernel/0#API" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VKernel:API</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of concepts which represent application programming
+interfaces.
+    </span>
+</span></a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
+non-valospace resources, notably including the services of the current
+execution environment.</span>
+</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
   </section>
 
   </body>

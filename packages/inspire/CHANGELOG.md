@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.30](https://github.com/valaatech/kernel/compare/v0.35.0-rc.29...v0.35.0-rc.30) (2020-09-17)
+
+
+### Bug Fixes
+
+* VDoc q, c, cell, valma ([e5101df](https://github.com/valaatech/kernel/commit/e5101df882c86e6988c5d8380fd1b1fd3a52480d))
+
+
+### Features
+
+* Add "Lens" and "On" namespaces ([0be9e08](https://github.com/valaatech/kernel/commit/0be9e081c10e8b08923cf74c44e83a93331d13fc))
+* Reference tooltips ([0e5790b](https://github.com/valaatech/kernel/commit/0e5790bc4805acd8be94dff2531ee6402e12c30d))
+
+
+
+
+
 # [0.35.0-rc.29](https://github.com/valaatech/kernel/compare/v0.35.0-rc.28...v0.35.0-rc.29) (2020-08-27)
 
 

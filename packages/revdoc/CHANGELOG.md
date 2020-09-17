@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.30](https://github.com/valaatech/kernel/compare/v0.35.0-rc.29...v0.35.0-rc.30) (2020-09-17)
+
+
+### Bug Fixes
+
+* VDoc q, c, cell, valma ([e5101df](https://github.com/valaatech/kernel/commit/e5101df882c86e6988c5d8380fd1b1fd3a52480d))
+
+
+### Features
+
+* Reference tooltips ([0e5790b](https://github.com/valaatech/kernel/commit/0e5790bc4805acd8be94dff2531ee6402e12c30d))
+* VRevdoc:Tooltip, VDoc:elidable, indexLabel, deprecatedInFavorOf ([b126296](https://github.com/valaatech/kernel/commit/b126296562562470dd1f4779f43b08c9f34482a2))
+* VRevdoc:VSX ([f8a4a60](https://github.com/valaatech/kernel/commit/f8a4a60717625ebe8b8e063a6d578eeb491bded3))
+* **vdoc:** VDoc:map, VDoc:heading, [@context](https://github.com/context) extraction, qualified refs ([4d7c8cf](https://github.com/valaatech/kernel/commit/4d7c8cf5e75595330bb9f370964300bad6ce2583))
+
+
+
+
+
 # [0.35.0-rc.29](https://github.com/valaatech/kernel/compare/v0.35.0-rc.28...v0.35.0-rc.29) (2020-08-27)
 
 **Note:** Version bump only for package @valos/revdoc

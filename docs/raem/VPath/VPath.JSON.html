@@ -14,57 +14,80 @@
   </head>
   <body class="vdoc vdoc-body">
     
-  <section id="abstract" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">VPath JSON is a JSON representation of VPath strings. It
+  <section id="abstract" class="vdoc type-vdoc-chapter"><div><p>
+  <div class="vdoc type-vdoc-paragraph">VPath JSON is a JSON representation of VPath strings. It
 has two formats: generic &#x27;VPath outlines&#x27; and their strict subset
-&#x27;sectioned VPaths&#x27;.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">Sectioned VPaths are the verbose, machine-processible canonical
+&#x27;sectioned VPaths&#x27;.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">Sectioned VPaths are the verbose, machine-processible canonical
 JSON 1-1 representation of VPath strings. Outlines are the more
 concise, writable and readable but non-canonical format: many different
 outlines can have the same VPath meaning. The normalization of an
-outline into its canonical, sectioned VPath is called disjoining.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">As sectioned VPaths are a subset of VPath outlines, a sectioned VPath
+outline into its canonical, sectioned VPath is called disjoining.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">As sectioned VPaths are a subset of VPath outlines, a sectioned VPath
 always disjoins into itself.
-</span>
+
+  </div>
 </p></div>
   </section>
 
-  <section id="sotd" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">This document is part of the library workspace <a href="https://valospace.org/raem" class="vdoc type-revdoc-package"><em>@valos/raem</em></a>
-(of domain <a href="https://valospace.org/kernel" class="vdoc type-revdoc-package"><em>@valos/kernel</em></a>) which has the description:
-&#x60;ValOS Resources And Events Model (ValOS-RAEM) API, schema and ontology&#x60;.</span>
+  <section id="sotd" class="vdoc type-vdoc-chapter"><div><p>
+  <div class="vdoc type-vdoc-paragraph">This document is part of the library workspace <a href="https://valospace.org/raem" class="vdoc type-vrevdoc-package"><em>@valos/raem</em></a>
+(of domain <a href="https://valospace.org/kernel" class="vdoc type-vrevdoc-package"><em>@valos/kernel</em></a>) which has the description:
+&#x60;ValOS Resources And Events Model (ValOS-RAEM) API, schema and ontology&#x60;.
+  </div>
 </p></div>
   </section>
 
-  <section id="introduction" class="vdoc type-vdoc-chapter"><div><p><span class="vdoc type-vdoc-paragraph">VPath JSON is a JSON representation of a VPath string.
+  <section id="introduction" class="vdoc type-vdoc-chapter"><div><p>
+  <div class="vdoc type-vdoc-paragraph">VPath JSON is a JSON representation of a VPath string.
 Different VPath JSON objects can express the same VPath which allows
-the most suitable representation to be chosen based on use case.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">The canonical subset of VPath JSON (with 1-1 mapping to VPath strings)
+the most suitable representation to be chosen based on use case.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">The canonical subset of VPath JSON (with 1-1 mapping to VPath strings)
 is called sectioned VPaths. These use a limited subset of JSON
-primitives and are designed to be easily machine-processible.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">Finally, the remaining, non-sectioned VPath JSON objects are called
+primitives and are designed to be easily machine-processible.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">Finally, the remaining, non-sectioned VPath JSON objects are called
 VPath outlines. Arbitrary JSON objects can be trivially escaped as
 VPath outline, allowing for generic JSON &#x3C;-&#x3E; VPath roundtripping.
 Edit me - this is the first payload chapter. Abstract and SOTD are
-essential <a href="https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate" class="vdoc type-vdoc-reference">ReSpec boilerplate</a></span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">See <a href="https://valospace.org/revdoc/tutorial" class="vdoc type-vdoc-reference">ReVDoc tutorial</a> for
-instructions on how to write revdoc source documents.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">See also <a href="https://valospace.org/revdoc" class="vdoc type-vdoc-reference">ReVdoc specification</a> and <a href="https://valospace.org/vdoc" class="vdoc type-vdoc-reference">VDoc specification</a> for reference documentation.</span>
+essential <a href="https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate" class="vdoc type-vdoc-reference">ReSpec boilerplate</a>
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">See <a href="https://valospace.org/revdoc/tutorial" class="vdoc type-vdoc-reference">ReVDoc tutorial</a> for
+instructions on how to write revdoc source documents.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">See also <a href="https://valospace.org/revdoc" class="vdoc type-vdoc-reference">ReVdoc specification</a> and <a href="https://valospace.org/vdoc" class="vdoc type-vdoc-reference">VDoc specification</a> for reference documentation.
+  </div>
 </p></div>
   </section>
 
   <section id="sectioned_vpath_json" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#sectioned_vpath_json">§ </a>Sectioned VPath JSON</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">
 Sectioned VPaths are the canonical JSON representation of a VPath.
 They use only a limited subset of JSON primitives: objects are not
 used; the literal &#x27;null&#x27;, the booleans &#x27;true&#x27; and &#x27;false&#x27;, all string
 values and all safe integers (ie. whole numbers from -(2^53-1) to
 (2^53-1)) are used to represent their corresponding contextless vparam
-values directly.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">All remaining VPath elements are represented with two-entry arrays
+values directly.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">All remaining VPath elements are represented with two-entry arrays
 as the titular &#x27;sections&#x27;. The mandatory first entry contains a
 &#x22;@&#x22;-prefixed section type string. The optional second entry contains
-the section payload.</span>
-</p></div><div><p><span class="vdoc type-vdoc-paragraph">The first two characters of the section type determine which vpath
+the section payload.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">The first two characters of the section type determine which vpath
 element the section represents:&#x27;@@&#x27; denote a vpath element. The type has no other characters. The
 optional payload is an array of /two/ or more sections or values.&#x27;@$&#x27; denote a vparam element. The remaining type characters contain
 the vparam context-term. If there are none the vparam is contextless.
@@ -72,12 +95,14 @@ The optional payload is a singular section or an unencoded string
 value.&#x27;@&#x27; denotes a vgrid element or a verb without a type. The mandatory
 payload is a non-empty array of vparam sections or values.Remaining types denote a verb element with the verb type contained
 in the characters after initial &#x27;@&#x27;. The optional payload is a
-non-empty array of sections or values.</span>
+non-empty array of sections or values.
+  </div>
 </p></div>
 <blockquote class="vdoc type-revdoc-example">
     <span class="vdoc type-vdoc-node">
     <h3>forms a VPath string from VPath section of computing a random value between 2.5 and 10</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> conjoinVPath(
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> conjoinVPath(
     [&#x22;@@&#x22;, [                // declare two-step path
       [&#x22;@!random&#x22;],         // first step: compute a random value
       [&#x22;@!min&#x22;, [           // second step: compute the min of
@@ -90,21 +115,25 @@ non-empty array of sections or values.</span>
     ]],
 )</span>
 </code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node">&#x22;@!random@!min$d.10$.@!max$d.2.5$.@@@@@@&#x22;</span>
-</code></pre></blockquote></span>
+</code></pre></blockquote>
+  </div>
 </p></div></span>
 
-</blockquote><div><p><span class="vdoc type-vdoc-paragraph">
+</blockquote><div><p>
+  <div class="vdoc type-vdoc-paragraph">
 During sectioning (be it from a vpath string or from an outline) all
 redundant sections are elided or simplified:Single-step vpath sections are replaced with that step itself - a
 vpath represents a sequential dependency between its
 constitutient steps so a single-step vpath is redundantVParam sections that represent null, true, false or any integer
 values are replaced with the direct JSON valueContextless vparam sections which contain a path or a verb section
-as the payload are replaced with the payload section itself.</span>
+as the payload are replaced with the payload section itself.
+  </div>
 </p></div>
 <blockquote class="vdoc type-revdoc-example">
     <span class="vdoc type-vdoc-node">
     <h3>elides degenerate vpath elements during sectioning</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> disjoinVPathString(&#x22;@!random@!min$d.10$.@!max$d.2.5$.@@@@@@&#x22;)</span>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> disjoinVPathString(&#x22;@!random@!min$d.10$.@!max$d.2.5$.@@@@@@&#x22;)</span>
 </code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node">[
   &#x22;@@&#x22;,
   [
@@ -131,7 +160,8 @@ as the payload are replaced with the payload section itself.</span>
     ]
   ]
 ]</span>
-</code></pre></blockquote></span>
+</code></pre></blockquote>
+  </div>
 </p></div></span>
 
 </blockquote>
@@ -139,14 +169,17 @@ as the payload are replaced with the payload section itself.</span>
 
   <section id="vpath_json_outline" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#vpath_json_outline">§ </a>VPath JSON outlines</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">
 VPath outlines are JSON structures which use convenience constructs.
-</span>
+
+  </div>
 </p></div>
 <blockquote class="vdoc type-revdoc-example">
     <span class="vdoc type-vdoc-node">
     <h3>disjoins a configuration outline</h3>
-<div><p><span class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> disjoinVPathOutline([
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> disjoinVPathOutline([
   [&#x22;@$o.folder&#x22;, &#x22;vault&#x22;],
   [&#x22;@$o.vlm&#x22;, &#x22;@&#x22;, &#x22;webpack&#x22;],
   [&#x22;@$o.folder&#x22;, &#x22;build&#x22;],
@@ -368,7 +401,8 @@ VPath outlines are JSON structures which use convenience constructs.
     ]
   ]
 ]</span>
-</code></pre></blockquote></span>
+</code></pre></blockquote>
+  </div>
 </p></div></span>
 
 </blockquote>

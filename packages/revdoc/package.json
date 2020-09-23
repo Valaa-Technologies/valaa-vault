@@ -13,5 +13,8 @@
     "access": "public"
   },
   "description": "ReVDoc - ReSpec document VDoc extension",
-  "main": "index.js"
+  "main": "index.js",
+  "dependencies": {
+    "@valos/vdoc": "^0.35.0-rc.30"
+  }
 }

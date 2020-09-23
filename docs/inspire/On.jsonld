@@ -58,7 +58,7 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/inspire",
-    "VRevdoc:version": "0.35.0-rc.30",
+    "VRevdoc:version": "0.35.0-rc.31",
     "VRevdoc:preferredPrefix": "On",
     "VRevdoc:baseIRI": "https://valospace.org/inspire/On/0#",
     "VRevdoc:referencedModules": {

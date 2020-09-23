@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.31](https://github.com/valaatech/kernel/compare/v0.35.0-rc.30...v0.35.0-rc.31) (2020-09-23)
+
+
+### Bug Fixes
+
+* Add missing @valos/revdoc dependencies ([aef4072](https://github.com/valaatech/kernel/commit/aef40725d53072d49cc8a4df21d19e5c26da90e9))
+
+
+
+
+
 # [0.35.0-rc.30](https://github.com/valaatech/kernel/compare/v0.35.0-rc.29...v0.35.0-rc.30) (2020-09-17)
 
 

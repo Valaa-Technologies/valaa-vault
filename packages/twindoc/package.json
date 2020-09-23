@@ -1,6 +1,6 @@
 {
   "name": "@valos/twindoc",
-  "version": "0.35.0-rc.30",
+  "version": "0.35.0-rc.31",
   "valos": {
     "type": "vdoc-extension",
     "domain": "@valos/kernel",
@@ -15,6 +15,6 @@
   "description": "TwinDoc - Valospace Hypertwin VDoc extension",
   "main": "index.js",
   "dependencies": {
-    "@valos/vdoc": "^0.35.0-rc.30"
+    "@valos/vdoc": "^0.35.0-rc.31"
   }
 }

@@ -61,7 +61,7 @@
     "VRevdoc:package": "@valos/inspire",
     "VRevdoc:preferredPrefix": "VRevela",
     "VRevdoc:baseIRI": "https://valospace.org/revela/0#",
-    "VRevdoc:version": "0.35.0-rc.30",
+    "VRevdoc:version": "0.35.0-rc.31",
     "VRevdoc:referencedModules": {
       "https://valospace.org/engine/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/engine/VEngine",
       "https://valospace.org/kernel/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/kernel/VKernel",
@@ -70,7 +70,7 @@
     },
     "VRevdoc:extenderModules": {},
     "respecConfig": {
-      "subtitle": "0.35.0-rc.30",
+      "subtitle": "0.35.0-rc.31",
       "specStatus": "unofficial",
       "editors": [
         {

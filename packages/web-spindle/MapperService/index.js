@@ -2,6 +2,7 @@
 
 import path from "path";
 import fs from "fs";
+import http from "http";
 
 import { extendTrack } from "~/raem/VPath";
 import { dumpify, dumpObject, FabricEventTarget, outputError } from "~/tools";
@@ -27,7 +28,8 @@ const Fastify = require("fastify");
 export type PrefixRouter = MapperService;
 
 export default class MapperService extends FabricEventTarget {
-  constructor (gateway, { identity, port, address, fastify, ...rest }, projectorCreators) {
+  constructor (gateway, options, projectorCreators) {
+    const { identity, port, httpsRedirectPort, address, fastify, ...rest } = options;
     super(gateway, rest.verbosity, rest.name);
 
     this._identity = identity;
@@ -36,15 +38,18 @@ export default class MapperService extends FabricEventTarget {
     this._address = address;
     this._projectorCreators = projectorCreators;
 
-    const options = { ...fastify };
-    if (options.https) {
-      options.https = {
-        ...options.https,
-        key: fs.readFileSync(path.join(process.cwd(), options.https.key), "utf8"),
-        cert: fs.readFileSync(path.join(process.cwd(), options.https.cert), "utf8"),
+    const fastifyOptions = { ...fastify };
+    if (fastifyOptions.https) {
+      fastifyOptions.https = {
+        ...fastifyOptions.https,
+        key: fs.readFileSync(path.join(process.cwd(), fastifyOptions.https.key), "utf8"),
+        cert: fs.readFileSync(path.join(process.cwd(), fastifyOptions.https.cert), "utf8"),
       };
     }
-    this._rootFastify = Fastify(options || {});
+    this._rootFastify = Fastify(fastifyOptions || {});
+    if (httpsRedirectPort) {
+      this._htmlRedirectFromPort = httpsRedirectPort;
+    }
     this._prefixRouters = {};
   }
 
@@ -104,16 +109,36 @@ export default class MapperService extends FabricEventTarget {
                         [`\n\t${prefix}:`, `${name}@${version} -`, title]
                 )));
           });
+      if (this._htmlRedirectFromPort && !this._redirectServer) {
+        this._redirectServer = this.createRedirectServer(this._htmlRedirectFromPort, this._port);
+      }
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, wrap,
           "\n\trouters:", ...dumpObject(this._prefixRouters));
     }
   }
 
+  createRedirectServer (fromPort, toPort) {
+    const toPortText = String(toPort) !== String(443) ? `:${String(toPort)}` : "";
+    return http.createServer((req, res) => {
+      const { headers: { host }, url } = req;
+      if (host) {
+        const redirectURL = `https://${host.split(":")[0]}${toPortText}${url}`;
+        res.writeHead(301, { Location: redirectURL });
+        res.end();
+      }
+    })
+    .listen(fromPort);
+  }
+
   async stop () {
     try {
       if (!this._listening) return undefined;
       this._listening = false;
+      if (this._redirectServer) {
+        this._redirectServer.close();
+        this._redirectServer = null;
+      }
       return await this.getRootFastify().close();
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, new Error("stop()"),

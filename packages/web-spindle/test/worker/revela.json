@@ -21,7 +21,8 @@
   "spindles": {
     "@valos/web-spindle": {
       "server": {
-        "port": "7357",
+        "port": 7357,
+        "httpsRedirectPort": 7380,
         "address": "127.0.0.1",
         "verbosity": 0,
         "fastify": {

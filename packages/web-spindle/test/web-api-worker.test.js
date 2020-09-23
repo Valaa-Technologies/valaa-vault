@@ -134,6 +134,12 @@ describe("Web API spindle worker", () => {
             { method: "POST", body: { name: "unauthorized-without-session" } }))
         .rejects.toMatchObject({ message: /403/ });
 
+    const httpsRedirection = await fetch("http://127.0.0.1:7380/rest-test/v0/individuals",
+        { method: "GET", redirect: "manual" });
+
+    expect(httpsRedirection.headers.get("location"))
+        .toEqual("https://127.0.0.1:7357/rest-test/v0/individuals");
+
     const { cookie } = await _initiateTestSession(adminChronicleURI);
     const headers = { cookie };
 

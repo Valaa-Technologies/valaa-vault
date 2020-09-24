@@ -121,3 +121,8 @@
   visibility: visible;
   opacity: 1;
 }
+
+.type-revdoc-command-prompt:after {
+  content: "$ ";
+  user-select: none
+}

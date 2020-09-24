@@ -84,7 +84,7 @@ function _extendWithArrayPatch (extender, rule, arrayPatch) {
             ? onlyEntry["VDoc:content"]
             : body);
   }
-  if (rule.body === "VDoc:entries") {
+  if ((rule.body === "VDoc:lines") || (rule.body === "VDoc:entries")) {
     return ret.map(_splitNewlineWhitespaceSections, rule.paragraphize);
   }
   return ret;

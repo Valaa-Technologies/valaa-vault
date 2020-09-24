@@ -1,7 +1,7 @@
 const { extension: vdocExtension } = require("@valos/vdoc");
 const { wrapError, dumpObject } = require("@valos/tools/wrapError");
 const { tooltip } = require("@valos/revdoc/extractee");
-const { obtainFullVocabulary } = require("@valos/revdoc/ontologyNamespace");
+const { obtainFullNamespace } = require("@valos/revdoc/ontologyNamespace");
 
 module.exports = {
   html: {
@@ -96,7 +96,10 @@ function emitReVDocReference (node, emission, stack) {
     const referencedModule = (stack.document["VRevdoc:referencedModules"] || {})[refBase];
     if (referencedModule) {
       const term = ref.slice(refIndex);
-      const definition = obtainFullVocabulary(referencedModule)[term];
+      const namespace = obtainFullNamespace(referencedModule);
+      const definition = term
+          ? namespace.vocabulary[term]
+          : { "rdfs:comment": namespace.description };
       if (!definition) {
         stack.error(
             `Can't find term '${term}' definition in module "${referencedModule}" vocabulary`,
@@ -115,15 +118,21 @@ function emitReVDocReference (node, emission, stack) {
 }
 
 function emitReVDocInvokation (node, emission, stack) {
-  return `${emission}<code>${
+  return `${emission}${_emitPrompt(node, stack)}<code>${
     stack.emitNode({ ...node, "@type": "VDoc:Node" }, "")
   }</code>`;
 }
 
 function emitReVDocCommand (node, emission, stack) {
-  return `${emission}<strong><em class="vdoc type-revdoc-command">${
+  return `${emission}${_emitPrompt(node, stack)}<strong><em class="vdoc type-revdoc-command">${
     stack.emitNode({ ...node, "@type": "VDoc:Node" }, "")
   }</em></strong>`;
+}
+
+function _emitPrompt (node, stack) {
+  const context = node["VDoc:context"];
+  if (context === undefined) return "";
+  return `<span class="vdoc type-revdoc-prompt">${stack.emitNode(context, "")}</span>`;
 }
 
 function emitReVDocExample (node, emission, stack) {

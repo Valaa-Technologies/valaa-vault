@@ -5,7 +5,7 @@ module.exports = {
   defineNamespace,
   extendNamespace,
   revdocOntologyProperties,
-  obtainFullVocabulary,
+  obtainFullNamespace,
 };
 
 function defineNamespace (namespace) {
@@ -16,7 +16,14 @@ function defineNamespace (namespace) {
   const alreadyAggregated = Object.create(null);
   const aggregate = { base: namespace, ...rest };
   if (!namespace.aggregate) {
-    const { documents } = require(domain);
+    let documents;
+    try {
+      documents = require(domain);
+    } catch (error) {
+      throw wrapError(new Error(`Misconfigured domain ${domain}: ${error.message}`),
+          new Error(`defineNamespace.require("${domain}")`),
+          "\n\tinner error:", ...dumpObject(error));
+    }
     for (const document of Object.values(documents)) _aggregateDocument(document);
     namespace.aggregate = extendNamespace(aggregate)[preferredPrefix];
   }
@@ -71,10 +78,10 @@ function defineNamespace (namespace) {
   }
 }
 
-function obtainFullVocabulary (referencedModule) {
+function obtainFullNamespace (referencedModule) {
   const namespace = require(referencedModule);
   if (!namespace.aggregate) defineNamespace(namespace);
-  return namespace.aggregate.vocabulary;
+  return namespace.aggregate;
 }
 
 function extendNamespace (namespace) {

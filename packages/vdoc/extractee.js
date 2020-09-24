@@ -53,7 +53,7 @@ module.exports = {
    * @returns
    */
   bulleted () {
-    return { "@type": "VDoc:BulletList", "VDoc:entries": [].slice.call(arguments) };
+    return { "@type": "VDoc:BulletList", "VDoc:lines": [].slice.call(arguments) };
   },
 
   /**
@@ -63,7 +63,7 @@ module.exports = {
    * @returns
    */
   numbered () {
-    return { "@type": "VDoc:NumberedList", "VDoc:entries": [].slice.call(arguments) };
+    return { "@type": "VDoc:NumberedList", "VDoc:lines": [].slice.call(arguments) };
   },
 
   /**
@@ -107,7 +107,7 @@ module.exports = {
    * @param {*} contextBase
    * @returns
    */
-  context (newContextPath, contextBase) {
+  cbase (newContextPath, contextBase) {
     return {
       ...module.exports.cpath(newContextPath, contextBase),
       "@type": "VDoc:ContextBase",

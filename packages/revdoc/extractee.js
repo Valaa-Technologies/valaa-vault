@@ -143,6 +143,8 @@ module.exports = {
     };
   },
 
+  inv6n (...parts) { return module.exports.invokation(...parts); },
+
   /**
    * Construct VRevdoc:CommandLineInteraction rows element.
    *
@@ -154,17 +156,28 @@ module.exports = {
         ? line
         : module.exports.invokation(line)));
     let currentContext = "";
-    const contextedRows = [];
+    const interactions = [];
     for (const row of commandedRows) {
-      if ((row != null) && (row["@type"] === "VDoc:ContextBase")) {
-        currentContext = row;
-      } else {
-        contextedRows.push([currentContext, "$ ", row]);
+      if (row == null) continue;
+      const firstEntry = Array.isArray(row) ? row[0] : row;
+      switch (firstEntry["@type"]) {
+        case "VDoc:ContextBase":
+          currentContext = firstEntry;
+          continue;
+        case "VDoc:ContextPath":
+        case "VRevdoc:Command":
+        case "VRevdoc:Invokation":
+          if (firstEntry["VDoc:context"] === undefined) {
+            firstEntry["VDoc:context"] = currentContext;
+          }
+          break;
+        default:
       }
+      interactions.push([row]);
     }
     return {
       "@type": "VRevdoc:CommandLineInteraction",
-      "VDoc:entries": contextedRows,
+      "VDoc:lines": interactions,
     };
   },
 

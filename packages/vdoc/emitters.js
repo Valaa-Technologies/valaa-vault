@@ -47,10 +47,13 @@ function emitNodeHTML (node, emission, stack) {
     body += `\n    <${elem}>${selfRef || ""}${stack.emitNode(node["dc:title"], "")}</${elem}>\n`;
   }
   let content;
-  const sequence = node["VDoc:words"] || node["VDoc:entries"];
+  const sequence = node["VDoc:words"] || node["VDoc:lines"] || node["VDoc:entries"];
   if (sequence) {
     const mapper = node["VDoc:map"];
-    const separator = node["VDoc:separator"] || (node["VDoc:words"] ? " " : undefined);
+    const separator = node["VDoc:separator"]
+        || (node["VDoc:lines"] ? null
+            : node["VDoc:words"] ? " "
+            : undefined);
     content = [].concat(...((sequence == null ? []
         : typeof sequence !== "object" ? [[null, sequence]]
         : Object.entries(!Array.isArray(sequence) ? sequence : [].concat(...sequence)))
@@ -85,7 +88,8 @@ function emitNodeHTML (node, emission, stack) {
     const attributes = nodeAttributes(node);
     if (node["VDoc:element"] || attributes) {
       const elem = node["VDoc:element"]
-          || ((node["@type"] === "VDoc:Paragraph") || node["VDoc:entries"] ? "div" : "span");
+          || ((node["@type"] === "VDoc:Paragraph") || node["VDoc:lines"] || node["VDoc:entries"]
+              ? "div" : "span");
       body = (elem === "span") ? `<${elem}${attributes}>${body}</${elem}>\n` : `
   <${elem}${attributes}>${body}
   </${elem}>\n`;
@@ -151,7 +155,7 @@ function emitParagraphHTML (node, emission, stack) {
 
 function emitBulletListHTML (node, emission, stack) {
   let lis = "";
-  for (const entry of (node["VDoc:entries"] || [])) {
+  for (const entry of (node["VDoc:lines"] || node["VDoc:entries"] || [])) {
     lis += `      <li>${stack.emitNode(entry, "")}</li>\n`;
   }
   return (!lis && node["VDoc:elidable"])
@@ -161,7 +165,7 @@ function emitBulletListHTML (node, emission, stack) {
 
 function emitNumberedListHTML (node, emission, stack) {
   let lis = "";
-  for (const entry of (node["VDoc:entries"] || [])) {
+  for (const entry of (node["VDoc:lines"] || node["VDoc:entries"] || [])) {
     lis += `      <li>${stack.emitNode(entry, "")}</li>\n`;
   }
   return (!lis && node["VDoc:elidable"])
@@ -202,7 +206,7 @@ function emitTableHTML (node, emission, stack) {
       }
       entryRowTemplates.push([
         ...(headerCell["VDoc:content"] || headerCell["VDoc:words"] || headerCell["VDoc:entries"]
-            ?  [headerCell] : []),
+            ? [headerCell] : []),
         cellTemplate,
       ]);
     } else {
@@ -217,9 +221,10 @@ function emitTableHTML (node, emission, stack) {
   const entryTexts = [];
   const lookup = (typeof node["VDoc:lookup"] !== "string") ? node["VDoc:lookup"]
       : stack.document[node["VDoc:lookup"]];
-  const entries = !node["VDoc:entries"]
+  const directEntries = node["VDoc:lines"] || node["VDoc:entries"];
+  const entries = !directEntries
       ? Object.entries(lookup || {})
-      : node["VDoc:entries"].map((entry, index) =>
+      : directEntries.map((entry, index) =>
           (!lookup || (typeof entry === "object") ? [index, entry] : [entry, lookup[entry]]));
   entries.forEach(([entryKey, entryData], entryIndex) => {
     if (entryKey === "@id") return;

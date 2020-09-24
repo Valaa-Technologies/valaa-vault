@@ -1,6 +1,6 @@
 {
   "name": "@valos/type-domain",
-  "version": "0.35.0-rc.31",
+  "version": "0.35.0-rc.32",
   "valos": {
     "type": "type",
     "domain": "@valos/kernel"
@@ -18,8 +18,8 @@
     "_vlm__status__type_domain_10-domain": "valma/status__domain_10-domain.js"
   },
   "dependencies": {
-    "@valos/tools": "^0.35.0-rc.31",
-    "@valos/type-toolset": "^0.35.0-rc.31",
-    "@valos/vdoc": "^0.35.0-rc.31"
+    "@valos/tools": "^0.35.0-rc.32",
+    "@valos/type-toolset": "^0.35.0-rc.32",
+    "@valos/vdoc": "^0.35.0-rc.32"
   }
 }

@@ -34,6 +34,11 @@
         "@container": "@list",
         "@type": "@id"
       },
+      "VDoc:lines": {
+        "@id": "#lines",
+        "@container": "@list",
+        "@type": "@id"
+      },
       "VDoc:columns": {
         "@id": "#columns",
         "@container": "@list",
@@ -117,7 +122,7 @@
           "VDoc:content": [
             {
               "@type": "VDoc:NumberedList",
-              "VDoc:entries": [
+              "VDoc:lines": [
                 [
                   "Ensure you have python installed."
                 ],
@@ -127,10 +132,8 @@
                     "Navigate to the folder you want your revdoc.js to reside and run the following command: ",
                     {
                       "@type": "VRevdoc:CommandLineInteraction",
-                      "VDoc:entries": [
+                      "VDoc:lines": [
                         [
-                          "",
-                          "$ ",
                           {
                             "@type": "VRevdoc:Invokation",
                             "VDoc:words": [
@@ -142,7 +145,8 @@
                               },
                               "write-revdoc",
                               "YOUR_DOCUMENT_NAME_WITHOUT_FILE_EXTENSION"
-                            ]
+                            ],
+                            "VDoc:context": ""
                           }
                         ]
                       ]
@@ -159,7 +163,7 @@
                       "VDoc:content": [
                         {
                           "@type": "VDoc:BulletList",
-                          "VDoc:entries": [
+                          "VDoc:lines": [
                             [
                               "Title of the document: This is human-readable title of the document."
                             ],
@@ -193,10 +197,8 @@
                     "Next navigate to the root of your project and run the following command ",
                     {
                       "@type": "VRevdoc:CommandLineInteraction",
-                      "VDoc:entries": [
+                      "VDoc:lines": [
                         [
-                          "",
-                          "$ ",
                           {
                             "@type": "VRevdoc:Invokation",
                             "VDoc:words": [
@@ -207,7 +209,8 @@
                                 ]
                               },
                               "regenerate-docs"
-                            ]
+                            ],
+                            "VDoc:context": ""
                           }
                         ]
                       ]
@@ -221,10 +224,8 @@
                     "Now run the following command ",
                     {
                       "@type": "VRevdoc:CommandLineInteraction",
-                      "VDoc:entries": [
+                      "VDoc:lines": [
                         [
-                          "",
-                          "$ ",
                           {
                             "@type": "VRevdoc:Invokation",
                             "VDoc:words": [
@@ -236,7 +237,8 @@
                               },
                               "-m",
                               "SimpleHTTPServer"
-                            ]
+                            ],
+                            "VDoc:context": ""
                           }
                         ]
                       ]

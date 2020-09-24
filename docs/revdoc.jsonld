@@ -34,6 +34,11 @@
         "@container": "@list",
         "@type": "@id"
       },
+      "VDoc:lines": {
+        "@id": "#lines",
+        "@container": "@list",
+        "@type": "@id"
+      },
       "VDoc:columns": {
         "@id": "#columns",
         "@container": "@list",
@@ -57,7 +62,7 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/revdoc",
-    "VRevdoc:version": "0.35.0-rc.31",
+    "VRevdoc:version": "0.35.0-rc.32",
     "VRevdoc:preferredPrefix": "VRevdoc",
     "VRevdoc:baseIRI": "https://valospace.org/revdoc/0#",
     "VRevdoc:referencedModules": {
@@ -68,7 +73,7 @@
     },
     "VRevdoc:extenderModules": {},
     "respecConfig": {
-      "subtitle": "0.35.0-rc.31",
+      "subtitle": "0.35.0-rc.32",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -269,15 +274,15 @@
         "rdfs:subClassOf": "VDoc:CharacterData",
         "rdfs:comment": "An VSX section node"
       },
-      "Invokation": {
-        "@type": "VDoc:Class",
-        "rdfs:subClassOf": "VDoc:Node",
-        "rdfs:comment": "A command invokation document node"
-      },
       "Command": {
         "@type": "VDoc:Class",
         "rdfs:subClassOf": "VDoc:ContextPath",
-        "rdfs:comment": "A command reference node"
+        "rdfs:comment": "A single command reference node"
+      },
+      "Invokation": {
+        "@type": "VDoc:Class",
+        "rdfs:subClassOf": "VDoc:ContextPath",
+        "rdfs:comment": "A command plus its parameters document node"
       },
       "CommandLineInteraction": {
         "@type": "VDoc:Class",
@@ -669,8 +674,8 @@
             "JSONLD",
             "Turtle",
             "VSX",
-            "Invokation",
             "Command",
+            "Invokation",
             "CommandLineInteraction",
             "Tooltip"
           ]

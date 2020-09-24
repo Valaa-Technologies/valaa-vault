@@ -34,6 +34,11 @@
         "@container": "@list",
         "@type": "@id"
       },
+      "VDoc:lines": {
+        "@id": "#lines",
+        "@container": "@list",
+        "@type": "@id"
+      },
       "VDoc:columns": {
         "@id": "#columns",
         "@container": "@list",
@@ -173,7 +178,7 @@
         },
         {
           "@type": "VDoc:BulletList",
-          "VDoc:entries": [
+          "VDoc:lines": [
             [
               {
                 "@type": "VDoc:Reference",

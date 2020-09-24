@@ -34,6 +34,11 @@
         "@container": "@list",
         "@type": "@id"
       },
+      "VDoc:lines": {
+        "@id": "#lines",
+        "@container": "@list",
+        "@type": "@id"
+      },
       "VDoc:columns": {
         "@id": "#columns",
         "@container": "@list",
@@ -497,7 +502,7 @@
               "VDoc:content": [
                 {
                   "@type": "VDoc:BulletList",
-                  "VDoc:entries": [
+                  "VDoc:lines": [
                     [
                       {
                         "VDoc:em": true,
@@ -1132,7 +1137,7 @@
               "VDoc:content": [
                 {
                   "@type": "VDoc:BulletList",
-                  "VDoc:entries": [
+                  "VDoc:lines": [
                     [
                       {
                         "VDoc:em": true,
@@ -1312,7 +1317,7 @@
               "VDoc:content": [
                 {
                   "@type": "VDoc:NumberedList",
-                  "VDoc:entries": [
+                  "VDoc:lines": [
                     [
                       "modifying the corresponding upstream git repository"
                     ],
@@ -1752,7 +1757,7 @@
               "VDoc:content": [
                 {
                   "@type": "VDoc:BulletList",
-                  "VDoc:entries": [
+                  "VDoc:lines": [
                     [
                       "Media content import/export tools"
                     ],
@@ -1792,7 +1797,7 @@
                   "VDoc:content": [
                     {
                       "@type": "VDoc:NumberedList",
-                      "VDoc:entries": [
+                      "VDoc:lines": [
                         [
                           "provided by ValOS core authorities, and"
                         ],

@@ -34,6 +34,11 @@
         "@container": "@list",
         "@type": "@id"
       },
+      "VDoc:lines": {
+        "@id": "#lines",
+        "@container": "@list",
+        "@type": "@id"
+      },
       "VDoc:columns": {
         "@id": "#columns",
         "@container": "@list",
@@ -57,7 +62,7 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/vdoc",
-    "VRevdoc:version": "0.35.0-rc.31",
+    "VRevdoc:version": "0.35.0-rc.32",
     "VRevdoc:preferredPrefix": "VDoc",
     "VRevdoc:baseIRI": "https://valospace.org/vdoc/0#",
     "VRevdoc:referencedModules": {
@@ -67,7 +72,7 @@
     },
     "VRevdoc:extenderModules": {},
     "respecConfig": {
-      "subtitle": "0.35.0-rc.31",
+      "subtitle": "0.35.0-rc.32",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -249,7 +254,7 @@
     "design_goals": {
       "@id": "design_goals",
       "@type": "VDoc:NumberedList",
-      "VDoc:entries": [
+      "VDoc:lines": [
         {
           "@id": "robustly_writable"
         },
@@ -311,7 +316,7 @@
     "design_non_goals": {
       "@id": "design_non_goals",
       "@type": "VDoc:NumberedList",
-      "VDoc:entries": [
+      "VDoc:lines": [
         {
           "@id": "no_unified_ontology"
         },
@@ -400,7 +405,7 @@
     "document_phases": {
       "@id": "document_phases",
       "@type": "VDoc:NumberedList",
-      "VDoc:entries": [
+      "VDoc:lines": [
         [
           {
             "VRevdoc:dfn": "#source_graph",
@@ -489,7 +494,7 @@
     "document_transformations": {
       "@id": "document_transformations",
       "@type": "VDoc:NumberedList",
-      "VDoc:entries": [
+      "VDoc:lines": [
         [
           {
             "VRevdoc:dfn": "#extraction",
@@ -607,7 +612,7 @@
     "node_types": {
       "@id": "node_types",
       "@type": "VDoc:NumberedList",
-      "VDoc:entries": [
+      "VDoc:lines": [
         [
           {
             "VRevdoc:dfn": "#document_node",
@@ -728,7 +733,7 @@
     "node_key_categories": {
       "@id": "node_key_categories",
       "@type": "VDoc:NumberedList",
-      "VDoc:entries": [
+      "VDoc:lines": [
         [
           {
             "VRevdoc:dfn": "#vdoc_key",
@@ -974,7 +979,7 @@
               "VDoc:content": [
                 {
                   "@type": "VDoc:NumberedList",
-                  "VDoc:entries": [
+                  "VDoc:lines": [
                     [
                       "namespace preferred prefix and its associated baseIRI"
                     ],
@@ -1088,7 +1093,7 @@
               "VDoc:content": [
                 {
                   "@type": "VDoc:BulletList",
-                  "VDoc:entries": [
+                  "VDoc:lines": [
                     [
                       {
                         "VRevdoc:dfn": "#extraction_key_pattern",
@@ -1235,7 +1240,7 @@
               "VDoc:content": [
                 {
                   "@type": "VDoc:BulletList",
-                  "VDoc:entries": [
+                  "VDoc:lines": [
                     [
                       "Improved discoverability via integrated documentation and code\n  completion"
                     ],
@@ -1357,6 +1362,13 @@
         "rdfs:domain": "VDoc:Node",
         "rdfs:range": "rdfs:List",
         "rdfs:comment": "A visible list of visually separate words"
+      },
+      "lines": {
+        "@type": "VDoc:Property",
+        "rdfs:subPropertyOf": "VDoc:entries",
+        "rdfs:domain": "VDoc:Node",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "A visible list of visually separate lines"
       },
       "lookup": {
         "@type": "VDoc:Property",
@@ -1485,7 +1497,7 @@
         "@type": "VDoc:Property",
         "rdfs:domain": "VDoc:ContextPath",
         "rdfs:range": "rdfs:Resource",
-        "rdfs:comment": "Non-visible context base (absolute or relative to current base)"
+        "rdfs:comment": "Possibly non-visible context base (absolute or relative to current base)"
       },
       "ContextBase": {
         "@type": "VDoc:Class",
@@ -1570,6 +1582,11 @@
       },
       "VDoc:words": {
         "@id": "#words",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VDoc:lines": {
+        "@id": "#lines",
         "@container": "@list",
         "@type": "@id"
       },
@@ -2105,6 +2122,7 @@
             "content",
             "entries",
             "words",
+            "lines",
             "lookup",
             "wide",
             "tall",
@@ -2656,13 +2674,13 @@
       "bulleted": {
         "range": "VDoc:BulletList",
         "owner": "VDoc:content",
-        "body": "VDoc:entries",
+        "body": "VDoc:lines",
         "comment": "Bulleted list"
       },
       "numbered": {
         "range": "VDoc:NumberedList",
         "owner": "VDoc:content",
-        "body": "VDoc:entries",
+        "body": "VDoc:lines",
         "comment": "Numbered list"
       },
       "table": {

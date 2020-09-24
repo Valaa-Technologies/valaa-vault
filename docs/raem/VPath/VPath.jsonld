@@ -34,6 +34,11 @@
         "@container": "@list",
         "@type": "@id"
       },
+      "VDoc:lines": {
+        "@id": "#lines",
+        "@container": "@list",
+        "@type": "@id"
+      },
       "VDoc:columns": {
         "@id": "#columns",
         "@container": "@list",
@@ -155,7 +160,7 @@
         },
         {
           "@type": "VDoc:BulletList",
-          "VDoc:entries": [
+          "VDoc:lines": [
             [
               "A VPath itself is an ordered sequence of \"@\"-separated vsteps, each\n  of which logically depends on the preceding one."
             ],
@@ -298,7 +303,7 @@
     "segment_types": {
       "@id": "segment_types",
       "@type": "VDoc:BulletList",
-      "VDoc:entries": [
+      "VDoc:lines": [
         [
           "\"@\" identifies a VPath segment with remaining entries as step\n  segments"
         ],
@@ -394,7 +399,7 @@
     "semantic_sources": {
       "@id": "semantic_sources",
       "@type": "VDoc:NumberedList",
-      "VDoc:entries": [
+      "VDoc:lines": [
         [
           "VPath specification (ie. this document) fully specifies the VPath\n  structure and grammar and defines several verb types"
         ],
@@ -819,7 +824,7 @@
         },
         {
           "@type": "VDoc:NumberedList",
-          "VDoc:entries": [
+          "VDoc:lines": [
             [
               "The different evaluator verb types only specify the means to access\n  and process the VPath data structure itself. These\n  `evaluator types` are defined by the VPath specification(s)."
             ],
@@ -894,7 +899,7 @@
         },
         {
           "@type": "VDoc:BulletList",
-          "VDoc:entries": [
+          "VDoc:lines": [
             [
               "\"vsteps vs. vparams\" or \"How should I express a sequence?\":\n  If the entries of a sequence depend on each other (e.g. in a query or\n  in an execution list) they are vsteps, if not (e.g. data entries)\n  they are vparams of a vstep."
             ],
@@ -1730,7 +1735,7 @@
         },
         {
           "@type": "VDoc:BulletList",
-          "VDoc:entries": [
+          "VDoc:lines": [
             [
               "Pseudo-rule 'vrid': this class contains all 'vpath' productions with\n  'vgrid' as their first expansion."
             ],

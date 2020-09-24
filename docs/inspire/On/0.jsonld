@@ -34,6 +34,11 @@
         "@container": "@list",
         "@type": "@id"
       },
+      "VDoc:lines": {
+        "@id": "#lines",
+        "@container": "@list",
+        "@type": "@id"
+      },
       "VDoc:columns": {
         "@id": "#columns",
         "@container": "@list",
@@ -58,7 +63,7 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/inspire",
-    "VRevdoc:version": "0.35.0-rc.31",
+    "VRevdoc:version": "0.35.0-rc.32",
     "VRevdoc:preferredPrefix": "On",
     "VRevdoc:baseIRI": "https://valospace.org/inspire/On/0#",
     "VRevdoc:referencedModules": {

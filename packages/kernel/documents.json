@@ -239,7 +239,7 @@
                 ]
               },
               "package": "@valos/kernel-vault",
-              "version": "0.35.0-rc.29"
+              "version": "0.35.0-rc.30"
             },
             "technician": {
               "@id": "https://valospace.org/technician",
@@ -335,7 +335,7 @@
                 ]
               },
               "package": "@valos/kernel-vault",
-              "version": "0.35.0-rc.29"
+              "version": "0.35.0-rc.30"
             },
             "voyager": {
               "@id": "https://valospace.org/voyager",
@@ -403,7 +403,7 @@
                 ]
               },
               "package": "@valos/kernel-vault",
-              "version": "0.35.0-rc.29"
+              "version": "0.35.0-rc.30"
             }
           },
           "VDoc:map": {
@@ -457,13 +457,11 @@
     "VRevdoc:referencedModules": {
       "https://valospace.org/engine/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/engine/VEngine",
       "https://valospace.org/kernel/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/kernel/VKernel",
-      "https://valospace.org/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/kernel/V",
-      "https://valospace.org/raem/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/raem/VModel",
-      "https://valospace.org/sourcerer/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/sourcerer/VSourcerer"
+      "https://valospace.org/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/kernel/V"
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/kernel-vault",
-    "version": "0.35.0-rc.30"
+    "version": "0.35.0-rc.31"
   },
   "sbom": {
     "@id": "https://valospace.org/sbom",
@@ -472,7 +470,7 @@
       "SBOM"
     ],
     "subProfiles": [],
-    "title": "@valos/kernel-vault@0.35.0-rc.30 Software Bill of Materials",
+    "title": "@valos/kernel-vault@0.35.0-rc.31 Software Bill of Materials",
     "abstract": {
       "@type": "VDoc:Chapter",
       "VDoc:content": [
@@ -519,7 +517,7 @@
       ]
     },
     "package": "@valos/kernel-vault",
-    "version": "0.35.0-rc.30"
+    "version": "0.35.0-rc.31"
   },
   "engine": {
     "@id": "https://valospace.org/engine",
@@ -616,7 +614,7 @@
       "https://valospace.org/0#": "@valos/engine/V"
     },
     "package": "@valos/engine",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "inspire/Lens/0": {
     "@id": "https://valospace.org/inspire/Lens/0",
@@ -722,7 +720,7 @@
                 "VDoc:content": [
                   {
                     "@type": "VDoc:BulletList",
-                    "VDoc:entries": [
+                    "VDoc:lines": [
                       [
                         "used by the Inspire engine to identify an attribute value given to\n  a UI element by the valonaut. Engine then uses this to either display\n  and customize the UI behavior or to invoke callbacks written by the\n  valonaut."
                       ],
@@ -741,7 +739,7 @@
                 "VDoc:content": [
                   {
                     "@type": "VDoc:BulletList",
-                    "VDoc:entries": [
+                    "VDoc:lines": [
                       [
                         {
                           "@type": "VDoc:Reference",
@@ -864,7 +862,7 @@
                 "VDoc:content": [
                   {
                     "@type": "VDoc:BulletList",
-                    "VDoc:entries": [
+                    "VDoc:lines": [
                       [
                         "'Primary' denotes the most commonly used terms"
                       ],
@@ -894,7 +892,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/inspire",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "inspire/Lens": {
     "@id": "https://valospace.org/inspire/Lens",
@@ -1000,7 +998,7 @@
                 "VDoc:content": [
                   {
                     "@type": "VDoc:BulletList",
-                    "VDoc:entries": [
+                    "VDoc:lines": [
                       [
                         "used by the Inspire engine to identify an attribute value given to\n  a UI element by the valonaut. Engine then uses this to either display\n  and customize the UI behavior or to invoke callbacks written by the\n  valonaut."
                       ],
@@ -1019,7 +1017,7 @@
                 "VDoc:content": [
                   {
                     "@type": "VDoc:BulletList",
-                    "VDoc:entries": [
+                    "VDoc:lines": [
                       [
                         {
                           "@type": "VDoc:Reference",
@@ -1142,7 +1140,7 @@
                 "VDoc:content": [
                   {
                     "@type": "VDoc:BulletList",
-                    "VDoc:entries": [
+                    "VDoc:lines": [
                       [
                         "'Primary' denotes the most commonly used terms"
                       ],
@@ -1172,7 +1170,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/inspire",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "inspire/On/0": {
     "@id": "https://valospace.org/inspire/On/0",
@@ -1272,7 +1270,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/inspire",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "inspire/On": {
     "@id": "https://valospace.org/inspire/On",
@@ -1372,7 +1370,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/inspire",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "inspire": {
     "@id": "https://valospace.org/inspire",
@@ -1445,7 +1443,7 @@
       ]
     },
     "package": "@valos/inspire",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "inspire/VRevela/0": {
     "@id": "https://valospace.org/inspire/VRevela/0",
@@ -1743,7 +1741,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/inspire",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "inspire/VRevela": {
     "@id": "https://valospace.org/inspire/VRevela",
@@ -2041,7 +2039,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/inspire",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "kernel/0": {
     "@id": "https://valospace.org/kernel/0",
@@ -2256,7 +2254,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/kernel",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "kernel": {
     "@id": "https://valospace.org/kernel",
@@ -2471,7 +2469,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/kernel",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "raem/0": {
     "@id": "https://valospace.org/raem/0",
@@ -2601,7 +2599,7 @@
       "https://valospace.org/0#": "@valos/raem/V"
     },
     "package": "@valos/raem",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "raem": {
     "@id": "https://valospace.org/raem",
@@ -2731,7 +2729,7 @@
       "https://valospace.org/0#": "@valos/raem/V"
     },
     "package": "@valos/raem",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "raem/VPath/VPath.JSON": {
     "@id": "https://valospace.org/raem/VPath/VPath.JSON",
@@ -2828,7 +2826,7 @@
       ]
     },
     "package": "@valos/raem",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "raem/VPath/VPath": {
     "@id": "https://valospace.org/raem/VPath/VPath",
@@ -2890,7 +2888,7 @@
       ]
     },
     "package": "@valos/raem",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "revdoc/0": {
     "@id": "https://valospace.org/revdoc/0",
@@ -2960,7 +2958,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/revdoc",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "revdoc": {
     "@id": "https://valospace.org/revdoc",
@@ -3030,7 +3028,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/revdoc",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "revdoc/tutorial": {
     "@id": "https://valospace.org/revdoc/tutorial",
@@ -3104,7 +3102,7 @@
       ]
     },
     "package": "@valos/revdoc",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "sbomdoc/0": {
     "@id": "https://valospace.org/sbomdoc/0",
@@ -3175,7 +3173,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/sbomdoc",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "sbomdoc": {
     "@id": "https://valospace.org/sbomdoc",
@@ -3246,7 +3244,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/sbomdoc",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "script/0": {
     "@id": "https://valospace.org/script/0",
@@ -3311,7 +3309,7 @@
       "https://valospace.org/0#": "@valos/script/V"
     },
     "package": "@valos/script",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "script": {
     "@id": "https://valospace.org/script",
@@ -3376,7 +3374,7 @@
       "https://valospace.org/0#": "@valos/script/V"
     },
     "package": "@valos/script",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "sourcerer/0": {
     "@id": "https://valospace.org/sourcerer/0",
@@ -3433,7 +3431,7 @@
       "https://valospace.org/0#": "@valos/sourcerer/V"
     },
     "package": "@valos/sourcerer",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "sourcerer": {
     "@id": "https://valospace.org/sourcerer",
@@ -3490,7 +3488,7 @@
       "https://valospace.org/0#": "@valos/sourcerer/V"
     },
     "package": "@valos/sourcerer",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "sourcerer/valos-event-log": {
     "@id": "https://valospace.org/sourcerer/valos-event-log",
@@ -3520,7 +3518,7 @@
       ]
     },
     "package": "@valos/sourcerer",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "sourcerer/VState": {
     "@id": "https://valospace.org/sourcerer/VState",
@@ -3559,7 +3557,7 @@
       ]
     },
     "package": "@valos/sourcerer",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "twindoc/0": {
     "@id": "https://valospace.org/twindoc/0",
@@ -3607,7 +3605,7 @@
               "VDoc:content": [
                 {
                   "@type": "VDoc:NumberedList",
-                  "VDoc:entries": [
+                  "VDoc:lines": [
                     [
                       "emit + extract: a roundtrip starting from VDocState into valospace back into VDocState"
                     ],
@@ -3650,7 +3648,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/twindoc",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "twindoc": {
     "@id": "https://valospace.org/twindoc",
@@ -3698,7 +3696,7 @@
               "VDoc:content": [
                 {
                   "@type": "VDoc:NumberedList",
-                  "VDoc:entries": [
+                  "VDoc:lines": [
                     [
                       "emit + extract: a roundtrip starting from VDocState into valospace back into VDocState"
                     ],
@@ -3741,7 +3739,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/twindoc",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "type-vault/AssortedTutorials": {
     "@id": "https://valospace.org/type-vault/AssortedTutorials",
@@ -3760,7 +3758,7 @@
     },
     "introduction": {},
     "package": "@valos/type-vault",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "vdoc/0": {
     "@id": "https://valospace.org/vdoc/0",
@@ -3855,7 +3853,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/vdoc",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "vdoc": {
     "@id": "https://valospace.org/vdoc",
@@ -3950,7 +3948,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/vdoc",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "web-spindle": {
     "@id": "https://valospace.org/web-spindle",
@@ -4056,7 +4054,7 @@
       ]
     },
     "package": "@valos/web-spindle",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "web-spindle/schema-builder": {
     "@id": "https://valospace.org/web-spindle/schema-builder",
@@ -4122,7 +4120,7 @@
         },
         {
           "@type": "VDoc:BulletList",
-          "VDoc:entries": [
+          "VDoc:lines": [
             [
               {
                 "@type": "VDoc:Reference",
@@ -4185,7 +4183,7 @@
       ]
     },
     "package": "@valos/web-spindle",
-    "version": "0.35.0-rc.31"
+    "version": "0.35.0-rc.32"
   },
   "removed-from": {
     "@id": "https://valospace.org/removed-from",
@@ -4236,7 +4234,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/kernel-vault",
-    "version": "0.35.0-rc.30"
+    "version": "0.35.0-rc.31"
   },
   "@valos/kernel-vault": {
     "@id": "https://valospace.org/index",
@@ -4478,7 +4476,7 @@
                 ]
               },
               "package": "@valos/kernel-vault",
-              "version": "0.35.0-rc.29"
+              "version": "0.35.0-rc.30"
             },
             "technician": {
               "@id": "https://valospace.org/technician",
@@ -4574,7 +4572,7 @@
                 ]
               },
               "package": "@valos/kernel-vault",
-              "version": "0.35.0-rc.29"
+              "version": "0.35.0-rc.30"
             },
             "voyager": {
               "@id": "https://valospace.org/voyager",
@@ -4642,7 +4640,7 @@
                 ]
               },
               "package": "@valos/kernel-vault",
-              "version": "0.35.0-rc.29"
+              "version": "0.35.0-rc.30"
             }
           },
           "VDoc:map": {
@@ -4696,13 +4694,11 @@
     "VRevdoc:referencedModules": {
       "https://valospace.org/engine/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/engine/VEngine",
       "https://valospace.org/kernel/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/kernel/VKernel",
-      "https://valospace.org/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/kernel/V",
-      "https://valospace.org/raem/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/raem/VModel",
-      "https://valospace.org/sourcerer/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/sourcerer/VSourcerer"
+      "https://valospace.org/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/kernel/V"
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/kernel-vault",
-    "version": "0.35.0-rc.30"
+    "version": "0.35.0-rc.31"
   },
   "technician": {
     "@id": "https://valospace.org/technician",
@@ -4798,7 +4794,7 @@
       ]
     },
     "package": "@valos/kernel-vault",
-    "version": "0.35.0-rc.30"
+    "version": "0.35.0-rc.31"
   },
   "valonaut": {
     "@id": "https://valospace.org/valonaut",
@@ -4880,7 +4876,7 @@
       ]
     },
     "package": "@valos/kernel-vault",
-    "version": "0.35.0-rc.30"
+    "version": "0.35.0-rc.31"
   },
   "voyager": {
     "@id": "https://valospace.org/voyager",
@@ -4948,6 +4944,6 @@
       ]
     },
     "package": "@valos/kernel-vault",
-    "version": "0.35.0-rc.30"
+    "version": "0.35.0-rc.31"
   }
 }

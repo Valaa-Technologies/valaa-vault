@@ -7,7 +7,7 @@
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"subtitle":"0.35.0-rc.31","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"shortName":"revdoc","alternateFormats":[{"label":"VDoc","uri":"revdoc.jsonld"}]};
+      var respecConfig = {"subtitle":"0.35.0-rc.32","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"shortName":"revdoc","alternateFormats":[{"label":"VDoc","uri":"revdoc.jsonld"}]};
     </script>
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
@@ -177,23 +177,23 @@ tailored for emitting ReSpec html output documents.
     </span>
 </span></a></td><td><span class="vdoc type-vdoc-node">An VSX section node</span>
 </td></tr>
-        <tr id="Invokation" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#Invokation" class="vdoc type-vdoc-reference">#Invokation</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/vdoc/0#Node" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VDoc:Node</span>
+        <tr id="Command" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#Command" class="vdoc type-vdoc-reference">#Command</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/vdoc/0#ContextPath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VDoc:ContextPath</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        A document tree Node
+        A context-based path document node
     </span>
-</span></a></td><td><span class="vdoc type-vdoc-node">A command invokation document node</span>
+</span></a></td><td><span class="vdoc type-vdoc-node">A single command reference node</span>
 </td></tr>
-        <tr id="Command" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#Command" class="vdoc type-vdoc-reference">#Command</a></em></strong> </h3></td></tr>
+        <tr id="Invokation" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#Invokation" class="vdoc type-vdoc-reference">#Invokation</a></em></strong> </h3></td></tr>
         <tr><td><a href="https://valospace.org/vdoc/0#ContextPath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">VDoc:ContextPath</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
         A context-based path document node
     </span>
-</span></a></td><td><span class="vdoc type-vdoc-node">A command reference node</span>
+</span></a></td><td><span class="vdoc type-vdoc-node">A command plus its parameters document node</span>
 </td></tr>
         <tr id="CommandLineInteraction" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#CommandLineInteraction" class="vdoc type-vdoc-reference">#CommandLineInteraction</a></em></strong> </h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/revdoc/0#Example" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
@@ -442,7 +442,7 @@ primitives and specifies a ReSpec html emission transformation.
         <tr><td><span class="vdoc type-vdoc-node">cpath</span>
 </td><td><span class="vdoc type-vdoc-node"></span>
 </td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">context</span>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">cbase</span>
 </td><td><span class="vdoc type-vdoc-node"></span>
 </td></tr>
         <tr><td><span class="vdoc type-vdoc-node">em</span>
@@ -493,31 +493,34 @@ primitives and specifies a ReSpec html emission transformation.
         <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">invokation</span>
 </td><td><span class="vdoc type-vdoc-node"></span>
 </td></tr>
-        <tr><td><span class="vdoc type-vdoc-node">cli</span>
+        <tr><td><span class="vdoc type-vdoc-node">inv6n</span>
 </td><td><span class="vdoc type-vdoc-node"></span>
 </td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">tooltip</span>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">cli</span>
 </td><td><span class="vdoc type-vdoc-node"></span>
 </td></tr>
-        <tr><td><span class="vdoc type-vdoc-node">filterKeysWithAnyOf</span>
+        <tr><td><span class="vdoc type-vdoc-node">tooltip</span>
 </td><td><span class="vdoc type-vdoc-node"></span>
 </td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">filterKeysWithAllOf</span>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">filterKeysWithAnyOf</span>
 </td><td><span class="vdoc type-vdoc-node"></span>
 </td></tr>
-        <tr><td><span class="vdoc type-vdoc-node">filterKeysWithNoneOf</span>
+        <tr><td><span class="vdoc type-vdoc-node">filterKeysWithAllOf</span>
 </td><td><span class="vdoc type-vdoc-node"></span>
 </td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">valosRaemFieldClasses</span>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">filterKeysWithNoneOf</span>
+</td><td><span class="vdoc type-vdoc-node"></span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">valosRaemFieldClasses</span>
 </td><td><span class="vdoc type-vdoc-node">VModel:FieldVModel:ExpressedFieldVModel:EventLoggedFieldVModel:CoupledFieldVModel:GeneratedFieldVModel:TransientFieldVModel:AliasField</span>
 </td></tr>
-        <tr><td><span class="vdoc type-vdoc-node">filterKeysWithFieldReduction</span>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">filterKeysWithFieldReduction</span>
 </td><td><span class="vdoc type-vdoc-node"></span>
 </td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">prepareTestDoc</span>
+        <tr><td><span class="vdoc type-vdoc-node">prepareTestDoc</span>
 </td><td><span class="vdoc type-vdoc-node"></span>
 </td></tr>
-        <tr><td><span class="vdoc type-vdoc-node">extractExampleText</span>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">extractExampleText</span>
 </td><td><span class="vdoc type-vdoc-node"></span>
 </td></tr>
       </tbody>

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.32](https://github.com/valaatech/kernel/compare/v0.35.0-rc.31...v0.35.0-rc.32) (2020-09-24)
+
+
+### Features
+
+* **revdoc:** inv6n shortcut, VDoc:lines, make prompt non-selectable ([e62e357](https://github.com/valaatech/kernel/commit/e62e357c9481edf492c2e72eaf9b45f1a429a03a))
+
+
+
+
+
 # [0.35.0-rc.31](https://github.com/valaatech/kernel/compare/v0.35.0-rc.30...v0.35.0-rc.31) (2020-09-23)
 
 

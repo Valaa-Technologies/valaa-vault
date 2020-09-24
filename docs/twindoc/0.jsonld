@@ -34,6 +34,11 @@
         "@container": "@list",
         "@type": "@id"
       },
+      "VDoc:lines": {
+        "@id": "#lines",
+        "@container": "@list",
+        "@type": "@id"
+      },
       "VDoc:columns": {
         "@id": "#columns",
         "@container": "@list",
@@ -58,7 +63,7 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/twindoc",
-    "VRevdoc:version": "0.35.0-rc.31",
+    "VRevdoc:version": "0.35.0-rc.32",
     "VRevdoc:preferredPrefix": "VTwindoc",
     "VRevdoc:baseIRI": "https://valospace.org/twindoc/0#",
     "VRevdoc:referencedModules": {
@@ -68,7 +73,7 @@
     },
     "VRevdoc:extenderModules": {},
     "respecConfig": {
-      "subtitle": "0.35.0-rc.31",
+      "subtitle": "0.35.0-rc.32",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -168,7 +173,7 @@
               "VDoc:content": [
                 {
                   "@type": "VDoc:NumberedList",
-                  "VDoc:entries": [
+                  "VDoc:lines": [
                     [
                       "emit + extract: a roundtrip starting from VDocState into valospace back into VDocState"
                     ],

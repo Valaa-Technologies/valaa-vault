@@ -34,6 +34,11 @@
         "@container": "@list",
         "@type": "@id"
       },
+      "VDoc:lines": {
+        "@id": "#lines",
+        "@container": "@list",
+        "@type": "@id"
+      },
       "VDoc:columns": {
         "@id": "#columns",
         "@container": "@list",
@@ -57,7 +62,7 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/sbomdoc",
-    "VRevdoc:version": "0.35.0-rc.31",
+    "VRevdoc:version": "0.35.0-rc.32",
     "VRevdoc:preferredPrefix": "VSbomdoc",
     "VRevdoc:baseIRI": "https://valospace.org/sbomdoc/0#",
     "VRevdoc:referencedModules": {
@@ -69,7 +74,7 @@
     },
     "VRevdoc:extenderModules": {},
     "respecConfig": {
-      "subtitle": "0.35.0-rc.31",
+      "subtitle": "0.35.0-rc.32",
       "specStatus": "unofficial",
       "editors": [
         {

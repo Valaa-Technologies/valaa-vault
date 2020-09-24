@@ -34,6 +34,11 @@
         "@container": "@list",
         "@type": "@id"
       },
+      "VDoc:lines": {
+        "@id": "#lines",
+        "@container": "@list",
+        "@type": "@id"
+      },
       "VDoc:columns": {
         "@id": "#columns",
         "@container": "@list",
@@ -62,7 +67,7 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/inspire",
-    "VRevdoc:version": "0.35.0-rc.31",
+    "VRevdoc:version": "0.35.0-rc.32",
     "VRevdoc:preferredPrefix": "Lens",
     "VRevdoc:baseIRI": "https://valospace.org/inspire/Lens/0#",
     "VRevdoc:referencedModules": {
@@ -248,7 +253,7 @@
               "VDoc:content": [
                 {
                   "@type": "VDoc:NumberedList",
-                  "VDoc:entries": [
+                  "VDoc:lines": [
                     [
                       {
                         "@type": "VDoc:Reference",
@@ -1527,7 +1532,7 @@
             "VDoc:content": [
               {
                 "@type": "VDoc:NumberedList",
-                "VDoc:entries": [
+                "VDoc:lines": [
                   [
                     "When this lens is used as an attribute value of a valoscope element:\n  the reference resolves to the direct lexical child elements of\n  the valoscope as they are appear in the media text itself."
                   ],
@@ -2690,7 +2695,7 @@
             "VDoc:content": [
               {
                 "@type": "VDoc:NumberedList",
-                "VDoc:entries": [
+                "VDoc:lines": [
                   [
                     "$Lens.pendingAttributesLens during the attribute resolution stage"
                   ],
@@ -3304,7 +3309,7 @@
                 "VDoc:content": [
                   {
                     "@type": "VDoc:BulletList",
-                    "VDoc:entries": [
+                    "VDoc:lines": [
                       [
                         "used by the Inspire engine to identify an attribute value given to\n  a UI element by the valonaut. Engine then uses this to either display\n  and customize the UI behavior or to invoke callbacks written by the\n  valonaut."
                       ],
@@ -3323,7 +3328,7 @@
                 "VDoc:content": [
                   {
                     "@type": "VDoc:BulletList",
-                    "VDoc:entries": [
+                    "VDoc:lines": [
                       [
                         {
                           "@type": "VDoc:Reference",
@@ -3446,7 +3451,7 @@
                 "VDoc:content": [
                   {
                     "@type": "VDoc:BulletList",
-                    "VDoc:entries": [
+                    "VDoc:lines": [
                       [
                         "'Primary' denotes the most commonly used terms"
                       ],

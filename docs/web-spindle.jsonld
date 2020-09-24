@@ -34,6 +34,11 @@
         "@container": "@list",
         "@type": "@id"
       },
+      "VDoc:lines": {
+        "@id": "#lines",
+        "@container": "@list",
+        "@type": "@id"
+      },
       "VDoc:columns": {
         "@id": "#columns",
         "@container": "@list",
@@ -321,7 +326,7 @@
     "declarative_desirable_qualities": {
       "@id": "declarative_desirable_qualities",
       "@type": "VDoc:NumberedList",
-      "VDoc:entries": [
+      "VDoc:lines": [
         [
           "ValOS resource model allows business logic to reside within the\n  valospace execution model. If the Web API integration logic can\n  be made to rely on this then the need for custom fabric code is\n  removed. This means lighter fabric-valospace integration overheads\n  and quicker development cycles."
         ],

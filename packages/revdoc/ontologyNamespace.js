@@ -2,13 +2,13 @@ const { dumpObject, wrapError } = require("@valos/tools/wrapError");
 const patchWith = require("@valos/tools/patchWith").default;
 
 module.exports = {
-  defineNamespace,
+  specifyNamespace,
   extendNamespace,
   revdocOntologyProperties,
   obtainFullNamespace,
 };
 
-function defineNamespace (namespace) {
+function specifyNamespace (namespace) {
   const { domain, preferredPrefix, baseIRI, ...rest } = namespace;
   if (!domain) throw new Error(`Missing namespace.domain`);
   if (!preferredPrefix) throw new Error(`Missing namespace.preferredPrefix`);
@@ -21,7 +21,7 @@ function defineNamespace (namespace) {
       documents = require(domain);
     } catch (error) {
       throw wrapError(new Error(`Misconfigured domain ${domain}: ${error.message}`),
-          new Error(`defineNamespace.require("${domain}")`),
+          new Error(`specifyNamespace.require("${domain}")`),
           "\n\tinner error:", ...dumpObject(error));
     }
     for (const document of Object.values(documents)) _aggregateDocument(document);
@@ -36,7 +36,7 @@ function defineNamespace (namespace) {
     try {
       alreadyAggregated[extenderModule] = true;
       extender = require(extenderModule);
-      if (!extender.base) return; // this is the defineNamespace module itself
+      if (!extender.base) return; // this is the specifyNamespace module itself
       if (extender.base.preferredPrefix !== preferredPrefix) {
         throw new Error(`Mismatch between extender.base.preferredPrefix '${
             extender.base.preferredPrefix}' and aggregated preferredPrefix '${preferredPrefix}'`);
@@ -68,7 +68,7 @@ function defineNamespace (namespace) {
       }
     } catch (error) {
       throw wrapError(error,
-          new Error(`During defineNamespace(${preferredPrefix} in ${domain
+          new Error(`During specifyNamespace(${preferredPrefix} in ${domain
               })._aggregateDocument(${document["@id"]})`),
           "\n\tdocument title:", document.title,
           "\n\tdocument package:", document.package, document.version,
@@ -80,7 +80,7 @@ function defineNamespace (namespace) {
 
 function obtainFullNamespace (referencedModule) {
   const namespace = require(referencedModule);
-  if (!namespace.aggregate) defineNamespace(namespace);
+  if (!namespace.aggregate) specifyNamespace(namespace);
   return namespace.aggregate;
 }
 

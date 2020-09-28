@@ -1,7 +1,7 @@
-const { defineNamespace } = require("@valos/revdoc");
+const { specifyNamespace } = require("@valos/revdoc");
 
 module.exports = {
-  ...defineNamespace(require("./Lens")),
-  ...defineNamespace(require("./On")),
-  ...defineNamespace(require("./VRevela")),
+  ...specifyNamespace(require("./Lens")),
+  ...specifyNamespace(require("./On")),
+  ...specifyNamespace(require("./VRevela")),
 };

@@ -153,7 +153,7 @@ exports.handler = async (yargv) => {
       author: (parentVaultConfig || {}).author || "",
       license: (parentVaultConfig || {}).license || "",
       repository: yargv.repository || (parentVaultConfig || {}).repository || "",
-      private: true,
+      private: false,
     };
     if (!ret.isNewDomain) {
       ret.newDevDependencies = [ret.valos.domain];
@@ -236,10 +236,11 @@ package configuration file for yarn (and also for npm, which yarn is
       const answer = await vlm.inquire([{
         message:
             justConfigured
-                ? `Commit valos stanza: ${JSON.stringify(ret.valos)}?`
+                ? `Commit package.json valos stanza: ${JSON.stringify(ret.valos)}?`
             : vlm.getValOSConfig()
-                ? `Reconfigure valos stanza: ${JSON.stringify({ ...vlm.getValOSConfig() })}?`
-            : "Initialize workspace valos stanza type and domain?",
+                ? `Reconfigure package.json valos stanza: ${
+                    JSON.stringify({ ...vlm.getValOSConfig() })}?`
+            : "Initialize package.json valos stanza type and domain?",
         type: "list", name: "choice", default: choices[0], choices,
       }]);
       if (answer.choice === "Bypass") break;

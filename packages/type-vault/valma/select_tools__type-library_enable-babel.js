@@ -2,7 +2,7 @@ const typeToolset = require("@valos/type-toolset");
 
 exports.vlm = { toolset: "@valos/type-library", tool: "enable-bable" };
 exports.command = ".select/.tools/.workspace/@valos/type-library/enable-babel";
-exports.describe = "Transpile all library files using the vault babel.config.js";
+exports.describe = "Transpile the library files on assembly with the vault babel.config.js";
 exports.introduction =
 `This tool enables babel transpilation for a library workspace when
 'vlm assemble-packages' is executed in the surrounding vault workspace.`;
@@ -27,7 +27,7 @@ exports.handler = (yargv) => {
   const vlm = yargv.vlm;
   if (yargv["enable-babel"]) {
     vlm.shell.ShellString(
-      `// This file exists so that vlm assemble-packages triggers babel
+`// This file exists so that vlm assemble-packages triggers babel
 // transpilation for this module.
 // Options here are merged on top of root babel.config.js
 module.exports = {};

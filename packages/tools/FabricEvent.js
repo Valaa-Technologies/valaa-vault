@@ -314,14 +314,14 @@ export class FabricEventTarget {
     for (let i = fabricEvent.path.length; i--;) {
       const pathEntry = fabricEvent.path[i];
       // AT_TARGET or CAPTURING_PHASE
-      fabricEvent.eventPhase = (pathEntry.eventTarget === this) ? 2 : 1;
+      fabricEvent.eventPhase = (pathEntry.target === this) ? 2 : 1;
       if (!_deliver(pathEntry, fabricEvent, "capturing")) break;
     }
     if (fabricEvent.bubbles && !fabricEvent._stopPropagation) {
       for (let i = 0; i !== fabricEvent.path.length; ++i) {
         const pathEntry = fabricEvent.path[i];
         // AT_TARGET or BUBBLING_PHASE
-        fabricEvent.eventPhase = (pathEntry.eventTarget === this) ? 2 : 3;
+        fabricEvent.eventPhase = (pathEntry.target === this) ? 2 : 3;
         if (!_deliver(pathEntry, fabricEvent, "bubbling")) break;
       }
     }

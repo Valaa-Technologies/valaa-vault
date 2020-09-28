@@ -124,7 +124,6 @@ const _vlm = {
 
   getPackageConfig,
   getValOSConfig,
-  // getValmaConfig,
   getToolsetsConfig,
   getToolsetPackageConfig,
 
@@ -1722,7 +1721,7 @@ function _locateDependedPools (initialPoolBase, poolFolders, relativePoolBase) {
   if ((poolsMissingNodeModules || []).length) {
     this.warn(`Module pools are missing node_modules:`, poolsMissingNodeModules,
         "\n\tSome dependent commands will likely be missing.",
-        `Run '${this.theme.executable("yarn install")
+        `Execute '${this.theme.executable("yarn install")
             }' to make dependent commands available.\n`);
   }
   return ret;
@@ -2366,6 +2365,7 @@ Maybe change option.type to 'any' as it works with if-undefined?`);
           (maxLen_, c) => Math.max(maxLen_, String(_choiceName(c)).length),
           0);
       question.choices = await Promise.all(choices.map(async c => ((typeof c !== "object") ? c : {
+        value: c.name,
         ...c,
         name: !c.description ? c.name : `${c.name.padEnd(maxLen)} - ${await c.description}`,
         short: c.short || c.name,

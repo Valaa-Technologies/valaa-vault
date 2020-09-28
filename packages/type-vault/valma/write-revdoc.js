@@ -28,22 +28,22 @@ exports.builder = (yargs) => yargs.options({
   valospace: {
     type: "any",
     description:
-`Add valospace namespace section ontology bindings. If string this is
-the name of a specific ontology-module export`,
+`Add a section for a valospace ontology namespace.
+Optionally a string value refers to a specific ontology-module export.`,
     causes: ["tags=VALOSPACE", "tags=ONTOLOGY"],
   },
   valosheath: {
     type: "any",
     description:
-`Add valosheath namespace section ontology bindings. If string this is
-the name of a specific ontology-module export`,
+`Add a section for a valosheath ontology namespace.
+Optionally a string value refers to a specific ontology-module export.`,
     causes: ["tags=VALOSHEATH", "tags=ONTOLOGY"],
   },
   fabric: {
     type: "any",
     description:
-`Add fabric namespace section ontology bindings. If string this is the
-name of a specific ontology-module export`,
+`Add a section for a fabric ontology namespace.
+Optionally a string value refers to a specific ontology-module export.`,
     causes: ["tags=FABRIC", "tags=ONTOLOGY"],
   },
   tags: {

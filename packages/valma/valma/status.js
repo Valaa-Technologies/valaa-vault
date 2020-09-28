@@ -27,7 +27,7 @@ exports.handler = async (yargv) => {
   }
   const subCommandGlob = yargv.toolsetGlob ? `*${yargv.toolsetGlob}*/**/*` : "**/*";
   const pendingSubCommandInvokations = vlm.invoke(
-      `.status/${selectorGlobFrom({ domain, type, name })}${subCommandGlob}`,
+      `.status/${selectorGlobFrom({ domain, type, workspace: name })}${subCommandGlob}`,
       yargv._);
   const resolveds = [].concat(...await Promise.all(pendingSubCommandInvokations))
       .filter(e => e && (typeof e === "object"));

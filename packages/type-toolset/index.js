@@ -32,15 +32,67 @@ module.exports = {
 };
 
 function draftSelectToolsetCommand (vlm, name, restrictor, draftOptions) {
-  return _draftSelectCommand(vlm, "toolset", name, restrictor, draftOptions);
+  const distributionDomain = vlm.getValOSConfig("domain");
+  return _draftSelectCommand(vlm, "toolset", name, restrictor, {
+    ...draftOptions,
+    introduction:
+`[Edit the introduction for the toolset '${name}' here - the first line
+of introduction is seen during toolset selection process.]
+
+[Once finalized this command should be transferred to the domain
+package '${distributionDomain}'. Once transferred then all workspaces
+that use that domain can select '${name}' as a toolset via
+'vlm configure' given that all selection restrictor conditions are
+satisfied.]
+`,
+    handler: `async (yargv) => ({
+  // This code is executed immediately after the toolset selection is
+  // confirmed and should return the toolsets.json config update and
+  // the devDependencies that are needed by the toolset itself.
+  //
+  // One-shot code that doesn't depend on any other packages can be
+  // executed here, although majority of the toolset configuration
+  // should happen in the toolset configure command.
+  //
+  // Finally, once complete, this file and its package.json bin section
+  // command entry should be moved to the domain package '${distributionDomain}'
+  // so that the toolset becomes available for 'vlm select-toolsets'.
+  devDependencies: {
+    [exports.vlm.toolset]: yargv.vlm.domainVersionTag("${distributionDomain}"),
+  },
+  toolsetsUpdate: { [exports.vlm.toolset]: { inUse: true } },
+  success: true,
+})`,
+  });
 }
 
 function draftSelectToolCommand (vlm, name, restrictor, draftOptions) {
-  return _draftSelectCommand(vlm, "tool", name, restrictor, draftOptions);
+  return _draftSelectCommand(vlm, "tool", name, restrictor, {
+    ...draftOptions,
+    introduction:
+`[Edit the introduction for the tool '${name}' here - the first line
+of introduction is seen during tool selection process.]
+`,
+    handler: `async (yargv) => ({
+  // This code is executed immediately after the tool selection is
+  // confirmed and should return the toolsets.json config update and
+  // the devDependencies that are needed by the tool itself.
+  //
+  // One-shot code that doesn't depend on any other packages can be
+  // executed here, although majority of the tool configuration
+  // should happen in the tool configure command.
+  devDependencies: {
+    // "@example/package": yargv.vlm.domainVersionTag("@example/domain"),
+  },
+  toolsetsUpdate: { [yargv.vlm.toolset]: { tools: { "${name}": {
+    inUse: true,
+  } } } },
+  success: true,
+})`,
+  });
 }
 
 function _draftSelectCommand (vlm, kind, name, restrictor, draftOptions) {
-  const distributionDomain = vlm.getValOSConfig("domain");
   const simpleName = name.match(/([^/]*)$/)[1];
   const capsKind = `${kind[0].toUpperCase()}${kind.slice(1)}`;
   return vlm.invoke("draft-command", [
@@ -57,31 +109,12 @@ function _draftSelectCommand (vlm, kind, name, restrictor, draftOptions) {
       brief: `select ${kind} '${name}'`,
       describe: `[Edit single-line description of '${simpleName}' here]`,
 
-      introduction:
-`[Edit the introduction for the ${kind} '${name}' here.]
-
-[Once finalized this command should be transferred to the domain
-package '${distributionDomain}'. Once transferred then all workspaces
-that use that domain can select '${name}' as a toolset via
-'vlm configure' given that all selection restrictor conditions are
-satisfied.]
-
-[This introduction text can be seen during the selection process.]
-`,
+      introduction: "",
       disabled:
 `(yargs) => typeToolset.check${capsKind}SelectorDisabled(yargs.vlm, exports,
     ${JSON.stringify(restrictor)})`,
 
       builder: `(yargs) => yargs.options({})`,
-      handler:
-`async (yargv) => ({
-  // Note: this file and the command should be moved to the domain
-  // package '${distributionDomain}'. Otherwise the toolset will not be visible
-  // for vlm select-toolsets.
-  devDependencies: { [exports.vlm.toolset]: yargv.vlm.domainVersionTag("${distributionDomain}") },
-  toolsetsUpdate: { [exports.vlm.toolset]: { inUse: true } },
-  success: true,
-})`,
       ...draftOptions,
     },
     `.select/.${kind}s/${restrictorPathFrom(restrictor)}${name}`,
@@ -91,9 +124,13 @@ satisfied.]
 function draftConfigureToolsetCommand (vlm, name, restrictor, draftOptions) {
   return _draftConfigureCommand(vlm, "toolset", name, restrictor, {
     introduction:
-`As a toolset this script is automatically called by configure.`,
+``,
     handler:
 `async (yargv) => {
+  // This code is called by 'vlm configure' every time it is executed
+  // in a workspace that uses this toolset.
+  // All packages specified as dev/dependencies by the toolset select
+  // command are available.
   const vlm = yargv.vlm;
   const toolsetConfig = vlm.getToolsetConfig(exports.vlm.toolset) || {};
   const toolsetConfigUpdate = { ...toolsetConfig };
@@ -110,10 +147,13 @@ function draftConfigureToolsetCommand (vlm, name, restrictor, draftOptions) {
 function createConfigureToolCommand (vlm, name, restrictor, draftOptions) {
   return _draftConfigureCommand(vlm, "tool", name, restrictor, {
     introduction:
-`As a tool this script is not automatically called. The parent
-toolset or tool which uses this tool must explicit invoke this command.`,
+``,
     handler:
 `async (yargv) => {
+  // This code is called by 'configureToolSelection' every time a
+  // toolset configure command that uses this tool is executed.
+  // All packages specified as dev/dependencies by the tool select
+  // command are available.
   const vlm = yargv.vlm;
   const toolConfig = vlm.getToolConfig(yargv.toolset, exports.vlm.tool) || {};
   const toolConfigUpdate = { ...toolConfig }; // Construct a tool config update or bail out.
@@ -440,7 +480,7 @@ async function configureConfigurableSelection (vlm, kind, reconfigure, selection
         "nothing selected or stowed and no --reconfigure given");
     return ret;
   }
-  const kindAndSelectorGlob = `.${kind}s/${selectorGlobFrom({ domain, type, name })}`;
+  const kindAndSelectorGlob = `.${kind}s/${selectorGlobFrom({ domain, type, workspace: name })}`;
   const packages = reconfigure ? selection : newlySelected;
   if (packages.length) {
     const packageFilter = (packages.length === 1) ? packages[0] : `{${packages.join(",")}}`;

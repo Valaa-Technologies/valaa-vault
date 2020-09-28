@@ -1,3 +1,3 @@
-const { defineNamespace } = require("@valos/revdoc");
+const { specifyNamespace } = require("@valos/revdoc");
 
-module.exports = defineNamespace(require("./VRevdoc"));
+module.exports = specifyNamespace(require("./VRevdoc"));

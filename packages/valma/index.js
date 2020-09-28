@@ -50,7 +50,7 @@ function _createChoicesOption (vlm, isSingular, primaryPrefix, selectorPackageCo
       }
       const domain = valos.domain;
       let choices = await listMatchingChoices(
-          vlm, primaryPrefix, { name, domain, type: valos.type, enableDisabled });
+          vlm, primaryPrefix, { workspace: name, domain, type: valos.type, enableDisabled });
       choices.unshift(...(prependChoices || []).filter(candidate =>
           choices.findIndex(existing => existing.value === candidate.value) === -1));
       choices.push(...(appendChoices || []).filter(candidate =>
@@ -80,9 +80,10 @@ function _createChoicesOption (vlm, isSingular, primaryPrefix, selectorPackageCo
   };
 }
 
-async function listMatchingChoices (vlm, primaryPrefix, { domain, type, name, enableDisabled }) {
+async function listMatchingChoices (
+    vlm, primaryPrefix, { workspace, domain, type, enableDisabled }) {
   const results = await vlm.invoke(
-      `${primaryPrefix}/${selectorGlobFrom({ domain, type, name })}**/*`,
+      `${primaryPrefix}/${selectorGlobFrom({ workspace, domain, type })}**/*`,
       ["--show-name", "--show-description"], { "enable-disabled": enableDisabled });
   // console.log("results:", results);
   return results.map(entry => {

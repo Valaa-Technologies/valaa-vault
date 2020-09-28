@@ -107,11 +107,11 @@ exports.builder = (yargs) => {
     releasable: {
       type: "any",
       description: `Draft the tool build and deploy release sub-commands${
-        typeOpspace
+        !typeOpspace
             ? ` (@valos/type-opspace required)`
             : ` (@valos/type-opspace found)`}`,
       interactive: {
-        type: "confirm", when: "if-undefined", default: !!typeOpspace,
+        type: "confirm", when: "if-undefined", default: !typeOpspace,
       },
     },
   });
@@ -123,6 +123,7 @@ exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
 
   const toolName = yargv.toolName;
+  if (!toolName || typeof toolName !== "string") throw new Error("toolName missing or invalid");
   const restrictor = { domain: yargv.domain, type: yargv.type, workspace: yargv.toolset };
   if (yargv.selectable) {
     await draftSelectToolCommand(vlm, toolName, restrictor, { describe: yargv.describe });

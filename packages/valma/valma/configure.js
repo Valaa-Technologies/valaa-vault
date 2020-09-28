@@ -40,7 +40,7 @@ exports.handler = async (yargv) => {
 
   const rest = [{ reconfigure: yargv.reconfigure }, ...yargv._];
 
-  const selectorGlob = selectorGlobFrom({ domain, type, name });
+  const selectorGlob = selectorGlobFrom({ domain, type, workspace: name });
   ret.toolsetConfigures = await vlm.invoke(
       `.configure/.toolsets/${selectorGlob}${yargv.toolsetGlob || "*"}/**/*`,
       rest);

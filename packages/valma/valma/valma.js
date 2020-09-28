@@ -126,6 +126,7 @@ const _vlm = {
   getValOSConfig,
   getToolsetsConfig,
   getToolsetPackageConfig,
+  findToolsetsConfig,
 
   // Registers pending updates to the package.json config file (and
   // immediately updates vlm._packageConfigStatus.content) which are
@@ -149,6 +150,8 @@ const _vlm = {
   // know about toolsets. OTOH valma type and the toolset scripts are part of valma package, so...
   getToolsetConfig,
   getToolConfig,
+  findToolsetConfig,
+  findToolConfig,
   confirmToolsetExists,
   updateToolsetConfig,
   updateToolConfig,
@@ -1682,38 +1685,53 @@ function _locateDependedPools (initialPoolBase, poolFolders, relativePoolBase) {
   // Now the pools are searched fixed to the pools available in the
   // initial current working directory (cwd).
   let pathBase = initialPoolBase, relativePathBase = relativePoolBase;
+  let packageConfigStatus = this._packageConfigStatus;
+  let toolsetsStatus = this._toolsetsConfigStatus;
   const ret = [];
   let poolsMissingNodeModules = !_vlm.vargv["bypass-validations"] && [];
   while (pathBase) {
-    poolFolders.forEach(candidateFolderName => {
-      const poolPath = this.path.join(pathBase, candidateFolderName);
+    const packageJSONPath = this.path.join(pathBase, "package.json");
+    if (shell.test("-f", packageJSONPath)) {
       const dirName = pathBase.match(/([^/]*)\/?$/)[1];
       const name = this.path.join(relativePathBase, "..", dirName);
-      const modulePackageJSONPath = candidateFolderName.startsWith("node_modules")
-          && this.path.join(pathBase, "package.json");
-      if (shell.test("-d", poolPath)) {
-        const pool = { name, path: poolPath };
-        if (modulePackageJSONPath) {
-          try {
-            pool.moduleConfig = require(modulePackageJSONPath);
-          } catch (error) {
-            throw wrapError(
-                new Error(`Could not load package.json for node_modules pool ${name}!`),
-                new Error(`_locateDependedPools("${initialPoolBase}")`),
-                "\n\tPool commands not loaded. Some dependent commands will likely be missing.",
-                "\n\tThis is irregular, node_modules should not be present without package.json.",
-                "\n\tload error:", ...dumpObject(error));
-          }
-          if (poolsMissingNodeModules && ((pool.moduleConfig.valos || {}).type === "vault")) {
+      let packageConfig;
+      try {
+        packageConfig = require(packageJSONPath);
+      } catch (error) {
+        throw wrapError(
+            new Error(`Could not load package.json for pool ${name}!`),
+            new Error(`_locateDependedPools("${initialPoolBase}")`),
+            "\n\tPool commands not loaded. Some dependent commands will likely be missing.",
+            "\n\tload error:", ...dumpObject(error));
+      }
+      poolFolders.forEach(candidateFolderName => {
+        const poolPath = this.path.join(pathBase, candidateFolderName);
+        if (shell.test("-d", poolPath)) {
+          const pool = { name, path: poolPath, packageConfig };
+          if (poolsMissingNodeModules && ((pool.packageConfig.valos || {}).type === "vault")) {
             poolsMissingNodeModules = [];
           }
+          ret.push(pool);
+        } else if (candidateFolderName === "node_modules") {
+          (poolsMissingNodeModules || []).push(name);
         }
-        ret.push(pool);
-      } else if (poolsMissingNodeModules
-            && modulePackageJSONPath && shell.test("-f", modulePackageJSONPath)) {
-        poolsMissingNodeModules.push(name);
+      });
+      if (packageConfigStatus) {
+        packageConfigStatus = packageConfigStatus.parent = {
+          path: packageJSONPath,
+          content: packageConfig,
+          updated: null,
+        };
       }
-    });
+      const toolsetsJSONPath = this.path.join(pathBase, "toolsets.json");
+      if (toolsetsStatus && shell.test("-f", toolsetsJSONPath)) {
+        toolsetsStatus = toolsetsStatus.parent = {
+          path: toolsetsJSONPath,
+          content: require(toolsetsJSONPath),
+          updated: null,
+        };
+      }
+    }
     if (pathBase === "/") break;
     pathBase = this.path.join(pathBase, "..");
     relativePathBase = this.path.join(relativePathBase, "..");
@@ -2448,6 +2466,15 @@ function getValOSConfig (...keys) {
 function getToolsetsConfig (...keys) {
   return this._getConfigAtPath(this._toolsetsConfigStatus.content, keys);
 }
+function findToolsetsConfig (...keys) {
+  let ret;
+  let configStatus = this._toolsetsConfigStatus;
+  do {
+    ret = this._getConfigAtPath(configStatus.content, keys);
+    configStatus = configStatus.parent;
+  } while ((ret === undefined) && (configStatus !== undefined));
+  return ret;
+}
 function getToolsetPackageConfig (toolset) {
   try {
     return require(this.path.join(toolset, "package"));
@@ -2525,6 +2552,23 @@ function getToolConfig (toolsetName, toolName, ...rest) {
         typeof toolsetName}|${typeof toolName}`);
   }
   return this.getToolsetsConfig(toolsetName, "tools", toolName, ...rest);
+}
+
+function findToolsetConfig (toolsetName, ...rest) {
+  if (typeof toolsetName !== "string" || !toolsetName) {
+    throw new Error(`Invalid arguments for findToolsetConfig, expexted string|..., got ${
+        typeof toolsetName}`);
+  }
+  return this.findToolsetsConfig(toolsetName, ...rest);
+}
+
+function findToolConfig (toolsetName, toolName, ...rest) {
+  if (typeof toolsetName !== "string" || typeof toolName !== "string"
+      || !toolsetName || !toolName) {
+    throw new Error(`Invalid arguments for findToolConfig, expexted string|string|..., got ${
+        typeof toolsetName}|${typeof toolName}`);
+  }
+  return this.findToolsetsConfig(toolsetName, "tools", toolName, ...rest);
 }
 
 function confirmToolsetExists (toolsetName) {

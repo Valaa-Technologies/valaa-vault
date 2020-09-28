@@ -18,6 +18,8 @@
     "@valos/type-toolset": "^0.35.0-rc.32"
   },
   "bin": {
-    "_vlm__configure__toolsets_-valos_type-library": "valma/configure_toolsets__type-library.js"
+    "_vlm__configure__toolsets_-valos_type-library": "valma/configure_toolsets__type-library.js",
+    "_vlm__select__tools__workspace_-valos_type-library_specify-namespace": "valma/select_tools_workspace_-valos_type-library__specify-namespace.js",
+    "_vlm__configure__tools__workspace_-valos_type-library_specify-namespace": "valma/configure_tools_workspace_-valos_type-library__specify-namespace.js"
   }
 }

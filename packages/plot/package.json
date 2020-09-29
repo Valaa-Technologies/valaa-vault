@@ -1,0 +1,22 @@
+{
+  "name": "@valos/plot",
+  "version": "0.35.0-rc.32",
+  "valos": {
+    "type": "library",
+    "domain": "@valos/kernel"
+  },
+  "description": "Specifies the hierarchical ValOS plot string format and the 'VPlot' namespace",
+  "author": "Valaa Technologies Ltd",
+  "license": "MIT",
+  "repository": "https://github.com/valaatech/kernel",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "index.js",
+  "devDependencies": {
+    "@valos/kernel": "^0.35.0-rc.32",
+    "@valos/revdoc": "^0.35.0-rc.32",
+    "@valos/type-library": "^0.35.0-rc.32"
+  }
+}

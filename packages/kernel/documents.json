@@ -3280,7 +3280,7 @@
               "VDoc:content": [
                 "events"
               ],
-              "VDoc:ref": "VModel:Event"
+              "VDoc:ref": "VLog:Event"
             },
             " from all valospace resource\nmodification side-effects and groups all such side effects into\ntransactions. Valoscript retains ECMAScript 5 syntax and semantics."
           ]
@@ -3345,7 +3345,7 @@
               "VDoc:content": [
                 "events"
               ],
-              "VDoc:ref": "VModel:Event"
+              "VDoc:ref": "VLog:Event"
             },
             " from all valospace resource\nmodification side-effects and groups all such side effects into\ntransactions. Valoscript retains ECMAScript 5 syntax and semantics."
           ]

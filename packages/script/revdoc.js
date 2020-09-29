@@ -50,7 +50,7 @@ for valoscript, the valospace ECMAScript dialect.`,
     "#0": [
 `Valoscript extends ECMAScript 5 object model transparently for
 manipulating valospace resources. The valoscript interpreter creates `,
-ref("events", "VModel:Event"), ` from all valospace resource
+ref("events", "VLog:Event"), ` from all valospace resource
 modification side-effects and groups all such side effects into
 transactions. Valoscript retains ECMAScript 5 syntax and semantics.`,
     ],

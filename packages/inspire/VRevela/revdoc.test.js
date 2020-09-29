@@ -207,12 +207,12 @@ async () => expose(lazyPatchRevelations(gatewayMock,
     },
     "chapter#section_verbs>6": {
       "dc:title": [
-em(preferredPrefix), ` `, ref("VModel:Verb", "VModel:Verb"), " vocabulary",
+em(preferredPrefix), ` `, ref("VValk:Verb", "VValk:Verb"), " vocabulary",
       ],
       "#0": [],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.verbs,
-        "VDoc:entries": filterKeysWithAnyOf("@type", "VModel:Verb", vocabulary),
+        "VDoc:entries": filterKeysWithAnyOf("@type", "VValk:Verb", vocabulary),
       },
     },
     "chapter#section_vocabulary_other>8": {
@@ -221,7 +221,7 @@ em(preferredPrefix), ` `, ref("VModel:Verb", "VModel:Verb"), " vocabulary",
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.vocabularyOther,
         "VDoc:entries": filterKeysWithNoneOf("@type", [
-          "VModel:Verb",
+          "VValk:Verb",
         ], vocabulary),
       },
     },

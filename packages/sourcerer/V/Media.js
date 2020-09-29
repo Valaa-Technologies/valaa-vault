@@ -67,7 +67,7 @@ to determine the default interpretation of the Media.`,
     "rdfs:domain": "V:Media",
     "rdfs:range": "xsd:nonNegativeInteger",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VModel:expressor": ["@$VSourcerer.resolveBvobSize@@"],
+    "VState:expressor": ["@$VValk.resolveBvobSize@@"],
     "rdfs:comment":
 `The number of octets in the of V:content Bvob octet-stream.`,
   },

@@ -25,7 +25,7 @@ properties available and it can thus be manipulated.`,
     "VModel:expressor": ["@$VModel.resolveVPath@@"],
     "VModel:impressor": ["@$VModel.impressViaVPath@@"],
     "rdfs:domain": "V:Extant",
-    "rdfs:range": ["xsd:string", "VModel:VParam"],
+    "rdfs:range": ["xsd:string", "VPlot:VParam"],
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "rdfs:comment":
 `The primary ValOS name of this extant resource. This name is a local

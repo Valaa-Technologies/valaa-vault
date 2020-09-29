@@ -61,7 +61,7 @@ frozen.`,
     "rdfs:domain": "V:SourceredNode",
     "rdfs:range": "xsd:double",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VModel:expressor": ["@$VSourcerer.resolveCreatedAt@@"],
+    "VState:expressor": ["@$VValk.resolveCreatedAt@@"],
     "rdfs:comment":
 `The creation UNIX epoch time of this node. This is defined as the
 log aspect timestamp of the CREATED event which impressed this node
@@ -73,7 +73,7 @@ into being.`,
     "rdfs:domain": "V:SourceredNode",
     "rdfs:range": "xsd:double",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VModel:expressor": ["@$VSourcerer.resolveModifiedAt@@"],
+    "VState:expressor": ["@$VValk.resolveModifiedAt@@"],
     "rdfs:comment":
 `The latest modification UNIX epoch time of this node. This is defined
 as the log aspect timestamp of the most recent event with a direct

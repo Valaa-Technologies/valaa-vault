@@ -1,18 +1,18 @@
 
 const {
+  ontologyColumns, revdocOntologyProperties,
   extractee: {
     em, ref,
     authors, pkg,
-    filterKeysWithAnyOf, filterKeysWithNoneOf, valosRaemFieldClasses,
+    filterKeysWithAnyOf, filterKeysWithNoneOf,
   },
-  ontologyColumns, revdocOntologyProperties,
 } = require("@valos/revdoc");
 
 const { name, version, description, valos: { type } = {} } = require("./package");
 
 const title = `${name} ${type} workspace`;
 const {
-  VEngine: {
+  VValk: {
     preferredPrefix, baseIRI, description: namespaceDescription,
     prefixes, context, referencedModules, vocabulary,
   },
@@ -20,8 +20,13 @@ const {
 } = require("./ontology");
 
 module.exports = {
+  "VDoc:tags": ["WORKSPACE", "FABRIC", "ONTOLOGY"],
+  "@context": {
+    ...prefixes,
+    ...context,
+  },
+
   "dc:title": title,
-  "VDoc:tags": ["FABRIC", "WORKSPACE", "ONTOLOGY"],
   "VRevdoc:package": name,
   "VRevdoc:version": version,
   "VRevdoc:preferredPrefix": preferredPrefix,
@@ -30,18 +35,24 @@ module.exports = {
 
   respecConfig: {
     specStatus: "unofficial",
-    shortName: "engine",
+    shortName: "valk",
     editors: authors("iridian"),
     authors: authors("iridian"),
   },
   "chapter#abstract>0": {
     "#0": [
-      description,
+description,
+null,
+em("VValk"), ` together with `, ref("VState:"), " ", ref("VLog:"),
+" and ", ref("VPlot:"), ` form the infrastructural foundation ie. the `,
+em("fabric"), ` of the valospace.`,
+em("VValk"), ` provides the intermediate language used for declarative
+and imperative logic alike.`,
     ],
   },
   "chapter#sotd>1": {
     "#0": [
-`This document is part of the library workspace `, pkg("@valos/engine"), `
+`This document is part of the library workspace `, pkg("@valos/valk"), `
 (of domain `, pkg("@valos/kernel"), `) which has the description:
 \`${description}\`.`,
     ],
@@ -59,7 +70,7 @@ See also `, ref("ReVdoc specification", "@valos/revdoc"), ` and `,
 ref("VDoc specification", "@valos/vdoc"), ` for reference documentation.`,
     ],
   },
-  "chapter#section_fabric>8": {
+  "chapter#section_fabric>9": {
     "dc:title": [
       "The ", em(preferredPrefix), " fabric namespace of the library ontology of ", pkg(name),
     ],
@@ -67,7 +78,7 @@ ref("VDoc specification", "@valos/vdoc"), ` for reference documentation.`,
     "data#vocabulary": vocabulary,
     "data#context": context,
     "#section_fabric_abstract>0": [
-      namespaceDescription,
+      namespaceDescription || "",
     ],
     "chapter#section_prefixes>1": {
       "dc:title": [em(name), " IRI prefixes"],
@@ -77,7 +88,7 @@ ref("VDoc specification", "@valos/vdoc"), ` for reference documentation.`,
     "chapter#section_classes>2": {
       "dc:title": [em(preferredPrefix), " ", ref("fabric classes", "VKernel:Class")],
       "#0": [
-"This section describes fabric classes introduced by the 'VEngine' namespace",
+"This section describes fabric classes introduced by the 'VValk' namespace",
       ],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.classes,
@@ -87,7 +98,7 @@ ref("VDoc specification", "@valos/vdoc"), ` for reference documentation.`,
     "chapter#section_properties>3": {
       "dc:title": [em(preferredPrefix), " ", ref("fabric properties", "VKernel:Property")],
       "#0": [
-"This section describes fabric properties introduced by the 'VEngine' namespace",
+"This section describes fabric properties introduced by the 'VValk' namespace",
       ],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.properties,
@@ -96,49 +107,35 @@ ref("VDoc specification", "@valos/vdoc"), ` for reference documentation.`,
     },
     "chapter#section_methods>4": {
       "dc:title": [
-        em(preferredPrefix), " ", ref("valosheath methods", "VEngine:Method"),
+        em(preferredPrefix), " ", ref("fabric methods", "VEngine:Method"),
       ],
       "#0": [
-"This section describes fabric methods introduced by the 'VEngine' namespace",
+"This section describes fabric methods introduced by the 'VValk' namespace",
       ],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.methods,
         "VDoc:entries": filterKeysWithAnyOf("@type", "VEngine:Method", vocabulary),
       },
     },
-    "chapter#section_resolvers>5": {
-      "dc:title": [em(preferredPrefix), " ", ref("field resolvers", "VValk:Resolver")],
-      "#0": [
-"This section describes valospace-to-fabric resolvers introduced by the 'VEngine' namespace",
-      ],
-      "table#>0;vocabulary": {
-        "VDoc:columns": ontologyColumns.verbs,
-        "VDoc:entries": filterKeysWithAnyOf("@type", "VValk:Resolver", vocabulary),
-      },
-    },
-    "chapter#section_globals>7": {
+    "chapter#section_globals>5": {
       "dc:title": [
-        em(preferredPrefix), " ", ref("valosheath globals", "VEngine:Global"),
+        em(preferredPrefix), " ", ref("fabric globals", "VEngine:Global"),
       ],
       "#0": [
-"This section describes valosheath global objects introduced by the 'VEngine' namespace",
+"This section describes fabric global objects introduced by the 'VValk' namespace",
       ],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.globals,
         "VDoc:entries": filterKeysWithAnyOf("@type", "VEngine:Global", vocabulary),
       },
     },
-    "chapter#section_vocabulary_other>9": {
-      "dc:title": [
-em(preferredPrefix), " remaining vocabulary names",
-      ],
+    "chapter#section_vocabulary_other>8": {
+      "dc:title": [em(preferredPrefix), " remaining vocabulary terms"],
       "#0": [],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.vocabularyOther,
         "VDoc:entries": filterKeysWithNoneOf("@type", [
-          "VKernel:Class", "VKernel:Property",
-          "VState:Type", ...valosRaemFieldClasses, "VValk:Resolver",
-          "VEngine:Global", "VEngine:Method",
+          "VKernel:Class", "VKernel:Property", "VEngine:Method", "VEngine:Global",
         ], vocabulary),
       },
     },

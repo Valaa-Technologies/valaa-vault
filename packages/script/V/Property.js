@@ -25,10 +25,10 @@ block as an rdf:Statement reification of hypertwinned triples.`,
 
   value: {
     "@type": "VModel:EventLoggedField",
-    "VModel:expressor": ["@$VModel.resolveVPath@@"],
-    "VModel:impressor": ["@$VModel.impressViaVPath@@"],
+    "VState:expressor": ["@$VValk.resolveVPlot@@"],
+    "VState:impressor": ["@$VValk.impressViaVPlot@@"],
     "rdfs:domain": "V:ScopeProperty",
-    "rdfs:range": ["xsd:string", "VModel:VPath"],
+    "rdfs:range": ["xsd:string", "VPlot:VPlot"],
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "rdfs:comment":
 `The value of this ScopeProperty.`,
@@ -41,7 +41,7 @@ block as an rdf:Statement reification of hypertwinned triples.`,
     "rdfs:domain": "V:ScopeProperty",
     "rdfs:range": "rdfs:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VModel:expressor": ["@$VScript.resolveTwinspace@@"],
+    "VState:expressor": ["@$VValk.resolveTwinspace@@"],
     "rdfs:comment":
 `The twinspace of this ScopeProperty. Equates to the expanded prefix
 of the V:name of this ScopeProperty using the context of this
@@ -56,7 +56,7 @@ the twinspace id of the scope resource for this twinspace.`,
     "rdfs:domain": "V:ScopeProperty",
     "rdfs:range": "rdfs:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VModel:expressor": ["@$VScript.resolveTwinSubject@@"],
+    "VState:expressor": ["@$VValk.resolveTwinSubject@@"],
     "rdfs:comment":
 `The subject of this ScopeProperty when interpreted as a reified
 rdf:Statement. Equates to the twinspace id of the scope resource using
@@ -83,7 +83,7 @@ ScopeProperty using the context of this chronicle.`,
     "rdfs:domain": "V:ScopeProperty",
     "rdfs:range": "rdfs:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VModel:expressor": ["@$VScript.resolveTwinObject@@"],
+    "VState:expressor": ["@$VValk.resolveTwinObject@@"],
     "rdfs:comment":
 `The object of this ScopeProperty when interpreted as a reified
 rdf:Statement. If the V:value refers to a scope which has this

@@ -96,11 +96,11 @@ c("ValOS event streams"), `.`,
       },
     },
     "chapter#section_resolvers>6": {
-      "dc:title": [em(preferredPrefix), " ", ref("field resolvers", "VModel:Resolver")],
+      "dc:title": [em(preferredPrefix), " ", ref("field resolvers", "VValk:Resolver")],
       "#0": [],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.verbs,
-        "VDoc:entries": filterKeysWithAnyOf("@type", "VModel:Resolver", vocabulary),
+        "VDoc:entries": filterKeysWithAnyOf("@type", "VValk:Resolver", vocabulary),
       },
     },
     "chapter#section_vocabulary_other>8": {
@@ -110,7 +110,7 @@ c("ValOS event streams"), `.`,
         "VDoc:columns": ontologyColumns.vocabularyOther,
         "VDoc:entries": filterKeysWithNoneOf("@type", [
           "VKernel:Class", "VKernel:Property",
-          "VModel:Type", ...valosRaemFieldClasses, "VModel:Resolver",
+          "VState:Type", ...valosRaemFieldClasses, "VValk:Resolver",
         ], vocabulary),
       },
     },

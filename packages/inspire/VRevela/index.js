@@ -5,7 +5,7 @@ module.exports = {
   namespaceModules: {
     VKernel: "@valos/kernel/VKernel",
     VModel: "@valos/raem/VModel",
-    VRevela: "@valos/inspire/VRevela",
+    VValk: "@valos/valk/VValk",
   },
   description:
 `'VRevela' namespace provides the vocabulary for revela.json

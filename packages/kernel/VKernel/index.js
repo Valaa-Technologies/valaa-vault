@@ -5,6 +5,7 @@ module.exports = {
   namespaceModules: {
     VKernel: "@valos/kernel/VKernel",
     VModel: "@valos/raem/VModel",
+    VValk: "@valos/valk/VValk",
     VEngine: "@valos/engine/VEngine",
   },
   description:

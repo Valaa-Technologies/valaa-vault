@@ -14,7 +14,7 @@ fields which are available even for unsourced bodies.`,
     "rdfs:domain": "V:Resource",
     "rdfs:range": "xsd:string",
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
-    "VModel:expressor": ["@$VModel.resolveId@@"],
+    "VState:expressor": ["@$VValk.resolveId@@"],
     "rdfs:comment":
 `The immutable string representation of the VRID of this resource.`,
   },
@@ -36,7 +36,7 @@ fields which are available even for unsourced bodies.`,
     "rdfs:domain": "V:Resource",
     "rdfs:range": "rdfs:List",
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
-    "VModel:expressor": ["@$VModel.resolveVRIDTransient@@"],
+    "VState:expressor": ["@$VValk.resolveVRIDTransient@@"],
     "rdfs:comment":
 `The immutable, segmented object representation of the VRID of this
 resource.`,
@@ -47,7 +47,7 @@ resource.`,
     "rdfs:domain": "V:Resource",
     "rdfs:range": "xsd:string",
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
-    "VModel:expressor": ["@$VModel.resolveDominantTypeName@@"],
+    "VState:expressor": ["@$VValk.resolveDominantTypeName@@"],
     "rdfs:comment":
 `The dominant type name of this resource`,
   },
@@ -80,7 +80,7 @@ V:prototype.`,
     "rdfs:domain": "V:Resource",
     "rdfs:range": "V:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VModel:expressor": ["@$VModel.resolveOwnFieldsTransient@@"],
+    "VState:expressor": ["@$VValk.resolveOwnFieldsTransient@@"],
     "rdfs:comment":
 `A transient version of this object as if prototype was undefined.
 All property accesses will only return field values which are directly
@@ -119,8 +119,8 @@ direct V:instancePrototype.`,
     "rdfs:domain": "V:Resource",
     "rdfs:range": "V:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VModel:expressor": ["@$VModel.resolveGhostPrototype@@"],
-    "VModel:coupledField": "V:ghosts",
+    "VState:expressor": ["@$VValk.resolveGhostPrototype@@"],
+    "VState:CoupledField": "V:ghosts",
     "rdfs:comment":
 `Ghost prototype of this ghost resource. The ghost prototype is the
 base resource from which this ghost was created during some primary
@@ -175,7 +175,7 @@ for why immaterial ghosts are not listed.`,
     "rdfs:domain": "V:Resource",
     "rdfs:range": "V:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VModel:expressor": ["@$VModel.resolveGhostHost@@"],
+    "VState:expressor": ["@$VValk.resolveGhostHost@@"],
     "rdfs:comment":
 `The instance resource which brought this ghost into being. This
 instance is equivalent to the innermost ancestor of this ghost which is

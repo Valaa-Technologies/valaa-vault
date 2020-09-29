@@ -27,7 +27,7 @@ with.`
     "rdfs:domain": "V:Bvob",
     "rdfs:range": "xsd:string",
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
-    "VModel:expressor": ["@$VModel.resolveContextTerm:@!$valos.vrid:1:1@@"],
+    "VState:expressor": ["@$VValk.resolveContextTerm:@!$valos.vrid:1:1@@"],
     "rdfs:comment":
 `The hash algorithm used to create the content hash of this Bvob`,
   },
@@ -37,7 +37,7 @@ with.`
     "rdfs:domain": "V:Bvob",
     "rdfs:range": "xsd:string",
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
-    "VModel:expressor": ["@!$valos.vrid:1:3@@"],
+    "VState:expressor": ["@!$valos.vrid:1:3@@"],
     "rdfs:comment":
 `The content hash of the octet-stream associated with this Bvob`,
   },
@@ -47,7 +47,7 @@ with.`
     "rdfs:domain": "V:Bvob",
     "rdfs:range": "xsd:nonNegativeInteger",
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
-    "VModel:expressor": ["@$VModel.resolveContentLength@@"],
+    "VState:expressor": ["@$VValk.resolveContentLength@@"],
     "rdfs:comment":
 `The number of octets in the octet-stream associated with this Bvob.`,
   },

@@ -43,7 +43,7 @@ be eventually locateable from anywhere.`,
     "rdfs:domain": "V:SourcerableNode",
     "rdfs:range": "V:SourceredNode",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VModel:expressor": ["@$VSourcerer.resolveChronicleRoot@@"],
+    "VState:expressor": ["@$VValk.resolveChronicleRoot@@"],
     "rdfs:comment":
 `The chronicle root node of this sourcerable (ie. the nearest ancestor,
 possibly this sourcerable itself self which has a non-null
@@ -55,7 +55,7 @@ V:authorityURI).`,
     "rdfs:domain": "V:SourcerableNode",
     "rdfs:range": "xsd:anyURI", // still a literal
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VModel:expressor": ["@$VSourcerer.resolveChronicleURI@@"],
+    "VState:expressor": ["@$VValk.resolveChronicleURI@@"],
     "rdfs:comment":
 `The chronicle URL of the event log that contain this potentially
 absent sourcerable as is known by the current view of the world.`,
@@ -84,7 +84,7 @@ of this resource`,
     "rdfs:domain": "V:SourcerableNode",
     "rdfs:range": "V:SourceredNode",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VModel:expressor": ["@$VSourcerer.resolveChronicleRoot@@"],
+    "VState:expressor": ["@$VValk.resolveChronicleRoot@@"],
     "rdfs:comment":
 `The chronicle root node of this sourcerable, ie. the nearest ancestor
 (possibly self) with a non-null V:authorityURI.`,

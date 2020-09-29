@@ -410,7 +410,7 @@ const {
         "VDoc:columns": ontologyColumns.methods,
         "VDoc:entries": filterKeysWithAnyOf("@type", "${names.method}", vocabulary),
       },
-    }`;
+    },`;
   }
   function _createGlobalsSection () {
     return !names.globals ? "" : `

@@ -2608,14 +2608,15 @@ function domainVersionTag (domain) {
  * Adds new dev dependencies to current workspace.
  *
  * Takes an object with package names as keys and either an explicit
- * version string or 'true' (accepting any version) as value.
+ * version string, release tag or 'true' (accepting any version) as
+ * value.
  *
  * If a package matching requested version already exists in either
  * normal or dev dependency section no further action is made.
  *
  * If no existing package was found and the requested version is 'true'
  * then the prefix map this.defaultTags is searched for an entry with
- * the longest key that prefix matches the package name. The value of
+ * the longest key that is a prefix of the package name. The value of
  * the entry is then used as the version tag in place of 'true'.
  *
  * @param {*} candidateDevDependencies

@@ -95,12 +95,17 @@ exports.handler = async (yargv) => {
   const baseIRI = yargv["base-iri"];
 
   const devDependencies = {};
+  const domainVersionTag = yargv.vlm.domainVersionTag(domain);
+
   for (const module of (yargv["namespace-modules"] || [])) {
     const packageName = (module.match(/((@[^/]+\/)?[^/]+)\/.*/) || [])[1];
     if (!packageName) {
       throw new Error(`Cannot determine dependency module from namespace module: "${module}"`);
     }
-    devDependencies[packageName] = true;
+    // FIXME(iridian, 2020-09): This will NOT give correct results for
+    // cross-domain dependencies. The code for checking whether a
+    // namespaceModule is cross-domain doesn't exist yet.
+    devDependencies[packageName] = domainVersionTag;
   }
   await vlm.addNewDevDependencies(devDependencies);
   const namespaceModules = {};

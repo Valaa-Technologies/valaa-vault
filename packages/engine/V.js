@@ -2,11 +2,11 @@ const valosheathTypes = require("@valos/engine/valosheath/valos/schema").default
 const { qualifiedNamesOf } = require("~/raem/tools/namespaceSymbols");
 
 module.exports = {
-  base: require("@valos/kernel/V"),
+  base: require("@valos/space/V"),
   extenderModule: "@valos/engine/V",
   namespaceModules: {
     VEngine: "@valos/engine/VEngine",
-    V: "@valos/kernel/V",
+    V: "@valos/space/V",
   },
   vocabulary: _importValosheathTypeProperties("V", valosheathTypes),
 };

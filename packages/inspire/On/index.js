@@ -9,7 +9,7 @@ module.exports = {
   baseIRI: "https://valospace.org/inspire/On/0#",
   namespaceModules: {
     VKernel: "@valos/kernel/VKernel",
-    V: "@valos/kernel/V",
+    V: "@valos/space/V",
     VEngine: "@valos/engine/VEngine",
     Lens: "@valos/inspire/Lens",
     On: "@valos/inspire/On",

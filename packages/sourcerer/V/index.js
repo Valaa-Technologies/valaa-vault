@@ -1,5 +1,5 @@
 module.exports = {
-  base: require("@valos/kernel/V"),
+  base: require("@valos/space/V"),
   extenderModule: "@valos/sourcerer/V",
   namespaceModules: {
     VKernel: "@valos/kernel/VKernel",

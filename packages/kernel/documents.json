@@ -447,7 +447,7 @@
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "'V' ie. the Valospace namespace provides vocabulary and definitions of\nthe primary ValOS resources."
+            "The 'V' namespace defines the valospace resource types and fields."
           ]
         }
       ]
@@ -458,7 +458,7 @@
       "https://valospace.org/engine/0#": "@valos/engine/VEngine",
       "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
       "https://valospace.org/state/0#": "@valos/state/VState",
-      "https://valospace.org/0#": "@valos/kernel/V",
+      "https://valospace.org/0#": "@valos/space/V",
       "https://valospace.org/plot/0#": "@valos/plot/VPlot",
       "https://valospace.org/log/0#": "@valos/log/VLog"
     },
@@ -557,7 +557,7 @@
       "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
       "https://valospace.org/valk/0#": "@valos/valk/VValk",
       "https://valospace.org/state/0#": "@valos/state/VState",
-      "https://valospace.org/0#": "@valos/kernel/V"
+      "https://valospace.org/0#": "@valos/space/V"
     },
     "VRevdoc:extenderModules": {
       "https://valospace.org/0#": "@valos/engine/V"
@@ -835,7 +835,7 @@
     "VRevdoc:referencedModules": {
       "https://valospace.org/engine/0#": "@valos/engine/VEngine",
       "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
-      "https://valospace.org/0#": "@valos/kernel/V",
+      "https://valospace.org/0#": "@valos/space/V",
       "https://valospace.org/inspire/Lens/0#": "@valos/inspire/Lens",
       "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
     },
@@ -1113,7 +1113,7 @@
     "VRevdoc:referencedModules": {
       "https://valospace.org/engine/0#": "@valos/engine/VEngine",
       "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
-      "https://valospace.org/0#": "@valos/kernel/V",
+      "https://valospace.org/0#": "@valos/space/V",
       "https://valospace.org/inspire/Lens/0#": "@valos/inspire/Lens",
       "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
     },
@@ -1213,7 +1213,7 @@
     "VRevdoc:referencedModules": {
       "https://valospace.org/engine/0#": "@valos/engine/VEngine",
       "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
-      "https://valospace.org/0#": "@valos/kernel/V",
+      "https://valospace.org/0#": "@valos/space/V",
       "https://valospace.org/inspire/Lens/0#": "@valos/inspire/Lens",
       "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
     },
@@ -1313,7 +1313,7 @@
     "VRevdoc:referencedModules": {
       "https://valospace.org/engine/0#": "@valos/engine/VEngine",
       "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
-      "https://valospace.org/0#": "@valos/kernel/V",
+      "https://valospace.org/0#": "@valos/space/V",
       "https://valospace.org/inspire/Lens/0#": "@valos/inspire/Lens",
       "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
     },
@@ -2845,7 +2845,7 @@
       "https://valospace.org/state/0#": "@valos/state/VState",
       "https://valospace.org/log/0#": "@valos/log/VLog",
       "https://valospace.org/valk/0#": "@valos/valk/VValk",
-      "https://valospace.org/0#": "@valos/kernel/V",
+      "https://valospace.org/0#": "@valos/space/V",
       "https://valospace.org/plot/0#": "@valos/plot/VPlot"
     },
     "VRevdoc:extenderModules": {
@@ -2981,7 +2981,7 @@
       "https://valospace.org/state/0#": "@valos/state/VState",
       "https://valospace.org/log/0#": "@valos/log/VLog",
       "https://valospace.org/valk/0#": "@valos/valk/VValk",
-      "https://valospace.org/0#": "@valos/kernel/V",
+      "https://valospace.org/0#": "@valos/space/V",
       "https://valospace.org/plot/0#": "@valos/plot/VPlot"
     },
     "VRevdoc:extenderModules": {
@@ -3565,8 +3565,7 @@
       "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
       "https://valospace.org/state/0#": "@valos/state/VState",
       "https://valospace.org/log/0#": "@valos/log/VLog",
-      "https://valospace.org/valk/0#": "@valos/valk/VValk",
-      "https://valospace.org/0#": "@valos/kernel/V"
+      "https://valospace.org/valk/0#": "@valos/valk/VValk"
     },
     "VRevdoc:extenderModules": {
       "https://valospace.org/0#": "@valos/script/V",
@@ -3633,14 +3632,106 @@
       "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
       "https://valospace.org/state/0#": "@valos/state/VState",
       "https://valospace.org/log/0#": "@valos/log/VLog",
-      "https://valospace.org/valk/0#": "@valos/valk/VValk",
-      "https://valospace.org/0#": "@valos/kernel/V"
+      "https://valospace.org/valk/0#": "@valos/valk/VValk"
     },
     "VRevdoc:extenderModules": {
       "https://valospace.org/0#": "@valos/script/V",
       "https://valospace.org/valk/0#": "@valos/script/VValk"
     },
     "package": "@valos/script",
+    "version": "0.35.0-rc.32"
+  },
+  "sheath": {
+    "@id": "https://valospace.org/sheath",
+    "tags": [
+      "WORKSPACE",
+      "VALOSHEATH",
+      "ONTOLOGY"
+    ],
+    "subProfiles": [],
+    "title": "@valos/sheath library workspace",
+    "abstract": {
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "Specifies the valospace-to-fabric API and the 'VSheath' namespace"
+          ]
+        }
+      ]
+    },
+    "introduction": {
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "Edit me - this is the first payload chapter. Abstract and SOTD are\nessential ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "ReSpec boilerplate"
+              ],
+              "VDoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
+            }
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "See ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "ReVDoc tutorial"
+              ],
+              "VDoc:ref": "@valos/revdoc/tutorial"
+            },
+            " for\ninstructions on how to write revdoc source documents."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "See also ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "ReVdoc specification"
+              ],
+              "VDoc:ref": "@valos/revdoc"
+            },
+            " and ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "VDoc specification"
+              ],
+              "VDoc:ref": "@valos/vdoc"
+            },
+            " for reference documentation."
+          ]
+        }
+      ]
+    },
+    "valosheathAbstract": {
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "The 'VSheath' namespace describes the valosheath public API types, members and constants."
+          ]
+        }
+      ]
+    },
+    "VRevdoc:preferredPrefix": "VSheath",
+    "VRevdoc:baseIRI": "https://valospace.org/sheath/0#",
+    "VRevdoc:referencedModules": {
+      "https://valospace.org/engine/0#": "@valos/engine/VEngine"
+    },
+    "VRevdoc:extenderModules": {},
+    "package": "@valos/sheath",
     "version": "0.35.0-rc.32"
   },
   "sourcerer/0": {
@@ -3694,7 +3785,7 @@
       "https://valospace.org/state/0#": "@valos/state/VState",
       "https://valospace.org/log/0#": "@valos/log/VLog",
       "https://valospace.org/valk/0#": "@valos/valk/VValk",
-      "https://valospace.org/0#": "@valos/kernel/V"
+      "https://valospace.org/0#": "@valos/space/V"
     },
     "VRevdoc:extenderModules": {
       "https://valospace.org/log/0#": "@valos/sourcerer/VLog",
@@ -3755,7 +3846,7 @@
       "https://valospace.org/state/0#": "@valos/state/VState",
       "https://valospace.org/log/0#": "@valos/log/VLog",
       "https://valospace.org/valk/0#": "@valos/valk/VValk",
-      "https://valospace.org/0#": "@valos/kernel/V"
+      "https://valospace.org/0#": "@valos/space/V"
     },
     "VRevdoc:extenderModules": {
       "https://valospace.org/log/0#": "@valos/sourcerer/VLog",
@@ -3832,6 +3923,104 @@
       ]
     },
     "package": "@valos/sourcerer",
+    "version": "0.35.0-rc.32"
+  },
+  "space": {
+    "@id": "https://valospace.org/space",
+    "tags": [
+      "WORKSPACE",
+      "VALOSPACE",
+      "ONTOLOGY"
+    ],
+    "subProfiles": [],
+    "title": "@valos/space library workspace",
+    "abstract": {
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "Specifies 'valospace' the globally distributed resource network and its related 'V' ontology namespace"
+          ]
+        }
+      ]
+    },
+    "introduction": {
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "Edit me - this is the first payload chapter. Abstract and SOTD are\nessential ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "ReSpec boilerplate"
+              ],
+              "VDoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
+            }
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "See ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "ReVDoc tutorial"
+              ],
+              "VDoc:ref": "@valos/revdoc/tutorial"
+            },
+            " for\ninstructions on how to write revdoc source documents."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "See also ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "ReVdoc specification"
+              ],
+              "VDoc:ref": "@valos/revdoc"
+            },
+            " and ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "VDoc specification"
+              ],
+              "VDoc:ref": "@valos/vdoc"
+            },
+            " for reference documentation."
+          ]
+        }
+      ]
+    },
+    "valospaceAbstract": {
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "The 'V' namespace defines the valospace resource types and fields."
+          ]
+        }
+      ]
+    },
+    "VRevdoc:preferredPrefix": "V",
+    "VRevdoc:baseIRI": "https://valospace.org/0#",
+    "VRevdoc:referencedModules": {
+      "https://valospace.org/engine/0#": "@valos/engine/VEngine",
+      "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
+      "https://valospace.org/state/0#": "@valos/state/VState",
+      "https://valospace.org/0#": "@valos/space/V",
+      "https://valospace.org/plot/0#": "@valos/plot/VPlot",
+      "https://valospace.org/log/0#": "@valos/log/VLog"
+    },
+    "VRevdoc:extenderModules": {},
+    "package": "@valos/space",
     "version": "0.35.0-rc.32"
   },
   "state": {
@@ -3976,7 +4165,7 @@
       "https://valospace.org/plot/0#": "@valos/plot/VPlot",
       "https://valospace.org/log/0#": "@valos/log/VLog",
       "https://valospace.org/valk/0#": "@valos/valk/VValk",
-      "https://valospace.org/0#": "@valos/kernel/V"
+      "https://valospace.org/0#": "@valos/space/V"
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/state",
@@ -4325,7 +4514,7 @@
       "https://valospace.org/plot/0#": "@valos/plot/VPlot",
       "https://valospace.org/state/0#": "@valos/state/VState",
       "https://valospace.org/log/0#": "@valos/log/VLog",
-      "https://valospace.org/0#": "@valos/kernel/V"
+      "https://valospace.org/0#": "@valos/space/V"
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/valk",
@@ -5255,7 +5444,7 @@
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "'V' ie. the Valospace namespace provides vocabulary and definitions of\nthe primary ValOS resources."
+            "The 'V' namespace defines the valospace resource types and fields."
           ]
         }
       ]
@@ -5266,7 +5455,7 @@
       "https://valospace.org/engine/0#": "@valos/engine/VEngine",
       "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
       "https://valospace.org/state/0#": "@valos/state/VState",
-      "https://valospace.org/0#": "@valos/kernel/V",
+      "https://valospace.org/0#": "@valos/space/V",
       "https://valospace.org/plot/0#": "@valos/plot/VPlot",
       "https://valospace.org/log/0#": "@valos/log/VLog"
     },
@@ -5413,9 +5602,9 @@
             {
               "@type": "VDoc:Reference",
               "VDoc:content": [
-                "Valospace"
+                "valospace"
               ],
-              "VDoc:ref": "Valospace"
+              "VDoc:ref": "@valos/space"
             },
             "."
           ]

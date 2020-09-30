@@ -7,8 +7,7 @@ module.exports = {
     VState: "@valos/state/VState",
   },
   description:
-`'V' ie. the Valospace namespace provides vocabulary and definitions of
-the primary ValOS resources.`,
+`The 'V' namespace defines the valospace resource types and fields.`,
   context: {
     restriction: { "@reverse": "owl:onProperty" },
   },

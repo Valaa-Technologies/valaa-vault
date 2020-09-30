@@ -1,9 +1,8 @@
 module.exports = {
-  base: require("@valos/kernel/V"),
+  base: require("@valos/space/V"),
   extenderModule: "@valos/script/V",
   namespaceModules: {
     VState: "@valos/state/VState",
-    V: "@valos/kernel/V",
   },
   vocabulary: {
     nameAlias: {

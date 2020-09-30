@@ -1,0 +1,21 @@
+{
+  "name": "@valos/space",
+  "version": "0.35.0-rc.32",
+  "valos": {
+    "type": "library",
+    "domain": "@valos/kernel"
+  },
+  "description": "Specifies 'valospace' the globally distributed resource network and its related 'V' ontology namespace",
+  "author": "Valaa Technologies Ltd",
+  "license": "MIT",
+  "repository": "https://github.com/valaatech/kernel",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "@valos/revdoc": ">=0.35.0-rc.32",
+    "@valos/type-library": ">=0.35.0-rc.32"
+  }
+}

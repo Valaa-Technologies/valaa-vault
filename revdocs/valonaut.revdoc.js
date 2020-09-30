@@ -31,7 +31,7 @@ content creators - to the ValOS ecosystem and its core tools.`,
   "chapter#introduction>2;How do I create and share interactive content?": {
     "#0": [
 `As a valonaut you create, share and deploy web content and
-interactive applications fully from inside `, ref("Valospace"), `.
+interactive applications fully from inside `, ref("valospace", "@valos/space"), `.
 
 You use a web editor called `, ref("Zero"), ` and with it employ
 traditional web technologies; HTML5, CSS and the Javascript

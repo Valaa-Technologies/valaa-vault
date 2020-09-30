@@ -5,7 +5,7 @@ module.exports = {
   extenderModule: "@valos/raem/VState",
   namespaceModules: {
     VKernel: "@valos/kernel/VKernel",
-    V: "@valos/kernel/V",
+    V: "@valos/space/V",
   },
   vocabulary: {
     ExpressedField: {

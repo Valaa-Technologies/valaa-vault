@@ -16,7 +16,7 @@ const {
     prefixes, context, referencedModules, vocabulary,
   },
   ...remainingOntology
-} = require("../dist/packages/@valos/kernel/ontology");
+} = require("../dist/packages/@valos/space/ontology");
 
 const roleDocuments = Object.fromEntries(
     // filterKeysWithAllOf("tags", ["PRIMARY", "ROLE"], documents)

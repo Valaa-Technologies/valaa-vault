@@ -263,8 +263,8 @@ function _createValospaceOntologySection (revdocOptions) {
     kind: "valospace",
     namespace: revdocOptions.valospaceNamespace,
     chapterIndex: "7",
-    class: "VModel:Type",
-    property: "VModel:Field",
+    class: "VState:Type",
+    property: "VState:Field",
     // method: "VEngine:Method",
     // globals: "VEngine:Global",
   });

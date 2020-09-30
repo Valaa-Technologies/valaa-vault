@@ -1,6 +1,6 @@
 module.exports = {
   Scope: {
-    "@type": "VModel:Type",
+    "@type": "VState:Type",
     "rdfs:subClassOf": ["V:Resource", "V:Extant"],
     "VRevdoc:brief": "property scope interface",
     "rdfs:comment":
@@ -8,12 +8,12 @@ module.exports = {
   },
 
   properties: {
-    "@type": "VModel:EventLoggedField",
+    "@type": "VState:EventLoggedField",
     "rdfs:subPropertyOf": "V:ownlings",
     "rdfs:domain": "V:Scope",
     "rdfs:range": "rdfs:List",
-    "VModel:isOwnerOf": true,
-    "VModel:coupledField": "V:scope",
+    "VState:isOwnerOf": true,
+    "VState:coupledToField": "V:scope",
     "rdfs:comment":
 `The ordered list of ScopeProperty resources of this scope`,
   },

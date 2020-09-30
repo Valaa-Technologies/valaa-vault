@@ -5,7 +5,7 @@ module.exports = {
   namespaceModules: {
     VKernel: "@valos/kernel/VKernel",
     VValk: "@valos/valk/VValk",
-    VModel: "@valos/raem/VModel",
+    VState: "@valos/state/VState",
     VEngine: "@valos/engine/VEngine",
   },
 description:
@@ -64,10 +64,10 @@ execution environment.`,
     },
     domainOfField: {
       "@type": "VKernel:Property",
-      "rdfs:domain": "VModel:Type",
-      "rdfs:range": "VModel:Field",
+      "rdfs:domain": "VState:Type",
+      "rdfs:range": "VState:Field",
       "rdfs:comment":
-`The VModel:Field individuals which have this VModel:Type as their rdfs:domain.`,
+`The VState:Field individuals which have this VState:Type as their rdfs:domain.`,
     },
     domainOfProperty: {
       "@type": "VKernel:Property",

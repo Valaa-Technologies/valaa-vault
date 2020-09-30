@@ -1,6 +1,6 @@
 module.exports = {
   Bvob: {
-    "@type": "VModel:Type",
+    "@type": "VState:Type",
     "VRevdoc:brief": "Binary ValOS Object type",
     "rdfs:subClassOf": "V:Resource",
     "rdfs:comment":
@@ -23,7 +23,7 @@ with.`
   // octet-streamprefixed with "hashV240:" as their VGRID.`,
 
   hashAlgorithm: {
-    "@type": "VModel:GeneratedField",
+    "@type": "VState:GeneratedField",
     "rdfs:domain": "V:Bvob",
     "rdfs:range": "xsd:string",
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
@@ -33,7 +33,7 @@ with.`
   },
 
   contentHash: {
-    "@type": "VModel:GeneratedField",
+    "@type": "VState:GeneratedField",
     "rdfs:domain": "V:Bvob",
     "rdfs:range": "xsd:string",
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
@@ -43,7 +43,7 @@ with.`
   },
 
   contentLength: {
-    "@type": "VModel:GeneratedField",
+    "@type": "VState:GeneratedField",
     "rdfs:domain": "V:Bvob",
     "rdfs:range": "xsd:nonNegativeInteger",
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
@@ -53,10 +53,10 @@ with.`
   },
 
   contentReferrers: {
-    "@type": "VModel:CoupledField",
+    "@type": "VState:CoupledField",
     "rdfs:domain": "V:Bvob",
     "rdfs:range": "V:Extant",
-    "VModel:defaultCoupledField": "V:content",
+    "VState:defaultCoupledField": "V:content",
     "rdfs:comment":
 `The unordered set of V:content references to this Bvob from
 within this view of the world.`,

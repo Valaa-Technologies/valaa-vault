@@ -5,10 +5,10 @@ module.exports = {
     const vocabulary = {};
     Object.entries((sourceOntology || {}).vocabulary || {}).forEach(([key, definition]) => {
       if (definition["rdfs:range"] === "rdfs:List"
-          && ((definition["@type"] === "VModel:EventLoggedField")
-              || (definition["@type"] === "VModel:CoupledField"))) {
+          && ((definition["@type"] === "VState:EventLoggedField")
+              || (definition["@type"] === "VState:CoupledField"))) {
         vocabulary[key] = {
-          "@type": "VModel:GeneratedField",
+          "@type": "VState:GeneratedField",
           "rdfs:domain": definition["rdfs:domain"],
           "rdfs:range": "rdfs:List",
           "rdfs:comment": `removed-from entries of field ${sourceOntology.preferredPrefix}:${key}.`,

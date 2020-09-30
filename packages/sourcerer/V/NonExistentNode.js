@@ -1,6 +1,6 @@
 module.exports = {
   NonExistentNode: {
-    "@type": "VModel:Type",
+    "@type": "VState:Type",
     "rdfs:subClassOf": ["V:Resource", "V:SourcerableNode"],
     "VRevdoc:brief": "non-existent node type",
     "rdfs:comment":

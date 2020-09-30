@@ -3,8 +3,8 @@ module.exports = {
   extenderModule: "@valos/sourcerer/V",
   namespaceModules: {
     VKernel: "@valos/kernel/VKernel",
-    VModel: "@valos/raem/VModel",
-    VSourcerer: "@valos/sourcerer/VSourcerer",
+    VState: "@valos/state/VState",
+    VLog: "@valos/log/VLog",
     V: "@valos/kernel/V",
   },
   vocabulary: {
@@ -14,24 +14,24 @@ module.exports = {
     ...require("./SourceredNode"),
 
     directory: {
-      "@type": "VModel:EventLoggedField",
+      "@type": "VState:EventLoggedField",
       "rdfs:subPropertyOf": "V:container",
       "rdfs:domain": ["V:Entity", "V:Media"],
       "rdfs:range": "V:SourceredNode",
       restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-      "VModel:isOwnedBy": true,
-      "VModel:coupledField": "V:entries",
+      "VState:isOwnedBy": true,
+      "VState:coupledToField": "V:entries",
       "rdfs:comment":
   `The directory (and owner) node of this sourcered node.`,
     },
 
     entries: {
-      "@type": "VModel:EventLoggedField",
+      "@type": "VState:EventLoggedField",
       "rdfs:subPropertyOf": "V:nodes",
       "rdfs:domain": "V:SourceredNode",
       "rdfs:range": "rdfs:List",
-      "VModel:isOwnerOf": true,
-      "VModel:coupledField": "V:directory",
+      "VState:isOwnerOf": true,
+      "VState:coupledToField": "V:directory",
       "rdfs:comment":
   `The ordered list of entries of this sourcered node when seen as
   a directory.`,

@@ -119,7 +119,7 @@ guide also gives a high-level overview of the rest.`,
       "table#>0;prefixes": ontologyColumns.prefixes,
     },
     "chapter#section_types>2": {
-      "dc:title": [em(preferredPrefix), " ", ref("valospace resource types", "VModel:Type")],
+      "dc:title": [em(preferredPrefix), " ", ref("valospace resource types", "VState:Type")],
       "#0": [
 `This section defines all valospace resource types introduced by the
 @valos/kernel packages. Any instance of a resource type is always
@@ -127,7 +127,7 @@ recorded in an event log.`,
       ],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.types,
-        "VDoc:entries": filterKeysWithAnyOf("@type", "VModel:Type", vocabulary),
+        "VDoc:entries": filterKeysWithAnyOf("@type", "VState:Type", vocabulary),
       },
     },
     "chapter#section_classes>3": {
@@ -143,7 +143,7 @@ recorded in an event log.`,
       },
     },
     "chapter#section_fields>4": {
-      "dc:title": [em(preferredPrefix), " ", ref("valospace fields", "VModel:Field")],
+      "dc:title": [em(preferredPrefix), " ", ref("valospace fields", "VState:Field")],
       "#0": [
 `This section defines all valospace resource fields introduced by the
 @valos/kernel packages. The values of these fields are either directly
@@ -218,7 +218,7 @@ the @valos/engine and their values are not recorded in event logs.`,
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.vocabularyOther,
         "VDoc:entries": filterKeysWithNoneOf("@type", [
-          "VModel:Type", ...valosRaemFieldClasses,
+          "VState:Type", ...valosRaemFieldClasses,
           "VEngine:Class",
           "VEngine:Property", "VEngine:Method", "VEngine:ObjectProperty", "VEngine:ObjectMethod",
         ], vocabulary),

@@ -1,6 +1,6 @@
 module.exports = {
   Extant: {
-    "@type": "VModel:Type",
+    "@type": "VState:Type",
     "VRevdoc:brief": "extant and present resource interface",
     "rdfs:subClassOf": "V:Resource",
     "rdfs:comment":
@@ -10,20 +10,20 @@ properties available and it can thus be manipulated.`,
   },
 
   owner: {
-    "@type": "VModel:EventLoggedField",
+    "@type": "VState:EventLoggedField",
     "rdfs:domain": "V:Extant",
     "rdfs:range": "V:Extant",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VModel:isOwnedBy": true,
-    "VModel:defaultCoupledField": "V:ownlings",
+    "VState:isOwnedBy": true,
+    "VState:defaultCoupledField": "V:ownlings",
     "rdfs:comment":
 `The owner of this extant resource.`,
   },
 
   name: {
-    "@type": "VModel:EventLoggedField",
-    "VModel:expressor": ["@$VModel.resolveVPath@@"],
-    "VModel:impressor": ["@$VModel.impressViaVPath@@"],
+    "@type": "VState:EventLoggedField",
+    "VState:expressor": ["@$VValk.resolveVPlot@@"],
+    "VState:impressor": ["@$VValk.impressViaVPlot@@"],
     "rdfs:domain": "V:Extant",
     "rdfs:range": ["xsd:string", "VPlot:VParam"],
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
@@ -35,12 +35,12 @@ a particular type which are owned by the same resource.`,
   },
 
   inheritancePrototype: {
-    "@type": "VModel:EventLoggedField",
+    "@type": "VState:EventLoggedField",
     "rdfs:subPropertyOf": "V:prototype",
     "rdfs:domain": "V:Extant",
     "rdfs:range": "V:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VModel:coupledField": "V:inheritors",
+    "VState:coupledToField": "V:inheritors",
     "rdfs:comment":
 `The inheritance prototype of this extant resource. This represents the
 traditional prototypical inheritance where inherited field values are
@@ -48,12 +48,12 @@ not remapped in any way.`,
   },
 
   instancePrototype: {
-    "@type": "VModel:EventLoggedField",
+    "@type": "VState:EventLoggedField",
     "rdfs:subPropertyOf": "V:prototype",
     "rdfs:domain": "V:Extant",
     "rdfs:range": "V:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VModel:coupledField": "V:instances",
+    "VState:coupledToField": "V:instances",
     "rdfs:comment":
 `The instance prototype of this extant resource. This represents
 valos 'ghost instantiation' where all recursively owned resources of
@@ -62,35 +62,35 @@ resource.`,
   },
 
   ownlings: {
-    "@type": "VModel:EventLoggedField",
+    "@type": "VState:EventLoggedField",
     "rdfs:domain": "V:Extant",
     "rdfs:range": "rdfs:List",
-    "VModel:isOwnerOf": true,
-    "VModel:coupledField": "V:owner",
+    "VState:isOwnerOf": true,
+    "VState:coupledToField": "V:owner",
     "rdfs:comment":
 `The ordered list of all resources owned by this extant resource. This
-list is a union of all fields which define a VModel:isOwnerOf.`
+list is a union of all fields which define a VState:isOwnerOf.`
   },
 
   unnamedOwnlings: {
-    "@type": "VModel:EventLoggedField",
+    "@type": "VState:EventLoggedField",
     "rdfs:subPropertyOf": "V:ownlings",
     "rdfs:domain": "V:Extant",
     "rdfs:range": "V:Extant",
-    "VModel:isOwnerOf": true,
-    "VModel:coupledField": "V:owner",
+    "VState:isOwnerOf": true,
+    "VState:coupledToField": "V:owner",
     "rdfs:comment":
 `The ordered list of all resources owned by this extant resource which
-are not contained in another VModel:isOwnerOf field list.`,
+are not contained in another VState:isOwnerOf field list.`,
   },
 
   isFrozen: {
-    "@type": "VModel:EventLoggedField",
+    "@type": "VState:EventLoggedField",
     "rdfs:domain": "V:Extant",
     "rdfs:range": "xsd:boolean",
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
-    "VModel:isDuplicateable": false,
-    "VModel:ownDefaultValue": false,
+    "VState:isDuplicateable": false,
+    "VState:ownDefaultValue": false,
     "rdfs:comment":
 `Indicates whether this extant resource is frozen. A frozen resource
 nor any of its ownlings cannot have any of their primary fields be

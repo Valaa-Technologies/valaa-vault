@@ -9,7 +9,7 @@ const {
 } = require("@valos/revdoc");
 
 const {
-  VModel: {
+  VRaem: {
     preferredPrefix, baseIRI, description: namespaceDescription,
     prefixes, context, referencedModules, vocabulary,
   },
@@ -233,15 +233,15 @@ operations.`,
       },
     },
     "chapter#section_types>4": {
-      "dc:title": [em(preferredPrefix), " ", ref("valospace resource types", "VModel:Type")],
+      "dc:title": [em(preferredPrefix), " ", ref("valospace resource types", "VState:Type")],
       "#0": [],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.types,
-        "VDoc:entries": filterKeysWithAnyOf("@type", "VModel:Type", vocabulary),
+        "VDoc:entries": filterKeysWithAnyOf("@type", "VState:Type", vocabulary),
       },
     },
     "chapter#section_fields>5": {
-      "dc:title": [em(preferredPrefix), " ", ref("valospace fields", "VModel:Field")],
+      "dc:title": [em(preferredPrefix), " ", ref("valospace fields", "VState:Field")],
       "#0": [],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.fields,

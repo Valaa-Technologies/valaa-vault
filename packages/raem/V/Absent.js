@@ -1,6 +1,6 @@
 module.exports = {
   Absent: {
-    "@type": "VModel:Type",
+    "@type": "VState:Type",
     "VRevdoc:brief": "absent resource type",
     "rdfs:subClassOf": "V:Resource",
     "rdfs:comment":

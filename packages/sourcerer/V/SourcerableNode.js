@@ -1,6 +1,6 @@
 module.exports = {
   SourcerableNode: {
-    "@type": "VModel:Type",
+    "@type": "VState:Type",
     "rdfs:subClassOf": "V:Resource",
     "VRevdoc:brief": "sourcerable node interface",
     "rdfs:comment":
@@ -39,7 +39,7 @@ be eventually locateable from anywhere.`,
   */
 
   chronicleRoot: {
-    "@type": "VModel:GeneratedField",
+    "@type": "VState:GeneratedField",
     "rdfs:domain": "V:SourcerableNode",
     "rdfs:range": "V:SourceredNode",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
@@ -51,7 +51,7 @@ V:authorityURI).`,
   },
 
   chronicleURI: {
-    "@type": "VModel:GeneratedField",
+    "@type": "VState:GeneratedField",
     "rdfs:domain": "V:SourcerableNode",
     "rdfs:range": "xsd:anyURI", // still a literal
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
@@ -62,11 +62,11 @@ absent sourcerable as is known by the current view of the world.`,
   },
 
   url: {
-    "@type": "VModel:GeneratedField",
+    "@type": "VState:GeneratedField",
     "rdfs:domain": "V:SourcerableNode",
     "rdfs:range": "xsd:anyURI", // still a literal
     restriction: { "@type": "owl:Restriction", "owl:cardinality": 1 },
-    "VModel:expressor": ["@!$valk.add:@!$V.chronicleURI@@:#:@!$V.id@@@@"],
+    "VState:expressor": ["@!$valk.add:@!$V.chronicleURI@@:#:@!$V.id@@@@"],
     "rdfs:comment":
 `The authoritative URL string of this sourcerable in the current view
 of the world. Always equivalent to a catenation of
@@ -77,9 +77,9 @@ of this resource`,
   // Deprecated fields
 
   partition: {
-    "@type": "VModel:AliasField",
+    "@type": "VState:AliasField",
     "VRevdoc:deprecatedInFavorOf": "V:chronicleRoot",
-    "VModel:aliasOf": "V:chronicleRoot",
+    "VState:aliasOf": "V:chronicleRoot",
     "rdfs:subPropertyOf": "V:chronicleRoot",
     "rdfs:domain": "V:SourcerableNode",
     "rdfs:range": "V:SourceredNode",
@@ -91,9 +91,9 @@ of this resource`,
   },
 
   partitionURI: {
-    "@type": "VModel:AliasField",
+    "@type": "VState:AliasField",
     "VRevdoc:deprecatedInFavorOf": "V:chronicleURI",
-    "VModel:aliasOf": "V:chronicleURI",
+    "VState:aliasOf": "V:chronicleURI",
     "rdfs:subPropertyOf": "V:chronicleURI",
     "rdfs:domain": "V:SourcerableNode",
     "rdfs:range": "xsd:anyURI",

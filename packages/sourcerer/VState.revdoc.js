@@ -82,8 +82,8 @@ when it is expanded as triples.
     "$~u4": { "@id": "urn:valos:$~u4.", "@prefix": true },
     "$~plt": { "@id": "urn:valos:$~plt.", "@prefix": true },
 
-    "$VSourcerer": "https://valospace.org/sourcerer/0#",
-    "/hasGlobal": { "@id": "$VSourcerer:hasGlobal", "@container": "@type" },
+    "$VLog": "https://valospace.org/log/0#",
+    "/hasGlobal": { "@id": "$VLog:hasGlobal", "@container": "@type" },
   }, {
     "$pot": "https://oftrust/#",
     "$pot_hypertwin": "https://pot.hypertwin.valospace.org/#",

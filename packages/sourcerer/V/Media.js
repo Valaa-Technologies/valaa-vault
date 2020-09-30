@@ -1,6 +1,6 @@
 module.exports = {
   Media: {
-    "@type": "VModel:Type",
+    "@type": "VState:Type",
     "VRevdoc:brief": "file media node type",
     "rdfs:subClassOf": [
       "V:Resource", "V:Extant", "V:Scope",
@@ -15,13 +15,13 @@ node types.
   },
 
   folder: {
-    "@type": "VModel:EventLoggedField",
+    "@type": "VState:EventLoggedField",
     "rdfs:subPropertyOf": "V:directory",
     "rdfs:domain": "V:Media",
     "rdfs:range": "V:SourceredNode",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VModel:isOwnedBy": true,
-    "VModel:coupledField": "V:medias",
+    "VState:isOwnedBy": true,
+    "VState:coupledToField": "V:medias",
     "rdfs:comment":
 `The folder (and directory, owner) node of this media.`,
   },
@@ -29,19 +29,19 @@ node types.
   // Note: 'medias' has domain SourceredNode but is listed
   // here due to its coupling with 'folder'.
   medias: {
-    "@type": "VModel:EventLoggedField",
+    "@type": "VState:EventLoggedField",
     "rdfs:subPropertyOf": "V:entries",
     "rdfs:domain": "V:SourceredNode",
     "rdfs:range": "rdfs:List",
-    "VModel:isOwnerOf": true,
-    "VModel:coupledField": "V:folder",
+    "VState:isOwnerOf": true,
+    "VState:coupledToField": "V:folder",
     "rdfs:comment":
 `The ordered list of medias contained in this sourcered node when seen
 as a folder`,
   },
 
   sourceURL: {
-    "@type": "VModel:EventLoggedField",
+    "@type": "VState:EventLoggedField",
     "rdfs:domain": "V:Media",
     "rdfs:range": "xsd:anyURI", // still a literal
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
@@ -53,7 +53,7 @@ failure considerations associated with its protocol.`,
 
   /*
   mediaType: {
-    "@type": "VModel:EventLoggedField",
+    "@type": "VState:EventLoggedField",
     "rdfs:domain": "V:Media",
     "rdfs:range": "V:MediaType",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
@@ -63,7 +63,7 @@ to determine the default interpretation of the Media.`,
   },
 
   size: {
-    "@type": "VModel:GeneratedField",
+    "@type": "VState:GeneratedField",
     "rdfs:domain": "V:Media",
     "rdfs:range": "xsd:nonNegativeInteger",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
@@ -74,12 +74,12 @@ to determine the default interpretation of the Media.`,
   */
 
   content: {
-    "@type": "VModel:EventLoggedField",
+    "@type": "VState:EventLoggedField",
     "rdfs:subPropertyOf": "rdf:object",
     "rdfs:domain": "V:Media",
     "rdfs:range": "V:Bvob",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VModel:coupledField": "V:contentReferrers",
+    "VState:coupledToField": "V:contentReferrers",
     "rdfs:comment":
 `The infrastructure-backed octet-stream content of this Media.`,
   },

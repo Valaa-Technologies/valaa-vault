@@ -205,9 +205,9 @@ module.exports = {
   },
 
   valosRaemFieldClasses: [
-    "VModel:Field",
-    "VModel:ExpressedField", "VModel:EventLoggedField", "VModel:CoupledField",
-    "VModel:GeneratedField", "VModel:TransientField", "VModel:AliasField",
+    "VState:Field",
+    "VState:Field", "VState:EventLoggedField", "VState:CoupledField",
+    "VState:GeneratedField", "VState:TransientField", "VState:AliasField",
   ],
 
   filterKeysWithFieldReduction,

@@ -173,13 +173,13 @@ function extendNamespace (namespace) {
       }
       let label;
       switch (definition["@type"]) {
-        case "VModel:Field":
-        case "VModel:ExpressedField":
-        case "VModel:EventLoggedField":
-        case "VModel:CoupledField":
-        case "VModel:GeneratedField":
-        case "VModel:TransientField":
-        case "VModel:AliasField": {
+        case "VState:Field":
+        case "VState:ExpressedField":
+        case "VState:EventLoggedField":
+        case "VState:CoupledField":
+        case "VState:GeneratedField":
+        case "VState:TransientField":
+        case "VState:AliasField": {
           label = `$${preferredPrefix}.${idSuffix}`;
           _addInferredIndex("VEngine:domainOfField", "rdfs:domain",
               definition["VRevdoc:indexLabel"] || `.${label}`);

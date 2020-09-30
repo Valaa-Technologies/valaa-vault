@@ -1,6 +1,6 @@
 module.exports = {
   SourceredNode: {
-    "@type": "VModel:Type",
+    "@type": "VState:Type",
     "VRevdoc:brief": "sourcered node interface",
     "rdfs:subClassOf": [
       "V:Resource", "V:Extant", "V:Scope",
@@ -16,36 +16,36 @@ graph.`,
   },
 
   container: {
-    "@type": "VModel:EventLoggedField",
+    "@type": "VState:EventLoggedField",
     "rdfs:subPropertyOf": "V:owner",
     "rdfs:domain": "V:SourceredNode",
     "rdfs:range": "V:SourceredNode",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VModel:isOwnedBy": true,
-    "VModel:coupledField": "V:nodes",
+    "VState:isOwnedBy": true,
+    "VState:coupledToField": "V:nodes",
     "rdfs:comment":
 `The container (and owner) node of this sourcered node.`,
   },
 
   nodes: {
-    "@type": "VModel:EventLoggedField",
+    "@type": "VState:EventLoggedField",
     "rdfs:subPropertyOf": "V:ownlings",
     "rdfs:domain": "V:SourceredNode",
     "rdfs:range": "rdfs:List",
-    "VModel:isOwnerOf": true,
-    "VModel:coupledField": "V:container",
+    "VState:isOwnerOf": true,
+    "VState:coupledToField": "V:container",
     "rdfs:comment":
 `The ordered list of all nodes directly contained by this sourcered
 node.`,
   },
 
   authorityURI: {
-    "@type": "VModel:EventLoggedField",
+    "@type": "VState:EventLoggedField",
     "rdfs:domain": "V:SourceredNode",
     "rdfs:range": "xsd:anyURI", // still a literal
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VModel:isDuplicateable": false,
-    "VModel:ownDefaultValue": null,
+    "VState:isDuplicateable": false,
+    "VState:ownDefaultValue": null,
     "rdfs:comment":
 `The authority URL of this sourcered chronicle root node. If this field
 is null then this sourcered node is not a root node. Setting this field
@@ -57,7 +57,7 @@ frozen.`,
   },
 
   createdAt: {
-    "@type": "VModel:GeneratedField",
+    "@type": "VState:GeneratedField",
     "rdfs:domain": "V:SourceredNode",
     "rdfs:range": "xsd:double",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
@@ -69,7 +69,7 @@ into being.`,
   },
 
   modifiedAt: {
-    "@type": "VModel:GeneratedField",
+    "@type": "VState:GeneratedField",
     "rdfs:domain": "V:SourceredNode",
     "rdfs:range": "xsd:double",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
@@ -83,9 +83,9 @@ impression on this Media resource.`,
   // Deprecated fields
 
   partitionAuthorityURI: {
-    "@type": "VModel:AliasField",
+    "@type": "VState:AliasField",
     "VRevdoc:deprecatedInFavorOf": "V:authorityURI",
-    "VModel:aliasOf": "V:authorityURI",
+    "VState:aliasOf": "V:authorityURI",
     "rdfs:subPropertyOf": "V:authorityURI",
     "rdfs:domain": "V:SourceredNode",
     "rdfs:range": "xsd:string",

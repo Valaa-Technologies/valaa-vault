@@ -67,7 +67,7 @@ which are empty as they inherit their entries from the prototype.`,
       "table#>0;prefixes": ontologyColumns.prefixes,
     },
     "chapter#section_fields>5": {
-      "dc:title": [em(preferredPrefix), " ", ref("valospace fields", "VModel:Field")],
+      "dc:title": [em(preferredPrefix), " ", ref("valospace fields", "VState:Field")],
       "#0": [],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.fields,

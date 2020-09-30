@@ -1,15 +1,15 @@
 module.exports = {
   domain: "@valos/kernel",
-  preferredPrefix: "VScript",
-  baseIRI: "https://valospace.org/script/0#",
+  preferredPrefix: "VRaem",
+  baseIRI: "https://valospace.org/raem/0#",
   namespaceModules: {
     VKernel: "@valos/kernel/VKernel",
     VState: "@valos/state/VState",
     VLog: "@valos/log/VLog",
-    VScript: "@valos/script/VScript",
+    VValk: "@valos/valk/VValk",
   },
   description:
-`The 'VScript' namespace describes the @valos/sourcerer API.`,
+`The 'VRaem' namespace describes the @valos/raem library public API.`,
   context: {
     restriction: { "@reverse": "owl:onProperty" },
   },

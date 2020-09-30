@@ -1,6 +1,6 @@
 module.exports = {
   UnsourceredNode: {
-    "@type": "VModel:Type",
+    "@type": "VState:Type",
     "VRevdoc:brief": "absent, sourcerable node type",
     "rdfs:subClassOf": ["V:Resource", "V:SourcerableNode"],
     "rdfs:comment":

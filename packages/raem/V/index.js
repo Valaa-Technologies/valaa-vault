@@ -3,7 +3,7 @@ module.exports = {
   extenderModule: "@valos/raem/V",
   namespaceModules: {
     VKernel: "@valos/kernel/VKernel",
-    VModel: "@valos/raem/VModel",
+    VState: "@valos/state/VState",
     V: "@valos/kernel/V",
   },
   vocabulary: {

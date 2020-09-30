@@ -151,7 +151,7 @@ const types = {
     "VDoc:cell": _simpleReferenceCell("rdfs:subClassOf"),
   },
   "column#14": {
-    "VDoc:content": ref("instance fields", "VModel:Field"),
+    "VDoc:content": ref("instance fields", "VState:Field"),
     "VDoc:wide": true,
     "VDoc:cell": _instanceFieldCell,
   },
@@ -188,8 +188,8 @@ const fields = {
     "VDoc:cell": _simpleReferenceCell("rdfs:subPropertyOf"),
   },
   "column#07": {
-    "VDoc:content": "VModel:coupledField",
-    "VDoc:cell": _simpleReferenceCell("VModel:coupledField"),
+    "VDoc:content": "VState:coupledToField",
+    "VDoc:cell": _simpleReferenceCell("VState:coupledToField"),
   },
 };
 

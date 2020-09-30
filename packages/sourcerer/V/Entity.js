@@ -1,6 +1,6 @@
 module.exports = {
   Entity: {
-    "@type": "VModel:Type",
+    "@type": "VState:Type",
     "VRevdoc:brief": "primary resource tree node type",
     "rdfs:subClassOf": [
       "V:Resource", "V:Extant", "V:Scope",
@@ -27,13 +27,13 @@ node can act as a root resource.
   },
 
   parent: {
-    "@type": "VModel:EventLoggedField",
+    "@type": "VState:EventLoggedField",
     "rdfs:subPropertyOf": "V:directory",
     "rdfs:domain": "V:Entity",
     "rdfs:range": "V:SourceredNode",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VModel:isOwnedBy": true,
-    "VModel:coupledField": "V:entities",
+    "VState:isOwnedBy": true,
+    "VState:coupledToField": "V:entities",
     "rdfs:comment":
 `The parent (and directory, owner) node of this entity.`,
   },
@@ -41,12 +41,12 @@ node can act as a root resource.
   // Note: 'entities' has domain SourceredNode but is listed
   // here due to its coupling with 'parent'.
   entities: {
-    "@type": "VModel:EventLoggedField",
+    "@type": "VState:EventLoggedField",
     "rdfs:subPropertyOf": "V:entries",
     "rdfs:domain": "V:SourceredNode",
     "rdfs:range": "rdfs:List",
-    "VModel:isOwnerOf": true,
-    "VModel:coupledField": "V:parent",
+    "VState:isOwnerOf": true,
+    "VState:coupledToField": "V:parent",
     "rdfs:comment":
 `The ordered list of entities contained in this sourcered node.`,
   },

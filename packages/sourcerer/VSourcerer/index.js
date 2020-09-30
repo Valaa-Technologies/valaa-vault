@@ -1,15 +1,15 @@
 module.exports = {
   domain: "@valos/kernel",
-  preferredPrefix: "VScript",
-  baseIRI: "https://valospace.org/script/0#",
+  preferredPrefix: "VSourcerer",
+  baseIRI: "https://valospace.org/sourcerer/0#",
   namespaceModules: {
     VKernel: "@valos/kernel/VKernel",
     VState: "@valos/state/VState",
     VLog: "@valos/log/VLog",
-    VScript: "@valos/script/VScript",
+    VValk: "@valos/valk/VValk",
   },
   description:
-`The 'VScript' namespace describes the @valos/sourcerer API.`,
+`The 'VSourcerer' namespace describes the @valos/sourcerer library public API.`,
   context: {
     restriction: { "@reverse": "owl:onProperty" },
   },

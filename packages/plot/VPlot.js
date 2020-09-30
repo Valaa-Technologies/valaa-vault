@@ -27,14 +27,14 @@ the object of the triple is not a literal, then the object contains
 the segmented representation of the VPlot rule value as an rdf List.`
     },
     VPlot: { "@type": "VKernel:Class",
-      "rdfs:subClassOf": "VValk:VPlotLiteral",
+      "rdfs:subClassOf": "VPlot:VPlotLiteral",
       "VRevdoc:brief": "VPlot rule 'vplot' datatype",
       "rdfs:comment":
 `The class of all resources that can be represented by the VPlot rule
 'vplot' (the string representation always begins with '@')`,
     },
     VRID: { "@type": "VKernel:Class",
-      "rdfs:subClassOf": "VValk:VPlotLiteral",
+      "rdfs:subClassOf": "VPlot:VPlotLiteral",
       "VRevdoc:brief": "VPlot rule 'vrid' datatype",
       "rdfs:comment":
 `The class of all resources that can be represented by the VPlot
@@ -42,7 +42,7 @@ pseudo-rule 'vrid', ie. which have have a 'vgrid' as their first step
 (the string representation always begins with '@')`,
     },
     Verbs: { "@type": "VKernel:Class",
-      "rdfs:subClassOf": "VValk:VPlotLiteral",
+      "rdfs:subClassOf": "VPlot:VPlotLiteral",
       "VRevdoc:brief": "VPlot rule 'verbs' datatype",
       "rdfs:comment":
 `The class of all resources that can be represented by the VPlot
@@ -51,7 +51,7 @@ which don't have a 'vgrid' as their first step (the string
 representation always begins with '@').`,
     },
     Verb: { "@type": "VKernel:Class",
-      "rdfs:subClassOf": "VValk:VPlotLiteral",
+      "rdfs:subClassOf": "VPlot:VPlotLiteral",
       "VRevdoc:brief": "verb name type",
       "rdfs:comment":
 `The class of all verb names. A context that performs VPlot valks shall
@@ -59,14 +59,14 @@ provide the conforming implementations for the subset of verbs that it
 has declared to support.`,
     },
     VGRID: { "@type": "VKernel:Class",
-      "rdfs:subClassOf": "VValk:VPlotLiteral",
+      "rdfs:subClassOf": "VPlot:VPlotLiteral",
       "VRevdoc:brief": "VPlot rule 'vgrid' datatype",
       "rdfs:comment":
 `The class of all resources representing the VPlot rule 'vgrid' (always
 begins with '$').`,
     },
     VParam: { "@type": "VKernel:Class",
-      "rdfs:subClassOf": "VValk:VPlotLiteral",
+      "rdfs:subClassOf": "VPlot:VPlotLiteral",
       "VRevdoc:brief": "VPlot rule 'vparam' datatype",
       "rdfs:comment":
 `The class of all resources representing the VPlot pseudo-rule

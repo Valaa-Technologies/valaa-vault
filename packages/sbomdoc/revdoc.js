@@ -22,9 +22,8 @@ module.exports = {
   "VDoc:tags": ["PRIMARY", "FABRIC", "WORKSPACE", "ONTOLOGY"],
   "VRevdoc:package": name,
   "VRevdoc:version": version,
-  "VRevdoc:preferredPrefix": preferredPrefix,
-  "VRevdoc:baseIRI": baseIRI,
-  ...revdocOntologyProperties({ prefixes, context, referencedModules }, remainingOntology),
+  ...revdocOntologyProperties(
+      { preferredPrefix, baseIRI, prefixes, context, referencedModules }, remainingOntology),
 
   respecConfig: {
     subtitle: version,
@@ -46,7 +45,7 @@ in various formats.`,
 may be updated, replaced or obsoleted by other documents at any
 time.
 
-This document is part of the `, ref("ValOS core specification", "@valos/kernel/spec"), `.
+This document is part of the `, ref("ValOS kernel specification", "@valos/kernel"), `.
 
 The format is implemented and supported by `, pkg("@valos/sbomdoc"), `
 npm package.`,

@@ -4,7 +4,7 @@ module.exports = {
   baseIRI: "https://valospace.org/0#",
   namespaceModules: {
     VKernel: "@valos/kernel/VKernel",
-    V: "@valos/kernel/V",
+    VState: "@valos/state/VState",
   },
   description:
 `'V' ie. the Valospace namespace provides vocabulary and definitions of

@@ -281,9 +281,7 @@ package configuration file for yarn (and also for npm, which yarn is
     while (yargv.reconfigure || wasInitial) {
       const visibleDomains = await vlm.delegate("vlm -bePVO .select/.domain/{,*/**/}*");
       vlm.info("Visible domains:\n", visibleDomains);
-      const choices = vlm.getPackageConfig("devDependencies")
-          ? ["Bypass", "yes", "help", "quit"]
-          : ["Yes", "bypass", "help", "quit"];
+      const choices = ["Bypass", "yes", "help", "quit"];
       let answer = await vlm.inquire([{
         message: wasError
             ? "Retry adding domains (or direct toolsets) as devDependencies?"
@@ -292,7 +290,7 @@ package configuration file for yarn (and also for npm, which yarn is
         type: "list", name: "choice", default: choices[0], choices,
       }]);
       wasError = false;
-      if (answer.choice === "Bypass" || answer.choice === "bypass") break;
+      if (answer.choice === "Bypass") break;
       if (answer.choice === "quit") return { success: false, reason: answer };
       if (answer.choice === "help") {
         vlm.speak();

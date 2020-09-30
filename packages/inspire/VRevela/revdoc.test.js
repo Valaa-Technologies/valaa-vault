@@ -59,10 +59,9 @@ module.exports = {
   "dc:title": title,
   "VDoc:tags": ["INTRODUCTORY", "FABRIC", "ONTOLOGY", "TESTDOC"],
   "VRevdoc:package": name,
-  "VRevdoc:preferredPrefix": preferredPrefix,
-  "VRevdoc:baseIRI": baseIRI,
   "VRevdoc:version": version,
-  ...revdocOntologyProperties({ prefixes, context, referencedModules }, remainingOntology),
+  ...revdocOntologyProperties(
+      { preferredPrefix, baseIRI, prefixes, context, referencedModules }, remainingOntology),
 
   respecConfig: {
     subtitle: version,
@@ -207,12 +206,12 @@ async () => expose(lazyPatchRevelations(gatewayMock,
     },
     "chapter#section_verbs>6": {
       "dc:title": [
-em(preferredPrefix), ` `, ref("VValk:Verb", "VValk:Verb"), " vocabulary",
+em(preferredPrefix), ` `, ref("VPlot:Verb"), " vocabulary",
       ],
       "#0": [],
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.verbs,
-        "VDoc:entries": filterKeysWithAnyOf("@type", "VValk:Verb", vocabulary),
+        "VDoc:entries": filterKeysWithAnyOf("@type", "VPlot:Verb", vocabulary),
       },
     },
     "chapter#section_vocabulary_other>8": {
@@ -221,7 +220,7 @@ em(preferredPrefix), ` `, ref("VValk:Verb", "VValk:Verb"), " vocabulary",
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.vocabularyOther,
         "VDoc:entries": filterKeysWithNoneOf("@type", [
-          "VValk:Verb",
+          "VPlot:Verb",
         ], vocabulary),
       },
     },

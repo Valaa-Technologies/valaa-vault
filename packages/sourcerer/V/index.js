@@ -5,7 +5,6 @@ module.exports = {
     VKernel: "@valos/kernel/VKernel",
     VState: "@valos/state/VState",
     VLog: "@valos/log/VLog",
-    V: "@valos/kernel/V",
   },
   vocabulary: {
     ...require("./SourcerableNode"),

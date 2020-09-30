@@ -6,7 +6,7 @@ module.exports = {
     VKernel: "@valos/kernel/VKernel",
     VState: "@valos/state/VState",
     VLog: "@valos/log/VLog",
-    VScript: "@valos/script/VScript",
+    VValk: "@valos/valk/VValk",
   },
   description:
 `The 'VScript' namespace describes the @valos/sourcerer API.`,

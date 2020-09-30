@@ -4,6 +4,7 @@ module.exports = {
   namespaceModules: {
     VKernel: "@valos/kernel/VKernel",
     VState: "@valos/state/VState",
+    VPlot: "@valos/plot/VPlot",
     V: "@valos/kernel/V",
   },
   vocabulary: {

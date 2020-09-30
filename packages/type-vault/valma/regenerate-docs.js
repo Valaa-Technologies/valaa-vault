@@ -207,12 +207,12 @@ exports.handler = async (yargv) => {
       });
       const referencedModules = revdocState[0]["VRevdoc:referencedModules"];
       if (referencedModules && yargv["assembly-root"]) {
+        const altModules = revdocState[0]["VRevdoc:referencedModules"] = { ...referencedModules };
         for (const [referencePrefix, referredModule] of Object.entries(referencedModules)) {
-          const alternateModulePath =
-              vlm.path.join(process.cwd(), yargv["assembly-root"], referredModule);
-          if (vlm.shell.test("-f", vlm.path.join(alternateModulePath, "index.js"))
-              || vlm.shell.test("-f", `${alternateModulePath}.js`)) {
-            referencedModules[referencePrefix] = alternateModulePath;
+          const altModule = vlm.path.join(process.cwd(), yargv["assembly-root"], referredModule);
+          if (vlm.shell.test("-f", vlm.path.join(altModule, "index.js"))
+              || vlm.shell.test("-f", `${altModule}.js`)) {
+            altModules[referencePrefix] = altModule;
           }
         }
       }
@@ -224,6 +224,7 @@ exports.handler = async (yargv) => {
       await vlm.shell.ShellString(revdocHTML)
           .to(`${targetDocumentPath}.html`);
       if (emitRevDocState) {
+        if (referencedModules) revdocState[0]["VRevdoc:referencedModules"] = referencedModules;
         await vlm.shell.ShellString(JSON.stringify(revdocState, null, 2))
             .to(`${targetDocumentPath}.jsonld`);
       }

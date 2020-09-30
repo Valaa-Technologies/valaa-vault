@@ -273,7 +273,7 @@ function _createValospaceOntologySection (revdocOptions) {
 function _createValosheathOntologySection (revdocOptions) {
   return _createOntologySection(revdocOptions, {
     kind: "valosheath",
-    namespace: revdocOptions.valospaceNamespace,
+    namespace: revdocOptions.valosheathNamespace,
     chapterIndex: "8",
     class: "VEngine:Class",
     property: "VEngine:Property",
@@ -332,9 +332,8 @@ const {
   },
 `);
   moduleExports.push(`
-  "VRevdoc:preferredPrefix": preferredPrefix,
-  "VRevdoc:baseIRI": baseIRI,
-  ...revdocOntologyProperties({ prefixes, context, referencedModules }, remainingOntology),
+  ...revdocOntologyProperties(
+      { preferredPrefix, baseIRI, prefixes, context, referencedModules }, remainingOntology),
 `);
 
   names.all = [names.class, names.property, names.method, names.globals];

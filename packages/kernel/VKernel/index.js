@@ -6,6 +6,7 @@ module.exports = {
     VKernel: "@valos/kernel/VKernel",
     VState: "@valos/state/VState",
     VValk: "@valos/valk/VValk",
+    VLog: "@valos/log/VLog",
     VEngine: "@valos/engine/VEngine",
   },
   description:

@@ -84,8 +84,8 @@ function emitReVDocReference (node, emission, stack) {
           stack.error("Unable to expand reference:", ref, "from @context entry:", contextEntry);
         }
       } else if (suffixes.length && (prefix[0] === "V") && prefix[1].toLowerCase() !== prefix[1]) {
-        stack.error(`Can't find valos namespace '${prefix}' definition in @context`,
-            `when trying to resolve reference`, ref);
+        stack.error(`Can't find valos term '${prefix}' definition in @context`,
+            `when trying to resolve reference`, ref, "in", stack.document["@id"]);
       }
     }
     if (ref !== node["VDoc:ref"]) {
@@ -97,13 +97,12 @@ function emitReVDocReference (node, emission, stack) {
     if (referencedModule) {
       const term = ref.slice(refIndex);
       const namespace = obtainFullNamespace(referencedModule);
-      const definition = term
-          ? namespace.vocabulary[term]
-          : { "rdfs:comment": namespace.description };
+      const definition = namespace.vocabulary[term]
+          || (!term && { "rdfs:comment": namespace.description });
       if (!definition) {
         stack.error(
             `Can't find term '${term}' definition in module "${referencedModule}" vocabulary`,
-            `when trying to resolve namespaced reference ${node["VDoc:ref"]}`);
+            `when trying to resolve reference`, node["VDoc:ref"], "in", stack.document["@id"]);
       } else if (definition["rdfs:comment"]) {
         if (node === node_) node_ = { ...node };
         node_["VDoc:content"] = [tooltip(node_["VDoc:content"], definition["rdfs:comment"])];

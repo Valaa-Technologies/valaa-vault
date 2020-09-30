@@ -21,9 +21,8 @@ module.exports = {
   "VDoc:tags": ["VALOSPACE", "ONTOLOGY", "TECHNICIAN"],
   "VRevdoc:package": name,
   "VRevdoc:version": version,
-  "VRevdoc:preferredPrefix": preferredPrefix,
-  "VRevdoc:baseIRI": baseIRI,
-  ...revdocOntologyProperties({ prefixes, context, referencedModules }, remainingOntology),
+  ...revdocOntologyProperties(
+      { preferredPrefix, baseIRI, prefixes, context, referencedModules }, remainingOntology),
 
   respecConfig: {
     subtitle: version,

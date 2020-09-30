@@ -18,7 +18,7 @@ function specifyNamespace (namespace) {
   if (!namespace.aggregate) {
     let documents;
     try {
-      documents = require(domain);
+      documents = require(domain).documents;
     } catch (error) {
       throw wrapError(new Error(`Misconfigured domain ${domain}: ${error.message}`),
           new Error(`specifyNamespace.require("${domain}")`),
@@ -232,13 +232,16 @@ function extendNamespace (namespace) {
 
 const VEngine = "https://valospace.org/engine/0#";
 
-function revdocOntologyProperties ({ prefixes, context, referencedModules }, remainingOntology) {
+function revdocOntologyProperties (
+    { preferredPrefix, baseIRI, prefixes, context, referencedModules }, remainingOntology) {
   const ret = {
     "@context": {
       VEngine,
       ...prefixes,
       ...context,
     },
+    "VRevdoc:preferredPrefix": preferredPrefix,
+    "VRevdoc:baseIRI": baseIRI,
     "VRevdoc:referencedModules": {
       [VEngine]: "@valos/engine/VEngine",
       ...referencedModules,
@@ -248,6 +251,8 @@ function revdocOntologyProperties ({ prefixes, context, referencedModules }, rem
   for (const namespace of Object.values(remainingOntology)) {
     if (namespace.extenderModule) {
       ret["VRevdoc:extenderModules"][namespace.baseIRI] = namespace.extenderModule;
+      Object.assign(ret["@context"], namespace.prefixes);
+      Object.assign(ret["VRevdoc:referencedModules"], namespace.referencedModules);
     }
   }
   return ret;

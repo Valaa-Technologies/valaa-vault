@@ -836,11 +836,11 @@
       "https://valospace.org/engine/0#": "@valos/engine/VEngine",
       "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
       "https://valospace.org/0#": "@valos/space/V",
-      "https://valospace.org/sourcerer/On/0#": "@valos/sourcerer/On",
+      "https://valospace.org/inspire/On/0#": "@valos/sourcerer/On",
       "https://valospace.org/inspire/Lens/0#": "@valos/inspire/Lens"
     },
     "VRevdoc:extenderModules": {
-      "https://valospace.org/sourcerer/On/0#": "@valos/inspire/On"
+      "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
     },
     "package": "@valos/inspire",
     "version": "0.35.0-rc.32"
@@ -1116,11 +1116,11 @@
       "https://valospace.org/engine/0#": "@valos/engine/VEngine",
       "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
       "https://valospace.org/0#": "@valos/space/V",
-      "https://valospace.org/sourcerer/On/0#": "@valos/sourcerer/On",
+      "https://valospace.org/inspire/On/0#": "@valos/sourcerer/On",
       "https://valospace.org/inspire/Lens/0#": "@valos/inspire/Lens"
     },
     "VRevdoc:extenderModules": {
-      "https://valospace.org/sourcerer/On/0#": "@valos/inspire/On"
+      "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
     },
     "package": "@valos/inspire",
     "version": "0.35.0-rc.32"
@@ -1132,7 +1132,7 @@
       "ONTOLOGY"
     ],
     "subProfiles": [],
-    "title": "The valospace 'undefined' namespace reference",
+    "title": "The valosheath 'On' namespace reference",
     "abstract": {
       "@type": "VDoc:Chapter",
       "VDoc:content": [
@@ -1224,7 +1224,7 @@
       ]
     },
     "VRevdoc:preferredPrefix": "On",
-    "VRevdoc:baseIRI": "https://valospace.org/sourcerer/On/0#",
+    "VRevdoc:baseIRI": "https://valospace.org/inspire/On/0#",
     "VRevdoc:referencedModules": {
       "https://valospace.org/engine/0#": "@valos/engine/VEngine",
       "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
@@ -1242,7 +1242,7 @@
       "ONTOLOGY"
     ],
     "subProfiles": [],
-    "title": "The valospace 'undefined' namespace reference",
+    "title": "The valosheath 'On' namespace reference",
     "abstract": {
       "@type": "VDoc:Chapter",
       "VDoc:content": [
@@ -1334,7 +1334,7 @@
       ]
     },
     "VRevdoc:preferredPrefix": "On",
-    "VRevdoc:baseIRI": "https://valospace.org/sourcerer/On/0#",
+    "VRevdoc:baseIRI": "https://valospace.org/inspire/On/0#",
     "VRevdoc:referencedModules": {
       "https://valospace.org/engine/0#": "@valos/engine/VEngine",
       "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
@@ -1347,16 +1347,20 @@
   },
   "inspire": {
     "@id": "https://valospace.org/inspire",
-    "tags": [],
+    "tags": [
+      "FABRIC",
+      "WORKSPACE",
+      "ONTOLOGY"
+    ],
     "subProfiles": [],
-    "title": "inspire",
+    "title": "@valos/inspire library workspace",
     "abstract": {
       "@type": "VDoc:Chapter",
       "VDoc:content": [
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "This document is a revdoc template document 'inspire' created by\nwrite-revdoc."
+            "ValOS Inspire application gateway"
           ]
         }
       ]
@@ -1410,10 +1414,31 @@
               ],
               "VDoc:ref": "@valos/vdoc"
             },
-            " for reference\ndocumentation."
+            " for reference documentation."
           ]
         }
       ]
+    },
+    "fabricAbstract": {
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "The inspire gateway fabric API"
+          ]
+        }
+      ]
+    },
+    "VRevdoc:preferredPrefix": "VInspire",
+    "VRevdoc:baseIRI": "https://valospace.org/inspire/0#",
+    "VRevdoc:referencedModules": {
+      "https://valospace.org/engine/0#": "@valos/engine/VEngine",
+      "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
+      "https://valospace.org/0#": "@valos/space/V",
+      "https://valospace.org/inspire/Lens/0#": "@valos/inspire/Lens"
+    },
+    "VRevdoc:extenderModules": {
+      "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
     },
     "package": "@valos/inspire",
     "version": "0.35.0-rc.32"
@@ -1716,7 +1741,7 @@
       "https://valospace.org/inspire/Lens/0#": "@valos/inspire/Lens"
     },
     "VRevdoc:extenderModules": {
-      "https://valospace.org/sourcerer/On/0#": "@valos/inspire/On"
+      "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
     },
     "package": "@valos/inspire",
     "version": "0.35.0-rc.32"
@@ -2019,7 +2044,7 @@
       "https://valospace.org/inspire/Lens/0#": "@valos/inspire/Lens"
     },
     "VRevdoc:extenderModules": {
-      "https://valospace.org/sourcerer/On/0#": "@valos/inspire/On"
+      "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
     },
     "package": "@valos/inspire",
     "version": "0.35.0-rc.32"

@@ -41,6 +41,7 @@ export { default as inProduction } from "./inProduction";
 
 export const FabricEvent = require("./FabricEvent").default;
 export const FabricEventTarget = require("./FabricEvent").FabricEventTarget;
+export const generateDispatchEventPath = require("./FabricEvent").generateDispatchEventPath;
 
 export const SimpleData = require("./SimpleData").default;
 

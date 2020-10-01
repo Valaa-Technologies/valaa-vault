@@ -13,6 +13,7 @@ import { FabricatorEvent } from "~/sourcerer/api/Fabricator";
 
 import {
   dumpObject, isPromise, outputError, thenChainEagerly, thisChainRedirect, mapEagerly,
+  generateDispatchEventPath,
 } from "~/tools";
 
 import FalseProphet from "./FalseProphet";
@@ -166,7 +167,7 @@ export function _rewriteVenueCommand (connection: FalseProphetConnection,
 export function _reviewRecomposedSchism (connection: FalseProphetConnection, schism: Prophecy,
     recomposition: Prophecy) {
   const semanticSchismReason = _checkForSemanticSchism(schism, recomposition);
-  const progress = schism.meta.operation.getProgress();
+  const progress = schism.meta.operation.getProgressEvent();
   if (!semanticSchismReason) {
     progress.isSchismatic = false;
     return recomposition;
@@ -203,17 +204,21 @@ export function _purgeHeresy (falseProphet: FalseProphet, heresy: Prophecy) {
   const meta = heresy.meta || {};
   const operation = meta.operation;
   if (!operation || !operation._venues) return;
-  const progress = operation.getProgress({ type: "purge", isSchismatic: true });
+  const progress = operation.getProgressEvent("purge");
+  progress.isSchismatic = true;
   const error = progress.error || new Error(progress.message);
-  if (meta.transactor && meta.transactor.onpurge) {
-    meta.transactor.dispatchAndDefaultActEvent(progress);
-  }
+  if (meta.transactor) meta.transactor.dispatchAndDefaultActEvent(progress);
   for (const venue of Object.values(operation._venues)) {
     if (!venue.confirmedTruth) {
       venue.rejectCommand(venue.rejectionReason || error);
       venue.commandEvent = null;
     }
   }
+}
+
+class ProgressEvent extends FabricatorEvent {
+  command: Command;
+  prophecy: Prophecy;
 }
 
 class ProphecyOperation extends ProphecyEventResult {
@@ -241,15 +246,17 @@ class ProphecyOperation extends ProphecyEventResult {
   getLogAspectOf (chronicleURI: string) {
     return this._venues[chronicleURI].commandEvent.aspects.log;
   }
-  getProgress (fields) {
-    const ret = this._progress || (this._progress = new FabricatorEvent("", {
-      command: this.event, prophecy: this._prophecy,
+  getProgressEvent (newType) {
+    const ret = this._progress || (this._progress = new ProgressEvent("", {
+      command: this.event,
+      prophecy: this._prophecy,
+      chronicles: this.event.meta.chronicles,
     }));
-    if (fields) Object.assign(ret, fields);
+    if (newType) ret.type = newType;
     return ret;
   }
   getErroringProgress (error, fields) {
-    const ret = this.getProgress();
+    const ret = this.getProgressEvent();
     ret.error = error;
     if (!ret.typePrecedingError) ret.typePrecedingError = ret.type || "external";
     ret.type = "error";
@@ -287,10 +294,11 @@ class ProphecyOperation extends ProphecyEventResult {
             throw ({ retry: true }); // eslint-disable-line no-throw-literal
           }
           const prophecy = this._prophecy || this.throwRejectionError();
-          const transactor = this.event.meta.transactor;
-          if (transactor && transactor.onpersist) {
+          const dispatchPath = generateDispatchEventPath(this.event.meta.transactor, "record");
+          if (dispatchPath) {
             Promise.resolve(this._persistedStory).then(() =>
-                transactor.dispatchAndDefaultActEvent(this.getProgress({ type: "persist" })));
+                this.event.meta.transactor.dispatchAndDefaultActEvent(
+                    this.getProgressEvent("record"), { dispatchPath }));
           }
           return (this._persistedStory = prophecy);
         },
@@ -305,16 +313,19 @@ class ProphecyOperation extends ProphecyEventResult {
       ));
   }
 
-  getTruthStory () {
+  getTruthStory (dispatchPath_) {
     return this._truthStory || (this._truthStory = thenChainEagerly(
         this._fulfillment,
         (fulfillment) => {
           if (fulfillment === null) throw this._rejectionError;
           const prophecy = this._prophecy || this.throwRejectionError();
-          const transactor = this.event.meta.transactor;
-          if (transactor && transactor.ontruth) {
-            Promise.resolve(this._truthStory).then(() =>
-                transactor.dispatchAndDefaultActEvent(this.getProgress({ type: "truth" })));
+          const dispatchPath = dispatchPath_
+              || generateDispatchEventPath(this.event.meta.transactor, "truth");
+          if (dispatchPath) {
+            Promise.resolve(prophecy).then(() => {
+              const progress = this.getProgressEvent("truth");
+              this.event.meta.transactor.dispatchAndDefaultActEvent(progress, { dispatchPath });
+            });
           }
           return (this._truthStory = prophecy);
         },
@@ -474,7 +485,7 @@ class ProphecyOperation extends ProphecyEventResult {
     this._firstStageVenues = venues;
     const ret = this._chronicleStageVenueCommands(venues);
     const transactor = this.event.meta.transactor;
-    if (transactor && transactor.onpersist) this.getPersistedStory();
+    if (transactor && transactor.onrecord) this.getPersistedStory();
     return ret;
   }
 
@@ -581,8 +592,8 @@ class ProphecyOperation extends ProphecyEventResult {
   _fulfillProphecy () {
     this._prophecy.isTruth = true;
     (this._fulfillment = this._prophecy);
-    const transactor = this.event.meta.transactor;
-    if (transactor && transactor.ontruth) this.getTruthStory();
+    const dispatchPath = generateDispatchEventPath(this.event.meta.transactor, "truth");
+    if (dispatchPath) this.getTruthStory(dispatchPath);
     return [this._fulfillment];
   }
 

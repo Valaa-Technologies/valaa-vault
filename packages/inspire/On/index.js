@@ -2,36 +2,23 @@ const { ref } = require("@valos/revdoc/extractee");
 const { buildNamespaceSpecification } = require("@valos/tools/namespace");
 
 module.exports = buildNamespaceSpecification({
-  domain: "@valos/kernel",
-  preferredPrefix: "On",
-  baseIRI: "https://valospace.org/inspire/On/0#",
+  base: require("@valos/sourcerer/On"),
+  extenderModule: "@valos/inspire/On",
   namespaceModules: {
     VKernel: "@valos/kernel/VKernel",
     V: "@valos/space/V",
     VEngine: "@valos/engine/VEngine",
     Lens: "@valos/inspire/Lens",
-    On: "@valos/inspire/On",
   },
-  description: [
-`The ValOS inspire On namespace contains event callback names used by
-the inspire UI layer.`,
-null,
-`The namespace inherits all HTML5 event names verbatim as name suffixes
-but also adds new valos-specific event callback names. Like HTML5
-events these callbacks are called with a synthetic event as their first
-argument.`,
-  ],
   declareNames,
-  processDeclaration (name, declaration, definitionDomain) {
-    const labels = [];
-    const componentType = tags.includes("Valoscope") ? "Lens:Valoscope"
-        : tags.includes("Attribute") ? "Lens:Element"
+  processDeclaration (name, declaration, { domain, addLabel }) {
+    const componentType = declaration.tags.includes("Valoscope") ? "Lens:Valoscope"
+        : declaration.tags.includes("Attribute") ? "Lens:Element"
         : null;
     if (componentType) {
-      definitionDomain.push(componentType);
-      labels.push([`On:${name}`, `On:${name}`]);
+      domain.push(componentType);
+      addLabel(`On:${name}`, `On:${name}`, [`When used as `, ref(componentType), " attribute"]);
     }
-    return labels;
   },
 });
 

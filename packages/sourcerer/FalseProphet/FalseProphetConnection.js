@@ -14,7 +14,9 @@ import extractChronicleEvent0Dot2
     from "~/sourcerer/tools/event-version-0.2/extractPartitionEvent0Dot2";
 import IdentityManager from "~/sourcerer/FalseProphet/IdentityManager";
 
-import { dumpObject, mapEagerly, thenChainEagerly, thisChainReturn } from "~/tools";
+import {
+  dumpObject, mapEagerly, generateDispatchEventPath, thenChainEagerly, thisChainReturn,
+} from "~/tools";
 
 import { Prophecy, _reviewRecomposedSchism } from "./_prophecyOps";
 import {
@@ -478,8 +480,9 @@ export default class FalseProphetConnection extends Connection {
       return thisChainReturn(false);
     }
     progress.type = "reform";
-    if (meta.transactor && meta.transactor.onreform) {
-      meta.transactor.dispatchAndDefaultActEvent(progress);
+    const dispatchPath = generateDispatchEventPath(meta.transactor, "reform");
+    if (dispatchPath) {
+      meta.transactor.dispatchAndDefaultActEvent(progress, { dispatchPath });
     } else {
       progress.isSchismatic = false;
     }

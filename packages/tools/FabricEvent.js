@@ -47,11 +47,14 @@ export default class FabricEvent {
 
   initEvent (type: string, bubbles: boolean, cancelable: boolean, detail: any) {
     if (this.dispatch) return;
-    this.eventPhase = 0; // NONE
     this.type = type;
     this.bubbles = bubbles;
     this.cancelable = cancelable;
     this.detail = detail;
+    this.reinitEvent();
+  }
+  reinitEvent () {
+    this.eventPhase = 0; // NONE
     this.defaultPrevented = false;
     this.target = null;
     this.currentTarget = null;
@@ -82,6 +85,7 @@ const _typeInstanceCounter = {};
 
 export const FabricEventTypesTag = Symbol("FabricEvent.Types");
 const FabricEventTargetTag = Symbol("FabricEvent.EventListener.EventTarget");
+export const FabricDispatchPathTag = Symbol("FabricEvent.EventListener.DispatchPath");
 
 export class FabricEventTarget {
   _parent: FabricEventTarget | Object;
@@ -293,23 +297,14 @@ export class FabricEventTarget {
     if (!listeners.length) delete this[listenerName];
   }
 
-  dispatchEvent (fabricEvent: Event) {
-    const listenerName = `on${fabricEvent.type}`;
+  dispatchEvent (fabricEvent: Event, {
+    dispatchPath = generateDispatchEventPath(this, fabricEvent.type),
+  } = {}) {
+    if (!dispatchPath) return true;
     fabricEvent.dispatch = true;
-    fabricEvent.path = [];
+    fabricEvent.path = dispatchPath;
     // Not implemented:
     // touchTargets, targetOverride, isActivationEvent, relatedTarget, slotable
-    for (let listeners, target_ = this; (listeners = target_[listenerName]);) { // eslint-disable-line
-      let target = listeners[FabricEventTargetTag];
-      if (!target) {
-        for (target = target_;
-            !target.hasOwnProperty(listenerName);
-            target = Object.getPrototypeOf(target));
-        listeners = [{ type: fabricEvent.type, callback: listeners }];
-      }
-      fabricEvent.path.push({ target, listeners });
-      target_ = Object.getPrototypeOf(target);
-    }
     fabricEvent.target = this;
     for (let i = fabricEvent.path.length; i--;) {
       const pathEntry = fabricEvent.path[i];
@@ -327,8 +322,7 @@ export class FabricEventTarget {
     }
     fabricEvent.dispatch = false;
     const ret = !fabricEvent.defaultPrevented;
-    fabricEvent.initEvent(
-        fabricEvent.type, fabricEvent.bubbles, fabricEvent.cancelable, fabricEvent.detail);
+    fabricEvent.reinitEvent();
     return ret;
   }
 
@@ -340,18 +334,20 @@ export class FabricEventTarget {
     const fabricEvent = reuseFabricEvent || new FabricEvent(type);
     fabricEvent.initEvent(type, eventType.bubbles, eventType.cancelable);
     if (updateFields) Object.assign(fabricEvent, updateFields);
-    this.dispatchAndDefaultActEvent(fabricEvent, eventType);
+    this.dispatchAndDefaultActEvent(fabricEvent, { eventType });
     return fabricEvent;
   }
 
-  dispatchAndDefaultActEvent (fabricEvent: FabricEvent,
-      eventType = this[FabricEventTypesTag][fabricEvent.type]) {
-    if (!eventType) {
-      throw new Error(
+  dispatchAndDefaultActEvent (fabricEvent: FabricEvent, options = {}) {
+    if (!options.eventType) {
+      options.eventType = this[FabricEventTypesTag][fabricEvent.type];
+      if (!options.eventType) {
+        throw new Error(
           `${this.constructor.name} doesn't implement fabric event type '${fabricEvent.type}'`);
+      }
     }
-    if (!this.dispatchEvent(fabricEvent)) return false;
-    const defaultAction = eventType.defaultAction;
+    if (!this.dispatchEvent(fabricEvent, options)) return false;
+    const defaultAction = options.eventType.defaultAction;
     if (defaultAction) {
       if (defaultAction.setIfUndefined) {
         for (const key of Object.keys(defaultAction.setIfUndefined)) {
@@ -375,6 +371,34 @@ export class FabricEventTarget {
     return true;
   }
 }
+
+export function generateDispatchEventPath (
+    eventTarget, eventType, targetPropertyName = `on${eventType}`, cachePathAtEventTarget = false) {
+  if (!eventTarget) return undefined;
+  let ret;
+  let outerPath;
+  for (let listeners, targetSeeker = eventTarget; (listeners = targetSeeker[targetPropertyName]);) { // eslint-disable-line
+    let target = listeners[FabricEventTargetTag];
+    if (!target) {
+      for (target = targetSeeker;
+          !target.hasOwnProperty(targetPropertyName);
+          target = Object.getPrototypeOf(target));
+      listeners = [_createListener(eventType, listeners, {})];
+      listeners[FabricEventTargetTag] = target;
+      target[targetPropertyName] = listeners;
+    } else {
+      outerPath = listeners[FabricDispatchPathTag];
+      if (outerPath) break;
+    }
+    (ret || (ret = [])).push({ target, listeners });
+    targetSeeker = Object.getPrototypeOf(target);
+  }
+  if (cachePathAtEventTarget && ret) {
+    ret[0].listeners[FabricDispatchPathTag] = ret;
+  }
+  return ret;
+}
+
 
 FabricEventTarget.prototype[FabricEventTypesTag] = {};
 

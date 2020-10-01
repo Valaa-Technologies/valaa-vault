@@ -8,7 +8,7 @@ import TransactionState from "~/sourcerer/FalseProphet/TransactionState";
 import { initializeAspects } from "~/sourcerer/tools/EventAspects";
 import EVENT_VERSION from "~/sourcerer/tools/EVENT_VERSION";
 
-import { dumpObject } from "~/tools";
+import { dumpObject, generateDispatchEventPath } from "~/tools";
 
 import FalseProphet from "./FalseProphet";
 import FalseProphetConnection from "./FalseProphetConnection";
@@ -34,33 +34,35 @@ export function _composeRecitalStoryFromEvent (falseProphet: FalseProphet, event
 
   const transactor = event.meta && event.meta.transactor;
   let progress;
-  if (transactor && transactor.onbeforecompose) {
-    progress = event.meta.operation
-        ? event.meta.operation.getProgress() : new FabricatorEvent("", { command: event });
-    progress.type = "beforecompose";
-    if (!transactor.dispatchAndDefaultActEvent(progress)) return undefined;
-  }
-
   const previousState = falseProphet._corpus.getState();
 
   let story, dump;
   if (transactionState) {
     story = transactionState._tryFastForwardOnCorpus(falseProphet._corpus);
-    if (!story) {
+    if (story) {
+      falseProphet.warnEvent(2, () => [
+        `Committing a main line transaction '${transactionState.name}' as fast-forwarded event:`,
+        "\n\tevent:", ...dumpObject(event),
+        ...dumpObject(story),
+      ]);
+    } else {
       dump = true;
       falseProphet.warnEvent(2, () => [
         `Rebasing a branched transaction '${transactionState.name}' as a regular new event:`,
         "\n\tevent:", ...dumpObject(event),
       ]);
-    } else {
-      falseProphet.warnEvent(2, () => [
-        `Committing a main line transaction '${transactionState.name}' as fast-forwarded event:`,
-        "\n\tevent:", ...dumpObject(event),
-        ...dumpObject(story),
-    ]);
     }
   }
-  if (!story) story = falseProphet._corpus.dispatch(event, dispatchDescription);
+  if (!story) {
+    const dispatchPath = generateDispatchEventPath(transactor, "replay");
+    if (dispatchPath) {
+      progress = event.meta.operation.getProgressEvent("replay");
+      if (!transactor.dispatchAndDefaultActEvent(progress, { dispatchPath })) {
+        return undefined;
+      }
+    }
+    story = falseProphet._corpus.dispatch(event, dispatchDescription);
+  }
   if (dump) {
     falseProphet.warnEvent(1, () => [
       `Rebased a branched transaction '${transactionState.name}' as a regular new event:`,
@@ -72,14 +74,12 @@ export function _composeRecitalStoryFromEvent (falseProphet: FalseProphet, event
   if (dispatchDescription === "receive-truth") story.isTruth = true;
   // story.id = story.aspects.command.id; TODO(iridian): what was this?
 
-  if (transactor && transactor.onaftercompose) {
-    if (!progress) {
-      progress = event.meta.operation
-          ? event.meta.operation.getProgress() : new FabricatorEvent("", { command: event });
-    }
-    progress.type = "aftercompose";
+  const dispatchPath = generateDispatchEventPath(transactor, "profess");
+  if (dispatchPath) {
+    if (!progress) progress = event.meta.operation.getProgressEvent();
+    progress.type = "profess";
     progress.prophecy = story;
-    if (!transactor.dispatchAndDefaultActEvent(progress)) {
+    if (!transactor.dispatchAndDefaultActEvent(progress, { dispatchPath })) {
       falseProphet.recreateCorpus(previousState);
       return undefined;
     }
@@ -101,9 +101,10 @@ export function _purgeLatestRecitedStory (falseProphet: FalseProphet, heresy: Ev
         latestStory.aspects.command.id}')`);
   }
   const transactor = latestStory.meta.transactor;
-  if (transactor && transactor.onpurge) {
+  const dispatchPath = generateDispatchEventPath(transactor, "purge");
+  if (dispatchPath) {
     transactor.dispatchAndDefaultActEvent(
-        latestStory.meta.operation.getProgress({ type: "purge" }));
+        latestStory.meta.operation.getProgressEvent("purge"), { dispatchPath });
   }
   falseProphet._primaryRecital.removeStory(latestStory);
   falseProphet.recreateCorpus(latestStory.previousState);
@@ -249,17 +250,14 @@ function _launchReformation (reformation: Object, schismaticCommands: Command[])
     if (!prophecy) continue;
     if (!initialSchism) initialSchism = prophecy;
     if (!prophecy.meta || !prophecy.meta.operation) continue;
-    const progress = prophecy.meta.operation.getProgress({
-      type: "schism", schismaticCommand: command,
-    });
+    const progress = prophecy.meta.operation.getProgressEvent("schism");
+    progress.schismaticCommand = command;
     if (progress.isSchismatic === undefined) progress.isSchismatic = true;
     // Mark schismatic prophecies as non-revisable but reformably by default to trigger reorder.
     if (progress.isRevisable === undefined) progress.isRevisable = false;
     if (progress.isReformable === undefined) progress.isReformable = true;
     const transactor = prophecy.meta.transactor;
-    if (transactor && transactor.onschism) {
-      transactor.dispatchAndDefaultActEvent(progress);
-    }
+    if (transactor) transactor.dispatchAndDefaultActEvent(progress);
   }
   if (!initialSchism) return undefined;
 
@@ -299,7 +297,7 @@ function _reviewForeignStory (reformation, reformee, nextSchism) { // eslint-dis
       : meta.chronicleURI ? [meta.chronicleURI]
       : undefined;
   if (!chronicleURIs) return undefined;
-  const progress = meta.operation.getProgress();
+  const progress = meta.operation.getProgressEvent();
   for (const chronicleURI of chronicleURIs) {
     const affectedChronicle = reformation.affectedChronicles[chronicleURI];
     if (!affectedChronicle) continue;
@@ -334,11 +332,12 @@ export function _recomposeSchismaticStory (falseProphet: FalseProphet, story: Pr
   try {
     recomposedStory = _composeRecitalStoryFromEvent(falseProphet, event, composeDescription);
     if (!recomposedStory) return undefined;
-    if (transactor && transactor.onreview) {
-      progress = operation.getProgress({
-        type: "review", prophecy: recomposedStory, oldProphecy: story,
-      });
-      if (!transactor.dispatchAndDefaultActEvent(progress)) {
+    const dispatchPath = generateDispatchEventPath(transactor, "review");
+    if (dispatchPath) {
+      progress = operation.getProgressEvent("review");
+      progress.prophecy = recomposedStory;
+      progress.oldProphecy = story;
+      if (!transactor.dispatchAndDefaultActEvent(progress, { dispatchPath })) {
         _purgeLatestRecitedStory(falseProphet, recomposedStory);
         return undefined;
       }

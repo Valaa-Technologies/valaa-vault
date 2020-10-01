@@ -5,9 +5,11 @@ import type { Discourse } from "~/sourcerer/api/types";
 import enfoldGatewaySheath from "~/engine/valosheath/enfoldGatewaySheath";
 import enfoldSchemaSheath, { injectTypeSheath, OwnerDefaultCouplingTag }
     from "~/engine/valosheath/enfoldSchemaSheath";
-import { addValosheathNamespace } from "~/engine/valosheath/namespace";
+import { addValosheathNamespace, integrateNamespace } from "~/engine/valosheath/namespace";
 
 import schemaTypeSheaths from "./schema";
+
+const SourcererOnNamespace = require("~/inspire/On");
 
 export { OwnerDefaultCouplingTag };
 
@@ -16,7 +18,11 @@ export { OwnerDefaultCouplingTag };
  */
 export default function extendValOS (scope: any, hostDescriptors: any, rootDiscourse: Discourse) {
   const valosheath = scope.valos || (scope.Valaa = scope.valos = {});
+
+  integrateNamespace(SourcererOnNamespace, valosheath, scope, hostDescriptors);
+
   enfoldGatewaySheath(valosheath, hostDescriptors, rootDiscourse);
+
   if (rootDiscourse.schema) {
     const primaryNamespace = addValosheathNamespace(valosheath, "valos", {
       preferredPrefix: "V",
@@ -41,5 +47,6 @@ export default function extendValOS (scope: any, hostDescriptors: any, rootDisco
     valosheath.Partition = valosheath.Chronicle;
     // valosheath.Chronicle = valosheath.Partition;
   }
+
   return valosheath;
 }

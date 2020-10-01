@@ -89,14 +89,14 @@ describe("Media handling", () => {
           .then(createBvob => ({
             bvobId: (media[valos.Media.content] = createBvob()),
             bvobComposed: new Promise(resolve =>
-                valos.getTransactor().addEventListener("aftercompose", resolve)),
+                valos.getTransactor().addEventListener("profess", resolve)),
             bvobPersisted: new Promise(resolve =>
-                valos.getTransactor().addEventListener("persist", resolve)),
+                valos.getTransactor().addEventListener("record", resolve)),
           }));
       this.text = media;
       ({
         media, contentUpdateStarted,
-        newMediaPersist: new Promise(resolve => (valos.getTransactor().onpersist = resolve)),
+        newMediaPersist: new Promise(resolve => (valos.getTransactor().onrecord = resolve)),
       });
     `, { exampleBuffer, console });
     await newMediaPersist;
@@ -146,7 +146,7 @@ describe("Media handling", () => {
           .then(createBvob => ({
             bvobId: (media[valos.Media.content] = createBvob()),
             bvobPersisted: new Promise(resolve =>
-                valos.getTransactor().addEventListener("persist", resolve)),
+                valos.getTransactor().addEventListener("record", resolve)),
             bvobPurged: new Promise(resolve =>
                 valos.getTransactor().addEventListener("purge", resolve)),
           }));
@@ -154,7 +154,7 @@ describe("Media handling", () => {
       valos.getTransactor().addEventListener("reform", onReform);
       ({
         media, contentUpdateStarted,
-        newMediaPersist: new Promise(resolve => (valos.getTransactor().onpersist = resolve)),
+        newMediaPersist: new Promise(resolve => (valos.getTransactor().onrecord = resolve)),
       });
     `,
         { exampleBuffer, console, onReform },
@@ -210,13 +210,13 @@ describe("Media handling", () => {
           .then(createBvob => ({
             bvobId: (media[valos.Media.content] = createBvob()),
             bvobPersisted: new Promise(resolve =>
-                valos.getTransactor().addEventListener("persist", resolve)),
+                valos.getTransactor().addEventListener("record", resolve)),
           }));
       this.text = media;
       valos.getTransactor().addEventListener("reform", onReform);
       ({
         media, contentUpdateStarted,
-        newMediaPersist: new Promise(resolve => (valos.getTransactor().onpersist = resolve)),
+        newMediaPersist: new Promise(resolve => (valos.getTransactor().onrecord = resolve)),
         newMediaError: new Promise(resolve => (valos.getTransactor().onerror = resolve)),
       });`,
         { exampleBuffer, console, onReform },
@@ -244,7 +244,7 @@ describe("Media handling", () => {
     expect(errorEvent.error.message)
         .toMatch(/Connection lost/);
     expect(errorEvent.typePrecedingError)
-        .toEqual("persist");
+        .toEqual("record");
     expect(errorEvent.isComposeSchism)
         .toBeFalsy();
     expect(reformCause)
@@ -280,7 +280,7 @@ describe("Media handling", () => {
           .then(createBvob => ({
             bvobId: (media[valos.Media.content] = createBvob()),
             bvobPersisted: new Promise(resolve =>
-                valos.getTransactor().addEventListener("persist", resolve)),
+                valos.getTransactor().addEventListener("record", resolve)),
             bvobPurged: new Promise(resolve =>
                 valos.getTransactor().addEventListener("purge", resolve)),
           }));
@@ -289,7 +289,7 @@ describe("Media handling", () => {
       valos.getTransactor().addEventListener("purge", onPurge);
       ({
         media, contentUpdateStarted,
-        newMediaPersist: new Promise(resolve => (valos.getTransactor().onpersist = resolve)),
+        newMediaPersist: new Promise(resolve => (valos.getTransactor().onrecord = resolve)),
       });`,
         { buffer, console, onReform, onPurge },
         { awaitResult: (result) => (mediaProphecy = result).getComposedEvent() });
@@ -322,7 +322,7 @@ describe("Media handling", () => {
     expect(mediaPurgeEvent.error.message)
         .toMatch(/Not permitted/);
     expect(mediaPurgeEvent.typePrecedingError)
-        .toEqual("persist");
+        .toEqual("record");
 
     resolveReformationDelay(true);
     harness.clockEvent(1, () => ["test.mediaProphecy.getPersistedStory()"]);

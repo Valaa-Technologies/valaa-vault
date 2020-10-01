@@ -7,14 +7,14 @@ import type { Corpus } from "~/raem/Corpus";
 import { StoryIndexTag, PassageIndexTag } from "~/raem/redux/Bard";
 
 import { ChronicleRequest, ChronicleEventResult } from "~/sourcerer/api/types";
-import Fabricator, { fabricatorEventTypes, fabricatorMixinOps }
+import Fabricator, { FabricatorEvent, fabricatorEventTypes, fabricatorMixinOps }
     from "~/sourcerer/api/Fabricator";
 import type Transactor from "~/sourcerer/api/Transactor";
 import type FalseProphetDiscourse from "~/sourcerer/FalseProphet/FalseProphetDiscourse";
 
 import { _universalizeAction } from "./_universalizationOps";
 
-import { dumpObject } from "~/tools";
+import { dumpObject, generateDispatchEventPath } from "~/tools";
 
 let transactionCounter = 0;
 let activeTransactionCounter = 0;
@@ -364,18 +364,26 @@ export default class TransactionState {
     const previousState = targetCorpus.getState();
     if (!this.isFastForwardFrom(previousState)) return undefined;
     // this.logEvent(`Committed '${transactionState.name}'`, story);
+    const command = this._finalCommand;
     const story = targetCorpus.createStoryFromEvent({
-      ...this._finalCommand,
+      ...command,
       actions: this._passages.map(passage => getActionFromPassage(passage)),
       meta: {
         ...(this._transacted.meta || {}),
-        partitions: this._universalChronicles,
+        chronicles: this._universalChronicles,
       },
     });
     story.passages = this._passages;
     story.state = this._stateAfter;
     story.state[StoryIndexTag] = story.storyIndex;
 
+    const dispatchPath = generateDispatchEventPath(this._transactor, "issue");
+    if (dispatchPath) {
+      const progress = command.meta.operation.getProgressEvent("issue");
+      if (!this._transactor.dispatchAndDefaultActEvent(progress, { dispatchPath })) {
+        throw new Error("Command rejected by 'issue' default action cancelation");
+      }
+    }
     targetCorpus.reinitialize(this._stateAfter);
     return story;
   }

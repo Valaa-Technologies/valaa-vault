@@ -17,6 +17,7 @@
   "dependencies": {
     "@babel/polyfill": "^7.8.0",
     "@valos/engine": "^0.35.0-rc.32",
+    "@valos/kernel": ">=0.35.0-rc.32",
     "@valos/revdoc": "^0.35.0-rc.32",
     "brace": "^0.9.1",
     "graphql": "^0.6.2",
@@ -37,5 +38,8 @@
     "simplebar-react": "^0.1.4",
     "ws": "^6.1.4"
   },
-  "homepage": "https://valospace.org/inspire"
+  "homepage": "https://valospace.org/inspire",
+  "devDependencies": {
+    "@valos/revdoc": ">=0.35.0-rc.32"
+  }
 }

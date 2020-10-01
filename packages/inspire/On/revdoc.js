@@ -8,16 +8,17 @@ const {
   ontologyColumns, revdocOntologyProperties,
 } = require("@valos/revdoc");
 
-const { name, version, description } = require("./../package");
-
-const title = `The valospace 'undefined' namespace reference`;
 const {
   On: {
     preferredPrefix, baseIRI, description: namespaceDescription,
     prefixes, context, referencedModules, vocabulary,
   },
   ...remainingOntology
-} = require("../ontology");
+} = require("@valos/sourcerer/ontology");
+
+const { name, version, description } = require("./../package");
+
+const title = `The valosheath 'On' namespace reference`;
 
 module.exports = {
   "dc:title": title,

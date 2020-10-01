@@ -21,9 +21,9 @@ module.exports = buildNamespaceSpecification({
   namespaceModules: {
     VKernel: "@valos/kernel/VKernel",
     V: "@valos/space/V",
+    On: "@valos/sourcerer/On",
     VEngine: "@valos/engine/VEngine",
     Lens: "@valos/inspire/Lens",
-    On: "@valos/inspire/On",
   },
   description: [
 `The 'Lens' namespace defines the primary valospace UI component

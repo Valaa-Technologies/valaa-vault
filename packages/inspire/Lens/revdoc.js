@@ -39,7 +39,7 @@ module.exports = {
 renders valospace user interfaces and also contains the 'Lens'
 namespace API reference.
 
-See the `, ref("'On' namespace reference", "@valos/inspire/On"), ` for
+See the `, ref("'On' namespace reference", "@valos/sourcerer/On"), ` for
 how to access the HTML5 events API from valospace.`,
     ],
   },

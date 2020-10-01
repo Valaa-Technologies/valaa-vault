@@ -1,4 +1,4 @@
-import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
+import { qualifiedSymbol } from "~/tools/namespace";
 
 import VALSK, { Kuery, isValOSFunction, toVAKONTag } from "~/script/VALSK";
 

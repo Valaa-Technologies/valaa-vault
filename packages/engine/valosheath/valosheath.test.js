@@ -2,7 +2,7 @@
 
 import { created } from "~/raem/events";
 import { vRef } from "~/raem/VRL";
-import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
+import { qualifiedSymbol } from "~/tools/namespace";
 
 import { valueExpression, transpileValoscriptBody } from "~/script";
 

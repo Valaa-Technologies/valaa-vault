@@ -198,7 +198,7 @@ function extend (target_, patch_, keyInParent, targetParent, patchParent, skipSp
             if (newEntry !== undefined) ret.push(newEntry);
           }
         }
-      } else if (Object.getPrototypeOf(patch_) !== Object.prototype) {
+      } else if ((Object.getPrototypeOf(patch_) || Object.prototype) !== Object.prototype) {
         phase = ".complex";
         switch (this.complexPatch) {
           case "overwrite": return patch_;

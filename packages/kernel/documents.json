@@ -202,9 +202,9 @@
                       {
                         "@type": "VDoc:Reference",
                         "VDoc:content": [
-                          "Valospace"
+                          "valospace"
                         ],
-                        "VDoc:ref": "Valospace"
+                        "VDoc:ref": "@valos/space"
                       },
                       "."
                     ]
@@ -604,7 +604,7 @@
               "VDoc:content": [
                 "'On' namespace reference"
               ],
-              "VDoc:ref": "@valos/inspire/On"
+              "VDoc:ref": "@valos/sourcerer/On"
             },
             " for\nhow to access the HTML5 events API from valospace."
           ]
@@ -836,10 +836,12 @@
       "https://valospace.org/engine/0#": "@valos/engine/VEngine",
       "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
       "https://valospace.org/0#": "@valos/space/V",
-      "https://valospace.org/inspire/Lens/0#": "@valos/inspire/Lens",
-      "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
+      "https://valospace.org/sourcerer/On/0#": "@valos/sourcerer/On",
+      "https://valospace.org/inspire/Lens/0#": "@valos/inspire/Lens"
     },
-    "VRevdoc:extenderModules": {},
+    "VRevdoc:extenderModules": {
+      "https://valospace.org/sourcerer/On/0#": "@valos/inspire/On"
+    },
     "package": "@valos/inspire",
     "version": "0.35.0-rc.32"
   },
@@ -882,7 +884,7 @@
               "VDoc:content": [
                 "'On' namespace reference"
               ],
-              "VDoc:ref": "@valos/inspire/On"
+              "VDoc:ref": "@valos/sourcerer/On"
             },
             " for\nhow to access the HTML5 events API from valospace."
           ]
@@ -1114,10 +1116,12 @@
       "https://valospace.org/engine/0#": "@valos/engine/VEngine",
       "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
       "https://valospace.org/0#": "@valos/space/V",
-      "https://valospace.org/inspire/Lens/0#": "@valos/inspire/Lens",
-      "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
+      "https://valospace.org/sourcerer/On/0#": "@valos/sourcerer/On",
+      "https://valospace.org/inspire/Lens/0#": "@valos/inspire/Lens"
     },
-    "VRevdoc:extenderModules": {},
+    "VRevdoc:extenderModules": {
+      "https://valospace.org/sourcerer/On/0#": "@valos/inspire/On"
+    },
     "package": "@valos/inspire",
     "version": "0.35.0-rc.32"
   },
@@ -1200,22 +1204,32 @@
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
             [
-              "The ValOS inspire On namespace contains event callback names used by\nthe inspire UI layer.",
+              "The ValOS 'On' namespace provides the event handler names used by\nValOS gateway both within fabric and valospace addEventHandler calls.",
               null,
-              "The namespace inherits all HTML5 event names verbatim as name suffixes\nbut also adds new valos-specific event callback names. Like HTML5\nevents these callbacks are called with a synthetic event as their first\nargument."
+              "Like HTML5 events these callbacks are called with a synthetic event as\ntheir first argument.",
+              "The namespace contains all new event names introduced by ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "valos kernel"
+                ],
+                "VDoc:ref": "@valos/kernel"
+              },
+              " but also inherits all HTML5 event names verbatim.",
+              null,
+              "Note: ValOS event names will not conflict with currently known web\nevent names and effort is made to ensure that there are no future\nconflicts either. However should new web API event names conflict with\nvalos names the ValOS event names take primacy. Conflicting web event\nnames are then made available in the 'On' namespace with \"web\" text as\na prefix."
             ]
           ]
         }
       ]
     },
     "VRevdoc:preferredPrefix": "On",
-    "VRevdoc:baseIRI": "https://valospace.org/inspire/On/0#",
+    "VRevdoc:baseIRI": "https://valospace.org/sourcerer/On/0#",
     "VRevdoc:referencedModules": {
       "https://valospace.org/engine/0#": "@valos/engine/VEngine",
       "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
       "https://valospace.org/0#": "@valos/space/V",
-      "https://valospace.org/inspire/Lens/0#": "@valos/inspire/Lens",
-      "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
+      "https://valospace.org/inspire/Lens/0#": "@valos/inspire/Lens"
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/inspire",
@@ -1300,22 +1314,32 @@
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
             [
-              "The ValOS inspire On namespace contains event callback names used by\nthe inspire UI layer.",
+              "The ValOS 'On' namespace provides the event handler names used by\nValOS gateway both within fabric and valospace addEventHandler calls.",
               null,
-              "The namespace inherits all HTML5 event names verbatim as name suffixes\nbut also adds new valos-specific event callback names. Like HTML5\nevents these callbacks are called with a synthetic event as their first\nargument."
+              "Like HTML5 events these callbacks are called with a synthetic event as\ntheir first argument.",
+              "The namespace contains all new event names introduced by ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "valos kernel"
+                ],
+                "VDoc:ref": "@valos/kernel"
+              },
+              " but also inherits all HTML5 event names verbatim.",
+              null,
+              "Note: ValOS event names will not conflict with currently known web\nevent names and effort is made to ensure that there are no future\nconflicts either. However should new web API event names conflict with\nvalos names the ValOS event names take primacy. Conflicting web event\nnames are then made available in the 'On' namespace with \"web\" text as\na prefix."
             ]
           ]
         }
       ]
     },
     "VRevdoc:preferredPrefix": "On",
-    "VRevdoc:baseIRI": "https://valospace.org/inspire/On/0#",
+    "VRevdoc:baseIRI": "https://valospace.org/sourcerer/On/0#",
     "VRevdoc:referencedModules": {
       "https://valospace.org/engine/0#": "@valos/engine/VEngine",
       "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
       "https://valospace.org/0#": "@valos/space/V",
-      "https://valospace.org/inspire/Lens/0#": "@valos/inspire/Lens",
-      "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
+      "https://valospace.org/inspire/Lens/0#": "@valos/inspire/Lens"
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/inspire",
@@ -1687,9 +1711,13 @@
       "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
       "https://valospace.org/plot/0#": "@valos/plot/VPlot",
       "https://valospace.org/state/0#": "@valos/state/VState",
-      "https://valospace.org/valk/0#": "@valos/valk/VValk"
+      "https://valospace.org/valk/0#": "@valos/valk/VValk",
+      "https://valospace.org/0#": "@valos/space/V",
+      "https://valospace.org/inspire/Lens/0#": "@valos/inspire/Lens"
     },
-    "VRevdoc:extenderModules": {},
+    "VRevdoc:extenderModules": {
+      "https://valospace.org/sourcerer/On/0#": "@valos/inspire/On"
+    },
     "package": "@valos/inspire",
     "version": "0.35.0-rc.32"
   },
@@ -1986,9 +2014,13 @@
       "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
       "https://valospace.org/plot/0#": "@valos/plot/VPlot",
       "https://valospace.org/state/0#": "@valos/state/VState",
-      "https://valospace.org/valk/0#": "@valos/valk/VValk"
+      "https://valospace.org/valk/0#": "@valos/valk/VValk",
+      "https://valospace.org/0#": "@valos/space/V",
+      "https://valospace.org/inspire/Lens/0#": "@valos/inspire/Lens"
     },
-    "VRevdoc:extenderModules": {},
+    "VRevdoc:extenderModules": {
+      "https://valospace.org/sourcerer/On/0#": "@valos/inspire/On"
+    },
     "package": "@valos/inspire",
     "version": "0.35.0-rc.32"
   },
@@ -5199,9 +5231,9 @@
                       {
                         "@type": "VDoc:Reference",
                         "VDoc:content": [
-                          "Valospace"
+                          "valospace"
                         ],
-                        "VDoc:ref": "Valospace"
+                        "VDoc:ref": "@valos/space"
                       },
                       "."
                     ]

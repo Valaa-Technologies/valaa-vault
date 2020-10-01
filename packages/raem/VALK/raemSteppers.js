@@ -3,7 +3,7 @@
 import { Iterable, OrderedMap } from "immutable";
 
 import VRL from "~/raem/VRL";
-import { qualifiedNamesOf } from "~/raem/tools/namespaceSymbols";
+import { qualifiedNamesOf } from "~/tools/namespace";
 
 import { elevateFieldRawSequence } from "~/raem/state/FieldInfo";
 import Transient, { PrototypeOfImmaterialTag } from "~/raem/state/Transient";

@@ -1,4 +1,4 @@
-const { qualifiedNamesOf } = require("~/raem/tools/namespaceSymbols");
+const { qualifiedNamesOf } = require("~/tools/namespace");
 
 const { dumpObject, wrapError } = require("~/tools/wrapError");
 const isSymbol = require("~/tools/isSymbol").default;

@@ -17,7 +17,6 @@ const vocabulary = {
           {
             "VDoc:words": { "VDoc:selectField": "rdfs:label" },
             "VDoc:elidable": true,
-            "VDoc:map": ref("VDoc:selectValue", "VEngine:valosheath"),
           },
         ],
       }),

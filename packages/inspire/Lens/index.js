@@ -1,18 +1,20 @@
 const React = require("react");
 
-const resolveNamespaceDefinitions = require("@valos/engine/valosheath/resolveNamespaceDefinitions");
-const defineName = require("@valos/engine/valosheath/defineName");
 const { em, ref, vsx } = require("@valos/revdoc/extractee");
 
 const { denoteValOSCallable } = require("~/raem/VALK");
 const Vrapper = require("~/engine/Vrapper").default;
 const debugId = require("~/engine/debugId").default;
 const { dumpObject } = require("~/engine/VALEK");
-const { dumpify, messageFromError, thenChainEagerly, wrapError } = require("~/tools");
+
+const {
+  buildNamespaceSpecification,
+  thenChainEagerly, dumpify, messageFromError, wrapError,
+} = require("~/tools");
 
 function tag (tagName, ...rest) { return [em(tagName), ...rest]; }
 
-module.exports = {
+module.exports = buildNamespaceSpecification({
   domain: "@valos/kernel",
   preferredPrefix: "Lens",
   baseIRI: "https://valospace.org/inspire/Lens/0#",
@@ -29,9 +31,8 @@ vocabulary. This vocabulary is the API between the UI code written by
 a valonaut and the @valos/inspire UI engine.`,
     ..._createIntroduction(),
   ],
-  vocabulary: _createBaseVocabulary(),
-  definitions: {},
-  symbols: {},
+  vocabulary,
+  declareNames,
   deprecatedNames: {
     scopeChildren: "children",
     fallbackLens: "loadingLens",
@@ -51,29 +52,30 @@ a valonaut and the @valos/inspire UI engine.`,
     mediaInterpretationErrorLens: "uninterpretableMediaLens",
     unrenderableMediaInterpretationLens: "unrenderableInterpretationLens",
   },
-  processTags (name, tags, definitionDomain) {
-    const labels = [];
-    const componentType = tags.includes("Valoscope") ? "Lens:Valoscope"
-        : tags.includes("Attribute") ? "Lens:Element"
+  tag,
+  processDeclaration (name, declaration, { domain, addLabel }) {
+    const componentType = declaration.tags.includes("Valoscope") ? "Lens:Valoscope"
+        : declaration.tags.includes("Attribute") ? "Lens:Element"
         : null;
     if (componentType) {
-      definitionDomain.push(componentType);
-      labels.push([`Lens:${name}`, `Lens:${name}`]);
+      domain.push(componentType);
+      addLabel(
+          `Lens:${name}`, `Lens:${name}`, [`When used as `, ref(componentType), ` attribute`]);
     }
-    if (tags.includes("Context")) {
-      definitionDomain.push("Lens:UIContext");
-      labels.push([`context[$Lens.${name}]`, `$Lens.${name}`]);
+    if (declaration.tags.includes("Attribute") || declaration.tags.includes("Context")) {
+      declaration.isSlotName = true;
     }
-    if (!componentType && tags.includes("Lens")) {
-      labels.push([`Lens:${name}`]);
+    if (declaration.tags.includes("Context")) {
+      declaration.isSlotName = true;
+      domain.push("Lens:UIContext");
+      addLabel(
+          `context[$Lens.${name}]`, `$Lens.${name}`, `When used within VSX {}-valoscript blocks`);
     }
-    return labels;
+    if (!componentType && declaration.tags.includes("Lens")) {
+      addLabel(`Lens:${name}`);
+    }
   },
-  tag,
-};
-
-_createSymbols();
-resolveNamespaceDefinitions(module.exports);
+});
 
 function _createIntroduction () {
   return [
@@ -114,7 +116,7 @@ There are also auxiliary tags:`,
   ];
 }
 
-function _createBaseVocabulary () {
+function vocabulary () {
   return {
     Node: { "@type": "VEngine:Class",
       "rdfs:comment":
@@ -177,13 +179,8 @@ nested components.`,
   };
 }
 
-function _createSymbols () {
-  const ret = module.exports.symbols;
-
-  function _defineName (name: string, createLensParameters: Object) {
-    return defineName(name, module.exports, createLensParameters, { slotName: true });
-  }
-
+function declareNames ({ declareName }) {
+  const symbols = this.symbols;
   const _lensMessageLoadingProps = {
     key: "lp",
     className: `inspire__lensMessage inspire__lensMessage_loading`,
@@ -204,7 +201,7 @@ function _createSymbols () {
   const _key = { key: "i-k", className: `inspire__lensMessage-infoKey` };
   const _value = { key: "i-v", className: `inspire__lensMessage-infoValue` };
 
-  ret.instrument = denoteValOSCallable([
+  symbols.instrument = denoteValOSCallable([
 `Return an _instrument lens_ which chains multiple sub-lenses in sequence.`,
 `When the instrument lens is used to view a focus it is first
 set as the focus subLens1. The results shown by subLens1 is then set as
@@ -227,7 +224,7 @@ lens are shown as the output of the instrument lens itself.`,
 
   // Primary slots
 
-  _defineName("focus", () => ({
+  declareName("focus", () => ({
     tags: ["Primary", "Attribute", "Lens"],
     type: "any",
     description: [
@@ -247,7 +244,7 @@ model-view-controller design pattern. The concept 'lens' corresponds to
     ],
   }));
 
-  _defineName("array", () => ({
+  declareName("array", () => ({
     tags: ["Primary", "Attribute"],
     type: "any[] | null",
     description: [
@@ -268,7 +265,7 @@ per update irrespective of the array length (even if 0).`,
     ],
   }));
 
-  _defineName("frame", () => ({
+  declareName("frame", () => ({
     tags: ["Primary", "Valoscope", "Attribute"],
     type: "string | (focus: string, index: ?number, keyPrefix: ?string) => string",
     description: [
@@ -329,7 +326,7 @@ unique frame keys.`
     ],
   }));
 
-  _defineName("lens", () => ({
+  declareName("lens", () => ({
     tags: ["Primary", "Valoscope", "Attribute", "Lens"],
     type: "Lens",
     description: [
@@ -353,7 +350,7 @@ to 'model', and the various components roughly correspond to 'controller'.
     isEnabled: true,
   }));
 
-  const loadingLens = _defineName("loadingLens", () => ({
+  const loadingLens = declareName("loadingLens", () => ({
     tags: ["Primary", "Attribute", "Context", "Lens", "Loading"],
     type: "Lens",
     description: [
@@ -369,7 +366,7 @@ own default lens.
     ],
   }));
 
-  const loadingFailedLens = _defineName("loadingFailedLens", () => ({
+  const loadingFailedLens = declareName("loadingFailedLens", () => ({
     tags: ["Primary", "Attribute", "Context", "Lens", "Loading", "Failure"],
     type: "Lens",
     description: [
@@ -387,7 +384,7 @@ their own default lens.
 
   // View control slots
 
-  _defineName("if", () => ({
+  declareName("if", () => ({
     tags: ["Attribute", "Lens"],
     type: "any | (focus) => boolean",
     description: [
@@ -425,7 +422,7 @@ If the condition is falsy the focus is displayed using lens from slot
     },
   }));
 
-  _defineName("then", () => ({
+  declareName("then", () => ({
     tags: ["Attribute", "Lens"],
     type: "Lens",
     description: [
@@ -436,7 +433,7 @@ null,
     ]
   }));
 
-  _defineName("else", () => ({
+  declareName("else", () => ({
     tags: ["Attribute", "Lens"],
     type: "Lens",
     description: [
@@ -447,7 +444,7 @@ null,
     ]
   }));
 
-  _defineName("offset", () => ({
+  declareName("offset", () => ({
     tags: ["Attribute"],
     type: "number | null",
     description: [
@@ -456,7 +453,7 @@ from.`,
     ],
   }));
 
-  _defineName("limit", () => ({
+  declareName("limit", () => ({
     tags: ["Attribute"],
     type: "number | null",
     description: [
@@ -467,7 +464,7 @@ but before sorting (see $Lens.sort).`,
     ],
   }));
 
-  _defineName("arrayIndex", () => ({
+  declareName("arrayIndex", () => ({
     tags: ["Context"],
     type: "number | null",
     description: [
@@ -481,7 +478,7 @@ of the implicit frame key generation (see $Lens.frame).`,
     ],
   }));
 
-  _defineName("endOffset", () => ({
+  declareName("endOffset", () => ({
     tags: ["Context"],
     type: "number | null",
     description: [
@@ -490,7 +487,7 @@ $Lens.limit has been met.`,
     ],
   }));
 
-  _defineName("elementIndex", () => ({
+  declareName("elementIndex", () => ({
     tags: ["Context"],
     type: "number | null",
     description: [
@@ -502,7 +499,7 @@ null,
     ],
   }));
 
-  _defineName("sort", () => ({
+  declareName("sort", () => ({
     tags: ["Attribute"],
     type: "(leftFocus, rightFocus, leftAttributes, rightAttributes) => number | Symbol | null",
     description: [
@@ -519,7 +516,7 @@ however.`,
     ],
   }));
 
-  _defineName("reverse", () => ({
+  declareName("reverse", () => ({
     tags: ["Attribute"],
     type: "boolean",
     description:
@@ -528,7 +525,7 @@ however.`,
 
   // Primitive lenses
 
-  _defineName("children", () => ({
+  declareName("children", () => ({
     tags: ["Internal", "Lens"],
     type: "any",
     description: [
@@ -558,7 +555,7 @@ three notably different looking use cases.`,
     ]
   }));
 
-  const componentChildrenLens = _defineName("componentChildrenLens", () => ({
+  const componentChildrenLens = declareName("componentChildrenLens", () => ({
     tags: ["Lens"],
     type: "Lens",
     description: [
@@ -571,7 +568,7 @@ three notably different looking use cases.`,
     value (focus: any, component) { return component.props.children; },
   }));
 
-  _defineName("static", () => ({
+  declareName("static", () => ({
     tags: ["Attribute"],
     type: "boolean",
     description: [
@@ -589,18 +586,18 @@ like above.`,
     ],
   }));
 
-  const slotAssembly = _defineName("slotAssembly", () => ({
+  const slotAssembly = declareName("slotAssembly", () => ({
     tags: ["Lens"],
     type: "string[]",
     description:
 `Lens that displays the lens slot assembly that is used by the component.`,
   }));
 
-  const niceActiveSlotNames = ret.instrument(
+  const niceActiveSlotNames = symbols.instrument(
       slotAssembly,
       slotNames => slotNames.slice(0, -1).reverse().join(" <| "));
 
-  const parentComponentLens = _defineName("parentComponentLens", () => ({
+  const parentComponentLens = declareName("parentComponentLens", () => ({
     tags: ["Lens"],
     type: "UIComponent",
     description: [
@@ -614,7 +611,7 @@ other slot (such as 'focusDetailLens').`,
     value (focus: any, component) { return component; },
   }));
 
-  const focusDescriptionLens = _defineName("focusDescriptionLens", () => ({
+  const focusDescriptionLens = declareName("focusDescriptionLens", () => ({
     tags: ["Lens"],
     type: "Lens",
     description: [
@@ -646,7 +643,7 @@ null,
     },
   }));
 
-  const focusDetailLens = _defineName("focusDetailLens", () => ({
+  const focusDetailLens = declareName("focusDetailLens", () => ({
     tags: ["Lens"],
     type: "Lens",
     description: [
@@ -661,7 +658,7 @@ null,
     }
   }));
 
-  const focusDumpLens = _defineName("focusDumpLens", () => ({
+  const focusDumpLens = declareName("focusDumpLens", () => ({
     tags: ["Lens"],
     type: "Lens",
     description: [
@@ -677,7 +674,7 @@ null,
     },
   }));
 
-  _defineName("focusPropertyKeysLens", () => ({
+  declareName("focusPropertyKeysLens", () => ({
     tags: ["Lens"],
     type: "Lens",
     description: [
@@ -695,7 +692,7 @@ null,
     },
   }));
 
-  const toggleableErrorDetailLens = _defineName("toggleableErrorDetailLens", () => ({
+  const toggleableErrorDetailLens = declareName("toggleableErrorDetailLens", () => ({
     tags: ["Context", "Lens"],
     type: "Lens",
     description: [
@@ -724,7 +721,7 @@ null,
     },
   }));
 
-  _defineName("internalErrorLens", () => ({
+  declareName("internalErrorLens", () => ({
     tags: ["Internal", "Context", "Lens", "Failure", "Error"],
     type: "Lens",
     description: [
@@ -748,7 +745,7 @@ null,
     },
   }));
 
-  const currentRenderDepth = _defineName("currentRenderDepth", () => ({
+  const currentRenderDepth = declareName("currentRenderDepth", () => ({
     tags: ["Context", "Lens"],
     type: "number",
     description: [
@@ -761,7 +758,7 @@ value for all nested child components of this component.`,
     defaultValue: 0,
   }));
 
-  _defineName("infiniteRecursionCheckWaterlineDepth", () => ({
+  declareName("infiniteRecursionCheckWaterlineDepth", () => ({
     tags: ["Context", "Lens"],
     type: "number",
     description: [
@@ -771,7 +768,7 @@ infinite render recursion.`,
     defaultValue: 150,
   }));
 
-  const maximumRenderDepth = _defineName("maximumRenderDepth", () => ({
+  const maximumRenderDepth = declareName("maximumRenderDepth", () => ({
     tags: ["Context", "Lens"],
     type: "number",
     description: [
@@ -780,7 +777,7 @@ infinite render recursion.`,
     defaultValue: 200,
   }));
 
-  const maximumRenderDepthExceededLens = _defineName("maximumRenderDepthExceededLens", () => ({
+  const maximumRenderDepthExceededLens = declareName("maximumRenderDepthExceededLens", () => ({
     tags: ["Context", "Lens", "Failure"],
     type: "Lens",
     description: [
@@ -812,7 +809,7 @@ null,
 
   // Valoscope and Valens
 
-  _defineName("valoscopeLens", () => ({
+  declareName("valoscopeLens", () => ({
     tags: ["Internal", "Lens"],
     type: "Lens",
     description: [
@@ -827,22 +824,22 @@ null,
     ],
     isEnabled: true,
     value: ({ delegate: Object.freeze([
-      ret.firstEnabledDelegateLens,
-      ret.if,
-      ret.disabledLens,
-      ret.unframedLens,
+      symbols.firstEnabledDelegateLens,
+      symbols.if,
+      symbols.disabledLens,
+      symbols.unframedLens,
       maximumRenderDepthExceededLens,
-      ret.instanceLens,
-      ret.undefinedLens,
-      ret.lens,
-      ret.nullLens,
+      symbols.instanceLens,
+      symbols.undefinedLens,
+      symbols.lens,
+      symbols.nullLens,
       componentChildrenLens,
-      ret.resourceLens,
-      ret.loadedLens,
+      symbols.resourceLens,
+      symbols.loadedLens,
     ]) }),
   }));
 
-  _defineName("valensLens", () => ({
+  declareName("valensLens", () => ({
     tags: ["Internal", "Lens"],
     type: "Lens",
     description: [
@@ -857,14 +854,14 @@ null,
     ],
     isEnabled: true,
     value: ({ delegate: Object.freeze([
-      ret.firstEnabledDelegateLens,
-      ret.disabledLens,
-      ret.undefinedLens,
-      ret.loadedLens,
+      symbols.firstEnabledDelegateLens,
+      symbols.disabledLens,
+      symbols.undefinedLens,
+      symbols.loadedLens,
     ]) }),
   }));
 
-  _defineName("uiComponentLens", () => ({
+  declareName("uiComponentLens", () => ({
     tags: ["Internal", "Lens"],
     type: "Lens",
     description: [
@@ -879,15 +876,15 @@ null,
     ],
     isEnabled: true,
     value: ({ delegate: [
-      ret.firstEnabledDelegateLens,
-      ret.disabledLens,
-      ret.undefinedLens,
-      ret.loadedLens,
+      symbols.firstEnabledDelegateLens,
+      symbols.disabledLens,
+      symbols.undefinedLens,
+      symbols.loadedLens,
     ] }),
   }));
 
 
-  _defineName("firstEnabledDelegateLens", () => ({
+  declareName("firstEnabledDelegateLens", () => ({
     tags: ["Internal", "Lens"],
     type: "Lens",
     description: [
@@ -902,7 +899,7 @@ null,
     }
   }));
 
-  _defineName("loadedLens", () => ({
+  declareName("loadedLens", () => ({
     tags: ["Internal", "Lens"],
     type: "Lens",
     description: [
@@ -919,7 +916,7 @@ null,
 
   // Content lenses
 
-  _defineName("undefinedLens", () => ({
+  declareName("undefinedLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description: [
@@ -927,13 +924,13 @@ null,
     ],
     isEnabled: (focus) => (focus === undefined),
     defaultValue: ({ delegate: [
-      ret.instrument(
+      symbols.instrument(
           (u, component) => (component.props.focus),
-          ret.pendingFocusLens),
+          symbols.pendingFocusLens),
     ] }),
   }));
 
-  _defineName("nullLens", () => ({
+  declareName("nullLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description: [
@@ -943,7 +940,7 @@ null,
     defaultValue: "",
   }));
 
-  _defineName("resourceLens", () => ({
+  declareName("resourceLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description: [
@@ -961,15 +958,15 @@ null,
     // Maybe this was intended to be refreshPhase instead?
     isEnabled: (focus?: Vrapper) => (focus instanceof Vrapper) && focus.activate(),
     defaultValue: ({ delegate: [
-      ret.activeLens,
-      ret.activatingLens,
-      ret.inactiveLens,
-      ret.destroyedLens,
-      ret.unavailableLens,
+      symbols.activeLens,
+      symbols.activatingLens,
+      symbols.inactiveLens,
+      symbols.destroyedLens,
+      symbols.unavailableLens,
     ] }),
   }));
 
-  _defineName("activeLens", () => ({
+  declareName("activeLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description: [
@@ -980,10 +977,10 @@ null,
 `    @focus {Object} focus  the active Resource focus.`,
     ],
     isEnabled: (focus?: Vrapper) => focus && focus.isActive(),
-    defaultValue: ret.focusPropertyLens,
+    defaultValue: symbols.focusPropertyLens,
   }));
 
-  _defineName("lensProperty", () => ({
+  declareName("lensProperty", () => ({
     tags: ["Valoscope", "Attribute", "Context"],
     type: "(string | string[])",
     description: [
@@ -1006,7 +1003,7 @@ element then the element will be wrapped inside an implicit Valoscope
 
   function _createLensPropertySlots (specificLensPropertySlotName, defaultValueProperties,
       propertyLensName, notFoundName) {
-    const slotSymbol = _defineName(specificLensPropertySlotName, () => ({
+    const slotSymbol = declareName(specificLensPropertySlotName, () => ({
       tags: ["Valoscope", "Attribute", "Context"],
       type: "(string | string[])",
       description: [
@@ -1024,7 +1021,7 @@ implicit Valoscope (including a new frame).`,
       defaultValue: defaultValueProperties,
     }));
 
-    _defineName(propertyLensName, () => ({
+    declareName(propertyLensName, () => ({
       tags: ["Internal", "Lens"],
       type: "Lens",
       description: [
@@ -1061,18 +1058,18 @@ null,
         if (specificLensValue !== undefined) return specificLensValue;
 
         const genericNames = component.props.lensProperty
-            || component.getUIContextValue(ret.lensProperty);
+            || component.getUIContextValue(symbols.lensProperty);
         const genericLensValue = genericNames ? _lookupPropertyBy(genericNames) : undefined;
         if (genericLensValue !== undefined) return genericLensValue;
         /*
         console.error("Can't find resource lens props:", specificLensPropertySlotName, slotSymbol,
-            "\n\tnotFoundName:", notFoundName, ret[notFoundName],
+            "\n\tnotFoundName:", notFoundName, symbols[notFoundName],
             "\n\tcomponent:", component,
             "\n\tfocus:", focus);
         */
 
         if (!notFoundName) return null;
-        return { delegate: [ret[notFoundName]] };
+        return { delegate: [symbols[notFoundName]] };
 
         function _lookupPropertyBy (propertyNames) {
           if (!Array.isArray(propertyNames)) {
@@ -1094,7 +1091,7 @@ null,
 
   // Instance lenses
 
-  _defineName("unframedLens", () => ({
+  declareName("unframedLens", () => ({
     tags: ["Attribute", "Context", "Lens"],
     type: "Lens",
     description:
@@ -1105,7 +1102,7 @@ null,
     },
   }));
 
-  _defineName("instanceLensPrototype", () => ({
+  declareName("instanceLensPrototype", () => ({
     tags: ["Valoscope", "Attribute"],
     type: "Resource",
     description: [
@@ -1117,7 +1114,7 @@ implicit Valoscope which handles the frame creation.`,
     ],
   }));
 
-  _defineName("instanceLens", () => ({
+  declareName("instanceLens", () => ({
     tags: ["Internal", "Lens"],
     type: "Lens",
     description: [
@@ -1138,7 +1135,7 @@ instance prototype.`,
               if ((scopeFrame == null) || !(scopeFrame instanceof Vrapper)) return "";
               if (!scopeFrame.hasInterface("Scope")) return scopeFrame;
               const instanceSlotName = `instance-${currentSlotName}`;
-              const instanceLens = component.getUIContextValue(ret.instancePropertyLens)(
+              const instanceLens = component.getUIContextValue(symbols.instancePropertyLens)(
                   scopeFrame, component, instanceSlotName);
               return (instanceLens != null) ? instanceLens : scopeFrame;
             }),
@@ -1149,7 +1146,7 @@ instance prototype.`,
   _createLensPropertySlots("instanceLensProperty", ["INSTANCE_LENS"], "instancePropertyLens",
       "mediaInstanceLens");
 
-  _defineName("mediaInstanceLens", () => ({
+  declareName("mediaInstanceLens", () => ({
     tags: ["Internal", "Lens"],
     type: "Lens",
     description: [
@@ -1165,7 +1162,7 @@ null,
     },
   }));
 
-  _defineName("scopeFrameResource", () => ({
+  declareName("scopeFrameResource", () => ({
     tags: ["Internal", "Context"],
     type: "Resource",
     description: [
@@ -1177,7 +1174,7 @@ current component will use this scope frame resource as their owner.`,
     ],
   }));
 
-  _defineName("frameStepPrefix", () => ({
+  declareName("frameStepPrefix", () => ({
     tags: ["Internal", "Context"],
     type: "string",
     description: [
@@ -1186,7 +1183,7 @@ innermost enclosing scope frame.`,
     ],
   }));
 
-  _defineName("frameOwner", () => ({
+  declareName("frameOwner", () => ({
     tags: ["Attribute"],
     type: "(string | null)",
     description: [
@@ -1207,7 +1204,7 @@ relative the current parent frame.`,
     ],
   }));
 
-  _defineName("frameAuthority", () => ({
+  declareName("frameAuthority", () => ({
     tags: ["Attribute", "Context"],
     type: "(string | null)",
     description: [
@@ -1231,7 +1228,7 @@ this implicit chronicle creation is disabled.`,
     defaultValue: "valaa-memory:",
   }));
 
-  _defineName("frameAuthorityProperty", () => ({
+  declareName("frameAuthorityProperty", () => ({
     tags: ["Context"],
     type: "(string)",
     description: [
@@ -1250,7 +1247,7 @@ root.`,
     defaultValue: ["FRAME_AUTHORITY", "LENS_AUTHORITY"],
   }));
 
-  _defineName("frameRoot", () => ({
+  declareName("frameRoot", () => ({
     tags: ["Internal", "Context"],
     type: "(Resource | null)",
     description: [
@@ -1265,7 +1262,7 @@ Such a focused resource is stored in slot 'frameRootFocus'.`,
     ],
   }));
 
-  _defineName("frameRootFocus", () => ({
+  declareName("frameRootFocus", () => ({
     tags: ["Internal", "Context"],
     type: "(Resource | null)",
     description: [
@@ -1280,7 +1277,7 @@ the same regular chronicle root resource.`,
     ],
   }));
 
-  _defineName("integrationScopeResource", () => ({
+  declareName("integrationScopeResource", () => ({
     tags: ["Context"],
     type: "Resource",
     description: [
@@ -1299,12 +1296,12 @@ Media that is used as source for render elements.`,
     <div {..._component}>
       <span {..._key}>Containing component:</span>
       <span {..._value}>
-        {ret.instrument(parentComponentLens, focusDetailLens)}
+        {symbols.instrument(parentComponentLens, focusDetailLens)}
       </span>
     </div>,
   ];
 
-  _defineName("disabledLens", () => ({
+  declareName("disabledLens", () => ({
     tags: ["Internal", "Context", "Lens", "Loading", "Failure"],
     type: "Lens",
     description: [
@@ -1326,7 +1323,7 @@ null,
     ] }),
   }));
 
-  const pendingLens = _defineName("pendingLens", () => ({
+  const pendingLens = declareName("pendingLens", () => ({
     tags: ["Primary", "Attribute", "Context", "Lens", "Loading"],
     type: "Lens",
     description: [
@@ -1342,7 +1339,7 @@ null,
     defaultValue: loadingLens,
   }));
 
-  const rejectedLens = _defineName("rejectedLens", () => ({
+  const rejectedLens = declareName("rejectedLens", () => ({
     tags: ["Primary", "Attribute", "Context", "Lens", "Loading", "Failure"],
     type: "Lens",
     description: [
@@ -1359,7 +1356,7 @@ null,
     defaultValue: loadingFailedLens,
   }));
 
-  _defineName("pendingPromiseLens", () => ({
+  declareName("pendingPromiseLens", () => ({
     tags: ["Attribute", "Context", "Lens", "Loading"],
     type: "Lens",
     description: [
@@ -1385,7 +1382,7 @@ null,
     ] }),
   }));
 
-  _defineName("rejectedPromiseLens", () => ({
+  declareName("rejectedPromiseLens", () => ({
     tags: ["Attribute", "Context", "Lens", "Loading", "Failure", "Error"],
     type: "Lens",
     description: [
@@ -1404,7 +1401,7 @@ null,
         <div {..._parameter}>
           <span {..._key}>Lens:</span>
           <span {..._value}>
-            {ret.instrument(error => error.lens, focusDetailLens)}
+            {symbols.instrument(error => error.lens, focusDetailLens)}
           </span>
         </div>
         {commonMessageRows}
@@ -1412,7 +1409,7 @@ null,
     ] }),
   }));
 
-  _defineName("pendingChroniclesLens", () => ({
+  declareName("pendingChroniclesLens", () => ({
     tags: ["Attribute", "Context", "Lens", "Loading"],
     type: "Lens",
     description: [
@@ -1434,7 +1431,7 @@ null,
     ] }),
   }));
 
-  _defineName("rejectedChroniclesLens", () => ({
+  declareName("rejectedChroniclesLens", () => ({
     tags: ["Attribute", "Context", "Lens", "Loading", "Failure", "Error"],
     type: "Lens",
     description: [
@@ -1453,7 +1450,7 @@ null,
         <div {..._parameter}>
           <span {..._key}>Chronicle:</span>
           <span {..._value}>
-            {ret.instrument(error => error.resource, focusDescriptionLens)}
+            {symbols.instrument(error => error.resource, focusDescriptionLens)}
           </span>
         </div>
         {commonMessageRows}
@@ -1461,7 +1458,7 @@ null,
     ] }),
   }));
 
-  _defineName("delayed", () => ({
+  declareName("delayed", () => ({
     tags: ["Attribute"],
     type: "boolean | Symbol[]",
     description: [
@@ -1489,7 +1486,7 @@ the above pending slot names to make selectively delayed.`,
     ],
   }));
 
-  _defineName("pendingAttributesLens", () => ({
+  declareName("pendingAttributesLens", () => ({
     tags: ["Context", "Lens", "Loading"],
     type: "Lens",
     description: [
@@ -1511,7 +1508,7 @@ null,
     ] }),
   }));
 
-  _defineName("rejectedAttributesLens", () => ({
+  declareName("rejectedAttributesLens", () => ({
     tags: ["Context", "Lens", "Loading", "Failure", "Error"],
     type: "Lens",
     description: [
@@ -1531,7 +1528,7 @@ null,
         <div {..._parameter}>
           <span {..._key}>Attribute (all) names:</span>
           <span {..._value}>
-            {ret.instrument(error => error.propsNames, focusDetailLens)}
+            {symbols.instrument(error => error.propsNames, focusDetailLens)}
           </span>
         </div>
         {commonMessageRows}
@@ -1539,7 +1536,7 @@ null,
     ] }),
   }));
 
-  _defineName("pendingFocusLens", () => ({
+  declareName("pendingFocusLens", () => ({
     tags: ["Attribute", "Context", "Lens", "Loading"],
     type: "Lens",
     description: [
@@ -1562,7 +1559,7 @@ null,
     ] }),
   }));
 
-  _defineName("rejectedFocusLens", () => ({
+  declareName("rejectedFocusLens", () => ({
     tags: ["Attribute", "Context", "Lens", "Loading", "Failure", "Error"],
     type: "Lens",
     description: [
@@ -1581,7 +1578,7 @@ null,
         <div {..._parameter}>
           <span {..._key}>Focus:</span>
           <span {..._value}>
-            {ret.instrument(error => error.resource, focusDescriptionLens)}
+            {symbols.instrument(error => error.resource, focusDescriptionLens)}
           </span>
         </div>
         {commonMessageRows}
@@ -1590,7 +1587,7 @@ null,
   }));
 
 
-  _defineName("pendingFrameLens", () => ({
+  declareName("pendingFrameLens", () => ({
     tags: ["Attribute", "Context", "Lens", "Loading"],
     type: "Lens",
     description: [
@@ -1612,7 +1609,7 @@ null,
     ] }),
   }));
 
-  _defineName("rejectedFrameLens", () => ({
+  declareName("rejectedFrameLens", () => ({
     tags: ["Attribute", "Context", "Lens", "Loading", "Failure", "Error"],
     type: "Lens",
     description: [
@@ -1631,7 +1628,7 @@ null,
         <div {..._parameter}>
           <span {..._key}>Frame:</span>
           <span {..._value}>
-            {ret.instrument(error => error.resource, focusDescriptionLens)}
+            {symbols.instrument(error => error.resource, focusDescriptionLens)}
           </span>
         </div>
         {commonMessageRows}
@@ -1639,7 +1636,7 @@ null,
     ] }),
   }));
 
-  _defineName("inactiveLens", () => ({
+  declareName("inactiveLens", () => ({
     tags: ["Attribute", "Context", "Lens", "Loading", "Failure"],
     type: "Lens",
     description: [
@@ -1661,7 +1658,7 @@ null,
     ] }),
   }));
 
-  _defineName("pendingMediaLens", () => ({
+  declareName("pendingMediaLens", () => ({
     tags: ["Attribute", "Context", "Lens", "Loading"],
     type: "Lens",
     description: [
@@ -1685,7 +1682,7 @@ null,
     ] }),
   }));
 
-  _defineName("rejectedMediaLens", () => ({
+  declareName("rejectedMediaLens", () => ({
     tags: ["Attribute", "Context", "Lens", "Loading", "Failure", "Error"],
     type: "Lens",
     description: [
@@ -1705,13 +1702,13 @@ null,
         <div {..._parameter}>
           <span {..._key}>Of Media:</span>
           <span {..._value}>
-            {ret.instrument(error => error.media, focusDescriptionLens)}
+            {symbols.instrument(error => error.media, focusDescriptionLens)}
           </span>
         </div>
         <div key="p1" {..._parameter}>
           <span {..._key}>Interpretation info:</span>
           <span {..._value}>
-            {ret.instrument(error => error.mediaInfo, ret.focusDetail)}
+            {symbols.instrument(error => error.mediaInfo, symbols.focusDetail)}
           </span>
         </div>
         {commonMessageRows}
@@ -1719,7 +1716,7 @@ null,
     ] }),
   }));
 
-  _defineName("uninterpretableMediaLens", () => ({
+  declareName("uninterpretableMediaLens", () => ({
     tags: ["Attribute", "Context", "Lens", "Loading", "Failure", "Error"],
     type: "Lens",
     description: [
@@ -1729,10 +1726,10 @@ null,
 `    @focus {Error} reason  interpretation error.`,
     ],
     isEnabled: true,
-    defaultValue: ret.rejectedMediaLens,
+    defaultValue: symbols.rejectedMediaLens,
   }));
 
-  _defineName("unrenderableInterpretationLens", () => ({
+  declareName("unrenderableInterpretationLens", () => ({
     tags: ["Attribute", "Context", "Lens", "Loading", "Failure", "Error"],
     type: "Lens",
     description: [
@@ -1745,10 +1742,10 @@ null,
 `    @focus {Error} reason  interpretation displaying error.`,
     ],
     isEnabled: true,
-    defaultValue: ret.rejectedMediaLens,
+    defaultValue: symbols.rejectedMediaLens,
   }));
 
-  _defineName("pendingElementsLens", () => ({
+  declareName("pendingElementsLens", () => ({
     tags: ["Attribute", "Context", "Lens", "Loading"],
     type: "Lens",
     description: [
@@ -1770,7 +1767,7 @@ null,
     ] }),
   }));
 
-  _defineName("rejectedElementsLens", () => ({
+  declareName("rejectedElementsLens", () => ({
     tags: ["Attribute", "Context", "Lens", "Loading", "Failure"],
     type: "Lens",
     description: [
@@ -1790,7 +1787,7 @@ null,
         <div {..._parameter}>
           <span {..._key}>Elements:</span>
           <span {..._value}>
-            {ret.instrument(error => error.children, focusDetailLens)}
+            {symbols.instrument(error => error.children, focusDetailLens)}
           </span>
         </div>
         {commonMessageRows}
@@ -1798,7 +1795,7 @@ null,
     ] }),
   }));
 
-  _defineName("activatingLens", () => ({
+  declareName("activatingLens", () => ({
     tags: ["Attribute", "Context", "Lens", "Loading"],
     type: "Lens",
     description: [
@@ -1825,7 +1822,7 @@ null,
     ] }),
   }));
 
-  _defineName("inactiveLens", () => ({
+  declareName("inactiveLens", () => ({
     tags: ["Attribute", "Context", "Lens", "Loading", "Failure"],
     type: "Lens",
     description: [
@@ -1847,7 +1844,7 @@ null,
     ] }),
   }));
 
-  _defineName("unavailableLens", () => ({
+  declareName("unavailableLens", () => ({
     tags: ["Attribute", "Context", "Lens", "Loading", "Failure"],
     type: "Lens",
     description: [
@@ -1869,7 +1866,7 @@ null,
     ] }),
   }));
 
-  _defineName("destroyedLens", () => ({
+  declareName("destroyedLens", () => ({
     tags: ["Attribute", "Context", "Lens", "Loading", "Failure"],
     type: "Lens",
     description: [
@@ -1891,7 +1888,7 @@ null,
     ] }),
   }));
 
-  _defineName("lensPropertyNotFoundLens", () => ({
+  declareName("lensPropertyNotFoundLens", () => ({
     tags: ["Attribute", "Context", "Lens", "Loading", "Failure"],
     type: "Lens",
     description: [
@@ -1912,13 +1909,13 @@ null,
           <div {..._parameter}>
             <span {..._key}>focusLensProperty:</span>
             <span {..._value}>
-              {ret.instrument(ret.focusLensProperty, p => JSON.stringify(p))}
+              {symbols.instrument(symbols.focusLensProperty, p => JSON.stringify(p))}
             </span>
           </div>
           <div key="p1" {..._parameter}>
             <span {..._key}>lensProperty:</span>
             <span {..._value}>
-              {ret.instrument(ret.lensProperty, p => JSON.stringify(p))}
+              {symbols.instrument(symbols.lensProperty, p => JSON.stringify(p))}
             </span>
           </div>
         </div>
@@ -1931,7 +1928,7 @@ null,
           <div key="p1" {..._parameter}>
             <span {..._key}>has properties:</span>
             <span {..._value}>
-              {ret.instrument(ret.focusPropertyKeysLens, p => JSON.stringify(p))}
+              {symbols.instrument(symbols.focusPropertyKeysLens, p => JSON.stringify(p))}
             </span>
           </div>
         </div>
@@ -1940,7 +1937,7 @@ null,
     ] }),
   }));
 
-  _defineName("notLensResourceLens", () => ({
+  declareName("notLensResourceLens", () => ({
     tags: ["Context", "Lens", "Loading", "Failure"],
     type: "Lens",
     description: [
@@ -1963,13 +1960,13 @@ null,
           <div {..._parameter}>
             <span {..._key}>delegateLensProperty:</span>
             <span {..._value}>
-              {ret.instrument(ret.delegateLensProperty, p => JSON.stringify(p))}
+              {symbols.instrument(symbols.delegateLensProperty, p => JSON.stringify(p))}
             </span>
           </div>
           <div key="p1" {..._parameter}>
             <span {..._key}>lensProperty:</span>
             <span {..._value}>
-              {ret.instrument(ret.lensProperty, p => JSON.stringify(p))}
+              {symbols.instrument(symbols.lensProperty, p => JSON.stringify(p))}
             </span>
           </div>
         </div>
@@ -1982,7 +1979,7 @@ null,
           <div key="p1" {..._parameter}>
             <span {..._key}>Lens candidate has properties:</span>
             <span {..._value}>
-              {ret.instrument(ret.focusPropertyKeysLens, p => JSON.stringify(p))}
+              {symbols.instrument(symbols.focusPropertyKeysLens, p => JSON.stringify(p))}
             </span>
           </div>
         </div>
@@ -1991,7 +1988,7 @@ null,
     ] }),
   }));
 
-  _defineName("arrayNotIterableLens", () => ({
+  declareName("arrayNotIterableLens", () => ({
     tags: ["Context", "Lens", "Loading", "Failure"],
     type: "Lens",
     description: [
@@ -2013,7 +2010,7 @@ null,
     ] }),
   }));
 
-  _defineName("invalidElementLens", () => ({
+  declareName("invalidElementLens", () => ({
     tags: ["Context", "Lens", "Loading", "Failure"],
     type: "Lens",
     description: [
@@ -2026,7 +2023,7 @@ null,
       loadingFailedLens,
       <div {..._lensMessageLoadingFailedProps}>
         <div {..._message}>
-            {ret.instrument(parentComponentLens, focusDetailLens)}
+            {symbols.instrument(parentComponentLens, focusDetailLens)}
             returned an invalid element.
         </div>
         <div {..._parameter}>
@@ -2037,5 +2034,4 @@ null,
       </div>
     ] }),
   }));
-  return ret;
 }

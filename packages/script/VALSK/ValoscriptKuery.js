@@ -1,7 +1,7 @@
 // @flow
 
 import { Kuery } from "~/raem/VALK";
-import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
+import { qualifiedSymbol } from "~/tools/namespace";
 
 export const ScopeAccessesTag = qualifiedSymbol("VALSK", "ScopeAccesses");
 export const ScopeAccessKeysTag = qualifiedSymbol("VALSK", "ScopeAccessKeys");

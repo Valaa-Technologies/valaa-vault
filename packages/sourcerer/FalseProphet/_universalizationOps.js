@@ -1,7 +1,7 @@
 // @flow
 
 import VRL, { JSONIdData, tryChronicleURIFrom } from "~/raem/VRL";
-import { qualifiedNamesOf } from "~/raem/tools/namespaceSymbols";
+import { qualifiedNamesOf } from "~/tools/namespace";
 import { naiveURI } from "~/raem/ValaaURI";
 import { Kuery, isValOSFunction } from "~/raem/VALK";
 import { tryHostRef } from "~/raem/VALK/hostReference";

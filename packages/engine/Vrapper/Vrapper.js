@@ -23,7 +23,7 @@ import { createGhostVRLInInstance, isMaterialized, createMaterializeGhostAction 
     from "~/raem/tools/denormalized/ghost";
 import { AbsentChroniclesError, addConnectToChronicleToError }
     from "~/raem/tools/denormalized/partitions";
-import { qualifiedNamesOf, qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
+import { qualifiedNamesOf, qualifiedSymbol } from "~/tools/namespace";
 
 import isAbsentTypeName from "~/raem/tools/graphql/isAbsentTypeName";
 

@@ -1,7 +1,7 @@
 /* global describe expect it */
 
 import { vRef } from "~/raem/VRL";
-import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
+import { qualifiedSymbol } from "~/tools/namespace";
 
 import { testRootId, clearAllScribeDatabases } from "~/sourcerer/test/SourcererTestHarness";
 

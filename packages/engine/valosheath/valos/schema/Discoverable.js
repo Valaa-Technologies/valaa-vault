@@ -1,7 +1,7 @@
 // @flow
 /*
 import { denoteDeprecatedValOSCallable, denoteValOSKueryFunction } from "~/raem/VALK";
-import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
+import { qualifiedSymbol } from "~/tools/namespace";
 import { extractFunctionVAKON } from "~/script";
 import VALEK from "~/engine/VALEK";
 */

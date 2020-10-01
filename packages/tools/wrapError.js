@@ -301,7 +301,7 @@ function debugObjectNest (head, nest = 1, alwaysStringify = false, indent, expan
       if (head instanceof WeakMap) return `<WeakMap size=${head.size}>`;
       if (head instanceof Set) return `<Set size=${head.size}>`;
       if (head[Symbol.iterator]) return `<Iterable ${head.constructor.name}>`;
-      if (head.then) return `<${String(head)}>`;
+      if (head.then) return `<thenable ${(head.constructor || {}).name || ""}>`;
     }
     if (head.toString && (typeof nest === "number")
         && (head.toString !== Object.prototype.toString)
@@ -344,8 +344,7 @@ function debugObjectNest (head, nest = 1, alwaysStringify = false, indent, expan
   } catch (error) {
     console.error("Suppressed an error in debugObjectNest:",
         "\n\terror.message:", error.message,
-        "\n\terror.stack:", error.stack,
-        "\n\treturning head:", head);
+        "\n\terror.stack:", error.stack);
   }
   return head;
 }

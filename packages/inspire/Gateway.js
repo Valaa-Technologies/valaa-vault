@@ -18,7 +18,7 @@ import createValidateEventMiddleware from "~/raem/redux/middleware/validateEvent
 import createProcessCommandIdMiddleware from "~/raem/redux/middleware/processCommandId";
 import { createBardMiddleware } from "~/raem/redux/Bard";
 import Corpus from "~/raem/Corpus";
-import { qualifiedNamesOf } from "~/raem/tools/namespaceSymbols";
+import { qualifiedNamesOf } from "~/tools/namespace";
 
 import upgradeEventTo0Dot2 from "~/sourcerer/tools/event-version-0.2/upgradeEventTo0Dot2";
 import EVENT_VERSION from "~/sourcerer/tools/EVENT_VERSION";

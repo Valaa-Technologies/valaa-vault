@@ -6,7 +6,7 @@ import raemSteppers, {
 } from "~/raem/VALK/raemSteppers";
 /* eslint-disable no-duplicate-imports */
 import type { BuiltinStep } from "~/raem/VALK/raemSteppers";
-import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
+import { qualifiedSymbol } from "~/tools/namespace";
 
 import { createNativeIdentifier, isNativeIdentifier, getNativeIdentifierValue,
   setNativeIdentifierValue,

@@ -49,10 +49,6 @@ export {
                                       naiveURI,
 } from "./ValaaURI";
 export {
-                                      qualifiedSymbol,
-                                      qualifiedNamesOf,
-} from "./tools/namespaceSymbols";
-export {
                            default as VALK
 } from "./VALK/VALK";
 export type {

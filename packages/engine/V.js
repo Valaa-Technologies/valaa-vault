@@ -1,5 +1,5 @@
 const valosheathTypes = require("@valos/engine/valosheath/valos/schema").default;
-const { qualifiedNamesOf } = require("~/raem/tools/namespaceSymbols");
+const { qualifiedNamesOf } = require("~/tools/namespace");
 
 module.exports = {
   base: require("@valos/space/V"),

@@ -1,6 +1,6 @@
 // @flow
 
-import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
+import { qualifiedSymbol } from "~/tools/namespace";
 
 import { getValosheathNamespace, integrateNamespace } from "~/engine/valosheath";
 
@@ -10,8 +10,9 @@ const OnNamespace = require("~/inspire/On");
 export default function extendValOSWithInspire (rootScope: Object, hostDescriptors: any) {
   const valosheath = rootScope.valos || (rootScope.Valaa = rootScope.valos = {});
 
-  valosheath.Lens = integrateNamespace(LensNamespace, rootScope, hostDescriptors);
-  valosheath.On = integrateNamespace(OnNamespace, rootScope, hostDescriptors);
+  integrateNamespace(LensNamespace, valosheath, rootScope, hostDescriptors);
+  integrateNamespace(OnNamespace, valosheath, rootScope, hostDescriptors);
+
   const primaryNamespace = getValosheathNamespace(valosheath, "valos");
   Object.getOwnPropertyNames(valosheath.Lens).forEach(lensName => {
     primaryNamespace.addSymbolField(lensName, valosheath.Lens[lensName]);

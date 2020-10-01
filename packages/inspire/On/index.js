@@ -1,9 +1,7 @@
 const { ref } = require("@valos/revdoc/extractee");
+const { buildNamespaceSpecification } = require("@valos/tools/namespace");
 
-const defineName = require("@valos/engine/valosheath/defineName");
-const resolveNamespaceDefinitions = require("@valos/engine/valosheath/resolveNamespaceDefinitions");
-
-module.exports = {
+module.exports = buildNamespaceSpecification({
   domain: "@valos/kernel",
   preferredPrefix: "On",
   baseIRI: "https://valospace.org/inspire/On/0#",
@@ -23,9 +21,8 @@ but also adds new valos-specific event callback names. Like HTML5
 events these callbacks are called with a synthetic event as their first
 argument.`,
   ],
-  definitions: {},
-  symbols: {},
-  processTags (tags, definitionDomain) {
+  declareNames,
+  processDeclaration (name, declaration, definitionDomain) {
     const labels = [];
     const componentType = tags.includes("Valoscope") ? "Lens:Valoscope"
         : tags.includes("Attribute") ? "Lens:Element"
@@ -36,42 +33,34 @@ argument.`,
     }
     return labels;
   },
-};
+});
 
-_createSymbols();
-resolveNamespaceDefinitions(module.exports);
-
-function _createSymbols () {
-  const ret = module.exports.symbols;
-  function _defineName (name, createNameParameters) {
-    return defineName(name, module.exports, createNameParameters);
-  }
-  _defineName("frameactive", () => ({
+function declareNames ({ declareName }) {
+  declareName("frameactive", {
     tags: ["Attribute", "Inspire", "Event"],
     type: "EventHandler",
     description:
 `The ValOS frame of the element is active`,
-  }));
+  });
 
-  _defineName("framepropertychange", () => ({
+  declareName("framepropertychange", {
     tags: ["Attribute", "Inspire", "Event"],
     type: "EventHandler",
     description:
 `A ValOS frame property has changed`,
-  }));
+  });
 
-  _defineName("focuspropertychange", () => ({
+  declareName("focuspropertychange", {
     tags: ["Attribute", "Inspire", "Event"],
     type: "EventHandler",
     description:
 `A ValOS focus property has changed`,
-  }));
+  });
 
-  _defineName("click", () => ({
+  declareName("click", {
     tags: ["Attribute", "HTML5", "Event"],
     type: "EventHandler",
     description:
 ref("The HTML5 'click' event", "https://w3c.github.io/uievents/#event-type-click"),
-  }));
-  return ret;
+  });
 }

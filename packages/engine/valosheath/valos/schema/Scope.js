@@ -3,7 +3,7 @@
 import {
   denoteValOSCallable, denoteValOSKueryFunction,
 } from "~/raem/VALK";
-import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
+import { qualifiedSymbol } from "~/tools/namespace";
 
 import { createNativeIdentifier } from "~/script";
 

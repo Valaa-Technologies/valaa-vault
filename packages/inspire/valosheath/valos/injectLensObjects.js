@@ -1,25 +1,25 @@
 // @flow
 
-const { symbols: Lens, definitions } = require("~/inspire/Lens");
+const { symbols: Lens, declarations } = require("~/inspire/Lens");
 
 export default function injectLensObjects (
     valos: Object, rootScope: Object, hostDescriptors: Object) {
   valos.Lens = Lens;
   const lensDescriptors = {};
-  for (const [slotName, createLensParameters] of Object.entries(definitions)) {
-    const { type, description, isEnabled, lens, defaultLens } = createLensParameters();
+  for (const [lensName, lensDefinition] of Object.entries(declarations)) {
+    const { type, description, isEnabled, lens, defaultLens } = lensDefinition;
     const descriptor = {
       valos: true, symbol: true,
       value: lens, type, description,
       writable: false, enumerable: true, configurable: false,
     };
     if (isEnabled) {
-      Object.assign(descriptor, { slotName: true, isEnabled, defaultLens });
+      Object.assign(descriptor, { isSlotName: true, isEnabled, defaultLens });
     }
-    lensDescriptors[slotName] = Object.freeze(descriptor);
-    hostDescriptors.set(Lens[slotName], descriptor);
+    lensDescriptors[lensName] = Object.freeze(descriptor);
+    hostDescriptors.set(Lens[lensName], descriptor);
     if (defaultLens || lens) {
-      rootScope[Lens[slotName]] = Object.freeze(defaultLens || lens);
+      rootScope[Lens[lensName]] = Object.freeze(defaultLens || lens);
     }
   }
   hostDescriptors.set(Lens, lensDescriptors);

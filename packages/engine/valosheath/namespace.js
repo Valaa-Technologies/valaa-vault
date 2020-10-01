@@ -2,7 +2,7 @@
 
 import { HostRef, UnpackedHostValue } from "~/raem/VALK/hostReference";
 import Transient from "~/raem/state/Transient";
-import { qualifiedSymbol, deprecateSymbolInFavorOf } from "~/raem/tools/namespaceSymbols";
+import { qualifiedSymbol, deprecateSymbolInFavorOf } from "~/tools/namespace";
 
 // import debugId from "~/engine/debugId";
 import { Valker } from "~/engine/VALEK";
@@ -10,9 +10,7 @@ import type Vrapper from "~/engine/Vrapper";
 
 import { isSymbol } from "~/tools";
 
-export const defineName = require("./defineName");
-
-export type NameDefinition = {
+export type TermDeclaration = {
   tags: string[],
   description: string,
   type: string,
@@ -21,19 +19,18 @@ export type NameDefinition = {
 };
 
 export type Namespace = {
-  preferredPrefix: string,
-  baseIRI: string,
-  description: string,
+  base: undefined | Namespace,
+  preferredPrefix: string | undefined,
+  baseIRI: string | undefined,
+  description: string | undefined,
   symbols: { [name: string | Symbol]: Symbol | string },
-  definitions: { [name: string]: NameDefinition },
+  declarations: { [name: string]: TermDeclaration },
 };
 
 export function integrateNamespace (
-    namespace: Namespace, rootScope: Object, hostDescriptors: Object) {
-  const {
-    preferredPrefix, baseIRI, description,
-    symbols, definitions, deprecatedNames,
-  } = namespace;
+    namespace: Namespace, valosheath: Object, rootScope: Object, hostDescriptors: Object) {
+  const { base, symbols, declarations, deprecatedNames } = namespace;
+  const { preferredPrefix, baseIRI, description } = base || namespace;
   const names = {};
   rootScope[`$${preferredPrefix}`] = symbols;
   hostDescriptors.set(symbols, {
@@ -41,8 +38,8 @@ export function integrateNamespace (
     valos: true, namespace: true, description, preferredPrefix, baseIRI,
     names,
   });
-  for (const [nameSuffix, createDefinition] of Object.entries(definitions)) {
-    const { value, defaultValue, ...rest } = createDefinition();
+  for (const [nameSuffix, declaration] of Object.entries(declarations)) {
+    const { value, defaultValue, ...rest } = declaration;
     const entryDescriptor = names[nameSuffix] = Object.freeze({
       writable: false, enumerable: true, configurable: false,
       valos: true, symbol: true,
@@ -59,7 +56,9 @@ export function integrateNamespace (
     const favoredSymbol = qualifiedSymbol(preferredPrefix, inFavorOfName);
     deprecateSymbolInFavorOf(preferredPrefix, deprecatedName, favoredSymbol);
   }
-  return symbols;
+  const valosheathSymbols = valosheath[preferredPrefix]
+      || (valosheath[preferredPrefix] = Object.create(null));
+  Object.assign(valosheathSymbols, symbols);
 }
 
 export const NamespaceInterfaceTag = Symbol("NamespaceInterface");

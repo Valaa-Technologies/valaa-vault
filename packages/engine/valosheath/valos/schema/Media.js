@@ -1,7 +1,7 @@
 // @flow
 
 import { denoteValOSKueryFunction } from "~/raem/VALK";
-import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
+import { qualifiedSymbol } from "~/tools/namespace";
 
 import { ValoscriptNew, ValoscriptInstantiate } from "~/script";
 

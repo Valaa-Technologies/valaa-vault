@@ -44,6 +44,11 @@ export const FabricEventTarget = require("./FabricEvent").FabricEventTarget;
 
 export const SimpleData = require("./SimpleData").default;
 
+export const qualifiedSymbol = require("./namespace").qualifiedSymbol;
+export const deprecateSymbolInFavorOf = require("./namespace").deprecateSymbolInFavorOf;
+export const qualifiedNamesOf = require("./namespace").qualifiedNamesOf;
+export const buildNamespaceSpecification = require("./namespace").buildNamespaceSpecification;
+
 export const thenChainEagerly = require("./thenChainEagerly").thenChainEagerly;
 export const thisChainEagerly = require("./thenChainEagerly").thisChainEagerly;
 export const thisChainRedirect = require("./thenChainEagerly").thisChainRedirect;

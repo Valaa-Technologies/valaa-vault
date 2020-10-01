@@ -2,7 +2,7 @@
 
 import type { VALKOptions } from "~/raem/VALK";
 import { SourceInfoTag } from "~/raem/VALK/StackTrace";
-import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
+import { qualifiedSymbol } from "~/tools/namespace";
 
 import { addExportsContainerToScope } from "~/script";
 

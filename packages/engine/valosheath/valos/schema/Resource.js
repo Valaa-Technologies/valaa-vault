@@ -5,7 +5,7 @@ import {
 } from "~/raem/VALK";
 import type { VRL } from "~/raem/VRL";
 import derivedId from "~/raem/tools/derivedId";
-import { qualifiedSymbol } from "~/raem/tools/namespaceSymbols";
+import { qualifiedSymbol } from "~/tools/namespace";
 
 import VALEK from "~/engine/VALEK";
 import Vrapper from "~/engine/Vrapper";

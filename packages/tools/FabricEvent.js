@@ -326,6 +326,10 @@ export class FabricEventTarget {
     return ret;
   }
 
+  setGenerateOuterPathCallback (callback) {
+    this._generateOuterPath = callback;
+  }
+
   obtainDispatchAndDefaultActEvent (reuseFabricEvent: Event, type: string, updateFields: Object) {
     const eventType = this[FabricEventTypesTag][type];
     if (!eventType) {
@@ -392,6 +396,13 @@ export function generateDispatchEventPath (
     }
     (ret || (ret = [])).push({ target, listeners });
     targetSeeker = Object.getPrototypeOf(target);
+  }
+  if (!outerPath && eventTarget._generateOuterPath) {
+    outerPath = eventTarget._generateOuterPath(eventType, targetPropertyName);
+  }
+  if (outerPath) {
+    if (!ret) ret = outerPath;
+    else ret.push(...outerPath);
   }
   if (cachePathAtEventTarget && ret) {
     ret[0].listeners[FabricDispatchPathTag] = ret;

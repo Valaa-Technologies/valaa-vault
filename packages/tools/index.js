@@ -46,6 +46,7 @@ export const generateDispatchEventPath = require("./FabricEvent").generateDispat
 export const SimpleData = require("./SimpleData").default;
 
 export const qualifiedSymbol = require("./namespace").qualifiedSymbol;
+export const qualifierNamespace = require("./namespace").qualifierNamespace;
 export const deprecateSymbolInFavorOf = require("./namespace").deprecateSymbolInFavorOf;
 export const qualifiedNamesOf = require("./namespace").qualifiedNamesOf;
 export const buildNamespaceSpecification = require("./namespace").buildNamespaceSpecification;

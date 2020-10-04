@@ -9,12 +9,15 @@ import VALEK, { toVAKONTag, IsLiveTag } from "~/engine/VALEK";
 import getImplicitMediaInterpretation from "~/engine/Vrapper/getImplicitMediaInterpretation";
 
 import {
-  dumpObject, patchWith, isPromise, isSymbol, thisChainEagerly, thisChainReturn, wrapError
+  dumpObject, patchWith, isPromise, isSymbol, qualifiedSymbol, qualifierNamespace,
+  generateDispatchEventPath, thisChainEagerly, thisChainReturn, wrapError
 } from "~/tools";
 
 import { VSSStyleSheetSymbol } from "./_styleOps";
 
 const { symbols: Lens } = require("~/inspire/Lens");
+
+export const FabricEventHandlers = Symbol("FabricEvent.Handlers");
 
 export function _bindLiveSubscriptions (component, focus, props) {
   const live = _createStateLive(component, props);
@@ -151,6 +154,7 @@ function _recordNewGenericPropValue (stateLive, propValue, propName, component) 
       if (namespace === "On") {
         newValue = _valensWrapCallback(component, propValue, propName);
         newName = `on${name[0].toUpperCase()}${name.slice(1)}`;
+        _obtainLocalContext(stateLive, component)[qualifiedSymbol("On", name)] = newValue;
       } else if (namespace === "Frame") {
         if (!stateLive.frameOverrides) {
           const targetProps = _obtainValoscopeProps(stateLive);
@@ -181,6 +185,11 @@ function _recordNewGenericPropValue (stateLive, propValue, propName, component) 
         "\n\tstateLive:", ...dumpObject(stateLive),
         "\n\tcomponent:", ...dumpObject(component));
   }
+}
+
+function _obtainLocalContext (stateLive, component) {
+  return stateLive.localContext
+      || (stateLive.localContext = Object.create(component.getUIContext()));
 }
 
 function _obtainValoscopeProps (stateLive) {
@@ -465,6 +474,8 @@ const _elementRecorders = Object.fromEntries([
   ...Object.entries(_elementRecorderProps).map(([k, v]) => _createRecorder(k, v)),
 ]);
 
+const _onNamespace = qualifierNamespace("On");
+
 function _valensWrapCallback (component: Object, callback_: Function, attributeName: string) {
   if (!callback_) return callback_;
   const callback = (callback_ === "function") ? callback_
@@ -482,6 +493,7 @@ function _valensWrapCallback (component: Object, callback_: Function, attributeN
             (eThis.__callerValker__ || component.context.engine.discourse)
                 .acquireFabricator(attributeName);
         eThis.__callerScope__ = component.getUIContext();
+        fabricator.setGenerateOuterPathCallback(_generateOuterDispatchPath);
       }
       return callback.apply(eThis, args);
     } catch (error) {
@@ -506,6 +518,23 @@ function _valensWrapCallback (component: Object, callback_: Function, attributeN
     ret._isVCall = true;
     ret[toVAKONTag] = callback[toVAKONTag];
     ret[SourceInfoTag] = callback[SourceInfoTag];
-    }
+  }
   return ret;
+
+  function _generateOuterDispatchPath (eventType) {
+    const eventSymbol = _onNamespace[eventType];
+    if (!eventSymbol) return undefined;
+    const stateLive = component.state.live;
+    const targetContext = stateLive.localContext || component.getUIContext();
+    const dispatchPath = generateDispatchEventPath(targetContext, eventType, eventSymbol, true);
+    if (dispatchPath && (((dispatchPath[0].listeners || [])[0] || {}).callback === ret)) {
+      const error = wrapError(
+          new Error(`Event 'on${eventType.type}' handler self-call loop detected`),
+          new Error(`attribute ${attributeName} call in ${component.getKey()}`),
+          "\n\tcomponent:", ...dumpObject(component));
+      component.enableError(error, "Exception raised by handlePostPropagateEvent");
+      throw error;
+    }
+    return dispatchPath;
+  }
 }

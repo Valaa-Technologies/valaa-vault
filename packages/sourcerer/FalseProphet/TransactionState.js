@@ -7,7 +7,7 @@ import type { Corpus } from "~/raem/Corpus";
 import { StoryIndexTag, PassageIndexTag } from "~/raem/redux/Bard";
 
 import { ChronicleRequest, ChronicleEventResult } from "~/sourcerer/api/types";
-import Fabricator, { FabricatorEvent, fabricatorEventTypes, fabricatorMixinOps }
+import Fabricator, { fabricatorEventTypes, fabricatorMixinOps }
     from "~/sourcerer/api/Fabricator";
 import type Transactor from "~/sourcerer/api/Transactor";
 import type FalseProphetDiscourse from "~/sourcerer/FalseProphet/FalseProphetDiscourse";

@@ -9,6 +9,7 @@ const _null = Object.create(null);
 
 module.exports = {
   qualifiedSymbol,
+  qualifierNamespace,
   deprecateSymbolInFavorOf,
   qualifiedNamesOf,
   buildNamespaceSpecification,
@@ -35,6 +36,10 @@ function qualifiedSymbol (prefix, localPart) {
     symbolNamespace[localPart] = symbol;
   }
   return symbol;
+}
+
+function qualifierNamespace (prefix) {
+  return _symbolNamespaces[prefix] || (_symbolNamespaces[prefix] = Object.create(null));
 }
 
 function deprecateSymbolInFavorOf (deprecatedPrefix, deprecatedLocalPart, favoredSymbol) {

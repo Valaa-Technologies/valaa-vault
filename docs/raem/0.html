@@ -7,7 +7,7 @@
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"subtitle":"0.35.0-rc.32","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"raem"};
+      var respecConfig = {"subtitle":"0.35.0-rc.33","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"raem"};
     </script>
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
@@ -278,11 +278,9 @@ operations.
   </section>
 
   <section id="section_valospace" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_valospace">§ </a>The <em>VModel</em> valospace namespace of the library ontology of <a href="https://valospace.org/raem" class="vdoc type-vrevdoc-package"><em>@valos/raem</em></a></h3>
+    <h3><a aria-label="§" href="#section_valospace">§ </a>The <em>VRaem</em> valospace namespace of the library ontology of <a href="https://valospace.org/raem" class="vdoc type-vrevdoc-package"><em>@valos/raem</em></a></h3>
 <div><p>
-  <div class="vdoc type-vdoc-paragraph">&#x27;VModel&#x27; ie. Valos Resources and Events Model namespace provides
-vocabulary and definitions for the resources that form the fabric of
-valospace.
+  <div class="vdoc type-vdoc-paragraph">The &#x27;VRaem&#x27; namespace describes the @valos/raem library public API.
   </div>
 </p></div>
   <section id="section_prefixes" class="vdoc type-vdoc-chapter">
@@ -311,11 +309,20 @@ valospace.
         <tr><td><span class="vdoc type-vdoc-node">dc</span>
 </td><td><span class="vdoc type-vdoc-node">http://purl.org/dc/elements/1.1/</span>
 </td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VModel</span>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VRaem</span>
 </td><td><span class="vdoc type-vdoc-node">https://valospace.org/raem/0#</span>
 </td></tr>
         <tr><td><span class="vdoc type-vdoc-node">VKernel</span>
 </td><td><span class="vdoc type-vdoc-node">https://valospace.org/kernel/0#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VState</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/state/0#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">VLog</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/log/0#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VValk</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/valk/0#</span>
 </td></tr>
       </tbody>
     </table>
@@ -323,7 +330,7 @@ valospace.
   </section>
 
   <section id="section_classes" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_classes">§ </a><em>VModel</em> <a href="https://valospace.org/kernel/0#Class" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <h3><a aria-label="§" href="#section_classes">§ </a><em>VRaem</em> <a href="https://valospace.org/kernel/0#Class" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">fabric classes</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
@@ -340,227 +347,14 @@ ontologies.
 </th>
       </thead>
       <tbody>
-        <tr id="Type" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#Type" class="vdoc type-vdoc-reference">#Type</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Class" class="vdoc type-vdoc-reference">rdfs:Class</a></td><td><span class="vdoc type-vdoc-node">The class of all valospace types. The instances of valospace types
-are called valospace resources and are the main valos ecosystem
-building block.Only valospace resources can appear as a subject in valospace resource
-and event triple graphs.</span>
-</td></tr>
-        <tr id="Field" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#Field" class="vdoc type-vdoc-reference">#Field</a></em></strong> </h3></td></tr>
-        <tr><td><a href="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property" class="vdoc type-vdoc-reference">rdf:Property</a></td><td><span class="vdoc type-vdoc-node">The class of all valospace resource field identifiers.Only the instances of this class can appear as the predicate in
-valospace triple graphs. All valospace fields have VModel:Type or one
-of its sub-classes as their rdf:domain.</span>
-</td></tr>
-        <tr id="ExpressedField" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#ExpressedField" class="vdoc type-vdoc-reference">#ExpressedField</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/raem/0#Field" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Field</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all valospace resource field identifiers.Only the instances of this class can appear as the predicate in
-valospace triple graphs. All valospace fields have VModel:Type or one
-of its sub-classes as their rdf:domain.
-    </span>
-</span></a></td><td><span class="vdoc type-vdoc-node">The class of valospace fields which have a full triple expression in
-all regular query and graph contexts (as opposed to fields with
-non-triple semantics or triple expression only in limited contexts).</span>
-</td></tr>
-        <tr id="EventLoggedField" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#EventLoggedField" class="vdoc type-vdoc-reference">#EventLoggedField</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/raem/0#ExpressedField" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:ExpressedField</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of valospace fields which have a full triple expression in
-all regular query and graph contexts (as opposed to fields with
-non-triple semantics or triple expression only in limited contexts).
-    </span>
-</span></a></td><td><span class="vdoc type-vdoc-node">The class of valospace fields which have both a triple state
-expression inside valospace and a change impression in event logs;
-these are the primary, persisted sources of truth.</span>
-</td></tr>
-        <tr id="CoupledField" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#CoupledField" class="vdoc type-vdoc-reference">#CoupledField</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/raem/0#ExpressedField" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:ExpressedField</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of valospace fields which have a full triple expression in
-all regular query and graph contexts (as opposed to fields with
-non-triple semantics or triple expression only in limited contexts).
-    </span>
-</span></a></td><td><span class="vdoc type-vdoc-node">The class of valospace fields which have triple expression inside
-valospace via coupled fields but no event log impression.</span>
-</td></tr>
-        <tr id="GeneratedField" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#GeneratedField" class="vdoc type-vdoc-reference">#GeneratedField</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/raem/0#ExpressedField" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:ExpressedField</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of valospace fields which have a full triple expression in
-all regular query and graph contexts (as opposed to fields with
-non-triple semantics or triple expression only in limited contexts).
-    </span>
-</span></a></td><td><span class="vdoc type-vdoc-node">The class of inferred fields where a field is not associated with
-raw valospace triples but the triples are fully generated by the
-expressor, with scope values:
-- VModel:0 as the field owner,
-- VModel:1 as the field id, and
-- VModel:2 as undefined.</span>
-</td></tr>
-        <tr id="TransientField" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#TransientField" class="vdoc type-vdoc-reference">#TransientField</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/raem/0#Field" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Field</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all valospace resource field identifiers.Only the instances of this class can appear as the predicate in
-valospace triple graphs. All valospace fields have VModel:Type or one
-of its sub-classes as their rdf:domain.
-    </span>
-</span></a></td><td><span class="vdoc type-vdoc-node">The class of valospace fields with no general triple expression but
-with custom semantics for specific queries.</span>
-</td></tr>
-        <tr id="AliasField" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#AliasField" class="vdoc type-vdoc-reference">#AliasField</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/raem/0#Field" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Field</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all valospace resource field identifiers.Only the instances of this class can appear as the predicate in
-valospace triple graphs. All valospace fields have VModel:Type or one
-of its sub-classes as their rdf:domain.
-    </span>
-</span></a></td><td><span class="vdoc type-vdoc-node">The class of inferred fields called alias fields where each such field
-has an &#x27;aliasOf&#x27; RDF property or valos Field. Alias fields are
-mutation-inference symmetric so that triples with an alias field as
-predicate are inferred from triples with aliasOf as predicate and
-mutations with an alias field as predicate are translated to use
-the aliasOf as predicate.</span>
-</td></tr>
-        <tr id="VPathRule" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#VPathRule" class="vdoc type-vdoc-reference">#VPathRule</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td> <a href="http://www.w3.org/2000/01/rdf-schema#Literal" class="vdoc type-vdoc-reference">rdfs:Literal</a> <a href="http://www.w3.org/2000/01/rdf-schema#List" class="vdoc type-vdoc-reference">rdfs:List</a></td><td><span class="vdoc type-vdoc-node">The class of all resources representing some VPath rule or
-pseudo-rule. &#x27;vrid&#x27;.
-If this class is used as literal datatype URI the literal contains the
-flat string VPath rule representation. Otherwise when this class is
-the range of a property which is used as a predicate in a triple, and
-the object of the triple is not a literal, then the object contains
-the segmented representation of the VPath rule value as an rdf List.</span>
-</td></tr>
-        <tr id="VPath" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#VPath" class="vdoc type-vdoc-reference">#VPath</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/raem/0#VPathRule" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:VPathRule</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all resources representing some VPath rule or
-pseudo-rule. &#x27;vrid&#x27;.
-If this class is used as literal datatype URI the literal contains the
-flat string VPath rule representation. Otherwise when this class is
-the range of a property which is used as a predicate in a triple, and
-the object of the triple is not a literal, then the object contains
-the segmented representation of the VPath rule value as an rdf List.
-    </span>
-</span></a></td><td><span class="vdoc type-vdoc-node">The class of all resources representing the VPath rule &#x27;vpath&#x27; (always
-begins with &#x27;@&#x27;)</span>
-</td></tr>
-        <tr id="VRID" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#VRID" class="vdoc type-vdoc-reference">#VRID</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/raem/0#VPathRule" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:VPathRule</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all resources representing some VPath rule or
-pseudo-rule. &#x27;vrid&#x27;.
-If this class is used as literal datatype URI the literal contains the
-flat string VPath rule representation. Otherwise when this class is
-the range of a property which is used as a predicate in a triple, and
-the object of the triple is not a literal, then the object contains
-the segmented representation of the VPath rule value as an rdf List.
-    </span>
-</span></a></td><td><span class="vdoc type-vdoc-node">The class of all resources representing the VPath pseudo-rule
-&#x27;vrid&#x27;, ie. a resource identifier with VGRID as the first step (always
-begins with &#x27;@&#x27;)</span>
-</td></tr>
-        <tr id="Verbs" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#Verbs" class="vdoc type-vdoc-reference">#Verbs</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/raem/0#VPathRule" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:VPathRule</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all resources representing some VPath rule or
-pseudo-rule. &#x27;vrid&#x27;.
-If this class is used as literal datatype URI the literal contains the
-flat string VPath rule representation. Otherwise when this class is
-the range of a property which is used as a predicate in a triple, and
-the object of the triple is not a literal, then the object contains
-the segmented representation of the VPath rule value as an rdf List.
-    </span>
-</span></a></td><td><span class="vdoc type-vdoc-node">The class of all resources representing the VPath pseudo-rule
-&#x27;verbs&#x27;, ie. a path between other resources without a VGRID as the
-first step (always begins with &#x27;@&#x27;).</span>
-</td></tr>
-        <tr id="VGRID" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#VGRID" class="vdoc type-vdoc-reference">#VGRID</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/raem/0#VPathRule" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:VPathRule</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all resources representing some VPath rule or
-pseudo-rule. &#x27;vrid&#x27;.
-If this class is used as literal datatype URI the literal contains the
-flat string VPath rule representation. Otherwise when this class is
-the range of a property which is used as a predicate in a triple, and
-the object of the triple is not a literal, then the object contains
-the segmented representation of the VPath rule value as an rdf List.
-    </span>
-</span></a></td><td><span class="vdoc type-vdoc-node">The class of all resources representing the VPath rule &#x27;vgrid&#x27; (always
-begins with &#x27;$&#x27;).</span>
-</td></tr>
-        <tr id="VParam" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#VParam" class="vdoc type-vdoc-reference">#VParam</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/raem/0#VPathRule" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:VPathRule</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all resources representing some VPath rule or
-pseudo-rule. &#x27;vrid&#x27;.
-If this class is used as literal datatype URI the literal contains the
-flat string VPath rule representation. Otherwise when this class is
-the range of a property which is used as a predicate in a triple, and
-the object of the triple is not a literal, then the object contains
-the segmented representation of the VPath rule value as an rdf List.
-    </span>
-</span></a></td><td><span class="vdoc type-vdoc-node">The class of all resources representing the VPath pseudo-rule
-&#x27;vparam&#x27; (always begins with &#x27;$&#x27; or &#x27;:&#x27;).</span>
-</td></tr>
-        <tr id="Verb" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#Verb" class="vdoc type-vdoc-reference">#Verb</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/kernel/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VKernel:Property</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of properties which are defined by the ValOS kernel domain
-ontologies.
-    </span>
-</span></a></td><td><span class="vdoc type-vdoc-node">The class of all verb names. Each context which performs VPath
-computation valks provides native implementations for the resolvers
-it supports in its VPath valks.
-</span>
-</td></tr>
-        <tr id="Resolver" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#Resolver" class="vdoc type-vdoc-reference">#Resolver</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/raem/0#Verb" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Verb</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all verb names. Each context which performs VPath
-computation valks provides native implementations for the resolvers
-it supports in its VPath valks.
-
-    </span>
-</span></a></td><td><span class="vdoc type-vdoc-node">The class of all resolver names. Resolvers are verbs which are used
-for resolving generated properties.
-</span>
-</td></tr>
-        <tr id="Event" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#Event" class="vdoc type-vdoc-reference">#Event</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td></td><td><span class="vdoc type-vdoc-node">The class of all chronicle event log entries</span>
-</td></tr>
+        
       </tbody>
     </table>
 
   </section>
 
   <section id="section_properties" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_properties">§ </a><em>VModel</em> <a href="https://valospace.org/kernel/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <h3><a aria-label="§" href="#section_properties">§ </a><em>VRaem</em> <a href="https://valospace.org/kernel/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">fabric properties</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
@@ -577,219 +371,14 @@ ontologies.
 </th>
       </thead>
       <tbody>
-        <tr id="expressor" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#expressor" class="vdoc type-vdoc-reference">#expressor</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/raem/0#ExpressedField" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:ExpressedField</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of valospace fields which have a full triple expression in
-all regular query and graph contexts (as opposed to fields with
-non-triple semantics or triple expression only in limited contexts).
-    </span>
-</span></a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#List" class="vdoc type-vdoc-reference">rdfs:List</a></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">The custom expressor of an ExpressedField as a VPath. If defined and
-whenever a triple expression for this field is required the expressor
-VPath is valked with scope values:
-- VModel:0 being the field owner,
-- VModel:1 being the field id, and
-- VModel:2 being the possible field raw triple object value if it
-  exists, otherwise undefined.
-The resulting valk value is used as the object of a new triple, with
-field owner and field id used as the subject and predicate.</span>
-</td></tr>
-        <tr id="impressor" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#impressor" class="vdoc type-vdoc-reference">#impressor</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/raem/0#EventLoggedField" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:EventLoggedField</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of valospace fields which have both a triple state
-expression inside valospace and a change impression in event logs;
-these are the primary, persisted sources of truth.
-    </span>
-</span></a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#List" class="vdoc type-vdoc-reference">rdfs:List</a></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">The custom impressor of an EventLoggedField as a VPath. Whenever an
-event log entry is required for an update that targets this field the
-impressor VPath is valked with scope values:
-- VModel:0 as the field owner,
-- VModel:1 as the field id,
-- VModel:2 as the possible current field raw triple object value or
-  undefined otherwise, and
-- VModel:3 the new value being updated to this field.</span>
-</td></tr>
-        <tr id="aliasOf" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#aliasOf" class="vdoc type-vdoc-reference">#aliasOf</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/raem/0#AliasField" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:AliasField</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of inferred fields called alias fields where each such field
-has an &#x27;aliasOf&#x27; RDF property or valos Field. Alias fields are
-mutation-inference symmetric so that triples with an alias field as
-predicate are inferred from triples with aliasOf as predicate and
-mutations with an alias field as predicate are translated to use
-the aliasOf as predicate.
-    </span>
-</span></a></td><td><a href="https://valospace.org/raem/0#Field" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Field</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all valospace resource field identifiers.Only the instances of this class can appear as the predicate in
-valospace triple graphs. All valospace fields have VModel:Type or one
-of its sub-classes as their rdf:domain.
-    </span>
-</span></a></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">The alias target property specifies the inference source and mutation
-target of an alias field.</span>
-</td></tr>
-        <tr id="isOwnerOf" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#isOwnerOf" class="vdoc type-vdoc-reference">#isOwnerOf</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/raem/0#Field" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Field</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all valospace resource field identifiers.Only the instances of this class can appear as the predicate in
-valospace triple graphs. All valospace fields have VModel:Type or one
-of its sub-classes as their rdf:domain.
-    </span>
-</span></a></td><td><a href="http://www.w3.org/2001/XMLSchema#boolean" class="vdoc type-vdoc-reference">xsd:boolean</a></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">This field refers to a resource which is owned by the field subject
-resource. If the subject resource is is destroyed or if this field
-is removed then the owned resource is cascade destroyed.</span>
-</td></tr>
-        <tr id="isOwnedBy" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#isOwnedBy" class="vdoc type-vdoc-reference">#isOwnedBy</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/raem/0#Field" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Field</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all valospace resource field identifiers.Only the instances of this class can appear as the predicate in
-valospace triple graphs. All valospace fields have VModel:Type or one
-of its sub-classes as their rdf:domain.
-    </span>
-</span></a></td><td><a href="http://www.w3.org/2001/XMLSchema#boolean" class="vdoc type-vdoc-reference">xsd:boolean</a></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">This field refers to a resource which owns the field subject resource.
-If the owner is destroyed or if the coupled field (which is marked
-with isOwnerOf) is removed from the owner then the subject resource
-will be cascade destroyed. Removing the isOwnedBy field itself will
-only orphan the subject resource.</span>
-</td></tr>
-        <tr id="coupledField" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#coupledField" class="vdoc type-vdoc-reference">#coupledField</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/raem/0#Field" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Field</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all valospace resource field identifiers.Only the instances of this class can appear as the predicate in
-valospace triple graphs. All valospace fields have VModel:Type or one
-of its sub-classes as their rdf:domain.
-    </span>
-</span></a></td><td><a href="valosField" class="vdoc type-vdoc-reference">valosField</a></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1></td></tr>
-        <tr id="defaultCoupledField" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#defaultCoupledField" class="vdoc type-vdoc-reference">#defaultCoupledField</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/raem/0#Field" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Field</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all valospace resource field identifiers.Only the instances of this class can appear as the predicate in
-valospace triple graphs. All valospace fields have VModel:Type or one
-of its sub-classes as their rdf:domain.
-    </span>
-</span></a></td><td><a href="http://www.w3.org/2001/XMLSchema#string" class="vdoc type-vdoc-reference">xsd:string</a></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1></td></tr>
-        <tr id="preventsDestroy" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#preventsDestroy" class="vdoc type-vdoc-reference">#preventsDestroy</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/raem/0#Field" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Field</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all valospace resource field identifiers.Only the instances of this class can appear as the predicate in
-valospace triple graphs. All valospace fields have VModel:Type or one
-of its sub-classes as their rdf:domain.
-    </span>
-</span></a></td><td><a href="http://www.w3.org/2001/XMLSchema#boolean" class="vdoc type-vdoc-reference">xsd:boolean</a></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">Field with this property prevent destruction of their subject
-resource if the field has active couplings inside the same chronicle.</span>
-</td></tr>
-        <tr id="isDuplicateable" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#isDuplicateable" class="vdoc type-vdoc-reference">#isDuplicateable</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/raem/0#Field" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Field</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all valospace resource field identifiers.Only the instances of this class can appear as the predicate in
-valospace triple graphs. All valospace fields have VModel:Type or one
-of its sub-classes as their rdf:domain.
-    </span>
-</span></a></td><td><a href="http://www.w3.org/2001/XMLSchema#boolean" class="vdoc type-vdoc-reference">xsd:boolean</a></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">If set to false this field not be visible for DUPLICATED class of
-events.</span>
-</td></tr>
-        <tr id="initialValue" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#initialValue" class="vdoc type-vdoc-reference">#initialValue</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/raem/0#Field" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Field</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all valospace resource field identifiers.Only the instances of this class can appear as the predicate in
-valospace triple graphs. All valospace fields have VModel:Type or one
-of its sub-classes as their rdf:domain.
-    </span>
-</span></a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">The implicit initial value of the resource field when the resource is
-created.</span>
-</td></tr>
-        <tr id="ownDefaultValue" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#ownDefaultValue" class="vdoc type-vdoc-reference">#ownDefaultValue</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/raem/0#Field" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Field</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all valospace resource field identifiers.Only the instances of this class can appear as the predicate in
-valospace triple graphs. All valospace fields have VModel:Type or one
-of its sub-classes as their rdf:domain.
-    </span>
-</span></a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">The value of a resource field which doesn&#x27;t have an own value defined
-(ie. is evaluated before prototype field lookup).</span>
-</td></tr>
-        <tr id="finalDefaultValue" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#finalDefaultValue" class="vdoc type-vdoc-reference">#finalDefaultValue</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/raem/0#Field" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Field</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all valospace resource field identifiers.Only the instances of this class can appear as the predicate in
-valospace triple graphs. All valospace fields have VModel:Type or one
-of its sub-classes as their rdf:domain.
-    </span>
-</span></a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">The value of a resource field which doesn&#x27;t have a value defined by
-any resource in its prototype chain.</span>
-</td></tr>
-        <tr id="allowTransientFieldToBeSingular" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#allowTransientFieldToBeSingular" class="vdoc type-vdoc-reference">#allowTransientFieldToBeSingular</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/raem/0#Field" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Field</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all valospace resource field identifiers.Only the instances of this class can appear as the predicate in
-valospace triple graphs. All valospace fields have VModel:Type or one
-of its sub-classes as their rdf:domain.
-    </span>
-</span></a></td><td><a href="http://www.w3.org/2001/XMLSchema#boolean" class="vdoc type-vdoc-reference">xsd:boolean</a></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">Bypass the default behavior which forces transient fields to be plural
-to allow for singular fields.</span>
-</td></tr>
+        
       </tbody>
     </table>
 
   </section>
 
   <section id="section_types" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_types">§ </a><em>VModel</em> <a href="https://valospace.org/raem/0#Type" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <h3><a aria-label="§" href="#section_types">§ </a><em>VRaem</em> <a href="https://valospace.org/state/0#Type" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">valospace resource types</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
@@ -815,12 +404,12 @@ and event triple graphs.
   </section>
 
   <section id="section_fields" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_fields">§ </a><em>VModel</em> <a href="https://valospace.org/raem/0#Field" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <h3><a aria-label="§" href="#section_fields">§ </a><em>VRaem</em> <a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">valospace fields</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
         The class of all valospace resource field identifiers.Only the instances of this class can appear as the predicate in
-valospace triple graphs. All valospace fields have VModel:Type or one
+valospace triple graphs. All valospace fields have VState:Type or one
 of its sub-classes as their rdf:domain.
     </span>
 </span></a></h3>
@@ -835,7 +424,7 @@ of its sub-classes as their rdf:domain.
 </th>
         <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:subPropertyOf</span>
 </th>
-        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">VModel:coupledField</span>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">VState:coupledToField</span>
 </th>
       </thead>
       <tbody>
@@ -846,7 +435,7 @@ of its sub-classes as their rdf:domain.
   </section>
 
   <section id="section_resolvers" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_resolvers">§ </a><em>VModel</em> <a href="https://valospace.org/raem/0#Resolver" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <h3><a aria-label="§" href="#section_resolvers">§ </a><em>VRaem</em> <a href="https://valospace.org/valk/0#Resolver" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">field resolvers</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
@@ -864,143 +453,14 @@ for resolving generated properties.
 </th>
       </thead>
       <tbody>
-        <tr id="resolveVPath" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#resolveVPath" class="vdoc type-vdoc-reference">#resolveVPath</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td></td><td><a href="https://valospace.org/raem/0#Resolver" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Resolver</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all resolver names. Resolvers are verbs which are used
-for resolving generated properties.
-
-    </span>
-</span></a></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">resolve VPath</span>
-</td></tr>
-        <tr id="impressViaVPath" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#impressViaVPath" class="vdoc type-vdoc-reference">#impressViaVPath</a></em></strong> </h3></td></tr>
-        <tr><td></td><td><a href="https://valospace.org/raem/0#Resolver" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Resolver</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all resolver names. Resolvers are verbs which are used
-for resolving generated properties.
-
-    </span>
-</span></a></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">assign via VPath</span>
-</td></tr>
-        <tr id="resolveContextTerm" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#resolveContextTerm" class="vdoc type-vdoc-reference">#resolveContextTerm</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td></td><td><a href="https://valospace.org/raem/0#Resolver" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Resolver</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all resolver names. Resolvers are verbs which are used
-for resolving generated properties.
-
-    </span>
-</span></a></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">resolve context term against the event log of the given resource</span>
-</td></tr>
-        <tr id="resolveId" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#resolveId" class="vdoc type-vdoc-reference">#resolveId</a></em></strong> </h3></td></tr>
-        <tr><td></td><td><a href="https://valospace.org/raem/0#Resolver" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Resolver</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all resolver names. Resolvers are verbs which are used
-for resolving generated properties.
-
-    </span>
-</span></a></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">resolve resource id of the given resource</span>
-</td></tr>
-        <tr id="resolveVRIDTransient" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#resolveVRIDTransient" class="vdoc type-vdoc-reference">#resolveVRIDTransient</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td></td><td><a href="https://valospace.org/raem/0#Resolver" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Resolver</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all resolver names. Resolvers are verbs which are used
-for resolving generated properties.
-
-    </span>
-</span></a></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">resolve resource VRID object of the given resource</span>
-</td></tr>
-        <tr id="resolveDominantTypeName" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#resolveDominantTypeName" class="vdoc type-vdoc-reference">#resolveDominantTypeName</a></em></strong> </h3></td></tr>
-        <tr><td></td><td><a href="https://valospace.org/raem/0#Resolver" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Resolver</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all resolver names. Resolvers are verbs which are used
-for resolving generated properties.
-
-    </span>
-</span></a></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">resolve dominant type name of the given resource</span>
-</td></tr>
-        <tr id="resolveOwnFieldsTransient" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#resolveOwnFieldsTransient" class="vdoc type-vdoc-reference">#resolveOwnFieldsTransient</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td></td><td><a href="https://valospace.org/raem/0#Resolver" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Resolver</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all resolver names. Resolvers are verbs which are used
-for resolving generated properties.
-
-    </span>
-</span></a></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">resolve only owns-fields-only transient of this resource</span>
-</td></tr>
-        <tr id="resolveGhostPrototype" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#resolveGhostPrototype" class="vdoc type-vdoc-reference">#resolveGhostPrototype</a></em></strong> </h3></td></tr>
-        <tr><td></td><td><a href="https://valospace.org/raem/0#Resolver" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Resolver</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all resolver names. Resolvers are verbs which are used
-for resolving generated properties.
-
-    </span>
-</span></a></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">resolve the ghost prototype of this ghost</span>
-</td></tr>
-        <tr id="resolveGhostHost" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#resolveGhostHost" class="vdoc type-vdoc-reference">#resolveGhostHost</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td></td><td><a href="https://valospace.org/raem/0#Resolver" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Resolver</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all resolver names. Resolvers are verbs which are used
-for resolving generated properties.
-
-    </span>
-</span></a></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">resolve the ghost host of this ghost</span>
-</td></tr>
-        <tr id="resolveContentLength" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#resolveContentLength" class="vdoc type-vdoc-reference">#resolveContentLength</a></em></strong> </h3></td></tr>
-        <tr><td></td><td><a href="https://valospace.org/raem/0#Resolver" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Resolver</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all resolver names. Resolvers are verbs which are used
-for resolving generated properties.
-
-    </span>
-</span></a></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">resolve octet count of the octet-stream associated with the Bvob</span>
-</td></tr>
+        
       </tbody>
     </table>
 
   </section>
 
   <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_vocabulary_other">§ </a><em>VModel</em> remaining vocabulary</h3>
+    <h3><a aria-label="§" href="#section_vocabulary_other">§ </a><em>VRaem</em> remaining vocabulary</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -1010,38 +470,14 @@ for resolving generated properties.
 </th>
       </thead>
       <tbody>
-        <tr id="0" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#0" class="vdoc type-vdoc-reference">#0</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Literal" class="vdoc type-vdoc-reference">rdfs:Literal</a></td><td></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">positional argument 0</span>
-</td></tr>
-        <tr id="1" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#1" class="vdoc type-vdoc-reference">#1</a></em></strong> </h3></td></tr>
-        <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Literal" class="vdoc type-vdoc-reference">rdfs:Literal</a></td><td></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">positional argument 1</span>
-</td></tr>
-        <tr id="2" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#2" class="vdoc type-vdoc-reference">#2</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Literal" class="vdoc type-vdoc-reference">rdfs:Literal</a></td><td></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">positional argument 2</span>
-</td></tr>
-        <tr id="3" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#3" class="vdoc type-vdoc-reference">#3</a></em></strong> </h3></td></tr>
-        <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Literal" class="vdoc type-vdoc-reference">rdfs:Literal</a></td><td></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">positional argument 3</span>
-</td></tr>
-        <tr id="4" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#4" class="vdoc type-vdoc-reference">#4</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Literal" class="vdoc type-vdoc-reference">rdfs:Literal</a></td><td></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">positional argument 4</span>
-</td></tr>
+        
       </tbody>
     </table>
 
   </section>
 
   <section id="section_context" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_context">§ </a><em>VModel</em> JSON-LD context term definitions</h3>
+    <h3><a aria-label="§" href="#section_context">§ </a><em>VRaem</em> JSON-LD context term definitions</h3>
 
     <table class="vdoc type-vdoc-table">
       <thead>
@@ -1063,28 +499,6 @@ for resolving generated properties.
         <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">@base</span>
 </td><td><span class="vdoc type-vdoc-node">https://valospace.org/raem/0#</span>
 </td><td></td><td></td><td></td></tr>
-        <tr><td><span class="vdoc type-vdoc-node">VModel:expressor</span>
-</td><td><span class="vdoc type-vdoc-node"></span>
-</td><td><span class="vdoc type-vdoc-node">#expressor</span>
-</td><td><span class="vdoc type-vdoc-node">@id</span>
-</td><td><span class="vdoc type-vdoc-node">@list</span>
-</td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VModel:impressor</span>
-</td><td><span class="vdoc type-vdoc-node"></span>
-</td><td><span class="vdoc type-vdoc-node">#impressor</span>
-</td><td><span class="vdoc type-vdoc-node">@id</span>
-</td><td><span class="vdoc type-vdoc-node">@list</span>
-</td></tr>
-        <tr><td><span class="vdoc type-vdoc-node">VModel:aliasOf</span>
-</td><td><span class="vdoc type-vdoc-node"></span>
-</td><td><span class="vdoc type-vdoc-node">#aliasOf</span>
-</td><td><span class="vdoc type-vdoc-node">@id</span>
-</td><td></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VModel:coupledField</span>
-</td><td><span class="vdoc type-vdoc-node"></span>
-</td><td><span class="vdoc type-vdoc-node">#coupledField</span>
-</td><td><span class="vdoc type-vdoc-node">@id</span>
-</td><td></td></tr>
       </tbody>
     </table>
 

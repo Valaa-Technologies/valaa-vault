@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>@valos/state library workspace</title>
+    <script
+     src='https://www.w3.org/Tools/respec/respec-w3c-common'
+     class='remove'></script>
+    <script class='remove'>
+      var respecConfig = {"specStatus":"unofficial","shortName":"state","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}]};
+    </script>
+    <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
+    
+  </head>
+  <body class="vdoc vdoc-body">
+    
+  <section id="abstract" class="vdoc type-vdoc-chapter"><div><p>
+  <div class="vdoc type-vdoc-paragraph">Provides the ValOS resource state specification and the &#x27;VState&#x27; ontology namespace
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph"><em>VState</em> together with <a href="https://valospace.org/log/0#" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VLog:</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The vocabulary for defining the ValOS chronicle event log structure
+and for adding content and behaviors to it.
+    </span>
+</span></a> <a href="https://valospace.org/plot/0#" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VPlot:</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The vocabulary for defining the hierarchical ValOS identifiers and for
+extending them with new step semantics
+    </span>
+</span></a> and <a href="https://valospace.org/valk/0#" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VValk:</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The vocabulary for defining ValOS computations and for
+adding defining new semantics to it.
+    </span>
+</span></a> form the infrastructural foundation ie. the <em>fabric</em> of the valospace.<em>VState</em> provides the data model and so enables structure and
+meanings.
+  </div>
+</p></div>
+  </section>
+
+  <section id="sotd" class="vdoc type-vdoc-chapter"><div><p>
+  <div class="vdoc type-vdoc-paragraph">This document is part of the library workspace <a href="@valos/state" class="vdoc type-vrevdoc-package"><em>@valos/state</em></a>
+(of domain <a href="https://valospace.org/kernel" class="vdoc type-vrevdoc-package"><em>@valos/kernel</em></a>) which has the description:
+&#x60;Provides the ValOS resource state specification and the &#x27;VState&#x27; ontology namespace&#x60;.
+  </div>
+</p></div>
+  </section>
+
+  <section id="introduction" class="vdoc type-vdoc-chapter"><div><p>
+  <div class="vdoc type-vdoc-paragraph">Edit me - this is the first payload chapter. Abstract and SOTD are
+essential <a href="https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate" class="vdoc type-vdoc-reference">ReSpec boilerplate</a>
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">See <a href="https://valospace.org/revdoc/tutorial" class="vdoc type-vdoc-reference">ReVDoc tutorial</a> for
+instructions on how to write revdoc source documents.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">See also <a href="https://valospace.org/revdoc" class="vdoc type-vdoc-reference">ReVdoc specification</a> and <a href="https://valospace.org/vdoc" class="vdoc type-vdoc-reference">VDoc specification</a> for reference documentation.
+  </div>
+</p></div>
+  </section>
+
+  <section id="section_fabric" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_fabric">§ </a>The <em>VState</em> fabric namespace of the library ontology of <a href="@valos/state" class="vdoc type-vrevdoc-package"><em>@valos/state</em></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">The vocabulary for defining the ValOS state core model and for
+extending it with new types and fields.
+  </div>
+</p></div>
+  <section id="section_prefixes" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_prefixes">§ </a><em>@valos/state</em> IRI prefixes</h3>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">Prefix</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">IRI</span>
+</th>
+      </thead>
+      <tbody>
+        <tr><td><span class="vdoc type-vdoc-node">rdf</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/1999/02/22-rdf-syntax-ns#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">rdfs</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/2000/01/rdf-schema#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">xsd</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/2001/XMLSchema#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">owl</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/2002/07/owl#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">dc</span>
+</td><td><span class="vdoc type-vdoc-node">http://purl.org/dc/elements/1.1/</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VState</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/state/0#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">VKernel</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/kernel/0#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VPlot</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/plot/0#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">VLog</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/log/0#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VValk</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/valk/0#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">V</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/0#</span>
+</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_classes" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_classes">§ </a><em>VState</em> <a href="https://valospace.org/kernel/0#Class" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">fabric classes</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of classes which are defined by the ValOS kernel domain
+ontologies.
+    </span>
+</span></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">This section describes fabric classes introduced by the &#x27;VState&#x27; namespace
+  </div>
+</p></div>
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:subClassOf</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</th>
+      </thead>
+      <tbody>
+        <tr id="Type" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#Type" class="vdoc type-vdoc-reference">#Type</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Class" class="vdoc type-vdoc-reference">rdfs:Class</a></td><td><span class="vdoc type-vdoc-node">The class of all valospace types. The instances of valospace types
+are called valospace resources and are the main valos ecosystem
+building block.Only valospace resources can appear as a subject in valospace resource
+and event triple graphs.</span>
+</td></tr>
+        <tr id="Field" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#Field" class="vdoc type-vdoc-reference">#Field</a></em></strong> </h3></td></tr>
+        <tr><td><a href="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property" class="vdoc type-vdoc-reference">rdf:Property</a></td><td><span class="vdoc type-vdoc-node">The class of all valospace resource field identifiers.Only the instances of this class can appear as the predicate in
+valospace triple graphs. All valospace fields have VState:Type or one
+of its sub-classes as their rdf:domain.</span>
+</td></tr>
+        <tr id="ExpressedField" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#ExpressedField" class="vdoc type-vdoc-reference">#ExpressedField</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference">VState:Field</a></td><td><span class="vdoc type-vdoc-node">The class of valospace fields which have a full triple expression in
+all regular query and graph contexts (as opposed to fields with
+non-triple semantics or triple expression only in limited contexts).</span>
+</td></tr>
+        <tr id="EventLoggedField" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#EventLoggedField" class="vdoc type-vdoc-reference">#EventLoggedField</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/state/0#ExpressedField" class="vdoc type-vdoc-reference">VState:ExpressedField</a></td><td><span class="vdoc type-vdoc-node">The class of valospace fields which have both a triple state
+expression inside valospace and a change impression in event logs;
+these are the primary, persisted sources of truth.</span>
+</td></tr>
+        <tr id="CoupledField" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#CoupledField" class="vdoc type-vdoc-reference">#CoupledField</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/state/0#ExpressedField" class="vdoc type-vdoc-reference">VState:ExpressedField</a></td><td><span class="vdoc type-vdoc-node">The class of valospace fields which have a triple expression inside
+valospace via their coupled fields but lack an event log impression.</span>
+</td></tr>
+        <tr id="GeneratedField" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#GeneratedField" class="vdoc type-vdoc-reference">#GeneratedField</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/state/0#ExpressedField" class="vdoc type-vdoc-reference">VState:ExpressedField</a></td><td><span class="vdoc type-vdoc-node">The class of inferred fields where a field is not associated with
+raw valospace triples but the triples are fully generated by the
+expressor, with scope values:
+    <ul>
+      <li><a href="https://valospace.org/valk/0#0" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VValk:0</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        positional argument 0
+    </span>
+</span></a>is set to the field owner id</li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph"><a href="https://valospace.org/valk/0#1" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VValk:1</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        positional argument 1
+    </span>
+</span></a>is set to the field id
+  </div>
+</p></div></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph"><a href="https://valospace.org/valk/0#2" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VValk:2</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        positional argument 2
+    </span>
+</span></a>is set as undefined
+  </div>
+</p></div></li>
+    </ul>
+</span>
+</td></tr>
+        <tr id="TransientField" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#TransientField" class="vdoc type-vdoc-reference">#TransientField</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference">VState:Field</a></td><td><span class="vdoc type-vdoc-node">The class of valospace fields with no general triple expression but
+with custom semantics for specific queries.</span>
+</td></tr>
+        <tr id="AliasField" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#AliasField" class="vdoc type-vdoc-reference">#AliasField</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference">VState:Field</a></td><td><span class="vdoc type-vdoc-node">The class of inferred fields called alias fields where each such field
+has an &#x27;aliasOf&#x27; RDF property or valos Field. Alias fields are
+mutation-inference symmetric so that triples with an alias field as
+predicate are inferred from triples with aliasOf as predicate and
+mutations with an alias field as predicate are translated to use
+the aliasOf as predicate.</span>
+</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_properties" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_properties">§ </a><em>VState</em> <a href="https://valospace.org/kernel/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">fabric properties</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of properties which are defined by the ValOS kernel domain
+ontologies.
+    </span>
+</span></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">This section describes fabric properties introduced by the &#x27;VState&#x27; namespace
+  </div>
+</p></div>
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:domain</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:range</span>
+</th>
+      </thead>
+      <tbody>
+        <tr id="expressor" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#expressor" class="vdoc type-vdoc-reference">#expressor</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/state/0#ExpressedField" class="vdoc type-vdoc-reference">VState:ExpressedField</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#List" class="vdoc type-vdoc-reference">rdfs:List</a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The custom &#x27;getter&#x27; expressor of an ExpressedField as a VPlot.This expressor is used to resolve the dynamic, inferred value of the
+field whenever it is requested. More specifically, whenever an inferred
+state triple is requested for a resource field with a custom expressor
+the expressor vplot is valked using following scope values:
+    <ul>
+      <li><a href="https://valospace.org/valk/0#0" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VValk:0</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        positional argument 0
+    </span>
+</span></a>is set to the field owner resource id</li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph"><a href="https://valospace.org/valk/0#1" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VValk:1</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        positional argument 1
+    </span>
+</span></a>is set to the field id
+  </div>
+</p></div></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph"><a href="https://valospace.org/valk/0#2" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VValk:2</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        positional argument 2
+    </span>
+</span></a>is a possible valospace primary field value if one is
+    defined (in which case the expressor can act as a transformer)
+  </div>
+</p></div></li>
+    </ul>
+Once the valk is resolved the inferred triple subject, predicate and
+  object are set to be the field owner resource id, the field id itself
+  and the valk result value, respectively.</span>
+</td></tr>
+        <tr id="impressor" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#impressor" class="vdoc type-vdoc-reference">#impressor</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/state/0#EventLoggedField" class="vdoc type-vdoc-reference">VState:EventLoggedField</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#List" class="vdoc type-vdoc-reference">rdfs:List</a></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The custom &#x27;setter&#x27; impressor of an EventLoggedField as a VPlot.This impressor is used as part of building an event object whenever
+some operation would assign a value to the field. More specifically,
+upon assignment the impressor vplot is valked using following scope
+values:
+    <ul>
+      <li><a href="https://valospace.org/valk/0#0" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VValk:0</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        positional argument 0
+    </span>
+</span></a>is set to the field owner id</li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph"><a href="https://valospace.org/valk/0#1" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VValk:1</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        positional argument 1
+    </span>
+</span></a>as the field id
+  </div>
+</p></div></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph"><a href="https://valospace.org/valk/0#2" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VValk:2</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        positional argument 2
+    </span>
+</span></a>is set to the new value being updated to this field.
+  </div>
+</p></div></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph"><a href="https://valospace.org/state/0#3" class="vdoc type-vdoc-reference">VState:3</a>is set to possible valospace primary value of the field
+    if one is defined (in which case the expressor can act as a mutator)
+  </div>
+</p></div></li>
+    </ul>
+</span>
+</td></tr>
+        <tr id="aliasOf" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#aliasOf" class="vdoc type-vdoc-reference">#aliasOf</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/state/0#AliasField" class="vdoc type-vdoc-reference">VState:AliasField</a></td><td><a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference">VState:Field</a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The alias target property specifies the inference source and mutation
+target of an alias field.</span>
+</td></tr>
+        <tr id="isOwnerOf" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#isOwnerOf" class="vdoc type-vdoc-reference">#isOwnerOf</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference">VState:Field</a></td><td><a href="http://www.w3.org/2001/XMLSchema#boolean" class="vdoc type-vdoc-reference">xsd:boolean</a></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">This field refers to a resource which is owned by the field subject
+resource. If the subject resource is is destroyed or if this field
+is removed then the owned resource is cascade destroyed.</span>
+</td></tr>
+        <tr id="isOwnedBy" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#isOwnedBy" class="vdoc type-vdoc-reference">#isOwnedBy</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference">VState:Field</a></td><td><a href="http://www.w3.org/2001/XMLSchema#boolean" class="vdoc type-vdoc-reference">xsd:boolean</a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">This field refers to a resource which owns the field subject resource.
+If the owner is destroyed or if the coupled field (which is marked
+with isOwnerOf) is removed from the owner then the subject resource
+will be cascade destroyed. Removing the isOwnedBy field itself will
+only orphan the subject resource.</span>
+</td></tr>
+        <tr id="coupledToField" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#coupledToField" class="vdoc type-vdoc-reference">#coupledToField</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference">VState:Field</a></td><td><a href="valosField" class="vdoc type-vdoc-reference">valosField</a></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1></td></tr>
+        <tr id="coupledField" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#coupledField" class="vdoc type-vdoc-reference">#coupledField</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><strong>DEPRECATED</strong> in favor of:</em></span>
+</td><td colspan=1><a href="https://valospace.org/state/0#coupledToField" class="vdoc type-vdoc-reference">VState:coupledToField</a></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference">VState:Field</a></td><td><a href="valosField" class="vdoc type-vdoc-reference">valosField</a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1></td></tr>
+        <tr id="defaultCoupledField" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#defaultCoupledField" class="vdoc type-vdoc-reference">#defaultCoupledField</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference">VState:Field</a></td><td><a href="http://www.w3.org/2001/XMLSchema#string" class="vdoc type-vdoc-reference">xsd:string</a></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1></td></tr>
+        <tr id="preventsDestroy" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#preventsDestroy" class="vdoc type-vdoc-reference">#preventsDestroy</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference">VState:Field</a></td><td><a href="http://www.w3.org/2001/XMLSchema#boolean" class="vdoc type-vdoc-reference">xsd:boolean</a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">Field with this property prevent destruction of their subject
+resource if the field has active couplings inside the same chronicle.</span>
+</td></tr>
+        <tr id="isDuplicateable" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#isDuplicateable" class="vdoc type-vdoc-reference">#isDuplicateable</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference">VState:Field</a></td><td><a href="http://www.w3.org/2001/XMLSchema#boolean" class="vdoc type-vdoc-reference">xsd:boolean</a></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">If set to false this field not be visible for DUPLICATED class of
+events.</span>
+</td></tr>
+        <tr id="initialValue" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#initialValue" class="vdoc type-vdoc-reference">#initialValue</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference">VState:Field</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The implicit initial value of the resource field when the resource is
+created.</span>
+</td></tr>
+        <tr id="ownDefaultValue" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#ownDefaultValue" class="vdoc type-vdoc-reference">#ownDefaultValue</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference">VState:Field</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The value of a resource field which doesn&#x27;t have an own value defined
+(ie. is evaluated before prototype field lookup).</span>
+</td></tr>
+        <tr id="finalDefaultValue" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#finalDefaultValue" class="vdoc type-vdoc-reference">#finalDefaultValue</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference">VState:Field</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The value of a resource field which doesn&#x27;t have a value defined by
+any resource in its prototype chain.</span>
+</td></tr>
+        <tr id="allowTransientFieldToBeSingular" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#allowTransientFieldToBeSingular" class="vdoc type-vdoc-reference">#allowTransientFieldToBeSingular</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference">VState:Field</a></td><td><a href="http://www.w3.org/2001/XMLSchema#boolean" class="vdoc type-vdoc-reference">xsd:boolean</a></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">Bypass the default behavior which forces transient fields to be plural
+to allow for singular fields.</span>
+</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_methods" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_methods">§ </a><em>VState</em> <a href="https://valospace.org/engine/0#Method" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">fabric methods</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all valosheath type prototype methods.
+    </span>
+</span></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">This section describes fabric methods introduced by the &#x27;VState&#x27; namespace
+  </div>
+</p></div>
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:domain</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:range</span>
+</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_globals" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_globals">§ </a><em>VState</em> <a href="https://valospace.org/engine/0#Global" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">fabric globals</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all valosheath global resources.
+    </span>
+</span></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">This section describes fabric global objects introduced by the &#x27;VState&#x27; namespace
+  </div>
+</p></div>
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdf:type</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">Comment</span>
+</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_vocabulary_other">§ </a><em>VState</em> remaining vocabulary terms</h3>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdf:type</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:subClassOf</span>
+</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  </section>
+
+  </body>
+</html>

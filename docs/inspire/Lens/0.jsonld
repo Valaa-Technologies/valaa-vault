@@ -67,17 +67,19 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/inspire",
-    "VRevdoc:version": "0.35.0-rc.32",
+    "VRevdoc:version": "0.35.0-rc.33",
     "VRevdoc:preferredPrefix": "Lens",
     "VRevdoc:baseIRI": "https://valospace.org/inspire/Lens/0#",
     "VRevdoc:referencedModules": {
-      "https://valospace.org/engine/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/engine/VEngine",
-      "https://valospace.org/kernel/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/kernel/VKernel",
-      "https://valospace.org/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/kernel/V",
-      "https://valospace.org/inspire/Lens/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/inspire/Lens",
-      "https://valospace.org/inspire/On/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/inspire/On"
+      "https://valospace.org/engine/0#": "@valos/engine/VEngine",
+      "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
+      "https://valospace.org/0#": "@valos/space/V",
+      "https://valospace.org/inspire/On/0#": "@valos/sourcerer/On",
+      "https://valospace.org/inspire/Lens/0#": "@valos/inspire/Lens"
     },
-    "VRevdoc:extenderModules": {},
+    "VRevdoc:extenderModules": {
+      "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
+    },
     "respecConfig": {
       "specStatus": "unofficial",
       "shortName": "lensNamespace",
@@ -128,7 +130,7 @@
               "VDoc:content": [
                 "'On' namespace reference"
               ],
-              "VDoc:ref": "@valos/inspire/On"
+              "VDoc:ref": "@valos/sourcerer/On"
             },
             " for\nhow to access the HTML5 events API from valospace."
           ]
@@ -542,8 +544,8 @@
       "Lens": "https://valospace.org/inspire/Lens/0#",
       "VKernel": "https://valospace.org/kernel/0#",
       "V": "https://valospace.org/0#",
-      "VEngine": "https://valospace.org/engine/0#",
-      "On": "https://valospace.org/inspire/On/0#"
+      "On": "https://valospace.org/inspire/On/0#",
+      "VEngine": "https://valospace.org/engine/0#"
     },
     "vocabulary": {
       "@id": "vocabulary",
@@ -1157,7 +1159,23 @@
           "Lens"
         ],
         "rdfs:label": [
-          "Lens:focus"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:focus"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:focus"
@@ -1181,7 +1199,23 @@
           "Attribute"
         ],
         "rdfs:label": [
-          "Lens:array"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:array"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:array"
@@ -1206,7 +1240,23 @@
           "Attribute"
         ],
         "rdfs:label": [
-          "Lens:frame"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:frame"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Valoscope"
+                ],
+                "VDoc:ref": "Lens:Valoscope"
+              },
+              " attribute"
+            ]
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:frame"
@@ -1249,7 +1299,23 @@
           "Lens"
         ],
         "rdfs:label": [
-          "Lens:lens"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:lens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Valoscope"
+                ],
+                "VDoc:ref": "Lens:Valoscope"
+              },
+              " attribute"
+            ]
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:lens"
@@ -1276,8 +1342,30 @@
           "Loading"
         ],
         "rdfs:label": [
-          "Lens:loadingLens",
-          "context[$Lens.loadingLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:loadingLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.loadingLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:loadingLens",
@@ -1305,8 +1393,30 @@
           "Failure"
         ],
         "rdfs:label": [
-          "Lens:loadingFailedLens",
-          "context[$Lens.loadingFailedLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:loadingFailedLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.loadingFailedLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:loadingFailedLens",
@@ -1331,7 +1441,23 @@
         ],
         "value": "\"<function value()>\"",
         "rdfs:label": [
-          "Lens:if"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:if"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:if"
@@ -1353,7 +1479,23 @@
           "Lens"
         ],
         "rdfs:label": [
-          "Lens:then"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:then"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:then"
@@ -1373,7 +1515,23 @@
           "Lens"
         ],
         "rdfs:label": [
-          "Lens:else"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:else"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:else"
@@ -1392,7 +1550,23 @@
           "Attribute"
         ],
         "rdfs:label": [
-          "Lens:offset"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:offset"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:offset"
@@ -1408,7 +1582,23 @@
           "Attribute"
         ],
         "rdfs:label": [
-          "Lens:limit"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:limit"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:limit"
@@ -1427,7 +1617,13 @@
           "Context"
         ],
         "rdfs:label": [
-          "context[$Lens.arrayIndex]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.arrayIndex]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "$Lens.arrayIndex"
@@ -1446,7 +1642,13 @@
           "Context"
         ],
         "rdfs:label": [
-          "context[$Lens.endOffset]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.endOffset]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "$Lens.endOffset"
@@ -1462,7 +1664,13 @@
           "Context"
         ],
         "rdfs:label": [
-          "context[$Lens.elementIndex]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.elementIndex]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "$Lens.elementIndex"
@@ -1481,7 +1689,23 @@
           "Attribute"
         ],
         "rdfs:label": [
-          "Lens:sort"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:sort"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:sort"
@@ -1502,7 +1726,23 @@
           "Attribute"
         ],
         "rdfs:label": [
-          "Lens:reverse"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:reverse"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:reverse"
@@ -1574,7 +1814,23 @@
           "Attribute"
         ],
         "rdfs:label": [
-          "Lens:static"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:static"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:static"
@@ -1694,7 +1950,13 @@
         ],
         "defaultValue": "\"<function renderToggleableErrorDetail()>\"",
         "rdfs:label": [
-          "context[$Lens.toggleableErrorDetailLens]",
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.toggleableErrorDetailLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          },
           "Lens:toggleableErrorDetailLens"
         ],
         "VRevdoc:indexLabel": [
@@ -1719,7 +1981,13 @@
         ],
         "defaultValue": "\"<function renderInternalFailure()>\"",
         "rdfs:label": [
-          "context[$Lens.internalErrorLens]",
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.internalErrorLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          },
           "Lens:internalErrorLens"
         ],
         "VRevdoc:indexLabel": [
@@ -1745,7 +2013,13 @@
         ],
         "defaultValue": "0",
         "rdfs:label": [
-          "context[$Lens.currentRenderDepth]",
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.currentRenderDepth]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          },
           "Lens:currentRenderDepth"
         ],
         "VRevdoc:indexLabel": [
@@ -1767,7 +2041,13 @@
         ],
         "defaultValue": "150",
         "rdfs:label": [
-          "context[$Lens.infiniteRecursionCheckWaterlineDepth]",
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.infiniteRecursionCheckWaterlineDepth]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          },
           "Lens:infiniteRecursionCheckWaterlineDepth"
         ],
         "VRevdoc:indexLabel": [
@@ -1786,7 +2066,13 @@
         ],
         "defaultValue": "200",
         "rdfs:label": [
-          "context[$Lens.maximumRenderDepth]",
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.maximumRenderDepth]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          },
           "Lens:maximumRenderDepth"
         ],
         "VRevdoc:indexLabel": [
@@ -1806,7 +2092,13 @@
         ],
         "defaultValue": "<Object>",
         "rdfs:label": [
-          "context[$Lens.maximumRenderDepthExceededLens]",
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.maximumRenderDepthExceededLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          },
           "Lens:maximumRenderDepthExceededLens"
         ],
         "VRevdoc:indexLabel": [
@@ -1925,8 +2217,30 @@
         ],
         "defaultValue": "[\"<function ()>\"]",
         "rdfs:label": [
-          "Lens:undefinedLens",
-          "context[$Lens.undefinedLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:undefinedLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.undefinedLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:undefinedLens",
@@ -1949,8 +2263,30 @@
         ],
         "defaultValue": "\"\"",
         "rdfs:label": [
-          "Lens:nullLens",
-          "context[$Lens.nullLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:nullLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.nullLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:nullLens",
@@ -1973,8 +2309,30 @@
         ],
         "defaultValue": "[$Lens.activeLens, $Lens.activatingLens, $Lens.inactiveLens, $Lens.destroyedLens, $Lens.unavailableLens]",
         "rdfs:label": [
-          "Lens:resourceLens",
-          "context[$Lens.resourceLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:resourceLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.resourceLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:resourceLens",
@@ -2004,8 +2362,30 @@
         ],
         "defaultValue": "$Lens.focusPropertyLens",
         "rdfs:label": [
-          "Lens:activeLens",
-          "context[$Lens.activeLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:activeLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.activeLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:activeLens",
@@ -2032,8 +2412,30 @@
           "Context"
         ],
         "rdfs:label": [
-          "Lens:lensProperty",
-          "context[$Lens.lensProperty]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:lensProperty"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Valoscope"
+                ],
+                "VDoc:ref": "Lens:Valoscope"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.lensProperty]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:lensProperty",
@@ -2061,8 +2463,30 @@
         ],
         "defaultValue": "[\"FOCUS_LENS\"]",
         "rdfs:label": [
-          "Lens:focusLensProperty",
-          "context[$Lens.focusLensProperty]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:focusLensProperty"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Valoscope"
+                ],
+                "VDoc:ref": "Lens:Valoscope"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.focusLensProperty]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:focusLensProperty",
@@ -2116,8 +2540,30 @@
         ],
         "defaultValue": "[\"DELEGATE_LENS\"]",
         "rdfs:label": [
-          "Lens:delegateLensProperty",
-          "context[$Lens.delegateLensProperty]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:delegateLensProperty"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Valoscope"
+                ],
+                "VDoc:ref": "Lens:Valoscope"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.delegateLensProperty]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:delegateLensProperty",
@@ -2171,8 +2617,30 @@
         ],
         "defaultValue": "\"<function renderUnframed()>\"",
         "rdfs:label": [
-          "Lens:unframedLens",
-          "context[$Lens.unframedLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:unframedLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.unframedLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:unframedLens",
@@ -2192,7 +2660,23 @@
           "Attribute"
         ],
         "rdfs:label": [
-          "Lens:instanceLensPrototype"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:instanceLensPrototype"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Valoscope"
+                ],
+                "VDoc:ref": "Lens:Valoscope"
+              },
+              " attribute"
+            ]
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:instanceLensPrototype"
@@ -2232,8 +2716,30 @@
         ],
         "defaultValue": "[\"INSTANCE_LENS\"]",
         "rdfs:label": [
-          "Lens:instanceLensProperty",
-          "context[$Lens.instanceLensProperty]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:instanceLensProperty"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Valoscope"
+                ],
+                "VDoc:ref": "Lens:Valoscope"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.instanceLensProperty]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:instanceLensProperty",
@@ -2303,7 +2809,13 @@
           "Context"
         ],
         "rdfs:label": [
-          "context[$Lens.scopeFrameResource]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.scopeFrameResource]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "$Lens.scopeFrameResource"
@@ -2323,7 +2835,13 @@
           "Context"
         ],
         "rdfs:label": [
-          "context[$Lens.frameStepPrefix]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.frameStepPrefix]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "$Lens.frameStepPrefix"
@@ -2339,7 +2857,23 @@
           "Attribute"
         ],
         "rdfs:label": [
-          "Lens:frameOwner"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:frameOwner"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:frameOwner"
@@ -2364,8 +2898,30 @@
         ],
         "defaultValue": "\"valaa-memory:\"",
         "rdfs:label": [
-          "Lens:frameAuthority",
-          "context[$Lens.frameAuthority]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:frameAuthority"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.frameAuthority]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:frameAuthority",
@@ -2391,7 +2947,13 @@
         ],
         "defaultValue": "[\"FRAME_AUTHORITY\", \"LENS_AUTHORITY\"]",
         "rdfs:label": [
-          "context[$Lens.frameAuthorityProperty]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.frameAuthorityProperty]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "$Lens.frameAuthorityProperty"
@@ -2413,7 +2975,13 @@
           "Context"
         ],
         "rdfs:label": [
-          "context[$Lens.frameRoot]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.frameRoot]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "$Lens.frameRoot"
@@ -2433,7 +3001,13 @@
           "Context"
         ],
         "rdfs:label": [
-          "context[$Lens.frameRootFocus]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.frameRootFocus]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "$Lens.frameRootFocus"
@@ -2454,7 +3028,13 @@
           "Context"
         ],
         "rdfs:label": [
-          "context[$Lens.integrationScopeResource]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.integrationScopeResource]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "$Lens.integrationScopeResource"
@@ -2475,7 +3055,13 @@
         ],
         "defaultValue": "[$Lens.loadingFailedLens, <Object>]",
         "rdfs:label": [
-          "context[$Lens.disabledLens]",
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.disabledLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          },
           "Lens:disabledLens"
         ],
         "VRevdoc:indexLabel": [
@@ -2500,8 +3086,30 @@
         ],
         "defaultValue": "$Lens.loadingLens",
         "rdfs:label": [
-          "Lens:pendingLens",
-          "context[$Lens.pendingLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:pendingLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.pendingLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:pendingLens",
@@ -2532,8 +3140,30 @@
         ],
         "defaultValue": "$Lens.loadingFailedLens",
         "rdfs:label": [
-          "Lens:rejectedLens",
-          "context[$Lens.rejectedLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:rejectedLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.rejectedLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:rejectedLens",
@@ -2564,8 +3194,30 @@
         ],
         "defaultValue": "[$Lens.pendingLens, <Object>]",
         "rdfs:label": [
-          "Lens:pendingPromiseLens",
-          "context[$Lens.pendingPromiseLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:pendingPromiseLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.pendingPromiseLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:pendingPromiseLens",
@@ -2596,8 +3248,30 @@
         ],
         "defaultValue": "[$Lens.rejectedLens, <Object>]",
         "rdfs:label": [
-          "Lens:rejectedPromiseLens",
-          "context[$Lens.rejectedPromiseLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:rejectedPromiseLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.rejectedPromiseLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:rejectedPromiseLens",
@@ -2624,8 +3298,30 @@
         ],
         "defaultValue": "[$Lens.pendingLens, <Object>]",
         "rdfs:label": [
-          "Lens:pendingChroniclesLens",
-          "context[$Lens.pendingChroniclesLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:pendingChroniclesLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.pendingChroniclesLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:pendingChroniclesLens",
@@ -2654,8 +3350,30 @@
         ],
         "defaultValue": "[$Lens.rejectedLens, <Object>]",
         "rdfs:label": [
-          "Lens:rejectedChroniclesLens",
-          "context[$Lens.rejectedChroniclesLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:rejectedChroniclesLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.rejectedChroniclesLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:rejectedChroniclesLens",
@@ -2678,7 +3396,23 @@
           "Attribute"
         ],
         "rdfs:label": [
-          "Lens:delayed"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:delayed"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:delayed"
@@ -2739,7 +3473,13 @@
         ],
         "defaultValue": "[$Lens.pendingLens, <Object>]",
         "rdfs:label": [
-          "context[$Lens.pendingAttributesLens]",
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.pendingAttributesLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          },
           "Lens:pendingAttributesLens"
         ],
         "VRevdoc:indexLabel": [
@@ -2764,7 +3504,13 @@
         ],
         "defaultValue": "[$Lens.rejectedLens, <Object>]",
         "rdfs:label": [
-          "context[$Lens.rejectedAttributesLens]",
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.rejectedAttributesLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          },
           "Lens:rejectedAttributesLens"
         ],
         "VRevdoc:indexLabel": [
@@ -2788,8 +3534,30 @@
         ],
         "defaultValue": "[$Lens.pendingLens, <Object>]",
         "rdfs:label": [
-          "Lens:pendingFocusLens",
-          "context[$Lens.pendingFocusLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:pendingFocusLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.pendingFocusLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:pendingFocusLens",
@@ -2818,8 +3586,30 @@
         ],
         "defaultValue": "[$Lens.rejectedLens, <Object>]",
         "rdfs:label": [
-          "Lens:rejectedFocusLens",
-          "context[$Lens.rejectedFocusLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:rejectedFocusLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.rejectedFocusLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:rejectedFocusLens",
@@ -2846,8 +3636,30 @@
         ],
         "defaultValue": "[$Lens.pendingLens, <Object>]",
         "rdfs:label": [
-          "Lens:pendingFrameLens",
-          "context[$Lens.pendingFrameLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:pendingFrameLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.pendingFrameLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:pendingFrameLens",
@@ -2876,8 +3688,30 @@
         ],
         "defaultValue": "[$Lens.rejectedLens, <Object>]",
         "rdfs:label": [
-          "Lens:rejectedFrameLens",
-          "context[$Lens.rejectedFrameLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:rejectedFrameLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.rejectedFrameLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:rejectedFrameLens",
@@ -2905,8 +3739,30 @@
         ],
         "defaultValue": "[$Lens.loadingFailedLens, <Object>]",
         "rdfs:label": [
-          "Lens:inactiveLens",
-          "context[$Lens.inactiveLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:inactiveLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.inactiveLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:inactiveLens",
@@ -2933,8 +3789,30 @@
         ],
         "defaultValue": "[$Lens.pendingLens, <Object>]",
         "rdfs:label": [
-          "Lens:pendingMediaLens",
-          "context[$Lens.pendingMediaLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:pendingMediaLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.pendingMediaLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:pendingMediaLens",
@@ -2963,8 +3841,30 @@
         ],
         "defaultValue": "[$Lens.rejectedLens, <Object>]",
         "rdfs:label": [
-          "Lens:rejectedMediaLens",
-          "context[$Lens.rejectedMediaLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:rejectedMediaLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.rejectedMediaLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:rejectedMediaLens",
@@ -2993,8 +3893,30 @@
         ],
         "defaultValue": "$Lens.rejectedMediaLens",
         "rdfs:label": [
-          "Lens:uninterpretableMediaLens",
-          "context[$Lens.uninterpretableMediaLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:uninterpretableMediaLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.uninterpretableMediaLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:uninterpretableMediaLens",
@@ -3023,8 +3945,30 @@
         ],
         "defaultValue": "$Lens.rejectedMediaLens",
         "rdfs:label": [
-          "Lens:unrenderableInterpretationLens",
-          "context[$Lens.unrenderableInterpretationLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:unrenderableInterpretationLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.unrenderableInterpretationLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:unrenderableInterpretationLens",
@@ -3053,8 +3997,30 @@
         ],
         "defaultValue": "[$Lens.loadingLens, <Object>]",
         "rdfs:label": [
-          "Lens:pendingElementsLens",
-          "context[$Lens.pendingElementsLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:pendingElementsLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.pendingElementsLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:pendingElementsLens",
@@ -3082,8 +4048,30 @@
         ],
         "defaultValue": "[$Lens.loadingFailedLens, <Object>]",
         "rdfs:label": [
-          "Lens:rejectedElementsLens",
-          "context[$Lens.rejectedElementsLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:rejectedElementsLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.rejectedElementsLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:rejectedElementsLens",
@@ -3110,8 +4098,30 @@
         ],
         "defaultValue": "[\"<function ()>\", $Lens.loadingLens, <Object>]",
         "rdfs:label": [
-          "Lens:activatingLens",
-          "context[$Lens.activatingLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:activatingLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.activatingLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:activatingLens",
@@ -3139,8 +4149,30 @@
         ],
         "defaultValue": "[$Lens.loadingFailedLens, <Object>]",
         "rdfs:label": [
-          "Lens:unavailableLens",
-          "context[$Lens.unavailableLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:unavailableLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.unavailableLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:unavailableLens",
@@ -3168,8 +4200,30 @@
         ],
         "defaultValue": "[$Lens.loadingFailedLens, <Object>]",
         "rdfs:label": [
-          "Lens:destroyedLens",
-          "context[$Lens.destroyedLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:destroyedLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.destroyedLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:destroyedLens",
@@ -3197,8 +4251,30 @@
         ],
         "defaultValue": "[$Lens.loadingFailedLens, <Object>]",
         "rdfs:label": [
-          "Lens:lensPropertyNotFoundLens",
-          "context[$Lens.lensPropertyNotFoundLens]"
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "Lens:lensPropertyNotFoundLens"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.lensPropertyNotFoundLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          }
         ],
         "VRevdoc:indexLabel": [
           "Lens:lensPropertyNotFoundLens",
@@ -3225,7 +4301,13 @@
         ],
         "defaultValue": "[$Lens.loadingFailedLens, <Object>]",
         "rdfs:label": [
-          "context[$Lens.notLensResourceLens]",
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.notLensResourceLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          },
           "Lens:notLensResourceLens"
         ],
         "VRevdoc:indexLabel": [
@@ -3249,7 +4331,13 @@
         ],
         "defaultValue": "[$Lens.loadingFailedLens, <Object>]",
         "rdfs:label": [
-          "context[$Lens.arrayNotIterableLens]",
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.arrayNotIterableLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          },
           "Lens:arrayNotIterableLens"
         ],
         "VRevdoc:indexLabel": [
@@ -3273,7 +4361,13 @@
         ],
         "defaultValue": "[$Lens.loadingFailedLens, <Object>]",
         "rdfs:label": [
-          "context[$Lens.invalidElementLens]",
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "context[$Lens.invalidElementLens]"
+            ],
+            "VRevdoc:tooltipContent": "When used within VSX {}-valoscript blocks"
+          },
           "Lens:invalidElementLens"
         ],
         "VRevdoc:indexLabel": [
@@ -3573,14 +4667,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }
@@ -3864,14 +4951,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }
@@ -4190,14 +5270,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }
@@ -4366,14 +5439,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }

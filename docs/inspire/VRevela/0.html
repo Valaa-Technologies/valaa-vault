@@ -7,7 +7,7 @@
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"subtitle":"0.35.0-rc.32","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"revela"};
+      var respecConfig = {"subtitle":"0.35.0-rc.33","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"revela"};
     </script>
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
@@ -206,8 +206,14 @@ configuration files.
         <tr><td><span class="vdoc type-vdoc-node">VKernel</span>
 </td><td><span class="vdoc type-vdoc-node">https://valospace.org/kernel/0#</span>
 </td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VModel</span>
-</td><td><span class="vdoc type-vdoc-node">https://valospace.org/raem/0#</span>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VPlot</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/plot/0#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">VState</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/state/0#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VValk</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/valk/0#</span>
 </td></tr>
       </tbody>
     </table>
@@ -215,14 +221,13 @@ configuration files.
   </section>
 
   <section id="section_verbs" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_verbs">§ </a><em>VRevela</em> <a href="https://valospace.org/raem/0#Verb" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Verb</span>
+    <h3><a aria-label="§" href="#section_verbs">§ </a><em>VRevela</em> <a href="https://valospace.org/plot/0#Verb" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VPlot:Verb</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The class of all verb names. Each context which performs VPath
-computation valks provides native implementations for the resolvers
-it supports in its VPath valks.
-
+        The class of all verb names. A context that performs VPlot valks shall
+provide the conforming implementations for the subset of verbs that it
+has declared to support.
     </span>
 </span></a> vocabulary</h3>
 

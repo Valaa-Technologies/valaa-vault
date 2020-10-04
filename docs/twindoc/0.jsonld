@@ -63,17 +63,17 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/twindoc",
-    "VRevdoc:version": "0.35.0-rc.32",
+    "VRevdoc:version": "0.35.0-rc.33",
     "VRevdoc:preferredPrefix": "VTwindoc",
     "VRevdoc:baseIRI": "https://valospace.org/twindoc/0#",
     "VRevdoc:referencedModules": {
-      "https://valospace.org/engine/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/engine/VEngine",
-      "https://valospace.org/kernel/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/kernel/VKernel",
-      "https://valospace.org/twindoc/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/twindoc/VTwindoc"
+      "https://valospace.org/engine/0#": "@valos/engine/VEngine",
+      "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
+      "https://valospace.org/twindoc/0#": "@valos/twindoc/VTwindoc"
     },
     "VRevdoc:extenderModules": {},
     "respecConfig": {
-      "subtitle": "0.35.0-rc.32",
+      "subtitle": "0.35.0-rc.33",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -133,9 +133,9 @@
             {
               "@type": "VDoc:Reference",
               "VDoc:content": [
-                "ValOS core specification"
+                "ValOS kernel specification"
               ],
-              "VDoc:ref": "@valos/kernel/spec"
+              "VDoc:ref": "@valos/kernel"
             },
             "."
           ]
@@ -363,14 +363,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }
@@ -640,14 +633,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }
@@ -816,14 +802,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }

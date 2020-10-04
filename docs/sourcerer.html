@@ -36,8 +36,7 @@ of the ValOS sourcerer architecture which is used to route <pre><code><span clas
   <section id="section_valospace" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#section_valospace">§ </a>The <em>VSourcerer</em> valospace namespace of the library ontology of <em>@valos/sourcerer</em></h3>
 <div><p>
-  <div class="vdoc type-vdoc-paragraph">&#x27;VSourcerer&#x27; namespace provides vocabulary for describing and defining
-chronicle behaviors and event contents.
+  <div class="vdoc type-vdoc-paragraph">The &#x27;VSourcerer&#x27; namespace describes the @valos/sourcerer library public API.
   </div>
 </p></div>
   <section id="section_prefixes" class="vdoc type-vdoc-chapter">
@@ -72,8 +71,14 @@ chronicle behaviors and event contents.
         <tr><td><span class="vdoc type-vdoc-node">VKernel</span>
 </td><td><span class="vdoc type-vdoc-node">https://valospace.org/kernel/0#</span>
 </td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VModel</span>
-</td><td><span class="vdoc type-vdoc-node">https://valospace.org/raem/0#</span>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VState</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/state/0#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">VLog</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/log/0#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VValk</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/valk/0#</span>
 </td></tr>
       </tbody>
     </table>
@@ -98,36 +103,7 @@ ontologies.
 </th>
       </thead>
       <tbody>
-        <tr id="EventAspect" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#EventAspect" class="vdoc type-vdoc-reference">#EventAspect</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td></td><td><span class="vdoc type-vdoc-node">The class of resources which contain contextual attributes of a
-particular event message lifetime phase.</span>
-</td></tr>
-        <tr id="CommandAspect" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#CommandAspect" class="vdoc type-vdoc-reference">#CommandAspect</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/sourcerer/0#EventAspect" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VSourcerer:EventAspect</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of resources which contain contextual attributes of a
-particular event message lifetime phase.
-    </span>
-</span></a></td><td><span class="vdoc type-vdoc-node">The class of gateway-provided command properties of an event.</span>
-</td></tr>
-        <tr id="LogAspect" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#LogAspect" class="vdoc type-vdoc-reference">#LogAspect</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/sourcerer/0#EventAspect" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VSourcerer:EventAspect</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of resources which contain contextual attributes of a
-particular event message lifetime phase.
-    </span>
-</span></a></td><td><span class="vdoc type-vdoc-node">The class of authority-provided truth properties of an event.</span>
-</td></tr>
-        <tr id="EventAspects" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#EventAspects" class="vdoc type-vdoc-reference">#EventAspects</a></em></strong> </h3></td></tr>
-        <tr><td></td><td><span class="vdoc type-vdoc-node">The class of resources which provide context-free container of all
-different aspects of event message lifetime as it travels through the
-ValOS sourcing streams. These properties are grouped to different
-contextual and/or functional aspects.</span>
-</td></tr>
+        
       </tbody>
     </table>
 
@@ -151,87 +127,14 @@ ontologies.
 </th>
       </thead>
       <tbody>
-        <tr id="version" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#version" class="vdoc type-vdoc-reference">#version</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/sourcerer/0#EventAspects" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VSourcerer:EventAspects</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of resources which provide context-free container of all
-different aspects of event message lifetime as it travels through the
-ValOS sourcing streams. These properties are grouped to different
-contextual and/or functional aspects.
-    </span>
-</span></a></td><td><a href="http://www.w3.org/2001/XMLSchema#string" class="vdoc type-vdoc-reference">xsd:string</a></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">The aspect version string. The version number of this specification is &#x22;0.3&#x22;</span>
-</td></tr>
-        <tr id="event" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#event" class="vdoc type-vdoc-reference">#event</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/sourcerer/0#EventAspects" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VSourcerer:EventAspects</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of resources which provide context-free container of all
-different aspects of event message lifetime as it travels through the
-ValOS sourcing streams. These properties are grouped to different
-contextual and/or functional aspects.
-    </span>
-</span></a></td><td><a href="https://valospace.org/raem/0#Event" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Event</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all chronicle event log entries
-    </span>
-</span></a></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">The aspect which contains the raem model event payload.</span>
-</td></tr>
-        <tr id="command" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#command" class="vdoc type-vdoc-reference">#command</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/sourcerer/0#EventAspects" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VSourcerer:EventAspects</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of resources which provide context-free container of all
-different aspects of event message lifetime as it travels through the
-ValOS sourcing streams. These properties are grouped to different
-contextual and/or functional aspects.
-    </span>
-</span></a></td><td><a href="https://valospace.org/sourcerer/0#CommandAspect" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VSourcerer:CommandAspect</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of gateway-provided command properties of an event.
-    </span>
-</span></a></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">The aspect which contains the client-generated command properties.</span>
-</td></tr>
-        <tr id="log" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#log" class="vdoc type-vdoc-reference">#log</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/sourcerer/0#EventAspects" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VSourcerer:EventAspects</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of resources which provide context-free container of all
-different aspects of event message lifetime as it travels through the
-ValOS sourcing streams. These properties are grouped to different
-contextual and/or functional aspects.
-    </span>
-</span></a></td><td><a href="https://valospace.org/sourcerer/0#LogAspect" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VSourcerer:LogAspect</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of authority-provided truth properties of an event.
-    </span>
-</span></a></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">The aspect which contains the authority-confirmed event log properties.</span>
-</td></tr>
+        
       </tbody>
     </table>
 
   </section>
 
   <section id="section_types" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_types">§ </a><em>VSourcerer</em> <a href="https://valospace.org/raem/0#Type" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <h3><a aria-label="§" href="#section_types">§ </a><em>VSourcerer</em> <a href="https://valospace.org/state/0#Type" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">valospace resource types</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
@@ -257,12 +160,12 @@ and event triple graphs.
   </section>
 
   <section id="section_fields" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_fields">§ </a><em>VSourcerer</em> <a href="https://valospace.org/raem/0#Field" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <h3><a aria-label="§" href="#section_fields">§ </a><em>VSourcerer</em> <a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">valospace fields</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
         The class of all valospace resource field identifiers.Only the instances of this class can appear as the predicate in
-valospace triple graphs. All valospace fields have VModel:Type or one
+valospace triple graphs. All valospace fields have VState:Type or one
 of its sub-classes as their rdf:domain.
     </span>
 </span></a></h3>
@@ -277,7 +180,7 @@ of its sub-classes as their rdf:domain.
 </th>
         <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:subPropertyOf</span>
 </th>
-        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">VModel:coupledField</span>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">VState:coupledToField</span>
 </th>
       </thead>
       <tbody>
@@ -288,7 +191,7 @@ of its sub-classes as their rdf:domain.
   </section>
 
   <section id="section_resolvers" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_resolvers">§ </a><em>VSourcerer</em> <a href="https://valospace.org/raem/0#Resolver" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <h3><a aria-label="§" href="#section_resolvers">§ </a><em>VSourcerer</em> <a href="https://valospace.org/valk/0#Resolver" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">field resolvers</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
@@ -306,58 +209,7 @@ for resolving generated properties.
 </th>
       </thead>
       <tbody>
-        <tr id="resolveChronicleRoot" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#resolveChronicleRoot" class="vdoc type-vdoc-reference">#resolveChronicleRoot</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td></td><td><a href="https://valospace.org/raem/0#Resolver" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Resolver</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all resolver names. Resolvers are verbs which are used
-for resolving generated properties.
-
-    </span>
-</span></a></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">resolve chronicle root of the resource</span>
-</td></tr>
-        <tr id="resolveChronicleURI" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#resolveChronicleURI" class="vdoc type-vdoc-reference">#resolveChronicleURI</a></em></strong> </h3></td></tr>
-        <tr><td></td><td><a href="https://valospace.org/raem/0#Resolver" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Resolver</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all resolver names. Resolvers are verbs which are used
-for resolving generated properties.
-
-    </span>
-</span></a></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">resolve chronicle URI of the resource</span>
-</td></tr>
-        <tr id="resolveModifiedAt" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#resolveModifiedAt" class="vdoc type-vdoc-reference">#resolveModifiedAt</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td></td><td><a href="https://valospace.org/raem/0#Resolver" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Resolver</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all resolver names. Resolvers are verbs which are used
-for resolving generated properties.
-
-    </span>
-</span></a></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">resolve modification timestamp of the resource</span>
-</td></tr>
-        <tr id="resolveCreatedAt" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#resolveCreatedAt" class="vdoc type-vdoc-reference">#resolveCreatedAt</a></em></strong> </h3></td></tr>
-        <tr><td></td><td><a href="https://valospace.org/raem/0#Resolver" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Resolver</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all resolver names. Resolvers are verbs which are used
-for resolving generated properties.
-
-    </span>
-</span></a></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">resolve creation timestamp of the resource</span>
-</td></tr>
+        
       </tbody>
     </table>
 
@@ -400,27 +252,9 @@ for resolving generated properties.
         <tr><td><span class="vdoc type-vdoc-node">restriction</span>
 </td><td><span class="vdoc type-vdoc-node"></span>
 </td><td></td><td></td><td></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">aspects</span>
-</td><td><span class="vdoc type-vdoc-node"></span>
-</td><td></td><td></td><td></td></tr>
-        <tr><td><span class="vdoc type-vdoc-node">@base</span>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">@base</span>
 </td><td><span class="vdoc type-vdoc-node">https://valospace.org/sourcerer/0#</span>
 </td><td></td><td></td><td></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VSourcerer:event</span>
-</td><td><span class="vdoc type-vdoc-node"></span>
-</td><td><span class="vdoc type-vdoc-node">#event</span>
-</td><td><span class="vdoc type-vdoc-node">@id</span>
-</td><td></td></tr>
-        <tr><td><span class="vdoc type-vdoc-node">VSourcerer:command</span>
-</td><td><span class="vdoc type-vdoc-node"></span>
-</td><td><span class="vdoc type-vdoc-node">#command</span>
-</td><td><span class="vdoc type-vdoc-node">@id</span>
-</td><td></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VSourcerer:log</span>
-</td><td><span class="vdoc type-vdoc-node"></span>
-</td><td><span class="vdoc type-vdoc-node">#log</span>
-</td><td><span class="vdoc type-vdoc-node">@id</span>
-</td><td></td></tr>
       </tbody>
     </table>
 

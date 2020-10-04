@@ -54,7 +54,10 @@
       },
       "VEngine": "https://valospace.org/engine/0#",
       "VScript": "https://valospace.org/script/0#",
-      "VModel": "https://valospace.org/raem/0#"
+      "VState": "https://valospace.org/state/0#",
+      "VLog": "https://valospace.org/log/0#",
+      "VValk": "https://valospace.org/valk/0#",
+      "V": "https://valospace.org/0#"
     },
     "dc:title": "ValOS Script API, schema",
     "VDoc:tags": [
@@ -65,17 +68,19 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/script",
-    "VRevdoc:version": "0.35.0-rc.32",
+    "VRevdoc:version": "0.35.0-rc.33",
     "VRevdoc:preferredPrefix": "VScript",
     "VRevdoc:baseIRI": "https://valospace.org/script/0#",
     "VRevdoc:referencedModules": {
-      "https://valospace.org/engine/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/engine/VEngine",
-      "https://valospace.org/kernel/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/kernel/VKernel",
-      "https://valospace.org/raem/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/raem/VModel",
-      "https://valospace.org/script/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/script/VScript"
+      "https://valospace.org/engine/0#": "@valos/engine/VEngine",
+      "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
+      "https://valospace.org/state/0#": "@valos/state/VState",
+      "https://valospace.org/log/0#": "@valos/log/VLog",
+      "https://valospace.org/valk/0#": "@valos/valk/VValk"
     },
     "VRevdoc:extenderModules": {
-      "https://valospace.org/0#": "@valos/script/V"
+      "https://valospace.org/0#": "@valos/script/V",
+      "https://valospace.org/valk/0#": "@valos/script/VValk"
     },
     "respecConfig": {
       "specStatus": "unofficial",
@@ -152,7 +157,7 @@
               "VDoc:content": [
                 "events"
               ],
-              "VDoc:ref": "VModel:Event"
+              "VDoc:ref": "VLog:Event"
             },
             " from all valospace resource\nmodification side-effects and groups all such side effects into\ntransactions. Valoscript retains ECMAScript 5 syntax and semantics."
           ]
@@ -223,25 +228,12 @@
       "dc": "http://purl.org/dc/elements/1.1/",
       "VScript": "https://valospace.org/script/0#",
       "VKernel": "https://valospace.org/kernel/0#",
-      "VModel": "https://valospace.org/raem/0#"
+      "VState": "https://valospace.org/state/0#",
+      "VLog": "https://valospace.org/log/0#",
+      "VValk": "https://valospace.org/valk/0#"
     },
     "vocabulary": {
-      "@id": "vocabulary",
-      "resolveTwinspace": {
-        "@type": "VModel:Resolver",
-        "VRevdoc:brief": "resolve twinspace",
-        "rdfs:comment": "resolve the twinspace of the ScopeProperty"
-      },
-      "resolveTwinSubject": {
-        "@type": "VModel:Resolver",
-        "VRevdoc:brief": "resolve reified twin subject",
-        "rdfs:comment": "resolve the reified twin subject of the ScopeProperty"
-      },
-      "resolveTwinObject": {
-        "@type": "VModel:Resolver",
-        "VRevdoc:brief": "resolve reified twin object",
-        "rdfs:comment": "resolve the reified twin object of the ScopeProperty"
-      }
+      "@id": "vocabulary"
     },
     "context": {
       "@id": "context",
@@ -256,7 +248,7 @@
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "'VScript' namespace specifies the vocabulary for Valoscript execution\nprimitives."
+            "The 'VScript' namespace describes the @valos/sourcerer API."
           ]
         }
       ]
@@ -358,14 +350,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }
@@ -635,14 +620,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }
@@ -772,7 +750,7 @@
           "VDoc:content": [
             "valospace resource types"
           ],
-          "VDoc:ref": "VModel:Type"
+          "VDoc:ref": "VState:Type"
         }
       ],
       "VDoc:content": [
@@ -818,14 +796,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }
@@ -917,7 +888,7 @@
                   "VDoc:content": [
                     "instance fields"
                   ],
-                  "VDoc:ref": "VModel:Field"
+                  "VDoc:ref": "VState:Field"
                 },
                 "VDoc:wide": true,
                 "VDoc:cell": {
@@ -1091,7 +1062,7 @@
           "VDoc:content": [
             "valospace fields"
           ],
-          "VDoc:ref": "VModel:Field"
+          "VDoc:ref": "VState:Field"
         }
       ],
       "VDoc:content": [
@@ -1137,14 +1108,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }
@@ -1250,10 +1214,10 @@
               },
               {
                 "@type": "VDoc:Header",
-                "VDoc:content": "VModel:coupledField",
+                "VDoc:content": "VState:coupledToField",
                 "VDoc:cell": {
                   "VDoc:words": {
-                    "VDoc:selectField": "VModel:coupledField"
+                    "VDoc:selectField": "VState:coupledToField"
                   },
                   "VDoc:map": {
                     "@type": "VDoc:Reference",
@@ -1322,7 +1286,7 @@
           "VDoc:content": [
             "field resolvers"
           ],
-          "VDoc:ref": "VModel:Resolver"
+          "VDoc:ref": "VValk:Resolver"
         }
       ],
       "VDoc:content": [
@@ -1368,14 +1332,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }
@@ -1472,11 +1429,7 @@
               }
             ]
           },
-          "VDoc:entries": [
-            "resolveTwinspace",
-            "resolveTwinSubject",
-            "resolveTwinObject"
-          ]
+          "VDoc:entries": []
         }
       ]
     },
@@ -1535,14 +1488,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }

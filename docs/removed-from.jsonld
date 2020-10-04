@@ -54,7 +54,75 @@
       },
       "VEngine": "https://valospace.org/engine/0#",
       "VRemovedFrom": "https://valospace.org/removed-from/0#",
-      "V": "https://valospace.org/0#"
+      "V": "https://valospace.org/0#",
+      "VState": "https://valospace.org/state/0#",
+      "VPlot": "https://valospace.org/plot/0#",
+      "VLog": "https://valospace.org/log/0#",
+      "VRemovedFrom:ownlings": {
+        "@id": "#ownlings",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VRemovedFrom:properties": {
+        "@id": "#properties",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VRemovedFrom:nodes": {
+        "@id": "#nodes",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VRemovedFrom:entries": {
+        "@id": "#entries",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VRemovedFrom:entities": {
+        "@id": "#entities",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VRemovedFrom:medias": {
+        "@id": "#medias",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VRemovedFrom:connectedRelations": {
+        "@id": "#connectedRelations",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VRemovedFrom:outRelations": {
+        "@id": "#outRelations",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VRemovedFrom:inRelations": {
+        "@id": "#inRelations",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VRemovedFrom:pairedOutRelations": {
+        "@id": "#pairedOutRelations",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VRemovedFrom:pairedInRelations": {
+        "@id": "#pairedInRelations",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VRemovedFrom:connectedOutRelations": {
+        "@id": "#connectedOutRelations",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VRemovedFrom:connectedInRelations": {
+        "@id": "#connectedInRelations",
+        "@container": "@list",
+        "@type": "@id"
+      }
     },
     "dc:title": "@valos/kernel removed-from field reference",
     "VDoc:tags": [
@@ -63,16 +131,16 @@
       "TECHNICIAN"
     ],
     "VRevdoc:package": "@valos/kernel",
-    "VRevdoc:version": "0.35.0-rc.31",
+    "VRevdoc:version": "0.35.0-rc.32",
     "VRevdoc:preferredPrefix": "VRemovedFrom",
     "VRevdoc:baseIRI": "https://valospace.org/removed-from/0#",
     "VRevdoc:referencedModules": {
-      "https://valospace.org/engine/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/engine/VEngine",
-      "https://valospace.org/kernel/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/kernel/VKernel"
+      "https://valospace.org/engine/0#": "@valos/engine/VEngine",
+      "https://valospace.org/kernel/0#": "@valos/kernel/VKernel"
     },
     "VRevdoc:extenderModules": {},
     "respecConfig": {
-      "subtitle": "0.35.0-rc.31",
+      "subtitle": "0.35.0-rc.32",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -95,7 +163,124 @@
       "VKernel": "https://valospace.org/kernel/0#"
     },
     "vocabulary": {
-      "@id": "vocabulary"
+      "@id": "vocabulary",
+      "ownlings": {
+        "@type": "VState:GeneratedField",
+        "rdfs:domain": "V:Extant",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "removed-from entries of field V:ownlings.",
+        "rdfs:label": [
+          "$VRemovedFrom.ownlings"
+        ]
+      },
+      "properties": {
+        "@type": "VState:GeneratedField",
+        "rdfs:domain": "V:Scope",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "removed-from entries of field V:properties.",
+        "rdfs:label": [
+          "$VRemovedFrom.properties"
+        ]
+      },
+      "nodes": {
+        "@type": "VState:GeneratedField",
+        "rdfs:domain": "V:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "removed-from entries of field V:nodes.",
+        "rdfs:label": [
+          "$VRemovedFrom.nodes"
+        ]
+      },
+      "entries": {
+        "@type": "VState:GeneratedField",
+        "rdfs:domain": "V:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "removed-from entries of field V:entries.",
+        "rdfs:label": [
+          "$VRemovedFrom.entries"
+        ]
+      },
+      "entities": {
+        "@type": "VState:GeneratedField",
+        "rdfs:domain": "V:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "removed-from entries of field V:entities.",
+        "rdfs:label": [
+          "$VRemovedFrom.entities"
+        ]
+      },
+      "medias": {
+        "@type": "VState:GeneratedField",
+        "rdfs:domain": "V:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "removed-from entries of field V:medias.",
+        "rdfs:label": [
+          "$VRemovedFrom.medias"
+        ]
+      },
+      "connectedRelations": {
+        "@type": "VState:GeneratedField",
+        "rdfs:domain": "V:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "removed-from entries of field V:connectedRelations.",
+        "rdfs:label": [
+          "$VRemovedFrom.connectedRelations"
+        ]
+      },
+      "outRelations": {
+        "@type": "VState:GeneratedField",
+        "rdfs:domain": "V:SourcerableNode",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "removed-from entries of field V:outRelations.",
+        "rdfs:label": [
+          "$VRemovedFrom.outRelations"
+        ]
+      },
+      "inRelations": {
+        "@type": "VState:GeneratedField",
+        "rdfs:domain": "V:SourcerableNode",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "removed-from entries of field V:inRelations.",
+        "rdfs:label": [
+          "$VRemovedFrom.inRelations"
+        ]
+      },
+      "pairedOutRelations": {
+        "@type": "VState:GeneratedField",
+        "rdfs:domain": "V:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "removed-from entries of field V:pairedOutRelations.",
+        "rdfs:label": [
+          "$VRemovedFrom.pairedOutRelations"
+        ]
+      },
+      "pairedInRelations": {
+        "@type": "VState:GeneratedField",
+        "rdfs:domain": "V:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "removed-from entries of field V:pairedInRelations.",
+        "rdfs:label": [
+          "$VRemovedFrom.pairedInRelations"
+        ]
+      },
+      "connectedOutRelations": {
+        "@type": "VState:GeneratedField",
+        "rdfs:domain": "V:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "removed-from entries of field V:connectedOutRelations.",
+        "rdfs:label": [
+          "$VRemovedFrom.connectedOutRelations"
+        ]
+      },
+      "connectedInRelations": {
+        "@type": "VState:GeneratedField",
+        "rdfs:domain": "V:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": "removed-from entries of field V:connectedInRelations.",
+        "rdfs:label": [
+          "$VRemovedFrom.connectedInRelations"
+        ]
+      }
     },
     "context": {
       "@id": "context",
@@ -106,10 +291,79 @@
       "dc": "http://purl.org/dc/elements/1.1/",
       "V": "https://valospace.org/0#",
       "VKernel": "https://valospace.org/kernel/0#",
+      "VState": "https://valospace.org/state/0#",
+      "VEngine": "https://valospace.org/engine/0#",
+      "VPlot": "https://valospace.org/plot/0#",
+      "VLog": "https://valospace.org/log/0#",
       "restriction": {
         "@reverse": "owl:onProperty"
       },
-      "@base": "https://valospace.org/removed-from/0#"
+      "@base": "https://valospace.org/removed-from/0#",
+      "VRemovedFrom:ownlings": {
+        "@id": "#ownlings",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VRemovedFrom:properties": {
+        "@id": "#properties",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VRemovedFrom:nodes": {
+        "@id": "#nodes",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VRemovedFrom:entries": {
+        "@id": "#entries",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VRemovedFrom:entities": {
+        "@id": "#entities",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VRemovedFrom:medias": {
+        "@id": "#medias",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VRemovedFrom:connectedRelations": {
+        "@id": "#connectedRelations",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VRemovedFrom:outRelations": {
+        "@id": "#outRelations",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VRemovedFrom:inRelations": {
+        "@id": "#inRelations",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VRemovedFrom:pairedOutRelations": {
+        "@id": "#pairedOutRelations",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VRemovedFrom:pairedInRelations": {
+        "@id": "#pairedInRelations",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VRemovedFrom:connectedOutRelations": {
+        "@id": "#connectedOutRelations",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VRemovedFrom:connectedInRelations": {
+        "@id": "#connectedInRelations",
+        "@container": "@list",
+        "@type": "@id"
+      }
     },
     "abstract": {
       "@id": "abstract",
@@ -267,7 +521,7 @@
           "VDoc:content": [
             "valospace fields"
           ],
-          "VDoc:ref": "VModel:Field"
+          "VDoc:ref": "VState:Field"
         }
       ],
       "VDoc:content": [
@@ -313,14 +567,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }
@@ -426,10 +673,10 @@
               },
               {
                 "@type": "VDoc:Header",
-                "VDoc:content": "VModel:coupledField",
+                "VDoc:content": "VState:coupledToField",
                 "VDoc:cell": {
                   "VDoc:words": {
-                    "VDoc:selectField": "VModel:coupledField"
+                    "VDoc:selectField": "VState:coupledToField"
                   },
                   "VDoc:map": {
                     "@type": "VDoc:Reference",
@@ -478,7 +725,21 @@
               }
             ]
           },
-          "VDoc:entries": []
+          "VDoc:entries": [
+            "ownlings",
+            "properties",
+            "nodes",
+            "entries",
+            "entities",
+            "medias",
+            "connectedRelations",
+            "outRelations",
+            "inRelations",
+            "pairedOutRelations",
+            "pairedInRelations",
+            "connectedOutRelations",
+            "connectedInRelations"
+          ]
         }
       ]
     },
@@ -537,14 +798,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }

@@ -54,22 +54,10 @@
       },
       "VEngine": "https://valospace.org/engine/0#",
       "VSourcerer": "https://valospace.org/sourcerer/0#",
-      "VModel": "https://valospace.org/raem/0#",
-      "aspects": {
-        "@reverse": "VSourcerer:event"
-      },
-      "VSourcerer:event": {
-        "@id": "#event",
-        "@type": "@id"
-      },
-      "VSourcerer:command": {
-        "@id": "#command",
-        "@type": "@id"
-      },
-      "VSourcerer:log": {
-        "@id": "#log",
-        "@type": "@id"
-      }
+      "VState": "https://valospace.org/state/0#",
+      "VLog": "https://valospace.org/log/0#",
+      "VValk": "https://valospace.org/valk/0#",
+      "V": "https://valospace.org/0#"
     },
     "dc:title": "ValOS Sourcerer API, schema",
     "VDoc:tags": [
@@ -80,17 +68,21 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/sourcerer",
-    "VRevdoc:version": "0.35.0-rc.32",
+    "VRevdoc:version": "0.35.0-rc.33",
     "VRevdoc:preferredPrefix": "VSourcerer",
     "VRevdoc:baseIRI": "https://valospace.org/sourcerer/0#",
     "VRevdoc:referencedModules": {
-      "https://valospace.org/engine/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/engine/VEngine",
-      "https://valospace.org/kernel/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/kernel/VKernel",
-      "https://valospace.org/raem/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/raem/VModel",
-      "https://valospace.org/sourcerer/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/sourcerer/VSourcerer"
+      "https://valospace.org/engine/0#": "@valos/engine/VEngine",
+      "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
+      "https://valospace.org/state/0#": "@valos/state/VState",
+      "https://valospace.org/log/0#": "@valos/log/VLog",
+      "https://valospace.org/valk/0#": "@valos/valk/VValk",
+      "https://valospace.org/0#": "@valos/space/V"
     },
     "VRevdoc:extenderModules": {
-      "https://valospace.org/0#": "@valos/sourcerer/V"
+      "https://valospace.org/log/0#": "@valos/sourcerer/VLog",
+      "https://valospace.org/0#": "@valos/sourcerer/V",
+      "https://valospace.org/valk/0#": "@valos/sourcerer/VValk"
     },
     "respecConfig": {
       "specStatus": "unofficial",
@@ -224,114 +216,19 @@
       "dc": "http://purl.org/dc/elements/1.1/",
       "VSourcerer": "https://valospace.org/sourcerer/0#",
       "VKernel": "https://valospace.org/kernel/0#",
-      "VModel": "https://valospace.org/raem/0#"
+      "VState": "https://valospace.org/state/0#",
+      "VLog": "https://valospace.org/log/0#",
+      "VValk": "https://valospace.org/valk/0#"
     },
     "vocabulary": {
-      "@id": "vocabulary",
-      "EventAspect": {
-        "@type": "VKernel:Class",
-        "VRevdoc:brief": "contextual event aspect",
-        "rdfs:comment": "The class of resources which contain contextual attributes of a\nparticular event message lifetime phase."
-      },
-      "CommandAspect": {
-        "@type": "VKernel:Class",
-        "rdfs:subClassOf": "VSourcerer:EventAspect",
-        "VRevdoc:brief": "gateway command aspect",
-        "rdfs:comment": "The class of gateway-provided command properties of an event."
-      },
-      "LogAspect": {
-        "@type": "VKernel:Class",
-        "rdfs:subClassOf": "VSourcerer:EventAspect",
-        "VRevdoc:brief": "authority truth aspect",
-        "rdfs:comment": "The class of authority-provided truth properties of an event."
-      },
-      "EventAspects": {
-        "@type": "VKernel:Class",
-        "VRevdoc:brief": "context-free container of event aspects",
-        "rdfs:comment": "The class of resources which provide context-free container of all\ndifferent aspects of event message lifetime as it travels through the\nValOS sourcing streams. These properties are grouped to different\ncontextual and/or functional aspects."
-      },
-      "version": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "VSourcerer:EventAspects",
-        "rdfs:range": "xsd:string",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The aspect version string. The version number of this specification is \"0.3\""
-      },
-      "event": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "VSourcerer:EventAspects",
-        "rdfs:range": "VModel:Event",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The aspect which contains the raem model event payload."
-      },
-      "command": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "VSourcerer:EventAspects",
-        "rdfs:range": "VSourcerer:CommandAspect",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The aspect which contains the client-generated command properties."
-      },
-      "log": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "VSourcerer:EventAspects",
-        "rdfs:range": "VSourcerer:LogAspect",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The aspect which contains the authority-confirmed event log properties."
-      },
-      "resolveChronicleRoot": {
-        "@type": "VModel:Resolver",
-        "VRevdoc:brief": "resolve chronicle root",
-        "rdfs:comment": "resolve chronicle root of the resource"
-      },
-      "resolveChronicleURI": {
-        "@type": "VModel:Resolver",
-        "VRevdoc:brief": "resolve chronicle URI",
-        "rdfs:comment": "resolve chronicle URI of the resource"
-      },
-      "resolveModifiedAt": {
-        "@type": "VModel:Resolver",
-        "VRevdoc:brief": "resolve modification timestamp",
-        "rdfs:comment": "resolve modification timestamp of the resource"
-      },
-      "resolveCreatedAt": {
-        "@type": "VModel:Resolver",
-        "VRevdoc:brief": "resolve creation timestamp",
-        "rdfs:comment": "resolve creation timestamp of the resource"
-      }
+      "@id": "vocabulary"
     },
     "context": {
       "@id": "context",
       "restriction": {
         "@reverse": "owl:onProperty"
       },
-      "aspects": {
-        "@reverse": "VSourcerer:event"
-      },
-      "@base": "https://valospace.org/sourcerer/0#",
-      "VSourcerer:event": {
-        "@id": "#event",
-        "@type": "@id"
-      },
-      "VSourcerer:command": {
-        "@id": "#command",
-        "@type": "@id"
-      },
-      "VSourcerer:log": {
-        "@id": "#log",
-        "@type": "@id"
-      }
+      "@base": "https://valospace.org/sourcerer/0#"
     },
     "section_valospace_abstract": {
       "@id": "section_valospace_abstract",
@@ -339,7 +236,7 @@
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "'VSourcerer' namespace provides vocabulary for describing and defining\nchronicle behaviors and event contents."
+            "The 'VSourcerer' namespace describes the @valos/sourcerer library public API."
           ]
         }
       ]
@@ -441,14 +338,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }
@@ -652,12 +542,7 @@
               }
             ]
           },
-          "VDoc:entries": [
-            "EventAspect",
-            "CommandAspect",
-            "LogAspect",
-            "EventAspects"
-          ]
+          "VDoc:entries": []
         }
       ]
     },
@@ -723,14 +608,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }
@@ -840,12 +718,7 @@
               }
             ]
           },
-          "VDoc:entries": [
-            "version",
-            "event",
-            "command",
-            "log"
-          ]
+          "VDoc:entries": []
         }
       ]
     },
@@ -865,7 +738,7 @@
           "VDoc:content": [
             "valospace resource types"
           ],
-          "VDoc:ref": "VModel:Type"
+          "VDoc:ref": "VState:Type"
         }
       ],
       "VDoc:content": [
@@ -911,14 +784,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }
@@ -1010,7 +876,7 @@
                   "VDoc:content": [
                     "instance fields"
                   ],
-                  "VDoc:ref": "VModel:Field"
+                  "VDoc:ref": "VState:Field"
                 },
                 "VDoc:wide": true,
                 "VDoc:cell": {
@@ -1184,7 +1050,7 @@
           "VDoc:content": [
             "valospace fields"
           ],
-          "VDoc:ref": "VModel:Field"
+          "VDoc:ref": "VState:Field"
         }
       ],
       "VDoc:content": [
@@ -1230,14 +1096,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }
@@ -1343,10 +1202,10 @@
               },
               {
                 "@type": "VDoc:Header",
-                "VDoc:content": "VModel:coupledField",
+                "VDoc:content": "VState:coupledToField",
                 "VDoc:cell": {
                   "VDoc:words": {
-                    "VDoc:selectField": "VModel:coupledField"
+                    "VDoc:selectField": "VState:coupledToField"
                   },
                   "VDoc:map": {
                     "@type": "VDoc:Reference",
@@ -1415,7 +1274,7 @@
           "VDoc:content": [
             "field resolvers"
           ],
-          "VDoc:ref": "VModel:Resolver"
+          "VDoc:ref": "VValk:Resolver"
         }
       ],
       "VDoc:content": [
@@ -1461,14 +1320,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }
@@ -1565,12 +1417,7 @@
               }
             ]
           },
-          "VDoc:entries": [
-            "resolveChronicleRoot",
-            "resolveChronicleURI",
-            "resolveModifiedAt",
-            "resolveCreatedAt"
-          ]
+          "VDoc:entries": []
         }
       ]
     },
@@ -1629,14 +1476,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }

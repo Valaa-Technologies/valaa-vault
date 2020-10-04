@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>@valos/log library workspace</title>
+    <script
+     src='https://www.w3.org/Tools/respec/respec-w3c-common'
+     class='remove'></script>
+    <script class='remove'>
+      var respecConfig = {"specStatus":"unofficial","shortName":"log","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}]};
+    </script>
+    <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
+    
+  </head>
+  <body class="vdoc vdoc-body">
+    
+  <section id="abstract" class="vdoc type-vdoc-chapter"><div><p>
+  <div class="vdoc type-vdoc-paragraph">Specifies the ValOS event log JSON-LD format and the &#x27;VLog&#x27; namespace
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph"><em>VLog</em> together with <a href="https://valospace.org/state/0#" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VState:</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The vocabulary for defining the ValOS state core model and for
+extending it with new types and fields.
+    </span>
+</span></a> <a href="https://valospace.org/plot/0#" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VPlot:</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The vocabulary for defining the hierarchical ValOS identifiers and for
+extending them with new step semantics
+    </span>
+</span></a> and <a href="https://valospace.org/valk/0#" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VValk:</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The vocabulary for defining ValOS computations and for
+adding defining new semantics to it.
+    </span>
+</span></a> forms the infrastructural foundation ie. the <em>fabric</em> of the valospace.<em>VLog</em> provides the temporal dimension and so enables change and reactions.
+  </div>
+</p></div>
+  </section>
+
+  <section id="sotd" class="vdoc type-vdoc-chapter"><div><p>
+  <div class="vdoc type-vdoc-paragraph">This document is part of the library workspace <a href="@valos/log" class="vdoc type-vrevdoc-package"><em>@valos/log</em></a>
+(of domain <a href="https://valospace.org/kernel" class="vdoc type-vrevdoc-package"><em>@valos/kernel</em></a>) which has the description:
+&#x60;Specifies the ValOS event log JSON-LD format and the &#x27;VLog&#x27; namespace&#x60;.
+  </div>
+</p></div>
+  </section>
+
+  <section id="introduction" class="vdoc type-vdoc-chapter"><div><p>
+  <div class="vdoc type-vdoc-paragraph">Edit me - this is the first payload chapter. Abstract and SOTD are
+essential <a href="https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate" class="vdoc type-vdoc-reference">ReSpec boilerplate</a>
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">See <a href="https://valospace.org/revdoc/tutorial" class="vdoc type-vdoc-reference">ReVDoc tutorial</a> for
+instructions on how to write revdoc source documents.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">See also <a href="https://valospace.org/revdoc" class="vdoc type-vdoc-reference">ReVdoc specification</a> and <a href="https://valospace.org/vdoc" class="vdoc type-vdoc-reference">VDoc specification</a> for reference documentation.
+  </div>
+</p></div>
+  </section>
+
+  <section id="section_fabric" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_fabric">§ </a>The <em>VLog</em> fabric namespace of the library ontology of <a href="@valos/log" class="vdoc type-vrevdoc-package"><em>@valos/log</em></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">The vocabulary for defining the ValOS chronicle event log structure
+and for adding content and behaviors to it.
+  </div>
+</p></div>
+  <section id="section_prefixes" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_prefixes">§ </a><em>@valos/log</em> IRI prefixes</h3>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">Prefix</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">IRI</span>
+</th>
+      </thead>
+      <tbody>
+        <tr><td><span class="vdoc type-vdoc-node">rdf</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/1999/02/22-rdf-syntax-ns#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">rdfs</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/2000/01/rdf-schema#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">xsd</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/2001/XMLSchema#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">owl</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/2002/07/owl#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">dc</span>
+</td><td><span class="vdoc type-vdoc-node">http://purl.org/dc/elements/1.1/</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VLog</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/log/0#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">VKernel</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/kernel/0#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VPlot</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/plot/0#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">VState</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/state/0#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VValk</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/valk/0#</span>
+</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_classes" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_classes">§ </a><em>VLog</em> <a href="https://valospace.org/kernel/0#Class" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">fabric classes</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of classes which are defined by the ValOS kernel domain
+ontologies.
+    </span>
+</span></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">This section describes fabric classes introduced by the &#x27;VLog&#x27; namespace
+  </div>
+</p></div>
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:subClassOf</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</th>
+      </thead>
+      <tbody>
+        <tr id="Event" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#Event" class="vdoc type-vdoc-reference">#Event</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td></td><td><span class="vdoc type-vdoc-node">The class of all chronicle event log entries</span>
+</td></tr>
+        <tr id="EventAspects" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#EventAspects" class="vdoc type-vdoc-reference">#EventAspects</a></em></strong> </h3></td></tr>
+        <tr><td></td><td><span class="vdoc type-vdoc-node">The class of resources which provide context-free container of all
+different lifetime aspects of a single event as it travels through the
+ValOS sourcering streams. These properties are grouped to different
+contextual and/or functional aspects.</span>
+</td></tr>
+        <tr id="EventAspect" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#EventAspect" class="vdoc type-vdoc-reference">#EventAspect</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td></td><td><span class="vdoc type-vdoc-node">The class of resources which contain contextual attributes of a
+particular phase of the event message lifetime.</span>
+</td></tr>
+        <tr id="CommandAspect" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#CommandAspect" class="vdoc type-vdoc-reference">#CommandAspect</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/log/0#EventAspect" class="vdoc type-vdoc-reference">VLog:EventAspect</a></td><td><span class="vdoc type-vdoc-node">The class of gateway-provided command properties of an event.</span>
+</td></tr>
+        <tr id="LogAspect" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#LogAspect" class="vdoc type-vdoc-reference">#LogAspect</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/log/0#EventAspect" class="vdoc type-vdoc-reference">VLog:EventAspect</a></td><td><span class="vdoc type-vdoc-node">The class of authority-provided truth properties of an event.</span>
+</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_properties" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_properties">§ </a><em>VLog</em> <a href="https://valospace.org/kernel/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">fabric properties</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of properties which are defined by the ValOS kernel domain
+ontologies.
+    </span>
+</span></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">This section describes fabric properties introduced by the &#x27;VLog&#x27; namespace
+  </div>
+</p></div>
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:domain</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:range</span>
+</th>
+      </thead>
+      <tbody>
+        <tr id="version" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#version" class="vdoc type-vdoc-reference">#version</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/log/0#EventAspects" class="vdoc type-vdoc-reference">VLog:EventAspects</a></td><td><a href="http://www.w3.org/2001/XMLSchema#string" class="vdoc type-vdoc-reference">xsd:string</a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The aspect version string. The version number of this specification is &#x22;0.3&#x22;</span>
+</td></tr>
+        <tr id="event" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#event" class="vdoc type-vdoc-reference">#event</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/log/0#EventAspects" class="vdoc type-vdoc-reference">VLog:EventAspects</a></td><td><a href="https://valospace.org/log/0#Event" class="vdoc type-vdoc-reference">VLog:Event</a></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The aspect which contains the event state change payload.</span>
+</td></tr>
+        <tr id="command" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#command" class="vdoc type-vdoc-reference">#command</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/log/0#EventAspects" class="vdoc type-vdoc-reference">VLog:EventAspects</a></td><td><a href="https://valospace.org/log/0#CommandAspect" class="vdoc type-vdoc-reference">VLog:CommandAspect</a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The aspect which contains the client-generated command properties.</span>
+</td></tr>
+        <tr id="log" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#log" class="vdoc type-vdoc-reference">#log</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/log/0#EventAspects" class="vdoc type-vdoc-reference">VLog:EventAspects</a></td><td><a href="https://valospace.org/log/0#LogAspect" class="vdoc type-vdoc-reference">VLog:LogAspect</a></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The aspect which contains the authority-confirmed event log properties.</span>
+</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_methods" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_methods">§ </a><em>VLog</em> <a href="https://valospace.org/engine/0#Method" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">fabric methods</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all valosheath type prototype methods.
+    </span>
+</span></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">This section describes fabric methods introduced by the &#x27;VLog&#x27; namespace
+  </div>
+</p></div>
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:domain</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:range</span>
+</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_globals" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_globals">§ </a><em>VLog</em> <a href="https://valospace.org/engine/0#Global" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">fabric globals</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all valosheath global resources.
+    </span>
+</span></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">This section describes fabric global objects introduced by the &#x27;VLog&#x27; namespace
+  </div>
+</p></div>
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdf:type</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">Comment</span>
+</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_vocabulary_other">§ </a><em>VLog</em> remaining vocabulary terms</h3>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdf:type</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:subClassOf</span>
+</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  </section>
+
+  </body>
+</html>

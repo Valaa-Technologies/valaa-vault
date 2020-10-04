@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.33](https://github.com/valaatech/kernel/compare/v0.35.0-rc.32...v0.35.0-rc.33) (2020-10-04)
+
+
+### Bug Fixes
+
+* Ontology revdoc generation issues ([d710690](https://github.com/valaatech/kernel/commit/d7106900d7a0eb4489192375336fede6a8c6df07))
+
+
+### Features
+
+* Add @valos/log library and the VLog namespace ([0d03ca9](https://github.com/valaatech/kernel/commit/0d03ca921ad42ae478e7936549601e3d42f4dc18))
+* Add @valos/plot library and the VPlot namespace ([1c003ad](https://github.com/valaatech/kernel/commit/1c003adaf45c11a163d53c99d0a4f21cc797efd1))
+* Add @valos/space library and move 'V' namespace specification to it ([20b00cd](https://github.com/valaatech/kernel/commit/20b00cd207f73ccfd7a78703480f141c861e7758))
+* Add @valos/state library and the VState namespace ([d129897](https://github.com/valaatech/kernel/commit/d129897aa91fe378cc12ffed21baca6b14fab544))
+* Add @valos/valk library and the VValk namespace ([97a9090](https://github.com/valaatech/kernel/commit/97a909064030556fafd6a59d67c533365efdca18))
+* Add fabricator ProgressEvent events to 'On' namespace ([7705e7c](https://github.com/valaatech/kernel/commit/7705e7c61b768b43e9e99a89633adf8dbe2945da))
+* Add On: namespace event handling to Valens ([116e5b6](https://github.com/valaatech/kernel/commit/116e5b6983a4cbbc5741498efa8ba4b6cf13cee9))
+* **type-library:** Add specify-namespace tool ([2234c3e](https://github.com/valaatech/kernel/commit/2234c3e76d4f2fbe6354f0ba46835cffeef33ea8))
+
+
+
+
+
 # [0.35.0-rc.32](https://github.com/valaatech/kernel/compare/v0.35.0-rc.31...v0.35.0-rc.32) (2020-09-24)
 
 

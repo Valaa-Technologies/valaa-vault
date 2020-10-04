@@ -31,7 +31,7 @@ for valoscript, the valospace ECMAScript dialect.
 
   <section id="introduction" class="vdoc type-vdoc-chapter"><div><p>
   <div class="vdoc type-vdoc-paragraph">Valoscript extends ECMAScript 5 object model transparently for
-manipulating valospace resources. The valoscript interpreter creates <a href="https://valospace.org/raem/0#Event" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+manipulating valospace resources. The valoscript interpreter creates <a href="https://valospace.org/log/0#Event" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">events</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
@@ -47,8 +47,7 @@ transactions. Valoscript retains ECMAScript 5 syntax and semantics.
   <section id="section_valospace" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#section_valospace">§ </a>The <em>VScript</em> valospace namespace of the library ontology of <a href="https://valospace.org/script" class="vdoc type-vrevdoc-package"><em>@valos/script</em></a></h3>
 <div><p>
-  <div class="vdoc type-vdoc-paragraph">&#x27;VScript&#x27; namespace specifies the vocabulary for Valoscript execution
-primitives.
+  <div class="vdoc type-vdoc-paragraph">The &#x27;VScript&#x27; namespace describes the @valos/sourcerer API.
   </div>
 </p></div>
   <section id="section_prefixes" class="vdoc type-vdoc-chapter">
@@ -83,8 +82,14 @@ primitives.
         <tr><td><span class="vdoc type-vdoc-node">VKernel</span>
 </td><td><span class="vdoc type-vdoc-node">https://valospace.org/kernel/0#</span>
 </td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VModel</span>
-</td><td><span class="vdoc type-vdoc-node">https://valospace.org/raem/0#</span>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VState</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/state/0#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">VLog</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/log/0#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VValk</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/valk/0#</span>
 </td></tr>
       </tbody>
     </table>
@@ -140,7 +145,7 @@ ontologies.
   </section>
 
   <section id="section_types" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_types">§ </a><em>VScript</em> <a href="https://valospace.org/raem/0#Type" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <h3><a aria-label="§" href="#section_types">§ </a><em>VScript</em> <a href="https://valospace.org/state/0#Type" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">valospace resource types</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
@@ -166,12 +171,12 @@ and event triple graphs.
   </section>
 
   <section id="section_fields" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_fields">§ </a><em>VScript</em> <a href="https://valospace.org/raem/0#Field" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <h3><a aria-label="§" href="#section_fields">§ </a><em>VScript</em> <a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">valospace fields</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
         The class of all valospace resource field identifiers.Only the instances of this class can appear as the predicate in
-valospace triple graphs. All valospace fields have VModel:Type or one
+valospace triple graphs. All valospace fields have VState:Type or one
 of its sub-classes as their rdf:domain.
     </span>
 </span></a></h3>
@@ -186,7 +191,7 @@ of its sub-classes as their rdf:domain.
 </th>
         <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:subPropertyOf</span>
 </th>
-        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">VModel:coupledField</span>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">VState:coupledToField</span>
 </th>
       </thead>
       <tbody>
@@ -197,7 +202,7 @@ of its sub-classes as their rdf:domain.
   </section>
 
   <section id="section_resolvers" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_resolvers">§ </a><em>VScript</em> <a href="https://valospace.org/raem/0#Resolver" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <h3><a aria-label="§" href="#section_resolvers">§ </a><em>VScript</em> <a href="https://valospace.org/valk/0#Resolver" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">field resolvers</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
@@ -215,45 +220,7 @@ for resolving generated properties.
 </th>
       </thead>
       <tbody>
-        <tr id="resolveTwinspace" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#resolveTwinspace" class="vdoc type-vdoc-reference">#resolveTwinspace</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td></td><td><a href="https://valospace.org/raem/0#Resolver" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Resolver</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all resolver names. Resolvers are verbs which are used
-for resolving generated properties.
-
-    </span>
-</span></a></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">resolve the twinspace of the ScopeProperty</span>
-</td></tr>
-        <tr id="resolveTwinSubject" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#resolveTwinSubject" class="vdoc type-vdoc-reference">#resolveTwinSubject</a></em></strong> </h3></td></tr>
-        <tr><td></td><td><a href="https://valospace.org/raem/0#Resolver" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Resolver</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all resolver names. Resolvers are verbs which are used
-for resolving generated properties.
-
-    </span>
-</span></a></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">resolve the reified twin subject of the ScopeProperty</span>
-</td></tr>
-        <tr id="resolveTwinObject" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#resolveTwinObject" class="vdoc type-vdoc-reference">#resolveTwinObject</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td></td><td><a href="https://valospace.org/raem/0#Resolver" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VModel:Resolver</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all resolver names. Resolvers are verbs which are used
-for resolving generated properties.
-
-    </span>
-</span></a></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">resolve the reified twin object of the ScopeProperty</span>
-</td></tr>
+        
       </tbody>
     </table>
 

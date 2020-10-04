@@ -147,9 +147,9 @@
             {
               "@type": "VDoc:Reference",
               "VDoc:content": [
-                "Valospace"
+                "valospace"
               ],
-              "VDoc:ref": "Valospace"
+              "VDoc:ref": "@valos/space"
             },
             "."
           ]

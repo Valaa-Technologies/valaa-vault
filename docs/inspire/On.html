@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset='utf-8'>
-    <title>The valospace &#x27;undefined&#x27; namespace reference</title>
+    <title>The valosheath &#x27;On&#x27; namespace reference</title>
     <script
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
@@ -46,12 +46,16 @@ instructions on how to write revdoc source documents.
   <section id="section_valosheath" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#section_valosheath">§ </a>The <em>On</em> valosheath namespace of the library ontology of <a href="https://valospace.org/inspire" class="vdoc type-vrevdoc-package"><em>@valos/inspire</em></a></h3>
 <div><p>
-  <div class="vdoc type-vdoc-paragraph">      <p>The ValOS inspire On namespace contains event callback names used by
-the inspire UI layer.</p>
-      <p>The namespace inherits all HTML5 event names verbatim as name suffixes
-but also adds new valos-specific event callback names. Like HTML5
-events these callbacks are called with a synthetic event as their first
-argument.</p>
+  <div class="vdoc type-vdoc-paragraph">      <p>The ValOS &#x27;On&#x27; namespace provides the event handler names used by
+ValOS gateway both within fabric and valospace addEventHandler calls.</p>
+      <p>Like HTML5 events these callbacks are called with a synthetic event as
+their first argument.The namespace contains all new event names introduced by <a href="https://valospace.org/kernel" class="vdoc type-vdoc-reference">valos kernel</a> but also inherits all HTML5 event names verbatim.</p>
+      <p>Note: ValOS event names will not conflict with currently known web
+event names and effort is made to ensure that there are no future
+conflicts either. However should new web API event names conflict with
+valos names the ValOS event names take primacy. Conflicting web event
+names are then made available in the &#x27;On&#x27; namespace with &#x22;web&#x22; text as
+a prefix.</p>
 
   </div>
 </p></div>
@@ -90,11 +94,11 @@ argument.</p>
         <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">V</span>
 </td><td><span class="vdoc type-vdoc-node">https://valospace.org/0#</span>
 </td></tr>
-        <tr><td><span class="vdoc type-vdoc-node">VEngine</span>
-</td><td><span class="vdoc type-vdoc-node">https://valospace.org/engine/0#</span>
-</td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">Lens</span>
+        <tr><td><span class="vdoc type-vdoc-node">Lens</span>
 </td><td><span class="vdoc type-vdoc-node">https://valospace.org/inspire/Lens/0#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VEngine</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/engine/0#</span>
 </td></tr>
       </tbody>
     </table>
@@ -149,23 +153,437 @@ argument.</p>
 </th>
       </thead>
       <tbody>
-        <tr id="frameactive" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#frameactive" class="vdoc type-vdoc-reference">#frameactive</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Attribute</em> <em>Inspire</em> <em>Event</em></td></tr>
+        <tr id="issue" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#issue" class="vdoc type-vdoc-reference">#issue</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">On:issue</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
+    </span>
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">addEventListener(&#x22;issue&#x22;, ...)</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used on Valoscript event target
+    </span>
+</span></h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Transactor</em> <em>FabricEvent</em></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at a transactor when its transaction commit has been issued and
+its command is about to be fast-forward professed into a prophecy as
+part of the current recital.</span>
+</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">      <p>This event is fired only during the initial commit and even then only
+if the command does not need to be replayed (otherwise &#x27;replay&#x27; is
+fired at the transaction ).</p>
+      <p>If the event defaultAction is canceled or an exception is thrown then
+the transaction is immediately rejected without recital and the fabric
+commit will throw an exception.</p>
+</span>
+</td></tr>
+        <tr id="replay" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#replay" class="vdoc type-vdoc-reference">#replay</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">On:replay</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
+    </span>
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">addEventListener(&#x22;replay&#x22;, ...)</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used on Valoscript event target
+    </span>
+</span></h3></td></tr>
+        <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Transactor</em> <em>FabricEvent</em></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at a transactor when the history of a prophecy has been revised
+and the command is about to be replayed and then professed into a
+prophecy as part of the current recital.</span>
+</td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">      <p>This event can be fired during the initial chronicle commit (if it
+can&#x27;t be fast-forwarded) but also during later revision and reformation
+replays.</p>
+      <p>If the event defaultAction is canceled or an exception is thrown then
+the replay recital of this command is rejected. If this event was fired
+as part of the initial transaction commit then this rejection behaves
+identically to that of a rejected &#x27;issue&#x27; event. Otherwise the
+rejection will remove the prophecy from the current recital and fire
+a &#x27;purge&#x27; event at the transactor.</p>
+</span>
+</td></tr>
+        <tr id="profess" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#profess" class="vdoc type-vdoc-reference">#profess</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">On:profess</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
+    </span>
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">addEventListener(&#x22;profess&#x22;, ...)</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used on Valoscript event target
+    </span>
+</span></h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Transactor</em> <em>FabricEvent</em></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at a transactor when its command has been successfully
+(re-)professed into a prophecy as part of the current recital.</span>
+</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">      <p>This event is fired both during the initial recital as well as during
+later revision and reformation recitals.</p>
+      <p>If the event defaultAction is canceled or an exception is thrown then
+the rejection will remove the prophecy from the current recital and
+fire a &#x27;purge&#x27; at the transactor.</p>
+</span>
+</td></tr>
+        <tr id="record" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#record" class="vdoc type-vdoc-reference">#record</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">On:record</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
+    </span>
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">addEventListener(&#x22;record&#x22;, ...)</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used on Valoscript event target
+    </span>
+</span></h3></td></tr>
+        <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Transactor</em> <em>FabricEvent</em></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at a transactor when a copy of its command has been written to a
+persistent storage.</span>
+</td></tr>
+        <tr id="truth" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#truth" class="vdoc type-vdoc-reference">#truth</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">On:truth</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
+    </span>
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">addEventListener(&#x22;truth&#x22;, ...)</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used on Valoscript event target
+    </span>
+</span></h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Transactor</em> <em>FabricEvent</em></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at a transactor when its command has been authorized as truth.</span>
+</td></tr>
+        <tr id="schism" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#schism" class="vdoc type-vdoc-reference">#schism</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">On:schism</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
+    </span>
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">addEventListener(&#x22;schism&#x22;, ...)</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used on Valoscript event target
+    </span>
+</span></h3></td></tr>
+        <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Transactor</em> <em>FabricEvent</em></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at a transactor when a prophecy that took part in a revision is
+deemed to be schismatic and which thus is subsequently going to be
+subject to a reformation.</span>
+</td></tr>
+        <tr id="purge" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#purge" class="vdoc type-vdoc-reference">#purge</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">On:purge</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
+    </span>
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">addEventListener(&#x22;purge&#x22;, ...)</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used on Valoscript event target
+    </span>
+</span></h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Transactor</em> <em>FabricEvent</em></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at transactor when a prophecy has been purged from the recital
+as a result of a rejected revision recital or a rejected reformation.</span>
+</td></tr>
+        <tr id="error" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#error" class="vdoc type-vdoc-reference">#error</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">On:error</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
+    </span>
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">addEventListener(&#x22;error&#x22;, ...)</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used on Valoscript event target
+    </span>
+</span></h3></td></tr>
+        <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Fabricator</em> <em>Failure</em> <em>FabricEvent</em></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at a fabricator frame when a script, fabrication or behavior
+error occurs inside the fabrication context.</span>
+</td></tr>
+        <tr id="precondition" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#precondition" class="vdoc type-vdoc-reference">#precondition</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">On:precondition</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
+    </span>
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">addEventListener(&#x22;precondition&#x22;, ...)</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used on Valoscript event target
+    </span>
+</span></h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Fabricator</em> <em>FabricEvent</em></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at all frame fabricators in depth-first pre-order during all
+fabrications (ie. during initial fabrication and during revision and
+reformation replays).</span>
+</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">      <p>Calling event.preventDefault or throwing an exception will reject the
+computation frame.
+If the frame is rejected during the initial fabrication an exception is
+(re-)thrown within the frame and can be caught by its catch-block.</p>
+      <p>Semantics of revision and reformation refabrications are not defined
+yet.</p>
+</span>
+</td></tr>
+        <tr id="postcondition" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#postcondition" class="vdoc type-vdoc-reference">#postcondition</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">On:postcondition</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
+    </span>
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">addEventListener(&#x22;postcondition&#x22;, ...)</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used on Valoscript event target
+    </span>
+</span></h3></td></tr>
+        <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Fabricator</em> <em>FabricEvent</em></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at all frame fabricators in depth-first post-order during all
+fabrications (ie. during initial, revision and reformation fabrications).</span>
+</td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">      <p>Calling event.preventDefault or throwing an exception will reject the
+computation frame.
+If the frame is rejected during the initial fabrication an exception is
+(re-)thrown within the frame and can be caught by its catch-block.</p>
+      <p>Semantics of revision and reformation refabrications are not defined
+yet.</p>
+</span>
+</td></tr>
+        <tr id="revise" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#revise" class="vdoc type-vdoc-reference">#revise</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">On:revise</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
+    </span>
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">addEventListener(&#x22;revise&#x22;, ...)</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used on Valoscript event target
+    </span>
+</span></h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Fabricator</em> <em>FabricEvent</em></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at frame fabricators during review phase of a schismatic
+prophecy, in depth-first pre-order immediately after a the
+corresponding frame precondition event.</span>
+</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node"></span>
+</td></tr>
+        <tr id="reform" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#reform" class="vdoc type-vdoc-reference">#reform</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">On:reform</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
+    </span>
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">addEventListener(&#x22;reform&#x22;, ...)</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used on Valoscript event target
+    </span>
+</span></h3></td></tr>
+        <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Fabricator</em> <em>FabricEvent</em></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at all frame fabricators during reform phase of a schismatic
+prophecy in depth-first post-order.</span>
+</td></tr>
+        <tr id="frameactive" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#frameactive" class="vdoc type-vdoc-reference">#frameactive</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">On:frameactive</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
+    </span>
+</span></a> attribute
+    </span>
+</span></h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
+    </span>
+</span></a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Attribute</em> <em>Inspire</em> <em>Event</em></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">The ValOS frame of the element is active</span>
 </td></tr>
-        <tr id="framepropertychange" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#framepropertychange" class="vdoc type-vdoc-reference">#framepropertychange</a></em></strong> </h3></td></tr>
-        <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Attribute</em> <em>Inspire</em> <em>Event</em></td></tr>
+        <tr id="framepropertychange" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#framepropertychange" class="vdoc type-vdoc-reference">#framepropertychange</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">On:framepropertychange</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
+    </span>
+</span></a> attribute
+    </span>
+</span></h3></td></tr>
+        <tr><td><a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
+    </span>
+</span></a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Attribute</em> <em>Inspire</em> <em>Event</em></td></tr>
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">A ValOS frame property has changed</span>
 </td></tr>
-        <tr id="focuspropertychange" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#focuspropertychange" class="vdoc type-vdoc-reference">#focuspropertychange</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Attribute</em> <em>Inspire</em> <em>Event</em></td></tr>
+        <tr id="focuspropertychange" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#focuspropertychange" class="vdoc type-vdoc-reference">#focuspropertychange</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">On:focuspropertychange</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
+    </span>
+</span></a> attribute
+    </span>
+</span></h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
+    </span>
+</span></a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Attribute</em> <em>Inspire</em> <em>Event</em></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">A ValOS focus property has changed</span>
 </td></tr>
-        <tr id="click" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#click" class="vdoc type-vdoc-reference">#click</a></em></strong> </h3></td></tr>
-        <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Attribute</em> <em>HTML5</em> <em>Event</em></td></tr>
+        <tr id="click" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#click" class="vdoc type-vdoc-reference">#click</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">On:click</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
+    </span>
+</span></a> attribute
+    </span>
+</span></h3></td></tr>
+        <tr><td><a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
+    </span>
+</span></a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Attribute</em> <em>HTML5</em> <em>Event</em></td></tr>
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node"><a href="https://w3c.github.io/uievents/#event-type-click" class="vdoc type-vdoc-reference">The HTML5 &#x27;click&#x27; event</a></span>
 </td></tr>

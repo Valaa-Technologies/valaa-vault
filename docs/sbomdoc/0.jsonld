@@ -62,19 +62,19 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/sbomdoc",
-    "VRevdoc:version": "0.35.0-rc.32",
+    "VRevdoc:version": "0.35.0-rc.33",
     "VRevdoc:preferredPrefix": "VSbomdoc",
     "VRevdoc:baseIRI": "https://valospace.org/sbomdoc/0#",
     "VRevdoc:referencedModules": {
-      "https://valospace.org/engine/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/engine/VEngine",
-      "https://valospace.org/kernel/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/kernel/VKernel",
-      "https://valospace.org/vdoc/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/vdoc/VDoc",
-      "https://valospace.org/revdoc/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/revdoc/VRevdoc",
-      "https://valospace.org/sbomdoc/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/sbomdoc/VSbomdoc"
+      "https://valospace.org/engine/0#": "@valos/engine/VEngine",
+      "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
+      "https://valospace.org/vdoc/0#": "@valos/vdoc/VDoc",
+      "https://valospace.org/revdoc/0#": "@valos/revdoc/VRevdoc",
+      "https://valospace.org/sbomdoc/0#": "@valos/sbomdoc/VSbomdoc"
     },
     "VRevdoc:extenderModules": {},
     "respecConfig": {
-      "subtitle": "0.35.0-rc.32",
+      "subtitle": "0.35.0-rc.33",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -136,9 +136,9 @@
             {
               "@type": "VDoc:Reference",
               "VDoc:content": [
-                "ValOS core specification"
+                "ValOS kernel specification"
               ],
-              "VDoc:ref": "@valos/kernel/spec"
+              "VDoc:ref": "@valos/kernel"
             },
             "."
           ]
@@ -349,14 +349,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }
@@ -626,14 +619,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }
@@ -802,14 +788,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }

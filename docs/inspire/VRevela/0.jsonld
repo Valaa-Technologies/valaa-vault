@@ -54,7 +54,12 @@
       },
       "VEngine": "https://valospace.org/engine/0#",
       "VRevela": "https://valospace.org/revela/0#",
-      "VModel": "https://valospace.org/raem/0#"
+      "VPlot": "https://valospace.org/plot/0#",
+      "VState": "https://valospace.org/state/0#",
+      "VValk": "https://valospace.org/valk/0#",
+      "On": "https://valospace.org/inspire/On/0#",
+      "V": "https://valospace.org/0#",
+      "Lens": "https://valospace.org/inspire/Lens/0#"
     },
     "dc:title": "revela.json format specification",
     "VDoc:tags": [
@@ -64,18 +69,23 @@
       "TESTDOC"
     ],
     "VRevdoc:package": "@valos/inspire",
+    "VRevdoc:version": "0.35.0-rc.33",
     "VRevdoc:preferredPrefix": "VRevela",
     "VRevdoc:baseIRI": "https://valospace.org/revela/0#",
-    "VRevdoc:version": "0.35.0-rc.32",
     "VRevdoc:referencedModules": {
-      "https://valospace.org/engine/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/engine/VEngine",
-      "https://valospace.org/kernel/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/kernel/VKernel",
-      "https://valospace.org/raem/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/raem/VModel",
-      "https://valospace.org/revela/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/inspire/VRevela"
+      "https://valospace.org/engine/0#": "@valos/engine/VEngine",
+      "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
+      "https://valospace.org/plot/0#": "@valos/plot/VPlot",
+      "https://valospace.org/state/0#": "@valos/state/VState",
+      "https://valospace.org/valk/0#": "@valos/valk/VValk",
+      "https://valospace.org/0#": "@valos/space/V",
+      "https://valospace.org/inspire/Lens/0#": "@valos/inspire/Lens"
     },
-    "VRevdoc:extenderModules": {},
+    "VRevdoc:extenderModules": {
+      "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
+    },
     "respecConfig": {
-      "subtitle": "0.35.0-rc.32",
+      "subtitle": "0.35.0-rc.33",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -96,7 +106,9 @@
       "dc": "http://purl.org/dc/elements/1.1/",
       "VRevela": "https://valospace.org/revela/0#",
       "VKernel": "https://valospace.org/kernel/0#",
-      "VModel": "https://valospace.org/raem/0#"
+      "VPlot": "https://valospace.org/plot/0#",
+      "VState": "https://valospace.org/state/0#",
+      "VValk": "https://valospace.org/valk/0#"
     },
     "vocabulary": {
       "@id": "vocabulary"
@@ -514,9 +526,9 @@
         {
           "@type": "VDoc:Reference",
           "VDoc:content": [
-            "VModel:Verb"
+            "VPlot:Verb"
           ],
-          "VDoc:ref": "VModel:Verb"
+          "VDoc:ref": "VPlot:Verb"
         },
         " vocabulary"
       ],
@@ -563,14 +575,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }
@@ -726,14 +731,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }

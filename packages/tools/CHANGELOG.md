@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.33](https://github.com/valaatech/kernel/compare/v0.35.0-rc.32...v0.35.0-rc.33) (2020-10-04)
+
+
+### Features
+
+* Add fabricator ProgressEvent events to 'On' namespace ([7705e7c](https://github.com/valaatech/kernel/commit/7705e7c61b768b43e9e99a89633adf8dbe2945da))
+* Add On: namespace event handling to Valens ([116e5b6](https://github.com/valaatech/kernel/commit/116e5b6983a4cbbc5741498efa8ba4b6cf13cee9))
+
+
+
+
+
 # [0.35.0-rc.32](https://github.com/valaatech/kernel/compare/v0.35.0-rc.31...v0.35.0-rc.32) (2020-09-24)
 
 **Note:** Version bump only for package @valos/tools

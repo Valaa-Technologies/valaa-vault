@@ -20,7 +20,7 @@ renders valospace user interfaces and also contains the &#x27;Lens&#x27;
 namespace API reference.
   </div>
 </p></div><div><p>
-  <div class="vdoc type-vdoc-paragraph">See the <a href="https://valospace.org/inspire/On" class="vdoc type-vdoc-reference">&#x27;On&#x27; namespace reference</a> for
+  <div class="vdoc type-vdoc-paragraph">See the <a href="https://valospace.org/sourcerer/On" class="vdoc type-vdoc-reference">&#x27;On&#x27; namespace reference</a> for
 how to access the HTML5 events API from valospace.
   </div>
 </p></div>
@@ -37,7 +37,17 @@ how to access the HTML5 events API from valospace.
   <section id="introduction" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#introduction">§ </a>Application UI is fully defined inside valospace</h3>
 <div><p>
-  <div class="vdoc type-vdoc-paragraph">A valos inspire application UI is written as <a href="#vsx" class="vdoc type-vdoc-reference">VSX text content</a> that is stored inside <a href="https://valospace.org/0#Media" class="vdoc type-vdoc-reference">valospace medias</a>.
+  <div class="vdoc type-vdoc-paragraph">A valos inspire application UI is written as <a href="#vsx" class="vdoc type-vdoc-reference">VSX text content</a> that is stored inside <a href="https://valospace.org/0#Media" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">valospace medias</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of valospace resources which represent interpretable media
+and can be associated with mutable binary content and accompanying
+metadata. With Relation and Media it forms the group of three primary
+node types.
+
+    </span>
+</span></a>.
 These media are in turn are referenced by <a href="#lens_properties" class="vdoc type-vdoc-reference"><em>LENS properties</em></a>
 of valospace resources.
   </div>
@@ -254,11 +264,11 @@ There are also auxiliary tags:
         <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">V</span>
 </td><td><span class="vdoc type-vdoc-node">https://valospace.org/0#</span>
 </td></tr>
-        <tr><td><span class="vdoc type-vdoc-node">VEngine</span>
-</td><td><span class="vdoc type-vdoc-node">https://valospace.org/engine/0#</span>
-</td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">On</span>
+        <tr><td><span class="vdoc type-vdoc-node">On</span>
 </td><td><span class="vdoc type-vdoc-node">https://valospace.org/inspire/On/0#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VEngine</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/engine/0#</span>
 </td></tr>
       </tbody>
     </table>
@@ -311,16 +321,8 @@ block.
     </span>
 </span></a></span>
 </td><td colspan=1> <a href="#focus" class="vdoc type-vdoc-reference">Lens:focus</a> <a href="#array" class="vdoc type-vdoc-reference">Lens:array</a> <a href="#loadingLens" class="vdoc type-vdoc-reference">Lens:loadingLens</a> <a href="#loadingFailedLens" class="vdoc type-vdoc-reference">Lens:loadingFailedLens</a> <a href="#if" class="vdoc type-vdoc-reference">Lens:if</a> <a href="#then" class="vdoc type-vdoc-reference">Lens:then</a> <a href="#else" class="vdoc type-vdoc-reference">Lens:else</a> <a href="#offset" class="vdoc type-vdoc-reference">Lens:offset</a> <a href="#limit" class="vdoc type-vdoc-reference">Lens:limit</a> <a href="#sort" class="vdoc type-vdoc-reference">Lens:sort</a> <a href="#reverse" class="vdoc type-vdoc-reference">Lens:reverse</a> <a href="#static" class="vdoc type-vdoc-reference">Lens:static</a> <a href="#undefinedLens" class="vdoc type-vdoc-reference">Lens:undefinedLens</a> <a href="#nullLens" class="vdoc type-vdoc-reference">Lens:nullLens</a> <a href="#resourceLens" class="vdoc type-vdoc-reference">Lens:resourceLens</a> <a href="#activeLens" class="vdoc type-vdoc-reference">Lens:activeLens</a> <a href="#unframedLens" class="vdoc type-vdoc-reference">Lens:unframedLens</a> <a href="#frameOwner" class="vdoc type-vdoc-reference">Lens:frameOwner</a> <a href="#frameAuthority" class="vdoc type-vdoc-reference">Lens:frameAuthority</a> <a href="#pendingLens" class="vdoc type-vdoc-reference">Lens:pendingLens</a> <a href="#rejectedLens" class="vdoc type-vdoc-reference">Lens:rejectedLens</a> <a href="#pendingPromiseLens" class="vdoc type-vdoc-reference">Lens:pendingPromiseLens</a> <a href="#rejectedPromiseLens" class="vdoc type-vdoc-reference">Lens:rejectedPromiseLens</a> <a href="#pendingChroniclesLens" class="vdoc type-vdoc-reference">Lens:pendingChroniclesLens</a> <a href="#rejectedChroniclesLens" class="vdoc type-vdoc-reference">Lens:rejectedChroniclesLens</a> <a href="#delayed" class="vdoc type-vdoc-reference">Lens:delayed</a> <a href="#pendingFocusLens" class="vdoc type-vdoc-reference">Lens:pendingFocusLens</a> <a href="#rejectedFocusLens" class="vdoc type-vdoc-reference">Lens:rejectedFocusLens</a> <a href="#pendingFrameLens" class="vdoc type-vdoc-reference">Lens:pendingFrameLens</a> <a href="#rejectedFrameLens" class="vdoc type-vdoc-reference">Lens:rejectedFrameLens</a> <a href="#inactiveLens" class="vdoc type-vdoc-reference">Lens:inactiveLens</a> <a href="#pendingMediaLens" class="vdoc type-vdoc-reference">Lens:pendingMediaLens</a> <a href="#rejectedMediaLens" class="vdoc type-vdoc-reference">Lens:rejectedMediaLens</a> <a href="#uninterpretableMediaLens" class="vdoc type-vdoc-reference">Lens:uninterpretableMediaLens</a> <a href="#unrenderableInterpretationLens" class="vdoc type-vdoc-reference">Lens:unrenderableInterpretationLens</a> <a href="#pendingElementsLens" class="vdoc type-vdoc-reference">Lens:pendingElementsLens</a> <a href="#rejectedElementsLens" class="vdoc type-vdoc-reference">Lens:rejectedElementsLens</a> <a href="#activatingLens" class="vdoc type-vdoc-reference">Lens:activatingLens</a> <a href="#unavailableLens" class="vdoc type-vdoc-reference">Lens:unavailableLens</a> <a href="#destroyedLens" class="vdoc type-vdoc-reference">Lens:destroyedLens</a> <a href="#lensPropertyNotFoundLens" class="vdoc type-vdoc-reference">Lens:lensPropertyNotFoundLens</a></td></tr>
-        <tr id="DOMElement" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#DOMElement" class="vdoc type-vdoc-reference">#DOMElement</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node"><pre><code><span class="vdoc type-vdoc-node">&#x3C;<em>lowercase-html-element-name</em> /&#x3E;</span>
-</code></pre></span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+        <tr id="DOMElement" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#DOMElement" class="vdoc type-vdoc-reference">#DOMElement</a></em></strong>  <pre><code><span class="vdoc type-vdoc-node">&#x3C;<em>lowercase-html-element-name</em> /&#x3E;</span>
+</code></pre></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -339,16 +341,8 @@ execution environment.
 </span></a></td><td><span class="vdoc type-vdoc-node">The class of UI resources which represent @valos/inspire user
 interface components.</span>
 </td></tr>
-        <tr id="Valoscope" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#Valoscope" class="vdoc type-vdoc-reference">#Valoscope</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node"><pre><code><span class="vdoc type-vdoc-node">&#x3C;Valoscope /&#x3E;</span>
-</code></pre></span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+        <tr id="Valoscope" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#Valoscope" class="vdoc type-vdoc-reference">#Valoscope</a></em></strong>  <pre><code><span class="vdoc type-vdoc-node">&#x3C;Valoscope /&#x3E;</span>
+</code></pre></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/inspire/Lens/0#Component" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Component</span>
 
@@ -369,16 +363,8 @@ interface components.
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
 </td><td colspan=1><span class="vdoc type-vdoc-node">The <em>Lens:</em>-prefix can be omitted for Valoscope attributes</span>
 </td></tr>
-        <tr id="InstanceComponent" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#InstanceComponent" class="vdoc type-vdoc-reference">#InstanceComponent</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node"><pre><code><span class="vdoc type-vdoc-node">&#x3C;<em>Uppercase-frame-prototype-identifier</em> /&#x3E;</span>
-</code></pre></span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+        <tr id="InstanceComponent" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#InstanceComponent" class="vdoc type-vdoc-reference">#InstanceComponent</a></em></strong>  <pre><code><span class="vdoc type-vdoc-node">&#x3C;<em>Uppercase-frame-prototype-identifier</em> /&#x3E;</span>
+</code></pre></h3></td></tr>
         <tr><td><a href="https://valospace.org/inspire/Lens/0#Valoscope" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Valoscope</span>
 
@@ -436,15 +422,19 @@ namespace.
 </th>
       </thead>
       <tbody>
-        <tr id="focus" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#focus" class="vdoc type-vdoc-reference">#focus</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="focus" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#focus" class="vdoc type-vdoc-reference">#focus</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:focus</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a></h3></td></tr>
+</span></a> attribute
+    </span>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -467,15 +457,19 @@ model-view-controller design pattern. The concept &#x27;lens&#x27; corresponds t
 &#x27;view&#x27;, and the various components roughly correspond to &#x27;controller&#x27;.</p>
 </span>
 </td></tr>
-        <tr id="array" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#array" class="vdoc type-vdoc-reference">#array</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="array" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#array" class="vdoc type-vdoc-reference">#array</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:array</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a></h3></td></tr>
+</span></a> attribute
+    </span>
+</span></h3></td></tr>
         <tr><td><a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -499,15 +493,19 @@ altogether.</p>
 per update irrespective of the array length (even if 0).</p>
 </span>
 </td></tr>
-        <tr id="frame" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#frame" class="vdoc type-vdoc-reference">#frame</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="frame" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#frame" class="vdoc type-vdoc-reference">#frame</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:frame</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Valoscope" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Valoscope</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of valos UI components that interact with valospace resources.
     </span>
-</span></a></h3></td></tr>
+</span></a> attribute
+    </span>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/inspire/Lens/0#Valoscope" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Valoscope</span>
 
@@ -564,15 +562,19 @@ directly. Array spread frame callback functions must always return
 unique frame keys.</p>
 </span>
 </td></tr>
-        <tr id="lens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#lens" class="vdoc type-vdoc-reference">#lens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="lens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#lens" class="vdoc type-vdoc-reference">#lens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:lens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Valoscope" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Valoscope</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of valos UI components that interact with valospace resources.
     </span>
-</span></a></h3></td></tr>
+</span></a> attribute
+    </span>
+</span></h3></td></tr>
         <tr><td><a href="https://valospace.org/inspire/Lens/0#Valoscope" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Valoscope</span>
 
@@ -598,23 +600,25 @@ to &#x27;model&#x27;, and the various components roughly correspond to &#x27;con
     @focus {Object} focus  the focus of the component.</p>
 </span>
 </td></tr>
-        <tr id="loadingLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#loadingLens" class="vdoc type-vdoc-reference">#loadingLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="loadingLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#loadingLens" class="vdoc type-vdoc-reference">#loadingLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:loadingLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.loadingLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -642,23 +646,25 @@ own default lens.
     @focus {Object} component  an object description of the dependency being loaded</p>
 </span>
 </td></tr>
-        <tr id="loadingFailedLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#loadingFailedLens" class="vdoc type-vdoc-reference">#loadingFailedLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="loadingFailedLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#loadingFailedLens" class="vdoc type-vdoc-reference">#loadingFailedLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:loadingFailedLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.loadingFailedLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -686,15 +692,19 @@ their own default lens.
     @focus {string|Error|Object} reason  the explanation of the loading failure</p>
 </span>
 </td></tr>
-        <tr id="if" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#if" class="vdoc type-vdoc-reference">#if</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="if" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#if" class="vdoc type-vdoc-reference">#if</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:if</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a></h3></td></tr>
+</span></a> attribute
+    </span>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -719,15 +729,19 @@ If the condition is falsy the focus is displayed using lens from slot
 &#x27;else&#x27; which presents null.</p>
 </span>
 </td></tr>
-        <tr id="then" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#then" class="vdoc type-vdoc-reference">#then</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="then" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#then" class="vdoc type-vdoc-reference">#then</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:then</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a></h3></td></tr>
+</span></a> attribute
+    </span>
+</span></h3></td></tr>
         <tr><td><a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -743,15 +757,19 @@ check.</span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>By default delegates displaying to the Valoscope lens chain.</p>
 </span>
 </td></tr>
-        <tr id="else" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#else" class="vdoc type-vdoc-reference">#else</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="else" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#else" class="vdoc type-vdoc-reference">#else</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:else</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a></h3></td></tr>
+</span></a> attribute
+    </span>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -767,15 +785,19 @@ check.</span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>By default displays null.</p>
 </span>
 </td></tr>
-        <tr id="offset" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#offset" class="vdoc type-vdoc-reference">#offset</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="offset" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#offset" class="vdoc type-vdoc-reference">#offset</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:offset</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a></h3></td></tr>
+</span></a> attribute
+    </span>
+</span></h3></td></tr>
         <tr><td><a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -790,15 +812,19 @@ from.</span>
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node"></span>
 </td></tr>
-        <tr id="limit" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#limit" class="vdoc type-vdoc-reference">#limit</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="limit" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#limit" class="vdoc type-vdoc-reference">#limit</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:limit</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a></h3></td></tr>
+</span></a> attribute
+    </span>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -814,15 +840,13 @@ execution environment.
 but before sorting (see $Lens.sort).</p>
 </span>
 </td></tr>
-        <tr id="arrayIndex" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#arrayIndex" class="vdoc type-vdoc-reference">#arrayIndex</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="arrayIndex" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#arrayIndex" class="vdoc type-vdoc-reference">#arrayIndex</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.arrayIndex]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr><td><a href="https://valospace.org/inspire/Lens/0#UIContext" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:UIContext</span>
 
@@ -842,15 +866,13 @@ filtering and sorting. By default $Lens.arrayIndex is also used as part
 of the implicit frame key generation (see $Lens.frame).</p>
 </span>
 </td></tr>
-        <tr id="endOffset" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#endOffset" class="vdoc type-vdoc-reference">#endOffset</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="endOffset" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#endOffset" class="vdoc type-vdoc-reference">#endOffset</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.endOffset]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/inspire/Lens/0#UIContext" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:UIContext</span>
 
@@ -866,15 +888,13 @@ $Lens.limit has been met.</span>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node"></span>
 </td></tr>
-        <tr id="elementIndex" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#elementIndex" class="vdoc type-vdoc-reference">#elementIndex</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="elementIndex" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#elementIndex" class="vdoc type-vdoc-reference">#elementIndex</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.elementIndex]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr><td><a href="https://valospace.org/inspire/Lens/0#UIContext" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:UIContext</span>
 
@@ -892,15 +912,19 @@ entry element within an array element spread, or null if there is none.</span>
 (see $Lens.if) and sorting (see $Lens.sort).</p>
 </span>
 </td></tr>
-        <tr id="sort" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#sort" class="vdoc type-vdoc-reference">#sort</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="sort" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#sort" class="vdoc type-vdoc-reference">#sort</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:sort</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a></h3></td></tr>
+</span></a> attribute
+    </span>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -921,15 +945,19 @@ that is passed as $Lens.array. This will not maintain identities,
 however.</p>
 </span>
 </td></tr>
-        <tr id="reverse" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#reverse" class="vdoc type-vdoc-reference">#reverse</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="reverse" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#reverse" class="vdoc type-vdoc-reference">#reverse</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:reverse</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a></h3></td></tr>
+</span></a> attribute
+    </span>
+</span></h3></td></tr>
         <tr><td><a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -940,15 +968,7 @@ execution environment.
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">Reverse the $Lens.sort order.</span>
 </td></tr>
-        <tr id="children" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#children" class="vdoc type-vdoc-reference">#children</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:children</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+        <tr id="children" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#children" class="vdoc type-vdoc-reference">#children</a></em></strong>  Lens:children</h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Internal</em> <em>Lens</em></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">Lens for displaying the focus using the child element(s) of the nearest
@@ -983,15 +1003,7 @@ three notably different looking use cases.
 </p>
 </span>
 </td></tr>
-        <tr id="componentChildrenLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#componentChildrenLens" class="vdoc type-vdoc-reference">#componentChildrenLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:componentChildrenLens</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+        <tr id="componentChildrenLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#componentChildrenLens" class="vdoc type-vdoc-reference">#componentChildrenLens</a></em></strong>  Lens:componentChildrenLens</h3></td></tr>
         <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Lens</em></td></tr>
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em>value</em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">&#x22;&#x3C;function value()&#x3E;&#x22;</span>
@@ -1002,15 +1014,19 @@ execution environment.
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node"></span>
 </td></tr>
-        <tr id="static" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#static" class="vdoc type-vdoc-reference">#static</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="static" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#static" class="vdoc type-vdoc-reference">#static</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:static</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a></h3></td></tr>
+</span></a> attribute
+    </span>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -1032,28 +1048,12 @@ selectively made static by prefixing their namespace with &#x27;static-&#x27;
 like above.</p>
 </span>
 </td></tr>
-        <tr id="slotAssembly" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#slotAssembly" class="vdoc type-vdoc-reference">#slotAssembly</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:slotAssembly</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+        <tr id="slotAssembly" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#slotAssembly" class="vdoc type-vdoc-reference">#slotAssembly</a></em></strong>  Lens:slotAssembly</h3></td></tr>
         <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2001/XMLSchema#string" class="vdoc type-vdoc-reference">xsd:string</a></td><td> <em>Lens</em></td></tr>
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">Lens that displays the lens slot assembly that is used by the component.</span>
 </td></tr>
-        <tr id="parentComponentLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#parentComponentLens" class="vdoc type-vdoc-reference">#parentComponentLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:parentComponentLens</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+        <tr id="parentComponentLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#parentComponentLens" class="vdoc type-vdoc-reference">#parentComponentLens</a></em></strong>  Lens:parentComponentLens</h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Lens</em></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em>value</em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">&#x22;&#x3C;function value()&#x3E;&#x22;</span>
@@ -1067,15 +1067,7 @@ is not renderable this slot must be used in an instrument before some
 other slot (such as &#x27;focusDetailLens&#x27;).</p>
 </span>
 </td></tr>
-        <tr id="focusDescriptionLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#focusDescriptionLens" class="vdoc type-vdoc-reference">#focusDescriptionLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:focusDescriptionLens</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+        <tr id="focusDescriptionLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#focusDescriptionLens" class="vdoc type-vdoc-reference">#focusDescriptionLens</a></em></strong>  Lens:focusDescriptionLens</h3></td></tr>
         <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Lens</em></td></tr>
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em>value</em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">&#x22;&#x3C;function renderFocusDescription()&#x3E;&#x22;</span>
@@ -1087,15 +1079,7 @@ execution environment.
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {any} focus  the focus to describe.</p>
 </span>
 </td></tr>
-        <tr id="focusDetailLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#focusDetailLens" class="vdoc type-vdoc-reference">#focusDetailLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:focusDetailLens</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+        <tr id="focusDetailLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#focusDetailLens" class="vdoc type-vdoc-reference">#focusDetailLens</a></em></strong>  Lens:focusDetailLens</h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Lens</em></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em>value</em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">&#x22;&#x3C;function renderFocusDetail()&#x3E;&#x22;</span>
@@ -1108,15 +1092,7 @@ the focus.</span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {any} focus  the focus to describe.</p>
 </span>
 </td></tr>
-        <tr id="focusDumpLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#focusDumpLens" class="vdoc type-vdoc-reference">#focusDumpLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:focusDumpLens</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+        <tr id="focusDumpLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#focusDumpLens" class="vdoc type-vdoc-reference">#focusDumpLens</a></em></strong>  Lens:focusDumpLens</h3></td></tr>
         <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Lens</em></td></tr>
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em>value</em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">&#x22;&#x3C;function renderFocusDump()&#x3E;&#x22;</span>
@@ -1130,15 +1106,7 @@ execution environment.
     @focus {any} focus  the focus to dump.</p>
 </span>
 </td></tr>
-        <tr id="focusPropertyKeysLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#focusPropertyKeysLens" class="vdoc type-vdoc-reference">#focusPropertyKeysLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:focusPropertyKeysLens</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+        <tr id="focusPropertyKeysLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#focusPropertyKeysLens" class="vdoc type-vdoc-reference">#focusPropertyKeysLens</a></em></strong>  Lens:focusPropertyKeysLens</h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Lens</em></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em>value</em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">&#x22;&#x3C;function renderFocusPropertyKeys()&#x3E;&#x22;</span>
@@ -1152,23 +1120,13 @@ execution environment.
     @focus {object | Resource} focus  the focus to describe.</p>
 </span>
 </td></tr>
-        <tr id="toggleableErrorDetailLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#toggleableErrorDetailLens" class="vdoc type-vdoc-reference">#toggleableErrorDetailLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="toggleableErrorDetailLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#toggleableErrorDetailLens" class="vdoc type-vdoc-reference">#toggleableErrorDetailLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.toggleableErrorDetailLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:toggleableErrorDetailLens</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+</span> Lens:toggleableErrorDetailLens</h3></td></tr>
         <tr><td><a href="https://valospace.org/inspire/Lens/0#UIContext" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:UIContext</span>
 
@@ -1190,23 +1148,13 @@ focused error.</span>
     @focus {string|Error} error  the failure description or exception object</p>
 </span>
 </td></tr>
-        <tr id="internalErrorLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#internalErrorLens" class="vdoc type-vdoc-reference">#internalErrorLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="internalErrorLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#internalErrorLens" class="vdoc type-vdoc-reference">#internalErrorLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.internalErrorLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:internalErrorLens</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+</span> Lens:internalErrorLens</h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/inspire/Lens/0#UIContext" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:UIContext</span>
 
@@ -1228,23 +1176,13 @@ violation such as &#x27;pendingPromiseLens&#x27; resulting in a promise itself.<
       <p>    @focus {string|Error} error  the failure description or exception object</p>
 </span>
 </td></tr>
-        <tr id="currentRenderDepth" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#currentRenderDepth" class="vdoc type-vdoc-reference">#currentRenderDepth</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="currentRenderDepth" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#currentRenderDepth" class="vdoc type-vdoc-reference">#currentRenderDepth</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.currentRenderDepth]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:currentRenderDepth</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+</span> Lens:currentRenderDepth</h3></td></tr>
         <tr><td><a href="https://valospace.org/inspire/Lens/0#UIContext" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:UIContext</span>
 
@@ -1265,23 +1203,13 @@ between this component and the root (inclusive).</span>
 value for all nested child components of this component.</p>
 </span>
 </td></tr>
-        <tr id="infiniteRecursionCheckWaterlineDepth" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#infiniteRecursionCheckWaterlineDepth" class="vdoc type-vdoc-reference">#infiniteRecursionCheckWaterlineDepth</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="infiniteRecursionCheckWaterlineDepth" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#infiniteRecursionCheckWaterlineDepth" class="vdoc type-vdoc-reference">#infiniteRecursionCheckWaterlineDepth</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.infiniteRecursionCheckWaterlineDepth]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:infiniteRecursionCheckWaterlineDepth</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+</span> Lens:infiniteRecursionCheckWaterlineDepth</h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/inspire/Lens/0#UIContext" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:UIContext</span>
 
@@ -1300,23 +1228,13 @@ infinite render recursion.</span>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node"></span>
 </td></tr>
-        <tr id="maximumRenderDepth" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#maximumRenderDepth" class="vdoc type-vdoc-reference">#maximumRenderDepth</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="maximumRenderDepth" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#maximumRenderDepth" class="vdoc type-vdoc-reference">#maximumRenderDepth</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.maximumRenderDepth]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:maximumRenderDepth</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+</span> Lens:maximumRenderDepth</h3></td></tr>
         <tr><td><a href="https://valospace.org/inspire/Lens/0#UIContext" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:UIContext</span>
 
@@ -1334,23 +1252,13 @@ scopes.
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node"></span>
 </td></tr>
-        <tr id="maximumRenderDepthExceededLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#maximumRenderDepthExceededLens" class="vdoc type-vdoc-reference">#maximumRenderDepthExceededLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="maximumRenderDepthExceededLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#maximumRenderDepthExceededLens" class="vdoc type-vdoc-reference">#maximumRenderDepthExceededLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.maximumRenderDepthExceededLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:maximumRenderDepthExceededLens</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+</span> Lens:maximumRenderDepthExceededLens</h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/inspire/Lens/0#UIContext" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:UIContext</span>
 
@@ -1370,15 +1278,7 @@ is greater than the slot value of &#x27;maximumRenderDepth&#x27;.</span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {Object} focus  currently focused value.</p>
 </span>
 </td></tr>
-        <tr id="valoscopeLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#valoscopeLens" class="vdoc type-vdoc-reference">#valoscopeLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:valoscopeLens</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+        <tr id="valoscopeLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#valoscopeLens" class="vdoc type-vdoc-reference">#valoscopeLens</a></em></strong>  Lens:valoscopeLens</h3></td></tr>
         <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Internal</em> <em>Lens</em></td></tr>
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em>value</em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">[$Lens.firstEnabledDelegateLens, $Lens.if, $Lens.disabledLens, $Lens.unframedLens, $Lens.maximumRenderDepthExceededLens, $Lens.instanceLens, $Lens.undefinedLens, $Lens.lens, $Lens.nullLens, $Lens.componentChildrenLens, $Lens.resourceLens, $Lens.loadedLens]</span>
@@ -1394,15 +1294,7 @@ below) based on the current dynamic state and/or value of the focus.</p>
       <p>    @focus {any} focus  the focus of the component</p>
 </span>
 </td></tr>
-        <tr id="valensLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#valensLens" class="vdoc type-vdoc-reference">#valensLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:valensLens</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+        <tr id="valensLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#valensLens" class="vdoc type-vdoc-reference">#valensLens</a></em></strong>  Lens:valensLens</h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Internal</em> <em>Lens</em></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em>value</em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">[$Lens.firstEnabledDelegateLens, $Lens.disabledLens, $Lens.undefinedLens, $Lens.loadedLens]</span>
@@ -1418,15 +1310,7 @@ component in response to such events.</p>
       <p>    @focus {any} focus  the focus of the component</p>
 </span>
 </td></tr>
-        <tr id="uiComponentLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#uiComponentLens" class="vdoc type-vdoc-reference">#uiComponentLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:uiComponentLens</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+        <tr id="uiComponentLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#uiComponentLens" class="vdoc type-vdoc-reference">#uiComponentLens</a></em></strong>  Lens:uiComponentLens</h3></td></tr>
         <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Internal</em> <em>Lens</em></td></tr>
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em>value</em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">[$Lens.firstEnabledDelegateLens, $Lens.disabledLens, $Lens.undefinedLens, $Lens.loadedLens]</span>
@@ -1442,15 +1326,7 @@ implementation.</p>
       <p>    @focus {string|Error|Object} focus  the focus of the component</p>
 </span>
 </td></tr>
-        <tr id="firstEnabledDelegateLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#firstEnabledDelegateLens" class="vdoc type-vdoc-reference">#firstEnabledDelegateLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:firstEnabledDelegateLens</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+        <tr id="firstEnabledDelegateLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#firstEnabledDelegateLens" class="vdoc type-vdoc-reference">#firstEnabledDelegateLens</a></em></strong>  Lens:firstEnabledDelegateLens</h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Internal</em> <em>Lens</em></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em>value</em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">&#x22;&#x3C;function renderFirstEnabledDelegate()&#x3E;&#x22;</span>
@@ -1463,15 +1339,7 @@ in the $Lens.delegate of the current fabric component.</span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {string|Error|Object} focus  the focus of the component</p>
 </span>
 </td></tr>
-        <tr id="loadedLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#loadedLens" class="vdoc type-vdoc-reference">#loadedLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:loadedLens</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+        <tr id="loadedLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#loadedLens" class="vdoc type-vdoc-reference">#loadedLens</a></em></strong>  Lens:loadedLens</h3></td></tr>
         <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Internal</em> <em>Lens</em></td></tr>
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em>value</em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">&#x22;&#x3C;function renderLoaded()&#x3E;&#x22;</span>
@@ -1484,23 +1352,25 @@ fabric method of the current component.</span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {string|Error|Object} focus  the focus of the component</p>
 </span>
 </td></tr>
-        <tr id="undefinedLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#undefinedLens" class="vdoc type-vdoc-reference">#undefinedLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="undefinedLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#undefinedLens" class="vdoc type-vdoc-reference">#undefinedLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:undefinedLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.undefinedLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -1524,23 +1394,25 @@ scopes.
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node"></span>
 </td></tr>
-        <tr id="nullLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#nullLens" class="vdoc type-vdoc-reference">#nullLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="nullLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#nullLens" class="vdoc type-vdoc-reference">#nullLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:nullLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.nullLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -1564,23 +1436,25 @@ scopes.
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node"></span>
 </td></tr>
-        <tr id="resourceLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#resourceLens" class="vdoc type-vdoc-reference">#resourceLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="resourceLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#resourceLens" class="vdoc type-vdoc-reference">#resourceLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:resourceLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.resourceLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -1608,23 +1482,25 @@ the focus is is inactive, activating, active, destroyer or unavailable.</p>
       <p>    @focus {Resource} focus  the Resource focus.</p>
 </span>
 </td></tr>
-        <tr id="activeLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#activeLens" class="vdoc type-vdoc-reference">#activeLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="activeLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#activeLens" class="vdoc type-vdoc-reference">#activeLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:activeLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.activeLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -1650,23 +1526,25 @@ scopes.
       <p>    @focus {Object} focus  the active Resource focus.</p>
 </span>
 </td></tr>
-        <tr id="lensProperty" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#lensProperty" class="vdoc type-vdoc-reference">#lensProperty</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="lensProperty" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#lensProperty" class="vdoc type-vdoc-reference">#lensProperty</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:lensProperty</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Valoscope" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Valoscope</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of valos UI components that interact with valospace resources.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.lensProperty]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td> <a href="https://valospace.org/inspire/Lens/0#Valoscope" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Valoscope</span>
 
@@ -1693,23 +1571,25 @@ element then the element will be wrapped inside an implicit Valoscope
 (including a new frame).</p>
 </span>
 </td></tr>
-        <tr id="focusLensProperty" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#focusLensProperty" class="vdoc type-vdoc-reference">#focusLensProperty</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="focusLensProperty" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#focusLensProperty" class="vdoc type-vdoc-reference">#focusLensProperty</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:focusLensProperty</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Valoscope" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Valoscope</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of valos UI components that interact with valospace resources.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.focusLensProperty]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr><td> <a href="https://valospace.org/inspire/Lens/0#Valoscope" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Valoscope</span>
 
@@ -1739,15 +1619,7 @@ for a non-valoscope element then the element will be wrapped inside an
 implicit Valoscope (including a new frame).</p>
 </span>
 </td></tr>
-        <tr id="focusPropertyLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#focusPropertyLens" class="vdoc type-vdoc-reference">#focusPropertyLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:focusPropertyLens</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+        <tr id="focusPropertyLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#focusPropertyLens" class="vdoc type-vdoc-reference">#focusPropertyLens</a></em></strong>  Lens:focusPropertyLens</h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Internal</em> <em>Lens</em></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em>value</em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">&#x22;&#x3C;function getLensProperty()&#x3E;&#x22;</span>
@@ -1767,23 +1639,25 @@ searched in the order they are defined from the focus Resource.</p>
       <p>    @focus {Object} focus  the Resource to search the lens from.</p>
 </span>
 </td></tr>
-        <tr id="delegateLensProperty" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#delegateLensProperty" class="vdoc type-vdoc-reference">#delegateLensProperty</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="delegateLensProperty" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#delegateLensProperty" class="vdoc type-vdoc-reference">#delegateLensProperty</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:delegateLensProperty</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Valoscope" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Valoscope</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of valos UI components that interact with valospace resources.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.delegateLensProperty]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr><td> <a href="https://valospace.org/inspire/Lens/0#Valoscope" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Valoscope</span>
 
@@ -1813,15 +1687,7 @@ for a non-valoscope element then the element will be wrapped inside an
 implicit Valoscope (including a new frame).</p>
 </span>
 </td></tr>
-        <tr id="delegatePropertyLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#delegatePropertyLens" class="vdoc type-vdoc-reference">#delegatePropertyLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:delegatePropertyLens</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+        <tr id="delegatePropertyLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#delegatePropertyLens" class="vdoc type-vdoc-reference">#delegatePropertyLens</a></em></strong>  Lens:delegatePropertyLens</h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Internal</em> <em>Lens</em></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em>value</em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">&#x22;&#x3C;function getLensProperty()&#x3E;&#x22;</span>
@@ -1841,23 +1707,25 @@ searched in the order they are defined from the focus Resource.</p>
       <p>    @focus {Object} focus  the Resource to search the lens from.</p>
 </span>
 </td></tr>
-        <tr id="unframedLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#unframedLens" class="vdoc type-vdoc-reference">#unframedLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="unframedLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#unframedLens" class="vdoc type-vdoc-reference">#unframedLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:unframedLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.unframedLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -1878,15 +1746,19 @@ scopes.
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">Slot for displaying a Valoscope which has not yet loaded its lens frame.</span>
 </td></tr>
-        <tr id="instanceLensPrototype" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#instanceLensPrototype" class="vdoc type-vdoc-reference">#instanceLensPrototype</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="instanceLensPrototype" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#instanceLensPrototype" class="vdoc type-vdoc-reference">#instanceLensPrototype</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:instanceLensPrototype</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Valoscope" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Valoscope</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of valos UI components that interact with valospace resources.
     </span>
-</span></a></h3></td></tr>
+</span></a> attribute
+    </span>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/inspire/Lens/0#Valoscope" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Valoscope</span>
 
@@ -1903,15 +1775,7 @@ non-valoscope element then the element will be wrapped inside an
 implicit Valoscope which handles the frame creation.</p>
 </span>
 </td></tr>
-        <tr id="instanceLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#instanceLens" class="vdoc type-vdoc-reference">#instanceLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:instanceLens</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+        <tr id="instanceLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#instanceLens" class="vdoc type-vdoc-reference">#instanceLens</a></em></strong>  Lens:instanceLens</h3></td></tr>
         <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Internal</em> <em>Lens</em></td></tr>
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em>value</em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">&#x22;&#x3C;function renderInstance()&#x3E;&#x22;</span>
@@ -1928,23 +1792,25 @@ delegates the displaying to the lens(es) specified by the scopeFrame
 instance prototype.</p>
 </span>
 </td></tr>
-        <tr id="instanceLensProperty" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#instanceLensProperty" class="vdoc type-vdoc-reference">#instanceLensProperty</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="instanceLensProperty" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#instanceLensProperty" class="vdoc type-vdoc-reference">#instanceLensProperty</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:instanceLensProperty</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Valoscope" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Valoscope</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of valos UI components that interact with valospace resources.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.instanceLensProperty]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td> <a href="https://valospace.org/inspire/Lens/0#Valoscope" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Valoscope</span>
 
@@ -1974,15 +1840,7 @@ for a non-valoscope element then the element will be wrapped inside an
 implicit Valoscope (including a new frame).</p>
 </span>
 </td></tr>
-        <tr id="instancePropertyLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#instancePropertyLens" class="vdoc type-vdoc-reference">#instancePropertyLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:instancePropertyLens</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+        <tr id="instancePropertyLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#instancePropertyLens" class="vdoc type-vdoc-reference">#instancePropertyLens</a></em></strong>  Lens:instancePropertyLens</h3></td></tr>
         <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Internal</em> <em>Lens</em></td></tr>
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em>value</em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">&#x22;&#x3C;function getLensProperty()&#x3E;&#x22;</span>
@@ -2002,15 +1860,7 @@ searched in the order they are defined from the focus Resource.</p>
       <p>    @focus {Object} focus  the Resource to search the lens from.</p>
 </span>
 </td></tr>
-        <tr id="mediaInstanceLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#mediaInstanceLens" class="vdoc type-vdoc-reference">#mediaInstanceLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:mediaInstanceLens</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+        <tr id="mediaInstanceLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#mediaInstanceLens" class="vdoc type-vdoc-reference">#mediaInstanceLens</a></em></strong>  Lens:mediaInstanceLens</h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Internal</em> <em>Lens</em></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em>value</em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">&#x22;&#x3C;function renderMediaInstance()&#x3E;&#x22;</span>
@@ -2023,15 +1873,13 @@ specify a lens property at all.</span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {Object} focus  the active Resource focus.</p>
 </span>
 </td></tr>
-        <tr id="scopeFrameResource" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#scopeFrameResource" class="vdoc type-vdoc-reference">#scopeFrameResource</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="scopeFrameResource" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#scopeFrameResource" class="vdoc type-vdoc-reference">#scopeFrameResource</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.scopeFrameResource]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr><td><a href="https://valospace.org/inspire/Lens/0#UIContext" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:UIContext</span>
 
@@ -2049,15 +1897,13 @@ is also a Resource.</span>
 current component will use this scope frame resource as their owner.</p>
 </span>
 </td></tr>
-        <tr id="frameStepPrefix" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#frameStepPrefix" class="vdoc type-vdoc-reference">#frameStepPrefix</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="frameStepPrefix" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#frameStepPrefix" class="vdoc type-vdoc-reference">#frameStepPrefix</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.frameStepPrefix]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/inspire/Lens/0#UIContext" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:UIContext</span>
 
@@ -2073,15 +1919,19 @@ innermost enclosing scope frame.</span>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node"></span>
 </td></tr>
-        <tr id="frameOwner" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#frameOwner" class="vdoc type-vdoc-reference">#frameOwner</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="frameOwner" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#frameOwner" class="vdoc type-vdoc-reference">#frameOwner</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:frameOwner</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a></h3></td></tr>
+</span></a> attribute
+    </span>
+</span></h3></td></tr>
         <tr><td><a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -2105,23 +1955,25 @@ cause unintended ambiguities as the frame key is still computed
 relative the current parent frame.</p>
 </span>
 </td></tr>
-        <tr id="frameAuthority" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#frameAuthority" class="vdoc type-vdoc-reference">#frameAuthority</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="frameAuthority" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#frameAuthority" class="vdoc type-vdoc-reference">#frameAuthority</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:frameAuthority</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.frameAuthority]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -2157,15 +2009,13 @@ is stored in &#x27;frameRootFocus&#x27;). If the context slot value is null then
 this implicit chronicle creation is disabled.</p>
 </span>
 </td></tr>
-        <tr id="frameAuthorityProperty" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#frameAuthorityProperty" class="vdoc type-vdoc-reference">#frameAuthorityProperty</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="frameAuthorityProperty" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#frameAuthorityProperty" class="vdoc type-vdoc-reference">#frameAuthorityProperty</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.frameAuthorityProperty]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr><td><a href="https://valospace.org/inspire/Lens/0#UIContext" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:UIContext</span>
 
@@ -2190,15 +2040,13 @@ that authority URI with a new scope frame resource as its chronicle
 root.</p>
 </span>
 </td></tr>
-        <tr id="frameRoot" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#frameRoot" class="vdoc type-vdoc-reference">#frameRoot</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="frameRoot" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#frameRoot" class="vdoc type-vdoc-reference">#frameRoot</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.frameRoot]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/inspire/Lens/0#UIContext" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:UIContext</span>
 
@@ -2219,15 +2067,13 @@ implicitly when a focused resource is a root of a regular chronicle
 Such a focused resource is stored in slot &#x27;frameRootFocus&#x27;.</p>
 </span>
 </td></tr>
-        <tr id="frameRootFocus" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#frameRootFocus" class="vdoc type-vdoc-reference">#frameRootFocus</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="frameRootFocus" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#frameRootFocus" class="vdoc type-vdoc-reference">#frameRootFocus</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.frameRootFocus]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr><td><a href="https://valospace.org/inspire/Lens/0#UIContext" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:UIContext</span>
 
@@ -2247,15 +2093,13 @@ the creation of new frame chronicles for each sub-element that focus
 the same regular chronicle root resource.</p>
 </span>
 </td></tr>
-        <tr id="integrationScopeResource" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#integrationScopeResource" class="vdoc type-vdoc-reference">#integrationScopeResource</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="integrationScopeResource" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#integrationScopeResource" class="vdoc type-vdoc-reference">#integrationScopeResource</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.integrationScopeResource]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/inspire/Lens/0#UIContext" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:UIContext</span>
 
@@ -2271,23 +2115,13 @@ Media that is used as source for render elements.</span>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node"></span>
 </td></tr>
-        <tr id="disabledLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#disabledLens" class="vdoc type-vdoc-reference">#disabledLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="disabledLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#disabledLens" class="vdoc type-vdoc-reference">#disabledLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.disabledLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:disabledLens</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+</span> Lens:disabledLens</h3></td></tr>
         <tr><td><a href="https://valospace.org/inspire/Lens/0#UIContext" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:UIContext</span>
 
@@ -2306,23 +2140,25 @@ scopes.
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {string|Error|Object} reason  a description of why the component is disabled.</p>
 </span>
 </td></tr>
-        <tr id="pendingLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#pendingLens" class="vdoc type-vdoc-reference">#pendingLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="pendingLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#pendingLens" class="vdoc type-vdoc-reference">#pendingLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:pendingLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.pendingLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -2351,23 +2187,25 @@ own default lens.</p>
       <p>    @focus {Object} component  an object description of the dependency being loaded</p>
 </span>
 </td></tr>
-        <tr id="rejectedLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#rejectedLens" class="vdoc type-vdoc-reference">#rejectedLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="rejectedLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#rejectedLens" class="vdoc type-vdoc-reference">#rejectedLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:rejectedLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.rejectedLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -2396,23 +2234,25 @@ own default lens.</p>
       <p>    @focus {Error} reason  the pending operation rejection error</p>
 </span>
 </td></tr>
-        <tr id="pendingPromiseLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#pendingPromiseLens" class="vdoc type-vdoc-reference">#pendingPromiseLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="pendingPromiseLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#pendingPromiseLens" class="vdoc type-vdoc-reference">#pendingPromiseLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:pendingPromiseLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.pendingPromiseLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -2440,23 +2280,25 @@ pending promise.</span>
       <p>    @focus {Object} dependency  a description object of the pending dependency.</p>
 </span>
 </td></tr>
-        <tr id="rejectedPromiseLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#rejectedPromiseLens" class="vdoc type-vdoc-reference">#rejectedPromiseLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="rejectedPromiseLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#rejectedPromiseLens" class="vdoc type-vdoc-reference">#rejectedPromiseLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:rejectedPromiseLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.rejectedPromiseLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -2481,23 +2323,25 @@ scopes.
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {Error} reason  operation rejection error.</p>
 </span>
 </td></tr>
-        <tr id="pendingChroniclesLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#pendingChroniclesLens" class="vdoc type-vdoc-reference">#pendingChroniclesLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="pendingChroniclesLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#pendingChroniclesLens" class="vdoc type-vdoc-reference">#pendingChroniclesLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:pendingChroniclesLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.pendingChroniclesLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -2522,23 +2366,25 @@ scopes.
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {Object[]} chronicles  the chronicles that are being sourcered.</p>
 </span>
 </td></tr>
-        <tr id="rejectedChroniclesLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#rejectedChroniclesLens" class="vdoc type-vdoc-reference">#rejectedChroniclesLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="rejectedChroniclesLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#rejectedChroniclesLens" class="vdoc type-vdoc-reference">#rejectedChroniclesLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:rejectedChroniclesLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.rejectedChroniclesLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -2563,15 +2409,19 @@ scopes.
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {Error} reason  a chronicle sourcery rejection error.</p>
 </span>
 </td></tr>
-        <tr id="delayed" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#delayed" class="vdoc type-vdoc-reference">#delayed</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="delayed" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#delayed" class="vdoc type-vdoc-reference">#delayed</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:delayed</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a></h3></td></tr>
+</span></a> attribute
+    </span>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -2615,23 +2465,13 @@ Optionally, the delayed attribute can be given an array of only some of
 the above pending slot names to make selectively delayed.</p>
 </span>
 </td></tr>
-        <tr id="pendingAttributesLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#pendingAttributesLens" class="vdoc type-vdoc-reference">#pendingAttributesLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="pendingAttributesLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#pendingAttributesLens" class="vdoc type-vdoc-reference">#pendingAttributesLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.pendingAttributesLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:pendingAttributesLens</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+</span> Lens:pendingAttributesLens</h3></td></tr>
         <tr><td><a href="https://valospace.org/inspire/Lens/0#UIContext" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:UIContext</span>
 
@@ -2650,23 +2490,13 @@ scopes.
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {Object} props  the pending attributes.</p>
 </span>
 </td></tr>
-        <tr id="rejectedAttributesLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#rejectedAttributesLens" class="vdoc type-vdoc-reference">#rejectedAttributesLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="rejectedAttributesLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#rejectedAttributesLens" class="vdoc type-vdoc-reference">#rejectedAttributesLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.rejectedAttributesLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:rejectedAttributesLens</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+</span> Lens:rejectedAttributesLens</h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/inspire/Lens/0#UIContext" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:UIContext</span>
 
@@ -2685,23 +2515,25 @@ scopes.
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {string|Error|Object} reason  attribute rejection error.</p>
 </span>
 </td></tr>
-        <tr id="pendingFocusLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#pendingFocusLens" class="vdoc type-vdoc-reference">#pendingFocusLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="pendingFocusLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#pendingFocusLens" class="vdoc type-vdoc-reference">#pendingFocusLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:pendingFocusLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.pendingFocusLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -2727,23 +2559,25 @@ activation.</span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {Object[]} focus  the component focus that is being activated.</p>
 </span>
 </td></tr>
-        <tr id="rejectedFocusLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#rejectedFocusLens" class="vdoc type-vdoc-reference">#rejectedFocusLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="rejectedFocusLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#rejectedFocusLens" class="vdoc type-vdoc-reference">#rejectedFocusLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:rejectedFocusLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.rejectedFocusLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -2768,23 +2602,25 @@ scopes.
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {Error} reason  the focus activation error.</p>
 </span>
 </td></tr>
-        <tr id="pendingFrameLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#pendingFrameLens" class="vdoc type-vdoc-reference">#pendingFrameLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="pendingFrameLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#pendingFrameLens" class="vdoc type-vdoc-reference">#pendingFrameLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:pendingFrameLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.pendingFrameLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -2809,23 +2645,25 @@ scopes.
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {Object[]} frame  the valoscope frame that is being created.</p>
 </span>
 </td></tr>
-        <tr id="rejectedFrameLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#rejectedFrameLens" class="vdoc type-vdoc-reference">#rejectedFrameLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="rejectedFrameLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#rejectedFrameLens" class="vdoc type-vdoc-reference">#rejectedFrameLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:rejectedFrameLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.rejectedFrameLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -2850,23 +2688,25 @@ scopes.
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {Error} reason  the frame creation error.</p>
 </span>
 </td></tr>
-        <tr id="inactiveLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#inactiveLens" class="vdoc type-vdoc-reference">#inactiveLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="inactiveLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#inactiveLens" class="vdoc type-vdoc-reference">#inactiveLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:inactiveLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.inactiveLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -2891,23 +2731,25 @@ scopes.
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {Object} focus  the inactive Resource focus.</p>
 </span>
 </td></tr>
-        <tr id="pendingMediaLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#pendingMediaLens" class="vdoc type-vdoc-reference">#pendingMediaLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="pendingMediaLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#pendingMediaLens" class="vdoc type-vdoc-reference">#pendingMediaLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:pendingMediaLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.pendingMediaLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -2934,23 +2776,25 @@ the lens to view the current focus but which is still being interpreted
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {Media} media  the Media being interpreted.</p>
 </span>
 </td></tr>
-        <tr id="rejectedMediaLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#rejectedMediaLens" class="vdoc type-vdoc-reference">#rejectedMediaLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="rejectedMediaLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#rejectedMediaLens" class="vdoc type-vdoc-reference">#rejectedMediaLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:rejectedMediaLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.rejectedMediaLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -2976,23 +2820,25 @@ as a lens to view the current focus.</span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {Error} reason  interpretation or displaying error.</p>
 </span>
 </td></tr>
-        <tr id="uninterpretableMediaLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#uninterpretableMediaLens" class="vdoc type-vdoc-reference">#uninterpretableMediaLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="uninterpretableMediaLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#uninterpretableMediaLens" class="vdoc type-vdoc-reference">#uninterpretableMediaLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:uninterpretableMediaLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.uninterpretableMediaLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -3018,23 +2864,25 @@ interpretation.</span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {Error} reason  interpretation error.</p>
 </span>
 </td></tr>
-        <tr id="unrenderableInterpretationLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#unrenderableInterpretationLens" class="vdoc type-vdoc-reference">#unrenderableInterpretationLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="unrenderableInterpretationLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#unrenderableInterpretationLens" class="vdoc type-vdoc-reference">#unrenderableInterpretationLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:unrenderableInterpretationLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.unrenderableInterpretationLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -3062,23 +2910,25 @@ native objects or the undefined value.</p>
       <p>    @focus {Error} reason  interpretation displaying error.</p>
 </span>
 </td></tr>
-        <tr id="pendingElementsLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#pendingElementsLens" class="vdoc type-vdoc-reference">#pendingElementsLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="pendingElementsLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#pendingElementsLens" class="vdoc type-vdoc-reference">#pendingElementsLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:pendingElementsLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.pendingElementsLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -3103,23 +2953,25 @@ scopes.
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {Object} elements  the pending elements Promise.</p>
 </span>
 </td></tr>
-        <tr id="rejectedElementsLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#rejectedElementsLens" class="vdoc type-vdoc-reference">#rejectedElementsLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="rejectedElementsLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#rejectedElementsLens" class="vdoc type-vdoc-reference">#rejectedElementsLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:rejectedElementsLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.rejectedElementsLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -3144,23 +2996,25 @@ scopes.
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {string|Error|Object} reason  element rejection error.</p>
 </span>
 </td></tr>
-        <tr id="activatingLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#activatingLens" class="vdoc type-vdoc-reference">#activatingLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="activatingLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#activatingLens" class="vdoc type-vdoc-reference">#activatingLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:activatingLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.activatingLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -3185,23 +3039,25 @@ scopes.
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {Object} focus  the activating Resource focus.</p>
 </span>
 </td></tr>
-        <tr id="unavailableLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#unavailableLens" class="vdoc type-vdoc-reference">#unavailableLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="unavailableLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#unavailableLens" class="vdoc type-vdoc-reference">#unavailableLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:unavailableLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.unavailableLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -3226,23 +3082,25 @@ scopes.
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {Object} focus  the unavailable Resource focus.</p>
 </span>
 </td></tr>
-        <tr id="destroyedLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#destroyedLens" class="vdoc type-vdoc-reference">#destroyedLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="destroyedLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#destroyedLens" class="vdoc type-vdoc-reference">#destroyedLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:destroyedLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.destroyedLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -3267,23 +3125,25 @@ scopes.
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {Object} focus  the destroyed Resource focus.</p>
 </span>
 </td></tr>
-        <tr id="lensPropertyNotFoundLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#lensPropertyNotFoundLens" class="vdoc type-vdoc-reference">#lensPropertyNotFoundLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="lensPropertyNotFoundLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#lensPropertyNotFoundLens" class="vdoc type-vdoc-reference">#lensPropertyNotFoundLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:lensPropertyNotFoundLens</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.lensPropertyNotFoundLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a></h3></td></tr>
+</span></h3></td></tr>
         <tr><td> <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
@@ -3309,23 +3169,13 @@ not have a requested lens property.</span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {Object} focus  the active Resource focus.</p>
 </span>
 </td></tr>
-        <tr id="notLensResourceLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#notLensResourceLens" class="vdoc type-vdoc-reference">#notLensResourceLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="notLensResourceLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#notLensResourceLens" class="vdoc type-vdoc-reference">#notLensResourceLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.notLensResourceLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:notLensResourceLens</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+</span> Lens:notLensResourceLens</h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/inspire/Lens/0#UIContext" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:UIContext</span>
 
@@ -3344,23 +3194,13 @@ scopes.
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {Object} nonLensResource  the non-lens-able Resource.</p>
 </span>
 </td></tr>
-        <tr id="arrayNotIterableLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#arrayNotIterableLens" class="vdoc type-vdoc-reference">#arrayNotIterableLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="arrayNotIterableLens" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#arrayNotIterableLens" class="vdoc type-vdoc-reference">#arrayNotIterableLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.arrayNotIterableLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:arrayNotIterableLens</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+</span> Lens:arrayNotIterableLens</h3></td></tr>
         <tr><td><a href="https://valospace.org/inspire/Lens/0#UIContext" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:UIContext</span>
 
@@ -3379,23 +3219,13 @@ scopes.
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>    @focus {Object} nonArray  the non-iterable value.</p>
 </span>
 </td></tr>
-        <tr id="invalidElementLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#invalidElementLens" class="vdoc type-vdoc-reference">#invalidElementLens</a></em></strong>  <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        <tr id="invalidElementLens" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#invalidElementLens" class="vdoc type-vdoc-reference">#invalidElementLens</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">context[$Lens.invalidElementLens]</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
+        When used within VSX {}-valoscript blocks
     </span>
-</span></a> <a href="https://valospace.org/engine/0#valosheath" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:invalidElementLens</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The API for accessing valos fabric from valospace.Contains the vocabulary with which valoscript code can access
-non-valospace resources, notably including the services of the current
-execution environment.
-    </span>
-</span></a></h3></td></tr>
+</span> Lens:invalidElementLens</h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/inspire/Lens/0#UIContext" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:UIContext</span>
 

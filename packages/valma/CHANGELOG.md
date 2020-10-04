@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.33](https://github.com/valaatech/kernel/compare/v0.35.0-rc.32...v0.35.0-rc.33) (2020-10-04)
+
+
+### Bug Fixes
+
+* Ontology revdoc generation issues ([d710690](https://github.com/valaatech/kernel/commit/d7106900d7a0eb4489192375336fede6a8c6df07))
+
+
+### Features
+
+* **type-library:** Add specify-namespace tool ([2234c3e](https://github.com/valaatech/kernel/commit/2234c3e76d4f2fbe6354f0ba46835cffeef33ea8))
+
+
+
+
+
 # [0.35.0-rc.32](https://github.com/valaatech/kernel/compare/v0.35.0-rc.31...v0.35.0-rc.32) (2020-09-24)
 
 **Note:** Version bump only for package valma

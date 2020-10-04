@@ -53,7 +53,9 @@
         "@type": "@id"
       },
       "VEngine": "https://valospace.org/engine/0#",
-      "VModel": "https://valospace.org/raem/0#",
+      "VValk": "https://valospace.org/valk/0#",
+      "VState": "https://valospace.org/state/0#",
+      "V": "https://valospace.org/0#",
       "VEngine:domainOfField": {
         "@id": "#domainOfField",
         "@type": "@id"
@@ -82,13 +84,15 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/engine",
-    "VRevdoc:version": "0.35.0-rc.32",
+    "VRevdoc:version": "0.35.0-rc.33",
     "VRevdoc:preferredPrefix": "VEngine",
     "VRevdoc:baseIRI": "https://valospace.org/engine/0#",
     "VRevdoc:referencedModules": {
-      "https://valospace.org/engine/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/engine/VEngine",
-      "https://valospace.org/kernel/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/kernel/VKernel",
-      "https://valospace.org/raem/0#": "/home/iridian/valaa/kernel/dist/packages/@valos/raem/VModel"
+      "https://valospace.org/engine/0#": "@valos/engine/VEngine",
+      "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
+      "https://valospace.org/valk/0#": "@valos/valk/VValk",
+      "https://valospace.org/state/0#": "@valos/state/VState",
+      "https://valospace.org/0#": "@valos/space/V"
     },
     "VRevdoc:extenderModules": {
       "https://valospace.org/0#": "@valos/engine/V"
@@ -277,7 +281,8 @@
       "dc": "http://purl.org/dc/elements/1.1/",
       "VEngine": "https://valospace.org/engine/0#",
       "VKernel": "https://valospace.org/kernel/0#",
-      "VModel": "https://valospace.org/raem/0#"
+      "VValk": "https://valospace.org/valk/0#",
+      "VState": "https://valospace.org/state/0#"
     },
     "vocabulary": {
       "@id": "vocabulary",
@@ -327,9 +332,9 @@
       },
       "domainOfField": {
         "@type": "VKernel:Property",
-        "rdfs:domain": "VModel:Type",
-        "rdfs:range": "VModel:Field",
-        "rdfs:comment": "The VModel:Field individuals which have this VModel:Type as their rdfs:domain."
+        "rdfs:domain": "VState:Type",
+        "rdfs:range": "VState:Field",
+        "rdfs:comment": "The VState:Field individuals which have this VState:Type as their rdfs:domain."
       },
       "domainOfProperty": {
         "@type": "VKernel:Property",
@@ -497,14 +502,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }
@@ -787,14 +785,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }
@@ -982,14 +973,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }
@@ -1119,7 +1103,7 @@
           "VDoc:content": [
             "field resolvers"
           ],
-          "VDoc:ref": "VModel:Resolver"
+          "VDoc:ref": "VValk:Resolver"
         }
       ],
       "VDoc:content": [
@@ -1171,14 +1155,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }
@@ -1347,14 +1324,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }
@@ -1622,14 +1592,7 @@
                           "VDoc:words": {
                             "VDoc:selectField": "rdfs:label"
                           },
-                          "VDoc:elidable": true,
-                          "VDoc:map": {
-                            "@type": "VDoc:Reference",
-                            "VDoc:content": [
-                              "VDoc:selectValue"
-                            ],
-                            "VDoc:ref": "VEngine:valosheath"
-                          }
+                          "VDoc:elidable": true
                         }
                       ]
                     }

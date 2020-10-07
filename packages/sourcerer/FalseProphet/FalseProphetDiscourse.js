@@ -102,11 +102,10 @@ export default class FalseProphetDiscourse extends Discourse {
           events.map(event => this._universalizeEvent(event, options.chronicleURI)), options);
 
       ret.eventResults.forEach(eventResult => {
-        const getPremiereStory = eventResult.getPremiereStory;
-        eventResult.waitOwnReactions = (() => eventResult.getFollowerReactions(this.getFollower()));
+        // const getPremiereStory = eventResult.getPremiereStory;
         eventResult.getPremiereStory = () => thenChainEagerly(
-            eventResult.waitOwnReactions(),
-            () => getPremiereStory.call(eventResult));
+            eventResult.getFollowerReactions(this.getFollower()),
+            () => eventResult.getComposedEvent());
       });
 
       return ret;

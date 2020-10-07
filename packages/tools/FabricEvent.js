@@ -196,6 +196,10 @@ export class FabricEventTarget {
   wrapErrorEvent (error: Error, nameOrMinVerbosity: Error | string | number, ...contexts_: any[]) {
     const excess = _verbosityExcess(nameOrMinVerbosity, this._verbosity, this);
     if (excess <= -3) return error; // no wrap.
+    if ((error == null) || !error.hasOwnProperty) {
+      console.error("wrapErrorEvent.error must be an object, got:", error);
+      throw new Error("wrapErrorEvent.error must be an object. See console.log for details");
+    }
     const [functionName, ...contexts] = this._getMessageParts(nameOrMinVerbosity, contexts_);
     const actualFunctionName = functionName instanceof Error ? functionName.message : functionName;
     if (error.hasOwnProperty("functionName")
@@ -453,7 +457,10 @@ function _deliver (pathEntry, fabricEvent, phase) {
         listener.callback.handleEvent(fabricEvent, currentTarget);
       }
     } catch (error) {
-      currentTarget.outputErrorEvent(wrapError(error,
+      (currentTarget.outputErrorEvent
+              ? currentTarget.outputErrorEvent.bind(currentTarget)
+              : console.error.bind(console))(
+          wrapError(error,
               new Error(`dispatchEvent(${fabricEvent.type})`),
               "\n\tfabricEvent:", ...dumpObject(fabricEvent),
               "\n\tlistener:", ...dumpObject(listener)),

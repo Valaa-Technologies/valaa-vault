@@ -90,7 +90,7 @@ describe("Media handling", () => {
             bvobId: (media[valos.Media.content] = createBvob()),
             bvobComposed: new Promise(resolve =>
                 valos.getTransactor().addEventListener("profess", resolve)),
-            bvobPersisted: new Promise(resolve =>
+            bvobRecorded: new Promise(resolve =>
                 valos.getTransactor().addEventListener("record", resolve)),
           }));
       this.text = media;
@@ -105,7 +105,7 @@ describe("Media handling", () => {
     expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 1);
     // local bvob persisted internally but not remotely
-    const { bvobId, bvobComposed, bvobPersisted } = await contentUpdateStarted;
+    const { bvobId, bvobComposed, bvobRecorded } = await contentUpdateStarted;
     expect(bvobId.getVRef().rawId())
         .toEqual(exampleContentId);
     expect(bvobId.getVRef().toJSON())
@@ -119,7 +119,7 @@ describe("Media handling", () => {
     testConnectionBackend.addPrepareBvobResult({ contentHash: exampleContentHash });
     expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 1);
-    await bvobPersisted;
+    await bvobRecorded;
     expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 2);
 
@@ -145,10 +145,10 @@ describe("Media handling", () => {
       const contentUpdateStarted = media[valos.prepareBvob](exampleBuffer)
           .then(createBvob => ({
             bvobId: (media[valos.Media.content] = createBvob()),
-            bvobPersisted: new Promise(resolve =>
+            bvobRecorded: new Promise(resolve =>
                 valos.getTransactor().addEventListener("record", resolve)),
             bvobPurged: new Promise(resolve =>
-                valos.getTransactor().addEventListener("purge", resolve)),
+                valos.getTransactor().addEventListener("reform", resolve)),
           }));
       this.text = media;
       valos.getTransactor().addEventListener("reform", onReform);
@@ -164,10 +164,10 @@ describe("Media handling", () => {
     expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 1);
     harness.clockEvent(1, () => ["test.contentUpdateStarted"]);
-    const { bvobPersisted, bvobPurged } = await contentUpdateStarted;
+    const { bvobRecorded, bvobPurged } = await contentUpdateStarted;
     testConnectionBackend.addPrepareBvobResult({ contentHash: exampleContentHash });
-    harness.clockEvent(1, () => ["test.bvobPersisted"]);
-    await bvobPersisted;
+    harness.clockEvent(1, () => ["test.bvobRecorded"]);
+    await bvobRecorded;
 
     expect(await media.extractValue())
         .toEqual(exampleContent);
@@ -209,7 +209,7 @@ describe("Media handling", () => {
       const contentUpdateStarted = media[valos.prepareBvob](exampleBuffer)
           .then(createBvob => ({
             bvobId: (media[valos.Media.content] = createBvob()),
-            bvobPersisted: new Promise(resolve =>
+            bvobRecorded: new Promise(resolve =>
                 valos.getTransactor().addEventListener("record", resolve)),
           }));
       this.text = media;
@@ -226,10 +226,10 @@ describe("Media handling", () => {
     expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 1);
     harness.clockEvent(1, () => ["test.contentUpdateStarted"]);
-    const { bvobPersisted } = await contentUpdateStarted;
+    const { bvobRecorded } = await contentUpdateStarted;
     testConnectionBackend.addPrepareBvobResult({ contentHash: exampleContentHash });
-    harness.clockEvent(1, () => ["test.bvobPersisted"]);
-    await bvobPersisted;
+    harness.clockEvent(1, () => ["test.bvobRecorded"]);
+    await bvobRecorded;
 
     expect(await media.extractValue())
         .toEqual(exampleContent);
@@ -254,7 +254,9 @@ describe("Media handling", () => {
         .toEqual(exampleContent);
   });
 
-  it("delays a depending reformation when dependent heretic reformation is delayed", async () => {
+  it("delays a depending reformation when dependent reformation is delayed", async () => {
+    // this test is broken. The delay-of-depending does not in fact happen
+    // and bvobPurged gets calle when it shouldn't.
     harness = await createEngineOracleHarness({ verbosity: 0, claimBaseBlock: true,
       oracle: { testAuthorityConfig: { isRemoteAuthority: true, isLocallyPersisted: true } },
       awaitResult: (result) => result.getPersistedStory(),
@@ -279,8 +281,10 @@ describe("Media handling", () => {
       const contentUpdateStarted = media[valos.prepareBvob](buffer)
           .then(createBvob => ({
             bvobId: (media[valos.Media.content] = createBvob()),
-            bvobPersisted: new Promise(resolve =>
+            bvobRecorded: new Promise(resolve =>
                 valos.getTransactor().addEventListener("record", resolve)),
+            bvobPurged: new Promise(resolve =>
+                valos.getTransactor().addEventListener("purge", resolve)),
             bvobPurged: new Promise(resolve =>
                 valos.getTransactor().addEventListener("purge", resolve)),
           }));
@@ -298,10 +302,10 @@ describe("Media handling", () => {
     expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 1);
     harness.clockEvent(1, () => ["test.contentUpdateStarted"]);
-        const { bvobPersisted, bvobPurged } = await contentUpdateStarted;
+        const { bvobRecorded, bvobPurged } = await contentUpdateStarted;
     testConnectionBackend.addPrepareBvobResult({ contentHash });
-    harness.clockEvent(1, () => ["test.bvobPersisted"]);
-    await bvobPersisted;
+    harness.clockEvent(1, () => ["test.bvobRecorded"]);
+    await bvobRecorded;
     expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 2);
     testConnectionBackend._chroniclings.splice(existingChroniclingCount, 2)[0]
@@ -319,12 +323,8 @@ describe("Media handling", () => {
         .toBeTruthy();
 
     expect(mediaReformCause.message).toEqual("Not permitted");
-    expect(mediaPurgeEvent.error.message)
-        .toMatch(/Not permitted/);
-    expect(mediaPurgeEvent.typePrecedingError)
-        .toEqual("record");
 
-    resolveReformationDelay(true);
+    resolveReformationDelay();
     harness.clockEvent(1, () => ["test.mediaProphecy.getPersistedStory()"]);
     let mediaStory;
     while (!mediaStory) {
@@ -337,6 +337,8 @@ describe("Media handling", () => {
       }
       await new Promise(resolve => setTimeout(resolve, 100));
     }
+    expect(mediaPurgeEvent)
+        .toEqual(undefined);
     expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 1);
     // FIXME(iridian, 2019-05): This test and its underlying

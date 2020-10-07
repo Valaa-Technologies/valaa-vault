@@ -16,13 +16,12 @@ import FalseProphetDiscourse from "./FalseProphetDiscourse";
 import FalseProphetConnection from "./FalseProphetConnection";
 
 import { Prophecy, _chronicleEvents } from "./_prophecyOps";
-import { _deliverStoriesToFollowers } from "./_recitalOps";
+import { _reciteStoriesToFollowers } from "./_recitalOps";
 import { deserializeVRL } from "./_universalizationOps";
 import StoryRecital from "./StoryRecital";
 
 type FalseProphetChronicleOptions = ChronicleOptions & {
-  reformHeresy?: (schism: Prophecy, connection: FalseProphetConnection,
-      newEvents: Command[], purgedCommands: Command[]) => Prophecy,
+  onReform?: (progressEvent: Object) => null,
 };
 
 /**
@@ -49,7 +48,7 @@ export default class FalseProphet extends Sourcerer {
 
   _totalCommandCount: number;
 
-  _primaryRecital: StoryRecital;
+  _canonicalRecital: StoryRecital;
 
   _onCommandCountUpdate: Function<>;
   _commandNotificationMinDelay: number;
@@ -66,7 +65,7 @@ export default class FalseProphet extends Sourcerer {
     this.schema = schema || corpus.getSchema();
 
     // Story queue is a sentinel-based linked list with a separate lookup structure.
-    this._primaryRecital = new StoryRecital(undefined, "main");
+    this._canonicalRecital = new StoryRecital(undefined, "canonical");
     this._onCommandCountUpdate = onCommandCountUpdate;
     if (upstream) this.setUpstream(upstream);
   }
@@ -105,12 +104,12 @@ export default class FalseProphet extends Sourcerer {
     return this.chronicleEvents([event], options).eventResults[0];
   }
 
-  _deliverStoriesToFollowers (stories: Story[], purgedRecital: ?StoryRecital) {
+  _reciteStoriesToFollowers (stories: Story[], purgedRecital: ?StoryRecital) {
     const unblockNotifications = this._blockNotifications();
     try {
-      return _deliverStoriesToFollowers(this, stories, purgedRecital);
+      return _reciteStoriesToFollowers(this, stories, purgedRecital);
     } catch (error) {
-      throw this.wrapErrorEvent(error, 1, new Error(`_deliverStoriesToFollowers()`),
+      throw this.wrapErrorEvent(error, 1, new Error(`_reciteStoriesToFollowers()`),
           "\n\tstories:", ...dumpObject(stories),
           "\n\tpurgedRecital:", ...dumpObject(purgedRecital));
     } finally {
@@ -167,7 +166,7 @@ export default class FalseProphet extends Sourcerer {
   }
 
   _dumpStatus () {
-    return this._primaryRecital.dumpStatus();
+    return this._canonicalRecital.dumpStatus();
   }
 
   deserializeReference = (serializedReference: JSONIdData, currentChronicleURI?: string) => {

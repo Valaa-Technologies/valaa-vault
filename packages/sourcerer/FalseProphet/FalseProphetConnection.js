@@ -1,8 +1,6 @@
 // @flow
 
-import { getActionFromPassage } from "~/raem";
 import { Command, EventBase } from "~/raem/events";
-import { Story } from "~/raem/redux/Bard";
 import VRL from "~/raem/VRL";
 
 import Connection from "~/sourcerer/api/Connection";
@@ -10,18 +8,13 @@ import { ChronicleOptions, ChronicleRequest, ChronicleEventResult, ConnectOption
     from "~/sourcerer/api/types";
 import { initializeAspects, obtainAspect, tryAspect } from "~/sourcerer/tools/EventAspects";
 import EVENT_VERSION from "~/sourcerer/tools/EVENT_VERSION";
-import extractChronicleEvent0Dot2
-    from "~/sourcerer/tools/event-version-0.2/extractPartitionEvent0Dot2";
 import IdentityManager from "~/sourcerer/FalseProphet/IdentityManager";
 
-import {
-  dumpObject, mapEagerly, generateDispatchEventPath, thenChainEagerly, thisChainReturn,
-} from "~/tools";
+import { dumpObject, mapEagerly, thenChainEagerly } from "~/tools";
 
 import { Prophecy, _reviewRecomposedSchism } from "./_prophecyOps";
 import {
-  _confirmLeadingTruthsToFollowers, _confirmRecitalStories, _recomposeSchismaticStory,
-  _refineRecital,
+  _confirmLeadingTruthsToFollowers, _confirmRecitalStories, _elaborateRecital,
 } from "./_recitalOps";
 
 /**
@@ -161,7 +154,7 @@ export default class FalseProphetConnection extends Connection {
       resultBase._events = events;
       resultBase.onError = errorOnFalseProphetChronicleEvents
           .bind(this, new Error("chronicleResultBase"));
-      const primaryRecital = this.getFalseProphet()._primaryRecital;
+      const canonicalRecital = this.getFalseProphet()._canonicalRecital;
       const ret = {
         eventResults: events.map((event, index) => {
           const result = Object.create(resultBase);
@@ -181,7 +174,7 @@ export default class FalseProphetConnection extends Connection {
               (error, head, index, truthResults, entries, callback, onRejected) => {
                 if (!leadingTruths) leadingTruths = truthResults.slice(0, index);
                 const command = events[index];
-                const prophecy = command && primaryRecital.getStoryBy(command.aspects.command.id);
+                const prophecy = command && canonicalRecital.getStoryBy(command.aspects.command.id);
                 if (error) connection._mostRecentError = error;
                 if (((error.proceed || {}).when === "narrated") && (renarration === undefined)) {
                   renarration = connection.narrateEventLog({
@@ -240,7 +233,8 @@ export default class FalseProphetConnection extends Connection {
             }
             throw rechronicle;
           }
-          return receiveTruths && (receivableTruths.length || initialSchism)
+          return receiveTruths
+              && (receivableTruths.length || initialSchism)
               && receiveTruths(receivableTruths, undefined, undefined, initialSchism);
         },
         function _finalizeChronicleResults () {
@@ -333,7 +327,7 @@ export default class FalseProphetConnection extends Connection {
         "\n\tnewTruths:", ...dumpObject(newTruths)
       ]);
       */
-      _refineRecital(this, newTruths, "receive-truth", schismaticCommands);
+      _elaborateRecital(this, newTruths, "receive-truth", schismaticCommands);
       return truths;
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, `receiveTruths(${this._dumpEventIds(truths)})`,
@@ -358,14 +352,14 @@ export default class FalseProphetConnection extends Connection {
           (command, queueIndex) => {
             schismaticCommands = this._unconfirmedCommands.splice(queueIndex);
           });
-      _refineRecital(this, newCommands || [], "receive-command", schismaticCommands);
+      _elaborateRecital(this, newCommands || [], "receive-command", schismaticCommands);
       return commands;
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, `receiveCommand(${this._dumpEventIds(commands)})`,
           "\n\treceived commands:", ...dumpObject(commands),
           "\n\tpendingTruths:", ...dumpObject([...this._pendingTruths]),
           "\n\tunconfirmedCommands:", ...dumpObject([...this._unconfirmedCommands]),
-          "\n\tthis:", ...dumpObject(this)
+          "\n\tthis:", ...dumpObject(this),
       );
     }
   }
@@ -408,10 +402,6 @@ export default class FalseProphetConnection extends Connection {
     return undefined;
   }
 
-  extractChronicleEvent (command: Command) {
-    return extractChronicleEvent0Dot2(this, command);
-  }
-
   createCommandChronicleInfo (/* action: Object, command: Command , bard: Bard */) {
     if (this._isFrozen) {
       throw new Error(
@@ -439,114 +429,5 @@ export default class FalseProphetConnection extends Connection {
           "\n\tpurged prophecy:", ...dumpObject(purged),
           "\n\tnew prophecy:", ...dumpObject(newProphecy));
     }
-  }
-
-  _reformHeresy (schism: Prophecy, reformation: Object, purgedStories: Story[],
-      newEvents: EventBase[]) {
-    const ret = this.performChain([{ schism, reformation, purgedStories, newEvents }],
-        "_reformHeresyChain", "_errorOnReformHeresy");
-    // if ret is a promise return undefined to denote purge.
-    if (!Array.isArray(ret) || (ret === false)) return undefined;
-    return ret;
-  }
-
-  static _reformHeresyChain = [
-    FalseProphetConnection.prototype._prepareHeresyReformation,
-    FalseProphetConnection.prototype._recomposeHeresy,
-    FalseProphetConnection.prototype._deliverStoriesIfReformationComplete,
-  ];
-
-  _prepareHeresyReformation (params) {
-    const meta = params.schism.meta || {};
-    const operation = meta.operation;
-    // No way to revise non-prophecy schisms: these come from elsewhere so not our job.
-    if (!operation) return thisChainReturn(false);
-    const venue = operation._venues[this.getChronicleURI()];
-    if (venue) {
-      operation._persistedStory = null;
-      venue.chronicling = null;
-    }
-    // First try to revise using the original chronicleEvents options.reformHeresy
-    // TODO(iridian, 2020-04): Review and revise or remove dead code
-    if (operation._options.reformHeresy) {
-      return thisChainReturn(
-          operation._options
-              .reformHeresy(params.schism, this, params.newEvents, params.purgedStories)
-          || false);
-    }
-    const progress = operation._progress;
-    // Then if the schism is not a semantic schism try basic revise-recompose.
-    if (progress.isSemanticSchism || (progress.isReformable === false)) {
-      return thisChainReturn(false);
-    }
-    progress.type = "reform";
-    const dispatchPath = generateDispatchEventPath(meta.transactor, "reform");
-    if (dispatchPath) {
-      meta.transactor.dispatchAndDefaultActEvent(progress, { dispatchPath });
-    } else {
-      progress.isSchismatic = false;
-    }
-    if (progress.isSchismatic) return thisChainReturn(false);
-    return [params, ...(progress._proceedWhenTruthy || [])];
-  }
-
-  _recomposeHeresy (params, ...proceedConditions) {
-    if (!params) return thisChainReturn(false);
-    const failingIndex = proceedConditions.findIndex(v => !v);
-    if (failingIndex >= 0) {
-      throw new Error(`Reformation aborted due to falsy proceed condition #${failingIndex}`);
-    }
-    const recomposedProphecy = _recomposeSchismaticStory(this.getFalseProphet(), params.schism);
-    if (!recomposedProphecy
-        || (Object.keys((recomposedProphecy.meta || {}).chronicles).length !== 1)) {
-      // Recomposition failed, revision failed or a multi-chronicle command reformation
-      // which is not supported (for now).
-      return thisChainReturn(false);
-    }
-    const recomposedCommand = getActionFromPassage(recomposedProphecy);
-    if (!recomposedCommand.meta) throw new Error("recomposedCommand.meta missing");
-    const recomposedChronicleCommand = this.extractChronicleEvent(recomposedCommand);
-    // Can only revise commands belonging to the originating chronicle
-    if (!recomposedChronicleCommand) return thisChainReturn(false);
-
-    const operation = recomposedCommand.meta.operation = params.schism.meta.operation;
-    operation._prophecy = recomposedProphecy;
-    operation._reformationAttempt = (operation._reformationAttempt || 0) + 1;
-    operation._persistedStory = null;
-    if (operation._progress) {
-      operation._progress.previousProphecy = operation._progress.prophecy;
-      operation._progress.prophecy = recomposedProphecy;
-    }
-    const venue = operation._venues[this.getChronicleURI()];
-    venue._reformationAttempt = operation._reformationAttempt;
-    venue.commandEvent = recomposedChronicleCommand;
-    venue.chronicling = this.chronicleEvent(venue.commandEvent, Object.create(operation._options));
-    return [params, recomposedProphecy];
-  }
-
-  _deliverStoriesIfReformationComplete (params, ...recomposedProphecies) {
-    if (params) {
-      if (!params.reformation.isComplete) return recomposedProphecies;
-      this.getFalseProphet()._deliverStoriesToFollowers(recomposedProphecies);
-    }
-    return thisChainReturn(false);
-  }
-
-  _errorOnReformHeresy (error, index, [{ schism, reformation, newEvents, purgedStories }]) {
-    const wrappedError = this.wrapErrorEvent(error, 2,
-        new Error(`_reformHeresy(${this._dumpEventIds(schism)}, ${
-          this._dumpEventIds(newEvents)}, ${this._dumpEventIds(purgedStories)})`));
-    const transactor = schism && schism.meta && schism.meta.transactor;
-    if (transactor) {
-      const progress = schism.meta.operation.getErroringProgress(wrappedError, {
-        oldProphecy: schism, isReformSchism: true,
-      });
-      if (!transactor.dispatchAndDefaultActEvent(progress)) return thisChainReturn(false);
-    }
-    if (reformation.isComplete) {
-      this.outputErrorEvent(wrappedError,
-          "Exception caught when reforming heresy");
-    }
-    return thisChainReturn(false);
   }
 }

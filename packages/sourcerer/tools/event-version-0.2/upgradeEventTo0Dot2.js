@@ -20,7 +20,7 @@ export default function upgradeEventTo0Dot2 (connection: Connection, event: Even
     if (event.aspects && (event.aspects.version === "0.2")) return event;
     if (event.version === "0.1") {
       ret = convertEvent0Dot1To0Dot2(connection, event);
-      const extracted = extractChronicleEvent0Dot2(connection, ret);
+      const extracted = extractChronicleEvent0Dot2(connection.getChronicleURI(), ret);
       if (!extracted) {
         throw new Error("Could not extract chronicle event while upgrading event from version 0.1");
       }

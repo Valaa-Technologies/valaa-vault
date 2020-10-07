@@ -2,16 +2,14 @@
 
 import { Action, isTransactedLike } from "~/raem/events";
 
-import Connection from "~/sourcerer/api/Connection";
+import { dumpObject, wrapError } from "~/tools";
 
-import { dumpObject } from "~/tools";
-
-export default function extractChronicleEvent0Dot2 (connection: Connection, action: Action,
+export default function extractChronicleEvent0Dot2 (chronicleURI: String, action: Action,
     excludeMetaless: ?boolean) {
   const meta = action.meta || action.local;
   if (!meta) return excludeMetaless ? undefined : action;
   const chronicles = meta.chronicles;
-  if (chronicles && !chronicles[connection.getChronicleURI()]) return undefined;
+  if (chronicles && !chronicles[chronicleURI]) return undefined;
   const ret = { ...action };
   try {
     delete ret.meta;
@@ -30,7 +28,7 @@ export default function extractChronicleEvent0Dot2 (connection: Connection, acti
     if (action.actions) {
       ret.actions = action.actions
           .map(subAction => extractChronicleEvent0Dot2(
-              connection, subAction, meta.chronicleURI !== connection.getChronicleURI()))
+              chronicleURI, subAction, meta.chronicleURI !== chronicleURI))
           .filter(notFalsy => notFalsy);
       if (!ret.actions.length) {
         throw new Error(`INTERNAL ERROR: No TRANSACTED.actions found for current chronicle ${
@@ -44,8 +42,8 @@ export default function extractChronicleEvent0Dot2 (connection: Connection, acti
     }
     return ret;
   } catch (error) {
-    throw connection.wrapErrorEvent(error, 1,
-        new Error(`extractChronicleEvent0Dot2(${connection.getName()})`),
+    throw wrapError(error, 1,
+        new Error(`During extractChronicleEvent0Dot2(${chronicleURI})`),
         "\n\taction:", ...dumpObject(action),
         "\n\taction chronicles:", ...dumpObject(chronicles),
         "\n\tcurrent ret:", ...dumpObject(ret),

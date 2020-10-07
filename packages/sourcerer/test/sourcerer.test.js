@@ -292,11 +292,15 @@ describe("Sourcerer", () => {
 
     const purgedHeresies = [];
     // Purge all heresies
-    const reformHeresy = (heresy) => { purgedHeresies.push(heresy); };
+    const onReform = (reformEvent) => {
+      purgedHeresies.push(reformEvent.prophecy);
+      reformEvent.isSchismatic = true;
+      reformEvent.isReformable = false;
+    };
 
     expectConnectionEventIds(scribeConnection, 0, 1, 1);
 
-    const first = harness.chronicleTestEvent(simpleCommand, { reformHeresy });
+    const first = harness.chronicleTestEvent(simpleCommand, { onReform });
     expect(first.getLogAspectOf(harness.testChronicleURI).index).toEqual(1);
 
     let firstTruth, firstFailure;
@@ -308,7 +312,7 @@ describe("Sourcerer", () => {
 
     expect(firstTruth).toEqual(undefined);
 
-    const seconds = harness.chronicleTestEvents(coupleCommands, { reformHeresy }).eventResults;
+    const seconds = harness.chronicleTestEvents(coupleCommands, { onReform }).eventResults;
 
     const secondsTruths = [], secondsFailures = [];
     const secondsTruthProcesses = seconds.map((result_, index) => result_.getTruthEvent().then(

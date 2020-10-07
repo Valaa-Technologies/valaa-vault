@@ -56,22 +56,30 @@ export class FabricatorEvent extends FabricEvent {
   isReformable: ?boolean; // If set to false, a heresy cannot be reformed even asynchronously
   isRefabricateable: ?boolean; // If set to false, the command cannot be refabricated
 
-  proceedWhenTruthy (...maybeAsyncConditions) {
-    (this._proceedWhenTruthy || (this._proceedWhenTruthy = [])).push(...maybeAsyncConditions);
+  proceedAfterAll (...maybeAsyncConditions) {
+    for (let condition of maybeAsyncConditions) {
+      if (typeof condition === "function") condition = new Promise(condition);
+      (this._proceedAfterAll || (this._proceedAfterAll = [])).push(condition);
+    }
     this.isRevisable = false;
   }
 
-  reformWhenTruthy (...maybeAsyncConditions) {
-    this.proceedWhenTruthy(...maybeAsyncConditions);
+  reformAfterAll (...maybeAsyncConditions) {
+    this.proceedAfterAll(...maybeAsyncConditions);
     this.isReformable = true;
   }
 
-  refabricateWhenTruthy (...maybeAsyncConditions) {
-    this.proceedWhenTruthy(...maybeAsyncConditions);
+  refabricateAfterAll (...maybeAsyncConditions) {
+    this.proceedAfterAll(...maybeAsyncConditions);
     this.isReformable = false;
     this.isRefabricateable = true;
   }
 }
+
+export const fabricatorEventTypes = Object.fromEntries(Object
+    .entries(declarations)
+    .filter(([, declaration]) => declaration.tags.includes("FabricEvent"))
+    .map(([name, declaration]) => ([name, { name, ...declaration }])));
 
 export const fabricatorMixinOps = {
   addPreCondition (name: String, validator: Function) {
@@ -85,8 +93,5 @@ export const fabricatorMixinOps = {
   validatePreConditions (/* event: Event */) {},
   validatePostConditions (/* event: Event */) {},
 
-  [FabricEventTypesTag]: Object.fromEntries(Object
-      .entries(declarations)
-      .filter(([, declaration]) => declaration.tags.includes("FabricEvent"))
-      .map(([name, declaration]) => ([name, { name, ...declaration }]))),
+  [FabricEventTypesTag]: fabricatorEventTypes,
 };

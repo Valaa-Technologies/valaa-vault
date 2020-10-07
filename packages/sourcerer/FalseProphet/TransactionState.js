@@ -14,7 +14,7 @@ import type FalseProphetDiscourse from "~/sourcerer/FalseProphet/FalseProphetDis
 
 import { _universalizeAction } from "./_universalizationOps";
 
-import { dumpObject, generateDispatchEventPath } from "~/tools";
+import { dumpObject } from "~/tools";
 
 let transactionCounter = 0;
 let activeTransactionCounter = 0;
@@ -103,7 +103,7 @@ class TransactionEventResult extends ChronicleEventResult {
   getPremiereStory () {
     if (this.info._finalCommand !== undefined) return this.story;
     return this.premiereStory || (this.premiereStory = new Promise((succeed, fail) => {
-      this.info_resultPromises[this.existingActionCount + this.index] = { succeed, fail };
+      this.info._resultPromises[this.existingActionCount + this.index] = { succeed, fail };
     }));
   }
 }
@@ -144,7 +144,6 @@ export default class TransactionState {
             `transactor.on${type}`,
             event.command.aspects.command.id,
             event.instigatorConnection ? event.instigatorConnection.getChronicleURI() : "",
-            event.error && event.error.message,
             event.defaultPrevented ? "canceled" : "",
             event.isSchismatic === undefined ? ""
                 : event.isSchismatic ? "schismatic" : "non-schismatic",
@@ -154,6 +153,9 @@ export default class TransactionState {
                 : event.isReformable ? "reformable" : "non-reformable",
             event.isRefabricateable === undefined ? ""
                 : event.isRefabricateable ? "refabricateable" : "non-refabricateable",
+            `\n\t${type !== "error" ? type : `error on ${event.errorCauseType}`}:`, event.error
+                ? JSON.stringify(event.error.message)
+                : event.message || "<no message>",
           ]);
         });
       });
@@ -376,14 +378,6 @@ export default class TransactionState {
     story.passages = this._passages;
     story.state = this._stateAfter;
     story.state[StoryIndexTag] = story.storyIndex;
-
-    const dispatchPath = generateDispatchEventPath(this._transactor, "issue");
-    if (dispatchPath) {
-      const progress = command.meta.operation.getProgressEvent("issue");
-      if (!this._transactor.dispatchAndDefaultActEvent(progress, { dispatchPath })) {
-        throw new Error("Command rejected by 'issue' default action cancelation");
-      }
-    }
     targetCorpus.reinitialize(this._stateAfter);
     return story;
   }

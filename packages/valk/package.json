@@ -3,7 +3,8 @@
   "version": "0.35.0-rc.33",
   "valos": {
     "type": "library",
-    "domain": "@valos/kernel"
+    "domain": "@valos/kernel",
+    "docs": "https://valospace.org/valk"
   },
   "description": "Provides the ValOS core model computation specification and the 'VValk' ontology namespace",
   "author": "Valaa Technologies Ltd",
@@ -18,5 +19,6 @@
     "@valos/kernel": "^0.35.0-rc.33",
     "@valos/revdoc": "^0.35.0-rc.33",
     "@valos/type-library": "^0.35.0-rc.33"
-  }
+  },
+  "homepage": "https://valospace.org/valk"
 }

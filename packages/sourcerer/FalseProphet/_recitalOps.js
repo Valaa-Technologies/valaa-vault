@@ -92,6 +92,9 @@ export function _composeEventIntoRecitalStory (falseProphet: FalseProphet, event
       return story;
     }
   }
+  if (progress && progress.isReformable) {
+    operation.launchFullReform();
+  }
   return undefined;
 }
 
@@ -439,7 +442,7 @@ function _finalizeRevisioning (elaboration: Object) {
       // not originating from our downstream during this execution session; someone else's problem.
       continue;
     }
-    const revisedHeresy = operation.reformAsPartOf(elaboration);
+    const revisedHeresy = operation.launchPartialReform(elaboration);
     if (revisedHeresy && !isPromise(revisedHeresy)) {
       // add synchronous reform as part of the current revisioning
       elaboration.newRecitalStories.push(revisedHeresy);

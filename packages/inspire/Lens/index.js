@@ -57,10 +57,12 @@ a valonaut and the @valos/inspire UI engine.`,
     const componentType = declaration.tags.includes("Valoscope") ? "Lens:Valoscope"
         : declaration.tags.includes("Attribute") ? "Lens:Element"
         : null;
+    const valueName = "lens";
     if (componentType) {
       domain.push(componentType);
-      addLabel(
-          `Lens:${name}`, `Lens:${name}`, [`When used as `, ref(componentType), ` attribute`]);
+      addLabel([`Lens:${name}={`, em(valueName), `}`],
+          `Lens:${name}`,
+          [`When used as a `, ref(componentType), ` attribute`]);
     }
     if (declaration.tags.includes("Attribute") || declaration.tags.includes("Context")) {
       declaration.isSlotName = true;
@@ -68,8 +70,10 @@ a valonaut and the @valos/inspire UI engine.`,
     if (declaration.tags.includes("Context")) {
       declaration.isSlotName = true;
       domain.push("Lens:UIContext");
-      addLabel(
-          `context[$Lens.${name}]`, `$Lens.${name}`, `When used within VSX {}-valoscript blocks`);
+      addLabel([`[$On.${name}]: `, em(valueName), `,`],
+          `On:${name}`,
+          ["When set as an ", componentType ? ref(componentType) : "element", " ",
+              ref("Lens:context"), " attribute property"]);
     }
     if (!componentType && declaration.tags.includes("Lens")) {
       addLabel(`Lens:${name}`);
@@ -348,6 +352,14 @@ to 'model', and the various components roughly correspond to 'controller'.
     @focus {Object} focus  the focus of the component.`,
     ],
     isEnabled: true,
+  }));
+
+  declareName("context", () => ({
+    tags: ["Primary", "Attribute", "Lens"],
+    type: "Object",
+    description: [
+`Attribute slot for assigning values into the context object of the component.`
+    ]
   }));
 
   const loadingLens = declareName("loadingLens", () => ({

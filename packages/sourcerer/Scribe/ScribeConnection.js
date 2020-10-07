@@ -24,7 +24,7 @@ import {
   _writeTruths, _readTruths, _writeCommands, _readCommands, _deleteCommands,
 } from "./_databaseOps";
 import {
-  _narrateEventLog, _chronicleEvents, _receiveEvents, _triggerEventQueueWrites
+  _narrateEventLog, _proclaimEvents, _receiveEvents, _triggerEventQueueWrites
 } from "./_eventOps";
 
 export default class ScribeConnection extends Connection {
@@ -161,7 +161,7 @@ export default class ScribeConnection extends Connection {
     const connection = this;
     let wrap = new Error("chronicleEvents()");
     try {
-      return _chronicleEvents(this, events, options, errorOnScribeChronicleEvents);
+      return _proclaimEvents(this, events, options, errorOnScribeChronicleEvents);
     } catch (error) { return errorOnScribeChronicleEvents(error); }
     function errorOnScribeChronicleEvents (error) {
       const cycleWraps = wrap;

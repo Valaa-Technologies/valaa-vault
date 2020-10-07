@@ -147,7 +147,7 @@ async function _narrateLocalLogs (connection: ScribeConnection,
  #####   #    #  #    #   ####   #    #     #     ####   ######  ######
 */
 
-export function _chronicleEvents (connection: ScribeConnection,
+export function _proclaimEvents (connection: ScribeConnection,
     events: EventBase[], options: ChronicleOptions = {}, onError: Function,
 ): ChronicleRequest {
   if (!events || !events.length) return { eventResults: events };

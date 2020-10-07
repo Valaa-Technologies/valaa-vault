@@ -1,6 +1,6 @@
 // @flow
 
-import { Command, EventBase } from "~/raem/events";
+import { EventBase } from "~/raem/events";
 import VRL from "~/raem/VRL";
 
 import Connection from "~/sourcerer/api/Connection";
@@ -194,7 +194,7 @@ export default class FalseProphetConnection extends Connection {
                     options.discourse.dispatchAndDefaultActEvent(progress);
                   }
                   if (renarration) {
-                    progress.proceedWhenTruthy(renarration);
+                    progress.proceedAfterAll(renarration);
                   }
                   if (progress.isSchismatic !== false) {
                     if (initialSchism === undefined) initialSchism = events[index];

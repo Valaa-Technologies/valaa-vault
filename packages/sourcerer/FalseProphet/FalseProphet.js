@@ -15,7 +15,7 @@ import { dumpObject } from "~/tools";
 import FalseProphetDiscourse from "./FalseProphetDiscourse";
 import FalseProphetConnection from "./FalseProphetConnection";
 
-import { Prophecy, _chronicleEvents } from "./_prophecyOps";
+import { _proclaimEvents } from "./_prophecyOps";
 import { _reciteStoriesToFollowers } from "./_recitalOps";
 import { deserializeVRL } from "./_universalizationOps";
 import StoryRecital from "./StoryRecital";
@@ -93,7 +93,7 @@ export default class FalseProphet extends Sourcerer {
   chronicleEvents (commands: Command[], options: FalseProphetChronicleOptions = {}):
       ChroniclePropheciesRequest {
     try {
-      return _chronicleEvents(this, commands, options);
+      return _proclaimEvents(this, commands, options);
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, "chronicleEvents()",
           "\n\toptions:", ...dumpObject(options));

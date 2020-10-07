@@ -181,11 +181,10 @@ describe("Media handling", () => {
     const purgeEvent = await bvobPurged;
     expect(purgeEvent.error.message)
         .toMatch(/Media does not exist/);
-    expect(purgeEvent.typePrecedingError)
+    expect(purgeEvent.errorCauseType)
         .toEqual("reform");
-    expect(purgeEvent.isComposeSchism)
-        .toBeTruthy();
-    expect(reformCause.message).toEqual("Not permitted");
+    expect(reformCause.message)
+        .toMatch(/Not permitted/);
 
     expect(() => media.extractValue())
         .toThrow(/Cannot operate on a non-Created/);
@@ -243,10 +242,8 @@ describe("Media handling", () => {
     const errorEvent = await newMediaError;
     expect(errorEvent.error.message)
         .toMatch(/Connection lost/);
-    expect(errorEvent.typePrecedingError)
+    expect(errorEvent.errorCauseType)
         .toEqual("record");
-    expect(errorEvent.isComposeSchism)
-        .toBeFalsy();
     expect(reformCause)
         .toEqual(undefined);
 
@@ -269,7 +266,7 @@ describe("Media handling", () => {
     let resolveReformationDelay;
     const onReform = e => {
       mediaReformCause = e.error;
-      e.reformWhenTruthy(new Promise(resolve => (resolveReformationDelay = resolve)));
+      e.reformAfterAll(resolve => { resolveReformationDelay = resolve; });
     };
     const onPurge = e => (mediaPurgeEvent = e);
     harness.clockEvent(1, () => ["test.runValoscript"]);
@@ -317,12 +314,11 @@ describe("Media handling", () => {
         .toEqual(existingChroniclingCount);
     expect(bvobPurgeEvent.error.message)
         .toMatch(/Media does not exist/);
-    expect(bvobPurgeEvent.typePrecedingError)
+    expect(bvobPurgeEvent.errorCauseType)
         .toEqual("reform");
-    expect(bvobPurgeEvent.isComposeSchism)
-        .toBeTruthy();
 
-    expect(mediaReformCause.message).toEqual("Not permitted");
+    expect(mediaReformCause.message)
+        .toMatch(/Not permitted/);
 
     resolveReformationDelay();
     harness.clockEvent(1, () => ["test.mediaProphecy.getPersistedStory()"]);

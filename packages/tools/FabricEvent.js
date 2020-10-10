@@ -260,42 +260,55 @@ export class FabricEventTarget {
         this);
   }
 
-  performChain (params: any, staticChainName: string, staticErrorHandlerName: string,
-      customVerbosity: ?number) {
-    let chain = this.constructor[staticChainName];
+  opChain (chainOrStaticName: string, params: any,
+      errorHandlerOrName: string, opLogOrMinVerbosity: ?number = 2) {
+    let chain = (typeof chainOrStaticName !== "string"
+        ? chainOrStaticName
+        : this.constructor[chainOrStaticName]);
     if (!chain) {
-      throw new Error(`performChain can't find chain '${staticChainName}' from ${
-          this.constructor.name} statics`);
+      throw new Error(`opChain can't find chain '${chainOrStaticName}' from ${
+          this.constructor.name} static class properties`);
     }
     let errorHandler;
-    if (staticErrorHandlerName) {
-      errorHandler = this[staticErrorHandlerName];
+    if (errorHandlerOrName) {
+      errorHandler = (typeof errorHandlerOrName !== "string")
+          ? errorHandlerOrName
+          : this[errorHandlerOrName];
       if (!errorHandler) {
-        throw new Error(`performChain can't find error handler '${
-            staticErrorHandlerName}' from ${this.constructor.name} non-statics`);
+        throw new Error(`opChain can't find error handler '${
+          errorHandlerOrName}' from ${this.constructor.name} non-static instance properties`);
       }
     }
-    if (this._verbosity >= (customVerbosity || 2)) {
-      chain = this.addChainClockers(customVerbosity || 2, staticChainName, chain, true);
+    if (((typeof opLogOrMinVerbosity === "number") && (this.getVerbosity() >= opLogOrMinVerbosity))
+        || opLogOrMinVerbosity) {
+      chain = this.addChainClockers(opLogOrMinVerbosity,
+          chainOrStaticName.name || chainOrStaticName, chain, true);
     }
     return thisChainEagerly(this, params, chain, errorHandler);
   }
 
-  addChainClockers (minVerbosity: number, eventPrefix: string, thenChainCallbacks: Function[],
-      isThisChain: boolean) {
-    if (!(this.getVerbosity() >= minVerbosity)) return thenChainCallbacks;
+  addChainClockers (opLogOrMinVerbosity: number, eventPrefix: string,
+      thenChainCallbacks: Function[], isThisChain: boolean) {
+    if (opLogOrMinVerbosity == null) return thenChainCallbacks;
+    const chainPlog = (typeof opLogOrMinVerbosity === "object")
+        ? opLogOrMinVerbosity.opLog(0, eventPrefix)
+        : this.opLog(opLogOrMinVerbosity, eventPrefix);
+    if (!chainPlog) return thenChainCallbacks;
     const clockerId = _clockerId++;
-    return [].concat(...thenChainCallbacks.map((callback, index) => [
-      ...(!callback.name ? [] : [(...params) => {
-        this.opEvent(`${eventPrefix}#[${index}]:${callback.name}`, clockerId);
-        return isThisChain ? params : params[0];
-      }]),
-      callback,
-    ]),
-    (...params) => {
-      this.opEvent(`${eventPrefix}.done`, clockerId);
-      return isThisChain ? params : params[0];
-    });
+    return [].concat(
+        ...thenChainCallbacks.map((callback, index) => [
+          ...(!callback.name ? [] : [(...params) => {
+            chainPlog.opEvent(this, `${eventPrefix}:${clockerId}:[${index}]`,
+                `Calling step #${index} ${callback.name}`);
+            return isThisChain ? params : params[0];
+          }]),
+          callback,
+        ]),
+        (...params) => {
+          chainPlog.opEvent(this, `${eventPrefix}:${clockerId}@.:done`,
+              `Chain ${eventPrefix} completed`);
+          return isThisChain ? params : params[0];
+        });
   }
 
   // Fabric EventTarget API

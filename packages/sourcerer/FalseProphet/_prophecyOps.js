@@ -61,9 +61,8 @@ export function _proclaimEvents (falseProphet: FalseProphet, events: EventBase[]
   falseProphet._reciteStoriesToFollowers(prophecies);
   for (const recitedProphecy of prophecies) {
     const operation = recitedProphecy.meta.operation;
-    operation._debugPhase = "proclaim";
-    operation._fulfillment = operation.performChain(
-        null, "_proclaimChain", "_errorOnProclaim");
+    operation._debugPhase = "profess";
+    operation._fulfillment = operation.opChain("_professChain", null, "_errorOnProfess");
   }
   return ret;
 
@@ -228,11 +227,11 @@ export class ProphecyOperation extends ProphecyEventResult {
     if (!elaboration.instigatorChronicleURI) {
       throw new Error(`launchPartialReform instigatorChronicleURI missing`);
     }
-    return this.performChain(elaboration, "_partialReformChain", "_errorOnReform");
+    return this.opChain("_partialReformChain", elaboration, "_errorOnReform");
   }
 
   launchFullReform () {
-    return this.performChain({}, "_fullReformChain", "_errorOnReform");
+    return this.opChain("_fullReformChain", {}, "_errorOnReform");
   }
 
   purge () {
@@ -245,7 +244,7 @@ export class ProphecyOperation extends ProphecyEventResult {
     }
     for (const venue of Object.values(this._venues)) {
       if (!venue.confirmedTruth) {
-        venue.rejectCommand(venue.rejectionReason || error);
+        if (venue.rejectCommand) venue.rejectCommand(venue.rejectionReason || error);
         venue.commandEvent = null;
       }
     }
@@ -403,7 +402,7 @@ export class ProphecyOperation extends ProphecyEventResult {
         "INTERNAL ERROR: ProphecyOperation._prophecy and _rejectionReason are both missing"));
   }
 
-  static _proclaimChain = [
+  static _professChain = [
     ProphecyOperation.prototype._prepareStagesAndCommands,
     ProphecyOperation.prototype._initiateConnectionValidations,
     ProphecyOperation.prototype._processRemoteVenues,
@@ -416,7 +415,7 @@ export class ProphecyOperation extends ProphecyEventResult {
     ProphecyOperation.prototype._prepareReform,
     ProphecyOperation.prototype._checkReformConditions,
     ProphecyOperation.prototype._reciteProphecy,
-    ...ProphecyOperation._proclaimChain,
+    ...ProphecyOperation._professChain,
   ];
 
   static _partialReformChain = [
@@ -494,18 +493,18 @@ export class ProphecyOperation extends ProphecyEventResult {
 
   _processRemoteVenues () {
     if (!this._remoteVenues) return undefined;
-    return this.performChain(["remote", this._remoteVenues], "_processFirstStageChain");
+    return this.opChain("_processFirstStageChain", ["remote", this._remoteVenues]);
   }
 
   _processLocalVenues () {
     if (!this._localVenues) return undefined;
-    return this.performChain(["local", this._localVenues],
-        this._firstStageVenues ? "_processStageChain" : "_processFirstStageChain");
+    return this.opChain(this._firstStageVenues ? "_processStageChain" : "_processFirstStageChain",
+        ["local", this._localVenues]);
   }
 
   _processMemoryVenues () {
     if (!this._memoryVenues) return undefined;
-    return this.performChain(["memory", this._memoryVenues], "_processStageChain");
+    return this.opChain("_processStageChain", ["memory", this._memoryVenues]);
   }
 
   static _processStageChain = [
@@ -571,9 +570,8 @@ export class ProphecyOperation extends ProphecyEventResult {
   }
 
   _processStageVenues (venues) {
-    return venues.map(venue => this.performChain(
-        [venue, venue.currentChronicling = venue.chronicling],
-        "_stageVenuesChain",
+    return venues.map(venue => this.opChain(
+        "_stageVenuesChain", [venue, venue.currentChronicling = venue.chronicling],
         "_errorOnProcessStageVenue"));
   }
 
@@ -636,13 +634,13 @@ export class ProphecyOperation extends ProphecyEventResult {
 
   _fulfillProphecy () {
     this._prophecy.isTruth = true;
-    (this._fulfillment = this._prophecy);
+    this._fulfillment = this._prophecy;
     const dispatchPath = generateDispatchEventPath(this.event.meta.transactor, "truth");
     if (dispatchPath) this.getTruthStory(dispatchPath);
     return [this._fulfillment];
   }
 
-  _errorOnProclaim (error, phaseIndex) {
+  _errorOnProfess (error, phaseIndex) {
     const prophecy = this._prophecy;
     if (!prophecy && this._rejectionError) throw this._rejectionError;
     this._fulfillment = null;
@@ -651,7 +649,7 @@ export class ProphecyOperation extends ProphecyEventResult {
       this.purge();
     }
     this._rejectionError = this.errorOnProphecyOperation(
-        new Error(`chronicleEvents.eventResults[${this.index}].proclaim(phase#${phaseIndex}/${
+        new Error(`chronicleEvents.eventResults[${this.index}].profess(phase#${phaseIndex}/${
             this._debugPhase})`),
         error, true);
     this._prophecy = null;
@@ -661,14 +659,14 @@ export class ProphecyOperation extends ProphecyEventResult {
       transactor.dispatchAndDefaultActEvent(progress);
     } else if (!this._truthStory && (this.getVerbosity() >= 1)) {
       this.outputErrorEvent(this._rejectionError,
-          `Exception caught during a fire-and-forget chronicleEvents.proclaim`);
+          `Exception caught during a fire-and-forget chronicleEvents.profess`);
     }
     if (prophecy) {
       prophecy.rejectionReason = this._rejectionError;
       try {
         _purgeLatestRecitedStory(this._parent, prophecy, false);
       } catch (innerError) {
-        outputError(innerError, `Exception caught during chronicleEvents.proclaim.purge`);
+        outputError(innerError, `Exception caught during chronicleEvents.profess.purge`);
       }
     }
     return null;

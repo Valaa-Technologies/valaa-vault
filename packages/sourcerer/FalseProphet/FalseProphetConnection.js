@@ -161,8 +161,8 @@ export default class FalseProphetConnection extends Connection {
           return result;
         }),
       };
-      resultBase._truthForwardResults = thenChainEagerly(null, this.addChainClockers(2,
-          "falseProphet.chronicle.upstream.ops", [
+      resultBase._truthForwardResults = thenChainEagerly(null, this.addChainClockers(plog2,
+          "falseConnection.proclaim.upstream.ops", [
         function _awaitUpstreamChronicling () {
           return (resultBase._forwardResults = chronicling.eventResults);
         },
@@ -296,7 +296,12 @@ export default class FalseProphetConnection extends Connection {
         // purge clears all unconfirmed commands
       }
       if (!schismaticCommands && schismaticCommand) {
-        const index = this._unconfirmedCommands.indexOf(schismaticCommand);
+        let index = this._unconfirmedCommands.indexOf(schismaticCommand);
+        if (index < 0) {
+          const schismaticCommandId = schismaticCommand.aspects.command.id;
+          index = this._unconfirmedCommands.findIndex(unconfirmed =>
+              (((unconfirmed || {}).aspects || {}).command || {}).id === schismaticCommandId);
+        }
         if (index < 0) {
           this.errorEvent("incoming schismatic command not in unconfirmed queue of", this.debugId(),
               "\n\tschismaticCommand.aspects:", JSON.stringify(schismaticCommand.aspects, null, 2),

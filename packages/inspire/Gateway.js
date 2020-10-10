@@ -196,8 +196,9 @@ export default class Gateway extends FabricEventTarget {
 
   fetchJSON (...rest) { return fetchJSON(...rest); }
 
-  async initialize (revelation: Revelation) {
+  async initialize (revelation: Revelation, parentPlog) {
     try {
+      const plog1 = (parentPlog || this).opLog(1, "init");
 /*
  * Process the initially served landing page and extract the initial
  * ValOS configuration ('revelation') from it. The revelation might be
@@ -212,32 +213,34 @@ export default class Gateway extends FabricEventTarget {
  * the event logs through indexeddb and keep the landing page
  * revelation minimal; whatever is most efficient.
  */
-      this.revelation = await reveal(this._interpretRevelation(revelation));
+      this.revelation = await reveal(this._interpretRevelation(revelation, plog1));
       this.gatewayRevelation = await expose(this.revelation.gateway);
       if (this.gatewayRevelation.name) this.setName(this.gatewayRevelation.name);
 
       this.setVerbosity(this.gatewayRevelation.verbosity || 0);
 
-      this.authorityNexus = await this._establishAuthorityNexus(this.gatewayRevelation);
+      this.authorityNexus = await this._establishAuthorityNexus(this.gatewayRevelation, plog1);
 
       // Create the stream router ('oracle') which uses scribe as its direct upstream, but which
       // manages the remote authority connections.
-      this.oracle = await this._summonOracle(this.gatewayRevelation, this.authorityNexus);
+      this.oracle = await this._summonOracle(this.gatewayRevelation, this.authorityNexus, plog1);
 
       // Create a connector (the 'scribe') to the locally backed event log / bvob indexeddb cache
       // ('scriptures') based on the revelation.
-      this.scribe = await this._proselytizeScribe(this.gatewayRevelation, this.oracle);
+      this.scribe = await this._proselytizeScribe(this.gatewayRevelation, this.oracle, plog1);
 
-      this.corpus = await this._incorporateCorpus(this.gatewayRevelation);
+      this.corpus = await this._incorporateCorpus(this.gatewayRevelation, plog1);
 
       // Create the the main in-memory false prophet using the stream router as its upstream.
-      this.falseProphet = await this._proselytizeFalseProphet(this.gatewayRevelation,
-          this.corpus, this.scribe);
+      this.falseProphet = await this._proselytizeFalseProphet(
+          this.gatewayRevelation, this.corpus, this.scribe, plog1);
 
-      this.identity = await this._establishIdentity(this.gatewayRevelation, this.falseProphet);
+      this.identity = await this._establishIdentity(
+          this.gatewayRevelation, this.falseProphet, plog1);
 
       // Create a connection and an identity for the gateway towards false prophet
-      this.discourse = await this._initiateDiscourse(this.gatewayRevelation, this.falseProphet);
+      this.discourse = await this._initiateDiscourse(
+          this.gatewayRevelation, this.falseProphet, plog1);
 
       this.spindleRevelations = (await expose(this.revelation.spindles)) || {};
       await this.attachSpindles(this.gatewayRevelation.spindlePrototypes);
@@ -253,15 +256,17 @@ export default class Gateway extends FabricEventTarget {
       ({ connections: this.prologueConnections, rootConnection: this._rootConnection }
           = await this._connectPrologueChronicles(this.prologue));
 
-      this.clockEvent(1, `vidgets.register`, `Registering builtin Inspire vidgets`);
+      plog1 && plog1.opEvent("vidgets",
+          "Registering builtin Inspire vidgets");
       // registerVidgets();
       const spindleNames = Object.keys(this._attachedSpindles);
-      this.clockEvent(1, `initialized`, "Gateway initialized");
+      plog1 && plog1.opEvent("initialized",
+          "Gateway initialized");
       this._isInitialized = true;
 
       this.viewRevelations = (await expose(this.revelation.views)) || {};
 
-      this.clockEvent(1, `spindles.notify`,
+      plog1 && plog1.opEvent("notify_spindles",
           `Notifying ${spindleNames.length} spindles of gateway initialization:`,
           spindleNames.join(", "));
       for (const spindle of Object.values(this._attachedSpindles)) {
@@ -273,7 +278,8 @@ export default class Gateway extends FabricEventTarget {
   }
 
   async terminate () {
-    this.clockEvent(1, `spindles.terminating`,
+    const plog1 = this.opLog(1, "terminate");
+    plog1 && plog1.opEvent("spindles",
         `Notifying spindles of gateway termination:`,
         Object.keys(this._attachedSpindles).join(" "));
     return Promise.all(Object.values(this._attachedSpindles).map(spindle =>
@@ -345,12 +351,13 @@ export default class Gateway extends FabricEventTarget {
     }
   }
 
-  addView (viewId, viewConfig) {
+  addView (viewId, viewConfig, parentPlog) {
     if ((this._views || {})[viewId]) throw new Error(`View ${viewId} already created`);
     return (!this._hostComponents)
         ? new Promise((resolve, reject) =>
             this._pendingViews.push([viewId, viewConfig, resolve, reject]))
-        : this._createAndConnectViewToDOM(viewId, { ...this._hostComponents, ...viewConfig });
+        : this._createAndConnectViewToDOM(
+            viewId, { ...this._hostComponents, ...viewConfig }, parentPlog);
   }
 
   getView (viewId) {
@@ -361,12 +368,12 @@ export default class Gateway extends FabricEventTarget {
     parent = this, verbosity,
     container, hostGlobal, createView,
     ...paramViewConfig
-  }) {
+  }, parentPlog) {
     if (!this._views) throw new Error("createAndConnectViewsToDOM must be called first");
     if (this._views[viewId]) throw new Error(`View ${viewId} already exists`);
+    const plog1 = (parentPlog || this).opLog(1, "create_view",
+        `Creating view "${viewId}"`, { verbosity, ...paramViewConfig });
     const view = createView({ parent, verbosity, name: viewId });
-    view.clockEvent(1, () => [`view.create`,
-        `createView({ name: ${viewId}, verbosity: ${verbosity} })`]);
     let rootScope;
     let viewConfig;
     let identity;
@@ -404,14 +411,8 @@ export default class Gateway extends FabricEventTarget {
         };
         Object.assign(engineOptions.discourse, viewConfig.discourse || {});
         const engine = new Engine(engineOptions);
-        gateway.clockEvent(1, () => [
-          `${viewConfig.name}.engine.create`,
-          `Created Engine ${engine.debugId()}`,
-          ...(!gateway.getVerbosity() ? [] : [", with:",
-            "\n\tengineOptions:", ...dumpObject(engineOptions),
-            "\n\tengine:", ...dumpObject(engine),
-          ]),
-        ]);
+        plog1 && plog1.current.opEvent(engine, "engine",
+            `Created Engine ${engine.debugId()}`, { engineOptions, engine });
         view.setEngine(engine);
         return engine;
       },
@@ -464,15 +465,14 @@ export default class Gateway extends FabricEventTarget {
         attachedView.setRootScope(rootScope);
         const attachedViewAwareSpindles = Object.values(gateway._attachedSpindles)
             .filter(spindle => spindle.onViewAttached);
-        attachedView.clockEvent(1, () => [`view.attach.spindles.notify`,
-          `Notifying ${attachedViewAwareSpindles.length} attached view-aware spindles`,
-        ]);
+        plog1 && plog1.v2 && plog1.current.opEvent(attachedView, "notify_spindles",
+            `Notifying ${attachedViewAwareSpindles.length} attached view-aware spindles`);
         return mapEagerly(attachedViewAwareSpindles,
             spindle => gateway._notifySpindle(spindle, "onViewAttached", attachedView, viewId));
       },
-      reactions => gateway._views[viewId].clockEvent(1, () => [`view.attach.spindles.reactions`,
-        "\n\tspindle reactions:", ...dumpObject(reactions.filter(notNull => notNull)),
-      ]),
+      reactions => plog1 && plog1.v2 && plog1.current
+          .opEvent(gateway._views[viewId], "spindle_reactions",
+              "\n\tspindle reactions:", { reactions }),
       () => gateway._views[viewId],
     ]), error => {
       throw this.wrapErrorEvent(error, 1, new Error(`_createAndConnectViewToDOM(${viewId})`),
@@ -490,10 +490,10 @@ export default class Gateway extends FabricEventTarget {
    *
    * @memberof Gateway
    */
-  async _interpretRevelation (revelation: Revelation): Object {
+  async _interpretRevelation (revelation: Revelation, plog): Object {
     try {
-      this.clockEvent(1, () => ["gateway.revelation",
-          `Interpreted revelation`, ...dumpObject(revelation)]);
+      plog && plog.v1 && plog.opEvent("revelation",
+          `Interpreted revelation`, revelation);
       return revelation;
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, new Error(`interpretRevelation`),
@@ -501,7 +501,7 @@ export default class Gateway extends FabricEventTarget {
     }
   }
 
-  async _establishAuthorityNexus (gatewayRevelation: Object) {
+  async _establishAuthorityNexus (gatewayRevelation: Object, parentPlog) {
     let nexusOptions;
     try {
       nexusOptions = {
@@ -510,15 +510,11 @@ export default class Gateway extends FabricEventTarget {
         ...(gatewayRevelation.nexus || {}),
         parent: this,
       };
-      this.clockEvent(1, () => [
-        `authorityNexus.create`, "new AuthorityNexus", ...dumpObject(nexusOptions),
-      ]);
+      const plog1 = (parentPlog || this).opLog(1, "create_authority-nexus",
+          "new AuthorityNexus", nexusOptions);
       const nexus = new AuthorityNexus(nexusOptions);
-      nexus.clockEvent(1, `create`,
-          ...(!this.getVerbosity() ? [] : [", with:",
-            "\n\toptions:", ...dumpObject(nexusOptions),
-            "\n\tnexus:", ...dumpObject(nexus),
-          ]));
+      plog1 && plog1.opEvent("done",
+          "Linked AuthorityNexus:", { nexusOptions, nexus });
       return nexus;
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, new Error(`establishAuthorityNexus`),
@@ -526,37 +522,7 @@ export default class Gateway extends FabricEventTarget {
     }
   }
 
-  async _proselytizeScribe (gatewayRevelation: Object, oracle: Oracle): Promise<Scribe> {
-    let scribeOptions;
-    try {
-      scribeOptions = {
-        name: "Inspire Scribe",
-        databaseAPI: gatewayRevelation.scribe.getDatabaseAPI(),
-        ...(gatewayRevelation.scribe || {}),
-        parent: this,
-        upstream: oracle,
-      };
-      this.clockEvent(1, () => [`scribe.create`,
-        "new Scribe", ...dumpObject(scribeOptions)]);
-      const scribe = new Scribe(scribeOptions);
-      this.clockEvent(1, `scribe.initiate`, "scribe.initiate()");
-      await scribe.initiate();
-
-      this.warnEvent(1, () => [
-        `Proselytized Scribe '${scribe.debugId()}'`,
-        ...(!this.getVerbosity() ? [] : [", with:",
-          "\n\tscribeOptions:", ...dumpObject(scribeOptions),
-          "\n\tscribe:", ...dumpObject(scribe),
-        ]),
-      ]);
-      return scribe;
-    } catch (error) {
-      throw this.wrapErrorEvent(error, 1, new Error(`proselytizeScribe`),
-          "\n\tscribeOptions:", ...dumpObject(scribeOptions));
-    }
-  }
-
-  async _summonOracle (gatewayRevelation: Object, authorityNexus: AuthorityNexus):
+  async _summonOracle (gatewayRevelation: Object, authorityNexus: AuthorityNexus, parentPlog):
       Promise<Sourcerer> {
     let oracleOptions;
     try {
@@ -566,15 +532,12 @@ export default class Gateway extends FabricEventTarget {
         parent: this,
         authorityNexus,
       };
-      this.clockEvent(1, () => [`oracle.create`, "new Oracle", ...dumpObject(oracleOptions)]);
+      const plog1 = (parentPlog || this).opLog(1, "create_oracle",
+          "new Oracle", oracleOptions);
       const oracle = new Oracle(oracleOptions);
-      this.warnEvent(1, () => [
-        `Proselytized Oracle ${oracle.debugId()}`,
-        ...(!this.getVerbosity() ? [] : [", with:",
-          "\n\toracleOptions:", ...dumpObject(oracleOptions),
-          "\n\toracle:", ...dumpObject(oracle),
-        ]),
-      ]);
+      plog1 && plog1.opEvent("done",
+          `Proselytized Oracle ${oracle.debugId()}`,
+          ", with:", { oracleOptions, oracle });
       return oracle;
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, new Error(`summonOracle`),
@@ -583,7 +546,32 @@ export default class Gateway extends FabricEventTarget {
     }
   }
 
-  async _incorporateCorpus (gatewayRevelation: Object) {
+  async _proselytizeScribe (gatewayRevelation: Object, oracle: Oracle, parentPlog): Scribe {
+    let scribeOptions;
+    try {
+      scribeOptions = {
+        name: "Inspire Scribe",
+        databaseAPI: gatewayRevelation.scribe.getDatabaseAPI(),
+        ...(gatewayRevelation.scribe || {}),
+        parent: this,
+        upstream: oracle,
+      };
+      const plog1 = (parentPlog || this).opLog(1, "create_scribe",
+        "new Scribe", scribeOptions);
+      const scribe = new Scribe(scribeOptions);
+      plog1 && plog1.opEvent("await_initiate",
+          "Initiating scribe");
+      await scribe.initiate();
+      plog1 && plog1.opEvent("done",
+          `Proselytized Scribe '${scribe.debugId()}'`, { scribeOptions, scribe });
+      return scribe;
+    } catch (error) {
+      throw this.wrapErrorEvent(error, 1, new Error(`proselytizeScribe`),
+          "\n\tscribeOptions:", ...dumpObject(scribeOptions));
+    }
+  }
+
+  async _incorporateCorpus (gatewayRevelation: Object, parentPlog) {
     const name = "Inspire Corpus";
     const reducerOptions = {
       ...EngineContentAPI, // schema, validators, reducers
@@ -606,8 +594,12 @@ export default class Gateway extends FabricEventTarget {
       initialState: new ImmutableMap(),
       ...(gatewayRevelation.corpus || {}),
     };
-    this.clockEvent(1, () => [`corpus.create`, "new Corpus", ...dumpObject(corpusOptions)]);
-    return new Corpus(corpusOptions);
+    const plog1 = (parentPlog || this).opLog(1, "corpus",
+        "new Corpus", corpusOptions);
+    const corpus = new Corpus(corpusOptions);
+    plog1 && plog1.opEvent("done",
+        "Created canonical corpus", { corpusOptions, corpus });
+    return corpus;
 
     function _createProcessCommandVersionMiddleware (version) {
       // Naive versioning which accepts versions given in or uses the supplied version as default
@@ -622,8 +614,9 @@ export default class Gateway extends FabricEventTarget {
     }
   }
 
-  async _proselytizeFalseProphet (gatewayRevelation: Object, corpus: Corpus, upstream: Sourcerer):
-      Promise<Sourcerer> {
+  async _proselytizeFalseProphet (
+      gatewayRevelation: Object, corpus: Corpus, upstream: Sourcerer, parentPlog,
+  ): Promise<Sourcerer> {
     let falseProphetOptions;
     try {
       this._commandCountListeners = new Map();
@@ -653,16 +646,12 @@ export default class Gateway extends FabricEventTarget {
         ...(gatewayRevelation.falseProphet || {}),
         parent: this,
       };
-      this.clockEvent(1, () => [`falseProphet.create`,
-        "new FalseProphet", ...dumpObject(falseProphetOptions)]);
+      const plog1 = (parentPlog || this).opLog(1, "create_falseProphet",
+          "new FalseProphet", falseProphetOptions);
       const falseProphet = new FalseProphet(falseProphetOptions);
-      this.warnEvent(1, () => [
-        `Proselytized FalseProphet ${falseProphet.debugId()}`,
-        ...(!this.getVerbosity() ? [] : [", with:",
-          "\n\tfalseProphetOptions:", ...dumpObject(falseProphetOptions),
-          "\n\tfalseProphet:", ...dumpObject(falseProphet),
-        ]),
-      ]);
+      plog1 && plog1.opEvent("done",
+          `Proselytized FalseProphet ${falseProphet.debugId()}`,
+          { falseProphetOptions, falseProphet });
       return falseProphet;
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, new Error(`proselytizeFalseProphet`),
@@ -698,7 +687,7 @@ export default class Gateway extends FabricEventTarget {
     }
   }
 
-  async _establishIdentity (gatewayRevelation: Object, falseProphet: FalseProphet) {
+  async _establishIdentity (gatewayRevelation: Object, falseProphet: FalseProphet, parentPlog) {
     let identityOptions, identity;
     try {
       identityOptions = {
@@ -706,18 +695,14 @@ export default class Gateway extends FabricEventTarget {
         parent: this,
         sourcerer: falseProphet,
       };
-      this.clockEvent(1, () => [`falseProphet.identity.create`,
-        "new IdentityManager", ...dumpObject(identityOptions)]);
+      const plog1 = (parentPlog || this).opLog(1, "create_identity",
+          "new IdentityManager", identityOptions);
       identity = new IdentityManager({
         ...identityOptions,
       });
-      this.warnEvent(1, () => [
-        `Established Gateway Identity ${identity.debugId()}`,
-        ...(!this.getVerbosity() ? [] : [", with:",
-          "\n\tidentityOptions:", ...dumpObject(identityOptions),
-          "\n\tidentity:", ...dumpObject(identity),
-        ]),
-      ]);
+      plog1 && plog1.opEvent("done",
+          `Established Gateway Identity ${identity.debugId()}`,
+          { identityOptions, identity });
       return identity;
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, new Error(`establishIdentity`),
@@ -727,22 +712,18 @@ export default class Gateway extends FabricEventTarget {
     }
   }
 
-  async _initiateDiscourse (gatewayRevelation: Object, falseProphet: FalseProphet) {
+  async _initiateDiscourse (gatewayRevelation: Object, falseProphet: FalseProphet, parentPlog) {
     let discourseOptions, discourse;
     try {
       discourseOptions = {
         ...(gatewayRevelation.discourse || {}),
       };
-      this.clockEvent(1, () => [`falseProphet.discourse.create`,
-          "new FalseProphetDiscourse", ...dumpObject(discourseOptions)]);
+      const plog1 = (parentPlog || this).opLog(1, "create_discourse",
+          "new FalseProphetDiscourse", discourseOptions);
       discourse = falseProphet.createDiscourse(this, discourseOptions);
-      this.warnEvent(1, () => [
-        `Initiated FalseProphetDiscourse ${discourse.debugId()}`,
-        ...(!this.getVerbosity() ? [] : [", with:",
-          "\n\tdiscourseOptions:", ...dumpObject(discourseOptions),
-          "\n\tdiscourse:", ...dumpObject(discourse),
-        ]),
-      ]);
+      plog1 && plog1.opEvent("done",
+          `Initiated FalseProphetDiscourse ${discourse.debugId()}`,
+          { discourseOptions, discourse });
       return discourse;
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, new Error(`initiateDiscourse`),
@@ -770,8 +751,8 @@ export default class Gateway extends FabricEventTarget {
   }
 
   async attachSpindles (spindleModules_: (Promise<Object> | Object)[],
-      options: { skipIfAlreadyAttached: boolean } = {}) {
-    this.clockEvent(1, `spindles.obtain`,
+      options: { skipIfAlreadyAttached: boolean } = {}, parentPlog) {
+    const plog1 = (parentPlog || this).opLog(1, "spindles",
         `Obtaining ${spindleModules_.length} spindle modules`);
     const spindleModules = await Promise.all(spindleModules_ || []);
     const newSpindleLookup = {};
@@ -812,8 +793,9 @@ export default class Gateway extends FabricEventTarget {
               : Object.assign(Object.create(spindlePrototype),
                   { gateway: this, revelation: spindleRevelation }));
         }));
-    this.clockEvent(1, `spindles.attach`, `Attaching ${spindleNames.length} spindles:`,
-        spindleNames.join(", "));
+    plog1 && plog1.opEvent("attach",
+        `Attaching ${spindleNames.length} spindles:`,
+        { spindleNames });
     for (const name of spindleNames) await this._attachSpindle(name, newSpindleLookup[name]);
   }
 
@@ -870,35 +852,37 @@ export default class Gateway extends FabricEventTarget {
             `Exception caught during notify '${notifyMethodName}' to spindle ${spindle.name}`));
   }
 
-  async _connectPrologueChronicles (prologue: Object) {
+  async _connectPrologueChronicles (prologue: Object, parentPlog) {
     let chronicles;
     try {
       let rootChronicleURI = prologue.rootChronicleURI
           && naiveURI.validateChronicleURI(await reveal(prologue.rootChronicleURI));
+      const plog1 = (parentPlog || this).opLog(1, "prologue");
       if (prologue.rootPartitionURI) {
         this.errorEvent("DEPRECATED: prologue.rootPartitionURI used to override rootChronicleURI",
             "\n\tthis is probably due to ?partition= query param; use ?chronicle= instead.");
         rootChronicleURI = naiveURI.createPartitionURI(prologue.rootPartitionURI);
       }
-      this.clockEvent(1, `prologues.extract`, `Determining prologues and the root chronicle <${
-        rootChronicleURI}>`);
+      plog1 && plog1.opEvent("determine",
+          `Determining prologues and the root chronicle <${rootChronicleURI}>`);
       this._rootFocusURI = await reveal(prologue.rootFocusURI);
       chronicles = await this._determinePrologueChronicles(prologue, rootChronicleURI);
-      this.warnEvent(1, () => [
-        `Extracted ${chronicles.length} chronicles from the prologue`,
-        "\n\troot chronicle:", rootChronicleURI,
-        "\n\tprologue chronicles:",
-            `<${chronicles.map(({ chronicleURI }) => chronicleURI).join(">, <")}>`,
-      ]);
-      this.clockEvent(1, `prologues.connect`, `Narrating and connecting ${chronicles.length
-          } prologue and root chronicles`, `<${rootChronicleURI}>`);
+      plog1 && plog1.warnEvent(
+          `Extracted ${chronicles.length} chronicles from the prologue`,
+          "\n\troot chronicle:", rootChronicleURI,
+          "\n\tprologue chronicles:",
+              `<${chronicles.map(({ chronicleURI }) => chronicleURI).join(">, <")}>`,
+      );
+      plog1 && plog1.opEvent("connect",
+          `Narrating and connecting ${chronicles.length} prologue and root chronicles`,
+          { chronicles, rootChronicleURI });
       const connections = await Promise.all(chronicles.map(chronicleInfo =>
-          this._connectPrologueChronicle(prologue, chronicleInfo)));
-      this.warnEvent(1, () => [
-        `Acquired active connections for all prologue chronicles:`,
-        ...[].concat(...connections.map(connection =>
-            [`\n\t${connection.getName()}:`, ...dumpObject(connection.getStatus())]))
-      ]);
+          this._connectPrologueChronicle(prologue, chronicleInfo, plog1)));
+      plog1 && plog1.opEvent("done",
+          `Acquired active connections for all prologue chronicles:`,
+          ...[].concat(...connections.map(connection =>
+              [`\n\t${connection.getName()}:`, ...dumpObject(connection.getStatus())]))
+      );
       const rootConnection = connections.find(connection =>
           (connection.getChronicleURI() === rootChronicleURI));
       return { connections, rootConnection };
@@ -942,19 +926,22 @@ export default class Gateway extends FabricEventTarget {
     chronicleURI: string,
     commandId: ?number, commandCount: ?number,
     eventId: ?number, truthCount: ?number, logs: ?Object,
-  }) {
+  }, parentPlog) {
     const chronicleURI = await reveal(info.chronicleURI);
     // Acquire connection without remote narration to determine the current last authorized event
     // so that we can narrate any content in the prologue before any remote activity.
-    this.clockEvent(1, "prologue.connect", `Acquiring connection <${chronicleURI}>`);
+    const plog1 = (parentPlog || this).opLog(1, "chronicle");
     const connectionOptions = await reveal(info.connection || {});
+    plog1 && plog1.opEvent("connect",
+        `Acquiring connection <${chronicleURI}>`, connectionOptions);
     const connection = this.discourse
         .acquireConnection(naiveURI.validateChronicleURI(chronicleURI), {
           ...connectionOptions,
           subscribeEvents: false,
           narrateOptions: { remote: false },
         });
-    connection.clockEvent(1, "prologue.activate", "Activating connection");
+    plog1 && plog1.opEvent(connection, "activate",
+        "Activating connection");
     await connection.asActiveConnection();
     let prologueTruthCount = await reveal(info.truthCount);
     if (!Number.isInteger(prologueTruthCount)) {
@@ -965,8 +952,8 @@ export default class Gateway extends FabricEventTarget {
     const eventIdEnd = connection.getFirstUnusedTruthEventId() || 0;
     const shouldChroniclePrologue = ((prologueTruthCount || 0) > eventIdEnd);
     if (shouldChroniclePrologue) {
-      connection.clockEvent(1, `prologue.chronicle`,
-          `Chronicling truths, medias and bvobs from revelation`);
+      plog1 && plog1.opEvent(connection, "proclaim",
+          `Proclaiming truths, medias and bvobs from revelation`);
       // If no event logs are replayed, we don't need to precache the bvobs either, so we delay
       // loading them up to this point.
       await (reveal(this.bvobInfos) || (this.bvobInfos = this._getBvobInfos()));
@@ -1009,14 +996,14 @@ export default class Gateway extends FabricEventTarget {
               }" during prologue narration, with bvob id "${mediaInfo.contentHash}" `);
         }
       });
-      connection.clockEvent(1, `prologue.chronicle.await.local.results`,
-          `Waiting for chronicle events to resolve locally`);
+      plog1 && plog1.opEvent(connection, "await_proclamation",
+          `Waiting for the proclaimed events to resolve locally`);
       for (const result of chronicling.eventResults) await result.getComposedEvent();
     }
     // Initiate remote narration.
     let remoteNarration;
     if (connectionOptions.remote !== false) {
-      connection.clockEvent(1, `prologue.narrate`,
+      plog1 && plog1.opEvent(connection, "narrate",
           `Starting full remote narration and subscribing for events`);
       remoteNarration = (connectionOptions.remote !== false) && connection.narrateEventLog({
         subscribeEvents: true,
@@ -1027,10 +1014,11 @@ export default class Gateway extends FabricEventTarget {
       if (!remoteNarration) {
         throw new Error(`No truths found in prologue for non-remote chronicle <${chronicleURI}>`);
       }
-      connection.clockEvent(1, `prologue.narrate.await`, `Waiting for remote narration`);
+      plog1 && plog1.opEvent(connection, "await_narration",
+          `Waiting for remote narration`);
       await remoteNarration;
     }
-    connection.clockEvent(1, `prologue.connect.done`);
+    plog1 && plog1.opEvent("done");
     return connection;
   }
 

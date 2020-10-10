@@ -101,7 +101,7 @@ export default class PerspireServer extends FabricEventTarget {
     return ret;
   }
 
-  async createView (viewName, viewConfigAdditions = {}) {
+  async createView (viewName, viewConfigAdditions = {}, parentPlog) {
     if (!this._container) throw new Error("PerspireServer hasn't been initialized yet");
     const gateway = await this._gateway;
     const viewConfig = {
@@ -110,7 +110,7 @@ export default class PerspireServer extends FabricEventTarget {
       viewRootId: `perspire-gateway--${viewName}-view`,
       ...viewConfigAdditions,
     };
-    const view = await gateway.addView(viewName, viewConfig);
+    const view = await gateway.addView(viewName, viewConfig, parentPlog);
     // Creating perspire specific objects and variables.
     // Please use server.valos.perspire for external packages
     const perspire = { worker: this, view, viewName, viewConfig };

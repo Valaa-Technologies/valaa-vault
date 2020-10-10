@@ -14,14 +14,14 @@ export default valosheath.exportSpindle({
     if (!server) throw new Error(`${this.name} revelation server section missing`);
     if (!prefixes) throw new Error(`${this.name} revelation prefixes section missing`);
     this._prefixRouters = {};
+    const plog = gateway.opLog(1, "web-spindle",
+        "Creating web-spindle", { server, prefixes });
     this._service = new MapperService(
         gateway, { identity: valosheath.identity, ...server }, projectors);
-    gateway.clockEvent(1, () => [
-      "restAPISpindle.onGatewayInitialized",
-      `Adding routers for prefixes: '${Object.keys(prefixes).join("', '")}'`,
-    ]);
+    const rplog1 = plog && plog.opLog(1, "prefix-routers",
+        "Adding routers for prefixes", prefixes);
     return Promise.all(Object.entries(prefixes).map(async ([prefix, prefixConfig]) =>
-        this._addPrefixRouter(gateway, prefix, await expose(prefixConfig))));
+        this._addPrefixRouter(gateway, prefix, await expose(prefixConfig), rplog1)));
   },
 
   getWebService () { return this._service; },
@@ -30,7 +30,7 @@ export default valosheath.exportSpindle({
     return this._service.stop();
   },
 
-  async _addPrefixRouter (gateway, prefix, prefixConfig) {
+  async _addPrefixRouter (gateway, prefix, prefixConfig, parentPlog) {
     const { dumpObject } = gateway.valosRequire("@valos/tools");
     try {
       const viewConfig = prefixConfig.view;
@@ -41,21 +41,21 @@ export default valosheath.exportSpindle({
                   ? "host"
               : viewConfig.name)
           || `${this.name}:view:${prefix}`;
+      const plog = (parentPlog || this._service).opLog(1, `$prefix.${prefix}`,
+          `Creating prefix router to <${prefix}>`, prefixConfig);
 
-      this._prefixRouters[viewName] = this._service.createPrefixRouter(prefix, prefixConfig);
+      this._prefixRouters[viewName] = this._service.createPrefixRouter(prefix, prefixConfig, plog);
       if (typeof viewConfig === "object") {
+        const vplog1 = plog && plog.opLog(1, `addView`,
+            `Adding view for prefixRouter <${prefix}>: ${viewName}`, viewConfig);
         const view = await gateway.addView(viewName, {
           contextLensProperty: ["WEB_LENS", "LENS"],
           lensProperty: ["WEB_API_LENS", "LENS"],
           ...viewConfig,
-        });
-        view.clockEvent(1, () => [
-          `web-spindle.addView.done`,
-          `Added view for prefixRouter ${prefix}: ${viewName}`,
-          ...(!gateway.getVerbosity() ? [] : [", with:",
-            "\n\tviewConfig:", ...dumpObject(viewConfig),
-          ]),
-        ]);
+        }, vplog1);
+        vplog1 && vplog1.opEvent("done",
+            `Added view for prefixRouter <${prefix}> as "${viewName}"`,
+            { viewConfig, view });
       }
     } catch (error) {
       gateway.outputErrorEvent(

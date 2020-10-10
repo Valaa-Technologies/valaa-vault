@@ -103,33 +103,36 @@ async function _narrateLocalLogs (connection: ScribeConnection,
 ): Promise<{ scribeTruthLog: any, scribeCommandQueue: any }> {
   const ret = {};
   let currentEventId = eventIdBegin;
+  const plog2 = connection.opLog(2, "scribe_narrate-local");
   if (receiveTruths) {
     const truthEventIdEnd = Math.min(connection.getFirstUnusedTruthEventId(), eventIdEnd);
-    connection.clockEvent(2, () => ["scribe.narrate.local.truths.read",
-        `_readTruths(${currentEventId}, ${truthEventIdEnd})`]);
-    const truths = ((currentEventId < truthEventIdEnd) && await connection._readTruths({
-      eventIdBegin: currentEventId, eventIdEnd: truthEventIdEnd
-    })) || [];
+    plog2 && plog2.opEvent("read_truths",
+        `_readTruths(${currentEventId}, ${truthEventIdEnd})`);
+    const truths = ((currentEventId < truthEventIdEnd) && await connection
+        ._readTruths({ eventIdBegin: currentEventId, eventIdEnd: truthEventIdEnd, plog: plog2 }))
+        || [];
     currentEventId = truthEventIdEnd;
-    connection.clockEvent(2, () => ["scribe.narrate.local.truths.receive",
-        `receiveTruths(${truths.length})`]);
+    plog2 && plog2.opEvent("receive_truths",
+        `receiveTruths(${truths.length})`);
     ret.scribeTruthLog = !truths.length ? truths
         : await Promise.all(await receiveTruths(truths, retrieveMediaBuffer));
   }
   if (receiveCommands) {
     const commandEventIdEnd = Math.min(connection.getFirstUnusedCommandEventId(), eventIdEnd);
-    connection.clockEvent(2, () => ["scribe.narrate.local.commands.read",
-      `_readCommands(${currentEventId}, ${commandEventIdEnd})`]);
-    const commands = ((currentEventId < commandEventIdEnd) && await connection._readCommands({
-      eventIdBegin: currentEventId, eventIdEnd: commandEventIdEnd,
-    })) || [];
+    plog2 && plog2.opEvent("read_commands",
+        `_readCommands(${currentEventId}, ${commandEventIdEnd})`);
+    const commands = ((currentEventId < commandEventIdEnd) && await connection
+        ._readCommands({
+          eventIdBegin: currentEventId, eventIdEnd: commandEventIdEnd, plog: plog2,
+        }))
+        || [];
     const commandIdBegin = connection._commandQueueInfo.eventIdBegin;
     commands.forEach(command => {
       connection._commandQueueInfo.commandIds[command.aspects.log.index - commandIdBegin]
           = command.aspects.command.id;
     });
-    connection.clockEvent(2, () => ["scribe.narrate.local.commands.receive",
-      `receiveCommands(${commands.length})`]);
+    plog2 && plog2.opEvent("receive_commands",
+        `receiveCommands(${commands.length})`);
     ret.scribeCommandQueue = !commands.length ? commands
         : await Promise.all(await receiveCommands(commands, retrieveMediaBuffer));
   }

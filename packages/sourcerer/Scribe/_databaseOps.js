@@ -425,14 +425,13 @@ export function _readTruths (connection: ScribeConnection, options: Object) {
   if (!connection._db) return undefined;
   const range = connection._db.getIDBKeyRange(options);
   if (range === null) return undefined;
-  connection.clockEvent(2, () => ["scribe.database.read.truths",
-    `_readTruths(${range.lower}, ${range.upper})`]);
+  (options.plog || {}).v2 && options.plog.opEvent("database_read_truths",
+      `_readTruths(${range.lower}, ${range.upper})`);
   return connection._db.transaction(["truths"], "readonly",
-      ({ truths }) => new Promise(_getAllShim.bind(null, connection, truths, range)));
+      ({ truths }) => new Promise(_getAllShim.bind(null, connection, truths, range, options.plog)));
 }
 
-export function _writeCommands (connection: ScribeConnection,
-    commandLog: EventBase[]) {
+export function _writeCommands (connection: ScribeConnection, commandLog: EventBase[]) {
   if (!connection._db) return undefined;
   return connection._db.transaction(["commands"], "readwrite", ({ commands }) => {
     commandLog.forEach(command => {
@@ -456,10 +455,11 @@ export function _readCommands (connection: ScribeConnection, options: Object) {
   if (!connection._db) return undefined;
   const range = connection._db.getIDBKeyRange(options);
   if (range === null) return undefined;
-  connection.clockEvent(2, () => ["scribe.database.read.commands",
-    `_readCommands(${range.lower}, ${range.upper})`]);
+  (options.plog || {}).v2 && options.plog.opEvent("database_read_commands",
+      `_readCommands(${range.lower}, ${range.upper})`);
   return connection._db.transaction(["commands"], "readonly",
-      ({ commands }) => new Promise(_getAllShim.bind(null, connection, commands, range)));
+      ({ commands }) => new Promise(
+          _getAllShim.bind(null, connection, commands, range, options.plog)));
 }
 
 export function _deleteCommands (connection: ScribeConnection,
@@ -472,7 +472,8 @@ export function _deleteCommands (connection: ScribeConnection,
       throw new Error(`Expected expectedCommandIds.length(${expectedCommandIds.length
           }) to equal range ([${eventIdBegin}, ${eventIdEnd}} === ${eventIdEnd - eventIdBegin})`);
     }
-    return new Promise((resolve, reject) => _getAllShim(connection, commands, range,
+    return new Promise((resolve, reject) => _getAllShim(
+        connection, commands, range, connection.opLog(2, "database_delete_commaands"),
         storedCommands => {
       for (let i = 0; i !== expectedCommandIds.length; ++i) {
         const existingCommandId = tryAspect(storedCommands[i], "command").id;
@@ -530,7 +531,7 @@ function _serializeEventAsJSON (connection: Object, event) {
 }
 
 function _getAllShim (connection: ScribeConnection, database, range: IDBKeyRange,
-    resolve: Function, reject: Function) {
+    plog, resolve: Function, reject: Function) {
   // Important note on IndexedDB transaction semantics: the resolve
   // callback must _synchronously_ create any follow-up database
   // request because the transaction active flag is only set during the
@@ -540,8 +541,8 @@ function _getAllShim (connection: ScribeConnection, database, range: IDBKeyRange
     req = database.getAll(range);
     req.onsuccess = () => {
       try {
-        connection.clockEvent(2, () => [`scribe.database.${database.name}.read.done`,
-          `resolve(${req.result.length})`]);
+        plog && plog.v2 && plog.opEvent("database_read-all_done",
+            `resolve(${req.result.length})`);
         resolve(req.result.map(eventLogRoot => swapAspectRoot("log", eventLogRoot, "event")));
       } catch (error) {
         reject(connection.wrapErrorEvent(error, 1, `getAll("${database.name}", ${range})`,

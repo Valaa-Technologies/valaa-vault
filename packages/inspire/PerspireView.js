@@ -23,14 +23,14 @@ export default class PerspireView extends VDOMView {
     const vFocus = this.getFocus();
     if (!vFocus) throw new Error("view focus missing for interactive");
     const mutableScope = Object.create(vFocus.getValospaceScope());
-
+    const plog1 = this.opLog(1, "interact",
+        "Opening job interactive", { focus: vFocus });
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
     let externalExit = false;
     rl.on("line", async (command) => {
       if (!command) return;
-      this.clockEvent(1, `worker.interactive.command`, {
-        action: `executing interactive command`, command,
-      });
+      plog1 && plog1.opEvent("command",
+          "Executing command", { action: `executing interactive command`, command });
       const sourceInfo = {
         phase: "interactive command transpilation",
         source: command,
@@ -39,17 +39,17 @@ export default class PerspireView extends VDOMView {
       };
       try {
         const result = await vFocus.doValoscript(command, {}, { sourceInfo, mutableScope });
-        this.clockEvent(1, `worker.interactive.result`, {
-          action: "executed interactive command", command, result,
-        });
+        plog1 && plog1.opEvent("result",
+            "Command resulted", { action: "interactive command result", command, result });
       } catch (error) {
-        this.clockEvent(1, `worker.interactive.error`, {
-          action: "caught exception during interactive command", command,
-          message: error.message, error,
+        plog1 && plog1.opEvent("error",
+            "Command errored", {
+          action: "interactive command error", command, message: error.message, error,
         });
       }
     }).on("close", () => {
-      this.infoEvent(1, "Closing perspire job interactive:", externalExit || "end of stream");
+      plog1 && plog1.opEvent("close",
+          "Job interactive closed", externalExit || "end of stream");
       if (!externalExit) process.exit(0);
     });
     return {

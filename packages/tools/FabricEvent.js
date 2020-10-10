@@ -169,10 +169,37 @@ export class FabricEventTarget {
     return this._outputMessageEvent((this._parent || this).error.bind(this._parent || this),
         true, this._getMessageParts(firstPartOrMinVerbosity, rest));
   }
-  clockEvent (firstPartOrMinVerbosity: number | any, ...rest: any[]) {
-    if (_verbosityExcess(firstPartOrMinVerbosity, this._verbosity, this) < 0) return this;
-    return this._outputMessageEvent(this.clock.bind(this),
-        false, this._getMessageParts(firstPartOrMinVerbosity, rest));
+
+  static _globalOps = Object.create(null);
+
+  opLog (requiredVerbosity, operationName, ...rest) {
+    const loudness = (this._verbosity || 0) - requiredVerbosity;
+    if (loudness < 0) return null;
+    const ret = Object.create(this);
+    ret._loudness = loudness;
+    const parentPlot = this._opLogPlot || "";
+    const ops = parentPlot
+        ? this._opLogOps || (this._opLogOps = Object.create(null))
+        : FabricEventTarget._globalOps;
+    const index = ops[operationName] || 0;
+    ops[operationName] = index + 1;
+    ret._opLogPlot = `${parentPlot}@-:${operationName}:${index}`;
+    ret.current = ret;
+    for (let i = this._verbosity; i; --i) ret[`v${i}`] = ret;
+    if (rest.length) ret.opEvent(...rest);
+    return ret;
+  }
+
+  opEvent (target: number | any, eventName, ...rest: any[]) {
+    if (typeof target !== "object") return this.opEvent(this, target, eventName, ...rest);
+    if (typeof eventName !== "string") {
+      throw new Error(`Invalid opEvent..eventName: expected string, got ${typeof eventName}`);
+    }
+    return target._outputMessageEvent(this.clock.bind(this), false, [].concat(
+        `${this._opLogPlot}${!eventName ? "" : `@:${eventName}`}@@`,
+        !this._loudness ? [] : [
+          ":\n\t", ...rest.map(e => (typeof e === "string" ? e : dumpObject(e))),
+        ]));
   }
 
   _getMessageParts (maybeMinVerbosity, rest) {
@@ -260,13 +287,13 @@ export class FabricEventTarget {
     const clockerId = _clockerId++;
     return [].concat(...thenChainCallbacks.map((callback, index) => [
       ...(!callback.name ? [] : [(...params) => {
-        this.clockEvent(minVerbosity, `${eventPrefix}#[${index}]:${callback.name}`, clockerId);
+        this.opEvent(`${eventPrefix}#[${index}]:${callback.name}`, clockerId);
         return isThisChain ? params : params[0];
       }]),
       callback,
     ]),
     (...params) => {
-      this.clockEvent(minVerbosity, `${eventPrefix}.done`, clockerId);
+      this.opEvent(`${eventPrefix}.done`, clockerId);
       return isThisChain ? params : params[0];
     });
   }

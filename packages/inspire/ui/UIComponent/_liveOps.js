@@ -8,6 +8,8 @@ import VALEK, { toVAKONTag, IsLiveTag } from "~/engine/VALEK";
 
 import getImplicitMediaInterpretation from "~/engine/Vrapper/getImplicitMediaInterpretation";
 
+import { fabricatorEventTypes } from "~/sourcerer/api/Fabricator";
+
 import {
   dumpObject, patchWith, isPromise, isSymbol, qualifiedSymbol, qualifierNamespace,
   generateDispatchEventPath, thisChainEagerly, thisChainReturn, wrapError
@@ -154,7 +156,10 @@ function _recordNewGenericPropValue (stateLive, propValue, propName, component) 
       if (namespace === "On") {
         newValue = _valensWrapCallback(component, propValue, propName);
         newName = `on${name[0].toUpperCase()}${name.slice(1)}`;
-        _obtainLocalContext(stateLive, component)[qualifiedSymbol("On", name)] = newValue;
+        if (fabricatorEventTypes[name]) {
+          _obtainLocalContext(stateLive, component)[qualifiedSymbol("On", name)] = newValue;
+          return false;
+        }
       } else if (namespace === "Frame") {
         if (!stateLive.frameOverrides) {
           const targetProps = _obtainValoscopeProps(stateLive);

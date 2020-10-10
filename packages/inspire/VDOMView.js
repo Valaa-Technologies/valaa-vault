@@ -74,21 +74,25 @@ export default class VDOMView extends Cog {
 
   async createJob (jobStack = {}) {
     const { delay, repeats, interval, journal } = jobStack;
+    const plog1 = this.opLog(1, "job", "Creating job");
     if (typeof delay === "number") {
-      this.clockEvent(1, "job.delay", `Delaying job setup for ${delay} seconds`);
+      plog1 && plog1.opEvent("delay",
+          `Delaying job setup for ${delay} seconds`);
       await new Promise(resolve => setTimeout(resolve, Math.abs(delay * 1000)));
     }
     const _getJobProduct = (product = jobStack.product) => product;
     if (!repeats) {
-      this.clockEvent(1, "job.singular.run", "Running a singular job");
+      plog1 && plog1.opEvent("run_singular",
+          "Running a singular job");
       if (journal) journal.mode = "singular";
       return _getJobProduct(await jobStack.performTask(0));
     }
     if (typeof interval !== "number") {
       throw new Error("runJob.options.interval must be a number (in seconds)");
     }
-    this.clockEvent(1, "job.repeats.setup", `Setting up a ${
-        typeof repeats === "number" ? repeats : "infinite"} repeats job every ${interval} seconds`);
+    plog1 && plog1.opEvent("setup_repeats",
+        `Setting up a ${typeof repeats === "number" ? repeats : "infinite"
+            } repeats job every ${interval} seconds`);
     if (journal) journal.mode = `repeats`;
     let beat = 0;
     return new Promise((resolve, reject) => {

@@ -65,7 +65,8 @@ describe("FalseProphet", () => {
     });
     let connection = falseProphet.acquireConnection(testChronicleURI);
     connection.getUpstreamConnection().addNarrateResults({ eventIdBegin: 0 }, []);
-    falseProphet.clockEvent(2, () => ["test.asActiveConnection"]);
+    const plog2 = falseProphet.opLog(2, "test_keep-track");
+    plog2 && plog2.opEvent("await_asActiveConnection");
     connection = await connection.asActiveConnection();
     expect(commandsCounted).toBe(0);
     const discourse = falseProphet.addFollower(new MockFollower());
@@ -74,23 +75,22 @@ describe("FalseProphet", () => {
     let resolveDelay;
     let delayer = new Promise(resolve => { resolveDelay = resolve; });
     falseProphet.setCommandNotificationBlocker(delayer);
-    falseProphet.clockEvent(2, () =>
-        ["test.chronicleEvent.createdTestChronicleEntity.getPremiereStory"]);
+    plog2 && plog2.opEvent("await_testChronicleEntity-getPremiereStory");
     await discourse.chronicleEvent(createTestChronicleEntityCreated()).getPremiereStory();
     resolveDelay();
-    falseProphet.clockEvent(2, () => ["test.pendingCommandNotification#1"]);
+    plog2 && plog2.opEvent("await_pendingCommandNotification#1");
     await falseProphet._pendingCommandNotification;
     expect(commandsCounted).toBe(1);
 
     delayer = new Promise(resolve => { resolveDelay = resolve; });
     falseProphet.setCommandNotificationBlocker(delayer);
     const results = connection.chronicleEvents(basicCommands, { isProphecy: true });
-    falseProphet.clockEvent(2, () => ["test.eventResults[2].event"]);
+    plog2 && plog2.opEvent("await_eventResults[2]-event");
     const lastStoredEvent = await results.eventResults[2].event;
     expect(lastStoredEvent.aspects.log.index)
         .toEqual(3);
     resolveDelay();
-    falseProphet.clockEvent(2, () => ["test.pendingCommandNotification#2"]);
+    plog2 && plog2.opEvent("await_pendingCommandNotification#2");
     await falseProphet._pendingCommandNotification;
     expect(commandsCounted).toBe(4);
   });

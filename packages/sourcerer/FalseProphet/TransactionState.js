@@ -137,26 +137,26 @@ export default class TransactionState {
     corpus.setName(`${transactor._corpus.getName()}/tx#${activeTransactionCounter}:${this.name}:${
       this._transacted.aspects.command.id}`);
     corpus.setState(this._stateBefore);
-    if (transactor.getVerbosity() >= 1) {
+    this._plog = transactor.opLog(1, "transactor");
+    if (this._plog) {
       Object.keys(fabricatorEventTypes).forEach(type => {
         transactor.addEventListener(type, event => {
-          transactor.clockEvent(1, () => [
-            `transactor.on${type}`,
-            event.command.aspects.command.id,
-            event.instigatorConnection ? event.instigatorConnection.getChronicleURI() : "",
-            event.defaultPrevented ? "canceled" : "",
-            event.isSchismatic === undefined ? ""
-                : event.isSchismatic ? "schismatic" : "non-schismatic",
-            event.isRevisable === undefined ? ""
-                : event.isRevisable ? "revisable" : "non-revisable",
-            event.isReformable === undefined ? ""
-                : event.isReformable ? "reformable" : "non-reformable",
-            event.isRefabricateable === undefined ? ""
-                : event.isRefabricateable ? "refabricateable" : "non-refabricateable",
-            `\n\t${type !== "error" ? type : `error on ${event.errorCauseType}`}:`, event.error
-                ? JSON.stringify(event.error.message)
-                : event.message || "<no message>",
-          ]);
+          this._plog.opEvent(`on${type}`,
+              event.command.aspects.command.id,
+              event.instigatorConnection ? event.instigatorConnection.getChronicleURI() : "",
+              event.defaultPrevented ? "canceled" : "",
+              event.isSchismatic === undefined ? ""
+                  : event.isSchismatic ? "schismatic" : "non-schismatic",
+              event.isRevisable === undefined ? ""
+                  : event.isRevisable ? "revisable" : "non-revisable",
+              event.isReformable === undefined ? ""
+                  : event.isReformable ? "reformable" : "non-reformable",
+              event.isRefabricateable === undefined ? ""
+                  : event.isRefabricateable ? "refabricateable" : "non-refabricateable",
+              `\n\t${type !== "error" ? type : `error on ${event.errorStage}`}:`, event.error
+                  ? JSON.stringify(event.error.message)
+                  : event.message || "<no message>",
+          );
         });
       });
     }

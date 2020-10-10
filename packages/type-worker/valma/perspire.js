@@ -318,9 +318,14 @@ async function _performJob (vlm, yargv, worker_) {
       entries: vlm.clockEvents,
     } };
   }
-  await _acquireConnections(vlm, yargv, worker);
-  const jobView = await _createView(vlm, yargv, worker, journal);
-  const job = _createJob(vlm, yargv, jobView, journal);
+  let jobName = yargv["job-name"];
+  if (typeof jobName !== "string") jobName = `job-${vlm.contextIndex}`;
+
+  const plog = worker.opLog(0, `job-${jobName}`,
+      `Created job ${jobName}`, journal);
+  await _acquireConnections(vlm, yargv, worker, plog);
+  const jobView = await _createView(vlm, yargv, worker, jobName, journal, plog);
+  const job = _createJob(vlm, yargv, jobView, journal, plog);
   const interactive = yargv.interactive && jobView.runInteractive();
   let jobResult, jobError;
   try {
@@ -335,33 +340,34 @@ async function _performJob (vlm, yargv, worker_) {
   }
 }
 
-async function _acquireConnections (vlm, yargv, worker) {
-  worker.clockEvent("job.connections", "worker.acquireConnections(yargv.chronicles)");
+async function _acquireConnections (vlm, yargv, worker, plog) {
   const connections = { root: (await worker.getGateway()).getRootConnection() };
   const chronicleURIs = yargv.chronicles || {};
   const focus = (yargv["job-view"] || {}).focus || (yargv.exec || {}).this;
   if (focus) {
     chronicleURIs.view = focus;
   }
+  const workerDiscourse = (await worker.getGateway()).discourse;
+  plog && plog.v1 && plog.opEvent(workerDiscourse, "acquireConnections",
+      "Acquiring connections to chronicles", chronicleURIs);
   for (const [key, chronicleURI] of Object.entries(chronicleURIs)) {
-    connections[key] = await (await worker.getGateway()).discourse
+    connections[key] = await workerDiscourse
         .acquireConnection(chronicleURI.split("#")[0], { newChronicle: false })
         .asActiveConnection();
   }
   return connections;
 }
 
-async function _createView (vlm, yargv, worker, journal) {
-  let jobName = yargv["job-name"];
-  if (typeof jobName !== "string") jobName = `job-${vlm.contextIndex}`;
-  worker.clockEvent("job.view.create", `worker.createView(${jobName})`);
+async function _createView (vlm, yargv, worker, jobName, journal, plog) {
   const viewConfig = {
     ...(yargv["job-view"] || {}),
     contextLensProperty: (yargv["job-view"] || {}).contextLensProperty
         ? [].concat(yargv["job-view"].contextLensProperty)
         : [yargv.attach ? "WORKER_LENS" : "JOB_LENS", "LENS"],
   };
-  const jobView = await worker.createView(jobName, viewConfig);
+  const vplog = plog && plog.opLog(1, "createView",
+      `Creating view for job "${jobName}" worker`, viewConfig);
+  const jobView = await worker.createView(jobName, viewConfig, vplog);
   const viewValos = jobView.getRootScope().valos;
   // viewValos.view = jobView.getFocus().getConnection();
   viewValos.perspire.yargv = yargv;
@@ -369,7 +375,7 @@ async function _createView (vlm, yargv, worker, journal) {
   return jobView;
 }
 
-async function _createJob (vlm, yargv, jobView, journal) {
+async function _createJob (vlm, yargv, jobView, journal, plog) {
   let { delay, repeats, interval, keepalive } = yargv;
   if (keepalive !== undefined) {
     vlm.warn("perspire --keepalive is DEPRECATED, see perspire --help");
@@ -417,7 +423,8 @@ async function _createJob (vlm, yargv, jobView, journal) {
       if (options || jobSpindle) {
         if (heartbeat) {
           entry.action = `running job '${journal.jobSpindleName || options.sourceInfo.mediaName}'`;
-          jobView.clockEvent(`job.heartbeat.run`, entry);
+          plog && plog.opEvent(jobView, `heartbeat`,
+              "Job heartbeat", entry);
         }
         try {
           this.product = await (jobSpindle
@@ -428,7 +435,8 @@ async function _createJob (vlm, yargv, jobView, journal) {
           entry.action = `caught exception: ${error.message}`;
           entry.message = error.message;
           entry.error = error;
-          jobView.clockEvent(`job.heartbeat.run.error`, entry);
+          plog && plog.opEvent(jobView, `heartbeat.error`,
+              "Error during job heartbeat", entry);
           const name = new Error("view.createJob.callback");
           jobView.outputErrorEvent(
               jobView.wrapErrorEvent(error, 1, () => [
@@ -440,8 +448,8 @@ async function _createJob (vlm, yargv, jobView, journal) {
       }
       if (heartbeat) {
         const jobHTML = jobView.getHTML();
-        jobView.clockEvent(`job.heartbeat.dom`,
-            { ...entry, action: "serializing DOM", html: jobHTML, product: this.product });
+        plog && plog.v1 && plog.opEvent(jobView, `heartbeat.dom`,
+            "Serializing DOM", { ...entry, html: jobHTML, product: this.product });
         if (yargv["job-html"]) {
           vlm.shell.ShellString(jobHTML).to(yargv["job-html"]);
           jobHTML.refreshHTML();

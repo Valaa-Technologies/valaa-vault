@@ -57,7 +57,7 @@ export default class MapperService extends FabricEventTarget {
 
   getRootFastify () { return this._rootFastify; }
 
-  createPrefixRouter (prefix, prefixConfig) {
+  createPrefixRouter (prefix, prefixConfig, parentPlog) {
     const service = this;
     const openapi = prefixConfig.openapi || { info: { name: "<missing>", version: "<missing>" } };
     try {
@@ -67,12 +67,11 @@ export default class MapperService extends FabricEventTarget {
       if (!prefixConfig.openapi) {
         throw new Error(`Prefix config openapi section missing for prefix: <${prefix}>`);
       }
-      this.clockEvent(1, () => [
-        `restAPISpindle.prefixRouter.create`,
-        `Creating prefix router for: ${prefix}`,
-      ]);
+      const plog = (parentPlog || this).opLog(1, `router`,
+          `Creating prefix router for <${prefix}>`, prefixConfig);
       // console.log("prefix:", prefix, "\n\tconfig:", prefixConfig);
-      const router = this._prefixRouters[prefix] = _createPrefixRouter(this, prefix, prefixConfig);
+      const router = this._prefixRouters[prefix] =
+          _createPrefixRouter(this, prefix, prefixConfig, plog);
       this.getRootFastify().after(error => {
         if (error) {
           outputError(errorOnCreatePrefixRouter(error),

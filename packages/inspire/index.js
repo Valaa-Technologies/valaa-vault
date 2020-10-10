@@ -51,6 +51,9 @@ export default (valosheath.createGateway = async function createGateway (
   try {
     setGlobalLogger(ret);
 
+    const plog = ret.opLog(1, "gateway",
+        "Constructed the Gateway object");
+
     valosheath.exportSpindle({ name: "@valos/inspire", mediaDecoders });
     if (valosheath.gateway) {
       throw new Error(`valos.gateway already exists as ${
@@ -65,13 +68,14 @@ export default (valosheath.createGateway = async function createGateway (
 
     valosheath.require = ret.valosRequire.bind(ret);
 
-    ret.clockEvent(1, `gateway.revelations`, `Preparing revelations in environment (${
-        String(process.env.NODE_ENV)})`);
-    ret.warnEvent(1, () => [
-      `Combining ${revelations.length} revelations:`,
-      ...[].concat(...revelations.map(revelation => dumpify(revelation))),
-      "\n\tand the spindlesRevelation:", ...dumpObject(spindlesRevelation),
-    ]);
+    plog && plog.opEvent("revelations",
+        `Preparing revelations in environment (${String(process.env.NODE_ENV)})`);
+
+    (plog || {}).v2 && plog.warnEvent(
+        `Combining ${revelations.length} revelations:`,
+        ...[].concat(...revelations.map(revelation => dumpify(revelation))),
+        "\n\tand the spindlesRevelation:", ...dumpObject(spindlesRevelation),
+    );
 
     combinedRevelation = await lazyPatchRevelations(
         ret,
@@ -80,14 +84,15 @@ export default (valosheath.createGateway = async function createGateway (
         spindlesRevelation,
         ...revelations);
 
-    ret.clockEvent(1, `gateway.initialize`, `Initializing gateway`);
-    await ret.initialize(combinedRevelation);
+    const initlog1 = plog && plog.opLog(1, `init`, `Initializing gateway`);
+    await ret.initialize(combinedRevelation, initlog1);
 
     valosheath.gateway = ret;
-    ret.warnEvent(1, () => [`Gateway set to window.valos.gateway as`, ...dumpObject(ret)]);
+    plog && plog.v2 && plog.warnEvent(
+        `Gateway set to window.valos.gateway as`, ...dumpObject(ret));
 
-    ret.clockEvent(1, `gateway.spindles.delayed.attach`, `Attaching ${
-        delayedSpindlePrototypes.length} delayed second stage spindles`);
+    plog && plog.opEvent("await_delayed_attachSpindles",
+        `Attaching ${delayedSpindlePrototypes.length} delayed second stage spindles`);
     while (delayedSpindlePrototypes.length) {
       await ret.attachSpindles(delayedSpindlePrototypes.splice(0), { skipIfAlreadyAttached: true });
     }
@@ -95,7 +100,8 @@ export default (valosheath.createGateway = async function createGateway (
       push (spindlePrototype) { ret.attachSpindle(spindlePrototype); },
     };
 
-    ret.clockEvent(1, "gateway.initialized");
+    plog && plog.opEvent("created",
+        "Gateway creation done");
     return ret;
   } catch (error) {
     outputError(ret.wrapErrorEvent(error, 1,

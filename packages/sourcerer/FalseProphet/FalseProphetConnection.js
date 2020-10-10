@@ -122,6 +122,8 @@ export default class FalseProphetConnection extends Connection {
     let chronicling, resultBase, leadingTruths, initialSchism, upstreamResults, renarration,
         rechronicle;
     try {
+      const plog2 = this.opLog(2, "proclaim",
+          `Proclaiming ${events.length} events`);
       if (options.isProphecy) {
         // console.log("assigning ids:", this.getName(), this._headEventId,
         //     this._unconfirmedCommands.length, "\n\tevents:", ...dumpObject(events));
@@ -132,22 +134,18 @@ export default class FalseProphetConnection extends Connection {
           obtainAspect(event, "log").index = this._headEventId + this._unconfirmedCommands.length;
           this._unconfirmedCommands.push(event);
         }
-        this._checkForFreezeAndNotify();
+        this._checkForFreezeAndNotify(undefined, plog2);
       } else if (typeof events[0].aspects.log.index !== "number") {
         throw new Error(`Can't chronicle events without aspects.log.index ${
             ""}(while options.isProphecy is not set)`);
       }
-      this.clockEvent(2, () => [
-        "falseProphet.chronicle", `chronicleEvents(${this._dumpEventIds(events)})`,
-      ]);
-
       const receiveTruths = !options.isTruth && this.getReceiveTruths(options.receiveTruths);
       if (receiveTruths) options.receiveTruths = receiveTruths;
       options.receiveCommands = options.isProphecy ? null
           : this.getReceiveCommands(options.receiveCommands);
       this._resolveOptionsIdentity(options);
-      this.clockEvent(2, () => ["falseProphet.chronicle.upstream",
-        `upstream.chronicleEvents(${events.length})`]);
+      plog2 && plog2.opEvent("to-upstream",
+          `upstream.chronicleEvents(${events.length})`, { events, options });
       chronicling = this._upstreamConnection.chronicleEvents(events, options);
 
       resultBase = new ChronicleEventResult(this);
@@ -200,12 +198,12 @@ export default class FalseProphetConnection extends Connection {
                     if (initialSchism === undefined) initialSchism = events[index];
                     progress.type = "schism";
                     progress.schismaticCommand = events[index];
-                    progress.message = `chronicleEvents error as ${
+                    progress.message = `a ${
                       progress.isRevisable ? "reviseable"
                       : progress.isReformable ? "reformable"
                       : progress.isRefabricateable ? "refabricateable"
-                      : "to-be-rejected"
-                    } schism: ${error.message}`;
+                      : "heretic"
+                    } schism resulting from chronicleEvents error: ${error.message}`;
                   }
                 }
                 // Process the remaining entries so that fully
@@ -271,10 +269,10 @@ export default class FalseProphetConnection extends Connection {
   receiveTruths (truths: EventBase[], unused1, unused2, schismaticCommand: EventBase) {
     let schismaticCommands, confirmCount = 0, confirmations, newTruthCount = 0, newTruths;
     try {
-      this.clockEvent(2, () => [
-        "falseProphet.receive.truths",
-        `receiveTruths(${this._dumpEventIds(truths)},${this._dumpEventIds(schismaticCommand)})`,
-      ]);
+      const plog2 = this.opLog(2, "receive_truths");
+      plog2 && plog2.opEvent("",
+          `receiveTruths(${this._dumpEventIds(truths)},${this._dumpEventIds(schismaticCommand)})`,
+          { truths, schismaticCommand });
       this._insertEventsToQueue(truths, this._pendingTruths, false,
           (truth, queueIndex, existingTruth) => {
             this.errorEvent(
@@ -300,7 +298,7 @@ export default class FalseProphetConnection extends Connection {
       if (!schismaticCommands && schismaticCommand) {
         const index = this._unconfirmedCommands.indexOf(schismaticCommand);
         if (index < 0) {
-          this.errorEvent("schismatic command noticed but not in queue of", this.debugId(),
+          this.errorEvent("incoming schismatic command not in unconfirmed queue of", this.debugId(),
               "\n\tschismaticCommand.aspects:", JSON.stringify(schismaticCommand.aspects, null, 2),
               "\n\tschismaticCommand:", JSON.stringify(schismaticCommand),
               "\n\tunconfirmed:", this._unconfirmedCommands.map(
@@ -316,7 +314,7 @@ export default class FalseProphetConnection extends Connection {
         _confirmRecitalStories(this, confirmations);
         if (!newTruths.length && !(schismaticCommands || []).length) {
           _confirmLeadingTruthsToFollowers(this.getFalseProphet());
-          this._checkForFreezeAndNotify();
+          this._checkForFreezeAndNotify(undefined, plog2);
           return truths;
         }
       }
@@ -327,7 +325,7 @@ export default class FalseProphetConnection extends Connection {
         "\n\tnewTruths:", ...dumpObject(newTruths)
       ]);
       */
-      _elaborateRecital(this, newTruths, "receive-truth", schismaticCommands);
+      _elaborateRecital(this, newTruths, "receive_truth", schismaticCommands);
       return truths;
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, `receiveTruths(${this._dumpEventIds(truths)})`,
@@ -346,13 +344,14 @@ export default class FalseProphetConnection extends Connection {
     // startup or to update a conflicting command read from another tab.
     let schismaticCommands;
     try {
-      this.clockEvent(2, () => ["falseProphet.receive.commands",
-        `receiveTruths(${commands.length})`]);
+      const plog2 = this.opLog(2, "receive_commands");
+      plog2 && plog2.opEvent("",
+          `receiveTruths(${commands.length})`, { commands });
       const newCommands = this._insertEventsToQueue(commands, this._unconfirmedCommands, true,
           (command, queueIndex) => {
             schismaticCommands = this._unconfirmedCommands.splice(queueIndex);
           });
-      _elaborateRecital(this, newCommands || [], "receive-command", schismaticCommands);
+      _elaborateRecital(this, newCommands || [], "receive_command", schismaticCommands);
       return commands;
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, `receiveCommand(${this._dumpEventIds(commands)})`,
@@ -410,10 +409,14 @@ export default class FalseProphetConnection extends Connection {
     return {};
   }
 
-  _checkForFreezeAndNotify (lastEvent: EventBase[] =
-      this._unconfirmedCommands[(this._unconfirmedCommands.length || 1) - 1]) {
-    this.clockEvent(2, () => ["falseProphet.unconfirmed.notify",
-      `_checkForFreezeAndNotify(${this._unconfirmedCommands.length})`]);
+  _checkForFreezeAndNotify (
+      lastEvent: EventBase[] =
+          this._unconfirmedCommands[(this._unconfirmedCommands.length || 1) - 1],
+      plog,
+  ) {
+    plog && plog.v2 && plog.opEvent(this, "update-post-conditions",
+        `_checkForFreezeAndNotify(${this._unconfirmedCommands.length})`,
+        { lastEvent, unconfirmedCommands: this._unconfirmedCommands });
     if (lastEvent) this.setIsFrozen(lastEvent.type === "FROZEN");
     this.getFalseProphet().setConnectionCommandCount(
         this.getChronicleURI(), this._unconfirmedCommands.length);

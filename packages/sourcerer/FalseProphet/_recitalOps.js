@@ -73,7 +73,7 @@ export function _composeEventIntoRecitalStory (falseProphet: FalseProphet, event
   if (story) {
     story.timed = timed;
     if (dispatchDescription.slice(0, 8) === "prophecy") story.isProphecy = true;
-    if (dispatchDescription === "receive-truth") story.isTruth = true;
+    if (dispatchDescription === "receive_truth") story.isTruth = true;
     if (operation) operation._prophecy = story;
     // story.id = story.aspects.command.id; TODO(iridian): what was this?
     const dispatchPath = generateDispatchEventPath(transactor, "profess");
@@ -140,11 +140,6 @@ export function _confirmRecitalStories (instigatorConnection: FalseProphetConnec
 
 export function _elaborateRecital (instigatorConnection: FalseProphetConnection,
     newEvents: Command[], type: string, schismaticCommands: ?Command[]) {
-  instigatorConnection.clockEvent(2, () => ["falseProphet.recital",
-      `_elaborateRecital(${
-          instigatorConnection._dumpEventIds(newEvents)}, ${type}, ${
-          instigatorConnection._dumpEventIds(schismaticCommands)})`]);
-  if (schismaticCommands && schismaticCommands.length) instigatorConnection.setIsFrozen(false);
   const elaboration = {
     instigatorConnection,
     newEvents,
@@ -157,21 +152,25 @@ export function _elaborateRecital (instigatorConnection: FalseProphetConnection,
     schismaticRecital: undefined,
     affectedChronicles: undefined,
   };
+  if (schismaticCommands && schismaticCommands.length) instigatorConnection.setIsFrozen(false);
+  const plog2 = elaboration.plog2 = elaboration.falseProphet.opLog(2, "elaboration");
+  plog2 && plog2.opEvent("",
+      `Elaborating recital (${
+          instigatorConnection._dumpEventIds(newEvents)}, ${type}, ${
+          instigatorConnection._dumpEventIds(schismaticCommands)})`, elaboration);
+
   newEvents.forEach((event, index) => {
     newEvents[index] = {
       ...event, meta: { ...(event.meta || {}), chronicleURI: elaboration.instigatorChronicleURI },
     };
   });
 
-  let revisee;
+  let revisioning;
   if (schismaticCommands) {
-    instigatorConnection.clockEvent(2, () => ["falseProphet.recital.revisioning",
-        `_launchRevisioning(${newEvents.length}, ${schismaticCommands.length})`]);
-    revisee = _launchRevisioning(elaboration);
+    revisioning = _launchRevisioning(elaboration);
+    plog2 && plog2.opEvent("revisioning",
+        `Revising schismatic recital: ${elaboration.schismaticRecital.size}`, { revisioning });
   }
-  instigatorConnection.clockEvent(2, () => ["falseProphet.recital.elaborate",
-      `Elaborating ${newEvents.length} and revising ${
-        (elaboration.schismaticRecital || { size: 0 }).size} events`]);
   let nextSchism;
   while (true) { // eslint-disable-line
     // Alternate between reciting new events and reviewing schismatic
@@ -184,21 +183,21 @@ export function _elaborateRecital (instigatorConnection: FalseProphetConnection,
 
     // break if not in a revisioning (both undefined) or if recital
     // ring end has been reached
-    if (revisee === elaboration.schismaticRecital) break;
+    if (revisioning === elaboration.schismaticRecital) break;
 
-    let progress = revisee.meta.operation._progress;
+    let progress = revisioning.meta.operation._progress;
 
-    if (!progress) progress = _reviewForeignStory(elaboration, revisee, nextSchism);
+    if (!progress) progress = _reviewForeignStory(elaboration, revisioning, nextSchism);
 
     const recomposition = (!progress || (progress.isRevisable !== false))
-        && _recomposeSchismaticStory(elaboration.falseProphet, revisee);
+        && _recomposeSchismaticStory(elaboration.falseProphet, revisioning);
     if (recomposition) {
       progress = recomposition.meta.operation._progress;
       if (!progress || !progress.isSchismatic) {
         elaboration.newRecitalStories.push(recomposition);
       } else {
         const revisedReformee = instigatorConnection
-            ._reviewRecomposedSchism(revisee, recomposition);
+            ._reviewRecomposedSchism(revisioning, recomposition);
         if (revisedReformee) {
           elaboration.newRecitalStories.push(revisedReformee);
         } else {
@@ -207,15 +206,15 @@ export function _elaborateRecital (instigatorConnection: FalseProphetConnection,
       }
     }
 
-    if (revisee === nextSchism) {
+    if (revisioning === nextSchism) {
       nextSchism = undefined;
-      progress = revisee.meta.operation._progress;
+      progress = revisioning.meta.operation._progress;
       const schismCause = newEvents[elaboration.newEventIndex];
       if (!progress || !progress.isSchismatic) {
-        _rewriteVenueCommand(instigatorConnection, revisee, schismCause);
+        _rewriteVenueCommand(instigatorConnection, revisioning, schismCause);
       } else {
         _rewriteRevisionBreachVenueCommand(
-              elaboration, progress, revisee, recomposition, schismCause);
+              elaboration, progress, revisioning, recomposition, schismCause);
       }
       ++elaboration.newEventIndex;
     }
@@ -228,26 +227,26 @@ export function _elaborateRecital (instigatorConnection: FalseProphetConnection,
       // need to be fully, possibly asynchronously, even interactively
       // revised as they're likely to depend on the first schismatic
       // change.
-      for (const chronicleURI of Object.keys((revisee.meta || {}).chronicles || {})) {
+      for (const chronicleURI of Object.keys((revisioning.meta || {}).chronicles || {})) {
         const affectedChronicle = elaboration.affectedChronicles[chronicleURI]
             || (elaboration.affectedChronicles[chronicleURI] = {});
         if (!progress.isSchismatic) continue;
         if (!affectedChronicle.isSchismatic) {
           affectedChronicle.isSchismatic = true;
-          affectedChronicle.initialSchism = revisee;
+          affectedChronicle.initialSchism = revisioning;
           affectedChronicle.propheciesToRevise = [];
         }
-        affectedChronicle.propheciesToRevise.push(revisee);
+        affectedChronicle.propheciesToRevise.push(revisioning);
       }
     }
 
     // Remove successfully repeated/reviewed stories from the schismatic recital.
-    revisee = !progress || !progress.isSchismatic
-        ? elaboration.schismaticRecital.removeStory(revisee) // Also advances to next
-        : revisee.next; // Keep it as schismatic, just advance to next
+    revisioning = !progress || !progress.isSchismatic
+        ? elaboration.schismaticRecital.removeStory(revisioning) // Also advances to next
+        : revisioning.next; // Keep it as schismatic, just advance to next
   }
 
-  if (revisee && _finalizeRevisioning(elaboration)) {
+  if (revisioning && _finalizeRevisioning(elaboration)) {
     elaboration.schismaticRecital = undefined;
   }
 
@@ -258,7 +257,8 @@ export function _elaborateRecital (instigatorConnection: FalseProphetConnection,
   _confirmLeadingTruthsToFollowers(elaboration.falseProphet);
 
   instigatorConnection._checkForFreezeAndNotify();
-  instigatorConnection.clockEvent(2, "falseProphet.recital.elaborate.done");
+  plog2 && plog2.opEvent("done",
+      "Elaboration done");
 }
 
 function _launchRevisioning (elaboration: Object): Story {
@@ -317,10 +317,10 @@ function _extendRecitalUntilNextSchism (elaboration) {
   return undefined;
 }
 
-function _reviewForeignStory (elaboration, revisee, nextSchism) { // eslint-disable-line
-  const meta = revisee.meta;
+function _reviewForeignStory (elaboration, revisioning, nextSchism) { // eslint-disable-line
+  const meta = revisioning.meta;
   // No progression tracking for pre-existing truths needed
-  if (!revisee.isProphecy || !meta) return undefined;
+  if (!revisioning.isProphecy || !meta) return undefined;
   const chronicleURIs = meta.chronicles ? Object.keys(meta.chronicles)
       : meta.chronicleURI ? [meta.chronicleURI]
       : undefined;
@@ -330,7 +330,7 @@ function _reviewForeignStory (elaboration, revisee, nextSchism) { // eslint-disa
     const affectedChronicle = elaboration.affectedChronicles[chronicleURI];
     if (!affectedChronicle) continue;
     if (chronicleURI === elaboration.instigatorChronicleURI) {
-      if (revisee === nextSchism) continue;
+      if (revisioning === nextSchism) continue;
       progress.message = `schism created by a prophecy reordering revisioning`;
       progress.reorderingSchism = nextSchism;
     } else if (affectedChronicle.isSchismatic) {
@@ -430,11 +430,9 @@ function _finalizeRevisioning (elaboration: Object) {
   // Reform or purge each of the heretic stories.
   const hereticRecital = elaboration.schismaticRecital;
   if (!hereticRecital || (hereticRecital.getFirst() === hereticRecital)) return true;
-  elaboration.instigatorConnection.clockEvent(2, () => [
-    "falseProphet.recital.revisioning",
-    `Reforming ${hereticRecital.size} events onwards from elaborated event #${
-        elaboration.newEventIndex}`,
-  ]);
+  elaboration.plog2 && elaboration.plog2.opEvent("revisioning.finalize",
+      `Reforming ${hereticRecital.size} events onwards from elaborated event #${
+          elaboration.newEventIndex}`);
   let purgedHeresies;
   for (let heresy = hereticRecital.getFirst(); heresy !== hereticRecital;) {
     const operation = (heresy.meta || {}).operation;
@@ -473,10 +471,9 @@ function _finalizeRevisioning (elaboration: Object) {
 }
 
 export function _reciteStoriesToFollowers (falseProphet: FalseProphet, stories: Story[],
-    purgedRecital: ?StoryRecital) {
-  falseProphet.clockEvent(2, () => ["falseProphet.recital.deliver",
-    `_reciteStoriesToFollowers(${stories.length}, ${purgedRecital ? purgedRecital.size : 0})`,
-  ]);
+    purgedRecital: ?StoryRecital, plog) {
+  plog && plog.v2 && plog.opEvent(falseProphet, "recite",
+      `_reciteStoriesToFollowers(${stories.length}, ${purgedRecital ? purgedRecital.size : 0})`);
   falseProphet._followers.forEach((discourse, follower) => {
     let reactions;
     try {
@@ -514,13 +511,13 @@ export function _reciteStoriesToFollowers (falseProphet: FalseProphet, stories: 
 // permanent truths in chronological order, ie. all stories at the
 // front of the recital marked as isTruth and which thus can no
 // longer be affected by any future purges and revisionings.
-export function _confirmLeadingTruthsToFollowers (falseProphet: FalseProphet) {
+export function _confirmLeadingTruthsToFollowers (falseProphet: FalseProphet, plog) {
   const truths = [];
   for (let story = falseProphet._canonicalRecital.getFirst(); story.isTruth; story = story.next) {
     truths.push(story);
   }
-  falseProphet.clockEvent(2, () => ["falseProphet.truths.confirm",
-    `_confirmLeadingTruthsToFollowers(${truths.length})`]);
+  plog && plog.v2 && plog.opEvent(falseProphet, "confirm",
+      `_confirmLeadingTruthsToFollowers(${truths.length})`);
   if (!truths.length) return;
   falseProphet._canonicalRecital.extractStoryChain(truths[0], truths[truths.length - 1].next);
   falseProphet._followers.forEach(discourse => {

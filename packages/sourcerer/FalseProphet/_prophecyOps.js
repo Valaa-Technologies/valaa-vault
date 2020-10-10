@@ -39,7 +39,7 @@ export function _proclaimEvents (falseProphet: FalseProphet, events: EventBase[]
   resultBase._events = events;
   resultBase._options = rest;
   resultBase._options.isProphecy = true;
-  const proclamationProphecies = [];
+  const prophecies = [];
   const ret = {
     eventResults: events.map((event, index) => {
       const operation = (event.meta || (event.meta = {})).operation = Object.create(resultBase);
@@ -52,14 +52,14 @@ export function _proclaimEvents (falseProphet: FalseProphet, events: EventBase[]
           throw new Error("Command rejected by 'proclaim' default action cancelation");
         }
       }
-      const proclamationProphecy = _composeEventIntoRecitalStory(
+      const prophecy = _composeEventIntoRecitalStory(
           falseProphet, event, "prophecy-chronicle", timed, transactionState);
-      if (proclamationProphecy) proclamationProphecies.push(proclamationProphecy);
+      if (prophecy) prophecies.push(prophecy);
       return operation;
     }),
   };
-  falseProphet._reciteStoriesToFollowers(proclamationProphecies);
-  for (const recitedProphecy of proclamationProphecies) {
+  falseProphet._reciteStoriesToFollowers(prophecies);
+  for (const recitedProphecy of prophecies) {
     const operation = recitedProphecy.meta.operation;
     operation._debugPhase = "proclaim";
     operation._fulfillment = operation.performChain(

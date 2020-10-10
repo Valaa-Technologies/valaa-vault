@@ -30,7 +30,7 @@ export default class ScriptTestHarness extends RAEMTestHarness {
       sourceInfo,
     });
     sourceInfo.phase = "harness.runValoscript execution";
-    options.discourse = this.valker.acquireFabricator("test-run-body");
+    options.discourse = this.valker.acquireFabricator("test_run-body");
     const selfMaybeRef = tryHostRef(self) || self;
     (options.scope || (options.scope = {})).this = selfMaybeRef;
     Object.assign(options.scope, extendScope);

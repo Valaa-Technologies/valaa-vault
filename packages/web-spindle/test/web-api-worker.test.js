@@ -47,6 +47,7 @@ beforeAll(async () => {
   await _server.initialize(["../web-spindle"]);
   await _server.createView("worker");
   _testView = _server.getGateway().getView("web-api-test-view");
+  if (!_testView) throw new Error(`The spindle view "web-api-test-view" failed to initialize`);
   _testRouter = _testView.prefixRouters["/rest-test/v0"];
   _vViewFocus = _testView.getFocus();
 

@@ -132,11 +132,12 @@ describe("Media handling", () => {
       oracle: { testAuthorityConfig: { isRemoteAuthority: true, isLocallyPersisted: true } },
       awaitResult: (result) => result.getPersistedStory(),
     });
+    const plog = harness.opLog(1, "test_purge-recompose", "Harness created");
     const testConnectionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
     const existingChroniclingCount = testConnectionBackend._chroniclings.length;
     let reformCause;
     const onReform = e => { reformCause = e.error; e.preventDefault(); };
-    harness.clockEvent(1, () => ["test.runValoscript"]);
+    plog && plog.opEvent("await_runValoscript");
     const { media, contentUpdateStarted, newMediaPersist } = await harness.runValoscript(
         vRef(testRootId), `
       const media = new Media({
@@ -159,14 +160,14 @@ describe("Media handling", () => {
     `,
         { exampleBuffer, console, onReform },
         { awaitResult: (result) => result.getComposedEvent() });
-    harness.clockEvent(1, () => ["test.newMediaPersist"]);
+    plog && plog.opEvent("await_newMediaPersist");
     await newMediaPersist;
     expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 1);
-    harness.clockEvent(1, () => ["test.contentUpdateStarted"]);
+    plog && plog.opEvent("await_contentUpdateStarted");
     const { bvobRecorded, bvobPurged } = await contentUpdateStarted;
     testConnectionBackend.addPrepareBvobResult({ contentHash: exampleContentHash });
-    harness.clockEvent(1, () => ["test.bvobRecorded"]);
+    plog && plog.opEvent("await_bvobRecorded");
     await bvobRecorded;
 
     expect(await media.extractValue())
@@ -177,7 +178,7 @@ describe("Media handling", () => {
     testConnectionBackend._chroniclings.splice(existingChroniclingCount, 2)[0]
         .rejectTruthEvent(Object.assign(new Error("Not permitted"),
             { isRevisable: false, isReformable: true }));
-    harness.clockEvent(1, () => ["test.bvobPurged"]);
+    plog && plog.opEvent("await_bvobPurged");
     const purgeEvent = await bvobPurged;
     expect(purgeEvent.error.message)
         .toMatch(/Media does not exist/);
@@ -195,11 +196,12 @@ describe("Media handling", () => {
       oracle: { testAuthorityConfig: { isRemoteAuthority: true, isLocallyPersisted: true } },
       awaitResult: (result) => result.getPersistedStory(),
     });
+    const plog = harness.opLog(1, "test_no-reform-non-schism");
     const testConnectionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
     const existingChroniclingCount = testConnectionBackend._chroniclings.length;
     let reformCause;
     const onReform = e => { reformCause = e.error; e.preventDefault(); };
-    harness.clockEvent(1, () => ["test.runValoscript"]);
+    plog && plog.opEvent("await_runValoscript");
     const { media, contentUpdateStarted, newMediaPersist, newMediaError } =
         await harness.runValoscript(vRef(testRootId), `
       const media = new Media({
@@ -220,14 +222,14 @@ describe("Media handling", () => {
       });`,
         { exampleBuffer, console, onReform },
         { awaitResult: (result) => result.getComposedEvent() });
-    harness.clockEvent(1, () => ["test.newMediaPersist"]);
+    plog && plog.opEvent("await_newMediaPersist");
     await newMediaPersist;
     expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 1);
-    harness.clockEvent(1, () => ["test.contentUpdateStarted"]);
+    plog && plog.opEvent("await_contentUpdateStarated");
     const { bvobRecorded } = await contentUpdateStarted;
     testConnectionBackend.addPrepareBvobResult({ contentHash: exampleContentHash });
-    harness.clockEvent(1, () => ["test.bvobRecorded"]);
+    plog && plog.opEvent("await_bvobRecorded");
     await bvobRecorded;
 
     expect(await media.extractValue())
@@ -238,7 +240,7 @@ describe("Media handling", () => {
     testConnectionBackend._chroniclings.splice(existingChroniclingCount, 2)[0]
         .rejectTruthEvent(Object.assign(new Error("Connection lost"),
             { isSchismatic: false }));
-    harness.clockEvent(1, () => ["test.newMediaError"]);
+    plog && plog.opEvent("await_newMediaError");
     const errorEvent = await newMediaError;
     expect(errorEvent.error.message)
         .toMatch(/Connection lost/);
@@ -258,6 +260,7 @@ describe("Media handling", () => {
       oracle: { testAuthorityConfig: { isRemoteAuthority: true, isLocallyPersisted: true } },
       awaitResult: (result) => result.getPersistedStory(),
     });
+    const plog = harness.opLog(1, "test_delay-depending", "Harness created");
     const buffer = arrayBufferFromUTF8String("example content");
     const contentHash = contentHashFromArrayBuffer(buffer);
     const testConnectionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
@@ -269,7 +272,7 @@ describe("Media handling", () => {
       e.reformAfterAll(resolve => { resolveReformationDelay = resolve; });
     };
     const onPurge = e => (mediaPurgeEvent = e);
-    harness.clockEvent(1, () => ["test.runValoscript"]);
+    plog && plog.opEvent("await_runValoscript");
     const { media, contentUpdateStarted, newMediaPersist } = await harness.runValoscript(
         vRef(testRootId), `
       const media = new Media({
@@ -294,21 +297,21 @@ describe("Media handling", () => {
       });`,
         { buffer, console, onReform, onPurge },
         { awaitResult: (result) => (mediaProphecy = result).getComposedEvent() });
-    harness.clockEvent(1, () => ["test.newMediaPersist"]);
+    plog && plog.opEvent("await_newMediaPersist");
     await newMediaPersist;
     expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 1);
-    harness.clockEvent(1, () => ["test.contentUpdateStarted"]);
+    plog && plog.opEvent("await_contentUpdateStarted");
         const { bvobRecorded, bvobPurged } = await contentUpdateStarted;
     testConnectionBackend.addPrepareBvobResult({ contentHash });
-    harness.clockEvent(1, () => ["test.bvobRecorded"]);
+    plog && plog.opEvent("await_bvobRecorded");
     await bvobRecorded;
     expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount + 2);
     testConnectionBackend._chroniclings.splice(existingChroniclingCount, 2)[0]
         .rejectTruthEvent(Object.assign(new Error("Not permitted"),
             { isRevisable: false, isReformable: true }));
-    harness.clockEvent(1, () => ["test.bvobPurged"]);
+    plog && plog.opEvent("await_bvobPurged");
     const bvobPurgeEvent = await bvobPurged;
     expect(testConnectionBackend._chroniclings.length)
         .toEqual(existingChroniclingCount);
@@ -321,7 +324,7 @@ describe("Media handling", () => {
         .toMatch(/Not permitted/);
 
     resolveReformationDelay();
-    harness.clockEvent(1, () => ["test.mediaProphecy.getPersistedStory()"]);
+    plog && plog.opEvent("await_mediaProphecy.getPersistedStory");
     let mediaStory;
     while (!mediaStory) {
       // FIXME(iridian, 2019-05): This is horrible. Async synchronization is pain.

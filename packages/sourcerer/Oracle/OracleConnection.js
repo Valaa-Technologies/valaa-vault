@@ -45,7 +45,6 @@ export default class OracleConnection extends Connection {
     // logic (defined in Connection.js) and begin I/O bound(?)
     // scribe event log narration in parallel to the authority
     // proxy/connection creation.
-    this.clockEvent(1, "oracle.doConnect", "_authoritySourcerer.acquireConnection");
     this.setUpstreamConnection(this._authoritySourcerer.acquireConnection(
         this.getChronicleURI(), {
           narrateOptions: false,

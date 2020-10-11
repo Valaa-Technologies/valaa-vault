@@ -229,7 +229,7 @@ host object associated with the context resource.
 
 TODO(iridian): Update outdated documentation
 Restricted commands are commands created by downstream components which
-contain incomplete information and cannot yet be chronicled upstream.
+contain incomplete information and cannot yet be proclaimed upstream.
 An example of such is a cross-chronicle DUPLICATED command which only
 contains the source and the target owner resources: the final command
 which reaches the target chronicle event log must also contain full

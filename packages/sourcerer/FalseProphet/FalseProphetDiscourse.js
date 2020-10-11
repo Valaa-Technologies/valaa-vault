@@ -7,11 +7,11 @@ import { ValaaURI, naiveURI, hasScheme } from "~/raem/ValaaURI";
 import { vRef } from "~/raem/VRL";
 import { dumpObject } from "~/raem/VALK";
 import { getHostRef } from "~/raem/VALK/hostReference";
-import { addConnectToChronicleToError } from "~/raem/tools/denormalized/partitions";
+import { addSourcifyChronicleToError } from "~/raem/tools/denormalized/partitions";
 
 import Discourse from "~/sourcerer/api/Discourse";
 import type Connection from "~/sourcerer/api/Connection";
-import type { ChronicleOptions, ChroniclePropheciesRequest, ConnectOptions, ProphecyEventResult }
+import type { ProclaimOptions, ChroniclePropheciesRequest, SourceryOptions, ProphecyEventResult }
     from "~/sourcerer/api/types";
 
 import EVENT_VERSION from "~/sourcerer/tools/EVENT_VERSION";
@@ -81,24 +81,23 @@ export default class FalseProphetDiscourse extends Discourse {
       }
       return super.run(head, kuery, actualOptions);
     } catch (error) {
-      addConnectToChronicleToError(error, this.connectToAbsentChronicle);
+      addSourcifyChronicleToError(error, this.connectToAbsentChronicle);
       throw error;
     }
   }
 
-  acquireConnection (chronicleURI: ValaaURI,
-      options: ConnectOptions = {}): ?Connection {
+  sourcifyChronicle (chronicleURI: ValaaURI, options: SourceryOptions = {}): ?Connection {
     options.discourse = this;
-    return this._falseProphet.acquireConnection(chronicleURI, options);
+    return this._falseProphet.sourcifyChronicle(chronicleURI, options);
   }
 
-  chronicleEvents (events: EventBase[], options: ChronicleOptions = {}):
+  proclaimEvents (events: EventBase[], options: ProclaimOptions = {}):
       ChroniclePropheciesRequest {
-    this.logEvent(1, () => ["chronicling", events.length, "events:", events]);
-    if (this._transaction) return this._transaction.chronicleEvents(events, options);
+    this.logEvent(1, () => ["proclamation", events.length, "events:", events]);
+    if (this._transaction) return this._transaction.proclaimEvents(events, options);
     try {
       options.discourse = this;
-      const ret = this._falseProphet.chronicleEvents(
+      const ret = this._falseProphet.proclaimEvents(
           events.map(event => this._universalizeEvent(event, options.chronicleURI)), options);
 
       ret.eventResults.forEach(eventResult => {
@@ -110,15 +109,15 @@ export default class FalseProphetDiscourse extends Discourse {
 
       return ret;
     } catch (error) {
-      addConnectToChronicleToError(error, this.connectToAbsentChronicle);
-      throw this.wrapErrorEvent(error, 1, `chronicleEvents()`,
+      addSourcifyChronicleToError(error, this.connectToAbsentChronicle);
+      throw this.wrapErrorEvent(error, 1, `proclaimEvents()`,
           "\n\tevents:", ...dumpObject(events),
       );
     }
   }
 
-  chronicleEvent (event: EventBase, options: ChronicleOptions = {}): ProphecyEventResult {
-    return this.chronicleEvents([event], options).eventResults[0];
+  proclaimEvent (event: EventBase, options: ProclaimOptions = {}): ProphecyEventResult {
+    return this.proclaimEvents([event], options).eventResults[0];
   }
 
   _universalizeEvent (event: EventBase, chronicleURI: ?string): EventBase {
@@ -138,8 +137,8 @@ export default class FalseProphetDiscourse extends Discourse {
     const chronicleURIString = String(missingChronicleURI);
     if (!this._implicitlySyncingConnections[chronicleURIString]) {
       this._implicitlySyncingConnections[chronicleURIString] = this
-          .acquireConnection(missingChronicleURI)
-          .asActiveConnection();
+          .sourcifyChronicle(missingChronicleURI)
+          .asSourceredConnection();
     }
     return (this._implicitlySyncingConnections[chronicleURIString] =
         await this._implicitlySyncingConnections[chronicleURIString]);

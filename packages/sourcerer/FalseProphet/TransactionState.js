@@ -6,7 +6,7 @@ import { transacted, EventBase } from "~/raem/events";
 import type { Corpus } from "~/raem/Corpus";
 import { StoryIndexTag, PassageIndexTag } from "~/raem/redux/Bard";
 
-import { ChronicleRequest, ChronicleEventResult } from "~/sourcerer/api/types";
+import { Proclamation, ProclaimEventResult } from "~/sourcerer/api/types";
 import Fabricator, { fabricatorEventTypes, fabricatorMixinOps }
     from "~/sourcerer/api/Fabricator";
 import type Transactor from "~/sourcerer/api/Transactor";
@@ -98,7 +98,7 @@ export const fabricatorOps = {
   },
 };
 
-class TransactionEventResult extends ChronicleEventResult {
+class TransactionEventResult extends ProclaimEventResult {
   getComposedStory () { return this.story; }
   getPremiereStory () {
     if (this.info._finalCommand !== undefined) return this.story;
@@ -193,7 +193,7 @@ export default class TransactionState {
     return this._stateBefore === previousState;
   }
 
-  chronicleEvents (events: EventBase[], options: Object = {}): ChronicleRequest {
+  proclaimEvents (events: EventBase[], options: Object = {}): Proclamation {
     try {
       if (!this._transacted) this._lazyInit();
       else if (this._finalCommand !== undefined) {
@@ -240,7 +240,7 @@ export default class TransactionState {
       };
     } catch (error) {
       throw this._transactor.wrapErrorEvent(error, 1,
-          `chronicleEvents(${this._transactor._corpus.getName()})`,
+          `proclaimEvents(${this._transactor._corpus.getName()})`,
           "\n\tevents:", ...dumpObject(events),
           "\n\ttransactor:", ...dumpObject(this._transactor),
           "\n\ttransactionState:", ...dumpObject(this),
@@ -248,7 +248,7 @@ export default class TransactionState {
     }
   }
 
-  commit (): ChronicleEventResult {
+  commit (): ProclaimEventResult {
     let command;
     try {
       if (this._finalCommand !== undefined) {
@@ -268,7 +268,7 @@ export default class TransactionState {
             event: this._finalCommand, story: command, getPremiereStory () { return command; },
           };
         }
-        this._commitChronicleResult = this._transactor._falseProphet.chronicleEvent(
+        this._commitChronicleResult = this._transactor._falseProphet.proclaimEvent(
             this._finalCommand, {
           transactionState: this, discourse: this._transactor,
         });

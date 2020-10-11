@@ -1,7 +1,7 @@
 // @flow
 
 import Sourcerer from "~/sourcerer/api/Sourcerer";
-import { ConnectOptions } from "~/sourcerer/api/types";
+import { SourceryOptions } from "~/sourcerer/api/types";
 
 import DecoderArray from "~/sourcerer/Oracle/DecoderArray";
 
@@ -47,14 +47,14 @@ export default class Oracle extends Sourcerer {
     return ret;
   }
 
-  _createConnection (chronicleURI: string, options: ConnectOptions) {
+  _createConnection (chronicleURI: string, options: SourceryOptions) {
     const authoritySourcerer = this._authorityNexus.obtainAuthorityOfChronicle(chronicleURI);
     if (!authoritySourcerer) {
       throw new Error(`Can't obtain authority for chronicle <${chronicleURI}>`);
     }
     return new OracleConnection({
       chronicleURI, sourcerer: this, verbosity: this.getVerbosity(),
-      receiveTruths: options.receiveTruths, authoritySourcerer,
+      pushTruths: options.pushTruths, authoritySourcerer,
     });
   }
 }

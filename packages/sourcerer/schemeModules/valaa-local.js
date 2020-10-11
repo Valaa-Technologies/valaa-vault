@@ -11,7 +11,7 @@ export default function createValaaLocalScheme (/* { parent } */): SchemeModule 
 
     obtainAuthorityConfig: (/* chronicleURI: string, authorityPreConfig: Object */) => ({
       eventVersion: EVENT_VERSION,
-      isLocallyPersisted: true,
+      isLocallyRecorded: true,
       isPrimaryAuthority: true,
       isRemoteAuthority: false,
     }),

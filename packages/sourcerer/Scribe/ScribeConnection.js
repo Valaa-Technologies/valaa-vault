@@ -5,7 +5,7 @@ import type { VRL } from "~/raem/VRL";
 
 import Connection from "~/sourcerer/api/Connection";
 import {
-  MediaInfo, NarrateOptions, ChronicleOptions, ChronicleRequest, ConnectOptions,
+  MediaInfo, NarrateOptions, ProclaimOptions, Proclamation, SourceryOptions,
   ReceiveEvents, RetrieveMediaBuffer,
 } from "~/sourcerer/api/types";
 import { tryAspect } from "~/sourcerer/tools/EventAspects";
@@ -84,16 +84,19 @@ export default class ScribeConnection extends Connection {
   _doConnect (options: ConnectOptions) {
     if (this.getScribe()._upstream) {
       const upstreamOptions = Object.create(options);
-      // Set the permanent receiver without options.receiveTruths,
-      // initiate connection but disable initial narration; perform
-      // the initial optimistic narrateEventLog later below using
-      // options.receiveTruths.
-      upstreamOptions.receiveTruths = this.getReceiveTruths();
+      // Set the permanent receiver without options.pushTruths,
+      // initiate connection but disable initial narration;
+      // perform the initial optimistic narrateEventLog later.
+      upstreamOptions.pushTruths = this.getReceiveTruths();
       upstreamOptions.narrateOptions = false;
       upstreamOptions.subscribeEvents = (options.narrateOptions === false)
           && options.subscribeEvents;
-      this.setUpstreamConnection(
-          this.getScribe()._upstream.acquireConnection(this.getChronicleURI(), upstreamOptions));
+      this.setUpstreamConnection(this.getScribe()._upstream
+          .sourcifyChronicle(this.getChronicleURI(), upstreamOptions));
+      // Unlike with other sourcerers scribe does not wait for upstream
+      // sourcery to complete: ScribeConnection can satisfy the
+      // optimistic narration criteria of the sourcery process via
+      // events in the local cache.
     }
     // ScribeConnection can be active even if the upstream
     // connection isn't, as long as there are any events in the local
@@ -142,7 +145,11 @@ export default class ScribeConnection extends Connection {
   narrateEventLog (options: ?NarrateOptions = {}):
       Promise<{ scribeTruthLog: any, scribeCommandQueue: any }> {
     if (!options) return undefined;
-    if (!this.isLocallyPersisted()) return super.narrateEventLog(options);
+    if (!this.isLocallyRecorded()) return super.narrateEventLog(options);
+    if (!this._db) {
+      throw new Error(
+          "INTERNAL ERROR: Missing _db for locally persisted ScribeConnection.narrateEventLog");
+    }
     const connection = this;
     const wrap = new Error("narrateEventLog()");
     const ret = {};
@@ -154,18 +161,18 @@ export default class ScribeConnection extends Connection {
         });
   }
 
-  chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest {
-    if (!this.isLocallyPersisted() || (options.isLocallyPersisted === false)) {
-      return super.chronicleEvents(events, options);
+  proclaimEvents (events: EventBase[], options: ProclaimOptions = {}): Proclamation {
+    if (!this.isLocallyRecorded() || (options.isLocallyRecorded === false)) {
+      return super.proclaimEvents(events, options);
     }
     const connection = this;
-    let wrap = new Error("chronicleEvents()");
+    let wrap = new Error("proclaimEvents()");
     try {
       return _proclaimEvents(this, events, options, errorOnScribeChronicleEvents);
     } catch (error) { return errorOnScribeChronicleEvents(error); }
     function errorOnScribeChronicleEvents (error) {
       const cycleWraps = wrap;
-      wrap = new Error("chronicleEvents()");
+      wrap = new Error("proclaimEvents()");
       throw connection.wrapErrorEvent(error, 1, cycleWraps,
           "\n\teventLog:", ...dumpObject(events),
           "\n\toptions:", ...dumpObject(options),
@@ -174,15 +181,14 @@ export default class ScribeConnection extends Connection {
   }
 
   receiveTruths (truths: EventBase[], retrieveMediaBuffer?: RetrieveMediaBuffer,
-      downstreamReceiveTruths: ReceiveEvents,
-      type: ("receiveTruths" | "receiveCommands") = "receiveTruths",
+      pushTruths: ReceiveEvents, type: ("receiveTruths" | "receiveCommands") = "receiveTruths",
   ) {
     if (!truths.length) return truths;
     const connection = this;
     const wrap = new Error(`${type}([${tryAspect(truths[0], "log").index}, ${
         tryAspect(truths[truths.length - 1], "log").index}])`);
     try {
-      return _receiveEvents(this, truths, retrieveMediaBuffer, downstreamReceiveTruths,
+      return _receiveEvents(this, truths, retrieveMediaBuffer, pushTruths,
           type, errorOnReceiveTruths);
     } catch (error) { throw errorOnReceiveTruths(error); }
     function errorOnReceiveTruths (error) {
@@ -193,9 +199,8 @@ export default class ScribeConnection extends Connection {
   }
 
   receiveCommands (commands: EventBase[], retrieveMediaBuffer?: RetrieveMediaBuffer,
-      downstreamReceiveCommands: ReceiveEvents) {
-    return this.receiveTruths(commands, retrieveMediaBuffer, downstreamReceiveCommands,
-        "receiveCommands");
+      pushCommands: ReceiveEvents) {
+    return this.receiveTruths(commands, retrieveMediaBuffer, pushCommands, "receiveCommands");
   }
 
   // Returns a promise to a write operation after which all entries

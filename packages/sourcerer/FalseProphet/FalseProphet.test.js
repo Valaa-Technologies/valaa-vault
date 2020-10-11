@@ -35,11 +35,11 @@ afterEach(async () => {
 });
 
 describe("FalseProphet", () => {
-  it("assigns proper eventIds for chronicled commands", async () => {
+  it("assigns proper eventIds for proclaimed commands", async () => {
     harness = await createSourcererOracleHarness({ verbosity: 0 });
 
     const connection = await harness.sourcerer
-        .acquireConnection(testChronicleURI).asActiveConnection();
+        .sourcifyChronicle(testChronicleURI).asSourceredConnection();
     const scribeConnection = connection.getUpstreamConnection();
 
     let oldCommandId;
@@ -48,7 +48,7 @@ describe("FalseProphet", () => {
     for (const command of basicCommands) {
       oldCommandId = newCommandId;
 
-      await harness.chronicleTestEvent(command).getPremiereStory();
+      await harness.proclaimTestEvent(command).getPremiereStory();
 
       newCommandId = scribeConnection.getFirstUnusedCommandEventId() - 1;
       expect(oldCommandId).toBeLessThan(newCommandId);
@@ -61,13 +61,13 @@ describe("FalseProphet", () => {
 
     const falseProphet = createFalseProphet({
       verbosity: 0, onCommandCountUpdate,
-      upstream: createTestMockSourcerer({ isLocallyPersisted: false, isRemoteAuthority: true }),
+      upstream: createTestMockSourcerer({ isLocallyRecorded: false, isRemoteAuthority: true }),
     });
-    let connection = falseProphet.acquireConnection(testChronicleURI);
+    let connection = falseProphet.sourcifyChronicle(testChronicleURI);
     connection.getUpstreamConnection().addNarrateResults({ eventIdBegin: 0 }, []);
     const plog2 = falseProphet.opLog(2, "test_keep-track");
     plog2 && plog2.opEvent("await_asActiveConnection");
-    connection = await connection.asActiveConnection();
+    connection = await connection.asSourceredConnection();
     expect(commandsCounted).toBe(0);
     const discourse = falseProphet.addFollower(new MockFollower());
 
@@ -76,7 +76,7 @@ describe("FalseProphet", () => {
     let delayer = new Promise(resolve => { resolveDelay = resolve; });
     falseProphet.setCommandNotificationBlocker(delayer);
     plog2 && plog2.opEvent("await_testChronicleEntity-getPremiereStory");
-    await discourse.chronicleEvent(createTestChronicleEntityCreated()).getPremiereStory();
+    await discourse.proclaimEvent(createTestChronicleEntityCreated()).getPremiereStory();
     resolveDelay();
     plog2 && plog2.opEvent("await_pendingCommandNotification#1");
     await falseProphet._pendingCommandNotification;
@@ -84,7 +84,7 @@ describe("FalseProphet", () => {
 
     delayer = new Promise(resolve => { resolveDelay = resolve; });
     falseProphet.setCommandNotificationBlocker(delayer);
-    const results = connection.chronicleEvents(basicCommands, { isProphecy: true });
+    const results = connection.proclaimEvents(basicCommands, { isProphecy: true });
     plog2 && plog2.opEvent("await_eventResults[2]-event");
     const lastStoredEvent = await results.eventResults[2].event;
     expect(lastStoredEvent.aspects.log.index)

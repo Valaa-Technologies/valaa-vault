@@ -21,14 +21,14 @@ export class AbsentChroniclesError extends Error {
   }
 }
 
-// Wraps the call inside logic which connects to absent chronicles if
-// a AbsentChroniclesError is thrown. The connect callback
-// is extracted from the error.connectToChronicle itself. Thus for the
-// autoconnect functionality to work some intervening layer must add
-// this callback into all caught missing connection errors.
-export function asyncConnectToChronicleIfAbsentAndRetry (call, onError) {
+// Wraps the call inside logic which sourcifies to absent chronicles if
+// a AbsentChroniclesError is thrown. The sourcery callback
+// is extracted from the error.sourcifyChronicle itself. Thus for the
+// auto-sourcery functionality to work some intervening layer must add
+// this callback into all caught missing sourcery errors.
+export function asyncSourcifyChronicleIfAbsentAndRetry (call, onError) {
   if ((typeof call !== "function") || !call.apply) throw new Error("call is not a function");
-  return function autoConnectingCall (...args: any[]) {
+  return function autoSourceryCall (...args: any[]) {
     return tryCall.call(this, call, onError, ...args);
   };
 }
@@ -42,12 +42,12 @@ function tryCall (call: any, onError, ...args: any[]) {
       throw error;
     }
     try {
-      return connectToAbsentChroniclesAndThen(error,
+      return sourcifyAbsentChroniclesAndThen(error,
           () => tryCall.call(this, call, onError, ...args));
     } catch (innerError) {
       const wrappedError = wrapError(innerError,
-        `During @asyncConnectToChronicleIfAbsentAndRetry(${call.name}):`,
-        "\n\thint: use chronicles:addConnectToChronicleToError to add it",
+        `During @asyncSourcifyChronicleIfAbsentAndRetry(${call.name}):`,
+        "\n\thint: use chronicles:addSourcifyChronicleToError to add it",
         "\n\tcall:", ...dumpObject(call),
         "\n\targs:", ...dumpObject(args));
       if (onError) return onError(wrappedError, ...args);
@@ -56,27 +56,27 @@ function tryCall (call: any, onError, ...args: any[]) {
   });
 }
 
-export function tryConnectToAbsentChroniclesAndThen (error, callback, explicitConnectToChronicle) {
+export function trySourcifyAbsentChroniclesAndThen (error, callback, explicitSourcifyChronicle) {
   const original = error.originalError || error;
   if (!original.absentChronicleURIs) return false;
-  return connectToAbsentChroniclesAndThen(error, callback, explicitConnectToChronicle);
+  return sourcifyAbsentChroniclesAndThen(error, callback, explicitSourcifyChronicle);
 }
 
-export function connectToAbsentChroniclesAndThen (error, callback, explicitConnectToChronicle) {
+export function sourcifyAbsentChroniclesAndThen (error, callback, explicitSourcifyChronicle) {
   const original = error.originalError || error;
-  const connectToChronicle = original.connectToChronicle || explicitConnectToChronicle;
-  if (!connectToChronicle) {
+  const sourcifyChronicle = original.sourcifyChronicle || explicitSourcifyChronicle;
+  if (!sourcifyChronicle) {
     throw wrapError(error, "caught AbsentChroniclesError",
-        "but no error.connectToChronicle found: cannot try connecting");
+        "but no error.sourcifyChronicle found: cannot sourcify");
   }
   if (!original.absentChronicleURIs || !original.absentChronicleURIs.length) {
     throw wrapError(error, "caught AbsentChroniclesError",
-            "but error.absentChronicleURIs is missing or empty: cannot try connecting");
+            "but error.absentChronicleURIs is missing or empty: cannot sourcify");
   }
   const ret = Promise.all(original.absentChronicleURIs.map(absentChronicleURI =>
       ((typeof absentChronicleURI === "string")
-          ? connectToChronicle(absentChronicleURI)
-          : absentChronicleURI) // a promise for an already existing connection process
+          ? sourcifyChronicle(absentChronicleURI)
+          : absentChronicleURI) // a promise for an already existing sourcery process
   )).then(() => callback());
   ret.operationInfo = {
     slotName: "pendingChroniclesLens", focus: original.absentChronicleURIs,
@@ -85,8 +85,8 @@ export function connectToAbsentChroniclesAndThen (error, callback, explicitConne
   return ret;
 }
 
-export function addConnectToChronicleToError (error, connectToChronicle) {
-  (error.originalError || error).connectToChronicle = connectToChronicle;
+export function addSourcifyChronicleToError (error, sourcifyChronicle) {
+  (error.originalError || error).sourcifyChronicle = sourcifyChronicle;
   return error;
 }
 

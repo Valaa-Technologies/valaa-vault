@@ -3,7 +3,7 @@
 import type { EventBase } from "~/raem/events";
 
 import Connection from "~/sourcerer/api/Connection";
-import { ChronicleRequest, ChronicleOptions, ChronicleEventResult, MediaInfo, NarrateOptions }
+import { Proclamation, ProclaimOptions, ProclaimEventResult, MediaInfo, NarrateOptions }
     from "~/sourcerer/api/types";
 
 import { thenChainEagerly, mapEagerly } from "~/tools/thenChainEagerly";
@@ -19,7 +19,7 @@ import { debugObjectType, dumpObject } from "~/tools/wrapError";
  * @extends {Connection}
  */
 export default class AuthorityConnection extends Connection {
-  isLocallyPersisted () { return this.getSourcerer().isLocallyPersisted(); }
+  isLocallyRecorded () { return this.getSourcerer().isLocallyRecorded(); }
   isPrimaryAuthority () { return this.getSourcerer().isPrimaryAuthority(); }
   isRemoteAuthority () { return this.getSourcerer().isRemoteAuthority(); }
   getEventVersion () { return this.getSourcerer().getEventVersion(); }
@@ -43,10 +43,10 @@ export default class AuthorityConnection extends Connection {
     return !options ? undefined : {};
   }
 
-  chronicleEvents (events: EventBase[], options: ChronicleOptions): ChronicleRequest {
+  proclaimEvents (events: EventBase[], options: ProclaimOptions): Proclamation {
     if (this.isRemoteAuthority() && !options.remoteEventsProcess) {
       throw new Error(`Failed to chronicle events to ${this.getName()}: ${this.constructor.name
-          }.chronicleEvents not overridden and options.remoteEventsProcess not defined`);
+          }.proclaimEvents not overridden and options.remoteEventsProcess not defined`);
     }
     let rejectedIndex;
     const resultBase = new AuthorityEventResult(this);
@@ -119,7 +119,7 @@ export default class AuthorityConnection extends Connection {
   }
 }
 
-export class AuthorityEventResult extends ChronicleEventResult {
+export class AuthorityEventResult extends ProclaimEventResult {
   getComposedEvent () {
     return thenChainEagerly(this.localProcess,
         receivedEvents => receivedEvents[this.index],

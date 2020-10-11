@@ -11,7 +11,7 @@ export default function createValaaTransientScheme (/* { parent } */): SchemeMod
 
     obtainAuthorityConfig: (/* chronicleURI: string, authorityPreConfig: Object */) => ({
       eventVersion: EVENT_VERSION,
-      isLocallyPersisted: false,
+      isLocallyRecorded: false,
       isPrimaryAuthority: true,
       isRemoteAuthority: false,
     }),

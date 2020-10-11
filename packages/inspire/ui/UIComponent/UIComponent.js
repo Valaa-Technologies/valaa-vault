@@ -3,7 +3,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { tryConnectToAbsentChroniclesAndThen } from "~/raem/tools/denormalized/partitions";
+import { trySourcifyAbsentChroniclesAndThen } from "~/raem/tools/denormalized/partitions";
 
 import { Subscription, LiveUpdate } from "~/engine/Vrapper";
 import debugId from "~/engine/debugId";
@@ -710,10 +710,10 @@ export default class UIComponent extends React.Component {
   _errorOnRenderChain (error = "", index, params) {
     const thisRendering = Array.isArray(params) ? params[0] : (this.state.rerenderings || 0);
     if (thisRendering < (this._cachedRendering || 0)) return -1;
-    // Try to connect to absent chronicles.
+    // Try to sourcify absent chronicles.
     try {
       this._cachedRendering = thisRendering;
-      if (tryConnectToAbsentChroniclesAndThen(error, () => this.flushAndRerender("sourcery"))) {
+      if (trySourcifyAbsentChroniclesAndThen(error, () => this.flushAndRerender("sourcery"))) {
         this._cachedRenderResult = this.tryRenderSlotAsLens("pendingChroniclesLens",
             (error.originalError || error).absentChronicleURIs.map(entry => String(entry)));
       } else {

@@ -11,12 +11,12 @@ async function setUp (testAuthorityConfig: Object = {}, options: {}) {
     ...options,
   });
   const ret = {
-    connection: await harness.sourcerer.acquireConnection(
-        harness.testChronicleURI).asActiveConnection(),
-    scribeConnection: await harness.scribe.acquireConnection(
-        harness.testChronicleURI, { newConnection: false }).asActiveConnection(),
-    oracleConnection: await harness.oracle.acquireConnection(
-        harness.testChronicleURI, { newConnection: false }).asActiveConnection(),
+    connection: await harness.sourcerer.sourcifyChronicle(
+        harness.testChronicleURI).asSourceredConnection(),
+    scribeConnection: await harness.scribe.sourcifyChronicle(
+        harness.testChronicleURI, { newConnection: false }).asSourceredConnection(),
+    oracleConnection: await harness.oracle.sourcifyChronicle(
+        harness.testChronicleURI, { newConnection: false }).asSourceredConnection(),
   };
   ret.authorityConnection = ret.oracleConnection.getUpstreamConnection();
   return ret;
@@ -35,7 +35,7 @@ describe("Chronicle load ordering and inactive resource handling", () => {
     // The test is a bit broken with "no events found when connecting":
     // this is not a bug of the payload source, but of arrangement of
     // this test.
-    await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
+    await setUp({ isRemoteAuthority: true, isLocallyRecorded: true }, { verbosity: 0 });
     let vLaterRoot;
     // Create a prototype to a separate chronicle
     const creation = harness.engine.create("Entity",
@@ -70,18 +70,18 @@ describe("Chronicle load ordering and inactive resource handling", () => {
         .toEqual(component);
 
     const pairness = await createEngineOracleHarness({ verbosity: 0, pairedHarness: harness });
-    await pairness.sourcerer.acquireConnection(harness.testChronicleURI)
-        .asActiveConnection();
+    await pairness.sourcerer.sourcifyChronicle(harness.testChronicleURI)
+        .asSourceredConnection();
     expect(await pairness
         .receiveTruthsFrom(harness.testConnection, { verbosity: 0 }))
         .toEqual(1);
 
     const pairedBaseConnection = pairness.sourcerer
-        .acquireConnection(baseChronicle.getChronicleURI());
+        .sourcifyChronicle(baseChronicle.getChronicleURI());
     expect(await pairness
         .receiveTruthsFrom(baseChronicle, { verbosity: 0, asNarrateResults: true }))
         .toEqual(2);
-    await pairedBaseConnection.asActiveConnection();
+    await pairedBaseConnection.asSourceredConnection();
 
     const componentId = componentGhost.getVRef();
     const pairedComponent = pairness.run(componentId, null);
@@ -92,11 +92,11 @@ describe("Chronicle load ordering and inactive resource handling", () => {
     expect(pairness.runValoscript(pairedComponent, `
       this.num;
     `, { verbosity: 0 })).toEqual(10);
-    // await pairness.sourcerer.acquireConnection(baseChronicle.getChronicleURI())
-    //    .asActiveConnection();
+    // await pairness.sourcerer.sourcifyChronicle(baseChronicle.getChronicleURI())
+    //    .asSourceredConnection();
     /*
 
-    await pairness.sourcerer.acquireConnection(harness.testChronicleURI);
+    await pairness.sourcerer.sourcifyChronicle(harness.testChronicleURI);
     */
   });
 });

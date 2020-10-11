@@ -55,20 +55,20 @@ describe("Scribe", () => {
   it("stores truths/commands in the database", async () => {
     const scribe = await createScribe(createTestMockSourcerer({ isRemoteAuthority: true }));
 
-    const connection = scribe.acquireConnection(testChronicleURI);
+    const connection = scribe.sourcifyChronicle(testChronicleURI);
     connection.getUpstreamConnection().addNarrateResults({ eventIdBegin: 0 }, []);
-    await connection.asActiveConnection();
+    await connection.asSourceredConnection();
     const database = await openDB(testChronicleURI.toString());
 
     // Adds an entity and checks that it has been stored
-    let storedEvent = await connection.chronicleEvent(simpleCommand).getComposedEvent();
+    let storedEvent = await connection.proclaimEvent(simpleCommand).getComposedEvent();
     expect(storedEvent.aspects.log.index)
         .toEqual(connection.getFirstUnusedCommandEventId() - 1);
     await expectStoredInDB(simpleCommand, database, "commands",
         connection.getFirstUnusedCommandEventId() - 1);
 
     // Runs a transaction and confirms that it has been stored
-    storedEvent = await connection.chronicleEvent(followupTransaction).getComposedEvent();
+    storedEvent = await connection.proclaimEvent(followupTransaction).getComposedEvent();
     expect(storedEvent.aspects.log.index)
         .toEqual(connection.getFirstUnusedCommandEventId() - 1);
     await expectStoredInDB(followupTransaction, database, "commands",
@@ -85,8 +85,8 @@ describe("Scribe", () => {
   it("stores (and returns) utf-8 strings correctly", async () => {
     const scribe = await createScribe(createTestMockSourcerer());
 
-    const connection = await scribe.acquireConnection(testChronicleURI)
-        .asActiveConnection();
+    const connection = await scribe.sourcifyChronicle(testChronicleURI)
+        .asSourceredConnection();
     const sharedDB = await openDB(sharedURI);
 
     for (const mediaContent of textMediaContents) {
@@ -108,34 +108,34 @@ describe("Scribe", () => {
   it("populates a new connection to an existing chronicle with its cached commands", async () => {
     const scribe = await createScribe(createTestMockSourcerer());
 
-    const firstConnection = await scribe.acquireConnection(testChronicleURI)
-        .asActiveConnection();
+    const firstConnection = await scribe.sourcifyChronicle(testChronicleURI)
+        .asSourceredConnection();
 
-    await firstConnection.chronicleEvent(simpleCommand).getComposedEvent();
+    await firstConnection.proclaimEvent(simpleCommand).getComposedEvent();
 
     const storedEvent = await firstConnection
-        .chronicleEvent(followupTransaction).getComposedEvent();
+        .proclaimEvent(followupTransaction).getComposedEvent();
 
     const firstUnusedCommandEventId = firstConnection.getFirstUnusedCommandEventId();
     expect(firstUnusedCommandEventId).toEqual(storedEvent.aspects.log.index + 1);
     expect(firstUnusedCommandEventId).toBeGreaterThan(1);
     firstConnection.disconnect();
 
-    const secondConnection = await scribe.acquireConnection(testChronicleURI)
-        .asActiveConnection();
+    const secondConnection = await scribe.sourcifyChronicle(testChronicleURI)
+        .asSourceredConnection();
     expect(secondConnection.getFirstUnusedCommandEventId()).toBe(firstUnusedCommandEventId);
   });
 
   it("ensures commands are stored in a proper ascending order", async () => {
     const scribe = await createScribe(createTestMockSourcerer());
 
-    const connection = await scribe.acquireConnection(testChronicleURI)
-        .asActiveConnection();
+    const connection = await scribe.sourcifyChronicle(testChronicleURI)
+        .asSourceredConnection();
     let oldUnusedCommandId;
     let newUnusedCommandId = connection.getFirstUnusedCommandEventId();
 
     for (const command of simpleCommandList) {
-      const storedEvent = await connection.chronicleEvent(command).getComposedEvent();
+      const storedEvent = await connection.proclaimEvent(command).getComposedEvent();
       expect(storedEvent.aspects.log.index)
           .toEqual(newUnusedCommandId);
 
@@ -148,15 +148,15 @@ describe("Scribe", () => {
   it("writes multiple commands in a single go gracefully", async () => {
     const scribe = await createScribe(createTestMockSourcerer());
 
-    const connection = await scribe.acquireConnection(testChronicleURI)
-        .asActiveConnection();
+    const connection = await scribe.sourcifyChronicle(testChronicleURI)
+        .asSourceredConnection();
 
-    const chronicling = connection.chronicleEvents(simpleCommandList);
-    const lastLocal = await chronicling.eventResults[simpleCommandList.length - 1]
+    const proclamation = connection.proclaimEvents(simpleCommandList);
+    const lastLocal = await proclamation.eventResults[simpleCommandList.length - 1]
         .getComposedEvent();
     expect(lastLocal.aspects.log.index + 1)
         .toEqual(connection.getFirstUnusedCommandEventId());
-    const lastTruth = await chronicling.eventResults[simpleCommandList.length - 1]
+    const lastTruth = await proclamation.eventResults[simpleCommandList.length - 1]
         .getTruthEvent();
     expect(lastTruth.aspects.log.index + 1)
         .toEqual(connection.getFirstUnusedTruthEventId());

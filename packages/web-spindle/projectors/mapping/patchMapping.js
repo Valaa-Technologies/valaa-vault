@@ -56,7 +56,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
             || router.resolveToScope("mapping", doCreateMapping, vResource, valkOptions),
         vMapping => router.updateResource(vMapping, request.body, valkOptions),
         () => valkOptions.discourse.releaseFabricator(),
-        eventResult => eventResult && eventResult.getPersistedEvent(),
+        eventResult => eventResult && eventResult.getRecordedEvent(),
         (/* persistedEvent */) => {
           if (isNewlyCreated) reply.code(201);
           return router.fillReplyFromResponse(

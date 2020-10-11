@@ -91,7 +91,7 @@ describe("chronicles", () => {
 
   it("meshes chronicle infos properly when setting cross-chronicle dependency", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
-    const finalEvent = harness.chronicleTestEvent(transacted({
+    const finalEvent = harness.proclaimTestEvent(transacted({
       actions: [
         created({ id: ["B_testRoot"], typeName: "TestThing",
           initialState: {

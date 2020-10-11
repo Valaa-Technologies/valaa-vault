@@ -169,7 +169,7 @@ describe("Ghost materialization and immaterialization", () => {
     assertImmaterialized(getGhostOwnling());
     const grandlingInRoot1 = _ghostVRL(vRef("grandling-1"), root1Id, "@$~raw.root@@");
     assertImmaterialized(grandlingInRoot1);
-    harness.chronicleTestEvent(createMaterializeGhostAction(harness.getValker(),
+    harness.proclaimTestEvent(createMaterializeGhostAction(harness.getValker(),
         getGrandlingInstanceGhost()));
     assertMaterialized(grandlingInRoot1);
     assertImmaterialized(getGhostOwnling());
@@ -179,7 +179,7 @@ describe("Ghost materialization and immaterialization", () => {
     setUp({ verbosity: 0, commands: [...createGrandlingInstance, ...createRootInstanceInstance] });
     const grandlingInRoot1 = _ghostVRL(vRef("grandling-1"), root1Id, "@$~raw.root@@");
     const grandlingInRoot11 = _ghostVRL(grandlingInRoot1, root11Id, root1Id);
-    harness.chronicleTestEvent(
+    harness.proclaimTestEvent(
         createMaterializeGhostAction(harness.getValker(), grandlingInRoot11));
     assertMaterialized(grandlingInRoot11);
     assertMaterialized(grandlingInRoot1);
@@ -197,7 +197,7 @@ describe("Ghost materialization and immaterialization", () => {
         harness.run(ghostGrandlingInRoot11, ["§->", "children", 0]);
     assertImmaterialized(ghostGrandlingInRoot11Child);
 
-    harness.chronicleTestEvent(
+    harness.proclaimTestEvent(
         createMaterializeGhostAction(harness.getValker(), ghostGrandlingInRoot11Child));
     assertMaterialized(ghostGrandlingInRoot11Child);
 
@@ -208,15 +208,15 @@ describe("Ghost materialization and immaterialization", () => {
   it("Immaterialization should not immaterialize ownlings", () => {
     setUp({ verbosity: 0, commands: [] });
     assertImmaterialized(getGhostGrandling());
-    harness.chronicleTestEvent(
+    harness.proclaimTestEvent(
         createMaterializeGhostAction(harness.getValker(), getGhostGrandling()));
     assertMaterialized(getGhostGrandling());
     assertImmaterialized(getGhostOwnling());
-    harness.chronicleTestEvent(
+    harness.proclaimTestEvent(
         createMaterializeGhostAction(harness.getValker(), getGhostOwnling()));
     assertMaterialized(getGhostOwnling());
 
-    harness.chronicleTestEvent(
+    harness.proclaimTestEvent(
         createImmaterializeGhostAction(harness.getValker(), getGhostOwnling()));
 
     assertImmaterialized(getGhostOwnling());
@@ -235,7 +235,7 @@ describe("Ghost materialization and immaterialization", () => {
         .toBeFalsy();
     expect(harness.run(greatGrandling1InRoot1VRL, "name"))
         .toEqual("Harambaby");
-    harness.chronicleTestEvent(fieldsSet({ id: greatGrandling1InRoot1VRL, typeName: "TestThing",
+    harness.proclaimTestEvent(fieldsSet({ id: greatGrandling1InRoot1VRL, typeName: "TestThing",
       sets: { name: "ghostGhostBaby" },
     }));
     const greatGrandling1InRoot1 = harness.run(greatGrandling1InRoot1VRL, null);
@@ -257,7 +257,7 @@ describe("Ghost materialization and immaterialization", () => {
       const firstResult = harness.run(
         vRef(root1Id), ["§->", "children", 0, "children", 0, "name"]
       );
-      harness.chronicleTestEvent(
+      harness.proclaimTestEvent(
           createMaterializeGhostAction(harness.getValker(), getGhostGrandling()));
       const secondResult = harness.run(
         vRef(root1Id), ["§->", "children", 0, "children", 0, "name"]
@@ -268,12 +268,12 @@ describe("Ghost materialization and immaterialization", () => {
 
     it("is true on immaterialization", () => {
       setUp({ verbosity: 0 });
-      harness.chronicleTestEvent(
+      harness.proclaimTestEvent(
           createMaterializeGhostAction(harness.getValker(), getGhostGrandling()));
       const firstResult = harness.run(
         vRef(root1Id), ["§->", "children", 0, "children", 0, "name"]
       );
-      harness.chronicleTestEvent(
+      harness.proclaimTestEvent(
           createImmaterializeGhostAction(harness.getValker(), getGhostGrandling()));
       const secondResult = harness.run(
         vRef(root1Id), ["§->", "children", 0, "children", 0, "name"]
@@ -288,7 +288,7 @@ describe("Mixing references across instantiation boundaries", () => {
   it("returns a sub-component of an instance prototype for an explicitly set instance field " +
       "instead of returning a ghost corresponding to this sub-component", () => {
     setUp({ verbosity: 0 });
-    harness.chronicleTestEvent(fieldsSet({ id: [root1Id], typeName: "TestThing",
+    harness.proclaimTestEvent(fieldsSet({ id: [root1Id], typeName: "TestThing",
       sets: { siblings: ["ownling"] },
     }));
     expect(harness.run(getTestChronicle(root1Id), ["§->", "siblings", 0]))
@@ -300,7 +300,7 @@ describe("Mixing references across instantiation boundaries", () => {
   it("returns a sub-component of an instance prototype for an explicitly set ghost field " +
       "instead of returning a ghost corresponding to this sub-component", () => {
     setUp({ verbosity: 0 });
-    harness.chronicleTestEvent(fieldsSet({ id: getGhostOwnling(), typeName: "TestThing",
+    harness.proclaimTestEvent(fieldsSet({ id: getGhostOwnling(), typeName: "TestThing",
       sets: { siblings: ["grandling"] },
     }));
     expect(harness.run(getGhostOwnling(), ["§->", "siblings", 0]))
@@ -368,7 +368,7 @@ describe("Mixing references across instantiation boundaries", () => {
     setUp({ verbosity: 0 });
     const ownlingInRoot1VRL =
         createGhostVRLInInstance(vRef("ownling"), getTestChronicle(root1Id));
-    harness.chronicleTestEvent(created({
+    harness.proclaimTestEvent(created({
       id: ["ownlingIn1-1"], typeName: "TestThing", initialState: {
       parent: [root1Id],
       instancePrototype: ownlingInRoot1VRL,
@@ -384,7 +384,7 @@ describe("Deep instantiations", () => {
     const grandling11 = harness.run(vRef(root11Id), ["§->", "children", 0, "children", 0]);
     expect(harness.run(grandling11, "name"))
         .toEqual("Harambe");
-    harness.chronicleTestEvent(fieldsSet({ id: grandling11, typeName: "TestThing",
+    harness.proclaimTestEvent(fieldsSet({ id: grandling11, typeName: "TestThing",
       sets: { name: "Ghostambe", },
     }));
     expect(harness.run(grandling11, "name"))
@@ -395,11 +395,11 @@ describe("Deep instantiations", () => {
 
   it("assigns a value on an immaterial ownling of an instance of an ownling of an instance", () => {
     setUp({ verbosity: 0 });
-    harness.chronicleTestEvent(created({ id: ["grandMuck"], typeName: "TestGlue", initialState: {
+    harness.proclaimTestEvent(created({ id: ["grandMuck"], typeName: "TestGlue", initialState: {
       source: ["ownling"],
       name: "muck",
     } }));
-    harness.chronicleTestEvent(created({ id: ["grandMuckChronicle"], typeName: "TestThing",
+    harness.proclaimTestEvent(created({ id: ["grandMuckChronicle"], typeName: "TestThing",
       initialState: { owner: ["grandMuck"], name: "muckChronicle", }
     }));
     const ownlingIn1 = harness.run(vRef(root1Id), ["§->", "children", 0]);
@@ -409,7 +409,7 @@ describe("Deep instantiations", () => {
     expect(harness.run(grandMuckIn1, ["§isimmaterial", ["§->", null]]))
         .toEqual(true);
     const grandMukIn1i1 = vRef("grandMuckIn1-1");
-    harness.chronicleTestEvent(created({ id: grandMukIn1i1, typeName: "TestGlue", initialState: {
+    harness.proclaimTestEvent(created({ id: grandMukIn1i1, typeName: "TestGlue", initialState: {
       owner: ownlingIn1,
       instancePrototype: grandMuckIn1,
     } }));
@@ -451,7 +451,7 @@ describe("Deep instantiations", () => {
     expect(harness.run(grandling111, ["§->", "children", ["§map", "prototype", "prototype"]]))
         .toEqual(harness.run(grandling1, "children"));
 
-    harness.chronicleTestEvent(created({ id: ["newGuy"], typeName: "TestThing", initialState: {
+    harness.proclaimTestEvent(created({ id: ["newGuy"], typeName: "TestThing", initialState: {
       parent: ["grandling-1"], name: "New Guy",
     } }));
 

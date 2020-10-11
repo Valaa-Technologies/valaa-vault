@@ -8,7 +8,7 @@ import { invariantify, FabricEventTarget } from "~/tools";
 
 export type AuthorityConfig = {
   eventVersion: string,
-  isLocallyPersisted: boolean,
+  isLocallyRecorded: boolean,
   isPrimaryAuthority: boolean,
   isRemoteAuthority: boolean,
 };

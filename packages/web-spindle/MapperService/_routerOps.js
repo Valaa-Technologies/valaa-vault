@@ -1,6 +1,6 @@
 // @flow
 
-import { asyncConnectToChronicleIfAbsentAndRetry } from "~/raem/tools/denormalized/partitions";
+import { asyncSourcifyChronicleIfAbsentAndRetry } from "~/raem/tools/denormalized/partitions";
 
 import {
   SessionExpiredError, clearReplySessionAndClientCookies,
@@ -155,7 +155,7 @@ function _attachProjectorFastifyRoutes (router) {
 }
 
 function _createSmartHandler (router, projector) {
-  return asyncConnectToChronicleIfAbsentAndRetry(
+  return asyncSourcifyChronicleIfAbsentAndRetry(
       (request, reply, ...rest) => thenChainEagerly(projector._whenReady, [
         function _handleRequest (readiness) {
           if (readiness === true) return projector.handler(request, reply, ...rest);

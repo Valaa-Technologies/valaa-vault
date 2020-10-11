@@ -30,7 +30,7 @@ const transact = {
     try {
       const command = transacted(JSON.parse(args.input.actions));
       command.bvobStubs = context.bvobStubs;
-      const truth = await context.store.chronicleEvent(command).getTruthEvent();
+      const truth = await context.store.proclaimEvent(command).getTruthEvent();
       return { clientMutationId: truth.id };
     } catch (error) {
       console.error(error.message, error.stack);

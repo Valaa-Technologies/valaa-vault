@@ -254,7 +254,7 @@ export default class Gateway extends FabricEventTarget {
       // Locate entry point event log (prologue), make it optimally available through scribe,
       // narrate it with false prophet and get the false prophet connection for it.
       ({ connections: this.prologueConnections, rootConnection: this._rootConnection }
-          = await this._connectPrologueChronicles(this.prologue));
+          = await this._sourcifyPrologueChronicles(this.prologue));
 
       plog1 && plog1.opEvent("vidgets",
           "Registering builtin Inspire vidgets");
@@ -668,7 +668,7 @@ export default class Gateway extends FabricEventTarget {
     for (const [key, count] of Object.entries(this._chronicleCommandCounts)) {
       if (count) {
         try {
-          const connection = this.falseProphet.acquireConnection(key, { newConnection: false });
+          const connection = this.falseProphet.sourcifyChronicle(key, { newConnection: false });
           ret[key] = connection.getStatus();
         } catch (error) {
           ret[key] = { commands: count };
@@ -852,7 +852,7 @@ export default class Gateway extends FabricEventTarget {
             `Exception caught during notify '${notifyMethodName}' to spindle ${spindle.name}`));
   }
 
-  async _connectPrologueChronicles (prologue: Object, parentPlog) {
+  async _sourcifyPrologueChronicles (prologue: Object, parentPlog) {
     let chronicles;
     try {
       let rootChronicleURI = prologue.rootChronicleURI
@@ -873,11 +873,11 @@ export default class Gateway extends FabricEventTarget {
           "\n\tprologue chronicles:",
               `<${chronicles.map(({ chronicleURI }) => chronicleURI).join(">, <")}>`,
       );
-      plog1 && plog1.opEvent("connect",
-          `Narrating and connecting ${chronicles.length} prologue and root chronicles`,
+      plog1 && plog1.opEvent("sourcering",
+          `Narrating and sourcering ${chronicles.length} prologue and root chronicles`,
           { chronicles, rootChronicleURI });
       const connections = await Promise.all(chronicles.map(chronicleInfo =>
-          this._connectPrologueChronicle(prologue, chronicleInfo, plog1)));
+          this._sourcifyPrologueChronicle(prologue, chronicleInfo, plog1)));
       plog1 && plog1.opEvent("done",
           `Acquired active connections for all prologue chronicles:`,
           ...[].concat(...connections.map(connection =>
@@ -922,7 +922,7 @@ export default class Gateway extends FabricEventTarget {
     }
   }
 
-  async _connectPrologueChronicle (prologue: Object, info: {
+  async _sourcifyPrologueChronicle (prologue: Object, info: {
     chronicleURI: string,
     commandId: ?number, commandCount: ?number,
     eventId: ?number, truthCount: ?number, logs: ?Object,
@@ -932,17 +932,17 @@ export default class Gateway extends FabricEventTarget {
     // so that we can narrate any content in the prologue before any remote activity.
     const plog1 = (parentPlog || this).opLog(1, "chronicle");
     const connectionOptions = await reveal(info.connection || {});
-    plog1 && plog1.opEvent("connect",
-        `Acquiring connection <${chronicleURI}>`, connectionOptions);
+    plog1 && plog1.opEvent("sourcify",
+        `Sourcering chronicle <${chronicleURI}>`, connectionOptions);
     const connection = this.discourse
-        .acquireConnection(naiveURI.validateChronicleURI(chronicleURI), {
+        .sourcifyChronicle(naiveURI.validateChronicleURI(chronicleURI), {
           ...connectionOptions,
           subscribeEvents: false,
           narrateOptions: { remote: false },
         });
     plog1 && plog1.opEvent(connection, "activate",
         "Activating connection");
-    await connection.asActiveConnection();
+    await connection.asSourceredConnection();
     let prologueTruthCount = await reveal(info.truthCount);
     if (!Number.isInteger(prologueTruthCount)) {
       // Migration code for eventId deprecation.
@@ -975,7 +975,7 @@ export default class Gateway extends FabricEventTarget {
         const upgradedEvent = upgradeEventTo0Dot2(connection, truthLog[i]);
         if (upgradedEvent !== truthLog[i]) truthLog[i] = upgradedEvent;
       }
-      const chronicling = connection.chronicleEvents(truthLog, {
+      const proclamation = connection.proclaimEvents(truthLog, {
         name: `prologue truths for '${connection.getName()}'`,
         isTruth: true,
         eventIdBegin: eventIdEnd,
@@ -998,7 +998,7 @@ export default class Gateway extends FabricEventTarget {
       });
       plog1 && plog1.opEvent(connection, "await_proclamation",
           `Waiting for the proclaimed events to resolve locally`);
-      for (const result of chronicling.eventResults) await result.getComposedEvent();
+      for (const result of proclamation.eventResults) await result.getComposedEvent();
     }
     // Initiate remote narration.
     let remoteNarration;

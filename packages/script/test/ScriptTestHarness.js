@@ -38,7 +38,7 @@ export default class ScriptTestHarness extends RAEMTestHarness {
     if (options.discourse) {
       const result = options.discourse.releaseFabricator();
       if (result) {
-        return Promise.resolve((options.awaitResult || (r => r.getPersistedEvent()))(result))
+        return Promise.resolve((options.awaitResult || (r => r.getRecordedEvent()))(result))
             .then(() => ret);
       }
     }

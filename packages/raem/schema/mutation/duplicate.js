@@ -29,7 +29,7 @@ const duplicate = {
     input: { type: new GraphQLNonNull(DuplicateMutationInput) },
   },
   resolve: async (context, args/* , info */) => {
-    const truth = await context.store.chronicleEvent(duplicated({
+    const truth = await context.store.proclaimEvent(duplicated({
       id: args.input.id,
       duplicateOf: JSON.parse(args.input.duplicateOf),
       initialState: args.input.initialState && JSON.parse(args.input.initialState),

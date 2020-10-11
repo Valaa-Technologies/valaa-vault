@@ -100,13 +100,13 @@ export function _prepareBvob (connection: ScribeConnection, content: any, buffer
   if (pendingBvobInfo.persistProcess === undefined) {
     pendingBvobInfo.persistProcess = thenChainEagerly(null, [
       () => {
-        if (connection.isLocallyPersisted()) {
+        if (connection.isLocallyRecorded()) {
           return connection.getScribe()._writeBvobBuffer(buffer, contentHash);
         }
         if (pendingBvobInfo.upstreamPrepareBvobProcess !== undefined) {
           return pendingBvobInfo.upstreamPrepareBvobProcess;
         }
-        throw new Error(`Can't prepare bvob locally (chronicle isLocallyPersisted is falsy) ${
+        throw new Error(`Can't prepare bvob locally (chronicle isLocallyRecorded is falsy) ${
             ""}and upstream prepare is not available.`);
       },
       (persistedContentHash) => (pendingBvobInfo.persistProcess = persistedContentHash),
@@ -121,7 +121,7 @@ function _prepareBvobToUpstreamWithRetries (connection: ScribeConnection,
 ) {
   // TODO(iridian, 2019-01): This should use active connection, but
   // right at this moment I don't dare to take the risk of deadlock.
-  // return thenChainEagerly(connection.getUpstreamConnection().asActiveConnection(), [
+  // return thenChainEagerly(connection.getUpstreamConnection().asSourceredConnection(), [
   return thenChainEagerly(connection.getUpstreamConnection(), [
     upstream => upstream.prepareBvob(buffer, mediaInfo),
     preparation => preparation.persistProcess,
@@ -156,7 +156,7 @@ export function _determineEventMediaPreOps (connection: ScribeConnection,
   const mediaId = mediaVRL.rawId();
   let mediaInfo;
   let newEntry: MediaEntry;
-  const isPersisted = connection.isLocallyPersisted();
+  const isPersisted = connection.isLocallyRecorded();
   if (currentEntry) {
     mediaInfo = { ...currentEntry.mediaInfo };
     newEntry = { ...currentEntry, mediaInfo };

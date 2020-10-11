@@ -28,7 +28,7 @@ export default class Authority extends Sourcerer {
 
   getAuthorityConfig () { return this._authorityConfig; }
 
-  isLocallyPersisted () { return this._authorityConfig.isLocallyPersisted; }
+  isLocallyRecorded () { return this._authorityConfig.isLocallyRecorded; }
   isPrimaryAuthority () { return this._authorityConfig.isPrimaryAuthority; }
   isRemoteAuthority () { return this._authorityConfig.isRemoteAuthority; }
   getEventVersion () { return this._authorityConfig.eventVersion; }

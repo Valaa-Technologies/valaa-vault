@@ -115,7 +115,7 @@ describe("CREATED with instancePrototype", () => {
 
   it("materializes ghost resources accessed with ghostPath", async () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA, createParentInstance);
-    harness.chronicleTestEvent(transacted({ actions:
+    harness.proclaimTestEvent(transacted({ actions:
         harness.run(vRef("A_parent"), "children")
             .map(child => createMaterializeGhostPathAction(harness.getValker(),
                 child.getGhostPath()
@@ -134,7 +134,7 @@ describe("CREATED with instancePrototype", () => {
   it("doesn't materialize the ghost grandling owner when materializing the grandling", async () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA,
         createGrandparentInstance);
-    harness.chronicleTestEvent(transacted({ actions:
+    harness.proclaimTestEvent(transacted({ actions:
         harness.run(vRef("A_grandparent"),
                 ["§->", "children", 0, "children"])
             .map(grandling => createMaterializeGhostPathAction(harness.getValker(),
@@ -156,7 +156,7 @@ describe("CREATED with instancePrototype", () => {
         .toEqual(createGhostRawId("@$~raw.A_child1@@", "@$~raw.A_grandparentInstance@@"));
     expect(ghostGrandlings[1].rawId())
         .toEqual(createGhostRawId("@$~raw.A_child2@@", "@$~raw.A_grandparentInstance@@"));
-    harness.chronicleTestEvent(transacted({ actions:
+    harness.proclaimTestEvent(transacted({ actions:
         ghostGrandlings.map(
             ghostGrandling => createMaterializeGhostAction(harness.getValker(), ghostGrandling))
     }));
@@ -171,12 +171,12 @@ describe("CREATED with instancePrototype", () => {
         createGrandparentInstance);
     const parentInInstance = harness.run(vRef("A_grandparentInstance"),
         ["§->", "children", 0]);
-    harness.chronicleTestEvent(fieldsSet({ id: parentInInstance, typeName: "TestThing", sets: {
+    harness.proclaimTestEvent(fieldsSet({ id: parentInInstance, typeName: "TestThing", sets: {
       name: "parentInInstance",
     }, }));
     expect(harness.run(parentInInstance, "name"))
         .toEqual("parentInInstance");
-    harness.chronicleTestEvent(createGrandparentInstanceInstance[0]);
+    harness.proclaimTestEvent(createGrandparentInstanceInstance[0]);
     const parentInInstanceInstance = harness.run(vRef("A_grandparentInstanceInstance"),
         ["§->", "children", 0], { verbosity: 0 });
     expect(parentInInstanceInstance)

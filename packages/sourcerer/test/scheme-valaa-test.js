@@ -3,7 +3,7 @@
 import { EventBase } from "~/raem/events";
 
 import { Authority, AuthorityConnection, EVENT_VERSION } from "~/sourcerer";
-import { ChronicleRequest, ChronicleOptions, ChronicleEventResult, MediaInfo, NarrateOptions }
+import { Proclamation, ProclaimOptions, ProclaimEventResult, MediaInfo, NarrateOptions }
     from "~/sourcerer/api/types";
 
 import { dumpObject } from "~/tools";
@@ -16,7 +16,7 @@ export default function createValaaTestScheme ({ config, authorityURI, /* parent
 
     obtainAuthorityConfig: () => ({
       eventVersion: EVENT_VERSION,
-      isLocallyPersisted: true,
+      isLocallyRecorded: true,
       isPrimaryAuthority: true,
       isRemoteAuthority: false,
       ...config,
@@ -27,14 +27,15 @@ export default function createValaaTestScheme ({ config, authorityURI, /* parent
 }
 
 export class TestConnection extends AuthorityConnection {
-  _narrations = {};
+  _pendingNarrations = {};
   _preparations = {};
-  _chroniclings = [];
+  _proclamations = [];
 
   // Test writer API
 
   addNarrateResults ({ eventIdBegin }, events) {
-    const narration = this._narrations[eventIdBegin] || (this._narrations[eventIdBegin] = {});
+    const narration = this._pendingNarrations[eventIdBegin]
+        || (this._pendingNarrations[eventIdBegin] = {});
     if (narration.resultEvents) {
       const error = new Error(`narration result events already exist for ${eventIdBegin}`);
       throw this.wrapErrorEvent(error, 1,
@@ -45,7 +46,7 @@ export class TestConnection extends AuthorityConnection {
   }
 
   getNarration (eventIdBegin) {
-    const ret = this._narrations[eventIdBegin];
+    const ret = this._pendingNarrations[eventIdBegin];
     if (!ret) {
       throw new Error(`Cannot find an existing narration request beginning from "${eventIdBegin}"`);
     }
@@ -73,8 +74,9 @@ export class TestConnection extends AuthorityConnection {
 
   narrateEventLog (options: ?NarrateOptions = {}): Promise<any> {
     if (!this.isRemoteAuthority()) return super.narrateEventLog(options);
-    const narration = this._narrations[options.eventIdBegin || 0]
-        || (this._narrations[options.eventIdBegin || 0] = {});
+    if (!options.receiveTruths) throw new Error("Missing narrateEventLog:options.receiveTruths");
+    const narration = this._pendingNarrations[options.eventIdBegin || 0]
+        || (this._pendingNarrations[options.eventIdBegin || 0] = {});
     narration.options = options;
     return this._tryFulfillNarration(narration) || new Promise((resolve, reject) => {
       narration.resolve = resolve;
@@ -82,8 +84,8 @@ export class TestConnection extends AuthorityConnection {
     });
   }
 
-  chronicleEvents (events: EventBase[], options: ChronicleOptions): ChronicleRequest {
-    if (!this.isRemoteAuthority()) return super.chronicleEvents(events, options);
+  proclaimEvents (events: EventBase[], options: ProclaimOptions): Proclamation {
+    if (!this.isRemoteAuthority()) return super.proclaimEvents(events, options);
     this._mostRecentChronicleOptions = options;
     const resultBase = new TestEventResult(this);
     resultBase._events = events;
@@ -91,7 +93,7 @@ export class TestConnection extends AuthorityConnection {
     const eventResults = events.map((event, index) => {
       const ret = Object.create(resultBase); ret.event = event; ret.index = index; return ret;
     });
-    this._chroniclings.push(...eventResults);
+    this._proclamations.push(...eventResults);
     return { eventResults };
   }
 
@@ -145,9 +147,9 @@ export class TestConnection extends AuthorityConnection {
   }
 }
 
-class TestEventResult extends ChronicleEventResult {
+class TestEventResult extends ProclaimEventResult {
   getComposedEvent () { return undefined; }
-  getPersistedEvent () { return undefined; }
+  getRecordedEvent () { return undefined; }
   getTruthEvent () {
     if (!this.isPrimary) {
       return Promise.reject(new Error("Non-primary authority cannot chronicle events"));

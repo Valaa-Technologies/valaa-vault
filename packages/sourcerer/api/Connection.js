@@ -4,7 +4,7 @@ import { naiveURI } from "~/raem/ValaaURI";
 import type { EventBase } from "~/raem/events";
 
 import Sourcerer from "~/sourcerer/api/Sourcerer";
-import { ConnectOptions, MediaInfo, NarrateOptions, ChronicleOptions, ChronicleRequest,
+import { SourceryOptions, MediaInfo, NarrateOptions, ProclaimOptions, Proclamation,
   ReceiveEvents, RetrieveMediaBuffer,
 } from "~/sourcerer/api/types";
 import Follower from "~/sourcerer/api/Follower";
@@ -25,10 +25,10 @@ export default class Connection extends Follower {
   _activeConnection: Connection | Promise<Connection>;
 
   constructor ({
-    name, sourcerer, chronicleURI, receiveTruths, receiveCommands, verbosity,
+    sourcerer, verbosity, name, chronicleURI, pushTruths, pushCommands,
   }: {
-    name: ?any, verbosity?: number, sourcerer: Sourcerer,
-    chronicleURI: string, receiveTruths?: ReceiveEvents, receiveCommands?: ReceiveEvents,
+    sourcerer: Sourcerer, verbosity?: number, name: ?any, chronicleURI: string,
+    pushTruths?: ReceiveEvents, pushCommands?: ReceiveEvents,
   }) {
     super(sourcerer, verbosity, name);
     invariantifyObject(sourcerer, "Connection.constructor.sourcerer",
@@ -39,8 +39,8 @@ export default class Connection extends Follower {
     }
     this._chronicleURI = chronicleURI;
     this._refCount = 0;
-    this._downstreamReceiveTruths = receiveTruths;
-    this._downstreamReceiveCommands = receiveCommands;
+    this._pushTruthsDownstream = pushTruths;
+    this._pushCommandsDownstream = pushCommands;
     this.setRawName(this._chronicleURI);
   }
 
@@ -56,24 +56,22 @@ export default class Connection extends Follower {
 
   getStatus (): Object {
     return {
-      local: !!this.isLocallyPersisted(),
+      local: !!this.isLocallyRecorded(),
       primary: !!this.isPrimaryAuthority(),
       remote: !!this.isRemoteAuthority(),
     };
   }
 
-  isLocallyPersisted () { return this._upstreamConnection.isLocallyPersisted(); }
+  isLocallyRecorded () { return this._upstreamConnection.isLocallyRecorded(); }
   isPrimaryAuthority () { return this._upstreamConnection.isPrimaryAuthority(); }
   isRemoteAuthority () { return this._upstreamConnection.isRemoteAuthority(); }
   getEventVersion () { return this._upstreamConnection.getEventVersion(); }
 
-  getReceiveTruths (downstreamReceiveTruths?: ReceiveEvents = this._downstreamReceiveTruths):
-      ReceiveEvents {
+  getReceiveTruths (pushTruths?: ReceiveEvents = this._pushTruthsDownstream): ReceiveEvents {
     return (truths, retrieveMediaBuffer, unused, rejectedEvent) => {
       try {
         invariantifyArray(truths, "receiveTruths.truths", { min: (rejectedEvent ? 0 : 1) });
-        return this.receiveTruths(truths, retrieveMediaBuffer, downstreamReceiveTruths,
-            rejectedEvent);
+        return this.receiveTruths(truths, retrieveMediaBuffer, pushTruths, rejectedEvent);
       } catch (error) {
         throw this.wrapErrorEvent(error, 1,
             new Error(`receiveTruths(${this._dumpEventIds(truths)})`),
@@ -81,12 +79,12 @@ export default class Connection extends Follower {
       }
     };
   }
-  getReceiveCommands (downstreamReceiveCommands?: ReceiveEvents = this._downstreamReceiveCommands):
+  getReceiveCommands (pushCommands?: ReceiveEvents = this._pushCommandsDownstream):
       ReceiveEvents {
     return (commands, retrieveMediaBuffer) => {
       try {
         invariantifyArray(commands, "receiveTruths.commands", { min: 1 });
-        return this.receiveCommands(commands, retrieveMediaBuffer, downstreamReceiveCommands);
+        return this.receiveCommands(commands, retrieveMediaBuffer, pushCommands);
       } catch (error) {
         throw this.wrapErrorEvent(error, 1,
             new Error(`receiveCommands(${this._dumpEventIds(commands)})`),
@@ -123,11 +121,11 @@ export default class Connection extends Follower {
    * eventIdBegin) are narrated.
    *
    *
-   * @param {ConnectOptions} options
+   * @param {SourceryOptions} options
    *
    * @memberof OracleConnection
    */
-  connect (options: ConnectOptions) {
+  sourcify (options: SourceryOptions) {
     const connection = this;
     const wrap = new Error("connect()");
     if (this._activeConnection) return this._activeConnection;
@@ -234,7 +232,7 @@ export default class Connection extends Follower {
     return false;
   }
 
-  asActiveConnection (requireSynchronous: ?boolean):
+  asSourceredConnection (requireSynchronous: ?boolean):
       null | Promise<Connection> | Connection {
     try {
       if (requireSynchronous && (this._activeConnection !== this)) {
@@ -245,7 +243,7 @@ export default class Connection extends Follower {
       throw new Error(
           `Cannot get an active connection promise from connection which is not being activated`);
     } catch (error) {
-      throw this.wrapErrorEvent(error, 1, new Error(`asActiveConnection(${
+      throw this.wrapErrorEvent(error, 1, new Error(`asSourceredConnection(${
           requireSynchronous ? "sync" : "async"})`));
     }
   }
@@ -270,15 +268,15 @@ export default class Connection extends Follower {
    * Takes ownership of the *events* (ie. can mutate them).
    *
    * @param {EventBase[]} [events={}]
-   * @param {ChronicleOptions} [options={}]
+   * @param {ProclaimOptions} [options={}]
    * @returns {Promise<Object>}
    * @memberof Connection
    */
-  chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest {
+  proclaimEvents (events: EventBase[], options: ProclaimOptions = {}): Proclamation {
     if (!options) return undefined;
     options.receiveTruths = this.getReceiveTruths(options.receiveTruths);
     options.receiveCommands = this.getReceiveCommands(options.receiveTruths);
-    return this._upstreamConnection.chronicleEvents(events, options);
+    return this._upstreamConnection.proclaimEvents(events, options);
   }
 
   getFirstUnusedTruthEventId () {
@@ -289,14 +287,14 @@ export default class Connection extends Follower {
   }
 
   receiveTruths (truths: EventBase[], retrieveMediaBuffer: RetrieveMediaBuffer,
-      downstreamReceiveTruths: ?ReceiveEvents, type: string = "receiveTruths",
+      receiveTruths: ?ReceiveEvents, type: string = "receiveTruths",
   ): Promise<(Promise<EventBase> | EventBase)[]> {
     try {
-      if (!downstreamReceiveTruths) {
+      if (!receiveTruths) {
         throw new Error(`INTERNAL ERROR: receiveTruths not implemented by ${this.constructor.name
             } and no explicit options.receiveTruths was defined (for narrate/chronicle).`);
       }
-      return downstreamReceiveTruths(truths, retrieveMediaBuffer);
+      return receiveTruths(truths, retrieveMediaBuffer);
     } catch (error) {
       throw this.wrapErrorEvent(error, 1,
           new Error(`${type}(${this._dumpEventIds(truths)})`),
@@ -306,10 +304,9 @@ export default class Connection extends Follower {
   }
 
   receiveCommands (commands: EventBase[], retrieveMediaBuffer: RetrieveMediaBuffer,
-      downstreamReceiveCommands?: ReceiveEvents,
+      receiveCommands?: ReceiveEvents,
   ): Promise<(Promise<EventBase> | EventBase)[]> {
-    return this.receiveTruths(commands, retrieveMediaBuffer, downstreamReceiveCommands,
-        "receiveCommands");
+    return this.receiveTruths(commands, retrieveMediaBuffer, receiveCommands, "receiveCommands");
   }
 
   /**
@@ -375,7 +372,7 @@ export default class Connection extends Follower {
 
   /**
    * Prepares the bvob content to be available for this chronicle,
-   * returning its contentHash and a promise to the persist process.
+   * returning its contentHash and a promise to the record process.
    *
    * This availability is impermanent. If the contentHash is not
    * referred to by the event log the content will eventually be

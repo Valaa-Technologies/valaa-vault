@@ -70,7 +70,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
           }
         },
         () => valkOptions.discourse && valkOptions.discourse.releaseFabricator(),
-        eventResult => eventResult && eventResult.getPersistedEvent(),
+        eventResult => eventResult && eventResult.getRecordedEvent(),
 
         () => (valkOptions.discourse = router.getDiscourse().acquireFabricator()),
         () => router.updateResource(scope.mapping, request.body,
@@ -78,7 +78,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         () => router.updateResource(scope.mapping, request.body.$V.target,
               { ...valkOptions, toPatchTarget: this.toMappingPatchTarget }),
         () => valkOptions.discourse && valkOptions.discourse.releaseFabricator(),
-        eventResult => eventResult && eventResult.getPersistedEvent(),
+        eventResult => eventResult && eventResult.getRecordedEvent(),
         (/* persistedEvent */) => {
           reply.code(201);
           return router.fillReplyFromResponse(

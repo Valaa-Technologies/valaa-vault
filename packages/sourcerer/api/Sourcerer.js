@@ -31,13 +31,13 @@ import { dumpObject } from "~/tools/wrapError";
    *
    * @memberof Oracle
    */
-export type ConnectOptions = {
-  connect?: boolean,               // default: true. Connect to updates
-  subscribeEvents?: boolean,       // default: true. Subscribe for downstream push events.
-  receiveTruths?: ReceiveEvents,   // The persistent connection callback for downstream push events.
+export type SourceryOptions = {
+  sourcify?: boolean,                      // default: true. Connect to updates
+  subscribeEvents?: boolean,              // default: true. Subscribe for downstream push events.
+  pushTruths?: ReceiveEvents,   // The persistent callback for downstream push events.
   narrateOptions?: NarrateOptions, // default: {}. Narrate with default options. False to disable.
-  newConnection?: boolean,         // if true, throw if a connection exists,
-                                   // if false, throw if no connection exists,
+  newConnection?: boolean,                // if true, throw if a connection exists,
+                                          // if false, throw if no connection exists,
   newChronicle?: boolean,          // if true, throw if a chronicle exists (has persisted events)
                                    // if false, throw if no chronicle exists (no persisted events)
   allowPartialConnection?: boolean,       // default: false. If true, return not fully narrated
@@ -115,7 +115,7 @@ export default class Sourcerer extends FabricEventTarget {
    *
    * @memberof Sourcerer
    */
-  acquireConnection (chronicleURI: string, options: ConnectOptions = {}): ?Connection {
+  sourcifyChronicle (chronicleURI: string, options: SourceryOptions = {}): ?Connection {
     try {
       let connection = this._connections[chronicleURI];
       if (connection) return connection;
@@ -125,15 +125,15 @@ export default class Sourcerer extends FabricEventTarget {
             "Can't create new chronicle connection with options.newConnection === false");
       }
       connection = this._createConnection(chronicleURI,
-          Object.assign(Object.create(options), { connect: false }));
+          Object.assign(Object.create(options), { sourcify: false }));
       if (!connection) return undefined;
       connection.addReference();
       this._connections[chronicleURI] = connection;
-      if (options.connect !== false) connection.connect(options); // Initiate connect but dont wait.
+      if (options.sourcify !== false) connection.sourcify(options); // Don't wait for sourcery.
       return connection;
     } catch (error) {
       throw this.wrapErrorEvent(error, 1,
-          new Error(`acquireConnection(${chronicleURI})`),
+          new Error(`sourcifyChronicle(${chronicleURI})`),
           "\n\toptions:", ...dumpObject(options));
     }
 
@@ -150,15 +150,19 @@ export default class Sourcerer extends FabricEventTarget {
       */
   }
 
-  _createConnection (chronicleURI: string, options: ConnectOptions) {
+  acquireConnection (chronicleURI: string, options: SourceryOptions) {
+    return this.sourcifyChronicle(chronicleURI, options);
+  }
+
+  _createConnection (chronicleURI: string, options: SourceryOptions) {
     const ConnectionType = this.constructor.ConnectionType;
     if (!ConnectionType) {
-      return this._upstream.acquireConnection(chronicleURI, options);
+      return this._upstream.sourcifyChronicle(chronicleURI, options);
     }
     return new ConnectionType({
       chronicleURI, sourcerer: this, verbosity: this.getVerbosity(),
-      receiveTruths: options.receiveTruths, receiveCommands: options.receiveCommands,
-      ...(options.createConnectionOptions || {}),
+      pushTruths: options.pushTruths,
+      pushCommands: options.pushCommands,
     });
   }
 
@@ -206,7 +210,7 @@ export default class Sourcerer extends FabricEventTarget {
   getActivatingConnections () : Map<string, Promise<Connection> > {
     const ret = {};
     Object.entries(this._connections).forEach(([key, connection]) => {
-      if (!connection.isActive()) ret[key] = connection.asActiveConnection();
+      if (!connection.isActive()) ret[key] = connection.asSourceredConnection();
     });
     return ret;
   }

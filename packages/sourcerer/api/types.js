@@ -39,7 +39,7 @@ export type NarrateOptions = {
   snapshots?: boolean,             // default: true, currently ignored. Start narration from most
                                    // recent snapshot within provided event range
   commands?: boolean,              // default: true. Narrate pending commands as well.
-  rechronicleOptions?: ChronicleOptions, // default: {}. Chronicle pending commands on the side.
+  reproclaimOptions?: ProclaimOptions, // default: {}. Chronicle pending commands on the side.
   receiveTruths?: ReceiveEvents,   // default: connection receiveTruths.
                                    //   Callback for downstream truth events.
   receiveCommands?: ReceiveEvents, // default: receiveTruths. Callback for re-narrated commands
@@ -48,15 +48,15 @@ export type NarrateOptions = {
   subscribeEvents?: boolean        // if provided will enable or disable event subscriptions.
                                    // TODO(iridian, 2019-01): This (c|sh)ould be extracted to its
                                    // own separate function. Now this flag is awkwardly present
-                                   // both here and in ConnectOptions.
+                                   // both here and in SourceryOptions.
 };
 
-export type ChronicleOptions = NarrateOptions & {
-  isTruth?: boolean,         // If true the chronicled events are already authorized truths.
+export type ProclaimOptions = NarrateOptions & {
+  isTruth?: boolean,         // If true the proclaimed events are already authorized truths.
   retrieveMediaBuffer?: RetrieveMediaBuffer,
 };
 
-export class ChronicleEventResult extends FabricEventTarget {
+export class ProclaimEventResult extends FabricEventTarget {
   constructor (chronicler, event) {
     super(chronicler);
     this.event = event;
@@ -64,7 +64,7 @@ export class ChronicleEventResult extends FabricEventTarget {
 
   event: EventBase; // Preliminary event after universalization
   index: number; // Index of this event result in a result set
-  _forwardResults: ChronicleEventResult[];
+  _forwardResults: ProclaimEventResult[];
 
   getChronicler () { return this._parent; }
 
@@ -90,14 +90,14 @@ export class ChronicleEventResult extends FabricEventTarget {
 
   // Get event after it has been persisted (possibly locally) but not
   // necessarily authorized.
-  getPersistedEvent (): EventBase | Promise<EventBase> {
+  getRecordedEvent (): EventBase | Promise<EventBase> {
     const forward = this._persistedForwardResults || this._forwardResults;
     if (!forward) {
-      throw new Error(`getPersistedEvent not implemented by ${this.constructor.name}`);
+      throw new Error(`getRecordedEvent not implemented by ${this.constructor.name}`);
     }
     return thenChainEagerly(forward, r => {
       const forwardedResult = r[this.index - (this._events.length - r.length)];
-      return forwardedResult && forwardedResult.getPersistedEvent();
+      return forwardedResult && forwardedResult.getRecordedEvent();
     }, this.onError);
   }
 
@@ -114,11 +114,11 @@ export class ChronicleEventResult extends FabricEventTarget {
   }
 }
 
-export type ChronicleRequest = {
-  eventResults: ChronicleEventResult[];
+export type Proclamation = {
+  eventResults: ProclaimEventResult[];
 }
 
-export class ProphecyEventResult extends ChronicleEventResult {
+export class ProphecyEventResult extends ProclaimEventResult {
   story: Story; // Preliminary story before any revisions
 
   // Returns the chronicle specific command of this prophecy event
@@ -128,11 +128,11 @@ export class ProphecyEventResult extends ChronicleEventResult {
 
   // Story of the event after its immediate follower reaction promises have resolved.
   getPremiereStory (): Story | Promise<Story> {
-    return this.getPersistedStory();
+    return this.getRecordedStory();
   }
 
   // Story of the event after it's either (possibly locally) persisted or confirmed as truth.
-  getPersistedStory (): Story | Promise<Story> {
+  getRecordedStory (): Story | Promise<Story> {
     return this.getTruthStory();
   }
 
@@ -152,8 +152,8 @@ export class ProphecyEventResult extends ChronicleEventResult {
   }
 
   // Get event after it has been persisted (possibly locally).
-  getPersistedEvent (): EventBase | Promise<EventBase> {
-    return thenChainEagerly(this.getPersistedStory(), getActionFromPassage);
+  getRecordedEvent (): EventBase | Promise<EventBase> {
+    return thenChainEagerly(this.getRecordedStory(), getActionFromPassage);
   }
 
   // Get event after it has been confirmed as a truth by its authority

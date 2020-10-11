@@ -186,7 +186,7 @@ export async function _updateMediaEntries (connection: ScribeConnection,
   }));
   const ret = {};
   updates.forEach(entry => {
-    if (connection.isLocallyPersisted() && !entry.updatePersisted) return;
+    if (connection.isLocallyRecorded() && !entry.updatePersisted) return;
     delete entry.updatePersisted;
     const currentScribeEntry = connection.getScribe()._persistedMediaLookup[entry.mediaId] || {};
     const contentHash = (currentScribeEntry.mediaInfo || {}).contentHash;

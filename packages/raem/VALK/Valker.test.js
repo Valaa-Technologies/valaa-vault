@@ -132,7 +132,7 @@ describe("ghost lookups", () => {
     let ghostOwnling = harness.run(vRef("testObjInst"),
         ["§->", "children", 0]);
     const materializeEvent = createMaterializeGhostAction(harness.getValker(), ghostOwnling);
-    harness.chronicleTestEvent(materializeEvent);
+    harness.proclaimTestEvent(materializeEvent);
     ghostOwnling = harness.run(vRef("testObjInst"),
         ["§->", "children", 0]);
 
@@ -150,7 +150,7 @@ describe("ghost lookups", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createTestObj, createTestObjInst);
     let ghostOwnling = harness.run(vRef("testObjInst"),
         ["§->", "children", 0]);
-    harness.chronicleTestEvent(createMaterializeGhostAction(harness.getValker(), ghostOwnling));
+    harness.proclaimTestEvent(createMaterializeGhostAction(harness.getValker(), ghostOwnling));
     ghostOwnling = harness.run(vRef("testObjInst"),
         ["§->", "children", 0]);
     const ghostGrandling = harness.run(ghostOwnling, ["§->", "children", 0]);
@@ -175,7 +175,7 @@ describe("ghost lookups", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createTestObj, createOwnlingInst);
     let ghostGrandling = harness.run(vRef("ownlingInst"),
         ["§->", "children", 0]);
-    harness.chronicleTestEvent(createMaterializeGhostAction(harness.getValker(), ghostGrandling));
+    harness.proclaimTestEvent(createMaterializeGhostAction(harness.getValker(), ghostGrandling));
     ghostGrandling = harness.run(vRef("ownlingInst"),
         ["§->", "children", 0]);
 
@@ -192,7 +192,7 @@ describe("ghost lookups", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createTestObj, createOwnlingInst);
     let ghostGrandling = harness.run(vRef("ownlingInst"),
         ["§->", "children", 0]);
-    harness.chronicleTestEvent(createMaterializeGhostAction(harness.getValker(), ghostGrandling));
+    harness.proclaimTestEvent(createMaterializeGhostAction(harness.getValker(), ghostGrandling));
     ghostGrandling = harness.run(vRef("ownlingInst"),
         ["§->", "children", 0]);
     const ghostGreatGrandling = harness.run(ghostGrandling, ["§->", "children", 0]);
@@ -241,7 +241,7 @@ describe("mutations", () => {
     let A_instance_B = harness.run(A_instance, ["§->", "children", 0]);
     expect(isMaterialized(harness.getState(), A_instance_B))
         .toEqual(false);
-    harness.chronicleTestEvent(fieldsSet({ id: A_instance_B, typeName: "TestThing",
+    harness.proclaimTestEvent(fieldsSet({ id: A_instance_B, typeName: "TestThing",
       sets: { name: "sanic", },
     }));
     A_instance_B = harness.run(A_instance, ["§->", "children", 0]);
@@ -256,7 +256,7 @@ describe("mutations", () => {
     let A_instance_B = harness.run(A_instance, ["§->", "children", 0]);
     expect(isMaterialized(harness.getState(), A_instance_B))
         .toEqual(false);
-    harness.chronicleTestEvent(fieldsSet({ id: A, typeName: "TestThing",
+    harness.proclaimTestEvent(fieldsSet({ id: A, typeName: "TestThing",
       sets: { uncoupledField: A_instance_B },
     }));
     A_instance_B = harness.run(A_instance, ["§->", "children", 0]);
@@ -274,7 +274,7 @@ describe("mutations", () => {
     // Do tests that do not depend on autorefresh
     const A_name = harness.run(vRef("A"), "name");
     const A_instance_name = harness.run(A_instance, "name");
-    harness.chronicleTestEvent(removedFrom({ id: ["A_instance"], typeName: "TestThing",
+    harness.proclaimTestEvent(removedFrom({ id: ["A_instance"], typeName: "TestThing",
       removes: { name: null } }));
     const A_instance_name_after_erase = harness.run(vRef("A_instance"),
         "name");
@@ -301,14 +301,14 @@ describe("mutations", () => {
     // Names are equal before any modifications to the ghost and different after changes
     expect(harness.run(A_instance_B, "name", { verbosity: 0 }))
         .toEqual(harness.run(A_B, "name"));
-    harness.chronicleTestEvent(fieldsSet({ id: A_instance_B, typeName: "TestThing",
+    harness.proclaimTestEvent(fieldsSet({ id: A_instance_B, typeName: "TestThing",
       sets: { name: "Ghost of Ownling" }
     }));
     expect(harness.run(A_instance_B, "name"))
         .not.toEqual(harness.run(A_B, "name"));
 
     // Set value back to undefined, restoring the value to the prototype's current value
-    harness.chronicleTestEvent(removedFrom({ id: A_instance_B, typeName: "TestThing",
+    harness.proclaimTestEvent(removedFrom({ id: A_instance_B, typeName: "TestThing",
       removes: { name: null }
     }));
     expect(harness.run(A_instance_B, "name"))
@@ -332,9 +332,9 @@ describe("mutations", () => {
 
     // Modify the original list
     const A = harness.run(vRef("A"), null);
-    harness.chronicleTestEvent(created({ id: ["A_C"], typeName: "TestThing",
+    harness.proclaimTestEvent(created({ id: ["A_C"], typeName: "TestThing",
       initialState: { parent: A, name: "Second Ownling" } }));
-    harness.chronicleTestEvent(created({ id: ["A_D"], typeName: "TestThing",
+    harness.proclaimTestEvent(created({ id: ["A_D"], typeName: "TestThing",
       initialState: { parent: A, name: "Third Ownling" } }));
 
     // Ensure that the new lists are different to the old ones, but equal to each other
@@ -378,8 +378,8 @@ describe("mutations", () => {
     }
 
     // Modify the original list
-    harness.chronicleTestEvent(destroyed({ id: ["A_C"] }));
-    harness.chronicleTestEvent(destroyed({ id: ["A_D"] }));
+    harness.proclaimTestEvent(destroyed({ id: ["A_C"] }));
+    harness.proclaimTestEvent(destroyed({ id: ["A_D"] }));
 
     // Ensure that the new lists are different to the old ones, but equal to each other
     const A_children_new = harness.run(vRef("A"), ["§->", "children"]);
@@ -404,7 +404,7 @@ describe("mutations", () => {
     const harness = createRAEMTestHarness({ verbosity: 0 }, createData, createBlankInstance);
 
     // Test instance
-    harness.chronicleTestEvent(fieldsSet({ id: ["A"], typeName: "TestThing",
+    harness.proclaimTestEvent(fieldsSet({ id: ["A"], typeName: "TestThing",
       sets: { name: "What is dead may never die and in strange aeons even death may die", },
     }));
     expect(
@@ -414,7 +414,7 @@ describe("mutations", () => {
     );
 
     // Test ghost
-    harness.chronicleTestEvent(fieldsSet({ id: ["A_B"], typeName: "TestThing",
+    harness.proclaimTestEvent(fieldsSet({ id: ["A_B"], typeName: "TestThing",
       sets: { name: "cthulhu fhtagn", },
     }));
     // A_B is child of A, so query children -> 0 -> name
@@ -491,18 +491,18 @@ describe("complex structures", () => {
         ["§->", "children", 0], { verbosity: 0 });
 
     // Falling apart workaround
-    harness.chronicleTestEvent(createMaterializeGhostAction(harness.getValker(), gA1_B));
-    harness.chronicleTestEvent(createMaterializeGhostAction(harness.getValker(), gA1_B_C));
-    harness.chronicleTestEvent(createMaterializeGhostAction(harness.getValker(), gA_B1_C));
+    harness.proclaimTestEvent(createMaterializeGhostAction(harness.getValker(), gA1_B));
+    harness.proclaimTestEvent(createMaterializeGhostAction(harness.getValker(), gA1_B_C));
+    harness.proclaimTestEvent(createMaterializeGhostAction(harness.getValker(), gA_B1_C));
 
     // Here everything falls apart
-    harness.chronicleTestEvent(created({ id: ["gA1_B1"], typeName: "TestThing", initialState: {
+    harness.proclaimTestEvent(created({ id: ["gA1_B1"], typeName: "TestThing", initialState: {
       instancePrototype: gA1_B,
     } }));
-    harness.chronicleTestEvent(created({ id: ["gA1_B_C1"], typeName: "TestThing", initialState: {
+    harness.proclaimTestEvent(created({ id: ["gA1_B_C1"], typeName: "TestThing", initialState: {
       instancePrototype: gA1_B_C,
     } }));
-    harness.chronicleTestEvent(created({ id: ["gA_B1_C1"], typeName: "TestThing", initialState: {
+    harness.proclaimTestEvent(created({ id: ["gA_B1_C1"], typeName: "TestThing", initialState: {
       instancePrototype: gA_B1_C,
     } }));
   };
@@ -511,7 +511,7 @@ describe("complex structures", () => {
   /*
   const createThirdDegreeInstances = (harness) => {
       const gA1_B1_C = harness.run(vRef("gA1_B1"), ["§->", "children", 0]);
-      harness.chronicleTestEvent(created({ id: ["gA1_B1_C1"], typeName: "TestThing", initialState: {
+      harness.proclaimTestEvent(created({ id: ["gA1_B1_C1"], typeName: "TestThing", initialState: {
         instancePrototype: gA1_B1_C,
       } }));
   };
@@ -713,7 +713,7 @@ describe("complex structures", () => {
     createAndExtractHarnessWithCommands({ verbosity: 0 });
     const oldName = harness.run(A_B_C, "name");
     const newName = "Elder / Middle / Youngest (A_B_C modification)";
-    harness.chronicleTestEvent(fieldsSet({ id: A_B_C, typeName: "TestThing",
+    harness.proclaimTestEvent(fieldsSet({ id: A_B_C, typeName: "TestThing",
       sets: { name: newName },
     }));
     expect(harness.run(A_B_C, "name")).not.toEqual(oldName);
@@ -735,7 +735,7 @@ describe("complex structures", () => {
     createAndExtractHarnessWithCommands({ verbosity: 0 });
     const oldName = harness.run(A_B_C1i, "name");
     const newName = "Elder / Middle / Youngest (A_B_C1i modification)";
-    harness.chronicleTestEvent(fieldsSet({ id: A_B_C1i, typeName: "TestThing",
+    harness.proclaimTestEvent(fieldsSet({ id: A_B_C1i, typeName: "TestThing",
       sets: { name: newName },
     }));
     expect(harness.run(A_B_C1i, "name")).toEqual(newName);
@@ -758,7 +758,7 @@ describe("complex structures", () => {
     createAndExtractHarnessWithCommands({ verbosity: 0 });
     const oldName = harness.run(gA_B1_C, "name", { verbosity: 0 });
     const newName = "Elder / Middle / Youngest (gA_B1_C modification)";
-    harness.chronicleTestEvent(fieldsSet({ id: gA_B1_C, typeName: "TestThing",
+    harness.proclaimTestEvent(fieldsSet({ id: gA_B1_C, typeName: "TestThing",
       sets: { name: newName },
     }));
     expect(harness.run(gA_B1_C, "name", { verbosity: 0 })).toEqual(newName);
@@ -778,7 +778,7 @@ describe("complex structures", () => {
   it("Modifications in A_B_C should be visible from A1i, and A_B1i via children access", () => {
     createAndExtractHarnessWithCommands({ verbosity: 0 });
     const oldName = harness.run(A_B_C, "name");
-    harness.chronicleTestEvent(fieldsSet({ id: A_B_C, typeName: "TestThing", sets: {
+    harness.proclaimTestEvent(fieldsSet({ id: A_B_C, typeName: "TestThing", sets: {
       name: "Elder / Middle / Youngest (changed)",
     } }));
     expect(harness.run(A_B_C, "name")).not.toEqual(oldName);
@@ -810,7 +810,7 @@ describe("complex structures", () => {
         .toEqual(harness.run(A_B1i, "children"));
 
     // Add a bloke to A_B1i
-    harness.chronicleTestEvent(created({ id: ["A_B1_D"], typeName: "TestThing", initialState: {
+    harness.proclaimTestEvent(created({ id: ["A_B1_D"], typeName: "TestThing", initialState: {
       parent: A_B1i, name: "new guy",
     } }));
 
@@ -824,7 +824,7 @@ describe("complex structures", () => {
     const startingList = harness.run(A_B, "children", { verbosity: 0 });
 
     // Add a bloke to A_B1i
-    harness.chronicleTestEvent(created({ id: ["A_B1_D"], typeName: "TestThing", initialState: {
+    harness.proclaimTestEvent(created({ id: ["A_B1_D"], typeName: "TestThing", initialState: {
       parent: A_B1i, name: "new guy",
     } }));
 
@@ -842,7 +842,7 @@ describe("complex structures", () => {
         .toEqual(startingList);
 
     // Modify the name of the newly-added object
-    harness.chronicleTestEvent(fieldsSet({ id: ["A_B1_D"], typeName: "TestThing",
+    harness.proclaimTestEvent(fieldsSet({ id: ["A_B1_D"], typeName: "TestThing",
       sets: { name: "new guy 2.0", },
     }));
 

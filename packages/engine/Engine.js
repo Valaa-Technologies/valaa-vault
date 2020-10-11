@@ -209,8 +209,8 @@ export default class Engine extends Cog {
   async activateResource (resourceURI: string) {
     const vref = this.discourse.obtainReference(resourceURI);
     const connection = await this.discourse
-        .acquireConnection(vref.getChronicleURI())
-        .asActiveConnection();
+        .sourcifyChronicle(vref.getChronicleURI())
+        .asSourceredConnection();
     const vResource = await this.getVrapperByRawId(vref.rawId() || connection.getChronicleId());
     await vResource.activate();
     return { reference: vref, vResource };
@@ -233,10 +233,10 @@ export default class Engine extends Cog {
       const id = action.id = this._assignConstructDirectiveId({ initialState, typeName }, options);
       if (initialState) action.initialState = initialState;
 
-      options.chronicling = discourse.chronicleEvent(action);
+      options.proclamation = discourse.proclaimEvent(action);
 
       ret = this._postConstructResource(discourse, id,
-          action.initialState, options.chronicling.story, extractedProperties, localWrapError);
+          action.initialState, options.proclamation.story, extractedProperties, localWrapError);
     } catch (error) {
       releaseOpts = { rollback: error };
       throw localWrapError(this, error, name);
@@ -244,7 +244,7 @@ export default class Engine extends Cog {
       if (discourse) discourse.releaseFabricator(releaseOpts);
     }
     return !options.awaitResult ? ret
-        : thenChainEagerly(options.awaitResult(options.chronicling, ret), () => ret);
+        : thenChainEagerly(options.awaitResult(options.proclamation, ret), () => ret);
 
     function localWrapError (self, error, operationName) {
       return self.wrapErrorEvent(error, operationName,
@@ -252,8 +252,8 @@ export default class Engine extends Cog {
           "\n\toptions:", ...dumpObject(options),
           "\n\taction:", ...dumpObject(action),
           "\n\textractedProperties:", ...dumpObject(extractedProperties),
-          "\n\tchronicling result:", ...dumpObject(options.chronicling),
-          "\n\tchronicling event:", ...dumpObject((options.chronicling || {}).event),
+          "\n\tproclamation:", ...dumpObject(options.proclamation),
+          "\n\tproclamation event:", ...dumpObject((options.proclamation || {}).event),
           "\n\tret:", ...dumpObject(ret),
       );
     }
@@ -261,7 +261,7 @@ export default class Engine extends Cog {
 
   recombine (duplicationDirectives: Object, options: Object = {}) {
     const recombinedEvent = { type: "RECOMBINED", actions: [] };
-    let discourse, releaseOpts, chronicling, ret;
+    let discourse, releaseOpts, proclamation, ret;
     const extractedProperties = [];
     try {
       options.discourse = discourse = (options.discourse || this.discourse)
@@ -276,14 +276,14 @@ export default class Engine extends Cog {
         }));
       }
 
-      chronicling = discourse.chronicleEvent(recombinedEvent);
+      proclamation = discourse.proclaimEvent(recombinedEvent);
 
       // FIXME(iridian): If the transaction fails the Vrapper will
       // contain inconsistent data until the next actual update on it.
 
       ret = duplicationDirectives.map((directive, index) =>
           this._updateResourceThing(discourse, directive.id, directive.initialState,
-            chronicling.story.passages[index], extractedProperties[index], localWrapError));
+            proclamation.story.passages[index], extractedProperties[index], localWrapError));
     } catch (error) {
       releaseOpts = { rollback: error };
       throw localWrapError(this, error, `recombined()`);
@@ -291,15 +291,15 @@ export default class Engine extends Cog {
       discourse.releaseFabricator(releaseOpts);
     }
     return !options.awaitResult ? ret
-          : thenChainEagerly(options.awaitResult(chronicling, ret), () => ret);
+          : thenChainEagerly(options.awaitResult(proclamation, ret), () => ret);
     function localWrapError (self, error, operationName) {
       return self.wrapErrorEvent(error, operationName,
           "\n\tduplication directives:", ...dumpObject(duplicationDirectives),
           "\n\toptions:", ...dumpObject(options),
           "\n\trecombined:", ...dumpObject(recombinedEvent),
           "\n\textractedProperties:", ...dumpObject(extractedProperties),
-          "\n\tchronicling result:", ...dumpObject(chronicling),
-          "\n\tchronicling event:", ...dumpObject((chronicling || {}).event),
+          "\n\tproclamation:", ...dumpObject(proclamation),
+          "\n\tproclamation event:", ...dumpObject((proclamation || {}).event),
           "\n\tret:", ...dumpObject(ret),
       );
     }
@@ -323,8 +323,8 @@ export default class Engine extends Cog {
       // Create chronicle(s) before the transaction is committed
       // (and thus before the commands leave upstream).
       discourse
-          .acquireConnection(id.getChronicleURI(), { newChronicle: true })
-          .asActiveConnection();
+          .sourcifyChronicle(id.getChronicleURI(), { newChronicle: true })
+          .asSourceredConnection();
     }
     // FIXME(iridian): If the transaction fails the Vrapper will
     // contain inconsistent data until the next actual update on it.

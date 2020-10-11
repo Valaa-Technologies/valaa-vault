@@ -47,7 +47,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
             : router.updateResource(scope.resource, request.body,
                 { ...valkOptions, route, toPatchTarget: this.toPatchTarget })),
         () => valkOptions.discourse.releaseFabricator(),
-        eventResult => eventResult && eventResult.getPersistedEvent(),
+        eventResult => eventResult && eventResult.getRecordedEvent(),
         (persistedEvent) => {
           const results = persistedEvent ? "UPDATED" : "UNCHANGED";
           reply.code(204);

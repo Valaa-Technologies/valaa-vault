@@ -7,7 +7,7 @@ import type { JSONIdData, VRL } from "~/raem/VRL";
 
 import Follower from "~/sourcerer/api/Follower";
 import Sourcerer from "~/sourcerer/api/Sourcerer";
-import { ChronicleOptions, ChroniclePropheciesRequest, ProphecyEventResult }
+import { ProclaimOptions, ChroniclePropheciesRequest, ProphecyEventResult }
     from "~/sourcerer/api/types";
 
 import { dumpObject } from "~/tools";
@@ -20,7 +20,7 @@ import { _reciteStoriesToFollowers } from "./_recitalOps";
 import { deserializeVRL } from "./_universalizationOps";
 import StoryRecital from "./StoryRecital";
 
-type FalseProphetChronicleOptions = ChronicleOptions & {
+type FalseProphetChronicleOptions = ProclaimOptions & {
   onReform?: (progressEvent: Object) => null,
 };
 
@@ -31,13 +31,13 @@ type FalseProphetChronicleOptions = ChronicleOptions & {
  *
  * In addition FalseProphet manages an internal prophecy and story
  * queue as a central component of event revisioning and operational
- * transformations. When upstream purges some previously chronicled
+ * transformations. When upstream purges some previously proclaimed
  * commands, FalseProphet is responsible for reforming the cache by
  * revisioning all commands that have been reduced to the corpus after
  * the come after the purged commands.
  *
  * Finally, FalseProphet initiates the universalisation process, where
- * commands coming from downstream via .chronicleEvents (whose meaning
+ * commands coming from downstream via .proclaimEvents (whose meaning
  * is well-defined only in current FalseProphet context) get rewritten
  * as universal commands so that their meaning is well-defined for all
  * clients. This process is carried out and more closely documented by
@@ -90,18 +90,18 @@ export default class FalseProphet extends Sourcerer {
   }
 
   // Split a command and transmit resulting chronicle commands towards upstream.
-  chronicleEvents (commands: Command[], options: FalseProphetChronicleOptions = {}):
+  proclaimEvents (commands: Command[], options: FalseProphetChronicleOptions = {}):
       ChroniclePropheciesRequest {
     try {
       return _proclaimEvents(this, commands, options);
     } catch (error) {
-      throw this.wrapErrorEvent(error, 1, "chronicleEvents()",
+      throw this.wrapErrorEvent(error, 1, "proclaimEvents()",
           "\n\toptions:", ...dumpObject(options));
     }
   }
 
-  chronicleEvent (event: EventBase, options: Object = {}): ProphecyEventResult {
-    return this.chronicleEvents([event], options).eventResults[0];
+  proclaimEvent (event: EventBase, options: Object = {}): ProphecyEventResult {
+    return this.proclaimEvents([event], options).eventResults[0];
   }
 
   _reciteStoriesToFollowers (stories: Story[], purgedRecital: ?StoryRecital) {

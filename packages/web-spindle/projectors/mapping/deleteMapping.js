@@ -52,7 +52,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
             ? router.resolveToScope("destruction", doDestroyMapping, vMapping, valkOptions)
             : vMapping.destroy(valkOptions)),
         () => valkOptions.discourse.releaseFabricator(),
-        eventResult => eventResult && eventResult.getPersistedEvent(),
+        eventResult => eventResult && eventResult.getRecordedEvent(),
         event => {
           reply.code(event ? 204 : 404);
           reply.send();

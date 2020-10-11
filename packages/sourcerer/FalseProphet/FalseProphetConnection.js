@@ -4,7 +4,7 @@ import { EventBase } from "~/raem/events";
 import VRL from "~/raem/VRL";
 
 import Connection from "~/sourcerer/api/Connection";
-import { ChronicleOptions, ChronicleRequest, ChronicleEventResult, ConnectOptions, NarrateOptions }
+import { ProclaimOptions, Proclamation, ProclaimEventResult, SourceryOptions, NarrateOptions }
     from "~/sourcerer/api/types";
 import { initializeAspects, obtainAspect, tryAspect } from "~/sourcerer/tools/EventAspects";
 import EVENT_VERSION from "~/sourcerer/tools/EVENT_VERSION";
@@ -65,9 +65,9 @@ export default class FalseProphetConnection extends Connection {
         });
   }
 
-  isLocallyPersisted () {
+  isLocallyRecorded () {
     return this._isLocallyPersisted !== undefined ? this._isLocallyPersisted
-        : (this._isLocallyPersisted = this._upstreamConnection.isLocallyPersisted());
+        : (this._isLocallyPersisted = this._upstreamConnection.isLocallyRecorded());
   }
   isPrimaryAuthority () {
     return this._isPrimaryAuthority !== undefined ? this._isPrimaryAuthority
@@ -116,10 +116,10 @@ export default class FalseProphetConnection extends Connection {
     options.identity = identity || this._originatingIdentity;
   }
 
-  chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest {
+  proclaimEvents (events: EventBase[], options: ProclaimOptions = {}): Proclamation {
     if (!events || !events.length) return { eventResults: events };
     const connection = this;
-    let chronicling, resultBase, leadingTruths, initialSchism, upstreamResults, renarration,
+    let proclamation, resultBase, leadingTruths, initialSchism, upstreamResults, renarration,
         rechronicle;
     try {
       const plog2 = this.opLog(2, "proclaim",
@@ -145,10 +145,10 @@ export default class FalseProphetConnection extends Connection {
           : this.getReceiveCommands(options.receiveCommands);
       this._resolveOptionsIdentity(options);
       plog2 && plog2.opEvent("to-upstream",
-          `upstream.chronicleEvents(${events.length})`, { events, options });
-      chronicling = this._upstreamConnection.chronicleEvents(events, options);
+          `upstream.proclaimEvents(${events.length})`, { events, options });
+      proclamation = this._upstreamConnection.proclaimEvents(events, options);
 
-      resultBase = new ChronicleEventResult(this);
+      resultBase = new ProclaimEventResult(this);
       resultBase._events = events;
       resultBase.onError = errorOnFalseProphetChronicleEvents
           .bind(this, new Error("chronicleResultBase"));
@@ -164,7 +164,7 @@ export default class FalseProphetConnection extends Connection {
       resultBase._truthForwardResults = thenChainEagerly(null, this.addChainClockers(plog2,
           "falseConnection.proclaim.upstream.ops", [
         function _awaitUpstreamChronicling () {
-          return (resultBase._forwardResults = chronicling.eventResults);
+          return (resultBase._forwardResults = proclamation.eventResults);
         },
         function _awaitUpstreamTruths (upstreamEventResults) {
           return mapEagerly((upstreamResults = (upstreamEventResults || events)),
@@ -247,20 +247,20 @@ export default class FalseProphetConnection extends Connection {
         leadingTruths = undefined;
         renarration = undefined;
         events = connection._unconfirmedCommands; // eslint-disable-line no-param-reassign
-        options.isLocallyPersisted = false;
-        chronicling = connection._upstreamConnection.chronicleEvents(events, options);
+        options.isLocallyRecorded = false;
+        proclamation = connection._upstreamConnection.proclaimEvents(events, options);
         return thenChainEagerly(null, functionChain, onRejected);
       });
       return ret;
     } catch (error) { return errorOnFalseProphetChronicleEvents.call(this, new Error(""), error); }
     function errorOnFalseProphetChronicleEvents (wrap, error) {
-      const wrap_ = new Error(`chronicleEvents(${events.length} events).${wrap.message}`);
+      const wrap_ = new Error(`proclaimEvents(${events.length} events).${wrap.message}`);
       wrap_.stack = wrap.stack;
       throw connection.wrapErrorEvent(error, 1, wrap_,
           "\n\toptions:", ...dumpObject(options),
           "\n\tevents:", ...dumpObject(connection._dumpEventIds(events)),
           "\n\tinternal:", ...dumpObject({
-            connection, chronicling, resultBase, leadingTruths, initialSchism,
+            connection, proclamation, resultBase, leadingTruths, initialSchism,
             upstreamResults, renarration, rechronicle,
           }));
     }

@@ -56,22 +56,22 @@ describe("Chronicle freezing", () => {
   it("allows freezing a chronicle", async () => {
     harness = await createEngineOracleHarness({ claimBaseBlock: false }, [transactionA]);
     expect(entities()[testRootId].step("isFrozen")).toBeFalsy();
-    await harness.chronicleTestEvent(freezeEventFor(testRootId)).getPremiereStory();
+    await harness.proclaimTestEvent(freezeEventFor(testRootId)).getPremiereStory();
     expect(entities()[testRootId].step("isFrozen")).toBeTruthy();
     expect(harness.testConnection.isFrozenConnection()).toBeTruthy();
   });
 
   it("prevents adding contents to a frozen chronicle", async () => {
     harness = await createEngineOracleHarness({ claimBaseBlock: false }, [transactionA]);
-    await harness.chronicleTestEvent(freezeEventFor(testRootId)).getPremiereStory();
-    expect(() => harness.chronicleTestEvent(lateEntityEvent))
+    await harness.proclaimTestEvent(freezeEventFor(testRootId)).getPremiereStory();
+    expect(() => harness.proclaimTestEvent(lateEntityEvent))
         .toThrow(/Cannot modify frozen.*@\$~raw.test_chronicle@@/);
     expect(entities().late_entity).toBeFalsy();
   });
 
   it("prevents modifying properties of a frozen Entity", async () => {
     harness = await createEngineOracleHarness({ claimBaseBlock: false }, [transactionA]);
-    await harness.chronicleTestEvent(freezeEventFor("test_entity")).getPremiereStory();
+    await harness.proclaimTestEvent(freezeEventFor("test_entity")).getPremiereStory();
     expect(() => entities().test_entity.assignProperty("prop", "Changed string"))
         .toThrow(/Cannot modify frozen.*test_entity/);
     expect(entities().test_entity.propertyValue("prop"))
@@ -81,7 +81,7 @@ describe("Chronicle freezing", () => {
   it("allows modifying the owner of a frozen Entity", async () => {
     harness = await createEngineOracleHarness({ claimBaseBlock: false, verbosity: 0 },
         [transactionA, lateEntityEvent]);
-    await harness.chronicleTestEvent(freezeEventFor("test_entity")).getPremiereStory();
+    await harness.proclaimTestEvent(freezeEventFor("test_entity")).getPremiereStory();
     expect(() => entities().test_entity.setField("owner", entities().late_entity))
         .not.toThrow();
     expect(entities().test_entity.step("owner").getVRef())
@@ -125,11 +125,11 @@ describe("Chronicle freezing", () => {
     harness = await createEngineOracleHarness({
       verbosity: 0, claimBaseBlock: false, acquireConnections: [bTestRootId],
     }, [transactionA, transactionB]);
-    await harness.chronicleTestEvent(freezeEventFor(testRootId)).getPremiereStory();
-    expect(() => harness.chronicleTestEvent(lateEntityEvent))
+    await harness.proclaimTestEvent(freezeEventFor(testRootId)).getPremiereStory();
+    expect(() => harness.proclaimTestEvent(lateEntityEvent))
         .toThrow(/Cannot modify frozen.*@\$~raw.test_chronicle@@/);
     expect(entities().late_entity).toBeFalsy();
-    await harness.chronicleTestEvent(lateEntityEventB).getPremiereStory();
+    await harness.proclaimTestEvent(lateEntityEventB).getPremiereStory();
     expect(entities().late_entity_b).toBeTruthy();
   });
 });

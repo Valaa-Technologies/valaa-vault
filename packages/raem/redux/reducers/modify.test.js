@@ -75,10 +75,10 @@ describe("MODIFIED action class", () => {
   describe("Data manipulations", () => {
     it("adds and traverses non-expanded, string reference Data", () => {
       const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
-      const dataGlue = harness.chronicleTestEvent(created({ id: ["glue1"], typeName: "TestDataGlue",
+      const dataGlue = harness.proclaimTestEvent(created({ id: ["glue1"], typeName: "TestDataGlue",
         initialState: { source: ["A_child1"], target: ["A_child2"] },
       })).getTruthEvent();
-      harness.chronicleTestEvent(addedTo({ id: ["A_child1"], typeName: "TestThing",
+      harness.proclaimTestEvent(addedTo({ id: ["A_child1"], typeName: "TestThing",
         adds: { sourceDataGlues: [dataGlue.id] },
       }));
 
@@ -89,11 +89,11 @@ describe("MODIFIED action class", () => {
 
     it("adds and traverses non-expanded VRL Data", () => {
       const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
-      const dataGlue = harness.chronicleTestEvent(created({
+      const dataGlue = harness.proclaimTestEvent(created({
         id: vRef("glue1"), typeName: "TestDataGlue",
         initialState: { source: ["A_child1"], target: ["A_child2"] },
       })).getTruthEvent();
-      harness.chronicleTestEvent(addedTo({ id: ["A_child1"], typeName: "TestThing",
+      harness.proclaimTestEvent(addedTo({ id: ["A_child1"], typeName: "TestThing",
         adds: { sourceDataGlues: [dataGlue.id] },
       }));
 
@@ -116,14 +116,14 @@ describe("MODIFIED action class", () => {
 
     it("fails to add expanded Data without explicit typeName to an abstract field", () => {
       const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
-      expect(() => harness.chronicleTestEvent(addedTo({ id: ["A_child1"], typeName: "TestThing",
+      expect(() => harness.proclaimTestEvent(addedTo({ id: ["A_child1"], typeName: "TestThing",
         adds: { targetDataGlues: [{ target: ["A_child1"], source: ["A_child2"] }] },
       }))).toThrow(/must have typeName field/);
     });
 
     it("adds and traverses expanded Data with explicit typeName to an abstract field", () => {
       const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
-      harness.chronicleTestEvent(addedTo({ id: ["A_child1"], typeName: "TestThing",
+      harness.proclaimTestEvent(addedTo({ id: ["A_child1"], typeName: "TestThing",
         adds: { targetDataGlues: [{ typeName: "TestDataGlue",
           target: ["A_child1"], source: ["A_child2"],
         }], },
@@ -140,7 +140,7 @@ describe("MODIFIED action class", () => {
           .toEqual([]);
       expect(harness.run(vRef("A_parent"), "children"))
           .toEqual([vRef("A_child1"), vRef("A_child2")]);
-      harness.chronicleTestEvent(removedFrom({ id: ["A_parent"], typeName: "TestThing",
+      harness.proclaimTestEvent(removedFrom({ id: ["A_parent"], typeName: "TestThing",
         removes: { children: null },
       }));
       expect(harness.run(vRef("A_parent"), "children"))
@@ -151,7 +151,7 @@ describe("MODIFIED action class", () => {
       const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
       expect(harness.run(vRef("A_parent"), "children"))
           .toEqual([vRef("A_child1"), vRef("A_child2")]);
-      harness.chronicleTestEvent(replacedWithin({ id: ["A_parent"], typeName: "TestThing",
+      harness.proclaimTestEvent(replacedWithin({ id: ["A_parent"], typeName: "TestThing",
         removes: { children: [] },
         adds: { children: [vRef("A_child2"), vRef("A_child1")] },
       }));
@@ -163,7 +163,7 @@ describe("MODIFIED action class", () => {
       const harness = createRAEMTestHarness({ verbosity: 0 }, createBlockA);
       expect(harness.run(vRef("A_parent"), "children"))
           .toEqual([vRef("A_child1"), vRef("A_child2")]);
-      harness.chronicleTestEvent(replacedWithin({ id: ["A_parent"], typeName: "TestThing",
+      harness.proclaimTestEvent(replacedWithin({ id: ["A_parent"], typeName: "TestThing",
         removes: { children: [vRef("A_child2")] },
         adds: { children: [vRef("A_child3"), vRef("A_child1")] },
       }));

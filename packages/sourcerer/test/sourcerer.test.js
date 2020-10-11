@@ -25,12 +25,12 @@ async function setUp (testAuthorityConfig: Object = {}, options: {}) {
     oracle: { ...(options.oracle || {}), testAuthorityConfig },
   });
   const ret = {
-    connection: await harness.sourcerer.acquireConnection(
-        harness.testChronicleURI).asActiveConnection(),
-    scribeConnection: await harness.scribe.acquireConnection(
-        harness.testChronicleURI, { newConnection: false }).asActiveConnection(),
-    oracleConnection: await harness.oracle.acquireConnection(
-        harness.testChronicleURI, { newConnection: false }).asActiveConnection(),
+    connection: await harness.sourcerer.sourcifyChronicle(
+        harness.testChronicleURI).asSourceredConnection(),
+    scribeConnection: await harness.scribe.sourcifyChronicle(
+        harness.testChronicleURI, { newConnection: false }).asSourceredConnection(),
+    oracleConnection: await harness.oracle.sourcifyChronicle(
+        harness.testChronicleURI, { newConnection: false }).asSourceredConnection(),
   };
   ret.authorityConnection = ret.oracleConnection.getUpstreamConnection();
   return ret;
@@ -58,8 +58,8 @@ describe("Sourcerer", () => {
     const scribe = await createScribe(createOracle());
 
     const connection = await scribe
-        .acquireConnection(naiveURI.createChronicleURI("valaa-test:", testRootId))
-        .asActiveConnection();
+        .sourcifyChronicle(naiveURI.createChronicleURI("valaa-test:", testRootId))
+        .asSourceredConnection();
 
     const mediaVRL = vRef("abcd-0123");
     for (const [bufferContent, mediaInfo, expectedContent] of structuredMediaContents) {
@@ -83,15 +83,15 @@ describe("Sourcerer", () => {
 
   it("stores the contents of the actions on the scribe correctly", async () => {
     harness = await createSourcererOracleHarness({ verbosity: 0,
-      oracle: { testAuthorityConfig: { isLocallyPersisted: true, isRemoteAuthority: true } },
+      oracle: { testAuthorityConfig: { isLocallyRecorded: true, isRemoteAuthority: true } },
     });
     const connection = await harness.sourcerer
-        .acquireConnection(harness.testChronicleURI).asActiveConnection();
+        .sourcifyChronicle(harness.testChronicleURI).asSourceredConnection();
     const scribeConnection = connection.getUpstreamConnection();
     const database = await openDB(scribeConnection._db.databaseId);
 
     for (const command of commands) {
-      const claimResult = await harness.chronicleTestEvent(command);
+      const claimResult = await harness.proclaimTestEvent(command);
       await claimResult.getPremiereStory();
       const venueCommand = await claimResult.getCommandOf(harness.testChronicleURI);
       const logIndex = scribeConnection.getFirstUnusedCommandEventId() - 1;
@@ -101,10 +101,10 @@ describe("Sourcerer", () => {
 
   it("assigns proper eventIds for commands", async () => {
     harness = await createSourcererOracleHarness({ verbosity: 0,
-      oracle: { testAuthorityConfig: { isLocallyPersisted: true } },
+      oracle: { testAuthorityConfig: { isLocallyRecorded: true } },
     });
     const connection = await harness.sourcerer
-        .acquireConnection(harness.testChronicleURI).asActiveConnection();
+        .sourcifyChronicle(harness.testChronicleURI).asSourceredConnection();
     const scribeConnection = connection.getUpstreamConnection();
 
     let oldCommandId;
@@ -113,7 +113,7 @@ describe("Sourcerer", () => {
     for (const command of commands) {
       oldCommandId = newCommandId;
 
-      await harness.chronicleTestEvent(command).getPremiereStory();
+      await harness.proclaimTestEvent(command).getPremiereStory();
 
       newCommandId = scribeConnection.getFirstUnusedCommandEventId() - 1;
       expect(oldCommandId).toBeLessThan(newCommandId);
@@ -154,36 +154,36 @@ describe("Sourcerer", () => {
 
   it("confirms remote chronicle commands as truths", async () => {
     const { scribeConnection, authorityConnection } =
-        await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
+        await setUp({ isRemoteAuthority: true, isLocallyRecorded: true }, { verbosity: 0 });
     let totalCommandCount;
     harness.sourcerer.setCommandCountCallback((total) => { totalCommandCount = total; });
     expect(totalCommandCount).toEqual(0);
     expectConnectionEventIds(scribeConnection, 0, 1, 1);
 
-    const first = harness.chronicleTestEvent(simpleCommand);
+    const first = harness.proclaimTestEvent(simpleCommand);
 
     expect(first.getLogAspectOf(harness.testChronicleURI).index).toEqual(1);
     await harness.sourcerer._pendingCommandNotification;
     expect(totalCommandCount).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 1, 2);
-    expect(authorityConnection._chroniclings.length).toEqual(0);
-    await first.getPersistedEvent();
-    expect(authorityConnection._chroniclings.length).toEqual(1);
+    expect(authorityConnection._proclamations.length).toEqual(0);
+    await first.getRecordedEvent();
+    expect(authorityConnection._proclamations.length).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 1, 2);
 
-    const seconds = harness.chronicleTestEvents(coupleCommands).eventResults;
+    const seconds = harness.proclaimTestEvents(coupleCommands).eventResults;
 
     expect(seconds[0].getLogAspectOf(harness.testChronicleURI).index).toEqual(2);
     expect(seconds[1].getLogAspectOf(harness.testChronicleURI).index).toEqual(3);
     expectConnectionEventIds(scribeConnection, 0, 1, 4);
     await harness.sourcerer._pendingCommandNotification;
     expect(totalCommandCount).toEqual(3);
-    expect(authorityConnection._chroniclings.length).toEqual(1);
-    await seconds[0].getPersistedEvent();
-    await seconds[1].getPersistedEvent();
-    expect(authorityConnection._chroniclings.length).toEqual(3);
+    expect(authorityConnection._proclamations.length).toEqual(1);
+    await seconds[0].getRecordedEvent();
+    await seconds[1].getRecordedEvent();
+    expect(authorityConnection._proclamations.length).toEqual(3);
 
-    const twoEntries = authorityConnection._chroniclings.splice(0, 2);
+    const twoEntries = authorityConnection._proclamations.splice(0, 2);
     const twoTruthEvents = twoEntries.map(entry => roundtripEvent(entry.event));
 
     twoEntries[0].resolveTruthEvent(twoTruthEvents[0]);
@@ -193,7 +193,7 @@ describe("Sourcerer", () => {
     expect(totalCommandCount).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 3, 4);
 
-    const lastEntry = authorityConnection._chroniclings.splice(0, 1);
+    const lastEntry = authorityConnection._proclamations.splice(0, 1);
     const lastTruthEvents = lastEntry.map(entry => roundtripEvent(entry.event));
     lastEntry[0].resolveTruthEvent(lastTruthEvents[0]);
     await authorityConnection.getReceiveTruths()(lastTruthEvents);
@@ -203,32 +203,32 @@ describe("Sourcerer", () => {
   });
 
   it("automatically confirms local chronicle commands as truths", async () => {
-    const { scribeConnection } = await setUp({ isLocallyPersisted: true }, { verbosity: 0 });
+    const { scribeConnection } = await setUp({ isLocallyRecorded: true }, { verbosity: 0 });
     let totalCommandCount;
     harness.sourcerer.setCommandCountCallback((total) => { totalCommandCount = total; });
     await harness.sourcerer._pendingCommandNotification;
     expect(totalCommandCount).toEqual(0);
     expectConnectionEventIds(scribeConnection, 0, 1, 1);
-    const first = harness.chronicleTestEvent(simpleCommand);
+    const first = harness.proclaimTestEvent(simpleCommand);
     expect(first.getLogAspectOf(harness.testChronicleURI).index).toEqual(1);
     await harness.sourcerer._pendingCommandNotification;
     expect(totalCommandCount).toEqual(1);
     expectConnectionEventIds(scribeConnection, 0, 1, 2);
-    const persisted = first.getPersistedEvent();
+    const recorded = first.getRecordedEvent();
     expectConnectionEventIds(scribeConnection, 0, 1, 2);
-    await persisted;
+    await recorded;
     await harness.sourcerer._pendingCommandNotification;
     expect(totalCommandCount).toEqual(0);
     await first.getTruthEvent();
     expectConnectionEventIds(scribeConnection, 0, 2, 2);
 
-    const seconds = harness.chronicleTestEvents(coupleCommands).eventResults;
+    const seconds = harness.proclaimTestEvents(coupleCommands).eventResults;
     expect(seconds[0].getLogAspectOf(harness.testChronicleURI).index).toEqual(2);
     expect(seconds[1].getLogAspectOf(harness.testChronicleURI).index).toEqual(3);
     await harness.sourcerer._pendingCommandNotification;
     expect(totalCommandCount).toEqual(2);
     expectConnectionEventIds(scribeConnection, 0, 2, 4);
-    await seconds[1].getPersistedEvent();
+    await seconds[1].getRecordedEvent();
     await harness.sourcerer._pendingCommandNotification;
     expect(totalCommandCount).toEqual(0);
     expectConnectionEventIds(scribeConnection, 0, 4, 4);
@@ -236,25 +236,25 @@ describe("Sourcerer", () => {
 
   it("resolves getTruthEvent when its commands are confirmed by either pull or push", async () => {
     const { scribeConnection, authorityConnection } =
-        await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
+        await setUp({ isRemoteAuthority: true, isLocallyRecorded: true }, { verbosity: 0 });
     expectConnectionEventIds(scribeConnection, 0, 1, 1);
 
-    const first = harness.chronicleTestEvent(simpleCommand);
+    const first = harness.proclaimTestEvent(simpleCommand);
 
     let firstTruth;
     const firstTruthProcess = first.getTruthEvent().then(truthEvent_ => (firstTruth = truthEvent_));
 
-    await first.getPersistedEvent();
+    await first.getRecordedEvent();
 
     expect(firstTruth).toEqual(undefined);
 
-    const seconds = harness.chronicleTestEvents(coupleCommands).eventResults;
+    const seconds = harness.proclaimTestEvents(coupleCommands).eventResults;
 
     const secondsTruths = [];
     const secondsTruthProcesses = seconds.map((result_, index) => result_.getTruthEvent()
         .then(truthEvent_ => (secondsTruths[index] = truthEvent_)));
 
-    await seconds[1].getPersistedEvent();
+    await seconds[1].getRecordedEvent();
 
     expect(firstTruth).toEqual(undefined);
     expect(secondsTruths.length).toEqual(0);
@@ -262,7 +262,7 @@ describe("Sourcerer", () => {
     expect(secondsTruths[1]).toEqual(undefined);
 
 
-    const twoEntries = authorityConnection._chroniclings.splice(0, 2);
+    const twoEntries = authorityConnection._proclamations.splice(0, 2);
     const twoTruthEvents = twoEntries.map(entry => roundtripEvent(entry.event));
     // resolve prophecy getTruthEvent via pull
     twoEntries[0].resolveTruthEvent(twoTruthEvents[0]);
@@ -275,7 +275,7 @@ describe("Sourcerer", () => {
     await authorityConnection.getReceiveTruths()(twoTruthEvents);
     expectConnectionEventIds(scribeConnection, 0, 3, 4);
 
-    const lastEntry = authorityConnection._chroniclings.splice(0, 1);
+    const lastEntry = authorityConnection._proclamations.splice(0, 1);
     const lastTruthEvents = lastEntry.map(entry => roundtripEvent(entry.event));
     // skip resolveTruthEvent - rely on downstream push via getReceiveTruths
     // lastEntry[0].resolveTruthEvent(coupleCommands[1]);
@@ -288,7 +288,7 @@ describe("Sourcerer", () => {
 
   it("resolves getTruthEvent when a command is reordered and others rejected", async () => {
     const { scribeConnection, authorityConnection } =
-        await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
+        await setUp({ isRemoteAuthority: true, isLocallyRecorded: true }, { verbosity: 0 });
     const plog1 = harness.opLog(1, "resolve-reorder-reject", "Harness created");
 
     const purgedHeresies = [];
@@ -301,27 +301,27 @@ describe("Sourcerer", () => {
 
     expectConnectionEventIds(scribeConnection, 0, 1, 1);
 
-    const first = harness.chronicleTestEvent(simpleCommand, { onReform });
+    const first = harness.proclaimTestEvent(simpleCommand, { onReform });
     expect(first.getLogAspectOf(harness.testChronicleURI).index).toEqual(1);
 
     let firstTruth, firstFailure;
     const firstTruthProcess = first.getTruthEvent()
         .then(truthEvent_ => (firstTruth = truthEvent_), failure => (firstFailure = failure));
 
-    plog1 && plog1.opEvent("first.getPersistedEvent");
-    await first.getPersistedEvent();
+    plog1 && plog1.opEvent("first.getRecordedEvent");
+    await first.getRecordedEvent();
 
     expect(firstTruth).toEqual(undefined);
 
-    const seconds = harness.chronicleTestEvents(coupleCommands, { onReform }).eventResults;
+    const seconds = harness.proclaimTestEvents(coupleCommands, { onReform }).eventResults;
 
     const secondsTruths = [], secondsFailures = [];
     const secondsTruthProcesses = seconds.map((result_, index) => result_.getTruthEvent().then(
             truthEvent_ => (secondsTruths[index] = truthEvent_),
             failure => (secondsFailures[index] = failure)));
 
-    plog1 && plog1.opEvent("seconds[1].getPersistedEvent");
-    await seconds[1].getPersistedEvent();
+    plog1 && plog1.opEvent("seconds[1].getRecordedEvent");
+    await seconds[1].getRecordedEvent();
     expectConnectionEventIds(scribeConnection, 0, 1, 4);
 
     expect(firstTruth).toEqual(undefined);
@@ -330,16 +330,16 @@ describe("Sourcerer", () => {
     expect(secondsTruths[1]).toEqual(undefined);
 
     // Remove the first entry.
-    authorityConnection._chroniclings.splice(0, 1);
+    authorityConnection._proclamations.splice(0, 1);
 
-    const oneEntries = authorityConnection._chroniclings.splice(0, 1);
+    const oneEntries = authorityConnection._proclamations.splice(0, 1);
     const oneTruthEvent = oneEntries.map(entry => roundtripEvent(entry.event));
     obtainAspect(oneTruthEvent[0], "log").index = 1;
     // The original third entry is now malformed, don't confirm it.
-    authorityConnection._chroniclings.splice(0, 1);
+    authorityConnection._proclamations.splice(0, 1);
     oneEntries[0].resolveTruthEvent(oneTruthEvent[0]);
     // Mismatching log.index's between sent commands and incoming truths
-    // will inhibit prophecy chronicle command rechronicles and will
+    // will inhibit prophecy chronicle command reproclaims and will
     // delay prophecy resolutions but otherwise has no other effect.
     expect(secondsTruths.length).toEqual(0);
     expectConnectionEventIds(scribeConnection, 0, 1, 4);
@@ -368,19 +368,19 @@ describe("Sourcerer", () => {
 
     const recommands = [...purgedHeresies].map(getActionFromPassage);
 
-    const rechronicleResults = harness.chronicleTestEvents(recommands).eventResults;
-    plog1 && plog1.opEvent("rechronicleResults[0].getPersistedEvent");
-    expect(await rechronicleResults[0].getPersistedEvent()).toMatchObject(simpleCommand);
-    plog1 && plog1.opEvent("rechronicleResults[1].getPersistedEvent");
-    expect(await rechronicleResults[1].getPersistedEvent()).toMatchObject(coupleCommands[1]);
+    const reproclaimResults = harness.proclaimTestEvents(recommands).eventResults;
+    plog1 && plog1.opEvent("reproclaimResults[0].getRecordedEvent");
+    expect(await reproclaimResults[0].getRecordedEvent()).toMatchObject(simpleCommand);
+    plog1 && plog1.opEvent("reproclaimResults[1].getRecordedEvent");
+    expect(await reproclaimResults[1].getRecordedEvent()).toMatchObject(coupleCommands[1]);
 
     expectConnectionEventIds(scribeConnection, 0, 2, 4);
 
     // Check that first command has been properly revised and resent
-    expect(rechronicleResults[0].getLogAspectOf(harness.testChronicleURI).index).toEqual(2);
-    expect(authorityConnection._chroniclings.length).toEqual(2);
+    expect(reproclaimResults[0].getLogAspectOf(harness.testChronicleURI).index).toEqual(2);
+    expect(authorityConnection._proclamations.length).toEqual(2);
 
-    const lastEntry = authorityConnection._chroniclings.splice(0, 2);
+    const lastEntry = authorityConnection._proclamations.splice(0, 2);
     const lastTruthEvents = lastEntry.map(entry => roundtripEvent(entry.event));
     // skip resolveTruthEvent - rely on downstream push only via getReceiveTruths
     // lastEntry[0].resolveTruthEvent(coupleCommands[1]);
@@ -388,10 +388,10 @@ describe("Sourcerer", () => {
     await authorityConnection.getReceiveTruths()(lastTruthEvents);
     expectConnectionEventIds(scribeConnection, 0, 4, 4);
 
-    plog1 && plog1.opEvent("rechronicleResults[0].getTruthEvent");
-    expect(await rechronicleResults[0].getTruthEvent()).toMatchObject(simpleCommand);
-    plog1 && plog1.opEvent("rechronicleResults[1].getTruthEvent");
-    expect(await rechronicleResults[1].getTruthEvent()).toMatchObject(coupleCommands[1]);
+    plog1 && plog1.opEvent("reproclaimResults[0].getTruthEvent");
+    expect(await reproclaimResults[0].getTruthEvent()).toMatchObject(simpleCommand);
+    plog1 && plog1.opEvent("reproclaimResults[1].getTruthEvent");
+    expect(await reproclaimResults[1].getTruthEvent()).toMatchObject(coupleCommands[1]);
 
     expect(harness.run(vRef("simple_entity"),
             VALK.toField("relations").toIndex(0).toField("target").toField("name")))
@@ -400,25 +400,25 @@ describe("Sourcerer", () => {
 
   it("resolves getTruthEvent when a command is reordered and others revised", async () => {
     const { scribeConnection, authorityConnection } =
-        await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
+        await setUp({ isRemoteAuthority: true, isLocallyRecorded: true }, { verbosity: 0 });
     const plog1 = harness.opLog(1, "resolve-getTruthEvent-reorder-revise", "Harness created");
 
     // Repeat the steps of the previous test case...
-    const first = harness.chronicleTestEvent(simpleCommand);
+    const first = harness.proclaimTestEvent(simpleCommand);
     let firstTruth, firstFailure;
     const firstTruthProcess = first.getTruthEvent()
         .then(truthEvent_ => (firstTruth = truthEvent_), failure => (firstFailure = failure));
-    plog1 && plog1.opEvent("first.getPersistedEvent");
-    await first.getPersistedEvent();
-    const seconds = harness.chronicleTestEvents(coupleCommands).eventResults;
+    plog1 && plog1.opEvent("first.getRecordedEvent");
+    await first.getRecordedEvent();
+    const seconds = harness.proclaimTestEvents(coupleCommands).eventResults;
     const secondsTruths = [], secondsFailures = [];
     const secondsTruthProcesses = seconds.map((result_, index) => result_.getTruthEvent().then(
         truthEvent_ => (secondsTruths[index] = truthEvent_),
         failure => (secondsFailures[index] = failure)));
-    plog1 && plog1.opEvent("seconds[1].getPersistedEvent");
-    await seconds[1].getPersistedEvent();
-    const secondsFirstEntries = authorityConnection._chroniclings.splice(1, 1);
-    authorityConnection._chroniclings = [];
+    plog1 && plog1.opEvent("seconds[1].getRecordedEvent");
+    await seconds[1].getRecordedEvent();
+    const secondsFirstEntries = authorityConnection._proclamations.splice(1, 1);
+    authorityConnection._proclamations = [];
     const secondsFirstTruth = secondsFirstEntries.map(entry => roundtripEvent(entry.event));
     obtainAspect(secondsFirstTruth[0], "log").index = 1; // reordering from index = 2
     secondsFirstEntries[0].resolveTruthEvent(secondsFirstTruth[0]);
@@ -431,11 +431,11 @@ describe("Sourcerer", () => {
     expectConnectionEventIds(scribeConnection, 0, 2, 4);
     expect(first.getLogAspectOf(harness.testChronicleURI).index).toEqual(2);
     expect(seconds[1].getLogAspectOf(harness.testChronicleURI).index).toEqual(3);
-    plog1 && plog1.opEvent("seconds[1].getPersistedEvent");
-    await seconds[1].getPersistedEvent();
+    plog1 && plog1.opEvent("seconds[1].getRecordedEvent");
+    await seconds[1].getRecordedEvent();
 
-    expect(authorityConnection._chroniclings.length).toEqual(2);
-    const stageTwoEntries = authorityConnection._chroniclings.splice(0, 2)
+    expect(authorityConnection._proclamations.length).toEqual(2);
+    const stageTwoEntries = authorityConnection._proclamations.splice(0, 2)
         .map(entry => roundtripEvent(entry.event));
     expect(stageTwoEntries[0].aspects.log.index).toEqual(2);
     expect(stageTwoEntries[1].aspects.log.index).toEqual(3);
@@ -463,34 +463,34 @@ describe("Sourcerer", () => {
 
   it("reviews prophecies and resolves getTruthEvent with incoming foreign truths", async () => {
     const { scribeConnection, authorityConnection } =
-        await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
+        await setUp({ isRemoteAuthority: true, isLocallyRecorded: true }, { verbosity: 0 });
 
     // Repeat the steps of the previous test case...
-    const first = harness.chronicleTestEvent(simpleCommand);
+    const first = harness.proclaimTestEvent(simpleCommand);
     let firstTruth, firstFailure;
     const firstTruthProcess = first.getTruthEvent()
         .then(truthEvent_ => (firstTruth = truthEvent_), failure => (firstFailure = failure));
-    await first.getPersistedEvent();
-    const seconds = harness.chronicleTestEvents(coupleCommands).eventResults;
+    await first.getRecordedEvent();
+    const seconds = harness.proclaimTestEvents(coupleCommands).eventResults;
     const secondsTruths = [], secondsFailures = [];
     const secondsTruthProcesses = seconds.map((result_, index) => result_.getTruthEvent().then(
             truthEvent_ => (secondsTruths[index] = truthEvent_),
             failure => (secondsFailures[index] = failure)));
-    await seconds[1].getPersistedEvent();
+    await seconds[1].getRecordedEvent();
     expectConnectionEventIds(scribeConnection, 0, 1, 4);
-    expect(authorityConnection._chroniclings.length).toEqual(3);
-    authorityConnection._chroniclings = [];
+    expect(authorityConnection._proclamations.length).toEqual(3);
+    authorityConnection._proclamations = [];
     const foreignTruth = initializeAspects(created({
       id: ["foreign_entity"], typeName: "Entity", initialState: {
         name: "Simple Entity", owner: [testRootId],
       },
     }), { version: "0.2", command: { id: "foreign_entity" }, log: { index: 1 } });
     await authorityConnection.getReceiveTruths()([foreignTruth]);
-    await seconds[1].getPersistedEvent();
+    await seconds[1].getRecordedEvent();
     expectConnectionEventIds(scribeConnection, 0, 2, 5);
 
-    expect(authorityConnection._chroniclings.length).toEqual(3);
-    const stageTwoEntries = authorityConnection._chroniclings.splice(0, 3)
+    expect(authorityConnection._proclamations.length).toEqual(3);
+    const stageTwoEntries = authorityConnection._proclamations.splice(0, 3)
         .map(entry => roundtripEvent(entry.event));
     expect(stageTwoEntries[0].aspects.log.index).toEqual(2);
     expect(stageTwoEntries[1].aspects.log.index).toEqual(3);
@@ -514,12 +514,12 @@ describe("Sourcerer", () => {
     expect(secondsFailures.length).toEqual(0);
   });
 
-  it("rejects a prophecy for which its chronicleEvents throws", async () => {
+  it("rejects a prophecy for which its proclaimEvents throws naively", async () => {
     const { scribeConnection, authorityConnection } =
-        await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
+        await setUp({ isRemoteAuthority: true, isLocallyRecorded: true }, { verbosity: 0 });
     const plog1 = harness.opLog(1, "reject-prophecy-on-throw", "Harness created");
 
-    const results = harness.chronicleTestEvents([
+    const results = harness.proclaimTestEvents([
       simpleCommand,
       created({
         id: ["followup_entity"], typeName: "Entity", initialState: {
@@ -533,9 +533,9 @@ describe("Sourcerer", () => {
             truthEvent_ => (truths[index] = truthEvent_),
             failure => (failures[index] = failure)));
 
-    plog1 && plog1.opEvent("1.await.persisted");
+    plog1 && plog1.opEvent("1.await.recorded");
 
-    await results[1].getPersistedEvent();
+    await results[1].getRecordedEvent();
     expect(results[1].getLogAspectOf(harness.testChronicleURI).index)
         .toEqual(2);
 
@@ -544,12 +544,17 @@ describe("Sourcerer", () => {
     expect(harness.run(vRef("followup_entity"), ["§->", "name"]))
         .toEqual("Followup Entity");
     expectConnectionEventIds(scribeConnection, 0, 1, 3);
-    expect(authorityConnection._chroniclings.length).toEqual(2);
+    expect(authorityConnection._proclamations.length).toEqual(2);
 
-    const twoEntries = authorityConnection._chroniclings.splice(0, 2);
+    const twoEntries = authorityConnection._proclamations.splice(0, 2);
+
+    plog1 && plog1.opEvent("2.reject-truth.0.not-permitted");
 
     twoEntries[0].rejectTruthEvent(
         Object.assign(new Error("Not permitted"), { isRevisable: false, isReformable: false }));
+
+    plog1 && plog1.opEvent("2.reject-truth.1.revise-reorder");
+
     twoEntries[1].rejectTruthEvent(
         Object.assign(new Error("revise: reorder"), { isRevisable: false, isReformable: true }));
 
@@ -561,12 +566,12 @@ describe("Sourcerer", () => {
     expect(truths.length === 0);
     expectConnectionEventIds(scribeConnection, 0, 1, 2);
 
-    plog1 && plog1.opEvent("3.await.persisted");
+    plog1 && plog1.opEvent("3.await.recorded");
 
-    await results[1].getPersistedEvent();
+    await results[1].getRecordedEvent();
     expect(results[1].getLogAspectOf(harness.testChronicleURI).index)
         .toEqual(1);
-    expect(authorityConnection._chroniclings.length).toEqual(1);
+    expect(authorityConnection._proclamations.length).toEqual(1);
 
     expect(() => harness.run(vRef("simple_entity"), ["§->", "name"]))
         .toThrow(/Could not find non-ghost.*simple_entity/);
@@ -575,10 +580,13 @@ describe("Sourcerer", () => {
 
     expect(truths.length === 0);
 
-    const revisedEntry = authorityConnection._chroniclings.splice(0, 1)[0];
+    const revisedEntry = authorityConnection._proclamations.splice(0, 1)[0];
+
+    plog1 && plog1.opEvent("4.resolve-truth.revisedEntry");
+
     revisedEntry.resolveTruthEvent(roundtripEvent(revisedEntry.event));
 
-    plog1 && plog1.opEvent("4.await.all-truths");
+    plog1 && plog1.opEvent("5.await.all-truths");
 
     await Promise.all(truthProcesses);
     expectConnectionEventIds(scribeConnection, 0, 2, 2);
@@ -587,7 +595,7 @@ describe("Sourcerer", () => {
     expect(truths[1].meta.chronicles[String(harness.testChronicleURI)].truth.aspects.log.index)
         .toEqual(1);
 
-    plog1 && plog1.opEvent("5.await.truth-processes");
+    plog1 && plog1.opEvent("6.await.truth-processes");
 
     await results[1].getTruthEvent();
     expect(results[1].getLogAspectOf(harness.testChronicleURI).index)
@@ -603,13 +611,13 @@ describe("Sourcerer", () => {
 describe("Cross-chronicle", () => {
   it("handles out-of-order cross-chronicle incomingRelations", async () => {
     const { scribeConnection } =
-        await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
+        await setUp({ isRemoteAuthority: true, isLocallyRecorded: true }, { verbosity: 0 });
     const lateChronicleURI = naiveURI.createChronicleURI(
         harness.testAuthorityURI, "@$~raw.test_late@@");
 
     const lateTargetId = vRef("late_target", undefined, undefined, lateChronicleURI);
 
-    await scribeConnection.chronicleEvent(created({
+    await scribeConnection.proclaimEvent(created({
       id: ["CrossRelation_A"], typeName: "Relation",
       initialState: {
         source: [testRootId], name: "CrossRelation", target: lateTargetId.toJSON(),
@@ -619,9 +627,9 @@ describe("Cross-chronicle", () => {
         log: { index: scribeConnection.getFirstUnusedCommandEventId() },
         command: { id: "cid-1" },
       },
-    }), { isTruth: true }).getPersistedEvent();
+    }), { isTruth: true }).getRecordedEvent();
 
-    const lateConnection = harness.sourcerer.acquireConnection(lateChronicleURI);
+    const lateConnection = harness.sourcerer.sourcifyChronicle(lateChronicleURI);
     harness.tryGetTestAuthorityConnection(lateConnection).addNarrateResults({ eventIdBegin: 0 }, [
       created({
         id: ["@$~raw.test_late@@"], typeName: "Entity",
@@ -634,7 +642,7 @@ describe("Cross-chronicle", () => {
         aspects: { version: "0.2", log: { index: 1 }, command: { id: "lid-1" } },
       }),
     ]);
-    await lateConnection.asActiveConnection();
+    await lateConnection.asSourceredConnection();
     const incomingRelations = harness.run(lateTargetId, "incomingRelations");
     expect(incomingRelations.length)
         .toEqual(1);
@@ -642,14 +650,14 @@ describe("Cross-chronicle", () => {
 
   it("handles out-of-order instantiation with properties in both chronicles", async () => {
     const { scribeConnection } =
-        await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
+        await setUp({ isRemoteAuthority: true, isLocallyRecorded: true }, { verbosity: 0 });
     const lateChronicleURI = naiveURI.createChronicleURI(
         harness.testAuthorityURI, "@$~raw.test_late@@");
 
     const latePrototypeId = vRef("late_prototype", undefined, undefined, lateChronicleURI);
 
     const index = scribeConnection.getFirstUnusedCommandEventId();
-    await Promise.all(scribeConnection.chronicleEvents([
+    await Promise.all(scribeConnection.proclaimEvents([
       created({
         id: ["CrossEntryInstance_A"], typeName: "Entity",
         initialState: { owner: [testRootId], instancePrototype: latePrototypeId.toJSON(),
@@ -663,9 +671,9 @@ describe("Cross-chronicle", () => {
           name: "bar",
         },
         aspects: { version: "0.2", log: { index: index + 1 }, command: { id: "cid-2" } },
-      })], { isTruth: true }).eventResults.map(result => result.getPersistedEvent()));
+      })], { isTruth: true }).eventResults.map(result => result.getRecordedEvent()));
 
-    const lateConnection = harness.sourcerer.acquireConnection(lateChronicleURI);
+    const lateConnection = harness.sourcerer.sourcifyChronicle(lateChronicleURI);
     harness.tryGetTestAuthorityConnection(lateConnection).addNarrateResults({ eventIdBegin: 0 }, [
       created({
         id: ["@$~raw.test_late@@"], typeName: "Entity",
@@ -685,7 +693,7 @@ describe("Cross-chronicle", () => {
         aspects: { version: "0.2", log: { index: 2 }, command: { id: "lid-3" } },
       }),
     ]);
-    await lateConnection.asActiveConnection();
+    await lateConnection.asSourceredConnection();
 
     const properties = harness.run(vRef("CrossEntryInstance_A"),
         ["§->", "properties", ["§map", "name"]]);
@@ -696,17 +704,17 @@ describe("Cross-chronicle", () => {
 
 describe("Disjoint clients using paired harnesses", () => {
   it("delivers commands from one harness as events to another harness", async () => {
-    const { scribeConnection } = await setUp({ isRemoteAuthority: true, isLocallyPersisted: true },
+    const { scribeConnection } = await setUp({ isRemoteAuthority: true, isLocallyRecorded: true },
         { verbosity: 0 });
     const pairness = await createSourcererOracleHarness({ verbosity: 0, pairedHarness: harness });
-    const pairedConnection = pairness.sourcerer.acquireConnection(harness.testChronicleURI);
+    const pairedConnection = pairness.sourcerer.sourcifyChronicle(harness.testChronicleURI);
 
-    const result = harness.chronicleTestEvent(created({
+    const result = harness.proclaimTestEvent(created({
       id: ["multiharness-entity"], typeName: "Entity",
       initialState: { owner: [testRootId], name: "Multi-harness test entity" },
       aspects: { version: "0.2", log: {}, command: { id: "cid-1" } },
     }));
-    await result.getPersistedEvent();
+    await result.getRecordedEvent();
     expect(await pairness.receiveTruthsFrom(harness, { verbosity: 0 }))
         .toEqual(1);
     expect(scribeConnection.getFirstCommandEventId())
@@ -720,11 +728,11 @@ describe("Disjoint clients using paired harnesses", () => {
   });
 
   it("reorders conflicting commands between harnesses", async () => {
-    await setUp({ isRemoteAuthority: true, isLocallyPersisted: true }, { verbosity: 0 });
+    await setUp({ isRemoteAuthority: true, isLocallyRecorded: true }, { verbosity: 0 });
     const pairness = await createSourcererOracleHarness({ verbosity: 0, pairedHarness: harness });
-    await pairness.sourcerer.acquireConnection(harness.testChronicleURI);
+    await pairness.sourcerer.sourcifyChronicle(harness.testChronicleURI);
 
-    const result = harness.chronicleTestEvent(created({
+    const result = harness.proclaimTestEvent(created({
       id: ["multiharness-entity"], typeName: "Entity",
       initialState: { owner: [testRootId], name: "Multi-harness test entity" },
       aspects: { version: "0.2", log: {}, command: { id: "cid-1" } },
@@ -733,12 +741,12 @@ describe("Disjoint clients using paired harnesses", () => {
     expect(result.getCommandOf(harness.testChronicleURI).aspects.log.index)
         .toEqual(1);
 
-    const pairedResult = pairness.chronicleTestEvent(created({
+    const pairedResult = pairness.proclaimTestEvent(created({
       id: ["pairedharness-entity"], typeName: "Entity",
       initialState: { owner: [testRootId], name: "Multi-harness distinct entity" },
       aspects: { version: "0.2", log: {}, command: { id: "cid-p-1" } },
     }));
-    await pairedResult.getPersistedEvent();
+    await pairedResult.getRecordedEvent();
     expect(pairedResult.getCommandOf(harness.testChronicleURI).aspects.log.index)
         .toEqual(1);
     // Make paired harness commands into truths first.

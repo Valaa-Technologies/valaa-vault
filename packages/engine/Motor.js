@@ -88,7 +88,7 @@ export default class Motor extends Cog {
       this.engineTime = next.key;
       // console.log("TIMED expanding", timed.startTime || timed.time, timed);
       next.value.forEach(story =>
-          this.getEngine().getSourcerer().chronicleEvents(story.actions, { timed: story }));
+          this.getEngine().getSourcerer().proclaimEvents(story.actions, { timed: story }));
     }
     this.engineTime = future;
     return actualDeltaS;

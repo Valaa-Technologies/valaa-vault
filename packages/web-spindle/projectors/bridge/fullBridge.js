@@ -43,7 +43,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       return thenChainEagerly(valkOptions.scope.routeRoot, [
         vRouteRoot => router.resolveToScope("response", response, vRouteRoot, valkOptions),
         () => valkOptions.discourse.releaseFabricator(),
-        eventResult => eventResult && eventResult.getPersistedEvent(),
+        eventResult => eventResult && eventResult.getRecordedEvent(),
         (/* persistedEvent */) => router
             .fillReplyFromResponse(valkOptions.scope.response, this.runtime, valkOptions),
       ], (error) => {

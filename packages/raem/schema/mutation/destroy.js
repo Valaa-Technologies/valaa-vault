@@ -29,7 +29,7 @@ const destroy = {
   },
   resolve: async (context, args/* , info */) => {
     try {
-      const truth = await context.store.chronicleEvent(destroyed(args.input)).getTruthEvent();
+      const truth = await context.store.proclaimEvent(destroyed(args.input)).getTruthEvent();
       return {
         clientMutationId: truth.id,
       };

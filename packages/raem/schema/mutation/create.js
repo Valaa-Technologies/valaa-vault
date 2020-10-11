@@ -30,7 +30,7 @@ const create = {
   },
   resolve: async (context, args/* , info */) => {
     try {
-      const truth = await context.store.chronicleEvent({
+      const truth = await context.store.proclaimEvent({
         ...created({
           id: args.input.id,
           typeName: args.input.typeName,

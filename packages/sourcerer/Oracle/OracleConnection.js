@@ -5,7 +5,7 @@ import { hasScheme } from "~/raem/ValaaURI";
 
 import Connection from "~/sourcerer/api/Connection";
 import {
-  ConnectOptions, MediaInfo, ReceiveEvents, RetrieveMediaBuffer,
+  SourceryOptions, MediaInfo, ReceiveEvents, RetrieveMediaBuffer,
 } from "~/sourcerer/api/types";
 
 import DecoderArray from "~/sourcerer/Oracle/DecoderArray";
@@ -65,13 +65,13 @@ export default class OracleConnection extends Connection {
   }
 
   receiveTruths (truths: EventBase[], retrieveMediaBuffer: RetrieveMediaBuffer,
-      downstreamReceiveTruths: ?ReceiveEvents, type: string = "receiveTruths",
+      pushTruths: ?ReceiveEvents, type: string = "receiveTruths",
   ): Promise<(Promise<EventBase> | EventBase)[]> {
     try {
-      if (!downstreamReceiveTruths) {
-        throw new Error(`INTERNAL ERROR: downstreamReceiveTruths was not defined`);
+      if (!pushTruths) {
+        throw new Error(`INTERNAL ERROR: receiveTruths..pushTruths was not defined`);
       }
-      return downstreamReceiveTruths(
+      return pushTruths(
           truths.map(event => upgradeEventTo0Dot2(this, event)),
           retrieveMediaBuffer);
     } catch (error) {

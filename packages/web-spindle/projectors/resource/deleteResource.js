@@ -43,7 +43,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
             : scope.resource.destroy(valkOptions)),
         () => valkOptions.discourse.releaseFabricator(),
         eventResult => eventResult
-            && eventResult.getPersistedEvent(),
+            && eventResult.getRecordedEvent(),
         () => {
           reply.code(204);
           reply.send();

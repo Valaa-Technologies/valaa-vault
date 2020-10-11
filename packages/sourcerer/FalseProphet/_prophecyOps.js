@@ -6,7 +6,7 @@ import { Story } from "~/raem/redux/Bard";
 import { AbsentChroniclesError } from "~/raem/tools/denormalized/partitions";
 import { naiveURI } from "~/raem/ValaaURI";
 
-import { ChronicleEventResult, Connection, ProphecyChronicleRequest, ProphecyEventResult }
+import { ProclaimEventResult, Connection, ProphecyChronicleRequest, ProphecyEventResult }
     from "~/sourcerer/api/types";
 import { tryAspect } from "~/sourcerer/tools/EventAspects";
 import { FabricatorEvent } from "~/sourcerer/api/Fabricator";
@@ -72,7 +72,7 @@ export function _proclaimEvents (falseProphet: FalseProphet, events: EventBase[]
   // For purge revision re-chronicles this is a potentially crucial
   // qualitative performance optimization. For _proclaimEvents this is
   // not crucial, but having both this function and revision
-  // rechronicles use the same multi-event functionality will lead in
+  // reproclaims use the same multi-event functionality will lead in
   // improved performance and code quality for both.
   //
   // Conflict purges might result in considerable sized revisions in
@@ -83,10 +83,10 @@ export function _proclaimEvents (falseProphet: FalseProphet, events: EventBase[]
   // commands are being generated and even longer command queues are
   // constantly being purged.
   // Grouping the revision commands together will ensure that even
-  // larger revision rechroniclings can be cleared at once.
+  // larger revision reproclamations can be cleared at once.
   // A naive authority implementation might still leave one client
   // undergoing a large revisioning in a starved state, if there exists
-  // another client which is constantly chronicling commands.
+  // another client which is constantly proclaiming commands.
   // This however is a problem that can and should be solved on the
   // authority side.
   // Various strategies for this can be devised.
@@ -209,11 +209,11 @@ export class ProphecyOperation extends ProphecyEventResult {
   _prophecy: Prophecy;
   _parent: FalseProphet;
   _events: EventBase[];
-  _options: Object; // upstream chronicleEvents options
+  _options: Object; // upstream proclaimEvents options
   _venues: { [chronicleURI: string]: {
     connection: Connection,
     commandEvent: Command,
-    chronicling: Promise<ChronicleEventResult>,
+    proclamation: Promise<ProclaimEventResult>,
     confirmCommand?: Function,
     rejectCommand?: Function,
   } };
@@ -281,24 +281,24 @@ export class ProphecyOperation extends ProphecyEventResult {
         this._firstStageVenues,
         () => this._prophecy || this.throwRejectionError(),
         this.errorOnProphecyOperation.bind(this,
-            new Error(`chronicleEvents.eventResults[${this.index}].getComposedStory()`)));
+            new Error(`proclaimEvents.eventResults[${this.index}].getComposedStory()`)));
   }
 
-  getPersistedStory (dispatchPath_) {
+  getRecordedStory (dispatchPath_) {
     let reformAttempt = this._reformAttempt;
     return this._persistedStory || (this._persistedStory = thenChainEagerly(
-        // TODO(iridian, 2019-01): Add also local stage chroniclings to
+        // TODO(iridian, 2019-01): Add also local stage proclamations to
         // the waited list, as _firstStageVenues only contains remote
-        // stage chroniclings. This requires refactoring: local
+        // stage proclamations. This requires refactoring: local
         // stage persisting currently waits remote truths. This command
         // must be operable offline, so it cannot rely on remote truths.
         // Local persisting must thus be refactored to not await on
         // remote truths, but this needs to have support for discarding
         // the locally persisted commands if the remotes rejected.
         this._firstStageVenues
-            && mapEagerly(this._firstStageVenues, ({ chronicling }) => {
-              if (!chronicling) throw new Error("Heresy pending reformation");
-              return chronicling.getPersistedEvent();
+            && mapEagerly(this._firstStageVenues, ({ proclamation }) => {
+              if (!proclamation) throw new Error("Heresy pending reformation");
+              return proclamation.getRecordedEvent();
             }),
         () => {
           if (reformAttempt !== this._reformAttempt) {
@@ -320,7 +320,7 @@ export class ProphecyOperation extends ProphecyEventResult {
             return thenChainEagerly(head, functionChain, onRejected);
           }
           return this.errorOnProphecyOperation.bind(this,
-            new Error(`chronicleEvents.eventResults[${this.index}].getPersistedStory()`));
+            new Error(`proclaimEvents.eventResults[${this.index}].getRecordedStory()`));
         },
       ));
   }
@@ -342,7 +342,7 @@ export class ProphecyOperation extends ProphecyEventResult {
           return (this._truthStory = prophecy);
         },
         this.errorOnProphecyOperation.bind(this,
-            new Error(`chronicleEvents.eventResults[${this.index}].getTruthStory()`))));
+            new Error(`proclaimEvents.eventResults[${this.index}].getTruthStory()`))));
   }
 
   getPremiereStory () {
@@ -352,7 +352,7 @@ export class ProphecyOperation extends ProphecyEventResult {
     // follower reactions have been resolved as well.
     // TODO(iridian): Exceptions from follower reactions can't
     // reject the prophecy, but we should catch, handle and/or
-    // expose them to the prophecy chronicleEvents originator.
+    // expose them to the prophecy proclaimEvents originator.
         this.getFollowerReactions(),
     // TODO(iridian): Exceptions from upstream signal failure
     // and possible heresy: we should catch and have logic for
@@ -360,7 +360,7 @@ export class ProphecyOperation extends ProphecyEventResult {
     // Nevertheless flushing the corpus is needed.
         () => this.getComposedEvent(),
         this.errorOnProphecyOperation.bind(this,
-            new Error(`chronicleEvents.eventResults[${this.index}].getPremiereStory()`)));
+            new Error(`proclaimEvents.eventResults[${this.index}].getPremiereStory()`)));
   }
 
   getFollowerReactions (ofSpecificFollower) {
@@ -448,7 +448,7 @@ export class ProphecyOperation extends ProphecyEventResult {
           chronicleURI, getActionFromPassage(this._prophecy));
       (connection.isRemoteAuthority()
               ? (this._remoteVenues || (this._remoteVenues = []))
-          : connection.isLocallyPersisted()
+          : connection.isLocallyRecorded()
               ? (this._localVenues || (this._localVenues = []))
               : (this._memoryVenues || (this._memoryVenues = []))
       ).push((this._venues[chronicleURI] = { connection, commandEvent }));
@@ -469,7 +469,7 @@ export class ProphecyOperation extends ProphecyEventResult {
     this._debugPhase = `validate venues`;
     this.getStages().forEach(stageVenues => stageVenues.forEach(venue => {
       venue.validatedConnection = thenChainEagerly(
-          venue.connection.asActiveConnection(),
+          venue.connection.asSourceredConnection(),
           (connection) => {
             this._debugPhase = `validate venue connection ${connection.getName()}`;
             if (connection.isFrozenConnection()) {
@@ -529,7 +529,7 @@ export class ProphecyOperation extends ProphecyEventResult {
     this._firstStageVenues = venues;
     const ret = this._chronicleStageVenueCommands(venues);
     const onRecordDispatchPath = generateDispatchEventPath(this.event.meta.transactor, "record");
-    if (onRecordDispatchPath) this.getPersistedStory(onRecordDispatchPath);
+    if (onRecordDispatchPath) this.getRecordedStory(onRecordDispatchPath);
     return ret;
   }
 
@@ -547,20 +547,20 @@ export class ProphecyOperation extends ProphecyEventResult {
 
     // Maybe determine aspects.log.index's beforehand?
 
-    // Get aspects.log.index and scribe persist finalizer for each chronicle
+    // Get aspects.log.index and scribe record finalizer for each chronicle
     this._debugPhase = `chronicle stage #${this._stageIndex} '${this._stageName}' commands`;
     for (const venue of venues) {
       try {
         this._debugPhase = `chronicle stage #${this._stageIndex} '${this._stageName}' command to ${
             venue.connection.getName()}`;
-        venue.chronicling = venue.connection
-            .chronicleEvent(venue.commandEvent, Object.create(this._options));
+        venue.proclamation = venue.connection
+            .proclaimEvent(venue.commandEvent, Object.create(this._options));
       } catch (error) {
         throw this._parent.wrapErrorEvent(error, 1,
-            new Error(`chronicleEvents.stage["${this._stageName}"].connection["${
-                venue.connection.getName()}"].chronicleEvents`),
+            new Error(`proclaimEvents.stage["${this._stageName}"].connection["${
+                venue.connection.getName()}"].proclaimEvents`),
             "\n\tcommandEvent:", ...dumpObject(venue.commandEvent),
-            "\n\tchronicling:", ...dumpObject(venue.chronicling),
+            "\n\tproclamation:", ...dumpObject(venue.proclamation),
         );
       }
     }
@@ -571,7 +571,7 @@ export class ProphecyOperation extends ProphecyEventResult {
 
   _processStageVenues (venues) {
     return venues.map(venue => this.opChain(
-        "_stageVenuesChain", [venue, venue.currentChronicling = venue.chronicling],
+        "_stageVenuesChain", [venue, venue.currentProclamation = venue.proclamation],
         "_errorOnProcessStageVenue"));
   }
 
@@ -601,9 +601,9 @@ export class ProphecyOperation extends ProphecyEventResult {
   _resolveStageVenueTruth (venue, truth, truthProcesses) {
     if (!truth) {
       const actualTruthProcesses = truthProcesses || [];
-      if (venue.chronicling !== venue.currentChronicling) {
+      if (venue.proclamation !== venue.currentProclamation) {
         // retry
-        return thisChainRedirect(0, [venue, venue.currentChronicling = venue.chronicling, []]);
+        return thisChainRedirect(0, [venue, venue.currentProclamation = venue.proclamation, []]);
       }
       Promise.all(actualTruthProcesses).then(([chronicled, received]) => {
         venue.connection.errorEvent(
@@ -624,9 +624,9 @@ export class ProphecyOperation extends ProphecyEventResult {
   _errorOnProcessStageVenue (error, index, params) {
     const venue = params[0];
     if ((!this._progress || !this._progress.isSchismatic)
-        && (venue.chronicling !== venue.currentChronicling)) {
+        && (venue.proclamation !== venue.currentProclamation)) {
       // retry
-      return thisChainRedirect(0, [venue, venue.currentChronicling = venue.chronicling]);
+      return thisChainRedirect(0, [venue, venue.currentProclamation = venue.proclamation]);
     }
     venue.rejectionReason = error;
     throw error;
@@ -649,24 +649,24 @@ export class ProphecyOperation extends ProphecyEventResult {
       this.purge();
     }
     this._rejectionError = this.errorOnProphecyOperation(
-        new Error(`chronicleEvents.eventResults[${this.index}].profess(phase#${phaseIndex}/${
+        new Error(`proclaimEvents.eventResults[${this.index}].profess(phase#${phaseIndex}/${
             this._debugPhase})`),
         error, true);
     this._prophecy = null;
     const transactor = this.event.meta.transactor;
     if (transactor) {
-      const progress = this.getErroringProgress(this._rejectionError, { prophecy });
+      const progress = this.getProgressErrorEvent("profess", this._rejectionError, { prophecy });
       transactor.dispatchAndDefaultActEvent(progress);
     } else if (!this._truthStory && (this.getVerbosity() >= 1)) {
       this.outputErrorEvent(this._rejectionError,
-          `Exception caught during a fire-and-forget chronicleEvents.profess`);
+          `Exception caught during a fire-and-forget proclaimEvents.profess`);
     }
     if (prophecy) {
       prophecy.rejectionReason = this._rejectionError;
       try {
         _purgeLatestRecitedStory(this._parent, prophecy, false);
       } catch (innerError) {
-        outputError(innerError, `Exception caught during chronicleEvents.profess.purge`);
+        outputError(innerError, `Exception caught during proclaimEvents.profess.purge`);
       }
     }
     return null;
@@ -681,7 +681,7 @@ export class ProphecyOperation extends ProphecyEventResult {
           : Object.values(this._venues)) {
         if (!venue) continue;
         this._persistedStory = null;
-        venue.chronicling = null;
+        venue.proclamation = null;
       }
     }
     const progress = this._progress;
@@ -745,8 +745,8 @@ export class ProphecyOperation extends ProphecyEventResult {
       if (!recomposedSubCommand) return thisChainReturn(false);
       venue._reformAttempt = this._reformAttempt;
       venue.commandEvent = recomposedSubCommand;
-      venue.chronicling = this._parent._connections[chronicleURI]
-          .chronicleEvent(venue.commandEvent, Object.create(this._options));
+      venue.proclamation = this._parent._connections[chronicleURI]
+          .proclaimEvent(venue.commandEvent, Object.create(this._options));
     }
     if (this._progress) {
       this._progress.previousProphecy = this._progress.prophecy;

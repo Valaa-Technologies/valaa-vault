@@ -4,7 +4,7 @@ import { Command, EventBase, Truth } from "~/raem/events";
 
 import { FabricEventTarget } from "~/tools/FabricEvent";
 
-import type { ChronicleOptions, ChronicleRequest, ChronicleEventResult } from "./types";
+import type { ProclaimOptions, Proclamation, ProclaimEventResult } from "./types";
 
 /**
  * Interface for events flowing downstream
@@ -24,7 +24,7 @@ export default class Follower extends FabricEventTarget {
    * receiveCommands - receive commands ie. possible future truth events.
    *
    * @param  {type} commands       list of uncertain future truth event
-   * @returns {type}               if these commands originates from a local chronicleEvent call,
+   * @returns {type}               if these commands originates from a local proclaimEvent call,
    *                               any return values are returned back to it, possibly as promises.
    *                               This is to facilitate more complex interactive logic (such as UI
    *                               interactions) in a straightforward async/await fashion.
@@ -38,16 +38,16 @@ export default class Follower extends FabricEventTarget {
    * Record events into the upstream.
    * Takes ownership of the *events* (ie. can mutate them).
    *
-   * @param {ChronicleOptions} [options={}]
+   * @param {ProclaimOptions} [options={}]
    * @returns {Promise<Object>}
    * @memberof Connection
    */
-  chronicleEvents (events: EventBase[], options: ChronicleOptions = {}): ChronicleRequest { // eslint-disable-line
-    throw new Error(`chronicleEvents not implemented by ${this.constructor.name}`);
+  proclaimEvents (events: EventBase[], options: ProclaimOptions = {}): Proclamation { // eslint-disable-line
+    throw new Error(`proclaimEvents not implemented by ${this.constructor.name}`);
   }
 
-  chronicleEvent (event: EventBase, options: ChronicleOptions = {}): ChronicleEventResult {
-    return this.chronicleEvents([event], options).eventResults[0];
+  proclaimEvent (event: EventBase, options: ProclaimOptions = {}): ProclaimEventResult {
+    return this.proclaimEvents([event], options).eventResults[0];
   }
 
   getIdentityManager () { return null; }

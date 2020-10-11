@@ -31,14 +31,14 @@ export function createRAEMTestHarness (options: Object, ...commandBlocks: any) {
         () => harness.initialize(),
         // Each commandBlock maps to two steps: [#2, #3], [#4, #5], etc.
         // Event steps set the thenChain head to corresponding commandBlocks events,
-        // odd steps does a chronicleEvents for those. This is for nicer error context messages.
+        // odd steps does a proclaimEvents for those. This is for nicer error context messages.
         ...[].concat(...commandBlocks.map(events => [
           () => events,
           (eventsAsHead) => mapEagerly(
-              harness.chronicleTestEvents(eventsAsHead).eventResults,
+              harness.proclaimTestEvents(eventsAsHead).eventResults,
               result => (
-                  result.getPersistedStory
-                      ? result.getPersistedStory()
+                  result.getRecordedStory
+                      ? result.getRecordedStory()
                   : result.getComposedStory
                       ? result.getComposedStory()
                       : result.getTruthEvent())),
@@ -95,8 +95,8 @@ export default class RAEMTestHarness extends FabricEventTarget {
   }
 
   /**
-   * chronicleEvents always delegates the operation to corpus.dispatch
-   * (handling restricted commands is done via .chronicleEvents, only
+   * proclaimEvents always delegates the operation to corpus.dispatch
+   * (handling restricted commands is done via .proclaimEvents, only
    * available in @valos/sourcerer). Also validates is-restricted for
    * incoming commands, and is-universal for resulting stories.
    *
@@ -104,7 +104,7 @@ export default class RAEMTestHarness extends FabricEventTarget {
    *
    * @memberof RAEMTestHarness
    */
-  chronicleTestEvents (events: EventBase[]) {
+  proclaimTestEvents (events: EventBase[]) {
     try {
       return {
         eventResults: events.map(event_ => {
@@ -124,8 +124,8 @@ export default class RAEMTestHarness extends FabricEventTarget {
           "\n\tevents:", ...dumpObject(events));
     }
   }
-  chronicleTestEvent (event: EventBase, options: ?Object) {
-    return this.chronicleTestEvents([event], options).eventResults[0];
+  proclaimTestEvent (event: EventBase, options: ?Object) {
+    return this.proclaimTestEvents([event], options).eventResults[0];
   }
 
   createCorpus (corpusOptions: Object = {}) {

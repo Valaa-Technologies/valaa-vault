@@ -37,18 +37,18 @@ describe("Oracle", () => {
     }
   });
 
-  it("Rejects commands chronicled after a freeze command", async () => {
+  it("Rejects commands that are proclaimed after a freeze command", async () => {
     harness = await createSourcererOracleHarness({});
     const chronicleURI = naiveURI.createChronicleURI(testAuthorityURI, testRootId);
-    await harness.sourcerer.acquireConnection(chronicleURI).asActiveConnection();
+    await harness.sourcerer.sourcifyChronicle(chronicleURI).asSourceredConnection();
 
     const commandsUpToFreeze = [freezeChronicleEvent];
     for (const command of commandsUpToFreeze) {
-      await harness.chronicleTestEvent(command).getPremiereStory();
+      await harness.proclaimTestEvent(command).getPremiereStory();
     }
 
     // Attempt to run an action post-freeze and expect complaints
-    expect(() => harness.chronicleTestEvent(lateCommand))
+    expect(() => harness.proclaimTestEvent(lateCommand))
         .toThrow(/Cannot modify frozen.*@\$~raw.test_chronicle@@/);
   });
 });

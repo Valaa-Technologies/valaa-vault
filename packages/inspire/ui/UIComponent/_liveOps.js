@@ -1,6 +1,6 @@
 // @flow
 
-import { tryConnectToAbsentChroniclesAndThen } from "~/raem/tools/denormalized/partitions";
+import { trySourcifyAbsentChroniclesAndThen } from "~/raem/tools/denormalized/partitions";
 import { SourceInfoTag } from "~/raem/VALK/StackTrace";
 
 import Vrapper, { LiveUpdate, getImplicitCallable } from "~/engine/Vrapper";
@@ -503,7 +503,7 @@ function _valensWrapCallback (component: Object, callback_: Function, attributeN
       return callback.apply(eThis, args);
     } catch (error) {
       releaseOpts = { rollback: error };
-      const absentChronicleSourcings = tryConnectToAbsentChroniclesAndThen(error,
+      const absentChronicleSourcings = trySourcifyAbsentChroniclesAndThen(error,
           () => ret.apply(this, args));
       if (absentChronicleSourcings) return absentChronicleSourcings;
       const finalError = wrapError(error,

@@ -44,7 +44,7 @@ export function createSourcererTestHarness (options: Object, ...commandBlocks: a
     sourcererOptions => createScriptTestHarness(sourcererOptions),
     harness => {
       commandBlocks.forEach(commands => {
-        harness.chronicleTestEvents(commands).eventResults.forEach((result, index) => {
+        harness.proclaimTestEvents(commands).eventResults.forEach((result, index) => {
           if (isPromise((result.getTruthEvent || result.getTruthStory).call(result))) {
             throw new Error(`command #${index} getTruthEvent resolves into a Promise.${
                 ""} Use the asynchronous createSourcererOracleHarness instead.`);
@@ -89,8 +89,8 @@ export function createSourcererOracleHarness (options: Object, ...commandBlocks:
       if (!options.acquireConnections) return [];
       const chronicleURIs = options.acquireConnections.map(
           chronicleId => naiveURI.createChronicleURI("valaa-test:", chronicleId));
-      return mapEagerly(chronicleURIs,
-          chronicleURI => harness.sourcerer.acquireConnection(chronicleURI).asActiveConnection());
+      return mapEagerly(chronicleURIs, chronicleURI =>
+          harness.sourcerer.sourcifyChronicle(chronicleURI).asSourceredConnection());
     },
     connections => {
       connections.forEach(connection => {
@@ -99,8 +99,8 @@ export function createSourcererOracleHarness (options: Object, ...commandBlocks:
         }
       });
       return mapEagerly(commandBlocks,
-          commands => mapEagerly(harness.chronicleTestEvents(commands).eventResults,
-              combinedOptions.awaitResult || (result => result.getPersistedStory())));
+          commands => mapEagerly(harness.proclaimTestEvents(commands).eventResults,
+              combinedOptions.awaitResult || (result => result.getRecordedStory())));
     },
     () => harness,
   ], error => {
@@ -141,7 +141,7 @@ export default class SourcererTestHarness extends ScriptTestHarness {
     return thenChainEagerly(
       super.initialize(), [
         ...(!this.oracleOptions ? [
-          () => createTestMockSourcerer({ isLocallyPersisted: false }),
+          () => createTestMockSourcerer({ isLocallyRecorded: false }),
         ] : [
           () => createOracle(
               { ...(this.oracleOptions || {}), parent: this },
@@ -155,7 +155,7 @@ export default class SourcererTestHarness extends ScriptTestHarness {
         upstream => this.sourcerer.setUpstream(upstream),
         () => {
           hasRemoteTestBackend = (this.testAuthorityConfig || {}).isRemoteAuthority;
-          const testConnection = this.sourcerer.acquireConnection(
+          const testConnection = this.sourcerer.sourcifyChronicle(
               this.testChronicleURI, { newChronicle: !hasRemoteTestBackend });
           if (hasRemoteTestBackend) {
             // For remote test chronicles with oracle we provide the root
@@ -166,13 +166,13 @@ export default class SourcererTestHarness extends ScriptTestHarness {
               aspects: { version: "0.2", log: { index: 0 }, command: { id: "rid-0" } },
             }]);
           }
-          return testConnection.asActiveConnection();
+          return testConnection.asSourceredConnection();
         },
         (testConnection) => (this.testConnection = testConnection),
           // For non-remotes we chronicle the root entity explicitly.
         () => {
           if (hasRemoteTestBackend) return undefined;
-          const result = this.chronicleTestEvent(
+          const result = this.proclaimTestEvent(
                 createTestChronicleEntityCreated(), { isTruth: true });
           return result.getPremiereStory();
         },
@@ -181,8 +181,8 @@ export default class SourcererTestHarness extends ScriptTestHarness {
     );
   }
 
-  chronicleTestEvents (events: EventBase[], ...rest: any) {
-    return this.chronicler.chronicleEvents(events.map(e => trivialClone(e)), ...rest);
+  proclaimTestEvents (events: EventBase[], ...rest: any) {
+    return this.chronicler.proclaimEvents(events.map(e => trivialClone(e)), ...rest);
   }
 
   createCorpus (corpusOptions: Object = {}) {
@@ -259,10 +259,10 @@ export default class SourcererTestHarness extends ScriptTestHarness {
             }> has no TestConnection at the end of the chain`);
       }
       const truths = JSON.parse(JSON.stringify(
-              (testSourceBackend._chroniclings || []).map(entry => entry.event)))
+              (testSourceBackend._proclamations || []).map(entry => entry.event)))
           .map(authorizeTruth);
-      if (clearSourceUpstreamEntries) testSourceBackend._chroniclings = [];
-      if (clearReceiverUpstreamEntries) receiverBackend._chroniclings = [];
+      if (clearSourceUpstreamEntries) testSourceBackend._proclamations = [];
+      if (clearReceiverUpstreamEntries) receiverBackend._proclamations = [];
       if (verbosity) {
         receiver.warnEvent("Receiving truths:", dumpify(truths, { indent: 2 }));
       }
@@ -361,7 +361,7 @@ export function createTestMockSourcerer (configOverrides: Object = {}) {
     authorityURI: "valaa-test:",
     authorityConfig: {
       eventVersion: EVENT_VERSION,
-      isLocallyPersisted: true,
+      isLocallyRecorded: true,
       isPrimaryAuthority: true,
       isRemoteAuthority: false,
       ...configOverrides,

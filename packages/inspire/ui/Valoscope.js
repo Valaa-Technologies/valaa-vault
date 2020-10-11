@@ -283,7 +283,7 @@ const _scopeFrameChain = [
     } else {
       this.frameRef = vRef(this.frameId, undefined, undefined, chronicleURI);
     }
-    return this.engine.discourse.acquireConnection(chronicleURI).asActiveConnection();
+    return this.engine.discourse.sourcifyChronicle(chronicleURI).asSourceredConnection();
   },
 
   function _obtainRootFrame (/* rootFrameConnection: Connection */) {
@@ -318,7 +318,7 @@ const _scopeFrameChain = [
     const vScopeFrame = (this.vPrototype != null)
         ? this.vPrototype.instantiate(initialState, options)
         : this.engine.create("Entity", initialState, options);
-    this.chronicling = options.chronicling;
+    this.proclamation = options.proclamation;
     if (this.rootFrameAuthorityURI && this.vFocus) {
       this.component.setUIContextValue(Lens.frameRootFocus, this.vFocus);
       this.component.setUIContextValue(Lens.frameRoot, vScopeFrame);
@@ -344,8 +344,8 @@ const _scopeFrameChain = [
     if (discourse) {
       this.discourse = null;
       const result = discourse.releaseFabricator();
-      if (!this.isTransitory && (result || this.chronicling)) {
-        return [vScopeFrame, (result || this.chronicling).getPersistedEvent()];
+      if (!this.isTransitory && (result || this.proclamation)) {
+        return [vScopeFrame, (result || this.proclamation).getRecordedEvent()];
       }
     }
     return vScopeFrame;

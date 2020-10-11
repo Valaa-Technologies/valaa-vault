@@ -173,8 +173,8 @@ export default class ReactRoot extends React.Component {
         vRootFocus.getRawId(), "ui-roots", `@$~raw.${encodeURIComponent(viewName)}@@`);
     const chronicleURI = naiveURI.createChronicleURI(authorityURI, localInstanceVRID);
     await vRootFocus.getEngine().discourse
-        .acquireConnection(chronicleURI)
-        .asActiveConnection();
+        .sourcifyChronicle(chronicleURI)
+        .asSourceredConnection();
     let vLocalUIRoot = vRootFocus.getEngine()
         .getVrapperByRawId(localInstanceVRID, { optional: true });
     if (!vLocalUIRoot) {

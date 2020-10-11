@@ -27,12 +27,12 @@ describe("Media handling", () => {
   it("does an async prepareBvob for non-locally persisted Media content", async () => {
     harness = await createEngineOracleHarness({ verbosity: 0, claimBaseBlock: true,
       oracle: { testAuthorityConfig: {
-        isRemoteAuthority: true, isLocallyPersisted: false,
+        isRemoteAuthority: true, isLocallyRecorded: false,
       } },
       awaitResult: (result) => result.getComposedStory(),
     });
     const testConnectionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
-    const existingChroniclingCount = testConnectionBackend._chroniclings.length;
+    const existingProclamationCount = testConnectionBackend._proclamations.length;
     const vTestRoot = entities()[testRootId];
     const { media, contentUpdateStarted } = await harness.runValoscript(vTestRoot, `
       const media = new Media({
@@ -57,16 +57,16 @@ describe("Media handling", () => {
         .toBeTruthy();
     expect(media.step("content"))
         .toBeFalsy();
-    expect(testConnectionBackend._chroniclings.length)
-        .toEqual(existingChroniclingCount + 1);
+    expect(testConnectionBackend._proclamations.length)
+        .toEqual(existingProclamationCount + 1);
     testConnectionBackend.addPrepareBvobResult({ contentHash: exampleContentHash });
     const { bvobId } = await contentUpdateStarted;
     expect(bvobId.getVRef().rawId())
         .toEqual(exampleContentId);
     expect(bvobId.getVRef().toJSON())
         .toEqual(media.step("content").getVRef().toJSON());
-    expect(testConnectionBackend._chroniclings.length)
-        .toEqual(existingChroniclingCount + 2);
+    expect(testConnectionBackend._proclamations.length)
+        .toEqual(existingProclamationCount + 2);
 
     await expect(media.extractValue()).rejects
         .toThrow(/content not found in local cache/);
@@ -75,11 +75,11 @@ describe("Media handling", () => {
   it("does an async prepareBvob for locally persisted Media content", async () => {
     harness = await createEngineOracleHarness({ verbosity: 0, claimBaseBlock: true,
       oracle: { testAuthorityConfig: {
-        isRemoteAuthority: true, isLocallyPersisted: true, // as opposed to false of previous test
+        isRemoteAuthority: true, isLocallyRecorded: true, // as opposed to false of previous test
       } },
     });
     const testConnectionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
-    const existingChroniclingCount = testConnectionBackend._chroniclings.length;
+    const existingProclamationCount = testConnectionBackend._proclamations.length;
     const { media, contentUpdateStarted, newMediaPersist } = await harness.runValoscript(
         vRef(testRootId), `
       const media = new Media({
@@ -102,8 +102,8 @@ describe("Media handling", () => {
     await newMediaPersist;
     expect(media.getVRef().toJSON())
         .toEqual(entities()[testRootId].step(["§..", "text"]).getVRef().toJSON());
-    expect(testConnectionBackend._chroniclings.length)
-        .toEqual(existingChroniclingCount + 1);
+    expect(testConnectionBackend._proclamations.length)
+        .toEqual(existingProclamationCount + 1);
     // local bvob persisted internally but not remotely
     const { bvobId, bvobComposed, bvobRecorded } = await contentUpdateStarted;
     expect(bvobId.getVRef().rawId())
@@ -117,11 +117,11 @@ describe("Media handling", () => {
 
     expect(bvobComposedEvent.command.actions.length).toEqual(2);
     testConnectionBackend.addPrepareBvobResult({ contentHash: exampleContentHash });
-    expect(testConnectionBackend._chroniclings.length)
-        .toEqual(existingChroniclingCount + 1);
+    expect(testConnectionBackend._proclamations.length)
+        .toEqual(existingProclamationCount + 1);
     await bvobRecorded;
-    expect(testConnectionBackend._chroniclings.length)
-        .toEqual(existingChroniclingCount + 2);
+    expect(testConnectionBackend._proclamations.length)
+        .toEqual(existingProclamationCount + 2);
 
     expect(await media.extractValue())
         .toEqual(exampleContent);
@@ -129,12 +129,12 @@ describe("Media handling", () => {
 
   it("rejects async prepareBvob command recomposition after Media command is purged", async () => {
     harness = await createEngineOracleHarness({ verbosity: 0, claimBaseBlock: true,
-      oracle: { testAuthorityConfig: { isRemoteAuthority: true, isLocallyPersisted: true } },
-      awaitResult: (result) => result.getPersistedStory(),
+      oracle: { testAuthorityConfig: { isRemoteAuthority: true, isLocallyRecorded: true } },
+      awaitResult: (result) => result.getRecordedStory(),
     });
     const plog = harness.opLog(1, "test_purge-recompose", "Harness created");
     const testConnectionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
-    const existingChroniclingCount = testConnectionBackend._chroniclings.length;
+    const existingProclamationCount = testConnectionBackend._proclamations.length;
     let reformCause;
     const onReform = e => { reformCause = e.error; e.preventDefault(); };
     plog && plog.opEvent("await_runValoscript");
@@ -162,8 +162,8 @@ describe("Media handling", () => {
         { awaitResult: (result) => result.getComposedEvent() });
     plog && plog.opEvent("await_newMediaPersist");
     await newMediaPersist;
-    expect(testConnectionBackend._chroniclings.length)
-        .toEqual(existingChroniclingCount + 1);
+    expect(testConnectionBackend._proclamations.length)
+        .toEqual(existingProclamationCount + 1);
     plog && plog.opEvent("await_contentUpdateStarted");
     const { bvobRecorded, bvobPurged } = await contentUpdateStarted;
     testConnectionBackend.addPrepareBvobResult({ contentHash: exampleContentHash });
@@ -173,9 +173,9 @@ describe("Media handling", () => {
     expect(await media.extractValue())
         .toEqual(exampleContent);
 
-    expect(testConnectionBackend._chroniclings.length)
-        .toEqual(existingChroniclingCount + 2);
-    testConnectionBackend._chroniclings.splice(existingChroniclingCount, 2)[0]
+    expect(testConnectionBackend._proclamations.length)
+        .toEqual(existingProclamationCount + 2);
+    testConnectionBackend._proclamations.splice(existingProclamationCount, 2)[0]
         .rejectTruthEvent(Object.assign(new Error("Not permitted"),
             { isRevisable: false, isReformable: true }));
     plog && plog.opEvent("await_bvobPurged");
@@ -191,14 +191,14 @@ describe("Media handling", () => {
         .toThrow(/Cannot operate on a non-Created/);
   });
 
-  it("does not reform nor rechronicle when only non-schismatic errors are thrown", async () => {
+  it("does not reform nor reproclaim when only non-schismatic errors are thrown", async () => {
     harness = await createEngineOracleHarness({ verbosity: 0, claimBaseBlock: true,
-      oracle: { testAuthorityConfig: { isRemoteAuthority: true, isLocallyPersisted: true } },
-      awaitResult: (result) => result.getPersistedStory(),
+      oracle: { testAuthorityConfig: { isRemoteAuthority: true, isLocallyRecorded: true } },
+      awaitResult: (result) => result.getRecordedStory(),
     });
     const plog = harness.opLog(1, "test_no-reform-non-schism");
     const testConnectionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
-    const existingChroniclingCount = testConnectionBackend._chroniclings.length;
+    const existingProclamationCount = testConnectionBackend._proclamations.length;
     let reformCause;
     const onReform = e => { reformCause = e.error; e.preventDefault(); };
     plog && plog.opEvent("await_runValoscript");
@@ -224,8 +224,8 @@ describe("Media handling", () => {
         { awaitResult: (result) => result.getComposedEvent() });
     plog && plog.opEvent("await_newMediaPersist");
     await newMediaPersist;
-    expect(testConnectionBackend._chroniclings.length)
-        .toEqual(existingChroniclingCount + 1);
+    expect(testConnectionBackend._proclamations.length)
+        .toEqual(existingProclamationCount + 1);
     plog && plog.opEvent("await_contentUpdateStarated");
     const { bvobRecorded } = await contentUpdateStarted;
     testConnectionBackend.addPrepareBvobResult({ contentHash: exampleContentHash });
@@ -235,9 +235,9 @@ describe("Media handling", () => {
     expect(await media.extractValue())
         .toEqual(exampleContent);
 
-    expect(testConnectionBackend._chroniclings.length)
-        .toEqual(existingChroniclingCount + 2);
-    testConnectionBackend._chroniclings.splice(existingChroniclingCount, 2)[0]
+    expect(testConnectionBackend._proclamations.length)
+        .toEqual(existingProclamationCount + 2);
+    testConnectionBackend._proclamations.splice(existingProclamationCount, 2)[0]
         .rejectTruthEvent(Object.assign(new Error("Connection lost"),
             { isSchismatic: false }));
     plog && plog.opEvent("await_newMediaError");
@@ -257,14 +257,14 @@ describe("Media handling", () => {
     // this test is broken. The delay-of-depending does not in fact happen
     // and bvobPurged gets calle when it shouldn't.
     harness = await createEngineOracleHarness({ verbosity: 0, claimBaseBlock: true,
-      oracle: { testAuthorityConfig: { isRemoteAuthority: true, isLocallyPersisted: true } },
-      awaitResult: (result) => result.getPersistedStory(),
+      oracle: { testAuthorityConfig: { isRemoteAuthority: true, isLocallyRecorded: true } },
+      awaitResult: (result) => result.getRecordedStory(),
     });
     const plog = harness.opLog(1, "test_delay-depending", "Harness created");
     const buffer = arrayBufferFromUTF8String("example content");
     const contentHash = contentHashFromArrayBuffer(buffer);
     const testConnectionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
-    const existingChroniclingCount = testConnectionBackend._chroniclings.length;
+    const existingProclamationCount = testConnectionBackend._proclamations.length;
     let mediaProphecy, mediaPurgeEvent, mediaReformCause;
     let resolveReformationDelay;
     const onReform = e => {
@@ -299,22 +299,22 @@ describe("Media handling", () => {
         { awaitResult: (result) => (mediaProphecy = result).getComposedEvent() });
     plog && plog.opEvent("await_newMediaPersist");
     await newMediaPersist;
-    expect(testConnectionBackend._chroniclings.length)
-        .toEqual(existingChroniclingCount + 1);
+    expect(testConnectionBackend._proclamations.length)
+        .toEqual(existingProclamationCount + 1);
     plog && plog.opEvent("await_contentUpdateStarted");
         const { bvobRecorded, bvobPurged } = await contentUpdateStarted;
     testConnectionBackend.addPrepareBvobResult({ contentHash });
     plog && plog.opEvent("await_bvobRecorded");
     await bvobRecorded;
-    expect(testConnectionBackend._chroniclings.length)
-        .toEqual(existingChroniclingCount + 2);
-    testConnectionBackend._chroniclings.splice(existingChroniclingCount, 2)[0]
+    expect(testConnectionBackend._proclamations.length)
+        .toEqual(existingProclamationCount + 2);
+    testConnectionBackend._proclamations.splice(existingProclamationCount, 2)[0]
         .rejectTruthEvent(Object.assign(new Error("Not permitted"),
             { isRevisable: false, isReformable: true }));
     plog && plog.opEvent("await_bvobPurged");
     const bvobPurgeEvent = await bvobPurged;
-    expect(testConnectionBackend._chroniclings.length)
-        .toEqual(existingChroniclingCount);
+    expect(testConnectionBackend._proclamations.length)
+        .toEqual(existingProclamationCount);
     expect(bvobPurgeEvent.error.message)
         .toMatch(/Media does not exist/);
     expect(bvobPurgeEvent.errorCauseType)
@@ -324,13 +324,13 @@ describe("Media handling", () => {
         .toMatch(/Not permitted/);
 
     resolveReformationDelay();
-    plog && plog.opEvent("await_mediaProphecy.getPersistedStory");
+    plog && plog.opEvent("await_mediaProphecy.getRecordedStory");
     let mediaStory;
     while (!mediaStory) {
       // FIXME(iridian, 2019-05): This is horrible. Async synchronization is pain.
       // This test produces "null truth when fulfilling prophecy" errors to the log .
       try {
-        mediaStory = await mediaProphecy.getPersistedStory();
+        mediaStory = await mediaProphecy.getRecordedStory();
       } catch (error) {
         if (error.message !== "Heresy pending reformation") throw error;
       }
@@ -338,8 +338,8 @@ describe("Media handling", () => {
     }
     expect(mediaPurgeEvent)
         .toEqual(undefined);
-    expect(testConnectionBackend._chroniclings.length)
-        .toEqual(existingChroniclingCount + 1);
+    expect(testConnectionBackend._proclamations.length)
+        .toEqual(existingProclamationCount + 1);
     // FIXME(iridian, 2019-05): This test and its underlying
     // implementation is partial. This test does not make sure that the
     // depending reformation gets run: in fact the bvob command remains
@@ -353,7 +353,7 @@ describe("Media handling", () => {
   it("doesn't fetch a media content from the stale lookups when updating content", async () => {
     harness = await createEngineOracleHarness({ verbosity: 0, claimBaseBlock: true,
       oracle: { testAuthorityConfig: {
-        isRemoteAuthority: true, isLocallyPersisted: true, // as opposed to false of previous test
+        isRemoteAuthority: true, isLocallyRecorded: true, // as opposed to false of previous test
       } },
     });
     const undefinedMedia = await harness.runValoscript(vRef(testRootId), `
@@ -468,7 +468,7 @@ describe("Media handling", () => {
 describe("Two paired harnesses emulating two gateways connected through event streams", () => {
   it("passes a property value to paired client", async () => {
     harness = await createEngineOracleHarness({ verbosity: 0, oracle: {
-      testAuthorityConfig: { isRemoteAuthority: true, isLocallyPersisted: true },
+      testAuthorityConfig: { isRemoteAuthority: true, isLocallyRecorded: true },
     } });
     const pairness = await createEngineOracleHarness({ verbosity: 0, pairedHarness: harness });
 
@@ -486,7 +486,7 @@ describe("Two paired harnesses emulating two gateways connected through event st
 
   it("passes a property reference to a newly created Entity to paired client", async () => {
     harness = await createEngineOracleHarness({ verbosity: 0, oracle: {
-      testAuthorityConfig: { isRemoteAuthority: true, isLocallyPersisted: true },
+      testAuthorityConfig: { isRemoteAuthority: true, isLocallyRecorded: true },
     } });
     const pairness = await createEngineOracleHarness({ verbosity: 0, pairedHarness: harness });
 
@@ -517,7 +517,7 @@ describe("Two paired harnesses emulating two gateways connected through event st
 
   it("passes a complex property with a Resource reference to paired client", async () => {
     harness = await createEngineOracleHarness({ verbosity: 0, oracle: {
-      testAuthorityConfig: { isRemoteAuthority: true, isLocallyPersisted: true },
+      testAuthorityConfig: { isRemoteAuthority: true, isLocallyRecorded: true },
     } });
     const pairness = await createEngineOracleHarness({ verbosity: 0, pairedHarness: harness });
 
@@ -545,7 +545,7 @@ describe("Two paired harnesses emulating two gateways connected through event st
 
   it("passes a function inside property to paired client", async () => {
     harness = await createEngineOracleHarness({ verbosity: 0, oracle: {
-      testAuthorityConfig: { isRemoteAuthority: true, isLocallyPersisted: true },
+      testAuthorityConfig: { isRemoteAuthority: true, isLocallyRecorded: true },
     } });
     const pairness = await createEngineOracleHarness({ verbosity: 0, pairedHarness: harness });
 
@@ -605,7 +605,7 @@ describe("Two paired harnesses emulating two gateways connected through event st
 
   it("activates an absent vref properly", async () => {
     harness = await createEngineOracleHarness({ verbosity: 0, oracle: {
-      testAuthorityConfig: { isRemoteAuthority: true, isLocallyPersisted: true },
+      testAuthorityConfig: { isRemoteAuthority: true, isLocallyRecorded: true },
     } });
     const pairness = await createEngineOracleHarness({ verbosity: 0, pairedHarness: harness });
 

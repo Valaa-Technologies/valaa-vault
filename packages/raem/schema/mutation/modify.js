@@ -34,7 +34,7 @@ const modify = {
     try {
       throw new Error("MODIFIED endpoint rotted - needs to be replaced with specific variants");
       /*
-      const truth = await context.store.chronicleEvent({
+      const truth = await context.store.proclaimEvent({
         ...modified({
           id: args.input.id,
           typeName: args.input.typeName,

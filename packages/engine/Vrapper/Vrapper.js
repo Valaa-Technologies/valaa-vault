@@ -21,7 +21,7 @@ import { getObjectRawField } from "~/raem/state/getObjectField";
 
 import { createGhostVRLInInstance, isMaterialized, createMaterializeGhostAction }
     from "~/raem/tools/denormalized/ghost";
-import { AbsentChroniclesError, addConnectToChronicleToError }
+import { AbsentChroniclesError, addSourcifyChronicleToError }
     from "~/raem/tools/denormalized/partitions";
 import { qualifiedNamesOf, qualifiedSymbol } from "~/tools/namespace";
 
@@ -32,7 +32,7 @@ import { transpileValoscriptBody } from "~/script/transpileValoscript";
 import { ScopeAccessesTag } from "~/script/VALSK";
 
 import { Discourse, Connection } from "~/sourcerer";
-import { ChronicleEventResult } from "~/sourcerer/api/types";
+import { ProclaimEventResult } from "~/sourcerer/api/types";
 
 import { createModuleGlobal } from "~/tools/mediaDecoders/JavaScriptDecoder";
 
@@ -266,7 +266,7 @@ export default class Vrapper extends Cog {
             }
           } else if (!blocker._connection || !blocker._connection.isActive()) {
             await (operationInfo.pendingConnection = blocker.getConnection())
-                .asActiveConnection();
+                .asSourceredConnection();
           } else if (blocker === this) {
             throw new Error(
                 `Connection is active but blocker is still this ${this._phase} Vrapper itself`);
@@ -330,7 +330,7 @@ export default class Vrapper extends Cog {
    * (Immaterial, Unavailable, NonResource).
    * Unavailable indicates an error on the chronicle connection sync
    * which can be extracted with
-   * `Promise.resolve(conn.asActiveConnection()).catch(onError);`
+   * `Promise.resolve(conn.asSourceredConnection()).catch(onError);`
    *
    * @param {Object} state
    * @param {Transient} transient
@@ -467,7 +467,7 @@ export default class Vrapper extends Cog {
             new Error(`Cannot operate on a non-Created ${this.debugId()}`)
         : this.isUnavailable() ?
             new Error(`Cannot operate on an Unavailable ${this.debugId()}`)
-        : addConnectToChronicleToError(new AbsentChroniclesError(
+        : addSourcifyChronicleToError(new AbsentChroniclesError(
                 `Missing or not fully narrated connection for ${this.debugId()}`,
                 [this.activate()]),
             this._parent.discourse.connectToAbsentChronicle);
@@ -517,7 +517,7 @@ export default class Vrapper extends Cog {
       }
       */
       this._connection = chronicleURI
-          && discourse.acquireConnection(chronicleURI, {
+          && discourse.sourcifyChronicle(chronicleURI, {
             newChronicle: false, newConnection: options.newConnection, require: options.require,
           });
       if (!this._connection) {
@@ -525,8 +525,8 @@ export default class Vrapper extends Cog {
         throw new Error(`Failed to acquire the connection of ${this.debugId()}`);
       }
       if (!this._connection.isActive()) {
-        this._connection.asActiveConnection().catch(onError.bind(this,
-            new Error(`getConnection.acquire.asActiveConnection()`)));
+        this._connection.asSourceredConnection().catch(onError.bind(this,
+            new Error(`getConnection.acquire.asSourceredConnection()`)));
       }
       return this._connection;
     } catch (error) {
@@ -559,7 +559,7 @@ export default class Vrapper extends Cog {
   _withActiveConnectionChainEagerly (options: VALKOptions,
       chainOperations: ((prev: any) => any)[], onError?: Function) {
     return thenChainEagerly(
-        this.getConnection(options).asActiveConnection(options.synchronous),
+        this.getConnection(options).asSourceredConnection(options.synchronous),
         chainOperations,
         onError);
   }
@@ -712,10 +712,10 @@ export default class Vrapper extends Cog {
     return isMaterialized(state, this[HostRef]);
   }
 
-  materialize (discourse: ?Discourse): ChronicleEventResult {
+  materialize (discourse: ?Discourse): ProclaimEventResult {
     const innerDiscourse = (discourse || this._parent.discourse);
     this.requireActive({ state: innerDiscourse.getState() });
-    return innerDiscourse.chronicleEvent(
+    return innerDiscourse.proclaimEvent(
         createMaterializeGhostAction(innerDiscourse, this[HostRef], this._type.name));
   }
 
@@ -778,7 +778,7 @@ export default class Vrapper extends Cog {
         discourse = null;
         if (result) {
           return thenChainEagerly(
-              (options.awaitResult || (r => r.getPersistedEvent()))(result),
+              (options.awaitResult || (r => r.getRecordedEvent()))(result),
               () => ret);
         }
       }
@@ -896,7 +896,7 @@ export default class Vrapper extends Cog {
       event.id = event.id.immutateWithChronicleURI(chronicleURI);
     }
     options.chronicleURI = chronicleURI;
-    return discourse.chronicleEvent(event, options);
+    return discourse.proclaimEvent(event, options);
   }
 
   /**
@@ -950,7 +950,7 @@ export default class Vrapper extends Cog {
   destroy (options: { discourse?: Discourse } = {}) {
     this.requireActive(options);
     return (options.discourse || this._parent.discourse)
-        .chronicleEvent(destroyed({ id: this[HostRef] }), {});
+        .proclaimEvent(destroyed({ id: this[HostRef] }), {});
   }
 
   /**
@@ -1114,7 +1114,7 @@ export default class Vrapper extends Cog {
       const fieldDescriptor = this._type.prototype[PropertyDescriptorsTag][propertyName];
       const writableFieldName = (fieldDescriptor || "").writableFieldName;
       if (writableFieldName) {
-        discourse.chronicleEvent({
+        discourse.proclaimEvent({
           type: "FIELDS_SET", typeName: this._type.name,
           id: discourse.bindObjectId(this[HostRef], this._type.name),
           sets: { [writableFieldName]: newValue },
@@ -1126,7 +1126,7 @@ export default class Vrapper extends Cog {
     if (options.updateExisting !== false) {
       const vProperty = this.getPropertyResource(propertyName, Object.create(options));
       if (vProperty) {
-        discourse.chronicleEvent({
+        discourse.proclaimEvent({
           type: "FIELDS_SET", typeName: "Property",
           id: discourse.bindObjectId(vProperty[HostRef], "Property"),
           sets: { value },
@@ -1139,7 +1139,7 @@ export default class Vrapper extends Cog {
       initialState: { owner: this[HostRef].coupleWith("properties"), name: propertyName, value },
     };
     discourse.assignNewVRID(event, String(options.chronicleURI));
-    discourse.chronicleEvent(event);
+    discourse.proclaimEvent(event);
     return newValue;
   }
 
@@ -1665,7 +1665,7 @@ export default class Vrapper extends Cog {
    * authority scheme and its configuration. valaa-memory doesn't
    * support Media content (or stores them in memory). valaa-local
    * optimistically and fully persists in the local Scribe. Typical
-   * remote chronicles optimistically persist on the local Scribe and
+   * remote chronicles optimistically record on the local Scribe and
    * fully persist on the remote authority once online.
    *
    * In general only the chronicle of this resource matters. However

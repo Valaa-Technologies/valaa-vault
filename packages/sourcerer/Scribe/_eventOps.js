@@ -4,7 +4,7 @@ import { isTransactedLike, EventBase, Truth } from "~/raem/events";
 import { getRawIdFrom } from "~/raem/VRL";
 
 import {
-  MediaInfo, NarrateOptions, ChronicleOptions, ChronicleRequest, ChronicleEventResult,
+  MediaInfo, NarrateOptions, ProclaimOptions, Proclamation, ProclaimEventResult,
   ReceiveEvents, RetrieveMediaBuffer,
 } from "~/sourcerer/api/types";
 
@@ -42,7 +42,7 @@ export function _narrateEventLog (connection: ScribeConnection,
         options.retrieveMediaBuffer),
     function _receiveLocalResults (localResults) { Object.assign(ret, localResults); },
     ...(upstream && (options.remote !== false) ? [
-      function _activateUpstream () { return upstream.asActiveConnection(); },
+      function _activateUpstream () { return upstream.asSourceredConnection(); },
       function _maybeInitiateRechronicleCommands () {
         if (options.rechronicleOptions === false || !(ret.scribeCommandQueue || []).length) return;
         // Resend all cached commands to remote on the side.
@@ -51,7 +51,7 @@ export function _narrateEventLog (connection: ScribeConnection,
           commands => _receiveEvents(
               connection, commands, null, null, "rechronicleCommands", onError),
           receivedCommands => connection.getUpstreamConnection()
-              .chronicleEvents(receivedCommands, options.rechronicleOptions || {}),
+              .proclaimEvents(receivedCommands, options.rechronicleOptions || {}),
         ], onError);
       },
       function _narrateUpstreamEventLog () {
@@ -94,8 +94,8 @@ export function _narrateEventLog (connection: ScribeConnection,
 }
 
 async function _narrateLocalLogs (connection: ScribeConnection,
-    receiveTruths: ?ReceiveEvents = connection._downstreamReceiveTruths,
-    receiveCommands: ?ReceiveEvents = connection._downstreamReceiveCommands,
+    receiveTruths: ?ReceiveEvents = connection._pushTruthsDownstream,
+    receiveCommands: ?ReceiveEvents = connection._pushCommandsDownstream,
     eventIdBegin: ?number = connection.getFirstTruthEventId(),
     eventIdEnd: ?number = Math.max(
         connection.getFirstUnusedTruthEventId(), connection.getFirstUnusedCommandEventId()),
@@ -141,24 +141,24 @@ async function _narrateLocalLogs (connection: ScribeConnection,
 
 
 /*
- #####
-#     #  #    #  #####    ####   #    #     #     ####   #       ######
-#        #    #  #    #  #    #  ##   #     #    #    #  #       #
-#        ######  #    #  #    #  # #  #     #    #       #       #####
-#        #    #  #####   #    #  #  # #     #    #       #       #
-#     #  #    #  #   #   #    #  #   ##     #    #    #  #       #
- #####   #    #  #    #   ####   #    #     #     ####   ######  ######
+######
+#     #  #####    ####    ####   #         ##       #    #    #
+#     #  #    #  #    #  #    #  #        #  #      #    ##  ##
+######   #    #  #    #  #       #       #    #     #    # ## #
+#        #####   #    #  #       #       ######     #    #    #
+#        #   #   #    #  #    #  #       #    #     #    #    #
+#        #    #   ####    ####   ######  #    #     #    #    #
 */
 
 export function _proclaimEvents (connection: ScribeConnection,
-    events: EventBase[], options: ChronicleOptions = {}, onError: Function,
-): ChronicleRequest {
+    events: EventBase[], options: ProclaimOptions = {}, onError: Function,
+): Proclamation {
   if (!events || !events.length) return { eventResults: events };
   const resultBase = new ScribeEventResult(connection);
   resultBase._events = events;
   resultBase.onError = onError;
   // the 'mostRecentReceiveEventsProcess' is a kludge to sequentialize
-  // the chronicling process so that waiting for possible media ops
+  // the proclamation process so that waiting for possible media ops
   // doesn't mess up the order.
   const receiveEventsLocallyProcess = options.isTruth
       ? connection.getReceiveTruths(options.receiveTruths)(
@@ -191,7 +191,7 @@ export function _proclaimEvents (connection: ScribeConnection,
           resultBase._locallyReceivedEvents = receivedEvents.filter(notNull => notNull);
           if (!resultBase._locallyReceivedEvents.length) return ({ eventResults: [] });
           return connection.getUpstreamConnection()
-              .chronicleEvents(resultBase._locallyReceivedEvents, options);
+              .proclaimEvents(resultBase._locallyReceivedEvents, options);
         });
     resultBase._forwardResults = thenChainEagerly(resultBase._persistedForwardResults, [
       function _syncToChronicleResultTruthEvents ({ eventResults }) {
@@ -224,7 +224,7 @@ export function _proclaimEvents (connection: ScribeConnection,
         const discard = resultBase._locallyReceivedEvents[0].aspects;
         connection._deleteQueuedCommandsOnwardsFrom(discard.log.index, discard.command.id);
       }
-      throw connection.wrapErrorEvent(error, 1, new Error("chronicleEvents()"),
+      throw connection.wrapErrorEvent(error, 1, new Error("proclaimEvents()"),
           "\n\teventLog:", ...dumpObject(events),
           "\n\toptions:", ...dumpObject(options),
       );
@@ -237,13 +237,13 @@ export function _proclaimEvents (connection: ScribeConnection,
   };
 }
 
-class ScribeEventResult extends ChronicleEventResult {
+class ScribeEventResult extends ProclaimEventResult {
   getComposedEvent (): EventBase {
     return thenChainEagerly(this.receivedEventsProcess,
         receivedEvents => receivedEvents[this.index],
         this.onError);
   }
-  getPersistedEvent (): Truth {
+  getRecordedEvent (): Truth {
     // TODO(iridian): Right now getComposedEvent will wait for full media
     // sync, including uploads. This is because the upload sync is
     // buried deep down the chain inside _retryingTwoWaySyncMediaContent
@@ -297,11 +297,11 @@ export function _receiveEvents (
     events: EventBase,
     retrieveMediaBuffer: RetrieveMediaBuffer = _readMediaContent.bind(null, connection),
     downstreamReceiveTruths: ReceiveEvents,
-    type: "receiveTruths" | "receiveCommands" | "rechronicleCommands",
+    type: "receiveTruths" | "receiveCommands" | "reproclaimCommands",
     onError: Function,
 ) {
   const isReceivingTruths = (type === "receiveTruths");
-  const isRechronicling = (type === "rechronicleCommands");
+  const isRechronicling = (type === "reproclaimCommands");
   let actionIdLowerBound = (isReceivingTruths || isRechronicling)
       ? connection.getFirstUnusedTruthEventId() : connection.getFirstUnusedCommandEventId();
   const mediaPreOps = {};
@@ -336,9 +336,9 @@ export function _receiveEvents (
     prepareBvob: (content, mediaInfo) => connection.prepareBvob(
         content, { ...mediaInfo, prepareBvobToUpstream: !isReceivingTruths }),
   };
-  const persist = connection.isLocallyPersisted();
+  const record = connection.isLocallyRecorded();
 
-  const mediaContentSyncs = persist && Promise.all(
+  const mediaContentSyncs = record && Promise.all(
       Object.values(mediaPreOps).map(mediaEntry =>
           _retryingTwoWaySyncMediaContent(connection, mediaEntry, syncOptions)));
 
@@ -349,7 +349,7 @@ export function _receiveEvents (
     // This is acceptable because the media info/event log state is
     // reflected in the in-memory structures.
     // If browser dies before truths are written to indexeddb, the
-    // worst case is that bvobs which have no persist refcount will
+    // worst case is that bvobs which have no record refcount will
     // be cleared at startup and need to be re-downloaded.
     // This is tolerable enough so we can send truths downstream
     // immediately and have the UI start responding to the incoming
@@ -363,12 +363,12 @@ export function _receiveEvents (
   if (isReceivingTruths) {
     const lastTruth = newActions[newActions.length - 1];
     connection._truthLogInfo.eventIdEnd = lastTruth.aspects.log.index + 1;
-    writeEventsProcess = persist
+    writeEventsProcess = record
         && Promise.all(connection._truthLogInfo.writeQueue.push(...newActions));
     connection._triggerTruthLogWrites(lastTruth.aspects.command.id);
   } else if (!isRechronicling) {
     connection._commandQueueInfo.eventIdEnd += newActions.length;
-    writeEventsProcess = persist
+    writeEventsProcess = record
         && Promise.all(connection._commandQueueInfo.writeQueue.push(...newActions));
     newActions.forEach(action =>
         connection._commandQueueInfo.commandIds.push(action.aspects.command.id));

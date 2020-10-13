@@ -345,15 +345,15 @@ export class FabricEventTarget {
       throw new Error(`${this.constructor.name} doesn't implement event type '${type}'`);
     }
     const listenerName = `on${type}`;
-    let listeners = this[listenerName];
-    if (!listeners || (listeners[FabricEventTargetTag] !== this)) {
-      listeners = (this[listenerName] = []);
-      listeners[FabricEventTargetTag] = this;
-    }
     const listener = (typeof callback !== "function") ? callback
         : _createListener(type, callback, options);
-    if (listeners.find(_matchesListener.bind(null, listener))) return;
-    listeners.push(listener);
+    let listeners = this[listenerName];
+    if (!listeners || (listeners[FabricEventTargetTag] !== this)) {
+      listeners = (this[listenerName] = [listener]);
+      listeners[FabricEventTargetTag] = this;
+    } else if (!listeners.find(_matchesListener.bind(null, listener))) {
+      listeners.push(listener);
+    }
   }
 
   removeEventListener (type: String, callback: Function, options: ?(boolean | Object)) {
@@ -413,15 +413,20 @@ export class FabricEventTarget {
   }
 
   dispatchAndDefaultActEvent (fabricEvent: FabricEvent, options = {}) {
-    if (!options.eventType) {
-      options.eventType = this[FabricEventTypesTag][fabricEvent.type];
-      if (!options.eventType) {
+    return this.dispatchEvent(fabricEvent, options)
+        && this.defaultActEvent(fabricEvent, options);
+  }
+
+  defaultActEvent (fabricEvent, options = {}) {
+    let eventType = options.eventType;
+    if (!eventType) {
+      eventType = this[FabricEventTypesTag][fabricEvent.type];
+      if (!eventType) {
         throw new Error(
           `${this.constructor.name} doesn't implement fabric event type '${fabricEvent.type}'`);
       }
     }
-    if (!this.dispatchEvent(fabricEvent, options)) return false;
-    const defaultAction = options.eventType.defaultAction;
+    const defaultAction = eventType.defaultAction;
     if (defaultAction) {
       if (defaultAction.setIfUndefined) {
         for (const key of Object.keys(defaultAction.setIfUndefined)) {

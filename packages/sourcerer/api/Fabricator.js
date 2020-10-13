@@ -57,9 +57,10 @@ export class FabricatorEvent extends FabricEvent {
   isRefabricateable: ?boolean; // If set to false, the command cannot be refabricated
 
   proceedAfterAll (...maybeAsyncConditions) {
+    this._proceedAfterAll = [];
     for (let condition of maybeAsyncConditions) {
       if (typeof condition === "function") condition = new Promise(condition);
-      (this._proceedAfterAll || (this._proceedAfterAll = [])).push(condition);
+      this._proceedAfterAll.push(condition);
     }
     this.isRevisable = false;
   }

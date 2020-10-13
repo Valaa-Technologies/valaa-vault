@@ -176,14 +176,15 @@ describe("Media handling", () => {
     expect(testConnectionBackend._proclamations.length)
         .toEqual(existingProclamationCount + 2);
     testConnectionBackend._proclamations.splice(existingProclamationCount, 2)[0]
-        .rejectTruthEvent(Object.assign(new Error("Not permitted"),
-            { isRevisable: false, isReformable: true }));
+        .rejectTruthEvent(Object.assign(
+            new Error("Not permitted"), { isRevisable: false, isReformable: true }));
     plog && plog.opEvent("await_bvobPurged");
     const purgeEvent = await bvobPurged;
+    plog && plog.opEvent("bvobPurged", "Purged bvob:", purgeEvent);
     expect(purgeEvent.error.message)
         .toMatch(/Media does not exist/);
-    expect(purgeEvent.errorCauseType)
-        .toEqual("reform");
+    expect(purgeEvent.errorStage)
+        .toEqual("compose");
     expect(reformCause.message)
         .toMatch(/Not permitted/);
 
@@ -217,8 +218,10 @@ describe("Media handling", () => {
       valos.getTransactor().addEventListener("reform", onReform);
       ({
         media, contentUpdateStarted,
-        newMediaPersist: new Promise(resolve => (valos.getTransactor().onrecord = resolve)),
-        newMediaError: new Promise(resolve => (valos.getTransactor().onerror = resolve)),
+        newMediaPersist: new Promise(resolve => valos.getTransactor()
+            .addEventListener("record", resolve)),
+        newMediaError: new Promise(resolve => valos.getTransactor()
+            .addEventListener("error", resolve)),
       });`,
         { exampleBuffer, console, onReform },
         { awaitResult: (result) => result.getComposedEvent() });
@@ -238,14 +241,14 @@ describe("Media handling", () => {
     expect(testConnectionBackend._proclamations.length)
         .toEqual(existingProclamationCount + 2);
     testConnectionBackend._proclamations.splice(existingProclamationCount, 2)[0]
-        .rejectTruthEvent(Object.assign(new Error("Connection lost"),
-            { isSchismatic: false }));
+        .rejectTruthEvent(Object.assign(
+            new Error("Connection lost"), { isSchismatic: false }));
     plog && plog.opEvent("await_newMediaError");
     const errorEvent = await newMediaError;
     expect(errorEvent.error.message)
         .toMatch(/Connection lost/);
-    expect(errorEvent.errorCauseType)
-        .toEqual("record");
+    expect(errorEvent.errorStage)
+        .toEqual("profess");
     expect(reformCause)
         .toEqual(undefined);
 
@@ -317,8 +320,8 @@ describe("Media handling", () => {
         .toEqual(existingProclamationCount);
     expect(bvobPurgeEvent.error.message)
         .toMatch(/Media does not exist/);
-    expect(bvobPurgeEvent.errorCauseType)
-        .toEqual("reform");
+    expect(bvobPurgeEvent.errorStage)
+        .toEqual("compose");
 
     expect(mediaReformCause.message)
         .toMatch(/Not permitted/);
@@ -725,7 +728,6 @@ describe("Two paired harnesses emulating two gateways connected through event st
   });
   it("shares valaa-memory property object values", async () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
-    await harness.interceptErrors(async () => {
     const {
       val, mem1, snapval, mem2, valself, equivalences,
     } = await harness.runValoscript(vRef(testRootId), `
@@ -760,7 +762,6 @@ describe("Two paired harnesses emulating two gateways connected through event st
         .toBe(mem2);
     expect(valself)
         .toBe(mem2);
-    })();
   });
 });
 

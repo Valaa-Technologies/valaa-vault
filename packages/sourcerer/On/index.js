@@ -215,9 +215,11 @@ truths coming downstream.`,
     cancelable: false,
     defaultAction: {
       setIfUndefined: {
-        isRevisable: true,
+        isSchismatic: true,
+        isRevisable: false,
+        isReformable: true,
       }
-    },
+    }
   });
   declareName("reform", {
     tags: ["Transactor", "FabricEvent"],

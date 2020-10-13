@@ -18,6 +18,7 @@ import {
   thenChainEagerly, thisChainRedirect, thisChainReturn, mapEagerly,
 } from "~/tools";
 
+import { fabricatorOps } from "~/sourcerer/FalseProphet/TransactionState";
 import FalseProphet from "./FalseProphet";
 import {
   _composeEventIntoRecitalStory, _recomposeSchismaticStory, _purgeLatestRecitedStory,
@@ -55,6 +56,9 @@ export function _proclaimEvents (falseProphet: FalseProphet, events: EventBase[]
       const prophecy = _composeEventIntoRecitalStory(
           falseProphet, event, "prophecy-chronicle", timed, transactionState);
       if (prophecy) prophecies.push(prophecy);
+      else if ((operation._progress || {}).isReformable) {
+        operation.launchFullReform();
+      }
       return operation;
     }),
   };
@@ -234,15 +238,23 @@ export class ProphecyOperation extends ProphecyEventResult {
     return this.opChain("_fullReformChain", {}, "_errorOnReform");
   }
 
-  purge () {
-    if (!this._venues) return;
+  purge (heresy) {
+    if (this._prophecy) {
+      this._prophecy.heresy = heresy;
+      this._prophecy = null;
+    }
     const progress = this.getProgressEvent("purge");
+    if (progress.heresy) return;
+    progress.heresy = heresy;
     progress.isSchismatic = true;
-    const error = progress.error || new Error(progress.message);
+    const error = progress.error || new Error(
+        typeof heresy === "string" ? heresy
+        : Array.isArray(heresy) ? heresy[0]
+        : progress.message);
     if (this.event.meta.transactor) {
       this.event.meta.transactor.dispatchAndDefaultActEvent(progress);
     }
-    for (const venue of Object.values(this._venues)) {
+    for (const venue of Object.values(this._venues || {})) {
       if (!venue.confirmedTruth) {
         if (venue.rejectCommand) venue.rejectCommand(venue.rejectionReason || error);
         venue.commandEvent = null;
@@ -258,21 +270,30 @@ export class ProphecyOperation extends ProphecyEventResult {
     return this._venues[chronicleURI].commandEvent.aspects.log;
   }
   getProgressEvent (newType) {
-    const ret = this._progress || (this._progress = new ProgressEvent("", {
-      command: this.event,
-      prophecy: this._prophecy,
-      chronicles: this.event.meta.chronicles,
-    }));
-    if (newType) ret.type = newType;
-    return ret;
+    if (!this._progress) {
+      this._progress = new ProgressEvent(newType, {
+        command: this.event,
+        prophecy: this._prophecy,
+        chronicles: this.event.meta.chronicles,
+        isSchismatic: false,
+      });
+    } else if (newType) {
+      this._progress.type = newType;
+    }
+    return this._progress;
   }
-  getErroringProgress (error, fields) {
-    const ret = this.getProgressEvent();
-    ret.error = error;
-    if (!ret.errorCauseType) ret.errorCauseType = ret.type || "external";
+  getProgressErrorEvent (errorStage, error, assignErrorFields, assignProgressFields = {
+    isSchismatic: true,
+  }) {
+    const progress = this.getProgressEvent(errorStage);
+    if (!progress.errorStage) progress.errorStage = errorStage;
+    progress.error = error;
+    Object.assign(progress, assignProgressFields);
+
+    const ret = new ProgressEvent("error");
+    Object.assign(ret, progress, assignErrorFields || {});
+    ret.errorStage = errorStage;
     ret.type = "error";
-    ret.isSchismatic = true;
-    if (fields) Object.assign(ret, fields);
     return ret;
   }
 
@@ -576,23 +597,25 @@ export class ProphecyOperation extends ProphecyEventResult {
   }
 
   static _stageVenuesChain = [
-    ProphecyOperation.prototype._divergentWaitStageVenueChronicling,
+    ProphecyOperation.prototype._divergentWaitStageVenueProclamation,
     ProphecyOperation.prototype._resolveStageVenueTruth,
   ];
 
-  _divergentWaitStageVenueChronicling (venue, chroniclingResult) {
-    if (!chroniclingResult) return [venue];
-    const chronicledTruth = chroniclingResult.getTruthEvent();
-    if (!isPromise(chronicledTruth)) return [venue, chronicledTruth];
+  _divergentWaitStageVenueProclamation (venue, proclamation) {
+    if (!proclamation) return [venue];
+    const proclaimedTruth = proclamation.getTruthEvent();
+    if (!isPromise(proclaimedTruth)) return [venue, proclaimedTruth];
     const receivedTruth = new Promise((resolve, reject) => {
       venue.confirmCommand = resolve;
       venue.rejectCommand = reject;
     });
     const truthProcesses = [
-      chronicledTruth.catch(reason => {
-        if (reason.isSchismatic === false) return receivedTruth;
-        throw reason;
-      }),
+      proclaimedTruth.then(
+          event => event || receivedTruth,
+          reason => {
+            if (reason.isSchismatic === false) return receivedTruth;
+            throw reason;
+          }),
       receivedTruth,
     ];
     return [venue, Promise.race(truthProcesses), truthProcesses];
@@ -605,11 +628,11 @@ export class ProphecyOperation extends ProphecyEventResult {
         // retry
         return thisChainRedirect(0, [venue, venue.currentProclamation = venue.proclamation, []]);
       }
-      Promise.all(actualTruthProcesses).then(([chronicled, received]) => {
+      Promise.all(actualTruthProcesses).then(([proclaimed, received]) => {
         venue.connection.errorEvent(
           "\n\tnull truth when fulfilling prophecy:", ...dumpObject(this._prophecy),
-          "\n\tchronicled:", isPromise(actualTruthProcesses[0]),
-              ...dumpObject(chronicled), ...dumpObject(actualTruthProcesses[0]),
+          "\n\tproclaimed:", isPromise(actualTruthProcesses[0]),
+              ...dumpObject(proclaimed), ...dumpObject(actualTruthProcesses[0]),
           "\n\treceived:", isPromise(actualTruthProcesses[1]),
               ...dumpObject(received), ...dumpObject(actualTruthProcesses[1]));
       });
@@ -644,10 +667,7 @@ export class ProphecyOperation extends ProphecyEventResult {
     const prophecy = this._prophecy;
     if (!prophecy && this._rejectionError) throw this._rejectionError;
     this._fulfillment = null;
-    if (prophecy) {
-      prophecy.isRejected = true;
-      this.purge();
-    }
+    if (prophecy) this.purge(error);
     this._rejectionError = this.errorOnProphecyOperation(
         new Error(`proclaimEvents.eventResults[${this.index}].profess(phase#${phaseIndex}/${
             this._debugPhase})`),
@@ -667,6 +687,8 @@ export class ProphecyOperation extends ProphecyEventResult {
         _purgeLatestRecitedStory(this._parent, prophecy, false);
       } catch (innerError) {
         outputError(innerError, `Exception caught during proclaimEvents.profess.purge`);
+        outputError(error, "Exception caught during proclaim");
+        throw innerError;
       }
     }
     return null;
@@ -687,23 +709,26 @@ export class ProphecyOperation extends ProphecyEventResult {
     const progress = this._progress;
     if (progress.isSemanticSchism || (progress.isReformable === false)) {
       // If the schism is a semantic schism no reform can be attempted
-      return thisChainReturn(this._reformFailed());
+      return thisChainReturn(this._reformFailed(["_prepareReform unreformable", progress]));
     }
     progress.type = "reform";
+    progress.isReformable = undefined;
     if (this._options.onReform) {
       this._options.onReform(progress);
     } else {
       const dispatchPath = generateDispatchEventPath(transactor, "reform");
-      if (dispatchPath) {
+      if (!dispatchPath) {
+        progress.isSchismatic = false;
+      } else {
         progress.message = `revisioning due ${
             (reformation.schismaticRecital || {}).id || "explicit request"}`;
         transactor.dispatchAndDefaultActEvent(progress, { dispatchPath });
         progress.error = null;
-      } else {
-        progress.isSchismatic = false;
       }
     }
-    if (progress.isSchismatic) return thisChainReturn(this._reformFailed());
+    if (progress.isSchismatic) {
+      return thisChainReturn(this._reformFailed(["_prepareReform schismatic", progress]));
+    }
     return [reformation, ...(progress._proceedAfterAll || [])];
   }
 
@@ -718,9 +743,16 @@ export class ProphecyOperation extends ProphecyEventResult {
     if (!reformedProphecy
         || (reformation.instigatorChronicleURI
             && (Object.keys((reformedProphecy.meta || {}).chronicles).length !== 1))) {
-      // Recomposition failed, revision failed or an instigated
+      if ((this._progress || {}).isReformable) {
+        return thisChainRedirect("_prepareReform", [reformation]);
+      }
+      // Recomposition or revision failed, or this is an instigated
       // multi-chronicle command reformation which is not supported (for now).
-      return thisChainReturn(this._reformFailed());
+      return thisChainReturn(this._reformFailed(!reformedProphecy
+          ? ["_checkReformConditions unrecomposable"]
+          : ["_checkReformConditions instigated multi-chronicle",
+              reformation.instigatorChronicleURI, (reformedProphecy.meta || {}).chronicles,
+          ]));
     }
     const reformedCommand = getActionFromPassage(reformedProphecy);
     if (!reformedCommand.meta) throw new Error("reformedCommand.meta missing");
@@ -755,8 +787,8 @@ export class ProphecyOperation extends ProphecyEventResult {
     return this._prophecy;
   }
 
-  _reformFailed () {
-    this.purge();
+  _reformFailed (reformHeresy) {
+    this.purge(reformHeresy);
     return false;
   }
 
@@ -769,14 +801,15 @@ export class ProphecyOperation extends ProphecyEventResult {
           connection._dumpEventIds(reformation.schismaticCommands || [])})`));
     const transactor = ((this._prophecy || {}).meta || {}).transactor;
     if (transactor) {
-      const progress = this.getErroringProgress(wrappedError, {
-        oldProphecy: this._prophecy, isReformSchism: true,
-      });
+      const progress = this.getProgressErrorEvent(
+          "reform", wrappedError, { prophecy: this._prophecy });
       transactor.dispatchAndDefaultActEvent(progress);
     }
     if (reformation.isComplete) {
       this.outputErrorEvent(wrappedError, "Exception caught when reforming heresy");
     }
-    return thisChainReturn(this._reformFailed());
+    return thisChainReturn(this._reformFailed(["_errorOnReform", error]));
   }
 }
+
+Object.assign(ProphecyOperation.prototype, fabricatorOps);

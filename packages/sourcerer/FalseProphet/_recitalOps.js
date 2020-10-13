@@ -92,9 +92,6 @@ export function _composeEventIntoRecitalStory (falseProphet: FalseProphet, event
       return story;
     }
   }
-  if (progress && progress.isReformable) {
-    operation.launchFullReform();
-  }
   return undefined;
 }
 
@@ -271,21 +268,30 @@ function _launchRevisioning (elaboration: Object): Story {
       initialSchism = prophecy;
       schismaticRecitalName = `schismatic:${initialSchism.aspects.command.id}`;
     }
-    if (!prophecy.meta || !prophecy.meta.operation) continue;
+    const operation = (prophecy.meta || {}).operation;
+    if (!operation) continue;
 
-    const progress = prophecy.meta.operation.getProgressEvent("schism");
+    const progress = operation.getProgressEvent("schism");
     progress.schismaticCommand = command;
-    if (progress.isSchismatic === undefined) progress.isSchismatic = true;
-    // Mark schismatic prophecies as non-revisable but reformable by default to trigger reorder.
-    if (progress.isRevisable === undefined) progress.isRevisable = false;
-    if (progress.isReformable === undefined) progress.isReformable = true;
-    const dispatchPath = generateDispatchEventPath(prophecy.meta.transactor, "schism");
-    if (dispatchPath) {
-      if (!progress.message) {
-        progress.message = `revisioning due to ${
-          initialSchism === prophecy ? "own schism" : schismaticRecitalName}`;
-      }
-      prophecy.meta.transactor.dispatchAndDefaultActEvent(progress, { dispatchPath });
+    if (progress.isSchismatic === true) {
+      // Mark already schismatic prophecies as decidedly non-revisable
+      progress.isRevisable = false;
+    } else {
+      // Mark dependent prophecies to become by-default-action
+      // schismatic and non-revisable.
+      progress.isSchismatic = undefined;
+      if (progress.isRevisable !== true) progress.isRevisable = undefined;
+    }
+    if (progress.isReformable !== false) progress.isReformable = undefined;
+    if (!progress.message) {
+      progress.message = `revisioning due to ${
+        initialSchism === prophecy ? "own schism" : schismaticRecitalName}`;
+    }
+    const transactor = prophecy.meta.transactor;
+    if (transactor) {
+      transactor.dispatchAndDefaultActEvent(progress);
+    } else {
+      operation.defaultActEvent(progress);
     }
   }
   if (!initialSchism) return undefined;
@@ -358,8 +364,8 @@ export function _recomposeSchismaticStory (falseProphet: FalseProphet, story: Pr
       : !progress.isSchismatic ? "prophecy-review"
       : "prophecy-schism-revise";
   try {
-    recomposedStory = _composeEventIntoRecitalStory(falseProphet, event, composeDescription);
-    if (!recomposedStory) return undefined;
+    return _composeEventIntoRecitalStory(falseProphet, event, composeDescription);
+    /*
     const dispatchPath = generateDispatchEventPath(transactor, "review");
     if (dispatchPath) {
       progress = operation.getProgressEvent("review");
@@ -370,7 +376,7 @@ export function _recomposeSchismaticStory (falseProphet: FalseProphet, story: Pr
         return undefined;
       }
     }
-    return recomposedStory;
+    */
   } catch (error) {
     const commandId = story.aspects.command.id;
     const wrappedError = falseProphet.wrapErrorEvent(error, 1,
@@ -386,10 +392,13 @@ export function _recomposeSchismaticStory (falseProphet: FalseProphet, story: Pr
     } else if (progress) {
       progress.type = "reform";
     }
-    progress = operation.getErroringProgress(wrappedError, {
-      oldProphecy: story, isRevisable: true, isComposeSchism: true, composeDescription,
+    progress = operation.getProgressErrorEvent("compose", wrappedError, {
+      prophecy: story,
+      composeDescription,
       message: `a reduction schism found during ${composeDescription
           } of a story of a purged command; ${error.message}`,
+    }, {
+      isRevisable: true,
     });
     if (transactor && !transactor.dispatchAndDefaultActEvent(progress)) return undefined;
     throw wrappedError;
@@ -417,7 +426,7 @@ function _rewriteRevisionBreachVenueCommand (
   });
   elaboration.instigatorConnection.outputErrorEvent(error,
       "Exception caught during schismatic command rewrite");
-  if (schism.meta.operation) schism.meta.operation.purge();
+  if (schism.meta.operation) schism.meta.operation.purge("revision breach");
   progress.type = "breach";
   elaboration.newRecitalStories.push(
       _composeEventIntoRecitalStory(
@@ -460,7 +469,8 @@ function _finalizeRevisioning (elaboration: Object) {
   }
   if (purgedHeresies) {
     elaboration.instigatorConnection.errorEvent(1, () => [
-      "\n\nHERESIES PURGED:", purgedHeresies.map(getActionFromPassage),
+      "\n\nHERESIES PURGED:", ...purgedHeresies.map(h =>
+          ({ ...getActionFromPassage(h), meta: null })),
       "\n\tby revisioning:", ...dumpObject(elaboration),
       "\n\tof heretic recital:", ...dumpObject(hereticRecital),
       "\n\telaboration new events:", ...dumpObject(elaboration.newEvents),

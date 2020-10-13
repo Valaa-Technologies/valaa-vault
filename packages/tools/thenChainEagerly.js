@@ -217,7 +217,7 @@ function thisChainEagerly (
     }
     const func = functions[index];
     if (!func) {
-      if (index < functions.length) continue;
+      if (++index < functions.length) continue;
       return params;
     }
     try {

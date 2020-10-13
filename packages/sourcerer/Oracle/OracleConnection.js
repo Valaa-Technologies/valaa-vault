@@ -40,28 +40,27 @@ export default class OracleConnection extends Connection {
 
   getOracle () { return this._parent; }
 
-  _doConnect (options: ConnectOptions) {
-    // Handle step 2. of the acquireConnection first narration
-    // logic (defined in Connection.js) and begin I/O bound(?)
-    // scribe event log narration in parallel to the authority
-    // proxy/connection creation.
-    this.setUpstreamConnection(this._authoritySourcerer.acquireConnection(
-        this.getChronicleURI(), {
+  static sourceryOpsName = "oracleSourcery";
+  static oracleSourcery = [
+    OracleConnection.prototype._sourcifyUpstream,
+    Connection.prototype._narrateEventLog,
+    Connection.prototype._finalizeSourcery,
+  ]
+
+  _sourcifyUpstream (options: SourceryOptions) {
+    // Handle step 2. of the sourcery first narration logic (defined in
+    // Connection.js) and begin I/O bound(?) scribe event log narration
+    // in parallel to the authority proxy/connection creation.
+    this.setUpstreamConnection(this._authoritySourcerer
+        .sourcifyChronicle(this.getChronicleURI(), {
           narrateOptions: false,
           subscribeEvents: (options.narrateOptions === false) && options.subscribeEvents,
-          receiveTruths: this.getReceiveTruths(options.receiveTruths),
+          pushTruths: this.getReceiveTruths(options.pushTruths),
+          plog: options.plog,
         }));
-    const connection = this;
-    return thenChainEagerly(null, this.addChainClockers(2, "oracle.doConnect.ops", [
-      function _waitForActiveUpstream () {
-        return connection._upstreamConnection.asActiveConnection();
-      },
-      function _narrateEventLog () {
-        if (options.narrateOptions === false) return {};
-        options.narrateOptions.subscribeEvents = options.subscribeEvents;
-        return connection.narrateEventLog(options.narrateOptions);
-      },
-    ]));
+    return super._sourcifyUpstream(options, {
+      sourceredUpstream: this._upstreamConnection.asSourceredConnection(),
+    });
   }
 
   receiveTruths (truths: EventBase[], retrieveMediaBuffer: RetrieveMediaBuffer,

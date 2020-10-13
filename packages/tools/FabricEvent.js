@@ -79,8 +79,6 @@ export class FabricEventLogger {
   clock: Function;
 }
 
-let _clockerId = 0;
-
 const _typeInstanceCounter = {};
 
 export const FabricEventTypesTag = Symbol("FabricEvent.Types");
@@ -140,7 +138,7 @@ export class FabricEventTarget {
   warn (...rest: any[]) { return this._parent.warn(...rest); }
   error (...rest: any[]) { return this._parent.error(...rest); }
   clock (...rest: any[]) {
-    return (this._parent.clock || (inBrowser() ? this._parent.log : this._parent.warn))
+    return (this._parent.clock || (inBrowser() ? this._parent.debug : this._parent.warn))
         .apply(this._parent, rest);
   }
 
@@ -172,34 +170,41 @@ export class FabricEventTarget {
 
   static _globalOps = Object.create(null);
 
-  opLog (requiredVerbosity, operationName, ...rest) {
-    const loudness = (this._verbosity || 0) - requiredVerbosity;
-    if (loudness < 0) return null;
+  opLog (parentOpLog = this, requiredVerbosity, operationName, ...rest) {
+    const loudness = (this._verbosity || 0)
+        - (typeof parentOpLog === "number" ? parentOpLog : requiredVerbosity);
+    if (loudness < 0) return undefined;
+    if (typeof parentOpLog === "number") {
+      return this.opLog(undefined, parentOpLog, requiredVerbosity, operationName, ...rest);
+    }
     const ret = Object.create(this);
     ret._loudness = loudness;
-    const parentPlot = this._opLogPlot || "";
+    const parentPlot = parentOpLog._opLogPlot || "";
     const ops = parentPlot
-        ? this._opLogOps || (this._opLogOps = Object.create(null))
+        ? parentOpLog._opLogOps || (parentOpLog._opLogOps = Object.create(null))
         : FabricEventTarget._globalOps;
     const index = ops[operationName] || 0;
     ops[operationName] = index + 1;
     ret._opLogPlot = `${parentPlot}@-:${operationName}:${index}`;
-    ret.current = ret;
     for (let i = this._verbosity; i; --i) ret[`v${i}`] = ret;
-    if (rest.length) ret.opEvent(...rest);
+    if (rest.length) ret.opEvent(this, "", ...rest);
     return ret;
   }
 
-  opEvent (target: number | any, eventName, ...rest: any[]) {
-    if (typeof target !== "object") return this.opEvent(this, target, eventName, ...rest);
+  opEvent (target: Object | string, eventName: string, ...rest: any[]) {
+    if (typeof target !== "object") {
+      return this.opEvent(this, target, ...(eventName === undefined ? [] : [eventName]), ...rest);
+    }
     if (typeof eventName !== "string") {
       throw new Error(`Invalid opEvent..eventName: expected string, got ${typeof eventName}`);
     }
     return target._outputMessageEvent(this.clock.bind(this), false, [].concat(
+        `${this._verbosity || 0}>=${(this._verbosity || 0) - this._loudness}`,
         `${this._opLogPlot}${!eventName ? "" : `@:${eventName}`}@@`,
-        !this._loudness ? [] : [
-          ":\n\t", ...rest.map(e => (typeof e === "string" ? e : dumpObject(e))),
-        ]));
+        ...(!rest.length ? []
+            : (!this._loudness && !inBrowser()) ? [":", rest[0]]
+            : [":\n\t", ...rest.map(e => (typeof e === "string" ? e : dumpObject(e)))]
+        )));
   }
 
   _getMessageParts (maybeMinVerbosity, rest) {
@@ -220,14 +225,17 @@ export class FabricEventTarget {
         : output(`${this.debugId({ raw: !joinFirstPieceWithId })}: ${first}`, ...parts.slice(1));
   }
 
-  wrapErrorEvent (error: Error, nameOrMinVerbosity: Error | string | number, ...contexts_: any[]) {
-    const excess = _verbosityExcess(nameOrMinVerbosity, this._verbosity, this);
+  wrapErrorEvent (error: Error, minVerbosity: number, name: Error | string, ...contexts_: any[]) {
+    if (typeof minVerbosity !== "number") {
+      return this.wrapErrorEvent(error, 0, name, ...contexts_);
+    }
+    const excess = _verbosityExcess(minVerbosity, this._verbosity, this);
     if (excess <= -3) return error; // no wrap.
     if ((error == null) || !error.hasOwnProperty) {
       console.error("wrapErrorEvent.error must be an object, got:", error);
       throw new Error("wrapErrorEvent.error must be an object. See console.log for details");
     }
-    const [functionName, ...contexts] = this._getMessageParts(nameOrMinVerbosity, contexts_);
+    const [functionName, ...contexts] = typeof name === "function" ? name() : [name, ...contexts_];
     const actualFunctionName = functionName instanceof Error ? functionName.message : functionName;
     if (error.hasOwnProperty("functionName")
         && (error.functionName === actualFunctionName)
@@ -242,9 +250,10 @@ export class FabricEventTarget {
           .slice((functionName instanceof Error) ? 2 : 3);
       wrapper.logger = this;
     }
-    if (typeof nameOrMinVerbosity === "number") {
-      wrapper.verbosities = [this.getVerbosity(), nameOrMinVerbosity];
+    if (typeof minVerbosity === "number") {
+      wrapper.verbosities = [this.getVerbosity(), minVerbosity];
     }
+    if (error.hasOwnProperty("_frameStackError")) wrapper.stack = error._frameStackError.stack;
     const ret = wrapError(error, wrapper, ...contexts);
     ret.functionName = actualFunctionName;
     ret.contextObject = this;
@@ -260,8 +269,10 @@ export class FabricEventTarget {
         this);
   }
 
+  static _returnParamsError = new Error("return original params hack");
+
   opChain (chainOrStaticName: string, params: any,
-      errorHandlerOrName: string, opLogOrMinVerbosity: ?number = 2) {
+      errorHandlerOrName: string, parentOpLog: ?Object, minVerbosity: ?number = 2) {
     let chain = (typeof chainOrStaticName !== "string"
         ? chainOrStaticName
         : this.constructor[chainOrStaticName]);
@@ -269,46 +280,61 @@ export class FabricEventTarget {
       throw new Error(`opChain can't find chain '${chainOrStaticName}' from ${
           this.constructor.name} static class properties`);
     }
-    let errorHandler;
-    if (errorHandlerOrName) {
-      errorHandler = (typeof errorHandlerOrName !== "string")
-          ? errorHandlerOrName
-          : this[errorHandlerOrName];
-      if (!errorHandler) {
-        throw new Error(`opChain can't find error handler '${
-          errorHandlerOrName}' from ${this.constructor.name} non-static instance properties`);
+    let errorHandler, stackError;
+    const verbosity = this.getVerbosity();
+    if (parentOpLog) parentOpLog.chain = null;
+    if (verbosity >= minVerbosity) {
+      chain = this._addChainClockers(parentOpLog, minVerbosity,
+          chainOrStaticName.name || chainOrStaticName, chain);
+    }
+    if (verbosity) stackError = new Error("stack");
+    return thisChainEagerly(this, params, chain, (error, index, innerParams, ...rest) => {
+      if (error === FabricEventTarget._returnParamsError) return innerParams;
+      if (!errorHandler && errorHandlerOrName) {
+        errorHandler = (typeof errorHandlerOrName !== "string")
+            ? errorHandlerOrName
+            : this[errorHandlerOrName];
+        if (!errorHandler) {
+          throw new Error(`opChain can't find error handler '${errorHandlerOrName
+              }' from ${this.constructor.name} non-static instance properties`);
+        }
       }
-    }
-    if (((typeof opLogOrMinVerbosity === "number") && (this.getVerbosity() >= opLogOrMinVerbosity))
-        || opLogOrMinVerbosity) {
-      chain = this.addChainClockers(opLogOrMinVerbosity,
-          chainOrStaticName.name || chainOrStaticName, chain, true);
-    }
-    return thisChainEagerly(this, params, chain, errorHandler);
+      if (stackError) error._frameStackError = stackError;
+      if (!errorHandler) throw error;
+      return errorHandler.call(this, error, index, innerParams, ...rest);
+    });
   }
 
-  addChainClockers (opLogOrMinVerbosity: number, eventPrefix: string,
-      thenChainCallbacks: Function[], isThisChain: boolean) {
-    if (opLogOrMinVerbosity == null) return thenChainCallbacks;
-    const chainPlog = (typeof opLogOrMinVerbosity === "object")
-        ? opLogOrMinVerbosity.opLog(0, eventPrefix)
-        : this.opLog(opLogOrMinVerbosity, eventPrefix);
-    if (!chainPlog) return thenChainCallbacks;
-    const clockerId = _clockerId++;
-    return [].concat(
-        ...thenChainCallbacks.map((callback, index) => [
-          ...(!callback.name ? [] : [(...params) => {
-            chainPlog.opEvent(this, `${eventPrefix}:${clockerId}:[${index}]`,
-                `Calling step #${index} ${callback.name}`);
-            return isThisChain ? params : params[0];
-          }]),
-          callback,
+  _addChainClockers (parentOpLog, minVerbosity: number, eventPrefix: string,
+      thenChainCallbacks: Function[]) {
+    const chainOpLog = this.opLog(parentOpLog, minVerbosity, eventPrefix);
+    if (!chainOpLog) return thenChainCallbacks;
+    return [].concat(...thenChainCallbacks.map((callback, index) => {
+      if (!callback) {
+        throw new Error("callback missing in addChainClockers:", thenChainCallbacks);
+      }
+      return [
+        ...(!callback || !callback.name ? [] : [
+          (...params) => {
+            if (parentOpLog) parentOpLog.chain = chainOpLog;
+            chainOpLog.opEvent(this, `${index}:${callback.name}`,
+                `op: ${callback.name}`, ...(!chainOpLog.v3
+                    ? [`(as ${eventPrefix} op #${index})`]
+                    : [].concat(...params.map((e, i) =>
+                        [!i ? "(" : `\n\t  ${" ".repeat(callback.name.length)},`, e]), ")")));
+            return params;
+          },
         ]),
-        (...params) => {
-          chainPlog.opEvent(this, `${eventPrefix}:${clockerId}@.:done`,
-              `Chain ${eventPrefix} completed`);
-          return isThisChain ? params : params[0];
-        });
+        callback,
+      ];
+    }), (...params) => {
+      chainOpLog.opEvent(this, "done",
+          `done: ${eventPrefix}`, ...params);
+      if (parentOpLog) parentOpLog.chain = null;
+      // This is a hack to ensure that the chain returns a single-param
+      // array or direct object as returned by the last chain callback.
+      throw FabricEventTarget._returnParamsError;
+    });
   }
 
   // Fabric EventTarget API

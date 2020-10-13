@@ -74,7 +74,7 @@ export class ProclaimEventResult extends FabricEventTarget {
     return thenChainEagerly(forward, r => {
       const forwardedResult = r && r[this.index - (this._events.length - r.length)];
       return forwardedResult && forwardedResult.getUniversalEvent();
-    }, this.onError);
+    }, this.onGetEventError);
   }
 
   // Get universalized event after it has been processed and reduced
@@ -85,7 +85,7 @@ export class ProclaimEventResult extends FabricEventTarget {
     return thenChainEagerly(forward, r => {
       const forwardedResult = r && r[this.index - (this._events.length - r.length)];
       return forwardedResult && forwardedResult.getComposedEvent();
-    }, this.onError);
+    }, this.onGetEventError);
   }
 
   // Get event after it has been persisted (possibly locally) but not
@@ -98,7 +98,7 @@ export class ProclaimEventResult extends FabricEventTarget {
     return thenChainEagerly(forward, r => {
       const forwardedResult = r[this.index - (this._events.length - r.length)];
       return forwardedResult && forwardedResult.getRecordedEvent();
-    }, this.onError);
+    }, this.onGetEventError);
   }
 
   // Get event after it has been confirmed as a truth by its authority
@@ -110,7 +110,7 @@ export class ProclaimEventResult extends FabricEventTarget {
     return thenChainEagerly(forward, r => {
       const forwardedResult = r[this.index - (this._events.length - r.length)];
       return forwardedResult && forwardedResult.getTruthEvent();
-    }, this.onError);
+    }, this.onGetEventError);
   }
 }
 

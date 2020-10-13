@@ -18,7 +18,7 @@ export default valosheath.exportSpindle({
         "Creating web-spindle", { server, prefixes });
     this._service = new MapperService(
         gateway, { identity: valosheath.identity, ...server }, projectors);
-    const rplog1 = plog && plog.opLog(1, "prefix-routers",
+    const rplog1 = this._service.opLog(plog, 1, "prefixes",
         "Adding routers for prefixes", prefixes);
     return Promise.all(Object.entries(prefixes).map(async ([prefix, prefixConfig]) =>
         this._addPrefixRouter(gateway, prefix, await expose(prefixConfig), rplog1)));
@@ -41,12 +41,12 @@ export default valosheath.exportSpindle({
                   ? "host"
               : viewConfig.name)
           || `${this.name}:view:${prefix}`;
-      const plog = (parentPlog || this._service).opLog(1, `$prefix.${prefix}`,
+      const plog1 = this._service.opLog(parentPlog, 1, prefix,
           `Creating prefix router to <${prefix}>`, prefixConfig);
 
-      this._prefixRouters[viewName] = this._service.createPrefixRouter(prefix, prefixConfig, plog);
+      this._prefixRouters[viewName] = this._service.createPrefixRouter(prefix, prefixConfig, plog1);
       if (typeof viewConfig === "object") {
-        const vplog1 = plog && plog.opLog(1, `addView`,
+        const vplog1 = gateway.opLog(plog1, 1, `addView`,
             `Adding view for prefixRouter <${prefix}>: ${viewName}`, viewConfig);
         const view = await gateway.addView(viewName, {
           contextLensProperty: ["WEB_LENS", "LENS"],

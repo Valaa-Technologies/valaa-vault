@@ -8,7 +8,7 @@ import {
   ReceiveEvents, RetrieveMediaBuffer,
 } from "~/sourcerer/api/types";
 
-import { dumpObject, mapEagerly, thenChainEagerly, vdon } from "~/tools";
+import { dumpObject, mapEagerly, thenChainEagerly, thisChainRedirect, vdon } from "~/tools";
 
 import ScribeConnection from "./ScribeConnection";
 import { _retryingTwoWaySyncMediaContent } from "./_contentOps";
@@ -32,111 +32,123 @@ export const vdoc = vdon({
 #     #  #    #  #    #  #    #  #    #     #    ######
 */
 
-export function _narrateEventLog (connection: ScribeConnection,
-    options: NarrateOptions, ret: Object, onError: Function) {
-  const upstream = connection.getUpstreamConnection();
-  return thenChainEagerly(null, connection.addChainClockers(2, "scribe.narrate.ops", [
-    _narrateLocalLogs.bind(null, connection,
-        options.receiveTruths, options.receiveCommands,
-        options.eventIdBegin, options.eventIdEnd,
-        options.retrieveMediaBuffer),
-    function _receiveLocalResults (localResults) { Object.assign(ret, localResults); },
-    ...(upstream && (options.remote !== false) ? [
-      function _activateUpstream () { return upstream.asSourceredConnection(); },
-      function _maybeInitiateRechronicleCommands () {
-        if (options.rechronicleOptions === false || !(ret.scribeCommandQueue || []).length) return;
-        // Resend all cached commands to remote on the side.
-        // Do not wait for success or results, ie. don't return this sub-chain.
-        thenChainEagerly(ret.scribeCommandQueue, [
-          commands => _receiveEvents(
-              connection, commands, null, null, "rechronicleCommands", onError),
-          receivedCommands => connection.getUpstreamConnection()
-              .proclaimEvents(receivedCommands, options.rechronicleOptions || {}),
-        ], onError);
-      },
-      function _narrateUpstreamEventLog () {
-        // Initiate upstream narration in any case...
-        const upstreamNarration = upstream.narrateEventLog(Object.assign(Object.create(options), {
-          receiveTruths: connection.getReceiveTruths(options.receiveTruths),
-          eventIdBegin: Math.max(
-              options.eventIdBegin || 0,
-              connection.getFirstUnusedTruthEventId()),
-        }));
-        // ...but only wait for it if requested or if we didn't find any local events
-        return ((options.fullNarrate === true)
-                || !(options.newChronicle
-                    || (ret.scribeTruthLog || []).length || (ret.scribeCommandQueue || []).length))
-            && upstreamNarration;
-      },
-      function _processUpstreamNarrationResults (upstreamNarration) {
-        // Handle step 2 of the opportunistic narration if local narration
-        // didn't find any truths by waiting for the upstream narration.
-        const sectionNames = upstreamNarration && Object.keys(upstreamNarration);
-        if (!sectionNames || !sectionNames.length) return undefined;
-        return mapEagerly(sectionNames.map(name => upstreamNarration[name]),
-            (section, index) => (ret[sectionNames[index]] = !Array.isArray(section)
-                ? section
-                : mapEagerly(section, entry => entry,
-                    function _onResultEventError (error, entry, entryIndex) {
-                      entry.localPersistError = error;
-                      const wrapped = connection.wrapErrorEvent(error, 1,
-                          `narrateEventLog.upstreamResults[${name}][${entryIndex}]`,
-                          "\n\toptions:", ...dumpObject(options),
-                          "\n\tsection:", ...dumpObject(section));
-                      if (error.blocksNarration) throw wrapped;
-                      connection.outputErrorEvent(wrapped,
-                          "Exception caught when processing narration results");
-                    })));
-      },
-    ] : []),
-    () => ret,
-  ]), onError);
-}
-
-async function _narrateLocalLogs (connection: ScribeConnection,
-    receiveTruths: ?ReceiveEvents = connection._pushTruthsDownstream,
-    receiveCommands: ?ReceiveEvents = connection._pushCommandsDownstream,
-    eventIdBegin: ?number = connection.getFirstTruthEventId(),
-    eventIdEnd: ?number = Math.max(
-        connection.getFirstUnusedTruthEventId(), connection.getFirstUnusedCommandEventId()),
-    retrieveMediaBuffer: ?RetrieveMediaBuffer,
-): Promise<{ scribeTruthLog: any, scribeCommandQueue: any }> {
-  const ret = {};
-  let currentEventId = eventIdBegin;
-  const plog2 = connection.opLog(2, "scribe_narrate-local");
+export function _narrateLocalLogs (options: NarrateOptions):
+    Promise<{ scribeTruthLog: any, scribeCommandQueue: any }> {
+  /* eslint-disable prefer-const */
+  let {
+    receiveTruths = this._pushTruthsDownstream,
+    receiveCommands = this._pushCommandsDownstream,
+    eventIdBegin = this.getFirstTruthEventId(),
+    eventIdEnd = Math.max(this.getFirstUnusedTruthEventId(), this.getFirstUnusedCommandEventId()),
+    retrieveMediaBuffer,
+  } = options;
+  /* eslint-enable prefer-const */
+  const plog2 = (options.plog || {}).chain;
+  let scribeTruthLog, scribeCommandQueue;
   if (receiveTruths) {
-    const truthEventIdEnd = Math.min(connection.getFirstUnusedTruthEventId(), eventIdEnd);
-    plog2 && plog2.opEvent("read_truths",
-        `_readTruths(${currentEventId}, ${truthEventIdEnd})`);
-    const truths = ((currentEventId < truthEventIdEnd) && await connection
-        ._readTruths({ eventIdBegin: currentEventId, eventIdEnd: truthEventIdEnd, plog: plog2 }))
-        || [];
-    currentEventId = truthEventIdEnd;
-    plog2 && plog2.opEvent("receive_truths",
-        `receiveTruths(${truths.length})`);
-    ret.scribeTruthLog = !truths.length ? truths
-        : await Promise.all(await receiveTruths(truths, retrieveMediaBuffer));
+    const truthIndexEnd = Math.min(this.getFirstUnusedTruthEventId(), eventIdEnd);
+    const plog3 = plog2 && this.opLog(plog2, 3, "local-truths",
+        "range:", { eventIdBegin, truthIndexEnd });
+    scribeTruthLog = (eventIdBegin >= truthIndexEnd) ? []
+        : Promise.resolve()
+        .then(() => this._readTruths({ eventIdBegin, eventIdEnd: truthIndexEnd, plog: plog3 }))
+        .then(truths => {
+          eventIdBegin = truthIndexEnd; // update eventIdBegin for receiveCommands
+          if (!truths || !truths.length) return [];
+          plog3 && plog3.opEvent("receive-truths", `receiveTruths(${truths.length})`);
+          return receiveTruths(truths, retrieveMediaBuffer);
+        }).then(receivedTruths => Promise.all(receivedTruths));
   }
   if (receiveCommands) {
-    const commandEventIdEnd = Math.min(connection.getFirstUnusedCommandEventId(), eventIdEnd);
-    plog2 && plog2.opEvent("read_commands",
-        `_readCommands(${currentEventId}, ${commandEventIdEnd})`);
-    const commands = ((currentEventId < commandEventIdEnd) && await connection
-        ._readCommands({
-          eventIdBegin: currentEventId, eventIdEnd: commandEventIdEnd, plog: plog2,
-        }))
-        || [];
-    const commandIdBegin = connection._commandQueueInfo.eventIdBegin;
-    commands.forEach(command => {
-      connection._commandQueueInfo.commandIds[command.aspects.log.index - commandIdBegin]
-          = command.aspects.command.id;
-    });
-    plog2 && plog2.opEvent("receive_commands",
-        `receiveCommands(${commands.length})`);
-    ret.scribeCommandQueue = !commands.length ? commands
-        : await Promise.all(await receiveCommands(commands, retrieveMediaBuffer));
+    const commandIndexEnd = Math.min(this.getFirstUnusedCommandEventId(), eventIdEnd);
+    let plog3;
+    scribeCommandQueue = (eventIdBegin >= commandIndexEnd) ? []
+        // wait for truth receive to complete so that eventIdBegin is properly updated
+        : Promise.resolve(scribeTruthLog)
+        .then(() => {
+          plog3 = plog2 && this.opLog(plog2, 3, "local-commands",
+              "range:", { eventIdBegin, commandIndexEnd });
+          return this._readCommands({ eventIdBegin, eventIdEnd: commandIndexEnd, plog: plog3 });
+        })
+        .then(commands => {
+          if (!commands || !commands.length) return [];
+          const commandIdBegin = this._commandQueueInfo.eventIdBegin;
+          commands.forEach(command => {
+            this._commandQueueInfo.commandIds[command.aspects.log.index - commandIdBegin]
+                = command.aspects.command.id;
+          });
+          plog3 && plog3.opEvent("receive-commands", `receiveCommands(${commands.length})`);
+          return receiveCommands(commands, retrieveMediaBuffer);
+        }).then(receivedCommands => Promise.all(receivedCommands));
   }
-  return ret;
+  return [options, {}, scribeTruthLog, scribeCommandQueue];
+}
+
+export function _integrateLocalNarrationResults (
+    options, narrationResult, scribeTruthLog, scribeCommandQueue) {
+  if (scribeTruthLog) narrationResult.scribeTruthLog = scribeTruthLog;
+  if (scribeCommandQueue) narrationResult.scribeCommandQueue = scribeCommandQueue;
+  const upstream = this.getUpstreamConnection();
+  const params = [options, narrationResult];
+  if (!upstream || (options.remote === false)) {
+    return thisChainRedirect("_finalizeNarration", params);
+  }
+  params.push(upstream.asSourceredConnection());
+  if ((options.reproclaimOptions === false)
+      || !(scribeCommandQueue || []).length) {
+    return thisChainRedirect("_narrateUpstreamEventLog", params);
+  }
+  params.push(_receiveEvents(
+      this, scribeCommandQueue, null, null, "reproclaimCommands",
+      (error) => this._errorOnScribeNarrateOpts(error, 1, params)));
+  return params;
+}
+
+export function _reproclaimLocalCommandsToUpstream (
+    options, narrationResult, upstream, receivedCommands) {
+  // Resend all cached commands to remote on the side.
+  // Do not wait for success or results, ie. don't return this sub-chain.
+  upstream.proclaimEvents(receivedCommands, options.reproclaimOptions || {});
+  return [options, narrationResult, upstream];
+}
+
+export function _narrateUpstreamEventLog (options, narrationResult, upstream) {
+  // Initiate upstream narration in any case...
+  const upstreamNarration = upstream.narrateEventLog(Object.assign(Object.create(options), {
+    receiveTruths: this.getReceiveTruths(options.receiveTruths),
+    eventIdBegin: Math.max(options.eventIdBegin || 0, this.getFirstUnusedTruthEventId()),
+  }));
+  return [options, narrationResult,
+    // ...but only wait for it if requested or if we didn't find any local events
+    ((options.fullNarrate === true)
+        || (!options.newChronicle
+            && !(narrationResult.scribeTruthLog || []).length
+            && !(narrationResult.scribeCommandQueue || []).length))
+    && upstreamNarration,
+  ];
+}
+
+export function _integrateUpstreamNarrationResults (options, narrationResult, upstreamNarration) {
+  // Handle step 2 of the opportunistic narration if local narration
+  // didn't find any truths by waiting for the upstream narration.
+  const sections = upstreamNarration && Object.keys(upstreamNarration);
+  if (!sections || !sections.length) return [options, narrationResult];
+  return [options, narrationResult,
+    mapEagerly(sections.map(section => upstreamNarration[section]),
+        (eventResults, index) => (narrationResult[sections[index]] = !Array.isArray(eventResults)
+            ? eventResults
+            : mapEagerly(eventResults, entry => entry,
+                function _onResultEventError (error, entry, entryIndex) {
+                  entry.localPersistError = error;
+                  const wrapped = this.wrapErrorEvent(error, 1,
+                      `scribeNarrate.upstreamResults[${sections[index]}][${entryIndex}]`,
+                      "\n\toptions:", ...dumpObject(options),
+                      "\n\teventResults:", ...dumpObject(eventResults));
+                  if (error.blocksNarration) throw wrapped;
+                  this.outputErrorEvent(wrapped,
+                      "Exception caught when processing narration results");
+                })))
+  ];
 }
 
 
@@ -156,7 +168,7 @@ export function _proclaimEvents (connection: ScribeConnection,
   if (!events || !events.length) return { eventResults: events };
   const resultBase = new ScribeEventResult(connection);
   resultBase._events = events;
-  resultBase.onError = onError;
+  resultBase.onGetEventError = onError;
   // the 'mostRecentReceiveEventsProcess' is a kludge to sequentialize
   // the proclamation process so that waiting for possible media ops
   // doesn't mess up the order.
@@ -241,7 +253,7 @@ class ScribeEventResult extends ProclaimEventResult {
   getComposedEvent (): EventBase {
     return thenChainEagerly(this.receivedEventsProcess,
         receivedEvents => receivedEvents[this.index],
-        this.onError);
+        this.onGetEventError);
   }
   getRecordedEvent (): Truth {
     // TODO(iridian): Right now getComposedEvent will wait for full media
@@ -251,7 +263,7 @@ class ScribeEventResult extends ProclaimEventResult {
         ? this.getComposedEvent()
         : thenChainEagerly(this._persistedForwardResults,
             () => this._locallyReceivedEvents[this.index],
-            this.onError);
+            this.onGetEventError);
   }
 }
 
@@ -301,8 +313,8 @@ export function _receiveEvents (
     onError: Function,
 ) {
   const isReceivingTruths = (type === "receiveTruths");
-  const isRechronicling = (type === "reproclaimCommands");
-  let actionIdLowerBound = (isReceivingTruths || isRechronicling)
+  const isReproclamation = (type === "reproclaimCommands");
+  let actionIdLowerBound = (isReceivingTruths || isReproclamation)
       ? connection.getFirstUnusedTruthEventId() : connection.getFirstUnusedCommandEventId();
   const mediaPreOps = {};
   const newActions = [];
@@ -331,7 +343,8 @@ export function _receiveEvents (
     retryTimes: 4, delayBaseSeconds: 5, blockOnBrokenDownload: false,
     retrieveMediaBuffer:
         isReceivingTruths ? retrieveMediaBuffer
-        : isRechronicling ? ({ contentHash }) => connection.getScribe().readBvobContent(contentHash)
+        : isReproclamation
+            ? ({ contentHash }) => connection.getScribe().readBvobContent(contentHash)
         : undefined,
     prepareBvob: (content, mediaInfo) => connection.prepareBvob(
         content, { ...mediaInfo, prepareBvobToUpstream: !isReceivingTruths }),
@@ -366,7 +379,7 @@ export function _receiveEvents (
     writeEventsProcess = record
         && Promise.all(connection._truthLogInfo.writeQueue.push(...newActions));
     connection._triggerTruthLogWrites(lastTruth.aspects.command.id);
-  } else if (!isRechronicling) {
+  } else if (!isReproclamation) {
     connection._commandQueueInfo.eventIdEnd += newActions.length;
     writeEventsProcess = record
         && Promise.all(connection._commandQueueInfo.writeQueue.push(...newActions));

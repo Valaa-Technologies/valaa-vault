@@ -198,7 +198,8 @@ export default class Gateway extends FabricEventTarget {
 
   async initialize (revelation: Revelation, parentPlog) {
     try {
-      const plog1 = (parentPlog || this).opLog(1, "init");
+      const plog1 = this.opLog(parentPlog, 1, "init",
+          "Initializing gateway", { revelation });
 /*
  * Process the initially served landing page and extract the initial
  * ValOS configuration ('revelation') from it. The revelation might be
@@ -371,115 +372,139 @@ export default class Gateway extends FabricEventTarget {
   }, parentPlog) {
     if (!this._views) throw new Error("createAndConnectViewsToDOM must be called first");
     if (this._views[viewId]) throw new Error(`View ${viewId} already exists`);
-    const plog1 = (parentPlog || this).opLog(1, "create_view",
+    const plog1 = this.opLog(parentPlog, 1, "create_view",
         `Creating view "${viewId}"`, { verbosity, ...paramViewConfig });
     const view = createView({ parent, verbosity, name: viewId });
-    let rootScope;
-    let viewConfig;
-    let identity;
-    const gateway = this;
-    this._views[viewId] = thenChainEagerly(view, view.addChainClockers(plog1 && plog1.v2, "ops", [
-      async function _createViewOptions () {
-        const views = (await expose(gateway.revelation.views)) || {};
+    const op = { viewId, container, hostGlobal, paramViewConfig, plog: plog1 };
+    return (this._views[viewId] = this.opChain(
+        "viewCreation", [op, view],
+        "_errorOnCreateView", plog1, 2));
+  }
+
+  static viewCreation = [
+    Gateway.prototype._createViewOptions,
+    Gateway.prototype._createViewIdentity,
+    Gateway.prototype._createViewEngine,
+    Gateway.prototype._buildViewRootScope,
+    Gateway.prototype._attachView,
+    Gateway.prototype._finalizeViewAndNotifySpindles,
+    Gateway.prototype._logSpindleReactions,
+  ]
+
+  _errorOnCreateView (error, index, [op]) {
+    throw this.wrapErrorEvent(error, 1, new Error(`_createAndConnectViewToDOM(${op.viewId})`),
+        "\n\tcontainer:", ...dumpObject(op.container),
+        "\n\tviewConfig:", ...dumpObject(op.paramViewConfig));
+  }
+
+  async _createViewOptions (op, view) {
+    const viewRevelations = (await expose(this.revelation.views)) || {};
 // TODO(iridian, 2020-01): Streamline the view parameterization hodgepodge
 // monstrosity to use this revelationConfig as much as possible.
-        const revelationConfig = views[viewId] || {};
-        viewConfig = patchWith(
-            { verbosity, name: viewId, viewRootId: `valos-gateway--${viewId}--view-root` },
-            ["...", revelationConfig, paramViewConfig],
-            { complexPatch: "setOnInitialize" });
-        view.setRawName(viewId);
-        view.setName(`${viewConfig.name}-View`);
-        view.setVerbosity(viewConfig.verbosity);
-      },
-      function _createIdentity () {
-        identity = new IdentityManager({
-          ...(viewConfig.identity || {}),
-          parent: view,
-          sourcerer: gateway.falseProphet,
-        });
-        return identity;
-      },
-      function _createEngine () {
-        const engineOptions = {
-          name: `${viewConfig.name} Engine`,
-          discourse: {},
-          ...(viewConfig.engine || {}),
-          parent: view,
-          sourcerer: gateway.falseProphet,
-          revelation: gateway.revelation,
-        };
-        Object.assign(engineOptions.discourse, viewConfig.discourse || {});
-        const engine = new Engine(engineOptions);
-        plog1 && plog1.current.opEvent(engine, "engine",
-            `Created Engine ${engine.debugId()}`, { engineOptions, engine });
-        view.setEngine(engine);
-        return engine;
-      },
-      function _buildRootScope (engine) {
-        rootScope = engine.getRootScope();
-        const hostDescriptors = engine.getHostDescriptors();
-        extendValosheathWithEngine(
-            rootScope, hostDescriptors, engine.discourse.getRootDiscourse());
-        if (!viewConfig.defaultAuthorityURI) {
-          extendValosheathWithInspire(rootScope, hostDescriptors, hostGlobal || getGlobal());
-        } else {
-          // FIXME(iridian): Implement this.schemes - still missing.
-          const defaultAuthorityConfig = gateway.schemes[viewConfig.defaultAuthorityURI];
-          invariantify(defaultAuthorityConfig,
-              `defaultAuthorityConfig missing when looking for default authority ${
-                    String(viewConfig.defaultAuthorityURI)}`);
-          extendValosheathWithInspire(rootScope, hostDescriptors, hostGlobal || getGlobal(),
-                defaultAuthorityConfig, engine);
-        }
-        rootScope.valos.gateway = gateway;
-        rootScope.valos.identity = identity;
-        rootScope.valos.view = {};
-        rootScope.console = Object.assign(Object.create(engine), {
-          debug: function verboseDebugEvent (...rest) {
-            gateway.debugEvent(0, ...[].concat(...rest.map(_trimObjects)));
-          },
-          info: function verboseInfoEvent (...rest) {
-            gateway.infoEvent(0, ...[].concat(...rest.map(_trimObjects)));
-          },
-          log: function verboseLogEvent (...rest) {
-            gateway.logEvent(0, ...[].concat(...rest.map(_trimObjects)));
-          },
-          warn: function verboseWarnEvent (...rest) {
-            gateway.warnEvent(0, ...[].concat(...rest.map(_trimObjects)));
-          },
-          error: function verboseErrorEvent (...rest) {
-            gateway.errorEvent(0, ...[].concat(...rest.map(_trimObjects)));
-          },
-        });
-        function _trimObjects (entry) {
-          if (entry && (typeof entry === "object") && !inBrowser()) return dumpObject(entry);
-          return entry;
-        }
-      },
-      function _attachView () {
-        return view.attach(container, viewConfig);
-      },
-      function _notifyViewSpindles (attachedView) {
-        gateway._views[viewId] = rootScope.valos.view = attachedView;
-        attachedView.setRootScope(rootScope);
-        const attachedViewAwareSpindles = Object.values(gateway._attachedSpindles)
-            .filter(spindle => spindle.onViewAttached);
-        plog1 && plog1.v2 && plog1.current.opEvent(attachedView, "notify_spindles",
-            `Notifying ${attachedViewAwareSpindles.length} attached view-aware spindles`);
-        return mapEagerly(attachedViewAwareSpindles,
-            spindle => gateway._notifySpindle(spindle, "onViewAttached", attachedView, viewId));
-      },
-      reactions => plog1 && plog1.v2 && plog1.current
-          .opEvent(gateway._views[viewId], "spindle_reactions",
-              "\n\tspindle reactions:", { reactions }),
-      () => gateway._views[viewId],
-    ]), error => {
-      throw this.wrapErrorEvent(error, 1, new Error(`_createAndConnectViewToDOM(${viewId})`),
-          "\n\tcontainer:", ...dumpObject(container),
-          "\n\tviewConfig:", ...dumpObject(paramViewConfig));
+    const revelationConfig = viewRevelations[op.viewId] || {};
+    op.viewConfig = patchWith(
+        { verbosity: op.verbosity, name: op.viewId,
+          viewRootId: `valos-gateway--${op.viewId}--view-root`
+        },
+        ["...", revelationConfig, op.paramViewConfig],
+        { complexPatch: "setOnInitialize" });
+    view.setRawName(op.viewId);
+    view.setName(`${op.viewConfig.name}-View`);
+    view.setVerbosity(op.viewConfig.verbosity);
+    return [op, view];
+  }
+
+  _createViewIdentity (op, view) {
+    op.identity = new IdentityManager({
+      ...(op.viewConfig.identity || {}),
+      parent: view,
+      sourcerer: this.falseProphet,
     });
-    return this._views[viewId];
+    return [op, view];
+  }
+
+  _createViewEngine (op, view) {
+    const engineOptions = {
+      name: `${op.viewConfig.name} Engine`,
+      discourse: {},
+      ...(op.viewConfig.engine || {}),
+      parent: view,
+      sourcerer: this.falseProphet,
+      revelation: this.revelation,
+    };
+    Object.assign(engineOptions.discourse, op.viewConfig.discourse || {});
+    const engine = op.engine = new Engine(engineOptions);
+    (op.plog || {}).chain && op.plog.chain.opEvent(engine, "engine",
+        `Created Engine ${engine.debugId()}`, { engineOptions, engine });
+    view.setEngine(engine);
+    return [op, view];
+  }
+
+  _buildViewRootScope (op, view) {
+    const rootScope = op.rootScope = op.engine.getRootScope();
+    const hostDescriptors = op.engine.getHostDescriptors();
+    extendValosheathWithEngine(
+        rootScope, hostDescriptors, op.engine.discourse.getRootDiscourse());
+    if (!op.viewConfig.defaultAuthorityURI) {
+      extendValosheathWithInspire(rootScope, hostDescriptors, op.hostGlobal || getGlobal());
+    } else {
+      // FIXME(iridian): Implement this.schemes - still missing.
+      const defaultAuthorityConfig = gateway.schemes[op.viewConfig.defaultAuthorityURI];
+      invariantify(defaultAuthorityConfig,
+          `defaultAuthorityConfig missing when looking for default authority ${
+                String(op.viewConfig.defaultAuthorityURI)}`);
+      extendValosheathWithInspire(rootScope, hostDescriptors, op.hostGlobal || getGlobal(),
+          defaultAuthorityConfig, op.engine);
+    }
+    const gateway = rootScope.valos.gateway = this;
+    rootScope.valos.identity = op.identity;
+    rootScope.valos.view = {};
+    rootScope.console = Object.assign(Object.create(op.engine), {
+      debug: function verboseDebugEvent (...rest) {
+        gateway.debugEvent(0, ...[].concat(...rest.map(_trimObjects)));
+      },
+      info: function verboseInfoEvent (...rest) {
+        gateway.infoEvent(0, ...[].concat(...rest.map(_trimObjects)));
+      },
+      log: function verboseLogEvent (...rest) {
+        gateway.logEvent(0, ...[].concat(...rest.map(_trimObjects)));
+      },
+      warn: function verboseWarnEvent (...rest) {
+        gateway.warnEvent(0, ...[].concat(...rest.map(_trimObjects)));
+      },
+      error: function verboseErrorEvent (...rest) {
+        gateway.errorEvent(0, ...[].concat(...rest.map(_trimObjects)));
+      },
+    });
+    function _trimObjects (entry) {
+      if (entry && (typeof entry === "object") && !inBrowser()) return dumpObject(entry);
+      return entry;
+    }
+    return [op, view];
+  }
+
+  _attachView (op, view) {
+    return [op, view.attach(op.container, op.viewConfig)];
+  }
+
+  _finalizeViewAndNotifySpindles (op, view) {
+    this._views[op.viewId] = op.rootScope.valos.view = view;
+    view.setRootScope(op.rootScope);
+
+    const attachedViewAwareSpindles = Object.values(this._attachedSpindles)
+        .filter(spindle => spindle.onViewAttached);
+    (op.plog || {}).chain && op.plog.chain.opEvent(view, "notify_spindles",
+        `Notifying ${attachedViewAwareSpindles.length} attached view-aware spindles`);
+    return [op, view,
+      mapEagerly(attachedViewAwareSpindles,
+          spindle => this._notifySpindle(spindle, "onViewAttached", view, op.viewId)),
+    ];
+  }
+
+  _logSpindleReactions (op, view, spindleReactions) {
+    (op.plog || {}).chain && op.plog.chain.opEvent(view, "spindle_reactions",
+        "\n\tspindle reactions:", spindleReactions);
+    return view;
   }
 
   /**
@@ -510,7 +535,7 @@ export default class Gateway extends FabricEventTarget {
         ...(gatewayRevelation.nexus || {}),
         parent: this,
       };
-      const plog1 = (parentPlog || this).opLog(1, "create_authority-nexus",
+      const plog1 = this.opLog(parentPlog, 1, "create_authority-nexus",
           "new AuthorityNexus", nexusOptions);
       const nexus = new AuthorityNexus(nexusOptions);
       plog1 && plog1.opEvent("done",
@@ -532,7 +557,7 @@ export default class Gateway extends FabricEventTarget {
         parent: this,
         authorityNexus,
       };
-      const plog1 = (parentPlog || this).opLog(1, "create_oracle",
+      const plog1 = this.opLog(parentPlog, 1, "create_oracle",
           "new Oracle", oracleOptions);
       const oracle = new Oracle(oracleOptions);
       plog1 && plog1.opEvent("done",
@@ -556,7 +581,7 @@ export default class Gateway extends FabricEventTarget {
         parent: this,
         upstream: oracle,
       };
-      const plog1 = (parentPlog || this).opLog(1, "create_scribe",
+      const plog1 = this.opLog(parentPlog, 1, "create_scribe",
         "new Scribe", scribeOptions);
       const scribe = new Scribe(scribeOptions);
       plog1 && plog1.opEvent("await_initiate",
@@ -594,7 +619,7 @@ export default class Gateway extends FabricEventTarget {
       initialState: new ImmutableMap(),
       ...(gatewayRevelation.corpus || {}),
     };
-    const plog1 = (parentPlog || this).opLog(1, "corpus",
+    const plog1 = this.opLog(parentPlog, 1, "corpus",
         "new Corpus", corpusOptions);
     const corpus = new Corpus(corpusOptions);
     plog1 && plog1.opEvent("done",
@@ -646,7 +671,7 @@ export default class Gateway extends FabricEventTarget {
         ...(gatewayRevelation.falseProphet || {}),
         parent: this,
       };
-      const plog1 = (parentPlog || this).opLog(1, "create_falseProphet",
+      const plog1 = this.opLog(parentPlog, 1, "create_false-prophet",
           "new FalseProphet", falseProphetOptions);
       const falseProphet = new FalseProphet(falseProphetOptions);
       plog1 && plog1.opEvent("done",
@@ -695,7 +720,7 @@ export default class Gateway extends FabricEventTarget {
         parent: this,
         sourcerer: falseProphet,
       };
-      const plog1 = (parentPlog || this).opLog(1, "create_identity",
+      const plog1 = this.opLog(parentPlog, 1, "create_identity",
           "new IdentityManager", identityOptions);
       identity = new IdentityManager({
         ...identityOptions,
@@ -718,7 +743,7 @@ export default class Gateway extends FabricEventTarget {
       discourseOptions = {
         ...(gatewayRevelation.discourse || {}),
       };
-      const plog1 = (parentPlog || this).opLog(1, "create_discourse",
+      const plog1 = this.opLog(parentPlog, 1, "create_discourse",
           "new FalseProphetDiscourse", discourseOptions);
       discourse = falseProphet.createDiscourse(this, discourseOptions);
       plog1 && plog1.opEvent("done",
@@ -752,7 +777,7 @@ export default class Gateway extends FabricEventTarget {
 
   async attachSpindles (spindleModules_: (Promise<Object> | Object)[],
       options: { skipIfAlreadyAttached: boolean } = {}, parentPlog) {
-    const plog1 = (parentPlog || this).opLog(1, "spindles",
+    const plog1 = this.opLog(parentPlog, 1, "spindles",
         `Obtaining ${spindleModules_.length} spindle modules`);
     const spindleModules = await Promise.all(spindleModules_ || []);
     const newSpindleLookup = {};
@@ -857,7 +882,7 @@ export default class Gateway extends FabricEventTarget {
     try {
       let rootChronicleURI = prologue.rootChronicleURI
           && naiveURI.validateChronicleURI(await reveal(prologue.rootChronicleURI));
-      const plog1 = (parentPlog || this).opLog(1, "prologue");
+      const plog1 = this.opLog(parentPlog, 1, "prologue");
       if (prologue.rootPartitionURI) {
         this.errorEvent("DEPRECATED: prologue.rootPartitionURI used to override rootChronicleURI",
             "\n\tthis is probably due to ?partition= query param; use ?chronicle= instead.");
@@ -867,14 +892,13 @@ export default class Gateway extends FabricEventTarget {
           `Determining prologues and the root chronicle <${rootChronicleURI}>`);
       this._rootFocusURI = await reveal(prologue.rootFocusURI);
       chronicles = await this._determinePrologueChronicles(prologue, rootChronicleURI);
-      plog1 && plog1.warnEvent(
-          `Extracted ${chronicles.length} chronicles from the prologue`,
-          "\n\troot chronicle:", rootChronicleURI,
-          "\n\tprologue chronicles:",
-              `<${chronicles.map(({ chronicleURI }) => chronicleURI).join(">, <")}>`,
-      );
-      plog1 && plog1.opEvent("sourcering",
-          `Narrating and sourcering ${chronicles.length} prologue and root chronicles`,
+      plog1 && plog1.opEvent("extraction",
+          `Extracted ${chronicles.length} chronicles from the prologue`, {
+            rootChronicleURI,
+            prologueChronicleURIs: chronicles.map(({ chronicleURI }) => chronicleURI),
+          });
+      plog1 && plog1.opEvent("sourcery",
+          `Sourcering ${chronicles.length} prologue and root chronicles`,
           { chronicles, rootChronicleURI });
       const connections = await Promise.all(chronicles.map(chronicleInfo =>
           this._sourcifyPrologueChronicle(prologue, chronicleInfo, plog1)));
@@ -930,9 +954,8 @@ export default class Gateway extends FabricEventTarget {
     const chronicleURI = await reveal(info.chronicleURI);
     // Acquire connection without remote narration to determine the current last authorized event
     // so that we can narrate any content in the prologue before any remote activity.
-    const plog1 = (parentPlog || this).opLog(1, "chronicle");
     const connectionOptions = await reveal(info.connection || {});
-    plog1 && plog1.opEvent("sourcify",
+    const plog2 = this.opLog(parentPlog, 2, "chronicle",
         `Sourcering chronicle <${chronicleURI}>`, connectionOptions);
     const connection = this.discourse
         .sourcifyChronicle(naiveURI.validateChronicleURI(chronicleURI), {
@@ -940,7 +963,7 @@ export default class Gateway extends FabricEventTarget {
           subscribeEvents: false,
           narrateOptions: { remote: false },
         });
-    plog1 && plog1.opEvent(connection, "activate",
+    plog2 && plog2.opEvent(connection, "activate",
         "Activating connection");
     await connection.asSourceredConnection();
     let prologueTruthCount = await reveal(info.truthCount);
@@ -952,7 +975,7 @@ export default class Gateway extends FabricEventTarget {
     const eventIdEnd = connection.getFirstUnusedTruthEventId() || 0;
     const shouldChroniclePrologue = ((prologueTruthCount || 0) > eventIdEnd);
     if (shouldChroniclePrologue) {
-      plog1 && plog1.opEvent(connection, "proclaim",
+      plog2 && plog2.opEvent(connection, "proclaim",
           `Proclaiming truths, medias and bvobs from revelation`);
       // If no event logs are replayed, we don't need to precache the bvobs either, so we delay
       // loading them up to this point.
@@ -996,14 +1019,14 @@ export default class Gateway extends FabricEventTarget {
               }" during prologue narration, with bvob id "${mediaInfo.contentHash}" `);
         }
       });
-      plog1 && plog1.opEvent(connection, "await_proclamation",
+      plog2 && plog2.opEvent(connection, "await_proclamation",
           `Waiting for the proclaimed events to resolve locally`);
       for (const result of proclamation.eventResults) await result.getComposedEvent();
     }
     // Initiate remote narration.
     let remoteNarration;
     if (connectionOptions.remote !== false) {
-      plog1 && plog1.opEvent(connection, "narrate",
+      plog2 && plog2.opEvent(connection, "narrate",
           `Starting full remote narration and subscribing for events`);
       remoteNarration = (connectionOptions.remote !== false) && connection.narrateEventLog({
         subscribeEvents: true,
@@ -1014,11 +1037,11 @@ export default class Gateway extends FabricEventTarget {
       if (!remoteNarration) {
         throw new Error(`No truths found in prologue for non-remote chronicle <${chronicleURI}>`);
       }
-      plog1 && plog1.opEvent(connection, "await_narration",
+      plog2 && plog2.opEvent(connection, "await_narration",
           `Waiting for remote narration`);
       await remoteNarration;
     }
-    plog1 && plog1.opEvent("done");
+    plog2 && plog2.opEvent("done");
     return connection;
   }
 

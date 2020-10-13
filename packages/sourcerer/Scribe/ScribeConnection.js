@@ -11,7 +11,7 @@ import {
 import { tryAspect } from "~/sourcerer/tools/EventAspects";
 import { deserializeVRL } from "~/sourcerer/FalseProphet";
 
-import { DelayedQueue, dumpObject, thenChainEagerly } from "~/tools";
+import { DelayedQueue, dumpObject, thenChainEagerly, thisChainRedirect } from "~/tools";
 
 import type IndexedDBWrapper from "~/tools/html5/IndexedDBWrapper";
 import { bufferAndContentHashFromNative } from "~/tools/id/contentId";
@@ -24,7 +24,9 @@ import {
   _writeTruths, _readTruths, _writeCommands, _readCommands, _deleteCommands,
 } from "./_databaseOps";
 import {
-  _narrateEventLog, _proclaimEvents, _receiveEvents, _triggerEventQueueWrites
+  _narrateLocalLogs, _integrateLocalNarrationResults, _reproclaimLocalCommandsToUpstream,
+  _narrateUpstreamEventLog, _integrateUpstreamNarrationResults,
+  _proclaimEvents, _receiveEvents, _triggerEventQueueWrites
 } from "./_eventOps";
 
 export default class ScribeConnection extends Connection {
@@ -81,7 +83,16 @@ export default class ScribeConnection extends Connection {
     return super.getName();
   }
 
-  _doConnect (options: ConnectOptions) {
+  static sourceryOpsName = "scribeSourcery";
+  static scribeSourcery = [
+    ScribeConnection.prototype._sourcifyUpstream,
+    ScribeConnection.prototype._readMediaEntries,
+    ScribeConnection.prototype._initializeMediaLookups,
+    Connection.prototype._narrateEventLog,
+    Connection.prototype._finalizeSourcery,
+  ]
+
+  _sourcifyUpstream (options: SourceryOptions) {
     if (this.getScribe()._upstream) {
       const upstreamOptions = Object.create(options);
       // Set the permanent receiver without options.pushTruths,
@@ -98,31 +109,29 @@ export default class ScribeConnection extends Connection {
       // optimistic narration criteria of the sourcery process via
       // events in the local cache.
     }
-    // ScribeConnection can be active even if the upstream
-    // connection isn't, as long as there are any events in the local
-    // cache and thus optimistic narration is possible.
-    const connection = this;
-    return thenChainEagerly(this, this.addChainClockers(2, "scribe.doConnect.ops", [
-      ...(!this.isLocallyPersisted() ? [] : [
-        _initializeConnectionIndexedDB,
-        _readMediaEntries,
-        function _initializeMediaLookups (mediaEntries) {
-          connection._pendingMediaLookup = mediaEntries;
-          for (const [mediaRawId, entry] of Object.entries(connection._pendingMediaLookup)) {
-            connection.getScribe()._persistedMediaLookup[mediaRawId] = entry;
-          }
-        },
-      ]),
-      function _postUpstreamConnectNarrate () {
-        if (options.narrateOptions === false) return undefined;
-        const narrateOptions = (options.narrateOptions || {});
-        narrateOptions.subscribeEvents = options.subscribeEvents;
-        return connection.narrateEventLog(narrateOptions);
-      },
-    ]), function errorOnScribeChronicleConnect (error) {
-      throw connection.wrapErrorEvent(error, 1, new Error("_doConnect"),
-          "\n\toptions:", ...dumpObject(options));
-    });
+    if (options.narrateOptions !== false) {
+      if (!options.narrateOptions) options.narrateOptions = {};
+      options.narrateOptions.subscribeEvents = options.subscribeEvents;
+    }
+    return this.isLocallyRecorded()
+        ? [options, _initializeConnectionIndexedDB(this)]
+        : thisChainRedirect(
+            (options.narrateOptions !== false) ? "_narrateEventLog" : "_finalizeSourcery", options);
+  }
+
+  _readMediaEntries (options, localDatabase) {
+    return [options, _readMediaEntries(this, localDatabase)];
+  }
+
+  _initializeMediaLookups (options, localMediaEntries) {
+    if (localMediaEntries) {
+      this._pendingMediaLookup = localMediaEntries;
+      for (const [mediaRawId, entry] of Object.entries(this._pendingMediaLookup)) {
+        this.getScribe()._persistedMediaLookup[mediaRawId] = entry;
+      }
+    }
+    return (options.narrateOptions !== false) ? options
+        : thisChainRedirect("_finalizeSourcery", options);
   }
 
   disconnect () {
@@ -144,21 +153,30 @@ export default class ScribeConnection extends Connection {
 
   narrateEventLog (options: ?NarrateOptions = {}):
       Promise<{ scribeTruthLog: any, scribeCommandQueue: any }> {
-    if (!options) return undefined;
+    if (!options) return undefined; // if explicitly null
     if (!this.isLocallyRecorded()) return super.narrateEventLog(options);
     if (!this._db) {
       throw new Error(
           "INTERNAL ERROR: Missing _db for locally persisted ScribeConnection.narrateEventLog");
     }
-    const connection = this;
-    const wrap = new Error("narrateEventLog()");
-    const ret = {};
-    return _narrateEventLog(this, options, ret,
-        function errorOnScribeNarrateEventLog (error) {
-          throw connection.wrapErrorEvent(error, 1, wrap,
-              "\n\toptions:", ...dumpObject(options),
-              "\n\tcurrent ret:", ...dumpObject(ret));
-        });
+    options.plog = this.opLog(options.plog, 2, "narrate");
+    return this.opChain("scribeNarrate", options, "_errorOnScribeNarrateOps", options.plog);
+  }
+
+  static scribeNarrate = [
+    _narrateLocalLogs,
+    _integrateLocalNarrationResults,
+    _reproclaimLocalCommandsToUpstream,
+    _narrateUpstreamEventLog,
+    _integrateUpstreamNarrationResults,
+    function _finalizeNarration (options, narrationResult) { return narrationResult; }
+  ]
+
+  _errorOnScribeNarrateOps (error, index, [options, narrationResult, ...rest]) {
+    throw this.wrapErrorEvent(error, 1, new Error("scribeNarrate"),
+        "\n\toptions:", ...dumpObject(options),
+        "\n\tnarrationResult:", ...dumpObject(narrationResult),
+        "\n\trest of params:", ...dumpObject(rest));
   }
 
   proclaimEvents (events: EventBase[], options: ProclaimOptions = {}): Proclamation {
@@ -356,14 +374,6 @@ export default class ScribeConnection extends Connection {
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, `_updateMediaEntries(${updates.length} updates)`,
           "\n\tupdates:", ...dumpObject(updates));
-    }
-  }
-
-  async _readMediaEntries () {
-    try {
-      return await _readMediaEntries(this);
-    } catch (error) {
-      throw this.wrapErrorEvent(error, 1, `_readMediaEntries()`);
     }
   }
 

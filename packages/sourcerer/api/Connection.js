@@ -11,7 +11,7 @@ import Follower from "~/sourcerer/api/Follower";
 
 import {
   dumpObject, invariantifyArray, invariantifyObject, invariantifyString,
-  isPromise, thenChainEagerly,
+  isPromise, thenChainEagerly, thisChainRedirect,
 } from "~/tools";
 
 /**
@@ -68,10 +68,11 @@ export default class Connection extends Follower {
   getEventVersion () { return this._upstreamConnection.getEventVersion(); }
 
   getReceiveTruths (pushTruths?: ReceiveEvents = this._pushTruthsDownstream): ReceiveEvents {
-    return (truths, retrieveMediaBuffer, unused, rejectedEvent) => {
+    return (truths, retrieveMediaBuffer, unused, rejectedEvent, parentPlog) => {
       try {
         invariantifyArray(truths, "receiveTruths.truths", { min: (rejectedEvent ? 0 : 1) });
-        return this.receiveTruths(truths, retrieveMediaBuffer, pushTruths, rejectedEvent);
+        return this.receiveTruths(
+            truths, retrieveMediaBuffer, pushTruths, rejectedEvent, parentPlog);
       } catch (error) {
         throw this.wrapErrorEvent(error, 1,
             new Error(`receiveTruths(${this._dumpEventIds(truths)})`),
@@ -126,74 +127,92 @@ export default class Connection extends Follower {
    * @memberof OracleConnection
    */
   sourcify (options: SourceryOptions) {
-    const connection = this;
-    const wrap = new Error("connect()");
     if (this._activeConnection) return this._activeConnection;
-    this.warnEvent(1, () => [
-      "\n\tBegun sourcery with options", ...dumpObject(options), ...dumpObject(this)
-    ]);
-    return (this._activeConnection = thenChainEagerly(null,
-        this.addChainClockers(2, "connection.connect.ops", [
-      function _doConnect () {
-        return connection._doConnect(Object.create(options));
-      },
-      function _postProcess (sourceryResults) {
-        if (options.narrateOptions !== false) {
-          const actionCount = Object.values(sourceryResults).reduce(
-              (s, log) => s + (Array.isArray(log) ? log.length : 0),
-              options.eventIdBegin || 0);
-          if (!actionCount && (options.newChronicle === false)) {
-            throw new Error(`No events found when connecting to an existing chronicle '${
-              connection.getChronicleURI()}'`);
-          } else if (actionCount && (options.newChronicle === true)) {
-            throw new Error(`Existing events found when trying to create a new chronicle '${
-              connection.getChronicleURI()}'`);
-          }
-          if ((options.requireLatestMediaContents !== false)
-              && (sourceryResults.mediaRetrievalStatus
-                  || { latestFailures: [] }).latestFailures.length) {
-            // FIXME(iridian): This error temporarily demoted to log error
-            connection.outputErrorEvent(
-                new Error(`Failed to connect to chronicle: encountered ${
-                  sourceryResults.mediaRetrievalStatus.latestFailures.length
-                    } latest media content retrieval failures (and ${
-                    ""}options.requireLatestMediaContents does not equal false).`),
-                "Exception logged when connecting to chronicle");
-          }
-        }
-        connection.warnEvent(1, () => [
-          "\n\tSourcered with results:", ...dumpObject(sourceryResults),
-          "\n\tconnection status:", ...dumpObject(connection.getStatus()),
-        ]);
-        return (connection._activeConnection = connection);
-      },
-    ]), function errorOnConnect (error, stepIndex, stepHead) {
-      throw connection.wrapErrorEvent(error, 1, wrap,
-          "\n\toptions:", ...dumpObject(options),
-          `\n\tstep #${stepIndex} head:`, ...dumpObject(stepHead));
-    }));
+    const Type = this.constructor;
+    const chainOptions = Object.create(options);
+    chainOptions.plog = (options.plog || {}).v1
+        || this.opLog(1, "sourcery",
+            `Sourcering ${Type.name}`, { options, connection: this });
+    return (this._activeConnection = this.opChain(
+        Type.sourceryOpsName, chainOptions,
+        "_errorOnSourcery", chainOptions.plog, 2));
   }
 
-  _doConnect (options: ConnectOptions) {
-    if (!this.getSourcerer()._upstream) {
-      throw new Error("Cannot connect using default _doConnect with no upstream");
+  static sourceryOpsName = "localSourcery";
+  static localSourcery = [
+    Connection.prototype._sourcifyUpstream,
+    Connection.prototype._narrateEventLog,
+    Connection.prototype._finalizeSourcery,
+  ];
+
+  _errorOnSourcery (error, stepIndex, params) {
+    throw this.wrapErrorEvent(error, 1, new Error("sourcify()"),
+        `\n\tstep #${stepIndex} params:`, ...dumpObject(params));
+  }
+
+  _sourcifyUpstream (options: SourceryOptions, subOptions = {}) {
+    let { sourceredUpstream } = subOptions;
+    const narrateOptions = options.narrateOptions;
+    if (sourceredUpstream === undefined) {
+      if (!this.getSourcerer()._upstream) {
+        throw new Error("Cannot call default _sourcifyUpstream with no sourcerer upstream");
+      }
+      // narrate later, but subscribe the persistent downstream push callbacks here
+      const upstreamOptions = Object.create(options);
+      upstreamOptions.narrateOptions = false;
+      upstreamOptions.pushTruths = this.getReceiveTruths(options.pushTruths);
+      upstreamOptions.pushCommands = this.getReceiveCommands(options.pushCommands);
+      this.setUpstreamConnection(this.getSourcerer()._upstream
+          .sourcifyChronicle(this.getChronicleURI(), upstreamOptions));
+      sourceredUpstream = this._upstreamConnection.asSourceredConnection();
     }
-    options.receiveTruths = this.getReceiveTruths(options.receiveTruths);
-    options.receiveCommands = this.getReceiveCommands(options.receiveCommands);
-    const postponedNarrateOptions = options.narrateOptions;
-    options.narrateOptions = false;
-    this.setUpstreamConnection(this.getSourcerer()._upstream
-        .acquireConnection(this.getChronicleURI(), options));
-    const connection = this;
-    return thenChainEagerly(null, this.addChainClockers(2, "connection.doConnect.ops", [
-      function _waitActiveUpstream () {
-        return connection._upstreamConnection.asActiveConnection();
-      },
-      function _narrateEventLog () {
-        return (postponedNarrateOptions !== false)
-            && connection.narrateEventLog(postponedNarrateOptions);
-      },
-    ]));
+    const params = [options, sourceredUpstream];
+    return narrateOptions !== false ? params : thisChainRedirect("_finalizeSourcery", params);
+  }
+
+  _narrateEventLog (options: SourceryOptions) {
+    if (options.narrateOptions === false) {
+      throw new Error(
+          "INTENRAL ERROR: options.narrateOptions is false: _narrateEventLog must be skipped");
+    }
+    const narrateOptions = options.narrateOptions || {};
+    narrateOptions.plog = options.plog;
+    return [options, this.narrateEventLog(narrateOptions)];
+  }
+
+  _finalizeSourcery (options, narrateResults) {
+    if (options.narrateOptions !== false) {
+      if (!narrateResults) {
+        this.outputErrorEvent(new Error(
+            "INTERNAL ERROR: options.narrateOptions not false but no narrateResults found"));
+      }
+      const eventIdEnd = Object.values(narrateResults || {}).reduce(
+          (sum, log) => sum + (Array.isArray(log) ? log.length : 0),
+          options.eventIdBegin || 0);
+      if (!eventIdEnd && (options.newChronicle === false)) {
+        throw new Error(`No events found when connecting to an existing chronicle <${
+            this.getChronicleURI()}>`);
+      } else if (eventIdEnd && (options.newChronicle === true)) {
+        throw new Error(`Existing events found when trying to create a new chronicle <${
+            this.getChronicleURI()}>`);
+      }
+      if ((options.requireLatestMediaContents !== false)
+          && (narrateResults.mediaRetrievalStatus
+              || { latestFailures: [] }).latestFailures.length) {
+        // FIXME(iridian): This error temporarily demoted to log error
+        this.outputErrorEvent(
+            new Error(`Failed to sourcify chronicle: encountered ${
+              narrateResults.mediaRetrievalStatus.latestFailures.length
+                } latest media content retrieval failures (and ${
+                ""}options.requireLatestMediaContents does not equal false).`),
+            "Exception logged when connecting to chronicle");
+      }
+      (options.plog || {}).chain && options.plog.chain.opEvent(this, "narrated",
+          "Narrated:", narrateResults);
+    }
+    options.plog && !Object.getPrototypeOf(options).plog && options.plog.opEvent(this, "done",
+        "Sourcery done:", { options, narrateResults });
+    return (this._activeConnection = this);
   }
 
   /**

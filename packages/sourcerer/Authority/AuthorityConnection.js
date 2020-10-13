@@ -33,7 +33,16 @@ export default class AuthorityConnection extends Connection {
     return this.getRawName();
   }
 
-  _doConnect (/* options: ConnectOptions */) {}
+  static sourceryOpsName = "authoritySourcery";
+  static authoritySourcery = [
+    AuthorityConnection.prototype._sourcifyUpstream,
+    Connection.prototype._narrateEventLog,
+    Connection.prototype._finalizeSourcery,
+  ]
+
+  _sourcifyUpstream (options) {
+    return super._sourcifyUpstream(options, { sourceredUpstream: null });
+  }
 
   narrateEventLog (options: ?NarrateOptions = {}): Object | Promise<Object> {
     if (this.isRemoteAuthority()) {
@@ -48,41 +57,63 @@ export default class AuthorityConnection extends Connection {
       throw new Error(`Failed to chronicle events to ${this.getName()}: ${this.constructor.name
           }.proclaimEvents not overridden and options.remoteEventsProcess not defined`);
     }
-    let rejectedIndex;
-    const resultBase = new AuthorityEventResult(this);
-    resultBase.remoteResults = null;
-    resultBase.isPrimary = this.isPrimaryAuthority();
-    resultBase.localProcess = thenChainEagerly(null, this.addChainClockers(2,
-        "authority.chronicle.localProcess.ops", [
-      function _processRemoteEvents () {
-        if (!options.remoteEventsProcess) return undefined;
-        return mapEagerly(options.remoteEventsProcess,
-            remoteEvent => remoteEvent,
-            (error, head, index, remoteEvents, entries, callback, onRejected) => {
-              if (rejectedIndex === undefined) rejectedIndex = index;
-              remoteEvents[index] = Promise.reject(error);
-              return mapEagerly(entries, callback, onRejected, index + 1, remoteEvents);
-            });
-      },
-      function _receiveTruthsLocally (remoteResults) {
-        resultBase.remoteResults = remoteResults;
-        const truths = (rejectedIndex !== undefined) ? remoteResults.slice(0, rejectedIndex)
-            : remoteResults || events;
-        if (!truths || !truths.length) return [];
-        return resultBase.getChronicler().getReceiveTruths(options.receivedTruths)(truths);
-      },
-      function _finalizeLocallyReceivedTruths (receivedTruths) {
-        return (resultBase.localProcess = receivedTruths);
-      },
-    ]));
-    resultBase.truthsProcess = thenChainEagerly(resultBase.localProcess,
-        (receivedTruths) => (resultBase.truthsProcess =
+    const op = { events, options, resultBase: new AuthorityEventResult(this) };
+    op.resultBase.remoteResults = null;
+    op.resultBase.isPrimary = this.isPrimaryAuthority();
+    op.resultBase.localProcess = this.opChain(
+        "authorityProclaim", op,
+        "_errorOnProclaimEvents", this.opLog(options.plog, 2, "proclaim"));
+    op.resultBase.truthsProcess = thenChainEagerly(op.resultBase.localProcess,
+        receivedTruths => (op.resultBase.truthsProcess =
             (this.isPrimaryAuthority() && (receivedTruths || events)) || []));
     return {
       eventResults: events.map((event, index) => {
-        const ret = Object.create(resultBase); ret.event = event; ret.index = index; return ret;
+        const ret = Object.create(op.resultBase);
+        ret.event = event; ret.index = index;
+        return ret;
       }),
     };
+  }
+
+  static authorityProclaim = [
+    AuthorityConnection.prototype._processRemoteEvents,
+    AuthorityConnection.prototype._receiveTruthsLocally,
+    AuthorityConnection.prototype._finalizeLocallyReceivedTruths,
+  ]
+
+  _errorOnProclaimEvents (error, stepIndex, params) {
+    throw this.wrapErrorEvent(error, 1, new Error("proclaimEvents()"),
+        `\n\tstep #${stepIndex} params:`, ...dumpObject(params));
+  }
+
+  _processRemoteEvents (op) {
+    if (!op.options.remoteEventsProcess) return [op];
+    return [
+        op,
+        mapEagerly(op.options.remoteEventsProcess,
+            remoteEvent => remoteEvent,
+            (error, head, index, remoteEvents, entries, callback, onRejected) => {
+              if (op.rejectedIndex === undefined) op.rejectedIndex = index;
+              remoteEvents[index] = Promise.reject(error);
+              return mapEagerly(entries, callback, onRejected, index + 1, remoteEvents);
+            }),
+    ];
+  }
+
+  _receiveTruthsLocally (op, remoteResults) {
+    op.resultBase.remoteResults = remoteResults;
+    const truths = (op.rejectedIndex !== undefined)
+        ? remoteResults.slice(0, op.rejectedIndex)
+        : remoteResults || op.events;
+    if (!truths || !truths.length) return [];
+    return [
+      op,
+      op.resultBase.getChronicler().getReceiveTruths(op.options.receivedTruths)(truths),
+    ];
+  }
+
+  _finalizeLocallyReceivedTruths (op, receivedTruths) {
+    return (op.resultBase.localProcess = receivedTruths);
   }
 
   // Coming from downstream: tries scribe first, otherwise forwards the request to authority.
@@ -123,7 +154,7 @@ export class AuthorityEventResult extends ProclaimEventResult {
   getComposedEvent () {
     return thenChainEagerly(this.localProcess,
         receivedEvents => receivedEvents[this.index],
-        this.onError);
+        this.onGetEventError);
   }
   getTruthEvent () {
     if (!this.isPrimary) {
@@ -133,6 +164,6 @@ export class AuthorityEventResult extends ProclaimEventResult {
     if (!this.truthsProcess) return this.getComposedEvent(); // implies: not remote
     return thenChainEagerly(this.truthsProcess,
         truthEvents => (this.remoteResults || truthEvents)[this.index],
-        this.onError);
+        this.onGetEventError);
   }
 }

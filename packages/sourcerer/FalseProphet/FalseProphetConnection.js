@@ -4,13 +4,13 @@ import { EventBase } from "~/raem/events";
 import VRL from "~/raem/VRL";
 
 import Connection from "~/sourcerer/api/Connection";
-import { ProclaimOptions, Proclamation, ProclaimEventResult, SourceryOptions, NarrateOptions }
+import { ProclaimOptions, Proclamation, ProclaimEventResult, NarrateOptions }
     from "~/sourcerer/api/types";
 import { initializeAspects, obtainAspect, tryAspect } from "~/sourcerer/tools/EventAspects";
 import EVENT_VERSION from "~/sourcerer/tools/EVENT_VERSION";
 import IdentityManager from "~/sourcerer/FalseProphet/IdentityManager";
 
-import { dumpObject, mapEagerly, thenChainEagerly } from "~/tools";
+import { dumpObject, mapEagerly, thisChainRedirect } from "~/tools";
 
 import { Prophecy, _reviewRecomposedSchism } from "./_prophecyOps";
 import {
@@ -56,14 +56,17 @@ export default class FalseProphetConnection extends Connection {
 
   getFalseProphet () { return this._parent; }
 
-  _doConnect (options: ConnectOptions, onError: Function) {
-    this._originatingIdentity = options.discourse && options.discourse.getIdentityManager();
-    return thenChainEagerly(super._doConnect(options, onError),
-        ret => {
-          this._referencePrototype.setAbsent(false);
-          return ret;
-        });
-  }
+  static sourceryOpsName = "falseSourcery";
+  static falseSourcery = [
+    function _prepareIdentity (...forward) {
+      this._originatingIdentity = forward[0].discourse && forward[0].discourse.getIdentityManager();
+      this._referencePrototype.setAbsent(false);
+      return forward;
+    },
+    Connection.prototype._sourcifyUpstream,
+    Connection.prototype._narrateEventLog,
+    Connection.prototype._finalizeSourcery,
+  ]
 
   isLocallyRecorded () {
     return this._isLocallyPersisted !== undefined ? this._isLocallyPersisted
@@ -102,10 +105,10 @@ export default class FalseProphetConnection extends Connection {
   narrateEventLog (options: ?NarrateOptions = {}): Promise<Object> {
     if (!options) return undefined;
     this._resolveOptionsIdentity(options);
-    if (options.rechronicleOptions !== false) {
-      if (!options.rechronicleOptions) options.rechronicleOptions = {};
-      options.rechronicleOptions.discourse = options.discourse;
-      options.rechronicleOptions.identity = options.identity;
+    if (options.reproclaimOptions !== false) {
+      if (!options.reproclaimOptions) options.reproclaimOptions = {};
+      options.reproclaimOptions.discourse = options.discourse;
+      options.reproclaimOptions.identity = options.identity;
     }
     return super.narrateEventLog(options);
   }
@@ -118,158 +121,179 @@ export default class FalseProphetConnection extends Connection {
 
   proclaimEvents (events: EventBase[], options: ProclaimOptions = {}): Proclamation {
     if (!events || !events.length) return { eventResults: events };
-    const connection = this;
-    let proclamation, resultBase, leadingTruths, initialSchism, upstreamResults, renarration,
-        rechronicle;
-    try {
-      const plog2 = this.opLog(2, "proclaim",
-          `Proclaiming ${events.length} events`);
-      if (options.isProphecy) {
-        // console.log("assigning ids:", this.getName(), this._headEventId,
-        //     this._unconfirmedCommands.length, "\n\tevents:", ...dumpObject(events));
-        for (const event of events) {
-          if (!event.aspects || !event.aspects.version) {
-            initializeAspects(event, { version: EVENT_VERSION });
-          }
-          obtainAspect(event, "log").index = this._headEventId + this._unconfirmedCommands.length;
-          this._unconfirmedCommands.push(event);
-        }
-        this._checkForFreezeAndNotify(undefined, plog2);
-      } else if (typeof events[0].aspects.log.index !== "number") {
-        throw new Error(`Can't chronicle events without aspects.log.index ${
-            ""}(while options.isProphecy is not set)`);
-      }
-      const receiveTruths = !options.isTruth && this.getReceiveTruths(options.receiveTruths);
-      if (receiveTruths) options.receiveTruths = receiveTruths;
-      options.receiveCommands = options.isProphecy ? null
-          : this.getReceiveCommands(options.receiveCommands);
-      this._resolveOptionsIdentity(options);
-      plog2 && plog2.opEvent("to-upstream",
-          `upstream.proclaimEvents(${events.length})`, { events, options });
-      proclamation = this._upstreamConnection.proclaimEvents(events, options);
-
-      resultBase = new ProclaimEventResult(this);
-      resultBase._events = events;
-      resultBase.onError = errorOnFalseProphetChronicleEvents
-          .bind(this, new Error("chronicleResultBase"));
-      const canonicalRecital = this.getFalseProphet()._canonicalRecital;
-      const ret = {
-        eventResults: events.map((event, index) => {
-          const result = Object.create(resultBase);
-          result.event = event;
-          result.index = index;
-          return result;
-        }),
-      };
-      resultBase._truthForwardResults = thenChainEagerly(null, this.addChainClockers(plog2,
-          "falseConnection.proclaim.upstream.ops", [
-        function _awaitUpstreamChronicling () {
-          return (resultBase._forwardResults = proclamation.eventResults);
-        },
-        function _awaitUpstreamTruths (upstreamEventResults) {
-          return mapEagerly((upstreamResults = (upstreamEventResults || events)),
-              result => result.getTruthEvent(),
-              (error, head, index, truthResults, entries, callback, onRejected) => {
-                if (!leadingTruths) leadingTruths = truthResults.slice(0, index);
-                const command = events[index];
-                const prophecy = command && canonicalRecital.getStoryBy(command.aspects.command.id);
-                if (error) connection._mostRecentError = error;
-                if (((error.proceed || {}).when === "narrated") && (renarration === undefined)) {
-                  renarration = connection.narrateEventLog({
-                    eventIdBegin: connection._headEventId,
-                    receiveTruths: null,
-                  });
-                }
-                if (prophecy) {
-                  const progress = prophecy.meta.operation.getErroringProgress(error, {
-                    instigatorConnection: connection,
-                    isSchismatic: error.isSchismatic !== false,
-                    isRevisable: error.isRevisable !== false,
-                    isReformable: error.isReformable !== false,
-                    isRefabricateable: error.isRefabricateable !== false,
-                  });
-                  if (options.discourse) {
-                    options.discourse.dispatchAndDefaultActEvent(progress);
-                  }
-                  if (renarration) {
-                    progress.proceedAfterAll(renarration);
-                  }
-                  if (progress.isSchismatic !== false) {
-                    if (initialSchism === undefined) initialSchism = events[index];
-                    progress.type = "schism";
-                    progress.schismaticCommand = events[index];
-                    progress.message = `a ${
-                      progress.isRevisable ? "reviseable"
-                      : progress.isReformable ? "reformable"
-                      : progress.isRefabricateable ? "refabricateable"
-                      : "heretic"
-                    } schism resulting from chronicleEvents error: ${error.message}`;
-                  }
-                }
-                // Process the remaining entries so that fully
-                // rejected commands will not be needlessly revised
-                return mapEagerly(entries, callback, onRejected, index + 1, truthResults);
-              });
-        },
-        function _awaitPossibleRenarration (truthResults) {
-          if (!leadingTruths) leadingTruths = truthResults;
-          return renarration;
-        },
-        function _receiveTruthsLocally (renarratedEvents = []) {
-          let receivableTruths = (!leadingTruths.length && !renarratedEvents.length) ? []
-              : !leadingTruths.length ? renarratedEvents
-              : !renarratedEvents.length && leadingTruths;
-          if (!receivableTruths) {
-            // TODO(iridian): Check that the truths -> narratedLog
-            // log.index transition is monotonous
-            receivableTruths = leadingTruths.concat(renarratedEvents);
-          }
-          if (!receivableTruths.length && renarration && connection._unconfirmedCommands.length) {
-            if (!rechronicle) {
-              rechronicle = new Error();
-              rechronicle.headIndex = events[0].aspects.log.index;
-            }
-            throw rechronicle;
-          }
-          return receiveTruths
-              && (receivableTruths.length || initialSchism)
-              && receiveTruths(receivableTruths, undefined, undefined, initialSchism);
-        },
-        function _finalizeChronicleResults () {
-          return (resultBase._truthForwardResults = !rechronicle ? upstreamResults
-              : upstreamResults.slice(
-                  rechronicle.headIndex - upstreamResults[0].aspects.log.index));
-        },
-      ]), (error, index, head, functionChain, onRejected) => {
-        if (error !== rechronicle) {
-          return errorOnFalseProphetChronicleEvents(new Error("chronicleUpstream"), error);
-        }
-        leadingTruths = undefined;
-        renarration = undefined;
-        events = connection._unconfirmedCommands; // eslint-disable-line no-param-reassign
-        options.isLocallyRecorded = false;
-        proclamation = connection._upstreamConnection.proclaimEvents(events, options);
-        return thenChainEagerly(null, functionChain, onRejected);
-      });
-      return ret;
-    } catch (error) { return errorOnFalseProphetChronicleEvents.call(this, new Error(""), error); }
-    function errorOnFalseProphetChronicleEvents (wrap, error) {
-      const wrap_ = new Error(`proclaimEvents(${events.length} events).${wrap.message}`);
-      wrap_.stack = wrap.stack;
-      throw connection.wrapErrorEvent(error, 1, wrap_,
-          "\n\toptions:", ...dumpObject(options),
-          "\n\tevents:", ...dumpObject(connection._dumpEventIds(events)),
-          "\n\tinternal:", ...dumpObject({
-            connection, proclamation, resultBase, leadingTruths, initialSchism,
-            upstreamResults, renarration, rechronicle,
-          }));
-    }
+    const resultBase = new ProclaimEventResult(this);
+    resultBase._events = events;
+    const op = {
+      events, options, resultBase,
+      plog: this.opLog(2, "proclaim", `Proclaiming ${events.length} events`),
+    };
+    resultBase.onGetEventError = error =>
+        this._errorOnFalseProphetProclaimOps(error, null, [op]);
+    resultBase._truthForwardResults = this.opChain(
+        "_falseProclaim", [op], "_errorOnFalseProphetProclaimOps", op.plog);
+    return {
+      eventResults: events.map((event, index) => {
+        const result = Object.create(resultBase);
+        result.event = event;
+        result.index = index;
+        return result;
+      }),
+    };
   }
 
-  receiveTruths (truths: EventBase[], unused1, unused2, schismaticCommand: EventBase) {
+  static _falseProclaim = [
+    FalseProphetConnection.prototype._prepareProclaim,
+    FalseProphetConnection.prototype._awaitProclamation,
+    FalseProphetConnection.prototype._awaitUpstreamTruths,
+    FalseProphetConnection.prototype._awaitPossibleRenarration,
+    FalseProphetConnection.prototype._receiveTruthsLocally,
+    FalseProphetConnection.prototype._finalizeProclaimResults,
+  ]
+
+  _errorOnFalseProphetProclaimOps (error, index, [op]) {
+    if (error === op.reproclaimError) {
+      op.leadingTruths = undefined;
+      op.renarration = undefined;
+      op.events = this._unconfirmedCommands; // eslint-disable-line no-param-reassign
+      op.options.isLocallyRecorded = false;
+      op.proclamation = this._upstreamConnection.proclaimEvents(op.events, op.options);
+      return thisChainRedirect("_awaitProclamation", op);
+    }
+    throw this.wrapErrorEvent(error, 1, new Error("proclaimEvents"),
+      "\n\toptions:", ...dumpObject(op.options),
+      "\n\tevents:", ...dumpObject(this._dumpEventIds(op.events)),
+      "\n\tstate:", ...dumpObject(op));
+  }
+
+  _prepareProclaim (op) {
+    if (op.options.isProphecy) {
+      // console.log("assigning ids:", this.getName(), this._headEventId,
+      //     this._unconfirmedCommands.length, "\n\tevents:", ...dumpObject(events));
+      for (const event of op.events) {
+        if (!event.aspects || !event.aspects.version) {
+          initializeAspects(event, { version: EVENT_VERSION });
+        }
+        obtainAspect(event, "log").index = this._headEventId + this._unconfirmedCommands.length;
+        this._unconfirmedCommands.push(event);
+      }
+      this._checkForFreezeAndNotify(undefined, op.plog);
+    } else if (typeof op.events[0].aspects.log.index !== "number") {
+      throw new Error(`Can't chronicle events without aspects.log.index ${
+          ""}(while options.isProphecy is not set)`);
+    }
+    op.receiveTruths = !op.options.isTruth
+        && this.getReceiveTruths(op.options.receiveTruths);
+    if (op.receiveTruths) op.options.receiveTruths = op.receiveTruths;
+    op.options.receiveCommands = op.options.isProphecy ? null
+        : this.getReceiveCommands(op.options.receiveCommands);
+    this._resolveOptionsIdentity(op.options);
+    op.plog && op.plog.v2 && op.plog.opEvent("to-upstream",
+        `upstream.proclaimEvents(${op.events.length})`, op);
+    op.proclamation = this._upstreamConnection.proclaimEvents(op.events, op.options);
+    return [op];
+  }
+
+  _awaitProclamation (op) {
+    return [op, (op.resultBase._forwardResults = op.proclamation.eventResults)];
+  }
+
+  _awaitUpstreamTruths (op, upstreamEventResults) {
+    op.upstreamResults = upstreamEventResults || op.events;
+    const canonicalRecital = this.getFalseProphet()._canonicalRecital;
+    return [op, mapEagerly(op.upstreamResults,
+        result => result.getTruthEvent(),
+        (error, head, index, truthResults, entries, callback, onRejected) => {
+          if (!op.leadingTruths) op.leadingTruths = truthResults.slice(0, index);
+          const command = op.events[index];
+          const prophecy = command && canonicalRecital.getStoryBy(command.aspects.command.id);
+          if (error) this._mostRecentError = error;
+          if (((error.proceed || {}).when === "narrated") && (op.renarration === undefined)) {
+            op.renarration = this.narrateEventLog({
+              eventIdBegin: this._headEventId,
+              receiveTruths: null,
+            });
+          }
+          if (prophecy) {
+            const chronicleURI = this.getChronicleURI();
+            const chronicle = (prophecy.meta.chronicles || {})[chronicleURI];
+            if (chronicle) chronicle.proclamationError = error;
+            const proclaimError = new Error(`Sub-command proclamation error to <${
+                chronicleURI}>: ${error.message}`);
+            proclaimError.chronicleURI = chronicleURI;
+            proclaimError.proclamationError = error;
+            const errorEvent = prophecy.meta.operation
+                .getProgressErrorEvent("profess", proclaimError, {}, {
+                  isSchismatic: error.isSchismatic !== false,
+                  isRevisable: error.isRevisable !== false,
+                  isReformable: error.isReformable !== false,
+                  isRefabricateable: error.isRefabricateable !== false,
+                  instigatorConnection: this,
+                });
+            if (op.options.discourse) {
+              op.options.discourse.dispatchAndDefaultActEvent(errorEvent);
+            }
+            const progress = prophecy.meta.operation.getProgressEvent();
+            if (op.renarration) {
+              progress.proceedAfterAll(op.renarration);
+            }
+            if (progress.isSchismatic !== false) {
+              if (op.initialSchism === undefined) op.initialSchism = op.events[index];
+              progress.type = "schism";
+              progress.schismaticCommand = op.events[index];
+              progress.message = `a ${
+                progress.isRevisable ? "reviseable"
+                : progress.isReformable ? "reformable"
+                : progress.isRefabricateable ? "refabricateable"
+                : "heretic"
+              } schism resulting from proclaimEvents error: ${error.message}`;
+            }
+          }
+          // Process the remaining entries so that fully
+          // rejected commands will not be needlessly revised
+          return mapEagerly(entries, callback, onRejected, index + 1, truthResults);
+        }),
+    ];
+  }
+
+  _awaitPossibleRenarration (op, truthResults) {
+    if (!op.leadingTruths) op.leadingTruths = truthResults;
+    return [op, op.renarration];
+  }
+
+  _receiveTruthsLocally (op, renarratedEvents = []) {
+    let receivableTruths = (!op.leadingTruths.length && !renarratedEvents.length) ? []
+        : !op.leadingTruths.length ? renarratedEvents
+        : !renarratedEvents.length && op.leadingTruths;
+    if (!receivableTruths) {
+      // TODO(iridian): Check that the truths -> narratedLog
+      // log.index transition is monotonous
+      receivableTruths = op.leadingTruths.concat(renarratedEvents);
+    }
+    if (!receivableTruths.length && op.renarration && this._unconfirmedCommands.length) {
+      if (!op.reproclaimError) {
+        op.reproclaimError = new Error();
+        op.reproclaimError.headIndex = op.events[0].aspects.log.index;
+      }
+      throw op.reproclaimError;
+    }
+    return [
+      op,
+      op.receiveTruths && (receivableTruths.length || op.initialSchism) && op.receiveTruths(
+          receivableTruths, undefined, undefined, op.initialSchism, (op.plog || {}).chain),
+    ];
+  }
+
+  _finalizeProclaimResults (op) {
+    return (op.resultBase._truthForwardResults = !op.reproclaimError
+        ? op.upstreamResults
+        : op.upstreamResults.slice(
+            op.reproclaimError.headIndex - op.upstreamResults[0].aspects.log.index));
+  }
+
+  receiveTruths (truths: EventBase[], unused1, unused2, schismaticCommand: EventBase, parentPlog) {
     let schismaticCommands, confirmCount = 0, confirmations, newTruthCount = 0, newTruths;
     try {
-      const plog2 = this.opLog(2, "receive_truths");
+      const plog2 = this.opLog(parentPlog, 2, "receive_truths");
       plog2 && plog2.opEvent("",
           `receiveTruths(${this._dumpEventIds(truths)},${this._dumpEventIds(schismaticCommand)})`,
           { truths, schismaticCommand });

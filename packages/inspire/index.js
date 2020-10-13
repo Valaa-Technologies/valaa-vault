@@ -84,8 +84,7 @@ export default (valosheath.createGateway = async function createGateway (
         spindlesRevelation,
         ...revelations);
 
-    const initlog1 = plog && plog.opLog(1, `init`, `Initializing gateway`);
-    await ret.initialize(combinedRevelation, initlog1);
+    await ret.initialize(combinedRevelation, plog);
 
     valosheath.gateway = ret;
     plog && plog.v2 && plog.warnEvent(

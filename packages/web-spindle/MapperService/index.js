@@ -67,11 +67,11 @@ export default class MapperService extends FabricEventTarget {
       if (!prefixConfig.openapi) {
         throw new Error(`Prefix config openapi section missing for prefix: <${prefix}>`);
       }
-      const plog = (parentPlog || this).opLog(1, `router`,
+      const plog1 = this.opLog(parentPlog, 1, `router`,
           `Creating prefix router for <${prefix}>`, prefixConfig);
       // console.log("prefix:", prefix, "\n\tconfig:", prefixConfig);
       const router = this._prefixRouters[prefix] =
-          _createPrefixRouter(this, prefix, prefixConfig, plog);
+          _createPrefixRouter(this, prefix, prefixConfig, plog1);
       this.getRootFastify().after(error => {
         if (error) {
           outputError(errorOnCreatePrefixRouter(error),

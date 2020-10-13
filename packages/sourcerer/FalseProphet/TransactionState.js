@@ -30,7 +30,7 @@ export const fabricatorOps = {
    * Returns a new valid transaction discourse which wraps this
    * Discourse as prototype and forks its corpus. The returned
    * discourse thus inherits all of false prophet discourse API, but
-   * in addition all chroniclings are intercepted in an internal
+   * in addition all proclamations are intercepted in an internal
    * transaction event log.
    * These events are resolved immediately against the forked corpus,
    * but only claimed forward as commands once the transaction is
@@ -137,11 +137,11 @@ export default class TransactionState {
     corpus.setName(`${transactor._corpus.getName()}/tx#${activeTransactionCounter}:${this.name}:${
       this._transacted.aspects.command.id}`);
     corpus.setState(this._stateBefore);
-    this._plog = transactor.opLog(1, "transactor");
-    if (this._plog) {
+    const plog1 = this._plog = transactor.opLog(1, "transactor");
+    if (plog1) {
       Object.keys(fabricatorEventTypes).forEach(type => {
-        transactor.addEventListener(type, event => {
-          this._plog.opEvent(`on${type}`,
+        transactor.addEventListener(type, function _transactorOpEvent (event) {
+          plog1.opEvent(`$On.${type}`,
               event.command.aspects.command.id,
               event.instigatorConnection ? event.instigatorConnection.getChronicleURI() : "",
               event.defaultPrevented ? "canceled" : "",

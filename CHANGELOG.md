@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.34](https://github.com/valaatech/kernel/compare/v0.35.0-rc.33...v0.35.0-rc.34) (2020-10-13)
+
+
+### Features
+
+* chainOp ([114e5cb](https://github.com/valaatech/kernel/commit/114e5cbc49d898c42d40fcee0573bc0cb1544021))
+* Logging sessions with opLog and opEvent ([fe3f7fb](https://github.com/valaatech/kernel/commit/fe3f7fb0cce902e94dcb3fc81e7fbe943bdbd20f))
+* proclaim -> full reform support using event.reformAfterAll ([04ad1dd](https://github.com/valaatech/kernel/commit/04ad1ddd23363eaacaca180585f6769078da6aa2))
+
+
+
+
+
 # [0.35.0-rc.33](https://github.com/valaatech/kernel/compare/v0.35.0-rc.32...v0.35.0-rc.33) (2020-10-04)
 
 

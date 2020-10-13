@@ -66,7 +66,7 @@
     ],
     "dc:title": "@valos/valk library workspace",
     "VRevdoc:package": "@valos/valk",
-    "VRevdoc:version": "0.35.0-rc.33",
+    "VRevdoc:version": "0.35.0-rc.34",
     "VRevdoc:preferredPrefix": "VValk",
     "VRevdoc:baseIRI": "https://valospace.org/valk/0#",
     "VRevdoc:referencedModules": {
@@ -352,6 +352,26 @@
         "VRevdoc:brief": "resolver verb name type",
         "rdfs:comment": "The class of all resolver names. Resolvers are verbs which are used\nfor resolving generated properties.\n"
       },
+      "resolveChronicleRoot": {
+        "@type": "VValk:Resolver",
+        "VRevdoc:brief": "resolve chronicle root",
+        "rdfs:comment": "resolve chronicle root of the resource"
+      },
+      "resolveChronicleURI": {
+        "@type": "VValk:Resolver",
+        "VRevdoc:brief": "resolve chronicle URI",
+        "rdfs:comment": "resolve chronicle URI of the resource"
+      },
+      "resolveModifiedAt": {
+        "@type": "VValk:Resolver",
+        "VRevdoc:brief": "resolve modification timestamp",
+        "rdfs:comment": "resolve modification timestamp of the resource"
+      },
+      "resolveCreatedAt": {
+        "@type": "VValk:Resolver",
+        "VRevdoc:brief": "resolve creation timestamp",
+        "rdfs:comment": "resolve creation timestamp of the resource"
+      },
       "resolveVPlot": {
         "@type": "VValk:Resolver",
         "VRevdoc:brief": "resolve VPlot",
@@ -416,26 +436,6 @@
         "@type": "VValk:Resolver",
         "VRevdoc:brief": "resolve reified twin object",
         "rdfs:comment": "resolve the reified twin object of the ScopeProperty"
-      },
-      "resolveChronicleRoot": {
-        "@type": "VValk:Resolver",
-        "VRevdoc:brief": "resolve chronicle root",
-        "rdfs:comment": "resolve chronicle root of the resource"
-      },
-      "resolveChronicleURI": {
-        "@type": "VValk:Resolver",
-        "VRevdoc:brief": "resolve chronicle URI",
-        "rdfs:comment": "resolve chronicle URI of the resource"
-      },
-      "resolveModifiedAt": {
-        "@type": "VValk:Resolver",
-        "VRevdoc:brief": "resolve modification timestamp",
-        "rdfs:comment": "resolve modification timestamp of the resource"
-      },
-      "resolveCreatedAt": {
-        "@type": "VValk:Resolver",
-        "VRevdoc:brief": "resolve creation timestamp",
-        "rdfs:comment": "resolve creation timestamp of the resource"
       }
     },
     "context": {
@@ -1584,6 +1584,10 @@
             "2",
             "3",
             "4",
+            "resolveChronicleRoot",
+            "resolveChronicleURI",
+            "resolveModifiedAt",
+            "resolveCreatedAt",
             "resolveVPlot",
             "impressViaVPlot",
             "resolveContextTerm",
@@ -1596,11 +1600,7 @@
             "resolveContentLength",
             "resolveTwinspace",
             "resolveTwinSubject",
-            "resolveTwinObject",
-            "resolveChronicleRoot",
-            "resolveChronicleURI",
-            "resolveModifiedAt",
-            "resolveCreatedAt"
+            "resolveTwinObject"
           ]
         }
       ]

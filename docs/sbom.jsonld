@@ -53,7 +53,7 @@
         "@type": "@id"
       }
     },
-    "dc:title": "@valos/kernel-vault@0.35.0-rc.32 Software Bill of Materials",
+    "dc:title": "@valos/kernel-vault@0.35.0-rc.33 Software Bill of Materials",
     "respecConfig": {
       "specStatus": "unofficial",
       "editors": [
@@ -105,7 +105,7 @@
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
             "This document was automatically generated on ",
-            "2020-10-04T07:56:46.433Z",
+            "2020-10-13T12:06:20.586Z",
             "."
           ]
         },
@@ -433,6 +433,15 @@
       },
       {
         "type": "library",
+        "name": "prettify-xml",
+        "version": "1.2.0",
+        "description": "Pretty-print XML.",
+        "licenses": "MIT",
+        "purl": "pkg:npm/prettify-xml@1.2.0",
+        "modified": false
+      },
+      {
+        "type": "library",
         "name": "read-installed",
         "version": "4.0.3",
         "description": "Read all the installed packages in a folder, and return a tree structure with all the data.",
@@ -478,15 +487,6 @@
       },
       {
         "type": "library",
-        "name": "prettify-xml",
-        "version": "1.2.0",
-        "description": "Pretty-print XML.",
-        "licenses": "MIT",
-        "purl": "pkg:npm/prettify-xml@1.2.0",
-        "modified": false
-      },
-      {
-        "type": "library",
         "name": "sax",
         "version": "1.2.4",
         "description": "An evented streaming XML parser in JavaScript",
@@ -526,39 +526,39 @@
         "type": "library",
         "group": "valos",
         "name": "inspire",
-        "version": "0.35.0-rc.33",
+        "version": "0.35.0-rc.34",
         "description": "ValOS Inspire application gateway",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/inspire@0.35.0-rc.33",
+        "purl": "pkg:npm/%40valos/inspire@0.35.0-rc.34",
         "modified": false
       },
       {
         "type": "library",
         "group": "valos",
         "name": "kernel",
-        "version": "0.35.0-rc.33",
+        "version": "0.35.0-rc.34",
         "description": "@valos/kernel domain",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/kernel@0.35.0-rc.33",
+        "purl": "pkg:npm/%40valos/kernel@0.35.0-rc.34",
         "modified": false
       },
       {
         "type": "library",
         "group": "valos",
         "name": "toolset-revealer",
-        "version": "0.35.0-rc.33",
+        "version": "0.35.0-rc.34",
         "description": "Tools for building revelations both for development and deployment purposes",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/toolset-revealer@0.35.0-rc.33",
+        "purl": "pkg:npm/%40valos/toolset-revealer@0.35.0-rc.34",
         "modified": false
       },
       {
         "type": "library",
         "name": "valma",
-        "version": "0.35.0-rc.33",
+        "version": "0.35.0-rc.34",
         "description": "A ValOS CLI tool for discovering and executing context-dependent command scripts",
         "licenses": "MIT",
-        "purl": "pkg:npm/valma@0.35.0-rc.33",
+        "purl": "pkg:npm/valma@0.35.0-rc.34",
         "modified": false
       },
       {
@@ -600,10 +600,10 @@
       {
         "type": "library",
         "name": "ansi-styles",
-        "version": "4.2.1",
+        "version": "4.3.0",
         "description": "ANSI escape codes for styling strings in the terminal",
         "licenses": "MIT",
-        "purl": "pkg:npm/ansi-styles@4.2.1",
+        "purl": "pkg:npm/ansi-styles@4.3.0",
         "modified": false
       },
       {
@@ -808,10 +808,10 @@
         "type": "library",
         "group": "valos",
         "name": "type-vault",
-        "version": "0.35.0-rc.33",
+        "version": "0.35.0-rc.34",
         "description": "The ValOS 'vault' workspace type toolset",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/type-vault@0.35.0-rc.33",
+        "purl": "pkg:npm/%40valos/type-vault@0.35.0-rc.34",
         "modified": false
       },
       {

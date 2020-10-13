@@ -66,7 +66,7 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/inspire",
-    "VRevdoc:version": "0.35.0-rc.33",
+    "VRevdoc:version": "0.35.0-rc.34",
     "VRevdoc:preferredPrefix": "On",
     "VRevdoc:baseIRI": "https://valospace.org/inspire/On/0#",
     "VRevdoc:referencedModules": {
@@ -269,7 +269,7 @@
     },
     "vocabulary": {
       "@id": "vocabulary",
-      "issue": {
+      "proclaim": {
         "@type": "VEngine:Property",
         "tags": [
           "Transactor",
@@ -279,10 +279,19 @@
           {
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
-              "On:issue"
+              [
+                "On:proclaim={",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                "}"
+              ]
             ],
             "VRevdoc:tooltipContent": [
-              "When used as ",
+              "When used as a ",
               {
                 "@type": "VDoc:Reference",
                 "VDoc:content": [
@@ -296,25 +305,61 @@
           {
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
-              "addEventListener(\"issue\", ...)"
+              [
+                "[$On.proclaim]: ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                ","
+              ]
             ],
-            "VRevdoc:tooltipContent": "When used on Valoscript event target"
+            "VRevdoc:tooltipContent": [
+              "When set as an element ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:context"
+                ],
+                "VDoc:ref": "Lens:context"
+              },
+              " attribute property"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              [
+                "addEventListener(\"proclaim\", ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                ")"
+              ]
+            ],
+            "VRevdoc:tooltipContent": "When called on a Valoscript event target"
           }
         ],
         "VRevdoc:indexLabel": [
-          "On:issue"
+          "On:proclaim",
+          "On:proclaim"
         ],
         "rdfs:domain": "rdfs:Resource",
         "rdfs:range": "rdfs:Resource",
-        "rdfs:comment": "Fired at a transactor when its transaction commit has been issued and\nits command is about to be fast-forward professed into a prophecy as\npart of the current recital.",
+        "rdfs:comment": "Fired at a transactor when its commit has been requested but before\nits command has been composed as part of the canonical recital.",
         "VRevdoc:introduction": [
           null,
-          "This event is fired only during the initial commit and even then only\nif the command does not need to be replayed (otherwise 'replay' is\nfired at the transaction ).",
+          "This event is fired only during the initial commit. If the transactor\nrecital is a direct continuation of the canonical recital then the\ninternal transactor recital is made into a canonical recital. Otherwise\na 'compose' event is fired at the transactor and the command will be\nre-composed. In both cases the command is then professed into a\nprophecy and a 'profess' event is then fired at the transactor.",
           null,
-          "If the event defaultAction is canceled or an exception is thrown then\nthe transaction is immediately rejected without recital and the fabric\ncommit will throw an exception."
+          "If the handler cancels the event defaultAction or throws an exception\nthen the transaction is immediately rejected. The command will not be\nprofessed and the fabric commit will throw an exception instead."
         ]
       },
-      "replay": {
+      "compose": {
         "@type": "VEngine:Property",
         "tags": [
           "Transactor",
@@ -324,10 +369,19 @@
           {
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
-              "On:replay"
+              [
+                "On:compose={",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                "}"
+              ]
             ],
             "VRevdoc:tooltipContent": [
-              "When used as ",
+              "When used as a ",
               {
                 "@type": "VDoc:Reference",
                 "VDoc:content": [
@@ -341,22 +395,101 @@
           {
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
-              "addEventListener(\"replay\", ...)"
+              [
+                "[$On.compose]: ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                ","
+              ]
             ],
-            "VRevdoc:tooltipContent": "When used on Valoscript event target"
+            "VRevdoc:tooltipContent": [
+              "When set as an element ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:context"
+                ],
+                "VDoc:ref": "Lens:context"
+              },
+              " attribute property"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              [
+                "addEventListener(\"compose\", ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                ")"
+              ]
+            ],
+            "VRevdoc:tooltipContent": "When called on a Valoscript event target"
           }
         ],
         "VRevdoc:indexLabel": [
-          "On:replay"
+          "On:compose",
+          "On:compose"
         ],
         "rdfs:domain": "rdfs:Resource",
         "rdfs:range": "rdfs:Resource",
-        "rdfs:comment": "Fired at a transactor when the history of a prophecy has been revised\nand the command is about to be replayed and then professed into a\nprophecy as part of the current recital.",
+        "rdfs:comment": "Fired at a transactor when its command is about to be (re-)composed\ninto a prophecy that is going to be made a part of the canonical\nrecital.",
         "VRevdoc:introduction": [
           null,
-          "This event can be fired during the initial chronicle commit (if it\ncan't be fast-forwarded) but also during later revision and reformation\nreplays.",
+          "This event may be fired during the initial commit if the transactor\nis not a direct continuation of the canonical recital but will always\nbe fired during later revision, reformation and refabrication\nrecompositions.",
           null,
-          "If the event defaultAction is canceled or an exception is thrown then\nthe replay recital of this command is rejected. If this event was fired\nas part of the initial transaction commit then this rejection behaves\nidentically to that of a rejected 'issue' event. Otherwise the\nrejection will remove the prophecy from the current recital and fire\na 'purge' event at the transactor."
+          "The composition performs three main functions:",
+          {
+            "VDoc:content": [
+              {
+                "@type": "VDoc:NumberedList",
+                "VDoc:lines": [
+                  [
+                    {
+                      "VDoc:em": true,
+                      "VDoc:content": [
+                        "Universalization"
+                      ]
+                    },
+                    ": splits the transactor command into\n  chronicle-specific universal sub-commands"
+                  ],
+                  {
+                    "@type": "VDoc:Paragraph",
+                    "VDoc:content": [
+                      {
+                        "VDoc:em": true,
+                        "VDoc:content": [
+                          "Reduction"
+                        ]
+                      },
+                      ": appends the sub-commands on top of the current\n  canonical recital and updates the corresponding resource state"
+                    ]
+                  },
+                  {
+                    "@type": "VDoc:Paragraph",
+                    "VDoc:content": [
+                      {
+                        "VDoc:em": true,
+                        "VDoc:content": [
+                          "Validation"
+                        ]
+                      },
+                      ": evaluates frame pre/postconditions and the\n  structural, semantic and behavior validity of the sub-commands"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "If the handler cancels the event defaultAction or throws an exception\nthen the composition of the command is rejected. If this event was\nfired as part of the initial commit then this rejection behaves\nidentically to that of a rejected 'proclaim' event. Otherwise the\nrejection removes the prophecy from the canonical recital and fires\na 'purge' event at the transactor."
         ]
       },
       "profess": {
@@ -369,10 +502,19 @@
           {
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
-              "On:profess"
+              [
+                "On:profess={",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                "}"
+              ]
             ],
             "VRevdoc:tooltipContent": [
-              "When used as ",
+              "When used as a ",
               {
                 "@type": "VDoc:Reference",
                 "VDoc:content": [
@@ -386,22 +528,60 @@
           {
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
-              "addEventListener(\"profess\", ...)"
+              [
+                "[$On.profess]: ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                ","
+              ]
             ],
-            "VRevdoc:tooltipContent": "When used on Valoscript event target"
+            "VRevdoc:tooltipContent": [
+              "When set as an element ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:context"
+                ],
+                "VDoc:ref": "Lens:context"
+              },
+              " attribute property"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              [
+                "addEventListener(\"profess\", ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                ")"
+              ]
+            ],
+            "VRevdoc:tooltipContent": "When called on a Valoscript event target"
           }
         ],
         "VRevdoc:indexLabel": [
+          "On:profess",
           "On:profess"
         ],
         "rdfs:domain": "rdfs:Resource",
         "rdfs:range": "rdfs:Resource",
-        "rdfs:comment": "Fired at a transactor when its command has been successfully\n(re-)professed into a prophecy as part of the current recital.",
+        "rdfs:comment": "Fired at a transactor when its command prophecy is about to be\n(re-)professed into a canonical prophecy as part of the canonical\nrecital.",
         "VRevdoc:introduction": [
           null,
-          "This event is fired both during the initial recital as well as during\nlater revision and reformation recitals.",
+          "This event is fired both during the initial recital as well as during\nlater revision, reformation and refabrication recitals. This event is\nimmediately followed by the propagation of the new canonical recital to\nall downstream listeners.",
           null,
-          "If the event defaultAction is canceled or an exception is thrown then\nthe rejection will remove the prophecy from the current recital and\nfire a 'purge' at the transactor."
+          "After profess the prophecy is in-flight and out of control of the\ntransactor until a 'truth', 'schism' or 'purge' event is fired. \"The\nball is in the authorities' court\" so to speak.",
+          null,
+          "If the handler cancels the event defaultAction or throws an exception\nthen the prophecy will not be (re-)professed as part of the canonical\nrecital. If the prophecy was already part of the canonical recital is\npurged and a 'purge' event is fired at the transactor."
         ]
       },
       "record": {
@@ -414,10 +594,19 @@
           {
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
-              "On:record"
+              [
+                "On:record={",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                "}"
+              ]
             ],
             "VRevdoc:tooltipContent": [
-              "When used as ",
+              "When used as a ",
               {
                 "@type": "VDoc:Reference",
                 "VDoc:content": [
@@ -431,17 +620,59 @@
           {
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
-              "addEventListener(\"record\", ...)"
+              [
+                "[$On.record]: ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                ","
+              ]
             ],
-            "VRevdoc:tooltipContent": "When used on Valoscript event target"
+            "VRevdoc:tooltipContent": [
+              "When set as an element ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:context"
+                ],
+                "VDoc:ref": "Lens:context"
+              },
+              " attribute property"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              [
+                "addEventListener(\"record\", ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                ")"
+              ]
+            ],
+            "VRevdoc:tooltipContent": "When called on a Valoscript event target"
           }
         ],
         "VRevdoc:indexLabel": [
+          "On:record",
           "On:record"
         ],
         "rdfs:domain": "rdfs:Resource",
         "rdfs:range": "rdfs:Resource",
-        "rdfs:comment": "Fired at a transactor when a copy of its command has been written to a\npersistent storage."
+        "rdfs:comment": "Fired at a transactor when a copy of one of its canonical prophecy\nchronicle sub-commands has been written to a persistent storage.",
+        "VRevdoc:introduction": [
+          null,
+          "After this the individual sub-command will survive an execution\nenvironment reset and become truths after it has been restarted. This\ncan happen for example if the a web app was used in offline mode and\nits tab was closed but which was later reopened when online.",
+          null,
+          "Note that because the transactor itself nor any of its handlers will\nnot survive a refresh the handlers cannot be relied on alone to execute\nsemantic life cycles to completion."
+        ]
       },
       "truth": {
         "@type": "VEngine:Property",
@@ -453,10 +684,19 @@
           {
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
-              "On:truth"
+              [
+                "On:truth={",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                "}"
+              ]
             ],
             "VRevdoc:tooltipContent": [
-              "When used as ",
+              "When used as a ",
               {
                 "@type": "VDoc:Reference",
                 "VDoc:content": [
@@ -470,17 +710,57 @@
           {
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
-              "addEventListener(\"truth\", ...)"
+              [
+                "[$On.truth]: ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                ","
+              ]
             ],
-            "VRevdoc:tooltipContent": "When used on Valoscript event target"
+            "VRevdoc:tooltipContent": [
+              "When set as an element ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:context"
+                ],
+                "VDoc:ref": "Lens:context"
+              },
+              " attribute property"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              [
+                "addEventListener(\"truth\", ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                ")"
+              ]
+            ],
+            "VRevdoc:tooltipContent": "When called on a Valoscript event target"
           }
         ],
         "VRevdoc:indexLabel": [
+          "On:truth",
           "On:truth"
         ],
         "rdfs:domain": "rdfs:Resource",
         "rdfs:range": "rdfs:Resource",
-        "rdfs:comment": "Fired at a transactor when its command has been authorized as truth."
+        "rdfs:comment": "Fired at a transactor when its canonical prophecy has been authorized\nas truth by of its chronicle sub-command authorities.",
+        "VRevdoc:introduction": [
+          null,
+          "Note that because the transactor itself nor any of its 'truth' event\nhandlers will not survive an execution environment refresh the handler\nitself cannot be relied on alone to execute semantic life cycles to\ncompletion."
+        ]
       },
       "schism": {
         "@type": "VEngine:Property",
@@ -492,10 +772,19 @@
           {
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
-              "On:schism"
+              [
+                "On:schism={",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                "}"
+              ]
             ],
             "VRevdoc:tooltipContent": [
-              "When used as ",
+              "When used as a ",
               {
                 "@type": "VDoc:Reference",
                 "VDoc:content": [
@@ -509,17 +798,253 @@
           {
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
-              "addEventListener(\"schism\", ...)"
+              [
+                "[$On.schism]: ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                ","
+              ]
             ],
-            "VRevdoc:tooltipContent": "When used on Valoscript event target"
+            "VRevdoc:tooltipContent": [
+              "When set as an element ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:context"
+                ],
+                "VDoc:ref": "Lens:context"
+              },
+              " attribute property"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              [
+                "addEventListener(\"schism\", ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                ")"
+              ]
+            ],
+            "VRevdoc:tooltipContent": "When called on a Valoscript event target"
           }
         ],
         "VRevdoc:indexLabel": [
+          "On:schism",
           "On:schism"
         ],
         "rdfs:domain": "rdfs:Resource",
         "rdfs:range": "rdfs:Resource",
-        "rdfs:comment": "Fired at a transactor when a prophecy that took part in a revision is\ndeemed to be schismatic and which thus is subsequently going to be\nsubject to a reformation."
+        "rdfs:comment": "Fired at a transactor when its currently canonical prophecy is\nconsidered ",
+        "VRevdoc:introduction": [
+          {
+            "VDoc:em": true,
+            "VDoc:content": [
+              "schismatic"
+            ]
+          },
+          " and going to undergo revisioning.",
+          null,
+          "A prophecy becomes ",
+          {
+            "VDoc:em": true,
+            "VDoc:content": [
+              "schismatic"
+            ]
+          },
+          " as a result of a ",
+          {
+            "VDoc:em": true,
+            "VDoc:content": [
+              "schism"
+            ]
+          },
+          " on the event flow of one its chronicle sub-commands\nand thus subject to removal from the canonical recital.",
+          null,
+          "The purpose of the revisioning is to determine whether the sub-command\nmight yet be confirmed as truth by its authority and thus should be\nretained as part of the canonical recital. If not, the prophecy is\nremoved from the canonical recital and a 'reform' or 'purge' event will\nbe fired at the transactor depending on the resolution.",
+          null,
+          "Schisms have two primary categories, each with a different reason\non why the command might be still in-flight:",
+          {
+            "VDoc:content": [
+              {
+                "@type": "VDoc:NumberedList",
+                "VDoc:lines": [
+                  [
+                    "Schisms caused by reformations and purges in the chronicle history\n  might allow for a sub-command to nevertheless remain in-flight if it\n  is configured to be reorderable by the upstream"
+                  ],
+                  {
+                    "@type": "VDoc:Paragraph",
+                    "VDoc:content": [
+                      "Schisms caused by upstream delivery errors might allow for the\n  sub-command to remain in-flight if the error is only an auxiliary\n  error in the immediate upstream command delivery tracking. The actual\n  command might still reach the target and be later be received and\n  confirmed as a truth via the primary event downstream."
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          null,
+          "Ordinarily the schism revisioning is performed internally. A handler\nmay inspect the schism conditions and decide to override this process\nby setting ",
+          {
+            "VDoc:em": true,
+            "VDoc:content": [
+              "isRevisable"
+            ]
+          },
+          " to desired value and then canceling\nthe default action. Otherwise the default policy associated with the\nspecific schism is followed.",
+          null,
+          "Note: The purpose of 'schism' is to avoid having to wait for upstream\nroundtrips on each step of the event flow while ensuring that a command\nis sent once and only once.",
+          "Semantically conservative resolutions are \"accept\" and \"purge\" as they\ndon't result in reformation and its possibly duplicate re-delivery of\nthe sub-commands. Purge immediately delegates the ball back to\nvalospace application logic whereas accepting the prophecy as canonical\nwill later either be confirmed as truths or reformed by a conflicting\ntruths coming downstream."
+        ]
+      },
+      "reform": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Transactor",
+          "FabricEvent"
+        ],
+        "rdfs:label": [
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              [
+                "On:reform={",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                "}"
+              ]
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as a ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              [
+                "[$On.reform]: ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                ","
+              ]
+            ],
+            "VRevdoc:tooltipContent": [
+              "When set as an element ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:context"
+                ],
+                "VDoc:ref": "Lens:context"
+              },
+              " attribute property"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              [
+                "addEventListener(\"reform\", ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                ")"
+              ]
+            ],
+            "VRevdoc:tooltipContent": "When called on a Valoscript event target"
+          }
+        ],
+        "VRevdoc:indexLabel": [
+          "On:reform",
+          "On:reform"
+        ],
+        "rdfs:domain": "rdfs:Resource",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": [
+          "Fired at a transactor when a ",
+          {
+            "VDoc:em": true,
+            "VDoc:content": [
+              "schismatic"
+            ]
+          },
+          " prophecy cannot\nbe revised and has been temporarily removed from the canonical recital.\nThe prophecy is about to be ",
+          {
+            "VDoc:em": true,
+            "VDoc:content": [
+              "reformed"
+            ]
+          },
+          " ie. about to have all\nof its chronicle sub-commands be recomposed and redelivered to their\nupstream authorities."
+        ],
+        "VRevdoc:introduction": [
+          null,
+          "This event can result from several different conditions:",
+          {
+            "VDoc:content": [
+              {
+                "@type": "VDoc:NumberedList",
+                "VDoc:lines": [
+                  [
+                    "A chronicle sub-command recomposition fails due to a structural or\n  behavioral inconsistency between the old and the new recital history\n  - authorities cannot reorder such commands."
+                  ],
+                  {
+                    "@type": "VDoc:Paragraph",
+                    "VDoc:content": [
+                      "A sub-command upstream delivery responds with an error condition with\n  isReformable set to true"
+                    ]
+                  },
+                  {
+                    "@type": "VDoc:Paragraph",
+                    "VDoc:content": [
+                      "Others (TODO: formalize)."
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          null,
+          "Irrespective of cause of the reformation the transactor event handlers\ncan now once again make decisions on the transactor command life cycle.\n\"The ball is back on transactor's court\".",
+          null,
+          "If the handler cancels the event defaultAction or throws an exception\nthen the prophecy is excluded from the reformation and a 'purge' event\nis fired at its transactor.",
+          null,
+          "Calling ",
+          {
+            "VDoc:em": true,
+            "VDoc:content": [
+              "reformAfterAll"
+            ]
+          },
+          " with one or more conditions (which\nmight contain promises) will delay the prophecy reformation until the\npromise resolves. If after resolution one of the conditions is strictly\nequal to false or if any condition throws an error the reform is\nskipped. This results in a purge semantically equally to throwing the\nerror from the handler."
+        ]
       },
       "purge": {
         "@type": "VEngine:Property",
@@ -531,10 +1056,19 @@
           {
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
-              "On:purge"
+              [
+                "On:purge={",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                "}"
+              ]
             ],
             "VRevdoc:tooltipContent": [
-              "When used as ",
+              "When used as a ",
               {
                 "@type": "VDoc:Reference",
                 "VDoc:content": [
@@ -548,17 +1082,57 @@
           {
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
-              "addEventListener(\"purge\", ...)"
+              [
+                "[$On.purge]: ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                ","
+              ]
             ],
-            "VRevdoc:tooltipContent": "When used on Valoscript event target"
+            "VRevdoc:tooltipContent": [
+              "When set as an element ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:context"
+                ],
+                "VDoc:ref": "Lens:context"
+              },
+              " attribute property"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              [
+                "addEventListener(\"purge\", ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                ")"
+              ]
+            ],
+            "VRevdoc:tooltipContent": "When called on a Valoscript event target"
           }
         ],
         "VRevdoc:indexLabel": [
+          "On:purge",
           "On:purge"
         ],
         "rdfs:domain": "rdfs:Resource",
         "rdfs:range": "rdfs:Resource",
-        "rdfs:comment": "Fired at transactor when a prophecy has been purged from the recital\nas a result of a rejected revision recital or a rejected reformation."
+        "rdfs:comment": "Fired at a transactor when its command has been permanently rejected\nfrom the canonical recital without further reformation or refabrication\nattempts.",
+        "VRevdoc:introduction": [
+          null,
+          "This event can result from several different conditions. Typical\nreasons include unrecoverable rejection by one of the prophecy\nchronicle sub-command authorities or a rejection during prophecy\nreformation."
+        ]
       },
       "error": {
         "@type": "VEngine:Property",
@@ -571,10 +1145,19 @@
           {
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
-              "On:error"
+              [
+                "On:error={",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                "}"
+              ]
             ],
             "VRevdoc:tooltipContent": [
-              "When used as ",
+              "When used as a ",
               {
                 "@type": "VDoc:Reference",
                 "VDoc:content": [
@@ -588,12 +1171,48 @@
           {
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
-              "addEventListener(\"error\", ...)"
+              [
+                "[$On.error]: ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                ","
+              ]
             ],
-            "VRevdoc:tooltipContent": "When used on Valoscript event target"
+            "VRevdoc:tooltipContent": [
+              "When set as an element ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:context"
+                ],
+                "VDoc:ref": "Lens:context"
+              },
+              " attribute property"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              [
+                "addEventListener(\"error\", ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                ")"
+              ]
+            ],
+            "VRevdoc:tooltipContent": "When called on a Valoscript event target"
           }
         ],
         "VRevdoc:indexLabel": [
+          "On:error",
           "On:error"
         ],
         "rdfs:domain": "rdfs:Resource",
@@ -610,10 +1229,19 @@
           {
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
-              "On:precondition"
+              [
+                "On:precondition={",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                "}"
+              ]
             ],
             "VRevdoc:tooltipContent": [
-              "When used as ",
+              "When used as a ",
               {
                 "@type": "VDoc:Reference",
                 "VDoc:content": [
@@ -627,22 +1255,58 @@
           {
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
-              "addEventListener(\"precondition\", ...)"
+              [
+                "[$On.precondition]: ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                ","
+              ]
             ],
-            "VRevdoc:tooltipContent": "When used on Valoscript event target"
+            "VRevdoc:tooltipContent": [
+              "When set as an element ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:context"
+                ],
+                "VDoc:ref": "Lens:context"
+              },
+              " attribute property"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              [
+                "addEventListener(\"precondition\", ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                ")"
+              ]
+            ],
+            "VRevdoc:tooltipContent": "When called on a Valoscript event target"
           }
         ],
         "VRevdoc:indexLabel": [
+          "On:precondition",
           "On:precondition"
         ],
         "rdfs:domain": "rdfs:Resource",
         "rdfs:range": "rdfs:Resource",
-        "rdfs:comment": "Fired at all frame fabricators in depth-first pre-order during all\nfabrications (ie. during initial fabrication and during revision and\nreformation replays).",
+        "rdfs:comment": "Fired at all frame fabricators in a depth-first pre-order during all\ncompositions (ie. during the initial fabrication, during revision and\nreformation recompositions and during a full refabrication).",
         "VRevdoc:introduction": [
           null,
-          "Calling event.preventDefault or throwing an exception will reject the\ncomputation frame.\nIf the frame is rejected during the initial fabrication an exception is\n(re-)thrown within the frame and can be caught by its catch-block.",
+          "The handler of this event should inspect invariant preconditions of\nthe execution frame.",
           null,
-          "Semantics of revision and reformation refabrications are not defined\nyet."
+          "If the handler cancels the defaultAction or throws an exception the\ncomputation frame is rejected. If this rejection happens during the\ninitial fabrication or during a refabrication an exception is\n(re-)thrown within the frame itself.\nIn other cases a frame rejection is semantically equivalent to an\nexception thrown by a handler of the immediately preceding 'reform'\nevent."
         ]
       },
       "postcondition": {
@@ -655,10 +1319,19 @@
           {
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
-              "On:postcondition"
+              [
+                "On:postcondition={",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                "}"
+              ]
             ],
             "VRevdoc:tooltipContent": [
-              "When used as ",
+              "When used as a ",
               {
                 "@type": "VDoc:Reference",
                 "VDoc:content": [
@@ -672,25 +1345,61 @@
           {
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
-              "addEventListener(\"postcondition\", ...)"
+              [
+                "[$On.postcondition]: ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                ","
+              ]
             ],
-            "VRevdoc:tooltipContent": "When used on Valoscript event target"
+            "VRevdoc:tooltipContent": [
+              "When set as an element ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:context"
+                ],
+                "VDoc:ref": "Lens:context"
+              },
+              " attribute property"
+            ]
+          },
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              [
+                "addEventListener(\"postcondition\", ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                ")"
+              ]
+            ],
+            "VRevdoc:tooltipContent": "When called on a Valoscript event target"
           }
         ],
         "VRevdoc:indexLabel": [
+          "On:postcondition",
           "On:postcondition"
         ],
         "rdfs:domain": "rdfs:Resource",
         "rdfs:range": "rdfs:Resource",
-        "rdfs:comment": "Fired at all frame fabricators in depth-first post-order during all\nfabrications (ie. during initial, revision and reformation fabrications).",
+        "rdfs:comment": "Fired at all frame fabricators in a depth-first post-order during all\ncompositions (ie. during the initial fabrication, during revision and\nreformation recompositions and during a full refabrication).",
         "VRevdoc:introduction": [
           null,
-          "Calling event.preventDefault or throwing an exception will reject the\ncomputation frame.\nIf the frame is rejected during the initial fabrication an exception is\n(re-)thrown within the frame and can be caught by its catch-block.",
+          "The handler of this event should inspect invariant postconditions of\nthe execution frame.",
           null,
-          "Semantics of revision and reformation refabrications are not defined\nyet."
+          "If the handler cancels the defaultAction or throws an exception the\ncomputation frame is rejected. If this rejection happens during the\ninitial fabrication or during a refabrication an exception is\n(re-)thrown within the frame itself.\nIn other cases a frame rejection is semantically equivalent to an\nexception thrown by a handler of the immediately preceding 'reform'\nevent."
         ]
       },
-      "revise": {
+      "review": {
         "@type": "VEngine:Property",
         "tags": [
           "Fabricator",
@@ -700,10 +1409,19 @@
           {
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
-              "On:revise"
+              [
+                "On:review={",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                "}"
+              ]
             ],
             "VRevdoc:tooltipContent": [
-              "When used as ",
+              "When used as a ",
               {
                 "@type": "VDoc:Reference",
                 "VDoc:content": [
@@ -717,57 +1435,68 @@
           {
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
-              "addEventListener(\"revise\", ...)"
-            ],
-            "VRevdoc:tooltipContent": "When used on Valoscript event target"
-          }
-        ],
-        "VRevdoc:indexLabel": [
-          "On:revise"
-        ],
-        "rdfs:domain": "rdfs:Resource",
-        "rdfs:range": "rdfs:Resource",
-        "rdfs:comment": "Fired at frame fabricators during review phase of a schismatic\nprophecy, in depth-first pre-order immediately after a the\ncorresponding frame precondition event.",
-        "VRevdoc:introduction": []
-      },
-      "reform": {
-        "@type": "VEngine:Property",
-        "tags": [
-          "Fabricator",
-          "FabricEvent"
-        ],
-        "rdfs:label": [
-          {
-            "@type": "VRevdoc:Tooltip",
-            "VDoc:content": [
-              "On:reform"
+              [
+                "[$On.review]: ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                ","
+              ]
             ],
             "VRevdoc:tooltipContent": [
-              "When used as ",
+              "When set as an element ",
               {
                 "@type": "VDoc:Reference",
                 "VDoc:content": [
-                  "Lens:Element"
+                  "Lens:context"
                 ],
-                "VDoc:ref": "Lens:Element"
+                "VDoc:ref": "Lens:context"
               },
-              " attribute"
+              " attribute property"
             ]
           },
           {
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
-              "addEventListener(\"reform\", ...)"
+              [
+                "addEventListener(\"review\", ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "handler"
+                  ]
+                },
+                ")"
+              ]
             ],
-            "VRevdoc:tooltipContent": "When used on Valoscript event target"
+            "VRevdoc:tooltipContent": "When called on a Valoscript event target"
           }
         ],
         "VRevdoc:indexLabel": [
-          "On:reform"
+          "On:review",
+          "On:review"
         ],
         "rdfs:domain": "rdfs:Resource",
         "rdfs:range": "rdfs:Resource",
-        "rdfs:comment": "Fired at all frame fabricators during reform phase of a schismatic\nprophecy in depth-first post-order."
+        "rdfs:comment": "Fired at the fabricators of ",
+        "VRevdoc:introduction": [
+          {
+            "VDoc:em": true,
+            "VDoc:content": [
+              "reformed"
+            ]
+          },
+          " frames in a\ndepth-first pre-order immediately after the corresponding frame\nprecondition event.",
+          null,
+          "Reformed frames arise during reformation of a schismatic prophecy.\nA frame is considered reformed if it is the innermost frame that\ndirectly contains modifications on a set of global primary resources\nwhose modification history was affected by the reformation. Note that\nall structured sub-resources are recursively considered to be part of\ntheir owning global resource.",
+          null,
+          "The modified resources are listed in the event property <TODO>.",
+          null,
+          "If the handler cancels the defaultAction or throws an exception the\nreformed frame is rejected. The rejection semantics are equivalent to\nthose of an exception thrown by a handler of the preceding 'reform'\nevent."
+        ]
       },
       "frameactive": {
         "@type": "VEngine:Property",
@@ -1477,18 +2206,18 @@
             ]
           },
           "VDoc:entries": [
-            "issue",
-            "replay",
+            "proclaim",
+            "compose",
             "profess",
             "record",
             "truth",
             "schism",
+            "reform",
             "purge",
             "error",
             "precondition",
             "postcondition",
-            "revise",
-            "reform",
+            "review",
             "frameactive",
             "framepropertychange",
             "focuspropertychange",

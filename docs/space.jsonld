@@ -55,8 +55,8 @@
       "VEngine": "https://valospace.org/engine/0#",
       "V": "https://valospace.org/0#",
       "VState": "https://valospace.org/state/0#",
-      "VPlot": "https://valospace.org/plot/0#",
       "VLog": "https://valospace.org/log/0#",
+      "VPlot": "https://valospace.org/plot/0#",
       "V:Chronicle.createPartitionURI": {
         "@id": "#Chronicle.createPartitionURI",
         "@type": "@id"
@@ -79,6 +79,10 @@
       },
       "V:Chronicle.acquireConnection": {
         "@id": "#Chronicle.acquireConnection",
+        "@type": "@id"
+      },
+      "V:Chronicle.sourcifyChronicle": {
+        "@id": "#Chronicle.sourcifyChronicle",
         "@type": "@id"
       },
       "V:immediateContent": {
@@ -249,105 +253,6 @@
         "@id": "#getHostGlobal",
         "@type": "@id"
       },
-      "V:vrid": {
-        "@id": "#vrid",
-        "@container": "@list",
-        "@type": "@id"
-      },
-      "V:prototype": {
-        "@id": "#prototype",
-        "@type": "@id"
-      },
-      "V:derivations": {
-        "@id": "#derivations",
-        "@type": "@id"
-      },
-      "V:ownFields": {
-        "@id": "#ownFields",
-        "@type": "@id"
-      },
-      "V:inheritors": {
-        "@id": "#inheritors",
-        "@type": "@id"
-      },
-      "V:instances": {
-        "@id": "#instances",
-        "@type": "@id"
-      },
-      "V:ghostPrototype": {
-        "@id": "#ghostPrototype",
-        "@type": "@id"
-      },
-      "V:ghosts": {
-        "@id": "#ghosts",
-        "@type": "@id"
-      },
-      "V:materializedGhosts": {
-        "@id": "#materializedGhosts",
-        "@type": "@id"
-      },
-      "V:unnamedCouplings": {
-        "@id": "#unnamedCouplings",
-        "@type": "@id"
-      },
-      "V:ghostHost": {
-        "@id": "#ghostHost",
-        "@type": "@id"
-      },
-      "V:ghostOwner": {
-        "@id": "#ghostOwner",
-        "@type": "@id"
-      },
-      "V:ghostOwnlings": {
-        "@id": "#ghostOwnlings",
-        "@type": "@id"
-      },
-      "V:contentReferrers": {
-        "@id": "#contentReferrers",
-        "@type": "@id"
-      },
-      "V:owner": {
-        "@id": "#owner",
-        "@type": "@id"
-      },
-      "V:name": {
-        "@id": "#name",
-        "@type": "@id"
-      },
-      "V:inheritancePrototype": {
-        "@id": "#inheritancePrototype",
-        "@type": "@id"
-      },
-      "V:instancePrototype": {
-        "@id": "#instancePrototype",
-        "@type": "@id"
-      },
-      "V:ownlings": {
-        "@id": "#ownlings",
-        "@container": "@list",
-        "@type": "@id"
-      },
-      "V:unnamedOwnlings": {
-        "@id": "#unnamedOwnlings",
-        "@type": "@id"
-      },
-      "V:prototypeAlias": {
-        "@id": "#prototypeAlias",
-        "@type": "@id"
-      },
-      "V:scope": {
-        "@id": "#scope",
-        "@type": "@id"
-      },
-      "V:value": {
-        "@id": "#value",
-        "@type": "@id"
-      },
-      "V:properties": {
-        "@id": "#properties",
-        "@container": "@list",
-        "@type": "@id"
-      },
       "V:chronicleRoot": {
         "@id": "#chronicleRoot",
         "@type": "@id"
@@ -473,6 +378,105 @@
         "@id": "#incomingRelations",
         "@container": "@list",
         "@type": "@id"
+      },
+      "V:vrid": {
+        "@id": "#vrid",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "V:prototype": {
+        "@id": "#prototype",
+        "@type": "@id"
+      },
+      "V:derivations": {
+        "@id": "#derivations",
+        "@type": "@id"
+      },
+      "V:ownFields": {
+        "@id": "#ownFields",
+        "@type": "@id"
+      },
+      "V:inheritors": {
+        "@id": "#inheritors",
+        "@type": "@id"
+      },
+      "V:instances": {
+        "@id": "#instances",
+        "@type": "@id"
+      },
+      "V:ghostPrototype": {
+        "@id": "#ghostPrototype",
+        "@type": "@id"
+      },
+      "V:ghosts": {
+        "@id": "#ghosts",
+        "@type": "@id"
+      },
+      "V:materializedGhosts": {
+        "@id": "#materializedGhosts",
+        "@type": "@id"
+      },
+      "V:unnamedCouplings": {
+        "@id": "#unnamedCouplings",
+        "@type": "@id"
+      },
+      "V:ghostHost": {
+        "@id": "#ghostHost",
+        "@type": "@id"
+      },
+      "V:ghostOwner": {
+        "@id": "#ghostOwner",
+        "@type": "@id"
+      },
+      "V:ghostOwnlings": {
+        "@id": "#ghostOwnlings",
+        "@type": "@id"
+      },
+      "V:contentReferrers": {
+        "@id": "#contentReferrers",
+        "@type": "@id"
+      },
+      "V:owner": {
+        "@id": "#owner",
+        "@type": "@id"
+      },
+      "V:name": {
+        "@id": "#name",
+        "@type": "@id"
+      },
+      "V:inheritancePrototype": {
+        "@id": "#inheritancePrototype",
+        "@type": "@id"
+      },
+      "V:instancePrototype": {
+        "@id": "#instancePrototype",
+        "@type": "@id"
+      },
+      "V:ownlings": {
+        "@id": "#ownlings",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "V:unnamedOwnlings": {
+        "@id": "#unnamedOwnlings",
+        "@type": "@id"
+      },
+      "V:prototypeAlias": {
+        "@id": "#prototypeAlias",
+        "@type": "@id"
+      },
+      "V:scope": {
+        "@id": "#scope",
+        "@type": "@id"
+      },
+      "V:value": {
+        "@id": "#value",
+        "@type": "@id"
+      },
+      "V:properties": {
+        "@id": "#properties",
+        "@container": "@list",
+        "@type": "@id"
       }
     },
     "VDoc:tags": [
@@ -482,7 +486,7 @@
     ],
     "dc:title": "@valos/space library workspace",
     "VRevdoc:package": "@valos/space",
-    "VRevdoc:version": "0.35.0-rc.33",
+    "VRevdoc:version": "0.35.0-rc.34",
     "VRevdoc:preferredPrefix": "V",
     "VRevdoc:baseIRI": "https://valospace.org/0#",
     "VRevdoc:referencedModules": {
@@ -490,8 +494,8 @@
       "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
       "https://valospace.org/state/0#": "@valos/state/VState",
       "https://valospace.org/0#": "@valos/space/V",
-      "https://valospace.org/plot/0#": "@valos/plot/VPlot",
-      "https://valospace.org/log/0#": "@valos/log/VLog"
+      "https://valospace.org/log/0#": "@valos/log/VLog",
+      "https://valospace.org/plot/0#": "@valos/plot/VPlot"
     },
     "VRevdoc:extenderModules": {},
     "respecConfig": {
@@ -671,8 +675,8 @@
       "VKernel": "https://valospace.org/kernel/0#",
       "VState": "https://valospace.org/state/0#",
       "VEngine": "https://valospace.org/engine/0#",
-      "VPlot": "https://valospace.org/plot/0#",
-      "VLog": "https://valospace.org/log/0#"
+      "VLog": "https://valospace.org/log/0#",
+      "VPlot": "https://valospace.org/plot/0#"
     },
     "vocabulary": {
       "@id": "vocabulary",
@@ -714,6 +718,10 @@
           {
             "@id": "#Chronicle.acquireConnection",
             "VRevdoc:indexLabel": "valos.Chronicle.acquireConnection()"
+          },
+          {
+            "@id": "#Chronicle.sourcifyChronicle",
+            "VRevdoc:indexLabel": "valos.Chronicle.sourcifyChronicle()"
           }
         ]
       },
@@ -787,6 +795,19 @@
         "rdfs:comment": "Returns a promise to a full connection to the chronicle with given\n*chronicleURI* and *options*.",
         "VRevdoc:introduction": [
           "If no full connection exists, waits on a possibly existing on-going\nconnection process. If none exists creates a new connection process."
+        ]
+      },
+      "Chronicle.sourcifyChronicle": {
+        "rdfs:label": [
+          "Chronicle.sourcifyChronicle"
+        ],
+        "VRevdoc:indexLabel": "valos.Chronicle.sourcifyChronicle()",
+        "rdf:subject": "V:Chronicle",
+        "@type": "VEngine:ObjectMethod",
+        "rdfs:range": " sourcifyChronicle(chronicleURI)",
+        "rdfs:comment": "Returns a promise to a sourcered chronicle with given\n      *chronicleURI* and *options*.",
+        "VRevdoc:introduction": [
+          "If no full connection exists, waits on a possibly existing on-going\n      connection process. If none exists creates a new connection process."
         ]
       },
       "Describable": {
@@ -1692,6 +1713,569 @@
           "window.valos.TransientScriptFields"
         ]
       },
+      "SourcerableNode": {
+        "@type": "VState:Type",
+        "rdfs:subClassOf": "V:Resource",
+        "VRevdoc:brief": "sourcerable node interface",
+        "rdfs:comment": "The class of sourcerable valospace nodes which either are already\nsourcered or are unsourcered but have references to them from extant\nresources.\n\nThis interface is the domain of all transient and generated fields\nwhich are available even for unsourcered node resources."
+      },
+      "chronicleRoot": {
+        "@type": "VState:GeneratedField",
+        "rdfs:domain": "V:SourcerableNode",
+        "rdfs:range": "V:SourceredNode",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "VState:expressor": [
+          "@$VValk.resolveChronicleRoot@@"
+        ],
+        "rdfs:comment": "The chronicle root node of this sourcerable (ie. the nearest ancestor,\npossibly this sourcerable itself self which has a non-null\nV:authorityURI).",
+        "rdfs:label": [
+          "$V.chronicleRoot"
+        ]
+      },
+      "chronicleURI": {
+        "@type": "VState:GeneratedField",
+        "rdfs:domain": "V:SourcerableNode",
+        "rdfs:range": "xsd:anyURI",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "VState:expressor": [
+          "@$VValk.resolveChronicleURI@@"
+        ],
+        "rdfs:comment": "The chronicle URL of the event log that contain this potentially\nabsent sourcerable as is known by the current view of the world.",
+        "rdfs:label": [
+          "$V.chronicleURI"
+        ]
+      },
+      "url": {
+        "@type": "VState:GeneratedField",
+        "rdfs:domain": "V:SourcerableNode",
+        "rdfs:range": "xsd:anyURI",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:cardinality": 1
+        },
+        "VState:expressor": [
+          "@!$valk.add:@!$V.chronicleURI@@:#:@!$V.id@@@@"
+        ],
+        "rdfs:comment": "The authoritative URL string of this sourcerable in the current view\nof the world. Always equivalent to a catenation of\n<V:chronicleURI> \"#\" <V:id>\nof this resource",
+        "rdfs:label": [
+          "$V.url"
+        ]
+      },
+      "partition": {
+        "@type": "VState:AliasField",
+        "VRevdoc:deprecatedInFavorOf": "V:chronicleRoot",
+        "VState:aliasOf": "V:chronicleRoot",
+        "rdfs:subPropertyOf": "V:chronicleRoot",
+        "rdfs:domain": "V:SourcerableNode",
+        "rdfs:range": "V:SourceredNode",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "VState:expressor": [
+          "@$VValk.resolveChronicleRoot@@"
+        ],
+        "rdfs:comment": "The chronicle root node of this sourcerable, ie. the nearest ancestor\n(possibly self) with a non-null V:authorityURI.",
+        "rdfs:label": [
+          "$V.partition"
+        ]
+      },
+      "partitionURI": {
+        "@type": "VState:AliasField",
+        "VRevdoc:deprecatedInFavorOf": "V:chronicleURI",
+        "VState:aliasOf": "V:chronicleURI",
+        "rdfs:subPropertyOf": "V:chronicleURI",
+        "rdfs:domain": "V:SourcerableNode",
+        "rdfs:range": "xsd:anyURI",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "rdfs:comment": "Deprecated in favor of 'chronicleURI'. This field is by definition\nalways a locator so its name should reflect it.",
+        "rdfs:label": [
+          "$V.partitionURI"
+        ]
+      },
+      "UnsourceredNode": {
+        "@type": "VState:Type",
+        "VRevdoc:brief": "absent, sourcerable node type",
+        "rdfs:subClassOf": [
+          "V:Resource",
+          "V:SourcerableNode"
+        ],
+        "rdfs:comment": "The dominant type class of absent but sourcerable valospace nodes. An\nabsent resource doesn't have a known representation in this view of the\nworld because it is inside an unsourcered Chronicle.\n\nThe transition from UnsourceredNode to and from other dominant types is\nthe only possible runtime type change for SourcerableNodes and happens\ndynamically based on the chronicle sourcery and banishment."
+      },
+      "NonExistentNode": {
+        "@type": "VState:Type",
+        "rdfs:subClassOf": [
+          "V:Resource",
+          "V:SourcerableNode"
+        ],
+        "VRevdoc:brief": "non-existent node type",
+        "rdfs:comment": "The dominant type class of sourcered resources which should be present\nbut are not. This typically because they have been destroyed or because\nthey never existed in the first place.\n\nOnly provides the transient fields of the SourcerableNode and Resource\ninterfaces."
+      },
+      "SourceredNode": {
+        "@type": "VState:Type",
+        "VRevdoc:brief": "sourcered node interface",
+        "rdfs:subClassOf": [
+          "V:Resource",
+          "V:Extant",
+          "V:Scope",
+          "V:SourcerableNode"
+        ],
+        "rdfs:comment": "The class of sourcered (ie. extant) valospace nodes. A node can act as\na chronicle root resource, as the source and target of Relation nodes,\nas the folder of Media nodes and as the parent of Entity nodes.\nAs these aforementioned types are also the primary sourcered nodes\nthemselves they form the main structure of global valospace resource\ngraph."
+      },
+      "container": {
+        "@type": "VState:EventLoggedField",
+        "rdfs:subPropertyOf": "V:owner",
+        "rdfs:domain": "V:SourceredNode",
+        "rdfs:range": "V:SourceredNode",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "VState:isOwnedBy": true,
+        "VState:coupledToField": "V:nodes",
+        "rdfs:comment": "The container (and owner) node of this sourcered node.",
+        "rdfs:label": [
+          "$V.container"
+        ]
+      },
+      "nodes": {
+        "@type": "VState:EventLoggedField",
+        "rdfs:subPropertyOf": "V:ownlings",
+        "rdfs:domain": "V:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "VState:isOwnerOf": true,
+        "VState:coupledToField": "V:container",
+        "rdfs:comment": "The ordered list of all nodes directly contained by this sourcered\nnode.",
+        "rdfs:label": [
+          "$V.nodes"
+        ]
+      },
+      "authorityURI": {
+        "@type": "VState:EventLoggedField",
+        "rdfs:domain": "V:SourceredNode",
+        "rdfs:range": "xsd:anyURI",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "VState:isDuplicateable": false,
+        "VState:ownDefaultValue": null,
+        "rdfs:comment": "The authority URL of this sourcered chronicle root node. If this field\nis null then this sourcered node is not a root node. Setting this field\nmakes this resource the root of a new chronicle root (if allowed). The\nchronicle URL is generated based on this as per the rules specified by\nthe authority URL schema.\nIf the chronicle root node is frozen the whole chronicle is permanently\nfrozen.",
+        "rdfs:label": [
+          "$V.authorityURI"
+        ]
+      },
+      "createdAt": {
+        "@type": "VState:GeneratedField",
+        "rdfs:domain": "V:SourceredNode",
+        "rdfs:range": "xsd:double",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "VState:expressor": [
+          "@$VValk.resolveCreatedAt@@"
+        ],
+        "rdfs:comment": "The creation UNIX epoch time of this node. This is defined as the\nlog aspect timestamp of the CREATED event which impressed this node\ninto being.",
+        "rdfs:label": [
+          "$V.createdAt"
+        ]
+      },
+      "modifiedAt": {
+        "@type": "VState:GeneratedField",
+        "rdfs:domain": "V:SourceredNode",
+        "rdfs:range": "xsd:double",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "VState:expressor": [
+          "@$VValk.resolveModifiedAt@@"
+        ],
+        "rdfs:comment": "The latest modification UNIX epoch time of this node. This is defined\nas the log aspect timestamp of the most recent event with a direct\nimpression on this Media resource.",
+        "rdfs:label": [
+          "$V.modifiedAt"
+        ]
+      },
+      "partitionAuthorityURI": {
+        "@type": "VState:AliasField",
+        "VRevdoc:deprecatedInFavorOf": "V:authorityURI",
+        "VState:aliasOf": "V:authorityURI",
+        "rdfs:subPropertyOf": "V:authorityURI",
+        "rdfs:domain": "V:SourceredNode",
+        "rdfs:range": "xsd:string",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "rdfs:label": [
+          "$V.partitionAuthorityURI"
+        ]
+      },
+      "directory": {
+        "@type": "VState:EventLoggedField",
+        "rdfs:subPropertyOf": "V:container",
+        "rdfs:domain": [
+          "V:Entity",
+          "V:Media"
+        ],
+        "rdfs:range": "V:SourceredNode",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "VState:isOwnedBy": true,
+        "VState:coupledToField": "V:entries",
+        "rdfs:comment": "The directory (and owner) node of this sourcered node.",
+        "rdfs:label": [
+          "$V.directory"
+        ]
+      },
+      "entries": {
+        "@type": "VState:EventLoggedField",
+        "rdfs:subPropertyOf": "V:nodes",
+        "rdfs:domain": "V:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "VState:isOwnerOf": true,
+        "VState:coupledToField": "V:directory",
+        "rdfs:comment": "The ordered list of entries of this sourcered node when seen as\n  a directory.",
+        "rdfs:label": [
+          "$V.entries"
+        ]
+      },
+      "parent": {
+        "@type": "VState:EventLoggedField",
+        "rdfs:subPropertyOf": "V:directory",
+        "rdfs:domain": "V:Entity",
+        "rdfs:range": "V:SourceredNode",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "VState:isOwnedBy": true,
+        "VState:coupledToField": "V:entities",
+        "rdfs:comment": "The parent (and directory, owner) node of this entity.",
+        "rdfs:label": [
+          "$V.parent"
+        ]
+      },
+      "entities": {
+        "@type": "VState:EventLoggedField",
+        "rdfs:subPropertyOf": "V:entries",
+        "rdfs:domain": "V:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "VState:isOwnerOf": true,
+        "VState:coupledToField": "V:parent",
+        "rdfs:comment": "The ordered list of entities contained in this sourcered node.",
+        "rdfs:label": [
+          "$V.entities"
+        ]
+      },
+      "folder": {
+        "@type": "VState:EventLoggedField",
+        "rdfs:subPropertyOf": "V:directory",
+        "rdfs:domain": "V:Media",
+        "rdfs:range": "V:SourceredNode",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "VState:isOwnedBy": true,
+        "VState:coupledToField": "V:medias",
+        "rdfs:comment": "The folder (and directory, owner) node of this media.",
+        "rdfs:label": [
+          "$V.folder"
+        ]
+      },
+      "medias": {
+        "@type": "VState:EventLoggedField",
+        "rdfs:subPropertyOf": "V:entries",
+        "rdfs:domain": "V:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "VState:isOwnerOf": true,
+        "VState:coupledToField": "V:folder",
+        "rdfs:comment": "The ordered list of medias contained in this sourcered node when seen\nas a folder",
+        "rdfs:label": [
+          "$V.medias"
+        ]
+      },
+      "sourceURL": {
+        "@type": "VState:EventLoggedField",
+        "rdfs:domain": "V:Media",
+        "rdfs:range": "xsd:anyURI",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "rdfs:comment": "The unreliable source URL of this Media. This URL is dereferenced\nwhen the Media content is accessed and as such is subject to all\nfailure considerations associated with its protocol.",
+        "rdfs:label": [
+          "$V.sourceURL"
+        ]
+      },
+      "content": {
+        "@type": "VState:EventLoggedField",
+        "rdfs:subPropertyOf": "rdf:object",
+        "rdfs:domain": "V:Media",
+        "rdfs:range": "V:Bvob",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "VState:coupledToField": "V:contentReferrers",
+        "rdfs:comment": "The infrastructure-backed octet-stream content of this Media.",
+        "rdfs:label": [
+          "$V.content"
+        ]
+      },
+      "connector": {
+        "@type": "VState:EventLoggedField",
+        "rdfs:subPropertyOf": "V:container",
+        "rdfs:domain": "V:Relation",
+        "rdfs:range": "V:SourceredNode",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "VState:isOwnedBy": true,
+        "VState:coupledToField": "V:connectedRelations",
+        "rdfs:comment": "The connector (and container, owner) node of this relation.\nTypically also either the source or the target but possibly neither.",
+        "rdfs:label": [
+          "$V.connector"
+        ]
+      },
+      "connectedRelations": {
+        "@type": "VState:EventLoggedField",
+        "rdfs:subPropertyOf": "V:nodes",
+        "rdfs:domain": "V:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "VState:isOwnerOf": true,
+        "VState:coupledToField": "V:connector",
+        "rdfs:comment": "The ordered list of relations that are connected (and contained,\nowned) _by_ this sourcered node. This includes both\nconnectedInRelations and connectedOutRelations (ie. incoming and\noutgoing relations which are also connected by this sourcered node) but\nalso relations which only have this sourcered node as their connector\nbut not as source or target.",
+        "rdfs:label": [
+          "$V.connectedRelations"
+        ]
+      },
+      "source": {
+        "@type": "VState:EventLoggedField",
+        "rdfs:subPropertyOf": "rdf:subject",
+        "rdfs:domain": "V:Relation",
+        "rdfs:range": "V:SourceredNode",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "VState:coupledToField": "V:outRelations",
+        "rdfs:comment": "The source node of this relation.",
+        "rdfs:label": [
+          "$V.source"
+        ]
+      },
+      "outRelations": {
+        "@type": "VState:CoupledField",
+        "rdfs:subPropertyOf": "V:nodes",
+        "rdfs:domain": "V:SourcerableNode",
+        "rdfs:range": "rdfs:List",
+        "VState:coupledToField": "V:source",
+        "rdfs:comment": "The unordered list of outgoing relations with this sourcerable\n(but possibly absent) node as their source (note that sourcerable and\nsource are completely separate concepts here).",
+        "rdfs:label": [
+          "$V.outRelations"
+        ]
+      },
+      "target": {
+        "@type": "VState:EventLoggedField",
+        "rdfs:subPropertyOf": "rdf:object",
+        "rdfs:domain": "V:Relation",
+        "rdfs:range": "V:SourceredNode",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "VState:coupledToField": "V:inRelations",
+        "rdfs:comment": "The target node of this relation.",
+        "rdfs:label": [
+          "$V.target"
+        ]
+      },
+      "inRelations": {
+        "@type": "VState:CoupledField",
+        "rdfs:subPropertyOf": "V:nodes",
+        "rdfs:domain": "V:SourcerableNode",
+        "rdfs:range": "rdfs:List",
+        "VState:coupledToField": "V:target",
+        "rdfs:comment": "The unordered list of incoming relations with this sourcerable\n(but possibly absent) node as their target.",
+        "rdfs:label": [
+          "$V.inRelations"
+        ]
+      },
+      "pairedSource": {
+        "@type": "VState:EventLoggedField",
+        "rdfs:subPropertyOf": "V:source",
+        "rdfs:domain": "V:Relation",
+        "rdfs:range": "V:SourceredNode",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "VState:coupledToField": "V:pairedOutRelations",
+        "rdfs:comment": "The paired source node of this relation (paired denotes that the\ncoupled field 'pairedOutRelations' is an event logged field).",
+        "rdfs:label": [
+          "$V.pairedSource"
+        ]
+      },
+      "pairedOutRelations": {
+        "@type": "VState:EventLoggedField",
+        "rdfs:subPropertyOf": "V:outgoingRelations",
+        "rdfs:domain": "V:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "VState:coupledToField": "V:pairedSource",
+        "rdfs:comment": "The ordered list of outgoing relations paired to this sourcered node.",
+        "rdfs:label": [
+          "$V.pairedOutRelations"
+        ]
+      },
+      "pairedTarget": {
+        "@type": "VState:EventLoggedField",
+        "rdfs:subPropertyOf": "V:target",
+        "rdfs:domain": "V:Relation",
+        "rdfs:range": "V:SourceredNode",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "VState:coupledToField": "V:pairedInRelations",
+        "rdfs:comment": "The paired target node of this relation (the coupled field\n'pairedInRelations' is an event logged field).",
+        "rdfs:label": [
+          "$V.pairedTarget"
+        ]
+      },
+      "pairedInRelations": {
+        "@type": "VState:EventLoggedField",
+        "rdfs:subPropertyOf": "V:incomingRelations",
+        "rdfs:domain": "V:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "VState:coupledToField": "V:pairedTarget",
+        "rdfs:comment": "The ordered list of incoming relations paired to this sourcered node.",
+        "rdfs:label": [
+          "$V.pairedInRelations"
+        ]
+      },
+      "connectedSource": {
+        "@type": "VState:EventLoggedField",
+        "rdfs:subPropertyOf": [
+          "V:connector",
+          "V:pairedSource"
+        ],
+        "rdfs:domain": "V:Relation",
+        "rdfs:range": "V:SourceredNode",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "VState:isOwnedBy": true,
+        "VState:coupledToField": "V:connectedOutRelations",
+        "rdfs:comment": "The source and also the connector node of this relation.",
+        "rdfs:label": [
+          "$V.connectedSource"
+        ]
+      },
+      "connectedOutRelations": {
+        "@type": "VState:EventLoggedField",
+        "rdfs:subPropertyOf": [
+          "V:connectedRelations",
+          "V:pairedOutRelations"
+        ],
+        "rdfs:domain": "V:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "VState:isOwnerOf": true,
+        "VState:coupledToField": "V:connectedSource",
+        "rdfs:comment": "The ordered list of outgoing relations contained in (and owned by)\nthis sourcered node.",
+        "rdfs:label": [
+          "$V.connectedOutRelations"
+        ]
+      },
+      "connectedTarget": {
+        "@type": "VState:EventLoggedField",
+        "rdfs:subPropertyOf": [
+          "V:connector",
+          "V:pairedTarget"
+        ],
+        "rdfs:domain": "V:Relation",
+        "rdfs:range": "V:SourceredNode",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "VState:isOwnedBy": true,
+        "VState:coupledToField": "V:connectedInRelations",
+        "rdfs:comment": "The target and also the connector node of this relation.",
+        "rdfs:label": [
+          "$V.connectedTarget"
+        ]
+      },
+      "connectedInRelations": {
+        "@type": "VState:EventLoggedField",
+        "rdfs:subPropertyOf": [
+          "V:connectedRelations",
+          "V:pairedInRelations"
+        ],
+        "rdfs:domain": "V:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "VState:isOwnerOf": true,
+        "VState:coupledToField": "V:connectedTarget",
+        "rdfs:comment": "The ordered list of incoming relations contained in (and owned by)\nthis sourcered node.",
+        "rdfs:label": [
+          "$V.connectedInRelations"
+        ]
+      },
+      "relations": {
+        "@type": "VState:AliasField",
+        "VRevdoc:deprecatedInFavorOf": "V:connectedRelations",
+        "VState:aliasOf": "V:connectedRelations",
+        "rdfs:subPropertyOf": "V:connectedRelations",
+        "rdfs:domain": "V:SourceredNode",
+        "rdfs:range": "rdfs:List",
+        "VState:isOwnerOf": true,
+        "VState:coupledToField": "V:connector",
+        "rdfs:comment": "A deprecation of V:connectedRelations; the ordered list of\nrelations contained within this sourcered node when seen as a graph.\nDo note that the semantics have changed: connectedRelations can now\nalso contain relations which have this sourcered node as their the\ntarget (instead of source) or as neither source nor target.\nThe set of just outgoing relations is 'outgoingRelations' and the set\nof owned outgoing relations is 'connectedOutRelations'.",
+        "rdfs:label": [
+          "$V.relations"
+        ]
+      },
+      "outgoingRelations": {
+        "@type": "VState:AliasField",
+        "VRevdoc:deprecatedInFavorOf": "V:outRelations",
+        "VState:aliasOf": "V:outRelations",
+        "rdfs:subPropertyOf": "V:outRelations",
+        "rdfs:domain": "V:SourcerableNode",
+        "rdfs:range": "rdfs:List",
+        "VState:coupledToField": "V:source",
+        "rdfs:comment": "The unordered list of outgoing relations with this sourcerable\n(but possibly absent) node as their source (note that sourcerable and\nsource are completely separate concepts here).",
+        "rdfs:label": [
+          "$V.outgoingRelations"
+        ]
+      },
+      "incomingRelations": {
+        "@type": "VState:AliasField",
+        "VRevdoc:deprecatedInFavorOf": "V:inRelations",
+        "VState:aliasOf": "V:inRelations",
+        "rdfs:subPropertyOf": "V:inRelations",
+        "rdfs:domain": "V:SourcerableNode",
+        "rdfs:range": "rdfs:List",
+        "VState:coupledToField": "V:target",
+        "rdfs:comment": "The unordered list of incoming relations with this sourcerable\n(but possibly absent) node as their target.",
+        "rdfs:label": [
+          "$V.incomingRelations"
+        ]
+      },
       "id": {
         "@type": "VState:GeneratedField",
         "rdfs:domain": "V:Resource",
@@ -2259,569 +2843,6 @@
         "rdfs:label": [
           "$V.properties"
         ]
-      },
-      "SourcerableNode": {
-        "@type": "VState:Type",
-        "rdfs:subClassOf": "V:Resource",
-        "VRevdoc:brief": "sourcerable node interface",
-        "rdfs:comment": "The class of sourcerable valospace nodes which either are already\nsourcered or are unsourcered but have references to them from extant\nresources.\n\nThis interface is the domain of all transient and generated fields\nwhich are available even for unsourcered node resources."
-      },
-      "chronicleRoot": {
-        "@type": "VState:GeneratedField",
-        "rdfs:domain": "V:SourcerableNode",
-        "rdfs:range": "V:SourceredNode",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "VState:expressor": [
-          "@$VValk.resolveChronicleRoot@@"
-        ],
-        "rdfs:comment": "The chronicle root node of this sourcerable (ie. the nearest ancestor,\npossibly this sourcerable itself self which has a non-null\nV:authorityURI).",
-        "rdfs:label": [
-          "$V.chronicleRoot"
-        ]
-      },
-      "chronicleURI": {
-        "@type": "VState:GeneratedField",
-        "rdfs:domain": "V:SourcerableNode",
-        "rdfs:range": "xsd:anyURI",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "VState:expressor": [
-          "@$VValk.resolveChronicleURI@@"
-        ],
-        "rdfs:comment": "The chronicle URL of the event log that contain this potentially\nabsent sourcerable as is known by the current view of the world.",
-        "rdfs:label": [
-          "$V.chronicleURI"
-        ]
-      },
-      "url": {
-        "@type": "VState:GeneratedField",
-        "rdfs:domain": "V:SourcerableNode",
-        "rdfs:range": "xsd:anyURI",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:cardinality": 1
-        },
-        "VState:expressor": [
-          "@!$valk.add:@!$V.chronicleURI@@:#:@!$V.id@@@@"
-        ],
-        "rdfs:comment": "The authoritative URL string of this sourcerable in the current view\nof the world. Always equivalent to a catenation of\n<V:chronicleURI> \"#\" <V:id>\nof this resource",
-        "rdfs:label": [
-          "$V.url"
-        ]
-      },
-      "partition": {
-        "@type": "VState:AliasField",
-        "VRevdoc:deprecatedInFavorOf": "V:chronicleRoot",
-        "VState:aliasOf": "V:chronicleRoot",
-        "rdfs:subPropertyOf": "V:chronicleRoot",
-        "rdfs:domain": "V:SourcerableNode",
-        "rdfs:range": "V:SourceredNode",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "VState:expressor": [
-          "@$VValk.resolveChronicleRoot@@"
-        ],
-        "rdfs:comment": "The chronicle root node of this sourcerable, ie. the nearest ancestor\n(possibly self) with a non-null V:authorityURI.",
-        "rdfs:label": [
-          "$V.partition"
-        ]
-      },
-      "partitionURI": {
-        "@type": "VState:AliasField",
-        "VRevdoc:deprecatedInFavorOf": "V:chronicleURI",
-        "VState:aliasOf": "V:chronicleURI",
-        "rdfs:subPropertyOf": "V:chronicleURI",
-        "rdfs:domain": "V:SourcerableNode",
-        "rdfs:range": "xsd:anyURI",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "Deprecated in favor of 'chronicleURI'. This field is by definition\nalways a locator so its name should reflect it.",
-        "rdfs:label": [
-          "$V.partitionURI"
-        ]
-      },
-      "UnsourceredNode": {
-        "@type": "VState:Type",
-        "VRevdoc:brief": "absent, sourcerable node type",
-        "rdfs:subClassOf": [
-          "V:Resource",
-          "V:SourcerableNode"
-        ],
-        "rdfs:comment": "The dominant type class of absent but sourcerable valospace nodes. An\nabsent resource doesn't have a known representation in this view of the\nworld because it is inside an unsourcered Chronicle.\n\nThe transition from UnsourceredNode to and from other dominant types is\nthe only possible runtime type change for SourcerableNodes and happens\ndynamically based on the chronicle sourcery and banishment."
-      },
-      "NonExistentNode": {
-        "@type": "VState:Type",
-        "rdfs:subClassOf": [
-          "V:Resource",
-          "V:SourcerableNode"
-        ],
-        "VRevdoc:brief": "non-existent node type",
-        "rdfs:comment": "The dominant type class of sourcered resources which should be present\nbut are not. This typically because they have been destroyed or because\nthey never existed in the first place.\n\nOnly provides the transient fields of the SourcerableNode and Resource\ninterfaces."
-      },
-      "SourceredNode": {
-        "@type": "VState:Type",
-        "VRevdoc:brief": "sourcered node interface",
-        "rdfs:subClassOf": [
-          "V:Resource",
-          "V:Extant",
-          "V:Scope",
-          "V:SourcerableNode"
-        ],
-        "rdfs:comment": "The class of sourcered (ie. extant) valospace nodes. A node can act as\na chronicle root resource, as the source and target of Relation nodes,\nas the folder of Media nodes and as the parent of Entity nodes.\nAs these aforementioned types are also the primary sourcered nodes\nthemselves they form the main structure of global valospace resource\ngraph."
-      },
-      "container": {
-        "@type": "VState:EventLoggedField",
-        "rdfs:subPropertyOf": "V:owner",
-        "rdfs:domain": "V:SourceredNode",
-        "rdfs:range": "V:SourceredNode",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "VState:isOwnedBy": true,
-        "VState:coupledToField": "V:nodes",
-        "rdfs:comment": "The container (and owner) node of this sourcered node.",
-        "rdfs:label": [
-          "$V.container"
-        ]
-      },
-      "nodes": {
-        "@type": "VState:EventLoggedField",
-        "rdfs:subPropertyOf": "V:ownlings",
-        "rdfs:domain": "V:SourceredNode",
-        "rdfs:range": "rdfs:List",
-        "VState:isOwnerOf": true,
-        "VState:coupledToField": "V:container",
-        "rdfs:comment": "The ordered list of all nodes directly contained by this sourcered\nnode.",
-        "rdfs:label": [
-          "$V.nodes"
-        ]
-      },
-      "authorityURI": {
-        "@type": "VState:EventLoggedField",
-        "rdfs:domain": "V:SourceredNode",
-        "rdfs:range": "xsd:anyURI",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "VState:isDuplicateable": false,
-        "VState:ownDefaultValue": null,
-        "rdfs:comment": "The authority URL of this sourcered chronicle root node. If this field\nis null then this sourcered node is not a root node. Setting this field\nmakes this resource the root of a new chronicle root (if allowed). The\nchronicle URL is generated based on this as per the rules specified by\nthe authority URL schema.\nIf the chronicle root node is frozen the whole chronicle is permanently\nfrozen.",
-        "rdfs:label": [
-          "$V.authorityURI"
-        ]
-      },
-      "createdAt": {
-        "@type": "VState:GeneratedField",
-        "rdfs:domain": "V:SourceredNode",
-        "rdfs:range": "xsd:double",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "VState:expressor": [
-          "@$VValk.resolveCreatedAt@@"
-        ],
-        "rdfs:comment": "The creation UNIX epoch time of this node. This is defined as the\nlog aspect timestamp of the CREATED event which impressed this node\ninto being.",
-        "rdfs:label": [
-          "$V.createdAt"
-        ]
-      },
-      "modifiedAt": {
-        "@type": "VState:GeneratedField",
-        "rdfs:domain": "V:SourceredNode",
-        "rdfs:range": "xsd:double",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "VState:expressor": [
-          "@$VValk.resolveModifiedAt@@"
-        ],
-        "rdfs:comment": "The latest modification UNIX epoch time of this node. This is defined\nas the log aspect timestamp of the most recent event with a direct\nimpression on this Media resource.",
-        "rdfs:label": [
-          "$V.modifiedAt"
-        ]
-      },
-      "partitionAuthorityURI": {
-        "@type": "VState:AliasField",
-        "VRevdoc:deprecatedInFavorOf": "V:authorityURI",
-        "VState:aliasOf": "V:authorityURI",
-        "rdfs:subPropertyOf": "V:authorityURI",
-        "rdfs:domain": "V:SourceredNode",
-        "rdfs:range": "xsd:string",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:label": [
-          "$V.partitionAuthorityURI"
-        ]
-      },
-      "directory": {
-        "@type": "VState:EventLoggedField",
-        "rdfs:subPropertyOf": "V:container",
-        "rdfs:domain": [
-          "V:Entity",
-          "V:Media"
-        ],
-        "rdfs:range": "V:SourceredNode",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "VState:isOwnedBy": true,
-        "VState:coupledToField": "V:entries",
-        "rdfs:comment": "The directory (and owner) node of this sourcered node.",
-        "rdfs:label": [
-          "$V.directory"
-        ]
-      },
-      "entries": {
-        "@type": "VState:EventLoggedField",
-        "rdfs:subPropertyOf": "V:nodes",
-        "rdfs:domain": "V:SourceredNode",
-        "rdfs:range": "rdfs:List",
-        "VState:isOwnerOf": true,
-        "VState:coupledToField": "V:directory",
-        "rdfs:comment": "The ordered list of entries of this sourcered node when seen as\n  a directory.",
-        "rdfs:label": [
-          "$V.entries"
-        ]
-      },
-      "parent": {
-        "@type": "VState:EventLoggedField",
-        "rdfs:subPropertyOf": "V:directory",
-        "rdfs:domain": "V:Entity",
-        "rdfs:range": "V:SourceredNode",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "VState:isOwnedBy": true,
-        "VState:coupledToField": "V:entities",
-        "rdfs:comment": "The parent (and directory, owner) node of this entity.",
-        "rdfs:label": [
-          "$V.parent"
-        ]
-      },
-      "entities": {
-        "@type": "VState:EventLoggedField",
-        "rdfs:subPropertyOf": "V:entries",
-        "rdfs:domain": "V:SourceredNode",
-        "rdfs:range": "rdfs:List",
-        "VState:isOwnerOf": true,
-        "VState:coupledToField": "V:parent",
-        "rdfs:comment": "The ordered list of entities contained in this sourcered node.",
-        "rdfs:label": [
-          "$V.entities"
-        ]
-      },
-      "folder": {
-        "@type": "VState:EventLoggedField",
-        "rdfs:subPropertyOf": "V:directory",
-        "rdfs:domain": "V:Media",
-        "rdfs:range": "V:SourceredNode",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "VState:isOwnedBy": true,
-        "VState:coupledToField": "V:medias",
-        "rdfs:comment": "The folder (and directory, owner) node of this media.",
-        "rdfs:label": [
-          "$V.folder"
-        ]
-      },
-      "medias": {
-        "@type": "VState:EventLoggedField",
-        "rdfs:subPropertyOf": "V:entries",
-        "rdfs:domain": "V:SourceredNode",
-        "rdfs:range": "rdfs:List",
-        "VState:isOwnerOf": true,
-        "VState:coupledToField": "V:folder",
-        "rdfs:comment": "The ordered list of medias contained in this sourcered node when seen\nas a folder",
-        "rdfs:label": [
-          "$V.medias"
-        ]
-      },
-      "sourceURL": {
-        "@type": "VState:EventLoggedField",
-        "rdfs:domain": "V:Media",
-        "rdfs:range": "xsd:anyURI",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The unreliable source URL of this Media. This URL is dereferenced\nwhen the Media content is accessed and as such is subject to all\nfailure considerations associated with its protocol.",
-        "rdfs:label": [
-          "$V.sourceURL"
-        ]
-      },
-      "content": {
-        "@type": "VState:EventLoggedField",
-        "rdfs:subPropertyOf": "rdf:object",
-        "rdfs:domain": "V:Media",
-        "rdfs:range": "V:Bvob",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "VState:coupledToField": "V:contentReferrers",
-        "rdfs:comment": "The infrastructure-backed octet-stream content of this Media.",
-        "rdfs:label": [
-          "$V.content"
-        ]
-      },
-      "connector": {
-        "@type": "VState:EventLoggedField",
-        "rdfs:subPropertyOf": "V:container",
-        "rdfs:domain": "V:Relation",
-        "rdfs:range": "V:SourceredNode",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "VState:isOwnedBy": true,
-        "VState:coupledToField": "V:connectedRelations",
-        "rdfs:comment": "The connector (and container, owner) node of this relation.\nTypically also either the source or the target but possibly neither.",
-        "rdfs:label": [
-          "$V.connector"
-        ]
-      },
-      "connectedRelations": {
-        "@type": "VState:EventLoggedField",
-        "rdfs:subPropertyOf": "V:nodes",
-        "rdfs:domain": "V:SourceredNode",
-        "rdfs:range": "rdfs:List",
-        "VState:isOwnerOf": true,
-        "VState:coupledToField": "V:connector",
-        "rdfs:comment": "The ordered list of relations that are connected (and contained,\nowned) _by_ this sourcered node. This includes both\nconnectedInRelations and connectedOutRelations (ie. incoming and\noutgoing relations which are also connected by this sourcered node) but\nalso relations which only have this sourcered node as their connector\nbut not as source or target.",
-        "rdfs:label": [
-          "$V.connectedRelations"
-        ]
-      },
-      "source": {
-        "@type": "VState:EventLoggedField",
-        "rdfs:subPropertyOf": "rdf:subject",
-        "rdfs:domain": "V:Relation",
-        "rdfs:range": "V:SourceredNode",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "VState:coupledToField": "V:outRelations",
-        "rdfs:comment": "The source node of this relation.",
-        "rdfs:label": [
-          "$V.source"
-        ]
-      },
-      "outRelations": {
-        "@type": "VState:CoupledField",
-        "rdfs:subPropertyOf": "V:nodes",
-        "rdfs:domain": "V:SourcerableNode",
-        "rdfs:range": "rdfs:List",
-        "VState:coupledToField": "V:source",
-        "rdfs:comment": "The unordered list of outgoing relations with this sourcerable\n(but possibly absent) node as their source (note that sourcerable and\nsource are completely separate concepts here).",
-        "rdfs:label": [
-          "$V.outRelations"
-        ]
-      },
-      "target": {
-        "@type": "VState:EventLoggedField",
-        "rdfs:subPropertyOf": "rdf:object",
-        "rdfs:domain": "V:Relation",
-        "rdfs:range": "V:SourceredNode",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "VState:coupledToField": "V:inRelations",
-        "rdfs:comment": "The target node of this relation.",
-        "rdfs:label": [
-          "$V.target"
-        ]
-      },
-      "inRelations": {
-        "@type": "VState:CoupledField",
-        "rdfs:subPropertyOf": "V:nodes",
-        "rdfs:domain": "V:SourcerableNode",
-        "rdfs:range": "rdfs:List",
-        "VState:coupledToField": "V:target",
-        "rdfs:comment": "The unordered list of incoming relations with this sourcerable\n(but possibly absent) node as their target.",
-        "rdfs:label": [
-          "$V.inRelations"
-        ]
-      },
-      "pairedSource": {
-        "@type": "VState:EventLoggedField",
-        "rdfs:subPropertyOf": "V:source",
-        "rdfs:domain": "V:Relation",
-        "rdfs:range": "V:SourceredNode",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "VState:coupledToField": "V:pairedOutRelations",
-        "rdfs:comment": "The paired source node of this relation (paired denotes that the\ncoupled field 'pairedOutRelations' is an event logged field).",
-        "rdfs:label": [
-          "$V.pairedSource"
-        ]
-      },
-      "pairedOutRelations": {
-        "@type": "VState:EventLoggedField",
-        "rdfs:subPropertyOf": "V:outgoingRelations",
-        "rdfs:domain": "V:SourceredNode",
-        "rdfs:range": "rdfs:List",
-        "VState:coupledToField": "V:pairedSource",
-        "rdfs:comment": "The ordered list of outgoing relations paired to this sourcered node.",
-        "rdfs:label": [
-          "$V.pairedOutRelations"
-        ]
-      },
-      "pairedTarget": {
-        "@type": "VState:EventLoggedField",
-        "rdfs:subPropertyOf": "V:target",
-        "rdfs:domain": "V:Relation",
-        "rdfs:range": "V:SourceredNode",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "VState:coupledToField": "V:pairedInRelations",
-        "rdfs:comment": "The paired target node of this relation (the coupled field\n'pairedInRelations' is an event logged field).",
-        "rdfs:label": [
-          "$V.pairedTarget"
-        ]
-      },
-      "pairedInRelations": {
-        "@type": "VState:EventLoggedField",
-        "rdfs:subPropertyOf": "V:incomingRelations",
-        "rdfs:domain": "V:SourceredNode",
-        "rdfs:range": "rdfs:List",
-        "VState:coupledToField": "V:pairedTarget",
-        "rdfs:comment": "The ordered list of incoming relations paired to this sourcered node.",
-        "rdfs:label": [
-          "$V.pairedInRelations"
-        ]
-      },
-      "connectedSource": {
-        "@type": "VState:EventLoggedField",
-        "rdfs:subPropertyOf": [
-          "V:connector",
-          "V:pairedSource"
-        ],
-        "rdfs:domain": "V:Relation",
-        "rdfs:range": "V:SourceredNode",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "VState:isOwnedBy": true,
-        "VState:coupledToField": "V:connectedOutRelations",
-        "rdfs:comment": "The source and also the connector node of this relation.",
-        "rdfs:label": [
-          "$V.connectedSource"
-        ]
-      },
-      "connectedOutRelations": {
-        "@type": "VState:EventLoggedField",
-        "rdfs:subPropertyOf": [
-          "V:connectedRelations",
-          "V:pairedOutRelations"
-        ],
-        "rdfs:domain": "V:SourceredNode",
-        "rdfs:range": "rdfs:List",
-        "VState:isOwnerOf": true,
-        "VState:coupledToField": "V:connectedSource",
-        "rdfs:comment": "The ordered list of outgoing relations contained in (and owned by)\nthis sourcered node.",
-        "rdfs:label": [
-          "$V.connectedOutRelations"
-        ]
-      },
-      "connectedTarget": {
-        "@type": "VState:EventLoggedField",
-        "rdfs:subPropertyOf": [
-          "V:connector",
-          "V:pairedTarget"
-        ],
-        "rdfs:domain": "V:Relation",
-        "rdfs:range": "V:SourceredNode",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "VState:isOwnedBy": true,
-        "VState:coupledToField": "V:connectedInRelations",
-        "rdfs:comment": "The target and also the connector node of this relation.",
-        "rdfs:label": [
-          "$V.connectedTarget"
-        ]
-      },
-      "connectedInRelations": {
-        "@type": "VState:EventLoggedField",
-        "rdfs:subPropertyOf": [
-          "V:connectedRelations",
-          "V:pairedInRelations"
-        ],
-        "rdfs:domain": "V:SourceredNode",
-        "rdfs:range": "rdfs:List",
-        "VState:isOwnerOf": true,
-        "VState:coupledToField": "V:connectedTarget",
-        "rdfs:comment": "The ordered list of incoming relations contained in (and owned by)\nthis sourcered node.",
-        "rdfs:label": [
-          "$V.connectedInRelations"
-        ]
-      },
-      "relations": {
-        "@type": "VState:AliasField",
-        "VRevdoc:deprecatedInFavorOf": "V:connectedRelations",
-        "VState:aliasOf": "V:connectedRelations",
-        "rdfs:subPropertyOf": "V:connectedRelations",
-        "rdfs:domain": "V:SourceredNode",
-        "rdfs:range": "rdfs:List",
-        "VState:isOwnerOf": true,
-        "VState:coupledToField": "V:connector",
-        "rdfs:comment": "A deprecation of V:connectedRelations; the ordered list of\nrelations contained within this sourcered node when seen as a graph.\nDo note that the semantics have changed: connectedRelations can now\nalso contain relations which have this sourcered node as their the\ntarget (instead of source) or as neither source nor target.\nThe set of just outgoing relations is 'outgoingRelations' and the set\nof owned outgoing relations is 'connectedOutRelations'.",
-        "rdfs:label": [
-          "$V.relations"
-        ]
-      },
-      "outgoingRelations": {
-        "@type": "VState:AliasField",
-        "VRevdoc:deprecatedInFavorOf": "V:outRelations",
-        "VState:aliasOf": "V:outRelations",
-        "rdfs:subPropertyOf": "V:outRelations",
-        "rdfs:domain": "V:SourcerableNode",
-        "rdfs:range": "rdfs:List",
-        "VState:coupledToField": "V:source",
-        "rdfs:comment": "The unordered list of outgoing relations with this sourcerable\n(but possibly absent) node as their source (note that sourcerable and\nsource are completely separate concepts here).",
-        "rdfs:label": [
-          "$V.outgoingRelations"
-        ]
-      },
-      "incomingRelations": {
-        "@type": "VState:AliasField",
-        "VRevdoc:deprecatedInFavorOf": "V:inRelations",
-        "VState:aliasOf": "V:inRelations",
-        "rdfs:subPropertyOf": "V:inRelations",
-        "rdfs:domain": "V:SourcerableNode",
-        "rdfs:range": "rdfs:List",
-        "VState:coupledToField": "V:target",
-        "rdfs:comment": "The unordered list of incoming relations with this sourcerable\n(but possibly absent) node as their target.",
-        "rdfs:label": [
-          "$V.incomingRelations"
-        ]
       }
     },
     "context": {
@@ -2852,6 +2873,10 @@
       },
       "V:Chronicle.acquireConnection": {
         "@id": "#Chronicle.acquireConnection",
+        "@type": "@id"
+      },
+      "V:Chronicle.sourcifyChronicle": {
+        "@id": "#Chronicle.sourcifyChronicle",
         "@type": "@id"
       },
       "V:immediateContent": {
@@ -3022,105 +3047,6 @@
         "@id": "#getHostGlobal",
         "@type": "@id"
       },
-      "V:vrid": {
-        "@id": "#vrid",
-        "@container": "@list",
-        "@type": "@id"
-      },
-      "V:prototype": {
-        "@id": "#prototype",
-        "@type": "@id"
-      },
-      "V:derivations": {
-        "@id": "#derivations",
-        "@type": "@id"
-      },
-      "V:ownFields": {
-        "@id": "#ownFields",
-        "@type": "@id"
-      },
-      "V:inheritors": {
-        "@id": "#inheritors",
-        "@type": "@id"
-      },
-      "V:instances": {
-        "@id": "#instances",
-        "@type": "@id"
-      },
-      "V:ghostPrototype": {
-        "@id": "#ghostPrototype",
-        "@type": "@id"
-      },
-      "V:ghosts": {
-        "@id": "#ghosts",
-        "@type": "@id"
-      },
-      "V:materializedGhosts": {
-        "@id": "#materializedGhosts",
-        "@type": "@id"
-      },
-      "V:unnamedCouplings": {
-        "@id": "#unnamedCouplings",
-        "@type": "@id"
-      },
-      "V:ghostHost": {
-        "@id": "#ghostHost",
-        "@type": "@id"
-      },
-      "V:ghostOwner": {
-        "@id": "#ghostOwner",
-        "@type": "@id"
-      },
-      "V:ghostOwnlings": {
-        "@id": "#ghostOwnlings",
-        "@type": "@id"
-      },
-      "V:contentReferrers": {
-        "@id": "#contentReferrers",
-        "@type": "@id"
-      },
-      "V:owner": {
-        "@id": "#owner",
-        "@type": "@id"
-      },
-      "V:name": {
-        "@id": "#name",
-        "@type": "@id"
-      },
-      "V:inheritancePrototype": {
-        "@id": "#inheritancePrototype",
-        "@type": "@id"
-      },
-      "V:instancePrototype": {
-        "@id": "#instancePrototype",
-        "@type": "@id"
-      },
-      "V:ownlings": {
-        "@id": "#ownlings",
-        "@container": "@list",
-        "@type": "@id"
-      },
-      "V:unnamedOwnlings": {
-        "@id": "#unnamedOwnlings",
-        "@type": "@id"
-      },
-      "V:prototypeAlias": {
-        "@id": "#prototypeAlias",
-        "@type": "@id"
-      },
-      "V:scope": {
-        "@id": "#scope",
-        "@type": "@id"
-      },
-      "V:value": {
-        "@id": "#value",
-        "@type": "@id"
-      },
-      "V:properties": {
-        "@id": "#properties",
-        "@container": "@list",
-        "@type": "@id"
-      },
       "V:chronicleRoot": {
         "@id": "#chronicleRoot",
         "@type": "@id"
@@ -3244,6 +3170,105 @@
       },
       "V:incomingRelations": {
         "@id": "#incomingRelations",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "V:vrid": {
+        "@id": "#vrid",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "V:prototype": {
+        "@id": "#prototype",
+        "@type": "@id"
+      },
+      "V:derivations": {
+        "@id": "#derivations",
+        "@type": "@id"
+      },
+      "V:ownFields": {
+        "@id": "#ownFields",
+        "@type": "@id"
+      },
+      "V:inheritors": {
+        "@id": "#inheritors",
+        "@type": "@id"
+      },
+      "V:instances": {
+        "@id": "#instances",
+        "@type": "@id"
+      },
+      "V:ghostPrototype": {
+        "@id": "#ghostPrototype",
+        "@type": "@id"
+      },
+      "V:ghosts": {
+        "@id": "#ghosts",
+        "@type": "@id"
+      },
+      "V:materializedGhosts": {
+        "@id": "#materializedGhosts",
+        "@type": "@id"
+      },
+      "V:unnamedCouplings": {
+        "@id": "#unnamedCouplings",
+        "@type": "@id"
+      },
+      "V:ghostHost": {
+        "@id": "#ghostHost",
+        "@type": "@id"
+      },
+      "V:ghostOwner": {
+        "@id": "#ghostOwner",
+        "@type": "@id"
+      },
+      "V:ghostOwnlings": {
+        "@id": "#ghostOwnlings",
+        "@type": "@id"
+      },
+      "V:contentReferrers": {
+        "@id": "#contentReferrers",
+        "@type": "@id"
+      },
+      "V:owner": {
+        "@id": "#owner",
+        "@type": "@id"
+      },
+      "V:name": {
+        "@id": "#name",
+        "@type": "@id"
+      },
+      "V:inheritancePrototype": {
+        "@id": "#inheritancePrototype",
+        "@type": "@id"
+      },
+      "V:instancePrototype": {
+        "@id": "#instancePrototype",
+        "@type": "@id"
+      },
+      "V:ownlings": {
+        "@id": "#ownlings",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "V:unnamedOwnlings": {
+        "@id": "#unnamedOwnlings",
+        "@type": "@id"
+      },
+      "V:prototypeAlias": {
+        "@id": "#prototypeAlias",
+        "@type": "@id"
+      },
+      "V:scope": {
+        "@id": "#scope",
+        "@type": "@id"
+      },
+      "V:value": {
+        "@id": "#value",
+        "@type": "@id"
+      },
+      "V:properties": {
+        "@id": "#properties",
         "@container": "@list",
         "@type": "@id"
       }
@@ -3615,14 +3640,14 @@
             "Relation",
             "Resource",
             "Scope",
-            "Absent",
-            "Extant",
-            "NonExistent",
-            "ScopeProperty",
             "SourcerableNode",
             "UnsourceredNode",
             "NonExistentNode",
-            "SourceredNode"
+            "SourceredNode",
+            "Absent",
+            "Extant",
+            "NonExistent",
+            "ScopeProperty"
           ]
         }
       ]
@@ -4028,6 +4053,7 @@
             "Chronicle.tryConnection",
             "Chronicle.acquirePartitionConnection",
             "Chronicle.acquireConnection",
+            "Chronicle.sourcifyChronicle",
             "Describable",
             "DestroyedScriptResource",
             "Discoverable",
@@ -4078,42 +4104,6 @@
             "getHostGlobal",
             "TransientFields",
             "TransientScriptFields",
-            "id",
-            "rawId",
-            "vrid",
-            "typeName",
-            "prototype",
-            "derivations",
-            "ownFields",
-            "inheritors",
-            "instances",
-            "ghostPrototype",
-            "ghosts",
-            "materializedGhosts",
-            "unnamedCouplings",
-            "ghostHost",
-            "ghostOwner",
-            "ghostOwnlings",
-            "hashAlgorithm",
-            "contentHash",
-            "contentLength",
-            "contentReferrers",
-            "owner",
-            "name",
-            "inheritancePrototype",
-            "instancePrototype",
-            "ownlings",
-            "unnamedOwnlings",
-            "isFrozen",
-            "nameAlias",
-            "prototypeAlias",
-            "scope",
-            "value",
-            "twinspace",
-            "subject",
-            "predicate",
-            "object",
-            "properties",
             "chronicleRoot",
             "chronicleURI",
             "url",
@@ -4149,7 +4139,43 @@
             "connectedInRelations",
             "relations",
             "outgoingRelations",
-            "incomingRelations"
+            "incomingRelations",
+            "id",
+            "rawId",
+            "vrid",
+            "typeName",
+            "prototype",
+            "derivations",
+            "ownFields",
+            "inheritors",
+            "instances",
+            "ghostPrototype",
+            "ghosts",
+            "materializedGhosts",
+            "unnamedCouplings",
+            "ghostHost",
+            "ghostOwner",
+            "ghostOwnlings",
+            "hashAlgorithm",
+            "contentHash",
+            "contentLength",
+            "contentReferrers",
+            "owner",
+            "name",
+            "inheritancePrototype",
+            "instancePrototype",
+            "ownlings",
+            "unnamedOwnlings",
+            "isFrozen",
+            "nameAlias",
+            "prototypeAlias",
+            "scope",
+            "value",
+            "twinspace",
+            "subject",
+            "predicate",
+            "object",
+            "properties"
           ]
         }
       ]

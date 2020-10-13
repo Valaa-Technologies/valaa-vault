@@ -153,11 +153,11 @@ a prefix.</p>
 </th>
       </thead>
       <tbody>
-        <tr id="issue" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#issue" class="vdoc type-vdoc-reference">#issue</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">On:issue</span>
+        <tr id="proclaim" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#proclaim" class="vdoc type-vdoc-reference">#proclaim</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">On:proclaim={<em>handler</em>}</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        When used as a <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
@@ -166,32 +166,46 @@ a prefix.</p>
 </span></a> attribute
     </span>
 </span> <span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">addEventListener(&#x22;issue&#x22;, ...)</span>
+    <span class="vdoc type-vdoc-node">[$On.proclaim]: <em>handler</em>,</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        When used on Valoscript event target
+        When set as an element <a href="https://valospace.org/inspire/Lens/0#context" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:context</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        Attribute slot for assigning values into the context object of the component.
+    </span>
+</span></a> attribute property
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">addEventListener(&#x22;proclaim&#x22;, <em>handler</em>)</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When called on a Valoscript event target
     </span>
 </span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Transactor</em> <em>FabricEvent</em></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at a transactor when its transaction commit has been issued and
-its command is about to be fast-forward professed into a prophecy as
-part of the current recital.</span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at a transactor when its commit has been requested but before
+its command has been composed as part of the canonical recital.</span>
 </td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
-</td><td colspan=2><span class="vdoc type-vdoc-node">      <p>This event is fired only during the initial commit and even then only
-if the command does not need to be replayed (otherwise &#x27;replay&#x27; is
-fired at the transaction ).</p>
-      <p>If the event defaultAction is canceled or an exception is thrown then
-the transaction is immediately rejected without recital and the fabric
-commit will throw an exception.</p>
+</td><td colspan=2><span class="vdoc type-vdoc-node">      <p>This event is fired only during the initial commit. If the transactor
+recital is a direct continuation of the canonical recital then the
+internal transactor recital is made into a canonical recital. Otherwise
+a &#x27;compose&#x27; event is fired at the transactor and the command will be
+re-composed. In both cases the command is then professed into a
+prophecy and a &#x27;profess&#x27; event is then fired at the transactor.</p>
+      <p>If the handler cancels the event defaultAction or throws an exception
+then the transaction is immediately rejected. The command will not be
+professed and the fabric commit will throw an exception instead.</p>
 </span>
 </td></tr>
-        <tr id="replay" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#replay" class="vdoc type-vdoc-reference">#replay</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">On:replay</span>
+        <tr id="compose" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#compose" class="vdoc type-vdoc-reference">#compose</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">On:compose={<em>handler</em>}</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        When used as a <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
@@ -200,35 +214,63 @@ commit will throw an exception.</p>
 </span></a> attribute
     </span>
 </span> <span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">addEventListener(&#x22;replay&#x22;, ...)</span>
+    <span class="vdoc type-vdoc-node">[$On.compose]: <em>handler</em>,</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        When used on Valoscript event target
+        When set as an element <a href="https://valospace.org/inspire/Lens/0#context" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:context</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        Attribute slot for assigning values into the context object of the component.
+    </span>
+</span></a> attribute property
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">addEventListener(&#x22;compose&#x22;, <em>handler</em>)</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When called on a Valoscript event target
     </span>
 </span></h3></td></tr>
         <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Transactor</em> <em>FabricEvent</em></td></tr>
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at a transactor when the history of a prophecy has been revised
-and the command is about to be replayed and then professed into a
-prophecy as part of the current recital.</span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at a transactor when its command is about to be (re-)composed
+into a prophecy that is going to be made a part of the canonical
+recital.</span>
 </td></tr>
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
-</td><td colspan=2><span class="vdoc type-vdoc-node">      <p>This event can be fired during the initial chronicle commit (if it
-can&#x27;t be fast-forwarded) but also during later revision and reformation
-replays.</p>
-      <p>If the event defaultAction is canceled or an exception is thrown then
-the replay recital of this command is rejected. If this event was fired
-as part of the initial transaction commit then this rejection behaves
-identically to that of a rejected &#x27;issue&#x27; event. Otherwise the
-rejection will remove the prophecy from the current recital and fire
+</td><td colspan=2><span class="vdoc type-vdoc-node">      <p>This event may be fired during the initial commit if the transactor
+is not a direct continuation of the canonical recital but will always
+be fired during later revision, reformation and refabrication
+recompositions.</p>
+      <p>The composition performs three main functions:
+    <ol>
+      <li><em>Universalization</em>: splits the transactor command into
+  chronicle-specific universal sub-commands</li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph"><em>Reduction</em>: appends the sub-commands on top of the current
+  canonical recital and updates the corresponding resource state
+  </div>
+</p></div></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph"><em>Validation</em>: evaluates frame pre/postconditions and the
+  structural, semantic and behavior validity of the sub-commands
+  </div>
+</p></div></li>
+    </ol>
+If the handler cancels the event defaultAction or throws an exception
+then the composition of the command is rejected. If this event was
+fired as part of the initial commit then this rejection behaves
+identically to that of a rejected &#x27;proclaim&#x27; event. Otherwise the
+rejection removes the prophecy from the canonical recital and fires
 a &#x27;purge&#x27; event at the transactor.</p>
 </span>
 </td></tr>
         <tr id="profess" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#profess" class="vdoc type-vdoc-reference">#profess</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">On:profess</span>
+    <span class="vdoc type-vdoc-node">On:profess={<em>handler</em>}</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        When used as a <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
@@ -237,30 +279,49 @@ a &#x27;purge&#x27; event at the transactor.</p>
 </span></a> attribute
     </span>
 </span> <span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">addEventListener(&#x22;profess&#x22;, ...)</span>
+    <span class="vdoc type-vdoc-node">[$On.profess]: <em>handler</em>,</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        When used on Valoscript event target
+        When set as an element <a href="https://valospace.org/inspire/Lens/0#context" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:context</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        Attribute slot for assigning values into the context object of the component.
+    </span>
+</span></a> attribute property
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">addEventListener(&#x22;profess&#x22;, <em>handler</em>)</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When called on a Valoscript event target
     </span>
 </span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Transactor</em> <em>FabricEvent</em></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at a transactor when its command has been successfully
-(re-)professed into a prophecy as part of the current recital.</span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at a transactor when its command prophecy is about to be
+(re-)professed into a canonical prophecy as part of the canonical
+recital.</span>
 </td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">      <p>This event is fired both during the initial recital as well as during
-later revision and reformation recitals.</p>
-      <p>If the event defaultAction is canceled or an exception is thrown then
-the rejection will remove the prophecy from the current recital and
-fire a &#x27;purge&#x27; at the transactor.</p>
+later revision, reformation and refabrication recitals. This event is
+immediately followed by the propagation of the new canonical recital to
+all downstream listeners.</p>
+      <p>After profess the prophecy is in-flight and out of control of the
+transactor until a &#x27;truth&#x27;, &#x27;schism&#x27; or &#x27;purge&#x27; event is fired. &#x22;The
+ball is in the authorities&#x27; court&#x22; so to speak.</p>
+      <p>If the handler cancels the event defaultAction or throws an exception
+then the prophecy will not be (re-)professed as part of the canonical
+recital. If the prophecy was already part of the canonical recital is
+purged and a &#x27;purge&#x27; event is fired at the transactor.</p>
 </span>
 </td></tr>
         <tr id="record" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#record" class="vdoc type-vdoc-reference">#record</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">On:record</span>
+    <span class="vdoc type-vdoc-node">On:record={<em>handler</em>}</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        When used as a <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
@@ -269,22 +330,44 @@ fire a &#x27;purge&#x27; at the transactor.</p>
 </span></a> attribute
     </span>
 </span> <span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">addEventListener(&#x22;record&#x22;, ...)</span>
+    <span class="vdoc type-vdoc-node">[$On.record]: <em>handler</em>,</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        When used on Valoscript event target
+        When set as an element <a href="https://valospace.org/inspire/Lens/0#context" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:context</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        Attribute slot for assigning values into the context object of the component.
+    </span>
+</span></a> attribute property
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">addEventListener(&#x22;record&#x22;, <em>handler</em>)</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When called on a Valoscript event target
     </span>
 </span></h3></td></tr>
         <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Transactor</em> <em>FabricEvent</em></td></tr>
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at a transactor when a copy of its command has been written to a
-persistent storage.</span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at a transactor when a copy of one of its canonical prophecy
+chronicle sub-commands has been written to a persistent storage.</span>
+</td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">      <p>After this the individual sub-command will survive an execution
+environment reset and become truths after it has been restarted. This
+can happen for example if the a web app was used in offline mode and
+its tab was closed but which was later reopened when online.</p>
+      <p>Note that because the transactor itself nor any of its handlers will
+not survive a refresh the handlers cannot be relied on alone to execute
+semantic life cycles to completion.</p>
+</span>
 </td></tr>
         <tr id="truth" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#truth" class="vdoc type-vdoc-reference">#truth</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">On:truth</span>
+    <span class="vdoc type-vdoc-node">On:truth={<em>handler</em>}</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        When used as a <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
@@ -293,21 +376,41 @@ persistent storage.</span>
 </span></a> attribute
     </span>
 </span> <span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">addEventListener(&#x22;truth&#x22;, ...)</span>
+    <span class="vdoc type-vdoc-node">[$On.truth]: <em>handler</em>,</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        When used on Valoscript event target
+        When set as an element <a href="https://valospace.org/inspire/Lens/0#context" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:context</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        Attribute slot for assigning values into the context object of the component.
+    </span>
+</span></a> attribute property
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">addEventListener(&#x22;truth&#x22;, <em>handler</em>)</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When called on a Valoscript event target
     </span>
 </span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Transactor</em> <em>FabricEvent</em></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at a transactor when its command has been authorized as truth.</span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at a transactor when its canonical prophecy has been authorized
+as truth by of its chronicle sub-command authorities.</span>
+</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">      <p>Note that because the transactor itself nor any of its &#x27;truth&#x27; event
+handlers will not survive an execution environment refresh the handler
+itself cannot be relied on alone to execute semantic life cycles to
+completion.</p>
+</span>
 </td></tr>
         <tr id="schism" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#schism" class="vdoc type-vdoc-reference">#schism</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">On:schism</span>
+    <span class="vdoc type-vdoc-node">On:schism={<em>handler</em>}</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        When used as a <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
@@ -316,23 +419,74 @@ persistent storage.</span>
 </span></a> attribute
     </span>
 </span> <span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">addEventListener(&#x22;schism&#x22;, ...)</span>
+    <span class="vdoc type-vdoc-node">[$On.schism]: <em>handler</em>,</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        When used on Valoscript event target
+        When set as an element <a href="https://valospace.org/inspire/Lens/0#context" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:context</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        Attribute slot for assigning values into the context object of the component.
+    </span>
+</span></a> attribute property
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">addEventListener(&#x22;schism&#x22;, <em>handler</em>)</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When called on a Valoscript event target
     </span>
 </span></h3></td></tr>
         <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Transactor</em> <em>FabricEvent</em></td></tr>
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at a transactor when a prophecy that took part in a revision is
-deemed to be schismatic and which thus is subsequently going to be
-subject to a reformation.</span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at a transactor when its currently canonical prophecy is
+considered </span>
 </td></tr>
-        <tr id="purge" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#purge" class="vdoc type-vdoc-reference">#purge</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">On:purge</span>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">      <p><em>schismatic</em> and going to undergo revisioning.</p>
+      <p>A prophecy becomes <em>schismatic</em> as a result of a <em>schism</em> on the event flow of one its chronicle sub-commands
+and thus subject to removal from the canonical recital.</p>
+      <p>The purpose of the revisioning is to determine whether the sub-command
+might yet be confirmed as truth by its authority and thus should be
+retained as part of the canonical recital. If not, the prophecy is
+removed from the canonical recital and a &#x27;reform&#x27; or &#x27;purge&#x27; event will
+be fired at the transactor depending on the resolution.</p>
+      <p>Schisms have two primary categories, each with a different reason
+on why the command might be still in-flight:
+    <ol>
+      <li>Schisms caused by reformations and purges in the chronicle history
+  might allow for a sub-command to nevertheless remain in-flight if it
+  is configured to be reorderable by the upstream</li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph">Schisms caused by upstream delivery errors might allow for the
+  sub-command to remain in-flight if the error is only an auxiliary
+  error in the immediate upstream command delivery tracking. The actual
+  command might still reach the target and be later be received and
+  confirmed as a truth via the primary event downstream.
+  </div>
+</p></div></li>
+    </ol>
+</p>
+      <p>Ordinarily the schism revisioning is performed internally. A handler
+may inspect the schism conditions and decide to override this process
+by setting <em>isRevisable</em> to desired value and then canceling
+the default action. Otherwise the default policy associated with the
+specific schism is followed.</p>
+      <p>Note: The purpose of &#x27;schism&#x27; is to avoid having to wait for upstream
+roundtrips on each step of the event flow while ensuring that a command
+is sent once and only once.Semantically conservative resolutions are &#x22;accept&#x22; and &#x22;purge&#x22; as they
+don&#x27;t result in reformation and its possibly duplicate re-delivery of
+the sub-commands. Purge immediately delegates the ball back to
+valospace application logic whereas accepting the prophecy as canonical
+will later either be confirmed as truths or reformed by a conflicting
+truths coming downstream.</p>
+</span>
+</td></tr>
+        <tr id="reform" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#reform" class="vdoc type-vdoc-reference">#reform</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">On:reform={<em>handler</em>}</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        When used as a <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
@@ -341,22 +495,68 @@ subject to a reformation.</span>
 </span></a> attribute
     </span>
 </span> <span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">addEventListener(&#x22;purge&#x22;, ...)</span>
+    <span class="vdoc type-vdoc-node">[$On.reform]: <em>handler</em>,</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        When used on Valoscript event target
+        When set as an element <a href="https://valospace.org/inspire/Lens/0#context" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:context</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        Attribute slot for assigning values into the context object of the component.
+    </span>
+</span></a> attribute property
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">addEventListener(&#x22;reform&#x22;, <em>handler</em>)</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When called on a Valoscript event target
     </span>
 </span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Transactor</em> <em>FabricEvent</em></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at transactor when a prophecy has been purged from the recital
-as a result of a rejected revision recital or a rejected reformation.</span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at a transactor when a <em>schismatic</em> prophecy cannot
+be revised and has been temporarily removed from the canonical recital.
+The prophecy is about to be <em>reformed</em> ie. about to have all
+of its chronicle sub-commands be recomposed and redelivered to their
+upstream authorities.</span>
 </td></tr>
-        <tr id="error" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#error" class="vdoc type-vdoc-reference">#error</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">On:error</span>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">      <p>This event can result from several different conditions:
+    <ol>
+      <li>A chronicle sub-command recomposition fails due to a structural or
+  behavioral inconsistency between the old and the new recital history
+  - authorities cannot reorder such commands.</li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph">A sub-command upstream delivery responds with an error condition with
+  isReformable set to true
+  </div>
+</p></div></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph">Others (TODO: formalize).
+  </div>
+</p></div></li>
+    </ol>
+</p>
+      <p>Irrespective of cause of the reformation the transactor event handlers
+can now once again make decisions on the transactor command life cycle.
+&#x22;The ball is back on transactor&#x27;s court&#x22;.</p>
+      <p>If the handler cancels the event defaultAction or throws an exception
+then the prophecy is excluded from the reformation and a &#x27;purge&#x27; event
+is fired at its transactor.</p>
+      <p>Calling <em>reformAfterAll</em> with one or more conditions (which
+might contain promises) will delay the prophecy reformation until the
+promise resolves. If after resolution one of the conditions is strictly
+equal to false or if any condition throws an error the reform is
+skipped. This results in a purge semantically equally to throwing the
+error from the handler.</p>
+</span>
+</td></tr>
+        <tr id="purge" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#purge" class="vdoc type-vdoc-reference">#purge</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">On:purge={<em>handler</em>}</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        When used as a <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
@@ -365,22 +565,78 @@ as a result of a rejected revision recital or a rejected reformation.</span>
 </span></a> attribute
     </span>
 </span> <span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">addEventListener(&#x22;error&#x22;, ...)</span>
+    <span class="vdoc type-vdoc-node">[$On.purge]: <em>handler</em>,</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        When used on Valoscript event target
+        When set as an element <a href="https://valospace.org/inspire/Lens/0#context" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:context</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        Attribute slot for assigning values into the context object of the component.
+    </span>
+</span></a> attribute property
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">addEventListener(&#x22;purge&#x22;, <em>handler</em>)</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When called on a Valoscript event target
     </span>
 </span></h3></td></tr>
-        <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Fabricator</em> <em>Failure</em> <em>FabricEvent</em></td></tr>
+        <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Transactor</em> <em>FabricEvent</em></td></tr>
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at a transactor when its command has been permanently rejected
+from the canonical recital without further reformation or refabrication
+attempts.</span>
+</td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">      <p>This event can result from several different conditions. Typical
+reasons include unrecoverable rejection by one of the prophecy
+chronicle sub-command authorities or a rejection during prophecy
+reformation.</p>
+</span>
+</td></tr>
+        <tr id="error" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#error" class="vdoc type-vdoc-reference">#error</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">On:error={<em>handler</em>}</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When used as a <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:Element</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of UI resources which represent any user interface element.
+    </span>
+</span></a> attribute
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">[$On.error]: <em>handler</em>,</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When set as an element <a href="https://valospace.org/inspire/Lens/0#context" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:context</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        Attribute slot for assigning values into the context object of the component.
+    </span>
+</span></a> attribute property
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">addEventListener(&#x22;error&#x22;, <em>handler</em>)</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When called on a Valoscript event target
+    </span>
+</span></h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Fabricator</em> <em>Failure</em> <em>FabricEvent</em></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
 </td><td colspan=2><span class="vdoc type-vdoc-node">Fired at a fabricator frame when a script, fabrication or behavior
 error occurs inside the fabrication context.</span>
 </td></tr>
-        <tr id="precondition" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#precondition" class="vdoc type-vdoc-reference">#precondition</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">On:precondition</span>
+        <tr id="precondition" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#precondition" class="vdoc type-vdoc-reference">#precondition</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">On:precondition={<em>handler</em>}</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        When used as a <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
@@ -389,65 +645,47 @@ error occurs inside the fabrication context.</span>
 </span></a> attribute
     </span>
 </span> <span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">addEventListener(&#x22;precondition&#x22;, ...)</span>
+    <span class="vdoc type-vdoc-node">[$On.precondition]: <em>handler</em>,</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        When used on Valoscript event target
+        When set as an element <a href="https://valospace.org/inspire/Lens/0#context" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:context</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        Attribute slot for assigning values into the context object of the component.
     </span>
-</span></h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Fabricator</em> <em>FabricEvent</em></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at all frame fabricators in depth-first pre-order during all
-fabrications (ie. during initial fabrication and during revision and
-reformation replays).</span>
-</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
-</td><td colspan=2><span class="vdoc type-vdoc-node">      <p>Calling event.preventDefault or throwing an exception will reject the
-computation frame.
-If the frame is rejected during the initial fabrication an exception is
-(re-)thrown within the frame and can be caught by its catch-block.</p>
-      <p>Semantics of revision and reformation refabrications are not defined
-yet.</p>
-</span>
-</td></tr>
-        <tr id="postcondition" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#postcondition" class="vdoc type-vdoc-reference">#postcondition</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">On:postcondition</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">Lens:Element</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of UI resources which represent any user interface element.
-    </span>
-</span></a> attribute
+</span></a> attribute property
     </span>
 </span> <span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">addEventListener(&#x22;postcondition&#x22;, ...)</span>
+    <span class="vdoc type-vdoc-node">addEventListener(&#x22;precondition&#x22;, <em>handler</em>)</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        When used on Valoscript event target
+        When called on a Valoscript event target
     </span>
 </span></h3></td></tr>
         <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Fabricator</em> <em>FabricEvent</em></td></tr>
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at all frame fabricators in depth-first post-order during all
-fabrications (ie. during initial, revision and reformation fabrications).</span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at all frame fabricators in a depth-first pre-order during all
+compositions (ie. during the initial fabrication, during revision and
+reformation recompositions and during a full refabrication).</span>
 </td></tr>
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
-</td><td colspan=2><span class="vdoc type-vdoc-node">      <p>Calling event.preventDefault or throwing an exception will reject the
-computation frame.
-If the frame is rejected during the initial fabrication an exception is
-(re-)thrown within the frame and can be caught by its catch-block.</p>
-      <p>Semantics of revision and reformation refabrications are not defined
-yet.</p>
+</td><td colspan=2><span class="vdoc type-vdoc-node">      <p>The handler of this event should inspect invariant preconditions of
+the execution frame.</p>
+      <p>If the handler cancels the defaultAction or throws an exception the
+computation frame is rejected. If this rejection happens during the
+initial fabrication or during a refabrication an exception is
+(re-)thrown within the frame itself.
+In other cases a frame rejection is semantically equivalent to an
+exception thrown by a handler of the immediately preceding &#x27;reform&#x27;
+event.</p>
 </span>
 </td></tr>
-        <tr id="revise" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#revise" class="vdoc type-vdoc-reference">#revise</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">On:revise</span>
+        <tr id="postcondition" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#postcondition" class="vdoc type-vdoc-reference">#postcondition</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">On:postcondition={<em>handler</em>}</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        When used as a <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
@@ -456,26 +694,47 @@ yet.</p>
 </span></a> attribute
     </span>
 </span> <span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">addEventListener(&#x22;revise&#x22;, ...)</span>
+    <span class="vdoc type-vdoc-node">[$On.postcondition]: <em>handler</em>,</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        When used on Valoscript event target
+        When set as an element <a href="https://valospace.org/inspire/Lens/0#context" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:context</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        Attribute slot for assigning values into the context object of the component.
+    </span>
+</span></a> attribute property
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">addEventListener(&#x22;postcondition&#x22;, <em>handler</em>)</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When called on a Valoscript event target
     </span>
 </span></h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Fabricator</em> <em>FabricEvent</em></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at frame fabricators during review phase of a schismatic
-prophecy, in depth-first pre-order immediately after a the
-corresponding frame precondition event.</span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at all frame fabricators in a depth-first post-order during all
+compositions (ie. during the initial fabrication, during revision and
+reformation recompositions and during a full refabrication).</span>
 </td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
-</td><td colspan=2><span class="vdoc type-vdoc-node"></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">      <p>The handler of this event should inspect invariant postconditions of
+the execution frame.</p>
+      <p>If the handler cancels the defaultAction or throws an exception the
+computation frame is rejected. If this rejection happens during the
+initial fabrication or during a refabrication an exception is
+(re-)thrown within the frame itself.
+In other cases a frame rejection is semantically equivalent to an
+exception thrown by a handler of the immediately preceding &#x27;reform&#x27;
+event.</p>
+</span>
 </td></tr>
-        <tr id="reform" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#reform" class="vdoc type-vdoc-reference">#reform</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">On:reform</span>
+        <tr id="review" class="vdoc vdoc-wide"><td colspan=3><h3> <strong><em><a href="#review" class="vdoc type-vdoc-reference">#review</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">On:review={<em>handler</em>}</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        When used as <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+        When used as a <a href="https://valospace.org/inspire/Lens/0#Element" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">Lens:Element</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
@@ -484,16 +743,44 @@ corresponding frame precondition event.</span>
 </span></a> attribute
     </span>
 </span> <span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">addEventListener(&#x22;reform&#x22;, ...)</span>
+    <span class="vdoc type-vdoc-node">[$On.review]: <em>handler</em>,</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        When used on Valoscript event target
+        When set as an element <a href="https://valospace.org/inspire/Lens/0#context" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">Lens:context</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        Attribute slot for assigning values into the context object of the component.
+    </span>
+</span></a> attribute property
+    </span>
+</span> <span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">addEventListener(&#x22;review&#x22;, <em>handler</em>)</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        When called on a Valoscript event target
     </span>
 </span></h3></td></tr>
         <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td> <em>Fabricator</em> <em>FabricEvent</em></td></tr>
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at all frame fabricators during reform phase of a schismatic
-prophecy in depth-first post-order.</span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">Fired at the fabricators of </span>
+</td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
+</td><td colspan=2><span class="vdoc type-vdoc-node">      <p><em>reformed</em> frames in a
+depth-first pre-order immediately after the corresponding frame
+precondition event.</p>
+      <p>Reformed frames arise during reformation of a schismatic prophecy.
+A frame is considered reformed if it is the innermost frame that
+directly contains modifications on a set of global primary resources
+whose modification history was affected by the reformation. Note that
+all structured sub-resources are recursively considered to be part of
+their owning global resource.</p>
+      <p>The modified resources are listed in the event property &#x3C;TODO&#x3E;.</p>
+      <p>If the handler cancels the defaultAction or throws an exception the
+reformed frame is rejected. The rejection semantics are equivalent to
+those of an exception thrown by a handler of the preceding &#x27;reform&#x27;
+event.</p>
+</span>
 </td></tr>
         <tr id="frameactive" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=3><h3> <strong><em><a href="#frameactive" class="vdoc type-vdoc-reference">#frameactive</a></em></strong>  <span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">On:frameactive</span>

@@ -1,6 +1,6 @@
 {
   "name": "@valos/sbomdoc",
-  "version": "0.35.0-rc.33",
+  "version": "0.35.0-rc.34",
   "valos": {
     "type": "vdoc-extension",
     "domain": "@valos/kernel",
@@ -15,6 +15,6 @@
   "description": "SBoMDoc - Software Bill of Materials VDoc extension",
   "main": "index.js",
   "dependencies": {
-    "@valos/vdoc": "^0.35.0-rc.33"
+    "@valos/vdoc": "^0.35.0-rc.34"
   }
 }

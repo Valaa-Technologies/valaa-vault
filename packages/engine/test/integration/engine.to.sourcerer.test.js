@@ -623,7 +623,7 @@ describe("Two paired harnesses emulating two gateways connected through event st
     const { target, instance, isActive, targetVRef } = await pairness.runValoscript(
         vRef(testRootId), `
       const newChronicle = new Entity({ authorityURI: "valaa-test:" });
-      const relation = new Relation({ owner: newChronicle, target: valos.vrefer(newVRef) });
+      const relation = new Relation({ owner: newChronicle, target: valos.refer(newVRef) });
       const instance = new Entity({
         owner: newChronicle, instancePrototype: relation.$V.target,
         // properties: { over: "ridden" },

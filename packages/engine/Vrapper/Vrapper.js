@@ -611,6 +611,22 @@ export default class Vrapper extends Cog {
     return this.getName();
   }
 
+  static _fickleIds = Object.create(null);
+
+  static getFickleResource (fickleId: string) {
+    return Vrapper._fickleIds[fickleId];
+  }
+
+  getFickleId (minimumLength = 4) {
+    const candidate = this.getRawId().slice(7, 7 + minimumLength);
+    const resource = Vrapper._fickleIds[candidate];
+    if (resource === undefined) {
+      Vrapper._fickleIds[candidate] = this;
+      return candidate;
+    }
+    return (resource === this) ? candidate : this.getFickleId(minimumLength + 1);
+  }
+
   getTypeName (options: any) {
     if (this.isResource() && (!options || (options.require !== false))) this.requireActive(options);
     return this._type.name;

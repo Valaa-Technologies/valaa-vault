@@ -6,6 +6,7 @@ import { denoteValOSCallable, denoteDeprecatedValOSCallable } from "~/raem/VALK"
 import { valoscriptInterfacePrototype, ValoscriptPrimitiveKind } from "~/script";
 import { toVAKONTag } from "~/script/VALSK";
 import VALEK from "~/engine/VALEK";
+import Vrapper from "~/engine/Vrapper";
 
 import type { Discourse } from "~/sourcerer/api/types";
 
@@ -40,27 +41,60 @@ function or a resource.`,
     return undefined;
   });
 
-  valos.vrefer = denoteValOSCallable(
-`Returns a valos resource locator built from the given *authorityURI*,
-*chronicleVRID* and *resourceVRID* parts.`
-  )(function vrefer (authorityURI_, chronicleVRID_, resourceVRID_) {
-    let resourceVRID, chronicleURI;
-    if (resourceVRID_ !== undefined) {
-      resourceVRID = resourceVRID_;
-      chronicleURI = `${authorityURI_}?id=${chronicleVRID_}`;
-    } else if (chronicleVRID_ !== undefined) {
-      resourceVRID = chronicleVRID_;
-      chronicleURI = authorityURI_;
-    } else {
-      ([chronicleURI, resourceVRID] = authorityURI_.split("#"));
-      if (resourceVRID === undefined) {
-        throw new Error("vref fragment resource VRID part missing");
-      }
+  valos.refer = denoteValOSCallable([
+`Returns a valos resource referred to by the given *resourcePart*
+and the optional *chroniclePart* and *authorityURL* parts.`,
+`This call has *locating* and *non-locating* variants depending on
+whether the parts contain the chronicle URL information.`,
+null,
+`If only a valos resource id string is given (ie. no '#'-separator) as
+the *resourcePart* then the reference doesn't contain a chronicle URL
+and is non-locating. If the resource is not already locally known then
+a non-locating resource cannot activated and is only useful for
+identity operations.
+If the resource is locally known it is returned and is possibly already
+active. Even if the resource is absent it is activateable because the
+known chronicle URI allows the chronicle to be sourcered.`,
+null,
+`All other variants contain the chronicle URL and return either a fully
+active or absent but locateable resource.`,
+null,
+`If all three parts are provided then *resourcePart* must be the vrid
+of the referred resource, *chroniclePart* must be the vgrid of the
+chronicle root resource and *authorityURL* must be the chronicle
+authority URL without the chronicle infix.`,
+null,
+`If no *authorityURL* is given then *chroniclePart* must be a
+fully formed chronicle URL (ie. contains the authority URL, the
+chronicle infix and the chronicle vgrid).`,
+null,
+`If no *chroniclePart* is given then *resourcePart* must be a full
+resource URL (ie. contains the chronicle URL as defined above and the
+'#' fragment separator followed by the resource vrid).`
+  ])(function refer (resourcePart, chroniclePart, authorityURI) {
+    let resourceVRID = resourcePart, chronicleURI;
+    if (chroniclePart !== undefined) {
+      chronicleURI = (authorityURI !== undefined)
+          ? `${authorityURI}?id=${chroniclePart}`
+          : chroniclePart;
+    } else if (resourcePart.indexOf("#") !== -1) {
+      ([chronicleURI, resourceVRID] = resourcePart.split("#"));
     }
     resourceVRID = resourceVRID.split(";")[0];
     return this.__callerValker__.run(null, VALEK.fromObject(resourceVRID).nullable())
-        || vRef(resourceVRID, undefined, undefined, chronicleURI)
-            .setAbsent();
+        || (chronicleURI
+            && vRef(resourceVRID, undefined, undefined, chronicleURI)
+                .setAbsent())
+        || null;
+  });
+
+  valos.fickleRefer = denoteValOSCallable([
+`Returns a valos resource referred to by the given *fickleId*`,
+`The fickle id must have been obtained during this execution session by
+a previous call to *resource*.$V.getFickleId(). Otherwise this call
+returns *undefined*.`,
+  ])(function fickleRefer (fickleId) {
+    return Vrapper.getFickleResource(fickleId);
   });
 
   valos.Discourse = Object.assign(Object.create(valoscriptInterfacePrototype), {

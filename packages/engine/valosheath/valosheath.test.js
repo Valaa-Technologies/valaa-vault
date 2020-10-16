@@ -749,6 +749,18 @@ describe("namespaced resource $V.names", () => {
     expect(ns2r1.map(r => r.propertyValue("@$prop.foo@@"))).toEqual([12, 16]);
     expect(ns2r2.map(r => r.propertyValue("@$prop.foo@@"))).toEqual([13, 17]);
   });
+  it("getFickleId returns a fickle id which returns original entity with valos.fickleRefer", () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
+    const { entity, fickleId, fickleEntity } = entities().creator.doValoscript(`
+      const entity = new Entity({ name: "fickl", owner: this });
+      const fickleId = entity.$V.getFickleId(5);
+      ({ entity, fickleId, fickleEntity: valos.fickleRefer(fickleId) });
+    `);
+    expect(fickleId.length >= 5)
+        .toEqual(true);
+    expect(String(entity))
+        .toEqual(String(fickleEntity));
+  });
 });
 
 describe("Bug 0000090 tests", () => {

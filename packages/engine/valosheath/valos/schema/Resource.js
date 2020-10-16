@@ -4,7 +4,6 @@ import {
   denoteValOSCallable, denoteValOSKueryFunction, denoteDeprecatedValOSCallable,
 } from "~/raem/VALK";
 import type { VRL } from "~/raem/VRL";
-import derivedId from "~/raem/tools/derivedId";
 import { qualifiedSymbol } from "~/tools/namespace";
 
 import VALEK from "~/engine/VALEK";
@@ -28,8 +27,6 @@ const symbols = {
   getMedia: qualifiedSymbol("V", "getMedia"),
   getSubResource: qualifiedSymbol("V", "getSubResource"),
   obtainSubResource: qualifiedSymbol("V", "obtainSubResource"),
-  createDerivedId: qualifiedSymbol("V", "createDerivedId"),
-  hasInterface: qualifiedSymbol("V", "hasInterface"),
   instantiate: qualifiedSymbol("V", "instantiate"),
   duplicate: qualifiedSymbol("V", "duplicate"),
   prepareBlob: qualifiedSymbol("V", "prepareBlob"),
@@ -347,21 +344,6 @@ new fields and properties can be added. Once the callback returns the
     )(function duplicate (initialState) {
       return duplicateResource.call(this.getValospaceType(),
           this.__callerValker__, this.__callerScope__, this, initialState);
-    }),
-
-    [symbols.createDerivedId]: denoteValOSCallable([
-`Creates a deterministic, unique id string based on the id of *this*
-resource as well as the optional *salt* and optional *contextId* strings.`,
-`The generated id is always the same for same combination of these
-three values.`,
-    ])(function createDerivedId (salt: string, contextId: string = "") {
-      return derivedId(this.getRawId(), salt, contextId);
-    }),
-
-    [symbols.hasInterface]: denoteValOSCallable(
-`Returns true if *this* resource implements the host interface *interfaceName*`,
-    )(function hasInterface (interfaceName: Vrapper) {
-      return Vrapper.prototype.hasInterface.call(this, interfaceName);
     }),
     /*
     hasInterface: denoteDeprecatedValOSCallable(

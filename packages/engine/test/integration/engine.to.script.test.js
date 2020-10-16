@@ -820,4 +820,29 @@ describe("Regression tests", () => {
     expect(sorted[0].step("name")).toEqual("bar");
     expect(sorted[1].step("name")).toEqual("foo");
   });
+  it(`returns falsy for hasInterface("Entity") for destroyed resources`, async () => {
+    harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });
+    await harness.interceptErrors(async () => {
+    const ret = await entities().creator.doValoscript(`
+      const entity = new Entity({ name: "foo", owner: this });
+      const isEntityBefore = entity.$V.hasInterface("Entity");
+      const parentEntitiesBefore = this.$V.entities;
+      valos.Resource.destroy(entity);
+      const isEntityAfter = entity.$V.hasInterface("Entity");
+      const parentEntitiesAfter = this.$V.entities;
+      ({ entity, isEntityBefore, isEntityAfter, parentEntitiesBefore, parentEntitiesAfter });
+    `, { console }, { verbosity: 0 });
+    const {
+      entity, isEntityBefore, isEntityAfter, parentEntitiesBefore, parentEntitiesAfter,
+    } = ret;
+    expect(isEntityBefore)
+        .toEqual(true);
+    expect(isEntityAfter)
+        .toEqual(false);
+    expect(parentEntitiesBefore.map(e => e.getRawId()))
+        .toEqual([entity.getRawId()]);
+    expect(parentEntitiesAfter)
+        .toEqual([]);
+    })();
+  });
 });

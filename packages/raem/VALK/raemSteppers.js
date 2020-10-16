@@ -227,7 +227,8 @@ export default {
       applyStep: BuiltinStep) {
     const eArgs = (applyStep[3] === undefined) ? []
         : tryUnpackLiteral(valker, head, applyStep[3], scope);
-    return callOrApply(this, valker, head, scope, applyStep, "§apply", undefined, undefined, eArgs);
+    return callOrApply(this, valker, head, scope, applyStep,
+        "§apply", tryLiteral(valker, head, applyStep[1], scope), undefined, eArgs);
   },
   "§call": function call (valker: Valker, head: any, scope: ?Object,
       callStep: BuiltinStep) {
@@ -236,14 +237,14 @@ export default {
       const arg = callStep[index + 3];
       eArgs[index] = tryUnpackLiteral(valker, head, arg, scope);
     }
-    return callOrApply(this, valker, head, scope, callStep, "$call", undefined, undefined, eArgs);
+    return callOrApply(this, valker, head, scope, callStep,
+        "$call", tryLiteral(valker, head, callStep[1], scope), undefined, eArgs);
   },
   "§callableof": function callableOf (valker: Valker, head: any, scope: ?Object,
       callableStep: BuiltinStep) {
     const ret = tryLiteral(callableStep[1]);
     if (typeof ret === "function") return ret;
-    const roleName = tryUnpackLiteral(callableStep[2]);
-    throw new Error(`Could not implicitly convert callee to a function for ${roleName}`);
+    return undefined;
   },
   "§argumentof": function callableOf (valker: Valker, head: any) {
     return head;
@@ -1054,11 +1055,18 @@ export function callOrApply (steppers: Object, valker: Valker, head: any, scope:
   let eThis = eThis_;
   let kueryFunction;
   try {
-    if (eCallee === undefined) {
-      eCallee = tryLiteral(valker, head, step[1], scope);
-    }
     if (typeof eCallee !== "function") {
-      eCallee = steppers["§callableof"](valker, eCallee, scope, ["§callableof", null, opName]);
+      eCallee = steppers["§callableof"](valker, eCallee_, scope, ["§callableof", null, opName]);
+      if (eCallee === undefined) {
+        const name = typeof step[1] === "string" ? `member $V.${step[1]}`
+            : !Array.isArray(step[1]) ? String(step[1])
+            : (step[1][0] === "§..") && (typeof step[1][1] === "string") ? `member '${step[1][1]}'`
+            : "<complex name>";
+        const reason = eCallee_ == null ? ` value is ${String(eCallee_)}`
+            : (typeof eCallee_ !== "object") ? ` value type is '${typeof eCallee_}'`
+            : "cannot convert complex value to function";
+        throw new Error(`Unable to call ${name}: ${reason}`);
+      }
       invariantify(typeof eCallee === "function",
           `trying to call a non-function value of type '${typeof eCallee}'`,
           `\n\tfunction wannabe value:`, eCallee);

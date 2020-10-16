@@ -67,8 +67,7 @@ function callableOf (valker: Valker, head: any, scope: ?Object,
     if (vrapper && (vrapper.tryTypeName() === "Media")) {
       return getImplicitCallable(vrapper, roleName, { discourse: valker });
     }
-    throw new Error(
-        `Can't convert callee with type '${typeof eCandidate}' to a function for ${roleName}`);
+    return undefined;
   } catch (error) {
     throw valker.wrapErrorEvent(error, 2, () => [
       `engine§callableof`,

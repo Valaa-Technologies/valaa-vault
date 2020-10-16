@@ -1,6 +1,6 @@
 // @flow
 
-import { GraphQLObjectType, isAbstractType } from "graphql/type";
+import { isAbstractType } from "graphql/type";
 import { Iterable } from "immutable";
 
 import type { VALKOptions } from "~/raem/VALK"; // eslint-disable-line no-duplicate-imports
@@ -564,12 +564,20 @@ export default class Vrapper extends Cog {
         onError);
   }
 
-  hasInterface (name: string, type: GraphQLObjectType = this.getTypeIntro()): boolean {
+  hasInterface (name: string, options: ?Object): boolean {
+    let type = this._type;
+    if (options && options.discourse) {
+      const typeName = options.discourse.getState().getIn(["TransientFields", this.getRawId()]);
+      if (typeName !== type.name) {
+        type = this._parent.getValospaceType(typeName);
+      }
+    }
     if (type.name === name) return true;
-    if (!type.getInterfaces) {
+    const intro = type[TypeIntroTag];
+    if (!intro.getInterfaces) {
       throw new Error("Vrapper.hasInterface is not (yet) implemented for interface objects");
     }
-    for (const interfaceType of type.getInterfaces()) {
+    for (const interfaceType of intro.getInterfaces()) {
       if (interfaceType.name === name) return true;
     }
     return false;

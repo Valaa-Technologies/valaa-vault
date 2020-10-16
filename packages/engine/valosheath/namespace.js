@@ -129,6 +129,6 @@ export function tryNamespaceFieldSymbolOrPropertyName (container, fieldName) {
   if (!namespaceInterface) return fieldName;
   const symbol = container[fieldName];
   if (symbol) return symbol;
-  throw new Error(`Namespace property ${container[AccessorNameTag]}.${fieldName
-      } not defined by namespace <${namespaceInterface.baseIRI}>`);
+  throw new Error(`Namespace property ${container[AccessorNameTag]}.${
+      fieldName} not defined by namespace <${namespaceInterface.baseIRI}>`);
 }

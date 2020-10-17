@@ -353,13 +353,13 @@ new fields and properties can be added. Once the callback returns the
       if (this instanceof Vrapper) return this.hasInterface(interfaceName);
       return interfaceName.hasInterface(interfaceNameLegacy);
     }),
-    [symbols.prepareBlob]: denoteDeprecatedValOSBuiltin(
+    */
+    [symbols.prepareBlob]: denoteDeprecatedValOSCallable(
         "Returns a promise to a Bvob creator callback. See Resource.prepareBvob.",
         ["DEPRECATED", "V:prepareBvob"],
     )(function prepareBlob (content: any) {
       return Promise.resolve(this.prepareBvob(content, { discourse: this.__callerValker__ }));
     }),
-    */
     [symbols.prepareBvob]: denoteValOSCallable([
 `Uploads the given *content* and returns a promise to a Bvob resource creation callback.`,
 `All valospace binary content is associated with a chronicle in the

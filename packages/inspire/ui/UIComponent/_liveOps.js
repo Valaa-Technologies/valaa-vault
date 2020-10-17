@@ -212,6 +212,15 @@ function _obtainValoscopeProps (stateLive) {
 // and components, but they are resolved by the valens and do not
 // by default appear on the contained element.
 export const _valensRecorderProps = {
+  array (stateLive, newValue) {
+    stateLive.array = !Array.isArray(newValue)
+            && (typeof newValue[Symbol.iterator] === "function")
+        ? [...newValue]
+        : newValue;
+    // enable stateLive as renderFocusAsSequence options object
+    stateLive.onlyPostRender = true;
+    stateLive.setEndOffset = true;
+  },
   frame: recordFrameKey,
   // children: "children",
   ref (stateLive, newValue) {
@@ -273,15 +282,6 @@ export const _valensRecorderProps = {
 // emission of an intermediate valoscope to which they are assigned.
 export const _emitValoscopeRecorderProps = {
   focus: "focus",
-  array (stateLive, newValue) {
-    stateLive.array = !Array.isArray(newValue)
-            && (typeof newValue[Symbol.iterator] === "function")
-        ? [...newValue]
-        : newValue;
-    // enable stateLive as renderFocusAsSequence options object
-    stateLive.onlyPostRender = true;
-    stateLive.setEndOffset = true;
-  },
   frameKey: "frameKey",
 
   lens: "lens",

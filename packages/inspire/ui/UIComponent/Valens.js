@@ -93,7 +93,8 @@ export default class Valens extends UIComponent {
 
   UNSAFE_componentWillReceiveProps (nextProps: Object, nextContext: Object) { // eslint-disable-line
     super.UNSAFE_componentWillReceiveProps(nextProps, nextContext,
-        nextProps.propsKueriesSeq !== this.props.propsKueriesSeq);
+        nextProps.elementPropsSeq !== this.props.elementPropsSeq
+            || nextProps.propsKueriesSeq !== this.props.propsKueriesSeq);
   }
 
   _currentSheetContent: ?Object;

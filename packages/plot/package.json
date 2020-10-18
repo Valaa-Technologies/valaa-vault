@@ -1,6 +1,6 @@
 {
   "name": "@valos/plot",
-  "version": "0.35.0-rc.34",
+  "version": "0.35.0-rc.35",
   "valos": {
     "type": "library",
     "domain": "@valos/kernel",
@@ -16,9 +16,9 @@
   },
   "main": "index.js",
   "devDependencies": {
-    "@valos/kernel": "^0.35.0-rc.34",
-    "@valos/revdoc": "^0.35.0-rc.34",
-    "@valos/type-library": "^0.35.0-rc.34"
+    "@valos/kernel": "^0.35.0-rc.35",
+    "@valos/revdoc": "^0.35.0-rc.35",
+    "@valos/type-library": "^0.35.0-rc.35"
   },
   "homepage": "https://valospace.org/plot"
 }

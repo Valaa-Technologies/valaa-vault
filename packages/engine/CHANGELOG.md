@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.35](https://github.com/valaatech/kernel/compare/v0.35.0-rc.34...v0.35.0-rc.35) (2020-10-18)
+
+
+### Bug Fixes
+
+* hasInterface not working properly for destroyed resources ([9e163ed](https://github.com/valaatech/kernel/commit/9e163ed0d1b4401ac78eb3d8facd2ba3dd0dcf4f))
+* Revert thoughtless removal of the deprecated $V.prepareBlob ([5cb2d79](https://github.com/valaatech/kernel/commit/5cb2d79984d25ba9c77d1151707fba2eba9afa64))
+
+
+### Features
+
+* resource.$V.getFickleId(minimumLength = 4) ([bc54425](https://github.com/valaatech/kernel/commit/bc54425dac957b7400fe0fcfe287b8037fec26eb))
+
+
+
+
+
 # [0.35.0-rc.34](https://github.com/valaatech/kernel/compare/v0.35.0-rc.33...v0.35.0-rc.34) (2020-10-13)
 
 

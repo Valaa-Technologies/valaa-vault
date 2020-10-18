@@ -69,7 +69,7 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/raem",
-    "VRevdoc:version": "0.35.0-rc.34",
+    "VRevdoc:version": "0.35.0-rc.35",
     "VRevdoc:preferredPrefix": "VRaem",
     "VRevdoc:baseIRI": "https://valospace.org/raem/0#",
     "VRevdoc:referencedModules": {
@@ -87,7 +87,7 @@
       "https://valospace.org/0#": "@valos/raem/V"
     },
     "respecConfig": {
-      "subtitle": "0.35.0-rc.34",
+      "subtitle": "0.35.0-rc.35",
       "specStatus": "unofficial",
       "editors": [
         {

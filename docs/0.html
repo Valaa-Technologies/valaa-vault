@@ -7,7 +7,7 @@
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"subtitle":"0.35.0-rc.34","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"valos"};
+      var respecConfig = {"subtitle":"0.35.0-rc.35","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"valos"};
     </script>
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
@@ -443,7 +443,7 @@ fields which are available even for unsourced bodies.</span>
         The class of all valosheath type prototype methods.
     </span>
 </span></a></span>
-</td><td colspan=1> <a href="#Resource.prototype.hasOwnProperty" class="vdoc type-vdoc-reference">.hasOwnProperty()</a> <a href="#getField" class="vdoc type-vdoc-reference">.$V.getField()</a> <a href="#getFieldCoupling" class="vdoc type-vdoc-reference">.$V.getFieldCoupling()</a> <a href="#setField" class="vdoc type-vdoc-reference">.$V.setField()</a> <a href="#addToField" class="vdoc type-vdoc-reference">.$V.addToField()</a> <a href="#removeFromField" class="vdoc type-vdoc-reference">.$V.removeFromField()</a> <a href="#replaceWithinField" class="vdoc type-vdoc-reference">.$V.replaceWithinField()</a> <a href="#setOwner" class="vdoc type-vdoc-reference">.$V.setOwner()</a> <a href="#getEntity" class="vdoc type-vdoc-reference">.$V.getEntity()</a> <a href="#getMedia" class="vdoc type-vdoc-reference">.$V.getMedia()</a> <a href="#getSubResource" class="vdoc type-vdoc-reference">.$V.getSubResource()</a> <a href="#obtainSubResource" class="vdoc type-vdoc-reference">.$V.obtainSubResource()</a> <a href="#instantiate" class="vdoc type-vdoc-reference">.$V.instantiate()</a> <a href="#duplicate" class="vdoc type-vdoc-reference">.$V.duplicate()</a> <a href="#createDerivedId" class="vdoc type-vdoc-reference">.$V.createDerivedId()</a> <a href="#hasInterface" class="vdoc type-vdoc-reference">.$V.hasInterface()</a> <a href="#prepareBvob" class="vdoc type-vdoc-reference">.$V.prepareBvob()</a></td></tr>
+</td><td colspan=1> <a href="#Resource.prototype.hasOwnProperty" class="vdoc type-vdoc-reference">.hasOwnProperty()</a> <a href="#getField" class="vdoc type-vdoc-reference">.$V.getField()</a> <a href="#getFieldCoupling" class="vdoc type-vdoc-reference">.$V.getFieldCoupling()</a> <a href="#setField" class="vdoc type-vdoc-reference">.$V.setField()</a> <a href="#addToField" class="vdoc type-vdoc-reference">.$V.addToField()</a> <a href="#removeFromField" class="vdoc type-vdoc-reference">.$V.removeFromField()</a> <a href="#replaceWithinField" class="vdoc type-vdoc-reference">.$V.replaceWithinField()</a> <a href="#setOwner" class="vdoc type-vdoc-reference">.$V.setOwner()</a> <a href="#getEntity" class="vdoc type-vdoc-reference">.$V.getEntity()</a> <a href="#getMedia" class="vdoc type-vdoc-reference">.$V.getMedia()</a> <a href="#getSubResource" class="vdoc type-vdoc-reference">.$V.getSubResource()</a> <a href="#obtainSubResource" class="vdoc type-vdoc-reference">.$V.obtainSubResource()</a> <a href="#instantiate" class="vdoc type-vdoc-reference">.$V.instantiate()</a> <a href="#duplicate" class="vdoc type-vdoc-reference">.$V.duplicate()</a> <a href="#prepareBlob" class="vdoc type-vdoc-reference">.$V.prepareBlob()</a> <a href="#prepareBvob" class="vdoc type-vdoc-reference">.$V.prepareBvob()</a></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><a href="https://valospace.org/engine/0#ObjectMethod" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">type object methods</span>
 
@@ -4016,7 +4016,15 @@ fields which are available even for unsourced bodies.
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
 </td><td colspan=1><span class="vdoc type-vdoc-node">Duplicates *this* Resource with given *initialState*.</span>
 </td></tr>
-        <tr id="createDerivedId" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#createDerivedId" class="vdoc type-vdoc-reference">#createDerivedId</a></em></strong>  Resource.prototype.$V.createDerivedId</h3></td></tr>
+        <tr id="prepareBlob" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#prepareBlob" class="vdoc type-vdoc-reference">#prepareBlob</a></em></strong>  Resource.prototype.$V.prepareBlob</h3></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><strong>DEPRECATED</strong> in favor of:</em></span>
+</td><td colspan=1><a href="https://valospace.org/0#prepareBvob" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">V:prepareBvob</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        Uploads the given *content* and returns a promise to a Bvob resource creation callback.
+    </span>
+</span></a></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/0#Resource" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">V:Resource</span>
 
@@ -4025,16 +4033,12 @@ fields which are available even for unsourced bodies.
 resource and event graphs. The domain of all transient and generated
 fields which are available even for unsourced bodies.
     </span>
-</span></a></td><td><a href=" createDerivedId(salt)" class="vdoc type-vdoc-reference"> createDerivedId(salt)</a></td></tr>
+</span></a></td><td><a href=" prepareBlob(content)" class="vdoc type-vdoc-reference"> prepareBlob(content)</a></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">Creates a deterministic, unique id string based on the id of *this*
-resource as well as the optional *salt* and optional *contextId* strings.</span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">DEPRECATED, prefer: V:prepareBvob.
+  Returns a promise to a Bvob creator callback. See Resource.prepareBvob.</span>
 </td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">The generated id is always the same for same combination of these
-three values.</span>
-</td></tr>
-        <tr id="hasInterface" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#hasInterface" class="vdoc type-vdoc-reference">#hasInterface</a></em></strong>  Resource.prototype.$V.hasInterface</h3></td></tr>
+        <tr id="prepareBvob" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#prepareBvob" class="vdoc type-vdoc-reference">#prepareBvob</a></em></strong>  Resource.prototype.$V.prepareBvob</h3></td></tr>
         <tr><td><a href="https://valospace.org/0#Resource" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">V:Resource</span>
 
@@ -4043,24 +4047,11 @@ three values.</span>
 resource and event graphs. The domain of all transient and generated
 fields which are available even for unsourced bodies.
     </span>
-</span></a></td><td><a href=" hasInterface(interfaceName)" class="vdoc type-vdoc-reference"> hasInterface(interfaceName)</a></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">Returns true if *this* resource implements the host interface *interfaceName*</span>
-</td></tr>
-        <tr id="prepareBvob" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#prepareBvob" class="vdoc type-vdoc-reference">#prepareBvob</a></em></strong>  Resource.prototype.$V.prepareBvob</h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/0#Resource" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">V:Resource</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of resources which can appear as a subject in valospace
-resource and event graphs. The domain of all transient and generated
-fields which are available even for unsourced bodies.
-    </span>
 </span></a></td><td><a href=" prepareBvob(content)" class="vdoc type-vdoc-reference"> prepareBvob(content)</a></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
 </td><td colspan=1><span class="vdoc type-vdoc-node">Uploads the given *content* and returns a promise to a Bvob resource creation callback.</span>
 </td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
 </td><td colspan=1><span class="vdoc type-vdoc-node">All valospace binary content is associated with a chronicle in the
 form immutable Bvob resource references. A full process of uploading
 content to valospace is a two-stage process. Firstly the content must
@@ -4102,35 +4093,35 @@ content persistence rules.</li>
     </ol>
 </span>
 </td></tr>
-        <tr id="getProperty" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#getProperty" class="vdoc type-vdoc-reference">#getProperty</a></em></strong>  Scope.prototype.$V.getProperty</h3></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><strong>DEPRECATED</strong> in favor of:</em></span>
+        <tr id="getProperty" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#getProperty" class="vdoc type-vdoc-reference">#getProperty</a></em></strong>  Scope.prototype.$V.getProperty</h3></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><strong>DEPRECATED</strong> in favor of:</em></span>
 </td><td colspan=1><a href="Object.getOwnPropertyDescriptor" class="vdoc type-vdoc-reference">Object.getOwnPropertyDescriptor</a></td></tr>
-        <tr><td><a href="https://valospace.org/0#Scope" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">V:Scope</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of valospace resources which can have scoped properties.
-    </span>
-</span></a></td><td><a href=" getProperty(name)" class="vdoc type-vdoc-reference"> getProperty(name)</a></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">DEPRECATED, prefer: Object.getOwnPropertyDescriptor.
-  Returns the Property object with the given name in this Scope.</span>
-</td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">This Property object is an internal detail of @valos/engine.</span>
-</td></tr>
-        <tr id="getHostGlobal" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#getHostGlobal" class="vdoc type-vdoc-reference">#getHostGlobal</a></em></strong>  Scope.prototype.$V.getHostGlobal</h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/0#Scope" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">V:Scope</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
         The class of valospace resources which can have scoped properties.
     </span>
-</span></a></td><td><a href=" getHostGlobal()" class="vdoc type-vdoc-reference"> getHostGlobal()</a></td></tr>
+</span></a></td><td><a href=" getProperty(name)" class="vdoc type-vdoc-reference"> getProperty(name)</a></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">Returns the javascript host global object associated with this Scope.</span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">DEPRECATED, prefer: Object.getOwnPropertyDescriptor.
+  Returns the Property object with the given name in this Scope.</span>
 </td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">This Property object is an internal detail of @valos/engine.</span>
+</td></tr>
+        <tr id="getHostGlobal" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#getHostGlobal" class="vdoc type-vdoc-reference">#getHostGlobal</a></em></strong>  Scope.prototype.$V.getHostGlobal</h3></td></tr>
+        <tr><td><a href="https://valospace.org/0#Scope" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">V:Scope</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of valospace resources which can have scoped properties.
+    </span>
+</span></a></td><td><a href=" getHostGlobal()" class="vdoc type-vdoc-reference"> getHostGlobal()</a></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">Returns the javascript host global object associated with this Scope.</span>
+</td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
 </td><td colspan=1><span class="vdoc type-vdoc-node">The host global object of a Scope resource is used as the javascript
 global object for all application/javascript medias that are owned by
 the Scope.
@@ -4158,6 +4149,39 @@ modifications are:
 </p></div></li>
     </ol>
 </span>
+</td></tr>
+        <tr id="getFickleId" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#getFickleId" class="vdoc type-vdoc-reference">#getFickleId</a></em></strong>  TransientFields.prototype.$V.getFickleId</h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/0#TransientFields" class="vdoc type-vdoc-reference">V:TransientFields</a></td><td><a href=" getFickleId(minimumLength)" class="vdoc type-vdoc-reference"> getFickleId(minimumLength)</a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">Returns a short, descriptive but fickle identifier string of this
+resource.</span>
+</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The fickle is uniquely mapped to this resource but during this
+execution session only. The returned fickle id string is guaranteed to
+be at least the given *minimumLength* characters long. The fickle id
+may be longer if a shorter id candidate is already allocated for
+another resource.
+
+The fickle algorithm is a best-effort algorithm which /most of the time/
+returns a prefix of the resource raw id that is same across sessions,
+but none of these qualities is guaranteed.
+</span>
+</td></tr>
+        <tr id="createDerivedId" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#createDerivedId" class="vdoc type-vdoc-reference">#createDerivedId</a></em></strong>  TransientFields.prototype.$V.createDerivedId</h3></td></tr>
+        <tr><td><a href="https://valospace.org/0#TransientFields" class="vdoc type-vdoc-reference">V:TransientFields</a></td><td><a href=" createDerivedId(salt)" class="vdoc type-vdoc-reference"> createDerivedId(salt)</a></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">Creates a deterministic, unique id string based on the id of *this*
+resource as well as the optional *salt* and optional *contextId* strings.</span>
+</td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="https://valospace.org/revdoc/0#introduction" class="vdoc type-vdoc-reference">introduction</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The generated id is always the same for same combination of these
+three values.</span>
+</td></tr>
+        <tr id="hasInterface" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#hasInterface" class="vdoc type-vdoc-reference">#hasInterface</a></em></strong>  TransientFields.prototype.$V.hasInterface</h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/0#TransientFields" class="vdoc type-vdoc-reference">V:TransientFields</a></td><td><a href=" hasInterface(interfaceName)" class="vdoc type-vdoc-reference"> hasInterface(interfaceName)</a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">Returns true if *this* resource implements the host interface *interfaceName*</span>
 </td></tr>
       </tbody>
     </table>
@@ -4871,6 +4895,36 @@ operations with name equal to the key of the scope lookup.</span>
 </td><td><span class="vdoc type-vdoc-node">#duplicate</span>
 </td><td><span class="vdoc type-vdoc-node">@id</span>
 </td><td></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">V:prepareBlob</span>
+</td><td><span class="vdoc type-vdoc-node"></span>
+</td><td><span class="vdoc type-vdoc-node">#prepareBlob</span>
+</td><td><span class="vdoc type-vdoc-node">@id</span>
+</td><td></td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">V:prepareBvob</span>
+</td><td><span class="vdoc type-vdoc-node"></span>
+</td><td><span class="vdoc type-vdoc-node">#prepareBvob</span>
+</td><td><span class="vdoc type-vdoc-node">@id</span>
+</td><td></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">V:Scope.createIdentifer</span>
+</td><td><span class="vdoc type-vdoc-node"></span>
+</td><td><span class="vdoc type-vdoc-node">#Scope.createIdentifer</span>
+</td><td><span class="vdoc type-vdoc-node">@id</span>
+</td><td></td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">V:getProperty</span>
+</td><td><span class="vdoc type-vdoc-node"></span>
+</td><td><span class="vdoc type-vdoc-node">#getProperty</span>
+</td><td><span class="vdoc type-vdoc-node">@id</span>
+</td><td></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">V:getHostGlobal</span>
+</td><td><span class="vdoc type-vdoc-node"></span>
+</td><td><span class="vdoc type-vdoc-node">#getHostGlobal</span>
+</td><td><span class="vdoc type-vdoc-node">@id</span>
+</td><td></td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">V:getFickleId</span>
+</td><td><span class="vdoc type-vdoc-node"></span>
+</td><td><span class="vdoc type-vdoc-node">#getFickleId</span>
+</td><td><span class="vdoc type-vdoc-node">@id</span>
+</td><td></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">V:createDerivedId</span>
 </td><td><span class="vdoc type-vdoc-node"></span>
 </td><td><span class="vdoc type-vdoc-node">#createDerivedId</span>
@@ -4879,26 +4933,6 @@ operations with name equal to the key of the scope lookup.</span>
         <tr><td><span class="vdoc type-vdoc-node">V:hasInterface</span>
 </td><td><span class="vdoc type-vdoc-node"></span>
 </td><td><span class="vdoc type-vdoc-node">#hasInterface</span>
-</td><td><span class="vdoc type-vdoc-node">@id</span>
-</td><td></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">V:prepareBvob</span>
-</td><td><span class="vdoc type-vdoc-node"></span>
-</td><td><span class="vdoc type-vdoc-node">#prepareBvob</span>
-</td><td><span class="vdoc type-vdoc-node">@id</span>
-</td><td></td></tr>
-        <tr><td><span class="vdoc type-vdoc-node">V:Scope.createIdentifer</span>
-</td><td><span class="vdoc type-vdoc-node"></span>
-</td><td><span class="vdoc type-vdoc-node">#Scope.createIdentifer</span>
-</td><td><span class="vdoc type-vdoc-node">@id</span>
-</td><td></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">V:getProperty</span>
-</td><td><span class="vdoc type-vdoc-node"></span>
-</td><td><span class="vdoc type-vdoc-node">#getProperty</span>
-</td><td><span class="vdoc type-vdoc-node">@id</span>
-</td><td></td></tr>
-        <tr><td><span class="vdoc type-vdoc-node">V:getHostGlobal</span>
-</td><td><span class="vdoc type-vdoc-node"></span>
-</td><td><span class="vdoc type-vdoc-node">#getHostGlobal</span>
 </td><td><span class="vdoc type-vdoc-node">@id</span>
 </td><td></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">V:chronicleRoot</span>

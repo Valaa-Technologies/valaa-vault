@@ -229,12 +229,8 @@
         "@id": "#duplicate",
         "@type": "@id"
       },
-      "V:createDerivedId": {
-        "@id": "#createDerivedId",
-        "@type": "@id"
-      },
-      "V:hasInterface": {
-        "@id": "#hasInterface",
+      "V:prepareBlob": {
+        "@id": "#prepareBlob",
         "@type": "@id"
       },
       "V:prepareBvob": {
@@ -251,6 +247,18 @@
       },
       "V:getHostGlobal": {
         "@id": "#getHostGlobal",
+        "@type": "@id"
+      },
+      "V:getFickleId": {
+        "@id": "#getFickleId",
+        "@type": "@id"
+      },
+      "V:createDerivedId": {
+        "@id": "#createDerivedId",
+        "@type": "@id"
+      },
+      "V:hasInterface": {
+        "@id": "#hasInterface",
         "@type": "@id"
       },
       "V:chronicleRoot": {
@@ -486,7 +494,7 @@
     ],
     "dc:title": "@valos/space library workspace",
     "VRevdoc:package": "@valos/space",
-    "VRevdoc:version": "0.35.0-rc.34",
+    "VRevdoc:version": "0.35.0-rc.35",
     "VRevdoc:preferredPrefix": "V",
     "VRevdoc:baseIRI": "https://valospace.org/0#",
     "VRevdoc:referencedModules": {
@@ -1231,12 +1239,8 @@
             "VRevdoc:indexLabel": ".$V.duplicate()"
           },
           {
-            "@id": "#createDerivedId",
-            "VRevdoc:indexLabel": ".$V.createDerivedId()"
-          },
-          {
-            "@id": "#hasInterface",
-            "VRevdoc:indexLabel": ".$V.hasInterface()"
+            "@id": "#prepareBlob",
+            "VRevdoc:indexLabel": ".$V.prepareBlob()"
           },
           {
             "@id": "#prepareBvob",
@@ -1544,29 +1548,17 @@
         "rdfs:comment": "Duplicates *this* Resource with given *initialState*.",
         "VRevdoc:introduction": null
       },
-      "createDerivedId": {
+      "prepareBlob": {
         "rdfs:label": [
-          "Resource.prototype.$V.createDerivedId"
+          "Resource.prototype.$V.prepareBlob"
         ],
-        "VRevdoc:indexLabel": ".$V.createDerivedId()",
+        "VRevdoc:indexLabel": ".$V.prepareBlob()",
         "rdfs:domain": "V:Resource",
         "@type": "VEngine:Method",
-        "rdfs:range": " createDerivedId(salt)",
-        "rdfs:comment": "Creates a deterministic, unique id string based on the id of *this*\nresource as well as the optional *salt* and optional *contextId* strings.",
-        "VRevdoc:introduction": [
-          "The generated id is always the same for same combination of these\nthree values."
-        ]
-      },
-      "hasInterface": {
-        "rdfs:label": [
-          "Resource.prototype.$V.hasInterface"
-        ],
-        "VRevdoc:indexLabel": ".$V.hasInterface()",
-        "rdfs:domain": "V:Resource",
-        "@type": "VEngine:Method",
-        "rdfs:range": " hasInterface(interfaceName)",
-        "rdfs:comment": "Returns true if *this* resource implements the host interface *interfaceName*",
-        "VRevdoc:introduction": null
+        "rdfs:range": " prepareBlob(content)",
+        "rdfs:comment": "DEPRECATED, prefer: V:prepareBvob.\n  Returns a promise to a Bvob creator callback. See Resource.prepareBvob.",
+        "VRevdoc:introduction": null,
+        "VRevdoc:deprecatedInFavorOf": "V:prepareBvob"
       },
       "prepareBvob": {
         "rdfs:label": [
@@ -1706,7 +1698,58 @@
       "TransientFields": {
         "rdfs:label": [
           "window.valos.TransientFields"
+        ],
+        "VEngine:domainOfMethod": [
+          {
+            "@id": "#getFickleId",
+            "VRevdoc:indexLabel": ".$V.getFickleId()"
+          },
+          {
+            "@id": "#createDerivedId",
+            "VRevdoc:indexLabel": ".$V.createDerivedId()"
+          },
+          {
+            "@id": "#hasInterface",
+            "VRevdoc:indexLabel": ".$V.hasInterface()"
+          }
         ]
+      },
+      "getFickleId": {
+        "rdfs:label": [
+          "TransientFields.prototype.$V.getFickleId"
+        ],
+        "VRevdoc:indexLabel": ".$V.getFickleId()",
+        "rdfs:domain": "V:TransientFields",
+        "@type": "VEngine:Method",
+        "rdfs:range": " getFickleId(minimumLength)",
+        "rdfs:comment": "Returns a short, descriptive but fickle identifier string of this\nresource.",
+        "VRevdoc:introduction": [
+          "The fickle is uniquely mapped to this resource but during this\nexecution session only. The returned fickle id string is guaranteed to\nbe at least the given *minimumLength* characters long. The fickle id\nmay be longer if a shorter id candidate is already allocated for\nanother resource.\n\nThe fickle algorithm is a best-effort algorithm which /most of the time/\nreturns a prefix of the resource raw id that is same across sessions,\nbut none of these qualities is guaranteed.\n"
+        ]
+      },
+      "createDerivedId": {
+        "rdfs:label": [
+          "TransientFields.prototype.$V.createDerivedId"
+        ],
+        "VRevdoc:indexLabel": ".$V.createDerivedId()",
+        "rdfs:domain": "V:TransientFields",
+        "@type": "VEngine:Method",
+        "rdfs:range": " createDerivedId(salt)",
+        "rdfs:comment": "Creates a deterministic, unique id string based on the id of *this*\nresource as well as the optional *salt* and optional *contextId* strings.",
+        "VRevdoc:introduction": [
+          "The generated id is always the same for same combination of these\nthree values."
+        ]
+      },
+      "hasInterface": {
+        "rdfs:label": [
+          "TransientFields.prototype.$V.hasInterface"
+        ],
+        "VRevdoc:indexLabel": ".$V.hasInterface()",
+        "rdfs:domain": "V:TransientFields",
+        "@type": "VEngine:Method",
+        "rdfs:range": " hasInterface(interfaceName)",
+        "rdfs:comment": "Returns true if *this* resource implements the host interface *interfaceName*",
+        "VRevdoc:introduction": null
       },
       "TransientScriptFields": {
         "rdfs:label": [
@@ -3023,12 +3066,8 @@
         "@id": "#duplicate",
         "@type": "@id"
       },
-      "V:createDerivedId": {
-        "@id": "#createDerivedId",
-        "@type": "@id"
-      },
-      "V:hasInterface": {
-        "@id": "#hasInterface",
+      "V:prepareBlob": {
+        "@id": "#prepareBlob",
         "@type": "@id"
       },
       "V:prepareBvob": {
@@ -3045,6 +3084,18 @@
       },
       "V:getHostGlobal": {
         "@id": "#getHostGlobal",
+        "@type": "@id"
+      },
+      "V:getFickleId": {
+        "@id": "#getFickleId",
+        "@type": "@id"
+      },
+      "V:createDerivedId": {
+        "@id": "#createDerivedId",
+        "@type": "@id"
+      },
+      "V:hasInterface": {
+        "@id": "#hasInterface",
         "@type": "@id"
       },
       "V:chronicleRoot": {
@@ -4096,13 +4147,15 @@
             "obtainSubResource",
             "instantiate",
             "duplicate",
-            "createDerivedId",
-            "hasInterface",
+            "prepareBlob",
             "prepareBvob",
             "Scope.createIdentifer",
             "getProperty",
             "getHostGlobal",
             "TransientFields",
+            "getFickleId",
+            "createDerivedId",
+            "hasInterface",
             "TransientScriptFields",
             "chronicleRoot",
             "chronicleURI",

@@ -62,7 +62,7 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/sbomdoc",
-    "VRevdoc:version": "0.35.0-rc.34",
+    "VRevdoc:version": "0.35.0-rc.35",
     "VRevdoc:preferredPrefix": "VSbomdoc",
     "VRevdoc:baseIRI": "https://valospace.org/sbomdoc/0#",
     "VRevdoc:referencedModules": {
@@ -74,7 +74,7 @@
     },
     "VRevdoc:extenderModules": {},
     "respecConfig": {
-      "subtitle": "0.35.0-rc.34",
+      "subtitle": "0.35.0-rc.35",
       "specStatus": "unofficial",
       "editors": [
         {

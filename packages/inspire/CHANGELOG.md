@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.35](https://github.com/valaatech/kernel/compare/v0.35.0-rc.34...v0.35.0-rc.35) (2020-10-18)
+
+
+### Bug Fixes
+
+* <Valoscope array> issues with non-triggering of Valens-handling ([cf58797](https://github.com/valaatech/kernel/commit/cf5879737ace38d8c920e4c63b918a15fb45ff3d))
+
+
+
+
+
 # [0.35.0-rc.34](https://github.com/valaatech/kernel/compare/v0.35.0-rc.33...v0.35.0-rc.34) (2020-10-13)
 
 

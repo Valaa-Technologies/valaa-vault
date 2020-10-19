@@ -21,6 +21,32 @@ and for adding content and behaviors to it.`,
       "rdfs:comment":
 `The class of all chronicle event log entries`,
     },
-    ...require("./events"),
+    EventAspects: {
+      "@type": "VKernel:Class",
+      "VRevdoc:brief": "all the aspects of an event",
+      "rdfs:comment":
+`The class of resources which contain all different lifecycle aspects
+of some chronicle event as it advances through the proclamation
+lifecycle.`,
+    },
+    EventAspect: {
+      "@type": "VKernel:Class",
+      "VRevdoc:brief": "event lifecycle aspect",
+      "rdfs:comment":
+`The class of resources which contain a set of attributes of a single
+lifecycle aspect of some chronicle event as it progresses through the
+proclamation lifecycle.`,
+    },
+    version: {
+      "@type": "VKernel:Property",
+      "rdfs:domain": "VLog:EventAspects",
+      "rdfs:range": "xsd:string",
+      restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
+      "rdfs:comment":
+`The aspect version string. The version of this specification is "0.3"`,
+    },
+    ...require("./ChangeAspect"),
+    ...require("./CommandAspect"),
+    ...require("./LogAspect"),
   },
 };

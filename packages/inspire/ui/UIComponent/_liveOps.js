@@ -212,6 +212,7 @@ function _obtainValoscopeProps (stateLive) {
 // and components, but they are resolved by the valens and do not
 // by default appear on the contained element.
 export const _valensRecorderProps = {
+  // array will always emit both valens (for spreading) and valoscope (for scoping)
   array (stateLive, newValue) {
     stateLive.array = !Array.isArray(newValue)
             && (typeof newValue[Symbol.iterator] === "function")
@@ -282,6 +283,8 @@ export const _valensRecorderProps = {
 // emission of an intermediate valoscope to which they are assigned.
 export const _emitValoscopeRecorderProps = {
   focus: "focus",
+  // array will always emit both valens (for spreading) and valoscope (for scoping)
+  array: _valensRecorderProps.array,
   frameKey: "frameKey",
 
   lens: "lens",

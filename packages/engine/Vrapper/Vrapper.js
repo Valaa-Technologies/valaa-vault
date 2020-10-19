@@ -2055,6 +2055,13 @@ export default class Vrapper extends Cog {
   }
 
   notifyMODIFIEDHandlers (fieldName: string, passage: Passage, story: Story) {
+    if (fieldName === "unnamedOwnlings") {
+      // TODO(iridian, 2020-10): This is a manual hack for filterTypeName
+      // which is only used by "entities" and "relations". These two
+      // are going to be made primary fields on their own right in "0.3"
+      this.notifyMODIFIEDHandlers("entities", passage, story);
+      this.notifyMODIFIEDHandlers("relations", passage, story);
+    }
     let fieldUpdate = this._fieldSubscriptions && this._fieldSubscriptions.get(fieldName);
     if (!fieldUpdate && !this._filterHooks) return undefined;
     if (!fieldUpdate) {

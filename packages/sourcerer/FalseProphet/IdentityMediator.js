@@ -1,12 +1,16 @@
 // @flow
 
+import VALK from "~/raem/VALK";
+import { vRef } from "~/raem/VRL";
+import { getHostRef } from "~/raem/VALK/hostReference";
+
 import type FalseProphet from "~/sourcerer/FalseProphet/FalseProphet";
 
 import { debugObjectType, dumpObject, FabricEventTarget } from "~/tools";
 
 const identityPrototypeMethods = require("~/gateway-api/identity");
 
-export default class IdentityManager extends FabricEventTarget {
+export default class IdentityMediator extends FabricEventTarget {
   constructor (options: {
     parent: Object, verbosity: ?number, name: ?string, sourcerer: FalseProphet,
     clientURI: string, sessionURI: string, add: ?Object,
@@ -16,6 +20,7 @@ export default class IdentityManager extends FabricEventTarget {
     this.clientURI = options.clientURI;
     this.sessionURI = options.sessionURI;
     this._activeIdentities = {};
+    this._authorityIdentities = {};
     for (const [identityChronicleURI, identityOptions] of Object.entries(options.add || {})) {
       this.add(identityChronicleURI, identityOptions);
     }
@@ -26,16 +31,18 @@ export default class IdentityManager extends FabricEventTarget {
   add (identityChronicleURI: string, options: Object = {}) {
     try {
       if (!identityChronicleURI || (typeof identityChronicleURI !== "string")) {
-        throw new Error(`IdentityManager.add.identityChronicleURI string required, got: ${
+        throw new Error(`IdentityMediator..add..identityChronicleURI string required, got: ${
             debugObjectType(identityChronicleURI)}`);
       }
-      options.authority = this._sourcerer.obtainAuthorityOfChronicle(identityChronicleURI);
-      if (!options.authority) {
-        throw new Error(
-            `Can't determine the authority of identity chronicle: <${identityChronicleURI}>`);
-      }
-      this._activeIdentities[identityChronicleURI] = options;
-      return options;
+      const identityParams = {
+        ...options,
+        identityChronicleURI,
+        authority: this._sourcerer.obtainAuthorityOfChronicle(identityChronicleURI),
+      };
+      this._authorityIdentities[identityParams.authority.getAuthorityURI()] =
+          this._activeIdentities[identityChronicleURI] =
+          identityParams;
+      return identityParams;
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, new Error("identity.add"),
           "\n\tidentityChronicleURI:", ...dumpObject(identityChronicleURI));
@@ -47,14 +54,16 @@ export default class IdentityManager extends FabricEventTarget {
   remove (identityChronicleURI: string) {
     try {
       if (!identityChronicleURI || (typeof identityChronicleURI !== "string")) {
-        throw new Error(`IdentityManager.remove.identityChronicle required, got: ${
+        throw new Error(`IdentityMediator..remove..identityChronicle required, got: ${
             debugObjectType(identityChronicleURI)}`);
       }
       const uriString = String(identityChronicleURI);
-      if (!this._activeIdentities[uriString]) {
+      const identityParams = this._activeIdentities[uriString];
+      if (!identityParams) {
         throw new Error(`No such active identity: <${uriString}>`);
       }
-      delete this._activeIdentities[uriString];
+      delete this._activeIdentities[identityParams.authority.getAuthorityURI()];
+      delete this._authorityIdentities[identityParams.authority.getAuthorityURI()];
       return true;
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, new Error("identity.remove"),
@@ -63,4 +72,4 @@ export default class IdentityManager extends FabricEventTarget {
   }
 }
 
-Object.assign(IdentityManager.prototype, identityPrototypeMethods);
+Object.assign(IdentityMediator.prototype, identityPrototypeMethods);

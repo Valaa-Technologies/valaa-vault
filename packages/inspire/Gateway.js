@@ -22,7 +22,7 @@ import { qualifiedNamesOf } from "~/tools/namespace";
 
 import upgradeEventTo0Dot2 from "~/sourcerer/tools/event-version-0.2/upgradeEventTo0Dot2";
 import EVENT_VERSION from "~/sourcerer/tools/EVENT_VERSION";
-import IdentityManager from "~/sourcerer/FalseProphet/IdentityManager";
+import IdentityMediator from "~/sourcerer/FalseProphet/IdentityMediator";
 
 import Engine from "~/engine/Engine";
 import EngineContentAPI from "~/engine/EngineContentAPI";
@@ -420,7 +420,7 @@ export default class Gateway extends FabricEventTarget {
   }
 
   _createViewIdentity (op, view) {
-    op.identity = new IdentityManager({
+    op.identity = new IdentityMediator({
       ...(op.viewConfig.identity || {}),
       parent: view,
       sourcerer: this.falseProphet,
@@ -726,8 +726,8 @@ export default class Gateway extends FabricEventTarget {
         sourcerer: falseProphet,
       };
       const plog1 = this.opLog(parentPlog, 1, "create_identity",
-          "new IdentityManager", identityOptions);
-      identity = new IdentityManager({
+          "new IdentityMediator", identityOptions);
+      identity = new IdentityMediator({
         ...identityOptions,
       });
       plog1 && plog1.opEvent("done",

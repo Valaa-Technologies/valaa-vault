@@ -8,7 +8,7 @@ import { ProclaimOptions, Proclamation, ProclaimEventResult, NarrateOptions }
     from "~/sourcerer/api/types";
 import { initializeAspects, obtainAspect, tryAspect } from "~/sourcerer/tools/EventAspects";
 import EVENT_VERSION from "~/sourcerer/tools/EVENT_VERSION";
-import IdentityManager from "~/sourcerer/FalseProphet/IdentityManager";
+import IdentityMediator from "~/sourcerer/FalseProphet/IdentityMediator";
 
 import { dumpObject, mapEagerly, thisChainRedirect } from "~/tools";
 
@@ -40,7 +40,7 @@ export default class FalseProphetConnection extends Connection {
   _firstUnconfirmedEventId = 0;
   _isFrozen: ?boolean;
   _referencePrototype: VRL;
-  _originatingIdentity: IdentityManager;
+  _originatingIdentity: IdentityMediator;
 
   constructor (options) {
     super(options);

@@ -1,8 +1,7 @@
 // @flow
 
-import JSSHA from "jssha/src/sha256";
-
 import { coerceAsVRID } from "~/raem/VPath";
+import { b64SHA256FromUTF8Text } from "~/security/hash";
 
 // IMPORTANT! This function must not be changed because DUPLICATED and ghost id's break.
 //
@@ -12,12 +11,9 @@ import { coerceAsVRID } from "~/raem/VPath";
 // ids from there in order.
 
 export default function derivedId (id, derivationName, contextId = "") {
-  if (contextId[0] !== "@") {
-    const sha = new JSSHA("SHA-256", "TEXT", { encoding: "UTF8" });
-    sha.update(id + derivationName + contextId);
-    return sha.getHash("B64");
-  }
-  return derivedVRID(coerceAsVRID(id), derivationName, contextId);
+  return (contextId[0] !== "@")
+      ? b64SHA256FromUTF8Text(id + derivationName + contextId)
+      : derivedVRID(coerceAsVRID(id), derivationName, contextId);
 }
 
 export function derivedVRID (vrid, derivationName, contextVRID) {

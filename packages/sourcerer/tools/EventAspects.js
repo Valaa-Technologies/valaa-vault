@@ -1,7 +1,8 @@
 // @flow
 
 import { EventBase } from "~/raem/events";
-import type HashV240 from "~/sourcerer/tools/hashV240";
+
+type HashV240 = string;
 
 // Event Aspects
 

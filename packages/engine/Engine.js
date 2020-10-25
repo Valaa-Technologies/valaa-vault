@@ -11,7 +11,7 @@ import { Kuery, dumpObject, engineSteppers } from "~/engine/VALEK";
 import { Command, duplicated, isCreatedLike } from "~/raem/events";
 
 import VRL, { vRef, IdData, getRawIdFrom } from "~/raem/VRL";
-import { tryHostRef } from "~/raem/VALK/hostReference";
+import { tryHostRef, getHostRef } from "~/raem/VALK/hostReference";
 import { getActionFromPassage } from "~/raem/redux/Bard";
 import { formVPath, coerceAsVRID, validateVRID, validateVVerbs } from "~/raem/VPath";
 import { naiveURI } from "~/raem/ValaaURI";
@@ -30,7 +30,6 @@ import LiveUpdate from "~/engine/Vrapper/LiveUpdate";
 import Subscription from "~/engine/Vrapper/Subscription";
 
 import { thenChainEagerly } from "~/tools";
-import { getHostRef } from "../raem/VALK/hostReference";
 
 export default class Engine extends Cog {
   constructor ({ name, parent, sourcerer, timeDilation = 1.0, verbosity, discourse }: Object) {

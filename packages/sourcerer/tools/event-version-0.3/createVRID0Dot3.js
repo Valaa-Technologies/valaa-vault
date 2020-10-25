@@ -2,7 +2,7 @@
 
 import { coerceAsVRID } from "~/raem/VPath";
 
-import hashV240 from "~/sourcerer/tools/hashV240";
+import { hashV240 } from "~/security/hash";
 
 /**
  * Note: this method is backwards compatible with event version 0.2

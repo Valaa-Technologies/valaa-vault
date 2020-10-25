@@ -1,8 +1,8 @@
 // @flow
 
-import { arrayBufferFromUTF8String } from "~/tools/textEncoding";
+import { arrayBufferFromUTF8String } from "~/security/textEncoding";
 
-import hashV240, { isHashV240 } from "./hashV240";
+import { hashV240, isHashV240 } from "./hash";
 
 // TODO(iridian, 2018-11): This test suite maybe needs to be expanded.
 // Not confident in its coverage yet. But maybe after ArrayBuffer tests

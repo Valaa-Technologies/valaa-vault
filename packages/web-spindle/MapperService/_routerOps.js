@@ -4,7 +4,7 @@ import { asyncSourcifyChronicleIfAbsentAndRetry } from "~/raem/tools/denormalize
 
 import {
   SessionExpiredError, clearReplySessionAndClientCookies,
-} from "~/web-spindle/tools/security";
+} from "~/web-spindle/tools/session";
 
 import { dumpify, dumpObject, isPromise, outputError, thenChainEagerly } from "~/tools";
 

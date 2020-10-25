@@ -2,7 +2,7 @@
 
 import { Vrapper } from "~/engine";
 
-import { verifySessionAuthorization } from "~/web-spindle/tools/security";
+import { verifySessionAuthorization } from "~/web-spindle/tools/session";
 
 import { dumpObject } from "~/tools";
 

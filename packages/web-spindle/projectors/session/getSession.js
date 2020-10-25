@@ -5,7 +5,7 @@ import crypto from "crypto";
 import type { PrefixRouter, Route } from "~/web-spindle/MapperService";
 import {
   extractAuthorizationGrantContent, fillReplySessionAndClientCookies,
-} from "~/web-spindle/tools/security";
+} from "~/web-spindle/tools/session";
 
 import { dumpObject } from "~/tools/wrapError";
 import { thenChainEagerly } from "~/tools/thenChainEagerly";

@@ -1,7 +1,8 @@
 // @flow
 
+import { utf8StringFromArrayBuffer } from "~/security/textEncoding";
+
 import { FabricEventTarget } from "~/tools/FabricEvent";
-import { utf8StringFromArrayBuffer } from "~/tools/textEncoding";
 
 /**
  * Defines media decoder interface.

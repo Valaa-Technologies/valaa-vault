@@ -1,6 +1,55 @@
-// @flow
+const JSSHA256 = require("jssha/src/sha256");
+const JSSHA512 = require("jssha/src/sha512");
+const JSSHA3 = require("jssha/src/sha3");
 
-import jsSHA from "jssha/src/sha3";
+const { arrayBufferFromUTF8String } = require("./textEncoding");
+
+module.exports = {
+  hashV240,
+  isHashV240,
+  b64SHA256FromUTF8Text,
+  hexSHA512FromArrayBuffer,
+  hexSHA512PromiseFromStream,
+};
+
+function b64SHA256FromUTF8Text (utf8Text) {
+  const sha = new JSSHA256("SHA-256", "TEXT", { encoding: "UTF8" });
+  sha.update(utf8Text);
+  return sha.getHash("B64");
+}
+
+function hexSHA512FromArrayBuffer (arrayBuffer) {
+  const sha = new JSSHA512("SHA-512", "ARRAYBUFFER");
+  sha.update(arrayBuffer);
+  return sha.getHash("HEX");
+}
+
+function hexSHA512PromiseFromStream (octetOrUTF8StringStream) {
+  return new Promise((resolve, reject) => {
+    try {
+      const sha = new JSSHA512("SHA-512", "ARRAYBUFFER");
+      octetOrUTF8StringStream.on("data", (bufferOrString) => {
+        if (typeof bufferOrString === "string") {
+          sha.update(arrayBufferFromUTF8String(bufferOrString));
+        } else {
+          sha.update(bufferOrString);
+        }
+      });
+      octetOrUTF8StringStream.on("error", reject);
+      octetOrUTF8StringStream.on("end", () => {
+        const digest = sha.getHash("HEX");
+        if (digest) {
+          resolve(digest);
+        } else {
+          reject(new Error("Could not resolve digest for stream"));
+        }
+      });
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
 /* eslint-disable max-len */
 /**
  * Returns a 240-bit SHAKE256 hash of the given input buffer or utf-8
@@ -26,9 +75,9 @@ import jsSHA from "jssha/src/sha3";
  * @param {string | ArrayBuffer} input  if a text string this is interpreted as utf-8.
  * @returns
  */
-export default function hashV240 (input: string | ArrayBuffer): HashV240 {
+function hashV240 (input) {
 /* eslint-enable max-len */
-  const hash = new jsSHA("SHAKE256",
+  const hash = new JSSHA3("SHAKE256",
       (typeof input === "string") ? "TEXT"
       : (input instanceof ArrayBuffer) ? "ARRAYBUFFER"
       : undefined);
@@ -37,9 +86,6 @@ export default function hashV240 (input: string | ArrayBuffer): HashV240 {
       .replace(/\+/g, "-").replace(/\//g, "_");
 }
 
-// String containing a V240 hash, ie. matches /[A-Za-z0-9\-_]{40}/ .
-export type HashV240 = string;
-
-export function isHashV240 (value: any): boolean {
+function isHashV240 (value): boolean {
   return ((typeof value === "string") && !!value.match(/^[A-Za-z0-9\-_]{40}$/));
 }

@@ -20,7 +20,7 @@ the authority is allowed to free the octet-stream resources associated
 with.`
   },
   // and have a valid base64-url encoded 240-bit SHAKE256 hash of that
-  // octet-streamprefixed with "hashV240:" as their VGRID.`,
+  // octet-stream prefixed with "hashV240:" as their VGRID.`,
 
   hashAlgorithm: {
     "@type": "VState:GeneratedField",

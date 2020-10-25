@@ -12,7 +12,6 @@ export { default as valosHash } from "./id/valosHash";
 export { default as valosUUID } from "./id/valosUUID";
 
 export const contentHashFromArrayBuffer = require("./id/contentId").contentHashFromArrayBuffer;
-export const contentHashFromNativeStream = require("./id/contentId").contentHashFromNativeStream;
 
 export { default as DelayedQueue } from "./DelayedQueue";
 

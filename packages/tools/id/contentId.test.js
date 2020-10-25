@@ -1,9 +1,8 @@
 import path from "path";
 import fs from "fs";
 
-import {
-  contentHashFromUCS2String, contentHashFromArrayBuffer, contentHashFromNativeStream,
-} from "./contentId";
+import { contentHashFromUCS2String, contentHashFromArrayBuffer } from "./contentId";
+import { hexSHA512PromiseFromStream } from "~/security/streamHash";
 
 function toArrayBuffer (buf) {
   const ab = new ArrayBuffer(buf.length);
@@ -68,7 +67,7 @@ describe("contentHash module", () => {
     for (const tf of testFiles) {
       it(`Given input stream ${tf.path}, it should calculate ${tf.hash}`, () => {
         const stream = fs.createReadStream(tf.path);
-        return contentHashFromNativeStream(stream).then(hash => {
+        return hexSHA512PromiseFromStream(stream).then(hash => {
           expect(hash).toEqual(tf.hash);
         });
       });
@@ -78,7 +77,7 @@ describe("contentHash module", () => {
       for (const tf of bigFiles) {
         it(`Given input stream ${tf.path}, it should calculate ${tf.hash}`, () => {
           const stream = fs.createReadStream(tf.path);
-          return contentHashFromNativeStream(stream).then(hash => {
+          return hexSHA512PromiseFromStream(stream).then(hash => {
             expect(hash).toEqual(tf.hash);
           });
         }, (2 ** 31) - 1); // last param is maximum timeout for jasmine, Infinity doesnt work

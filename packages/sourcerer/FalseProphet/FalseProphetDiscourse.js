@@ -17,8 +17,8 @@ import type { ProclaimOptions, ChroniclePropheciesRequest, SourceryOptions, Prop
 import EVENT_VERSION from "~/sourcerer/tools/EVENT_VERSION";
 
 import { initializeAspects, obtainAspect, tryAspect } from "~/sourcerer/tools/EventAspects";
-import createVRID0Dot3, { upgradeVRIDTo0Dot3, createChronicleRootVRID0Dot3 }
-    from "~/sourcerer/tools/event-version-0.3/createVRID0Dot3";
+import createVRID0Dot2, { upgradeVRIDTo0Dot2, createChronicleRootVRID0Dot2 }
+    from "~/sourcerer/tools/event-version-0.2/createVRID0Dot2";
 
 import FalseProphet from "~/sourcerer/FalseProphet";
 import TransactionState, { fabricatorOps } from "~/sourcerer/FalseProphet/TransactionState";
@@ -190,7 +190,7 @@ export default class FalseProphetDiscourse extends Discourse {
             targetAction.initialState.owner || targetAction.initialState.source,
             `Property.initialState.owner`,
         ).rawId();
-        if (parentVRID[0] !== "@") parentVRID = upgradeVRIDTo0Dot3(parentVRID);
+        if (parentVRID[0] !== "@") parentVRID = upgradeVRIDTo0Dot2(parentVRID);
         resourceVRID = `${parentVRID.slice(0, -2)}${subVPath}`;
         /*
         resourceRawId = ((ownerRawId[0] !== "@") || (ownerRawId.slice(-2) !== "@@"))
@@ -208,7 +208,7 @@ export default class FalseProphetDiscourse extends Discourse {
       if (!chronicle.createIndex) chronicle.createIndex = 0;
 
       if (!explicitRawId) {
-        resourceVRID = createVRID0Dot3(
+        resourceVRID = createVRID0Dot2(
             root.aspects.command.id, chronicleURI, chronicle.createIndex++);
       } else if (explicitRawId[0] === "@") {
         resourceVRID = explicitRawId;
@@ -262,7 +262,7 @@ export default class FalseProphetDiscourse extends Discourse {
     const chronicles = (root.meta || (root.meta = {})).chronicles || (root.meta.chronicles = {});
 
     const chronicleRootVRID = explicitChronicleRootVRID
-        || createChronicleRootVRID0Dot3(
+        || createChronicleRootVRID0Dot2(
             root.aspects.command.id, authorityURI, Object.keys(chronicles).length);
     const chronicleURI = naiveURI.createChronicleURI(authorityURI, chronicleRootVRID);
     targetAction.id = vRef(chronicleRootVRID, undefined, undefined, chronicleURI);

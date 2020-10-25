@@ -42,16 +42,13 @@ export default class Oracle extends Sourcerer {
   obtainAuthorityOfChronicle (chronicleURI: string) {
     const ret = this._authorityNexus.obtainAuthorityOfChronicle(chronicleURI);
     if (!ret) {
-      throw new Error(`Can't obtain authority of chronicle <${chronicleURI}>`);
+      throw new Error(`Can't obtain authority for chronicle <${chronicleURI}>`);
     }
     return ret;
   }
 
   _createConnection (chronicleURI: string, options: SourceryOptions) {
-    const authoritySourcerer = this._authorityNexus.obtainAuthorityOfChronicle(chronicleURI);
-    if (!authoritySourcerer) {
-      throw new Error(`Can't obtain authority for chronicle <${chronicleURI}>`);
-    }
+    const authoritySourcerer = this.obtainAuthorityOfChronicle(chronicleURI);
     return new OracleConnection({
       chronicleURI, sourcerer: this, verbosity: this.getVerbosity(),
       pushTruths: options.pushTruths, authoritySourcerer,

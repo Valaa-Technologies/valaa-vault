@@ -55,7 +55,7 @@ describe("Scribe", () => {
   it("stores truths/commands in the database", async () => {
     const scribe = await createScribe(createTestMockSourcerer({ isRemoteAuthority: true }));
 
-    const connection = scribe.sourcifyChronicle(testChronicleURI);
+    const connection = scribe.sourcerChronicle(testChronicleURI);
     connection.getUpstreamConnection().addNarrateResults({ eventIdBegin: 0 }, []);
     await connection.asSourceredConnection();
     const database = await openDB(testChronicleURI.toString());
@@ -85,7 +85,7 @@ describe("Scribe", () => {
   it("stores (and returns) utf-8 strings correctly", async () => {
     const scribe = await createScribe(createTestMockSourcerer());
 
-    const connection = await scribe.sourcifyChronicle(testChronicleURI)
+    const connection = await scribe.sourcerChronicle(testChronicleURI)
         .asSourceredConnection();
     const sharedDB = await openDB(sharedURI);
 
@@ -108,7 +108,7 @@ describe("Scribe", () => {
   it("populates a new connection to an existing chronicle with its cached commands", async () => {
     const scribe = await createScribe(createTestMockSourcerer());
 
-    const firstConnection = await scribe.sourcifyChronicle(testChronicleURI)
+    const firstConnection = await scribe.sourcerChronicle(testChronicleURI)
         .asSourceredConnection();
 
     await firstConnection.proclaimEvent(simpleCommand).getComposedEvent();
@@ -121,7 +121,7 @@ describe("Scribe", () => {
     expect(firstUnusedCommandEventId).toBeGreaterThan(1);
     firstConnection.disconnect();
 
-    const secondConnection = await scribe.sourcifyChronicle(testChronicleURI)
+    const secondConnection = await scribe.sourcerChronicle(testChronicleURI)
         .asSourceredConnection();
     expect(secondConnection.getFirstUnusedCommandEventId()).toBe(firstUnusedCommandEventId);
   });
@@ -129,7 +129,7 @@ describe("Scribe", () => {
   it("ensures commands are stored in a proper ascending order", async () => {
     const scribe = await createScribe(createTestMockSourcerer());
 
-    const connection = await scribe.sourcifyChronicle(testChronicleURI)
+    const connection = await scribe.sourcerChronicle(testChronicleURI)
         .asSourceredConnection();
     let oldUnusedCommandId;
     let newUnusedCommandId = connection.getFirstUnusedCommandEventId();
@@ -148,7 +148,7 @@ describe("Scribe", () => {
   it("writes multiple commands in a single go gracefully", async () => {
     const scribe = await createScribe(createTestMockSourcerer());
 
-    const connection = await scribe.sourcifyChronicle(testChronicleURI)
+    const connection = await scribe.sourcerChronicle(testChronicleURI)
         .asSourceredConnection();
 
     const proclamation = connection.proclaimEvents(simpleCommandList);

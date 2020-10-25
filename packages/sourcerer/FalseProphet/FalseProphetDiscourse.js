@@ -7,7 +7,7 @@ import { ValaaURI, naiveURI, hasScheme } from "~/raem/ValaaURI";
 import { vRef } from "~/raem/VRL";
 import { dumpObject } from "~/raem/VALK";
 import { getHostRef } from "~/raem/VALK/hostReference";
-import { addSourcifyChronicleToError } from "~/raem/tools/denormalized/partitions";
+import { addSourcerChronicleToError } from "~/raem/tools/denormalized/partitions";
 
 import Discourse from "~/sourcerer/api/Discourse";
 import type Connection from "~/sourcerer/api/Connection";
@@ -81,22 +81,22 @@ export default class FalseProphetDiscourse extends Discourse {
       }
       return super.run(head, kuery, actualOptions);
     } catch (error) {
-      addSourcifyChronicleToError(error, this.connectToAbsentChronicle);
+      addSourcerChronicleToError(error, this.connectToAbsentChronicle);
       throw error;
     }
   }
 
-  sourcifyChronicle (chronicleURI: ValaaURI, options: SourceryOptions = {}): ?Connection {
+  sourcerChronicle (chronicleURI: ValaaURI, options: SourceryOptions = {}): ?Connection {
     options.discourse = this;
-    return this._falseProphet.sourcifyChronicle(chronicleURI, options);
+    return this._falseProphet.sourcerChronicle(chronicleURI, options);
   }
 
   proclaimEvents (events: EventBase[], options: ProclaimOptions = {}):
       ChroniclePropheciesRequest {
-    this.logEvent(1, () => ["proclamation", events.length, "events:", events]);
     if (this._transaction) return this._transaction.proclaimEvents(events, options);
     try {
       options.discourse = this;
+      this.logEvent(1, () => ["proclaiming", events.length, "events:", events]);
       const ret = this._falseProphet.proclaimEvents(
           events.map(event => this._universalizeEvent(event, options.chronicleURI)), options);
 
@@ -109,7 +109,7 @@ export default class FalseProphetDiscourse extends Discourse {
 
       return ret;
     } catch (error) {
-      addSourcifyChronicleToError(error, this.connectToAbsentChronicle);
+      addSourcerChronicleToError(error, this.connectToAbsentChronicle);
       throw this.wrapErrorEvent(error, 1, `proclaimEvents()`,
           "\n\tevents:", ...dumpObject(events),
       );
@@ -137,7 +137,7 @@ export default class FalseProphetDiscourse extends Discourse {
     const chronicleURIString = String(missingChronicleURI);
     if (!this._implicitlySyncingConnections[chronicleURIString]) {
       this._implicitlySyncingConnections[chronicleURIString] = this
-          .sourcifyChronicle(missingChronicleURI)
+          .sourcerChronicle(missingChronicleURI)
           .asSourceredConnection();
     }
     return (this._implicitlySyncingConnections[chronicleURIString] =

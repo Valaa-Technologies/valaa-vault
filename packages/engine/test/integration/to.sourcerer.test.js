@@ -32,7 +32,7 @@ describe("Media handling", () => {
       } },
       awaitResult: (result) => result.getComposedStory(),
     });
-    const testConnectionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
+    const testConnectionBackend = harness.tryGetTestAuthorityConnection(harness.testChronicle);
     const existingProclamationCount = testConnectionBackend._proclamations.length;
     const vTestRoot = entities()[testRootId];
     const { media, contentUpdateStarted } = await harness.runValoscript(vTestRoot, `
@@ -79,7 +79,7 @@ describe("Media handling", () => {
         isRemoteAuthority: true, isLocallyRecorded: true, // as opposed to false of previous test
       } },
     });
-    const testConnectionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
+    const testConnectionBackend = harness.tryGetTestAuthorityConnection(harness.testChronicle);
     const existingProclamationCount = testConnectionBackend._proclamations.length;
     const { media, contentUpdateStarted, newMediaPersist } = await harness.runValoscript(
         vRef(testRootId), `
@@ -134,7 +134,7 @@ describe("Media handling", () => {
       awaitResult: (result) => result.getRecordedStory(),
     });
     const plog = harness.opLog(1, "test_purge-recompose", "Harness created");
-    const testConnectionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
+    const testConnectionBackend = harness.tryGetTestAuthorityConnection(harness.testChronicle);
     const existingProclamationCount = testConnectionBackend._proclamations.length;
     let reformCause;
     const onReform = e => { reformCause = e.error; e.preventDefault(); };
@@ -184,7 +184,7 @@ describe("Media handling", () => {
     plog && plog.opEvent("bvobPurged", "Purged bvob:", purgeEvent);
     expect(purgeEvent.error.message)
         .toMatch(/Media does not exist/);
-    expect(purgeEvent.errorStage)
+    expect(purgeEvent.errorAct)
         .toEqual("compose");
     expect(reformCause.message)
         .toMatch(/Not permitted/);
@@ -199,7 +199,7 @@ describe("Media handling", () => {
       awaitResult: (result) => result.getRecordedStory(),
     });
     const plog = harness.opLog(1, "test_no-reform-non-schism");
-    const testConnectionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
+    const testConnectionBackend = harness.tryGetTestAuthorityConnection(harness.testChronicle);
     const existingProclamationCount = testConnectionBackend._proclamations.length;
     let reformCause;
     const onReform = e => { reformCause = e.error; e.preventDefault(); };
@@ -248,7 +248,7 @@ describe("Media handling", () => {
     const errorEvent = await newMediaError;
     expect(errorEvent.error.message)
         .toMatch(/Connection lost/);
-    expect(errorEvent.errorStage)
+    expect(errorEvent.errorAct)
         .toEqual("profess");
     expect(reformCause)
         .toEqual(undefined);
@@ -267,7 +267,7 @@ describe("Media handling", () => {
     const plog = harness.opLog(1, "test_delay-depending", "Harness created");
     const buffer = arrayBufferFromUTF8String("example content");
     const contentHash = contentHashFromArrayBuffer(buffer);
-    const testConnectionBackend = harness.tryGetTestAuthorityConnection(harness.testConnection);
+    const testConnectionBackend = harness.tryGetTestAuthorityConnection(harness.testChronicle);
     const existingProclamationCount = testConnectionBackend._proclamations.length;
     let mediaProphecy, mediaPurgeEvent, mediaReformCause;
     let resolveReformationDelay;
@@ -321,7 +321,7 @@ describe("Media handling", () => {
         .toEqual(existingProclamationCount);
     expect(bvobPurgeEvent.error.message)
         .toMatch(/Media does not exist/);
-    expect(bvobPurgeEvent.errorStage)
+    expect(bvobPurgeEvent.errorAct)
         .toEqual("compose");
 
     expect(mediaReformCause.message)
@@ -480,7 +480,7 @@ describe("Two paired harnesses emulating two gateways connected through event st
       this.val = "yo";
     `)).toEqual("yo");
 
-    expect(await pairness.receiveTruthsFrom(harness))
+    expect((await pairness.receiveEventsFrom(harness)).length)
         .toEqual(1);
 
     expect(pairness.runValoscript(vRef(testRootId), `
@@ -501,7 +501,7 @@ describe("Two paired harnesses emulating two gateways connected through event st
       this.thing.$V.name;
     `)).toEqual("thingie");
 
-    expect(await pairness.receiveTruthsFrom(harness))
+    expect((await pairness.receiveEventsFrom(harness)).length)
         .toEqual(1);
 
     const { thing, names } = pairness.runValoscript(vRef(testRootId), `
@@ -537,7 +537,7 @@ describe("Two paired harnesses emulating two gateways connected through event st
       ];
     `)).toEqual(["thingie", "yoyo", undefined, "local but not universal"]);
 
-    expect(await pairness.receiveTruthsFrom(harness, { verbosity: 0 }))
+    expect((await pairness.receiveEventsFrom(harness, { verbosity: 0 })).length)
         .toEqual(1);
 
     expect(pairness.runValoscript(vRef(testRootId), `
@@ -583,7 +583,7 @@ describe("Two paired harnesses emulating two gateways connected through event st
         .toEqual([12, 12, 2, 16, 18, 18, -2, -18]);
     // expect(values[values.length - 1].call({ increment: 3 }))
     //    .toEqual(23); // this works but it's a pita to await for getComposedEvent
-    expect(await pairness.receiveTruthsFrom(harness, { verbosity: 0 }))
+    expect((await pairness.receiveEventsFrom(harness, { verbosity: 0 })).length)
         .toEqual(1);
 
     const pairedValues = await pairness.runValoscript(vRef(testRootId), `
@@ -598,9 +598,9 @@ describe("Two paired harnesses emulating two gateways connected through event st
         .toEqual([18, 20, 20, undefined /* -1 */, -20]);
     // See VALEK/index.js:94 for missing getter universalization
 
-    expect(await harness.receiveTruthsFrom(harness, { clearUpstreamEntries: true }))
+    expect((await harness.receiveEventsFrom(harness, { clearUpstreamEntries: true })).length)
         .toEqual(1);
-    expect(await harness.receiveTruthsFrom(pairness, { clearUpstreamEntries: true }))
+    expect((await harness.receiveEventsFrom(pairness, { clearUpstreamEntries: true })).length)
         .toEqual(1);
 
     expect(await harness.runValoscript(vRef(testRootId), `this.obj.callbackEntity.result`))
@@ -641,7 +641,7 @@ describe("Two paired harnesses emulating two gateways connected through event st
     expect(instance.getPhase())
         .toEqual("Activating");
 
-    expect(await pairness.receiveTruthsFrom(harness, { verbosity: 0 }))
+    expect((await pairness.receiveEventsFrom(harness, { verbosity: 0 })).length)
         .toEqual(1);
 
     expect(target.getPhase())

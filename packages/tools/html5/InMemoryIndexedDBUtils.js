@@ -6,69 +6,60 @@ import { Command } from "~/raem/events";
 import { dumpObject, wrapError } from "~/tools";
 import { swapAspectRoot } from "../../sourcerer/tools/EventAspects";
 
-export async function openDB (uri: string) {
+export function openDB (uri: string) {
   let database;
-  const process = new Promise((resolve, reject) => {
+  return (new Promise((resolve, reject) => {
     const request = FakeIndexedDB.open(uri, 1);
     request.onerror = reject;
     request.onsuccess = (event: Event) => {
       database = event.target.result;
       resolve();
     };
-  });
-  await process;
-  return database;
+  }))
+  .then(() => database);
 }
 
-export async function getFromDB (database: FDBDatabase, table: string, key: any) {
-  try {
+export function getFromDB (database: FDBDatabase, table: string, key: any) {
+  let entry;
+  return (new Promise((resolve, reject) => {
     const transaction = database.transaction([table], "readonly");
     const objectStore = transaction.objectStore(table);
-
-    let entry;
-    const process = new Promise((resolve, reject) => {
       const request = objectStore.get(key);
-      request.onerror = reject;
-      request.onsuccess = (event: Event) => {
-        entry = event.target.result;
-        resolve();
-      };
-    });
-    await process;
-    return entry;
-  } catch (error) {
+    request.onerror = reject;
+    request.onsuccess = (event: Event) => {
+      entry = event.target.result;
+      resolve();
+    };
+  }))
+  .then(() => entry, error => {
     throw wrapError(error, `During getFromDB("${database.name}", ${table}, ${key}), with:`,
         "\n\tkey:", key);
-  }
+  });
 }
 
-export async function getKeysFromDB (database: FDBDatabase, table: string) {
+export function getKeysFromDB (database: FDBDatabase, table: string) {
   let keys;
-  try {
+  return (new Promise((resolve, reject) => {
     const transaction = database.transaction([table], "readonly");
     const objectStore = transaction.objectStore(table);
-
-    const process = new Promise((resolve, reject) => {
-      const request = objectStore.getAllKeys();
-      request.onerror = reject;
-      request.onsuccess = (event: Event) => {
-        keys = event.target.result;
-        resolve();
-      };
-    });
-    await process;
-    return keys;
-  } catch (error) {
+    const request = objectStore.getAllKeys();
+    request.onerror = reject;
+    request.onsuccess = (event: Event) => {
+      keys = event.target.result;
+      resolve();
+    };
+  }))
+  .then(() => keys, error => {
     throw wrapError(error, `During getKeyFromDB("${database.name}", ${table}), with:`,
         "\n\tcurrent ret keys:", keys);
-  }
+  });
 }
 
 // Utility function verifying that a command got stored in the database with a given logIndex.
 export async function expectStoredInDB (command: Command, database: FDBDatabase, table: string,
     logIndex: number) {
   let stored, expected;
-  expect(command.aspects.log.index).toEqual(logIndex);
+  expect((command.aspects.log || {}).index).toEqual(logIndex);
   try {
     const storedCommand = await getFromDB(database, table, logIndex);
     if (storedCommand === undefined) {

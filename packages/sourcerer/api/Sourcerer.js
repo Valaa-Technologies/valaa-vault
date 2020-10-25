@@ -32,7 +32,7 @@ import { dumpObject } from "~/tools/wrapError";
    * @memberof Oracle
    */
 export type SourceryOptions = {
-  sourcify?: boolean,                      // default: true. Connect to updates
+  sourcer?: boolean,                      // default: true. Connect to updates
   subscribeEvents?: boolean,              // default: true. Subscribe for downstream push events.
   pushTruths?: ReceiveEvents,   // The persistent callback for downstream push events.
   narrateOptions?: NarrateOptions, // default: {}. Narrate with default options. False to disable.
@@ -115,7 +115,7 @@ export default class Sourcerer extends FabricEventTarget {
    *
    * @memberof Sourcerer
    */
-  sourcifyChronicle (chronicleURI: string, options: SourceryOptions = {}): ?Connection {
+  sourcerChronicle (chronicleURI: string, options: SourceryOptions = {}): ?Connection {
     try {
       let connection = this._connections[chronicleURI];
       if (connection) return connection;
@@ -125,15 +125,15 @@ export default class Sourcerer extends FabricEventTarget {
             "Can't create new chronicle connection with options.newConnection === false");
       }
       connection = this._createConnection(chronicleURI,
-          Object.assign(Object.create(options), { sourcify: false }));
+          Object.assign(Object.create(options), { sourcer: false }));
       if (!connection) return undefined;
       connection.addReference();
       this._connections[chronicleURI] = connection;
-      if (options.sourcify !== false) connection.sourcify(options); // Don't wait for sourcery.
+      if (options.sourcer !== false) connection.sourcer(options); // Don't wait for sourcery.
       return connection;
     } catch (error) {
       throw this.wrapErrorEvent(error, 1,
-          new Error(`sourcifyChronicle(${chronicleURI})`),
+          new Error(`sourcerChronicle(${chronicleURI})`),
           "\n\toptions:", ...dumpObject(options));
     }
 
@@ -151,13 +151,13 @@ export default class Sourcerer extends FabricEventTarget {
   }
 
   acquireConnection (chronicleURI: string, options: SourceryOptions) {
-    return this.sourcifyChronicle(chronicleURI, options);
+    return this.sourcerChronicle(chronicleURI, options);
   }
 
   _createConnection (chronicleURI: string, options: SourceryOptions) {
     const ConnectionType = this.constructor.ConnectionType;
     if (!ConnectionType) {
-      return this._upstream.sourcifyChronicle(chronicleURI, options);
+      return this._upstream.sourcerChronicle(chronicleURI, options);
     }
     return new ConnectionType({
       chronicleURI, sourcerer: this, verbosity: this.getVerbosity(),

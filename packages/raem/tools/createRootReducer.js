@@ -58,7 +58,7 @@ function mergeActionReducers (reducerDictionaryCreates, context) {
  */
 export default function createRootReducer ({
   schema, parent, reducers, validators, context = {},
-  subReduceLogThreshold = 2, reduceLogThreshold = 1
+  subReduceLogThreshold = 3, reduceLogThreshold = 3
 }) {
   const reducerContext = {
     subReduce,

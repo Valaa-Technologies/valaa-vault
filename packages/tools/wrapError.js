@@ -208,7 +208,8 @@ function outputError (error, header = "Exception caught", logger = _globalLogger
       warn(`[${verbosities.join(">=")}] error context by:\n  ${context.name}`,
           ...context.contextDescriptions.map(dumpifyObject));
     } else if (excess >= -1) {
-      logger.debug(`\t[${verbosities.join("<")}]`, { traces }, `collapsed fabric traces`);
+      logger.debug(`\t[${verbosities.join("<")}]`,
+          inBrowser() ? { traces } : traces.length, `collapsed fabric traces`);
       traces = [];
       const lines = [];
       for (const entry of context.contextDescriptions) {
@@ -216,7 +217,8 @@ function outputError (error, header = "Exception caught", logger = _globalLogger
         lines[lines.length - 1].push(entry);
       }
       const info = (contextLogger.infoEvent || contextLogger.info).bind(contextLogger);
-      info(`[${verbosities.join("<")}] collapsed error context by ${context.name}:`, lines);
+      info(`[${verbosities.join("<")}] collapsed error context by ${context.name}:`,
+          inBrowser() ? { lines } : `${lines.length} lines hidden`);
     } else {
       traces.push(`  [${verbosities.join("<<")}] hidden error context by ${context.name}`);
     }

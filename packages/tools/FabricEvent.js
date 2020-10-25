@@ -170,14 +170,22 @@ export class FabricEventTarget {
 
   static _globalOps = Object.create(null);
 
-  opLog (parentOpLog = this, requiredVerbosity, operationName, ...rest) {
-    const loudness = (this._verbosity || 0)
-        - (typeof parentOpLog === "number" ? parentOpLog : requiredVerbosity);
+  opLog (requiredVerbosity, parentLogOrOptionsOrName = this, operationName, ...rest) {
+    let verbosity = parentLogOrOptionsOrName.verbosity || 0;
+    if (this._verbosity > verbosity) verbosity = this._verbosity;
+    const loudness = verbosity - requiredVerbosity;
     if (loudness < 0) return undefined;
-    if (typeof parentOpLog === "number") {
-      return this.opLog(undefined, parentOpLog, requiredVerbosity, operationName, ...rest);
+    let parentOpLog;
+    if (typeof parentLogOrOptionsOrName === "string") {
+      return this.opLog(requiredVerbosity, this, parentLogOrOptionsOrName, operationName, ...rest);
+    }
+    if (parentLogOrOptionsOrName instanceof FabricEventTarget) {
+      parentOpLog = parentLogOrOptionsOrName;
+    } else {
+      parentOpLog = parentLogOrOptionsOrName.plog || this;
     }
     const ret = Object.create(this);
+    ret._verbosity = ret.verbosity = verbosity;
     ret._loudness = loudness;
     const parentPlot = parentOpLog._opLogPlot || "";
     const ops = parentPlot
@@ -186,7 +194,7 @@ export class FabricEventTarget {
     const index = ops[operationName] || 0;
     ops[operationName] = index + 1;
     ret._opLogPlot = `${parentPlot}@-:${operationName}:${index}`;
-    for (let i = this._verbosity; i; --i) ret[`v${i}`] = ret;
+    for (let i = verbosity; i; --i) ret[`v${i}`] = ret;
     if (rest.length) ret.opEvent(this, "", ...rest);
     return ret;
   }
@@ -307,7 +315,7 @@ export class FabricEventTarget {
 
   _addChainClockers (parentOpLog, minVerbosity: number, eventPrefix: string,
       thenChainCallbacks: Function[]) {
-    const chainOpLog = this.opLog(parentOpLog, minVerbosity, eventPrefix);
+    const chainOpLog = this.opLog(minVerbosity, parentOpLog, eventPrefix);
     if (!chainOpLog) return thenChainCallbacks;
     return [].concat(...thenChainCallbacks.map((callback, index) => {
       if (!callback) {

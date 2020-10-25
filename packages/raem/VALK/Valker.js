@@ -203,7 +203,8 @@ export default class Valker extends Resolver {
       throw this.wrapErrorEvent(error, 1, () => [
         `run()`,
         "\n\tvalk head:", ...dumpObject(packedHead),
-        "\n\tvalk kuery:", ...dumpKuery(kuery),
+        `\n\tvalk ${(kuery instanceof Kuery) ? "kuery" : "vakon"}:`, ...dumpKuery(kuery),
+        "\n\tsourceInfo:", ...dumpObject(valker[SourceInfoTag]),
         ...(this.getVerbosity() < 2 ? [] : [
           "\n\tscope:", scope,
           "\n\tstate:", ...dumpObject(valker.state && valker.state.toJS()),

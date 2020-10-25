@@ -11,11 +11,11 @@ async function setUp (testAuthorityConfig: Object = {}, options: {}) {
     ...options,
   });
   const ret = {
-    connection: await harness.sourcerer.sourcifyChronicle(
+    connection: await harness.sourcerer.sourcerChronicle(
         harness.testChronicleURI).asSourceredConnection(),
-    scribeConnection: await harness.scribe.sourcifyChronicle(
+    scribeConnection: await harness.scribe.sourcerChronicle(
         harness.testChronicleURI, { newConnection: false }).asSourceredConnection(),
-    oracleConnection: await harness.oracle.sourcifyChronicle(
+    oracleConnection: await harness.oracle.sourcerChronicle(
         harness.testChronicleURI, { newConnection: false }).asSourceredConnection(),
   };
   ret.authorityConnection = ret.oracleConnection.getUpstreamConnection();
@@ -70,16 +70,15 @@ describe("Chronicle load ordering and inactive resource handling", () => {
         .toEqual(component);
 
     const pairness = await createEngineOracleHarness({ verbosity: 0, pairedHarness: harness });
-    await pairness.sourcerer.sourcifyChronicle(harness.testChronicleURI)
+    await pairness.sourcerer.sourcerChronicle(harness.testChronicleURI)
         .asSourceredConnection();
-    expect(await pairness
-        .receiveTruthsFrom(harness.testConnection, { verbosity: 0 }))
+    expect((await pairness.receiveEventsFrom(harness.testChronicle, { verbosity: 0 })).length)
         .toEqual(1);
 
     const pairedBaseConnection = pairness.sourcerer
-        .sourcifyChronicle(baseChronicle.getChronicleURI());
-    expect(await pairness
-        .receiveTruthsFrom(baseChronicle, { verbosity: 0, asNarrateResults: true }))
+        .sourcerChronicle(baseChronicle.getChronicleURI());
+    expect((await pairness
+            .receiveEventsFrom(baseChronicle, { verbosity: 0, asNarrateResults: true })).length)
         .toEqual(2);
     await pairedBaseConnection.asSourceredConnection();
 
@@ -92,11 +91,11 @@ describe("Chronicle load ordering and inactive resource handling", () => {
     expect(pairness.runValoscript(pairedComponent, `
       this.num;
     `, { verbosity: 0 })).toEqual(10);
-    // await pairness.sourcerer.sourcifyChronicle(baseChronicle.getChronicleURI())
+    // await pairness.sourcerer.sourcerChronicle(baseChronicle.getChronicleURI())
     //    .asSourceredConnection();
     /*
 
-    await pairness.sourcerer.sourcifyChronicle(harness.testChronicleURI);
+    await pairness.sourcerer.sourcerChronicle(harness.testChronicleURI);
     */
   });
 });

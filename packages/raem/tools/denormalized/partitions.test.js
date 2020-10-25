@@ -107,7 +107,7 @@ describe("chronicles", () => {
       "valaa-local:?id=@$~raw.A_grandparent@@": {},
     };
     const bTestRootChronicle = { // eslint-disable-line
-      "valaa-test:?id=@$~raw.B_testRoot@@": {},
+      "valaa-test:?id=@$~raw.B_testRoot@@": { isNewChronicle: true },
     };
     expect(finalEvent.meta.chronicles)
         .toEqual({ ...aGrandparentChronicle, ...bTestRootChronicle });

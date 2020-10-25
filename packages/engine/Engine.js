@@ -208,7 +208,7 @@ export default class Engine extends Cog {
   async activateResource (resourceURI: string) {
     const vref = this.discourse.obtainReference(resourceURI);
     const connection = await this.discourse
-        .sourcifyChronicle(vref.getChronicleURI())
+        .sourcerChronicle(vref.getChronicleURI())
         .asSourceredConnection();
     const vResource = await this.getVrapperByRawId(vref.rawId() || connection.getChronicleId());
     await vResource.activate();
@@ -322,7 +322,7 @@ export default class Engine extends Cog {
       // Create chronicle(s) before the transaction is committed
       // (and thus before the commands leave upstream).
       discourse
-          .sourcifyChronicle(id.getChronicleURI(), { newChronicle: true })
+          .sourcerChronicle(id.getChronicleURI(), { newChronicle: true })
           .asSourceredConnection();
     }
     // FIXME(iridian): If the transaction fails the Vrapper will

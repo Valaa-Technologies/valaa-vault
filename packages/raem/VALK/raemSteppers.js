@@ -9,7 +9,7 @@ import { elevateFieldRawSequence } from "~/raem/state/FieldInfo";
 import Transient, { PrototypeOfImmaterialTag } from "~/raem/state/Transient";
 import { getObjectRawField } from "~/raem/state/getObjectField";
 
-import { trySourcifyAbsentChroniclesAndThen } from "~/raem/tools/denormalized/partitions";
+import { trySourcerAbsentChroniclesAndThen } from "~/raem/tools/denormalized/partitions";
 
 import Valker from "~/raem/VALK/Valker";
 import Kuery, { dumpObject, dumpKuery, dumpScope } from "~/raem/VALK/Kuery";
@@ -1019,7 +1019,7 @@ function _createVCall (capturingValker: Valker, vakon: any, sourceInfo: ?Object,
     } else {
       opName = `raem§call/${valkCaller ? "advance" : "run"}${contextText}`;
       if (!valkCaller) {
-        const absentChronicleSourcery = trySourcifyAbsentChroniclesAndThen(
+        const absentChronicleSourcery = trySourcerAbsentChroniclesAndThen(
           advanceError, () => vcall.apply(this, arguments));
         if (absentChronicleSourcery) return absentChronicleSourcery;
       }

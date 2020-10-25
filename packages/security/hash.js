@@ -2,14 +2,11 @@ const JSSHA256 = require("jssha/src/sha256");
 const JSSHA512 = require("jssha/src/sha512");
 const JSSHA3 = require("jssha/src/sha3");
 
-const { arrayBufferFromUTF8String } = require("./textEncoding");
-
 module.exports = {
   hashV240,
   isHashV240,
   b64SHA256FromUTF8Text,
-  hexSHA512FromArrayBuffer,
-  hexSHA512PromiseFromStream,
+  hexSHA512FromBuffer,
 };
 
 function b64SHA256FromUTF8Text (utf8Text) {
@@ -18,36 +15,12 @@ function b64SHA256FromUTF8Text (utf8Text) {
   return sha.getHash("B64");
 }
 
-function hexSHA512FromArrayBuffer (arrayBuffer) {
+function hexSHA512FromBuffer (arrayBuffer) {
   const sha = new JSSHA512("SHA-512", "ARRAYBUFFER");
   sha.update(arrayBuffer);
   return sha.getHash("HEX");
 }
 
-function hexSHA512PromiseFromStream (octetOrUTF8StringStream) {
-  return new Promise((resolve, reject) => {
-    try {
-      const sha = new JSSHA512("SHA-512", "ARRAYBUFFER");
-      octetOrUTF8StringStream.on("data", (bufferOrString) => {
-        if (typeof bufferOrString === "string") {
-          sha.update(arrayBufferFromUTF8String(bufferOrString));
-        } else {
-          sha.update(bufferOrString);
-        }
-      });
-      octetOrUTF8StringStream.on("error", reject);
-      octetOrUTF8StringStream.on("end", () => {
-        const digest = sha.getHash("HEX");
-        if (digest) {
-          resolve(digest);
-        } else {
-          reject(new Error("Could not resolve digest for stream"));
-        }
-      });
-    } catch (err) {
-      reject(err);
-    }
-  });
 }
 
 /* eslint-disable max-len */

@@ -14,7 +14,7 @@ import { hashV240 } from "~/security/hash";
  * @param {?number} intraEventIndex
  * @returns
  */
-export default function createVRID0Dot3 (
+export default function createVRID0Dot2 (
     commandId: string, chronicleURI: string, intraEventIndex: ?number) {
   if (typeof commandId !== "string") throw new Error("commandId is not a string");
   if (typeof chronicleURI !== "string") throw new Error("chronicleURI is not a string");
@@ -25,7 +25,7 @@ export default function createVRID0Dot3 (
   return `@$~cih.${hashV240(`${commandId} ${chronicleURI} ${String(intraEventIndex)}`)}@@`;
 }
 
-export function createChronicleRootVRID0Dot3 (
+export function createChronicleRootVRID0Dot2 (
     commandId: string, authorityURI: string, intraEventChronicleCount: ?number) {
   if (!Number.isInteger(intraEventChronicleCount)
       || !(intraEventChronicleCount >= 0) || !(intraEventChronicleCount < 65536)) {
@@ -36,6 +36,6 @@ export function createChronicleRootVRID0Dot3 (
       intraEventChronicleCount)}`)}@@`;
 }
 
-export function upgradeVRIDTo0Dot3 (version0Dot2RawId) {
+export function upgradeVRIDTo0Dot2 (version0Dot2RawId) {
   return coerceAsVRID(version0Dot2RawId);
 }

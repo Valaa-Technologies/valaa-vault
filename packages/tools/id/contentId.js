@@ -1,6 +1,6 @@
 // @flow
 
-import { hexSHA512FromArrayBuffer, hexSHA512PromiseFromStream } from "~/security/hash";
+import { hexSHA512FromBuffer } from "~/security/hash";
 import { arrayBufferFromUTF8String } from "~/security/textEncoding";
 
 import { thenChainEagerly } from "~/tools/thenChainEagerly";
@@ -34,13 +34,5 @@ export function contentHashFromUCS2String (contentString: string) {
 }
 
 export function contentHashFromArrayBuffer (buffer: ArrayBuffer): string {
-  return hexSHA512FromArrayBuffer(buffer);
-}
-
-/*
-  Returns a promise that resolves with the sha512 hash of the content of the given stream.
-*/
-
-export function contentHashFromNativeStream (contentStream): Promise<string> {
-  return hexSHA512PromiseFromStream(contentStream);
+  return hexSHA512FromBuffer(buffer);
 }

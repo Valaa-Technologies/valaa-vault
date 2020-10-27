@@ -195,6 +195,9 @@ export default class Connection extends Follower {
     }
     const narrateOptions = options.narrateOptions || {};
     narrateOptions.plog = options.plog;
+    if (options.newChronicle && (narrateOptions.remote === undefined)) {
+      narrateOptions.remote = false;
+    }
     return [options, this.narrateEventLog(narrateOptions)];
   }
 

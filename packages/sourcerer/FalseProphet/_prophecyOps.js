@@ -227,7 +227,6 @@ export class ProphecyOperation extends ProphecyEventResult {
   _fulfillment: Promise<Object>;
   _actIndex: number = 0;
   _sceneName: string = "construct";
-  _firstStageVenues: Promise<Object>;
 
   launchPartialReform (elaboration: Object) {
     if (!elaboration.instigatorChronicleURI) {
@@ -301,7 +300,8 @@ export class ProphecyOperation extends ProphecyEventResult {
 
   getComposedStory () {
     return thenChainEagerly(
-        this._firstStageVenues,
+        this._firstAct
+            || (this._firstAct = new Promise(resolve => { this._resolveFirstAct = resolve; })),
         () => this._prophecy || this.throwRejectionError(),
         this.errorOnProphecyOperation.bind(this,
             new Error(`proclaimEvents.eventResults[${this.index}].getComposedStory()`)));
@@ -310,33 +310,36 @@ export class ProphecyOperation extends ProphecyEventResult {
   getRecordedStory (dispatchPath_) {
     let reformAttempt = this._reformAttempt;
     return this._recordedStory || (this._recordedStory = thenChainEagerly(
-        // TODO(iridian, 2019-01): Add also local act proclamations to
-        // the waited list, as _firstAct only contains remote
-        // act proclamations. This requires refactoring: local
-        // act persisting currently waits remote truths. This command
-        // must be operable offline, so it cannot rely on remote truths.
-        // Local persisting must thus be refactored to not await on
-        // remote truths, but this needs to have support for discarding
-        // the locally persisted commands if the remotes rejected.
-        this._firstStageVenues
-            && mapEagerly(this._firstStageVenues, ({ proclamation }) => {
-              if (!proclamation) throw new Error("Heresy pending reformation");
-              return proclamation.getRecordedEvent();
-            }),
-        () => {
-          if (reformAttempt !== this._reformAttempt) {
-            throw ({ retry: true }); // eslint-disable-line no-throw-literal
-          }
-          const prophecy = this._prophecy || this.throwRejectionError();
-          const dispatchPath = dispatchPath_
-              || generateDispatchEventPath(this.event.meta.transactor, "record");
-          if (dispatchPath) {
-            Promise.resolve(this._recordedStory).then(() =>
-                this.event.meta.transactor.dispatchAndDefaultActEvent(
-                    this.getProgressEvent("record"), { dispatchPath }));
-          }
-          return (this._recordedStory = prophecy);
-        },
+        this._firstAct
+            || (this._firstAct = new Promise(resolve => { this._resolveFirstAct = resolve; })),
+        [
+          // TODO(iridian, 2019-01): Add also local act proclamations to
+          // the waited list, as _firstAct only contains remote
+          // act proclamations. This requires refactoring: local
+          // act persisting currently waits remote truths. This command
+          // must be operable offline, so it cannot rely on remote truths.
+          // Local persisting must thus be refactored to not await on
+          // remote truths, but this needs to have support for discarding
+          // the locally persisted commands if the remotes rejected.
+          firstAct => mapEagerly(firstAct, ({ proclamation }) => {
+            if (!proclamation) throw new Error("Heresy pending reformation");
+            return proclamation.getRecordedEvent();
+          }),
+          () => {
+            if (reformAttempt !== this._reformAttempt) {
+              throw ({ retry: true }); // eslint-disable-line no-throw-literal
+            }
+            const prophecy = this._prophecy || this.throwRejectionError();
+            const dispatchPath = dispatchPath_
+                || generateDispatchEventPath(this.event.meta.transactor, "record");
+            if (dispatchPath) {
+              Promise.resolve(this._recordedStory).then(() =>
+                  this.event.meta.transactor.dispatchAndDefaultActEvent(
+                      this.getProgressEvent("record"), { dispatchPath }));
+            }
+            return (this._recordedStory = prophecy);
+          },
+        ],
         (error, index, head, functionChain, onRejected) => {
           if (error.retry && (reformAttempt !== this._reformAttempt)) {
             reformAttempt = this._reformAttempt;
@@ -411,9 +414,7 @@ export class ProphecyOperation extends ProphecyEventResult {
         "\n\tevent:", ...dumpObject(this._events[this.index]),
         "\n\tprophecy:", ...dumpObject(this.event),
         "\n\tvenues:", ...dumpObject(this._venues),
-        "\n\tremote stage:", ...dumpObject(this._remoteVenues),
-        "\n\tlocal stage:", ...dumpObject(this._localVenues),
-        "\n\tmemory stage:", ...dumpObject(this._memoryVenues),
+        "\n\tacts:", ...dumpObject(this._acts),
         "\n\toperation:", ...dumpObject(this),
     );
     if (!nothrow) throw wrappedError;
@@ -428,9 +429,8 @@ export class ProphecyOperation extends ProphecyEventResult {
   static _professChain = [
     ProphecyOperation.prototype._prepareActsAndCommands,
     ProphecyOperation.prototype._initiateAllVenueValidations,
-    ProphecyOperation.prototype._processRemoteVenues,
-    ProphecyOperation.prototype._processLocalVenues,
-    ProphecyOperation.prototype._processMemoryVenues,
+    ProphecyOperation.prototype._prepareNextAct,
+    ProphecyOperation.prototype._performNextAct,
     ProphecyOperation.prototype._fulfillProphecy,
   ];
 
@@ -450,13 +450,15 @@ export class ProphecyOperation extends ProphecyEventResult {
   _prepareActsAndCommands () {
     this._sceneName = "prepare acts";
     this._venues = {};
+    this._acts = [];
     let missingConnections;
     const chronicles = (this._prophecy.meta || {}).chronicles;
     if (!chronicles) {
       throw new Error("prophecy is missing chronicle information");
     }
     const prophet = this._parent;
-    for (const chronicleOrPartitionURI of Object.keys(chronicles)) {
+    let remoteActs, localActs, memoryActs;
+    for (const [chronicleOrPartitionURI, chronicleInfo] of Object.entries(chronicles)) {
       let chronicleURI = chronicleOrPartitionURI;
       let connection = prophet._connections[chronicleURI];
       if (!connection) {
@@ -472,95 +474,63 @@ export class ProphecyOperation extends ProphecyEventResult {
         }
       }
       if (!this._prophecy.meta) throw new Error("prophecy.meta missing");
+
       const commandEvent = extractChronicleEvent0Dot2(
           chronicleURI, getActionFromPassage(this._prophecy));
       (connection.isRemoteAuthority()
-              ? (this._remoteVenues || (this._remoteVenues = []))
+              ? (remoteActs || (remoteActs = []))
           : connection.isLocallyRecorded()
-              ? (this._localVenues || (this._localVenues = []))
-              : (this._memoryVenues || (this._memoryVenues = []))
+              ? (localActs || (localActs = []))
+              : (memoryActs || (memoryActs = []))
       ).push((this._venues[chronicleURI] = { connection, commandEvent }));
     }
     if (missingConnections) {
       throw new AbsentChroniclesError(`Missing active connections: '${
           missingConnections.map(c => c.toString()).join("', '")}'`, missingConnections);
     }
+    if (remoteActs) this._acts.push(remoteActs);
+    if (localActs) this._acts.push(localActs);
+    if (memoryActs) this._acts.push(memoryActs);
   }
 
   getActs () {
-    return this._allStages || (this._allStages = [
-      this._remoteVenues, this._localVenues, this._memoryVenues,
-    ].filter(s => s));
+    return this._acts;
   }
 
   _initiateAllVenueValidations () {
     this._sceneName = `validate venues`;
-    this.getActs().forEach(actVenues => actVenues.forEach(venue => {
-      venue.validatedVenue = thenChainEagerly(
-          venue.connection.asSourceredConnection(),
-          (connection) => {
-            this._sceneName = `validate venue connection ${connection.getName()}`;
-            if (connection.isFrozenConnection()) {
-              throw new Error(`Trying to chronicle events to a frozen chronicle ${
-                  connection.getName()}`);
-            }
-            const commandEventVersion = venue.commandEvent.aspects.version;
-            const connectionEventVersion = connection.getEventVersion();
-            if (!connectionEventVersion || (connectionEventVersion !== commandEventVersion)) {
-              throw new Error(`Command event version "${commandEventVersion
-                  }" not supported by connection ${connection.getName()} which only supports "${
-                  connectionEventVersion}"`);
-            }
-            // Perform other chronicle validatedVenue
-            // TODO(iridian): extract chronicle content (EDIT: a what now?)
-            return (venue.validatedVenue = venue);
-          },
-      );
-    }));
+    for (const actVenues of this._acts) {
+      actVenues.forEach(venue => {
+        venue.validatedVenue = thenChainEagerly(
+            venue.connection.asSourceredConnection(),
+            (connection) => {
+              this._sceneName = `validate venue connection ${connection.getName()}`;
+              if (connection.isFrozenConnection()) {
+                throw new Error(`Trying to chronicle events to a frozen chronicle ${
+                    connection.getName()}`);
+              }
+              const commandEventVersion = venue.commandEvent.aspects.version;
+              const connectionEventVersion = connection.getEventVersion();
+              if (!connectionEventVersion || (connectionEventVersion !== commandEventVersion)) {
+                throw new Error(`Command event version "${commandEventVersion
+                    }" not supported by connection ${connection.getName()} which only supports "${
+                    connectionEventVersion}"`);
+              }
+              // Perform other chronicle validatedVenue
+              // TODO(iridian): extract chronicle content (EDIT: a what now?)
+              return (venue.validatedVenue = venue);
+            },
+        );
+      });
+    }
   }
 
-  _processRemoteVenues () {
-    if (!this._remoteVenues) return undefined;
-    return this.opChain("_processFirstStageChain", ["remote", this._remoteVenues]);
+  _prepareNextAct () {
+    this._sceneName = `await act #${this._actIndex} connection venue validations`;
+    return this._acts[this._actIndex].map(venue => venue.validatedVenue);
   }
 
-  _processLocalVenues () {
-    if (!this._localVenues) return undefined;
-    return this.opChain(this._firstStageVenues ? "_processStageChain" : "_processFirstStageChain",
-        ["local", this._localVenues]);
-  }
-
-  _processMemoryVenues () {
-    if (!this._memoryVenues) return undefined;
-    return this.opChain("_processStageChain", ["memory", this._memoryVenues]);
-  }
-
-  ];
-  static _processActChain = [
-    ProphecyOperation.prototype._finalizeActVenueValidations,
-    ProphecyOperation.prototype._chronicleActVenueCommands,
-    ProphecyOperation.prototype._processActVenues,
-
-  static _processFirstStageChain = [
-    ProphecyOperation.prototype._validateConnections,
-    ProphecyOperation.prototype._chronicleFirstStageVenueCommands,
-    ProphecyOperation.prototype._processStageVenues,
-  ];
-
-  _finalizeActVenueValidations (actName, venues) {
-    this._actName = actName;
-    this._sceneName = `await act #${this._actIndex} '${actName}' connection validatedVenues`;
-    return venues.map(venue => venue.validatedVenue);
-  }
-
-  _chronicleFirstStageVenueCommands (venues) {
-    this._firstStageVenues = venues;
-    const ret = this._chronicleStageVenueCommands(venues);
-    const onRecordDispatchPath = generateDispatchEventPath(this.event.meta.transactor, "record");
-    if (onRecordDispatchPath) this.getRecordedStory(onRecordDispatchPath);
-    return ret;
-  }
-  _chronicleActVenueCommands (...validatedVenues) {
+  _performNextAct (...validatedVenues) {
     // Persist the prophecy and add refs to all associated event bvobs.
     // This is necessary for prophecy reattempts so that the bvobs aren't
     // garbage collected on browser refresh. Otherwise they can't be
@@ -575,34 +545,41 @@ export class ProphecyOperation extends ProphecyEventResult {
     // Maybe determine aspects.log.index's beforehand?
 
     // Get aspects.log.index and scribe record finalizer for each chronicle
-    this._sceneName = `chronicle act #${this._actIndex} '${this._actName}' commands`;
+    const actIndex = this._actIndex;
+    this._sceneName = `proclaim act #${actIndex} commands`;
     for (const venue of validatedVenues) {
       try {
-        this._sceneName = `chronicle act #${this._actIndex} '${this._actName}' command to ${
+        this._sceneName = `proclaim act #${actIndex} command to ${
             venue.connection.getName()}`;
-        venue.proclamation = venue.connection
+        venue.currentProclamation = venue.proclamation = venue.connection
             .proclaimEvent(venue.commandEvent, Object.create(this._options));
       } catch (error) {
         throw this._parent.wrapErrorEvent(error, 1,
-            new Error(`proclaimEvents.act["${this._actName}"].connection["${
+            new Error(`proclaimEvents.act[${actIndex}].connection["${
                 venue.connection.getName()}"].proclaimEvents`),
             "\n\tcommandEvent:", ...dumpObject(venue.commandEvent),
             "\n\tproclamation:", ...dumpObject(venue.proclamation),
         );
       }
     }
-    this._actIndex++;
-    this._sceneName = `await act #${this._actIndex} '${this._actName}' truths`;
-    return [validatedVenues];
+
+    if (!actIndex) {
+      this._firstAct = validatedVenues;
+      if (this._resolveFirstAct) this._resolveFirstAct(validatedVenues);
+      const onRecordDispatchPath = generateDispatchEventPath(this.event.meta.transactor, "record");
+      if (onRecordDispatchPath) this.getRecordedStory(onRecordDispatchPath);
+    }
+
+    this._sceneName = `await act #${actIndex} truths`;
+    const venuePerformances = validatedVenues.map(venue => this.opChain(
+        "_performVenueChain", [venue, venue.proclamation],
+        "_errorOnPerformVenue"));
+    return (++this._actIndex === this._acts.length)
+        ? venuePerformances
+        : thisChainRedirect("_prepareNextAct", venuePerformances);
   }
 
-  _processActVenues (venues) {
-    return venues.map(venue => this.opChain(
-        "_actVenuesChain", [venue, venue.currentProclamation = venue.proclamation],
-        "_errorOnProcessActVenue"));
-  }
-
-  static _actVenuesChain = [
+  static _performVenueChain = [
     ProphecyOperation.prototype._divergeVenueProclamationResolutions,
     ProphecyOperation.prototype._convergeVenueProclamationTruth,
   ];

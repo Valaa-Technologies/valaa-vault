@@ -101,7 +101,7 @@ export function addSourcerChronicleToError (error, sourcerChronicle) {
  * fetched from the ghost host.
  */
 
-export function universalizeChronicleMutation (bard: Bard, id: VRL) {
+export function universalizeChronicleMutation (bard: Bard, id: VRL, isNewChronicle: ?boolean) {
   let chronicleURI, targetMeta, enclosingPassage, enclosingChronicleURI;
   const ref = tryHostRef(id);
   try {
@@ -151,6 +151,9 @@ export function universalizeChronicleMutation (bard: Bard, id: VRL) {
     if (!chronicleInfo) {
       chronicleInfo = !bard.createCommandChronicleInfo ? {}
           : bard.createCommandChronicleInfo(chronicleURI, action, bard.event, bard);
+    }
+    if (isNewChronicle) {
+      chronicleInfo.isNewChronicle = true;
     }
     if (!enclosingChronicleURI) {
       targetMeta = eventMeta;
@@ -213,17 +216,22 @@ export function resolveChronicleURI (resolver: Resolver, resourceId: VRL) {
 
 export function setCreatedObjectChronicle (mutableTransient: Transient) {
   const transientId = mutableTransient.get("id");
-  const chronicleURI = determineNewObjectChronicle(mutableTransient, transientId);
-  if (!chronicleURI) return;
+  const authorityURI = mutableTransient.get("authorityURI")
+      || mutableTransient.get("partitionAuthorityURI");
+  const chronicleURI = determineNewObjectChronicle(authorityURI, mutableTransient, transientId);
+  if (!chronicleURI) return undefined;
   if (chronicleURI !== transientId.getChronicleURI()) {
     transientId.setChronicleURI(chronicleURI);
   }
+  return !!authorityURI;
 }
 
 export function setModifiedObjectChronicleAndUpdateOwneeObjectIdChronicles (
     bard: Bard, mutableTransient: Transient) {
   const transientId = mutableTransient.get("id");
-  const chronicleURI = determineNewObjectChronicle(mutableTransient, transientId);
+  const authorityURI = mutableTransient.get("authorityURI")
+      || mutableTransient.get("partitionAuthorityURI");
+  const chronicleURI = determineNewObjectChronicle(authorityURI, mutableTransient, transientId);
   const oldChronicleURI = transientId.getChronicleURI();
   if (chronicleURI !== oldChronicleURI) {
     mutableTransient.set("id", transientId.immutateWithChronicleURI(chronicleURI));
@@ -231,9 +239,8 @@ export function setModifiedObjectChronicleAndUpdateOwneeObjectIdChronicles (
   }
 }
 
-export function determineNewObjectChronicle (mutableTransient: Transient, transientId: VRL) {
-  const authorityURI = mutableTransient.get("authorityURI")
-      || mutableTransient.get("partitionAuthorityURI");
+export function determineNewObjectChronicle (
+    authorityURI, mutableTransient: Transient, transientId: VRL) {
   if (transientId.isGhost()) {
     // Materializing or modifying ghost.
     if (authorityURI) {

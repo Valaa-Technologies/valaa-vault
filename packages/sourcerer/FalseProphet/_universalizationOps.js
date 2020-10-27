@@ -85,8 +85,12 @@ export function deserializeVRL (serializedRef: string | JSONIdData,
               ""} nor valos URI regex /${valOSURIRegExpString}/`);
         }
       }
-      if (parts[1] !== "urn:valos:") (resolver || (resolver = {})).partition = parts[1];
       nss = parts[3];
+      if (parts[1] !== "urn:valos:") {
+        (resolver || (resolver = {})).partition = parts[1];
+        if (!nss) nss = naiveURI.getPartitionRawId(parts[1]);
+      }
+      if (!nss) throw new Error(`Malformed urn:valos reference: empty nss part`);
       if (parts[5]) {
         if (!resolver) resolver = {};
         // explicit resolver.partition overrides the generic ValOS URI

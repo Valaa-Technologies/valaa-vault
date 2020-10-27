@@ -222,4 +222,8 @@ export default class Sourcerer extends FabricEventTarget {
   obtainAuthorityOfChronicle (chronicleURI: string) {
     return this._upstream.obtainAuthorityOfChronicle(chronicleURI);
   }
+
+  resolveReference (reference: string | Object) {
+    return this._upstream.resolveReference(reference);
+  }
 }

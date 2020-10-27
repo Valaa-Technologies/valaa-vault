@@ -1,12 +1,11 @@
 // @flow
 
-import VALK from "~/raem/VALK";
 import { vRef } from "~/raem/VRL";
 import { getHostRef } from "~/raem/VALK/hostReference";
 
 import type FalseProphet from "~/sourcerer/FalseProphet/FalseProphet";
 
-import { debugObjectType, dumpObject, FabricEventTarget } from "~/tools";
+import { dumpObject, FabricEventTarget } from "~/tools";
 
 const identityPrototypeMethods = require("~/gateway-api/identity");
 
@@ -21,53 +20,56 @@ export default class IdentityMediator extends FabricEventTarget {
     this.sessionURI = options.sessionURI;
     this._activeIdentities = {};
     this._authorityIdentities = {};
-    for (const [identityChronicleURI, identityOptions] of Object.entries(options.add || {})) {
-      this.add(identityChronicleURI, identityOptions);
+    for (const [publicIdentity, identityOptions] of Object.entries(options.add || {})) {
+      this.add(publicIdentity, identityOptions);
     }
   }
 
   list () { return Object.keys(this._activeIdentities); }
 
-  add (identityChronicleURI: string, options: Object = {}) {
+  add (publicAuthorityIdentity: string | Object, options: Object = {}) {
     try {
-      if (!identityChronicleURI || (typeof identityChronicleURI !== "string")) {
-        throw new Error(`IdentityMediator..add..identityChronicleURI string required, got: ${
-            debugObjectType(identityChronicleURI)}`);
+      const { authority, chronicleURI, resource } = this._sourcerer
+          .resolveReference(publicAuthorityIdentity);
+      const authorityURI = authority.getAuthorityURI();
+      if (this._authorityIdentities[authorityURI]) {
+        throw new Error(`IdentityMediator..add: authority <${
+            authorityURI}> already has a public identity: ${
+            this._authorityIdentities[authorityURI].identityId}`);
       }
       const identityParams = {
         ...options,
-        identityChronicleURI,
-        authority: this._sourcerer.obtainAuthorityOfChronicle(identityChronicleURI),
+        authority,
+        identityChronicleURI: chronicleURI,
+        publicIdentity: resource,
       };
-      this._authorityIdentities[identityParams.authority.getAuthorityURI()] =
-          this._activeIdentities[identityChronicleURI] =
-          identityParams;
+      this._activeIdentities[chronicleURI] = identityParams;
+      this._authorityIdentities[authorityURI] = identityParams;
       return identityParams;
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, new Error("identity.add"),
-          "\n\tidentityChronicleURI:", ...dumpObject(identityChronicleURI));
+          "\n\tpublicAuthorityIdentity:", ...dumpObject(publicAuthorityIdentity),
+      );
     }
   }
 
   get (identityChronicleURI: string) { return this._activeIdentities[identityChronicleURI]; }
 
-  remove (identityChronicleURI: string) {
+  remove (publicAuthorityIdentity: string | Object) {
     try {
-      if (!identityChronicleURI || (typeof identityChronicleURI !== "string")) {
-        throw new Error(`IdentityMediator..remove..identityChronicle required, got: ${
-            debugObjectType(identityChronicleURI)}`);
-      }
-      const uriString = String(identityChronicleURI);
-      const identityParams = this._activeIdentities[uriString];
+      const { authority, chronicleURI } = this._sourcerer
+          .resolveReference(publicAuthorityIdentity);
+      const identityParams = this._activeIdentities[chronicleURI];
       if (!identityParams) {
-        throw new Error(`No such active identity: <${uriString}>`);
+        throw new Error(`No active public authority identity: <${chronicleURI}>`);
       }
-      delete this._activeIdentities[identityParams.authority.getAuthorityURI()];
-      delete this._authorityIdentities[identityParams.authority.getAuthorityURI()];
+      delete this._activeIdentities[chronicleURI];
+      delete this._authorityIdentities[authority.getAuthorityURI()];
       return true;
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, new Error("identity.remove"),
-          "\n\tidentityChronicleURI:", ...dumpObject(identityChronicleURI));
+          "\n\tpublicAuthorityIdentity:", ...dumpObject(publicAuthorityIdentity),
+      );
     }
   }
 }

@@ -1,5 +1,8 @@
 // @flow
 
+import { naiveURI } from "~/raem/ValaaURI";
+import VALK from "~/raem/VALK";
+import { tryHostRef } from "~/raem/VALK/hostReference";
 import { Command, EventBase } from "~/raem/events";
 import type { Story } from "~/raem/redux/Bard";
 import type { State } from "~/raem/state";
@@ -10,7 +13,7 @@ import Sourcerer from "~/sourcerer/api/Sourcerer";
 import { ProclaimOptions, ChroniclePropheciesRequest, ProphecyEventResult }
     from "~/sourcerer/api/types";
 
-import { dumpObject } from "~/tools";
+import { debugObjectType, dumpObject } from "~/tools";
 
 import FalseProphetDiscourse from "./FalseProphetDiscourse";
 import FalseProphetConnection from "./FalseProphetConnection";
@@ -177,6 +180,20 @@ export default class FalseProphet extends Sourcerer {
           "\n\tserializedReference:", ...dumpObject(serializedReference),
           "\n\tcurrentChronicleURI:", ...dumpObject(currentChronicleURI));
     }
+  }
+
+  resolveReference (reference: string | Object) {
+    const resource = tryHostRef(reference) || deserializeVRL(reference, undefined, this);
+    if (!resource) {
+      throw new Error(`bindReference: cannot resolve reference from: ${
+          debugObjectType(reference)}`);
+    }
+    const chronicleURI = resource.getChronicleURI();
+    return {
+      authority: this.obtainAuthorityOfChronicle(chronicleURI),
+      chronicleURI,
+      resource,
+    };
   }
 
   createCommandChronicleInfo = (chronicleURI: string, action: Object, command: Command,

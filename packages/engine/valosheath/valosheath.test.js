@@ -109,15 +109,15 @@ describe("Creating and instancing with 'new' keyword", () => {
     expect(MyTypeEntity.step(VALEK.relations("myRelation").to(0)))
         .toEqual(myRelation);
   });
-  it("adds with 'new' a structured sub-Relation to an existing Entity", () => {
+  it("adds with 'new' a fixed sub-Relation to an existing Entity", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
     const bodyText = `
         const parent = new Entity({ name: "parent", owner: this,
             properties: { position: { x: 10, y: 20 } } });
-        const ret = parent.$V.getSubResource(["@-:rel:1@@"]);
+        const ret = parent.$V.getFixedRelation({ name: "rel", params: "1" });
         new Relation({
-          name: "myRelation",
-          owner: parent, subResource: ["@-:rel:1@@"],
+          owner: parent,
+          fixed: { name: "rel", params: "1" },
           properties: { position: { x: 1, y: 2 } },
         });
         ret;
@@ -125,23 +125,23 @@ describe("Creating and instancing with 'new' keyword", () => {
     const bodyKuery = transpileValoscriptTestBody(bodyText);
     const myRelation = entities().creator.do(bodyKuery);
     expect(myRelation.step("name"))
-        .toEqual("myRelation");
+        .toEqual("rel");
     expect(myRelation.step(VALEK.propertyLiteral("position")))
         .toEqual({ x: 1, y: 2 });
     const MyTypeEntity = myRelation.step("owner");
     expect(MyTypeEntity.step("name"))
         .toEqual("parent");
-    expect(MyTypeEntity.step(VALEK.relations("myRelation").to(0)))
+    expect(MyTypeEntity.step(VALEK.relations("rel").to(0)))
         .toEqual(myRelation);
   });
-  it("construct sub-resources with obtainSubResource", () => {
+  it("construct sub-resources with obtainFixedResource", () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true }, valoscriptBlock);
-    const [subEnt, nuuEnt, subRel1, subRel2] = entities().creator.doValoscript(`
+    const [fixEnt, nuuEnt, subRel1, subRel2] = entities().creator.doValoscript(`
         const ToThing = new Relation({ name: "ToThing", owner: this,
           properties: { position: { x: 10, y: 20 } }
         });
         const parent = new Entity({ name: "parent", owner: this });
-        const subEnt = new Entity({ owner: parent, subResource: ["@+$foo.existing@@"] });
+        const fixEnt = new Entity({ owner: parent, fixed: { id: ["@+$foo.existing@@"] } });
         const primer = (initialState, section, index) => {
           if (index === 2) {
             initialState.instancePrototype = ToThing;
@@ -150,15 +150,18 @@ describe("Creating and instancing with 'new' keyword", () => {
             }
           }
         };
-        const relInst1 = parent.$V.obtainSubResource(
+        const relInst1 = parent.$V.obtainFixedResource(
             ["@+$foo.existing@+$foo.nuu@-$foo.toThings$d.1@@"], primer);
-        const relInst2 = parent.$V.obtainSubResource(
-            [["@+", $foo.existing], ["@+", $foo.nuu], ["@-", $foo.toThings, 2]], primer);
-        [subEnt, subEnt[$foo.nuu], relInst1, relInst2];
+        const relInst2 = parent.$V.obtainFixedResource([
+          ["@+", $foo.existing],
+          ["@+", $foo.nuu],
+          { typeName: "Relation", name: $foo.toThings, params: 2 },
+        ], primer);
+        [fixEnt, fixEnt[$foo.nuu], relInst1, relInst2];
     `, { console });
-    expect(subEnt.propertyValue(qualifiedSymbol("foo", "nuu")))
+    expect(fixEnt.propertyValue(qualifiedSymbol("foo", "nuu")))
         .toEqual(nuuEnt);
-    expect(subEnt.propertyValue("@$foo.nuu@@"))
+    expect(fixEnt.propertyValue("@$foo.nuu@@"))
         .toEqual(nuuEnt);
     expect(subRel1.step("name"))
         .toEqual("@$foo.toThings@@");

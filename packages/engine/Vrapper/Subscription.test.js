@@ -104,7 +104,7 @@ describe("Subscription", () => {
           .toBe(idOf(entities().ownling));
     });
 
-    it("properly refreshes listeners on structural updates", () => {
+    it("properly refreshes listeners on fixed updates", () => {
       setUpPropertyTargetTestHarness("template_matching", { verbosity: 0, claimBaseBlock: true });
       expect(liveCallback.mock.calls.length).toBe(1);
 
@@ -122,7 +122,7 @@ describe("Subscription", () => {
           .toBe(idOf(entities().ownling));
     });
 
-    it("properly deregisters listeners on structural updates", () => {
+    it("properly deregisters listeners on fixed updates", () => {
       setUpPropertyTargetTestHarness("template", { verbosity: 0, claimBaseBlock: true });
       expect(liveCallback.mock.calls.length).toBe(1);
 

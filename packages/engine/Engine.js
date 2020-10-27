@@ -357,10 +357,14 @@ export default class Engine extends Cog {
 
     let explicitId = options.id || initialState.id;
     delete initialState.id;
-    let subResource = options.subResource || initialState.subResource;
-    delete initialState.subResource;
     if (initialState.partitionAuthorityURI) {
       throw new Error("partitionAuthorityURI is deprecated");
+    }
+    let subPlot;
+    if (initialState.fixed) {
+      subPlot = this.subPlotFromFixedFields(
+          initialState.fixed, directive.typeName, initialState);
+      delete initialState.fixed;
     }
     const authorityURI = initialState.authorityURI;
     /* Allowed combinations of id, sub, owner, aur
@@ -376,7 +380,7 @@ export default class Engine extends Cog {
      */
     if (explicitId) {
       // cases 3, 7, b, f
-      if (subResource) throw new Error("Can't have both explicit id and explicit subResource");
+      if (subPlot) throw new Error("Can't have both explicit id and fixed fields");
       if (Array.isArray(explicitId)) {
         explicitId = formVPath(explicitId);
         if (explicitId[1] !== "$") throw new Error("explicit VRID must have a GRId as first step");
@@ -394,7 +398,7 @@ export default class Engine extends Cog {
     }
     const owner = initialState.owner || initialState.source;
     if (!owner) {
-      if (subResource) throw new Error("Can't have subResource without owner"); // cases 2, 6
+      if (subPlot) throw new Error("Can't have fixed fields without owner"); // cases 2, 6
       if (authorityURI) { // cases 4, 5
         return discourse.assignNewChronicleRootId(directive, authorityURI, explicitId);
       }
@@ -406,24 +410,56 @@ export default class Engine extends Cog {
     /*
       8:                owner: yes, global resource id
       9: id,            owner: yes, global explicit id
-      a:     sub,       owner: yes, structured id with owner as sub parent
+      a:     sub,       owner: yes, fixed id with owner as sub parent
       b: id, sub,       owner: no, both owner and explicit id can't be the sub parent
       c:          auri, owner: future (with multi-chronicle tx), generated chronicle id
       d: id,      auri, owner: future (with multi-chronicle tx), explicit chronicle id
-      e:     sub, auri, owner: future (with multi-chronicle tx), structured id, owner as sub parent
+      e:     sub, auri, owner: future (with multi-chronicle tx), fixed id, owner as sub parent
       f: id, sub, auri, owner: no, both owner and explicit id can't be the sub parent
     */
     const chronicleURI = this.getChronicleURIOf(getHostRef(owner), discourse);
     // cases 8, 9, a, c, d, e
     // naiveURI.validateChronicleURI(chronicleURI);
-    if (subResource) { // case a -> 9, e -> d
-      if (Array.isArray(subResource)) subResource = formVPath(subResource);
-      else validateVVerbs(subResource);
-      if (subResource[1] === "$") {
-        throw new Error("explicit subResource must not have a GRId as first step");
+    if (subPlot) { // case a -> 9, e -> d
+      if (Array.isArray(subPlot)) subPlot = formVPath(subPlot);
+      else validateVVerbs(subPlot);
+      if (subPlot[1] === "$") {
+        throw new Error("explicit fixed id must not have a GRId as first step");
       }
     }
-    return discourse.assignNewVRID(directive, String(chronicleURI), explicitId, subResource);
+    return discourse.assignNewVRID(directive, String(chronicleURI), explicitId, subPlot);
+  }
+
+  subPlotFromFixedFields (fixed: Object, typeName: ?string, initialState: ?Object) {
+    const ret = !fixed.id ? [Vrapper.typeKeys[typeName || fixed.typeName] || "@_"]
+        : Array.isArray(fixed.id) ? [...fixed.id]
+        : [fixed.id];
+    if (fixed.name) {
+      if (initialState) initialState.name = fixed.name;
+      ret.push(fixed.name);
+    }
+    for (const key of Object.getOwnPropertyNames(fixed).sort()) {
+      if (key === "name" || key === "id" || key === "params" || key === "typeName") continue;
+      if (initialState) initialState[key] = fixed[key];
+      ret.push(this._asStep(key, fixed[key]));
+    }
+    for (const symbol of Object.getOwnPropertySymbols(fixed)) {
+      if (initialState) initialState[symbol] = fixed[symbol];
+      ret.push(this._asStep(symbol, fixed[symbol]));
+    }
+    if (fixed.params) {
+      if (Array.isArray(fixed.params)) ret.push(...fixed.params);
+      else ret.push(fixed.params);
+    }
+    return ret;
+  }
+
+  _asStep (name, value) {
+    const ref = tryHostRef(value);
+    return ["@.", [
+      typeof name === "string" ? ["@$V", name] : name,
+      ref ? [ref.vrid()] : value,
+    ]];
   }
 
   getChronicleURIOf (vref, discourse, require) {

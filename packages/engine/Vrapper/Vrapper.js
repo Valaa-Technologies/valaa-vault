@@ -190,7 +190,7 @@ export default class Vrapper extends Cog {
   _setType (type: Object) {
     if (type === this._type) return;
     this._type = type;
-    const typeKey = Vrapper._typeKeys[type.name];
+    const typeKey = Vrapper.typeKeys[type.name];
     if (typeKey) {
       this.setNameFromTypeInstanceCount(typeKey || type.name);
     }
@@ -650,7 +650,7 @@ export default class Vrapper extends Cog {
     "@~": "Media",
   };
 
-  static _typeKeys = {
+  static typeKeys = {
     Entity: "@+",
     Relation: "@-",
     Media: "@~",
@@ -1913,25 +1913,35 @@ export default class Vrapper extends Cog {
     return this._parent.getVrapper(ghostVRL, { state });
   }
 
-  getSubResource (subId, options: { contextChronicleURI: string, discourse: ?Discourse } = {}) {
+  getFixedResource (subPlot,
+      options: { typeName: string, contextChronicleURI: string, discourse: ?Discourse } = {}) {
     this.requireActive(options);
     if (!options.contextChronicleURI) {
       options.contextChronicleURI = this.getConnection().getChronicleURI(options);
     }
-    const vrid = formVPath(this[HostRef].vrid(), subId);
+    const vrid = formVPath(
+        this[HostRef].vrid(),
+        ((typeof subPlot !== "object") || Array.isArray(subPlot))
+            ? subPlot
+            : this._parent.subPlotFromFixedFields(subPlot, options.typeName));
     return this._parent.tryVrapper(vrid, options)
         || vRef(vrid, undefined, undefined, options.contextChronicleURI)
             .setAbsent();
   }
 
-  obtainSubResource (subId, options: {
+  obtainFixedResource (subPlot, options: {
     extendInitialState: Function, contextChronicleURI: string, discourse: ?Discourse,
   } = {}) {
     this.requireActive(options);
     if (!options.contextChronicleURI) {
       options.contextChronicleURI = this.getConnection().getChronicleURI(options);
     }
-    const sections = disjoinVPath(subId);
+    for (let i = 0; i < subPlot.length; ++i) {
+      if (typeof subPlot[i] === "object" && !Array.isArray(subPlot[i])) {
+        subPlot[i] = this._parent.subPlotFromFixedFields(subPlot[i]);
+      }
+    }
+    const sections = disjoinVPath(subPlot);
     if (sections[0] !== "@@") return this._obtainSubResource(sections, 0, options);
     return sections[1].reduce((r, subSection, index) =>
         r._obtainSubResource(subSection, index, Object.create(options)), this);
@@ -2208,16 +2218,16 @@ export default class Vrapper extends Cog {
   triggerFilterHooks (fieldUpdate: LiveUpdate, passageCounter: ?number) {
     if (!this._filterHooks) return;
     const fieldIntro = this.getTypeIntro().getFields()[fieldUpdate._fieldName];
-    for (const [subscription, [filter, isStructural]] of this._filterHooks) {
+    for (const [subscription, [filter, isFixed]] of this._filterHooks) {
       try {
         if (filter && ((typeof filter !== "function") || filter(fieldIntro))) {
-          subscription.triggerFilterUpdate(isStructural, fieldUpdate, passageCounter);
+          subscription.triggerFilterUpdate(isFixed, fieldUpdate, passageCounter);
         }
       } catch (error) {
         this.outputErrorEvent(
             this.wrapErrorEvent(error, 1,
                 new Error(`Subscription.triggerFilterHooks('${fieldUpdate._fieldName
-                    }').filterHook(${subscription.debugId()}, [${filter}, ${isStructural}])`),
+                    }').filterHook(${subscription.debugId()}, [${filter}, ${isFixed}])`),
                 "\n\tlive update:", fieldUpdate,
                 "\n\tlive update options:", fieldUpdate.getOptions(),
                 "\n\tfailing filter subscription:", ...dumpObject(subscription),
@@ -2335,7 +2345,7 @@ export default class Vrapper extends Cog {
         const name = decodeURIComponent(subPropertyMatch[3]);
         if (!namespace) {
           if ((name === "this") || (name === "self")) {
-            this.warnEvent(`Structural property name '${
+            this.warnEvent(`Fixed property name '${
                 name}' is a reserved word and is omitted from scope`);
             return;
           }
@@ -2348,7 +2358,7 @@ export default class Vrapper extends Cog {
         return;
       }
 
-      // console.debug("Non-structural property seen:", propertyRawId);
+      // console.debug("Non-fixed property seen:", propertyRawId);
 
       const nameSub = this._scopeNameSubs[propertyRawId] = vActualAdd
           .obtainSubscription("name", { state: fieldUpdate.getState(), scope: null });

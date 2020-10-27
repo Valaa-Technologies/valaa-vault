@@ -244,7 +244,7 @@ export default class FalseProphetDiscourse extends Discourse {
   assignNewUnchronicledVRID (targetAction: EventBase, explicitRawId?: string) {
     if (targetAction.typeName === "Property") {
       throw new Error(
-          "Cannot create a resource id for a structural type 'Property' which is missing an owner");
+          "Cannot create a resource id for a fixed type 'Property' which is missing an owner");
     }
     targetAction.id = vRef(explicitRawId || `@$~u4.${valosUUID()}@@`);
     /*

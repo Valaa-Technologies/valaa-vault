@@ -73,7 +73,7 @@ describe("Chronicle behaviors: VLog:requireAuthoredEvents", () => {
 
       new Relation({
         source: authoroot,
-        structured: {
+        fixed: {
           name: $VLog.director,
           target: valos.identity.getPublicIdentityFor(authoroot),
         },
@@ -346,7 +346,7 @@ describe("Chronicle behaviors: VLog:requireAuthoredEvents", () => {
         valos.sourcifyIdentityMediator("${decepTributorURI}")
       ]).then(([impersonateeMediator, decepMediator]) => new Relation({
         source: this,
-        structured: {
+        fixed: {
           name: $VLog.contributor,
           target: impersonateeMediator.getPublicIdentityFor(this),
         },

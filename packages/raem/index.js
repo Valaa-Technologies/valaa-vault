@@ -32,15 +32,15 @@ export {
                                       vRef,
 } from "./VRL";
 export {
-                                      formVPath,
-                                      conjoinVPath,
-                                      conjoinVPathSection,
-                                      disjoinVPath,
-                                      disjoinVPathString,
-                                      disjoinVPathOutline,
-                                      validateVPath,
+                                      formVPlot,
+                                      conjoinVPlot,
+                                      conjoinVPlotSection,
+                                      disjoinVPlot,
+                                      disjoinVPlotString,
+                                      disjoinVPlotOutline,
+                                      validateVPlot,
                                       validateVKeyPath,
-} from "./VPath";
+} from "./VPlot";
 export type {
                                       ValaaURI,
 } from "./ValaaURI";

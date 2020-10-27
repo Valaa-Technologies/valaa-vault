@@ -14,7 +14,7 @@ export function _createToMapping (router: PrefixRouter, route: Route, runtime) {
     router.appendSchemaSteps(
         runtime, route.config.resource.schema, { targetTrack: toMappingSource });
     const relationSchema = router.derefSchema(route.config.relation.schema);
-    router.appendVPathSteps(runtime, relationSchema.valospace.reflection, toMappingSource);
+    router.appendVPlotSteps(runtime, relationSchema.valospace.reflection, toMappingSource);
     const relationsIndex = toMappingSource.findIndex(e => (e === "relations"));
 
     toMapping.push(...toMappingSource.splice(relationsIndex));

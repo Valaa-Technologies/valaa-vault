@@ -44,7 +44,7 @@ is fixed at what the underlying fastify web server consumes.`,
 patterns which are matched against incoming request IRIs.
 
 The mapping definition is JSON-LD document (created by a technician)
-which describes a set of routes and their mapping vpaths to valospace
+which describes a set of routes and their mapping vplots to valospace
 resources. These paths typically originate from a single, configurable
 `, em("service index"), ` valospace resource.
 

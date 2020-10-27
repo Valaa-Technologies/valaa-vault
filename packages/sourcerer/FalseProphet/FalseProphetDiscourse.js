@@ -160,13 +160,13 @@ export default class FalseProphetDiscourse extends Discourse {
   }
 
   assignNewVRID (targetAction: EventBase, chronicleURI: string,
-      explicitRawId?: string, subVPath_?: string) {
-    let subVPath = subVPath_;
+      explicitRawId?: string, subVPlot_?: string) {
+    let subVPlot = subVPlot_;
     try {
       if (!chronicleURI) throw new Error("assignNewVRID.chronicleURI missing");
       let resourceVRID;
 
-      if (!subVPath && (targetAction.typeName === "Property")) {
+      if (!subVPlot && (targetAction.typeName === "Property")) {
         const propertyName = targetAction.initialState.name;
         if (!propertyName) {
           throw new Error(`${targetAction.type}.initialState.name is required for a Property`);
@@ -174,24 +174,24 @@ export default class FalseProphetDiscourse extends Discourse {
         const qualifiedNames = qualifiedNamesOf(propertyName);
         if (qualifiedNames) {
           targetAction.initialState.name = qualifiedNames[3];
-          subVPath = qualifiedNames[4];
+          subVPlot = qualifiedNames[4];
         } else if (typeof propertyName === "string") {
             // && ((propertyName[0] !== "@") || !propertyName.endsWith("@@"))
-          subVPath = `@.$.${encodeURIComponent(propertyName)}@@`;
+          subVPlot = `@.$.${encodeURIComponent(propertyName)}@@`;
         } else {
           throw new Error(isSymbol(propertyName)
               ? `Property name symbol ${propertyName} is not a qualified name symbol`
-              : `Property name must be a non-vpath string or symbol, got '${typeof propertyName}'`);
+              : `Property name must be a non-vplot string or symbol, got '${typeof propertyName}'`);
         }
       }
 
-      if (subVPath) {
+      if (subVPlot) {
         let parentVRID = getHostRef(
             targetAction.initialState.owner || targetAction.initialState.source,
             `Property.initialState.owner`,
         ).rawId();
         if (parentVRID[0] !== "@") parentVRID = upgradeVRIDTo0Dot2(parentVRID);
-        resourceVRID = `${parentVRID.slice(0, -2)}${subVPath}`;
+        resourceVRID = `${parentVRID.slice(0, -2)}${subVPlot}`;
         /*
         resourceRawId = ((ownerRawId[0] !== "@") || (ownerRawId.slice(-2) !== "@@"))
             ? `${ownerRawId}@.$.${encodeURIComponent(propertyName)}`
@@ -214,9 +214,9 @@ export default class FalseProphetDiscourse extends Discourse {
         resourceVRID = explicitRawId;
       } else {
         if (!hasScheme(chronicleURI, "valaa-memory")) {
-          this.errorEvent(`a non-VPath assignNewVRID.explicitRawId was explicitly provided${
+          this.errorEvent(`a non-VPlot assignNewVRID.explicitRawId was explicitly provided${
               ""} for a regular chronicle resource in a non-'valaa-memory:' chronicle: this will${
-              ""} be deprecated Very Soon(tm) in favor of VPath resource identifiers.`,
+              ""} be deprecated Very Soon(tm) in favor of VPlot resource identifiers.`,
               "\n\texplicitRawId:", explicitRawId,
               "\n\tchronicleURI:", chronicleURI);
         }
@@ -236,7 +236,7 @@ export default class FalseProphetDiscourse extends Discourse {
           "\n\ttargetAction:", ...dumpObject(targetAction),
           "\n\tchronicleURI:", ...dumpObject(chronicleURI),
           "\n\texplicitRawId:", ...dumpObject(explicitRawId),
-          "\n\tsubVPath:", ...dumpObject(subVPath),
+          "\n\tsubVPlot:", ...dumpObject(subVPlot),
       );
     }
   }

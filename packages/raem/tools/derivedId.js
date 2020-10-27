@@ -1,6 +1,6 @@
 // @flow
 
-import { coerceAsVRID } from "~/raem/VPath";
+import { coerceAsVRID } from "~/plot";
 import { b64SHA256FromUTF8Text } from "~/security/hash";
 
 // IMPORTANT! This function must not be changed because DUPLICATED and ghost id's break.

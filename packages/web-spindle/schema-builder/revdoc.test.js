@@ -49,7 +49,7 @@ configuration that can be consumed by the Web API spindle. This config
 is a fully declarative `, ref("JSON schema", "http://json-schema.org/"),
 `-based format which not just describes the external API routes and
 types but also defines their valospace projections using embedded `,
-ref("VPath", "@valos/raem/VPath"), `.
+ref("VPlot", "@valos/plot"), `.
 
 This library is primarily intended to be used from inside a
 `, em("spindle configuration library"), ` which is invoked from inside
@@ -89,7 +89,7 @@ This document is part of the spindle workspace `, pkg("@valos/web-spindle"), `
   parameters. Routes tie into valospace resources via gate projections
   which are embedded inside primary type schemas.`],
 [ref(`Projections and reflections`, "#section_projections"), ` are `,
-  ref(`VPaths`, "@valos/raem/VPath"), ` that are embedded in the gates
+  ref(`VPlots`, "@valos/plot"), ` that are embedded in the gates
   and types respectively and which define paths into and between
   valospace resources, respectively`],
     ],
@@ -97,7 +97,7 @@ This document is part of the spindle workspace `, pkg("@valos/web-spindle"), `
   "chapter#section_site_configuration>3;Site configuration": _createSiteConfigurationChapter(),
   "chapter#section_schemas>4;Type and property schemas": _createSchemasChapter(),
   "chapter#section_routes>5;Route definitions": _createRoutesChapter(),
-  "chapter#section_projections>6;Projection and reflection VPaths": _createProjectionsChapter(),
+  "chapter#section_projections>6;Projection and reflection VPlots": _createProjectionsChapter(),
 };
 
 runTestDoc();
@@ -669,7 +669,7 @@ function _createProjectionsChapter () {
   // const { shared } = createExampleData();
   return {
     "#0": [
-`Projections and reflections are `, ref("VPaths", "@valos/raem/VPath"), `
+`Projections and reflections are `, ref("VPlots", "@valos/plot"), `
 which are present primary type \`valospace.gate.projection\` fields and
 in type and property \`valospace.reflection\` fields.`
     ],

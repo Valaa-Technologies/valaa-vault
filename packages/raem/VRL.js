@@ -5,7 +5,7 @@ import ValaaURI, { naiveURI } from "~/raem/ValaaURI";
 import GhostPath, { JSONGhostPath, ghostPathFromJSON } from "~/raem/state/GhostPath";
 
 import { HostRef, tryHostRef } from "~/raem/VALK/hostReference";
-import { coerceAsVRID, conjoinVPathSection } from "~/raem/VPath";
+import { coerceAsVRID, conjoinVPlotSection } from "~/plot";
 
 import { debugObjectType, dumpObject, wrapError } from "~/tools/wrapError";
 import invariantify, { invariantifyString } from "~/tools/invariantify";
@@ -120,7 +120,7 @@ class VRL {
   vrid (): string { return this._vrid || (this._vrid = coerceAsVRID(this._nss)); }
 
   getSubRef (subSection) {
-    const step = (typeof subSection === "string") ? subSection : conjoinVPathSection(subSection);
+    const step = (typeof subSection === "string") ? subSection : conjoinVPlotSection(subSection);
     if (step[0] !== "@") {
       throw new Error(`subSection must be verb type (non-'@@', non-'@$'), got: '${subSection[0]}'`);
     }

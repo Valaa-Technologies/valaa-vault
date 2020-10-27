@@ -1,6 +1,6 @@
 import { vRef } from "~/raem/VRL";
 import type { VRL } from "~/raem/VRL"; // eslint-disable-line no-duplicate-imports
-import { disjoinVPath, cementVPath } from "~/raem/VPath";
+import { disjoinVPlot, cementVPlot } from "~/plot";
 
 import beaumpify from "~/tools/beaumpify";
 import invariantify, { invariantifyArray, invariantifyNumber, invariantifyString,
@@ -429,9 +429,9 @@ export default class Kuery {
     return this._addRawVAKON(kuery, type);
   }
 
-  fromVPath (vrid: string | Array<any>, options: { context: Object, type: ?string }): Kuery {
-    const vpathSections = disjoinVPath(vrid);
-    const cemented = cementVPath(vpathSections, options);
+  fromVPlot (vrid: string | Array<any>, options: { context: Object, type: ?string }): Kuery {
+    const vplotSections = disjoinVPlot(vrid);
+    const cemented = cementVPlot(vplotSections, options);
     return this._addRawVAKON(cemented, options && options.type);
   }
 

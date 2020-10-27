@@ -13,7 +13,7 @@ import { Command, duplicated, isCreatedLike } from "~/raem/events";
 import VRL, { vRef, IdData, getRawIdFrom } from "~/raem/VRL";
 import { tryHostRef, getHostRef } from "~/raem/VALK/hostReference";
 import { getActionFromPassage } from "~/raem/redux/Bard";
-import { formVPath, coerceAsVRID, validateVRID, validateVVerbs } from "~/raem/VPath";
+import { formVPlot, coerceAsVRID, validateVRID, validateVVerbs } from "~/plot";
 import { naiveURI } from "~/raem/ValaaURI";
 
 import Transient, { createTransient, getTransientTypeName } from "~/raem/state/Transient";
@@ -382,16 +382,16 @@ export default class Engine extends Cog {
       // cases 3, 7, b, f
       if (subPlot) throw new Error("Can't have both explicit id and fixed fields");
       if (Array.isArray(explicitId)) {
-        explicitId = formVPath(explicitId);
+        explicitId = formVPlot(explicitId);
         if (explicitId[1] !== "$") throw new Error("explicit VRID must have a GRId as first step");
       } else if (explicitId instanceof VRL) {
         return directive.id = explicitId;
       } else if (typeof explicitId !== "string") {
-        throw new Error("explicit id must be either a string or a VPath steps array");
+        throw new Error("explicit id must be either a string or a VPlot steps array");
       } else if (explicitId[0] === "@") {
         validateVRID(explicitId);
       } else {
-        this.debugEvent("DEPRECATED non-vpath format id:", explicitId,
+        this.debugEvent("DEPRECATED non-vplot format id:", explicitId,
             "\n\tcoerced as VRID:", coerceAsVRID(explicitId));
         explicitId = coerceAsVRID(explicitId);
       }
@@ -421,7 +421,7 @@ export default class Engine extends Cog {
     // cases 8, 9, a, c, d, e
     // naiveURI.validateChronicleURI(chronicleURI);
     if (subPlot) { // case a -> 9, e -> d
-      if (Array.isArray(subPlot)) subPlot = formVPath(subPlot);
+      if (Array.isArray(subPlot)) subPlot = formVPlot(subPlot);
       else validateVVerbs(subPlot);
       if (subPlot[1] === "$") {
         throw new Error("explicit fixed id must not have a GRId as first step");

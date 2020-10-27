@@ -3,7 +3,7 @@
 import PropTypes from "prop-types";
 
 import { naiveURI } from "~/raem/ValaaURI";
-import { conjoinVPathSection, disjoinVPathOutline } from "~/raem/VPath";
+import { conjoinVPlotSection, disjoinVPlotOutline } from "~/plot";
 import { vRef } from "~/raem/VRL";
 
 // import type { Connection } from "~/sourcerer";
@@ -256,8 +256,8 @@ const _scopeFrameChain = [
       this.component.setUIContextValue(Lens.frameStepPrefix, "");
     }
     // const prototypePart = this.vPrototype ? `@_$V.proto${_getSubscriptId(this.vPrototype)}` : "";
-    const frameSection = disjoinVPathOutline(frameOutline, "@@");
-    const frameStep = conjoinVPathSection(frameSection);
+    const frameSection = disjoinVPlotOutline(frameOutline, "@@");
+    const frameStep = conjoinVPlotSection(frameSection);
     if (rootFrameAuthorityURI && (isTransitory || !this.vOwner)) {
       this.frameId = `@$~V.frames${
           this.vOwner ? this.vOwner.getBriefUnstableId() : ""}${frameStep}@@`;

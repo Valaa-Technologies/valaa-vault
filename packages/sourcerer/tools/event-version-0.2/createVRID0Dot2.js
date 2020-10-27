@@ -1,6 +1,6 @@
 // @flow
 
-import { coerceAsVRID } from "~/raem/VPath";
+import { coerceAsVRID } from "~/plot";
 
 import { hashV240 } from "~/security/hash";
 

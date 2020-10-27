@@ -1,31 +1,31 @@
 const {
-  formVPath,
-  conjoinVPath, conjoinVPathSection,
-  disjoinVPath, disjoinVPathString, disjoinVPathOutline,
+  formVPlot,
+  conjoinVPlot, conjoinVPlotSection,
+  disjoinVPlot, disjoinVPlotString, disjoinVPlotOutline,
 } = require("./_sectionOps");
 const {
-  validateVPath, validateVPathSection, validateVKeyPath,
-  validateVPathString, validateFullVPathSection,
+  validateVPlot, validateVPlotSection, validateVKeyPath,
+  validateVPlotString, validateFullVPlotSection,
   validateVRIDString, validateVRID, validateVRIDSection, validateVVerbs, validateVVerbsSection,
   validateVGRID, validateVGRIDSection, validateFormatTerm,
   validateVVerb, validateVVerbSection, validateVerbType,
   validateVParam, validateVParamSection, validateContextTerm, validateParamValueText
 } = require("./_validateOps");
-const { cementVPath, extendTrack } = require("./_cementOps");
+const { cementVPlot, extendTrack } = require("./_cementOps");
 const { coerceAsVRID } = require("./_coerceOps");
 
 module.exports = {
-  conjoinVPath,
-  conjoinVPathSection,
-  disjoinVPath,
-  disjoinVPathOutline,
-  disjoinVPathString,
-  formVPath,
-  validateVPathString,
-  validateVPath,
-  validateVPathSection,
+  conjoinVPlot,
+  conjoinVPlotSection,
+  disjoinVPlot,
+  disjoinVPlotOutline,
+  disjoinVPlotString,
+  formVPlot,
+  validateVPlotString,
+  validateVPlot,
+  validateVPlotSection,
   validateVKeyPath,
-  validateFullVPathSection,
+  validateFullVPlotSection,
   validateVRIDString,
   validateVRID,
   validateVRIDSection,
@@ -41,7 +41,7 @@ module.exports = {
   validateVParamSection,
   validateContextTerm,
   validateParamValueText,
-  cementVPath,
+  cementVPlot,
   extendTrack,
   coerceAsVRID,
 };

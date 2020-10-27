@@ -1,4 +1,4 @@
-const { disjoinVPath, cementVPath } = require("@valos/raem/VPath");
+const { disjoinVPlot, cementVPlot } = require("@valos/plot");
 
 const inProduction = require("@valos/tools/inProduction").default;
 const isPromise = require("@valos/tools/isPromise").default;
@@ -416,13 +416,13 @@ const revelationContext = {
 function _importURI (state, suffix, prefix) { return `<${prefix}://${suffix}>`; }
 
 function _cementSpreaderPath (spreader) {
-  const vpath = (Array.isArray(spreader) && ((spreader[0] || "")[0] === "@"))
+  const vplot = (Array.isArray(spreader) && ((spreader[0] || "")[0] === "@"))
        ? spreader
        : ["@!", spreader];
-  const sections = disjoinVPath(vpath);
-  const track = cementVPath(sections, { context: revelationContext });
+  const sections = disjoinVPlot(vplot);
+  const track = cementVPlot(sections, { context: revelationContext });
   /*
-  console.log("cementSpreaderPath, vpath:", ...dumpObject(vpath),
+  console.log("cementSpreaderPath, vplot:", ...dumpObject(vplot),
       "\n\tsections:", ...dumpObject(sections),
       "\n\ttrack:", ...dumpObject(track));
   */

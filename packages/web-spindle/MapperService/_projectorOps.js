@@ -6,7 +6,7 @@ import type { PrefixRouter } from "~/web-spindle/MapperService";
 
 import { dumpObject, thenChainEagerly } from "~/tools";
 
-import { _vakonpileVPath } from "./_vakonpileOps";
+import { _vakonpileVPlot } from "./_vakonpileOps";
 
 export function _createProjectorRuntime (
     router: PrefixRouter, { name, config }, route, runtime) {
@@ -36,7 +36,7 @@ export function _createProjectorRuntime (
     }
     let ruleVAKON, maybeStaticReference, resolveRule;
     try {
-      ruleVAKON = _vakonpileVPath(rule, runtime, null);
+      ruleVAKON = _vakonpileVPlot(rule, runtime, null);
       if (ruleVAKON[0] === "§'" && !Array.isArray(ruleVAKON[1])) {
         scopePreparations[ruleName] = ruleVAKON[1];
         return;

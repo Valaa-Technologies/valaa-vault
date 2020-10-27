@@ -1,15 +1,15 @@
 // @flow
 
-import { disjoinVPathOutline, cementVPath } from "~/raem/VPath";
+import { disjoinVPlotOutline, cementVPlot } from "~/plot";
 // import { dumpObject } from "~/tools";
 
-export function _vakonpileVPath (vpath, runtime, disjoinKey = "@@") {
-  const sections = disjoinVPathOutline(vpath, disjoinKey);
+export function _vakonpileVPlot (vplot, runtime, disjoinKey = "@@") {
+  const sections = disjoinVPlotOutline(vplot, disjoinKey);
   if ((sections[0] === "@$") && !sections[1]) return null;
   const stack = { context: contextRuleLookup, contextState: runtime, isPluralHead: false };
-  const track = cementVPath(sections, stack);
+  const track = cementVPlot(sections, stack);
   /*
-  console.log("cemented vpath:", ...dumpObject(vpath),
+  console.log("cemented vplot:", ...dumpObject(vplot),
       "\n\tvia sections:", ...dumpObject(sections),
       "\n\tinto track:", ...dumpObject(track),
       "\n\tplural head:", stack.isPluralHead);

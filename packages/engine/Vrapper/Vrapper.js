@@ -10,7 +10,7 @@ import { getHostRef, HostRef, UnpackedHostValue } from "~/raem/VALK/hostReferenc
 import { destroyed, isCreatedLike } from "~/raem/events";
 import VRL, { vRef, invariantifyId, getRawIdFrom } from "~/raem/VRL";
 import { naiveURI } from "~/raem/ValaaURI";
-import { disjoinVPath, formVPath } from "~/raem/VPath";
+import { disjoinVPlot, formVPlot } from "~/plot";
 
 import dataFieldValue from "~/raem/tools/denormalized/dataFieldValue";
 
@@ -1919,7 +1919,7 @@ export default class Vrapper extends Cog {
     if (!options.contextChronicleURI) {
       options.contextChronicleURI = this.getConnection().getChronicleURI(options);
     }
-    const vrid = formVPath(
+    const vrid = formVPlot(
         this[HostRef].vrid(),
         ((typeof subPlot !== "object") || Array.isArray(subPlot))
             ? subPlot
@@ -1941,7 +1941,7 @@ export default class Vrapper extends Cog {
         subPlot[i] = this._parent.subPlotFromFixedFields(subPlot[i]);
       }
     }
-    const sections = disjoinVPath(subPlot);
+    const sections = disjoinVPlot(subPlot);
     if (sections[0] !== "@@") return this._obtainSubResource(sections, 0, options);
     return sections[1].reduce((r, subSection, index) =>
         r._obtainSubResource(subSection, index, Object.create(options)), this);

@@ -1,4 +1,4 @@
-import { disjoinVPathOutline } from "~/raem/VPath";
+import { disjoinVPlotOutline } from "~/plot";
 import { wrapError, dumpify, dumpObject } from "~/tools";
 
 import { ObjectSchema, schemaRefOf, trySchemaNameOf } from "./types";
@@ -29,7 +29,7 @@ export function _setupRouteResourceConfig (route, resourceType) {
     schema: schemaRefOf(resourceType),
     gate: {
       ...valospace.gate,
-      projection: disjoinVPathOutline(valospace.gate.projection, "@@"),
+      projection: disjoinVPlotOutline(valospace.gate.projection, "@@"),
     },
   };
 }

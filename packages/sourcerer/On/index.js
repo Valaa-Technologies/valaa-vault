@@ -361,7 +361,7 @@ null,
 A frame is considered reformed if it is the innermost frame that
 directly contains modifications on a set of global primary resources
 whose modification history was affected by the reformation. Note that
-all structured sub-resources are recursively considered to be part of
+all fixed sub-resources are recursively considered to be part of
 their owning global resource.`,
 null,
 `The modified resources are listed in the event property <TODO>.`,

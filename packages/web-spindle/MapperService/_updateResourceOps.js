@@ -30,7 +30,7 @@ function _recursiveUpdate (vScope, patch, options, isValOSFields) {
           : vScope.step(propertyName, Object.create(options));
       if (currentValue instanceof Vrapper) {
         if ((value == null) || (typeof value !== "object")) {
-          throw new Error(`Cannot overwrite a structural property '${propertyName
+          throw new Error(`Cannot overwrite a fixed property '${propertyName
               }' with a non-object value of type '${typeof value}'`);
         }
         _recursiveUpdate(currentValue, value, options, isValOSFields !== null ? false : null);

@@ -25,8 +25,11 @@ const symbols = {
   setOwner: qualifiedSymbol("V", "setOwner"),
   getEntity: qualifiedSymbol("V", "getEntity"),
   getMedia: qualifiedSymbol("V", "getMedia"),
-  getSubResource: qualifiedSymbol("V", "getSubResource"),
-  obtainSubResource: qualifiedSymbol("V", "obtainSubResource"),
+  getFixedResource: qualifiedSymbol("V", "getFixedResource"),
+  getFixedEntity: qualifiedSymbol("V", "getFixedEntity"),
+  getFixedMedia: qualifiedSymbol("V", "getFixedMedia"),
+  getFixedRelation: qualifiedSymbol("V", "getFixedRelation"),
+  obtainFixedResource: qualifiedSymbol("V", "obtainFixedResource"),
   instantiate: qualifiedSymbol("V", "instantiate"),
   duplicate: qualifiedSymbol("V", "duplicate"),
   prepareBlob: qualifiedSymbol("V", "prepareBlob"),
@@ -290,43 +293,108 @@ resource as either 'unnamedOwnlings', 'properties', 'relations' or 'listeners'`,
           .filter(VALEK.isOfType("Media").and(VALEK.hasName(name))).toIndex(0).toVAKON();
     }),
 
-    [symbols.getSubResource]: denoteValOSCallable([
-`Returns a reference to the structured sub-resource reached from this
-resource via the given *subId* VPath.`,
-`This call does not create any resources. If the sub-resource does not
+    [symbols.getFixedResource]: denoteValOSCallable([
+`Returns a reference to the fixed sub-resource reached from this
+resource via the given *subPlot* VPlot.`,
+`This call does not create any resources. If the resource does not
 exist the reference will be immaterial.
 
-See $V.obtainSubResource.`
-    ])(function getSubResource (subId, explicitChronicleURI) {
-      return Vrapper.prototype.getSubResource.call(this, subId, {
+Alternatively the *subPlot* can be a fixed field object which is used
+to determined the actual resource sub-id vplot. The keys of the object
+are divided to three groups:
+- Specials: keys 'id', 'typeName', 'name' and 'params' have semantics described below
+- Plain terms: all other string keys are sorted and treated as namespace 'V' terms
+- Symbol terms: all symbols must be valid namespace names, sorted
+  lexically as [namespace, term] pairs
+
+Firstly the resource sub-id starts with the value of 'id' key which if
+given must contain the verb type and an optional number of params.
+Otherwise if 'id' is not given the sub-id verb type is generated based
+on 'typeName' if it is given. Otherwise the verb type is set to "@_".
+Secondly if 'name' is specified it is then prepended as the first param.
+Thirdly all sorted plain terms are appended to the params.
+Fourthly all sorted symbol terms are appended to the params.
+Finally all 'param' values are appended to the params.
+
+See also $V.obtainFixedResource.`
+    ])(function getFixedResource (subPlot, explicitChronicleURI) {
+      return Vrapper.prototype.getFixedResource.call(this, subPlot, {
         contextChronicleURI: explicitChronicleURI, discourse: this.__callerValker__,
       });
     }),
 
-    [symbols.obtainSubResource]: denoteValOSCallable([
-`Returns an existing or a newly created structured sub-resource that is
-reached from this resource via the given *subId* VPath.`,
-`Will create all resources traversed by the subId VPath that don't
+    [symbols.getFixedEntity]: denoteValOSCallable([
+`Returns a reference to the fixed sub-entity reached from this
+resource via the given *subPlot* VPlot.`,
+`This call does not create any resources. If the sub-resource does not
+exist the reference will be immaterial.
+
+Alternatively the *subPlot* can be a fixed field object. In this case
+this call adds "Entity" as a typeName to it.
+See $V.getFixedResource for more details.`
+    ])(function getFixedEntity (subPlot, explicitChronicleURI) {
+      return Vrapper.prototype.getFixedResource.call(this, subPlot, {
+        typeName: "Entity",
+        contextChronicleURI: explicitChronicleURI, discourse: this.__callerValker__,
+      });
+    }),
+
+    [symbols.getFixedMedia]: denoteValOSCallable([
+`Returns a reference to the fixed sub-media reached from this
+resource via the given *subPlot* VPlot.`,
+`This call does not create any resources. If the sub-resource does not
+exist the reference will be immaterial.
+
+Alternatively the *subPlot* can be a fixed field object. In this case
+this call adds "Media" as a typeName to it.
+See $V.getFixedResource for more details.`
+    ])(function getFixedEntity (subPlot, explicitChronicleURI) {
+      return Vrapper.prototype.getFixedResource.call(this, subPlot, {
+        typeName: "Media",
+        contextChronicleURI: explicitChronicleURI, discourse: this.__callerValker__,
+      });
+    }),
+
+    [symbols.getFixedRelation]: denoteValOSCallable([
+`Returns a reference to the fixed sub-relation reached from this
+resource via the given *subPlot* VPlot.`,
+`This call does not create any resources. If the sub-resource does not
+exist the reference will be immaterial.
+
+Alternatively the *subPlot* can be a fixed field object. In this case
+this call adds "Relation" as a typeName to it.
+See $V.getFixedResource for more details.`
+    ])(function getFixedEntity (subPlot, explicitChronicleURI) {
+      return Vrapper.prototype.getFixedResource.call(this, subPlot, {
+        typeName: "Relation",
+        contextChronicleURI: explicitChronicleURI, discourse: this.__callerValker__,
+      });
+    }),
+
+    [symbols.obtainFixedResource]: denoteValOSCallable([
+`Returns an existing or a newly created fixed sub-resource that is
+reached from this resource via the given *subPlot* VPlot.`,
+`Will create all resources traversed by the subPlot VPlot that don't
 exist.
 
 Provides initial field and property values for the newly created
-resources so that they satisfy the semantic constraints of the subId
-VPath elements. This typically means that at least the resource type
-and its $V.owner and $V.name are initialized, but depending on VPath
+resources so that they satisfy the semantic constraints of the *subPlot*
+VPlot elements. This typically means that at least the resource type
+and its $V.owner and $V.name are initialized, but depending on VPlot
 contents other properties can also be initialized.
 
 Calls the optional callback argument *extendInitialState* for each new
-resource right before the resource is created. This call is passed
-*initialState* and *subIdIndex* as arguments.
-The *subIdIndex* is an index to the *subId* sub-element for which a new
-resource is about to be created.
+resource right before the resource is created.
+This call is passed *initialState* and *subPlotIndex* as arguments.
+The *subPlotIndex* is an index to the *subPlot* sub-element for which
+a new resource is about to be created.
 The *initialState* contains the initial fields and properties for the
 new resource. These values are immutable and can only be inspected but
 new fields and properties can be added. Once the callback returns the
 *initialState* will be passed to the V:Resource.new call.
 `,
-    ])(function obtainSubResource (subId, extendInitialState, explicitChronicleURI) {
-      return Vrapper.prototype.obtainSubResource.call(this, subId, {
+    ])(function obtainFixedResource (subPlot, extendInitialState, explicitChronicleURI) {
+      return Vrapper.prototype.obtainFixedResource.call(this, subPlot, {
         extendInitialState,
         contextChronicleURI: explicitChronicleURI, discourse: this.__callerValker__,
       });

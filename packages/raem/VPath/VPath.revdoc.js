@@ -83,7 +83,7 @@ global resource identifier (a *VGRID*).`,
 A VPath with a first vstep lacking a verb type and no other vsteps
 identifies a global resource.
 
-Many valospace resources, so called *structural sub-resources* are
+Many valospace resources, so called *fixed sub-resources* are
 identified by a fixed path from the global resource defined by the same
 verbs that define non-VRID VPaths. Thus while paths and identifiers are
 superficially different it is useful to represent them both using the
@@ -443,7 +443,7 @@ guidelines apply:`,
     }
   },
   [`chapter#section_vrid>5;${
-      ""}VRID is a stable identifier of a global resource or a structural sub-resource`]: {
+      ""}VRID is a stable identifier of a global resource or a fixed sub-resource`]: {
     "#0": `
 A VRID is a VPath which has VGRID as its first production
 (via vgrid-tail).`,
@@ -460,10 +460,9 @@ Each valospace resource is identified by a VRID.
 If a resource VRID has only VGRID part but no verbs the resource is
 called a global resource.
 
-If a resource VRID has verbs then the verbs describe a structural path
-from the global resource of its initial VGRID part to the resource
-itself. The resource is called a *structural sub-resource* of that
-global resource.
+If a resource VRID has verbs then the verbs describe a fixed path from
+the global resource of its initial VGRID part to the resource itself.
+The resource is called a *fixed sub-resource* of that global resource.
 
 Each resource is affiliated with an event log of its global resource.
 
@@ -553,27 +552,26 @@ account and/or specify context definition additions which do not change
 the equivalence semantics.`,
       ],
     },
-    [`chapter#section_structural_sub_resources>3;VRID verbs identify structural sub-resources${
+    [`chapter#section_fixed_sub_resources>3;VRID verbs identify fixed sub-resources${
         ""} - fixed ownership, inferred state, 'secondary keys'`]: {
       "#0": [
 `In VRID context the vsteps-tail that follows the VGRID specifies
-a structural path from the global resource to a
-*structural sub-resource* of the global resource. The triple
-constraints of each verb in that path are _inferred as triples_ for the
-particular resource that that verb affects.
+a fixed path from the global resource to a *fixed sub-resource* of the
+global resource. The triple constraints of each verb in that path are
+_inferred as triples_ for the particular resource that that verb affects.
 
-`, blockquote(`Principle: a structural sub-resource using a particular
+`, blockquote(`Principle: a fixed sub-resource using a particular
 vsteps-tail in its identifying VRID will always infer the triples that
 are required to satisfy the same vsteps-tail in a query context which
 starts from the same global resource.`), `
 
-This fixed triple inference is the meat and bones of the structural
+This fixed triple inference is the meat and bones of the fixed
 sub-resources: they allow for protected, constrained semantics to be
 expressed in the valospace resources. This allows both simplified
 semantics (eg. properties _cannot_ be renamed so the complex
 functionality doesn't need to be supported on fabric level), more
 principled mechanism for chronicle crypto behaviours (permission
-relations are structural sub-resources which simplifies security
+relations are fixed sub-resources which simplifies security
 analysis but retains valospace convenience) and also a mechanism for
 expressing non-trivial resources such as hypertwin resources.
 
@@ -616,7 +614,7 @@ the vvalue.`
 An identifier of an immutable, procedurally generated resource with its
 content inferred from the VPath embedded in the vvalue.
 While of limited use in itself this is useful when used as the
-prototype of structural ghost sub-resources which are quite mutable.`,
+prototype of fixed ghost sub-resources which are quite mutable.`,
       },
       [`chapter#section_vgrid_command_resource_hash>3;${
           ""}VGRID format "\`~cih\`": The id of a command-id hash-based insecure resource`]: {
@@ -670,13 +668,13 @@ well as other possible constraints.`,
       ; V:prototype <urn:valos:$~u4.f00b-b507-0763>
 `),
       ],
-      "chapter#section_structural_ghost>0;verb type \"`_`\": structural subspace sub-resource": {
+      "chapter#section_fixed_ghost>0;verb type \"`_`\": fixed subspace sub-resource": {
         "#0": `
 Ghost sub-resources are products of ghost instantiation. All the ghosts
 of the directly _and indirectly_ owned resources of the instance
-prototype are flattened as _direct_ structural sub-resources of the
+prototype are flattened as _direct_ fixed sub-resources of the
 instance itself. The instance is called *ghost host* of all such ghosts.`,
-        "example#example_structural_ghost>0;Structural ghost triple inference": [
+        "example#example_fixed_ghost>0;Fixed ghost triple inference": [
 `\`<urn:valos:$~u4.f00b@_$~u4.ba54>\` reads as "inside the
 instance resource \`f00b\` the ghost of the $~u4 resource \`ba54\`"
 and infers triples:
@@ -690,7 +688,7 @@ and infers triples:
 In case of deeper instantiation chains the outermost ghost segment
 provides inferences recursively to all of its sub-resources; nested
 ghost segments wont provide any further inferences.`,
-        "example#example_structural_ghost_recursive>1;Recursive ghost triple inference": [
+        "example#example_fixed_ghost_recursive>1;Recursive ghost triple inference": [
 `\`<urn:valos:$~u4.f00b@_$~u4.ba54@_$~u4.b7e4>\` reads as "inside
 the instance resource \`f00b\` the ghost of
 \`<urn:valos:$~u4.ba54@_$~u4.b7e4>\`" and infers triples:
@@ -701,10 +699,10 @@ the instance resource \`f00b\` the ghost of
 `)
         ],
       },
-      "chapter#section_structural_subspace>1;verb type \"`_`\": structural subspace override": {
+      "chapter#section_fixed_subspace>1;verb type \"`_`\": fixed subspace override": {
         "#0": `
-Selects a variant resource value for a base resource within a
-structurally identified subspace. The variant resource provides
+Selects a variant resource value for a base resource within a fixed
+subspace. The variant resource provides
 inferred \`subspacePrototype\` fallbacks to an *inner* subspace and
 eventually to the non-variant base resource as well as to the
 homologous sub-resource of the host resource inheritancePrototype.
@@ -712,7 +710,7 @@ homologous sub-resource of the host resource inheritancePrototype.
 This means that no matter where a subspace variant is defined in
 the prototype chain or in the nested sub-structure its value will be
 found.`,
-        "example#example_structural_subspace>0;Structural subspace triple inference": [
+        "example#example_fixed_subspace>0;Fixed subspace triple inference": [
 `\`<urn:valos:$~u4.f00b@.$.myProp@_$lang.fi>\` is a lang fi variant of
 f00b myProp and infers triples:
 `, turtle(`
@@ -730,7 +728,7 @@ identified Relation's etc.
 The verb segment-term can also specify triple inferences for *all*
 sub-resources in the subspace (not just for the immediate
 sub-resource of the selector segment).`,
-        "example#example_structural_subspace_recursive>1;Structural subspace recursive inference": [
+        "example#example_fixed_subspace_recursive>1;Fixed subspace recursive inference": [
 `\`<urn:valos:$~u4.f00b@_$~u4.b453@_$lang.fi@_$~u4.b74e@.$.myProp>\`
 infers triples:
 `, turtle(`
@@ -742,10 +740,10 @@ infers triples:
 `),
         ],
       },
-      "chapter#section_structural_scope_property>2;verb type \"`.`\": structural ScopeProperty": {
+      "chapter#section_fixed_scope_property>2;verb type \"`.`\": fixed ScopeProperty": {
         "#0": `
-Structural properties infer a type, fixed owner and name.`,
-        "example#example_structural_scope_property>0;Structural scope property triple inference": [
+Fixed properties infer a type, fixed owner and name.`,
+        "example#example_fixed_scope_property>0;Fixed scope property triple inference": [
 `\`<urn:valos:$~u4.f00b@.$.myProp>\` is a resource with fixed name
 "myProp", dominant type ScopeProperty, $~u4 resource f00b as the owning
 scope and a structurally homologous prototype inside
@@ -767,7 +765,7 @@ resource they modify it with a fixed rdf:object triple.
 In addition \`.S-\` and \`.O-\` denote \`V:source\` \`V:target\`
 which are the rdf:subject and rdf:object properties of a Relation.`,
         ],
-        "example#example_structural_object>1;Structural rdf:object triple inference": [
+        "example#example_fixed_object>1;Fixed rdf:object triple inference": [
 `\`<urn:valos:$~u4.f00b@-out--$.PERMISSIONS:@.O-$~ih.8766>\` is a PERMISSIONS
 relation with fixed ~ih target 8766 and infers triples:
 `, turtle(`
@@ -781,11 +779,11 @@ relation with fixed ~ih target 8766 and infers triples:
 rdf:object property is V:target'`
         ],
       },
-      "chapter#section_structural_relation>3;verb type \"`*`\": structural Relation": {
+      "chapter#section_fixed_relation>3;verb type \"`-`\": fixed Relation": {
         "#0": `
-Structural relations infer a type, fixed owner (connector), name and
+Fixed relations infer a type, fixed owner (connector), name and
 possibly source and target.`,
-        "example#example_structural_relation>0;Structural relation triple inference": [
+        "example#example_fixed_relation>0;Fixed relation triple inference": [
 `\`<urn:valos:$~u4.f00b@-out--$.PERMISSIONS@_$.1>\` is a resource with
 fixed name "PERMISSIONS", dominant type Relation, ~u4 f00b as the
 source, a structurally homologous prototype inside f00b-b507-0763
@@ -801,10 +799,10 @@ and thus infers triples:
 `),
         ],
       },
-      "chapter#section_structural_entity>4;verb type \"`+`\": structural Entity": {
+      "chapter#section_fixed_entity>4;verb type \"`*`\": fixed Entity": {
         "#0": `
-Structural entities infer a type, fixed owner (parent) and name.`,
-        "example#example_structural_entity>0;Structural Entity triple inference": [
+Fixed entities infer a type, fixed owner (parent) and name.`,
+        "example#example_fixed_entity>0;Fixed Entity triple inference": [
 `\`<urn:valos:$~u4.f00b@*$.Scripts>\` has a fixed name "scripts",
 dominant type Entity, $~u4 resource f00b as the owning container and
 a structurally homologous prototype inside f00b-b507-0763 and thus
@@ -817,10 +815,10 @@ infers triples:
 `),
         ],
       },
-      "chapter#section_structural_media>5;verb type \"`~`\": structural Media": {
+      "chapter#section_fixed_media>5;verb type \"`~`\": fixed Media": {
         "#0": `
-Structural medias infer a type, fixed owner (folder) and name.`,
-        "example#example_structural_media>0;Structural Media triple inference": [
+Fixed medias infer a type, fixed owner (folder) and name.`,
+        "example#example_fixed_media>0;Fixed Media triple inference": [
 `\`<urn:valos:$~u4.f00b@~$.foo.vs>\` has a fixed name "foo.vs", dominant
 type Media, $~u4 resource f00b as the owning folder and a structurally
 homologous prototype inside f00b-b507-0763 and thus infers triples:

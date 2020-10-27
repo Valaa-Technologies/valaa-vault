@@ -324,17 +324,17 @@ export default class Subscription extends LiveUpdate {
     if (refreshed) this._broadcastUpdate(this, passageCounter);
   }
 
-  attachFilterHook (emitter: Vrapper, filter: Function | boolean, isStructural: ?boolean) {
+  attachFilterHook (emitter: Vrapper, filter: Function | boolean, isFixed: ?boolean) {
     // console.log(this.debugId(),
-    //     `attachFilterHook(${emitter.debugId()}, ${filter}, ${isStructural})`);
-    const hookContainer = emitter._addFilterHook(this, filter, isStructural);
+    //     `attachFilterHook(${emitter.debugId()}, ${filter}, ${isFixed})`);
+    const hookContainer = emitter._addFilterHook(this, filter, isFixed);
     if (hookContainer) this._attachedHooks.set(hookContainer, null);
   }
 
-  triggerFilterUpdate (isStructural: any, fieldUpdate: LiveUpdate, passageCounter: ?number) {
-    // console.log("triggerFieldUpdate", this.debugId(), isStructural, passageCounter);
+  triggerFilterUpdate (isFixed: any, fieldUpdate: LiveUpdate, passageCounter: ?number) {
+    // console.log("triggerFieldUpdate", this.debugId(), isFixed, passageCounter);
     if (this._liveKuery !== undefined) {
-      this.triggerKueryUpdate(isStructural, fieldUpdate, passageCounter);
+      this.triggerKueryUpdate(isFixed, fieldUpdate, passageCounter);
       return;
     }
     if (passageCounter !== undefined) {
@@ -374,28 +374,28 @@ export default class Subscription extends LiveUpdate {
     }
   }
 
-  attachKueryFieldHook (emitter: Vrapper, fieldName: string, isStructural: ?boolean) {
+  attachKueryFieldHook (emitter: Vrapper, fieldName: string, isFixed: ?boolean) {
     // console.log(this.debugId(),
-    //    `\n\t.attachKueryFieldHook(${emitter.debugId()}, ${fieldName}, ${isStructural})`);
+    //    `\n\t.attachKueryFieldHook(${emitter.debugId()}, ${fieldName}, ${isFixed})`);
     if (this._liveKuery === undefined) {
       throw new Error("Only kuery subscriptions can attach field hooks");
     }
     const fieldSubscription = emitter.obtainFieldSubscription(fieldName);
     if (fieldSubscription) {
       fieldSubscription.addListenerCallback(this, "kuery",
-          this.triggerKueryUpdate.bind(this, isStructural), false);
+          this.triggerKueryUpdate.bind(this, isFixed), false);
       this._attachedHooks.set(fieldSubscription, "kuery");
     }
   }
 
-  triggerKueryUpdate (isStructural: any, fieldUpdate: LiveUpdate, passageCounter) {
+  triggerKueryUpdate (isFixed: any, fieldUpdate: LiveUpdate, passageCounter) {
     if (passageCounter !== undefined) {
       if (this._seenPassageCounter >= passageCounter) return;
       this._seenPassageCounter = passageCounter;
     }
     /*
     console.log("triggerKueryUpdate", this.debugId(),
-        "\n\tstructural/update:", isStructural, fieldUpdate.debugId(),
+        "\n\tfixed, update:", isFixed, fieldUpdate.debugId(),
         "\n\tpassageCounters:", passageCounter, this._seenPassageCounter,
         "\n\t:", !this._obtainDiscourse, !!this._liveOptions.state,
             this._liveOptions.state === fieldUpdate.getState());
@@ -405,9 +405,9 @@ export default class Subscription extends LiveUpdate {
       if (this._liveOptions.state === newState) return;
       this._liveOptions.state = newState;
     }
-    if (isStructural === false) {
+    if (isFixed === false) {
       // TODO(iridian, 2019-03): Some of the field handlers are now
-      // properly marked as non-structural with hookData === false.
+      // properly marked as non-fixed with hookData === false.
       // Fill the rest too.
       if (this.refreshValue()) this._broadcastUpdate(this, passageCounter);
       return;

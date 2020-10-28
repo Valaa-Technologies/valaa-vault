@@ -1,0 +1,21 @@
+{
+  "name": "@valos/chronicle",
+  "version": "0.35.0-rc.35",
+  "valos": {
+    "type": "library",
+    "domain": "@valos/kernel"
+  },
+  "description": "Specifies ValOS chronicle behaviors and the 'VChronicle' namespace",
+  "author": "Valaa Technologies Ltd",
+  "license": "MIT",
+  "repository": "https://github.com/valaatech/kernel",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "@valos/revdoc": "^0.35.0-rc.35",
+    "@valos/type-library": "^0.35.0-rc.35"
+  }
+}

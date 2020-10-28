@@ -1,0 +1,10 @@
+{
+  "@valos/type-library": {
+    "inUse": "always",
+    "tools": {
+      "specify-namespace": {
+        "inUse": true
+      }
+    }
+  }
+}

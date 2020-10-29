@@ -297,7 +297,7 @@ export default class Gateway extends FabricEventTarget {
     return this._rootFocusURI || this.getRootChronicleURI();
   }
 
-  getIdentityManager () {
+  getIdentityMediator () {
     return this.identity;
   }
 

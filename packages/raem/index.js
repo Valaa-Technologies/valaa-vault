@@ -31,16 +31,6 @@ export {
                            default as VRL,
                                       vRef,
 } from "./VRL";
-export {
-                                      formVPlot,
-                                      conjoinVPlot,
-                                      conjoinVPlotSection,
-                                      disjoinVPlot,
-                                      disjoinVPlotString,
-                                      disjoinVPlotOutline,
-                                      validateVPlot,
-                                      validateVKeyPath,
-} from "./VPlot";
 export type {
                                       ValaaURI,
 } from "./ValaaURI";

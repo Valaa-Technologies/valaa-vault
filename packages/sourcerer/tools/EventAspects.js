@@ -82,9 +82,10 @@ export function tryAspect (root, aspectName) {
 export function swapAspectRoot (currentRootAspectName: string, currentRoot: Object,
     newRootAspectName: string) {
   const aspects = currentRoot.aspects;
+  const newRoot = aspects[newRootAspectName];
+  if (!newRoot) throw new Error(`Can't find aspect '${newRootAspectName}' to swap as new root`);
   delete currentRoot.aspects;
   aspects[currentRootAspectName] = currentRoot;
-  const newRoot = aspects[newRootAspectName];
   delete aspects[newRootAspectName];
   newRoot.aspects = aspects;
   return newRoot;

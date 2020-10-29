@@ -101,9 +101,11 @@
 import resourceCreated, * as c from "./created";
 import resourceDestroyed, * as d from "./destroyed";
 import resourceDuplicated, * as dup from "./duplicated";
+import resourceInvalidated, * as i from "./invalidated";
 import * as m from "./modified";
 import resourceFrozen, * as f from "./frozen";
 import resourceRecombined, * as r from "./recombined";
+import resourceSealed, * as s from "./sealed";
 import resourceTimed, * as td from "./timed";
 import resourceTransacted, * as t from "./transacted";
 
@@ -116,19 +118,23 @@ export { Action, Command, Truth, EventBase };
 export const CREATED = c.CREATED;
 export const DESTROYED = d.DESTROYED;
 export const DUPLICATED = dup.DUPLICATED;
+export const INVALIDATED = i.INVALIDATED;
 export const FIELDS_SET = m.FIELDS_SET;
 export const ADDED_TO = m.ADDED_TO;
 export const REMOVED_FROM = m.REMOVED_FROM;
 export const REPLACED_WITHIN = m.REPLACED_WITHIN;
 export const FROZEN = f.FROZEN;
 export const RECOMBINED = r.RECOMBINED;
+export const SEALED = s.SEALED;
 export const TIMED = td.TIMED;
 export const TRANSACTED = t.TRANSACTED;
 export const created = resourceCreated;
 export const destroyed = resourceDestroyed;
 export const duplicated = resourceDuplicated;
+export const invalidated = resourceInvalidated;
 export const frozen = resourceFrozen;
 export const recombined = resourceRecombined;
+export const sealed = resourceSealed;
 export const timed = resourceTimed;
 export const transacted = resourceTransacted;
 export const fieldsSet = m.fieldsSet;
@@ -154,17 +160,23 @@ export function isTransactedLike (action: Action) {
       || (action.type === RECOMBINED);
 }
 
+export function isFrozenLike (action: Action) {
+  return (action.type === FROZEN) || (action.type === INVALIDATED) || (action.type === SEALED);
+}
+
 export const actionValidators = {
   [VERSION]: {
     CREATED: c.validateCreated,
     DESTROYED: d.validateDestroyed,
     DUPLICATED: dup.validateDuplicated,
+    INVALIDATED: i.validateInvalidated,
     FIELDS_SET: m.validateFieldsSet,
     ADDED_TO: m.validateAddedTo,
     REMOVED_FROM: m.validateRemovedFrom,
     REPLACED_WITHIN: m.validateReplacedWithin,
     FROZEN: f.validateFrozen,
     RECOMBINED: r.validateRecombined,
+    SEALED: s.validateSealed,
     TIMED: td.validateTimed,
     TRANSACTED: t.validateTransacted,
   }

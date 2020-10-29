@@ -1,6 +1,6 @@
 // @flow
 
-import { EventBase } from "~/raem/events";
+import { EventBase, sealed, isFrozenLike } from "~/raem/events";
 import VRL from "~/raem/VRL";
 
 import Connection from "~/sourcerer/api/Connection";
@@ -102,8 +102,10 @@ export default class FalseProphetConnection extends Connection {
   }
 
   setIsFrozen (value: boolean = true) { this._isFrozen = value; }
-
   isFrozenConnection (): boolean { return !!this._isFrozen; }
+
+  setInvalidated (invalidation: ?string, event) { this._invalidation = [invalidation, event]; }
+  isInvalidated (): ?string { return this._invalidation; }
 
   narrateEventLog (options: ?NarrateOptions = {}): Promise<Object> {
     if (!options) return undefined;
@@ -443,12 +445,38 @@ export default class FalseProphetConnection extends Connection {
   }
 
   _checkForFreezeAndNotify (plog, newEvents: ?EventBase[]) {
-    let lastEvent = this._unconfirmedCommands[this._unconfirmedCommands.length - 1]
+    const lastEvent = this._unconfirmedCommands[this._unconfirmedCommands.length - 1]
         || (newEvents && newEvents[newEvents.length - 1]);
     plog && plog.v2 && plog.opEvent(this, "update-post-conditions",
         `_checkForFreezeAndNotify(${this._unconfirmedCommands.length})`,
         { lastEvent, unconfirmedCommands: this._unconfirmedCommands });
-    if (lastEvent) this.setIsFrozen(lastEvent.type === "FROZEN");
+    if (!this.isFrozenConnection()
+        && (this.isInvalidated() || (lastEvent && isFrozenLike(lastEvent)))) {
+      let invalidation = this.isInvalidated();
+      if (!invalidation) {
+        for (let i = 0; i !== (newEvents || []).length; ++i) {
+          if (newEvents[i].type === "INVALIDATED") {
+            invalidation = [newEvents[i].invalidationReason, newEvents[i].invalidEvent];
+            break;
+          }
+        }
+      }
+      if (invalidation) {
+        const stateAfter = this._parent.getState();
+        Promise.resolve()
+        .then(() => this.proclaimEvents([
+          sealed({
+            actions: [],
+            invalidAntecedentIndex: invalidation[1].aspects.log.index,
+            invalidationReason: invalidation[0],
+            frozenPartitions: [this.getChronicleId()], // deprecated
+          }),
+        ], { isProphecy: true, stateAfter }))
+        .catch(error => this.outputErrorEvent(
+            error, "Exception caught during invalidation SEALED proclamation"));
+      }
+      this.setIsFrozen();
+    }
     this.getFalseProphet().setConnectionCommandCount(
         this.getChronicleURI(), this._unconfirmedCommands.length);
   }

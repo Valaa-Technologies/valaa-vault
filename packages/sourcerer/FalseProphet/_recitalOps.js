@@ -11,8 +11,10 @@ import { dumpObject, generateDispatchEventPath, isPromise } from "~/tools";
 
 import FalseProphet from "./FalseProphet";
 import FalseProphetConnection from "./FalseProphetConnection";
-import { Prophecy, _confirmVenueCommand, _rewriteVenueCommand } from "./_prophecyOps";
 import StoryRecital from "./StoryRecital";
+
+import { Prophecy, _confirmVenueCommand, _rewriteVenueCommand } from "./_prophecyOps";
+import { _validateAuthorAspect } from "./_authorOps";
 
 /**
  * Dispatches given event to the corpus and get the corresponding
@@ -26,7 +28,8 @@ import StoryRecital from "./StoryRecital";
  * @returns {type}          description
  */
 export function _composeEventIntoRecitalStory (falseProphet: FalseProphet, event: EventBase,
-    dispatchDescription: string, timed: ?EventBase, transactionState?: TransactionState) {
+    dispatchDescription: string, timed: ?EventBase, transactionState?: TransactionState,
+    truthConnection: ?FalseProphetConnection) {
   if (!event.aspects) initializeAspects(event, { version: EVENT_VERSION });
 
   const transactor = event.meta && event.meta.transactor;
@@ -53,15 +56,24 @@ export function _composeEventIntoRecitalStory (falseProphet: FalseProphet, event
     }
   }
   if (!story) {
-    const dispatchPath = generateDispatchEventPath(transactor, "compose");
-    if (dispatchPath) {
-      progress = operation.getProgressEvent("compose");
-      if (!transactor.dispatchAndDefaultActEvent(progress, { dispatchPath })) {
-        story = null;
+    if (!truthConnection) {
+      const dispatchPath = generateDispatchEventPath(transactor, "compose");
+      if (dispatchPath) {
+        progress = operation.getProgressEvent("compose");
+        if (!transactor.dispatchAndDefaultActEvent(progress, { dispatchPath })) {
+          story = null;
+        }
       }
+    } else if (truthConnection.isFrozenConnection() || truthConnection.isInvalidated()) {
+      story = null;
     }
     if (story === undefined) {
       story = falseProphet._corpus.dispatch(event, dispatchDescription);
+      if (truthConnection
+          && !_validateAuthorAspect(truthConnection, falseProphet._corpus.getState(), event)) {
+        falseProphet.recreateCorpus(previousState);
+        story = null;
+      }
       if (dump) {
         falseProphet.warnEvent(1, () => [
           `Rebased a branched transaction '${transactionState.name}' as a regular new event:`,
@@ -73,7 +85,7 @@ export function _composeEventIntoRecitalStory (falseProphet: FalseProphet, event
   if (story) {
     story.timed = timed;
     if (dispatchDescription.slice(0, 8) === "prophecy") story.isProphecy = true;
-    if (dispatchDescription === "receive_truth") story.isTruth = true;
+    if (truthConnection) story.isTruth = true;
     if (operation) operation._prophecy = story;
     // story.id = story.aspects.command.id; TODO(iridian): what was this?
     const dispatchPath = generateDispatchEventPath(transactor, "profess");
@@ -150,7 +162,10 @@ export function _elaborateRecital (instigatorConnection: FalseProphetConnection,
     schismaticRecital: undefined,
     affectedChronicles: undefined,
   };
-  if (schismaticCommands && schismaticCommands.length) instigatorConnection.setIsFrozen(false);
+  if (schismaticCommands && schismaticCommands.length) {
+    instigatorConnection.setInvalidated(false);
+    instigatorConnection.setIsFrozen(false);
+  }
   const plog2 = elaboration.plog2 = elaboration.falseProphet.opLog(2, "elaboration");
   plog2 && plog2.opEvent("",
       `Elaborating recital (${
@@ -318,7 +333,8 @@ function _extendRecitalUntilNextSchism (elaboration) {
       return nextSchism; // Switch to schism review phase.
     }
     const story = _composeEventIntoRecitalStory(
-        elaboration.falseProphet, newEvent, elaboration.type);
+        elaboration.falseProphet, newEvent, elaboration.type, undefined, undefined,
+        (elaboration.type === "receive_truth") && elaboration.instigatorConnection);
     if (story) elaboration.newRecitalStories.push(story);
   }
   return undefined;
@@ -359,7 +375,7 @@ export function _recomposeSchismaticStory (falseProphet: FalseProphet, story: Pr
   const event = getActionFromPassage(story);
   const transactor = event.meta.transactor;
   const operation = event.meta.operation;
-  let progress = operation._progress;
+  const progress = operation._progress;
   let recomposedStory;
   const composeDescription = !progress ? "story-recompose"
       : !progress.isSchismatic ? "prophecy-review"

@@ -71,7 +71,22 @@ export default class OracleConnection extends Connection {
         throw new Error(`INTERNAL ERROR: receiveTruths..pushTruths was not defined`);
       }
       return pushTruths(
-          truths.map(event => upgradeEventTo0Dot2(this, event)),
+          truths.map(event => {
+            try {
+              return upgradeEventTo0Dot2(this, event);
+            } catch (error) {
+              this.warnEvent(1, () => [
+                "Invalid event encountered while validating a version 0.2 event:", error.message,
+                "\n\tevent:", ...dumpObject(event),
+              ]);
+              return {
+                type: "INVALIDATED",
+                invalidationReason: error.message,
+                invalidEvent: { ...event, aspects: undefined },
+                aspects: event.aspects || { version: "0.2" },
+              };
+            }
+          }),
           retrieveMediaBuffer);
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, new Error(type),

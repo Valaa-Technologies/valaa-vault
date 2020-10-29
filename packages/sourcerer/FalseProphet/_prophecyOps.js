@@ -552,7 +552,7 @@ export class ProphecyOperation extends ProphecyEventResult {
         this._sceneName = `proclaim act #${actIndex} command to ${
             venue.connection.getName()}`;
         const options = Object.create(this._options);
-        options.prophecy = this;
+        options.stateAfter = this._prophecy.state;
         venue.currentProclamation = venue.proclamation = venue.connection
             .proclaimEvent(venue.commandEvent, options);
       } catch (error) {

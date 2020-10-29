@@ -6,14 +6,12 @@ import type FalseProphetConnection from "./FalseProphetConnection";
 export function _resolveAuthorParams (connection: FalseProphetConnection, op: Object) {
   const mediator = connection._resolveOptionsIdentity(op.options);
   const identityParams = mediator && mediator.try(connection.getChronicleURI());
-  console.log("resolveAuthorParams:", connection.getChronicleURI(), identityParams);
   let rejection;
-  const state = op.options.prophecy._prophecy.state;
+  const state = op.options.stateAfter;
   const requireAuthoredEvents = state.getIn([
     "Property", `${connection._rootStem}@.$VChronicle.requireAuthoredEvents@@`, "value", "value",
   ]);
   if (!identityParams) {
-    // TODO: check if the connection requires authoring
     if (!requireAuthoredEvents) return undefined;
     rejection = "no public identity found and VChronicle:requireAuthoredEvents is set";
   } else {
@@ -27,13 +25,13 @@ export function _resolveAuthorParams (connection: FalseProphetConnection, op: Ob
     ]);
     if (!chroniclePublicKey) {
       if (!requireAuthoredEvents) return undefined;
-      // TODO: add VChronicle:allowGuestContributors which when set
+      // TODO(iridian, 2020-10): add VChronicle:allowGuestContributors which when set
       // permits automatic identity relation creation into the event
       rejection = `No VChronicle:contributor found targeting the authority public identity${
         ""} (and VChronicle:allowGuestContributors not set)`;
       // _autoAddContributorRelation(connection, op, identityParams);
     } else if (chroniclePublicKey !== identityParams.asContributor.publicKey) {
-      // TODO: auto-refresh identity relation public key if the chronicle permits it
+      // TODO(iridian, 2020-10): auto-refresh identity relation public key if the chronicle permits
       rejection = "Obsolete VChronicle:contributor publicKey (auto-refresh not implemented)";
     }
     if (!rejection) {

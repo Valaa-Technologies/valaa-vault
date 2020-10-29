@@ -53,6 +53,7 @@ export default class FalseProphetConnection extends Connection {
       this._referencePrototype = new VRL()
           .initResolverComponent({ absent: true, partition: this._chronicleURI });
     }
+    this._rootStem = this._chronicleURI.match(/\?id=(.*)@@$/)[1];
   }
 
   getFalseProphet () { return this._parent; }

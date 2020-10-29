@@ -53,7 +53,8 @@ export default class IdentityMediator extends FabricEventTarget {
     }
   }
 
-  get (identityChronicleURI: string) { return this._activeIdentities[identityChronicleURI]; }
+  get (resource: string | Object) { return _getIdentityParams(this, resource); }
+  try (resource: string | Object) { return _getIdentityParams(this, resource, false); }
 
   remove (publicAuthorityIdentity: string | Object) {
     try {
@@ -72,6 +73,23 @@ export default class IdentityMediator extends FabricEventTarget {
       );
     }
   }
+
+  getPublicIdentityFor (resource: Object | string) {
+    return _getIdentityParams(this, resource).publicIdentity;
+  }
+
+  getContributorPropertiesFor (resource: Object | string) {
+    return { ..._getIdentityParams(this, resource).asContributor };
+  }
 }
 
 Object.assign(IdentityMediator.prototype, identityPrototypeMethods);
+
+function _getIdentityParams (mediator, reference, require = true) {
+  const { authority, resource } = mediator._sourcerer.resolveReference(reference);
+  const identityParams = mediator._authorityIdentities[authority.getAuthorityURI()];
+  if (require && !identityParams) {
+    throw new Error(`Cannot find an active public authority identity for <${resource.toString()}>`);
+  }
+  return identityParams;
+}

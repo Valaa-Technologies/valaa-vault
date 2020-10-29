@@ -48,5 +48,6 @@ proclamation lifecycle.`,
     ...require("./ChangeAspect"),
     ...require("./CommandAspect"),
     ...require("./LogAspect"),
+    ...require("./AuthorAspect"),
   },
 };

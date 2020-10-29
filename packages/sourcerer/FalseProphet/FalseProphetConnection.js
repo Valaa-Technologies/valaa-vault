@@ -12,6 +12,7 @@ import IdentityMediator from "~/sourcerer/FalseProphet/IdentityMediator";
 
 import { dumpObject, mapEagerly, thisChainRedirect } from "~/tools";
 
+import { _resolveAuthorParams, _addAuthorAspect } from "./_authorOps";
 import { Prophecy, _reviewRecomposedSchism } from "./_prophecyOps";
 import {
   _confirmLeadingTruthsToFollowers, _confirmRecitalStories, _elaborateRecital,
@@ -59,7 +60,8 @@ export default class FalseProphetConnection extends Connection {
   static sourceryOpsName = "falseSourcery";
   static falseSourcery = [
     function _prepareIdentity (...forward) {
-      this._originatingIdentity = forward[0].discourse && forward[0].discourse.getIdentityMediator();
+      this._originatingIdentity = forward[0].discourse
+          && forward[0].discourse.getIdentityMediator();
       this._referencePrototype.setAbsent(false);
       return forward;
     },
@@ -167,13 +169,16 @@ export default class FalseProphetConnection extends Connection {
 
   _prepareProclaim (op) {
     if (op.options.isProphecy) {
+      const authorParams = _resolveAuthorParams(this, op);
       // console.log("assigning ids:", this.getName(), this._headEventId,
       //     this._unconfirmedCommands.length, "\n\tevents:", ...dumpObject(events));
       for (const event of op.events) {
         if (!event.aspects || !event.aspects.version) {
           initializeAspects(event, { version: EVENT_VERSION });
         }
-        obtainAspect(event, "log").index = this._headEventId + this._unconfirmedCommands.length;
+        const log = obtainAspect(event, "log");
+        log.index = this._headEventId + this._unconfirmedCommands.length;
+        if (authorParams) _addAuthorAspect(this, op, authorParams, event, log.index);
         this._unconfirmedCommands.push(event);
       }
       this._checkForFreezeAndNotify(undefined, op.plog);
@@ -186,7 +191,6 @@ export default class FalseProphetConnection extends Connection {
     if (op.receiveTruths) op.options.receiveTruths = op.receiveTruths;
     op.options.receiveCommands = op.options.isProphecy ? null
         : this.getReceiveCommands(op.options.receiveCommands);
-    this._resolveOptionsIdentity(op.options);
     op.plog && op.plog.v2 && op.plog.opEvent("to-upstream",
         `upstream.proclaimEvents(${op.events.length})`, op);
     op.proclamation = this._upstreamConnection.proclaimEvents(op.events, op.options);

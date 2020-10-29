@@ -1,12 +1,13 @@
 import { Map } from "immutable";
 
 import { CREATED, DESTROYED, FIELDS_SET, ADDED_TO, REMOVED_FROM, REPLACED_WITHIN,
-    DUPLICATED, FROZEN, RECOMBINED, TIMED, TRANSACTED } from "~/raem/events";
+    DUPLICATED, FROZEN, INVALIDATED, SEALED, RECOMBINED, TIMED, TRANSACTED } from "~/raem/events";
 import create from "~/raem/redux/reducers/create";
 import duplicate from "~/raem/redux/reducers/duplicate";
 import destroy from "~/raem/redux/reducers/destroy";
 import modify from "~/raem/redux/reducers/modify";
 import freeze from "~/raem/redux/reducers/freeze";
+import invalidate from "~/raem/redux/reducers/invalidate";
 import recombine from "~/raem/redux/reducers/recombine";
 import transact from "~/raem/redux/reducers/transact";
 import { createBardReducer } from "~/raem/redux/Bard";
@@ -23,6 +24,8 @@ export default function createRAEMReducers () {
     [REMOVED_FROM]: createBardReducer(modify),
     [REPLACED_WITHIN]: createBardReducer(modify),
     [FROZEN]: createBardReducer(freeze),
+    [SEALED]: createBardReducer(freeze),
+    [INVALIDATED]: createBardReducer(invalidate),
     [RECOMBINED]: createBardReducer(recombine, { skipPostPassageStateUpdate: true }),
     [TRANSACTED]: createBardReducer(transact),
     // TIMED events will be expanded to actions and resulting events/sub-actions by appropriate

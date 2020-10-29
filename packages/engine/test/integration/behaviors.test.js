@@ -5,6 +5,7 @@ import { createSignatureKeys, verifyVPlotSignature } from "~/security/signatures
 import { naiveURI } from "~/raem/ValaaURI";
 
 import { getAspect, swapAspectRoot } from "~/sourcerer/tools/EventAspects";
+import IdentityMediator from "~/sourcerer/FalseProphet/IdentityMediator";
 
 import { testAuthorityURI, createEngineOracleHarness } from "~/engine/test/EngineTestHarness";
 
@@ -49,7 +50,6 @@ const signatureKeys = {};
 
 async function registerLocalTestUserIdentity (targetHarness, publicIdentityId) {
   const { publicKey, secretKey } = createSignatureKeys(publicIdentityId);
-  signatureKeys[publicIdentityId] = { publicKey, secretKey };
   const identityRoot = await targetHarness.runValoscript(null, `
     const identityRoot = new Entity({
       id: "${publicIdentityId}",
@@ -62,6 +62,8 @@ async function registerLocalTestUserIdentity (targetHarness, publicIdentityId) {
     });
     identityRoot;
   `, {}, {});
+  signatureKeys[publicIdentityId] = { publicKey, secretKey };
+  signatureKeys[identityRoot.getChronicleURI()] = { publicKey, secretKey };
   return identityRoot.getChronicleURI();
 }
 
@@ -80,29 +82,37 @@ describe("Chronicle behaviors: VChronicle:requireAuthoredEvents", () => {
         },
       });
 
-      new Relation({
-        source: authoroot,
-        fixed: {
-          name: $VChronicle.director,
-          target: valos.identity.getPublicIdentityFor(authoroot),
-        },
-        properties: valos.identity.getContributorPropertiesFor(authoroot),
-      });
+      ${_addIdentityRoleRelation("authoroot")};
 
       ({ authoroot, directors: authoroot.$V.getRelations($VChronicle.director) });
     `;
   }
 
-  async function _sourcerDecepAuthoroot (authoroot) {
+  function _addIdentityRoleRelation (
+      chronicleRoot = "this", role = "$VChronicle.director",
+      targetMediator = "valos.identity", contributorMediator = "valos.identity") {
+    return `
+      new Relation({
+        source: ${chronicleRoot},
+        fixed: { name: ${role}, target: ${targetMediator}.getPublicIdentityFor(${chronicleRoot}) },
+        properties: ${contributorMediator}.getContributorPropertiesFor(${chronicleRoot}),
+      })
+    `;
+  }
+
+  async function _sourcerDecepAuthoroot (authoroot, expectedAuthorootEvents = 1) {
     expect((await decepness.receiveEventsFrom(harness.testChronicle)).length)
         .toEqual(2);
 
     const authorootConnection = await authoroot.getConnection().asSourceredConnection();
     const decepConnection = decepness.sourcerer
         .sourcerChronicle(authorootConnection.getChronicleURI());
-    const authorootEvents = await decepness.receiveEventsFrom(authorootConnection);
+    const authorootEvents = await decepness
+        .receiveEventsFrom(authorootConnection, {
+          alsoReceiveBackToSource: true,
+        });
     expect(authorootEvents.length)
-        .toEqual(1);
+        .toEqual(expectedAuthorootEvents);
 
     await decepConnection.asSourceredConnection();
     const decepAuthoroot = decepEntities().creator.propertyValue("authoroot");
@@ -163,33 +173,97 @@ describe("Chronicle behaviors: VChronicle:requireAuthoredEvents", () => {
         .toBeUndefined();
   });
 
-  xit("freezes ie. seals a chronicle with SEALED on an authorized but invalid event", async () => {
+  function _addCustomIdentityRoleRelation (
+      publicIdentityURI, chronicleRoot = "this", role = "$VChronicle.director") {
+    return `
+      valos.sourcerIdentityMediator("${publicIdentityURI}")
+      .then(identity => ${_addIdentityRoleRelation(chronicleRoot, role, "identity", "identity")});
+    `;
+  }
+
+  async function _addIdentityAsContributor (chronicleRoot, identityURI) {
+    const mediator = new IdentityMediator({ parent: chronicleRoot.getEngine() });
+    mediator.add(identityURI, {
+      asContributor: { publicKey: signatureKeys[identityURI].publicKey },
+    });
+    return chronicleRoot.doValoscript(
+        _addIdentityRoleRelation("this", "$VChronicle.contributor", "mediator", "mediator"),
+        { mediator });
+  }
+
+  it("freezes a chronicle with SEALED (ie. seals) on an authorized but invalid event", async () => {
     await prepareHarnesses({ verbosity: 0, claimBaseBlock: true });
     const { authoroot } = await entities().creator.doValoscript(
         _createAuthoredOnlyChronicle(), {}, {});
 
-    const { decepAuthoroot } = await _sourcerDecepAuthoroot(authoroot);
+    await _addIdentityAsContributor(authoroot, decepTributorURI);
 
-    decepAuthoroot.doValoscript(`
-      this.manuallyBrokenModification = true;`
-    );
+    const { decepAuthoroot } = await _sourcerDecepAuthoroot(authoroot, 2);
 
-    expect(decepAuthoroot.propertyValue("manuallyBrokenModification"))
-        .toEqual("true");
+    await decepAuthoroot.doValoscript(`this.happyModification = 1;`);
+    await decepAuthoroot.doValoscript(`this.manuallyBrokenModification = 2;`);
+    await decepAuthoroot.doValoscript(`this.postBrokenModification = 3;`);
 
-    // TODO(iridian, 2020-10): break the event
-
-    expect((await harness.receiveEventsFrom(decepness, {})).length)
+    expect(decepAuthoroot.propertyValue("happyModification"))
         .toEqual(1);
+    expect(decepAuthoroot.propertyValue("manuallyBrokenModification"))
+        .toEqual(2);
+    expect(decepAuthoroot.propertyValue("postBrokenModification"))
+        .toEqual(3);
 
+    const decepAuthorootBackend = decepness
+        .tryGetTestAuthorityConnection(decepAuthoroot.getConnection());
+    const event = decepAuthorootBackend._proclamations[1].event;
+    const validPreviousType = event.type;
+
+    // break the event for prime harness to detect
+    event.type = "BROKEN";
+    expect((await harness.receiveEventsFrom(decepAuthoroot.getConnection(), {})).length)
+        .toEqual(3);
+
+    // fix the event for decepness to have fraudulently confirmed
+    event.type = validPreviousType;
+    expect((await decepness.receiveEventsFrom(
+            decepAuthoroot.getConnection(), { clearSourceUpstream: true })).length)
+        .toEqual(3);
+
+    expect(authoroot.propertyValue("happyModification"))
+        .toEqual(1);
     expect(authoroot.propertyValue("manuallyBrokenModification"))
         .toBeUndefined();
-
-    expect((await decepness.receiveEventsFrom(harness, {})).length)
-        .toEqual(1);
-    expect(decepAuthoroot.propertyValue("manuallyBrokenModification"))
+    expect(authoroot.propertyValue("postBrokenModification"))
         .toBeUndefined();
-    expect((await decepAuthoroot.getConnection()).isFrozen())
+
+    expect(authoroot.getConnection().isFrozenConnection())
+        .toEqual(true);
+
+    await new Promise(resolve => setTimeout(resolve, 1));
+
+    const decepEvents = (await decepness.receiveEventsFrom(authoroot.getConnection(), {}));
+
+    expect(decepEvents[0])
+        .toMatchObject({
+          type: "SEALED",
+          invalidAntecedentIndex: 3,
+          aspects: { author: { antecedent: 4, publicIdentity: primeDirectorId } },
+        });
+    expect(decepEvents[0].invalidationReason)
+        .toMatch(/validator missing for type BROKEN/);
+
+    // TODO(iridian, 2020-10): Evaluate whether retrograde invalidation
+    // of already confirmed truths by an incoming SEALED is desirable.
+    // In general gateways should already invalidate local commands
+    // themselves and thus SEALED is useful as an only informative
+    // variant of FROZEN. Retrograde invalidation would be useful if
+    // there are different types of validation behaviors in which case
+    // some gateways could treat all incoming events as unconfirmed and
+    // rely on SEALED.
+    // Not implementing retroactive invalidation yet:
+    //
+    // expect(decepAuthoroot.propertyValue("manuallyBrokenModification"))
+    //    .toBeUndefined();
+
+    expect(decepAuthoroot.getConnection().isFrozenConnection())
         .toEqual(true);
   });
 
@@ -255,34 +329,20 @@ describe("Chronicle behaviors: VChronicle:requireAuthoredEvents", () => {
         .toEqual(true);
   });
 
-  function _addIdentityRoleRelation (publicIdentityURI, role = "$VChronicle.director", target = "this") {
-    return `
-      valos.sourcerIdentityMediator("${publicIdentityURI}")
-      .then(identity => new Relation({
-          source: ${target},
-          fixed: {
-            name: ${role},
-            target: identity.getPublicIdentityFor(${target}),
-          },
-          properties: identity.getContributorPropertiesFor(${target}),
-      }))
-    `;
-  }
-
   xit("seals on a subversively authorized and authored yet forbidden privilege escalation event",
       async () => {
     await prepareHarnesses({ verbosity: 0, claimBaseBlock: true });
     const { authoroot } = await entities().creator.doValoscript(
         _createAuthoredOnlyChronicle(), {}, {});
     await authoroot.doValoscript(
-        _addIdentityRoleRelation(decepTributorURI, "$VChronicle.contributor"), {}, {});
+        _addCustomIdentityRoleRelation(decepTributorURI, "this", "$VChronicle.contributor"), {});
 
     const { decepAuthoroot } = await _sourcerDecepAuthoroot(authoroot);
 
     // TODO(iridian, 2020-10): disable local director validation on VChronicle property changes
 
     await decepAuthoroot.doValoscript(
-        _addIdentityRoleRelation(decepTributorURI, "$VChronicle.director"), {}, {});
+        _addCustomIdentityRoleRelation(decepTributorURI, "this", "$VChronicle.director"), {});
 
     expect(decepAuthoroot.propertyValue(qualifiedSymbol("VChronicle", "requireAuthoredEvents")))
         .toEqual(true);
@@ -314,7 +374,7 @@ describe("Chronicle behaviors: VChronicle:requireAuthoredEvents", () => {
     const { authoroot } = await entities().creator.doValoscript(
         _createAuthoredOnlyChronicle(), {}, {});
     await authoroot.doValoscript(
-        _addIdentityRoleRelation(decepTributorURI, "$VChronicle.director"), {}, {});
+        _addCustomIdentityRoleRelation(decepTributorURI, "this", "$VChronicle.director"), {}, {});
 
     const { decepAuthoroot } = await _sourcerDecepAuthoroot(authoroot);
 
@@ -356,7 +416,7 @@ describe("Chronicle behaviors: VChronicle:requireAuthoredEvents", () => {
     const { authoroot } = await entities().creator.doValoscript(
         _createAuthoredOnlyChronicle(), {}, {});
     await authoroot.doValoscript(
-        _addIdentityRoleRelation(decepTributorURI, "$VChronicle.director"), {}, {});
+        _addCustomIdentityRoleRelation(decepTributorURI, "this", "$VChronicle.director"), {}, {});
 
     const { decepAuthoroot } = await _sourcerDecepAuthoroot(authoroot);
 
@@ -366,14 +426,10 @@ describe("Chronicle behaviors: VChronicle:requireAuthoredEvents", () => {
       Promise.all([
         valos.sourcerIdentityMediator("${impersonateeURI}"),
         valos.sourcerIdentityMediator("${decepTributorURI}")
-      ]).then(([impersonateeMediator, decepMediator]) => new Relation({
-        source: this,
-        fixed: {
-          name: $VChronicle.contributor,
-          target: impersonateeMediator.getPublicIdentityFor(this),
-        },
-        properties: decepMediator.getContributorPropertiesFor(this),
-      }))
+      ]).then(([impersonateeMediator, decepMediator]) =>
+          ${_addIdentityRoleRelation(
+              "this", "$VChronicle.contributor", "impersonateeMediator", "decepMediator")}
+      )
     `);
 
     await decepAuthoroot.doValoscript(`

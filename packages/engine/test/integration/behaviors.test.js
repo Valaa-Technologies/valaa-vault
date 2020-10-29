@@ -1,6 +1,10 @@
 /* global describe expect it */
 
+import { createSignatureKeys, verifyVPlotSignature } from "~/security/signatures";
+
 import { naiveURI } from "~/raem/ValaaURI";
+
+import { getAspect, swapAspectRoot } from "~/sourcerer/tools/EventAspects";
 
 import { testAuthorityURI, createEngineOracleHarness } from "~/engine/test/EngineTestHarness";
 
@@ -41,15 +45,20 @@ async function prepareHarnesses (sharedOptions) {
   })();
 }
 
+const signatureKeys = {};
+
 async function registerLocalTestUserIdentity (targetHarness, publicIdentityId) {
+  const { publicKey, secretKey } = createSignatureKeys(publicIdentityId);
+  signatureKeys[publicIdentityId] = { publicKey, secretKey };
   const identityRoot = await targetHarness.runValoscript(null, `
     const identityRoot = new Entity({
       id: "${publicIdentityId}",
       authorityURI: "${testAuthorityURI}",
+      properties: { asContributor: { publicKey: "${publicKey}" } },
     });
-    valos.identity.add(identityRoot.$V.chronicleURI, {
-      asContributor: {
-      },
+    valos.identity.add(identityRoot, {
+      secretKey: "${secretKey}",
+      asContributor: { publicKey: "${publicKey}" },
     });
     identityRoot;
   `, {}, {});
@@ -100,7 +109,7 @@ describe("Chronicle behaviors: VChronicle:requireAuthoredEvents", () => {
     return { decepAuthoroot, authorootEvents };
   }
 
-  xit("happily receives authored events", async () => {
+  it("happily receives authored events", async () => {
     await prepareHarnesses({ verbosity: 0, claimBaseBlock: true });
     const { authoroot, directors } = await entities().creator.doValoscript(
         _createAuthoredOnlyChronicle(), { console }, { verbosity: 0 });
@@ -122,8 +131,17 @@ describe("Chronicle behaviors: VChronicle:requireAuthoredEvents", () => {
     expect(decepAuthoroot.step("name"))
         .toEqual("authored-only");
 
-    expect(authorootEvents[0].aspects.author)
-        .toMatchObject({});
+    const event = authorootEvents[0];
+    const command = getAspect(event, "command");
+    const author = swapAspectRoot("event", event, "author");
+    expect(author)
+        .toMatchObject({ antecedent: -1, publicIdentity: primeDirectorId });
+    expect(verifyVPlotSignature(
+            { event, command },
+            author.signature,
+            signatureKeys[author.publicIdentity].publicKey))
+        .toEqual(true);
+    swapAspectRoot("author", author, "event");
   });
 
   xit("refuses to profess a non-authorable outgoing event", async () => {

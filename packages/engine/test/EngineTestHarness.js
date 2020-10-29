@@ -5,6 +5,7 @@ import SourcererTestHarness, {
   createSourcererTestHarness, createSourcererOracleHarness,
 } from "~/sourcerer/test/SourcererTestHarness";
 import { obtainAspect } from "~/sourcerer/tools/EventAspects";
+import IdentityMediator from "~/sourcerer/FalseProphet/IdentityMediator";
 
 import EngineTestAPI from "~/engine/test/EngineTestAPI";
 import Engine from "~/engine/Engine";
@@ -56,6 +57,12 @@ export default class EngineTestHarness extends SourcererTestHarness {
       RemoteAuthorityURI: "valaa-testing:",
       LocalAuthorityURI: "valaa-local:",
     };
+    // TODO(iridian, 2020-10): Identity also should be in InspireTestHarness.
+    rootScope.valos.identity = new IdentityMediator({
+      name: "Test Identity",
+      parent: this,
+      sourcerer: this.sourcerer,
+    });
     this.createds = new TestCollectCREATEDCog(this);
     this.engine.addCog(this.createds);
     this.entities = this.createds.Entity;

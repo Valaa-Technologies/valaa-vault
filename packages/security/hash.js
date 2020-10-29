@@ -1,5 +1,5 @@
+const nacl = require("tweetnacl");
 const JSSHA256 = require("jssha/src/sha256");
-const JSSHA512 = require("jssha/src/sha512");
 const JSSHA3 = require("jssha/src/sha3");
 
 module.exports = {
@@ -9,6 +9,8 @@ module.exports = {
   hexSHA512FromBuffer,
 };
 
+// TODO(iridian, 2020-10): Phase this function out when the support for
+// old chronicles with old-style derived id's can be finally dropped.
 function b64SHA256FromUTF8Text (utf8Text) {
   const sha = new JSSHA256("SHA-256", "TEXT", { encoding: "UTF8" });
   sha.update(utf8Text);
@@ -16,9 +18,7 @@ function b64SHA256FromUTF8Text (utf8Text) {
 }
 
 function hexSHA512FromBuffer (arrayBuffer) {
-  const sha = new JSSHA512("SHA-512", "ARRAYBUFFER");
-  sha.update(arrayBuffer);
-  return sha.getHash("HEX");
+  return hexFromBuffer(nacl.hash(new Uint8Array(arrayBuffer)));
 }
 
 }

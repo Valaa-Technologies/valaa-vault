@@ -1,6 +1,6 @@
 {
   "name": "@valos/chronicle",
-  "version": "0.35.0-rc.35",
+  "version": "0.36.0-alpha.0",
   "valos": {
     "type": "library",
     "domain": "@valos/kernel"
@@ -15,7 +15,7 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@valos/revdoc": "^0.35.0-rc.35",
-    "@valos/type-library": "^0.35.0-rc.35"
+    "@valos/revdoc": "^0.36.0-alpha.0",
+    "@valos/type-library": "^0.36.0-alpha.0"
   }
 }

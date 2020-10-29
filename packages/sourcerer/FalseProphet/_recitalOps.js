@@ -252,9 +252,9 @@ export function _elaborateRecital (instigatorConnection: FalseProphetConnection,
       ._reciteStoriesToFollowers(elaboration.newRecitalStories, elaboration.schismaticRecital);
   elaboration.isComplete = true;
 
+  instigatorConnection._checkForFreezeAndNotify(plog2, newEvents);
   _confirmLeadingTruthsToFollowers(elaboration.falseProphet);
 
-  instigatorConnection._checkForFreezeAndNotify();
   plog2 && plog2.opEvent("done",
       "Elaboration done");
 }

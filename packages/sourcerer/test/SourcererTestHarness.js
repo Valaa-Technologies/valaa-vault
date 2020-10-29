@@ -235,12 +235,13 @@ export default class SourcererTestHarness extends ScriptTestHarness {
     verbosity = 0,
     requireReceivingConnection = true,
     clearSourceUpstream = false,
+    alsoReceiveBackToSource = false,
     clearReceiverUpstream = false,
     authorizeTruth = (i => i),
     asNarrateResults = false,
   } = {}) {
     const ret = [];
-    const results = [];
+    const finallyWaitFor = [];
     for (const connection of ((source instanceof Connection)
         ? [source]
         : Object.values((source instanceof Sourcerer ? source : source.sourcerer)._connections))) {
@@ -262,19 +263,29 @@ export default class SourcererTestHarness extends ScriptTestHarness {
       const truths = JSON.parse(JSON.stringify(
               (testSourceBackend._proclamations || []).map(entry => entry.event)))
           .map(authorizeTruth);
-      if (clearSourceUpstream) testSourceBackend._proclamations = [];
-      if (clearReceiverUpstream) receiverBackend._proclamations = [];
-      if (verbosity) {
-        receiver.warnEvent("Receiving truths:", dumpify(truths, { indent: 2 }));
-      }
       ret.push(...truths);
-      if (asNarrateResults) {
-        receiverBackend.addNarrateResults({ eventIdBegin: truths[0].aspects.log.index }, truths);
-      } else {
-        results.push(receiverBackend.getReceiveTruths()(truths));
-      }
+      finallyWaitFor.push(
+          this._receiveTruthsToBackend(testSourceBackend,
+              clearSourceUpstream || alsoReceiveBackToSource,
+              alsoReceiveBackToSource && truths, asNarrateResults, verbosity));
+      finallyWaitFor.push(
+          this._receiveTruthsToBackend(receiverBackend, clearReceiverUpstream,
+              truths, asNarrateResults, verbosity));
     }
-    return Promise.all(results).then(() => ret);
+    return Promise.all(finallyWaitFor).then(() => ret);
+  }
+
+  _receiveTruthsToBackend (connectionBackend, clearUpstream, truths, asNarrateResults, verbosity) {
+    if (clearUpstream) connectionBackend._proclamations = [];
+    if (verbosity) {
+      connectionBackend.warnEvent("Receiving truths:", dumpify(truths, { indent: 2 }));
+    }
+    if (!truths) return [];
+    if (!asNarrateResults) {
+      return connectionBackend.getReceiveTruths()(truths);
+    }
+    connectionBackend.addNarrateResults({ eventIdBegin: truths[0].aspects.log.index }, truths);
+    return undefined;
   }
 
   tryGetTestAuthorityConnection (connection): Connection {

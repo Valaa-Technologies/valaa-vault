@@ -182,7 +182,7 @@ export default class FalseProphetConnection extends Connection {
         if (authorParams) _addAuthorAspect(this, op, authorParams, event, log.index);
         this._unconfirmedCommands.push(event);
       }
-      this._checkForFreezeAndNotify(undefined, op.plog);
+      this._checkForFreezeAndNotify(op.plog);
     } else if (typeof op.events[0].aspects.log.index !== "number") {
       throw new Error(`Can't chronicle events without aspects.log.index ${
           ""}(while options.isProphecy is not set)`);
@@ -347,8 +347,8 @@ export default class FalseProphetConnection extends Connection {
       if (confirmations) {
         _confirmRecitalStories(this, confirmations);
         if (!newTruths.length && !(schismaticCommands || []).length) {
+          this._checkForFreezeAndNotify(plog2);
           _confirmLeadingTruthsToFollowers(this.getFalseProphet());
-          this._checkForFreezeAndNotify(undefined, plog2);
           return truths;
         }
       }
@@ -443,11 +443,9 @@ export default class FalseProphetConnection extends Connection {
     return {};
   }
 
-  _checkForFreezeAndNotify (
-      lastEvent: EventBase[] =
-          this._unconfirmedCommands[(this._unconfirmedCommands.length || 1) - 1],
-      plog,
-  ) {
+  _checkForFreezeAndNotify (plog, newEvents: ?EventBase[]) {
+    let lastEvent = this._unconfirmedCommands[this._unconfirmedCommands.length - 1]
+        || (newEvents && newEvents[newEvents.length - 1]);
     plog && plog.v2 && plog.opEvent(this, "update-post-conditions",
         `_checkForFreezeAndNotify(${this._unconfirmedCommands.length})`,
         { lastEvent, unconfirmedCommands: this._unconfirmedCommands });

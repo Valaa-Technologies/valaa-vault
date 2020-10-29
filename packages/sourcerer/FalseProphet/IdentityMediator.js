@@ -15,7 +15,7 @@ export default class IdentityMediator extends FabricEventTarget {
     clientURI: string, sessionURI: string, add: ?Object,
   }) {
     super(options.parent, options.verbosity, options.name);
-    this._sourcerer = options.sourcerer;
+    this._sourcerer = options.sourcerer || options.parent.getSourcerer();
     this.clientURI = options.clientURI;
     this.sessionURI = options.sessionURI;
     this._activeIdentities = {};

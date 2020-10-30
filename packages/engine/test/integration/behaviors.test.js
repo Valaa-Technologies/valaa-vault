@@ -319,34 +319,54 @@ describe("Chronicle behaviors: VChronicle:requireAuthoredEvents", () => {
         .toEqual(true);
   });
 
-  xit("seals on a deceptively authorized but incorrectly signed event", async () => {
+  it("seals on a deceptively authorized but incorrectly signed event", async () => {
     await prepareHarnesses({ verbosity: 0, claimBaseBlock: true });
     const { authoroot } = await entities().creator.doValoscript(
         _createAuthoredOnlyChronicle(), {}, {});
+    await _addIdentityAsContributor(authoroot, decepTributorURI);
+    const { decepAuthoroot } = await _sourcerDecepAuthoroot(authoroot, 2);
 
-    const { decepAuthoroot } = await _sourcerDecepAuthoroot(authoroot);
-
-    // TODO(iridian, 2020-10): impersonate director prime
-
-    expect(() => decepAuthoroot.doValoscript(`
-      this.incorrectlySigned = true;
-    `));
+    await decepAuthoroot.doValoscript(`this.incorrectlySigned = true;`);
 
     expect(decepAuthoroot.propertyValue("incorrectlySigned"))
         .toEqual(true);
 
-    expect((await harness.receiveEventsFrom(decepness, {})).length)
+    const decepAuthorootBackend = decepness
+        .tryGetTestAuthorityConnection(decepAuthoroot.getConnection());
+    const event = decepAuthorootBackend._proclamations[0].event;
+
+    // Scramble the signature
+    const correctSignature = event.aspects.author.signature;
+    event.aspects.author.signature =
+        "sfnIAQa16JF6MIvHNbDbbNp3pa__lj0a3iHxzFjQvysUR-2pBwkP-FOmAbg-SvCH-ZsehaNUghgJExhzBqr9Aw";
+    expect((await harness.receiveEventsFrom(decepAuthoroot.getConnection(), {})).length)
         .toEqual(1);
+
+    // Revert the signature aspect for the fraudulent harness itself
+    event.aspects.author.signature = correctSignature;
+    expect((await decepness.receiveEventsFrom(
+            decepAuthoroot.getConnection(), { clearSourceUpstream: true })).length)
+        .toEqual(1);
+
     expect(authoroot.propertyValue("incorrectlySigned"))
         .toBeUndefined();
-    expect((await authoroot.getConnection()).isFrozen())
+    expect((await authoroot.getConnection()).isFrozenConnection())
         .toEqual(true);
 
-    expect((await decepness.receiveEventsFrom(harness, {})).length)
-        .toEqual(1);
-    expect(decepAuthoroot.propertyValue("incorrectlySigned"))
-        .toBeUndefined();
-    expect((await decepAuthoroot.getConnection()).isFrozen())
+    const decepEvents = (await decepness.receiveEventsFrom(authoroot.getConnection(), {}));
+    expect(decepEvents[0])
+        .toMatchObject({
+          type: "SEALED",
+          invalidAntecedentIndex: 2,
+          aspects: { author: { antecedent: 2, publicIdentity: primeDirectorId } },
+        });
+    expect(decepEvents[0].invalidationReason)
+        .toMatch(/Invalid signature/);
+
+    // See note on previous test
+    // expect(decepAuthoroot.propertyValue("obnoxiouslyNonAuthored"))
+    //     .toBeUndefined();
+    expect((await decepAuthoroot.getConnection()).isFrozenConnection())
         .toEqual(true);
   });
 

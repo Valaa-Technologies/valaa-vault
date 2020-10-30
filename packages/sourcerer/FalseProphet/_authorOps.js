@@ -1,4 +1,4 @@
-import { signVPlot } from "~/security/signatures";
+import { signVPlot, verifyVPlotSignature } from "~/security/signatures";
 
 import { obtainAspect, swapAspectRoot } from "~/sourcerer/tools/EventAspects";
 import type FalseProphetConnection from "./FalseProphetConnection";
@@ -75,7 +75,20 @@ export function _validateAuthorAspect (connection, state, event) {
     } else {
       const author = event.aspects.author;
       const stem = connection._rootStem;
-      if (!author && state
+      if (author) {
+        const command = obtainAspect(event, "command");
+        swapAspectRoot("event", event, "author");
+        const meta = event.meta;
+        delete event.meta;
+        const publicKey = _getPublicKeyFromChronicle(author.publicIdentity, state, stem);
+        if (!publicKey) {
+          invalidation = "Can't find the author public key from the chronicle";
+        } else if (!verifyVPlotSignature({ event, command }, author.signature, publicKey)) {
+          invalidation = "Invalid signature";
+        } // else valid
+        event.meta = meta;
+        swapAspectRoot("author", author, "event");
+      } else if (state
           .getIn(["Property", `${stem}@.$VChronicle.requireAuthoredEvents@@`, "value", "value"])) {
         invalidation = "AuthorAspect missing while required by $VChronicle.requireAuthoredEvents";
       }

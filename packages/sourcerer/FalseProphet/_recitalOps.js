@@ -27,9 +27,10 @@ import { _validateAuthorAspect } from "./_authorOps";
  * @param  {type} event     an command to go upstream
  * @returns {type}          description
  */
-export function _composeEventIntoRecitalStory (falseProphet: FalseProphet, event: EventBase,
-    dispatchDescription: string, timed: ?EventBase, transactionState?: TransactionState,
-    truthConnection: ?FalseProphetConnection) {
+export function _composeEventIntoRecitalStory (
+    falseProphet: FalseProphet, event: EventBase, dispatchDescription: string, options: Object = {},
+) {
+  const { transactionState, truthConnection } = options;
   if (!event.aspects) initializeAspects(event, { version: EVENT_VERSION });
 
   const transactor = event.meta && event.meta.transactor;
@@ -40,7 +41,7 @@ export function _composeEventIntoRecitalStory (falseProphet: FalseProphet, event
   const previousState = falseProphet._corpus.getState();
   let story, dump;
   if (transactionState) {
-    story = transactionState._tryFastForwardOnCorpus(falseProphet._corpus);
+    story = options.transactionState._tryFastForwardOnCorpus(falseProphet._corpus);
     if (story) {
       falseProphet.warnEvent(2, () => [
         `Committing a main line transaction '${transactionState.name}' as fast-forwarded event:`,
@@ -56,7 +57,7 @@ export function _composeEventIntoRecitalStory (falseProphet: FalseProphet, event
     }
   }
   if (!story) {
-    if (!truthConnection) {
+    if (!options.truthConnection) {
       const dispatchPath = generateDispatchEventPath(transactor, "compose");
       if (dispatchPath) {
         progress = operation.getProgressEvent("compose");
@@ -70,7 +71,8 @@ export function _composeEventIntoRecitalStory (falseProphet: FalseProphet, event
     if (story === undefined) {
       story = falseProphet._corpus.dispatch(event, dispatchDescription);
       if (truthConnection
-          && !_validateAuthorAspect(truthConnection, falseProphet._corpus.getState(), event)) {
+          && !_validateAuthorAspect(
+              truthConnection, event, previousState, falseProphet._corpus.getState())) {
         falseProphet.recreateCorpus(previousState);
         story = null;
       }
@@ -83,9 +85,9 @@ export function _composeEventIntoRecitalStory (falseProphet: FalseProphet, event
     }
   }
   if (story) {
-    story.timed = timed;
+    // story.timed = options.timed;
     if (dispatchDescription.slice(0, 8) === "prophecy") story.isProphecy = true;
-    if (truthConnection) story.isTruth = true;
+    if (options.truthConnection) story.isTruth = true;
     if (operation) operation._prophecy = story;
     // story.id = story.aspects.command.id; TODO(iridian): what was this?
     const dispatchPath = generateDispatchEventPath(transactor, "profess");
@@ -332,9 +334,9 @@ function _extendRecitalUntilNextSchism (elaboration) {
       }
       return nextSchism; // Switch to schism review phase.
     }
-    const story = _composeEventIntoRecitalStory(
-        elaboration.falseProphet, newEvent, elaboration.type, undefined, undefined,
-        (elaboration.type === "receive_truth") && elaboration.instigatorConnection);
+    const story = _composeEventIntoRecitalStory(elaboration.falseProphet, newEvent,
+        elaboration.type, (elaboration.type !== "receive_truth") ? {}
+            : { truthConnection: elaboration.instigatorConnection });
     if (story) elaboration.newRecitalStories.push(story);
   }
   return undefined;

@@ -56,7 +56,7 @@ export function _proclaimEvents (falseProphet: FalseProphet, events: EventBase[]
         }
       }
       const prophecy = _composeEventIntoRecitalStory(
-          falseProphet, event, "prophecy-chronicle", options.timed, options.transactionState);
+          falseProphet, event, "prophecy-chronicle", options);
       if (prophecy) prophecies.push(prophecy);
       else if ((operation._progress || {}).isReformable) {
         operation.launchFullReform();
@@ -482,7 +482,7 @@ export class ProphecyOperation extends ProphecyEventResult {
           : connection.isLocallyRecorded()
               ? (localActs || (localActs = []))
               : (memoryActs || (memoryActs = []))
-      ).push((this._venues[chronicleURI] = { connection, commandEvent }));
+      ).push((this._venues[chronicleURI] = { connection, commandEvent, chronicleInfo }));
     }
     if (missingConnections) {
       throw new AbsentChroniclesError(`Missing active connections: '${
@@ -552,7 +552,8 @@ export class ProphecyOperation extends ProphecyEventResult {
         this._sceneName = `proclaim act #${actIndex} command to ${
             venue.connection.getName()}`;
         const options = Object.create(this._options);
-        options.stateAfter = this._prophecy.state;
+        options.prophecy = this._prophecy;
+        options.chronicleInfo = venue.chronicleInfo;
         venue.currentProclamation = venue.proclamation = venue.connection
             .proclaimEvent(venue.commandEvent, options);
       } catch (error) {
@@ -772,8 +773,9 @@ export class ProphecyOperation extends ProphecyEventResult {
       venue._reformAttempt = this._reformAttempt;
       venue.commandEvent = recomposedSubCommand;
       const options = Object.create(this._options);
-      options.prophecy = this;
-      venue.proclamation = this._parent._connections[chronicleURI]
+      options.prophecy = this._prophecy;
+      options.chronicleInfo = venue.chronicleInfo;
+      venue.proclamation = venue.connection // this._parent._connections[chronicleURI]
           .proclaimEvent(venue.commandEvent, options);
       venue.proclamation.reformAttempt = this._reformAttempt;
     }

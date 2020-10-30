@@ -87,7 +87,7 @@ Object.assign(IdentityMediator.prototype, identityPrototypeMethods);
 
 function _getIdentityParams (mediator, reference, require = true) {
   const { authority, resource } = mediator._sourcerer.resolveReference(reference);
-  const identityParams = mediator._authorityIdentities[authority.getAuthorityURI()];
+  const identityParams = authority && mediator._authorityIdentities[authority.getAuthorityURI()];
   if (require && !identityParams) {
     throw new Error(`Cannot find an active public authority identity for <${resource.toString()}>`);
   }

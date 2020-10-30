@@ -5,48 +5,68 @@ import type FalseProphetConnection from "./FalseProphetConnection";
 
 import { dumpObject } from "~/tools";
 
-export function _resolveAuthorParams (connection: FalseProphetConnection, op: Object) {
+export function _resolveAuthorParams (
+    connection: FalseProphetConnection, op: Object, index: number) {
   const mediator = connection._resolveOptionsIdentity(op.options);
   const identityParams = mediator && mediator.try(connection.getChronicleURI());
-  let rejection;
-  const state = op.options.stateAfter;
-  const requireAuthoredEvents = state.getIn([
-    "Property", `${connection._rootStem}@.$VChronicle.requireAuthoredEvents@@`, "value", "value",
-  ]);
-  if (!identityParams) {
-    if (!requireAuthoredEvents) return undefined;
-    rejection = "no public identity found and VChronicle:requireAuthoredEvents is set";
-  } else {
-    const publicIdentity = identityParams.publicIdentity.vrid();
-    const chroniclePublicKey = _getPublicKeyFromChronicle(
-        publicIdentity, state, connection._rootStem);
-    if (!chroniclePublicKey) {
-      if (!requireAuthoredEvents) return undefined;
-      // TODO(iridian, 2020-10): add VChronicle:allowGuestContributors which when set
-      // permits automatic identity relation creation into the event
-      rejection = `No VChronicle:contributor found targeting the authority public identity${
-        ""} (and VChronicle:allowGuestContributors not set)`;
-      // _autoAddContributorRelation(connection, op, identityParams);
-    } else if (chroniclePublicKey !== identityParams.asContributor.publicKey) {
-      // TODO(iridian, 2020-10): auto-refresh identity relation public key if the chronicle permits
-      rejection = "Obsolete VChronicle:contributor publicKey (auto-refresh not implemented)";
-    }
-    if (!rejection) {
-      return { publicIdentity, secretKey: identityParams.secretKey };
-    }
-  }
-  const error = new Error(
-      `Cannot author an event to <${connection.getChronicleURI()}>: ${rejection}`);
+  const { previousState, state } = op.options.prophecy;
+  const validationResult = _validateRoleAndGetKey(connection,
+      identityParams && identityParams.publicIdentity.vrid(),
+      ((identityParams || {}).asContributor || {}).publicKey,
+      (identityParams || {}).secretKey,
+      index, previousState, state, (op.options.chronicleInfo || {}).updatesVChronicle,
+      connection._bypassLocalAuthorChecks);
+  if (!validationResult.rejection) return validationResult;
+  const error = new Error(`Cannot author an event to <${connection.getChronicleURI()}>: ${
+      validationResult.rejection}`);
   error.updateProgress = { isSchismatic: true, isRevisable: false, isReformable: false };
   throw error;
 }
 
-function _getPublicKeyFromChronicle (publicIdentity, state, chronicleRootIdStem) {
+function _validateRoleAndGetKey (connection,
+    publicIdentity, mediatorPublicKey, secretKey,
+    index, previousState, state, updatesVChronicle, bypassLocalAuthorChecks) {
+  const requireAuthoredEvents = state.getIn([
+    "Property", `${connection._rootStem}@.$VChronicle.requireAuthoredEvents@@`, "value", "value",
+  ]);
+  if (!publicIdentity) {
+    if (!requireAuthoredEvents) return {};
+    return { rejection: "no public identity found and VChronicle:requireAuthoredEvents is set" };
+  }
+
+  const directorKey = _getPublicKeyFromChronicle(publicIdentity,
+    // Always sign and validate using previous director key except for first event
+      !index ? state : previousState, connection._rootStem, "director");
+  if (!directorKey && updatesVChronicle && !bypassLocalAuthorChecks) {
+    return {
+      rejection: `No VChronicle:director chronicle identity found${
+          ""} while trying to modify a VChronicle field`,
+    };
+  }
+  const publicKey = directorKey
+      || _getPublicKeyFromChronicle(publicIdentity, state, connection._rootStem, "contributor");
+  if (!publicKey) {
+    if (!requireAuthoredEvents) return {};
+    // TODO(iridian, 2020-10): add VChronicle:allowGuestContributors which when set
+    // permits automatic identity relation creation into the event
+    // _autoAddContributorRelation(connection, op, identityParams);
+    return {
+      rejection: `No VChronicle:contributor found targeting the authority public identity${
+          ""} (and VChronicle:allowGuestContributors not set)`,
+    };
+  }
+  if (mediatorPublicKey && (publicKey !== mediatorPublicKey) && !bypassLocalAuthorChecks) {
+    // TODO(iridian, 2020-10): auto-refresh identity relation public key if permitted
+    return {
+      rejection: "Obsolete VChronicle:contributor publicKey (auto-refresh not implemented)",
+    };
+  }
+  return { publicIdentity, publicKey, secretKey };
+}
+
+function _getPublicKeyFromChronicle (publicIdentity, state, chronicleRootIdStem, role) {
   return state.getIn([
-    "Property", `${chronicleRootIdStem}@-$VChronicle.director$.@.$V.target${
-        publicIdentity.slice(1)}@.$.publicKey@@`, "value", "value",
-  ]) || state.getIn([
-    "Property", `${chronicleRootIdStem}@-$VChronicle.contributor$.@.$V.target${
+    "Property", `${chronicleRootIdStem}@-$VChronicle.${role}$.@.$V.target${
         publicIdentity.slice(1)}@.$.publicKey@@`, "value", "value",
   ]);
 }
@@ -65,7 +85,7 @@ export function _addAuthorAspect (connection, op, authorParams, event, index) {
   swapAspectRoot("author", author, "event");
 }
 
-export function _validateAuthorAspect (connection, state, event) {
+export function _validateAuthorAspect (connection, event, previousState, state) {
   let invalidation;
   try {
     if (connection.isInvalidated()) {
@@ -80,12 +100,20 @@ export function _validateAuthorAspect (connection, state, event) {
         swapAspectRoot("event", event, "author");
         const meta = event.meta;
         delete event.meta;
-        const publicKey = _getPublicKeyFromChronicle(author.publicIdentity, state, stem);
-        if (!publicKey) {
-          invalidation = "Can't find the author public key from the chronicle";
-        } else if (!verifyVPlotSignature({ event, command }, author.signature, publicKey)) {
-          invalidation = "Invalid signature";
-        } // else valid
+
+        const validationResult = _validateRoleAndGetKey(connection,
+            author.publicIdentity, undefined, undefined,
+            author.aspects.log.index, previousState, state, (meta || {}).updatesVChronicle);
+        invalidation = validationResult.rejection;
+        if (!invalidation) {
+          if (!validationResult.publicKey) {
+            invalidation = "Can't find the author public key from the chronicle";
+          } else if (!verifyVPlotSignature(
+              { event, command }, author.signature, validationResult.publicKey)) {
+            invalidation = "Invalid signature";
+          } // else valid
+        }
+
         event.meta = meta;
         swapAspectRoot("author", author, "event");
       } else if (state

@@ -191,6 +191,17 @@ describe("Chronicle behaviors: VChronicle:requireAuthoredEvents", () => {
         { mediator });
   }
 
+  async function _addIdentityAsDirector (chronicleRoot, identityURI) {
+    const mediator = new IdentityMediator({ parent: chronicleRoot.getEngine() });
+    mediator.add(identityURI, {
+      secretKey: signatureKeys[identityURI].secretKey,
+      asContributor: { publicKey: signatureKeys[identityURI].publicKey },
+    });
+    return chronicleRoot.doValoscript(
+        _addIdentityRoleRelation("this", "$VChronicle.director", "mediator", "mediator"),
+        { mediator });
+  }
+
   it("freezes a chronicle with SEALED (ie. seals) on an authorized but invalid event", async () => {
     await prepareHarnesses({ verbosity: 0, claimBaseBlock: true });
     const { authoroot } = await entities().creator.doValoscript(
@@ -370,43 +381,61 @@ describe("Chronicle behaviors: VChronicle:requireAuthoredEvents", () => {
         .toEqual(true);
   });
 
-  xit("seals on a subversively authorized and authored yet forbidden privilege escalation event",
+  it("seals on a subversively authorized and authored yet forbidden privilege escalation event",
       async () => {
     await prepareHarnesses({ verbosity: 0, claimBaseBlock: true });
     const { authoroot } = await entities().creator.doValoscript(
         _createAuthoredOnlyChronicle(), {}, {});
-    await authoroot.doValoscript(
-        _addCustomIdentityRoleRelation(decepTributorURI, "this", "$VChronicle.contributor"), {});
+    await _addIdentityAsContributor(authoroot, decepTributorURI);
+    const { decepAuthoroot } = await _sourcerDecepAuthoroot(authoroot, 2);
 
-    const { decepAuthoroot } = await _sourcerDecepAuthoroot(authoroot);
+    expect(decepAuthoroot.propertyValue(qualifiedSymbol("VChronicle", "requireAuthoredEvents")))
+        .toEqual(true);
+
+    expect(() => decepAuthoroot
+        .doValoscript(`this[$VChronicle.requireAuthoredEvents] = false;`, {}))
+        .toThrow(/No VChronicle:director chronicle identity found/);
+
+    await expect(_addIdentityAsDirector(decepAuthoroot, decepTributorURI))
+        .rejects.toThrow(/No VChronicle:director chronicle identity found/);
 
     // TODO(iridian, 2020-10): disable local director validation on VChronicle property changes
 
+    decepAuthoroot.getConnection()._bypassLocalAuthorChecks = true;
+
     await decepAuthoroot.doValoscript(
-        _addCustomIdentityRoleRelation(decepTributorURI, "this", "$VChronicle.director"), {});
-
-    expect(decepAuthoroot.propertyValue(qualifiedSymbol("VChronicle", "requireAuthoredEvents")))
-        .toEqual(true);
-
-    await decepAuthoroot.doValoscript(`
-      this[$VChronicle.requireAuthoredEvents] = false;
-    `, {}, {});
-
+        `this[$VChronicle.requireAuthoredEvents] = false;`, {}, {});
     expect(decepAuthoroot.propertyValue(qualifiedSymbol("VChronicle", "requireAuthoredEvents")))
         .toEqual(false);
 
-    expect((await harness.receiveEventsFrom(decepness, {})).length)
-        .toEqual(2);
+    expect((await harness.receiveEventsFrom(decepAuthoroot.getConnection(), {})).length)
+        .toEqual(1);
+
+    expect((await decepness.receiveEventsFrom(
+            decepAuthoroot.getConnection(), { clearSourceUpstream: true })).length)
+        .toEqual(1);
+
     expect(authoroot.propertyValue(qualifiedSymbol("VChronicle", "requireAuthoredEvents")))
         .toEqual(true);
-    expect((await authoroot.getConnection()).isFrozen())
+    expect((await authoroot.getConnection()).isFrozenConnection())
         .toEqual(true);
 
-    expect((await decepness.receiveEventsFrom(harness, {})).length)
-        .toEqual(1);
-    expect(decepAuthoroot.propertyValue(qualifiedSymbol("VChronicle", "requireAuthoredEvents")))
-        .toEqual(true);
-    expect((await decepAuthoroot.getConnection()).isFrozen())
+    await new Promise(resolve => setTimeout(resolve, 1));
+
+    const decepEvents = (await decepness.receiveEventsFrom(authoroot.getConnection(), {}));
+    expect(decepEvents[0])
+        .toMatchObject({
+          type: "SEALED",
+          invalidAntecedentIndex: 2,
+          aspects: { author: { antecedent: 2, publicIdentity: primeDirectorId } },
+        });
+    expect(decepEvents[0].invalidationReason)
+        .toMatch(/No VChronicle:director chronicle identity found/);
+
+    // See note on previous test
+    // expect(decepAuthoroot.propertyValue(qualifiedSymbol("VChronicle", "requireAuthoredEvents")))
+    //    .toEqual(true);
+    expect((await decepAuthoroot.getConnection()).isFrozenConnection())
         .toEqual(true);
   });
 

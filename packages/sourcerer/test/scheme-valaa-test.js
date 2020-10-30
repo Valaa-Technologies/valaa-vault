@@ -169,4 +169,8 @@ export class TestSourcerer extends Authority {
     const connectors = {};
     return connectors;
   }
+
+  obtainAuthorityOfChronicle (chronicleURI) {
+    return chronicleURI.startsWith(this.getAuthorityURI()) && this;
+  }
 }

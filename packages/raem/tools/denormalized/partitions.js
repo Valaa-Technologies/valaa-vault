@@ -105,8 +105,13 @@ export function universalizeChronicleMutation (bard: Bard, id: VRL, isNewChronic
   let chronicleURI, targetMeta, enclosingPassage, enclosingChronicleURI;
   const ref = tryHostRef(id);
   try {
+    if (!ref) return undefined;
     const eventMeta = bard.event.meta;
-    if (!eventMeta.isBeingUniversalized || !ref) return undefined;
+    const updatesVChronicle = ref.rawId().includes("$VChronicle.");
+    if (!eventMeta.isBeingUniversalized) {
+      if (updatesVChronicle) bard.event.meta.updatesVChronicle = true;
+      return undefined;
+    }
     if (ref.isAbsent()) throw new Error(`Cannot modify an absent resource <${ref.toString()}>`);
     let smallestNonGhostId = ref;
     chronicleURI = smallestNonGhostId.getChronicleURI();
@@ -152,9 +157,8 @@ export function universalizeChronicleMutation (bard: Bard, id: VRL, isNewChronic
       chronicleInfo = !bard.createCommandChronicleInfo ? {}
           : bard.createCommandChronicleInfo(chronicleURI, action, bard.event, bard);
     }
-    if (isNewChronicle) {
-      chronicleInfo.isNewChronicle = true;
-    }
+    if (isNewChronicle)  chronicleInfo.isNewChronicle = true;
+    if (updatesVChronicle) chronicleInfo.updatesVChronicle = true;
     if (!enclosingChronicleURI) {
       targetMeta = eventMeta;
     } else {

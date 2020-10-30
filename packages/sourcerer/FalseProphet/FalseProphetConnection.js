@@ -104,7 +104,9 @@ export default class FalseProphetConnection extends Connection {
   setIsFrozen (value: boolean = true) { this._isFrozen = value; }
   isFrozenConnection (): boolean { return !!this._isFrozen; }
 
-  setInvalidated (invalidation: ?string, event) { this._invalidation = [invalidation, event]; }
+  setInvalidated (invalidation: ?string, event) {
+    this._invalidation = invalidation && [invalidation, event];
+  }
   isInvalidated (): ?string { return this._invalidation; }
 
   narrateEventLog (options: ?NarrateOptions = {}): Promise<Object> {
@@ -172,7 +174,8 @@ export default class FalseProphetConnection extends Connection {
 
   _prepareProclaim (op) {
     if (op.options.isProphecy) {
-      const authorParams = _resolveAuthorParams(this, op);
+      let index = this._headEventId + this._unconfirmedCommands.length;
+      const authorParams = _resolveAuthorParams(this, op, index);
       // console.log("assigning ids:", this.getName(), this._headEventId,
       //     this._unconfirmedCommands.length, "\n\tevents:", ...dumpObject(events));
       for (const event of op.events) {
@@ -180,8 +183,8 @@ export default class FalseProphetConnection extends Connection {
           initializeAspects(event, { version: EVENT_VERSION });
         }
         const log = obtainAspect(event, "log");
-        log.index = this._headEventId + this._unconfirmedCommands.length;
-        if (authorParams) _addAuthorAspect(this, op, authorParams, event, log.index);
+        log.index = index++;
+        if (authorParams.publicIdentity) _addAuthorAspect(this, op, authorParams, event, log.index);
         this._unconfirmedCommands.push(event);
       }
       this._checkForFreezeAndNotify(op.plog);
@@ -463,7 +466,7 @@ export default class FalseProphetConnection extends Connection {
         }
       }
       if (invalidation) {
-        const stateAfter = this._parent.getState();
+        const state = this._parent.getState();
         Promise.resolve()
         .then(() => this.proclaimEvents([
           sealed({
@@ -472,7 +475,7 @@ export default class FalseProphetConnection extends Connection {
             invalidationReason: invalidation[0],
             frozenPartitions: [this.getChronicleId()], // deprecated
           }),
-        ], { isProphecy: true, stateAfter }))
+        ], { isProphecy: true, prophecy: { state, previousState: state } }))
         .catch(error => this.outputErrorEvent(
             error, "Exception caught during invalidation SEALED proclamation"));
       }

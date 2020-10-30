@@ -72,6 +72,13 @@ export function _validateAuthorAspect (connection, state, event) {
       invalidation = "Chronicle invalidated by an earlier event";
     } else if (event.type === "INVALIDATED") {
       invalidation = event.invalidationReason;
+    } else {
+      const author = event.aspects.author;
+      const stem = connection._rootStem;
+      if (!author && state
+          .getIn(["Property", `${stem}@.$VChronicle.requireAuthoredEvents@@`, "value", "value"])) {
+        invalidation = "AuthorAspect missing while required by $VChronicle.requireAuthoredEvents";
+      }
     }
     if (!invalidation && (event.type === "SEALED")) {
       invalidation = event.invalidationReason;

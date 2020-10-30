@@ -267,34 +267,55 @@ describe("Chronicle behaviors: VChronicle:requireAuthoredEvents", () => {
         .toEqual(true);
   });
 
-  xit("seals on an obnoxiously authorized but non-authored incoming event", async () => {
+  it("seals on an obnoxiously authorized but non-authored incoming event", async () => {
     await prepareHarnesses({ verbosity: 0, claimBaseBlock: true });
     const { authoroot } = await entities().creator.doValoscript(
         _createAuthoredOnlyChronicle(), {}, {});
+    await _addIdentityAsContributor(authoroot, decepTributorURI);
+    const { decepAuthoroot } = await _sourcerDecepAuthoroot(authoroot, 2);
 
-    const { decepAuthoroot } = await _sourcerDecepAuthoroot(authoroot);
-
-    // TODO(iridian, 2020-10): obnoxiously disable local authoring check
-
-    expect(decepAuthoroot.doValoscript(`
-      this.obnoxiouslyNonAuthored = true;
-    `));
+    await decepAuthoroot.doValoscript(`this.obnoxiouslyNonAuthored = true;`);
 
     expect(decepAuthoroot.propertyValue("obnoxiouslyNonAuthored"))
         .toEqual(true);
 
-    expect((await harness.receiveEventsFrom(decepness, {})).length)
+    const decepAuthorootBackend = decepness
+        .tryGetTestAuthorityConnection(decepAuthoroot.getConnection());
+    const event = decepAuthorootBackend._proclamations[0].event;
+
+    // Nuke the upstream author aspect
+    const author = event.aspects.author;
+    delete event.aspects.author;
+    expect((await harness.receiveEventsFrom(decepAuthoroot.getConnection(), {})).length)
         .toEqual(1);
+
+    // Return the author aspect for the fraudulent harness itself
+    event.aspects.author = author;
+    expect((await decepness.receiveEventsFrom(
+            decepAuthoroot.getConnection(), { clearSourceUpstream: true })).length)
+        .toEqual(1);
+
     expect(authoroot.propertyValue("obnoxiouslyNonAuthored"))
         .toBeUndefined();
-    expect((await authoroot.getConnection()).isFrozen())
+    expect((await authoroot.getConnection()).isFrozenConnection())
         .toEqual(true);
 
-    expect((await decepness.receiveEventsFrom(harness, {})).length)
-        .toEqual(1);
-    expect(decepAuthoroot.propertyValue("obnoxiouslyNonAuthored"))
-        .toBeUndefined();
-    expect((await decepAuthoroot.getConnection()).isFrozen())
+    await new Promise(resolve => setTimeout(resolve, 1));
+
+    const decepEvents = (await decepness.receiveEventsFrom(authoroot.getConnection(), {}));
+    expect(decepEvents[0])
+        .toMatchObject({
+          type: "SEALED",
+          invalidAntecedentIndex: 2,
+          aspects: { author: { antecedent: 2, publicIdentity: primeDirectorId } },
+        });
+    expect(decepEvents[0].invalidationReason)
+        .toMatch(/AuthorAspect missing/);
+
+    // See note on previous test
+    // expect(decepAuthoroot.propertyValue("obnoxiouslyNonAuthored"))
+    //     .toBeUndefined();
+    expect((await decepAuthoroot.getConnection()).isFrozenConnection())
         .toEqual(true);
   });
 

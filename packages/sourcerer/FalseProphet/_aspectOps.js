@@ -1,4 +1,8 @@
+// @flow
+
+import { formVPlot } from "~/plot";
 import { signVPlot, verifyVPlotSignature } from "~/security/signatures";
+import { hashVPlot } from "~/security/hash";
 
 import {
   obtainAspect, swapAspectRoot, obtainAspectRoot, trySwapAspectRoot,
@@ -11,8 +15,12 @@ export function _resolveProclaimAspectParams (connection: FalseProphetConnection
   const mediator = connection._resolveOptionsIdentity(op.options);
   const identityParams = mediator && mediator.try(connection.getChronicleURI());
   const unconfirmeds = connection._unconfirmedCommands;
+  const previousEvent = unconfirmeds.length
+      ? unconfirmeds[unconfirmeds.length - 1]
+      : connection._latestTruth;
   const aspectParams = {
     index: connection._headEventId + unconfirmeds.length,
+    predecessorLog: ((previousEvent || {}).aspects || {}).log,
     ...(!identityParams ? {} : {
       publicIdentity: identityParams.publicIdentity.vrid(),
       publicKey: (identityParams.asContributor || {}).publicKey,
@@ -80,10 +88,11 @@ function _getPublicKeyFromChronicle (publicIdentity, state, chronicleRootIdStem,
 
 // export function _autoRefreshContributorRelation (connection, op, identityParams) {}
 
-export function _validateAspects (connection, event, previousState, state) {
+export function _validateAspects (connection, event, previousState, state, previousEvent) {
   let invalidationReason;
   try {
-    invalidationReason = _validateAuthorAspect(connection, event, previousState, state);
+    invalidationReason = _validateAuthorAspect(connection, event, previousState, state)
+        || _validateLogAspect(connection, event, previousEvent);
   } catch (error) {
     connection.outputErrorEvent(
         connection.wrapErrorEvent(error, 0, "_validateAspects",
@@ -155,8 +164,31 @@ export function _addLogAspect (connection, op, aspectParams, event) {
   const log = obtainAspectRoot("log", event, "event");
   try {
     log.index = aspectParams.index;
+    log.chainHash = _calculateChainHash(event, log.aspects.author, aspectParams.predecessorLog);
   } finally {
     swapAspectRoot("event", log, "log");
   }
 }
 
+function _validateLogAspect (connection, event, previousEvent) {
+  const log = swapAspectRoot("log", event, "event");
+  const chainHash = log.chainHash
+      && _calculateChainHash(event, log.aspects.author, previousEvent && previousEvent.aspects.log);
+  swapAspectRoot("event", log, "log");
+  if (chainHash === log.chainHash) return undefined;
+  return "Invalid VLog:chainHash";
+}
+
+function _calculateChainHash (event, authorAspect, predecessorLogAspect) {
+  const chainHash = (predecessorLogAspect || {}).chainHash;
+  const predecessorStep = !chainHash ? "" : `@.$VLog.chainHash$.${chainHash}`;
+  let eventStep = (authorAspect || {}).signature
+      && `@.$VLog.signature$.${(authorAspect || {}).signature}`;
+  if (!eventStep) {
+    const meta = event.meta;
+    delete event.meta;
+    eventStep = `@.$VLog.event$.${formVPlot(event)}`;
+    event.meta = meta;
+  }
+  return hashVPlot(`${predecessorStep}${eventStep}@@`, { isValidVPlot: true });
+}

@@ -71,7 +71,8 @@ export function _composeEventIntoRecitalStory (
       story = falseProphet._corpus.dispatch(event, dispatchDescription);
       if (truthConnection
           && !_validateAspects(
-              truthConnection, event, previousState, falseProphet._corpus.getState())) {
+              truthConnection, event, previousState, falseProphet._corpus.getState(),
+              options.previousEvent)) {
         falseProphet.recreateCorpus(previousState);
         story = null;
       }
@@ -150,12 +151,9 @@ export function _confirmRecitalStories (instigatorConnection: FalseProphetConnec
 }
 
 export function _elaborateRecital (instigatorConnection: FalseProphetConnection,
-    newEvents: Command[], type: string, schismaticCommands: ?Command[]) {
+    newEvents: Command[], type: string, schismaticCommands: ?Command[], latestTruth) {
   const elaboration = {
-    instigatorConnection,
-    newEvents,
-    type,
-    schismaticCommands,
+    instigatorConnection, newEvents, type, schismaticCommands, latestTruth,
     falseProphet: instigatorConnection.getFalseProphet(),
     instigatorChronicleURI: instigatorConnection.getChronicleURI(),
     newEventIndex: 0,
@@ -334,8 +332,10 @@ function _extendRecitalUntilNextSchism (elaboration) {
       return nextSchism; // Switch to schism review phase.
     }
     const story = _composeEventIntoRecitalStory(elaboration.falseProphet, newEvent,
-        elaboration.type, (elaboration.type !== "receive_truth") ? {}
-            : { truthConnection: elaboration.instigatorConnection });
+        elaboration.type, (elaboration.type !== "receive_truth") ? {} : {
+          truthConnection: elaboration.instigatorConnection,
+          previousEvent: newEvents[elaboration.newEventIndex - 1] || elaboration.latestTruth,
+        });
     if (story) elaboration.newRecitalStories.push(story);
   }
   return undefined;

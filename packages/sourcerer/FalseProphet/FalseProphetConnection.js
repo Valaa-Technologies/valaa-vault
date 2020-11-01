@@ -325,6 +325,7 @@ export default class FalseProphetConnection extends Connection {
       }
       if (confirmCount) {
         confirmations = this._pendingTruths.splice(0, confirmCount);
+        this._latestTruth = confirmations[confirmations.length - 1];
         if (!schismaticCommands) this._unconfirmedCommands.splice(0, confirmCount);
         // purge clears all unconfirmed commands
       }
@@ -348,9 +349,11 @@ export default class FalseProphetConnection extends Connection {
       while (this._pendingTruths[newTruthCount]) ++newTruthCount;
       this._headEventId += confirmCount + newTruthCount;
       newTruths = this._pendingTruths.splice(0, newTruthCount);
+      const latestTruth = this._latestTruth;
+      if (newTruthCount) this._latestTruth = newTruths[newTruths.length - 1];
       if (confirmations) {
         _confirmRecitalStories(this, confirmations);
-        if (!newTruths.length && !(schismaticCommands || []).length) {
+        if (!newTruthCount && !(schismaticCommands || []).length) {
           this._checkForFreezeAndNotify(plog2);
           _confirmLeadingTruthsToFollowers(this.getFalseProphet());
           return truths;
@@ -363,7 +366,7 @@ export default class FalseProphetConnection extends Connection {
         "\n\tnewTruths:", ...dumpObject(newTruths)
       ]);
       */
-      _elaborateRecital(this, newTruths, "receive_truth", schismaticCommands);
+      _elaborateRecital(this, newTruths, "receive_truth", schismaticCommands, latestTruth);
       return truths;
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, `receiveTruths(${this._dumpEventIds(truths)})`,

@@ -2,6 +2,7 @@
 
 import type { VRL } from "~/raem/VRL"; // eslint-disable-line no-duplicate-imports
 
+import { isCreatedLike } from "~/raem/events";
 import Bard, { getActionFromPassage } from "~/raem/redux/Bard";
 import { tryHostRef } from "~/raem/VALK/hostReference";
 import { naiveURI } from "~/raem/ValaaURI";
@@ -109,7 +110,7 @@ export function universalizeChronicleMutation (bard: Bard, id: VRL, isNewChronic
     const eventMeta = bard.event.meta;
     const updatesVChronicle = ref.rawId().includes("$VChronicle.");
     if (!eventMeta.isBeingUniversalized) {
-      if (updatesVChronicle) bard.event.meta.updatesVChronicle = true;
+      if (updatesVChronicle) _addUpdatesVChronicle(bard, bard.event.meta, ref.rawId());
       return undefined;
     }
     if (ref.isAbsent()) throw new Error(`Cannot modify an absent resource <${ref.toString()}>`);
@@ -158,7 +159,7 @@ export function universalizeChronicleMutation (bard: Bard, id: VRL, isNewChronic
           : bard.createCommandChronicleInfo(chronicleURI, action, bard.event, bard);
     }
     if (isNewChronicle)  chronicleInfo.isNewChronicle = true;
-    if (updatesVChronicle) chronicleInfo.updatesVChronicle = true;
+    if (updatesVChronicle) _addUpdatesVChronicle(bard, chronicleInfo, ref.rawId());
     if (!enclosingChronicleURI) {
       targetMeta = eventMeta;
     } else {
@@ -209,6 +210,29 @@ export function universalizeChronicleMutation (bard: Bard, id: VRL, isNewChronic
       "\n\ttarget.meta:", ...dumpObject(targetMeta),
     ]);
   }
+}
+
+const _isDirectorUpdate = /^@([^@]*)@-\$VChronicle\.director\$\.@\.\$V\.target([^@]*)@@(.*)@@$/i;
+
+function _addUpdatesVChronicle (bard, chronicleInfo, vrid) {
+  const updatesVChronicle = chronicleInfo.updatesVChronicle
+      || (chronicleInfo.updatesVChronicle = {});
+  const directorUpdate = vrid.match(_isDirectorUpdate);
+  if (!directorUpdate) return;
+  if (isCreatedLike(bard.passage) && !directorUpdate[3]) {
+    updatesVChronicle[directorUpdate[1]] = "new";
+    return;
+  }
+  const requiresDirector = `@${directorUpdate[2]}@@`;
+  if (updatesVChronicle[directorUpdate[1]]
+      || (updatesVChronicle.requiresDirector === requiresDirector)) {
+    return;
+  }
+  if (updatesVChronicle.requiresDirector) {
+    throw new Error(`Unable to make modifications requiring multiple director identities${
+      ""} in a single transaction`);
+  }
+  updatesVChronicle.requiresDirector = requiresDirector;
 }
 
 export function resolveChronicleURI (resolver: Resolver, resourceId: VRL) {

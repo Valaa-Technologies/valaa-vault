@@ -58,8 +58,15 @@ function _validateRoleAndRefreshChroniclePublicKey (
   const chronicleDirectorKey = _getPublicKeyFromChronicle(aspectParams.publicIdentity,
     // Always sign and validate using previous director key except for first event
       (aspectParams.index === 0) ? state : previousState, connection._rootStem, "director");
-  if (!chronicleDirectorKey && updatesVChronicle && !bypassLocalAuthorChecks) {
-    return `No VChronicle:director chronicle identity found when modifying VChronicle sub-resource`;
+  if (updatesVChronicle && !bypassLocalAuthorChecks) {
+    if (!chronicleDirectorKey) {
+      return `No VChronicle:director identity found when modifying a VChronicle resource`;
+    }
+    if (updatesVChronicle.requiresDirector
+        && (updatesVChronicle.requiresDirector !== aspectParams.publicIdentity)) {
+      return `Incongruent VChronicle:director identity encountered ${
+        ""}when modifying a VChronicle:director resource`;
+    }
   }
   const chroniclePublicKey = chronicleDirectorKey || _getPublicKeyFromChronicle(
       aspectParams.publicIdentity, state, connection._rootStem, "contributor");

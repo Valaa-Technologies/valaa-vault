@@ -6,7 +6,8 @@ module.exports = {
     VKernel: "@valos/kernel/VKernel",
     V: "@valos/space/V",
   },
-  description: "The valospace vocabulary for specifying chronicle behaviors",
+  description:
+`The valospace vocabulary for specifying behaviors on specific chronicles`,
   context: {},
   vocabulary: {
     // behaviors
@@ -24,8 +25,8 @@ module.exports = {
       "rdfs:domain": "V:Resource",
       "rdfs:range": "V:Resource", // TODO(iridian, 2020-10): Add user role semantics
       "rdfs:comment":
-`The collection of roles which have registered certificates for signing
-events to this chronicle event log.`,
+`The collection of identities which have registered their signature
+public keys to the chronicle event log.`,
     },
     director: {
       "@type": "VKernel:Property",

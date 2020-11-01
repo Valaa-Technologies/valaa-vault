@@ -394,10 +394,10 @@ describe("Chronicle behaviors: VChronicle:requireAuthoredEvents", () => {
 
     expect(() => decepAuthoroot
         .doValoscript(`this[$VChronicle.requireAuthoredEvents] = false;`, {}))
-        .toThrow(/No VChronicle:director chronicle identity found/);
+        .toThrow(/No VChronicle:director identity found/);
 
     await expect(_addIdentityAsDirector(decepAuthoroot, decepTributorURI))
-        .rejects.toThrow(/No VChronicle:director chronicle identity found/);
+        .rejects.toThrow(/No VChronicle:director identity found/);
 
     // Disable local director validation on VChronicle property changes
 
@@ -430,7 +430,7 @@ describe("Chronicle behaviors: VChronicle:requireAuthoredEvents", () => {
           aspects: { author: { antecedent: 2, publicIdentity: primeDirectorId } },
         });
     expect(decepEvents[0].invalidationReason)
-        .toMatch(/No VChronicle:director chronicle identity found/);
+        .toMatch(/No VChronicle:director identity found/);
 
     // See note on previous test
     // expect(decepAuthoroot.propertyValue(qualifiedSymbol("VChronicle", "requireAuthoredEvents")))

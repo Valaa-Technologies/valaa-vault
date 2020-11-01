@@ -1,12 +1,17 @@
 const nacl = require("tweetnacl");
 const JSSHA256 = require("jssha/src/sha256");
 const JSSHA3 = require("jssha/src/sha3");
+const { TextEncoder } = require("text-encoding");
+
+const { base64URLFromBuffer } = require("~/gateway-api/base64");
+const { formVPlot } = require("~/plot");
 
 module.exports = {
-  hashV240,
-  isHashV240,
   b64SHA256FromUTF8Text,
   hexSHA512FromBuffer,
+  hashVPlot,
+  hashV240,
+  isHashV240,
 };
 
 // TODO(iridian, 2020-10): Phase this function out when the support for
@@ -21,7 +26,26 @@ function hexSHA512FromBuffer (arrayBuffer) {
   return hexFromBuffer(nacl.hash(new Uint8Array(arrayBuffer)));
 }
 
+const _byteToHex = [];
+for (let n = 0; n <= 0xff; ++n) _byteToHex.push(n.toString(16).padStart(2, "0"));
+
+function hexFromBuffer (arrayBuffer) {
+  const buff = arrayBuffer instanceof Uint8Array ? arrayBuffer : new Uint8Array(arrayBuffer);
+  const ret = new Array(arrayBuffer.length);
+  for (let i = 0; i < buff.length; ++i) ret[i] = _byteToHex[buff[i]];
+  return ret.join("");
 }
+
+function hashVPlot (object, options) {
+  const vplot = options.isValidVPlot ? object : formVPlot(object);
+  return base64URLFromBuffer(nacl.hash(new TextEncoder().encode(vplot))).slice(0, 64);
+}
+
+// TODO(iridian, 2020-10): The SHA3 algorithm should probably be
+// replaced with 240-bit truncated version SHA-512 via tweetnacl or
+// with 240-bit BLAKE3 https://github.com/BLAKE3-team/BLAKE3-specs/blob/master/blake3.pdf
+// Once this is done and the b64SHA256FromUTF8Text is removed the
+// dependency to jssha can be removed.
 
 /* eslint-disable max-len */
 /**

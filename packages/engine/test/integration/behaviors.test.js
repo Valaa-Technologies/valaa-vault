@@ -143,7 +143,7 @@ describe("Chronicle behaviors: VChronicle:requireAuthoredEvents", () => {
 
     const event = authorootEvents[0];
     const command = getAspect(event, "command");
-    const author = swapAspectRoot("event", event, "author");
+    const author = swapAspectRoot("author", event, "event");
     expect(author)
         .toMatchObject({ publicIdentity: primeDirectorId });
     expect(verifyVPlotSignature(
@@ -372,7 +372,7 @@ describe("Chronicle behaviors: VChronicle:requireAuthoredEvents", () => {
           aspects: { author: { antecedent: 2, publicIdentity: primeDirectorId } },
         });
     expect(decepEvents[0].invalidationReason)
-        .toMatch(/Invalid signature/);
+        .toMatch(/Invalid VLog:signature/);
 
     // See note on previous test
     // expect(decepAuthoroot.propertyValue("obnoxiouslyNonAuthored"))
@@ -439,45 +439,63 @@ describe("Chronicle behaviors: VChronicle:requireAuthoredEvents", () => {
         .toEqual(true);
   });
 
-  xit("seals on an anachronistic crypto chain breaking event", async () => {
+  it("seals on an anachronistic crypto chain breaking event", async () => {
     await prepareHarnesses({ verbosity: 0, claimBaseBlock: true });
     const { authoroot } = await entities().creator.doValoscript(
         _createAuthoredOnlyChronicle(), {}, {});
-    await authoroot.doValoscript(
-        _addCustomIdentityRoleRelation(decepTributorURI, "this", "$VChronicle.director"), {}, {});
+    await _addIdentityAsContributor(authoroot, decepTributorURI);
+    const { decepAuthoroot } = await _sourcerDecepAuthoroot(authoroot, 2);
 
-    const { decepAuthoroot } = await _sourcerDecepAuthoroot(authoroot);
-
-    await decepAuthoroot.doValoscript(`
-      this.hacked = 10;
-    `, {}, {});
-    await decepAuthoroot.doValoscript(`
-      this.untouched = 20;
-    `, {}, {});
+    await decepAuthoroot.doValoscript(`this.hacked = 15;`, {}, {});
+    await decepAuthoroot.doValoscript(`this.untouched = 20;`, {}, {});
 
     expect(decepAuthoroot.propertyValue("hacked"))
-        .toEqual(10);
+        .toEqual(15);
     expect(decepAuthoroot.propertyValue("untouched"))
         .toEqual(20);
 
-    // TODO(iridian, 2020-10): hack the hacked value incl. the outgoing event chain hash
+    const decepAuthorootBackend = decepness
+        .tryGetTestAuthorityConnection(decepAuthoroot.getConnection());
+    const event = decepAuthorootBackend._proclamations[0].event;
 
-    expect((await harness.receiveEventsFrom(decepness, {})).length)
+    // Hack the 'hacked' value with a correct signature but invalid event chain hash
+    event.initialState.value.value = 10;
+    event.aspects.command.timeStamp = 1605570226556;
+    event.aspects.author.signature =
+        "xbvSJb3lg3aR4Ft0iMy3G07jP-Dk2pW2d1Pz1qpxkLfib0iMoTiG1SFMi-scAlc_rzzC3pcM9ahOhcTXfyjxAg";
+
+    expect((await harness.receiveEventsFrom(decepAuthoroot.getConnection(), {})).length)
         .toEqual(2);
+
+    expect((await decepness.receiveEventsFrom(
+            decepAuthoroot.getConnection(), { clearSourceUpstream: true })).length)
+        .toEqual(2);
+
     expect(authoroot.propertyValue("hacked"))
         .toBeUndefined();
     expect(authoroot.propertyValue("untouched"))
         .toBeUndefined();
-    expect((await authoroot.getConnection()).isFrozen())
+    expect((await authoroot.getConnection()).isFrozenConnection())
         .toEqual(true);
 
-    expect((await decepness.receiveEventsFrom(harness, {})).length)
-        .toEqual(1);
-    expect(decepAuthoroot.propertyValue("hacked"))
-        .toBeUndefined();
-    expect(decepAuthoroot.propertyValue("untouched"))
-        .toBeUndefined();
-    expect((await decepAuthoroot.getConnection()).isFrozen())
+    await new Promise(resolve => setTimeout(resolve, 1));
+
+    const decepEvents = (await decepness.receiveEventsFrom(authoroot.getConnection(), {}));
+    expect(decepEvents[0])
+        .toMatchObject({
+          type: "SEALED",
+          invalidAntecedentIndex: 2,
+          aspects: { author: { antecedent: 3, publicIdentity: primeDirectorId } },
+        });
+    expect(decepEvents[0].invalidationReason)
+        .toMatch(/Invalid VLog:chain/);
+
+    // See note on previous test
+    // expect(decepAuthoroot.propertyValue("hacked"))
+    //     .toBeUndefined();
+    // expect(decepAuthoroot.propertyValue("untouched"))
+    //     .toBeUndefined();
+    expect((await decepAuthoroot.getConnection()).isFrozenConnection())
         .toEqual(true);
   });
 

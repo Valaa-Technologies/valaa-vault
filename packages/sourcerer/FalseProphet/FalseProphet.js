@@ -1,7 +1,5 @@
 // @flow
 
-import { naiveURI } from "~/raem/ValaaURI";
-import VALK from "~/raem/VALK";
 import { tryHostRef } from "~/raem/VALK/hostReference";
 import { Command, EventBase } from "~/raem/events";
 import type { Story } from "~/raem/redux/Bard";

@@ -2,9 +2,9 @@
 const {
   ontologyColumns, revdocOntologyProperties,
   extractee: {
-    c, em, ref, cli, command, cpath, bulleted,
+    em, ref,
     authors, pkg,
-    filterKeysWithAnyOf, filterKeysWithNoneOf, valosRaemFieldClasses,
+    filterKeysWithAnyOf, filterKeysWithNoneOf,
   },
 } = require("@valos/revdoc");
 
@@ -14,7 +14,7 @@ const title = `${name} ${type} workspace`;
 const {
   VChronicle: {
     preferredPrefix, baseIRI, description: namespaceDescription,
-    prefixes, context, referencedModules, vocabulary, extractionRules,
+    prefixes, context, referencedModules, vocabulary,
   },
   ...remainingOntology
 } = require("./ontology");

@@ -169,7 +169,7 @@ export default class FalseProphetConnection extends Connection {
     throw this.wrapErrorEvent(error, 1, new Error("proclaimEvents"),
         "\n\toptions:", ...dumpObject(op.options),
         "\n\tevents:", ...dumpObject(this._dumpEventIds(op.events)),
-        "\n\tstate:", ...dumpObject(op));
+        "\n\top:", ...dumpObject(op));
   }
 
   _prepareProclaim (op) {
@@ -479,13 +479,17 @@ export default class FalseProphetConnection extends Connection {
     if (!invalidation) return;
     const state = this._parent.getState();
     Promise.resolve([...invalidation])
-    .then(([invalidationReason, invalidatingEvent]) => {
+    .then(([invalidationReason, invalidatedEvent]) => {
+      this.errorEvent("INVALIDATED event encountered on a non-SEALED chronicle; proclaiming SEALED",
+          "\n\tinvalidationReason:", invalidationReason,
+          "\n\tinvalidatedEvent:", ...dumpObject(invalidatedEvent));
       return this.proclaimEvents([
             sealed({
               actions: [],
-              invalidAntecedentIndex: invalidatingEvent.aspects.log.index,
+              invalidAntecedentIndex: invalidatedEvent.aspects.log.index,
               invalidationReason,
               frozenPartitions: [this.getChronicleId()], // deprecated
+              aspects: { command: { id: "" } },
             }),
           ],
           { isProphecy: true, prophecy: { state, previousState: state } });

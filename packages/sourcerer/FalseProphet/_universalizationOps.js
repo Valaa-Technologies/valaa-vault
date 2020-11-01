@@ -302,7 +302,7 @@ function _universalizePropertyLiteralValue (value, propertyName) {
           propertyName}' encountered a non-valospace function at sub-property ${key}': ${
               clonee.name}`);
       }
-      return ["§capture", ["§'", extractFunctionVAKON(clonee)], undefined, "literal"];
+      return ["§capture", ["§'", extractFunctionVAKON(clonee)], ["§void"], "literal"];
     }
     /*
     if (cloneeDescriptor && (typeof cloneeDescriptor.get === "function")) {

@@ -12,21 +12,23 @@ import type FalseProphetConnection from "./FalseProphetConnection";
 import { dumpObject } from "~/tools";
 
 export function _resolveProclaimAspectParams (connection: FalseProphetConnection, op: Object) {
+  const unconfirmeds = connection._unconfirmedCommands;
+  const aspectParams = {
+    index: connection._headEventId + unconfirmeds.length,
+  };
   const mediator = connection._resolveOptionsIdentity(op.options);
   const identityParams = mediator && mediator.try(connection.getChronicleURI());
-  const unconfirmeds = connection._unconfirmedCommands;
+  if (identityParams) {
+    aspectParams.publicIdentity = identityParams.publicIdentity.vrid();
+    aspectParams.publicKey = (identityParams.asContributor || {}).publicKey;
+    aspectParams.secretKey = identityParams.secretKey;
+  }
+
   const previousEvent = unconfirmeds.length
       ? unconfirmeds[unconfirmeds.length - 1]
       : connection._latestTruth;
-  const aspectParams = {
-    index: connection._headEventId + unconfirmeds.length,
-    predecessorLog: ((previousEvent || {}).aspects || {}).log,
-    ...(!identityParams ? {} : {
-      publicIdentity: identityParams.publicIdentity.vrid(),
-      publicKey: (identityParams.asContributor || {}).publicKey,
-      secretKey: identityParams.secretKey,
-    }),
-  };
+  aspectParams.predecessorLog = ((previousEvent || {}).aspects || {}).log || null;
+
   const { previousState, state } = op.options.prophecy;
   const rejection = _validateRoleAndRefreshChroniclePublicKey(
       connection, aspectParams, previousState, state,
@@ -37,6 +39,7 @@ export function _resolveProclaimAspectParams (connection: FalseProphetConnection
     error.updateProgress = { isSchismatic: true, isRevisable: false, isReformable: false };
     throw error;
   }
+
   return aspectParams;
 }
 
@@ -165,17 +168,28 @@ export function _addLogAspect (connection, op, aspectParams, event) {
   try {
     log.index = aspectParams.index;
     log.chainHash = _calculateChainHash(event, log.aspects.author, aspectParams.predecessorLog);
+    connection.debugEvent(3, () => [
+      "VLog:chainHash added:", log.chainHash,
+      "\n\tpredecessorLog:", aspectParams.predecessorLog,
+      "\n\tevent:", ...dumpObject(event),
+      "\n\tevent:", JSON.stringify(event),
+    ]);
   } finally {
     swapAspectRoot("event", log, "log");
   }
 }
 
-function _validateLogAspect (connection, event, previousEvent) {
+function _validateLogAspect (connection, event, predecessor) {
   const log = swapAspectRoot("log", event, "event");
   const chainHash = log.chainHash
-      && _calculateChainHash(event, log.aspects.author, previousEvent && previousEvent.aspects.log);
+      && _calculateChainHash(event, log.aspects.author, predecessor && predecessor.aspects.log);
   swapAspectRoot("event", log, "log");
   if (chainHash === log.chainHash) return undefined;
+  connection.errorEvent(0, () => [
+    "VLog:chainHash mismatch, got:", chainHash, ", expected:", log.chainHash,
+    "\n\tpredecessorLog:", ...dumpObject(predecessor && predecessor.aspects.log),
+    "\n\tevent:", ...dumpObject(event),
+  ]);
   return "Invalid VLog:chainHash";
 }
 
@@ -190,5 +204,12 @@ function _calculateChainHash (event, authorAspect, predecessorLogAspect) {
     eventStep = `@.$VLog.event$.${formVPlot(event)}`;
     event.meta = meta;
   }
-  return hashVPlot(`${predecessorStep}${eventStep}@@`, { isValidVPlot: true });
+  const ret = hashVPlot(`${predecessorStep}${eventStep}@@`, { isValidVPlot: true });
+  /*
+  console.log("VLog:chain:", ret,
+      "\n\tvplot:", `${predecessorStep}${eventStep}@@`,
+      "\n\tevent:", JSON.stringify(plotEvent, null, 2),
+      );
+  */
+  return ret;
 }

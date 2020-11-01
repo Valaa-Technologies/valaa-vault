@@ -19,11 +19,9 @@ const decepEntities = () => decepness.createds.Entity;
 
 const primeDirectorId = "@$~raw.director-prime@@";
 const decepTributorId = "@$~raw.decep-tributor@@";
-const impersonateeId = "@$~raw.impersona-tributor@@";
 
 const primeDirectorURI = naiveURI.createChronicleURI(testAuthorityURI, primeDirectorId);
 const decepTributorURI = naiveURI.createChronicleURI(testAuthorityURI, decepTributorId);
-const impersonateeURI = naiveURI.createChronicleURI(testAuthorityURI, impersonateeId);
 
 async function prepareHarnesses (sharedOptions) {
   harness = await createEngineOracleHarness({
@@ -499,43 +497,71 @@ describe("Chronicle behaviors: VChronicle:requireAuthoredEvents", () => {
         .toEqual(true);
   });
 
-  xit("seals on an impersonating authorized but incongruent contributor update event", async () => {
+  it("seals on an impersonating authorized but incongruent director update event", async () => {
     await prepareHarnesses({ verbosity: 0, claimBaseBlock: true });
     const { authoroot } = await entities().creator.doValoscript(
         _createAuthoredOnlyChronicle(), {}, {});
-    await authoroot.doValoscript(
-        _addCustomIdentityRoleRelation(decepTributorURI, "this", "$VChronicle.director"), {}, {});
+    await _addIdentityAsDirector(authoroot, decepTributorURI);
+    const { decepAuthoroot } = await _sourcerDecepAuthoroot(authoroot, 2);
 
-    const { decepAuthoroot } = await _sourcerDecepAuthoroot(authoroot);
+    const decepPublicKey = signatureKeys[decepTributorURI].publicKey;
+    expect(() =>
+        decepAuthoroot.doValoscript(
+            `this.$V.getRelations($VChronicle.director)[0].publicKey = decepPublicKey`,
+            { decepPublicKey }, {}))
+        .toThrow(/Incongruent VChronicle:director identity encountered when modifying/);
 
-    // TODO(iridian, 2020-10): bypass local contributor checks
+    // Disable local author aspect validations
+    decepAuthoroot.getConnection()._bypassLocalAuthorChecks = true;
+
+    await decepAuthoroot.doValoscript(
+      `this.$V.getRelations($VChronicle.director)[0].publicKey = decepPublicKey`,
+      { decepPublicKey }, {});
 
     await decepAuthoroot.doValoscript(`
-      Promise.all([
-        valos.sourcerIdentityMediator("${impersonateeURI}"),
-        valos.sourcerIdentityMediator("${decepTributorURI}")
-      ]).then(([impersonateeMediator, decepMediator]) =>
-          ${_addIdentityRoleRelation(
-              "this", "$VChronicle.contributor", "impersonateeMediator", "decepMediator")}
-      )
-    `);
+        valos.identity.remove("${decepTributorURI}");
+        valos.identity.add("${primeDirectorURI}", {
+          secretKey: secretKey,
+          asContributor: { publicKey: publicKey },
+        });
+        `, { publicKey: decepPublicKey, secretKey: signatureKeys[decepTributorURI].secretKey });
 
-    await decepAuthoroot.doValoscript(`
-      this.nonchalantFollowup = true;
-    `);
-
-    expect((await harness.receiveEventsFrom(decepness, {})).length)
-        .toEqual(2);
-    expect(authoroot.propertyValue("nonchalantFollowup"))
-        .toBeUndefined();
-    expect((await authoroot.getConnection()).isFrozen())
+    await decepAuthoroot.doValoscript(`this.impersonatedWrite = true;`, {}, {});
+    expect(decepAuthoroot.propertyValue("impersonatedWrite"))
         .toEqual(true);
 
-    expect((await decepness.receiveEventsFrom(harness, {})).length)
-        .toEqual(1);
-    expect(decepAuthoroot.propertyValue("nonchalantFollowup"))
+    const decepAuthorootBackend = decepness
+        .tryGetTestAuthorityConnection(decepAuthoroot.getConnection());
+    const event = decepAuthorootBackend._proclamations[1].event;
+    expect(event.aspects.author)
+        .toMatchObject({ antecedent: 2, publicIdentity: "@$~raw.director-prime@@" });
+
+    expect((await harness.receiveEventsFrom(decepAuthoroot.getConnection(), {})).length)
+        .toEqual(2);
+
+    expect((await decepness.receiveEventsFrom(
+          decepAuthoroot.getConnection(), { clearSourceUpstream: true })).length)
+      .toEqual(2);
+
+    expect(authoroot.propertyValue("impersonatedWrite"))
         .toBeUndefined();
-    expect((await decepAuthoroot.getConnection()).isFrozen())
+    expect((await authoroot.getConnection()).isFrozenConnection())
+        .toEqual(true);
+
+    const decepEvents = (await decepness.receiveEventsFrom(authoroot.getConnection(), {}));
+    expect(decepEvents[0])
+        .toMatchObject({
+          type: "SEALED",
+          invalidAntecedentIndex: 2,
+          aspects: { author: { antecedent: 3, publicIdentity: primeDirectorId } },
+        });
+    expect(decepEvents[0].invalidationReason)
+        .toMatch(/Incongruent VChronicle:director identity encountered/);
+
+    // See note on previous test
+    // expect(decepAuthoroot.propertyValue("nonchalantFollowup"))
+    //     .toBeUndefined();
+    expect((await decepAuthoroot.getConnection()).isFrozenConnection())
         .toEqual(true);
   });
 });

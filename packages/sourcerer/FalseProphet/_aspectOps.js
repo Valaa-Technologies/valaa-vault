@@ -16,6 +16,8 @@ export function _resolveProclaimAspectParams (connection: FalseProphetConnection
   const aspectParams = {
     index: connection._headEventId + unconfirmeds.length,
   };
+  if (!connection.isRemoteAuthority()) return aspectParams;
+
   const mediator = connection._resolveOptionsIdentity(op.options);
   const identityParams = mediator && mediator.try(connection.getChronicleURI());
   if (identityParams) {
@@ -92,6 +94,7 @@ function _getPublicKeyFromChronicle (publicIdentity, state, chronicleRootIdStem,
 // export function _autoRefreshContributorRelation (connection, op, identityParams) {}
 
 export function _validateAspects (connection, event, previousState, state, previousEvent) {
+  if (!connection.isRemoteAuthority()) return true;
   let invalidationReason;
   try {
     invalidationReason = _validateAuthorAspect(connection, event, previousState, state)
@@ -167,7 +170,9 @@ export function _addLogAspect (connection, op, aspectParams, event) {
   const log = obtainAspectRoot("log", event, "event");
   try {
     log.index = aspectParams.index;
-    log.chainHash = _calculateChainHash(event, log.aspects.author, aspectParams.predecessorLog);
+    if (aspectParams.predecessorLog !== undefined) {
+      log.chainHash = _calculateChainHash(event, log.aspects.author, aspectParams.predecessorLog);
+    }
     connection.debugEvent(3, () => [
       "VLog:chainHash added:", log.chainHash,
       "\n\tpredecessorLog:", aspectParams.predecessorLog,
@@ -206,7 +211,7 @@ function _calculateChainHash (event, authorAspect, predecessorLogAspect) {
   }
   const ret = hashVPlot(`${predecessorStep}${eventStep}@@`, { isValidVPlot: true });
   /*
-  console.log("VLog:chain:", ret,
+  console.log("VLog:chainHash:", ret,
       "\n\tvplot:", `${predecessorStep}${eventStep}@@`,
       "\n\tevent:", JSON.stringify(plotEvent, null, 2),
       );

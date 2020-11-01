@@ -3,7 +3,6 @@
 import { Command, EventBase } from "~/raem/events";
 import { getActionFromPassage, Story } from "~/raem/redux/Bard";
 
-import TransactionState from "~/sourcerer/FalseProphet/TransactionState";
 import { initializeAspects } from "~/sourcerer/tools/EventAspects";
 import EVENT_VERSION from "~/sourcerer/tools/EVENT_VERSION";
 
@@ -14,7 +13,7 @@ import FalseProphetConnection from "./FalseProphetConnection";
 import StoryRecital from "./StoryRecital";
 
 import { Prophecy, _confirmVenueCommand, _rewriteVenueCommand } from "./_prophecyOps";
-import { _validateAuthorAspect } from "./_authorOps";
+import { _validateAspects } from "./_aspectOps";
 
 /**
  * Dispatches given event to the corpus and get the corresponding
@@ -57,7 +56,7 @@ export function _composeEventIntoRecitalStory (
     }
   }
   if (!story) {
-    if (!options.truthConnection) {
+    if (!truthConnection) {
       const dispatchPath = generateDispatchEventPath(transactor, "compose");
       if (dispatchPath) {
         progress = operation.getProgressEvent("compose");
@@ -71,7 +70,7 @@ export function _composeEventIntoRecitalStory (
     if (story === undefined) {
       story = falseProphet._corpus.dispatch(event, dispatchDescription);
       if (truthConnection
-          && !_validateAuthorAspect(
+          && !_validateAspects(
               truthConnection, event, previousState, falseProphet._corpus.getState())) {
         falseProphet.recreateCorpus(previousState);
         story = null;

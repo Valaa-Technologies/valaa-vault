@@ -75,7 +75,7 @@ export async function expectStoredInDB (command: Command, database: FDBDatabase,
     // XXX Hack to flatten any vrefs that may be dangling onto the commands
     stored = JSON.parse(JSON.stringify(storedCommand));
     expected = JSON.parse(JSON.stringify(command));
-    expected = swapAspectRoot("event", expected, "log");
+    expected = swapAspectRoot("log", expected, "event");
     delete expected.aspects.log;
     // console.info("STORED:\n", stored, "\n\nINDEXED:\n", indexed);
   } catch (error) {

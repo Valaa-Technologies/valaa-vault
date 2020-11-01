@@ -571,7 +571,7 @@ export function _deleteCommands (connection: ScribeConnection,
 }
 
 function _serializeEventAsJSON (connection: Object, event) {
-  const logRoot = swapAspectRoot("event", event, "log");
+  const logRoot = swapAspectRoot("log", event, "event");
   try {
     return trivialClone(logRoot, (value, key) => {
       try {
@@ -596,7 +596,7 @@ function _serializeEventAsJSON (connection: Object, event) {
     const name = new Error("serializeEventAsJSON");
     throw connection.wrapErrorEvent(error, 1, () => [name, "\n\tevent:", ...dumpObject(event)]);
   } finally {
-    swapAspectRoot("log", logRoot, "event");
+    swapAspectRoot("event", logRoot, "log");
   }
 }
 
@@ -611,7 +611,7 @@ function _getAllShim (connection: ScribeConnection, database, range: IDBKeyRange
     req = database.getAll(range);
     req.onsuccess = () => {
       try {
-        const ret = req.result.map(eventLogRoot => swapAspectRoot("log", eventLogRoot, "event"));
+        const ret = req.result.map(eventLogRoot => swapAspectRoot("event", eventLogRoot, "log"));
         plog && plog.v2 && plog.opEvent("db_read_done",
             `resolve(${req.result.length})`, ret);
         resolve(ret);
@@ -627,7 +627,7 @@ function _getAllShim (connection: ScribeConnection, database, range: IDBKeyRange
     req.onsuccess = () => {
       const nextCursor = event.target.result;
       if (nextCursor) {
-        result.push(swapAspectRoot("log", nextCursor.value, "event"));
+        result.push(swapAspectRoot("event", nextCursor.value, "log"));
         nextCursor.continue();
       } else {
         // complete

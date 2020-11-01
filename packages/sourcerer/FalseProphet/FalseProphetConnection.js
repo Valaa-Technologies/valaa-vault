@@ -6,13 +6,13 @@ import VRL from "~/raem/VRL";
 import Connection from "~/sourcerer/api/Connection";
 import { ProclaimOptions, Proclamation, ProclaimEventResult, NarrateOptions }
     from "~/sourcerer/api/types";
-import { initializeAspects, obtainAspect, tryAspect } from "~/sourcerer/tools/EventAspects";
+import { initializeAspects, tryAspect } from "~/sourcerer/tools/EventAspects";
 import EVENT_VERSION from "~/sourcerer/tools/EVENT_VERSION";
 import IdentityMediator from "~/sourcerer/FalseProphet/IdentityMediator";
 
 import { dumpObject, mapEagerly, thisChainRedirect } from "~/tools";
 
-import { _resolveAuthorParams, _addAuthorAspect } from "./_authorOps";
+import { _resolveProclaimAspectParams, _addLogAspect, _addAuthorAspect } from "./_aspectOps";
 import { Prophecy, _reviewRecomposedSchism } from "./_prophecyOps";
 import {
   _confirmLeadingTruthsToFollowers, _confirmRecitalStories, _elaborateRecital,
@@ -173,17 +173,16 @@ export default class FalseProphetConnection extends Connection {
 
   _prepareProclaim (op) {
     if (op.options.isProphecy) {
-      let index = this._headEventId + this._unconfirmedCommands.length;
-      const authorParams = _resolveAuthorParams(this, op, index);
+      const aspectParams = _resolveProclaimAspectParams(this, op);
       // console.log("assigning ids:", this.getName(), this._headEventId,
       //     this._unconfirmedCommands.length, "\n\tevents:", ...dumpObject(events));
       for (const event of op.events) {
         if (!event.aspects || !event.aspects.version) {
           initializeAspects(event, { version: EVENT_VERSION });
         }
-        const log = obtainAspect(event, "log");
-        log.index = index++;
-        if (authorParams.publicIdentity) _addAuthorAspect(this, op, authorParams, event, log.index);
+        if (aspectParams.publicIdentity) _addAuthorAspect(this, op, aspectParams, event);
+        _addLogAspect(this, op, aspectParams, event);
+        ++aspectParams.index;
         this._unconfirmedCommands.push(event);
       }
       this._checkForFreezeAndNotify(op.plog);
@@ -454,34 +453,44 @@ export default class FalseProphetConnection extends Connection {
         `_checkForFreezeAndNotify(${this._unconfirmedCommands.length})`,
         { lastEvent, unconfirmedCommands: this._unconfirmedCommands });
     if (!this.isFrozenConnection()
-        && (this.isInvalidated() || (lastEvent && isFrozenLike(lastEvent)))) {
-      let invalidation = this.isInvalidated();
-      if (!invalidation) {
-        for (let i = 0; i !== (newEvents || []).length; ++i) {
-          if (newEvents[i].type === "INVALIDATED") {
-            invalidation = [newEvents[i].invalidationReason, newEvents[i].invalidEvent];
-            break;
-          }
-        }
-      }
-      if (invalidation) {
-        const state = this._parent.getState();
-        Promise.resolve()
-        .then(() => this.proclaimEvents([
-          sealed({
-            actions: [],
-            invalidAntecedentIndex: invalidation[1].aspects.log.index,
-            invalidationReason: invalidation[0],
-            frozenPartitions: [this.getChronicleId()], // deprecated
-          }),
-        ], { isProphecy: true, prophecy: { state, previousState: state } }))
-        .catch(error => this.outputErrorEvent(
-            error, "Exception caught during invalidation SEALED proclamation"));
-      }
+        && ((lastEvent && isFrozenLike(lastEvent)) || this.isInvalidated())) {
+      this._sealChronicleIfRequired(newEvents, lastEvent);
       this.setIsFrozen();
     }
     this.getFalseProphet().setConnectionCommandCount(
         this.getChronicleURI(), this._unconfirmedCommands.length);
+  }
+
+  _sealChronicleIfRequired (newEvents, lastEvent) {
+    if ((lastEvent || {}).type === "SEALED") return;
+    let invalidation = this.isInvalidated();
+    if (!invalidation) {
+      for (let i = 0; i !== (newEvents || []).length; ++i) {
+        if (newEvents[i].type === "INVALIDATED") {
+          invalidation = [newEvents[i].invalidationReason, newEvents[i].invalidEvent];
+          break;
+        }
+      }
+    }
+    if (!invalidation) return;
+    const state = this._parent.getState();
+    Promise.resolve([...invalidation])
+    .then(([invalidationReason, invalidatingEvent]) => {
+      return this.proclaimEvents([
+            sealed({
+              actions: [],
+              invalidAntecedentIndex: invalidatingEvent.aspects.log.index,
+              invalidationReason,
+              frozenPartitions: [this.getChronicleId()], // deprecated
+            }),
+          ],
+          { isProphecy: true, prophecy: { state, previousState: state } });
+    })
+    .catch(error => {
+      if (!error.message.match(/No public identity found/)) {
+        this.outputErrorEvent(error, 0, "Exception caught during SEALED proclamation");
+      }
+    });
   }
 
   _reviewRecomposedSchism (purged: Prophecy, newProphecy: Prophecy) {

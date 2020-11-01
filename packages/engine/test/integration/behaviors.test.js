@@ -145,13 +145,13 @@ describe("Chronicle behaviors: VChronicle:requireAuthoredEvents", () => {
     const command = getAspect(event, "command");
     const author = swapAspectRoot("event", event, "author");
     expect(author)
-        .toMatchObject({ antecedent: -1, publicIdentity: primeDirectorId });
+        .toMatchObject({ publicIdentity: primeDirectorId });
     expect(verifyVPlotSignature(
             { event, command },
             author.signature,
             signatureKeys[author.publicIdentity].publicKey))
         .toEqual(true);
-    swapAspectRoot("author", author, "event");
+    swapAspectRoot("event", author, "author");
   });
 
   it("refuses to profess a non-authorable outgoing event", async () => {
@@ -399,7 +399,7 @@ describe("Chronicle behaviors: VChronicle:requireAuthoredEvents", () => {
     await expect(_addIdentityAsDirector(decepAuthoroot, decepTributorURI))
         .rejects.toThrow(/No VChronicle:director chronicle identity found/);
 
-    // TODO(iridian, 2020-10): disable local director validation on VChronicle property changes
+    // Disable local director validation on VChronicle property changes
 
     decepAuthoroot.getConnection()._bypassLocalAuthorChecks = true;
 

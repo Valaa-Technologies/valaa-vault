@@ -202,7 +202,7 @@ function disjoinVPlotString (vplot, stack = { i: -1 }) {
       throw new Error(`Invalid VPlot: expected eof at pos ${stack.i}, got: "${
           vplot[stack.i]}", of vplot: "${vplot}"`);
     }
-    if (stack.outlineSuffixes && stack.outlineSuffixes.length) {
+    if (stack.outlineSuffixes && stack.outlineSuffixes.length && false) {
       throw new Error(`Failed to section VPlot: not all outlineSuffixes were consumed`);
     }
     return ret;

@@ -3,8 +3,8 @@ const JSSHA256 = require("jssha/src/sha256");
 const JSSHA3 = require("jssha/src/sha3");
 const { TextEncoder } = require("text-encoding");
 
-const { base64URLFromBuffer } = require("~/gateway-api/base64");
-const { formVPlot } = require("~/plot");
+const { base64URLFromBuffer } = require("@valos/gateway-api/base64");
+const { formVPlot } = require("@valos/plot");
 
 module.exports = {
   b64SHA256FromUTF8Text,
@@ -83,6 +83,6 @@ function hashV240 (input) {
       .replace(/\+/g, "-").replace(/\//g, "_");
 }
 
-function isHashV240 (value): boolean {
+function isHashV240 (value) {
   return ((typeof value === "string") && !!value.match(/^[A-Za-z0-9\-_]{40}$/));
 }

@@ -1,6 +1,9 @@
-const { dumpObject, wrapError } = require("~/tools/wrapError");
+const { dumpObject, wrapError } = require("@valos/tools/wrapError");
 
-module.exports = { cementVPlot, extendTrack };
+module.exports = {
+  cementVPlot,
+  extendTrack,
+};
 
 function extendTrack (target, extension) {
   if (target[0] !== "§->" || !Array.isArray(extension) || extension[0] !== "§->") {

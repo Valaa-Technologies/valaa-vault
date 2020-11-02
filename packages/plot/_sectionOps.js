@@ -1,7 +1,7 @@
-const { qualifiedNamesOf } = require("~/tools/namespace");
+const { qualifiedNamesOf } = require("@valos/tools/namespace");
 
-const { dumpObject, wrapError } = require("~/tools/wrapError");
-const isSymbol = require("~/tools/isSymbol").default;
+const { dumpObject, wrapError } = require("@valos/tools/wrapError");
+const isSymbol = require("@valos/tools/isSymbol").default;
 
 const {
   validateVerbType, validateContextTerm, validateParamValueText, validateOutlineParamValueText

@@ -1,4 +1,4 @@
-const { dumpObject, wrapError } = require("~/tools/wrapError");
+const { dumpObject, wrapError } = require("@valos/tools/wrapError");
 
 const { disjoinVPlotOutline, disjoinVPlotString } = require("./_sectionOps");
 

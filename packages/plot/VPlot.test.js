@@ -335,5 +335,177 @@ describe("VPlot", () => {
         }@*$pot_hypertwin.inLinks@-in-$ot.ownerOf${""
         }$.@.S--$~plt.@.$ot$.@.O.$.aa592f56-1d82-4484-8360-ad9b82d00592@@@@@@@@`);
     });
+    it("Forms a big VPlot", () => {
+      const bigComplexObject = JSON.parse(`{
+        "actions": [
+          {
+            "type": "CREATED",
+            "typeName": "Entity",
+            "id": [ "@$~cih.iNbc6KTSicF1AJ0_kiSEKKSlB89vDIhWFFA5rZun@@",
+              { "partition": "valaa-test:?id=@$~raw.test_chronicle@@" }
+            ],
+            "initialState": {
+              "name": "Callback Target",
+              "owner": ["@$~raw.test_chronicle@@",
+                { "partition": "valaa-test:?id=@$~raw.test_chronicle@@" },
+                { "coupling": "unnamedOwnlings" }
+              ]
+            }
+          },
+          {
+            "type": "CREATED",
+            "typeName": "Property",
+            "initialState": {
+              "owner": ["@$~cih.iNbc6KTSicF1AJ0_kiSEKKSlB89vDIhWFFA5rZun@@",
+                { "partition": "valaa-test:?id=@$~raw.test_chronicle@@" },
+                { "coupling": "properties" }
+              ],
+              "name": "result",
+              "value": { "typeName": "Literal", "value": 10 }
+            },
+            "id": ["@$~cih.iNbc6KTSicF1AJ0_kiSEKKSlB89vDIhWFFA5rZun@.$.result@@",
+              { "partition": "valaa-test:?id=@$~raw.test_chronicle@@" }
+            ]
+          },
+          {
+            "type": "CREATED",
+            "typeName": "Property",
+            "id": ["@$~cih.iNbc6KTSicF1AJ0_kiSEKKSlB89vDIhWFFA5rZun@.$.antiresult@@",
+              { "partition": "valaa-test:?id=@$~raw.test_chronicle@@" }
+            ],
+            "initialState": {
+              "name": "antiresult",
+              "value": {
+                "typeName": "KueryExpression",
+                "vakon": [
+                  "§->",["§$<-",{"this":["§->",null]}],{},
+                  ["§@",["§void",["§.<-",{
+                    "return":{"result":["§negate",["§->",["§$","this"],["§..","result"]]]},
+                    "looping":0
+                  }]]],"return",false,"result"]
+              },
+              "owner": ["@$~cih.iNbc6KTSicF1AJ0_kiSEKKSlB89vDIhWFFA5rZun@@",
+                { "partition": "valaa-test:?id=@$~raw.test_chronicle@@" },
+                { "coupling": "properties" }
+              ]
+            }
+          },
+          {
+            "type": "FIELDS_SET",
+            "typeName": "Property",
+            "sets": { "value": { "typeName": "Literal", "value": 12 } },
+            "id": ["@$~cih.iNbc6KTSicF1AJ0_kiSEKKSlB89vDIhWFFA5rZun@.$.result@@",
+              { "partition": "valaa-test:?id=@$~raw.test_chronicle@@" }
+            ]
+          },
+          {
+            "type": "CREATED",
+            "typeName": "Property",
+            "initialState": {
+              "owner": ["@$~raw.test_chronicle@@",
+                { "partition": "valaa-test:?id=@$~raw.test_chronicle@@" },
+                { "coupling": "properties" }
+              ],
+              "name": "obj",
+              "value": {
+                "typeName": "Literal",
+                "value": {
+                  "increment": 1,
+                  "callbackEntity": ["§vrl",
+                    ["@$~cih.iNbc6KTSicF1AJ0_kiSEKKSlB89vDIhWFFA5rZun@@",
+                      { "partition": "valaa-test:?id=@$~raw.test_chronicle@@"}
+                    ]
+                  ],
+                  "callback": ["§capture",["§'",["§->",
+                    ["§$<-",{
+                      "obj":{
+                        "increment":1,
+                        "callbackEntity":["§vrl",
+                          ["@$~cih.iNbc6KTSicF1AJ0_kiSEKKSlB89vDIhWFFA5rZun@@",
+                            {"partition":"valaa-test:?id=@$~raw.test_chronicle@@"}
+                        ]]
+                      },
+                      "callbackEntity":["§vrl",
+                        ["@$~cih.iNbc6KTSicF1AJ0_kiSEKKSlB89vDIhWFFA5rZun@@",
+                          {"partition":"valaa-test:?id=@$~raw.test_chronicle@@"}
+                        ]]
+                    }],
+                    ["§->",
+                      ["§$<-",{"this":["§->",null]}],
+                      {},
+                      ["§@",["§void",["§.<-",{
+                        "return":{"result":["§..<->","result",
+                          ["§expression","§+",
+                            ["§'",["§->",null]],
+                            ["§literal",["§+",
+                              ["§->",["§$","this"],["§..","increment"]],
+                              ["§->",["§$$","obj"],["§..","increment"]]
+                          ]]],
+                          ["§$$","callbackEntity"]
+                        ]},
+                        "looping":0
+                      }]]],
+                      "return",false,"result"
+                    ]]],
+                    null,"literal"
+                  ]
+                }
+              }
+            },
+            "id": ["@$~raw.test_chronicle@.$.obj@@",
+              {"partition": "valaa-test:?id=@$~raw.test_chronicle@@"}
+            ]
+          },
+          {
+            "type": "FIELDS_SET",
+            "typeName": "Property",
+            "sets": { "value": { "typeName": "Literal", "value": 16 } },
+            "id": ["@$~cih.iNbc6KTSicF1AJ0_kiSEKKSlB89vDIhWFFA5rZun@.$.result@@",
+              { "partition": "valaa-test:?id=@$~raw.test_chronicle@@" }
+            ]
+          },
+          {
+            "type": "FIELDS_SET",
+            "typeName": "Property",
+            "sets": { "value": { "typeName": "Literal", "value": 18 } },
+            "id": ["@$~cih.iNbc6KTSicF1AJ0_kiSEKKSlB89vDIhWFFA5rZun@.$.result@@",
+              { "partition": "valaa-test:?id=@$~raw.test_chronicle@@" }
+            ]
+          }
+        ],
+        "type": "TRANSACTED"
+      }`);
+      expect(formVPlot(bigComplexObject))
+          .toEqual(`@-$.@*$.@.$.actions$.@-$.@*$.@.$.id$~cih.iNbc6KTSicF1AJ0_kiSEKKSlB89vDIhWFFA5rZ\
+un@@$.@.$.initialState$.@*$.@.$.name$.Callback%20Target@@$.@.$.owner$~raw.test_chronicle@@@@@@$.@.$\
+.type$.CREATED@@$.@.$.typeName$.Entity@@@@$.@*$.@.$.id$.@$~cih.iNbc6KTSicF1AJ0_kiSEKKSlB89vDIhWFFA5\
+rZun@.$.result@@@@$.@.$.initialState$.@*$.@.$.name$.result@@$.@.$.owner$~cih.iNbc6KTSicF1AJ0_kiSEKK\
+SlB89vDIhWFFA5rZun@@$.@.$.value$.@*$.@.$.typeName$.Literal@@$.@.$.value$d.10@@@@@@@@@@$.@.$.type$.C\
+REATED@@$.@.$.typeName$.Property@@@@$.@*$.@.$.id$.@$~cih.iNbc6KTSicF1AJ0_kiSEKKSlB89vDIhWFFA5rZun@.\
+$.antiresult@@@@$.@.$.initialState$.@*$.@.$.name$.antiresult@@$.@.$.owner$~cih.iNbc6KTSicF1AJ0_kiSE\
+KKSlB89vDIhWFFA5rZun@@$.@.$.value$.@*$.@.$.typeName$.KueryExpression@@$.@.$.vakon$.@-$.%C2%A7-%3E$.\
+@-$.%C2%A7%24%3C-$.@*$.@.$.this$.@-$.%C2%A7-%3E$n@@@@@@@@$.@*@@$.@-$.%C2%A7%40$.@-$.%C2%A7void$.@-$\
+.%C2%A7.%3C-$.@*$.@.$.looping$d.0@@$.@.$.return$.@*$.@.$.result$.@-$.%C2%A7negate$.@-$.%C2%A7-%3E$.\
+@-$.%C2%A7%24$.this@@$.@-$.%C2%A7..$.result@@@@@@@@@@@@@@@@@@@@$.return$f$.result@@@@@@@@@@@@$.@.$.\
+type$.CREATED@@$.@.$.typeName$.Property@@@@$.@*$.@.$.id$.@$~cih.iNbc6KTSicF1AJ0_kiSEKKSlB89vDIhWFFA\
+5rZun@.$.result@@@@$.@.$.sets$.@*$.@.$.value$.@*$.@.$.typeName$.Literal@@$.@.$.value$d.12@@@@@@@@@@\
+$.@.$.type$.FIELDS_SET@@$.@.$.typeName$.Property@@@@$.@*$.@.$.id$.@$~raw.test_chronicle@.$.obj@@@@$\
+.@.$.initialState$.@*$.@.$.name$.obj@@$.@.$.owner$~raw.test_chronicle@@$.@.$.value$.@*$.@.$.typeNam\
+e$.Literal@@$.@.$.value$.@*$.@.$.callback$.@-$.%C2%A7capture$.@-$.%C2%A7'$.@-$.%C2%A7-%3E$.@-$.%C2%\
+A7%24%3C-$.@*$.@.$.callbackEntity$.@-$.%C2%A7vrl$~cih.iNbc6KTSicF1AJ0_kiSEKKSlB89vDIhWFFA5rZun@@@@$\
+.@.$.obj$.@*$.@.$.callbackEntity$.@-$.%C2%A7vrl$~cih.iNbc6KTSicF1AJ0_kiSEKKSlB89vDIhWFFA5rZun@@@@$.\
+@.$.increment$d.1@@@@@@@@@@$.@-$.%C2%A7-%3E$.@-$.%C2%A7%24%3C-$.@*$.@.$.this$.@-$.%C2%A7-%3E$n@@@@@\
+@@@$.@*@@$.@-$.%C2%A7%40$.@-$.%C2%A7void$.@-$.%C2%A7.%3C-$.@*$.@.$.looping$d.0@@$.@.$.return$.@*$.@\
+.$.result$.@-$.%C2%A7..%3C-%3E$.result$.@-$.%C2%A7expression$.%C2%A7%2B$.@-$.%C2%A7'$.@-$.%C2%A7-%3\
+E$n@@@@$.@-$.%C2%A7literal$.@-$.%C2%A7%2B$.@-$.%C2%A7-%3E$.@-$.%C2%A7%24$.this@@$.@-$.%C2%A7..$.inc\
+rement@@@@$.@-$.%C2%A7-%3E$.@-$.%C2%A7%24%24$.obj@@$.@-$.%C2%A7..$.increment@@@@@@@@@@$.@-$.%C2%A7%\
+24%24$.callbackEntity@@@@@@@@@@@@@@@@@@$.return$f$.result@@@@@@$n$.literal@@@@$.@.$.callbackEntity$\
+.@-$.%C2%A7vrl$~cih.iNbc6KTSicF1AJ0_kiSEKKSlB89vDIhWFFA5rZun@@@@$.@.$.increment$d.1@@@@@@@@@@@@@@$.\
+@.$.type$.CREATED@@$.@.$.typeName$.Property@@@@$.@*$.@.$.id$.@$~cih.iNbc6KTSicF1AJ0_kiSEKKSlB89vDIh\
+WFFA5rZun@.$.result@@@@$.@.$.sets$.@*$.@.$.value$.@*$.@.$.typeName$.Literal@@$.@.$.value$d.16@@@@@@\
+@@@@$.@.$.type$.FIELDS_SET@@$.@.$.typeName$.Property@@@@$.@*$.@.$.id$.@$~cih.iNbc6KTSicF1AJ0_kiSEKK\
+SlB89vDIhWFFA5rZun@.$.result@@@@$.@.$.sets$.@*$.@.$.value$.@*$.@.$.typeName$.Literal@@$.@.$.value$d\
+.18@@@@@@@@@@$.@.$.type$.FIELDS_SET@@$.@.$.typeName$.Property@@@@@@@@$.@.$.type$.TRANSACTED@@@@@@`);
+    });
   });
 });

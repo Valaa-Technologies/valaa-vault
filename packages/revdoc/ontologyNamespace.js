@@ -173,6 +173,18 @@ function extendNamespace (namespace) {
       }
       let label;
       switch (definition["@type"]) {
+        default:
+          _addInferredIndex("VEngine:domainOfProperty", definition["rdfs:domain"],
+              definition["VRevdoc:indexLabel"] || `${preferredPrefix}:${idSuffix}`);
+          break;
+        case "VEngine:Property":
+          _addInferredIndex("VEngine:domainOfProperty", definition["rdfs:domain"],
+              definition["VRevdoc:indexLabel"] || `.${idSuffix}`);
+          break;
+        case "VEngine:Method":
+          _addInferredIndex("VEngine:domainOfMethod", definition["rdfs:domain"],
+              definition["VRevdoc:indexLabel"] || `.${idSuffix}()`);
+          break;
         case "VState:Field":
         case "VState:ExpressedField":
         case "VState:EventLoggedField":
@@ -181,18 +193,10 @@ function extendNamespace (namespace) {
         case "VState:TransientField":
         case "VState:AliasField": {
           label = `$${preferredPrefix}.${idSuffix}`;
-          _addInferredIndex("VEngine:domainOfField", "rdfs:domain",
+          _addInferredIndex("VEngine:domainOfField", definition["rdfs:domain"],
               definition["VRevdoc:indexLabel"] || `.${label}`);
           break;
         }
-        case "VEngine:Property":
-          _addInferredIndex("VEngine:domainOfProperty", definition["rdfs:domain"],
-              definition["VRevdoc:indexLabel"]);
-          break;
-        case "VEngine:Method":
-          _addInferredIndex("VEngine:domainOfMethod", definition["rdfs:domain"],
-              definition["VRevdoc:indexLabel"]);
-          break;
         case "VEngine:ObjectProperty":
           _addInferredIndex("VEngine:hasProperty", definition["rdf:subject"],
               definition["VRevdoc:indexLabel"]);
@@ -200,8 +204,6 @@ function extendNamespace (namespace) {
         case "VEngine:ObjectMethod":
           _addInferredIndex("VEngine:hasMethod", definition["rdf:subject"],
               definition["VRevdoc:indexLabel"]);
-          break;
-        default:
           break;
       }
       if (!definition["rdfs:label"] && label) definition["rdfs:label"] = [label];
@@ -214,11 +216,17 @@ function extendNamespace (namespace) {
           return;
         }
         const [indexPrefix, indexName] = indexNames.split(":");
-        if (indexPrefix !== preferredPrefix) return;
+        if (indexPrefix !== preferredPrefix) {
+          return;
+        }
         const indexDefinition = vocabulary[indexName];
-        if (!indexDefinition) return;
+        if (!indexDefinition) {
+          return;
+        }
         const values = indexDefinition[indexProperty] || (indexDefinition[indexProperty] = []);
-        if (values.find(({ "@id": existingId }) => (existingId === id))) return;
+        if (values.find(({ "@id": existingId }) => (existingId === id))) {
+          return;
+        }
         values.push({ "@id": id, "VRevdoc:indexLabel": indexLabel });
       }
     });

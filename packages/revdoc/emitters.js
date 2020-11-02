@@ -83,7 +83,8 @@ function emitReVDocReference (node, emission, stack) {
         } else {
           stack.error("Unable to expand reference:", ref, "from @context entry:", contextEntry);
         }
-      } else if (suffixes.length && (prefix[0] === "V") && prefix[1].toLowerCase() !== prefix[1]) {
+      } else if (suffixes.length && (prefix[0] === "V")
+          && (prefix[1] || "V").toLowerCase() !== (prefix[1] || "V")) {
         stack.error(`Can't find valos term '${prefix}' definition in @context`,
             `when trying to resolve reference`, ref, "in", stack.document["@id"]);
       }

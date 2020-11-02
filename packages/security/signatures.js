@@ -1,8 +1,8 @@
 const { TextEncoder } = require("text-encoding");
 const nacl = require("tweetnacl");
 
-const { formVPlot } = require("~/plot");
-const { base64URLFromBuffer, byteArrayFromBase64URL } = require("~/gateway-api/base64");
+const { formVPlot } = require("@valos/plot");
+const { base64URLFromBuffer, byteArrayFromBase64URL } = require("@valos/gateway-api/base64");
 
 module.exports = {
   createSignatureKeys,

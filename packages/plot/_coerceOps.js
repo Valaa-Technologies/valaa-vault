@@ -4,7 +4,11 @@ const _uuidv4Regex = /^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0
 
 const _migrateLookup = {};
 
-export function coerceAsVRID (rawId) {
+module.exports = {
+  coerceAsVRID,
+};
+
+function coerceAsVRID (rawId) {
   let ret = _migrateLookup[rawId];
   if (!ret) {
     if (rawId[0] === "@") ret = validateVRIDString(rawId);

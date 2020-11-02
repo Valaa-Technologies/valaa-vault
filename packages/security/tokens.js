@@ -3,7 +3,7 @@ const crypto = require("crypto");
 const {
   base64URLDecode, base64URLEncode, base64URLFromBuffer, byteArrayFromBase64URL,
   base64URLFromBase64,
-} = require("~/gateway-api/base64");
+} = require("@valos/gateway-api/base64");
 
 const _normalizeAlg = Object.assign(Object.create(null), {
   A256GCM: "aes-256-gcm",

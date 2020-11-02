@@ -3,13 +3,15 @@ module.exports = {
   preferredPrefix: "VLog",
   baseIRI: "https://valospace.org/log/0#",
   description:
-`The vocabulary for defining the ValOS chronicle event log structure
-and for adding content and behaviors to it.`,
+`The fabric storage and transport layer vocabulary that both specifies
+the ValOS event log and aspects structure and is used to express the
+content and behaviors of individual chronicles.`,
   namespaceModules: {
     VKernel: "@valos/kernel/VKernel",
     VPlot: "@valos/plot/VPlot",
     VState: "@valos/state/VState",
     VValk: "@valos/valk/VValk",
+    V: "@valos/space/V",
   },
   context: {
     restriction: { "@reverse": "owl:onProperty" },
@@ -45,7 +47,7 @@ proclamation lifecycle.`,
       "rdfs:comment":
 `The aspect version string. The version of this specification is "0.3"`,
     },
-    ...require("./ChangeAspect"),
+    ...require("./DeltaAspect"),
     ...require("./CommandAspect"),
     ...require("./LogAspect"),
     ...require("./AuthorAspect"),

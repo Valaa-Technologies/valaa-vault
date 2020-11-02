@@ -40,12 +40,20 @@ module.exports = {
   },
   "chapter#abstract>0": {
     "#0": [
-      description,
-      null,
-      em("VLog"), ` together with `, ref("VState:"), " ", ref("VPlot:"),
-      " and ", ref("VValk:"), ` forms the infrastructural foundation ie. the `,
-      em("fabric"), ` of the valospace.`,
-      em("VLog"), ` provides the temporal dimension and so enables change and reactions.`,
+description,
+null,
+`The event log is sequence of `, ref("event resources", "VLog:Event"), `.
+An event resource is a map of semantically different `, ref("aspects", "VLog:EventAspect"),
+`. Each aspect represents some role or lifecycle phase of the event and
+is a map of attributes that relate to that role. Most notable one is
+the `, ref("delta aspect", "VLog:DeltaAspect"), ` which defines the
+actual state change payload of the event.`,
+null,
+`The `, em("VLog"), ` namespace together with `, ref("VState:"), " ",
+ref("VPlot:"), " and ", ref("VValk:"), ` namespaces forms the
+infrastructural foundation or the `, em("fabric"), ` of the valospace.`,
+em("VLog"), ` provides the temporal dimension and thus makes change
+and reactions possible.`,
     ],
   },
   "chapter#sotd>1": {

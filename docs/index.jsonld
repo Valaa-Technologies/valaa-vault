@@ -55,6 +55,7 @@
       "VEngine": "https://valospace.org/engine/0#",
       "V": "https://valospace.org/0#",
       "VState": "https://valospace.org/state/0#",
+      "VScript": "https://valospace.org/script/0#",
       "VLog": "https://valospace.org/log/0#",
       "VPlot": "https://valospace.org/plot/0#",
       "V:Chronicle.createPartitionURI": {
@@ -81,8 +82,8 @@
         "@id": "#Chronicle.acquireConnection",
         "@type": "@id"
       },
-      "V:Chronicle.sourcifyChronicle": {
-        "@id": "#Chronicle.sourcifyChronicle",
+      "V:Chronicle.sourcerChronicle": {
+        "@id": "#Chronicle.sourcerChronicle",
         "@type": "@id"
       },
       "V:immediateContent": {
@@ -213,12 +214,24 @@
         "@id": "#getMedia",
         "@type": "@id"
       },
-      "V:getSubResource": {
-        "@id": "#getSubResource",
+      "V:getFixedResource": {
+        "@id": "#getFixedResource",
         "@type": "@id"
       },
-      "V:obtainSubResource": {
-        "@id": "#obtainSubResource",
+      "V:getFixedEntity": {
+        "@id": "#getFixedEntity",
+        "@type": "@id"
+      },
+      "V:getFixedMedia": {
+        "@id": "#getFixedMedia",
+        "@type": "@id"
+      },
+      "V:getFixedRelation": {
+        "@id": "#getFixedRelation",
+        "@type": "@id"
+      },
+      "V:obtainFixedResource": {
+        "@id": "#obtainFixedResource",
         "@type": "@id"
       },
       "V:instantiate": {
@@ -502,6 +515,7 @@
       "https://valospace.org/engine/0#": "@valos/engine/VEngine",
       "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
       "https://valospace.org/state/0#": "@valos/state/VState",
+      "https://valospace.org/script/0#": "@valos/script/VScript",
       "https://valospace.org/0#": "@valos/space/V",
       "https://valospace.org/log/0#": "@valos/log/VLog",
       "https://valospace.org/plot/0#": "@valos/plot/VPlot"
@@ -986,7 +1000,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/kernel-vault",
-        "version": "0.35.0-rc.33"
+        "version": "0.35.0-rc.34"
       },
       "@id": "documents",
       "sbom": {
@@ -996,7 +1010,7 @@
           "SBOM"
         ],
         "subProfiles": [],
-        "title": "@valos/kernel-vault@0.35.0-rc.33 Software Bill of Materials",
+        "title": "@valos/kernel-vault@0.35.0-rc.34 Software Bill of Materials",
         "abstract": {
           "@type": "VDoc:Chapter",
           "VDoc:content": [
@@ -1043,7 +1057,7 @@
           ]
         },
         "package": "@valos/kernel-vault",
-        "version": "0.35.0-rc.33"
+        "version": "0.35.0-rc.34"
       },
       "engine": {
         "@id": "https://valospace.org/engine",
@@ -1142,7 +1156,7 @@
           "https://valospace.org/0#": "@valos/engine/V"
         },
         "package": "@valos/engine",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "inspire/Lens/0": {
         "@id": "https://valospace.org/inspire/Lens/0",
@@ -1422,7 +1436,7 @@
           "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
         },
         "package": "@valos/inspire",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "inspire/Lens": {
         "@id": "https://valospace.org/inspire/Lens",
@@ -1702,7 +1716,7 @@
           "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
         },
         "package": "@valos/inspire",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "inspire/On/0": {
         "@id": "https://valospace.org/inspire/On/0",
@@ -1813,12 +1827,12 @@
           "https://valospace.org/log/0#": "@valos/log/VLog"
         },
         "VRevdoc:extenderModules": {
-          "https://valospace.org/log/0#": "@valos/sourcerer/VLog",
+          "https://valospace.org/log/0#": "@valos/log/VLog",
           "https://valospace.org/0#": "@valos/sourcerer/V",
           "https://valospace.org/valk/0#": "@valos/sourcerer/VValk"
         },
         "package": "@valos/inspire",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "inspire/On": {
         "@id": "https://valospace.org/inspire/On",
@@ -1929,12 +1943,12 @@
           "https://valospace.org/log/0#": "@valos/log/VLog"
         },
         "VRevdoc:extenderModules": {
-          "https://valospace.org/log/0#": "@valos/sourcerer/VLog",
+          "https://valospace.org/log/0#": "@valos/log/VLog",
           "https://valospace.org/0#": "@valos/sourcerer/V",
           "https://valospace.org/valk/0#": "@valos/sourcerer/VValk"
         },
         "package": "@valos/inspire",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "inspire": {
         "@id": "https://valospace.org/inspire",
@@ -2032,7 +2046,7 @@
           "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
         },
         "package": "@valos/inspire",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "inspire/VRevela/0": {
         "@id": "https://valospace.org/inspire/VRevela/0",
@@ -2335,7 +2349,7 @@
           "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
         },
         "package": "@valos/inspire",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "inspire/VRevela": {
         "@id": "https://valospace.org/inspire/VRevela",
@@ -2638,7 +2652,7 @@
           "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
         },
         "package": "@valos/inspire",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "kernel/0": {
         "@id": "https://valospace.org/kernel/0",
@@ -2855,7 +2869,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "kernel": {
         "@id": "https://valospace.org/kernel",
@@ -3072,7 +3086,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/kernel",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "log": {
         "@id": "https://valospace.org/log",
@@ -3219,7 +3233,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/log",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "plot": {
         "@id": "https://valospace.org/plot",
@@ -3366,7 +3380,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/plot",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "raem/0": {
         "@id": "https://valospace.org/raem/0",
@@ -3502,7 +3516,7 @@
           "https://valospace.org/0#": "@valos/raem/V"
         },
         "package": "@valos/raem",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "raem": {
         "@id": "https://valospace.org/raem",
@@ -3638,7 +3652,7 @@
           "https://valospace.org/0#": "@valos/raem/V"
         },
         "package": "@valos/raem",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "raem/VPath/VPath.JSON": {
         "@id": "https://valospace.org/raem/VPath/VPath.JSON",
@@ -3735,7 +3749,7 @@
           ]
         },
         "package": "@valos/raem",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "raem/VPath/VPath": {
         "@id": "https://valospace.org/raem/VPath/VPath",
@@ -3797,7 +3811,7 @@
           ]
         },
         "package": "@valos/raem",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "revdoc/0": {
         "@id": "https://valospace.org/revdoc/0",
@@ -3867,7 +3881,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/revdoc",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "revdoc": {
         "@id": "https://valospace.org/revdoc",
@@ -3937,7 +3951,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/revdoc",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "revdoc/tutorial": {
         "@id": "https://valospace.org/revdoc/tutorial",
@@ -4011,7 +4025,7 @@
           ]
         },
         "package": "@valos/revdoc",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "sbomdoc/0": {
         "@id": "https://valospace.org/sbomdoc/0",
@@ -4082,7 +4096,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/sbomdoc",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "sbomdoc": {
         "@id": "https://valospace.org/sbomdoc",
@@ -4153,7 +4167,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/sbomdoc",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "script/0": {
         "@id": "https://valospace.org/script/0",
@@ -4220,7 +4234,7 @@
           "https://valospace.org/valk/0#": "@valos/script/VValk"
         },
         "package": "@valos/script",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "script": {
         "@id": "https://valospace.org/script",
@@ -4287,7 +4301,7 @@
           "https://valospace.org/valk/0#": "@valos/script/VValk"
         },
         "package": "@valos/script",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "sourcerer/0": {
         "@id": "https://valospace.org/sourcerer/0",
@@ -4343,12 +4357,12 @@
           "https://valospace.org/0#": "@valos/space/V"
         },
         "VRevdoc:extenderModules": {
-          "https://valospace.org/log/0#": "@valos/sourcerer/VLog",
+          "https://valospace.org/log/0#": "@valos/log/VLog",
           "https://valospace.org/0#": "@valos/sourcerer/V",
           "https://valospace.org/valk/0#": "@valos/sourcerer/VValk"
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "sourcerer": {
         "@id": "https://valospace.org/sourcerer",
@@ -4404,12 +4418,12 @@
           "https://valospace.org/0#": "@valos/space/V"
         },
         "VRevdoc:extenderModules": {
-          "https://valospace.org/log/0#": "@valos/sourcerer/VLog",
+          "https://valospace.org/log/0#": "@valos/log/VLog",
           "https://valospace.org/0#": "@valos/sourcerer/V",
           "https://valospace.org/valk/0#": "@valos/sourcerer/VValk"
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "sourcerer/valos-event-log": {
         "@id": "https://valospace.org/sourcerer/valos-event-log",
@@ -4439,7 +4453,7 @@
           ]
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "sourcerer/VState": {
         "@id": "https://valospace.org/sourcerer/VState",
@@ -4478,7 +4492,7 @@
           ]
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "space": {
         "@id": "https://valospace.org/space",
@@ -4576,7 +4590,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/space",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "state": {
         "@id": "https://valospace.org/state",
@@ -4724,7 +4738,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/state",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "twindoc/0": {
         "@id": "https://valospace.org/twindoc/0",
@@ -4815,7 +4829,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/twindoc",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "twindoc": {
         "@id": "https://valospace.org/twindoc",
@@ -4906,7 +4920,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/twindoc",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "type-vault/AssortedTutorials": {
         "@id": "https://valospace.org/type-vault/AssortedTutorials",
@@ -4925,7 +4939,7 @@
         },
         "introduction": {},
         "package": "@valos/type-vault",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "valk": {
         "@id": "https://valospace.org/valk",
@@ -5073,7 +5087,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/valk",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "vdoc/0": {
         "@id": "https://valospace.org/vdoc/0",
@@ -5168,7 +5182,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/vdoc",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "vdoc": {
         "@id": "https://valospace.org/vdoc",
@@ -5263,7 +5277,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/vdoc",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "web-spindle": {
         "@id": "https://valospace.org/web-spindle",
@@ -5369,7 +5383,7 @@
           ]
         },
         "package": "@valos/web-spindle",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "web-spindle/schema-builder": {
         "@id": "https://valospace.org/web-spindle/schema-builder",
@@ -5498,7 +5512,7 @@
           ]
         },
         "package": "@valos/web-spindle",
-        "version": "0.35.0-rc.34"
+        "version": "0.35.0-rc.35"
       },
       "removed-from": {
         "@id": "https://valospace.org/removed-from",
@@ -5549,7 +5563,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/kernel-vault",
-        "version": "0.35.0-rc.33"
+        "version": "0.35.0-rc.34"
       },
       "@valos/kernel-vault": {
         "@id": "https://valospace.org/index",
@@ -6016,7 +6030,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/kernel-vault",
-        "version": "0.35.0-rc.33"
+        "version": "0.35.0-rc.34"
       },
       "technician": {
         "@id": "https://valospace.org/technician",
@@ -6112,7 +6126,7 @@
           ]
         },
         "package": "@valos/kernel-vault",
-        "version": "0.35.0-rc.33"
+        "version": "0.35.0-rc.34"
       },
       "valonaut": {
         "@id": "https://valospace.org/valonaut",
@@ -6194,7 +6208,7 @@
           ]
         },
         "package": "@valos/kernel-vault",
-        "version": "0.35.0-rc.33"
+        "version": "0.35.0-rc.34"
       },
       "voyager": {
         "@id": "https://valospace.org/voyager",
@@ -6262,7 +6276,7 @@
           ]
         },
         "package": "@valos/kernel-vault",
-        "version": "0.35.0-rc.33"
+        "version": "0.35.0-rc.34"
       }
     },
     "prefixes": {
@@ -6275,6 +6289,7 @@
       "V": "https://valospace.org/0#",
       "VKernel": "https://valospace.org/kernel/0#",
       "VState": "https://valospace.org/state/0#",
+      "VScript": "https://valospace.org/script/0#",
       "VEngine": "https://valospace.org/engine/0#",
       "VLog": "https://valospace.org/log/0#",
       "VPlot": "https://valospace.org/plot/0#"
@@ -6289,7 +6304,25 @@
         "VRevdoc:brief": "Binary ValOS Object type",
         "rdfs:subClassOf": "V:Resource",
         "rdfs:comment": "The dominant type class of resources which are immutably associated\nwith an octet-stream of fixed length.",
-        "VRevdoc:introduction": "Bvob resource id is the hash of the octet-stream prefixed with the\nhash algorithm, as their VGRID.\n\nUnlike any other valospace resources, Bvobs are shared, not owned on\nthe object level. Multiple Bvob's with the same id can be CREATED in\nmany chronicles (or in fact, even in the same chronicle).\n\nConversely a Bvob cannot be destroyed but only released by nulling all\nreferences to it. Once a chronicle has no references to a specific Bvob\nthe authority is allowed to free the octet-stream resources associated\nwith."
+        "VRevdoc:introduction": "Bvob resource id is the hash of the octet-stream prefixed with the\nhash algorithm, as their VGRID.\n\nUnlike any other valospace resources, Bvobs are shared, not owned on\nthe object level. Multiple Bvob's with the same id can be CREATED in\nmany chronicles (or in fact, even in the same chronicle).\n\nConversely a Bvob cannot be destroyed but only released by nulling all\nreferences to it. Once a chronicle has no references to a specific Bvob\nthe authority is allowed to free the octet-stream resources associated\nwith.",
+        "VEngine:domainOfField": [
+          {
+            "@id": "#hashAlgorithm",
+            "VRevdoc:indexLabel": ".$V.hashAlgorithm"
+          },
+          {
+            "@id": "#contentHash",
+            "VRevdoc:indexLabel": ".$V.contentHash"
+          },
+          {
+            "@id": "#contentLength",
+            "VRevdoc:indexLabel": ".$V.contentLength"
+          },
+          {
+            "@id": "#contentReferrers",
+            "VRevdoc:indexLabel": ".$V.contentReferrers"
+          }
+        ]
       },
       "Chronicle": {
         "rdfs:label": [
@@ -6321,8 +6354,8 @@
             "VRevdoc:indexLabel": "valos.Chronicle.acquireConnection()"
           },
           {
-            "@id": "#Chronicle.sourcifyChronicle",
-            "VRevdoc:indexLabel": "valos.Chronicle.sourcifyChronicle()"
+            "@id": "#Chronicle.sourcerChronicle",
+            "VRevdoc:indexLabel": "valos.Chronicle.sourcerChronicle()"
           }
         ]
       },
@@ -6345,7 +6378,7 @@
         "rdf:subject": "V:Chronicle",
         "@type": "VEngine:ObjectMethod",
         "rdfs:range": " createNaiveChronicleURI(authorityURI, chronicleVRID)",
-        "rdfs:comment": "Creates a URI from given *base* and *chronicleId* strings (coercing non-vpath id's)",
+        "rdfs:comment": "Creates a URI from given *base* and *chronicleId* strings (coercing non-vplot id's)",
         "VRevdoc:introduction": null
       },
       "Chronicle.tryPartitionConnection": {
@@ -6398,14 +6431,14 @@
           "If no full connection exists, waits on a possibly existing on-going\nconnection process. If none exists creates a new connection process."
         ]
       },
-      "Chronicle.sourcifyChronicle": {
+      "Chronicle.sourcerChronicle": {
         "rdfs:label": [
-          "Chronicle.sourcifyChronicle"
+          "Chronicle.sourcerChronicle"
         ],
-        "VRevdoc:indexLabel": "valos.Chronicle.sourcifyChronicle()",
+        "VRevdoc:indexLabel": "valos.Chronicle.sourcerChronicle()",
         "rdf:subject": "V:Chronicle",
         "@type": "VEngine:ObjectMethod",
-        "rdfs:range": " sourcifyChronicle(chronicleURI)",
+        "rdfs:range": " sourcerChronicle(chronicleURI)",
         "rdfs:comment": "Returns a promise to a sourcered chronicle with given\n      *chronicleURI* and *options*.",
         "VRevdoc:introduction": [
           "If no full connection exists, waits on a possibly existing on-going\n      connection process. If none exists creates a new connection process."
@@ -6444,12 +6477,32 @@
           "V:SourcerableNode",
           "V:SourceredNode"
         ],
-        "rdfs:comment": "The class of valospace resources which act as the main valospace tree\nhierarchy building block. With Relation and Media it forms the group of\nthree primary node types. As a Scope it can have scriptable properties,\nwhich entities expose to all child resources as their lexical scripting\nnamespace.\n\nThe set of valospace tree hierarchies is defined via triple pattern:\n\n  SELECT ?root ?parent ?node WHERE {\n    ?node V:parent ?parent .\n    ?parent V:parent* ?root .\n    NOT EXISTS ( ?root V:parent ?rootParent )\n  }\n\nThis implies that only Entity resources can be nodes but any primary\nnode can act as a root resource.\n"
+        "rdfs:comment": "The class of valospace resources which act as the main valospace tree\nhierarchy building block. With Relation and Media it forms the group of\nthree primary node types. As a Scope it can have scriptable properties,\nwhich entities expose to all child resources as their lexical scripting\nnamespace.\n\nThe set of valospace tree hierarchies is defined via triple pattern:\n\n  SELECT ?root ?parent ?node WHERE {\n    ?node V:parent ?parent .\n    ?parent V:parent* ?root .\n    NOT EXISTS ( ?root V:parent ?rootParent )\n  }\n\nThis implies that only Entity resources can be nodes but any primary\nnode can act as a root resource.\n",
+        "VEngine:domainOfField": [
+          {
+            "@id": "#directory",
+            "VRevdoc:indexLabel": ".$V.directory"
+          },
+          {
+            "@id": "#parent",
+            "VRevdoc:indexLabel": ".$V.parent"
+          }
+        ]
       },
       "Media": {
         "rdfs:label": [
           "window.Media"
         ],
+        "@type": "VState:Type",
+        "VRevdoc:brief": "file media node type",
+        "rdfs:subClassOf": [
+          "V:Resource",
+          "V:Extant",
+          "V:Scope",
+          "V:SourcerableNode",
+          "V:SourceredNode"
+        ],
+        "rdfs:comment": "The class of valospace resources which represent interpretable media\nand can be associated with mutable binary content and accompanying\nmetadata. With Relation and Media it forms the group of three primary\nnode types.\n",
         "VEngine:domainOfMethod": [
           {
             "@id": "#immediateContent",
@@ -6468,16 +6521,24 @@
             "VRevdoc:indexLabel": ".$V.getURL()"
           }
         ],
-        "@type": "VState:Type",
-        "VRevdoc:brief": "file media node type",
-        "rdfs:subClassOf": [
-          "V:Resource",
-          "V:Extant",
-          "V:Scope",
-          "V:SourcerableNode",
-          "V:SourceredNode"
-        ],
-        "rdfs:comment": "The class of valospace resources which represent interpretable media\nand can be associated with mutable binary content and accompanying\nmetadata. With Relation and Media it forms the group of three primary\nnode types.\n"
+        "VEngine:domainOfField": [
+          {
+            "@id": "#directory",
+            "VRevdoc:indexLabel": ".$V.directory"
+          },
+          {
+            "@id": "#folder",
+            "VRevdoc:indexLabel": ".$V.folder"
+          },
+          {
+            "@id": "#sourceURL",
+            "VRevdoc:indexLabel": ".$V.sourceURL"
+          },
+          {
+            "@id": "#content",
+            "VRevdoc:indexLabel": ".$V.content"
+          }
+        ]
       },
       "immediateContent": {
         "rdfs:label": [
@@ -6726,12 +6787,46 @@
           "V:SourceredNode"
         ],
         "VRevdoc:brief": "directed relationship node type",
-        "rdfs:comment": "The class of valospace resources which represent directed,\nmany-to-many relationships between nodes.\nWith Entity and Media it forms the group of three primary node types.\nAs a Scope it can have scriptable properties. Relation being\na SourceredNode itself allows for nested and recursive relationship\nstructures."
+        "rdfs:comment": "The class of valospace resources which represent directed,\nmany-to-many relationships between nodes.\nWith Entity and Media it forms the group of three primary node types.\nAs a Scope it can have scriptable properties. Relation being\na SourceredNode itself allows for nested and recursive relationship\nstructures.",
+        "VEngine:domainOfField": [
+          {
+            "@id": "#connector",
+            "VRevdoc:indexLabel": ".$V.connector"
+          },
+          {
+            "@id": "#source",
+            "VRevdoc:indexLabel": ".$V.source"
+          },
+          {
+            "@id": "#target",
+            "VRevdoc:indexLabel": ".$V.target"
+          },
+          {
+            "@id": "#pairedSource",
+            "VRevdoc:indexLabel": ".$V.pairedSource"
+          },
+          {
+            "@id": "#pairedTarget",
+            "VRevdoc:indexLabel": ".$V.pairedTarget"
+          },
+          {
+            "@id": "#connectedSource",
+            "VRevdoc:indexLabel": ".$V.connectedSource"
+          },
+          {
+            "@id": "#connectedTarget",
+            "VRevdoc:indexLabel": ".$V.connectedTarget"
+          }
+        ]
       },
       "Resource": {
         "rdfs:label": [
           "window.Resource"
         ],
+        "@type": "VState:Type",
+        "VRevdoc:brief": "base resource interface",
+        "rdfs:subClassOf": "rdfs:Resource",
+        "rdfs:comment": "The class of resources which can appear as a subject in valospace\nresource and event graphs. The domain of all transient and generated\nfields which are available even for unsourced bodies.",
         "VEngine:hasMethod": [
           {
             "@id": "#Resource.activate",
@@ -6816,12 +6911,24 @@
             "VRevdoc:indexLabel": ".$V.getMedia()"
           },
           {
-            "@id": "#getSubResource",
-            "VRevdoc:indexLabel": ".$V.getSubResource()"
+            "@id": "#getFixedResource",
+            "VRevdoc:indexLabel": ".$V.getFixedResource()"
           },
           {
-            "@id": "#obtainSubResource",
-            "VRevdoc:indexLabel": ".$V.obtainSubResource()"
+            "@id": "#getFixedEntity",
+            "VRevdoc:indexLabel": ".$V.getFixedEntity()"
+          },
+          {
+            "@id": "#getFixedMedia",
+            "VRevdoc:indexLabel": ".$V.getFixedMedia()"
+          },
+          {
+            "@id": "#getFixedRelation",
+            "VRevdoc:indexLabel": ".$V.getFixedRelation()"
+          },
+          {
+            "@id": "#obtainFixedResource",
+            "VRevdoc:indexLabel": ".$V.obtainFixedResource()"
           },
           {
             "@id": "#instantiate",
@@ -6840,10 +6947,72 @@
             "VRevdoc:indexLabel": ".$V.prepareBvob()"
           }
         ],
-        "@type": "VState:Type",
-        "VRevdoc:brief": "base resource interface",
-        "rdfs:subClassOf": "rdfs:Resource",
-        "rdfs:comment": "The class of resources which can appear as a subject in valospace\nresource and event graphs. The domain of all transient and generated\nfields which are available even for unsourced bodies."
+        "VEngine:domainOfField": [
+          {
+            "@id": "#id",
+            "VRevdoc:indexLabel": ".$V.id"
+          },
+          {
+            "@id": "#rawId",
+            "VRevdoc:indexLabel": ".$V.rawId"
+          },
+          {
+            "@id": "#vrid",
+            "VRevdoc:indexLabel": ".$V.vrid"
+          },
+          {
+            "@id": "#typeName",
+            "VRevdoc:indexLabel": ".$V.typeName"
+          },
+          {
+            "@id": "#prototype",
+            "VRevdoc:indexLabel": ".$V.prototype"
+          },
+          {
+            "@id": "#derivations",
+            "VRevdoc:indexLabel": ".$V.derivations"
+          },
+          {
+            "@id": "#ownFields",
+            "VRevdoc:indexLabel": ".$V.ownFields"
+          },
+          {
+            "@id": "#inheritors",
+            "VRevdoc:indexLabel": ".$V.inheritors"
+          },
+          {
+            "@id": "#instances",
+            "VRevdoc:indexLabel": ".$V.instances"
+          },
+          {
+            "@id": "#ghostPrototype",
+            "VRevdoc:indexLabel": ".$V.ghostPrototype"
+          },
+          {
+            "@id": "#ghosts",
+            "VRevdoc:indexLabel": ".$V.ghosts"
+          },
+          {
+            "@id": "#materializedGhosts",
+            "VRevdoc:indexLabel": ".$V.materializedGhosts"
+          },
+          {
+            "@id": "#unnamedCouplings",
+            "VRevdoc:indexLabel": ".$V.unnamedCouplings"
+          },
+          {
+            "@id": "#ghostHost",
+            "VRevdoc:indexLabel": ".$V.ghostHost"
+          },
+          {
+            "@id": "#ghostOwner",
+            "VRevdoc:indexLabel": ".$V.ghostOwner"
+          },
+          {
+            "@id": "#ghostOwnlings",
+            "VRevdoc:indexLabel": ".$V.ghostOwnlings"
+          }
+        ]
       },
       "Resource.activate": {
         "rdfs:label": [
@@ -7093,30 +7262,69 @@
         "rdfs:comment": "Returns the first owned Media with the given *name*.",
         "VRevdoc:introduction": null
       },
-      "getSubResource": {
+      "getFixedResource": {
         "rdfs:label": [
-          "Resource.prototype.$V.getSubResource"
+          "Resource.prototype.$V.getFixedResource"
         ],
-        "VRevdoc:indexLabel": ".$V.getSubResource()",
+        "VRevdoc:indexLabel": ".$V.getFixedResource()",
         "rdfs:domain": "V:Resource",
         "@type": "VEngine:Method",
-        "rdfs:range": " getSubResource(subId, explicitChronicleURI)",
-        "rdfs:comment": "Returns a reference to the structured sub-resource reached from this\nresource via the given *subId* VPath.",
+        "rdfs:range": " getFixedResource(subPlot, explicitChronicleURI)",
+        "rdfs:comment": "Returns a reference to the fixed sub-resource reached from this\nresource via the given *subPlot* VPlot.",
         "VRevdoc:introduction": [
-          "This call does not create any resources. If the sub-resource does not\nexist the reference will be immaterial.\n\nSee $V.obtainSubResource."
+          "This call does not create any resources. If the resource does not\nexist the reference will be immaterial.\n\nAlternatively the *subPlot* can be a fixed field object which is used\nto determined the actual resource sub-id vplot. The keys of the object\nare divided to three groups:\n- Specials: keys 'id', 'typeName', 'name' and 'params' have semantics described below\n- Plain terms: all other string keys are sorted and treated as namespace 'V' terms\n- Symbol terms: all symbols must be valid namespace names, sorted\n  lexically as [namespace, term] pairs\n\nFirstly the resource sub-id starts with the value of 'id' key which if\ngiven must contain the verb type and an optional number of params.\nOtherwise if 'id' is not given the sub-id verb type is generated based\non 'typeName' if it is given. Otherwise the verb type is set to \"@_\".\nSecondly if 'name' is specified it is then prepended as the first param.\nThirdly all sorted plain terms are appended to the params.\nFourthly all sorted symbol terms are appended to the params.\nFinally all 'param' values are appended to the params.\n\nSee also $V.obtainFixedResource."
         ]
       },
-      "obtainSubResource": {
+      "getFixedEntity": {
         "rdfs:label": [
-          "Resource.prototype.$V.obtainSubResource"
+          "Resource.prototype.$V.getFixedEntity"
         ],
-        "VRevdoc:indexLabel": ".$V.obtainSubResource()",
+        "VRevdoc:indexLabel": ".$V.getFixedEntity()",
         "rdfs:domain": "V:Resource",
         "@type": "VEngine:Method",
-        "rdfs:range": " obtainSubResource(subId, extendInitialState, explicitChronicleURI)",
-        "rdfs:comment": "Returns an existing or a newly created structured sub-resource that is\nreached from this resource via the given *subId* VPath.",
+        "rdfs:range": " getFixedEntity(subPlot, explicitChronicleURI)",
+        "rdfs:comment": "Returns a reference to the fixed sub-entity reached from this\nresource via the given *subPlot* VPlot.",
         "VRevdoc:introduction": [
-          "Will create all resources traversed by the subId VPath that don't\nexist.\n\nProvides initial field and property values for the newly created\nresources so that they satisfy the semantic constraints of the subId\nVPath elements. This typically means that at least the resource type\nand its $V.owner and $V.name are initialized, but depending on VPath\ncontents other properties can also be initialized.\n\nCalls the optional callback argument *extendInitialState* for each new\nresource right before the resource is created. This call is passed\n*initialState* and *subIdIndex* as arguments.\nThe *subIdIndex* is an index to the *subId* sub-element for which a new\nresource is about to be created.\nThe *initialState* contains the initial fields and properties for the\nnew resource. These values are immutable and can only be inspected but\nnew fields and properties can be added. Once the callback returns the\n*initialState* will be passed to the V:Resource.new call.\n"
+          "This call does not create any resources. If the sub-resource does not\nexist the reference will be immaterial.\n\nAlternatively the *subPlot* can be a fixed field object. In this case\nthis call adds \"Entity\" as a typeName to it.\nSee $V.getFixedResource for more details."
+        ]
+      },
+      "getFixedMedia": {
+        "rdfs:label": [
+          "Resource.prototype.$V.getFixedMedia"
+        ],
+        "VRevdoc:indexLabel": ".$V.getFixedMedia()",
+        "rdfs:domain": "V:Resource",
+        "@type": "VEngine:Method",
+        "rdfs:range": " getFixedEntity(subPlot, explicitChronicleURI)",
+        "rdfs:comment": "Returns a reference to the fixed sub-media reached from this\nresource via the given *subPlot* VPlot.",
+        "VRevdoc:introduction": [
+          "This call does not create any resources. If the sub-resource does not\nexist the reference will be immaterial.\n\nAlternatively the *subPlot* can be a fixed field object. In this case\nthis call adds \"Media\" as a typeName to it.\nSee $V.getFixedResource for more details."
+        ]
+      },
+      "getFixedRelation": {
+        "rdfs:label": [
+          "Resource.prototype.$V.getFixedRelation"
+        ],
+        "VRevdoc:indexLabel": ".$V.getFixedRelation()",
+        "rdfs:domain": "V:Resource",
+        "@type": "VEngine:Method",
+        "rdfs:range": " getFixedEntity(subPlot, explicitChronicleURI)",
+        "rdfs:comment": "Returns a reference to the fixed sub-relation reached from this\nresource via the given *subPlot* VPlot.",
+        "VRevdoc:introduction": [
+          "This call does not create any resources. If the sub-resource does not\nexist the reference will be immaterial.\n\nAlternatively the *subPlot* can be a fixed field object. In this case\nthis call adds \"Relation\" as a typeName to it.\nSee $V.getFixedResource for more details."
+        ]
+      },
+      "obtainFixedResource": {
+        "rdfs:label": [
+          "Resource.prototype.$V.obtainFixedResource"
+        ],
+        "VRevdoc:indexLabel": ".$V.obtainFixedResource()",
+        "rdfs:domain": "V:Resource",
+        "@type": "VEngine:Method",
+        "rdfs:range": " obtainFixedResource(subPlot, extendInitialState, explicitChronicleURI)",
+        "rdfs:comment": "Returns an existing or a newly created fixed sub-resource that is\nreached from this resource via the given *subPlot* VPlot.",
+        "VRevdoc:introduction": [
+          "Will create all resources traversed by the subPlot VPlot that don't\nexist.\n\nProvides initial field and property values for the newly created\nresources so that they satisfy the semantic constraints of the *subPlot*\nVPlot elements. This typically means that at least the resource type\nand its $V.owner and $V.name are initialized, but depending on VPlot\ncontents other properties can also be initialized.\n\nCalls the optional callback argument *extendInitialState* for each new\nresource right before the resource is created.\nThis call is passed *initialState* and *subPlotIndex* as arguments.\nThe *subPlotIndex* is an index to the *subPlot* sub-element for which\na new resource is about to be created.\nThe *initialState* contains the initial fields and properties for the\nnew resource. These values are immutable and can only be inspected but\nnew fields and properties can be added. Once the callback returns the\n*initialState* will be passed to the V:Resource.new call.\n"
         ]
       },
       "instantiate": {
@@ -7194,6 +7402,13 @@
         "rdfs:label": [
           "window.Scope"
         ],
+        "@type": "VState:Type",
+        "rdfs:subClassOf": [
+          "V:Resource",
+          "V:Extant"
+        ],
+        "VRevdoc:brief": "property scope interface",
+        "rdfs:comment": "The class of valospace resources which can have scoped properties.",
         "VEngine:hasMethod": [
           {
             "@id": "#Scope.createIdentifer",
@@ -7210,13 +7425,12 @@
             "VRevdoc:indexLabel": ".$V.getHostGlobal()"
           }
         ],
-        "@type": "VState:Type",
-        "rdfs:subClassOf": [
-          "V:Resource",
-          "V:Extant"
-        ],
-        "VRevdoc:brief": "property scope interface",
-        "rdfs:comment": "The class of valospace resources which can have scoped properties."
+        "VEngine:domainOfField": [
+          {
+            "@id": "#properties",
+            "VRevdoc:indexLabel": ".$V.properties"
+          }
+        ]
       },
       "Scope.createIdentifer": {
         "rdfs:label": [
@@ -7353,7 +7567,45 @@
         "@type": "VState:Type",
         "rdfs:subClassOf": "V:Resource",
         "VRevdoc:brief": "sourcerable node interface",
-        "rdfs:comment": "The class of sourcerable valospace nodes which either are already\nsourcered or are unsourcered but have references to them from extant\nresources.\n\nThis interface is the domain of all transient and generated fields\nwhich are available even for unsourcered node resources."
+        "rdfs:comment": "The class of sourcerable valospace nodes which either are already\nsourcered or are unsourcered but have references to them from extant\nresources.\n\nThis interface is the domain of all transient and generated fields\nwhich are available even for unsourcered node resources.",
+        "VEngine:domainOfField": [
+          {
+            "@id": "#chronicleRoot",
+            "VRevdoc:indexLabel": ".$V.chronicleRoot"
+          },
+          {
+            "@id": "#chronicleURI",
+            "VRevdoc:indexLabel": ".$V.chronicleURI"
+          },
+          {
+            "@id": "#url",
+            "VRevdoc:indexLabel": ".$V.url"
+          },
+          {
+            "@id": "#partition",
+            "VRevdoc:indexLabel": ".$V.partition"
+          },
+          {
+            "@id": "#partitionURI",
+            "VRevdoc:indexLabel": ".$V.partitionURI"
+          },
+          {
+            "@id": "#outRelations",
+            "VRevdoc:indexLabel": ".$V.outRelations"
+          },
+          {
+            "@id": "#inRelations",
+            "VRevdoc:indexLabel": ".$V.inRelations"
+          },
+          {
+            "@id": "#outgoingRelations",
+            "VRevdoc:indexLabel": ".$V.outgoingRelations"
+          },
+          {
+            "@id": "#incomingRelations",
+            "VRevdoc:indexLabel": ".$V.incomingRelations"
+          }
+        ]
       },
       "chronicleRoot": {
         "@type": "VState:GeneratedField",
@@ -7465,7 +7717,69 @@
           "V:Scope",
           "V:SourcerableNode"
         ],
-        "rdfs:comment": "The class of sourcered (ie. extant) valospace nodes. A node can act as\na chronicle root resource, as the source and target of Relation nodes,\nas the folder of Media nodes and as the parent of Entity nodes.\nAs these aforementioned types are also the primary sourcered nodes\nthemselves they form the main structure of global valospace resource\ngraph."
+        "rdfs:comment": "The class of sourcered (ie. extant) valospace nodes. A node can act as\na chronicle root resource, as the source and target of Relation nodes,\nas the folder of Media nodes and as the parent of Entity nodes.\nAs these aforementioned types are also the primary sourcered nodes\nthemselves they form the main structure of global valospace resource\ngraph.",
+        "VEngine:domainOfField": [
+          {
+            "@id": "#container",
+            "VRevdoc:indexLabel": ".$V.container"
+          },
+          {
+            "@id": "#nodes",
+            "VRevdoc:indexLabel": ".$V.nodes"
+          },
+          {
+            "@id": "#authorityURI",
+            "VRevdoc:indexLabel": ".$V.authorityURI"
+          },
+          {
+            "@id": "#createdAt",
+            "VRevdoc:indexLabel": ".$V.createdAt"
+          },
+          {
+            "@id": "#modifiedAt",
+            "VRevdoc:indexLabel": ".$V.modifiedAt"
+          },
+          {
+            "@id": "#partitionAuthorityURI",
+            "VRevdoc:indexLabel": ".$V.partitionAuthorityURI"
+          },
+          {
+            "@id": "#entries",
+            "VRevdoc:indexLabel": ".$V.entries"
+          },
+          {
+            "@id": "#entities",
+            "VRevdoc:indexLabel": ".$V.entities"
+          },
+          {
+            "@id": "#medias",
+            "VRevdoc:indexLabel": ".$V.medias"
+          },
+          {
+            "@id": "#connectedRelations",
+            "VRevdoc:indexLabel": ".$V.connectedRelations"
+          },
+          {
+            "@id": "#pairedOutRelations",
+            "VRevdoc:indexLabel": ".$V.pairedOutRelations"
+          },
+          {
+            "@id": "#pairedInRelations",
+            "VRevdoc:indexLabel": ".$V.pairedInRelations"
+          },
+          {
+            "@id": "#connectedOutRelations",
+            "VRevdoc:indexLabel": ".$V.connectedOutRelations"
+          },
+          {
+            "@id": "#connectedInRelations",
+            "VRevdoc:indexLabel": ".$V.connectedInRelations"
+          },
+          {
+            "@id": "#relations",
+            "VRevdoc:indexLabel": ".$V.relations"
+          }
+        ]
       },
       "container": {
         "@type": "VState:EventLoggedField",
@@ -8209,7 +8523,45 @@
         "@type": "VState:Type",
         "VRevdoc:brief": "extant and present resource interface",
         "rdfs:subClassOf": "V:Resource",
-        "rdfs:comment": "The class of valospace resources that are present and extant in this\nview of the world. An extant resource has all of its fields and\nproperties available and it can thus be manipulated."
+        "rdfs:comment": "The class of valospace resources that are present and extant in this\nview of the world. An extant resource has all of its fields and\nproperties available and it can thus be manipulated.",
+        "VEngine:domainOfField": [
+          {
+            "@id": "#owner",
+            "VRevdoc:indexLabel": ".$V.owner"
+          },
+          {
+            "@id": "#name",
+            "VRevdoc:indexLabel": ".$V.name"
+          },
+          {
+            "@id": "#inheritancePrototype",
+            "VRevdoc:indexLabel": ".$V.inheritancePrototype"
+          },
+          {
+            "@id": "#instancePrototype",
+            "VRevdoc:indexLabel": ".$V.instancePrototype"
+          },
+          {
+            "@id": "#ownlings",
+            "VRevdoc:indexLabel": ".$V.ownlings"
+          },
+          {
+            "@id": "#unnamedOwnlings",
+            "VRevdoc:indexLabel": ".$V.unnamedOwnlings"
+          },
+          {
+            "@id": "#isFrozen",
+            "VRevdoc:indexLabel": ".$V.isFrozen"
+          },
+          {
+            "@id": "#nameAlias",
+            "VRevdoc:indexLabel": ".$V.nameAlias"
+          },
+          {
+            "@id": "#prototypeAlias",
+            "VRevdoc:indexLabel": ".$V.prototypeAlias"
+          }
+        ]
       },
       "owner": {
         "@type": "VState:EventLoggedField",
@@ -8360,7 +8712,33 @@
           "V:Extant",
           "rdf:Statement"
         ],
-        "rdfs:comment": "The dominant type class of resources representing properties with a\nlocally unique name inside an owning Scope namespace resource.\n\nAdditionally a ScopeProperty represents the core hypertwin building\nblock as an rdf:Statement reification of hypertwinned triples."
+        "rdfs:comment": "The dominant type class of resources representing properties with a\nlocally unique name inside an owning Scope namespace resource.\n\nAdditionally a ScopeProperty represents the core hypertwin building\nblock as an rdf:Statement reification of hypertwinned triples.",
+        "VEngine:domainOfField": [
+          {
+            "@id": "#scope",
+            "VRevdoc:indexLabel": ".$V.scope"
+          },
+          {
+            "@id": "#value",
+            "VRevdoc:indexLabel": ".$V.value"
+          },
+          {
+            "@id": "#twinspace",
+            "VRevdoc:indexLabel": ".$V.twinspace"
+          },
+          {
+            "@id": "#subject",
+            "VRevdoc:indexLabel": ".$V.subject"
+          },
+          {
+            "@id": "#predicate",
+            "VRevdoc:indexLabel": ".$V.predicate"
+          },
+          {
+            "@id": "#object",
+            "VRevdoc:indexLabel": ".$V.object"
+          }
+        ]
       },
       "scope": {
         "@type": "VState:EventLoggedField",
@@ -8511,8 +8889,8 @@
         "@id": "#Chronicle.acquireConnection",
         "@type": "@id"
       },
-      "V:Chronicle.sourcifyChronicle": {
-        "@id": "#Chronicle.sourcifyChronicle",
+      "V:Chronicle.sourcerChronicle": {
+        "@id": "#Chronicle.sourcerChronicle",
         "@type": "@id"
       },
       "V:immediateContent": {
@@ -8643,12 +9021,24 @@
         "@id": "#getMedia",
         "@type": "@id"
       },
-      "V:getSubResource": {
-        "@id": "#getSubResource",
+      "V:getFixedResource": {
+        "@id": "#getFixedResource",
         "@type": "@id"
       },
-      "V:obtainSubResource": {
-        "@id": "#obtainSubResource",
+      "V:getFixedEntity": {
+        "@id": "#getFixedEntity",
+        "@type": "@id"
+      },
+      "V:getFixedMedia": {
+        "@id": "#getFixedMedia",
+        "@type": "@id"
+      },
+      "V:getFixedRelation": {
+        "@id": "#getFixedRelation",
+        "@type": "@id"
+      },
+      "V:obtainFixedResource": {
+        "@id": "#obtainFixedResource",
         "@type": "@id"
       },
       "V:instantiate": {
@@ -9188,7 +9578,7 @@
                 ]
               },
               "package": "@valos/kernel-vault",
-              "version": "0.35.0-rc.33"
+              "version": "0.35.0-rc.34"
             },
             "technician": {
               "@id": "https://valospace.org/technician",
@@ -9284,7 +9674,7 @@
                 ]
               },
               "package": "@valos/kernel-vault",
-              "version": "0.35.0-rc.33"
+              "version": "0.35.0-rc.34"
             },
             "voyager": {
               "@id": "https://valospace.org/voyager",
@@ -9352,7 +9742,7 @@
                 ]
               },
               "package": "@valos/kernel-vault",
-              "version": "0.35.0-rc.33"
+              "version": "0.35.0-rc.34"
             }
           },
           "VDoc:map": {
@@ -10779,8 +11169,11 @@
             "setOwner",
             "getEntity",
             "getMedia",
-            "getSubResource",
-            "obtainSubResource",
+            "getFixedResource",
+            "getFixedEntity",
+            "getFixedMedia",
+            "getFixedRelation",
+            "obtainFixedResource",
             "instantiate",
             "duplicate",
             "prepareBlob",
@@ -11161,7 +11554,7 @@
             "Chronicle.tryConnection",
             "Chronicle.acquirePartitionConnection",
             "Chronicle.acquireConnection",
-            "Chronicle.sourcifyChronicle",
+            "Chronicle.sourcerChronicle",
             "Relatable.getRelationsOf",
             "Relatable.getIncomingRelationsOf",
             "Resource.activate",

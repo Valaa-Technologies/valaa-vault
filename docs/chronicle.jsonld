@@ -1,8 +1,8 @@
 [
   {
-    "@id": "https://valospace.org/log",
+    "@id": "https://valospace.org/chronicle",
     "@context": {
-      "@base": "https://valospace.org/log/0#",
+      "@base": "https://valospace.org/chronicle/0#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
       "xsd": "http://www.w3.org/2001/XMLSchema#",
@@ -53,57 +53,40 @@
         "@type": "@id"
       },
       "VEngine": "https://valospace.org/engine/0#",
-      "VLog": "https://valospace.org/log/0#",
-      "VPlot": "https://valospace.org/plot/0#",
+      "VChronicle": "https://valospace.org/chronicle/0#",
       "VState": "https://valospace.org/state/0#",
-      "VValk": "https://valospace.org/valk/0#",
+      "VLog": "https://valospace.org/log/0#",
       "V": "https://valospace.org/0#",
-      "aspects": {
-        "@reverse": "VLog:event"
-      },
-      "VLog:delta": {
-        "@id": "#delta",
+      "VChronicle:contributor": {
+        "@id": "#contributor",
         "@type": "@id"
       },
-      "VLog:command": {
-        "@id": "#command",
-        "@type": "@id"
-      },
-      "VLog:log": {
-        "@id": "#log",
-        "@type": "@id"
-      },
-      "VLog:author": {
-        "@id": "#author",
-        "@type": "@id"
-      },
-      "VLog:publicIdentity": {
-        "@id": "#publicIdentity",
+      "VChronicle:director": {
+        "@id": "#director",
         "@type": "@id"
       }
     },
     "VDoc:tags": [
       "WORKSPACE",
-      "FABRIC",
+      "VALOSPACE",
       "ONTOLOGY"
     ],
-    "dc:title": "@valos/log library workspace",
-    "VRevdoc:package": "@valos/log",
+    "dc:title": "@valos/chronicle library workspace",
+    "VRevdoc:package": "@valos/chronicle",
     "VRevdoc:version": "0.35.0-rc.35",
-    "VRevdoc:preferredPrefix": "VLog",
-    "VRevdoc:baseIRI": "https://valospace.org/log/0#",
+    "VRevdoc:preferredPrefix": "VChronicle",
+    "VRevdoc:baseIRI": "https://valospace.org/chronicle/0#",
     "VRevdoc:referencedModules": {
       "https://valospace.org/engine/0#": "@valos/engine/VEngine",
       "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
-      "https://valospace.org/plot/0#": "@valos/plot/VPlot",
       "https://valospace.org/state/0#": "@valos/state/VState",
-      "https://valospace.org/valk/0#": "@valos/valk/VValk",
+      "https://valospace.org/log/0#": "@valos/log/VLog",
       "https://valospace.org/0#": "@valos/space/V"
     },
     "VRevdoc:extenderModules": {},
     "respecConfig": {
       "specStatus": "unofficial",
-      "shortName": "log",
+      "shortName": "chronicle",
       "editors": [
         {
           "name": "Iridian Kiiskinen",
@@ -126,88 +109,82 @@
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "Specifies the ValOS event log JSON-LD format and the 'VLog' namespace"
+            "Specifies ValOS chronicle, its behaviors and the 'VChronicle' namespace"
           ]
         },
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "The event log is sequence of ",
-            {
-              "@type": "VDoc:Reference",
-              "VDoc:content": [
-                "event resources"
-              ],
-              "VDoc:ref": "VLog:Event"
-            },
-            ".\nAn event resource is a map of semantically different ",
-            {
-              "@type": "VDoc:Reference",
-              "VDoc:content": [
-                "aspects"
-              ],
-              "VDoc:ref": "VLog:EventAspect"
-            },
-            ". Each aspect represents some role or lifecycle phase of the event and\nis a map of attributes that relate to that role. Most notable one is\nthe ",
-            {
-              "@type": "VDoc:Reference",
-              "VDoc:content": [
-                "delta aspect"
-              ],
-              "VDoc:ref": "VLog:DeltaAspect"
-            },
-            " which defines the\nactual state change payload of the event."
+            "A chronicle is a document with a history. In ValOS a chronicle has two\nfacets. The valospace facet of a chronicle is the set of all *state resources*\nthat are recursively owned by the chronicle *root resource*. The fabric\nfacet of a chronicle is the *event log* ie. the linear sequence of\n*events* that describe the incremental changes to the chronicle state\nresources."
           ]
         },
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "The ",
-            {
-              "VDoc:em": true,
-              "VDoc:content": [
-                "VLog"
-              ]
-            },
-            " namespace together with ",
+            "The valospace facet is specified by the ",
             {
               "@type": "VDoc:Reference",
               "VDoc:content": [
-                "VState:"
+                [
+                  "primary ",
+                  {
+                    "VDoc:em": true,
+                    "VDoc:content": [
+                      "V"
+                    ]
+                  }
+                ]
+              ],
+              "VDoc:ref": "V:"
+            },
+            " namespace. The fabric facet is specified by the ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "VState"
+                  ]
+                }
               ],
               "VDoc:ref": "VState:"
             },
-            " ",
+            " and the ",
             {
               "@type": "VDoc:Reference",
               "VDoc:content": [
-                "VPlot:"
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "VLog"
+                  ]
+                }
               ],
-              "VDoc:ref": "VPlot:"
+              "VDoc:ref": "VLog:"
             },
-            " and ",
+            " namespaces."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "This document specifies the ",
             {
               "@type": "VDoc:Reference",
               "VDoc:content": [
-                "VValk:"
+                "VChronicle"
               ],
-              "VDoc:ref": "VValk:"
+              "VDoc:ref": "VChronicle:"
             },
-            " namespaces forms the\ninfrastructural foundation or the ",
+            " namespace for defining *chronicle behaviors* ie. constraints to the\nchanges that can be made to a chronicle. These behaviors are defined\nvia the chronicle root resource properties that are named using ",
             {
               "VDoc:em": true,
               "VDoc:content": [
-                "fabric"
+                "VChronicle"
               ]
             },
-            " of the valospace.",
-            {
-              "VDoc:em": true,
-              "VDoc:content": [
-                "VLog"
-              ]
-            },
-            " provides the temporal dimension and thus makes change\nand reactions possible."
+            " namespace terms."
           ]
         }
       ]
@@ -226,11 +203,11 @@
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
-                    "@valos/log"
+                    "@valos/chronicle"
                   ]
                 }
               ],
-              "VDoc:ref": "@valos/log"
+              "VDoc:ref": "@valos/chronicle"
             },
             "\n(of domain ",
             {
@@ -245,7 +222,7 @@
               ],
               "VDoc:ref": "@valos/kernel"
             },
-            ") which has the description:\n`Specifies the ValOS event log JSON-LD format and the 'VLog' namespace`."
+            ") which has the description:\n`Specifies ValOS chronicle, its behaviors and the 'VChronicle' namespace`."
           ]
         }
       ]
@@ -305,49 +282,43 @@
         }
       ]
     },
-    "section_fabric": {
-      "@id": "section_fabric",
+    "section_valospace": {
+      "@id": "section_valospace",
       "@type": "VDoc:Chapter",
       "dc:title": [
         "The ",
         {
           "VDoc:em": true,
           "VDoc:content": [
-            "VLog"
+            "VChronicle"
           ]
         },
-        " fabric namespace of the library ontology of ",
+        " valospace namespace of the library ontology of ",
         {
           "@type": "VRevdoc:Package",
           "VDoc:content": [
             {
               "VDoc:em": true,
               "VDoc:content": [
-                "@valos/log"
+                "@valos/chronicle"
               ]
             }
           ],
-          "VDoc:ref": "@valos/log"
+          "VDoc:ref": "@valos/chronicle"
         }
       ],
       "VDoc:content": [
         {
-          "@id": "section_fabric_abstract"
+          "@id": "section_valospace_abstract"
         },
         {
           "@id": "section_prefixes"
         },
         {
-          "@id": "section_classes"
+          "@id": "section_types"
         },
         {
-          "@id": "section_properties"
-        },
-        {
-          "@id": "section_methods"
-        },
-        {
-          "@id": "section_globals"
+          "@id": "section_fields"
         },
         {
           "@id": "section_vocabulary_other"
@@ -361,238 +332,53 @@
       "xsd": "http://www.w3.org/2001/XMLSchema#",
       "owl": "http://www.w3.org/2002/07/owl#",
       "dc": "http://purl.org/dc/elements/1.1/",
-      "VLog": "https://valospace.org/log/0#",
+      "VChronicle": "https://valospace.org/chronicle/0#",
       "VKernel": "https://valospace.org/kernel/0#",
-      "VPlot": "https://valospace.org/plot/0#",
       "VState": "https://valospace.org/state/0#",
-      "VValk": "https://valospace.org/valk/0#",
+      "VLog": "https://valospace.org/log/0#",
       "V": "https://valospace.org/0#"
     },
     "vocabulary": {
       "@id": "vocabulary",
-      "Event": {
-        "@type": "VKernel:Class",
-        "VRevdoc:brief": "chronicle event",
-        "rdfs:comment": "The class of all chronicle event log entries"
-      },
-      "EventAspects": {
-        "@type": "VKernel:Class",
-        "VRevdoc:brief": "all the aspects of an event",
-        "rdfs:comment": "The class of resources which contain all different lifecycle aspects\nof some chronicle event as it advances through the proclamation\nlifecycle.",
-        "VEngine:domainOfProperty": [
-          {
-            "@id": "#version",
-            "VRevdoc:indexLabel": "VLog:version"
-          },
-          {
-            "@id": "#delta",
-            "VRevdoc:indexLabel": "VLog:delta"
-          },
-          {
-            "@id": "#command",
-            "VRevdoc:indexLabel": "VLog:command"
-          },
-          {
-            "@id": "#log",
-            "VRevdoc:indexLabel": "VLog:log"
-          },
-          {
-            "@id": "#author",
-            "VRevdoc:indexLabel": "VLog:author"
-          }
-        ]
-      },
-      "EventAspect": {
-        "@type": "VKernel:Class",
-        "VRevdoc:brief": "event lifecycle aspect",
-        "rdfs:comment": "The class of resources which contain a set of attributes of a single\nlifecycle aspect of some chronicle event as it progresses through the\nproclamation lifecycle."
-      },
-      "version": {
+      "requireAuthoredEvents": {
         "@type": "VKernel:Property",
-        "rdfs:domain": "VLog:EventAspects",
-        "rdfs:range": "xsd:string",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The aspect version string. The version of this specification is \"0.3\""
+        "rdfs:domain": "V:Resource",
+        "rdfs:range": "xsd:boolean",
+        "rdfs:comment": "When set to true all the chronicle events must be authored with\nan AuthorAspect."
       },
-      "DeltaAspect": {
-        "@type": "VKernel:Class",
-        "VRevdoc:brief": "state delta aspect",
-        "rdfs:subClassOf": "VLog:EventAspect",
-        "rdfs:comment": "The class of resources which contain the state delta payload of some\nchronicle event."
-      },
-      "delta": {
+      "contributor": {
         "@type": "VKernel:Property",
-        "rdfs:domain": "VLog:EventAspects",
-        "rdfs:range": "VLog:DeltaAspect",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The state delta aspect of the event."
+        "rdfs:domain": "V:Resource",
+        "rdfs:range": "V:Resource",
+        "rdfs:comment": "The collection of identities which have registered their signature\npublic keys to the chronicle event log."
       },
-      "CommandAspect": {
-        "@type": "VKernel:Class",
-        "VRevdoc:brief": "command fabrication aspect",
-        "rdfs:subClassOf": "VLog:EventAspect",
-        "rdfs:comment": "The class of resources which contain attributes added by a gateway to\nsome event during the fabrication of the event command."
-      },
-      "command": {
+      "director": {
         "@type": "VKernel:Property",
-        "rdfs:domain": "VLog:EventAspects",
-        "rdfs:range": "VLog:CommandAspect",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The command fabrication aspect of the event."
-      },
-      "LogAspect": {
-        "@type": "VKernel:Class",
-        "rdfs:subClassOf": "VLog:EventAspect",
-        "VRevdoc:brief": "event log aspect",
-        "rdfs:comment": "The class of resources which contain attributes of an event which\nrelate to its position in the chronicle event log. The contents of this\naspect are ultimately finally provided by the authority but is\ntypically provisionally provided by the gateway.",
-        "VEngine:domainOfProperty": [
-          {
-            "@id": "#index",
-            "VRevdoc:indexLabel": "VLog:index"
-          },
-          {
-            "@id": "#chainHash",
-            "VRevdoc:indexLabel": "VLog:chainHash"
-          }
-        ]
-      },
-      "log": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "VLog:EventAspects",
-        "rdfs:range": "VLog:LogAspect",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The authority log aspect of the event."
-      },
-      "index": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "VLog:LogAspect",
-        "rdfs:range": "xsd:integer",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The 0-based index of the event in the event log."
-      },
-      "chainHash": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "VLog:LogAspect",
-        "rdfs:range": "xsd:string",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The base64url-encoded SHA-512/384 hash of the combination of the\npreceding event chainHash with the current event signature or delta.\nThe exact format of the combination is pending. The event contents is\ndefined to be the VLog:signature if the event is signed, otherwise it\nis the vplot serialization of the VLog:DeltaAspect of the event."
-      },
-      "AuthorAspect": {
-        "@type": "VKernel:Class",
-        "VRevdoc:brief": "command author aspect",
-        "rdfs:subClassOf": "VLog:EventAspect",
-        "rdfs:comment": "The class of resources which contain the authoring attributes and the\ncommand signature of a single chronicle event.",
-        "VEngine:domainOfProperty": [
-          {
-            "@id": "#antecedent",
-            "VRevdoc:indexLabel": "VLog:antecedent"
-          },
-          {
-            "@id": "#publicIdentity",
-            "VRevdoc:indexLabel": "VLog:publicIdentity"
-          },
-          {
-            "@id": "#signature",
-            "VRevdoc:indexLabel": "VLog:signature"
-          }
-        ]
-      },
-      "author": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "VLog:EventAspects",
-        "rdfs:range": "VLog:AuthorAspect",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The command author aspect of the event."
-      },
-      "antecedent": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "VLog:AuthorAspect",
-        "rdfs:range": "xsd:integer",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The index of an antecedent event the payload of which this author\nsection confirms. This usually is the index of the directly preceding\nevent but if the chronicle allows for reordering and eventual\nconsistency this can refer to further in the log."
-      },
-      "publicIdentity": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "VLog:AuthorAspect",
-        "rdfs:range": "V:Entity",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The public identity resource of the contributor of this event."
-      },
-      "signature": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "VLog:AuthorAspect",
-        "rdfs:range": "xsd:string",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The base64url-encoded 512-bit Ed25519 signature (as provided by\ntweetnacl.sign.detached) of the event payload. The exact format of the\npayload is pending precise specification. This signature is created\nusing the secretKey associated with the chronicle publicKey of the\nauthoring publicIdentity."
+        "rdfs:subPropertyOf": "VChronicle:contributor",
+        "rdfs:domain": "V:Resource",
+        "rdfs:range": "V:Resource",
+        "rdfs:comment": "The collection of identities which (and only which) can make changes\nto the chronicle behaviors (eg. permissions)."
       }
     },
     "context": {
       "@id": "context",
-      "restriction": {
-        "@reverse": "owl:onProperty"
-      },
-      "aspects": {
-        "@reverse": "VLog:event"
-      },
-      "@base": "https://valospace.org/log/0#",
-      "VLog:delta": {
-        "@id": "#delta",
+      "@base": "https://valospace.org/chronicle/0#",
+      "VChronicle:contributor": {
+        "@id": "#contributor",
         "@type": "@id"
       },
-      "VLog:command": {
-        "@id": "#command",
-        "@type": "@id"
-      },
-      "VLog:log": {
-        "@id": "#log",
-        "@type": "@id"
-      },
-      "VLog:author": {
-        "@id": "#author",
-        "@type": "@id"
-      },
-      "VLog:publicIdentity": {
-        "@id": "#publicIdentity",
+      "VChronicle:director": {
+        "@id": "#director",
         "@type": "@id"
       }
     },
-    "section_fabric_abstract": {
-      "@id": "section_fabric_abstract",
+    "section_valospace_abstract": {
+      "@id": "section_valospace_abstract",
       "VDoc:content": [
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "The fabric storage and transport layer vocabulary that both specifies\nthe ValOS event log and aspects structure and is used to express the\ncontent and behaviors of individual chronicles."
+            "The valospace vocabulary for specifying behaviors on specific chronicles"
           ]
         }
       ]
@@ -604,7 +390,7 @@
         {
           "VDoc:em": true,
           "VDoc:content": [
-            "@valos/log"
+            "@valos/chronicle"
           ]
         },
         " IRI prefixes"
@@ -632,30 +418,30 @@
         }
       ]
     },
-    "section_classes": {
-      "@id": "section_classes",
+    "section_types": {
+      "@id": "section_types",
       "@type": "VDoc:Chapter",
       "dc:title": [
         {
           "VDoc:em": true,
           "VDoc:content": [
-            "VLog"
+            "VChronicle"
           ]
         },
         " ",
         {
           "@type": "VDoc:Reference",
           "VDoc:content": [
-            "fabric classes"
+            "valospace types"
           ],
-          "VDoc:ref": "VKernel:Class"
+          "VDoc:ref": "VState:Type"
         }
       ],
       "VDoc:content": [
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "This section describes fabric classes introduced by the 'VLog' namespace"
+            "This section describes valospace types introduced by the 'VChronicle' namespace"
           ]
         },
         {
@@ -739,6 +525,20 @@
               {
                 "@type": "VDoc:Header",
                 "VDoc:content": [
+                  "VRevdoc:brief"
+                ],
+                "VDoc:cell": {
+                  "VDoc:strong": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:selectField": "VRevdoc:brief"
+                    }
+                  ]
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
                   "rdfs:subClassOf"
                 ],
                 "VDoc:cell": {
@@ -769,7 +569,35 @@
                     }
                   ]
                 },
-                "VDoc:wide": false
+                "VDoc:wide": true
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "instance fields"
+                  ],
+                  "VDoc:ref": "VState:Field"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:domainOfField"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
               },
               {
                 "@type": "VDoc:Header",
@@ -832,7 +660,7 @@
                 "VDoc:content": {
                   "@type": "VDoc:Reference",
                   "VDoc:content": [
-                    "class properties"
+                    "type object properties"
                   ],
                   "VDoc:ref": "VEngine:ObjectProperty"
                 },
@@ -860,7 +688,7 @@
                 "VDoc:content": {
                   "@type": "VDoc:Reference",
                   "VDoc:content": [
-                    "class methods"
+                    "type object methods"
                   ],
                   "VDoc:ref": "VEngine:ObjectMethod"
                 },
@@ -904,33 +732,25 @@
               }
             ]
           },
-          "VDoc:entries": [
-            "Event",
-            "EventAspects",
-            "EventAspect",
-            "DeltaAspect",
-            "CommandAspect",
-            "LogAspect",
-            "AuthorAspect"
-          ]
+          "VDoc:entries": []
         }
       ]
     },
-    "section_properties": {
-      "@id": "section_properties",
+    "section_fields": {
+      "@id": "section_fields",
       "@type": "VDoc:Chapter",
       "dc:title": [
         {
           "VDoc:em": true,
           "VDoc:content": [
-            "VLog"
+            "VChronicle"
           ]
         },
         " ",
         {
           "@type": "VDoc:Reference",
           "VDoc:content": [
-            "fabric properties"
+            "valospace fields"
           ],
           "VDoc:ref": "VKernel:Property"
         }
@@ -939,7 +759,7 @@
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "This section describes fabric properties introduced by the 'VLog' namespace"
+            "This section describes valospace fields introduced by the 'VChronicle' namespace"
           ]
         },
         {
@@ -1047,345 +867,6 @@
                   "VDoc:words": {
                     "VDoc:selectField": "rdfs:range"
                   },
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      "VDoc:selectValue"
-                    ],
-                    "VDoc:ref": "VDoc:selectValue"
-                  }
-                }
-              },
-              {
-                "VDoc:cell": "rdfs:comment",
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "@type": "VDoc:Reference",
-                      "VDoc:content": [
-                        "description"
-                      ],
-                      "VDoc:ref": "rdfs:comment"
-                    }
-                  ]
-                },
-                "VDoc:wide": true
-              },
-              {
-                "VDoc:cell": "VRevdoc:introduction",
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "@type": "VDoc:Reference",
-                      "VDoc:content": [
-                        "introduction"
-                      ],
-                      "VDoc:ref": "VRevdoc:introduction"
-                    }
-                  ]
-                },
-                "VDoc:wide": true,
-                "VDoc:collapsed": true,
-                "VDoc:elidable": true
-              }
-            ]
-          },
-          "VDoc:entries": [
-            "version",
-            "delta",
-            "command",
-            "log",
-            "index",
-            "chainHash",
-            "author",
-            "antecedent",
-            "publicIdentity",
-            "signature"
-          ]
-        }
-      ]
-    },
-    "section_methods": {
-      "@id": "section_methods",
-      "@type": "VDoc:Chapter",
-      "dc:title": [
-        {
-          "VDoc:em": true,
-          "VDoc:content": [
-            "VLog"
-          ]
-        },
-        " ",
-        {
-          "@type": "VDoc:Reference",
-          "VDoc:content": [
-            "fabric methods"
-          ],
-          "VDoc:ref": "VEngine:Method"
-        }
-      ],
-      "VDoc:content": [
-        {
-          "@type": "VDoc:Paragraph",
-          "VDoc:content": [
-            "This section describes fabric methods introduced by the 'VLog' namespace"
-          ]
-        },
-        {
-          "VDoc:lookup": "vocabulary",
-          "@type": "VDoc:Table",
-          "VDoc:columns": {
-            "VDoc:entries": [
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": null,
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:resourceId": "VDoc:selectKey",
-                  "VDoc:heading": true,
-                  "VDoc:content": [
-                    {
-                      "VDoc:words": [
-                        {
-                          "VDoc:strong": true,
-                          "VDoc:content": [
-                            {
-                              "VDoc:em": true,
-                              "VDoc:content": [
-                                {
-                                  "@type": "VDoc:Reference",
-                                  "VDoc:content": [
-                                    [
-                                      "#",
-                                      "VDoc:selectKey"
-                                    ]
-                                  ],
-                                  "VDoc:ref": [
-                                    "#",
-                                    "VDoc:selectKey"
-                                  ]
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "VDoc:words": {
-                            "VDoc:selectField": "rdfs:label"
-                          },
-                          "VDoc:elidable": true
-                        }
-                      ]
-                    }
-                  ]
-                }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "VDoc:strong": true,
-                      "VDoc:content": [
-                        "DEPRECATED"
-                      ]
-                    },
-                    " in favor of:"
-                  ]
-                },
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:entries": {
-                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
-                  },
-                  "VDoc:elidable": true,
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      "VDoc:selectValue"
-                    ],
-                    "VDoc:ref": "VDoc:selectValue"
-                  }
-                }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": [
-                  "rdfs:domain"
-                ],
-                "VDoc:cell": {
-                  "VDoc:words": {
-                    "VDoc:selectField": "rdfs:domain"
-                  },
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      "VDoc:selectValue"
-                    ],
-                    "VDoc:ref": "VDoc:selectValue"
-                  }
-                }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": [
-                  "rdfs:range"
-                ],
-                "VDoc:cell": {
-                  "VDoc:words": {
-                    "VDoc:selectField": "rdfs:range"
-                  },
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      "VDoc:selectValue"
-                    ],
-                    "VDoc:ref": "VDoc:selectValue"
-                  }
-                }
-              },
-              {
-                "VDoc:cell": "rdfs:comment",
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "@type": "VDoc:Reference",
-                      "VDoc:content": [
-                        "description"
-                      ],
-                      "VDoc:ref": "rdfs:comment"
-                    }
-                  ]
-                },
-                "VDoc:wide": true
-              },
-              {
-                "VDoc:cell": "VRevdoc:introduction",
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "@type": "VDoc:Reference",
-                      "VDoc:content": [
-                        "introduction"
-                      ],
-                      "VDoc:ref": "VRevdoc:introduction"
-                    }
-                  ]
-                },
-                "VDoc:wide": true,
-                "VDoc:collapsed": true,
-                "VDoc:elidable": true
-              }
-            ]
-          },
-          "VDoc:entries": []
-        }
-      ]
-    },
-    "section_globals": {
-      "@id": "section_globals",
-      "@type": "VDoc:Chapter",
-      "dc:title": [
-        {
-          "VDoc:em": true,
-          "VDoc:content": [
-            "VLog"
-          ]
-        },
-        " ",
-        {
-          "@type": "VDoc:Reference",
-          "VDoc:content": [
-            "fabric globals"
-          ],
-          "VDoc:ref": "VEngine:Global"
-        }
-      ],
-      "VDoc:content": [
-        {
-          "@type": "VDoc:Paragraph",
-          "VDoc:content": [
-            "This section describes fabric global objects introduced by the 'VLog' namespace"
-          ]
-        },
-        {
-          "VDoc:lookup": "vocabulary",
-          "@type": "VDoc:Table",
-          "VDoc:columns": {
-            "VDoc:entries": [
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": null,
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:resourceId": "VDoc:selectKey",
-                  "VDoc:heading": true,
-                  "VDoc:content": [
-                    {
-                      "VDoc:words": [
-                        {
-                          "VDoc:strong": true,
-                          "VDoc:content": [
-                            {
-                              "VDoc:em": true,
-                              "VDoc:content": [
-                                {
-                                  "@type": "VDoc:Reference",
-                                  "VDoc:content": [
-                                    [
-                                      "#",
-                                      "VDoc:selectKey"
-                                    ]
-                                  ],
-                                  "VDoc:ref": [
-                                    "#",
-                                    "VDoc:selectKey"
-                                  ]
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "VDoc:words": {
-                            "VDoc:selectField": "rdfs:label"
-                          },
-                          "VDoc:elidable": true
-                        }
-                      ]
-                    }
-                  ]
-                }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "VDoc:strong": true,
-                      "VDoc:content": [
-                        "DEPRECATED"
-                      ]
-                    },
-                    " in favor of:"
-                  ]
-                },
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:entries": {
-                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
-                  },
-                  "VDoc:elidable": true,
                   "VDoc:map": {
                     "@type": "VDoc:Reference",
                     "VDoc:content": [
@@ -1412,11 +893,36 @@
                 }
               },
               {
-                "VDoc:cell": "comment",
                 "@type": "VDoc:Header",
-                "VDoc:content": [
-                  "Comment"
-                ]
+                "VDoc:content": "rdfs:subPropertyOf",
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:subPropertyOf"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": "VState:coupledToField",
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VState:coupledToField"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
               },
               {
                 "VDoc:cell": "rdfs:comment",
@@ -1434,118 +940,6 @@
                   ]
                 },
                 "VDoc:wide": true
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "@type": "VDoc:Reference",
-                  "VDoc:content": [
-                    "prototype properties"
-                  ],
-                  "VDoc:ref": "VEngine:Property"
-                },
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:words": {
-                    "VDoc:selectField": "VEngine:domainOfProperty"
-                  },
-                  "VDoc:elidable": true,
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      {
-                        "VDoc:selectField": "VRevdoc:indexLabel"
-                      }
-                    ],
-                    "VDoc:ref": {
-                      "VDoc:selectField": "@id"
-                    }
-                  }
-                }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "@type": "VDoc:Reference",
-                  "VDoc:content": [
-                    "prototype methods"
-                  ],
-                  "VDoc:ref": "VEngine:Method"
-                },
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:words": {
-                    "VDoc:selectField": "VEngine:domainOfMethod"
-                  },
-                  "VDoc:elidable": true,
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      {
-                        "VDoc:selectField": "VRevdoc:indexLabel"
-                      }
-                    ],
-                    "VDoc:ref": {
-                      "VDoc:selectField": "@id"
-                    }
-                  }
-                }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "@type": "VDoc:Reference",
-                  "VDoc:content": [
-                    "object properties"
-                  ],
-                  "VDoc:ref": "VEngine:ObjectProperty"
-                },
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:words": {
-                    "VDoc:selectField": "VEngine:hasProperty"
-                  },
-                  "VDoc:elidable": true,
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      {
-                        "VDoc:selectField": "VRevdoc:indexLabel"
-                      }
-                    ],
-                    "VDoc:ref": {
-                      "VDoc:selectField": "@id"
-                    }
-                  }
-                }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "@type": "VDoc:Reference",
-                  "VDoc:content": [
-                    "object methods"
-                  ],
-                  "VDoc:ref": "VEngine:ObjectMethod"
-                },
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:words": {
-                    "VDoc:selectField": "VEngine:hasMethod"
-                  },
-                  "VDoc:elidable": true,
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      {
-                        "VDoc:selectField": "VRevdoc:indexLabel"
-                      }
-                    ],
-                    "VDoc:ref": {
-                      "VDoc:selectField": "@id"
-                    }
-                  }
-                }
               },
               {
                 "VDoc:cell": "VRevdoc:introduction",
@@ -1568,7 +962,11 @@
               }
             ]
           },
-          "VDoc:entries": []
+          "VDoc:entries": [
+            "requireAuthoredEvents",
+            "contributor",
+            "director"
+          ]
         }
       ]
     },
@@ -1579,7 +977,7 @@
         {
           "VDoc:em": true,
           "VDoc:content": [
-            "VLog"
+            "VChronicle"
           ]
         },
         " remaining vocabulary terms"
@@ -1751,7 +1149,7 @@
         "@id": "introduction"
       },
       {
-        "@id": "section_fabric"
+        "@id": "section_valospace"
       }
     ]
   }

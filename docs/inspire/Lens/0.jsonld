@@ -3641,7 +3641,7 @@
         ],
         "rdfs:domain": "Lens:UIContext",
         "rdfs:range": "xsd:string",
-        "rdfs:comment": "Slot which contains the frame vpath step prefix from the current\ninnermost enclosing scope frame.",
+        "rdfs:comment": "Slot which contains the frame vplot step prefix from the current\ninnermost enclosing scope frame.",
         "VRevdoc:introduction": []
       },
       "frameOwner": {

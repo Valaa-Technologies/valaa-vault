@@ -56,6 +56,7 @@
       "VRemovedFrom": "https://valospace.org/removed-from/0#",
       "V": "https://valospace.org/0#",
       "VState": "https://valospace.org/state/0#",
+      "VScript": "https://valospace.org/script/0#",
       "VLog": "https://valospace.org/log/0#",
       "VPlot": "https://valospace.org/plot/0#",
       "VRemovedFrom:nodes": {
@@ -131,7 +132,7 @@
       "TECHNICIAN"
     ],
     "VRevdoc:package": "@valos/kernel",
-    "VRevdoc:version": "0.35.0-rc.34",
+    "VRevdoc:version": "0.35.0-rc.35",
     "VRevdoc:preferredPrefix": "VRemovedFrom",
     "VRevdoc:baseIRI": "https://valospace.org/removed-from/0#",
     "VRevdoc:referencedModules": {
@@ -140,7 +141,7 @@
     },
     "VRevdoc:extenderModules": {},
     "respecConfig": {
-      "subtitle": "0.35.0-rc.34",
+      "subtitle": "0.35.0-rc.35",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -292,6 +293,7 @@
       "V": "https://valospace.org/0#",
       "VKernel": "https://valospace.org/kernel/0#",
       "VState": "https://valospace.org/state/0#",
+      "VScript": "https://valospace.org/script/0#",
       "VEngine": "https://valospace.org/engine/0#",
       "VLog": "https://valospace.org/log/0#",
       "VPlot": "https://valospace.org/plot/0#",

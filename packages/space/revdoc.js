@@ -40,7 +40,17 @@ module.exports = {
   },
   "chapter#abstract>0": {
     "#0": [
-      description,
+description,
+null,
+`Valospace is the global collection of all valos resources and their
+identifiers that can be programmatically manipulated using `,
+ref(em("valoscript"), "VScript:"), `. This document specifies the
+three primary resource types:`, ref(em("Entity"), "V:Entity"), ", ",
+ref(em("Relation"), "V:Relation"), ", ", ref(em("Media"), "V:Media"),
+` and their fields.`,
+null,
+`See `, ref(em("VState"), "VState:"), ` for the specification for the
+underlying data model.`,
     ],
   },
   "chapter#sotd>1": {

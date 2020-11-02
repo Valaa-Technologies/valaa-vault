@@ -18,7 +18,14 @@
   <div class="vdoc type-vdoc-paragraph">Specifies the ValOS event log JSON-LD format and the &#x27;VLog&#x27; namespace
   </div>
 </p></div><div><p>
-  <div class="vdoc type-vdoc-paragraph"><em>VLog</em> together with <a href="https://valospace.org/state/0#" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+  <div class="vdoc type-vdoc-paragraph">The event log is sequence of <a href="https://valospace.org/log/0#Event" class="vdoc type-vdoc-reference">event resources</a>.
+An event resource is a map of semantically different <a href="https://valospace.org/log/0#EventAspect" class="vdoc type-vdoc-reference">aspects</a>. Each aspect represents some role or lifecycle phase of the event and
+is a map of attributes that relate to that role. Most notable one is
+the <a href="https://valospace.org/log/0#DeltaAspect" class="vdoc type-vdoc-reference">delta aspect</a> which defines the
+actual state change payload of the event.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">The <em>VLog</em> namespace together with <a href="https://valospace.org/state/0#" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">VState:</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
@@ -39,7 +46,9 @@ extending them with new step semantics
         The vocabulary for defining ValOS computations and for
 adding defining new semantics to it.
     </span>
-</span></a> forms the infrastructural foundation ie. the <em>fabric</em> of the valospace.<em>VLog</em> provides the temporal dimension and so enables change and reactions.
+</span></a> namespaces forms the
+infrastructural foundation or the <em>fabric</em> of the valospace.<em>VLog</em> provides the temporal dimension and thus makes change
+and reactions possible.
   </div>
 </p></div>
   </section>
@@ -69,8 +78,9 @@ instructions on how to write revdoc source documents.
   <section id="section_fabric" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#section_fabric">§ </a>The <em>VLog</em> fabric namespace of the library ontology of <a href="https://valospace.org/log" class="vdoc type-vrevdoc-package"><em>@valos/log</em></a></h3>
 <div><p>
-  <div class="vdoc type-vdoc-paragraph">The vocabulary for defining the ValOS chronicle event log structure
-and for adding content and behaviors to it.
+  <div class="vdoc type-vdoc-paragraph">The fabric storage and transport layer vocabulary that both specifies
+the ValOS event log and aspects structure and is used to express the
+content and behaviors of individual chronicles.
   </div>
 </p></div>
   <section id="section_prefixes" class="vdoc type-vdoc-chapter">
@@ -114,6 +124,9 @@ and for adding content and behaviors to it.
         <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VValk</span>
 </td><td><span class="vdoc type-vdoc-node">https://valospace.org/valk/0#</span>
 </td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">V</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/0#</span>
+</td></tr>
       </tbody>
     </table>
 
@@ -144,21 +157,57 @@ ontologies.
         <tr class="vdoc vdoc-nth-child-2n"><td></td><td><span class="vdoc type-vdoc-node">The class of all chronicle event log entries</span>
 </td></tr>
         <tr id="EventAspects" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#EventAspects" class="vdoc type-vdoc-reference">#EventAspects</a></em></strong> </h3></td></tr>
-        <tr><td></td><td><span class="vdoc type-vdoc-node">The class of resources which provide context-free container of all
-different lifetime aspects of a single event as it travels through the
-ValOS sourcering streams. These properties are grouped to different
-contextual and/or functional aspects.</span>
+        <tr><td></td><td><span class="vdoc type-vdoc-node">The class of resources which contain all different lifecycle aspects
+of some chronicle event as it advances through the proclamation
+lifecycle.</span>
 </td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><a href="https://valospace.org/engine/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">instance properties</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all valosheath type prototype properties.
+    </span>
+</span></a></span>
+</td><td colspan=1> <a href="#version" class="vdoc type-vdoc-reference">VLog:version</a> <a href="#delta" class="vdoc type-vdoc-reference">VLog:delta</a> <a href="#command" class="vdoc type-vdoc-reference">VLog:command</a> <a href="#log" class="vdoc type-vdoc-reference">VLog:log</a> <a href="#author" class="vdoc type-vdoc-reference">VLog:author</a></td></tr>
         <tr id="EventAspect" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#EventAspect" class="vdoc type-vdoc-reference">#EventAspect</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td></td><td><span class="vdoc type-vdoc-node">The class of resources which contain contextual attributes of a
-particular phase of the event message lifetime.</span>
+        <tr class="vdoc vdoc-nth-child-2n"><td></td><td><span class="vdoc type-vdoc-node">The class of resources which contain a set of attributes of a single
+lifecycle aspect of some chronicle event as it progresses through the
+proclamation lifecycle.</span>
 </td></tr>
-        <tr id="CommandAspect" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#CommandAspect" class="vdoc type-vdoc-reference">#CommandAspect</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/log/0#EventAspect" class="vdoc type-vdoc-reference">VLog:EventAspect</a></td><td><span class="vdoc type-vdoc-node">The class of gateway-provided command properties of an event.</span>
+        <tr id="DeltaAspect" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#DeltaAspect" class="vdoc type-vdoc-reference">#DeltaAspect</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/log/0#EventAspect" class="vdoc type-vdoc-reference">VLog:EventAspect</a></td><td><span class="vdoc type-vdoc-node">The class of resources which contain the state delta payload of some
+chronicle event.</span>
 </td></tr>
-        <tr id="LogAspect" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#LogAspect" class="vdoc type-vdoc-reference">#LogAspect</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/log/0#EventAspect" class="vdoc type-vdoc-reference">VLog:EventAspect</a></td><td><span class="vdoc type-vdoc-node">The class of authority-provided truth properties of an event.</span>
+        <tr id="CommandAspect" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#CommandAspect" class="vdoc type-vdoc-reference">#CommandAspect</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/log/0#EventAspect" class="vdoc type-vdoc-reference">VLog:EventAspect</a></td><td><span class="vdoc type-vdoc-node">The class of resources which contain attributes added by a gateway to
+some event during the fabrication of the event command.</span>
 </td></tr>
+        <tr id="LogAspect" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#LogAspect" class="vdoc type-vdoc-reference">#LogAspect</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/log/0#EventAspect" class="vdoc type-vdoc-reference">VLog:EventAspect</a></td><td><span class="vdoc type-vdoc-node">The class of resources which contain attributes of an event which
+relate to its position in the chronicle event log. The contents of this
+aspect are ultimately finally provided by the authority but is
+typically provisionally provided by the gateway.</span>
+</td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><a href="https://valospace.org/engine/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">instance properties</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all valosheath type prototype properties.
+    </span>
+</span></a></span>
+</td><td colspan=1> <a href="#index" class="vdoc type-vdoc-reference">VLog:index</a> <a href="#chainHash" class="vdoc type-vdoc-reference">VLog:chainHash</a></td></tr>
+        <tr id="AuthorAspect" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#AuthorAspect" class="vdoc type-vdoc-reference">#AuthorAspect</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/log/0#EventAspect" class="vdoc type-vdoc-reference">VLog:EventAspect</a></td><td><span class="vdoc type-vdoc-node">The class of resources which contain the authoring attributes and the
+command signature of a single chronicle event.</span>
+</td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><a href="https://valospace.org/engine/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">instance properties</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all valosheath type prototype properties.
+    </span>
+</span></a></span>
+</td><td colspan=1> <a href="#antecedent" class="vdoc type-vdoc-reference">VLog:antecedent</a> <a href="#publicIdentity" class="vdoc type-vdoc-reference">VLog:publicIdentity</a> <a href="#signature" class="vdoc type-vdoc-reference">VLog:signature</a></td></tr>
       </tbody>
     </table>
 
@@ -188,22 +237,85 @@ ontologies.
         <tr id="version" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#version" class="vdoc type-vdoc-reference">#version</a></em></strong> </h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/log/0#EventAspects" class="vdoc type-vdoc-reference">VLog:EventAspects</a></td><td><a href="http://www.w3.org/2001/XMLSchema#string" class="vdoc type-vdoc-reference">xsd:string</a></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">The aspect version string. The version number of this specification is &#x22;0.3&#x22;</span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The aspect version string. The version of this specification is &#x22;0.3&#x22;</span>
 </td></tr>
-        <tr id="event" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#event" class="vdoc type-vdoc-reference">#event</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/log/0#EventAspects" class="vdoc type-vdoc-reference">VLog:EventAspects</a></td><td><a href="https://valospace.org/log/0#Event" class="vdoc type-vdoc-reference">VLog:Event</a></td></tr>
+        <tr id="delta" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#delta" class="vdoc type-vdoc-reference">#delta</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/log/0#EventAspects" class="vdoc type-vdoc-reference">VLog:EventAspects</a></td><td><a href="https://valospace.org/log/0#DeltaAspect" class="vdoc type-vdoc-reference">VLog:DeltaAspect</a></td></tr>
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">The aspect which contains the event state change payload.</span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The state delta aspect of the event.</span>
 </td></tr>
         <tr id="command" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#command" class="vdoc type-vdoc-reference">#command</a></em></strong> </h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/log/0#EventAspects" class="vdoc type-vdoc-reference">VLog:EventAspects</a></td><td><a href="https://valospace.org/log/0#CommandAspect" class="vdoc type-vdoc-reference">VLog:CommandAspect</a></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">The aspect which contains the client-generated command properties.</span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The command fabrication aspect of the event.</span>
 </td></tr>
         <tr id="log" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#log" class="vdoc type-vdoc-reference">#log</a></em></strong> </h3></td></tr>
         <tr><td><a href="https://valospace.org/log/0#EventAspects" class="vdoc type-vdoc-reference">VLog:EventAspects</a></td><td><a href="https://valospace.org/log/0#LogAspect" class="vdoc type-vdoc-reference">VLog:LogAspect</a></td></tr>
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">The aspect which contains the authority-confirmed event log properties.</span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The authority log aspect of the event.</span>
+</td></tr>
+        <tr id="index" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#index" class="vdoc type-vdoc-reference">#index</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/log/0#LogAspect" class="vdoc type-vdoc-reference">VLog:LogAspect</a></td><td><a href="http://www.w3.org/2001/XMLSchema#integer" class="vdoc type-vdoc-reference">xsd:integer</a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The 0-based index of the event in the event log.</span>
+</td></tr>
+        <tr id="chainHash" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#chainHash" class="vdoc type-vdoc-reference">#chainHash</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/log/0#LogAspect" class="vdoc type-vdoc-reference">VLog:LogAspect</a></td><td><a href="http://www.w3.org/2001/XMLSchema#string" class="vdoc type-vdoc-reference">xsd:string</a></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The base64url-encoded SHA-512/384 hash of the combination of the
+preceding event chainHash with the current event signature or delta.
+The exact format of the combination is pending. The event contents is
+defined to be the VLog:signature if the event is signed, otherwise it
+is the vplot serialization of the VLog:DeltaAspect of the event.</span>
+</td></tr>
+        <tr id="author" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#author" class="vdoc type-vdoc-reference">#author</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/log/0#EventAspects" class="vdoc type-vdoc-reference">VLog:EventAspects</a></td><td><a href="https://valospace.org/log/0#AuthorAspect" class="vdoc type-vdoc-reference">VLog:AuthorAspect</a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The command author aspect of the event.</span>
+</td></tr>
+        <tr id="antecedent" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#antecedent" class="vdoc type-vdoc-reference">#antecedent</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/log/0#AuthorAspect" class="vdoc type-vdoc-reference">VLog:AuthorAspect</a></td><td><a href="http://www.w3.org/2001/XMLSchema#integer" class="vdoc type-vdoc-reference">xsd:integer</a></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The index of an antecedent event the payload of which this author
+section confirms. This usually is the index of the directly preceding
+event but if the chronicle allows for reordering and eventual
+consistency this can refer to further in the log.</span>
+</td></tr>
+        <tr id="publicIdentity" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#publicIdentity" class="vdoc type-vdoc-reference">#publicIdentity</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/log/0#AuthorAspect" class="vdoc type-vdoc-reference">VLog:AuthorAspect</a></td><td><a href="https://valospace.org/0#Entity" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">V:Entity</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of valospace resources which act as the main valospace tree
+hierarchy building block. With Relation and Media it forms the group of
+three primary node types. As a Scope it can have scriptable properties,
+which entities expose to all child resources as their lexical scripting
+namespace.
+
+The set of valospace tree hierarchies is defined via triple pattern:
+
+  SELECT ?root ?parent ?node WHERE {
+    ?node V:parent ?parent .
+    ?parent V:parent* ?root .
+    NOT EXISTS ( ?root V:parent ?rootParent )
+  }
+
+This implies that only Entity resources can be nodes but any primary
+node can act as a root resource.
+
+    </span>
+</span></a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The public identity resource of the contributor of this event.</span>
+</td></tr>
+        <tr id="signature" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#signature" class="vdoc type-vdoc-reference">#signature</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/log/0#AuthorAspect" class="vdoc type-vdoc-reference">VLog:AuthorAspect</a></td><td><a href="http://www.w3.org/2001/XMLSchema#string" class="vdoc type-vdoc-reference">xsd:string</a></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The base64url-encoded 512-bit Ed25519 signature (as provided by
+tweetnacl.sign.detached) of the event payload. The exact format of the
+payload is pending precise specification. This signature is created
+using the secretKey associated with the chronicle publicKey of the
+authoring publicIdentity.</span>
 </td></tr>
       </tbody>
     </table>

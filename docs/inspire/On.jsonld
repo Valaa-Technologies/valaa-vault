@@ -56,8 +56,8 @@
       "On": "https://valospace.org/inspire/On/0#",
       "V": "https://valospace.org/0#",
       "Lens": "https://valospace.org/inspire/Lens/0#",
-      "VLog": "https://valospace.org/log/0#",
       "VState": "https://valospace.org/state/0#",
+      "VLog": "https://valospace.org/log/0#",
       "VValk": "https://valospace.org/valk/0#"
     },
     "dc:title": "The valosheath 'On' namespace reference",
@@ -78,7 +78,6 @@
       "https://valospace.org/log/0#": "@valos/log/VLog"
     },
     "VRevdoc:extenderModules": {
-      "https://valospace.org/log/0#": "@valos/sourcerer/VLog",
       "https://valospace.org/0#": "@valos/sourcerer/V",
       "https://valospace.org/valk/0#": "@valos/sourcerer/VValk"
     },
@@ -1491,7 +1490,7 @@
           },
           " frames in a\ndepth-first pre-order immediately after the corresponding frame\nprecondition event.",
           null,
-          "Reformed frames arise during reformation of a schismatic prophecy.\nA frame is considered reformed if it is the innermost frame that\ndirectly contains modifications on a set of global primary resources\nwhose modification history was affected by the reformation. Note that\nall structured sub-resources are recursively considered to be part of\ntheir owning global resource.",
+          "Reformed frames arise during reformation of a schismatic prophecy.\nA frame is considered reformed if it is the innermost frame that\ndirectly contains modifications on a set of global primary resources\nwhose modification history was affected by the reformation. Note that\nall fixed sub-resources are recursively considered to be part of\ntheir owning global resource.",
           null,
           "The modified resources are listed in the event property <TODO>.",
           null,

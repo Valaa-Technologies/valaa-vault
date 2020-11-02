@@ -142,7 +142,7 @@
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "The mapping definition is JSON-LD document (created by a technician)\nwhich describes a set of routes and their mapping vpaths to valospace\nresources. These paths typically originate from a single, configurable\n",
+            "The mapping definition is JSON-LD document (created by a technician)\nwhich describes a set of routes and their mapping vplots to valospace\nresources. These paths typically originate from a single, configurable\n",
             {
               "VDoc:em": true,
               "VDoc:content": [

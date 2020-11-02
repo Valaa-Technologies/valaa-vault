@@ -1335,7 +1335,81 @@
       },
       "Node": {
         "@type": "VDoc:Class",
-        "rdfs:comment": "A document tree Node"
+        "rdfs:comment": "A document tree Node",
+        "VEngine:domainOfProperty": [
+          {
+            "@id": "#resourceId",
+            "VRevdoc:indexLabel": "VDoc:resourceId"
+          },
+          {
+            "@id": "#content",
+            "VRevdoc:indexLabel": "VDoc:content"
+          },
+          {
+            "@id": "#entries",
+            "VRevdoc:indexLabel": "VDoc:entries"
+          },
+          {
+            "@id": "#words",
+            "VRevdoc:indexLabel": "VDoc:words"
+          },
+          {
+            "@id": "#lines",
+            "VRevdoc:indexLabel": "VDoc:lines"
+          },
+          {
+            "@id": "#lookup",
+            "VRevdoc:indexLabel": "VDoc:lookup"
+          },
+          {
+            "@id": "#wide",
+            "VRevdoc:indexLabel": "VDoc:wide"
+          },
+          {
+            "@id": "#tall",
+            "VRevdoc:indexLabel": "VDoc:tall"
+          },
+          {
+            "@id": "#heading",
+            "VRevdoc:indexLabel": "VDoc:heading"
+          },
+          {
+            "@id": "#collapsed",
+            "VRevdoc:indexLabel": "VDoc:collapsed"
+          },
+          {
+            "@id": "#elidable",
+            "VRevdoc:indexLabel": "VDoc:elidable"
+          },
+          {
+            "@id": "#map",
+            "VRevdoc:indexLabel": "VDoc:map"
+          },
+          {
+            "@id": "#em",
+            "VRevdoc:indexLabel": "VDoc:em"
+          },
+          {
+            "@id": "#strong",
+            "VRevdoc:indexLabel": "VDoc:strong"
+          },
+          {
+            "@id": "#ins",
+            "VRevdoc:indexLabel": "VDoc:ins"
+          },
+          {
+            "@id": "#del",
+            "VRevdoc:indexLabel": "VDoc:del"
+          },
+          {
+            "@id": "#q",
+            "VRevdoc:indexLabel": "VDoc:q"
+          },
+          {
+            "@id": "#blockquote",
+            "VRevdoc:indexLabel": "VDoc:blockquote"
+          }
+        ]
       },
       "resourceId": {
         "@type": "VDoc:Property",
@@ -1429,12 +1503,24 @@
       "Table": {
         "@type": "VDoc:Class",
         "rdfs:subClassOf": "VDoc:Node",
-        "rdfs:comment": "A two-dimensional table document node"
+        "rdfs:comment": "A two-dimensional table document node",
+        "VEngine:domainOfProperty": [
+          {
+            "@id": "#columns",
+            "VRevdoc:indexLabel": "VDoc:columns"
+          }
+        ]
       },
       "Header": {
         "@type": "VDoc:Class",
         "rdfs:subClassOf": "VDoc:Node",
-        "rdfs:comment": "A table cross-entry-section header node"
+        "rdfs:comment": "A table cross-entry-section header node",
+        "VEngine:domainOfProperty": [
+          {
+            "@id": "#cell",
+            "VRevdoc:indexLabel": "VDoc:cell"
+          }
+        ]
       },
       "columns": {
         "@type": "VDoc:Property",
@@ -1475,7 +1561,13 @@
       "CharacterData": {
         "@type": "VDoc:Class",
         "rdfs:subClassOf": "VDoc:Node",
-        "rdfs:comment": "A character data document node"
+        "rdfs:comment": "A character data document node",
+        "VEngine:domainOfProperty": [
+          {
+            "@id": "#language",
+            "VRevdoc:indexLabel": "VDoc:language"
+          }
+        ]
       },
       "language": {
         "@type": "VDoc:Property",
@@ -1491,7 +1583,13 @@
       "ContextPath": {
         "@type": "VDoc:Class",
         "rdfs:subClassOf": "VDoc:Node",
-        "rdfs:comment": "A context-based path document node"
+        "rdfs:comment": "A context-based path document node",
+        "VEngine:domainOfProperty": [
+          {
+            "@id": "#context",
+            "VRevdoc:indexLabel": "VDoc:context"
+          }
+        ]
       },
       "context": {
         "@type": "VDoc:Property",
@@ -1507,7 +1605,13 @@
       "HTMLElementProperty": {
         "@type": "VDoc:Class",
         "rdfs:subClassOf": "VDoc:Property",
-        "rdfs:comment": "The class of vdoc properties which directly inherit the semantics of\na specific HTML5 element"
+        "rdfs:comment": "The class of vdoc properties which directly inherit the semantics of\na specific HTML5 element",
+        "VEngine:domainOfProperty": [
+          {
+            "@id": "#elementName",
+            "VRevdoc:indexLabel": "VDoc:elementName"
+          }
+        ]
       },
       "elementName": {
         "@type": "VDoc:Property",

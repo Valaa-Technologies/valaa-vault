@@ -4,6 +4,8 @@ module.exports = {
   baseIRI: "https://valospace.org/chronicle/0#",
   namespaceModules: {
     VKernel: "@valos/kernel/VKernel",
+    VState: "@valos/state/VState",
+    VLog: "@valos/log/VLog",
     V: "@valos/space/V",
   },
   description:
@@ -16,9 +18,9 @@ module.exports = {
       "rdfs:domain": "V:Resource",
       "rdfs:range": "xsd:boolean", // TODO(iridian, 2020-10): Add user role semantics
       "rdfs:comment":
-`When set all chronicle events must be authored with an AuthorAspect.`,
+`When set to true all the chronicle events must be authored with
+an AuthorAspect.`,
     },
-
     // contributors
     contributor: {
       "@type": "VKernel:Property",
@@ -30,12 +32,12 @@ public keys to the chronicle event log.`,
     },
     director: {
       "@type": "VKernel:Property",
-      "rdfs:subPropertyOf": "VLog:contributor",
+      "rdfs:subPropertyOf": "VChronicle:contributor",
       "rdfs:domain": "V:Resource",
       "rdfs:range": "V:Resource", // TODO(iridian, 2020-10): Add user role semantics
       "rdfs:comment":
-`The collection of roles which and only which can make changes to the
-chronicle behaviors (eg. permissions).`,
+`The collection of identities which (and only which) can make changes
+to the chronicle behaviors (eg. permissions).`,
     },
   },
 };

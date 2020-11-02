@@ -131,13 +131,14 @@
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
+            "The ",
             {
               "VDoc:em": true,
               "VDoc:content": [
                 "VState"
               ]
             },
-            " together with ",
+            " namespace together with ",
             {
               "@type": "VDoc:Reference",
               "VDoc:content": [
@@ -145,7 +146,7 @@
               ],
               "VDoc:ref": "VLog:"
             },
-            " ",
+            ", ",
             {
               "@type": "VDoc:Reference",
               "VDoc:content": [
@@ -161,14 +162,14 @@
               ],
               "VDoc:ref": "VValk:"
             },
-            " form the infrastructural foundation ie. the ",
+            " namespaces form the\ninfrastructural foundation (the ",
             {
               "VDoc:em": true,
               "VDoc:content": [
                 "fabric"
               ]
             },
-            " of the valospace.",
+            ") of the valospace.",
             {
               "VDoc:em": true,
               "VDoc:content": [
@@ -354,12 +355,64 @@
         "rdfs:comment": [
           "The class of all valospace resource field identifiers.",
           "Only the instances of this class can appear as the predicate in\nvalospace triple graphs. All valospace fields have VState:Type or one\nof its sub-classes as their rdf:domain."
+        ],
+        "VEngine:domainOfProperty": [
+          {
+            "@id": "#isOwnerOf",
+            "VRevdoc:indexLabel": "VState:isOwnerOf"
+          },
+          {
+            "@id": "#isOwnedBy",
+            "VRevdoc:indexLabel": "VState:isOwnedBy"
+          },
+          {
+            "@id": "#coupledToField",
+            "VRevdoc:indexLabel": "VState:coupledToField"
+          },
+          {
+            "@id": "#coupledField",
+            "VRevdoc:indexLabel": "VState:coupledField"
+          },
+          {
+            "@id": "#defaultCoupledField",
+            "VRevdoc:indexLabel": "VState:defaultCoupledField"
+          },
+          {
+            "@id": "#preventsDestroy",
+            "VRevdoc:indexLabel": "VState:preventsDestroy"
+          },
+          {
+            "@id": "#isDuplicateable",
+            "VRevdoc:indexLabel": "VState:isDuplicateable"
+          },
+          {
+            "@id": "#initialValue",
+            "VRevdoc:indexLabel": "VState:initialValue"
+          },
+          {
+            "@id": "#ownDefaultValue",
+            "VRevdoc:indexLabel": "VState:ownDefaultValue"
+          },
+          {
+            "@id": "#finalDefaultValue",
+            "VRevdoc:indexLabel": "VState:finalDefaultValue"
+          },
+          {
+            "@id": "#allowTransientFieldToBeSingular",
+            "VRevdoc:indexLabel": "VState:allowTransientFieldToBeSingular"
+          }
         ]
       },
       "ExpressedField": {
         "@type": "VKernel:Class",
         "rdfs:subClassOf": "VState:Field",
-        "rdfs:comment": "The class of valospace fields which have a full triple expression in\nall regular query and graph contexts (as opposed to fields with\nnon-triple semantics or triple expression only in limited contexts)."
+        "rdfs:comment": "The class of valospace fields which have a full triple expression in\nall regular query and graph contexts (as opposed to fields with\nnon-triple semantics or triple expression only in limited contexts).",
+        "VEngine:domainOfProperty": [
+          {
+            "@id": "#expressor",
+            "VRevdoc:indexLabel": "VState:expressor"
+          }
+        ]
       },
       "expressor": {
         "@type": "VKernel:Property",
@@ -419,7 +472,13 @@
       "EventLoggedField": {
         "@type": "VKernel:Class",
         "rdfs:subClassOf": "VState:ExpressedField",
-        "rdfs:comment": "The class of valospace fields which have both a triple state\nexpression inside valospace and a change impression in event logs;\nthese are the primary, persisted sources of truth."
+        "rdfs:comment": "The class of valospace fields which have both a triple state\nexpression inside valospace and a change impression in event logs;\nthese are the primary, persisted sources of truth.",
+        "VEngine:domainOfProperty": [
+          {
+            "@id": "#impressor",
+            "VRevdoc:indexLabel": "VState:impressor"
+          }
+        ]
       },
       "impressor": {
         "@type": "VKernel:Property",
@@ -553,7 +612,13 @@
       "AliasField": {
         "@type": "VKernel:Class",
         "rdfs:subClassOf": "VState:Field",
-        "rdfs:comment": "The class of inferred fields called alias fields where each such field\nhas an 'aliasOf' RDF property or valos Field. Alias fields are\nmutation-inference symmetric so that triples with an alias field as\npredicate are inferred from triples with aliasOf as predicate and\nmutations with an alias field as predicate are translated to use\nthe aliasOf as predicate."
+        "rdfs:comment": "The class of inferred fields called alias fields where each such field\nhas an 'aliasOf' RDF property or valos Field. Alias fields are\nmutation-inference symmetric so that triples with an alias field as\npredicate are inferred from triples with aliasOf as predicate and\nmutations with an alias field as predicate are translated to use\nthe aliasOf as predicate.",
+        "VEngine:domainOfProperty": [
+          {
+            "@id": "#aliasOf",
+            "VRevdoc:indexLabel": "VState:aliasOf"
+          }
+        ]
       },
       "aliasOf": {
         "@type": "VKernel:Property",

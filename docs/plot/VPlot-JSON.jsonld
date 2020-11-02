@@ -1,0 +1,403 @@
+[
+  {
+    "@id": "https://valospace.org/plot/VPlot-JSON",
+    "@context": {
+      "@base": "https://valospace.org/vdoc/0#",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "VSbomdoc": "https://valospace.org/sbomdoc/0#",
+      "VKernel": "https://valospace.org/kernel/0#",
+      "VDoc": "https://valospace.org/vdoc/0#",
+      "VRevdoc": "https://valospace.org/revdoc/0#",
+      "restriction": {
+        "@reverse": "owl:onProperty"
+      },
+      "VRevdoc:tooltipContent": {
+        "@id": "#tooltipContent",
+        "@type": "@id"
+      },
+      "VDoc:content": {
+        "@id": "#content",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VDoc:entries": {
+        "@id": "#entries",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VDoc:words": {
+        "@id": "#words",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VDoc:lines": {
+        "@id": "#lines",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VDoc:columns": {
+        "@id": "#columns",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VDoc:map": {
+        "@id": "#map",
+        "@type": "@id"
+      },
+      "VDoc:cell": {
+        "@id": "#cell",
+        "@type": "@id"
+      }
+    },
+    "dc:title": "VPlot JSON representations",
+    "respecConfig": {
+      "specStatus": "unofficial",
+      "editors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ],
+      "authors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ],
+      "shortName": "vplotJSON"
+    },
+    "abstract": {
+      "@id": "abstract",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "VPlot JSON is a JSON representation of VPlot strings. It\nhas two formats: generic 'VPlot outlines' and their strict subset\n'sectioned VPlots'."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "Sectioned VPlots are the verbose, machine-processible canonical\nJSON 1-1 representation of VPlot strings. Outlines are the more\nconcise, writable and readable but non-canonical format: many different\noutlines can have the same VPlot meaning. The normalization of an\noutline into its canonical, sectioned VPlot is called disjoining."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "As sectioned VPlots are a subset of VPlot outlines, a sectioned VPlot\nalways disjoins into itself.\n"
+          ]
+        }
+      ]
+    },
+    "sotd": {
+      "@id": "sotd",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "This document is part of the library workspace ",
+            {
+              "@type": "VRevdoc:Package",
+              "VDoc:content": [
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "@valos/raem"
+                  ]
+                }
+              ],
+              "VDoc:ref": "@valos/raem"
+            },
+            "\n(of domain ",
+            {
+              "@type": "VRevdoc:Package",
+              "VDoc:content": [
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "@valos/kernel"
+                  ]
+                }
+              ],
+              "VDoc:ref": "@valos/kernel"
+            },
+            ") which has the description:\n`ValOS Resources And Events Model (ValOS-RAEM) API, schema and ontology`."
+          ]
+        }
+      ]
+    },
+    "introduction": {
+      "@id": "introduction",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "VPlot JSON is a JSON representation of a VPlot string.\nDifferent VPlot JSON objects can express the same VPlot which allows\nthe most suitable representation to be chosen based on use case."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "The canonical subset of VPlot JSON (with 1-1 mapping to VPlot strings)\nis called sectioned VPlots. These use a limited subset of JSON\nprimitives and are designed to be easily machine-processible."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "Finally, the remaining, non-sectioned VPlot JSON objects are called\nVPlot outlines. Arbitrary JSON objects can be trivially escaped as\nVPlot outline, allowing for generic JSON <-> VPlot roundtripping.\nEdit me - this is the first payload chapter. Abstract and SOTD are\nessential ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "ReSpec boilerplate"
+              ],
+              "VDoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
+            }
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "See ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "ReVDoc tutorial"
+              ],
+              "VDoc:ref": "@valos/revdoc/tutorial"
+            },
+            " for\ninstructions on how to write revdoc source documents."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "See also ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "ReVdoc specification"
+              ],
+              "VDoc:ref": "@valos/revdoc"
+            },
+            " and ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "VDoc specification"
+              ],
+              "VDoc:ref": "@valos/vdoc"
+            },
+            " for reference documentation."
+          ]
+        }
+      ]
+    },
+    "sectioned_vplot_json": {
+      "@id": "sectioned_vplot_json",
+      "dc:title": "Sectioned VPlot JSON",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "\nSectioned VPlots are the canonical JSON representation of a VPlot.\nThey use only a limited subset of JSON primitives: objects are not\nused; the literal 'null', the booleans 'true' and 'false', all string\nvalues and all safe integers (ie. whole numbers from -(2^53-1) to\n(2^53-1)) are used to represent their corresponding contextless vparam\nvalues directly."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "All remaining VPlot elements are represented with two-entry arrays\nas the titular 'sections'. The mandatory first entry contains a\n\"@\"-prefixed section type string. The optional second entry contains\nthe section payload."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "The first two characters of the section type determine which vplot\nelement the section represents:",
+            [
+              [
+                "'@@' denote a vplot element. The type has no other characters. The\noptional payload is an array of /two/ or more sections or values."
+              ],
+              [
+                "'@$' denote a vparam element. The remaining type characters contain\nthe vparam context-term. If there are none the vparam is contextless.\nThe optional payload is a singular section or an unencoded string\nvalue."
+              ],
+              [
+                "'@' denotes a vgrid element or a verb without a type. The mandatory\npayload is a non-empty array of vparam sections or values."
+              ],
+              [
+                "Remaining types denote a verb element with the verb type contained\nin the characters after initial '@'. The optional payload is a\nnon-empty array of sections or values."
+              ]
+            ]
+          ]
+        },
+        {
+          "@type": "VRevdoc:Example",
+          "dc:title": "forms a VPlot string from VPlot section of computing a random value between 2.5 and 10",
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                [
+                  "we expect",
+                  {
+                    "VDoc:blockquote": true,
+                    "VDoc:content": [
+                      {
+                        "@type": "VDoc:CharacterData",
+                        "VDoc:content": [
+                          " conjoinVPlot(\n    [\"@@\", [                // declare two-step path\n      [\"@!random\"],         // first step: compute a random value\n      [\"@!min\", [           // second step: compute the min of\n        10,                 // a whole number >= Number.MIN_SAFE_INTEGER, <= Number.MAX_SAFE_INTEGER\n        [\"@!max\", [         // and the max of\n          [\"@$d\", \"2.5\"],   // a double-precision fractional number\n          [\"@@\"],           // and the 'head' ie. the result of first step random computation\n        ]],\n      ]],\n    ]],\n)"
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "toEqual",
+                {
+                  "VDoc:blockquote": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:CharacterData",
+                      "VDoc:content": [
+                        "\"@!random@!min$d.10$.@!max$d.2.5$.@@@@@@\""
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "\nDuring sectioning (be it from a vplot string or from an outline) all\nredundant sections are elided or simplified:",
+            [
+              [
+                "Single-step vplot sections are replaced with that step itself - a\nvplot represents a sequential dependency between its\nconstitutient steps so a single-step vplot is redundant"
+              ],
+              [
+                "VParam sections that represent null, true, false or any integer\nvalues are replaced with the direct JSON value"
+              ],
+              [
+                "Contextless vparam sections which contain a path or a verb section\nas the payload are replaced with the payload section itself."
+              ]
+            ]
+          ]
+        },
+        {
+          "@type": "VRevdoc:Example",
+          "dc:title": "elides degenerate vplot elements during sectioning",
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                [
+                  "we expect",
+                  {
+                    "VDoc:blockquote": true,
+                    "VDoc:content": [
+                      {
+                        "@type": "VDoc:CharacterData",
+                        "VDoc:content": [
+                          " disjoinVPlotString(\"@!random@!min$d.10$.@!max$d.2.5$.@@@@@@\")"
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "toEqual",
+                {
+                  "VDoc:blockquote": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:CharacterData",
+                      "VDoc:content": [
+                        "[\n  \"@@\",\n  [\n    [\n      \"@!random\"\n    ],\n    [\n      \"@!min\",\n      [\n        10,\n        [\n          \"@!max\",\n          [\n            [\n              \"@$d\",\n              \"2.5\"\n            ],\n            [\n              \"@@\"\n            ]\n          ]\n        ]\n      ]\n    ]\n  ]\n]"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "vplot_json_outline": {
+      "@id": "vplot_json_outline",
+      "dc:title": "VPlot JSON outlines",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "\nVPlot outlines are JSON structures which use convenience constructs.\n"
+          ]
+        },
+        {
+          "@type": "VRevdoc:Example",
+          "dc:title": "disjoins a configuration outline",
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                [
+                  "we expect",
+                  {
+                    "VDoc:blockquote": true,
+                    "VDoc:content": [
+                      {
+                        "@type": "VDoc:CharacterData",
+                        "VDoc:content": [
+                          " disjoinVPlotOutline([\n  [\"@$o.folder\", \"vault\"],\n  [\"@$o.vlm\", \"@\", \"webpack\"],\n  [\"@$o.folder\", \"build\"],\n  [\"@$o.import\", {\n    \"@.:workshop\": [\n      [\"@$o.folder\", \"vault\", {\n        \"@+:workers\": {\n          \"@+:ot-worker-hyperbridge-dev\": [],\n        },\n        \"@+:env\": {\n          \"@.:ot:@.:ot-dev@@\": [\n            [\"@+:public-session\"],\n            [\"@+:session\"],\n            [\"@~:ot-identity.json\"],\n            [\"@~:hyperbridge-identity.json\"],\n          ]\n        },\n        \"@+:revelations\": {\n          \"@+:sites\": [\n            [\"@.:inspire\", [\"@$o.folder\", \"vault\", \"dist\", \"revealer\", \"sites\", \"inspire\"]],\n            [\"@+:myworld-dev\"],\n          ]\n        }\n      }],\n      [\"@$o.folder\", \"opspace\", \"build\", [\"@+:env\"]]\n    ]\n  }, {\n    \"workshop.tar.gz\": [\"@$o.tar-gz\", [\"@+:workshop\"]],\n  }]\n], \"@@\")"
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "toEqual",
+                {
+                  "VDoc:blockquote": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:CharacterData",
+                      "VDoc:content": [
+                        "[\n  \"@@\",\n  [\n    [\n      \"@\",\n      [\n        [\n          \"@$o\",\n          \"folder\"\n        ],\n        \"vault\"\n      ]\n    ],\n    [\n      \"@\",\n      [\n        [\n          \"@$o\",\n          \"vlm\"\n        ],\n        \"@\",\n        \"webpack\"\n      ]\n    ],\n    [\n      \"@\",\n      [\n        [\n          \"@$o\",\n          \"folder\"\n        ],\n        \"build\"\n      ]\n    ],\n    [\n      \"@\",\n      [\n        [\n          \"@$o\",\n          \"import\"\n        ],\n        [\n          \"@.\",\n          [\n            \"workshop\",\n            [\n              \"@\",\n              [\n                [\n                  \"@$o\",\n                  \"folder\"\n                ],\n                \"vault\",\n                [\n                  \"@+\",\n                  [\n                    \"env\",\n                    [\n                      \"@.\",\n                      [\n                        \"ot\",\n                        [\n                          \"@.\",\n                          [\n                            \"ot-dev\"\n                          ]\n                        ],\n                        [\n                          \"@+\",\n                          [\n                            \"public-session\"\n                          ]\n                        ],\n                        [\n                          \"@+\",\n                          [\n                            \"session\"\n                          ]\n                        ],\n                        [\n                          \"@~\",\n                          [\n                            \"ot-identity.json\"\n                          ]\n                        ],\n                        [\n                          \"@~\",\n                          [\n                            \"hyperbridge-identity.json\"\n                          ]\n                        ]\n                      ]\n                    ]\n                  ]\n                ],\n                [\n                  \"@+\",\n                  [\n                    \"revelations\",\n                    [\n                      \"@+\",\n                      [\n                        \"sites\",\n                        [\n                          \"@.\",\n                          [\n                            \"inspire\",\n                            [\n                              \"@\",\n                              [\n                                [\n                                  \"@$o\",\n                                  \"folder\"\n                                ],\n                                \"vault\",\n                                \"dist\",\n                                \"revealer\",\n                                \"sites\",\n                                \"inspire\"\n                              ]\n                            ]\n                          ]\n                        ],\n                        [\n                          \"@+\",\n                          [\n                            \"myworld-dev\"\n                          ]\n                        ]\n                      ]\n                    ]\n                  ]\n                ],\n                [\n                  \"@+\",\n                  [\n                    \"workers\",\n                    [\n                      \"@+\",\n                      [\n                        \"ot-worker-hyperbridge-dev\"\n                      ]\n                    ]\n                  ]\n                ]\n              ]\n            ],\n            [\n              \"@\",\n              [\n                [\n                  \"@$o\",\n                  \"folder\"\n                ],\n                \"opspace\",\n                \"build\",\n                [\n                  \"@+\",\n                  [\n                    \"env\"\n                  ]\n                ]\n              ]\n            ]\n          ]\n        ],\n        [\n          \"@.\",\n          [\n            \"workshop.tar.gz\",\n            [\n              \"@\",\n              [\n                [\n                  \"@$o\",\n                  \"tar-gz\"\n                ],\n                [\n                  \"@+\",\n                  [\n                    \"workshop\"\n                  ]\n                ]\n              ]\n            ]\n          ]\n        ]\n      ]\n    ]\n  ]\n]"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "@type": "VRevdoc:Document",
+    "VDoc:content": [
+      {
+        "@id": "abstract"
+      },
+      {
+        "@id": "sotd"
+      },
+      {
+        "@id": "introduction"
+      },
+      {
+        "@id": "sectioned_vplot_json"
+      },
+      {
+        "@id": "vplot_json_outline"
+      }
+    ]
+  }
+]

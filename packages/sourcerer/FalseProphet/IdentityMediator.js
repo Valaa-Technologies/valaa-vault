@@ -1,8 +1,6 @@
 // @flow
 
-import { vRef } from "~/raem/VRL";
-import { getHostRef } from "~/raem/VALK/hostReference";
-
+import { createSignatureKeys } from "~/security/signatures";
 import type FalseProphet from "~/sourcerer/FalseProphet/FalseProphet";
 
 import { dumpObject, FabricEventTarget } from "~/tools";
@@ -72,6 +70,10 @@ export default class IdentityMediator extends FabricEventTarget {
           "\n\tpublicAuthorityIdentity:", ...dumpObject(publicAuthorityIdentity),
       );
     }
+  }
+
+  createAuthorKeys (seed: ?string) {
+    return createSignatureKeys(seed);
   }
 
   getPublicIdentityFor (resource: Object | string) {

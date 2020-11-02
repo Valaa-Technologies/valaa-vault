@@ -1,6 +1,6 @@
 /* global describe expect it */
 
-import { createSignatureKeys, verifyVPlotSignature } from "~/security/signatures";
+import { verifyVPlotSignature } from "~/security/signatures";
 
 import { naiveURI } from "~/raem/ValaaURI";
 
@@ -47,19 +47,17 @@ async function prepareHarnesses (sharedOptions) {
 const signatureKeys = {};
 
 async function registerLocalTestUserIdentity (targetHarness, publicIdentityId) {
-  const { publicKey, secretKey } = createSignatureKeys(publicIdentityId);
-  const identityRoot = await targetHarness.runValoscript(null, `
+  const { identityRoot, publicKey, secretKey } = await targetHarness.runValoscript(null, `
+    const keys = valos.identity.createAuthorKeys(seed);
+    const publicKey = keys.publicKey, secretKey = keys.secretKey;
     const identityRoot = new Entity({
       id: "${publicIdentityId}",
       authorityURI: "${testAuthorityURI}",
-      properties: { asContributor: { publicKey: "${publicKey}" } },
+      properties: { asContributor: { publicKey } },
     });
-    valos.identity.add(identityRoot, {
-      secretKey: "${secretKey}",
-      asContributor: { publicKey: "${publicKey}" },
-    });
-    identityRoot;
-  `, {}, {});
+    valos.identity.add(identityRoot, { secretKey, asContributor: { publicKey } });
+    ({ identityRoot, publicKey, secretKey });
+  `, { seed: publicIdentityId }, {});
   signatureKeys[publicIdentityId] = { publicKey, secretKey };
   signatureKeys[identityRoot.getChronicleURI()] = { publicKey, secretKey };
   return identityRoot.getChronicleURI();
@@ -170,14 +168,6 @@ describe("Chronicle behaviors: VChronicle:requireAuthoredEvents", () => {
     expect(decepAuthoroot.propertyValue("nonAuthoredNotRefused"))
         .toBeUndefined();
   });
-
-  function _addCustomIdentityRoleRelation (
-      publicIdentityURI, chronicleRoot = "this", role = "$VChronicle.director") {
-    return `
-      valos.sourcerIdentityMediator("${publicIdentityURI}")
-      .then(identity => ${_addIdentityRoleRelation(chronicleRoot, role, "identity", "identity")});
-    `;
-  }
 
   async function _addIdentityAsContributor (chronicleRoot, identityURI) {
     const mediator = new IdentityMediator({ parent: chronicleRoot.getEngine() });
@@ -486,7 +476,7 @@ describe("Chronicle behaviors: VChronicle:requireAuthoredEvents", () => {
           aspects: { author: { antecedent: 3, publicIdentity: primeDirectorId } },
         });
     expect(decepEvents[0].invalidationReason)
-        .toMatch(/Invalid VLog:chain/);
+        .toMatch(/Invalid VLog:chainHash/);
 
     // See note on previous test
     // expect(decepAuthoroot.propertyValue("hacked"))

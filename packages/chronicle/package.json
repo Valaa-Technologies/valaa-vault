@@ -3,9 +3,10 @@
   "version": "0.36.0-alpha.0",
   "valos": {
     "type": "library",
-    "domain": "@valos/kernel"
+    "domain": "@valos/kernel",
+    "docs": "https://valospace.org/chronicle"
   },
-  "description": "Specifies ValOS chronicle behaviors and the 'VChronicle' namespace",
+  "description": "Specifies ValOS chronicle, its behaviors and the 'VChronicle' namespace",
   "author": "Valaa Technologies Ltd",
   "license": "MIT",
   "repository": "https://github.com/valaatech/kernel",
@@ -17,5 +18,6 @@
   "dependencies": {
     "@valos/revdoc": "^0.36.0-alpha.0",
     "@valos/type-library": "^0.36.0-alpha.0"
-  }
+  },
+  "homepage": "https://valospace.org/chronicle"
 }

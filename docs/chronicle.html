@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>@valos/chronicle library workspace</title>
+    <script
+     src='https://www.w3.org/Tools/respec/respec-w3c-common'
+     class='remove'></script>
+    <script class='remove'>
+      var respecConfig = {"specStatus":"unofficial","shortName":"chronicle","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}]};
+    </script>
+    <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
+    
+  </head>
+  <body class="vdoc vdoc-body">
+    
+  <section id="abstract" class="vdoc type-vdoc-chapter"><div><p>
+  <div class="vdoc type-vdoc-paragraph">Specifies ValOS chronicle, its behaviors and the &#x27;VChronicle&#x27; namespace
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">A chronicle is a document with a history. In ValOS a chronicle has two
+facets. The valospace facet of a chronicle is the set of all *state resources*
+that are recursively owned by the chronicle *root resource*. The fabric
+facet of a chronicle is the *event log* ie. the linear sequence of
+*events* that describe the incremental changes to the chronicle state
+resources.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">The valospace facet is specified by the <a href="https://valospace.org/0#" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">primary <em>V</em></span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The &#x27;V&#x27; namespace defines the valospace resource types and fields.
+    </span>
+</span></a> namespace. The fabric facet is specified by the <a href="https://valospace.org/state/0#" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node"><em>VState</em></span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The vocabulary for defining the ValOS state core model and for
+extending it with new types and fields.
+    </span>
+</span></a> and the <a href="https://valospace.org/log/0#" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node"><em>VLog</em></span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The fabric storage and transport layer vocabulary that both specifies
+the ValOS event log and aspects structure and is used to express the
+content and behaviors of individual chronicles.
+    </span>
+</span></a> namespaces.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">This document specifies the <a href="https://valospace.org/chronicle/0#" class="vdoc type-vdoc-reference">VChronicle</a> namespace for defining *chronicle behaviors* ie. constraints to the
+changes that can be made to a chronicle. These behaviors are defined
+via the chronicle root resource properties that are named using <em>VChronicle</em> namespace terms.
+  </div>
+</p></div>
+  </section>
+
+  <section id="sotd" class="vdoc type-vdoc-chapter"><div><p>
+  <div class="vdoc type-vdoc-paragraph">This document is part of the library workspace <a href="https://valospace.org/chronicle" class="vdoc type-vrevdoc-package"><em>@valos/chronicle</em></a>
+(of domain <a href="https://valospace.org/kernel" class="vdoc type-vrevdoc-package"><em>@valos/kernel</em></a>) which has the description:
+&#x60;Specifies ValOS chronicle, its behaviors and the &#x27;VChronicle&#x27; namespace&#x60;.
+  </div>
+</p></div>
+  </section>
+
+  <section id="introduction" class="vdoc type-vdoc-chapter"><div><p>
+  <div class="vdoc type-vdoc-paragraph">Edit me - this is the first payload chapter. Abstract and SOTD are
+essential <a href="https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate" class="vdoc type-vdoc-reference">ReSpec boilerplate</a>
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">See <a href="https://valospace.org/revdoc/tutorial" class="vdoc type-vdoc-reference">ReVDoc tutorial</a> for
+instructions on how to write revdoc source documents.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">See also <a href="https://valospace.org/revdoc" class="vdoc type-vdoc-reference">ReVdoc specification</a> and <a href="https://valospace.org/vdoc" class="vdoc type-vdoc-reference">VDoc specification</a> for reference documentation.
+  </div>
+</p></div>
+  </section>
+
+  <section id="section_valospace" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_valospace">§ </a>The <em>VChronicle</em> valospace namespace of the library ontology of <a href="https://valospace.org/chronicle" class="vdoc type-vrevdoc-package"><em>@valos/chronicle</em></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">The valospace vocabulary for specifying behaviors on specific chronicles
+  </div>
+</p></div>
+  <section id="section_prefixes" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_prefixes">§ </a><em>@valos/chronicle</em> IRI prefixes</h3>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">Prefix</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">IRI</span>
+</th>
+      </thead>
+      <tbody>
+        <tr><td><span class="vdoc type-vdoc-node">rdf</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/1999/02/22-rdf-syntax-ns#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">rdfs</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/2000/01/rdf-schema#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">xsd</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/2001/XMLSchema#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">owl</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/2002/07/owl#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">dc</span>
+</td><td><span class="vdoc type-vdoc-node">http://purl.org/dc/elements/1.1/</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VChronicle</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/chronicle/0#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">VKernel</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/kernel/0#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VState</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/state/0#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">VLog</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/log/0#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">V</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/0#</span>
+</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_types" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_types">§ </a><em>VChronicle</em> <a href="https://valospace.org/state/0#Type" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">valospace types</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all valospace types. The instances of valospace types
+are called valospace resources and are the main valos ecosystem
+building block.Only valospace resources can appear as a subject in valospace resource
+and event triple graphs.
+    </span>
+</span></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">This section describes valospace types introduced by the &#x27;VChronicle&#x27; namespace
+  </div>
+</p></div>
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">VRevdoc:brief</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:subClassOf</span>
+</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_fields" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_fields">§ </a><em>VChronicle</em> <a href="https://valospace.org/kernel/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">valospace fields</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of properties which are defined by the ValOS kernel domain
+ontologies.
+    </span>
+</span></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">This section describes valospace fields introduced by the &#x27;VChronicle&#x27; namespace
+  </div>
+</p></div>
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:domain</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:range</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdf:type</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:subPropertyOf</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">VState:coupledToField</span>
+</th>
+      </thead>
+      <tbody>
+        <tr id="requireAuthoredEvents" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=5><h3> <strong><em><a href="#requireAuthoredEvents" class="vdoc type-vdoc-reference">#requireAuthoredEvents</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/0#Resource" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">V:Resource</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of resources which can appear as a subject in valospace
+resource and event graphs. The domain of all transient and generated
+fields which are available even for unsourced bodies.
+    </span>
+</span></a></td><td><a href="http://www.w3.org/2001/XMLSchema#boolean" class="vdoc type-vdoc-reference">xsd:boolean</a></td><td><a href="https://valospace.org/kernel/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VKernel:Property</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of properties which are defined by the ValOS kernel domain
+ontologies.
+    </span>
+</span></a></td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=4><span class="vdoc type-vdoc-node">When set to true all the chronicle events must be authored with
+an AuthorAspect.</span>
+</td></tr>
+        <tr id="contributor" class="vdoc vdoc-wide"><td colspan=5><h3> <strong><em><a href="#contributor" class="vdoc type-vdoc-reference">#contributor</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/0#Resource" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">V:Resource</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of resources which can appear as a subject in valospace
+resource and event graphs. The domain of all transient and generated
+fields which are available even for unsourced bodies.
+    </span>
+</span></a></td><td><a href="https://valospace.org/0#Resource" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">V:Resource</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of resources which can appear as a subject in valospace
+resource and event graphs. The domain of all transient and generated
+fields which are available even for unsourced bodies.
+    </span>
+</span></a></td><td><a href="https://valospace.org/kernel/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VKernel:Property</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of properties which are defined by the ValOS kernel domain
+ontologies.
+    </span>
+</span></a></td><td></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=4><span class="vdoc type-vdoc-node">The collection of identities which have registered their signature
+public keys to the chronicle event log.</span>
+</td></tr>
+        <tr id="director" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=5><h3> <strong><em><a href="#director" class="vdoc type-vdoc-reference">#director</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/0#Resource" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">V:Resource</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of resources which can appear as a subject in valospace
+resource and event graphs. The domain of all transient and generated
+fields which are available even for unsourced bodies.
+    </span>
+</span></a></td><td><a href="https://valospace.org/0#Resource" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">V:Resource</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of resources which can appear as a subject in valospace
+resource and event graphs. The domain of all transient and generated
+fields which are available even for unsourced bodies.
+    </span>
+</span></a></td><td><a href="https://valospace.org/kernel/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VKernel:Property</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of properties which are defined by the ValOS kernel domain
+ontologies.
+    </span>
+</span></a></td><td><a href="https://valospace.org/chronicle/0#contributor" class="vdoc type-vdoc-reference">VChronicle:contributor</a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=4><span class="vdoc type-vdoc-node">The collection of identities which (and only which) can make changes
+to the chronicle behaviors (eg. permissions).</span>
+</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_vocabulary_other">§ </a><em>VChronicle</em> remaining vocabulary terms</h3>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdf:type</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:subClassOf</span>
+</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  </section>
+
+  </body>
+</html>

@@ -23,10 +23,10 @@ command signature of a single chronicle event.`,
     "rdfs:range": "xsd:integer",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "rdfs:comment":
-`The index of an antecedent event that this author section chains
-against. This usually is the index of the directly preceding event but
-if the chronicle allows for reordering and eventual consistency this
-can refer to further in the log.`,
+`The index of an antecedent event the payload of which this author
+section confirms. This usually is the index of the directly preceding
+event but if the chronicle allows for reordering and eventual
+consistency this can refer to further in the log.`,
   },
 
   publicIdentity: {
@@ -35,7 +35,7 @@ can refer to further in the log.`,
     "rdfs:range": "V:Entity",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "rdfs:comment":
-`The public identity resource of the contributor of this author aspect.`,
+`The public identity resource of the contributor of this event.`,
   },
 
   signature: {
@@ -44,9 +44,10 @@ can refer to further in the log.`,
     "rdfs:range": "xsd:string",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "rdfs:comment":
-`A base64-url encoded string containing the 512-bit Ed25519 signature
-that is created by tweetnacl.sign.detached when given a VPlot
-serialization of '{ command, events }' and the secretKey associated
-with the authoring publicIdentity.`,
+`The base64url-encoded 512-bit Ed25519 signature (as provided by
+tweetnacl.sign.detached) of the event payload. The exact format of the
+payload is pending precise specification. This signature is created
+using the secretKey associated with the chronicle publicKey of the
+authoring publicIdentity.`,
   },
 };

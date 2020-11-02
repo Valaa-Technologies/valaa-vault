@@ -147,7 +147,7 @@
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "The evaluation allows for VPath operations, most notably importing\nrelative config files and accessing their subsections. Together the\nevaluation, spread and merge allow for fine-grained ",
+            "The evaluation allows for VPlot operations, most notably importing\nrelative config files and accessing their subsections. Together the\nevaluation, spread and merge allow for fine-grained ",
             {
               "@type": "VDoc:Reference",
               "VDoc:content": [

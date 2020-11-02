@@ -237,7 +237,17 @@
       "Document": {
         "@type": "VDoc:Class",
         "rdfs:subClassOf": "VDoc:Chapter",
-        "rdfs:comment": "A ReSpec specification document"
+        "rdfs:comment": "A ReSpec specification document",
+        "VEngine:domainOfProperty": [
+          {
+            "@id": "#preferredPrefix",
+            "VRevdoc:indexLabel": "VRevdoc:preferredPrefix"
+          },
+          {
+            "@id": "#baseIRI",
+            "VRevdoc:indexLabel": "VRevdoc:baseIRI"
+          }
+        ]
       },
       "Example": {
         "@type": "VDoc:Class",
@@ -322,7 +332,13 @@
       "Tooltip": {
         "@type": "VDoc:Class",
         "rdfs:subClassOf": "VDoc:Node",
-        "rdfs:comment": "A hoverable tooltip document node"
+        "rdfs:comment": "A hoverable tooltip document node",
+        "VEngine:domainOfProperty": [
+          {
+            "@id": "#tooltipContent",
+            "VRevdoc:indexLabel": "VRevdoc:tooltipContent"
+          }
+        ]
       },
       "tooltipContent": {
         "@type": "VDoc:Property",

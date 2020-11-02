@@ -5,6 +5,7 @@ module.exports = {
   namespaceModules: {
     VKernel: "@valos/kernel/VKernel",
     VState: "@valos/state/VState",
+    VScript: "@valos/script/VScript",
   },
   description:
 `The 'V' namespace defines the valospace resource types and fields.`,

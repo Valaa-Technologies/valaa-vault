@@ -42,9 +42,9 @@ module.exports = {
     "#0": [
 description,
 null,
-em("VState"), ` together with `, ref("VLog:"), " ", ref("VPlot:"),
-" and ", ref("VValk:"), ` form the infrastructural foundation ie. the `,
-em("fabric"), ` of the valospace.`,
+`The `, em("VState"), ` namespace together with `, ref("VLog:"), ", ",
+ref("VPlot:"), " and ", ref("VValk:"), ` namespaces form the
+infrastructural foundation (the `, em("fabric"), `) of the valospace.`,
 em("VState"), ` provides the data model and so enables structure and
 meanings.`,
     ],

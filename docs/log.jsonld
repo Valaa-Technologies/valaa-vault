@@ -57,11 +57,12 @@
       "VPlot": "https://valospace.org/plot/0#",
       "VState": "https://valospace.org/state/0#",
       "VValk": "https://valospace.org/valk/0#",
+      "V": "https://valospace.org/0#",
       "aspects": {
         "@reverse": "VLog:event"
       },
-      "VLog:event": {
-        "@id": "#event",
+      "VLog:delta": {
+        "@id": "#delta",
         "@type": "@id"
       },
       "VLog:command": {
@@ -70,6 +71,14 @@
       },
       "VLog:log": {
         "@id": "#log",
+        "@type": "@id"
+      },
+      "VLog:author": {
+        "@id": "#author",
+        "@type": "@id"
+      },
+      "VLog:publicIdentity": {
+        "@id": "#publicIdentity",
         "@type": "@id"
       }
     },
@@ -90,7 +99,8 @@
       "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
       "https://valospace.org/plot/0#": "@valos/plot/VPlot",
       "https://valospace.org/state/0#": "@valos/state/VState",
-      "https://valospace.org/valk/0#": "@valos/valk/VValk"
+      "https://valospace.org/valk/0#": "@valos/valk/VValk",
+      "https://valospace.org/0#": "@valos/space/V"
     },
     "VRevdoc:extenderModules": {},
     "respecConfig": {
@@ -124,13 +134,44 @@
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
+            "The event log is sequence of ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "event resources"
+              ],
+              "VDoc:ref": "VLog:Event"
+            },
+            ".\nAn event resource is a map of semantically different ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "aspects"
+              ],
+              "VDoc:ref": "VLog:EventAspect"
+            },
+            ". Each aspect represents some role or lifecycle phase of the event and\nis a map of attributes that relate to that role. Most notable one is\nthe ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "delta aspect"
+              ],
+              "VDoc:ref": "VLog:DeltaAspect"
+            },
+            " which defines the\nactual state change payload of the event."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "The ",
             {
               "VDoc:em": true,
               "VDoc:content": [
                 "VLog"
               ]
             },
-            " together with ",
+            " namespace together with ",
             {
               "@type": "VDoc:Reference",
               "VDoc:content": [
@@ -154,7 +195,7 @@
               ],
               "VDoc:ref": "VValk:"
             },
-            " forms the infrastructural foundation ie. the ",
+            " namespaces forms the\ninfrastructural foundation or the ",
             {
               "VDoc:em": true,
               "VDoc:content": [
@@ -168,7 +209,7 @@
                 "VLog"
               ]
             },
-            " provides the temporal dimension and so enables change and reactions."
+            " provides the temporal dimension and thus makes change\nand reactions possible."
           ]
         }
       ]
@@ -326,7 +367,8 @@
       "VKernel": "https://valospace.org/kernel/0#",
       "VPlot": "https://valospace.org/plot/0#",
       "VState": "https://valospace.org/state/0#",
-      "VValk": "https://valospace.org/valk/0#"
+      "VValk": "https://valospace.org/valk/0#",
+      "V": "https://valospace.org/0#"
     },
     "vocabulary": {
       "@id": "vocabulary",
@@ -337,8 +379,35 @@
       },
       "EventAspects": {
         "@type": "VKernel:Class",
-        "VRevdoc:brief": "context-free container of event aspects",
-        "rdfs:comment": "The class of resources which provide context-free container of all\ndifferent lifetime aspects of a single event as it travels through the\nValOS sourcering streams. These properties are grouped to different\ncontextual and/or functional aspects."
+        "VRevdoc:brief": "all the aspects of an event",
+        "rdfs:comment": "The class of resources which contain all different lifecycle aspects\nof some chronicle event as it advances through the proclamation\nlifecycle.",
+        "VEngine:domainOfProperty": [
+          {
+            "@id": "#version",
+            "VRevdoc:indexLabel": "VLog:version"
+          },
+          {
+            "@id": "#delta",
+            "VRevdoc:indexLabel": "VLog:delta"
+          },
+          {
+            "@id": "#command",
+            "VRevdoc:indexLabel": "VLog:command"
+          },
+          {
+            "@id": "#log",
+            "VRevdoc:indexLabel": "VLog:log"
+          },
+          {
+            "@id": "#author",
+            "VRevdoc:indexLabel": "VLog:author"
+          }
+        ]
+      },
+      "EventAspect": {
+        "@type": "VKernel:Class",
+        "VRevdoc:brief": "event lifecycle aspect",
+        "rdfs:comment": "The class of resources which contain a set of attributes of a single\nlifecycle aspect of some chronicle event as it progresses through the\nproclamation lifecycle."
       },
       "version": {
         "@type": "VKernel:Property",
@@ -348,34 +417,29 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "rdfs:comment": "The aspect version string. The version number of this specification is \"0.3\""
+        "rdfs:comment": "The aspect version string. The version of this specification is \"0.3\""
       },
-      "EventAspect": {
+      "DeltaAspect": {
         "@type": "VKernel:Class",
-        "VRevdoc:brief": "contextual event aspect",
-        "rdfs:comment": "The class of resources which contain contextual attributes of a\nparticular phase of the event message lifetime."
+        "VRevdoc:brief": "state delta aspect",
+        "rdfs:subClassOf": "VLog:EventAspect",
+        "rdfs:comment": "The class of resources which contain the state delta payload of some\nchronicle event."
       },
-      "event": {
+      "delta": {
         "@type": "VKernel:Property",
         "rdfs:domain": "VLog:EventAspects",
-        "rdfs:range": "VLog:Event",
+        "rdfs:range": "VLog:DeltaAspect",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "rdfs:comment": "The aspect which contains the event state change payload."
+        "rdfs:comment": "The state delta aspect of the event."
       },
       "CommandAspect": {
         "@type": "VKernel:Class",
+        "VRevdoc:brief": "command fabrication aspect",
         "rdfs:subClassOf": "VLog:EventAspect",
-        "VRevdoc:brief": "gateway command aspect",
-        "rdfs:comment": "The class of gateway-provided command properties of an event."
-      },
-      "LogAspect": {
-        "@type": "VKernel:Class",
-        "rdfs:subClassOf": "VLog:EventAspect",
-        "VRevdoc:brief": "authority truth aspect",
-        "rdfs:comment": "The class of authority-provided truth properties of an event."
+        "rdfs:comment": "The class of resources which contain attributes added by a gateway to\nsome event during the fabrication of the event command."
       },
       "command": {
         "@type": "VKernel:Property",
@@ -385,7 +449,23 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "rdfs:comment": "The aspect which contains the client-generated command properties."
+        "rdfs:comment": "The command fabrication aspect of the event."
+      },
+      "LogAspect": {
+        "@type": "VKernel:Class",
+        "rdfs:subClassOf": "VLog:EventAspect",
+        "VRevdoc:brief": "event log aspect",
+        "rdfs:comment": "The class of resources which contain attributes of an event which\nrelate to its position in the chronicle event log. The contents of this\naspect are ultimately finally provided by the authority but is\ntypically provisionally provided by the gateway.",
+        "VEngine:domainOfProperty": [
+          {
+            "@id": "#index",
+            "VRevdoc:indexLabel": "VLog:index"
+          },
+          {
+            "@id": "#chainHash",
+            "VRevdoc:indexLabel": "VLog:chainHash"
+          }
+        ]
       },
       "log": {
         "@type": "VKernel:Property",
@@ -395,7 +475,87 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "rdfs:comment": "The aspect which contains the authority-confirmed event log properties."
+        "rdfs:comment": "The authority log aspect of the event."
+      },
+      "index": {
+        "@type": "VKernel:Property",
+        "rdfs:domain": "VLog:LogAspect",
+        "rdfs:range": "xsd:integer",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "rdfs:comment": "The 0-based index of the event in the event log."
+      },
+      "chainHash": {
+        "@type": "VKernel:Property",
+        "rdfs:domain": "VLog:LogAspect",
+        "rdfs:range": "xsd:string",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "rdfs:comment": "The base64url-encoded SHA-512/384 hash of the combination of the\npreceding event chainHash with the current event signature or delta.\nThe exact format of the combination is pending. The event contents is\ndefined to be the VLog:signature if the event is signed, otherwise it\nis the vplot serialization of the VLog:DeltaAspect of the event."
+      },
+      "AuthorAspect": {
+        "@type": "VKernel:Class",
+        "VRevdoc:brief": "command author aspect",
+        "rdfs:subClassOf": "VLog:EventAspect",
+        "rdfs:comment": "The class of resources which contain the authoring attributes and the\ncommand signature of a single chronicle event.",
+        "VEngine:domainOfProperty": [
+          {
+            "@id": "#antecedent",
+            "VRevdoc:indexLabel": "VLog:antecedent"
+          },
+          {
+            "@id": "#publicIdentity",
+            "VRevdoc:indexLabel": "VLog:publicIdentity"
+          },
+          {
+            "@id": "#signature",
+            "VRevdoc:indexLabel": "VLog:signature"
+          }
+        ]
+      },
+      "author": {
+        "@type": "VKernel:Property",
+        "rdfs:domain": "VLog:EventAspects",
+        "rdfs:range": "VLog:AuthorAspect",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "rdfs:comment": "The command author aspect of the event."
+      },
+      "antecedent": {
+        "@type": "VKernel:Property",
+        "rdfs:domain": "VLog:AuthorAspect",
+        "rdfs:range": "xsd:integer",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "rdfs:comment": "The index of an antecedent event the payload of which this author\nsection confirms. This usually is the index of the directly preceding\nevent but if the chronicle allows for reordering and eventual\nconsistency this can refer to further in the log."
+      },
+      "publicIdentity": {
+        "@type": "VKernel:Property",
+        "rdfs:domain": "VLog:AuthorAspect",
+        "rdfs:range": "V:Entity",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "rdfs:comment": "The public identity resource of the contributor of this event."
+      },
+      "signature": {
+        "@type": "VKernel:Property",
+        "rdfs:domain": "VLog:AuthorAspect",
+        "rdfs:range": "xsd:string",
+        "restriction": {
+          "@type": "owl:Restriction",
+          "owl:maxCardinality": 1
+        },
+        "rdfs:comment": "The base64url-encoded 512-bit Ed25519 signature (as provided by\ntweetnacl.sign.detached) of the event payload. The exact format of the\npayload is pending precise specification. This signature is created\nusing the secretKey associated with the chronicle publicKey of the\nauthoring publicIdentity."
       }
     },
     "context": {
@@ -407,8 +567,8 @@
         "@reverse": "VLog:event"
       },
       "@base": "https://valospace.org/log/0#",
-      "VLog:event": {
-        "@id": "#event",
+      "VLog:delta": {
+        "@id": "#delta",
         "@type": "@id"
       },
       "VLog:command": {
@@ -418,6 +578,14 @@
       "VLog:log": {
         "@id": "#log",
         "@type": "@id"
+      },
+      "VLog:author": {
+        "@id": "#author",
+        "@type": "@id"
+      },
+      "VLog:publicIdentity": {
+        "@id": "#publicIdentity",
+        "@type": "@id"
       }
     },
     "section_fabric_abstract": {
@@ -426,7 +594,7 @@
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "The vocabulary for defining the ValOS chronicle event log structure\nand for adding content and behaviors to it."
+            "The fabric storage and transport layer vocabulary that both specifies\nthe ValOS event log and aspects structure and is used to express the\ncontent and behaviors of individual chronicles."
           ]
         }
       ]
@@ -742,8 +910,10 @@
             "Event",
             "EventAspects",
             "EventAspect",
+            "DeltaAspect",
             "CommandAspect",
-            "LogAspect"
+            "LogAspect",
+            "AuthorAspect"
           ]
         }
       ]
@@ -928,9 +1098,15 @@
           },
           "VDoc:entries": [
             "version",
-            "event",
+            "delta",
             "command",
-            "log"
+            "log",
+            "index",
+            "chainHash",
+            "author",
+            "antecedent",
+            "publicIdentity",
+            "signature"
           ]
         }
       ]

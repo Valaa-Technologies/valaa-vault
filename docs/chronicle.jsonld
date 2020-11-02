@@ -1,8 +1,8 @@
 [
   {
-    "@id": "https://valospace.org/revdoc",
+    "@id": "https://valospace.org/chronicle",
     "@context": {
-      "@base": "https://valospace.org/revdoc/0#",
+      "@base": "https://valospace.org/chronicle/0#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
       "xsd": "http://www.w3.org/2001/XMLSchema#",
@@ -52,29 +52,41 @@
         "@id": "#cell",
         "@type": "@id"
       },
-      "VEngine": "https://valospace.org/engine/0#"
+      "VEngine": "https://valospace.org/engine/0#",
+      "VChronicle": "https://valospace.org/chronicle/0#",
+      "VState": "https://valospace.org/state/0#",
+      "VLog": "https://valospace.org/log/0#",
+      "V": "https://valospace.org/0#",
+      "VChronicle:contributor": {
+        "@id": "#contributor",
+        "@type": "@id"
+      },
+      "VChronicle:director": {
+        "@id": "#director",
+        "@type": "@id"
+      }
     },
-    "dc:title": "ReVDoc - ReSpec document VDoc extension",
     "VDoc:tags": [
-      "PRIMARY",
       "WORKSPACE",
-      "FABRIC",
+      "VALOSPACE",
       "ONTOLOGY"
     ],
-    "VRevdoc:package": "@valos/revdoc",
-    "VRevdoc:version": "0.37.0-alpha.4",
-    "VRevdoc:preferredPrefix": "VRevdoc",
-    "VRevdoc:baseIRI": "https://valospace.org/revdoc/0#",
+    "dc:title": "@valos/chronicle library workspace",
+    "VRevdoc:package": "@valos/chronicle",
+    "VRevdoc:version": "0.36.0-alpha.0",
+    "VRevdoc:preferredPrefix": "VChronicle",
+    "VRevdoc:baseIRI": "https://valospace.org/chronicle/0#",
     "VRevdoc:referencedModules": {
       "https://valospace.org/engine/0#": "@valos/engine/VEngine",
       "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
-      "https://valospace.org/vdoc/0#": "@valos/vdoc/VDoc",
-      "https://valospace.org/revdoc/0#": "@valos/revdoc/VRevdoc"
+      "https://valospace.org/state/0#": "@valos/state/VState",
+      "https://valospace.org/log/0#": "@valos/log/VLog",
+      "https://valospace.org/0#": "@valos/space/V"
     },
     "VRevdoc:extenderModules": {},
     "respecConfig": {
-      "subtitle": "0.37.0-alpha.4",
       "specStatus": "unofficial",
+      "shortName": "chronicle",
       "editors": [
         {
           "name": "Iridian Kiiskinen",
@@ -82,11 +94,11 @@
           "github": "http://github.com/valospace"
         }
       ],
-      "shortName": "revdoc",
-      "alternateFormats": [
+      "authors": [
         {
-          "label": "VDoc",
-          "uri": "revdoc.jsonld"
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
         }
       ]
     },
@@ -97,23 +109,82 @@
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "This document specifies VRevdoc, a ",
+            "Specifies ValOS chronicle, its behaviors and the 'VChronicle' namespace"
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "A chronicle is a document with a history. In ValOS a chronicle has two\nfacets. The valospace facet of a chronicle is the set of all *state resources*\nthat are recursively owned by the chronicle *root resource*. The fabric\nfacet of a chronicle is the *event log* ie. the linear sequence of\n*events* that describe the incremental changes to the chronicle state\nresources."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "The valospace facet is specified by the ",
             {
               "@type": "VDoc:Reference",
               "VDoc:content": [
-                "VDoc extension"
+                [
+                  "primary ",
+                  {
+                    "VDoc:em": true,
+                    "VDoc:content": [
+                      "V"
+                    ]
+                  }
+                ]
               ],
-              "VDoc:ref": "@valos/vdoc#extension"
+              "VDoc:ref": "V:"
             },
-            "\nfor extracting and emitting ",
+            " namespace. The fabric facet is specified by the ",
             {
               "@type": "VDoc:Reference",
               "VDoc:content": [
-                "ReSpec documents"
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "VState"
+                  ]
+                }
               ],
-              "VDoc:ref": "https://github.com/w3c/respec"
+              "VDoc:ref": "VState:"
             },
-            "."
+            " and the ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "VLog"
+                  ]
+                }
+              ],
+              "VDoc:ref": "VLog:"
+            },
+            " namespaces."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "This document specifies the ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "VChronicle"
+              ],
+              "VDoc:ref": "VChronicle:"
+            },
+            " namespace for defining *chronicle behaviors* ie. constraints to the\nchanges that can be made to a chronicle. These behaviors are defined\nvia the chronicle root resource properties that are named using ",
+            {
+              "VDoc:em": true,
+              "VDoc:content": [
+                "VChronicle"
+              ]
+            },
+            " namespace terms."
           ]
         }
       ]
@@ -125,40 +196,33 @@
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "This document has not been reviewed. This is a draft document and may\nbe updated, replaced or obsoleted by other documents at any time."
-          ]
-        },
-        {
-          "@type": "VDoc:Paragraph",
-          "VDoc:content": [
-            "This document is part of the ",
-            {
-              "@type": "VDoc:Reference",
-              "VDoc:content": [
-                "ValOS kernel specification"
-              ],
-              "VDoc:ref": "@valos/kernel"
-            },
-            "."
-          ]
-        },
-        {
-          "@type": "VDoc:Paragraph",
-          "VDoc:content": [
-            "The format is implemented and supported by ",
+            "This document is part of the library workspace ",
             {
               "@type": "VRevdoc:Package",
               "VDoc:content": [
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
-                    "@valos/revdoc"
+                    "@valos/chronicle"
                   ]
                 }
               ],
-              "VDoc:ref": "@valos/revdoc"
+              "VDoc:ref": "@valos/chronicle"
             },
-            "\nnpm package."
+            "\n(of domain ",
+            {
+              "@type": "VRevdoc:Package",
+              "VDoc:content": [
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "@valos/kernel"
+                  ]
+                }
+              ],
+              "VDoc:ref": "@valos/kernel"
+            },
+            ") which has the description:\n`Specifies ValOS chronicle, its behaviors and the 'VChronicle' namespace`."
           ]
         }
       ]
@@ -170,54 +234,94 @@
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "VRevdoc is a VDoc extension which can produce ReSpec documents."
+            "Edit me - this is the first payload chapter. Abstract and SOTD are\nessential ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "ReSpec boilerplate"
+              ],
+              "VDoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
+            }
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "See ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "ReVDoc tutorial"
+              ],
+              "VDoc:ref": "@valos/revdoc/tutorial"
+            },
+            " for\ninstructions on how to write revdoc source documents."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "See also ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "ReVdoc specification"
+              ],
+              "VDoc:ref": "@valos/revdoc"
+            },
+            " and ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "VDoc specification"
+              ],
+              "VDoc:ref": "@valos/vdoc"
+            },
+            " for reference documentation."
           ]
         }
       ]
     },
-    "section_fabric": {
-      "@id": "section_fabric",
+    "section_valospace": {
+      "@id": "section_valospace",
       "@type": "VDoc:Chapter",
       "dc:title": [
         "The ",
         {
           "VDoc:em": true,
           "VDoc:content": [
-            "VRevdoc"
+            "VChronicle"
           ]
         },
-        " fabric namespace of the library ontology of ",
+        " valospace namespace of the library ontology of ",
         {
           "@type": "VRevdoc:Package",
           "VDoc:content": [
             {
               "VDoc:em": true,
               "VDoc:content": [
-                "@valos/revdoc"
+                "@valos/chronicle"
               ]
             }
           ],
-          "VDoc:ref": "@valos/revdoc"
+          "VDoc:ref": "@valos/chronicle"
         }
       ],
       "VDoc:content": [
         {
-          "@id": "section_fabric_abstract"
+          "@id": "section_valospace_abstract"
         },
         {
           "@id": "section_prefixes"
         },
         {
-          "@id": "section_classes"
+          "@id": "section_types"
         },
         {
-          "@id": "section_properties"
+          "@id": "section_fields"
         },
         {
           "@id": "section_vocabulary_other"
-        },
-        {
-          "@id": "section_context"
         }
       ]
     },
@@ -228,163 +332,69 @@
       "xsd": "http://www.w3.org/2001/XMLSchema#",
       "owl": "http://www.w3.org/2002/07/owl#",
       "dc": "http://purl.org/dc/elements/1.1/",
-      "VRevdoc": "https://valospace.org/revdoc/0#",
+      "VChronicle": "https://valospace.org/chronicle/0#",
       "VKernel": "https://valospace.org/kernel/0#",
-      "VDoc": "https://valospace.org/vdoc/0#"
+      "VState": "https://valospace.org/state/0#",
+      "VLog": "https://valospace.org/log/0#",
+      "V": "https://valospace.org/0#"
     },
     "vocabulary": {
       "@id": "vocabulary",
-      "Document": {
-        "@type": "VDoc:Class",
-        "rdfs:subClassOf": "VDoc:Chapter",
-        "rdfs:comment": "A ReSpec specification document",
-        "VEngine:domainOfProperty": [
-          {
-            "@id": "#preferredPrefix",
-            "VRevdoc:indexLabel": "VRevdoc:preferredPrefix"
-          },
-          {
-            "@id": "#baseIRI",
-            "VRevdoc:indexLabel": "VRevdoc:baseIRI"
-          }
-        ]
+      "requireAuthoredEvents": {
+        "@type": "VKernel:Property",
+        "rdfs:domain": "V:Resource",
+        "rdfs:range": "xsd:boolean",
+        "rdfs:comment": "When set to true all the chronicle events must be authored with\nan AuthorAspect."
       },
-      "Example": {
-        "@type": "VDoc:Class",
-        "rdfs:subClassOf": "VDoc:Node",
-        "rdfs:comment": "A ReSpec example node"
+      "contributor": {
+        "@type": "VKernel:Property",
+        "rdfs:domain": "V:Resource",
+        "rdfs:range": "V:Resource",
+        "rdfs:comment": "The collection of identities which have registered their signature\npublic keys to the chronicle event log."
       },
-      "Definition": {
-        "@type": "VDoc:Class",
-        "rdfs:subClassOf": "VDoc:Node",
-        "rdfs:comment": "A ReSpec term definition document node"
-      },
-      "Package": {
-        "@type": "VDoc:Class",
-        "rdfs:subClassOf": "VDoc:Reference",
-        "rdfs:comment": "A package reference document node"
-      },
-      "ABNF": {
-        "@type": "VDoc:Class",
-        "rdfs:subClassOf": "VDoc:CharacterData",
-        "rdfs:comment": "An ABNF section node"
-      },
-      "JSONLD": {
-        "@type": "VDoc:Class",
-        "rdfs:subClassOf": "VDoc:CharacterData",
-        "rdfs:comment": "An JSONLD section node"
-      },
-      "Turtle": {
-        "@type": "VDoc:Class",
-        "rdfs:subClassOf": "VDoc:CharacterData",
-        "rdfs:comment": "An Turtle section node"
-      },
-      "VSX": {
-        "@type": "VDoc:Class",
-        "rdfs:subClassOf": "VDoc:CharacterData",
-        "rdfs:comment": "An VSX section node"
-      },
-      "Command": {
-        "@type": "VDoc:Class",
-        "rdfs:subClassOf": "VDoc:ContextPath",
-        "rdfs:comment": "A single command reference node"
-      },
-      "Invokation": {
-        "@type": "VDoc:Class",
-        "rdfs:subClassOf": "VDoc:ContextPath",
-        "rdfs:comment": "A command plus its parameters document node"
-      },
-      "CommandLineInteraction": {
-        "@type": "VDoc:Class",
-        "rdfs:subClassOf": "VRevdoc:Example",
-        "rdfs:comment": "A command line interaction sequence document node"
-      },
-      "preferredPrefix": {
-        "@type": "VDoc:Property",
-        "rdfs:domain": "VRevdoc:Document",
-        "rdfs:range": "rdfs:Literal",
-        "rdfs:comment": "The preferred prefix of an ontology namespace"
-      },
-      "baseIRI": {
-        "@type": "VDoc:Property",
-        "rdfs:domain": "VRevdoc:Document",
-        "rdfs:range": "rdfs:Resource",
-        "rdfs:comment": "The base IRI of an ontology namespace"
-      },
-      "package": {
-        "@type": "VDoc:Property",
-        "rdfs:domain": "VDoc:Node",
-        "rdfs:range": "rdfs:Literal",
-        "rdfs:comment": "A package name"
-      },
-      "version": {
-        "@type": "VDoc:Property",
-        "rdfs:domain": "VDoc:Node",
-        "rdfs:range": "rdfs:Literal",
-        "rdfs:comment": "A semver string"
-      },
-      "introduction": {
-        "@type": "VDoc:Property",
-        "rdfs:domain": "VDoc:Node",
-        "rdfs:range": "rdfs:Literal",
-        "rdfs:comment": "VRevdoc introduction section"
-      },
-      "Tooltip": {
-        "@type": "VDoc:Class",
-        "rdfs:subClassOf": "VDoc:Node",
-        "rdfs:comment": "A hoverable tooltip document node",
-        "VEngine:domainOfProperty": [
-          {
-            "@id": "#tooltipContent",
-            "VRevdoc:indexLabel": "VRevdoc:tooltipContent"
-          }
-        ]
-      },
-      "tooltipContent": {
-        "@type": "VDoc:Property",
-        "rdfs:domain": "VRevdoc:Tooltip",
-        "rdfs:range": "VDoc:Node",
-        "rdfs:comment": "The tooltip content"
-      },
-      "deprecatedInFavorOf": {
-        "@type": "VDoc:Property",
-        "rdfs:domain": "rdfs:Resource",
-        "rdfs:range": "xsd:string",
-        "rdfs:comment": "The preferred resource in favor of the subject resource."
-      },
-      "indexLabel": {
-        "@type": "VDoc:Property",
-        "rdfs:domain": "rdfs:Resource",
-        "rdfs:range": "rdfs:Literal",
-        "rdfs:comment": "User-readable label for index references *to* the subject resource"
+      "director": {
+        "@type": "VKernel:Property",
+        "rdfs:subPropertyOf": "VChronicle:contributor",
+        "rdfs:domain": "V:Resource",
+        "rdfs:range": "V:Resource",
+        "rdfs:comment": "The collection of identities which (and only which) can make changes\nto the chronicle behaviors (eg. permissions)."
       }
     },
     "context": {
       "@id": "context",
-      "restriction": {
-        "@reverse": "owl:onProperty"
+      "@base": "https://valospace.org/chronicle/0#",
+      "VChronicle:contributor": {
+        "@id": "#contributor",
+        "@type": "@id"
       },
-      "@base": "https://valospace.org/revdoc/0#",
-      "VRevdoc:tooltipContent": {
-        "@id": "#tooltipContent",
+      "VChronicle:director": {
+        "@id": "#director",
         "@type": "@id"
       }
     },
-    "section_fabric_abstract": {
-      "@id": "section_fabric_abstract",
+    "section_valospace_abstract": {
+      "@id": "section_valospace_abstract",
       "VDoc:content": [
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "'VRevdoc' namespace provides vocabulary and definitions which are\ntailored for emitting ReSpec html output documents."
+            "The valospace vocabulary for specifying behaviors on specific chronicles"
           ]
         }
       ]
     },
     "section_prefixes": {
       "@id": "section_prefixes",
-      "dc:title": "VRevdoc IRI prefixes",
       "@type": "VDoc:Chapter",
+      "dc:title": [
+        {
+          "VDoc:em": true,
+          "VDoc:content": [
+            "@valos/chronicle"
+          ]
+        },
+        " IRI prefixes"
+      ],
       "VDoc:content": [
         {
           "VDoc:lookup": "prefixes",
@@ -408,26 +418,32 @@
         }
       ]
     },
-    "section_classes": {
-      "@id": "section_classes",
+    "section_types": {
+      "@id": "section_types",
       "@type": "VDoc:Chapter",
       "dc:title": [
         {
           "VDoc:em": true,
           "VDoc:content": [
-            "VRevdoc"
+            "VChronicle"
           ]
         },
         " ",
         {
           "@type": "VDoc:Reference",
           "VDoc:content": [
-            "VDoc classes"
+            "valospace types"
           ],
-          "VDoc:ref": "VDoc:Class"
+          "VDoc:ref": "VState:Type"
         }
       ],
       "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "This section describes valospace types introduced by the 'VChronicle' namespace"
+          ]
+        },
         {
           "VDoc:lookup": "vocabulary",
           "@type": "VDoc:Table",
@@ -509,6 +525,20 @@
               {
                 "@type": "VDoc:Header",
                 "VDoc:content": [
+                  "VRevdoc:brief"
+                ],
+                "VDoc:cell": {
+                  "VDoc:strong": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:selectField": "VRevdoc:brief"
+                    }
+                  ]
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
                   "rdfs:subClassOf"
                 ],
                 "VDoc:cell": {
@@ -539,7 +569,35 @@
                     }
                   ]
                 },
-                "VDoc:wide": false
+                "VDoc:wide": true
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "instance fields"
+                  ],
+                  "VDoc:ref": "VState:Field"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:domainOfField"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
               },
               {
                 "@type": "VDoc:Header",
@@ -602,7 +660,7 @@
                 "VDoc:content": {
                   "@type": "VDoc:Reference",
                   "VDoc:content": [
-                    "class properties"
+                    "type object properties"
                   ],
                   "VDoc:ref": "VEngine:ObjectProperty"
                 },
@@ -630,7 +688,7 @@
                 "VDoc:content": {
                   "@type": "VDoc:Reference",
                   "VDoc:content": [
-                    "class methods"
+                    "type object methods"
                   ],
                   "VDoc:ref": "VEngine:ObjectMethod"
                 },
@@ -674,43 +732,36 @@
               }
             ]
           },
-          "VDoc:entries": [
-            "Document",
-            "Example",
-            "Definition",
-            "Package",
-            "ABNF",
-            "JSONLD",
-            "Turtle",
-            "VSX",
-            "Command",
-            "Invokation",
-            "CommandLineInteraction",
-            "Tooltip"
-          ]
+          "VDoc:entries": []
         }
       ]
     },
-    "section_properties": {
-      "@id": "section_properties",
+    "section_fields": {
+      "@id": "section_fields",
       "@type": "VDoc:Chapter",
       "dc:title": [
         {
           "VDoc:em": true,
           "VDoc:content": [
-            "VRevdoc"
+            "VChronicle"
           ]
         },
         " ",
         {
           "@type": "VDoc:Reference",
           "VDoc:content": [
-            "VDoc properties"
+            "valospace fields"
           ],
-          "VDoc:ref": "VDoc:Property"
+          "VDoc:ref": "VKernel:Property"
         }
       ],
       "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "This section describes valospace fields introduced by the 'VChronicle' namespace"
+          ]
+        },
         {
           "VDoc:lookup": "vocabulary",
           "@type": "VDoc:Table",
@@ -826,6 +877,54 @@
                 }
               },
               {
+                "@type": "VDoc:Header",
+                "VDoc:content": "rdf:type",
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "@type"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": "rdfs:subPropertyOf",
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:subPropertyOf"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": "VState:coupledToField",
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VState:coupledToField"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
                 "VDoc:cell": "rdfs:comment",
                 "@type": "VDoc:Header",
                 "VDoc:content": {
@@ -864,14 +963,9 @@
             ]
           },
           "VDoc:entries": [
-            "preferredPrefix",
-            "baseIRI",
-            "package",
-            "version",
-            "introduction",
-            "tooltipContent",
-            "deprecatedInFavorOf",
-            "indexLabel"
+            "requireAuthoredEvents",
+            "contributor",
+            "director"
           ]
         }
       ]
@@ -883,10 +977,10 @@
         {
           "VDoc:em": true,
           "VDoc:content": [
-            "VRevdoc"
+            "VChronicle"
           ]
         },
-        " remaining vocabulary"
+        " remaining vocabulary terms"
       ],
       "VDoc:content": [
         {
@@ -1043,220 +1137,6 @@
         }
       ]
     },
-    "section_context": {
-      "@id": "section_context",
-      "dc:title": "VRevdoc JSON-LD context term definitions",
-      "@type": "VDoc:Chapter",
-      "VDoc:content": [
-        {
-          "VDoc:lookup": "context",
-          "@type": "VDoc:Table",
-          "VDoc:columns": [
-            {
-              "VDoc:cell": "VDoc:selectKey",
-              "@type": "VDoc:Header",
-              "VDoc:content": [
-                "Term"
-              ]
-            },
-            {
-              "VDoc:cell": "VDoc:selectValue",
-              "@type": "VDoc:Header",
-              "VDoc:content": [
-                "Definition"
-              ]
-            },
-            {
-              "VDoc:cell": "@id",
-              "@type": "VDoc:Header",
-              "VDoc:content": [
-                "@id"
-              ]
-            },
-            {
-              "VDoc:cell": "@type",
-              "@type": "VDoc:Header",
-              "VDoc:content": [
-                "@type"
-              ]
-            },
-            {
-              "VDoc:cell": "@container",
-              "@type": "VDoc:Header",
-              "VDoc:content": [
-                "@container"
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    "transformations": {
-      "@id": "transformations",
-      "@type": "VDoc:Chapter",
-      "VDoc:content": [
-        {
-          "@type": "VDoc:Paragraph",
-          "VDoc:content": [
-            "VRevdoc lightly extends basic VDoc extraction with some ReSpec specific\nprimitives and specifies a ReSpec html emission transformation."
-          ]
-        },
-        {
-          "@id": "extraction_rules"
-        },
-        {
-          "@id": "extractee_api"
-        },
-        {
-          "@id": "emission_output"
-        },
-        {
-          "@id": "emission_rules"
-        }
-      ]
-    },
-    "extraction_rules": {
-      "@id": "extraction_rules",
-      "dc:title": "VRevdoc extraction rules",
-      "@type": "VDoc:Chapter",
-      "VDoc:content": [
-        {
-          "VDoc:lookup": "extraction_rules_data",
-          "@type": "VDoc:Table",
-          "VDoc:columns": [
-            {
-              "VDoc:cell": "VDoc:selectKey",
-              "@type": "VDoc:Header",
-              "VDoc:content": [
-                "Rule name"
-              ]
-            },
-            {
-              "VDoc:cell": "range",
-              "@type": "VDoc:Header",
-              "VDoc:content": [
-                "Inter-node rdf:type"
-              ]
-            },
-            {
-              "VDoc:cell": "owner",
-              "@type": "VDoc:Header",
-              "VDoc:content": [
-                "Owner property"
-              ]
-            },
-            {
-              "VDoc:cell": "body",
-              "@type": "VDoc:Header",
-              "VDoc:content": [
-                "Body property"
-              ]
-            },
-            {
-              "VDoc:cell": "rest",
-              "@type": "VDoc:Header",
-              "VDoc:content": [
-                "';rest' property"
-              ]
-            },
-            {
-              "VDoc:cell": "comment",
-              "@type": "VDoc:Header",
-              "VDoc:content": [
-                "Comment"
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    "extraction_rules_data": {
-      "@id": "extraction_rules_data",
-      "example": {
-        "range": "VRevdoc:Example",
-        "owner": "VDoc:content",
-        "body": "VDoc:content",
-        "rest": "dc:title",
-        "comment": "Example node"
-      }
-    },
-    "extractee_api": {
-      "@id": "extractee_api",
-      "dc:title": "VRevdoc extractee API",
-      "@type": "VDoc:Chapter",
-      "VDoc:content": [
-        {
-          "VDoc:lookup": "extractee_api_lookup",
-          "@type": "VDoc:Table",
-          "VDoc:columns": [
-            {
-              "VDoc:cell": "VDoc:selectKey",
-              "@type": "VDoc:Header",
-              "VDoc:content": [
-                "API identifier"
-              ]
-            },
-            {
-              "VDoc:cell": "VDoc:selectValue",
-              "@type": "VDoc:Header",
-              "VDoc:content": [
-                "rdf:type"
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    "extractee_api_lookup": {
-      "@id": "extractee_api_lookup",
-      "valosRaemFieldClasses": [
-        "VState:Field",
-        "VState:Field",
-        "VState:EventLoggedField",
-        "VState:CoupledField",
-        "VState:GeneratedField",
-        "VState:TransientField",
-        "VState:AliasField"
-      ]
-    },
-    "emission_output": {
-      "@id": "emission_output",
-      "dc:title": "VRevdoc emission output",
-      "@type": "VDoc:Chapter",
-      "VDoc:content": [
-        {
-          "@type": "VDoc:Paragraph",
-          "VDoc:content": [
-            "VRevdoc emits html which makes use of ReSpec primitives."
-          ]
-        }
-      ]
-    },
-    "emission_rules": {
-      "@id": "emission_rules",
-      "dc:title": "VRevdoc emission rules",
-      "@type": "VDoc:Chapter",
-      "VDoc:content": [
-        {
-          "@type": "VDoc:Paragraph",
-          "VDoc:content": [
-            "VRevdoc provides html emission rules for ",
-            {
-              "VDoc:words": [
-                "VDoc:Document",
-                "VRevdoc:Document",
-                "VDoc:Chapter",
-                "VDoc:Reference",
-                "VRevdoc:Invokation",
-                "VRevdoc:Command",
-                "VRevdoc:Example",
-                "VRevdoc:Tooltip"
-              ]
-            }
-          ]
-        }
-      ]
-    },
     "@type": "VRevdoc:Document",
     "VDoc:content": [
       {
@@ -1269,10 +1149,7 @@
         "@id": "introduction"
       },
       {
-        "@id": "section_fabric"
-      },
-      {
-        "@id": "transformations"
+        "@id": "section_valospace"
       }
     ]
   }

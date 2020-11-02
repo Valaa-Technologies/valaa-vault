@@ -18,14 +18,15 @@
   <div class="vdoc type-vdoc-paragraph">Provides the ValOS resource state specification and the &#x27;VState&#x27; ontology namespace
   </div>
 </p></div><div><p>
-  <div class="vdoc type-vdoc-paragraph"><em>VState</em> together with <a href="https://valospace.org/log/0#" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+  <div class="vdoc type-vdoc-paragraph">The <em>VState</em> namespace together with <a href="https://valospace.org/log/0#" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">VLog:</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-        The vocabulary for defining the ValOS chronicle event log structure
-and for adding content and behaviors to it.
+        The fabric storage and transport layer vocabulary that both specifies
+the ValOS event log and aspects structure and is used to express the
+content and behaviors of individual chronicles.
     </span>
-</span></a> <a href="https://valospace.org/plot/0#" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+</span></a>, <a href="https://valospace.org/plot/0#" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
     <span class="vdoc type-vdoc-node">VPlot:</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
@@ -39,7 +40,8 @@ extending them with new step semantics
         The vocabulary for defining ValOS computations and for
 adding defining new semantics to it.
     </span>
-</span></a> form the infrastructural foundation ie. the <em>fabric</em> of the valospace.<em>VState</em> provides the data model and so enables structure and
+</span></a> namespaces form the
+infrastructural foundation (the <em>fabric</em>) of the valospace.<em>VState</em> provides the data model and so enables structure and
 meanings.
   </div>
 </p></div>
@@ -155,16 +157,40 @@ and event triple graphs.</span>
 valospace triple graphs. All valospace fields have VState:Type or one
 of its sub-classes as their rdf:domain.</span>
 </td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><a href="https://valospace.org/engine/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">instance properties</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all valosheath type prototype properties.
+    </span>
+</span></a></span>
+</td><td colspan=1> <a href="#isOwnerOf" class="vdoc type-vdoc-reference">VState:isOwnerOf</a> <a href="#isOwnedBy" class="vdoc type-vdoc-reference">VState:isOwnedBy</a> <a href="#coupledToField" class="vdoc type-vdoc-reference">VState:coupledToField</a> <a href="#coupledField" class="vdoc type-vdoc-reference">VState:coupledField</a> <a href="#defaultCoupledField" class="vdoc type-vdoc-reference">VState:defaultCoupledField</a> <a href="#preventsDestroy" class="vdoc type-vdoc-reference">VState:preventsDestroy</a> <a href="#isDuplicateable" class="vdoc type-vdoc-reference">VState:isDuplicateable</a> <a href="#initialValue" class="vdoc type-vdoc-reference">VState:initialValue</a> <a href="#ownDefaultValue" class="vdoc type-vdoc-reference">VState:ownDefaultValue</a> <a href="#finalDefaultValue" class="vdoc type-vdoc-reference">VState:finalDefaultValue</a> <a href="#allowTransientFieldToBeSingular" class="vdoc type-vdoc-reference">VState:allowTransientFieldToBeSingular</a></td></tr>
         <tr id="ExpressedField" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#ExpressedField" class="vdoc type-vdoc-reference">#ExpressedField</a></em></strong> </h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference">VState:Field</a></td><td><span class="vdoc type-vdoc-node">The class of valospace fields which have a full triple expression in
 all regular query and graph contexts (as opposed to fields with
 non-triple semantics or triple expression only in limited contexts).</span>
 </td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><a href="https://valospace.org/engine/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">instance properties</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all valosheath type prototype properties.
+    </span>
+</span></a></span>
+</td><td colspan=1> <a href="#expressor" class="vdoc type-vdoc-reference">VState:expressor</a></td></tr>
         <tr id="EventLoggedField" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#EventLoggedField" class="vdoc type-vdoc-reference">#EventLoggedField</a></em></strong> </h3></td></tr>
         <tr><td><a href="https://valospace.org/state/0#ExpressedField" class="vdoc type-vdoc-reference">VState:ExpressedField</a></td><td><span class="vdoc type-vdoc-node">The class of valospace fields which have both a triple state
 expression inside valospace and a change impression in event logs;
 these are the primary, persisted sources of truth.</span>
 </td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><a href="https://valospace.org/engine/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">instance properties</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all valosheath type prototype properties.
+    </span>
+</span></a></span>
+</td><td colspan=1> <a href="#impressor" class="vdoc type-vdoc-reference">VState:impressor</a></td></tr>
         <tr id="CoupledField" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#CoupledField" class="vdoc type-vdoc-reference">#CoupledField</a></em></strong> </h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/state/0#ExpressedField" class="vdoc type-vdoc-reference">VState:ExpressedField</a></td><td><span class="vdoc type-vdoc-node">The class of valospace fields which have a triple expression inside
 valospace via their coupled fields but lack an event log impression.</span>
@@ -216,6 +242,14 @@ predicate are inferred from triples with aliasOf as predicate and
 mutations with an alias field as predicate are translated to use
 the aliasOf as predicate.</span>
 </td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><a href="https://valospace.org/engine/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">instance properties</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all valosheath type prototype properties.
+    </span>
+</span></a></span>
+</td><td colspan=1> <a href="#aliasOf" class="vdoc type-vdoc-reference">VState:aliasOf</a></td></tr>
       </tbody>
     </table>
 

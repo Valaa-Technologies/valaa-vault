@@ -80,7 +80,6 @@
       "https://valospace.org/0#": "@valos/space/V"
     },
     "VRevdoc:extenderModules": {
-      "https://valospace.org/log/0#": "@valos/sourcerer/VLog",
       "https://valospace.org/0#": "@valos/sourcerer/V",
       "https://valospace.org/valk/0#": "@valos/sourcerer/VValk"
     },

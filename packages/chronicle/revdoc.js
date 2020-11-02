@@ -40,7 +40,24 @@ module.exports = {
   },
   "chapter#abstract>0": {
     "#0": [
-      description,
+description,
+null,
+`A chronicle is a document with a history. In ValOS a chronicle has two
+facets. The valospace facet of a chronicle is the set of all *state resources*
+that are recursively owned by the chronicle *root resource*. The fabric
+facet of a chronicle is the *event log* ie. the linear sequence of
+*events* that describe the incremental changes to the chronicle state
+resources.`,
+null,
+`The valospace facet is specified by the `, ref(["primary ", em("V")], "V:"),
+` namespace. The fabric facet is specified by the `, ref(em("VState"), "VState:"),
+` and the `, ref(em("VLog"), "VLog:"), ` namespaces.`,
+null,
+`This document specifies the `, ref("VChronicle", "VChronicle:"),
+` namespace for defining *chronicle behaviors* ie. constraints to the
+changes that can be made to a chronicle. These behaviors are defined
+via the chronicle root resource properties that are named using `,
+em("VChronicle"), ` namespace terms.`,
     ],
   },
   "chapter#sotd>1": {
@@ -104,7 +121,7 @@ ref("VDoc specification", "@valos/vdoc"), ` for reference documentation.`,
       "table#>0;vocabulary": {
         "VDoc:columns": ontologyColumns.vocabularyOther,
         "VDoc:entries": filterKeysWithNoneOf("@type", [
-          "VState:Type", "VState:Field",
+          "VState:Type", "VKernel:Property",
         ], vocabulary),
       },
     },

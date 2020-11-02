@@ -1,19 +1,19 @@
 module.exports = {
-  ChangeAspect: {
+  DeltaAspect: {
     "@type": "VKernel:Class",
-    "VRevdoc:brief": "state change aspect",
+    "VRevdoc:brief": "state delta aspect",
     "rdfs:subClassOf": "VLog:EventAspect",
     "rdfs:comment":
-`The class of resources which contain the state change payload of a
-some chronicle event.`,
+`The class of resources which contain the state delta payload of some
+chronicle event.`,
   },
 
-  change: {
+  delta: {
     "@type": "VKernel:Property",
     "rdfs:domain": "VLog:EventAspects",
-    "rdfs:range": "VLog:ChangeAspect",
+    "rdfs:range": "VLog:DeltaAspect",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "rdfs:comment":
-`The state change aspect of the event.`,
+`The state delta aspect of the event.`,
   },
 };

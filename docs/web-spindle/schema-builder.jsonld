@@ -85,9 +85,9 @@
             {
               "@type": "VDoc:Reference",
               "VDoc:content": [
-                "VPath"
+                "VPlot"
               ],
-              "VDoc:ref": "@valos/raem/VPath"
+              "VDoc:ref": "@valos/plot"
             },
             "."
           ]
@@ -229,9 +229,9 @@
                 {
                   "@type": "VDoc:Reference",
                   "VDoc:content": [
-                    "VPaths"
+                    "VPlots"
                   ],
-                  "VDoc:ref": "@valos/raem/VPath"
+                  "VDoc:ref": "@valos/plot"
                 },
                 " that are embedded in the gates\n  and types respectively and which define paths into and between\n  valospace resources, respectively"
               ]
@@ -970,7 +970,7 @@
     },
     "section_projections": {
       "@id": "section_projections",
-      "dc:title": "Projection and reflection VPaths",
+      "dc:title": "Projection and reflection VPlots",
       "@type": "VDoc:Chapter",
       "VDoc:content": [
         {
@@ -980,9 +980,9 @@
             {
               "@type": "VDoc:Reference",
               "VDoc:content": [
-                "VPaths"
+                "VPlots"
               ],
-              "VDoc:ref": "@valos/raem/VPath"
+              "VDoc:ref": "@valos/plot"
             },
             "\nwhich are present primary type `valospace.gate.projection` fields and\nin type and property `valospace.reflection` fields."
           ]

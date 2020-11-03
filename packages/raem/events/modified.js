@@ -59,6 +59,7 @@ export function validateFieldsSet (action: Action): FieldsSet {
   _validateModifiedBase(FIELDS_SET, action, id, typeName, rest);
 
   invariantifyObject(sets, "FIELDS_SET.sets", {
+    allowEmpty: true,
     elementInvariant: (value, key) => key && (typeof key === "string"),
   }, "\n\taction:", action);
   return action;
@@ -87,6 +88,7 @@ export function validateAddedTo (action: Action): AddedTo {
   _validateModifiedBase(ADDED_TO, action, id, typeName, rest);
 
   invariantifyObject(adds, `ADDED_TO.adds`, {
+    allowEmpty: true,
     elementInvariant: (value, key) => key
         && (typeof key === "string")
         && invariantifyArray(value, `ADDED_TO.adds['${key}'], with:`,
@@ -112,6 +114,7 @@ export function validateRemovedFrom (action: Action): RemovedFrom {
   _validateModifiedBase(REMOVED_FROM, action, id, typeName, rest);
 
   invariantifyObject(removes, `REMOVED_FROM.removes`, {
+    allowEmpty: true,
     elementInvariant: (value, key) => key
         && (typeof key === "string")
         && invariantifyArray(value, `REMOVED_FROM.removes['${key}'], with:`,
@@ -139,6 +142,7 @@ export function validateReplacedWithin (action: Action): ReplacedWithin {
   _validateModifiedBase(REPLACED_WITHIN, action, id, typeName, rest);
 
   invariantifyObject(removes, `REPLACED_WITHIN.removes`, {
+    allowEmpty: true,
     elementInvariant: (value, key) => key
         && (typeof key === "string")
         && invariantifyArray(value, `REPLACED_WITHIN.removes['${key}'], with:`,
@@ -147,6 +151,7 @@ export function validateReplacedWithin (action: Action): ReplacedWithin {
             "\n\taction:", action)
   }, "\n\taction:", action);
   invariantifyObject(adds, `REPLACED_WITHIN.adds`, {
+    allowEmpty: true,
     elementInvariant: (value, key) => key
         && (typeof key === "string")
         && invariantifyArray(value, `REPLACED_WITHIN.adds['${key}'], with:`,

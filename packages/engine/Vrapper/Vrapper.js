@@ -626,7 +626,9 @@ export default class Vrapper extends Cog {
   }
 
   getFickleId (minimumLength = 4) {
-    const candidate = this.getRawId().slice(7, 7 + minimumLength);
+    const rawId = this.getRawId();
+    const paramIndex = rawId.indexOf(".") + 1;
+    const candidate = this.getRawId().slice(paramIndex, paramIndex + minimumLength);
     const resource = Vrapper._fickleIds[candidate];
     if (resource === undefined) {
       Vrapper._fickleIds[candidate] = this;

@@ -70,7 +70,7 @@ a valonaut and the @valos/inspire UI engine.`,
     if (declaration.tags.includes("Context")) {
       declaration.isSlotName = true;
       domain.push("Lens:UIContext");
-      addLabel([`[$On.${name}]: `, em(valueName), `,`],
+      addLabel([`[$\`On:${name}\`]: `, em(valueName), `,`],
           `On:${name}`,
           ["When set as an ", componentType ? ref(componentType) : "element", " ",
               ref("Lens:context"), " attribute property"]);

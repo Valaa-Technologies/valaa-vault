@@ -49,6 +49,8 @@ export const qualifiedSymbol = require("./namespace").qualifiedSymbol;
 export const qualifierNamespace = require("./namespace").qualifierNamespace;
 export const deprecateSymbolInFavorOf = require("./namespace").deprecateSymbolInFavorOf;
 export const qualifiedNamesOf = require("./namespace").qualifiedNamesOf;
+export const namespacedSymbolTag = require("./namespace").namespacedSymbolTag;
+export const $ = require("./namespace").$;
 export const buildNamespaceSpecification = require("./namespace").buildNamespaceSpecification;
 
 export const thenChainEagerly = require("./thenChainEagerly").thenChainEagerly;

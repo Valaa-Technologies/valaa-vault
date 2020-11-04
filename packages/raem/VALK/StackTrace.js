@@ -25,7 +25,7 @@ export function getSourceEntryInfo (sourceInfo, entrySource) {
 }
 
 export function addSourceEntryInfo (sourceInfo, entrySource, entryInfo) {
-  if (sourceInfo) {
+  if (sourceInfo && entryInfo.loc) {
   // if (!sourceInfo.sourceMap.get(entrySource)) {
     sourceInfo.sourceMap.set(entrySource, entryInfo);
   // }

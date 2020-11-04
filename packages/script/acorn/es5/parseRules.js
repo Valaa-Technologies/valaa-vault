@@ -975,14 +975,17 @@ export function parseCallExpression (transpiler: Transpiler, ast: CallExpression
 
 export function extractEscapedKueryFromCallExpression (transpiler: Transpiler, ast: CallExpression,
     options: Object) {
-  return (ast.callee.type === "Identifier" && ast.callee.name[0] === "$")
-      ? { escapedKuery: transpiler.VALK(), stepName: ast.callee.name.slice(1) }
-    : (ast.callee.type === "MemberExpression" && (ast.callee.property.name || "")[0] === "$")
-        ? {
-          escapedKuery: transpiler.kueryFromAst(ast.callee.object, options),
-          stepName: ast.callee.property.name.slice(1)
-        }
-      : { escapedKuery: undefined, stepName: undefined };
+  const name = (ast.callee.type === "Identifier") ? ast.callee.name
+      : (ast.callee.type === "MemberExpression") ? ast.callee.property.name
+      : undefined;
+  return (!name || name[0] !== "$" || name.length === 1)
+      ? { escapedKuery: undefined, stepName: undefined }
+      : {
+        escapedKuery: (ast.callee.type === "Identifier")
+            ? transpiler.VALK()
+            : transpiler.kueryFromAst(ast.callee.object, options),
+        stepName: name.slice(1),
+      };
 }
 
 export function makeComponentsForCallExpression (transpiler: Transpiler, ast: CallExpression,
@@ -992,7 +995,7 @@ export function makeComponentsForCallExpression (transpiler: Transpiler, ast: Ca
   let this_;
   if (ast.callee.type !== "MemberExpression") {
     stem = transpiler.VALK();
-    callee = transpiler.kueryFromAst(ast.callee, options);
+    callee = transpiler.kueryFromAst(ast.callee, { ...options, leftSideRole: null });
     this_ = transpiler.VALK().fromScope();
   } else {
     stem = transpiler.kueryFromAst(ast.callee.object, options);

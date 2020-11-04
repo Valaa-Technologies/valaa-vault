@@ -1,7 +1,7 @@
 /* global describe expect it */
 
 import { vRef } from "~/raem/VRL";
-import { qualifiedSymbol } from "~/tools/namespace";
+import { qualifiedSymbol, $ } from "~/tools/namespace";
 
 import { testRootId, clearAllScribeDatabases } from "~/sourcerer/test/SourcererTestHarness";
 
@@ -503,9 +503,10 @@ describe("Two paired harnesses emulating two gateways connected through event st
     expect(await pairness.receiveTruthsFrom(harness))
         .toEqual(1);
 
-    const { thing, names } = pairness.runValoscript(vRef(testRootId), `
-      ({ thing: this.thing, names: [this.thing.$V.name, this.thing.val, this.thing[$foo.bar]] });
-    `);
+    const [thing, names] = pairness.runValoscript(vRef(testRootId), `
+      ([this.thing, [this.thing.$V.name, this.thing.val, this.thing[$\`foo:bar\`]]]);
+    `, { console }, { verbosity: 0 });
+
     expect(names)
         .toEqual(["thingie", "yoyo", "oyoy"]);
     expect(thing.getValospaceScope()[qualifiedSymbol("foo", "bar")].getVRef().vrid())
@@ -514,7 +515,7 @@ describe("Two paired harnesses emulating two gateways connected through event st
         .toEqual(thing.getVRef().getSubRef("@.$foo.bar").vrid());
     expect(thing.propertyValue("@$foo.bar@@"))
         .toEqual("oyoy");
-    expect(thing.propertyValue(qualifiedSymbol("foo", "bar")))
+    expect(thing.propertyValue($`foo:bar`))
         .toEqual("oyoy");
   });
 

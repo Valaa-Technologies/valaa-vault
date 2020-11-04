@@ -31,7 +31,7 @@ a prefix.`,
     addLabel([`On:${name}={`, em("handler"), `}`],
         `On:${name}`,
         ["When used as a ", ref("Lens:Element"), " attribute"]);
-    addLabel([`[$On.${name}]: `, em("handler"), `,`],
+    addLabel([`[$\`On:${name}\`]: `, em("handler"), `,`],
         `On:${name}`,
         ["When set as an element ", ref("Lens:context"), " attribute property"]);
     addLabel([`addEventListener("${name}", `, em("handler"), `)`],

@@ -3,7 +3,7 @@ const dumpify = require("./dumpify").default;
 
 const _symbolToQualifiedName = Object.create(null);
 
-const _symbolNamespaces = Object.create(null);
+const _namespaces = Object.create(null);
 const _deprecatedNamespaces = Object.create(null);
 const _null = Object.create(null);
 
@@ -12,13 +12,23 @@ module.exports = {
   qualifierNamespace,
   deprecateSymbolInFavorOf,
   qualifiedNamesOf,
+  $,
+  namespacedSymbolTag,
   buildNamespaceSpecification,
 };
 
+function qualifierNamespace (prefix) {
+  let ret = _namespaces[prefix];
+  if (!ret) {
+    // TODO(iridian, 2020-11): Validate namespace prefix.
+    ret = _namespaces[prefix] = Object.create(null);
+  }
+  return ret;
+}
+
 function qualifiedSymbol (prefix, localPart) {
-  const symbolNamespace = _symbolNamespaces[prefix]
-      || (_symbolNamespaces[prefix] = Object.create(null));
-  let symbol = symbolNamespace[localPart];
+  const namespace = _namespaces[prefix] || qualifierNamespace(prefix);
+  let symbol = namespace[localPart];
   if (!symbol) {
     const deprecationForward = (_deprecatedNamespaces[prefix] || _null)[localPart];
     if (deprecationForward) {
@@ -33,22 +43,46 @@ function qualifiedSymbol (prefix, localPart) {
         prefix, localPart, qualifiedName, vpathName, `@.${qualifiedName}@@`,
       ]);
     }
-    symbolNamespace[localPart] = symbol;
+    namespace[localPart] = symbol;
   }
   return symbol;
 }
 
-function qualifierNamespace (prefix) {
-  return _symbolNamespaces[prefix] || (_symbolNamespaces[prefix] = Object.create(null));
+function $ (...rest) {
+  return typeof rest[0] === "string"
+      ? namespacedSymbolTag(rest)
+      : namespacedSymbolTag(...rest);
+}
+
+function namespacedSymbolTag (strings, ...rest) {
+  let prefix = "", localPart;
+  for (let i = 0; i !== strings.length; ++i) {
+    if (localPart !== undefined) {
+      localPart = `${localPart}${rest[i - 1]}${strings[i]}`;
+      continue;
+    }
+    const current = strings[i];
+    const colonIndex = current.indexOf(":");
+    if (colonIndex === -1) {
+      prefix = `${prefix}${current}${rest[i]}`;
+    } else {
+      prefix = `${prefix}${current.slice(0, colonIndex)}`;
+      localPart = current.slice(colonIndex + 1);
+    }
+  }
+  if (localPart === undefined) {
+    throw new Error("Missing ':'-separator between namespace and local part");
+  }
+  return qualifiedSymbol(prefix, localPart);
 }
 
 function deprecateSymbolInFavorOf (deprecatedPrefix, deprecatedLocalPart, favoredSymbol) {
   if (!isSymbol(favoredSymbol)) {
     throw new Error(`favoredSymbol is not a symbol: ${String(favoredSymbol)}`);
   }
-  const symbolNamespace = _deprecatedNamespaces[deprecatedPrefix]
+  const namespace = _deprecatedNamespaces[deprecatedPrefix]
       || (_deprecatedNamespaces[deprecatedPrefix] = Object.create(null));
-  return (symbolNamespace[deprecatedLocalPart] = favoredSymbol);
+  return (namespace[deprecatedLocalPart] = favoredSymbol);
 }
 
 function qualifiedNamesOf (symbol) {

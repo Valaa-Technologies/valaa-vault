@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0-rc.36](https://github.com/valaatech/kernel/compare/v0.35.0-rc.35...v0.35.0-rc.36) (2020-11-04)
+
+
+### Bug Fixes
+
+* "entities" and "relations" do not live update on resource creation ([38c6a65](https://github.com/valaatech/kernel/commit/38c6a65aad22edbfac0f6e2fe83d7c41bdc5a107))
+* $V.getFickleId() didnt start immediately after '.' ([3d4d3fe](https://github.com/valaatech/kernel/commit/3d4d3fe6f8a680186ccde043bf78f476df7842ca))
+* Relax non-empty requirement from various MODIFIED fields ([131cf9e](https://github.com/valaatech/kernel/commit/131cf9eccf7c98145c9a78cc515f911b723337aa))
+
+
+### Features
+
+* valoscript namespace symbol via $-tagged literals: $`V:name` ([fb2668e](https://github.com/valaatech/kernel/commit/fb2668ea7656269a594250f2836ebe776bfa4879))
+
+
+
+
+
 # [0.35.0-rc.35](https://github.com/valaatech/kernel/compare/v0.35.0-rc.34...v0.35.0-rc.35) (2020-10-18)
 
 

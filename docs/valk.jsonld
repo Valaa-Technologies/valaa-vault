@@ -66,7 +66,7 @@
     ],
     "dc:title": "@valos/valk library workspace",
     "VRevdoc:package": "@valos/valk",
-    "VRevdoc:version": "0.35.0-rc.35",
+    "VRevdoc:version": "0.35.0-rc.36",
     "VRevdoc:preferredPrefix": "VValk",
     "VRevdoc:baseIRI": "https://valospace.org/valk/0#",
     "VRevdoc:referencedModules": {

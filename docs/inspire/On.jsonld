@@ -66,7 +66,7 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/inspire",
-    "VRevdoc:version": "0.35.0-rc.35",
+    "VRevdoc:version": "0.35.0-rc.36",
     "VRevdoc:preferredPrefix": "On",
     "VRevdoc:baseIRI": "https://valospace.org/inspire/On/0#",
     "VRevdoc:referencedModules": {
@@ -306,7 +306,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.proclaim]: ",
+                "[$`On:proclaim`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -396,7 +396,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.compose]: ",
+                "[$`On:compose`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -529,7 +529,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.profess]: ",
+                "[$`On:profess`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -621,7 +621,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.record]: ",
+                "[$`On:record`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -711,7 +711,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.truth]: ",
+                "[$`On:truth`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -799,7 +799,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.schism]: ",
+                "[$`On:schism`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -942,7 +942,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.reform]: ",
+                "[$`On:reform`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -1083,7 +1083,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.purge]: ",
+                "[$`On:purge`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -1172,7 +1172,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.error]: ",
+                "[$`On:error`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -1256,7 +1256,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.precondition]: ",
+                "[$`On:precondition`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -1346,7 +1346,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.postcondition]: ",
+                "[$`On:postcondition`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -1436,7 +1436,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.review]: ",
+                "[$`On:review`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [

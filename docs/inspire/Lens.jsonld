@@ -67,7 +67,7 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/inspire",
-    "VRevdoc:version": "0.35.0-rc.35",
+    "VRevdoc:version": "0.35.0-rc.36",
     "VRevdoc:preferredPrefix": "Lens",
     "VRevdoc:baseIRI": "https://valospace.org/inspire/Lens/0#",
     "VRevdoc:referencedModules": {
@@ -1457,7 +1457,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.loadingLens]: ",
+                "[$`On:loadingLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -1544,7 +1544,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.loadingFailedLens]: ",
+                "[$`On:loadingFailedLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -1823,7 +1823,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.arrayIndex]: ",
+                "[$`On:arrayIndex`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -1869,7 +1869,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.endOffset]: ",
+                "[$`On:endOffset`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -1912,7 +1912,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.elementIndex]: ",
+                "[$`On:elementIndex`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -2246,7 +2246,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.toggleableErrorDetailLens]: ",
+                "[$`On:toggleableErrorDetailLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -2298,7 +2298,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.internalErrorLens]: ",
+                "[$`On:internalErrorLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -2351,7 +2351,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.currentRenderDepth]: ",
+                "[$`On:currentRenderDepth`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -2400,7 +2400,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.infiniteRecursionCheckWaterlineDepth]: ",
+                "[$`On:infiniteRecursionCheckWaterlineDepth`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -2446,7 +2446,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.maximumRenderDepth]: ",
+                "[$`On:maximumRenderDepth`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -2493,7 +2493,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.maximumRenderDepthExceededLens]: ",
+                "[$`On:maximumRenderDepthExceededLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -2665,7 +2665,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.undefinedLens]: ",
+                "[$`On:undefinedLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -2747,7 +2747,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.nullLens]: ",
+                "[$`On:nullLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -2829,7 +2829,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.resourceLens]: ",
+                "[$`On:resourceLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -2918,7 +2918,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.activeLens]: ",
+                "[$`On:activeLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -3004,7 +3004,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.lensProperty]: ",
+                "[$`On:lensProperty`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -3091,7 +3091,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.focusLensProperty]: ",
+                "[$`On:focusLensProperty`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -3204,7 +3204,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.delegateLensProperty]: ",
+                "[$`On:delegateLensProperty`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -3317,7 +3317,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.unframedLens]: ",
+                "[$`On:unframedLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -3461,7 +3461,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.instanceLensProperty]: ",
+                "[$`On:instanceLensProperty`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -3564,7 +3564,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.scopeFrameResource]: ",
+                "[$`On:scopeFrameResource`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -3611,7 +3611,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.frameStepPrefix]: ",
+                "[$`On:frameStepPrefix`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -3730,7 +3730,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.frameAuthority]: ",
+                "[$`On:frameAuthority`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -3789,7 +3789,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.frameAuthorityProperty]: ",
+                "[$`On:frameAuthorityProperty`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -3838,7 +3838,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.frameRoot]: ",
+                "[$`On:frameRoot`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -3885,7 +3885,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.frameRootFocus]: ",
+                "[$`On:frameRootFocus`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -3933,7 +3933,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.integrationScopeResource]: ",
+                "[$`On:integrationScopeResource`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -3981,7 +3981,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.disabledLens]: ",
+                "[$`On:disabledLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -4059,7 +4059,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.pendingLens]: ",
+                "[$`On:pendingLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -4149,7 +4149,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.rejectedLens]: ",
+                "[$`On:rejectedLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -4239,7 +4239,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.pendingPromiseLens]: ",
+                "[$`On:pendingPromiseLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -4329,7 +4329,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.rejectedPromiseLens]: ",
+                "[$`On:rejectedPromiseLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -4415,7 +4415,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.pendingChroniclesLens]: ",
+                "[$`On:pendingChroniclesLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -4503,7 +4503,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.rejectedChroniclesLens]: ",
+                "[$`On:rejectedChroniclesLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -4645,7 +4645,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.pendingAttributesLens]: ",
+                "[$`On:pendingAttributesLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -4697,7 +4697,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.rejectedAttributesLens]: ",
+                "[$`On:rejectedAttributesLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -4774,7 +4774,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.pendingFocusLens]: ",
+                "[$`On:pendingFocusLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -4862,7 +4862,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.rejectedFocusLens]: ",
+                "[$`On:rejectedFocusLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -4948,7 +4948,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.pendingFrameLens]: ",
+                "[$`On:pendingFrameLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -5036,7 +5036,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.rejectedFrameLens]: ",
+                "[$`On:rejectedFrameLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -5123,7 +5123,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.inactiveLens]: ",
+                "[$`On:inactiveLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -5209,7 +5209,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.pendingMediaLens]: ",
+                "[$`On:pendingMediaLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -5297,7 +5297,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.rejectedMediaLens]: ",
+                "[$`On:rejectedMediaLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -5385,7 +5385,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.uninterpretableMediaLens]: ",
+                "[$`On:uninterpretableMediaLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -5473,7 +5473,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.unrenderableInterpretationLens]: ",
+                "[$`On:unrenderableInterpretationLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -5561,7 +5561,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.pendingElementsLens]: ",
+                "[$`On:pendingElementsLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -5648,7 +5648,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.rejectedElementsLens]: ",
+                "[$`On:rejectedElementsLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -5734,7 +5734,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.activatingLens]: ",
+                "[$`On:activatingLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -5821,7 +5821,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.unavailableLens]: ",
+                "[$`On:unavailableLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -5908,7 +5908,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.destroyedLens]: ",
+                "[$`On:destroyedLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -5995,7 +5995,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.lensPropertyNotFoundLens]: ",
+                "[$`On:lensPropertyNotFoundLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -6055,7 +6055,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.notLensResourceLens]: ",
+                "[$`On:notLensResourceLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -6106,7 +6106,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.arrayNotIterableLens]: ",
+                "[$`On:arrayNotIterableLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
@@ -6157,7 +6157,7 @@
             "@type": "VRevdoc:Tooltip",
             "VDoc:content": [
               [
-                "[$On.invalidElementLens]: ",
+                "[$`On:invalidElementLens`]: ",
                 {
                   "VDoc:em": true,
                   "VDoc:content": [

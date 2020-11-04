@@ -68,7 +68,7 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/sourcerer",
-    "VRevdoc:version": "0.35.0-rc.35",
+    "VRevdoc:version": "0.35.0-rc.36",
     "VRevdoc:preferredPrefix": "VSourcerer",
     "VRevdoc:baseIRI": "https://valospace.org/sourcerer/0#",
     "VRevdoc:referencedModules": {

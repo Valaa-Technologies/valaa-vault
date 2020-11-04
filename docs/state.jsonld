@@ -88,7 +88,7 @@
     ],
     "dc:title": "@valos/state library workspace",
     "VRevdoc:package": "@valos/state",
-    "VRevdoc:version": "0.35.0-rc.35",
+    "VRevdoc:version": "0.35.0-rc.36",
     "VRevdoc:preferredPrefix": "VState",
     "VRevdoc:baseIRI": "https://valospace.org/state/0#",
     "VRevdoc:referencedModules": {

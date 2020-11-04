@@ -128,6 +128,20 @@
             <modified>false</modified>
         </component>
         <component type="library">
+            <name>function-bind</name>
+            <version>1.1.1</version>
+            <description>
+                <![CDATA[Implementation of Function.prototype.bind]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/function-bind@1.1.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
             <name>glob</name>
             <version>7.1.6</version>
             <description>
@@ -226,6 +240,20 @@
             <modified>false</modified>
         </component>
         <component type="library">
+            <name>has</name>
+            <version>1.0.3</version>
+            <description>
+                <![CDATA[Object.prototype.hasOwnProperty.call shortcut]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/has@1.0.3</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
             <name>hosted-git-info</name>
             <version>2.8.8</version>
             <description>
@@ -237,6 +265,20 @@
                 </license>
             </licenses>
             <purl>pkg:npm/hosted-git-info@2.8.8</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>is-core-module</name>
+            <version>2.0.0</version>
+            <description>
+                <![CDATA[Is this specifier a node.js core module?]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/is-core-module@2.0.0</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -269,7 +311,7 @@
         </component>
         <component type="library">
             <name>resolve</name>
-            <version>1.17.0</version>
+            <version>1.18.1</version>
             <description>
                 <![CDATA[resolve like require.resolve() on behalf of files asynchronously and synchronously]]>
             </description>
@@ -278,7 +320,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/resolve@1.17.0</purl>
+            <purl>pkg:npm/resolve@1.18.1</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -551,7 +593,7 @@
         <component type="library">
             <group>valos</group>
             <name>inspire</name>
-            <version>0.35.0-rc.35</version>
+            <version>0.35.0-rc.36</version>
             <description>
                 <![CDATA[ValOS Inspire application gateway]]>
             </description>
@@ -560,13 +602,13 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/inspire@0.35.0-rc.35</purl>
+            <purl>pkg:npm/%40valos/inspire@0.35.0-rc.36</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <group>valos</group>
             <name>kernel</name>
-            <version>0.35.0-rc.35</version>
+            <version>0.35.0-rc.36</version>
             <description>
                 <![CDATA[@valos/kernel domain]]>
             </description>
@@ -575,13 +617,13 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/kernel@0.35.0-rc.35</purl>
+            <purl>pkg:npm/%40valos/kernel@0.35.0-rc.36</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <group>valos</group>
             <name>toolset-revealer</name>
-            <version>0.35.0-rc.35</version>
+            <version>0.35.0-rc.36</version>
             <description>
                 <![CDATA[Tools for building revelations both for development and deployment purposes]]>
             </description>
@@ -590,12 +632,12 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/toolset-revealer@0.35.0-rc.35</purl>
+            <purl>pkg:npm/%40valos/toolset-revealer@0.35.0-rc.36</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <name>valma</name>
-            <version>0.35.0-rc.35</version>
+            <version>0.35.0-rc.36</version>
             <description>
                 <![CDATA[A ValOS CLI tool for discovering and executing context-dependent command scripts]]>
             </description>
@@ -604,7 +646,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/valma@0.35.0-rc.35</purl>
+            <purl>pkg:npm/valma@0.35.0-rc.36</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -988,7 +1030,7 @@
         <component type="library">
             <group>valos</group>
             <name>type-vault</name>
-            <version>0.35.0-rc.35</version>
+            <version>0.35.0-rc.36</version>
             <description>
                 <![CDATA[The ValOS 'vault' workspace type toolset]]>
             </description>
@@ -997,7 +1039,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/type-vault@0.35.0-rc.35</purl>
+            <purl>pkg:npm/%40valos/type-vault@0.35.0-rc.36</purl>
             <modified>false</modified>
         </component>
         <component type="library">

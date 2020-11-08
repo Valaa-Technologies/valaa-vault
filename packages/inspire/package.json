@@ -1,6 +1,6 @@
 {
   "name": "@valos/inspire",
-  "version": "0.35.0-rc.36",
+  "version": "0.35.0",
   "valos": {
     "type": "library",
     "domain": "@valos/kernel",
@@ -16,9 +16,9 @@
   "main": "index.js",
   "dependencies": {
     "@babel/polyfill": "^7.8.0",
-    "@valos/engine": "^0.35.0-rc.36",
-    "@valos/kernel": "^0.35.0-rc.36",
-    "@valos/revdoc": "^0.35.0-rc.36",
+    "@valos/engine": "^0.35.0",
+    "@valos/kernel": "^0.35.0",
+    "@valos/revdoc": "^0.35.0",
     "brace": "^0.9.1",
     "graphql": "^0.6.2",
     "immutable": "~3.7.4",

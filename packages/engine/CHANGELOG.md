@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.35.0](https://github.com/valaatech/kernel/compare/v0.35.0-rc.36...v0.35.0) (2020-11-08)
+
+
+### Bug Fixes
+
+* Vrapper#hasInterface issue with destroyed/non-created resources ([fafeb2d](https://github.com/valaatech/kernel/commit/fafeb2dd57309e0474983967b61ee98463720c02))
+
+
+
+
+
 # [0.35.0-rc.36](https://github.com/valaatech/kernel/compare/v0.35.0-rc.35...v0.35.0-rc.36) (2020-11-04)
 
 

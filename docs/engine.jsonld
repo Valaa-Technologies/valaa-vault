@@ -84,7 +84,7 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/engine",
-    "VRevdoc:version": "0.35.0-rc.36",
+    "VRevdoc:version": "0.35.0",
     "VRevdoc:preferredPrefix": "VEngine",
     "VRevdoc:baseIRI": "https://valospace.org/engine/0#",
     "VRevdoc:referencedModules": {

@@ -65,7 +65,7 @@
     ],
     "dc:title": "@valos/plot library workspace",
     "VRevdoc:package": "@valos/plot",
-    "VRevdoc:version": "0.35.0-rc.36",
+    "VRevdoc:version": "0.35.0",
     "VRevdoc:preferredPrefix": "VPlot",
     "VRevdoc:baseIRI": "https://valospace.org/plot/0#",
     "VRevdoc:referencedModules": {

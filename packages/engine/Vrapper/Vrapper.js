@@ -566,10 +566,11 @@ export default class Vrapper extends Cog {
 
   hasInterface (name: string, options: ?Object): boolean {
     let type = this._type;
-    if (options && options.discourse) {
-      const typeName = options.discourse.getState().getIn(["TransientFields", this.getRawId()]);
-      if (typeName !== type.name) {
-        type = this._parent.getValospaceType(typeName);
+    const customDiscourse = (options && options.discourse) || (!type && this._parent.discourse);
+    if (customDiscourse) {
+      const typeName = customDiscourse.getState().getIn(["TransientFields", this.getRawId()]);
+      if (!type || (typeName && (typeName !== type.name))) {
+        type = this._parent.getValospaceType(typeName || customDiscourse.schema.destroyedType);
       }
     }
     if (type.name === name) return true;

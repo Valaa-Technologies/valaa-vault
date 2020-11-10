@@ -194,7 +194,7 @@ exports.handler = async (yargv) => {
       if (yargv.develop) {
         preparation.preid = (yargv.develop === true) ? "prerelease" : yargv.develop;
       }
-      ret.releaseDescription = `New ${preparation.newBranchKind} ${type} branch`;
+      ret.releaseDescription = `New ${vlm.theme.strong(preparation.newBranchKind)} ${type} branch`;
       // No patch bump if releasing from develop into a release.
       const bump = (preparation.isRelease && (releaseOrDevelopBranch !== "release")) ? 0 : 1;
       const newMajor = typeof yargv.major === "number" ? yargv.major
@@ -212,7 +212,7 @@ exports.handler = async (yargv) => {
           .split("\n").filter(b => !b.match(/^\s*$/)).length) {
         throw new Error(`Branch '${preparation.targetBranch}' already exists`);
       }
-      if (releaseOrDevelopBranch !== "release") preparation.previousDevelopBranch = branchName;
+      if (releaseOrDevelopBranch === "develop") preparation.previousDevelopBranch = branchName;
     }
 
     const isDirty = (await vlm.delegate("git status -s"))

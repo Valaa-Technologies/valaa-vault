@@ -605,6 +605,9 @@ const themes = {
     babble: "cyan",
     expound: "cyan",
 
+    strong: "bold",
+    em: "italic",
+
     argument: ["bold", "blue"],
     return: ["bold", "italic", "blue"],
     executable: ["flatsplit", { first: ["magenta"], nonfirst: "argument" }],
@@ -1249,8 +1252,13 @@ function execute (args, options = {}) {
         `${this.theme.executable(argv[0])}:`,
         this.theme.error("exception:", String(error)));
     return _inquireErrorForRetry(this, error,
-        `Exception received from execute. Retry '${this.theme.executable(...argv)}'?`,
-        () => ({ _preExecute: [] }),
+        `Exception received from execute: ${error.message}`, [
+          {
+            name: `Re-execute ${this.theme.executable(...argv)}`,
+            value: () => thisChainRedirect("_preExecute")
+          },
+          ...(options.retryChoices || []),
+        ],
         innerError => wrapError(innerError,
             new Error(`During vlm.execute(${this.theme.executable(...argv)})`),
             "\n\toptions:", ...dumpObject(options)));
@@ -1269,14 +1277,38 @@ function _readStreamContent (stream) {
   });
 }
 
-function _inquireErrorForRetry (vlm, error, prompt, onRetry, onError) {
+function _inquireErrorForRetry (vlm, error, prompt, choices, onError) {
   if (error.valmaRetry === false) throw error;
-  return vlm.inquireConfirm(prompt).then(retry => {
-    if (retry) return onRetry();
-    const outerError = !onError ? error : onError(error);
-    outerError.valmaRetry = false;
-    throw outerError;
+  return vlm.inquireConfirm(`${prompt}.\nInspect manually before continuing?`, false)
+  .then(inspect => {
+    if (!inspect) _rethrow();
+    return _inquireOptions();
   });
+  function _rethrow (valmaRetry = false) {
+    const outerError = !onError ? error : onError(error);
+    outerError.valmaRetry = valmaRetry;
+    throw outerError;
+  }
+  function _inquireOptions () {
+    return vlm.inquire([{
+      message: `Choose a resolution for the exception:`,
+      type: "list", name: "choice", default: choices[0],
+      choices: [
+        { value: "accept", name: "Accept and rethrow (no further inspections)" },
+        { value: "postpone", name: "Postpone and rethrow (inspect by outer handler)" },
+        { value: "inspect", name: "Inspect error (then choose again)" },
+        ...choices,
+      ],
+    }])
+    .then(answer => {
+      if (typeof answer.choice === "function") return answer.choice();
+      if (answer.choice === "inspect") {
+        outputError(error, "When manually inspecting an error");
+        return _inquireOptions();
+      }
+      return _rethrow(answer.choice !== "accept");
+    });
+  }
 }
 
 function delegate (args, options = {}) {
@@ -1335,9 +1367,14 @@ function invoke (commandSelectorArg, args, options = {}) {
           this.theme.error("exception:", String(error)));
     }
     return _inquireErrorForRetry(this, error,
-        `Exception received from invoke. Retry '${
-            this.theme.vlmCommand("vlm", _getSelectorText(), ...argv)}'?`,
-        () => ({ _preInvoke: [] }));
+        `Exception received from invoke: ${error.message}`, [
+          {
+            name: "retry",
+            description: `Re-invoke ${this.theme.vlmCommand("vlm", _getSelectorText(), ...argv)}`,
+            value: () => thisChainRedirect("_preInvoke"),
+          },
+          ...(options.retryChoices || []),
+        ]);
   });
   function _getSelectorText () {
     return __isWildcardCommand(commandSelector) ? `'${commandSelector}'` : commandSelector;

@@ -257,7 +257,7 @@ blockquote(em("valos-vault-4.1.2"), `: utility must explicitly define
         "VDoc:columns":
 ["Utility"    , "Tool"          , "Payload"                    , "Providers"   , "Consumed via"      , "Upstream", "Configuration" , "Modified via"        , "Produced via"       , "Authority"  , "Distributed via"],
         "VDoc:entries": [
-["files"      , "`git`"         , "files in `./*`"             , "github.com"  , "`git clone`"       , "N/A"     , "`.git/*`"      , "`branch` `commit`"   , "`git push` & PR"    , "human"      , "merge PR to & `git push master`"],
+["files"      , "`git`"         , "files in `./*`"             , "github.com"  , "`git clone`"       , "N/A"     , "`.git/*`"      , "`branch` `commit`"   , "`git push` & PR"    , "human"      , "merge PR to & `git push stable`"],
 ["packages"   , "`vlm`, `yarn`" , "files in `/node_modules/..`", "npmjs.com"   , "`depend` `require`", "`files`" , "`package.json`", "ups. `src/*` `bin/*`", "upstream"           , "hybrid"     , "`assemble-packages` `publish-packages`"],
 ["authorities", "`vlm`"         , "APIs, site & gateway files" , "IaaS, custom", "browsers, various" , "`files`" , "upstream *"    , "upstream *"          , "upstream"           , "hybrid"     , "`build-release` `deploy-release`"],
 ["chronicles" , "`vlm`, gateway", "event logs, bvobs"          , "authorities" , "event & bvob APIs" , "N/A"     , "N/A"           , "gateway"             , "command & bvob APIs", "authorities", "automatic, custom"],
@@ -288,7 +288,7 @@ generated from the content in git repositories. Making updates to
 such utility content thus requires:`,
         { "numbered#": [
 ["modifying the corresponding upstream git repository"],
-[`distributing the git changes (a PR followed with `, command("git push master"), `)`],
+[`distributing the git changes (a PR followed with `, command("git push stable"), `)`],
 [`distributing the utility update (`, command("publish-packages"),
   ` or `, command("deploy-release"), `).`],
         ] }, `

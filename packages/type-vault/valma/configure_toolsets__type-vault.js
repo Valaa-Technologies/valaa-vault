@@ -37,7 +37,7 @@ exports.handler = async (yargv) => {
 
   const config = await vlm.getPackageConfig();
   const [version, preid] = config.version.split("-");
-  const branchName = preid ? "prerelease" : "release";
+  const branchName = preid ? "develop" : "release";
 
   if (!vlm.shell.test("-f", "lerna.json")) {
     const lerna = {
@@ -65,7 +65,7 @@ exports.handler = async (yargv) => {
   const hadGit = vlm.shell.test("-d", ".git");
   if (!hadGit && await vlm.inquireConfirm("Initialize git repository?")) {
     await vlm.interact("git init");
-    const newOrigin = (config.repository
+    let newOrigin = (config.repository
             && (await vlm.inquireConfirm(
                 `Set git remote "origin" to package.json:repository "${config.repository}"?`))
             && config.repository)
@@ -75,20 +75,26 @@ exports.handler = async (yargv) => {
       await vlm.interact(`git remote add origin ${newOrigin}`);
       await vlm.interact(`git fetch`);
       try {
-        await vlm.interact(`git checkout master`);
+        await vlm.interact(`git checkout stable`);
+        await vlm.interact(`git checkout edge`);
         if (!(await vlm.inquireConfirm(
-            `Remote repository not empty. Continue appending on top of 'master'?`))) {
-          throw new Error("Aborted by user due to non-empty 'master'. No cleanup done.");
+            `Remote repository not empty. Continue appending on top of 'edge'?`))) {
+          throw new Error("Aborted by user due to non-empty 'edge'. No cleanup done.");
         }
+        newOrigin = false;
       } catch (error) {
         if ((await vlm.delegate("git branch -a") || "").trim()) {
-          throw new Error(
-              "Invalid, initialized git state: branches exist but 'git checkout master' failed");
+          throw new Error(`Unrecognized initialized git state: ${
+            ""} branches exist but either 'git checkout edge' or 'git checkout stable' fails`);
         }
       }
     }
     await vlm.interact("git add -A");
     await vlm.interact(`git commit -a -m v${config.version}`);
+    if (newOrigin) {
+      await vlm.interact("git checkout -b stable");
+      await vlm.interact("git checkout -b edge");
+    }
     if (await vlm.inquireConfirm(`Set up initial ${branchName} branch and its annotated tag?`)) {
       await vlm.interact(`git tag -a -m v${config.version} v${config.version}`);
       await vlm.interact(`git checkout -b ${branchName}/${

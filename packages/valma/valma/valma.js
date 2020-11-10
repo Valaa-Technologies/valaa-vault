@@ -2597,7 +2597,7 @@ function updateToolConfig (toolsetName, toolName, updates) {
 
 function domainVersionTag (domain) {
   const packageJSON = require(`${domain}/package`);
-  const [, prerelease] = packageJSON.version.match(/[0-9]*\.[0-9]*\.[0-9]*(-prerelease|-rc)?/);
+  const [, prerelease] = packageJSON.version.match(/[0-9]*\.[0-9]*\.[0-9]*(-*)?/);
   return prerelease
       ? `>=${packageJSON.version}`
       : `^{packageJSON.version}`;

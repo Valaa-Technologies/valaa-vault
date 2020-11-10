@@ -44,10 +44,12 @@ exports.handler = async (yargv) => {
   const releasePath = yargv.target;
 
   if (!yargv.overwrite && vlm.shell.test("-d", releasePath)) {
-    if (version.indexOf("-prerelease") !== -1) {
-      vlm.warn("Removing an existing prerelease build target:", vlm.theme.path(releasePath),
+    const preVersion = (version.indexOf("-") !== -1) && version.slice(version.indexOf("-") + 1);
+    if (preVersion) {
+      vlm.warn(`Removing an existing ${preVersion.slice(0, preVersion.indexOf("."))} build target:`,
+          vlm.theme.path(releasePath),
       // Carefully refers to how overwrite will remove target even for non-prerelease builds
-          `(carefully provide '${vlm.theme.argument("--overwrite")}' to prevent remove)`);
+          `(mindfully provide '${vlm.theme.argument("--overwrite")}' to prevent remove)`);
       vlm.shell.rm("-rf", releasePath);
     } else {
       throw new Error(`build-release: existing build for non-prerelease version ${

@@ -4,8 +4,8 @@ exports.vlm = { toolset: "@valos/type-vault" };
 exports.command = "release-vault";
 exports.describe = "Prepare, commit and potentially publish a new release of vault packages";
 exports.introduction =
-`Create a new release/prerelease branch or extend an existing one
-based on given options and current environment.
+`Prepares a release to a new or existing release/develop branch based
+on given options and current environment.
 
 Prepares the release by first running sanity checks, then cleaning and
 reinstalling intermediate files like node_modules, yarn workspaces,
@@ -19,7 +19,7 @@ If --publish is not explicitly given then the final publish step must
 be manually performed. In this case a pre-publish phase is done which
 prepares the manual publish command instructions in the results output.
 
-Will invoke valma command hooks between stages as per:
+Will invoke valma command hooks between phases as follows:
 1. 'vlm .release-vault/.prepared-hooks/{**/,}* --summary=<obj>' after successful preparation
 2. 'vlm .release-vault/.committed-hooks/{**/,}* --summary=<obj>' after successful commit
 3. 'vlm .release-vault/.pre-published-hooks/{**/,}* --summary=<obj>' after successful pre-publish
@@ -32,45 +32,73 @@ const assembleDefault = Object.freeze({ "add-unchanged": true });
 exports.disabled = (yargs) => typeToolset.checkToolsetDisabled(yargs.vlm, exports);
 exports.builder = (yargs) => yargs.options({
   clean: {
-    group: "Active options",
+    group: "Phases",
     type: "any", default: Object.assign({}, cleanDefault),
     description: `Clean and reinstall intermediate files with '${
         yargs.vlm.theme.command("clean-vault")}'`,
   },
   test: {
-    group: "Active options",
+    group: "Phases",
     type: "string", array: true, default: ["*"], choices: ["*", "jest", "lint", false],
     description: "Run tests which match given globs",
   },
   assemble: {
-    group: "Active options",
+    group: "Phases",
     type: "any", default: Object.assign({}, assembleDefault),
     description: `Assemble packages with '${yargs.vlm.theme.vlmCommand("vlm assemble-packages")}')`,
   },
-  "update-master": {
-    group: "Active options",
-    type: "boolean", default: true,
-    description: `Update master branch if release updates the latest release/* branch`,
-  },
-  release: {
-    type: "any", choices: [true, "major", "minor", "patch"],
-    description: `Create a new release branch based on the current branch.
-Prevent yarn lock rebuild by clean.
-Bump the version section based on the given value (default to current branch section)`,
-  },
-  prerelease: {
-    type: "any", choices: [true, "major", "minor", "patch"],
-    description: `Create a new prerelease branch based on the current branch.
-Bump the version section based on the given value (default to current branch section)`,
+  publish: {
+    group: "Phases",
+    type: "boolean", default: false,
+    description: "Publish the repository files and packages to their upstreams",
   },
   dirty: {
+    group: "Sanity check",
     type: "boolean",
     description: `Allow a git-dirty repository to be released (as per '${
         yargs.vlm.theme.executable("git status")}')`
   },
-  publish: {
+  "fast-forward-stable": {
+    group: "Version control",
+    type: "boolean", default: true,
+    description: `If a release/* branch is affected fast-forward 'stable' into it if possible`,
+  },
+  "fast-forward-edge": {
+    group: "Version control",
+    type: "boolean", default: true,
+    description: `If a develop/* branch is affected fast-forward 'edge' into it if possible`,
+  },
+  release: {
+    group: "Version control",
     type: "boolean",
-    description: "Publish the repository files and packages to their upstreams",
+    description:
+`Create a new release/* branch based on the current branch.
+Suppress yarn.lock rebuild of the cleaning phase.
+If current branch is a develop branch remove the prerelease version, otherwise bump the version
+section specified in lerna.json:command.version.bump.`,
+  },
+  develop: {
+    group: "Version control",
+    type: "string",
+    description:
+`Create a new develop/* branch based on the current branch.
+Bump the version section specified by lerna.json:command.version.bump.
+Use the given value or "prerelease" as the preid.`,
+  },
+  major: {
+    group: "Version control",
+    type: "any", default: false,
+    description: `Bump the major branch version to the given value or by one by default.`,
+  },
+  minor: {
+    group: "Version control",
+    type: "any", default: false,
+    description: `Bump the minor branch version to the given value or by one by default.`,
+  },
+  patch: {
+    group: "Version control",
+    type: "any", default: false,
+    description: `Bump the patch branch version to the given value or by one by default.`,
   },
 });
 
@@ -130,46 +158,61 @@ exports.handler = async (yargv) => {
   }
   return ret;
 
-  async function _prepare (preparation) {
-    const branches = ((await vlm.delegate("git branch --list --no-color release/* prerelease/*"))
-            || "").split("\n")
+  async function _prepare (preparation) { // eslint-disable-line complexity
+    const branches =
+        ((await vlm.delegate(
+            "git branch --list --no-color stable edge release/* develop/* master prerelease/*"))
+                || "").split("\n")
         .map(name => name.match(
-            /^((\* )| {2})(master|((pre)?release\/([0-9]*)(\.[0-9]+)?(\.[0-9]+)?))$/
+            /^((\* )| {2})(stable|edge|master|((release|develop|prerelease)\/([0-9]*)(\.[0-9]+)?(\.[0-9]+)?))$/ // eslint-disable-line
         )).filter(match => match);
     const currentBranchMatch = branches.find(match => match[2]); // 2 <=> search for "* "
-    if (!currentBranchMatch) throw new Error("Current branch is not master or (pre)release branch");
-    const [,,, branchName, currentIsNotMaster, currentIsPrerelease, major, dotMinor, dotPatch]
+    if (!currentBranchMatch) {
+      throw new Error("Current branch is not 'stable', 'edge' nor a release or a develop branch");
+    }
+    const [,,, branchName,, releaseOrDevelopBranch, major, dotMinor, dotPatch]
         = currentBranchMatch;
-    if (!currentIsNotMaster && (!yargv.release && !yargv.prerelease)) {
-      throw new Error(
-          "No explicit --release or --prerelease given when trying to release from 'master'");
+    if (!releaseOrDevelopBranch && (!yargv.release && !yargv.develop)) {
+      throw new Error(`Provide --release or --develop when releasing from '${branchName}'`);
     }
     preparation.lernaConfig = require(vlm.path.join(process.cwd(), "lerna.json"));
     const [, minor, patch] = preparation.lernaConfig.version.match(/^[0-9]*\.([0-9]+)\.([0-9]+)/);
-    preparation.isRelease = !!yargv.release || !(yargv.prerelease || currentIsPrerelease);
-    preparation.newBranchGroup = yargv.release || yargv.prerelease;
-    if (!preparation.newBranchGroup) {
-      ret.releaseDescription = preparation.isRelease ? "Release" : "Prerelease";
+    preparation.isRelease = !!yargv.release
+        || (!yargv.develop && (releaseOrDevelopBranch === "release"));
+    preparation.newBranchKind = (yargv.release || yargv.develop)
+        && (yargv.major ? "major" : yargv.minor ? "minor" : yargv.patch ? "patch" : true);
+    if (!preparation.newBranchKind) {
+      ret.releaseDescription = `Existing ${preparation.isRelease ? "release" : "develop"} branch`;
       preparation.targetBranch = branchName;
     } else {
-      const type = yargv.release ? "release" : "prerelease";
-      if (preparation.newBranchGroup === true) {
-        preparation.newBranchGroup = dotPatch ? "patch" : dotMinor ? "minor" : "major";
+      const type = preparation.isRelease ? "release" : "develop";
+      if (preparation.newBranchKind === true) {
+        preparation.newBranchKind = !releaseOrDevelopBranch
+            ? preparation.lernaConfig.command.version.bump
+            : dotPatch ? "patch" : dotMinor ? "minor" : "major";
       }
-      ret.releaseDescription = `New ${preparation.newBranchGroup} ${type} branch`;
-      const patchInc = (yargv.release && currentIsPrerelease) ? 0 : 1;
-      const minorInc = (patchInc || Number(patch)) ? 1 : 0;
-      const majorInc = (minorInc || Number(minor)) ? 1 : 0;
+      if (yargv.develop) {
+        preparation.preid = (yargv.develop === true) ? "prerelease" : yargv.develop;
+      }
+      ret.releaseDescription = `New ${preparation.newBranchKind} ${type} branch`;
+      // No patch bump if releasing from develop into a release.
+      const bump = (preparation.isRelease && (releaseOrDevelopBranch !== "release")) ? 0 : 1;
+      const newMajor = typeof yargv.major === "number" ? yargv.major
+          : Number(major || 0) + (preparation.newBranchKind === "major" ? bump : 0);
+      const newMinor = typeof yargv.minor === "number" ? yargv.minor
+          : Number(minor || 0) + (preparation.newBranchKind === "minor" ? bump : 0);
+      const newPatch = typeof yargv.patch === "number" ? yargv.patch
+          : Number(patch || 0) + bump;
       preparation.branchVersion
-          = (preparation.newBranchGroup === "major") ? `${Number(major || 0) + majorInc}`
-          : (preparation.newBranchGroup === "minor") ? `${major}.${Number(minor || 0) + minorInc}`
-          : `${major}.${minor || 0}.${Number(patch || 0) + patchInc}`;
+          = (preparation.newBranchKind === "major") ? `${newMajor}`
+          : (preparation.newBranchKind === "minor") ? `${newMajor}.${newMinor}`
+          : `${newMajor}.${newMinor}.${newPatch}`;
       preparation.targetBranch = `${type}/${preparation.branchVersion}`;
       if ((await vlm.delegate(`git branch --list --no-color ${preparation.targetBranch}`))
           .split("\n").filter(b => !b.match(/^\s*$/)).length) {
         throw new Error(`Branch '${preparation.targetBranch}' already exists`);
       }
-      if (currentIsPrerelease) preparation.previousPrereleaseBranch = branchName;
+      if (releaseOrDevelopBranch !== "release") preparation.previousDevelopBranch = branchName;
     }
 
     const isDirty = (await vlm.delegate("git status -s"))
@@ -208,20 +251,20 @@ exports.handler = async (yargv) => {
         preparation.success ? "successful" : "FAILED"}: gathered config files and test results`;
   }
 
-  async function _commit ({ isRelease, targetBranch, newBranchGroup,
-      previousPrereleaseBranch, lernaConfig, success }, commit) {
+  async function _commit ({ isRelease, targetBranch, newBranchKind, preid,
+      previousDevelopBranch, lernaConfig, success }, commit) {
     if (!success) {
       commit.skipped = "preparation phase failed";
       commit["..."].heading = `${ret.releaseDescription} commit skipped: ${commit.skipped}`;
       return;
     }
 
-    if (newBranchGroup) {
+    if (newBranchKind) {
       await vlm.delegate(`git checkout -b ${targetBranch}`);
       commit.newBranch = targetBranch;
       commit.lernaConfig = JSON.parse(JSON.stringify(lernaConfig));
-      commit.lernaConfig.command.version.bump = isRelease ? newBranchGroup : `pre${newBranchGroup}`;
-      commit.lernaConfig.command.version.preid = isRelease ? "" : "prerelease";
+      commit.lernaConfig.command.version.bump = preid ? `pre${newBranchKind}` : newBranchKind;
+      commit.lernaConfig.command.version.preid = preid || "";
       commit.lernaConfig.command.version.allowBranch = targetBranch;
       vlm.shell.ShellString(JSON.stringify(commit.lernaConfig, null, 2)).to("./lerna.json");
       await vlm.delegate(`git add lerna.json`);
@@ -235,6 +278,7 @@ exports.handler = async (yargv) => {
         Object.assign({ versioning: "amend" }, assembleDefault, yargv.assemble));
 
     commit.success = commit["vlm assemble-packages"].success;
+    let fastForwardBase;
     if (commit.success) {
       commit.version = commit["vlm assemble-packages"].version;
       if (!commit.version) {
@@ -248,13 +292,23 @@ exports.handler = async (yargv) => {
       await vlm.delegate(`git add package.json`);
       await vlm.delegate(["git commit --amend -m", [tagName]]);
       await vlm.delegate(["git tag -a", [tagName], "-m", [tagName]]);
-      if (isRelease && yargv["update-master"]) {
+      fastForwardBase = isRelease
+          ? (yargv["fast-forward-stable"] && "stable")
+          : (yargv["fast-forward-edge"] && "edge");
+      if (fastForwardBase) {
         try {
-          await vlm.delegate(`git checkout master`);
-          await vlm.delegate(`git merge --ff-only ${targetBranch}`);
+          await vlm.delegate(`git checkout ${fastForwardBase}`);
+          if (await vlm.delegate(`git merge --ff-only ${targetBranch}`, {
+            retryChoices: [{
+              name: `Skip ${fastForwardBase} fast-forward and continue release`,
+              value: "ignored",
+            }],
+          }) === "ignored") {
+            fastForwardBase = "";
+          }
         } catch (error) {
           commit.success = false;
-          vlm.error(`failed to fast-forward master to ${targetBranch}, aborting:`,
+          vlm.error(`Failed to fast-forward '${fastForwardBase}' to ${targetBranch}, aborting:`,
               `checking out current git branch back to ${targetBranch} for diagnostics`);
           throw error;
         } finally {
@@ -264,10 +318,10 @@ exports.handler = async (yargv) => {
     }
     commit["..."].heading = `${ret.releaseDescription} commit ${commit.success
         ? "successful" : "FAILED"}: changes to local git and prepared publishables under dist/`;
-    commit.publishFiles = `git push --tags origin master ${targetBranch}`;
-    if (previousPrereleaseBranch) {
-      commit.publishFiles += ` :${previousPrereleaseBranch}`;
-      commit.deletePrerelease = `git branch -d ${previousPrereleaseBranch}`;
+    commit.publishFiles = `git push --tags origin ${fastForwardBase} ${targetBranch}`;
+    if (previousDevelopBranch) {
+      commit.publishFiles += ` :${previousDevelopBranch}`;
+      commit.deleteDevelop = `git branch -d ${previousDevelopBranch}`;
     }
     commit.vlmPublishPackages = isRelease
         ? `publish-packages`
@@ -275,7 +329,7 @@ exports.handler = async (yargv) => {
   }
 
   async function _prePublish ({ success: preparationSuccess },
-      { success: commitSuccess, publishFiles, vlmPublishPackages, deletePrerelease }, prePublish) {
+      { success: commitSuccess, publishFiles, vlmPublishPackages, deleteDevelop }, prePublish) {
     if (!preparationSuccess || !commitSuccess) {
       prePublish.skipped = `${!preparationSuccess ? "preparation" : "commit"} phase failed`;
       prePublish["..."].heading =
@@ -285,26 +339,27 @@ exports.handler = async (yargv) => {
       prePublish["..."].valueText = "command";
       prePublish.files = vlm.theme.executable(publishFiles);
       prePublish.packages = vlm.theme.vlmCommand("vlm", vlmPublishPackages);
-      if (deletePrerelease) prePublish.deletePrerelease = vlm.theme.executable(deletePrerelease);
+      if (deleteDevelop) prePublish.deleteDevelop = vlm.theme.executable(deleteDevelop);
       prePublish.success = true;
       prePublish["..."].heading = `${ret.releaseDescription} pre-publish ${prePublish.success
           ? "successful" : "FAILED"}: list of commands for manual publishing`;
     }
   }
 
-  async function _publish ({ previousPrereleaseBranch, success: preparationSuccess },
-      { success: commitSuccess, publishFiles, vlmPublishPackages, deletePrerelease }, publish) {
+  async function _publish ({ previousDevelopBranch, success: preparationSuccess },
+      { success: commitSuccess, publishFiles, vlmPublishPackages, deleteDevelop }, publish) {
     if (!preparationSuccess || !commitSuccess) {
       publish.skipped = `${!preparationSuccess ? "preparation" : "commit"} phase failed`;
       publish["..."].heading = `${ret.releaseDescription} publish skipped: ${publish.skipped}`;
     } else {
-      // FIXME(iridian): Asking for password breaks inside execute: the stdin inheritance doesn't
-      // convey isTTY status to the child process (possibly?)
+      // FIXME(iridian): Asking for password breaks inside execute: the
+      // stdin inheritance doesn't convey isTTY status to the child
+      // process (possibly?)
       publish.files = await vlm.execute(publishFiles);
       publish.packages = await vlm.invoke(vlmPublishPackages);
-      if (deletePrerelease) {
-        publish.deletedPrereleaseBranch =
-            (await vlm.delegate(deletePrerelease)) && previousPrereleaseBranch;
+      if (deleteDevelop) {
+        publish.deletedDevelopBranch =
+            (await vlm.delegate(deleteDevelop)) && previousDevelopBranch;
       }
       publish.success = true;
       publish["..."].heading = `${ret.releaseDescription} publish ${

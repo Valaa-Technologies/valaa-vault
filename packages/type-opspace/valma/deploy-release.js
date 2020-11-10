@@ -25,10 +25,12 @@ exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
   const { name, version, valos: { domain, type } } = vlm.getPackageConfig();
   const releasePath = yargv.source;
+  const preVersion = (version.indexOf("-") !== -1) && version.slice(version.indexOf("-") + 1);
 
-  if (!yargv.prerelease && (version.indexOf("-prerelease") !== -1)) {
-    throw new Error(`deploy-release: cannot deploy a release with a '-prerelease' version${
-        ""} (provide '--prerelease' option to override).`);
+  if (!yargv.prerelease && preVersion) {
+    throw new Error(`deploy-release: cannot deploy a prerelease version '${
+        vlm.theme.version(preVersion)}' (provide ${
+        vlm.theme.argument("--prerelease")} to override).`);
   }
 
   if (!vlm.shell.test("-d", releasePath)) {

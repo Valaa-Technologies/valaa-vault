@@ -65,7 +65,7 @@
     ],
     "dc:title": "@valos/inspire library workspace",
     "VRevdoc:package": "@valos/inspire",
-    "VRevdoc:version": "0.35.0",
+    "VRevdoc:version": "0.36.0-alpha.0",
     "VRevdoc:preferredPrefix": "VInspire",
     "VRevdoc:baseIRI": "https://valospace.org/inspire/0#",
     "VRevdoc:referencedModules": {

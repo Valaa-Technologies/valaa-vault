@@ -1087,7 +1087,7 @@
               "`branch` `commit`",
               "`git push` & PR",
               "human",
-              "merge PR to & `git push master`"
+              "merge PR to & `git push stable`"
             ],
             [
               "packages",
@@ -1328,7 +1328,7 @@
                         {
                           "@type": "VRevdoc:Command",
                           "VDoc:content": [
-                            "git push master"
+                            "git push stable"
                           ]
                         },
                         ")"

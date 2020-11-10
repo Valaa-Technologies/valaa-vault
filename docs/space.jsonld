@@ -494,7 +494,7 @@
     ],
     "dc:title": "@valos/space library workspace",
     "VRevdoc:package": "@valos/space",
-    "VRevdoc:version": "0.35.0",
+    "VRevdoc:version": "0.36.0-alpha.0",
     "VRevdoc:preferredPrefix": "V",
     "VRevdoc:baseIRI": "https://valospace.org/0#",
     "VRevdoc:referencedModules": {

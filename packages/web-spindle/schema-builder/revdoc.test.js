@@ -637,15 +637,15 @@ containing the mapping.`,
     rules: {
       doCreateMappingAndTarget: ["@!new", [
         ["@!", ["Relation"]],
-        ["@+", [
+        ["@*", [
           ["@.", ["name", ["@!", ["relationName"]]]],
           ["@.", ["source", ["@!", ["resource"]]]],
           ["@.", ["target", ["@!new", [
             ["@!", ["Entity"]],
-            ["@+", [
+            ["@*", [
               ["@.", ["name", ["@!", ["request", "body", "$V", "target", "name"]]]],
               ["@.", ["owner", ["@!", ["routeRoot"]]]],
-              ["@.", ["properties", ["@+", [
+              ["@.", ["properties", ["@*", [
                 ["@.", ["name", ["@!", ["request", "body", "$V", "target", "name"]]]],
               ]]]],
             ]],

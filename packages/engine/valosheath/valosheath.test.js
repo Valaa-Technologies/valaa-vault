@@ -141,7 +141,7 @@ describe("Creating and instancing with 'new' keyword", () => {
           properties: { position: { x: 10, y: 20 } }
         });
         const parent = new Entity({ name: "parent", owner: this });
-        const subEnt = new Entity({ owner: parent, subResource: ["@+$foo.existing@@"] });
+        const subEnt = new Entity({ owner: parent, subResource: ["@*$foo.existing@@"] });
         const primer = (initialState, section, index) => {
           if (index === 2) {
             initialState.instancePrototype = ToThing;
@@ -151,9 +151,9 @@ describe("Creating and instancing with 'new' keyword", () => {
           }
         };
         const relInst1 = parent.$V.obtainSubResource(
-            ["@+$foo.existing@+$foo.nuu@-$foo.toThings$d.1@@"], primer);
+            ["@*$foo.existing@*$foo.nuu@-$foo.toThings$d.1@@"], primer);
         const relInst2 = parent.$V.obtainSubResource(
-            [["@+", $\`foo:existing\`], ["@+", $\`foo:nuu\`], ["@-", $\`foo:toThings\`, 2]],
+            [["@*", $\`foo:existing\`], ["@*", $\`foo:nuu\`], ["@-", $\`foo:toThings\`, 2]],
             primer);
         [subEnt, subEnt[$\`foo:nuu\`], relInst1, relInst2];
     `, { console });

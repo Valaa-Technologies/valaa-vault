@@ -648,13 +648,14 @@ export default class Vrapper extends Cog {
   }
 
   static _keyTypes = {
-    "@+": "Entity",
+    "@*": "Entity",
+    "@+": "Entity", // TODO(iridian, 2020-11): Deprecate and remove
     "@-": "Relation",
     "@~": "Media",
   };
 
   static _typeKeys = {
-    Entity: "@+",
+    Entity: "@*",
     Relation: "@-",
     Media: "@~",
     Property: "@.",

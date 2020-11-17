@@ -68,7 +68,8 @@ const _singularLookup = {
 };
 
 const _pluralLookup = {
-  "@+": "entities",
+  "@*": "entities",
+  "@+": "entities", // TODO(iridian, 2020-11): Deprecate and remove
   "@~": "medias",
   "@-": "relations",
   "@-out": "relations",
@@ -95,7 +96,8 @@ const _cementersByType = {
   ...(Object.keys(_pluralLookup)
       .reduce((a, p) => { a[p] = _cementPluralProperty; return a; }, {})),
   "@.": _cementProperty,
-  "@+": _cementCollection,
+  "@*": _cementCollection,
+  "@+": _cementCollection, // TODO(iridian, 2020-11): Deprecate and remove
   "@-": _cementCollection,
   "@~": _cementCollection,
 };
@@ -208,7 +210,8 @@ function _cementProperty (stack, section, parentSection) {
   const payload = section[1];
   if (!payload) throw new Error("Missing property payload");
   const firstTrack = _cementSection(stack, payload[0], section, 0);
-  if (parentSection[0] === "@+") {
+  // TODO(iridian, 2020-11): Deprecate and remove "@+"
+  if ((parentSection[0] === "@*") || (parentSection[0] === "@+")) {
     // Object initializer.
     if (payload.length > 2) {
       throw new Error(`Cannot cement property: multi-param properties not supported`);
@@ -262,7 +265,10 @@ function _maybeEscapedSection (section) {
       }
       if (payload.length === 1) ret = payload[0];
     }
-    if ((ret[0] === "@-") || (ret[0] === "@+") || (ret[0] === "@!")) return undefined;
+    // TODO(iridian, 2020-11): Deprecate and remove "@+"
+    if ((ret[0] === "@-") || (ret[0] === "@*") || (ret[0] === "@+") || (ret[0] === "@!")) {
+      return undefined;
+    }
   }
   return (typeof ret !== "object") ? ret : ["§'", ret];
 }
@@ -314,7 +320,7 @@ function _cementCollection (stack, section) {
       throw new Error(`Cannot cement named dictionary '${
         collectionType}': each param must be a property verb ("@."), got: ${entry[0]}`);
     }
-    initializers[i] = _cementSection(paramStack, entry, ["@+"], i);
+    initializers[i] = _cementSection(paramStack, entry, ["@*"], i);
   }
   initializers.sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
   initializers.unshift("§{}");

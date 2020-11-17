@@ -19,7 +19,7 @@ describe("VPath", () => {
           .toBeTruthy();
       expect(() => validateVPath("@$~raw.@@"))
           .toThrow(/closing "@"/);
-      expect(validateVPath("@-$.F$focus.@+$.1@@@@"))
+      expect(validateVPath("@-$.F$focus.@*$.1@@@@"))
           .toBeTruthy();
       expect(validateVPath("@!invoke$.create$.@!$.body$V.target$.name@@@@"))
           .toBeTruthy();
@@ -36,7 +36,7 @@ describe("VPath", () => {
           .toThrow(/expected "@\$".*got "@!"/);
       expect(validateVRID("@$~raw.0000@@"))
           .toBeTruthy();
-      expect(() => validateVRID("@-$.F$focus.@+$.1@@@@"))
+      expect(() => validateVRID("@-$.F$focus.@*$.1@@@@"))
           .toThrow(/expected "@\$" as section type, got "@-"/);
       expect(() => validateVRID("@!invoke$.create$.@!$.body$V.target$.name@@@@"))
           .toThrow(/expected "@\$".*got "@!invoke"/);
@@ -69,7 +69,7 @@ describe("VPath", () => {
           ["@!invoke", ["create", ["@!", ["body", ["@$V", "target"], "name"]]]]
       )).toBeTruthy();
       expect(validateVPathSection(
-        ["@-", ["F", ["@$focus", ["@+", ["1"]]]]]
+        ["@-", ["F", ["@$focus", ["@*", ["1"]]]]]
       )).toBeTruthy();
       expect(validateVPathSection(
           ["@!invoke", ["create", "event",
@@ -109,8 +109,8 @@ describe("VPath", () => {
           .toEqual(["@!", [["@$a_1__b"]]]);
       expect(disjoinVPathString("@$~b.c@@"))
           .toEqual(["@$~b", "c"]);
-      expect(disjoinVPathString("@-$.F$focus.@+$.1@@@@"))
-          .toEqual(["@-", ["F", ["@$focus", ["@+", ["1"]]]]]);
+      expect(disjoinVPathString("@-$.F$focus.@*$.1@@@@"))
+          .toEqual(["@-", ["F", ["@$focus", ["@*", ["1"]]]]]);
       expect(disjoinVPathString("@!$.scriptRoot@!random@@"))
           .toEqual(["@@", [["@!", ["scriptRoot"]], ["@!random"]]]);
       expect(disjoinVPathString("@$~u4.aaaabbbb-cccc-dddd-eeee-ffffffffffff@@"))
@@ -134,14 +134,14 @@ describe("VPath", () => {
       expect(disjoinVPath(
           `@$~u4.55a5c4fb-1fd4-424f-8578-7b06ffdb3ef0${
             ""}@_$~plt.@.$ot$.@.O.$.7741938f-801a-4892-9cf0-dd59bd8c9166@@@@${
-            ""}@+$pot_hypertwin.inLinks@-in-$ot.ownerOf${
+            ""}@*$pot_hypertwin.inLinks@-in-$ot.ownerOf${
             ""}$.@.S--$.@$~plt.@.$ot$.@.O.$.aa592f56-1d82-4484-8360-ad9b82d00592@@@@@@@@@@`
       )).toEqual(["@@", [
         ["@$~u4", "55a5c4fb-1fd4-424f-8578-7b06ffdb3ef0"],
         ["@_", [["@$~plt",
           ["@.", [["@$ot"], ["@.O.", ["7741938f-801a-4892-9cf0-dd59bd8c9166"]]]],
         ]]],
-        ["@+", [["@$pot_hypertwin", "inLinks"]]],
+        ["@*", [["@$pot_hypertwin", "inLinks"]]],
         ["@-in-", [
           ["@$ot", "ownerOf"],
           ["@.S--", [["@$~plt",
@@ -194,13 +194,13 @@ describe("VPath", () => {
     }));
     it("disjoins VPath outlines with objects", () => {
       expect(disjoinVPathOutline({ arr: [] }))
-          .toEqual(["@+", [["@.", ["arr", ["@-"]]]]]);
+          .toEqual(["@*", [["@.", ["arr", ["@-"]]]]]);
       expect(disjoinVPathOutline({ head: ["@@"] }))
-          .toEqual(["@+", [["@.", ["head", ["@@"]]]]]);
+          .toEqual(["@*", [["@.", ["head", ["@@"]]]]]);
       expect(disjoinVPathOutline({ und: undefined }))
-          .toEqual(["@+", [["@.", ["und"]]]]);
+          .toEqual(["@*", [["@.", ["und"]]]]);
       expect(disjoinVPathOutline({ und: ["@$"] }))
-          .toEqual(["@+", [["@.", ["und", ["@$"]]]]]);
+          .toEqual(["@*", [["@.", ["und", ["@$"]]]]]);
       expect(disjoinVPathOutline(["@$foo.bar", { v1: "v1v", v2: 10, v3: ["a", 10] }]))
           .toEqual(["@", [["@$foo", "bar"],
             ["@.", ["v1", "v1v"]],
@@ -268,25 +268,25 @@ describe("VPath", () => {
       expect(disjoinVPathOutline({
         "@.$.ot": [
           ["@.$.ot-dev"],
-          ["@+$.public-session"],
-          ["@+$.session"],
+          ["@*$.public-session"],
+          ["@*$.session"],
           ["@~$.ot-identity.json"],
           ["@~$.hyperbridge-identity.json"],
         ]
       }, "@@")).toEqual(["@.", ["ot",
         ["@.", ["ot-dev"]],
-        ["@+", ["public-session"]],
-        ["@+", ["session"]],
+        ["@*", ["public-session"]],
+        ["@*", ["session"]],
         ["@~", ["ot-identity.json"]],
         ["@~", ["hyperbridge-identity.json"]],
       ]]);
       expect(disjoinVPathOutline(
-          { "workshop.tar.gz": ["@$o.tar-gz", ["@+$.workshop"]] },
+          { "workshop.tar.gz": ["@$o.tar-gz", ["@*$.workshop"]] },
           "@$o.import",
       )).toEqual(["@", [
         ["@$o", "import"],
         ["@.", ["workshop.tar.gz", ["@",
-          [["@$o", "tar-gz"], ["@+", ["workshop"]]],
+          [["@$o", "tar-gz"], ["@*", ["workshop"]]],
         ]]],
       ]]);
     }));
@@ -323,7 +323,7 @@ describe("VPath", () => {
       expect(formVPath(
         ["@$~u4", "55a5c4fb-1fd4-424f-8578-7b06ffdb3ef0"],
         ["@_", ["@$~plt", ["@.", ["@$ot"], ["@.O.", "7741938f-801a-4892-9cf0-dd59bd8c9166"]]]],
-        ["@+", ["@$pot_hypertwin", "inLinks"]],
+        ["@*", ["@$pot_hypertwin", "inLinks"]],
         ["@-in-",
           ["@$ot", "ownerOf"],
           ["@@", ["@.S--",
@@ -332,7 +332,7 @@ describe("VPath", () => {
         ],
       )).toEqual(`@$~u4.55a5c4fb-1fd4-424f-8578-7b06ffdb3ef0${""
         }@_$~plt.@.$ot$.@.O.$.7741938f-801a-4892-9cf0-dd59bd8c9166@@@@${""
-        }@+$pot_hypertwin.inLinks@-in-$ot.ownerOf${""
+        }@*$pot_hypertwin.inLinks@-in-$ot.ownerOf${""
         }$.@.S--$~plt.@.$ot$.@.O.$.aa592f56-1d82-4484-8360-ad9b82d00592@@@@@@@@`);
     });
   });

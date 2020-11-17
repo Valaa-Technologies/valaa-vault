@@ -146,28 +146,28 @@ VPath outlines are JSON structures which use convenience constructs.
   ["@$o.import", {
     "@.:workshop": [
       ["@$o.folder", "vault", {
-        "@+:workers": {
-          "@+:ot-worker-hyperbridge-dev": [],
+        "@*:workers": {
+          "@*:ot-worker-hyperbridge-dev": [],
         },
-        "@+:env": {
+        "@*:env": {
           "@.:ot:@.:ot-dev@@": [
-            ["@+:public-session"],
-            ["@+:session"],
+            ["@*:public-session"],
+            ["@*:session"],
             ["@~:ot-identity.json"],
             ["@~:hyperbridge-identity.json"],
           ]
         },
-        "@+:revelations": {
-          "@+:sites": [
+        "@*:revelations": {
+          "@*:sites": [
             ["@.:inspire", ["@$o.folder", "vault", "dist", "revealer", "sites", "inspire"]],
-            ["@+:myworld-dev"],
+            ["@*:myworld-dev"],
           ]
         }
       }],
-      ["@$o.folder", "opspace", "build", ["@+:env"]]
+      ["@$o.folder", "opspace", "build", ["@*:env"]]
     ]
   }, {
-    "workshop.tar.gz": ["@$o.tar-gz", ["@+:workshop"]],
+    "workshop.tar.gz": ["@$o.tar-gz", ["@*:workshop"]],
   }]
 ], "@@"),
 "toEqual",
@@ -179,31 +179,31 @@ VPath outlines are JSON structures which use convenience constructs.
     ["@.", ["workshop",
       ["@", [["@$o", "folder"],
         "vault",
-        ["@+", ["env",
+        ["@*", ["env",
           ["@.", ["ot",
             ["@.", ["ot-dev"]],
-            ["@+", ["public-session"]],
-            ["@+", ["session"]],
+            ["@*", ["public-session"]],
+            ["@*", ["session"]],
             ["@~", ["ot-identity.json"]],
             ["@~", ["hyperbridge-identity.json"]],
           ]]],
         ],
-        ["@+", ["revelations",
-          ["@+", ["sites",
+        ["@*", ["revelations",
+          ["@*", ["sites",
             ["@.", ["inspire",
               ["@", [["@$o", "folder"], "vault", "dist", "revealer", "sites", "inspire"]],
             ]],
-            ["@+", ["myworld-dev"]],
+            ["@*", ["myworld-dev"]],
           ]],
         ]],
-        ["@+", ["workers",
-          ["@+", ["ot-worker-hyperbridge-dev"]],
+        ["@*", ["workers",
+          ["@*", ["ot-worker-hyperbridge-dev"]],
         ]],
       ]],
-      ["@", [["@$o", "folder"], "opspace", "build", ["@+", ["env"]]]],
+      ["@", [["@$o", "folder"], "opspace", "build", ["@*", ["env"]]]],
     ]],
     ["@.", ["workshop.tar.gz",
-      ["@", [["@$o", "tar-gz"], ["@+", ["workshop"]]]],
+      ["@", [["@$o", "tar-gz"], ["@*", ["workshop"]]]],
     ]],
   ]],
 ]],

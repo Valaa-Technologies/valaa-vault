@@ -300,7 +300,7 @@ name and which has the head as their container.`,
   ?o    V:parent ?s
       ; V:name "Scripts"
 `), `
-Mnemonic: "+" is a list-view symbol of an expandable container.`,
+Mnemonic: "*" is a list-view symbol of an expandable container.`,
           ],
         },
         "chapter#section_verb_content>3;verb type \"`~`\": content or Media selector": {
@@ -805,14 +805,14 @@ and thus infers triples:
         "#0": `
 Structural entities infer a type, fixed owner (parent) and name.`,
         "example#example_structural_entity>0;Structural Entity triple inference": [
-`\`<urn:valos:$~u4.f00b@+$.Scripts>\` has a fixed name "scripts",
+`\`<urn:valos:$~u4.f00b@*$.Scripts>\` has a fixed name "scripts",
 dominant type Entity, $~u4 resource f00b as the owning container and
 a structurally homologous prototype inside f00b-b507-0763 and thus
 infers triples:
 `, turtle(`
-  <urn:valos:$~u4.f00b@+$.Scripts> a V:Entity
+  <urn:valos:$~u4.f00b@*$.Scripts> a V:Entity
       ; V:parent <urn:valos:$~u4.f00b>
-      ; V:inheritancePrototype <urn:valos:$~u4.f00b-b507-0763@+$.Scripts>
+      ; V:inheritancePrototype <urn:valos:$~u4.f00b-b507-0763@*$.Scripts>
       ; V:name "scripts"
 `),
         ],

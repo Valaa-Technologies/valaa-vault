@@ -151,7 +151,7 @@ function disjoinVPathOutline (value, vkey) {
       } else if (Object.getPrototypeOf(value) === Object.prototype) {
         const sortedKeys = Object.keys(value).sort();
         entries = sortedKeys.map(k => disjoinVPathOutline(value[k], k));
-        valueSection = ["@+"];
+        valueSection = ["@*"];
       } else {
         throw new Error(`Cannot disjoin complex value type "${
           (value.constructor || "").name || value.name || typeof value}"`);

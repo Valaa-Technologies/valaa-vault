@@ -76,6 +76,13 @@ export default class Gateway extends FabricEventTarget {
     };
   }
 
+  getAuthorityNexus () { return this.authorityNexus; }
+  getOracle () { return this.oracle; }
+  getScribe () { return this.scribe; }
+  getFalseProphet () { return this.falseProphet; }
+  getIdentityMediator () { return this.identity; }
+  getIdentityManager () { return this.identity; }
+
   getRootDiscourse () { return this.discourse; }
   getRootConnection () { return this._rootConnection; }
   getRootChronicleURI () { return this._rootConnection.getChronicleURI(); }
@@ -283,17 +290,20 @@ export default class Gateway extends FabricEventTarget {
     }
   }
 
-  async terminate () {
+  async terminate (options = {}) {
     const plog1 = this.opLog(1, "terminate");
     plog1 && plog1.opEvent("spindles",
         `Notifying spindles of gateway termination:`,
         Object.keys(this._attachedSpindles).join(" "));
-    return Promise.all(Object.values(this._attachedSpindles).map(spindle =>
+    const ret = await Promise.all(Object.values(this._attachedSpindles).map(spindle =>
         this._notifySpindle(spindle, "onGatewayTerminating")));
-  }
-
-  getIdentityManager () {
-    return this.identity;
+    await Promise.all(Object.values(this._views).map(view =>
+        view.detach && view.detach(options.views)));
+    await this.authorityNexus.terminate(options.authorityNexus);
+    await this.oracle.terminate(options.oracle);
+    await this.scribe.terminate(options.scribe);
+    await this.falseProphet.terminate(options.falseProphet);
+    return ret;
   }
 
   setupHostComponents (components: Object) {

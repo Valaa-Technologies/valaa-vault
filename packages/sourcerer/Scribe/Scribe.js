@@ -11,7 +11,7 @@ import ScribeConnection from "./ScribeConnection";
 
 import {
   BvobInfo, _initializeSharedIndexedDB, _writeBvobBuffer, _readBvobBuffers,
-  _adjustBvobBufferPersistRefCounts,
+  _adjustBvobBufferPersistRefCounts, _deleteDatabases,
 } from "./_databaseOps";
 
 import {
@@ -83,6 +83,15 @@ export default class Scribe extends Sourcerer {
             return (this._initiation = this);
           },
         ]));
+  }
+
+  async terminate (options = {}) {
+    await super.terminate(options);
+    if (this._sharedDb) {
+      this._sharedDb.release();
+      this._sharedDb = null;
+    }
+    if (options.deleteDatabases) await _deleteDatabases(this, options.deleteDatabases);
   }
 
   getDatabaseAPI (): DatabaseAPI { return this._databaseAPI; }

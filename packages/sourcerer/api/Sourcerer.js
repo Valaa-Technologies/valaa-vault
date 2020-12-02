@@ -64,6 +64,11 @@ export default class Sourcerer extends FabricEventTarget {
 
   initiate (): Promise<Sourcerer> | Sourcerer {}
 
+  terminate (options: Object): Promise<Object> {
+    return Promise.all(Object.values(this._connections)
+        .map(connection => connection.disconnect(options)));
+  }
+
   addFollower (follower: Follower, options: ?Object): Follower {
     const discourse = this.createDiscourse(follower, options);
     this._followers.set(follower, discourse);

@@ -94,6 +94,42 @@ export async function _initializeSharedIndexedDB (scribe: Scribe) {
   return { totalBytes, clearedBuffers, releasedBytes, contentLookup, chronicleLookup };
 }
 
+export function _deleteDatabases (scribe: Scribe, allOrChronicleURIs) {
+  const promises = [];
+  for (const chronicleURI of Array.isArray(allOrChronicleURIs)
+      ? allOrChronicleURIs
+      : Object.keys(scribe._chronicleLookup || {})) {
+    const connection = scribe._connections[chronicleURI];
+    const database = ((connection || {})._db || {}).database;
+    promises.push(database
+        ? _deleteActive(database)
+        : _deleteUnconnected(scribe.getChronicleDatabaseId(chronicleURI)));
+  }
+  if (allOrChronicleURIs === true) {
+    promises.push(_deleteUnconnected(scribe.getSharedDatabaseId()));
+  }
+  return Promise.all(promises);
+  function _deleteActive (database) {
+    const transaction = database.transaction([...database.objectStoreNames], "readwrite");
+    for (const table of database.objectStoreNames) {
+      transaction.objectStore(table).clear();
+    }
+    return transaction;
+  }
+  function _deleteUnconnected (databaseId) {
+    return new Promise((resolve, reject) => {
+      const deletion = scribe.getDatabaseAPI().indexedDB.deleteDatabase(databaseId);
+      deletion.onsuccess = () => {
+        resolve();
+      };
+      deletion.onerror = (event) => {
+        reject(scribe.wrapErrorEvent(
+            new Error(`Error deleting database: ${String(event)}`),
+            new Error(`_deleteDatabase(${databaseId})`),
+            "\n\terror event:", ...dumpObject(event)));
+      };
+    });
+  }
 }
 
 export async function _initializeConnectionIndexedDB (connection: ScribeConnection) {

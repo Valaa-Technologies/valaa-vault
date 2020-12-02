@@ -28,7 +28,6 @@ import * as ToolsDecoders from "~/tools/mediaDecoders";
 
 import { thenChainEagerly, mapEagerly } from "~/tools/thenChainEagerly";
 import { getDatabaseAPI } from "~/tools/indexedDB/getInMemoryDatabaseAPI";
-import { openDB } from "~/tools/html5/InMemoryIndexedDBUtils";
 import { dumpify, dumpObject, isPromise, trivialClone, wrapError } from "~/tools";
 
 export const testAuthorityURI = "valaa-test:";
@@ -314,16 +313,7 @@ async function clearScribeDatabases (scribe: Scribe) {
   const index = activeScribes.findIndex(candidate => (candidate === scribe));
   if (index === -1) return;
   activeScribes.splice(index, 1);
-  for (const idbw of [scribe._sharedDb, ...Object.values(scribe._connections).map(c => c._db)]) {
-    if (!idbw) continue;
-    const database = await openDB(idbw.databaseId);
-    for (const table of database.objectStoreNames) {
-      const transaction = database.transaction([table], "readwrite");
-      const objectStore = transaction.objectStore(table);
-      objectStore.clear();
-      await transaction;
-    }
-  }
+  await scribe.terminate({ deleteDatabases: true });
 }
 
 export function createOracle (options?: Object, nexusOptions?: Object) {

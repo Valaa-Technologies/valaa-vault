@@ -40,6 +40,11 @@ export default class AuthorityNexus extends FabricEventTarget {
     this._authoritySourcerers = {};
   }
 
+  terminate (options) {
+    return Promise.all(Object.values(this._authoritySourcerers).map(sourcerer =>
+        sourcerer.terminate(options)));
+  }
+
   addSchemeModule (schemeModule: SchemeModule) {
     invariantify(schemeModule.scheme, `schemeModule is missing scheme`);
     invariantify(!this._schemeModules[schemeModule.scheme],

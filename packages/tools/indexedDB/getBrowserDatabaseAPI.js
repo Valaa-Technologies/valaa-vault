@@ -3,7 +3,7 @@ import type { DatabaseAPI } from "~/tools/indexedDB/databaseAPI";
 
 export function getDatabaseAPI (): DatabaseAPI {
   return {
-    IndexedDB: window.indexedDB,
+    indexedDB: window.indexedDB,
     IDBFactory,
     IDBOpenDBRequest,
     IDBDatabase,

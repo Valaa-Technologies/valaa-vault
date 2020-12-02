@@ -1,6 +1,6 @@
 // @flow
 
-import FakeIndexedDB from "fake-indexeddb";
+import fakeIndexedDB from "fake-indexeddb";
 import FDBFactory from "fake-indexeddb/lib/FDBFactory";
 import FDBOpenDBRequest from "fake-indexeddb/lib/FDBOpenDBRequest";
 import FDBDatabase from "fake-indexeddb/lib/FDBDatabase";
@@ -21,7 +21,7 @@ import type { DatabaseAPI } from "~/tools/indexedDB/databaseAPI";
 
 export function getDatabaseAPI (): DatabaseAPI {
   return {
-    IndexedDB: FakeIndexedDB,
+    indexedDB: fakeIndexedDB,
     IDBFactory: FDBFactory,
     IDBOpenDBRequest: FDBOpenDBRequest,
     IDBDatabase: FDBDatabase,

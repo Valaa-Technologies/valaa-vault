@@ -65,6 +65,9 @@ export default class DelayedQueue {
         (promise, index) => promise && promise.resolve(values[index]));
     return ret;
   }
+  reject (reason) {
+    this._promises.splice().forEach(promise => promise.reject(reason));
+  }
 }
 
 Object.defineProperty(DelayedQueue.prototype, "length", {

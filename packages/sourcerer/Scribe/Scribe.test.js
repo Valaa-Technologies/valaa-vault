@@ -12,7 +12,7 @@ import { initializeAspects } from "~/sourcerer/tools/EventAspects";
 
 import { utf8StringFromArrayBuffer } from "~/tools/textEncoding";
 
-import { openDB, getFromDB, getKeysFromDB, expectStoredInDB }
+import { openDB, closeDB, getFromDB, getKeysFromDB, expectStoredInDB }
     from "~/tools/html5/InMemoryIndexedDBUtils";
 
 const sharedURI = "valos-shared-content";
@@ -73,6 +73,8 @@ describe("Scribe", () => {
         .toEqual(connection.getFirstUnusedCommandEventId() - 1);
     await expectStoredInDB(followupTransaction, database, "commands",
         connection.getFirstUnusedCommandEventId() - 1);
+
+    await closeDB(database);
   });
 
   const textMediaContents = [
@@ -103,6 +105,8 @@ describe("Scribe", () => {
       const restoredContent = utf8StringFromArrayBuffer(restoredBuffer.buffer);
       expect(restoredContent).toEqual(mediaContent);
     }
+
+    closeDB(sharedDB);
   });
 
   it("populates a new connection to an existing chronicle with its cached commands", async () => {

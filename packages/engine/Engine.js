@@ -322,9 +322,15 @@ export default class Engine extends Cog {
     if ((initialState || {}).authorityURI) {
       // Create chronicle(s) before the transaction is committed
       // (and thus before the commands leave upstream).
-      discourse
-          .sourcifyChronicle(id.getChronicleURI(), { newChronicle: true })
-          .asSourceredConnection();
+      Promise.resolve(discourse
+              .sourcifyChronicle(id.getChronicleURI(), { newChronicle: true })
+              .asSourceredConnection())
+          .catch(error => {
+            this.outputErrorEvent(
+                localWrapError(this, error, `_construct.sourcerChronicle ${id.getChronicleURI()}`),
+                0,
+                `Exception caught during new chronicle sourcery for root ${id}`);
+          });
     }
     // FIXME(iridian): If the transaction fails the Vrapper will
     // contain inconsistent data until the next actual update on it.
@@ -335,7 +341,7 @@ export default class Engine extends Cog {
       const initialBlocker = vResource.refreshPhase(state);
       if (initialBlocker) {
         Promise.resolve(vResource.activate({ state, allowImmaterial: true, initialBlocker }))
-            .then(undefined, (error) => {
+            .catch((error) => {
               this.outputErrorEvent(
                   localWrapError(this, error, `_construct.activate ${vResource.debugId()}`),
                   1,

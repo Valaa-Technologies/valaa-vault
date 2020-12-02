@@ -20,6 +20,10 @@ export async function openDB (uri: string) {
   return database;
 }
 
+export async function closeDB (database) {
+  database.close();
+}
+
 export async function getFromDB (database: FDBDatabase, table: string, key: any) {
   try {
     const transaction = database.transaction([table], "readonly");

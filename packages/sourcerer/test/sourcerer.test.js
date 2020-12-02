@@ -15,7 +15,7 @@ import {
 } from "~/sourcerer/test/SourcererTestHarness";
 import { initializeAspects, obtainAspect } from "~/sourcerer/tools/EventAspects";
 
-import { openDB, expectStoredInDB } from "~/tools/html5/InMemoryIndexedDBUtils";
+import { openDB, closeDB, expectStoredInDB } from "~/tools/html5/InMemoryIndexedDBUtils";
 
 let harness = null;
 
@@ -97,6 +97,8 @@ describe("Sourcerer", () => {
       const logIndex = scribeConnection.getFirstUnusedCommandEventId() - 1;
       await expectStoredInDB(venueCommand, database, "commands", logIndex);
     }
+
+    closeDB(database);
   });
 
   it("assigns proper eventIds for commands", async () => {

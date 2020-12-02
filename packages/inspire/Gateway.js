@@ -76,6 +76,11 @@ export default class Gateway extends FabricEventTarget {
     };
   }
 
+  getRootDiscourse () { return this.discourse; }
+  getRootConnection () { return this._rootConnection; }
+  getRootChronicleURI () { return this._rootConnection.getChronicleURI(); }
+  getRootFocusURI () { return this._rootFocusURI || this.getRootChronicleURI(); }
+
   callRevelation (Type: Function | any) {
     if (typeof Type !== "function") return Type;
     return new Type({ parent: this, gateway: this });
@@ -285,16 +290,6 @@ export default class Gateway extends FabricEventTarget {
         Object.keys(this._attachedSpindles).join(" "));
     return Promise.all(Object.values(this._attachedSpindles).map(spindle =>
         this._notifySpindle(spindle, "onGatewayTerminating")));
-  }
-
-  getRootConnection () { return this._rootConnection; }
-
-  getRootChronicleURI () {
-    return this._rootConnection.getChronicleURI();
-  }
-
-  getRootFocusURI () {
-    return this._rootFocusURI || this.getRootChronicleURI();
   }
 
   getIdentityManager () {

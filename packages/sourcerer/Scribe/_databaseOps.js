@@ -36,7 +36,7 @@ export type BvobInfo = {
 export async function _initializeSharedIndexedDB (scribe: Scribe) {
   scribe._sharedDb = new IndexedDBWrapper({
     parent: scribe,
-    databaseId: `${scribe._databasePrefix}valos-shared-content`,
+    databaseId: scribe.getSharedDatabaseId(),
     storeDescriptors: [
       { name: "bvobs", keyPath: "contentHash" },
       { name: "buffers", keyPath: "contentHash" },
@@ -84,15 +84,20 @@ export async function _initializeConnectionIndexedDB (connection: ScribeConnecti
   // Also create Scribe._contentLookup entries for contents referenced by the _pendingMediaLookup
   // entries, including the in-memory contents.
   // If the chronicle does not exist, create it and its structures.
+  const scribe = connection.getScribe();
+  const chronicleURI = connection.getChronicleURI();
+
+
+  const databaseId = scribe.getChronicleDatabaseId(chronicleURI);
   connection._db = new IndexedDBWrapper({
     parent: connection,
-    databaseId: `${connection.getScribe()._databasePrefix}${connection._chronicleURI}`,
+    databaseAPI: connection.getScribe().getDatabaseAPI(),
+    databaseId,
     storeDescriptors: [
       { name: "truths", keyPath: "index" },
       { name: "commands", keyPath: "index" },
       { name: "medias", keyPath: "mediaId" },
     ],
-    databaseAPI: connection.getScribe().getDatabaseAPI(),
   });
   await connection._db.initialize();
 
@@ -351,7 +356,7 @@ export async function _adjustBvobBufferPersistRefCounts (
       req.onsuccess = () => {
         if (!req.result) {
           scribe.errorEvent(`While adjusting content buffer persist references, cannot find ${
-              ""}IndexedDB.valos-shared-content.bvobs entry ${contentHash}, skipping`);
+              ""}indexedDB.valos-shared-content.bvobs entry ${contentHash}, skipping`);
           return;
         }
         let persistRefCount = (req.result && req.result.persistRefCount) || 0;

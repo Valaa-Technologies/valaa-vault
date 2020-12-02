@@ -84,6 +84,14 @@ export default class Scribe extends Sourcerer {
 
   getDatabaseAPI (): DatabaseAPI { return this._databaseAPI; }
 
+  getSharedDatabaseId () {
+    return `${this._databasePrefix}valos-shared-content`;
+  }
+
+  getChronicleDatabaseId (chronicleURI) {
+    return `${this._databasePrefix}${chronicleURI}`;
+  }
+
   // bvob content ops
 
   preCacheBvob (contentHash: string, newInfo: Object, retrieveBvobContent: Function,

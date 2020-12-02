@@ -1,13 +1,12 @@
 // @flow
 
 /**
- * This file describes a type that encapsulates either all possibly relevant scope of IndexedDB or
- * its mock for jest tests in FakeIndexedDB.
- * TODO: Double-check if this is the correct way to describe the types
+ * This file describes a type that encapsulates either all possibly
+ * relevant scope of IndexedDB or its mock for jest tests in FakeIndexedDB.
  */
 
 export type DatabaseAPI = {
-  IndexedDB: IDBFactory,
+  indexedDB: IDBFactory,
   IDBFactory: Function,
   IDBOpenDBRequest: Function,
   IDBDatabase: Function,

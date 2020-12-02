@@ -9,6 +9,7 @@ import {
 // @flow
 
 import { initializeAspects } from "~/sourcerer/tools/EventAspects";
+import { SHARED_DB_VERSION, CHRONICLE_DB_VERSION } from "~/sourcerer/Scribe";
 
 import { utf8StringFromArrayBuffer } from "~/tools/textEncoding";
 
@@ -58,7 +59,7 @@ describe("Scribe", () => {
     const connection = scribe.sourcifyChronicle(testChronicleURI);
     connection.getUpstreamConnection().addNarrateResults({ eventIdBegin: 0 }, []);
     await connection.asSourceredConnection();
-    const database = await openDB(testChronicleURI.toString());
+    const database = await openDB(testChronicleURI.toString(), CHRONICLE_DB_VERSION);
 
     // Adds an entity and checks that it has been stored
     let storedEvent = await connection.proclaimEvent(simpleCommand).getComposedEvent();
@@ -89,7 +90,7 @@ describe("Scribe", () => {
 
     const connection = await scribe.sourcifyChronicle(testChronicleURI)
         .asSourceredConnection();
-    const sharedDB = await openDB(sharedURI);
+    const sharedDB = await openDB(sharedURI, SHARED_DB_VERSION);
 
     for (const mediaContent of textMediaContents) {
       const preparation = await connection.prepareBvob(mediaContent, { name: "Some media" });

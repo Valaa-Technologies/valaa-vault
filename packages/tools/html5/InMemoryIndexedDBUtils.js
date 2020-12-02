@@ -6,10 +6,11 @@ import { Command } from "~/raem/events";
 import { dumpObject, wrapError } from "~/tools";
 import { swapAspectRoot } from "../../sourcerer/tools/EventAspects";
 
-export async function openDB (uri: string) {
+export async function openDB (uri: string, version: number) {
   let database;
+  if (!version) throw new Error("version missing");
   const process = new Promise((resolve, reject) => {
-    const request = FakeIndexedDB.open(uri, 1);
+    const request = FakeIndexedDB.open(uri, version);
     request.onerror = reject;
     request.onsuccess = (event: Event) => {
       database = event.target.result;

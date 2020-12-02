@@ -16,19 +16,19 @@ export default class IndexedDBWrapper extends FabricEventTarget {
   constructor (options: {
     parent: FabricEventTarget, verbosity: ?number, name: ?string,
     databaseId: string, storeDescriptors: Array<{ name: string, keyPath: string}>,
-    databaseAPI: DatabaseAPI,
+    databaseAPI: DatabaseAPI, version: number,
   }) {
     super(options.parent, options.verbosity, options.name || options.databaseId);
     this.databaseAPI = options.databaseAPI;
     this.databaseId = options.databaseId;
+    this.version = options.version || 1;
     this.storeDescriptors = options.storeDescriptors;
   }
 
   initialize () {
     return new Promise((resolve, reject) => {
-      const openReq = this.databaseAPI.IndexedDB.open(this.databaseId, 1);
+      const openReq = this.databaseAPI.indexedDB.open(this.databaseId, this.version);
       openReq.onerror = reject;
-
       openReq.onupgradeneeded = (event: Event) => {
         this._upgradeDatabase(event);
       };

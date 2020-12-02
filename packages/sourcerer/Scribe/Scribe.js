@@ -18,6 +18,8 @@ import {
   _preCacheBvob,
 } from "./_contentOps";
 
+export { SHARED_DB_VERSION, CHRONICLE_DB_VERSION } from "./_databaseOps";
+
 /**
  * Scribe handles all local event and content caching, providing both
  * new semantic functionality as well as performance improvements of
@@ -70,13 +72,14 @@ export default class Scribe extends Sourcerer {
     return this._initiation || (this._initiation = thenChainEagerly(
         this.warnEvent(1, "Initializing bvob content lookups..."), [
           () => _initializeSharedIndexedDB(this),
-          ({ totalBytes, clearedBuffers, releasedBytes, contentLookup }) => {
+          ({ totalBytes, clearedBuffers, releasedBytes, contentLookup, chronicleLookup }) => {
             this.warnEvent(1, () => [
               `Content lookup initialization done with ${
                   Object.keys(contentLookup).length} buffers, totaling ${totalBytes} bytes.`,
               `\n\tcleared ${clearedBuffers} buffers, releasing ${releasedBytes} bytes`,
             ]);
             this._bvobLookup = contentLookup;
+            this._chronicleLookup = chronicleLookup;
             return (this._initiation = this);
           },
         ]));

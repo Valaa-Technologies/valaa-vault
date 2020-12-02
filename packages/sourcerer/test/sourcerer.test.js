@@ -14,6 +14,7 @@ import {
   testChronicleURI,
 } from "~/sourcerer/test/SourcererTestHarness";
 import { initializeAspects, obtainAspect } from "~/sourcerer/tools/EventAspects";
+import { CHRONICLE_DB_VERSION } from "~/sourcerer/Scribe";
 
 import { openDB, closeDB, expectStoredInDB } from "~/tools/html5/InMemoryIndexedDBUtils";
 
@@ -88,7 +89,7 @@ describe("Sourcerer", () => {
     const connection = await harness.sourcerer
         .sourcifyChronicle(harness.testChronicleURI).asSourceredConnection();
     const scribeConnection = connection.getUpstreamConnection();
-    const database = await openDB(scribeConnection._db.databaseId);
+    const database = await openDB(scribeConnection._db.databaseId, CHRONICLE_DB_VERSION);
 
     for (const command of commands) {
       const claimResult = await harness.proclaimTestEvent(command);

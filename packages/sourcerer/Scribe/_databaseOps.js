@@ -33,24 +33,40 @@ export type BvobInfo = {
   persistProcess: ?Promise<any>,
 };
 
+export const SHARED_DB_VERSION = 2;
+// version 1: legacy
+// version 2: add "chronicles" store
+
+export const CHRONICLE_DB_VERSION = 1;
+// version 1: legacy
+
 export async function _initializeSharedIndexedDB (scribe: Scribe) {
   scribe._sharedDb = new IndexedDBWrapper({
     parent: scribe,
     databaseId: scribe.getSharedDatabaseId(),
     storeDescriptors: [
+      { name: "chronicles", keyPath: "chronicleURI" },
       { name: "bvobs", keyPath: "contentHash" },
       { name: "buffers", keyPath: "contentHash" },
     ],
     databaseAPI: scribe.getDatabaseAPI(),
+    version: SHARED_DB_VERSION,
   });
   await scribe._sharedDb.initialize();
 
+  const chronicleLookup = {};
   const contentLookup = {};
   let totalBytes = 0;
   const clearedBuffers = 0;
   const releasedBytes = 0;
-  await scribe._sharedDb.transaction(["bvobs", "buffers"], "readwrite",
-      ({ bvobs, /* buffers */ }) => {
+  await scribe._sharedDb.transaction(["chronicles", "bvobs", "buffers"], "readwrite",
+      ({ chronicles, bvobs, /* buffers */ }) => {
+    chronicles.openCursor().onsuccess = event => {
+      const cursor: IDBCursorWithValue = event.target.result;
+      if (!cursor) return;
+      if (!chronicleLookup[cursor.key]) chronicleLookup[cursor.key] = { ...cursor.value };
+      cursor.continue();
+    };
     bvobs.openCursor().onsuccess = event => {
       const cursor: IDBCursorWithValue = event.target.result;
       if (!cursor) return;
@@ -75,7 +91,9 @@ export async function _initializeSharedIndexedDB (scribe: Scribe) {
       cursor.continue();
     };
   });
-  return { totalBytes, clearedBuffers, releasedBytes, contentLookup };
+  return { totalBytes, clearedBuffers, releasedBytes, contentLookup, chronicleLookup };
+}
+
 }
 
 export async function _initializeConnectionIndexedDB (connection: ScribeConnection) {
@@ -87,12 +105,23 @@ export async function _initializeConnectionIndexedDB (connection: ScribeConnecti
   const scribe = connection.getScribe();
   const chronicleURI = connection.getChronicleURI();
 
+  let chronicleMeta = scribe._chronicleLookup[chronicleURI];
+  if (!chronicleMeta) {
+    chronicleMeta = await scribe._sharedDb.transaction(["chronicles"], "readwrite",
+        ({ chronicles }) => {
+      const ret = { chronicleURI };
+      chronicles.put(ret);
+      return ret;
+    });
+    scribe._chronicleLookup[chronicleURI] = chronicleMeta;
+  }
 
   const databaseId = scribe.getChronicleDatabaseId(chronicleURI);
   connection._db = new IndexedDBWrapper({
     parent: connection,
     databaseAPI: connection.getScribe().getDatabaseAPI(),
     databaseId,
+    version: CHRONICLE_DB_VERSION,
     storeDescriptors: [
       { name: "truths", keyPath: "index" },
       { name: "commands", keyPath: "index" },

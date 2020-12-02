@@ -447,10 +447,16 @@ export function _triggerEventQueueWrites (connection: ScribeConnection, eventsIn
   return (eventsInfo.writeProcess = thenChainEagerly(
       writeEvents([...myQueue]),
       writtenEvents => {
-        if (myQueue !== eventsInfo.writeQueue) {
-          const error = new Error(
-              `${writeEvents.name} write queue purged, discarding all old writes`);
+        let error;
+        if (!writtenEvents) {
+          error = new Error(`${writeEvents.name} database released, discarding all old writes`);
+          error.disconnected = true;
+        } else if (myQueue !== eventsInfo.writeQueue) {
+          error = new Error(`${writeEvents.name} write queue purged, discarding all old writes`);
+        }
+        if (error) {
           myQueue.reject(error);
+          if (onError) return onError(error);
           throw error;
         }
         eventsInfo.writeProcess = null;

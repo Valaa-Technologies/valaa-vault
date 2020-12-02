@@ -20,7 +20,8 @@ import {
   MediaEntry, _prepareBvob, _determineEventMediaPreOps, _requestMediaContents
 } from "./_contentOps";
 import {
-  _initializeConnectionIndexedDB, _updateMediaEntries, _readMediaEntries, _destroyMediaInfo,
+  _initializeConnectionIndexedDB,
+  _updateMediaEntries, _readMediaEntries, _destroyMediaInfo,
   _writeTruths, _readTruths, _writeCommands, _readCommands, _deleteCommands,
 } from "./_databaseOps";
 import {
@@ -135,14 +136,19 @@ export default class ScribeConnection extends Connection {
   }
 
   disconnect () {
+    super.disconnect();
     const adjusts = {};
     for (const entry of Object.values(this._pendingMediaLookup)) {
-      if (entry.isInMemory) adjusts[entry.contentHash] = -1;
+      const contentHash = entry.mediaInfo.contentHash;
+      if (contentHash && entry.isInMemory) adjusts[contentHash] = -1;
       if (entry.isPersisted) delete this.getScribe()._persistedMediaLookup[entry.mediaId];
     }
     this.getScribe()._adjustInMemoryBvobBufferRefCounts(adjusts);
     this._pendingMediaLookup = {};
-    super.disconnect();
+    if (this._db) {
+      this._db.release();
+      this._db = null;
+    }
   }
 
   getFirstTruthEventId () { return this._truthLogInfo.eventIdBegin; }
@@ -231,6 +237,7 @@ export default class ScribeConnection extends Connection {
     }
     return _triggerEventQueueWrites(this, this._commandQueueInfo, this._writeCommands.bind(this),
         undefined, (error) => {
+          if (error.disconnected) return null;
           // Check for cross-tab writes
           throw error;
         });
@@ -245,7 +252,12 @@ export default class ScribeConnection extends Connection {
     if (this._truthLogInfo.writeProcess) {
       return this._truthLogInfo.writeProcess.then(() => this._truthLogInfo.writeProcess);
     }
-    return _triggerEventQueueWrites(this, this._truthLogInfo, this._writeTruths.bind(this));
+    return _triggerEventQueueWrites(this, this._truthLogInfo, this._writeTruths.bind(this),
+        undefined, (error) => {
+          if (error.disconnected) return null;
+          // Check for cross-tab writes
+          throw error;
+        });
   }
 
   _clampCommandQueueByTruthEventIdEnd (lastTruthCommandId?: any) {

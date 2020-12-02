@@ -102,11 +102,25 @@ export default class Connection extends Follower {
     }]`;
   }
 
+  static _disconnectedPushEventsDownstream = () => undefined;
+
   isConnected () {
     if (this._upstreamConnection) return this._upstreamConnection.isConnected();
-    throw new Error("isConnected not implemented");
+    return this._pushTruthsDownstream !== Connection._disconnectedPushEventsDownstream;
   }
 
+  /**
+   * disconnect - Disconnects from chronicle, stops receiving further requests
+   *
+   * @returns {type}                   description
+   */
+  disconnect () {
+    this._refCount = null;
+    this._pushTruthsDownstream = Connection._disconnectedPushEventsDownstream;
+    this._pushCommandsDownstream = Connection._disconnectedPushEventsDownstream;
+    delete this._parent._connections[this.getChronicleURI()];
+    if (this._upstreamConnection) this._upstreamConnection.disconnect();
+  }
 
   /**
    * Asynchronous operation which activates the connection to the
@@ -127,7 +141,7 @@ export default class Connection extends Follower {
    * @memberof OracleConnection
    */
   sourcify (options: SourceryOptions) {
-    if (this._activeConnection) return this._activeConnection;
+    if (this._activeConnection !== undefined) return this._activeConnection;
     const Type = this.constructor;
     const chainOptions = Object.create(options);
     chainOptions.plog = (options.plog || {}).v1
@@ -146,6 +160,10 @@ export default class Connection extends Follower {
   ];
 
   _errorOnSourcery (error, stepIndex, params) {
+    this._activeConnection = null;
+    if (error.disconnected && (params[0].narrateOptions !== false)) {
+      return null;
+    }
     throw this.wrapErrorEvent(error, 1, new Error("sourcify()"),
         `\n\tstep #${stepIndex} params:`, ...dumpObject(params));
   }
@@ -173,7 +191,7 @@ export default class Connection extends Follower {
   _narrateEventLog (options: SourceryOptions) {
     if (options.narrateOptions === false) {
       throw new Error(
-          "INTENRAL ERROR: options.narrateOptions is false: _narrateEventLog must be skipped");
+          "INTERNAL ERROR: options.narrateOptions is false: _narrateEventLog must be skipped");
     }
     const narrateOptions = options.narrateOptions || {};
     narrateOptions.plog = options.plog;
@@ -214,15 +232,6 @@ export default class Connection extends Follower {
         "Sourcery done:", { options, narrateResults });
     return (this._activeConnection = this);
   }
-
-  /**
-   * disconnect - Disconnects from chronicle, stops receiving further requests
-   *
-   * @returns {type}                   description
-   */
-  disconnect () {
-    this._refCount = null;
-  } // eslint-disable-line
 
   addReference () { ++this._refCount; }
 

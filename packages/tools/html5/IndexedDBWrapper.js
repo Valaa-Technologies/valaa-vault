@@ -30,32 +30,44 @@ export default class IndexedDBWrapper extends FabricEventTarget {
       openReq.onerror = reject;
 
       openReq.onupgradeneeded = (event: Event) => {
-        this._initDatabase(event);
+        this._upgradeDatabase(event);
       };
 
-      // AFAIK if onupgradeneeded is called then onsuccess will not be called until any transactions
-      // from onupgradeneeded are complete
+      // AFAIK if onupgradeneeded is called then onsuccess will not be
+      // called until any transactions from onupgradeneeded are complete
       openReq.onsuccess = (event: Event) => {
-        this._setDatabaseObject(event);
-        resolve();
+        if (this.database === null) { // closed via API call before init was complete
+          event.target.result.close();
+          const error = new Error("database released during initialize");
+          error.disconnected = true;
+          reject(error);
+        } else {
+          this.database = event.target.result;
+          this.database.onerror = (evt: Event) => {
+            throw this.wrapErrorEvent(evt.target.error, 1, `IDB.onerror`,
+                "\n\tstores:", this.storeDescriptors.map(descriptor =>
+                    (descriptor ? descriptor.name : "<no descriptor>")).join(", "));
+          };
+          resolve();
+        }
       };
     });
   }
 
-  _initDatabase = (event: Event) => {
-    const database: IDBDatabase = event.target.result;
-    for (const storeDescriptor of Object.values(this.storeDescriptors)) {
-      database.createObjectStore(storeDescriptor.name, { keyPath: storeDescriptor.keyPath });
+  release () {
+    if (this.database) {
+      this.database.close();
     }
+    this.database = null;
   }
 
-  _setDatabaseObject = (event: Event) => {
-    this.database = event.target.result;
-    this.database.onerror = (evt: Event) => {
-      throw this.wrapErrorEvent(evt.target.error, 1, `IDB.onerror`,
-          "\n\tstores:", this.storeDescriptors
-              .map(descriptor => (descriptor ? descriptor.name : "<no descriptor>")).join(", "));
-    };
+  _upgradeDatabase = (event: Event) => {
+    const database: IDBDatabase = event.target.result;
+    for (const storeDescriptor of Object.values(this.storeDescriptors)) {
+      if (!database.objectStoreNames.contains(storeDescriptor.name)) {
+        database.createObjectStore(storeDescriptor.name, { keyPath: storeDescriptor.keyPath });
+      }
+    }
   }
 
   async transaction (stores: Array<string>, mode: string = "readonly", opsCallback: Function) {

@@ -28,7 +28,7 @@ function conjoinVPath (section) {
   return ret[0] !== "$" ? `${ret}@@` : `@${ret}@@`;
 }
 
-function disjoinVPath (vpath: string | Array) {
+function disjoinVPath (vpath) {
   const ret = (typeof vpath === "string")
       ? disjoinVPathString(vpath)
       : disjoinVPathOutline(vpath, "@@");

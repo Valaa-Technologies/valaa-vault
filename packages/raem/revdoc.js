@@ -1,7 +1,7 @@
 
 const {
   extractee: {
-    c, em, ref,
+    em, ref,
     authors, q, pkg,
     filterKeysWithAnyOf, filterKeysWithNoneOf, valosRaemFieldClasses,
   },
@@ -20,7 +20,7 @@ const { name, version, description } = require("./package");
 
 module.exports = {
   "dc:title": description,
-  "VDoc:tags": ["PRIMARY", "INTRODUCTORY", "VALOSPACE", "WORKSPACE", "ONTOLOGY"],
+  "VDoc:tags": ["PRIMARY", "WORKSPACE", "VALOSPACE", "ONTOLOGY"],
   "VRevdoc:package": name,
   "VRevdoc:version": version,
   ...revdocOntologyProperties(
@@ -36,7 +36,7 @@ module.exports = {
   "chapter#abstract>0": {
     "#0": [
 `This library provides the definitions and reference implementation
-for the fundamental `, c(`ValOS Resources`), " and ", c(`ValOS Events`), `
+for the fundamental `, em(`ValOS Resources`), " and ", em(`ValOS Events`), `
 systems.`,
     ],
   },
@@ -50,16 +50,16 @@ systems.`,
   "chapter#introduction>2": {
     "#0": [
 `This library provides the definitions and reference implementations
-for the fundamental `, c(`ValOS Resources`), " and ", c(`ValOS Events`), `
+for the fundamental `, em(`ValOS Resources`), " and ", em(`ValOS Events`), `
 systems.
 
 `, q([
-  `A ValOS Resource `, c(`resource`), ` represents a well-defined part of
+  `A ValOS Resource `, em(`resource`), ` represents a well-defined part of
   the world. It has a well-defined state at each particular moment in time.`,
 ]), `
 
 `, q([
-  `A ValOS Event `, c(`event`), ` represents a dynamic change to a
+  `A ValOS Event `, em(`event`), ` represents a dynamic change to a
   resource by describing the change from previous to subsequent resource
   states at a particular time.`,
 ]), `
@@ -73,16 +73,16 @@ foundation of the Valaa Open System.`,
     "#0":
 `This library provides:`,
     "bulleted#1": [
-["schema definitions for ", c("Resource"), " and the other core types."],
-[c("Corpus"), " component which stores in-memory representations of the resources."],
-[c("reducers"), " which a corpus uses to convert (", c("reduce"),
+["schema definitions for ", em("Resource"), " and the other core types."],
+[em("Corpus"), " component which stores in-memory representations of the resources."],
+[em("reducers"), " which a corpus uses to convert (", em("reduce"),
   ") events into changes of its resource representations."],
-["the kuery language ", c("VALK"), " definition and the kuery engine ",
-  c("Valker"), "component for accessing and manipulating the resources."],
-[c("ghost instancing"), ` mechanism which unifies the object
+["the kuery language ", em("VALK"), " definition and the kuery engine ",
+  em("Valker"), "component for accessing and manipulating the resources."],
+[em("ghost instancing"), ` mechanism which unifies the object
   oriented instantiation and inheritance principles into a single
   but powerful mechanism for ValOS resources.`],
-[c("resource couplings"), ` mechanism which allows referential
+[em("resource couplings"), ` mechanism which allows referential
   integrity and the definition of different types of reference
   semantics like ownership, global references and local references.`],
 // TODO(iridian, 2019-07): Valospace and chronicles should in principle
@@ -91,20 +91,20 @@ foundation of the Valaa Open System.`,
 // simplify its implementation considerably.
 // However that's gonna be a damn of a refactoring process to fully
 // abstract and excise them from @valos/raem.
-[c("urn:valos"), ` specification which defines globally unique
+[em("urn:valos"), ` specification which defines globally unique
   identifiers for ValOS resources.`],
-[c("ValOSURL"), ` specification which allows for universal locating of resources.`],
-[c("valospace"), ` definition as a distributed set of resources
+[em("ValOSURL"), ` specification which allows for universal locating of resources.`],
+[em("valospace"), ` definition as a distributed set of resources
   containing references to each other using the VRLs.`],
-[c("chronicles"), ` mechanism which allows for unlimited scalability of
-  the `, c("valospace"), ` into a singular globally distributed and
+[em("chronicles"), ` mechanism which allows for unlimited scalability of
+  the `, em("valospace"), ` into a singular globally distributed and
   unified object space.`],
     ],
     "bulleted#2": [
-["depends:", pkg(`@valos/tools`), c(`immutable`)],
-["exports:", c(`Corpus`), c(`Command`), c(`VALK`), c(`Valker`), c(`RAEMContentAPI`)],
-["valospace:", c(`Resource`), c(`TransientFields`), c(`Bvob`), c(`Chronicle`)],
-["concepts:", c(`ghost instancing`), c(`chronicles`), c(`couplings`)],
+["depends:", pkg(`@valos/tools`), em(`immutable`)],
+["exports:", em(`Corpus`), em(`Command`), em(`VALK`), em(`Valker`), em(`RAEMContentAPI`)],
+["valospace:", em(`Resource`), em(`TransientFields`), em(`Bvob`), em(`Chronicle`)],
+["concepts:", em(`ghost instancing`), em(`chronicles`), em(`couplings`)],
     ],
     "chapter#section_url_urn_id>2;ValOS URLs, urn:valos and raw id's": {
       "#0": [

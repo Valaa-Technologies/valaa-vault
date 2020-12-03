@@ -18,7 +18,7 @@ const {
 
 module.exports = {
   "dc:title": description,
-  "VDoc:tags": ["PRIMARY", "FABRIC", "WORKSPACE", "ONTOLOGY"],
+  "VDoc:tags": ["PRIMARY", "WORKSPACE", "FABRIC", "ONTOLOGY"],
   "VRevdoc:package": name,
   "VRevdoc:version": version,
   ...revdocOntologyProperties(

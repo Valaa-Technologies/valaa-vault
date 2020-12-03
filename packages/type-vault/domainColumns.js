@@ -54,15 +54,16 @@ const roles =  {
   },
 };
 
-const introductionDocuments =  {
+const introductoryDocuments =  {
   ...documents,
   "column#08": {
     "VDoc:content": em("Title:"),
     "VDoc:cell": ref({ "VDoc:selectField": "title" }, ["VDoc:selectKey", "#introduction"]),
     "VDoc:wide": true,
   },
-  "column#09;introduction": {
+  "column#09": {
     "VDoc:content": em("Introduction:"),
+    "VDoc:cell": { "VDoc:selectField": ["introduction", "abstract"] },
     "VDoc:wide": true,
     "VDoc:tall": true,
   },
@@ -75,8 +76,9 @@ const valospaceDocuments = {
     "VDoc:cell": ref({ "VDoc:selectField": "title" }, ["VDoc:selectKey", "#valospaceAbstract"]),
     "VDoc:wide": true,
   },
-  "column#09;valospaceAbstract": {
+  "column#09": {
     "VDoc:content": em("Valospace abstract:"),
+    "VDoc:cell": { "VDoc:selectField": ["valospaceAbstract", "abstract"] },
     "VDoc:wide": true,
     "VDoc:tall": true,
   },
@@ -89,8 +91,9 @@ const valosheathDocuments = {
     "VDoc:cell": ref({ "VDoc:selectField": "title" }, ["VDoc:selectKey", "#valosheathAbstract"]),
     "VDoc:wide": true,
   },
-  "column#09;valosheathAbstract": {
+  "column#09": {
     "VDoc:content": em("Valosheath abstract:"),
+    "VDoc:cell": { "VDoc:selectField": ["valosheathAbstract", "abstract"] },
     "VDoc:wide": true,
     "VDoc:tall": true,
   },
@@ -103,8 +106,24 @@ const fabricDocuments = {
     "VDoc:cell": ref({ "VDoc:selectField": "title" }, ["VDoc:selectKey", "#fabricAbstract"]),
     "VDoc:wide": true,
   },
-  "column#09;fabricAbstract": {
+  "column#09": {
     "VDoc:content": em("Fabric abstract:"),
+    "VDoc:cell": { "VDoc:selectField": ["fabricAbstract", "abstract"] },
+    "VDoc:wide": true,
+    "VDoc:tall": true,
+  },
+};
+
+const specificationDocuments = {
+  ...documents,
+  "column#08": {
+    "VDoc:content": em("Title:"),
+    "VDoc:cell": ref({ "VDoc:selectField": "title" }, ["VDoc:selectKey", "#specificationAbstract"]),
+    "VDoc:wide": true,
+  },
+  "column#09": {
+    "VDoc:content": em("Specification abstract:"),
+    "VDoc:cell": { "VDoc:selectField": ["specificationAbstract", "abstract"] },
     "VDoc:wide": true,
     "VDoc:tall": true,
   },
@@ -174,10 +193,11 @@ const workspaces = {
 module.exports = {
   roles,
   documents: titledDocuments,
-  introductionDocuments,
+  introductoryDocuments,
   valospaceDocuments,
   valosheathDocuments,
   fabricDocuments,
+  specificationDocuments,
   primaryDocuments,
   summary,
   commandSourced,

@@ -1,7 +1,7 @@
 
 const {
   extractee: {
-    c, authors, em, pkg, ref,
+    authors, em, pkg, ref,
     filterKeysWithAnyOf, filterKeysWithNoneOf, valosRaemFieldClasses,
   },
   ontologyColumns, revdocOntologyProperties,
@@ -20,7 +20,7 @@ const { name, version, description } = require("./package");
 module.exports = {
   "@context": { ...prefixes, ...context },
   "dc:title": description,
-  "VDoc:tags": ["PRIMARY", "INTRODUCTORY", "VALOSPACE", "WORKSPACE", "ONTOLOGY"],
+  "VDoc:tags": ["PRIMARY", "INTRODUCTORY", "WORKSPACE", "VALOSPACE", "ONTOLOGY"],
   "VRevdoc:package": name,
   "VRevdoc:version": version,
   ...revdocOntologyProperties(
@@ -36,7 +36,7 @@ module.exports = {
     "#0": [
 `This library provides the definitions and reference implementation
 of the ValOS sourcerer architecture which is used to route `,
-c("ValOS event streams"), `.`,
+em("ValOS event streams"), `.`,
     ],
   },
   "chapter#sotd>1": {

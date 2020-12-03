@@ -22,17 +22,23 @@ const {
   ...remainingOntology
 } = require("./ontology");
 
-const roleDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "ROLE"], documents);
-const introductionDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "INTRODUCTORY"], documents);
-const valospaceDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "VALOSPACE"], documents);
-const valosheathDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "VALOSHEATH"], documents);
-const fabricDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "FABRIC"], documents);
-const otherPrimaryDocuments = filterKeysWithAllOf("tags", "PRIMARY", documents)
+const newest = Object.fromEntries(Object.entries(documents)
+    .filter(([documentName]) => !documentName.match(/[0-9]$/)));
+
+const roleDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "ROLE"], newest);
+const introductoryDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "INTRODUCTORY"], newest);
+const valospaceDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "VALOSPACE"], newest);
+const valosheathDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "VALOSHEATH"], newest);
+const fabricDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "FABRIC"], newest);
+const specificationDocuments = filterKeysWithAllOf("tags", ["PRIMARY", "SPECIFICATION"], newest);
+const otherPrimaryDocuments = filterKeysWithAllOf("tags", "PRIMARY", newest)
     .filter(key => !roleDocuments.includes(key)
-        && !introductionDocuments.includes(key)
+        && !introductoryDocuments.includes(key)
         && !valospaceDocuments.includes(key)
         && !valosheathDocuments.includes(key)
-        && !fabricDocuments.includes(key));
+        && !fabricDocuments.includes(key)
+        && !specificationDocuments.includes(key)
+    );
 
 module.exports = {
   "dc:title": `${name} domain content reference`,
@@ -101,29 +107,39 @@ ref([em("vlm"), ` the command line script invoker`], "@/valma"), `.`,
     "chapter#section_introduction_documents>0;Introduction documents": {
       "#0": [],
       "table#>0;documents": {
-        "VDoc:columns": domainColumns.introductionDocuments,
-        "VDoc:entries": introductionDocuments,
+        "VDoc:columns": domainColumns.introductoryDocuments,
+        "VDoc:entries": introductoryDocuments,
       },
     },
-    "chapter#section_valospace_documents>1;Valospace documents": {
+    "chapter#section_api_documents>1;API documents": {
       "#0": [],
-      "table#>0;documents": {
-        "VDoc:columns": domainColumns.valospaceDocuments,
-        "VDoc:entries": valospaceDocuments,
+      "chapter#section_valospace_documents>1;Valospace API documents": {
+        "#0": [],
+        "table#>0;documents": {
+          "VDoc:columns": domainColumns.valospaceDocuments,
+          "VDoc:entries": valospaceDocuments,
+        },
+      },
+      "chapter#section_valosheath_documents>2;Valosheath API documents": {
+        "#0": [],
+        "table#>0;documents": {
+          "VDoc:columns": domainColumns.valosheathDocuments,
+          "VDoc:entries": valosheathDocuments,
+        },
+      },
+      "chapter#section_ontology_documents>3;Fabric API documents": {
+        "#0": [],
+        "table#>0;documents": {
+          "VDoc:columns": domainColumns.fabricDocuments,
+          "VDoc:entries": fabricDocuments,
+        },
       },
     },
-    "chapter#section_valosheath_documents>1;Valosheath documents": {
+    "chapter#section_specification_documents>2;Specification documents": {
       "#0": [],
       "table#>0;documents": {
-        "VDoc:columns": domainColumns.valosheathDocuments,
-        "VDoc:entries": valosheathDocuments,
-      },
-    },
-    "chapter#section_ontology_documents>2;Fabric documents": {
-      "#0": [],
-      "table#>0;documents": {
-        "VDoc:columns": domainColumns.fabricDocuments,
-        "VDoc:entries": fabricDocuments,
+        "VDoc:columns": domainColumns.specificationDocuments,
+        "VDoc:entries": specificationDocuments,
       },
     },
     "chapter#section_other_primary_documents>3;Other primary documents": {
@@ -139,26 +155,26 @@ ref([em("vlm"), ` the command line script invoker`], "@/valma"), `.`,
 `This domain introduces the following `, ref("workspaces", "@/valma#workspace"),
 ` and workspace infrastructure components.`,
     ],
-    [`chapter#section_new_types>0;Workspace types, ${Object.keys(types).length} new`]: {
+    [`chapter#section_workspaces_types>0;Workspace types, ${Object.keys(types).length} new`]: {
       "#0": [
         `This domain introduces the following `, ref("workspace types", "@/valma#type"), ".",
       ],
       "table#>0;types": domainColumns.types,
     },
-    [`chapter#section_new_toolsets>1;Workspace toolsets, ${
+    [`chapter#section_workspaces_toolsets>1;Workspace toolsets, ${
         Object.keys(toolsets).length} new`]: {
       "#0": [
         `This domain introduces the following `, ref("workspace toolsets", "@/valma#toolset"), ":",
       ],
       "table#>0;toolsets": domainColumns.toolsets,
     },
-    [`chapter#section_new_tools>2;Workspace tools, ${Object.keys(tools).length} new`]: {
+    [`chapter#section_workspaces_tools>2;Workspace tools, ${Object.keys(tools).length} new`]: {
       "#0": [
         `This domain introduces the following `, ref("workspace tools", "@/valma#tool"), ":",
       ],
       "table#>0;tools": domainColumns.tools,
     },
-    [`chapter#section_new_commands>3;Valma commands, ${Object.keys(commands).length} new`]: {
+    [`chapter#section_workspaces_commands>3;Valma commands, ${Object.keys(commands).length} new`]: {
       "#0": [
         `This domain introduces the following top-level `,
         ref("valma commands", "@/valma#command"), ":",
@@ -166,7 +182,7 @@ ref([em("vlm"), ` the command line script invoker`], "@/valma"), `.`,
       "table#>0;commands": domainColumns.commands,
     },
     ...Object.entries(workspaces).map(([type, typeWorkspaces], index) => ({
-      [`chapter#section_new_${identifize(type)}_workspaces>${4 + index
+      [`chapter#section_workspaces_type_${identifize(type)}>${4 + index
           };Type '${type}' workspaces, ${Object.keys(typeWorkspaces).length} new`]: {
         "#0": [
 (types[type] || {}).introduction || `

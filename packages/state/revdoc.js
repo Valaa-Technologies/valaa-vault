@@ -20,7 +20,7 @@ const {
 } = require("./ontology");
 
 module.exports = {
-  "VDoc:tags": ["WORKSPACE", "FABRIC", "ONTOLOGY"],
+  "VDoc:tags": ["PRIMARY", "WORKSPACE", "FABRIC", "SPECIFICATION", "ONTOLOGY"],
   "@context": {
     ...prefixes,
     ...context,

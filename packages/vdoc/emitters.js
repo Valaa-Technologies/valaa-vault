@@ -178,7 +178,7 @@ function emitTableHTML (node, emission, stack) {
   const columnHeaderTexts = [];
   let columns = node["VDoc:columns"];
   if (!columns) {
-    throw new Error("VDoc:Table is missing columns");
+    throw new Error("VDoc:Table is missing 'VDoc:columns'");
   }
   if (!Array.isArray(columns)) {
     if (columns["VDoc:entries"]) columns = columns["VDoc:entries"];
@@ -288,15 +288,15 @@ function _instantiateTemplate (template, entryKey, entryData) {
         if (typeof patch === "string") {
           return select[patch] !== undefined ? select[patch] : patch;
         }
-        if ((patch != null) && patch["VDoc:selectField"]) {
-          const ret = (entryData == null) ? undefined : entryData[patch["VDoc:selectField"]];
-          if (ret === undefined) {
-            // console.log(`Can't select field '${patch["VDoc:selectField"]
-            //     }' from entry with key '${entryKey}'`);
-          }
-          return ret !== undefined ? ret : null;
+        const selectFields = (patch != null) && patch["VDoc:selectField"];
+        if (!selectFields) return undefined;
+        if (entryData == null) return null;
+        for (const selectField of [].concat(selectFields)) {
+          if (entryData[selectField] !== undefined) return entryData[selectField];
         }
-        return undefined;
+        // console.log(`Can't select field '${patch["VDoc:selectField"]
+        //     }' from entry with key '${entryKey}'`);
+        return null;
       },
     });
   }

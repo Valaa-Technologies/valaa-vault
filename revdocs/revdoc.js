@@ -25,7 +25,7 @@ const roleDocuments = Object.fromEntries(
 
 module.exports = {
   "dc:title": "Valos introduction and valospace API reference",
-  "VDoc:tags": ["PRIMARY", "INTRODUCTION", "ONTOLOGY", "VALONAUT"],
+  "VDoc:tags": ["PRIMARY", "INTRODUCTORY", "VALOSPACE", "ONTOLOGY"],
   "VRevdoc:package": name,
   "VRevdoc:version": version,
   ...revdocOntologyProperties(

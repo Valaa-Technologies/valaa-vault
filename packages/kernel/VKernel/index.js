@@ -4,6 +4,7 @@ module.exports = {
   baseIRI: "https://valospace.org/kernel/0#",
   namespaceModules: {
     VKernel: "@valos/kernel/VKernel",
+    VPlot: "@valos/plot/VPlot",
     VState: "@valos/state/VState",
     VValk: "@valos/valk/VValk",
     VLog: "@valos/log/VLog",

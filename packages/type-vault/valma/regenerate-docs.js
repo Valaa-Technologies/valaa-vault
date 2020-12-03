@@ -69,23 +69,24 @@ exports.handler = async (yargv) => {
   const docsBaseIRI = vaultDocsConfig.docsBaseIRI;
   const listing = {};
   function _addDocumentToListing (documentPath, vdocState, { tags = [], ...rest }) {
+    const docRoot = vdocState[0];
     listing[documentPath] = {
-      "@id": vdocState[0]["@id"],
-      tags: (vdocState[0]["VDoc:tags"] || []).concat(...tags)
+      "@id": docRoot["@id"],
+      tags: (docRoot["VDoc:tags"] || []).concat(...tags)
           .filter((v, i, a) => a.indexOf(v) === i),
-      subProfiles: (vdocState[0].subProfiles || []),
-      title: vdocState[0]["dc:title"] || documentPath,
-      ..._embedSection("abstract", vdocState[0].abstract),
-      ..._embedSection("introduction",
-          { ...vdocState[0].introduction || {}, "dc:title": undefined }),
-      ..._embedSection("valospaceAbstract", vdocState[0].section_valospace_abstract),
-      ..._embedSection("valosheathAbstract", vdocState[0].section_valosheath_abstract),
-      ..._embedSection("fabricAbstract", vdocState[0].section_fabric_abstract),
-      ...(vdocState[0]["VRevdoc:preferredPrefix"] && {
-        "VRevdoc:preferredPrefix": vdocState[0]["VRevdoc:preferredPrefix"],
-        "VRevdoc:baseIRI": vdocState[0]["VRevdoc:baseIRI"],
-        "VRevdoc:referencedModules": vdocState[0]["VRevdoc:referencedModules"],
-        "VRevdoc:extenderModules": vdocState[0]["VRevdoc:extenderModules"],
+      subProfiles: (docRoot.subProfiles || []),
+      title: docRoot["dc:title"] || documentPath,
+      ..._embedSection("abstract", docRoot.abstract),
+      ..._embedSection("introduction", { ...docRoot.introduction || {}, "dc:title": undefined }),
+      ..._embedSection("valospaceAbstract", docRoot.section_valospace_abstract),
+      ..._embedSection("valosheathAbstract", docRoot.section_valosheath_abstract),
+      ..._embedSection("fabricAbstract", docRoot.section_fabric_abstract),
+      ..._embedSection("specificationAbstract", docRoot.section_specification_abstract),
+      ...(docRoot["VRevdoc:preferredPrefix"] && {
+        "VRevdoc:preferredPrefix": docRoot["VRevdoc:preferredPrefix"],
+        "VRevdoc:baseIRI": docRoot["VRevdoc:baseIRI"],
+        "VRevdoc:referencedModules": docRoot["VRevdoc:referencedModules"],
+        "VRevdoc:extenderModules": docRoot["VRevdoc:extenderModules"],
       }),
       ...rest,
     };

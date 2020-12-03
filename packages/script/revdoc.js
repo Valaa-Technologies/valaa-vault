@@ -20,7 +20,7 @@ const { name, version, description } = require("./package");
 
 module.exports = {
   "dc:title": description,
-  "VDoc:tags": ["PRIMARY", "INTRODUCTORY", "VALOSPACE", "WORKSPACE", "ONTOLOGY"],
+  "VDoc:tags": ["PRIMARY", "INTRODUCTORY", "WORKSPACE", "VALOSPACE", "ONTOLOGY"],
   "VRevdoc:package": name,
   "VRevdoc:version": version,
   ...revdocOntologyProperties(

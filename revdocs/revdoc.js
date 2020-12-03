@@ -45,35 +45,40 @@ module.exports = {
 
   "chapter#abstract>0": {
     "#0": [
-      [tooltip(
-          em(strong(`'Valos extends boundlessly across the valospace-time fabric.'`),
-              " (...in progress(tm))"),
-          [
-strong("-> Vertically"), `: as a full application development solution
-valos radically simplifies the semantic web technology stack.`,
-null,
-strong("-> Horizontally"), `: as a global, de-centralized ecosystem
-valos eases cross-organization interfacing.`,
-null,
-strong("-> In depth"), `: with its unified resource model valos blurs
-the boundary between frontends and backends.`,
-null,
-strong("-> Temporally"), `: valos unifies document state and change
-updates into seamless event stream *chronicles*.`,
-          ])],
-    null,
-`In other words, valos is a bit ambitious and a lot to take in at once.
+`Valaa (`, em("Valaa Open System"), `) is an ambitious push towards
+more decentralized web application ecosystems. The primary means for
+this are (`, tooltip("*or will be",
+        `Most of ValOS is still prototypical.
+        However the entries marked with (*) are work in progress, or sometimes
+        not even more than an empty shape defined by the surrounding ecosystem.`),
+`):`,
+      { "numbered#1": [
+["Open resource model, protocol(*) and API ",
+    ref("specifications", "/kernel/0#section_specification_documents")],
+["The open library, browser and backend(*) ",
+    ref("reference implementations", "/kernel/0#section_workspaces_type_library")],
+["The ", ref("open valospace IDE", "/zone"),
+    " for rapid application development"],
+      ] },
+      null,
+`
+In its technical ambition ValOS is a lot to take in at once.
 
-To address this the first part of this document provides separate
-introduction paths into valos for a software developer
-(referred to as `, em(ref("a valonaut", "/valonaut")), `), for a
-systems operator (as `, em(ref("a technician", "/technician")), `) and
-for a project manager (as `, em(ref("a voyager", "/voyager")), `).
+To address this there are separate introduction paths into ValOS from
+the perspective of three familiar archetypes. Each of these paths has
+a valos-specific role name and a document:`,
+      { "bulleted#": [
+[`A software developer should study `, ref(["the path of a ", em("valonaut")], "/valonaut")],
+[`A systems operator should study `, ref(["the path of a ", em("technician")], "/technician")],
+[`A project manager should study `, ref(["the path of a ", em("voyager")], "/voyager")],
+      ] }, `
 
 Choosing the most familiar path helps you to get hands-on the quickest.
 
 The second part of this document is the `, ref("valospace"),
-` API reference and is aimed for valonauts for repeat viewing.`,
+` API reference. It is a semantic namespace definition of the valospace
+application development primitives and is aimed for valonauts for
+repeat viewing.`,
     ],
   },
   "chapter#sotd>1": {
@@ -86,14 +91,28 @@ The second part of this document is the `, ref("valospace"),
   "chapter#introduction>2": {
     "dc:title": `First valosteps to the three primary valos roles`,
     "#0": [
+      [tooltip(em(strong(`'Valos extends boundlessly across the valospace-time fabric.'`), "(*)"),
+          [
+strong("-> Vertically"), `: as a full application development solution
+valos radically simplifies the semantic web technology stack.`,
+null,
+strong("-> Horizontally"), `: as a global, decentralized ecosystem
+valos eases cross-organization interfacing.`,
+null,
+strong("-> In depth"), `: with its isomorphic resource model valos
+blurs the boundary between frontends and backends.`,
+null,
+strong("-> Temporally"), `: valos unifies document state and change
+updates into seamless event streams, *chronicles*.`,
+          ])],
+    null,
 `The three traditional roles of application developer, systems operator
 and project manager have their own unique characteristics in valos
 ecosystem and are called valonaut, technician and voyager respectively.
 
-Each role has a detailed (editor's note: eventually) how-to guide which
-are linked and briefly introduced below. The roles support each other
-and the guides reflect this. The hands-on introduction section of each
-guide also gives a high-level overview of the rest.`,
+Each role has a detailed (*) how-to guide which are linked and briefly
+introduced below. The roles support each other and the guides reflect
+this.`,
     ],
     "#1": {
       "VDoc:entries": roleDocuments,

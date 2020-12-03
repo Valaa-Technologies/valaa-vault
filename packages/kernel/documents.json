@@ -37,18 +37,40 @@
                   "@type": "VDoc:NumberedList",
                   "VDoc:lines": [
                     [
-                      "Open resource model, protocol(*) and API specifications"
+                      "Open resource model, protocol(*) and API ",
+                      {
+                        "@type": "VDoc:Reference",
+                        "VDoc:content": [
+                          "specifications"
+                        ],
+                        "VDoc:ref": "/kernel/0#section_specification_documents"
+                      }
                     ],
                     {
                       "@type": "VDoc:Paragraph",
                       "VDoc:content": [
-                        "The open library, browser and backend(*) reference implementations"
+                        "The open library, browser and backend(*) ",
+                        {
+                          "@type": "VDoc:Reference",
+                          "VDoc:content": [
+                            "reference implementations"
+                          ],
+                          "VDoc:ref": "/kernel/0#section_workspaces_type_library"
+                        }
                       ]
                     },
                     {
                       "@type": "VDoc:Paragraph",
                       "VDoc:content": [
-                        "The open valospace IDE for rapid application development"
+                        "The ",
+                        {
+                          "@type": "VDoc:Reference",
+                          "VDoc:content": [
+                            "open valospace IDE"
+                          ],
+                          "VDoc:ref": "/zone"
+                        },
+                        " for rapid application development"
                       ]
                     }
                   ]
@@ -5887,18 +5909,40 @@
                   "@type": "VDoc:NumberedList",
                   "VDoc:lines": [
                     [
-                      "Open resource model, protocol(*) and API specifications"
+                      "Open resource model, protocol(*) and API ",
+                      {
+                        "@type": "VDoc:Reference",
+                        "VDoc:content": [
+                          "specifications"
+                        ],
+                        "VDoc:ref": "/kernel/0#section_specification_documents"
+                      }
                     ],
                     {
                       "@type": "VDoc:Paragraph",
                       "VDoc:content": [
-                        "The open library, browser and backend(*) reference implementations"
+                        "The open library, browser and backend(*) ",
+                        {
+                          "@type": "VDoc:Reference",
+                          "VDoc:content": [
+                            "reference implementations"
+                          ],
+                          "VDoc:ref": "/kernel/0#section_workspaces_type_library"
+                        }
                       ]
                     },
                     {
                       "@type": "VDoc:Paragraph",
                       "VDoc:content": [
-                        "The open valospace IDE for rapid application development"
+                        "The ",
+                        {
+                          "@type": "VDoc:Reference",
+                          "VDoc:content": [
+                            "open valospace IDE"
+                          ],
+                          "VDoc:ref": "/zone"
+                        },
+                        " for rapid application development"
                       ]
                     }
                   ]
@@ -6634,6 +6678,26 @@
         }
       ]
     },
+    "package": "@valos/kernel-vault",
+    "version": "0.36.0-alpha.0"
+  },
+  "zone": {
+    "@id": "https://valospace.org/zone",
+    "tags": [],
+    "subProfiles": [],
+    "title": "Zone IDE",
+    "abstract": {
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "Zone is the ValOS application development IDE. Zone itself is a ValOS\napplication and used to develop itself.\n"
+          ]
+        }
+      ]
+    },
+    "introduction": {},
     "package": "@valos/kernel-vault",
     "version": "0.36.0-alpha.0"
   }

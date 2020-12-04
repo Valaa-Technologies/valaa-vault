@@ -7,7 +7,7 @@
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"subtitle":"0.36.0-alpha.0","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"valos"};
+      var respecConfig = {"subtitle":"0.37.0-alpha.0","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"valos"};
     </script>
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
@@ -15,37 +15,58 @@
   <body class="vdoc vdoc-body">
     
   <section id="abstract" class="vdoc type-vdoc-chapter"><div><p>
-  <div class="vdoc type-vdoc-paragraph"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node"><em><strong>&#x27;Valos extends boundlessly across the valospace-time fabric.&#x27;</strong> (...in progress(tm))</em></span>
+  <div class="vdoc type-vdoc-paragraph">Valaa (<em>Valaa Open System</em>) is an ambitious push towards
+more decentralized web application ecosystems. The primary means for
+this are (<span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">*or will be</span>
 
     <span class="vdoc type-revdoc-tooltip-content">
-              <p><strong>-&#x3E; Vertically</strong>: as a full application development solution
-valos radically simplifies the semantic web technology stack.</p>
-      <p><strong>-&#x3E; Horizontally</strong>: as a global, de-centralized ecosystem
-valos eases cross-organization interfacing.</p>
-      <p><strong>-&#x3E; In depth</strong>: with its unified resource model valos blurs
-the boundary between frontends and backends.</p>
-      <p><strong>-&#x3E; Temporally</strong>: valos unifies document state and change
-updates into seamless event stream *chronicles*.</p>
-
+        Most of ValOS is still prototypical.
+        However the entries marked with (*) are work in progress, or sometimes
+        not even more than an empty shape defined by the surrounding ecosystem.
     </span>
-</span>
+</span>):
+    <ol>
+      <li>Open resource model, protocol(*) and API <a href="/kernel/0#section_specification_documents" class="vdoc type-vdoc-reference">specifications</a></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph">The open library, browser and backend(*) <a href="/kernel/0#section_workspaces_type_library" class="vdoc type-vdoc-reference">reference implementations</a>
+  </div>
+</p></div></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph">The <a href="/zone" class="vdoc type-vdoc-reference">open valospace IDE</a> for rapid application development
+  </div>
+</p></div></li>
+    </ol>
+
   </div>
 </p></div><div><p>
-  <div class="vdoc type-vdoc-paragraph">In other words, valos is a bit ambitious and a lot to take in at once.
+  <div class="vdoc type-vdoc-paragraph">
+In its technical ambition ValOS is a lot to take in at once.
   </div>
 </p></div><div><p>
-  <div class="vdoc type-vdoc-paragraph">To address this the first part of this document provides separate
-introduction paths into valos for a software developer
-(referred to as <em><a href="/valonaut" class="vdoc type-vdoc-reference">a valonaut</a></em>), for a
-systems operator (as <em><a href="/technician" class="vdoc type-vdoc-reference">a technician</a></em>) and
-for a project manager (as <em><a href="/voyager" class="vdoc type-vdoc-reference">a voyager</a></em>).
+  <div class="vdoc type-vdoc-paragraph">To address this there are separate introduction paths into ValOS from
+the perspective of three familiar archetypes. Each of these paths has
+a valos-specific role name and a document:
+    <ul>
+      <li>A software developer should study <a href="/valonaut" class="vdoc type-vdoc-reference">the path of a <em>valonaut</em></a></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph">A systems operator should study <a href="/technician" class="vdoc type-vdoc-reference">the path of a <em>technician</em></a>
+  </div>
+</p></div></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph">A project manager should study <a href="/voyager" class="vdoc type-vdoc-reference">the path of a <em>voyager</em></a>
+  </div>
+</p></div></li>
+    </ul>
+
   </div>
 </p></div><div><p>
   <div class="vdoc type-vdoc-paragraph">Choosing the most familiar path helps you to get hands-on the quickest.
   </div>
 </p></div><div><p>
-  <div class="vdoc type-vdoc-paragraph">The second part of this document is the <a href="valospace" class="vdoc type-vdoc-reference">valospace</a> API reference and is aimed for valonauts for repeat viewing.
+  <div class="vdoc type-vdoc-paragraph">The second part of this document is the <a href="valospace" class="vdoc type-vdoc-reference">valospace</a> API reference. It is a semantic namespace definition of the valospace
+application development primitives and is aimed for valonauts for
+repeat viewing.
   </div>
 </p></div>
   </section>
@@ -61,15 +82,31 @@ for a project manager (as <em><a href="/voyager" class="vdoc type-vdoc-reference
   <section id="introduction" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#introduction">§ </a>First valosteps to the three primary valos roles</h3>
 <div><p>
+  <div class="vdoc type-vdoc-paragraph"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node"><em><strong>&#x27;Valos extends boundlessly across the valospace-time fabric.&#x27;</strong>(*)</em></span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+              <p><strong>-&#x3E; Vertically</strong>: as a full application development solution
+valos radically simplifies the semantic web technology stack.</p>
+      <p><strong>-&#x3E; Horizontally</strong>: as a global, decentralized ecosystem
+valos eases cross-organization interfacing.</p>
+      <p><strong>-&#x3E; In depth</strong>: with its isomorphic resource model valos
+blurs the boundary between frontends and backends.</p>
+      <p><strong>-&#x3E; Temporally</strong>: valos unifies document state and change
+updates into seamless event streams, *chronicles*.</p>
+
+    </span>
+</span>
+  </div>
+</p></div><div><p>
   <div class="vdoc type-vdoc-paragraph">The three traditional roles of application developer, systems operator
 and project manager have their own unique characteristics in valos
 ecosystem and are called valonaut, technician and voyager respectively.
   </div>
 </p></div><div><p>
-  <div class="vdoc type-vdoc-paragraph">Each role has a detailed (editor&#x27;s note: eventually) how-to guide which
-are linked and briefly introduced below. The roles support each other
-and the guides reflect this. The hands-on introduction section of each
-guide also gives a high-level overview of the rest.
+  <div class="vdoc type-vdoc-paragraph">Each role has a detailed (*) how-to guide which are linked and briefly
+introduced below. The roles support each other and the guides reflect
+this.
   </div>
 </p></div>
   <section class="vdoc type-vdoc-chapter">

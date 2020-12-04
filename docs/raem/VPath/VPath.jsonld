@@ -668,7 +668,7 @@
           ],
           "VDoc:language": "https://www.w3.org/TR/turtle/"
         },
-        "\nMnemonic: \"+\" is a list-view symbol of an expandable container."
+        "\nMnemonic: \"*\" is a list-view symbol of an expandable container."
       ]
     },
     "section_verb_content": {
@@ -1643,11 +1643,11 @@
       "dc:title": "Structural Entity triple inference",
       "@type": "VRevdoc:Example",
       "VDoc:content": [
-        "`<urn:valos:$~u4.f00b@+$.Scripts>` has a fixed name \"scripts\",\ndominant type Entity, $~u4 resource f00b as the owning container and\na structurally homologous prototype inside f00b-b507-0763 and thus\ninfers triples:\n",
+        "`<urn:valos:$~u4.f00b@*$.Scripts>` has a fixed name \"scripts\",\ndominant type Entity, $~u4 resource f00b as the owning container and\na structurally homologous prototype inside f00b-b507-0763 and thus\ninfers triples:\n",
         {
           "@type": "VRevdoc:Turtle",
           "VDoc:content": [
-            "\n  <urn:valos:$~u4.f00b@+$.Scripts> a V:Entity\n      ; V:parent <urn:valos:$~u4.f00b>\n      ; V:inheritancePrototype <urn:valos:$~u4.f00b-b507-0763@+$.Scripts>\n      ; V:name \"scripts\"\n"
+            "\n  <urn:valos:$~u4.f00b@*$.Scripts> a V:Entity\n      ; V:parent <urn:valos:$~u4.f00b>\n      ; V:inheritancePrototype <urn:valos:$~u4.f00b-b507-0763@*$.Scripts>\n      ; V:name \"scripts\"\n"
           ],
           "VDoc:language": "https://www.w3.org/TR/turtle/"
         }

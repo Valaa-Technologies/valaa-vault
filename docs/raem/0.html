@@ -7,7 +7,7 @@
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"subtitle":"0.36.0-alpha.0","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"raem"};
+      var respecConfig = {"subtitle":"0.37.0-alpha.0","specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[],"shortName":"raem"};
     </script>
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
@@ -16,9 +16,7 @@
     
   <section id="abstract" class="vdoc type-vdoc-chapter"><div><p>
   <div class="vdoc type-vdoc-paragraph">This library provides the definitions and reference implementation
-for the fundamental <pre><code><span class="vdoc type-vdoc-node">ValOS Resources</span>
-</code></pre> and <pre><code><span class="vdoc type-vdoc-node">ValOS Events</span>
-</code></pre>
+for the fundamental <em>ValOS Resources</em> and <em>ValOS Events</em>
 systems.
   </div>
 </p></div>
@@ -34,19 +32,15 @@ systems.
 
   <section id="introduction" class="vdoc type-vdoc-chapter"><div><p>
   <div class="vdoc type-vdoc-paragraph">This library provides the definitions and reference implementations
-for the fundamental <pre><code><span class="vdoc type-vdoc-node">ValOS Resources</span>
-</code></pre> and <pre><code><span class="vdoc type-vdoc-node">ValOS Events</span>
-</code></pre>
+for the fundamental <em>ValOS Resources</em> and <em>ValOS Events</em>
 systems.
   </div>
 </p></div><div><p>
-  <div class="vdoc type-vdoc-paragraph"><q>A ValOS Resource <pre><code><span class="vdoc type-vdoc-node">resource</span>
-</code></pre> represents a well-defined part of
+  <div class="vdoc type-vdoc-paragraph"><q>A ValOS Resource <em>resource</em> represents a well-defined part of
   the world. It has a well-defined state at each particular moment in time.</q>
   </div>
 </p></div><div><p>
-  <div class="vdoc type-vdoc-paragraph"><q>A ValOS Event <pre><code><span class="vdoc type-vdoc-node">event</span>
-</code></pre> represents a dynamic change to a
+  <div class="vdoc type-vdoc-paragraph"><q>A ValOS Event <em>event</em> represents a dynamic change to a
   resource by describing the change from previous to subsequent resource
   states at a particular time.</q>
   </div>
@@ -64,91 +58,65 @@ foundation of the Valaa Open System.
   </div>
 </p></div>
     <ul>
-      <li>schema definitions for <pre><code><span class="vdoc type-vdoc-node">Resource</span>
-</code></pre> and the other core types.</li>
+      <li>schema definitions for <em>Resource</em> and the other core types.</li>
       <li><div><p>
-  <div class="vdoc type-vdoc-paragraph"><pre><code><span class="vdoc type-vdoc-node">Corpus</span>
-</code></pre> component which stores in-memory representations of the resources.
+  <div class="vdoc type-vdoc-paragraph"><em>Corpus</em> component which stores in-memory representations of the resources.
   </div>
 </p></div></li>
       <li><div><p>
-  <div class="vdoc type-vdoc-paragraph"><pre><code><span class="vdoc type-vdoc-node">reducers</span>
-</code></pre> which a corpus uses to convert (<pre><code><span class="vdoc type-vdoc-node">reduce</span>
-</code></pre>) events into changes of its resource representations.
+  <div class="vdoc type-vdoc-paragraph"><em>reducers</em> which a corpus uses to convert (<em>reduce</em>) events into changes of its resource representations.
   </div>
 </p></div></li>
       <li><div><p>
-  <div class="vdoc type-vdoc-paragraph">the kuery language <pre><code><span class="vdoc type-vdoc-node">VALK</span>
-</code></pre> definition and the kuery engine <pre><code><span class="vdoc type-vdoc-node">Valker</span>
-</code></pre>component for accessing and manipulating the resources.
+  <div class="vdoc type-vdoc-paragraph">the kuery language <em>VALK</em> definition and the kuery engine <em>Valker</em>component for accessing and manipulating the resources.
   </div>
 </p></div></li>
       <li><div><p>
-  <div class="vdoc type-vdoc-paragraph"><pre><code><span class="vdoc type-vdoc-node">ghost instancing</span>
-</code></pre> mechanism which unifies the object
+  <div class="vdoc type-vdoc-paragraph"><em>ghost instancing</em> mechanism which unifies the object
   oriented instantiation and inheritance principles into a single
   but powerful mechanism for ValOS resources.
   </div>
 </p></div></li>
       <li><div><p>
-  <div class="vdoc type-vdoc-paragraph"><pre><code><span class="vdoc type-vdoc-node">resource couplings</span>
-</code></pre> mechanism which allows referential
+  <div class="vdoc type-vdoc-paragraph"><em>resource couplings</em> mechanism which allows referential
   integrity and the definition of different types of reference
   semantics like ownership, global references and local references.
   </div>
 </p></div></li>
       <li><div><p>
-  <div class="vdoc type-vdoc-paragraph"><pre><code><span class="vdoc type-vdoc-node">urn:valos</span>
-</code></pre> specification which defines globally unique
+  <div class="vdoc type-vdoc-paragraph"><em>urn:valos</em> specification which defines globally unique
   identifiers for ValOS resources.
   </div>
 </p></div></li>
       <li><div><p>
-  <div class="vdoc type-vdoc-paragraph"><pre><code><span class="vdoc type-vdoc-node">ValOSURL</span>
-</code></pre> specification which allows for universal locating of resources.
+  <div class="vdoc type-vdoc-paragraph"><em>ValOSURL</em> specification which allows for universal locating of resources.
   </div>
 </p></div></li>
       <li><div><p>
-  <div class="vdoc type-vdoc-paragraph"><pre><code><span class="vdoc type-vdoc-node">valospace</span>
-</code></pre> definition as a distributed set of resources
+  <div class="vdoc type-vdoc-paragraph"><em>valospace</em> definition as a distributed set of resources
   containing references to each other using the VRLs.
   </div>
 </p></div></li>
       <li><div><p>
-  <div class="vdoc type-vdoc-paragraph"><pre><code><span class="vdoc type-vdoc-node">chronicles</span>
-</code></pre> mechanism which allows for unlimited scalability of
-  the <pre><code><span class="vdoc type-vdoc-node">valospace</span>
-</code></pre> into a singular globally distributed and
+  <div class="vdoc type-vdoc-paragraph"><em>chronicles</em> mechanism which allows for unlimited scalability of
+  the <em>valospace</em> into a singular globally distributed and
   unified object space.
   </div>
 </p></div></li>
     </ul>
 
     <ul>
-      <li>depends:<a href="@valos/tools" class="vdoc type-vrevdoc-package"><em>@valos/tools</em></a><pre><code><span class="vdoc type-vdoc-node">immutable</span>
-</code></pre></li>
+      <li>depends:<a href="@valos/tools" class="vdoc type-vrevdoc-package"><em>@valos/tools</em></a><em>immutable</em></li>
       <li><div><p>
-  <div class="vdoc type-vdoc-paragraph">exports:<pre><code><span class="vdoc type-vdoc-node">Corpus</span>
-</code></pre><pre><code><span class="vdoc type-vdoc-node">Command</span>
-</code></pre><pre><code><span class="vdoc type-vdoc-node">VALK</span>
-</code></pre><pre><code><span class="vdoc type-vdoc-node">Valker</span>
-</code></pre><pre><code><span class="vdoc type-vdoc-node">RAEMContentAPI</span>
-</code></pre>
+  <div class="vdoc type-vdoc-paragraph">exports:<em>Corpus</em><em>Command</em><em>VALK</em><em>Valker</em><em>RAEMContentAPI</em>
   </div>
 </p></div></li>
       <li><div><p>
-  <div class="vdoc type-vdoc-paragraph">valospace:<pre><code><span class="vdoc type-vdoc-node">Resource</span>
-</code></pre><pre><code><span class="vdoc type-vdoc-node">TransientFields</span>
-</code></pre><pre><code><span class="vdoc type-vdoc-node">Bvob</span>
-</code></pre><pre><code><span class="vdoc type-vdoc-node">Chronicle</span>
-</code></pre>
+  <div class="vdoc type-vdoc-paragraph">valospace:<em>Resource</em><em>TransientFields</em><em>Bvob</em><em>Chronicle</em>
   </div>
 </p></div></li>
       <li><div><p>
-  <div class="vdoc type-vdoc-paragraph">concepts:<pre><code><span class="vdoc type-vdoc-node">ghost instancing</span>
-</code></pre><pre><code><span class="vdoc type-vdoc-node">chronicles</span>
-</code></pre><pre><code><span class="vdoc type-vdoc-node">couplings</span>
-</code></pre>
+  <div class="vdoc type-vdoc-paragraph">concepts:<em>ghost instancing</em><em>chronicles</em><em>couplings</em>
   </div>
 </p></div></li>
     </ul>

@@ -63,12 +63,12 @@
     "VDoc:tags": [
       "PRIMARY",
       "INTRODUCTORY",
-      "VALOSPACE",
       "WORKSPACE",
+      "VALOSPACE",
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/script",
-    "VRevdoc:version": "0.36.0-alpha.0",
+    "VRevdoc:version": "0.37.0-alpha.0",
     "VRevdoc:preferredPrefix": "VScript",
     "VRevdoc:baseIRI": "https://valospace.org/script/0#",
     "VRevdoc:referencedModules": {

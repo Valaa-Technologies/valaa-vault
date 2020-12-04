@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0-alpha.0](https://github.com/valaatech/kernel/compare/v0.36.0-alpha.0...v0.37.0-alpha.0) (2020-12-04)
+
+
+### Features
+
+* Add "chronicles" shared db store. Inc SHARED_DB_VERSION to 2 ([1121a53](https://github.com/valaatech/kernel/commit/1121a5344aae21719d917ed3b267bc13f2430c6e))
+* Add inspect and postpone options to invoke/execute retry handler ([c3a15bd](https://github.com/valaatech/kernel/commit/c3a15bd1c6b7aad816148844501e58f83c411040))
+* Add terminate to Sourcerers with scribe option for deleting databases ([826fd0f](https://github.com/valaatech/kernel/commit/826fd0f1c41ad76be0b30a0350e71625287ad0d0))
+
+
+
+
+
 # [0.36.0-alpha.0](https://github.com/valaatech/kernel/compare/v0.35.0...v0.36.0-alpha.0) (2020-11-10)
 
 

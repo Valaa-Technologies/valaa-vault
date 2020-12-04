@@ -1,6 +1,6 @@
 {
   "name": "@valos/kernel-vault",
-  "version": "0.36.0-alpha.0",
+  "version": "0.37.0-alpha.0",
   "valos": {
     "type": "vault",
     "domain": "@valos/kernel"
@@ -31,11 +31,11 @@
   },
   "devDependencies": {
     "@cyclonedx/bom": "^0.2.6",
-    "@valos/inspire": "^0.35.0-rc.12",
-    "@valos/kernel": "^0.35.0-rc.12",
-    "@valos/toolset-revealer": "^0.35.0-rc.12",
-    "@valos/type-vault": "^0.35.0-rc.12",
-    "valma": "^0.35.0-rc.12",
+    "@valos/inspire": "^0.36.0-alpha.0",
+    "@valos/kernel": "^0.36.0-alpha.0",
+    "@valos/toolset-revealer": "^0.36.0-alpha.0",
+    "@valos/type-vault": "^0.36.0-alpha.0",
+    "valma": "^0.36.0-alpha.0",
     "xml-js": "^1.6.11"
   },
   "dependencies": {}

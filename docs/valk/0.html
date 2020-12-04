@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>@valos/valk library workspace</title>
+    <script
+     src='https://www.w3.org/Tools/respec/respec-w3c-common'
+     class='remove'></script>
+    <script class='remove'>
+      var respecConfig = {"specStatus":"unofficial","shortName":"valk","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}]};
+    </script>
+    <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
+    
+  </head>
+  <body class="vdoc vdoc-body">
+    
+  <section id="abstract" class="vdoc type-vdoc-chapter"><div><p>
+  <div class="vdoc type-vdoc-paragraph">Provides the ValOS core model computation specification and the &#x27;VValk&#x27; ontology namespace
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph"><em>VValk</em> together with <a href="https://valospace.org/state/0#" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VState:</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The vocabulary for defining the ValOS state core model and for
+extending it with new types and fields.
+    </span>
+</span></a> <a href="https://valospace.org/log/0#" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VLog:</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The vocabulary for defining the ValOS chronicle event log structure
+and for adding content and behaviors to it.
+    </span>
+</span></a> and <a href="https://valospace.org/plot/0#" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VPlot:</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The vocabulary for defining the hierarchical ValOS identifiers and for
+extending them with new step semantics
+    </span>
+</span></a> form the infrastructural foundation ie. the <em>fabric</em> of the valospace.<em>VValk</em> provides the intermediate language used for declarative
+and imperative logic alike.
+  </div>
+</p></div>
+  </section>
+
+  <section id="sotd" class="vdoc type-vdoc-chapter"><div><p>
+  <div class="vdoc type-vdoc-paragraph">This document is part of the library workspace <a href="https://valospace.org/valk" class="vdoc type-vrevdoc-package"><em>@valos/valk</em></a>
+(of domain <a href="https://valospace.org/kernel" class="vdoc type-vrevdoc-package"><em>@valos/kernel</em></a>) which has the description:
+&#x60;Provides the ValOS core model computation specification and the &#x27;VValk&#x27; ontology namespace&#x60;.
+  </div>
+</p></div>
+  </section>
+
+  <section id="introduction" class="vdoc type-vdoc-chapter"><div><p>
+  <div class="vdoc type-vdoc-paragraph">Edit me - this is the first payload chapter. Abstract and SOTD are
+essential <a href="https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate" class="vdoc type-vdoc-reference">ReSpec boilerplate</a>
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">See <a href="https://valospace.org/revdoc/tutorial" class="vdoc type-vdoc-reference">ReVDoc tutorial</a> for
+instructions on how to write revdoc source documents.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">See also <a href="https://valospace.org/revdoc" class="vdoc type-vdoc-reference">ReVdoc specification</a> and <a href="https://valospace.org/vdoc" class="vdoc type-vdoc-reference">VDoc specification</a> for reference documentation.
+  </div>
+</p></div>
+  </section>
+
+  <section id="section_fabric" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_fabric">§ </a>The <em>VValk</em> fabric namespace of the library ontology of <a href="https://valospace.org/valk" class="vdoc type-vrevdoc-package"><em>@valos/valk</em></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">The vocabulary for defining ValOS computations and for
+adding defining new semantics to it.
+  </div>
+</p></div>
+  <section id="section_prefixes" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_prefixes">§ </a><em>@valos/valk</em> IRI prefixes</h3>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">Prefix</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">IRI</span>
+</th>
+      </thead>
+      <tbody>
+        <tr><td><span class="vdoc type-vdoc-node">rdf</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/1999/02/22-rdf-syntax-ns#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">rdfs</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/2000/01/rdf-schema#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">xsd</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/2001/XMLSchema#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">owl</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/2002/07/owl#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">dc</span>
+</td><td><span class="vdoc type-vdoc-node">http://purl.org/dc/elements/1.1/</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VValk</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/valk/0#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">VKernel</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/kernel/0#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VPlot</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/plot/0#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">VState</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/state/0#</span>
+</td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VLog</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/log/0#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">V</span>
+</td><td><span class="vdoc type-vdoc-node">https://valospace.org/0#</span>
+</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_classes" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_classes">§ </a><em>VValk</em> <a href="https://valospace.org/kernel/0#Class" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">fabric classes</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of classes which are defined by the ValOS kernel domain
+ontologies.
+    </span>
+</span></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">This section describes fabric classes introduced by the &#x27;VValk&#x27; namespace
+  </div>
+</p></div>
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:subClassOf</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</th>
+      </thead>
+      <tbody>
+        <tr id="Kuery" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#Kuery" class="vdoc type-vdoc-reference">#Kuery</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><strong>DEPRECATED</strong> in favor of:</em></span>
+</td><td colspan=1><a href="https://valospace.org/plot/0#" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VPlot:</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The vocabulary for defining the hierarchical ValOS identifiers and for
+extending them with new step semantics
+    </span>
+</span></a></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td></td><td><span class="vdoc type-vdoc-node">The class of resources which represent VValk kueries.
+Deprecation note: VValk kueries and VAKON are an internal
+implementation detail. They will be superseded by VPlot-based
+computations, which will also be made an externally available.</span>
+</td></tr>
+        <tr id="Resolver" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#Resolver" class="vdoc type-vdoc-reference">#Resolver</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/plot/0#Verb" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VPlot:Verb</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all verb names. A context that performs VPlot valks shall
+provide the conforming implementations for the subset of verbs that it
+has declared to support.
+    </span>
+</span></a></td><td><span class="vdoc type-vdoc-node">The class of all resolver names. Resolvers are verbs which are used
+for resolving generated properties.
+</span>
+</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_properties" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_properties">§ </a><em>VValk</em> <a href="https://valospace.org/kernel/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">fabric properties</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of properties which are defined by the ValOS kernel domain
+ontologies.
+    </span>
+</span></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">This section describes fabric properties introduced by the &#x27;VValk&#x27; namespace
+  </div>
+</p></div>
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:domain</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:range</span>
+</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_methods" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_methods">§ </a><em>VValk</em> <a href="https://valospace.org/engine/0#Method" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">fabric methods</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all valosheath type prototype methods.
+    </span>
+</span></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">This section describes fabric methods introduced by the &#x27;VValk&#x27; namespace
+  </div>
+</p></div>
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:domain</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:range</span>
+</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_globals" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_globals">§ </a><em>VValk</em> <a href="https://valospace.org/engine/0#Global" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">fabric globals</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of all valosheath global resources.
+    </span>
+</span></a></h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">This section describes fabric global objects introduced by the &#x27;VValk&#x27; namespace
+  </div>
+</p></div>
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdf:type</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">Comment</span>
+</th>
+      </thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+
+  </section>
+
+  <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_vocabulary_other">§ </a><em>VValk</em> remaining vocabulary terms</h3>
+
+    <table class="vdoc type-vdoc-table">
+      <thead>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdf:type</span>
+</th>
+        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:subClassOf</span>
+</th>
+      </thead>
+      <tbody>
+        <tr id="0" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#0" class="vdoc type-vdoc-reference">#0</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Literal" class="vdoc type-vdoc-reference">rdfs:Literal</a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">positional argument 0</span>
+</td></tr>
+        <tr id="1" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#1" class="vdoc type-vdoc-reference">#1</a></em></strong> </h3></td></tr>
+        <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Literal" class="vdoc type-vdoc-reference">rdfs:Literal</a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">positional argument 1</span>
+</td></tr>
+        <tr id="2" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#2" class="vdoc type-vdoc-reference">#2</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Literal" class="vdoc type-vdoc-reference">rdfs:Literal</a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">positional argument 2</span>
+</td></tr>
+        <tr id="3" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#3" class="vdoc type-vdoc-reference">#3</a></em></strong> </h3></td></tr>
+        <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Literal" class="vdoc type-vdoc-reference">rdfs:Literal</a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">positional argument 3</span>
+</td></tr>
+        <tr id="4" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#4" class="vdoc type-vdoc-reference">#4</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Literal" class="vdoc type-vdoc-reference">rdfs:Literal</a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">positional argument 4</span>
+</td></tr>
+        <tr id="resolveChronicleRoot" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#resolveChronicleRoot" class="vdoc type-vdoc-reference">#resolveChronicleRoot</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/valk/0#Resolver" class="vdoc type-vdoc-reference">VValk:Resolver</a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">resolve chronicle root of the resource</span>
+</td></tr>
+        <tr id="resolveChronicleURI" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#resolveChronicleURI" class="vdoc type-vdoc-reference">#resolveChronicleURI</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/valk/0#Resolver" class="vdoc type-vdoc-reference">VValk:Resolver</a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">resolve chronicle URI of the resource</span>
+</td></tr>
+        <tr id="resolveModifiedAt" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#resolveModifiedAt" class="vdoc type-vdoc-reference">#resolveModifiedAt</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/valk/0#Resolver" class="vdoc type-vdoc-reference">VValk:Resolver</a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">resolve modification timestamp of the resource</span>
+</td></tr>
+        <tr id="resolveCreatedAt" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#resolveCreatedAt" class="vdoc type-vdoc-reference">#resolveCreatedAt</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/valk/0#Resolver" class="vdoc type-vdoc-reference">VValk:Resolver</a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">resolve creation timestamp of the resource</span>
+</td></tr>
+        <tr id="resolveVPlot" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#resolveVPlot" class="vdoc type-vdoc-reference">#resolveVPlot</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/valk/0#Resolver" class="vdoc type-vdoc-reference">VValk:Resolver</a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">resolve VPlot</span>
+</td></tr>
+        <tr id="impressViaVPlot" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#impressViaVPlot" class="vdoc type-vdoc-reference">#impressViaVPlot</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/valk/0#Resolver" class="vdoc type-vdoc-reference">VValk:Resolver</a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">assign via VPlot</span>
+</td></tr>
+        <tr id="resolveContextTerm" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#resolveContextTerm" class="vdoc type-vdoc-reference">#resolveContextTerm</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/valk/0#Resolver" class="vdoc type-vdoc-reference">VValk:Resolver</a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">resolve context term against the event log of the given resource</span>
+</td></tr>
+        <tr id="resolveId" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#resolveId" class="vdoc type-vdoc-reference">#resolveId</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/valk/0#Resolver" class="vdoc type-vdoc-reference">VValk:Resolver</a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">resolve resource id of the given resource</span>
+</td></tr>
+        <tr id="resolveVRIDTransient" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#resolveVRIDTransient" class="vdoc type-vdoc-reference">#resolveVRIDTransient</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/valk/0#Resolver" class="vdoc type-vdoc-reference">VValk:Resolver</a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">resolve resource VRID object of the given resource</span>
+</td></tr>
+        <tr id="resolveDominantTypeName" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#resolveDominantTypeName" class="vdoc type-vdoc-reference">#resolveDominantTypeName</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/valk/0#Resolver" class="vdoc type-vdoc-reference">VValk:Resolver</a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">resolve dominant type name of the given resource</span>
+</td></tr>
+        <tr id="resolveOwnFieldsTransient" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#resolveOwnFieldsTransient" class="vdoc type-vdoc-reference">#resolveOwnFieldsTransient</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/valk/0#Resolver" class="vdoc type-vdoc-reference">VValk:Resolver</a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">resolve only owns-fields-only transient of this resource</span>
+</td></tr>
+        <tr id="resolveGhostPrototype" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#resolveGhostPrototype" class="vdoc type-vdoc-reference">#resolveGhostPrototype</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/valk/0#Resolver" class="vdoc type-vdoc-reference">VValk:Resolver</a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">resolve the ghost prototype of this ghost</span>
+</td></tr>
+        <tr id="resolveGhostHost" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#resolveGhostHost" class="vdoc type-vdoc-reference">#resolveGhostHost</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/valk/0#Resolver" class="vdoc type-vdoc-reference">VValk:Resolver</a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">resolve the ghost host of this ghost</span>
+</td></tr>
+        <tr id="resolveContentLength" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#resolveContentLength" class="vdoc type-vdoc-reference">#resolveContentLength</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/valk/0#Resolver" class="vdoc type-vdoc-reference">VValk:Resolver</a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">resolve octet count of the octet-stream associated with the Bvob</span>
+</td></tr>
+        <tr id="resolveTwinspace" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#resolveTwinspace" class="vdoc type-vdoc-reference">#resolveTwinspace</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/valk/0#Resolver" class="vdoc type-vdoc-reference">VValk:Resolver</a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">resolve the twinspace of the ScopeProperty</span>
+</td></tr>
+        <tr id="resolveTwinSubject" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#resolveTwinSubject" class="vdoc type-vdoc-reference">#resolveTwinSubject</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/valk/0#Resolver" class="vdoc type-vdoc-reference">VValk:Resolver</a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">resolve the reified twin subject of the ScopeProperty</span>
+</td></tr>
+        <tr id="resolveTwinObject" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#resolveTwinObject" class="vdoc type-vdoc-reference">#resolveTwinObject</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/valk/0#Resolver" class="vdoc type-vdoc-reference">VValk:Resolver</a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">resolve the reified twin object of the ScopeProperty</span>
+</td></tr>
+      </tbody>
+    </table>
+
+  </section>
+
+  </section>
+
+  </body>
+</html>

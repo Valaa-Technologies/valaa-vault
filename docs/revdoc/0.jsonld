@@ -57,12 +57,12 @@
     "dc:title": "ReVDoc - ReSpec document VDoc extension",
     "VDoc:tags": [
       "PRIMARY",
-      "FABRIC",
       "WORKSPACE",
+      "FABRIC",
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/revdoc",
-    "VRevdoc:version": "0.36.0-alpha.0",
+    "VRevdoc:version": "0.37.0-alpha.0",
     "VRevdoc:preferredPrefix": "VRevdoc",
     "VRevdoc:baseIRI": "https://valospace.org/revdoc/0#",
     "VRevdoc:referencedModules": {
@@ -73,7 +73,7 @@
     },
     "VRevdoc:extenderModules": {},
     "respecConfig": {
-      "subtitle": "0.36.0-alpha.0",
+      "subtitle": "0.37.0-alpha.0",
       "specStatus": "unofficial",
       "editors": [
         {

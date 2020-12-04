@@ -58,12 +58,12 @@
     "dc:title": "TwinDoc - Valospace Hypertwin VDoc extension",
     "VDoc:tags": [
       "PRIMARY",
-      "FABRIC",
       "WORKSPACE",
+      "FABRIC",
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/twindoc",
-    "VRevdoc:version": "0.36.0-alpha.0",
+    "VRevdoc:version": "0.37.0-alpha.0",
     "VRevdoc:preferredPrefix": "VTwindoc",
     "VRevdoc:baseIRI": "https://valospace.org/twindoc/0#",
     "VRevdoc:referencedModules": {
@@ -73,7 +73,7 @@
     },
     "VRevdoc:extenderModules": {},
     "respecConfig": {
-      "subtitle": "0.36.0-alpha.0",
+      "subtitle": "0.37.0-alpha.0",
       "specStatus": "unofficial",
       "editors": [
         {

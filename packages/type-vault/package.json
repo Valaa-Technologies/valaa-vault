@@ -1,6 +1,6 @@
 {
   "name": "@valos/type-vault",
-  "version": "0.36.0-alpha.0",
+  "version": "0.37.0-alpha.0",
   "valos": {
     "type": "type",
     "domain": "@valos/kernel",
@@ -41,8 +41,8 @@
     "@babel/preset-stage-0": "^7.8.0",
     "@babel/runtime": "^7.8.0",
     "@babel/runtime-corejs2": "^7.8.0",
-    "@valos/revdoc": "^0.36.0-alpha.0",
-    "@valos/type-toolset": "^0.36.0-alpha.0",
+    "@valos/revdoc": "^0.37.0-alpha.0",
+    "@valos/type-toolset": "^0.37.0-alpha.0",
     "babel-core": "^7.0.0-0",
     "babel-eslint": "^10.0.1",
     "babel-jest": "^23.6.0",
@@ -59,7 +59,7 @@
     "flow-bin": "^0.89.0",
     "jest": "^23.5.0",
     "lerna": "^3.4.0",
-    "valma": "^0.36.0-alpha.0",
+    "valma": "^0.37.0-alpha.0",
     "yalc": "^1.0.0-pre.35"
   }
 }

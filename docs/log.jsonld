@@ -74,13 +74,15 @@
       }
     },
     "VDoc:tags": [
+      "PRIMARY",
       "WORKSPACE",
       "FABRIC",
+      "SPECIFICATION",
       "ONTOLOGY"
     ],
     "dc:title": "@valos/log library workspace",
     "VRevdoc:package": "@valos/log",
-    "VRevdoc:version": "0.36.0-alpha.0",
+    "VRevdoc:version": "0.37.0-alpha.0",
     "VRevdoc:preferredPrefix": "VLog",
     "VRevdoc:baseIRI": "https://valospace.org/log/0#",
     "VRevdoc:referencedModules": {

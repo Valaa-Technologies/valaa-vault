@@ -1,0 +1,1837 @@
+[
+  {
+    "@id": "https://valospace.org/state/0",
+    "@context": {
+      "@base": "https://valospace.org/state/0#",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "VSbomdoc": "https://valospace.org/sbomdoc/0#",
+      "VKernel": "https://valospace.org/kernel/0#",
+      "VDoc": "https://valospace.org/vdoc/0#",
+      "VRevdoc": "https://valospace.org/revdoc/0#",
+      "restriction": {
+        "@reverse": "owl:onProperty"
+      },
+      "VRevdoc:tooltipContent": {
+        "@id": "#tooltipContent",
+        "@type": "@id"
+      },
+      "VDoc:content": {
+        "@id": "#content",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VDoc:entries": {
+        "@id": "#entries",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VDoc:words": {
+        "@id": "#words",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VDoc:lines": {
+        "@id": "#lines",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VDoc:columns": {
+        "@id": "#columns",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VDoc:map": {
+        "@id": "#map",
+        "@type": "@id"
+      },
+      "VDoc:cell": {
+        "@id": "#cell",
+        "@type": "@id"
+      },
+      "VEngine": "https://valospace.org/engine/0#",
+      "VState": "https://valospace.org/state/0#",
+      "VPlot": "https://valospace.org/plot/0#",
+      "VLog": "https://valospace.org/log/0#",
+      "VValk": "https://valospace.org/valk/0#",
+      "V": "https://valospace.org/0#",
+      "VState:expressor": {
+        "@id": "#expressor",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VState:impressor": {
+        "@id": "#impressor",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VState:aliasOf": {
+        "@id": "#aliasOf",
+        "@type": "@id"
+      },
+      "VState:coupledToField": {
+        "@id": "#coupledToField",
+        "@type": "@id"
+      },
+      "VState:coupledField": {
+        "@id": "#coupledField",
+        "@type": "@id"
+      }
+    },
+    "VDoc:tags": [
+      "PRIMARY",
+      "WORKSPACE",
+      "FABRIC",
+      "SPECIFICATION",
+      "ONTOLOGY"
+    ],
+    "dc:title": "@valos/state library workspace",
+    "VRevdoc:package": "@valos/state",
+    "VRevdoc:version": "0.37.0-alpha.0",
+    "VRevdoc:preferredPrefix": "VState",
+    "VRevdoc:baseIRI": "https://valospace.org/state/0#",
+    "VRevdoc:referencedModules": {
+      "https://valospace.org/engine/0#": "@valos/engine/VEngine",
+      "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
+      "https://valospace.org/plot/0#": "@valos/plot/VPlot",
+      "https://valospace.org/log/0#": "@valos/log/VLog",
+      "https://valospace.org/valk/0#": "@valos/valk/VValk",
+      "https://valospace.org/0#": "@valos/space/V"
+    },
+    "VRevdoc:extenderModules": {},
+    "respecConfig": {
+      "specStatus": "unofficial",
+      "shortName": "state",
+      "editors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ],
+      "authors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ]
+    },
+    "abstract": {
+      "@id": "abstract",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "Provides the ValOS resource state specification and the 'VState' ontology namespace"
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            {
+              "VDoc:em": true,
+              "VDoc:content": [
+                "VState"
+              ]
+            },
+            " together with ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "VLog:"
+              ],
+              "VDoc:ref": "VLog:"
+            },
+            " ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "VPlot:"
+              ],
+              "VDoc:ref": "VPlot:"
+            },
+            " and ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "VValk:"
+              ],
+              "VDoc:ref": "VValk:"
+            },
+            " form the infrastructural foundation ie. the ",
+            {
+              "VDoc:em": true,
+              "VDoc:content": [
+                "fabric"
+              ]
+            },
+            " of the valospace.",
+            {
+              "VDoc:em": true,
+              "VDoc:content": [
+                "VState"
+              ]
+            },
+            " provides the data model and so enables structure and\nmeanings."
+          ]
+        }
+      ]
+    },
+    "sotd": {
+      "@id": "sotd",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "This document is part of the library workspace ",
+            {
+              "@type": "VRevdoc:Package",
+              "VDoc:content": [
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "@valos/state"
+                  ]
+                }
+              ],
+              "VDoc:ref": "@valos/state"
+            },
+            "\n(of domain ",
+            {
+              "@type": "VRevdoc:Package",
+              "VDoc:content": [
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "@valos/kernel"
+                  ]
+                }
+              ],
+              "VDoc:ref": "@valos/kernel"
+            },
+            ") which has the description:\n`Provides the ValOS resource state specification and the 'VState' ontology namespace`."
+          ]
+        }
+      ]
+    },
+    "introduction": {
+      "@id": "introduction",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "Edit me - this is the first payload chapter. Abstract and SOTD are\nessential ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "ReSpec boilerplate"
+              ],
+              "VDoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
+            }
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "See ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "ReVDoc tutorial"
+              ],
+              "VDoc:ref": "@valos/revdoc/tutorial"
+            },
+            " for\ninstructions on how to write revdoc source documents."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "See also ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "ReVdoc specification"
+              ],
+              "VDoc:ref": "@valos/revdoc"
+            },
+            " and ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "VDoc specification"
+              ],
+              "VDoc:ref": "@valos/vdoc"
+            },
+            " for reference documentation."
+          ]
+        }
+      ]
+    },
+    "section_fabric": {
+      "@id": "section_fabric",
+      "@type": "VDoc:Chapter",
+      "dc:title": [
+        "The ",
+        {
+          "VDoc:em": true,
+          "VDoc:content": [
+            "VState"
+          ]
+        },
+        " fabric namespace of the library ontology of ",
+        {
+          "@type": "VRevdoc:Package",
+          "VDoc:content": [
+            {
+              "VDoc:em": true,
+              "VDoc:content": [
+                "@valos/state"
+              ]
+            }
+          ],
+          "VDoc:ref": "@valos/state"
+        }
+      ],
+      "VDoc:content": [
+        {
+          "@id": "section_fabric_abstract"
+        },
+        {
+          "@id": "section_prefixes"
+        },
+        {
+          "@id": "section_classes"
+        },
+        {
+          "@id": "section_properties"
+        },
+        {
+          "@id": "section_methods"
+        },
+        {
+          "@id": "section_globals"
+        },
+        {
+          "@id": "section_vocabulary_other"
+        }
+      ]
+    },
+    "prefixes": {
+      "@id": "prefixes",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "VState": "https://valospace.org/state/0#",
+      "VKernel": "https://valospace.org/kernel/0#",
+      "VPlot": "https://valospace.org/plot/0#",
+      "VLog": "https://valospace.org/log/0#",
+      "VValk": "https://valospace.org/valk/0#",
+      "V": "https://valospace.org/0#"
+    },
+    "vocabulary": {
+      "@id": "vocabulary",
+      "Type": {
+        "@type": "VKernel:Class",
+        "rdfs:subClassOf": "rdfs:Class",
+        "VRevdoc:brief": "valospace type",
+        "rdfs:comment": [
+          "The class of all valospace types. The instances of valospace types\nare called valospace resources and are the main valos ecosystem\nbuilding block.",
+          "Only valospace resources can appear as a subject in valospace resource\nand event triple graphs."
+        ]
+      },
+      "Field": {
+        "@type": "VKernel:Class",
+        "rdfs:subClassOf": "rdf:Property",
+        "VRevdoc:brief": "valospace field",
+        "rdfs:comment": [
+          "The class of all valospace resource field identifiers.",
+          "Only the instances of this class can appear as the predicate in\nvalospace triple graphs. All valospace fields have VState:Type or one\nof its sub-classes as their rdf:domain."
+        ]
+      },
+      "ExpressedField": {
+        "@type": "VKernel:Class",
+        "rdfs:subClassOf": "VState:Field",
+        "rdfs:comment": "The class of valospace fields which have a full triple expression in\nall regular query and graph contexts (as opposed to fields with\nnon-triple semantics or triple expression only in limited contexts)."
+      },
+      "expressor": {
+        "@type": "VKernel:Property",
+        "rdfs:domain": "VState:ExpressedField",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": [
+          "The custom 'getter' expressor of an ExpressedField as a VPlot.",
+          "This expressor is used to resolve the dynamic, inferred value of the\nfield whenever it is requested. More specifically, whenever an inferred\nstate triple is requested for a resource field with a custom expressor\nthe expressor vplot is valked using following scope values:",
+          {
+            "VDoc:content": [
+              {
+                "@type": "VDoc:BulletList",
+                "VDoc:lines": [
+                  [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "VValk:0"
+                      ],
+                      "VDoc:ref": "VValk:0"
+                    },
+                    "is set to the field owner resource id"
+                  ],
+                  {
+                    "@type": "VDoc:Paragraph",
+                    "VDoc:content": [
+                      {
+                        "@type": "VDoc:Reference",
+                        "VDoc:content": [
+                          "VValk:1"
+                        ],
+                        "VDoc:ref": "VValk:1"
+                      },
+                      "is set to the field id"
+                    ]
+                  },
+                  {
+                    "@type": "VDoc:Paragraph",
+                    "VDoc:content": [
+                      {
+                        "@type": "VDoc:Reference",
+                        "VDoc:content": [
+                          "VValk:2"
+                        ],
+                        "VDoc:ref": "VValk:2"
+                      },
+                      "is a possible valospace primary field value if one is\n    defined (in which case the expressor can act as a transformer)"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "Once the valk is resolved the inferred triple subject, predicate and\n  object are set to be the field owner resource id, the field id itself\n  and the valk result value, respectively."
+        ]
+      },
+      "EventLoggedField": {
+        "@type": "VKernel:Class",
+        "rdfs:subClassOf": "VState:ExpressedField",
+        "rdfs:comment": "The class of valospace fields which have both a triple state\nexpression inside valospace and a change impression in event logs;\nthese are the primary, persisted sources of truth."
+      },
+      "impressor": {
+        "@type": "VKernel:Property",
+        "rdfs:domain": "VState:EventLoggedField",
+        "rdfs:range": "rdfs:List",
+        "rdfs:comment": [
+          "The custom 'setter' impressor of an EventLoggedField as a VPlot.",
+          "This impressor is used as part of building an event object whenever\nsome operation would assign a value to the field. More specifically,\nupon assignment the impressor vplot is valked using following scope\nvalues:",
+          {
+            "VDoc:content": [
+              {
+                "@type": "VDoc:BulletList",
+                "VDoc:lines": [
+                  [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "VValk:0"
+                      ],
+                      "VDoc:ref": "VValk:0"
+                    },
+                    "is set to the field owner id"
+                  ],
+                  {
+                    "@type": "VDoc:Paragraph",
+                    "VDoc:content": [
+                      {
+                        "@type": "VDoc:Reference",
+                        "VDoc:content": [
+                          "VValk:1"
+                        ],
+                        "VDoc:ref": "VValk:1"
+                      },
+                      "as the field id"
+                    ]
+                  },
+                  {
+                    "@type": "VDoc:Paragraph",
+                    "VDoc:content": [
+                      {
+                        "@type": "VDoc:Reference",
+                        "VDoc:content": [
+                          "VValk:2"
+                        ],
+                        "VDoc:ref": "VValk:2"
+                      },
+                      "is set to the new value being updated to this field."
+                    ]
+                  },
+                  {
+                    "@type": "VDoc:Paragraph",
+                    "VDoc:content": [
+                      {
+                        "@type": "VDoc:Reference",
+                        "VDoc:content": [
+                          "VState:3"
+                        ],
+                        "VDoc:ref": "VState:3"
+                      },
+                      "is set to possible valospace primary value of the field\n    if one is defined (in which case the expressor can act as a mutator)"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "CoupledField": {
+        "@type": "VKernel:Class",
+        "rdfs:subClassOf": "VState:ExpressedField",
+        "rdfs:comment": "The class of valospace fields which have a triple expression inside\nvalospace via their coupled fields but lack an event log impression."
+      },
+      "GeneratedField": {
+        "@type": "VKernel:Class",
+        "rdfs:subClassOf": "VState:ExpressedField",
+        "rdfs:comment": [
+          "The class of inferred fields where a field is not associated with\nraw valospace triples but the triples are fully generated by the\nexpressor, with scope values:",
+          {
+            "VDoc:content": [
+              {
+                "@type": "VDoc:BulletList",
+                "VDoc:lines": [
+                  [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "VValk:0"
+                      ],
+                      "VDoc:ref": "VValk:0"
+                    },
+                    "is set to the field owner id"
+                  ],
+                  {
+                    "@type": "VDoc:Paragraph",
+                    "VDoc:content": [
+                      {
+                        "@type": "VDoc:Reference",
+                        "VDoc:content": [
+                          "VValk:1"
+                        ],
+                        "VDoc:ref": "VValk:1"
+                      },
+                      "is set to the field id"
+                    ]
+                  },
+                  {
+                    "@type": "VDoc:Paragraph",
+                    "VDoc:content": [
+                      {
+                        "@type": "VDoc:Reference",
+                        "VDoc:content": [
+                          "VValk:2"
+                        ],
+                        "VDoc:ref": "VValk:2"
+                      },
+                      "is set as undefined"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "TransientField": {
+        "@type": "VKernel:Class",
+        "rdfs:subClassOf": "VState:Field",
+        "rdfs:comment": "The class of valospace fields with no general triple expression but\nwith custom semantics for specific queries."
+      },
+      "AliasField": {
+        "@type": "VKernel:Class",
+        "rdfs:subClassOf": "VState:Field",
+        "rdfs:comment": "The class of inferred fields called alias fields where each such field\nhas an 'aliasOf' RDF property or valos Field. Alias fields are\nmutation-inference symmetric so that triples with an alias field as\npredicate are inferred from triples with aliasOf as predicate and\nmutations with an alias field as predicate are translated to use\nthe aliasOf as predicate."
+      },
+      "aliasOf": {
+        "@type": "VKernel:Property",
+        "rdfs:domain": "VState:AliasField",
+        "rdfs:range": "VState:Field",
+        "rdfs:comment": "The alias target property specifies the inference source and mutation\ntarget of an alias field."
+      },
+      "isOwnerOf": {
+        "@type": "VKernel:Property",
+        "rdfs:domain": "VState:Field",
+        "rdfs:range": "xsd:boolean",
+        "rdfs:comment": "This field refers to a resource which is owned by the field subject\nresource. If the subject resource is is destroyed or if this field\nis removed then the owned resource is cascade destroyed."
+      },
+      "isOwnedBy": {
+        "@type": "VKernel:Property",
+        "rdfs:domain": "VState:Field",
+        "rdfs:range": "xsd:boolean",
+        "rdfs:comment": "This field refers to a resource which owns the field subject resource.\nIf the owner is destroyed or if the coupled field (which is marked\nwith isOwnerOf) is removed from the owner then the subject resource\nwill be cascade destroyed. Removing the isOwnedBy field itself will\nonly orphan the subject resource."
+      },
+      "coupledToField": {
+        "@type": "VKernel:Property",
+        "rdfs:domain": "VState:Field",
+        "rdfs:range": "valosField",
+        "rdfs:comment": ""
+      },
+      "coupledField": {
+        "@type": "VKernel:Property",
+        "VRevdoc:deprecatedInFavorOf": "VState:coupledToField",
+        "rdfs:domain": "VState:Field",
+        "rdfs:range": "valosField",
+        "rdfs:comment": ""
+      },
+      "defaultCoupledField": {
+        "@type": "VKernel:Property",
+        "rdfs:domain": "VState:Field",
+        "rdfs:range": "xsd:string",
+        "rdfs:comment": ""
+      },
+      "preventsDestroy": {
+        "@type": "VKernel:Property",
+        "rdfs:domain": "VState:Field",
+        "rdfs:range": "xsd:boolean",
+        "rdfs:comment": "Field with this property prevent destruction of their subject\nresource if the field has active couplings inside the same chronicle."
+      },
+      "isDuplicateable": {
+        "@type": "VKernel:Property",
+        "rdfs:domain": "VState:Field",
+        "rdfs:range": "xsd:boolean",
+        "rdfs:comment": "If set to false this field not be visible for DUPLICATED class of\nevents."
+      },
+      "initialValue": {
+        "@type": "VKernel:Property",
+        "rdfs:domain": "VState:Field",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "The implicit initial value of the resource field when the resource is\ncreated."
+      },
+      "ownDefaultValue": {
+        "@type": "VKernel:Property",
+        "rdfs:domain": "VState:Field",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "The value of a resource field which doesn't have an own value defined\n(ie. is evaluated before prototype field lookup)."
+      },
+      "finalDefaultValue": {
+        "@type": "VKernel:Property",
+        "rdfs:domain": "VState:Field",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "The value of a resource field which doesn't have a value defined by\nany resource in its prototype chain."
+      },
+      "allowTransientFieldToBeSingular": {
+        "@type": "VKernel:Property",
+        "rdfs:domain": "VState:Field",
+        "rdfs:range": "xsd:boolean",
+        "rdfs:comment": "Bypass the default behavior which forces transient fields to be plural\nto allow for singular fields."
+      }
+    },
+    "context": {
+      "@id": "context",
+      "restriction": {
+        "@reverse": "owl:onProperty"
+      },
+      "@base": "https://valospace.org/state/0#",
+      "VState:expressor": {
+        "@id": "#expressor",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VState:impressor": {
+        "@id": "#impressor",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VState:aliasOf": {
+        "@id": "#aliasOf",
+        "@type": "@id"
+      },
+      "VState:coupledToField": {
+        "@id": "#coupledToField",
+        "@type": "@id"
+      },
+      "VState:coupledField": {
+        "@id": "#coupledField",
+        "@type": "@id"
+      }
+    },
+    "section_fabric_abstract": {
+      "@id": "section_fabric_abstract",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "The vocabulary for defining the ValOS state core model and for\nextending it with new types and fields."
+          ]
+        }
+      ]
+    },
+    "section_prefixes": {
+      "@id": "section_prefixes",
+      "@type": "VDoc:Chapter",
+      "dc:title": [
+        {
+          "VDoc:em": true,
+          "VDoc:content": [
+            "@valos/state"
+          ]
+        },
+        " IRI prefixes"
+      ],
+      "VDoc:content": [
+        {
+          "VDoc:lookup": "prefixes",
+          "@type": "VDoc:Table",
+          "VDoc:columns": [
+            {
+              "VDoc:cell": "VDoc:selectKey",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
+                "Prefix"
+              ]
+            },
+            {
+              "VDoc:cell": "VDoc:selectValue",
+              "@type": "VDoc:Header",
+              "VDoc:content": [
+                "IRI"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "section_classes": {
+      "@id": "section_classes",
+      "@type": "VDoc:Chapter",
+      "dc:title": [
+        {
+          "VDoc:em": true,
+          "VDoc:content": [
+            "VState"
+          ]
+        },
+        " ",
+        {
+          "@type": "VDoc:Reference",
+          "VDoc:content": [
+            "fabric classes"
+          ],
+          "VDoc:ref": "VKernel:Class"
+        }
+      ],
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "This section describes fabric classes introduced by the 'VState' namespace"
+          ]
+        },
+        {
+          "VDoc:lookup": "vocabulary",
+          "@type": "VDoc:Table",
+          "VDoc:columns": {
+            "VDoc:entries": [
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": null,
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:resourceId": "VDoc:selectKey",
+                  "VDoc:heading": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:words": [
+                        {
+                          "VDoc:strong": true,
+                          "VDoc:content": [
+                            {
+                              "VDoc:em": true,
+                              "VDoc:content": [
+                                {
+                                  "@type": "VDoc:Reference",
+                                  "VDoc:content": [
+                                    [
+                                      "#",
+                                      "VDoc:selectKey"
+                                    ]
+                                  ],
+                                  "VDoc:ref": [
+                                    "#",
+                                    "VDoc:selectKey"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "VDoc:words": {
+                            "VDoc:selectField": "rdfs:label"
+                          },
+                          "VDoc:elidable": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:strong": true,
+                      "VDoc:content": [
+                        "DEPRECATED"
+                      ]
+                    },
+                    " in favor of:"
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:entries": {
+                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "rdfs:subClassOf"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:subClassOf"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "VDoc:cell": "rdfs:comment",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "description"
+                      ],
+                      "VDoc:ref": "rdfs:comment"
+                    }
+                  ]
+                },
+                "VDoc:wide": false
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "instance properties"
+                  ],
+                  "VDoc:ref": "VEngine:Property"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:domainOfProperty"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "instance methods"
+                  ],
+                  "VDoc:ref": "VEngine:Method"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:domainOfMethod"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "class properties"
+                  ],
+                  "VDoc:ref": "VEngine:ObjectProperty"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:hasProperty"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "class methods"
+                  ],
+                  "VDoc:ref": "VEngine:ObjectMethod"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:hasMethod"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
+              },
+              {
+                "VDoc:cell": "VRevdoc:introduction",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "introduction"
+                      ],
+                      "VDoc:ref": "VRevdoc:introduction"
+                    }
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:collapsed": true,
+                "VDoc:elidable": true
+              }
+            ]
+          },
+          "VDoc:entries": [
+            "Type",
+            "Field",
+            "ExpressedField",
+            "EventLoggedField",
+            "CoupledField",
+            "GeneratedField",
+            "TransientField",
+            "AliasField"
+          ]
+        }
+      ]
+    },
+    "section_properties": {
+      "@id": "section_properties",
+      "@type": "VDoc:Chapter",
+      "dc:title": [
+        {
+          "VDoc:em": true,
+          "VDoc:content": [
+            "VState"
+          ]
+        },
+        " ",
+        {
+          "@type": "VDoc:Reference",
+          "VDoc:content": [
+            "fabric properties"
+          ],
+          "VDoc:ref": "VKernel:Property"
+        }
+      ],
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "This section describes fabric properties introduced by the 'VState' namespace"
+          ]
+        },
+        {
+          "VDoc:lookup": "vocabulary",
+          "@type": "VDoc:Table",
+          "VDoc:columns": {
+            "VDoc:entries": [
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": null,
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:resourceId": "VDoc:selectKey",
+                  "VDoc:heading": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:words": [
+                        {
+                          "VDoc:strong": true,
+                          "VDoc:content": [
+                            {
+                              "VDoc:em": true,
+                              "VDoc:content": [
+                                {
+                                  "@type": "VDoc:Reference",
+                                  "VDoc:content": [
+                                    [
+                                      "#",
+                                      "VDoc:selectKey"
+                                    ]
+                                  ],
+                                  "VDoc:ref": [
+                                    "#",
+                                    "VDoc:selectKey"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "VDoc:words": {
+                            "VDoc:selectField": "rdfs:label"
+                          },
+                          "VDoc:elidable": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:strong": true,
+                      "VDoc:content": [
+                        "DEPRECATED"
+                      ]
+                    },
+                    " in favor of:"
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:entries": {
+                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "rdfs:domain"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:domain"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "rdfs:range"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:range"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "VDoc:cell": "rdfs:comment",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "description"
+                      ],
+                      "VDoc:ref": "rdfs:comment"
+                    }
+                  ]
+                },
+                "VDoc:wide": true
+              },
+              {
+                "VDoc:cell": "VRevdoc:introduction",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "introduction"
+                      ],
+                      "VDoc:ref": "VRevdoc:introduction"
+                    }
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:collapsed": true,
+                "VDoc:elidable": true
+              }
+            ]
+          },
+          "VDoc:entries": [
+            "expressor",
+            "impressor",
+            "aliasOf",
+            "isOwnerOf",
+            "isOwnedBy",
+            "coupledToField",
+            "coupledField",
+            "defaultCoupledField",
+            "preventsDestroy",
+            "isDuplicateable",
+            "initialValue",
+            "ownDefaultValue",
+            "finalDefaultValue",
+            "allowTransientFieldToBeSingular"
+          ]
+        }
+      ]
+    },
+    "section_methods": {
+      "@id": "section_methods",
+      "@type": "VDoc:Chapter",
+      "dc:title": [
+        {
+          "VDoc:em": true,
+          "VDoc:content": [
+            "VState"
+          ]
+        },
+        " ",
+        {
+          "@type": "VDoc:Reference",
+          "VDoc:content": [
+            "fabric methods"
+          ],
+          "VDoc:ref": "VEngine:Method"
+        }
+      ],
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "This section describes fabric methods introduced by the 'VState' namespace"
+          ]
+        },
+        {
+          "VDoc:lookup": "vocabulary",
+          "@type": "VDoc:Table",
+          "VDoc:columns": {
+            "VDoc:entries": [
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": null,
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:resourceId": "VDoc:selectKey",
+                  "VDoc:heading": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:words": [
+                        {
+                          "VDoc:strong": true,
+                          "VDoc:content": [
+                            {
+                              "VDoc:em": true,
+                              "VDoc:content": [
+                                {
+                                  "@type": "VDoc:Reference",
+                                  "VDoc:content": [
+                                    [
+                                      "#",
+                                      "VDoc:selectKey"
+                                    ]
+                                  ],
+                                  "VDoc:ref": [
+                                    "#",
+                                    "VDoc:selectKey"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "VDoc:words": {
+                            "VDoc:selectField": "rdfs:label"
+                          },
+                          "VDoc:elidable": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:strong": true,
+                      "VDoc:content": [
+                        "DEPRECATED"
+                      ]
+                    },
+                    " in favor of:"
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:entries": {
+                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "rdfs:domain"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:domain"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "rdfs:range"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:range"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "VDoc:cell": "rdfs:comment",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "description"
+                      ],
+                      "VDoc:ref": "rdfs:comment"
+                    }
+                  ]
+                },
+                "VDoc:wide": true
+              },
+              {
+                "VDoc:cell": "VRevdoc:introduction",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "introduction"
+                      ],
+                      "VDoc:ref": "VRevdoc:introduction"
+                    }
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:collapsed": true,
+                "VDoc:elidable": true
+              }
+            ]
+          },
+          "VDoc:entries": []
+        }
+      ]
+    },
+    "section_globals": {
+      "@id": "section_globals",
+      "@type": "VDoc:Chapter",
+      "dc:title": [
+        {
+          "VDoc:em": true,
+          "VDoc:content": [
+            "VState"
+          ]
+        },
+        " ",
+        {
+          "@type": "VDoc:Reference",
+          "VDoc:content": [
+            "fabric globals"
+          ],
+          "VDoc:ref": "VEngine:Global"
+        }
+      ],
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "This section describes fabric global objects introduced by the 'VState' namespace"
+          ]
+        },
+        {
+          "VDoc:lookup": "vocabulary",
+          "@type": "VDoc:Table",
+          "VDoc:columns": {
+            "VDoc:entries": [
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": null,
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:resourceId": "VDoc:selectKey",
+                  "VDoc:heading": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:words": [
+                        {
+                          "VDoc:strong": true,
+                          "VDoc:content": [
+                            {
+                              "VDoc:em": true,
+                              "VDoc:content": [
+                                {
+                                  "@type": "VDoc:Reference",
+                                  "VDoc:content": [
+                                    [
+                                      "#",
+                                      "VDoc:selectKey"
+                                    ]
+                                  ],
+                                  "VDoc:ref": [
+                                    "#",
+                                    "VDoc:selectKey"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "VDoc:words": {
+                            "VDoc:selectField": "rdfs:label"
+                          },
+                          "VDoc:elidable": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:strong": true,
+                      "VDoc:content": [
+                        "DEPRECATED"
+                      ]
+                    },
+                    " in favor of:"
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:entries": {
+                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": "rdf:type",
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "@type"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "VDoc:cell": "comment",
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "Comment"
+                ]
+              },
+              {
+                "VDoc:cell": "rdfs:comment",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "description"
+                      ],
+                      "VDoc:ref": "rdfs:comment"
+                    }
+                  ]
+                },
+                "VDoc:wide": true
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "prototype properties"
+                  ],
+                  "VDoc:ref": "VEngine:Property"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:domainOfProperty"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "prototype methods"
+                  ],
+                  "VDoc:ref": "VEngine:Method"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:domainOfMethod"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "object properties"
+                  ],
+                  "VDoc:ref": "VEngine:ObjectProperty"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:hasProperty"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "object methods"
+                  ],
+                  "VDoc:ref": "VEngine:ObjectMethod"
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "VEngine:hasMethod"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      {
+                        "VDoc:selectField": "VRevdoc:indexLabel"
+                      }
+                    ],
+                    "VDoc:ref": {
+                      "VDoc:selectField": "@id"
+                    }
+                  }
+                }
+              },
+              {
+                "VDoc:cell": "VRevdoc:introduction",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "introduction"
+                      ],
+                      "VDoc:ref": "VRevdoc:introduction"
+                    }
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:collapsed": true,
+                "VDoc:elidable": true
+              }
+            ]
+          },
+          "VDoc:entries": []
+        }
+      ]
+    },
+    "section_vocabulary_other": {
+      "@id": "section_vocabulary_other",
+      "@type": "VDoc:Chapter",
+      "dc:title": [
+        {
+          "VDoc:em": true,
+          "VDoc:content": [
+            "VState"
+          ]
+        },
+        " remaining vocabulary terms"
+      ],
+      "VDoc:content": [
+        {
+          "VDoc:lookup": "vocabulary",
+          "@type": "VDoc:Table",
+          "VDoc:columns": {
+            "VDoc:entries": [
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": null,
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:resourceId": "VDoc:selectKey",
+                  "VDoc:heading": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:words": [
+                        {
+                          "VDoc:strong": true,
+                          "VDoc:content": [
+                            {
+                              "VDoc:em": true,
+                              "VDoc:content": [
+                                {
+                                  "@type": "VDoc:Reference",
+                                  "VDoc:content": [
+                                    [
+                                      "#",
+                                      "VDoc:selectKey"
+                                    ]
+                                  ],
+                                  "VDoc:ref": [
+                                    "#",
+                                    "VDoc:selectKey"
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "VDoc:words": {
+                            "VDoc:selectField": "rdfs:label"
+                          },
+                          "VDoc:elidable": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "VDoc:strong": true,
+                      "VDoc:content": [
+                        "DEPRECATED"
+                      ]
+                    },
+                    " in favor of:"
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:cell": {
+                  "VDoc:entries": {
+                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
+                  },
+                  "VDoc:elidable": true,
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": "rdf:type",
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "@type"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "rdfs:subClassOf"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "rdfs:subClassOf"
+                  },
+                  "VDoc:map": {
+                    "@type": "VDoc:Reference",
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ],
+                    "VDoc:ref": "VDoc:selectValue"
+                  }
+                }
+              },
+              {
+                "VDoc:cell": "rdfs:comment",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "description"
+                      ],
+                      "VDoc:ref": "rdfs:comment"
+                    }
+                  ]
+                },
+                "VDoc:wide": true
+              },
+              {
+                "VDoc:cell": "VRevdoc:introduction",
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "introduction"
+                      ],
+                      "VDoc:ref": "VRevdoc:introduction"
+                    }
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:collapsed": true,
+                "VDoc:elidable": true
+              }
+            ]
+          },
+          "VDoc:entries": []
+        }
+      ]
+    },
+    "@type": "VRevdoc:Document",
+    "VDoc:content": [
+      {
+        "@id": "abstract"
+      },
+      {
+        "@id": "sotd"
+      },
+      {
+        "@id": "introduction"
+      },
+      {
+        "@id": "section_fabric"
+      }
+    ]
+  }
+]

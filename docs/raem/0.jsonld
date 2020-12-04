@@ -63,13 +63,12 @@
     "dc:title": "ValOS Resources And Events Model (ValOS-RAEM) API, schema and ontology",
     "VDoc:tags": [
       "PRIMARY",
-      "INTRODUCTORY",
-      "VALOSPACE",
       "WORKSPACE",
+      "VALOSPACE",
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/raem",
-    "VRevdoc:version": "0.36.0-alpha.0",
+    "VRevdoc:version": "0.37.0-alpha.0",
     "VRevdoc:preferredPrefix": "VRaem",
     "VRevdoc:baseIRI": "https://valospace.org/raem/0#",
     "VRevdoc:referencedModules": {
@@ -87,7 +86,7 @@
       "https://valospace.org/0#": "@valos/raem/V"
     },
     "respecConfig": {
-      "subtitle": "0.36.0-alpha.0",
+      "subtitle": "0.37.0-alpha.0",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -108,14 +107,14 @@
           "VDoc:content": [
             "This library provides the definitions and reference implementation\nfor the fundamental ",
             {
-              "@type": "VDoc:CharacterData",
+              "VDoc:em": true,
               "VDoc:content": [
                 "ValOS Resources"
               ]
             },
             " and ",
             {
-              "@type": "VDoc:CharacterData",
+              "VDoc:em": true,
               "VDoc:content": [
                 "ValOS Events"
               ]
@@ -172,14 +171,14 @@
           "VDoc:content": [
             "This library provides the definitions and reference implementations\nfor the fundamental ",
             {
-              "@type": "VDoc:CharacterData",
+              "VDoc:em": true,
               "VDoc:content": [
                 "ValOS Resources"
               ]
             },
             " and ",
             {
-              "@type": "VDoc:CharacterData",
+              "VDoc:em": true,
               "VDoc:content": [
                 "ValOS Events"
               ]
@@ -196,7 +195,7 @@
                 [
                   "A ValOS Resource ",
                   {
-                    "@type": "VDoc:CharacterData",
+                    "VDoc:em": true,
                     "VDoc:content": [
                       "resource"
                     ]
@@ -216,7 +215,7 @@
                 [
                   "A ValOS Event ",
                   {
-                    "@type": "VDoc:CharacterData",
+                    "VDoc:em": true,
                     "VDoc:content": [
                       "event"
                     ]
@@ -252,7 +251,7 @@
             [
               "schema definitions for ",
               {
-                "@type": "VDoc:CharacterData",
+                "VDoc:em": true,
                 "VDoc:content": [
                   "Resource"
                 ]
@@ -263,7 +262,7 @@
               "@type": "VDoc:Paragraph",
               "VDoc:content": [
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "Corpus"
                   ]
@@ -275,14 +274,14 @@
               "@type": "VDoc:Paragraph",
               "VDoc:content": [
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "reducers"
                   ]
                 },
                 " which a corpus uses to convert (",
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "reduce"
                   ]
@@ -295,14 +294,14 @@
               "VDoc:content": [
                 "the kuery language ",
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "VALK"
                   ]
                 },
                 " definition and the kuery engine ",
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "Valker"
                   ]
@@ -314,7 +313,7 @@
               "@type": "VDoc:Paragraph",
               "VDoc:content": [
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "ghost instancing"
                   ]
@@ -326,7 +325,7 @@
               "@type": "VDoc:Paragraph",
               "VDoc:content": [
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "resource couplings"
                   ]
@@ -338,7 +337,7 @@
               "@type": "VDoc:Paragraph",
               "VDoc:content": [
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "urn:valos"
                   ]
@@ -350,7 +349,7 @@
               "@type": "VDoc:Paragraph",
               "VDoc:content": [
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "ValOSURL"
                   ]
@@ -362,7 +361,7 @@
               "@type": "VDoc:Paragraph",
               "VDoc:content": [
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "valospace"
                   ]
@@ -374,14 +373,14 @@
               "@type": "VDoc:Paragraph",
               "VDoc:content": [
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "chronicles"
                   ]
                 },
                 " mechanism which allows for unlimited scalability of\n  the ",
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "valospace"
                   ]
@@ -409,7 +408,7 @@
                 "VDoc:ref": "@valos/tools"
               },
               {
-                "@type": "VDoc:CharacterData",
+                "VDoc:em": true,
                 "VDoc:content": [
                   "immutable"
                 ]
@@ -420,31 +419,31 @@
               "VDoc:content": [
                 "exports:",
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "Corpus"
                   ]
                 },
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "Command"
                   ]
                 },
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "VALK"
                   ]
                 },
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "Valker"
                   ]
                 },
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "RAEMContentAPI"
                   ]
@@ -456,25 +455,25 @@
               "VDoc:content": [
                 "valospace:",
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "Resource"
                   ]
                 },
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "TransientFields"
                   ]
                 },
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "Bvob"
                   ]
                 },
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "Chronicle"
                   ]
@@ -486,19 +485,19 @@
               "VDoc:content": [
                 "concepts:",
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "ghost instancing"
                   ]
                 },
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "chronicles"
                   ]
                 },
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "couplings"
                   ]

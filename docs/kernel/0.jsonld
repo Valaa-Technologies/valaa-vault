@@ -53,6 +53,7 @@
         "@type": "@id"
       },
       "VEngine": "https://valospace.org/engine/0#",
+      "VPlot": "https://valospace.org/plot/0#",
       "VState": "https://valospace.org/state/0#",
       "VValk": "https://valospace.org/valk/0#",
       "VLog": "https://valospace.org/log/0#"
@@ -65,19 +66,20 @@
       "TECHNICIAN"
     ],
     "VRevdoc:package": "@valos/kernel",
-    "VRevdoc:version": "0.36.0-alpha.0",
+    "VRevdoc:version": "0.37.0-alpha.0",
     "VRevdoc:preferredPrefix": "VKernel",
     "VRevdoc:baseIRI": "https://valospace.org/kernel/0#",
     "VRevdoc:referencedModules": {
       "https://valospace.org/engine/0#": "@valos/engine/VEngine",
       "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
+      "https://valospace.org/plot/0#": "@valos/plot/VPlot",
       "https://valospace.org/state/0#": "@valos/state/VState",
       "https://valospace.org/valk/0#": "@valos/valk/VValk",
       "https://valospace.org/log/0#": "@valos/log/VLog"
     },
     "VRevdoc:extenderModules": {},
     "respecConfig": {
-      "subtitle": "0.36.0-alpha.0",
+      "subtitle": "0.37.0-alpha.0",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -94,9 +96,9 @@
         "@id": "https://valospace.org/0",
         "tags": [
           "PRIMARY",
-          "INTRODUCTION",
-          "ONTOLOGY",
-          "VALONAUT"
+          "INTRODUCTORY",
+          "VALOSPACE",
+          "ONTOLOGY"
         ],
         "subProfiles": [],
         "title": "Valos introduction and valospace API reference",
@@ -106,109 +108,149 @@
             {
               "@type": "VDoc:Paragraph",
               "VDoc:content": [
-                [
-                  {
-                    "@type": "VRevdoc:Tooltip",
-                    "VDoc:content": [
-                      {
-                        "VDoc:em": true,
-                        "VDoc:content": [
+                "Valaa (",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "Valaa Open System"
+                  ]
+                },
+                ") is an ambitious push towards\nmore decentralized web application ecosystems. The primary means for\nthis are (",
+                {
+                  "@type": "VRevdoc:Tooltip",
+                  "VDoc:content": [
+                    "*or will be"
+                  ],
+                  "VRevdoc:tooltipContent": "Most of ValOS is still prototypical.\n        However the entries marked with (*) are work in progress, or sometimes\n        not even more than an empty shape defined by the surrounding ecosystem."
+                },
+                "):",
+                {
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:NumberedList",
+                      "VDoc:lines": [
+                        [
+                          "Open resource model, protocol(*) and API ",
                           {
-                            "VDoc:strong": true,
+                            "@type": "VDoc:Reference",
                             "VDoc:content": [
-                              "'Valos extends boundlessly across the valospace-time fabric.'"
-                            ]
-                          },
-                          " (...in progress(tm))"
-                        ]
-                      }
-                    ],
-                    "VRevdoc:tooltipContent": [
-                      {
-                        "VDoc:strong": true,
-                        "VDoc:content": [
-                          "-> Vertically"
-                        ]
-                      },
-                      ": as a full application development solution\nvalos radically simplifies the semantic web technology stack.",
-                      null,
-                      {
-                        "VDoc:strong": true,
-                        "VDoc:content": [
-                          "-> Horizontally"
-                        ]
-                      },
-                      ": as a global, de-centralized ecosystem\nvalos eases cross-organization interfacing.",
-                      null,
-                      {
-                        "VDoc:strong": true,
-                        "VDoc:content": [
-                          "-> In depth"
-                        ]
-                      },
-                      ": with its unified resource model valos blurs\nthe boundary between frontends and backends.",
-                      null,
-                      {
-                        "VDoc:strong": true,
-                        "VDoc:content": [
-                          "-> Temporally"
-                        ]
-                      },
-                      ": valos unifies document state and change\nupdates into seamless event stream *chronicles*."
-                    ]
-                  }
-                ]
+                              "specifications"
+                            ],
+                            "VDoc:ref": "/kernel/0#section_specification_documents"
+                          }
+                        ],
+                        {
+                          "@type": "VDoc:Paragraph",
+                          "VDoc:content": [
+                            "The open library, browser and backend(*) ",
+                            {
+                              "@type": "VDoc:Reference",
+                              "VDoc:content": [
+                                "reference implementations"
+                              ],
+                              "VDoc:ref": "/kernel/0#section_workspaces_type_library"
+                            }
+                          ]
+                        },
+                        {
+                          "@type": "VDoc:Paragraph",
+                          "VDoc:content": [
+                            "The ",
+                            {
+                              "@type": "VDoc:Reference",
+                              "VDoc:content": [
+                                "open valospace IDE"
+                              ],
+                              "VDoc:ref": "/zone"
+                            },
+                            " for rapid application development"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
               ]
             },
             {
               "@type": "VDoc:Paragraph",
               "VDoc:content": [
-                "In other words, valos is a bit ambitious and a lot to take in at once."
+                "\nIn its technical ambition ValOS is a lot to take in at once."
               ]
             },
             {
               "@type": "VDoc:Paragraph",
               "VDoc:content": [
-                "To address this the first part of this document provides separate\nintroduction paths into valos for a software developer\n(referred to as ",
+                "To address this there are separate introduction paths into ValOS from\nthe perspective of three familiar archetypes. Each of these paths has\na valos-specific role name and a document:",
                 {
-                  "VDoc:em": true,
                   "VDoc:content": [
                     {
-                      "@type": "VDoc:Reference",
-                      "VDoc:content": [
-                        "a valonaut"
-                      ],
-                      "VDoc:ref": "/valonaut"
+                      "@type": "VDoc:BulletList",
+                      "VDoc:lines": [
+                        [
+                          "A software developer should study ",
+                          {
+                            "@type": "VDoc:Reference",
+                            "VDoc:content": [
+                              [
+                                "the path of a ",
+                                {
+                                  "VDoc:em": true,
+                                  "VDoc:content": [
+                                    "valonaut"
+                                  ]
+                                }
+                              ]
+                            ],
+                            "VDoc:ref": "/valonaut"
+                          }
+                        ],
+                        {
+                          "@type": "VDoc:Paragraph",
+                          "VDoc:content": [
+                            "A systems operator should study ",
+                            {
+                              "@type": "VDoc:Reference",
+                              "VDoc:content": [
+                                [
+                                  "the path of a ",
+                                  {
+                                    "VDoc:em": true,
+                                    "VDoc:content": [
+                                      "technician"
+                                    ]
+                                  }
+                                ]
+                              ],
+                              "VDoc:ref": "/technician"
+                            }
+                          ]
+                        },
+                        {
+                          "@type": "VDoc:Paragraph",
+                          "VDoc:content": [
+                            "A project manager should study ",
+                            {
+                              "@type": "VDoc:Reference",
+                              "VDoc:content": [
+                                [
+                                  "the path of a ",
+                                  {
+                                    "VDoc:em": true,
+                                    "VDoc:content": [
+                                      "voyager"
+                                    ]
+                                  }
+                                ]
+                              ],
+                              "VDoc:ref": "/voyager"
+                            }
+                          ]
+                        }
+                      ]
                     }
                   ]
-                },
-                "), for a\nsystems operator (as ",
-                {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "@type": "VDoc:Reference",
-                      "VDoc:content": [
-                        "a technician"
-                      ],
-                      "VDoc:ref": "/technician"
-                    }
-                  ]
-                },
-                ") and\nfor a project manager (as ",
-                {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "@type": "VDoc:Reference",
-                      "VDoc:content": [
-                        "a voyager"
-                      ],
-                      "VDoc:ref": "/voyager"
-                    }
-                  ]
-                },
-                ")."
+                }
               ]
             },
             {
@@ -228,7 +270,7 @@
                   ],
                   "VDoc:ref": "valospace"
                 },
-                " API reference and is aimed for valonauts for repeat viewing."
+                " API reference. It is a semantic namespace definition of the valospace\napplication development primitives and is aimed for valonauts for\nrepeat viewing."
               ]
             }
           ]
@@ -239,13 +281,70 @@
             {
               "@type": "VDoc:Paragraph",
               "VDoc:content": [
+                [
+                  {
+                    "@type": "VRevdoc:Tooltip",
+                    "VDoc:content": [
+                      {
+                        "VDoc:em": true,
+                        "VDoc:content": [
+                          {
+                            "VDoc:strong": true,
+                            "VDoc:content": [
+                              "'Valos extends boundlessly across the valospace-time fabric.'"
+                            ]
+                          },
+                          "(*)"
+                        ]
+                      }
+                    ],
+                    "VRevdoc:tooltipContent": [
+                      {
+                        "VDoc:strong": true,
+                        "VDoc:content": [
+                          "-> Vertically"
+                        ]
+                      },
+                      ": as a full application development solution\nvalos radically simplifies the semantic web technology stack.",
+                      null,
+                      {
+                        "VDoc:strong": true,
+                        "VDoc:content": [
+                          "-> Horizontally"
+                        ]
+                      },
+                      ": as a global, decentralized ecosystem\nvalos eases cross-organization interfacing.",
+                      null,
+                      {
+                        "VDoc:strong": true,
+                        "VDoc:content": [
+                          "-> In depth"
+                        ]
+                      },
+                      ": with its isomorphic resource model valos\nblurs the boundary between frontends and backends.",
+                      null,
+                      {
+                        "VDoc:strong": true,
+                        "VDoc:content": [
+                          "-> Temporally"
+                        ]
+                      },
+                      ": valos unifies document state and change\nupdates into seamless event streams, *chronicles*."
+                    ]
+                  }
+                ]
+              ]
+            },
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
                 "The three traditional roles of application developer, systems operator\nand project manager have their own unique characteristics in valos\necosystem and are called valonaut, technician and voyager respectively."
               ]
             },
             {
               "@type": "VDoc:Paragraph",
               "VDoc:content": [
-                "Each role has a detailed (editor's note: eventually) how-to guide which\nare linked and briefly introduced below. The roles support each other\nand the guides reflect this. The hands-on introduction section of each\nguide also gives a high-level overview of the rest."
+                "Each role has a detailed (*) how-to guide which are linked and briefly\nintroduced below. The roles support each other and the guides reflect\nthis."
               ]
             },
             {
@@ -330,7 +429,7 @@
                     ]
                   },
                   "package": "@valos/kernel-vault",
-                  "version": "0.35.0-rc.35"
+                  "version": "0.36.0-alpha.0"
                 },
                 "technician": {
                   "@id": "https://valospace.org/technician",
@@ -426,7 +525,7 @@
                     ]
                   },
                   "package": "@valos/kernel-vault",
-                  "version": "0.35.0-rc.35"
+                  "version": "0.36.0-alpha.0"
                 },
                 "voyager": {
                   "@id": "https://valospace.org/voyager",
@@ -494,7 +593,7 @@
                     ]
                   },
                   "package": "@valos/kernel-vault",
-                  "version": "0.35.0-rc.35"
+                  "version": "0.36.0-alpha.0"
                 }
               },
               "VDoc:map": {
@@ -555,39 +654,25 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/kernel-vault",
-        "version": "0.35.0-rc.36"
+        "version": "0.36.0-alpha.0"
       },
       "@id": "documents",
-      "sbom": {
-        "@id": "https://valospace.org/sbom",
+      "engine/0": {
+        "@id": "https://valospace.org/engine/0",
         "tags": [
-          "PRIMARY",
-          "SBOM"
+          "FABRIC",
+          "WORKSPACE",
+          "ONTOLOGY"
         ],
         "subProfiles": [],
-        "title": "@valos/kernel-vault@0.35.0-rc.36 Software Bill of Materials",
+        "title": "@valos/engine library workspace",
         "abstract": {
           "@type": "VDoc:Chapter",
           "VDoc:content": [
             {
               "@type": "VDoc:Paragraph",
               "VDoc:content": [
-                "This document is an autogenerated ",
-                {
-                  "@type": "VDoc:Reference",
-                  "VDoc:content": [
-                    "CycloneDX"
-                  ],
-                  "VDoc:ref": "https://cyclonedx.org/"
-                },
-                " ",
-                {
-                  "@type": "VDoc:Reference",
-                  "VDoc:content": [
-                    "SBoM document"
-                  ],
-                  "VDoc:ref": "https://www.owasp.org/index.php/Component_Analysis#Software_Bill-of-Materials_.28SBOM.29"
-                }
+                "ValOS Engine API and Schema"
               ]
             }
           ]
@@ -598,21 +683,78 @@
             {
               "@type": "VDoc:Paragraph",
               "VDoc:content": [
-                "Configure @valos/type-vault-sbom.introduction section using",
+                "Edit me - this is the first payload chapter. Abstract and SOTD are\nessential ",
                 {
                   "@type": "VDoc:Reference",
                   "VDoc:content": [
-                    "VDoc source graph syntax"
+                    "ReSpec boilerplate"
                   ],
-                  "VDoc:ref": "@valos/vdoc#source_graph"
+                  "VDoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
+                }
+              ]
+            },
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "See ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "ReVDoc tutorial"
+                  ],
+                  "VDoc:ref": "@valos/revdoc/tutorial"
                 },
-                "\nto define the content of this section."
+                " for\ninstructions on how to write revdoc source documents."
+              ]
+            },
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "See also ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "ReVdoc specification"
+                  ],
+                  "VDoc:ref": "@valos/revdoc"
+                },
+                " and ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "VDoc specification"
+                  ],
+                  "VDoc:ref": "@valos/vdoc"
+                },
+                " for reference documentation."
               ]
             }
           ]
         },
-        "package": "@valos/kernel-vault",
-        "version": "0.35.0-rc.36"
+        "fabricAbstract": {
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "'VEngine' namespace provides vocabulary for describing and defining\nthe valosheath and its types, objects, properties, methods and constants."
+              ]
+            }
+          ]
+        },
+        "VRevdoc:preferredPrefix": "VEngine",
+        "VRevdoc:baseIRI": "https://valospace.org/engine/0#",
+        "VRevdoc:referencedModules": {
+          "https://valospace.org/engine/0#": "@valos/engine/VEngine",
+          "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
+          "https://valospace.org/valk/0#": "@valos/valk/VValk",
+          "https://valospace.org/state/0#": "@valos/state/VState",
+          "https://valospace.org/0#": "@valos/space/V"
+        },
+        "VRevdoc:extenderModules": {
+          "https://valospace.org/0#": "@valos/engine/V"
+        },
+        "package": "@valos/engine",
+        "version": "0.36.0-alpha.0"
       },
       "engine": {
         "@id": "https://valospace.org/engine",
@@ -711,7 +853,105 @@
           "https://valospace.org/0#": "@valos/engine/V"
         },
         "package": "@valos/engine",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
+      },
+      "inspire/0": {
+        "@id": "https://valospace.org/inspire/0",
+        "tags": [
+          "FABRIC",
+          "WORKSPACE",
+          "ONTOLOGY"
+        ],
+        "subProfiles": [],
+        "title": "@valos/inspire library workspace",
+        "abstract": {
+          "@type": "VDoc:Chapter",
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "ValOS Inspire application gateway"
+              ]
+            }
+          ]
+        },
+        "introduction": {
+          "@type": "VDoc:Chapter",
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "Edit me - this is the first payload chapter. Abstract and SOTD are\nessential ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "ReSpec boilerplate"
+                  ],
+                  "VDoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
+                }
+              ]
+            },
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "See ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "ReVDoc tutorial"
+                  ],
+                  "VDoc:ref": "@valos/revdoc/tutorial"
+                },
+                " for\ninstructions on how to write revdoc source documents."
+              ]
+            },
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "See also ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "ReVdoc specification"
+                  ],
+                  "VDoc:ref": "@valos/revdoc"
+                },
+                " and ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "VDoc specification"
+                  ],
+                  "VDoc:ref": "@valos/vdoc"
+                },
+                " for reference documentation."
+              ]
+            }
+          ]
+        },
+        "fabricAbstract": {
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "The inspire gateway fabric API"
+              ]
+            }
+          ]
+        },
+        "VRevdoc:preferredPrefix": "VInspire",
+        "VRevdoc:baseIRI": "https://valospace.org/inspire/0#",
+        "VRevdoc:referencedModules": {
+          "https://valospace.org/engine/0#": "@valos/engine/VEngine",
+          "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
+          "https://valospace.org/0#": "@valos/space/V",
+          "https://valospace.org/inspire/Lens/0#": "@valos/inspire/Lens"
+        },
+        "VRevdoc:extenderModules": {
+          "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
+        },
+        "package": "@valos/inspire",
+        "version": "0.36.0-alpha.0"
       },
       "inspire/Lens/0": {
         "@id": "https://valospace.org/inspire/Lens/0",
@@ -991,7 +1231,7 @@
           "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
         },
         "package": "@valos/inspire",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "inspire/Lens": {
         "@id": "https://valospace.org/inspire/Lens",
@@ -1271,7 +1511,7 @@
           "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
         },
         "package": "@valos/inspire",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "inspire/On/0": {
         "@id": "https://valospace.org/inspire/On/0",
@@ -1387,7 +1627,7 @@
           "https://valospace.org/valk/0#": "@valos/sourcerer/VValk"
         },
         "package": "@valos/inspire",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "inspire/On": {
         "@id": "https://valospace.org/inspire/On",
@@ -1503,7 +1743,7 @@
           "https://valospace.org/valk/0#": "@valos/sourcerer/VValk"
         },
         "package": "@valos/inspire",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "inspire": {
         "@id": "https://valospace.org/inspire",
@@ -1601,7 +1841,7 @@
           "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
         },
         "package": "@valos/inspire",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "inspire/VRevela/0": {
         "@id": "https://valospace.org/inspire/VRevela/0",
@@ -1904,7 +2144,7 @@
           "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
         },
         "package": "@valos/inspire",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "inspire/VRevela": {
         "@id": "https://valospace.org/inspire/VRevela",
@@ -2207,7 +2447,7 @@
           "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
         },
         "package": "@valos/inspire",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "kernel/0": {
         "@id": "https://valospace.org/kernel/0",
@@ -2418,13 +2658,14 @@
         "VRevdoc:referencedModules": {
           "https://valospace.org/engine/0#": "@valos/engine/VEngine",
           "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
+          "https://valospace.org/plot/0#": "@valos/plot/VPlot",
           "https://valospace.org/state/0#": "@valos/state/VState",
           "https://valospace.org/valk/0#": "@valos/valk/VValk",
           "https://valospace.org/log/0#": "@valos/log/VLog"
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/kernel",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "kernel": {
         "@id": "https://valospace.org/kernel",
@@ -2635,19 +2876,22 @@
         "VRevdoc:referencedModules": {
           "https://valospace.org/engine/0#": "@valos/engine/VEngine",
           "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
+          "https://valospace.org/plot/0#": "@valos/plot/VPlot",
           "https://valospace.org/state/0#": "@valos/state/VState",
           "https://valospace.org/valk/0#": "@valos/valk/VValk",
           "https://valospace.org/log/0#": "@valos/log/VLog"
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/kernel",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
-      "log": {
-        "@id": "https://valospace.org/log",
+      "log/0": {
+        "@id": "https://valospace.org/log/0",
         "tags": [
+          "PRIMARY",
           "WORKSPACE",
           "FABRIC",
+          "SPECIFICATION",
           "ONTOLOGY"
         ],
         "subProfiles": [],
@@ -2788,13 +3032,164 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/log",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
-      "plot": {
-        "@id": "https://valospace.org/plot",
+      "log": {
+        "@id": "https://valospace.org/log",
         "tags": [
+          "PRIMARY",
           "WORKSPACE",
           "FABRIC",
+          "SPECIFICATION",
+          "ONTOLOGY"
+        ],
+        "subProfiles": [],
+        "title": "@valos/log library workspace",
+        "abstract": {
+          "@type": "VDoc:Chapter",
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "Specifies the ValOS event log JSON-LD format and the 'VLog' namespace"
+              ]
+            },
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "VLog"
+                  ]
+                },
+                " together with ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "VState:"
+                  ],
+                  "VDoc:ref": "VState:"
+                },
+                " ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "VPlot:"
+                  ],
+                  "VDoc:ref": "VPlot:"
+                },
+                " and ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "VValk:"
+                  ],
+                  "VDoc:ref": "VValk:"
+                },
+                " forms the infrastructural foundation ie. the ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "fabric"
+                  ]
+                },
+                " of the valospace.",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "VLog"
+                  ]
+                },
+                " provides the temporal dimension and so enables change and reactions."
+              ]
+            }
+          ]
+        },
+        "introduction": {
+          "@type": "VDoc:Chapter",
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "Edit me - this is the first payload chapter. Abstract and SOTD are\nessential ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "ReSpec boilerplate"
+                  ],
+                  "VDoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
+                }
+              ]
+            },
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "See ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "ReVDoc tutorial"
+                  ],
+                  "VDoc:ref": "@valos/revdoc/tutorial"
+                },
+                " for\ninstructions on how to write revdoc source documents."
+              ]
+            },
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "See also ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "ReVdoc specification"
+                  ],
+                  "VDoc:ref": "@valos/revdoc"
+                },
+                " and ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "VDoc specification"
+                  ],
+                  "VDoc:ref": "@valos/vdoc"
+                },
+                " for reference documentation."
+              ]
+            }
+          ]
+        },
+        "fabricAbstract": {
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "The vocabulary for defining the ValOS chronicle event log structure\nand for adding content and behaviors to it."
+              ]
+            }
+          ]
+        },
+        "VRevdoc:preferredPrefix": "VLog",
+        "VRevdoc:baseIRI": "https://valospace.org/log/0#",
+        "VRevdoc:referencedModules": {
+          "https://valospace.org/engine/0#": "@valos/engine/VEngine",
+          "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
+          "https://valospace.org/plot/0#": "@valos/plot/VPlot",
+          "https://valospace.org/state/0#": "@valos/state/VState",
+          "https://valospace.org/valk/0#": "@valos/valk/VValk"
+        },
+        "VRevdoc:extenderModules": {},
+        "package": "@valos/log",
+        "version": "0.36.0-alpha.0"
+      },
+      "plot/0": {
+        "@id": "https://valospace.org/plot/0",
+        "tags": [
+          "PRIMARY",
+          "WORKSPACE",
+          "FABRIC",
+          "SPECIFICATION",
           "ONTOLOGY"
         ],
         "subProfiles": [],
@@ -2935,15 +3330,163 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/plot",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
+      },
+      "plot": {
+        "@id": "https://valospace.org/plot",
+        "tags": [
+          "PRIMARY",
+          "WORKSPACE",
+          "FABRIC",
+          "SPECIFICATION",
+          "ONTOLOGY"
+        ],
+        "subProfiles": [],
+        "title": "@valos/plot library workspace",
+        "abstract": {
+          "@type": "VDoc:Chapter",
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "Specifies the hierarchical ValOS plot string format and the 'VPlot' namespace"
+              ]
+            },
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "VPlot"
+                  ]
+                },
+                " together with ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "VState:"
+                  ],
+                  "VDoc:ref": "VState:"
+                },
+                " ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "VLog:"
+                  ],
+                  "VDoc:ref": "VLog:"
+                },
+                " and ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "VValk:"
+                  ],
+                  "VDoc:ref": "VValk:"
+                },
+                " form the infrastructural foundation ie. the ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "fabric"
+                  ]
+                },
+                " of the valospace.",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "VPlot"
+                  ]
+                },
+                " provides the basic primitive used to identify resources\nand define computations and so underlies the other three fabric\ncomponents."
+              ]
+            }
+          ]
+        },
+        "introduction": {
+          "@type": "VDoc:Chapter",
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "Edit me - this is the first payload chapter. Abstract and SOTD are\nessential ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "ReSpec boilerplate"
+                  ],
+                  "VDoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
+                }
+              ]
+            },
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "See ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "ReVDoc tutorial"
+                  ],
+                  "VDoc:ref": "@valos/revdoc/tutorial"
+                },
+                " for\ninstructions on how to write revdoc source documents."
+              ]
+            },
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "See also ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "ReVdoc specification"
+                  ],
+                  "VDoc:ref": "@valos/revdoc"
+                },
+                " and ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "VDoc specification"
+                  ],
+                  "VDoc:ref": "@valos/vdoc"
+                },
+                " for reference documentation."
+              ]
+            }
+          ]
+        },
+        "fabricAbstract": {
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "The vocabulary for defining the hierarchical ValOS identifiers and for\nextending them with new step semantics"
+              ]
+            }
+          ]
+        },
+        "VRevdoc:preferredPrefix": "VPlot",
+        "VRevdoc:baseIRI": "https://valospace.org/plot/0#",
+        "VRevdoc:referencedModules": {
+          "https://valospace.org/engine/0#": "@valos/engine/VEngine",
+          "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
+          "https://valospace.org/state/0#": "@valos/state/VState",
+          "https://valospace.org/log/0#": "@valos/log/VLog",
+          "https://valospace.org/valk/0#": "@valos/valk/VValk"
+        },
+        "VRevdoc:extenderModules": {},
+        "package": "@valos/plot",
+        "version": "0.36.0-alpha.0"
       },
       "raem/0": {
         "@id": "https://valospace.org/raem/0",
         "tags": [
           "PRIMARY",
-          "INTRODUCTORY",
-          "VALOSPACE",
           "WORKSPACE",
+          "VALOSPACE",
           "ONTOLOGY"
         ],
         "subProfiles": [],
@@ -2956,14 +3499,14 @@
               "VDoc:content": [
                 "This library provides the definitions and reference implementation\nfor the fundamental ",
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "ValOS Resources"
                   ]
                 },
                 " and ",
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "ValOS Events"
                   ]
@@ -2981,14 +3524,14 @@
               "VDoc:content": [
                 "This library provides the definitions and reference implementations\nfor the fundamental ",
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "ValOS Resources"
                   ]
                 },
                 " and ",
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "ValOS Events"
                   ]
@@ -3005,7 +3548,7 @@
                     [
                       "A ValOS Resource ",
                       {
-                        "@type": "VDoc:CharacterData",
+                        "VDoc:em": true,
                         "VDoc:content": [
                           "resource"
                         ]
@@ -3025,7 +3568,7 @@
                     [
                       "A ValOS Event ",
                       {
-                        "@type": "VDoc:CharacterData",
+                        "VDoc:em": true,
                         "VDoc:content": [
                           "event"
                         ]
@@ -3071,15 +3614,14 @@
           "https://valospace.org/0#": "@valos/raem/V"
         },
         "package": "@valos/raem",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "raem": {
         "@id": "https://valospace.org/raem",
         "tags": [
           "PRIMARY",
-          "INTRODUCTORY",
-          "VALOSPACE",
           "WORKSPACE",
+          "VALOSPACE",
           "ONTOLOGY"
         ],
         "subProfiles": [],
@@ -3092,14 +3634,14 @@
               "VDoc:content": [
                 "This library provides the definitions and reference implementation\nfor the fundamental ",
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "ValOS Resources"
                   ]
                 },
                 " and ",
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "ValOS Events"
                   ]
@@ -3117,14 +3659,14 @@
               "VDoc:content": [
                 "This library provides the definitions and reference implementations\nfor the fundamental ",
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "ValOS Resources"
                   ]
                 },
                 " and ",
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "ValOS Events"
                   ]
@@ -3141,7 +3683,7 @@
                     [
                       "A ValOS Resource ",
                       {
-                        "@type": "VDoc:CharacterData",
+                        "VDoc:em": true,
                         "VDoc:content": [
                           "resource"
                         ]
@@ -3161,7 +3703,7 @@
                     [
                       "A ValOS Event ",
                       {
-                        "@type": "VDoc:CharacterData",
+                        "VDoc:em": true,
                         "VDoc:content": [
                           "event"
                         ]
@@ -3207,7 +3749,7 @@
           "https://valospace.org/0#": "@valos/raem/V"
         },
         "package": "@valos/raem",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "raem/VPath/VPath.JSON": {
         "@id": "https://valospace.org/raem/VPath/VPath.JSON",
@@ -3304,7 +3846,7 @@
           ]
         },
         "package": "@valos/raem",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "raem/VPath/VPath": {
         "@id": "https://valospace.org/raem/VPath/VPath",
@@ -3366,14 +3908,14 @@
           ]
         },
         "package": "@valos/raem",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "revdoc/0": {
         "@id": "https://valospace.org/revdoc/0",
         "tags": [
           "PRIMARY",
-          "FABRIC",
           "WORKSPACE",
+          "FABRIC",
           "ONTOLOGY"
         ],
         "subProfiles": [],
@@ -3436,14 +3978,14 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/revdoc",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "revdoc": {
         "@id": "https://valospace.org/revdoc",
         "tags": [
           "PRIMARY",
-          "FABRIC",
           "WORKSPACE",
+          "FABRIC",
           "ONTOLOGY"
         ],
         "subProfiles": [],
@@ -3506,7 +4048,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/revdoc",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "revdoc/tutorial": {
         "@id": "https://valospace.org/revdoc/tutorial",
@@ -3580,14 +4122,14 @@
           ]
         },
         "package": "@valos/revdoc",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "sbomdoc/0": {
         "@id": "https://valospace.org/sbomdoc/0",
         "tags": [
           "PRIMARY",
-          "FABRIC",
           "WORKSPACE",
+          "FABRIC",
           "ONTOLOGY"
         ],
         "subProfiles": [],
@@ -3651,14 +4193,14 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/sbomdoc",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "sbomdoc": {
         "@id": "https://valospace.org/sbomdoc",
         "tags": [
           "PRIMARY",
-          "FABRIC",
           "WORKSPACE",
+          "FABRIC",
           "ONTOLOGY"
         ],
         "subProfiles": [],
@@ -3722,15 +4264,15 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/sbomdoc",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "script/0": {
         "@id": "https://valospace.org/script/0",
         "tags": [
           "PRIMARY",
           "INTRODUCTORY",
-          "VALOSPACE",
           "WORKSPACE",
+          "VALOSPACE",
           "ONTOLOGY"
         ],
         "subProfiles": [],
@@ -3789,15 +4331,15 @@
           "https://valospace.org/valk/0#": "@valos/script/VValk"
         },
         "package": "@valos/script",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "script": {
         "@id": "https://valospace.org/script",
         "tags": [
           "PRIMARY",
           "INTRODUCTORY",
-          "VALOSPACE",
           "WORKSPACE",
+          "VALOSPACE",
           "ONTOLOGY"
         ],
         "subProfiles": [],
@@ -3856,15 +4398,15 @@
           "https://valospace.org/valk/0#": "@valos/script/VValk"
         },
         "package": "@valos/script",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "sourcerer/0": {
         "@id": "https://valospace.org/sourcerer/0",
         "tags": [
           "PRIMARY",
           "INTRODUCTORY",
-          "VALOSPACE",
           "WORKSPACE",
+          "VALOSPACE",
           "ONTOLOGY"
         ],
         "subProfiles": [],
@@ -3877,7 +4419,7 @@
               "VDoc:content": [
                 "This library provides the definitions and reference implementation\nof the ValOS sourcerer architecture which is used to route ",
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "ValOS event streams"
                   ]
@@ -3917,15 +4459,15 @@
           "https://valospace.org/valk/0#": "@valos/sourcerer/VValk"
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "sourcerer": {
         "@id": "https://valospace.org/sourcerer",
         "tags": [
           "PRIMARY",
           "INTRODUCTORY",
-          "VALOSPACE",
           "WORKSPACE",
+          "VALOSPACE",
           "ONTOLOGY"
         ],
         "subProfiles": [],
@@ -3938,7 +4480,7 @@
               "VDoc:content": [
                 "This library provides the definitions and reference implementation\nof the ValOS sourcerer architecture which is used to route ",
                 {
-                  "@type": "VDoc:CharacterData",
+                  "VDoc:em": true,
                   "VDoc:content": [
                     "ValOS event streams"
                   ]
@@ -3978,7 +4520,7 @@
           "https://valospace.org/valk/0#": "@valos/sourcerer/VValk"
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "sourcerer/valos-event-log": {
         "@id": "https://valospace.org/sourcerer/valos-event-log",
@@ -4008,7 +4550,7 @@
           ]
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "sourcerer/VState": {
         "@id": "https://valospace.org/sourcerer/VState",
@@ -4047,11 +4589,12 @@
           ]
         },
         "package": "@valos/sourcerer",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "space": {
         "@id": "https://valospace.org/space",
         "tags": [
+          "PRIMARY",
           "WORKSPACE",
           "VALOSPACE",
           "ONTOLOGY"
@@ -4145,13 +4688,15 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/space",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
-      "state": {
-        "@id": "https://valospace.org/state",
+      "state/0": {
+        "@id": "https://valospace.org/state/0",
         "tags": [
+          "PRIMARY",
           "WORKSPACE",
           "FABRIC",
+          "SPECIFICATION",
           "ONTOLOGY"
         ],
         "subProfiles": [],
@@ -4293,14 +4838,164 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/state",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
+      },
+      "state": {
+        "@id": "https://valospace.org/state",
+        "tags": [
+          "PRIMARY",
+          "WORKSPACE",
+          "FABRIC",
+          "SPECIFICATION",
+          "ONTOLOGY"
+        ],
+        "subProfiles": [],
+        "title": "@valos/state library workspace",
+        "abstract": {
+          "@type": "VDoc:Chapter",
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "Provides the ValOS resource state specification and the 'VState' ontology namespace"
+              ]
+            },
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "VState"
+                  ]
+                },
+                " together with ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "VLog:"
+                  ],
+                  "VDoc:ref": "VLog:"
+                },
+                " ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "VPlot:"
+                  ],
+                  "VDoc:ref": "VPlot:"
+                },
+                " and ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "VValk:"
+                  ],
+                  "VDoc:ref": "VValk:"
+                },
+                " form the infrastructural foundation ie. the ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "fabric"
+                  ]
+                },
+                " of the valospace.",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "VState"
+                  ]
+                },
+                " provides the data model and so enables structure and\nmeanings."
+              ]
+            }
+          ]
+        },
+        "introduction": {
+          "@type": "VDoc:Chapter",
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "Edit me - this is the first payload chapter. Abstract and SOTD are\nessential ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "ReSpec boilerplate"
+                  ],
+                  "VDoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
+                }
+              ]
+            },
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "See ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "ReVDoc tutorial"
+                  ],
+                  "VDoc:ref": "@valos/revdoc/tutorial"
+                },
+                " for\ninstructions on how to write revdoc source documents."
+              ]
+            },
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "See also ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "ReVdoc specification"
+                  ],
+                  "VDoc:ref": "@valos/revdoc"
+                },
+                " and ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "VDoc specification"
+                  ],
+                  "VDoc:ref": "@valos/vdoc"
+                },
+                " for reference documentation."
+              ]
+            }
+          ]
+        },
+        "fabricAbstract": {
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "The vocabulary for defining the ValOS state core model and for\nextending it with new types and fields."
+              ]
+            }
+          ]
+        },
+        "VRevdoc:preferredPrefix": "VState",
+        "VRevdoc:baseIRI": "https://valospace.org/state/0#",
+        "VRevdoc:referencedModules": {
+          "https://valospace.org/engine/0#": "@valos/engine/VEngine",
+          "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
+          "https://valospace.org/plot/0#": "@valos/plot/VPlot",
+          "https://valospace.org/log/0#": "@valos/log/VLog",
+          "https://valospace.org/valk/0#": "@valos/valk/VValk",
+          "https://valospace.org/0#": "@valos/space/V"
+        },
+        "VRevdoc:extenderModules": {},
+        "package": "@valos/state",
+        "version": "0.36.0-alpha.0"
       },
       "twindoc/0": {
         "@id": "https://valospace.org/twindoc/0",
         "tags": [
           "PRIMARY",
-          "FABRIC",
           "WORKSPACE",
+          "FABRIC",
           "ONTOLOGY"
         ],
         "subProfiles": [],
@@ -4384,14 +5079,14 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/twindoc",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "twindoc": {
         "@id": "https://valospace.org/twindoc",
         "tags": [
           "PRIMARY",
-          "FABRIC",
           "WORKSPACE",
+          "FABRIC",
           "ONTOLOGY"
         ],
         "subProfiles": [],
@@ -4475,7 +5170,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/twindoc",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "type-vault/AssortedTutorials": {
         "@id": "https://valospace.org/type-vault/AssortedTutorials",
@@ -4494,7 +5189,155 @@
         },
         "introduction": {},
         "package": "@valos/type-vault",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
+      },
+      "valk/0": {
+        "@id": "https://valospace.org/valk/0",
+        "tags": [
+          "WORKSPACE",
+          "FABRIC",
+          "ONTOLOGY"
+        ],
+        "subProfiles": [],
+        "title": "@valos/valk library workspace",
+        "abstract": {
+          "@type": "VDoc:Chapter",
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "Provides the ValOS core model computation specification and the 'VValk' ontology namespace"
+              ]
+            },
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "VValk"
+                  ]
+                },
+                " together with ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "VState:"
+                  ],
+                  "VDoc:ref": "VState:"
+                },
+                " ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "VLog:"
+                  ],
+                  "VDoc:ref": "VLog:"
+                },
+                " and ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "VPlot:"
+                  ],
+                  "VDoc:ref": "VPlot:"
+                },
+                " form the infrastructural foundation ie. the ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "fabric"
+                  ]
+                },
+                " of the valospace.",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "VValk"
+                  ]
+                },
+                " provides the intermediate language used for declarative\nand imperative logic alike."
+              ]
+            }
+          ]
+        },
+        "introduction": {
+          "@type": "VDoc:Chapter",
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "Edit me - this is the first payload chapter. Abstract and SOTD are\nessential ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "ReSpec boilerplate"
+                  ],
+                  "VDoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
+                }
+              ]
+            },
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "See ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "ReVDoc tutorial"
+                  ],
+                  "VDoc:ref": "@valos/revdoc/tutorial"
+                },
+                " for\ninstructions on how to write revdoc source documents."
+              ]
+            },
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "See also ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "ReVdoc specification"
+                  ],
+                  "VDoc:ref": "@valos/revdoc"
+                },
+                " and ",
+                {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    "VDoc specification"
+                  ],
+                  "VDoc:ref": "@valos/vdoc"
+                },
+                " for reference documentation."
+              ]
+            }
+          ]
+        },
+        "fabricAbstract": {
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "The vocabulary for defining ValOS computations and for\nadding defining new semantics to it."
+              ]
+            }
+          ]
+        },
+        "VRevdoc:preferredPrefix": "VValk",
+        "VRevdoc:baseIRI": "https://valospace.org/valk/0#",
+        "VRevdoc:referencedModules": {
+          "https://valospace.org/engine/0#": "@valos/engine/VEngine",
+          "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
+          "https://valospace.org/plot/0#": "@valos/plot/VPlot",
+          "https://valospace.org/state/0#": "@valos/state/VState",
+          "https://valospace.org/log/0#": "@valos/log/VLog",
+          "https://valospace.org/0#": "@valos/space/V"
+        },
+        "VRevdoc:extenderModules": {},
+        "package": "@valos/valk",
+        "version": "0.36.0-alpha.0"
       },
       "valk": {
         "@id": "https://valospace.org/valk",
@@ -4642,14 +5485,15 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/valk",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "vdoc/0": {
         "@id": "https://valospace.org/vdoc/0",
         "tags": [
           "PRIMARY",
-          "FABRIC",
           "WORKSPACE",
+          "FABRIC",
+          "SPECIFICATION",
           "ONTOLOGY"
         ],
         "subProfiles": [],
@@ -4737,14 +5581,15 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/vdoc",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "vdoc": {
         "@id": "https://valospace.org/vdoc",
         "tags": [
           "PRIMARY",
-          "FABRIC",
           "WORKSPACE",
+          "FABRIC",
+          "SPECIFICATION",
           "ONTOLOGY"
         ],
         "subProfiles": [],
@@ -4832,7 +5677,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/vdoc",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "web-spindle": {
         "@id": "https://valospace.org/web-spindle",
@@ -4938,7 +5783,7 @@
           ]
         },
         "package": "@valos/web-spindle",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "web-spindle/schema-builder": {
         "@id": "https://valospace.org/web-spindle/schema-builder",
@@ -5067,7 +5912,7 @@
           ]
         },
         "package": "@valos/web-spindle",
-        "version": "0.35.0"
+        "version": "0.36.0-alpha.0"
       },
       "removed-from": {
         "@id": "https://valospace.org/removed-from",
@@ -5118,15 +5963,15 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/kernel-vault",
-        "version": "0.35.0-rc.36"
+        "version": "0.36.0-alpha.0"
       },
       "@valos/kernel-vault": {
         "@id": "https://valospace.org/index",
         "tags": [
           "PRIMARY",
-          "INTRODUCTION",
-          "ONTOLOGY",
-          "VALONAUT"
+          "INTRODUCTORY",
+          "VALOSPACE",
+          "ONTOLOGY"
         ],
         "subProfiles": [],
         "title": "Valos introduction and valospace API reference",
@@ -5136,109 +5981,149 @@
             {
               "@type": "VDoc:Paragraph",
               "VDoc:content": [
-                [
-                  {
-                    "@type": "VRevdoc:Tooltip",
-                    "VDoc:content": [
-                      {
-                        "VDoc:em": true,
-                        "VDoc:content": [
+                "Valaa (",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "Valaa Open System"
+                  ]
+                },
+                ") is an ambitious push towards\nmore decentralized web application ecosystems. The primary means for\nthis are (",
+                {
+                  "@type": "VRevdoc:Tooltip",
+                  "VDoc:content": [
+                    "*or will be"
+                  ],
+                  "VRevdoc:tooltipContent": "Most of ValOS is still prototypical.\n        However the entries marked with (*) are work in progress, or sometimes\n        not even more than an empty shape defined by the surrounding ecosystem."
+                },
+                "):",
+                {
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:NumberedList",
+                      "VDoc:lines": [
+                        [
+                          "Open resource model, protocol(*) and API ",
                           {
-                            "VDoc:strong": true,
+                            "@type": "VDoc:Reference",
                             "VDoc:content": [
-                              "'Valos extends boundlessly across the valospace-time fabric.'"
-                            ]
-                          },
-                          " (...in progress(tm))"
-                        ]
-                      }
-                    ],
-                    "VRevdoc:tooltipContent": [
-                      {
-                        "VDoc:strong": true,
-                        "VDoc:content": [
-                          "-> Vertically"
-                        ]
-                      },
-                      ": as a full application development solution\nvalos radically simplifies the semantic web technology stack.",
-                      null,
-                      {
-                        "VDoc:strong": true,
-                        "VDoc:content": [
-                          "-> Horizontally"
-                        ]
-                      },
-                      ": as a global, de-centralized ecosystem\nvalos eases cross-organization interfacing.",
-                      null,
-                      {
-                        "VDoc:strong": true,
-                        "VDoc:content": [
-                          "-> In depth"
-                        ]
-                      },
-                      ": with its unified resource model valos blurs\nthe boundary between frontends and backends.",
-                      null,
-                      {
-                        "VDoc:strong": true,
-                        "VDoc:content": [
-                          "-> Temporally"
-                        ]
-                      },
-                      ": valos unifies document state and change\nupdates into seamless event stream *chronicles*."
-                    ]
-                  }
-                ]
+                              "specifications"
+                            ],
+                            "VDoc:ref": "/kernel/0#section_specification_documents"
+                          }
+                        ],
+                        {
+                          "@type": "VDoc:Paragraph",
+                          "VDoc:content": [
+                            "The open library, browser and backend(*) ",
+                            {
+                              "@type": "VDoc:Reference",
+                              "VDoc:content": [
+                                "reference implementations"
+                              ],
+                              "VDoc:ref": "/kernel/0#section_workspaces_type_library"
+                            }
+                          ]
+                        },
+                        {
+                          "@type": "VDoc:Paragraph",
+                          "VDoc:content": [
+                            "The ",
+                            {
+                              "@type": "VDoc:Reference",
+                              "VDoc:content": [
+                                "open valospace IDE"
+                              ],
+                              "VDoc:ref": "/zone"
+                            },
+                            " for rapid application development"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
               ]
             },
             {
               "@type": "VDoc:Paragraph",
               "VDoc:content": [
-                "In other words, valos is a bit ambitious and a lot to take in at once."
+                "\nIn its technical ambition ValOS is a lot to take in at once."
               ]
             },
             {
               "@type": "VDoc:Paragraph",
               "VDoc:content": [
-                "To address this the first part of this document provides separate\nintroduction paths into valos for a software developer\n(referred to as ",
+                "To address this there are separate introduction paths into ValOS from\nthe perspective of three familiar archetypes. Each of these paths has\na valos-specific role name and a document:",
                 {
-                  "VDoc:em": true,
                   "VDoc:content": [
                     {
-                      "@type": "VDoc:Reference",
-                      "VDoc:content": [
-                        "a valonaut"
-                      ],
-                      "VDoc:ref": "/valonaut"
+                      "@type": "VDoc:BulletList",
+                      "VDoc:lines": [
+                        [
+                          "A software developer should study ",
+                          {
+                            "@type": "VDoc:Reference",
+                            "VDoc:content": [
+                              [
+                                "the path of a ",
+                                {
+                                  "VDoc:em": true,
+                                  "VDoc:content": [
+                                    "valonaut"
+                                  ]
+                                }
+                              ]
+                            ],
+                            "VDoc:ref": "/valonaut"
+                          }
+                        ],
+                        {
+                          "@type": "VDoc:Paragraph",
+                          "VDoc:content": [
+                            "A systems operator should study ",
+                            {
+                              "@type": "VDoc:Reference",
+                              "VDoc:content": [
+                                [
+                                  "the path of a ",
+                                  {
+                                    "VDoc:em": true,
+                                    "VDoc:content": [
+                                      "technician"
+                                    ]
+                                  }
+                                ]
+                              ],
+                              "VDoc:ref": "/technician"
+                            }
+                          ]
+                        },
+                        {
+                          "@type": "VDoc:Paragraph",
+                          "VDoc:content": [
+                            "A project manager should study ",
+                            {
+                              "@type": "VDoc:Reference",
+                              "VDoc:content": [
+                                [
+                                  "the path of a ",
+                                  {
+                                    "VDoc:em": true,
+                                    "VDoc:content": [
+                                      "voyager"
+                                    ]
+                                  }
+                                ]
+                              ],
+                              "VDoc:ref": "/voyager"
+                            }
+                          ]
+                        }
+                      ]
                     }
                   ]
-                },
-                "), for a\nsystems operator (as ",
-                {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "@type": "VDoc:Reference",
-                      "VDoc:content": [
-                        "a technician"
-                      ],
-                      "VDoc:ref": "/technician"
-                    }
-                  ]
-                },
-                ") and\nfor a project manager (as ",
-                {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "@type": "VDoc:Reference",
-                      "VDoc:content": [
-                        "a voyager"
-                      ],
-                      "VDoc:ref": "/voyager"
-                    }
-                  ]
-                },
-                ")."
+                }
               ]
             },
             {
@@ -5258,7 +6143,7 @@
                   ],
                   "VDoc:ref": "valospace"
                 },
-                " API reference and is aimed for valonauts for repeat viewing."
+                " API reference. It is a semantic namespace definition of the valospace\napplication development primitives and is aimed for valonauts for\nrepeat viewing."
               ]
             }
           ]
@@ -5269,13 +6154,70 @@
             {
               "@type": "VDoc:Paragraph",
               "VDoc:content": [
+                [
+                  {
+                    "@type": "VRevdoc:Tooltip",
+                    "VDoc:content": [
+                      {
+                        "VDoc:em": true,
+                        "VDoc:content": [
+                          {
+                            "VDoc:strong": true,
+                            "VDoc:content": [
+                              "'Valos extends boundlessly across the valospace-time fabric.'"
+                            ]
+                          },
+                          "(*)"
+                        ]
+                      }
+                    ],
+                    "VRevdoc:tooltipContent": [
+                      {
+                        "VDoc:strong": true,
+                        "VDoc:content": [
+                          "-> Vertically"
+                        ]
+                      },
+                      ": as a full application development solution\nvalos radically simplifies the semantic web technology stack.",
+                      null,
+                      {
+                        "VDoc:strong": true,
+                        "VDoc:content": [
+                          "-> Horizontally"
+                        ]
+                      },
+                      ": as a global, decentralized ecosystem\nvalos eases cross-organization interfacing.",
+                      null,
+                      {
+                        "VDoc:strong": true,
+                        "VDoc:content": [
+                          "-> In depth"
+                        ]
+                      },
+                      ": with its isomorphic resource model valos\nblurs the boundary between frontends and backends.",
+                      null,
+                      {
+                        "VDoc:strong": true,
+                        "VDoc:content": [
+                          "-> Temporally"
+                        ]
+                      },
+                      ": valos unifies document state and change\nupdates into seamless event streams, *chronicles*."
+                    ]
+                  }
+                ]
+              ]
+            },
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
                 "The three traditional roles of application developer, systems operator\nand project manager have their own unique characteristics in valos\necosystem and are called valonaut, technician and voyager respectively."
               ]
             },
             {
               "@type": "VDoc:Paragraph",
               "VDoc:content": [
-                "Each role has a detailed (editor's note: eventually) how-to guide which\nare linked and briefly introduced below. The roles support each other\nand the guides reflect this. The hands-on introduction section of each\nguide also gives a high-level overview of the rest."
+                "Each role has a detailed (*) how-to guide which are linked and briefly\nintroduced below. The roles support each other and the guides reflect\nthis."
               ]
             },
             {
@@ -5360,7 +6302,7 @@
                     ]
                   },
                   "package": "@valos/kernel-vault",
-                  "version": "0.35.0-rc.35"
+                  "version": "0.36.0-alpha.0"
                 },
                 "technician": {
                   "@id": "https://valospace.org/technician",
@@ -5456,7 +6398,7 @@
                     ]
                   },
                   "package": "@valos/kernel-vault",
-                  "version": "0.35.0-rc.35"
+                  "version": "0.36.0-alpha.0"
                 },
                 "voyager": {
                   "@id": "https://valospace.org/voyager",
@@ -5524,7 +6466,7 @@
                     ]
                   },
                   "package": "@valos/kernel-vault",
-                  "version": "0.35.0-rc.35"
+                  "version": "0.36.0-alpha.0"
                 }
               },
               "VDoc:map": {
@@ -5585,7 +6527,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/kernel-vault",
-        "version": "0.35.0-rc.36"
+        "version": "0.36.0-alpha.0"
       },
       "technician": {
         "@id": "https://valospace.org/technician",
@@ -5681,7 +6623,7 @@
           ]
         },
         "package": "@valos/kernel-vault",
-        "version": "0.35.0-rc.36"
+        "version": "0.36.0-alpha.0"
       },
       "valonaut": {
         "@id": "https://valospace.org/valonaut",
@@ -5763,7 +6705,7 @@
           ]
         },
         "package": "@valos/kernel-vault",
-        "version": "0.35.0-rc.36"
+        "version": "0.36.0-alpha.0"
       },
       "voyager": {
         "@id": "https://valospace.org/voyager",
@@ -5831,73 +6773,93 @@
           ]
         },
         "package": "@valos/kernel-vault",
-        "version": "0.35.0-rc.36"
+        "version": "0.36.0-alpha.0"
+      },
+      "zone": {
+        "@id": "https://valospace.org/zone",
+        "tags": [],
+        "subProfiles": [],
+        "title": "Zone IDE",
+        "abstract": {
+          "@type": "VDoc:Chapter",
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                "Zone is the ValOS application development IDE. Zone itself is a ValOS\napplication and used to develop itself.\n"
+              ]
+            }
+          ]
+        },
+        "introduction": {},
+        "package": "@valos/kernel-vault",
+        "version": "0.36.0-alpha.0"
       }
     },
     "workspaces": {
       "@id": "workspaces",
       "toolset": {
         "valma": {
-          "version": "0.35.0-rc.36",
+          "version": "0.35.0",
           "description": "A ValOS CLI tool for discovering and executing context-dependent command scripts",
           "license": "MIT"
         },
         "@valos/toolset-revealer": {
-          "version": "0.35.0-rc.36",
+          "version": "0.35.0",
           "description": "Tools for building revelations both for development and deployment purposes",
           "license": "MIT"
         }
       },
       "library": {
         "@valos/engine": {
-          "version": "0.35.0-rc.36",
+          "version": "0.35.0",
           "description": "ValOS Engine API and Schema",
           "homepage": "https://valospace.org/engine",
           "license": "MIT"
         },
         "@valos/gateway-api": {
-          "version": "0.35.0-rc.36",
+          "version": "0.35.0",
           "description": "Minimal footprint ValOS Gateway API local forwards",
           "license": "MIT"
         },
         "@valos/hypertwin": {
-          "version": "0.35.0-rc.36",
+          "version": "0.35.0",
           "description": "ValOS Hypertwin Specifications and Tools Library",
           "license": "MIT"
         },
         "@valos/inspire": {
-          "version": "0.35.0-rc.36",
+          "version": "0.35.0",
           "description": "ValOS Inspire application gateway",
           "homepage": "https://valospace.org/inspire",
           "license": "MIT"
         },
         "@valos/raem": {
-          "version": "0.35.0-rc.36",
+          "version": "0.35.0",
           "description": "ValOS Resources And Events Model (ValOS-RAEM) API, schema and ontology",
           "homepage": "https://valospace.org/raem",
           "license": "MIT"
         },
         "@valos/script": {
-          "version": "0.35.0-rc.36",
+          "version": "0.35.0",
           "description": "ValOS Script API, schema",
           "homepage": "https://valospace.org/script",
           "license": "MIT"
         },
         "@valos/sourcerer": {
-          "version": "0.35.0-rc.36",
+          "version": "0.35.0",
           "description": "ValOS Sourcerer API, schema",
           "homepage": "https://valospace.org/sourcerer",
           "license": "MIT"
         },
         "@valos/tools": {
-          "version": "0.35.0-rc.36",
+          "version": "0.35.0",
           "description": "ValOS Tools API",
           "license": "MIT"
         }
       },
       "domain": {
         "@valos/kernel": {
-          "version": "0.35.0-rc.36",
+          "version": "0.35.0",
           "description": "@valos/kernel domain",
           "homepage": "https://valospace.org/kernel",
           "license": "MIT",
@@ -5906,25 +6868,25 @@
       },
       "vdoc-extension": {
         "@valos/revdoc": {
-          "version": "0.35.0-rc.36",
+          "version": "0.35.0",
           "description": "ReVDoc - ReSpec document VDoc extension",
           "homepage": "https://valospace.org/revdoc",
           "license": "MIT"
         },
         "@valos/sbomdoc": {
-          "version": "0.35.0-rc.36",
+          "version": "0.35.0",
           "description": "SBoMDoc - Software Bill of Materials VDoc extension",
           "homepage": "https://valospace.org/sbomdoc",
           "license": "MIT"
         },
         "@valos/twindoc": {
-          "version": "0.35.0-rc.36",
+          "version": "0.35.0",
           "description": "TwinDoc - Valospace Hypertwin VDoc extension",
           "homepage": "https://valospace.org/twindoc",
           "license": "MIT"
         },
         "@valos/vdoc": {
-          "version": "0.35.0-rc.36",
+          "version": "0.35.0",
           "description": "VDoc - ValOS document interchange specification",
           "homepage": "https://valospace.org/vdoc",
           "license": "MIT"
@@ -5932,7 +6894,7 @@
       },
       "spindle": {
         "@valos/web-spindle": {
-          "version": "0.35.0-rc.36",
+          "version": "0.35.0",
           "description": "A spindle for structured ValOS Web APIs",
           "homepage": "https://valospace.org/web-spindle",
           "license": "MIT"
@@ -5940,28 +6902,28 @@
       },
       "type": {
         "@valos/type-spindle": {
-          "version": "0.35.0-rc.36",
+          "version": "0.35.0",
           "description": "The ValOS 'spindle' workspace type toolset",
           "license": "MIT"
         },
         "@valos/type-opspace": {
-          "version": "0.35.0-rc.36",
+          "version": "0.35.0",
           "description": "The ValOS 'opspace' workspace type toolset",
           "license": "MIT"
         },
         "@valos/type-vault": {
-          "version": "0.35.0-rc.36",
+          "version": "0.35.0",
           "description": "The ValOS 'vault' workspace type toolset",
           "homepage": "https://valospace.org/type-vault",
           "license": "MIT"
         },
         "@valos/type-worker": {
-          "version": "0.35.0-rc.36",
+          "version": "0.35.0",
           "description": "The ValOS 'worker' workspace type toolset",
           "license": "MIT"
         },
         "@valos/type-domain": {
-          "version": "0.35.0-rc.36",
+          "version": "0.35.0",
           "description": "The ValOS domain workspace type toolset",
           "license": "MIT"
         }
@@ -5972,61 +6934,61 @@
       "tool": {
         "description": "'tool' workspace type is deprecated",
         "package": "@valos/kernel",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "'tool' workspace type is deprecated.\n\nTools are a toolset implementation detail. A tool is similar to\na toolset in that it can have its own workspace specific\nconfigurations. A tool differs from a toolset in that it cannot be\nstandalone; it doesn't appear in listings, its always part of one or\nmore toolsets and its toolsets.json config stanzas are placed under\nits parent toolset stanzas.\n\nThe main case for tools and toolsets separation came from the release\ndeployment system of opspaces, where the modularity and granular\nsemantic versioning of tool packages allows for more efficient and\nrobust deployments.\n\nTool workspaces allows splitting complex toolsets into separate\ntools with different deployment logic. Infrastructure code which\nchanges rarily can be placed under tool packages with naive\ndeployment logic which relies on the tool package version number only.\nFrequently changing configs can be managed by the toolset workspace\nitself but even it can then use tool workspaces to source in\ncommands and other resources to help with the deployment management.\n\nAdditionally because the tool configuration is always inside its\nparent toolset config this allows the same tool be used by several\ndifferent toolsets in a single workspace. Because of this all tool\ncommands must have an option for '--toolset=<@scope/toolsetname>' which\nuses yargs.vlm.toolset as its default value.\n"
       },
       "toolset": {
         "description": "Construct a collection of valma tools that other workspaces can select and use",
         "package": "@valos/kernel",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Construct a collection of valma tools that other workspaces can select and use.\n\nA toolset is a package that can be selected by any valos workspace\nduring 'vlm init'. More precisely:\n1. given that the toolset is registered to a domain, and\n2. the workspace is set up to use this domain (f.ex. during 'vlm init'), then\n2. the 'vlm configure' presents the toolset as a selectable option, and if selected,\n3. the toolset is added as a devDependency to the workspace, and also\n4. a toolset configuration section with \"inUse: true\" is added to the\n  workspace 'toolsets.json' using the toolset name as the key, and finally\n5. the toolset configuration valma command is called by 'vlm configure'\n\nThis makes all valma commands and other primitives of the toolset\navailable for the workspace and also allows these commands to manage\ntheir workspace-specific configurations.\n\n"
       },
       "domain": {
         "description": "Curate a valos discovery domain of packages",
         "package": "@valos/kernel",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Curate a valos discovery domain of packages.\n\nA domain package provides a set of valma commands for defining and\nmanaging a ValOS domain. Specific domain workspaces then:\n1. shall provide domain package (de)registration via\n   .configure/.<domain>/{,de}register-package\n2. can provide new workspace types via .select/.type/*\n3. can provide new toolsets via\n   .select/.toolsets/{,.domain/<domain>/}{,.type/<type>/}{,.workspace/<name>}/**/*\n\nNotably the package (de)registration should provide means for any new\ndomain toolset packages to request the addition of their toolset\nconfigure command to the domain domain.\nIdiomatic way to implement this is a domain command which issues a PR\nagainst the source control repository of the domain package.\n"
       },
       "type": {
         "description": "Declare a new valos type",
         "package": "@valos/kernel",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Declare a new valos type.\n\nA valos type is a name that can be chosen as a package.json:valos.type\nvalue during workspace init. Each type serves a particular purpose\nwhich is described in the type introduction.\n\nEach type is optionally associated with a specific type toolset which\nprovides tools and code to implement and support the purpose of the\ntype. When a type with a type toolset is chosen for a workspace the\ntype toolsets is automatically configured to be always in use.\n\nAs an  example the type 'worker' adds the toolset @valos/type-worker\nwhich provides template files and shared code for managing perspire\ngateway execution environments. As a bit more self-referential example\nthe type 'toolset' adds the toolset @valos/type-toolset which provides\ncommands and shared code for managing the valos toolset functionality\nitself.\n\nFinally, the type of these type toolsets themselves is 'type'. And\nconversely initializing a fresh workspace with type 'type' makes the\nworkspace to be a type toolset, with template files and provisions on\nhow to implement and make the newly created type available to others.\n[NOTE(iridian, 2020-06): These provisions are very provisional, as in\nthey don't exist yet.]\n"
       },
       "opspace": {
         "description": "Dev a singular but repeated Ops 'build-release' / 'deploy-release' task",
         "package": "@valos/kernel",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Dev a singular but repeated Ops 'build-release' / 'deploy-release' task.\n\nAn opspaces workspace is used to for configuring, deploying, updating,\nmonitoring and diagnosing all types of live infrastructure resources.\n\nOpspaces rely heavily on various toolsets to get their job done.\nOpspaces rarily are published and packages and typically reside in\n\"opspaces/*\" vault workspace directory\n"
       },
       "library": {
         "description": "Develop a publishable software components package",
         "package": "@valos/kernel",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Develop a publishable software components package.\n\nA library workspace contains arbitrary ES5 source code and exposes a\nAPI via package.json .main stanza (usually index.js).\n\nA library can provide convenience valma commands but unlike toolsets\na library cannot have workspace local configurations.\n\nLibrary workspaces are almost always published as a packages and\ntypically reside in \"packages/*\" vault workspace directory.\n"
       },
       "spindle": {
         "description": "Develop a valos gateway plugin",
         "package": "@valos/kernel",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Develop a valos gateway plugin.\n\nA gateway spindle extends inspire and perspire gateways with various\nfunctionalities.\n\nCore spindles provide new resource schemas, media decoders, protocol\nschemes, external APIs, valosheath APIs, etc.\n\nCustom spindles can be plugged into workers for arbitrary code but are\nonly available on inspire if they are explicitly bundled with it.\n\nSpindles load their configuration from the gateway revelation. When a\nparticular spindle is configured for a perspire worker its\nconfiguration is typically placed as a tool the toolset.\n\n"
       },
       "worker": {
         "description": "Execute perspire gateway as a Node.js process",
         "package": "@valos/kernel",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Execute perspire gateway as a Node.js process.\n\nA worker workspace is used to launch and manage a particular service\nprocess. The workspace files contain configuration and data used by the\nprocess. This data can include even dynamic runtime data.\n\nA worker workspace is fully agnostic to version control solutions:\n- script-generated workers, where worker is locally spawned by scripts\n- clone-and-forget workers, where worker is cloned from a versioned\n  upstream repository, has its configuration locally customized and\n  local content potentially overridden. No further download sync is\n  expected nor will workers push updates back upstream. Each clone\n  represents its own computation.\n- synchronized workers, where the versioned repository itself\n  represents the worker process. Worker workspace shards (there can be\n  many if the computation is parallelizable) are still cloned from the\n  versioned upstream. Unlike with clone-and-forget workers the\n  synchronized worker workspaces keep themselves in sync with\n  upstream configuration and data changes and adjust their computation\n  accordingly.\n  Sync workers shards can even push results back to the versioned\n  repository if appropriate.\n"
       },
       "vdoc-extension": {
         "description": "Extend valos document spec with domain specific vocabulary and functionality",
         "package": "@valos/kernel",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Extend valos document spec with domain specific vocabulary and functionality.\n\nA vdoc-extension workspace contains the extension specification and\nsupporting libraries for a VDoc extension. It inherits library\nworkspace characteristics but has a specific structure and initial\ntemplates which is useful for VDoc extensions in specific.\n\n"
       },
       "vault": {
         "description": "Maintain many workspaces in a single version controlled mono-repository",
         "package": "@valos/kernel",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Maintain many workspaces in a single version controlled mono-repository.\n\nA vault is a *monorepository* which contains multiple sub-workspaces\nof various types. Vaults are used to group packages with high cohesion\ntogether so that development, testing, review and deployment workflows\ncan be done within a single repository when feasible.\n\nVault is primarily an organizational unit and is hosted in a single\nversion control repository. All sub-workspaces have identical access\nrights for all contributors. All sub-workspaces must have similar\nlicences. Exceptions to this must be clearly noted both in the\nexceptional workspace root document as well as in the vault root\ndocument.\n\nA vault can have different types of workspaces in it; some of these\n(such as libraries, toolsets) may be published to repositories as\n*packages* so that they can be used as dependencies for other\nworkspaces. Others are only local and used for other purposes;\n*opspaces* contain configurations and tools for managing infrastructure\nconfigurations and *workers* contain files for spawning local processes.\n\nNo matter what the valos type of the domain all share important\nqualities: they can have package dependencies, are versioned and are\nmanaged by valma.\n\nA vault often also manages a *domain* for the packages it publishes via\na *domain package*. Domain is a discovery construct. When\na domain package is added as a devDependency to some external package\nthen valma will be able to list and configure any applicable toolsets\nand other workspaces for this package.\n\n"
       }
     },
@@ -6035,7 +6997,7 @@
       "@valos/type-toolset": {
         "description": "Make current workspace selectable as a toolset for other workspaces",
         "package": "@valos/kernel",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Make current workspace selectable as a toolset for other workspaces.\n\nA toolset is a package that can be selected by any valos workspace\nduring 'vlm init'. More precisely:\n1. given that the toolset is registered to a domain, and\n2. the workspace is set up to use this domain (f.ex. during 'vlm init'), then\n2. the 'vlm configure' presents the toolset as a selectable option, and if selected,\n3. the toolset is added as a devDependency to the workspace, and also\n4. a toolset configuration section with \"inUse: true\" is added to the\n  workspace 'toolsets.json' using the toolset name as the key, and finally\n5. the toolset configuration valma command is called by 'vlm configure'\n\nThis makes all valma commands and other primitives of the toolset\navailable for the workspace and also allows these commands to manage\ntheir workspace-specific configurations.\n\n"
       },
       "@valos/web-spindle": {
@@ -6043,13 +7005,13 @@
         "explanation": ".disabled => Toolset '@valos/web-spindle' only selectable by 'worker' workspaces",
         "description": "Project http/s requests to valospace-fabric via a gateway plugin",
         "package": "@valos/kernel",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Project http/s requests to valospace-fabric via a gateway plugin.\n\nSelects web-spindle as a worker toolset.\n"
       },
       "@valos/toolset-revealer": {
         "description": "Run 'vlm rouse-revealer' to serve local inspire sites with webpack-dev-server",
         "package": "@valos/kernel",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Run 'vlm rouse-revealer' to serve local inspire sites with webpack-dev-server.\n\nThis toolset enables valma command 'rouse-revealer' for deploying a\nlocal dev environment for inspire gateway revelations.\n\nSets up the webpack entry and output config as webpack.config.js in\nthe workspace root, which combines shared revealer config from\n@valos/toolset-revealer/shared/webpack.config.js, local toolset config\nand any customizations in the root webpack.config.js itself.\n"
       }
     },
@@ -6060,25 +7022,25 @@
         "explanation": ".disabled => Tools must have a context-vlm.toolset specified",
         "description": "Copy toolset template files to the workspace",
         "package": "@valos/kernel",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Copy toolset template files to the workspace.\n\nCopy toolset template files to the workspace.\n\nWhen selected for a toolset this tool will copy all template files from\nthe toolset package templates/ sub-directory to the current workspace.\n\n"
       },
       "docs": {
         "description": "Generate /docs html files from all vault revdocs files",
         "package": "@valos/type-vault",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Generate /docs html files from all vault revdocs files.\n\nThis type-vault tool provides commands for (re)generating the /docs\nfolder from document sources present in the local workspaces, notably\nall revdoc documents matching glob '*.revdoc{,.test}.js'.\nAdditionally this tool can be configured to regenerate all docs on\n(pre)release time.\n"
       },
       "domain": {
         "description": "Setup a type-domain package for curating the domain of this vault",
         "package": "@valos/type-vault",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Setup a type-domain package for curating the domain of this vault.\n\nThis type-vault tool enables the domain management and (re)generation\nof docs/index.html domain summary revdoc document.\n"
       },
       "enable-babel": {
         "description": "Transpile the library files on assembly with the vault babel.config.js",
         "package": "@valos/type-vault",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Transpile the library files on assembly with the vault babel.config.js.\n\nThis tool enables babel transpilation for a library workspace when\n'vlm assemble-packages' is executed in the surrounding vault workspace.\n"
       }
     },
@@ -6087,19 +7049,19 @@
       "clean-vault": {
         "description": "Clean various more or less transient vault files and subdirectories",
         "package": "@valos/kernel",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Clean various more or less transient vault files and subdirectories.\n\nBy default the three elements installed by 'yarn install' are cleaned:\n1. workspace packages by 'lerna clean --yes'\n2. yalc local dependencies by 'yalc remove --all'\n3. vault root node_modules by 'rm -rf'\n\nIn addition, dist/ can be removed with --dist in preparation for a clean slate publish/deploy ops.\nBe mindful that all of dist/ will be removed.\nyarn.lock can be removed with --yarn in preparation for persisted dependency updates.\n"
       },
       "compose-revelation": {
         "description": "Compose revealer bundles based on the revealer toolset config",
         "package": "@valos/toolset-revealer",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Compose revealer bundles based on the revealer toolset config.\n\n\n"
       },
       "rouse-revealer": {
         "description": "Launch a webpack-dev-server at localhost serving a local revelation",
         "package": "@valos/toolset-revealer",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Launch a webpack-dev-server at localhost serving a local revelation.\n\nThe revelation consists of two parts: webpack output and static files.\nWebpack output is configured by the project root webpack.config.js and\nthe static files are served from --content-base. If this --content-base\ndoesn't exist it is created by copying all files from the directory(s)\nprovided by --content-source.\n"
       },
       "build-release": {
@@ -6107,7 +7069,7 @@
         "explanation": ".disabled => Toolset '@valos/type-opspace' not selected by the current workspace",
         "description": "Build a new release of this opspace",
         "package": "@valos/type-opspace",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Build a new release of this opspace.\n\nThis command prepares, builds and tests a new opspace release locally\nwithout making external changes. This forms the first part of the\nopspace deployment process. The second half is `deploy-release` which\nperforms the actual deployment process.\n\nThis command resolves a local 'releasePath' for the build and then\ninvokes all release-build sub-commands as follows:\n\nvlm .release-build/${toolsetGlob || \"**/*\"} --target=${releasePath} ${rest}\n\nThese sub-commands (which can be local opspace commands or commands\nprovided by opspace toolset dependencies) then (re)build the actual\nbuild artifacts under the target path.\n\n"
       },
       "deploy-release": {
@@ -6115,85 +7077,85 @@
         "explanation": ".disabled => Toolset '@valos/type-opspace' not selected by the current workspace",
         "description": "Deploy previously built releases to their deployment targets",
         "package": "@valos/type-opspace",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Deploy previously built releases to their deployment targets.\n\nThis command is second part of the two-part deployment with\nbuild-release building the release.\n"
       },
       "assemble-packages": {
         "description": "Assemble all current modified vault packages (preparing for publish)",
         "package": "@valos/type-vault",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Assemble all current modified vault packages (preparing for publish).\n\nUses lerna to handle the monorepo sub-packages update detection,\nversioning, and git interactions. Configuration for lerna is in\nlerna.json: notably the version increase semantics is configured there.\n\nLerna is not used for constructing the actual packages. This is done by\na flat recursive cp to the target at the moment.\n\nInvokes babel for all projects with babel.config.js in their root. If\nthe vault has a shared babel.config.js for all packages, a symlink from\nthis root to each project should be created.\n\nWhen assembling lerna will automatically update the shared version for\nall packages and their cross-dependencies and make a git commit and git\ntag for the new version.\nThis behaviour can be omitted with --no-versioning.\n\n  Iterative development with yalc and publish-packages:\n\nOnce a set of packages has been been built to the target, run:\n\n'vlm publish-packages --publisher=yalc'\n\nThis will make the package assemblies available in a local yalc\n'registry'; see https://github.com/whitecolor/yalc for more details on\nhow to use such packages by other depending packages. Reassembling\nand pushing those changes through yalc to dependents can be done with:\n\n'vlm assemble-packages --reassemble --post-execute=\"cd $ASSEMBLY_TARGET && yalc push --no-sig\"'\n\nThis allows packages to be developed iteratively locally while having\nother packages depend and be tested against them.\n\n"
       },
       "generate-domain-summary": {
         "description": "Generate the domain components summary file for the domain root revdoc",
         "package": "@valos/type-vault",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Generate the domain components summary file for the domain root revdoc.\n\n\n"
       },
       "release-vault": {
         "description": "Prepare, commit and potentially publish a new release of vault packages",
         "package": "@valos/type-vault",
-        "version": "0.35.0",
-        "introduction": "Prepare, commit and potentially publish a new release of vault packages.\n\nCreate a new release/prerelease branch or extend an existing one\nbased on given options and current environment.\n\nPrepares the release by first running sanity checks, then cleaning and\nreinstalling intermediate files like node_modules, yarn workspaces,\nyarn.lock and dist/ and finally requires all test suites and lint to\npass without errors.\n\nOnce preparation is done creates a new release commit and tag using\n'lerna version'.\n\nIf --publish is not explicitly given then the final publish step must\nbe manually performed. In this case a pre-publish phase is done which\nprepares the manual publish command instructions in the results output.\n\nWill invoke valma command hooks between stages as per:\n1. 'vlm .release-vault/.prepared-hooks/{**/,}* --summary=<obj>' after successful preparation\n2. 'vlm .release-vault/.committed-hooks/{**/,}* --summary=<obj>' after successful commit\n3. 'vlm .release-vault/.pre-published-hooks/{**/,}* --summary=<obj>' after successful pre-publish\n4. 'vlm .release-vault/.published-hooks/{**/,}* --summary=<obj>' after successful publish\n\n"
+        "version": "0.36.0-alpha.0",
+        "introduction": "Prepare, commit and potentially publish a new release of vault packages.\n\nPrepares a release to a new or existing release/develop branch based\non given options and current environment.\n\nPrepares the release by first running sanity checks, then cleaning and\nreinstalling intermediate files like node_modules, yarn workspaces,\nyarn.lock and dist/ and finally requires all test suites and lint to\npass without errors.\n\nOnce preparation is done creates a new release commit and tag using\n'lerna version'.\n\nIf --publish is not explicitly given then the final publish step must\nbe manually performed. In this case a pre-publish phase is done which\nprepares the manual publish command instructions in the results output.\n\nWill invoke valma command hooks between phases as follows:\n1. 'vlm .release-vault/.prepared-hooks/{**/,}* --summary=<obj>' after successful preparation\n2. 'vlm .release-vault/.committed-hooks/{**/,}* --summary=<obj>' after successful commit\n3. 'vlm .release-vault/.pre-published-hooks/{**/,}* --summary=<obj>' after successful pre-publish\n4. 'vlm .release-vault/.published-hooks/{**/,}* --summary=<obj>' after successful publish\n\n"
       },
       "publish-packages": {
         "description": "Publish package assemblies to their registries",
         "package": "@valos/type-vault",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Publish package assemblies to their registries.\n\n\n"
       },
       "regenerate-docs": {
         "description": "Regenerate all configured /docs content",
         "package": "@valos/type-vault",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Regenerate all configured /docs content.\n\n\n"
       },
       "write-revdoc": {
         "description": "Write a new revdoc source code file",
         "package": "@valos/type-vault",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Write a new revdoc source code file.\n\n\n"
       },
       "bundle-revelation": {
         "description": "Bundles chronicles and other preloadable content into a revela.json",
         "package": "@valos/type-worker",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Bundles chronicles and other preloadable content into a revela.json.\n\n\nLists the chronicles listed in the revelation-path prologue.\nPreloads their event logs and media contents using vlm export-chronicle.\nBundles these back into revelation files and adds them into prologue\nchronicleVLogs, chronicleMediaInfos, bvobInfos and bvobBuffers sections.\n"
       },
       "export-chronicle": {
         "description": "Exports given chronicle as file hierarchy under target directory",
         "package": "@valos/type-worker",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Exports given chronicle as file hierarchy under target directory.\n\nUses perspire.\n"
       },
       "perspire": {
         "description": "Launch a headless worker gateway for virtual DOM ValOS computation jobs",
         "package": "@valos/type-worker",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Launch a headless worker gateway for virtual DOM ValOS computation jobs.\n\n\n"
       },
       "configure": {
         "description": "Configure the current ValOS workspace type, domain and all configurables",
         "package": "valma",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Configure the current ValOS workspace type, domain and all configurables.\n\nConfigures type and domain, selects and stows toolsets, tools and\nother  configurables and finally configures them.\n"
       },
       "status": {
         "description": "Display the status of the current valos workspace",
         "package": "valma",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Display the status of the current valos workspace.\n\nIf toolsetGlob is specified the status is limited to status scripts\nmatching '.status/*{toolsetGlob}*/**/*', otherwise all status scripts\nby '.status/**/*' are used.\n"
       },
       "draft-command": {
         "description": "Draft and possibly export a new valma command script",
         "package": "valma",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Draft and possibly export a new valma command script.\n\nThe new command is drafted as a local valma.bin/ command with the\nsource file in valma/, making it the highest priority command and\nimmediately available.\nWith --import a existing exported script is copied for local editing\nand development.\n"
       },
       "@": {
         "description": "Execute a package bin command within valma context interactively",
         "package": "valma",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Execute a package bin command within valma context interactively.\n\nExecute a package bin command within valma context interactively.\n\nThis is the command line shim to valma script vlm.interact.\nLike 'npx -c' it executes a regular command exported by some package\ndependency to the node_modules/.bin/ folder.\n\nUnlike 'npx' which only searches the current directory and the global\ncache '@' prepends all available valma pools to env.PATH, innermost\npool first.\n\n"
       },
       "init": {
@@ -6201,7 +7163,7 @@
         "explanation": ".disabled => Already initialized (package.json:valos section exists)",
         "description": "Initialize the current directory as a ValOS workspace from scratch",
         "package": "valma",
-        "version": "0.35.0",
+        "version": "0.36.0-alpha.0",
         "introduction": "Initialize the current directory as a ValOS workspace from scratch.\n\n\nThis command will interactively create and configure a new valma workspace in the current working directory from scratch.\n\nValma init has following interactive phases:\n1. Initialization of package.json via 'yarn init'\n2. Configuration of workspace valos.type and .domain via 'vlm .configure/.valos-stanza'\n3. Addition of new known domains via 'yarn add --dev (-W)'\n4. Selection of in-use toolsets from available toolsets via 'vlm select-toolsets'\n5. Configuration of in-use toolsets and tools via 'vlm configure'\n"
       }
     },
@@ -6213,6 +7175,7 @@
       "owl": "http://www.w3.org/2002/07/owl#",
       "dc": "http://purl.org/dc/elements/1.1/",
       "VKernel": "https://valospace.org/kernel/0#",
+      "VPlot": "https://valospace.org/plot/0#",
       "VState": "https://valospace.org/state/0#",
       "VValk": "https://valospace.org/valk/0#",
       "VLog": "https://valospace.org/log/0#",
@@ -6493,13 +7456,10 @@
           "@id": "section_introduction_documents"
         },
         {
-          "@id": "section_valospace_documents"
+          "@id": "section_api_documents"
         },
         {
-          "@id": "section_valosheath_documents"
-        },
-        {
-          "@id": "section_ontology_documents"
+          "@id": "section_specification_documents"
         },
         {
           "@id": "section_other_primary_documents"
@@ -6582,12 +7542,17 @@
                 "VDoc:wide": true
               },
               {
-                "VDoc:cell": "introduction",
                 "@type": "VDoc:Header",
                 "VDoc:content": {
                   "VDoc:em": true,
                   "VDoc:content": [
                     "Introduction:"
+                  ]
+                },
+                "VDoc:cell": {
+                  "VDoc:selectField": [
+                    "introduction",
+                    "abstract"
                   ]
                 },
                 "VDoc:wide": true,
@@ -6596,19 +7561,32 @@
             ]
           },
           "VDoc:entries": [
-            "raem/0",
-            "raem",
-            "script/0",
             "script",
-            "sourcerer/0",
-            "sourcerer"
+            "sourcerer",
+            "@valos/kernel-vault"
           ]
+        }
+      ]
+    },
+    "section_api_documents": {
+      "@id": "section_api_documents",
+      "dc:title": "API documents",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@id": "section_valospace_documents"
+        },
+        {
+          "@id": "section_valosheath_documents"
+        },
+        {
+          "@id": "section_ontology_documents"
         }
       ]
     },
     "section_valospace_documents": {
       "@id": "section_valospace_documents",
-      "dc:title": "Valospace documents",
+      "dc:title": "Valospace API documents",
       "@type": "VDoc:Chapter",
       "VDoc:content": [
         {
@@ -6682,12 +7660,17 @@
                 "VDoc:wide": true
               },
               {
-                "VDoc:cell": "valospaceAbstract",
                 "@type": "VDoc:Header",
                 "VDoc:content": {
                   "VDoc:em": true,
                   "VDoc:content": [
                     "Valospace abstract:"
+                  ]
+                },
+                "VDoc:cell": {
+                  "VDoc:selectField": [
+                    "valospaceAbstract",
+                    "abstract"
                   ]
                 },
                 "VDoc:wide": true,
@@ -6696,19 +7679,18 @@
             ]
           },
           "VDoc:entries": [
-            "raem/0",
             "raem",
-            "script/0",
             "script",
-            "sourcerer/0",
-            "sourcerer"
+            "sourcerer",
+            "space",
+            "@valos/kernel-vault"
           ]
         }
       ]
     },
     "section_valosheath_documents": {
       "@id": "section_valosheath_documents",
-      "dc:title": "Valosheath documents",
+      "dc:title": "Valosheath API documents",
       "@type": "VDoc:Chapter",
       "VDoc:content": [
         {
@@ -6782,12 +7764,17 @@
                 "VDoc:wide": true
               },
               {
-                "VDoc:cell": "valosheathAbstract",
                 "@type": "VDoc:Header",
                 "VDoc:content": {
                   "VDoc:em": true,
                   "VDoc:content": [
                     "Valosheath abstract:"
+                  ]
+                },
+                "VDoc:cell": {
+                  "VDoc:selectField": [
+                    "valosheathAbstract",
+                    "abstract"
                   ]
                 },
                 "VDoc:wide": true,
@@ -6801,7 +7788,7 @@
     },
     "section_ontology_documents": {
       "@id": "section_ontology_documents",
-      "dc:title": "Fabric documents",
+      "dc:title": "Fabric API documents",
       "@type": "VDoc:Chapter",
       "VDoc:content": [
         {
@@ -6875,12 +7862,17 @@
                 "VDoc:wide": true
               },
               {
-                "VDoc:cell": "fabricAbstract",
                 "@type": "VDoc:Header",
                 "VDoc:content": {
                   "VDoc:em": true,
                   "VDoc:content": [
                     "Fabric abstract:"
+                  ]
+                },
+                "VDoc:cell": {
+                  "VDoc:selectField": [
+                    "fabricAbstract",
+                    "abstract"
                   ]
                 },
                 "VDoc:wide": true,
@@ -6889,13 +7881,115 @@
             ]
           },
           "VDoc:entries": [
-            "revdoc/0",
+            "log",
+            "plot",
             "revdoc",
-            "sbomdoc/0",
             "sbomdoc",
-            "twindoc/0",
+            "state",
             "twindoc",
-            "vdoc/0",
+            "vdoc"
+          ]
+        }
+      ]
+    },
+    "section_specification_documents": {
+      "@id": "section_specification_documents",
+      "dc:title": "Specification documents",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "VDoc:lookup": "documents",
+          "@type": "VDoc:Table",
+          "VDoc:columns": {
+            "VDoc:entries": [
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "Name"
+                ],
+                "VDoc:cell": {
+                  "VDoc:strong": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:Reference",
+                      "VDoc:content": [
+                        "VDoc:selectKey"
+                      ],
+                      "VDoc:ref": "VDoc:selectKey"
+                    }
+                  ]
+                }
+              },
+              {
+                "VDoc:cell": "package",
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "Package"
+                ]
+              },
+              {
+                "VDoc:cell": "version",
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "Version"
+                ]
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "Tags"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "tags"
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "Title:"
+                  ]
+                },
+                "VDoc:cell": {
+                  "@type": "VDoc:Reference",
+                  "VDoc:content": [
+                    {
+                      "VDoc:selectField": "title"
+                    }
+                  ],
+                  "VDoc:ref": [
+                    "VDoc:selectKey",
+                    "#specificationAbstract"
+                  ]
+                },
+                "VDoc:wide": true
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "Specification abstract:"
+                  ]
+                },
+                "VDoc:cell": {
+                  "VDoc:selectField": [
+                    "specificationAbstract",
+                    "abstract"
+                  ]
+                },
+                "VDoc:wide": true,
+                "VDoc:tall": true
+              }
+            ]
+          },
+          "VDoc:entries": [
+            "log",
+            "plot",
+            "state",
             "vdoc"
           ]
         }
@@ -6991,12 +8085,8 @@
             ]
           },
           "VDoc:entries": [
-            "0",
-            "sbom",
-            "kernel/0",
             "kernel",
-            "type-vault/AssortedTutorials",
-            "@valos/kernel-vault"
+            "type-vault/AssortedTutorials"
           ]
         }
       ]
@@ -7021,39 +8111,39 @@
           ]
         },
         {
-          "@id": "section_new_types"
+          "@id": "section_workspaces_types"
         },
         {
-          "@id": "section_new_toolsets"
+          "@id": "section_workspaces_toolsets"
         },
         {
-          "@id": "section_new_tools"
+          "@id": "section_workspaces_tools"
         },
         {
-          "@id": "section_new_commands"
+          "@id": "section_workspaces_commands"
         },
         {
-          "@id": "section_new_toolset_workspaces"
+          "@id": "section_workspaces_type_toolset"
         },
         {
-          "@id": "section_new_library_workspaces"
+          "@id": "section_workspaces_type_library"
         },
         {
-          "@id": "section_new_domain_workspaces"
+          "@id": "section_workspaces_type_domain"
         },
         {
-          "@id": "section_new_vdoc_extension_workspaces"
+          "@id": "section_workspaces_type_vdoc_extension"
         },
         {
-          "@id": "section_new_spindle_workspaces"
+          "@id": "section_workspaces_type_spindle"
         },
         {
-          "@id": "section_new_type_workspaces"
+          "@id": "section_workspaces_type_type"
         }
       ]
     },
-    "section_new_types": {
-      "@id": "section_new_types",
+    "section_workspaces_types": {
+      "@id": "section_workspaces_types",
       "dc:title": "Workspace types, 10 new",
       "@type": "VDoc:Chapter",
       "VDoc:content": [
@@ -7122,8 +8212,8 @@
         }
       ]
     },
-    "section_new_toolsets": {
-      "@id": "section_new_toolsets",
+    "section_workspaces_toolsets": {
+      "@id": "section_workspaces_toolsets",
       "dc:title": "Workspace toolsets, 3 new",
       "@type": "VDoc:Chapter",
       "VDoc:content": [
@@ -7192,8 +8282,8 @@
         }
       ]
     },
-    "section_new_tools": {
-      "@id": "section_new_tools",
+    "section_workspaces_tools": {
+      "@id": "section_workspaces_tools",
       "dc:title": "Workspace tools, 4 new",
       "@type": "VDoc:Chapter",
       "VDoc:content": [
@@ -7262,8 +8352,8 @@
         }
       ]
     },
-    "section_new_commands": {
-      "@id": "section_new_commands",
+    "section_workspaces_commands": {
+      "@id": "section_workspaces_commands",
       "dc:title": "Valma commands, 19 new",
       "@type": "VDoc:Chapter",
       "VDoc:content": [
@@ -7329,8 +8419,8 @@
         }
       ]
     },
-    "section_new_toolset_workspaces": {
-      "@id": "section_new_toolset_workspaces",
+    "section_workspaces_type_toolset": {
+      "@id": "section_workspaces_type_toolset",
       "dc:title": "Type 'toolset' workspaces, 2 new",
       "@type": "VDoc:Chapter",
       "VDoc:content": [
@@ -7432,18 +8522,18 @@
     "toolset_workspaces": {
       "@id": "toolset_workspaces",
       "valma": {
-        "version": "0.35.0-rc.36",
+        "version": "0.35.0",
         "description": "A ValOS CLI tool for discovering and executing context-dependent command scripts",
         "license": "MIT"
       },
       "@valos/toolset-revealer": {
-        "version": "0.35.0-rc.36",
+        "version": "0.35.0",
         "description": "Tools for building revelations both for development and deployment purposes",
         "license": "MIT"
       }
     },
-    "section_new_library_workspaces": {
-      "@id": "section_new_library_workspaces",
+    "section_workspaces_type_library": {
+      "@id": "section_workspaces_type_library",
       "dc:title": "Type 'library' workspaces, 8 new",
       "@type": "VDoc:Chapter",
       "VDoc:content": [
@@ -7546,53 +8636,53 @@
     "library_workspaces": {
       "@id": "library_workspaces",
       "@valos/engine": {
-        "version": "0.35.0-rc.36",
+        "version": "0.35.0",
         "description": "ValOS Engine API and Schema",
         "homepage": "https://valospace.org/engine",
         "license": "MIT"
       },
       "@valos/gateway-api": {
-        "version": "0.35.0-rc.36",
+        "version": "0.35.0",
         "description": "Minimal footprint ValOS Gateway API local forwards",
         "license": "MIT"
       },
       "@valos/hypertwin": {
-        "version": "0.35.0-rc.36",
+        "version": "0.35.0",
         "description": "ValOS Hypertwin Specifications and Tools Library",
         "license": "MIT"
       },
       "@valos/inspire": {
-        "version": "0.35.0-rc.36",
+        "version": "0.35.0",
         "description": "ValOS Inspire application gateway",
         "homepage": "https://valospace.org/inspire",
         "license": "MIT"
       },
       "@valos/raem": {
-        "version": "0.35.0-rc.36",
+        "version": "0.35.0",
         "description": "ValOS Resources And Events Model (ValOS-RAEM) API, schema and ontology",
         "homepage": "https://valospace.org/raem",
         "license": "MIT"
       },
       "@valos/script": {
-        "version": "0.35.0-rc.36",
+        "version": "0.35.0",
         "description": "ValOS Script API, schema",
         "homepage": "https://valospace.org/script",
         "license": "MIT"
       },
       "@valos/sourcerer": {
-        "version": "0.35.0-rc.36",
+        "version": "0.35.0",
         "description": "ValOS Sourcerer API, schema",
         "homepage": "https://valospace.org/sourcerer",
         "license": "MIT"
       },
       "@valos/tools": {
-        "version": "0.35.0-rc.36",
+        "version": "0.35.0",
         "description": "ValOS Tools API",
         "license": "MIT"
       }
     },
-    "section_new_domain_workspaces": {
-      "@id": "section_new_domain_workspaces",
+    "section_workspaces_type_domain": {
+      "@id": "section_workspaces_type_domain",
       "dc:title": "Type 'domain' workspaces, 1 new",
       "@type": "VDoc:Chapter",
       "VDoc:content": [
@@ -7689,15 +8779,15 @@
     "domain_workspaces": {
       "@id": "domain_workspaces",
       "@valos/kernel": {
-        "version": "0.35.0-rc.36",
+        "version": "0.35.0",
         "description": "@valos/kernel domain",
         "homepage": "https://valospace.org/kernel",
         "license": "MIT",
         "repository": "https://github.com/valaatech/kernel"
       }
     },
-    "section_new_vdoc_extension_workspaces": {
-      "@id": "section_new_vdoc_extension_workspaces",
+    "section_workspaces_type_vdoc_extension": {
+      "@id": "section_workspaces_type_vdoc_extension",
       "dc:title": "Type 'vdoc-extension' workspaces, 4 new",
       "@type": "VDoc:Chapter",
       "VDoc:content": [
@@ -7793,32 +8883,32 @@
     "vdoc_extension_workspaces": {
       "@id": "vdoc_extension_workspaces",
       "@valos/revdoc": {
-        "version": "0.35.0-rc.36",
+        "version": "0.35.0",
         "description": "ReVDoc - ReSpec document VDoc extension",
         "homepage": "https://valospace.org/revdoc",
         "license": "MIT"
       },
       "@valos/sbomdoc": {
-        "version": "0.35.0-rc.36",
+        "version": "0.35.0",
         "description": "SBoMDoc - Software Bill of Materials VDoc extension",
         "homepage": "https://valospace.org/sbomdoc",
         "license": "MIT"
       },
       "@valos/twindoc": {
-        "version": "0.35.0-rc.36",
+        "version": "0.35.0",
         "description": "TwinDoc - Valospace Hypertwin VDoc extension",
         "homepage": "https://valospace.org/twindoc",
         "license": "MIT"
       },
       "@valos/vdoc": {
-        "version": "0.35.0-rc.36",
+        "version": "0.35.0",
         "description": "VDoc - ValOS document interchange specification",
         "homepage": "https://valospace.org/vdoc",
         "license": "MIT"
       }
     },
-    "section_new_spindle_workspaces": {
-      "@id": "section_new_spindle_workspaces",
+    "section_workspaces_type_spindle": {
+      "@id": "section_workspaces_type_spindle",
       "dc:title": "Type 'spindle' workspaces, 1 new",
       "@type": "VDoc:Chapter",
       "VDoc:content": [
@@ -7932,14 +9022,14 @@
     "spindle_workspaces": {
       "@id": "spindle_workspaces",
       "@valos/web-spindle": {
-        "version": "0.35.0-rc.36",
+        "version": "0.35.0",
         "description": "A spindle for structured ValOS Web APIs",
         "homepage": "https://valospace.org/web-spindle",
         "license": "MIT"
       }
     },
-    "section_new_type_workspaces": {
-      "@id": "section_new_type_workspaces",
+    "section_workspaces_type_type": {
+      "@id": "section_workspaces_type_type",
       "dc:title": "Type 'type' workspaces, 5 new",
       "@type": "VDoc:Chapter",
       "VDoc:content": [
@@ -8048,28 +9138,28 @@
     "type_workspaces": {
       "@id": "type_workspaces",
       "@valos/type-spindle": {
-        "version": "0.35.0-rc.36",
+        "version": "0.35.0",
         "description": "The ValOS 'spindle' workspace type toolset",
         "license": "MIT"
       },
       "@valos/type-opspace": {
-        "version": "0.35.0-rc.36",
+        "version": "0.35.0",
         "description": "The ValOS 'opspace' workspace type toolset",
         "license": "MIT"
       },
       "@valos/type-vault": {
-        "version": "0.35.0-rc.36",
+        "version": "0.35.0",
         "description": "The ValOS 'vault' workspace type toolset",
         "homepage": "https://valospace.org/type-vault",
         "license": "MIT"
       },
       "@valos/type-worker": {
-        "version": "0.35.0-rc.36",
+        "version": "0.35.0",
         "description": "The ValOS 'worker' workspace type toolset",
         "license": "MIT"
       },
       "@valos/type-domain": {
-        "version": "0.35.0-rc.36",
+        "version": "0.35.0",
         "description": "The ValOS domain workspace type toolset",
         "license": "MIT"
       }

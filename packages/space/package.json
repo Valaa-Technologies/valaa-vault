@@ -1,6 +1,6 @@
 {
   "name": "@valos/space",
-  "version": "0.36.0-alpha.0",
+  "version": "0.37.0-alpha.0",
   "valos": {
     "type": "library",
     "domain": "@valos/kernel",
@@ -16,8 +16,8 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@valos/revdoc": "^0.36.0-alpha.0",
-    "@valos/type-library": "^0.36.0-alpha.0"
+    "@valos/revdoc": "^0.37.0-alpha.0",
+    "@valos/type-library": "^0.37.0-alpha.0"
   },
   "homepage": "https://valospace.org/space"
 }

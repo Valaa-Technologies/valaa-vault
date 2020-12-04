@@ -186,28 +186,28 @@ VPath outlines are JSON structures which use convenience constructs.
   [&#x22;@$o.import&#x22;, {
     &#x22;@.:workshop&#x22;: [
       [&#x22;@$o.folder&#x22;, &#x22;vault&#x22;, {
-        &#x22;@+:workers&#x22;: {
-          &#x22;@+:ot-worker-hyperbridge-dev&#x22;: [],
+        &#x22;@*:workers&#x22;: {
+          &#x22;@*:ot-worker-hyperbridge-dev&#x22;: [],
         },
-        &#x22;@+:env&#x22;: {
+        &#x22;@*:env&#x22;: {
           &#x22;@.:ot:@.:ot-dev@@&#x22;: [
-            [&#x22;@+:public-session&#x22;],
-            [&#x22;@+:session&#x22;],
+            [&#x22;@*:public-session&#x22;],
+            [&#x22;@*:session&#x22;],
             [&#x22;@~:ot-identity.json&#x22;],
             [&#x22;@~:hyperbridge-identity.json&#x22;],
           ]
         },
-        &#x22;@+:revelations&#x22;: {
-          &#x22;@+:sites&#x22;: [
+        &#x22;@*:revelations&#x22;: {
+          &#x22;@*:sites&#x22;: [
             [&#x22;@.:inspire&#x22;, [&#x22;@$o.folder&#x22;, &#x22;vault&#x22;, &#x22;dist&#x22;, &#x22;revealer&#x22;, &#x22;sites&#x22;, &#x22;inspire&#x22;]],
-            [&#x22;@+:myworld-dev&#x22;],
+            [&#x22;@*:myworld-dev&#x22;],
           ]
         }
       }],
-      [&#x22;@$o.folder&#x22;, &#x22;opspace&#x22;, &#x22;build&#x22;, [&#x22;@+:env&#x22;]]
+      [&#x22;@$o.folder&#x22;, &#x22;opspace&#x22;, &#x22;build&#x22;, [&#x22;@*:env&#x22;]]
     ]
   }, {
-    &#x22;workshop.tar.gz&#x22;: [&#x22;@$o.tar-gz&#x22;, [&#x22;@+:workshop&#x22;]],
+    &#x22;workshop.tar.gz&#x22;: [&#x22;@$o.tar-gz&#x22;, [&#x22;@*:workshop&#x22;]],
   }]
 ], &#x22;@@&#x22;)</span>
 </code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node">[
@@ -264,7 +264,7 @@ VPath outlines are JSON structures which use convenience constructs.
                 ],
                 &#x22;vault&#x22;,
                 [
-                  &#x22;@+&#x22;,
+                  &#x22;@*&#x22;,
                   [
                     &#x22;env&#x22;,
                     [
@@ -278,13 +278,13 @@ VPath outlines are JSON structures which use convenience constructs.
                           ]
                         ],
                         [
-                          &#x22;@+&#x22;,
+                          &#x22;@*&#x22;,
                           [
                             &#x22;public-session&#x22;
                           ]
                         ],
                         [
-                          &#x22;@+&#x22;,
+                          &#x22;@*&#x22;,
                           [
                             &#x22;session&#x22;
                           ]
@@ -306,11 +306,11 @@ VPath outlines are JSON structures which use convenience constructs.
                   ]
                 ],
                 [
-                  &#x22;@+&#x22;,
+                  &#x22;@*&#x22;,
                   [
                     &#x22;revelations&#x22;,
                     [
-                      &#x22;@+&#x22;,
+                      &#x22;@*&#x22;,
                       [
                         &#x22;sites&#x22;,
                         [
@@ -334,7 +334,7 @@ VPath outlines are JSON structures which use convenience constructs.
                           ]
                         ],
                         [
-                          &#x22;@+&#x22;,
+                          &#x22;@*&#x22;,
                           [
                             &#x22;myworld-dev&#x22;
                           ]
@@ -344,11 +344,11 @@ VPath outlines are JSON structures which use convenience constructs.
                   ]
                 ],
                 [
-                  &#x22;@+&#x22;,
+                  &#x22;@*&#x22;,
                   [
                     &#x22;workers&#x22;,
                     [
-                      &#x22;@+&#x22;,
+                      &#x22;@*&#x22;,
                       [
                         &#x22;ot-worker-hyperbridge-dev&#x22;
                       ]
@@ -367,7 +367,7 @@ VPath outlines are JSON structures which use convenience constructs.
                 &#x22;opspace&#x22;,
                 &#x22;build&#x22;,
                 [
-                  &#x22;@+&#x22;,
+                  &#x22;@*&#x22;,
                   [
                     &#x22;env&#x22;
                   ]
@@ -388,7 +388,7 @@ VPath outlines are JSON structures which use convenience constructs.
                   &#x22;tar-gz&#x22;
                 ],
                 [
-                  &#x22;@+&#x22;,
+                  &#x22;@*&#x22;,
                   [
                     &#x22;workshop&#x22;
                   ]

@@ -79,7 +79,7 @@ section specified in lerna.json:command.version.bump.`,
   },
   develop: {
     group: "Version control",
-    type: "string",
+    type: "string", default: "alpha",
     description:
 `Create a new develop/* branch based on the current branch.
 Bump the version section specified by lerna.json:command.version.bump.

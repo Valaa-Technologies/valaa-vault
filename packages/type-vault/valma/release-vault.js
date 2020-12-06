@@ -192,7 +192,7 @@ exports.handler = async (yargv) => {
             : dotPatch ? "patch" : dotMinor ? "minor" : "major";
       }
       if (yargv.develop) {
-        preparation.preid = (yargv.develop === true) ? "prerelease" : yargv.develop;
+        preparation.preid = (yargv.develop === true) ? "alpha" : yargv.develop;
       }
       ret.releaseDescription = `New ${vlm.theme.strong(preparation.newBranchKind)} ${type} branch`;
       // No patch bump if releasing from develop into a release.

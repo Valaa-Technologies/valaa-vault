@@ -259,12 +259,15 @@ exports.handler = async (yargv) => {
       return;
     }
 
+    const assembleOverrides = { ...yargv.assemble };
+
     if (newBranchKind) {
       await vlm.delegate(`git checkout -b ${targetBranch}`);
       commit.newBranch = targetBranch;
       commit.lernaConfig = JSON.parse(JSON.stringify(lernaConfig));
-      commit.lernaConfig.command.version.bump = preid ? `pre${newBranchKind}` : newBranchKind;
+      commit.lernaConfig.command.version.bump = preid ? `prerelease` : newBranchKind;
       commit.lernaConfig.command.version.preid = preid || "";
+      if (preid) assembleOverrides.bump = `pre${newBranchKind}`;
       commit.lernaConfig.command.version.allowBranch = targetBranch;
       vlm.shell.ShellString(JSON.stringify(commit.lernaConfig, null, 2)).to("./lerna.json");
       await vlm.delegate(`git add lerna.json`);
@@ -275,7 +278,7 @@ exports.handler = async (yargv) => {
     ]);
 
     commit["vlm assemble-packages"] = await vlm.invoke("assemble-packages",
-        Object.assign({ versioning: "amend" }, assembleDefault, yargv.assemble));
+        Object.assign({ versioning: "amend" }, assembleDefault, assembleOverrides));
 
     commit.success = commit["vlm assemble-packages"].success;
     let fastForwardBase;

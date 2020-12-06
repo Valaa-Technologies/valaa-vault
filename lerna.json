@@ -5,7 +5,7 @@
   "useWorkspaces": true,
   "command": {
     "version": {
-      "bump": "preminor",
+      "bump": "prerelease",
       "preid": "alpha",
       "allowBranch": "develop/0.36"
     }

@@ -61,7 +61,7 @@ exports.handler = async (yargv) => {
     throw new Error(`valma-clean-vault --at-root requested when not at package root ${
         ""}(TODO: implement the directory change for this option)`);
   }
-  if (yargv.yalc) {
+  if (yargv.yalc && vlm.shell.test("-d", ".yalc")) {
     await vlm.delegate(["yalc", "remove", { all: true }]);
     ret["yalc dependencies"] = "removed";
   }

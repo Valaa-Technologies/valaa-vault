@@ -79,6 +79,11 @@ exports.builder = (yargs) => yargs.options({
         yargs.vlm.theme.executable("lerna version")}.
 'amend' will amend the most recent commit instead of creating a new one.`,
   },
+  bump: {
+    type: "string", choices: ["major", "minor", "patch", "premajor", "preminor", "prepatch"],
+    description: `Explicit semver bump position given to ${
+        yargs.vlm.theme.executable("lerna version")}.`,
+  },
   reassemble: {
     type: "boolean",
     description: `Reassembles packages with only dirty changes.
@@ -260,7 +265,7 @@ exports.handler = async (yargv) => {
     let lernaConfig = await vlm.tryReadFile("lerna.json");
     oldVersion = lernaConfig && JSON.parse(lernaConfig).version;
     await vlm.delegate([
-      "lerna version", {
+      "lerna version", ...(yargv.bump ? [yargv.bump] : []), {
         "conventional-commits": true, amend: (yargv.versioning === "amend"), push: false, yes: true,
         ...(!selections.length ? {} : {
           "force-publish": selections.map(({ name }) => name).join(","),

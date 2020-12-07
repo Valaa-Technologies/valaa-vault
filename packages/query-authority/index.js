@@ -1,5 +1,8 @@
 // @flow
 
-export default function foo () {
-  return true;
+function newSparqlEngine () {
+  return require("./config/query-authority-sparql-engine.js");
 }
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.newSparqlEngine = newSparqlEngine;

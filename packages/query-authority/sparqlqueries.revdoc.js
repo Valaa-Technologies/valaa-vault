@@ -7,9 +7,9 @@ module.exports = {
   "dc:title": "SPARQL Queries for PoT/TTP hypertwin",
   respecConfig: {
     specStatus: "unofficial",
-    editors: authors("iridianI"),
+    editors: authors("iridian"),
     authors: authors("iridian", "Jaradacl"),
-    shortName: "sparqlqueries",
+    shortName: "sparql-queries",
   },
   "chapter#abstract>0": [
     "This document is a revdoc template document 'sparqlqueries' created by create-revdoc.",

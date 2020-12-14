@@ -64,21 +64,21 @@ exports.builder = (yargs) => {
   return yargs.options({
     toolset: {
       type: "string",
-      description: `Restrict the tool to a specific toolset.`,
+      description: `Restrict the tool to a specific toolset`,
       interactive: {
         type: "input", when: "if-undefined",
         default: vlm.getToolsetConfig("@valos/type-toolset") && vlm.getPackageConfig("name"),
       },
       causes: ["no-domain", "no-type"],
     },
-    domain: {
-      type: "string", description: "Restrict the tool to toolsets of a specific domain",
-      interactive: { type: "input", when: "if-undefined", default: vlm.getValOSConfig("domain") },
+    type: {
+      type: "string", description: "Restrict the tool to all toolsets with a specific type",
+      interactive: { type: "input", when: "if-undefined" },
       causes: ["no-toolset"],
     },
-    type: {
-      type: "string", description: "Restrict the tool to toolsets of a specific type",
-      interactive: { type: "input", when: "if-undefined" },
+    domain: {
+      type: "string", description: "Restrict the tool to all toolsets from a specific domain",
+      interactive: { type: "input", when: "if-undefined", default: vlm.getValOSConfig("domain") },
       causes: ["no-toolset"],
     },
     local: {
@@ -122,8 +122,13 @@ exports.handler = async (yargv) => {
   // Only enabled inside package
   const vlm = yargv.vlm;
 
-  const toolName = yargv.toolName;
-  if (!toolName || typeof toolName !== "string") throw new Error("toolName missing or invalid");
+  let toolName = yargv.toolName;
+  if (typeof toolName !== "string") toolName = null;
+  if (!toolName && !yargv.local && await vlm.inquireConfirm(
+      `Use the current workspace name ${vlm.getPackageConfig("name")} as the tool name?`)) {
+    toolName = vlm.getPackageConfig("name");
+  }
+  if (!toolName) throw new Error("toolName missing or invalid");
   const restrictor = { domain: yargv.domain, type: yargv.type, workspace: yargv.toolset };
   if (yargv.selectable) {
     await draftSelectToolCommand(vlm, toolName, restrictor, { describe: yargv.describe });

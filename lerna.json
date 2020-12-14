@@ -7,7 +7,7 @@
     "version": {
       "bump": "prerelease",
       "preid": "alpha",
-      "allowBranch": "develop/0.36"
+      "allowBranch": "develop/0.37"
     }
   }
 }

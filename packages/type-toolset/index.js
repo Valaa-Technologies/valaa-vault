@@ -26,6 +26,7 @@ module.exports = {
   configureToolSelection,
   createToolToolsetOption,
 
+  maybeResctrictedToolsetVLMExport,
   selectorGlobFrom,
   restrictorPathFrom,
   simpleRestrictorFrom,
@@ -105,7 +106,7 @@ function _draftSelectCommand (vlm, kind, name, restrictor, draftOptions) {
 `const typeToolset = require("@valos/type-toolset");
 
 `,
-      "exports-vlm": `{ ${kind}: "${name}" }`,
+      "exports-vlm": `{ ${maybeResctrictedToolsetVLMExport(kind, restrictor)}${kind}: "${name}" }`,
       brief: `select ${kind} '${name}'`,
       describe: `[Edit single-line description of '${simpleName}' here]`,
 
@@ -177,7 +178,7 @@ function _draftConfigureCommand (vlm, kind, name, restrictor, draftOptions) {
 `const typeToolset = require("@valos/type-toolset");
 
 `,
-      "exports-vlm": `{ ${kind}: "${name}" }`,
+      "exports-vlm": `{ ${maybeResctrictedToolsetVLMExport(kind, restrictor)}${kind}: "${name}" }`,
       brief: `configure ${kind}`,
       describe: `Configure the ${kind} '${name}' within the current workspace`,
 
@@ -221,7 +222,7 @@ function _draftStatusSubCommand (vlm, kind, name, restrictor, draftOptions) {
 `const typeToolset = require("@valos/type-toolset");
 
 `,
-      "exports-vlm": `{ ${kind}: "${name}" }`,
+      "exports-vlm": `{ ${maybeResctrictedToolsetVLMExport(kind, restrictor)}${kind}: "${name}" }`,
       brief: `display ${kind} status`,
 
       introduction: "",
@@ -498,4 +499,9 @@ async function configureConfigurableSelection (vlm, kind, reconfigure, selection
         [{ reconfigure: false }, ...configureArgs]);
   }
   return ret;
+}
+
+function maybeResctrictedToolsetVLMExport (restrictor, kind) {
+  return kind !== "tool" || !restrictor.workspace ? ""
+      : `toolset: "${restrictor.workspace}", `;
 }

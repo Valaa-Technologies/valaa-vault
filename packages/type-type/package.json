@@ -1,0 +1,20 @@
+{
+  "name": "@valos/type-type",
+  "version": "0.37.0-alpha.1",
+  "valos": {
+    "type": "type",
+    "domain": "@valos/kernel"
+  },
+  "description": "The ValOS 'type' workspace type toolset",
+  "author": "Valaa Technologies Ltd",
+  "license": "MIT",
+  "repository": "https://github.com/valaatech/kernel",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "@valos/type-toolset": ">=0.37.0-alpha.1"
+  }
+}

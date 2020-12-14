@@ -6,7 +6,7 @@
     "domain": { "!!!": ["./package", "valos", "domain"] }
   },
   "gateway": {
-    "authorityConfigs": { "!!!": "./revelation_authority-configs" },
+    "authorityConfigs": { "!!!": "./revelation_authorityConfigs" },
     "verbosity": 1,
     "scribe": { "verbosity": 0 }
   },

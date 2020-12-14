@@ -1,6 +1,7 @@
 const { restrictorPathFrom, simpleRestrictorFrom } = require("valma");
 const {
   checkToolsetDisabled, checkToolDisabled, createToolToolsetOption,
+  maybeResctrictedToolsetVLMExport,
 } = require("@valos/type-toolset");
 
 module.exports = {
@@ -54,7 +55,7 @@ function _draftReleaseSubCommand (vlm, primary, kind, name, restrictor = {}) {
 `const typeOpspace = require("@valos/type-opspace");
 
 `,
-    "exports-vlm": `{ ${kind}: "${name}" }`,
+    "exports-vlm": `{ ${maybeResctrictedToolsetVLMExport(kind, restrictor)}${kind}: "${name}" }`,
     describe: `${capPrimary} a sub-release of ${name}`,
     introduction: isTool
         ?

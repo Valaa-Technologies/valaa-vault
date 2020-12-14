@@ -124,6 +124,7 @@ const _vlm = {
 
   getPackageConfig,
   getValOSConfig,
+  getFileConfig,
   getToolsetsConfig,
   getToolsetPackageConfig,
   findToolsetsConfig,
@@ -150,6 +151,7 @@ const _vlm = {
   // know about toolsets. OTOH valma type and the toolset scripts are part of valma package, so...
   getToolsetConfig,
   getToolConfig,
+
   findToolsetConfig,
   findToolConfig,
   confirmToolsetExists,
@@ -2394,7 +2396,7 @@ async function _fillVargvInteractively () {
       case "always":
         break;
       case "if-undefined":
-        if (option.type === "boolean") {
+        if (option.type === "boolean" && (answers[optionName] === false)) {
           this.warn(
 `boolean option '${optionName}' interactive.when = "if-undefined" is
 degenerate as boolean options default to false.
@@ -2503,6 +2505,16 @@ function getValOSConfig (...keys) {
 function getToolsetsConfig (...keys) {
   return this._getConfigAtPath(this._toolsetsConfigStatus.content, keys);
 }
+function getFileConfig (workspaceFile, ...rest) {
+  if (typeof workspaceFile !== "string") {
+    throw new Error(`Invalid arguments for workspaceFile, expexted string, got ${
+        typeof workspaceFile}`);
+  }
+  const fileConfigStatus = { path: this.path.join(process.cwd(), workspaceFile) };
+  _reloadFileConfig(fileConfigStatus);
+  return this._getConfigAtPath(fileConfigStatus.content, rest);
+}
+
 function findToolsetsConfig (...keys) {
   let ret;
   let configStatus = this._toolsetsConfigStatus;
@@ -2512,6 +2524,7 @@ function findToolsetsConfig (...keys) {
   } while ((ret === undefined) && (configStatus !== undefined));
   return ret;
 }
+
 function getToolsetPackageConfig (toolset) {
   try {
     return require(this.path.join(toolset, "package"));

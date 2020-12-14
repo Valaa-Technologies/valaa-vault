@@ -662,8 +662,8 @@ export default class Vrapper extends Cog {
     ScopeProperty: "@.",
     Blob: "@'",
     Bvob: "@'",
-    InactiveResource: "@?",
-    InactiveScriptResource: "@?",
+    InactiveResource: "@I",
+    InactiveScriptResource: "@I",
     DestroyedResource: "@X",
     DestroyedScriptResource: "@X",
   };
@@ -692,7 +692,7 @@ export default class Vrapper extends Cog {
       const targetId = (options || {}).transient && (options || {}).transient.get("target");
       if (!targetId) targetText = "@$n@@";
       else if (targetId.isAbsent()) {
-        targetText = `.O-@?@@?+chronicle=${targetId.getChronicleURI()}`;
+        targetText = `.O-@I@@?+chronicle=${targetId.getChronicleURI()}`;
       } else {
         const target = this.step("target", innerOptions);
         targetText = `.O-${target ? target.getName() : "@@"}`;

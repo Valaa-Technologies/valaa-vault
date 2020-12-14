@@ -67,7 +67,7 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/inspire",
-    "VRevdoc:version": "0.37.0-alpha.1",
+    "VRevdoc:version": "0.37.0-alpha.2",
     "VRevdoc:preferredPrefix": "Lens",
     "VRevdoc:baseIRI": "https://valospace.org/inspire/Lens/0#",
     "VRevdoc:referencedModules": {

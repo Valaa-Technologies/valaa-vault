@@ -62,7 +62,7 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/revdoc",
-    "VRevdoc:version": "0.37.0-alpha.1",
+    "VRevdoc:version": "0.37.0-alpha.2",
     "VRevdoc:preferredPrefix": "VRevdoc",
     "VRevdoc:baseIRI": "https://valospace.org/revdoc/0#",
     "VRevdoc:referencedModules": {
@@ -73,7 +73,7 @@
     },
     "VRevdoc:extenderModules": {},
     "respecConfig": {
-      "subtitle": "0.37.0-alpha.1",
+      "subtitle": "0.37.0-alpha.2",
       "specStatus": "unofficial",
       "editors": [
         {

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0-alpha.2](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.1...v0.37.0-alpha.2) (2020-12-14)
+
+
+### Bug Fixes
+
+* Make release-vault --develop default to "alpha" ([d496f84](https://github.com/valaatech/kernel/commit/d496f84a37835e80567996f4d01fa1c6821d068f))
+
+
+
+
+
 # [0.37.0-alpha.1](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.0...v0.37.0-alpha.1) (2020-12-06)
 
 

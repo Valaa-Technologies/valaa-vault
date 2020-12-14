@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0-alpha.2](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.1...v0.37.0-alpha.2) (2020-12-14)
+
+
+### Bug Fixes
+
+* Builtin Valens attribute with function value is not wrapped properly ([ef2ff8c](https://github.com/valaatech/kernel/commit/ef2ff8c23ef572c75f60a93d6cb7dae06966d514))
+* InaactiveResource verb-type mapping from "@?" to "@I" ([93c4c44](https://github.com/valaatech/kernel/commit/93c4c44cfdffa0dcb085a6872ae75380e9666cba))
+
+
+
+
+
 # [0.37.0-alpha.1](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.0...v0.37.0-alpha.1) (2020-12-06)
 
 **Note:** Version bump only for package @valos/engine

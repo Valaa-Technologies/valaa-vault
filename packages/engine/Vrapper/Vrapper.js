@@ -1301,8 +1301,9 @@ export default class Vrapper extends Cog {
       if (kuerySubscription) {
         kuerySubscription.attachKueryFieldHook(this, "value", true);
       }
-      valueEntry = explicitValueEntry;
-      if (!valueEntry) {
+      if (explicitValueEntry) {
+        valueEntry = explicitValueEntry;
+      } else {
         const thisTransient = this.getTransient(options);
         valueEntry = thisTransient.get("value");
         if (!valueEntry) {

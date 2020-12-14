@@ -111,6 +111,9 @@ function _initializeElementPropsToLive (component, props, stateLive, kueryStates
       }
       newValue = newValue(kueryValues);
     }
+    if (typeof newValue === "function") {
+      newValue = _valensWrapCallback(component, propValue, propName);
+    }
     (stateLive.recorders[propName] || _recordNewGenericPropValue)(
         stateLive, newValue, propName, component);
   }
@@ -127,8 +130,12 @@ function _recordUpdatedKueryValue (newKueryValue) {
   let wasUpdated;
   const component = stateLive.component;
   for (const [propName, propFetcher] of this.dependentProps) {
+    let propValue = propFetcher(kueryValues);
+    if (typeof propValue === "function") {
+      propValue = _valensWrapCallback(component, propValue, propName);
+    }
     if (!(stateLive.recorders[propName] || _recordNewGenericPropValue)(
-        stateLive, propFetcher(kueryValues), propName, component)) {
+        stateLive, propValue, propName, component)) {
       wasUpdated = true;
     }
   }
@@ -154,7 +161,9 @@ function _recordNewGenericPropValue (stateLive, propValue, propName, component) 
         return false;
       }
       if (namespace === "On") {
-        newValue = _valensWrapCallback(component, propValue, propName);
+        if (typeof newValue !== "function") {
+          newValue = _valensWrapCallback(component, propValue, propName);
+        }
         newName = `on${name[0].toUpperCase()}${name.slice(1)}`;
         if (fabricatorEventTypes[name]) {
           _obtainLocalContext(stateLive, component)[qualifiedSymbol("On", name)] = newValue;
@@ -171,7 +180,8 @@ function _recordNewGenericPropValue (stateLive, propValue, propName, component) 
         throw new Error(`Unrecognized attribute ${propName}`);
       }
     } else if (propName.startsWith("on")
-        && (stateLive.elementProps || (propName[2] === propName[2].toUpperCase()))) {
+        && (stateLive.elementProps || (propName[2] === propName[2].toUpperCase()))
+        && (typeof propValue !== "function")) {
       /*
       console.debug(`DEPRECATED: React-style camelcase event handler '${propName}', prefer 'On:${
           propName[2].toLowerCase()}${propName.slice(3)} (in ${
@@ -243,7 +253,8 @@ export const _valensRecorderProps = {
   },
   if: function if_ (stateLive, newValue) {
     const oldValue = stateLive.if;
-    if (newValue === oldValue && ((oldValue !== undefined) || stateLive.hasOwnProperty("if"))) {
+    if (newValue === oldValue
+        && ((oldValue !== undefined) || stateLive.hasOwnProperty("if"))) {
       return true;
     }
     stateLive.if = newValue;

@@ -190,18 +190,18 @@ function _refreshPendingProps (stateLive) {
 }
 
 function _createRenderRejection (stateLive) {
-  return !stateLive.if
-          ? (focus => stateLive.component.renderLens(stateLive.else, focus))
-      : (typeof stateLive.if !== "function")
-          ? ((stateLive.then === undefined)
-              ? undefined
-              : (focus => stateLive.component.renderLens(stateLive.then, focus)))
-      : function _checkAndRenderRejection (focus, index) {
-        const condition = stateLive.if(focus, index);
-        return !condition
-                ? stateLive.component.renderLens(stateLive.else, focus)
-            : stateLive.then !== undefined
-                ? stateLive.component.renderLens(stateLive.then, focus)
-            : undefined;
-      };
+  if (!stateLive.if) return focus => stateLive.component.renderLens(stateLive.else, focus);
+  if (typeof stateLive.if !== "function") {
+    return (stateLive.then === undefined)
+        ? undefined
+        : (focus => stateLive.component.renderLens(stateLive.then, focus));
+  }
+  return function _checkAndRenderRejection (focus, index) {
+    const condition = stateLive.if(focus, index);
+    return !condition
+            ? stateLive.component.renderLens(stateLive.else, focus)
+        : stateLive.then !== undefined
+            ? stateLive.component.renderLens(stateLive.then, focus)
+        : undefined;
+  };
 }

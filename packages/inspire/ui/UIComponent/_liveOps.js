@@ -111,9 +111,11 @@ function _initializeElementPropsToLive (component, props, stateLive, kueryStates
       }
       newValue = newValue(kueryValues);
     }
+    /*
     if (typeof newValue === "function") {
       newValue = _valensWrapCallback(component, propValue, propName);
     }
+    */
     (stateLive.recorders[propName] || _recordNewGenericPropValue)(
         stateLive, newValue, propName, component);
   }
@@ -130,10 +132,12 @@ function _recordUpdatedKueryValue (newKueryValue) {
   let wasUpdated;
   const component = stateLive.component;
   for (const [propName, propFetcher] of this.dependentProps) {
-    let propValue = propFetcher(kueryValues);
+    const propValue = propFetcher(kueryValues);
+    /*
     if (typeof propValue === "function") {
       propValue = _valensWrapCallback(component, propValue, propName);
     }
+    */
     if (!(stateLive.recorders[propName] || _recordNewGenericPropValue)(
         stateLive, propValue, propName, component)) {
       wasUpdated = true;
@@ -180,8 +184,7 @@ function _recordNewGenericPropValue (stateLive, propValue, propName, component) 
         throw new Error(`Unrecognized attribute ${propName}`);
       }
     } else if (propName.startsWith("on")
-        && (stateLive.elementProps || (propName[2] === propName[2].toUpperCase()))
-        && (typeof propValue !== "function")) {
+        && (stateLive.elementProps || (propName[2] === propName[2].toUpperCase()))) {
       /*
       console.debug(`DEPRECATED: React-style camelcase event handler '${propName}', prefer 'On:${
           propName[2].toLowerCase()}${propName.slice(3)} (in ${
@@ -252,21 +255,22 @@ export const _valensRecorderProps = {
     return false;
   },
   if: function if_ (stateLive, newValue) {
-    const oldValue = stateLive.if;
+    const oldValue = stateLive.rawIf;
     if (newValue === oldValue
-        && ((oldValue !== undefined) || stateLive.hasOwnProperty("if"))) {
+        && ((oldValue !== undefined) || stateLive.hasOwnProperty("rawIf"))) {
       return true;
     }
-    stateLive.if = newValue;
+    stateLive.rawIf = newValue;
+    stateLive.if = _maybeValensWrapCallback(stateLive.component, stateLive.rawIf, "$Lens.if");
     stateLive.renderRejection = null;
     return !newValue === !oldValue;
   },
   else: function else_ (stateLive, newValue) {
-    stateLive.else = newValue;
+    stateLive.else = _maybeValensWrapCallback(stateLive.component, newValue, "$Lens.else");
     return stateLive.if;
   },
   then: function then_ (stateLive, newValue) {
-    stateLive.then = newValue;
+    stateLive.then = _maybeValensWrapCallback(stateLive.component, newValue, "$Lens.then");
     return !stateLive.if;
   },
   limit (stateLive, newValue) {
@@ -276,7 +280,7 @@ export const _valensRecorderProps = {
   },
   sort (stateLive, newValue) {
     if (stateLive.sort === newValue) return true;
-    stateLive.sort = newValue;
+    stateLive.sort = _maybeValensWrapCallback(stateLive.component, newValue, "$Lens.sort");
     return false;
   },
   reverse (stateLive, newValue) {
@@ -494,6 +498,11 @@ const _elementRecorders = Object.fromEntries([
 ]);
 
 const _onNamespace = qualifierNamespace("On");
+
+function _maybeValensWrapCallback (component: Object, callback_: Function, attributeName: string) {
+  return (typeof callback_ !== "function") ? callback_
+      : _valensWrapCallback(component, callback_, attributeName);
+}
 
 function _valensWrapCallback (component: Object, callback_: Function, attributeName: string) {
   if (!callback_) return callback_;

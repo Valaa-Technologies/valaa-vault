@@ -165,6 +165,7 @@ const Deprecated = Symbol("Deprecated revelation option");
 module.exports = {
   EntryTemplate,
   Deprecated,
+  individualOf,
   dictionaryOf,
   arrayOf,
   deprecated,
@@ -173,16 +174,34 @@ module.exports = {
   expose,
 };
 
+function individualOf (prototype) {
+  return _prototypify(prototype);
+}
+
 function dictionaryOf (valueTemplate) {
   const ret = {};
-  ret[EntryTemplate] = valueTemplate;
+  ret[EntryTemplate] = _prototypify(valueTemplate);
   return ret;
 }
 
 function arrayOf (entryTemplate) {
   const ret = [];
-  ret[EntryTemplate] = entryTemplate;
+  ret[EntryTemplate] = _prototypify(entryTemplate);
   return ret;
+}
+
+function _prototypify (prototype) {
+  if ((prototype == null) || (typeof prototype !== "object")
+      || (prototype[EntryTemplate] !== undefined)
+      || (Object.getPrototypeOf(prototype) !== Object.prototype)) {
+    return prototype;
+  }
+  const ret = Object.fromEntries(Object.entries(prototype).map(([key, value]) => [
+    key,
+    _prototypify(value),
+  ]));
+  ret[EntryTemplate] = null;
+  return Object.freeze(ret);
 }
 
 function deprecated (template, deprecationMessage) {
@@ -266,10 +285,13 @@ function _patchRevelation (gateway, targetRevelation, patchRevelation) {
       patchSymbols: true,
       complexPatch: "overwrite",
       preExtend (target, patch, key, targetParent, patchParent) {
-        if (target === undefined) {
-          if (patch && (typeof patch === "object") && !Array.isArray(patch)
-              && Object.getPrototypeOf(patch) !== Object.prototype) {
+        if ((target === undefined) && patch && (typeof patch === "object")
+            && !Array.isArray(patch)) {
+          if (Object.getPrototypeOf(patch) !== Object.prototype) {
             return patch;
+          }
+          if (patch[EntryTemplate] === null) { // patch is individualOf -template
+            return this.extend({}, patch, key, targetParent, patchParent);
           }
         }
         if ((target == null) || (patch == null) || (key === EntryTemplate)) return undefined;

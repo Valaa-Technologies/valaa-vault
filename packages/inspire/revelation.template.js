@@ -1,8 +1,8 @@
 // @flow
 
-import { arrayOf, dictionaryOf, deprecated } from "~/inspire/Revelation";
+import { individualOf, arrayOf, dictionaryOf, deprecated } from "~/inspire/Revelation";
 
-export default {
+export default individualOf({
   name: "",
   version: "",
   description: "",
@@ -43,7 +43,7 @@ export default {
     blobBuffers: dictionaryOf(blobBuffer()), // deprecated
   },
   views: dictionaryOf(viewConfig()),
-};
+});
 
 function spindlePrototype () {
   return {
@@ -85,7 +85,7 @@ function authorityConfig () {
     credentials: { accessKeyId: "", secretAccessKey: "", region: "", IdentityPoolId: "" },
     api: { endpoint: "", verifyEndpoint: "" },
     iot: { endpoint: "" },
-    s3: { pendingBucketName: "", liveBucketName: "" },
+    s3: { endpoint: "", pendingBucketName: "", liveBucketName: "" },
     repositoryIndexId: false,
     noconnect: null,
     test: null,

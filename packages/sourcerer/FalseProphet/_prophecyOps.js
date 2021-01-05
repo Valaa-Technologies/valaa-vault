@@ -30,6 +30,8 @@ export type Prophecy = Story & {
   isProphecy: true;
 }
 
+const DEFAULT_MAX_REFORM_ATTEMPTS = 10;
+
 // Create prophecies out of provided events and send their chronicle
 // commands upstream. Aborts all remaining events on first exception
 // and rolls back previous ones.
@@ -739,6 +741,10 @@ export class ProphecyOperation extends ProphecyEventResult {
         throw new Error(`Reformation aborted due to falsy proceed condition #${failingIndex}`);
       }
     }
+    const maxAttempts = this._options.maxReformAttempts || DEFAULT_MAX_REFORM_ATTEMPTS;
+    if ((this._reformAttempt || 0) >= maxAttempts) {
+      throw new Error(`Max reform attempts (${maxAttempts}) exceeded`);
+    }
     const reformedProphecy = _recomposeSchismaticStory(this._parent, this._prophecy);
     if (!reformedProphecy
         || (reformation.instigatorChronicleURI
@@ -779,6 +785,7 @@ export class ProphecyOperation extends ProphecyEventResult {
       venue.commandEvent = recomposedSubCommand;
       venue.proclamation = this._parent._connections[chronicleURI]
           .proclaimEvent(venue.commandEvent, Object.create(this._options));
+      venue.proclamation.reformAttempt = this._reformAttempt;
     }
     if (this._progress) {
       this._progress.previousProphecy = this._progress.prophecy;

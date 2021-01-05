@@ -131,14 +131,13 @@ export default class FalseProphetConnection extends Connection {
         this._errorOnFalseProphetProclaimOps(error, null, [op]);
     resultBase._truthForwardResults = this.opChain(
         "_falseProclaim", [op], "_errorOnFalseProphetProclaimOps", op.plog);
-    return {
-      eventResults: events.map((event, index) => {
-        const result = Object.create(resultBase);
-        result.event = event;
-        result.index = index;
-        return result;
-      }),
-    };
+    op.eventResults = events.map((event, index) => {
+      const result = Object.create(resultBase);
+      result.event = event;
+      result.index = index;
+      return result;
+    });
+    return { eventResults: op.eventResults };
   }
 
   static _falseProclaim = [
@@ -206,7 +205,7 @@ export default class FalseProphetConnection extends Connection {
           if (!op.leadingTruths) op.leadingTruths = truthResults.slice(0, index);
           const command = op.events[index];
           const prophecy = command && canonicalRecital.getStoryBy(command.aspects.command.id);
-          if (error) this._mostRecentError = error;
+          if (error) this._mostRecentError = op.eventResults[index].error = error;
           if (((error.proceed || {}).when === "narrated") && (op.renarration === undefined)) {
             op.renarration = this.narrateEventLog({
               eventIdBegin: this._headEventId,

@@ -52,7 +52,8 @@ export type NarrateOptions = {
 };
 
 export type ProclaimOptions = NarrateOptions & {
-  isTruth?: boolean,         // If true the proclaimed events are already authorized truths.
+  isTruth?: boolean,          // If true the proclaimed events are already authorized truths.
+  maxReformAttempts?: number, // maximum number of heretic proclamation reformations (default: 10)
   retrieveMediaBuffer?: RetrieveMediaBuffer,
 };
 

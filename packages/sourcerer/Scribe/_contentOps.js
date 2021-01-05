@@ -130,16 +130,29 @@ function _prepareBvobToUpstreamWithRetries (connection: ScribeConnection,
     const wrappedError = connection.wrapErrorEvent(error, 1, wrap,
         "\n\tmediaInfo:", ...dumpObject(mediaInfo),
     );
-    if ((error.isRetryable !== false) && (retriesRemaining > 0)) {
+    const response = error.response;
+    if (response && error.isRetryable === undefined) {
+      error.isRetryable = _isRetryableStatus[response.status];
+    }
+    if (error.isRetryable && (retriesRemaining > 0)) {
       connection.outputErrorEvent(wrappedError,
           `Exception caught while preparing bvob ${mediaName
             } to upstream (retrying with ${retriesRemaining} retries remaining):`);
       return _prepareBvobToUpstreamWithRetries(connection, buffer, mediaInfo, mediaName, wrap,
           retriesRemaining - 1);
     }
+    error.isSchismatic = true;
+    error.isRevisable = false;
+    error.isReformable = false;
     throw wrappedError;
   }
 }
+
+const _isRetryableStatus = {
+  408: true,
+  503: true,
+  504: true,
+};
 
 /*
 #######
@@ -274,7 +287,7 @@ export async function _retryingTwoWaySyncMediaContent (connection: ScribeConnect
         throw wrappedError;
       }
       connection.outputErrorEvent(wrappedError,
-          "Exception caught when downloading content, retrying");
+          `Exception caught when downloading content, retrying after ${nextBackoff} seconds`);
       if (i > 1) await _waitBackoff(nextBackoff);
       previousBackoff = nextBackoff;
     }

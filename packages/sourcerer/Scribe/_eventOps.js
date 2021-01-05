@@ -100,7 +100,7 @@ export function _integrateLocalNarrationResults (
   }
   params.push(_receiveEvents(
       this, scribeCommandQueue, null, null, "reproclaimCommands",
-      (error) => this._errorOnScribeNarrateOpts(error, 1, params)));
+      (error) => this._errorOnScribeNarrateOps(error, 1, params)));
   return params;
 }
 
@@ -210,11 +210,11 @@ export function _proclaimEvents (connection: ScribeConnection,
         upstreamEventResults = eventResults;
         return mapEagerly(upstreamEventResults,
             result => result.getTruthEvent(),
-            (error, head, index, getTruthResults, entries, callback, onRejected) => {
+            (error, head, index, truthResults, entries, callback, onRejected) => {
               if (error.isSchismatic === false) {
                 // For non-schismatic errors just swallow the error but
                 // leave content to local cache
-                return mapEagerly(entries, callback, onRejected, index + 1, getTruthResults);
+                return mapEagerly(entries, callback, onRejected, index + 1, truthResults);
               }
               // Discard all commands from failing command onwards from the queue.
               // Downstream will handle reformations and re-chronicles.
@@ -223,11 +223,11 @@ export function _proclaimEvents (connection: ScribeConnection,
               connection._deleteQueuedCommandsOnwardsFrom(
                   discardedAspects.log.index, discardedAspects.command.id);
               // Eat the error, forward the already-confirmed events for receiveTruths.
-              return getTruthResults;
+              return truthResults;
             });
       },
-      function _receiveConfirmedTruthsLocally (getTruthResults) {
-        const confirmedTruths = getTruthResults && getTruthResults.filter(notNull => notNull);
+      function _receiveConfirmedTruthsLocally (truthResults) {
+        const confirmedTruths = truthResults && truthResults.filter(notNull => notNull);
         return confirmedTruths && confirmedTruths.length && receiveTruths(confirmedTruths);
       },
       () => (resultBase._forwardResults = upstreamEventResults),
@@ -340,7 +340,7 @@ export function _receiveEvents (
   if (!newActions.length) return receivedActions;
 
   const syncOptions = {
-    retryTimes: 4, delayBaseSeconds: 5, blockOnBrokenDownload: false,
+    retryTimes: 3, delayBaseSeconds: 5, blockOnBrokenDownload: false,
     retrieveMediaBuffer:
         isReceivingTruths ? retrieveMediaBuffer
         : isReproclamation

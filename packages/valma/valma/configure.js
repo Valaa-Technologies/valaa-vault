@@ -42,12 +42,12 @@ exports.handler = async (yargv) => {
 
   const selectorGlob = selectorGlobFrom({ domain, type, workspace: name });
   ret.toolsetConfigures = await vlm.invoke(
-      `.configure/.toolsets/${selectorGlob}${yargv.toolsetGlob || "*"}/**/*`,
+      `.configure/.toolsets/${selectorGlob}${yargv.toolsetGlob || "*"}{,/**/*}`,
       rest);
   Object.assign(ret, await updateConfigurableSideEffects(vlm, ...ret.toolsetConfigures));
 
   if (!yargv.toolsetGlob) {
-    ret.mainConfigures = await vlm.invoke(`.configure/${selectorGlob}**/*`, rest);
+    ret.mainConfigures = await vlm.invoke(`.configure/${selectorGlob}{,**/*}`, rest);
     Object.assign(ret, await updateConfigurableSideEffects(vlm, ...ret.mainConfigures));
     if (ret.success === false) return ret;
   }

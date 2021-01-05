@@ -284,6 +284,12 @@ const _vlm = {
     });
   },
 
+  async inquireQuestion (question) {
+    return (await this.inquire({
+      ...question,
+      name: "question",
+    })).question;
+  },
   async inquireText (message, default_ = "") {
     return (await this.inquire({
       type: "input", name: "text", message, default: default_,
@@ -937,10 +943,24 @@ while (workspacePath && !_vlm.shell.test("-f", _vlm.path.join(workspacePath, "pa
 }
 
 _vlm._packageConfigStatus = {
-  path: _vlm.path.join(workspacePath || "./", "package.json"), workspacePath, updated: false,
+  filename: "package.json",
+  path: _vlm.path.join(workspacePath || "./", "package.json"),
+  workspacePath,
+  updated: false,
+  createUpdatedContent: currentContent => {
+    const reorderedContent = {};
+    reorderedContent.name = currentContent.name;
+    reorderedContent.version = currentContent.version;
+    if (currentContent.valos !== undefined) reorderedContent.valos = currentContent.valos;
+    Object.keys(currentContent).forEach(key => {
+      if (reorderedContent[key] === undefined) reorderedContent[key] = currentContent[key];
+    });
+    return reorderedContent;
+  },
 };
 
 _vlm._toolsetsConfigStatus = {
+  filename: "toolsets.json",
   path: _vlm.path.join(workspacePath || "./", "toolsets.json"), workspacePath, updated: false,
 };
 
@@ -2381,14 +2401,13 @@ async function _fillVargvInteractively () {
   }
   delete this.vargs.getOptions().interactive;
   const questions = [];
-  const answers = {};
-  for (const optionName of Object.keys(interactiveOptions)) {
-    answers[optionName] = this.vargv[optionName];
-  }
+  const answers = Object.assign({}, this.vargv);
   for (const optionName of Object.keys(interactiveOptions)) {
     const option = interactiveOptions[optionName];
     let questionOptions = option.interactive;
-    if (typeof questionOptions === "function") questionOptions = questionOptions(answers);
+    if (typeof questionOptions === "function") {
+      questionOptions = questionOptions(answers);
+    }
     questionOptions = await questionOptions;
     const question = Object.assign({}, questionOptions);
     question.array = option.array;
@@ -2540,30 +2559,38 @@ function _getConfigAtPath (root, keys) {
           root);
 }
 
-function updatePackageConfig (updatesOrPath, maybeUpdates) {
+function updatePackageConfig (updatesOrPath, maybeUpdates, maybeOptions) {
   if (!_vlm._packageConfigStatus.content) {
     throw new Error("vlm.updatePackageConfig: cannot update package.json as it doesn't exist");
   }
-  return _updateConfig(_vlm, _vlm._packageConfigStatus, updatesOrPath, maybeUpdates);
+  return _updateConfig(_vlm, _vlm._packageConfigStatus, updatesOrPath, maybeUpdates, maybeOptions);
 }
 
-function updateToolsetsConfig (updatesOrPath, maybeUpdates) {
+function updateToolsetsConfig (updatesOrPath, maybeUpdates, maybeOptions) {
   if (!_vlm._toolsetsConfigStatus.content) {
     _vlm._toolsetsConfigStatus.content = {};
     _vlm._toolsetsConfigStatus.updated = true;
   }
-  return _updateConfig(_vlm, _vlm._toolsetsConfigStatus, updatesOrPath, maybeUpdates);
+  return _updateConfig(_vlm, _vlm._toolsetsConfigStatus, updatesOrPath, maybeUpdates, maybeOptions);
 }
 
-function updateFileConfig (workspaceFile, updatesOrPath, maybeUpdates) {
-  const fileConfigStatus = { path: this.path.join(process.cwd(), workspaceFile) };
+function updateFileConfig (filename, updatesOrPath, maybeUpdates, maybeOptions = { flush: true }) {
+  if (!Array.isArray(updatesOrPath)) {
+    return updateFileConfig.call(this, filename, [], updatesOrPath, maybeUpdates);
+  }
+  const fileConfigStatus = { filename, path: this.path.join(process.cwd(), filename) };
   _reloadFileConfig(fileConfigStatus);
-  _updateConfig(this, fileConfigStatus, updatesOrPath, maybeUpdates);
-  _commitUpdates(this, workspaceFile, fileConfigStatus);
+  const updatedConfig = _updateConfig(
+      this, fileConfigStatus, updatesOrPath, maybeUpdates, maybeOptions);
+  return updatedConfig;
 }
 
-function _updateConfig (vlm, configStatus, updatesOrPath, maybeUpdates) {
-  const updates = _nestUpdatesInsidePath(updatesOrPath, maybeUpdates);
+function _updateConfig (vlm, configStatus, updatesOrPath, maybeUpdates, options) {
+  if (!Array.isArray(updatesOrPath)) {
+    return _updateConfig(vlm, configStatus, [], updatesOrPath, maybeUpdates);
+  }
+  const updates = updatesOrPath.reduceRight(
+      (innerUpdates, pathKey) => ({ [pathKey]: innerUpdates }), maybeUpdates);
   // TODO(iridian): Implement locally pending config writes. See _flushPendingConfigWrites
   if (typeof updates !== "object" || !updates) {
     throw new Error(`Invalid arguments for config update: expexted object, got ${typeof update}`);
@@ -2575,14 +2602,10 @@ function _updateConfig (vlm, configStatus, updatesOrPath, maybeUpdates) {
     vlm.ifVerbose(1)
         .info(`config file updated:`, configStatus.path);
   }
-}
-
-function _nestUpdatesInsidePath (updatesOrPath, maybeUpdates) {
-  return !Array.isArray(updatesOrPath)
-      ? updatesOrPath
-      : updatesOrPath.reduceRight(
-          (innerUpdates, pathKey) => ({ [pathKey]: innerUpdates }),
-          maybeUpdates);
+  if ((options || {}).flush) {
+    _commitUpdates(vlm, configStatus);
+  }
+  return updatedConfig;
 }
 
 // Toolset vlm functions
@@ -2628,21 +2651,23 @@ function confirmToolsetExists (toolsetName) {
   return false;
 }
 
-function updateToolsetConfig (toolsetName, updates) {
+function updateToolsetConfig (toolsetName, updates, options) {
   if (typeof toolsetName !== "string" || typeof updates !== "object" || !toolsetName || !updates) {
     throw new Error(`Invalid arguments for updateToolsetConfig, expexted string|object, got ${
         typeof toolsetName}|${typeof updates}`);
   }
-  return this.updateToolsetsConfig({ [toolsetName]: updates });
+  const updated = this.updateToolsetsConfig([toolsetName], updates, options);
+  return updated[toolsetName];
 }
 
-function updateToolConfig (toolsetName, toolName, updates) {
+function updateToolConfig (toolsetName, toolName, updates, options) {
   if (typeof toolsetName !== "string" || typeof toolName !== "string" || typeof updates !== "object"
       || !toolsetName || !toolName || !updates) {
     throw new Error(`Invalid arguments for updateToolConfig, expexted string|string|object, got ${
         typeof toolsetName}|${typeof toolName}|${typeof updates}`);
   }
-  return this.updateToolsetsConfig({ [toolsetName]: { tools: { [toolName]: updates } } });
+  const updated = this.updateToolsetsConfig([toolsetName, "tools", toolName], updates, options);
+  return updated[toolsetName].tools[toolName];
 }
 
 function domainVersionTag (domain) {
@@ -2738,30 +2763,26 @@ function _flushPendingConfigWrites () {
   // but the resulting semantics are not clean and might result in inconsistent/partial config
   // writes. The config files could be stored in the local vlm contexts and selectively written only
   // when the command associated with a context successfully completes.
-  _commitUpdates(this, "toolsets.json", _vlm._toolsetsConfigStatus);
-  _commitUpdates(this, "package.json", _vlm._packageConfigStatus, currentContent => {
-    const reorderedContent = {};
-    reorderedContent.name = currentContent.name;
-    reorderedContent.version = currentContent.version;
-    if (currentContent.valos !== undefined) reorderedContent.valos = currentContent.valos;
-    Object.keys(currentContent).forEach(key => {
-      if (reorderedContent[key] === undefined) reorderedContent[key] = currentContent[key];
-    });
-    return reorderedContent;
-  });
+  _commitUpdates(this, _vlm._toolsetsConfigStatus);
+  _commitUpdates(this, _vlm._packageConfigStatus);
 }
 
-function _commitUpdates (vlm, filename, configStatus, createUpdatedContent = (content => content)) {
+function _commitUpdates (vlm, configStatus) {
   // TODO(iridian): Implement locally pending config writes. See _flushPendingConfigWrites
   if (!configStatus.updated) return;
   if (_vlm.vargv && _vlm.vargv["dry-run"]) {
-    vlm.info(`commit '${filename}' updates --dry-run:`, "not committing queued updates to file");
+    vlm.info(`commit '${configStatus.path}' updates --dry-run:`,
+        "not committing queued updates to file");
     return;
   }
-  const configString = JSON.stringify(createUpdatedContent(configStatus.content), null, 2);
+  const configString = JSON.stringify(
+      configStatus.createUpdatedContent
+          ? configStatus.createUpdatedContent(configStatus.content)
+          : configStatus.content,
+      null, 2);
   shell.ShellString(`${configString}\n`).to(configStatus.path);
   vlm.ifVerbose(1)
-      .info(`committed '${filename}' updates to file:`);
+      .info(`committed '${configStatus.path}' updates to file:`);
   configStatus.updated = false;
 }
 

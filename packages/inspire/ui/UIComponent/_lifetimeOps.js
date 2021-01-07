@@ -63,7 +63,7 @@ function _getActiveParentFocus (props: Object, context: Object) {
   return getScopeValue(context.parentUIContext, "focus");
 }
 
-function _tryUpdateUIContext (component, nextProps, oldPropsContext) {
+function _tryUpdateUIContext (component, nextProps) {
   const arrayIndex = nextProps.arrayIndex;
   const uiContext = component.state.uiContext;
   if (arrayIndex !== undefined) {
@@ -72,15 +72,13 @@ function _tryUpdateUIContext (component, nextProps, oldPropsContext) {
         nextProps.elementIndex !== undefined ? nextProps.elementIndex : arrayIndex);
   }
   const propsContext = nextProps.context;
-  if (!propsContext
-      || (oldPropsContext && !_comparePropsOrState(propsContext, oldPropsContext, "shallow"))) {
-    return;
-  }
-  for (const name of Object.getOwnPropertyNames(propsContext)) {
-    setScopeValue(uiContext, name, propsContext[name]);
-  }
-  for (const symbol of Object.getOwnPropertySymbols(propsContext)) {
-    setScopeValue(uiContext, symbol, propsContext[symbol]);
+  if (propsContext) {
+    for (const name of Object.getOwnPropertyNames(propsContext)) {
+      setScopeValue(uiContext, name, propsContext[name]);
+    }
+    for (const symbol of Object.getOwnPropertySymbols(propsContext)) {
+      setScopeValue(uiContext, symbol, propsContext[symbol]);
+    }
   }
 }
 

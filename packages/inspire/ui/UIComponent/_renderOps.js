@@ -224,15 +224,13 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
           return _tryRenderPropertyLens(component, lens, focus, lensName);
         }
         if (lens.getTypeName() === "Media") {
-          ret = _tryRenderMediaLens(component, lens, focus, lensName, vInterpreterProperty);
-          subLensName = `~<-${lensName}`;
-        } else {
-          subLensName = `<<-${lensName}`;
-          ret = component.readSlotValue(
-              "delegatePropertyLens", Lens.delegatePropertyLens, lens, true);
-          if ((ret == null) || ((ret.delegate || [])[0] === Lens.notLensResourceLens)) {
-            return component.renderSlotAsLens("notLensResourceLens", lens, undefined, subLensName);
-          }
+          return _tryRenderMediaLens(component, lens, focus, lensName, vInterpreterProperty);
+        }
+        subLensName = `<<-${lensName}`;
+        ret = component.readSlotValue(
+            "delegatePropertyLens", Lens.delegatePropertyLens, lens, true);
+        if ((ret == null) || ((ret.delegate || [])[0] === Lens.notLensResourceLens)) {
+          return component.renderSlotAsLens("notLensResourceLens", lens, undefined, subLensName);
         }
       } else if (Array.isArray(lens)) {
         return _tryRenderLensArray(component, lens, focus, lensName);
@@ -282,8 +280,8 @@ function _tryRenderPropertyLens (component, vProperty, focus, lensName) {
       focus, subLensName, undefined, undefined, vProperty);
 }
 
-function _tryRenderMediaLens (
-    component: UIComponent, media: any, focus: any, lensName, vInterpreterProperty: ?Vrapper) {
+function _tryRenderMediaLens (component: UIComponent, media: any, focus: any, lensName,
+    vInterpreterProperty: ?Vrapper) {
   const bindingSlot = media.getRawId();
   if (!component.getBoundSubscription(bindingSlot)) {
     component.bindLiveKuery(bindingSlot, media, VALEK.toMediaContentField(), {
@@ -308,7 +306,10 @@ function _tryRenderMediaLens (
     vIntegrationScope = baseProperty.step("owner", { discourse: engine.discourse });
   }
   const ret = thisChainEagerly(
-      { component, media, options: { fallbackContentType: "text/vsx", vIntegrationScope } },
+      {
+        component, media, lensName,
+        options: { fallbackContentType: "text/vsx", vIntegrationScope },
+      },
       component.maybeDelayed(Lens.pendingMediaLens),
       _renderMediaLensChain,
       function errorOnRenderMediaLens (error) {
@@ -340,20 +341,17 @@ const _renderMediaLensChain = [
     } else if (contentInterpretation.__esModule) {
       if (contentInterpretation.default !== undefined) return contentInterpretation.default;
       error = new Error(`Can't find default export from module Media '${info.name}'`);
-    } else if (Array.isArray(contentInterpretation)
-        || (Object.getPrototypeOf(contentInterpretation) === Object.prototype)
-        || React.isValidElement(contentInterpretation)) {
-      // FIXME(iridian, 2020-07): This is a kludge which breaks at
-      // corner-cases. Notably, if a VSX lens contains one or more
-      // sub-elements which resolve to Media's, then those medias will
-      // here set the top-level ui context integration scope resource
-      // and thus will conflict with each other.
-      this.component.setUIContextValue("this", this.media);
+    } else if (React.isValidElement(contentInterpretation)) {
+      const extendContext = { this: this.media };
       if (this.options.vIntegrationScope) {
-        this.component.setUIContextValue(
-            Lens.integrationScopeResource, this.options.vIntegrationScope);
+        extendContext[Lens.integrationScopeResource] = this.options.vIntegrationScope;
       }
-      return contentInterpretation;
+      return wrapElementInValens(
+          this.component, contentInterpretation, focus, `~<-${this.lensName}`, extendContext);
+    } else if (Array.isArray(contentInterpretation)
+        || (Object.getPrototypeOf(contentInterpretation) === Object.prototype)) {
+      error = new Error(`Media '${info.name
+          }' interpretation must not return an array or plain old object`);
     } else if (contentInterpretation instanceof Error) {
       error = contentInterpretation;
     } else {

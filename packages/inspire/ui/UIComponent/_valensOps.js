@@ -12,8 +12,8 @@ import { arrayFromAny, dumpObject, isPromise, wrapError } from "~/tools";
 export const ValensPropsTag = Symbol("Valens.props");
 
 export function wrapElementInValens (component: UIComponent, element: Object, focus: any,
-    hierarchyKey?: string) {
-  const ret = tryWrapElementInValens(component, element, focus, hierarchyKey);
+    hierarchyKey?: string, extendContext?: Object) {
+  const ret = tryWrapElementInValens(component, element, focus, hierarchyKey, extendContext);
   return (ret !== undefined) ? ret : element;
 }
 
@@ -29,8 +29,8 @@ let _Valens;
  * @param {string} [name]
  * @returns
  */
-export function tryWrapElementInValens (
-    component: UIComponent, element: Object, focus: any, hierarchyKey?: string) {
+export function tryWrapElementInValens (component: UIComponent, element: Object, focus: any,
+    hierarchyKey?: string, extendContext?: Object) {
   // TODO(iridian, 2020-06): This whole setup should be implemented in
   // JSXDecoder also, then deprecated here, and finally removed from
   // here.
@@ -50,9 +50,10 @@ export function tryWrapElementInValens (
         value: `Valens_${valensProps.key}`,
       });
       // */
-      return React.createElement(...valensArgs, ...arrayFromAny(element.props.children));
+      const props = _mergeExtendContextToProps(extendContext, valensArgs[1]);
+      return React.createElement(valensArgs[0], props, ...arrayFromAny(element.props.children));
     }
-    return tryPostRenderElement(component, element, focus, hierarchyKey);
+    return tryPostRenderElement(component, element, focus, hierarchyKey, extendContext);
   } catch (error) {
     throw wrapError(error, `During ${component.debugId()}\n .tryWrapElementInValens(`,
             typeof element.type === "function" ? element.type.name : element.type, `), with:`,
@@ -62,12 +63,18 @@ export function tryWrapElementInValens (
   }
 }
 
-export function postRenderElement (component, element, focus, hierarchyKey) {
-  const ret = tryPostRenderElement(component, element, focus, hierarchyKey);
+function _mergeExtendContextToProps (context, props) {
+  if (!context) return props;
+  if (!props.context) return { ...props, context };
+  return { ...props, context: { ...props.context, ...context } };
+}
+
+export function postRenderElement (component, element, focus, hierarchyKey, extendContext) {
+  const ret = tryPostRenderElement(component, element, focus, hierarchyKey, extendContext);
   return (ret !== undefined) ? ret : element;
 }
 
-export function tryPostRenderElement (component, element, focus, hierarchyKey) {
+export function tryPostRenderElement (component, element, focus, hierarchyKey, extendContext) {
   let processedProps;
   if (isUIComponentElement(element)) {
     // const hasUIContext = props.parentUIContext;
@@ -78,14 +85,23 @@ export function tryPostRenderElement (component, element, focus, hierarchyKey) {
     // Otherwise if the UIComponent has a key no pre-processing
     // is required now. UIComponent does its own post-processing.
     // else
-    if (element.key || !hierarchyKey) return undefined;
-    processedProps = { ...element.props, key: hierarchyKey };
+    if (!element.key && hierarchyKey) {
+      processedProps = { ...element.props, key: hierarchyKey };
+      if (extendContext) {
+        processedProps.context = !processedProps.context
+            ? extendContext
+            : Object.assign(processedProps.context, extendContext);
+      }
+    } else if (extendContext) {
+      processedProps = _mergeExtendContextToProps(extendContext, element.props);
+    }
+  } else if (extendContext) {
+    return React.createElement(UIComponent, { context: extendContext }, element);
   } else {
     // non-UIComponent sans live props has its children directly rendered.
     const children = component.tryRenderLensSequence(element.props.children, focus, hierarchyKey);
     if (children === undefined) {
-      if (element.key || !hierarchyKey) return undefined;
-      processedProps = { ...element.props, key: hierarchyKey };
+      if (!element.key && hierarchyKey) processedProps = { ...element.props, key: hierarchyKey };
     } else if (isPromise(children)) {
       children.operationInfo = Object.assign(children.operationInfo || {}, {
         slotName: "pendingElementsLens", focus: element.props.children,
@@ -96,6 +112,7 @@ export function tryPostRenderElement (component, element, focus, hierarchyKey) {
       processedProps = { ...element.props, key: element.key || hierarchyKey, children };
     }
   }
+  if (!processedProps) return undefined;
   if (element.ref) processedProps.ref = element.ref;
   return React.createElement(element.type, processedProps);
 }

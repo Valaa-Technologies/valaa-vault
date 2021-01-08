@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0-alpha.3](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.2...v0.37.0-alpha.3) (2021-01-08)
+
+
+### Bug Fixes
+
+* **#698:** Inline-including context.this.something causes context.this to be wonky ([4aecc88](https://github.com/valaatech/kernel/commit/4aecc88496e2de2642440a363ff92cf68601b49a)), closes [#698](https://github.com/valaatech/kernel/issues/698)
+* Revert generic attribute function wrapping back to selective ones ([bde4fb2](https://github.com/valaatech/kernel/commit/bde4fb27b8a5401df4d63c9f4fd3b0d76604ab07))
+
+
+### Features
+
+* individualOf for revelation templates ([0dd723e](https://github.com/valaatech/kernel/commit/0dd723e67f9f2254d79a597370ec6631f9eda7b3))
+
+
+
+
+
 # [0.37.0-alpha.2](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.1...v0.37.0-alpha.2) (2020-12-14)
 
 

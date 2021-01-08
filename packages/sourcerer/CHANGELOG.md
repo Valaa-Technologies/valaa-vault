@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0-alpha.3](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.2...v0.37.0-alpha.3) (2021-01-08)
+
+
+### Features
+
+* **sourcerer:** Add maxReformAttempts to ProclaimOptions ([a41aa0a](https://github.com/valaatech/kernel/commit/a41aa0aa4aff408d500a4fb213942447d680fa2a))
+
+
+
+
+
 # [0.37.0-alpha.2](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.1...v0.37.0-alpha.2) (2020-12-14)
 
 **Note:** Version bump only for package @valos/sourcerer

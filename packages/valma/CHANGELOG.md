@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0-alpha.3](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.2...v0.37.0-alpha.3) (2021-01-08)
+
+
+### Features
+
+* **valma:** Add update*Config (path, update, { flush: true }) option ([192e122](https://github.com/valaatech/kernel/commit/192e122232a885e15e146930938fede775290c92))
+
+
+
+
+
 # [0.37.0-alpha.2](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.1...v0.37.0-alpha.2) (2020-12-14)
 
 

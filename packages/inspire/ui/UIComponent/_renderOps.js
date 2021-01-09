@@ -190,8 +190,8 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
       if (lens instanceof Kuery) {
         subLensName = `§<-${lensName}`;
         const options = { asRepeathenable: "reuse", scope: component.getUIContext() };
-        const initialRepeathenable = component.bindLiveKuery(
-            subLensName, component.getUIContextValue("frame"), lens, options);
+        const head = component.getUIContextValue("frame");
+        const initialRepeathenable = component.bindLiveKuery(subLensName, head, lens, options);
         const repeathenableState = options.repeathenableState;
         if (initialRepeathenable) {
           repeathenableState.chain = thenChainEagerly(
@@ -207,7 +207,10 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
           );
         }
         ret = repeathenableState.currentValue;
-        if (ret === undefined) ret = repeathenableState.chain || null;
+        if (ret === undefined) {
+          ret = repeathenableState.chain || null;
+          repeathenableState.currentValue = null;
+        }
         // ret = React.createElement(UIComponent,
         //    component.childProps(subLensName, { delegate: [lens] }));
       } else if (lens instanceof Vrapper) {

@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0-alpha.4](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.3...v0.37.0-alpha.4) (2021-01-09)
+
+
+### Bug Fixes
+
+* **699:** Chronicle activation does not cause live trigger? ([b900df2](https://github.com/valaatech/kernel/commit/b900df2b1783af8bda898150e0dc4d030b763272))
+* **702:** Instance lens does not work as the only element in VSX ([acf1595](https://github.com/valaatech/kernel/commit/acf1595e9cdb6bb2bf7d03a9dd47b4b3cb2cec64))
+
+
+
+
+
 # [0.37.0-alpha.3](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.2...v0.37.0-alpha.3) (2021-01-08)
 
 

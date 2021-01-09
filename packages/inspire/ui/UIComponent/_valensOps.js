@@ -34,7 +34,7 @@ export function tryWrapElementInValens (component: UIComponent, element: Object,
   // TODO(iridian, 2020-06): This whole setup should be implemented in
   // JSXDecoder also, then deprecated here, and finally removed from
   // here.
-  if (element.type.isValens) return undefined;
+  if (element.type.isValens && !extendContext) return undefined;
   let valensArgs = element[ValensPropsTag];
   try {
     if (valensArgs === undefined) {

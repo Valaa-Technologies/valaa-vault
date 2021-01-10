@@ -162,8 +162,8 @@ class LogAspect {
   commandSignature: ?string;
 
   // hashV240(`{aspect.command.eventHash} ${aspect.chain.timeStamp} ${
-  //     aspect.chain.commandSignature} ${previousEventInChain.aspect.chain.chainHash}`)
-  chainHash: HashV240;
+  //     aspect.chain.commandSignature} ${previousEventInChain.aspect.chain.vplotHashV0}`)
+  vplotHashV0: HashV240;
 
   // Contains the other aspects. Only present if this aspect is the root aspect.
   aspects: ?EventAspects;

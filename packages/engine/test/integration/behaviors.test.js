@@ -340,7 +340,7 @@ describe("Chronicle behaviors: VChronicle:requireAuthoredEvents", () => {
     // Scramble the signature
     const correctSignature = event.aspects.author.signature;
     event.aspects.author.signature =
-        "sfnIAQa16JF6MIvHNbDbbNp3pa__lj0a3iHxzFjQvysUR-2pBwkP-FOmAbg-SvCH-ZsehaNUghgJExhzBqr9Aw";
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     expect((await harness.receiveEventsFrom(decepAuthoroot.getConnection(), {})).length)
         .toEqual(1);
 
@@ -479,7 +479,7 @@ describe("Chronicle behaviors: VChronicle:requireAuthoredEvents", () => {
           aspects: { author: { antecedent: 3, publicIdentity: primeDirectorId } },
         });
     expect(decepEvents[0].invalidationReason)
-        .toMatch(/Invalid VLog:chainHash/);
+        .toMatch(/Invalid VLog:vplotHashV0/);
 
     // See note on previous test
     // expect(decepAuthoroot.propertyValue("hacked"))

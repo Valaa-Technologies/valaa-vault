@@ -26,12 +26,16 @@ export function _resolveProclaimAspectParams (connection: FalseProphetConnection
     aspectParams.secretKey = identityParams.secretKey;
   }
 
-  const previousEvent = unconfirmeds.length
+  let predecessorLogAspect = (((unconfirmeds.length
       ? unconfirmeds[unconfirmeds.length - 1]
-      : connection._latestTruth;
-  aspectParams.predecessorLog = ((previousEvent || {}).aspects || {}).log || null;
-
+      : connection._latestTruth) || {}).aspects || {}).log;
   const { previousState, state } = op.options.prophecy;
+  if (!(predecessorLogAspect || {}).vplotHashV0) {
+    predecessorLogAspect = _isHashChainingEnabled(connection, aspectParams, previousState, state)
+        ? null : undefined;
+  }
+  if (predecessorLogAspect !== undefined) aspectParams.predecessorLogAspect = predecessorLogAspect;
+
   const rejection = _validateRoleAndRefreshChroniclePublicKey(
       connection, aspectParams, previousState, state,
       (op.options.chronicleInfo || {}).updatesVChronicle, connection._bypassLocalAuthorChecks);
@@ -41,8 +45,13 @@ export function _resolveProclaimAspectParams (connection: FalseProphetConnection
     error.updateProgress = { isSchismatic: true, isRevisable: false, isReformable: false };
     throw error;
   }
-
   return aspectParams;
+}
+
+function _isHashChainingEnabled (connection, aspectParams, previousState, state) {
+  return state.getIn([
+    "Property", `${connection._rootStem}@.$VChronicle.requireAuthoredEvents@@`, "value", "value",
+  ]);
 }
 
 function _validateRoleAndRefreshChroniclePublicKey (
@@ -177,12 +186,13 @@ export function _addLogAspect (connection, op, aspectParams, event) {
   const log = obtainAspectRoot("log", event, "event");
   try {
     log.index = aspectParams.index;
-    if (aspectParams.predecessorLog !== undefined) {
-      log.chainHash = _calculateChainHash(event, log.aspects.author, aspectParams.predecessorLog);
+    if (aspectParams.predecessorLogAspect !== undefined) {
+      log.vplotHashV0 = _calculateVPlotHashV0(
+          event, log.aspects.author, aspectParams.predecessorLogAspect);
     }
     connection.debugEvent(3, () => [
-      "VLog:chainHash added:", log.chainHash,
-      "\n\tpredecessorLog:", aspectParams.predecessorLog,
+      "VLog:vplotHashV0 added:", log.vplotHashV0,
+      "\n\tpredecessorLogAspect:", aspectParams.predecessorLogAspect,
       "\n\tevent:", ...dumpObject(event),
       "\n\tevent:", JSON.stringify(event),
     ]);
@@ -193,21 +203,21 @@ export function _addLogAspect (connection, op, aspectParams, event) {
 
 function _validateLogAspect (connection, event, predecessor) {
   const log = swapAspectRoot("log", event, "event");
-  const chainHash = log.chainHash
-      && _calculateChainHash(event, log.aspects.author, predecessor && predecessor.aspects.log);
+  const vplotHashV0 = log.vplotHashV0
+      && _calculateVPlotHashV0(event, log.aspects.author, predecessor && predecessor.aspects.log);
   swapAspectRoot("event", log, "log");
-  if (chainHash === log.chainHash) return undefined;
+  if (vplotHashV0 === log.vplotHashV0) return undefined;
   connection.errorEvent(0, () => [
-    "VLog:chainHash mismatch, got:", chainHash, ", expected:", log.chainHash,
+    "VLog:vplotHashV0 mismatch, got:", vplotHashV0, ", expected:", log.vplotHashV0,
     "\n\tpredecessorLog:", ...dumpObject(predecessor && predecessor.aspects.log),
     "\n\tevent:", ...dumpObject(event),
   ]);
-  return "Invalid VLog:chainHash";
+  return "Invalid VLog:vplotHashV0";
 }
 
-function _calculateChainHash (event, authorAspect, predecessorLogAspect) {
-  const chainHash = (predecessorLogAspect || {}).chainHash;
-  const predecessorStep = !chainHash ? "" : `@.$VLog.chainHash$.${chainHash}`;
+function _calculateVPlotHashV0 (event, authorAspect, predecessorLogAspect) {
+  const vplotHashV0 = (predecessorLogAspect || {}).vplotHashV0;
+  const predecessorStep = !vplotHashV0 ? "" : `@.$VLog.vplotHashV0$.${vplotHashV0}`;
   let eventStep = (authorAspect || {}).signature
       && `@.$VLog.signature$.${(authorAspect || {}).signature}`;
   if (!eventStep) {
@@ -216,9 +226,9 @@ function _calculateChainHash (event, authorAspect, predecessorLogAspect) {
     eventStep = `@.$VLog.event$.${formVPlot(event)}`;
     event.meta = meta;
   }
-  const ret = hashVPlot(`${predecessorStep}${eventStep}@@`, { isValidVPlot: true });
+  const ret = hashVPlot(`${eventStep}${predecessorStep}@@`, { isValidVPlot: true });
   /*
-  console.log("VLog:chainHash:", ret,
+  console.log("VLog:vplotHashV0:", ret,
       "\n\tvplot:", `${predecessorStep}${eventStep}@@`,
       "\n\tevent:", JSON.stringify(plotEvent, null, 2),
       );

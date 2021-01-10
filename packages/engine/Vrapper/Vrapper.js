@@ -809,8 +809,8 @@ export default class Vrapper extends Cog {
       if (extendScope) Object.assign(options.scope, extendScope);
       const ret = this.run(this[HostRef], valoscriptKuery, options);
       if (discourse) {
-        const result = discourse.releaseFabricator();
         discourse = null;
+        const result = options.discourse.releaseFabricator();
         if (result) {
           return thenChainEagerly(
               (options.awaitResult || (r => r.getRecordedEvent()))(result),
@@ -1312,6 +1312,7 @@ export default class Vrapper extends Cog {
         valueEntry = explicitValueEntry;
       } else {
         const thisTransient = this.getTransient(options);
+        if (!thisTransient) return undefined; // destroyed
         valueEntry = thisTransient.get("value");
         if (!valueEntry) {
           // immaterial property kludge

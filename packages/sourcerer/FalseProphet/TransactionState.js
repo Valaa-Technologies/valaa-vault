@@ -71,10 +71,10 @@ export const fabricatorOps = {
       throw new Error("Invalid call to releaseFabricator from outside Fabricator");
     }
     this.logEvent(2, () => [
-      (options || {}).abort ? "  <<<<====   ABORTING"
-          : (options || {}).rollback ? "  <<<<====   rolling back"
+      (options || {}).abort ? "  <<====   ABORTING"
+          : (options || {}).rollback ? "  <<====   rolling back"
           : (this._finalizedFabricatorCount + 1 < this._fabricatorCount) ? "releasing on"
-          : "  <<<<====  finalizing",
+          : "  <<====  finalizing",
       this._parentFabricator ? "fabricator" : "TRANSACTION", this._fabricatorName, ":",
       ...dumpObject({ fabricator: this, transaction, options }),
     ]);

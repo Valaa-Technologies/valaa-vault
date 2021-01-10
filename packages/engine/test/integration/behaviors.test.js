@@ -144,17 +144,21 @@ describe("Chronicle behaviors: VChronicle:requireAuthoredEvents", () => {
     swapAspectRoot("author", author, "event");
   });
 
-  xit("refuses to profess a non-authorable outgoing event", async () => {
+  it("refuses to profess a non-authorable outgoing event", async () => {
     await prepareHarnesses({ verbosity: 0, claimBaseBlock: true });
     const { authoroot } = await entities().creator
         .doValoscript(_createAuthoredOnlyChronicle(), {}, {});
 
     const { decepAuthoroot } = await _sourcerDecepAuthoroot(authoroot);
+    const errorResult = {};
 
     expect(() => decepAuthoroot.doValoscript(`
       this.nonAuthoredNotRefused = true;
-    `)).toThrow(/blrblrblr/);
+      valos.getTransactor().addEventListener("error", event => errorResult.event = event);
+    `, { errorResult })).toThrow(/No VChronicle:contributor found/);
 
+    expect(errorResult.event)
+        .toMatchObject({ isSchismatic: true, isRevisable: false, isReformable: false });
     expect(decepAuthoroot.propertyValue("nonAuthoredNotRefused"))
         .toBeUndefined();
   });

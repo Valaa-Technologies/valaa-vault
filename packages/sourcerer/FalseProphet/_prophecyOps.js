@@ -551,8 +551,10 @@ export class ProphecyOperation extends ProphecyEventResult {
       try {
         this._sceneName = `proclaim act #${actIndex} command to ${
             venue.connection.getName()}`;
+        const options = Object.create(this._options);
+        options.prophecy = this;
         venue.currentProclamation = venue.proclamation = venue.connection
-            .proclaimEvent(venue.commandEvent, Object.create(this._options));
+            .proclaimEvent(venue.commandEvent, options);
       } catch (error) {
         throw this._parent.wrapErrorEvent(error, 1,
             new Error(`proclaimEvents.act[${actIndex}].connection["${
@@ -659,7 +661,7 @@ export class ProphecyOperation extends ProphecyEventResult {
     const transactor = this.event.meta.transactor;
     if (transactor) {
       const errorEvent = this.getProgressErrorEvent(
-          "profess", this._rejectionError, { prophecy }, error.progressUpdate);
+          "profess", this._rejectionError, { prophecy }, error.updateProgress);
       transactor.dispatchAndDefaultActEvent(errorEvent);
     } else if (!this._truthStory && (this.getVerbosity() >= 1)) {
       this.outputErrorEvent(this._rejectionError,
@@ -668,7 +670,10 @@ export class ProphecyOperation extends ProphecyEventResult {
     if (!prophecy) return null;
     prophecy.rejectionReason = this._rejectionError;
     try {
-      _purgeLatestRecitedStory(this._parent, prophecy, false);
+      const purgedRecital = _purgeLatestRecitedStory(this._parent, prophecy, false);
+      if (purgedRecital) {
+        this._parent._reciteStoriesToFollowers([], purgedRecital);
+      }
     } catch (innerError) {
       outputError(innerError, `Exception caught during proclaimEvents.profess.purge`);
       outputError(error, "Exception caught during proclaim");
@@ -766,8 +771,10 @@ export class ProphecyOperation extends ProphecyEventResult {
       if (!recomposedSubCommand) return thisChainReturn(false);
       venue._reformAttempt = this._reformAttempt;
       venue.commandEvent = recomposedSubCommand;
+      const options = Object.create(this._options);
+      options.prophecy = this;
       venue.proclamation = this._parent._connections[chronicleURI]
-          .proclaimEvent(venue.commandEvent, Object.create(this._options));
+          .proclaimEvent(venue.commandEvent, options);
       venue.proclamation.reformAttempt = this._reformAttempt;
     }
     if (this._progress) {

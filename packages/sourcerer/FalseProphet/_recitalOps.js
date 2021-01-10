@@ -101,7 +101,7 @@ export function _purgeLatestRecitedStory (falseProphet: FalseProphet, heresy: Ev
       || (((latestStory.aspects || {}).command || {}).id
           !== ((heresy.aspects || {}).command || {}).id)) {
     if (!require && !falseProphet._canonicalRecital.getStoryBy(heresy.aspects.command.id)) {
-      return; // Already purged.
+      return false; // Already purged.
     }
     throw new Error(`_purgeLatestRecitedStory.heresy.aspects.command.id ('${
         heresy.aspects.command.id}') prophecy was found in recital but not as the latest story ('${
@@ -115,6 +115,7 @@ export function _purgeLatestRecitedStory (falseProphet: FalseProphet, heresy: Ev
   }
   falseProphet._canonicalRecital.removeStory(latestStory);
   falseProphet.recreateCorpus(latestStory.previousState);
+  return new StoryRecital(latestStory);
 }
 
 export function _confirmRecitalStories (instigatorConnection: FalseProphetConnection,

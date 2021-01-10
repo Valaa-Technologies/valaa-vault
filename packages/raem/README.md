@@ -176,7 +176,7 @@ using `+` <-> `-`, `/` <-> `_` character mappings.
 
 ### 1.2.1 secondary-part - lenient naming, restricted ownership
 
-This section is OBSOLETE and needs to be update to new VPath structure.
+This section is OBSOLETE and needs to be update to new VPlot structure.
 
 The *secondary* id part is a qualified name which can be expanded into
 an URI. This URI then defines how the referred resource is determined

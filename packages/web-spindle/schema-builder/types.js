@@ -1,4 +1,4 @@
-const { disjoinVPathOutline } = require("~/raem/VPath");
+const { disjoinVPlotOutline } = require("~/plot");
 const patchWith = require("~/tools/patchWith").default;
 
 const ObjectSchema = Symbol("Object-JSONSchema");
@@ -178,7 +178,7 @@ function _createRelationTypeTo (targetType, relationNameOrProjection, {
     ...relationProperties
 } = {}) {
   if (!targetType) throw new Error("targetType missing");
-  const reflection = disjoinVPathOutline(
+  const reflection = disjoinVPlotOutline(
       (typeof relationNameOrProjection === "string")
           ? ["@-out", ["@$", relationNameOrProjection]]
           : relationNameOrProjection,
@@ -227,12 +227,12 @@ function exportSchemaOf (aType) {
   if (ret.valospace) {
     ret.valospace = { ...ret.valospace };
     if (ret.valospace.reflection) {
-      ret.valospace.reflection = disjoinVPathOutline(ret.valospace.reflection, "@@");
+      ret.valospace.reflection = disjoinVPlotOutline(ret.valospace.reflection, "@@");
     }
     if (ret.valospace.gate) {
       ret.valospace.gate = {
         ...ret.valospace.gate,
-        projection: disjoinVPathOutline(ret.valospace.gate.projection, "@@"),
+        projection: disjoinVPlotOutline(ret.valospace.gate.projection, "@@"),
       };
     }
     if (ret.valospace.resourceType) {

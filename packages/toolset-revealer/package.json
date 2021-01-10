@@ -32,7 +32,7 @@
     "webpack-dev-server": "^3.11.0"
   },
   "peerDependencies": {
-    "@valos/inspire": "^0.37.0-alpha.1",
+    "@valos/inspire": "^0.37.0-alpha.4",
     "css-loader": "^4.2.2",
     "style-loader": "^1.2.1"
   }

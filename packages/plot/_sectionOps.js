@@ -8,42 +8,48 @@ const {
 } = require("./_validateTerminalOps");
 
 module.exports = {
-  formVPath,
-  conjoinVPath,
-  conjoinVPathSection,
-  disjoinVPath,
-  disjoinVPathString,
-  disjoinVPathOutline,
+  formVPlot,
+  conjoinVPlot,
+  conjoinVPlotSection,
+  disjoinVPlot,
+  disjoinVPlotString,
+  disjoinVPlotOutline,
 };
 
-function formVPath (...steps) {
-  const section = disjoinVPathOutline(steps.map(step => [].concat(step)), "@@");
-  const ret = conjoinVPath(section);
-  // console.log("formVPath(", ...steps, ") -> ", ...section, " -> ", ret);
-  return ret;
+function formVPlot (...steps) {
+  let section;
+  try {
+    section = disjoinVPlotOutline(steps.map(step => [].concat(step)), "@@");
+    return conjoinVPlot(section);
+    // console.log("formVPlot(", ...steps, ") -> ", ...section, " -> ", ret);
+  } catch (error) {
+    throw wrapError(error, new Error("During formVPlot(), with:",
+        "\n\tsteps:", ...dumpObject(steps),
+        "\n\tsection:", ...dumpObject(section)));
+  }
 }
 
-function conjoinVPath (section) {
-  const ret = conjoinVPathSection(section);
+function conjoinVPlot (section) {
+  const ret = conjoinVPlotSection(section);
   return ret[0] !== "$" ? `${ret}@@` : `@${ret}@@`;
 }
 
-function disjoinVPath (vpath) {
-  const ret = (typeof vpath === "string")
-      ? disjoinVPathString(vpath)
-      : disjoinVPathOutline(vpath, "@@");
-  // console.log("disjoinVPath(", ...dumpObject(vpath), ":", ...dumpObject(ret));
+function disjoinVPlot (vplot) {
+  const ret = (typeof vplot === "string")
+      ? disjoinVPlotString(vplot)
+      : disjoinVPlotOutline(vplot, "@@");
+  // console.log("disjoinVPlot(", ...dumpObject(vplot), ":", ...dumpObject(ret));
   return ret;
 }
 
 /**
- * Return a vpath section string.
- * A vpath section string for non-vparam sections is equal to the full
- * vpath string without the cap string "@@" at the end.
- * A vpath section string for vparam sections is the same but also
+ * Return a vplot section string.
+ * A vplot section string for non-vparam sections is equal to the full
+ * vplot string without the cap string "@@" at the end.
+ * A vplot section string for vparam sections is the same but also
  * without the leading "@".
  */
-function conjoinVPathSection (section) {
+function conjoinVPlotSection (section) {
   let type = section[0];
   const payload = section[1];
   try {
@@ -51,7 +57,7 @@ function conjoinVPathSection (section) {
       return (payload === undefined) ? type.slice(1)
           : `${type.slice(1)}.${typeof payload === "string"
               ? encodeURIComponent(payload)
-              : conjoinVPath(payload)}`;
+              : conjoinVPlot(payload)}`;
     }
     if (type === "@@") type = "";
     if (payload === undefined) return type;
@@ -71,23 +77,23 @@ function conjoinVPathSection (section) {
       } else if ((typeof entry === "number") && Number.isInteger(entry)) {
         entryString = `$d.${String(entry)}`;
       } else if (!Array.isArray(entry)) {
-        throw new Error(`Invalid vpath section payload entry: type ${typeof entry
+        throw new Error(`Invalid vplot section payload entry: type ${typeof entry
             } not allowed ${typeof entry === "number" ? "(value is not an integer)" : ""}`);
       } else {
         const differentiator = entry[0][1];
-        entryString = conjoinVPathSection(entry);
+        entryString = conjoinVPlotSection(entry);
         if (differentiator !== "$") {
           retParts[i + 1] = type
-                  ? `$.${entryString}@@`  // verbs and vpaths must be embedded and capped in verbs
+                  ? `$.${entryString}@@`  // verbs and vplots must be embedded and capped in verbs
               : differentiator === "@"
-                  ? `@$.${entryString}@@` // vpaths must be prefixed, embedded and capped in vpaths
-                  : entryString;          // verbs can be used as-is in vpaths
+                  ? `@$.${entryString}@@` // vplots must be prefixed, embedded and capped in vplots
+                  : entryString;          // verbs can be used as-is in vplots
           continue;
         }
       }
       retParts[i + 1] = type
           ? entryString        // vparams can be used as-is in verbs
-          : `@${entryString}`; // vparams (ie. vgrids) need to be prefixed in vpaths
+          : `@${entryString}`; // vparams (ie. vgrids) need to be prefixed in vplots
     }
     return retParts.join("");
   } catch (error) {
@@ -96,23 +102,23 @@ function conjoinVPathSection (section) {
       actualError = new Error("Section is not an array");
     } else if ((type[1] !== "$") && (section[1] !== undefined) && !Array.isArray(section[1])) {
       actualError = new Error(
-        `${type ? "vpath" : "vstep"} section payload is not undefined or an array`);
+        `${type ? "vplot" : "vstep"} section payload is not undefined or an array`);
     }
-    throw wrapError(actualError, new Error(`During conjoinVPathSection(${type})`),
+    throw wrapError(actualError, new Error(`During conjoinVPlotSection(${type})`),
         "\n\tsection:", ...dumpObject(section));
   }
 }
 
-function disjoinVPathOutline (value, vkey) {
+function disjoinVPlotOutline (value, vkey) {
   let valueSection = value, entries;
   try {
-    // console.log("disjoinVPathSection in", value, vkey);
+    // console.log("disjoinVPlotSection in", value, vkey);
     switch (typeof value) {
     case "undefined":
       if ((vkey == null) || (vkey === "@@")) return ["@$"];
       if (vkey[0] !== "@") return ["@.", [vkey]];
       if ((vkey[1] === "$") && !vkey.includes(".")) return [vkey];
-      if (vkey[1] !== "@") return disjoinVPathString(vkey, { i: -1, outlineSuffixes: [] });
+      if (vkey[1] !== "@") return disjoinVPlotString(vkey, { i: -1, outlineSuffixes: [] });
       break;
     case "number":
       if (!Number.isInteger(value)) valueSection = ["@$number", JSON.stringify(value)];
@@ -135,7 +141,7 @@ function disjoinVPathOutline (value, vkey) {
           entries = [];
           for (let i = 1; i !== value.length; ++i) {
             const entry = value[i];
-            const entrySection = disjoinVPathOutline(entry, "@@");
+            const entrySection = disjoinVPlotOutline(entry, "@@");
             if (entrySection && (entrySection[0] === "@@") && ((entry[0] || "")[0] !== "@")) {
               entries.push(...entrySection[1]);
             } else {
@@ -146,11 +152,11 @@ function disjoinVPathOutline (value, vkey) {
           entries = undefined;
           break;
         }
-        entries = value.map(e => disjoinVPathOutline(e));
+        entries = value.map(e => disjoinVPlotOutline(e));
         valueSection = ["@-"];
       } else if (Object.getPrototypeOf(value) === Object.prototype) {
         const sortedKeys = Object.keys(value).sort();
-        entries = sortedKeys.map(k => disjoinVPathOutline(value[k], k));
+        entries = sortedKeys.map(k => disjoinVPlotOutline(value[k], k));
         valueSection = ["@*"];
       } else {
         throw new Error(`Cannot disjoin complex value type "${
@@ -162,13 +168,13 @@ function disjoinVPathOutline (value, vkey) {
       throw new Error(`Cannot disjoin unrecognized type "${
         (value.constructor || "").name || value.name || typeof value}"`);
     }
-    // console.log("disjoinVPathSection interim", value, vkey,
+    // console.log("disjoinVPlotSection interim", value, vkey,
     //    "->", ...dumpObject(valueSection), ...dumpObject(entries));
     if (vkey == null) return valueSection;
     if (vkey[0] !== "@") return ["@.", [vkey, valueSection]];
     return _assembleSection(vkey, entries || [valueSection]);
   } catch (error) {
-    throw wrapError(error, new Error(`disjoinVPathOutline(${vkey})`),
+    throw wrapError(error, new Error(`disjoinVPlotOutline(${vkey})`),
         "\n\tvalue:", ...dumpObject(value),
         "\n\tvkey:", ...dumpObject(vkey),
         "\n\tvpayload:", ...dumpObject(entries));
@@ -177,42 +183,42 @@ function disjoinVPathOutline (value, vkey) {
 
 function _assembleSection (vkey, entries) {
   if (vkey[1] !== "@") {
-    return disjoinVPathString(vkey, { i: -1, outlineSuffixes: entries });
+    return disjoinVPlotString(vkey, { i: -1, outlineSuffixes: entries });
   }
   if (vkey.length !== 2) {
-    throw new Error(`Invalid vpath vkey; "@@" mustn't be followed by chars, got: "${vkey}"`);
+    throw new Error(`Invalid vplot vkey; "@@" mustn't be followed by chars, got: "${vkey}"`);
   }
   return !entries.length ? ["@@"] : (entries.length === 1) ? entries[0] : ["@@", entries];
 }
 
-function disjoinVPathString (vpath, stack = { i: -1 }) {
+function disjoinVPlotString (vplot, stack = { i: -1 }) {
   try {
-    if (typeof vpath !== "string") {
-      throw new Error(`Can't section invalid vpath: expected string, got ${typeof vpath}`);
+    if (typeof vplot !== "string") {
+      throw new Error(`Can't section invalid vplot: expected string, got ${typeof vplot}`);
     }
-    stack.vpath = vpath;
+    stack.vplot = vplot;
     const ret = _classOps[_advance(stack)](stack);
-    if (stack.i !== vpath.length) {
-      throw new Error(`Invalid VPath: expected eof at pos ${stack.i}, got: "${
-          vpath[stack.i]}", of vpath: "${vpath}"`);
+    if (stack.i !== vplot.length) {
+      throw new Error(`Invalid VPlot: expected eof at pos ${stack.i}, got: "${
+          vplot[stack.i]}", of vplot: "${vplot}"`);
     }
     if (stack.outlineSuffixes && stack.outlineSuffixes.length) {
-      throw new Error(`Failed to section VPath: not all outlineSuffixes were consumed`);
+      throw new Error(`Failed to section VPlot: not all outlineSuffixes were consumed`);
     }
     return ret;
   } catch (error) {
-    throw wrapError(error, new Error("During disjoinVPathString"),
-        "\n\tvpath:", ...dumpObject(vpath),
+    throw wrapError(error, new Error("During disjoinVPlotString"),
+        "\n\tvplot:", ...dumpObject(vplot),
         "\n\tstack:", ...dumpObject(stack));
   }
 }
 
 function _advance (stack) {
-  return (stack.lookahead = (_classOf[stack.vpath[++stack.i] || ""]) || _restClass);
+  return (stack.lookahead = (_classOf[stack.vplot[++stack.i] || ""]) || _restClass);
 }
 
 const _eofClass = 1;
-const _vpathClass = 2;
+const _vplotClass = 2;
 const _vparamClass = 3;
 const _shorthandVParamClass = 4;
 const _escapeClass = 5;
@@ -221,7 +227,7 @@ const _vgridTypeClass = 7;
 const _restClass = 8;
 const _classOf = {
   "": 1,
-  "@": _vpathClass,
+  "@": _vplotClass,
   $: _vparamClass,
   ":": _shorthandVParamClass,
   "%": _escapeClass,
@@ -234,12 +240,12 @@ const _valueMinClass = _escapeClass;
 const _termMinClass = _vgridTypeClass;
 
 // function _isVerbClass (classId) { return classId >= _vparamClass; }
-const _className = [null, "eof", "vpath", "verb", "context term", "value"];
+const _className = [null, "eof", "vplot", "verb", "context term", "value"];
 
 const _classOps = [
   null,
   _eof,
-  _recurseIntoVPath,
+  _recurseIntoVPlot,
   _recurseIntoVParam,
   _recurseIntoShorthandVParam,
   _invalidEscape,
@@ -250,22 +256,22 @@ const _classOps = [
 
 function _eof () { return undefined; }
 
-function _recurseIntoVPath (stack) {
+function _recurseIntoVPlot (stack) {
   const vsteps = [];
   let openerPos = stack.i;
   let closerFailure;
   _advance(stack);
-  for (; stack.lookahead > _vpathClass; _advance(stack)) {
+  for (; stack.lookahead > _vplotClass; _advance(stack)) {
     openerPos = stack.i;
     vsteps.push(_recurseIntoVStep(stack));
-    if (stack.lookahead !== _vpathClass) { closerFailure = "vstep"; break; }
+    if (stack.lookahead !== _vplotClass) { closerFailure = "vstep"; break; }
   }
-  if (stack.lookahead === _vpathClass) {
+  if (stack.lookahead === _vplotClass) {
     _advance(stack);
   } else if ((stack.lookahead !== _eofClass) || !stack.outlineSuffixes) {
-    throw new Error(`Invalid vpath char "${stack.vpath[stack.i]}" at pos ${
-      stack.i}: expected a closing "@" for the ${closerFailure || "vpath"} opened at ${
-      openerPos} (of vpath: "${stack.vpath}")`);
+    throw new Error(`Invalid vplot char "${stack.vplot[stack.i]}" at pos ${
+      stack.i}: expected a closing "@" for the ${closerFailure || "vplot"} opened at ${
+      openerPos} (of vplot: "${stack.vplot}")`);
   } else if (stack.outlineSuffixes.length) {
     vsteps.push(...stack.outlineSuffixes);
     stack.outlineSuffixes = []; // apply only once
@@ -303,20 +309,20 @@ function _recurseIntoVStep (stack) {
 
 function _recurseIntoShorthandVParam (stack) {
   if (!stack.outlineSuffixes) {
-    throw new Error(`Invalid vpath char ":" at pos ${
-      stack.i}: only vpath outlines can contain the contextless shorthand vparam`);
+    throw new Error(`Invalid vplot char ":" at pos ${
+      stack.i}: only vplot outlines can contain the contextless shorthand vparam`);
   }
   if (_advance(stack) >= _valueMinClass) {
     return _extractLiteral(stack, _valueMinClass, validateOutlineParamValueText);
   }
-  if (stack.lookahead === _vpathClass) {
-    return _recurseIntoVPath(stack);
+  if (stack.lookahead === _vplotClass) {
+    return _recurseIntoVPlot(stack);
   }
   if ((stack.lookahead === _eofClass) && stack.outlineSuffixes.length) {
     return stack.outlineSuffixes.shift();
   }
-  throw new Error(`Invalid shorthand vparam-value char "${stack.vpath[stack.i]}" at pos ${stack.i
-      }: expected vvalue (of vpath: "${stack.vpath}")`);
+  throw new Error(`Invalid shorthand vparam-value char "${stack.vplot[stack.i]}" at pos ${stack.i
+      }: expected vvalue (of vplot: "${stack.vplot}")`);
 }
 
 function _recurseIntoVParam (stack) {
@@ -328,8 +334,8 @@ function _recurseIntoVParam (stack) {
   const shouldHaveValue = (stack.lookahead === _dotClass);
   if (shouldHaveValue) {
     _advance(stack);
-    if (stack.lookahead === _vpathClass) {
-      value = _recurseIntoVPath(stack);
+    if (stack.lookahead === _vplotClass) {
+      value = _recurseIntoVPlot(stack);
     } else if (stack.lookahead >= _valueMinClass) {
       value = _extractLiteral(stack, _valueMinClass, validateParamValueText);
     }
@@ -339,8 +345,8 @@ function _recurseIntoVParam (stack) {
       value = stack.outlineSuffixes.shift();
     } else if (shouldHaveValue || (segmentTypeClass === _vgridTypeClass)) {
       throw new Error(`Invalid ${segmentTypeClass === _vgridTypeClass ? "vgrid" : "vparam-value"
-        } char "${stack.vpath[stack.i]}" at pos ${stack.i
-        }: expected vvalue (of vpath: "${stack.vpath}")`);
+        } char "${stack.vplot[stack.i]}" at pos ${stack.i
+        }: expected vvalue (of vplot: "${stack.vplot}")`);
     } else {
       return !segmentType ? ["@$"] // undefined
           : segmentType === "@$t" ? true
@@ -366,7 +372,7 @@ function _extractLiteral (stack, minimumClass, stringValidator) {
     if (stack.lookahead === _escapeClass) hasEscapes = true;
   }
   if (stack.lookahead === _escapeClass) _invalidEscape(stack);
-  const literal = stringValidator(stack.vpath.substring(literalBegin, stack.i));
+  const literal = stringValidator(stack.vplot.substring(literalBegin, stack.i));
   // TODO(iridian, 2019-11): Could validate on the fly.
   return hasEscapes ? decodeURIComponent(literal) : literal;
 }

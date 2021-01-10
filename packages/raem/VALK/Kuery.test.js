@@ -44,7 +44,7 @@ describe("VALK basic functionality tests", () => {
   });
 });
 
-describe("VPath to concrete VAKON valks", () => {
+describe("VPlot to concrete VAKON valks", () => {
   const testContext = {
     random: {
       steps: ["§!random"],
@@ -60,22 +60,22 @@ describe("VPath to concrete VAKON valks", () => {
     }
   };
 
-  it("Cements simple VPaths into VAKON", () => {
-    expect(VALK.fromVPath("@!$.scriptRoot@!$random@@", { context: testContext }).toVAKON())
+  it("Cements simple VPlots into VAKON", () => {
+    expect(VALK.fromVPlot("@!$.scriptRoot@!$random@@", { context: testContext }).toVAKON())
         .toEqual(["§->", ["§$", "scriptRoot"], ["§!random"]]);
-    expect(VALK.fromVPath("@!invoke$.create$.@!$.body$.%24V$.target$.name@@@@").toVAKON())
+    expect(VALK.fromVPlot("@!invoke$.create$.@!$.body$.%24V$.target$.name@@@@").toVAKON())
         .toEqual([
           "§invoke", ["§'", "create"],
           ["§->", ["§$", "body"], ["§..", "$V"], ["§..", "target"], ["§..", "name"]],
         ]);
   });
-  it("Rejects VPaths context terms which are undefined by the context", () => {
-    expect(() => VALK.fromVPath("@!$.scriptRoot@!$thisIsBad@@", { context: testContext })
+  it("Rejects VPlots context terms which are undefined by the context", () => {
+    expect(() => VALK.fromVPlot("@!$.scriptRoot@!$thisIsBad@@", { context: testContext })
             .toVAKON())
         .toThrow(/unrecognized context term 'thisIsBad'/);
   });
-  it("Cements complex VPaths into VAKON", () => {
-    expect(VALK.fromVPath(
+  it("Cements complex VPlots into VAKON", () => {
+    expect(VALK.fromVPlot(
             "@!invoke$.create$.event$.@!$.source@@$.@!$.body@.$.%24V@.$.target@.$.name@@@@")
         .toVAKON())
     .toEqual([
@@ -83,7 +83,7 @@ describe("VPath to concrete VAKON valks", () => {
       ["§$", "source"],
       ["§->", ["§$", "body"], ["§..", "$V"], ["§..", "target"], ["§..", "name"]],
     ]);
-    expect(VALK.fromVPath(["@@", [
+    expect(VALK.fromVPlot(["@@", [
       ["@!$valk.const:newResource", ["@!$valk.new", [["@!:Entity"], {
         name: ["@!:request:body", "$V", "target", "name"],
         owner: ["@!:routeRoot"],
@@ -127,23 +127,23 @@ describe("VPath to concrete VAKON valks", () => {
       ]
     ]);
   });
-  it("Cements VPath outlines into VAKON while escaping nested vpaths", () => {
-    expect(VALK.fromVPath(["@@", ["@$.", "constant"]])
+  it("Cements VPlot outlines into VAKON while escaping nested vplots", () => {
+    expect(VALK.fromVPlot(["@@", ["@$.", "constant"]])
         .toVAKON())
     .toEqual(["§'", "constant"]);
-    expect(VALK.fromVPath([{ val: "constant", val2: 10 }])
+    expect(VALK.fromVPlot([{ val: "constant", val2: 10 }])
         .toVAKON())
     .toEqual(["§{}", ["val", "constant"], ["val2", 10]]);
-    expect(VALK.fromVPath([{ val: ["@$", "@"] }])
+    expect(VALK.fromVPlot([{ val: ["@$", "@"] }])
         .toVAKON())
     .toEqual(["§{}", ["val", "@"]]);
-    expect(VALK.fromVPath([{ val: "@", val3: [1, 2, 3], val2: null }])
+    expect(VALK.fromVPlot([{ val: "@", val3: [1, 2, 3], val2: null }])
         .toVAKON())
     .toEqual(["§{}",
         ["val", "@"],
         ["val2", ["§'", null]],
         ["val3", ["§[]", ["§'", 1], ["§'", 2], ["§'", 3]]]]);
-    expect(VALK.fromVPath(["@!:request:cookies", ["@!:identity:clientCookieName"]])
+    expect(VALK.fromVPlot(["@!:request:cookies", ["@!:identity:clientCookieName"]])
         .toVAKON())
     .toEqual(["§->",
       ["§$", "request"],
@@ -151,8 +151,8 @@ describe("VPath to concrete VAKON valks", () => {
       ["§..", ["§->", ["§$", "identity"], ["§..", "clientCookieName"]]],
     ]);
   });
-  it("Cements complex embedded VPaths into VAKON", () => {
-    expect(VALK.fromVPath([
+  it("Cements complex embedded VPlots into VAKON", () => {
+    expect(VALK.fromVPlot([
       "@!invoke$.create$.event", ["@!$.source"],
         ["@!$.body@.$.%24V@", ["@.$.target"], ["@.$.name"]],
     ]).toVAKON())

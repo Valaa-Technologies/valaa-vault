@@ -1,33 +1,33 @@
 // @flow
 
 import {
-  validateVPath, validateVPathSection, validateVRIDString, validateVRID,
-  formVPath,
-  disjoinVPath, disjoinVPathOutline, disjoinVPathString,
-  conjoinVPath,
+  validateVPlot, validateVPlotSection, validateVRIDString, validateVRID,
+  formVPlot,
+  disjoinVPlot, disjoinVPlotOutline, disjoinVPlotString,
+  conjoinVPlot,
 } from ".";
 import { wrapOutputError } from "~/tools/thenChainEagerly";
 
-describe("VPath", () => {
-  describe("VPath validation", () => {
-    it("validates generic VPath strings", wrapOutputError(() => {
-      expect(validateVPath("@!$.scriptRoot@!random@@"))
+describe("VPlot", () => {
+  describe("VPlot validation", () => {
+    it("validates generic VPlot strings", wrapOutputError(() => {
+      expect(validateVPlot("@!$.scriptRoot@!random@@"))
           .toBeTruthy();
-      expect(() => validateVPath("@!$.scriptRoot@!random"))
+      expect(() => validateVPlot("@!$.scriptRoot@!random"))
           .toThrow(/closing "@"/);
-      expect(validateVPath("@$~raw.0000@@"))
+      expect(validateVPlot("@$~raw.0000@@"))
           .toBeTruthy();
-      expect(() => validateVPath("@$~raw.@@"))
+      expect(() => validateVPlot("@$~raw.@@"))
           .toThrow(/closing "@"/);
-      expect(validateVPath("@-$.F$focus.@*$.1@@@@"))
+      expect(validateVPlot("@-$.F$focus.@*$.1@@@@"))
           .toBeTruthy();
-      expect(validateVPath("@!invoke$.create$.@!$.body$V.target$.name@@@@"))
+      expect(validateVPlot("@!invoke$.create$.@!$.body$V.target$.name@@@@"))
           .toBeTruthy();
-      expect(validateVPath("@$~raw.0000@$foo@@"))
+      expect(validateVPlot("@$~raw.0000@$foo@@"))
           .toBeTruthy();
-      expect(validateVPath("@$~raw.0000@$foo.bar@@"))
+      expect(validateVPlot("@$~raw.0000@$foo.bar@@"))
           .toBeTruthy();
-      expect(validateVPath(
+      expect(validateVPlot(
               "@!invoke$.create$.event$.@!$.source@@$.@!$.body@.$V.target@.$.name@@@@"))
           .toBeTruthy();
     }));
@@ -50,80 +50,80 @@ describe("VPath", () => {
       expect(() => validateVRIDString("aaaabbbb-cccc-dddd-eeee-ffffffffffff"))
           .toThrow(/must be a string beginning with "@"/);
     });
-    it("validates fully disjoint VPaths", () => {
-      expect(validateVPathSection(["@@", [["@$~raw", "0000"], ["@!random"]]]))
+    it("validates fully disjoint VPlots", () => {
+      expect(validateVPlotSection(["@@", [["@$~raw", "0000"], ["@!random"]]]))
           .toBeTruthy();
-      expect(() => validateVPathSection(["@@", ["@$~raw", "0000"], ["@!random", []]]))
-          .toThrow(/Invalid full vpath.*at most two entries/);
-      expect(() => validateVPathSection(["@@", [["@$~raw", "0000"], ["@!random", []]]]))
+      expect(() => validateVPlotSection(["@@", ["@$~raw", "0000"], ["@!random", []]]))
+          .toThrow(/Invalid full vplot.*at most two entries/);
+      expect(() => validateVPlotSection(["@@", [["@$~raw", "0000"], ["@!random", []]]]))
           .toThrow(/non-empty/);
-      expect(() => validateVPathSection(["@@", [["@$~raw", "0000"]]]))
-          .toThrow(/Invalid full vpath.*two or more/);
-      expect(validateVPathSection(["@!random"]))
+      expect(() => validateVPlotSection(["@@", [["@$~raw", "0000"]]]))
+          .toThrow(/Invalid full vplot.*two or more/);
+      expect(validateVPlotSection(["@!random"]))
           .toBeTruthy();
-      expect(() => validateVPathSection(["!random"]))
-          .toThrow(/Invalid vpath.*must begin with "@"/);
-      expect(() => validateVPathSection(["@@", [["@!", ["scriptRoot"]], ["@!random", []]]]))
+      expect(() => validateVPlotSection(["!random"]))
+          .toThrow(/Invalid vplot.*must begin with "@"/);
+      expect(() => validateVPlotSection(["@@", [["@!", ["scriptRoot"]], ["@!random", []]]]))
           .toThrow(/Invalid vverb.*non-empty/);
-      expect(validateVPathSection(
+      expect(validateVPlotSection(
           ["@!invoke", ["create", ["@!", ["body", ["@$V", "target"], "name"]]]]
       )).toBeTruthy();
-      expect(validateVPathSection(
+      expect(validateVPlotSection(
         ["@-", ["F", ["@$focus", ["@*", ["1"]]]]]
       )).toBeTruthy();
-      expect(validateVPathSection(
+      expect(validateVPlotSection(
           ["@!invoke", ["create", "event",
             ["@!", ["source"]],
             ["@@", [["@!", ["body"]], ["@.", [["@$V", "target"]]], ["@.", ["name"]]]],
           ]],
       )).toBeTruthy();
     });
-    it("fails to validate non-disjoint VPaths outlines", wrapOutputError(() => {
-      expect(() => validateVPathSection(
+    it("fails to validate non-disjoint VPlots outlines", wrapOutputError(() => {
+      expect(() => validateVPlotSection(
           ["@!invoke$.create$.event", [
             "@!$.source", ["@@!$.body@!$.%24V", ["@!$.target", "@!$.name"]],
           ]]
       )).toThrow(/Invalid verb-type.*doesn't match/);
-      expect(() => validateVPathSection(
+      expect(() => validateVPlotSection(
           ["@!invoke", [
             "create", "event", "@!$.source", ["@!$.body@!$.%24V@!$.target"], "!$.name",
           ]]
       )).toThrow(/Invalid verb-type.*doesn't match/);
     }));
   });
-  describe("VPath sectioning", () => {
-    it("disjoins simple VPath strings", () => {
-      expect(() => disjoinVPathString("!$."))
+  describe("VPlot sectioning", () => {
+    it("disjoins simple VPlot strings", () => {
+      expect(() => disjoinVPlotString("!$."))
           .toThrow(/Invalid vparam-value/);
-      expect(() => disjoinVPathString("!$a-"))
+      expect(() => disjoinVPlotString("!$a-"))
           .toThrow(/Invalid context-term/);
-      expect(() => disjoinVPathString("!$1a"))
+      expect(() => disjoinVPlotString("!$1a"))
           .toThrow(/Invalid context-term/);
-      expect(() => disjoinVPathString("!$over_three_thousand_and_two_longg"))
+      expect(() => disjoinVPlotString("!$over_three_thousand_and_two_longg"))
           .toThrow(/Invalid context-term/);
-      expect(() => disjoinVPathString("@$~b@@"))
+      expect(() => disjoinVPlotString("@$~b@@"))
           .toThrow(/Invalid vgrid/);
-      expect(disjoinVPathString("!$"))
+      expect(disjoinVPlotString("!$"))
           .toEqual(["@!", [["@$"]]]);
-      expect(disjoinVPathString("!$a_1__b"))
+      expect(disjoinVPlotString("!$a_1__b"))
           .toEqual(["@!", [["@$a_1__b"]]]);
-      expect(disjoinVPathString("@$~b.c@@"))
+      expect(disjoinVPlotString("@$~b.c@@"))
           .toEqual(["@$~b", "c"]);
-      expect(disjoinVPathString("@-$.F$focus.@*$.1@@@@"))
+      expect(disjoinVPlotString("@-$.F$focus.@*$.1@@@@"))
           .toEqual(["@-", ["F", ["@$focus", ["@*", ["1"]]]]]);
-      expect(disjoinVPathString("@!$.scriptRoot@!random@@"))
+      expect(disjoinVPlotString("@!$.scriptRoot@!random@@"))
           .toEqual(["@@", [["@!", ["scriptRoot"]], ["@!random"]]]);
-      expect(disjoinVPathString("@$~u4.aaaabbbb-cccc-dddd-eeee-ffffffffffff@@"))
+      expect(disjoinVPlotString("@$~u4.aaaabbbb-cccc-dddd-eeee-ffffffffffff@@"))
           .toEqual(["@$~u4", "aaaabbbb-cccc-dddd-eeee-ffffffffffff"]);
-      expect(disjoinVPathString("@!invoke$.create$.@!$.body$V.target$.name@@@@"))
+      expect(disjoinVPlotString("@!invoke$.create$.@!$.body$V.target$.name@@@@"))
           .toEqual(["@!invoke", ["create", ["@!", ["body", ["@$V", "target"], "name"]]]]);
-      expect(disjoinVPathString("@$~raw.0000@!random@@"))
+      expect(disjoinVPlotString("@$~raw.0000@!random@@"))
           .toEqual(["@@", [["@$~raw", "0000"], ["@!random"]]]);
-      expect(disjoinVPathString("12345678-90ab-cdef-fedc-ba0987654321"))
+      expect(disjoinVPlotString("12345678-90ab-cdef-fedc-ba0987654321"))
           .toEqual(["@12345678-90ab-cdef-fedc-ba0987654321"]);
     });
-    it("disjoins complex nested VPath strings", () => {
-      expect(disjoinVPath(
+    it("disjoins complex nested VPlot strings", () => {
+      expect(disjoinVPlot(
           "@!invoke$.create$.event$.@!$.source@@$.@!$.body@.$V.target@.$.name@@@@",
       )).toEqual(["@!invoke", ["create", "event", ["@!", ["source"]], ["@@", [
           ["@!", ["body"]],
@@ -131,7 +131,7 @@ describe("VPath", () => {
           ["@.", ["name"]],
         ]],
       ]]);
-      expect(disjoinVPath(
+      expect(disjoinVPlot(
           `@$~u4.55a5c4fb-1fd4-424f-8578-7b06ffdb3ef0${
             ""}@_$~plt.@.$ot$.@.O.$.7741938f-801a-4892-9cf0-dd59bd8c9166@@@@${
             ""}@*$pot_hypertwin.inLinks@-in-$ot.ownerOf${
@@ -150,26 +150,26 @@ describe("VPath", () => {
         ]],
       ]]);
     });
-    it("disjoinVPath and disjoinVPathOutline strips redundant top-level '@@'", () => {
-      expect(disjoinVPath(["@@", ["@!$"]]))
+    it("disjoinVPlot and disjoinVPlotOutline strips redundant top-level '@@'", () => {
+      expect(disjoinVPlot(["@@", ["@!$"]]))
           .toEqual(["@!", [["@$"]]]);
-      expect(disjoinVPath(["@!$"]))
+      expect(disjoinVPlot(["@!$"]))
           .toEqual(["@!", [["@$"]]]);
-      expect(disjoinVPathOutline(["@@", ["@!$"]]))
+      expect(disjoinVPlotOutline(["@@", ["@!$"]]))
           .toEqual(["@!", [["@$"]]]);
-      expect(disjoinVPathOutline(["@!$"]))
+      expect(disjoinVPlotOutline(["@!$"]))
           .toEqual(["@!", [["@$"]]]);
     });
-    it("disjoins VPath outlines", wrapOutputError(() => {
-      expect(disjoinVPathOutline(["@@", ["@!$.a"]]))
+    it("disjoins VPlot outlines", wrapOutputError(() => {
+      expect(disjoinVPlotOutline(["@@", ["@!$.a"]]))
           .toEqual(["@!", ["a"]]);
-      expect(() => disjoinVPathOutline(["@@", ["@!", ["@$."]]]))
+      expect(() => disjoinVPlotOutline(["@@", ["@!", ["@$."]]]))
           .toThrow(/Invalid vparam/);
-      expect(disjoinVPathOutline(["@@", ["@$a", ["@$~raw.b"]]]))
+      expect(disjoinVPlotOutline(["@@", ["@$a", ["@$~raw.b"]]]))
           .toEqual(["@$a", ["@$~raw", "b"]]);
-      expect(conjoinVPath(disjoinVPathOutline(["@@", ["@$a", ["@$~raw.b"]]])))
+      expect(conjoinVPlot(disjoinVPlotOutline(["@@", ["@$a", ["@$~raw.b"]]])))
           .toEqual("@$a.@$~raw.b@@@@");
-      expect(disjoinVPathOutline(["@!invoke$.create$.event",
+      expect(disjoinVPlotOutline(["@!invoke$.create$.event",
         ["@!$.source"],
         ["@!$.body@!$.%24V@", ["@!$.target"], ["@!$.name"]],
       ]))
@@ -183,7 +183,7 @@ describe("VPath", () => {
           ["@!", ["name"]],
         ]],
       ]]);
-      expect(disjoinVPathOutline([
+      expect(disjoinVPlotOutline([
         "@!invoke$.create$.event", ["@!$.source@@"], ["@!$.body@!$.%24V@!$.target@", ["@!$.name"]],
       ]))
       .toEqual(["@!invoke", [
@@ -192,44 +192,44 @@ describe("VPath", () => {
         ["@@", [["@!", ["body"]], ["@!", ["$V"]], ["@!", ["target"]], ["@!", ["name"]]]],
       ]]);
     }));
-    it("disjoins VPath outlines with objects", () => {
-      expect(disjoinVPathOutline({ arr: [] }))
+    it("disjoins VPlot outlines with objects", () => {
+      expect(disjoinVPlotOutline({ arr: [] }))
           .toEqual(["@*", [["@.", ["arr", ["@-"]]]]]);
-      expect(disjoinVPathOutline({ head: ["@@"] }))
+      expect(disjoinVPlotOutline({ head: ["@@"] }))
           .toEqual(["@*", [["@.", ["head", ["@@"]]]]]);
-      expect(disjoinVPathOutline({ und: undefined }))
+      expect(disjoinVPlotOutline({ und: undefined }))
           .toEqual(["@*", [["@.", ["und"]]]]);
-      expect(disjoinVPathOutline({ und: ["@$"] }))
+      expect(disjoinVPlotOutline({ und: ["@$"] }))
           .toEqual(["@*", [["@.", ["und", ["@$"]]]]]);
-      expect(disjoinVPathOutline(["@$foo.bar", { v1: "v1v", v2: 10, v3: ["a", 10] }]))
+      expect(disjoinVPlotOutline(["@$foo.bar", { v1: "v1v", v2: 10, v3: ["a", 10] }]))
           .toEqual(["@", [["@$foo", "bar"],
             ["@.", ["v1", "v1v"]],
             ["@.", ["v2", 10]],
             ["@.", ["v3", ["@-", ["a", 10]]]],
           ]]);
     });
-    it("disjoins already disjoint VPaths correctly", () => {
-      expect(disjoinVPath([["@-out$.TAGS"], ["@.$V.target"]]))
+    it("disjoins already disjoint VPlots correctly", () => {
+      expect(disjoinVPlot([["@-out$.TAGS"], ["@.$V.target"]]))
           .toEqual(["@@", [["@-out", ["TAGS"]], ["@.", [["@$V", "target"]]]]]);
-      expect(disjoinVPath(["@@", [["@-out", ["TAGS"]], ["@.", [["@$V", "target"]]]]]))
+      expect(disjoinVPlot(["@@", [["@-out", ["TAGS"]], ["@.", [["@$V", "target"]]]]]))
           .toEqual(["@@", [["@-out", ["TAGS"]], ["@.", [["@$V", "target"]]]]]);
-      expect(disjoinVPath([["@-out", ["@$", "TAGS"]], ["@.", ["@$V", "target"]]]))
+      expect(disjoinVPlot([["@-out", ["@$", "TAGS"]], ["@.", ["@$V", "target"]]]))
           .toEqual(["@@", [["@-out", ["TAGS"]], ["@.", [["@$V", "target"]]]]]);
-      expect(disjoinVPath([["@.$V.owner"], ["@.$V.rawId"]]))
+      expect(disjoinVPlot([["@.$V.owner"], ["@.$V.rawId"]]))
           .toEqual(["@@", [["@.", [["@$V", "owner"]]], ["@.", [["@$V", "rawId"]]]]]);
     });
     it("Doesn't disjoin into spurious fields", () => {
-      expect(disjoinVPathString("!$"))
+      expect(disjoinVPlotString("!$"))
           .toEqual(["@!", [["@$"]]]);
-      expect(disjoinVPathString("!$random"))
+      expect(disjoinVPlotString("!$random"))
           .toEqual(["@!", [["@$random"]]]);
-      expect(disjoinVPathString("!$random")[1][0].length)
+      expect(disjoinVPlotString("!$random")[1][0].length)
           .toEqual(1);
-      expect(disjoinVPathString("@!$.scriptRoot@!$random@@"))
+      expect(disjoinVPlotString("@!$.scriptRoot@!$random@@"))
           .toEqual(["@@", [["@!", ["scriptRoot"]], ["@!", [["@$random"]]]]]);
     });
     it("disjoins a non-trivial verb template", () => {
-      expect(disjoinVPath(["@!", ["@$https.foobar.com%2Fpath"], [[
+      expect(disjoinVPlot(["@!", ["@$https.foobar.com%2Fpath"], [[
         "fetchedField",
         ["@.$.fetchOptions@.$.input"]
       ]]])).toEqual(["@!", [
@@ -241,31 +241,31 @@ describe("VPath", () => {
       ]]);
     });
     it("disjoins distinct outlines into the same section", () => {
-      expect(disjoinVPathOutline(["@$ex"], "@!"))
+      expect(disjoinVPlotOutline(["@$ex"], "@!"))
           .toEqual(["@!", [["@$ex"]]]);
-      expect(disjoinVPathOutline(["@!$ex"]))
+      expect(disjoinVPlotOutline(["@!$ex"]))
           .toEqual(["@!", [["@$ex"]]]);
-      expect(disjoinVPathOutline(["@@", ["@!$ex"]]))
+      expect(disjoinVPlotOutline(["@@", ["@!$ex"]]))
           .toEqual(["@!", [["@$ex"]]]);
-      expect(disjoinVPathOutline(["@@", ["@!", ["@$ex"]]]))
+      expect(disjoinVPlotOutline(["@@", ["@!", ["@$ex"]]]))
           .toEqual(["@!", [["@$ex"]]]);
-      expect(disjoinVPathOutline(["@!$ex"], "@@"))
+      expect(disjoinVPlotOutline(["@!$ex"], "@@"))
           .toEqual(["@!", [["@$ex"]]]);
-      expect(disjoinVPathOutline(["@@", ["@!$ex"]], "@@"))
+      expect(disjoinVPlotOutline(["@@", ["@!$ex"]], "@@"))
           .toEqual(["@!", [["@$ex"]]]);
-      expect(disjoinVPathOutline(["@@", ["@!", ["@$ex"]]], "@@"))
+      expect(disjoinVPlotOutline(["@@", ["@!", ["@$ex"]]], "@@"))
           .toEqual(["@!", [["@$ex"]]]);
-      expect(disjoinVPathOutline(["@!$ex"], "@$"))
+      expect(disjoinVPlotOutline(["@!$ex"], "@$"))
           .toEqual(["@!", [["@$ex"]]]);
-      expect(disjoinVPathOutline(["@@", ["@!$ex"]], "@$."))
+      expect(disjoinVPlotOutline(["@@", ["@!$ex"]], "@$."))
           .toEqual(["@!", [["@$ex"]]]);
-      expect(disjoinVPathOutline(["@$ex"], "@$.@!"))
+      expect(disjoinVPlotOutline(["@$ex"], "@$.@!"))
           .toEqual(["@!", [["@$ex"]]]);
     });
     it("disjoins object outline into verb params", wrapOutputError(() => {
-      expect(disjoinVPathOutline(["@$o.vlm", "@", "webpack"]))
+      expect(disjoinVPlotOutline(["@$o.vlm", "@", "webpack"]))
           .toEqual(["@", [["@$o", "vlm"], "@", "webpack"]]);
-      expect(disjoinVPathOutline({
+      expect(disjoinVPlotOutline({
         "@.$.ot": [
           ["@.$.ot-dev"],
           ["@*$.public-session"],
@@ -280,7 +280,7 @@ describe("VPath", () => {
         ["@~", ["ot-identity.json"]],
         ["@~", ["hyperbridge-identity.json"]],
       ]]);
-      expect(disjoinVPathOutline(
+      expect(disjoinVPlotOutline(
           { "workshop.tar.gz": ["@$o.tar-gz", ["@*$.workshop"]] },
           "@$o.import",
       )).toEqual(["@", [
@@ -291,27 +291,27 @@ describe("VPath", () => {
       ]]);
     }));
   });
-  describe("VPath formation", () => {
-    it("Forms simple VPaths", wrapOutputError(() => {
-      expect(formVPath(["@$V", "target"]))
+  describe("VPlot formation", () => {
+    it("Forms simple VPlots", wrapOutputError(() => {
+      expect(formVPlot(["@$V", "target"]))
           .toEqual("@$V.target@@");
-      expect(formVPath(["@!", "scriptRoot"]))
+      expect(formVPlot(["@!", "scriptRoot"]))
           .toEqual("@!$.scriptRoot@@");
-      expect(formVPath(["@!", "scriptRoot"], ["@!random"]))
+      expect(formVPlot(["@!", "scriptRoot"], ["@!random"]))
           .toEqual("@!$.scriptRoot@!random@@");
-      expect(formVPath([["@!", "scriptRoot"], ["@!random"]]))
+      expect(formVPlot([["@!", "scriptRoot"], ["@!random"]]))
           .toEqual("@-$.@!$.scriptRoot@@$.@!random@@@@");
-      expect(formVPath(["@!invoke", "create", ["@!", "body", ["@$V", "target"], "name"]]))
+      expect(formVPlot(["@!invoke", "create", ["@!", "body", ["@$V", "target"], "name"]]))
           .toEqual("@!invoke$.create$.@!$.body$V.target$.name@@@@");
-      expect(formVPath(["@$~raw", "0000"], ["@!random"]))
+      expect(formVPlot(["@$~raw", "0000"], ["@!random"]))
           .toEqual("@$~raw.0000@!random@@");
-      expect(formVPath([["@$~raw", "0000"], ["@!random"]]))
+      expect(formVPlot([["@$~raw", "0000"], ["@!random"]]))
           .toEqual("@-$~raw.0000$.@!random@@@@");
-      expect(formVPath(["@.", ["@$ot"], ["@.O.", "7741938f-801a-4892-9cf0-dd59bd8c9166"]]))
+      expect(formVPlot(["@.", ["@$ot"], ["@.O.", "7741938f-801a-4892-9cf0-dd59bd8c9166"]]))
           .toEqual("@.$ot$.@.O.$.7741938f-801a-4892-9cf0-dd59bd8c9166@@@@");
     }));
-    it("Forms complex nested VPaths", () => {
-      expect(formVPath([
+    it("Forms complex nested VPlots", () => {
+      expect(formVPlot([
         "@!invoke", "create", "event",
         ["@!", "source"],
         ["@@",
@@ -320,7 +320,7 @@ describe("VPath", () => {
           ["@.", "name"],
         ],
       ])).toEqual("@!invoke$.create$.event$.@!$.source@@$.@!$.body@.$V.target@.$.name@@@@");
-      expect(formVPath(
+      expect(formVPlot(
         ["@$~u4", "55a5c4fb-1fd4-424f-8578-7b06ffdb3ef0"],
         ["@_", ["@$~plt", ["@.", ["@$ot"], ["@.O.", "7741938f-801a-4892-9cf0-dd59bd8c9166"]]]],
         ["@*", ["@$pot_hypertwin", "inLinks"]],

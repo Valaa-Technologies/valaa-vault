@@ -16,6 +16,7 @@
   "main": "index.js",
   "dependencies": {
     "@valos/tools": "^0.37.0-alpha.4",
+    "@valos/plot": "^0.37.0-alpha.4",
     "graphql": "^0.6.2",
     "immutable": "~3.7.4",
     "url-parse": "^1.4.1"

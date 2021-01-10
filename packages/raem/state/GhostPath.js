@@ -2,7 +2,7 @@
 
 import type { RawId } from "~/raem/VRL";
 import derivedId from "~/raem/tools/derivedId";
-import { coerceAsVRID } from "~/raem/VPath";
+import { coerceAsVRID } from "~/plot";
 
 import { invariantifyString } from "~/tools/invariantify";
 

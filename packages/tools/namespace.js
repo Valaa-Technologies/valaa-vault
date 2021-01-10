@@ -38,9 +38,9 @@ function qualifiedSymbol (prefix, localPart) {
     } else {
       const qualifiedName = `$${prefix}.${encodeURIComponent(localPart)}`;
       symbol = Symbol(qualifiedName);
-      const vpathName = `@${qualifiedName}@@`;
-      _symbolToQualifiedName[vpathName] = _symbolToQualifiedName[symbol] = Object.freeze([
-        prefix, localPart, qualifiedName, vpathName, `@.${qualifiedName}@@`,
+      const vplotName = `@${qualifiedName}@@`;
+      _symbolToQualifiedName[vplotName] = _symbolToQualifiedName[symbol] = Object.freeze([
+        prefix, localPart, qualifiedName, vplotName, `@.${qualifiedName}@@`,
       ]);
     }
     namespace[localPart] = symbol;

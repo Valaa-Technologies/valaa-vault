@@ -6,7 +6,7 @@ import { naiveURI } from "~/raem/ValaaURI";
 import { Kuery, isValOSFunction } from "~/raem/VALK";
 import { tryHostRef } from "~/raem/VALK/hostReference";
 import GhostPath, { ghostPathFromJSON } from "~/raem/state/GhostPath";
-// import { coerceAsVRID } from "~/raem/VPath";
+// import { coerceAsVRID } from "~/plot";
 
 import { extractFunctionVAKON } from "~/script";
 
@@ -75,7 +75,7 @@ export function deserializeVRL (serializedRef: string | JSONIdData,
       } else if (!parts) {
         parts = serializedRef.match(oldRawIdRegExp);
         if (parts) {
-          console.debug(`DEPRECATED: old-style valos raw id refs in favor of VPaths, got: "${
+          console.debug(`DEPRECATED: old-style valos raw id refs in favor of VPlots, got: "${
               serializedRef}"`);
           parts.unshift(null, null);
           parts[1] = "urn:valos:";

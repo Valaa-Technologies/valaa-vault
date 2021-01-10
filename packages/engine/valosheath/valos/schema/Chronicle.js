@@ -12,7 +12,7 @@ export default {
     // implementation dispatcher.
     )(naiveURI.createPartitionURI),
     createChronicleURI: denoteValOSCallable(
-`Creates a URI from given *base* and *chronicleId* strings (coercing non-vpath id's)`
+`Creates a URI from given *base* and *chronicleId* strings (coercing non-vplot id's)`
     // TODO(iridian): Replace naiveURI.createChronicleURI with appropriate authority scheme-specific
     // implementation dispatcher.
     )(naiveURI.createChronicleURI),

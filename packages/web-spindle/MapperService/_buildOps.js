@@ -8,11 +8,11 @@ export function _appendSchemaSteps (
     const objectKuery = {};
     Object.entries(jsonSchema.properties).forEach(([key, valueSchema]) => {
       let op;
-      const reflectionVPath = (valueSchema.valospace || {}).reflection;
+      const reflectionVPlot = (valueSchema.valospace || {}).reflection;
       if (key === "$V") {
         op = router.appendSchemaSteps(
             runtime, valueSchema, { expandProperties: true, isValOSFields: true });
-      } else if (isValOSFields && (reflectionVPath === undefined)) {
+      } else if (isValOSFields && (reflectionVPlot === undefined)) {
         if (key === "href") {
           const targetType = ((jsonSchema.properties.target || {}).valospace || {}).resourceType;
           const targetSchema = targetType && router.derefSchema(`${targetType}#`);
@@ -31,7 +31,7 @@ export function _appendSchemaSteps (
       } else {
         op = router.appendSchemaSteps(runtime, valueSchema, { expandProperties: true });
         op = (op.length === 1) ? ["§..", key]
-            : ((valueSchema.type === "array") || (reflectionVPath !== undefined))
+            : ((valueSchema.type === "array") || (reflectionVPlot !== undefined))
                 ? op
             : ["§->", ["§..", key], false, ...op.slice(1)];
       }

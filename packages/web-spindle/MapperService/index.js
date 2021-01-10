@@ -4,7 +4,7 @@ import path from "path";
 import fs from "fs";
 import http from "http";
 
-import { extendTrack } from "~/raem/VPath";
+import { extendTrack } from "~/plot";
 import { dumpify, dumpObject, FabricEventTarget, outputError } from "~/tools";
 
 import { _createPrefixRouter, _projectPrefixRoutesFromView } from "./_routerOps";
@@ -18,7 +18,7 @@ import {
 } from "./_resultOps";
 import { _addResourceProjector, _createGetRelSelfHRef, _relRequest } from "./_relOps";
 import { _updateResource } from "./_updateResourceOps";
-import { _vakonpileVPath } from "./_vakonpileOps";
+import { _vakonpileVPlot } from "./_vakonpileOps";
 
 const Fastify = require("fastify");
 
@@ -317,7 +317,7 @@ export default class MapperService extends FabricEventTarget {
     try {
       schema = this.derefSchema(maybeJSONSchema);
       innerTargetTrack = entryTargetTrack
-          || this.appendVPathSteps(runtime, (schema.valospace || {}).reflection, targetTrack);
+          || this.appendVPlotSteps(runtime, (schema.valospace || {}).reflection, targetTrack);
       if (!innerTargetTrack) {
         if (schema.type !== "array") innerTargetTrack = targetTrack;
         else targetTrack.push((innerTargetTrack = ["§map"]));
@@ -334,12 +334,12 @@ export default class MapperService extends FabricEventTarget {
     }
   }
 
-  appendVPathSteps (runtime, vpath, targetTrack = ["§->"]) {
+  appendVPlotSteps (runtime, vplot, targetTrack = ["§->"]) {
     let track, maybeInnerPluralMapTrack;
     try {
-      if (vpath === undefined) return undefined;
-      if (!vpath) return targetTrack;
-      track = _vakonpileVPath(vpath, runtime);
+      if (vplot === undefined) return undefined;
+      if (!vplot) return targetTrack;
+      track = _vakonpileVPlot(vplot, runtime);
       extendTrack(targetTrack, track);
       if (Array.isArray(track)) {
         maybeInnerPluralMapTrack = track[track.length - 1];
@@ -349,9 +349,9 @@ export default class MapperService extends FabricEventTarget {
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, new Error("appendSchemaSteps"),
           "\n\truntime:", ...dumpObject(runtime),
-          "\n\tvpath:", ...dumpObject(vpath),
+          "\n\tvplot:", ...dumpObject(vplot),
           "\n\ttargetTrack:", ...dumpObject(targetTrack),
-          "\n\tvpathTrack:", ...dumpObject(runtime),
+          "\n\tvplotTrack:", ...dumpObject(runtime),
           "\n\tmaybeInnerPluralMapTrack:", ...dumpObject(maybeInnerPluralMapTrack));
     }
   }
@@ -363,11 +363,11 @@ export default class MapperService extends FabricEventTarget {
       if (!gate || (gate.projection === undefined)) {
         throw new Error(`Resource ${resource.name} gate or projection missing`);
       }
-      entryTargetTrack = this.appendVPathSteps(runtime, gate.projection, targetTrack);
+      entryTargetTrack = this.appendVPlotSteps(runtime, gate.projection, targetTrack);
       this.appendSchemaSteps(runtime, resource.schema, { targetTrack: entryTargetTrack });
       if (gate.filterCondition) {
         const filter = ["§?"];
-        this.appendVPathSteps(runtime, gate.filterCondition, filter);
+        this.appendVPlotSteps(runtime, gate.filterCondition, filter);
         filter.push(null);
         entryTargetTrack.push(filter, false);
       }

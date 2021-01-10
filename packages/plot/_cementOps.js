@@ -1,6 +1,6 @@
 const { dumpObject, wrapError } = require("~/tools/wrapError");
 
-module.exports = { cementVPath, extendTrack };
+module.exports = { cementVPlot, extendTrack };
 
 function extendTrack (target, extension) {
   if (target[0] !== "§->" || !Array.isArray(extension) || extension[0] !== "§->") {
@@ -8,11 +8,11 @@ function extendTrack (target, extension) {
   } else target.push(...extension.slice(1));
 }
 
-function cementVPath (vpathSection,
+function cementVPlot (vplotSection,
     stack /* : { context: Object, contextState, isPluralHead } */ = {}) {
   if (!stack.context) stack.context = {};
   return _cementSection(
-      stack, vpathSection, stack.parentSection || ["@@", [vpathSection]], stack.index || 0);
+      stack, vplotSection, stack.parentSection || ["@@", [vplotSection]], stack.index || 0);
 }
 
 function _cementSection (stack, section, parentSection, index) {
@@ -206,7 +206,7 @@ function _cementQuotation (stack, section) {
 }
 
 function _cementProperty (stack, section, parentSection) {
-  // ref("@valos/raem/VPath#section_structured_scope_cementProperty")
+  // ref("@valos/plot#section_structured_scope_cementProperty")
   const payload = section[1];
   if (!payload) throw new Error("Missing property payload");
   const firstTrack = _cementSection(stack, payload[0], section, 0);
@@ -339,7 +339,7 @@ function _tryAsNameParam (section) {
 }
 
 function _cementSingularProperty (stack, section) {
-  // ref("@valos/raem/VPath#section_structured_object_value")
+  // ref("@valos/plot#section_structured_object_value")
   const selector = _singularLookup[section[0]];
   stack.isPluralHead = false;
   if (selector === undefined) {
@@ -352,7 +352,7 @@ function _cementSingularProperty (stack, section) {
 }
 
 function _cementPluralProperty (stack, section) {
-  // ref("@valos/raem/VPath#section_structured_relation")
+  // ref("@valos/plot#section_structured_relation")
   const propertyType = section[0];
   const field = _pluralLookup[propertyType];
   if (field === undefined) {

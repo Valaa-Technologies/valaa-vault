@@ -1,17 +1,17 @@
 const { dumpObject, wrapError } = require("~/tools/wrapError");
 
-const { disjoinVPathOutline, disjoinVPathString } = require("./_sectionOps");
+const { disjoinVPlotOutline, disjoinVPlotString } = require("./_sectionOps");
 
 const {
   validateFormatTerm, validateVerbType, validateContextTerm, validateParamValueText,
 } = require("./_validateTerminalOps");
 
 module.exports = {
-  validateVPathString,
-  validateVPath,
-  validateVPathSection,
+  validateVPlotString,
+  validateVPlot,
+  validateVPlotSection,
   validateVKeyPath,
-  validateFullVPathSection,
+  validateFullVPlotSection,
   validateVRIDString,
   validateVRID,
   validateVRIDSection,
@@ -30,39 +30,39 @@ module.exports = {
 };
 
 
-function validateVPathString (vpath) {
-  if ((typeof vpath !== "string") || (vpath[0] !== "@")) {
-    throw new Error(`Invalid full vpath: must be a string beginning with "@"`);
+function validateVPlotString (vplot) {
+  if ((typeof vplot !== "string") || (vplot[0] !== "@")) {
+    throw new Error(`Invalid full vplot: must be a string beginning with "@"`);
   }
-  return validateFullVPathSection(disjoinVPathString(vpath), vpath);
+  return validateFullVPlotSection(disjoinVPlotString(vplot), vplot);
 }
 
 function validateVRIDString (vrid) {
   if ((typeof vrid !== "string") || (vrid[0] !== "@")) {
     throw new Error(`Invalid full vrid: must be a string beginning with "@"`);
   }
-  return validateVRIDSection(disjoinVPathString(vrid), vrid);
+  return validateVRIDSection(disjoinVPlotString(vrid), vrid);
 }
 
-function validateVPath (vpath) {
-  return (typeof vpath !== "string")
-      ? validateVPathSection(vpath)
-      : validateVPathSection(disjoinVPathString(vpath), vpath);
+function validateVPlot (vplot) {
+  return (typeof vplot !== "string")
+      ? validateVPlotSection(vplot)
+      : validateVPlotSection(disjoinVPlotString(vplot), vplot);
 }
 
-function validateVPathSection (section, source) {
+function validateVPlotSection (section, source) {
   try {
     const type = section[0];
     if (type[0] !== "@") {
-      throw new Error(`Invalid vpath: section type must begin with "@", got "${type}"`);
+      throw new Error(`Invalid vplot: section type must begin with "@", got "${type}"`);
     }
     if (type[1] === "$") validateVParamSection(section, source);
     else if (type[1] !== "@") validateVVerbSection(section, source);
-    else if (type === "@@") validateFullVPathSection(section, source);
-    else  throw new Error(`Invalid vpath: invalid section type "${type}"`);
+    else if (type === "@@") validateFullVPlotSection(section, source);
+    else  throw new Error(`Invalid vplot: invalid section type "${type}"`);
     return section;
   } catch (error) {
-    throw wrapError(error, new Error(`During validateVPathSection(${(section || "")[0]})`),
+    throw wrapError(error, new Error(`During validateVPlotSection(${(section || "")[0]})`),
         "\n\tsegment:", ...dumpObject(section),
         "\n\ttemplate:", ...dumpObject(source),
     );
@@ -71,35 +71,35 @@ function validateVPathSection (section, source) {
 
 function validateVPayloadEntrySection (section) {
   if (typeof section !== "string") {
-    validateVPath(section);
+    validateVPlot(section);
   }
   return section;
 }
 
 function validateVKeyPath (vkey, value) {
-  disjoinVPathOutline(value, vkey);
+  disjoinVPlotOutline(value, vkey);
   return value;
 }
 
-function validateFullVPathSection (section, source) {
+function validateFullVPlotSection (section, source) {
   try {
     if (section.length > 2) {
-      throw new Error(`Invalid full vpath: section must be an array with at most two entries`);
+      throw new Error(`Invalid full vplot: section must be an array with at most two entries`);
     }
     const [type, vsteps] = section;
     if (type !== "@@") {
-      throw new Error(`Invalid full vpath: expected "@@" as section type, got "${type}"`);
+      throw new Error(`Invalid full vplot: expected "@@" as section type, got "${type}"`);
     }
     if (vsteps !== undefined) {
       if (!Array.isArray(vsteps) || (vsteps.length < 2)) {
         throw new Error(
-            `Invalid full vpath: section payload must be an array with two or more entries`);
+            `Invalid full vplot: section payload must be an array with two or more entries`);
       }
       vsteps.forEach(validateVPayloadEntrySection);
     }
     return source || section;
   } catch (error) {
-    throw wrapError(error, new Error(`During validateFullVPathSection(${(section || "")[0]})`),
+    throw wrapError(error, new Error(`During validateFullVPlotSection(${(section || "")[0]})`),
         "\n\tsegment:", ...dumpObject(section),
         "\n\ttemplate:", ...dumpObject(source),
     );
@@ -109,7 +109,7 @@ function validateFullVPathSection (section, source) {
 function validateVRID (vrid) {
   return (typeof vrid !== "string")
       ? validateVRIDSection(vrid)
-      : validateVRIDSection(disjoinVPathString(vrid), vrid);
+      : validateVRIDSection(disjoinVPlotString(vrid), vrid);
 }
 
 function validateVRIDSection (section, source) {
@@ -126,7 +126,7 @@ function validateVRIDSection (section, source) {
     }
     vsteps.forEach((e, i) => (!i
         ? validateVGRIDSection // first
-        : validateVVerbSection // vrid steps must be fully qualified vverbs (unlike for vpaths).
+        : validateVVerbSection // vrid steps must be fully qualified vverbs (unlike for vplots).
     )(e));
     return source || section;
   } catch (error) {
@@ -140,7 +140,7 @@ function validateVRIDSection (section, source) {
 function validateVVerbs (verbs) {
   return (typeof verbs !== "string")
       ? validateVVerbsSection(verbs)
-      : validateVVerbsSection(disjoinVPathString(verbs), verbs);
+      : validateVVerbsSection(disjoinVPlotString(verbs), verbs);
 }
 
 function validateVVerbsSection (section, source) {
@@ -171,7 +171,7 @@ function validateVVerbsSection (section, source) {
 function validateVGRID (vgrid) {
   return (typeof vgrid !== "string")
       ? validateVGRIDSection(vgrid)
-      : validateVGRIDSection(disjoinVPathString(vgrid), vgrid);
+      : validateVGRIDSection(disjoinVPlotString(vgrid), vgrid);
 }
 
 function validateVGRIDSection (section, source) {
@@ -204,7 +204,7 @@ function validateVGRIDSection (section, source) {
 function validateVVerb (verb) {
   return (typeof verb !== "string")
       ? validateVVerbSection(verb)
-      : validateVVerbSection(disjoinVPathString(verb), verb);
+      : validateVVerbSection(disjoinVPlotString(verb), verb);
 }
 
 function validateVVerbSection (section, source) {
@@ -237,7 +237,7 @@ function validateVVerbSection (section, source) {
 function validateVParam (vparam) {
   return (typeof vparam !== "string")
       ? validateVParamSection(vparam)
-      : validateVParamSection(disjoinVPathString(vparam), vparam);
+      : validateVParamSection(disjoinVPlotString(vparam), vparam);
 }
 
 function validateVParamSection (section, source) {
@@ -256,10 +256,10 @@ function validateVParamSection (section, source) {
     if (contextTerm !== "@$") validateContextTerm(contextTerm.slice(2));
     if (paramValue !== undefined && (typeof paramValue !== "string")) {
       if (Array.isArray(paramValue)) {
-        validateVPathSection(paramValue);
+        validateVPlotSection(paramValue);
       } else {
         throw new Error(`Invalid vparam:${
-          ""} param-value must be undefined, string or an array containing a vpath section`);
+          ""} param-value must be undefined, string or an array containing a vplot section`);
       }
     }
     return source || section;

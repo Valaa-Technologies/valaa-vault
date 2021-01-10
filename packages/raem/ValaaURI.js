@@ -3,7 +3,7 @@
 import URLParse from "url-parse";
 
 import { invariantifyString } from "~/tools/invariantify";
-import { coerceAsVRID, validateVRIDString } from "~/raem/VPath";
+import { coerceAsVRID, validateVRIDString } from "~/plot";
 import { vdon } from "~/tools/vdon";
 import { wrapError } from "~/tools/wrapError";
 
@@ -155,7 +155,7 @@ export const naiveURI = {
       let chronicleVRID = partitionRawId;
       if (partitionRawId.slice(-2) !== "@@") {
         chronicleVRID = coerceAsVRID(partitionRawId);
-        // console.debug(`DEPRECATED: createPartitionURI.chronicleId must be a valid VPath, got: ${
+        // console.debug(`DEPRECATED: createPartitionURI.chronicleId must be a valid VPlot, got: ${
         //   partitionRawId}, coerced as: ${chronicleVRID}`);
       }
       return naiveURI.createChronicleURI(baseString, chronicleVRID);
@@ -198,7 +198,7 @@ export const naiveURI = {
     }
     const chronicleIdPart = match[naiveURI.chronicleIdPart];
     if (chronicleIdPart[0] !== "@") {
-      throw new Error(`chronicle id must be a VPath in naive chronicle URI <${naiveChronicleURI}>`);
+      throw new Error(`chronicle id must be a VPlot in naive chronicle URI <${naiveChronicleURI}>`);
     }
     return chronicleIdPart;
   },

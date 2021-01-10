@@ -620,7 +620,7 @@ describe("Two paired harnesses emulating two gateways connected through event st
       } })).$V.vref;
     `);
     expect(newVRef)
-        .toEqual(`valaa-test:?id=${testRootId}#@$~raw.test_chronicle@+$.subEntity@@`);
+        .toEqual(`valaa-test:?id=${testRootId}#@$~raw.test_chronicle@*$.subEntity@@`);
 
     const { target, instance, isActive, targetVRef } = await pairness.runValoscript(
         vRef(testRootId), `

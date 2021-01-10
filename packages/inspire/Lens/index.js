@@ -1190,7 +1190,7 @@ current component will use this scope frame resource as their owner.`,
     tags: ["Internal", "Context"],
     type: "string",
     description: [
-`Slot which contains the frame vpath step prefix from the current
+`Slot which contains the frame vplot step prefix from the current
 innermost enclosing scope frame.`,
     ],
   }));

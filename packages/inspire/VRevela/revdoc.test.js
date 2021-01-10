@@ -81,7 +81,7 @@ configuration file in which all "!!!" key values (`, em("spreads"), `)
 are evaluated and their results then spread and merged on top of the
 surrounding object.
 
-The evaluation allows for VPath operations, most notably importing
+The evaluation allows for VPlot operations, most notably importing
 relative config files and accessing their subsections. Together the
 evaluation, spread and merge allow for fine-grained `,
 ref("DRY", "https://en.wikipedia.org/wiki/Don%27t_repeat_yourself"), `

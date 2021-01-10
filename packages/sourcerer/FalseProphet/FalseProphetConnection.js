@@ -59,7 +59,7 @@ export default class FalseProphetConnection extends Connection {
   static sourceryOpsName = "falseSourcery";
   static falseSourcery = [
     function _prepareIdentity (...forward) {
-      this._originatingIdentity = forward[0].discourse && forward[0].discourse.getIdentityManager();
+      this._originatingIdentity = forward[0].discourse && forward[0].discourse.getIdentityMediator();
       this._referencePrototype.setAbsent(false);
       return forward;
     },
@@ -114,9 +114,9 @@ export default class FalseProphetConnection extends Connection {
   }
 
   _resolveOptionsIdentity (options) {
-    if (options.identity !== undefined) return;
-    const identity = options.discourse && options.discourse.getIdentityManager();
-    options.identity = identity || this._originatingIdentity;
+    if (options.identity !== undefined) return options.identity;
+    const identity = options.discourse && options.discourse.getIdentityMediator();
+    return (options.identity = identity || this._originatingIdentity);
   }
 
   proclaimEvents (events: EventBase[], options: ProclaimOptions = {}): Proclamation {
@@ -159,9 +159,9 @@ export default class FalseProphetConnection extends Connection {
       return thisChainRedirect("_awaitProclamation", op);
     }
     throw this.wrapErrorEvent(error, 1, new Error("proclaimEvents"),
-      "\n\toptions:", ...dumpObject(op.options),
-      "\n\tevents:", ...dumpObject(this._dumpEventIds(op.events)),
-      "\n\tstate:", ...dumpObject(op));
+        "\n\toptions:", ...dumpObject(op.options),
+        "\n\tevents:", ...dumpObject(this._dumpEventIds(op.events)),
+        "\n\tstate:", ...dumpObject(op));
   }
 
   _prepareProclaim (op) {

@@ -23,8 +23,8 @@ export default class Discourse extends Valker {
     throw new Error(`${this.constructor.name}/Discourse.obtainId not implemented`);
   }
 
-  getIdentityManager (): Object {
-    throw new Error(`${this.constructor.name}/Discourse.getIdentityManager not implemented`);
+  getIdentityMediator (): Object {
+    throw new Error(`${this.constructor.name}/Discourse.getIdentityMediator not implemented`);
   }
 
   /**

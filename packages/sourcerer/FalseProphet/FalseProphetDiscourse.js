@@ -63,7 +63,7 @@ export default class FalseProphetDiscourse extends Discourse {
 
   getRootDiscourse () { return this._rootDiscourse; }
   getTransactor () { return this._transaction && this._transaction._transactor; }
-  getIdentityManager () { return this.getFollower().getIdentityManager(); }
+  getIdentityMediator () { return this.getFollower().getIdentityMediator(); }
 
   setAssignCommandId (assignCommandId) {
     this._assignCommandId = assignCommandId;

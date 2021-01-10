@@ -392,7 +392,7 @@ export function _recomposeSchismaticStory (falseProphet: FalseProphet, story: Pr
     } else if (progress) {
       progress.type = "reform";
     }
-    progress = operation.getProgressErrorEvent("compose", wrappedError, {
+    const errorEvent = operation.getProgressErrorEvent("compose", wrappedError, {
       prophecy: story,
       composeDescription,
       message: `a reduction schism found during ${composeDescription
@@ -400,7 +400,7 @@ export function _recomposeSchismaticStory (falseProphet: FalseProphet, story: Pr
     }, {
       isRevisable: true,
     });
-    if (transactor && !transactor.dispatchAndDefaultActEvent(progress)) return undefined;
+    if (transactor && !transactor.dispatchAndDefaultActEvent(errorEvent)) return undefined;
     throw wrappedError;
   }
 }

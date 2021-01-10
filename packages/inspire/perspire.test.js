@@ -28,7 +28,7 @@ describe("testing perspire", () => {
       });
       await server.initialize();
       const workerView = await server.createView("worker");
-      expect(workerView.getEngine().getIdentityManager()
+      expect(workerView.getEngine().getIdentityMediator()
               .add("valaa-local:?id=@$~raw.dummy-user@@")
               .authority.getAuthorityURI())
           .toEqual("valaa-local:");

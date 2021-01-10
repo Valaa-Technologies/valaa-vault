@@ -658,22 +658,24 @@ export class ProphecyOperation extends ProphecyEventResult {
     this._prophecy = null;
     const transactor = this.event.meta.transactor;
     if (transactor) {
-      const progress = this.getProgressErrorEvent("profess", this._rejectionError, { prophecy });
-      transactor.dispatchAndDefaultActEvent(progress);
+      const errorEvent = this.getProgressErrorEvent(
+          "profess", this._rejectionError, { prophecy }, error.progressUpdate);
+      transactor.dispatchAndDefaultActEvent(errorEvent);
     } else if (!this._truthStory && (this.getVerbosity() >= 1)) {
       this.outputErrorEvent(this._rejectionError,
           `Exception caught during a fire-and-forget proclaimEvents.profess`);
     }
-    if (prophecy) {
-      prophecy.rejectionReason = this._rejectionError;
-      try {
-        _purgeLatestRecitedStory(this._parent, prophecy, false);
-      } catch (innerError) {
-        outputError(innerError, `Exception caught during proclaimEvents.profess.purge`);
-        outputError(error, "Exception caught during proclaim");
-        throw innerError;
-      }
+    if (!prophecy) return null;
+    prophecy.rejectionReason = this._rejectionError;
+    try {
+      _purgeLatestRecitedStory(this._parent, prophecy, false);
+    } catch (innerError) {
+      outputError(innerError, `Exception caught during proclaimEvents.profess.purge`);
+      outputError(error, "Exception caught during proclaim");
+      throw innerError;
     }
+    if ((this._progress || {}).isSchismatic
+        && !this._progress.isRevisable && !this._progress.isReformable) throw error;
     return null;
   }
 
@@ -789,9 +791,9 @@ export class ProphecyOperation extends ProphecyEventResult {
           connection._dumpEventIds(reformation.schismaticCommands || [])})`));
     const transactor = ((this._prophecy || {}).meta || {}).transactor;
     if (transactor) {
-      const progress = this.getProgressErrorEvent(
+      const errorEvent = this.getProgressErrorEvent(
           "reform", wrappedError, { prophecy: this._prophecy });
-      transactor.dispatchAndDefaultActEvent(progress);
+      transactor.dispatchAndDefaultActEvent(errorEvent);
     }
     if (reformation.isComplete) {
       this.outputErrorEvent(wrappedError, "Exception caught when reforming heresy");

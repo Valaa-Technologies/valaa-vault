@@ -50,5 +50,5 @@ export default class Follower extends FabricEventTarget {
     return this.proclaimEvents([event], options).eventResults[0];
   }
 
-  getIdentityManager () { return null; }
+  getIdentityMediator () { return null; }
 }

@@ -24,7 +24,7 @@ export function createRAEMTestHarness (options: Object, ...commandBlocks: any) {
   return thenChainEagerly(TestHarnessType, [
         // #0
         (TestHarnessType_) => (harness = new TestHarnessType_({
-          name: "RAEM Test Harness", ContentAPI: RAEMTestAPI,
+          name: "RAEMHarness", ContentAPI: RAEMTestAPI,
           ...options,
         })),
         // #1
@@ -143,6 +143,7 @@ export default class RAEMTestHarness extends FabricEventTarget {
 
   createValker () {
     return new Valker({
+      name: `${this.getName()} Valker`,
       parent: this,
       schema: this.schema,
       packFromHost (value) { return (value instanceof OrderedMap ? value.get("id") : value); },

@@ -40,6 +40,6 @@
   "homepage": "https://valospace.org/inspire",
   "devDependencies": {
     "@valos/kernel": "^0.37.0-alpha.4",
-    "@valos/revdoc": ">=0.36.0-alpha.0"
+    "@valos/revdoc": "^0.37.0-alpha.4"
   }
 }

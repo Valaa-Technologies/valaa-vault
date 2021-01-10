@@ -13,7 +13,7 @@ import {
 import { initializeAspects } from "~/sourcerer/tools/EventAspects";
 import { SHARED_DB_VERSION, CHRONICLE_DB_VERSION } from "~/sourcerer/Scribe";
 
-import { openDB, closeDB, getFromDB, getKeysFromDB, expectStoredInDB }
+import { openMemoryDB, closeMemoryDB, getFromMemoryDB, getKeysFromMemoryDB, expectStoredInMemoryDB }
     from "~/tools/html5/InMemoryIndexedDBUtils";
 
 const sharedURI = "valos-shared-content";
@@ -59,23 +59,23 @@ describe("Scribe", () => {
     const connection = scribe.sourcerChronicle(testChronicleURI);
     connection.getUpstreamConnection().addNarrateResults({ eventIdBegin: 0 }, []);
     await connection.asSourceredConnection();
-    const database = await openDB(testChronicleURI.toString(), CHRONICLE_DB_VERSION);
+    const database = await openMemoryDB(testChronicleURI.toString(), CHRONICLE_DB_VERSION);
 
     // Adds an entity and checks that it has been stored
     let storedEvent = await connection.proclaimEvent(simpleCommand).getComposedEvent();
     expect(storedEvent.aspects.log.index)
         .toEqual(connection.getFirstUnusedCommandEventId() - 1);
-    await expectStoredInDB(simpleCommand, database, "commands",
+    await expectStoredInMemoryDB(simpleCommand, database, "commands",
         connection.getFirstUnusedCommandEventId() - 1);
 
     // Runs a transaction and confirms that it has been stored
     storedEvent = await connection.proclaimEvent(followupTransaction).getComposedEvent();
     expect(storedEvent.aspects.log.index)
         .toEqual(connection.getFirstUnusedCommandEventId() - 1);
-    await expectStoredInDB(followupTransaction, database, "commands",
+    await expectStoredInMemoryDB(followupTransaction, database, "commands",
         connection.getFirstUnusedCommandEventId() - 1);
 
-    await closeDB(database);
+    await closeMemoryDB(database);
   });
 
   const textMediaContents = [
@@ -90,24 +90,24 @@ describe("Scribe", () => {
 
     const connection = await scribe.sourcerChronicle(testChronicleURI)
         .asSourceredConnection();
-    const sharedDB = await openDB(sharedURI, SHARED_DB_VERSION);
+    const sharedDB = await openMemoryDB(sharedURI, SHARED_DB_VERSION);
 
     for (const mediaContent of textMediaContents) {
       const preparation = await connection.prepareBvob(mediaContent, { name: "Some media" });
       const contentHash = await preparation.persistProcess;
 
-      const bvobKeys = await getKeysFromDB(sharedDB, "bvobs");
+      const bvobKeys = await getKeysFromMemoryDB(sharedDB, "bvobs");
       expect(bvobKeys).toContain(contentHash);
 
-      const bufferKeys = await getKeysFromDB(sharedDB, "buffers");
+      const bufferKeys = await getKeysFromMemoryDB(sharedDB, "buffers");
       expect(bufferKeys).toContain(contentHash);
 
-      const restoredBuffer = await getFromDB(sharedDB, "buffers", contentHash);
+      const restoredBuffer = await getFromMemoryDB(sharedDB, "buffers", contentHash);
       const restoredContent = utf8StringFromArrayBuffer(restoredBuffer.buffer);
       expect(restoredContent).toEqual(mediaContent);
     }
 
-    closeDB(sharedDB);
+    closeMemoryDB(sharedDB);
   });
 
   it("populates a new connection to an existing chronicle with its cached commands", async () => {

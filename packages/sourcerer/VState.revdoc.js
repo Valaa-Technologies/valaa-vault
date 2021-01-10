@@ -101,7 +101,7 @@ when it is expanded as triples.
     "$V:Entity": [{
       "@context": {
         "^0": "^thistwinroot:",
-        "^0-0": "^0:+$pot_hypertwin.inLinks@"
+        "^0-0": "^0:*$pot_hypertwin.inLinks@"
       },
       "@id": "^0:@",
       "/.P": "thistwinname",

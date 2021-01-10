@@ -25,6 +25,7 @@ const decepTributorURI = naiveURI.createChronicleURI(testAuthorityURI, decepTrib
 
 async function prepareHarnesses (sharedOptions) {
   harness = await createEngineOracleHarness({
+    name: "prime",
     verbosity: 0, claimBaseBlock: true,
     oracle: { testAuthorityConfig: { isRemoteAuthority: true } },
     awaitResult: (result) => result.getComposedStory(),
@@ -34,6 +35,7 @@ async function prepareHarnesses (sharedOptions) {
     await registerLocalTestUserIdentity(harness, primeDirectorId);
 
     decepness = await createEngineOracleHarness({
+      name: "decep",
       pairedHarness: harness,
       verbosity: 0, claimBaseBlock: true,
       oracle: { testAuthorityConfig: { isRemoteAuthority: true } },
@@ -105,7 +107,8 @@ describe("Chronicle behaviors: VChronicle:requireAuthoredEvents", () => {
         .sourcerChronicle(authorootConnection.getChronicleURI());
     const authorootEvents = await decepness
         .receiveEventsFrom(authorootConnection, {
-          alsoReceiveBackToSource: true,
+          asNarrateResults: true,
+          alsoReceiveBackToSource: "asPush",
         });
     expect(authorootEvents.length)
         .toEqual(expectedAuthorootEvents);

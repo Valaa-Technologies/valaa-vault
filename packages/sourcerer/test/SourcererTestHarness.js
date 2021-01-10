@@ -37,7 +37,7 @@ export const testChronicleURI = naiveURI.createChronicleURI(testAuthorityURI, te
 export function createSourcererTestHarness (options: Object, ...commandBlocks: any) {
   const wrap = new Error("During createSourcererHarness");
   return thenChainEagerly({
-    name: "Sourcerer Test Harness", ContentAPI: SourcererTestAPI, TestHarness: SourcererTestHarness,
+    name: "SourcererFrontHarness", ContentAPI: SourcererTestAPI, TestHarness: SourcererTestHarness,
     ...options,
   }, [
     sourcererOptions => createScriptTestHarness(sourcererOptions),
@@ -64,7 +64,7 @@ let dbIsolationAutoPrefix = 0;
 export function createSourcererOracleHarness (options: Object, ...commandBlocks: any) {
   const isPaired = !!options.pairedHarness;
   const combinedOptions = {
-    name: `${isPaired ? "Paired " : ""}Sourcerer Oracle Harness`,
+    name: `${isPaired ? "Paired " : ""}FullSourcererHarness`,
     ...options,
     oracle: {
       verbosity: options.verbosity || 0,
@@ -140,15 +140,17 @@ export default class SourcererTestHarness extends ScriptTestHarness {
     return thenChainEagerly(
       super.initialize(), [
         ...(!this.oracleOptions ? [
-          () => createTestMockSourcerer({ isLocallyRecorded: false }),
+          () => createTestMockSourcerer({ isLocallyRecorded: false },
+              { name: `${this.getName()} Sourcerer` }),
         ] : [
           () => createOracle(
-              { ...(this.oracleOptions || {}), parent: this },
+              { name: `${this.getName()} Oracle`, ...(this.oracleOptions || {}), parent: this },
               { ...(this.nexusOptions || {}), parent: this }),
           oracle => (this.oracle = oracle),
         ]),
         ...(!this.scribeOptions ? [] : [
-          upstream => createScribe(upstream, { ...this.scribeOptions, parent: this }),
+          upstream => createScribe(upstream,
+              { name: `${this.getName()} Scribe`, ...(this.scribeOptions || {}), parent: this }),
           scribe => (this.scribe = scribe),
         ]),
         upstream => this.sourcerer.setUpstream(upstream),
@@ -188,6 +190,7 @@ export default class SourcererTestHarness extends ScriptTestHarness {
     // Called by RAEMTestHarness.constructor (so before oracle/scribe are created)
     const corpus = super.createCorpus(corpusOptions);
     this.sourcerer = this.falseProphet = createFalseProphet({
+      name: `${this.getName()} FalseProphet`,
       schema: this.schema, corpus,
       ...(this.falseProphetOptions || {}),
       parent: this,
@@ -198,6 +201,7 @@ export default class SourcererTestHarness extends ScriptTestHarness {
 
   createValker () {
     return (this.discourse = this.chronicler = new FalseProphetDiscourse({
+      name: `${this.getName()} Discourse`,
       sourcerer: this.sourcerer,
       parent: new MockFollower(this),
       verbosity: this.getVerbosity(),
@@ -263,13 +267,21 @@ export default class SourcererTestHarness extends ScriptTestHarness {
               (testSourceBackend._proclamations || []).map(entry => entry.event)))
           .map(authorizeTruth);
       ret.push(...truths);
-      finallyWaitFor.push(
+      if (alsoReceiveBackToSource) {
+        const sourceAsNarrateResults = alsoReceiveBackToSource === "asNarrateResults";
+        if (!sourceAsNarrateResults && (alsoReceiveBackToSource !== "asPush")) {
+          throw new Error("alsoReceiveBackToSource must be either 'asPush' or 'asNarrateResults");
+        }
+        finallyWaitFor.push(
           this._receiveTruthsToBackend(testSourceBackend,
-              clearSourceUpstream || alsoReceiveBackToSource,
-              alsoReceiveBackToSource && truths, asNarrateResults, verbosity));
+              true, truths, sourceAsNarrateResults, verbosity && "back to source"));
+      } else if (clearSourceUpstream) {
+        finallyWaitFor.push(
+          this._receiveTruthsToBackend(testSourceBackend, true));
+      }
       finallyWaitFor.push(
           this._receiveTruthsToBackend(receiverBackend, clearReceiverUpstream,
-              truths, asNarrateResults, verbosity));
+              truths, asNarrateResults, verbosity && "to receiver"));
     }
     return Promise.all(finallyWaitFor).then(() => ret);
   }
@@ -277,7 +289,9 @@ export default class SourcererTestHarness extends ScriptTestHarness {
   _receiveTruthsToBackend (connectionBackend, clearUpstream, truths, asNarrateResults, verbosity) {
     if (clearUpstream) connectionBackend._proclamations = [];
     if (verbosity) {
-      connectionBackend.warnEvent("Receiving truths:", dumpify(truths, { indent: 2 }));
+      connectionBackend.warnEvent("Receiving truths", verbosity,
+          asNarrateResults ? "as narrate results" : "by pushing to receive truths",
+          dumpify(truths, { indent: 2 }));
     }
     if (!truths) return [];
     if (!asNarrateResults) {
@@ -358,7 +372,7 @@ export function createFalseProphet (options?: Object) {
   });
 }
 
-export function createTestMockSourcerer (configOverrides: Object = {}) {
+export function createTestMockSourcerer (configOverrides: Object = {}, sourcererOverrides = {}) {
   return new TestSourcerer({
     authorityURI: "valaa-test:",
     authorityConfig: {
@@ -368,6 +382,7 @@ export function createTestMockSourcerer (configOverrides: Object = {}) {
       isRemoteAuthority: false,
       ...configOverrides,
     },
+    ...sourcererOverrides,
   });
 }
 

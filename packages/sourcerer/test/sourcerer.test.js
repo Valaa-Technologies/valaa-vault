@@ -16,7 +16,8 @@ import {
 import { initializeAspects, obtainAspect } from "~/sourcerer/tools/EventAspects";
 import { CHRONICLE_DB_VERSION } from "~/sourcerer/Scribe";
 
-import { openDB, closeDB, expectStoredInDB } from "~/tools/html5/InMemoryIndexedDBUtils";
+import { openMemoryDB, closeMemoryDB, expectStoredInMemoryDB }
+    from "~/tools/html5/InMemoryIndexedDBUtils";
 
 let harness = null;
 
@@ -89,17 +90,17 @@ describe("Sourcerer", () => {
     const connection = await harness.sourcerer
         .sourcerChronicle(harness.testChronicleURI).asSourceredConnection();
     const scribeConnection = connection.getUpstreamConnection();
-    const database = await openDB(scribeConnection._db.databaseId, CHRONICLE_DB_VERSION);
+    const database = await openMemoryDB(scribeConnection._db.databaseId, CHRONICLE_DB_VERSION);
 
     for (const command of commands) {
       const claimResult = await harness.proclaimTestEvent(command);
       await claimResult.getRecordedStory();
       const venueCommand = await claimResult.getCommandOf(harness.testChronicleURI);
       const logIndex = scribeConnection.getFirstUnusedCommandEventId() - 1;
-      await expectStoredInDB(venueCommand, database, "commands", logIndex);
+      await expectStoredInMemoryDB(venueCommand, database, "commands", logIndex);
     }
 
-    closeDB(database);
+    closeMemoryDB(database);
   });
 
   it("assigns proper eventIds for commands", async () => {

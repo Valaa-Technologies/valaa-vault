@@ -22,7 +22,7 @@ export { testAuthorityURI, testRootId, testChronicleURI };
 
 export function createEngineTestHarness (options: Object, ...commandBlocks: any) {
   const ret = createSourcererTestHarness({
-    name: "Engine Test Harness", ContentAPI: EngineTestAPI, TestHarness: EngineTestHarness,
+    name: "EngineFrontHarness", ContentAPI: EngineTestAPI, TestHarness: EngineTestHarness,
     corpus: { steppers: engineSteppers },
     ...options,
   }, ...(options.claimBaseBlock ? [baseEventBlock] : []), ...commandBlocks);
@@ -35,7 +35,7 @@ export function createEngineTestHarness (options: Object, ...commandBlocks: any)
 
 export function createEngineOracleHarness (options: Object, ...commandBlocks: any) {
   return createSourcererOracleHarness({
-    name: "Engine Oracle Harness", ContentAPI: EngineTestAPI, TestHarness: EngineTestHarness,
+    name: "FullEngineHarness", ContentAPI: EngineTestAPI, TestHarness: EngineTestHarness,
     corpus: { steppers: engineSteppers },
     ...options,
   }, ...(options.claimBaseBlock ? [baseEventBlock] : []), ...commandBlocks);
@@ -44,7 +44,7 @@ export function createEngineOracleHarness (options: Object, ...commandBlocks: an
 export default class EngineTestHarness extends SourcererTestHarness {
   createValker () {
     this.engine = new Engine({
-      name: "Test Engine",
+      name: `${this.getName()} Engine`,
       parent: this,
       sourcerer: this.sourcerer, // created by createCorpus of SourcererTestHarness
       verbosity: this.getVerbosity(),
@@ -59,7 +59,7 @@ export default class EngineTestHarness extends SourcererTestHarness {
     };
     // TODO(iridian, 2020-10): Identity also should be in InspireTestHarness.
     rootScope.valos.identity = new IdentityMediator({
-      name: "Test Identity",
+      name: `${this.getName()} Identity`,
       parent: this,
       sourcerer: this.sourcerer,
     });

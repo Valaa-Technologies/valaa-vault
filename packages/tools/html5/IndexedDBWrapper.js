@@ -27,7 +27,7 @@ export default class IndexedDBWrapper extends FabricEventTarget {
 
   initialize () {
     return (this.database = new Promise((resolve, reject) => {
-      const openReq = this.databaseAPI.IndexedDB.open(this.databaseId, this.version);
+      const openReq = this.databaseAPI.indexedDB.open(this.databaseId, this.version);
       openReq.onerror = reject;
       openReq.onupgradeneeded = (event: Event) => {
         this._upgradeDatabase(event);

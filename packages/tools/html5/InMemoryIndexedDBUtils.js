@@ -6,11 +6,11 @@ import { Command } from "~/raem/events";
 import { dumpObject, wrapError } from "~/tools";
 import { swapAspectRoot } from "../../sourcerer/tools/EventAspects";
 
-export function openDB (uri: string, version: number) {
+export function openMemoryDB (uri: string, version: number) {
   let database;
-  if (!version) throw new Error("version missing");
+  if (typeof version !== "number") throw new Error("version is not a number");
   return (new Promise((resolve, reject) => {
-    const request = FakeIndexedDB.open(uri, 1);
+    const request = FakeIndexedDB.open(uri, version);
     request.onerror = reject;
     request.onsuccess = (event: Event) => {
       database = event.target.result;
@@ -20,11 +20,11 @@ export function openDB (uri: string, version: number) {
   .then(() => database);
 }
 
-export async function closeDB (database) {
+export async function closeMemoryDB (database) {
   database.close();
 }
 
-export function getFromDB (database: FDBDatabase, table: string, key: any) {
+export function getFromMemoryDB (database: FDBDatabase, table: string, key: any) {
   let entry;
   return (new Promise((resolve, reject) => {
     const transaction = database.transaction([table], "readonly");
@@ -37,12 +37,12 @@ export function getFromDB (database: FDBDatabase, table: string, key: any) {
     };
   }))
   .then(() => entry, error => {
-    throw wrapError(error, `During getFromDB("${database.name}", ${table}, ${key}), with:`,
+    throw wrapError(error, `During getFromMemoryDB("${database.name}", ${table}, ${key}), with:`,
         "\n\tkey:", key);
   });
 }
 
-export function getKeysFromDB (database: FDBDatabase, table: string) {
+export function getKeysFromMemoryDB (database: FDBDatabase, table: string) {
   let keys;
   return (new Promise((resolve, reject) => {
     const transaction = database.transaction([table], "readonly");
@@ -61,12 +61,12 @@ export function getKeysFromDB (database: FDBDatabase, table: string) {
 }
 
 // Utility function verifying that a command got stored in the database with a given logIndex.
-export async function expectStoredInDB (command: Command, database: FDBDatabase, table: string,
-    logIndex: number) {
+export async function expectStoredInMemoryDB (
+    command: Command, database: FDBDatabase, table: string, logIndex: number) {
   let stored, expected;
   expect((command.aspects.log || {}).index).toEqual(logIndex);
   try {
-    const storedCommand = await getFromDB(database, table, logIndex);
+    const storedCommand = await getFromMemoryDB(database, table, logIndex);
     if (storedCommand === undefined) {
       throw new Error(`No event found for id '${logIndex}' in "${database.name}"/${table}`);
     }
@@ -79,7 +79,7 @@ export async function expectStoredInDB (command: Command, database: FDBDatabase,
     delete expected.aspects.log;
     // console.info("STORED:\n", stored, "\n\nINDEXED:\n", indexed);
   } catch (error) {
-    throw wrapError(error, `During expectStoredInDB("${database.name}", ${table}), with:`,
+    throw wrapError(error, `During expectStoredInMemoryDB("${database.name}", ${table}), with:`,
         "\n\tlogIndex:", logIndex,
         "\n\texpected command:", ...dumpObject(expected || command));
   }

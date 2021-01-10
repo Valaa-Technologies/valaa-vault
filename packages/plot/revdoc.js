@@ -328,7 +328,7 @@ the only things that can have multiple instances with the same name).`,
 Verb for selecting the resource (typically an Entity) with the given
 name and which has the head as their container.`,
           "example#example_verb_container>0;Container selector example": [
-`Triple pattern \`?s <urn:valos:+$.Scripts> ?o\` matches like:
+`Triple pattern \`?s <urn:valos:*$.Scripts> ?o\` matches like:
 `, turtle(`
   ?o    V:parent ?s
       ; V:name "Scripts"

@@ -1,6 +1,6 @@
 {
   "name": "@valos/security",
-  "version": "0.36.0-alpha.0",
+  "version": "0.37.0-alpha.4",
   "valos": {
     "type": "library",
     "domain": "@valos/kernel"

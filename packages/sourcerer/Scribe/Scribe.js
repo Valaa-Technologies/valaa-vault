@@ -63,6 +63,7 @@ export default class Scribe extends Sourcerer {
     super({ ...rest });
     this._mediaTypes = {};
     this._persistedMediaLookup = {};
+    if (!databaseAPI) throw new Error("Scribe#constructor options.databaseAPI missing");
     this._databaseAPI = databaseAPI;
     this._databasePrefix = databasePrefix || "";
   }

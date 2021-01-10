@@ -1,0 +1,22 @@
+{
+  "name": "@valos/security",
+  "version": "0.36.0-alpha.0",
+  "valos": {
+    "type": "library",
+    "domain": "@valos/kernel"
+  },
+  "description": "Valos kernel security primitives",
+  "author": "Valaa Technologies Ltd",
+  "license": "MIT",
+  "repository": "https://github.com/valaatech/kernel",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "@valos/type-library": "^0.37.0-alpha.4",
+    "@valos/gateway-api": "^0.37.0-alpha.4",
+    "jssha": "^2.3.1"
+  }
+}

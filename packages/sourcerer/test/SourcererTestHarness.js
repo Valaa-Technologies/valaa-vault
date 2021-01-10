@@ -172,7 +172,7 @@ export default class SourcererTestHarness extends ScriptTestHarness {
         () => {
           if (hasRemoteTestBackend) return undefined;
           const result = this.proclaimTestEvent(
-                createTestChronicleEntityCreated(), { isTruth: true });
+              createTestChronicleEntityCreated(), { isTruth: true });
           return result.getPremiereStory();
         },
       ],

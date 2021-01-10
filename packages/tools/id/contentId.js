@@ -1,9 +1,9 @@
 // @flow
 
-import JSSHA from "jssha/src/sha512";
+import { hexSHA512FromArrayBuffer, hexSHA512PromiseFromStream } from "~/security/hash";
+import { arrayBufferFromUTF8String } from "~/security/textEncoding";
 
 import { thenChainEagerly } from "~/tools/thenChainEagerly";
-import { arrayBufferFromUTF8String } from "~/tools/textEncoding";
 
 export function bufferAndContentHashFromNative (maybeObject: any, mediaInfo?: Object):
     Object | Promise<Object> {
@@ -34,9 +34,7 @@ export function contentHashFromUCS2String (contentString: string) {
 }
 
 export function contentHashFromArrayBuffer (buffer: ArrayBuffer): string {
-  const sha = new JSSHA("SHA-512", "ARRAYBUFFER");
-  sha.update(buffer);
-  return sha.getHash("HEX");
+  return hexSHA512FromArrayBuffer(buffer);
 }
 
 /*
@@ -44,27 +42,5 @@ export function contentHashFromArrayBuffer (buffer: ArrayBuffer): string {
 */
 
 export function contentHashFromNativeStream (contentStream): Promise<string> {
-  return new Promise((resolve, reject) => {
-    try {
-      const sha = new JSSHA("SHA-512", "ARRAYBUFFER");
-      contentStream.on("data", (bufferOrString) => {
-        if (typeof bufferOrString === "string") {
-          sha.update(arrayBufferFromUTF8String(bufferOrString));
-        } else {
-          sha.update(bufferOrString);
-        }
-      });
-      contentStream.on("error", reject);
-      contentStream.on("end", () => {
-        const digest = sha.getHash("HEX");
-        if (digest) {
-          resolve(digest);
-        } else {
-          reject(new Error("Could not resolve digest for stream"));
-        }
-      });
-    } catch (err) {
-      reject(err);
-    }
-  });
+  return hexSHA512PromiseFromStream(contentStream);
 }

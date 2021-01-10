@@ -4,7 +4,7 @@ import PerspireServer from "~/inspire/PerspireServer";
 
 import fetchJSON, { fetch } from "~/tools/fetchJSON";
 
-import { burlaesgEncode, hs256JWTDecode } from "~/web-spindle/tools/security";
+import { burlaesgEncode, hs256JWTDecode } from "~/security/tokens";
 
 const revelationRoot = "./packages/web-spindle/test/worker/";
 const expectedOutputHTML = `<html><head>${

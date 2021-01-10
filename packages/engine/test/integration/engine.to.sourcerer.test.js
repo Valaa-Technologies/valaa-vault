@@ -8,7 +8,8 @@ import { testRootId, clearAllScribeDatabases } from "~/sourcerer/test/SourcererT
 import { createEngineTestHarness, createEngineOracleHarness }
     from "~/engine/test/EngineTestHarness";
 
-import { arrayBufferFromUTF8String } from "~/tools/textEncoding";
+import { arrayBufferFromUTF8String } from "~/security/textEncoding";
+
 import { contentHashFromArrayBuffer } from "~/tools";
 
 let harness: { createds: Object, engine: Object, sourcerer: Object, testEntities: Object };

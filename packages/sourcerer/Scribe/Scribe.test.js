@@ -1,5 +1,7 @@
 // @flow
 
+import { utf8StringFromArrayBuffer } from "~/security/textEncoding";
+
 import { created, transacted } from "~/raem/events/index";
 
 import {
@@ -10,8 +12,6 @@ import {
 
 import { initializeAspects } from "~/sourcerer/tools/EventAspects";
 import { SHARED_DB_VERSION, CHRONICLE_DB_VERSION } from "~/sourcerer/Scribe";
-
-import { utf8StringFromArrayBuffer } from "~/tools/textEncoding";
 
 import { openDB, closeDB, getFromDB, getKeysFromDB, expectStoredInDB }
     from "~/tools/html5/InMemoryIndexedDBUtils";

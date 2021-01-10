@@ -1,6 +1,6 @@
 // @flow
 
-import hashV240 from "~/sourcerer/tools/hashV240";
+import { hashV240 } from "~/security/hash";
 
 export default function createResourceId0Dot2 (commandId: string, chronicleURI: string,
     intraEventIndex: ?number) {

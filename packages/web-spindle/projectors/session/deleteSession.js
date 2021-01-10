@@ -1,6 +1,6 @@
 
 import type { PrefixRouter, Route } from "~/web-spindle/MapperService";
-import { burlaesgDecode, hs256JWTDecode } from "~/web-spindle/tools/security";
+import { burlaesgDecode, hs256JWTDecode } from "~/security/tokens";
 
 import { dumpObject } from "~/tools/wrapError";
 

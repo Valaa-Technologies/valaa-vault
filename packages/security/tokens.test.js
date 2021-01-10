@@ -2,10 +2,10 @@
 
 import {
   generateBurlaesgIV, burlaesgEncode, burlaesgDecode, hs256JWTDecode, hs256JWTEncode,
-} from "./security";
+} from "./tokens";
 
-describe("Session security", () => {
-  it("roundtrips a burlaesg payload properly", () => {
+describe("Valos security primitives", () => {
+  it("roundtrips a base64-url-aes-g payload properly", () => {
     const key = "abcdefghijklmnopqrstuvwxyz0123";
     // USE THIS in external code (only occasionally in tests)
     const iv = generateBurlaesgIV();

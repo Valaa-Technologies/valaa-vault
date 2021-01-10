@@ -35,13 +35,13 @@ export default class AuthorityConnection extends Connection {
 
   static sourceryOpsName = "authoritySourcery";
   static authoritySourcery = [
-    AuthorityConnection.prototype._sourcifyUpstream,
+    AuthorityConnection.prototype._sourcerUpstream,
     Connection.prototype._narrateEventLog,
     Connection.prototype._finalizeSourcery,
   ]
 
-  _sourcifyUpstream (options) {
-    return super._sourcifyUpstream(options, { sourceredUpstream: null });
+  _sourcerUpstream (options) {
+    return super._sourcerUpstream(options, { sourceredUpstream: null });
   }
 
   narrateEventLog (options: ?NarrateOptions = {}): Object | Promise<Object> {
@@ -57,12 +57,12 @@ export default class AuthorityConnection extends Connection {
       throw new Error(`Failed to chronicle events to ${this.getName()}: ${this.constructor.name
           }.proclaimEvents not overridden and options.remoteEventsProcess not defined`);
     }
-    const op = { events, options, resultBase: new AuthorityEventResult(this) };
+    const op = { events, options, resultBase: new AuthorityEventResult(this, options.verbosity) };
     op.resultBase.remoteResults = null;
     op.resultBase.isPrimary = this.isPrimaryAuthority();
     op.resultBase.localProcess = this.opChain(
         "authorityProclaim", op,
-        "_errorOnProclaimEvents", this.opLog(options.plog, 2, "proclaim"));
+        "_errorOnProclaimEvents", this.opLog(2, options.plog, "proclaim"));
     op.resultBase.truthsProcess = thenChainEagerly(op.resultBase.localProcess,
         receivedTruths => (op.resultBase.truthsProcess =
             (this.isPrimaryAuthority() && (receivedTruths || events)) || []));

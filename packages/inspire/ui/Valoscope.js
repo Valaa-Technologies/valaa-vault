@@ -283,7 +283,7 @@ const _scopeFrameChain = [
     } else {
       this.frameRef = vRef(this.frameId, undefined, undefined, chronicleURI);
     }
-    return this.engine.discourse.sourcifyChronicle(chronicleURI).asSourceredConnection();
+    return this.engine.discourse.sourcerChronicle(chronicleURI).asSourceredConnection();
   },
 
   function _obtainRootFrame (/* rootFrameConnection: Connection */) {

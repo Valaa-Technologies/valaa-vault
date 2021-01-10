@@ -35,12 +35,12 @@ const DEFAULT_MAX_REFORM_ATTEMPTS = 10;
 // Create prophecies out of provided events and send their chronicle
 // commands upstream. Aborts all remaining events on first exception
 // and rolls back previous ones.
-export function _proclaimEvents (falseProphet: FalseProphet, events: EventBase[],
-    { timed, transactionState, ...rest } = {}): ProphecyChronicleRequest {
-  if (timed) throw new Error("timed events not supported yet");
-  const resultBase = new ProphecyOperation(falseProphet);
+export function _proclaimEvents (falseProphet: FalseProphet, events: EventBase[], options = {}):
+    ProphecyChronicleRequest {
+  if (options.timed) throw new Error("timed events not supported yet");
+  const resultBase = new ProphecyOperation(falseProphet, options.verbosity);
   resultBase._events = events;
-  resultBase._options = rest;
+  resultBase._options = options;
   resultBase._options.isProphecy = true;
   const prophecies = [];
   const ret = {
@@ -56,7 +56,7 @@ export function _proclaimEvents (falseProphet: FalseProphet, events: EventBase[]
         }
       }
       const prophecy = _composeEventIntoRecitalStory(
-          falseProphet, event, "prophecy-chronicle", timed, transactionState);
+          falseProphet, event, "prophecy-chronicle", options.timed, options.transactionState);
       if (prophecy) prophecies.push(prophecy);
       else if ((operation._progress || {}).isReformable) {
         operation.launchFullReform();
@@ -67,7 +67,7 @@ export function _proclaimEvents (falseProphet: FalseProphet, events: EventBase[]
   falseProphet._reciteStoriesToFollowers(prophecies);
   for (const recitedProphecy of prophecies) {
     const operation = recitedProphecy.meta.operation;
-    operation._debugPhase = "profess";
+    operation._sceneName = "profess";
     operation._fulfillment = operation.opChain("_professChain", null, "_errorOnProfess");
   }
   return ret;
@@ -212,10 +212,11 @@ export class ProgressEvent extends FabricatorEvent {
 }
 
 export class ProphecyOperation extends ProphecyEventResult {
-  _prophecy: Prophecy;
   _parent: FalseProphet;
   _events: EventBase[];
   _options: Object; // upstream proclaimEvents options
+
+  _prophecy: Prophecy;
   _venues: { [chronicleURI: string]: {
     connection: Connection,
     commandEvent: Command,
@@ -224,10 +225,9 @@ export class ProphecyOperation extends ProphecyEventResult {
     rejectCommand?: Function,
   } };
   _fulfillment: Promise<Object>;
-  _stageIndex: number = 0;
+  _actIndex: number = 0;
+  _sceneName: string = "construct";
   _firstStageVenues: Promise<Object>;
-  _persistment: Promise<Object>;
-  _debugPhase: string = "construct";
 
   launchPartialReform (elaboration: Object) {
     if (!elaboration.instigatorChronicleURI) {
@@ -264,7 +264,7 @@ export class ProphecyOperation extends ProphecyEventResult {
     }
   }
 
-  getDebugPhase () { return this._debugPhase; }
+  getSceneName () { return this._sceneName; }
   getCommandOf (chronicleURI: string) {
     return this._venues[chronicleURI].commandEvent;
   }
@@ -284,17 +284,17 @@ export class ProphecyOperation extends ProphecyEventResult {
     }
     return this._progress;
   }
-  getProgressErrorEvent (errorStage, error, assignErrorFields, assignProgressFields = {
+  getProgressErrorEvent (errorAct, error, assignErrorFields, assignProgressFields = {
     isSchismatic: true,
   }) {
-    const progress = this.getProgressEvent(errorStage);
-    if (!progress.errorStage) progress.errorStage = errorStage;
+    const progress = this.getProgressEvent(errorAct);
+    if (!progress.errorAct) progress.errorAct = errorAct;
     progress.error = error;
     Object.assign(progress, assignProgressFields);
 
     const ret = new ProgressEvent("error");
     Object.assign(ret, progress, assignErrorFields || {});
-    ret.errorStage = errorStage;
+    ret.errorAct = errorAct;
     ret.type = "error";
     return ret;
   }
@@ -309,11 +309,11 @@ export class ProphecyOperation extends ProphecyEventResult {
 
   getRecordedStory (dispatchPath_) {
     let reformAttempt = this._reformAttempt;
-    return this._persistedStory || (this._persistedStory = thenChainEagerly(
-        // TODO(iridian, 2019-01): Add also local stage proclamations to
-        // the waited list, as _firstStageVenues only contains remote
-        // stage proclamations. This requires refactoring: local
-        // stage persisting currently waits remote truths. This command
+    return this._recordedStory || (this._recordedStory = thenChainEagerly(
+        // TODO(iridian, 2019-01): Add also local act proclamations to
+        // the waited list, as _firstAct only contains remote
+        // act proclamations. This requires refactoring: local
+        // act persisting currently waits remote truths. This command
         // must be operable offline, so it cannot rely on remote truths.
         // Local persisting must thus be refactored to not await on
         // remote truths, but this needs to have support for discarding
@@ -331,11 +331,11 @@ export class ProphecyOperation extends ProphecyEventResult {
           const dispatchPath = dispatchPath_
               || generateDispatchEventPath(this.event.meta.transactor, "record");
           if (dispatchPath) {
-            Promise.resolve(this._persistedStory).then(() =>
+            Promise.resolve(this._recordedStory).then(() =>
                 this.event.meta.transactor.dispatchAndDefaultActEvent(
                     this.getProgressEvent("record"), { dispatchPath }));
           }
-          return (this._persistedStory = prophecy);
+          return (this._recordedStory = prophecy);
         },
         (error, index, head, functionChain, onRejected) => {
           if (error.retry && (reformAttempt !== this._reformAttempt)) {
@@ -406,7 +406,7 @@ export class ProphecyOperation extends ProphecyEventResult {
 
   errorOnProphecyOperation (errorWrap, error, nothrow) {
     const wrappedError = this.getChronicler().wrapErrorEvent(error, 1, errorWrap,
-        "\n\tduring:", this._debugPhase,
+        "\n\tduring:", this._sceneName,
         "\n\tevents:", ...dumpObject(this._events),
         "\n\tevent:", ...dumpObject(this._events[this.index]),
         "\n\tprophecy:", ...dumpObject(this.event),
@@ -426,8 +426,8 @@ export class ProphecyOperation extends ProphecyEventResult {
   }
 
   static _professChain = [
-    ProphecyOperation.prototype._prepareStagesAndCommands,
-    ProphecyOperation.prototype._initiateConnectionValidations,
+    ProphecyOperation.prototype._prepareActsAndCommands,
+    ProphecyOperation.prototype._initiateAllVenueValidations,
     ProphecyOperation.prototype._processRemoteVenues,
     ProphecyOperation.prototype._processLocalVenues,
     ProphecyOperation.prototype._processMemoryVenues,
@@ -447,23 +447,28 @@ export class ProphecyOperation extends ProphecyEventResult {
     ProphecyOperation.prototype._reformRecompose,
   ];
 
-  _prepareStagesAndCommands () {
-    this._debugPhase = "prepare stages";
+  _prepareActsAndCommands () {
+    this._sceneName = "prepare acts";
     this._venues = {};
     let missingConnections;
     const chronicles = (this._prophecy.meta || {}).chronicles;
     if (!chronicles) {
       throw new Error("prophecy is missing chronicle information");
     }
+    const prophet = this._parent;
     for (const chronicleOrPartitionURI of Object.keys(chronicles)) {
       let chronicleURI = chronicleOrPartitionURI;
-      let connection = this._parent._connections[chronicleURI];
+      let connection = prophet._connections[chronicleURI];
       if (!connection) {
         chronicleURI = naiveURI.createPartitionURI(chronicleOrPartitionURI);
-        connection = this._parent._connections[chronicleURI];
+        connection = prophet._connections[chronicleURI];
         if (!connection) {
-          (missingConnections || (missingConnections = [])).push(chronicleURI);
-          continue;
+          if (!chronicleInfo.isNewConnection) {
+            (missingConnections || (missingConnections = [])).push(chronicleURI);
+            continue;
+          }
+          connection = prophet._connections[chronicleURI] = prophet
+              .sourcerChronicle(chronicleURI, { newChronicle: true });
         }
       }
       if (!this._prophecy.meta) throw new Error("prophecy.meta missing");
@@ -482,19 +487,19 @@ export class ProphecyOperation extends ProphecyEventResult {
     }
   }
 
-  getStages () {
+  getActs () {
     return this._allStages || (this._allStages = [
       this._remoteVenues, this._localVenues, this._memoryVenues,
     ].filter(s => s));
   }
 
-  _initiateConnectionValidations () {
-    this._debugPhase = `validate venues`;
-    this.getStages().forEach(stageVenues => stageVenues.forEach(venue => {
-      venue.validatedConnection = thenChainEagerly(
+  _initiateAllVenueValidations () {
+    this._sceneName = `validate venues`;
+    this.getActs().forEach(actVenues => actVenues.forEach(venue => {
+      venue.validatedVenue = thenChainEagerly(
           venue.connection.asSourceredConnection(),
           (connection) => {
-            this._debugPhase = `validate venue connection ${connection.getName()}`;
+            this._sceneName = `validate venue connection ${connection.getName()}`;
             if (connection.isFrozenConnection()) {
               throw new Error(`Trying to chronicle events to a frozen chronicle ${
                   connection.getName()}`);
@@ -506,9 +511,9 @@ export class ProphecyOperation extends ProphecyEventResult {
                   }" not supported by connection ${connection.getName()} which only supports "${
                   connectionEventVersion}"`);
             }
-            // Perform other chronicle validation
+            // Perform other chronicle validatedVenue
             // TODO(iridian): extract chronicle content (EDIT: a what now?)
-            return (venue.validatedConnection = connection);
+            return (venue.validatedVenue = venue);
           },
       );
     }));
@@ -530,11 +535,11 @@ export class ProphecyOperation extends ProphecyEventResult {
     return this.opChain("_processStageChain", ["memory", this._memoryVenues]);
   }
 
-  static _processStageChain = [
-    ProphecyOperation.prototype._validateConnections,
-    ProphecyOperation.prototype._chronicleStageVenueCommands,
-    ProphecyOperation.prototype._processStageVenues,
   ];
+  static _processActChain = [
+    ProphecyOperation.prototype._finalizeActVenueValidations,
+    ProphecyOperation.prototype._chronicleActVenueCommands,
+    ProphecyOperation.prototype._processActVenues,
 
   static _processFirstStageChain = [
     ProphecyOperation.prototype._validateConnections,
@@ -542,10 +547,10 @@ export class ProphecyOperation extends ProphecyEventResult {
     ProphecyOperation.prototype._processStageVenues,
   ];
 
-  _validateConnections (stageName, venues) {
-    this._stageName = stageName;
-    this._debugPhase = `await stage #${this._stageIndex} '${stageName}' connection validations`;
-    return [venues, ...venues.map(venue => venue.validatedConnection)];
+  _finalizeActVenueValidations (actName, venues) {
+    this._actName = actName;
+    this._sceneName = `await act #${this._actIndex} '${actName}' connection validatedVenues`;
+    return venues.map(venue => venue.validatedVenue);
   }
 
   _chronicleFirstStageVenueCommands (venues) {
@@ -555,8 +560,7 @@ export class ProphecyOperation extends ProphecyEventResult {
     if (onRecordDispatchPath) this.getRecordedStory(onRecordDispatchPath);
     return ret;
   }
-
-  _chronicleStageVenueCommands (venues) {
+  _chronicleActVenueCommands (...validatedVenues) {
     // Persist the prophecy and add refs to all associated event bvobs.
     // This is necessary for prophecy reattempts so that the bvobs aren't
     // garbage collected on browser refresh. Otherwise they can't be
@@ -571,39 +575,39 @@ export class ProphecyOperation extends ProphecyEventResult {
     // Maybe determine aspects.log.index's beforehand?
 
     // Get aspects.log.index and scribe record finalizer for each chronicle
-    this._debugPhase = `chronicle stage #${this._stageIndex} '${this._stageName}' commands`;
-    for (const venue of venues) {
+    this._sceneName = `chronicle act #${this._actIndex} '${this._actName}' commands`;
+    for (const venue of validatedVenues) {
       try {
-        this._debugPhase = `chronicle stage #${this._stageIndex} '${this._stageName}' command to ${
+        this._sceneName = `chronicle act #${this._actIndex} '${this._actName}' command to ${
             venue.connection.getName()}`;
         venue.proclamation = venue.connection
             .proclaimEvent(venue.commandEvent, Object.create(this._options));
       } catch (error) {
         throw this._parent.wrapErrorEvent(error, 1,
-            new Error(`proclaimEvents.stage["${this._stageName}"].connection["${
+            new Error(`proclaimEvents.act["${this._actName}"].connection["${
                 venue.connection.getName()}"].proclaimEvents`),
             "\n\tcommandEvent:", ...dumpObject(venue.commandEvent),
             "\n\tproclamation:", ...dumpObject(venue.proclamation),
         );
       }
     }
-    this._stageIndex++;
-    this._debugPhase = `await stage #${this._stageIndex} '${this._stageName}' truths`;
-    return [venues];
+    this._actIndex++;
+    this._sceneName = `await act #${this._actIndex} '${this._actName}' truths`;
+    return [validatedVenues];
   }
 
-  _processStageVenues (venues) {
+  _processActVenues (venues) {
     return venues.map(venue => this.opChain(
-        "_stageVenuesChain", [venue, venue.currentProclamation = venue.proclamation],
-        "_errorOnProcessStageVenue"));
+        "_actVenuesChain", [venue, venue.currentProclamation = venue.proclamation],
+        "_errorOnProcessActVenue"));
   }
 
-  static _stageVenuesChain = [
-    ProphecyOperation.prototype._divergentWaitStageVenueProclamation,
-    ProphecyOperation.prototype._resolveStageVenueTruth,
+  static _actVenuesChain = [
+    ProphecyOperation.prototype._divergeVenueProclamationResolutions,
+    ProphecyOperation.prototype._convergeVenueProclamationTruth,
   ];
 
-  _divergentWaitStageVenueProclamation (venue, proclamation) {
+  _divergeVenueProclamationResolutions (venue, proclamation) {
     if (!proclamation) return [venue];
     const proclaimedTruth = proclamation.getTruthEvent();
     if (!isPromise(proclaimedTruth)) return [venue, proclaimedTruth];
@@ -623,7 +627,7 @@ export class ProphecyOperation extends ProphecyEventResult {
     return [venue, Promise.race(truthProcesses), truthProcesses];
   }
 
-  _resolveStageVenueTruth (venue, truth, truthProcesses) {
+  _convergeVenueProclamationTruth (venue, truth, truthProcesses) {
     if (!truth) {
       const actualTruthProcesses = truthProcesses || [];
       if (venue.proclamation !== venue.currentProclamation) {
@@ -646,7 +650,7 @@ export class ProphecyOperation extends ProphecyEventResult {
     return [venue];
   }
 
-  _errorOnProcessStageVenue (error, index, params) {
+  _errorOnPerformVenue (error, index, params) {
     const venue = params[0];
     if ((!this._progress || !this._progress.isSchismatic)
         && (venue.proclamation !== venue.currentProclamation)) {
@@ -672,7 +676,7 @@ export class ProphecyOperation extends ProphecyEventResult {
     if (prophecy) this.purge(error);
     this._rejectionError = this.errorOnProphecyOperation(
         new Error(`proclaimEvents.eventResults[${this.index}].profess(phase#${phaseIndex}/${
-            this._debugPhase})`),
+            this._sceneName})`),
         error, true);
     this._prophecy = null;
     const transactor = this.event.meta.transactor;
@@ -704,7 +708,7 @@ export class ProphecyOperation extends ProphecyEventResult {
           ? [[reformation.instigatorChronicleURI]]
           : Object.values(this._venues)) {
         if (!venue) continue;
-        this._persistedStory = null;
+        this._recordedStory = null;
         venue.proclamation = null;
       }
     }
@@ -763,7 +767,7 @@ export class ProphecyOperation extends ProphecyEventResult {
     const reformedCommand = getActionFromPassage(reformedProphecy);
     if (!reformedCommand.meta) throw new Error("reformedCommand.meta missing");
     reformedCommand.meta.operation = this;
-    this._persistedStory = null;
+    this._recordedStory = null;
     this._prophecy = reformedProphecy;
     return [reformation, reformedCommand];
   }

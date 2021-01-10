@@ -63,7 +63,7 @@ export default class FalseProphetConnection extends Connection {
       this._referencePrototype.setAbsent(false);
       return forward;
     },
-    Connection.prototype._sourcifyUpstream,
+    Connection.prototype._sourcerUpstream,
     Connection.prototype._narrateEventLog,
     Connection.prototype._finalizeSourcery,
   ]
@@ -125,7 +125,7 @@ export default class FalseProphetConnection extends Connection {
     resultBase._events = events;
     const op = {
       events, options, resultBase,
-      plog: this.opLog(2, "proclaim", `Proclaiming ${events.length} events`),
+      plog: this.opLog(2, options, "proclaim", `Proclaiming ${events.length} events`),
     };
     resultBase.onGetEventError = error =>
         this._errorOnFalseProphetProclaimOps(error, null, [op]);
@@ -292,7 +292,7 @@ export default class FalseProphetConnection extends Connection {
   receiveTruths (truths: EventBase[], unused1, unused2, schismaticCommand: EventBase, parentPlog) {
     let schismaticCommands, confirmCount = 0, confirmations, newTruthCount = 0, newTruths;
     try {
-      const plog2 = this.opLog(parentPlog, 2, "receive_truths");
+      const plog2 = this.opLog(2, parentPlog, "receive_truths");
       plog2 && plog2.opEvent("",
           `receiveTruths(${this._dumpEventIds(truths)},${this._dumpEventIds(schismaticCommand)})`,
           { truths, schismaticCommand });

@@ -23,7 +23,7 @@ given *chronicleURI*, undefined otherwise`,
       "DEPRECATED", `V:Chronicle.tryConnection`
     ])(function tryPartitionConnection (chronicleURI) {
       const ret = this.__callerValker__
-          .sourcifyChronicle(chronicleURI, { require: false, newConnection: false });
+          .sourcerChronicle(chronicleURI, { require: false, newConnection: false });
       return (ret && ret.isActive()) ? ret : undefined;
     }),
     tryConnection: denoteValOSCallable(
@@ -31,7 +31,7 @@ given *chronicleURI*, undefined otherwise`,
 given *chronicleURI*, undefined otherwise`,
     )(function tryConnection (chronicleURI) {
       const ret = this.__callerValker__
-          .sourcifyChronicle(chronicleURI, { require: false, newConnection: false });
+          .sourcerChronicle(chronicleURI, { require: false, newConnection: false });
       return (ret && ret.isActive()) ? ret : undefined;
     }),
     acquirePartitionConnection: denoteValOSCallable([
@@ -43,7 +43,7 @@ connection process. If none exists creates a new connection process.`,
       "DEPRECATED", "V:Chronicle.acquireConnection",
     ])(function acquireConnection (chronicleURI, options = {}) {
       return Promise.resolve(this.__callerValker__
-          .sourcifyChronicle(chronicleURI, options)
+          .sourcerChronicle(chronicleURI, options)
           .asSourceredConnection());
     }),
     acquireConnection: denoteValOSCallable([
@@ -53,17 +53,17 @@ connection process. If none exists creates a new connection process.`,
 connection process. If none exists creates a new connection process.`,
     ])(function acquireConnection (chronicleURI, options = {}) {
       return Promise.resolve(this.__callerValker__
-          .sourcifyChronicle(chronicleURI, options)
+          .sourcerChronicle(chronicleURI, options)
           .asSourceredConnection());
     }),
-    sourcifyChronicle: denoteValOSCallable([
+    sourcerChronicle: denoteValOSCallable([
       `Returns a promise to a sourcered chronicle with given
       *chronicleURI* and *options*.`,
       `If no full connection exists, waits on a possibly existing on-going
       connection process. If none exists creates a new connection process.`,
-          ])(function sourcifyChronicle (chronicleURI, options = {}) {
+          ])(function sourcerChronicle (chronicleURI, options = {}) {
             return Promise.resolve(this.__callerValker__
-                .sourcifyChronicle(chronicleURI, options)
+                .sourcerChronicle(chronicleURI, options)
                 .asSourceredConnection());
           }),
     },

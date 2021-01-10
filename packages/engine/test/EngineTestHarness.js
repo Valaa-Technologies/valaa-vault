@@ -51,7 +51,7 @@ export default class EngineTestHarness extends SourcererTestHarness {
     const rootScope = this.engine.getRootScope();
     extendValosheath(rootScope, this.engine.getHostDescriptors(), this.engine.discourse);
     extendTestsheath(rootScope, this.engine.getHostDescriptors(), this.engine.discourse);
-    // TODOO(iridian): This should be in InspireTestHarness, but there is no such thing.
+    // TODO(iridian): This should be in InspireTestHarness, but there is no such thing.
     rootScope.valos.GatewayConfig = {
       RemoteAuthorityURI: "valaa-testing:",
       LocalAuthorityURI: "valaa-local:",

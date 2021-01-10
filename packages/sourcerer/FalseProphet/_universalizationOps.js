@@ -57,7 +57,7 @@ export function vRefFromJSON (json: JSONIdData, RefType: Object = VRL): VRL {
 // rfc3986 uri regex for reference: ^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?
 
 const urnValOSRegExpString = "^(urn:valos:)(([^#?]*)(\\?\\+([^#]*))?(\\?=([^#]*))?(#(.*))?)?$";
-const valOSURIRegExpString = "^([^:/?#]+:[^#]*)(#([^#?]*)(\\?\\+([^#]*))?(\\?=([^#]*))?)?$";
+const valOSURIRegExpString = "^([^:/?#]+:[^#]*)(#([^#?;]*)(\\?\\+([^#]*))?(\\?=([^#]*))?)?$";
 const urnValOSRegExp = new RegExp(urnValOSRegExpString);
 const valOSURIRegExp = new RegExp(valOSURIRegExpString);
 
@@ -80,7 +80,7 @@ export function deserializeVRL (serializedRef: string | JSONIdData,
           parts.unshift(null, null);
           parts[1] = "urn:valos:";
         } else {
-          throw new Error(`Malformed urn:valos reference "${serializedRef
+          throw new Error(`Malformed valos reference "${serializedRef
               }": doesn't match either urn:valos regex /${urnValOSRegExpString}/${
               ""} nor valos URI regex /${valOSURIRegExpString}/`);
         }

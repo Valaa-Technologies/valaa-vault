@@ -352,7 +352,7 @@ async function _acquireConnections (vlm, yargv, worker, plog) {
       "Acquiring connections to chronicles", chronicleURIs);
   for (const [key, chronicleURI] of Object.entries(chronicleURIs)) {
     connections[key] = await workerDiscourse
-        .sourcifyChronicle(chronicleURI.split("#")[0], { newChronicle: false })
+        .sourcerChronicle(chronicleURI.split("#")[0], { newChronicle: false })
         .asSourceredConnection();
   }
   return connections;

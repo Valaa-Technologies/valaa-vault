@@ -140,12 +140,12 @@ export default class Connection extends Follower {
    *
    * @memberof OracleConnection
    */
-  sourcify (options: SourceryOptions) {
+  sourcer (options: SourceryOptions) {
     if (this._activeConnection !== undefined) return this._activeConnection;
     const Type = this.constructor;
     const chainOptions = Object.create(options);
     chainOptions.plog = (options.plog || {}).v1
-        || this.opLog(1, "sourcery",
+        || this.opLog(1, options, "sourcery",
             `Sourcering ${Type.name}`, { options, connection: this });
     return (this._activeConnection = this.opChain(
         Type.sourceryOpsName, chainOptions,
@@ -154,7 +154,7 @@ export default class Connection extends Follower {
 
   static sourceryOpsName = "localSourcery";
   static localSourcery = [
-    Connection.prototype._sourcifyUpstream,
+    Connection.prototype._sourcerUpstream,
     Connection.prototype._narrateEventLog,
     Connection.prototype._finalizeSourcery,
   ];
@@ -164,16 +164,16 @@ export default class Connection extends Follower {
     if (error.disconnected && (params[0].narrateOptions !== false)) {
       return null;
     }
-    throw this.wrapErrorEvent(error, 1, new Error("sourcify()"),
+    throw this.wrapErrorEvent(error, 1, new Error("sourcer()"),
         `\n\tstep #${stepIndex} params:`, ...dumpObject(params));
   }
 
-  _sourcifyUpstream (options: SourceryOptions, subOptions = {}) {
+  _sourcerUpstream (options: SourceryOptions, subOptions = {}) {
     let { sourceredUpstream } = subOptions;
     const narrateOptions = options.narrateOptions;
     if (sourceredUpstream === undefined) {
       if (!this.getSourcerer()._upstream) {
-        throw new Error("Cannot call default _sourcifyUpstream with no sourcerer upstream");
+        throw new Error("Cannot call default _sourcerUpstream with no sourcerer upstream");
       }
       // narrate later, but subscribe the persistent downstream push callbacks here
       const upstreamOptions = Object.create(options);
@@ -181,7 +181,7 @@ export default class Connection extends Follower {
       upstreamOptions.pushTruths = this.getReceiveTruths(options.pushTruths);
       upstreamOptions.pushCommands = this.getReceiveCommands(options.pushCommands);
       this.setUpstreamConnection(this.getSourcerer()._upstream
-          .sourcifyChronicle(this.getChronicleURI(), upstreamOptions));
+          .sourcerChronicle(this.getChronicleURI(), upstreamOptions));
       sourceredUpstream = this._upstreamConnection.asSourceredConnection();
     }
     const params = [options, sourceredUpstream];
@@ -219,7 +219,7 @@ export default class Connection extends Follower {
               || { latestFailures: [] }).latestFailures.length) {
         // FIXME(iridian): This error temporarily demoted to log error
         this.outputErrorEvent(
-            new Error(`Failed to sourcify chronicle: encountered ${
+            new Error(`Failed to sourcer chronicle: encountered ${
               narrateResults.mediaRetrievalStatus.latestFailures.length
                 } latest media content retrieval failures (and ${
                 ""}options.requireLatestMediaContents does not equal false).`),

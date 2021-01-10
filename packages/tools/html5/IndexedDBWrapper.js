@@ -26,8 +26,8 @@ export default class IndexedDBWrapper extends FabricEventTarget {
   }
 
   initialize () {
-    return new Promise((resolve, reject) => {
-      const openReq = this.databaseAPI.indexedDB.open(this.databaseId, this.version);
+    return (this.database = new Promise((resolve, reject) => {
+      const openReq = this.databaseAPI.IndexedDB.open(this.databaseId, this.version);
       openReq.onerror = reject;
       openReq.onupgradeneeded = (event: Event) => {
         this._upgradeDatabase(event);
@@ -48,10 +48,10 @@ export default class IndexedDBWrapper extends FabricEventTarget {
                 "\n\tstores:", this.storeDescriptors.map(descriptor =>
                     (descriptor ? descriptor.name : "<no descriptor>")).join(", "));
           };
-          resolve();
+          resolve(event.target.result);
         }
       };
-    });
+    }));
   }
 
   release () {
@@ -72,13 +72,13 @@ export default class IndexedDBWrapper extends FabricEventTarget {
 
   async transaction (stores: Array<string>, mode: string = "readonly", opsCallback: Function) {
     let result;
-    const database = this.database;
+    const database = await this.database;
     try {
       if (!database) {
         throw new Error(`transaction could not be initiated against a database connection to '${
             this.databaseId}' that has been detached`);
       }
-      const trans = this.database.transaction(stores, mode);
+      const trans = database.transaction(stores, mode);
       const objStores = stores.reduce((container, store) => {
         container[store] = trans.objectStore(store);
         return container;

@@ -86,14 +86,14 @@ export default class ScribeConnection extends Connection {
 
   static sourceryOpsName = "scribeSourcery";
   static scribeSourcery = [
-    ScribeConnection.prototype._sourcifyUpstream,
+    ScribeConnection.prototype._sourcerUpstream,
     ScribeConnection.prototype._readMediaEntries,
     ScribeConnection.prototype._initializeMediaLookups,
     Connection.prototype._narrateEventLog,
     Connection.prototype._finalizeSourcery,
   ]
 
-  _sourcifyUpstream (options: SourceryOptions) {
+  _sourcerUpstream (options: SourceryOptions) {
     if (this.getScribe()._upstream) {
       const upstreamOptions = Object.create(options);
       // Set the permanent receiver without options.pushTruths,
@@ -104,7 +104,7 @@ export default class ScribeConnection extends Connection {
       upstreamOptions.subscribeEvents = (options.narrateOptions === false)
           && options.subscribeEvents;
       this.setUpstreamConnection(this.getScribe()._upstream
-          .sourcifyChronicle(this.getChronicleURI(), upstreamOptions));
+          .sourcerChronicle(this.getChronicleURI(), upstreamOptions));
       // Unlike with other sourcerers scribe does not wait for upstream
       // sourcery to complete: ScribeConnection can satisfy the
       // optimistic narration criteria of the sourcery process via
@@ -165,7 +165,7 @@ export default class ScribeConnection extends Connection {
       throw new Error(
           "INTERNAL ERROR: Missing _db for locally persisted ScribeConnection.narrateEventLog");
     }
-    options.plog = this.opLog(options.plog, 2, "narrate");
+    options.plog = this.opLog(2, options.plog, "narrate");
     return this.opChain("scribeNarrate", options, "_errorOnScribeNarrateOps", options.plog);
   }
 

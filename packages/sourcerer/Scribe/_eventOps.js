@@ -47,7 +47,7 @@ export function _narrateLocalLogs (options: NarrateOptions):
   let scribeTruthLog, scribeCommandQueue;
   if (receiveTruths) {
     const truthIndexEnd = Math.min(this.getFirstUnusedTruthEventId(), eventIdEnd);
-    const plog3 = plog2 && this.opLog(plog2, 3, "local-truths",
+    const plog3 = plog2 && this.opLog(3, plog2, "local-truths",
         "range:", { eventIdBegin, truthIndexEnd });
     scribeTruthLog = (eventIdBegin >= truthIndexEnd) ? []
         : Promise.resolve()
@@ -66,7 +66,7 @@ export function _narrateLocalLogs (options: NarrateOptions):
         // wait for truth receive to complete so that eventIdBegin is properly updated
         : Promise.resolve(scribeTruthLog)
         .then(() => {
-          plog3 = plog2 && this.opLog(plog2, 3, "local-commands",
+          plog3 = plog2 && this.opLog(3, plog2, "local-commands",
               "range:", { eventIdBegin, commandIndexEnd });
           return this._readCommands({ eventIdBegin, eventIdEnd: commandIndexEnd, plog: plog3 });
         })
@@ -120,11 +120,10 @@ export function _narrateUpstreamEventLog (options, narrationResult, upstream) {
   }));
   return [options, narrationResult,
     // ...but only wait for it if requested or if we didn't find any local events
-    ((options.fullNarrate === true)
-        || (!options.newChronicle
-            && !(narrationResult.scribeTruthLog || []).length
+    ((options.remote === true)
+        || (!(narrationResult.scribeTruthLog || []).length
             && !(narrationResult.scribeCommandQueue || []).length))
-    && upstreamNarration,
+        && upstreamNarration,
   ];
 }
 
@@ -166,7 +165,7 @@ export function _proclaimEvents (connection: ScribeConnection,
     events: EventBase[], options: ProclaimOptions = {}, onError: Function,
 ): Proclamation {
   if (!events || !events.length) return { eventResults: events };
-  const resultBase = new ScribeEventResult(connection);
+  const resultBase = new ScribeEventResult(connection, options.verbosity);
   resultBase._events = events;
   resultBase.onGetEventError = onError;
   // the 'mostRecentReceiveEventsProcess' is a kludge to sequentialize

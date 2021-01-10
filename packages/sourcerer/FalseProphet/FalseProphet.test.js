@@ -39,7 +39,7 @@ describe("FalseProphet", () => {
     harness = await createSourcererOracleHarness({ verbosity: 0 });
 
     const connection = await harness.sourcerer
-        .sourcifyChronicle(testChronicleURI).asSourceredConnection();
+        .sourcerChronicle(testChronicleURI).asSourceredConnection();
     const scribeConnection = connection.getUpstreamConnection();
 
     let oldCommandId;
@@ -63,7 +63,7 @@ describe("FalseProphet", () => {
       verbosity: 0, onCommandCountUpdate,
       upstream: createTestMockSourcerer({ isLocallyRecorded: false, isRemoteAuthority: true }),
     });
-    let connection = falseProphet.sourcifyChronicle(testChronicleURI);
+    let connection = falseProphet.sourcerChronicle(testChronicleURI);
     connection.getUpstreamConnection().addNarrateResults({ eventIdBegin: 0 }, []);
     const plog2 = falseProphet.opLog(2, "test_keep-track");
     plog2 && plog2.opEvent("await_asActiveConnection");

@@ -153,7 +153,7 @@ export default class TransactionState {
                   : event.isReformable ? "reformable" : "non-reformable",
               event.isRefabricateable === undefined ? ""
                   : event.isRefabricateable ? "refabricateable" : "non-refabricateable",
-              `\n\t${type !== "error" ? type : `error on ${event.errorStage}`}:`, event.error
+              `\n\t${type !== "error" ? type : `error on ${event.errorAct}`}:`, event.error
                   ? JSON.stringify(event.error.message)
                   : event.message || "<no message>",
           );
@@ -217,7 +217,7 @@ export default class TransactionState {
           this._transacted, this._transactionDescription);
       // Only alter transaction internals after the dispatch has
       // performed the content validations.
-      const resultBase = new TransactionEventResult(this._transactor);
+      const resultBase = new TransactionEventResult(this._transactor, options.verbosity);
       resultBase.info = this;
       resultBase.existingActionCount = this._actions.length;
 

@@ -3,7 +3,7 @@
 import type { VALKOptions } from "~/raem/VALK";
 import { addStackFrameToError, SourceInfoTag } from "~/raem/VALK/StackTrace";
 
-import { trySourcifyAbsentChroniclesAndThen } from "~/raem/tools/denormalized/partitions";
+import { trySourcerAbsentChroniclesAndThen } from "~/raem/tools/denormalized/partitions";
 
 import liveKuerySteppers from "~/engine/Vrapper/liveKuerySteppers";
 import Vrapper from "~/engine/Vrapper";
@@ -167,7 +167,7 @@ export default class Subscription extends LiveUpdate {
         return this.getDiscourse().run(this._liveHead, this._liveKuery, this._liveOptions);
       } catch (error) {
         this._invalidateState();
-        const connecting = trySourcifyAbsentChroniclesAndThen(error, () => this._resolveValue());
+        const connecting = trySourcerAbsentChroniclesAndThen(error, () => this._resolveValue());
         if (connecting) return connecting;
         throw error;
       } finally {
@@ -356,7 +356,7 @@ export default class Subscription extends LiveUpdate {
       }
     } catch (error) {
       this.detachHooks();
-      if (trySourcifyAbsentChroniclesAndThen(error, () => {
+      if (trySourcerAbsentChroniclesAndThen(error, () => {
         this._invalidateState();
         if (!this._attachedHooks) this.attachHooks(triggerBroadcast);
         else if (triggerBroadcast !== false) this._triggerPostUpdate();

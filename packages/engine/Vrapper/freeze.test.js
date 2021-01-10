@@ -58,7 +58,7 @@ describe("Chronicle freezing", () => {
     expect(entities()[testRootId].step("isFrozen")).toBeFalsy();
     await harness.proclaimTestEvent(freezeEventFor(testRootId)).getPremiereStory();
     expect(entities()[testRootId].step("isFrozen")).toBeTruthy();
-    expect(harness.testConnection.isFrozenConnection()).toBeTruthy();
+    expect(harness.testChronicle.isFrozenConnection()).toBeTruthy();
   });
 
   it("prevents adding contents to a frozen chronicle", async () => {

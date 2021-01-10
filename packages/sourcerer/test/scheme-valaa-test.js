@@ -87,7 +87,7 @@ export class TestConnection extends AuthorityConnection {
   proclaimEvents (events: EventBase[], options: ProclaimOptions): Proclamation {
     if (!this.isRemoteAuthority()) return super.proclaimEvents(events, options);
     this._mostRecentChronicleOptions = options;
-    const resultBase = new TestEventResult(this);
+    const resultBase = new TestEventResult(this, options.verbosity);
     resultBase._events = events;
     resultBase.isPrimary = this.isPrimaryAuthority();
     const eventResults = events.map((event, index) => {

@@ -84,13 +84,13 @@ describe("Chronicle behaviors: VLog:requireAuthoredEvents", () => {
     `;
   }
 
-  async function _sourcifyDecepAuthoroot (authoroot) {
+  async function _sourcerDecepAuthoroot (authoroot) {
     expect((await decepness.receiveEventsFrom(harness.testChronicle)).length)
         .toEqual(2);
 
     const authorootConnection = await authoroot.getConnection().asSourceredConnection();
     const decepConnection = decepness.sourcerer
-        .sourcifyChronicle(authorootConnection.getChronicleURI());
+        .sourcerChronicle(authorootConnection.getChronicleURI());
     const authorootEvents = await decepness.receiveEventsFrom(authorootConnection);
     expect(authorootEvents.length)
         .toEqual(1);
@@ -113,7 +113,7 @@ describe("Chronicle behaviors: VLog:requireAuthoredEvents", () => {
 
     // Receive the events by another client harness
 
-    const { decepAuthoroot, authorootEvents } = await _sourcifyDecepAuthoroot(authoroot);
+    const { decepAuthoroot, authorootEvents } = await _sourcerDecepAuthoroot(authoroot);
 
     expect(decepAuthoroot.getRawId())
         .toEqual(authoroot.getRawId());
@@ -131,7 +131,7 @@ describe("Chronicle behaviors: VLog:requireAuthoredEvents", () => {
     const { authoroot } = await entities().creator
         .doValoscript(_createAuthoredOnlyChronicle(), {}, {});
 
-    const { decepAuthoroot } = await _sourcifyDecepAuthoroot(authoroot);
+    const { decepAuthoroot } = await _sourcerDecepAuthoroot(authoroot);
 
     expect(() => decepAuthoroot.doValoscript(`
       this.nonAuthoredNotRefused = true;
@@ -146,7 +146,7 @@ describe("Chronicle behaviors: VLog:requireAuthoredEvents", () => {
     const { authoroot } = await entities().creator.doValoscript(
         _createAuthoredOnlyChronicle(), {}, {});
 
-    const { decepAuthoroot } = await _sourcifyDecepAuthoroot(authoroot);
+    const { decepAuthoroot } = await _sourcerDecepAuthoroot(authoroot);
 
     decepAuthoroot.doValoscript(`
       this.manuallyBrokenModification = true;`
@@ -176,7 +176,7 @@ describe("Chronicle behaviors: VLog:requireAuthoredEvents", () => {
     const { authoroot } = await entities().creator.doValoscript(
         _createAuthoredOnlyChronicle(), {}, {});
 
-    const { decepAuthoroot } = await _sourcifyDecepAuthoroot(authoroot);
+    const { decepAuthoroot } = await _sourcerDecepAuthoroot(authoroot);
 
     // TODO(iridian, 2020-10): obnoxiously disable local authoring check
 
@@ -207,7 +207,7 @@ describe("Chronicle behaviors: VLog:requireAuthoredEvents", () => {
     const { authoroot } = await entities().creator.doValoscript(
         _createAuthoredOnlyChronicle(), {}, {});
 
-    const { decepAuthoroot } = await _sourcifyDecepAuthoroot(authoroot);
+    const { decepAuthoroot } = await _sourcerDecepAuthoroot(authoroot);
 
     // TODO(iridian, 2020-10): impersonate director prime
 
@@ -235,7 +235,7 @@ describe("Chronicle behaviors: VLog:requireAuthoredEvents", () => {
 
   function _addIdentityRoleRelation (publicIdentityURI, role = "$VLog.director", target = "this") {
     return `
-      valos.sourcifyIdentityMediator("${publicIdentityURI}")
+      valos.sourcerIdentityMediator("${publicIdentityURI}")
       .then(identity => new Relation({
           source: ${target},
           structured: {
@@ -255,7 +255,7 @@ describe("Chronicle behaviors: VLog:requireAuthoredEvents", () => {
     await authoroot.doValoscript(
         _addIdentityRoleRelation(decepTributorURI, "$VLog.contributor"), {}, {});
 
-    const { decepAuthoroot } = await _sourcifyDecepAuthoroot(authoroot);
+    const { decepAuthoroot } = await _sourcerDecepAuthoroot(authoroot);
 
     // TODO(iridian, 2020-10): disable local director validation on VLog property changes
 
@@ -294,7 +294,7 @@ describe("Chronicle behaviors: VLog:requireAuthoredEvents", () => {
     await authoroot.doValoscript(
         _addIdentityRoleRelation(decepTributorURI, "$VLog.director"), {}, {});
 
-    const { decepAuthoroot } = await _sourcifyDecepAuthoroot(authoroot);
+    const { decepAuthoroot } = await _sourcerDecepAuthoroot(authoroot);
 
     await decepAuthoroot.doValoscript(`
       this.hacked = 10;
@@ -336,14 +336,14 @@ describe("Chronicle behaviors: VLog:requireAuthoredEvents", () => {
     await authoroot.doValoscript(
         _addIdentityRoleRelation(decepTributorURI, "$VLog.director"), {}, {});
 
-    const { decepAuthoroot } = await _sourcifyDecepAuthoroot(authoroot);
+    const { decepAuthoroot } = await _sourcerDecepAuthoroot(authoroot);
 
     // TODO(iridian, 2020-10): bypass local contributor checks
 
     await decepAuthoroot.doValoscript(`
       Promise.all([
-        valos.sourcifyIdentityMediator("${impersonateeURI}"),
-        valos.sourcifyIdentityMediator("${decepTributorURI}")
+        valos.sourcerIdentityMediator("${impersonateeURI}"),
+        valos.sourcerIdentityMediator("${decepTributorURI}")
       ]).then(([impersonateeMediator, decepMediator]) => new Relation({
         source: this,
         structured: {

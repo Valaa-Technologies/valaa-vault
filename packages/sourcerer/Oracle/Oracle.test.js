@@ -13,8 +13,8 @@ afterEach(() => { if (harness) harness.cleanupScribe(); harness = null; });
 describe("Oracle", () => {
   it("sets up a connection and creates a chronicle", async () => {
     harness = await createSourcererOracleHarness({});
-    expect(harness.testConnection).toBeTruthy();
-    expect(harness.testConnection.isConnected())
+    expect(harness.testChronicle).toBeTruthy();
+    expect(harness.testChronicle.isConnected())
         .toEqual(true);
     expect(harness.run(vRef(testRootId), "name"))
         .toEqual("Automatic Test Chronicle Root");
@@ -40,7 +40,7 @@ describe("Oracle", () => {
   it("Rejects commands that are proclaimed after a freeze command", async () => {
     harness = await createSourcererOracleHarness({});
     const chronicleURI = naiveURI.createChronicleURI(testAuthorityURI, testRootId);
-    await harness.sourcerer.sourcifyChronicle(chronicleURI).asSourceredConnection();
+    await harness.sourcerer.sourcerChronicle(chronicleURI).asSourceredConnection();
 
     const commandsUpToFreeze = [freezeChronicleEvent];
     for (const command of commandsUpToFreeze) {

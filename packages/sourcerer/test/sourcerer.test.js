@@ -26,11 +26,11 @@ async function setUp (testAuthorityConfig: Object = {}, options: {}) {
     oracle: { ...(options.oracle || {}), testAuthorityConfig },
   });
   const ret = {
-    connection: await harness.sourcerer.sourcifyChronicle(
+    connection: await harness.sourcerer.sourcerChronicle(
         harness.testChronicleURI).asSourceredConnection(),
-    scribeConnection: await harness.scribe.sourcifyChronicle(
+    scribeConnection: await harness.scribe.sourcerChronicle(
         harness.testChronicleURI, { newConnection: false }).asSourceredConnection(),
-    oracleConnection: await harness.oracle.sourcifyChronicle(
+    oracleConnection: await harness.oracle.sourcerChronicle(
         harness.testChronicleURI, { newConnection: false }).asSourceredConnection(),
   };
   ret.authorityConnection = ret.oracleConnection.getUpstreamConnection();
@@ -59,7 +59,7 @@ describe("Sourcerer", () => {
     const scribe = await createScribe(createOracle());
 
     const connection = await scribe
-        .sourcifyChronicle(naiveURI.createChronicleURI("valaa-test:", testRootId))
+        .sourcerChronicle(naiveURI.createChronicleURI("valaa-test:", testRootId))
         .asSourceredConnection();
 
     const mediaVRL = vRef("abcd-0123");
@@ -87,13 +87,13 @@ describe("Sourcerer", () => {
       oracle: { testAuthorityConfig: { isLocallyRecorded: true, isRemoteAuthority: true } },
     });
     const connection = await harness.sourcerer
-        .sourcifyChronicle(harness.testChronicleURI).asSourceredConnection();
+        .sourcerChronicle(harness.testChronicleURI).asSourceredConnection();
     const scribeConnection = connection.getUpstreamConnection();
     const database = await openDB(scribeConnection._db.databaseId, CHRONICLE_DB_VERSION);
 
     for (const command of commands) {
       const claimResult = await harness.proclaimTestEvent(command);
-      await claimResult.getPremiereStory();
+      await claimResult.getRecordedStory();
       const venueCommand = await claimResult.getCommandOf(harness.testChronicleURI);
       const logIndex = scribeConnection.getFirstUnusedCommandEventId() - 1;
       await expectStoredInDB(venueCommand, database, "commands", logIndex);
@@ -107,7 +107,7 @@ describe("Sourcerer", () => {
       oracle: { testAuthorityConfig: { isLocallyRecorded: true } },
     });
     const connection = await harness.sourcerer
-        .sourcifyChronicle(harness.testChronicleURI).asSourceredConnection();
+        .sourcerChronicle(harness.testChronicleURI).asSourceredConnection();
     const scribeConnection = connection.getUpstreamConnection();
 
     let oldCommandId;
@@ -632,7 +632,7 @@ describe("Cross-chronicle", () => {
       },
     }), { isTruth: true }).getRecordedEvent();
 
-    const lateConnection = harness.sourcerer.sourcifyChronicle(lateChronicleURI);
+    const lateConnection = harness.sourcerer.sourcerChronicle(lateChronicleURI);
     harness.tryGetTestAuthorityConnection(lateConnection).addNarrateResults({ eventIdBegin: 0 }, [
       created({
         id: ["@$~raw.test_late@@"], typeName: "Entity",
@@ -676,7 +676,7 @@ describe("Cross-chronicle", () => {
         aspects: { version: "0.2", log: { index: index + 1 }, command: { id: "cid-2" } },
       })], { isTruth: true }).eventResults.map(result => result.getRecordedEvent()));
 
-    const lateConnection = harness.sourcerer.sourcifyChronicle(lateChronicleURI);
+    const lateConnection = harness.sourcerer.sourcerChronicle(lateChronicleURI);
     harness.tryGetTestAuthorityConnection(lateConnection).addNarrateResults({ eventIdBegin: 0 }, [
       created({
         id: ["@$~raw.test_late@@"], typeName: "Entity",
@@ -710,7 +710,7 @@ describe("Disjoint clients using paired harnesses", () => {
     const { scribeConnection } = await setUp({ isRemoteAuthority: true, isLocallyRecorded: true },
         { verbosity: 0 });
     const pairness = await createSourcererOracleHarness({ verbosity: 0, pairedHarness: harness });
-    const pairedConnection = pairness.sourcerer.sourcifyChronicle(harness.testChronicleURI);
+    const pairedConnection = pairness.sourcerer.sourcerChronicle(harness.testChronicleURI);
 
     const result = harness.proclaimTestEvent(created({
       id: ["multiharness-entity"], typeName: "Entity",
@@ -718,13 +718,13 @@ describe("Disjoint clients using paired harnesses", () => {
       aspects: { version: "0.2", log: {}, command: { id: "cid-1" } },
     }));
     await result.getRecordedEvent();
-    expect(await pairness.receiveTruthsFrom(harness, { verbosity: 0 }))
+    expect((await pairness.receiveEventsFrom(harness, { verbosity: 0 })).length)
         .toEqual(1);
     expect(scribeConnection.getFirstCommandEventId())
         .toEqual(1);
     expect(pairedConnection.getUpstreamConnection().getFirstCommandEventId())
         .toEqual(2);
-    expect(await harness.receiveTruthsFrom(harness, { clearUpstreamEntries: true }))
+    expect((await harness.receiveEventsFrom(harness, { clearUpstreamEntries: true })).length)
         .toEqual(1);
     expect(scribeConnection.getFirstCommandEventId())
         .toEqual(2);
@@ -733,7 +733,7 @@ describe("Disjoint clients using paired harnesses", () => {
   it("reorders conflicting commands between harnesses", async () => {
     await setUp({ isRemoteAuthority: true, isLocallyRecorded: true }, { verbosity: 0 });
     const pairness = await createSourcererOracleHarness({ verbosity: 0, pairedHarness: harness });
-    await pairness.sourcerer.sourcifyChronicle(harness.testChronicleURI);
+    await pairness.sourcerer.sourcerChronicle(harness.testChronicleURI);
 
     const result = harness.proclaimTestEvent(created({
       id: ["multiharness-entity"], typeName: "Entity",
@@ -753,14 +753,14 @@ describe("Disjoint clients using paired harnesses", () => {
     expect(pairedResult.getCommandOf(harness.testChronicleURI).aspects.log.index)
         .toEqual(1);
     // Make paired harness commands into truths first.
-    expect(await harness.receiveTruthsFrom(pairness, { clearReceiverUpstreamEntries: true }))
+    expect((await harness.receiveEventsFrom(pairness, { clearReceiverUpstream: true })).length)
         .toEqual(1);
-    expect(await pairness.receiveTruthsFrom(pairness, { clearReceiverUpstreamEntries: true }))
+    expect((await pairness.receiveEventsFrom(pairness, { clearReceiverUpstream: true })).length)
         .toEqual(1);
     // Re-send reordered commands by harness.
-    expect(await pairness.receiveTruthsFrom(harness, { verbosity: 0 }))
+    expect((await pairness.receiveEventsFrom(harness, { verbosity: 0 })).length)
         .toEqual(2);
-    expect(await harness.receiveTruthsFrom(harness, { clearReceiverUpstreamEntries: true }))
+    expect((await harness.receiveEventsFrom(harness, { clearReceiverUpstream: true })).length)
         .toEqual(2);
     expect(immutableIs(harness.corpus.getState(), pairness.corpus.getState()))
         .toEqual(true);

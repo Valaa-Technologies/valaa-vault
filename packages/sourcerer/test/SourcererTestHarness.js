@@ -89,7 +89,7 @@ export function createSourcererOracleHarness (options: Object, ...commandBlocks:
       const chronicleURIs = options.acquireConnections.map(
           chronicleId => naiveURI.createChronicleURI("valaa-test:", chronicleId));
       return mapEagerly(chronicleURIs, chronicleURI =>
-          harness.sourcerer.sourcifyChronicle(chronicleURI).asSourceredConnection());
+          harness.sourcerer.sourcerChronicle(chronicleURI).asSourceredConnection());
     },
     connections => {
       connections.forEach(connection => {
@@ -154,20 +154,20 @@ export default class SourcererTestHarness extends ScriptTestHarness {
         upstream => this.sourcerer.setUpstream(upstream),
         () => {
           hasRemoteTestBackend = (this.testAuthorityConfig || {}).isRemoteAuthority;
-          const testConnection = this.sourcerer.sourcifyChronicle(
+          const testChronicle = this.sourcerer.sourcerChronicle(
               this.testChronicleURI, { newChronicle: !hasRemoteTestBackend });
           if (hasRemoteTestBackend) {
             // For remote test chronicles with oracle we provide the root
             // entity as a response to the initial narrate request.
-            const testBackend = this.tryGetTestAuthorityConnection(testConnection);
+            const testBackend = this.tryGetTestAuthorityConnection(testChronicle);
             testBackend.addNarrateResults({ eventIdBegin: 0 }, [{
               ...createTestChronicleEntityCreated(),
               aspects: { version: "0.2", log: { index: 0 }, command: { id: "rid-0" } },
             }]);
           }
-          return testConnection.asSourceredConnection();
+          return testChronicle.asSourceredConnection();
         },
-        (testConnection) => (this.testConnection = testConnection),
+        (testChronicle) => (this.testChronicle = testChronicle),
           // For non-remotes we chronicle the root entity explicitly.
         () => {
           if (hasRemoteTestBackend) return undefined;
@@ -224,21 +224,22 @@ export default class SourcererTestHarness extends ScriptTestHarness {
    * @param {(Sourcerer | Connection)} source
    * @param {*} [{
    *     requireReceivingConnection = true,
-   *     clearSourceUpstreamEntries = false,
-   *     clearReceiverUpstreamEntries = false,
+   *     clearSourceUpstream = false,
+   *     clearReceiverUpstream = false,
    *     authorizeTruth = (i => i),
    *   }={}]
    * @memberof SourcererTestHarness
    */
-  async receiveTruthsFrom (source: Sourcerer | Connection, {
+  receiveEventsFrom (source: Sourcerer | Connection, {
     verbosity = 0,
     requireReceivingConnection = true,
-    clearSourceUpstreamEntries = false,
-    clearReceiverUpstreamEntries = false,
+    clearSourceUpstream = false,
+    clearReceiverUpstream = false,
     authorizeTruth = (i => i),
     asNarrateResults = false,
   } = {}) {
-    let ret = 0;
+    const ret = [];
+    const results = [];
     for (const connection of ((source instanceof Connection)
         ? [source]
         : Object.values((source instanceof Sourcerer ? source : source.sourcerer)._connections))) {
@@ -260,19 +261,19 @@ export default class SourcererTestHarness extends ScriptTestHarness {
       const truths = JSON.parse(JSON.stringify(
               (testSourceBackend._proclamations || []).map(entry => entry.event)))
           .map(authorizeTruth);
-      if (clearSourceUpstreamEntries) testSourceBackend._proclamations = [];
-      if (clearReceiverUpstreamEntries) receiverBackend._proclamations = [];
+      if (clearSourceUpstream) testSourceBackend._proclamations = [];
+      if (clearReceiverUpstream) receiverBackend._proclamations = [];
       if (verbosity) {
         receiver.warnEvent("Receiving truths:", dumpify(truths, { indent: 2 }));
       }
-      ret += truths.length;
+      ret.push(...truths);
       if (asNarrateResults) {
         receiverBackend.addNarrateResults({ eventIdBegin: truths[0].aspects.log.index }, truths);
       } else {
-        await Promise.all(await receiverBackend.getReceiveTruths()(truths));
+        results.push(receiverBackend.getReceiveTruths()(truths));
       }
     }
-    return ret;
+    return Promise.all(results).then(() => ret);
   }
 
   tryGetTestAuthorityConnection (connection): Connection {

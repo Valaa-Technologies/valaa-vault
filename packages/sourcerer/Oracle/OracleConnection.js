@@ -42,23 +42,23 @@ export default class OracleConnection extends Connection {
 
   static sourceryOpsName = "oracleSourcery";
   static oracleSourcery = [
-    OracleConnection.prototype._sourcifyUpstream,
+    OracleConnection.prototype._sourcerUpstream,
     Connection.prototype._narrateEventLog,
     Connection.prototype._finalizeSourcery,
   ]
 
-  _sourcifyUpstream (options: SourceryOptions) {
+  _sourcerUpstream (options: SourceryOptions) {
     // Handle step 2. of the sourcery first narration logic (defined in
     // Connection.js) and begin I/O bound(?) scribe event log narration
     // in parallel to the authority proxy/connection creation.
     this.setUpstreamConnection(this._authoritySourcerer
-        .sourcifyChronicle(this.getChronicleURI(), {
+        .sourcerChronicle(this.getChronicleURI(), {
           narrateOptions: false,
           subscribeEvents: (options.narrateOptions === false) && options.subscribeEvents,
           pushTruths: this.getReceiveTruths(options.pushTruths),
           plog: options.plog,
         }));
-    return super._sourcifyUpstream(options, {
+    return super._sourcerUpstream(options, {
       sourceredUpstream: this._upstreamConnection.asSourceredConnection(),
     });
   }

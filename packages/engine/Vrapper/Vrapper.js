@@ -21,7 +21,7 @@ import { getObjectRawField } from "~/raem/state/getObjectField";
 
 import { createGhostVRLInInstance, isMaterialized, createMaterializeGhostAction }
     from "~/raem/tools/denormalized/ghost";
-import { AbsentChroniclesError, addSourcifyChronicleToError }
+import { AbsentChroniclesError, addSourcerChronicleToError }
     from "~/raem/tools/denormalized/partitions";
 import { qualifiedNamesOf, qualifiedSymbol } from "~/tools/namespace";
 
@@ -230,7 +230,7 @@ export default class Vrapper extends Cog {
   getFieldIntro (fieldName: string): Object { return this._type[FieldsIntroTag][fieldName]; }
 
   /**
-   * Initiate the activation of this resource by sourcifying all
+   * Initiate the activation of this resource by sourcering all
    * chronicles of the resource and its prototypes.
    *
    * Returns a newly initiated or an already existing activation
@@ -467,7 +467,7 @@ export default class Vrapper extends Cog {
             new Error(`Cannot operate on a non-Created ${this.debugId()}`)
         : this.isUnavailable() ?
             new Error(`Cannot operate on an Unavailable ${this.debugId()}`)
-        : addSourcifyChronicleToError(new AbsentChroniclesError(
+        : addSourcerChronicleToError(new AbsentChroniclesError(
                 `Missing or not fully narrated connection for ${this.debugId()}`,
                 [this.activate()]),
             this._parent.discourse.connectToAbsentChronicle);
@@ -517,7 +517,7 @@ export default class Vrapper extends Cog {
       }
       */
       this._connection = chronicleURI
-          && discourse.sourcifyChronicle(chronicleURI, {
+          && discourse.sourcerChronicle(chronicleURI, {
             newChronicle: false, newConnection: options.newConnection, require: options.require,
           });
       if (!this._connection) {
@@ -788,13 +788,20 @@ export default class Vrapper extends Cog {
     try {
       discourse = options.discourse = (options.discourse || this._parent.discourse)
           .acquireFabricator("do-vs");
+      let verbosity = (options.verbosity !== undefined) ? options.verbosity : this.getVerbosity();
+      if (verbosity && !options.sourceInfo && (typeof valoscriptBody === "string")) {
+        options.sourceInfo = {
+          phase: "Vrapper.doValoscript transpilation",
+          source: valoscriptBody,
+          mediaName: "doValoscript:#0",
+          sourceMap: new Map(),
+        };
+        --verbosity;
+      }
       valoscriptKuery = (typeof valoscriptBody !== "string"
           ? valoscriptBody
-          : (options.kuery = transpileValoscriptBody(valoscriptBody, {
-            verbosity: options.verbosity || 0,
-            customVALK: VALEK,
-            sourceInfo: options.sourceInfo,
-          })));
+          : (options.kuery = transpileValoscriptBody(
+              valoscriptBody, { verbosity, customVALK: VALEK, sourceInfo: options.sourceInfo })));
       options.scope = options.mutableScope ||
           Object.create((options.scope !== undefined)
               ? options.scope

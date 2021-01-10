@@ -210,7 +210,7 @@ export default class Gateway extends FabricEventTarget {
 
   async initialize (revelation: Revelation, parentPlog) {
     try {
-      const plog1 = this.opLog(parentPlog, 1, "init",
+      const plog1 = this.opLog(1, parentPlog, "init",
           "Initializing gateway", { revelation });
 /*
  * Process the initially served landing page and extract the initial
@@ -267,7 +267,7 @@ export default class Gateway extends FabricEventTarget {
       // Locate entry point event log (prologue), make it optimally available through scribe,
       // narrate it with false prophet and get the false prophet connection for it.
       ({ connections: this.prologueConnections, rootConnection: this._rootConnection }
-          = await this._sourcifyPrologueChronicles(this.prologue));
+          = await this._sourcerPrologueChronicles(this.prologue));
 
       plog1 && plog1.opEvent("vidgets",
           "Registering builtin Inspire vidgets");
@@ -377,7 +377,7 @@ export default class Gateway extends FabricEventTarget {
   }, parentPlog) {
     if (!this._views) throw new Error("createAndConnectViewsToDOM must be called first");
     if (this._views[viewId]) throw new Error(`View ${viewId} already exists`);
-    const plog1 = this.opLog(parentPlog, 1, "create_view",
+    const plog1 = this.opLog(1, parentPlog, "create_view",
         `Creating view "${viewId}"`, { verbosity, ...paramViewConfig });
     const view = createView({ parent, verbosity, name: viewId });
     const op = { viewId, container, hostGlobal, paramViewConfig, plog: plog1 };
@@ -540,7 +540,7 @@ export default class Gateway extends FabricEventTarget {
         ...(gatewayRevelation.nexus || {}),
         parent: this,
       };
-      const plog1 = this.opLog(parentPlog, 1, "create_authority-nexus",
+      const plog1 = this.opLog(1, parentPlog, "create_authority-nexus",
           "new AuthorityNexus", nexusOptions);
       const nexus = new AuthorityNexus(nexusOptions);
       plog1 && plog1.opEvent("done",
@@ -562,7 +562,7 @@ export default class Gateway extends FabricEventTarget {
         parent: this,
         authorityNexus,
       };
-      const plog1 = this.opLog(parentPlog, 1, "create_oracle",
+      const plog1 = this.opLog(1, parentPlog, "create_oracle",
           "new Oracle", oracleOptions);
       const oracle = new Oracle(oracleOptions);
       plog1 && plog1.opEvent("done",
@@ -586,7 +586,7 @@ export default class Gateway extends FabricEventTarget {
         parent: this,
         upstream: oracle,
       };
-      const plog1 = this.opLog(parentPlog, 1, "create_scribe",
+      const plog1 = this.opLog(1, parentPlog, "create_scribe",
         "new Scribe", scribeOptions);
       const scribe = new Scribe(scribeOptions);
       plog1 && plog1.opEvent("await_initiate",
@@ -624,7 +624,7 @@ export default class Gateway extends FabricEventTarget {
       initialState: new ImmutableMap(),
       ...(gatewayRevelation.corpus || {}),
     };
-    const plog1 = this.opLog(parentPlog, 1, "corpus",
+    const plog1 = this.opLog(1, parentPlog, "corpus",
         "new Corpus", corpusOptions);
     const corpus = new Corpus(corpusOptions);
     plog1 && plog1.opEvent("done",
@@ -676,7 +676,7 @@ export default class Gateway extends FabricEventTarget {
         ...(gatewayRevelation.falseProphet || {}),
         parent: this,
       };
-      const plog1 = this.opLog(parentPlog, 1, "create_false-prophet",
+      const plog1 = this.opLog(1, parentPlog, "create_false-prophet",
           "new FalseProphet", falseProphetOptions);
       const falseProphet = new FalseProphet(falseProphetOptions);
       plog1 && plog1.opEvent("done",
@@ -698,7 +698,7 @@ export default class Gateway extends FabricEventTarget {
     for (const [key, count] of Object.entries(this._chronicleCommandCounts)) {
       if (count) {
         try {
-          const connection = this.falseProphet.sourcifyChronicle(key, { newConnection: false });
+          const connection = this.falseProphet.sourcerChronicle(key, { newConnection: false });
           ret[key] = connection.getStatus();
         } catch (error) {
           ret[key] = { commands: count };
@@ -725,7 +725,7 @@ export default class Gateway extends FabricEventTarget {
         parent: this,
         sourcerer: falseProphet,
       };
-      const plog1 = this.opLog(parentPlog, 1, "create_identity",
+      const plog1 = this.opLog(1, parentPlog, "create_identity",
           "new IdentityMediator", identityOptions);
       identity = new IdentityMediator({
         ...identityOptions,
@@ -748,7 +748,7 @@ export default class Gateway extends FabricEventTarget {
       discourseOptions = {
         ...(gatewayRevelation.discourse || {}),
       };
-      const plog1 = this.opLog(parentPlog, 1, "create_discourse",
+      const plog1 = this.opLog(1, parentPlog, "create_discourse",
           "new FalseProphetDiscourse", discourseOptions);
       discourse = falseProphet.createDiscourse(this, discourseOptions);
       plog1 && plog1.opEvent("done",
@@ -782,7 +782,7 @@ export default class Gateway extends FabricEventTarget {
 
   async attachSpindles (spindleModules_: (Promise<Object> | Object)[],
       options: { skipIfAlreadyAttached: boolean } = {}, parentPlog) {
-    const plog1 = this.opLog(parentPlog, 1, "spindles",
+    const plog1 = this.opLog(1, parentPlog, "spindles",
         `Obtaining ${spindleModules_.length} spindle modules`);
     const spindleModules = await Promise.all(spindleModules_ || []);
     const newSpindleLookup = {};
@@ -882,12 +882,12 @@ export default class Gateway extends FabricEventTarget {
             `Exception caught during notify '${notifyMethodName}' to spindle ${spindle.name}`));
   }
 
-  async _sourcifyPrologueChronicles (prologue: Object, parentPlog) {
+  async _sourcerPrologueChronicles (prologue: Object, parentPlog) {
     let chronicles;
     try {
       let rootChronicleURI = prologue.rootChronicleURI
           && naiveURI.validateChronicleURI(await reveal(prologue.rootChronicleURI));
-      const plog1 = this.opLog(parentPlog, 1, "prologue");
+      const plog1 = this.opLog(1, parentPlog, "prologue");
       if (prologue.rootPartitionURI) {
         this.errorEvent("DEPRECATED: prologue.rootPartitionURI used to override rootChronicleURI",
             "\n\tthis is probably due to ?partition= query param; use ?chronicle= instead.");
@@ -906,7 +906,7 @@ export default class Gateway extends FabricEventTarget {
           `Sourcering ${chronicles.length} prologue and root chronicles`,
           { chronicles, rootChronicleURI });
       const connections = await Promise.all(chronicles.map(chronicleInfo =>
-          this._sourcifyPrologueChronicle(prologue, chronicleInfo, plog1)));
+          this._sourcerPrologueChronicle(prologue, chronicleInfo, plog1)));
       plog1 && plog1.opEvent("done",
           `Acquired active connections for all prologue chronicles:`,
           ...[].concat(...connections.map(connection =>
@@ -951,7 +951,7 @@ export default class Gateway extends FabricEventTarget {
     }
   }
 
-  async _sourcifyPrologueChronicle (prologue: Object, info: {
+  async _sourcerPrologueChronicle (prologue: Object, info: {
     chronicleURI: string,
     commandId: ?number, commandCount: ?number,
     eventId: ?number, truthCount: ?number, logs: ?Object,
@@ -960,10 +960,10 @@ export default class Gateway extends FabricEventTarget {
     // Acquire connection without remote narration to determine the current last authorized event
     // so that we can narrate any content in the prologue before any remote activity.
     const connectionOptions = await reveal(info.connection || {});
-    const plog2 = this.opLog(parentPlog, 2, "chronicle",
+    const plog2 = this.opLog(2, parentPlog, "chronicle",
         `Sourcering chronicle <${chronicleURI}>`, connectionOptions);
     const connection = this.discourse
-        .sourcifyChronicle(naiveURI.validateChronicleURI(chronicleURI), {
+        .sourcerChronicle(naiveURI.validateChronicleURI(chronicleURI), {
           ...connectionOptions,
           subscribeEvents: false,
           narrateOptions: { remote: false },

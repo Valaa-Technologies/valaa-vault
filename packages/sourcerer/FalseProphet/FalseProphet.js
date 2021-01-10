@@ -20,7 +20,7 @@ import { _reciteStoriesToFollowers } from "./_recitalOps";
 import { deserializeVRL } from "./_universalizationOps";
 import StoryRecital from "./StoryRecital";
 
-type FalseProphetChronicleOptions = ProclaimOptions & {
+type FalseProphetProclaimOptions = ProclaimOptions & {
   onReform?: (progressEvent: Object) => null,
 };
 
@@ -90,7 +90,7 @@ export default class FalseProphet extends Sourcerer {
   }
 
   // Split a command and transmit resulting chronicle commands towards upstream.
-  proclaimEvents (commands: Command[], options: FalseProphetChronicleOptions = {}):
+  proclaimEvents (commands: Command[], options: FalseProphetProclaimOptions = {}):
       ChroniclePropheciesRequest {
     try {
       return _proclaimEvents(this, commands, options);

@@ -58,11 +58,6 @@ export type ProclaimOptions = NarrateOptions & {
 };
 
 export class ProclaimEventResult extends FabricEventTarget {
-  constructor (chronicler, event) {
-    super(chronicler);
-    this.event = event;
-  }
-
   event: EventBase; // Preliminary event after universalization
   index: number; // Index of this event result in a result set
   _forwardResults: ProclaimEventResult[];

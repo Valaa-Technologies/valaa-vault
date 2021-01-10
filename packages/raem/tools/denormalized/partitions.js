@@ -23,10 +23,10 @@ export class AbsentChroniclesError extends Error {
 
 // Wraps the call inside logic which sourcifies to absent chronicles if
 // a AbsentChroniclesError is thrown. The sourcery callback
-// is extracted from the error.sourcifyChronicle itself. Thus for the
+// is extracted from the error.sourcerChronicle itself. Thus for the
 // auto-sourcery functionality to work some intervening layer must add
 // this callback into all caught missing sourcery errors.
-export function asyncSourcifyChronicleIfAbsentAndRetry (call, onError) {
+export function asyncSourcerChronicleIfAbsentAndRetry (call, onError) {
   if ((typeof call !== "function") || !call.apply) throw new Error("call is not a function");
   return function autoSourceryCall (...args: any[]) {
     return tryCall.call(this, call, onError, ...args);
@@ -42,12 +42,12 @@ function tryCall (call: any, onError, ...args: any[]) {
       throw error;
     }
     try {
-      return sourcifyAbsentChroniclesAndThen(error,
+      return sourcerAbsentChroniclesAndThen(error,
           () => tryCall.call(this, call, onError, ...args));
     } catch (innerError) {
       const wrappedError = wrapError(innerError,
-        `During @asyncSourcifyChronicleIfAbsentAndRetry(${call.name}):`,
-        "\n\thint: use chronicles:addSourcifyChronicleToError to add it",
+        `During @asyncSourcerChronicleIfAbsentAndRetry(${call.name}):`,
+        "\n\thint: use chronicles:addSourcerChronicleToError to add it",
         "\n\tcall:", ...dumpObject(call),
         "\n\targs:", ...dumpObject(args));
       if (onError) return onError(wrappedError, ...args);
@@ -56,26 +56,26 @@ function tryCall (call: any, onError, ...args: any[]) {
   });
 }
 
-export function trySourcifyAbsentChroniclesAndThen (error, callback, explicitSourcifyChronicle) {
+export function trySourcerAbsentChroniclesAndThen (error, callback, explicitChronicle) {
   const original = error.originalError || error;
   if (!original.absentChronicleURIs) return false;
-  return sourcifyAbsentChroniclesAndThen(error, callback, explicitSourcifyChronicle);
+  return sourcerAbsentChroniclesAndThen(error, callback, explicitChronicle);
 }
 
-export function sourcifyAbsentChroniclesAndThen (error, callback, explicitSourcifyChronicle) {
+export function sourcerAbsentChroniclesAndThen (error, callback, explicitChronicle) {
   const original = error.originalError || error;
-  const sourcifyChronicle = original.sourcifyChronicle || explicitSourcifyChronicle;
-  if (!sourcifyChronicle) {
+  const sourcerChronicle = original.sourcerChronicle || explicitChronicle;
+  if (!sourcerChronicle) {
     throw wrapError(error, "caught AbsentChroniclesError",
-        "but no error.sourcifyChronicle found: cannot sourcify");
+        "but no error.sourcerChronicle found: cannot sourcer");
   }
   if (!original.absentChronicleURIs || !original.absentChronicleURIs.length) {
     throw wrapError(error, "caught AbsentChroniclesError",
-            "but error.absentChronicleURIs is missing or empty: cannot sourcify");
+            "but error.absentChronicleURIs is missing or empty: cannot sourcer");
   }
   const ret = Promise.all(original.absentChronicleURIs.map(absentChronicleURI =>
       ((typeof absentChronicleURI === "string")
-          ? sourcifyChronicle(absentChronicleURI)
+          ? sourcerChronicle(absentChronicleURI)
           : absentChronicleURI) // a promise for an already existing sourcery process
   )).then(() => callback());
   ret.operationInfo = {
@@ -85,8 +85,8 @@ export function sourcifyAbsentChroniclesAndThen (error, callback, explicitSourci
   return ret;
 }
 
-export function addSourcifyChronicleToError (error, sourcifyChronicle) {
-  (error.originalError || error).sourcifyChronicle = sourcifyChronicle;
+export function addSourcerChronicleToError (error, sourcerChronicle) {
+  (error.originalError || error).sourcerChronicle = sourcerChronicle;
   return error;
 }
 

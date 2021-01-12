@@ -155,7 +155,9 @@ export function tryCreateValensArgs (
       return undefined;
     }
     if (!valensProps) {
-      if ((behavior === undefined) && !(propValue instanceof Kuery)) return undefined;
+      if ((behavior === undefined)
+          && !(propValue instanceof Kuery)
+          && !propName.startsWith("$On")) return undefined;
       valensProps = { hierarchyKey, elementType, elementPropsSeq: [] };
       rerunAfterPriming = true;
       return true; // rerun all props from beginning

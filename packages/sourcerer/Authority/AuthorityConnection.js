@@ -60,10 +60,11 @@ export default class AuthorityConnection extends Connection {
     const op = { events, options, resultBase: new AuthorityEventResult(this, options.verbosity) };
     op.resultBase.remoteResults = null;
     op.resultBase.isPrimary = this.isPrimaryAuthority();
-    op.resultBase.localProcess = this.opChain(
+    op.resultBase.authorityProclaimProcess = this.opChain(
         "authorityProclaim", op,
         "_errorOnProclaimEvents", this.opLog(2, options.plog, "proclaim"));
-    op.resultBase.truthsProcess = thenChainEagerly(op.resultBase.localProcess,
+    op.resultBase.truthsProcess = thenChainEagerly(
+        op.resultBase.authorityProclaimProcess,
         receivedTruths => (op.resultBase.truthsProcess =
             (this.isPrimaryAuthority() && (receivedTruths || events)) || []));
     return {
@@ -105,7 +106,7 @@ export default class AuthorityConnection extends Connection {
     const truths = (op.rejectedIndex !== undefined)
         ? remoteResults.slice(0, op.rejectedIndex)
         : remoteResults || op.events;
-    if (!truths || !truths.length) return [];
+    if (!truths || !truths.length) return [op];
     return [
       op,
       op.resultBase.getChronicler().getReceiveTruths(op.options.receivedTruths)(truths),
@@ -113,7 +114,7 @@ export default class AuthorityConnection extends Connection {
   }
 
   _finalizeLocallyReceivedTruths (op, receivedTruths) {
-    return (op.resultBase.localProcess = receivedTruths);
+    return (op.resultBase.authorityProclaimProcess = receivedTruths);
   }
 
   // Coming from downstream: tries scribe first, otherwise forwards the request to authority.
@@ -152,7 +153,7 @@ export default class AuthorityConnection extends Connection {
 
 export class AuthorityEventResult extends ProclaimEventResult {
   getComposedEvent () {
-    return thenChainEagerly(this.localProcess,
+    return thenChainEagerly(this.authorityProclaimProcess,
         receivedEvents => receivedEvents[this.index],
         this.onGetEventError);
   }

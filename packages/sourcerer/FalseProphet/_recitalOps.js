@@ -487,8 +487,12 @@ function _finalizeRevisioning (elaboration: Object) {
   }
   if (purgedHeresies) {
     elaboration.instigatorConnection.errorEvent(1, () => [
-      "\n\nHERESIES PURGED:", ...purgedHeresies.map(h =>
-          ({ ...getActionFromPassage(h), meta: null })),
+      "\n\nHERESIES PURGED:", ...purgedHeresies.map(h => {
+        const result = { command: ({ ...getActionFromPassage(h) }) };
+        result.chronicles = result.command.meta.chronicles;
+        delete result.command.meta;
+        return result;
+      }),
       "\n\tby revisioning:", ...dumpObject(elaboration),
       "\n\tof heretic recital:", ...dumpObject(hereticRecital),
       "\n\telaboration new events:", ...dumpObject(elaboration.newEvents),

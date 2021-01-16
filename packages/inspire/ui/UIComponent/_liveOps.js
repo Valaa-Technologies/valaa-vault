@@ -165,9 +165,7 @@ function _recordNewGenericPropValue (stateLive, propValue, propName, component) 
         return false;
       }
       if (namespace === "On") {
-        if (typeof newValue !== "function") {
-          newValue = _valensWrapCallback(component, propValue, propName);
-        }
+        newValue = _valensWrapCallback(component, propValue, propName);
         newName = `on${name[0].toUpperCase()}${name.slice(1)}`;
         if (fabricatorEventTypes[name]) {
           _obtainLocalContext(stateLive, component)[qualifiedSymbol("On", name)] = newValue;

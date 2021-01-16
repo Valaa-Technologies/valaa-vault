@@ -232,9 +232,9 @@ export default class FalseProphetConnection extends Connection {
             const errorEvent = prophecy.meta.operation
                 .getProgressErrorEvent("profess", proclaimError, {}, {
                   isSchismatic: error.isSchismatic !== false,
-                  isRevisable: error.isRevisable !== false,
-                  isReformable: error.isReformable !== false,
-                  isRefabricateable: error.isRefabricateable !== false,
+                  isRevisable: error.isRevisable === true,
+                  isReformable: error.isReformable === true,
+                  isRefabricateable: error.isRefabricateable === true,
                   instigatorConnection: this,
                 });
             if (op.options.discourse) {

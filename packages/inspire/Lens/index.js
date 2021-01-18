@@ -213,7 +213,8 @@ the focus of subLens2 and so on until the final results of the last
 lens are shown as the output of the instrument lens itself.`,
   // eslint-disable-next-line
   ])(function instrument (...lenses) {
-    return (focus: any, component, lensName: string) => {
+    return (focus: any, context, lensName: string) => {
+      const component = context[nativeComponent];
       try {
         return lenses.reduce((refraction, lens) =>
             component.renderLens(lens, refraction, lensName, undefined, true), focus);
@@ -358,7 +359,7 @@ to 'model', and the various components roughly correspond to 'controller'.
     tags: ["Primary", "Attribute", "Lens"],
     type: "Object",
     description: [
-`Attribute slot for assigning values into the context object of the component.`
+`Attribute slot for merging values into the context object of the component.`
     ]
   }));
 
@@ -412,24 +413,26 @@ null,
 If the condition is falsy the focus is displayed using lens from slot
 'else' which presents null.`,
     ],
-    isEnabled (focus: any, component) {
-      if (!component.props.hasOwnProperty("if")) return false;
-      let condition = component.props.if;
-      if (component.props.then !== undefined) return true;
+    isEnabled (focus: any, context) {
+      const props = context[nativeComponent].props;
+      if (!props.hasOwnProperty("if")) return false;
+      let condition = props.if;
+      if (props.then !== undefined) return true;
       if (typeof condition === "function") {
         condition = condition(focus);
       }
       return !condition; // if falsy condition, enable lens
     },
-    value (focus: any, component) {
+    value (focus: any, context) {
+      const props = context[nativeComponent].props;
       // if then is undefined we only get here if condition is falsy.
-      const then_ = component.props.then;
+      const then_ = props.then;
       if (then_ !== undefined) {
-        let condition = component.props.if;
+        let condition = props.if;
         if (typeof condition === "function") condition = condition(focus);
         if (condition) return then_;
       }
-      const else_ = component.props.else;
+      const else_ = props.else;
       return else_ === undefined ? [] : else_;
     },
   }));
@@ -573,11 +576,13 @@ three notably different looking use cases.`,
     description: [
 `Lens that displays the child elements of the immediate parent component.`,
     ],
-    isEnabled (u: any, component) {
-      const children = component.props.children;
+    isEnabled (u: any, context) {
+      const children = context[nativeComponent].props.children;
       return Array.isArray(children) ? children.length : children != null;
     },
-    value (focus: any, component) { return component.props.children; },
+    value (focus: any, context) {
+      return context[nativeComponent].props.children;
+    },
   }));
 
   declareName("static", () => ({
@@ -609,18 +614,25 @@ like above.`,
       slotAssembly,
       slotNames => slotNames.slice(0, -1).reverse().join(" <| "));
 
-  const parentComponentLens = declareName("parentComponentLens", () => ({
+  const nativeComponent = declareName("nativeComponent", () => ({
+    tags: ["Internal", "Context"],
+    type: "UIComponent",
+    description: [
+`Context slot which contains the current native component`,
+    ],
+  }));
+
+  const nativeComponentLens = declareName("nativeComponentLens", () => ({
     tags: ["Lens"],
     type: "UIComponent",
     description: [
 `Lens that displays the current parent component.`,
 null,
-`As the component itself
-is not renderable this slot must be used in an instrument before some
-other slot (such as 'focusDetailLens').`,
+`As the component itself is not renderable this slot must be used in an
+instrument before some other slot (such as 'focusDetailLens').`,
     ],
     isEnabled: true,
-    value (focus: any, component) { return component; },
+    value (focus: any, context) { return context[nativeComponent]; },
   }));
 
   const focusDescriptionLens = declareName("focusDescriptionLens", () => ({
@@ -632,7 +644,7 @@ null,
 `    @focus {any} focus  the focus to describe.`,
     ],
     isEnabled: true,
-    value: function renderFocusDescription (focus: any, component) {
+    value: function renderFocusDescription (focus: any, context) {
       switch (typeof focus) {
         case "string":
           return `"${focus.length <= 30 ? focus : `${focus.slice(0, 27)}...`}"`;
@@ -642,7 +654,7 @@ null,
           if (focus !== null) {
             if (focus instanceof Vrapper) return focus.debugId({ short: true });
             if (Array.isArray(focus)) {
-              return `[${focus.map(entry => renderFocusDescription(entry, component))
+              return `[${focus.map(entry => renderFocusDescription(entry, context))
                   .join(", ")}]`;
             }
             return `{ ${Object.keys(focus).join(", ")} }`;
@@ -716,7 +728,8 @@ null,
     @focus {string|Error} error  the failure description or exception object`,
     ],
     isEnabled: true,
-    defaultValue: function renderToggleableErrorDetail (failure: any, component) {
+    defaultValue: function renderToggleableErrorDetail (failure: any, context) {
+      const component = context[nativeComponent];
       return ([
         <button onClick={() => component.toggleError()}>
           {component.state.errorHidden ? "Show" : "Hide"}
@@ -798,9 +811,7 @@ is greater than the slot value of 'maximumRenderDepth'.`,
 null,
 `    @focus {Object} focus  currently focused value.`,
     ],
-    isEnabled: (u, component) =>
-      (component.getUIContextValue(currentRenderDepth) >
-          component.getUIContextValue(maximumRenderDepth)),
+    isEnabled: (u, context) => context[currentRenderDepth] > context[maximumRenderDepth],
     defaultValue:
       <div {..._lensMessageInternalFailureProps}>
         <div {..._message}>
@@ -905,8 +916,9 @@ in the $Lens.delegate of the current fabric component.`,
 null,
 `    @focus {string|Error|Object} focus  the focus of the component`,
     ],
-    isEnabled: (u, component) => (component.props.delegate !== undefined),
-    value: function renderFirstEnabledDelegate (focus, component, lensName = "delegate") {
+    isEnabled: (u, context) => (context[nativeComponent].props.delegate !== undefined),
+    value: function renderFirstEnabledDelegate (focus, context, lensName = "delegate") {
+      const component = context[nativeComponent];
       return component.renderFirstEnabledDelegate(component.props.delegate, focus, lensName);
     }
   }));
@@ -921,8 +933,8 @@ null,
 `    @focus {string|Error|Object} focus  the focus of the component`,
     ],
     isEnabled: true,
-    value: function renderLoaded (focus, component) {
-      return component.renderLoaded(focus);
+    value: function renderLoaded (focus, context) {
+      return context[nativeComponent].renderLoaded(focus);
     },
   }));
 
@@ -937,7 +949,7 @@ null,
     isEnabled: (focus) => (focus === undefined),
     defaultValue: ({ delegate: [
       symbols.instrument(
-          (u, component) => (component.props.focus),
+          (u, context) => (context[nativeComponent].props.focus),
           symbols.pendingFocusLens),
     ] }),
   }));
@@ -1054,7 +1066,8 @@ null,
 `    @focus {Object} focus  the Resource to search the lens from.`,
       ],
       isEnabled: (focus?: Vrapper) => focus && focus.hasInterface("Scope"),
-      value: function getLensProperty (focus: any, component, /* currentSlotName: string */) {
+      value: function getLensProperty (focus: any, context, /* currentSlotName: string */) {
+        const component = context[nativeComponent];
         /*
         if (component.props.lensName) {
           console.warn("DEPRECATED: props.lensName\n\tprefer: props.lensProperty",
@@ -1065,12 +1078,12 @@ null,
         const scope = focus.tryValospaceScope();
         const options = { scope };
         const specificNames = component.props[specificLensPropertySlotName]
-            || component.getUIContextValue(slotSymbol);
+            || context[slotSymbol];
         const specificLensValue = specificNames ? _lookupPropertyBy(specificNames) : undefined;
         if (specificLensValue !== undefined) return specificLensValue;
 
         const genericNames = component.props.lensProperty
-            || component.getUIContextValue(symbols.lensProperty);
+            || context[symbols.lensProperty];
         const genericLensValue = genericNames ? _lookupPropertyBy(genericNames) : undefined;
         if (genericLensValue !== undefined) return genericLensValue;
         /*
@@ -1108,7 +1121,7 @@ null,
     type: "Lens",
     description:
 `Slot for displaying a Valoscope which has not yet loaded its lens frame.`,
-    isEnabled: (focus, component) => !component.state || (component.state.scopeFrame === undefined),
+    isEnabled: (focus, context) => (context[nativeComponent].state || {}).scopeFrame === undefined,
     defaultValue: function renderUnframed () {
       return "<Loading frame...>";
     },
@@ -1139,15 +1152,16 @@ to it. If no instance lens property is found from the focus then
 delegates the displaying to the lens(es) specified by the scopeFrame
 instance prototype.`,
     ],
-    isEnabled: (focus, component) => component.props.instanceLensPrototype,
-    value: function renderInstance (focus, component, currentSlotName) {
+    isEnabled: (focus, context) => context[nativeComponent].props.instanceLensPrototype,
+    value: function renderInstance (focus, context, currentSlotName) {
+      const component = context[nativeComponent];
       return thenChainEagerly(
           component.state.scopeFrame, [
             (scopeFrame => {
               if ((scopeFrame == null) || !(scopeFrame instanceof Vrapper)) return "";
               if (!scopeFrame.hasInterface("Scope")) return scopeFrame;
               const instanceSlotName = `instance-${currentSlotName}`;
-              const instanceLens = component.getUIContextValue(symbols.instancePropertyLens)(
+              const instanceLens = context[symbols.instancePropertyLens](
                   scopeFrame, component, instanceSlotName);
               return (instanceLens != null) ? instanceLens : scopeFrame;
             }),
@@ -1167,10 +1181,10 @@ specify a lens property at all.`,
 null,
 `    @focus {Object} focus  the active Resource focus.`,
     ],
-    isEnabled: (focus, component) =>
-        (component.props.instanceLensPrototype.getTypeName() === "Media"),
-    value: function renderMediaInstance (focus, component) {
-      return component.props.instanceLensPrototype;
+    isEnabled: (focus, context) =>
+        (context[nativeComponent].props.instanceLensPrototype.getTypeName() === "Media"),
+    value: function renderMediaInstance (focus, context) {
+      return context[nativeComponent].props.instanceLensPrototype;
     },
   }));
 
@@ -1308,7 +1322,7 @@ Media that is used as source for render elements.`,
     <div {..._component}>
       <span {..._key}>Containing component:</span>
       <span {..._value}>
-        {symbols.instrument(parentComponentLens, focusDetailLens)}
+        {symbols.instrument(nativeComponentLens, focusDetailLens)}
       </span>
     </div>,
   ];
@@ -1321,7 +1335,7 @@ Media that is used as source for render elements.`,
 null,
 `    @focus {string|Error|Object} reason  a description of why the component is disabled.`,
     ],
-    isEnabled: (u, component) => ((component.state || {}).uiContext === undefined),
+    isEnabled: (u, context) => ((context[nativeComponent].state || {}).uiContext === undefined),
     defaultValue: ({ delegate: [
       loadingFailedLens,
       <div {..._lensMessageLoadingFailedProps}>
@@ -1817,9 +1831,12 @@ null,
     ],
     isEnabled: (focus?: Vrapper) => focus && focus.isActivating(),
     defaultValue: ({ delegate: [
-      (focus, component) => {
+      (focus, context) => {
         const activation = focus.activate();
-        if (activation !== focus) activation.then(() => component.flushAndRerender("activated"));
+        if (activation !== focus) {
+          activation.then(() =>
+              context[nativeComponent].flushAndRerender("activated"));
+        }
         return undefined;
       },
       loadingLens,
@@ -2035,7 +2052,7 @@ null,
       loadingFailedLens,
       <div {..._lensMessageLoadingFailedProps}>
         <div {..._message}>
-            {symbols.instrument(parentComponentLens, focusDetailLens)}
+            {symbols.instrument(nativeComponentLens, focusDetailLens)}
             returned an invalid element.
         </div>
         <div {..._parameter}>

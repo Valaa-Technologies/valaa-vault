@@ -43,20 +43,21 @@ export function _checkForRenderDepthFailure (component: UIComponent) {
     const newKey = component.getKey();
     // eslint-disable-next-line
     while ((uiContext = Object.getPrototypeOf(uiContext))) {
-      if (!uiContext.reactComponent || (uiContext.reactComponent.getKey() !== newKey)
-          || (uiContext.reactComponent.constructor !== component.constructor)) {
+      const ancestorComponent = uiContext[Lens.nativeComponent];
+      if (!ancestorComponent || (ancestorComponent.getKey() !== newKey)
+          || (ancestorComponent.constructor !== component.constructor)) {
         continue;
       }
       if (uiContext.focus !== newFocus) {
         continue;
       }
-      if (_comparePropsOrState(uiContext.reactComponent.props, component.props, "onelevelshallow",
+      if (_comparePropsOrState(ancestorComponent.props, component.props, "onelevelshallow",
           component.constructor.propsCompareModesOnComponentUpdate, "props")) {
         continue;
       }
       console.log("Infinite render recursion match found in component", component,
               component.state.uiContext,
-          "\n\tancestor props:", uiContext.reactComponent.props,
+          "\n\tancestor props:", ancestorComponent.props,
           "\n\telement props:", component.props);
       error = new Error("Infinite component render recursion detected");
       break;
@@ -72,10 +73,10 @@ export function _checkForRenderDepthFailure (component: UIComponent) {
         Object.create(Object.getPrototypeOf(component.state.uiContext)),
         component.state.uiContext),
     ...((uiContext === component.state.uiContext) ? [] : [
-      "\n\trecurring ancestor:", uiContext.reactComponent,
-      "\n\trecurring ancestor focus:", uiContext.reactComponent.getKey(),
-      "\n\trecurring ancestor key:", uiContext.reactComponent.getKey(),
-      "\n\trecurring ancestor props:", uiContext.reactComponent.props,
+      "\n\trecurring ancestor:", uiContext[Lens.nativeComponent],
+      "\n\trecurring ancestor focus:", uiContext[Lens.nativeComponent].getKey(),
+      "\n\trecurring ancestor key:", uiContext[Lens.nativeComponent].getKey(),
+      "\n\trecurring ancestor props:", uiContext[Lens.nativeComponent].props,
       "\n\trecurring ancestor uiContext:", uiContext,
     ]),
   ];

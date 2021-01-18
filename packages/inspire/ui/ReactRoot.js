@@ -51,7 +51,7 @@ export default class ReactRoot extends React.Component {
     const vRootFocus = (props.rootProps || {}).focus;
     this._rootContext = this._createRootContext(vRootFocus, props.rootUIContext);
     this._rootContext.context = this._rootContext;
-    this._rootContext.reactComponent = this;
+    this._rootContext[Lens.nativeComponent] = this;
     this._rootContext[Lens.currentRenderDepth] = 0;
     this._rootContext[Lens.arrayIndex] = null;
     this._rootContext[Lens.elementIndex] = null;
@@ -195,14 +195,14 @@ export default class ReactRoot extends React.Component {
         const rootSheet = getImplicitMediaInterpretation(this[VSSStyleSheetSymbol],
             "VSS.rootStyleSheet", { fallbackContentType: "text/css", discourse: engine.discourse });
         const contextSheet = rootSheet
-            && reactRoot.getVSSSheet(rootSheet, this.reactComponent).classes;
+            && reactRoot.getVSSSheet(rootSheet, this[Lens.nativeComponent]).classes;
         reactRoot._resolveVSSOption(this, engine, ret, contextSheet, rest);
         return ret.data;
       } catch (error) {
-        throw wrapError(error, `During ${this.reactComponent.debugId()}\n .VSS:`,
+        throw wrapError(error, `During ${this[Lens.nativeComponent].debugId()}\n .VSS:`,
             "\n\targs:", ...rest,
-            "\n\tprops:", this.reactComponent.props,
-            "\n\tstate:", this.reactComponent.state);
+            "\n\tprops:", this[Lens.nativeComponent].props,
+            "\n\tstate:", this[Lens.nativeComponent].state);
       }
     };
   }
@@ -242,11 +242,11 @@ export default class ReactRoot extends React.Component {
       } else {
         const newSheet = getImplicitMediaInterpretation(option, "VSS.option",
             { discourse: engine.discourse, contentType: "text/css" });
-        return this.getVSSSheet(newSheet, localContext.reactComponent).classes;
+        return this.getVSSSheet(newSheet, localContext[Lens.nativeComponent]).classes;
       }
       return sheet;
     } catch (error) {
-      throw wrapError(error, `During ${localContext.reactComponent.debugId()
+      throw wrapError(error, `During ${localContext[Lens.nativeComponent].debugId()
               }\n ._resolveVSSOption:`,
           "\n\tcurrent option:", ...dumpObject(option),
           "\n\tcurrent sheet:", ...dumpObject(sheet));

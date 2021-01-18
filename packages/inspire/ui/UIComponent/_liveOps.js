@@ -11,6 +11,10 @@ import getImplicitMediaInterpretation from "~/engine/Vrapper/getImplicitMediaInt
 import { fabricatorEventTypes } from "~/sourcerer/api/Fabricator";
 
 import {
+  createNativeIdentifier, isNativeIdentifier, getNativeIdentifierValue, setNativeIdentifierValue,
+} from "~/script";
+
+import {
   dumpObject, patchWith, isPromise, isSymbol, qualifiedSymbol, qualifierNamespace,
   generateDispatchEventPath, thisChainEagerly, thisChainReturn, wrapError
 } from "~/tools";
@@ -163,6 +167,18 @@ function _recordNewGenericPropValue (stateLive, propValue, propName, component) 
       if (namespace === "Context") {
         component.state.uiContext[name] = propValue;
         return false;
+      }
+      if (namespace === "Var") {
+        // _obtainLocalContext(stateLive, component)
+        const lexicalContext = component.state.uiContext;
+        const scopeVariable = lexicalContext[name];
+        if (!isNativeIdentifier(scopeVariable)) {
+          lexicalContext[name] = createNativeIdentifier(newValue);
+          return false;
+        }
+        const previousValue = getNativeIdentifierValue(scopeVariable);
+        setNativeIdentifierValue(scopeVariable, newValue);
+        return previousValue === newValue;
       }
       if (namespace === "On") {
         newValue = _valensWrapCallback(component, propValue, propName);

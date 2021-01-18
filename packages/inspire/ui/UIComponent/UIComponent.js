@@ -129,7 +129,6 @@ export default class UIComponent extends React.Component {
     focus: "shallow",
     head: "shallow",
     context: "onelevelshallow",
-    reactComponent: "ignore",
     frameOverrides: "ignore",
   }
 
@@ -139,7 +138,7 @@ export default class UIComponent extends React.Component {
     super(props, context);
     const uiContext = Object.create(context.parentUIContext);
     uiContext.context = uiContext;
-    uiContext.reactComponent = this;
+    uiContext[Lens.nativeComponent] = this;
     const renderDepth = uiContext[Lens.currentRenderDepth] =
         context.parentUIContext[Lens.currentRenderDepth] + 1;
     const maximumRenderDepth = uiContext[Lens.maximumRenderDepth];
@@ -296,6 +295,14 @@ export default class UIComponent extends React.Component {
     return getScopeValue(this.state.uiContext, key);
   }
 
+  getLexicalContext () {
+    return this.state.uiContext;
+  }
+
+  getLexicalContextValue (key: string | Symbol) {
+    return getScopeValue(this.getLexicalContext(), key);
+  }
+
   getParentUIContextValue (key: string | Symbol) {
     return getScopeValue(Object.getPrototypeOf(this.getUIContext()), key);
   }
@@ -321,7 +328,7 @@ export default class UIComponent extends React.Component {
   }
 
   getKey () {
-    return this.context.parentUIContext.reactComponent.getKey();
+    return this.context.parentUIContext[Lens.nativeComponent].getKey();
   }
 
   readSlotValue (slotName: string, slotSymbol: Symbol, focus: any, onlyIfAble?: boolean,
@@ -329,13 +336,16 @@ export default class UIComponent extends React.Component {
     void | null | string | React.Element<any> | [] | Promise<any> {
     if (onlyIfAble) {
       const descriptor = this.context.engine.getHostObjectDescriptor(slotSymbol);
+      const lexicalContext = this.getLexicalContext();
       if (descriptor) {
-        if ((typeof descriptor.isEnabled === "function") && !descriptor.isEnabled(focus, this)) {
+        if ((typeof descriptor.isEnabled === "function")
+            && !descriptor.isEnabled(focus, lexicalContext)) {
           return undefined;
         }
         const value = descriptor.value;
         if (value !== undefined) {
-          return (typeof value !== "function") ? value : value(focus, this);
+          return (typeof value !== "function") ? value
+              : value.call(lexicalContext.this, focus, lexicalContext);
         }
       }
     }

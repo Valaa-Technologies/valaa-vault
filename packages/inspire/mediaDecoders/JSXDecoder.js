@@ -19,6 +19,7 @@ import notThatSafeEval from "~/tools/notThatSafeEval";
 import { dumpObject } from "~/tools";
 
 const { symbols: Lens, deprecatedNames } = require("~/inspire/Lens");
+const { symbols: Var } = require("~/inspire/Var");
 
 export default class JSXDecoder extends MediaDecoder {
   static mediaTypes = [
@@ -410,6 +411,8 @@ export default class JSXDecoder extends MediaDecoder {
       else if (namespace === "Lens") {
         if (name === "static") return;
         if (_valoscopeAttributes[name]) ret.hasFrame = true;
+      } else if (namespace === "Var") {
+        if (Var[name]) throw new Error(`Cannot define reserved attribute Var:${name}`);
       }
       ++ret.totalCount;
       const namespaceAttrs = ret.byNamespace[namespace] || (ret.byNamespace[namespace] = {});

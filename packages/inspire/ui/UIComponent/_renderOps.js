@@ -175,9 +175,9 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
     case "undefined":
       return null;
     case "function": {
-      const contextThis = component.getUIContextValue("component");
+      const lexicalContext = component.getLexicalContext();
       subLensName = `${lens.name}()<-${lensName}`;
-      ret = lens.call(contextThis, focus, component, lensName);
+      ret = lens.call(lexicalContext.this, focus, lexicalContext, lensName);
       break;
     }
     case "object":
@@ -190,7 +190,7 @@ export function _tryRenderLens (component: UIComponent, lens: any, focus: any,
       if (lens instanceof Kuery) {
         subLensName = `§<-${lensName}`;
         const options = { asRepeathenable: "reuse", scope: component.getUIContext() };
-        const head = component.getUIContextValue("frame");
+        const head = component.getLexicalContextValue("this");
         const initialRepeathenable = component.bindLiveKuery(subLensName, head, lens, options);
         const repeathenableState = options.repeathenableState;
         if (initialRepeathenable) {

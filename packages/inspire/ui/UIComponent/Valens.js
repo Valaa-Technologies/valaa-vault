@@ -69,6 +69,10 @@ export default class Valens extends UIComponent {
         : `${keyPrefix}:${this.props.hierarchyKey}`));
   }
 
+  getLexicalContext () {
+    return (this.state.live || {}).localContext || this.state.uiContext;
+  }
+
   bindFocusSubscriptions (focus: any, props: Object) {
     super.bindFocusSubscriptions(focus, props);
     // Live props are always based on the parent focus.
@@ -105,7 +109,7 @@ export default class Valens extends UIComponent {
     // cannot be explicitly passed any props.
     // These slot props should probably be passed to Valens inside props, though...
     return super.readSlotValue(slotName, slotSymbol, focus, onlyIfAble,
-        ((this.context.parentUIContext || {}).reactComponent || this).props);
+        ((this.context.parentUIContext || {})[Lens.nativeComponent] || this).props);
   }
 
   renderLoaded (focus: any) {

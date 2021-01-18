@@ -23,6 +23,13 @@ module.exports = buildNamespaceSpecification({
 });
 
 function declareNames ({ declareName }) {
+  declareName("click", {
+    tags: ["Attribute", "HTML5", "Event"],
+    type: "EventHandler",
+    description:
+ref("The HTML5 'click' event", "https://w3c.github.io/uievents/#event-type-click"),
+  });
+
   declareName("frameactive", {
     tags: ["Attribute", "Inspire", "Event"],
     type: "EventHandler",
@@ -42,12 +49,5 @@ function declareNames ({ declareName }) {
     type: "EventHandler",
     description:
 `A ValOS focus property has changed`,
-  });
-
-  declareName("click", {
-    tags: ["Attribute", "HTML5", "Event"],
-    type: "EventHandler",
-    description:
-ref("The HTML5 'click' event", "https://w3c.github.io/uievents/#event-type-click"),
   });
 }

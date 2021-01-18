@@ -1648,6 +1648,7 @@ export default class Kuery {
     return this.isActiveKuery() ? this._toVAKON() : null;
   }
   toJSON (): any { return this.toVAKON(); }
+  toSourceKey (): any { return this.toVAKON(); }
 
   toDumpify (options: ?any): string {
     return dumpify(this.toVAKON(), options);

@@ -139,14 +139,20 @@ export default class JSXDecoder extends MediaDecoder {
         function _recurseWithKeys (parentKey: string, parentChildrenMeta: Object) {
           try {
             return self._createKeyedElement(
-              sourceInfo, loc, type, props, restChildren, parentKey, parentChildrenMeta);
+                sourceInfo, loc, type, props, restChildren, parentKey, parentChildrenMeta);
           } catch (error) {
-            throw self.wrapErrorEvent(error, 0, () => [
-              new Error(`_createKeyedElement(${parentKey})`),
+            const origin = new Error(`_createKeyedElement(${parentKey})`);
+            const wrappedError = self.wrapErrorEvent(error, 0, () => [
+              origin,
               "\n\ttype:", ...dumpObject(type),
               "\n\tprops:", ...dumpObject(props),
               "\n\trestChildren:", ...dumpObject(restChildren),
             ]);
+            if (sourceInfo) {
+              addStackFrameToError(wrappedError,
+                  addSourceEntryInfo(sourceInfo, {}, { loc }), sourceInfo, origin, this);
+            }
+            throw wrappedError;
           }
         }
       },
@@ -165,19 +171,17 @@ export default class JSXDecoder extends MediaDecoder {
     }
     const sourceInfo: any = embeddedContent[SourceInfoTag];
     if (!sourceInfo) {
-      addSourceEntryInfo(outerSourceInfo, embeddedContent.toVAKON(), { loc: { ...loc } });
+      addSourceEntryInfo(outerSourceInfo, embeddedContent.toVAKON(),
+          { loc: { start: { ...loc.start }, end: { ...loc.end } } });
     } else {
       for (const [key, entry] of sourceInfo.sourceMap) {
-        const subLoc = { start: { ...entry.loc.start }, end: { ...entry.loc.end } };
-        if (subLoc.start.line === 1) {
-          subLoc.start.column += loc.start.column + this.constructor.columnOffset;
-        }
-        if (subLoc.end.line === 1) {
-          subLoc.end.column += loc.start.column + this.constructor.columnOffset;
-        }
-        subLoc.start.line += loc.start.line - 1;
-        subLoc.end.line += loc.start.line - 1;
-        addSourceEntryInfo(outerSourceInfo, key, { ...entry, loc: subLoc });
+        const start = { ...entry.loc.start };
+        const end = { ...entry.loc.end };
+        if (start.line === 1) start.column += loc.start.column + this.constructor.columnOffset;
+        if (end.line === 1) end.column += loc.start.column + this.constructor.columnOffset;
+        start.line += loc.start.line - 1;
+        end.line += loc.start.line - 1;
+        addSourceEntryInfo(outerSourceInfo, key, { ...entry, loc: { start, end } });
       }
     }
     embeddedContent[SourceInfoTag] = outerSourceInfo;
@@ -355,6 +359,30 @@ export default class JSXDecoder extends MediaDecoder {
     const flattenedNamespace = !isComponentLens ? "HTML" : "Lens";
 
     for (let [attrName, attr] of Object.entries(parsedProps)) {
+      try {
+        _processAttribute.call(this, attrName, attr);
+      } catch (error) {
+        const origin = new Error(`_processAttribute(${attrName})`);
+        const wrappedError = this.wrapErrorEvent(error, 0, () => [origin]);
+        if (sourceInfo && attr instanceof Kuery) {
+          const attrEntry = sourceInfo.sourceMap.get(attr.toVAKON());
+          const entryInfo = { loc: {
+            start: { ...attrEntry.loc.start },
+            end: { ...attrEntry.loc.start },
+          } };
+          // wishful whitespaceless heuristics
+          entryInfo.loc.start.column = Math.max(0,
+              entryInfo.loc.start.column - 1 - (attrName.length || 1));
+          entryInfo.loc.end.column -= 2;
+          addStackFrameToError(wrappedError,
+              addSourceEntryInfo(sourceInfo, {}, entryInfo),
+              sourceInfo, origin, this);
+        }
+        throw wrappedError;
+      }
+    }
+    function _processAttribute (attrName, attr) {
+      let actualAttrName = attrName;
       const migration = JSXDecoder._migrationDirectives[attrName];
       if (migration && (migration[0].startsWith("$Lens") || isComponentLens)) {
         let [aliasOf, shouldWarn, warning] = migration;
@@ -368,11 +396,11 @@ export default class JSXDecoder extends MediaDecoder {
               attrName}' would alias to ${aliasOf.slice(1)} which has an existing value "${
               parsedProps[aliasOf]}" (in ${elementName} at ${sourceKey})`);
         }
-        attrName = aliasOf;
+        actualAttrName = aliasOf;
       }
 
-      let [, namespace, name] = attrName.match(/^\$([^.]+)\.(.*)$/)
-          || [null, defaultNamespace, attrName];
+      let [, namespace, name] = actualAttrName.match(/^\$([^.]+)\.(.*)$/)
+          || [null, defaultNamespace, actualAttrName];
       let isLiveKuery = namespace.startsWith("live-") ? true
           : namespace.startsWith("static-") ? false
           : undefined;
@@ -380,7 +408,7 @@ export default class JSXDecoder extends MediaDecoder {
       else if (staticKueriesByDefault) isLiveKuery = false;
       if (namespace === "Frame") ret.hasFrame = true;
       else if (namespace === "Lens") {
-        if (name === "static") continue;
+        if (name === "static") return;
         if (_valoscopeAttributes[name]) ret.hasFrame = true;
       }
       ++ret.totalCount;

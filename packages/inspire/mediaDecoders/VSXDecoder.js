@@ -45,6 +45,7 @@ export default class VSXDecoder extends JSXDecoder {
           { customVALK: VALEK, sourceInfo, cache: this._transpilationCache });
       sourceInfo.phase = `inline VS run at ${loc.start.line}:${loc.start.column} in ${
           sourceInfo.phaseBase}`;
+      sourceInfo.sourceMap = new Map(sourceInfo.sourceMap); // prevent cache corruption
       return super._addKuerySourceInfo(kuery, sourceInfo, loc);
     } catch (error) {
       const origin = new Error(`_transpileEmbeddedValoscript(${sourceInfo.phaseBase})`);

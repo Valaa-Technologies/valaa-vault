@@ -33,9 +33,14 @@ export function addSourceEntryInfo (sourceInfo, entrySource, entryInfo) {
   return entrySource;
 }
 
-export function addStackFrameToError (error: Error, sourceObject: Object,
+export function addStackFrameToError (error: Error, sourceObjectOrWrapper: Object,
     sourceInfo: Object, origin: any = sourceInfo.phase, discourse: Object): Error {
-  if (!sourceInfo || (error == null) || (typeof error !== "object")) return error;
+  if (!sourceInfo || (error == null) || (typeof error !== "object")
+      || (sourceObjectOrWrapper == null)) {
+    return error;
+  }
+  const sourceObject = sourceObjectOrWrapper.toSourceKey ? sourceObjectOrWrapper.toSourceKey()
+      : sourceObjectOrWrapper;
   invariantifyString(sourceInfo.mediaName, "(!sourceInfo || sourceInfo.mediaName)");
   invariantifyString(sourceInfo.source, "(!sourceInfo || sourceInfo.source)");
   invariantifyObject(sourceInfo.sourceMap, "(!sourceInfo || sourceInfo.sourceMap)",
@@ -91,8 +96,9 @@ export function parseErrorMessagesFromStackTrace (stackTrace: VALKStackTrace) {
 
     if (!mapEntry) {
       latestError.messages = [
-        `indeterminate lines (no source mapping found) ${mediaInfoString} for source component`,
-        ...dumpObject(frame.sourceObject.toJSON ? frame.sourceObject.toJSON() : frame.sourceObject),
+        `indeterminate lines (no source mapping found) ${mediaInfoString} for source key:`,
+        ...dumpObject((frame.sourceObject || {}).toJSON ? frame.sourceObject.toJSON()
+            : frame.sourceObject),
         "\n\tsourceInfo:", ...dumpObject(frame.sourceInfo),
         "\n\tframe origin:", ...dumpObject(frame.origin),
         ...(!frame.discourse ? [] : ["\n\tframe discourse:", ...dumpObject(frame.discourse)]),

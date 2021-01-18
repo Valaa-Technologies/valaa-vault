@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0-alpha.5](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.4...v0.37.0-alpha.5) (2021-01-18)
+
+
+### Bug Fixes
+
+* Documentation require issues, missing index links ([9ed7831](https://github.com/valaatech/kernel/commit/9ed7831498b42b73bac9c0ec052490cb10e4f5ba))
+* Extraneous vplot outline suffix VPlot serialization as a hack ([07b91bd](https://github.com/valaatech/kernel/commit/07b91bdd0319856ca3e2c67656dfe8e10dec4089))
+
+
+
+
+
 # [0.37.0-alpha.4](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.3...v0.37.0-alpha.4) (2021-01-09)
 
 **Note:** Version bump only for package @valos/plot

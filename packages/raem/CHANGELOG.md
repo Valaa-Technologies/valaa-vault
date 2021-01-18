@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0-alpha.5](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.4...v0.37.0-alpha.5) (2021-01-18)
+
+
+### Bug Fixes
+
+* ProphecyOperation swallows unrecoverable errors ([8815fbc](https://github.com/valaatech/kernel/commit/8815fbc2e917ea56d10c28e852ba25091749b7c6))
+
+
+### Features
+
+* **inspire:** Add stack trace visualizations to VSX attribute errors ([1d453dc](https://github.com/valaatech/kernel/commit/1d453dc1514797dc7b753619a02912f1b1a3e498))
+* Add @valos/security library for containing valos security primitives ([338d31d](https://github.com/valaatech/kernel/commit/338d31d4147034233b3dec61c93ee12e583295d7))
+* Add INVALIDATED, SEALED event types as reaction to invalid truths ([3826594](https://github.com/valaatech/kernel/commit/38265943315e7f48d879e2e4f2257135dfa17c81))
+* Implement 'fixed' resource fields (was known as 'structural') ([948d274](https://github.com/valaatech/kernel/commit/948d27411371025950e10d19f67cf1eb07b1d5e6))
+* Seals on a subversive privilege bypass event ([e3008f1](https://github.com/valaatech/kernel/commit/e3008f106ad4e9317ee6c9f1de422a5ef433430a))
+* Seals on an impersonating director resource modification ([be34c0d](https://github.com/valaatech/kernel/commit/be34c0d4abcb220896fd3018baaecc75329d5800))
+
+
+
+
+
 # [0.37.0-alpha.4](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.3...v0.37.0-alpha.4) (2021-01-09)
 
 **Note:** Version bump only for package @valos/raem

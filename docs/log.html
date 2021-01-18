@@ -195,7 +195,7 @@ typically provisionally provided by the gateway.</span>
         The class of all valosheath type prototype properties.
     </span>
 </span></a></span>
-</td><td colspan=1> <a href="#index" class="vdoc type-vdoc-reference">VLog:index</a> <a href="#chainHash" class="vdoc type-vdoc-reference">VLog:chainHash</a></td></tr>
+</td><td colspan=1> <a href="#index" class="vdoc type-vdoc-reference">VLog:index</a> <a href="#vplotHashV0" class="vdoc type-vdoc-reference">VLog:vplotHashV0</a></td></tr>
         <tr id="AuthorAspect" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#AuthorAspect" class="vdoc type-vdoc-reference">#AuthorAspect</a></em></strong> </h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/log/0#EventAspect" class="vdoc type-vdoc-reference">VLog:EventAspect</a></td><td><span class="vdoc type-vdoc-node">The class of resources which contain the authoring attributes and the
 command signature of a single chronicle event.</span>
@@ -259,11 +259,11 @@ ontologies.
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
 </td><td colspan=1><span class="vdoc type-vdoc-node">The 0-based index of the event in the event log.</span>
 </td></tr>
-        <tr id="chainHash" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#chainHash" class="vdoc type-vdoc-reference">#chainHash</a></em></strong> </h3></td></tr>
+        <tr id="vplotHashV0" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#vplotHashV0" class="vdoc type-vdoc-reference">#vplotHashV0</a></em></strong> </h3></td></tr>
         <tr><td><a href="https://valospace.org/log/0#LogAspect" class="vdoc type-vdoc-reference">VLog:LogAspect</a></td><td><a href="http://www.w3.org/2001/XMLSchema#string" class="vdoc type-vdoc-reference">xsd:string</a></td></tr>
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
 </td><td colspan=1><span class="vdoc type-vdoc-node">The base64url-encoded SHA-512/384 hash of the combination of the
-preceding event chainHash with the current event signature or delta.
+preceding event vplotHashV0 with the current event signature or delta.
 The exact format of the combination is pending. The event contents is
 defined to be the VLog:signature if the event is signed, otherwise it
 is the vplot serialization of the VLog:DeltaAspect of the event.</span>

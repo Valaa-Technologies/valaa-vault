@@ -67,7 +67,7 @@
     ],
     "dc:title": "@valos/plot library workspace",
     "VRevdoc:package": "@valos/plot",
-    "VRevdoc:version": "0.37.0-alpha.4",
+    "VRevdoc:version": "0.37.0-alpha.5",
     "VRevdoc:preferredPrefix": "VPlot",
     "VRevdoc:baseIRI": "https://valospace.org/plot/0#",
     "VRevdoc:referencedModules": {
@@ -746,7 +746,7 @@
       "dc:title": "Container selector example",
       "@type": "VRevdoc:Example",
       "VDoc:content": [
-        "Triple pattern `?s <urn:valos:+$.Scripts> ?o` matches like:\n",
+        "Triple pattern `?s <urn:valos:*$.Scripts> ?o` matches like:\n",
         {
           "@type": "VRevdoc:Turtle",
           "VDoc:content": [
@@ -1679,7 +1679,7 @@
     },
     "section_fixed_relation": {
       "@id": "section_fixed_relation",
-      "dc:title": "verb type \"`*`\": fixed Relation",
+      "dc:title": "verb type \"`-`\": fixed Relation",
       "@type": "VDoc:Chapter",
       "VDoc:content": [
         {
@@ -1710,7 +1710,7 @@
     },
     "section_fixed_entity": {
       "@id": "section_fixed_entity",
-      "dc:title": "verb type \"`+`\": fixed Entity",
+      "dc:title": "verb type \"`*`\": fixed Entity",
       "@type": "VDoc:Chapter",
       "VDoc:content": [
         {
@@ -1729,11 +1729,11 @@
       "dc:title": "Fixed Entity triple inference",
       "@type": "VRevdoc:Example",
       "VDoc:content": [
-        "`<urn:valos:$~u4.f00b@+$.Scripts>` has a fixed name \"scripts\",\ndominant type Entity, $~u4 resource f00b as the owning container and\na structurally homologous prototype inside f00b-b507-0763 and thus\ninfers triples:\n",
+        "`<urn:valos:$~u4.f00b@*$.Scripts>` has a fixed name \"scripts\",\ndominant type Entity, $~u4 resource f00b as the owning container and\na structurally homologous prototype inside f00b-b507-0763 and thus\ninfers triples:\n",
         {
           "@type": "VRevdoc:Turtle",
           "VDoc:content": [
-            "\n  <urn:valos:$~u4.f00b@+$.Scripts> a V:Entity\n      ; V:parent <urn:valos:$~u4.f00b>\n      ; V:inheritancePrototype <urn:valos:$~u4.f00b-b507-0763@+$.Scripts>\n      ; V:name \"scripts\"\n"
+            "\n  <urn:valos:$~u4.f00b@*$.Scripts> a V:Entity\n      ; V:parent <urn:valos:$~u4.f00b>\n      ; V:inheritancePrototype <urn:valos:$~u4.f00b-b507-0763@*$.Scripts>\n      ; V:name \"scripts\"\n"
           ],
           "VDoc:language": "https://www.w3.org/TR/turtle/"
         }

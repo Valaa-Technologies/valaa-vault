@@ -67,7 +67,7 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/inspire",
-    "VRevdoc:version": "0.37.0-alpha.4",
+    "VRevdoc:version": "0.37.0-alpha.5",
     "VRevdoc:preferredPrefix": "Lens",
     "VRevdoc:baseIRI": "https://valospace.org/inspire/Lens/0#",
     "VRevdoc:referencedModules": {
@@ -924,6 +924,12 @@
             ]
           },
           {
+            "@id": "#nativeComponent",
+            "VRevdoc:indexLabel": [
+              "On:nativeComponent"
+            ]
+          },
+          {
             "@id": "#toggleableErrorDetailLens",
             "VRevdoc:indexLabel": [
               "On:toggleableErrorDetailLens"
@@ -1414,7 +1420,7 @@
         ],
         "rdfs:domain": "Lens:Element",
         "rdfs:range": "rdfs:Resource",
-        "rdfs:comment": "Attribute slot for assigning values into the context object of the component.",
+        "rdfs:comment": "Attribute slot for merging values into the context object of the component.",
         "VRevdoc:introduction": []
       },
       "loadingLens": {
@@ -2149,21 +2155,65 @@
         "rdfs:range": "xsd:string",
         "rdfs:comment": "Lens that displays the lens slot assembly that is used by the component."
       },
-      "parentComponentLens": {
+      "nativeComponent": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Internal",
+          "Context"
+        ],
+        "rdfs:label": [
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              [
+                "[$`On:nativeComponent`]: ",
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "lens"
+                  ]
+                },
+                ","
+              ]
+            ],
+            "VRevdoc:tooltipContent": [
+              "When set as an ",
+              "element",
+              " ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:context"
+                ],
+                "VDoc:ref": "Lens:context"
+              },
+              " attribute property"
+            ]
+          }
+        ],
+        "VRevdoc:indexLabel": [
+          "On:nativeComponent"
+        ],
+        "rdfs:domain": "Lens:UIContext",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "Context slot which contains the current native component",
+        "VRevdoc:introduction": []
+      },
+      "nativeComponentLens": {
         "@type": "VEngine:Property",
         "tags": [
           "Lens"
         ],
         "value": "\"<function value()>\"",
         "rdfs:label": [
-          "Lens:parentComponentLens"
+          "Lens:nativeComponentLens"
         ],
         "rdfs:domain": "rdfs:Resource",
         "rdfs:range": "rdfs:Resource",
         "rdfs:comment": "Lens that displays the current parent component.",
         "VRevdoc:introduction": [
           null,
-          "As the component itself\nis not renderable this slot must be used in an instrument before some\nother slot (such as 'focusDetailLens')."
+          "As the component itself is not renderable this slot must be used in an\ninstrument before some other slot (such as 'focusDetailLens')."
         ]
       },
       "focusDescriptionLens": {
@@ -6945,7 +6995,8 @@
             "componentChildrenLens",
             "static",
             "slotAssembly",
-            "parentComponentLens",
+            "nativeComponent",
+            "nativeComponentLens",
             "focusDescriptionLens",
             "focusDetailLens",
             "focusDumpLens",

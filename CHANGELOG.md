@@ -3,6 +3,44 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0-alpha.5](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.4...v0.37.0-alpha.5) (2021-01-18)
+
+
+### Bug Fixes
+
+* Documentation require issues, missing index links ([9ed7831](https://github.com/valaatech/kernel/commit/9ed7831498b42b73bac9c0ec052490cb10e4f5ba))
+* Extraneous vplot outline suffix VPlot serialization as a hack ([07b91bd](https://github.com/valaatech/kernel/commit/07b91bdd0319856ca3e2c67656dfe8e10dec4089))
+* ProphecyOperation swallows unrecoverable errors ([8815fbc](https://github.com/valaatech/kernel/commit/8815fbc2e917ea56d10c28e852ba25091749b7c6))
+* Universalization 'undefined' leak, missing INVALIDATED command.id ([5c0f220](https://github.com/valaatech/kernel/commit/5c0f2205fb2c5b9b1cb3cb7c3882279ee7768c22))
+* Various minor bugs ([c47ec68](https://github.com/valaatech/kernel/commit/c47ec6882f5d9dffcce3922896d904b644a097a5))
+* **inspire:** Trivial On:click handlers do not translate as onClick ([61803ef](https://github.com/valaatech/kernel/commit/61803ef346ee53f6a422920d455e9bfb5f11a647))
+
+
+### Features
+
+* **inspire:** Add stack trace visualizations to VSX attribute errors ([1d453dc](https://github.com/valaatech/kernel/commit/1d453dc1514797dc7b753619a02912f1b1a3e498))
+* **inspire:** Set lens "this" to be originating Media ([cbcd415](https://github.com/valaatech/kernel/commit/cbcd4156b90554aa6f581e05ac53b7d59e579dbc))
+* Add @valos/chronicle library and the 'VChronicle' namespace ([549d400](https://github.com/valaatech/kernel/commit/549d400ea3c561b6421abac2cb60e55864c7a9fd))
+* Add @valos/security library for containing valos security primitives ([338d31d](https://github.com/valaatech/kernel/commit/338d31d4147034233b3dec61c93ee12e583295d7))
+* Add AuthorAspect and use tweetnacl for signing events ([6022c18](https://github.com/valaatech/kernel/commit/6022c18531286ed2511c3bb5b8aab88ec00ed747))
+* Add INVALIDATED, SEALED event types as reaction to invalid truths ([3826594](https://github.com/valaatech/kernel/commit/38265943315e7f48d879e2e4f2257135dfa17c81))
+* Add preliminary 1 happy and 7 sad chronicle behaviors tests ([7e8f7e1](https://github.com/valaatech/kernel/commit/7e8f7e1e6a053e79fe2cf83ab43d462d23030d45))
+* Disable author aspect and validation for non-remote authorities ([3f1eaf3](https://github.com/valaatech/kernel/commit/3f1eaf37b17f1f1afbef428e4b82cb944594df31))
+* Enable vplotHashV0 only when VChronicle:requireAuthoredEvents is set ([2d0d3a7](https://github.com/valaatech/kernel/commit/2d0d3a7b993e2f014eb0b8410cb4e74c922c5115))
+* Implement 'fixed' resource fields (was known as 'structural') ([948d274](https://github.com/valaatech/kernel/commit/948d27411371025950e10d19f67cf1eb07b1d5e6))
+* Refuse to profess non-authorable outgoing events ([89367fc](https://github.com/valaatech/kernel/commit/89367fcc44b2a23b286f120c645226303df0a188))
+* Seals a chronicle on an obnoxiously authorized yet non-authored event ([07d7807](https://github.com/valaatech/kernel/commit/07d7807da9b6476dbc24049efcde5abc7115a3c3))
+* Seals on a subversive privilege bypass event ([e3008f1](https://github.com/valaatech/kernel/commit/e3008f106ad4e9317ee6c9f1de422a5ef433430a))
+* Seals on an anachronistic crypto chain breaking event ([45c4c8c](https://github.com/valaatech/kernel/commit/45c4c8cbd2bb9deda9fc1232643880e51a070601))
+* Seals on an impersonating director resource modification ([be34c0d](https://github.com/valaatech/kernel/commit/be34c0d4abcb220896fd3018baaecc75329d5800))
+* Seals on deceptively authorized but incorrectly signed event ([28c5627](https://github.com/valaatech/kernel/commit/28c5627006758419cbb57ce98d664454c7b588cb))
+* Sourcerer.resolveReference ([4f8c6b3](https://github.com/valaatech/kernel/commit/4f8c6b3d4644777547eb8532b10aeb9042597b18))
+* valos.identity.createAuthorKeys ([79d48e3](https://github.com/valaatech/kernel/commit/79d48e39e55be52f050c1b1e4c7d8a22d267c18b))
+
+
+
+
+
 # [0.37.0-alpha.4](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.3...v0.37.0-alpha.4) (2021-01-09)
 
 

@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0-alpha.5](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.4...v0.37.0-alpha.5) (2021-01-18)
+
+
+### Features
+
+* Add AuthorAspect and use tweetnacl for signing events ([6022c18](https://github.com/valaatech/kernel/commit/6022c18531286ed2511c3bb5b8aab88ec00ed747))
+* Enable vplotHashV0 only when VChronicle:requireAuthoredEvents is set ([2d0d3a7](https://github.com/valaatech/kernel/commit/2d0d3a7b993e2f014eb0b8410cb4e74c922c5115))
+
+
+
+
+
 # [0.37.0-alpha.4](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.3...v0.37.0-alpha.4) (2021-01-09)
 
 **Note:** Version bump only for package @valos/log

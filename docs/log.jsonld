@@ -91,7 +91,7 @@
     ],
     "dc:title": "@valos/log library workspace",
     "VRevdoc:package": "@valos/log",
-    "VRevdoc:version": "0.37.0-alpha.4",
+    "VRevdoc:version": "0.37.0-alpha.5",
     "VRevdoc:preferredPrefix": "VLog",
     "VRevdoc:baseIRI": "https://valospace.org/log/0#",
     "VRevdoc:referencedModules": {
@@ -462,8 +462,8 @@
             "VRevdoc:indexLabel": "VLog:index"
           },
           {
-            "@id": "#chainHash",
-            "VRevdoc:indexLabel": "VLog:chainHash"
+            "@id": "#vplotHashV0",
+            "VRevdoc:indexLabel": "VLog:vplotHashV0"
           }
         ]
       },
@@ -487,7 +487,7 @@
         },
         "rdfs:comment": "The 0-based index of the event in the event log."
       },
-      "chainHash": {
+      "vplotHashV0": {
         "@type": "VKernel:Property",
         "rdfs:domain": "VLog:LogAspect",
         "rdfs:range": "xsd:string",
@@ -495,7 +495,7 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "rdfs:comment": "The base64url-encoded SHA-512/384 hash of the combination of the\npreceding event chainHash with the current event signature or delta.\nThe exact format of the combination is pending. The event contents is\ndefined to be the VLog:signature if the event is signed, otherwise it\nis the vplot serialization of the VLog:DeltaAspect of the event."
+        "rdfs:comment": "The base64url-encoded SHA-512/384 hash of the combination of the\npreceding event vplotHashV0 with the current event signature or delta.\nThe exact format of the combination is pending. The event contents is\ndefined to be the VLog:signature if the event is signed, otherwise it\nis the vplot serialization of the VLog:DeltaAspect of the event."
       },
       "AuthorAspect": {
         "@type": "VKernel:Class",
@@ -1102,7 +1102,7 @@
             "command",
             "log",
             "index",
-            "chainHash",
+            "vplotHashV0",
             "author",
             "antecedent",
             "publicIdentity",

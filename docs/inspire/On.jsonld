@@ -66,7 +66,7 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/inspire",
-    "VRevdoc:version": "0.37.0-alpha.4",
+    "VRevdoc:version": "0.37.0-alpha.5",
     "VRevdoc:preferredPrefix": "On",
     "VRevdoc:baseIRI": "https://valospace.org/inspire/On/0#",
     "VRevdoc:referencedModules": {
@@ -1497,6 +1497,45 @@
           "If the handler cancels the defaultAction or throws an exception the\nreformed frame is rejected. The rejection semantics are equivalent to\nthose of an exception thrown by a handler of the preceding 'reform'\nevent."
         ]
       },
+      "click": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Attribute",
+          "HTML5",
+          "Event"
+        ],
+        "rdfs:label": [
+          {
+            "@type": "VRevdoc:Tooltip",
+            "VDoc:content": [
+              "On:click"
+            ],
+            "VRevdoc:tooltipContent": [
+              "When used as ",
+              {
+                "@type": "VDoc:Reference",
+                "VDoc:content": [
+                  "Lens:Element"
+                ],
+                "VDoc:ref": "Lens:Element"
+              },
+              " attribute"
+            ]
+          }
+        ],
+        "VRevdoc:indexLabel": [
+          "On:click"
+        ],
+        "rdfs:domain": "Lens:Element",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": {
+          "@type": "VDoc:Reference",
+          "VDoc:content": [
+            "The HTML5 'click' event"
+          ],
+          "VDoc:ref": "https://w3c.github.io/uievents/#event-type-click"
+        }
+      },
       "frameactive": {
         "@type": "VEngine:Property",
         "tags": [
@@ -1595,45 +1634,6 @@
         "rdfs:domain": "Lens:Element",
         "rdfs:range": "rdfs:Resource",
         "rdfs:comment": "A ValOS focus property has changed"
-      },
-      "click": {
-        "@type": "VEngine:Property",
-        "tags": [
-          "Attribute",
-          "HTML5",
-          "Event"
-        ],
-        "rdfs:label": [
-          {
-            "@type": "VRevdoc:Tooltip",
-            "VDoc:content": [
-              "On:click"
-            ],
-            "VRevdoc:tooltipContent": [
-              "When used as ",
-              {
-                "@type": "VDoc:Reference",
-                "VDoc:content": [
-                  "Lens:Element"
-                ],
-                "VDoc:ref": "Lens:Element"
-              },
-              " attribute"
-            ]
-          }
-        ],
-        "VRevdoc:indexLabel": [
-          "On:click"
-        ],
-        "rdfs:domain": "Lens:Element",
-        "rdfs:range": "rdfs:Resource",
-        "rdfs:comment": {
-          "@type": "VDoc:Reference",
-          "VDoc:content": [
-            "The HTML5 'click' event"
-          ],
-          "VDoc:ref": "https://w3c.github.io/uievents/#event-type-click"
-        }
       }
     },
     "context": {
@@ -2217,10 +2217,10 @@
             "precondition",
             "postcondition",
             "review",
+            "click",
             "frameactive",
             "framepropertychange",
-            "focuspropertychange",
-            "click"
+            "focuspropertychange"
           ]
         }
       ]

@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0-alpha.5](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.4...v0.37.0-alpha.5) (2021-01-18)
+
+
+### Bug Fixes
+
+* ProphecyOperation swallows unrecoverable errors ([8815fbc](https://github.com/valaatech/kernel/commit/8815fbc2e917ea56d10c28e852ba25091749b7c6))
+* Various minor bugs ([c47ec68](https://github.com/valaatech/kernel/commit/c47ec6882f5d9dffcce3922896d904b644a097a5))
+* **inspire:** Trivial On:click handlers do not translate as onClick ([61803ef](https://github.com/valaatech/kernel/commit/61803ef346ee53f6a422920d455e9bfb5f11a647))
+
+
+### Features
+
+* **inspire:** Add stack trace visualizations to VSX attribute errors ([1d453dc](https://github.com/valaatech/kernel/commit/1d453dc1514797dc7b753619a02912f1b1a3e498))
+* **inspire:** Set lens "this" to be originating Media ([cbcd415](https://github.com/valaatech/kernel/commit/cbcd4156b90554aa6f581e05ac53b7d59e579dbc))
+
+
+
+
+
 # [0.37.0-alpha.4](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.3...v0.37.0-alpha.4) (2021-01-09)
 
 

@@ -492,7 +492,7 @@ name and which has the head as their container.
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_verb_container" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_verb_container">§ </a>Container selector example</h3>
-Triple pattern &#x60;?s &#x3C;urn:valos:+$.Scripts&#x3E; ?o&#x60; matches like:
+Triple pattern &#x60;?s &#x3C;urn:valos:*$.Scripts&#x3E; ?o&#x60; matches like:
 <pre><code><span class="vdoc type-vdoc-node">
   ?o    V:parent ?s
       ; V:name &#x22;Scripts&#x22;
@@ -1144,7 +1144,7 @@ rdf:object property is V:target&#x27;</span>
   </section>
 
   <section id="section_fixed_relation" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_fixed_relation">§ </a>verb type &#x22;&#x60;*&#x60;&#x22;: fixed Relation</h3>
+    <h3><a aria-label="§" href="#section_fixed_relation">§ </a>verb type &#x22;&#x60;-&#x60;&#x22;: fixed Relation</h3>
 <div><p>
   <div class="vdoc type-vdoc-paragraph">
 Fixed relations infer a type, fixed owner (connector), name and
@@ -1173,7 +1173,7 @@ and thus infers triples:
   </section>
 
   <section id="section_fixed_entity" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_fixed_entity">§ </a>verb type &#x22;&#x60;+&#x60;&#x22;: fixed Entity</h3>
+    <h3><a aria-label="§" href="#section_fixed_entity">§ </a>verb type &#x22;&#x60;*&#x60;&#x22;: fixed Entity</h3>
 <div><p>
   <div class="vdoc type-vdoc-paragraph">
 Fixed entities infer a type, fixed owner (parent) and name.
@@ -1182,14 +1182,14 @@ Fixed entities infer a type, fixed owner (parent) and name.
 <blockquote class="vdoc type-revdoc-example">
     <span id="example_fixed_entity" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_fixed_entity">§ </a>Fixed Entity triple inference</h3>
-&#x60;&#x3C;urn:valos:$~u4.f00b@+$.Scripts&#x3E;&#x60; has a fixed name &#x22;scripts&#x22;,
+&#x60;&#x3C;urn:valos:$~u4.f00b@*$.Scripts&#x3E;&#x60; has a fixed name &#x22;scripts&#x22;,
 dominant type Entity, $~u4 resource f00b as the owning container and
 a structurally homologous prototype inside f00b-b507-0763 and thus
 infers triples:
 <pre><code><span class="vdoc type-vdoc-node">
-  &#x3C;urn:valos:$~u4.f00b@+$.Scripts&#x3E; a V:Entity
+  &#x3C;urn:valos:$~u4.f00b@*$.Scripts&#x3E; a V:Entity
       ; V:parent &#x3C;urn:valos:$~u4.f00b&#x3E;
-      ; V:inheritancePrototype &#x3C;urn:valos:$~u4.f00b-b507-0763@+$.Scripts&#x3E;
+      ; V:inheritancePrototype &#x3C;urn:valos:$~u4.f00b-b507-0763@*$.Scripts&#x3E;
       ; V:name &#x22;scripts&#x22;
 </span>
 </code></pre></span>

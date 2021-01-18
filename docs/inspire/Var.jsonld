@@ -1,8 +1,8 @@
 [
   {
-    "@id": "https://valospace.org/engine/0",
+    "@id": "https://valospace.org/inspire/Var",
     "@context": {
-      "@base": "https://valospace.org/engine/0#",
+      "@base": "https://valospace.org/inspire/Var/0#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
       "xsd": "http://www.w3.org/2001/XMLSchema#",
@@ -53,53 +53,33 @@
         "@type": "@id"
       },
       "VEngine": "https://valospace.org/engine/0#",
-      "VValk": "https://valospace.org/valk/0#",
-      "VState": "https://valospace.org/state/0#",
+      "Var": "https://valospace.org/inspire/Var/0#",
       "V": "https://valospace.org/0#",
-      "VEngine:domainOfField": {
-        "@id": "#domainOfField",
-        "@type": "@id"
-      },
-      "VEngine:domainOfProperty": {
-        "@id": "#domainOfProperty",
-        "@type": "@id"
-      },
-      "VEngine:domainOfMethod": {
-        "@id": "#domainOfMethod",
-        "@type": "@id"
-      },
-      "VEngine:hasProperty": {
-        "@id": "#hasProperty",
-        "@type": "@id"
-      },
-      "VEngine:hasMethod": {
-        "@id": "#hasMethod",
-        "@type": "@id"
-      }
+      "On": "https://valospace.org/inspire/On/0#",
+      "Lens": "https://valospace.org/inspire/Lens/0#"
     },
-    "dc:title": "@valos/engine library workspace",
+    "dc:title": "The valosheath 'Var' namespace reference",
     "VDoc:tags": [
-      "FABRIC",
-      "WORKSPACE",
+      "VALOSHEATH",
       "ONTOLOGY"
     ],
-    "VRevdoc:package": "@valos/engine",
+    "VRevdoc:package": "@valos/inspire",
     "VRevdoc:version": "0.37.0-alpha.5",
-    "VRevdoc:preferredPrefix": "VEngine",
-    "VRevdoc:baseIRI": "https://valospace.org/engine/0#",
+    "VRevdoc:preferredPrefix": "Var",
+    "VRevdoc:baseIRI": "https://valospace.org/inspire/Var/0#",
     "VRevdoc:referencedModules": {
       "https://valospace.org/engine/0#": "@valos/engine/VEngine",
       "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
-      "https://valospace.org/valk/0#": "@valos/valk/VValk",
-      "https://valospace.org/state/0#": "@valos/state/VState",
-      "https://valospace.org/0#": "@valos/space/V"
+      "https://valospace.org/0#": "@valos/space/V",
+      "https://valospace.org/inspire/On/0#": "@valos/sourcerer/On",
+      "https://valospace.org/inspire/Lens/0#": "@valos/inspire/Lens"
     },
     "VRevdoc:extenderModules": {
-      "https://valospace.org/0#": "@valos/engine/V"
+      "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
     },
     "respecConfig": {
       "specStatus": "unofficial",
-      "shortName": "engine",
+      "shortName": "varNamespace",
       "editors": [
         {
           "name": "Iridian Kiiskinen",
@@ -122,7 +102,7 @@
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "ValOS Engine API and Schema"
+            "This document is a revdoc template document 'varNamespace' created by\nwrite-revdoc."
           ]
         }
       ]
@@ -141,11 +121,11 @@
                 {
                   "VDoc:em": true,
                   "VDoc:content": [
-                    "@valos/engine"
+                    "@valos/inspire"
                   ]
                 }
               ],
-              "VDoc:ref": "@valos/engine"
+              "VDoc:ref": "@valos/inspire"
             },
             "\n(of domain ",
             {
@@ -160,7 +140,7 @@
               ],
               "VDoc:ref": "@valos/kernel"
             },
-            ") which has the description:\n`ValOS Engine API and Schema`."
+            ") which has the description:\n`ValOS Inspire application gateway`."
           ]
         }
       ]
@@ -220,34 +200,34 @@
         }
       ]
     },
-    "section_fabric": {
-      "@id": "section_fabric",
+    "section_valosheath": {
+      "@id": "section_valosheath",
       "@type": "VDoc:Chapter",
       "dc:title": [
         "The ",
         {
           "VDoc:em": true,
           "VDoc:content": [
-            "VEngine"
+            "Var"
           ]
         },
-        " fabric namespace of the library ontology of ",
+        " valosheath namespace of the library ontology of ",
         {
           "@type": "VRevdoc:Package",
           "VDoc:content": [
             {
               "VDoc:em": true,
               "VDoc:content": [
-                "@valos/engine"
+                "@valos/inspire"
               ]
             }
           ],
-          "VDoc:ref": "@valos/engine"
+          "VDoc:ref": "@valos/inspire"
         }
       ],
       "VDoc:content": [
         {
-          "@id": "section_fabric_abstract"
+          "@id": "section_valosheath_abstract"
         },
         {
           "@id": "section_prefixes"
@@ -260,9 +240,6 @@
         },
         {
           "@id": "section_methods"
-        },
-        {
-          "@id": "section_resolvers"
         },
         {
           "@id": "section_globals"
@@ -279,122 +256,113 @@
       "xsd": "http://www.w3.org/2001/XMLSchema#",
       "owl": "http://www.w3.org/2002/07/owl#",
       "dc": "http://purl.org/dc/elements/1.1/",
-      "VEngine": "https://valospace.org/engine/0#",
+      "Var": "https://valospace.org/inspire/Var/0#",
       "VKernel": "https://valospace.org/kernel/0#",
-      "VValk": "https://valospace.org/valk/0#",
-      "VState": "https://valospace.org/state/0#"
+      "V": "https://valospace.org/0#",
+      "On": "https://valospace.org/inspire/On/0#",
+      "VEngine": "https://valospace.org/engine/0#",
+      "Lens": "https://valospace.org/inspire/Lens/0#"
     },
     "vocabulary": {
       "@id": "vocabulary",
-      "valosheath": {
-        "@type": "VKernel:API",
-        "VRevdoc:brief": "valos fabric API",
-        "rdfs:comment": [
-          "The API for accessing valos fabric from valospace.",
-          "Contains the vocabulary with which valoscript code can access\nnon-valospace resources, notably including the services of the current\nexecution environment."
+      "this": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Inspire",
+          "VSX",
+          "Lexical"
+        ],
+        "rdfs:domain": "rdfs:Resource",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "The originating Media resource of this lens.",
+        "VRevdoc:introduction": [
+          null,
+          "Cannot be defined or assigned. Automatically defined during VSX media\nintegration.\n\nWhen 'this' is used inside an unbound non-arrow function or inside an\narrow function that is defined within the lens itself, Inspire UI will\nprovide the Media as the value of 'this'. Here the value is thus\nequivalent to the value outside the function body.\n\nHowever as per javascript semantics, when 'this' appears inside a bound\nnon-arrow function or inside an arrow function has been defined\nelsewhere, the value of 'this' is defined by the originating binding\ncontext.\n"
         ]
       },
-      "Class": {
-        "@type": "VKernel:Class",
-        "rdfs:subClassOf": "VKernel:Class",
-        "VRevdoc:brief": "valosheath type prototype property",
-        "rdfs:comment": "The class of all valosheath type prototype properties."
+      "focus": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Inspire",
+          "VSX",
+          "Lexical"
+        ],
+        "rdfs:domain": "rdfs:Resource",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "The current focus of this lens.",
+        "VRevdoc:introduction": [
+          null,
+          "Cannot be defined or assigned; instead see the ",
+          {
+            "@type": "VDoc:Reference",
+            "VDoc:content": [
+              "Lens:focus"
+            ],
+            "VDoc:ref": "Lens:focus"
+          },
+          " component attribute for how to specify the focus for component\nsub-elements."
+        ]
       },
-      "Property": {
-        "@type": "VKernel:Class",
-        "rdfs:subClassOf": "VKernel:Property",
-        "VRevdoc:brief": "valosheath type prototype property",
-        "rdfs:comment": "The class of all valosheath type prototype properties."
+      "frame": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Inspire",
+          "VSX",
+          "Lexical"
+        ],
+        "rdfs:domain": "rdfs:Resource",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "The frame resource of the innermost surrounding Valoscope component.",
+        "VRevdoc:introduction": [
+          null,
+          "Cannot be defined or assigned; instead see the ",
+          {
+            "@type": "VDoc:Reference",
+            "VDoc:content": [
+              "Lens:frame"
+            ],
+            "VDoc:ref": "Lens:frame"
+          },
+          " component attribute for how frame resource is constructed and how to\nspecify the frame resource identity."
+        ]
       },
-      "Method": {
-        "@type": "VKernel:Class",
-        "rdfs:subClassOf": "VKernel:Property",
-        "VRevdoc:brief": "valosheath type prototype method",
-        "rdfs:comment": "The class of all valosheath type prototype methods."
-      },
-      "Global": {
-        "@type": "VKernel:Class",
-        "rdfs:subClassOf": "rdfs:Resource",
-        "VRevdoc:brief": "valosheath global resource",
-        "rdfs:comment": "The class of all valosheath global resources."
-      },
-      "ObjectProperty": {
-        "@type": "VKernel:Class",
-        "rdfs:subClassOf": "rdf:Property",
-        "VRevdoc:brief": "valosheath object property",
-        "rdfs:comment": "The class of all valosheath object properties."
-      },
-      "ObjectMethod": {
-        "@type": "VKernel:Class",
-        "rdfs:subClassOf": "rdf:Property",
-        "VRevdoc:brief": "valosheath object method",
-        "rdfs:comment": "The class of all valosheath object methods."
-      },
-      "domainOfField": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "VState:Type",
-        "rdfs:range": "VState:Field",
-        "rdfs:comment": "The VState:Field individuals which have this VState:Type as their rdfs:domain."
-      },
-      "domainOfProperty": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "rdfs:Class",
-        "rdfs:range": "VKernel:Property",
-        "rdfs:comment": "The VKernel:Property individuals which have this rdfs:Class as their rdfs:domain."
-      },
-      "domainOfMethod": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "rdfs:Class",
-        "rdfs:range": "VEngine:Method",
-        "rdfs:comment": "The VEngine:Method individuals which have this rdfs:Class as their rdfs:domain."
-      },
-      "hasProperty": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "rdfs:Class",
-        "rdfs:range": "VEngine:ObjectProperty",
-        "rdfs:comment": "The VEngine:ObjectProperty individuals which have this rdfs:Class as their rdfs:domain."
-      },
-      "hasMethod": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "rdfs:Class",
-        "rdfs:range": "VEngine:ObjectMethod",
-        "rdfs:comment": "The VEngine:ObjectMethod individuals which have this rdfs:Class as their rdfs:domain."
+      "context": {
+        "@type": "VEngine:Property",
+        "tags": [
+          "Inspire",
+          "VSX",
+          "Lexical"
+        ],
+        "rdfs:domain": "rdfs:Resource",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "The context object of the innermost surrounding component.",
+        "VRevdoc:introduction": [
+          null,
+          "Cannot be defined assigned; instead see the ",
+          {
+            "@type": "VDoc:Reference",
+            "VDoc:content": [
+              "Lens:context"
+            ],
+            "VDoc:ref": "Lens:context"
+          },
+          " component attribute for how to merge new context properties for the\nsub-elements of this component."
+        ]
       }
     },
     "context": {
       "@id": "context",
-      "restriction": {
-        "@reverse": "owl:onProperty"
-      },
-      "@base": "https://valospace.org/engine/0#",
-      "VEngine:domainOfField": {
-        "@id": "#domainOfField",
-        "@type": "@id"
-      },
-      "VEngine:domainOfProperty": {
-        "@id": "#domainOfProperty",
-        "@type": "@id"
-      },
-      "VEngine:domainOfMethod": {
-        "@id": "#domainOfMethod",
-        "@type": "@id"
-      },
-      "VEngine:hasProperty": {
-        "@id": "#hasProperty",
-        "@type": "@id"
-      },
-      "VEngine:hasMethod": {
-        "@id": "#hasMethod",
-        "@type": "@id"
-      }
+      "@base": "https://valospace.org/inspire/Var/0#"
     },
-    "section_fabric_abstract": {
-      "@id": "section_fabric_abstract",
+    "section_valosheath_abstract": {
+      "@id": "section_valosheath_abstract",
       "VDoc:content": [
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "'VEngine' namespace provides vocabulary for describing and defining\nthe valosheath and its types, objects, properties, methods and constants."
+            [
+              "This namespace contains the names of the reserved lexical scope\nvariables that are usable inside a VSX lens medias.\n\nAdditionally, the Var: namespace can be used as a UI component\nattribute prefix for defining new arbitrary variables. The identifier\nname of these variables is the suffix of the attribute without the\n'Var:' prefix and they are are lexically visible (inside this VSX lens\nonly) to all nested sub-scopes of the component.\n\nThis differs from 'Context:' variables which are dynamically scoped and\nare visible to all internal sub-components (ie. possibly to lenses\ndefined by other VSX medias) and which might get overridden for\nsome nested sub-scopes by the internals of some intermediary component.\n\n"
+            ]
           ]
         }
       ]
@@ -406,7 +374,7 @@
         {
           "VDoc:em": true,
           "VDoc:content": [
-            "@valos/engine"
+            "@valos/inspire"
           ]
         },
         " IRI prefixes"
@@ -441,23 +409,23 @@
         {
           "VDoc:em": true,
           "VDoc:content": [
-            "VEngine"
+            "Var"
           ]
         },
         " ",
         {
           "@type": "VDoc:Reference",
           "VDoc:content": [
-            "fabric classes"
+            "valosheath classes"
           ],
-          "VDoc:ref": "VKernel:Class"
+          "VDoc:ref": "VEngine:Class"
         }
       ],
       "VDoc:content": [
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "This section describes fabric classes introduced by the 'VEngine' namespace"
+            "This section describes valosheath classes introduced by the 'Var' namespace"
           ]
         },
         {
@@ -706,14 +674,7 @@
               }
             ]
           },
-          "VDoc:entries": [
-            "Class",
-            "Property",
-            "Method",
-            "Global",
-            "ObjectProperty",
-            "ObjectMethod"
-          ]
+          "VDoc:entries": []
         }
       ]
     },
@@ -724,23 +685,23 @@
         {
           "VDoc:em": true,
           "VDoc:content": [
-            "VEngine"
+            "Var"
           ]
         },
         " ",
         {
           "@type": "VDoc:Reference",
           "VDoc:content": [
-            "fabric properties"
+            "valosheath properties"
           ],
-          "VDoc:ref": "VKernel:Property"
+          "VDoc:ref": "VEngine:Property"
         }
       ],
       "VDoc:content": [
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "This section describes fabric properties introduced by the 'VEngine' namespace"
+            "This section describes valosheath properties introduced by the 'Var' namespace"
           ]
         },
         {
@@ -858,6 +819,55 @@
                 }
               },
               {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  "tags"
+                ],
+                "VDoc:cell": {
+                  "VDoc:words": {
+                    "VDoc:selectField": "tags"
+                  },
+                  "VDoc:map": {
+                    "VDoc:em": true,
+                    "VDoc:content": [
+                      "VDoc:selectValue"
+                    ]
+                  }
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  {
+                    "VDoc:em": true,
+                    "VDoc:content": [
+                      "value"
+                    ]
+                  }
+                ],
+                "VDoc:wide": true,
+                "VDoc:elidable": true,
+                "VDoc:cell": {
+                  "VDoc:selectField": "value"
+                }
+              },
+              {
+                "@type": "VDoc:Header",
+                "VDoc:content": [
+                  {
+                    "VDoc:em": true,
+                    "VDoc:content": [
+                      "default value"
+                    ]
+                  }
+                ],
+                "VDoc:wide": true,
+                "VDoc:elidable": true,
+                "VDoc:cell": {
+                  "VDoc:selectField": "defaultValue"
+                }
+              },
+              {
                 "VDoc:cell": "rdfs:comment",
                 "@type": "VDoc:Header",
                 "VDoc:content": {
@@ -896,11 +906,10 @@
             ]
           },
           "VDoc:entries": [
-            "domainOfField",
-            "domainOfProperty",
-            "domainOfMethod",
-            "hasProperty",
-            "hasMethod"
+            "this",
+            "focus",
+            "frame",
+            "context"
           ]
         }
       ]
@@ -912,7 +921,7 @@
         {
           "VDoc:em": true,
           "VDoc:content": [
-            "VEngine"
+            "Var"
           ]
         },
         " ",
@@ -928,7 +937,7 @@
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "This section describes fabric methods introduced by the 'VEngine' namespace"
+            "This section describes valosheath methods introduced by the 'Var' namespace"
           ]
         },
         {
@@ -1035,175 +1044,6 @@
                 "VDoc:cell": {
                   "VDoc:words": {
                     "VDoc:selectField": "rdfs:range"
-                  },
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      "VDoc:selectValue"
-                    ],
-                    "VDoc:ref": "VDoc:selectValue"
-                  }
-                }
-              },
-              {
-                "VDoc:cell": "rdfs:comment",
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "@type": "VDoc:Reference",
-                      "VDoc:content": [
-                        "description"
-                      ],
-                      "VDoc:ref": "rdfs:comment"
-                    }
-                  ]
-                },
-                "VDoc:wide": true
-              },
-              {
-                "VDoc:cell": "VRevdoc:introduction",
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "@type": "VDoc:Reference",
-                      "VDoc:content": [
-                        "introduction"
-                      ],
-                      "VDoc:ref": "VRevdoc:introduction"
-                    }
-                  ]
-                },
-                "VDoc:wide": true,
-                "VDoc:collapsed": true,
-                "VDoc:elidable": true
-              }
-            ]
-          },
-          "VDoc:entries": []
-        }
-      ]
-    },
-    "section_resolvers": {
-      "@id": "section_resolvers",
-      "@type": "VDoc:Chapter",
-      "dc:title": [
-        {
-          "VDoc:em": true,
-          "VDoc:content": [
-            "VEngine"
-          ]
-        },
-        " ",
-        {
-          "@type": "VDoc:Reference",
-          "VDoc:content": [
-            "field resolvers"
-          ],
-          "VDoc:ref": "VValk:Resolver"
-        }
-      ],
-      "VDoc:content": [
-        {
-          "@type": "VDoc:Paragraph",
-          "VDoc:content": [
-            "This section describes valospace-to-fabric resolvers introduced by the 'VEngine' namespace"
-          ]
-        },
-        {
-          "VDoc:lookup": "vocabulary",
-          "@type": "VDoc:Table",
-          "VDoc:columns": {
-            "VDoc:entries": [
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": null,
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:resourceId": "VDoc:selectKey",
-                  "VDoc:heading": true,
-                  "VDoc:content": [
-                    {
-                      "VDoc:words": [
-                        {
-                          "VDoc:strong": true,
-                          "VDoc:content": [
-                            {
-                              "VDoc:em": true,
-                              "VDoc:content": [
-                                {
-                                  "@type": "VDoc:Reference",
-                                  "VDoc:content": [
-                                    [
-                                      "#",
-                                      "VDoc:selectKey"
-                                    ]
-                                  ],
-                                  "VDoc:ref": [
-                                    "#",
-                                    "VDoc:selectKey"
-                                  ]
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "VDoc:words": {
-                            "VDoc:selectField": "rdfs:label"
-                          },
-                          "VDoc:elidable": true
-                        }
-                      ]
-                    }
-                  ]
-                }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "VDoc:strong": true,
-                      "VDoc:content": [
-                        "DEPRECATED"
-                      ]
-                    },
-                    " in favor of:"
-                  ]
-                },
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:entries": {
-                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
-                  },
-                  "VDoc:elidable": true,
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      "VDoc:selectValue"
-                    ],
-                    "VDoc:ref": "VDoc:selectValue"
-                  }
-                }
-              },
-              {
-                "VDoc:cell": "comment",
-                "@type": "VDoc:Header",
-                "VDoc:content": [
-                  "Comment"
-                ]
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": "rdf:type",
-                "VDoc:cell": {
-                  "VDoc:words": {
-                    "VDoc:selectField": "@type"
                   },
                   "VDoc:map": {
                     "@type": "VDoc:Reference",
@@ -1263,7 +1103,7 @@
         {
           "VDoc:em": true,
           "VDoc:content": [
-            "VEngine"
+            "Var"
           ]
         },
         " ",
@@ -1279,7 +1119,7 @@
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "This section describes valosheath global objects introduced by the 'VEngine' namespace"
+            "This section describes valosheath global objects introduced by the 'Var' namespace"
           ]
         },
         {
@@ -1544,10 +1384,10 @@
         {
           "VDoc:em": true,
           "VDoc:content": [
-            "VEngine"
+            "Var"
           ]
         },
-        " remaining vocabulary names"
+        " remaining vocabulary terms"
       ],
       "VDoc:content": [
         {
@@ -1700,9 +1540,7 @@
               }
             ]
           },
-          "VDoc:entries": [
-            "valosheath"
-          ]
+          "VDoc:entries": []
         }
       ]
     },
@@ -1718,7 +1556,7 @@
         "@id": "introduction"
       },
       {
-        "@id": "section_fabric"
+        "@id": "section_valosheath"
       }
     ]
   }

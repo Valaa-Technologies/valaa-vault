@@ -50,48 +50,48 @@ export function _resolveProclaimAspectParams (connection: FalseProphetConnection
 
 function _isHashChainingEnabled (connection, aspectParams, previousState, state) {
   return state.getIn([
-    "Property", `${connection._rootStem}@.$VChronicle.requireAuthoredEvents@@`, "value", "value",
+    "Property", `${connection._rootStem}@.$VChronicle.requiresAuthoredEvents@@`, "value", "value",
   ]);
 }
 
 function _validateRoleAndRefreshChroniclePublicKey (
     connection, aspectParams, previousState, state, updatesVChronicle, bypassLocalAuthorChecks) {
-  const requireAuthoredEvents = state.getIn([
-    "Property", `${connection._rootStem}@.$VChronicle.requireAuthoredEvents@@`, "value", "value",
+  const requiresAuthoredEvents = state.getIn([
+    "Property", `${connection._rootStem}@.$VChronicle.requiresAuthoredEvents@@`, "value", "value",
   ]);
   if (!aspectParams.publicIdentity) {
-    if (!requireAuthoredEvents) return null;
-    return "No public identity found and VChronicle:requireAuthoredEvents is set";
+    if (!requiresAuthoredEvents) return null;
+    return "No public identity found and VChronicle:requiresAuthoredEvents is set";
   }
 
   const chronicleDirectorKey = _getPublicKeyFromChronicle(aspectParams.publicIdentity,
     // Always sign and validate using previous director key except for first event
-      (aspectParams.index === 0) ? state : previousState, connection._rootStem, "director");
+      (aspectParams.index === 0) ? state : previousState, connection._rootStem, "hasDirector");
   if (updatesVChronicle && !bypassLocalAuthorChecks) {
     if (!chronicleDirectorKey) {
-      return `No VChronicle:director identity found when modifying a VChronicle resource`;
+      return `No VChronicle:hasDirector identity found when modifying a VChronicle resource`;
     }
     if (updatesVChronicle.requiresDirector
         && (updatesVChronicle.requiresDirector !== aspectParams.publicIdentity)) {
-      return `Incongruent VChronicle:director identity encountered ${
-        ""}when modifying a VChronicle:director resource`;
+      return `Incongruent VChronicle:hasDirector identity encountered ${
+        ""}when modifying a VChronicle:hasDirector relation`;
     }
   }
   const chroniclePublicKey = chronicleDirectorKey || _getPublicKeyFromChronicle(
-      aspectParams.publicIdentity, state, connection._rootStem, "contributor");
+      aspectParams.publicIdentity, state, connection._rootStem, "hasContributor");
   if (!chroniclePublicKey) {
     aspectParams.publicIdentity = null;
-    if (requireAuthoredEvents) {
+    if (requiresAuthoredEvents) {
       // TODO(iridian, 2020-10): add VChronicle:allowGuestContributors which when set
       // permits automatic identity relation creation into the event
       // _autoAddContributorRelation(connection, op, identityParams);
-      return `No VChronicle:contributor found targeting the authority public identity${
+      return `No VChronicle:hasContributor found targeting the authority public identity${
         ""} (and VChronicle:allowGuestContributors not set)`;
     }
   } else if (chroniclePublicKey !== aspectParams.publicKey) {
     if (aspectParams.publicKey && !bypassLocalAuthorChecks) {
     // TODO(iridian, 2020-10): auto-refresh identity relation public key if permitted
-      return "Obsolete VChronicle:contributor publicKey (auto-refresh not implemented)";
+      return "Obsolete VChronicle:hasContributor publicKey (auto-refresh not implemented)";
     }
     aspectParams.publicKey = chroniclePublicKey;
   }
@@ -152,8 +152,8 @@ function _validateAuthorAspect (connection, event, previousState, state) {
   const author = trySwapAspectRoot("author", event, "event");
   if (!author) {
     if (state.getIn(
-        ["Property", `${stem}@.$VChronicle.requireAuthoredEvents@@`, "value", "value"])) {
-      return "AuthorAspect missing although required by VChronicle:requireAuthoredEvents";
+        ["Property", `${stem}@.$VChronicle.requiresAuthoredEvents@@`, "value", "value"])) {
+      return "AuthorAspect missing although required by VChronicle:requiresAuthoredEvents";
     }
   } else {
     try {

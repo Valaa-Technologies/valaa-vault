@@ -13,7 +13,7 @@ module.exports = {
   context: {},
   vocabulary: {
     // behaviors
-    requireAuthoredEvents: {
+    requiresAuthoredEvents: {
       "@type": "VKernel:Property",
       "rdfs:domain": "V:Resource",
       "rdfs:range": "xsd:boolean", // TODO(iridian, 2020-10): Add user role semantics
@@ -22,7 +22,7 @@ module.exports = {
 an AuthorAspect.`,
     },
     // contributors
-    contributor: {
+    hasContributor: {
       "@type": "VKernel:Property",
       "rdfs:domain": "V:Resource",
       "rdfs:range": "V:Resource", // TODO(iridian, 2020-10): Add user role semantics
@@ -30,9 +30,9 @@ an AuthorAspect.`,
 `The collection of identities which have registered their signature
 public keys to the chronicle event log.`,
     },
-    director: {
+    hasDirector: {
       "@type": "VKernel:Property",
-      "rdfs:subPropertyOf": "VChronicle:contributor",
+      "rdfs:subPropertyOf": "VChronicle:hasContributor",
       "rdfs:domain": "V:Resource",
       "rdfs:range": "V:Resource", // TODO(iridian, 2020-10): Add user role semantics
       "rdfs:comment":

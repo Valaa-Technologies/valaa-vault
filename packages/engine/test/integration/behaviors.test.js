@@ -23,6 +23,8 @@ const decepTributorId = "@$~raw.decep-tributor@@";
 const primeDirectorURI = naiveURI.createChronicleURI(testAuthorityURI, primeDirectorId);
 const decepTributorURI = naiveURI.createChronicleURI(testAuthorityURI, decepTributorId);
 
+jest.setTimeout(60000);
+
 async function prepareHarnesses (sharedOptions) {
   harness = await createEngineOracleHarness({
     name: "prime",

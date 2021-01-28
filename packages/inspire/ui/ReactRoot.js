@@ -25,7 +25,7 @@ const _sheetIds = new WeakMap();
 
 export default class ReactRoot extends React.Component {
   static propTypes = {
-    isRoot: PropTypes.bool,
+    isFullscreen: PropTypes.bool,
     viewName: PropTypes.string,
     children: PropTypes.object,
     contextLensProperty: PropTypes.arrayOf(PropTypes.string),
@@ -262,7 +262,7 @@ export default class ReactRoot extends React.Component {
       frameKey: "root",
     };
     const valoscope = <Valoscope {...rootscopeProps}>{this.props.children}</Valoscope>;
-    return this.props.isRoot
+    return !this.props.isFullscreen
         ? valoscope
         : (<div style={{ width: "100vw", height: "100vh" }}>{valoscope}</div>);
   }

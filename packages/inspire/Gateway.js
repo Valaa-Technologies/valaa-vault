@@ -311,8 +311,8 @@ export default class Gateway extends FabricEventTarget {
       createView: components.createView || (options => new InspireView(options)),
       container: components.container,
       containerId: components.containerId,
-      hostGlobal: components.hostGlobal,
-      window: components.window,
+      hostGlobal: components.hostGlobal || window,
+      window: components.window || window,
     };
   }
 

@@ -111,7 +111,7 @@ export default class FalseProphetConnection extends Connection {
 
   narrateEventLog (options: ?NarrateOptions = {}): Promise<Object> {
     if (!options) return undefined;
-    this._resolveOptionsIdentity(options);
+    this._setOptionsIdentity(options);
     if (options.reproclaimOptions !== false) {
       if (!options.reproclaimOptions) options.reproclaimOptions = {};
       options.reproclaimOptions.discourse = options.discourse;
@@ -120,7 +120,7 @@ export default class FalseProphetConnection extends Connection {
     return super.narrateEventLog(options);
   }
 
-  _resolveOptionsIdentity (options) {
+  _setOptionsIdentity (options) {
     if (options.identity !== undefined) return options.identity;
     const identity = options.discourse && options.discourse.getIdentityMediator();
     return (options.identity = identity || this._originatingIdentity);

@@ -18,12 +18,12 @@ export function _resolveProclaimAspectParams (connection: FalseProphetConnection
   };
   if (!connection.isRemoteAuthority()) return aspectParams;
 
-  const mediator = connection._resolveOptionsIdentity(op.options);
-  const identityParams = mediator && mediator.try(connection.getChronicleURI());
-  if (identityParams) {
-    aspectParams.publicIdentity = identityParams.publicIdentity.vrid();
-    aspectParams.publicKey = (identityParams.asContributor || {}).publicKey;
-    aspectParams.secretKey = identityParams.secretKey;
+  const identity = connection._setOptionsIdentity(op.options);
+  const claims = identity && identity.tryClaimsFor(connection.getChronicleURI());
+  if (claims) {
+    aspectParams.publicIdentity = claims.publicIdentity.vrid();
+    aspectParams.publicKey = (claims.asContributor || {}).publicKey;
+    aspectParams.secretKey = claims.secretKey;
   }
 
   let predecessorLogAspect = (((unconfirmeds.length
@@ -84,7 +84,7 @@ function _validateRoleAndRefreshChroniclePublicKey (
     if (requiresAuthoredEvents) {
       // TODO(iridian, 2020-10): add VChronicle:allowGuestContributors which when set
       // permits automatic identity relation creation into the event
-      // _autoAddContributorRelation(connection, op, identityParams);
+      // _autoAddContributorRelation(connection, op, aspectParams);
       return `No VChronicle:hasContributor found targeting the authority public identity${
         ""} (and VChronicle:allowGuestContributors not set)`;
     }
@@ -105,9 +105,9 @@ function _getPublicKeyFromChronicle (publicIdentity, state, chronicleRootIdStem,
   ]);
 }
 
-// export function _autoAddContributorRelation (connection, op, identityParams) {}
+// export function _autoAddContributorRelation (connection, op, aspectParams) {}
 
-// export function _autoRefreshContributorRelation (connection, op, identityParams) {}
+// export function _autoRefreshContributorRelation (connection, op, aspectParams) {}
 
 export function _validateAspects (connection, event, previousState, state, previousEvent) {
   if (!connection.isRemoteAuthority()) return true;

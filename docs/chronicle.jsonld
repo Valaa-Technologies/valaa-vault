@@ -57,12 +57,12 @@
       "VState": "https://valospace.org/state/0#",
       "VLog": "https://valospace.org/log/0#",
       "V": "https://valospace.org/0#",
-      "VChronicle:contributor": {
-        "@id": "#contributor",
+      "VChronicle:hasContributor": {
+        "@id": "#hasContributor",
         "@type": "@id"
       },
-      "VChronicle:director": {
-        "@id": "#director",
+      "VChronicle:hasDirector": {
+        "@id": "#hasDirector",
         "@type": "@id"
       }
     },
@@ -73,7 +73,7 @@
     ],
     "dc:title": "@valos/chronicle library workspace",
     "VRevdoc:package": "@valos/chronicle",
-    "VRevdoc:version": "0.37.0-alpha.5",
+    "VRevdoc:version": "0.37.0-alpha.6",
     "VRevdoc:preferredPrefix": "VChronicle",
     "VRevdoc:baseIRI": "https://valospace.org/chronicle/0#",
     "VRevdoc:referencedModules": {
@@ -340,21 +340,21 @@
     },
     "vocabulary": {
       "@id": "vocabulary",
-      "requireAuthoredEvents": {
+      "requiresAuthoredEvents": {
         "@type": "VKernel:Property",
         "rdfs:domain": "V:Resource",
         "rdfs:range": "xsd:boolean",
         "rdfs:comment": "When set to true all the chronicle events must be authored with\nan AuthorAspect."
       },
-      "contributor": {
+      "hasContributor": {
         "@type": "VKernel:Property",
         "rdfs:domain": "V:Resource",
         "rdfs:range": "V:Resource",
         "rdfs:comment": "The collection of identities which have registered their signature\npublic keys to the chronicle event log."
       },
-      "director": {
+      "hasDirector": {
         "@type": "VKernel:Property",
-        "rdfs:subPropertyOf": "VChronicle:contributor",
+        "rdfs:subPropertyOf": "VChronicle:hasContributor",
         "rdfs:domain": "V:Resource",
         "rdfs:range": "V:Resource",
         "rdfs:comment": "The collection of identities which (and only which) can make changes\nto the chronicle behaviors (eg. permissions)."
@@ -363,12 +363,12 @@
     "context": {
       "@id": "context",
       "@base": "https://valospace.org/chronicle/0#",
-      "VChronicle:contributor": {
-        "@id": "#contributor",
+      "VChronicle:hasContributor": {
+        "@id": "#hasContributor",
         "@type": "@id"
       },
-      "VChronicle:director": {
-        "@id": "#director",
+      "VChronicle:hasDirector": {
+        "@id": "#hasDirector",
         "@type": "@id"
       }
     },
@@ -963,9 +963,9 @@
             ]
           },
           "VDoc:entries": [
-            "requireAuthoredEvents",
-            "contributor",
-            "director"
+            "requiresAuthoredEvents",
+            "hasContributor",
+            "hasDirector"
           ]
         }
       ]

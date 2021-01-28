@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0-alpha.6](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.5...v0.37.0-alpha.6) (2021-01-28)
+
+
+### Features
+
+* **inspire:** Add isFullscreen view option, deprecates "isView", "isRoot" ([220d844](https://github.com/valaatech/kernel/commit/220d8445fc5e4498072da147aeff50c29181f455))
+* **inspire:** Add valos.initialize, valos.createView and prologue.root ([0fa03bc](https://github.com/valaatech/kernel/commit/0fa03bceb322ed30d49d63241c5eb3288e376e8a))
+* **sourcerer:** IdentityMediator API simplification ([457f685](https://github.com/valaatech/kernel/commit/457f68599e0af36abd64bbcfe1fd7bc4f91c1069))
+
+
+
+
+
 # [0.37.0-alpha.5](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.4...v0.37.0-alpha.5) (2021-01-18)
 
 

@@ -64,7 +64,7 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/inspire",
-    "VRevdoc:version": "0.37.0-alpha.5",
+    "VRevdoc:version": "0.37.0-alpha.6",
     "VRevdoc:preferredPrefix": "Var",
     "VRevdoc:baseIRI": "https://valospace.org/inspire/Var/0#",
     "VRevdoc:referencedModules": {

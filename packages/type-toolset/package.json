@@ -1,6 +1,6 @@
 {
   "name": "@valos/type-toolset",
-  "version": "0.37.0-alpha.5",
+  "version": "0.37.0-alpha.6",
   "valos": {
     "type": "type",
     "domain": "@valos/kernel"

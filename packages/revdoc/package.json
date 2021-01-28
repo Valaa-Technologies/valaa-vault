@@ -1,6 +1,6 @@
 {
   "name": "@valos/revdoc",
-  "version": "0.37.0-alpha.5",
+  "version": "0.37.0-alpha.6",
   "valos": {
     "type": "vdoc-extension",
     "domain": "@valos/kernel",
@@ -15,6 +15,6 @@
   "description": "ReVDoc - ReSpec document VDoc extension",
   "main": "index.js",
   "dependencies": {
-    "@valos/vdoc": "^0.37.0-alpha.5"
+    "@valos/vdoc": "^0.37.0-alpha.6"
   }
 }

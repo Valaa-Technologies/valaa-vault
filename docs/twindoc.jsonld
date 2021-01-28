@@ -63,7 +63,7 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/twindoc",
-    "VRevdoc:version": "0.37.0-alpha.5",
+    "VRevdoc:version": "0.37.0-alpha.6",
     "VRevdoc:preferredPrefix": "VTwindoc",
     "VRevdoc:baseIRI": "https://valospace.org/twindoc/0#",
     "VRevdoc:referencedModules": {
@@ -73,7 +73,7 @@
     },
     "VRevdoc:extenderModules": {},
     "respecConfig": {
-      "subtitle": "0.37.0-alpha.5",
+      "subtitle": "0.37.0-alpha.6",
       "specStatus": "unofficial",
       "editors": [
         {

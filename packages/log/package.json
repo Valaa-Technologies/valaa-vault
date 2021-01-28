@@ -1,6 +1,6 @@
 {
   "name": "@valos/log",
-  "version": "0.37.0-alpha.5",
+  "version": "0.37.0-alpha.6",
   "valos": {
     "type": "library",
     "domain": "@valos/kernel",
@@ -16,9 +16,9 @@
   },
   "main": "index.js",
   "devDependencies": {
-    "@valos/kernel": "^0.37.0-alpha.5",
-    "@valos/revdoc": "^0.37.0-alpha.5",
-    "@valos/type-library": "^0.37.0-alpha.5"
+    "@valos/kernel": "^0.37.0-alpha.6",
+    "@valos/revdoc": "^0.37.0-alpha.6",
+    "@valos/type-library": "^0.37.0-alpha.6"
   },
   "homepage": "https://valospace.org/log"
 }

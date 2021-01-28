@@ -55,7 +55,7 @@
     },
     "dc:title": "Zone IDE",
     "VRevdoc:package": "@valos/kernel-vault",
-    "VRevdoc:version": "0.37.0-alpha.4",
+    "VRevdoc:version": "0.37.0-alpha.5",
     "respecConfig": {
       "specStatus": "unofficial",
       "shortName": "zone",

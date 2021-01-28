@@ -19,18 +19,19 @@ export default individualOf({
 
     verbosity: 0,
 
-    authorityConfigs: dictionaryOf(authorityConfig()),
     scribe: { verbosity: 0 },
     oracle: { verbosity: 0 },
     reducer: { verbosity: 0 },
     corpus: { verbosity: 0 },
     falseProphet: { verbosity: 0 },
 
+    authorityConfigs: dictionaryOf(authorityConfig()),
     spindlePrototypes: arrayOf(spindlePrototype()),
   },
   spindles: dictionaryOf(spindleConfig()),
   prologue: {
     endpoint: "",
+    root: "",
     rootChronicleURI: "",
     endpoints: dictionaryOf(""),
     partitionInfos: dictionaryOf(partitionInfo()),

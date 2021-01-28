@@ -21,7 +21,7 @@
     }
   },
   "prologue": {
-    "rootChronicleURI": "valaa-local:?id=@$~u4.efff2621-b8e6-46d9-af39-604f242e15da@@",
+    "root": "valaa-local:?id=@$~u4.efff2621-b8e6-46d9-af39-604f242e15da@@",
     "partitionInfos": { "!!!": "./partitions/partitionInfos.json" },
     "bvobInfos": { "!!!": "./partitions/./bvobInfos.json" },
     "bvobBuffers": { "!!!": "./partitions/../partitions/bvobBuffers.json" },

@@ -28,7 +28,11 @@ if (inBrowser()) {
 // TODO(iridian, 2019-09): They do now though. See attachSpawn
 valosheath.getURIQueryField = getURIQueryField;
 
-valosheath.createInspireGateway = function createInspireGateway (...revelations: any[]) {
+let _gatewayPromise;
+let _pendingViews;
+
+valosheath.initialize = valosheath.createInspireGateway =
+    function createInspireGateway (...revelations: any[]) {
   const inspireBrowserEnvironmentRevelation = {
     gateway: { scribe: {
       getDatabaseAPI: require("~/tools/indexedDB/getBrowserDatabaseAPI").getDatabaseAPI,
@@ -39,8 +43,29 @@ valosheath.createInspireGateway = function createInspireGateway (...revelations:
     siteRoot: "/", // TODO(iridian, 2018-12): provide this somehow via index.html
     revelationRoot: window.location.pathname,
   }, ...revelations, inspireBrowserEnvironmentRevelation);
-  return new Promise(resolve =>
-      document.addEventListener("DOMContentLoaded", () => { resolve(gatewayPromise); }));
+  _gatewayPromise = new Promise(resolve =>
+      document.addEventListener("DOMContentLoaded", () => {
+        resolve(gatewayPromise);
+      }));
+  return _gatewayPromise;
+};
+
+valosheath.createView = function createView (viewName, options) {
+  if (!_gatewayPromise) {
+    throw new Error("No valos gateway found. Maybe call valos.createInspireGateway first?");
+  }
+  if ((valosheath.gateway || {})._views) {
+    valosheath.gateway.addView(viewName, options);
+  } else if (_pendingViews) {
+    _pendingViews[viewName] = options;
+  } else {
+    _pendingViews = { [viewName]: options };
+    _gatewayPromise.then(gateway => {
+      const pendingViews = _pendingViews;
+      _pendingViews = null;
+      return gateway.createAndConnectViewsToDOM(pendingViews);
+    });
+  }
 };
 
 export default (valosheath.createGateway = async function createGateway (

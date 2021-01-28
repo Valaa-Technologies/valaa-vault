@@ -17,27 +17,16 @@
         <link rel="preload" href="/valos/inspire/valos-inspire.js" as="script"/>
       </head>
     <body>
-        <div id="valos-inspire--main-container"></div>
         <script src="/valos/inspire/valos-inspire.js"></script>
         <script>
-          valos.createInspireGateway({ "!!!": "./revela.json" }, {
+          valos.initialize({ "!!!": "./revela.json" }, {
             gateway: {
               verbosity: 0,
             },
-            prologue: {
-              rootChronicleURI: valos.getURIQueryField(document.location, "partition"),
-            },
-          }).then(function (gateway) {
-            valos.views = gateway.createAndConnectViewsToDOM({
-              inspireMain: {
-                name: "ValOS perspire-test Inspire Main",
-                focus: gateway.getRootFocusURI() || gateway.getRootChronicleURI(),
-                container: document.querySelector("#valos-inspire--main-container"),
-                viewRootId: "valos-inspire--main-root",
-                size: { width: window.innerWidth, height: window.innerHeight, scale: 1 },
-              },
-            });
-          });
+          })
         </script>
+
+        <div id="valos-gateway--main-container"></div>
+        <script>valos.createView("main", { containerId: "valos-gateway--main-container" });</script>
     </body>
 </html>

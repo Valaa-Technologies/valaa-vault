@@ -310,6 +310,7 @@ export default class Gateway extends FabricEventTarget {
     this._hostComponents = {
       createView: components.createView || (options => new InspireView(options)),
       container: components.container,
+      containerId: components.containerId,
       hostGlobal: components.hostGlobal,
       window: components.window,
     };
@@ -325,10 +326,14 @@ export default class Gateway extends FabricEventTarget {
     if (!this._views) this._views = {};
     if (!this._hostComponents) {
       this.setupHostComponents({});
-      for (const { container, hostGlobal, window } of Object.values(views)) {
-        if (this._hostComponents.container == null) this._hostComponents.container = container;
-        if (this._hostComponents.hostGlobal == null) this._hostComponents.hostGlobal = hostGlobal;
-        if (this._hostComponents.window == null) this._hostComponents.window = window;
+      for (const [key, config] of Object.entries(views)) {
+        const { container, containerId, hostGlobal, window } = (typeof config !== "function")
+            ? config
+            : (views[key] = config(this));
+        this._hostComponents.container = this._hostComponents.container || container;
+        this._hostComponents.containerId = this._hostComponents.containerId || containerId;
+        this._hostComponents.hostGlobal = this._hostComponents.hostGlobal || hostGlobal;
+        this._hostComponents.window = this._hostComponents.window || window;
       }
     }
     for (const [viewId, config, resolve, reject] of [
@@ -359,11 +364,13 @@ export default class Gateway extends FabricEventTarget {
 
   addView (viewId, viewConfig, parentPlog) {
     if ((this._views || {})[viewId]) throw new Error(`View ${viewId} already created`);
-    return (!this._hostComponents)
-        ? new Promise((resolve, reject) =>
-            this._pendingViews.push([viewId, viewConfig, resolve, reject]))
-        : this._createAndConnectViewToDOM(
-            viewId, { ...this._hostComponents, ...viewConfig }, parentPlog);
+    if (!this._hostComponents) {
+      return new Promise((resolve, reject) =>
+          this._pendingViews.push([viewId, viewConfig, resolve, reject]));
+    }
+    const actualConfig = (typeof viewConfig === "function") ? viewConfig(this) : viewConfig;
+    return this._createAndConnectViewToDOM(
+            viewId, { ...this._hostComponents, ...actualConfig }, parentPlog);
   }
 
   getView (viewId) {
@@ -372,7 +379,7 @@ export default class Gateway extends FabricEventTarget {
 
   _createAndConnectViewToDOM (viewId, {
     parent = this, verbosity,
-    container, hostGlobal, createView,
+    container, containerId, hostGlobal, createView,
     ...paramViewConfig
   }, parentPlog) {
     if (!this._views) throw new Error("createAndConnectViewsToDOM must be called first");
@@ -380,7 +387,15 @@ export default class Gateway extends FabricEventTarget {
     const plog1 = this.opLog(1, parentPlog, "create_view",
         `Creating view "${viewId}"`, { verbosity, ...paramViewConfig });
     const view = createView({ parent, verbosity, name: viewId });
-    const op = { viewId, container, hostGlobal, paramViewConfig, plog: plog1 };
+    const actualContainer = container
+        || (containerId && paramViewConfig.window.document.querySelector(`#${containerId}`));
+    if (!actualContainer) {
+      const reason = !containerId
+          ? "no view config .container or .containerId provided"
+          : `cannot locate element with id "${containerId}"`;
+      throw new Error(`Cannot locate container for view "${viewId}": ${reason}`);
+    }
+    const op = { viewId, container: actualContainer, hostGlobal, paramViewConfig, plog: plog1 };
     return (this._views[viewId] = this.opChain(
         "viewCreation", [op, view],
         "_errorOnCreateView", plog1, 2));
@@ -885,17 +900,26 @@ export default class Gateway extends FabricEventTarget {
   async _sourcerPrologueChronicles (prologue: Object, parentPlog) {
     let chronicles;
     try {
-      let rootChronicleURI = prologue.rootChronicleURI
-          && naiveURI.validateChronicleURI(await reveal(prologue.rootChronicleURI));
+      const rootFocusURI = await reveal(prologue.root) || await reveal(prologue.rootFocusURI);
+      let rootChronicleURI = await reveal(prologue.rootChronicleURI);
+      if (!rootChronicleURI && rootFocusURI) {
+        rootChronicleURI = rootFocusURI.split("#")[0];
+      }
+      if (rootChronicleURI) {
+        rootChronicleURI = naiveURI.validateChronicleURI(rootChronicleURI);
+      }
       const plog1 = this.opLog(1, parentPlog, "prologue");
-      if (prologue.rootPartitionURI) {
+      if (!rootChronicleURI && prologue.rootPartitionURI) {
         this.errorEvent("DEPRECATED: prologue.rootPartitionURI used to override rootChronicleURI",
             "\n\tthis is probably due to ?partition= query param; use ?chronicle= instead.");
         rootChronicleURI = naiveURI.createPartitionURI(prologue.rootPartitionURI);
       }
+      if (!rootChronicleURI) {
+        throw new Error("gateway.rootChronicleURI and gateway.rootFocusURI are missing");
+      }
       plog1 && plog1.opEvent("determine",
           `Determining prologues and the root chronicle <${rootChronicleURI}>`);
-      this._rootFocusURI = await reveal(prologue.rootFocusURI);
+      this._rootFocusURI = rootFocusURI;
       chronicles = await this._determinePrologueChronicles(prologue, rootChronicleURI);
       plog1 && plog1.opEvent("extraction",
           `Extracted ${chronicles.length} chronicles from the prologue`, {

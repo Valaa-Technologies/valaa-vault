@@ -50,7 +50,7 @@ valosheath.initialize = valosheath.createInspireGateway =
   return _gatewayPromise;
 };
 
-valosheath.createView = function createView (viewName, options) {
+valosheath.attachView = function attachView (viewName, options) {
   if (!_gatewayPromise) {
     throw new Error("No valos gateway found. Maybe call valos.createInspireGateway first?");
   }

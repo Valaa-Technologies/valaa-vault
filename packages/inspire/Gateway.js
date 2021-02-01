@@ -310,7 +310,6 @@ export default class Gateway extends FabricEventTarget {
     this._hostComponents = {
       createView: components.createView || (options => new InspireView(options)),
       container: components.container,
-      containerId: components.containerId,
       hostGlobal: components.hostGlobal || window,
       window: components.window || window,
     };
@@ -327,11 +326,10 @@ export default class Gateway extends FabricEventTarget {
     if (!this._hostComponents) {
       this.setupHostComponents({});
       for (const [key, config] of Object.entries(views)) {
-        const { container, containerId, hostGlobal, window } = (typeof config !== "function")
+        const { container, hostGlobal, window } = (typeof config !== "function")
             ? config
             : (views[key] = config(this));
         this._hostComponents.container = this._hostComponents.container || container;
-        this._hostComponents.containerId = this._hostComponents.containerId || containerId;
         this._hostComponents.hostGlobal = this._hostComponents.hostGlobal || hostGlobal;
         this._hostComponents.window = this._hostComponents.window || window;
       }
@@ -379,7 +377,7 @@ export default class Gateway extends FabricEventTarget {
 
   _createAndConnectViewToDOM (viewId, {
     parent = this, verbosity,
-    container, containerId, hostGlobal, createView,
+    container, hostGlobal, createView,
     ...paramViewConfig
   }, parentPlog) {
     if (!this._views) throw new Error("createAndConnectViewsToDOM must be called first");
@@ -387,12 +385,13 @@ export default class Gateway extends FabricEventTarget {
     const plog1 = this.opLog(1, parentPlog, "create_view",
         `Creating view "${viewId}"`, { verbosity, ...paramViewConfig });
     const view = createView({ parent, verbosity, name: viewId });
-    const actualContainer = container
-        || (containerId && paramViewConfig.window.document.querySelector(`#${containerId}`));
+    const actualContainer = (typeof container !== "string")
+        ? container
+        : paramViewConfig.window.document.querySelector(`#${container}`);
     if (!actualContainer) {
-      const reason = !containerId
-          ? "no view config .container or .containerId provided"
-          : `cannot locate element with id "${containerId}"`;
+      const reason = (typeof container !== "string")
+          ? "no view config .container provided"
+          : `cannot locate element with id "${container}"`;
       throw new Error(`Cannot locate container for view "${viewId}": ${reason}`);
     }
     const op = { viewId, container: actualContainer, hostGlobal, paramViewConfig, plog: plog1 };

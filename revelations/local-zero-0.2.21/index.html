@@ -38,9 +38,9 @@
 
     <div id="valos-inspire--main-container"></div>
     <script>
-      valos.createView("inspireMain", gateway => ({
+      valos.attachView("inspireMain", gateway => ({
         name: "ValOS local-zero-0.2.21 Main",
-        containerId: "valos-inspire--main-container",
+        container: "valos-inspire--main-container",
         setTitleKuery: "name",
         contextLensProperty: ["EDITOR_LENS", "LENS"],
         size: { width: window.innerWidth, height: window.innerHeight, scale: 1 },

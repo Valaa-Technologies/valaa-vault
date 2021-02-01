@@ -10,12 +10,15 @@ const identityPrototypeMethods = require("~/gateway-api/identity");
 export default class IdentityMediator extends FabricEventTarget {
   constructor (options: {
     parent: Object, verbosity: ?number, name: ?string, sourcerer: FalseProphet,
-    clientURI: string, sessionURI: string, add: ?Object,
+    clientURI: string, sessionURI: string, identityProviderURI: string,
+    add: ?Object,
   }) {
     super(options.parent, options.verbosity, options.name);
     this._sourcerer = options.sourcerer || options.parent.getSourcerer();
-    this.clientURI = options.clientURI;
+    this.clientId = options.clientId || options.clientURI;
+    this.clientURI = options.clientURI || options.clientId;
     this.sessionURI = options.sessionURI;
+    this.identityProviderURI = options.identityProviderURI;
     this._activeIdClaims = {};
     this._authorityIdentities = {};
     for (const [publicIdentity, identityOptions] of Object.entries(options.add || {})) {
@@ -29,7 +32,7 @@ export default class IdentityMediator extends FabricEventTarget {
     return this.revokeSession(options);
   }
 
-  getClaims (options = {}) { return this.getSessionClaims(options); }
+  getClaims (options = {}) { return this.getAuthenticatedIdClaims(options); }
   getClaimsFor (resource: string | Object) { return _getIdClaims(this, resource); }
   tryClaimsFor (resource: string | Object) { return _getIdClaims(this, resource, false); }
 

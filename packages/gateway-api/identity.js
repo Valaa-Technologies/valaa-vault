@@ -6,6 +6,7 @@ module.exports = {
   getClientCookieName,
   getSessionCookieName,
   getSessionClaims,
+  getAuthenticatedIdClaims,
   authorizeSession,
   revokeSession,
   finalizeSession,
@@ -28,6 +29,10 @@ function getSessionCookieName (options = {}) {
 }
 
 function getSessionClaims (options = {}) {
+  return getAuthenticatedIdClaims.call(this, options);
+}
+
+function getAuthenticatedIdClaims (options = {}) {
   const clientCookieName = getClientCookieName.call(this, options);
   for (const line of window.document.cookie.split(";")) {
     const [name, value] = line.split("=");
@@ -42,13 +47,22 @@ function getSessionClaims (options = {}) {
 
 /* eslint-disable camelcase */
 function authorizeSession ({
-  grantProvider, client_id, clientId, clientURI, redirect_uri, sessionURI, ...rest
+  identityProviderURI,             // Authorization server is an OpenId Connect identity provider
+  authorizationURI, grantProvider, // Any other authorization server
+  clientId, sessionURI,
+  client_id, clientURI, redirect_uri, ...rest
 }) {
   if (!inBrowser()) throw new Error("Cannot authorize a session in a non-browser context");
-  const authorizeURI = grantProvider || (this || {}).authorizeURI;
-  if (!grantProvider) throw new Error("authorizeSession.grantProvider missing");
-  if (authorizeURI.substr(0, 8) !== "https://") {
-    throw new Error("Invalid grant provider: only OpenId Connect https:// scheme is supported");
+  const actualProviderURI = identityProviderURI || (this || {}).identityProviderURI;
+  const actualAuthorizationURI = actualProviderURI
+      || authorizationURI || grantProvider || (this || {}).authorizationURI;
+  if (!actualAuthorizationURI) {
+    throw new Error("Both authorizeSession.identityProviderURI and .authorizationURI are missing");
+  }
+  if (actualAuthorizationURI.substr(0, 8) !== "https://") {
+    throw new Error(`Invalid authorizeSession.${
+          actualProviderURI ? "identityProviderURI" : "authorizationURI"
+        }: only https:// scheme is supported`);
   }
   const params = {
     client_id: getClientId.call(this, { clientId: client_id || clientId, clientURI }),
@@ -59,8 +73,14 @@ function authorizeSession ({
     throw new Error("authorizeSession.(sessionURI|redirect_uri) missing");
   }
   const clientCookieName = getClientCookieName.call(this, params);
-  if (params.scope === undefined) {
-    params.scope = "openid profile";
+  if (actualProviderURI) {
+    // OpenId Connect
+    if (params.scope === undefined) {
+      params.scope = "openid";
+    } else if (!params.scope.includes("openid")) {
+      throw new Error(
+          `Invalid explicit authorizeSession.scope: OpenId Connect requirement "openid" missing`);
+    }
   }
   if (params.state === undefined) {
     params.state = (`${Math.random().toString(36)}000000000`).slice(2, 7);
@@ -69,7 +89,7 @@ function authorizeSession ({
     window.document.cookie = `${clientCookieName}=${encodeURIComponent(params.state)
       }; max-age=900; Secure; SameSite=Lax`;
   }
-  let requestAuthorization = `${authorizeURI}?response_type=code`;
+  let requestAuthorization = `${actualAuthorizationURI}?response_type=code`;
   Object.keys(params).forEach(k => {
     if (params[k]) {
       requestAuthorization += `&${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`;

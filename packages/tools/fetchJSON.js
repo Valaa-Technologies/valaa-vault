@@ -7,12 +7,12 @@ const { wrapError } = require("./wrapError");
 
 const _getCache = {};
 
-exports.default = function fetchJSON (input, options = {}) {
+exports.default = function fetchJSON (input, options = {}, customFetch) {
   const method = (options.method || "GET").toUpperCase();
   if ((method === "GET") && _getCache[input]) return _getCache[input];
   const fetchOperation = thenChainEagerly(input, [
     function performFetch () {
-      const fetch = getGlobal().fetch;
+      const fetch = customFetch || getGlobal().fetch;
       if (!fetch) {
         throw new Error(`window/global.fetch is missing; if running in a non-browser ${
             ""}environment please execute through perspire gateway (or similar)`);

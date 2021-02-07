@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const childProcess = require("child_process");
+const fetch = require("node-fetch");
 const fs = require("fs");
 const path = require("path");
 const util = require("util");
@@ -15,6 +16,7 @@ const yargs = require("yargs/yargs");
 const yargsParser = require("yargs-parser").detailed;
 
 const patchWith = require("@valos/tools/patchWith").default;
+const fetchJSON = require("@valos/tools/fetchJSON").default;
 const dumpify = require("@valos/tools/dumpify").default;
 const wrapErrorModule = require("@valos/tools/wrapError");
 const {
@@ -198,6 +200,9 @@ const _vlm = {
   // minimatch namespace of the glob matching tools
   // See https://github.com/isaacs/minimatch
   minimatch,
+
+  fetch,
+  fetchJSON (input, options) { return fetchJSON(input, options, fetch); },
 
   // node.js path.posix tools - all shell commands expect posix-style paths.
   // See https://nodejs.org/api/path.html
@@ -1202,18 +1207,18 @@ function execute (args, options = {}) {
         subProcess.on("error",
             error => resolveToOnExecuteDone([error, undefined, undefined, stdout, stderr]));
         if (options.onProcess) options.onProcess(subProcess);
-        process.on("SIGINT", () => {
+        process.on("SIGINT", _killSubProcess);
+        process.on("SIGTERM", _killSubProcess);
+        if (options.terminateOnceTruthy) {
+          thenChainEagerly(options.terminateWhenTruthy,
+              shouldTerminate => shouldTerminate && _killSubProcess());
+        }
+        function _killSubProcess () {
           _vlm.warn(`vlm (pid ${process.getgid()}) killing pid ${subProcess.pid}:`,
               _vlm.theme.green(...argv));
           process.kill(-subProcess.pid, "SIGTERM");
           process.kill(-subProcess.pid, "SIGKILL");
-        });
-        process.on("SIGTERM", () => {
-          _vlm.warn(`vlm (pid ${process.getgid()}) killing pid ${subProcess.pid}:`,
-              _vlm.theme.green(...argv));
-          process.kill(-subProcess.pid, "SIGTERM");
-          process.kill(-subProcess.pid, "SIGKILL");
-        });
+        }
       });
     },
     function _postExecute (error, code, signal, stdout, stderr) {
@@ -2780,6 +2785,9 @@ function _commitUpdates (vlm, configStatus) {
           ? configStatus.createUpdatedContent(configStatus.content)
           : configStatus.content,
       null, 2);
+  if (!vlm.shell.test("-f", configStatus.path)) {
+    vlm.shell.mkdir("-p", vlm.path.dirname(configStatus.path));
+  }
   shell.ShellString(`${configString}\n`).to(configStatus.path);
   vlm.ifVerbose(1)
       .info(`committed '${configStatus.path}' updates to file:`);

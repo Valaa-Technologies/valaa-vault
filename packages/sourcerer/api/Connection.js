@@ -24,23 +24,21 @@ export default class Connection extends Follower {
   _upstreamConnection: Connection;
   _activeConnection: Connection | Promise<Connection>;
 
-  constructor ({
-    sourcerer, verbosity, name, chronicleURI, pushTruths, pushCommands,
-  }: {
+  constructor (options: {
     sourcerer: Sourcerer, verbosity?: number, name: ?any, chronicleURI: string,
-    pushTruths?: ReceiveEvents, pushCommands?: ReceiveEvents,
+    sourcerOptions: SourceryOptions,
   }) {
-    super(sourcerer, verbosity, name);
-    invariantifyObject(sourcerer, "Connection.constructor.sourcerer",
+    super(options.sourcerer, options.verbosity, name);
+    invariantifyObject(options.sourcerer, "Connection.constructor.sourcerer",
         { instanceof: Sourcerer });
     if (typeof chronicleURI !== "string") {
-      invariantifyString(chronicleURI, "Connection.constructor.chronicleURI",
+      invariantifyString(options.chronicleURI, "Connection.constructor.chronicleURI",
           { allowEmpty: true });
     }
-    this._chronicleURI = chronicleURI;
+    this._chronicleURI = options.chronicleURI;
     this._refCount = 0;
-    this._pushTruthsDownstream = pushTruths;
-    this._pushCommandsDownstream = pushCommands;
+    this._pushTruthsDownstream = options.sourceryOptions.pushTruths;
+    this._pushCommandsDownstream = options.sourceryOptions.pushCommands;
     this.setRawName(this._chronicleURI);
   }
 

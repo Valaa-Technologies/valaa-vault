@@ -32,17 +32,19 @@ import { dumpObject } from "~/tools/wrapError";
    * @memberof Oracle
    */
 export type SourceryOptions = {
-  sourcer?: boolean,                      // default: true. Connect to updates
-  subscribeEvents?: boolean,              // default: true. Subscribe for downstream push events.
-  pushTruths?: ReceiveEvents,   // The persistent callback for downstream push events.
+  sourcer?: boolean,                     // default: true. Connect to updates
+  subscribeEvents?: boolean,             // default: true. Subscribe for downstream push events.
+  pushTruths?: ReceiveEvents,            // The persistent callback for pushing truths downstream.
+  pushCommands?: ReceiveEvents,          // The persistent callback for pushing commands downstream.
+
   narrateOptions?: NarrateOptions, // default: {}. Narrate with default options. False to disable.
-  newConnection?: boolean,                // if true, throw if a connection exists,
-                                          // if false, throw if no connection exists,
+  newConnection?: boolean,               // if true, throw if a connection exists,
+                                         // if false, throw if no connection exists,
   newChronicle?: boolean,          // if true, throw if a chronicle exists (has persisted events)
                                    // if false, throw if no chronicle exists (no persisted events)
-  allowPartialConnection?: boolean,       // default: false. If true, return not fully narrated
-                                          // connection synchronously
-  requireLatestMediaContents?: boolean,   //
+  allowPartialConnection?: boolean,      // default: false. If true, return not fully narrated
+                                        // connection synchronously
+  requireLatestMediaContents?: boolean,  //
 };
 
 /* eslint-disable no-unused-vars */
@@ -159,15 +161,13 @@ export default class Sourcerer extends FabricEventTarget {
     return this.sourcerChronicle(chronicleURI, options);
   }
 
-  _createConnection (chronicleURI: string, options: SourceryOptions) {
+  _createConnection (chronicleURI: string, sourceryOptions: SourceryOptions) {
     const ConnectionType = this.constructor.ConnectionType;
     if (!ConnectionType) {
-      return this._upstream.sourcerChronicle(chronicleURI, options);
+      return this._upstream.sourcerChronicle(chronicleURI, sourceryOptions);
     }
     return new ConnectionType({
-      chronicleURI, sourcerer: this, verbosity: this.getVerbosity(),
-      pushTruths: options.pushTruths,
-      pushCommands: options.pushCommands,
+      chronicleURI, sourcerer: this, verbosity: this.getVerbosity(), sourceryOptions,
     });
   }
 

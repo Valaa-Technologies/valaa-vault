@@ -47,11 +47,11 @@ export default class Oracle extends Sourcerer {
     return ret;
   }
 
-  _createConnection (chronicleURI: string, options: SourceryOptions) {
+  _createConnection (chronicleURI: string, sourceryOptions: SourceryOptions) {
     const authoritySourcerer = this.obtainAuthorityOfChronicle(chronicleURI);
     return new OracleConnection({
       chronicleURI, sourcerer: this, verbosity: this.getVerbosity(),
-      pushTruths: options.pushTruths, authoritySourcerer,
+      sourceryOptions, authoritySourcerer,
     });
   }
 }

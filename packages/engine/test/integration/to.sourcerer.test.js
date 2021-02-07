@@ -612,31 +612,50 @@ describe("Two paired harnesses emulating two gateways connected through event st
     harness = await createEngineOracleHarness({ verbosity: 0, oracle: {
       testAuthorityConfig: { isRemoteAuthority: true, isLocallyRecorded: true },
     } });
-    const pairness = await createEngineOracleHarness({ verbosity: 0, pairedHarness: harness });
+    const pairness = await createEngineOracleHarness({ verbosity: 1, pairedHarness: harness });
 
-    const newVRef = await harness.runValoscript(vRef(testRootId), `
-      (new Entity({ owner: this, fixed: { name: "subEntity" }, properties: {
+    const { newVRef, nonExistent } = await harness.runValoscript(vRef(testRootId), `
+      const subEntity = new Entity({ owner: this, fixed: { name: "subEntity" }, properties: {
         thing: "the", over: "base",
-      } })).$V.vref;
+        nonExistent: valos.refer("valaa-test:?id=@$~raw.nonexistent@@#@$~raw.nonexistent@@"),
+      } });
+      ({ newVRef: subEntity.$V.vref, nonExistent: subEntity.nonExistent })
     `);
     expect(newVRef)
         .toEqual(`valaa-test:?id=${testRootId}#@$~raw.test_chronicle@*$.subEntity@@`);
 
-    const { target, instance, isActive, targetVRef } = await pairness.runValoscript(
+    const {
+      target, prop, areEqual, instance, isActive, targetVRef, propVRef,
+    } = await pairness.runValoscript(
         vRef(testRootId), `
-      const newChronicle = new Entity({ authorityURI: "valaa-test:" });
+      const newChronicle = new Entity({
+        authorityURI: "valaa-test:",
+        properties: { prop: valos.refer(newVRef) },
+      });
+      const prop = newChronicle.prop;
       const relation = new Relation({ owner: newChronicle, target: valos.refer(newVRef) });
+      const areEqual = (prop === relation.$V.target);
       const instance = new Entity({
         owner: newChronicle, instancePrototype: relation.$V.target,
         // properties: { over: "ridden" },
       });
       const target = relation.$V.target;
-      ({ target, instance, isActive: valos.Resource.isActive(target), targetVRef: target.$V.vref });
+      ({
+        target, prop, areEqual,
+        instance, isActive: valos.Resource.isActive(target),
+        targetVRef: target.$V.vref, propVRef: prop.$V.vref,
+      });
     `, { newVRef });
     expect(isActive)
         .toEqual(false);
+    expect(areEqual)
+        .toEqual(true);
     expect(targetVRef)
         .toEqual(newVRef);
+    expect(propVRef)
+        .toEqual(newVRef);
+    expect(prop)
+        .toEqual(target);
     expect(target.getPhase())
         .toEqual("Immaterial");
     expect(instance.getPhase())
@@ -648,12 +667,14 @@ describe("Two paired harnesses emulating two gateways connected through event st
     expect(target.getPhase())
         .toEqual("Active");
 
-    const { isNowActive, thing, over, ithing, itprop } = await pairness.runValoscript(target, `({
+    const { isNowActive, thing, over, ithing, itprop, pairedNonExistent } =
+        await pairness.runValoscript(target, `({
       isNowActive: valos.Resource.isActive(this),
       thing: this.thing,
       over: instance.over,
       ithing: instance.thing,
       itprop: instance.$V.properties[0],
+      pairedNonExistent: instance.nonExistent,
     });
     `, { instance });
     const instanceId = instance.getRawId();
@@ -669,6 +690,8 @@ describe("Two paired harnesses emulating two gateways connected through event st
         .toEqual("Active");
     expect(itprop.getRawId())
         .toEqual(`${instanceId.slice(0, -2)}@.$.thing@@`);
+    expect(nonExistent.getRawId())
+        .toEqual(pairedNonExistent.getRawId());
   });
   it("copies valaa-test property object values on assignment", async () => {
     harness = createEngineTestHarness({ verbosity: 0, claimBaseBlock: true });

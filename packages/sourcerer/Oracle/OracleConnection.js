@@ -29,9 +29,13 @@ import { DelayedQueue, dumpObject, thenChainEagerly } from "~/tools";
  * @extends {Connection}
  */
 export default class OracleConnection extends Connection {
-  constructor ({ authoritySourcerer, ...rest }: Object) {
-    super(rest);
-    this._authoritySourcerer = authoritySourcerer;
+  constructor (options: Object) {
+    super(options);
+    // TODO(iridian, 2021-02): This is probably a refactoring artifact
+    // and should probably be removed.
+    this._pushCommandsDownstream = null;
+
+    this._authoritySourcerer = options.authoritySourcerer;
     this._decoderArray = new DecoderArray({
       name: `Decoders of ${this.getName()}`,
       fallbackArray: this.getOracle().getDecoderArray(),

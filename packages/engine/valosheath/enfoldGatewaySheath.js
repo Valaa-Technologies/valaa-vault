@@ -81,11 +81,11 @@ resource URL (ie. contains the chronicle URL as defined above and the
       ([chronicleURI, resourceVRID] = resourcePart.split("#"));
     }
     resourceVRID = resourceVRID.split(";")[0];
-    return this.__callerValker__.run(null, VALEK.fromObject(resourceVRID).nullable())
-        || (chronicleURI
-            && vRef(resourceVRID, undefined, undefined, chronicleURI)
-                .setAbsent())
-        || null;
+    let ret = this.__callerValker__.run(null, VALEK.fromObject(resourceVRID).nullable());
+    if (!ret && chronicleURI) {
+      ret = vRef(resourceVRID, undefined, undefined, chronicleURI).setAbsent();
+    }
+    return ret || null;
   });
 
   valos.fickleRefer = denoteValOSCallable([

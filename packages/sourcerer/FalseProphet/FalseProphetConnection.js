@@ -53,6 +53,9 @@ export default class FalseProphetConnection extends Connection {
       this._referencePrototype = new VRL()
           .initResolverComponent({ absent: true, partition: this._chronicleURI });
     }
+    if ((options.sourceryOptions || {}).newChronicle) {
+      this._referencePrototype.setAbsent(false);
+    }
     this._rootStem = this._chronicleURI.match(/\?id=(.*)@@$/)[1];
   }
 
@@ -63,13 +66,17 @@ export default class FalseProphetConnection extends Connection {
     function _prepareIdentity (...forward) {
       this._originatingIdentity = forward[0].discourse
           && forward[0].discourse.getIdentityMediator();
-      this._referencePrototype.setAbsent(false);
       return forward;
     },
     Connection.prototype._sourcerUpstream,
     Connection.prototype._narrateEventLog,
-    Connection.prototype._finalizeSourcery,
+    FalseProphetConnection.prototype._finalizeSourcery,
   ]
+
+  _finalizeSourcery (...rest) {
+    this._referencePrototype.setAbsent(false);
+    return super._finalizeSourcery(...rest);
+  }
 
   isLocallyRecorded () {
     return this._isLocallyPersisted !== undefined ? this._isLocallyPersisted
@@ -346,6 +353,9 @@ export default class FalseProphetConnection extends Connection {
         }
       }
       while (this._pendingTruths[newTruthCount]) ++newTruthCount;
+      if (!this._headEventId) {
+        this._referencePrototype.setAbsent(false);
+      }
       this._headEventId += confirmCount + newTruthCount;
       newTruths = this._pendingTruths.splice(0, newTruthCount);
       const latestTruth = this._latestTruth;

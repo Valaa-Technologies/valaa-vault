@@ -40,7 +40,7 @@ export default class AuthorityConnection extends Connection {
     Connection.prototype._finalizeSourcery,
   ]
 
-  _sourcerUpstream (options) {
+  _sourcerUpstream (options /* , authorityConfig */) {
     return super._sourcerUpstream(options, { sourceredUpstream: null });
   }
 

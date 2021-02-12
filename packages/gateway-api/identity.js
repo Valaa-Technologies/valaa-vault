@@ -19,13 +19,13 @@ function getClientId (options = {}) {
 function getClientCookieName (options = {}) {
   if (!options.client_id) options.client_id = getClientId.call(this, options);
   if (!options.client_id) throw new Error("getClientCookieName.(clientURI|client_id) missing");
-  return `__Secure-valos-client-${encodeURIComponent(options.client_id)}`;
+  return `__Secure-valos-id-claims-${encodeURIComponent(options.client_id)}`;
 }
 
 function getSessionCookieName (options = {}) {
   if (!options.client_id) options.client_id = getClientId.call(this, options);
   if (!options.client_id) throw new Error("getSessionCookieName.(clientURI|client_id) missing");
-  return `__Secure-valos-session-token-${encodeURIComponent(options.client_id)}`;
+  return `__Secure-valos-session-${encodeURIComponent(options.client_id)}`;
 }
 
 function getSessionClaims (options = {}) {

@@ -22,8 +22,8 @@ beforeEach(() => {});
 
 const testClientChronicleURI = "valaa-local:?id=@$~u4.f3d306d9-79ac-4087-afbc-46f739226eb2@@";
 const testClientId = encodeURIComponent(testClientChronicleURI);
-const sessionCookieName = `__Secure-valos-session-token-${testClientId}`;
-const clientCookieName = `__Secure-valos-client-${testClientId}`;
+const sessionCookieName = `__Secure-valos-session-${testClientId}`;
+const clientCookieName = `__Secure-valos-id-claims-${testClientId}`;
 
 const testAdminId = "@$~test.admin@@";
 const testUserId = "@$~test.user@@";

@@ -130,7 +130,8 @@ function thenChainEagerly (
     initialValue, // : any,
     functions, // : any | Function[],
     onRejected, // : ?Function,
-    startIndex // : number
+    startIndex, // : number
+    errorDetailLevel = 2, // : number
 ) {
   const functionChain = (startIndex !== undefined) || Array.isArray(functions) ? functions
       : [functions];
@@ -153,11 +154,12 @@ function thenChainEagerly (
   }
   --index;
   return next.then(
-      newHead => (index + 1 >= functionChain.length
-          ? newHead
-          : thenChainEagerly(newHead, functionChain, onRejected, index + 1)),
+      newHead =>
+          (index + 1 >= functionChain.length
+              ? newHead
+              : thenChainEagerly(newHead, functionChain, onRejected, index + 1)),
       error => {
-        const wrapped = wrapError(error, new Error(getName("thenable")),
+        const wrapped = wrapError(error, errorDetailLevel, new Error(getName("thenable")),
             "\n\thead:", ...dumpObject(head, { nest: 0 }),
             "\n\tinitialValue:", ...dumpObject(initialValue),
             "\n\tfunctionChain:", ...dumpObject(functionChain));
@@ -178,7 +180,8 @@ function thisChainEagerly (
     initialParams, // : any,
     functions, // : any | Function[],
     onRejected, // : ?Function,
-    startIndex // : number
+    startIndex, // : number
+    errorDetailLevel = 2, // : number
 ) {
   let index = startIndex || 0, params = initialParams;
   let paramsArray;
@@ -232,21 +235,21 @@ function thisChainEagerly (
     paramsArray = null;
   }
   --index;
-  const ret = params.then(
-      newParams => thisChainEagerly(this_, newParams, functions, onRejected, index + 1),
+  return params.then(
+      newParams =>
+          thisChainEagerly(this_, newParams, functions, onRejected, index + 1),
       error => {
         const retry = onThisChainError(
             error, new Error(getName("thenable resolution")), onRejected);
         return thisChainEagerly(this_, retry, functions, onRejected, functions.length);
       });
-  return ret;
   function getName (info) {
     const functionName = (functions[index] || "").name;
     return `During ${`${functionName ? `${functionName} (as ` : ""
         }thisChainEagerly ${index === -1 ? "initial params" : `step #${index}`}`} ${info})`;
   }
   function onThisChainError (error, errorName, maybeOnRejected) {
-    const wrapped = wrapError(error, errorName,
+    const wrapped = wrapError(error, errorDetailLevel, errorName,
         "\n\tthis:", ...dumpObject(this_, { nest: 0 }),
         "\n\tparams:", ...dumpObject(params),
         "\n\tfunctions:", ...dumpObject(functions),

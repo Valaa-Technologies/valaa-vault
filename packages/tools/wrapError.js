@@ -51,7 +51,7 @@ function dumpifyObject (value) {
  * @param {any} contextDescription
  * @returns
  */
-function wrapError (errorIn, contextName, ...contextDescriptions) {
+function wrapError (errorIn, detailLevel, contextName, ...contextDescriptions) {
   const error = _tryCooperativeError(errorIn) || new Error(errorIn);
   if (!error.stack) error.stack = (new Error("dummy").stack);
   if ((typeof error !== "object") || !error || (typeof error.message !== "string")) {
@@ -60,6 +60,9 @@ function wrapError (errorIn, contextName, ...contextDescriptions) {
     throw new Error("wrapError.error must be an Error object");
   }
   const originalMessage = error.originalMessage || error.message;
+  if (typeof detailLevel !== "number") {
+    return wrapError(error, 0, detailLevel, contextName || "", ...contextDescriptions);
+  }
   const contextError = new Error("", error.fileName, error.lineNumber);
   if (!(contextName instanceof Error)) {
     contextError.name = contextName;
@@ -68,8 +71,11 @@ function wrapError (errorIn, contextName, ...contextDescriptions) {
     contextError.name = contextName.message;
     contextError.tidyFrameList = contextName.stack.split("\n").slice(2);
     contextError.logger = contextName.logger;
-    contextError.verbosities = contextName.verbosities;
+    contextError.detailAdjustment = (contextName.logger || {}).getVerbosity
+        ? -(contextName.logger || {}).getVerbosity() : 0;
   }
+  contextError.detailLevel = detailLevel;
+
   const outermostError = error.errorContexts
       ? error.errorContexts[error.errorContexts.length - 1]
       : error;
@@ -188,7 +194,7 @@ function _clipFrameListToCurrentContext (innerError, outerError) {
 function outputError (error, header = "Exception caught", logger = _globalLogger,
     contextVerbosity = 1) {
   (logger.errorEvent || logger.error).call(logger,
-      `  ${header} (with ${(error.errorContexts || []).length} contexts):\n\n`,
+      `  ${header} (with ${(error.errorContexts || []).length} contexts, innermost first):\n\n`,
       error.originalMessage || error.message, `\n `);
   if (error.customErrorHandler) {
     error.customErrorHandler(logger);
@@ -198,17 +204,19 @@ function outputError (error, header = "Exception caught", logger = _globalLogger
       : error.stack.split("\n").slice(1);
   for (const context of (error.errorContexts || [])) {
     const contextLogger = context.logger || logger;
-    const verbosities = context.verbosities || [0];
-    if (verbosities[1] === undefined) verbosities.unshift(contextVerbosity);
-    const excess = verbosities[0] - verbosities[1];
-    if (excess >= 0) {
+    const contextDetailLevel = (context.detailLevel || 0) + (context.detailAdjustment || 0);
+    const visibility = contextVerbosity - contextDetailLevel;
+    const contextDetail = !context.detailAdjustment ? String(contextDetailLevel)
+        : context.detailAdjustment < 0 ? `${context.detailLevel}-${-context.detailAdjustment}`
+        : `${context.detailLevel}+${context.detailAdjustment}`;
+    if (visibility >= 0) {
       logger.debug(traces.join("\n"));
       traces = [];
       const warn = (contextLogger.warnEvent || contextLogger.warn).bind(contextLogger);
-      warn(`[${verbosities.join(">=")}] error context by:\n  ${context.name}`,
+      warn(`[${contextVerbosity}>=${contextDetail}] context:\n  ${context.name}`,
           ...context.contextDescriptions.map(dumpifyObject));
-    } else if (excess >= -1) {
-      logger.debug(`\t[${verbosities.join("<")}]`,
+    } else if (visibility >= -1) {
+      logger.debug(`\t[${contextVerbosity}<${contextDetail}]`,
           inBrowser() ? { traces } : traces.length, `collapsed fabric traces`);
       traces = [];
       const lines = [];
@@ -217,10 +225,11 @@ function outputError (error, header = "Exception caught", logger = _globalLogger
         lines[lines.length - 1].push(entry);
       }
       const info = (contextLogger.infoEvent || contextLogger.info).bind(contextLogger);
-      info(`[${verbosities.join("<")}] collapsed error context by ${context.name}:`,
+      info(`[${contextVerbosity}<${contextDetail}] collapsed context; ${context.name}:`,
           inBrowser() ? { lines } : `${lines.length} lines hidden`);
     } else {
-      traces.push(`  [${verbosities.join("<<")}] hidden error context by ${context.name}`);
+      traces.push(
+          `  [${contextVerbosity}<<${contextDetail}] hidden context; ${context.name}`);
     }
     traces.push(...(context.tidyFrameList || []));
   }

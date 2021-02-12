@@ -142,30 +142,30 @@ export class FabricEventTarget {
         .apply(this._parent, rest);
   }
 
-  debugEvent (firstPartOrMinVerbosity: number | any, ...rest: any[]) {
-    if (_verbosityExcess(firstPartOrMinVerbosity, this._verbosity, this) < 0) return this;
+  debugEvent (firstPartOrDetailLevel: number | any, ...rest: any[]) {
+    if (_adjustDetailLevel(firstPartOrDetailLevel, this._verbosity, this) > 0) return this;
     return this._outputMessageEvent((this._parent || this).debug.bind(this._parent || this),
-        true, this._getMessageParts(firstPartOrMinVerbosity, rest));
+        true, this._getMessageParts(firstPartOrDetailLevel, rest));
   }
-  infoEvent (firstPartOrMinVerbosity: number | any, ...rest: any[]) {
-    if (_verbosityExcess(firstPartOrMinVerbosity, this._verbosity, this) < 0) return this;
+  infoEvent (firstPartOrDetailLevel: number | any, ...rest: any[]) {
+    if (_adjustDetailLevel(firstPartOrDetailLevel, this._verbosity, this) > 0) return this;
     return this._outputMessageEvent((this._parent || this).info.bind(this._parent || this),
-        true, this._getMessageParts(firstPartOrMinVerbosity, rest));
+        true, this._getMessageParts(firstPartOrDetailLevel, rest));
   }
-  logEvent (firstPartOrMinVerbosity: number | any, ...rest: any[]) {
-    if (_verbosityExcess(firstPartOrMinVerbosity, this._verbosity, this) < 0) return this;
+  logEvent (firstPartOrDetailLevel: number | any, ...rest: any[]) {
+    if (_adjustDetailLevel(firstPartOrDetailLevel, this._verbosity, this) > 0) return this;
     return this._outputMessageEvent((this._parent || this).log.bind(this._parent || this),
-        true, this._getMessageParts(firstPartOrMinVerbosity, rest));
+        true, this._getMessageParts(firstPartOrDetailLevel, rest));
   }
-  warnEvent (firstPartOrMinVerbosity: number | any, ...rest: any[]) {
-    if (_verbosityExcess(firstPartOrMinVerbosity, this._verbosity, this) < 0) return this;
+  warnEvent (firstPartOrDetailLevel: number | any, ...rest: any[]) {
+    if (_adjustDetailLevel(firstPartOrDetailLevel, this._verbosity, this) > 0) return this;
     return this._outputMessageEvent((this._parent || this).warn.bind(this._parent || this),
-        true, this._getMessageParts(firstPartOrMinVerbosity, rest));
+        true, this._getMessageParts(firstPartOrDetailLevel, rest));
   }
-  errorEvent (firstPartOrMinVerbosity: number | any, ...rest: any[]) {
-    if (_verbosityExcess(firstPartOrMinVerbosity, this._verbosity, this) < 0) return this;
+  errorEvent (firstPartOrDetailLevel: number | any, ...rest: any[]) {
+    if (_adjustDetailLevel(firstPartOrDetailLevel, this._verbosity, this) > 0) return this;
     return this._outputMessageEvent((this._parent || this).error.bind(this._parent || this),
-        true, this._getMessageParts(firstPartOrMinVerbosity, rest));
+        true, this._getMessageParts(firstPartOrDetailLevel, rest));
   }
 
   static _globalOps = Object.create(null);
@@ -233,12 +233,12 @@ export class FabricEventTarget {
         : output(`${this.debugId({ raw: !joinFirstPieceWithId })}: ${first}`, ...parts.slice(1));
   }
 
-  wrapErrorEvent (error: Error, minVerbosity: number, name: Error | string, ...contexts_: any[]) {
-    if (typeof minVerbosity !== "number") {
+  wrapErrorEvent (error: Error, detailLevel: number, name: Error | string, ...contexts_: any[]) {
+    if (typeof detailLevel !== "number") {
       return this.wrapErrorEvent(error, 0, name, ...contexts_);
     }
-    const excess = _verbosityExcess(minVerbosity, this._verbosity, this);
-    if (excess <= -3) return error; // no wrap.
+    const adjustedDetailLevel = _adjustDetailLevel(detailLevel, this._verbosity, this);
+    if (adjustedDetailLevel > 2) return error; // no wrap.
     if ((error == null) || !error.hasOwnProperty) {
       console.error("wrapErrorEvent.error must be an object, got:", error);
       throw new Error("wrapErrorEvent.error must be an object. See console.log for details");
@@ -258,22 +258,20 @@ export class FabricEventTarget {
           .slice((functionName instanceof Error) ? 2 : 3);
       wrapper.logger = this;
     }
-    if (typeof minVerbosity === "number") {
-      wrapper.verbosities = [this.getVerbosity(), minVerbosity];
-    }
     if (error.hasOwnProperty("_frameStackError")) wrapper.stack = error._frameStackError.stack;
-    const ret = wrapError(error, wrapper, ...contexts);
+    wrapper.detailAdjustment = adjustedDetailLevel - detailLevel;
+    const ret = wrapError(error, detailLevel, ...contexts);
     ret.functionName = actualFunctionName;
     ret.contextObject = this;
     return ret;
   }
 
-  outputErrorEvent (error: Error, firstMessageOrMinVerbosity, ...restMessages) {
-    return (!_verbosityExcess(firstMessageOrMinVerbosity, this._verbosity, this)
+  outputErrorEvent (error: Error, firstMessageOrDetailLevel, ...restMessages) {
+    return (_adjustDetailLevel(firstMessageOrDetailLevel, this._verbosity, this) > 0
             ? outputCollapsedError
             : outputError)(
         error,
-        this._getMessageParts(firstMessageOrMinVerbosity, restMessages).join(", "),
+        this._getMessageParts(firstMessageOrDetailLevel, restMessages).join(", "),
         this);
   }
 
@@ -496,9 +494,9 @@ export function generateDispatchEventPath (
 
 FabricEventTarget.prototype[FabricEventTypesTag] = {};
 
-function _verbosityExcess (maybeMinVerbosity, verbosity, eventTarget) {
-  return (typeof maybeMinVerbosity !== "number") ? 0
-      : (verbosity !== undefined ? verbosity : eventTarget.getVerbosity()) - maybeMinVerbosity;
+function _adjustDetailLevel (maybeDetailLevel, verbosity, eventTarget) {
+  return ((typeof maybeDetailLevel !== "number") ? 0 : maybeDetailLevel)
+      - (verbosity !== undefined ? verbosity : eventTarget.getVerbosity());
 }
 
 function _createListener (type, callback, options) {

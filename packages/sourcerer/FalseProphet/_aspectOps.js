@@ -66,32 +66,32 @@ function _validateRoleAndRefreshChroniclePublicKey (
 
   const chronicleDirectorKey = _getPublicKeyFromChronicle(aspectParams.publicIdentity,
     // Always sign and validate using previous director key except for first event
-      (aspectParams.index === 0) ? state : previousState, connection._rootStem, "hasDirector");
+      (aspectParams.index === 0) ? state : previousState, connection._rootStem, "Directorship");
   if (updatesVChronicle && !bypassLocalAuthorChecks) {
     if (!chronicleDirectorKey) {
-      return `No VChronicle:hasDirector identity found when modifying a VChronicle resource`;
+      return `No VChronicle:Directorship identity found when modifying a VChronicle resource`;
     }
     if (updatesVChronicle.requiresDirector
         && (updatesVChronicle.requiresDirector !== aspectParams.publicIdentity)) {
-      return `Incongruent VChronicle:hasDirector identity encountered ${
-        ""}when modifying a VChronicle:hasDirector relation`;
+      return `Incongruent VChronicle:Directorship identity encountered ${
+        ""}when modifying a VChronicle:Directorship relation`;
     }
   }
   const chroniclePublicKey = chronicleDirectorKey || _getPublicKeyFromChronicle(
-      aspectParams.publicIdentity, state, connection._rootStem, "hasContributor");
+      aspectParams.publicIdentity, state, connection._rootStem, "Contributorship");
   if (!chroniclePublicKey) {
     aspectParams.publicIdentity = null;
     if (requiresAuthoredEvents) {
       // TODO(iridian, 2020-10): add VChronicle:allowGuestContributors which when set
       // permits automatic identity relation creation into the event
       // _autoAddContributorRelation(connection, op, aspectParams);
-      return `No VChronicle:hasContributor found targeting the authority public identity${
+      return `No VChronicle:Contributorship found targeting the authority public identity${
         ""} (and VChronicle:allowGuestContributors not set)`;
     }
   } else if (chroniclePublicKey !== aspectParams.publicKey) {
     if (aspectParams.publicKey && !bypassLocalAuthorChecks) {
     // TODO(iridian, 2020-10): auto-refresh identity relation public key if permitted
-      return "Obsolete VChronicle:hasContributor publicKey (auto-refresh not implemented)";
+      return "Obsolete VChronicle:Contributorship publicKey (auto-refresh not implemented)";
     }
     aspectParams.publicKey = chroniclePublicKey;
   }

@@ -212,7 +212,8 @@ export function universalizeChronicleMutation (bard: Bard, id: VRL, isNewChronic
   }
 }
 
-const _isDirectorUpdate = /^@([^@]*)@-\$VChronicle\.hasDirector\$\.@\.\$V\.target([^@]*)@@(.*)@@$/i;
+const _isDirectorUpdate =
+    /^@([^@]*)@-\$VChronicle\.Directorship\$\.@\.\$V\.target([^@]*)@@(.*)@@$/i;
 
 function _addUpdatesVChronicle (bard, chronicleInfo, vrid) {
   const updatesVChronicle = chronicleInfo.updatesVChronicle

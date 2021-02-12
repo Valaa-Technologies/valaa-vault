@@ -2,6 +2,10 @@ module.exports = {
   domain: "@valos/kernel",
   preferredPrefix: "VChronicle",
   baseIRI: "https://valospace.org/chronicle/0#",
+  prefixes: {
+    acl: "http://www.w3.org/ns/auth/acl#",
+    vcard: "http://www.w3.org/2006/vcard/ns#",
+  },
   namespaceModules: {
     VKernel: "@valos/kernel/VKernel",
     VState: "@valos/state/VState",
@@ -14,7 +18,7 @@ module.exports = {
   vocabulary: {
     // behaviors
     requiresAuthoredEvents: {
-      "@type": "VKernel:Property",
+      "@type": "VKernel:Class",
       "rdfs:domain": "V:Resource",
       "rdfs:range": "xsd:boolean", // TODO(iridian, 2020-10): Add user role semantics
       "rdfs:comment":
@@ -22,19 +26,19 @@ module.exports = {
 an AuthorAspect.`,
     },
     // contributors
-    hasContributor: {
-      "@type": "VKernel:Property",
-      "rdfs:domain": "V:Resource",
-      "rdfs:range": "V:Resource", // TODO(iridian, 2020-10): Add user role semantics
+    Contributorship: {
+      "@type": "V:Relation",
+      "rdfs:subClassOf": "acl:Authorization",
+      // TODO(iridian, 2020-02): Add inference denotation for:
+      // Contributorship V:source to be same as acl:accessTo
+      // Contributorship V:target to be same as acl:agent
       "rdfs:comment":
-`The collection of identities which have registered their signature
-public keys to the chronicle event log.`,
+`The collection of agents which have registered their signature public
+keys to the chronicle event log.`,
     },
-    hasDirector: {
-      "@type": "VKernel:Property",
-      "rdfs:subPropertyOf": "VChronicle:hasContributor",
-      "rdfs:domain": "V:Resource",
-      "rdfs:range": "V:Resource", // TODO(iridian, 2020-10): Add user role semantics
+    Directorship: {
+      "@type": "V:Relation",
+      "rdfs:subClassOf": "VChronicle:Contributorship",
       "rdfs:comment":
 `The collection of identities which (and only which) can make changes
 to the chronicle behaviors (eg. permissions).`,

@@ -10,6 +10,7 @@ module.exports = {
   b64SHA256FromUTF8Text,
   hexSHA512FromBuffer,
   hashVPlot,
+  hash40,
   hashV240,
   isHashV240,
 };
@@ -37,8 +38,14 @@ function hexFromBuffer (arrayBuffer) {
 }
 
 function hashVPlot (object, options) {
-  const vplot = options.isValidVPlot ? object : formVPlot(object);
-  return base64URLFromBuffer(nacl.hash(new TextEncoder().encode(vplot))).slice(0, 64);
+  const vplot = options && options.isValidVPlot ? object : formVPlot(object);
+  return base64URLFromBuffer(nacl.hash(new TextEncoder().encode(vplot)))
+      .slice(0, (options && options.length) || 64);
+}
+
+function hash40 (input) {
+  const inputBuffer = (typeof input === "string") ? new TextEncoder().encode(input) : input;
+  return base64URLFromBuffer(nacl.hash(inputBuffer)).slice(0, 40);
 }
 
 // TODO(iridian, 2020-10): The SHA3 algorithm should probably be

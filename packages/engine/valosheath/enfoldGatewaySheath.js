@@ -1,5 +1,6 @@
 // @flow
 
+import { hash40 } from "~/security/hash";
 import { vRef } from "~/raem/VRL";
 import { denoteValOSCallable, denoteDeprecatedValOSCallable } from "~/raem/VALK";
 
@@ -96,6 +97,13 @@ returns *undefined*.`,
   ])(function fickleRefer (fickleId) {
     return Vrapper.getFickleResource(fickleId);
   });
+
+  valos.hash40 = denoteValOSCallable([
+`Returns a 40-character SHA-512 hash of the given input. The input can
+be an ArrayBuffer or a utf-8 text string. The returned value is a
+base64-url-encoded string that is truncated to the leftmost 40
+characters (ie. the leftmost 240 bits) of the hash.`,
+      ])(hash40);
 
   valos.Discourse = Object.assign(Object.create(valoscriptInterfacePrototype), {
     name: "Discourse",

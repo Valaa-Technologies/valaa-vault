@@ -345,6 +345,33 @@ const _vlm = {
     console.log(...rest);
     return this;
   },
+  chapter (name, body) {
+    return {
+      "...": { chapters: true, ...(name && { heading: name }) },
+      ...body,
+    };
+  },
+  table (headers, rows) {
+    const columns = [];
+    let ellipsisIndex;
+    const columnTemplates = {};
+    for (const header of headers) {
+      if (header === "...") ellipsisIndex = columns.length;
+      columns.push([header, columnTemplates[header] = {}]);
+    }
+    if (ellipsisIndex !== undefined) {
+      const ellipsisColumns = [];
+      for (const entry of rows) {
+        for (const prop of Object.keys(entry)) {
+          if (!columnTemplates[prop]) {
+            ellipsisColumns.push([prop, columnTemplates[prop] = {}]);
+          }
+        }
+      }
+      columns.splice(ellipsisIndex, 0, ellipsisColumns);
+    }
+    return { "...": { columns, entries: rows } };
+  },
   result (...rest) {
     const outputs = this.render(_vlm.vargv.output, ...rest.map(result =>
     // If the result has a heading, wrap the result inside an object so that the heading will be

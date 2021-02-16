@@ -170,49 +170,65 @@ exports.handler = async (yargv) => {
     if (!currentBranchMatch) {
       throw new Error("Current branch is not 'stable', 'edge' nor a release or a develop branch");
     }
-    const [,,, branchName,, releaseOrDevelopBranch, major, dotMinor, dotPatch]
+    const [,,, branchName,, uniqueBranchName, major, dotMinor, dotPatch]
         = currentBranchMatch;
-    if (!releaseOrDevelopBranch && (!yargv.release && !yargv.develop)) {
+    if (!uniqueBranchName && (!yargv.release && !yargv.develop)) {
       throw new Error(`Provide --release or --develop when releasing from '${branchName}'`);
     }
-    preparation.lernaConfig = require(vlm.path.join(process.cwd(), "lerna.json"));
-    const [, minor, patch] = preparation.lernaConfig.version.match(/^[0-9]*\.([0-9]+)\.([0-9]+)/);
+    const lerna = preparation.lernaConfig = require(vlm.path.join(process.cwd(), "lerna.json"));
+    const [, minor, patch] = lerna.version.match(/^[0-9]*\.([0-9]+)\.([0-9]+)/);
     preparation.isRelease = !!yargv.release
-        || (!yargv.develop && (releaseOrDevelopBranch === "release"));
+        || (!yargv.develop && (uniqueBranchName === "release"));
     preparation.newBranchKind = (yargv.release || yargv.develop)
         && (yargv.major ? "major" : yargv.minor ? "minor" : yargv.patch ? "patch" : true);
     if (!preparation.newBranchKind) {
       ret.releaseDescription = `Existing ${preparation.isRelease ? "release" : "develop"} branch`;
       preparation.targetBranch = branchName;
+      vlm.info(`Implicitly bumping the current version`, vlm.theme.version(lerna.version),
+          "in the current branch", vlm.theme.name(branchName), "as per lerna.json configuration");
     } else {
       const type = preparation.isRelease ? "release" : "develop";
       if (preparation.newBranchKind === true) {
-        preparation.newBranchKind = !releaseOrDevelopBranch
-            ? preparation.lernaConfig.command.version.bump
+        preparation.newBranchKind = !uniqueBranchName
+            ? lerna.command.version.bump
             : dotPatch ? "patch" : dotMinor ? "minor" : "major";
       }
       if (yargv.develop) {
         preparation.preid = (yargv.develop === true) ? "alpha" : yargv.develop;
+        if (lerna.command.version.preid
+            && preparation.preid.localeCompare(lerna.command.version.preid) > 0) {
+          preparation.isSimplePreidIncrease = true;
+        }
       }
       ret.releaseDescription = `New ${vlm.theme.strong(preparation.newBranchKind)} ${type} branch`;
-      // No patch bump if releasing from develop into a release.
-      const bump = (preparation.isRelease && (releaseOrDevelopBranch !== "release")) ? 0 : 1;
+      // No patch bump if releasing from develop into a release or if the preid update
+      const bumpInc = preparation.isSimplePreidIncrease
+          || (preparation.isRelease && (uniqueBranchName !== "release")) ? 0 : 1;
       const newMajor = typeof yargv.major === "number" ? yargv.major
-          : Number(major || 0) + (preparation.newBranchKind === "major" ? bump : 0);
+          : Number(major || 0) + (preparation.newBranchKind === "major" ? bumpInc : 0);
       const newMinor = typeof yargv.minor === "number" ? yargv.minor
-          : Number(minor || 0) + (preparation.newBranchKind === "minor" ? bump : 0);
+          : Number(minor || 0) + (preparation.newBranchKind === "minor" ? bumpInc : 0);
       const newPatch = typeof yargv.patch === "number" ? yargv.patch
-          : Number(patch || 0) + bump;
-      preparation.branchVersion
-          = (preparation.newBranchKind === "major") ? `${newMajor}`
-          : (preparation.newBranchKind === "minor") ? `${newMajor}.${newMinor}`
-          : `${newMajor}.${newMinor}.${newPatch}`;
-      preparation.targetBranch = `${type}/${preparation.branchVersion}`;
-      if ((await vlm.delegate(`git branch --list --no-color ${preparation.targetBranch}`))
-          .split("\n").filter(b => !b.match(/^\s*$/)).length) {
-        throw new Error(`Branch '${preparation.targetBranch}' already exists`);
+          : Number(patch || 0) + bumpInc;
+      if (preparation.isSimplePreidIncrease) {
+        preparation.targetBranch = branchName;
+      } else {
+        preparation.branchVersion
+            = (preparation.newBranchKind === "major") ? `${newMajor}`
+            : (preparation.newBranchKind === "minor") ? `${newMajor}.${newMinor}`
+            : `${newMajor}.${newMinor}.${newPatch}`;
+        preparation.targetBranch = `${type}/${preparation.branchVersion}`;
+        if ((await vlm.delegate(`git branch --list --no-color ${preparation.targetBranch}`))
+            .split("\n").filter(b => !b.match(/^\s*$/)).length) {
+          throw new Error(`Branch '${preparation.targetBranch}' already exists`);
+        }
+        if (uniqueBranchName === "develop") preparation.previousDevelopBranch = branchName;
       }
-      if (releaseOrDevelopBranch === "develop") preparation.previousDevelopBranch = branchName;
+      preparation.explicitVersion = `${newMajor}.${newMinor}.${newPatch}${
+          preparation.preid ? `-${preparation.preid}.0` : ""}`;
+      vlm.info(vlm.theme.strong("Preparing new explicit version:"),
+          vlm.theme.version(preparation.explicitVersion),
+          "into branch", vlm.theme.name(preparation.targetBranch));
     }
 
     const isDirty = (await vlm.delegate("git status -s"))
@@ -251,7 +267,8 @@ exports.handler = async (yargv) => {
         preparation.success ? "successful" : "FAILED"}: gathered config files and test results`;
   }
 
-  async function _commit ({ isRelease, targetBranch, newBranchKind, preid,
+  async function _commit ({ isRelease, targetBranch,
+      explicitVersion, newBranchKind, preid, isSimplePreidIncrease,
       previousDevelopBranch, lernaConfig, success }, commit) {
     if (!success) {
       commit.skipped = "preparation phase failed";
@@ -262,12 +279,16 @@ exports.handler = async (yargv) => {
     const assembleOverrides = { ...yargv.assemble };
 
     if (newBranchKind) {
-      await vlm.delegate(`git checkout -b ${targetBranch}`);
+      if (!isSimplePreidIncrease) {
+        await vlm.delegate(`git checkout -b ${targetBranch}`);
+      }
+      assembleOverrides.versionBump = explicitVersion
+          || (preid && `pre${newBranchKind}`)
+          || undefined;
       commit.newBranch = targetBranch;
       commit.lernaConfig = JSON.parse(JSON.stringify(lernaConfig));
       commit.lernaConfig.command.version.bump = preid ? `prerelease` : newBranchKind;
       commit.lernaConfig.command.version.preid = preid || "";
-      if (preid) assembleOverrides.bump = `pre${newBranchKind}`;
       commit.lernaConfig.command.version.allowBranch = targetBranch;
       vlm.shell.ShellString(JSON.stringify(commit.lernaConfig, null, 2)).to("./lerna.json");
       await vlm.delegate(`git add lerna.json`);

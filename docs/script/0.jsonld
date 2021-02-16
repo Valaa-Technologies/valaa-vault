@@ -68,7 +68,7 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/script",
-    "VRevdoc:version": "0.37.0-alpha.6",
+    "VRevdoc:version": "0.37.0-prerelease.0",
     "VRevdoc:preferredPrefix": "VScript",
     "VRevdoc:baseIRI": "https://valospace.org/script/0#",
     "VRevdoc:referencedModules": {

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0-prerelease.0](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.6...v0.37.0-prerelease.0) (2021-02-16)
+
+
+### Bug Fixes
+
+* **valma:** Don't bump version if updating preid to a greater one ([f5e7de5](https://github.com/valaatech/kernel/commit/f5e7de58097bd5aa37c74f0edd89131964021509))
+
+
+
+
+
 # [0.37.0-alpha.6](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.5...v0.37.0-alpha.6) (2021-01-28)
 
 **Note:** Version bump only for package @valos/type-vault

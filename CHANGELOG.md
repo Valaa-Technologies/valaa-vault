@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0-prerelease.0](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.6...v0.37.0-prerelease.0) (2021-02-16)
+
+
+### Bug Fixes
+
+* **valma:** Don't bump version if updating preid to a greater one ([f5e7de5](https://github.com/valaatech/kernel/commit/f5e7de58097bd5aa37c74f0edd89131964021509))
+* Premature setAbsent(false) ([ea252a6](https://github.com/valaatech/kernel/commit/ea252a6add166c9be620f88b052158e6b2d747e5))
+
+
+### Features
+
+* **gateway-api:** Add authorizeSession.identityProviderURI for openid servers ([60adfff](https://github.com/valaatech/kernel/commit/60adfffad09daa935cf05aeaccb0399a5f7fcc15))
+* **inspire:** Add valos.attachView, some fixes ([78ebb81](https://github.com/valaatech/kernel/commit/78ebb81fbe408e9966d08cd9c12d74421fd21bb6))
+* **security:** Add valos.hash40, the base64url encoded SHA256/240 ([d27cd7c](https://github.com/valaatech/kernel/commit/d27cd7c224d753923b0c4fd30e02dd609a38b678))
+* **valma:** Add vlm.fetch and vlm.fetchJSON ([92f86df](https://github.com/valaatech/kernel/commit/92f86df5d4501c4f82be83c60e5c68c67209e573))
+* **vlm:** Add vlm.chapter and vlm.table ([6c20ab6](https://github.com/valaatech/kernel/commit/6c20ab65681160cc87cd756927c1e7bb16a88fc7))
+
+
+
+
+
 # [0.37.0-alpha.6](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.5...v0.37.0-alpha.6) (2021-01-28)
 
 

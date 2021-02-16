@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0-prerelease.0](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.6...v0.37.0-prerelease.0) (2021-02-16)
+
+
+### Bug Fixes
+
+* Premature setAbsent(false) ([ea252a6](https://github.com/valaatech/kernel/commit/ea252a6add166c9be620f88b052158e6b2d747e5))
+
+
+### Features
+
+* **security:** Add valos.hash40, the base64url encoded SHA256/240 ([d27cd7c](https://github.com/valaatech/kernel/commit/d27cd7c224d753923b0c4fd30e02dd609a38b678))
+
+
+
+
+
 # [0.37.0-alpha.6](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.5...v0.37.0-alpha.6) (2021-01-28)
 
 **Note:** Version bump only for package @valos/engine

@@ -1,6 +1,6 @@
 {
   "name": "@valos/gateway-api",
-  "version": "0.37.0-alpha.6",
+  "version": "0.37.0-prerelease.0",
   "valos": {
     "type": "library",
     "domain": "@valos/kernel"

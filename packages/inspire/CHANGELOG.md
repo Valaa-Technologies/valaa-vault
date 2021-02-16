@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0-prerelease.0](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.6...v0.37.0-prerelease.0) (2021-02-16)
+
+
+### Features
+
+* **inspire:** Add valos.attachView, some fixes ([78ebb81](https://github.com/valaatech/kernel/commit/78ebb81fbe408e9966d08cd9c12d74421fd21bb6))
+
+
+
+
+
 # [0.37.0-alpha.6](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.5...v0.37.0-alpha.6) (2021-01-28)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "@valos/vdoc",
-  "version": "0.37.0-alpha.6",
+  "version": "0.37.0-prerelease.0",
   "valos": {
     "type": "vdoc-extension",
     "domain": "@valos/kernel",

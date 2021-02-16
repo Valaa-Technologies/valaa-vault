@@ -1,6 +1,6 @@
 {
   "name": "@valos/web-spindle",
-  "version": "0.37.0-alpha.6",
+  "version": "0.37.0-prerelease.0",
   "valos": {
     "type": "spindle",
     "domain": "@valos/kernel",
@@ -15,15 +15,15 @@
     "access": "public"
   },
   "dependencies": {
-    "@valos/security": "^0.37.0-alpha.6",
-    "@valos/type-spindle": "^0.37.0-alpha.6",
-    "@valos/type-toolset": "^0.37.0-alpha.6",
+    "@valos/security": "^0.37.0-prerelease.0",
+    "@valos/type-spindle": "^0.37.0-prerelease.0",
+    "@valos/type-toolset": "^0.37.0-prerelease.0",
     "fastify": "^2.3.0",
     "fastify-cookie": "^3.0.2",
     "fastify-swagger": "^2.3.2"
   },
   "devDependencies": {
-    "@valos/inspire": "^0.37.0-alpha.6"
+    "@valos/inspire": "^0.37.0-prerelease.0"
   },
   "homepage": "https://valospace.org/web-spindle",
   "bin": {

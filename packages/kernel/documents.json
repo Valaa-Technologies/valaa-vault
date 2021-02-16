@@ -336,7 +336,7 @@
                 ]
               },
               "package": "@valos/kernel-vault",
-              "version": "0.37.0-alpha.4"
+              "version": "0.37.0-alpha.5"
             },
             "technician": {
               "@id": "https://valospace.org/technician",
@@ -432,7 +432,7 @@
                 ]
               },
               "package": "@valos/kernel-vault",
-              "version": "0.37.0-alpha.4"
+              "version": "0.37.0-alpha.5"
             },
             "voyager": {
               "@id": "https://valospace.org/voyager",
@@ -500,7 +500,7 @@
                 ]
               },
               "package": "@valos/kernel-vault",
-              "version": "0.37.0-alpha.4"
+              "version": "0.37.0-alpha.5"
             }
           },
           "VDoc:map": {
@@ -562,7 +562,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/kernel-vault",
-    "version": "0.37.0-alpha.5"
+    "version": "0.37.0-alpha.6"
   },
   "sbom": {
     "@id": "https://valospace.org/sbom",
@@ -571,7 +571,7 @@
       "SBOM"
     ],
     "subProfiles": [],
-    "title": "@valos/kernel-vault@0.37.0-alpha.5 Software Bill of Materials",
+    "title": "@valos/kernel-vault@0.37.0-alpha.6 Software Bill of Materials",
     "abstract": {
       "@type": "VDoc:Chapter",
       "VDoc:content": [
@@ -618,7 +618,7 @@
       ]
     },
     "package": "@valos/kernel-vault",
-    "version": "0.37.0-alpha.5"
+    "version": "0.37.0-alpha.6"
   },
   "chronicle": {
     "@id": "https://valospace.org/chronicle",
@@ -790,7 +790,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/chronicle",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "engine/0": {
     "@id": "https://valospace.org/engine/0",
@@ -889,7 +889,7 @@
       "https://valospace.org/0#": "@valos/engine/V"
     },
     "package": "@valos/engine",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "engine": {
     "@id": "https://valospace.org/engine",
@@ -988,7 +988,7 @@
       "https://valospace.org/0#": "@valos/engine/V"
     },
     "package": "@valos/engine",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "inspire/0": {
     "@id": "https://valospace.org/inspire/0",
@@ -1086,7 +1086,7 @@
       "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
     },
     "package": "@valos/inspire",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "inspire/Lens/0": {
     "@id": "https://valospace.org/inspire/Lens/0",
@@ -1366,7 +1366,7 @@
       "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
     },
     "package": "@valos/inspire",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "inspire/Lens": {
     "@id": "https://valospace.org/inspire/Lens",
@@ -1646,7 +1646,7 @@
       "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
     },
     "package": "@valos/inspire",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "inspire/On/0": {
     "@id": "https://valospace.org/inspire/On/0",
@@ -1761,7 +1761,7 @@
       "https://valospace.org/valk/0#": "@valos/sourcerer/VValk"
     },
     "package": "@valos/inspire",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "inspire/On": {
     "@id": "https://valospace.org/inspire/On",
@@ -1876,7 +1876,7 @@
       "https://valospace.org/valk/0#": "@valos/sourcerer/VValk"
     },
     "package": "@valos/inspire",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "inspire": {
     "@id": "https://valospace.org/inspire",
@@ -1974,7 +1974,7 @@
       "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
     },
     "package": "@valos/inspire",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "inspire/Var/0": {
     "@id": "https://valospace.org/inspire/Var/0",
@@ -2074,7 +2074,7 @@
       "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
     },
     "package": "@valos/inspire",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "inspire/Var": {
     "@id": "https://valospace.org/inspire/Var",
@@ -2174,7 +2174,7 @@
       "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
     },
     "package": "@valos/inspire",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "inspire/VRevela/0": {
     "@id": "https://valospace.org/inspire/VRevela/0",
@@ -2477,7 +2477,7 @@
       "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
     },
     "package": "@valos/inspire",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "inspire/VRevela": {
     "@id": "https://valospace.org/inspire/VRevela",
@@ -2780,7 +2780,7 @@
       "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
     },
     "package": "@valos/inspire",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "kernel/0": {
     "@id": "https://valospace.org/kernel/0",
@@ -2998,7 +2998,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/kernel",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "kernel": {
     "@id": "https://valospace.org/kernel",
@@ -3216,7 +3216,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/kernel",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "log/0": {
     "@id": "https://valospace.org/log/0",
@@ -3397,7 +3397,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/log",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "log": {
     "@id": "https://valospace.org/log",
@@ -3578,7 +3578,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/log",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "plot/0": {
     "@id": "https://valospace.org/plot/0",
@@ -3709,7 +3709,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/plot",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "plot": {
     "@id": "https://valospace.org/plot",
@@ -3840,7 +3840,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/plot",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "plot/VPlot-JSON": {
     "@id": "https://valospace.org/plot/VPlot-JSON",
@@ -3937,7 +3937,7 @@
       ]
     },
     "package": "@valos/plot",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "raem/0": {
     "@id": "https://valospace.org/raem/0",
@@ -4072,7 +4072,7 @@
       "https://valospace.org/0#": "@valos/raem/V"
     },
     "package": "@valos/raem",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "raem": {
     "@id": "https://valospace.org/raem",
@@ -4207,7 +4207,7 @@
       "https://valospace.org/0#": "@valos/raem/V"
     },
     "package": "@valos/raem",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "revdoc/0": {
     "@id": "https://valospace.org/revdoc/0",
@@ -4277,7 +4277,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/revdoc",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "revdoc": {
     "@id": "https://valospace.org/revdoc",
@@ -4347,7 +4347,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/revdoc",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "revdoc/tutorial": {
     "@id": "https://valospace.org/revdoc/tutorial",
@@ -4421,7 +4421,7 @@
       ]
     },
     "package": "@valos/revdoc",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "sbomdoc/0": {
     "@id": "https://valospace.org/sbomdoc/0",
@@ -4492,7 +4492,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/sbomdoc",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "sbomdoc": {
     "@id": "https://valospace.org/sbomdoc",
@@ -4563,7 +4563,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/sbomdoc",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "script/0": {
     "@id": "https://valospace.org/script/0",
@@ -4630,7 +4630,7 @@
       "https://valospace.org/valk/0#": "@valos/script/VValk"
     },
     "package": "@valos/script",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "script": {
     "@id": "https://valospace.org/script",
@@ -4697,7 +4697,7 @@
       "https://valospace.org/valk/0#": "@valos/script/VValk"
     },
     "package": "@valos/script",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "sourcerer/0": {
     "@id": "https://valospace.org/sourcerer/0",
@@ -4757,7 +4757,7 @@
       "https://valospace.org/valk/0#": "@valos/sourcerer/VValk"
     },
     "package": "@valos/sourcerer",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "sourcerer": {
     "@id": "https://valospace.org/sourcerer",
@@ -4817,7 +4817,7 @@
       "https://valospace.org/valk/0#": "@valos/sourcerer/VValk"
     },
     "package": "@valos/sourcerer",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "sourcerer/valos-event-log": {
     "@id": "https://valospace.org/sourcerer/valos-event-log",
@@ -4847,7 +4847,7 @@
       ]
     },
     "package": "@valos/sourcerer",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "sourcerer/VState": {
     "@id": "https://valospace.org/sourcerer/VState",
@@ -4886,7 +4886,7 @@
       ]
     },
     "package": "@valos/sourcerer",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "space": {
     "@id": "https://valospace.org/space",
@@ -5063,7 +5063,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/space",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "state/0": {
     "@id": "https://valospace.org/state/0",
@@ -5214,7 +5214,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/state",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "state": {
     "@id": "https://valospace.org/state",
@@ -5365,7 +5365,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/state",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "twindoc/0": {
     "@id": "https://valospace.org/twindoc/0",
@@ -5456,7 +5456,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/twindoc",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "twindoc": {
     "@id": "https://valospace.org/twindoc",
@@ -5547,7 +5547,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/twindoc",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "type-vault/AssortedTutorials": {
     "@id": "https://valospace.org/type-vault/AssortedTutorials",
@@ -5566,7 +5566,7 @@
     },
     "introduction": {},
     "package": "@valos/type-vault",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "valk/0": {
     "@id": "https://valospace.org/valk/0",
@@ -5714,7 +5714,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/valk",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "valk": {
     "@id": "https://valospace.org/valk",
@@ -5862,7 +5862,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/valk",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "vdoc/0": {
     "@id": "https://valospace.org/vdoc/0",
@@ -5958,7 +5958,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/vdoc",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "vdoc": {
     "@id": "https://valospace.org/vdoc",
@@ -6054,7 +6054,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/vdoc",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "web-spindle": {
     "@id": "https://valospace.org/web-spindle",
@@ -6160,7 +6160,7 @@
       ]
     },
     "package": "@valos/web-spindle",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "web-spindle/schema-builder": {
     "@id": "https://valospace.org/web-spindle/schema-builder",
@@ -6289,7 +6289,7 @@
       ]
     },
     "package": "@valos/web-spindle",
-    "version": "0.37.0-alpha.6"
+    "version": "0.37.0-prerelease.0"
   },
   "removed-from": {
     "@id": "https://valospace.org/removed-from",
@@ -6340,7 +6340,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/kernel-vault",
-    "version": "0.37.0-alpha.5"
+    "version": "0.37.0-alpha.6"
   },
   "@valos/kernel-vault": {
     "@id": "https://valospace.org/index",
@@ -6679,7 +6679,7 @@
                 ]
               },
               "package": "@valos/kernel-vault",
-              "version": "0.37.0-alpha.4"
+              "version": "0.37.0-alpha.5"
             },
             "technician": {
               "@id": "https://valospace.org/technician",
@@ -6775,7 +6775,7 @@
                 ]
               },
               "package": "@valos/kernel-vault",
-              "version": "0.37.0-alpha.4"
+              "version": "0.37.0-alpha.5"
             },
             "voyager": {
               "@id": "https://valospace.org/voyager",
@@ -6843,7 +6843,7 @@
                 ]
               },
               "package": "@valos/kernel-vault",
-              "version": "0.37.0-alpha.4"
+              "version": "0.37.0-alpha.5"
             }
           },
           "VDoc:map": {
@@ -6905,7 +6905,7 @@
     },
     "VRevdoc:extenderModules": {},
     "package": "@valos/kernel-vault",
-    "version": "0.37.0-alpha.5"
+    "version": "0.37.0-alpha.6"
   },
   "technician": {
     "@id": "https://valospace.org/technician",
@@ -7001,7 +7001,7 @@
       ]
     },
     "package": "@valos/kernel-vault",
-    "version": "0.37.0-alpha.5"
+    "version": "0.37.0-alpha.6"
   },
   "valonaut": {
     "@id": "https://valospace.org/valonaut",
@@ -7083,7 +7083,7 @@
       ]
     },
     "package": "@valos/kernel-vault",
-    "version": "0.37.0-alpha.5"
+    "version": "0.37.0-alpha.6"
   },
   "voyager": {
     "@id": "https://valospace.org/voyager",
@@ -7151,7 +7151,7 @@
       ]
     },
     "package": "@valos/kernel-vault",
-    "version": "0.37.0-alpha.5"
+    "version": "0.37.0-alpha.6"
   },
   "zone": {
     "@id": "https://valospace.org/zone",
@@ -7171,6 +7171,6 @@
     },
     "introduction": {},
     "package": "@valos/kernel-vault",
-    "version": "0.37.0-alpha.5"
+    "version": "0.37.0-alpha.6"
   }
 }

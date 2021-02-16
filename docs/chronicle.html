@@ -111,6 +111,12 @@ instructions on how to write revdoc source documents.
         <tr><td><span class="vdoc type-vdoc-node">dc</span>
 </td><td><span class="vdoc type-vdoc-node">http://purl.org/dc/elements/1.1/</span>
 </td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">acl</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/ns/auth/acl#</span>
+</td></tr>
+        <tr><td><span class="vdoc type-vdoc-node">vcard</span>
+</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/2006/vcard/ns#</span>
+</td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VChronicle</span>
 </td><td><span class="vdoc type-vdoc-node">https://valospace.org/chronicle/0#</span>
 </td></tr>
@@ -187,85 +193,7 @@ ontologies.
 </th>
       </thead>
       <tbody>
-        <tr id="requiresAuthoredEvents" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=5><h3> <strong><em><a href="#requiresAuthoredEvents" class="vdoc type-vdoc-reference">#requiresAuthoredEvents</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/0#Resource" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">V:Resource</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of resources which can appear as a subject in valospace
-resource and event graphs. The domain of all transient and generated
-fields which are available even for unsourced bodies.
-    </span>
-</span></a></td><td><a href="http://www.w3.org/2001/XMLSchema#boolean" class="vdoc type-vdoc-reference">xsd:boolean</a></td><td><a href="https://valospace.org/kernel/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VKernel:Property</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of properties which are defined by the ValOS kernel domain
-ontologies.
-    </span>
-</span></a></td><td></td><td></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=4><span class="vdoc type-vdoc-node">When set to true all the chronicle events must be authored with
-an AuthorAspect.</span>
-</td></tr>
-        <tr id="hasContributor" class="vdoc vdoc-wide"><td colspan=5><h3> <strong><em><a href="#hasContributor" class="vdoc type-vdoc-reference">#hasContributor</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/0#Resource" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">V:Resource</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of resources which can appear as a subject in valospace
-resource and event graphs. The domain of all transient and generated
-fields which are available even for unsourced bodies.
-    </span>
-</span></a></td><td><a href="https://valospace.org/0#Resource" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">V:Resource</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of resources which can appear as a subject in valospace
-resource and event graphs. The domain of all transient and generated
-fields which are available even for unsourced bodies.
-    </span>
-</span></a></td><td><a href="https://valospace.org/kernel/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VKernel:Property</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of properties which are defined by the ValOS kernel domain
-ontologies.
-    </span>
-</span></a></td><td></td><td></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=4><span class="vdoc type-vdoc-node">The collection of identities which have registered their signature
-public keys to the chronicle event log.</span>
-</td></tr>
-        <tr id="hasDirector" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=5><h3> <strong><em><a href="#hasDirector" class="vdoc type-vdoc-reference">#hasDirector</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/0#Resource" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">V:Resource</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of resources which can appear as a subject in valospace
-resource and event graphs. The domain of all transient and generated
-fields which are available even for unsourced bodies.
-    </span>
-</span></a></td><td><a href="https://valospace.org/0#Resource" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">V:Resource</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of resources which can appear as a subject in valospace
-resource and event graphs. The domain of all transient and generated
-fields which are available even for unsourced bodies.
-    </span>
-</span></a></td><td><a href="https://valospace.org/kernel/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VKernel:Property</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of properties which are defined by the ValOS kernel domain
-ontologies.
-    </span>
-</span></a></td><td><a href="https://valospace.org/chronicle/0#hasContributor" class="vdoc type-vdoc-reference">VChronicle:hasContributor</a></td><td></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=4><span class="vdoc type-vdoc-node">The collection of identities which (and only which) can make changes
-to the chronicle behaviors (eg. permissions).</span>
-</td></tr>
+        
       </tbody>
     </table>
 
@@ -282,7 +210,53 @@ to the chronicle behaviors (eg. permissions).</span>
 </th>
       </thead>
       <tbody>
-        
+        <tr id="requiresAuthoredEvents" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#requiresAuthoredEvents" class="vdoc type-vdoc-reference">#requiresAuthoredEvents</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/kernel/0#Class" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">VKernel:Class</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of classes which are defined by the ValOS kernel domain
+ontologies.
+    </span>
+</span></a></td><td></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">When set to true all the chronicle events must be authored with
+an AuthorAspect.</span>
+</td></tr>
+        <tr id="Contributorship" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#Contributorship" class="vdoc type-vdoc-reference">#Contributorship</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/0#Relation" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">V:Relation</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of valospace resources which represent directed,
+many-to-many relationships between nodes.
+With Entity and Media it forms the group of three primary node types.
+As a Scope it can have scriptable properties. Relation being
+a SourceredNode itself allows for nested and recursive relationship
+structures.
+    </span>
+</span></a></td><td><a href="http://www.w3.org/ns/auth/acl#Authorization" class="vdoc type-vdoc-reference">acl:Authorization</a></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The collection of agents which have registered their signature public
+keys to the chronicle event log.</span>
+</td></tr>
+        <tr id="Directorship" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#Directorship" class="vdoc type-vdoc-reference">#Directorship</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/0#Relation" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
+    <span class="vdoc type-vdoc-node">V:Relation</span>
+
+    <span class="vdoc type-revdoc-tooltip-content">
+        The class of valospace resources which represent directed,
+many-to-many relationships between nodes.
+With Entity and Media it forms the group of three primary node types.
+As a Scope it can have scriptable properties. Relation being
+a SourceredNode itself allows for nested and recursive relationship
+structures.
+    </span>
+</span></a></td><td><a href="https://valospace.org/chronicle/0#Contributorship" class="vdoc type-vdoc-reference">VChronicle:Contributorship</a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">The collection of identities which (and only which) can make changes
+to the chronicle behaviors (eg. permissions).</span>
+</td></tr>
       </tbody>
     </table>
 

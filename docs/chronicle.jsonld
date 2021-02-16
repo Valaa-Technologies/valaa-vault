@@ -53,18 +53,12 @@
         "@type": "@id"
       },
       "VEngine": "https://valospace.org/engine/0#",
+      "acl": "http://www.w3.org/ns/auth/acl#",
+      "vcard": "http://www.w3.org/2006/vcard/ns#",
       "VChronicle": "https://valospace.org/chronicle/0#",
       "VState": "https://valospace.org/state/0#",
       "VLog": "https://valospace.org/log/0#",
-      "V": "https://valospace.org/0#",
-      "VChronicle:hasContributor": {
-        "@id": "#hasContributor",
-        "@type": "@id"
-      },
-      "VChronicle:hasDirector": {
-        "@id": "#hasDirector",
-        "@type": "@id"
-      }
+      "V": "https://valospace.org/0#"
     },
     "VDoc:tags": [
       "WORKSPACE",
@@ -73,7 +67,7 @@
     ],
     "dc:title": "@valos/chronicle library workspace",
     "VRevdoc:package": "@valos/chronicle",
-    "VRevdoc:version": "0.37.0-alpha.6",
+    "VRevdoc:version": "0.37.0-prerelease.0",
     "VRevdoc:preferredPrefix": "VChronicle",
     "VRevdoc:baseIRI": "https://valospace.org/chronicle/0#",
     "VRevdoc:referencedModules": {
@@ -332,6 +326,8 @@
       "xsd": "http://www.w3.org/2001/XMLSchema#",
       "owl": "http://www.w3.org/2002/07/owl#",
       "dc": "http://purl.org/dc/elements/1.1/",
+      "acl": "http://www.w3.org/ns/auth/acl#",
+      "vcard": "http://www.w3.org/2006/vcard/ns#",
       "VChronicle": "https://valospace.org/chronicle/0#",
       "VKernel": "https://valospace.org/kernel/0#",
       "VState": "https://valospace.org/state/0#",
@@ -341,36 +337,25 @@
     "vocabulary": {
       "@id": "vocabulary",
       "requiresAuthoredEvents": {
-        "@type": "VKernel:Property",
+        "@type": "VKernel:Class",
         "rdfs:domain": "V:Resource",
         "rdfs:range": "xsd:boolean",
         "rdfs:comment": "When set to true all the chronicle events must be authored with\nan AuthorAspect."
       },
-      "hasContributor": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "V:Resource",
-        "rdfs:range": "V:Resource",
-        "rdfs:comment": "The collection of identities which have registered their signature\npublic keys to the chronicle event log."
+      "Contributorship": {
+        "@type": "V:Relation",
+        "rdfs:subClassOf": "acl:Authorization",
+        "rdfs:comment": "The collection of agents which have registered their signature public\nkeys to the chronicle event log."
       },
-      "hasDirector": {
-        "@type": "VKernel:Property",
-        "rdfs:subPropertyOf": "VChronicle:hasContributor",
-        "rdfs:domain": "V:Resource",
-        "rdfs:range": "V:Resource",
+      "Directorship": {
+        "@type": "V:Relation",
+        "rdfs:subClassOf": "VChronicle:Contributorship",
         "rdfs:comment": "The collection of identities which (and only which) can make changes\nto the chronicle behaviors (eg. permissions)."
       }
     },
     "context": {
       "@id": "context",
-      "@base": "https://valospace.org/chronicle/0#",
-      "VChronicle:hasContributor": {
-        "@id": "#hasContributor",
-        "@type": "@id"
-      },
-      "VChronicle:hasDirector": {
-        "@id": "#hasDirector",
-        "@type": "@id"
-      }
+      "@base": "https://valospace.org/chronicle/0#"
     },
     "section_valospace_abstract": {
       "@id": "section_valospace_abstract",
@@ -962,11 +947,7 @@
               }
             ]
           },
-          "VDoc:entries": [
-            "requiresAuthoredEvents",
-            "hasContributor",
-            "hasDirector"
-          ]
+          "VDoc:entries": []
         }
       ]
     },
@@ -1133,7 +1114,11 @@
               }
             ]
           },
-          "VDoc:entries": []
+          "VDoc:entries": [
+            "requiresAuthoredEvents",
+            "Contributorship",
+            "Directorship"
+          ]
         }
       ]
     },

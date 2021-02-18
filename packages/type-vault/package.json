@@ -43,7 +43,7 @@
     "@babel/runtime-corejs2": "^7.8.0",
     "@valos/revdoc": "^0.37.0-prerelease.0",
     "@valos/type-toolset": "^0.37.0-prerelease.0",
-    "babel-core": "^7.0.0-0",
+    "babel-core": "7.0.0-bridge.0",
     "babel-eslint": "^10.0.1",
     "babel-jest": "^23.6.0",
     "babel-loader": "^8.0.4",

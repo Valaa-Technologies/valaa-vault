@@ -14,8 +14,8 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@babel/runtime": ">7.0.0-rc",
-    "@babel/runtime-corejs2": ">7.0.0-rc",
+    "@babel/runtime": "^7.8.0",
+    "@babel/runtime-corejs2": "^7.8.0",
     "@valos/gateway-api": "^0.37.0-prerelease.0",
     "@valos/security": "^0.37.0-prerelease.0",
     "fake-indexeddb": "^2.0.3",

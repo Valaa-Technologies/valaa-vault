@@ -27,12 +27,12 @@
     "postcss-loader": "^2.1.6",
     "style-loader": "^1.2.1",
     "terser-webpack-plugin": "^4.1.0",
-    "webpack": "^5.0.0-beta.28",
+    "webpack": "^5.23.0",
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "^3.11.0"
   },
   "peerDependencies": {
-    "@valos/inspire": "^0.37.0-alpha.4",
+    "@valos/inspire": "^0.37.0-prerelease.0",
     "css-loader": "^4.2.2",
     "style-loader": "^1.2.1"
   }

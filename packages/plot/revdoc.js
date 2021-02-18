@@ -2,7 +2,7 @@
 const {
   ontologyColumns, revdocOntologyProperties,
   extractee: {
-    abnf, blockquote, example, turtle,
+    abnf, blockquote, example, regex, turtle,
     em, ref,
     authors, pkg,
     filterKeysWithAnyOf, filterKeysWithNoneOf,
@@ -41,20 +41,19 @@ module.exports = {
   },
   "chapter#abstract>0": {
     "#0": [
-`ValOS Plots ('VPlots') are *identifier-query* strings with recursive
-grammar with extensible semantics and a limited character set that
-makes them easily URI embeddable.`,
+`A vplot is a generic, hierarchically structured string with
+a character set that is untransformed by `,
+ref("encodeURIComponent", "https://262.ecma-international.org/5.1/#sec-15.1.3.4"),
+"(", regex("[a-zA-Z0-9_.!~*'()-]"), `). The vplot structure expresses
+sequential dependencies, parameter lists, nesting, term/data pairs and
+arbitrary data encoding. The vplot strings themselves are
+meaning-agnostic: the semantics are provided by the specific vplot
+processors.`,
 null,
-`Generally speaking a query which always resolves to the same resource
-can be used as an identifier for that resource. VPlot is a format for
-expressing queries in an identifier-friendly string syntax. VPlot only
-provides primitives for query structure. The actual query semantics are
-specified by the semantic ontology terms that are used in the vplots.`,
-null,
-`In ValOS context they are used as resource identifiers, valospace
+`In ValOS context vplots are used as resource identifiers, valospace
 queries, but also as a deterministic JSON serialization,
 an intermediate language for computation, a configuration language,
-JSON-LD interactions and more.`,
+JSON-LD integration glue and more.`,
 null,
 em("VPlot"), ` together with `, ref("VState:"), " ", ref("VLog:"),
 " and ", ref("VValk:"), ` form the infrastructural foundation ie. the `,
@@ -867,27 +866,24 @@ homologous prototype inside f00b-b507-0763 and thus infers triples:
   },
   "chapter#section_grammar>8;Collected VPlot ABNF grammar": {
     "#0": [
-`The VPlot grammar is an LL(1) grammar. It is recursive be virtue of
-vvalue productions which can nest VPlots themselves without additional
+`The VPlot grammar is an LL(1) grammar. The recursion is by virtue of
+vparam productions which can nest VPlots themselves without additional
 encoding.
 
 The list of definitive rules:
 `, abnf(
-`  vplot         = "@" *(vstep "@") "@"
-  vstep         = [ verb-type ] *vparam
-  vparam        = "$" [ context-term ] "." vvalue
-  vvalue        = vplot / "$" / 1*( unencoded / pct-encoded )
+`  vplot      = 1*( "(" vstep ")" )
+  vstep      = 1*( vparam "!" )
+  vparam     = vplot / [ vterm ] [ "'" ( vvalue / "'" vdata ) ]
 
-  verb-type     = 1*unencoded
-  context-term  = 1*unreserved
-  unencoded     = unreserved / "!" / "*" / "'" / "(" / ")"
-  unreserved    = unreserved-nt / "~"
-  unreserved-nt = ALPHA / DIGIT / "-" / "_" / "."
-  pct-encoded   = "%" HEXDIG HEXDIG
+  vterm      = 1*unencoded
+  vvalue     = 1*( unencoded / "(" / ")" )
+  vdata      = 1*B64URLCHAR
 
-  ALPHA         = %x41-5A / %x61-7A                         ; A-Z / a-z
-  HEXDIG        = DIGIT / "A" / "B" / "C" / "D" / "E" / "F" ; 0-9 / A-F
-  DIGIT         = %x30-39                                   ; 0-9`
+  unencoded  = b64urlchar / "." / "~" / "*"
+  b64urlchar = ALPHANUM / "-" / "_"
+
+  ALPHANUM   = %x30-39 / %x41-5A / %x61-7A                             ; 0-9 / A-Z / a-z`
 ), `
 
 In addition there are pseudo-rules which are not used by an LL(1)

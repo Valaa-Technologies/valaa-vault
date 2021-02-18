@@ -55,7 +55,7 @@ module.exports = {
   },
 
   /**
-   * Construct a VRevdoc:ABNF element.
+   * Construct a VRevdoc:Turtle element.
    *
    * @param {*} text
    * @param {*} rest
@@ -68,6 +68,23 @@ module.exports = {
       // providing language identifiers for non-natural languages.
       ...c(text, { language: "https://www.w3.org/TR/turtle/" }),
       "@type": "VRevdoc:Turtle",
+    };
+  },
+
+  /**
+   * Construct a VRevdoc:RegEx element.
+   *
+   * @param {*} text
+   * @param {*} rest
+   * @returns
+   */
+  regex (text) {
+    // Add validation and maybe restructuring?
+    return {
+      // TODO(iridian, 2019-08): Figure out if there's any sense in
+      // providing language identifiers for non-natural languages.
+      ...c(text, { language: "https://www.google.com/?q=regex" }),
+      "@type": "VRevdoc:RegEx",
     };
   },
 

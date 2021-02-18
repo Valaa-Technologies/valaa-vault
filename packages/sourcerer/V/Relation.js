@@ -15,34 +15,34 @@ a SourceredNode itself allows for nested and recursive relationship
 structures.`,
   },
 
-  connector: {
+  graph: {
     "@type": "VState:EventLoggedField",
     "rdfs:subPropertyOf": "V:container",
     "rdfs:domain": "V:Relation",
     "rdfs:range": "V:SourceredNode",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "VState:isOwnedBy": true,
-    "VState:coupledToField": "V:connectedRelations",
+    "VState:coupledToField": "V:ownsRelation",
     "rdfs:comment":
-`The connector (and container, owner) node of this relation.
+`The graph (and container, owner) node of this relation.
 Typically also either the source or the target but possibly neither.`,
   },
 
-  // Note: 'connectedRelations' has domain SourceredNode but is listed
-  // here due to its coupling with 'connector'.
-  connectedRelations: {
+  // Note: 'ownsRelation' has domain SourceredNode but is listed
+  // here due to its coupling with 'graph'.
+  ownsRelation: {
     "@type": "VState:EventLoggedField",
     "rdfs:subPropertyOf": "V:nodes",
     "rdfs:domain": "V:SourceredNode",
     "rdfs:range": "rdfs:List",
     "VState:isOwnerOf": true,
-    "VState:coupledToField": "V:connector",
+    "VState:coupledToField": "V:graph",
     "rdfs:comment":
 `The ordered list of relations that are connected (and contained,
 owned) _by_ this sourcered node. This includes both
-connectedInRelations and connectedOutRelations (ie. incoming and
+ownsInRelation and ownsOutRelation (ie. incoming and
 outgoing relations which are also connected by this sourcered node) but
-also relations which only have this sourcered node as their connector
+also relations which only have this sourcered node as their graph
 but not as source or target.`,
   },
 
@@ -52,14 +52,14 @@ but not as source or target.`,
     "rdfs:domain": "V:Relation",
     "rdfs:range": "V:SourceredNode",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VState:coupledToField": "V:outRelations",
+    "VState:coupledToField": "V:outRelation",
     "rdfs:comment":
 `The source node of this relation.`,
   },
 
   // Note: 'outgoingRelations' has domain SourcerableNode but is listed
   // here due to its coupling with 'source'.
-  outRelations: {
+  outRelation: {
     "@type": "VState:CoupledField",
     "rdfs:subPropertyOf": "V:nodes",
     "rdfs:domain": "V:SourcerableNode",
@@ -77,14 +77,14 @@ source are completely separate concepts here).`,
     "rdfs:domain": "V:Relation",
     "rdfs:range": "V:SourceredNode",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VState:coupledToField": "V:inRelations",
+    "VState:coupledToField": "V:inRelation",
     "rdfs:comment":
 `The target node of this relation.`,
   },
 
   // Note: 'incomingRelations' has domain SourcerableNode but is listed
   // here due to its coupling with 'source'.
-  inRelations: {
+  inRelation: {
     "@type": "VState:CoupledField",
     "rdfs:subPropertyOf": "V:nodes",
     "rdfs:domain": "V:SourcerableNode",
@@ -101,15 +101,15 @@ source are completely separate concepts here).`,
     "rdfs:domain": "V:Relation",
     "rdfs:range": "V:SourceredNode",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VState:coupledToField": "V:pairedOutRelations",
+    "VState:coupledToField": "V:pairedOutRelation",
     "rdfs:comment":
 `The paired source node of this relation (paired denotes that the
-coupled field 'pairedOutRelations' is an event logged field).`,
+coupled field 'pairedOutRelation' is an event logged field).`,
   },
 
-  // Note: 'pairedOutRelations' has domain SourceredNode but is listed
+  // Note: 'pairedOutRelation' has domain SourceredNode but is listed
   // here due to its coupling with 'pairedSource'.
-  pairedOutRelations: {
+  pairedOutRelation: {
     "@type": "VState:EventLoggedField",
     "rdfs:subPropertyOf": "V:outgoingRelations",
     "rdfs:domain": "V:SourceredNode",
@@ -125,15 +125,15 @@ coupled field 'pairedOutRelations' is an event logged field).`,
     "rdfs:domain": "V:Relation",
     "rdfs:range": "V:SourceredNode",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VState:coupledToField": "V:pairedInRelations",
+    "VState:coupledToField": "V:pairedInRelation",
     "rdfs:comment":
 `The paired target node of this relation (the coupled field
-'pairedInRelations' is an event logged field).`,
+'pairedInRelation' is an event logged field).`,
   },
 
-  // Note: 'pairedInRelations' has domain SourceredNode but is listed
+  // Note: 'pairedInRelation' has domain SourceredNode but is listed
   // here due to its coupling with 'pairedTarget'.
-  pairedInRelations: {
+  pairedInRelation: {
     "@type": "VState:EventLoggedField",
     "rdfs:subPropertyOf": "V:incomingRelations",
     "rdfs:domain": "V:SourceredNode",
@@ -143,53 +143,53 @@ coupled field 'pairedOutRelations' is an event logged field).`,
 `The ordered list of incoming relations paired to this sourcered node.`,
   },
 
-  connectedSource: {
+  graphSource: {
     "@type": "VState:EventLoggedField",
-    "rdfs:subPropertyOf": ["V:connector", "V:pairedSource"],
+    "rdfs:subPropertyOf": ["V:graph", "V:pairedSource"],
     "rdfs:domain": "V:Relation",
     "rdfs:range": "V:SourceredNode",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "VState:isOwnedBy": true,
-    "VState:coupledToField": "V:connectedOutRelations",
+    "VState:coupledToField": "V:ownsOutRelation",
     "rdfs:comment":
-`The source and also the connector node of this relation.`,
+`The source and also the graph node of this relation.`,
   },
 
-  // Note: 'connectedOutRelations' has domain SourceredNode but is listed
-  // here due to its coupling with 'connectedSource'.
-  connectedOutRelations: {
+  // Note: 'ownsOutRelation' has domain SourceredNode but is listed
+  // here due to its coupling with 'graphSource'.
+  ownsOutRelation: {
     "@type": "VState:EventLoggedField",
-    "rdfs:subPropertyOf": ["V:connectedRelations", "V:pairedOutRelations"],
+    "rdfs:subPropertyOf": ["V:ownsRelation", "V:pairedOutRelation"],
     "rdfs:domain": "V:SourceredNode",
     "rdfs:range": "rdfs:List",
     "VState:isOwnerOf": true,
-    "VState:coupledToField": "V:connectedSource",
+    "VState:coupledToField": "V:graphSource",
     "rdfs:comment":
 `The ordered list of outgoing relations contained in (and owned by)
 this sourcered node.`,
   },
 
-  connectedTarget: {
+  graphTarget: {
     "@type": "VState:EventLoggedField",
-    "rdfs:subPropertyOf": ["V:connector", "V:pairedTarget"],
+    "rdfs:subPropertyOf": ["V:graph", "V:pairedTarget"],
     "rdfs:domain": "V:Relation",
     "rdfs:range": "V:SourceredNode",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "VState:isOwnedBy": true,
-    "VState:coupledToField": "V:connectedInRelations",
+    "VState:coupledToField": "V:ownsInRelation",
     "rdfs:comment":
-`The target and also the connector node of this relation.`,
+`The node that is both the target and the graph of this relation.`,
   },
 
-  // Note: 'connectedInRelations' has domain SourceredNode but is
-  // listed here due to its coupling with 'connectedTarget'.
-  connectedInRelations: {
+  // Note: 'ownsInRelation' has domain SourceredNode but is
+  // listed here due to its coupling with 'graphTarget'.
+  ownsInRelation: {
     "@type": "VState:EventLoggedField",
-    "rdfs:subPropertyOf": ["V:connectedRelations", "V:pairedInRelations"],
+    "rdfs:subPropertyOf": ["V:ownsRelation", "V:pairedInRelation"],
     "rdfs:domain": "V:SourceredNode",
     "rdfs:range": "rdfs:List",
     "VState:isOwnerOf": true,
-    "VState:coupledToField": "V:connectedTarget",
+    "VState:coupledToField": "V:graphTarget",
     "rdfs:comment":
 `The ordered list of incoming relations contained in (and owned by)
 this sourcered node.`,
@@ -199,28 +199,28 @@ this sourcered node.`,
 
   relations: {
     "@type": "VState:AliasField",
-    "VRevdoc:deprecatedInFavorOf": "V:connectedRelations",
-    "VState:aliasOf": "V:connectedRelations",
-    "rdfs:subPropertyOf": "V:connectedRelations",
+    "VRevdoc:deprecatedInFavorOf": "V:ownsRelation",
+    "VState:aliasOf": "V:ownsRelation",
+    "rdfs:subPropertyOf": "V:ownsRelation",
     "rdfs:domain": "V:SourceredNode",
     "rdfs:range": "rdfs:List",
     "VState:isOwnerOf": true,
-    "VState:coupledToField": "V:connector",
+    "VState:coupledToField": "V:graph",
     "rdfs:comment":
-`A deprecation of V:connectedRelations; the ordered list of
+`A deprecation of V:ownsRelation; the ordered list of
 relations contained within this sourcered node when seen as a graph.
-Do note that the semantics have changed: connectedRelations can now
+Do note that the semantics have changed: ownsRelation can now
 also contain relations which have this sourcered node as their the
 target (instead of source) or as neither source nor target.
 The set of just outgoing relations is 'outgoingRelations' and the set
-of owned outgoing relations is 'connectedOutRelations'.`,
+of owned outgoing relations is 'ownsOutRelation'.`,
   },
 
   outgoingRelations: {
     "@type": "VState:AliasField",
-    "VRevdoc:deprecatedInFavorOf": "V:outRelations",
-    "VState:aliasOf": "V:outRelations",
-    "rdfs:subPropertyOf": "V:outRelations",
+    "VRevdoc:deprecatedInFavorOf": "V:outRelation",
+    "VState:aliasOf": "V:outRelation",
+    "rdfs:subPropertyOf": "V:outRelation",
     "rdfs:domain": "V:SourcerableNode",
     "rdfs:range": "rdfs:List",
     "VState:coupledToField": "V:source",
@@ -232,9 +232,9 @@ source are completely separate concepts here).`,
 
   incomingRelations: {
     "@type": "VState:AliasField",
-    "VRevdoc:deprecatedInFavorOf": "V:inRelations",
-    "VState:aliasOf": "V:inRelations",
-    "rdfs:subPropertyOf": "V:inRelations",
+    "VRevdoc:deprecatedInFavorOf": "V:inRelation",
+    "VState:aliasOf": "V:inRelation",
+    "rdfs:subPropertyOf": "V:inRelation",
     "rdfs:domain": "V:SourcerableNode",
     "rdfs:range": "rdfs:List",
     "VState:coupledToField": "V:target",

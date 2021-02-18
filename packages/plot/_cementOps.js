@@ -58,8 +58,8 @@ function _cementGenericPayload (stack, section, track, initial = 0) {
 const _singularLookup = {
   "@.S.": ["§.", "owner"],
   "@.O.": ["§.", "value"],
-  "@.S+": ["§.", "owner"],
-  "@.O+": ["§.", "rawId"],
+  "@.S*": ["§.", "owner"],
+  "@.O*": ["§.", "rawId"],
   "@.S~": ["§.", "owner"],
   "@.O~": ["§.", "content"],
   "@.S-": ["§.", "source"],

@@ -380,7 +380,7 @@ current resource.`
 `Triple pattern \`?s <urn:valos:_$~u4.ba54> ?o\` matches like:
 `, turtle(`
   ?o    V:ghostHost ?s
-      ; V:ghostPrototype <urn:valos:$~u4.ba54>
+      ; V:ghostOf <urn:valos:$~u4.ba54>
 `), `
 Mnemonic: The '_$~' is a 'subspace of ghoStS'.`,
           ],
@@ -696,8 +696,8 @@ well as other possible constraints.`,
       "example#example_shared_vrid_verb_data>0;Shared example data": [
 `The examples below all share the following triples:`,
         turtle(`
-  <urn:valos:$~u4.f00b> a V:Entity
-      ; V:prototype <urn:valos:$~u4.f00b-b507-0763>
+  <urn:valos:$~u4.f00b> a valos:Entity
+      ; V:specializationOf <urn:valos:$~u4.f00b-b507-0763>
 `),
       ],
       "chapter#section_fixed_ghost>0;verb type \"`_`\": fixed subspace sub-resource": {
@@ -713,7 +713,7 @@ and infers triples:
 `, turtle(`
   <urn:valos:$~u4.f00b@_$~u4.ba54>
         V:ghostHost <urn:valos:$~u4.f00b>
-      ; V:ghostPrototype <urn:valos:$~u4.ba54>
+      ; V:ghostOf <urn:valos:$~u4.ba54>
 `),
         ],
         "#1": `
@@ -727,7 +727,7 @@ the instance resource \`f00b\` the ghost of
 `, turtle(`
   <urn:valos:$~u4.f00b@_$~u4.ba54@_$~u4.b7e4>
         V:ghostHost <urn:valos:$~u4.f00b>
-      ; V:ghostPrototype <urn:valos:$~u4.ba54@_$~u4.b7e4>
+      ; V:ghostOf <urn:valos:$~u4.ba54@_$~u4.b7e4>
 `)
         ],
       },
@@ -737,7 +737,7 @@ Selects a variant resource value for a base resource within a fixed
 subspace. The variant resource provides
 inferred \`subspacePrototype\` fallbacks to an *inner* subspace and
 eventually to the non-variant base resource as well as to the
-homologous sub-resource of the host resource inheritancePrototype.
+homologous sub-resource of the host resource hasPrototype.
 
 This means that no matter where a subspace variant is defined in
 the prototype chain or in the nested sub-structure its value will be
@@ -766,7 +766,7 @@ infers triples:
 `, turtle(`
   <urn:valos:$~u4.f00b@_$~u4.b453@_$lang.fi@_$~u4.b74e@.$.myProp> a V:ScopeProperty
       ; V:ghostHost <urn:valos:$~u4.f00b>
-      ; V:ghostPrototype <urn:valos:$~u4.b453@_$lang.fi@_$~u4.b74e@.$.myProp>
+      ; V:ghostOf <urn:valos:$~u4.b453@_$lang.fi@_$~u4.b74e@.$.myProp>
       ; V:subspacePrototype <urn:valos:$~u4.f00b@_$~u4.b453@_$~u4.b74e@_$lang.fi@.$.myProp>
       ; V:language "fi"
 `),
@@ -783,12 +783,12 @@ f00b-b507-0763 and thus infers triples:
 `, turtle(`
   <urn:valos:$~u4.f00b@.$.myProp> a V:ScopeProperty
       ; V:scope <urn:valos:$~u4.f00b>
-      ; V:inheritancePrototype <urn:valos:$~u4.f00b-b507-0763@.$.myProp>
+      ; V:hasPrototype <urn:valos:$~u4.f00b-b507-0763@.$.myProp>
       ; V:name "myProp"
 `),
         ],
         "#1": [
-`The verbs \`.O.\`, \`.O+\`, and \`.O~\` denote the properties
+`The verbs \`.O.\`, \`.O*\`, and \`.O~\` denote the properties
 \`V:value\`, \`V:id\`, and \`V:content'\` respectively.
 These are the primary `, em("rdf:object sub-properties"), ` of
 ScopeProperty, Entity and Media, respectively (the 'O' in the
@@ -802,8 +802,8 @@ which are the rdf:subject and rdf:object properties of a Relation.`,
 relation with fixed ~ih target 8766 and infers triples:
 `, turtle(`
   <urn:valos:$~u4.f00b@-out--$.PERMISSIONS:@.O-$~ih.8766> a V:Relation
-      ; V:connectedSource <urn:valos:$~u4.f00b>
-      ; V:prototype <urn:valos:$~u4.f00b-b507-0763@-out--$.PERMISSIONS:@.O-$~ih.8766>
+      ; V:graphSource <urn:valos:$~u4.f00b>
+      ; V:specializationOf <urn:valos:$~u4.f00b-b507-0763@-out--$.PERMISSIONS:@.O-$~ih.8766>
       ; V:name "PERMISSIONS"
       ; V:target <urn:valos:$~u4.8766>
 `),
@@ -822,8 +822,8 @@ source, a structurally homologous prototype inside f00b-b507-0763
 and thus infers triples:
 `, turtle(`
   <urn:valos:$~u4.f00b@-out--$.PERMISSIONS> a V:Relation
-      ; V:connectedSource <urn:valos:$~u4.f00b>
-      ; V:inheritancePrototype <urn:valos:$~u4.f00b-b507-0763@-out--$.PERMISSIONS>
+      ; V:graphSource <urn:valos:$~u4.f00b>
+      ; V:hasPrototype <urn:valos:$~u4.f00b-b507-0763@-out--$.PERMISSIONS>
       ; V:name "PERMISSIONS"
   <urn:valos:$~u4.f00b@-out--$.PERMISSIONS@_$.1> a V:Relation
       ; V:subspacePrototype <urn:valos:$~u4.f00b@-out--$.PERMISSIONS>
@@ -842,7 +842,7 @@ infers triples:
 `, turtle(`
   <urn:valos:$~u4.f00b@*$.Scripts> a V:Entity
       ; V:parent <urn:valos:$~u4.f00b>
-      ; V:inheritancePrototype <urn:valos:$~u4.f00b-b507-0763@*$.Scripts>
+      ; V:hasPrototype <urn:valos:$~u4.f00b-b507-0763@*$.Scripts>
       ; V:name "scripts"
 `),
         ],
@@ -857,7 +857,7 @@ homologous prototype inside f00b-b507-0763 and thus infers triples:
 `, turtle(`
   <urn:valos:$~u4.f00b@~$.foo.vs> a V:Media
       ; V:folder <urn:valos:$~u4.f00b>
-      ; V:inheritancePrototype <urn:valos:$~u4.f00b-b507-0763@~$.foo.vs>
+      ; V:hasPrototype <urn:valos:$~u4.f00b-b507-0763@~$.foo.vs>
       ; V:name "foo.vs"
 `),
         ],

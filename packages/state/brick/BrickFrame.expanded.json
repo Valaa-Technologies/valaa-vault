@@ -1,0 +1,262 @@
+[
+  {
+    "@id": "g0",
+    "@type": ["http://www.w3.org/2002/07/owl#Restriction"],
+    "http://www.w3.org/2002/07/owl#onProperty": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#hasToken"}],
+    "http://www.w3.org/2002/07/owl#someValuesFrom": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#Token"}]
+  },
+  {
+    "@id": "g1",
+    "@type": ["http://www.w3.org/2002/07/owl#Restriction"],
+    "http://www.w3.org/2002/07/owl#onProperty": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#hasTag"}],
+    "http://www.w3.org/2002/07/owl#someValuesFrom": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#Token"}]
+  },
+  {
+    "@id": "g2",
+    "@type": ["http://www.w3.org/2002/07/owl#Restriction"],
+    "http://www.w3.org/2002/07/owl#onProperty": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#hasTagSet"}],
+    "http://www.w3.org/2002/07/owl#someValuesFrom": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#TagSet"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame",
+    "@type": ["http://www.w3.org/2002/07/owl#Ontology"],
+    "http://purl.org/dc/terms/license": [{"@id":"https://raw.githubusercontent.com/BuildSysUniformMetadata/Brick/master/LICENSE"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#Equipment",
+    "@type": ["http://www.w3.org/2002/07/owl#Class"],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#Taggable"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#FunctionBlock",
+    "@type": ["http://www.w3.org/2002/07/owl#Class"]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#Label",
+    "@type": ["http://www.w3.org/2002/07/owl#Class"],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [{"@id":"g0"},{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#Taggable"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#Location",
+    "@type": ["http://www.w3.org/2002/07/owl#Class"],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#Taggable"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#ObservedSignal",
+    "@type": ["http://www.w3.org/2002/07/owl#Class"],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#Signal"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#Point",
+    "@type": ["http://www.w3.org/2002/07/owl#Class"],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#Taggable"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#Signal",
+    "@type": ["http://www.w3.org/2002/07/owl#Class"]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#Tag",
+    "@type": ["http://www.w3.org/2002/07/owl#Class"]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#TagSet",
+    "@type": ["http://www.w3.org/2002/07/owl#Class"]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#Taggable",
+    "@type": ["http://www.w3.org/2002/07/owl#Class"]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#Token",
+    "@type": ["http://www.w3.org/2002/07/owl#Class"],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [{"@id":"g1"},{"@id":"g2"},{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#Taggable"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#UnobservedSignal",
+    "@type": ["http://www.w3.org/2002/07/owl#Class"],
+    "http://www.w3.org/2000/01/rdf-schema#subClassOf": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#Signal"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#controls",
+    "@type": ["http://www.w3.org/2002/07/owl#ObjectProperty"],
+    "http://www.w3.org/2002/07/owl#inverseOf": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#isControlledBy"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#equivalentTagSet",
+    "@type": ["http://www.w3.org/2002/07/owl#AnnotationProperty"]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#feeds",
+    "@type": ["http://www.w3.org/2002/07/owl#ObjectProperty"],
+    "http://www.w3.org/2002/07/owl#inverseOf": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#isFedBy"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#hasInput",
+    "@type": ["http://www.w3.org/2002/07/owl#ObjectProperty"],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#FunctionBlock"}],
+    "http://www.w3.org/2000/01/rdf-schema#range": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#Signal"}],
+    "http://www.w3.org/2002/07/owl#inverseOf": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#isInputOf"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#hasLocation",
+    "@type": ["http://www.w3.org/2002/07/owl#ObjectProperty","http://www.w3.org/2002/07/owl#TransitiveProperty"]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#hasMeasurement",
+    "@type": ["http://www.w3.org/2002/07/owl#ObjectProperty"],
+    "http://www.w3.org/2002/07/owl#inverseOf": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#isMeasuredBy"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#hasOutput",
+    "@type": ["http://www.w3.org/2002/07/owl#ObjectProperty"],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#FunctionBlock"}],
+    "http://www.w3.org/2000/01/rdf-schema#range": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#Signal"}],
+    "http://www.w3.org/2002/07/owl#inverseOf": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#isOutputOf"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#hasPart",
+    "@type": ["http://www.w3.org/2002/07/owl#ObjectProperty","http://www.w3.org/2002/07/owl#TransitiveProperty"],
+    "http://www.w3.org/2002/07/owl#inverseOf": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#isPartOf"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#hasPoint",
+    "@type": ["http://www.w3.org/2002/07/owl#ObjectProperty"],
+    "http://www.w3.org/2000/01/rdf-schema#range": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#Point"}],
+    "http://www.w3.org/2002/07/owl#inverseOf": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#isPointOf"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#hasSubAsset",
+    "@type": ["http://www.w3.org/2002/07/owl#ObjectProperty","http://www.w3.org/2002/07/owl#TransitiveProperty"]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#hasTag",
+    "@type": ["http://www.w3.org/2002/07/owl#ObjectProperty"],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#Taggable"}],
+    "http://www.w3.org/2000/01/rdf-schema#range": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#Tag"}],
+    "http://www.w3.org/2002/07/owl#inverseOf": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#isTagOf"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#hasTagSet",
+    "@type": ["http://www.w3.org/2002/07/owl#ObjectProperty"],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#Taggable"}],
+    "http://www.w3.org/2000/01/rdf-schema#range": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#TagSet"}],
+    "http://www.w3.org/2002/07/owl#inverseOf": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#isTagSetOf"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#hasToken",
+    "@type": ["http://www.w3.org/2002/07/owl#ObjectProperty"],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#Label"}],
+    "http://www.w3.org/2000/01/rdf-schema#range": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#Token"}],
+    "http://www.w3.org/2002/07/owl#inverseOf": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#isTokenOf"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#isControlledBy",
+    "@type": ["http://www.w3.org/2002/07/owl#ObjectProperty"]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#isFedBy",
+    "@type": ["http://www.w3.org/2002/07/owl#ObjectProperty"]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#isHierarchical",
+    "@type": ["http://www.w3.org/2002/07/owl#AnnotationProperty"]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#isInputOf",
+    "@type": ["http://www.w3.org/2002/07/owl#ObjectProperty"],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#Signal"}],
+    "http://www.w3.org/2000/01/rdf-schema#range": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#FunctionBlock"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#isLocationOf",
+    "@type": ["http://www.w3.org/2002/07/owl#ObjectProperty"],
+    "http://www.w3.org/2002/07/owl#inverseOf": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#hasLocation"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#isMeasuredBy",
+    "@type": ["http://www.w3.org/2002/07/owl#ObjectProperty","http://www.w3.org/2002/07/owl#TransitiveProperty"]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#isOutputOf",
+    "@type": ["http://www.w3.org/2002/07/owl#ObjectProperty"],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#Signal"}],
+    "http://www.w3.org/2000/01/rdf-schema#range": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#FunctionBlock"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#isPartOf",
+    "@type": ["http://www.w3.org/2002/07/owl#ObjectProperty","http://www.w3.org/2002/07/owl#TransitiveProperty"]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#isPointOf",
+    "@type": ["http://www.w3.org/2002/07/owl#ObjectProperty"],
+    "http://www.w3.org/2000/01/rdf-schema#range": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#Point"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#isTagOf",
+    "@type": ["http://www.w3.org/2002/07/owl#ObjectProperty"],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#Tag"}],
+    "http://www.w3.org/2000/01/rdf-schema#range": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#Taggable"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#isTagSetOf",
+    "@type": ["http://www.w3.org/2002/07/owl#ObjectProperty"],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#TagSet"}],
+    "http://www.w3.org/2000/01/rdf-schema#range": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#Taggable"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#isTokenOf",
+    "@type": ["http://www.w3.org/2002/07/owl#ObjectProperty"],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#Token"}],
+    "http://www.w3.org/2000/01/rdf-schema#range": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#Label"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#similarTagSet",
+    "@type": ["http://www.w3.org/2002/07/owl#AnnotationProperty"],
+    "http://www.w3.org/2000/01/rdf-schema#domain": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#TagSet"}],
+    "http://www.w3.org/2000/01/rdf-schema#range": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#TagSet"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#usedBy",
+    "@type": ["http://www.w3.org/2002/07/owl#AnnotationProperty"]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#usedByDimension",
+    "@type": ["http://www.w3.org/2002/07/owl#AnnotationProperty"],
+    "http://www.w3.org/2000/01/rdf-schema#subPropertyOf": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#usedBy"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#usedByPoint",
+    "@type": ["http://www.w3.org/2002/07/owl#AnnotationProperty"],
+    "http://www.w3.org/2000/01/rdf-schema#subPropertyOf": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#usedByDimension"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#usesDimension",
+    "@type": ["http://www.w3.org/2002/07/owl#AnnotationProperty"],
+    "http://www.w3.org/2002/07/owl#inverseOf": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#usedByDimension"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#usesEquipment",
+    "@type": ["http://www.w3.org/2002/07/owl#AnnotationProperty"],
+    "http://www.w3.org/2000/01/rdf-schema#subPropertyOf": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#usesDimension"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#usesLocation",
+    "@type": ["http://www.w3.org/2002/07/owl#AnnotationProperty"],
+    "http://www.w3.org/2000/01/rdf-schema#subPropertyOf": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#usesDimension"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#usesMeasurement",
+    "@type": ["http://www.w3.org/2002/07/owl#AnnotationProperty"],
+    "http://www.w3.org/2000/01/rdf-schema#subPropertyOf": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#usesDimension"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#usesPoint",
+    "@type": ["http://www.w3.org/2002/07/owl#AnnotationProperty"],
+    "http://www.w3.org/2000/01/rdf-schema#subPropertyOf": [{"@id":"https://brickschema.org/schema/1.0.3/BrickFrame#usesDimension"}]
+  },
+  {
+    "@id": "https://brickschema.org/schema/1.0.3/BrickFrame#usesTag",
+    "@type": ["http://www.w3.org/2002/07/owl#AnnotationProperty"]
+  }
+]

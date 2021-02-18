@@ -19,5 +19,8 @@
     "@valos/security": "^0.37.0-prerelease.0",
     "graphql": "^0.6.2"
   },
+  "devDependencies": {
+    "fake-indexeddb": "^3.0.0"
+  },
   "homepage": "https://valospace.org/sourcerer"
 }

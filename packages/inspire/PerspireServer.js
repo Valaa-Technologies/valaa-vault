@@ -164,7 +164,7 @@ export default class PerspireServer extends FabricEventTarget {
   _createTestPerspireGateway (gatewayOptions: Object, ...revelations: any[]) {
     const testEnvironmentRevelation = {
       gateway: { scribe: {
-        getDatabaseAPI: require("~/tools/indexedDB/getInMemoryDatabaseAPI").getDatabaseAPI,
+        getDatabaseAPI: require("~/sourcerer/tools/getInMemoryDatabaseAPI").getDatabaseAPI,
       } },
     };
     return createGateway(gatewayOptions, ...revelations, testEnvironmentRevelation);

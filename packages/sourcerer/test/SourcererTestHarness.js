@@ -22,12 +22,12 @@ import createValaaTestScheme, { TestSourcerer, TestConnection }
 import createValaaLocalScheme from "~/sourcerer/schemeModules/valaa-local";
 import createValaaMemoryScheme from "~/sourcerer/schemeModules/valaa-memory";
 import createValaaTransientScheme from "~/sourcerer/schemeModules/valaa-transient";
+import { getDatabaseAPI } from "~/sourcerer/tools/getInMemoryDatabaseAPI";
 
 import * as ValoscriptDecoders from "~/script/mediaDecoders";
 import * as ToolsDecoders from "~/tools/mediaDecoders";
 
 import { thenChainEagerly, mapEagerly } from "~/tools/thenChainEagerly";
-import { getDatabaseAPI } from "~/tools/indexedDB/getInMemoryDatabaseAPI";
 import { dumpify, dumpObject, isPromise, trivialClone, wrapError } from "~/tools";
 
 export const testAuthorityURI = "valaa-test:";

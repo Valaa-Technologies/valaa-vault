@@ -1,0 +1,139 @@
+const baseContextText = `{
+  "^": "urn:valos:",
+  "@base": "_:",
+  "@vocab": "urn:valos:.$.",
+
+  "V": "https://valospace.org/0#",
+
+  ".": { "@id": "V:ownsProperty", "@type": "@id", "@container": "@id" },
+  "-E": { "@id": "V:ownsEntity", "@type": "@id", "@container": "@id" },
+  "-R": { "@id": "V:ownsRelation", "@type": "@id", "@container": "@id" },
+  "-M": { "@id": "V:ownsMedia", "@type": "@id", "@container": "@id" },
+  "_": { "@id": "V:ownsGhost", "@type": "@id", "@container": "@id" },
+
+  ".I": { "@id": "V:instanceOf", "@type": "@id" },
+  ".G": { "@id": "V:ghostOf", "@type": "@id" },
+
+  ".N": { "@id": "V:name" },
+  ".P": { "@id": "V:name", "@type": "@id" },
+
+  ".S": { "@id": "V:subject", "@type": "@id" },
+  ".O": { "@id": "V:object" },
+
+  ".SP^": { "@id": "V:scope", "@type": "@id" },
+  ".OP": { "@id": "V:value", "@type": "@id" },
+
+  ".SE^": { "@id": "V:parent", "@type": "@id" },
+  ".OE": { "@id": "V:id", "@type": "@id" },
+
+  ".SM^": { "@id": "V:folder", "@type": "@id" },
+  ".OM": { "@id": "V:content", "@type": "@id" },
+
+  ".SR": { "@id": "V:source", "@type": "@id" },
+  ".OR": { "@id": "V:target", "@type": "@id" },
+
+  ".SR^": { "@id": "V:graphSource", "@type": "@id" },
+  ".OR^": { "@id": "V:graphTarget", "@type": "@id" },
+
+  "-out": { "@id": "V:outRelation", "@type": "@id", "@container": "@list" },
+  "-in": { "@id": "V:inRelation", "@type": "@id", "@container": "@list" },
+
+  "VLog": "https://valospace.org/log/0#",
+  "VSourcerer": "https://valospace.org/sourcerer/0#",
+  "VState": "https://valospace.org/state/0#",
+
+  "~u4": "https://valospace.org/state/u4/0#"
+}`;
+
+const baseContext = Object.freeze(Object.assign(Object.create(null), JSON.parse(baseContextText)));
+
+const referenceLookupTag = Symbol("VLog:referenceLookup");
+const referenceArrayTag = Symbol("VLog:referenceArray");
+
+module.exports = {
+  baseContext,
+  baseContextText,
+  createVState,
+  mutateVState,
+  referenceLookupTag,
+  referenceArrayTag,
+  lookupReference,
+  obtainReferenceEntry,
+};
+
+function createVState (references = []) {
+  const _referenceArray = [];
+  const _referenceLookup = {};
+
+  const vstate = { "/": Object.create(null) };
+  Object.defineProperty(vstate, referenceArrayTag, {
+    writable: true, configurable: false, enumerable: false,
+    value: _referenceArray,
+  });
+  Object.defineProperty(vstate, referenceLookupTag, {
+    writable: true, configurable: false, enumerable: false,
+    value: _referenceLookup,
+  });
+  Object.defineProperty(vstate, "toJSON", {
+    writable: true, configurable: false, enumerable: false,
+    value () {
+      const json = {
+        "@context": [
+          baseContext,
+          Object.fromEntries(_referenceArray.map((value, index) => [index, value])),
+        ],
+      };
+      for (const [key, value] of Object.entries(vstate)) {
+        json[key] = _flattenToJSON(value);
+      }
+      return json;
+    },
+  });
+
+  for (const [indexValue, reference] of Object.entries(references)) {
+    const index = parseInt(indexValue, 10);
+    if (typeof index !== "number" || String(index) !== String(indexValue) || index < 0) {
+      throw new Error(`Invalid reference index: "${indexValue}" is not a non-negative integer`);
+    }
+    _referenceArray[index] = reference;
+    _referenceLookup[reference] = [index, {}];
+  }
+  return vstate;
+}
+
+function _flattenToJSON (object) {
+  if (typeof object !== "object" || (object == null)) return object;
+  if (Array.isArray(object)) return object.map(_flattenToJSON);
+  const ret = {};
+  // eslint-disable-next-line guard-for-in
+  for (const key in object) {
+    const value = object[key];
+    if (typeof value === "function") continue;
+    ret[key] = _flattenToJSON(value);
+  }
+  return ret;
+}
+
+function mutateVState (state) {
+  const ret = createVState(state[referenceArrayTag]);
+  for (const key of Object.keys(state)) {
+    if (key === "@context") continue;
+    ret[key] = Object.create(state[key]);
+  }
+  return ret;
+}
+
+function lookupReference (state, index) {
+  return state[referenceArrayTag][index];
+}
+
+function obtainReferenceEntry (state, reference) {
+  const lookup = state[referenceLookupTag];
+  let ret = lookup[reference];
+  if (!ret) {
+    const array = state[referenceArrayTag];
+    array.push(reference);
+    ret = lookup[reference] = [array.length, reference];
+  }
+  return ret;
+}

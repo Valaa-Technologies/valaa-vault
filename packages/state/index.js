@@ -1,48 +1,50 @@
 const baseContextText = `{
   "^": "urn:valos:",
-  "@base": "_:",
-  "@vocab": "urn:valos:.$.",
+  "@base": "urn:valos:chronicle:",
+  "@vocab": "vplot:'",
 
   "V": "https://valospace.org/0#",
-
-  ".": { "@id": "V:ownsProperty", "@type": "@id", "@container": "@id" },
-  "-E": { "@id": "V:ownsEntity", "@type": "@id", "@container": "@id" },
-  "-R": { "@id": "V:ownsRelation", "@type": "@id", "@container": "@id" },
-  "-M": { "@id": "V:ownsMedia", "@type": "@id", "@container": "@id" },
-  "_": { "@id": "V:ownsGhost", "@type": "@id", "@container": "@id" },
-
-  ".I": { "@id": "V:instanceOf", "@type": "@id" },
-  ".G": { "@id": "V:ghostOf", "@type": "@id" },
-
-  ".N": { "@id": "V:name" },
-  ".P": { "@id": "V:name", "@type": "@id" },
-
-  ".S": { "@id": "V:subject", "@type": "@id" },
-  ".O": { "@id": "V:object" },
-
-  ".SP^": { "@id": "V:scope", "@type": "@id" },
-  ".OP": { "@id": "V:value", "@type": "@id" },
-
-  ".SE^": { "@id": "V:parent", "@type": "@id" },
-  ".OE": { "@id": "V:id", "@type": "@id" },
-
-  ".SM^": { "@id": "V:folder", "@type": "@id" },
-  ".OM": { "@id": "V:content", "@type": "@id" },
-
-  ".SR": { "@id": "V:source", "@type": "@id" },
-  ".OR": { "@id": "V:target", "@type": "@id" },
-
-  ".SR^": { "@id": "V:graphSource", "@type": "@id" },
-  ".OR^": { "@id": "V:graphTarget", "@type": "@id" },
-
-  "-out": { "@id": "V:outRelation", "@type": "@id", "@container": "@list" },
-  "-in": { "@id": "V:inRelation", "@type": "@id", "@container": "@list" },
-
   "VLog": "https://valospace.org/log/0#",
-  "VSourcerer": "https://valospace.org/sourcerer/0#",
   "VState": "https://valospace.org/state/0#",
 
-  "~u4": "https://valospace.org/state/u4/0#"
+  "&+": { "@id": "VState:adds", "@type": "@id", "@container": "@id" },
+  "&-": { "@id": "VState:removes", "@container": "@graph" },
+
+  "*P": { "@id": "V:ownsProperty", "@type": "@id", "@container": "@id" },
+  "*E": { "@id": "V:ownsEntity", "@type": "@id", "@container": "@id" },
+  "*R": { "@id": "V:ownsRelation", "@type": "@id", "@container": "@id" },
+  "*M": { "@id": "V:ownsMedia", "@type": "@id", "@container": "@id" },
+
+  ".o": { "@id": "V:owner", "@type": "@id" },
+
+  ".P*": { "@id": "V:scope", "@type": "@id" },
+  ".E*": { "@id": "V:parent", "@type": "@id" },
+  ".R*": { "@id": "V:graph", "@type": "@id" },
+  ".M*": { "@id": "V:folder", "@type": "@id" },
+
+  ".n": { "@id": "V:name" },
+
+  ".iOf": { "@id": "V:instanceOf", "@type": "@id" },
+  "-hasI": { "@id": "V:hasInstance", "@type": "@id", "@container": "@id" },
+
+  ".gOf": { "@id": "V:ghostOf", "@type": "@id" },
+  "-hasG": { "@id": "V:hasGhost", "@type": "@id", "@container": "@id" },
+
+  ".src": { "@id": "V:source", "@type": "@id" },
+  "-out": { "@id": "V:hasOutRelation", "@type": "@id", "@container": "@list" },
+
+  ".tgt": { "@id": "V:target", "@type": "@id" },
+  "-in": { "@id": "V:hasInRelation", "@type": "@id", "@container": "@list" },
+
+  ".src-": { "@id": "V:linkedSouirce", "@type": "@id" },
+  ".tgt-": { "@id": "V:linkedTarget", "@type": "@id" },
+
+  ".src*": { "@id": "V:ownerSource", "@type": "@id" },
+  ".tgt*": { "@id": "V:ownerTarget", "@type": "@id" },
+
+  "VSourcerer": "https://valospace.org/sourcerer/0#",
+
+  "~u4": "urn:valos:u4:"
 }`;
 
 const baseContext = Object.freeze(Object.assign(Object.create(null), JSON.parse(baseContextText)));

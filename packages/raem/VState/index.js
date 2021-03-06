@@ -136,8 +136,18 @@ only orphan the subject resource.`,
       "rdfs:domain": "VState:Field",
       "rdfs:range": "valosField",
       "rdfs:comment":
-  ``,
+`This field infers a reverse triple with predicate equal to this field
+value.`,
     },
+    linkedToField: {
+      "@type": "VKernel:Property",
+      "rdfs:subPropertyOf": "VState:coupledToField",
+      "rdfs:domain": "VState:Field",
+      "rdfs:range": "valosField",
+      "rdfs:comment":
+`This field requires the existence of a reverse triple with predicate
+equal to this field value.`,
+          },
     coupledField: {
       "@type": "VKernel:Property",
       "VRevdoc:deprecatedInFavorOf": "VState:coupledToField",

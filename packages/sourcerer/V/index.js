@@ -19,7 +19,7 @@ module.exports = {
       "rdfs:range": "V:SourceredNode",
       restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
       "VState:isOwnedBy": true,
-      "VState:coupledToField": "V:entries",
+      "VState:linkedToField": "V:entries",
       "rdfs:comment":
   `The directory (and owner) node of this sourcered node.`,
     },
@@ -30,7 +30,7 @@ module.exports = {
       "rdfs:domain": "V:SourceredNode",
       "rdfs:range": "rdfs:List",
       "VState:isOwnerOf": true,
-      "VState:coupledToField": "V:directory",
+      "VState:linkedToField": "V:directory",
       "rdfs:comment":
   `The ordered list of entries of this sourcered node when seen as
   a directory.`,

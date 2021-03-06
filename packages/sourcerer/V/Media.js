@@ -21,20 +21,20 @@ node types.
     "rdfs:range": "V:SourceredNode",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "VState:isOwnedBy": true,
-    "VState:coupledToField": "V:medias",
+    "VState:linkedToField": "V:ownsMedia",
     "rdfs:comment":
 `The folder (and directory, owner) node of this media.`,
   },
 
   // Note: 'medias' has domain SourceredNode but is listed
   // here due to its coupling with 'folder'.
-  medias: {
+  ownsMedia: {
     "@type": "VState:EventLoggedField",
     "rdfs:subPropertyOf": "V:entries",
     "rdfs:domain": "V:SourceredNode",
     "rdfs:range": "rdfs:List",
     "VState:isOwnerOf": true,
-    "VState:coupledToField": "V:folder",
+    "VState:linkedToField": "V:folder",
     "rdfs:comment":
 `The ordered list of medias contained in this sourcered node when seen
 as a folder`,

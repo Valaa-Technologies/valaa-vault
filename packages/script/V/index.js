@@ -21,16 +21,21 @@ native javascript property 'name' in certain execution contexts`,
     },
     prototypeAlias: {
       "@type": "VState:AliasField",
-      "VState:aliasOf": "V:prototype",
-      "rdfs:subPropertyOf": "V:prototype",
+      "VRevdoc:deprecatedInFavorOf": "V:specializationOf",
+      "VState:aliasOf": "V:specializationOf",
+      "rdfs:subPropertyOf": "V:specializationOf",
       "rdfs:domain": "V:Extant",
       "rdfs:range": "V:Resource",
       restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
       "rdfs:comment":
 `The prototype of this resource.
 
-This is an alias for V:prototype to bypass conflicts with native
-javascript property 'prototype' in certain execution contexts.`
+This is an alias for V:specializationOf to bypass conflicts with native
+javascript property 'prototype' in certain execution contexts.
+
+Deprecated after 'prototype' was renamed as V:specializationOf, making
+this alias unnecessary.
+`
     },
     ...require("./Property"),
     ...require("./Scope"),

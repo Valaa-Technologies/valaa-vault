@@ -18,7 +18,7 @@ block as an rdf:Statement reification of hypertwinned triples.`,
     "rdfs:range": "V:Scope",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "VState:isOwnedBy": true,
-    "VState:coupledToField": "V:properties",
+    "VState:linkedToField": "V:ownsProperty",
     "rdfs:comment":
 `The scope resource (and owner) of this ScopeProperty.`,
   },

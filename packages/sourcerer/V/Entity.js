@@ -33,20 +33,20 @@ node can act as a root resource.
     "rdfs:range": "V:SourceredNode",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "VState:isOwnedBy": true,
-    "VState:coupledToField": "V:entities",
+    "VState:linkedToField": "V:ownsEntity",
     "rdfs:comment":
 `The parent (and directory, owner) node of this entity.`,
   },
 
   // Note: 'entities' has domain SourceredNode but is listed
   // here due to its coupling with 'parent'.
-  entities: {
+  ownsEntity: {
     "@type": "VState:EventLoggedField",
     "rdfs:subPropertyOf": "V:entries",
     "rdfs:domain": "V:SourceredNode",
     "rdfs:range": "rdfs:List",
     "VState:isOwnerOf": true,
-    "VState:coupledToField": "V:parent",
+    "VState:linkedToField": "V:parent",
     "rdfs:comment":
 `The ordered list of entities contained in this sourcered node.`,
   },

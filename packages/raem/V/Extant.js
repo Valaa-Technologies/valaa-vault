@@ -34,31 +34,30 @@ the same context. Idiomatically this context is all resources of
 a particular type which are owned by the same resource.`,
   },
 
-  inheritancePrototype: {
+  hasPrototype: {
     "@type": "VState:EventLoggedField",
-    "rdfs:subPropertyOf": "V:prototype",
+    "rdfs:subPropertyOf": "V:specializationOf",
     "rdfs:domain": "V:Extant",
     "rdfs:range": "V:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VState:coupledToField": "V:inheritors",
+    "VState:coupledToField": "V:prototypeOf",
     "rdfs:comment":
-`The inheritance prototype of this extant resource. This represents the
+`The prototype of this extant resource. This represents the
 traditional prototypical inheritance where inherited field values are
 not remapped in any way.`,
   },
 
-  instancePrototype: {
+  instanceOf: {
     "@type": "VState:EventLoggedField",
-    "rdfs:subPropertyOf": "V:prototype",
+    "rdfs:subPropertyOf": "V:specializationOf",
     "rdfs:domain": "V:Extant",
     "rdfs:range": "V:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VState:coupledToField": "V:instances",
+    "VState:coupledToField": "V:hasInstance",
     "rdfs:comment":
-`The instance prototype of this extant resource. This represents
-valos 'ghost instantiation' where all recursively owned resources of
-the instancePrototype are also inherited as 'ghosts' under this extant
-resource.`,
+`The instance prototype of this extant resource. This represents valos
+'ghost instantiation' where all recursively owned resources of the
+instanceOf are also inherited as 'ghosts' under this extant resource.`,
   },
 
   ownlings: {
@@ -66,7 +65,7 @@ resource.`,
     "rdfs:domain": "V:Extant",
     "rdfs:range": "rdfs:List",
     "VState:isOwnerOf": true,
-    "VState:coupledToField": "V:owner",
+    "VState:linkedToField": "V:owner",
     "rdfs:comment":
 `The ordered list of all resources owned by this extant resource. This
 list is a union of all fields which define a VState:isOwnerOf.`
@@ -78,7 +77,7 @@ list is a union of all fields which define a VState:isOwnerOf.`
     "rdfs:domain": "V:Extant",
     "rdfs:range": "V:Extant",
     "VState:isOwnerOf": true,
-    "VState:coupledToField": "V:owner",
+    "VState:linkedToField": "V:owner",
     "rdfs:comment":
 `The ordered list of all resources owned by this extant resource which
 are not contained in another VState:isOwnerOf field list.`,

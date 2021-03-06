@@ -52,27 +52,27 @@ resource.`,
 `The dominant type name of this resource`,
   },
 
-  prototype: {
+  specializationOf: {
     "@type": "VState:EventLoggedField",
     "rdfs:domain": "V:Resource",
     "rdfs:range": "V:Resource",
-    "VState:coupledToField": "V:derivations",
+    "VState:coupledToField": "V:hasSpecialization",
     "rdfs:comment":
 `The prototypes of this resource. All field lookups for which there is
 no associated value set and whose field descriptors don't have
 ownDefaultValue are forwarded to the prototype.`,
   },
 
-  derivations: {
+  hasSpecialization: {
     "@type": "VState:CoupledField",
     "rdfs:domain": "V:Resource",
     "rdfs:range": "V:Resource",
-    "VState:coupledToField": "V:prototype",
+    "VState:coupledToField": "V:specializationOf",
     "VState:preventsDestroy": true,
     "VState:ownDefaultValue": [],
     "rdfs:comment":
 `An unordered set of resources which have this resource as their
-V:prototype.`,
+V:specializationOf.`,
   },
 
   ownFields: {
@@ -87,40 +87,40 @@ All property accesses will only return field values which are directly
 owned by this resource.`,
   },
 
-  inheritors: {
+  prototypeOf: {
     "@type": "VState:CoupledField",
-    "rdfs:subPropertyOf": "V:derivations",
+    "rdfs:subPropertyOf": "V:specializationOf",
     "rdfs:domain": "V:Resource",
     "rdfs:range": "V:Resource",
-    "VState:coupledToField": "V:inheritancePrototype",
+    "VState:coupledToField": "V:hasPrototype",
     "VState:preventsDestroy": true,
     "VState:ownDefaultValue": [],
     "rdfs:comment":
 `An unordered set of resources which have this resource as their
-V:inheritancePrototype.`,
+V:hasPrototype.`,
   },
 
-  instances: {
+  hasInstance: {
     "@type": "VState:CoupledField",
-    "rdfs:subPropertyOf": "V:derivations",
+    "rdfs:subPropertyOf": "V:hasSpecialization",
     "rdfs:domain": "V:Resource",
     "rdfs:range": "V:Resource",
-    "VState:coupledToField": "V:instancePrototype",
+    "VState:coupledToField": "V:instanceOf",
     "VState:preventsDestroy": true,
     "VState:ownDefaultValue": [],
     "rdfs:comment":
 `An unordered set of resources which have this resource as their
-direct V:instancePrototype.`,
+direct V:instanceOf.`,
   },
 
-  ghostPrototype: {
+  ghostOf: {
     "@type": "VState:GeneratedField",
     "rdfs:subPropertyOf": "V:prototype",
     "rdfs:domain": "V:Resource",
     "rdfs:range": "V:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
-    "VState:expressor": ["@$VValk.resolveGhostPrototype@@"],
-    "VState:coupledToField": "V:ghosts",
+    "VState:expressor": ["@$VValk.resolveGhostOf@@"],
+    "VState:coupledToField": "V:hasGhost",
     "rdfs:comment":
 `Ghost prototype of this ghost resource. The ghost prototype is the
 base resource from which this ghost was created during some primary
@@ -134,28 +134,28 @@ instance prototype is called the ghost host prototype, and the
 of the corresponding ghosts (ie. this field).} .`,
   },
 
-  ghosts: {
+  hasGhost: {
     "@type": "VState:CoupledField",
-    "rdfs:subPropertyOf": "V:derivations",
+    "rdfs:subPropertyOf": "V:hasSpecialization",
     "rdfs:domain": "V:Resource",
     "rdfs:range": "V:Resource",
-    "VState:coupledToField": "V:ghostPrototype",
+    "VState:coupledToField": "V:ghostOf",
     "VState:preventsDestroy": true,
     "VState:ownDefaultValue": [],
     "rdfs:comment":
 `An unordered set of all (materialized) ghosts which have this resource
-as their V:ghostPrototype. See VState:section_ghost_instancing
+as their V:ghostOf. See VState:section_ghost_instancing
 for why immaterial ghosts are not listed.`,
   },
 
   materializedGhosts: {
     "@type": "VState:AliasField",
-    "VRevdoc:deprecatedInFavorOf": "V:ghosts",
-    "VState:aliasOf": "V:ghosts",
-    "rdfs:subPropertyOf": "V:ghosts",
+    "VRevdoc:deprecatedInFavorOf": "V:hasGhost",
+    "VState:aliasOf": "V:hasGhost",
+    "rdfs:subPropertyOf": "V:hasGhost",
     "rdfs:domain": "V:Resource",
     "rdfs:range": "V:Resource",
-    "VState:coupledToField": "V:ghostPrototype",
+    "VState:coupledToField": "V:ghostOf",
     "VState:preventsDestroy": true,
     "VState:ownDefaultValue": [],
   },
@@ -188,7 +188,7 @@ not a ghost itself.`,
     "rdfs:range": "V:Resource",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "VState:isOwnedBy": true,
-    "VState:coupledToField": "V:ghostOwnlings",
+    "VState:linkedToField": "V:ownsGhost",
     "VState:ownDefaultValue": null,
     "VState:allowTransientFieldToBeSingular": true,
     "rdfs:comment":
@@ -200,12 +200,13 @@ removal of either of these owning field relationships will
 immaterialize, not destroy, the ghost.`,
   },
 
-  ghostOwnlings: {
+  ownsGhost: {
     "@type": "VState:CoupledField",
+    "rdfs:subPropertyOf": "V:ownsFixed",
     "rdfs:domain": "V:Resource",
     "rdfs:range": "V:Resource",
     "VState:isOwnerOf": true,
-    "VState:coupledToField": "V:ghostOwner",
+    "VState:linkedToField": "V:ghostOwner",
     "VState:ownDefaultValue": [],
     "rdfs:comment":
 `Materialized ghost resources which have this instance as their ghost

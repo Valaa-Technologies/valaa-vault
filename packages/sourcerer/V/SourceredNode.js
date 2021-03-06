@@ -22,7 +22,7 @@ graph.`,
     "rdfs:range": "V:SourceredNode",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "VState:isOwnedBy": true,
-    "VState:coupledToField": "V:nodes",
+    "VState:linkedToField": "V:nodes",
     "rdfs:comment":
 `The container (and owner) node of this sourcered node.`,
   },
@@ -33,7 +33,7 @@ graph.`,
     "rdfs:domain": "V:SourceredNode",
     "rdfs:range": "rdfs:List",
     "VState:isOwnerOf": true,
-    "VState:coupledToField": "V:container",
+    "VState:linkedToField": "V:container",
     "rdfs:comment":
 `The ordered list of all nodes directly contained by this sourcered
 node.`,

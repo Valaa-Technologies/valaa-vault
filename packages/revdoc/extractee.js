@@ -55,7 +55,7 @@ module.exports = {
   },
 
   /**
-   * Construct a VRevdoc:ABNF element.
+   * Construct a VRevdoc:Turtle element.
    *
    * @param {*} text
    * @param {*} rest
@@ -68,6 +68,23 @@ module.exports = {
       // providing language identifiers for non-natural languages.
       ...c(text, { language: "https://www.w3.org/TR/turtle/" }),
       "@type": "VRevdoc:Turtle",
+    };
+  },
+
+  /**
+   * Construct a VRevdoc:RegEx element.
+   *
+   * @param {*} text
+   * @param {*} rest
+   * @returns
+   */
+  regexp (text) {
+    // Add validation and maybe restructuring?
+    return {
+      // TODO(iridian, 2019-08): Figure out if there's any sense in
+      // providing language identifiers for non-natural languages.
+      ...c(text, { language: "https://tc39.es/ecma262/#sec-regexp-regular-expression-objects" }),
+      "@type": "VRevdoc:RegExp",
     };
   },
 
@@ -239,8 +256,9 @@ module.exports = {
                     const ra = await a;
                     return op(typeof ra === "function" ? ra() : ra);
                   });
-                  expect(typeof actual === "function" ? await actual() : actual)[toSatisfy](
-                      typeof result === "function" ? await result() : result);
+                  const actualResult = typeof actual === "function" ? await actual() : actual;
+                  expect(actualResult)[toSatisfy](
+                      typeof result === "function" ? await result(actualResult) : result);
                 } catch (error) {
                   outputError(error, `Exception noted while running testdoc test ${named}`);
                   throw error;

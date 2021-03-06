@@ -1,6 +1,6 @@
 const {
   extractee: {
-    c, authors, jsonld, ref, context, cli, command, cpath, bulleted, pkg,
+    c, authors, jsonld, em, ref, context, cli, command, cpath, bulleted, pkg, regexp, turtle,
     prepareTestDoc,
   },
 } = require("@valos/revdoc");
@@ -26,16 +26,18 @@ module.exports = {
 
   "chapter#abstract>0": {
     "#0": [
-`ValOS log ('VLog') format specifies an ontology and algorithms for
-expressing a ValOS chronicle change event history as a sequence of
-`, ref("VState", "@valos/state"), `-formatted JSON-LD document
-entries.`,
+`ValOS log ('VLog') format specifies the ontology, the format and the
+algorithms for expressing a ValOS chronicle change event history as a
+sequence of`, ref("VState", "@valos/state"), `-formatted JSON-LD
+document entries.`,
     ],
   },
 
   "chapter#sotd>1": {
     "#0": [
-`This document is part of the library workspace `, pkg("@valos/log"), `
+`This document is a design document of a potential specification.
+
+This document is part of the library workspace `, pkg("@valos/log"), `
 (of domain `, pkg("@valos/kernel"), `) which has the description:
 \`VLog specification and reference implementation\`.`,
     ],
@@ -43,15 +45,18 @@ entries.`,
 
   "chapter#introduction>2": {
     "#0": [
-`Edit me - this is the first payload chapter. Abstract and SOTD are
-essential `, ref("ReSpec boilerplate",
-    "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"), `
-
-See `, ref("ReVDoc tutorial", "@valos/revdoc/tutorial"), ` for
-instructions on how to write revdoc source documents.
-
-See also `, ref("ReVdoc specification", "@valos/revdoc"), ` and `,
-ref("VDoc specification", "@valos/vdoc"), ` for reference documentation.`,
+`A VLog event is a specifically structured JSON-LD document that
+represents a change between two VState documents. The document contains
+several sub-components, `, ref("aspects", "#section_aspects"),  ` that
+contain `, ref("the delta payload", "#section_delta_aspect"), ` itself
+but also metadata, validations and other lifetime attribute of the
+event.`,
+null,
+`The delta aspect is a semantically incomplete precursor of the actual
+triples that are added to (or removed from) the vstate graph itself. To
+complete the precursor the accumulated state @context `,
+ref("URI mappings", "#section_uri_mappings"), ` must be added to the
+delta root context.`,
     ],
   },
 
@@ -61,18 +66,19 @@ ref("VDoc specification", "@valos/vdoc"), ` for reference documentation.`,
 wish-list:`,
       { "bulleted#0": [
 [`Each event is a named graph with a name that is a monotonically
-  increasing vpath-name derived based on the chronicle id itself.`],
+  increasing vplot-name derived based on the chronicle id itself.`],
 [`Event graphs are thus disjoint when flattened.`],
 [`Reduction is the process of applying the events in succession from
   the very beginning of the vlog and yields a snapshot vstate graph.`],
-[`Reduction consists of validation, stripping and update steps.`],
-[`Validation rejects heretical events. Stripping removes event metadata
-  and splits the remaining payload to separate update stages. Update
-  applies these parts to state.`],
-[`Stripping and update should be computationally simple, naive even, as
-  they are unavoidable and often heavily repeated.`],
-[`Validation can often be selectivelly waived and thus can be
-  incrementally, if not outrageously, costlier.`],
+[`Reduction consists of validation, separation and update steps.`],
+[`Validation rejects heretical events. Separation removes event
+  metadata and splits the remaining payload to separate update stages.
+  Update applies these parts to state.`],
+[`Separation and update should be computationally simple, naive even,
+  as they are unavoidable and often heavily repeated.`],
+[`Validation can often be selectivelly waived by secondary consumers or
+  sub-sequent event log consumption runs and thus can be incrementally
+  (if not outrageously) costlier that the other steps.`],
 [`Event payload should be bytewise minimal. VLogs can appear anywhere
   and compression aint free either.`],
 [`Event payload should be as flat as possible to facilitate easy
@@ -80,7 +86,10 @@ wish-list:`,
 [`Events must be valid and internally consistent JSON-LD even in
   isolation but they don't need to be semantically complete.`],
 [`Events need to be semantically complete when evaluated using the
-  accumulated parent context of all previous vlog events.`],
+  accumulated parent context of all previous vlog events.`
+  // Won't get semantical completeness. Hierarchical VPlot references
+  // will be broken before the implicit local contexts are added.
+  ],
 [`Cryptographical signing of event payloads by user signatures should
   be simple.`],
 [`Event creators can specify crypto-behaviors that add validateable
@@ -93,6 +102,8 @@ wish-list:`,
   crypto-behaviors`],
 [`Dual construct is a triple which is directly 'reified' by a resource
   in the same named graph. Properties and Relations have dual nature.`],
+  // Dual constructs are the domain of vstate spec. VLog doesn't need
+  // to know about it.
       ] },
 ``
     ],
@@ -117,35 +128,52 @@ assigned a blank node '_:0' that corresponds to id context entry URN.`,
   "@context": [{
     "0": "~u4:cccccccc-6600-2211-cc77-333333333333"
   }],
-  "/": { "0": { ".N": "rootName", "V:authorityURI": "valaa-local:" } }
+  "&+": { "0": { ".n": "rootName", "V:authorityURI": "valaa-local:" } }
 }))),
         "toMatchObject",
 () => ({
   "@context": [baseContext, {
     "0": "~u4:cccccccc-6600-2211-cc77-333333333333"
   }],
-  "/": { "0": { ".N": "rootName", "V:authorityURI": "valaa-local:" } }
+  "&+": {
+    "0": { ".n": "rootName", "V:authorityURI": "valaa-local:" }
+  }
 }),
     ),
     "#2": [
-`New resources have chronicle-local index names.
-These local names are valid only within the event itself
-and start counting from 0 for each event.
+// TODO(iridian, 2021-03): Move this section to a proper location in
+// the @valos/state revdoc
+`VLog node objects have chronicle-local vplot identifiers. A local
+vplot id begins with `, c("vplot:chronicle/"), ` and is followed by a `,
+ref("route-vplot", "@valos/vplot#route-vplot"), ` string. Each vterm of
+the local vplot id that matches the pattern `, regexp("[0-9]+"), `
+maps to a URI in the chronicle URI lookup. The local vplot id can be
+translated to a global valos:urn vplot id by replacing all the mappings
+with their corresponding URI and converting the id to `,
+ref("urn-vplot", "@valos/vplot#urn-vplot"), ` form.
 
-During reduction these names are translated into vlog names, which
-start with '^~' or '^-' (for Entity and Relation types
-respectively) and are followed by an integer which identifies the
-resource within that chronicle with that type uniquely in perpetuity.
-These relative names can be used within all contexts that have this
-chronicle as their primary context, most notably in all future vlog
-events of this chronicle.
+These local vplot ids form a nested hierarchy. Resource views project
+subtrees of this hierarchy (`, em("view origin"), `) to be accessible
+at other subtree locations (`, em("view image")`). Notably, ownership
+views project the stable root-level embodiment of a resource (`,
+em("stable origin"), `) to be accessible at its current logical
+location in the ownership hierarchy (`, em("logical image"), `).
 
-References to resources in other chronicles ('global names') use the
-vgrid (combined with chronicle URI) of the resource.
+Delta updates to resources must always be applied to the logical
+image, never to the resource origin itself (unless they're the
+same). Similarily, references in deltas must refer to logical images
+as long as the referenced resource belongs to the same chronicle.
+
+Conversely, the state of a resource is always represented at the
+stable origin. Similarily, all references in state objects must refer
+to the stable origins of the resources.
+
+All references (in both deltas and state alike) to resources in other
+chronicles must refer to their stable origin.
 .`
     ],
     "example#>2": itExpects(
-        "creates a resource with various references",
+        "delta application to harmonize refs to appropriate stable origin refs",
 () => JSON.parse(JSON.stringify(state = applyVLogDelta(state,
 {
   "@context": [{
@@ -155,12 +183,20 @@ vgrid (combined with chronicle URI) of the resource.
     "4": "~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee",
     "5": "valaa-test:?id=(~raw'extl!)#"
   }],
-  "/": {
-    "0": { ".N": "newRootName" },
-    "1": { ".SE^": "0", ".N": "older", toOutside: { "@id": "5:" } },
-    "2": { ".SE^": "0", ".N": "unger", toOlder: { "@id": "1:" } },
-    "3": { ".SR^": "1", ".N": "SIBLING", ".OR": "2" },
-    "4": { ".SR^": "2", ".N": "SIBLING", ".OR": "1" },
+  "&+": {
+    "0": { ".n": "newRootName" },
+    "0/1": { ".E*": "0", ".n": "older",
+      "toOutside": { "@id": "5" }, "absolutelyParent": { "@id": "/0" },
+    },
+    "0/2": { ".n": "unger",
+      "@context": { "@base": "0/" },
+      ".E*": "../0",
+      "toOlder": { "@id": "1" }, "absolutelyOlder": { "@id": "/0/1" },
+      "&+": {
+        "2/3": { ".tgt*": "1", ".n": "SIBLING", ".src": "2" }
+      }
+    },
+    "0/2/4": { ".src*": "0/2", ".n": "SIBLING", ".tgt": "0/1" }
   },
 }))),
         "toMatchObject",
@@ -173,20 +209,39 @@ vgrid (combined with chronicle URI) of the resource.
     "4": "~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee",
     "5": "valaa-test:?id=(~raw'extl!)#"
   }],
-  "/": {
-    "0": { ".N": "newRootName", "V:authorityURI": "valaa-local:", "-E": ["1", "2"] },
-    "1": { ".SE^": "0", ".N": "older", toOutside: { "@id": "5:" }, "-R": ["3"] },
-    "2": { ".SE^": "0", ".N": "unger", toOlder: { "@id": "1:" }, "-R": ["4"] },
-    "3": { ".SR^": "1", ".N": "SIBLING", ".OR": "2" },
-    "4": { ".SR^": "2", ".N": "SIBLING", ".OR": "1" },
+  "&+": {
+    "0": { ".n": "newRootName",
+      "V:authorityURI": "valaa-local:",
+      "*E": ["1", "2"],
+    },
+    "1": { ".E*": "0", ".n": "older",
+      "*R": ["3", "4"],
+      "-out": ["3"], "-in": ["4"],
+      "toOutside": { "@id": "5" }, "absolutelyParent": { "@id": "/0" }
+    },
+    "2": { ".E*": "0", ".n": "unger",
+      "-out": ["4"], "-in": ["3"],
+      toOlder: { "@id": "1" }, "absolutelyOlder": { "@id": "/1" }
+    },
+    "3": { ".src*": "1", ".n": "SIBLING", ".tgt": "2" },
+    "4": { ".tgt*": "1", ".n": "SIBLING", ".src": "2" },
   },
 }
     ),
     "#3": [`
-Ghost instancing and the subscript vpath verb '_' are the cornerstone
-of the unified valos resource model. Blank nodes are used to express
-vplots with the added ability of being able to refer to vlog context
-resource terms.
+Ghost instancing with `, ref("V:instanceOf"), ` term ".iOf" and the
+recursive application of the `, ref("VState:subResources"),
+` term '&+' are the cornerstone of the unified valos resource model for
+application development.
+
+Instancing dynamics primarily affects state inference and as such no
+additional functionality for deltas is necessary. It should be noted
+however that the logical image vplot of ghosts 'flattens' the stable
+origin vplot of its ghost prototype (See how resource "0/1/3/8" is
+ghosted as "0/6/8" and "0/7/8"). Instance views behave here similar to
+external references: the ghost vplot cannot know the exact logical
+location of its prototype (not least because the prototype might be
+in a different chronicle!).
 `],
     "example#>3": itExpects(
         "instances a resource with ghosts",
@@ -194,21 +249,22 @@ resource terms.
 {
   "@context": [{
     "6": "~u4:11111111-2255-7744-22cc-eeeeeeeeeeee",
+    "7": "~u4:22222222-2255-7744-22cc-eeeeeeeeeeee",
+    "8": "~u4:d336d336-9999-6666-0000-777700000000"
   }],
-  "/": {
-    "6": {
-      ".SE^": "0", ".I": "0", ".N": "instance",
-      "/": {
-        "1": { ".N": "olderGhost" },
-        "6": { ".N": "inceptor",
-          "/": { "2": { ".N": "ungceptGhost" } }
-        }
-      }
+  "&+": {
+    "0/1/3/8": { ".E*": "0/1/3", ".n": "deeplyOwned" },
+    "0/6": { ".E*": "0", ".iOf": "0/1", ".n": "olderInstance" },
+    "0/6/3": {
+      "instance": { "@id": "0/6" },
+      "absoluteInstance": { "@id": "/0/6" },
+      "deepProto": { "@id": "0/1/3/8" },
+      "absoluteDeepProto": { "@id": "/0/1/3/8" },
     },
-    "6/2": { ".N": "ungerGhost" },
-    "6/3": { ".N": "toNephewOldceptGhost", ".OR": "_:6/6/1" },
-    "6/4": { ".N": "toNephewUngceptGhost", ".OR": "_:6/6/2" },
-    "6/6/1": { ".N": "oldceptGhost" }
+    "0/6/8": { ".n": "deeplyOwnedInstance" },
+    "0/7": { ".E*": "0", ".iOf": "0/6", ".n": "olderInstanceInstance" },
+    "0/7/3": { "instanceInstance": { "@id": "0/7" } },
+    "0/7/8": { ".n": "deeplyOwnedInstanceInstance" },
   },
 }))),
         "toMatchObject",
@@ -220,32 +276,258 @@ resource terms.
     "3": "~u4:abababab-bbbb-cccc-dddd-eeeeeeeeeeee",
     "4": "~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee",
     "5": "valaa-test:?id=(~raw'extl!)#",
-    "6": "~u4:11111111-2255-7744-22cc-eeeeeeeeeeee"
+    "6": "~u4:11111111-2255-7744-22cc-eeeeeeeeeeee",
+    "7": "~u4:22222222-2255-7744-22cc-eeeeeeeeeeee",
+    "8": "~u4:dd333399-9999-6666-0000-777700000000"
   }],
-  "/": {
-    "0": { ".N": "newRootName", "V:authorityURI": "valaa-local:", "-E": ["1", "2", "6"] },
-    "1": { ".SE^": "0", ".N": "older", "toOutside": { "@id": "5:" }, "-R": ["3"] },
-    "2": { ".SE^": "0", ".N": "unger", "toOlder": { "@id": "1:" }, "-R": ["4"] },
-    "3": { ".SR^": "1", ".N": "SIBLING", ".OR": "2" },
-    "4": { ".SR^": "2", ".N": "SIBLING", ".OR": "1" },
-    "6": {
+  "&+": {
+    "0": { ".n": "newRootName",
+      "V:authorityURI": "valaa-local:",
+      "*E": ["1", "2", "6", "7"]
+    },
+    "1": { ".E*": "0", ".n": "older",
+      "*R": ["3", "4"],
+      "-out": ["3"], "-in": ["4"], "-hasI": ["6"],
+      "toOutside": { "@id": "5" }, "absolutelyParent": { "@id": "/0" }
+    },
+    "2": { ".E*": "0", ".n": "unger",
+      "-out": ["4"], "-in": ["3"],
+      "toOlder": { "@id": "1" }, "absolutelyOlder": { "@id": "/1" }
+    },
+    "3": { ".src*": "1", ".n": "SIBLING", ".tgt": "2", "*E": ["8"] },
+    "4": { ".tgt*": "2", ".n": "SIBLING", ".src": "1" },
+    "6": [{ ".E*": "0", ".iOf": "1", ".n": "olderInstance", "-hasI": ["7"] }, {
       "@context": { "@base": "6/" },
-      ".I": "0", ".SE^": "0", ".N": "instance",
-      "/": {
-        "1": { ".G": "1", ".N": "olderGhost" },
-        "2": { ".G": "2", ".N": "ungerGhost" },
-        "3": { ".G": "3", ".N": "toNephewOldceptGhost", ".OR": "_:6/6/1" },
-        "4": { ".G": "4", ".N": "toNephewUngceptGhost", ".OR": "_:6/6/2" },
-        "6": {
-          "@context": { "@base": "6/" },
-          ".G": "6", ".N": "inceptor",
-          "/": {
-            "1": { ".G": "_:6/1", ".N": "oldceptGhost", "-in": ["_:6/3"] },
-            "2": { ".G": "_:6/2", ".N": "ungceptGhost", "-in": ["_:6/4"] }
-          }
+      "&+": {
+        "3": {
+          "instance": { "@id": "6" },
+          "absoluteInstance": { "@id": "/6" },
+          "deepProto": { "@id": "../8" },
+          "absoluteDeepProto": { "@id": "/8" },
         },
+        "8": { ".n": "deeplyOwnedInstance" }
       }
-    }
+    }],
+    "7": [{ ".E*": "0", ".iOf": "6", ".n": "olderInstanceInstance" }, {
+      "@context": { "@base": "7/" },
+      "&+": {
+        "3": { "instanceInstance": { "@id": "7" }, },
+        "8": { ".n": "deeplyOwnedInstanceInstance" }
+      }
+    }],
+    "8": { ".E*": "3", ".n": "deeplyOwned" },
+  },
+}),
+    ),
+    "#4": [`
+Projection views are the underlying mechanism on top of which the
+instancing is built. Projection views project virtual, inferred copies
+of their origin subtrees to their view location. An instancing ".iOf"
+property creates such a projection from the prototype (as the origin)
+onto the instance (as view) itself.
+
+This virtual copying is lexical: projected relative references will now
+refer to the relative resources inside the instance view instead of
+to the originally referenced resources within the prototype. Conversely,
+absolute references (ie. those that begin with "/") keep refering to
+to the same resources even when projected.
+
+The normalized vplot base of a relative reference that appears in the
+body of some resource is the vplot id of the `, em("parent"), ` of that
+resource. References that appear in a delta can be based arbitrarily
+however: the delta application will perform this reference normalization.
+`],
+    "example#>4": itExpects(
+        "complex vplot relative references to be normalized",
+() => JSON.parse(JSON.stringify(state = applyVLogDelta(state,
+{
+  "@context": [{
+    "9": "~u4:77777777-1111-eeee-3333-555555555555",
+  }],
+  "&+": {
+    "9": { ".E*": "../0", ".n": "inceptor", ".iOf": "../0",
+      "@context": { "@base": "9/" },
+      "&+": {
+        "1": { ".n": "olderGhost" },
+        "9": { ".n": "firstInception",
+          "@context": { "@base": "9/" },
+          "&+": {
+            "2": { ".n": "ungceptGhost" }
+          }
+        }
+      }
+    },
+    "9/2": { ".n": "ungerGhost" },
+    "9/3": { ".n": "toNephewOldceptGhost",
+      "@context": { "@base": "9/3/" },
+      ".tgt": "../9/1"
+    },
+    "9/4": { ".n": "toNephewUngceptGhost",
+      "@context": { "@base": "9/4/" },
+      ".tgt": "../9/2"
+    },
+    "9/9/1": { ".n": "oldceptGhost" }
+  },
+}))),
+        "toMatchObject",
+() => ({
+  "@context": [baseContext, {
+    "0": "~u4:cccccccc-6600-2211-cc77-333333333333",
+    "1": "~u4:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "2": "~u4:bbbbbbbb-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "3": "~u4:abababab-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "4": "~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "5": "valaa-test:?id=(~raw'extl!)#",
+    "6": "~u4:11111111-2255-7744-22cc-eeeeeeeeeeee",
+    "7": "~u4:22222222-2255-7744-22cc-eeeeeeeeeeee",
+    "8": "~u4:dd333399-9999-6666-0000-777700000000",
+    "9": "~u4:77777777-1111-eeee-3333-555555555555"
+  }],
+  "&+": {
+    "0": { ".n": "newRootName",
+      "V:authorityURI": "valaa-local:",
+      "*E": ["1", "2", "6", "7", "9"]
+    },
+    "1": { ".E*": "0", ".n": "older",
+      "*R": ["3", "4"],
+      "-out": ["3"], "-in": ["4"], "-hasI": ["6"],
+      "toOutside": { "@id": "5" }, "absolutelyParent": { "@id": "/0" }
+    },
+    "2": { ".E*": "0", ".n": "unger",
+      "-out": ["4"], "-in": ["3"],
+      "toOlder": { "@id": "1" }, "absolutelyOlder": { "@id": "/1" }
+    },
+    "3": { ".src*": "1", ".n": "SIBLING", ".tgt": "2", "*E": ["8"] },
+    "4": { ".tgt*": "1", ".n": "SIBLING", ".src": "2" },
+    "6": [{ ".E*": "0", ".n": "olderInstance", ".iOf": "1", "-hasI": ["7"] }, {
+      "@context": { "@base": "6/" },
+      "&+": {
+        "3": {
+          "instance": { "@id": "6" },
+          "absoluteInstance": { "@id": "/6" },
+          "deepProto": { "@id": "../8" },
+          "absoluteDeepProto": { "@id": "/8" }
+        },
+        "8": { ".n": "deeplyOwnedInstance" }
+      }
+    }],
+    "7": [{ ".E*": "0", ".n": "olderInstanceInstance", ".iOf": "6" }, {
+      "@context": { "@base": "7/" },
+      "&+": {
+        "3": { "instanceInstance": { "@id": "7" } },
+        "8": { ".n": "deeplyOwnedInstanceInstance" }
+      }
+    }],
+    "8": { ".E*": "3", ".n": "deeplyOwned" },
+    "9": [{ ".E*": "0", ".n": "inceptor", ".iOf": "0" }, {
+      "@context": { "@base": "9/" },
+      "&+": {
+        "1": { ".n": "olderGhost" },
+        "2": { ".n": "ungerGhost" },
+        "3": { ".n": "toNephewOldceptGhost", ".tgt": "9/1" },
+        "4": { ".n": "toNephewUngceptGhost", ".tgt": "9/2" },
+        "9": [{ ".n": "firstInception" }, {
+          "@context": { "@base": "9/" },
+          "&+": {
+            "1": { ".n": "oldceptGhost", "-in": ["../3"] },
+            "2": { ".n": "ungceptGhost", "-in": ["../4"] }
+          }
+        }]
+      }
+    }]
+  },
+}),
+    ),
+    "#5": [`
+Resource deletion is done by adding the removed triples to the removal
+graphs via `, ref("VState:removes"), ` term "&+".
+
+Triple removals from various container properties are persisted in the
+state in any resources that can be view images, as these removals are
+then continuously applied to a the possible corresponding inherited
+view container properties.
+`],
+    "example#>5": itExpects(
+        "resource deletions to be persisted in state",
+() => JSON.parse(JSON.stringify(state = applyVLogDelta(state,
+{
+  "@context": [{}],
+  "&+": {
+    "9/9": { "&-": { "&+": ["9/9/2"], "*E": ["9/9/2"] } },
+    "9/4": { "&-": { ".tgt": "9/9/2" } },
+  },
+}))),
+        "toMatchObject",
+() => ({
+  "@context": [baseContext, {
+    "0": "~u4:cccccccc-6600-2211-cc77-333333333333",
+    "1": "~u4:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "2": "~u4:bbbbbbbb-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "3": "~u4:abababab-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "4": "~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "5": "valaa-test:?id=(~raw'extl!)#",
+    "6": "~u4:11111111-2255-7744-22cc-eeeeeeeeeeee",
+    "7": "~u4:22222222-2255-7744-22cc-eeeeeeeeeeee",
+    "8": "~u4:dd333399-9999-6666-0000-777700000000",
+    "9": "~u4:77777777-1111-eeee-3333-555555555555"
+  }],
+  "&+": {
+    "0": { ".n": "newRootName",
+      "V:authorityURI": "valaa-local:",
+      "*E": ["1", "2", "6", "7", "9"]
+    },
+    "1": { ".E*": "0", ".n": "older",
+      "*R": ["3", "4"],
+      "-out": ["3"], "-in": ["4"], "-hasI": ["6"],
+      "toOutside": { "@id": "5" }, "absolutelyParent": { "@id": "/0" }
+    },
+    "2": { ".E*": "0", ".n": "unger",
+      "-out": ["4"], "-in": ["3"],
+      "toOlder": { "@id": "1" }, "absolutelyOlder": { "@id": "/1" }
+    },
+    "3": { ".src*": "1", ".n": "SIBLING", ".tgt": "2", "*E": ["8"] },
+    "4": { ".tgt*": "1", ".n": "SIBLING", ".src": "2" },
+    "6": [{ ".E*": "0", ".n": "olderInstance", ".iOf": "1", "-hasI": ["7"] }, {
+      "@context": { "@base": "6/" },
+      "&+": {
+        "3": {
+          "instance": { "@id": "6" },
+          "absoluteInstance": { "@id": "/6" },
+          "deepProto": { "@id": "../8" },
+          "absoluteDeepProto": { "@id": "/8" }
+        },
+        "8": { ".n": "deeplyOwnedInstance" }
+      }
+    }],
+    "7": [{ ".E*": "0", ".n": "olderInstanceInstance", ".iOf": "6" }, {
+      "@context": { "@base": "7/" },
+      "&+": {
+        "3": { "instanceInstance": { "@id": "7" } },
+        "8": { ".n": "deeplyOwnedInstanceInstance" }
+      }
+    }],
+    "8": { ".E*": "3", ".n": "deeplyOwned" },
+    "9": [{ ".E*": "0", ".iOf": "0", ".n": "inceptor" }, {
+      "@context": { "@base": "9/" },
+      "&+": {
+        "1": { ".n": "olderGhost" },
+        "2": { ".n": "ungerGhost" },
+        "3": { ".n": "toNephewOldceptGhost", ".tgt": "9/1" },
+        "4": { ".n": "toNephewUngceptGhost" },
+        "9": [{ ".n": "firstInception", "&-": { "*E": ["9/2"] } }, {
+          "@context": { "@base": "9/" },
+          "&+": {
+            "1": { ".n": "oldceptGhost", "-in": ["../3"] }
+          }
+        }],
+        "6": [{ ".n": "oldceptInstance" }, {
+          "@context": { "@base": "6/" },
+          "&+": {
+            "3": { ".n": "SUB_SIBLING", ".tgt": "2" },
+          }
+        }]
+      }
+    }],
   },
 }),
     ),

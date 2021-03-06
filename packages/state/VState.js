@@ -36,5 +36,27 @@ valospace triple graphs. All valospace fields have VState:Type or one
 of its sub-classes as their rdf:domain.`,
       ],
     },
+
+    subResources: {
+      "@type": "VKernel:Property",
+      "rdfs:domain": "rdfs:Resource",
+      "rdfs:range": "rdfs:Resource",
+      "rdfs:comment":
+`This field refers to all resources that are added as sub-resources to
+this resource.`,
+    },
+
+    subRemovals: {
+      "@type": "VKernel:Property",
+      "rdfs:domain": "rdfs:Resource",
+      "rdfs:range": "rdfs:Resource",
+      "rdfs:comment":
+`This field refers to graph which contains triples that are to be
+removed from this resource. When this field is expressed in state
+graphs this removal affects triples that would be inferred from
+ownership and instancing projections. When this field is expressed in
+log delta graphs the removal represents state triple removal change
+and takes effect during the delta application.`,
+    },
   },
 };

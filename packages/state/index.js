@@ -7,8 +7,8 @@ const baseContextText = `{
   "VLog": "https://valospace.org/log/0#",
   "VState": "https://valospace.org/state/0#",
 
-  "&+": { "@id": "VState:adds", "@type": "@id", "@container": "@id" },
-  "&-": { "@id": "VState:removes", "@container": "@graph" },
+  "&+": { "@id": "VState:subResources", "@type": "@id", "@container": "@id" },
+  "&-": { "@id": "VState:subRemovals", "@container": "@graph" },
 
   "*P": { "@id": "V:ownsProperty", "@type": "@id", "@container": "@id" },
   "*E": { "@id": "V:ownsEntity", "@type": "@id", "@container": "@id" },

@@ -250,7 +250,9 @@ exports.handler = async (yargv) => {
 
   async function extractVDocState (sbomxml) {
     const sbomgraph = patchWith({}, convert.xml2js(sbomxml, { compact: true, nativeType: true }), {
-      preExtend (target, patch, key, targetObject) {
+      spreaderKey: "...",
+      deleteUndefined: true,
+      preApplyPatch (target, patch, key, parentTarget) {
         if (patch == null || Array.isArray(patch)) return undefined;
         const flatten = (patch._text !== undefined) ? patch._text
             : (patch._cdata !== undefined) ? patch._cdata
@@ -259,17 +261,17 @@ exports.handler = async (yargv) => {
                 ? [].concat(patch.license || patch.component)
             : undefined;
         if (flatten !== undefined) {
-          const ret = this.extend(undefined, flatten);
+          const ret = this.patch(undefined, flatten);
           if (key === "licenses") return ret.join(",");
           return ret;
         }
         if (key === "_attributes") {
-          this.extend(targetObject, patch);
+          this.patch(parentTarget, patch);
           return null;
         }
         return undefined;
       },
-      postExtend (tgt) {
+      postApplyPatch (tgt) {
         return (tgt !== null) ? tgt : undefined;
       },
     });

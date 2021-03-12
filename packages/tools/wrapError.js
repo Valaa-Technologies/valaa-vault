@@ -66,9 +66,12 @@ function wrapError (errorIn, detailLevel, contextName, ...contextDescriptions) {
   const contextError = new Error("", error.fileName, error.lineNumber);
   if (!(contextName instanceof Error)) {
     contextError.name = contextName;
+    // Remove first line (the error message) and the second line (the
+    // new Error line above) and the wrapError line.
     contextError.tidyFrameList = contextError.stack.split("\n").slice(3);
   } else {
     contextError.name = contextName.message;
+    // Remove first line (the error message) and the second line (the new Error).
     contextError.tidyFrameList = contextName.stack.split("\n").slice(2);
     contextError.logger = contextName.logger;
     contextError.detailAdjustment = (contextName.logger || {}).getVerbosity
@@ -159,7 +162,7 @@ function _clipFrameListToCurrentContext (innerError, outerError) {
   let skipOuter = 0;
   let matches = 0;
   if (inner.length && (inner[inner.length - 1].slice(0, 3) !== "<<<")) {
-    for (; !matches && (skipOuter !== outer.length); ++skipOuter) {
+    for (; skipOuter !== outer.length; ++skipOuter) {
       // Find first matching line
       for (skipInner = 0; (skipInner !== inner.length) && (inner[skipInner] !== outer[skipOuter]);
           ++skipInner);
@@ -171,9 +174,9 @@ function _clipFrameListToCurrentContext (innerError, outerError) {
           break;
         }
       }
+      if (matches) break;
     }
   }
-  // let innerSplice, outerSplice;
   if (!matches || (skipOuter > skipInner + 2)) {
     inner.push("<<< disjoint inner and context error traces >>>");
   } else {

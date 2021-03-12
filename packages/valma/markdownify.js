@@ -105,19 +105,19 @@ function createPatchOptions (customizations) {
 const _deepExtendOptions = Object.freeze({
   require: require, // eslint-disable-line
   spreaderKey: _spreaderKey,
-  spread (spreaderValue, target, source, key, targetContainer, sourceContainer) {
+  spread (spreaderValue, target, source, key, targetContainer, sourceKey, sourceContainer) {
     const extendee = (typeof spreaderValue === "string")
         ? this.require(spreaderValue)
         : { [_layoutKey]: spreaderValue };
     if (!Array.isArray(source)) return extendee;
-    let inter = this.extend(target, extendee, key, targetContainer, sourceContainer);
+    let inter = this.patch(target, extendee, key, targetContainer, sourceKey, sourceContainer);
     if (source.length >= 2) {
-      inter = this.extend(inter, source.slice(2), key, targetContainer, sourceContainer);
+      inter = this.patch(inter, source.slice(2), key, targetContainer, sourceKey, sourceContainer);
     }
     targetContainer[key] = inter;
     return undefined; // Stop further spread-extending
   },
-  preExtend (target, source, key, targetContainer) {
+  preApplyPatch (target, source, key, targetContainer) {
     // console.log("target:", target, "\nsource:", source, "\nkey:", key, "\n");
     if (typeof source === "function") return `<function ${source.name}>`;
     if (typeof source !== "object") return undefined;
@@ -125,7 +125,7 @@ const _deepExtendOptions = Object.freeze({
     if ((source[0] === _spreaderKey) || source[_spreaderKey]) return undefined;
     if ((Object.getPrototypeOf(source) !== Object.prototype) && !Array.isArray(source)) {
       if (source.debugId) return source.debugId();
-      return this.errorOn("preExtend",
+      return this.errorOn("preApplyPatch",
           new Error(`Cannot markdownify a complex object with type '${
             (source.constructor || { name: "<unknown object>" }).name}'`),
           target, source, key, targetContainer);
@@ -134,14 +134,15 @@ const _deepExtendOptions = Object.freeze({
     const containerLayout = _getLayout(targetContainer) || {};
     const layout = ret[_layoutKey] = patchWith(
         _getLayout(ret) || { trivial: true, height: 0, depth: (containerLayout.depth || 0) + 1 },
-        _getLayout(source));
-    // TODO(iridian): Make the markdownify extend idempotent so that an already extended structure
+        _getLayout(source),
+        { spreaderKey: "..." });
+    // TODO(iridian): Make the markdownify patch idempotent so that an already extended structure
     // will produce a structure identical to itself when extended onto "undefined".
     return Array.isArray(source)
         ? this._extendArrayBlock(ret, source, layout, containerLayout)
         : this._extendObjectBlock(ret, source, layout, containerLayout);
   },
-  postExtend (block, source, key, targetContainer) {
+  postApplyPatch (block, source, key, targetContainer) {
     const layout = _getLayout(block);
     const contextLayout = _getLayout(targetContainer);
     if (contextLayout) {
@@ -157,7 +158,7 @@ const _deepExtendOptions = Object.freeze({
    return block;
   },
   errorOn (opName, error, target, source) {
-    if (opName === "preExtend") {
+    if (opName === "preApplyPatch") {
       if (source && (source instanceof Error)) return `Error thrown: ${source.message}`;
       (this.logger || console).error("markdownify error:", error.message,
           "\n\tkeyPath:", ...dumpObject(this.keyPath),
@@ -180,7 +181,8 @@ function _extendArrayBlock (target, sourceArray, layout, containerLayout) {
   if ((currentEntries.length + sourceArray.length) === 1) layout.singular = true;
   else delete layout.singular;
   layout.entries = currentEntries.concat(...sourceArray.map((sourceEntry, index) => {
-    const block = this.extend(undefined, sourceEntry, lastTargetIndex + index, target, sourceArray);
+    const block = this.patch(
+        undefined, sourceEntry, lastTargetIndex + index, target, index, sourceArray);
     const entryLayout = _getLayout(block);
     const subEntries = (entryLayout || {}).entries || [];
     if ((subEntries.length !== 1) || (entryLayout.type !== "object")) {
@@ -253,7 +255,7 @@ function _extractObjectEntries (entry, sourceObject, targetEntries, target, layo
     if (!target[key]) {
       const entryBlock = !sourceObject
           ? { [_layoutKey]: {} }
-          : this.extend(undefined, sourceObject[key], key, target, sourceObject);
+          : this.patch(undefined, sourceObject[key], key, target, key, sourceObject);
       targetEntries.push(entry);
       target[key] = entryBlock;
     }

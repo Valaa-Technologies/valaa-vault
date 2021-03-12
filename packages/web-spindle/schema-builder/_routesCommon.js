@@ -32,7 +32,8 @@ export function _prepareRoute (route, userConfig) {
     (route.config.valueAssertedRules || (route.config.valueAssertedRules = []))
         .push(...valueAssertedRules);
   }
-  route.config = patchWith(route.config, userConfig);
+  route.config = patchWith(
+      route.config, userConfig, { spreaderKey: "...", deleteUndefined: true  });
   route.schema = route.config.schema;
   delete route.config.schema;
 }

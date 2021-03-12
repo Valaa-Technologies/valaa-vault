@@ -80,7 +80,7 @@ module.exports = {
 
 function extendType (...allTypes) {
   return patchWith({}, ["..."].concat(...allTypes), {
-    patchSymbols: true, concatArrays: false,
+    spreaderKey: "...", patchSymbols: true, iterableToArray: "overwrite",
   });
 }
 

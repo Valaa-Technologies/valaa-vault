@@ -22,10 +22,11 @@ function extract (sourceGraphs, {
   const vdocState = [];
   try {
     return patchWith(vdocState, [].concat(sourceGraphs), {
-      keyPath: [],
+      spreaderKey: "...", keyPath: [],
+      deleteUndefined: true,
       extractionRules: extensions.reduce((a, { getNamespace }) =>
           Object.assign(a, getNamespace().extractionRules || {}), {}),
-      preExtend (innerTarget, patch, key, targetObject, patchObject) {
+      preApplyPatch (innerTarget, patch, key, parentTarget, patchKey, parentPatch) {
         if (this.keyPath.length === 1) {
           if (!innerTarget) {
             const root = target || {};
@@ -42,26 +43,26 @@ function extract (sourceGraphs, {
                 }
               }
             }
-            return this.extend(root, patch);
+            return this.patch(root, patch);
           }
           this.documentNode = innerTarget;
         }
         if (innerTarget === patch) return innerTarget;
         for (const extension of extensions) {
-          const preExtend = (extension.extractors.native || {}).preExtend;
-          if (!preExtend) continue;
-          const ret = preExtend.call(this, target, patch, key, targetObject, patchObject);
+          const preApplyPatch = (extension.extractors.native || {}).preApplyPatch;
+          if (!preApplyPatch) continue;
+          const ret = preApplyPatch.call(this, target, patch, key, parentTarget, patchKey, parentPatch);
           if (ret !== undefined) return ret;
         }
         return undefined;
       },
-      postExtend (innerTarget, patch, key, targetObject, patchObject) {
+      postApplyPatch (innerTarget, patch, key, parentTarget, patchKey, parentPatch) {
         if ((this.keyPath <= 1) && (key === undefined)) return innerTarget;
         let ret;
         for (const extension of extensions) {
-          const postExtend = (extension.extractors.native || {}).postExtend;
-          if (!postExtend) continue;
-          ret = postExtend.call(this, innerTarget, patch, key, targetObject, patchObject);
+          const postApplyPatch = (extension.extractors.native || {}).postApplyPatch;
+          if (!postApplyPatch) continue;
+          ret = postApplyPatch.call(this, innerTarget, patch, key, parentTarget, patchKey, parentPatch);
           if (ret !== undefined) return ret;
         }
         return innerTarget;

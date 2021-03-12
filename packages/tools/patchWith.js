@@ -2,22 +2,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 
 const { dumpObject, wrapError } = require("./wrapError");
 
-/**
- * Recursively updates the *target* with the changes described in *patch*
- * using customized rules and callbacks of *options*: {
- *   spreaderKey: string = "...",
- *   preExtend: (tgt, patch, key, tgtObj, patchObj) => any,
- *   spread (spreader, tgt, patch, key, tgtObj, patchObj) => any,
- *   postExtend: (tgt, patch, key, tgtObj, patchObj) => any,
- *   keyPath: string[] = [],
- *   concatArrays: boolean = true,
- *   patchSymbols: boolean = false,
- *   complexPatch: ?("overwrite", "patch", "setOnInitialize", "reject") = "reject",
- * }
- * If *pre|postExtend* returns non-undefined then that value is directly
+/*
+ * If *pre|postApplyPatch* returns non-undefined then that value is directly
  * returned skipping the rest of that patch recursion branch,
  * otherwise patch is performed normally.
- * If *spread* returns **undefined** then undefined is returned and the
+ * If **spread** returns **undefined** then undefined is returned and the
  * rest of that patch recursion is skipped. Otherwise the return value
  * is patched on target and its result is returned.
  *
@@ -25,23 +14,23 @@ const { dumpObject, wrapError } = require("./wrapError");
  * an external resource and is spread before extension.
  *
  * patchWith semantics are defined by callbacks:
- * - options.preExtend can be used to fully replace an extend
+ * - options.preApplyPatch can be used to fully replace a patch
  *   operation at some nesting level with the final result value (with
  *   semantics identical to lodash.mergeWith customizer)
  * - options.spreader resolves link location, retrieves the resource
  *   and interprets the resource as a native object
- * - options.postExtend is called after preExtend/extend steps to
- *   finalize the extend at some depth (identical parameters with
- *   preExtend)
+ * - options.postApplyPatch is called after preApplyPatch/patch steps to
+ *   finalize the patch at some depth (identical parameters with
+ *   preApplyPatch)
  *
  * The default options.spread semantics is to call options.require for
  * the link location.
- * The default options.extend semantics is to treat link parameters as
+ * The default options.patch semantics is to treat link parameters as
  * spread patch property data overrides.
  *
  * Additionally patchWith introduces the *spread operation* and the *spreader properties*.
  * As first class properties (default key "...") these spreader properties can be used to /describe/
- * localized, lazily evaluated, and context-dependent deep extend operations as persistent,
+ * localized, lazily evaluated, and context-dependent deep patch operations as persistent,
  * fully JSON-compatible data.
  *
  * The idiomatic example is shared JSON configurations (similar to babel presets or eslint extends):
@@ -52,7 +41,7 @@ const { dumpObject, wrapError } = require("./wrapError");
  * // myproject.json
  * `{ "...": "./common.json", name: "myproject", plugins: ["myplugin"] }`
  *
- * When myproject.json is deep-extended onto {} (with the contextual configSpread callback)
+ * When myproject.json is deep-patched onto {} (with the contextual configSpread callback)
  * `patchWith({}, myProjectJSON, { spread: configSpread });`
  * the result equals `{ kind: "project", name: "myproject", plugins: ["basicplugin", "myplugin"] }`.
  *
@@ -60,9 +49,9 @@ const { dumpObject, wrapError } = require("./wrapError");
  * patchWith then appends the result of that onto {} followed by the rest of myProjectJSON.
  *
  *
- * Deep extend has two semantics: the universal deep extend semantics and the spread semantics.
+ * Deep patch has two semantics: the universal deep patch semantics and the spread semantics.
  *
- * Deep extend semantics depend only on the patch value type:
+ * Deep patch semantics depend only on the patch value type:
  * Empty object and undefined patch values are no-ops and return the target unchanged.
  * Arrays in-place append and plain old objects in-place update the target value and return the
  * mutated target value. All other patch values are returned directly.
@@ -82,10 +71,10 @@ const { dumpObject, wrapError } = require("./wrapError");
  * If a patch object of some nested deep append phase has a spreader property (by default "...")
  * then right before it is deep assigned a spread operation is performed:
  * 1. The spread callback is called like so:
- *    const intermediate = spread(patch["..."], target, patch, key, targetParent,
- *    patchParent).
+ *    const intermediate = spread(patch["..."], target, patch, key, parentTarget,
+ *    parentPatch).
  * 2. If the returned intermediate is undefined the subsequent deep assign of the patch is skipped
- *    and deep assign returns targetParent[key].
+ *    and deep assign returns parentTarget[key].
  * 3. Otherwise the intermediate is deep assigned onto the target value, potentially recursively
  *    evaluating further spread operations.
  * 4. Finally the original patch object is omitted the spreader property and deep assigned onto
@@ -105,7 +94,7 @@ const { dumpObject, wrapError } = require("./wrapError");
  * patchWith({de:{ep:{ foo: [1] }}}, {de:{ep:{ foo: arrayRewriter }}})-> {de:{ep:{ foo: [3] }}}
  *
  *
- * Elementary extend rules as "target ... patch -> result" productions based on patch type:
+ * Elementary patch rules as "target ... patch -> result" productions based on patch type:
  *
  * patch: undefined | {}          -> target
  * patch: { "...": spr, ...rest } -> patchWith(patchWith(target, spread(spr, ...)), rest)
@@ -114,173 +103,368 @@ const { dumpObject, wrapError } = require("./wrapError");
  * patch: Object                  -> asObject(target, (ret => Object.keys(patch).forEach(key =>
  *                                     { ret[key] = patchWith(ret[key], [patch[key]]); });
  * patch: any                     -> patch
+ */
+
+ /**
  *
+ *
+ * @callback patchCallback
+ * @param {*} target                  Target object to modify or replace
+ * @param {*} patch                   The immutable modification value to apply to target
+ * @param {string|number} targetKey   The key of target in parentTarget
+ * @param {*} parentTarget            The mutable parent object of the target
+ * @param {string|number} patchKey    The key of patch in parentPatch
+ * @param {*} parentPatch             The immutable parent object of the patch
+ */
+
+ /**
+ * Recursively updates the *target* with the changes described in
+ * *patch* using customized rules and callbacks of *options*: {
+ *   spreaderKey: string = "...",
+ *   preApplyPatch: (tgt, patch, key, tgtObj, patchObj) => any,
+ *   spread (spreader, tgt, patch, key, tgtObj, patchObj) => any,
+ *   postApplyPatch: (tgt, patch, key, tgtObj, patchObj) => any,
+ *   keyPath: string[] = [],
+ *   iterableToArray: ?("overwrite", "patch", "concat") = "concat",
+ *   patchSymbols: boolean = false,
+ *   complexToAny: ?("overwrite", "onlySetIfUndefined", "reject") = "reject",
+ * }
  * @export
  * @param {*} target
- * @param {*} spreadee
- * @param {*} stack
+ * @param {*[]} patch
+ * @param {Object} options
+ * @param {string} options.spreaderKey
+ * @param {patchCallback} options.preApplyPatch
+ * @param {patchCallback} options.patch
+ * @param {patchCallback} options.postApplyPatch
+ * @param {*} options.spread
+ * @param {string[]} options.keyPath
+ * @param {"overwrite"|"reduce"|"concat"|"merge"|patchCallback}
+ *    [options.iterableToArray="overwrite"]
+ * @param {"overwrite"|"reduce"|patchCallback} [options.iterableToOther="overwrite"]
+ * @param {boolean} options.patchSymbols
+ * @param {boolean} options.deleteUndefined
+ * @param {"reject"|"onlySetIfUndefined"|"overwrite"|patchCallback} [options.complexToAny="reject"]
  */
-exports.default = function patchWith (target /* : Object */, patch /* : Array<any> */,
-    options /* : {
-  spread?: Function,
-  spreaderKey?: string,
-  preExtend?: Function,
-  postExtend?: Function,
-  keyPath?: Array<any>,
-} */) {
+exports.default = function patchWith (target_, patch_, options) {
+  let _cache;
   const stack = options || {};
   stack.returnUndefined = _returnUndefined;
-  if (stack.concatArrays === undefined) stack.concatArrays = true;
-  if (stack.customizer) {
-    stack.preExtend = stack.customizer;
-    console.warn("patchWith.options.customizer DEPRECATED in favor of options.preExtend");
-  }
-  if (stack.postProcessor) {
-    stack.postExtend = stack.postProcessor;
-    console.warn("patchWith.options.postProcessor DEPRECATED in favor of options.postExtend");
-  }
-  stack.extend = extend;
-  if (stack.spreaderKey === undefined) stack.spreaderKey = "...";
-  if (stack.spreaderKey && !stack.spread) {
-    stack.spread = function spread (spreadee_, target_, patch_, keyInParent,
-        targetParent /* , patchParent */) {
-      if ((spreadee_ === null) || (spreadee_ === undefined)) return undefined;
-      if (typeof spreadee_ === "function") {
-        return (targetParent[keyInParent] = spreadee_(target_));
-      }
-      if (typeof spreadee_ === "string") {
-        if (!this.require) {
-          throw new Error(`No patchWith.options.require specified (needed by default spread ${
-              ""} for spreadee '${spreadee_}')`);
+  stack.patch = _patch;
+  stack.applyPatch = _applyPatch;
+  stack._getPatchTargetFromCacheOrInit = _getPatchTargetFromCacheOrInit;
+
+  const objectToAny = !stack.patchSymbols
+      ? (stack.deleteUndefined
+          ? _objectToAny.objectNoSymbolsDeleteUndefined
+          : _objectToAny.objectNoSymbolsKeepUndefined)
+      : (stack.deleteUndefined
+          ? _objectToAny.objectWithSymbolsDeleteUndefined
+          : _objectToAny.objectWithSymbolsKeepUndefined);
+
+  return stack.patch(target_, patch_);
+
+  /* eslint-disable prefer-rest-params */
+
+  function _applyPatch (target, patch, targetKey, parentTarget, patchKey, parentPatch, skipSpread) {
+    if (patch === undefined) return target;
+    if (typeof patch !== "object" || patch === null) return patch;
+    let ret;
+    let patcher;
+    try {
+      if (patch === target) throw new Error("Cannot apply patch to self");
+
+      // Patch with iterable
+      if (patch[Symbol.iterator]) {
+        const isSpreader = !skipSpread && (patch[0] === this.spreaderKey) && this.spreaderKey;
+        if (isSpreader /* || ((ret !== undefined) && !Array.isArray(ret)) */) {
+          ret = target;
+          for (let i = 1; i !== patch.length; ++i) ret = this.patch(ret, patch[i], targetKey);
+          return ret;
         }
-        return this.require(spreadee_);
+        if (Array.isArray(target)) {
+          patcher = this.iterableToArray;
+          if (typeof patcher !== "function") patcher = _obtainPatcher(this, "iterableToArray");
+        } else {
+          patcher = this.iterableToOther;
+          if (typeof patcher !== "function") patcher = _obtainPatcher(this, "iterableToOther");
+        }
+      } else if ((Object.getPrototypeOf(patch) || Object.prototype) !== Object.prototype) {
+        patcher = this.complexToAny;
+        if (typeof patcher !== "function") patcher = _obtainPatcher(this, "complexToAny");
+      } else if (!skipSpread && this.spreaderKey
+          && patch[this.spreaderKey] && patch.hasOwnProperty(this.spreaderKey)) {
+        patcher = _applySpreader;
+      } else {
+        patcher = objectToAny;
       }
-      if (!Array.isArray(spreadee_)) return spreadee_;
-      let ret = target_;
-      for (const entry of spreadee_) {
-        ret = this.extend(ret, entry);
-      }
-      targetParent[keyInParent] = ret;
-      return undefined;
-    };
+    } catch (error) {
+      throw _formulateError(this, error, new Error("applyPatch.prepare"), ...arguments);
+    }
+
+    try {
+      return patcher.call(this, target, patch, targetKey, parentTarget, patchKey, parentPatch);
+    } catch (error) {
+      throw _formulateError(this, error, new Error(`applyPatch=${patcher.name}`), ...arguments);
+    }
   }
-  return stack.extend(target, patch);
+
+  // Returns true on cache hit for synchronous return: current patch
+  // has already been used to create a new target value.
+  // Reuse the previously created value as the 'ret'.
+  // Note: this facility solves infinite recursion on cyclic patches
+  // and thus is not just a performance optimization.
+  function _getPatchTargetFromCacheOrInit (patch, createArray) {
+    if (!_cache) _cache = new Map();
+    let value = _cache.get(patch);
+    if (value) return { hit: true, value };
+    value = createArray ? [] : {};
+    _cache.set(patch, value);
+    return { value };
+  }
 };
 
 const _returnUndefined = Symbol("returnUndefined");
 
-/* eslint-disable complexity */
-
-function extend (target_, patch_, keyInParent, targetParent, patchParent, skipSpread = false) {
-  let ret, phase = ".preExtend";
+function _patch (target, patch, targetKey, parentTarget, patchKey, parentPatch, skipSpread) {
+  let ret;
+  if (this.keyPath && (patchKey !== undefined)) this.keyPath.push(patchKey);
   try {
-    if (this.keyPath && (keyInParent !== undefined)) this.keyPath.push(keyInParent);
-    ret = this.preExtend
-        && this.preExtend(target_, patch_, keyInParent, targetParent, patchParent);
-    if (ret === undefined) {
-      ret = target_;
-      if (typeof patch_ !== "object") ret = (patch_ === undefined ? target_ : patch_);
-      else if (patch_ === null) ret = null;
-      else if (patch_ === target_) throw new Error("Cannot extend to self");
-      else if (Array.isArray(patch_)) {
-        phase = ".array";
-        const isSpreader = !skipSpread && (patch_[0] === this.spreaderKey) && this.spreaderKey;
-        if (isSpreader /* || ((ret !== undefined) && !Array.isArray(ret)) */) {
-          // FIXME(iridian, 2019-11): this path should not be taken when this.concatArrays is false
-          // even if ret is not an array. Fix was not straightforward.
-          for (let i = 1; i !== patch_.length; ++i) {
-            ret = this.extend(ret, patch_[i], keyInParent);
-          }
-        } else if (Array.isArray(ret) || !_setRetFromCacheAndMaybeBail(this)) {
-          if (!this.concatArrays) ret = [];
-          for (const entry of patch_) {
-            const newEntry = this.extend(undefined, entry, ret.length, ret, patch_);
-            if (newEntry !== undefined) ret.push(newEntry);
-          }
-        }
-      } else if ((Object.getPrototypeOf(patch_) || Object.prototype) !== Object.prototype) {
-        phase = ".complex";
-        switch (this.complexPatch) {
-          case "overwrite": return patch_;
-          case "patch": return undefined;
-          case "setOnInitialize":
-            if (ret === undefined) return patch_;
-            throw new Error("Invalid complex patch with setOnInitialize: target is not undefined");
-          default:
-            throw new Error(`Invalid complex patch (prototype not equal to Object.prototype): ${
-                ""}see options.complexPatch`);
-        }
-      } else if (!skipSpread && this.spreaderKey
-          && patch_[this.spreaderKey] && patch_.hasOwnProperty(this.spreaderKey)) {
-        phase = ".spread";
-        if (!_setRetFromSpreadAndMaybeBail(this, patch_[this.spreaderKey])
-            && Object.keys(patch_).length > 1) {
-          const src = !this.preExtend ? patch_ : { ...patch_ };
-          if (this.preExtend) delete src[this.spreaderKey];
-          ret = this.extend(ret, src, keyInParent, targetParent, patchParent, true);
-        }
-      } else {
-        phase = ".object";
-        const targetIsArray = Array.isArray(ret);
-        const keys = Object.keys(patch_);
-        if (this.patchSymbols) {
-          keys.push(...Object.getOwnPropertySymbols(patch_));
-        }
-        for (const key of keys) {
-          if (key === this.spreaderKey) continue;
-          if (((ret === null) || (typeof ret !== "object")) && _setRetFromCacheAndMaybeBail(this)) {
-            break;
-          }
-          const newValue = this.extend(ret[key], patch_[key], key, ret, patch_);
-          if (newValue !== undefined) ret[key] = newValue;
-          else if (!targetIsArray) delete ret[key];
-        }
-        if (targetIsArray) {
-          for (let i = 0; i !== ret.length; ++i) if (ret[i] === undefined) ret.splice(i--, 1);
-        } else if (ret === undefined) {
-          _setRetFromCacheAndMaybeBail(this);
-        }
+    if (this.preApplyPatch) {
+      try {
+        ret = this.preApplyPatch(target, patch, targetKey, parentTarget, patchKey, parentPatch);
+      } catch (error) {
+        throw _formulateError(this, error,
+            new Error(`preApplyPatch=${this.preApplyPatch.name || ""}`), ...arguments);
       }
     }
-    if (this.postExtend) {
-      phase = ".postExtend";
-      ret = this.postExtend(ret, patch_, keyInParent, targetParent, patchParent, this);
+    if (ret === undefined) {
+      ret = this.applyPatch(
+          target, patch, targetKey, parentTarget, patchKey, parentPatch, skipSpread);
     }
-    return ret === _returnUndefined ? undefined : ret;
-  } catch (error) {
-    throw wrapError(error,
-        new Error(`patchWith.extend(keyPath: ${(this.keyPath || []).join(" | ")})${phase}`),
-        "\n\tkeyInParent:", ...dumpObject(keyInParent),
-        "\n\ttarget_:", ...dumpObject(target_),
-        "\n\tpatch_:", ...dumpObject(patch_),
-    );
+    if (this.postApplyPatch) {
+      try {
+        ret = this.postApplyPatch(ret, patch, targetKey, parentTarget, patchKey, parentPatch);
+      } catch (error) {
+        throw _formulateError(this, error,
+            new Error(`postApplyPatch=${this.postApplyPatch.name || ""}`), ...arguments);
+      }
+    }
   } finally {
-    if (this.keyPath && (keyInParent !== undefined)) this.keyPath.pop();
+    if (this.keyPath && (patchKey !== undefined)) this.keyPath.pop();
   }
+  return (ret === _returnUndefined) ? undefined : ret;
+}
 
-  function _setRetFromSpreadAndMaybeBail (stack, spreaderValue) {
-    const spreadee = stack.spread(
-        spreaderValue, ret, patch_, keyInParent, targetParent, patchParent, stack);
-    if (spreadee === undefined) {
-      // spread callback has handled the whole remaining process and
-      // has possibly replaced 'target' in its targetParent[keyInParent]
-      // update ret to refer to this new object accordingly.
-      ret = targetParent && targetParent[keyInParent];
-      return true;
-    }
-    ret = stack.extend(ret, spreadee, keyInParent, targetParent, patchParent);
-    return false;
-  }
+function _formulateError (stack, error,
+    name, target, patch, targetKey, parentTarget, patchKey, parentPatch) {
+  name.message = `patchWith.${name.message}(keyPath: [${(stack.keyPath || []).join("][")}])`;
+  return wrapError(error, name,
+      "\n\ttarget:", ...dumpObject(targetKey), ":", ...dumpObject(target),
+      "\n\tpatch:", ...dumpObject(patchKey), ":", ...dumpObject(patch),
+      "\n\tparentTarget:", ...dumpObject(parentTarget),
+      "\n\tparentPatch:", ...dumpObject(parentPatch),
+  );
+}
 
-  // Returns true on cache hit for synchronous return: patch has already extended the target
-  function _setRetFromCacheAndMaybeBail (stack) {
-    const cache = stack.cache || (stack.cache = new Map());
-    const cacheHit = cache.get(patch_);
-    if (cacheHit) {
-      ret = cacheHit;
-      return true;
-    }
-    cache.set(patch_, (ret = (Array.isArray(patch_) ? [] : {})));
-    return false;
+function _obtainPatcher (stack, patcherName) {
+  const ret = _patchers[patcherName][stack[patcherName] || _patcherDefaults[patcherName]];
+  if (!ret) {
+    throw new Error(`Unrecognized ${patcherName} option "${stack[patcherName]}"`);
   }
+  return (stack[patcherName] = ret);
+}
+
+const _patcherDefaults = {
+  iterableToArray: "overwrite",
+  iterableToOther: "overwrite",
+  complexToAny: "reject",
+};
+
+const _patchers = {
+  iterableToArray: {
+    overwrite,
+    reduce,
+    concat (target, patch) {
+      return _applyIterablePatchEntries(this, target, patch, target.length);
+    },
+    merge (target, patch) {
+      return _applyIterablePatchEntries(this, target, patch, 0);
+    },
+  },
+  iterableToOther: {
+    overwrite,
+    reduce,
+  },
+  complexToAny: {
+    overwrite (target, patch) { return patch; },
+    onlySetIfUndefined (target, patch) {
+      if (target !== undefined) {
+        throw new Error(`Invalid complex value patch: target is not undefined ${
+            ""}with options.complexToAny="onlySetIfUndefined"`);
+      }
+      return patch;
+    },
+    reject () {
+      throw new Error(`Invalid complex value patch: (prototype is not equal to {
+        ""}Object.prototype) with options.complexToAny="reject"`);
+    },
+  },
+};
+
+function overwrite (target, patch) {
+  const cached = this._getPatchTargetFromCacheOrInit(patch, true);
+  return cached.hit || _applyIterablePatchEntries(this, cached.value, patch, 0);
+}
+
+function reduce (target, patch, targetKey, parentTarget) {
+  let ret = target;
+  let i = 0;
+  for (const entry of patch) ret = this.patch(ret, entry, targetKey, parentTarget, i++, patch);
+  return ret;
+}
+
+function _applyIterablePatchEntries (stack, ret, patch, initialKey) {
+  let key = initialKey;
+  const shouldKeepUndefined = (stack.undefinedEntry === "keep");
+  let i = 0;
+  for (const entry of patch) {
+    const newEntry = stack.patch(ret[key], entry, key, ret, i++, patch);
+    if (shouldKeepUndefined || (newEntry !== undefined)) {
+      ret[key++] = newEntry;
+    } else if (key < ret.length) {
+      ret.splice(key, 1);
+    }
+  }
+  return ret;
+}
+
+const _objectToAny = {
+  objectNoSymbolsDeleteUndefined (target, patch) {
+    const targetIsArray = Array.isArray(target);
+    let ret = target;
+    for (const key of Object.keys(patch)) {
+      if (key === this.spreaderKey) continue;
+      if ((ret === null) || (typeof ret !== "object")) {
+        const cached = this._getPatchTargetFromCacheOrInit(patch);
+        if (cached.hit) return cached.hit;
+        ret = cached.value;
+      }
+      const newValue = this.patch(ret[key], patch[key], key, ret, key, patch);
+      if (newValue !== undefined) ret[key] = newValue;
+      else if (!targetIsArray) delete ret[key];
+    }
+    if (targetIsArray) {
+      for (let i = 0; i !== ret.length; ++i) if (ret[i] === undefined) ret.splice(i--, 1);
+    } else if (ret === undefined) {
+      return this._getPatchTargetFromCacheOrInit(patch).value;
+    }
+    return ret;
+  },
+  objectNoSymbolsKeepUndefined (target, patch) {
+    let ret = target;
+    for (const key of Object.keys(patch)) {
+      if (key === this.spreaderKey) continue;
+      if ((ret === null) || (typeof ret !== "object")) {
+        const cached = this._getPatchTargetFromCacheOrInit(patch);
+        if (cached.hit) return cached.hit;
+        ret = cached.value;
+      }
+      ret[key] = this.patch(ret[key], patch[key], key, ret, key, patch);
+    }
+    if (ret === undefined) {
+      return this._getPatchTargetFromCacheOrInit(patch).value;
+    }
+    return ret;
+  },
+  objectWithSymbolsDeleteUndefined (target, patch) {
+    const targetIsArray = Array.isArray(target);
+    const keys = Object.keys(patch);
+    if (this.patchSymbols) {
+      keys.push(...Object.getOwnPropertySymbols(patch));
+    }
+    let ret = target;
+    for (const key of keys) {
+      if (key === this.spreaderKey) continue;
+      if ((ret === null) || (typeof ret !== "object")) {
+        const cached = this._getPatchTargetFromCacheOrInit(patch);
+        if (cached.hit) return cached.hit;
+        ret = cached.value;
+      }
+      const newValue = this.patch(ret[key], patch[key], key, ret, key, patch);
+      if (newValue !== undefined) ret[key] = newValue;
+      else if (!targetIsArray) delete ret[key];
+    }
+    if (targetIsArray) {
+      for (let i = 0; i !== ret.length; ++i) if (ret[i] === undefined) ret.splice(i--, 1);
+    } else if (ret === undefined) {
+      return this._getPatchTargetFromCacheOrInit(patch).value;
+    }
+    return ret;
+  },
+  objectWithSymbolsKeepUndefined (target, patch) {
+    const keys = Object.keys(patch);
+    if (this.patchSymbols) {
+      keys.push(...Object.getOwnPropertySymbols(patch));
+    }
+    let ret = target;
+    for (const key of keys) {
+      if (key === this.spreaderKey) continue;
+      if ((ret === null) || (typeof ret !== "object")) {
+        const cached = this._getPatchTargetFromCacheOrInit(patch);
+        if (cached.hit) return cached.hit;
+        ret = cached.value;
+      }
+      ret[key] = this.patch(ret[key], patch[key], key, ret, patch);
+    }
+    if (ret === undefined) {
+      return this._getPatchTargetFromCacheOrInit(patch).value;
+    }
+    return ret;
+  },
+};
+
+function _applySpreader (target, patch, targetKey, parentTarget, patchKey, parentPatch) {
+  const spreaderValue = patch[this.spreaderKey];
+  let spread = this.spread;
+  if (typeof spread !== "function") spread = this.spread = _patchSpread;
+  const spreadee = spread.call(
+      this, spreaderValue, target, patch, targetKey, parentTarget, patchKey, parentPatch);
+  let ret;
+  if (spreadee === undefined) {
+    // spread callback has handled the whole remaining process and
+    // has possibly replaced 'target' in its parentTarget[targetKey]
+    // update ret to refer to this new object accordingly.
+    ret = parentTarget && parentTarget[targetKey];
+    return ret;
+  }
+  ret = this.patch(ret, spreadee, targetKey, parentTarget, patchKey, parentPatch);
+  if (Object.keys(patch).length > 1) {
+    const src = !this.preApplyPatch ? patch : { ...patch };
+    if (this.preApplyPatch) delete src[this.spreaderKey];
+    ret = this.patch(ret, src, targetKey, parentTarget, patchKey, parentPatch, true);
+  }
+  return ret;
+}
+
+function _patchSpread (
+    spreadee, target, patch, targetKey, parentTarget /* , patchKey, parentPatch */) {
+  if ((spreadee === null) || (spreadee === undefined)) return undefined;
+  if (typeof spreadee === "function") {
+    return (parentTarget[targetKey] = spreadee(target));
+  }
+  if (typeof spreadee === "string") {
+    if (!this.require) {
+      throw new Error(`No patchWith.options.require specified (needed by default spread ${
+          ""} for spreadee '${spreadee}')`);
+    }
+    return this.require(spreadee);
+  }
+  if (!Array.isArray(spreadee)) return spreadee;
+  let ret = target;
+  for (const entry of spreadee) {
+    ret = this.patch(ret, entry);
+  }
+  parentTarget[targetKey] = ret;
+  return undefined;
 }

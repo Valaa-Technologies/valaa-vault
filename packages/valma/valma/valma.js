@@ -1058,7 +1058,7 @@ _vlm.ifVerbose(2)
 
 // Allow --vlm to override any implicit vlm modifications (ie. --vlm.verbosity=100 overrides -v)
 if (_vlm.vargv.vlmOption) {
-  patchWith(_vlm, _vlm.vargv.vlmOption);
+  patchWith(_vlm, _vlm.vargv.vlmOption, { spreaderKey: "..." });
 }
 
 process.on("SIGINT", () => {

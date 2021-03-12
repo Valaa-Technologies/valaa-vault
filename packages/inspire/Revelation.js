@@ -281,27 +281,28 @@ function _patchRevelation (gateway, targetRevelation, patchRevelation) {
     return patchWith(targetRevelation, patchRevelation, {
       spreaderKey: "!!!",
       keyPath: [],
-      concatArrays: true,
+      iterableToArray: "concat",
       patchSymbols: true,
-      complexPatch: "overwrite",
-      preExtend (target, patch, key, targetParent, patchParent) {
+      deleteUndefined: true,
+      complexToAny: "overwrite",
+      preApplyPatch (target, patch, key, parentTarget, patchKey, parentPatch) {
         if ((target === undefined) && patch && (typeof patch === "object")
             && !Array.isArray(patch)) {
           if (Object.getPrototypeOf(patch) !== Object.prototype) {
             return patch;
           }
           if (patch[EntryTemplate] === null) { // patch is individualOf -template
-            return this.extend({}, patch, key, targetParent, patchParent);
+            return this.patch({}, patch, key, parentTarget, patchKey, parentPatch);
           }
         }
         if ((target == null) || (patch == null) || (key === EntryTemplate)) return undefined;
 
         const delayed = _delayIfAnyObscured([target, patch], [
           ([revealedTarget, revealedPatch]) =>
-              this.extend(revealedTarget, revealedPatch, key, targetParent, patchParent),
-          function _setParentPropertyAfterExtend (extendResult) {
-            if (targetParent) targetParent[key] = extendResult;
-            return extendResult;
+              this.patch(revealedTarget, revealedPatch, key, parentTarget, patchKey, parentPatch),
+          function _setParentPropertyAfterPatch (patchResult) {
+            if (parentTarget) parentTarget[key] = patchResult;
+            return patchResult;
           },
         ]);
         if (delayed) return delayed;
@@ -318,7 +319,7 @@ function _patchRevelation (gateway, targetRevelation, patchRevelation) {
             let revelationPatch;
             try {
               revelationPatch = gateway.callRevelation(patch);
-              const combined = this.extend(target, revelationPatch);
+              const combined = this.patch(target, revelationPatch);
               if (typeof revelationPatch !== "object") return combined;
               for (const baseKey of Object.keys(target)) {
                 if ((target[baseKey] !== undefined) && !revelationPatch.hasOwnProperty(baseKey)) {
@@ -370,37 +371,38 @@ function _patchRevelation (gateway, targetRevelation, patchRevelation) {
           const entryTemplate = target[EntryTemplate];
           if (entryTemplate) {
             if (Array.isArray(patch)) {
-              target.push(...patch.map(patchEntry => this.extend(
-                  this.extend({}, entryTemplate), patchEntry, key, targetParent, patchParent)));
+              target.push(...patch.map(patchEntry => this.patch(
+                  this.patch({}, entryTemplate), patchEntry,
+                  key, parentTarget, patchKey, parentPatch)));
               return target;
             }
             const ret = Object.create(
                 Object.getPrototypeOf(target),
                 Object.getOwnPropertyDescriptors(target));
             Object.entries(patch).forEach(([subKey, subValue]) => {
-              ret[subKey] = this.extend(
-                  this.extend({}, entryTemplate), subValue, subKey, ret, patch);
+              ret[subKey] = this.patch(
+                  this.patch({}, entryTemplate), subValue, subKey, ret, subKey, patch);
             });
             return ret;
           }
           return undefined;
         } catch (error) {
           throw gateway.wrapErrorEvent(error, 1,
-              new Error(`patchRevelation.preExtend(key: ${key})`),
+              new Error(`patchRevelation.preApplyPatch(key: ${key})`),
               "\n\ttarget:", ...dumpObject(target),
               "\n\tpatch:", ...dumpObject(patch),
-              "\n\ttargetParent:", ...dumpObject(targetParent),
-              "\n\tpatchParent:", ...dumpObject(patchParent));
+              "\n\ttargetParent:", ...dumpObject(parentTarget),
+              "\n\tpatchParent:", ...dumpObject(parentPatch));
         }
       },
       spread (spreader /* , outerRet */) {
         if (typeof spreader === "string") return _spreadValk(spreader);
         if ((spreader === null) || (typeof spreader !== "object")) return spreader;
         // Expand inner spreaders.
-        const extendedSpreader = expose(this.extend(undefined, spreader));
-        if (isPromise(extendedSpreader)) return extendedSpreader.then(_spreadValk);
-        if (!Array.isArray(spreader)) return extendedSpreader || spreader;
-        return _spreadValk(extendedSpreader);
+        const patchedSpreader = expose(this.patch(undefined, spreader));
+        if (isPromise(patchedSpreader)) return patchedSpreader.then(_spreadValk);
+        if (!Array.isArray(spreader)) return patchedSpreader || spreader;
+        return _spreadValk(patchedSpreader);
         function _spreadValk (spreadedSpreader) {
           const pathOp = _cementSpreaderPath(spreadedSpreader);
           // console.log("pre-spreaderSpreader:", JSON.stringify(spreadedSpreader, null, 2));

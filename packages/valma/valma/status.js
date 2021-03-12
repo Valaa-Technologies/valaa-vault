@@ -33,5 +33,7 @@ exports.handler = async (yargv) => {
       .filter(e => e && (typeof e === "object"));
   const patchWith = require("@valos/tools/patchWith").default;
 
-  return resolveds.reduce((acc, res) => patchWith(acc, res), { "": { chapters: true } });
+  return resolveds.reduce(
+      (acc, res) => patchWith(acc, res, { spreaderKey: "..." }),
+      { "": { chapters: true } });
 };

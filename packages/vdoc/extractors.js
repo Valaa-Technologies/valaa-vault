@@ -2,7 +2,7 @@ const _extractionRuleRegex = /([^#]*)#(([0-9]+)|([^>;]+))?(>([0-9]+)|([^;]*))?(;
 
 module.exports = {
   native: {
-    preExtend (target, patch, key, targetObject /* , patchObject */) {
+    preApplyPatch (target, patch, key, parentTarget /* , patchKey, parentPatch */) {
       if (typeof key !== "string") return undefined;
       const [match, ruleName,, elementId, resourceId,, orderElement, orderId,, rest] =
           key.match(_extractionRuleRegex) || [];
@@ -26,10 +26,10 @@ module.exports = {
       if (Array.isArray(patch)) {
         if (!rule.owner || (!resourceId && !Object.keys(node).length)) {
           // console.log("array-split:", ruleName, key);
-          node = _splitNewlineWhitespaceSections(this.extend([], patch), rule.paragraphize);
+          node = _splitNewlineWhitespaceSections(this.patch([], patch), rule.paragraphize);
           if (resourceId) this.documentNode[resourceId] = node;
         } else {
-          // console.log("array-extend:", ruleName, key);
+          // console.log("array-patch:", ruleName, key);
           node[rule.body] = _extendWithArrayPatch(this, rule, patch);
         }
       } else if ((typeof patch !== "object") || (patch === null) || patch["@type"]) {
@@ -39,18 +39,18 @@ module.exports = {
               ? patch
               : _splitNewlineWhitespaceSections(patch, rule.paragraphize);
         } else {
-          // console.log("singular-extend:", ruleName, key, JSON.stringify(rule, null, 0));
+          // console.log("singular-patch:", ruleName, key, JSON.stringify(rule, null, 0));
           node[rule.body] = _extendWithArrayPatch(this, rule, [patch]);
         }
       } else {
         // console.log("pre-post-process:", ruleName, key);
         node["VDoc:pre_body"] = rule.body;
-        this.extend(node, patch);
+        this.patch(node, patch);
         delete node["VDoc:pre_body"];
       }
       if (rule.owner) {
-        const preOwnees = (targetObject["VDoc:pre_ownees"]
-            || (targetObject["VDoc:pre_ownees"] = {}));
+        const preOwnees = (parentTarget["VDoc:pre_ownees"]
+            || (parentTarget["VDoc:pre_ownees"] = {}));
         (preOwnees[rule.owner] || (preOwnees[rule.owner] = [])).push([
           (orderId && `${orderId}\uFFFF`) || (orderElement && (Number(orderElement) + 0.5))
               || resourceId || (elementId && Number(elementId)),
@@ -59,7 +59,7 @@ module.exports = {
       }
       return this.returnUndefined;
     },
-    postExtend (target) {
+    postApplyPatch (target) {
       if ((target == null) || (target === this.returnUndefined)) return target;
       const unorderedOwnees = target["VDoc:pre_ownees"];
       if (unorderedOwnees) {
@@ -75,7 +75,7 @@ module.exports = {
 };
 
 function _extendWithArrayPatch (extender, rule, arrayPatch) {
-  const ret = extender.extend([], arrayPatch);
+  const ret = extender.patch([], arrayPatch);
   if (rule.body === "VDoc:content") {
     const body = _splitNewlineWhitespaceSections(ret, rule.paragraphize);
     const onlyEntry = !Array.isArray(body) ? body : (body.length === 1) ? body[0] : undefined;

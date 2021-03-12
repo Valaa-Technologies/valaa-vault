@@ -283,7 +283,9 @@ function _instantiateTemplate (template, entryKey, entryData) {
     if (entry === undefined) entry = (entryData == null) ? undefined : entryData[template];
   } else {
     entry = patchWith({}, template, {
-      preExtend (tgt, patch, key) {
+      spreaderKey: "...",
+      deleteUndefined: true,
+      preApplyPatch (tgt, patch, key) {
         if ((key === "VDoc:map") || (key === "VDoc:cell")) return patch;
         if (typeof patch === "string") {
           return select[patch] !== undefined ? select[patch] : patch;

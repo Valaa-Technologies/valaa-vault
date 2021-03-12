@@ -254,7 +254,7 @@ function _createToolsetStatusHandlerBody (name) {
     const toolStatuses = await yargv.vlm.invoke(
         \`.status/.tools/\${tool}*\`, [{ toolset: vlm.toolset }]);
     for (const results of [].concat(...(toolStatuses || []))) {
-      if (yargv["include-tools"]) patchWith(target, results);
+      if (yargv["include-tools"]) patchWith(target, results, { spreaderKey: "..." });
       const toolResult = results[\`status_toolset_\${underscoredToolset}_tools\`][tool];
       if (toolResult.warnings) warnings.push(...toolResult.warnings.map(w => \`\${tool}: \${w}\`));
       if (toolResult.failures) failures.push(...toolResult.failures.map(f => \`\${tool}: \${f}\`));

@@ -49,12 +49,12 @@ function specifyNamespace (namespace) {
         "prefixes", "context", "namespaceModules", "description", "vocabulary", "extractionRules",
       ]) {
         aggregate[section] = patchWith(aggregate[section], extender[section], {
-          keyPath: [],
-          preExtend (currentValue, extenderValue) {
-            if ((currentValue === extenderValue)
+          keyPath: [], spreaderKey: "...",
+          preApplyPatch (currentValue, patchValue) {
+            if ((currentValue === patchValue)
                 || (typeof currentValue === "object")
                 || (currentValue == null)
-                || (extenderValue === undefined)) {
+                || (patchValue === undefined)) {
               return undefined;
             }
             throw wrapError(new Error(`Ontology namespace aggregation conflict at '${
@@ -62,7 +62,7 @@ function specifyNamespace (namespace) {
                     }': extender value and current values differ`),
                 new Error(`When aggregating section '${section}'`),
                 "\n\tcurrentValue:", JSON.stringify(currentValue),
-                "\n\textenderValue:", JSON.stringify(extenderValue));
+                "\n\textenderValue:", JSON.stringify(patchValue));
           },
         });
       }

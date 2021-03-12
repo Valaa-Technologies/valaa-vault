@@ -441,8 +441,12 @@ function _refreshClassName (component, value, focus = component.tryFocus()) {
     if (component._currentSheetContent) component.context.releaseVssSheets(component);
     component._currentSheetContent = sheetContent;
     const sheet = {};
-    if (sheetContent.html) patchWith(sheet, sheetContent.html);
-    if (sheetContent.body) patchWith(sheet, sheetContent.body);
+    if (sheetContent.html) {
+      patchWith(sheet, sheetContent.html, { spreaderKey: "...", deleteUndefined: true });
+    }
+    if (sheetContent.body) {
+      patchWith(sheet, sheetContent.body, { spreaderKey: "...", deleteUndefined: true });
+    }
     for (const [selector, styles] of Object.entries(sheetContent)) {
       if ((selector !== "body") && (selector !== "html")) {
         sheet[`& .${selector}`] = styles;

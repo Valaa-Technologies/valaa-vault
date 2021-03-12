@@ -426,7 +426,7 @@ export default class Gateway extends FabricEventTarget {
           viewRootId: `valos-gateway--${op.viewId}--view-root`
         },
         ["...", revelationConfig, op.paramViewConfig],
-        { complexPatch: "setOnInitialize" });
+        { spreaderKey: "...", complexToAny: "onlySetIfUndefined" });
     view.setRawName(op.viewId);
     view.setName(`${op.viewConfig.name}-View`);
     view.setVerbosity(op.viewConfig.verbosity);

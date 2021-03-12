@@ -74,7 +74,7 @@ exports.createConfig = function createConfig (options) {
       }, globalRules),
       ...[].concat(...testTypes.map(_createGateRoutes.bind(null, globalRules))).filter(e => e),
     ],
-  }, rest);
+  }, rest, { spreaderKey: "..." });
 };
 
 function _createGateRoutes (globalRules, resourceType) {

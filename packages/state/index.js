@@ -36,7 +36,7 @@ const baseContextText = `{
   ".tgt": { "@id": "V:target", "@type": "@id" },
   "-in": { "@id": "V:hasInRelation", "@type": "@id", "@container": "@list" },
 
-  ".src-": { "@id": "V:linkedSouirce", "@type": "@id" },
+  ".src-": { "@id": "V:linkedSource", "@type": "@id" },
   ".tgt-": { "@id": "V:linkedTarget", "@type": "@id" },
 
   ".src*": { "@id": "V:ownerSource", "@type": "@id" },
@@ -67,7 +67,7 @@ function createVState (references = []) {
   const _referenceArray = [];
   const _referenceLookup = {};
 
-  const vstate = { "/": Object.create(null) };
+  const vstate = { "&+": Object.create(null) };
   Object.defineProperty(vstate, referenceArrayTag, {
     writable: true, configurable: false, enumerable: false,
     value: _referenceArray,

@@ -154,7 +154,7 @@ ref("urn-vplot", "@valos/vplot#urn-vplot"), ` form.
 
 These local vplot ids form a nested hierarchy. Resource views project
 subtrees of this hierarchy (`, em("view origin"), `) to be accessible
-at other subtree locations (`, em("view image")`). Notably, ownership
+at other subtree locations (`, em("view image"), `). Notably, ownership
 views project the stable root-level embodiment of a resource (`,
 em("stable origin"), `) to be accessible at its current logical
 location in the ownership hierarchy (`, em("logical image"), `).
@@ -193,7 +193,7 @@ chronicles must refer to their stable origin.
       ".E*": "../0",
       "toOlder": { "@id": "1" }, "absolutelyOlder": { "@id": "/0/1" },
       "&+": {
-        "2/3": { ".tgt*": "1", ".n": "SIBLING", ".src": "2" }
+        "2/3": { ".tgt*": "2", ".n": "SIBLING", ".src": "1" }
       }
     },
     "0/2/4": { ".src*": "0/2", ".n": "SIBLING", ".tgt": "0/1" }
@@ -215,16 +215,16 @@ chronicles must refer to their stable origin.
       "*E": ["1", "2"],
     },
     "1": { ".E*": "0", ".n": "older",
-      "*R": ["3", "4"],
       "-out": ["3"], "-in": ["4"],
       "toOutside": { "@id": "5" }, "absolutelyParent": { "@id": "/0" }
     },
     "2": { ".E*": "0", ".n": "unger",
+      "*R": ["3", "4"],
       "-out": ["4"], "-in": ["3"],
       toOlder: { "@id": "1" }, "absolutelyOlder": { "@id": "/1" }
     },
-    "3": { ".src*": "1", ".n": "SIBLING", ".tgt": "2" },
-    "4": { ".tgt*": "1", ".n": "SIBLING", ".src": "2" },
+    "3": { ".tgt*": "2", ".n": "SIBLING", ".src": "1" },
+    "4": { ".src*": "2", ".n": "SIBLING", ".tgt": "1" },
   },
 }
     ),

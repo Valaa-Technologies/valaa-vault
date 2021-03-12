@@ -112,7 +112,7 @@ shall be transactionally modified whenever this field is modified.`,
   // here due to its coupling with 'linkedSource'.
   linkedOutRelation: {
     "@type": "VState:EventLoggedField",
-    "rdfs:subPropertyOf": "V:outgoingRelations",
+    "rdfs:subPropertyOf": "V:hasOutRelation",
     "rdfs:domain": "V:SourceredNode",
     "rdfs:range": "rdfs:List",
     "VState:linkedToField": "V:linkedSource",
@@ -138,7 +138,7 @@ shall be transactionally modified whenever this field is modified.`,
   // here due to its coupling with 'linkedTarget'.
   linkedInRelation: {
     "@type": "VState:EventLoggedField",
-    "rdfs:subPropertyOf": "V:incomingRelations",
+    "rdfs:subPropertyOf": "V:hasInRelation",
     "rdfs:domain": "V:SourceredNode",
     "rdfs:range": "rdfs:List",
     "VState:linkedToField": "V:linkedTarget",

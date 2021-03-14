@@ -113,7 +113,15 @@ function _flattenToJSON (object) {
     if (typeof value === "function") continue;
     ret[key] = _flattenToJSON(value);
   }
-  return ret;
+  const subs = ret["&+"];
+  const context = ret["@context"];
+  if (!subs || !context) return ret;
+  // FIXME(iridian, 2021-03): This heuristic does not distinguish
+  // between actual resource nodes and literal value objects that
+  // happen to contain @context and &+ keys.
+  delete ret["&+"];
+  delete ret["@context"];
+  return [ret, { "@context": context, "&+": subs }];
 }
 
 function mutateVState (state) {

@@ -185,7 +185,7 @@ function _patchSubs (target, patch, targetKey, parentTarget) {
       originSubPlot = subStack.originPlot;
       originParentSubs = this.mutableRootResources;
     } else {
-      originSubPlot = rootOriginId.slice(this.originPlot.length);
+      originSubPlot = subStack.originPlot.slice(this.originPlot.length);
       if (!mutableSubs) {
         mutableSubs = _mutateSubs(parentTarget, parentLogicalPlot[parentLogicalPlot.length - 1]);
       }
@@ -395,6 +395,7 @@ function _originIdFromRootPlot (originPlot, rootPlot, isAbsolute) {
   let i = 0;
   const maxLen = originPlot.length && (originPlot.length - 1);
   for (; i !== maxLen; ++i) if (originPlot[i] !== rootPlot[i]) break;
+  if (i === rootPlot.length) --i; // "" -> "../x"
   return `${"../".repeat(maxLen - i)}${rootPlot.slice(i).join("/")}`;
 }
 
@@ -410,6 +411,10 @@ function _originIdFromRootPlot (originPlot, rootPlot, isAbsolute) {
 function _mutateDeepSubResource (initialParentSubs, subResourcePlot) {
   let parentSubs = initialParentSubs;
   let prevStep, mutableResource;
+  if (!Array.isArray(subResourcePlot) || !subResourcePlot[0]) {
+    throw new Error(`Invalid subResourcePlot, array with non-empty first item expected, got: "${
+        String(subResourcePlot)}"`);
+  }
   for (let i = 0; i !== subResourcePlot.length; ++i) {
     if (prevStep) parentSubs = _mutateSubs(mutableResource, prevStep);
     mutableResource = _mutateSubResource(parentSubs, prevStep = subResourcePlot[i]);
@@ -418,6 +423,9 @@ function _mutateDeepSubResource (initialParentSubs, subResourcePlot) {
 }
 
 function _mutateSubResource (mutableSubs, childStep) {
+  if (childStep[0] === "/") {
+    throw new Error(`Invalid sub-resource vplot: "${childStep}": cannot be a root reference`);
+  }
   const subResource = mutableSubs[childStep];
   return (subResource && Object.hasOwnProperty.call(mutableSubs, childStep))
       ? subResource

@@ -253,18 +253,21 @@ in a different chronicle!).
     "8": "~u4:d336d336-9999-6666-0000-777700000000"
   }],
   "&+": {
-    "0/1/3/8": { ".E*": "0/1/3", ".n": "deeplyOwned" },
-    "0/6": { ".E*": "0", ".iOf": "0/1", ".n": "olderInstance" },
+    "0/2/3/8": { ".E*": "0/2/3", ".n": "deeplyOwned" },
+    "0/6": { ".E*": "0", ".iOf": "0/2", ".n": "ungerInstance",
+      "&+": {
+        "0/6/8": { ".n": "deeplyOwnedGhost" },
+      }
+    },
     "0/6/3": {
       "instance": { "@id": "0/6" },
       "absoluteInstance": { "@id": "/0/6" },
-      "deepProto": { "@id": "0/1/3/8" },
-      "absoluteDeepProto": { "@id": "/0/1/3/8" },
+      "deepProto": { "@id": "0/2/3/8" },
+      "absoluteDeepProto": { "@id": "/0/2/3/8" },
     },
-    "0/6/8": { ".n": "deeplyOwnedInstance" },
-    "0/7": { ".E*": "0", ".iOf": "0/6", ".n": "olderInstanceInstance" },
+    "0/7": { ".E*": "0", ".iOf": "0/6", ".n": "ungerInstanceInstance" },
     "0/7/3": { "instanceInstance": { "@id": "0/7" } },
-    "0/7/8": { ".n": "deeplyOwnedInstanceInstance" },
+    "0/7/8": { ".n": "deeplyOwnedGhostGhost" },
   },
 }))),
         "toMatchObject",
@@ -278,7 +281,7 @@ in a different chronicle!).
     "5": "valaa-test:?id=(~raw'extl!)#",
     "6": "~u4:11111111-2255-7744-22cc-eeeeeeeeeeee",
     "7": "~u4:22222222-2255-7744-22cc-eeeeeeeeeeee",
-    "8": "~u4:dd333399-9999-6666-0000-777700000000"
+    "8": "~u4:d336d336-9999-6666-0000-777700000000"
   }],
   "&+": {
     "0": { ".n": "newRootName",
@@ -286,17 +289,19 @@ in a different chronicle!).
       "*E": ["1", "2", "6", "7"]
     },
     "1": { ".E*": "0", ".n": "older",
-      "*R": ["3", "4"],
-      "-out": ["3"], "-in": ["4"], "-hasI": ["6"],
+      "-out": ["3"], "-in": ["4"],
       "toOutside": { "@id": "5" }, "absolutelyParent": { "@id": "/0" }
     },
     "2": { ".E*": "0", ".n": "unger",
-      "-out": ["4"], "-in": ["3"],
+      "*R": ["3", "4"],
+      "-out": ["4"], "-in": ["3"], "-hasI": ["6"],
       "toOlder": { "@id": "1" }, "absolutelyOlder": { "@id": "/1" }
     },
-    "3": { ".src*": "1", ".n": "SIBLING", ".tgt": "2", "*E": ["8"] },
-    "4": { ".tgt*": "2", ".n": "SIBLING", ".src": "1" },
-    "6": [{ ".E*": "0", ".iOf": "1", ".n": "olderInstance", "-hasI": ["7"] }, {
+    "3": { ".tgt*": "2", ".n": "SIBLING", ".src": "1", "*E": ["8"] },
+    "4": { ".src*": "2", ".n": "SIBLING", ".tgt": "1" },
+    "6": [{ ".E*": "0", ".n": "ungerInstance",
+      ".iOf": "2", "-hasI": ["7"],
+    }, {
       "@context": { "@base": "6/" },
       "&+": {
         "3": {
@@ -305,14 +310,16 @@ in a different chronicle!).
           "deepProto": { "@id": "../8" },
           "absoluteDeepProto": { "@id": "/8" },
         },
-        "8": { ".n": "deeplyOwnedInstance" }
+        "8": { ".n": "deeplyOwnedGhost" }
       }
     }],
-    "7": [{ ".E*": "0", ".iOf": "6", ".n": "olderInstanceInstance" }, {
+    "7": [{ ".E*": "0", ".n": "ungerInstanceInstance",
+      ".iOf": "6",
+    }, {
       "@context": { "@base": "7/" },
       "&+": {
-        "3": { "instanceInstance": { "@id": "7" }, },
-        "8": { ".n": "deeplyOwnedInstanceInstance" }
+        "3": { "instanceInstance": { "@id": "../7" }, },
+        "8": { ".n": "deeplyOwnedGhostGhost" }
       }
     }],
     "8": { ".E*": "3", ".n": "deeplyOwned" },

@@ -128,7 +128,7 @@ assigned a blank node '_:0' that corresponds to id context entry URN.`,
   "@context": [{
     "0": "~u4:cccccccc-6600-2211-cc77-333333333333"
   }],
-  "&+": { "0": { ".n": "rootName", "V:authorityURI": "valaa-local:" } }
+  "&+": { "../0": { ".n": "rootName", "V:authorityURI": "valaa-local:" } }
 }))),
         "toMatchObject",
 () => ({
@@ -184,19 +184,17 @@ chronicles must refer to their stable origin.
     "5": "valaa-test:?id=(~raw'extl!)#"
   }],
   "&+": {
-    "0": { ".n": "newRootName" },
-    "0/1": { ".E*": "0", ".n": "older",
-      "toOutside": { "@id": "5" }, "absolutelyParent": { "@id": "/0" },
+    "../0": { ".n": "newRootName" },
+    "1": { ".E*": "../0", ".n": "older",
+      "toOutside": { "@id": "../5" }, "absolutelyParent": { "@id": "/0" },
     },
-    "0/2": { ".n": "unger",
-      "@context": { "@base": "0/" },
-      ".E*": "../0",
+    "2": { ".E*": "../0", ".n": "unger",
       "toOlder": { "@id": "1" }, "absolutelyOlder": { "@id": "/0/1" },
       "&+": {
         "2/3": { ".tgt*": "2", ".n": "SIBLING", ".src": "1" }
       }
     },
-    "0/2/4": { ".src*": "0/2", ".n": "SIBLING", ".tgt": "0/1" }
+    "2/4": { ".src*": "2", ".n": "SIBLING", ".tgt": "1" }
   },
 }))),
         "toMatchObject",
@@ -253,21 +251,21 @@ in a different chronicle!).
     "8": "~u4:d336d336-9999-6666-0000-777700000000"
   }],
   "&+": {
-    "0/2/3/8": { ".E*": "0/2/3", ".n": "deeplyOwned" },
-    "0/6": { ".E*": "0", ".iOf": "0/2", ".n": "ungerInstance",
+    "2/3/8": { ".E*": "2/3", ".n": "deeplyOwned" },
+    "6": { ".E*": "../0", ".iOf": "2", ".n": "ungerInstance",
       "&+": {
-        "0/6/8": { ".n": "deeplyOwnedGhost" },
+        "6/8": { ".n": "deeplyOwnedGhost" },
       }
     },
-    "0/6/3": {
-      "instance": { "@id": "0/6" },
+    "6/3": {
+      "instance": { "@id": "6" },
       "absoluteInstance": { "@id": "/0/6" },
-      "deepProto": { "@id": "0/2/3/8" },
+      "deepProto": { "@id": "2/3/8" },
       "absoluteDeepProto": { "@id": "/0/2/3/8" },
     },
-    "0/7": { ".E*": "0", ".iOf": "0/6", ".n": "ungerInstanceInstance" },
-    "0/7/3": { "instanceInstance": { "@id": "0/7" } },
-    "0/7/8": { ".n": "deeplyOwnedGhostGhost" },
+    "7": { ".E*": "../0", ".iOf": "6", ".n": "ungerInstanceInstance" },
+    "7/3": { "instanceInstance": { "@id": "7" } },
+    "7/8": { ".n": "deeplyOwnedGhostGhost" },
   },
 }))),
         "toMatchObject",
@@ -305,7 +303,7 @@ in a different chronicle!).
       "@context": { "@base": "6/" },
       "&+": {
         "3": {
-          "instance": { "@id": "6" },
+          "instance": { "@id": "../6" },
           "absoluteInstance": { "@id": "/6" },
           "deepProto": { "@id": "../8" },
           "absoluteDeepProto": { "@id": "/8" },

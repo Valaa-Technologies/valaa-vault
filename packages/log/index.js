@@ -120,7 +120,7 @@ function _patchURITerms (mutableState, vlogEvent) {
 
 function _patchDeltaComponent (target, patch, key, parentTarget, patchKey, parentPatch) {
   if (this.keyPath.length === 0) {
-    this.basePlot = [];
+    this.basePlot = ["0"];
     this.logicalPlot = [];
     this.originPlot = [];
     return undefined;
@@ -313,6 +313,11 @@ function _joinTargetPlot (basePlot, plotString) {
   if (plotString[0] === "/") {
     throw new Error(`Invalid vplot id "${plotString}": target ids must be relative`);
   }
+  // Allow root resource reference as "../0" (as it could not be
+  // referred to otherwise from initial base plot ["0"]), deny all
+  // other plots containing "..".
+  // Eventually this syntax will allow for adopting orphaned resources.
+  if ((plotString === "../0") && (basePlot.length === 1)) return ["0"];
   return _joinPlot(basePlot, plotString, "target ids");
 }
 

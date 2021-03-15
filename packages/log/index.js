@@ -7,18 +7,16 @@ const { VState } = require("@valos/state/ontology");
 module.exports = {
   applyVLogDelta (currentVState, vlogEvent) {
     const mutableState = mutateVState(currentVState);
-
     _patchURITerms(mutableState, vlogEvent);
     return patchWith(mutableState, vlogEvent, {
       keyPath: [],
       deleteUndefined: true,
       iterableToArray: "reduce",
       iterableToOther: "reduce",
-      mutableState,
-      mutableRootResources: _mutateSubs(mutableState),
-      preApplyPatch: _patchDeltaComponent,
-      _patchSubs,
-      _patchResourceProperty,
+      basePlot: ["0"],
+      logicalPlot: [],
+      originPlot: [],
+      preApplyPatch: _patchStateResource,
     });
   },
 };
@@ -34,10 +32,14 @@ module.exports = {
 
 const ontologies = { V, VState };
 
-const _nodeTermPatchers = {
-  "@context": _patchContext,
-  "&+": _patchSubs,
-  "&-": _patchSubRemoval,
+const _nodeTermUpserters = {
+  // Ignore all direct @context modifications.
+  // @base has already been resolved by _patchDeltaNode (as it
+  // needs to be resolved before other entries)
+  // TODO(iridian, 2021-03): Validate @context and reject all unsupported fields.
+  "@context": null,
+  "&+": null,
+  "&-": null,
   "*P": _patchRejectForbiddenDirectManipulation,
   "*E": _patchRejectForbiddenDirectManipulation,
   "*R": _patchRejectForbiddenDirectManipulation,
@@ -48,6 +50,12 @@ const _nodeTermPatchers = {
   "-in": _patchRejectForbiddenDirectManipulation,
 };
 
+
+function _patchRejectForbiddenDirectManipulation (stack, target, delta, key) {
+  throw new Error(`Cannot apply a patch to term "${key}" directly ${
+      ""}(only via its linked/coupled properties)`);
+}
+
 const _vlogTermById = {};
 
 for (const [term, expansion] of Object.entries(baseContext)) {
@@ -56,14 +64,14 @@ for (const [term, expansion] of Object.entries(baseContext)) {
 }
 
 for (const [term, expansion] of Object.entries(baseContext)) {
-  if (term[0] === "@" || _nodeTermPatchers[term]) continue;
+  if (term[0] === "@" || (_nodeTermUpserters[term] !== undefined)) continue;
   const id = expansion["@id"];
   if (!id) continue;
   const definition = _getDefinitionOf(id);
   const aliases = [id].concat(_recurseSubProperties(definition) || []);
   const coupledTerms = _getReverseTermsOf(definition["VState:coupledToField"]);
   const linkedTerms = _getReverseTermsOf(definition["VState:linkedToField"]);
-  _nodeTermPatchers[term] = _createStandardTermPatcher(term, {
+  _nodeTermUpserters[term] = _createStandardTermPatcher(term, {
     expansion, definition,
     isId: expansion["@type"] === "@id",
     isSingular: expansion["@container"] === undefined,
@@ -118,45 +126,52 @@ function _patchURITerms (mutableState, vlogEvent) {
   }
 }
 
-function _patchDeltaComponent (target, patch, key, parentTarget, patchKey, parentPatch) {
-  if (this.keyPath.length === 0) {
-    this.basePlot = ["0"];
-    this.logicalPlot = [];
-    this.originPlot = [];
-    return undefined;
-  }
-  if (this.keyPath.length === 1) {
-    return key !== "&+"
-        ? target // Ignore all other root aspects except subresources.
-        : this._patchSubs(target, patch, "&+", parentTarget);
-  }
-  if (this.keyPath[this.keyPath.length - (typeof patchKey !== "number" ? 2 : 3)] === "&+") {
-    if (patch["@context"]) {
-      const base = (patch["@context"] || {})["@base"] || "";
-      const subStack = Object.create(this);
-      subStack.basePlot = _joinBaseContextPlot(this.basePlot, base);
-      return subStack.applyPatch(target, patch, key, parentTarget, patchKey, parentPatch);
+function _patchStateResource (mutableTarget, delta, key, parentTarget, deltaKey) {
+  const context = delta["@context"];
+  const subsDelta = delta["&+"];
+  let stack = this;
+  if (deltaKey === undefined) {
+    // The entry patch call onto the "global void" resource.
+    if (!subsDelta) throw new Error("VLog event is missing global '&+' resource delta section");
+    this.mutableRootResources = _mutateSubs(mutableTarget);
+  } else {
+    const base = (context || {})["@base"] || "";
+    const removalsDelta = delta["&-"];
+
+    if (base) {
+      stack = Object.create(this);
+      stack.basePlot = _joinBaseContextPlot(this.basePlot, base);
+      console.log("  Adjusting @context @base:", base, "as plot:", stack.basePlot,
+          "from:", deltaKey, "to:", key);
     }
-    return undefined;
-    // delta node: default patch, as _patchSubs has already mutated the target.
+    if (removalsDelta) {
+      _processProperties(stack, mutableTarget, removalsDelta, true);
+    }
+    _processProperties(stack, mutableTarget, delta);
   }
-  return this._patchResourceProperty(target, patch, key, parentTarget, patchKey, parentPatch);
+  if (subsDelta) {
+    _processSubs(stack, mutableTarget, subsDelta);
+  }
+  return mutableTarget;
 }
 
-function _patchSubs (target, patch, targetKey, parentTarget) {
-  const subStack = Object.create(this);
-  const entryKeys = Object.keys(patch);
+function _processSubs (stack, parentTarget, subsDelta) {
+  const basePlot = stack.basePlot;
+  const mutableRootResources = stack.mutableRootResources;
+  const parentLogicalPlot = stack.logicalPlot;
+  const parentOriginPlot = stack.originPlot;
+  const parentOriginId = parentOriginPlot.join("/");
+
+  const entryKeys = Object.keys(subsDelta);
   entryKeys.sort();
   if (!entryKeys.length) {
-    throw new Error(`Invalid empty "&+" sub-resource patch for "${this.logicalPlot.join("/")}"`);
+    throw new Error(`Invalid empty "&+" sub-resource delta for "${stack.logicalPlot.join("/")}"`);
   }
-  const parentLogicalPlot = this.logicalPlot;
-  const parentOriginId = this.originPlot.join("/");
 
   let mutableSubs;
   for (const logicalSteps of entryKeys) {
-    const patchEntry = patch[logicalSteps];
-    const logicalPlot = subStack.logicalPlot = _joinTargetPlot(this.basePlot, logicalSteps);
+    const resourceDelta = subsDelta[logicalSteps];
+    const logicalPlot = stack.logicalPlot = _joinTargetPlot(basePlot, logicalSteps);
 
     // TODO(iridian, 2021-03): Maybe the leeway for different @base
     // values in the delta JSON-LD is not ideal? We could avoid having
@@ -177,74 +192,58 @@ function _patchSubs (target, patch, targetKey, parentTarget) {
     }
 
     const rootOriginId = _rootOriginIdFromLogicalPlot(
-        this.mutableRootResources, logicalPlot, i, parentOriginId);
-    subStack.originPlot = rootOriginId.split("/");
-
-    let originParentSubs, originSubPlot;
-    if (!rootOriginId.startsWith(parentOriginId)) {
-      originSubPlot = subStack.originPlot;
-      originParentSubs = this.mutableRootResources;
-    } else {
-      originSubPlot = subStack.originPlot.slice(this.originPlot.length);
+        mutableRootResources, logicalPlot, i, parentOriginId);
+    let originSubPlot = stack.originPlot = rootOriginId.split("/");
+    let originParentSubs = mutableRootResources;
+    if (parentOriginId && rootOriginId.startsWith(parentOriginId)) {
+      originSubPlot = originSubPlot.slice(parentOriginPlot.length);
       if (!mutableSubs) {
         mutableSubs = _mutateSubs(parentTarget, parentLogicalPlot[parentLogicalPlot.length - 1]);
       }
       originParentSubs = mutableSubs;
     }
-
     const { mutableResource, prevStep, parentSubs } =
         _mutateDeepSubResource(originParentSubs, originSubPlot);
-    subStack.patch(mutableResource, patchEntry, prevStep, parentSubs, logicalSteps, patch);
+    stack.patch(mutableResource, resourceDelta, prevStep, parentSubs, logicalSteps, subsDelta);
   }
-  return mutableSubs || this.returnUndefined;
+  return mutableSubs;
 }
 
-function _patchContext (currentValue) {
-  // Ignore all direct @context modifications.
-  // @base has already been resolved by _patchDeltaNode (as it
-  // needs to be resolved before other entries)
-  // TODO(iridian, 2021-03): Validate @context and reject all unsupported fields.
-  return currentValue || this.returnUndefined;
-}
-
-function _patchResourceProperty (oldValue, newValue, name, stateNode, patchKey, patchNode) {
-  if (typeof name !== "string") {
-    throw new Error(`Invalid delta resource property: string expected, got "${name}"`);
-  }
-  let patchEntry = _nodeTermPatchers[name];
-  let actualName = name;
-  if (!patchEntry) {
-    patchEntry = _patchGenericProperty;
-    const colonIndex = name.indexOf(":");
-    if (colonIndex !== -1) {
-      actualName = [name.slice(0, colonIndex), name.slice(colonIndex + 1)];
-      const patchNamespacedProperty = _namespacePatchers[actualName[0]];
-      if (patchNamespacedProperty) patchEntry = patchNamespacedProperty;
-      // TODO(iridian, 2021-03): Add support and validation for custom chronicle namespaces
+function _processProperties (stack, mutableResource, propertiesDelta, isRemoval) {
+  for (const [name, deltaValue] of Object.entries(propertiesDelta)) {
+    let patcher = (isRemoval ? _nodeTermRemovers : _nodeTermUpserters)[name];
+    let expandedName = name;
+    if (patcher === undefined) {
+      const colonIndex = name.indexOf(":");
+      if (colonIndex !== -1) {
+        expandedName = [name.slice(0, colonIndex), name.slice(colonIndex + 1)];
+        patcher = (isRemoval ? _namespaceTermRemovers : _namespaceTermUpserters)[expandedName[0]];
+        // TODO(iridian, 2021-03): Add support and validation for custom chronicle namespaces
+      }
+      if (patcher === undefined) {
+        patcher = isRemoval ? _removeGenericProperty : _upsertGenericProperty;
+      }
+    }
+    if (patcher) {
+      mutableResource[name] =
+          patcher(stack, mutableResource[name], deltaValue, expandedName, mutableResource);
     }
   }
-  return patchEntry.call(this, oldValue, newValue, actualName, stateNode, patchKey, patchNode);
 }
 
-function _patchGenericProperty (target, patch) {
-  const id = (patch != null) && patch["@id"];
+function _upsertGenericProperty (stack, currentValue, deltaValue) {
+  const id = (deltaValue != null) && deltaValue["@id"];
   if (id) {
     const targetRootPlot = _rootOriginIdFromRelativeId(
-        this.mutableRootResources, this.basePlot, id).split("/");
-    return {
-      "@id": _originIdFromRootPlot(this.originPlot, targetRootPlot, id[0] === "/"),
-    };
+        stack.mutableRootResources, stack.basePlot, id).split("/");
+    const originRelativeId = _originIdFromRootPlot(stack.originPlot, targetRootPlot, id[0] === "/");
+    return { "@id": originRelativeId };
   }
-  return patch;
+  return deltaValue;
 }
 
-function _patchRejectForbiddenDirectManipulation (target, patch, key) {
-  throw new Error(`Cannot apply a patch to term "${key}" directly ${
-      ""}(only via its linked/coupled properties)`);
-}
-
-function _patchSubRemoval (target, patch, targetKey, parentTarget) {
-  throw new Error("subremovals not implemented");
+function _removeGenericProperty () {
+  throw new Error("Generic term removal not implemented");
 }
 
 function _createStandardTermPatcher (term, {
@@ -254,33 +253,33 @@ function _createStandardTermPatcher (term, {
   if (isSingular) {
     return patchSingular;
   }
-  return function _patchMultiEntry (
-      target, patch, targetKey, parentTarget, patchKey, parentPatch) {
-    for (const patchEntry of patch) {
-      patchSingular(target, patchEntry, targetKey, parentTarget, patchKey, parentPatch);
+  return function _patchMultiEntry (stack, currentValue, deltaValue, targetKey, mutableParent) {
+    for (const deltaEntry of deltaValue) {
+      patchSingular(stack, currentValue, deltaEntry, targetKey, mutableParent);
     }
   };
 
-  function _patchLiteralEntry (target, patchEntry, targetKey, parentTarget) {
-    if ((patchEntry != null) && patchEntry["@id"]) {
+  function _patchLiteralEntry (stack, currentValue, deltaEntry) {
+    if ((deltaEntry != null) && deltaEntry["@id"]) {
       throw new Error(`Cannot assign an id to non-id term "${term}"`);
     }
-    return patchEntry;
+    return deltaEntry;
   }
 
-  function _patchIdEntry (target, patchEntry, targetKey, parentTarget) {
+  function _patchIdEntry (stack, currentValue, deltaEntry, targetKey, mutableParent) {
     const remoteRootPlot = _rootOriginIdFromRelativeId(
-        this.mutableRootResources, this.basePlot, patchEntry).split("/");
-    const remoteId = _originIdFromRootPlot(this.originPlot, remoteRootPlot, patchEntry[0] === "/");
+        stack.mutableRootResources, stack.basePlot, deltaEntry).split("/");
+    let remoteId = _originIdFromRootPlot(stack.originPlot, remoteRootPlot, deltaEntry[0] === "/");
     if (aliases) {
       for (const alias of aliases) {
-        if (isSingular) parentTarget[alias] = remoteId;
+        if (isSingular) mutableParent[alias] = remoteId;
         else throw new Error("multi-alias not implemented");
       }
     }
     if (coupledTerms || linkedTerms) {
-      const { mutableResource } = _mutateDeepSubResource(this.mutableRootResources, remoteRootPlot);
-      const reverseSelfId = _originIdFromRootPlot(remoteRootPlot, this.originPlot);
+      const { mutableResource } =
+          _mutateDeepSubResource(stack.mutableRootResources, remoteRootPlot);
+      const reverseSelfId = _originIdFromRootPlot(remoteRootPlot, stack.originPlot);
       for (const reverseTerm of (coupledTerms || [])) {
         _addContainerEntry(mutableResource, reverseTerm, reverseSelfId);
       }
@@ -292,10 +291,10 @@ function _createStandardTermPatcher (term, {
   }
 }
 
-const _namespacePatchers = {
-  V (target, patch, [, suffix]) {
+const _namespaceTermUpserters = {
+  V (stack, currentValue, deltaValue, [, suffix]) {
     if (!V.vocabulary[suffix]) throw new Error(`Invalid V namespace property "${suffix}"`);
-    return undefined;
+    return deltaValue;
   },
 };
 
@@ -383,7 +382,7 @@ function _rootOriginIdFromLogicalPlot (
       /*
       const currentLogicalOwnerId = logicalPlot.slice(0, -1).join("/");
       const patchOwnerLogicalId = _joinPlot(this.basePlot,
-          _getOwnerValue(Array.isArray(patchEntry) ? patchEntry[0] : patchEntry));
+          _getOwnerValue(Array.isArray(resourceDelta) ? resourceDelta[0] : resourceDelta));
       isOwnerGlobal = (currentLogicalOwnerId === patchOwnerLogicalId);
       console.log("isOwnerGlobal of local:", logicalStep, i, logicalSteps, isOwnerGlobal,
           currentLogicalOwnerId, patchOwnerLogicalId);

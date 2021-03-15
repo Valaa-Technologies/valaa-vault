@@ -337,12 +337,12 @@ function _joinPlot (basePlot, plotString, noDotsName) {
   const ret = isAbsolute ? relativePlot.slice(1) : basePlot.concat(relativePlot);
   for (let i = 0; i < ret.length;) {
     const step = ret[i];
-    if ((step[i] !== ".") && (step[i] !== "..")) {
+    if ((step !== ".") && (step !== "..")) {
       ++i;
     } else if (noDotsName || isAbsolute) {
       throw new Error(`Invalid local id "${
           plotString}": ${noDotsName || "absolute vplot"} cannot contain "." or ".."`);
-    } else if (ret[i] === ".") {
+    } else if (step === ".") {
       ret.splice(i, 1);
     } else if (i === 0) {
       throw new Error(`Invalid local id "${plotString}": cannot move up from root`);

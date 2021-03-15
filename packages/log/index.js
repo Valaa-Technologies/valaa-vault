@@ -50,6 +50,11 @@ const _nodeTermUpserters = {
   "-in": _patchRejectForbiddenDirectManipulation,
 };
 
+const _nodeTermRemovers = {
+  "@context": null,
+  "&+": null,
+  "&-": null,
+};
 
 function _patchRejectForbiddenDirectManipulation (stack, target, delta, key) {
   throw new Error(`Cannot apply a patch to term "${key}" directly ${
@@ -64,19 +69,30 @@ for (const [term, expansion] of Object.entries(baseContext)) {
 }
 
 for (const [term, expansion] of Object.entries(baseContext)) {
-  if (term[0] === "@" || (_nodeTermUpserters[term] !== undefined)) continue;
+  if (term[0] === "@") continue;
   const id = expansion["@id"];
   if (!id) continue;
   const definition = _getDefinitionOf(id);
   const aliases = [id].concat(_recurseSubProperties(definition) || []);
   const coupledTerms = _getReverseTermsOf(definition["VState:coupledToField"]);
   const linkedTerms = _getReverseTermsOf(definition["VState:linkedToField"]);
-  _nodeTermUpserters[term] = _createStandardTermPatcher(term, {
-    expansion, definition,
-    isId: expansion["@type"] === "@id",
-    isSingular: expansion["@container"] === undefined,
-    aliases, coupledTerms, linkedTerms,
-  });
+  if (_nodeTermUpserters[term] === undefined) {
+    _nodeTermUpserters[term] = _createStandardTermPatcher(term, {
+      expansion, definition,
+      isId: expansion["@type"] === "@id",
+      isSingular: expansion["@container"] === undefined,
+      aliases, coupledTerms, linkedTerms,
+    });
+  }
+  if (_nodeTermRemovers[term] === undefined) {
+    _nodeTermRemovers[term] = _createStandardTermPatcher(term, {
+      expansion, definition,
+      isId: expansion["@type"] === "@id",
+      isSingular: expansion["@container"] === undefined,
+      isRemover: true,
+      aliases, coupledTerms, linkedTerms,
+    });
+  }
 }
 
 function _getDefinitionOf (id) {
@@ -247,9 +263,10 @@ function _removeGenericProperty () {
 }
 
 function _createStandardTermPatcher (term, {
-  expansion, definition, isId, isSingular, aliases, coupledTerms, linkedTerms,
+  expansion, definition, isId, isSingular, isRemover, aliases, coupledTerms, linkedTerms,
 }) {
   const patchSingular = isId ? _patchIdEntry : _patchLiteralEntry;
+  const updateContainerEntry = isRemover ? _removeContainerEntry : _addContainerEntry;
   if (isSingular) {
     return patchSingular;
   }
@@ -270,6 +287,23 @@ function _createStandardTermPatcher (term, {
     const remoteRootPlot = _rootOriginIdFromRelativeId(
         stack.mutableRootResources, stack.basePlot, deltaEntry).split("/");
     let remoteId = _originIdFromRootPlot(stack.originPlot, remoteRootPlot, deltaEntry[0] === "/");
+    if (isRemover) {
+      if (!isSingular) {
+        const afterSuccessfulRemoval = _removeContainerEntry(mutableParent, targetKey, remoteId);
+        const removals = _mutateStateObject(mutableParent["&-"] || null, "&-", mutableParent);
+        _addContainerEntry(removals, targetKey, remoteId);
+        return afterSuccessfulRemoval || currentValue; // Do not remove couplings
+      }
+      if (remoteId === undefined) {
+        return null;
+      }
+      if (remoteId !== currentValue) {
+        throw new Error(`Mismatch between current value "${currentValue}" and removed value "${
+          remoteId}"`);
+      } else {
+        remoteId = undefined;
+      }
+    }
     if (aliases) {
       for (const alias of aliases) {
         if (isSingular) mutableParent[alias] = remoteId;
@@ -281,10 +315,10 @@ function _createStandardTermPatcher (term, {
           _mutateDeepSubResource(stack.mutableRootResources, remoteRootPlot);
       const reverseSelfId = _originIdFromRootPlot(remoteRootPlot, stack.originPlot);
       for (const reverseTerm of (coupledTerms || [])) {
-        _addContainerEntry(mutableResource, reverseTerm, reverseSelfId);
+        updateContainerEntry(mutableResource, reverseTerm, reverseSelfId);
       }
       for (const reverseTerm of (linkedTerms || [])) {
-        _addContainerEntry(mutableResource, reverseTerm, reverseSelfId);
+        updateContainerEntry(mutableResource, reverseTerm, reverseSelfId);
       }
     }
     return remoteId;
@@ -297,6 +331,18 @@ const _namespaceTermUpserters = {
     return deltaValue;
   },
 };
+
+const _namespaceTermRemovers = {
+  V (stack, currentValue, deletedValue, [, suffix]) {
+    if (!V.vocabulary[suffix]) throw new Error(`Invalid V namespace property "${suffix}"`);
+    if (currentValue !== deletedValue) {
+      throw new Error(`Cannot remove V namespace property "${
+          suffix}": existing value differs from expected delete value`);
+    }
+    return undefined;
+  },
+};
+
 
 /*
  #    #   #####     #    #
@@ -461,4 +507,13 @@ function _mutateStateObject (maybeObject, keyInParent, parent) {
 function _addContainerEntry (mutableResource, containerName, value) {
   const container = mutableResource[containerName] || (mutableResource[containerName] = []);
   if (!container.includes(value)) container.push(value);
+}
+
+function _removeContainerEntry (mutableResource, containerName, value) {
+  const container = mutableResource[containerName];
+  if (!container) return undefined;
+  const index = container.indexOf(value);
+  if (index === -1) return undefined;
+  container.splice(index, 1);
+  return container;
 }

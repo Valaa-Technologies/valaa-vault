@@ -1,6 +1,6 @@
 const baseContextText = `{
   "^": "urn:valos:",
-  "@base": "urn:valos:chronicle:",
+  "@base": "urn:valos:chronicle:0/",
   "@vocab": "vplot:'",
 
   "V": "https://valospace.org/0#",
@@ -107,11 +107,16 @@ function _flattenToJSON (object) {
   if (typeof object !== "object" || (object == null)) return object;
   if (Array.isArray(object)) return object.map(_flattenToJSON);
   const ret = {};
+  let removals;
   // eslint-disable-next-line guard-for-in
   for (const key in object) {
     const value = object[key];
     if (typeof value === "function") continue;
-    ret[key] = _flattenToJSON(value);
+    if (value !== undefined) {
+      ret[key] = _flattenToJSON(value);
+    } else if (!(object["&-"] || {})[key]) {
+      (removals || (removals = ret["&-"] = {}))[key] = null;
+    }
   }
   const subs = ret["&+"];
   const context = ret["@context"];

@@ -463,8 +463,8 @@ view container properties.
 {
   "@context": [{}],
   "&+": {
-    "9/9": { "&-": { "&+": ["9/9/2"], "*E": ["9/9/2"] } },
     "9/4": { "&-": { ".tgt": "9/9/2" } },
+    "9/9": { "&-": { "&+": ["9/9/2"], "*E": ["9/9/2"] } },
   },
 }))),
         "toMatchObject",
@@ -478,7 +478,7 @@ view container properties.
     "5": "valaa-test:?id=(~raw'extl!)#",
     "6": "~u4:11111111-2255-7744-22cc-eeeeeeeeeeee",
     "7": "~u4:22222222-2255-7744-22cc-eeeeeeeeeeee",
-    "8": "~u4:dd333399-9999-6666-0000-777700000000",
+    "8": "~u4:d336d336-9999-6666-0000-777700000000",
     "9": "~u4:77777777-1111-eeee-3333-555555555555"
   }],
   "&+": {
@@ -487,53 +487,53 @@ view container properties.
       "*E": ["1", "2", "6", "7", "9"]
     },
     "1": { ".E*": "0", ".n": "older",
-      "*R": ["3", "4"],
-      "-out": ["3"], "-in": ["4"], "-hasI": ["6"],
+      "-out": ["3"], "-in": ["4"],
       "toOutside": { "@id": "5" }, "absolutelyParent": { "@id": "/0" }
     },
     "2": { ".E*": "0", ".n": "unger",
-      "-out": ["4"], "-in": ["3"],
+      "*R": ["3", "4"],
+      "-out": ["4"], "-in": ["3"], "-hasI": ["6"],
       "toOlder": { "@id": "1" }, "absolutelyOlder": { "@id": "/1" }
     },
-    "3": { ".src*": "1", ".n": "SIBLING", ".tgt": "2", "*E": ["8"] },
-    "4": { ".tgt*": "1", ".n": "SIBLING", ".src": "2" },
-    "6": [{ ".E*": "0", ".n": "olderInstance", ".iOf": "1", "-hasI": ["7"] }, {
+    "3": { ".tgt*": "2", ".n": "SIBLING", ".src": "1", "*E": ["8"] },
+    "4": { ".src*": "2", ".n": "SIBLING", ".tgt": "1" },
+    "6": [{ ".E*": "0", ".n": "ungerInstance",
+      ".iOf": "2", "-hasI": ["7"]
+    }, {
       "@context": { "@base": "6/" },
       "&+": {
         "3": {
-          "instance": { "@id": "6" },
+          "instance": { "@id": "../6" },
           "absoluteInstance": { "@id": "/6" },
           "deepProto": { "@id": "../8" },
           "absoluteDeepProto": { "@id": "/8" }
         },
-        "8": { ".n": "deeplyOwnedInstance" }
+        "8": { ".n": "deeplyOwnedGhost" }
       }
     }],
-    "7": [{ ".E*": "0", ".n": "olderInstanceInstance", ".iOf": "6" }, {
+    "7": [{ ".E*": "0", ".n": "ungerInstanceInstance",
+      ".iOf": "6"
+    }, {
       "@context": { "@base": "7/" },
       "&+": {
-        "3": { "instanceInstance": { "@id": "7" } },
-        "8": { ".n": "deeplyOwnedInstanceInstance" }
+        "3": { "instanceInstance": { "@id": "../7" } },
+        "8": { ".n": "deeplyOwnedGhostGhost" }
       }
     }],
     "8": { ".E*": "3", ".n": "deeplyOwned" },
-    "9": [{ ".E*": "0", ".iOf": "0", ".n": "inceptor" }, {
+    "9": [{ ".E*": "0", ".n": "inceptor", ".iOf": "0" }, {
       "@context": { "@base": "9/" },
       "&+": {
         "1": { ".n": "olderGhost" },
         "2": { ".n": "ungerGhost" },
         "3": { ".n": "toNephewOldceptGhost", ".tgt": "9/1" },
         "4": { ".n": "toNephewUngceptGhost" },
-        "9": [{ ".n": "firstInception", "&-": { "*E": ["9/2"] } }, {
+        "9": [{ ".n": "firstInception",
+          "&-": { "*E": ["9/2"] }
+        }, {
           "@context": { "@base": "9/" },
           "&+": {
             "1": { ".n": "oldceptGhost", "-in": ["../3"] }
-          }
-        }],
-        "6": [{ ".n": "oldceptInstance" }, {
-          "@context": { "@base": "6/" },
-          "&+": {
-            "3": { ".n": "SUB_SIBLING", ".tgt": "2" },
           }
         }]
       }

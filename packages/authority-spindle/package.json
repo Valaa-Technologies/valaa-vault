@@ -1,0 +1,27 @@
+{
+  "name": "@valos/authority-spindle",
+  "version": "0.37.0-prerelease.0",
+  "valos": {
+    "type": "spindle",
+    "domain": "@valos/kernel"
+  },
+  "description": "ValOS authority web route projectors spindle",
+  "author": "Valaa Technologies Ltd",
+  "license": "MIT",
+  "repository": "https://github.com/valaatech/kernel",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "@valos/tools": ">=0.37.0-prerelease.0",
+    "@valos/type-spindle": ">=0.37.0-prerelease.0",
+    "@valos/type-toolset": ">=0.37.0-prerelease.0"
+  },
+  "bin": {
+    "_vlm__select__toolsets__type_worker_-valos_authority-spindle": "valma/select_toolsets_type_worker__authority-spindle.js",
+    "_vlm__configure__toolsets__type_worker_-valos_authority-spindle": "valma/configure_toolsets_type_worker__authority-spindle.js",
+    "_vlm__status__toolsets__type_worker_-valos_authority-spindle": "valma/status_toolsets_type_worker__authority-spindle.js"
+  }
+}

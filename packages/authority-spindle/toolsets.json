@@ -1,0 +1,13 @@
+{
+  "@valos/type-spindle": {
+    "inUse": "always",
+    "tools": {
+      "copy-template-files": {
+        "inUse": true
+      }
+    }
+  },
+  "@valos/type-toolset": {
+    "inUse": true
+  }
+}

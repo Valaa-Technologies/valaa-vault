@@ -4,13 +4,12 @@ const valosheath = require("~/gateway-api/valosheath").default;
 export default valosheath.exportSpindle({
   name: packageJSON.name,
 
-  ContentAPI: undefined,
   schemeModules: [],
   authorityConfigs: [],
   mediaDecoders: [],
 
-  attachSpawn (gateway, revelation) {
-    return Object.assign(Object.create(this), { gateway, revelation });
+  attachSpawn (gateway, spindleRevelation) {
+    return Object.assign(Object.create(this), { gateway, revelation: spindleRevelation });
   },
 
   onGatewayInitialized (/* gateway */) {

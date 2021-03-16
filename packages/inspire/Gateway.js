@@ -779,6 +779,10 @@ export default class Gateway extends FabricEventTarget {
 
   _attachedSpindles = {};
 
+  getSpindles () {
+    return Object.values(this._attachedSpindles);
+  }
+
   getSpindle (name) {
     const ret = this._attachedSpindles[name];
     if (!ret) throw new Error(`No spindle found with name "${name}"`);

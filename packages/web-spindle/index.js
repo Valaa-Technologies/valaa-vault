@@ -14,10 +14,26 @@ export default valosheath.exportSpindle({
     if (!server) throw new Error(`${this.name} revelation server section missing`);
     if (!prefixes) throw new Error(`${this.name} revelation prefixes section missing`);
     this._prefixRouters = {};
+    const allProjectors = { ...projectors };
     const plog = gateway.opLog(1, "web-spindle",
         "Creating web-spindle", { server, prefixes });
+
+    gateway.getSpindles()
+        .filter(spindle => spindle["@valos/web-spindle"])
+        .forEach(({ name, "@valos/web-spindle": { projectors: extensionProjectors } }) => {
+          plog && plog.opEvent("extension.projectors", `Adding projectors from spindle "${name}"`);
+          for (const [projectorName, projector] of Object.entries(extensionProjectors)) {
+            const qualifiedName = `${name}:${projectorName}`;
+            if (allProjectors[qualifiedName]) {
+              throw new Error(`Projector "${qualifiedName
+                  }" already exists (while adding projectors from extension spindle "${name}")`);
+            }
+            allProjectors[qualifiedName] = projector;
+          }
+        });
+
     this._service = new MapperService(
-        gateway, { identity: valosheath.identity, ...server }, projectors);
+        gateway, { identity: valosheath.identity, ...server }, allProjectors);
     const rplog1 = this._service.opLog(1, plog, "prefixes",
         "Adding routers for prefixes", prefixes);
     return Promise.all(Object.entries(prefixes).map(async ([prefix, prefixConfig]) =>

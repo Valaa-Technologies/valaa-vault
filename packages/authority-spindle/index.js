@@ -1,3 +1,5 @@
+import * as projectors from "./projectors";
+
 const packageJSON = require("./package");
 const valosheath = require("~/gateway-api/valosheath").default;
 
@@ -8,6 +10,10 @@ export default valosheath.exportSpindle({
   schemeModules: [],
   authorityConfigs: [],
   mediaDecoders: [],
+
+  "@valos/web-spindle": {
+    projectors,
+  },
 
   attachSpawn (gateway, revelation) {
     return Object.assign(Object.create(this), { gateway, revelation });

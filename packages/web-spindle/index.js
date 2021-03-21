@@ -18,19 +18,19 @@ export default valosheath.exportSpindle({
     const plog = gateway.opLog(1, "web-spindle",
         "Creating web-spindle", { server, prefixes });
 
-    gateway.getSpindles()
-        .filter(spindle => spindle["@valos/web-spindle"])
-        .forEach(({ name, "@valos/web-spindle": { projectors: extensionProjectors } }) => {
-          plog && plog.opEvent("extension.projectors", `Adding projectors from spindle "${name}"`);
-          for (const [projectorName, projector] of Object.entries(extensionProjectors)) {
-            const qualifiedName = `${name}:${projectorName}`;
-            if (allProjectors[qualifiedName]) {
-              throw new Error(`Projector "${qualifiedName
-                  }" already exists (while adding projectors from extension spindle "${name}")`);
-            }
-            allProjectors[qualifiedName] = projector;
-          }
-        });
+    const extensions = gateway.getSpindles()
+        .filter(spindle => (spindle["@valos/web-spindle"] || {}).getProjectors);
+    for (const { name, "@valos/web-spindle": extender } of extensions) {
+      plog && plog.opEvent("extension.projectors", `Adding projectors from spindle "${name}"`);
+      for (const [projectorName, projector] of Object.entries(extender.getProjectors())) {
+        const qualifiedName = `${name}:${projectorName}`;
+        if (allProjectors[qualifiedName]) {
+          throw new Error(`Projector "${qualifiedName
+              }" already exists (while adding projectors from extension spindle "${name}")`);
+        }
+        allProjectors[qualifiedName] = projector;
+      }
+    }
 
     this._service = new MapperService(
         gateway, { identity: valosheath.identity, ...server }, allProjectors);

@@ -20,9 +20,9 @@ export default class ValoscriptTranspiler extends FabricEventTarget {
 
   constructor (parent: FabricEventTarget, language: Language, acornParseOptions: Object) {
     super(parent, 1, language.name);
-    invariantifyObject(language, "ValoscriptTranspiler.language", { instanceOf: Language });
+    invariantifyObject(language, "ValoscriptTranspiler.language", { /* instanceof: Language */ });
     invariantifyObject(acornParseOptions.VALK, "ValoscriptTranspiler.language",
-        { instanceOf: Kuery });
+        { instanceof: Kuery });
     this._VALK = acornParseOptions.VALK;
     this.language = language;
     this.acornParseOptions = { ...language.acornParseOptions, ...acornParseOptions };

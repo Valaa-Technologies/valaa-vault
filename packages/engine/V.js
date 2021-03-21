@@ -38,7 +38,8 @@ function _importValosheathTypeProperties (targetPrefix, types) {
     const [prefix, localPart, qualifiedName] = qualifiedNames;
     const isSymbolProperty = !!prefix;
     if (isSymbolProperty && (prefix !== targetPrefix)) {
-      console.debug(`Invalid valosheath prefix '${prefix}' with symbol ${String(name)}`);
+      // console.debug(`Invalid valosheath prefix '${prefix}' with symbol ${String(name)
+      //     }, "${targetPrefix}" expected`);
       return;
     }
     const localName = qualifiedName || name;

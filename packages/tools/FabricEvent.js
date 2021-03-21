@@ -260,7 +260,7 @@ export class FabricEventTarget {
     }
     if (error.hasOwnProperty("_frameStackError")) wrapper.stack = error._frameStackError.stack;
     wrapper.detailAdjustment = adjustedDetailLevel - detailLevel;
-    const ret = wrapError(error, detailLevel, ...contexts);
+    const ret = wrapError(error, detailLevel, actualFunctionName, ...contexts);
     ret.functionName = actualFunctionName;
     ret.contextObject = this;
     return ret;

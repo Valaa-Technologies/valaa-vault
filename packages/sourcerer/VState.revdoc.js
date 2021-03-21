@@ -34,6 +34,20 @@ This document is part of the library workspace `, pkg("@valos/sourcerer"), `
 `JSON-LD is the primary state format. Some of this information is lost
 when it is expanded as triples.
 `,
+  },
+  "chapter#principles>3;General principles": {
+    "#0": [
+`General design principles.`, {
+  "bulleted#0": [
+[""],
+] }, `
+`],
+  },
+  "chapter#examples>6;Examples": {
+    "#0":
+`JSON-LD is the primary state format. Some of this information is lost
+when it is expanded as triples.
+`,
     "example#state_example>0;An example of state JSON-LD serialization": [
       jsonld(
 `[{
@@ -41,49 +55,57 @@ when it is expanded as triples.
     "$V": "https://valospace.org/0#",
     "@vocab": "urn:valos:.$.",
 
-    "/.S": { "@id": "$V:subject", "@type": "@id" },
+    "/.": { "@id": "$V:ownsProperty", "@type": "@id", "@container": "@index" },
+    "/+": { "@id": "$V:ownsEntity", "@type": "@id", "@container": "@index" },
+    "/~": { "@id": "$V:ownsMedia", "@type": "@id", "@container": "@index" },
+    "/-": { "@id": "$V:relations", "@type": "@id", "@container": "@list" },
+
     "/.P": { "@id": "$V:name", "@type": "@id" },
+
+    "/.S": { "@id": "$V:subject", "@type": "@id" },
     "/.O": { "@id": "$V:object" },
 
-    "/.": { "@id": "$V:properties", "@type": "@id", "@container": "@index" },
     "/.S.": { "@id": "$V:scope", "@type": "@id" },
     "/.O.": { "@id": "$V:value", "@type": "@id" },
 
-    "/+": { "@id": "$V:entities", "@type": "@id", "@container": "@index" },
-    "/.S+": { "@id": "$V:parent", "@type": "@id" },
-    "/.O+": { "@id": "$V:id", "@type": "@id" },
+    "/.S*": { "@id": "$V:parent", "@type": "@id" },
+    "/.O*": { "@id": "$V:id", "@type": "@id" },
 
-    "/~": { "@id": "$V:medias", "@type": "@id", "@container": "@index" },
     "/.S~": { "@id": "$V:folder", "@type": "@id" },
     "/.O~": { "@id": "$V:content", "@type": "@id" },
 
-    "/*": { "@id": "$V:relations", "@type": "@id", "@container": "@list" },
-    "/-out": { "@id": "$V:outRelations", "@type": "@id", "@container": "@list" },
-    "/*in": { "@id": "$V:inRelations", "@type": "@id", "@container": "@list" },
-    "/-out-": { "@id": "$V:pairedOutRelations", "@type": "@id", "@container": "@list" },
-    "/-in-": { "@id": "$V:pairedInRelations", "@type": "@id", "@container": "@list" },
-    "/-out--": { "@id": "$V:connectedOutRelations", "@type": "@id", "@container": "@list" },
-    "/-in--": { "@id": "$V:connectedInRelations", "@type": "@id", "@container": "@list" },
+    "/-out": { "@id": "$V:hasOutRelation", "@type": "@id", "@container": "@list" },
+    "/-in": { "@id": "$V:hasOutRelation", "@type": "@id", "@container": "@list" },
+    "/-out-": { "@id": "$V:linkedOutRelation", "@type": "@id", "@container": "@list" },
+    "/-in-": { "@id": "$V:linkedInRelation", "@type": "@id", "@container": "@list" },
+    "/-out--": { "@id": "$V:ownsOutRelation", "@type": "@id", "@container": "@list" },
+    "/-in--": { "@id": "$V:ownsInRelation", "@type": "@id", "@container": "@list" },
+
     "/.S-": { "@id": "$V:source", "@type": "@id" },
     "/.O-": { "@id": "$V:target", "@type": "@id" },
-    "/.S--": { "@id": "$V:pairedSource", "@type": "@id" },
-    "/.O--": { "@id": "$V:pairedTarget", "@type": "@id" },
-    "/.S---": { "@id": "$V:connectedSource", "@type": "@id" },
-    "/.O---": { "@id": "$V:connectedTarget", "@type": "@id" },
+    "/.S--": { "@id": "$V:linkedSource", "@type": "@id" },
+    "/.O--": { "@id": "$V:linkedTarget", "@type": "@id" },
+    "/.S---": { "@id": "$V:ownerSource", "@type": "@id" },
+    "/.O---": { "@id": "$V:ownerTarget", "@type": "@id" },
 
     "--$V": "https://valospace.org/removed-from/0#",
-    "--/.": { "@id": "--$V:properties", "@type": "@id" },
-    "--/+": { "@id": "--$V:entities", "@type": "@id" },
-    "--/~": { "@id": "--$V:medias", "@type": "@id" },
+    "--/.": { "@id": "--$V:ownsProperty", "@type": "@id" },
+    "--/+": { "@id": "--$V:ownsEntity", "@type": "@id" },
+    "--/~": { "@id": "--$V:ownsMedia", "@type": "@id" },
     "--/-": { "@id": "--$V:relations", "@type": "@id" },
-    "--/-out-": { "@id": "--$V:pairedOutRelations", "@type": "@id" },
-    "--/-in-": { "@id": "--$V:pairedInRelations", "@type": "@id" },
+
+    "--/-out": { "@id": "--$V:hasOutRelation", "@type": "@id", "@container": "@list" },
+    "--/-in": { "@id": "--$V:hasInRelation", "@type": "@id", "@container": "@list" },
+    "--/-out-": { "@id": "--$V:linkedOutRelation", "@type": "@id" },
+    "--/-in-": { "@id": "--$V:linkedInRelation", "@type": "@id" },
+    "--/-out--": { "@id": "--$V:ownsOutRelation", "@type": "@id", "@container": "@list" },
+    "--/-in--": { "@id": "--$V:ownsInRelation", "@type": "@id", "@container": "@list" },
 
     "$~u4": { "@id": "urn:valos:$~u4.", "@prefix": true },
     "$~plt": { "@id": "urn:valos:$~plt.", "@prefix": true },
 
-    "$VLog": "https://valospace.org/log/0#",
-    "/hasGlobal": { "@id": "$VLog:hasGlobal", "@container": "@type" },
+    "VLog": "https://valospace.org/log/0#",
+    "/hasGlobal": { "@id": "VLog:hasGlobal", "@container": "@type" },
   }, {
     "$pot": "https://oftrust/#",
     "$pot_hypertwin": "https://pot.hypertwin.valospace.org/#",
@@ -116,7 +138,7 @@ when it is expanded as triples.
       "/+": {
         "$pot_hypertwin:inLinks": {
           "@id": "^0-0:@",
-          "/*": [{
+          "/-": [{
             "@id": "^0-0:-in-$pot.ownerOf$.@.S--$.@$~plt.@.$pot$.@.O.$.aa592f56-1d82-4484-8360-ad9b82d00592@@@@@@@@@@",
             "/.S--": "^hyperlane:_$~plt.@.$pot$.@.O.$.aa592f56-1d82-4484-8360-ad9b82d00592@@@@@@"
             "/.P": "$pot.ownerOf",

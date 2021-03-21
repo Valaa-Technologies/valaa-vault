@@ -577,14 +577,19 @@ function _delayIfAnyObscured (mystery, operations) {
   if (!_isObscured(mystery) && (!Array.isArray(mystery) || !mystery.find(_isObscured))) {
     return undefined;
   }
+  let ret, isEvaluated;
   return _markDelayed(function _revealAnyDelayed () {
-    return thenChainEagerly(mystery, [
-      reveal,
-      function revealEntries (revealedMystery) {
-        return !Array.isArray(revealedMystery) || !revealedMystery.find(_isObscured)
-            ? revealedMystery
-            : mapEagerly(revealedMystery, reveal);
-      },
-    ].concat(operations));
+    if (!isEvaluated) {
+      ret = thenChainEagerly(mystery, [
+        reveal,
+        function revealEntries (revealedMystery) {
+          return !Array.isArray(revealedMystery) || !revealedMystery.find(_isObscured)
+              ? revealedMystery
+              : mapEagerly(revealedMystery, reveal);
+        },
+      ].concat(operations));
+      isEvaluated = true;
+    }
+    return ret;
   });
 }

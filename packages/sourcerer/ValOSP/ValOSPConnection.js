@@ -1,15 +1,15 @@
 // @flow
 
 import type { EventBase } from "~/raem";
-import { AuthorityConnection } from "~/sourcerer";
+import AuthorityConnection from "~/sourcerer/Authority/AuthorityConnection";
 import type {
-  ProclaimOptions, SourceryOptions, EventCallback, EventData, MediaInfo, NarrateOptions,
+  NarrateOptions, ProclaimOptions, SourceryOptions,
+  EventCallback, EventData, MediaInfo,
 } from "~/sourcerer";
 
-import { dumpObject, thenChainEagerly } from "~/tools";
+import type { FutureEventData } from "~/sourcerer/tools/event-version-0.3";
 
-type CommandResponse = { chronicleId: string, eventId: number, event: Object }
-type EventEnvelope = { chronicleId: string, eventId: number, event: EventData }
+import { dumpObject, thenChainEagerly } from "~/tools";
 
 export const proclaimFailureFlags = {
   unconnected: { isSchismatic: false, proceed: { when: "connected" } },

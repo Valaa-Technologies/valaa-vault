@@ -146,7 +146,7 @@ value.`,
       "rdfs:range": "valosField",
       "rdfs:comment":
 `This field requires the existence of a reverse triple with predicate
-equal to this field value.`,
+equal to the object of this property.`,
           },
     coupledField: {
       "@type": "VKernel:Property",

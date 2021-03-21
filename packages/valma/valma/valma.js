@@ -439,7 +439,7 @@ const _vlm = {
         error: (msg, ...rest_) => console.error(this.theme.error(msg), ...rest_),
         warn: (msg, ...rest_) => console.warn(this.theme.warning(msg), ...rest_),
         log: (msg, ...rest_) => console.log(msg, ...rest_),
-      });
+      }, this.getVerbosity());
     }
     return this;
   },

@@ -79,7 +79,7 @@ this document.
 valaa-test://example.com:123/dev?id=@$~raw.ab...@@#987b-72...8263?=coupling=relations&lens=ROOT_LENS
 
                                                    └─────┬──────┘  └──────────────┬────────────────┘
-                                                        nss                  q-component
+                                                        nss                urn-q-component
 └───┬────┘   └──────┬──────┘ └┬┘ └───────┬───────┘ └──────────────────────┬────────────────────────┘
   scheme        authority    path      query                           fragment
              └────────┬────────┘
@@ -131,37 +131,73 @@ everything but the fragment.
 
 ### 1.2. resource-id
 
-Resource id is the NSS part of an urn:valos URI. It globally uniquely
-identifies a *referenced resource*:
+resource-id is an NSS sub-part of an urn:valos:id URN scheme. It
+globally uniquely identifies a *referenced resource*:
 
-`resource-id        = primary-part [ "/" secondary-part ]`
+`resource-id        = [ secondary-part "!" ] primary-part`
 
-The first, non-optional *primary* part globally uniquely identifies a
-freely movable *primary* resource. If no secondary part exists this
-resource is also the referenced resource. If the secondary part exists
-it identifies a fixed sub-resource which is deterministic to the
-primary resource.
-The referenced resource is then this sub-resource.
+The first, non-optional *primary-id* part globally uniquely identifies
+an independent *primary resource*. If reference-path is not specified
+the primary resource is also the referenced resource of the whole
+resource-id. Otherwise the reference-path specifies a fixed semantic
+path from the primary resource to a dependent *sub-resource* which then
+is the referenced resource.
+
+```
+valos-resource-ref  = "urn:valos:id:" resource-ref
+resource-ref        = resource-id
+                      [ "?+" r-component ] [ "?=" q-component ]
+```
+
+resource-refs are a superset of resource-ids with additional
+resolver/query parameterization and possible reference aliasing.
+
+All resources are always associated with a single resource-id which is
+inherently canonical. This resource-id must always be locally available
+with any representation of the resource. resource-ref's which refer to
+the same resource are semantically not resource-id's even though they
+are syntactically indistinguishable.
 
 Two resource ids refer to the same resource iff their canonical string
 representations are lexically equivalent. Notably:
-1. both parts are case sensitive. If a part specification refers to a
-   case insensitive external naming system it must specify a canonical
-   representation.
+1. both primary-id and reference-path are case sensitive. If a part
+   specification refers to a case insensitive external naming system it
+   must specify a canonical representation.
    It is recommended that this representation is all-lowercase.
 2. no redundant encoding. If a part contains encoding schemes then any
    characters or tokens which can expressed without encoding must not
    be encoded.
+3. No resource-id reference aliasing. Some reference-step schemes are
+   used outside resource-id's and resource-ref's as well. Some of these
+   schemes are sufficiently powerful that a resource-ref which contains
+   a reference-step using such a scheme can refer to a resource with
+   a different canonical resource-id. In order to minimize issues from
+   aliasing ambiguity a reference-step scheme must clearly define its
+   different syntactic representations into one of three semantic
+   categories: canonical syntax, aliasing syntax and sucky syntax.
+   - A resource referenced using only canonical syntax must always
+   contain the same primary id and reference-path parts in their
+   resource id.
+   - A resource referenced using one or more aliasing syntax path parts
+   must never contain the aliasing path in its resource id.
+   - A resource reference using sucky syntax path parts can but is not
+   required to contain the sucky path as part of their canonical id.
+   Syntax requiring sucky path semantics should be avoided as
+   determining whether a resource-ref containing sucky parts is
+   canonical or not could require complex checks.
+   TODO(iridian, 2019-03): Come up with a better name for sucky paths.
+                           Or maybe outright forbid it.
 
-#### 1.2.1 primary-part - restricted naming, free ownership
+#### 1.2.1 primary-id - restricted naming, independent ownership
 
-The primary id part has a very restricted character set of `unreserved`
-as specified in the [URI specification](https://tools.ietf.org/html/rfc3986).
+The primary-id has a very restricted character set of `unreserved`
+(as per in the [URI specification](https://tools.ietf.org/html/rfc3986) ).
 
-`primary-part       = *( unreserved )`
+`primary-id         = *unreserved`
 
-The *primary* part must be globally unique.
-Note: uuid v4 is recommended for now, but eventually primary id
+This *primary-id* must be globally unique.
+
+Note: uuid v4 is allowed for now, but eventually primary id
 generation should tied to the deterministic event id chain. This in
 turn should be seeded by some ValOS authority.
 
@@ -174,37 +210,72 @@ encoding with `+` and `/` . For backwards compatibility they are
 permitted, but [considered equal to the base64url](https://tools.ietf.org/html/rfc7515#appendix-C)
 using `+` <-> `-`, `/` <-> `_` character mappings.
 
-### 1.2.1 secondary-part - lenient naming, restricted ownership
+### 1.2.1 reference-step - lenient naming, dependent ownership
 
-This section is OBSOLETE and needs to be update to new VPlot structure.
+A *reference-step* is a potentially qualified name which can be
+mapped into an URI. This URI defines the semantics on how a single or
+set of *target resources* is resolved from an *originating resource*.
 
-The *secondary* id part is a qualified name which can be expanded into
-an URI. This URI then defines how the referred resource is determined
-from the primary resource.
+Within a resource-id the reference-step parts are applied left-to-right
+with the primary-id denoting the originating resource of the leftmost
+reference-step. Each reference-steps inside a resource-id must always
+resolve into exactly one target resource which is then used as the
+originating resource of the reference-step to its right and so on.
+The target resource of the rightmost reference-step is the referenced
+resource of the whole resource-id itself.
 
-`secondary-part    = prefix *( pchar / "/" )`
-`prefix            = *( unreserved / pct-encoded / sub-delims / "@" ) ":"`
+```
+reference-step      = ( step-valos-prefix / step-owner-prefix ) ":" *( pchar )
+                    / step-global-uri
+step-valos-prefix   = 1( sub-delims / "-" / "." / "_" / "~" ) *( unreserved / sub-delims )
+step-owner-prefix   = 1ALPHA *( unreserved / sub-delims )
+step-global-uri-enc = *( unreserved / pct-encoded )
+```
 
-The expansion is done by replacing the prefix with a corresponding
-value. Currently the only allowed prefixes and their semantics is
-limited to the exclusive list of three entries:
+The semantics of a reference-step is defined based on whether it
+contains a step-valos-prefix, step-owner-prefix or step-global-uri and
+are specified for...
+- step-valos-prefix by @valos/vault specification (ie. currently below).
+- step-owner-prefix by the authority which owns the primary resource.
+- step-global-uri-enc by the author of the uri (which is pct-encoded).
 
-1. prefix `_` - instance-ghost ids
-  `urn:valos:$~raw.ba54@_$~raw.b7e4` reads as "inside the instanced resource
-  `ba54` the ghost of the regular resource `b7e4`".
-  The expansion of the prefix `@:` is `valos:urn:` itself.
-  This means nested ghost paths are allowed, like so:
-  `urn:valos:$~raw.f00b@_$~raw.ba54@_$~raw.b7e4` reads as "inside the
-  instance `f00b` the ghost of `urn:valos:$~raw.ba54@_$~raw.b7e4`.
-2. prefix `.` - property ids
-  `urn:valos:$~raw.f00b@.$.propName` - a directly owned Property
-  resource with a constant name `propName` and prototype which is
-  dynamically linked to the corresponding Property in the prototype of
-  `urn:valos:$~raw.f00b`,
-  like so: `${prototype("urn:valos:f00b")}@.$.propName`.
+Note: step-owner-prefix and step-global-uri are provisional
+placeholders and not further specified. Currently the reference-steps
+with fully specified semantics is limited to this exclusive list:
+
+1. prefix `=:` expands to `urn:valos:id:` - ghost ids
+  `urn:valos:id:ba54@:b7e4` reads as:
+  > ghost of `b7e4` inside resource `ba54`
+  Nested ghost paths are allowed, like so:
+  `urn:valos:id:f00b@~:ba54@~:b7e4` reads as:
+  > ghost of `urn:valos:id:ba54@~:b7e4` inside resource `f00b`
+2. prefix `$:` expands to `urn:valos:interface:`
+2. prefix `.:` expands to `urn:valos:owned:Property:` - property ids
+  `urn:valos:id:f00b@.:propName` - a directly owned Property resource
+   with a constant name `propName` and prototype which is dynamically
+   linked to the corresponding Property in the prototype of
+   `urn:valos:id:f00b`, like so:
+   `${prototype("urn:valos:id:f00b")}@.:propName`.
+3. prefix `*:` expands to `urn:valos:owned:Relation:` - property ids
+  `urn:valos:id:f00b@.:propName` - a directly owned Relation resource
+   with a constant name `propName` and prototype which is dynamically
+   linked to the corresponding Property in the prototype of
+   `urn:valos:id:f00b`, like so:
+   `${prototype("urn:valos:id:f00b")}@.:propName`.
+4. prefix `&:` expands to `urn:valos:group:`- virtual groups
+  permanently immaterial ghosts with nevertheless separate identities.
+  When used as prototype with instance-ghosts allows separate
+  instantiation of the same fundamental prototype in the same instance:
+  `urn:valos:f00b!$:1!@:b74e`
+  `urn:valos:f00b!$:2!@:b74e`
+  `urn:valos:f00b!$:textsalt!@:b74e`
+
+"!" / "$" / "&" / "'" / "(" / ")" / "*" / "+" / "," / ";" / "="
+
+
 
 Resources identified by these parts are tightly bound to the resource
-identified by the primary part (which must exist). They must be always
+identified by the primary id (which must exist). They must be always
 directly or indirectly owned by the primary resource.
 
 ### 1.3. VRL

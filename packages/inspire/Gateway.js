@@ -801,7 +801,7 @@ export default class Gateway extends FabricEventTarget {
   async attachSpindles (spindleModules_: (Promise<Object> | Object)[],
       options: { skipIfAlreadyAttached: boolean } = {}, parentPlog) {
     const plog1 = this.opLog(1, parentPlog, "spindles",
-        `Obtaining ${spindleModules_.length} spindle modules`);
+        `Obtaining ${(spindleModules_ || []).length} spindle modules`);
     const spindleModules = await Promise.all(spindleModules_ || []);
     const newSpindleLookup = {};
     const spindleNames = [];

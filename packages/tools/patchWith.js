@@ -258,13 +258,17 @@ function _patch (target, patch, targetKey, parentTarget, patchKey, parentPatch, 
 
 function _formulateError (stack, error,
     name, target, patch, targetKey, parentTarget, patchKey, parentPatch) {
-  name.message = `patchWith.${name.message}(keyPath: [${(stack.keyPath || []).join("][")}])`;
+  name.message = `patchWith.${name.message}(keyPath: ${_keyPathString(stack.keyPath)})`;
   return wrapError(error, name,
       "\n\ttarget:", ...dumpObject(targetKey), ":", ...dumpObject(target),
       "\n\tpatch:", ...dumpObject(patchKey), ":", ...dumpObject(patch),
       "\n\tparentTarget:", ...dumpObject(parentTarget),
       "\n\tparentPatch:", ...dumpObject(parentPatch),
   );
+}
+
+function _keyPathString (keyPath) {
+  return `[${(keyPath || []).map(step => String(step)).join("][")}]`;
 }
 
 function _obtainPatcher (stack, patcherName) {
@@ -430,15 +434,13 @@ function _applySpreader (target, patch, targetKey, parentTarget, patchKey, paren
   if (typeof spread !== "function") spread = this.spread = _patchSpread;
   const spreadee = spread.call(
       this, spreaderValue, target, patch, targetKey, parentTarget, patchKey, parentPatch);
-  let ret;
   if (spreadee === undefined) {
     // spread callback has handled the whole remaining process and
     // has possibly replaced 'target' in its parentTarget[targetKey]
     // update ret to refer to this new object accordingly.
-    ret = parentTarget && parentTarget[targetKey];
-    return ret;
+    return parentTarget && parentTarget[targetKey];
   }
-  ret = this.patch(ret, spreadee, targetKey, parentTarget, patchKey, parentPatch);
+  let ret = this.patch(target, spreadee, targetKey, parentTarget, patchKey, parentPatch);
   if (Object.keys(patch).length > 1) {
     const src = !this.preApplyPatch ? patch : { ...patch };
     if (this.preApplyPatch) delete src[this.spreaderKey];

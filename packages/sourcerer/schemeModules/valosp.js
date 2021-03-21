@@ -2,10 +2,12 @@
 
 import { EventBase } from "~/raem/events";
 
-import { Authority, AuthorityConnection, FUTURE_EVENT_VERSION } from "~/sourcerer";
 import type { AuthorityConfig, AuthorityOptions, Sourcerer } from "~/sourcerer";
 import { Proclamation, ProclaimOptions, ProclaimEventResult, MediaInfo, NarrateOptions }
     from "~/sourcerer/api/types";
+
+import Authority, { AuthorityConnection } from "~/sourcerer/Authority";
+import { EVENT_VERSION as FUTURE_EVENT_VERSION } from "~/sourcerer/tools/event-version-0.3";
 
 import ValOSPAuthority from "~/sourcerer/ValOSP/ValOSPAuthority";
 

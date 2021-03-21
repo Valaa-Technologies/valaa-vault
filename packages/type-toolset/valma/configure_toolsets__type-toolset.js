@@ -31,7 +31,7 @@ exports.builder = (yargs) => {
       prependChoices: [
         {
           name: "<none>", value: undefined,
-          description: `<allow be '${name}' selectable by workspaces of all domains>`,
+          description: `<allow "${name}" to be selectable by workspaces of all domains>`,
           confirm: false,
         },
         {
@@ -47,7 +47,7 @@ exports.builder = (yargs) => {
       prependChoices: [
         {
           name: "<none>", value: undefined,
-          description: `<allow be '${name}' selectable by all workspace types>`,
+          description: `<allow "${name}" to be selectable by all workspace types>`,
           confirm: false,
         },
         {

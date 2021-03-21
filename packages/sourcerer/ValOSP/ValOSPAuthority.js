@@ -1,6 +1,6 @@
 // @flow
 
-import { Authority } from "~/sourcerer";
+import Authority from "~/sourcerer/Authority";
 import type { Sourcerer } from "~/sourcerer/api/Sourcerer";
 
 import { thenChainEagerly } from "~/tools";

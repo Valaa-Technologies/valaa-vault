@@ -1,13 +1,16 @@
+Object.defineProperty(exports, "__esModule", { value: true });
+
 const global = require("./getGlobal").default();
 
 const inBrowser = require("./inBrowser").default;
 const identity = require("./identity");
 
-export const standalone = {
+const standalone = {
   gateway: null,
 
   reveal (origin) { return this.require(origin); },
   require (module) {
+    if (this.gateway) return this.gateway.valosRequire(module);
     if (!inBrowser()) return require(module);
     throw new Error(`Cannot valos.require requested module "${
         module}": no valos.gateway found in browser context`);
@@ -54,6 +57,7 @@ export const standalone = {
   identity: { ...identity },
 };
 
+
 /**
  * The global ValOS namespace object is a shared by protected namespace
  * for cross-communication between ValOS fabric, gateway and valospace
@@ -64,4 +68,7 @@ export const standalone = {
  * deprecated, but discouraged).
  * It is available in valospace side as the global valos object.
  */
-export default (global.valos || (global.Valaa = global.valos = standalone));
+module.exports = {
+  standalone,
+  default: (global.valos || (global.Valaa = global.valos = standalone)),
+};

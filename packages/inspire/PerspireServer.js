@@ -78,16 +78,17 @@ export default class PerspireServer extends FabricEventTarget {
   }
 
   requireSpindles (newSpindles = []) {
-    newSpindles.filter(newSpindle => !this._spindles.includes(newSpindle)).forEach(newSpindle => {
+    for (const newSpindle of newSpindles) {
+      if (this._spindles.includes(newSpindle)) continue;
       try {
-        const ret = require(newSpindle);
-        this._spindles.push(ret);
-        return ret;
+        require(newSpindle);
+        this._spindles.push(newSpindle);
       } catch (error) {
-        throw this.wrapErrorEvent(error, 1,
-            new Error(`During PerspireServer.loadSpindle("${newSpindle}")`));
+        throw this.wrapErrorEvent(error, 0,
+            new Error(`During PerspireServer.requireSpindle("${newSpindle}")`),
+            `\n\trequire.resolve:`, require.resolve(newSpindle));
       }
-    });
+    }
   }
 
   _createJSDOM () {

@@ -6,8 +6,8 @@ module.exports = {
     "rdfs:comment":
 `The class of resources which contain attributes of an event which
 relate to its position in the chronicle event log. The contents of this
-aspect are ultimately finally provided by the authority but is
-typically provisionally provided by the gateway.`,
+aspect are ultimately determined by the authority but is typically
+provisionally provided by the gateway.`,
   },
 
   log: {
@@ -25,7 +25,7 @@ typically provisionally provided by the gateway.`,
     "rdfs:range": "xsd:integer",
     restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
     "rdfs:comment":
-`The 0-based index of the event in the event log.`,
+`The 0-based index of the event in the chronicle event log.`,
   },
 
   vplotHashV0: {

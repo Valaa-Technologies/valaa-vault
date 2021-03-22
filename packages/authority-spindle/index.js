@@ -18,10 +18,10 @@ module.exports = valosheath.exportSpindle({
   },
 
   onGatewayInitialized (/* gateway */) {
-    throw new Error(`${this.name}.onGatewayInitialized not implemented`);
+    // throw new Error(`${this.name}.prototype.onGatewayInitialized not implemented`);
   },
 
   onViewAttached (/* view, viewName */) {
-    throw new Error(`${this.name}.onViewAttached not implemented`);
+    // throw new Error(`${this.name}.prototype.onViewAttached not implemented`);
   },
 });

@@ -8,8 +8,8 @@ const { dumpObject, thenChainEagerly } = valosheath.require("@valos/tools");
 
 export default function createProjector (router: PrefixRouter, route: Route) {
   return {
-    requiredRules: ["routeRoot"],
-    valueAssertedRules: ["chroniclePlot", "startIndex", "endIndex"],
+    // requiredRules: ["routeRoot"],
+    // valueAssertedRules: ["chroniclePlot", "eventIndex"],
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this, route);
@@ -31,8 +31,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         "\n\trequest.body:", ...dumpObject(request.body),
         "\n\tresolvers:", ...dumpObject(this.runtime.ruleResolvers),
         "\n\tchroniclePlot:", ...dumpObject(scope.chroniclePlot),
-        "\n\tstartIndex:", ...dumpObject(scope.startIndex),
-        "\n\tendIndex:", ...dumpObject(scope.endIndex),
+        "\n\teventIndex:", ...dumpObject(scope.eventIndex),
       ]);
       // const {} = this.runtime.ruleResolvers;
 
@@ -45,16 +44,20 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       return thenChainEagerly(scope.connection.asSourceredConnection(), [
         connection => {
           // Add or validate body event index to equal scope.eventIndex
-          return connection.proclaimEvents(request.body);
+          return connection.narrateEventLog({
+            eventIdBegin: scope.eventIndex,
+            eventIdEnd: scope.eventIndex,
+            commands: false,
+          });
         },
         // () => valkOptions.discourse.releaseFabricator(),
-        eventResult => eventResult && eventResult.getTruthEvent(),
-        (truthEvent) => {
-          reply.code(201);
-          reply.send();
+        (sections) => {
+          // Flatten sections and pick correct event
+          reply.code(200);
+          reply.send(sections);
           router.infoEvent(2, () => [
             `${this.name}:`,
-            "\n\tresults:", ...dumpObject(truthEvent),
+            "\n\tsections:", ...dumpObject(sections),
           ]);
           return true;
         },

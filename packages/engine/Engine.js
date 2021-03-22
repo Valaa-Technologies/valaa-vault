@@ -206,6 +206,7 @@ export default class Engine extends Cog {
   }
 
   async activateResource (resourceURI: string) {
+    if (!resourceURI) return { reference: null, vResource: null };
     const vref = this.discourse.obtainReference(resourceURI);
     const connection = await this.discourse
         .sourcerChronicle(vref.getChronicleURI())

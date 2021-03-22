@@ -21,7 +21,10 @@ export default class PerspireView extends VDOMView {
 
   runInteractive () {
     const vFocus = this.getFocus();
-    if (!vFocus) throw new Error("view focus missing for interactive");
+    if (!vFocus) {
+      this.warnEvent(1, "Cannot launch interactive: view focus is falsy");
+      return { close () {} };
+    }
     const mutableScope = Object.create(vFocus.getValospaceScope());
     const plog1 = this.opLog(1, "interactive",
         "Opening job interactive", { focus: vFocus });
@@ -62,8 +65,10 @@ export default class PerspireView extends VDOMView {
 
   async _waitForConnectionsToActivate () {
     let pendingConnections;
-    while (true) { // eslint-disable-line no-constant-condition
-      pendingConnections = this._vFocus.getEngine().getSourcerer().getActivatingConnections();
+    const sourcerer = this._vFocus && this._vFocus.getEngine().getSourcerer();
+    if (!sourcerer) return;
+    while (true) {
+      pendingConnections = sourcerer.getActivatingConnections();
       const keys = Object.keys(pendingConnections);
       if (!keys.length) break;
       this.warnEvent(1, () => [
@@ -73,7 +78,7 @@ export default class PerspireView extends VDOMView {
     }
     this.warnEvent(1, () => [
       `attach(): all connections acquired:`,
-      ...Object.values(this._vFocus.getEngine().getSourcerer().getActiveConnections())
+      ...Object.values(sourcerer.getActiveConnections())
           .map(connection => `\n\t${connection.debugId()}`),
     ]);
   }

@@ -85,7 +85,7 @@ export default class Gateway extends FabricEventTarget {
 
   getRootDiscourse () { return this.discourse; }
   getRootConnection () { return this._rootConnection; }
-  getRootChronicleURI () { return this._rootConnection.getChronicleURI(); }
+  getRootChronicleURI () { return this._rootConnection && this._rootConnection.getChronicleURI(); }
   getRootFocusURI () { return this._rootFocusURI || this.getRootChronicleURI(); }
 
   callRevelation (Type: Function | any) {
@@ -904,6 +904,7 @@ export default class Gateway extends FabricEventTarget {
     let chronicles;
     try {
       const rootFocusURI = await reveal(prologue.root) || await reveal(prologue.rootFocusURI);
+      this._rootFocusURI = rootFocusURI;
       let rootChronicleURI = await reveal(prologue.rootChronicleURI);
       if (!rootChronicleURI && rootFocusURI) {
         rootChronicleURI = rootFocusURI.split("#")[0];
@@ -917,30 +918,45 @@ export default class Gateway extends FabricEventTarget {
             "\n\tthis is probably due to ?partition= query param; use ?chronicle= instead.");
         rootChronicleURI = naiveURI.createPartitionURI(prologue.rootPartitionURI);
       }
-      if (!rootChronicleURI) {
-        throw new Error("gateway.rootChronicleURI and gateway.rootFocusURI are missing");
-      }
       plog1 && plog1.opEvent("determine",
           `Determining prologues and the root chronicle <${rootChronicleURI}>`);
-      this._rootFocusURI = rootFocusURI;
       chronicles = await this._determinePrologueChronicles(prologue, rootChronicleURI);
       plog1 && plog1.opEvent("extraction",
           `Extracted ${chronicles.length} chronicles from the prologue`, {
             rootChronicleURI,
             prologueChronicleURIs: chronicles.map(({ chronicleURI }) => chronicleURI),
           });
+
       plog1 && plog1.opEvent("sourcery",
           `Sourcering ${chronicles.length} prologue and root chronicles`,
           { chronicles, rootChronicleURI });
       const connections = await Promise.all(chronicles.map(chronicleInfo =>
           this._sourcerPrologueChronicle(prologue, chronicleInfo, plog1)));
-      plog1 && plog1.opEvent("done",
+
+      plog1 && plog1.opEvent("connections",
           `Acquired active connections for all prologue chronicles:`,
           ...[].concat(...connections.map(connection =>
               [`\n\t${connection.getName()}:`, ...dumpObject(connection.getStatus())]))
       );
-      const rootConnection = connections.find(connection =>
-          (connection.getChronicleURI() === rootChronicleURI));
+
+      let rootConnection;
+      if (rootChronicleURI) {
+        rootConnection = connections.find(connection =>
+            (connection.getChronicleURI() === rootChronicleURI));
+        plog1 && plog1.opEvent("root",
+            "Using configured root chronicle:", rootChronicleURI);
+      } else if (connections.length) {
+        rootChronicleURI = connections[connections.length - 1].getChronicleURI();
+        plog1 && plog1.opEvent("root",
+            "Using last prologue chronicle as the root chronicle:", rootChronicleURI);
+      } else if (!inBrowser()) {
+        plog1 && plog1.opEvent("root", "Running in rootless mode:",
+            "no gateway.rootChornicleURI, gateway.rootFocusURI nor prologue chronicles specified");
+      } else {
+        throw new Error(`Cannot determine rootChronicleURI: ${
+            ""}no gateway.rootChronicleURI, gateway.rootFocusURI nor prologue chronicles defined`);
+      }
+
       return { connections, rootConnection };
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, new Error(`narratePrologue`),
@@ -965,10 +981,6 @@ export default class Gateway extends FabricEventTarget {
       }
       if (rootChronicleURI && !rootChronicleURISeen) {
         ret.push({ chronicleURI: rootChronicleURI, truthCount: 0, logs: { truthLog: [] } });
-      }
-      if (!ret.length) {
-        throw new Error(`Revelation prologue is missing an entry point${
-            ""} (last of the prologue.chronicleInfos or prologue.rootChronicleURI)`);
       }
       return ret;
     } catch (error) {

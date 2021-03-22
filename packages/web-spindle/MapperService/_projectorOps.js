@@ -87,6 +87,10 @@ export async function _preloadRuntimeResources (router: PrefixRouter, projector,
     vRouteRoot = runtime.scopeBase.routeRoot = runtime.resolveRouteRoot(
         router.getEngine(), runtime.scopeBase.serviceIndex, { scope: runtime.scopeBase });
     if (!(vRouteRoot instanceof Vrapper)) {
+      if (vRouteRoot == null) {
+        router.infoEvent(1, "Route root is nully: valospace capabilities disabled");
+        return;
+      }
       throw new Error(`Route root is not a resource for ${router._projectorName(projector)}`);
     }
     router.infoEvent(1, () => [`Preloading projector ${router._projectorName(projector)}`,

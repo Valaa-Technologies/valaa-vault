@@ -131,7 +131,9 @@ export default class VDOMView extends Cog {
     const ret = {
       focus: vFocus,
       lensProperty: [].concat(
-          focusRef.getQueryComponent().lens || lensProperty || ["ROOT_LENS", "LENS"]),
+          (focusRef && focusRef.getQueryComponent().lens)
+              || lensProperty
+              || ["ROOT_LENS", "LENS"]),
     };
     if (lens !== undefined) {
       ret.lens = lens.includes("://")
@@ -139,7 +141,7 @@ export default class VDOMView extends Cog {
           : lens;
     }
     this.warnEvent(1, () => [
-      `preAttach(): view '${vFocus.step("name")}' focus set:`, ret.focus.debugId(),
+      `preAttach(): view '${vFocus && vFocus.step("name")}' focus set:`, vFocus && vFocus.debugId(),
     ]);
     return ret;
   }

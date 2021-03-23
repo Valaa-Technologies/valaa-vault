@@ -13,14 +13,14 @@ export function _setupRoute (route, userConfig, globalRules) {
 }
 
 export function _prepareRoute (route, userConfig) {
-  const category = projectors[route.category];
-  if (!category) {
-    throw new Error(`No such category '${route.category}' for route: ${_routeName(route)}`);
+  const projector = projectors[route.projector];
+  if (!projector) {
+    throw new Error(`No such projector '${route.projector}' for route: ${_routeName(route)}`);
   }
-  const handler = category[route.method];
+  const handler = projector[route.method];
   if (!handler) {
-    throw new Error(`No such method '${route.method}' in category '${
-        route.category}' for route: ${_routeName(route)}`);
+    throw new Error(`No such method '${route.method}' in projector '${
+        route.projector}' for route: ${_routeName(route)}`);
   }
   const { requiredRules, valueAssertedRules, runtimeRules } = handler();
   if (!route.config) route.config = {};
@@ -59,12 +59,12 @@ export function _finalizeRoute (route, userConfig, globalRules) {
 
 function _assignRulesFrom (
     ruleSource: Object,
-    routeToExtract: { name: string, category: string, method: string, mappingName: string },
+    routeToExtract: { name: string, projector: string, method: string, mappingName: string },
     rules = {}) {
   if (!ruleSource) return rules;
   const {
     "&ofName": ofName,
-    "&ofCategory": ofCategory,
+    "&ofProjector": ofProjector,
     "&ofMethod": ofMethod,
     "&ofResource": ofResource,
     "&ofRelation": ofRelation,
@@ -74,8 +74,8 @@ function _assignRulesFrom (
   if ((ofName || {})[routeToExtract.name]) {
     _assignRulesFrom(ofName[routeToExtract.name], routeToExtract, rules);
   }
-  if ((ofCategory || {})[routeToExtract.category]) {
-    _assignRulesFrom(ofCategory[routeToExtract.category], routeToExtract, rules);
+  if ((ofProjector || {})[routeToExtract.projector]) {
+    _assignRulesFrom(ofProjector[routeToExtract.projector], routeToExtract, rules);
   }
   if ((ofMethod || {})[routeToExtract.method]) {
     _assignRulesFrom(ofMethod[routeToExtract.method], routeToExtract, rules);
@@ -92,7 +92,7 @@ function _assignRulesFrom (
 }
 
 export function _routeName (route) {
-  return `${route.category}: ${route.method} <${route.url}>`;
+  return `${route.projector}: ${route.method} <${route.url}>`;
 }
 
 const _unreservedWordListPattern = "^([a-zA-Z0-9\\-_.~/*$]*(\\,([a-zA-Z0-9\\-_.~/*$])*)*)?$";

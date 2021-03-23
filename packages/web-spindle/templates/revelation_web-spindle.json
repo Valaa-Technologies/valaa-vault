@@ -39,7 +39,7 @@
         "securityDefinitions": { "apiKey": { "type": "apiKey", "name": "apiKey", "in": "header" } }
       },
       "routes": [{
-        "url": "*", "category": "bridge", "method": "GET",
+        "url": "*", "projector": "bridge", "method": "GET",
         "config": {
           "rules": {
             "routeRoot": ["@@"],
@@ -56,7 +56,7 @@
           "response": { "200": { "type": "string" }, "404": { "type": "string" } }
         }
       }, {
-        "url": "*", "category": "bridge", "method": "PUT",
+        "url": "*", "projector": "bridge", "method": "PUT",
         "config": {
           "rules": {
             "routeRoot": ["@@"],
@@ -73,7 +73,7 @@
           "response": { "200": { "type": "string" }, "404": { "type": "string" } }
         }
       }, {
-        "url": "*", "category": "bridge", "method": "DELETE",
+        "url": "*", "projector": "bridge", "method": "DELETE",
         "config": {
           "rules": {
             "routeRoot": ["@@"],
@@ -90,7 +90,7 @@
           "response": { "200": { "type": "string" }, "404": { "type": "string" } }
         }
       }, {
-        "url": "*", "category": "bridge", "method": "POST",
+        "url": "*", "projector": "bridge", "method": "POST",
         "config": {
           "rules": {
             "routeRoot": ["@@"],

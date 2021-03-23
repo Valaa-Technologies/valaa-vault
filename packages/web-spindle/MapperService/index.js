@@ -186,12 +186,12 @@ export default class MapperService extends FabricEventTarget {
     const wrap = new Error(`createRouteProjector(${this._routeName(route)})`);
     try {
       if (!route.url) throw new Error(`Route url undefined`);
-      if (!route.category) throw new Error(`Route category undefined`);
+      if (!route.projector) throw new Error(`Route projector undefined`);
       if (!route.method) throw new Error(`Route method undefined`);
       if (!route.config) throw new Error(`Route config undefined`);
-      const createProjector = (this._projectorCreators[route.category] || {})[route.method];
+      const createProjector = (this._projectorCreators[route.projector] || {})[route.method];
       if (!createProjector) {
-        throw new Error(`No projector found for '${route.category} ${route.method}'`);
+        throw new Error(`No projector found for '${route.projector} ${route.method}'`);
       }
       route.params = [];
       route.parts = route.url.split("/").slice(1).map(part => {
@@ -216,7 +216,7 @@ export default class MapperService extends FabricEventTarget {
   getProjectors (options = {}) {
     return this._projectors.filter(projector =>
         (!options.url || (options.url === projector.route.url))
-        && (!options.category || (options.category === projector.route.category))
+        && (!options.projector || (options.projector === projector.route.projector))
         && (!options.method || (options.method === projector.route.method)));
   }
 
@@ -300,7 +300,7 @@ export default class MapperService extends FabricEventTarget {
   }
 
   _routeName (route) {
-    return `${route.method}-${route.category} <${route.url}>`;
+    return `${route.method}-${route.projector} <${route.url}>`;
   }
 
   // Build ops

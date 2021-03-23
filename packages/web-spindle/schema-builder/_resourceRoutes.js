@@ -35,7 +35,7 @@ export function _setupRouteResourceConfig (route, resourceType) {
 }
 
 export function listingGETRoute (url, userConfig, globalRules, resourceType) {
-  const route = { url, category: "listing", method: "GET" };
+  const route = { url, projector: "listing", method: "GET" };
   try {
     if (!_setupResourceRoute(route, userConfig, globalRules, resourceType)) return undefined;
     Object.assign(route.schema, {
@@ -64,7 +64,7 @@ export function listingGETRoute (url, userConfig, globalRules, resourceType) {
 }
 
 export function resourcePOSTRoute (url, userConfig, globalRules, resourceType) {
-  const route = { url, category: "resource", method: "POST" };
+  const route = { url, projector: "resource", method: "POST" };
   try {
     if (!_setupResourceRoute(route, userConfig, globalRules, resourceType)) return undefined;
     Object.assign(route.schema, {
@@ -86,7 +86,7 @@ export function resourcePOSTRoute (url, userConfig, globalRules, resourceType) {
 }
 
 export function resourceGETRoute (url, userConfig, globalRules, resourceType) {
-  const route = { url, category: "resource", method: "GET" };
+  const route = { url, projector: "resource", method: "GET" };
   try {
     if (!_setupResourceRoute(route, userConfig, globalRules, resourceType)) return undefined;
     Object.assign(route.schema, {
@@ -112,7 +112,7 @@ export function resourceGETRoute (url, userConfig, globalRules, resourceType) {
 }
 
 export function resourcePATCHRoute (url, userConfig, globalRules, resourceType) {
-  const route = { url, category: "resource", method: "PATCH" };
+  const route = { url, projector: "resource", method: "PATCH" };
   try {
     if (!_setupResourceRoute(route, userConfig, globalRules, resourceType)) return undefined;
     Object.assign(route.schema, {
@@ -135,7 +135,7 @@ export function resourcePATCHRoute (url, userConfig, globalRules, resourceType) 
 }
 
 export function resourceDELETERoute (url, userConfig, globalRules, resourceType) {
-  const route = { url, category: "resource", method: "DELETE" };
+  const route = { url, projector: "resource", method: "DELETE" };
   try {
     if (!_setupResourceRoute(route, userConfig, globalRules, resourceType)) return undefined;
     Object.assign(route.schema, {

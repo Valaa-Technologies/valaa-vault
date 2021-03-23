@@ -10,7 +10,7 @@ export function _setupBridgeRoute (route, userConfig, globalRules) {
 }
 
 function _bridgeRoute (method, url, userConfig, globalRules) {
-  const route = { url, category: "bridge", method };
+  const route = { url, projector: "bridge", method };
   try {
     if (!_setupBridgeRoute(route, userConfig, globalRules)) return undefined;
     Object.assign(route.schema, {

@@ -7,7 +7,7 @@ import { StringType, XWWWFormURLEncodedStringType } from "./types";
 import { _setupRoute, _routeName } from "./_routesCommon";
 
 export function sessionGETRoute (url, userConfig, globalRules) {
-  const route = { url, category: "session", method: "GET", config: {
+  const route = { url, projector: "session", method: "GET", config: {
     rules: {
       grantExpirationDelay: 60,
       tokenExpirationDelay: 86400,
@@ -52,7 +52,7 @@ export function sessionGETRoute (url, userConfig, globalRules) {
 }
 
 export function sessionPOSTRoute (url, userConfig, globalRules) {
-  const route = { url, category: "session", method: "POST", config: {
+  const route = { url, projector: "session", method: "POST", config: {
     rules: {
       tokenExpirationDelay: 7 * 86400,
       clientCookie: ["@!:request:cookies", ["@!:identity:clientCookieName"]],
@@ -79,7 +79,7 @@ export function sessionPOSTRoute (url, userConfig, globalRules) {
 }
 
 export function sessionDELETERoute (url, userConfig, globalRules) {
-  const route = { url, category: "session", method: "DELETE", config: {
+  const route = { url, projector: "session", method: "DELETE", config: {
     rules: {
       clientCookie: ["@!:request:cookies", ["@!:identity:clientCookieName"]],
       sessionCookie: ["@!:request:cookies", ["@!:identity:sessionCookieName"]],

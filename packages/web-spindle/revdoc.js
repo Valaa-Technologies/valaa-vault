@@ -79,7 +79,7 @@ objects which the web API spindle can then consume.`
 `All routes share common as well as separate characteristics. The
 handler of a request is located using the most specific route config
 which matches the request IRI and its HTTP method. The route config
-specifies the route *category* which when combined with the request
+specifies the route *projector* which when combined with the request
 method uniquely specifies the actual route type and thus the
 handler callback.
 

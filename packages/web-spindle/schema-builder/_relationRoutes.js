@@ -52,7 +52,7 @@ function _setupRouteRelationConfig (route, relationField) {
 }
 
 export function relationsGETRoute (url, userConfig, globalRules, resourceType, relationField) {
-  const route = { url, category: "relations", method: "GET" };
+  const route = { url, projector: "relations", method: "GET" };
   try {
     if (!_setupRelationRoute(route, userConfig, globalRules, resourceType, relationField)) {
       return undefined;
@@ -94,7 +94,7 @@ mapping is thus implicitly inferred from the route.
 */
 
 export function mappingPOSTRoute (url, userConfig, globalRules, resourceType, relationField_) {
-  const route = { url, category: "mapping", method: "POST" };
+  const route = { url, projector: "mapping", method: "POST" };
   const relationField = _resolveFunction(relationField_);
   try {
     if (!_setupRelationRoute(route, userConfig, globalRules, resourceType, relationField)) {
@@ -138,7 +138,7 @@ containing the mapping.`,
 }
 
 export function mappingGETRoute (url, userConfig, globalRules, resourceType, relationField_) {
-  const route = { url, category: "mapping", method: "GET" };
+  const route = { url, projector: "mapping", method: "GET" };
   const relationField = _resolveFunction(relationField_);
   try {
     if (!_setupRelationRoute(route, userConfig, globalRules, resourceType, relationField)) {
@@ -176,7 +176,7 @@ route.config.target.name} route resource`,
 }
 
 export function mappingPATCHRoute (url, userConfig, globalRules, resourceType, relationField_) {
-  const route = { url, category: "mapping", method: "PATCH" };
+  const route = { url, projector: "mapping", method: "PATCH" };
   const relationField = _resolveFunction(relationField_);
   try {
     if (!_setupRelationRoute(route, userConfig, globalRules, resourceType, relationField)) {
@@ -214,7 +214,7 @@ export function mappingPATCHRoute (url, userConfig, globalRules, resourceType, r
 }
 
 export function mappingDELETERoute (url, userConfig, globalRules, resourceType, relationField_) {
-  const route = { url, category: "mapping", method: "DELETE" };
+  const route = { url, projector: "mapping", method: "DELETE" };
   const relationField = _resolveFunction(relationField_);
   try {
     if (!_setupRelationRoute(route, userConfig, globalRules, resourceType, relationField)) {

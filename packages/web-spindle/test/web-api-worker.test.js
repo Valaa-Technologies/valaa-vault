@@ -417,7 +417,7 @@ describe("Web API spindle worker", () => {
     const postIndividualOptions = { method: "POST", body: { name: "other" }, headers };
 
     // first make a failed POST individual attempt with expired refresh delay
-    const refreshProjector = _testRouter.getProjectors({ method: "POST", category: "session" })[0];
+    const refreshProjector = _testRouter.getProjectors({ method: "POST", projector: "session" })[0];
     const previousRefreshDelay = refreshProjector.runtime.scopeBase.tokenExpirationDelay;
     refreshProjector.runtime.scopeBase.tokenExpirationDelay = 0;
     await expect(fetchJSON("http://127.0.0.1:7357/rest-test/v0/individuals", postIndividualOptions))

@@ -500,7 +500,7 @@ TestIndividualType gate projection.`
 }, {}, TestIndividualType),
           "toEqual",
 () => ({
-  name: "individuals", method: "GET", category: "resource",
+  name: "individuals", method: "GET", projector: "resource",
   url: "/individuals/:resourceId",
   schema: {
     description: "Get the contents of a TestIndividual route resource",
@@ -561,7 +561,7 @@ thing.`
 }, testGlobalRules, TestIndividualType, testThingTagsMapping),
           "toEqual",
 () => ({
-  name: "individuals", method: "POST", category: "mapping",
+  name: "individuals", method: "POST", projector: "mapping",
   url: "/individuals/:resourceId/tags",
   schema: {
     description:

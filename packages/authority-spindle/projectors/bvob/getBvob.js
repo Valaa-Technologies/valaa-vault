@@ -8,8 +8,8 @@ const { dumpObject, thenChainEagerly } = valosheath.require("@valos/tools");
 
 export default function createProjector (router: PrefixRouter, route: Route) {
   return {
-    // requiredRules: ["routeRoot"],
-    // valueAssertedRules: ["chroniclePlot", "eventIndex"],
+    requiredRules: ["routeRoot"],
+    valueAssertedRules: ["chroniclePlot", "contentHash"],
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this, route);
@@ -26,12 +26,17 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         "\n\trequest.cookies:", ...dumpObject(Object.keys(request.cookies || {})),
       ]);
       const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
+      if (router.presolveRulesToScope(this.runtime, valkOptions)) {
+        router.warnEvent(1, () =>
+            [`RUNTIME RULE FAILURE in ${router._routeName(this.runtime.route)}.`]);
+        return false;
+      }
       const scope = valkOptions.scope;
       router.infoEvent(2, () => [`${this.name}:`,
         "\n\trequest.body:", ...dumpObject(request.body),
         "\n\tresolvers:", ...dumpObject(this.runtime.ruleResolvers),
         "\n\tchroniclePlot:", ...dumpObject(scope.chroniclePlot),
-        "\n\teventIndex:", ...dumpObject(scope.eventIndex),
+        "\n\tcontentHash:", ...dumpObject(scope.contentHash),
       ]);
       // const {} = this.runtime.ruleResolvers;
 
@@ -44,16 +49,20 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       return thenChainEagerly(scope.connection.asSourceredConnection(), [
         connection => {
           // Add or validate body event index to equal scope.eventIndex
-          return connection.proclaimEvents([request.body]);
+          return connection.narrateEventLog({
+            eventIdBegin: scope.eventIndex,
+            eventIdEnd: scope.eventIndex,
+            commands: false,
+          });
         },
         // () => valkOptions.discourse.releaseFabricator(),
-        eventResult => eventResult && eventResult.getTruthEvent(),
-        (truthEvent) => {
-          reply.code(201);
-          reply.send();
+        (sections) => {
+          // Flatten sections and pick correct event
+          reply.code(200);
+          reply.send(sections);
           router.infoEvent(2, () => [
             `${this.name}:`,
-            "\n\tresults:", ...dumpObject(truthEvent),
+            "\n\tsections:", ...dumpObject(sections),
           ]);
           return true;
         },

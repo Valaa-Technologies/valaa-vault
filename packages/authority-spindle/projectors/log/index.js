@@ -1,7 +1,6 @@
 // @flow
 
-import GET from "./getLogEvent";
-import PUT from "./putLogEvent";
+import GET from "./getLogEvents";
 import POST from "./postLogEvents";
 
-export { GET, PUT, POST };
+export { GET, POST };

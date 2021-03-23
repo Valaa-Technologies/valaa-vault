@@ -9,7 +9,7 @@ const { dumpObject, thenChainEagerly } = valosheath.require("@valos/tools");
 export default function createProjector (router: PrefixRouter, route: Route) {
   return {
     requiredRules: ["routeRoot"],
-    valueAssertedRules: ["chroniclePlot", "startIndex"],
+    valueAssertedRules: ["chroniclePlot", "eventIndex"],
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this, route);
@@ -36,8 +36,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         "\n\trequest.body:", ...dumpObject(request.body),
         "\n\tresolvers:", ...dumpObject(this.runtime.ruleResolvers),
         "\n\tchroniclePlot:", ...dumpObject(scope.chroniclePlot),
-        "\n\tstartIndex:", ...dumpObject(scope.startIndex),
-        "\n\tendIndex:", ...dumpObject(scope.endIndex),
+        "\n\teventIndex:", ...dumpObject(scope.eventIndex),
       ]);
       // const {} = this.runtime.ruleResolvers;
 
@@ -50,7 +49,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       return thenChainEagerly(scope.connection.asSourceredConnection(), [
         connection => {
           // Add or validate body event index to equal scope.eventIndex
-          return connection.proclaimEvents(request.body);
+          return connection.proclaimEvents([request.body]);
         },
         // () => valkOptions.discourse.releaseFabricator(),
         eventResult => eventResult && eventResult.getTruthEvent(),

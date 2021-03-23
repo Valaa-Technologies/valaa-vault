@@ -195,9 +195,28 @@ export default class MapperService extends FabricEventTarget {
       }
       route.params = [];
       route.parts = route.url.split("/").slice(1).map(part => {
-        if (part[0] !== ":") return part;
-        route.params.push(part.slice(1));
-        return route.params.length - 1;
+        for (let i = 0; i !== part.length; ++i) {
+          if (part[i] !== ":") continue;
+          ++i;
+          if (part[i] === ":") continue;
+          let nameI = i;
+          for (; nameI !== part.length; ++nameI) {
+            if (part[nameI] === "(" || part[nameI] === "-" || part[nameI] === ":") break;
+          }
+          route.params.push(part.slice(i, nameI));
+          if (part[nameI] === "(") {
+             for (let depth = 1; depth && nameI !== part.length; ++nameI) {
+              if (part[nameI] === "\\") ++nameI;
+              else if (part[nameI] === "(") ++depth;
+              else if (part[nameI] === ")") --depth;
+            }
+          }
+          if ((i === 1) && (nameI === part.length)) {
+            return route.params.length - 1;
+          }
+          i = nameI - 1;
+        }
+        return part;
       });
       const projector = createProjector(this, route);
       if (projector == null) return undefined;

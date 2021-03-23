@@ -9,15 +9,37 @@ import { dumpObject, thenChainEagerly } from "~/tools";
 import { _vakonpileVPlot } from "./_vakonpileOps";
 
 export function _createProjectorRuntime (
-    router: PrefixRouter, { name, config }, route, runtime) {
+    router: PrefixRouter, { name, config, requiredRules, valueAssertedRules }, route, runtime) {
+  const consolidatedRules = { ...config.rules };
+
+  for (const paramName of route.params) {
+    if (!consolidatedRules[paramName]) {
+      consolidatedRules[paramName] = [`@!:request:params:${paramName}`];
+    }
+  }
+
+  for (const ruleName of (requiredRules || [])) {
+    if (consolidatedRules[ruleName] === undefined) {
+      throw new Error(`Projector rule '${ruleName}' missing for route <${
+          route.url}> (required by projector "${route.projector}")`);
+    }
+  }
+  for (const ruleName of (valueAssertedRules || [])) {
+    if (consolidatedRules[ruleName] === undefined) {
+      throw new Error(`Projector value-asserted rule '${ruleName}' missing for route <${
+          route.url}> (required by projector "${route.projector}")`);
+    }
+  }
   for (const ruleName of (config.requiredRules || [])) {
-    if (config.rules[ruleName] === undefined) {
-      throw new Error(`Required route rule '${ruleName}' missing for route <${route.url}>`);
+    if (consolidatedRules[ruleName] === undefined) {
+      throw new Error(`Config rule '${ruleName}' missing for route <${
+          route.url}> (required by the config itself)`);
     }
   }
   for (const ruleName of (config.valueAssertedRules || [])) {
-    if (config.rules[ruleName] === undefined) {
-      throw new Error(`Required runtime route rule '${ruleName}' missing for route <${route.url}>`);
+    if (consolidatedRules[ruleName] === undefined) {
+      throw new Error(`Config value-asserted rule '${ruleName}' missing for route <${
+          route.url}> (required by the config itself)`);
     }
   }
   runtime.name = name;
@@ -29,7 +51,7 @@ export function _createProjectorRuntime (
 
   const scopePreparations = runtime.scopePreparations = {};
 
-  Object.entries(config.rules).forEach(([ruleName, rule]) => {
+  Object.entries(consolidatedRules).forEach(([ruleName, rule]) => {
     if (!Array.isArray(rule)) {
       scopePreparations[ruleName] = rule;
       return;
@@ -87,28 +109,29 @@ export async function _preloadRuntimeResources (router: PrefixRouter, projector,
     vRouteRoot = runtime.scopeBase.routeRoot = runtime.resolveRouteRoot(
         router.getEngine(), runtime.scopeBase.serviceIndex, { scope: runtime.scopeBase });
     if (!(vRouteRoot instanceof Vrapper)) {
-      if (vRouteRoot == null) {
-        router.infoEvent(1, "Route root is nully: valospace capabilities disabled");
-        return;
+      if (vRouteRoot != null) {
+        throw new Error(`Route root is not a resource for ${router._projectorName(projector)}`);
       }
-      throw new Error(`Route root is not a resource for ${router._projectorName(projector)}`);
+      router.infoEvent(1, "Route root is nully: valospace capabilities are disabled");
     }
     router.infoEvent(1, () => [`Preloading projector ${router._projectorName(projector)}`,
         "; activating", runtime.staticResources.length, "static rule resources and root",
-        vRouteRoot.debugId()]);
-    const rootActivation = vRouteRoot.activate();
-    if (rootActivation !== vRouteRoot) await rootActivation;
-    const activations = runtime.staticResources
-        .map(staticResource => router.getEngine()
-            .getVrapper(staticResource, { contextChronicleURI: null }).activate())
-        .filter(e => !(e instanceof Vrapper));
-    await Promise.all(activations);
-    router.infoEvent(1, () => ["Done preloading projector:", router._projectorName(projector),
-        (rootActivation
-            ? "\n\twaited for route root activation:"
-            : "\n\troute root already active:"), ...dumpObject(vRouteRoot.debugId()),
-        "\n\twaited for", activations.length, `static resource activations (${
-          runtime.staticResources.length - activations.length} were already active})`]);
+        vRouteRoot && vRouteRoot.debugId()]);
+    if (vRouteRoot) {
+      const rootActivation = vRouteRoot.activate();
+      if (rootActivation !== vRouteRoot) await rootActivation;
+      const activations = runtime.staticResources
+          .map(staticResource => router.getEngine()
+              .getVrapper(staticResource, { contextChronicleURI: null }).activate())
+          .filter(e => !(e instanceof Vrapper));
+      await Promise.all(activations);
+      router.infoEvent(1, () => ["Done preloading projector:", router._projectorName(projector),
+      (rootActivation
+          ? "\n\twaited for route root activation:"
+          : "\n\troute root already active:"), ...dumpObject(vRouteRoot.debugId()),
+      "\n\twaited for", activations.length, `static resource activations (${
+        runtime.staticResources.length - activations.length} were already active})`]);
+    }
   } catch (error) {
     throw router.wrapErrorEvent(error, 1, new Error(`preloadRuntimeResources(${
             router._projectorName(projector)})`),

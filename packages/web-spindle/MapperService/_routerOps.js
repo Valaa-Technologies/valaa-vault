@@ -121,8 +121,8 @@ function _prepareProjectors (router) {
   for (const projector of router._projectors) {
     try {
       if (projector.prepare && isPromise(projector.prepare())) {
-        throw new Error(`Projector prepare must not be async for ${
-          router._projectorName(projector)}`);
+        throw new Error(`Projector prepare must not be async (via route ${
+          router._projectorName(projector)})`);
       }
       projector._whenReady = new Promise(resolve => (projector._resolveWhenReady = resolve));
     } catch (error) {

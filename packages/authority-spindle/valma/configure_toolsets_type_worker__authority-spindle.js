@@ -7,18 +7,36 @@ exports.describe = "Configure the toolset '@valos/authority-spindle' within the 
 exports.introduction = `${exports.describe}.`;
 
 exports.disabled = (yargs) => typeToolset.checkToolsetDisabled(yargs.vlm, exports);
-exports.builder = (yargs) => yargs.options({
-  ...typeToolset.createConfigureToolsetOptions(yargs.vlm, exports),
-});
+exports.builder = (yargs) => {
+  const vlm = yargs.vlm;
+  const toolsetConfig = vlm.getToolsetConfig(vlm.toolset) || {};
+  return yargs.options({
+    "authority-uri": {
+      type: "string", default: (toolsetConfig || {}).authorityURI,
+      description: "The authority valosp URI.",
+      interactive: {
+        when: "if-undefined",
+        confirm: candidateAuthorityURI => {
+          if (!candidateAuthorityURI) return true;
+          const matcher = "^valosp\\:\\/\\/.*/$";
+          if (candidateAuthorityURI.match(new RegExp(matcher))) return true;
+          vlm.warn(vlm.theme.bold(`Invalid authority valosp URI <${candidateAuthorityURI}>`),
+              `: does not match regex "${matcher}"`);
+          return false;
+        },
+      },
+    },
+    ...typeToolset.createConfigureToolsetOptions(yargs.vlm, exports),
+  });
+};
 
 exports.handler = async (yargv) => {
-  // This code is called by 'vlm configure' every time it is executed
-  // in a workspace that uses this toolset.
-  // All packages specified as dev/dependencies by the toolset select
-  // command are available.
   const vlm = yargv.vlm;
   const toolsetConfig = vlm.getToolsetConfig(exports.vlm.toolset) || {};
-  const toolsetConfigUpdate = { ...toolsetConfig };
+  const toolsetConfigUpdate = {
+    ...toolsetConfig,
+    authorityURI: yargv["authority-uri"],
+  };
   // Construct a toolset config update or exit.
   vlm.updateToolsetConfig(vlm.toolset, toolsetConfigUpdate);
   const selectionResult = await typeToolset.configureToolSelection(

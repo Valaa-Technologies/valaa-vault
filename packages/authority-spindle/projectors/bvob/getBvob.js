@@ -3,12 +3,13 @@
 import valosheath from "@valos/gateway-api/valosheath";
 
 import type { PrefixRouter, Route } from "~/web-spindle/MapperService";
+import { _getChronicleURIFromRoutePlot } from "../_common";
 
 const { dumpObject, thenChainEagerly } = valosheath.require("@valos/tools");
 
 export default function createProjector (router: PrefixRouter, route: Route) {
   return {
-    requiredRules: ["routeRoot"],
+    requiredRules: ["routeRoot", "authorityURI"],
     valueAssertedRules: ["chroniclePlot", "contentHash"],
 
     prepare () {
@@ -42,8 +43,9 @@ export default function createProjector (router: PrefixRouter, route: Route) {
 
       const wrap = new Error(this.name);
 
-      scope.connection = router.getDiscourse().getSourcerer()
-          .sourcerChronicle(this.authorityBase + scope.chroniclePlot);
+      const chronicleURI = _getChronicleURIFromRoutePlot(scope.authorityURI, scope.chroniclePlot);
+      scope.connection = router.getSourcerer()
+          .sourcerChronicle(chronicleURI);
 
       // valkOptions.discourse = router.getDiscourse().acquireFabricator();
       return thenChainEagerly(scope.connection.asSourceredConnection(), [

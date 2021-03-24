@@ -1,0 +1,19 @@
+{
+  "name": "@valos/testaur-worker",
+  "version": "0.37.0-prerelease.0",
+  "valos": {
+    "type": "worker",
+    "domain": "@valos/kernel"
+  },
+  "description": "The kernel test authority worker",
+  "author": "Valaa Technologies Ltd",
+  "license": "MIT",
+  "repository": "https://github.com/valaatech/kernel",
+  "private": true,
+  "main": "index.js",
+  "dependencies": {
+    "@valos/authority-spindle": ">=0.37.0-prerelease.0",
+    "@valos/type-worker": ">=0.37.0-prerelease.0",
+    "@valos/web-spindle": ">=0.37.0-prerelease.0"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": {
+    "!!!": ["./package", "name"]
+  },
+  "description": {
+    "!!!": ["./package", "description"]
+  },
+  "valos": {
+    "type": "revelation",
+    "domain": { "!!!": ["./package", "valos", "domain"] }
+  },
+  "gateway": {
+    "authorityConfigs": { "!!!": "./revelation_authorityConfigs" },
+    "verbosity": 2,
+    "scribe": { "verbosity": 0 }
+  },
+  "spindles": {
+    "@valos/web-spindle": { "!!!": "./revelation_web-spindle" }
+  },
+  "prologue": {
+    "rootChronicleURI": {
+      "!!!": ["./toolsets", "@valos/type-worker", "serviceURI"]
+    }
+  },
+  "views": {}
+}

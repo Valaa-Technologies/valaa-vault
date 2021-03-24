@@ -1,0 +1,39 @@
+{
+  "@valos/type-worker": {
+    "inUse": "always",
+    "serviceURI": null,
+    "commands": {
+      "perspire": {
+        "options": {
+          "keepalive": 60,
+          "heartbeat": "worker-perspire-template",
+          "output": "dist/perspire/worker-view.html",
+          "spindles": [
+            "@valos/authority-spindle",
+            "@valos/web-spindle"
+          ]
+        }
+      }
+    },
+    "tools": {
+      "copy-template-files": {
+        "inUse": true
+      }
+    }
+  },
+  "@valos/web-spindle": {
+    "inUse": true,
+    "port": "8443",
+    "address": "0.0.0.0",
+    "title": "openapi Example Title",
+    "tools": {
+      "copy-template-files": {
+        "inUse": true
+      }
+    }
+  },
+  "@valos/authority-spindle": {
+    "inUse": true,
+    "authorityURI": "valosp://192.168.72.145:8443/testaur/"
+  }
+}

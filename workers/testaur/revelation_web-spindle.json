@@ -1,0 +1,133 @@
+{
+  "server": {
+    "port": { "!!!": ["./toolsets", "@valos/web-spindle", "port"] },
+    "address": { "!!!": ["./toolsets", "@valos/web-spindle", "address"] },
+    "verbosity": 2,
+    "fastify": {
+      "ignoreTrailingSlash": false,
+      "logger": true,
+      "pluginTimeout": 10000,
+      "https": {
+        "allowHTTP1": true,
+        "key": "env/local-authority.key.pem",
+        "cert": "env/local-authority.crt"
+      }
+    }
+  },
+  "prefixes": {
+    "/": {
+      "view": {
+        "name": "web-spindle root view",
+        "verbosity": 2,
+        "focus": { "!!!": ["./toolsets", "@valos/type-worker", "serviceURI"] }
+      },
+      "sessionDuration": 86400,
+      "swaggerPrefix": "/openapi",
+      "openapi": {
+        "openapi": "3.0.2",
+        "info": {
+          "title": { "!!!": ["./toolsets", "@valos/web-spindle", "title"] },
+          "name": { "!!!": ["./package", "name"] },
+          "version": { "!!!": ["./package", "version"] },
+          "description": { "!!!": ["./package", "description"] }
+        },
+        "servers": [],
+        "externalDocs": {
+          "url": { "!!!": ["./package", "valos", "docs"] },
+          "description": "Find more info here"
+        },
+        "host": { "!!!": ["./toolsets", "@valos/web-spindle", "address"] },
+        "schemes": ["http", "https"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": [],
+        "securityDefinitions": { "apiKey": { "type": "apiKey", "name": "apiKey", "in": "header" } }
+      },
+      "routes": [{
+        "url": "testaur/:chroniclePlot/-log!':eventIndex(^\\d+)/",
+        "method": "GET",
+        "projector": "@valos/authority-spindle:event",
+        "config": { "rules": {
+          "routeRoot": ["@@"],
+          "authorityURI": { "!!!": ["./toolsets", "@valos/authority-spindle", "authorityURI"] }
+        } },
+        "schema": {
+          "description": "Narrate a single event from a chronicle log",
+          "response": { "200": { "type": "string" }, "404": { "type": "string" } }
+        }
+      }, {
+        "url": "testaur/:chroniclePlot/-log!':eventIndex(^\\d+)/",
+        "method": "PUT",
+        "projector": "@valos/authority-spindle:event",
+        "config": { "rules": {
+          "routeRoot": ["@@"],
+          "authorityURI": { "!!!": ["./toolsets", "@valos/authority-spindle", "authorityURI"] }
+        } },
+        "schema": {
+          "description": "Proclaiming a single event to a chronicle log",
+          "response": { "200": { "type": "string" }, "404": { "type": "string" } }
+        }
+      }, {
+        "url": "testaur/:chroniclePlot/-log!:indexRange(^\\*|\\(\\*.+\\))/",
+        "method": "GET",
+        "projector": "@valos/authority-spindle:log",
+        "config": { "rules": {
+          "routeRoot": ["@@"],
+          "authorityURI": { "!!!": ["./toolsets", "@valos/authority-spindle", "authorityURI"] }
+        } },
+        "schema": {
+          "description": "Narrate multiple events from a chronicle log",
+          "response": { "200": { "type": "string" }, "404": { "type": "string" } }
+        }
+      }, {
+        "url": "testaur/:chroniclePlot/-log!':startIndex(^\\d+)/",
+        "method": "POST",
+        "projector": "@valos/authority-spindle:log",
+        "config": { "rules": {
+          "routeRoot": ["@@"],
+          "authorityURI": { "!!!": ["./toolsets", "@valos/authority-spindle", "authorityURI"] }
+        } },
+        "schema": {
+          "description": "Proclaim multiple events to a chronicle log",
+          "response": { "200": { "type": "string" }, "404": { "type": "string" } }
+        }
+      }, {
+        "url": "testaur/:chroniclePlot/~bvob':contentHash/",
+        "method": "GET",
+        "projector": "@valos/authority-spindle:bvob",
+        "config": { "rules": {
+          "routeRoot": ["@@"],
+          "authorityURI": { "!!!": ["./toolsets", "@valos/authority-spindle", "authorityURI"] }
+        } },
+        "schema": {
+          "description": "Fetch a binary valos object that is accessible by the chronicle",
+          "response": { "200": { "type": "string" }, "404": { "type": "string" } }
+        }
+      }, {
+        "url": "testaur/:chroniclePlot/~bvob':contentHash/",
+        "method": "HEAD",
+        "projector": "@valos/authority-spindle:bvob",
+        "config": { "rules": {
+          "routeRoot": ["@@"],
+          "authorityURI": { "!!!": ["./toolsets", "@valos/authority-spindle", "authorityURI"] }
+        } },
+        "schema": {
+          "description": "Check whether a binary valos object is accessible by the chronicle",
+          "response": { "200": { "type": "string" }, "404": { "type": "string" } }
+        }
+      }, {
+        "url": "testaur/:chroniclePlot/~bvob':contentHash/",
+        "method": "PUT",
+        "projector": "@valos/authority-spindle:bvob",
+        "config": { "rules": {
+          "routeRoot": ["@@"],
+          "authorityURI": { "!!!": ["./toolsets", "@valos/authority-spindle", "authorityURI"] }
+        } },
+        "schema": {
+          "description": "Upload a binary valos object to make it accessible by the chronicle",
+          "response": { "200": { "type": "string" }, "404": { "type": "string" } }
+        }
+      }]
+    }
+  }
+}

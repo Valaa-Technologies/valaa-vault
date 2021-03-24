@@ -1,0 +1,11 @@
+{
+  "valosp://192.168.72.145:8443/testaur/": {
+    "authorityURI": "valosp://192.168.72.145:8443/testaur/",
+    "name": "valos kernel test authority",
+    "isLocallyRecorded": true,
+    "isPrimaryAuthority": true,
+    "isRemoteAuthority": false,
+    "eventVersion": "0.3",
+    "verbosity": 1
+  }
+}

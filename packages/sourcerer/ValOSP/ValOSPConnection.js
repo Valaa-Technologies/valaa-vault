@@ -75,6 +75,11 @@ export default class ValOSPConnection extends AuthorityConnection {
     }
   }
 
+  getValOSPChronicleURL () {
+    return this._chronicleValOSPURL
+        || (this._chronicleValOSPURL = `https${this._chronicleURI.slice(6)}`);
+  }
+
   isConnected () {
     return this._isConnected;
   }
@@ -259,24 +264,21 @@ export default class ValOSPConnection extends AuthorityConnection {
   requestMediaContents (mediaInfos: MediaInfo[]): any {
     return this.getSourcerer()
         .getStorage()
-        .downloadBvobContents(mediaInfos);
+        .downloadBvobsContents(this, mediaInfos);
   }
 
   prepareBvob (content: ArrayBuffer | () => Promise<ArrayBuffer>, mediaInfo?: MediaInfo):
       { contentHash: string, persistProcess: string | ?Promise<string> } {
-    const whileTrying = (mediaInfo && (typeof mediaInfo.name !== "string"))
-        ? `while trying to prepare media '${mediaInfo.name}' content for persist`
-        : "while trying to prepare unnamed media content for persist";
+    const mediaName = (mediaInfo || {}).name ? `media '${mediaInfo.name}'` : "unnamed media";
+    const whileTrying = `while trying to prepare ${mediaName} bvob content for persist`;
     try {
       if (!mediaInfo) throw new Error(`mediaInfo missing ${whileTrying}`);
-      if (!mediaInfo.contentHash) {
-        throw new Error(`mediaInfo.contentHash missing ${whileTrying}`);
-      }
+      if (!mediaInfo.contentHash) throw new Error(`mediaInfo.contentHash missing ${whileTrying}`);
       return {
         contentHash: mediaInfo.contentHash,
         persistProcess: this.getSourcerer()
             .getStorage()
-            .uploadBvobContent(content, mediaInfo),
+            .uploadBvobContent(this, mediaInfo.contentHash || mediaInfo.bvobId, content, mediaName),
       };
     } catch (error) {
       throw this.wrapErrorEvent(error, `prepareBvob(${whileTrying})`,

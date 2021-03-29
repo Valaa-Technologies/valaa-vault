@@ -112,7 +112,7 @@ export async function _preloadRuntimeResources (router: PrefixRouter, projector,
       if (vRouteRoot != null) {
         throw new Error(`Route root is not a resource for ${router._projectorName(projector)}`);
       }
-      router.infoEvent(1, "Route root is nully: valospace capabilities are disabled");
+      router.infoEvent(1, "Route root is nully: valospace access is disabled");
     }
     router.infoEvent(1, () => [`Preloading projector ${router._projectorName(projector)}`,
         "; activating", runtime.staticResources.length, "static rule resources and root",
@@ -126,11 +126,12 @@ export async function _preloadRuntimeResources (router: PrefixRouter, projector,
           .filter(e => !(e instanceof Vrapper));
       await Promise.all(activations);
       router.infoEvent(1, () => ["Done preloading projector:", router._projectorName(projector),
-      (rootActivation
-          ? "\n\twaited for route root activation:"
-          : "\n\troute root already active:"), ...dumpObject(vRouteRoot.debugId()),
-      "\n\twaited for", activations.length, `static resource activations (${
-        runtime.staticResources.length - activations.length} were already active})`]);
+        (rootActivation
+            ? "\n\twaited for route root activation:"
+            : "\n\troute root already active:"), ...dumpObject(vRouteRoot.debugId()),
+        "\n\twaited for", activations.length, `static resource activations (${
+          runtime.staticResources.length - activations.length} were already active})`,
+      ]);
     }
   } catch (error) {
     throw router.wrapErrorEvent(error, 1, new Error(`preloadRuntimeResources(${

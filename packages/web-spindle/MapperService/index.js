@@ -149,6 +149,7 @@ export default class MapperService extends FabricEventTarget {
 
   getEngine () { return this._engine; }
   getDiscourse () { return this._engine.discourse; }
+  getSourcerer () { return this._engine.getSourcerer(); }
   getViewFocus () { return this._view.getFocus(); }
   getViewScope () { return this._engine.getRootScope(); }
   getSessionDuration () { return 86400 * 1.5; }

@@ -61,7 +61,7 @@ function mapEagerly (
     startIndex = 0,
     results = []) {
   let index = null;
-  let errorName, entries, entryHead, valueCandidate;
+  let contextName, entries, entryHead, valueCandidate;
   const callback = (typeof callbacks === "function")
       ? callbacks
       : (e => thenChainEagerly(e, callbacks));
@@ -70,7 +70,7 @@ function mapEagerly (
       if ((entriesOrThenables == null) || (typeof entriesOrThenables.then !== "function")) {
         throw new Error("mapEagerly: array expected as first argument");
       }
-      errorName = new Error(`mapEagerly.entriesOrThenables.catch`);
+      contextName = new Error(`mapEagerly.entriesOrThenables.catch`);
       return entriesOrThenables.then(
           entries_ => mapEagerly(entries_, callback, onRejected, startIndex, results),
           errorOnMapEagerly);
@@ -84,15 +84,15 @@ function mapEagerly (
         try {
           valueCandidate = callback(entryHead, index, entries);
         } catch (error) {
-          errorName = new Error(getName("callback"));
+          contextName = new Error(getName("callback"));
           return errorOnMapEagerly(error);
         }
         if ((valueCandidate == null) || (typeof valueCandidate.then !== "function")) continue;
-        errorName = new Error(getName("callback thenable resolution"));
+        contextName = new Error(getName("callback thenable resolution"));
       } else {
         // eslint-disable-next-line no-loop-func
         valueCandidate = entryHead.then(resolvedHead => callback(resolvedHead, index, entries));
-        errorName = new Error(getName("head or callback promise resolution"));
+        contextName = new Error(getName("head or callback promise resolution"));
       }
       return valueCandidate.then(
           value => { // eslint-disable-line no-loop-func
@@ -103,7 +103,7 @@ function mapEagerly (
     }
     return results;
   } catch (error) {
-    errorName = new Error(getName("handling"));
+    contextName = new Error(getName("handling"));
     return errorOnMapEagerly(error);
   }
   function getName (info) {
@@ -119,7 +119,7 @@ function mapEagerly (
             index, results, entries, callback, onRejected);
       }
     } catch (onRejectedError) { innerError = onRejectedError; }
-    throw wrapError(innerError, errorName,
+    throw wrapError(innerError, contextName,
         "\n\tentry head:", ...dumpObject(entryHead, { nest: 0 }),
         "\n\tmaybePromises:", ...dumpObject(entries || entriesOrThenables),
         "\n\tcurrent entry:", ...dumpObject((entries || entriesOrThenables || [])[index]));
@@ -135,9 +135,9 @@ function thenChainEagerly (
 ) {
   const functionChain = (startIndex !== undefined) || Array.isArray(functions) ? functions
       : [functions];
-  let next = initialValue;
   let index = startIndex || 0;
-  let head;
+  let next = initialValue;
+  let head, contextName;
   for (; (next == null) || (typeof next.then !== "function"); ++index) {
     head = next;
     try {
@@ -145,31 +145,40 @@ function thenChainEagerly (
       const func = functionChain[index];
       next = !func ? head : func(head);
     } catch (error) {
-      const wrapped = wrapError(error, new Error(getName("callback")),
-          "\n\thead:", ...dumpObject(head, { nest: 0 }),
-          "\n\tfunctionChain:", ...dumpObject(functionChain));
-      if (!onRejected) throw wrapped;
-      next = onRejected(wrapped, index, head, functionChain, onRejected);
+      contextName = new Error("callback call");
+      next = onThenChainError(error);
+      // TODO(iridian, 2021-03): Fix the inconsistency here between
+      // thisChain, which sets index to functions.length (thus returning)
+      // and thenChain behavior here, which continues to next chain.
     }
   }
   --index;
+  contextName = (errorDetailLevel != null) && new Error("thenable resolution");
   return next.then(
       newHead =>
           (index + 1 >= functionChain.length
               ? newHead
               : thenChainEagerly(newHead, functionChain, onRejected, index + 1)),
       error => {
-        const wrapped = wrapError(error, errorDetailLevel, new Error(getName("thenable")),
-            "\n\thead:", ...dumpObject(head, { nest: 0 }),
-            "\n\tinitialValue:", ...dumpObject(initialValue),
-            "\n\tfunctionChain:", ...dumpObject(functionChain));
-        if (!onRejected) throw wrapped;
-        return onRejected(wrapped, index, head, functionChain, onRejected);
+        if (!contextName) contextName = new Error("thenable resolution");
+        // TODO(iridian, 2021-03): Same inconsistency as in comment above.
+        return onThenChainError(error);
       });
-  function getName (info) {
-    const functionName = (functionChain[index] || "").name;
-    return `${`${functionName ? `${functionName} (as ` : ""
-      }thenChainEagerly ${index === -1 ? "initial value" : `step #${index}`}`} ${info})`;
+  function onThenChainError (error) {
+    if (!contextName.origin) {
+      contextName.origin = contextName.message;
+      const functionName = (functionChain[index] || "").name;
+      contextName.message = `During ${
+            `${functionName ? `${functionName} (as ` : ""
+          }thenChainEagerly ${
+            index === -1 ? "initial value" : `step #${index}`}`
+          } ${contextName.origin}${functionName ? ")" : ""}`;
+    }
+    const wrapped = wrapError(error, errorDetailLevel, contextName,
+        "\n\tvalue:", ...dumpObject(head, { nest: 0 }),
+        "\n\tinitialValue:", ...dumpObject(initialValue));
+    if (!onRejected) throw wrapped;
+    return onRejected(wrapped, index, head, functionChain, onRejected);
   }
 }
 
@@ -184,7 +193,7 @@ function thisChainEagerly (
     errorDetailLevel = 2, // : number
 ) {
   let index = startIndex || 0, params = initialParams;
-  let paramsArray;
+  let paramsArray, contextName;
   for (;;) {
     if ((typeof params === "object") && (params != null)) {
       if (Array.isArray(params)) {
@@ -229,35 +238,40 @@ function thisChainEagerly (
           : func.call(this_, params);
       ++index;
     } catch (error) {
-      params = onThisChainError(error, new Error(getName("callback")), onRejected);
+      contextName = new Error("callback call");
+      params = onThisChainError(error);
       index = functions.length;
     }
     paramsArray = null;
   }
   --index;
+  contextName = (errorDetailLevel != null) && new Error("thenable resolution");
   return params.then(
       newParams =>
           thisChainEagerly(this_, newParams, functions, onRejected, index + 1),
       error => {
-        const retry = onThisChainError(
-            error, new Error(getName("thenable resolution")), onRejected);
+        if (!contextName) contextName = new Error("thenable resolution");
+        const retry = onThisChainError(error);
         return thisChainEagerly(this_, retry, functions, onRejected, functions.length);
       });
-  function getName (info) {
-    const functionName = (functions[index] || "").name;
-    return `During ${`${functionName ? `${functionName} (as ` : ""
-        }thisChainEagerly ${index === -1 ? "initial params" : `step #${index}`}`} ${info})`;
-  }
-  function onThisChainError (error, errorName, maybeOnRejected) {
-    const wrapped = wrapError(error, errorDetailLevel, errorName,
+
+  function onThisChainError (error) {
+    if (!contextName.origin) {
+      contextName.origin = contextName.message;
+      const functionName = (functions[index] || "").name;
+      contextName.message = `During ${
+            `${functionName ? `${functionName} (as ` : ""
+          }thisChainEagerly ${
+            index === -1 ? "initial params" : `step #${index}`}`
+          } ${contextName.origin}${functionName ? ")" : ""}`;
+    }
+    const wrapped = wrapError(error, errorDetailLevel, contextName,
         "\n\tthis:", ...dumpObject(this_, { nest: 0 }),
         "\n\tparams:", ...dumpObject(params),
-        "\n\tfunctions:", ...dumpObject(functions),
-        "\n\tonRejected:", ...dumpObject(onRejected),
+        "\n\tinitialParams:", ...dumpObject(initialParams),
     );
-    if (!maybeOnRejected) throw wrapped;
-    return maybeOnRejected.call(
-        this_, wrapped, index, paramsArray || params, functions, maybeOnRejected);
+    if (!onRejected) throw wrapped;
+    return onRejected.call(this_, wrapped, index, paramsArray || params, functions, onRejected);
   }
 }
 

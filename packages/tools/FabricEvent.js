@@ -233,9 +233,10 @@ export class FabricEventTarget {
         : output(`${this.debugId({ raw: !joinFirstPieceWithId })}: ${first}`, ...parts.slice(1));
   }
 
-  wrapErrorEvent (error: Error, detailLevel: number, name: Error | string, ...contexts_: any[]) {
+  wrapErrorEvent (
+      error: Error, detailLevel: number, contextName: Error | string, ...contexts_: any[]) {
     if (typeof detailLevel !== "number") {
-      return this.wrapErrorEvent(error, 0, name, ...contexts_);
+      return this.wrapErrorEvent(error, 0, contextName, ...contexts_);
     }
     const adjustedDetailLevel = _adjustDetailLevel(detailLevel, this._verbosity, this);
     if (adjustedDetailLevel > 2) return error; // no wrap.
@@ -243,7 +244,8 @@ export class FabricEventTarget {
       console.error("wrapErrorEvent.error must be an object, got:", error);
       throw new Error("wrapErrorEvent.error must be an object. See console.log for details");
     }
-    const [functionName, ...contexts] = typeof name === "function" ? name() : [name, ...contexts_];
+    const [functionName, ...contexts] =
+        typeof contextName === "function" ? contextName() : [contextName, ...contexts_];
     const actualFunctionName = functionName instanceof Error ? functionName.message : functionName;
     if (error.hasOwnProperty("functionName")
         && (error.functionName === actualFunctionName)
@@ -255,12 +257,12 @@ export class FabricEventTarget {
     const wrapper = (functionName instanceof Error) ? functionName : new Error(actualFunctionName);
     if (!wrapper.tidyFrameList) {
       wrapper.tidyFrameList = wrapper.stack.split("\n")
-          .slice((functionName instanceof Error) ? 2 : 3);
-      wrapper.logger = this;
+          .slice((functionName instanceof Error) ? 1 : 2);
     }
+    wrapper.logger = this;
     if (error.hasOwnProperty("_frameStackError")) wrapper.stack = error._frameStackError.stack;
     wrapper.detailAdjustment = adjustedDetailLevel - detailLevel;
-    const ret = wrapError(error, detailLevel, actualFunctionName, ...contexts);
+    const ret = wrapError(error, detailLevel, wrapper, ...contexts);
     ret.functionName = actualFunctionName;
     ret.contextObject = this;
     return ret;

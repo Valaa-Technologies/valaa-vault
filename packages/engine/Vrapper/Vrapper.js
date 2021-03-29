@@ -253,6 +253,7 @@ export default class Vrapper extends Cog {
     }
     this._phase = ACTIVATING;
     const operationInfo = { pendingConnection: null };
+    const contextName = new Error("activate");
     this._activationProcess = (async () => {
       try {
         while (blocker) {
@@ -280,7 +281,7 @@ export default class Vrapper extends Cog {
             (blocker !== this) ? INACTIVE
             : this.isActivating() ? UNAVAILABLE
             : this._phase; // no change.
-        throw this.wrapErrorEvent(error, 1, "activate.process",
+        throw this.wrapErrorEvent(error, 1, contextName,
             "\n\tthis:", ...dumpObject(this),
             "\n\tblocker:", ...dumpObject(blocker));
       } finally {
@@ -491,7 +492,7 @@ export default class Vrapper extends Cog {
       { require?: boolean, discourse?: Discourse, newConnection?: boolean }
           = { require: true }): ?Connection {
     if (this._connection) return this._connection;
-    let chronicleURI;
+    let chronicleURI, contextName;
     // let nonGhostOwnerRawId;
     try {
       if (!this.isResource()) {
@@ -525,16 +526,16 @@ export default class Vrapper extends Cog {
         throw new Error(`Failed to acquire the connection of ${this.debugId()}`);
       }
       if (!this._connection.isActive()) {
-        this._connection.asSourceredConnection().catch(onError.bind(this,
-            new Error(`getConnection.acquire.asSourceredConnection()`)));
+        contextName = new Error(`getConnection.acquire.asSourceredConnection()`);
+        this._connection.asSourceredConnection().catch(onError.bind(this));
       }
       return this._connection;
     } catch (error) {
-      return onError.call(this, new Error(`getConnection(${
-          options.require ? "require" : "optional"})`), error);
+      contextName = new Error(`getConnection(${options.require ? "require" : "optional"})`);
+      return onError.call(this, error);
     }
-    function onError (wrapper, error) {
-      throw this.wrapErrorEvent(error, 1, wrapper,
+    function onError (error) {
+      throw this.wrapErrorEvent(error, 1, contextName,
           "\n\toptions:", ...dumpObject(options),
           "\n\tthis[HostRef]:", this[HostRef],
           "\n\tchronicleURI:", chronicleURI,

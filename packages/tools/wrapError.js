@@ -64,37 +64,49 @@ function wrapError (errorIn, detailLevel, contextName, ...contextDescriptions) {
     return wrapError(error, 0, detailLevel, contextName || "", ...contextDescriptions);
   }
   const contextError = new Error("", error.fileName, error.lineNumber);
-  if (!(contextName instanceof Error)) {
+  if (contextName instanceof Error) {
+    contextError.name = contextName.message;
+    // Remove first line (the error message) and the second line (the new Error).
+    contextError.tidyFrameList = contextName.tidyFrameList
+        ? contextName.tidyFrameList.slice()
+        : contextName.stack.split("\n").slice(2);
+    contextError.logger = contextName.logger;
+    contextError.detailAdjustment = (contextName.logger || {}).getVerbosity
+        ? -contextName.logger.getVerbosity() : 0;
+  } else {
     contextError.name = contextName;
     // Remove first line (the error message) and the second line (the
     // new Error line above) and the wrapError line.
     contextError.tidyFrameList = contextError.stack.split("\n").slice(3);
-  } else {
-    contextError.name = contextName.message;
-    // Remove first line (the error message) and the second line (the new Error).
-    contextError.tidyFrameList = contextName.stack.split("\n").slice(2);
-    contextError.logger = contextName.logger;
-    contextError.detailAdjustment = (contextName.logger || {}).getVerbosity
-        ? -(contextName.logger || {}).getVerbosity() : 0;
   }
   contextError.detailLevel = detailLevel;
 
-  const outermostError = error.errorContexts
+  const innerError = error.errorContexts
       ? error.errorContexts[error.errorContexts.length - 1]
       : error;
-  const clippedFrameList = _clipFrameListToCurrentContext(outermostError, contextError);
-  // const myTraceAndContext = `${clippedFrameList.join("\n")}
-  // ${contextDescriptions.map(debugObjectHard).join(" ")}`;
-  // const allTraceAndContext = `${error.allTraceAndContext || ""}
-  // ${myTraceAndContext}`;
-  contextError.message = errorIn.message; // `${originalMessage}\n${allTraceAndContext}`;
-  contextError.clippedFrameList = clippedFrameList;
-  // contextError.allTraceAndContext = allTraceAndContext;
+  if (!innerError.tidyFrameList) {
+    if (!innerError.stack) {
+      console.error("innerError has no .stack:", innerError,
+        "\n\ttoString:", innerError.toString(),
+      );
+      innerError.tidyFrameList = ["<<< inner error stack empty>>>"];
+    } else {
+      const typeHeader = innerError.stack.match(/[^:]*: /);
+      innerError.tidyFrameList = innerError.stack
+          .slice(((typeHeader && typeHeader[0].length) || 0) + innerError.message.length)
+          .split("\n")
+          .slice(1);
+    }
+  }
+  const innerTidyFrameList = innerError.tidyFrameList.slice();
+  _clipFrameListToCurrentContext(innerError.tidyFrameList, contextError);
+  contextError.message = errorIn.message;
   contextError.originalError = error.originalError || error;
   contextError.originalMessage = originalMessage;
   contextError.contextDescriptions = contextDescriptions;
   error.originalError = error.originalError || error;
   error.errorContexts = (error.errorContexts || []).concat([contextError]);
+  error.tidyFrameList = contextError.tidyFrameList;
   return error;
 }
 
@@ -134,42 +146,29 @@ function messageFromError (error) {
   return message;
 }
 
-function _clipFrameListToCurrentContext (innerError, outerError) {
-  if (!outerError.tidyFrameList) {
-    console.error("outerError has no .tidyFrameList:", outerError,
-      "\n\ttoString:", outerError.toString(),
+function _clipFrameListToCurrentContext (clipped, contextError) {
+  if (!contextError.tidyFrameList) {
+    console.error("contextError has no .tidyFrameList:", contextError,
+      "\n\ttoString:", contextError.toString(),
     );
-    return ["<<< outer error tidyFrameList missing>>>"];
+    clipped.splice(0, clipped.length, "<<< outer error tidyFrameList missing>>>");
   }
-  if (!innerError.tidyFrameList) {
-    if (!innerError.stack) {
-      console.error("innerError has no .stack:", innerError,
-        "\n\ttoString:", innerError.toString(),
-      );
-      return (innerError.tidyFrameList = ["<<< inner error stack empty>>>"]);
-    }
-    const typeHeader = innerError.stack.match(/[^:]*: /);
-    innerError.tidyFrameList = innerError.stack
-        .slice(((typeHeader && typeHeader[0].length) || 0) + innerError.message.length)
-        .split("\n")
-        .slice(1);
-  }
-  const inner = innerError.tidyFrameList;
-  const outer = outerError.tidyFrameList;
+  const outer = contextError.tidyFrameList;
   // console.log("clipping inner:", inner);
   // console.log("versus context:", outer);
   let skipInner = 0;
   let skipOuter = 0;
   let matches = 0;
-  if (inner.length && (inner[inner.length - 1].slice(0, 3) !== "<<<")) {
+  if (clipped.length && (clipped[clipped.length - 1].slice(0, 3) !== "<<<")) {
     for (; skipOuter !== outer.length; ++skipOuter) {
       // Find first matching line
-      for (skipInner = 0; (skipInner !== inner.length) && (inner[skipInner] !== outer[skipOuter]);
+      for (skipInner = 0;
+          (skipInner !== clipped.length) && (clipped[skipInner] !== outer[skipOuter]);
           ++skipInner);
       // Check that remaining lines match
-      for (; ((skipInner + matches) !== inner.length) && ((skipOuter + matches) !== outer.length);
+      for (; ((skipInner + matches) !== clipped.length) && ((skipOuter + matches) !== outer.length);
           ++matches) {
-        if (inner[skipInner + matches] !== outer[skipOuter + matches]) {
+        if (clipped[skipInner + matches] !== outer[skipOuter + matches]) {
           matches = 0;
           break;
         }
@@ -178,9 +177,9 @@ function _clipFrameListToCurrentContext (innerError, outerError) {
     }
   }
   if (!matches || (skipOuter > skipInner + 2)) {
-    inner.push("<<< disjoint inner and context error traces >>>");
+    clipped.push("<<< disjoint inner and context error traces >>>");
   } else {
-    inner.splice(skipInner || 1); // Always keep at least one line in the inner log
+    clipped.splice(skipInner || 1); // Always keep at least one line in the clipped log
     // If skipOuter is larger than skipInner then this is likely a
     // disjoint trace with accidentally identical outermost trace.
     // Keep the whole context trace
@@ -191,7 +190,6 @@ function _clipFrameListToCurrentContext (innerError, outerError) {
   console.log("spliced inner from line", skipInner, "onwards:", innerSplice);
   console.log("spliced outer up to line", skipInner, ":", outerSplice);
   */
-  return inner;
 }
 
 function outputError (error, header = "Exception caught", logger = _globalLogger,
@@ -215,9 +213,10 @@ function outputError (error, header = "Exception caught", logger = _globalLogger
     if (visibility >= 0) {
       logger.debug(traces.join("\n"));
       traces = [];
-      const warn = (contextLogger.warnEvent || contextLogger.warn).bind(contextLogger);
-      warn(`[${contextVerbosity}>=${contextDetail}] context:\n  ${context.name}`,
-          ...context.contextDescriptions.map(dumpifyObject));
+      (contextLogger.warnEvent || contextLogger.warn)
+          .call(contextLogger,
+              `[${contextVerbosity}>=${contextDetail}] context:\n  ${context.name}`,
+              ...context.contextDescriptions.map(dumpifyObject));
     } else if (visibility >= -1) {
       logger.debug(`\t[${contextVerbosity}<${contextDetail}]`,
           inBrowser() ? { traces } : traces.length, `collapsed fabric traces`);
@@ -227,9 +226,10 @@ function outputError (error, header = "Exception caught", logger = _globalLogger
         if (!entry || entry[0] === "\n" || !lines.length) lines.push([]);
         lines[lines.length - 1].push(entry);
       }
-      const info = (contextLogger.infoEvent || contextLogger.info).bind(contextLogger);
-      info(`[${contextVerbosity}<${contextDetail}] collapsed context; ${context.name}:`,
-          inBrowser() ? { lines } : `${lines.length} lines hidden`);
+      (contextLogger.infoEvent || contextLogger.info)
+          .call(contextLogger,
+              `[${contextVerbosity}<${contextDetail}] collapsed context; ${context.name}:`,
+              inBrowser() ? { lines } : `${lines.length} lines hidden`);
     } else {
       traces.push(
           `  [${contextVerbosity}<<${contextDetail}] hidden context; ${context.name}`);

@@ -157,12 +157,14 @@ export default class Connection extends Follower {
     Connection.prototype._finalizeSourcery,
   ];
 
-  _errorOnSourcery (error, stepIndex, params) {
+  _errorOnSourcery (error, stepIndex, params, functions) {
     this._activeConnection = null;
     if (error.disconnected && (params[0].narrateOptions !== false)) {
       return null;
     }
-    throw this.wrapErrorEvent(error, 1, new Error("sourcer()"),
+    const contextName = new Error(`sourcer.${(functions[stepIndex] || "").name}()`);
+    contextName.tidyFrameList = error.outerFrameList;
+    throw this.wrapErrorEvent(error, 1, contextName,
         `\n\tstep #${stepIndex} params:`, ...dumpObject(params));
   }
 

@@ -50,6 +50,9 @@ export default class StoryRecital {
 
   getFirst () { return this.next; }
   getLast () { return this.prev; }
+
+  isEmpty () { return this.next === this; }
+
   getStoryBy (commandId: string) { return this._storyByCommandId[commandId]; }
 
   addStory (story: Story, before: Story = this) {

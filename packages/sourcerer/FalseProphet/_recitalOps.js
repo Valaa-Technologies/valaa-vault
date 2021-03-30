@@ -4,7 +4,7 @@ import { Command, EventBase } from "~/raem/events";
 import { getActionFromPassage, Story } from "~/raem/redux/Bard";
 
 import { initializeAspects } from "~/sourcerer/tools/EventAspects";
-import SOURCERER_EVENT_VERSION from "~/sourcerer";
+import { SOURCERER_EVENT_VERSION  } from "~/sourcerer";
 
 import { dumpObject, generateDispatchEventPath, isPromise } from "~/tools";
 
@@ -109,27 +109,28 @@ export function _composeEventIntoRecitalStory (
   return undefined;
 }
 
-export function _purgeLatestRecitedStory (falseProphet: FalseProphet, heresy: EventBase, require) {
-  const latestStory = falseProphet._canonicalRecital.getLast();
-  if (!latestStory
-      || (((latestStory.aspects || {}).command || {}).id
-          !== ((heresy.aspects || {}).command || {}).id)) {
-    if (!require && !falseProphet._canonicalRecital.getStoryBy(heresy.aspects.command.id)) {
-      return false; // Already purged.
+function _purgeRecitedStory (
+    falseProphet: FalseProphet, heresy: EventBase, mustBeLatest: boolean) {
+  let hereticStory = falseProphet._canonicalRecital.getLast();
+  const hereticId = ((heresy.aspects || {}).command || {}).id;
+  if (!hereticStory || (hereticId !== ((hereticStory.aspects || {}).command || {}).id)) {
+    if (mustBeLatest) {
+      throw new Error(`_purgeRecitedStory.heresy.aspects.command.id ('${
+        heresy.aspects.command.id}') prophecy was not found as the latest story (which is '${
+        hereticStory && hereticStory.aspects.command.id}')`);
     }
-    throw new Error(`_purgeLatestRecitedStory.heresy.aspects.command.id ('${
-        heresy.aspects.command.id}') prophecy was found in recital but not as the latest story ('${
-        latestStory.aspects.command.id}')`);
+    hereticStory = falseProphet._canonicalRecital.getStoryBy(heresy.aspects.command.id);
+    if (!hereticStory) return undefined; // Already purged.
   }
-  const transactor = latestStory.meta.transactor;
+  const transactor = hereticStory.meta.transactor;
   const dispatchPath = generateDispatchEventPath(transactor, "purge");
   if (dispatchPath) {
     transactor.dispatchAndDefaultActEvent(
-        latestStory.meta.operation.getProgressEvent("purge"), { dispatchPath });
+        hereticStory.meta.operation.getProgressEvent("purge"), { dispatchPath });
   }
-  falseProphet._canonicalRecital.removeStory(latestStory);
-  falseProphet.recreateCorpus(latestStory.previousState);
-  return new StoryRecital(latestStory);
+  falseProphet._canonicalRecital.extractStoryChain(hereticStory);
+  falseProphet.recreateCorpus(hereticStory.previousState);
+  return new StoryRecital(hereticStory, `purged-heresy:${hereticId}`);
 }
 
 export function _confirmRecitalStories (instigatorConnection: FalseProphetConnection,
@@ -152,38 +153,115 @@ export function _confirmRecitalStories (instigatorConnection: FalseProphetConnec
 
 export function _elaborateRecital (instigatorConnection: FalseProphetConnection,
     newEvents: Command[], type: string, schismaticCommands: ?Command[], latestTruth) {
+  const falseProphet = instigatorConnection.getFalseProphet();
+  const chronicleURI = instigatorConnection.getChronicleURI();
   const elaboration = {
-    instigatorConnection, newEvents, type, schismaticCommands, latestTruth,
-    falseProphet: instigatorConnection.getFalseProphet(),
-    instigatorChronicleURI: instigatorConnection.getChronicleURI(),
+    instigatorConnection,
+    falseProphet,
+    instigatorChronicleURI: chronicleURI,
+    newEvents, type, latestTruth,
     newEventIndex: 0,
     newRecitalStories: [],
     schismaticRecital: undefined,
     affectedChronicles: undefined,
   };
+
+  newEvents.forEach((event, index) => {
+    newEvents[index] = { ...event, meta: { ...(event.meta || {}), chronicleURI } };
+  });
+
+  let firstRevisionedStory;
   if (schismaticCommands && schismaticCommands.length) {
     instigatorConnection.setInvalidated(false);
     instigatorConnection.setIsFrozen(false);
+
+    let initialSchism, schismaticRecitalName;
+    for (const command of schismaticCommands) {
+      const prophecy = falseProphet._canonicalRecital.getStoryBy(command.aspects.command.id);
+      if (!prophecy) continue;
+      if (!initialSchism) {
+        initialSchism = prophecy;
+        schismaticRecitalName = `schismatic:${initialSchism.aspects.command.id}`;
+      }
+      const operation = (prophecy.meta || {}).operation;
+      if (!operation) continue;
+
+      const progress = operation.getProgressEvent("schism");
+      progress.schismaticCommand = command;
+      if (progress.isSchismatic === true) {
+        // Mark already schismatic prophecies as decidedly non-revisable
+        progress.isRevisable = false;
+      } else {
+        // Mark dependent prophecies to become by-default-action
+        // schismatic and non-revisable.
+        progress.isSchismatic = undefined;
+        if (progress.isRevisable !== true) progress.isRevisable = undefined;
+      }
+      if (progress.isReformable !== false) progress.isReformable = undefined;
+      if (!progress.message) {
+        progress.message = `revisioning due to ${
+          initialSchism === prophecy ? "own schism" : schismaticRecitalName}`;
+      }
+      const transactor = prophecy.meta.transactor;
+      if (transactor) {
+        transactor.dispatchAndDefaultActEvent(progress);
+      } else {
+        operation.defaultActEvent(progress);
+      }
+    }
+    if (initialSchism) {
+      falseProphet._canonicalRecital.extractStoryChain(initialSchism);
+      initialSchism.recreateCorpus(initialSchism.previousState);
+      elaboration.schismaticRecital = new StoryRecital(initialSchism, schismaticRecitalName);
+      elaboration.affectedChronicles = { [elaboration.instigatorChronicleURI]: {} };
+      firstRevisionedStory = elaboration.schismaticRecital.getFirst();
+    }
   }
+  return _iterateElaborationAndOrRevisioning(elaboration, firstRevisionedStory);
+}
+
+export function _purgeProphecyFromRecital (falseProphet, prophecy) {
+  const purgedRecital = _purgeRecitedStory(falseProphet, prophecy, false);
+  if (!purgedRecital) return;
+  if (purgedRecital.getFirst() === purgedRecital.getLast()) {
+    falseProphet._reciteStoriesToFollowers([], purgedRecital);
+    return;
+  }
+  const purgedProphecy = purgedRecital.getFirst();
+  const affectedChronicles = {};
+  for (const chronicleURI of Object.keys((purgedProphecy.meta || {}).chronicles || {})) {
+    affectedChronicles[chronicleURI] = {};
+  }
+  const elaboration = {
+    falseProphet,
+    type: "profess-error",
+    newRecitalStories: [],
+    schismaticRecital: purgedRecital,
+    affectedChronicles,
+  };
+  _iterateElaborationAndOrRevisioning(elaboration,
+      purgedProphecy.next, // completely skip the purged prophecy
+  );
+}
+
+function _iterateElaborationAndOrRevisioning (elaboration, firstRevisionedStory) {
   const plog2 = elaboration.plog2 = elaboration.falseProphet.opLog(2, "elaboration");
-  plog2 && plog2.opEvent("",
-      `Elaborating recital (${
-          instigatorConnection._dumpEventIds(newEvents)}, ${type}, ${
-          instigatorConnection._dumpEventIds(schismaticCommands)})`, elaboration);
+  const instigatorConnection = elaboration.instigatorConnection;
 
-  newEvents.forEach((event, index) => {
-    newEvents[index] = {
-      ...event, meta: { ...(event.meta || {}), chronicleURI: elaboration.instigatorChronicleURI },
-    };
-  });
-
-  let revisioning;
-  if (schismaticCommands) {
-    revisioning = _launchRevisioning(elaboration);
-    plog2 && plog2.opEvent("revisioning",
-        `Revising schismatic recital: ${elaboration.schismaticRecital.size}`, { revisioning });
+  if (instigatorConnection) {
+    plog2 && plog2.opEvent("",
+        `Elaborating recital (${
+          instigatorConnection._dumpEventIds(elaboration.newEvents)}, ${elaboration.type})`,
+          elaboration);
   }
-  let nextSchism;
+
+  if (firstRevisionedStory) {
+    plog2 && plog2.opEvent("revisioning", `Revising schismatic recital: ${
+        elaboration.schismaticRecital.size}`, { firstRevisionedStory });
+  }
+
+  let newEventBlockingSchism;
+  let currentRevisionee = firstRevisionedStory;
   while (true) { // eslint-disable-line
     // Alternate between reciting new events and reviewing schismatic
     // stories, always preferring new events unless a new event is part
@@ -191,44 +269,50 @@ export function _elaborateRecital (instigatorConnection: FalseProphetConnection,
     // revise and recite or remove schismatic stories until the schism
     // blocking new events is resolved. Then go back to dispatching new
     // events.
-    if (!nextSchism) nextSchism = _extendRecitalUntilNextSchism(elaboration);
+    if (!newEventBlockingSchism && elaboration.newEvents) {
+      newEventBlockingSchism = _extendRecitalWithNewEventsUntilPartOfSchism(elaboration);
+    }
 
     // break if not in a revisioning (both undefined) or if recital
     // ring end has been reached
-    if (revisioning === elaboration.schismaticRecital) break;
+    if (currentRevisionee === elaboration.schismaticRecital) break;
 
-    let progress = revisioning.meta.operation._progress;
+    let progress = currentRevisionee.meta.operation._progress;
 
-    if (!progress) progress = _reviewForeignStory(elaboration, revisioning, nextSchism);
+    if (!progress) {
+      progress = _reviewForeignStory(elaboration, currentRevisionee, newEventBlockingSchism);
+    }
 
     const recomposition = (!progress || (progress.isRevisable !== false))
-        && _recomposeSchismaticStory(elaboration.falseProphet, revisioning);
+        && _recomposeSchismaticStory(elaboration.falseProphet, currentRevisionee);
     if (recomposition) {
       progress = recomposition.meta.operation._progress;
       if (!progress || !progress.isSchismatic) {
         elaboration.newRecitalStories.push(recomposition);
       } else {
-        const revisedReformee = instigatorConnection
-            ._reviewRecomposedSchism(revisioning, recomposition);
+        const revisedReformee = instigatorConnection && instigatorConnection
+            ._reviewRecomposedSchism(currentRevisionee, recomposition);
         if (revisedReformee) {
           elaboration.newRecitalStories.push(revisedReformee);
         } else {
-          _purgeLatestRecitedStory(elaboration.falseProphet, recomposition);
+          _purgeRecitedStory(elaboration.falseProphet, recomposition, true);
         }
       }
     }
 
-    if (revisioning === nextSchism) {
-      nextSchism = undefined;
-      progress = revisioning.meta.operation._progress;
-      const schismCause = newEvents[elaboration.newEventIndex];
-      if (!progress || !progress.isSchismatic) {
-        _rewriteVenueCommand(instigatorConnection, revisioning, schismCause);
-      } else {
-        _rewriteRevisionBreachVenueCommand(
-              elaboration, progress, revisioning, recomposition, schismCause);
+    if (currentRevisionee === newEventBlockingSchism) {
+      newEventBlockingSchism = undefined;
+      progress = currentRevisionee.meta.operation._progress;
+      if (elaboration.newEventIndex !== undefined) {
+        const schismCause = elaboration.newEvents[elaboration.newEventIndex];
+        if (!progress || !progress.isSchismatic) {
+          _rewriteVenueCommand(elaboration.instigatorConnection, currentRevisionee, schismCause);
+        } else {
+          _rewriteRevisionBreachVenueCommand(
+                elaboration, progress, currentRevisionee, recomposition, schismCause);
+        }
+        ++elaboration.newEventIndex;
       }
-      ++elaboration.newEventIndex;
     }
 
     if (progress) {
@@ -239,26 +323,26 @@ export function _elaborateRecital (instigatorConnection: FalseProphetConnection,
       // need to be fully, possibly asynchronously, even interactively
       // revised as they're likely to depend on the first schismatic
       // change.
-      for (const chronicleURI of Object.keys((revisioning.meta || {}).chronicles || {})) {
+      for (const chronicleURI of Object.keys((currentRevisionee.meta || {}).chronicles || {})) {
         const affectedChronicle = elaboration.affectedChronicles[chronicleURI]
             || (elaboration.affectedChronicles[chronicleURI] = {});
         if (!progress.isSchismatic) continue;
         if (!affectedChronicle.isSchismatic) {
           affectedChronicle.isSchismatic = true;
-          affectedChronicle.initialSchism = revisioning;
+          affectedChronicle.initialSchism = currentRevisionee;
           affectedChronicle.propheciesToRevise = [];
         }
-        affectedChronicle.propheciesToRevise.push(revisioning);
+        affectedChronicle.propheciesToRevise.push(currentRevisionee);
       }
     }
 
     // Remove successfully repeated/reviewed stories from the schismatic recital.
-    revisioning = !progress || !progress.isSchismatic
-        ? elaboration.schismaticRecital.removeStory(revisioning) // Also advances to next
-        : revisioning.next; // Keep it as schismatic, just advance to next
+    currentRevisionee = !progress || !progress.isSchismatic
+        ? elaboration.schismaticRecital.removeStory(currentRevisionee) // Also advances to next
+        : currentRevisionee.next; // Keep it as schismatic, just advance to next
   }
 
-  if (revisioning && _finalizeRevisioning(elaboration)) {
+  if (currentRevisionee && _finalizeRevisioning(elaboration)) {
     elaboration.schismaticRecital = undefined;
   }
 
@@ -266,70 +350,26 @@ export function _elaborateRecital (instigatorConnection: FalseProphetConnection,
       ._reciteStoriesToFollowers(elaboration.newRecitalStories, elaboration.schismaticRecital);
   elaboration.isComplete = true;
 
-  instigatorConnection._checkForFreezeAndNotify(plog2, newEvents);
+  if (elaboration.instigatorConnection) {
+    elaboration.instigatorConnection._checkForFreezeAndNotify(plog2, elaboration.newEvents);
+  }
   _confirmLeadingTruthsToFollowers(elaboration.falseProphet);
 
   plog2 && plog2.opEvent("done",
       "Elaboration done");
 }
 
-function _launchRevisioning (elaboration: Object): Story {
-  let initialSchism, schismaticRecitalName;
-  const prophet = elaboration.falseProphet;
-  for (const command of elaboration.schismaticCommands) {
-    const prophecy = prophet._canonicalRecital.getStoryBy(command.aspects.command.id);
-    if (!prophecy) continue;
-    if (!initialSchism) {
-      initialSchism = prophecy;
-      schismaticRecitalName = `schismatic:${initialSchism.aspects.command.id}`;
-    }
-    const operation = (prophecy.meta || {}).operation;
-    if (!operation) continue;
-
-    const progress = operation.getProgressEvent("schism");
-    progress.schismaticCommand = command;
-    if (progress.isSchismatic === true) {
-      // Mark already schismatic prophecies as decidedly non-revisable
-      progress.isRevisable = false;
-    } else {
-      // Mark dependent prophecies to become by-default-action
-      // schismatic and non-revisable.
-      progress.isSchismatic = undefined;
-      if (progress.isRevisable !== true) progress.isRevisable = undefined;
-    }
-    if (progress.isReformable !== false) progress.isReformable = undefined;
-    if (!progress.message) {
-      progress.message = `revisioning due to ${
-        initialSchism === prophecy ? "own schism" : schismaticRecitalName}`;
-    }
-    const transactor = prophecy.meta.transactor;
-    if (transactor) {
-      transactor.dispatchAndDefaultActEvent(progress);
-    } else {
-      operation.defaultActEvent(progress);
-    }
-  }
-  if (!initialSchism) return undefined;
-
-  prophet._canonicalRecital.extractStoryChain(initialSchism);
-  const purgedState = initialSchism.previousState;
-  prophet.recreateCorpus(purgedState);
-  elaboration.schismaticRecital = new StoryRecital(initialSchism, schismaticRecitalName);
-  elaboration.affectedChronicles = { [elaboration.instigatorChronicleURI]: {} };
-  return elaboration.schismaticRecital.getFirst();
-}
-
-function _extendRecitalUntilNextSchism (elaboration) {
+function _extendRecitalWithNewEventsUntilPartOfSchism (elaboration) {
   const newEvents = elaboration.newEvents;
   for (; elaboration.newEventIndex !== newEvents.length; ++elaboration.newEventIndex) {
     const newEvent = newEvents[elaboration.newEventIndex];
-    const nextSchism = elaboration.schismaticRecital
+    const partOfSchism = elaboration.schismaticRecital
         && elaboration.schismaticRecital.getStoryBy(newEvent.aspects.command.id);
-    if (nextSchism) { // This new event revises an existing schism.
-      if (nextSchism.meta.operation._progress) {
-        nextSchism.meta.operation._progress.isRevisable = true;
+    if (partOfSchism) { // This new event revises an existing schism.
+      if (partOfSchism.meta.operation._progress) {
+        partOfSchism.meta.operation._progress.isRevisable = true;
       }
-      return nextSchism; // Switch to schism review phase.
+      return partOfSchism; // Switch to schism review phase.
     }
     const story = _composeEventIntoRecitalStory(elaboration.falseProphet, newEvent,
         elaboration.type, (elaboration.type !== "receive_truth") ? {} : {
@@ -341,10 +381,10 @@ function _extendRecitalUntilNextSchism (elaboration) {
   return undefined;
 }
 
-function _reviewForeignStory (elaboration, revisioning, nextSchism) { // eslint-disable-line
-  const meta = revisioning.meta;
+function _reviewForeignStory (elaboration, foreignStory, nextSchism) { // eslint-disable-line
+  const meta = foreignStory.meta;
   // No progression tracking for pre-existing truths needed
-  if (!revisioning.isProphecy || !meta) return undefined;
+  if (!foreignStory.isProphecy || !meta) return undefined;
   const chronicleURIs = meta.chronicles ? Object.keys(meta.chronicles)
       : meta.chronicleURI ? [meta.chronicleURI]
       : undefined;
@@ -354,7 +394,7 @@ function _reviewForeignStory (elaboration, revisioning, nextSchism) { // eslint-
     const affectedChronicle = elaboration.affectedChronicles[chronicleURI];
     if (!affectedChronicle) continue;
     if (chronicleURI === elaboration.instigatorChronicleURI) {
-      if (revisioning === nextSchism) continue;
+      if (foreignStory === nextSchism) continue;
       progress.message = `schism created by a prophecy reordering revisioning`;
       progress.reorderingSchism = nextSchism;
     } else if (affectedChronicle.isSchismatic) {
@@ -390,7 +430,7 @@ export function _recomposeSchismaticStory (falseProphet: FalseProphet, story: Pr
       progress.prophecy = recomposedStory;
       progress.oldProphecy = story;
       if (!transactor.dispatchAndDefaultActEvent(progress, { dispatchPath })) {
-        _purgeLatestRecitedStory(falseProphet, recomposedStory);
+        _purgeRecitedStory(falseProphet, recomposedStory, true);
         return undefined;
       }
     }
@@ -406,7 +446,7 @@ export function _recomposeSchismaticStory (falseProphet: FalseProphet, story: Pr
         "\n\tevent:", ...dumpObject(event),
         "\n\tstory:", ...dumpObject(story));
     if (recomposedStory) {
-      _purgeLatestRecitedStory(falseProphet, recomposedStory, false);
+      _purgeRecitedStory(falseProphet, recomposedStory, false);
     } else if (progress) {
       progress.type = "reform";
     }
@@ -461,13 +501,22 @@ function _finalizeRevisioning (elaboration: Object) {
       `Reforming ${hereticRecital.size} events onwards from elaborated event #${
           elaboration.newEventIndex}`);
   let purgedHeresies;
-  for (let heresy = hereticRecital.getFirst(); heresy !== hereticRecital;) {
+  let heresy = hereticRecital.getFirst();
+  const isPurgeRevisioning = !elaboration.instigatorConnection;
+  if (isPurgeRevisioning) {
+     // skip the alredy purged prophecy that caused this revisioning
+    purgedHeresies = [heresy];
+    heresy = heresy.next;
+  }
+  while (heresy !== hereticRecital) {
     const operation = (heresy.meta || {}).operation;
     if (!operation) {
       // not originating from our downstream during this execution session; someone else's problem.
       continue;
     }
-    const revisedHeresy = operation.launchPartialReform(elaboration);
+    const revisedHeresy = !isPurgeRevisioning
+        ? operation.launchPartialReform(elaboration)
+        : operation.launchFullReform();
     if (revisedHeresy && !isPromise(revisedHeresy)) {
       // add synchronous reform as part of the current revisioning
       elaboration.newRecitalStories.push(revisedHeresy);
@@ -486,7 +535,7 @@ function _finalizeRevisioning (elaboration: Object) {
     heresy = heresy.next;
   }
   if (purgedHeresies) {
-    elaboration.instigatorConnection.errorEvent(1, () => [
+    (elaboration.instigatorConnection || elaboration.falseProphet).errorEvent(1, () => [
       "\n\nHERESIES PURGED:", ...purgedHeresies.map(h => {
         const result = { command: ({ ...getActionFromPassage(h) }) };
         result.chronicles = result.command.meta.chronicles;
@@ -496,10 +545,9 @@ function _finalizeRevisioning (elaboration: Object) {
       "\n\tby revisioning:", ...dumpObject(elaboration),
       "\n\tof heretic recital:", ...dumpObject(hereticRecital),
       "\n\telaboration new events:", ...dumpObject(elaboration.newEvents),
-      "\n\telaboration schismatic commands:", ...dumpObject(elaboration.schismaticCommands),
     ]);
   }
-  return hereticRecital.getFirst() === hereticRecital;
+  return hereticRecital.isEmpty();
 }
 
 export function _reciteStoriesToFollowers (falseProphet: FalseProphet, stories: Story[],

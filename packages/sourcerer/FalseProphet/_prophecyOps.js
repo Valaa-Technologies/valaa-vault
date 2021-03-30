@@ -21,7 +21,7 @@ import {
 import { fabricatorOps } from "~/sourcerer/FalseProphet/TransactionState";
 import FalseProphet from "./FalseProphet";
 import {
-  _composeEventIntoRecitalStory, _recomposeSchismaticStory, _purgeLatestRecitedStory,
+  _composeEventIntoRecitalStory, _recomposeSchismaticStory, _purgeProphecyFromRecital,
 } from "./_recitalOps";
 import FalseProphetConnection from "./FalseProphetConnection";
 
@@ -407,8 +407,8 @@ export class ProphecyOperation extends ProphecyEventResult {
     return Promise.all(storyReactions);
   }
 
-  errorOnProphecyOperation (errorWrap, error, nothrow) {
-    const wrappedError = this.getChronicler().wrapErrorEvent(error, 1, errorWrap,
+  errorOnProphecyOperation (contextName, error, nothrow) {
+    const wrappedError = this.getChronicler().wrapErrorEvent(error, 1, contextName,
         "\n\tduring:", this._sceneName,
         "\n\tevents:", ...dumpObject(this._events),
         "\n\tevent:", ...dumpObject(this._events[this.index]),
@@ -452,12 +452,12 @@ export class ProphecyOperation extends ProphecyEventResult {
     this._venues = {};
     this._acts = [];
     let missingConnections;
-    const chronicles = (this._prophecy.meta || {}).chronicles;
-    if (!chronicles) {
-      throw new Error("prophecy is missing chronicle information");
-    }
+    if (!this._prophecy.meta) throw new Error("prophecy.meta missing");
+    const chronicles = this._prophecy.meta.chronicles;
+    if (!chronicles) throw new Error("prophecy is missing chronicle information");
+
     const prophet = this._parent;
-    let remoteActs, localActs, memoryActs;
+    let remoteVenues, localVenues, memoryVenues;
     for (const [chronicleOrPartitionURI, chronicleInfo] of Object.entries(chronicles)) {
       let chronicleURI = chronicleOrPartitionURI;
       let connection = prophet._connections[chronicleURI];
@@ -465,7 +465,7 @@ export class ProphecyOperation extends ProphecyEventResult {
         chronicleURI = naiveURI.createPartitionURI(chronicleOrPartitionURI);
         connection = prophet._connections[chronicleURI];
         if (!connection) {
-          if (!chronicleInfo.isNewConnection) {
+          if (!chronicleInfo.isNewChronicle) {
             (missingConnections || (missingConnections = [])).push(chronicleURI);
             continue;
           }
@@ -473,24 +473,23 @@ export class ProphecyOperation extends ProphecyEventResult {
               .sourcerChronicle(chronicleURI, { newChronicle: true });
         }
       }
-      if (!this._prophecy.meta) throw new Error("prophecy.meta missing");
 
       const commandEvent = extractChronicleEvent0Dot2(
           chronicleURI, getActionFromPassage(this._prophecy));
-      (connection.isRemoteAuthority()
-              ? (remoteActs || (remoteActs = []))
+      const actVenues = connection.isRemoteAuthority()
+              ? (remoteVenues || (remoteVenues = []))
           : connection.isLocallyRecorded()
-              ? (localActs || (localActs = []))
-              : (memoryActs || (memoryActs = []))
-      ).push((this._venues[chronicleURI] = { connection, commandEvent, chronicleInfo }));
+              ? (localVenues || (localVenues = []))
+              : (memoryVenues || (memoryVenues = []));
+      actVenues.push((this._venues[chronicleURI] = { connection, commandEvent, chronicleInfo }));
     }
     if (missingConnections) {
       throw new AbsentChroniclesError(`Missing active connections: '${
           missingConnections.map(c => c.toString()).join("', '")}'`, missingConnections);
     }
-    if (remoteActs) this._acts.push(remoteActs);
-    if (localActs) this._acts.push(localActs);
-    if (memoryActs) this._acts.push(memoryActs);
+    if (remoteVenues) this._acts.push(remoteVenues);
+    if (localVenues) this._acts.push(localVenues);
+    if (memoryVenues) this._acts.push(memoryVenues);
   }
 
   getActs () {
@@ -516,8 +515,7 @@ export class ProphecyOperation extends ProphecyEventResult {
                     }" not supported by connection ${connection.getName()} which only supports "${
                     connectionEventVersion}"`);
               }
-              // Perform other chronicle validatedVenue
-              // TODO(iridian): extract chronicle content (EDIT: a what now?)
+              // Perform other chronicle validation
               return (venue.validatedVenue = venue);
             },
         );
@@ -654,10 +652,10 @@ export class ProphecyOperation extends ProphecyEventResult {
     if (!prophecy && this._rejectionError) throw this._rejectionError;
     this._fulfillment = null;
     if (prophecy) this.purge(error);
-    this._rejectionError = this.errorOnProphecyOperation(
-        new Error(`proclaimEvents.eventResults[${this.index}].profess(phase#${phaseIndex}/${
-            this._sceneName})`),
-        error, true);
+    const contextName = new Error(`proclaimEvents.eventResults[${
+        this.index}].profess(phase#${phaseIndex}/${this._sceneName})`);
+    contextName.tidyFrameList = error.outerFrameList;
+    this._rejectionError = this.errorOnProphecyOperation(contextName, error, true);
     this._prophecy = null;
     const transactor = this.event.meta.transactor;
     if (transactor) {
@@ -666,15 +664,12 @@ export class ProphecyOperation extends ProphecyEventResult {
       transactor.dispatchAndDefaultActEvent(errorEvent);
     } else if (!this._truthStory && (this.getVerbosity() >= 1)) {
       this.outputErrorEvent(this._rejectionError,
-          `Exception caught during a fire-and-forget proclaimEvents.profess`);
+          `Exception caught during a transactor-less proclaimEvents.profess`);
     }
     if (!prophecy) return null;
     prophecy.rejectionReason = this._rejectionError;
     try {
-      const purgedRecital = _purgeLatestRecitedStory(this._parent, prophecy, false);
-      if (purgedRecital) {
-        this._parent._reciteStoriesToFollowers([], purgedRecital);
-      }
+      _purgeProphecyFromRecital(this._parent, prophecy);
     } catch (innerError) {
       outputError(innerError, `Exception caught during proclaimEvents.profess.purge`);
       outputError(error, "Exception caught during proclaim");
@@ -690,8 +685,8 @@ export class ProphecyOperation extends ProphecyEventResult {
     const venues = this._venues;
     if (venues) {
       for (const venue of reformation.instigatorChronicleURI
-          ? [[reformation.instigatorChronicleURI]]
-          : Object.values(this._venues)) {
+          ? [venues[reformation.instigatorChronicleURI]]
+          : Object.values(venues)) {
         if (!venue) continue;
         this._recordedStory = null;
         venue.proclamation = null;
@@ -796,8 +791,7 @@ export class ProphecyOperation extends ProphecyEventResult {
     const connection = reformation.instigatorConnection;
     const wrappedError = !connection ? error : this.wrapErrorEvent(error, 2,
         new Error(`reformAsHeresy(${connection._dumpEventIds(this._prophecy)}, ${
-          connection._dumpEventIds(reformation.newEvents || [])}, ${
-          connection._dumpEventIds(reformation.schismaticCommands || [])})`));
+          connection._dumpEventIds(reformation.newEvents || [])})`));
     const transactor = ((this._prophecy || {}).meta || {}).transactor;
     if (transactor) {
       const errorEvent = this.getProgressErrorEvent(

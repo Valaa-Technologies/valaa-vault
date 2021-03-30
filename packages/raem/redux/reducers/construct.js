@@ -180,7 +180,7 @@ export function recurseCreateOrDuplicate (bard: CreateBard, actionTypeName: stri
 
       if (isResource) {
         bard.refreshChronicle = false;
-        const isNewChronicle = setCreatedObjectChronicle(bard.objectTransient);
+        const isNewChronicle = setCreatedObjectChronicle(bard, bard.objectTransient);
         if (!(bard.passage.meta || {}).isVirtualAction) {
           universalizeChronicleMutation(bard, bard.objectId, isNewChronicle);
         }

@@ -224,6 +224,14 @@ export default class Sourcerer extends FabricEventTarget {
     return this.getActiveConnections();
   }
 
+  createChronicleURI (authorityURI: string, chronicleId: string): string {
+    return this._upstream.createChronicleURI(authorityURI, chronicleId);
+  }
+
+  splitChronicleURI (chronicleURI: string): [string, string] {
+    return this._upstream.splitChronicleURI(chronicleURI);
+  }
+
   obtainAuthorityOfChronicle (chronicleURI: string) {
     return this._upstream.obtainAuthorityOfChronicle(chronicleURI);
   }

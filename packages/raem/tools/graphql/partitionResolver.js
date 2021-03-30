@@ -1,13 +1,14 @@
 // @flow
 
-import { naiveURI } from "~/raem/ValaaURI";
 import { resolveChronicleURI } from "~/raem/tools/denormalized/partitions";
 
 export default function chronicleRootResolver (source: any, args: any,
     { rootValue: { resolver } }: Object) {
   const chronicleURI = resolveChronicleURI(resolver, source.get("id"));
-  return chronicleURI && Object.create(resolver)
-      .goToTransientOfRawId(naiveURI.getChronicleId(chronicleURI), "TransientFields");
+  if (!chronicleURI) return undefined;
+  const [, chronicleId] = resolver.splitChronicleURI(chronicleURI);
+  return Object.create(resolver)
+      .goToTransientOfRawId(chronicleId, "TransientFields");
 }
 
 export function chronicleURIResolver (source: any, args: any,

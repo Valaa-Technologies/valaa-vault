@@ -5,7 +5,6 @@ import type { VRL } from "~/raem/VRL"; // eslint-disable-line no-duplicate-impor
 import { isCreatedLike } from "~/raem/events";
 import Bard, { getActionFromPassage } from "~/raem/redux/Bard";
 import { tryHostRef } from "~/raem/VALK/hostReference";
-import { naiveURI } from "~/raem/ValaaURI";
 import { Resolver, Transient } from "~/raem/state";
 
 import traverseMaterializedOwnlings
@@ -243,11 +242,12 @@ export function resolveChronicleURI (resolver: Resolver, resourceId: VRL) {
       .getChronicleURI();
 }
 
-export function setCreatedObjectChronicle (mutableTransient: Transient) {
+export function setCreatedObjectChronicle (bard: Bard, mutableTransient: Transient) {
   const transientId = mutableTransient.get("id");
   const authorityURI = mutableTransient.get("authorityURI")
       || mutableTransient.get("partitionAuthorityURI");
-  const chronicleURI = determineNewObjectChronicle(authorityURI, mutableTransient, transientId);
+  const chronicleURI = determineNewObjectChronicle(
+      bard, authorityURI, mutableTransient, transientId);
   if (!chronicleURI) return undefined;
   if (chronicleURI !== transientId.getChronicleURI()) {
     transientId.setChronicleURI(chronicleURI);
@@ -260,7 +260,8 @@ export function setModifiedObjectChronicleAndUpdateOwneeObjectIdChronicles (
   const transientId = mutableTransient.get("id");
   const authorityURI = mutableTransient.get("authorityURI")
       || mutableTransient.get("partitionAuthorityURI");
-  const chronicleURI = determineNewObjectChronicle(authorityURI, mutableTransient, transientId);
+  const chronicleURI = determineNewObjectChronicle(
+      bard, authorityURI, mutableTransient, transientId);
   const oldChronicleURI = transientId.getChronicleURI();
   if (chronicleURI !== oldChronicleURI) {
     mutableTransient.set("id", transientId.immutateWithChronicleURI(chronicleURI));
@@ -269,7 +270,7 @@ export function setModifiedObjectChronicleAndUpdateOwneeObjectIdChronicles (
 }
 
 export function determineNewObjectChronicle (
-    authorityURI, mutableTransient: Transient, transientId: VRL) {
+    bard: Bard, authorityURI: string, mutableTransient: Transient, transientId: VRL) {
   if (transientId.isGhost()) {
     // Materializing or modifying ghost.
     if (authorityURI) {
@@ -282,7 +283,7 @@ export function determineNewObjectChronicle (
   let chronicleURI;
   const ownerId = mutableTransient.get("owner");
   if (authorityURI) {
-    chronicleURI = naiveURI.createChronicleURI(authorityURI, transientId.rawId());
+    chronicleURI = bard.createChronicleURI(authorityURI, transientId.rawId());
   } else if (ownerId) {
     chronicleURI = ownerId.getChronicleURI();
   } else {

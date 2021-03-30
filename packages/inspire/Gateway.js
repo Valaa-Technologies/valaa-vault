@@ -242,7 +242,7 @@ export default class Gateway extends FabricEventTarget {
       // ('scriptures') based on the revelation.
       this.scribe = await this._proselytizeScribe(this.gatewayRevelation, this.oracle, plog1);
 
-      this.corpus = await this._incorporateCorpus(this.gatewayRevelation, plog1);
+      this.corpus = await this._incorporateCorpus(this.gatewayRevelation, this.oracle, plog1);
 
       // Create the the main in-memory false prophet using the stream router as its upstream.
       this.falseProphet = await this._proselytizeFalseProphet(
@@ -615,7 +615,7 @@ export default class Gateway extends FabricEventTarget {
     }
   }
 
-  async _incorporateCorpus (gatewayRevelation: Object, parentPlog) {
+  async _incorporateCorpus (gatewayRevelation: Object, oracle: Oracle, parentPlog) {
     const name = "Inspire Corpus";
     const reducerOptions = {
       ...EngineContentAPI, // schema, validators, reducers
@@ -635,6 +635,8 @@ export default class Gateway extends FabricEventTarget {
       parent: this, name,
       schema, middlewares,
       reduce: mainReduce, subReduce,
+      createChronicleURI: oracle.createChronicleURI.bind(oracle),
+      splitChronicleURI: oracle.splitChronicleURI.bind(oracle),
       initialState: new ImmutableMap(),
       ...(gatewayRevelation.corpus || {}),
     };
@@ -972,10 +974,10 @@ export default class Gateway extends FabricEventTarget {
       const chronicleInfos = Object.assign({},
           await reveal(prologue.partitionInfos),
           await reveal(prologue.chronicleInfos));
-      for (const [revelationChronicleURI, info] of Object.entries(chronicleInfos)) {
+      for (const [revelationChronicleIdOrURI, info] of Object.entries(chronicleInfos)) {
         const chronicleURI = info.authorityURI
-            ? naiveURI.createChronicleURI(info.authorityURI, revelationChronicleURI)
-            : naiveURI.createPartitionURI(revelationChronicleURI);
+            ? this.discourse.createChronicleURI(info.authorityURI, revelationChronicleIdOrURI)
+            : naiveURI.createPartitionURI(revelationChronicleIdOrURI);
         ret.push({ chronicleURI, ...(await reveal(info)) });
         if (chronicleURI === rootChronicleURI) rootChronicleURISeen = true;
       }

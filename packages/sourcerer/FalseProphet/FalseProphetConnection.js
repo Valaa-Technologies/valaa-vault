@@ -7,7 +7,7 @@ import Connection from "~/sourcerer/api/Connection";
 import { ProclaimOptions, Proclamation, ProclaimEventResult, NarrateOptions }
     from "~/sourcerer/api/types";
 import { initializeAspects, tryAspect } from "~/sourcerer/tools/EventAspects";
-import SOURCERER_EVENT_VERSION from "~/sourcerer";
+import { SOURCERER_EVENT_VERSION  } from "~/sourcerer";
 import IdentityMediator from "~/sourcerer/FalseProphet/IdentityMediator";
 
 import { dumpObject, mapEagerly, thisChainRedirect } from "~/tools";
@@ -45,10 +45,11 @@ export default class FalseProphetConnection extends Connection {
 
   constructor (options) {
     super(options);
-    const existingRef = this.getFalseProphet()._absentChronicleVRLPrototypes[this._chronicleURI];
+    const prophet = this.getFalseProphet();
+    const existingRef = prophet._absentChronicleVRLPrototypes[this._chronicleURI];
     if (existingRef) {
       this._referencePrototype = existingRef;
-      delete this.getFalseProphet()._absentChronicleVRLPrototypes[this._chronicleURI];
+      delete prophet._absentChronicleVRLPrototypes[this._chronicleURI];
     } else {
       this._referencePrototype = new VRL()
           .initResolverComponent({ absent: true, partition: this._chronicleURI });
@@ -56,7 +57,8 @@ export default class FalseProphetConnection extends Connection {
     if ((options.sourceryOptions || {}).newChronicle) {
       this._referencePrototype.setAbsent(false);
     }
-    this._rootStem = this._chronicleURI.match(/\?id=(.*)@@$/)[1];
+    const [, chronicleId] = prophet.splitChronicleURI(this._chronicleURI);
+    this._rootStem = chronicleId.endsWith("@@") ? chronicleId.slice(0, -2) : `@${chronicleId}`;
   }
 
   getFalseProphet () { return this._parent; }

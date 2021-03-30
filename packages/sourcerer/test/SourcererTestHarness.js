@@ -12,9 +12,9 @@ import ScriptTestHarness, { createScriptTestHarness } from "~/script/test/Script
 import {
   AuthorityNexus, FalseProphet, FalseProphetDiscourse, Oracle, Connection, Sourcerer,
   Scribe, Follower,
+  SOURCERER_EVENT_VERSION,
 } from "~/sourcerer";
 import { obtainAspect } from "~/sourcerer/tools/EventAspects";
-import SOURCERER_EVENT_VERSION from "~/sourcerer";
 
 import SourcererTestAPI from "~/sourcerer/test/SourcererTestAPI";
 import createValaaTestScheme, { TestSourcerer, TestConnection }
@@ -131,7 +131,7 @@ export default class SourcererTestHarness extends ScriptTestHarness {
     this.testAuthorityURI = options.testAuthorityURI || testAuthorityURI;
     this.testChronicleURI = options.testChronicleURI
         || (options.testAuthorityURI
-            && naiveURI.createChronicleURI(this.testAuthorityURI, testRootId))
+            && naiveURI.createChronicleURI(options.testAuthorityURI, testRootId))
         || testChronicleURI;
   }
 

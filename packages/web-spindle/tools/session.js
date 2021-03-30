@@ -82,7 +82,7 @@ export function resolveScopeIdentityRoles (router, route, scope) {
     throw expired;
   }
   const ret = router.getIdentityRoles(identityChronicle);
-  const [, authorityURI, identityId] = identityChronicle.match(/^(.*)\?id=(.*)$/) || [];
+  const [authorityURI, identityId] = router.getDiscourse().splitChronicleURI(identityChronicle);
   if (authorityURI) {
     scope.sessionIdentity = vRef(identityId, undefined, undefined, identityChronicle)
         .setAbsent();

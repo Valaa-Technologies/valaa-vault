@@ -131,19 +131,19 @@ this document.`
 ┌────────────────────────────────────────────────┴─────────────────────────────────────────────────┐
                   chronicle-uri                                      resource-ref
 ┌───────────────────────┴────────────────────────┐ ┌──────────────────────┴────────────────────────┐
-                         resource-url                                         ref-params
+                         resource-uri                                         ref-params
 ┌──────────────────────────────┴────────────────────────────────┐  ┌───────────────┴───────────────┐
          authority-uri               chronicle-id   resource-id         coupling           lens
-┌──────────────┴───────────────┐    ┌─────┴──────┐ ┌─────┴──────┐  ┌───────┴────────┐ ┌─────┴──────┐
+┌────────────────┴────────────────┐┌─────┴──────┐  ┌─────┴──────┐  ┌───────┴────────┐ ┌─────┴──────┐
 
-valaa-test://example.com:123/dev?id=@$~raw.a...2@@#987b-72...8263?=coupling=relations&lens=ROOT_LENS
+valosp://example.com:123/dev-stage/~raw:abcd-efgh/#987b-72...8263?=coupling=relations&lens=ROOT_LENS
 
                                                    └─────┬──────┘  └──────────────┬────────────────┘
                                                         nss                  q-component
-└───┬────┘   └──────┬──────┘ └┬┘ └───────┬───────┘ └──────────────────────┬────────────────────────┘
-  scheme        authority    path      query                           fragment
-             └────────┬────────┘
-                  hier-part
+└──┬──┘  └──────┬──────┘└───────────┬────────────┘└───────────────────────┬────────────────────────┘
+  scheme      authority            path                                fragment
+                        └───────────┬────────────┘
+                              hier-part
 `,
       "chapter#section_dualisms>1;Curious dualisms of *chronicle URI* and *local reference*": {
         "#0":

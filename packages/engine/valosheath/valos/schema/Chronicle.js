@@ -12,11 +12,15 @@ export default {
     // implementation dispatcher.
     )(naiveURI.createPartitionURI),
     createChronicleURI: denoteValOSCallable(
-`Creates a URI from given *base* and *chronicleId* strings (coercing non-vplot id's)`
-    // TODO(iridian): Replace naiveURI.createChronicleURI with appropriate authority scheme-specific
-    // implementation dispatcher.
-    )(naiveURI.createChronicleURI),
-    tryPartitionConnection: denoteValOSCallable([
+`Creates a URI from given *authorityURI* and *chronicleId* strings (coercing non-vplot id's)`
+    )(function createChronicleURI (authorityURI, chronicleId) {
+      return this.__callerValker.createChronicleURI(authorityURI, chronicleId);
+    }),
+    splitChronicleURI: denoteValOSCallable(
+`Returns an array containing the authority URI and the chronicle id of given *chronicleURI*`
+    )(function splitChronicleURI (chronicleURI) {
+      return this.__callerValker.splitChronicleURI(chronicleURI);
+    }),    tryPartitionConnection: denoteValOSCallable([
 `Returns an existing, fully active connection to the chronicle with
 given *chronicleURI*, undefined otherwise`,
     ], [

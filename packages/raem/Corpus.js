@@ -5,6 +5,7 @@ import { invariantifyObject, invariantifyFunction } from "~/tools/invariantify";
 import type { Action } from "~/raem/events";
 import Bard, { StoryIndexTag } from "~/raem/redux/Bard";
 import layoutByObjectField from "~/raem/tools/denormalized/layoutByObjectField";
+import { naiveURI } from "~/raem/ValaaURI";
 
 import { dumpify } from "~/tools";
 import { dumpObject } from "~/tools/wrapError";
@@ -30,7 +31,7 @@ export default class Corpus extends Bard {
   constructor (options: {
     name: ?string, verbosity: ?number, parent: Object,
     schema: Object, middlewares: Array, reduce: Function, subReduce: Function,
-    initialState: Object,
+    createChronicleURI: ?Function, initialState: Object,
   }) {
     super(options);
     invariantifyObject(options.schema, "schema");
@@ -39,6 +40,8 @@ export default class Corpus extends Bard {
     invariantifyObject(options.initialState, "initialState", { allowUndefined: true });
     this.subReduce = options.subReduce || options.reduce;
     this.reduce = options.reduce;
+    this.createChronicleURI = options.createChronicleURI || naiveURI.createChronicleURI;
+    this.splitChronicleURI = options.splitChronicleURI || naiveURI.splitChronicleURI;
     this._dispatch = options.middlewares.reduceRight(
         (next, middleware) => middleware(this)(next),
         (action, corpus) => {

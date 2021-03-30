@@ -12,16 +12,25 @@ import { EVENT_VERSION as FUTURE_EVENT_VERSION } from "~/sourcerer/tools/event-v
 import ValOSPAuthority from "~/sourcerer/ValOSP/ValOSPAuthority";
 
 import { dumpObject, thenChainEagerly, fetchJSON } from "~/tools";
-import { naiveURI } from "~/raem";
 import type { ValaaURI } from "~/raem/ValaaURI";
 
 export default function createValOSProtocolScheme ({ parent } = {}) {
   return {
     scheme: "valosp",
 
-    getAuthorityURIFromChronicleURI (chronicleURI: string) {
-      const parts = chronicleURI.match(naiveURI.regex);
-      return `valosp://${parts[naiveURI.hostPart] || ""}${parts[naiveURI.pathPart] || ""}`;
+    createChronicleURI (authorityURI: string, chronicleId: string) {
+      if (authorityURI.slice(-1) !== "/") {
+        throw new Error(`valosp authorityURI must end in '/', got <${authorityURI}>`);
+      }
+      let chroniclePlot = chronicleId;
+      if (chronicleId.startsWith("@$")) {
+        chroniclePlot = chronicleId.slice(2, -2).replace(".", ":");
+      }
+      return `${authorityURI}${chroniclePlot}/`;
+    },
+
+    splitChronicleURI (chronicleURI: string): [string, string] {
+      return chronicleURI.match(/^(valosp:\/\/.*\/)([^/]+)\/$/).slice(1);
     },
 
     obtainAuthorityConfig (authorityURI: ValaaURI, maybePreConfig: ?AuthorityConfig):

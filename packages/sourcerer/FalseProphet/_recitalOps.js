@@ -211,7 +211,7 @@ export function _elaborateRecital (instigatorConnection: FalseProphetConnection,
     }
     if (initialSchism) {
       falseProphet._canonicalRecital.extractStoryChain(initialSchism);
-      initialSchism.recreateCorpus(initialSchism.previousState);
+      falseProphet.recreateCorpus(initialSchism.previousState);
       elaboration.schismaticRecital = new StoryRecital(initialSchism, schismaticRecitalName);
       elaboration.affectedChronicles = { [elaboration.instigatorChronicleURI]: {} };
       firstRevisionedStory = elaboration.schismaticRecital.getFirst();

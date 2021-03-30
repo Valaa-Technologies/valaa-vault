@@ -44,30 +44,37 @@ function or a resource.`,
 
   valos.refer = denoteValOSCallable([
 `Returns a valos resource referred to by the given *resourcePart*
-and the optional *chroniclePart* and *authorityURL* parts.`,
+and the optional *chroniclePart* and *authorityURI* parts.`,
 `This call has *locating* and *non-locating* variants depending on
 whether the parts contain the chronicle URL information.`,
 null,
-`If only a valos resource id string is given (ie. no '#'-separator) as
-the *resourcePart* then the reference doesn't contain a chronicle URL
-and is non-locating. If the resource is not already locally known then
-a non-locating resource cannot activated and is only useful for
-identity operations.
-If the resource is locally known it is returned and is possibly already
-active. Even if the resource is absent it is activateable because the
-known chronicle URI allows the chronicle to be sourcered.`,
+`If only the *resourcePart* is given and it only contains a valos
+resource id string (that is, it doesn't contain the '#'-separator) then
+the reference doesn't contain a chronicle URL and is non-locating.`,
 null,
-`All other variants contain the chronicle URL and return either a fully
-active or absent but locateable resource.`,
+`If a non-locating resource is not already locally known then
+non-activateable resource placeholder is returned. A placeholder
+is in itself is only useful for identity operations, but if the
+resource ever becomes locally known via other means the placeholder
+will be become known as well.
+Otherwise the locally known resource is returned. Note that it can
+still be absent (chronicle log is not sourcered) or sourcered but
+inactive (one of its prototypes' chronicle logs is not sourcered).
+However a locally known resource can always be activated as its known
+chronicle URI allows the resource chronicle and all of its prototypes'
+chronicles to be sourcered.`,
+null,
+`All other variants contain the chronicle URL and thus return locally
+known resources that are either fully active or activateable.`,
 null,
 `If all three parts are provided then *resourcePart* must be the vrid
 of the referred resource, *chroniclePart* must be the vgrid of the
 chronicle root resource and *authorityURL* must be the chronicle
-authority URL without the chronicle infix.`,
+authority URL (without any "?id=" or similar infix).`,
 null,
 `If no *authorityURL* is given then *chroniclePart* must be a
 fully formed chronicle URL (ie. contains the authority URL, the
-chronicle infix and the chronicle vgrid).`,
+possible joiner infix and the chronicle vgrid).`,
 null,
 `If no *chroniclePart* is given then *resourcePart* must be a full
 resource URL (ie. contains the chronicle URL as defined above and the
@@ -76,7 +83,7 @@ resource URL (ie. contains the chronicle URL as defined above and the
     let resourceVRID = resourcePart, chronicleURI;
     if (chroniclePart !== undefined) {
       chronicleURI = (authorityURI !== undefined)
-          ? `${authorityURI}?id=${chroniclePart}`
+          ? this._callerValker__.createChronicleURI(authorityURI, chroniclePart)
           : chroniclePart;
     } else if (resourcePart.indexOf("#") !== -1) {
       ([chronicleURI, resourceVRID] = resourcePart.split("#"));

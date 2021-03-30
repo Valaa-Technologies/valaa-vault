@@ -60,7 +60,7 @@ describe("Sourcerer", () => {
     const scribe = await createScribe(createOracle());
 
     const connection = await scribe
-        .sourcerChronicle(naiveURI.createChronicleURI("valaa-test:", testRootId))
+        .sourcerChronicle(scribe.createChronicleURI("valaa-test:", testRootId))
         .asSourceredConnection();
 
     const mediaVRL = vRef("abcd-0123");

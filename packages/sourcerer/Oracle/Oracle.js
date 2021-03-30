@@ -39,10 +39,18 @@ export default class Oracle extends Sourcerer {
 
   getDecoderArray () { return this._decoderArray; }
 
+  createChronicleURI (authorityURI: string, chronicleId: string) {
+    return this._authorityNexus.createChronicleURI(authorityURI, chronicleId);
+  }
+
+  splitChronicleURI (chronicleURI: string): [string, string] {
+    return this._authorityNexus.splitChronicleURI(chronicleURI);
+  }
+
   obtainAuthorityOfChronicle (chronicleURI: string) {
     const ret = this._authorityNexus.obtainAuthorityOfChronicle(chronicleURI);
     if (!ret) {
-      throw new Error(`Can't obtain authority for chronicle <${chronicleURI}>`);
+      throw new Error(`Couldn't obtain authority for chronicle <${chronicleURI}>`);
     }
     return ret;
   }

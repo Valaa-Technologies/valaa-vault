@@ -142,7 +142,7 @@ export default class RAEMTestHarness extends FabricEventTarget {
   }
 
   createValker () {
-    return new Valker({
+    const ret = new Valker({
       name: `${this.getName()} Valker`,
       parent: this,
       schema: this.schema,
@@ -155,6 +155,9 @@ export default class RAEMTestHarness extends FabricEventTarget {
       },
       steppers: this.corpusOptions.steppers,
     });
+    ret.createChronicleURI = this.corpus.createChronicleURI;
+    ret.splitChronicleURI = this.corpus.splitChronicleURI;
+    return ret;
   }
 
   static interceptErrors (testFunction) {

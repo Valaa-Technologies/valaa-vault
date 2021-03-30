@@ -146,6 +146,10 @@ export const naiveURI = {
     }
   },
 
+  splitChronicleURI: function splitNaiveChronicleURI (chronicleURI: string) {
+    return chronicleURI.match(/^([^?]*)\?id=(.*)$/).slice(1);
+  },
+
   createPartitionURI: function createNaivePartitionURI (
       baseString: string, partitionRawId: ?string): ValaaURI {
     if (partitionRawId !== undefined) {

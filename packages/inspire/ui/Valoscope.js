@@ -2,7 +2,6 @@
 
 import PropTypes from "prop-types";
 
-import { naiveURI } from "~/raem/ValaaURI";
 import { conjoinVPlotSection, disjoinVPlotOutline } from "~/plot";
 import { vRef } from "~/raem/VRL";
 
@@ -277,13 +276,14 @@ const _scopeFrameChain = [
       return thisChainRedirect("_createFrame");
     }
     this.rootFrameAuthorityURI = rootFrameAuthorityURI;
-    const chronicleURI = naiveURI.createChronicleURI(rootFrameAuthorityURI, this.frameId);
+    const discourse = this.engine.discourse;
+    const chronicleURI = discourse.createChronicleURI(rootFrameAuthorityURI, this.frameId);
     if (this.frameRef) {
       this.frameRef = this.frameRef.immutateWithChronicleURI(chronicleURI);
     } else {
       this.frameRef = vRef(this.frameId, undefined, undefined, chronicleURI);
     }
-    return this.engine.discourse.sourcerChronicle(chronicleURI).asSourceredConnection();
+    return discourse.sourcerChronicle(chronicleURI).asSourceredConnection();
   },
 
   function _obtainRootFrame (/* rootFrameConnection: Connection */) {

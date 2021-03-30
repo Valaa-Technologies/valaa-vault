@@ -9,7 +9,6 @@ import { getHostRef, HostRef, UnpackedHostValue } from "~/raem/VALK/hostReferenc
 
 import { destroyed, isCreatedLike } from "~/raem/events";
 import VRL, { vRef, invariantifyId, getRawIdFrom } from "~/raem/VRL";
-import { naiveURI } from "~/raem/ValaaURI";
 import { disjoinVPlot, formVPlot } from "~/plot";
 
 import dataFieldValue from "~/raem/tools/denormalized/dataFieldValue";
@@ -212,7 +211,8 @@ export default class Vrapper extends Cog {
   isChronicleRoot () {
     const chronicleURI = this[HostRef].getChronicleURI();
     if (!chronicleURI) return false;
-    return naiveURI.getChronicleId(chronicleURI) === this[HostRef].rawId();
+    const [, chronicleId] = this._parent.discourse.splitChronicleURI(chronicleURI);
+    return chronicleId === this[HostRef].rawId();
   }
 
   toJSON () {
@@ -511,7 +511,7 @@ export default class Vrapper extends Cog {
             const authorityURI = transient.get("authorityURI")
                 || transient.get("partitionAuthorityURI");
             chronicleURI = authorityURI
-                && naiveURI.createChronicleURI(authorityURI, transient.get("id").rawId());
+                && discourse.createChronicleURI(authorityURI, transient.get("id").rawId());
             console.warn("Created chronicle URI during connection acquire", chronicleURI);
           }
         }

@@ -4,7 +4,6 @@ import { OrderedMap, is } from "immutable";
 
 import { isCreatedLike } from "~/raem/events";
 import VRL, { getRawIdFrom } from "~/raem/VRL";
-import { naiveURI } from "~/raem/ValaaURI";
 
 import { elevateFieldRawSequence } from "~/raem/state/FieldInfo";
 import getObjectField, { fillFieldInfoAndResolveAliases }
@@ -381,7 +380,7 @@ const customSetFieldHandlers = {
   },
   authorityURI (bard: Bard, fieldInfo: Object, newAuthorityURI: ?string) {
     const newChronicleURI = newAuthorityURI
-        && naiveURI.createChronicleURI(newAuthorityURI, bard.objectId.rawId());
+        && bard.createChronicleURI(newAuthorityURI, bard.objectId.rawId());
     const oldChronicleURI = bard.objectId.getChronicleURI();
     if ((newChronicleURI && newChronicleURI.toString()) !==
         (oldChronicleURI && oldChronicleURI.toString())) {

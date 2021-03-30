@@ -1,6 +1,5 @@
 // @flow
 
-import { naiveURI } from "~/raem/ValaaURI";
 import type { EventBase } from "~/raem/events";
 
 import Sourcerer from "~/sourcerer/api/Sourcerer";
@@ -48,9 +47,9 @@ export default class Connection extends Follower {
   }
   getSourcerer (): Sourcerer { return this._parent; }
 
-  getAuthorityURI (): string { return naiveURI.getAuthorityURI(this._chronicleURI); }
+  getAuthorityURI (): string { return this._parent.splitChronicleURI(this._chronicleURI)[0]; }
   getChronicleURI (): string { return this._chronicleURI; }
-  getChronicleId (): string { return naiveURI.getChronicleId(this._chronicleURI); }
+  getChronicleId (): string { return this._parent.splitChronicleURI(this._chronicleURI)[1]; }
 
   getStatus (): Object {
     return {

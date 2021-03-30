@@ -14,7 +14,7 @@ import type Connection from "~/sourcerer/api/Connection";
 import type { ProclaimOptions, ChroniclePropheciesRequest, SourceryOptions, ProphecyEventResult }
     from "~/sourcerer/api/types";
 
-import SOURCERER_EVENT_VERSION from "~/sourcerer";
+import { SOURCERER_EVENT_VERSION  } from "~/sourcerer";
 
 import { initializeAspects, obtainAspect, tryAspect } from "~/sourcerer/tools/EventAspects";
 import createVRID0Dot2, { upgradeVRIDTo0Dot2, createChronicleRootVRID0Dot2 }
@@ -264,7 +264,7 @@ export default class FalseProphetDiscourse extends Discourse {
     const chronicleRootVRID = explicitChronicleRootVRID
         || createChronicleRootVRID0Dot2(
             root.aspects.command.id, authorityURI, Object.keys(chronicles).length);
-    const chronicleURI = naiveURI.createChronicleURI(authorityURI, chronicleRootVRID);
+    const chronicleURI = this.createChronicleURI(authorityURI, chronicleRootVRID);
     targetAction.id = vRef(chronicleRootVRID, undefined, undefined, chronicleURI);
     chronicles[chronicleURI] = {};
     /*
@@ -272,6 +272,14 @@ export default class FalseProphetDiscourse extends Discourse {
         explicitChronicleRootVRID, "\n\ttargetAction:", ...dumpObject(targetAction));
     */
     return targetAction.id;
+  }
+
+  createChronicleURI (authorityURI: string, chronicleId: string): string {
+    return this._falseProphet.createChronicleURI(authorityURI, chronicleId);
+  }
+
+  splitChronicleURI (chronicleURI: string): [string, string] {
+    return this._falseProphet.splitChronicleURI(chronicleURI);
   }
 }
 

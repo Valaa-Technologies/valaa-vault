@@ -98,7 +98,6 @@ function wrapError (errorIn, detailLevel, contextName, ...contextDescriptions) {
           .slice(1);
     }
   }
-  const innerTidyFrameList = innerError.tidyFrameList.slice();
   _clipFrameListToCurrentContext(innerError.tidyFrameList, contextError);
   contextError.message = errorIn.message;
   contextError.originalError = error.originalError || error;
@@ -106,7 +105,7 @@ function wrapError (errorIn, detailLevel, contextName, ...contextDescriptions) {
   contextError.contextDescriptions = contextDescriptions;
   error.originalError = error.originalError || error;
   error.errorContexts = (error.errorContexts || []).concat([contextError]);
-  error.tidyFrameList = contextError.tidyFrameList;
+  error.outerFrameList = contextError.tidyFrameList;
   return error;
 }
 

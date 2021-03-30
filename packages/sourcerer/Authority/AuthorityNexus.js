@@ -21,7 +21,8 @@ export type AuthorityOptions = {
 
 export type SchemeModule = {
   scheme: string,
-  getAuthorityURIFromChronicleURI: (chronicleURI: string) => string,
+  createChronicleURI: (authorityURI: string, chronicleId: string) => string,
+  splitChronicleURI: (chronicleURI: string) => [string, string],
   obtainAuthorityConfig:
       (chronicleURI: string, authorityPreConfig: ?AuthorityConfig) => ?AuthorityConfig,
   createAuthority: (options: AuthorityOptions) => Sourcerer,
@@ -81,8 +82,30 @@ export default class AuthorityNexus extends FabricEventTarget {
     throw new Error(`Cannot find authority for "${String(authorityURI)}"`);
   }
 
+  createChronicleURI (authorityURI: string, chronicleId: string) {
+    const ret = this
+        .getSchemeModule(getScheme(authorityURI))
+        .createChronicleURI(authorityURI, chronicleId);
+    if (!ret) {
+      throw new Error(`Couldn't create chronicleURI under authority <${authorityURI}>`);
+    }
+    return ret;
+  }
+
+  splitChronicleURI (chronicleURI: string): [string, string] {
+    const ret = this
+        .getSchemeModule(getScheme(chronicleURI))
+        .splitChronicleURI(chronicleURI);
+    if (!ret) {
+      throw new Error(`Couldn't split chronicleURI <${
+          chronicleURI}> to its authority URI and chronicle id parts`);
+    }
+    return ret;
+  }
+
   obtainAuthorityOfChronicle (chronicleURI: string) {
-    return this.obtainAuthority(this.getAuthorityURIFromChronicleURI(chronicleURI));
+    const [authorityURI] = this.splitChronicleURI(chronicleURI);
+    return this.obtainAuthority(authorityURI);
   }
 
   obtainAuthority (authorityURI: ValaaURI): Sourcerer {
@@ -92,27 +115,6 @@ export default class AuthorityNexus extends FabricEventTarget {
           = this._createAuthority(authorityURI);
     }
     return ret;
-  }
-
-  getAuthorityURIFromChronicleURI (chronicleURI: string): ValaaURI {
-    return this._tryAuthorityURIFromChronicleURI(chronicleURI, { require: true });
-  }
-
-  _tryAuthorityURIFromChronicleURI (chronicleURI: string, { require }: Object = {}): ValaaURI {
-    let schemeModule;
-    try {
-      schemeModule = this.trySchemeModule(getScheme(chronicleURI), { require });
-      if (!schemeModule) return undefined;
-      const ret = schemeModule.getAuthorityURIFromChronicleURI(chronicleURI, { require });
-      if (require && (ret === undefined)) {
-        throw new Error(`Scheme "${getScheme(chronicleURI)
-            }" could not determine authority URI of chronicle <${chronicleURI}>`);
-      }
-      return ret;
-    } catch (error) {
-      throw this.wrapErrorEvent(error, 2, `_tryAuthorityURIFromChronicleURI("${chronicleURI}")`,
-          "\n\tschemeModule:", schemeModule);
-    }
   }
 
   _createAuthority (authorityURI: ValaaURI): Sourcerer {

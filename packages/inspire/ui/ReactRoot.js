@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import preset from "jss-preset-default";
 import jss, { SheetsManager } from "jss";
 
-import { naiveURI } from "~/raem/ValaaURI";
 import derivedId from "~/raem/tools/derivedId";
 
 import Vrapper, { getImplicitMediaInterpretation } from "~/engine/Vrapper";
@@ -171,8 +170,9 @@ export default class ReactRoot extends React.Component {
   async _obtainUIRootFrame (authorityURI: string, vRootFocus: Vrapper, viewName: string) {
     const localInstanceVRID = derivedId(
         vRootFocus.getRawId(), "ui-roots", `@$~raw.${encodeURIComponent(viewName)}@@`);
-    const chronicleURI = naiveURI.createChronicleURI(authorityURI, localInstanceVRID);
-    await vRootFocus.getEngine().discourse
+    const discourse = vRootFocus.getEngine().discourse;
+    const chronicleURI = discourse.createChronicleURI(authorityURI, localInstanceVRID);
+    await discourse
         .sourcerChronicle(chronicleURI)
         .asSourceredConnection();
     let vLocalUIRoot = vRootFocus.getEngine()

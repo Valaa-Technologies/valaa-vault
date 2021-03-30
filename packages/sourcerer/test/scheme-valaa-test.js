@@ -1,6 +1,7 @@
 // @flow
 
 import { EventBase } from "~/raem/events";
+import { naiveURI } from "~/raem";
 
 import { Authority, AuthorityConnection, SOURCERER_EVENT_VERSION } from "~/sourcerer";
 import { Proclamation, ProclaimOptions, ProclaimEventResult, MediaInfo, NarrateOptions }
@@ -8,11 +9,12 @@ import { Proclamation, ProclaimOptions, ProclaimEventResult, MediaInfo, NarrateO
 
 import { dumpObject } from "~/tools";
 
-export default function createValaaTestScheme ({ config, authorityURI, /* parent */ } = {}) {
+export default function createValaaTestScheme ({ config, /* parent */ } = {}) {
   return {
     scheme: "valaa-test",
 
-    getAuthorityURIFromChronicleURI: () => authorityURI || `valaa-test:`,
+    createChronicleURI: naiveURI.createChronicleURI,
+    splitChronicleURI: naiveURI.splitChronicleURI,
 
     obtainAuthorityConfig: () => ({
       eventVersion: SOURCERER_EVENT_VERSION,
@@ -168,6 +170,14 @@ export class TestSourcerer extends Authority {
   addFollower (/* falseProphet */) {
     const connectors = {};
     return connectors;
+  }
+
+  createChronicleURI (authorityURI: string, chronicleId: string): string {
+    return naiveURI.createChronicleURI(authorityURI, chronicleId);
+  }
+
+  splitChronicleURI (chronicleURI: string): [string, string] {
+    return naiveURI.splitChronicleURI(chronicleURI);
   }
 
   obtainAuthorityOfChronicle (chronicleURI) {

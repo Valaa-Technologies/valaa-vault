@@ -14,7 +14,6 @@ import VRL, { vRef, IdData, getRawIdFrom } from "~/raem/VRL";
 import { tryHostRef, getHostRef } from "~/raem/VALK/hostReference";
 import { getActionFromPassage } from "~/raem/redux/Bard";
 import { formVPlot, coerceAsVRID, validateVRID, validateVVerbs } from "~/plot";
-import { naiveURI } from "~/raem/ValaaURI";
 
 import Transient, { createTransient, getTransientTypeName } from "~/raem/state/Transient";
 import layoutByObjectField from "~/raem/tools/denormalized/layoutByObjectField";
@@ -480,8 +479,8 @@ export default class Engine extends Cog {
         if (!chronicleURI) {
           const authorityURI = transient.get("authorityURI")
               || transient.get("partitionAuthorityURI");
-          chronicleURI = authorityURI
-              && naiveURI.createChronicleURI(authorityURI, transient.get("id").rawId());
+          chronicleURI = authorityURI && this.getSourcerer()
+              .createChronicleURI(authorityURI, transient.get("id").rawId());
         }
       }
       /*

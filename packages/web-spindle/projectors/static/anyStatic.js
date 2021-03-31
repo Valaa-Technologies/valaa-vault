@@ -6,7 +6,7 @@ import { dumpObject } from "~/tools";
 export default function createProjector (router: PrefixRouter, route: Route) {
   return {
     requiredRules: ["routeRoot"],
-    valueAssertedRules: ["json"],
+    runtimeRules: ["headers", "body"],
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this, route);
@@ -29,9 +29,13 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         return false;
       }
       router.infoEvent(2, () => [`${this.name}:`,
-        "\n\tjson:", ...dumpObject(valkOptions.scope.json),
+        "\n\theaders:", ...dumpObject(valkOptions.scope.headers),
+        "\n\tbody:", ...dumpObject(valkOptions.scope.body),
       ]);
-      return router.fillReplyFromResponse(valkOptions.scope.json, this.runtime, valkOptions);
+      for (const [headerName, headerValue] of Object.entries(valkOptions.scope.headers || {})) {
+        reply.header(headerName, headerValue);
+      }
+      return router.fillReplyFromResponse(valkOptions.scope.body, this.runtime, valkOptions);
     },
   };
 }

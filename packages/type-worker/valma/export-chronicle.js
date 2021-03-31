@@ -71,7 +71,8 @@ exports.handler = (yargv) => {
   }
 
   _hacklm = yargv.vlm;
-  const chronicleId = yargv["chronicle-uri"].match(/\?id=(.*)$/)[1];
+  const chronicleId = (yargv["chronicle-uri"].match(/\?id=(.*)$/)
+      || yargv["chronicle-uri"].match(/\/([^/]*)\/$/))[1];
   return yargv.vlm.invoke("perspire", [{
     ...(yargv.revelation ? { revelation: yargv.revelation } : {}),
     attach: true,

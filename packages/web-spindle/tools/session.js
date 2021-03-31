@@ -3,6 +3,8 @@
 import { vRef } from "~/raem/VRL";
 import { VALEK, Vrapper } from "~/engine";
 
+import { encodeVPlotValue } from "~/sourcerer/tools/event-version-0.3";
+
 import { dumpObject } from "~/tools";
 
 import {
@@ -83,10 +85,13 @@ export function resolveScopeIdentityRoles (router, route, scope) {
   }
   const ret = router.getIdentityRoles(identityChronicle);
   const [authorityURI, identityId] = router.getDiscourse().splitChronicleURI(identityChronicle);
+  // const [, authorityURI, identityId] = identityChronicle.match(/^(.*)\?id=(.*)$/) || [];
   if (authorityURI) {
     scope.sessionIdentity = vRef(identityId, undefined, undefined, identityChronicle)
         .setAbsent();
-    ret[`${authorityURI}?id=@$~aur.${encodeURIComponent(authorityURI)}@@`] = true;
+    const aurChronicleURI = router.getDiscourse().createChronicleURI(
+        authorityURI, `~aur'${encodeVPlotValue(authorityURI)}`);
+    ret[aurChronicleURI] = true;
   }
   return ret;
 }

@@ -91,7 +91,12 @@ export function deserializeVRL (serializedRef: string | JSONIdData,
         if (!nss) {
           nss = naiveURI.tryPartitionRawId(parts[1]);
           if (!nss) {
-            throw new Error(`Could not determine chronicle id from serialized reference <${serializedRef}>`);
+            if (parts[1][parts[1].length - 1] === "/") {
+              nss = (parts[1].match(/\/([^/]+)\/$/) || [])[1];
+            } else {
+              throw new Error(
+                  `Could not determine chronicle id from serialized reference <${serializedRef}>`);
+            }
           }
         }
       }

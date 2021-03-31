@@ -172,6 +172,12 @@ export const naiveURI = {
     }
     const idPos = baseString.indexOf("?id=");
     if (idPos === -1) {
+      if (baseString.startsWith("valosp:")) {
+        if (!baseString.endsWith("/")) {
+          throw new Error(`Malformed 'valosp:' URI does not end with '/': got <${baseString}>`);
+        }
+        return baseString;
+      }
       throw new Error(`naiveURI.createPartitionURI.baseString missing required "?id=" separator`);
     }
     return (_naiveChronicleURILookup[baseString] =

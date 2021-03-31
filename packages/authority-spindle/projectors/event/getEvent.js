@@ -10,6 +10,7 @@ const { dumpObject, thenChainEagerly } = valosheath.require("@valos/tools");
 export default function createProjector (router: PrefixRouter, route: Route) {
   return {
     requiredRules: ["routeRoot", "authorityURI"],
+    runtimeRules: ["headers"],
     valueAssertedRules: ["chroniclePlot", "eventIndex"],
 
     prepare () {

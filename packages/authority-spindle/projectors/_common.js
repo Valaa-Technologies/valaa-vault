@@ -23,6 +23,10 @@ export function _prepareChronicleRequest (router, projector, request, reply) {
 
   scope.connection = discourse.sourcerChronicle(chronicleURI);
 
+  for (const [headerName, headerValue] of Object.entries(valkOptions.scope.headers || {})) {
+    reply.header(headerName, headerValue);
+  }
+
   return { valkOptions, scope, discourse, chronicleURI };
 }
 

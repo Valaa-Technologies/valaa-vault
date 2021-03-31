@@ -3,7 +3,7 @@
 import valosheath from "@valos/gateway-api/valosheath";
 
 import type { PrefixRouter, Route } from "~/web-spindle/MapperService";
-import { _getChronicleURIFromRoutePlot } from "../_common";
+import { _prepareChronicleRequest } from "../_common";
 
 const { dumpObject, thenChainEagerly } = valosheath.require("@valos/tools");
 
@@ -21,18 +21,10 @@ export default function createProjector (router: PrefixRouter, route: Route) {
     },
 
     handler (request, reply) {
-      router.infoEvent(1, () => [`${this.name}:`,
-        "\n\trequest.params:", ...dumpObject(request.params),
-        "\n\trequest.query:", ...dumpObject(request.query),
-        "\n\trequest.cookies:", ...dumpObject(Object.keys(request.cookies || {})),
-      ]);
-      const valkOptions = router.buildRuntimeVALKOptions(this, this.runtime, request, reply);
-      if (router.presolveRulesToScope(this.runtime, valkOptions)) {
-        router.warnEvent(1, () =>
-            [`RUNTIME RULE FAILURE in ${router._routeName(this.runtime.route)}.`]);
-        return false;
-      }
-      const scope = valkOptions.scope;
+      const { valkOptions, scope, discourse, chronicleURI } =
+          _prepareChronicleRequest(router, this, request, reply);
+      if (!valkOptions) return false;
+
       router.infoEvent(2, () => [`${this.name}:`,
         "\n\trequest.body:", ...dumpObject(request.body),
         "\n\tresolvers:", ...dumpObject(this.runtime.ruleResolvers),
@@ -41,17 +33,12 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       ]);
       // const {} = this.runtime.ruleResolvers;
 
-      const chronicleURI = _getChronicleURIFromRoutePlot(scope.authorityURI, scope.chroniclePlot);
-      scope.connection = router.getSourcerer()
-          .sourcerChronicle(chronicleURI);
-
-      // valkOptions.discourse = router.getDiscourse().acquireFabricator();
       return thenChainEagerly(scope.connection.asSourceredConnection(), [
         connection => {
           // Add or validate body event index to equal scope.eventIndex
           return connection.narrateEventLog({
             eventIdBegin: scope.eventIndex,
-            eventIdEnd: scope.eventIndex,
+            eventIdEnd: scope.eventIndex + 1,
             commands: false,
           });
         },

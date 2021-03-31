@@ -1024,9 +1024,9 @@ function _createVCall (capturingValker: Valker, vakon: any, sourceInfo: ?Object,
         if (absentChronicleSourcery) return absentChronicleSourcery;
       }
     }
-    const wrap = (transaction || capturingValker).wrapErrorEvent(
+    const wrappedError = (transaction || capturingValker).wrapErrorEvent(
         transactionError || advanceError, 1,
-        opName,
+        new Error(opName),
         ...((transactionError && advanceError)
             ? ["\n\t\tadvance rollback cause:", ...dumpObject(advanceError)] : []),
         "\n\tthis:", ...dumpObject(head),
@@ -1039,8 +1039,8 @@ function _createVCall (capturingValker: Valker, vakon: any, sourceInfo: ?Object,
         "\n\tcapturingValker.state:", ...dumpObject(
             capturingValker && capturingValker.getState().toJS()),
     );
-    if (sourceInfo) addStackFrameToError(wrap, vakon, sourceInfo, opName, transaction);
-    throw wrap;
+    if (sourceInfo) addStackFrameToError(wrappedError, vakon, sourceInfo, opName, transaction);
+    throw wrappedError;
   };
   vcall._isVCall = true;
   vcall[toVAKONTag] = vakon;

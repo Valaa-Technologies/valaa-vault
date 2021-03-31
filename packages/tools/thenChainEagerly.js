@@ -174,11 +174,11 @@ function thenChainEagerly (
             index === -1 ? "initial value" : `step #${index}`}`
           } ${contextName.origin}${functionName ? ")" : ""}`;
     }
-    const wrapped = wrapError(error, errorDetailLevel, contextName,
+    const wrappedError = wrapError(error, errorDetailLevel, contextName,
         "\n\tvalue:", ...dumpObject(head, { nest: 0 }),
         "\n\tinitialValue:", ...dumpObject(initialValue));
-    if (!onRejected) throw wrapped;
-    return onRejected(wrapped, index, head, functionChain, onRejected);
+    if (!onRejected) throw wrappedError;
+    return onRejected(wrappedError, index, head, functionChain, onRejected);
   }
 }
 
@@ -265,13 +265,14 @@ function thisChainEagerly (
             index === -1 ? "initial params" : `step #${index}`}`
           } ${contextName.origin}${functionName ? ")" : ""}`;
     }
-    const wrapped = wrapError(error, errorDetailLevel, contextName,
+    const wrappedError = wrapError(error, errorDetailLevel, contextName,
         "\n\tthis:", ...dumpObject(this_, { nest: 0 }),
         "\n\tparams:", ...dumpObject(params),
         "\n\tinitialParams:", ...dumpObject(initialParams),
     );
-    if (!onRejected) throw wrapped;
-    return onRejected.call(this_, wrapped, index, paramsArray || params, functions, onRejected);
+    if (!onRejected) throw wrappedError;
+    return onRejected.call(
+        this_, wrappedError, index, paramsArray || params, functions, onRejected);
   }
 }
 

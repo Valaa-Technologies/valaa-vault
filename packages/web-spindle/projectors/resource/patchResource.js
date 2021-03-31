@@ -39,7 +39,6 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       ]);
       const { doPatchResource } = this.runtime.ruleResolvers;
 
-      const wrap = new Error(this.name);
       valkOptions.discourse = router.getDiscourse().acquireFabricator();
       return thenChainEagerly(scope.resource, [
         () => (doPatchResource
@@ -62,7 +61,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         if (valkOptions.discourse.isActiveFabricator()) {
           valkOptions.discourse.releaseFabricator({ abort: error });
         }
-        throw router.wrapErrorEvent(error, 1, wrap,
+        throw router.wrapErrorEvent(error, 1, error.chainContextName(this.name),
           "\n\trequest.query:", ...dumpObject(request.query),
           "\n\trequest.body:", ...dumpObject(request.body),
           "\n\tscope.resource:", ...dumpObject(scope.resource),

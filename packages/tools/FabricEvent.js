@@ -254,15 +254,18 @@ export class FabricEventTarget {
       // functionName in the same context.
       return error;
     }
-    const wrapper = (functionName instanceof Error) ? functionName : new Error(actualFunctionName);
-    if (!wrapper.tidyFrameList) {
-      wrapper.tidyFrameList = wrapper.stack.split("\n")
+    const actualContextName = (functionName instanceof Error)
+        ? functionName : new Error(actualFunctionName);
+    if (!actualContextName.tidyFrameList) {
+      actualContextName.tidyFrameList = actualContextName.stack.split("\n")
           .slice((functionName instanceof Error) ? 1 : 2);
     }
-    wrapper.logger = this;
-    if (error.hasOwnProperty("_frameStackError")) wrapper.stack = error._frameStackError.stack;
-    wrapper.detailAdjustment = adjustedDetailLevel - detailLevel;
-    const ret = wrapError(error, detailLevel, wrapper, ...contexts);
+    actualContextName.logger = this;
+    if (error.hasOwnProperty("_frameStackError")) {
+      actualContextName.stack = error._frameStackError.stack;
+    }
+    actualContextName.detailAdjustment = adjustedDetailLevel - detailLevel;
+    const ret = wrapError(error, detailLevel, actualContextName, ...contexts);
     ret.functionName = actualFunctionName;
     ret.contextObject = this;
     return ret;

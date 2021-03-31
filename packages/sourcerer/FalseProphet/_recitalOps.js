@@ -438,11 +438,11 @@ export function _recomposeSchismaticStory (falseProphet: FalseProphet, story: Pr
   } catch (error) {
     const commandId = story.aspects.command.id;
     const wrappedError = falseProphet.wrapErrorEvent(error, 1,
-        new Error(`_recomposeSchismaticStory.${composeDescription}.dispatch(${commandId}) ${
+        `_recomposeSchismaticStory.${composeDescription}.dispatch(${commandId}) ${
           (composeDescription !== "story-recompose")
               ? "recomposition schism: failed to reduce the purged command against fresh corpus"
               : "INTERNAL ERROR: non-purged event recomposition resulted in an error"}
-        }`),
+        }`,
         "\n\tevent:", ...dumpObject(event),
         "\n\tstory:", ...dumpObject(story));
     if (recomposedStory) {

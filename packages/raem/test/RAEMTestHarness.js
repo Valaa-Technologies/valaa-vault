@@ -20,7 +20,6 @@ const TEST_EVENT_VERSION = "0.2";
 export function createRAEMTestHarness (options: Object, ...commandBlocks: any) {
   let harness;
   const TestHarnessType = options.TestHarness || RAEMTestHarness;
-  const wrap = new Error(`During createRAEMTestHarness/${TestHarnessType.name}`);
   return thenChainEagerly(TestHarnessType, [
         // #0
         (TestHarnessType_) => (harness = new TestHarnessType_({
@@ -46,7 +45,8 @@ export function createRAEMTestHarness (options: Object, ...commandBlocks: any) {
         () => harness,
       ],
       function errorOnCreateRAEMTestHarness (error, index, head) {
-        throw wrapError(error, wrap,
+        throw wrapError(error, 0,
+            error.chainContextName(`During createRAEMTestHarness/${TestHarnessType.name}`),
             `\n\tchain step #${index} head:`, ...dumpObject(head),
             "\n\t(step #0 = new, #1 = initialize, #3 = commandBlock[0], #5 = commandBlock[1], ...)",
             "\n\toptions:", ...dumpObject(options),
@@ -167,9 +167,9 @@ export default class RAEMTestHarness extends FabricEventTarget {
   }
   interceptErrors = RAEMTestHarness.interceptErrors;
 
-  static errorOn (wrap, ...rest) {
+  static errorOn (contextName, ...rest) {
     return (error, maybeStepIndex, maybeHead) => {
-      const wrappedError = wrapError(error, wrap,
+      const wrappedError = wrapError(error, contextName,
           ...(maybeStepIndex === undefined ? []
               : (typeof maybeStepIndex === "number") ? [
                 `\n\tstep #${maybeStepIndex} head:`, ...dumpObject(maybeHead),

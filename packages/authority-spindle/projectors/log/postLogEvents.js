@@ -42,8 +42,6 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       ]);
       // const {} = this.runtime.ruleResolvers;
 
-      const wrap = new Error(this.name);
-
       const chronicleURI = _getChronicleURIFromRoutePlot(scope.authorityURI, scope.chroniclePlot);
       scope.connection = router.getSourcerer()
           .sourcerChronicle(chronicleURI);
@@ -66,7 +64,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
           return true;
         },
       ], (error) => {
-        throw router.wrapErrorEvent(error, 1, wrap,
+        throw router.wrapErrorEvent(error, 1, error.chainContextName(this.name),
           "\n\trequest.query:", ...dumpObject(request.query),
           "\n\trequest.body:", ...dumpObject(request.body),
           "\n\tscope.resource:", ...dumpObject(scope.resource),

@@ -94,7 +94,6 @@ export default class MapperService extends FabricEventTarget {
   }
 
   start () {
-    const wrap = new Error(`start()`);
     try {
       if (this._listening) return;
       this._listening = true;
@@ -112,7 +111,7 @@ export default class MapperService extends FabricEventTarget {
         this._redirectServer = this.createRedirectServer(this._htmlRedirectFromPort, this._port);
       }
     } catch (error) {
-      throw this.wrapErrorEvent(error, 1, wrap,
+      throw this.wrapErrorEvent(error, 1, `start()`,
           "\n\trouters:", ...dumpObject(this._prefixRouters));
     }
   }
@@ -184,7 +183,6 @@ export default class MapperService extends FabricEventTarget {
   }
 
   createRouteProjector (route) {
-    const wrap = new Error(`createRouteProjector(${this._routeName(route)})`);
     try {
       if (!route.url) throw new Error(`Route url undefined`);
       if (!route.projector) throw new Error(`Route projector undefined`);
@@ -226,7 +224,7 @@ export default class MapperService extends FabricEventTarget {
       projector.config = route.config;
       return projector;
     } catch (error) {
-      throw this.wrapErrorEvent(error, 1, wrap,
+      throw this.wrapErrorEvent(error, 1, `createRouteProjector(${this._routeName(route)})`,
           "\n\troute:", ...dumpObject(route));
     }
   }

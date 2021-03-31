@@ -652,9 +652,8 @@ export class ProphecyOperation extends ProphecyEventResult {
     if (!prophecy && this._rejectionError) throw this._rejectionError;
     this._fulfillment = null;
     if (prophecy) this.purge(error);
-    const contextName = new Error(`proclaimEvents.eventResults[${
+    const contextName = error.chainContextName(`proclaimEvents.eventResults[${
         this.index}].profess(phase#${phaseIndex}/${this._sceneName})`);
-    contextName.tidyFrameList = error.outerFrameList;
     this._rejectionError = this.errorOnProphecyOperation(contextName, error, true);
     this._prophecy = null;
     const transactor = this.event.meta.transactor;
@@ -790,8 +789,8 @@ export class ProphecyOperation extends ProphecyEventResult {
     const reformation = Array.isArray(reformation_) ? reformation_[0] : reformation_;
     const connection = reformation.instigatorConnection;
     const wrappedError = !connection ? error : this.wrapErrorEvent(error, 2,
-        new Error(`reformAsHeresy(${connection._dumpEventIds(this._prophecy)}, ${
-          connection._dumpEventIds(reformation.newEvents || [])})`));
+        `reformAsHeresy(${connection._dumpEventIds(this._prophecy)}, ${
+          connection._dumpEventIds(reformation.newEvents || [])})`);
     const transactor = ((this._prophecy || {}).meta || {}).transactor;
     if (transactor) {
       const errorEvent = this.getProgressErrorEvent(

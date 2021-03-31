@@ -190,14 +190,12 @@ export default class ScribeConnection extends Connection {
       return super.proclaimEvents(events, options);
     }
     const connection = this;
-    let wrap = new Error("proclaimEvents()");
+    const contextName = new Error("proclaimEvents()");
     try {
       return _proclaimEvents(this, events, options, errorOnScribeChronicleEvents);
     } catch (error) { return errorOnScribeChronicleEvents(error); }
     function errorOnScribeChronicleEvents (error) {
-      const cycleWraps = wrap;
-      wrap = new Error("proclaimEvents()");
-      throw connection.wrapErrorEvent(error, 1, cycleWraps,
+      throw connection.wrapErrorEvent(error, 1, contextName,
           "\n\teventLog:", ...dumpObject(events),
           "\n\toptions:", ...dumpObject(options),
       );
@@ -209,14 +207,14 @@ export default class ScribeConnection extends Connection {
   ) {
     if (!truths.length) return truths;
     const connection = this;
-    const wrap = new Error(`${type}([${tryAspect(truths[0], "log").index}, ${
+    const contextName = new Error(`${type}([${tryAspect(truths[0], "log").index}, ${
         tryAspect(truths[truths.length - 1], "log").index}])`);
     try {
       return _receiveEvents(this, truths, retrieveMediaBuffer, pushTruths,
           type, errorOnReceiveTruths);
     } catch (error) { throw errorOnReceiveTruths(error); }
     function errorOnReceiveTruths (error) {
-      throw connection.wrapErrorEvent(error, 1, wrap,
+      throw connection.wrapErrorEvent(error, 1, contextName,
           "\n\ttruths:", ...dumpObject(truths), truths,
           "\n\tthis:", ...dumpObject(this));
     }
@@ -277,7 +275,6 @@ export default class ScribeConnection extends Connection {
       this._commandQueueInfo.eventIdBegin = this._commandQueueInfo.eventIdEnd =
           this._truthLogInfo.eventIdEnd;
     }
-    const wrap = new Error(`_clampCommandQueueByTruthEventIdEnd(${lastTruthCommandId})`);
     return !deletedIds.length ? undefined : thenChainEagerly(
         _deleteCommands(this, deleteBegin, deleteBegin + deletedIds.length, deletedIds),
         commands => commands,
@@ -285,7 +282,8 @@ export default class ScribeConnection extends Connection {
           if (typeof error.conflictingCommandEventId === "number") {
             return this._reloadCommandQueue(error.conflictingCommandEventId);
           }
-          throw this.wrapErrorEvent(error, 1, wrap,
+          throw this.wrapErrorEvent(error, 1,
+              error.chainContextName(`_clampCommandQueueByTruthEventIdEnd(${lastTruthCommandId})`),
               "\n\tdeleteBegin:", deleteBegin,
               "\n\tdeleteBegin + len:", deleteBegin + deletedIds.length,
               "\n\tdeletedIds:", deletedIds);
@@ -330,12 +328,12 @@ export default class ScribeConnection extends Connection {
 
   requestMediaContents (mediaInfos: MediaInfo[]): any[] {
     const connection = this;
-    const wrap = new Error(`requestMediaContents(${this.getName()}`);
+    const contextName = new Error(`requestMediaContents(${this.getName()}`);
     try {
       return _requestMediaContents(this, mediaInfos, errorOnRequestMediaContents);
     } catch (error) { return errorOnRequestMediaContents(error); }
     function errorOnRequestMediaContents (error: Object, mediaInfo: MediaInfo = error.mediaInfo) {
-      throw connection.wrapErrorEvent(error, 1, wrap,
+      throw connection.wrapErrorEvent(error, 1, contextName,
           "\n\tmediaInfo:", ...dumpObject(mediaInfo),
           "\n\tmediaInfos:", ...dumpObject(mediaInfos),
           "\n\tconnection:", ...dumpObject(connection),
@@ -346,7 +344,7 @@ export default class ScribeConnection extends Connection {
   prepareBvob (content: any, mediaInfo?: MediaInfo):
       Promise<Object> | { buffer: ArrayBuffer, contentHash: string, persistProcess: ?Promise } {
     const connection = this;
-    const wrap = new Error(`prepareBvob(${
+    const contextName = new Error(`prepareBvob(${
         mediaInfo && mediaInfo.name ? `of Media "${mediaInfo.name}"` : typeof content})`);
     try {
       return thenChainEagerly(
@@ -355,7 +353,7 @@ export default class ScribeConnection extends Connection {
               _prepareBvob(this, content, buffer, contentHash, mediaInfo, errorOnPrepareBvob));
     } catch (error) { return errorOnPrepareBvob(error); }
     function errorOnPrepareBvob (error) {
-      throw connection.wrapErrorEvent(error, 1, wrap,
+      throw connection.wrapErrorEvent(error, 1, contextName,
           "\n\tcontent:", ...dumpObject({ content }),
           "\n\tmediaInfo:", ...dumpObject(mediaInfo));
     }

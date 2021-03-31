@@ -105,7 +105,11 @@ function wrapError (errorIn, detailLevel, contextName, ...contextDescriptions) {
   contextError.contextDescriptions = contextDescriptions;
   error.originalError = error.originalError || error;
   error.errorContexts = (error.errorContexts || []).concat([contextError]);
-  error.outerFrameList = contextError.tidyFrameList;
+  error.chainContextName = contextNameString => {
+    const ret = new Error(contextNameString);
+    ret.tidyFrameList = [...contextError.tidyFrameList];
+    return ret;
+  };
   return error;
 }
 

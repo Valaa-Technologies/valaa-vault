@@ -1201,7 +1201,6 @@ function execute (args, options = {}) {
   ++executionVLM.taskDepth;
   const executorIndexText = this.getContextIndexText();
   const executionIndexText = executionVLM.getContextIndexText();
-  const contextName = new Error(`During vlm.execute(${this.theme.executable(...argv)})`);
   return thisChainEagerly(executionVLM, [], [
     function _preExecute () {
       this.echo(`${executorIndexText}>> ${executionIndexText}vlm @`,
@@ -1315,7 +1314,8 @@ function execute (args, options = {}) {
           },
           ...(options.retryChoices || []),
         ],
-        innerError => wrapError(innerError, contextName,
+        innerError => wrapError(innerError,
+            error.chainContextName(`During vlm.execute(${this.theme.executable(...argv)})`),
             "\n\targv:", ...dumpObject(argv),
             "\n\toptions:", ...dumpObject(options)));
   });
@@ -1397,7 +1397,6 @@ function invoke (commandSelectorArg, args, options = {}) {
 
   const invokeSignatureText = this.theme.vlmCommand("vlm", _getSelectorText());
   const fullInvokeSignatureText = this.theme.vlmCommand("vlm", _getSelectorText(), ...argv);
-  const contextName = new Error(`During $ ${fullInvokeSignatureText}`);
   return thisChainEagerly(invokationVLM, [], [
     function _preInvoke () {
       if (!suppressEcho) {
@@ -1431,7 +1430,8 @@ function invoke (commandSelectorArg, args, options = {}) {
           },
           ...(options.retryChoices || []),
         ],
-        innerError => wrapError(innerError, contextName,
+        innerError => wrapError(innerError,
+            error.chainContextName(`During $ ${fullInvokeSignatureText}`),
             "\n\targv:", ...dumpObject(...argv),
             "\n\toptions:", ...dumpObject(options)));
   });

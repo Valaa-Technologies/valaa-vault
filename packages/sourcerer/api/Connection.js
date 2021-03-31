@@ -161,9 +161,8 @@ export default class Connection extends Follower {
     if (error.disconnected && (params[0].narrateOptions !== false)) {
       return null;
     }
-    const contextName = new Error(`sourcer.${(functions[stepIndex] || "").name}()`);
-    contextName.tidyFrameList = error.outerFrameList;
-    throw this.wrapErrorEvent(error, 1, contextName,
+    throw this.wrapErrorEvent(error, 1,
+        error.chainContextName(`sourcer.${(functions[stepIndex] || "").name}()`),
         `\n\tstep #${stepIndex} params:`, ...dumpObject(params));
   }
 

@@ -102,13 +102,14 @@ export default class ValOSPRemoteStorageAPI extends FabricEventTarget {
       return undefined;
 
       function onError (error) {
-        const wrap = this.wrapErrorEvent(error, `downloadBvobsContents(${mediaName})`, whileTrying,
+        const wrappedError = this.wrapErrorEvent(
+            error, `downloadBvobsContents(${mediaName})`, whileTrying,
             "\n\tfrom:", bvobURL,
             "\n\tmediaInfo:", ...dumpObject(mediaInfo),
             "\n\toutgoing options:", ...dumpObject(options),
         );
         this.outputErrorEvent(error);
-        throw wrap;
+        throw wrappedError;
       }
     });
   }

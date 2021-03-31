@@ -117,7 +117,7 @@ export function _prepareBvob (connection: ScribeConnection, content: any, buffer
 
 function _prepareBvobToUpstreamWithRetries (connection: ScribeConnection,
     buffer: ArrayBuffer | (() => ArrayBuffer), mediaInfo: MediaInfo,
-    mediaName: string, wrap: Error, retriesRemaining: number,
+    mediaName: string, contextName: Error, retriesRemaining: number,
 ) {
   // TODO(iridian, 2019-01): This should use active connection, but
   // right at this moment I don't dare to take the risk of deadlock.
@@ -127,7 +127,7 @@ function _prepareBvobToUpstreamWithRetries (connection: ScribeConnection,
     preparation => preparation.persistProcess,
   ], errorOnScribePrepareBvobToUpstream);
   function errorOnScribePrepareBvobToUpstream (error) {
-    const wrappedError = connection.wrapErrorEvent(error, 1, wrap,
+    const wrappedError = connection.wrapErrorEvent(error, 1, contextName,
         "\n\tmediaInfo:", ...dumpObject(mediaInfo),
     );
     const response = error.response;
@@ -138,8 +138,8 @@ function _prepareBvobToUpstreamWithRetries (connection: ScribeConnection,
       connection.outputErrorEvent(wrappedError,
           `Exception caught while preparing bvob ${mediaName
             } to upstream (retrying with ${retriesRemaining} retries remaining):`);
-      return _prepareBvobToUpstreamWithRetries(connection, buffer, mediaInfo, mediaName, wrap,
-          retriesRemaining - 1);
+      return _prepareBvobToUpstreamWithRetries(connection, buffer, mediaInfo, mediaName,
+          contextName, retriesRemaining - 1);
     }
     error.isSchismatic = true;
     error.isRevisable = false;

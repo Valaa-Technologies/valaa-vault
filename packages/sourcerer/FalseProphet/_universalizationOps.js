@@ -170,10 +170,9 @@ export function deserializeVRL (serializedRef: string | JSONIdData,
     }
     return ret;
   } catch (error) {
-    const wrap = new Error("deserializeVRL()");
     throw (falseProphet
-        ? falseProphet.wrapErrorEvent.bind(falseProphet, error, 1, wrap)
-        : wrapError.bind(null, error, wrap))(
+        ? falseProphet.wrapErrorEvent.bind(falseProphet, error, 1, "deserializeVRL()")
+        : wrapError.bind(null, error, "deserializeVRL()"))(
             "\n\tserializedReference:", serializedRef,
             "\n\tcurrentChronicleURI:", currentChronicleURI,
             "\n\tnss:", nss,

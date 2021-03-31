@@ -106,7 +106,7 @@ export default class OracleConnection extends Connection {
     const urlRequests = new DelayedQueue();
     const bufferRequests = new DelayedQueue();
     const ret = mediaInfos.map(mediaInfo => {
-      const wrap = new Error(`requestMediaContents().mediaInfo["${
+      const contextName = new Error(`requestMediaContents().mediaInfo["${
           mediaInfo.name || `unnamed media`}"]`);
       try {
         const contentHash = mediaInfo.contentHash;
@@ -163,7 +163,7 @@ export default class OracleConnection extends Connection {
         return errorOnOracleConnectionRequestMediaContentForInfo(error);
       }
       function errorOnOracleConnectionRequestMediaContentForInfo (error) {
-        const wrapped = connection.wrapErrorEvent(error, 1, wrap,
+        const wrapped = connection.wrapErrorEvent(error, 1, contextName,
             "\n\tmediaVRL:", ...dumpObject(mediaInfo.mediaVRL),
             "\n\tmediaInfo:", ...dumpObject(mediaInfo));
         if (mediaInfos.length === 1) throw wrapped;

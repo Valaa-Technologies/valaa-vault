@@ -38,7 +38,6 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       ]);
       const { response } = this.runtime.ruleResolvers;
 
-      const wrap = new Error(`bridge ${route.method} ${route.url}`);
       valkOptions.discourse = router.getDiscourse().acquireFabricator();
       return thenChainEagerly(valkOptions.scope.routeRoot, [
         vRouteRoot => router.resolveToScope("response", response, vRouteRoot, valkOptions),
@@ -50,7 +49,8 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         if (valkOptions.discourse && valkOptions.discourse.isActiveFabricator()) {
           valkOptions.discourse.releaseFabricator({ abort: error });
         }
-        throw router.wrapErrorEvent(error, 1, wrap,
+        throw router.wrapErrorEvent(error, 1,
+            error.chainContextName(`bridge ${route.method} ${route.url}`),
             "\n\trequest.query:", ...dumpObject(request.query),
             "\n\trequest.cookies:", ...dumpObject(Object.keys(request.cookies || {})),
             "\n\trequest.body:", ...dumpObject(request.body),

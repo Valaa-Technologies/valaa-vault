@@ -35,7 +35,6 @@ export const testRootId = "@$~raw.test_chronicle@@";
 export const testChronicleURI = naiveURI.createChronicleURI(testAuthorityURI, testRootId);
 
 export function createSourcererTestHarness (options: Object, ...commandBlocks: any) {
-  const wrap = new Error("During createSourcererHarness");
   return thenChainEagerly({
     name: "SourcererFrontHarness", ContentAPI: SourcererTestAPI, TestHarness: SourcererTestHarness,
     ...options,
@@ -53,7 +52,7 @@ export function createSourcererTestHarness (options: Object, ...commandBlocks: a
       return harness;
     }
   ], function errorOnCreateSourcererHarness (error) {
-    throw wrapError(error, wrap,
+    throw wrapError(error, error.chainContextName("During createSourcererHarness"),
         "\n\toptions:", ...dumpObject(options),
         "\n\tcommandBlocks:", ...dumpObject(commandBlocks));
   });

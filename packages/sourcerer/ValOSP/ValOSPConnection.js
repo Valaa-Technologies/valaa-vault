@@ -2,16 +2,13 @@
 
 import type { EventBase } from "~/raem";
 import AuthorityConnection from "~/sourcerer/Authority/AuthorityConnection";
-import type {
-  NarrateOptions, ProclaimOptions, SourceryOptions,
-  EventCallback, EventData, MediaInfo,
-} from "~/sourcerer";
+import type { NarrateOptions, ProclaimOptions, SourceryOptions, MediaInfo } from "~/sourcerer";
 
-import type { FutureEventData } from "~/sourcerer/tools/event-version-0.3";
+import { getEventIndex } from "~/sourcerer/tools/event-version-0.3";
 
-import { dumpObject, thenChainEagerly } from "~/tools";
+import { dumpObject, thisChainEagerly, thisChainReturn } from "~/tools";
 
-export const proclaimFailureFlags = {
+export const _proclaimFailureFlags = {
   unconnected: { isSchismatic: false, proceed: { when: "connected" } },
 
   // Information responses
@@ -59,10 +56,7 @@ export const proclaimFailureFlags = {
 
 export default class ValOSPConnection extends AuthorityConnection {
   _config: Object;
-  _lastEventId = 0;
-  _firstPendingDownstreamLogIndex = undefined;
-  _pendingDownstreamEvents = [];
-  _eventsAPI: Object;
+  _eventSubscription: ?{ unsubscribe: () => void };
 
   constructor (options: Object) {
     super(options);
@@ -113,9 +107,6 @@ export default class ValOSPConnection extends AuthorityConnection {
           this.getSourcerer().getAuthorityURI()}`);
     }
     this._config = authorityConfig;
-    if (options.newChronicle) {
-      this._firstPendingDownstreamLogIndex = 0;
-    }
     if (options.narrateOptions !== false) {
       (options.narrateOptions || (options.narrateOptions = {})).isConnecting = true;
     }
@@ -130,122 +121,158 @@ export default class ValOSPConnection extends AuthorityConnection {
   // (EventEnvelopes) directly for some reason. In that case the events
   // will be delivered directly and any internal processing
   // of the envelopes skipped.
-  async narrateEventLog (options: NarrateOptions) {
-    const config = this._config || (await this.getSourcerer().getAuthorityConfig());
-    if (!config) {
-      throw new Error(`Cannot narrate from unavailable authority ${
-          this.getSourcerer().getAuthorityURI()}`);
-    }
+  narrateEventLog (options: NarrateOptions) {
     let { // eslint-disable-next-line
-      receiveTruths, eventIdBegin, isConnecting, subscribeEvents, remote, identity,
-      /* , lastEventId, noSnapshots */
+      receiveTruths, eventIdBegin, eventIdEnd, isConnecting, subscribeEvents, remote, identity,
+      /* , noSnapshots */
     } = options || {};
-    let nextChunkIndex = 0;
-    /* eslint-disable no-loop-func */
-    try {
-      if (!config.isRemoteAuthority) {
-        return super.narrateEventLog(options);
-      }
-      if (!isConnecting && !this.isActive()) await this.sourcer({ narrateOptions: false });
-      if (subscribeEvents === true) await this._subscribeToEventMessages(true);
-      if ((subscribeEvents === false) && this.isConnected()) await this.disconnect();
-      if (eventIdBegin === undefined) eventIdBegin = 0;
-      if (this._firstPendingDownstreamLogIndex !== eventIdBegin) {
-        this._firstPendingDownstreamLogIndex = eventIdBegin;
-        this._pendingDownstreamEvents = [];
-      }
-
-      // fetches the events
-      const ret = {};
-      if (remote === false) return ret;
-
-      const identities = this._createIdentities(identity);
-      let delayedEnvelopes = [];
-      for (;;) {
-        let remoteNarrateProcess;
-        if (eventIdBegin !== undefined) {
-          remoteNarrateProcess = this._eventsAPI
-              .narrateRemoteEventLog(this, eventIdBegin, undefined, identities);
+    let chunkIndex = 0;
+    return thisChainEagerly(this, [this._config || this.getSourcerer().getAuthorityConfig()], [
+      config => {
+        if (!config) {
+          throw new Error(`Cannot narrate from unavailable authority <${
+              this.getSourcerer().getAuthorityURI()}>`);
         }
-
-        if (delayedEnvelopes.length) {
-          this._integrateReceivedEvents(delayedEnvelopes, "paginated narrate");
-          ret[`remoteLogChunk${nextChunkIndex++}`] =
-              this._pushAllLeadingEventsDownstream(receiveTruths);
-          delayedEnvelopes = undefined;
-          if (!remoteNarrateProcess) break; // This was the last chunk of a paginated narration.
+        if (!config.isRemoteAuthority) {
+          return thisChainReturn(super.narrateEventLog(options));
         }
-
-        const responseJSON = await remoteNarrateProcess;
-        this.logEvent(2, () => ["\tGET success onwards from:", eventIdBegin]);
-
-        delayedEnvelopes = responseJSON.Items || [];
-        if (responseJSON.LastEvaluatedKey !== undefined) {
-          // The result has been paginated, need to fetch more
-          this.logEvent(3, () => [
-            "Fetching more, last event was:", responseJSON.LastEvaluatedKey.eventId,
-          ]);
-          const nextEventIdBegin = responseJSON.LastEvaluatedKey.eventId + 1;
-          if (nextEventIdBegin === eventIdBegin) {
-            this.errorEvent("INTERNAL ERROR: pagination repeats event index:", eventIdBegin);
-            throw new Error("Paginated event narration is repeating the same query.");
+        return !isConnecting && !this.isActive() && [this.sourcer({ narrateOptions: false })];
+      },
+      () => ((subscribeEvents === true) && [this._subscribeToEventMessages(true)])
+          || ((subscribeEvents === false) && this.isConnected() && [this.disconnect()]),
+      () => {
+        if (eventIdBegin === undefined) eventIdBegin = 0;
+        if (this._downstreamQueueStartIndex !== eventIdBegin) {
+          this._downstreamQueueStartIndex = eventIdBegin;
+          this._downstreamEventQueue = [];
+        }
+        // fetches the events
+        const sections = {};
+        if (remote === false) return thisChainReturn(sections);
+        return [sections, this._createIdentities(identity)];
+      },
+      async function _fetchEventLogChunks (sections, identities) {
+        let receivedEventsToIntegrate;
+        while (eventIdBegin !== undefined || receivedEventsToIntegrate) {
+          let remoteNarrateProcess;
+          if (eventIdBegin !== undefined) {
+            remoteNarrateProcess = this.getSourcerer().getEventsAPI()
+                .narrateRemoteEventLog(this, eventIdBegin, eventIdEnd, identities);
           }
-          eventIdBegin = nextEventIdBegin;
-        } else if (nextChunkIndex) {
-          // Last chunk of a paginated narration. Loop once more
-          // without fetching to receive the last events.
-          eventIdBegin = undefined;
-        } else {
-           // Single-chunk request, receive and break.
-          ret.remoteLog = [];
-          if (delayedEnvelopes.length) {
-            this._integrateReceivedEvents(delayedEnvelopes, "single-chunk narrate");
-            ret.remoteLog = this._pushAllLeadingEventsDownstream(receiveTruths);
+
+          if (receivedEventsToIntegrate) {
+            const isSingleChunk = (!remoteNarrateProcess && !chunkIndex);
+            this._placeEventsToDownstreamQueue(receivedEventsToIntegrate,
+                isSingleChunk ? "single-chunk narrate" : "paginated narrate");
+            receivedEventsToIntegrate = undefined;
+            sections[isSingleChunk ? "remoteLog" : `remoteLogChunk${chunkIndex++}`] =
+                this._pushConsecutiveQueueEventsDownstream(receiveTruths);
+            if (!remoteNarrateProcess) break;
           }
-          break;
+
+          const remoteEvents = await remoteNarrateProcess;
+          this.logEvent(2, () => ["\tGET success onwards from:", eventIdBegin]);
+          if (!remoteEvents || !remoteEvents.length) {
+            break;
+          }
+          receivedEventsToIntegrate = remoteEvents;
+          if (remoteEvents[remoteEvents.length - 1] != null) {
+            // No pagination, this was a single-chunk narrate.
+            eventIdBegin = undefined;
+          } else {
+            // The result has been paginated, need to fetch more.
+            remoteEvents.pop();
+            const lastIndex = getEventIndex(remoteEvents[remoteEvents.length - 1]);
+            let nextStartIndex = eventIdBegin + remoteEvents.length;
+            if (lastIndex + 1 !== nextStartIndex) {
+              this.warnEvent(1, () => [
+                "Narrate pagination index mismatch: expected next index to be", nextStartIndex,
+                "but latest event index received was", lastIndex,
+                "\n\tNarrating from", lastIndex + 1,
+              ]);
+              nextStartIndex = lastIndex + 1;
+            }
+            if (nextStartIndex === eventIdBegin) {
+              this.errorEvent("INTERNAL ERROR: pagination repeats event index:", eventIdBegin);
+              throw new Error("Paginated event narration is repeating the same query.");
+            }
+            this.logEvent(3, () => [
+              "Fetching more, last event was:", lastIndex,
+            ]);
+            // Prime fetch for next chunk
+            eventIdBegin = nextStartIndex;
+          }
         }
+        return [sections];
+      },
+      async function _postProcessSections (sections) {
+        for (const [key, value] of Object.entries(sections)) {
+          sections[key] = await value;
+          if (!(sections[key] || []).length) delete sections[key];
+        }
+        return sections;
       }
-      for (const [key, value] of Object.entries(ret)) {
-        ret[key] = await value;
-        if (!(ret[key] || []).length) delete ret[key];
-      }
-      return ret;
-    } catch (error) {
+    ], function _onNarrateEventLogError (error) {
       this.warnEvent(2, () => [
         "\tGET FAILURE:", (error.response || {}).status || error.message,
       ]);
-      throw this.wrapErrorEvent(error,  new Error("narrateEventLog()"),
-          "\n\tnextChunkIndex:", nextChunkIndex,
+      throw this.wrapErrorEvent(error, 1, error.chainContextName("narrateEventLog()"),
+          "\n\tchunkIndex:", chunkIndex,
           "\n\teventIdBegin:", eventIdBegin,
           "\n\terror response:", error.response);
-    }
+    });
   }
 
   // Sends a given command within a command envelope to the API endpoint
   proclaimEvents (events: EventBase[], options: ProclaimOptions = {}) {
-    return thenChainEagerly(this.asSourceredConnection(), [
+    return thisChainEagerly(this, this.asSourceredConnection(), [
       () => this._config || this.getSourcerer().getAuthorityConfig(),
       config => {
         if (!config) {
-          throw new Error(
-              `Cannot proclaim to unavailable authority ${this.getSourcerer().getAuthorityURI()}`);
-        }
-        if (!config.isRemoteAuthority) {
-          throw new Error(`Can't proclaim events to a non-remote chronicle.`);
+          throw new Error(`Cannot proclaim to unavailable authority ${
+            this.getSourcerer().getAuthorityURI()}`);
         }
         if (config.rejectChronicleUpstream) {
-          throw new Error(`Won't proclaim events due to authorityConfig.rejectChronicleEvents: ${
+          throw new Error(`Won't proclaim events due to authorityConfig.rejectChronicleUpstream: ${
             config.rejectChronicleUpstream}`);
         }
-        const identities = this._createIdentities(options.identity);
-        return super.proclaimEvents(events, {
-          ...options,
-          remoteEventsProcess: this._enqueueUpstreamEvents(events, identities),
-        });
+        if (config.isRemoteAuthority) {
+          const startIndex = getEventIndex(events[0]);
+          const identities = this._createIdentities(options.identity);
+
+          const fixedResponse = this._config.blockChronicleUpstream
+              ? { status: 100 }
+              : this._config.fixedChronicleResponse;
+
+          const remoteResults = fixedResponse
+              ? Promise.reject(Object.assign(
+                  new Error(`Blocked locally with fixed response: ${JSON.stringify(fixedResponse)}`),
+                  { response: fixedResponse }))
+              : Promise.resolve(this.getSourcerer().getEventsAPI()
+                  .proclaimRemoteCommands(this, startIndex, events, identities));
+
+          options.proclamationResults = remoteResults
+              .catch(error => {
+                const actualError = (error instanceof Error) ? error : new Error(error.response);
+                if (!actualError.response) actualError.response = { status: 400 };
+                this._embedErrorResolutionFlagsFromHTTPResponse(
+                    actualError, actualError.response, _proclaimFailureFlags);
+                this.warnEvent(1, () => [
+                  `\n\tproclaim FAILURE at #${startIndex}:`, actualError,
+                  "\n\tapplying resolution to all", events.length, "proclaimed events",
+                ]);
+                return events.map(Promise.reject(actualError));
+              });
+        } else if (config.isPrimaryAuthority) {
+          // Add authority aspects.
+        } else {
+          throw new Error(`Can't proclaim events to a non-remote non-primary chronicle.`);
+        }
+        return super.proclaimEvents(events, options);
       },
     ], function errorOnProclaimEvents (error) {
-      throw this.wrapErrorEvent(error, new Error("proclaimEvents"));
-    }.bind(this));
+      throw this.wrapErrorEvent(error, error.chainContextName("proclaimEvents"));
+    });
   }
 
   _createIdentities (identity: Object) {
@@ -259,6 +286,18 @@ export default class ValOSPConnection extends AuthorityConnection {
       }
     });
     return ret;
+  }
+
+  _embedErrorResolutionFlagsFromHTTPResponse (error, response, resolutionFlagLookup) {
+    let status = (response || {}).status;
+    if (!status) return;
+    if (typeof status === "string") status = parseInt(status, 10);
+    if (typeof status !== "number" || isNaN(status)) status = "unconnected";
+    const resolutionFlags = Object.assign({},
+        ((typeof status === "number")
+            && resolutionFlagLookup[`section${Math.floor(status / 100)}00`]) || {},
+        resolutionFlagLookup[status] || {});
+    Object.assign(error, resolutionFlags);
   }
 
   requestMediaContents (mediaInfos: MediaInfo[]): any {
@@ -288,71 +327,6 @@ export default class ValOSPConnection extends AuthorityConnection {
     }
   }
 
-  // Upstream events section
-
-  _pendingProclaimCommands: Object[] = [];
-
-  async _enqueueUpstreamEvents (events: Object[], identities: Object[]) {
-    let responseJSON: Array<CommandResponse>;
-    /* eslint-disable no-loop-func */
-    try {
-      const fixedResponse = this._config.blockChronicleUpstream
-          ? { status: 100 }
-          : this._config.fixedChronicleResponse;
-      if (fixedResponse) {
-        this.warnEvent(1, () => [
-          `Blocking events #${queueEntry.envelope.command.aspects.log.index} with fixed response:`,
-          fixedResponse,
-        ]);
-        const error = new Error(
-            `valosp authority configuration fixed response: ${JSON.stringify(fixedResponse)}`);
-        error.response = { ...fixedResponse };
-        throw error;
-      }
-      const response = await this._eventsAPI
-          .proclaimRemoteCommands(this, events, identities);
-      this.logEvent(2, () => [
-        `\tPUT command #${queueEntry.envelope.command.aspects.log.index} success`,
-      ]);
-      return ret;
-    } catch (error) {
-      const index = this._pendingProclaimCommands.indexOf(queueEntry);
-      if ((index >= 0) && (index < this._pendingProclaimCommands.length)) {
-        this._pendingProclaimCommands.length = index;
-      }
-      const actualError = (error instanceof Error) ? error : new Error(error.response);
-      this._embedResolutionFlagsFromHTTPResponse(actualError, error.response, proclaimFailureFlags);
-      if (actualError.isTruth) {
-        return {};
-      }
-      this.warnEvent(1, () => [
-        `\tPUT command #${queueEntry.envelope.command.aspects.log.index} FAILURE:`, actualError,
-      ]);
-      throw this.wrapErrorEvent(actualError, `persistCommandEnvelope`,
-          "\n\tqueueEntry:", ...dumpObject(queueEntry),
-          "\n\tenvelope:", ...dumpObject(queueEntry.envelope),
-          "\n\tcommand:", ...dumpObject(queueEntry.envelope.command),
-          "\n\tresponseJSON:", ...dumpObject(responseJSON),
-          "\n\terror status:", ...dumpObject(error.status),
-          "\n\terror response:", error.response,
-      );
-    }
-  }
-
-  _embedResolutionFlagsFromHTTPResponse (error, response, resolutionFlagLookup) {
-    let status = (response || {}).status;
-    if (!status) return;
-    if (typeof status === "string") status = parseInt(status, 10);
-    if (typeof status !== "number" || isNaN(status)) status = "unconnected";
-    const resolutionFlags = Object.assign({},
-        ((typeof status === "number")
-            && resolutionFlagLookup[`section${Math.floor(status / 100)}00`]) || {},
-        resolutionFlagLookup[status] || {});
-    Object.assign(error, resolutionFlags);
-  }
-
-  // Downstream events section
-
   // subscribe to topics, and set up the callbacks for receiving events
   _subscribeToEventMessages (require) {
     if (this._config.subscribeEvents === false) {
@@ -361,81 +335,7 @@ export default class ValOSPConnection extends AuthorityConnection {
     if (require && !this._config.isRemoteAuthority) {
       throw new Error(`Can't subscribe for events on a non-remote chronicle connection.`);
     }
-    return (async () => (this._eventSubscription = await this._eventsAPI
+    return (async () => (this._eventSubscription = await this.getSourcerer().getEventsAPI()
         .subscribeToEventMessages(this)))();
-  }
-
-  // return value: accepted or not (note: not accepted can be normal operation)
-  receiveEventMessage (message: string) {
-    this.logEvent(2, () => ["Received event message:", { message }]);
-    this._integrateReceivedEvents(
-        [].concat((typeof message !== "string" ? message : JSON.parse(message)) || []),
-        "received push event");
-    const downstreamFlushing = this._pushAllLeadingEventsDownstream();
-    if (downstreamFlushing) {
-      thenChainEagerly(downstreamFlushing, [], e =>
-          this.outputErrorEvent(e, "Exception caught during push event downstream flush"));
-      if (!this._pendingDownstreamEvents.length) {
-        // Received events; all of them were handled. No renarration necessary.
-        return;
-      }
-    }
-    this._renarrateMissingEvents();
-  }
-
-  // return value: accepted or not (note: not accepted can be normal operation)
-  _integrateReceivedEvents (events: EventEnvelope[]) {
-    for (const event of events) {
-      if (event == null) continue;
-      const eventIndex = event.eventId;
-      if (eventIndex === undefined) {
-        this.warnEvent(1, `Ignoring an incoming event which is missing eventIndex:`,
-            ...dumpObject(event));
-        continue;
-      }
-      const pendingIndex = eventIndex - this._firstPendingDownstreamLogIndex;
-      const duplicateReason = !(pendingIndex >= 0) ? "already narrated"
-          : (this._pendingDownstreamEvents[pendingIndex] !== undefined) ? "already pending in queue"
-          : undefined;
-      if (!duplicateReason) {
-        this._pendingDownstreamEvents[pendingIndex] = event;
-      } else {
-        this.warnEvent(1, () => [
-          `Ignoring an event with index ${eventIndex}: ${duplicateReason}.`,
-          ...dumpObject(event),
-        ]);
-      }
-    }
-  }
-
-  _pushAllLeadingEventsDownstream (pushTruths: EventCallback = this._pushTruthsDownstream) {
-    let count = 0;
-    while (this._pendingDownstreamEvents[count]) ++count;
-    if (!count) return false;
-    const truths = this._pendingDownstreamEvents.splice(0, count);
-    this._firstPendingDownstreamLogIndex += count;
-    return pushTruths(truths);
-  }
-
-  _renarrateMissingEvents () {
-    if (!this._config.isRemoteAuthority || this._missingEventsRenarration) {
-      return;
-    }
-    const narrateOptions = { eventIdBegin: this._firstPendingDownstreamLogIndex };
-    const firstNonMissingIndex = this._pendingDownstreamEvents.findIndex(v => (v != null));
-    if (firstNonMissingIndex > 0) {
-      narrateOptions.eventIdEnd = this._firstPendingDownstreamLogIndex + firstNonMissingIndex;
-    }
-    const renarration = this._missingEventsRenarration = this
-        .narrateEventLog(narrateOptions)
-        .finally(() => {
-          if (this._missingEventsRenarration === renarration) {
-            this._missingEventsRenarration = undefined;
-          }
-        })
-        .then(result => Object.keys(result).length
-            && this._renarrateMissingEvents())
-        .catch(error =>
-            this.outputErrorEvent(error, "Exception caught during renarrateMissingQueueEvents"));
   }
 }

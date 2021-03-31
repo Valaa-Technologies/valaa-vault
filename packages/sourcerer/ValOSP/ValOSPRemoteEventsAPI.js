@@ -16,27 +16,44 @@ export default class ValOSPRemoteEventsAPI extends FabricEventTarget {
   }
 
   narrateRemoteEventLog (connection, startIndex, endIndex, identities) {
-    const narrateRoute = `${this._authorityConfig.endpoint
-        }/${connection.getChronicleId()}/${startIndex}/${endIndex}`;
+    const isSingular = startIndex + 1 === endIndex;
+    const indexFilterPlot =
+        isSingular
+            ? `i'${startIndex}`
+        : (startIndex || 0) === 0 && (endIndex == null)
+            ? "*"
+        : (endIndex == null)
+            ? `(*ge!i'${startIndex})`
+            : `(*in!i'${startIndex || 0}!i'${endIndex})`;
+    const narrateRoute = `${connection.getValOSPChronicleURL()}-log!${indexFilterPlot}/`;
     this.logEvent(2, () => [
       `GET events from chronicle ${connection.getName()} via <${narrateRoute}>`,
     ]);
-    return fetchJSON(narrateRoute, {
+    const ret = fetchJSON(narrateRoute, {
       method: "GET", mode: "cors",
     });
+    return !isSingular ? ret : ret.then(res => [res]);
   }
 
-  proclaimRemoteCommands (connection, startIndex, endIndex, commands, identities) {
-    const proclaimRoute = `${this._authorityConfig.endpoint
-        }/${connection.getChronicleId()}/${startIndex}/${endIndex}`;
+  proclaimRemoteCommands (connection, startIndex, commands, identities) {
+    const proclaimRoute = `${connection.getValOSPChronicleURL()}-log!i'${startIndex}/`;
+    const isMulti = commands.length > 1;
+    const method = isMulti ? "POST" : "PUT";
     this.logEvent(2, () => [
-      `PUT command to chronicle ${connection.getName()} via <${proclaimRoute}>`,
+      `${method} command${isMulti ? "s" : ""} to chronicle ${connection.getName()
+          } via <${proclaimRoute}>`,
     ]);
-    return fetchJSON(proclaimRoute, {
-      method: "PUT", mode: "cors",
+    this.logEvent(2, () => [
+      `\t${method} command(s) #${startIndex} success`,
+    ]);
+    const options = {
+      method, mode: "cors",
       headers: { "Content-Type": "application/json" },
-      body: commands,
-    });
+      body: isMulti ? commands : commands[0],
+    };
+    const ret = fetchJSON(proclaimRoute, options);
+    return ret.then(results =>
+        (isMulti ? results : [results]).map((event, index) => event || commands[index]));
   }
 
   subscribeToEventMessages (/* connection */) {

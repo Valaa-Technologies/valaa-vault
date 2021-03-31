@@ -37,13 +37,15 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       return thenChainEagerly(scope.connection.asSourceredConnection(), [
         connection => {
           // Add or validate body event index to equal scope.eventIndex
-          return connection.proclaimEvents([request.body]);
+          return connection.proclaimEvents([request.body]).eventResults[0];
         },
         // () => valkOptions.discourse.releaseFabricator(),
-        eventResult => eventResult && eventResult.getTruthEvent(),
+        eventResult => {
+          return eventResult && eventResult.getTruthEvent();
+        },
         (truthEvent) => {
-          reply.code(201);
-          reply.send();
+          reply.code(204);
+          reply.send("{}");
           router.infoEvent(2, () => [
             `${this.name}:`,
             "\n\tresults:", ...dumpObject(truthEvent),

@@ -33,24 +33,23 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         "\n\tindexRange:", ...dumpObject(scope.indexRange),
       ]);
       // const {} = this.runtime.ruleResolvers;
+      if (scope.indexRange !== "*") throw new Error("Only index range '*' implemented");
+
+      const eventIdBegin = 0;
+      const eventIdEnd = undefined;
 
       return thenChainEagerly(scope.connection.asSourceredConnection(), [
-        connection => {
-          // Add or validate body event index to equal scope.eventIndex
-          return connection.narrateEventLog({
-            eventIdBegin: scope.eventIndex,
-            eventIdEnd: scope.eventIndex,
-            commands: false,
-          });
-        },
+        connection => connection.narrateEventLog({ eventIdBegin, eventIdEnd, commands: false }),
         // () => valkOptions.discourse.releaseFabricator(),
         (sections) => {
-          // Flatten sections and pick correct event
+          const eventResults = []
+              .concat(...Object.values(sections))
+              .sort((a, b) => a.aspects.log.index - b.aspects.log.index);
           reply.code(200);
-          reply.send(sections);
+          reply.send(JSON.stringify(eventResults));
           router.infoEvent(2, () => [
             `${this.name}:`,
-            "\n\tsections:", ...dumpObject(sections),
+            "\n\teventResults:", ...dumpObject(eventResults),
           ]);
           return true;
         },

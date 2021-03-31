@@ -222,7 +222,7 @@ export default class FalseProphetConnection extends Connection {
         (error, head, index, truthResults, entries, callback, onRejected) => {
           if (!op.leadingTruths) op.leadingTruths = truthResults.slice(0, index);
           const command = op.events[index];
-          const prophecy = command && canonicalRecital.getStoryBy(command.aspects.command.id);
+          const recitalStory = command && canonicalRecital.getStoryBy(command.aspects.command.id);
           if (error) this._mostRecentError = op.eventResults[index].error = error;
           if (((error.proceed || {}).when === "narrated") && (op.renarration === undefined)) {
             op.renarration = this.narrateEventLog({
@@ -230,7 +230,9 @@ export default class FalseProphetConnection extends Connection {
               receiveTruths: null,
             });
           }
-          if (prophecy) {
+          const prophecyOperation = recitalStory && recitalStory.meta.operation;
+          if (prophecyOperation) {
+            const prophecy = recitalStory;
             const chronicleURI = this.getChronicleURI();
             const chronicle = (prophecy.meta.chronicles || {})[chronicleURI];
             if (chronicle) chronicle.proclamationError = error;
@@ -238,7 +240,7 @@ export default class FalseProphetConnection extends Connection {
                 chronicleURI}>: ${error.message}`);
             proclaimError.chronicleURI = chronicleURI;
             proclaimError.proclamationError = error;
-            const errorEvent = prophecy.meta.operation
+            const errorEvent = prophecyOperation
                 .getProgressErrorEvent("profess", proclaimError, {}, {
                   isSchismatic: error.isSchismatic !== false,
                   isRevisable: error.isRevisable === true,
@@ -249,7 +251,7 @@ export default class FalseProphetConnection extends Connection {
             if (op.options.discourse) {
               op.options.discourse.dispatchAndDefaultActEvent(errorEvent);
             }
-            const progress = prophecy.meta.operation.getProgressEvent();
+            const progress = prophecyOperation.getProgressEvent();
             if (op.renarration) {
               progress.proceedAfterAll(op.renarration);
             }

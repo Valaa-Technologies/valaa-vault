@@ -34,22 +34,33 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       ]);
       // const {} = this.runtime.ruleResolvers;
 
+      const eventIndex = parseInt(scope.eventIndex, 10);
+      if (typeof eventIndex !== "number") {
+        throw new Error(`Invalid non-integer eventIndex: "${scope.eventIndex}"`);
+      }
+
       return thenChainEagerly(scope.connection.asSourceredConnection(), [
-        connection => {
-          // Add or validate body event index to equal scope.eventIndex
-          return connection.narrateEventLog({
-            eventIdBegin: scope.eventIndex,
-            eventIdEnd: scope.eventIndex + 1,
-            commands: false,
-          });
-        },
-        // () => valkOptions.discourse.releaseFabricator(),
+        connection => connection.narrateEventLog({
+          eventIdBegin: eventIndex, eventIdEnd: eventIndex + 1, commands: false,
+        }),
         (sections) => {
-          // Flatten sections and pick correct event
-          reply.code(200);
-          reply.send(sections);
+          for (const sectionEvents of Object.values(sections)) {
+            for (const event of sectionEvents) {
+              if ((((event || {}).aspects || {}).log || {}).index === eventIndex) {
+                reply.code(200);
+                reply.send(JSON.stringify(event));
+                router.infoEvent(2, () => [
+                  `${this.name}:`, 200,
+                  "\n\tevent:", ...dumpObject(event),
+                ]);
+                return true;
+              }
+            }
+          }
+          reply.code(404);
+          reply.send();
           router.infoEvent(2, () => [
-            `${this.name}:`,
+            `${this.name}:`, 404,
             "\n\tsections:", ...dumpObject(sections),
           ]);
           return true;

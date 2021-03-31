@@ -3,7 +3,7 @@
 import { Command, /* created, duplicated, destroyed, */ EventBase } from "~/raem/events";
 import { StoryIndexTag, PassageIndexTag } from "~/raem/redux/Bard";
 import { qualifiedNamesOf } from "~/tools/namespace";
-import { ValaaURI, naiveURI, hasScheme } from "~/raem/ValaaURI";
+import { ValaaURI, hasScheme } from "~/raem/ValaaURI";
 import { vRef } from "~/raem/VRL";
 import { dumpObject } from "~/raem/VALK";
 import { getHostRef } from "~/raem/VALK/hostReference";

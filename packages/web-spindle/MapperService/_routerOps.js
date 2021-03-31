@@ -181,14 +181,14 @@ function _createSmartHandler (router, projector) {
             throw error;
           },
           function _deliverError (actualError) {
-            if (!reply.statusCode) reply.code(500);
+            if (!(reply.statusCode >= 400)) reply.code(500);
             if (!reply.sent) reply.send(actualError.message);
             if (!router.getVerbosity() && (reply.statusCode < 500)) {
               router.warnEvent(`Exception caught during projector: ${projector.name}:`,
                   reply.statusCode, actualError.message);
             } else {
               outputError(router.wrapErrorEvent(actualError,
-                      new Error(`${projector.name}`),
+                      projector.name,
                       "\n\trequest.params:", ...dumpObject(request.params),
                       "\n\trequest.query:", ...dumpObject(request.query),
                       "\n\trequest.cookies:", ...dumpObject(Object.keys(request.cookies || {})),

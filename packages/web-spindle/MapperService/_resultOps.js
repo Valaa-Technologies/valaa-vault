@@ -267,8 +267,9 @@ export function _fillReplyFromResponse (router, responseContent, runtime, valkOp
   if (!reply.statusCode) reply.code(200);
   if (!reply.sent) reply.send(...(sendContent !== undefined ? [sendContent] : []));
   router.infoEvent(2, () => [
-    `${router.name}:`, ...dumpObject(scope.resource),
+    `${runtime.route.name}:`, reply.statusCode,
     "\n\tresponseContent:", ...dumpObject(responseContent),
+    "\n\tscope.resource:", ...dumpObject(scope.resource),
   ]);
   return true;
 }

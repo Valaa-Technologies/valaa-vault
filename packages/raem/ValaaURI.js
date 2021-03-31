@@ -181,13 +181,11 @@ export const naiveURI = {
   // FIXME(iridian, 2019-02): naive chronicle URI's must be replaced with
   // chronicle schema specific logic and VRL-based API instead
   // of raw string access API.
-  getPartitionRawId: function getNaivePartitionRawId (naivePartitionURI: ValaaURI): string {
+  tryPartitionRawId: function tryNaivePartitionRawId (
+      naivePartitionURI: ValaaURI): string {
     const match = (typeof naivePartitionURI === "string")
         && naivePartitionURI.match(naiveURI.regex);
-    if (!match) {
-      throw new Error(`Invalid naivePartitionURI (does not match naiveURI regex): <${
-          naivePartitionURI}>`);
-    }
+    if (!match) return null;
     const chronicleIdPart = match[naiveURI.chronicleIdPart];
     if (chronicleIdPart.slice(-2) === "@@") return chronicleIdPart;
     return decodeURIComponent(chronicleIdPart);

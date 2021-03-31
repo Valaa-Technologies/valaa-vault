@@ -496,7 +496,7 @@ function _finalizeRevisioning (elaboration: Object) {
   // Schismatic recital is now considered to be heretic recital events.
   // Reform or purge each of the heretic stories.
   const hereticRecital = elaboration.schismaticRecital;
-  if (!hereticRecital || (hereticRecital.getFirst() === hereticRecital)) return true;
+  if (!hereticRecital || hereticRecital.isEmpty()) return true;
   elaboration.plog2 && elaboration.plog2.opEvent("revisioning.finalize",
       `Reforming ${hereticRecital.size} events onwards from elaborated event #${
           elaboration.newEventIndex}`);
@@ -536,12 +536,16 @@ function _finalizeRevisioning (elaboration: Object) {
   }
   if (purgedHeresies) {
     (elaboration.instigatorConnection || elaboration.falseProphet).errorEvent(1, () => [
-      "\n\nHERESIES PURGED:", ...purgedHeresies.map(h => {
-        const result = { command: ({ ...getActionFromPassage(h) }) };
+      "\n\nHERESIES PURGED:", ...[].concat(...purgedHeresies.map(h => {
+        const result = {
+          error: ((h.heresy || [])[1] || {}).error,
+          heresy: h.heresy,
+          command: ({ ...getActionFromPassage(h) }),
+        };
         result.chronicles = result.command.meta.chronicles;
         delete result.command.meta;
-        return result;
-      }),
+        return [`\n\t#${result.command.aspects.command.id}:`, ...dumpObject(result)];
+      })),
       "\n\tby revisioning:", ...dumpObject(elaboration),
       "\n\tof heretic recital:", ...dumpObject(hereticRecital),
       "\n\telaboration new events:", ...dumpObject(elaboration.newEvents),

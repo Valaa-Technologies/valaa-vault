@@ -88,7 +88,12 @@ export function deserializeVRL (serializedRef: string | JSONIdData,
       nss = parts[3];
       if (parts[1] !== "urn:valos:") {
         (resolver || (resolver = {})).partition = parts[1];
-        if (!nss) nss = naiveURI.getPartitionRawId(parts[1]);
+        if (!nss) {
+          nss = naiveURI.tryPartitionRawId(parts[1]);
+          if (!nss) {
+            throw new Error(`Could not determine chronicle id from serialized reference <${serializedRef}>`);
+          }
+        }
       }
       if (!nss) throw new Error(`Malformed urn:valos reference: empty nss part`);
       if (parts[5]) {

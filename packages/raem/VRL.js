@@ -198,15 +198,6 @@ class VRL {
   }
 
   getChronicleURI (): string { return this._r.partition; }
-  getChronicleId (): ?string {
-    try {
-      return naiveURI.getPartitionRawId(this._r.partition);
-    } catch (error) {
-      throw wrapError(error, `During ${this.debugId()}\n .getPartitionRawId(), with:`,
-          "\n\tchronicleURI:", this._r.partition);
-    }
-  }
-
   setChronicleURI (chronicleURI: ValaaURI) {
     try {
       if (this._r.partition) {

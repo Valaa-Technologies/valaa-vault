@@ -65,16 +65,16 @@ function mapEagerly (
   const callback = (typeof callbacks === "function")
       ? callbacks
       : (e => thenChainEagerly(e, callbacks));
-  try {
-    if (!Array.isArray(entriesOrThenables)) {
-      if ((entriesOrThenables == null) || (typeof entriesOrThenables.then !== "function")) {
-        throw new Error("mapEagerly: array expected as first argument");
-      }
-      contextName = new Error(`mapEagerly.entriesOrThenables.catch`);
-      return entriesOrThenables.then(
-          entries_ => mapEagerly(entries_, callback, onRejected, startIndex, results),
-          errorOnMapEagerly);
+  if (!Array.isArray(entriesOrThenables)) {
+    if ((entriesOrThenables == null) || (typeof entriesOrThenables.then !== "function")) {
+      throw new Error("mapEagerly: array expected as first argument");
     }
+    contextName = new Error(`mapEagerly.entriesOrThenables.catch`);
+    return entriesOrThenables.then(
+        entries_ => mapEagerly(entries_, callback, onRejected, startIndex, results),
+        errorOnMapEagerly);
+  }
+  try {
     entries = entriesOrThenables;
     for (index = startIndex;
         index < entries.length;

@@ -8,10 +8,10 @@ export function getEventIndex (anyAspect: EventAspect) {
 
 export function encodeVPlotValue (value) {
   return encodeURIComponent(value)
-      .replace(/[%!'()*]/g, c => (c === "%" ? "'" : `'${c.charCodeAt(0).toString(16)}`));
+      .replace(/[%!'()*]/g, c => (c === "%" ? "!" : `'${c.charCodeAt(0).toString(16)}`));
 }
 
 export function decodeVPlotValue (value) {
-  return value.replace(/'/g, "%").decodeURIComponent(value);
+  return value.replace(/!/g, "%").decodeURIComponent(value);
 }
 

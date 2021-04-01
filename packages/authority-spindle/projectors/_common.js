@@ -32,18 +32,18 @@ export function _prepareChronicleRequest (router, projector, request, reply) {
 
 export function _getChronicleURIFromRoutePlot (discourse, authorityURI, routePlot) {
   try {
-    const params = routePlot.split("!");
+    const params = routePlot.split("'");
     if (params.length !== 1) {
       throw new Error(`Invalid chronicle plot id: 1 param expected, got ${params.length}`);
     }
-    const [term, suffix] = params[0].split("'");
+    const [term, suffix] = params[0].split("!");
     if (term[0] !== "~") {
       throw new Error(`Invalid chronicle plot id term: expected "~" as first char, got "${term}"`);
     }
     if (!suffix) {
       throw new Error(`Invalid nully chronicle plot id suffix`);
     }
-    return discourse.createChronicleURI(authorityURI, `${term}'${suffix}`);
+    return discourse.createChronicleURI(authorityURI, `${term}!${suffix}`);
   } catch (error) {
     throw discourse.wrapErrorEvent(error, 1,
         new Error(`getChronicleURIFromRoutePlot(<${authorityURI}>, "${routePlot}")`));

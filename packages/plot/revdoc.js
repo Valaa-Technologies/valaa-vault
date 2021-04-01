@@ -873,8 +873,8 @@ encoding.
 The list of definitive rules:
 `, abnf(
 `  vplot       = 1*( "(" vstep ")" )
-  vstep       = vparam *( "!" vparam )
-  vparam      = vplot / [ vterm ] [ "'" ( vvalue / "'" vdata ) ]
+  vstep       = vparam *( "'" vparam )
+  vparam      = vplot / [ vterm ] [ "!" ( vvalue / "!" vdata ) ]
 
   route-vplot = vstep *( "/" vstep )
   urn-vplot   = vstep *( ":" vstep )

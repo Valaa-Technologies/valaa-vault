@@ -90,7 +90,7 @@ export function resolveScopeIdentityRoles (router, route, scope) {
     scope.sessionIdentity = vRef(identityId, undefined, undefined, identityChronicle)
         .setAbsent();
     const aurChronicleURI = router.getDiscourse().createChronicleURI(
-        authorityURI, `~aur'${encodeVPlotValue(authorityURI)}`);
+        authorityURI, `~aur!${encodeVPlotValue(authorityURI)}`);
     ret[aurChronicleURI] = true;
   }
   return ret;

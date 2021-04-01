@@ -19,13 +19,13 @@ export default class ValOSPRemoteEventsAPI extends FabricEventTarget {
     const isSingular = startIndex + 1 === endIndex;
     const indexFilterPlot =
         isSingular
-            ? `i'${startIndex}`
+            ? `!${startIndex}/`
         : (startIndex || 0) === 0 && (endIndex == null)
-            ? "*"
+            ? ""
         : (endIndex == null)
-            ? `(*ge!i'${startIndex})`
-            : `(*in!i'${startIndex || 0}!i'${endIndex})`;
-    const narrateRoute = `${connection.getValOSPChronicleURL()}-log!${indexFilterPlot}/`;
+            ? `'(*ge'i!${startIndex})`
+            : `'(*in'i!${startIndex || 0}'i!${endIndex})`;
+    const narrateRoute = `${connection.getValOSPChronicleURL()}-log${indexFilterPlot}`;
     this.logEvent(2, () => [
       `GET events from chronicle ${connection.getName()} via <${narrateRoute}>`,
     ]);
@@ -36,9 +36,10 @@ export default class ValOSPRemoteEventsAPI extends FabricEventTarget {
   }
 
   proclaimRemoteCommands (connection, startIndex, commands, identities) {
-    const proclaimRoute = `${connection.getValOSPChronicleURL()}-log!i'${startIndex}/`;
     const isMulti = commands.length > 1;
     const method = isMulti ? "POST" : "PUT";
+    const proclaimRoute = `${
+        connection.getValOSPChronicleURL()}-log${isMulti ? "" : `!${startIndex}/`}`;
     this.logEvent(2, () => [
       `${method} command${isMulti ? "s" : ""} to chronicle ${connection.getName()
           } via <${proclaimRoute}>`,

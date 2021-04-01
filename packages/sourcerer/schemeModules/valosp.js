@@ -26,7 +26,7 @@ export default function createValOSProtocolScheme ({ parent } = {}) {
       }
       let chroniclePlot = chronicleId;
       if (chronicleId.startsWith("@$")) {
-        chroniclePlot = chronicleId.slice(2, -2).replace(".", "'");
+        chroniclePlot = chronicleId.slice(2, -2).replace(".", "!");
       }
       return `${authorityURI}${chroniclePlot}/`;
     },
@@ -40,7 +40,7 @@ export default function createValOSProtocolScheme ({ parent } = {}) {
       const httpsEndpointBase = `https${authorityURI.slice(6)}`;
       return thenChainEagerly(
           maybePreConfig || fetchJSON(
-              `${httpsEndpointBase}~aur'${encodeVPlotValue(authorityURI)}/authorityConfig/`,
+              `${httpsEndpointBase}~aur!${encodeVPlotValue(authorityURI)}/.authorityConfig/`,
               { method: "GET", mode: "cors" }),
           preConfig => {
             if (!preConfig) return null;

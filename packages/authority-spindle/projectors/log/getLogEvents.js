@@ -33,7 +33,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         "\n\tindexRange:", ...dumpObject(scope.indexRange),
       ]);
       // const {} = this.runtime.ruleResolvers;
-      if (scope.indexRange !== "*") throw new Error("Only index range '*' implemented");
+      if (scope.indexRange !== "") throw new Error("Only full index range implemented");
 
       const eventIdBegin = 0;
       const eventIdEnd = undefined;

@@ -39,6 +39,12 @@ export default class Oracle extends Sourcerer {
 
   getDecoderArray () { return this._decoderArray; }
 
+  createChronicleRootId (authorityURI: string, identityMediator: Object,
+      commandId: string, commandChronicleIndex: number): string {
+    return this._authorityNexus.createChronicleRootId(
+        authorityURI, identityMediator, commandId, commandChronicleIndex);
+  }
+
   createChronicleURI (authorityURI: string, chronicleId: string) {
     return this._authorityNexus.createChronicleURI(authorityURI, chronicleId);
   }

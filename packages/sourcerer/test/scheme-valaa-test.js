@@ -6,6 +6,7 @@ import { naiveURI } from "~/raem";
 import { Authority, AuthorityConnection, SOURCERER_EVENT_VERSION } from "~/sourcerer";
 import { Proclamation, ProclaimOptions, ProclaimEventResult, MediaInfo, NarrateOptions }
     from "~/sourcerer/api/types";
+import { createChronicleRootVRID0Dot2 } from "~/sourcerer/tools/event-version-0.2/createVRID0Dot2";
 
 import { dumpObject } from "~/tools";
 
@@ -13,6 +14,7 @@ export default function createValaaTestScheme ({ config, /* parent */ } = {}) {
   return {
     scheme: "valaa-test",
 
+    createChronicleRootId: createChronicleRootVRID0Dot2,
     createChronicleURI: naiveURI.createChronicleURI,
     splitChronicleURI: naiveURI.splitChronicleURI,
 

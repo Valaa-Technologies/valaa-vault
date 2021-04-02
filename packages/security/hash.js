@@ -1,5 +1,4 @@
 const nacl = require("tweetnacl");
-const JSSHA256 = require("jssha/src/sha256");
 const JSSHA3 = require("jssha/src/sha3");
 const { TextEncoder } = require("text-encoding");
 
@@ -7,21 +6,12 @@ const { base64URLFromBuffer } = require("@valos/gateway-api/base64");
 const { formVPlot } = require("@valos/plot");
 
 module.exports = {
-  b64SHA256FromUTF8Text,
   hexSHA512FromBuffer,
   hashVPlot,
   hash40,
   hashV240,
   isHashV240,
 };
-
-// TODO(iridian, 2020-10): Phase this function out when the support for
-// old chronicles with old-style derived id's can be finally dropped.
-function b64SHA256FromUTF8Text (utf8Text) {
-  const sha = new JSSHA256("SHA-256", "TEXT", { encoding: "UTF8" });
-  sha.update(utf8Text);
-  return sha.getHash("B64");
-}
 
 function hexSHA512FromBuffer (arrayBuffer) {
   return hexFromBuffer(nacl.hash(new Uint8Array(arrayBuffer)));

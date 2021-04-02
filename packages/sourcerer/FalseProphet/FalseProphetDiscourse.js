@@ -17,7 +17,7 @@ import type { ProclaimOptions, ChroniclePropheciesRequest, SourceryOptions, Prop
 import { SOURCERER_EVENT_VERSION  } from "~/sourcerer";
 
 import { initializeAspects, obtainAspect, tryAspect } from "~/sourcerer/tools/EventAspects";
-import createVRID0Dot2, { upgradeVRIDTo0Dot2, createChronicleRootVRID0Dot2 }
+import createVRID0Dot2, { upgradeVRIDTo0Dot2 }
     from "~/sourcerer/tools/event-version-0.2/createVRID0Dot2";
 
 import FalseProphet from "~/sourcerer/FalseProphet";
@@ -262,8 +262,8 @@ export default class FalseProphetDiscourse extends Discourse {
     const chronicles = (root.meta || (root.meta = {})).chronicles || (root.meta.chronicles = {});
 
     const chronicleRootVRID = explicitChronicleRootVRID
-        || createChronicleRootVRID0Dot2(
-            root.aspects.command.id, authorityURI, Object.keys(chronicles).length);
+        || this._falseProphet.createChronicleRootId(authorityURI,
+            this.getIdentityMediator(), root.aspects.command.id, Object.keys(chronicles).length);
     const chronicleURI = this.createChronicleURI(authorityURI, chronicleRootVRID);
     targetAction.id = vRef(chronicleRootVRID, undefined, undefined, chronicleURI);
     chronicles[chronicleURI] = {};

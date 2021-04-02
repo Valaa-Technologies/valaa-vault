@@ -1,13 +1,16 @@
 // @flow
 
+import { naiveURI } from "~/raem";
+
 import { Authority, SOURCERER_EVENT_VERSION } from "~/sourcerer";
 import type { SchemeModule } from "~/sourcerer";
-import { naiveURI } from "~/raem";
+import { createChronicleRootVRID0Dot2 } from "~/sourcerer/tools/event-version-0.2/createVRID0Dot2";
 
 export default function createValaaMemoryScheme (/* { parent } */): SchemeModule {
   return {
     scheme: "valaa-memory",
 
+    createChronicleRootId: createChronicleRootVRID0Dot2,
     createChronicleURI: naiveURI.createChronicleURI,
     splitChronicleURI: naiveURI.splitChronicleURI,
 

@@ -82,6 +82,18 @@ export default class AuthorityNexus extends FabricEventTarget {
     throw new Error(`Cannot find authority for "${String(authorityURI)}"`);
   }
 
+  createChronicleRootId (authorityURI: string, identityMediator: Object,
+      commandId: string, commandChronicleIndex: number): string {
+    const ret = this
+        .getSchemeModule(getScheme(authorityURI))
+        .createChronicleRootId(
+            authorityURI, identityMediator, commandId, commandChronicleIndex);
+    if (!ret) {
+      throw new Error(`Couldn't create chronicle root id under authority <${authorityURI}>`);
+    }
+    return ret;
+  }
+
   createChronicleURI (authorityURI: string, chronicleId: string) {
     const ret = this
         .getSchemeModule(getScheme(authorityURI))

@@ -33,17 +33,19 @@ export default class IdentityMediator extends FabricEventTarget {
   }
 
   getClaims (options = {}) { return this.getAuthenticatedIdClaims(options); }
-  getClaimsFor (resource: string | Object) { return _getIdClaims(this, resource); }
-  tryClaimsFor (resource: string | Object) { return _getIdClaims(this, resource, false); }
+  getClaimsFor (resource: string | Object) { return _getResourceIdClaims(this, resource); }
+  tryClaimsFor (resource: string | Object) { return _getResourceIdClaims(this, resource, false); }
+
+  tryClaimsForAuthority (authorityURI: string) { return _getAuthorityIdClaims(this, authorityURI); }
 
   get (resource: string | Object) {
     console.debug("DEPRECATED: IdentityMediator.prototype.get, in favor of: .getClaimsFor");
-    return _getIdClaims(this, resource);
+    return _getResourceIdClaims(this, resource);
   }
 
   try (resource: string | Object) {
     console.debug("DEPRECATED: IdentityMediator.prototype.try, in favor of: .tryClaimsFor");
-    return _getIdClaims(this, resource, false);
+    return _getResourceIdClaims(this, resource, false);
   }
 
   list () { return Object.keys(this._activeIdClaims); }
@@ -97,22 +99,26 @@ export default class IdentityMediator extends FabricEventTarget {
   }
 
   getPublicIdentityFor (resource: Object | string) {
-    return _getIdClaims(this, resource).publicIdentity;
+    return _getResourceIdClaims(this, resource).publicIdentity;
   }
 
   getContributorPropertiesFor (resource: Object | string) {
-    return { ..._getIdClaims(this, resource).asContributor };
+    return { ..._getResourceIdClaims(this, resource).asContributor };
   }
 }
 
 Object.assign(IdentityMediator.prototype, identityPrototypeMethods);
 
-function _getIdClaims (mediator, reference, require = true) {
+function _getResourceIdClaims (mediator, reference, require = true) {
   const { authority, resource } = mediator._sourcerer.resolveReference(reference);
-  const chronicleURI = authority && mediator._authorityIdentities[authority.getAuthorityURI()];
-  const ret = chronicleURI && mediator._activeIdClaims[chronicleURI];
+  const ret = authority && _getAuthorityIdClaims(authority.getAuthorityURI());
   if (!ret && require) {
     throw new Error(`Cannot find an active public authority identity for <${resource.toString()}>`);
   }
   return ret;
+}
+
+function _getAuthorityIdClaims (mediator, authorityURI) {
+  const chronicleURI = mediator._authorityIdentities[authorityURI];
+  return chronicleURI && mediator._activeIdClaims[chronicleURI];
 }

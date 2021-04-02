@@ -26,7 +26,7 @@ export default function createVRID0Dot2 (
 }
 
 export function createChronicleRootVRID0Dot2 (
-    commandId: string, authorityURI: string, intraEventChronicleCount: ?number) {
+    authorityURI: string, identityMediator, commandId: string, intraEventChronicleCount: ?number) {
   if (!Number.isInteger(intraEventChronicleCount)
       || !(intraEventChronicleCount >= 0) || !(intraEventChronicleCount < 65536)) {
     throw new Error(`intraEventIndex is not an integer between 0 and 65535, got: ${

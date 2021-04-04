@@ -171,7 +171,7 @@ export class FabricEventTarget {
   static _globalOps = Object.create(null);
 
   opLog (requiredVerbosity, parentLogOrOptionsOrName = this, operationName, ...rest) {
-    let verbosity = parentLogOrOptionsOrName.verbosity || 0;
+    let verbosity = (parentLogOrOptionsOrName || "").verbosity || 0;
     if (this._verbosity > verbosity) verbosity = this._verbosity;
     const loudness = verbosity - requiredVerbosity;
     if (loudness < 0) return undefined;

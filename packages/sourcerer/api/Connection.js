@@ -46,6 +46,9 @@ export default class Connection extends Follower {
         || super.getName() || super.getRawName();
   }
   getSourcerer (): Sourcerer { return this._parent; }
+  getActiveAuthority () {
+    return this._upstreamConnection && this._upstreamConnection.getActiveAuthority();
+  }
 
   getAuthorityURI (): string { return this._parent.splitChronicleURI(this._chronicleURI)[0]; }
   getChronicleURI (): string { return this._chronicleURI; }
@@ -143,7 +146,7 @@ export default class Connection extends Follower {
     const chainOptions = Object.create(options);
     chainOptions.plog = (options.plog || {}).v1
         || this.opLog(1, options, "sourcery",
-            `Sourcering ${Type.name}`, { options, connection: this });
+            `Sourcering ${Type.name} ${Type.sourceryOpsName}`, { options, connection: this });
     return (this._activeConnection = this.opChain(
         Type.sourceryOpsName, chainOptions,
         "_errorOnSourcery", chainOptions.plog, 2));

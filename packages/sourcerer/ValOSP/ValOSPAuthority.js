@@ -28,7 +28,14 @@ export default class ValOSPAuthority extends Authority {
         return ((authorityConfig || {}).isRemoteAuthority)
             && this._initializeRemoteComponents(authorityConfig);
       },
-      () => this._authorityConfig,
+      () => {
+        if (typeof this._authorityConfig.verbosity === "number") {
+          this.setVerbosity(this._authorityConfig.verbosity);
+        }
+        this.logEvent(1, `Connected to authority "${name}" at <${this.getAuthorityURI()}>`,
+            this._authorityConfig);
+        return this._authorityConfig;
+      }
     ]);
   }
 

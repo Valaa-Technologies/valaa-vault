@@ -74,6 +74,10 @@ export default class ValOSPConnection extends AuthorityConnection {
         || (this._chronicleValOSPURL = `https${this._chronicleURI.slice(6)}`);
   }
 
+  getActiveAuthority () {
+    return this.getSourcerer().getAuthorityConfig();
+  }
+
   isConnected () {
     return this._isConnected;
   }

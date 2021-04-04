@@ -2,9 +2,10 @@
 
 import type { AuthorityConfig, AuthorityOptions, Sourcerer } from "~/sourcerer";
 
-import {
-  EVENT_VERSION as FUTURE_EVENT_VERSION, encodeVPlotValue, createChronicleRootVRID0Dot3,
-} from "~/sourcerer/tools/event-version-0.3";
+import { EVENT_VERSION as FUTURE_EVENT_VERSION, encodeVPlotValue }
+    from "~/sourcerer/tools/event-version-0.3";
+import { createChronicleRootVRID0Dot3 }
+    from "~/sourcerer/tools/event-version-0.3/createVRID0Dot3";
 
 import ValOSPAuthority from "~/sourcerer/ValOSP/ValOSPAuthority";
 
@@ -67,9 +68,7 @@ export default function createValOSProtocolScheme ({ parent } = {}) {
         options.nexus.logEvent(
             `Connecting to authority "${name}" at <${options.authorityURI}>`);
       }
-      const ret = new ValOSPAuthority({ name, parent, ...options });
-      ret.logEvent(1, `Connected to authority "${name}" at <${options.authorityURI}>`);
-      return ret;
+      return new ValOSPAuthority({ name, parent, ...options });
     }
   };
 }

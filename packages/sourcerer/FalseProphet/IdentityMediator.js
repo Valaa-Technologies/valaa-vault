@@ -111,7 +111,7 @@ Object.assign(IdentityMediator.prototype, identityPrototypeMethods);
 
 function _getResourceIdClaims (mediator, reference, require = true) {
   const { authority, resource } = mediator._sourcerer.resolveReference(reference);
-  const ret = authority && _getAuthorityIdClaims(authority.getAuthorityURI());
+  const ret = authority && _getAuthorityIdClaims(mediator, authority.getAuthorityURI());
   if (!ret && require) {
     throw new Error(`Cannot find an active public authority identity for <${resource.toString()}>`);
   }

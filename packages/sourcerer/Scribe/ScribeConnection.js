@@ -87,6 +87,7 @@ export default class ScribeConnection extends Connection {
   static sourceryOpsName = "scribeSourcery";
   static scribeSourcery = [
     ScribeConnection.prototype._sourcerUpstream,
+    ScribeConnection.prototype._maybeInitializeDatabase,
     ScribeConnection.prototype._readMediaEntries,
     ScribeConnection.prototype._initializeMediaLookups,
     Connection.prototype._narrateEventLog,
@@ -94,7 +95,8 @@ export default class ScribeConnection extends Connection {
   ]
 
   _sourcerUpstream (options: SourceryOptions) {
-    if (this.getScribe()._upstream) {
+    let upstreamAuthority = this.getScribe()._upstream;
+    if (upstreamAuthority) {
       const upstreamOptions = Object.create(options);
       // Set the permanent receiver without options.pushTruths,
       // initiate connection but disable initial narration;
@@ -103,13 +105,19 @@ export default class ScribeConnection extends Connection {
       upstreamOptions.narrateOptions = false;
       upstreamOptions.subscribeEvents = (options.narrateOptions === false)
           && options.subscribeEvents;
-      this.setUpstreamConnection(this.getScribe()._upstream
-          .sourcerChronicle(this.getChronicleURI(), upstreamOptions));
+      const upstream = upstreamAuthority
+          .sourcerChronicle(this.getChronicleURI(), upstreamOptions);
+      this.setUpstreamConnection(upstream);
       // Unlike with other sourcerers scribe does not wait for upstream
       // sourcery to complete: ScribeConnection can satisfy the
       // optimistic narration criteria of the sourcery process via
       // events in the local cache.
+      upstreamAuthority = upstream.getActiveAuthority();
     }
+    return [options, upstreamAuthority];
+  }
+
+  _maybeInitializeDatabase (options: SourceryOptions) {
     if (options.narrateOptions !== false) {
       if (!options.narrateOptions) options.narrateOptions = {};
       options.narrateOptions.subscribeEvents = options.subscribeEvents;

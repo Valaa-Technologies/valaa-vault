@@ -813,17 +813,18 @@ export default class Gateway extends FabricEventTarget {
           if (module.default) module = module.default;
           if ((module || "").hasOwnProperty("name")) return [module.name, module];
           if (options.skipIfAlreadyAttached && this._attachedSpindles[module]) return [module];
-          const requiredModule = (this.valosRequire(module) || "").default;
-          if (!requiredModule) {
+          let moduleRequire = this.valosRequire(module) || "";
+          if (!moduleRequire.name && moduleRequire.default) moduleRequire = moduleRequire.default;
+          if (!moduleRequire.name) {
             throw new Error(`Failed spindle module require("${String(module)
-                }"): exports.default missing`);
+                }"): no module.exports.name or module.exports.default.name specified`);
           }
-          if (!isSymbol(module) && (requiredModule.name !== module)) {
+          if (!isSymbol(module) && (moduleRequire.name !== module)) {
             throw new Error(`Failed spindle module require("${String(module)
-                }"): exports.default.name ("${String(requiredModule.name)
+                }"): exports.default.name ("${String(moduleRequire.name)
                 }") differs from the required module name`);
           }
-          return [requiredModule.name, requiredModule];
+          return [moduleRequire.name, moduleRequire];
         })
         .map(async ([spindleName, spindlePrototype]) => {
           if (!spindlePrototype) return null;

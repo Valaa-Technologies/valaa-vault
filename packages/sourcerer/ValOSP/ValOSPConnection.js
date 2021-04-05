@@ -305,6 +305,10 @@ export default class ValOSPConnection extends AuthorityConnection {
   }
 
   requestMediaContents (mediaInfos: MediaInfo[]): any {
+    if (!this._config.isRemoteAuthority) {
+      throw new Error(`Invalid valosp backend requestMediaContents call: ${
+        ""} should be served from local Scribe`);
+    }
     return this.getSourcerer()
         .getStorage()
         .downloadBvobsContents(this, mediaInfos);
@@ -319,9 +323,10 @@ export default class ValOSPConnection extends AuthorityConnection {
       if (!mediaInfo.contentHash) throw new Error(`mediaInfo.contentHash missing ${whileTrying}`);
       return {
         contentHash: mediaInfo.contentHash,
-        persistProcess: this.getSourcerer()
-            .getStorage()
-            .uploadBvobContent(this, mediaInfo.contentHash || mediaInfo.bvobId, content, mediaName),
+        persistProcess: !this._config.isRemoteAuthority
+            ? mediaInfo.contentHash
+            : this.getSourcerer().getStorage().uploadBvobContent(
+                this, mediaInfo.contentHash || mediaInfo.bvobId, content, mediaName),
       };
     } catch (error) {
       throw this.wrapErrorEvent(error, `prepareBvob(${whileTrying})`,

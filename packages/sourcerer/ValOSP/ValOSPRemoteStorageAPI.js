@@ -1,6 +1,7 @@
 // @flow
 
 import type { MediaInfo } from "@valos/sourcerer";
+import { hash40FromHexSHA512 } from "@valos/security/hash";
 import { debugObjectType, dumpObject, FabricEventTarget } from "@valos/tools";
 
 /**
@@ -25,17 +26,20 @@ export default class ValOSPRemoteStorageAPI extends FabricEventTarget {
       const asURL = mediaInfo.asURL && "URL";
       const mediaName = mediaInfo.name ? `media '${mediaInfo.name}'` : "unnamed media";
       const whileTrying = `while trying to fetch ${mediaName} ${asURL || "content"}`;
-      const contentHash = mediaInfo.contentHash || mediaInfo.bvobId;
+      const contextName = new Error(`downloadBvobsContents(${mediaName})`);
+      const contentHash = mediaInfo.contentHash.length === 40
+          ? mediaInfo.contentHash
+          : hash40FromHexSHA512(mediaInfo.contentHash);
       const contentType = mediaInfo.contentType
           || mediaInfo.mime
           || ((mediaInfo.type && mediaInfo.subtype) && `${mediaInfo.type}/${mediaInfo.subtype}`);
 
-      const bvobURL = `${connection.getValOSPChronicleURL()}~bvob'${contentHash}/`;
+      const bvobURL = `${connection.getValOSPChronicleURL()}~bvob!${contentHash}/`;
 
       let options;
       try {
         if (!contentHash) {
-          throw new Error(`requestMediaContent.(contentHash|bvobId) missing ${whileTrying}`);
+          throw new Error(`requestMediaContent.contentHash missing ${whileTrying}`);
         }
         if (asURL && !contentType) {
           throw new Error(`getMediaURL.mime (or type/subtype or contentType) missing`);
@@ -81,11 +85,11 @@ export default class ValOSPRemoteStorageAPI extends FabricEventTarget {
         }
 
         const ret = fetch(bvobURL, options)
-            .then(result => {
-              if (!result.ok) {
-                throw new Error(`Received non-ok status ${result.status} while downloading bvob`);
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(`Received non-ok status ${response.status} while downloading bvob`);
               }
-              return result.body;
+              return response.body.arrayBuffer();
             })
             .catch(onError.bind(this));
 
@@ -100,10 +104,8 @@ export default class ValOSPRemoteStorageAPI extends FabricEventTarget {
         return ret;
       } catch (error) { onError.call(this, error); }
       return undefined;
-
       function onError (error) {
-        const wrappedError = this.wrapErrorEvent(
-            error, `downloadBvobsContents(${mediaName})`, whileTrying,
+        const wrappedError = this.wrapErrorEvent(error, contextName, whileTrying,
             "\n\tfrom:", bvobURL,
             "\n\tmediaInfo:", ...dumpObject(mediaInfo),
             "\n\toutgoing options:", ...dumpObject(options),
@@ -124,20 +126,22 @@ export default class ValOSPRemoteStorageAPI extends FabricEventTarget {
    * @memberof ValOSPRemoteStorageAPI
    */
   uploadBvobContent (connection,
-      contentHash: string,
+      contentHash_: string,
       content: ?ArrayBuffer | () => Promise<ArrayBuffer>,
       mediaName: string): ?string | Promise<?string> {
+    const contentHash = contentHash_.length === 40
+        ? contentHash_
+        : hash40FromHexSHA512(contentHash_);
     const alreadyUploadedPromiseToHash = this._uploadedContentHashes[contentHash];
     if (alreadyUploadedPromiseToHash) return alreadyUploadedPromiseToHash;
-    if (!content) return contentHash;
+    if (!content) return { contentHash };
 
-    const bvobURL = `${connection.getValOSPChronicleURL()}~bvob'${contentHash}/`;
+    const bvobURL = `${connection.getValOSPChronicleURL()}~bvob!${contentHash}/`;
     const contextName = new Error(`uploadBvobContent(${contentHash}, ${mediaName})`);
     return (this._uploadedContentHashes[contentHash] = (async () => {
       const options = {
-        method: "PUT",
+        method: "POST",
         mode: "cors",
-        headers: { "Content-Type": "application/octet-stream" },
       };
       try {
         let actualContent = (typeof content === "function") ? await content() : content;
@@ -151,9 +155,12 @@ export default class ValOSPRemoteStorageAPI extends FabricEventTarget {
             debugObjectType(actualContent)}`);
         }
         this.logEvent(2, () => [
-          `PUT ${mediaName} bvob arraybuffer content with hash:`, contentHash,
+          `POST ${mediaName} bvob arraybuffer content with hash:`, contentHash,
           "\n\toptions:", ...dumpObject(options)
         ]);
+
+        options.body = new FormData();
+        options.body.append("file", new Blob([actualContent]));
 
         const result = await fetch(bvobURL, options);
         if (!result.ok) {

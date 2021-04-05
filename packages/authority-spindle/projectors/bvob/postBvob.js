@@ -35,24 +35,24 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       // const {} = this.runtime.ruleResolvers;
 
       return thenChainEagerly(scope.connection.asSourceredConnection(), [
-        connection => {
-          // Add or validate body event index to equal scope.eventIndex
-          return connection.narrateEventLog({
-            eventIdBegin: scope.eventIndex,
-            eventIdEnd: scope.eventIndex,
-            commands: false,
-          });
-        },
+        () => request.file().then(data => data.toBuffer()),
+        async buffer => scope.connection
+            .prepareBvob(buffer, { contentHash: scope.contentHash }).persistProcess,
         // () => valkOptions.discourse.releaseFabricator(),
-        (sections) => {
-          // Flatten sections and pick correct event
-          reply.code(200);
-          reply.send(sections);
+        (persistedContentHash) => {
+          if (scope.contentHash !== persistedContentHash) {
+            console.log("foo:", scope.contentHash, persistedContentHash);
+            reply.code(400);
+            reply.send("content hash mismatch");
+          } else {
+            reply.code(201);
+            reply.send();
+          }
           router.infoEvent(2, () => [
-            `${this.name}:`,
-            "\n\tsections:", ...dumpObject(sections),
+            `${this.name}:`, reply.statusCode,
+            "\n\tpersistedContentHash:", ...dumpObject(persistedContentHash),
           ]);
-          return true;
+        return true;
         },
       ], (error) => {
         throw router.wrapErrorEvent(error, 1, error.chainContextName(this.name),

@@ -32,27 +32,22 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         "\n\tchroniclePlot:", ...dumpObject(scope.chroniclePlot),
         "\n\tcontentHash:", ...dumpObject(scope.contentHash),
       ]);
+      if (scope.contentHash.length !== 40) throw new Error("contentHash must be a valid hash40");
       // const {} = this.runtime.ruleResolvers;
 
       return thenChainEagerly(scope.connection.asSourceredConnection(), [
-        connection => {
-          // Add or validate body event index to equal scope.eventIndex
-          return connection.narrateEventLog({
-            eventIdBegin: scope.eventIndex,
-            eventIdEnd: scope.eventIndex,
-            commands: false,
-          });
-        },
+        connection => connection.requestMediaContents({
+          contentHash: scope.contentHash,
+          contentType: "application/octet-stream",
+        }),
         // () => valkOptions.discourse.releaseFabricator(),
-        (sections) => {
+        (buffer) => {
           // Flatten sections and pick correct event
-          reply.code(200);
-          reply.send(sections);
           router.infoEvent(2, () => [
             `${this.name}:`,
-            "\n\tsections:", ...dumpObject(sections),
+            "\n\tbuffer.byteLength:", buffer.byteLength,
           ]);
-          return true;
+          return router.fillReplyFromResponse(buffer, this.runtime, valkOptions);
         },
       ], (error) => {
         throw router.wrapErrorEvent(error, 1, error.chainContextName(this.name),

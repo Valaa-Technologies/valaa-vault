@@ -2,6 +2,6 @@
 
 import GET from "./getBvob";
 import HEAD from "./headBvob";
-import PUT from "./putBvob";
+import POST from "./postBvob";
 
-export { GET, HEAD, PUT };
+export { GET, HEAD, POST };

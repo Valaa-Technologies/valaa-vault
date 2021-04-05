@@ -10,6 +10,7 @@ import { dumpify, dumpObject, isPromise, outputError, thenChainEagerly } from "~
 
 const FastifySwaggerPlugin = require("fastify-swagger");
 const FastifyCookiePlugin = require("fastify-cookie");
+const FastifyMultiPartPlugin = require("fastify-multipart");
 
 export function _createPrefixRouter (rootService, prefix, prefixConfig) {
   const frameError = new Error(`createPrefixRouter(<${prefix}>)`);
@@ -49,6 +50,7 @@ export function _createPrefixRouter (rootService, prefix, prefixConfig) {
     prefixRouter._fastify = routerFastify;
     try {
       routerFastify.register(FastifyCookiePlugin);
+      routerFastify.register(FastifyMultiPartPlugin);
       if (swaggerPrefix) {
         routerFastify.register(FastifySwaggerPlugin, {
           routePrefix: swaggerPrefix,

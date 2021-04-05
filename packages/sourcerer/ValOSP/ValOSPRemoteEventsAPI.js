@@ -23,8 +23,8 @@ export default class ValOSPRemoteEventsAPI extends FabricEventTarget {
         : (startIndex || 0) === 0 && (endIndex == null)
             ? ""
         : (endIndex == null)
-            ? `'(*ge'i!${startIndex})`
-            : `'(*in'i!${startIndex || 0}'i!${endIndex})`;
+            ? `'!${startIndex}`
+            : `'!${startIndex || 0}'!${endIndex}`;
     const narrateRoute = `${connection.getValOSPChronicleURL()}-log${indexFilterPlot}`;
     this.logEvent(2, () => [
       `GET events from chronicle ${connection.getName()} via <${narrateRoute}>`,

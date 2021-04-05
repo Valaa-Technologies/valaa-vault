@@ -10,8 +10,8 @@ const { dumpObject, thenChainEagerly } = valosheath.require("@valos/tools");
 export default function createProjector (router: PrefixRouter, route: Route) {
   return {
     requiredRules: ["routeRoot", "authorityURI"],
-    runtimeRules: ["headers"],
-    valueAssertedRules: ["chroniclePlot", "indexRange"],
+    runtimeRules: ["headers", "startIndex", "endIndex"],
+    valueAssertedRules: ["chroniclePlot"],
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this, route);
@@ -33,6 +33,8 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         "\n\tindexRange:", ...dumpObject(scope.indexRange),
       ]);
       // const {} = this.runtime.ruleResolvers;
+
+      // TODO(iridian, 2021-04): Should validate startIndex against first body event
 
       return thenChainEagerly(scope.connection.asSourceredConnection(), [
         connection => {

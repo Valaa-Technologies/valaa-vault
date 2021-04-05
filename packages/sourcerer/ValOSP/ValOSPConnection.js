@@ -130,101 +130,126 @@ export default class ValOSPConnection extends AuthorityConnection {
       receiveTruths, eventIdBegin, eventIdEnd, isConnecting, subscribeEvents, remote, identity,
       /* , noSnapshots */
     } = options || {};
+    return this.opChain(
+        "valospNarrateEventLog",
+        [options, this._config || this.getSourcerer().getAuthorityConfig()],
+        "_onNarrateEventLogError", options.plog, 2);
+  }
+
+  static valospNarrateEventLog = [
+    ValOSPConnection.prototype._validateNarrate,
+    ValOSPConnection.prototype._narrateUpdateSubscriptions,
+    ValOSPConnection.prototype._fetchEventLogChunks,
+    ValOSPConnection.prototype._prepareIteration,
+    ValOSPConnection.prototype._postProcessSections,
+  ];
+
+  _validateNarrate (options, config) {
+    if (!config) {
+      throw new Error(`Cannot narrate from unavailable authority <${
+          this.getSourcerer().getAuthorityURI()}>`);
+    }
+    if (!config.isRemoteAuthority) {
+      return thisChainReturn(super.narrateEventLog(options));
+    }
+    return [
+      options,
+      !options.isConnecting && !this.isActive() && this.sourcer({ narrateOptions: false }),
+    ];
+  }
+
+  _narrateUpdateSubscriptions (options) {
+    return [
+      options,
+      (options.subscribeEvents === true) && [this._subscribeToEventMessages(true)],
+      (options.subscribeEvents === false) && this.isConnected() && [this.disconnect()],
+    ];
+  }
+
+  _prepareIteration (options) {
+    if (options.eventIdBegin === undefined) options.eventIdBegin = 0;
+    if (this._downstreamQueueStartIndex !== options.eventIdBegin) {
+      this._downstreamQueueStartIndex = options.eventIdBegin;
+      this._downstreamEventQueue = [];
+    }
+    // fetches the events
+    const sections = {};
+    if (options.remote === false) return thisChainReturn(sections);
+    return [options, sections, this._createIdentities(options.identity)];
+  }
+
+  async _fetchEventLogChunks (options, sections, identities) {
+    let receivedEventsToIntegrate;
     let chunkIndex = 0;
-    return thisChainEagerly(this, [this._config || this.getSourcerer().getAuthorityConfig()], [
-      config => {
-        if (!config) {
-          throw new Error(`Cannot narrate from unavailable authority <${
-              this.getSourcerer().getAuthorityURI()}>`);
-        }
-        if (!config.isRemoteAuthority) {
-          return thisChainReturn(super.narrateEventLog(options));
-        }
-        return !isConnecting && !this.isActive() && [this.sourcer({ narrateOptions: false })];
-      },
-      () => ((subscribeEvents === true) && [this._subscribeToEventMessages(true)])
-          || ((subscribeEvents === false) && this.isConnected() && [this.disconnect()]),
-      () => {
-        if (eventIdBegin === undefined) eventIdBegin = 0;
-        if (this._downstreamQueueStartIndex !== eventIdBegin) {
-          this._downstreamQueueStartIndex = eventIdBegin;
-          this._downstreamEventQueue = [];
-        }
-        // fetches the events
-        const sections = {};
-        if (remote === false) return thisChainReturn(sections);
-        return [sections, this._createIdentities(identity)];
-      },
-      async function _fetchEventLogChunks (sections, identities) {
-        let receivedEventsToIntegrate;
-        while (eventIdBegin !== undefined || receivedEventsToIntegrate) {
-          let remoteNarrateProcess;
-          if (eventIdBegin !== undefined) {
-            remoteNarrateProcess = this.getSourcerer().getEventsAPI()
-                .narrateRemoteEventLog(this, eventIdBegin, eventIdEnd, identities);
-          }
-
-          if (receivedEventsToIntegrate) {
-            const isSingleChunk = (!remoteNarrateProcess && !chunkIndex);
-            this._placeEventsToDownstreamQueue(receivedEventsToIntegrate,
-                isSingleChunk ? "single-chunk narrate" : "paginated narrate");
-            receivedEventsToIntegrate = undefined;
-            sections[isSingleChunk ? "remoteLog" : `remoteLogChunk${chunkIndex++}`] =
-                this._pushConsecutiveQueueEventsDownstream(receiveTruths);
-            if (!remoteNarrateProcess) break;
-          }
-
-          const remoteEvents = await remoteNarrateProcess;
-          this.logEvent(2, () => ["\tGET success onwards from:", eventIdBegin]);
-          if (!remoteEvents || !remoteEvents.length) {
-            break;
-          }
-          receivedEventsToIntegrate = remoteEvents;
-          if (remoteEvents[remoteEvents.length - 1] != null) {
-            // No pagination, this was a single-chunk narrate.
-            eventIdBegin = undefined;
-          } else {
-            // The result has been paginated, need to fetch more.
-            remoteEvents.pop();
-            const lastIndex = getEventIndex(remoteEvents[remoteEvents.length - 1]);
-            let nextStartIndex = eventIdBegin + remoteEvents.length;
-            if (lastIndex + 1 !== nextStartIndex) {
-              this.warnEvent(1, () => [
-                "Narrate pagination index mismatch: expected next index to be", nextStartIndex,
-                "but latest event index received was", lastIndex,
-                "\n\tNarrating from", lastIndex + 1,
-              ]);
-              nextStartIndex = lastIndex + 1;
-            }
-            if (nextStartIndex === eventIdBegin) {
-              this.errorEvent("INTERNAL ERROR: pagination repeats event index:", eventIdBegin);
-              throw new Error("Paginated event narration is repeating the same query.");
-            }
-            this.logEvent(3, () => [
-              "Fetching more, last event was:", lastIndex,
-            ]);
-            // Prime fetch for next chunk
-            eventIdBegin = nextStartIndex;
-          }
-        }
-        return [sections];
-      },
-      async function _postProcessSections (sections) {
-        for (const [key, value] of Object.entries(sections)) {
-          sections[key] = await value;
-          if (!(sections[key] || []).length) delete sections[key];
-        }
-        return sections;
+    while (options.eventIdBegin !== undefined || receivedEventsToIntegrate) {
+      let remoteNarrateProcess;
+      if (options.eventIdBegin !== undefined) {
+        remoteNarrateProcess = this.getSourcerer().getEventsAPI()
+            .narrateRemoteEventLog(this, options.eventIdBegin, options.eventIdEnd, identities);
       }
-    ], function _onNarrateEventLogError (error) {
-      this.warnEvent(2, () => [
-        "\tGET FAILURE:", (error.response || {}).status || error.message,
-      ]);
-      throw this.wrapErrorEvent(error, 1, error.chainContextName("narrateEventLog()"),
-          "\n\tchunkIndex:", chunkIndex,
-          "\n\teventIdBegin:", eventIdBegin,
-          "\n\terror response:", error.response);
-    });
+
+      if (receivedEventsToIntegrate) {
+        const isSingleChunk = (!remoteNarrateProcess && !chunkIndex);
+        this._placeEventsToDownstreamQueue(receivedEventsToIntegrate,
+            isSingleChunk ? "single-chunk narrate" : "paginated narrate");
+        receivedEventsToIntegrate = undefined;
+        sections[isSingleChunk ? "remoteLog" : `remoteLogChunk${chunkIndex++}`] =
+            this._pushConsecutiveQueueEventsDownstream(options.receiveTruths);
+        if (!remoteNarrateProcess) break;
+      }
+
+      const remoteEvents = await remoteNarrateProcess;
+      this.logEvent(2, () => ["\tGET success onwards from:", options.eventIdBegin]);
+      if (!remoteEvents || !remoteEvents.length) {
+        break;
+      }
+      receivedEventsToIntegrate = remoteEvents;
+      if (remoteEvents[remoteEvents.length - 1] != null) {
+        // No pagination, this was a single-chunk narrate.
+        options.eventIdBegin = undefined;
+      } else {
+        // The result has been paginated, need to fetch more.
+        remoteEvents.pop();
+        const lastIndex = getEventIndex(remoteEvents[remoteEvents.length - 1]);
+        let nextStartIndex = options.eventIdBegin + remoteEvents.length;
+        if (lastIndex + 1 !== nextStartIndex) {
+          this.warnEvent(1, () => [
+            "Narrate pagination index mismatch: expected next index to be", nextStartIndex,
+            "but latest event index received was", lastIndex,
+            "\n\tNarrating from", lastIndex + 1,
+          ]);
+          nextStartIndex = lastIndex + 1;
+        }
+        if (nextStartIndex === options.eventIdBegin) {
+          this.errorEvent("INTERNAL ERROR: pagination repeats event index:", options.eventIdBegin);
+          throw new Error("Paginated event narration is repeating the same query.");
+        }
+        this.logEvent(3, () => [
+          "Fetching more, last event was:", lastIndex,
+        ]);
+        // Prime fetch for next chunk
+        options.eventIdBegin = nextStartIndex;
+      }
+    }
+    return [options, sections];
+  }
+
+  async _postProcessSections (options, sections) {
+    for (const [key, value] of Object.entries(sections)) {
+      sections[key] = await value;
+      if (!(sections[key] || []).length) delete sections[key];
+    }
+    return thisChainReturn(sections);
+  }
+
+  _onNarrateEventLogError (error, index, [options]) {
+    this.warnEvent(2, () => [
+      "\tGET FAILURE:", (error.response || {}).status || error.message,
+    ]);
+    throw this.wrapErrorEvent(error, 1, error.chainContextName("narrateEventLog()"),
+        "\n\tchunkIndex:", options.chunkIndex,
+        "\n\teventIdBegin:", options.eventIdBegin,
+        "\n\terror response:", error.response);
   }
 
   // Sends a given command within a command envelope to the API endpoint

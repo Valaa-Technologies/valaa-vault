@@ -10,8 +10,8 @@ const { dumpObject, thenChainEagerly } = valosheath.require("@valos/tools");
 export default function createProjector (router: PrefixRouter, route: Route) {
   return {
     requiredRules: ["routeRoot", "authorityURI"],
-    runtimeRules: ["headers"],
-    valueAssertedRules: ["chroniclePlot", "indexRange"],
+    runtimeRules: ["headers", "startIndex", "endIndex"],
+    valueAssertedRules: ["chroniclePlot"],
 
     prepare () {
       this.runtime = router.createProjectorRuntime(this, route);
@@ -33,10 +33,9 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         "\n\tindexRange:", ...dumpObject(scope.indexRange),
       ]);
       // const {} = this.runtime.ruleResolvers;
-      if (scope.indexRange !== "") throw new Error("Only full index range implemented");
 
-      const eventIdBegin = 0;
-      const eventIdEnd = undefined;
+      const eventIdBegin = !scope.startIndex ? 0 : parseInt(scope.startIndex.slice(1), 10);
+      const eventIdEnd = !scope.endIndex ? 0 : parseInt(scope.endIndex.slice(1), 10);
 
       return thenChainEagerly(scope.connection.asSourceredConnection(), [
         connection => connection.narrateEventLog({ eventIdBegin, eventIdEnd, commands: false }),

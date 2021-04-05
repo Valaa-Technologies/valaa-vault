@@ -1,0 +1,11 @@
+{
+  "valosp://localhost:7358/testaur/": {
+    "authorityURI": "valosp://localhost:7358/testaur/",
+    "name": "valos kernel test suite authority",
+    "isLocallyRecorded": true,
+    "isPrimaryAuthority": true,
+    "isRemoteAuthority": false,
+    "eventVersion": "0.2",
+    "verbosity": 2
+  }
+}

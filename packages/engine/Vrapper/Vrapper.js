@@ -527,7 +527,8 @@ export default class Vrapper extends Cog {
       }
       if (!this._connection.isActive()) {
         contextName = new Error(`getConnection.acquire.asSourceredConnection()`);
-        this._connection.asSourceredConnection().catch(onError.bind(this));
+        const sourceredConnection = this._connection.asSourceredConnection();
+        if (isPromise(sourceredConnection)) sourceredConnection.catch(onError.bind(this));
       }
       return this._connection;
     } catch (error) {

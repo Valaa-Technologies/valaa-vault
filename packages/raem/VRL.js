@@ -225,7 +225,7 @@ class VRL {
 
   // Primitive operations, introspection and serialization
 
-  toString (nest: number = 1): string {
+  toString (): string {
     const resolverComponent = stringifyComponent(this._r, "?+");
     const queryComponent = stringifyComponent(this._q, "?=");
     const fragmentComponent = (this._f && `#${encodeURIComponent(this._f)}`) || "";
@@ -237,7 +237,7 @@ class VRL {
         let value = component[param];
         if (typeof value === "string") value = encodeURIComponent(value);
         else if (value instanceof GhostPath) {
-          value = (nest && value.isGhost()) ? value.toURIString() : undefined;
+          value = value.isGhost() ? value.toURIString() : undefined;
         } else if (value) value = encodeURIComponent(JSON.stringify(value));
         if (!value) return acc;
         return `${acc ? `${acc}&` : prefix}${param}=${value}`;

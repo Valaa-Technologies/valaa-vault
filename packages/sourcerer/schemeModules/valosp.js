@@ -9,7 +9,7 @@ import { createChronicleRootVRID0Dot3 }
 
 import ValOSPAuthority from "~/sourcerer/ValOSP/ValOSPAuthority";
 
-import { thenChainEagerly, fetchJSON } from "~/tools";
+import { thenChainEagerly, fetchJSON, outputError, wrapError } from "~/tools";
 import type { ValaaURI } from "~/raem/ValaaURI";
 
 export default function createValOSProtocolScheme ({ parent } = {}) {
@@ -36,10 +36,9 @@ export default function createValOSProtocolScheme ({ parent } = {}) {
     obtainAuthorityConfig (authorityURI: ValaaURI, maybePreConfig: ?AuthorityConfig):
         AuthorityConfig {
       const httpsEndpointBase = `https${authorityURI.slice(6)}`;
+      const url = `${httpsEndpointBase}~aur!${encodeVPlotValue(authorityURI)}/.authorityConfig/`;
       return thenChainEagerly(
-          maybePreConfig || fetchJSON(
-              `${httpsEndpointBase}~aur!${encodeVPlotValue(authorityURI)}/.authorityConfig/`,
-              { method: "GET", mode: "cors" }),
+          maybePreConfig || fetchJSON(url, { method: "GET", mode: "cors" }),
           preConfig => {
             if (!preConfig) return null;
             const ret = {
@@ -56,9 +55,12 @@ export default function createValOSProtocolScheme ({ parent } = {}) {
             return ret;
           },
           error => {
-            console.log(
-                "Error while fetching authorityConfig for", authorityURI, ":", { error });
-            return null;
+            outputError(wrapError(error, 1,
+                error.chainContextName("valosp.obtainAuthorityConfig"),
+                "\n\tGET url:", url,
+            ));
+            throw new Error(`Unable to connect to authority <${authorityURI
+                }>: could not fetch authority config. See console for more details.`);
           });
     },
 

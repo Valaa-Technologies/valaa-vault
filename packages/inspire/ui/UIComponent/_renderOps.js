@@ -350,7 +350,7 @@ const _renderMediaLensChain = [
         extendContext[Lens.integrationScopeResource] = this.options.vIntegrationScope;
       }
       return wrapElementInValens(
-          this.component, contentInterpretation, focus, `~<-${this.lensName}`, extendContext);
+          this.component, contentInterpretation, this.focus, `~<-${this.lensName}`, extendContext);
     } else if (Array.isArray(contentInterpretation)
         || (Object.getPrototypeOf(contentInterpretation) === Object.prototype)) {
       error = new Error(`Media '${info.name

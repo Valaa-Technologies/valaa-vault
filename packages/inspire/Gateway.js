@@ -43,7 +43,7 @@ const patchWith = require("@valos/tools/patchWith").default;
 const { AuthorityNexus, FalseProphet, Oracle, Sourcerer, Scribe } = valosSourcerer;
 const {
   dumpObject, inBrowser, invariantify, isSymbol, isPromise, FabricEventTarget, mapEagerly,
-  thenChainEagerly,
+  thenChainEagerly, thisChainReturn,
 } = valosTools;
 
 const posixPath = path.posix || path;
@@ -523,7 +523,7 @@ export default class Gateway extends FabricEventTarget {
   _logSpindleReactions (op, view, spindleReactions) {
     (op.plog || {}).chain && op.plog.chain.opEvent(view, "spindle_reactions",
         "\n\tspindle reactions:", spindleReactions);
-    return view;
+    return thisChainReturn(view);
   }
 
   /**

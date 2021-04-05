@@ -43,7 +43,7 @@ export default valosheath.exportSpindle({
   getWebService () { return this._service; },
 
   async onGatewayTerminating () {
-    return this._service.stop();
+    return this._service && this._service.stop();
   },
 
   async _addPrefixRouter (gateway, prefix, prefixConfig, parentPlog) {

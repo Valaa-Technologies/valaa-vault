@@ -622,19 +622,19 @@ export default class UIComponent extends React.Component {
       const chainHead = this._stickyErrorObject
           || _checkForRenderDepthFailure(this)
           || this.maybeDelayed(Lens.pendingElementsLens, this.state.rerenderings || 0);
-      const chainResult = thisChainEagerly(
+      const renderResult = thisChainEagerly(
           this,
-          chainHead,
+          [chainHead],
           UIComponent._renderChain,
           UIComponent.prototype._errorOnRenderChain);
-      if (typeof chainResult === "number") {
+      if (typeof renderResult === "number") {
         ret = this._cachedRenderResult; // newly set by chain
         if (ret === undefined) {
-          throw new Error(`INTERNAL ERROR: render chain returned ${chainResult
+          throw new Error(`INTERNAL ERROR: render chain returned ${renderResult
               } directly but didn't set _cachedRenderResult`);
         }
-      } else { // chainResult is a promise
-        chainResult.then(successfulRendering => {
+      } else { // renderResult is a promise
+        renderResult.then(successfulRendering => {
           if (successfulRendering >= 0) {
             this._cachedRendering = successfulRendering;
             this.rerender("elements", null);
@@ -652,11 +652,11 @@ export default class UIComponent extends React.Component {
           // Maybe add a timer that will trigger pending lens rendering after a while?
           ret = this._cachedRenderResult;
         } else {
-          const operationInfo = chainResult.operationInfo || {
+          const operationInfo = renderResult.operationInfo || {
             slotName: "pendingElementsLens", focus: {
-              render: chainResult, latestRenderedLensSlot: this.constructor.mainLensSlotName,
+              render: renderResult, latestRenderedLensSlot: this.constructor.mainLensSlotName,
             },
-            onError: { slotName: "rejectedElementsLens", lens: { render: chainResult } },
+            onError: { slotName: "rejectedElementsLens", lens: { render: renderResult } },
           };
           ret = this.tryRenderSlotAsLens(operationInfo.slotName, operationInfo.focus);
           if ((ret === undefined) || isPromise(ret)) {
@@ -696,7 +696,7 @@ export default class UIComponent extends React.Component {
   _validateRenderResult (thisRendering, renderResult) {
     if (thisRendering < (this._cachedRendering || 0)) {
       // Some later rerender call finished before this chain call. Discard all.
-      return -1;
+      return [-1];
     }
     if (renderResult === undefined) {
       this._cachedRenderResult = null;
@@ -714,12 +714,13 @@ export default class UIComponent extends React.Component {
       }
       this._cachedRenderResult = renderResult;
     }
-    return thisRendering;
+    return thisChainReturn(thisRendering);
   }
 
-  _errorOnRenderChain (error = "", index, params) {
-    const thisRendering = Array.isArray(params) ? params[0] : (this.state.rerenderings || 0);
-    if (thisRendering < (this._cachedRendering || 0)) return -1;
+  _errorOnRenderChain (error = "", index, [thisRendering_]) {
+    const thisRendering = thisRendering_ !== undefined
+        ? thisRendering_ : (this.state.rerenderings || 0);
+    if (thisRendering < (this._cachedRendering || 0)) return thisChainReturn(-1);
     // Try to sourcer absent chronicles.
     try {
       this._cachedRendering = thisRendering;
@@ -759,7 +760,7 @@ export default class UIComponent extends React.Component {
     } catch (secondaryError) {
       this._cachedRenderResult = this._renderSecondaryError(secondaryError, error);
     }
-    return thisRendering;
+    return thisChainReturn(thisRendering);
   }
 
   _renderSecondaryError (secondaryError, primaryError) {
@@ -772,7 +773,8 @@ export default class UIComponent extends React.Component {
           `INTERNAL ERROR: Exception caught in ${this.constructor.name
               }.render() second pass,`,
           "\n\twhile rendering primary error:", ...dumpObject(primaryError),
-          "\n\tin component:", ...dumpObject(this)));
+          "\n\tin component:", ...dumpObject(this),
+          "\n\twith traces:", ...dumpObject(primaryError.stack.split("  ").join("    "))));
       return (
         <div>
           Exception caught while trying to render error:

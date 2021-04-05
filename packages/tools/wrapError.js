@@ -221,8 +221,10 @@ function outputError (error, header = "Exception caught", logger = _globalLogger
               `[${contextVerbosity}>=${contextDetail}] context:\n  ${context.name}`,
               ...context.contextDescriptions.map(dumpifyObject));
     } else if (visibility >= -1) {
-      logger.debug(`\t[${contextVerbosity}<${contextDetail}]`,
-          inBrowser() ? { traces } : traces.length, `collapsed fabric traces`);
+      const firstTrace = traces.shift();
+      logger.debug(firstTrace,
+          `\n\t[${contextVerbosity}<${contextDetail}]`,
+          inBrowser() ? { traces } : traces.length, `other collapsed fabric traces`);
       traces = [];
       const lines = [];
       for (const entry of context.contextDescriptions) {
@@ -323,7 +325,7 @@ function debugObjectNest (head, nest = 1, alwaysStringify = false, indent, expan
     if (head.toString && (typeof nest === "number")
         && (head.toString !== Object.prototype.toString)
         && (head.toString !== Array.prototype.toString)) {
-      return head.toString(nest);
+      return head.toString();
     }
     if (nest) {
       const cache = cache_ || new Map();

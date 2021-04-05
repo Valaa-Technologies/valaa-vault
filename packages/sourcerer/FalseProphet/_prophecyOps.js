@@ -629,7 +629,7 @@ export class ProphecyOperation extends ProphecyEventResult {
   }
 
   _errorOnPerformVenue (error, index, params) {
-    const venue = params[0];
+    const venue = Array.isArray(params) ? params[0] : params;
     if ((!this._progress || !this._progress.isSchismatic)
         && (venue.proclamation !== venue.currentProclamation)) {
       // retry

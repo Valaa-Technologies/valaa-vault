@@ -10,7 +10,7 @@ import Follower from "~/sourcerer/api/Follower";
 
 import {
   dumpObject, invariantifyArray, invariantifyObject, invariantifyString,
-  isPromise, thenChainEagerly, thisChainRedirect,
+  isPromise, thenChainEagerly, thisChainRedirect, thisChainReturn,
 } from "~/tools";
 
 /**
@@ -234,7 +234,7 @@ export default class Connection extends Follower {
     }
     options.plog && !Object.getPrototypeOf(options).plog && options.plog.opEvent(this, "done",
         "Sourcery done:", { options, narrateResults });
-    return (this._activeConnection = this);
+    return thisChainReturn(this._activeConnection = this);
   }
 
   addReference () { ++this._refCount; }

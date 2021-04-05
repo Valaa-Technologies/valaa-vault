@@ -13,17 +13,18 @@ module.exports = {
   isHashV240,
 };
 
-function hexSHA512FromBuffer (arrayBuffer) {
-  return hexFromBuffer(nacl.hash(new Uint8Array(arrayBuffer)));
+function hexSHA512FromBuffer (buffer) {
+  const byteArray = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+  return hexFromBuffer(nacl.hash(new Uint8Array(byteArray)));
 }
 
 const _byteToHex = [];
 for (let n = 0; n <= 0xff; ++n) _byteToHex.push(n.toString(16).padStart(2, "0"));
 
-function hexFromBuffer (arrayBuffer) {
-  const buff = arrayBuffer instanceof Uint8Array ? arrayBuffer : new Uint8Array(arrayBuffer);
-  const ret = new Array(arrayBuffer.length);
-  for (let i = 0; i < buff.length; ++i) ret[i] = _byteToHex[buff[i]];
+function hexFromBuffer (buffer) {
+  const byteArray = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+  const ret = new Array(buffer.length);
+  for (let i = 0; i < byteArray.length; ++i) ret[i] = _byteToHex[byteArray[i]];
   return ret.join("");
 }
 

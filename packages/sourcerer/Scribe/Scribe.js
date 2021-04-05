@@ -1,9 +1,9 @@
 // @flow
 
 import Sourcerer from "~/sourcerer/api/Sourcerer";
+import { hash40FromHexSHA512 } from "~/security/hash";
 
 import type IndexedDBWrapper from "~/tools/html5/IndexedDBWrapper";
-
 import { dumpObject, invariantifyObject, thenChainEagerly } from "~/tools";
 import type { DatabaseAPI } from "~/tools/indexedDB/databaseAPI";
 
@@ -113,17 +113,22 @@ export default class Scribe extends Sourcerer {
       return _preCacheBvob(this, contentHash, newInfo, retrieveBvobContent, initialPersistRefCount);
     } catch (error) {
       throw this.wrapErrorEvent(error, 1, `preCacheBvob('${contentHash}')`,
-          "\n\tbvobInfo:", ...dumpObject(this._bvobLookup[contentHash]));
+          "\n\tbvobInfo:", ...dumpObject(this.tryBvobInfo(contentHash)));
     }
   }
 
+  tryBvobInfo (contentHash: string) {
+    return this._bvobLookup[contentHash || ""]
+        || ((contentHash.length !== 40) && this._bvobLookup[hash40FromHexSHA512(contentHash)]);
+  }
+
   tryGetCachedBvobContent (contentHash: string): ?ArrayBuffer {
-    const bvobInfo = this._bvobLookup[contentHash || ""];
+    const bvobInfo = this.tryBvobInfo(contentHash);
     return bvobInfo && bvobInfo.buffer;
   }
 
   readBvobContent (contentHash: string): ?ArrayBuffer {
-    const bvobInfo = this._bvobLookup[contentHash || ""];
+    const bvobInfo = this.tryBvobInfo(contentHash);
     try {
       if (!bvobInfo) throw new Error(`Can't find Bvob info '${contentHash}'`);
       return _readBvobBuffers(this, [bvobInfo])[0];
@@ -135,7 +140,7 @@ export default class Scribe extends Sourcerer {
 
   _writeBvobBuffer (buffer: ArrayBuffer, contentHash: string, initialPersistRefCount: number = 0):
       ?Promise<any> {
-    const bvobInfo = this._bvobLookup[contentHash || ""];
+    const bvobInfo = this.tryBvobInfo(contentHash);
     try {
       if ((typeof contentHash !== "string") || !contentHash) {
         throw new Error(`Invalid contentHash '${contentHash}', expected non-empty string`);
@@ -172,7 +177,7 @@ export default class Scribe extends Sourcerer {
     const readBuffers = [];
     try {
       const ret = Object.keys(adjusts).map(contentHash => {
-        const bvobInfo = this._bvobLookup[contentHash];
+        const bvobInfo = this.tryBvobInfo(contentHash);
         if (!bvobInfo) throw new Error(`Cannot find Bvob info for '${contentHash}'`);
         return [bvobInfo, adjusts[contentHash]];
       }).map(([bvobInfo, adjust]) => {
@@ -205,7 +210,7 @@ export default class Scribe extends Sourcerer {
   async _adjustBvobBufferPersistRefCounts (adjusts: { [contentHash: string]: number }): Object[] {
     try {
       Object.keys(adjusts).forEach(contentHash => {
-        if (!this._bvobLookup[contentHash]) {
+        if (!this.tryBvobInfo(contentHash)) {
           throw new Error(`Cannot find Bvob info '${contentHash}'`);
         }
       });

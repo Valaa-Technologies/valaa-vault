@@ -4,6 +4,8 @@ import type { EventBase } from "~/raem/events";
 
 import { tryAspect, swapAspectRoot } from "~/sourcerer/tools/EventAspects";
 
+import { hash40FromHexSHA512 } from "~/security/hash";
+
 import { debugObjectType, dumpObject, vdon } from "~/tools";
 import IndexedDBWrapper from "~/tools/html5/IndexedDBWrapper";
 import type MediaDecoder from "~/tools/MediaDecoder";
@@ -219,7 +221,7 @@ export async function _updateMediaEntries (connection: ScribeConnection,
           const newInfo = entry.mediaInfo;
           const contentHash = newInfo.contentHash;
           if (contentHash) {
-            if (connection.getScribe()._bvobLookup[contentHash]) {
+            if (connection.getScribe().tryBvobInfo(contentHash)) {
               if (entry.isInMemory) _addAdjust(inMemoryRefCountAdjusts, contentHash, 1);
               if (entry.isPersisted) _addAdjust(persistRefCountAdjusts, contentHash, 1);
             } else {
@@ -230,7 +232,8 @@ export async function _updateMediaEntries (connection: ScribeConnection,
           const currentMediaInfo = ((currentEntryReq.result || {}).mediaInfo || {});
           const currentContentHash = currentMediaInfo.contentHash;
           if (currentContentHash && currentEntryReq.result.isPersisted) {
-            if (connection.getScribe()._bvobLookup[currentContentHash]) {
+            const bvobInfo = connection.getScribe().tryBvobInfo(currentContentHash);
+            if (bvobInfo) {
               _addAdjust(persistRefCountAdjusts, currentContentHash, -1);
             } else {
               console.log(`Can't find Media "${newInfo.name}" Bvob info for ${currentContentHash
@@ -287,7 +290,7 @@ export function _readMediaEntries (connection: ScribeConnection, database) {
           const entry = { ...cursor.value, isInMemory: true };
           const contentHash = (entry.mediaInfo || {}).contentHash;
           if (contentHash && entry.isInMemory) {
-            if (connection.getScribe()._bvobLookup[contentHash]) {
+            if (connection.getScribe().tryBvobInfo(contentHash)) {
               connection.getScribe()._adjustInMemoryBvobBufferRefCounts({ [contentHash]: 1 });
             } else {
               connection.errorEvent(`Can't find Media "${(entry.mediaInfo || {}).name
@@ -364,6 +367,9 @@ export function _writeBvobBuffer (scribe: Scribe, buffer: ArrayBuffer,
           return contentHash;
         })
   };
+  if (contentHash.length !== 40) {
+    scribe._bvobLookup[hash40FromHexSHA512(contentHash)] = actualBvobInfo;
+  }
   return actualBvobInfo.persistProcess;
 }
 
@@ -396,7 +402,9 @@ export function _readBvobBuffers (scribe: Scribe, bvobInfos: BvobInfo[]):
             pendingRead.reject(new Error(
                 `Cannot find bvob '${bvobInfo.contentHash}' from IndexedDB`));
           } else {
-            if (bvobInfo.inMemoryRefCount) bvobInfo.buffer = req.result.buffer;
+            if (bvobInfo.inMemoryRefCount) {
+              bvobInfo.buffer = req.result.buffer;
+            }
             pendingRead.resolve(req.result.buffer);
           }
         };
@@ -443,7 +451,7 @@ export async function _adjustBvobBufferPersistRefCounts (
     });
   });
   return newPersistRefcounts.map(([contentHash, persistRefCount]) => {
-    const bvobInfo = scribe._bvobLookup[contentHash] || { contentHash /* , bvobId: contentHash */ };
+    const bvobInfo = scribe.tryBvobInfo(contentHash) || { contentHash /* , bvobId: contentHash */ };
     bvobInfo.persistRefCount = persistRefCount;
     return bvobInfo;
   });

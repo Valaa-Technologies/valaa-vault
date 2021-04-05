@@ -11,7 +11,12 @@ export function bufferAndContentHashFromNative (maybeObject: any, mediaInfo?: Ob
   return thenChainEagerly(maybeObject, [
     object => {
       if (typeof object === "string") return _arrayBufferFromStringAndMediaInfo(object, mediaInfo);
-      if (ArrayBuffer.isView(object)) return object.buffer;
+      if (ArrayBuffer.isView(object)) {
+        if ((typeof Buffer !== "undefined") && object instanceof Buffer) {
+          return Uint8Array.prototype.slice.call(object).buffer;
+        }
+        return object.buffer;
+      }
       if (object instanceof ArrayBuffer) return object;
       if ((typeof Blob !== "undefined") && (object instanceof Blob)) return object.arrayBuffer();
       return _arrayBufferFromStringAndMediaInfo(JSON.stringify(object), mediaInfo);

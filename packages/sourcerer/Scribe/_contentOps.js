@@ -1,5 +1,7 @@
 // @flow
 
+import { hash40FromHexSHA512 } from "~/security/hash";
+
 import { isCreatedLike } from "~/raem/events";
 import VRL, { getRawIdFrom } from "~/raem/VRL";
 
@@ -45,7 +47,7 @@ export type MediaLookup = {
 
 export function _preCacheBvob (scribe: Scribe, contentHash: string, newInfo: BvobInfo,
     retrieveBvobContent: Function, initialPersistRefCount: number) {
-  const bvobInfo = scribe._bvobLookup[contentHash];
+  const bvobInfo = scribe.tryBvobInfo(contentHash);
   if (bvobInfo) {
     // This check produces false positives: if byteLengths match there is no error even if
     // the contents might still be inconsistent.
@@ -64,20 +66,27 @@ export function _preCacheBvob (scribe: Scribe, contentHash: string, newInfo: Bvo
 
 const defaultRetries = 3;
 
-export function _prepareBvob (connection: ScribeConnection, content: any, buffer, contentHash,
+export function _prepareBvob (connection: ScribeConnection, content: any, buffer, contentHash_,
     mediaInfo: MediaInfo = {}, onError: Function) {
+  let contentHash = contentHash_;
   if (!mediaInfo.contentHash) {
     mediaInfo.contentHash = contentHash;
   } else if (mediaInfo.contentHash !== contentHash) {
-    connection.errorEvent(
+    const hash40 = contentHash.length === 40 ? contentHash : hash40FromHexSHA512(contentHash);
+    if (hash40 === mediaInfo.contentHash) {
+      contentHash = hash40;
+    } else {
+      connection.errorEvent(
         `\n\tINTERNAL ERROR: contentHash mismatch when preparing bvob for Media '${
             mediaInfo.name}', CONTENT IS NOT PERSISTED`,
         "\n\tactual content sha512 hash:", contentHash,
+        "\n\thash40:", hash40,
         "\n\tbased on content:", ...dumpObject({ content }),
         "\n\texpected contentHash:", mediaInfo.contentHash,
         "\n\tbased on mediaInfo:", ...dumpObject(mediaInfo),
-    );
-    return {};
+      );
+      return {};
+    }
   }
 
   const mediaName = mediaInfo && (mediaInfo.name ? `"${mediaInfo.name}"` : contentHash);
@@ -363,7 +372,7 @@ function _getMediaContent (connection: ScribeConnection, mediaInfo: MediaInfo,
     upstreamOperation: Object) {
   const actualInfo = { ...mediaInfo };
   const contentHash = actualInfo.contentHash || "";
-  const bvobInfo = connection.getScribe()._bvobLookup[contentHash];
+  const bvobInfo = connection.getScribe().tryBvobInfo(contentHash);
   if (bvobInfo) {
     actualInfo.buffer = bvobInfo.buffer || bvobInfo.pendingBuffer
     // TODO(iridian, 2019-05): even ref count 0 is persisted at the
@@ -394,7 +403,7 @@ function _getMediaURL (connection: ScribeConnection, mediaInfo: MediaInfo,
     upstreamOperation: Object, onError: Function): any {
   // Only use cached in-memory nativeContent if its id matches the requested id.
   const contentHash = mediaInfo.contentHash || "";
-  const bvobInfo = connection.getScribe()._bvobLookup[contentHash];
+  const bvobInfo = connection.getScribe().tryBvobInfo(contentHash);
   // Media's with sourceURL or too large/missing bvobs will be handled by Oracle
   if (!bvobInfo) {
     if (mediaInfo.asURL === "data") {

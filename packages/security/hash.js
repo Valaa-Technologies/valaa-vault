@@ -9,6 +9,7 @@ module.exports = {
   hexSHA512FromBuffer,
   hashVPlot,
   hash40,
+  hash40FromHexSHA512,
   hashV240,
   isHashV240,
 };
@@ -83,4 +84,14 @@ function hashV240 (input) {
 
 function isHashV240 (value) {
   return ((typeof value === "string") && !!value.match(/^[A-Za-z0-9\-_]{40}$/));
+}
+
+function hash40FromHexSHA512 (hexSHA) {
+  if (hexSHA.length < 60) {
+    throw new Error(
+        `Too short hex SHA512 for converting to hash40 (length 60 expected, got ${hexSHA.length}`);
+  }
+  const bytes = [];
+  for (let i = 0; i !== 60; i += 2) bytes.push(parseInt(hexSHA[i], 16));
+  return base64URLFromBuffer(Uint8Array.from(bytes).buffer);
 }

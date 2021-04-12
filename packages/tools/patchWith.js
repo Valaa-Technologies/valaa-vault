@@ -318,7 +318,7 @@ const _patchers = {
 
 function overwrite (target, patch) {
   const cached = this._getPatchTargetFromCacheOrInit(patch, true);
-  return cached.hit || _applyIterablePatchEntries(this, cached.value, patch, 0);
+  return cached.hit ? cached.value : _applyIterablePatchEntries(this, cached.value, patch, 0);
 }
 
 function reduce (target, patch, targetKey, parentTarget) {
@@ -351,7 +351,7 @@ const _objectToAny = {
       if (key === this.spreaderKey) continue;
       if ((ret === null) || (typeof ret !== "object")) {
         const cached = this._getPatchTargetFromCacheOrInit(patch);
-        if (cached.hit) return cached.hit;
+        if (cached.hit) return cached.value;
         ret = cached.value;
       }
       const newValue = this.patch(ret[key], patch[key], key, ret, key, patch);
@@ -371,7 +371,7 @@ const _objectToAny = {
       if (key === this.spreaderKey) continue;
       if ((ret === null) || (typeof ret !== "object")) {
         const cached = this._getPatchTargetFromCacheOrInit(patch);
-        if (cached.hit) return cached.hit;
+        if (cached.hit) return cached.value;
         ret = cached.value;
       }
       ret[key] = this.patch(ret[key], patch[key], key, ret, key, patch);
@@ -392,7 +392,7 @@ const _objectToAny = {
       if (key === this.spreaderKey) continue;
       if ((ret === null) || (typeof ret !== "object")) {
         const cached = this._getPatchTargetFromCacheOrInit(patch);
-        if (cached.hit) return cached.hit;
+        if (cached.hit) return cached.value;
         ret = cached.value;
       }
       const newValue = this.patch(ret[key], patch[key], key, ret, key, patch);
@@ -416,7 +416,7 @@ const _objectToAny = {
       if (key === this.spreaderKey) continue;
       if ((ret === null) || (typeof ret !== "object")) {
         const cached = this._getPatchTargetFromCacheOrInit(patch);
-        if (cached.hit) return cached.hit;
+        if (cached.hit) return cached.value;
         ret = cached.value;
       }
       ret[key] = this.patch(ret[key], patch[key], key, ret, patch);

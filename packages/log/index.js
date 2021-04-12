@@ -384,9 +384,10 @@ function _joinBaseContextPlot (basePlot, plotString) {
 
 function _joinPlot (basePlot, plotString, noDotsName) {
   const relativePlot = plotString.split("/");
-  if ((relativePlot.length > 1) && relativePlot[relativePlot.length - 1] === "") {
-    throw new Error(`Invalid local id "${plotString}": must not end with "/"`);
+  if (!relativePlot.length && (relativePlot[relativePlot.length - 1] !== "")) {
+    throw new Error(`Invalid local id "${plotString}": must end with "/"`);
   }
+  relativePlot.pop();
   const isAbsolute = relativePlot[0] === "";
   const ret = isAbsolute ? relativePlot.slice(1) : basePlot.concat(relativePlot);
   for (let i = 0; i < ret.length;) {

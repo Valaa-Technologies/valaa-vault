@@ -23,7 +23,7 @@ describe("contentHash module", () => {
     {
       msg: "foobar\n",
       hash40: "DgkIDQIDCgQOCQ8ODQ4OCAUCCAQDCA8JBAYCBQIF",
-      hash: "f9ca84e2325f44747ac8233a68ecd8731aa3544e0df7c4c3a0e85175eaf76cb095768b5f8357c4bc069b80cc53f09c4a45838049feec860cc028a12431d38f7b",
+      hash: "e79b8ad22b34a54be999f4eadde2ee895c208d4b3d83f1954b61255d2556a8b73773c0dc0210aa044ffcca6834839460959cbc9f73d3079262fc8bc935d46262",
     },
     { msg: "abc", hash: "ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f" },
     { msg: "", hash: "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e" },

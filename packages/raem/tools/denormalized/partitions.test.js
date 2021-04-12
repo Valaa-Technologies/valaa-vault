@@ -123,10 +123,10 @@ describe("chronicles", () => {
 
     const aGrandParent = harness.run(vRef("A_grandparent"), null);
     const bTestRoot = harness.run(vRef("B_testRoot"), null);
-    expect(aGrandParent.getChronicleId())
-        .toEqual("@$~raw.A_grandparent@@");
-    expect(bTestRoot.getChronicleId())
-        .toEqual("@$~raw.B_testRoot@@");
+    expect(aGrandParent.getChronicleURI())
+        .toEqual("valaa-local:?id=@$~raw.A_grandparent@@");
+    expect(bTestRoot.getChronicleURI())
+        .toEqual("valaa-test:?id=@$~raw.B_testRoot@@");
 
     expect(harness.run(vRef("A_grandparent"), ["§->", "siblings", 0]))
         .toBe(bTestRoot);

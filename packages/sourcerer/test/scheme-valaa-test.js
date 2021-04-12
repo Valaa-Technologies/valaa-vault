@@ -174,6 +174,12 @@ export class TestSourcerer extends Authority {
     return connectors;
   }
 
+  createChronicleRootId (authorityURI: string, identityMediator: Object,
+      commandId: string, commandChronicleIndex: number) {
+    return createChronicleRootVRID0Dot2(
+        authorityURI, identityMediator, commandId, commandChronicleIndex);
+  }
+
   createChronicleURI (authorityURI: string, chronicleId: string): string {
     return naiveURI.createChronicleURI(authorityURI, chronicleId);
   }

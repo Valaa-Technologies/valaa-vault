@@ -64,6 +64,7 @@ function spindlePrototype () {
 function schemeModule () {
   return {
     scheme: "",
+    createChronicleRootId () {},
     createChronicleURI () {},
     splitChronicleURI () {},
     obtainAuthorityConfig () {},

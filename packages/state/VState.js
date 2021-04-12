@@ -37,6 +37,15 @@ of its sub-classes as their rdf:domain.`,
       ],
     },
 
+    globalResources: {
+      "@type": "VKernel:Property",
+      "rdfs:domain": "rdfs:Resource",
+      "rdfs:range": "rdfs:Resource",
+      "rdfs:comment":
+`This field refers to all resources that are global resources of a
+particular chronicle.`,
+    },
+
     subResources: {
       "@type": "VKernel:Property",
       "rdfs:domain": "rdfs:Resource",

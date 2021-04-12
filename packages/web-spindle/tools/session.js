@@ -3,8 +3,6 @@
 import { vRef } from "~/raem/VRL";
 import { VALEK, Vrapper } from "~/engine";
 
-import { encodeVPlotValue } from "~/sourcerer/tools/event-version-0.3";
-
 import { dumpObject } from "~/tools";
 
 import {

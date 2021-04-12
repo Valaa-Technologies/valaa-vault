@@ -42,13 +42,19 @@ export function _appendSchemaSteps (
 }
 
 export function _derefSchema (router, schemaOrSchemaName) {
-  if (typeof schemaOrSchemaName !== "string") return schemaOrSchemaName;
-  if (schemaOrSchemaName[(schemaOrSchemaName.length || 1) - 1] !== "#") {
-    throw new Error(`Invalid shared schema name: "${schemaOrSchemaName}" is missing '#'-suffix`);
+  let sharedName;
+  if (typeof schemaOrSchemaName !== "string") {
+    if (!(schemaOrSchemaName || "").$ref) return schemaOrSchemaName;
+    sharedName = schemaOrSchemaName.$ref.match(/#(.*\/)?([^/]+)$/)[2];
+  } else if (schemaOrSchemaName[(schemaOrSchemaName.length || 1) - 1] === "#") {
+    sharedName = schemaOrSchemaName.slice(0, -1);
+  } else {
+    throw new Error(
+        `Invalid shared schema name: "${schemaOrSchemaName}" is missing '#'-suffix`);
   }
-  const sharedSchema = router._fastify.getSchemas()[schemaOrSchemaName.slice(0, -1)];
+  const sharedSchema = router._fastify.getSchemas()[sharedName];
   if (!sharedSchema) {
-    throw new Error(`Can't resolve shared schema "${schemaOrSchemaName}"`);
+    throw new Error(`Can't resolve shared schema "${sharedName}"`);
   }
   return sharedSchema;
 }

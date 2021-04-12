@@ -168,7 +168,7 @@ function trySchemaNameOf (aType) {
 
 function schemaRefOf (aType) {
   return trySchemaNameOf(aType)
-      ? `${aType[ObjectSchema].schemaName}#`
+      ? { $ref: `#${aType[ObjectSchema].schemaName}` }
       : exportSchemaOf(aType);
 }
 

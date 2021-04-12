@@ -13,7 +13,8 @@ const FastifyCookiePlugin = require("fastify-cookie");
 const FastifyMultiPartPlugin = require("fastify-multipart");
 
 export function _createPrefixRouter (rootService, prefix, prefixConfig) {
-  const frameError = new Error(`createPrefixRouter(<${prefix}>)`);
+  const contextName = new Error(`createPrefixRouter(<${prefix}>)`);
+
   const prefixRouter = Object.create(rootService);
   const {
     openapi, swaggerPrefix, schemas, routes, identity, sessionDuration, ...pluginOptions
@@ -49,6 +50,8 @@ export function _createPrefixRouter (rootService, prefix, prefixConfig) {
   .register((routerFastify, opts, next) => {
     prefixRouter._fastify = routerFastify;
     try {
+      _addSchemas(prefixRouter, schemas || [], openapi);
+
       routerFastify.register(FastifyCookiePlugin);
       routerFastify.register(FastifyMultiPartPlugin);
       if (swaggerPrefix) {
@@ -59,7 +62,6 @@ export function _createPrefixRouter (rootService, prefix, prefixConfig) {
         });
       }
 
-      _addSchemas(prefixRouter, schemas || []);
       _prepareProjectors(prefixRouter);
       _attachProjectorFastifyRoutes(prefixRouter);
 
@@ -94,20 +96,23 @@ export function _createPrefixRouter (rootService, prefix, prefixConfig) {
   });
   return prefixRouter;
   function errorOnCreatePrefixRouter (error) {
-    prefixRouter.outputErrorEvent(prefixRouter.wrapErrorEvent(error, 1, frameError,
+    prefixRouter.outputErrorEvent(prefixRouter.wrapErrorEvent(error, 1, contextName,
         "\n\tplugin options:", ...dumpObject(pluginOptions),
     ), `Exception intercepted during createPrefixRouter(<${prefix}>)`);
   }
 }
 
-function _addSchemas (router, schemas) {
+function _addSchemas (router, schemas, openapi) {
   router.infoEvent(1, () => [
     `${router.getRoutePrefix()}: adding ${schemas.length} schemas:`,
     ...schemas.map(schema => schema.schemaName),
   ]);
+  if (!openapi.components) openapi.components = {};
+  if (!openapi.components.schemas) openapi.components.schemas = {};
   for (const schema of schemas) {
     try {
       router._fastify.addSchema(schema);
+      openapi.components.schemas[schema.schemaName] = schema;
     } catch (error) {
       throw router.wrapErrorEvent(error, 1,
           new Error(`_addSchemas(${schema.schemaName})`),

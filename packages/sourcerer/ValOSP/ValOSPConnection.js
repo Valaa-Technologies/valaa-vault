@@ -294,6 +294,9 @@ export default class ValOSPConnection extends AuthorityConnection {
               });
         } else if (config.isPrimaryAuthority) {
           // Add authority aspects.
+          for (const event of events) {
+            event.aspects.log.timeStamp = Date.now();
+          }
         } else {
           throw new Error(`Can't proclaim events to a non-remote non-primary chronicle.`);
         }

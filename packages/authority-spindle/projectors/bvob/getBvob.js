@@ -36,12 +36,12 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       // const {} = this.runtime.ruleResolvers;
 
       return thenChainEagerly(scope.connection.asSourceredConnection(), [
-        connection => connection.requestMediaContents({
+        connection => connection.requestMediaContents([{
           contentHash: scope.contentHash,
           contentType: "application/octet-stream",
-        }),
+        }]),
         // () => valkOptions.discourse.releaseFabricator(),
-        (buffer) => {
+        ([buffer]) => {
           // Flatten sections and pick correct event
           router.infoEvent(2, () => [
             `${this.name}:`,

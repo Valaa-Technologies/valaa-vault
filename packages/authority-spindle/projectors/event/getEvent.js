@@ -2,6 +2,7 @@
 
 import valosheath from "@valos/gateway-api/valosheath";
 
+import { swapAspectRoot } from "~/sourcerer/tools/EventAspects";
 import type { PrefixRouter, Route } from "~/web-spindle/MapperService";
 import { _prepareChronicleRequest } from "../_common";
 
@@ -47,8 +48,9 @@ export default function createProjector (router: PrefixRouter, route: Route) {
           for (const sectionEvents of Object.values(sections)) {
             for (const event of sectionEvents) {
               if ((((event || {}).aspects || {}).log || {}).index === eventIndex) {
+                const deltaAspect = swapAspectRoot("delta", event, "event");
                 reply.code(200);
-                reply.send(JSON.stringify(event));
+                reply.send(JSON.stringify(deltaAspect));
                 router.infoEvent(2, () => [
                   `${this.name}:`, 200,
                   "\n\tevent:", ...dumpObject(event),

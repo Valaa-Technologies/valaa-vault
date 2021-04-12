@@ -1,12 +1,14 @@
 // @flow
 
 import https from "https";
+import fetch from "node-fetch";
+import FormData from "form-data";
 
 import PerspireServer from "~/inspire/PerspireServer";
 
-import fetchJSON, { fetch } from "~/tools/fetchJSON";
+import fetchJSON from "~/tools/fetchJSON";
 
-const ignoreSelfSignedAgent = new https.Agent({ rejectUnauthorized: false });
+const allowSelfSignedCertsAgent = new https.Agent({ rejectUnauthorized: false });
 
 // This assumes that the test is being run via "yarn test" (or similar)
 // at the monorepo root.
@@ -136,37 +138,150 @@ describe("Authority spindle worker", () => {
         .toEqual(`${userChronicleURI}#${testUserId}`);
   });
 
-  it("performs a full resource methods session", async () => {
-    const croVGRID = "@$~cro.Y5H1SS5yAhfxF4RjXqKkLOFMPGrXbiYvrr_-Br45@@";
-    const croPlot = "~cro!Y5H1SS5yAhfxF4RjXqKkLOFMPGrXbiYvrr_-Br45";
+  it("performs simple unauthenticated, nonauthored events and bvobs operations", async () => {
+    const croHash40 = "Y5H1SS5yAhfxF4RjXqKkLOFMPGrXbiYvrr_-Br45";
+    const croVGRID = `@$~cro.${croHash40}@@`;
+    const croPlot = `~cro!${croHash40}`;
     const croURL = `${_testAuthorityURI}${croPlot}/`;
-    const proclaim0Stack = {
-      method: "PUT",
-      agent: ignoreSelfSignedAgent,
-      body: {
-        actions: [{
-          type: "CREATED", typeName: "Entity", id: [croVGRID, { partition: croURL }],
-          initialState: { name: "new thing", authorityURI: _testAuthorityURI },
-        }, {
-          type: "CREATED", typeName: "Property",
-          initialState: {
-            owner: [croVGRID, { partition: croURL }, { coupling: "properties" }],
-            name: "value",
-            value: { typeName: "Literal", value: 15 },
-          },
-          id: [`${croVGRID.slice(0, -1)}.$.value@@`, { partition: croURL }]
-        }],
-        type: "TRANSACTED",
-        aspects: {
-          version: "0.2",
-          command: { id: "2fcf6edb-a248-4622-821c-5c98bfe9ce97", timeStamp: 1617614771461 },
-          log: { index: 0 },
+    const command0 = {
+      "@context": [{
+        0: `~cro:${croHash40}`,
+      }],
+      "&~": {
+        "": { ".n": "new thing", "V:authorityURI": _testAuthorityURI, value: 15 },
+      },
+      aspects: {
+        version: "0.2",
+        command: { id: "2fcf6edb-a248-4622-821c-5c98bfe9ce97", timeStamp: 1617614771461 },
+        log: { index: 0 },
+        event: {
+          actions: [{
+            type: "CREATED", typeName: "Entity", id: [croVGRID, { partition: croURL }],
+            initialState: { name: "new thing", authorityURI: _testAuthorityURI },
+          }, {
+            type: "CREATED", typeName: "Property",
+            initialState: {
+              owner: [croVGRID, { partition: croURL }, { coupling: "properties" }],
+              name: "value",
+              value: { typeName: "Literal", value: 15 },
+            },
+            id: [`${croVGRID.slice(0, -1)}.$.value@@`, { partition: croURL }]
+          }],
+          type: "TRANSACTED",
+        }
+      },
+    };
+    const proclaim0Stack = { method: "PUT", body: command0, agent: allowSelfSignedCertsAgent };
+    const updated0Aspects = await fetchJSON(
+          `${_testAuthorityEndpoint}${croPlot}/-log!0/`, proclaim0Stack);
+    expect(updated0Aspects.log.timeStamp)
+        .toBeDefined();
+    const proclaimedTruth0 = { ...command0, aspects: { ...command0.aspects, ...updated0Aspects } };
+    expect(proclaim0Stack.response.status).toEqual(201);
+
+    const narratedTruth0 = await fetchJSON(`${_testAuthorityEndpoint}${croPlot}/-log!0/`,
+        { agent: allowSelfSignedCertsAgent });
+
+    expect(narratedTruth0)
+        .toEqual(proclaimedTruth0);
+
+    const originalText = "foo\nbar\n";
+
+    const content = Buffer.from(originalText, "utf8");
+    const contentHash =
+`6315cb20ebb5bbc580429ae5ebf1be3027bc6c92735ceb7a8e39686ccf6e73530e30197f4dac787fed63b714db239c764\
+8370cf88e1023869727e8b7d16daab6`;
+    const bvobHash = "BgEMAg4LCwwIBAkODg8LAwILBgkHBQ4HCAMGBgwG";
+
+    const bvobMultiPart = new FormData();
+    bvobMultiPart.append("file", content);
+
+    const upload0Response = await fetch(
+        `${_testAuthorityEndpoint}${croPlot}/~bvob!${bvobHash}/`, {
+      method: "POST",
+      mode: "cors",
+      agent: allowSelfSignedCertsAgent,
+      body: bvobMultiPart,
+    });
+
+    expect(upload0Response.status)
+        .toEqual(201);
+
+    const download0Response = await fetch(
+        `${_testAuthorityEndpoint}${croPlot}/~bvob!${bvobHash}/`, {
+      method: "GET", mode: "cors", agent: allowSelfSignedCertsAgent,
+    });
+
+    expect(download0Response.status)
+        .toEqual(200);
+
+    const roundtripText = await download0Response.text();
+    expect(roundtripText)
+        .toEqual(originalText);
+
+    const command1 = {
+      "@context": [{
+        1: "~cih:51ZYWV6CgKK2-zBeDH8H_UUzbyjaq5-6Pv739d_t",
+        2: `~bvob:${bvobHash}`,
+      }],
+      "&~": {
+        "1/": {
+          ".M~": "0/", ".n": "foo.txt", ".c": "2/",
+          "V:mediaType": { type: "text", subtype: "plain" },
+        }
+      },
+      aspects: {
+        version: "0.2",
+        command: { id: "f2212245-1dfc-46da-ab3f-970bc543ae81", timeStamp: 1618064424021 },
+        log: { index: 1 },
+        event: {
+          type: "TRANSACTED",
+          actions: [{
+            type: "CREATED", typeName: "Media",
+            id: ["@$~cih.51ZYWV6CgKK2-zBeDH8H_UUzbyjaq5-6Pv739d_t@@", { partition: croURL }],
+            initialState: {
+              name: "New Media",
+              owner: [croVGRID, { partition: croURL }, { coupling: "unnamedOwnlings" }],
+            },
+          }, {
+            type: "FIELDS_SET", typeName: "Media",
+            id: ["@$~cih.51ZYWV6CgKK2-zBeDH8H_UUzbyjaq5-6Pv739d_t@@", { partition: croURL }],
+            sets: { name: "foo.txt" }
+          }, {
+            type: "FIELDS_SET", typeName: "Media",
+            id: ["@$~cih.51ZYWV6CgKK2-zBeDH8H_UUzbyjaq5-6Pv739d_t@@", { partition: croURL }],
+            sets: { mediaType: { type: "text", subtype: "plain" } }
+          }, {
+            type: "CREATED", typeName: "Blob",
+            id: [`@$~bvob.${contentHash}@@`],
+          }, {
+            type: "FIELDS_SET", typeName: "Media",
+            id: ["@$~cih.51ZYWV6CgKK2-zBeDH8H_UUzbyjaq5-6Pv739d_t@@", { partition: croURL }],
+            sets: { content: [`@$~bvob.${contentHash}@@`] },
+          }],
         },
       },
     };
-    await fetchJSON(`${_testAuthorityEndpoint}${croPlot}/-log!0/`, proclaim0Stack);
-    console.log("response:", await proclaim0Stack.response.text());
-    expect(proclaim0Stack.response.status).toEqual(204);
+
+    const proclaim1Stack = {
+      method: "PUT",
+      agent: allowSelfSignedCertsAgent,
+      body: command1,
+    };
+    const updated1Aspects = await fetchJSON(
+        `${_testAuthorityEndpoint}${croPlot}/-log!1/`, proclaim1Stack);
+    expect(updated1Aspects.log.timeStamp)
+        .toBeDefined();
+    expect(proclaim1Stack.response.status).toEqual(201);
+
+    const proclaimedTruth1 = { ...command1, aspects: { ...command1.aspects, ...updated1Aspects } };
+
+    // multi-event narrate form
+    const narratedTruthsFrom1 = await fetchJSON(`${_testAuthorityEndpoint}${croPlot}/-log'!1`,
+        { agent: allowSelfSignedCertsAgent });
+
+    expect(narratedTruthsFrom1)
+        .toEqual([proclaimedTruth1]);
 
     /*
     const httpsRedirection = await fetch("http://localhost:7380/rest-test/v0/individuals",

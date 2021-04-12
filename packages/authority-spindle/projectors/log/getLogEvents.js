@@ -2,6 +2,7 @@
 
 import valosheath from "@valos/gateway-api/valosheath";
 
+import { swapAspectRoot } from "~/sourcerer/tools/EventAspects";
 import type { PrefixRouter, Route } from "~/web-spindle/MapperService";
 import { _prepareChronicleRequest } from "../_common";
 
@@ -34,8 +35,8 @@ export default function createProjector (router: PrefixRouter, route: Route) {
       ]);
       // const {} = this.runtime.ruleResolvers;
 
-      const eventIdBegin = !scope.startIndex ? 0 : parseInt(scope.startIndex.slice(1), 10);
-      const eventIdEnd = !scope.endIndex ? 0 : parseInt(scope.endIndex.slice(1), 10);
+      const eventIdBegin = !scope.startIndex ? 0 : parseInt(scope.startIndex.slice(2), 10);
+      const eventIdEnd = !scope.endIndex ? undefined : parseInt(scope.endIndex.slice(2), 10);
 
       return thenChainEagerly(scope.connection.asSourceredConnection(), [
         connection => connection.narrateEventLog({ eventIdBegin, eventIdEnd, commands: false }),
@@ -43,7 +44,8 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         (sections) => {
           const eventResults = []
               .concat(...Object.values(sections))
-              .sort((a, b) => a.aspects.log.index - b.aspects.log.index);
+              .sort((a, b) => a.aspects.log.index - b.aspects.log.index)
+              .map(event => swapAspectRoot("delta", event, "event"));
           reply.code(200);
           reply.send(JSON.stringify(eventResults));
           router.infoEvent(2, () => [

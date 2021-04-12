@@ -23,5 +23,8 @@
     "_vlm__select__toolsets__type_worker_-valos_authority-spindle": "valma/select_toolsets_type_worker__authority-spindle.js",
     "_vlm__configure__toolsets__type_worker_-valos_authority-spindle": "valma/configure_toolsets_type_worker__authority-spindle.js",
     "_vlm__status__toolsets__type_worker_-valos_authority-spindle": "valma/status_toolsets_type_worker__authority-spindle.js"
+  },
+  "devDependencies": {
+    "form-data": "^4.0.0"
   }
 }

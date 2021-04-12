@@ -4,6 +4,7 @@ import valosheath from "@valos/gateway-api/valosheath";
 
 import type { PrefixRouter, Route } from "~/web-spindle/MapperService";
 import { _prepareChronicleRequest } from "../_common";
+import { swapAspectRoot } from "@valos/sourcerer/tools/EventAspects";
 
 const { dumpObject, thenChainEagerly } = valosheath.require("@valos/tools");
 
@@ -42,10 +43,10 @@ export default function createProjector (router: PrefixRouter, route: Route) {
           return connection.proclaimEvents(request.body);
         },
         // () => valkOptions.discourse.releaseFabricator(),
-        eventResult => eventResult && eventResult.getTruthEvent(),
-        (truthEvent) => {
+        eventResults => Promise.all((eventResults || []).map(result => result.getTruthEvent())),
+        (truthEvents) => {
           reply.code(201);
-          reply.send();
+          reply.send(JSON.stringify(truthEvents.map(event => ({ log: event.aspects.log }))));
           router.infoEvent(2, () => [
             `${this.name}:`,
             "\n\tresults:", ...dumpObject(truthEvent),

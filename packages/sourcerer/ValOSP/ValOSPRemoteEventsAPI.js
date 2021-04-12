@@ -1,6 +1,8 @@
 // @flow
 
-import { FabricEventTarget, fetchJSON } from "@valos/tools";
+import { swapAspectRoot } from "~/sourcerer/tools/EventAspects";
+
+import { FabricEventTarget, fetchJSON } from "~/tools";
 
 export default class ValOSPRemoteEventsAPI extends FabricEventTarget {
   _authorityConfig: Object;
@@ -32,7 +34,8 @@ export default class ValOSPRemoteEventsAPI extends FabricEventTarget {
     const ret = fetchJSON(narrateRoute, {
       method: "GET", mode: "cors",
     });
-    return !isSingular ? ret : ret.then(res => [res]);
+    return ret.then(res => (!isSingular ? res : [res])
+        .map(event => swapAspectRoot("event", event, "delta")));
   }
 
   proclaimRemoteCommands (connection, startIndex, commands, identities) {
@@ -47,14 +50,30 @@ export default class ValOSPRemoteEventsAPI extends FabricEventTarget {
     this.logEvent(2, () => [
       `\t${method} command(s) #${startIndex} success`,
     ]);
-    const options = {
-      method, mode: "cors",
-      headers: { "Content-Type": "application/json" },
-      body: isMulti ? commands : commands[0],
-    };
-    const ret = fetchJSON(proclaimRoute, options);
-    return ret.then(results =>
-        (isMulti ? results : [results]).map((event, index) => event || commands[index]));
+    const outCommands = commands.map(command => {
+      if (!command.aspects.delta) command.aspects.delta = {};
+      return swapAspectRoot("delta", command, "event");
+    });
+    let ret;
+    try {
+      const options = {
+        method, mode: "cors",
+        headers: { "Content-Type": "application/json" },
+        body: isMulti ? outCommands : outCommands[0],
+      };
+      ret = fetchJSON(proclaimRoute, options);
+    } finally {
+      for (const command of outCommands) {
+        swapAspectRoot("event", command, "delta");
+      }
+    }
+    return ret.then(results => {
+      let index = 0;
+      for (const result of isMulti ? results : [results]) {
+        Object.assign(commands[index++].aspects, result || {});
+      }
+      return commands;
+    });
   }
 
   subscribeToEventMessages (/* connection */) {

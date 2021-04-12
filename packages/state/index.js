@@ -24,6 +24,7 @@ const baseContextText = `{
   ".M~": { "@id": "V:folder", "@type": "@id" },
 
   ".n": { "@id": "V:name" },
+  ".c": { "@id": "V:content" },
 
   ".iOf": { "@id": "V:instanceOf", "@type": "@id" },
   "-hasI": { "@id": "V:hasInstance", "@type": "@id", "@container": "@id" },

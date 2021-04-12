@@ -1,26 +1,27 @@
 const baseContextText = `{
   "^": "urn:valos:",
-  "@base": "urn:valos:chronicle:0/",
+  "@base": "urn:valos:chronicle:",
   "@vocab": "vplot:'",
 
   "V": "https://valospace.org/0#",
   "VLog": "https://valospace.org/log/0#",
   "VState": "https://valospace.org/state/0#",
 
+  "&~": { "@id": "VState:globalResources", "@type": "@id", "@container": "@id" },
   "&+": { "@id": "VState:subResources", "@type": "@id", "@container": "@id" },
   "&-": { "@id": "VState:subRemovals", "@container": "@graph" },
 
-  "*P": { "@id": "V:ownsProperty", "@type": "@id", "@container": "@id" },
-  "*E": { "@id": "V:ownsEntity", "@type": "@id", "@container": "@id" },
-  "*R": { "@id": "V:ownsRelation", "@type": "@id", "@container": "@id" },
-  "*M": { "@id": "V:ownsMedia", "@type": "@id", "@container": "@id" },
+  "~P": { "@id": "V:ownsProperty", "@type": "@id", "@container": "@id" },
+  "~E": { "@id": "V:ownsEntity", "@type": "@id", "@container": "@id" },
+  "~R": { "@id": "V:ownsRelation", "@type": "@id", "@container": "@id" },
+  "~M": { "@id": "V:ownsMedia", "@type": "@id", "@container": "@id" },
 
-  ".o": { "@id": "V:owner", "@type": "@id" },
+  ".~": { "@id": "V:owner", "@type": "@id" },
 
-  ".P*": { "@id": "V:scope", "@type": "@id" },
-  ".E*": { "@id": "V:parent", "@type": "@id" },
-  ".R*": { "@id": "V:graph", "@type": "@id" },
-  ".M*": { "@id": "V:folder", "@type": "@id" },
+  ".P~": { "@id": "V:scope", "@type": "@id" },
+  ".E~": { "@id": "V:parent", "@type": "@id" },
+  ".R~": { "@id": "V:graph", "@type": "@id" },
+  ".M~": { "@id": "V:folder", "@type": "@id" },
 
   ".n": { "@id": "V:name" },
 
@@ -39,8 +40,8 @@ const baseContextText = `{
   ".src-": { "@id": "V:linkedSource", "@type": "@id" },
   ".tgt-": { "@id": "V:linkedTarget", "@type": "@id" },
 
-  ".src*": { "@id": "V:ownerSource", "@type": "@id" },
-  ".tgt*": { "@id": "V:ownerTarget", "@type": "@id" },
+  ".src~": { "@id": "V:ownerSource", "@type": "@id" },
+  ".tgt~": { "@id": "V:ownerTarget", "@type": "@id" },
 
   "VSourcerer": "https://valospace.org/sourcerer/0#",
 
@@ -67,7 +68,7 @@ function createVState (references = []) {
   const _referenceArray = [];
   const _referenceLookup = {};
 
-  const vstate = { "&+": Object.create(null) };
+  const vstate = { "&~": Object.create(null) };
   Object.defineProperty(vstate, referenceArrayTag, {
     writable: true, configurable: false, enumerable: false,
     value: _referenceArray,

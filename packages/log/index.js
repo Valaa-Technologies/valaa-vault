@@ -1,10 +1,14 @@
 
 const { default: patchWith } = require("@valos/tools/patchWith");
-const { mutateVState, baseContext, referenceArrayTag } = require("@valos/state");
+const { mutateVState, baseContext, referenceArrayTag, baseStateContext } = require("@valos/state");
 const { V } = require("@valos/space/ontology");
 const { VState } = require("@valos/state/ontology");
 
 module.exports = {
+  baseLogContext: {
+    ...baseStateContext,
+    "@base": "urn:valos:chronicle:0/",
+  },
   applyVLogDelta (currentVState, vlogEvent) {
     const mutableState = mutateVState(currentVState);
     _patchURITerms(mutableState, vlogEvent);
@@ -38,12 +42,13 @@ const _nodeTermUpserters = {
   // needs to be resolved before other entries)
   // TODO(iridian, 2021-03): Validate @context and reject all unsupported fields.
   "@context": null,
+  "&~": null,
   "&+": null,
   "&-": null,
-  "*P": _patchRejectForbiddenDirectManipulation,
-  "*E": _patchRejectForbiddenDirectManipulation,
-  "*R": _patchRejectForbiddenDirectManipulation,
-  "*M": _patchRejectForbiddenDirectManipulation,
+  "~P": _patchRejectForbiddenDirectManipulation,
+  "~E": _patchRejectForbiddenDirectManipulation,
+  "~R": _patchRejectForbiddenDirectManipulation,
+  "~M": _patchRejectForbiddenDirectManipulation,
   "-hasI": _patchRejectForbiddenDirectManipulation,
   "-hasG": _patchRejectForbiddenDirectManipulation,
   "-out": _patchRejectForbiddenDirectManipulation,
@@ -52,6 +57,7 @@ const _nodeTermUpserters = {
 
 const _nodeTermRemovers = {
   "@context": null,
+  "&~": null,
   "&+": null,
   "&-": null,
 };
@@ -144,13 +150,16 @@ function _patchURITerms (mutableState, vlogEvent) {
 
 function _patchStateResource (mutableTarget, delta, key, parentTarget, deltaKey) {
   const context = delta["@context"];
-  const subsDelta = delta["&+"];
+  let subsDelta;
   let stack = this;
-  if (deltaKey === undefined) {
+  const isTopLevel = (deltaKey === undefined);
+  if (isTopLevel) {
+    subsDelta = delta["&~"];
     // The entry patch call onto the "global void" resource.
     if (!subsDelta) throw new Error("VLog event is missing global '&+' resource delta section");
     this.mutableRootResources = _mutateSubs(mutableTarget);
   } else {
+    subsDelta = delta["&+"];
     const base = (context || {})["@base"] || "";
     const removalsDelta = delta["&-"];
 
@@ -166,12 +175,12 @@ function _patchStateResource (mutableTarget, delta, key, parentTarget, deltaKey)
     _processProperties(stack, mutableTarget, delta);
   }
   if (subsDelta) {
-    _processSubs(stack, mutableTarget, subsDelta);
+    _processSubs(stack, mutableTarget, subsDelta, isTopLevel);
   }
   return mutableTarget;
 }
 
-function _processSubs (stack, parentTarget, subsDelta) {
+function _processSubs (stack, parentTarget, subsDelta, isTopLevel) {
   const basePlot = stack.basePlot;
   const mutableRootResources = stack.mutableRootResources;
   const parentLogicalPlot = stack.logicalPlot;
@@ -401,7 +410,7 @@ function _joinPlot (basePlot, plotString, noDotsName) {
 
 function _getOwnerValue (object) {
   return object["V:owner"]
-      || object[".E*"] || object[".R*"] || object[".src*"]  || object[".tgt*"] || "";
+      || object[".E~"] || object[".R~"] || object[".src~"]  || object[".tgt~"] || "";
 }
 
 function _rootOriginIdFromRelativeId (rootResources, basePlot, plotString) {

@@ -12,11 +12,18 @@ exports.disabled = (yargs) => typeToolset.checkToolsetDisabled(yargs.vlm, export
 exports.builder = (yargs) => {
   const toolsetConfig = yargs.vlm.getToolsetConfig(exports.vlm.toolset) || {};
   return yargs.options({
+    ssl: {
+      type: "boolean", default: toolsetConfig.ssl,
+      interactive: answers => ({
+        type: "input", default: true, when: answers.reconfigure ? "always" : "if-undefined",
+      }),
+      description: "Enable SSL",
+    },
     port: {
       type: "string", default: toolsetConfig.port,
       interactive: answers => ({
         type: "input",
-        default: 80,
+        default: answers.ssl ? 443 : 80,
         when: answers.reconfigure ? "always" : "if-undefined",
       }),
       description: "The port the Web API listens.",
@@ -41,7 +48,9 @@ exports.handler = async (yargv) => {
     ...toolsetConfig,
     port: yargv.port,
     address: yargv.address,
+    focus: null,
   };
+
   if (toolsetConfigUpdate.title === undefined) {
     // TOOD(iridian, 2020-06): Make these conditional on user
     // selecting the copy-template-files tool
@@ -58,6 +67,7 @@ exports.handler = async (yargv) => {
       },
     });
   }
+
   vlm.updateToolsetConfig(vlm.toolset, toolsetConfigUpdate);
 
   await require("@valos/type-worker")
@@ -65,6 +75,39 @@ exports.handler = async (yargv) => {
 
   const selectionResult = await typeToolset.configureToolSelection(
       vlm, vlm.toolset, yargv.reconfigure, yargv.tools);
+
+  if (yargv.ssl && vlm.getToolConfig("@valos/type-worker", "copy-template-files", "inUse")) {
+    const envPath = "env";
+    const keyout = vlm.path.join(envPath, "local-authority.key.pem");
+    const out = vlm.path.join(envPath, "local-authority.crt");
+    vlm.shell.mkdir("-p", "env");
+    if (await vlm.inquireConfirm(
+        "Use 'openssl' to create insecure self-signed placeholder certificates?")) {
+      await vlm.execute([
+        "openssl req", {
+          x509: true,
+          newkey: "rsa:4096",
+          keyout,
+          out,
+          days: 7300,
+          nodes: true,
+          subj: "/CN=localhost",
+        }
+      ], { paramPrefix: "-" });
+    } else {
+      vlm.shell.ShellString("").to("env/local-authority.crt");
+      vlm.shell.ShellString("").to("env/local-authority.key.pem");
+      vlm.info("Created empty placeholders", vlm.theme.path("env/local-authority.crt"), "and",
+          vlm.theme.path("env/local-authority.crt"));
+    }
+    await vlm.updateFileConfig("./revelation_web-spindle.json", {
+      server: { fastify: { https: {
+        allowHTTP1: true,
+        key: "env/local-authority.key.pem",
+        cert: "env/local-authority.crt"
+      } } },
+    });
+  }
 
   return {
     ...selectionResult,

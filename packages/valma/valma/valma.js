@@ -1184,7 +1184,7 @@ function handler (vargv) {
 function execute (args, options = {}) {
   this._flushPendingConfigWrites();
   _refreshActivePools.call(this);
-  const argv = __processArgs(args);
+  const argv = __processArgs(args, options);
   if ((argv[0] === "vlm") && !Object.keys(options).length) {
     // TODO(iridian, 2020-06): invoke now in principle supports options
     // forwarding via _state flags. The above constraint on not having
@@ -1223,7 +1223,7 @@ function execute (args, options = {}) {
         this.ifVerbose(3)
             .babble(`spawning child process "${argv[0]}" with options:`, spawnOptions);
         const finalArgv = !spawnOptions.shell ? argv
-            : __processArgs(args, { shellEscapeChar: "'" });
+            : __processArgs(args, { ...options, shellEscapeChar: "'" });
 
         const subProcess = childProcess.spawn(finalArgv[0], finalArgv.slice(1), spawnOptions);
         const stdout = !options.asTTY && _readStreamContent(subProcess.stdout);
@@ -1390,7 +1390,7 @@ function invoke (commandSelectorArg, args, options = {}) {
   // as commandSelector as-is (these often have yargs usage arguments
   // after the command selector itself).
   const commandSelector = commandSelectorArg.split(" ")[0];
-  const argv = (processArgs !== false) ? __processArgs(args) : args;
+  const argv = (processArgs !== false) ? __processArgs(args, options) : args;
 
   const invokerIndexText = this.getContextIndexText();
   const invokationIndexText = invokationVLM.getContextIndexText();
@@ -2166,21 +2166,25 @@ function listAllMatchingCommands (commandSelector) {
 // Array values are expanded as sequence of "--<key>=<value1> --<key>=<value2> ...".
 // type like so: ["y", { foo: "bar", val: true, nothing: null, neg: false, bar: ["xy", false, 0] }]
 //            -> ["y", "--foo", "bar", "--val", "--no-neg", "--bar=xy", "--no-bar", "--bar=0"]
-function __processArgs (args, { shellEscapeChar = "" } = {}) {
+function __processArgs (args, { shellEscapeChar = "", paramPrefix = "--" } = {}) {
   return [].concat(...[].concat(args).map(entry =>
-    ((typeof entry === "string")
-        ? entry.split(" ")
-    : Array.isArray(entry)
-        ? entry.map(e => ((typeof e === "string") ? e : JSON.stringify(e))).join("")
-    : _toArgString(entry))));
+      ((typeof entry === "string")
+          ? entry.split(" ")
+      : Array.isArray(entry)
+          ? entry.map(e => ((typeof e === "string") ? e : JSON.stringify(e))).join("")
+      : _toArgString(entry))));
 
   function _toArgString (value, keys) {
     if ((value === undefined) || (value === null)) return [];
-    if (typeof value === "boolean") return !keys ? [] : `--${value ? "" : "no-"}${keys.join(".")}`;
-    if (Array.isArray(value)) return [].concat(...value.map(entry => _toArgString(entry, keys)));
+    if (typeof value === "boolean") {
+      return !keys ? [] : `${paramPrefix}${value ? "" : "no-"}${keys.join(".")}`;
+    }
+    if (Array.isArray(value)) {
+      return [].concat(...value.map(entry => _toArgString(entry, keys)));
+    }
     if (typeof value !== "object") {
       const str = _maybeEscape((typeof value === "string") ? value : JSON.stringify(value));
-      return !keys ? str : `--${keys.join(".")}=${str}`;
+      return !keys ? str : `${paramPrefix}${keys.join(".")}=${str}`;
     }
     return [].concat(...Object.keys(value)
         .map(key => ((key[0] === ".") ? [] : _toArgString(value[key], [...(keys || []), key]))));
@@ -2437,7 +2441,6 @@ async function _fillVargvInteractively () {
     return this.vargv;
   }
   delete this.vargs.getOptions().interactive;
-  const questions = [];
   const answers = Object.assign({}, this.vargv);
   for (const optionName of Object.keys(interactiveOptions)) {
     const option = interactiveOptions[optionName];
@@ -2509,10 +2512,6 @@ Maybe change option.type to 'any' as it works with if-undefined?`);
     // if (!question.pageSize) ...;
     // if (!question.prefix) ...;
     // if (!question.suffix) ...;
-    questions.push(question);
-  }
-  if (!Object.keys(questions).length) return this.vargv;
-  for (const question of questions) {
     do {
       Object.assign(answers, await this.inquire([question]));
       if (question.array && (typeof answers[question.name] === "string")) {

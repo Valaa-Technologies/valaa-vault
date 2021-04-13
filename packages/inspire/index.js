@@ -79,7 +79,10 @@ export default (valosheath.createGateway = async function createGateway (
     const plog = ret.opLog(1, "gateway",
         "Constructed the Gateway object");
 
-    valosheath.exportSpindle({ name: "@valos/inspire", mediaDecoders });
+    valosheath.exportSpindle({
+      name: "@valos/inspire", mediaDecoders,
+      meta: { url: typeof __dirname !== "undefined" ?  __dirname : "" },
+    });
     if (valosheath.gateway) {
       throw new Error(`valos.gateway already exists as ${
           valosheath.gateway.debugId()}. There can be only one.`);

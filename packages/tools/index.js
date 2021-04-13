@@ -6,7 +6,10 @@ export const valosheath = require("~/gateway-api/valosheath").default;
 export const inBrowser = require("~/gateway-api/inBrowser").default;
 export const getGlobal = require("~/gateway-api/getGlobal").default;
 
-export default valosheath.exportSpindle({ name: "@valos/tools", mediaDecoders });
+export default valosheath.exportSpindle({
+  name: "@valos/tools", mediaDecoders,
+  meta: { url: typeof __dirname !== "undefined" ?  __dirname : "" },
+});
 
 export { default as valosHash } from "./id/valosHash";
 export { default as valosUUID } from "./id/valosUUID";

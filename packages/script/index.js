@@ -5,7 +5,10 @@ import * as mediaDecoders from "./mediaDecoders";
 
 const valosheath = require("~/gateway-api/valosheath").default;
 
-export default valosheath.exportSpindle({ name: "@valos/script", ContentAPI, mediaDecoders });
+export default valosheath.exportSpindle({
+  name: "@valos/script", ContentAPI, mediaDecoders,
+  meta: { url: typeof __dirname !== "undefined" ?  __dirname : "" },
+});
 
 
 export {

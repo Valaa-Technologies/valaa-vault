@@ -3,6 +3,7 @@ const valosheath = require("~/gateway-api/valosheath").default;
 
 module.exports = valosheath.exportSpindle({
   name: packageJSON.name,
+  meta: { url: typeof __dirname !== "undefined" ?  __dirname : "" },
 
   ContentAPI: undefined,
   schemeModules: [],

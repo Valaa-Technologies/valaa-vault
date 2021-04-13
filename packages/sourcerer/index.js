@@ -7,7 +7,10 @@ import schemeModules from "./schemeModules";
 
 export const valosheath = require("~/gateway-api/valosheath").default;
 
-export default valosheath.exportSpindle({ name: "@valos/sourcerer", ContentAPI, schemeModules });
+export default valosheath.exportSpindle({
+  name: "@valos/sourcerer", ContentAPI, schemeModules,
+  meta: { url: typeof __dirname !== "undefined" ?  __dirname : "" },
+});
 
 export {
                      EVENT_VERSION as SOURCERER_EVENT_VERSION,

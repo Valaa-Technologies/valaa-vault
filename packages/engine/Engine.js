@@ -109,8 +109,8 @@ export default class Engine extends Cog {
     }
   }
 
-  valosRequire (module: string | symbol) {
-    return this._parent._parent.valosRequire(module);
+  valosRequire (module: string | symbol, options) {
+    return this._parent._parent.valosRequire(module, options);
   }
 
   /**

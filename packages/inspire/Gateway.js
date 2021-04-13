@@ -199,6 +199,7 @@ export default class Gateway extends FabricEventTarget {
         throw new Error(`Unavailable valos.require module '${moduleName}' ${
             !subPath ? `top-level entry path` : `sub-path: '${subPath}'`}`);
       }
+      if (options) options.modulePath = `valospace:${moduleName}#/${subPath}`;
       return requiredModule[subPath || ""];
     } catch (error) {
       throw this.wrapErrorEvent(error, new Error(`valos.require("${String(module)}")`),
@@ -256,6 +257,7 @@ export default class Gateway extends FabricEventTarget {
           this.gatewayRevelation, this.falseProphet, plog1);
 
       this.spindleRevelations = (await expose(this.revelation.spindles)) || {};
+
       await this.attachSpindles(this.gatewayRevelation.spindlePrototypes);
 
       // Attach so-far unattached spindles which have revelation configurations
@@ -829,9 +831,9 @@ export default class Gateway extends FabricEventTarget {
         .map(async ([spindleName, spindlePrototype]) => {
           if (!spindlePrototype) return null;
           if (newSpindleLookup[spindleName]) {
-            this.errorEvent(`Spindle '${spindleName}' already being added:`,
-                newSpindleLookup[spindleName],
-                "\n\tskipping adding a new duplicate:", ...dumpObject(spindlePrototype));
+            this.errorEvent(`Spindle '${spindleName}' already being added with meta:`,
+                    newSpindleLookup[spindleName].meta,
+                "\n\tskipping new duplicate with meta:", ...dumpObject(spindlePrototype.meta));
           }
           if (this._attachedSpindles[spindleName]) {
             if (options.skipIfAlreadyAttached) return null;

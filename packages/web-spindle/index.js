@@ -8,6 +8,7 @@ const MapperService = require("./MapperService").default;
 
 export default valosheath.exportSpindle({
   name: "@valos/web-spindle",
+  meta: { url: typeof __dirname !== "undefined" ?  __dirname : "" } ,
 
   async onGatewayInitialized (gateway, { server, prefixes }) {
     const { expose } = gateway.valosRequire("@valos/inspire");

@@ -32,7 +32,6 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         return true;
       }
       router.infoEvent(2, () => [`${this.name}:`,
-        "\n\trequest.cookies:", ...dumpObject(request.cookies),
         "\n\trequest.body:", ...dumpObject(request.body),
         "\n\tresolvers:", ...dumpObject(this.runtime.ruleResolvers),
       ]);

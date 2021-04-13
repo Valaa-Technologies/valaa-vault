@@ -43,9 +43,9 @@ exports.builder = (yargs) => {
 
 exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
-  const toolsetConfig = vlm.getToolsetConfig(exports.vlm.toolset);
+  // const toolsetConfig = vlm.getToolsetConfig(exports.vlm.toolset);
   const toolsetConfigUpdate = {
-    ...toolsetConfig,
+    ssl: yargv.ssl,
     port: yargv.port,
     address: yargv.address,
     focus: null,
@@ -70,16 +70,18 @@ exports.handler = async (yargv) => {
 
   vlm.updateToolsetConfig(vlm.toolset, toolsetConfigUpdate);
 
-  await require("@valos/type-worker")
-      .updateSpindleAsWorkerTool(vlm, vlm.toolset, true);
-
   const selectionResult = await typeToolset.configureToolSelection(
       vlm, vlm.toolset, yargv.reconfigure, yargv.tools);
 
-  if (yargv.ssl && vlm.getToolConfig("@valos/type-worker", "copy-template-files", "inUse")) {
-    const envPath = "env";
-    const keyout = vlm.path.join(envPath, "local-authority.key.pem");
-    const out = vlm.path.join(envPath, "local-authority.crt");
+  await require("@valos/type-worker")
+      .updateSpindleAsWorkerTool(vlm, vlm.toolset, true);
+
+  const envPath = "env";
+  const keyout = vlm.path.join(envPath, "local-authority.key.pem");
+  const out = vlm.path.join(envPath, "local-authority.crt");
+  if (yargv.ssl
+      && vlm.getToolConfig("@valos/type-worker", "copy-template-files", "inUse")
+      && !vlm.shell.test("-f", keyout)) {
     vlm.shell.mkdir("-p", "env");
     if (await vlm.inquireConfirm(
         "Use 'openssl' to create insecure self-signed placeholder certificates?")) {

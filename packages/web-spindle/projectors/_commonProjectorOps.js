@@ -26,8 +26,10 @@ export function _presolveRouteRequest (router, runtime, valkOptions, route = run
 }
 
 export function _verifyResourceAuthorization (router, route, scope, resource, resourceName) {
-  if (!resource || (Array.isArray(resource) ? !resource.length : !(resource instanceof Vrapper))) {
+  let accessRoots = resource;
+  if (resource === null) accessRoots = [];
+  else if (!resource || (Array.isArray(resource) ? !resource.length : !(resource instanceof Vrapper))) {
     throw new Error(`Resource '${resourceName}' missing or invalid`);
   }
-  return verifySessionAuthorization(router, route, scope, resource, resourceName);
+  return verifySessionAuthorization(router, route, scope, accessRoots, resourceName);
 }

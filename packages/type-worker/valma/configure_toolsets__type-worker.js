@@ -12,7 +12,7 @@ exports.builder = (yargs) => {
   const toolsetConfig = yargs.vlm.getToolsetConfig(exports.vlm.toolset) || {};
   return yargs.options({
     serviceURI: {
-      type: "string", default: toolsetConfig.serviceURI || undefined,
+      type: "string", default: toolsetConfig.serviceURI,
       interactive: answers => ({
         type: "input", when: answers.reconfigure ? "always" : "if-undefined",
       }),
@@ -32,18 +32,18 @@ exports.handler = async (yargv) => {
       vlm.theme.path(templates), "(will not clobber existing files)");
   vlm.shell.cp("-nR", templates, ".");
   const toolsetConfigUpdate = {
-    ...toolsetConfig,
-    serviceURI: yargv.serviceURI,
+    serviceURI: yargv.serviceURI || null,
   };
-  if (yargv.reconfigure || !(toolsetConfigUpdate.commands || {}).perspire) {
-    toolsetConfigUpdate.commands = toolsetConfigUpdate.commands || {};
-    toolsetConfigUpdate.commands.perspire = {
-      options: {
-        keepalive: 60,
-        heartbeat: "worker-perspire-template",
-        output: "dist/perspire/worker-view.html",
-        spindles: [],
-      }
+  if (!(toolsetConfig.commands || {}).perspire) {
+    toolsetConfigUpdate.commands = {
+      perspire: {
+        options: {
+          keepalive: 60,
+          heartbeat: "worker-perspire-template",
+          output: "dist/perspire/worker-view.html",
+          spindles: [],
+        }
+      },
     };
   }
   await vlm.updateToolsetConfig(vlm.toolset, toolsetConfigUpdate);

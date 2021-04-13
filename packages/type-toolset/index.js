@@ -133,8 +133,8 @@ function draftConfigureToolsetCommand (vlm, name, restrictor, draftOptions) {
   // All packages specified as dev/dependencies by the toolset select
   // command are available.
   const vlm = yargv.vlm;
-  const toolsetConfig = vlm.getToolsetConfig(exports.vlm.toolset) || {};
-  const toolsetConfigUpdate = { ...toolsetConfig };
+  // const toolsetConfig = vlm.getToolsetConfig(exports.vlm.toolset) || {};
+  const toolsetConfigUpdate = {};
   // Construct a toolset config update or exit.
   vlm.updateToolsetConfig(vlm.toolset, toolsetConfigUpdate);
   const selectionResult = await typeToolset.configureToolSelection(

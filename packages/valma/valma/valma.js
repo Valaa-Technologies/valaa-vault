@@ -2779,7 +2779,7 @@ function __deepFreeze (object) {
 
 function __deepAssign (target, source) {
   if (source === undefined) return target;
-  if (Array.isArray(target) && (source !== null)) return target.concat(source);
+  if (Array.isArray(source)) return [...source];
   if ((typeof source !== "object") || (source === null)
       || (typeof target !== "object") || (target === null)) return source;
   let objectTarget = target;

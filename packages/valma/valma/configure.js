@@ -25,7 +25,7 @@ exports.handler = async (yargv) => {
   const vlm = yargv.vlm;
   vlm.reconfigure = yargv.reconfigure;
   const { name, valos: { domain, type } = {} } = vlm.getPackageConfig();
-  if (!name || !type || !domain) {
+  if (!name || !type || (domain == null)) {
     throw new Error("vlm configure: current directory is not a valos workspace; "
         + "no package.json with valos stanza with both type and domain set"
         + "(maybe run 'vlm init' to initialize?)");

@@ -139,8 +139,10 @@ exports.handler = async (yargv) => {
           ret.valos.type = typeCandidate;
         }
       }
-    } else if (!ret.valos.type && await vlm.inquireConfirm(
-        "Set 'vault' as the valos.type (workspace is outside a vault)?")) {
+    } else if (!ret.valos.type
+        && await vlm.inquireConfirm(
+            "Set 'vault' as the valos.type (workspace is outside a vault)?",
+            false)) {
       ret.valos.type = "vault";
     }
     Object.assign(ret, await vlm.invoke(".configure/.valos-stanza", ret.valos));
@@ -155,20 +157,23 @@ exports.handler = async (yargv) => {
       repository: yargv.repository || (parentVaultConfig || {}).repository || "",
       private: false,
     };
-    if (!ret.isNewDomain) {
-      ret.newDevDependencies = [ret.valos.domain];
-    } else {
+    if (ret.isNewDomain) {
       packageJSON.description = `Vault for domain ${ret.valos.domain}`;
+    } else if (ret.valos.domain) {
+      ret.newDevDependencies = [ret.valos.domain];
     }
-    const domainNamespace = ret.valos.domain.split("/")[0];
-    if (!namespace && await vlm.inquireConfirm(
-        `Set '${domainNamespace}' as the package namespace (based on the domain namespace)?`)) {
-      namespace = domainNamespace;
+    const domainNamespace = ret.valos.domain.split("/");
+    if (domainNamespace.length > 1) {
+      if (!namespace && await vlm.inquireConfirm(
+        `Set '${domainNamespace[0]}' as the package namespace (based on the domain namespace)?`)) {
+      namespace = domainNamespace[0];
+    }
     }
     if (namespace) {
       packageJSON.name = `${namespace}/${packageJSON.name}`;
     }
     if ((ret.valos.type === "vault")
+        || !ret.valos.domain
         || !(await vlm.inquireConfirm(`Is this workspace published to a package repository?`))) {
       packageJSON.private = true;
       if (!packageJSON.name.endsWith(`-${ret.valos.type}`)) {
@@ -254,7 +259,8 @@ package configuration file for yarn (and also for npm, which yarn is
       if (answer.choice === "Commit") {
         ret.commitValOS = await vlm.updatePackageConfig({ valos: ret.valos });
         ret.select = {
-          domain: !yargv["new-domain"] && await vlm.invoke(`.select/.domain/${ret.valos.domain}`),
+          domain: !yargv["new-domain"] && ret.valos.domain
+              && await vlm.invoke(`.select/.domain/${ret.valos.domain}`),
           type: await vlm.invoke(`.select/.type/${ret.valos.type}`),
         };
         Object.assign(ret.select,

@@ -36,7 +36,7 @@ function _createChoicesOption (vlm, isSingular, primaryPrefix, selectorPackageCo
   when, default: defaultAnswer, prependChoices, appendChoices, pageSize, filterChoices,
   confirm, allowGlob, postConfirm, useAnswersReconfigure, enableDisabled,
 }) {
-  const { name, valos = {} } = selectorPackageConfig;
+  const { name, valos = {} } = selectorPackageConfig || {};
   return {
     type: "string",
     default: defaultAnswer,

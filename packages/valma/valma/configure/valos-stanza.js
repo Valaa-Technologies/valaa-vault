@@ -9,11 +9,7 @@ Domain defines the context and the overall purpose of this workspace.
 Both affect the available toolsets for the workspace.`;
 
 exports.disabled = (yargs) =>
-    ((yargs.vlm._packageConfigStatus.workspacePath !== process.cwd())
-        ? "Current directory is not a workspace (no package.json)"
-    : yargs.vlm.getValOSConfig()
-        ? "Valos stanza is already configured"
-    : undefined);
+    (yargs.vlm.getValOSConfig() ? "Valos stanza is already configured" : undefined);
 
 exports.builder = (yargs) => {
   const vlm = yargs.vlm;
@@ -28,6 +24,11 @@ exports.builder = (yargs) => {
       selectorBrief: "the new workspace",
       useAnswersReconfigure: true,
       appendChoices: [
+        {
+          name: "<no domain>", value: "",
+          description: "<this workspace is not part of a domain>",
+          confirm: false,
+        },
         ...((!currentValos.type || (currentValos.type === "vault")) ? [{
           name: "<create>", value: "<create>",
           description: "<enter the name of a new domain this workspace introduces>",

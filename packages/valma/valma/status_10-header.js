@@ -13,7 +13,7 @@ exports.handler = (yargv) => {
   const vlm = yargv.vlm;
   const config = yargv.vlm.getPackageConfig();
   const valos = config && (config.valos || config.valaa);
-  if (!valos || !valos.type || !valos.domain) {
+  if (!valos || !valos.type || (valos.domain == null)) {
     vlm.warn(
 `package '${yargv.vlm.theme.package(config && config.name)}' is not a
 valos workspace. Either package.json doesn't have the .valos stanza or

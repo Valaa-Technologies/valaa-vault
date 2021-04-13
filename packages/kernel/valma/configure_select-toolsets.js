@@ -32,7 +32,7 @@ exports.disabled = (yargs) => {
   const valos = yargs.vlm.getValOSConfig();
   return !valos ? "No package.json valos stanza found"
       : !valos.type ? "No package.json valos.type stanza found"
-      : !valos.domain ? "No package.json valos.domain stanza found"
+      : (valos.domain == null) ? "No package.json valos.domain stanza found"
       : !yargs.vlm.getToolsetsConfig() && "No toolsets.json found";
 };
 

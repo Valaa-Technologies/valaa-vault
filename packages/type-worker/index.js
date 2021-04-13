@@ -7,11 +7,9 @@ function updateSpindleAsWorkerTool (vlm, spindle, inUse) {
   const workerToolsetSpindles = vlm.getToolsetConfig(
       "@valos/type-worker", "commands", "perspire", "options", "spindles") || [];
   if (inUse && !workerToolsetSpindles.includes(spindle)) {
-    console.log("Updating perspire options spindles:");
     vlm.updateToolsetConfig("@valos/type-worker",
         { commands: { perspire: { options: { spindles: [spindle] } } } });
-    console.log("Updated perspire options spindles:",
-        vlm.getToolsetConfig("@valos/type-worker", "commands", "perspire"));
+    vlm.info("Added", vlm.theme.package(spindle), "to perspire spindles options");
   } else if (!inUse && (workerToolsetSpindles.includes(spindle))) {
     vlm.warn(`When stowing toolset ${spindle}, removing the spindle '${spindle
         }' from '@valos/type-worker' perspire spindles is not implemented yet.`,

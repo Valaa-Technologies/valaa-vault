@@ -23,7 +23,7 @@ export default valosheath.exportSpindle({
     for (const { name, "@valos/web-spindle": extender } of extensions) {
       plog && plog.opEvent("extension.projectors", `Adding projectors from spindle "${name}"`);
       for (const [projectorName, projector] of Object.entries(extender.getProjectors())) {
-        const qualifiedName = `${name}:${projectorName}`;
+        const qualifiedName = `${name}#/${projectorName}`;
         if (allProjectors[qualifiedName]) {
           throw new Error(`Projector "${qualifiedName
               }" already exists (while adding projectors from extension spindle "${name}")`);

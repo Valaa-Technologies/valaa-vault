@@ -46,7 +46,7 @@
       "routes": [{
         "url": "testaur/:chroniclePlot/-log!:eventIndex(^\\d+)/",
         "method": "GET",
-        "projector": "@valos/authority-spindle:event",
+        "projector": "@valos/authority-spindle#/event",
         "config": { "rules": {
           "routeRoot": ["@@"],
           "authorityURI": { "!!!": ["./toolsets", "@valos/authority-spindle", "authorityURI"] }
@@ -58,7 +58,7 @@
       }, {
         "url": "testaur/:chroniclePlot/-log!:eventIndex(^\\d+)/",
         "method": "PUT",
-        "projector": "@valos/authority-spindle:event",
+        "projector": "@valos/authority-spindle#/event",
         "config": { "rules": {
           "routeRoot": ["@@"],
           "authorityURI": { "!!!": ["./toolsets", "@valos/authority-spindle", "authorityURI"] }
@@ -70,7 +70,7 @@
       }, {
         "url": "testaur/:chroniclePlot/-log:indexRange(^(|'.+)$)",
         "method": "GET",
-        "projector": "@valos/authority-spindle:log",
+        "projector": "@valos/authority-spindle#/log",
         "config": { "rules": {
           "routeRoot": ["@@"],
           "authorityURI": { "!!!": ["./toolsets", "@valos/authority-spindle", "authorityURI"] }
@@ -82,7 +82,7 @@
       }, {
         "url": "testaur/:chroniclePlot/-log:indexRange(^(|'.+)$)",
         "method": "POST",
-        "projector": "@valos/authority-spindle:log",
+        "projector": "@valos/authority-spindle#/log",
         "config": { "rules": {
           "routeRoot": ["@@"],
           "authorityURI": { "!!!": ["./toolsets", "@valos/authority-spindle", "authorityURI"] }
@@ -94,7 +94,7 @@
       }, {
         "url": "testaur/:chroniclePlot/~bvob!:contentHash/",
         "method": "GET",
-        "projector": "@valos/authority-spindle:bvob",
+        "projector": "@valos/authority-spindle#/bvob",
         "config": { "rules": {
           "routeRoot": ["@@"],
           "authorityURI": { "!!!": ["./toolsets", "@valos/authority-spindle", "authorityURI"] }
@@ -106,7 +106,7 @@
       }, {
         "url": "testaur/:chroniclePlot/~bvob!:contentHash/",
         "method": "HEAD",
-        "projector": "@valos/authority-spindle:bvob",
+        "projector": "@valos/authority-spindle#/bvob",
         "config": { "rules": {
           "routeRoot": ["@@"],
           "authorityURI": { "!!!": ["./toolsets", "@valos/authority-spindle", "authorityURI"] }
@@ -118,7 +118,7 @@
       }, {
         "url": "testaur/:chroniclePlot/~bvob!:contentHash/",
         "method": "PUT",
-        "projector": "@valos/authority-spindle:bvob",
+        "projector": "@valos/authority-spindle#/bvob",
         "config": { "rules": {
           "routeRoot": ["@@"],
           "authorityURI": { "!!!": ["./toolsets", "@valos/authority-spindle", "authorityURI"] }

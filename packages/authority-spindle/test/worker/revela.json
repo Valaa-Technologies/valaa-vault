@@ -89,7 +89,7 @@
           }, {
             "url": "/:chroniclePlot/-log!:eventIndex(^\\d+)/",
             "method": "GET",
-            "projector": "@valos/authority-spindle:event",
+            "projector": "@valos/authority-spindle#/event",
             "config": { "rules": {
               "routeRoot": ["@@"],
               "authorityURI": "valosp://localhost:7358/testaur/",
@@ -118,7 +118,7 @@
           }, {
             "url": "/:chroniclePlot/-log!:eventIndex(^\\d+)/",
             "method": "PUT",
-            "projector": "@valos/authority-spindle:event",
+            "projector": "@valos/authority-spindle#/event",
             "config": { "rules": {
               "routeRoot": ["@@"],
               "authorityURI": "valosp://localhost:7358/testaur/",
@@ -131,7 +131,7 @@
           }, {
             "url": "/:chroniclePlot/-log:startIndex(^(|'![^']+))",
             "method": "GET",
-            "projector": "@valos/authority-spindle:log",
+            "projector": "@valos/authority-spindle#/log",
             "config": { "rules": {
               "routeRoot": ["@@"],
               "authorityURI": "valosp://localhost:7358/testaur/",
@@ -160,7 +160,7 @@
           }, {
             "url": "/:chroniclePlot/-log:startIndex(^(|'![^']+)):endIndex(^(|'![^']+))",
             "method": "POST",
-            "projector": "@valos/authority-spindle:log",
+            "projector": "@valos/authority-spindle#/log",
             "config": { "rules": {
               "routeRoot": ["@@"],
               "authorityURI": "valosp://localhost:7358/testaur/",
@@ -173,7 +173,7 @@
           }, {
             "url": "/:chroniclePlot/~bvob!:contentHash/",
             "method": "GET",
-            "projector": "@valos/authority-spindle:bvob",
+            "projector": "@valos/authority-spindle#/bvob",
             "config": { "rules": {
               "routeRoot": ["@@"],
               "authorityURI": "valosp://localhost:7358/testaur/",
@@ -186,7 +186,7 @@
           }, {
             "url": "/:chroniclePlot/~bvob!:contentHash/",
             "method": "HEAD",
-            "projector": "@valos/authority-spindle:bvob",
+            "projector": "@valos/authority-spindle#/bvob",
             "config": { "rules": {
               "routeRoot": ["@@"],
               "authorityURI": "valosp://localhost:7358/testaur/",
@@ -215,7 +215,7 @@
           }, {
             "url": "/:chroniclePlot/~bvob!:contentHash/",
             "method": "POST",
-            "projector": "@valos/authority-spindle:bvob",
+            "projector": "@valos/authority-spindle#/bvob",
             "config": { "rules": {
               "routeRoot": ["@@"],
               "authorityURI": "valosp://localhost:7358/testaur/",

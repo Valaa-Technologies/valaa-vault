@@ -281,7 +281,7 @@ automatically during schema generation.`
 () => ({ tag: TestTagType }),
 type => exportSchemaOf(type),
           ],
-          "toEqual", { tag: "TestTag#" },
+          "toEqual", { tag: { $ref: "#TestTag" } },
       ),
     },
     "chapter#mapping_schemas>4;Mapping schemas": {
@@ -510,7 +510,7 @@ TestIndividualType gate projection.`
       },
     },
     response: {
-      200: "TestIndividual#",
+      200: { $ref: "#TestIndividual" },
       403: { type: "string" },
       404: { type: "string" },
     }
@@ -521,7 +521,7 @@ TestIndividualType gate projection.`
     runtimeRules: [],
     resource: {
       name: "TestIndividual",
-      schema: "TestIndividual#",
+      schema: { $ref: "#TestIndividual" },
       gate: {
         name: "individuals",
         projection: ["@@", [["@-out", ["INDIVIDUAL"]], ["@.", [["@$V", "target"]]]]],
@@ -576,7 +576,7 @@ containing the mapping.`,
       valospace: { filterable: true },
       properties: {
         highlight: { type: "boolean" },
-        $V: { type: "object", properties: { target: "TestTag#" } },
+        $V: { type: "object", properties: { target: { $ref: "#TestTag" } } },
       },
     },
     response: {
@@ -585,7 +585,7 @@ containing the mapping.`,
         properties: {
           highlight: { type: "boolean" },
           $V: { type: "object", properties: {
-            href: { type: "string" }, rel: { type: "string" }, target: "TestTag#",
+            href: { type: "string" }, rel: { type: "string" }, target: { $ref: "#TestTag" },
           } },
         },
       },
@@ -596,7 +596,7 @@ containing the mapping.`,
   config: {
     resource: {
       name: "TestIndividual",
-      schema: "TestIndividual#",
+      schema: { $ref: "#TestIndividual" },
       gate: {
         name: "individuals",
         projection: ["@@", [["@-out", ["INDIVIDUAL"]], ["@.", [["@$V", "target"]]]]],
@@ -629,7 +629,7 @@ containing the mapping.`,
         },
       },
     },
-    target: { name: "TestTag", schema: "TestTag#" },
+    target: { name: "TestTag", schema: { $ref: "#TestTag" } },
     enabledWithRules: ["relationName"],
     requiredRules: ["routeRoot", "mappingName"],
     valueAssertedRules: ["resource"],

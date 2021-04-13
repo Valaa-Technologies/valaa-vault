@@ -18,6 +18,7 @@
     "_vlm_clean-vault": "valma/clean-vault.js",
     "_vlm__configure_select-toolsets": "valma/configure_select-toolsets.js",
     "_vlm__select__domain_-valos_kernel": "valma/select/domain__kernel.js",
+    "_vlm__select__toolsets__type_worker_-valos_authority-spindle": "valma/select/toolsets_type_worker__authority-spindle.js",
     "_vlm__select__toolsets__type_worker_-valos_web-spindle": "valma/select/toolsets_type_worker__web-spindle.js",
     "_vlm__select__toolsets_-valos_toolset-revealer": "valma/select/toolsets__toolset-revealer.js",
     "_vlm__select__toolsets_-valos_type-toolset": "valma/select/toolsets__type-toolset.js",

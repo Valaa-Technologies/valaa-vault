@@ -1,0 +1,206 @@
+{
+  "view": {
+    "name": "authority-view",
+    "verbosity": 1,
+    "engine": { "verbosity": 0, "discourse": { "verbosity": 0 } },
+    "focus": { "!!!": ["./toolsets", "@valos/authority-spindle", "focus"] }
+  },
+  "identity": { "!!!": ["./env_authority-identity"] },
+  "sessionDuration": 3600,
+  "swaggerPrefix": "/openapi",
+  "openapi": {
+    "openapi": "3.0.2",
+    "info": {
+      "title": { "!!!": ["./toolsets",  "@valos/authority-spindle", "description"] },
+      "name": { "!!!": ["./package", "name"] },
+      "version": { "!!!": ["./package", "version"] },
+      "description": { "!!!": ["./package", "description"] }
+    },
+    "servers": [],
+    "host": "localhost",
+    "schemes": ["http", "https"],
+    "consumes": ["application/json"],
+    "produces": ["application/json"],
+    "tags": [],
+    "securityDefinitions": { "apiKey": { "type": "apiKey", "name": "apiKey", "in": "header" } }
+  },
+  "routes": [{
+    "url": { "!!!": ["./toolsets", "@valos/authority-spindle", "configDiscoveryRouteURL"] },
+    "method": "GET",
+    "projector": "static",
+    "config": {
+      "rules": {
+        "routeRoot": ["@@"],
+        "body": {
+          "!!!": ["./revelation_authority_authorityConfig"],
+          "isRemoteAuthority": true,
+          "verbosity": 0
+        },
+        "headers": { "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Origin": "*" }
+      }
+    },
+    "schema": {
+      "description": "Get authority config",
+      "response": { "200": { "type": "string" }, "404": { "type": "string" } }
+    }
+  }, {
+    "url": "/:chroniclePlot/-log!:eventIndex(^\\d+)/",
+    "method": "GET",
+    "projector": "@valos/authority-spindle#/event",
+    "config": {
+      "rules": {
+        "routeRoot": ["@@"],
+        "authorityURI": { "!!!": ["./toolsets", "@valos/authority-spindle", "authorityURI"] },
+        "headers": { "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Origin": "*" }
+      }
+    },
+    "schema": {
+      "description": "Narrate a single event from a chronicle log",
+      "response": { "200": { "type": "string" }, "404": { "type": "string" } }
+    }
+  }, {
+    "url": "/:chroniclePlot/-log!:eventIndex(^\\d+)/",
+    "method": "OPTIONS",
+    "projector": "static",
+    "config": {
+      "rules": {
+        "routeRoot": ["@@"],
+        "headers": {
+          "Access-Control-Allow-Methods": "GET, OPTIONS, PUT",
+          "Access-Control-Allow-Headers": "*",
+          "Access-Control-Allow-Origin": "*"
+        }
+      }
+    },
+    "schema": {
+      "description": "Enable CORS for single chronicle log event GET, OPTIONS, and PUT",
+      "response": { "200": { "type": "string" }, "404": { "type": "string" } }
+    }
+  }, {
+    "url": "/:chroniclePlot/-log!:eventIndex(^\\d+)/",
+    "method": "PUT",
+    "projector": "@valos/authority-spindle#/event",
+    "config": {
+      "rules": {
+        "routeRoot": ["@@"],
+        "authorityURI": { "!!!": ["./toolsets", "@valos/authority-spindle", "authorityURI"] },
+        "headers": { "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Origin": "*" }
+      }
+    },
+    "schema": {
+      "description": "Proclaim a single event to a chronicle log",
+      "response": { "200": { "type": "string" }, "404": { "type": "string" } }
+    }
+  }, {
+    "url": "/:chroniclePlot/-log:startIndex(^(|'![^']+))",
+    "method": "GET",
+    "projector": "@valos/authority-spindle#/log",
+    "config": {
+      "rules": {
+        "routeRoot": ["@@"],
+        "authorityURI": { "!!!": ["./toolsets", "@valos/authority-spindle", "authorityURI"] },
+        "headers": { "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Origin": "*" }
+      }
+    },
+    "schema": {
+      "description": "Narrate multiple events from a chronicle log",
+      "response": { "200": { "type": "string" }, "404": { "type": "string" } }
+    }
+  }, {
+    "url": "/:chroniclePlot/-log:startIndex(^(|'![^']+)):endIndex(^(|'![^']+))",
+    "method": "OPTIONS",
+    "projector": "static",
+    "config": {
+      "rules": {
+        "routeRoot": ["@@"],
+        "headers": {
+          "Access-Control-Allow-Methods": "GET, OPTIONS, POST",
+          "Access-Control-Allow-Headers": "*",
+          "Access-Control-Allow-Origin": "*"
+        }
+      }
+    },
+    "schema": {
+      "description": "Enable CORS for single chronicle log event GET, OPTIONS, and POST",
+      "response": { "200": { "type": "string" }, "404": { "type": "string" } }
+    }
+  }, {
+    "url": "/:chroniclePlot/-log:startIndex(^(|'![^']+)):endIndex(^(|'![^']+))",
+    "method": "POST",
+    "projector": "@valos/authority-spindle#/log",
+    "config": {
+      "rules": {
+        "routeRoot": ["@@"],
+        "authorityURI": { "!!!": ["./toolsets", "@valos/authority-spindle", "authorityURI"] },
+        "headers": { "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Origin": "*" }
+      }
+    },
+    "schema": {
+      "description": "Proclaim multiple events to a chronicle log",
+      "response": { "200": { "type": "string" }, "404": { "type": "string" } }
+    }
+  }, {
+    "url": "/:chroniclePlot/~bvob!:contentHash/",
+    "method": "OPTIONS",
+    "projector": "static",
+    "config": {
+      "rules": {
+        "routeRoot": ["@@"],
+        "headers": {
+          "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS, PUT",
+          "Access-Control-Allow-Headers": "*",
+          "Access-Control-Allow-Origin": "*"
+        }
+      }
+    },
+    "schema": {
+      "description": "Enable CORS for binary valos object GET, HEAD, OPTIONS and PUT",
+      "response": { "200": { "type": "string" }, "404": { "type": "string" } }
+    }
+  }, {
+    "url": "/:chroniclePlot/~bvob!:contentHash/",
+    "method": "GET",
+    "projector": "@valos/authority-spindle#/bvob",
+    "config": {
+      "rules": {
+        "routeRoot": ["@@"],
+        "authorityURI": { "!!!": ["./toolsets", "@valos/authority-spindle", "authorityURI"] },
+        "headers": { "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Origin": "*" }
+      }
+    },
+    "schema": {
+      "description": "Fetch a binary valos object that is accessible by the chronicle",
+      "response": { "200": { "type": "string" }, "404": { "type": "string" } }
+    }
+  }, {
+    "url": "/:chroniclePlot/~bvob!:contentHash/",
+    "method": "HEAD",
+    "projector": "@valos/authority-spindle#/bvob",
+    "config": {
+      "rules": {
+        "routeRoot": ["@@"],
+        "authorityURI": { "!!!": ["./toolsets", "@valos/authority-spindle", "authorityURI"] },
+        "headers": { "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Origin": "*" }
+      }
+    },
+    "schema": {
+      "description": "Check whether a binary valos object is accessible by the chronicle",
+      "response": { "200": { "type": "string" }, "404": { "type": "string" } }
+    }
+  }, {
+    "url": "/:chroniclePlot/~bvob!:contentHash/",
+    "method": "POST",
+    "projector": "@valos/authority-spindle#/bvob",
+    "config": {
+      "rules": {
+        "routeRoot": ["@@"],
+        "authorityURI": { "!!!": ["./toolsets", "@valos/authority-spindle", "authorityURI"] },
+        "headers": { "Access-Control-Allow-Headers": "*", "Access-Control-Allow-Origin": "*" }
+      }
+    },
+    "schema": {
+      "description": "Upload a binary valos object to make it accessible by the chronicle",
+      "response": { "200": { "type": "string" }, "404": { "type": "string" } }
+    }
+  }]
+}

@@ -1,0 +1,9 @@
+{
+  "authorityURI": { "!!!": ["./toolsets", "@valos/authority-spindle", "authorityURI"] },
+  "name": { "!!!": ["./toolsets", "@valos/authority-spindle", "description"] },
+  "isLocallyRecorded": true,
+  "isPrimaryAuthority": true,
+  "isRemoteAuthority": false,
+  "eventVersion": "0.2",
+  "verbosity": 2
+}

@@ -3,7 +3,8 @@
   "version": "0.37.0-prerelease.0",
   "valos": {
     "type": "spindle",
-    "domain": "@valos/kernel"
+    "domain": "@valos/kernel",
+    "docs": "https://valospace.org/authority-spindle"
   },
   "description": "ValOS authority web route projectors spindle",
   "author": "Valaa Technologies Ltd",
@@ -26,5 +27,6 @@
   },
   "devDependencies": {
     "form-data": "^4.0.0"
-  }
+  },
+  "homepage": "https://valospace.org/authority-spindle"
 }

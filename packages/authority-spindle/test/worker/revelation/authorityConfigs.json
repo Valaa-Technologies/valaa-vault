@@ -6,6 +6,6 @@
     "isPrimaryAuthority": true,
     "isRemoteAuthority": false,
     "eventVersion": "0.2",
-    "verbosity": 2
+    "verbosity": 0
   }
 }

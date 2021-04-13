@@ -1,0 +1,4 @@
+{
+  "clientURI": { "!!!": ["./toolsets", "@valos/authority-spindle", "focus"] },
+  "clientSecret": ""
+}

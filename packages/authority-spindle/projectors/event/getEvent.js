@@ -23,7 +23,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
     },
 
     handler (request, reply) {
-      const { valkOptions, scope, discourse, chronicleURI } =
+      const { valkOptions, scope /* , discourse, chronicleURI */ } =
           _prepareChronicleRequest(router, this, request, reply);
       if (!valkOptions) return false;
 

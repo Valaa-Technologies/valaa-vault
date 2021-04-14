@@ -51,7 +51,8 @@ function extract (sourceGraphs, {
         for (const extension of extensions) {
           const preApplyPatch = (extension.extractors.native || {}).preApplyPatch;
           if (!preApplyPatch) continue;
-          const ret = preApplyPatch.call(this, target, patch, key, parentTarget, patchKey, parentPatch);
+          const ret = preApplyPatch
+              .call(this, target, patch, key, parentTarget, patchKey, parentPatch);
           if (ret !== undefined) return ret;
         }
         return undefined;
@@ -62,7 +63,8 @@ function extract (sourceGraphs, {
         for (const extension of extensions) {
           const postApplyPatch = (extension.extractors.native || {}).postApplyPatch;
           if (!postApplyPatch) continue;
-          ret = postApplyPatch.call(this, innerTarget, patch, key, parentTarget, patchKey, parentPatch);
+          ret = postApplyPatch
+              .call(this, innerTarget, patch, key, parentTarget, patchKey, parentPatch);
           if (ret !== undefined) return ret;
         }
         return innerTarget;

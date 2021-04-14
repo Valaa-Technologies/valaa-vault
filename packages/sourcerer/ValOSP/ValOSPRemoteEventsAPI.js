@@ -17,7 +17,7 @@ export default class ValOSPRemoteEventsAPI extends FabricEventTarget {
     return false;
   }
 
-  narrateRemoteEventLog (connection, startIndex, endIndex, identities) {
+  narrateRemoteEventLog (connection, startIndex, endIndex /* , identities */) {
     const isSingular = startIndex + 1 === endIndex;
     const indexFilterPlot =
         isSingular
@@ -38,7 +38,7 @@ export default class ValOSPRemoteEventsAPI extends FabricEventTarget {
         .map(event => swapAspectRoot("event", event, "delta")));
   }
 
-  proclaimRemoteCommands (connection, startIndex, commands, identities) {
+  proclaimRemoteCommands (connection, startIndex, commands /* , identities */) {
     const isMulti = commands.length > 1;
     const method = isMulti ? "POST" : "PUT";
     const proclaimRoute = `${

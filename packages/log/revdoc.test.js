@@ -1,6 +1,6 @@
 const {
   extractee: {
-    c, authors, jsonld, em, ref, context, cli, command, cpath, bulleted, pkg, regexp, turtle,
+    c, authors, jsonld, em, ref, pkg, regexp,
     prepareTestDoc,
   },
 } = require("@valos/revdoc");

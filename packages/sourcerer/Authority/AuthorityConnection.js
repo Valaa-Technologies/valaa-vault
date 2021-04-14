@@ -7,7 +7,7 @@ import {
   EventCallback, Proclamation, ProclaimOptions, ProclaimEventResult, MediaInfo, NarrateOptions,
 } from "~/sourcerer/api/types";
 
-import { FutureEventData, getEventIndex } from "~/sourcerer/tools/event-version-0.3";
+import { getEventIndex } from "~/sourcerer/tools/event-version-0.3";
 
 import { thenChainEagerly, mapEagerly } from "~/tools/thenChainEagerly";
 import { debugObjectType, dumpObject } from "~/tools/wrapError";

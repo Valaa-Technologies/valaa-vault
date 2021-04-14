@@ -12,7 +12,7 @@ exports.builder = (yargs) => yargs.options({
 });
 
 exports.handler = async (yargv) => {
-  const { extension, extractee: { ref } } = require("@valos/vdoc");
+  const { extension } = require("@valos/vdoc");
   const patchWith = require("@valos/tools/patchWith").default;
   const vlm = yargv.vlm;
   const toolsetConfig = vlm.getToolsetConfig(exports.vlm.toolset);

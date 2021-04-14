@@ -24,7 +24,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
     },
 
     handler (request, reply) {
-      const { valkOptions, scope, discourse, chronicleURI } =
+      const { valkOptions, scope /* , discourse, chronicleURI */ } =
           _prepareChronicleRequest(router, this, request, reply);
       if (!valkOptions) return false;
 
@@ -45,9 +45,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
           return connection.proclaimEvents([eventAspect]).eventResults[0];
         },
         // () => valkOptions.discourse.releaseFabricator(),
-        eventResult => {
-          return eventResult && eventResult.getTruthEvent();
-        },
+        eventResult => eventResult && eventResult.getTruthEvent(),
         (truthEvent) => {
           reply.code(201);
           reply.send(JSON.stringify({ log: truthEvent.aspects.log }));

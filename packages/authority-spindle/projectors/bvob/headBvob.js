@@ -22,7 +22,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
     },
 
     handler (request, reply) {
-      const { valkOptions, scope, discourse, chronicleURI } =
+      const { valkOptions, scope /* , discourse, chronicleURI */ } =
           _prepareChronicleRequest(router, this, request, reply);
       if (!valkOptions) return false;
 
@@ -32,25 +32,23 @@ export default function createProjector (router: PrefixRouter, route: Route) {
         "\n\tchroniclePlot:", ...dumpObject(scope.chroniclePlot),
         "\n\tcontentHash:", ...dumpObject(scope.contentHash),
       ]);
+      if (scope.contentHash.length !== 40) throw new Error("contentHash must be a valid hash40");
       // const {} = this.runtime.ruleResolvers;
 
       return thenChainEagerly(scope.connection.asSourceredConnection(), [
-        connection => {
-          // Add or validate body event index to equal scope.eventIndex
-          return connection.narrateEventLog({
-            eventIdBegin: scope.eventIndex,
-            eventIdEnd: scope.eventIndex,
-            commands: false,
-          });
-        },
+        connection => connection.requestMediaContents([{
+          contentHash: scope.contentHash,
+          contentType: "application/octet-stream",
+        }]),
         // () => valkOptions.discourse.releaseFabricator(),
-        (sections) => {
-          // Flatten sections and pick correct event
+        ([buffer]) => {
+          // TODO(iridian, 2021-04): Refactor so that content is not
+          // loaded into memory unnecessarily.
           reply.code(200);
-          reply.send(sections);
+          reply.send();
           router.infoEvent(2, () => [
             `${this.name}:`,
-            "\n\tsections:", ...dumpObject(sections),
+            "\n\tbuffer.byteLength:", buffer.byteLength,
           ]);
           return true;
         },

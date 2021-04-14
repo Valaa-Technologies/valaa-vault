@@ -26,10 +26,10 @@ const expectedOutputHTML = `<html><head>${
 
 beforeEach(() => {});
 
-const testClientChronicleURI = "valaa-local:?id=@$~u4.f3d306d9-79ac-4087-afbc-46f739226eb2@@";
-const testClientId = encodeURIComponent(testClientChronicleURI);
-const sessionCookieName = `__Secure-valos-session-${testClientId}`;
-const clientCookieName = `__Secure-valos-id-claims-${testClientId}`;
+// const testClientChronicleURI = "valaa-local:?id=@$~u4.f3d306d9-79ac-4087-afbc-46f739226eb2@@";
+// const testClientId = encodeURIComponent(testClientChronicleURI);
+// const sessionCookieName = `__Secure-valos-session-${testClientId}`;
+// const clientCookieName = `__Secure-valos-id-claims-${testClientId}`;
 
 const _testAuthorityURI = "valosp://localhost:7358/testaur/";
 const _testAuthorityEndpoint = "https://localhost:7358/testaur/";
@@ -40,10 +40,10 @@ const testRandoId = "@$~test.rando@@";
 
 const adminChronicleURI = `${_testAuthorityURI}~test!admin/`;
 const userChronicleURI = `${_testAuthorityURI}~test!user/`;
-const randoChronicleURI = `${_testAuthorityURI}~test!rando/`;
+// const randoChronicleURI = `${_testAuthorityURI}~test!rando/`;
 
-let _server, _testView, _testRouter;
-let _vViewFocus, _vAuRoot, _vAdmin, _vUser, _vRando;
+let _server, _testView; /* , _testRouter */
+let _vViewFocus, _vAuRoot, _vAdmin, _vUser; /* , _vRando */
 
 beforeAll(async () => {
   _server = new PerspireServer({
@@ -56,7 +56,7 @@ beforeAll(async () => {
   await _server.createView("worker");
   _testView = _server.getGateway().getView("authority-test-view");
   if (!_testView) throw new Error(`The spindle view "authority-test-view" failed to initialize`);
-  _testRouter = _testView.prefixRouters["/testaur"];
+  // _testRouter = _testView.prefixRouters["/testaur"];
   _vViewFocus = _testView.getFocus();
 
   _vAuRoot = await _vViewFocus.doValoscript(
@@ -68,7 +68,7 @@ beforeAll(async () => {
   _vUser = await _vViewFocus.doValoscript(
       `this.user = new Entity({ id, name: "user", authorityURI })`,
       { id: testUserId, authorityURI: _testAuthorityURI });
-  _vRando = await _vViewFocus.doValoscript(
+  /* _vRando = */ await _vViewFocus.doValoscript(
       `new Entity({ id, name: "rando", authorityURI })`,
       { id: testRandoId, authorityURI: _testAuthorityURI });
 
@@ -90,41 +90,6 @@ beforeAll(async () => {
 });
 
 afterAll(() => _server.terminate());
-
-async function _initiateTestSession (identityChronicle) {
-  // DO NOT COPY TO OUTSIDE TESTS. iv and nonce must be unique. See security.test.js
-  const iv = new Uint8Array(12);
-  iv.set([185, 101, 152, 96, 39, 227, 175, 178, 236, 173, 121, 187], 0);
-  const nonce = "sdsd098131##";
-
-  const code = burlaesgEncode({
-    identityChronicle, claims: { email: "tester@example.org", preferred_username: "tester" },
-    nonce, timeStamp: Math.floor(Date.now() / 1000),
-  }, "pen-pineapple-apple-pen", iv);
-
-  const sessionRedirect = await fetch(`${_testAuthorityEndpoint}v0/session${
-      ""}?code=${code}&state=auth-state`, {
-        method: "GET",
-        headers: { cookie: `${clientCookieName}=auth-state` },
-        redirect: "manual",
-      });
-  expect(sessionRedirect.status)
-      .toEqual(302);
-  expect(sessionRedirect.headers.get("location"))
-      .toEqual("http://localhost:7358/rest-test-app/");
-  return _extractSessionClientCookie(sessionRedirect.headers);
-}
-
-function _extractSessionClientCookie (incomingHeaders) {
-  const cookies = incomingHeaders.get("set-cookie");
-  const sessionCookie = cookies.match(new RegExp(`${sessionCookieName}\\=([^;]*)\\;`))[1];
-  const clientCookie = cookies.match(new RegExp(`${clientCookieName}\\=([^;]*)\\;`))[1];
-  return {
-    sessionCookie,
-    clientCookie,
-    cookie: `${sessionCookieName}=${sessionCookie}; ${clientCookieName}=${clientCookie}`,
-  };
-}
 
 describe("Authority spindle worker", () => {
   it("runs a trivial local revelation which renders a proper html dump", async () => {

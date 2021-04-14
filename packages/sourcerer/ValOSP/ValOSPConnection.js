@@ -275,7 +275,8 @@ export default class ValOSPConnection extends AuthorityConnection {
 
           const remoteResults = fixedResponse
               ? Promise.reject(Object.assign(
-                  new Error(`Blocked locally with fixed response: ${JSON.stringify(fixedResponse)}`),
+                  new Error(
+                      `Blocked locally with fixed response: ${JSON.stringify(fixedResponse)}`),
                   { response: fixedResponse }))
               : Promise.resolve(this.getSourcerer().getEventsAPI()
                   .proclaimRemoteCommands(this, startIndex, events, identities));

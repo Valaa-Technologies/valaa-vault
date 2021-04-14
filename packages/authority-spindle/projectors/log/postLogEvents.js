@@ -1,10 +1,10 @@
 // @flow
 
-import valosheath from "@valos/gateway-api/valosheath";
+import valosheath from "~/gateway-api/valosheath";
+import { swapAspectRoot } from "~/sourcerer/tools/EventAspects";
 
 import type { PrefixRouter, Route } from "~/web-spindle/MapperService";
 import { _prepareChronicleRequest } from "../_common";
-import { swapAspectRoot } from "@valos/sourcerer/tools/EventAspects";
 
 const { dumpObject, thenChainEagerly } = valosheath.require("@valos/tools");
 
@@ -23,7 +23,7 @@ export default function createProjector (router: PrefixRouter, route: Route) {
     },
 
     handler (request, reply) {
-      const { valkOptions, scope, discourse, chronicleURI } =
+      const { valkOptions, scope /* , discourse, chronicleURI */ } =
           _prepareChronicleRequest(router, this, request, reply);
       if (!valkOptions) return false;
 
@@ -39,17 +39,19 @@ export default function createProjector (router: PrefixRouter, route: Route) {
 
       return thenChainEagerly(scope.connection.asSourceredConnection(), [
         connection => {
-          // Add or validate body event index to equal scope.eventIndex
-          return connection.proclaimEvents(request.body);
+          const commands = request.body.map(deltaAspect =>
+              swapAspectRoot("event", deltaAspect, "delta"));
+          return connection.proclaimEvents(commands);
         },
         // () => valkOptions.discourse.releaseFabricator(),
         eventResults => Promise.all((eventResults || []).map(result => result.getTruthEvent())),
         (truthEvents) => {
           reply.code(201);
-          reply.send(JSON.stringify(truthEvents.map(event => ({ log: event.aspects.log }))));
+          reply.send(JSON.stringify(truthEvents
+              .map(truthEvent => ({ log: truthEvent.aspects.log }))));
           router.infoEvent(2, () => [
             `${this.name}:`,
-            "\n\tresults:", ...dumpObject(truthEvent),
+            "\n\tresults:", ...dumpObject(truthEvents),
           ]);
           return true;
         },

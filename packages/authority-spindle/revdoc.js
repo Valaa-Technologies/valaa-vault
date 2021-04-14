@@ -1,12 +1,12 @@
 
 const {
   extractee: {
-    c, em, ref, cli, command, cpath, bulleted,
+    em, ref, cli, command,
     authors, pkg,
   },
 } = require("@valos/revdoc");
 
-const { name, version, description, valos: { type } = {} } = require("./package");
+const { name, version, description } = require("./package");
 
 const title = "ValOSP Authority";
 

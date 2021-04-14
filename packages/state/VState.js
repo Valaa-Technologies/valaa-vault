@@ -55,7 +55,7 @@ particular chronicle.`,
 this resource.`,
     },
 
-    subRemovals: {
+    removes: {
       "@type": "VKernel:Property",
       "rdfs:domain": "rdfs:Resource",
       "rdfs:range": "rdfs:Resource",

@@ -1,13 +1,16 @@
-
 const { default: patchWith } = require("@valos/tools/patchWith");
-const { mutateVState, baseContext, referenceArrayTag, baseStateContext } = require("@valos/state");
+const { mutateVState, baseStateContext, referenceArrayTag } = require("@valos/state");
 const { V } = require("@valos/space/ontology");
 const { VState } = require("@valos/state/ontology");
+const { wrapError } = require("@valos/tools");
 
 module.exports = {
   baseLogContext: {
     ...baseStateContext,
-    "@base": "urn:valos:chronicle:0/",
+    "&~": {
+      "@base": "urn:valos:chronicle:0/",
+      "@id": "VState:logicalResources", "@type": "@id", "@container": "@id",
+    },
   },
   applyVLogDelta (currentVState, vlogEvent) {
     const mutableState = mutateVState(currentVState);
@@ -17,8 +20,7 @@ module.exports = {
       deleteUndefined: true,
       iterableToArray: "reduce",
       iterableToOther: "reduce",
-      basePlot: ["0"],
-      logicalPlot: [],
+      basePlot: [],
       originPlot: [],
       preApplyPatch: _patchStateResource,
     });
@@ -43,7 +45,7 @@ const _nodeTermUpserters = {
   // TODO(iridian, 2021-03): Validate @context and reject all unsupported fields.
   "@context": null,
   "&~": null,
-  "&+": null,
+  "&_": null,
   "&-": null,
   "~P": _patchRejectForbiddenDirectManipulation,
   "~E": _patchRejectForbiddenDirectManipulation,
@@ -58,7 +60,7 @@ const _nodeTermUpserters = {
 const _nodeTermRemovers = {
   "@context": null,
   "&~": null,
-  "&+": null,
+  "&_": null,
   "&-": null,
 };
 
@@ -69,12 +71,12 @@ function _patchRejectForbiddenDirectManipulation (stack, target, delta, key) {
 
 const _vlogTermById = {};
 
-for (const [term, expansion] of Object.entries(baseContext)) {
+for (const [term, expansion] of Object.entries(baseStateContext)) {
   if (!expansion["@id"]) continue;
   _vlogTermById[expansion["@id"]] = term;
 }
 
-for (const [term, expansion] of Object.entries(baseContext)) {
+for (const [term, expansion] of Object.entries(baseStateContext)) {
   if (term[0] === "@") continue;
   const id = expansion["@id"];
   if (!id) continue;
@@ -150,88 +152,96 @@ function _patchURITerms (mutableState, vlogEvent) {
 
 function _patchStateResource (mutableTarget, delta, key, parentTarget, deltaKey) {
   const context = delta["@context"];
-  let subsDelta;
-  let stack = this;
-  const isTopLevel = (deltaKey === undefined);
-  if (isTopLevel) {
-    subsDelta = delta["&~"];
-    // The entry patch call onto the "global void" resource.
-    if (!subsDelta) throw new Error("VLog event is missing global '&+' resource delta section");
-    this.mutableRootResources = _mutateSubs(mutableTarget);
+  if (deltaKey === undefined) {
+    // Top level delta.
+    if (!delta["&~"]) throw new Error("VLog event is missing global resource delta section '&~'");
+    this.mutableGlobalResources = _mutateSubs(mutableTarget, undefined, "&^");
+    _processGlobalResourcesDelta(this, delta["&~"], this.mutableGlobalResources);
+  } else if (context) {
+    throw new Error("@context not allowed for log events");
   } else {
-    subsDelta = delta["&+"];
-    const base = (context || {})["@base"] || "";
-    const removalsDelta = delta["&-"];
-
-    if (base) {
-      stack = Object.create(this);
-      stack.basePlot = _joinBaseContextPlot(this.basePlot, base);
-      console.log("  Adjusting @context @base:", base, "as plot:", stack.basePlot,
-          "from:", deltaKey, "to:", key);
+    if (delta["&-"]) _processProperties(this, mutableTarget, delta["&-"], true);
+    _processProperties(this, mutableTarget, delta);
+    if (delta["&_"]) {
+      if (this.originPlot.length !== 1) {
+        throw new Error(
+            `Nested sub-resources not allowed in deltas ('&_' present in sub-resource </${
+                this.originPlot.join("/")}/>)`);
+      }
+      _processSubResourcesDelta(
+          this, delta["&_"], _mutateSubs(mutableTarget, `${this.originPlot[0]}/`));
     }
-    if (removalsDelta) {
-      _processProperties(stack, mutableTarget, removalsDelta, true);
-    }
-    _processProperties(stack, mutableTarget, delta);
-  }
-  if (subsDelta) {
-    _processSubs(stack, mutableTarget, subsDelta, isTopLevel);
   }
   return mutableTarget;
 }
 
-function _processSubs (stack, parentTarget, subsDelta, isTopLevel) {
-  const basePlot = stack.basePlot;
-  const mutableRootResources = stack.mutableRootResources;
-  const parentLogicalPlot = stack.logicalPlot;
+function _processGlobalResourcesDelta (stack, resourcesDelta, originParentSubs) {
+  const resourceKeys = Object.keys(resourcesDelta);
+  resourceKeys.sort();
+  if (!resourceKeys.length) throw new Error(`Invalid empty "&~" global resources delta`);
+  for (const logicalStepsString of resourceKeys) {
+    const globalResourceDelta = resourcesDelta[logicalStepsString];
+    let rootOriginId, originSubPlot;
+    try {
+      const logicalPlot = _joinResourcesPlot(["0"], logicalStepsString);
+      // validate logical plot
+      /*
+      let i = 0;
+      for (; i !== parentLogicalPlot.length; ++i) {
+        if (logicalPlot[i] !== parentLogicalPlot[i]) {
+          throw new Error(`Invalid vplot "${logicalStepsString
+              }": step #${i} mismatch; resulting logical plot "${logicalPlot.join("/")
+              }" is not a descendant of the parent plot "${parentLogicalPlot.join("/")}"`);
+        }
+      }
+      if (i >= logicalPlot.length) {
+        throw new Error(`Invalid vplot "${logicalStepsString}": length of resulting logical plot "${
+            logicalPlot.join("/")}" is shorter and thus not a descendant of the parent plot "${
+            parentLogicalPlot.join("/")}"`);
+      }
+      */
+      originSubPlot = stack.originPlot = logicalPlot.slice(-1);
+      const globalStep = `${originSubPlot[0]}/`;
+      stack.patch(_mutateSubResource(originParentSubs, globalStep),
+          globalResourceDelta, globalStep, originParentSubs, logicalStepsString, resourcesDelta);
+    } catch (error) {
+      throw wrapError(error, 1, `_processGlobalResourcesDelta["${logicalStepsString}"]`,
+          "\n\trootOriginId:", rootOriginId,
+          "\n\toriginSubPlot:", originSubPlot,
+      );
+    }
+  }
+  return originParentSubs;
+}
+
+function _processSubResourcesDelta (stack, resourcesDelta, originParentSubs) {
   const parentOriginPlot = stack.originPlot;
-  const parentOriginId = parentOriginPlot.join("/");
-
-  const entryKeys = Object.keys(subsDelta);
-  entryKeys.sort();
-  if (!entryKeys.length) {
-    throw new Error(`Invalid empty "&+" sub-resource delta for "${stack.logicalPlot.join("/")}"`);
+  const resourceKeys = Object.keys(resourcesDelta);
+  resourceKeys.sort();
+  if (!resourceKeys.length) {
+    throw new Error(`Invalid empty "&_" sub-resources delta for "${parentOriginPlot.join("/")}"`);
   }
-
-  let mutableSubs;
-  for (const logicalSteps of entryKeys) {
-    const resourceDelta = subsDelta[logicalSteps];
-    const logicalPlot = stack.logicalPlot = _joinTargetPlot(basePlot, logicalSteps);
-
-    // TODO(iridian, 2021-03): Maybe the leeway for different @base
-    // values in the delta JSON-LD is not ideal? We could avoid having
-    // to have these validations here if the @base was strictly fixed
-    // and mandatory.
-    let i = 0;
-    for (; i !== parentLogicalPlot.length; ++i) {
-      if (logicalPlot[i] !== parentLogicalPlot[i]) {
-        throw new Error(`Invalid vplot "${logicalSteps
-            }": step #${i} mismatch; resulting logical plot "${logicalPlot.join("/")
-            }" is not a descendant of the parent plot "${parentLogicalPlot.join("/")}"`);
+  for (const subResourceStepsString of resourceKeys) {
+    const subResourceDelta = resourcesDelta[subResourceStepsString];
+    let mutableResource, prevStep, parentSubs;
+    try {
+      const originPlot = stack.originPlot = _joinResourcesPlot([], subResourceStepsString);
+      if (originPlot[0] !== parentOriginPlot[0]) {
+        throw new Error(`Invalid sub-resource "${subResourceStepsString}" is not a child of "${
+            parentOriginPlot[0]}/"`);
       }
+      ({ mutableResource, prevStep, parentSubs } =
+          _mutateDeepSubResource(originParentSubs, originPlot, 1));
+      stack.patch(mutableResource, subResourceDelta,
+          prevStep, parentSubs, subResourceStepsString, resourcesDelta);
+    } catch (error) {
+      throw wrapError(error, 1, `_processSubResourcesDelta["${subResourceStepsString}"]`,
+          "\n\tparentOriginPlot:", parentOriginPlot,
+          "\n\tprevStep:", prevStep,
+      );
     }
-    if (i >= logicalPlot.length) {
-      throw new Error(`Invalid vplot "${logicalSteps}": length of resulting logical plot "${
-          logicalPlot.join("/")}" is shorter and thus not a descendant of the parent plot "${
-          parentLogicalPlot.join("/")}"`);
-    }
-
-    const rootOriginId = _rootOriginIdFromLogicalPlot(
-        mutableRootResources, logicalPlot, i, parentOriginId);
-    let originSubPlot = stack.originPlot = rootOriginId.split("/");
-    let originParentSubs = mutableRootResources;
-    if (parentOriginId && rootOriginId.startsWith(parentOriginId)) {
-      originSubPlot = originSubPlot.slice(parentOriginPlot.length);
-      if (!mutableSubs) {
-        mutableSubs = _mutateSubs(parentTarget, parentLogicalPlot[parentLogicalPlot.length - 1]);
-      }
-      originParentSubs = mutableSubs;
-    }
-    const { mutableResource, prevStep, parentSubs } =
-        _mutateDeepSubResource(originParentSubs, originSubPlot);
-    stack.patch(mutableResource, resourceDelta, prevStep, parentSubs, logicalSteps, subsDelta);
   }
-  return mutableSubs;
+  return originParentSubs;
 }
 
 function _processProperties (stack, mutableResource, propertiesDelta, isRemoval) {
@@ -259,8 +269,8 @@ function _processProperties (stack, mutableResource, propertiesDelta, isRemoval)
 function _upsertGenericProperty (stack, currentValue, deltaValue) {
   const id = (deltaValue != null) && deltaValue["@id"];
   if (id) {
-    const targetRootPlot = _rootOriginIdFromRelativeId(
-        stack.mutableRootResources, stack.basePlot, id).split("/");
+    const targetRootPlot = _resourcePlotFromString(
+        _rootOriginIdFromRelativeId(stack.mutableGlobalResources, stack.basePlot, id));
     const originRelativeId = _originIdFromRootPlot(stack.originPlot, targetRootPlot, id[0] === "/");
     return { "@id": originRelativeId };
   }
@@ -272,7 +282,7 @@ function _removeGenericProperty () {
 }
 
 function _createStandardTermPatcher (term, {
-  expansion, definition, isId, isSingular, isRemover, aliases, coupledTerms, linkedTerms,
+  /* expansion, definition, */ isId, isSingular, isRemover, aliases, coupledTerms, linkedTerms,
 }) {
   const patchSingular = isId ? _patchIdEntry : _patchLiteralEntry;
   const updateContainerEntry = isRemover ? _removeContainerEntry : _addContainerEntry;
@@ -293,8 +303,9 @@ function _createStandardTermPatcher (term, {
   }
 
   function _patchIdEntry (stack, currentValue, deltaEntry, targetKey, mutableParent) {
-    const remoteRootPlot = _rootOriginIdFromRelativeId(
-        stack.mutableRootResources, stack.basePlot, deltaEntry).split("/");
+    const remoteOriginId = _rootOriginIdFromRelativeId(
+        stack.mutableGlobalResources, stack.basePlot, deltaEntry);
+    const remoteRootPlot = _resourcePlotFromString(remoteOriginId);
     let remoteId = _originIdFromRootPlot(stack.originPlot, remoteRootPlot, deltaEntry[0] === "/");
     if (isRemover) {
       if (!isSingular) {
@@ -321,8 +332,14 @@ function _createStandardTermPatcher (term, {
     }
     if (coupledTerms || linkedTerms) {
       const { mutableResource } =
-          _mutateDeepSubResource(stack.mutableRootResources, remoteRootPlot);
+          _mutateDeepSubResource(stack.mutableGlobalResources, remoteRootPlot);
       const reverseSelfId = _originIdFromRootPlot(remoteRootPlot, stack.originPlot);
+      /*
+      console.log("Adding reverse to", remoteRootPlot, ":", reverseSelfId,
+          "\n\tstack.basePlot/deltaEntry:", stack.basePlot, deltaEntry,
+          "\n\tremoteOriginId:", remoteOriginId,
+          "\n\tstack.originPlot:", stack.originPlot);
+      */
       for (const reverseTerm of (coupledTerms || [])) {
         updateContainerEntry(mutableResource, reverseTerm, reverseSelfId);
       }
@@ -352,7 +369,6 @@ const _namespaceTermRemovers = {
   },
 };
 
-
 /*
  #    #   #####     #    #
  #    #     #       #    #
@@ -362,49 +378,41 @@ const _namespaceTermRemovers = {
   ####      #       #    ######
 */
 
-
-function _joinTargetPlot (basePlot, plotString) {
+function _joinResourcesPlot (targetPlot, plotString) {
   if (plotString[0] === "/") {
-    throw new Error(`Invalid vplot id "${plotString}": target ids must be relative`);
+    throw new Error(`Invalid vplot "${plotString}": delta resource plots must be relative`);
   }
-  // Allow root resource reference as "../0" (as it could not be
-  // referred to otherwise from initial base plot ["0"]), deny all
-  // other plots containing "..".
-  // Eventually this syntax will allow for adopting orphaned resources.
-  if ((plotString === "../0") && (basePlot.length === 1)) return ["0"];
-  return _joinPlot(basePlot, plotString, "target ids");
+  return _joinPlot(targetPlot, plotString,
+      targetPlot.length ? "logical plot" : "sub-resource plot");
 }
 
-function _joinBaseContextPlot (basePlot, plotString) {
-  if (plotString[plotString.length - 1] !== "/") {
-    throw new Error(`Invalid @context @base entry "${plotString}", must end with "/"`);
-  }
-  return _joinPlot(basePlot, plotString.slice(0, -1), "@context @base");
-}
-
-function _joinPlot (basePlot, plotString, noDotsName) {
-  const relativePlot = plotString.split("/");
-  if (!relativePlot.length && (relativePlot[relativePlot.length - 1] !== "")) {
-    throw new Error(`Invalid local id "${plotString}": must end with "/"`);
-  }
-  relativePlot.pop();
-  const isAbsolute = relativePlot[0] === "";
-  const ret = isAbsolute ? relativePlot.slice(1) : basePlot.concat(relativePlot);
-  for (let i = 0; i < ret.length;) {
-    const step = ret[i];
+function _joinPlot (targetPlot, plotString, noDotsName) {
+  const relativePlot = _resourcePlotFromString(plotString);
+  const isAbsolute = (relativePlot[0] === "");
+  const ret = isAbsolute ? [] : targetPlot;
+  for (let i = isAbsolute ? 1 : 0; i < relativePlot.length; ++i) {
+    const step = relativePlot[i];
     if ((step !== ".") && (step !== "..")) {
-      ++i;
+      ret.push(step);
     } else if (noDotsName || isAbsolute) {
       throw new Error(`Invalid local id "${
           plotString}": ${noDotsName || "absolute vplot"} cannot contain "." or ".."`);
     } else if (step === ".") {
-      ret.splice(i, 1);
-    } else if (i === 0) {
+      continue;
+    } else if (ret.length === 0) {
       throw new Error(`Invalid local id "${plotString}": cannot move up from root`);
     } else {
-      ret.splice(i - 1, 2);
-      --i;
+      ret.pop();
     }
+  }
+  return ret;
+}
+
+function _resourcePlotFromString (plotString) {
+  if (plotString === "") return [];
+  const ret = plotString.split("/");
+  if (ret.pop() !== "") {
+    throw new Error(`Invalid resource plot "${plotString}": must terminate in "/"`);
   }
   return ret;
 }
@@ -415,7 +423,8 @@ function _getOwnerValue (object) {
 }
 
 function _rootOriginIdFromRelativeId (rootResources, basePlot, plotString) {
-  return _rootOriginIdFromLogicalPlot(rootResources, _joinPlot(basePlot, plotString), 0, "");
+  return _rootOriginIdFromLogicalPlot(rootResources,
+      _joinPlot(basePlot.slice(), plotString), 0, "");
 }
 
 function _rootOriginIdFromLogicalPlot (
@@ -423,12 +432,12 @@ function _rootOriginIdFromLogicalPlot (
   let currentOriginId = initialOriginId;
   let i = initialStepIndex;
   for (; i < logicalPlot.length; ++i) {
-    const logicalStep = logicalPlot[i];
+    const logicalStep = `${logicalPlot[i]}/`;
     const globalResource = rootResources[logicalStep];
     if (globalResource) {
       currentOriginId = (currentOriginId === _getOwnerValue(globalResource))
           ? logicalStep
-          : `${currentOriginId}/${logicalStep}`;
+          : `${currentOriginId}${logicalStep}`;
     } else if (i + 1 < logicalPlot.length) {
       throw new Error(`No origin resource "${logicalStep}" in state for sub-plot "${
         logicalPlot.join("/")}" step #${i}`);
@@ -437,7 +446,7 @@ function _rootOriginIdFromLogicalPlot (
       // subStack.validateCreateGlobalLogicalPlot = logicalPlot;
       /*
       const currentLogicalOwnerId = logicalPlot.slice(0, -1).join("/");
-      const patchOwnerLogicalId = _joinPlot(this.basePlot,
+      const patchOwnerLogicalId = _joinPlot(this.basePlot.slice(),
           _getOwnerValue(Array.isArray(resourceDelta) ? resourceDelta[0] : resourceDelta));
       isOwnerGlobal = (currentLogicalOwnerId === patchOwnerLogicalId);
       console.log("isOwnerGlobal of local:", logicalStep, i, logicalSteps, isOwnerGlobal,
@@ -451,12 +460,12 @@ function _rootOriginIdFromLogicalPlot (
 // Ignores the last entry of originPlot. The relative base of resources
 // is their parent origin plot.
 function _originIdFromRootPlot (originPlot, rootPlot, isAbsolute) {
-  if (isAbsolute) return `/${rootPlot.join("/")}`;
+  if (isAbsolute) return `/${rootPlot.join("/")}/`;
   let i = 0;
-  const maxLen = originPlot.length && (originPlot.length - 1);
+  const maxLen = originPlot.length - 1;
   for (; i !== maxLen; ++i) if (originPlot[i] !== rootPlot[i]) break;
-  if (i === rootPlot.length) --i; // "" -> "../x"
-  return `${"../".repeat(maxLen - i)}${rootPlot.slice(i).join("/")}`;
+  const plotSuffix = rootPlot.length === i ? "" : `${rootPlot.slice(i).join("/")}/`;
+  return `${"../".repeat(maxLen - i)}${plotSuffix}`;
 }
 
 /*
@@ -468,16 +477,17 @@ function _originIdFromRootPlot (originPlot, rootPlot, isAbsolute) {
   ####      #    #    #     #    ######
 */
 
-function _mutateDeepSubResource (initialParentSubs, subResourcePlot) {
+function _mutateDeepSubResource (initialParentSubs, subResourcePlot, firstIndex = 0) {
   let parentSubs = initialParentSubs;
   let prevStep, mutableResource;
   if (!Array.isArray(subResourcePlot) || !subResourcePlot[0]) {
     throw new Error(`Invalid subResourcePlot, array with non-empty first item expected, got: "${
         String(subResourcePlot)}"`);
   }
-  for (let i = 0; i !== subResourcePlot.length; ++i) {
+  for (let i = firstIndex; i !== subResourcePlot.length; ++i) {
     if (prevStep) parentSubs = _mutateSubs(mutableResource, prevStep);
-    mutableResource = _mutateSubResource(parentSubs, prevStep = subResourcePlot[i]);
+    prevStep = `${subResourcePlot[i]}/`;
+    mutableResource = _mutateSubResource(parentSubs, prevStep);
   }
   return { mutableResource, parentSubs, prevStep };
 }
@@ -492,18 +502,15 @@ function _mutateSubResource (mutableSubs, childStep) {
       : (mutableSubs[childStep] = Object.create(subResource || null));
 }
 
-function _mutateSubs (targetResource, localId) {
-  if (localId) _emitParentContextBase(targetResource, localId);
-  return _mutateStateObject(targetResource["&+"] || null, "&+", targetResource);
-}
-
-function _emitParentContextBase (parent, id) {
-  const newBase = `${id}/`;
-  if (!parent["@context"]) parent["@context"] = { "@base": newBase };
-  else if (parent["@context"]["@base"] !== newBase) {
-    throw new Error(`Invalid existing @context: expected "@base": "${newBase}", got: "${
-        parent["@context"]["@base"]}"`);
+function _mutateSubs (targetResource, parentLocalStep, subsKey = "&_") {
+  if (parentLocalStep) {
+    if (!targetResource["@context"]) targetResource["@context"] = { "@base": parentLocalStep };
+    else if (targetResource["@context"]["@base"] !== parentLocalStep) {
+      throw new Error(`Invalid existing @context: expected "@base" to be "${
+          parentLocalStep}", got: "${targetResource["@context"]["@base"]}"`);
+    }
   }
+  return _mutateStateObject(targetResource[subsKey] || null, subsKey, targetResource);
 }
 
 function _mutateStateObject (maybeObject, keyInParent, parent) {

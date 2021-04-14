@@ -1,4 +1,4 @@
-const baseContextText = `{
+const baseStateContextText = `{
   "^": "urn:valos:",
   "@base": "urn:valos:chronicle:",
   "@vocab": "vplot:'",
@@ -7,9 +7,9 @@ const baseContextText = `{
   "VLog": "https://valospace.org/log/0#",
   "VState": "https://valospace.org/state/0#",
 
-  "&~": { "@id": "VState:globalResources", "@type": "@id", "@container": "@id" },
-  "&+": { "@id": "VState:subResources", "@type": "@id", "@container": "@id" },
-  "&-": { "@id": "VState:subRemovals", "@container": "@graph" },
+  "&^": { "@id": "VState:globalResources", "@type": "@id", "@container": "@id" },
+  "&_": { "@id": "VState:subResources", "@type": "@id", "@container": "@id" },
+  "&-": { "@id": "VState:removes", "@container": "@graph" },
 
   "~P": { "@id": "V:ownsProperty", "@type": "@id", "@container": "@id" },
   "~E": { "@id": "V:ownsEntity", "@type": "@id", "@container": "@id" },
@@ -49,14 +49,15 @@ const baseContextText = `{
   "~u4": "urn:valos:u4:"
 }`;
 
-const baseContext = Object.freeze(Object.assign(Object.create(null), JSON.parse(baseContextText)));
+const baseStateContext = Object.freeze(Object.assign(Object.create(null),
+    JSON.parse(baseStateContextText)));
 
 const referenceLookupTag = Symbol("VLog:referenceLookup");
 const referenceArrayTag = Symbol("VLog:referenceArray");
 
 module.exports = {
-  baseContext,
-  baseContextText,
+  baseStateContext,
+  baseStateContextText,
   createVState,
   mutateVState,
   referenceLookupTag,
@@ -69,7 +70,7 @@ function createVState (references = []) {
   const _referenceArray = [];
   const _referenceLookup = {};
 
-  const vstate = { "&~": Object.create(null) };
+  const vstate = { "&^": Object.create(null) };
   Object.defineProperty(vstate, referenceArrayTag, {
     writable: true, configurable: false, enumerable: false,
     value: _referenceArray,
@@ -83,7 +84,7 @@ function createVState (references = []) {
     value () {
       const json = {
         "@context": [
-          baseContext,
+          baseStateContext,
           Object.fromEntries(_referenceArray.map((value, index) => [index, value])),
         ],
       };
@@ -120,15 +121,15 @@ function _flattenToJSON (object) {
       (removals || (removals = ret["&-"] = {}))[key] = null;
     }
   }
-  const subs = ret["&+"];
+  const subs = ret["&_"];
   const context = ret["@context"];
   if (!subs || !context) return ret;
   // FIXME(iridian, 2021-03): This heuristic does not distinguish
   // between actual resource nodes and literal value objects that
-  // happen to contain @context and &+ keys.
-  delete ret["&+"];
+  // happen to contain @context and &_ keys.
+  delete ret["&_"];
   delete ret["@context"];
-  return [ret, { "@context": context, "&+": subs }];
+  return [ret, { "@context": context, "&_": subs }];
 }
 
 function mutateVState (state) {

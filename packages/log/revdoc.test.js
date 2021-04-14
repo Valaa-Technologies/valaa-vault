@@ -5,8 +5,8 @@ const {
   },
 } = require("@valos/revdoc");
 
-const { baseStateContext, baseContextText, createVState } = require("@valos/state");
-const { baseLogContextText, applyVLogDelta } = require("@valos/log");
+const { baseStateContext, baseStateContextText, createVState } = require("@valos/state");
+const { applyVLogDelta } = require("@valos/log");
 
 const title = "VLog format specification";
 const { itExpects, runTestDoc } = prepareTestDoc(title);
@@ -35,7 +35,8 @@ document entries.`,
 
   "chapter#sotd>1": {
     "#0": [
-`This document is a design document of a potential specification.
+`This document speficies the event delta structure and semantics via
+declarative examples.
 
 This document is part of the library workspace `, pkg("@valos/log"), `
 (of domain `, pkg("@valos/kernel"), `) which has the description:
@@ -115,7 +116,7 @@ wish-list:`,
 Each successive example uses the output state of the previous example
 as its input state.`
     ],
-    "example#>0;Initial state @context": jsonld(baseContextText),
+    "example#>0;Initial state @context": jsonld(baseStateContextText),
     "#1": [
 `The first vlog event always creates the chronicle root resource with
 an id equal to the vlog chronicle id itself. The id URN of the root
@@ -135,7 +136,7 @@ assigned a blank node '_:0' that corresponds to id context entry URN.`,
   "@context": [baseStateContext, {
     "0": "~u4:cccccccc-6600-2211-cc77-333333333333"
   }],
-  "&~": {
+  "&^": {
     "0/": { ".n": "rootName", "V:authorityURI": "valaa-local:" }
   }
 }),
@@ -185,11 +186,11 @@ chronicles must refer to their stable origin.
   }],
   "&~": {
     "": { ".n": "newRootName" },
-    "1/": { ".E~": "", ".n": "older",
-      "toOutside": { "@id": "../5/" }, "absolutelyParent": { "@id": "/0/" },
+    "1/": { ".E~": "0/", ".n": "older",
+      "toOutside": { "@id": "5/" }, "absolutelyParent": { "@id": "/0/" },
     },
-    "2/": { ".E~": "", ".n": "unger",
-      "toOlder": { "@id": "1/" }, "absolutelyOlder": { "@id": "/0/1/" },
+    "2/": { ".E~": "0/", ".n": "unger",
+      "toOlder": { "@id": "1/" }, "absolutelyOlder": { "@id": "/1/" },
     },
     "2/3/": { ".tgt~": "2/", ".n": "SIBLING", ".src": "1/" },
     "2/4/": { ".src~": "2/", ".n": "SIBLING", ".tgt": "1/" },
@@ -205,7 +206,7 @@ chronicles must refer to their stable origin.
     "4": "~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee",
     "5": "valaa-test:?id=(~raw'extl!)#"
   }],
-  "&~": {
+  "&^": {
     "0/": { ".n": "newRootName",
       "V:authorityURI": "valaa-local:",
       "~E": ["1/", "2/"],
@@ -227,7 +228,7 @@ chronicles must refer to their stable origin.
     "#3": [`
 Ghost instancing with `, ref("V:instanceOf"), ` term ".iOf" and the
 recursive application of the `, ref("VState:subResources"),
-` term '&+' are the cornerstone of the unified valos resource model for
+` term '&_' are the cornerstone of the unified valos resource model for
 application development.
 
 Instancing dynamics primarily affects state inference and as such no
@@ -249,22 +250,22 @@ in a different chronicle!).
     "8": "~u4:d336d336-9999-6666-0000-777700000000"
   }],
   "&~": {
-    "2/3/8/": { ".E~": "2/3/", ".n": "deeplyOwned" },
+    "2/3/8/": { ".E~": "3/", ".n": "deeplyOwned" },
     "6/": {
-      ".E~": "", ".iOf": "2/", ".n": "ungerInstance",
-      "&+": {
+      ".E~": "0/", ".iOf": "2/", ".n": "ungerInstance",
+      "&_": {
         "6/3/": {
           "instance": { "@id": "6/" },
-          "absoluteInstance": { "@id": "/0/6/" },
-          "deepProto": { "@id": "2/3/8/" },
-          "absoluteDeepProto": { "@id": "/0/2/3/8/" },
+          "absoluteInstance": { "@id": "/6/" },
+          "deepProto": { "@id": "8/" },
+          "absoluteDeepProto": { "@id": "/8/" },
         },
         "6/8/": { ".n": "deeplyOwnedGhost" },
       },
     },
     "7/": {
-      ".E~": "", ".iOf": "6/", ".n": "ungerInstanceInstance",
-      "&+": {
+      ".E~": "0/", ".iOf": "6/", ".n": "ungerInstanceInstance",
+      "&_": {
         "7/3/": { "instanceInstance": { "@id": "7/" } },
         "7/8/": { ".n": "deeplyOwnedGhostGhost" },
       },
@@ -284,7 +285,7 @@ in a different chronicle!).
     "7": "~u4:22222222-2255-7744-22cc-eeeeeeeeeeee",
     "8": "~u4:d336d336-9999-6666-0000-777700000000"
   }],
-  "&~": {
+  "&^": {
     "0/": { ".n": "newRootName",
       "V:authorityURI": "valaa-local:",
       "~E": ["1/", "2/", "6/", "7/"]
@@ -304,7 +305,7 @@ in a different chronicle!).
       ".iOf": "2/", "-hasI": ["7/"],
     }, {
       "@context": { "@base": "6/" },
-      "&+": {
+      "&_": {
         "3/": {
           "instance": { "@id": "" },
           "absoluteInstance": { "@id": "/6/" },
@@ -318,7 +319,7 @@ in a different chronicle!).
       ".iOf": "6/",
     }, {
       "@context": { "@base": "7/" },
-      "&+": {
+      "&_": {
         "3/": { "instanceInstance": { "@id": "" }, },
         "8/": { ".n": "deeplyOwnedGhostGhost" }
       }
@@ -354,22 +355,15 @@ however: the delta application will perform this reference normalization.
   }],
   "&~": {
     "9/": {
-      "@context": { "@base": "9/" },
-      ".E~": "../", ".n": "inceptor", ".iOf": "../",
-      "&+": {
-        "1/": { ".n": "olderGhost" },
-        "2/": { ".n": "ungerGhost" },
-        "3/": { ".n": "toNephewOldceptGhost",
-          "@context": { "@base": "3/" },
-          ".tgt": "../9/1/"
-        },
-        "4/": { ".n": "toNephewUngceptGhost",
-          "@context": { "@base": "4/" },
-          ".tgt": "../9/2"
-        },
-        "9/": { ".n": "firstInception" },
-        "9/1/": { ".n": "oldceptGhost" },
-        "9/2/": { ".n": "ungceptGhost" }
+      ".E~": "0/", ".n": "inceptor", ".iOf": "0/",
+      "&_": {
+        "9/1/": { ".n": "olderGhost" },
+        "9/2/": { ".n": "ungerGhost" },
+        "9/3/": { ".n": "toNephewOldceptGhost", ".tgt": "9/9/1/" },
+        "9/4/": { ".n": "toNephewUngceptGhost", ".tgt": "9/9/2/" },
+        "9/9/": { ".n": "firstInception" },
+        "9/9/1/": { ".n": "oldceptGhost" },
+        "9/9/2/": { ".n": "ungceptGhost" }
       }
     },
   },
@@ -388,7 +382,7 @@ however: the delta application will perform this reference normalization.
     "8": "~u4:d336d336-9999-6666-0000-777700000000",
     "9": "~u4:77777777-1111-eeee-3333-555555555555"
   }],
-  "&~": {
+  "&^": {
     "0/": { ".n": "newRootName",
       "V:authorityURI": "valaa-local:",
       "~E": ["1/", "2/", "6/", "7/", "9/"]
@@ -408,7 +402,7 @@ however: the delta application will perform this reference normalization.
       ".iOf": "2/", "-hasI": ["7/"]
     }, {
       "@context": { "@base": "6/" },
-      "&+": {
+      "&_": {
         "3/": {
           "instance": { "@id": "" },
           "absoluteInstance": { "@id": "/6/" },
@@ -422,7 +416,7 @@ however: the delta application will perform this reference normalization.
       ".iOf": "6/"
     }, {
       "@context": { "@base": "7/" },
-      "&+": {
+      "&_": {
         "3/": { "instanceInstance": { "@id": "" } },
         "8/": { ".n": "deeplyOwnedGhostGhost" }
       }
@@ -430,14 +424,20 @@ however: the delta application will perform this reference normalization.
     "8/": { ".E~": "3/", ".n": "deeplyOwned" },
     "9/": [{ ".E~": "0/", ".n": "inceptor", ".iOf": "0/" }, {
       "@context": { "@base": "9/" },
-      "&+": {
+      "&_": {
         "1/": { ".n": "olderGhost" },
         "2/": { ".n": "ungerGhost" },
         "3/": { ".n": "toNephewOldceptGhost", ".tgt": "9/1/" },
-        "4": { ".n": "toNephewUngceptGhost", ".tgt": "9/2/" },
-        "9/": { ".n": "firstInception" },
-        "9/1/": { ".n": "oldceptGhost", "-in": ["../3/"] },
-        "9/2/": { ".n": "ungceptGhost", "-in": ["../4/"] }
+        "4/": { ".n": "toNephewUngceptGhost", ".tgt": "9/2/" },
+        "9/": [{
+          ".n": "firstInception",
+        }, {
+          "@context": { "@base": "9/" },
+          "&_": {
+            "1/": { ".n": "oldceptGhost", "-in": ["../3/"] },
+            "2/": { ".n": "ungceptGhost", "-in": ["../4/"] }
+          }
+        }],
       }
     }]
   },
@@ -445,7 +445,7 @@ however: the delta application will perform this reference normalization.
     ),
     "#5": [`
 Resource deletion is done by adding the removed triples to the removal
-graphs via `, ref("VState:removes"), ` term "&+".
+graphs via `, ref("VState:removes"), ` term "&-".
 
 Triple removals from various container properties are persisted in the
 state in any resources that can be view images, as these removals are
@@ -458,9 +458,9 @@ view container properties.
 {
   "@context": [{}],
   "&~": {
-    "9/": { "&+": {
-      "4/": { "&-": { ".tgt": "9/9/2/" } },
-      "9/": { "&-": { "&+": ["9/9/2/"], "~E": ["9/9/2/"] } },
+    "9/": { "&_": {
+      "9/4/": { "&-": { ".tgt": "9/9/2/" } },
+      "9/9/": { "&-": { "&_": ["9/9/2/"], "~E": ["9/9/2/"] } },
     }, },
   },
 }))),
@@ -478,7 +478,7 @@ view container properties.
     "8": "~u4:d336d336-9999-6666-0000-777700000000",
     "9": "~u4:77777777-1111-eeee-3333-555555555555"
   }],
-  "&~": {
+  "&^": {
     "0/": { ".n": "newRootName",
       "V:authorityURI": "valaa-local:",
       "~E": ["1/", "2/", "6/", "7/", "9/"]
@@ -493,12 +493,12 @@ view container properties.
       "toOlder": { "@id": "1/" }, "absolutelyOlder": { "@id": "/1/" }
     },
     "3/": { ".tgt~": "2/", ".n": "SIBLING", ".src": "1/", "~E": ["8/"] },
-    "4/": { ".src~": "2/", ".n": "SIBLING", ".tgt": "1" },
-    "6/": [{ ".E~": "0", ".n": "ungerInstance",
-      ".iOf": "2", "-hasI": ["7/"]
+    "4/": { ".src~": "2/", ".n": "SIBLING", ".tgt": "1/" },
+    "6/": [{ ".E~": "0/", ".n": "ungerInstance",
+      ".iOf": "2/", "-hasI": ["7/"]
     }, {
       "@context": { "@base": "6/" },
-      "&+": {
+      "&_": {
         "3/": {
           "instance": { "@id": "" },
           "absoluteInstance": { "@id": "/6/" },
@@ -512,7 +512,7 @@ view container properties.
       ".iOf": "6/"
     }, {
       "@context": { "@base": "7/" },
-      "&+": {
+      "&_": {
         "3/": { "instanceInstance": { "@id": "" } },
         "8/": { ".n": "deeplyOwnedGhostGhost" }
       }
@@ -520,13 +520,20 @@ view container properties.
     "8/": { ".E~": "3/", ".n": "deeplyOwned" },
     "9/": [{ ".E~": "0/", ".n": "inceptor", ".iOf": "0/" }, {
       "@context": { "@base": "9/" },
-      "&+": {
+      "&_": {
         "1/": { ".n": "olderGhost" },
         "2/": { ".n": "ungerGhost" },
         "3/": { ".n": "toNephewOldceptGhost", ".tgt": "9/1/" },
         "4/": { ".n": "toNephewUngceptGhost" },
-        "9/": { ".n": "firstInception", "&-": { "~E": ["9/2/"] } },
-        "9/1/": { ".n": "oldceptGhost", "-in": ["../3/"] }
+        "9/": [{
+          ".n": "firstInception",
+          "&-": { "~E": ["9/2/"] },
+        }, {
+          "@context": { "@base": "9/" },
+          "&_": {
+            "1/": { ".n": "oldceptGhost", "-in": ["../3/"] }
+          }
+        }],
       }
     }],
   },

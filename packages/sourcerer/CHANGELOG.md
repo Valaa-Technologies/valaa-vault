@@ -3,6 +3,41 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0-prerelease.1](https://github.com/valaatech/kernel/compare/v0.37.0-prerelease.0...v0.37.0-prerelease.1) (2021-04-14)
+
+
+### Bug Fixes
+
+* Lint errors ([8aa1b12](https://github.com/valaatech/kernel/commit/8aa1b12eca33966bc902328050835fbfc2064227))
+* Minor fixes and document updates ([5e836b1](https://github.com/valaatech/kernel/commit/5e836b14bb399bfa47350b4e8274dee7ff6cd00e))
+* Reduce naiveURI usage and other minor fixes ([ae1c8da](https://github.com/valaatech/kernel/commit/ae1c8da8900494e76a253db43f5649019f24c615))
+* Regression bugs caught by test suite ([f77890a](https://github.com/valaatech/kernel/commit/f77890a972bb74e482bc31431050ac848180d43b))
+* Various minor fixes and logging improvements ([ed7866f](https://github.com/valaatech/kernel/commit/ed7866fd7aca7791b71040e089f82f138a84fb2f))
+* **sourcerer:** Perform revisioning on profess errors ([6cae75a](https://github.com/valaatech/kernel/commit/6cae75afe27055ad09a23d300b5a4310aa1469d8))
+
+
+### Features
+
+* Add "meta" section to all spindle prototypes ([3af199e](https://github.com/valaatech/kernel/commit/3af199e66f229dd66e4003868f93dc9789c76370))
+* **authority-spindle:** Complete unauthenticated, nonauthored paths ([6766884](https://github.com/valaatech/kernel/commit/67668849c8f79509abf9230788ae4e0023b23c5d))
+* **authority-spindle:** Complete valosp PUT and GET event routes ([e2ff108](https://github.com/valaatech/kernel/commit/e2ff1085b36a58dd1985e8e5c5a8642aa2269e14))
+* **authority-spindle:** Implement ranges for (get|post)LogEvents ([a57b08a](https://github.com/valaatech/kernel/commit/a57b08adf23bc44c9f24c4663b7e682f18b7a14f))
+* **sourcerer:** Add Connection.getActiveAuthority for delayed authorities ([11e97e0](https://github.com/valaatech/kernel/commit/11e97e063b80e75f898da06cbeafa9d9a18d1d00))
+* **sourcerer:** Add log.timeStamp when authorizing a valosp command as truth ([814253c](https://github.com/valaatech/kernel/commit/814253cc3eac90cd18dafa2f385bedd0415d09aa))
+* Add (encode|decode)VPlotValue, implement valosp URI conventions ([d9936c9](https://github.com/valaatech/kernel/commit/d9936c9b817b7759690b4fe941a5a9780d4563ae))
+* Add error.chainContextName for (this|then)Chain* error handlers ([5958ace](https://github.com/valaatech/kernel/commit/5958acec060f5595ca1f2350c80ad4da3f97e7b4))
+* Add hash40FromHexSHA512 as bvob hash fallback ([1285206](https://github.com/valaatech/kernel/commit/12852061e0a951ae2b92a43ef56872aacf6a3bbd))
+* Implement valosp bvob pathway as POST multipart/form-data file ([4a6d5ac](https://github.com/valaatech/kernel/commit/4a6d5ac8e9304c27de94917976b54301e1f6e8cc))
+* **log:** Rename several V:, VState: and VLog: properties ([61cfa9d](https://github.com/valaatech/kernel/commit/61cfa9d6926e27fb3ca55aff5d982577f1bf5d84))
+* **sourcerer:** Add Sourcerer..createChronicleRootID ([0f734bd](https://github.com/valaatech/kernel/commit/0f734bd145be49d771d14c9653a07a2115a0f571))
+* **sourcerer:** Implement valosp bvob operations ([3f6e963](https://github.com/valaatech/kernel/commit/3f6e96321ae95c8a16b46800fcb6c9138aacfd4a))
+* **sourcerer:** Initial valosp scheme Authority/Connection implementation ([bcde424](https://github.com/valaatech/kernel/commit/bcde424d4af7a2339efd7ceafef8924480644007))
+* **sourcerer:** Replace naiveURI with *.(create|split)ChronicleURI pipeline ([d75a1f2](https://github.com/valaatech/kernel/commit/d75a1f20715f40d9efdf582d703737e498759762))
+
+
+
+
+
 # [0.37.0-prerelease.0](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.6...v0.37.0-prerelease.0) (2021-02-16)
 
 

@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0-prerelease.1](https://github.com/valaatech/kernel/compare/v0.37.0-prerelease.0...v0.37.0-prerelease.1) (2021-04-14)
+
+
+### Bug Fixes
+
+* Minor fixes and document updates ([5e836b1](https://github.com/valaatech/kernel/commit/5e836b14bb399bfa47350b4e8274dee7ff6cd00e))
+
+
+### Features
+
+* **valma:** Add execute(..., { paramPrefix }) (with "--" as default) ([7b725cd](https://github.com/valaatech/kernel/commit/7b725cddc78d4d322e1cddf9adc8868761c21624))
+* Add error.chainContextName for (this|then)Chain* error handlers ([5958ace](https://github.com/valaatech/kernel/commit/5958acec060f5595ca1f2350c80ad4da3f97e7b4))
+
+
+
+
+
 # [0.37.0-prerelease.0](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.6...v0.37.0-prerelease.0) (2021-02-16)
 
 

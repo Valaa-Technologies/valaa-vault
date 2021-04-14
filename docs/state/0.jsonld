@@ -76,6 +76,10 @@
         "@id": "#coupledToField",
         "@type": "@id"
       },
+      "VState:linkedToField": {
+        "@id": "#linkedToField",
+        "@type": "@id"
+      },
       "VState:coupledField": {
         "@id": "#coupledField",
         "@type": "@id"
@@ -90,7 +94,7 @@
     ],
     "dc:title": "@valos/state library workspace",
     "VRevdoc:package": "@valos/state",
-    "VRevdoc:version": "0.37.0-prerelease.0",
+    "VRevdoc:version": "0.37.0-prerelease.1",
     "VRevdoc:preferredPrefix": "VState",
     "VRevdoc:baseIRI": "https://valospace.org/state/0#",
     "VRevdoc:referencedModules": {
@@ -372,6 +376,10 @@
             "VRevdoc:indexLabel": "VState:coupledToField"
           },
           {
+            "@id": "#linkedToField",
+            "VRevdoc:indexLabel": "VState:linkedToField"
+          },
+          {
             "@id": "#coupledField",
             "VRevdoc:indexLabel": "VState:coupledField"
           },
@@ -404,6 +412,24 @@
             "VRevdoc:indexLabel": "VState:allowTransientFieldToBeSingular"
           }
         ]
+      },
+      "globalResources": {
+        "@type": "VKernel:Property",
+        "rdfs:domain": "rdfs:Resource",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "This field refers to all resources that are global resources of a\nparticular chronicle."
+      },
+      "subResources": {
+        "@type": "VKernel:Property",
+        "rdfs:domain": "rdfs:Resource",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "This field refers to all resources that are added as sub-resources to\nthis resource."
+      },
+      "removes": {
+        "@type": "VKernel:Property",
+        "rdfs:domain": "rdfs:Resource",
+        "rdfs:range": "rdfs:Resource",
+        "rdfs:comment": "This field refers to graph which contains triples that are to be\nremoved from this resource. When this field is expressed in state\ngraphs this removal affects triples that would be inferred from\nownership and instancing projections. When this field is expressed in\nlog delta graphs the removal represents state triple removal change\nand takes effect during the delta application."
       },
       "ExpressedField": {
         "@type": "VKernel:Class",
@@ -644,7 +670,14 @@
         "@type": "VKernel:Property",
         "rdfs:domain": "VState:Field",
         "rdfs:range": "valosField",
-        "rdfs:comment": ""
+        "rdfs:comment": "This field infers a reverse triple with predicate equal to this field\nvalue."
+      },
+      "linkedToField": {
+        "@type": "VKernel:Property",
+        "rdfs:subPropertyOf": "VState:coupledToField",
+        "rdfs:domain": "VState:Field",
+        "rdfs:range": "valosField",
+        "rdfs:comment": "This field requires the existence of a reverse triple with predicate\nequal to the object of this property."
       },
       "coupledField": {
         "@type": "VKernel:Property",
@@ -718,6 +751,10 @@
       },
       "VState:coupledToField": {
         "@id": "#coupledToField",
+        "@type": "@id"
+      },
+      "VState:linkedToField": {
+        "@id": "#linkedToField",
         "@type": "@id"
       },
       "VState:coupledField": {
@@ -1235,12 +1272,16 @@
             ]
           },
           "VDoc:entries": [
+            "globalResources",
+            "subResources",
+            "removes",
             "expressor",
             "impressor",
             "aliasOf",
             "isOwnerOf",
             "isOwnedBy",
             "coupledToField",
+            "linkedToField",
             "coupledField",
             "defaultCoupledField",
             "preventsDestroy",

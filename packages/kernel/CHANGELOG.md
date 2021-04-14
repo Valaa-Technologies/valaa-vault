@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0-prerelease.1](https://github.com/valaatech/kernel/compare/v0.37.0-prerelease.0...v0.37.0-prerelease.1) (2021-04-14)
+
+
+### Features
+
+* **authority-spindle:** Add full init flow with the revdoc setup guide ([6555579](https://github.com/valaatech/kernel/commit/6555579541905cfac1a0600bffa314064872ee6b))
+
+
+
+
+
 # [0.37.0-prerelease.0](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.6...v0.37.0-prerelease.0) (2021-02-16)
 
 **Note:** Version bump only for package @valos/kernel

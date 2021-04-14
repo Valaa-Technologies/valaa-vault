@@ -334,7 +334,9 @@ automatically during schema generation.
   <div class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> ({ tag: TestTagType })</span>
 </code></pre></blockquote>via<blockquote><pre><code><span class="vdoc type-vdoc-node"> exportSchemaOf(type)</span>
 </code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node">{
-  &#x22;tag&#x22;: &#x22;TestTag#&#x22;
+  &#x22;tag&#x22;: {
+    &#x22;$ref&#x22;: &#x22;#TestTag&#x22;
+  }
 }</span>
 </code></pre></blockquote>
   </div>
@@ -602,7 +604,7 @@ TestIndividualType gate projection.
   },
 }, {}, TestIndividualType)</span>
 </code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node"> ({
-  name: &#x22;individuals&#x22;, method: &#x22;GET&#x22;, category: &#x22;resource&#x22;,
+  name: &#x22;individuals&#x22;, method: &#x22;GET&#x22;, projector: &#x22;resource&#x22;,
   url: &#x22;/individuals/:resourceId&#x22;,
   schema: {
     description: &#x22;Get the contents of a TestIndividual route resource&#x22;,
@@ -612,7 +614,7 @@ TestIndividualType gate projection.
       },
     },
     response: {
-      200: &#x22;TestIndividual#&#x22;,
+      200: { $ref: &#x22;#TestIndividual&#x22; },
       403: { type: &#x22;string&#x22; },
       404: { type: &#x22;string&#x22; },
     }
@@ -623,7 +625,7 @@ TestIndividualType gate projection.
     runtimeRules: [],
     resource: {
       name: &#x22;TestIndividual&#x22;,
-      schema: &#x22;TestIndividual#&#x22;,
+      schema: { $ref: &#x22;#TestIndividual&#x22; },
       gate: {
         name: &#x22;individuals&#x22;,
         projection: [&#x22;@@&#x22;, [[&#x22;@-out&#x22;, [&#x22;INDIVIDUAL&#x22;]], [&#x22;@.&#x22;, [[&#x22;@$V&#x22;, &#x22;target&#x22;]]]]],
@@ -672,7 +674,7 @@ thing.
   },
 }, testGlobalRules, TestIndividualType, testThingTagsMapping)</span>
 </code></pre></blockquote>toEqual<blockquote><pre><code><span class="vdoc type-vdoc-node"> ({
-  name: &#x22;individuals&#x22;, method: &#x22;POST&#x22;, category: &#x22;mapping&#x22;,
+  name: &#x22;individuals&#x22;, method: &#x22;POST&#x22;, projector: &#x22;mapping&#x22;,
   url: &#x22;/individuals/:resourceId/tags&#x22;,
   schema: {
     description:
@@ -687,7 +689,7 @@ containing the mapping.&#x60;,
       valospace: { filterable: true },
       properties: {
         highlight: { type: &#x22;boolean&#x22; },
-        $V: { type: &#x22;object&#x22;, properties: { target: &#x22;TestTag#&#x22; } },
+        $V: { type: &#x22;object&#x22;, properties: { target: { $ref: &#x22;#TestTag&#x22; } } },
       },
     },
     response: {
@@ -696,7 +698,7 @@ containing the mapping.&#x60;,
         properties: {
           highlight: { type: &#x22;boolean&#x22; },
           $V: { type: &#x22;object&#x22;, properties: {
-            href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; }, target: &#x22;TestTag#&#x22;,
+            href: { type: &#x22;string&#x22; }, rel: { type: &#x22;string&#x22; }, target: { $ref: &#x22;#TestTag&#x22; },
           } },
         },
       },
@@ -707,7 +709,7 @@ containing the mapping.&#x60;,
   config: {
     resource: {
       name: &#x22;TestIndividual&#x22;,
-      schema: &#x22;TestIndividual#&#x22;,
+      schema: { $ref: &#x22;#TestIndividual&#x22; },
       gate: {
         name: &#x22;individuals&#x22;,
         projection: [&#x22;@@&#x22;, [[&#x22;@-out&#x22;, [&#x22;INDIVIDUAL&#x22;]], [&#x22;@.&#x22;, [[&#x22;@$V&#x22;, &#x22;target&#x22;]]]]],
@@ -740,7 +742,7 @@ containing the mapping.&#x60;,
         },
       },
     },
-    target: { name: &#x22;TestTag&#x22;, schema: &#x22;TestTag#&#x22; },
+    target: { name: &#x22;TestTag&#x22;, schema: { $ref: &#x22;#TestTag&#x22; } },
     enabledWithRules: [&#x22;relationName&#x22;],
     requiredRules: [&#x22;routeRoot&#x22;, &#x22;mappingName&#x22;],
     valueAssertedRules: [&#x22;resource&#x22;],

@@ -2,7 +2,7 @@
   {
     "@id": "https://valospace.org/log",
     "@context": {
-      "@base": "https://valospace.org/log/0#",
+      "@base": "https://valospace.org/vdoc/0#",
       "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
       "xsd": "http://www.w3.org/2001/XMLSchema#",
@@ -51,61 +51,11 @@
       "VDoc:cell": {
         "@id": "#cell",
         "@type": "@id"
-      },
-      "VEngine": "https://valospace.org/engine/0#",
-      "VLog": "https://valospace.org/log/0#",
-      "VPlot": "https://valospace.org/plot/0#",
-      "VState": "https://valospace.org/state/0#",
-      "VValk": "https://valospace.org/valk/0#",
-      "V": "https://valospace.org/0#",
-      "aspects": {
-        "@reverse": "VLog:event"
-      },
-      "VLog:delta": {
-        "@id": "#delta",
-        "@type": "@id"
-      },
-      "VLog:command": {
-        "@id": "#command",
-        "@type": "@id"
-      },
-      "VLog:log": {
-        "@id": "#log",
-        "@type": "@id"
-      },
-      "VLog:author": {
-        "@id": "#author",
-        "@type": "@id"
-      },
-      "VLog:publicIdentity": {
-        "@id": "#publicIdentity",
-        "@type": "@id"
       }
     },
-    "VDoc:tags": [
-      "PRIMARY",
-      "WORKSPACE",
-      "FABRIC",
-      "SPECIFICATION",
-      "ONTOLOGY"
-    ],
-    "dc:title": "@valos/log library workspace",
-    "VRevdoc:package": "@valos/log",
-    "VRevdoc:version": "0.37.0-prerelease.0",
-    "VRevdoc:preferredPrefix": "VLog",
-    "VRevdoc:baseIRI": "https://valospace.org/log/0#",
-    "VRevdoc:referencedModules": {
-      "https://valospace.org/engine/0#": "@valos/engine/VEngine",
-      "https://valospace.org/kernel/0#": "@valos/kernel/VKernel",
-      "https://valospace.org/plot/0#": "@valos/plot/VPlot",
-      "https://valospace.org/state/0#": "@valos/state/VState",
-      "https://valospace.org/valk/0#": "@valos/valk/VValk",
-      "https://valospace.org/0#": "@valos/space/V"
-    },
-    "VRevdoc:extenderModules": {},
+    "dc:title": "VLog format specification",
     "respecConfig": {
       "specStatus": "unofficial",
-      "shortName": "log",
       "editors": [
         {
           "name": "Iridian Kiiskinen",
@@ -119,7 +69,8 @@
           "url": "https://valaatech.github.io/fabric/authors/iridian",
           "github": "http://github.com/valospace"
         }
-      ]
+      ],
+      "shortName": "vlog"
     },
     "abstract": {
       "@id": "abstract",
@@ -128,88 +79,15 @@
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "Specifies the ValOS event log JSON-LD format and the 'VLog' namespace"
-          ]
-        },
-        {
-          "@type": "VDoc:Paragraph",
-          "VDoc:content": [
-            "The event log is sequence of ",
+            "ValOS log ('VLog') format specifies the ontology, the format and the\nalgorithms for expressing a ValOS chronicle change event history as a\nsequence of",
             {
               "@type": "VDoc:Reference",
               "VDoc:content": [
-                "event resources"
+                "VState"
               ],
-              "VDoc:ref": "VLog:Event"
+              "VDoc:ref": "@valos/state"
             },
-            ".\nAn event resource is a map of semantically different ",
-            {
-              "@type": "VDoc:Reference",
-              "VDoc:content": [
-                "aspects"
-              ],
-              "VDoc:ref": "VLog:EventAspect"
-            },
-            ". Each aspect represents some role or lifecycle phase of the event and\nis a map of attributes that relate to that role. Most notable one is\nthe ",
-            {
-              "@type": "VDoc:Reference",
-              "VDoc:content": [
-                "delta aspect"
-              ],
-              "VDoc:ref": "VLog:DeltaAspect"
-            },
-            " which defines the\nactual state change payload of the event."
-          ]
-        },
-        {
-          "@type": "VDoc:Paragraph",
-          "VDoc:content": [
-            "The ",
-            {
-              "VDoc:em": true,
-              "VDoc:content": [
-                "VLog"
-              ]
-            },
-            " namespace together with ",
-            {
-              "@type": "VDoc:Reference",
-              "VDoc:content": [
-                "VState:"
-              ],
-              "VDoc:ref": "VState:"
-            },
-            " ",
-            {
-              "@type": "VDoc:Reference",
-              "VDoc:content": [
-                "VPlot:"
-              ],
-              "VDoc:ref": "VPlot:"
-            },
-            " and ",
-            {
-              "@type": "VDoc:Reference",
-              "VDoc:content": [
-                "VValk:"
-              ],
-              "VDoc:ref": "VValk:"
-            },
-            " namespaces forms the\ninfrastructural foundation or the ",
-            {
-              "VDoc:em": true,
-              "VDoc:content": [
-                "fabric"
-              ]
-            },
-            " of the valospace.",
-            {
-              "VDoc:em": true,
-              "VDoc:content": [
-                "VLog"
-              ]
-            },
-            " provides the temporal dimension and thus makes change\nand reactions possible."
+            "-formatted JSON-LD\ndocument entries."
           ]
         }
       ]
@@ -218,6 +96,12 @@
       "@id": "sotd",
       "@type": "VDoc:Chapter",
       "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "This document speficies the event delta structure and semantics via\ndeclarative examples."
+          ]
+        },
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
@@ -247,7 +131,7 @@
               ],
               "VDoc:ref": "@valos/kernel"
             },
-            ") which has the description:\n`Specifies the ValOS event log JSON-LD format and the 'VLog' namespace`."
+            ") which has the description:\n`VLog specification and reference implementation`."
           ]
         }
       ]
@@ -259,1485 +143,538 @@
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "Edit me - this is the first payload chapter. Abstract and SOTD are\nessential ",
+            "A VLog event is a specifically structured JSON-LD document that\nrepresents a change between two VState documents. The document contains\nseveral sub-components, ",
             {
               "@type": "VDoc:Reference",
               "VDoc:content": [
-                "ReSpec boilerplate"
+                "aspects"
               ],
-              "VDoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
+              "VDoc:ref": "#section_aspects"
+            },
+            " that\ncontain ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "the delta payload"
+              ],
+              "VDoc:ref": "#section_delta_aspect"
+            },
+            " itself\nbut also metadata, validations and other lifetime attribute of the\nevent."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "The delta aspect is a semantically incomplete precursor of the actual\ntriples that are added to (or removed from) the vstate graph itself. To\ncomplete the precursor the accumulated state @context ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "URI mappings"
+              ],
+              "VDoc:ref": "#section_uri_mappings"
+            },
+            " must be added to the\ndelta root context."
+          ]
+        }
+      ]
+    },
+    "principles": {
+      "@id": "principles",
+      "dc:title": "General principles",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "General design concepts, aims and ideas and out-right in a mish-mash\nwish-list:",
+            {
+              "VDoc:content": [
+                {
+                  "@type": "VDoc:BulletList",
+                  "VDoc:lines": [
+                    [
+                      "Each event is a named graph with a name that is a monotonically\n  increasing vplot-name derived based on the chronicle id itself."
+                    ],
+                    {
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
+                        "Event graphs are thus disjoint when flattened."
+                      ]
+                    },
+                    {
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
+                        "Reduction is the process of applying the events in succession from\n  the very beginning of the vlog and yields a snapshot vstate graph."
+                      ]
+                    },
+                    {
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
+                        "Reduction consists of validation, separation and update steps."
+                      ]
+                    },
+                    {
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
+                        "Validation rejects heretical events. Separation removes event\n  metadata and splits the remaining payload to separate update stages.\n  Update applies these parts to state."
+                      ]
+                    },
+                    {
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
+                        "Separation and update should be computationally simple, naive even,\n  as they are unavoidable and often heavily repeated."
+                      ]
+                    },
+                    {
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
+                        "Validation can often be selectivelly waived by secondary consumers or\n  sub-sequent event log consumption runs and thus can be incrementally\n  (if not outrageously) costlier that the other steps."
+                      ]
+                    },
+                    {
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
+                        "Event payload should be bytewise minimal. VLogs can appear anywhere\n  and compression aint free either."
+                      ]
+                    },
+                    {
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
+                        "Event payload should be as flat as possible to facilitate easy\n  introspection APIs"
+                      ]
+                    },
+                    {
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
+                        "Events must be valid and internally consistent JSON-LD even in\n  isolation but they don't need to be semantically complete."
+                      ]
+                    },
+                    {
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
+                        "Events need to be semantically complete when evaluated using the\n  accumulated parent context of all previous vlog events."
+                      ]
+                    },
+                    {
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
+                        "Cryptographical signing of event payloads by user signatures should\n  be simple."
+                      ]
+                    },
+                    {
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
+                        "Event creators can specify crypto-behaviors that add validateable\n  constraints to the future vlog operations."
+                      ]
+                    },
+                    {
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
+                        "Constraints can be used to limit the addition of new\n  crypto-behaviors"
+                      ]
+                    },
+                    {
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
+                        "Reordering of events by vlog authorities should be possible whenever\n  it can be proven that reordering doesn't change essential semantics"
+                      ]
+                    },
+                    {
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
+                        "Event creators can specify what is considered essential semantics by\n  crypto-behaviors"
+                      ]
+                    },
+                    {
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
+                        "Dual construct is a triple which is directly 'reified' by a resource\n  in the same named graph. Properties and Relations have dual nature."
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "examples": {
+      "@id": "examples",
+      "dc:title": "Examples",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "The examples use the standard context as the initial starting context.\nEach successive example uses the output state of the previous example\nas its input state."
+          ]
+        },
+        {
+          "dc:title": "Initial state @context",
+          "@type": "VRevdoc:Example",
+          "VDoc:content": [
+            {
+              "@type": "VRevdoc:JSONLD",
+              "VDoc:content": [
+                "{\n  \"^\": \"urn:valos:\",\n  \"@base\": \"urn:valos:chronicle:\",\n  \"@vocab\": \"vplot:'\",\n\n  \"V\": \"https://valospace.org/0#\",\n  \"VLog\": \"https://valospace.org/log/0#\",\n  \"VState\": \"https://valospace.org/state/0#\",\n\n  \"&^\": { \"@id\": \"VState:globalResources\", \"@type\": \"@id\", \"@container\": \"@id\" },\n  \"&_\": { \"@id\": \"VState:subResources\", \"@type\": \"@id\", \"@container\": \"@id\" },\n  \"&-\": { \"@id\": \"VState:removes\", \"@container\": \"@graph\" },\n\n  \"~P\": { \"@id\": \"V:ownsProperty\", \"@type\": \"@id\", \"@container\": \"@id\" },\n  \"~E\": { \"@id\": \"V:ownsEntity\", \"@type\": \"@id\", \"@container\": \"@id\" },\n  \"~R\": { \"@id\": \"V:ownsRelation\", \"@type\": \"@id\", \"@container\": \"@id\" },\n  \"~M\": { \"@id\": \"V:ownsMedia\", \"@type\": \"@id\", \"@container\": \"@id\" },\n\n  \".~\": { \"@id\": \"V:owner\", \"@type\": \"@id\" },\n\n  \".P~\": { \"@id\": \"V:scope\", \"@type\": \"@id\" },\n  \".E~\": { \"@id\": \"V:parent\", \"@type\": \"@id\" },\n  \".R~\": { \"@id\": \"V:graph\", \"@type\": \"@id\" },\n  \".M~\": { \"@id\": \"V:folder\", \"@type\": \"@id\" },\n\n  \".n\": { \"@id\": \"V:name\" },\n  \".c\": { \"@id\": \"V:content\" },\n\n  \".iOf\": { \"@id\": \"V:instanceOf\", \"@type\": \"@id\" },\n  \"-hasI\": { \"@id\": \"V:hasInstance\", \"@type\": \"@id\", \"@container\": \"@id\" },\n\n  \".gOf\": { \"@id\": \"V:ghostOf\", \"@type\": \"@id\" },\n  \"-hasG\": { \"@id\": \"V:hasGhost\", \"@type\": \"@id\", \"@container\": \"@id\" },\n\n  \".src\": { \"@id\": \"V:source\", \"@type\": \"@id\" },\n  \"-out\": { \"@id\": \"V:hasOutRelation\", \"@type\": \"@id\", \"@container\": \"@list\" },\n\n  \".tgt\": { \"@id\": \"V:target\", \"@type\": \"@id\" },\n  \"-in\": { \"@id\": \"V:hasInRelation\", \"@type\": \"@id\", \"@container\": \"@list\" },\n\n  \".src-\": { \"@id\": \"V:linkedSource\", \"@type\": \"@id\" },\n  \".tgt-\": { \"@id\": \"V:linkedTarget\", \"@type\": \"@id\" },\n\n  \".src~\": { \"@id\": \"V:ownerSource\", \"@type\": \"@id\" },\n  \".tgt~\": { \"@id\": \"V:ownerTarget\", \"@type\": \"@id\" },\n\n  \"VSourcerer\": \"https://valospace.org/sourcerer/0#\",\n\n  \"~u4\": \"urn:valos:u4:\"\n}"
+              ],
+              "VDoc:language": "https://www.w3.org/TR/json-ld11/"
             }
           ]
         },
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "See ",
+            "The first vlog event always creates the chronicle root resource with\nan id equal to the vlog chronicle id itself. The id URN of the root\nresource is added into the context with key \"0\". The root resource is\nassigned a blank node '_:0' that corresponds to id context entry URN."
+          ]
+        },
+        {
+          "@type": "VRevdoc:Example",
+          "dc:title": "creates chronicle root entity",
+          "VDoc:content": [
             {
-              "@type": "VDoc:Reference",
+              "@type": "VDoc:Paragraph",
               "VDoc:content": [
-                "ReVDoc tutorial"
-              ],
-              "VDoc:ref": "@valos/revdoc/tutorial"
-            },
-            " for\ninstructions on how to write revdoc source documents."
+                [
+                  "we expect",
+                  {
+                    "VDoc:blockquote": true,
+                    "VDoc:content": [
+                      {
+                        "@type": "VDoc:CharacterData",
+                        "VDoc:content": [
+                          " JSON.parse(JSON.stringify(state = applyVLogDelta(state, {\n  \"@context\": [{\n    \"0\": \"~u4:cccccccc-6600-2211-cc77-333333333333\"\n  }],\n  \"&~\": { \"\": { \".n\": \"rootName\", \"V:authorityURI\": \"valaa-local:\" } }\n})))"
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "toMatchObject",
+                {
+                  "VDoc:blockquote": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:CharacterData",
+                      "VDoc:content": [
+                        " ({\n  \"@context\": [baseStateContext, {\n    \"0\": \"~u4:cccccccc-6600-2211-cc77-333333333333\"\n  }],\n  \"&^\": {\n    \"0/\": { \".n\": \"rootName\", \"V:authorityURI\": \"valaa-local:\" }\n  }\n})"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
           ]
         },
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "See also ",
+            "VLog node objects have chronicle-local vplot identifiers. A local\nvplot id begins with ",
+            {
+              "@type": "VDoc:CharacterData",
+              "VDoc:content": [
+                "vplot:chronicle/"
+              ]
+            },
+            " and is followed by a ",
             {
               "@type": "VDoc:Reference",
               "VDoc:content": [
-                "ReVdoc specification"
+                "route-vplot"
               ],
-              "VDoc:ref": "@valos/revdoc"
+              "VDoc:ref": "@valos/vplot#route-vplot"
             },
-            " and ",
+            " string. Each vterm of\nthe local vplot id that matches the pattern ",
+            {
+              "@type": "VRevdoc:RegExp",
+              "VDoc:content": [
+                "[0-9]+"
+              ],
+              "VDoc:language": "https://tc39.es/ecma262/#sec-regexp-regular-expression-objects"
+            },
+            "\nmaps to a URI in the chronicle URI lookup. The local vplot id can be\ntranslated to a global valos:urn vplot id by replacing all the mappings\nwith their corresponding URI and converting the id to ",
             {
               "@type": "VDoc:Reference",
               "VDoc:content": [
-                "VDoc specification"
+                "urn-vplot"
               ],
-              "VDoc:ref": "@valos/vdoc"
+              "VDoc:ref": "@valos/vplot#urn-vplot"
             },
-            " for reference documentation."
-          ]
-        }
-      ]
-    },
-    "section_fabric": {
-      "@id": "section_fabric",
-      "@type": "VDoc:Chapter",
-      "dc:title": [
-        "The ",
-        {
-          "VDoc:em": true,
-          "VDoc:content": [
-            "VLog"
+            " form."
           ]
         },
-        " fabric namespace of the library ontology of ",
         {
-          "@type": "VRevdoc:Package",
+          "@type": "VDoc:Paragraph",
           "VDoc:content": [
+            "These local vplot ids form a nested hierarchy. Resource views project\nsubtrees of this hierarchy (",
             {
               "VDoc:em": true,
               "VDoc:content": [
-                "@valos/log"
-              ]
-            }
-          ],
-          "VDoc:ref": "@valos/log"
-        }
-      ],
-      "VDoc:content": [
-        {
-          "@id": "section_fabric_abstract"
-        },
-        {
-          "@id": "section_prefixes"
-        },
-        {
-          "@id": "section_classes"
-        },
-        {
-          "@id": "section_properties"
-        },
-        {
-          "@id": "section_methods"
-        },
-        {
-          "@id": "section_globals"
-        },
-        {
-          "@id": "section_vocabulary_other"
-        }
-      ]
-    },
-    "prefixes": {
-      "@id": "prefixes",
-      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-      "xsd": "http://www.w3.org/2001/XMLSchema#",
-      "owl": "http://www.w3.org/2002/07/owl#",
-      "dc": "http://purl.org/dc/elements/1.1/",
-      "VLog": "https://valospace.org/log/0#",
-      "VKernel": "https://valospace.org/kernel/0#",
-      "VPlot": "https://valospace.org/plot/0#",
-      "VState": "https://valospace.org/state/0#",
-      "VValk": "https://valospace.org/valk/0#",
-      "V": "https://valospace.org/0#"
-    },
-    "vocabulary": {
-      "@id": "vocabulary",
-      "Event": {
-        "@type": "VKernel:Class",
-        "VRevdoc:brief": "chronicle event",
-        "rdfs:comment": "The class of all chronicle event log entries"
-      },
-      "EventAspects": {
-        "@type": "VKernel:Class",
-        "VRevdoc:brief": "all the aspects of an event",
-        "rdfs:comment": "The class of resources which contain all different lifecycle aspects\nof some chronicle event as it advances through the proclamation\nlifecycle.",
-        "VEngine:domainOfProperty": [
-          {
-            "@id": "#version",
-            "VRevdoc:indexLabel": "VLog:version"
-          },
-          {
-            "@id": "#delta",
-            "VRevdoc:indexLabel": "VLog:delta"
-          },
-          {
-            "@id": "#command",
-            "VRevdoc:indexLabel": "VLog:command"
-          },
-          {
-            "@id": "#log",
-            "VRevdoc:indexLabel": "VLog:log"
-          },
-          {
-            "@id": "#author",
-            "VRevdoc:indexLabel": "VLog:author"
-          }
-        ]
-      },
-      "EventAspect": {
-        "@type": "VKernel:Class",
-        "VRevdoc:brief": "event lifecycle aspect",
-        "rdfs:comment": "The class of resources which contain a set of attributes of a single\nlifecycle aspect of some chronicle event as it progresses through the\nproclamation lifecycle."
-      },
-      "version": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "VLog:EventAspects",
-        "rdfs:range": "xsd:string",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The aspect version string. The version of this specification is \"0.3\""
-      },
-      "DeltaAspect": {
-        "@type": "VKernel:Class",
-        "VRevdoc:brief": "state delta aspect",
-        "rdfs:subClassOf": "VLog:EventAspect",
-        "rdfs:comment": "The class of resources which contain the state delta payload of some\nchronicle event."
-      },
-      "delta": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "VLog:EventAspects",
-        "rdfs:range": "VLog:DeltaAspect",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The state delta aspect of the event."
-      },
-      "CommandAspect": {
-        "@type": "VKernel:Class",
-        "VRevdoc:brief": "command fabrication aspect",
-        "rdfs:subClassOf": "VLog:EventAspect",
-        "rdfs:comment": "The class of resources which contain attributes added by a gateway to\nsome event during the fabrication of the event command."
-      },
-      "command": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "VLog:EventAspects",
-        "rdfs:range": "VLog:CommandAspect",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The command fabrication aspect of the event."
-      },
-      "LogAspect": {
-        "@type": "VKernel:Class",
-        "rdfs:subClassOf": "VLog:EventAspect",
-        "VRevdoc:brief": "event log aspect",
-        "rdfs:comment": "The class of resources which contain attributes of an event which\nrelate to its position in the chronicle event log. The contents of this\naspect are ultimately finally provided by the authority but is\ntypically provisionally provided by the gateway.",
-        "VEngine:domainOfProperty": [
-          {
-            "@id": "#index",
-            "VRevdoc:indexLabel": "VLog:index"
-          },
-          {
-            "@id": "#vplotHashV0",
-            "VRevdoc:indexLabel": "VLog:vplotHashV0"
-          }
-        ]
-      },
-      "log": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "VLog:EventAspects",
-        "rdfs:range": "VLog:LogAspect",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The authority log aspect of the event."
-      },
-      "index": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "VLog:LogAspect",
-        "rdfs:range": "xsd:integer",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The 0-based index of the event in the event log."
-      },
-      "vplotHashV0": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "VLog:LogAspect",
-        "rdfs:range": "xsd:string",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The base64url-encoded SHA-512/384 hash of the combination of the\npreceding event vplotHashV0 with the current event signature or delta.\nThe exact format of the combination is pending. The event contents is\ndefined to be the VLog:signature if the event is signed, otherwise it\nis the vplot serialization of the VLog:DeltaAspect of the event."
-      },
-      "AuthorAspect": {
-        "@type": "VKernel:Class",
-        "VRevdoc:brief": "command author aspect",
-        "rdfs:subClassOf": "VLog:EventAspect",
-        "rdfs:comment": "The class of resources which contain the authoring attributes and the\ncommand signature of a single chronicle event.",
-        "VEngine:domainOfProperty": [
-          {
-            "@id": "#antecedent",
-            "VRevdoc:indexLabel": "VLog:antecedent"
-          },
-          {
-            "@id": "#publicIdentity",
-            "VRevdoc:indexLabel": "VLog:publicIdentity"
-          },
-          {
-            "@id": "#signature",
-            "VRevdoc:indexLabel": "VLog:signature"
-          }
-        ]
-      },
-      "author": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "VLog:EventAspects",
-        "rdfs:range": "VLog:AuthorAspect",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The command author aspect of the event."
-      },
-      "antecedent": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "VLog:AuthorAspect",
-        "rdfs:range": "xsd:integer",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The index of an antecedent event the payload of which this author\nsection confirms. This usually is the index of the directly preceding\nevent but if the chronicle allows for reordering and eventual\nconsistency this can refer to further in the log."
-      },
-      "publicIdentity": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "VLog:AuthorAspect",
-        "rdfs:range": "V:Entity",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The public identity resource of the contributor of this event."
-      },
-      "signature": {
-        "@type": "VKernel:Property",
-        "rdfs:domain": "VLog:AuthorAspect",
-        "rdfs:range": "xsd:string",
-        "restriction": {
-          "@type": "owl:Restriction",
-          "owl:maxCardinality": 1
-        },
-        "rdfs:comment": "The base64url-encoded 512-bit Ed25519 signature (as provided by\ntweetnacl.sign.detached) of the event payload. The exact format of the\npayload is pending precise specification. This signature is created\nusing the secretKey associated with the chronicle publicKey of the\nauthoring publicIdentity."
-      }
-    },
-    "context": {
-      "@id": "context",
-      "restriction": {
-        "@reverse": "owl:onProperty"
-      },
-      "aspects": {
-        "@reverse": "VLog:event"
-      },
-      "@base": "https://valospace.org/log/0#",
-      "VLog:delta": {
-        "@id": "#delta",
-        "@type": "@id"
-      },
-      "VLog:command": {
-        "@id": "#command",
-        "@type": "@id"
-      },
-      "VLog:log": {
-        "@id": "#log",
-        "@type": "@id"
-      },
-      "VLog:author": {
-        "@id": "#author",
-        "@type": "@id"
-      },
-      "VLog:publicIdentity": {
-        "@id": "#publicIdentity",
-        "@type": "@id"
-      }
-    },
-    "section_fabric_abstract": {
-      "@id": "section_fabric_abstract",
-      "VDoc:content": [
-        {
-          "@type": "VDoc:Paragraph",
-          "VDoc:content": [
-            "The fabric storage and transport layer vocabulary that both specifies\nthe ValOS event log and aspects structure and is used to express the\ncontent and behaviors of individual chronicles."
-          ]
-        }
-      ]
-    },
-    "section_prefixes": {
-      "@id": "section_prefixes",
-      "@type": "VDoc:Chapter",
-      "dc:title": [
-        {
-          "VDoc:em": true,
-          "VDoc:content": [
-            "@valos/log"
-          ]
-        },
-        " IRI prefixes"
-      ],
-      "VDoc:content": [
-        {
-          "VDoc:lookup": "prefixes",
-          "@type": "VDoc:Table",
-          "VDoc:columns": [
-            {
-              "VDoc:cell": "VDoc:selectKey",
-              "@type": "VDoc:Header",
-              "VDoc:content": [
-                "Prefix"
+                "view origin"
               ]
             },
+            ") to be accessible\nat other subtree locations (",
             {
-              "VDoc:cell": "VDoc:selectValue",
-              "@type": "VDoc:Header",
+              "VDoc:em": true,
               "VDoc:content": [
-                "IRI"
+                "view image"
+              ]
+            },
+            "). Notably, ownership\nviews project the stable root-level embodiment of a resource (",
+            {
+              "VDoc:em": true,
+              "VDoc:content": [
+                "stable origin"
+              ]
+            },
+            ") to be accessible at its current logical\nlocation in the ownership hierarchy (",
+            {
+              "VDoc:em": true,
+              "VDoc:content": [
+                "logical image"
+              ]
+            },
+            ")."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "Delta updates to resources must always be applied to the logical\nimage, never to the resource origin itself (unless they're the\nsame). Similarily, references in deltas must refer to logical images\nas long as the referenced resource belongs to the same chronicle."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "Conversely, the state of a resource is always represented at the\nstable origin. Similarily, all references in state objects must refer\nto the stable origins of the resources."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "All references (in both deltas and state alike) to resources in other\nchronicles must refer to their stable origin.\n."
+          ]
+        },
+        {
+          "@type": "VRevdoc:Example",
+          "dc:title": "delta application to harmonize refs to appropriate stable origin refs",
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                [
+                  "we expect",
+                  {
+                    "VDoc:blockquote": true,
+                    "VDoc:content": [
+                      {
+                        "@type": "VDoc:CharacterData",
+                        "VDoc:content": [
+                          " JSON.parse(JSON.stringify(state = applyVLogDelta(state,\n{\n  \"@context\": [{\n    \"1\": \"~u4:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee\",\n    \"2\": \"~u4:bbbbbbbb-bbbb-cccc-dddd-eeeeeeeeeeee\",\n    \"3\": \"~u4:abababab-bbbb-cccc-dddd-eeeeeeeeeeee\",\n    \"4\": \"~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee\",\n    \"5\": \"valaa-test:?id=(~raw'extl!)#\"\n  }],\n  \"&~\": {\n    \"\": { \".n\": \"newRootName\" },\n    \"1/\": { \".E~\": \"0/\", \".n\": \"older\",\n      \"toOutside\": { \"@id\": \"5/\" }, \"absolutelyParent\": { \"@id\": \"/0/\" },\n    },\n    \"2/\": { \".E~\": \"0/\", \".n\": \"unger\",\n      \"toOlder\": { \"@id\": \"1/\" }, \"absolutelyOlder\": { \"@id\": \"/1/\" },\n    },\n    \"2/3/\": { \".tgt~\": \"2/\", \".n\": \"SIBLING\", \".src\": \"1/\" },\n    \"2/4/\": { \".src~\": \"2/\", \".n\": \"SIBLING\", \".tgt\": \"1/\" },\n  },\n})))"
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "toMatchObject",
+                {
+                  "VDoc:blockquote": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:CharacterData",
+                      "VDoc:content": [
+                        "{\n  \"@context\": [\n    {\n      \"^\": \"urn:valos:\",\n      \"@base\": \"urn:valos:chronicle:\",\n      \"@vocab\": \"vplot:'\",\n      \"V\": \"https://valospace.org/0#\",\n      \"VLog\": \"https://valospace.org/log/0#\",\n      \"VState\": \"https://valospace.org/state/0#\",\n      \"&^\": {\n        \"@id\": \"VState:globalResources\",\n        \"@type\": \"@id\",\n        \"@container\": \"@id\"\n      },\n      \"&_\": {\n        \"@id\": \"VState:subResources\",\n        \"@type\": \"@id\",\n        \"@container\": \"@id\"\n      },\n      \"&-\": {\n        \"@id\": \"VState:removes\",\n        \"@container\": \"@graph\"\n      },\n      \"~P\": {\n        \"@id\": \"V:ownsProperty\",\n        \"@type\": \"@id\",\n        \"@container\": \"@id\"\n      },\n      \"~E\": {\n        \"@id\": \"V:ownsEntity\",\n        \"@type\": \"@id\",\n        \"@container\": \"@id\"\n      },\n      \"~R\": {\n        \"@id\": \"V:ownsRelation\",\n        \"@type\": \"@id\",\n        \"@container\": \"@id\"\n      },\n      \"~M\": {\n        \"@id\": \"V:ownsMedia\",\n        \"@type\": \"@id\",\n        \"@container\": \"@id\"\n      },\n      \".~\": {\n        \"@id\": \"V:owner\",\n        \"@type\": \"@id\"\n      },\n      \".P~\": {\n        \"@id\": \"V:scope\",\n        \"@type\": \"@id\"\n      },\n      \".E~\": {\n        \"@id\": \"V:parent\",\n        \"@type\": \"@id\"\n      },\n      \".R~\": {\n        \"@id\": \"V:graph\",\n        \"@type\": \"@id\"\n      },\n      \".M~\": {\n        \"@id\": \"V:folder\",\n        \"@type\": \"@id\"\n      },\n      \".n\": {\n        \"@id\": \"V:name\"\n      },\n      \".c\": {\n        \"@id\": \"V:content\"\n      },\n      \".iOf\": {\n        \"@id\": \"V:instanceOf\",\n        \"@type\": \"@id\"\n      },\n      \"-hasI\": {\n        \"@id\": \"V:hasInstance\",\n        \"@type\": \"@id\",\n        \"@container\": \"@id\"\n      },\n      \".gOf\": {\n        \"@id\": \"V:ghostOf\",\n        \"@type\": \"@id\"\n      },\n      \"-hasG\": {\n        \"@id\": \"V:hasGhost\",\n        \"@type\": \"@id\",\n        \"@container\": \"@id\"\n      },\n      \".src\": {\n        \"@id\": \"V:source\",\n        \"@type\": \"@id\"\n      },\n      \"-out\": {\n        \"@id\": \"V:hasOutRelation\",\n        \"@type\": \"@id\",\n        \"@container\": \"@list\"\n      },\n      \".tgt\": {\n        \"@id\": \"V:target\",\n        \"@type\": \"@id\"\n      },\n      \"-in\": {\n        \"@id\": \"V:hasInRelation\",\n        \"@type\": \"@id\",\n        \"@container\": \"@list\"\n      },\n      \".src-\": {\n        \"@id\": \"V:linkedSource\",\n        \"@type\": \"@id\"\n      },\n      \".tgt-\": {\n        \"@id\": \"V:linkedTarget\",\n        \"@type\": \"@id\"\n      },\n      \".src~\": {\n        \"@id\": \"V:ownerSource\",\n        \"@type\": \"@id\"\n      },\n      \".tgt~\": {\n        \"@id\": \"V:ownerTarget\",\n        \"@type\": \"@id\"\n      },\n      \"VSourcerer\": \"https://valospace.org/sourcerer/0#\",\n      \"~u4\": \"urn:valos:u4:\"\n    },\n    {\n      \"0\": \"~u4:cccccccc-6600-2211-cc77-333333333333\",\n      \"1\": \"~u4:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee\",\n      \"2\": \"~u4:bbbbbbbb-bbbb-cccc-dddd-eeeeeeeeeeee\",\n      \"3\": \"~u4:abababab-bbbb-cccc-dddd-eeeeeeeeeeee\",\n      \"4\": \"~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee\",\n      \"5\": \"valaa-test:?id=(~raw'extl!)#\"\n    }\n  ],\n  \"&^\": {\n    \"0/\": {\n      \".n\": \"newRootName\",\n      \"V:authorityURI\": \"valaa-local:\",\n      \"~E\": [\n        \"1/\",\n        \"2/\"\n      ]\n    },\n    \"1/\": {\n      \".E~\": \"0/\",\n      \".n\": \"older\",\n      \"-out\": [\n        \"3/\"\n      ],\n      \"-in\": [\n        \"4/\"\n      ],\n      \"toOutside\": {\n        \"@id\": \"5/\"\n      },\n      \"absolutelyParent\": {\n        \"@id\": \"/0/\"\n      }\n    },\n    \"2/\": {\n      \".E~\": \"0/\",\n      \".n\": \"unger\",\n      \"~R\": [\n        \"3/\",\n        \"4/\"\n      ],\n      \"-out\": [\n        \"4/\"\n      ],\n      \"-in\": [\n        \"3/\"\n      ],\n      \"toOlder\": {\n        \"@id\": \"1/\"\n      },\n      \"absolutelyOlder\": {\n        \"@id\": \"/1/\"\n      }\n    },\n    \"3/\": {\n      \".tgt~\": \"2/\",\n      \".n\": \"SIBLING\",\n      \".src\": \"1/\"\n    },\n    \"4/\": {\n      \".src~\": \"2/\",\n      \".n\": \"SIBLING\",\n      \".tgt\": \"1/\"\n    }\n  }\n}"
+                      ]
+                    }
+                  ]
+                }
               ]
             }
           ]
-        }
-      ]
-    },
-    "section_classes": {
-      "@id": "section_classes",
-      "@type": "VDoc:Chapter",
-      "dc:title": [
-        {
-          "VDoc:em": true,
-          "VDoc:content": [
-            "VLog"
-          ]
         },
-        " ",
-        {
-          "@type": "VDoc:Reference",
-          "VDoc:content": [
-            "fabric classes"
-          ],
-          "VDoc:ref": "VKernel:Class"
-        }
-      ],
-      "VDoc:content": [
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "This section describes fabric classes introduced by the 'VLog' namespace"
+            "\nGhost instancing with ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "V:instanceOf"
+              ],
+              "VDoc:ref": "V:instanceOf"
+            },
+            " term \".iOf\" and the\nrecursive application of the ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "VState:subResources"
+              ],
+              "VDoc:ref": "VState:subResources"
+            },
+            " term '&_' are the cornerstone of the unified valos resource model for\napplication development."
           ]
         },
-        {
-          "VDoc:lookup": "vocabulary",
-          "@type": "VDoc:Table",
-          "VDoc:columns": {
-            "VDoc:entries": [
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": null,
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:resourceId": "VDoc:selectKey",
-                  "VDoc:heading": true,
-                  "VDoc:content": [
-                    {
-                      "VDoc:words": [
-                        {
-                          "VDoc:strong": true,
-                          "VDoc:content": [
-                            {
-                              "VDoc:em": true,
-                              "VDoc:content": [
-                                {
-                                  "@type": "VDoc:Reference",
-                                  "VDoc:content": [
-                                    [
-                                      "#",
-                                      "VDoc:selectKey"
-                                    ]
-                                  ],
-                                  "VDoc:ref": [
-                                    "#",
-                                    "VDoc:selectKey"
-                                  ]
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "VDoc:words": {
-                            "VDoc:selectField": "rdfs:label"
-                          },
-                          "VDoc:elidable": true
-                        }
-                      ]
-                    }
-                  ]
-                }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "VDoc:strong": true,
-                      "VDoc:content": [
-                        "DEPRECATED"
-                      ]
-                    },
-                    " in favor of:"
-                  ]
-                },
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:entries": {
-                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
-                  },
-                  "VDoc:elidable": true,
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      "VDoc:selectValue"
-                    ],
-                    "VDoc:ref": "VDoc:selectValue"
-                  }
-                }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": [
-                  "rdfs:subClassOf"
-                ],
-                "VDoc:cell": {
-                  "VDoc:words": {
-                    "VDoc:selectField": "rdfs:subClassOf"
-                  },
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      "VDoc:selectValue"
-                    ],
-                    "VDoc:ref": "VDoc:selectValue"
-                  }
-                }
-              },
-              {
-                "VDoc:cell": "rdfs:comment",
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "@type": "VDoc:Reference",
-                      "VDoc:content": [
-                        "description"
-                      ],
-                      "VDoc:ref": "rdfs:comment"
-                    }
-                  ]
-                },
-                "VDoc:wide": false
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "@type": "VDoc:Reference",
-                  "VDoc:content": [
-                    "instance properties"
-                  ],
-                  "VDoc:ref": "VEngine:Property"
-                },
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:words": {
-                    "VDoc:selectField": "VEngine:domainOfProperty"
-                  },
-                  "VDoc:elidable": true,
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      {
-                        "VDoc:selectField": "VRevdoc:indexLabel"
-                      }
-                    ],
-                    "VDoc:ref": {
-                      "VDoc:selectField": "@id"
-                    }
-                  }
-                }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "@type": "VDoc:Reference",
-                  "VDoc:content": [
-                    "instance methods"
-                  ],
-                  "VDoc:ref": "VEngine:Method"
-                },
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:words": {
-                    "VDoc:selectField": "VEngine:domainOfMethod"
-                  },
-                  "VDoc:elidable": true,
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      {
-                        "VDoc:selectField": "VRevdoc:indexLabel"
-                      }
-                    ],
-                    "VDoc:ref": {
-                      "VDoc:selectField": "@id"
-                    }
-                  }
-                }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "@type": "VDoc:Reference",
-                  "VDoc:content": [
-                    "class properties"
-                  ],
-                  "VDoc:ref": "VEngine:ObjectProperty"
-                },
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:words": {
-                    "VDoc:selectField": "VEngine:hasProperty"
-                  },
-                  "VDoc:elidable": true,
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      {
-                        "VDoc:selectField": "VRevdoc:indexLabel"
-                      }
-                    ],
-                    "VDoc:ref": {
-                      "VDoc:selectField": "@id"
-                    }
-                  }
-                }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "@type": "VDoc:Reference",
-                  "VDoc:content": [
-                    "class methods"
-                  ],
-                  "VDoc:ref": "VEngine:ObjectMethod"
-                },
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:words": {
-                    "VDoc:selectField": "VEngine:hasMethod"
-                  },
-                  "VDoc:elidable": true,
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      {
-                        "VDoc:selectField": "VRevdoc:indexLabel"
-                      }
-                    ],
-                    "VDoc:ref": {
-                      "VDoc:selectField": "@id"
-                    }
-                  }
-                }
-              },
-              {
-                "VDoc:cell": "VRevdoc:introduction",
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "@type": "VDoc:Reference",
-                      "VDoc:content": [
-                        "introduction"
-                      ],
-                      "VDoc:ref": "VRevdoc:introduction"
-                    }
-                  ]
-                },
-                "VDoc:wide": true,
-                "VDoc:collapsed": true,
-                "VDoc:elidable": true
-              }
-            ]
-          },
-          "VDoc:entries": [
-            "Event",
-            "EventAspects",
-            "EventAspect",
-            "DeltaAspect",
-            "CommandAspect",
-            "LogAspect",
-            "AuthorAspect"
-          ]
-        }
-      ]
-    },
-    "section_properties": {
-      "@id": "section_properties",
-      "@type": "VDoc:Chapter",
-      "dc:title": [
-        {
-          "VDoc:em": true,
-          "VDoc:content": [
-            "VLog"
-          ]
-        },
-        " ",
-        {
-          "@type": "VDoc:Reference",
-          "VDoc:content": [
-            "fabric properties"
-          ],
-          "VDoc:ref": "VKernel:Property"
-        }
-      ],
-      "VDoc:content": [
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "This section describes fabric properties introduced by the 'VLog' namespace"
+            "Instancing dynamics primarily affects state inference and as such no\nadditional functionality for deltas is necessary. It should be noted\nhowever that the logical image vplot of ghosts 'flattens' the stable\norigin vplot of its ghost prototype (See how resource \"0/1/3/8\" is\nghosted as \"0/6/8\" and \"0/7/8\"). Instance views behave here similar to\nexternal references: the ghost vplot cannot know the exact logical\nlocation of its prototype (not least because the prototype might be\nin a different chronicle!).\n"
           ]
         },
         {
-          "VDoc:lookup": "vocabulary",
-          "@type": "VDoc:Table",
-          "VDoc:columns": {
-            "VDoc:entries": [
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": null,
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:resourceId": "VDoc:selectKey",
-                  "VDoc:heading": true,
+          "@type": "VRevdoc:Example",
+          "dc:title": "instances a resource with ghosts",
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                [
+                  "we expect",
+                  {
+                    "VDoc:blockquote": true,
+                    "VDoc:content": [
+                      {
+                        "@type": "VDoc:CharacterData",
+                        "VDoc:content": [
+                          " JSON.parse(JSON.stringify(state = applyVLogDelta(state,\n{\n  \"@context\": [{\n    \"6\": \"~u4:11111111-2255-7744-22cc-eeeeeeeeeeee\",\n    \"7\": \"~u4:22222222-2255-7744-22cc-eeeeeeeeeeee\",\n    \"8\": \"~u4:d336d336-9999-6666-0000-777700000000\"\n  }],\n  \"&~\": {\n    \"2/3/8/\": { \".E~\": \"3/\", \".n\": \"deeplyOwned\" },\n    \"6/\": {\n      \".E~\": \"0/\", \".iOf\": \"2/\", \".n\": \"ungerInstance\",\n      \"&_\": {\n        \"6/3/\": {\n          \"instance\": { \"@id\": \"6/\" },\n          \"absoluteInstance\": { \"@id\": \"/6/\" },\n          \"deepProto\": { \"@id\": \"8/\" },\n          \"absoluteDeepProto\": { \"@id\": \"/8/\" },\n        },\n        \"6/8/\": { \".n\": \"deeplyOwnedGhost\" },\n      },\n    },\n    \"7/\": {\n      \".E~\": \"0/\", \".iOf\": \"6/\", \".n\": \"ungerInstanceInstance\",\n      \"&_\": {\n        \"7/3/\": { \"instanceInstance\": { \"@id\": \"7/\" } },\n        \"7/8/\": { \".n\": \"deeplyOwnedGhostGhost\" },\n      },\n    },\n  },\n})))"
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "toMatchObject",
+                {
+                  "VDoc:blockquote": true,
                   "VDoc:content": [
                     {
-                      "VDoc:words": [
-                        {
-                          "VDoc:strong": true,
-                          "VDoc:content": [
-                            {
-                              "VDoc:em": true,
-                              "VDoc:content": [
-                                {
-                                  "@type": "VDoc:Reference",
-                                  "VDoc:content": [
-                                    [
-                                      "#",
-                                      "VDoc:selectKey"
-                                    ]
-                                  ],
-                                  "VDoc:ref": [
-                                    "#",
-                                    "VDoc:selectKey"
-                                  ]
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "VDoc:words": {
-                            "VDoc:selectField": "rdfs:label"
-                          },
-                          "VDoc:elidable": true
-                        }
+                      "@type": "VDoc:CharacterData",
+                      "VDoc:content": [
+                        " ({\n  \"@context\": [baseStateContext, {\n    \"0\": \"~u4:cccccccc-6600-2211-cc77-333333333333\",\n    \"1\": \"~u4:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee\",\n    \"2\": \"~u4:bbbbbbbb-bbbb-cccc-dddd-eeeeeeeeeeee\",\n    \"3\": \"~u4:abababab-bbbb-cccc-dddd-eeeeeeeeeeee\",\n    \"4\": \"~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee\",\n    \"5\": \"valaa-test:?id=(~raw'extl!)#\",\n    \"6\": \"~u4:11111111-2255-7744-22cc-eeeeeeeeeeee\",\n    \"7\": \"~u4:22222222-2255-7744-22cc-eeeeeeeeeeee\",\n    \"8\": \"~u4:d336d336-9999-6666-0000-777700000000\"\n  }],\n  \"&^\": {\n    \"0/\": { \".n\": \"newRootName\",\n      \"V:authorityURI\": \"valaa-local:\",\n      \"~E\": [\"1/\", \"2/\", \"6/\", \"7/\"]\n    },\n    \"1/\": { \".E~\": \"0/\", \".n\": \"older\",\n      \"-out\": [\"3/\"], \"-in\": [\"4/\"],\n      \"toOutside\": { \"@id\": \"5/\" }, \"absolutelyParent\": { \"@id\": \"/0/\" }\n    },\n    \"2/\": { \".E~\": \"0/\", \".n\": \"unger\",\n      \"~R\": [\"3/\", \"4/\"],\n      \"-out\": [\"4/\"], \"-in\": [\"3/\"], \"-hasI\": [\"6/\"],\n      \"toOlder\": { \"@id\": \"1/\" }, \"absolutelyOlder\": { \"@id\": \"/1/\" }\n    },\n    \"3/\": { \".tgt~\": \"2/\", \".n\": \"SIBLING\", \".src\": \"1/\", \"~E\": [\"8/\"] },\n    \"4/\": { \".src~\": \"2/\", \".n\": \"SIBLING\", \".tgt\": \"1/\" },\n    \"6/\": [{ \".E~\": \"0/\", \".n\": \"ungerInstance\",\n      \".iOf\": \"2/\", \"-hasI\": [\"7/\"],\n    }, {\n      \"@context\": { \"@base\": \"6/\" },\n      \"&_\": {\n        \"3/\": {\n          \"instance\": { \"@id\": \"\" },\n          \"absoluteInstance\": { \"@id\": \"/6/\" },\n          \"deepProto\": { \"@id\": \"../8/\" },\n          \"absoluteDeepProto\": { \"@id\": \"/8/\" },\n        },\n        \"8/\": { \".n\": \"deeplyOwnedGhost\" }\n      }\n    }],\n    \"7/\": [{ \".E~\": \"0/\", \".n\": \"ungerInstanceInstance\",\n      \".iOf\": \"6/\",\n    }, {\n      \"@context\": { \"@base\": \"7/\" },\n      \"&_\": {\n        \"3/\": { \"instanceInstance\": { \"@id\": \"\" }, },\n        \"8/\": { \".n\": \"deeplyOwnedGhostGhost\" }\n      }\n    }],\n    \"8/\": { \".E~\": \"3/\", \".n\": \"deeplyOwned\" },\n  },\n})"
                       ]
                     }
                   ]
                 }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "VDoc:strong": true,
-                      "VDoc:content": [
-                        "DEPRECATED"
-                      ]
-                    },
-                    " in favor of:"
-                  ]
-                },
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:entries": {
-                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
-                  },
-                  "VDoc:elidable": true,
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      "VDoc:selectValue"
-                    ],
-                    "VDoc:ref": "VDoc:selectValue"
-                  }
-                }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": [
-                  "rdfs:domain"
-                ],
-                "VDoc:cell": {
-                  "VDoc:words": {
-                    "VDoc:selectField": "rdfs:domain"
-                  },
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      "VDoc:selectValue"
-                    ],
-                    "VDoc:ref": "VDoc:selectValue"
-                  }
-                }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": [
-                  "rdfs:range"
-                ],
-                "VDoc:cell": {
-                  "VDoc:words": {
-                    "VDoc:selectField": "rdfs:range"
-                  },
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      "VDoc:selectValue"
-                    ],
-                    "VDoc:ref": "VDoc:selectValue"
-                  }
-                }
-              },
-              {
-                "VDoc:cell": "rdfs:comment",
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "@type": "VDoc:Reference",
-                      "VDoc:content": [
-                        "description"
-                      ],
-                      "VDoc:ref": "rdfs:comment"
-                    }
-                  ]
-                },
-                "VDoc:wide": true
-              },
-              {
-                "VDoc:cell": "VRevdoc:introduction",
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "@type": "VDoc:Reference",
-                      "VDoc:content": [
-                        "introduction"
-                      ],
-                      "VDoc:ref": "VRevdoc:introduction"
-                    }
-                  ]
-                },
-                "VDoc:wide": true,
-                "VDoc:collapsed": true,
-                "VDoc:elidable": true
-              }
-            ]
-          },
-          "VDoc:entries": [
-            "version",
-            "delta",
-            "command",
-            "log",
-            "index",
-            "vplotHashV0",
-            "author",
-            "antecedent",
-            "publicIdentity",
-            "signature"
-          ]
-        }
-      ]
-    },
-    "section_methods": {
-      "@id": "section_methods",
-      "@type": "VDoc:Chapter",
-      "dc:title": [
-        {
-          "VDoc:em": true,
-          "VDoc:content": [
-            "VLog"
+              ]
+            }
           ]
         },
-        " ",
-        {
-          "@type": "VDoc:Reference",
-          "VDoc:content": [
-            "fabric methods"
-          ],
-          "VDoc:ref": "VEngine:Method"
-        }
-      ],
-      "VDoc:content": [
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "This section describes fabric methods introduced by the 'VLog' namespace"
+            "\nProjection views are the underlying mechanism on top of which the\ninstancing is built. Projection views project virtual, inferred copies\nof their origin subtrees to their view location. An instancing \".iOf\"\nproperty creates such a projection from the prototype (as the origin)\nonto the instance (as view) itself."
           ]
         },
-        {
-          "VDoc:lookup": "vocabulary",
-          "@type": "VDoc:Table",
-          "VDoc:columns": {
-            "VDoc:entries": [
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": null,
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:resourceId": "VDoc:selectKey",
-                  "VDoc:heading": true,
-                  "VDoc:content": [
-                    {
-                      "VDoc:words": [
-                        {
-                          "VDoc:strong": true,
-                          "VDoc:content": [
-                            {
-                              "VDoc:em": true,
-                              "VDoc:content": [
-                                {
-                                  "@type": "VDoc:Reference",
-                                  "VDoc:content": [
-                                    [
-                                      "#",
-                                      "VDoc:selectKey"
-                                    ]
-                                  ],
-                                  "VDoc:ref": [
-                                    "#",
-                                    "VDoc:selectKey"
-                                  ]
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "VDoc:words": {
-                            "VDoc:selectField": "rdfs:label"
-                          },
-                          "VDoc:elidable": true
-                        }
-                      ]
-                    }
-                  ]
-                }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "VDoc:strong": true,
-                      "VDoc:content": [
-                        "DEPRECATED"
-                      ]
-                    },
-                    " in favor of:"
-                  ]
-                },
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:entries": {
-                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
-                  },
-                  "VDoc:elidable": true,
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      "VDoc:selectValue"
-                    ],
-                    "VDoc:ref": "VDoc:selectValue"
-                  }
-                }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": [
-                  "rdfs:domain"
-                ],
-                "VDoc:cell": {
-                  "VDoc:words": {
-                    "VDoc:selectField": "rdfs:domain"
-                  },
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      "VDoc:selectValue"
-                    ],
-                    "VDoc:ref": "VDoc:selectValue"
-                  }
-                }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": [
-                  "rdfs:range"
-                ],
-                "VDoc:cell": {
-                  "VDoc:words": {
-                    "VDoc:selectField": "rdfs:range"
-                  },
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      "VDoc:selectValue"
-                    ],
-                    "VDoc:ref": "VDoc:selectValue"
-                  }
-                }
-              },
-              {
-                "VDoc:cell": "rdfs:comment",
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "@type": "VDoc:Reference",
-                      "VDoc:content": [
-                        "description"
-                      ],
-                      "VDoc:ref": "rdfs:comment"
-                    }
-                  ]
-                },
-                "VDoc:wide": true
-              },
-              {
-                "VDoc:cell": "VRevdoc:introduction",
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "@type": "VDoc:Reference",
-                      "VDoc:content": [
-                        "introduction"
-                      ],
-                      "VDoc:ref": "VRevdoc:introduction"
-                    }
-                  ]
-                },
-                "VDoc:wide": true,
-                "VDoc:collapsed": true,
-                "VDoc:elidable": true
-              }
-            ]
-          },
-          "VDoc:entries": []
-        }
-      ]
-    },
-    "section_globals": {
-      "@id": "section_globals",
-      "@type": "VDoc:Chapter",
-      "dc:title": [
-        {
-          "VDoc:em": true,
-          "VDoc:content": [
-            "VLog"
-          ]
-        },
-        " ",
-        {
-          "@type": "VDoc:Reference",
-          "VDoc:content": [
-            "fabric globals"
-          ],
-          "VDoc:ref": "VEngine:Global"
-        }
-      ],
-      "VDoc:content": [
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "This section describes fabric global objects introduced by the 'VLog' namespace"
+            "This virtual copying is lexical: projected relative references will now\nrefer to the relative resources inside the instance view instead of\nto the originally referenced resources within the prototype. Conversely,\nabsolute references (ie. those that begin with \"/\") keep refering to\nto the same resources even when projected."
           ]
         },
         {
-          "VDoc:lookup": "vocabulary",
-          "@type": "VDoc:Table",
-          "VDoc:columns": {
-            "VDoc:entries": [
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": null,
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:resourceId": "VDoc:selectKey",
-                  "VDoc:heading": true,
-                  "VDoc:content": [
-                    {
-                      "VDoc:words": [
-                        {
-                          "VDoc:strong": true,
-                          "VDoc:content": [
-                            {
-                              "VDoc:em": true,
-                              "VDoc:content": [
-                                {
-                                  "@type": "VDoc:Reference",
-                                  "VDoc:content": [
-                                    [
-                                      "#",
-                                      "VDoc:selectKey"
-                                    ]
-                                  ],
-                                  "VDoc:ref": [
-                                    "#",
-                                    "VDoc:selectKey"
-                                  ]
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "VDoc:words": {
-                            "VDoc:selectField": "rdfs:label"
-                          },
-                          "VDoc:elidable": true
-                        }
-                      ]
-                    }
-                  ]
-                }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "VDoc:strong": true,
-                      "VDoc:content": [
-                        "DEPRECATED"
-                      ]
-                    },
-                    " in favor of:"
-                  ]
-                },
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:entries": {
-                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
-                  },
-                  "VDoc:elidable": true,
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      "VDoc:selectValue"
-                    ],
-                    "VDoc:ref": "VDoc:selectValue"
-                  }
-                }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": "rdf:type",
-                "VDoc:cell": {
-                  "VDoc:words": {
-                    "VDoc:selectField": "@type"
-                  },
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      "VDoc:selectValue"
-                    ],
-                    "VDoc:ref": "VDoc:selectValue"
-                  }
-                }
-              },
-              {
-                "VDoc:cell": "comment",
-                "@type": "VDoc:Header",
-                "VDoc:content": [
-                  "Comment"
-                ]
-              },
-              {
-                "VDoc:cell": "rdfs:comment",
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "@type": "VDoc:Reference",
-                      "VDoc:content": [
-                        "description"
-                      ],
-                      "VDoc:ref": "rdfs:comment"
-                    }
-                  ]
-                },
-                "VDoc:wide": true
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "@type": "VDoc:Reference",
-                  "VDoc:content": [
-                    "prototype properties"
-                  ],
-                  "VDoc:ref": "VEngine:Property"
-                },
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:words": {
-                    "VDoc:selectField": "VEngine:domainOfProperty"
-                  },
-                  "VDoc:elidable": true,
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      {
-                        "VDoc:selectField": "VRevdoc:indexLabel"
-                      }
-                    ],
-                    "VDoc:ref": {
-                      "VDoc:selectField": "@id"
-                    }
-                  }
-                }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "@type": "VDoc:Reference",
-                  "VDoc:content": [
-                    "prototype methods"
-                  ],
-                  "VDoc:ref": "VEngine:Method"
-                },
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:words": {
-                    "VDoc:selectField": "VEngine:domainOfMethod"
-                  },
-                  "VDoc:elidable": true,
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      {
-                        "VDoc:selectField": "VRevdoc:indexLabel"
-                      }
-                    ],
-                    "VDoc:ref": {
-                      "VDoc:selectField": "@id"
-                    }
-                  }
-                }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "@type": "VDoc:Reference",
-                  "VDoc:content": [
-                    "object properties"
-                  ],
-                  "VDoc:ref": "VEngine:ObjectProperty"
-                },
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:words": {
-                    "VDoc:selectField": "VEngine:hasProperty"
-                  },
-                  "VDoc:elidable": true,
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      {
-                        "VDoc:selectField": "VRevdoc:indexLabel"
-                      }
-                    ],
-                    "VDoc:ref": {
-                      "VDoc:selectField": "@id"
-                    }
-                  }
-                }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "@type": "VDoc:Reference",
-                  "VDoc:content": [
-                    "object methods"
-                  ],
-                  "VDoc:ref": "VEngine:ObjectMethod"
-                },
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:words": {
-                    "VDoc:selectField": "VEngine:hasMethod"
-                  },
-                  "VDoc:elidable": true,
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      {
-                        "VDoc:selectField": "VRevdoc:indexLabel"
-                      }
-                    ],
-                    "VDoc:ref": {
-                      "VDoc:selectField": "@id"
-                    }
-                  }
-                }
-              },
-              {
-                "VDoc:cell": "VRevdoc:introduction",
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "@type": "VDoc:Reference",
-                      "VDoc:content": [
-                        "introduction"
-                      ],
-                      "VDoc:ref": "VRevdoc:introduction"
-                    }
-                  ]
-                },
-                "VDoc:wide": true,
-                "VDoc:collapsed": true,
-                "VDoc:elidable": true
-              }
-            ]
-          },
-          "VDoc:entries": []
-        }
-      ]
-    },
-    "section_vocabulary_other": {
-      "@id": "section_vocabulary_other",
-      "@type": "VDoc:Chapter",
-      "dc:title": [
-        {
-          "VDoc:em": true,
+          "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "VLog"
+            "The normalized vplot base of a relative reference that appears in the\nbody of some resource is the vplot id of the ",
+            {
+              "VDoc:em": true,
+              "VDoc:content": [
+                "parent"
+              ]
+            },
+            " of that\nresource. References that appear in a delta can be based arbitrarily\nhowever: the delta application will perform this reference normalization.\n"
           ]
         },
-        " remaining vocabulary terms"
-      ],
-      "VDoc:content": [
         {
-          "VDoc:lookup": "vocabulary",
-          "@type": "VDoc:Table",
-          "VDoc:columns": {
-            "VDoc:entries": [
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": null,
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:resourceId": "VDoc:selectKey",
-                  "VDoc:heading": true,
-                  "VDoc:content": [
-                    {
-                      "VDoc:words": [
-                        {
-                          "VDoc:strong": true,
-                          "VDoc:content": [
-                            {
-                              "VDoc:em": true,
-                              "VDoc:content": [
-                                {
-                                  "@type": "VDoc:Reference",
-                                  "VDoc:content": [
-                                    [
-                                      "#",
-                                      "VDoc:selectKey"
-                                    ]
-                                  ],
-                                  "VDoc:ref": [
-                                    "#",
-                                    "VDoc:selectKey"
-                                  ]
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "VDoc:words": {
-                            "VDoc:selectField": "rdfs:label"
-                          },
-                          "VDoc:elidable": true
-                        }
-                      ]
-                    }
-                  ]
-                }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "VDoc:strong": true,
-                      "VDoc:content": [
-                        "DEPRECATED"
-                      ]
-                    },
-                    " in favor of:"
-                  ]
-                },
-                "VDoc:wide": true,
-                "VDoc:cell": {
-                  "VDoc:entries": {
-                    "VDoc:selectField": "VRevdoc:deprecatedInFavorOf"
-                  },
-                  "VDoc:elidable": true,
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
+          "@type": "VRevdoc:Example",
+          "dc:title": "complex vplot relative references to be normalized",
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                [
+                  "we expect",
+                  {
+                    "VDoc:blockquote": true,
                     "VDoc:content": [
-                      "VDoc:selectValue"
-                    ],
-                    "VDoc:ref": "VDoc:selectValue"
+                      {
+                        "@type": "VDoc:CharacterData",
+                        "VDoc:content": [
+                          " JSON.parse(JSON.stringify(state = applyVLogDelta(state,\n{\n  \"@context\": [{\n    \"9\": \"~u4:77777777-1111-eeee-3333-555555555555\",\n  }],\n  \"&~\": {\n    \"9/\": {\n      \".E~\": \"0/\", \".n\": \"inceptor\", \".iOf\": \"0/\",\n      \"&_\": {\n        \"9/1/\": { \".n\": \"olderGhost\" },\n        \"9/2/\": { \".n\": \"ungerGhost\" },\n        \"9/3/\": { \".n\": \"toNephewOldceptGhost\", \".tgt\": \"9/9/1/\" },\n        \"9/4/\": { \".n\": \"toNephewUngceptGhost\", \".tgt\": \"9/9/2/\" },\n        \"9/9/\": { \".n\": \"firstInception\" },\n        \"9/9/1/\": { \".n\": \"oldceptGhost\" },\n        \"9/9/2/\": { \".n\": \"ungceptGhost\" }\n      }\n    },\n  },\n})))"
+                        ]
+                      }
+                    ]
                   }
-                }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": "rdf:type",
-                "VDoc:cell": {
-                  "VDoc:words": {
-                    "VDoc:selectField": "@type"
-                  },
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      "VDoc:selectValue"
-                    ],
-                    "VDoc:ref": "VDoc:selectValue"
-                  }
-                }
-              },
-              {
-                "@type": "VDoc:Header",
-                "VDoc:content": [
-                  "rdfs:subClassOf"
                 ],
-                "VDoc:cell": {
-                  "VDoc:words": {
-                    "VDoc:selectField": "rdfs:subClassOf"
-                  },
-                  "VDoc:map": {
-                    "@type": "VDoc:Reference",
-                    "VDoc:content": [
-                      "VDoc:selectValue"
-                    ],
-                    "VDoc:ref": "VDoc:selectValue"
-                  }
+                "toMatchObject",
+                {
+                  "VDoc:blockquote": true,
+                  "VDoc:content": [
+                    {
+                      "@type": "VDoc:CharacterData",
+                      "VDoc:content": [
+                        " ({\n  \"@context\": [baseStateContext, {\n    \"0\": \"~u4:cccccccc-6600-2211-cc77-333333333333\",\n    \"1\": \"~u4:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee\",\n    \"2\": \"~u4:bbbbbbbb-bbbb-cccc-dddd-eeeeeeeeeeee\",\n    \"3\": \"~u4:abababab-bbbb-cccc-dddd-eeeeeeeeeeee\",\n    \"4\": \"~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee\",\n    \"5\": \"valaa-test:?id=(~raw'extl!)#\",\n    \"6\": \"~u4:11111111-2255-7744-22cc-eeeeeeeeeeee\",\n    \"7\": \"~u4:22222222-2255-7744-22cc-eeeeeeeeeeee\",\n    \"8\": \"~u4:d336d336-9999-6666-0000-777700000000\",\n    \"9\": \"~u4:77777777-1111-eeee-3333-555555555555\"\n  }],\n  \"&^\": {\n    \"0/\": { \".n\": \"newRootName\",\n      \"V:authorityURI\": \"valaa-local:\",\n      \"~E\": [\"1/\", \"2/\", \"6/\", \"7/\", \"9/\"]\n    },\n    \"1/\": { \".E~\": \"0/\", \".n\": \"older\",\n      \"-out\": [\"3/\"], \"-in\": [\"4/\"],\n      \"toOutside\": { \"@id\": \"5/\" }, \"absolutelyParent\": { \"@id\": \"/0/\" }\n    },\n    \"2/\": { \".E~\": \"0/\", \".n\": \"unger\",\n      \"~R\": [\"3/\", \"4/\"],\n      \"-out\": [\"4/\"], \"-in\": [\"3/\"], \"-hasI\": [\"6/\"],\n      \"toOlder\": { \"@id\": \"1/\" }, \"absolutelyOlder\": { \"@id\": \"/1/\" }\n    },\n    \"3/\": { \".tgt~\": \"2/\", \".n\": \"SIBLING\", \".src\": \"1/\", \"~E\": [\"8/\"] },\n    \"4/\": { \".src~\": \"2/\", \".n\": \"SIBLING\", \".tgt\": \"1/\" },\n    \"6/\": [{ \".E~\": \"0/\", \".n\": \"ungerInstance\",\n      \".iOf\": \"2/\", \"-hasI\": [\"7/\"]\n    }, {\n      \"@context\": { \"@base\": \"6/\" },\n      \"&_\": {\n        \"3/\": {\n          \"instance\": { \"@id\": \"\" },\n          \"absoluteInstance\": { \"@id\": \"/6/\" },\n          \"deepProto\": { \"@id\": \"../8/\" },\n          \"absoluteDeepProto\": { \"@id\": \"/8/\" }\n        },\n        \"8/\": { \".n\": \"deeplyOwnedGhost\" }\n      }\n    }],\n    \"7/\": [{ \".E~\": \"0/\", \".n\": \"ungerInstanceInstance\",\n      \".iOf\": \"6/\"\n    }, {\n      \"@context\": { \"@base\": \"7/\" },\n      \"&_\": {\n        \"3/\": { \"instanceInstance\": { \"@id\": \"\" } },\n        \"8/\": { \".n\": \"deeplyOwnedGhostGhost\" }\n      }\n    }],\n    \"8/\": { \".E~\": \"3/\", \".n\": \"deeplyOwned\" },\n    \"9/\": [{ \".E~\": \"0/\", \".n\": \"inceptor\", \".iOf\": \"0/\" }, {\n      \"@context\": { \"@base\": \"9/\" },\n      \"&_\": {\n        \"1/\": { \".n\": \"olderGhost\" },\n        \"2/\": { \".n\": \"ungerGhost\" },\n        \"3/\": { \".n\": \"toNephewOldceptGhost\", \".tgt\": \"9/1/\" },\n        \"4/\": { \".n\": \"toNephewUngceptGhost\", \".tgt\": \"9/2/\" },\n        \"9/\": [{\n          \".n\": \"firstInception\",\n        }, {\n          \"@context\": { \"@base\": \"9/\" },\n          \"&_\": {\n            \"1/\": { \".n\": \"oldceptGhost\", \"-in\": [\"../3/\"] },\n            \"2/\": { \".n\": \"ungceptGhost\", \"-in\": [\"../4/\"] }\n          }\n        }],\n      }\n    }]\n  },\n})"
+                      ]
+                    }
+                  ]
                 }
-              },
-              {
-                "VDoc:cell": "rdfs:comment",
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "VDoc:em": true,
+              ]
+            }
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "\nResource deletion is done by adding the removed triples to the removal\ngraphs via ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "VState:removes"
+              ],
+              "VDoc:ref": "VState:removes"
+            },
+            " term \"&-\"."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "Triple removals from various container properties are persisted in the\nstate in any resources that can be view images, as these removals are\nthen continuously applied to a the possible corresponding inherited\nview container properties.\n"
+          ]
+        },
+        {
+          "@type": "VRevdoc:Example",
+          "dc:title": "resource deletions to be persisted in state",
+          "VDoc:content": [
+            {
+              "@type": "VDoc:Paragraph",
+              "VDoc:content": [
+                [
+                  "we expect",
+                  {
+                    "VDoc:blockquote": true,
+                    "VDoc:content": [
+                      {
+                        "@type": "VDoc:CharacterData",
+                        "VDoc:content": [
+                          " JSON.parse(JSON.stringify(state = applyVLogDelta(state,\n{\n  \"@context\": [{}],\n  \"&~\": {\n    \"9/\": { \"&_\": {\n      \"9/4/\": { \"&-\": { \".tgt\": \"9/9/2/\" } },\n      \"9/9/\": { \"&-\": { \"&_\": [\"9/9/2/\"], \"~E\": [\"9/9/2/\"] } },\n    }, },\n  },\n})))"
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "toMatchObject",
+                {
+                  "VDoc:blockquote": true,
                   "VDoc:content": [
                     {
-                      "@type": "VDoc:Reference",
+                      "@type": "VDoc:CharacterData",
                       "VDoc:content": [
-                        "description"
-                      ],
-                      "VDoc:ref": "rdfs:comment"
+                        " ({\n  \"@context\": [baseStateContext, {\n    \"0\": \"~u4:cccccccc-6600-2211-cc77-333333333333\",\n    \"1\": \"~u4:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee\",\n    \"2\": \"~u4:bbbbbbbb-bbbb-cccc-dddd-eeeeeeeeeeee\",\n    \"3\": \"~u4:abababab-bbbb-cccc-dddd-eeeeeeeeeeee\",\n    \"4\": \"~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee\",\n    \"5\": \"valaa-test:?id=(~raw'extl!)#\",\n    \"6\": \"~u4:11111111-2255-7744-22cc-eeeeeeeeeeee\",\n    \"7\": \"~u4:22222222-2255-7744-22cc-eeeeeeeeeeee\",\n    \"8\": \"~u4:d336d336-9999-6666-0000-777700000000\",\n    \"9\": \"~u4:77777777-1111-eeee-3333-555555555555\"\n  }],\n  \"&^\": {\n    \"0/\": { \".n\": \"newRootName\",\n      \"V:authorityURI\": \"valaa-local:\",\n      \"~E\": [\"1/\", \"2/\", \"6/\", \"7/\", \"9/\"]\n    },\n    \"1/\": { \".E~\": \"0/\", \".n\": \"older\",\n      \"-out\": [\"3/\"], \"-in\": [\"4/\"],\n      \"toOutside\": { \"@id\": \"5/\" }, \"absolutelyParent\": { \"@id\": \"/0/\" }\n    },\n    \"2/\": { \".E~\": \"0/\", \".n\": \"unger\",\n      \"~R\": [\"3/\", \"4/\"],\n      \"-out\": [\"4/\"], \"-in\": [\"3/\"], \"-hasI\": [\"6/\"],\n      \"toOlder\": { \"@id\": \"1/\" }, \"absolutelyOlder\": { \"@id\": \"/1/\" }\n    },\n    \"3/\": { \".tgt~\": \"2/\", \".n\": \"SIBLING\", \".src\": \"1/\", \"~E\": [\"8/\"] },\n    \"4/\": { \".src~\": \"2/\", \".n\": \"SIBLING\", \".tgt\": \"1/\" },\n    \"6/\": [{ \".E~\": \"0/\", \".n\": \"ungerInstance\",\n      \".iOf\": \"2/\", \"-hasI\": [\"7/\"]\n    }, {\n      \"@context\": { \"@base\": \"6/\" },\n      \"&_\": {\n        \"3/\": {\n          \"instance\": { \"@id\": \"\" },\n          \"absoluteInstance\": { \"@id\": \"/6/\" },\n          \"deepProto\": { \"@id\": \"../8/\" },\n          \"absoluteDeepProto\": { \"@id\": \"/8/\" }\n        },\n        \"8/\": { \".n\": \"deeplyOwnedGhost\" }\n      }\n    }],\n    \"7/\": [{ \".E~\": \"0/\", \".n\": \"ungerInstanceInstance\",\n      \".iOf\": \"6/\"\n    }, {\n      \"@context\": { \"@base\": \"7/\" },\n      \"&_\": {\n        \"3/\": { \"instanceInstance\": { \"@id\": \"\" } },\n        \"8/\": { \".n\": \"deeplyOwnedGhostGhost\" }\n      }\n    }],\n    \"8/\": { \".E~\": \"3/\", \".n\": \"deeplyOwned\" },\n    \"9/\": [{ \".E~\": \"0/\", \".n\": \"inceptor\", \".iOf\": \"0/\" }, {\n      \"@context\": { \"@base\": \"9/\" },\n      \"&_\": {\n        \"1/\": { \".n\": \"olderGhost\" },\n        \"2/\": { \".n\": \"ungerGhost\" },\n        \"3/\": { \".n\": \"toNephewOldceptGhost\", \".tgt\": \"9/1/\" },\n        \"4/\": { \".n\": \"toNephewUngceptGhost\" },\n        \"9/\": [{\n          \".n\": \"firstInception\",\n          \"&-\": { \"~E\": [\"9/2/\"] },\n        }, {\n          \"@context\": { \"@base\": \"9/\" },\n          \"&_\": {\n            \"1/\": { \".n\": \"oldceptGhost\", \"-in\": [\"../3/\"] }\n          }\n        }],\n      }\n    }],\n  },\n})"
+                      ]
                     }
                   ]
-                },
-                "VDoc:wide": true
-              },
-              {
-                "VDoc:cell": "VRevdoc:introduction",
-                "@type": "VDoc:Header",
-                "VDoc:content": {
-                  "VDoc:em": true,
-                  "VDoc:content": [
-                    {
-                      "@type": "VDoc:Reference",
-                      "VDoc:content": [
-                        "introduction"
-                      ],
-                      "VDoc:ref": "VRevdoc:introduction"
-                    }
-                  ]
-                },
-                "VDoc:wide": true,
-                "VDoc:collapsed": true,
-                "VDoc:elidable": true
-              }
-            ]
-          },
-          "VDoc:entries": []
+                }
+              ]
+            }
+          ]
         }
       ]
     },
@@ -1753,7 +690,10 @@
         "@id": "introduction"
       },
       {
-        "@id": "section_fabric"
+        "@id": "principles"
+      },
+      {
+        "@id": "examples"
       }
     ]
   }

@@ -66,6 +66,10 @@
         "@id": "#Chronicle.createChronicleURI",
         "@type": "@id"
       },
+      "V:Chronicle.splitChronicleURI": {
+        "@id": "#Chronicle.splitChronicleURI",
+        "@type": "@id"
+      },
       "V:Chronicle.tryPartitionConnection": {
         "@id": "#Chronicle.tryPartitionConnection",
         "@type": "@id"
@@ -304,8 +308,8 @@
         "@id": "#parent",
         "@type": "@id"
       },
-      "V:entities": {
-        "@id": "#entities",
+      "V:ownsEntity": {
+        "@id": "#ownsEntity",
         "@container": "@list",
         "@type": "@id"
       },
@@ -313,8 +317,8 @@
         "@id": "#folder",
         "@type": "@id"
       },
-      "V:medias": {
-        "@id": "#medias",
+      "V:ownsMedia": {
+        "@id": "#ownsMedia",
         "@container": "@list",
         "@type": "@id"
       },
@@ -322,12 +326,12 @@
         "@id": "#content",
         "@type": "@id"
       },
-      "V:connector": {
-        "@id": "#connector",
+      "V:graph": {
+        "@id": "#graph",
         "@type": "@id"
       },
-      "V:connectedRelations": {
-        "@id": "#connectedRelations",
+      "V:ownsRelation": {
+        "@id": "#ownsRelation",
         "@container": "@list",
         "@type": "@id"
       },
@@ -335,8 +339,8 @@
         "@id": "#source",
         "@type": "@id"
       },
-      "V:outRelations": {
-        "@id": "#outRelations",
+      "V:hasOutRelation": {
+        "@id": "#hasOutRelation",
         "@container": "@list",
         "@type": "@id"
       },
@@ -344,44 +348,44 @@
         "@id": "#target",
         "@type": "@id"
       },
-      "V:inRelations": {
-        "@id": "#inRelations",
+      "V:hasInRelation": {
+        "@id": "#hasInRelation",
         "@container": "@list",
         "@type": "@id"
       },
-      "V:pairedSource": {
-        "@id": "#pairedSource",
+      "V:linkedSource": {
+        "@id": "#linkedSource",
         "@type": "@id"
       },
-      "V:pairedOutRelations": {
-        "@id": "#pairedOutRelations",
+      "V:linkedOutRelation": {
+        "@id": "#linkedOutRelation",
         "@container": "@list",
         "@type": "@id"
       },
-      "V:pairedTarget": {
-        "@id": "#pairedTarget",
+      "V:linkedTarget": {
+        "@id": "#linkedTarget",
         "@type": "@id"
       },
-      "V:pairedInRelations": {
-        "@id": "#pairedInRelations",
+      "V:linkedInRelation": {
+        "@id": "#linkedInRelation",
         "@container": "@list",
         "@type": "@id"
       },
-      "V:connectedSource": {
-        "@id": "#connectedSource",
+      "V:ownerSource": {
+        "@id": "#ownerSource",
         "@type": "@id"
       },
-      "V:connectedOutRelations": {
-        "@id": "#connectedOutRelations",
+      "V:ownsOutRelation": {
+        "@id": "#ownsOutRelation",
         "@container": "@list",
         "@type": "@id"
       },
-      "V:connectedTarget": {
-        "@id": "#connectedTarget",
+      "V:ownerTarget": {
+        "@id": "#ownerTarget",
         "@type": "@id"
       },
-      "V:connectedInRelations": {
-        "@id": "#connectedInRelations",
+      "V:ownsInRelation": {
+        "@id": "#ownsInRelation",
         "@container": "@list",
         "@type": "@id"
       },
@@ -405,32 +409,32 @@
         "@container": "@list",
         "@type": "@id"
       },
-      "V:prototype": {
-        "@id": "#prototype",
+      "V:specializationOf": {
+        "@id": "#specializationOf",
         "@type": "@id"
       },
-      "V:derivations": {
-        "@id": "#derivations",
+      "V:hasSpecialization": {
+        "@id": "#hasSpecialization",
         "@type": "@id"
       },
       "V:ownFields": {
         "@id": "#ownFields",
         "@type": "@id"
       },
-      "V:inheritors": {
-        "@id": "#inheritors",
+      "V:prototypeOf": {
+        "@id": "#prototypeOf",
         "@type": "@id"
       },
-      "V:instances": {
-        "@id": "#instances",
+      "V:hasInstance": {
+        "@id": "#hasInstance",
         "@type": "@id"
       },
-      "V:ghostPrototype": {
-        "@id": "#ghostPrototype",
+      "V:ghostOf": {
+        "@id": "#ghostOf",
         "@type": "@id"
       },
-      "V:ghosts": {
-        "@id": "#ghosts",
+      "V:hasGhost": {
+        "@id": "#hasGhost",
         "@type": "@id"
       },
       "V:materializedGhosts": {
@@ -449,8 +453,8 @@
         "@id": "#ghostOwner",
         "@type": "@id"
       },
-      "V:ghostOwnlings": {
-        "@id": "#ghostOwnlings",
+      "V:ownsGhost": {
+        "@id": "#ownsGhost",
         "@type": "@id"
       },
       "V:contentReferrers": {
@@ -465,12 +469,12 @@
         "@id": "#name",
         "@type": "@id"
       },
-      "V:inheritancePrototype": {
-        "@id": "#inheritancePrototype",
+      "V:hasPrototype": {
+        "@id": "#hasPrototype",
         "@type": "@id"
       },
-      "V:instancePrototype": {
-        "@id": "#instancePrototype",
+      "V:instanceOf": {
+        "@id": "#instanceOf",
         "@type": "@id"
       },
       "V:ownlings": {
@@ -494,8 +498,8 @@
         "@id": "#value",
         "@type": "@id"
       },
-      "V:properties": {
-        "@id": "#properties",
+      "V:ownsProperty": {
+        "@id": "#ownsProperty",
         "@container": "@list",
         "@type": "@id"
       }
@@ -508,7 +512,7 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/kernel",
-    "VRevdoc:version": "0.37.0-prerelease.0",
+    "VRevdoc:version": "0.37.0-prerelease.1",
     "VRevdoc:preferredPrefix": "V",
     "VRevdoc:baseIRI": "https://valospace.org/0#",
     "VRevdoc:referencedModules": {
@@ -522,7 +526,7 @@
     },
     "VRevdoc:extenderModules": {},
     "respecConfig": {
-      "subtitle": "0.37.0-prerelease.0",
+      "subtitle": "0.37.0-prerelease.1",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -872,7 +876,7 @@
                     ]
                   },
                   "package": "@valos/kernel-vault",
-                  "version": "0.37.0-alpha.4"
+                  "version": "0.37.0-alpha.5"
                 },
                 "technician": {
                   "@id": "https://valospace.org/technician",
@@ -968,7 +972,7 @@
                     ]
                   },
                   "package": "@valos/kernel-vault",
-                  "version": "0.37.0-alpha.4"
+                  "version": "0.37.0-alpha.5"
                 },
                 "voyager": {
                   "@id": "https://valospace.org/voyager",
@@ -1036,7 +1040,7 @@
                     ]
                   },
                   "package": "@valos/kernel-vault",
-                  "version": "0.37.0-alpha.4"
+                  "version": "0.37.0-alpha.5"
                 }
               },
               "VDoc:map": {
@@ -1098,7 +1102,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/kernel-vault",
-        "version": "0.37.0-alpha.5"
+        "version": "0.37.0-alpha.6"
       },
       "@id": "documents",
       "sbom": {
@@ -1108,7 +1112,7 @@
           "SBOM"
         ],
         "subProfiles": [],
-        "title": "@valos/kernel-vault@0.37.0-alpha.5 Software Bill of Materials",
+        "title": "@valos/kernel-vault@0.37.0-alpha.6 Software Bill of Materials",
         "abstract": {
           "@type": "VDoc:Chapter",
           "VDoc:content": [
@@ -1155,7 +1159,7 @@
           ]
         },
         "package": "@valos/kernel-vault",
-        "version": "0.37.0-alpha.5"
+        "version": "0.37.0-alpha.6"
       },
       "chronicle": {
         "@id": "https://valospace.org/chronicle",
@@ -1327,7 +1331,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/chronicle",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "engine/0": {
         "@id": "https://valospace.org/engine/0",
@@ -1426,7 +1430,7 @@
           "https://valospace.org/0#": "@valos/engine/V"
         },
         "package": "@valos/engine",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "engine": {
         "@id": "https://valospace.org/engine",
@@ -1525,7 +1529,7 @@
           "https://valospace.org/0#": "@valos/engine/V"
         },
         "package": "@valos/engine",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "inspire/0": {
         "@id": "https://valospace.org/inspire/0",
@@ -1623,7 +1627,7 @@
           "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
         },
         "package": "@valos/inspire",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "inspire/Lens/0": {
         "@id": "https://valospace.org/inspire/Lens/0",
@@ -1903,7 +1907,7 @@
           "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
         },
         "package": "@valos/inspire",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "inspire/Lens": {
         "@id": "https://valospace.org/inspire/Lens",
@@ -2183,7 +2187,7 @@
           "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
         },
         "package": "@valos/inspire",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "inspire/On/0": {
         "@id": "https://valospace.org/inspire/On/0",
@@ -2298,7 +2302,7 @@
           "https://valospace.org/valk/0#": "@valos/sourcerer/VValk"
         },
         "package": "@valos/inspire",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "inspire/On": {
         "@id": "https://valospace.org/inspire/On",
@@ -2413,7 +2417,7 @@
           "https://valospace.org/valk/0#": "@valos/sourcerer/VValk"
         },
         "package": "@valos/inspire",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "inspire": {
         "@id": "https://valospace.org/inspire",
@@ -2511,7 +2515,7 @@
           "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
         },
         "package": "@valos/inspire",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "inspire/Var/0": {
         "@id": "https://valospace.org/inspire/Var/0",
@@ -2611,7 +2615,7 @@
           "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
         },
         "package": "@valos/inspire",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "inspire/Var": {
         "@id": "https://valospace.org/inspire/Var",
@@ -2711,7 +2715,7 @@
           "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
         },
         "package": "@valos/inspire",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "inspire/VRevela/0": {
         "@id": "https://valospace.org/inspire/VRevela/0",
@@ -3014,7 +3018,7 @@
           "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
         },
         "package": "@valos/inspire",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "inspire/VRevela": {
         "@id": "https://valospace.org/inspire/VRevela",
@@ -3317,7 +3321,7 @@
           "https://valospace.org/inspire/On/0#": "@valos/inspire/On"
         },
         "package": "@valos/inspire",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "kernel/0": {
         "@id": "https://valospace.org/kernel/0",
@@ -3535,7 +3539,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/kernel",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "kernel": {
         "@id": "https://valospace.org/kernel",
@@ -3753,7 +3757,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/kernel",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "log/0": {
         "@id": "https://valospace.org/log/0",
@@ -3934,7 +3938,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/log",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "log": {
         "@id": "https://valospace.org/log",
@@ -4115,7 +4119,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/log",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "plot/0": {
         "@id": "https://valospace.org/plot/0",
@@ -4246,7 +4250,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/plot",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "plot": {
         "@id": "https://valospace.org/plot",
@@ -4377,7 +4381,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/plot",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "plot/VPlot-JSON": {
         "@id": "https://valospace.org/plot/VPlot-JSON",
@@ -4474,7 +4478,7 @@
           ]
         },
         "package": "@valos/plot",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "raem/0": {
         "@id": "https://valospace.org/raem/0",
@@ -4609,7 +4613,7 @@
           "https://valospace.org/0#": "@valos/raem/V"
         },
         "package": "@valos/raem",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "raem": {
         "@id": "https://valospace.org/raem",
@@ -4744,7 +4748,7 @@
           "https://valospace.org/0#": "@valos/raem/V"
         },
         "package": "@valos/raem",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "revdoc/0": {
         "@id": "https://valospace.org/revdoc/0",
@@ -4814,7 +4818,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/revdoc",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "revdoc": {
         "@id": "https://valospace.org/revdoc",
@@ -4884,7 +4888,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/revdoc",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "revdoc/tutorial": {
         "@id": "https://valospace.org/revdoc/tutorial",
@@ -4958,7 +4962,7 @@
           ]
         },
         "package": "@valos/revdoc",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "sbomdoc/0": {
         "@id": "https://valospace.org/sbomdoc/0",
@@ -5029,7 +5033,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/sbomdoc",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "sbomdoc": {
         "@id": "https://valospace.org/sbomdoc",
@@ -5100,7 +5104,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/sbomdoc",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "script/0": {
         "@id": "https://valospace.org/script/0",
@@ -5167,7 +5171,7 @@
           "https://valospace.org/valk/0#": "@valos/script/VValk"
         },
         "package": "@valos/script",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "script": {
         "@id": "https://valospace.org/script",
@@ -5234,7 +5238,7 @@
           "https://valospace.org/valk/0#": "@valos/script/VValk"
         },
         "package": "@valos/script",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "sourcerer/0": {
         "@id": "https://valospace.org/sourcerer/0",
@@ -5294,7 +5298,7 @@
           "https://valospace.org/valk/0#": "@valos/sourcerer/VValk"
         },
         "package": "@valos/sourcerer",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "sourcerer": {
         "@id": "https://valospace.org/sourcerer",
@@ -5354,7 +5358,7 @@
           "https://valospace.org/valk/0#": "@valos/sourcerer/VValk"
         },
         "package": "@valos/sourcerer",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "sourcerer/valos-event-log": {
         "@id": "https://valospace.org/sourcerer/valos-event-log",
@@ -5384,7 +5388,7 @@
           ]
         },
         "package": "@valos/sourcerer",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "sourcerer/VState": {
         "@id": "https://valospace.org/sourcerer/VState",
@@ -5423,7 +5427,7 @@
           ]
         },
         "package": "@valos/sourcerer",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "space": {
         "@id": "https://valospace.org/space",
@@ -5600,7 +5604,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/space",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "state/0": {
         "@id": "https://valospace.org/state/0",
@@ -5751,7 +5755,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/state",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "state": {
         "@id": "https://valospace.org/state",
@@ -5902,7 +5906,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/state",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "twindoc/0": {
         "@id": "https://valospace.org/twindoc/0",
@@ -5993,7 +5997,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/twindoc",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "twindoc": {
         "@id": "https://valospace.org/twindoc",
@@ -6084,7 +6088,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/twindoc",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "type-vault/AssortedTutorials": {
         "@id": "https://valospace.org/type-vault/AssortedTutorials",
@@ -6103,7 +6107,7 @@
         },
         "introduction": {},
         "package": "@valos/type-vault",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "valk/0": {
         "@id": "https://valospace.org/valk/0",
@@ -6251,7 +6255,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/valk",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "valk": {
         "@id": "https://valospace.org/valk",
@@ -6399,7 +6403,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/valk",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "vdoc/0": {
         "@id": "https://valospace.org/vdoc/0",
@@ -6495,7 +6499,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/vdoc",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "vdoc": {
         "@id": "https://valospace.org/vdoc",
@@ -6591,7 +6595,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/vdoc",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "web-spindle": {
         "@id": "https://valospace.org/web-spindle",
@@ -6697,7 +6701,7 @@
           ]
         },
         "package": "@valos/web-spindle",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "web-spindle/schema-builder": {
         "@id": "https://valospace.org/web-spindle/schema-builder",
@@ -6826,7 +6830,7 @@
           ]
         },
         "package": "@valos/web-spindle",
-        "version": "0.37.0-alpha.6"
+        "version": "0.37.0-prerelease.0"
       },
       "removed-from": {
         "@id": "https://valospace.org/removed-from",
@@ -6877,7 +6881,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/kernel-vault",
-        "version": "0.37.0-alpha.5"
+        "version": "0.37.0-alpha.6"
       },
       "@valos/kernel-vault": {
         "@id": "https://valospace.org/index",
@@ -7216,7 +7220,7 @@
                     ]
                   },
                   "package": "@valos/kernel-vault",
-                  "version": "0.37.0-alpha.4"
+                  "version": "0.37.0-alpha.5"
                 },
                 "technician": {
                   "@id": "https://valospace.org/technician",
@@ -7312,7 +7316,7 @@
                     ]
                   },
                   "package": "@valos/kernel-vault",
-                  "version": "0.37.0-alpha.4"
+                  "version": "0.37.0-alpha.5"
                 },
                 "voyager": {
                   "@id": "https://valospace.org/voyager",
@@ -7380,7 +7384,7 @@
                     ]
                   },
                   "package": "@valos/kernel-vault",
-                  "version": "0.37.0-alpha.4"
+                  "version": "0.37.0-alpha.5"
                 }
               },
               "VDoc:map": {
@@ -7442,7 +7446,7 @@
         },
         "VRevdoc:extenderModules": {},
         "package": "@valos/kernel-vault",
-        "version": "0.37.0-alpha.5"
+        "version": "0.37.0-alpha.6"
       },
       "technician": {
         "@id": "https://valospace.org/technician",
@@ -7538,7 +7542,7 @@
           ]
         },
         "package": "@valos/kernel-vault",
-        "version": "0.37.0-alpha.5"
+        "version": "0.37.0-alpha.6"
       },
       "valonaut": {
         "@id": "https://valospace.org/valonaut",
@@ -7620,7 +7624,7 @@
           ]
         },
         "package": "@valos/kernel-vault",
-        "version": "0.37.0-alpha.5"
+        "version": "0.37.0-alpha.6"
       },
       "voyager": {
         "@id": "https://valospace.org/voyager",
@@ -7688,7 +7692,7 @@
           ]
         },
         "package": "@valos/kernel-vault",
-        "version": "0.37.0-alpha.5"
+        "version": "0.37.0-alpha.6"
       },
       "zone": {
         "@id": "https://valospace.org/zone",
@@ -7708,7 +7712,7 @@
         },
         "introduction": {},
         "package": "@valos/kernel-vault",
-        "version": "0.37.0-alpha.5"
+        "version": "0.37.0-alpha.6"
       }
     },
     "prefixes": {
@@ -7770,6 +7774,10 @@
             "VRevdoc:indexLabel": "valos.Chronicle.createChronicleURI()"
           },
           {
+            "@id": "#Chronicle.splitChronicleURI",
+            "VRevdoc:indexLabel": "valos.Chronicle.splitChronicleURI()"
+          },
+          {
             "@id": "#Chronicle.tryPartitionConnection",
             "VRevdoc:indexLabel": "valos.Chronicle.tryPartitionConnection()"
           },
@@ -7809,8 +7817,19 @@
         "VRevdoc:indexLabel": "valos.Chronicle.createChronicleURI()",
         "rdf:subject": "V:Chronicle",
         "@type": "VEngine:ObjectMethod",
-        "rdfs:range": " createNaiveChronicleURI(authorityURI, chronicleVRID)",
-        "rdfs:comment": "Creates a URI from given *base* and *chronicleId* strings (coercing non-vplot id's)",
+        "rdfs:range": " createChronicleURI(authorityURI, chronicleId)",
+        "rdfs:comment": "Creates a URI from given *authorityURI* and *chronicleId* strings (coercing non-vplot id's)",
+        "VRevdoc:introduction": null
+      },
+      "Chronicle.splitChronicleURI": {
+        "rdfs:label": [
+          "Chronicle.splitChronicleURI"
+        ],
+        "VRevdoc:indexLabel": "valos.Chronicle.splitChronicleURI()",
+        "rdf:subject": "V:Chronicle",
+        "@type": "VEngine:ObjectMethod",
+        "rdfs:range": " splitChronicleURI(chronicleURI)",
+        "rdfs:comment": "Returns an array containing the authority URI and the chronicle id of given *chronicleURI*",
         "VRevdoc:introduction": null
       },
       "Chronicle.tryPartitionConnection": {
@@ -8222,8 +8241,8 @@
         "rdfs:comment": "The class of valospace resources which represent directed,\nmany-to-many relationships between nodes.\nWith Entity and Media it forms the group of three primary node types.\nAs a Scope it can have scriptable properties. Relation being\na SourceredNode itself allows for nested and recursive relationship\nstructures.",
         "VEngine:domainOfField": [
           {
-            "@id": "#connector",
-            "VRevdoc:indexLabel": ".$V.connector"
+            "@id": "#graph",
+            "VRevdoc:indexLabel": ".$V.graph"
           },
           {
             "@id": "#source",
@@ -8234,20 +8253,20 @@
             "VRevdoc:indexLabel": ".$V.target"
           },
           {
-            "@id": "#pairedSource",
-            "VRevdoc:indexLabel": ".$V.pairedSource"
+            "@id": "#linkedSource",
+            "VRevdoc:indexLabel": ".$V.linkedSource"
           },
           {
-            "@id": "#pairedTarget",
-            "VRevdoc:indexLabel": ".$V.pairedTarget"
+            "@id": "#linkedTarget",
+            "VRevdoc:indexLabel": ".$V.linkedTarget"
           },
           {
-            "@id": "#connectedSource",
-            "VRevdoc:indexLabel": ".$V.connectedSource"
+            "@id": "#ownerSource",
+            "VRevdoc:indexLabel": ".$V.ownerSource"
           },
           {
-            "@id": "#connectedTarget",
-            "VRevdoc:indexLabel": ".$V.connectedTarget"
+            "@id": "#ownerTarget",
+            "VRevdoc:indexLabel": ".$V.ownerTarget"
           }
         ]
       },
@@ -8397,32 +8416,32 @@
             "VRevdoc:indexLabel": ".$V.typeName"
           },
           {
-            "@id": "#prototype",
-            "VRevdoc:indexLabel": ".$V.prototype"
+            "@id": "#specializationOf",
+            "VRevdoc:indexLabel": ".$V.specializationOf"
           },
           {
-            "@id": "#derivations",
-            "VRevdoc:indexLabel": ".$V.derivations"
+            "@id": "#hasSpecialization",
+            "VRevdoc:indexLabel": ".$V.hasSpecialization"
           },
           {
             "@id": "#ownFields",
             "VRevdoc:indexLabel": ".$V.ownFields"
           },
           {
-            "@id": "#inheritors",
-            "VRevdoc:indexLabel": ".$V.inheritors"
+            "@id": "#prototypeOf",
+            "VRevdoc:indexLabel": ".$V.prototypeOf"
           },
           {
-            "@id": "#instances",
-            "VRevdoc:indexLabel": ".$V.instances"
+            "@id": "#hasInstance",
+            "VRevdoc:indexLabel": ".$V.hasInstance"
           },
           {
-            "@id": "#ghostPrototype",
-            "VRevdoc:indexLabel": ".$V.ghostPrototype"
+            "@id": "#ghostOf",
+            "VRevdoc:indexLabel": ".$V.ghostOf"
           },
           {
-            "@id": "#ghosts",
-            "VRevdoc:indexLabel": ".$V.ghosts"
+            "@id": "#hasGhost",
+            "VRevdoc:indexLabel": ".$V.hasGhost"
           },
           {
             "@id": "#materializedGhosts",
@@ -8441,8 +8460,8 @@
             "VRevdoc:indexLabel": ".$V.ghostOwner"
           },
           {
-            "@id": "#ghostOwnlings",
-            "VRevdoc:indexLabel": ".$V.ghostOwnlings"
+            "@id": "#ownsGhost",
+            "VRevdoc:indexLabel": ".$V.ownsGhost"
           }
         ]
       },
@@ -8859,8 +8878,8 @@
         ],
         "VEngine:domainOfField": [
           {
-            "@id": "#properties",
-            "VRevdoc:indexLabel": ".$V.properties"
+            "@id": "#ownsProperty",
+            "VRevdoc:indexLabel": ".$V.ownsProperty"
           }
         ]
       },
@@ -9022,12 +9041,12 @@
             "VRevdoc:indexLabel": ".$V.partitionURI"
           },
           {
-            "@id": "#outRelations",
-            "VRevdoc:indexLabel": ".$V.outRelations"
+            "@id": "#hasOutRelation",
+            "VRevdoc:indexLabel": ".$V.hasOutRelation"
           },
           {
-            "@id": "#inRelations",
-            "VRevdoc:indexLabel": ".$V.inRelations"
+            "@id": "#hasInRelation",
+            "VRevdoc:indexLabel": ".$V.hasInRelation"
           },
           {
             "@id": "#outgoingRelations",
@@ -9180,32 +9199,32 @@
             "VRevdoc:indexLabel": ".$V.entries"
           },
           {
-            "@id": "#entities",
-            "VRevdoc:indexLabel": ".$V.entities"
+            "@id": "#ownsEntity",
+            "VRevdoc:indexLabel": ".$V.ownsEntity"
           },
           {
-            "@id": "#medias",
-            "VRevdoc:indexLabel": ".$V.medias"
+            "@id": "#ownsMedia",
+            "VRevdoc:indexLabel": ".$V.ownsMedia"
           },
           {
-            "@id": "#connectedRelations",
-            "VRevdoc:indexLabel": ".$V.connectedRelations"
+            "@id": "#ownsRelation",
+            "VRevdoc:indexLabel": ".$V.ownsRelation"
           },
           {
-            "@id": "#pairedOutRelations",
-            "VRevdoc:indexLabel": ".$V.pairedOutRelations"
+            "@id": "#linkedOutRelation",
+            "VRevdoc:indexLabel": ".$V.linkedOutRelation"
           },
           {
-            "@id": "#pairedInRelations",
-            "VRevdoc:indexLabel": ".$V.pairedInRelations"
+            "@id": "#linkedInRelation",
+            "VRevdoc:indexLabel": ".$V.linkedInRelation"
           },
           {
-            "@id": "#connectedOutRelations",
-            "VRevdoc:indexLabel": ".$V.connectedOutRelations"
+            "@id": "#ownsOutRelation",
+            "VRevdoc:indexLabel": ".$V.ownsOutRelation"
           },
           {
-            "@id": "#connectedInRelations",
-            "VRevdoc:indexLabel": ".$V.connectedInRelations"
+            "@id": "#ownsInRelation",
+            "VRevdoc:indexLabel": ".$V.ownsInRelation"
           },
           {
             "@id": "#relations",
@@ -9223,7 +9242,7 @@
           "owl:maxCardinality": 1
         },
         "VState:isOwnedBy": true,
-        "VState:coupledToField": "V:nodes",
+        "VState:linkedToField": "V:nodes",
         "rdfs:comment": "The container (and owner) node of this sourcered node.",
         "rdfs:label": [
           "$V.container"
@@ -9235,7 +9254,7 @@
         "rdfs:domain": "V:SourceredNode",
         "rdfs:range": "rdfs:List",
         "VState:isOwnerOf": true,
-        "VState:coupledToField": "V:container",
+        "VState:linkedToField": "V:container",
         "rdfs:comment": "The ordered list of all nodes directly contained by this sourcered\nnode.",
         "rdfs:label": [
           "$V.nodes"
@@ -9316,7 +9335,7 @@
           "owl:maxCardinality": 1
         },
         "VState:isOwnedBy": true,
-        "VState:coupledToField": "V:entries",
+        "VState:linkedToField": "V:entries",
         "rdfs:comment": "The directory (and owner) node of this sourcered node.",
         "rdfs:label": [
           "$V.directory"
@@ -9328,7 +9347,7 @@
         "rdfs:domain": "V:SourceredNode",
         "rdfs:range": "rdfs:List",
         "VState:isOwnerOf": true,
-        "VState:coupledToField": "V:directory",
+        "VState:linkedToField": "V:directory",
         "rdfs:comment": "The ordered list of entries of this sourcered node when seen as\n  a directory.",
         "rdfs:label": [
           "$V.entries"
@@ -9344,22 +9363,22 @@
           "owl:maxCardinality": 1
         },
         "VState:isOwnedBy": true,
-        "VState:coupledToField": "V:entities",
+        "VState:linkedToField": "V:ownsEntity",
         "rdfs:comment": "The parent (and directory, owner) node of this entity.",
         "rdfs:label": [
           "$V.parent"
         ]
       },
-      "entities": {
+      "ownsEntity": {
         "@type": "VState:EventLoggedField",
         "rdfs:subPropertyOf": "V:entries",
         "rdfs:domain": "V:SourceredNode",
         "rdfs:range": "rdfs:List",
         "VState:isOwnerOf": true,
-        "VState:coupledToField": "V:parent",
+        "VState:linkedToField": "V:parent",
         "rdfs:comment": "The ordered list of entities contained in this sourcered node.",
         "rdfs:label": [
-          "$V.entities"
+          "$V.ownsEntity"
         ]
       },
       "folder": {
@@ -9372,22 +9391,22 @@
           "owl:maxCardinality": 1
         },
         "VState:isOwnedBy": true,
-        "VState:coupledToField": "V:medias",
+        "VState:linkedToField": "V:ownsMedia",
         "rdfs:comment": "The folder (and directory, owner) node of this media.",
         "rdfs:label": [
           "$V.folder"
         ]
       },
-      "medias": {
+      "ownsMedia": {
         "@type": "VState:EventLoggedField",
         "rdfs:subPropertyOf": "V:entries",
         "rdfs:domain": "V:SourceredNode",
         "rdfs:range": "rdfs:List",
         "VState:isOwnerOf": true,
-        "VState:coupledToField": "V:folder",
+        "VState:linkedToField": "V:folder",
         "rdfs:comment": "The ordered list of medias contained in this sourcered node when seen\nas a folder",
         "rdfs:label": [
-          "$V.medias"
+          "$V.ownsMedia"
         ]
       },
       "sourceURL": {
@@ -9418,7 +9437,7 @@
           "$V.content"
         ]
       },
-      "connector": {
+      "graph": {
         "@type": "VState:EventLoggedField",
         "rdfs:subPropertyOf": "V:container",
         "rdfs:domain": "V:Relation",
@@ -9428,22 +9447,22 @@
           "owl:maxCardinality": 1
         },
         "VState:isOwnedBy": true,
-        "VState:coupledToField": "V:connectedRelations",
-        "rdfs:comment": "The connector (and container, owner) node of this relation.\nTypically also either the source or the target but possibly neither.",
+        "VState:linkedToField": "V:ownsRelation",
+        "rdfs:comment": "The graph (and container, owner) node of this relation.\nTypically also either the source or the target but possibly neither.",
         "rdfs:label": [
-          "$V.connector"
+          "$V.graph"
         ]
       },
-      "connectedRelations": {
+      "ownsRelation": {
         "@type": "VState:EventLoggedField",
         "rdfs:subPropertyOf": "V:nodes",
         "rdfs:domain": "V:SourceredNode",
         "rdfs:range": "rdfs:List",
         "VState:isOwnerOf": true,
-        "VState:coupledToField": "V:connector",
-        "rdfs:comment": "The ordered list of relations that are connected (and contained,\nowned) _by_ this sourcered node. This includes both\nconnectedInRelations and connectedOutRelations (ie. incoming and\noutgoing relations which are also connected by this sourcered node) but\nalso relations which only have this sourcered node as their connector\nbut not as source or target.",
+        "VState:linkedToField": "V:graph",
+        "rdfs:comment": "The ordered list of relations that are connected (and contained,\nowned) _by_ this sourcered node. This includes both\nownsInRelation and ownsOutRelation (ie. incoming and\noutgoing relations which are also connected by this sourcered node) but\nalso relations which only have this sourcered node as their graph\nbut not as source or target.",
         "rdfs:label": [
-          "$V.connectedRelations"
+          "$V.ownsRelation"
         ]
       },
       "source": {
@@ -9455,13 +9474,13 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "VState:coupledToField": "V:outRelations",
+        "VState:coupledToField": "V:hasOutRelation",
         "rdfs:comment": "The source node of this relation.",
         "rdfs:label": [
           "$V.source"
         ]
       },
-      "outRelations": {
+      "hasOutRelation": {
         "@type": "VState:CoupledField",
         "rdfs:subPropertyOf": "V:nodes",
         "rdfs:domain": "V:SourcerableNode",
@@ -9469,7 +9488,7 @@
         "VState:coupledToField": "V:source",
         "rdfs:comment": "The unordered list of outgoing relations with this sourcerable\n(but possibly absent) node as their source (note that sourcerable and\nsource are completely separate concepts here).",
         "rdfs:label": [
-          "$V.outRelations"
+          "$V.hasOutRelation"
         ]
       },
       "target": {
@@ -9481,13 +9500,13 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "VState:coupledToField": "V:inRelations",
+        "VState:coupledToField": "V:hasInRelation",
         "rdfs:comment": "The target node of this relation.",
         "rdfs:label": [
           "$V.target"
         ]
       },
-      "inRelations": {
+      "hasInRelation": {
         "@type": "VState:CoupledField",
         "rdfs:subPropertyOf": "V:nodes",
         "rdfs:domain": "V:SourcerableNode",
@@ -9495,10 +9514,10 @@
         "VState:coupledToField": "V:target",
         "rdfs:comment": "The unordered list of incoming relations with this sourcerable\n(but possibly absent) node as their target.",
         "rdfs:label": [
-          "$V.inRelations"
+          "$V.hasInRelation"
         ]
       },
-      "pairedSource": {
+      "linkedSource": {
         "@type": "VState:EventLoggedField",
         "rdfs:subPropertyOf": "V:source",
         "rdfs:domain": "V:Relation",
@@ -9507,24 +9526,24 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "VState:coupledToField": "V:pairedOutRelations",
-        "rdfs:comment": "The paired source node of this relation (paired denotes that the\ncoupled field 'pairedOutRelations' is an event logged field).",
+        "VState:linkedToField": "V:linkedOutRelation",
+        "rdfs:comment": "The backlinked source node of this relation. Backlinking implies\nthat the coupled field 'linkedOutRelation' is an event logged field and\nshall be transactionally modified whenever this field is modified.",
         "rdfs:label": [
-          "$V.pairedSource"
+          "$V.linkedSource"
         ]
       },
-      "pairedOutRelations": {
+      "linkedOutRelation": {
         "@type": "VState:EventLoggedField",
-        "rdfs:subPropertyOf": "V:outgoingRelations",
+        "rdfs:subPropertyOf": "V:hasOutRelation",
         "rdfs:domain": "V:SourceredNode",
         "rdfs:range": "rdfs:List",
-        "VState:coupledToField": "V:pairedSource",
-        "rdfs:comment": "The ordered list of outgoing relations paired to this sourcered node.",
+        "VState:linkedToField": "V:linkedSource",
+        "rdfs:comment": "The ordered list of outgoing backlinked relations to this sourcered\nnode.",
         "rdfs:label": [
-          "$V.pairedOutRelations"
+          "$V.linkedOutRelation"
         ]
       },
-      "pairedTarget": {
+      "linkedTarget": {
         "@type": "VState:EventLoggedField",
         "rdfs:subPropertyOf": "V:target",
         "rdfs:domain": "V:Relation",
@@ -9533,28 +9552,28 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "VState:coupledToField": "V:pairedInRelations",
-        "rdfs:comment": "The paired target node of this relation (the coupled field\n'pairedInRelations' is an event logged field).",
+        "VState:linkedToField": "V:linkedInRelation",
+        "rdfs:comment": "The backlinked target node of this relation. Backlinking implies\nthat the coupled field 'linkedInRelation' is an event logged field and\nshall be transactionally modified whenever this field is modified.",
         "rdfs:label": [
-          "$V.pairedTarget"
+          "$V.linkedTarget"
         ]
       },
-      "pairedInRelations": {
+      "linkedInRelation": {
         "@type": "VState:EventLoggedField",
-        "rdfs:subPropertyOf": "V:incomingRelations",
+        "rdfs:subPropertyOf": "V:hasInRelation",
         "rdfs:domain": "V:SourceredNode",
         "rdfs:range": "rdfs:List",
-        "VState:coupledToField": "V:pairedTarget",
+        "VState:linkedToField": "V:linkedTarget",
         "rdfs:comment": "The ordered list of incoming relations paired to this sourcered node.",
         "rdfs:label": [
-          "$V.pairedInRelations"
+          "$V.linkedInRelation"
         ]
       },
-      "connectedSource": {
+      "ownerSource": {
         "@type": "VState:EventLoggedField",
         "rdfs:subPropertyOf": [
-          "V:connector",
-          "V:pairedSource"
+          "V:graph",
+          "V:linkedSource"
         ],
         "rdfs:domain": "V:Relation",
         "rdfs:range": "V:SourceredNode",
@@ -9563,32 +9582,32 @@
           "owl:maxCardinality": 1
         },
         "VState:isOwnedBy": true,
-        "VState:coupledToField": "V:connectedOutRelations",
-        "rdfs:comment": "The source and also the connector node of this relation.",
+        "VState:linkedToField": "V:ownsOutRelation",
+        "rdfs:comment": "The resource that is both the source and the owner of this relation.",
         "rdfs:label": [
-          "$V.connectedSource"
+          "$V.ownerSource"
         ]
       },
-      "connectedOutRelations": {
+      "ownsOutRelation": {
         "@type": "VState:EventLoggedField",
         "rdfs:subPropertyOf": [
-          "V:connectedRelations",
-          "V:pairedOutRelations"
+          "V:ownsRelation",
+          "V:linkedOutRelation"
         ],
         "rdfs:domain": "V:SourceredNode",
         "rdfs:range": "rdfs:List",
         "VState:isOwnerOf": true,
-        "VState:coupledToField": "V:connectedSource",
+        "VState:linkedToField": "V:ownerSource",
         "rdfs:comment": "The ordered list of outgoing relations contained in (and owned by)\nthis sourcered node.",
         "rdfs:label": [
-          "$V.connectedOutRelations"
+          "$V.ownsOutRelation"
         ]
       },
-      "connectedTarget": {
+      "ownerTarget": {
         "@type": "VState:EventLoggedField",
         "rdfs:subPropertyOf": [
-          "V:connector",
-          "V:pairedTarget"
+          "V:graph",
+          "V:linkedTarget"
         ],
         "rdfs:domain": "V:Relation",
         "rdfs:range": "V:SourceredNode",
@@ -9597,46 +9616,46 @@
           "owl:maxCardinality": 1
         },
         "VState:isOwnedBy": true,
-        "VState:coupledToField": "V:connectedInRelations",
-        "rdfs:comment": "The target and also the connector node of this relation.",
+        "VState:linkedToField": "V:ownsInRelation",
+        "rdfs:comment": "The resource that is both the target and the owner of this relation.",
         "rdfs:label": [
-          "$V.connectedTarget"
+          "$V.ownerTarget"
         ]
       },
-      "connectedInRelations": {
+      "ownsInRelation": {
         "@type": "VState:EventLoggedField",
         "rdfs:subPropertyOf": [
-          "V:connectedRelations",
-          "V:pairedInRelations"
+          "V:ownsRelation",
+          "V:linkedInRelation"
         ],
         "rdfs:domain": "V:SourceredNode",
         "rdfs:range": "rdfs:List",
         "VState:isOwnerOf": true,
-        "VState:coupledToField": "V:connectedTarget",
+        "VState:linkedToField": "V:ownerTarget",
         "rdfs:comment": "The ordered list of incoming relations contained in (and owned by)\nthis sourcered node.",
         "rdfs:label": [
-          "$V.connectedInRelations"
+          "$V.ownsInRelation"
         ]
       },
       "relations": {
         "@type": "VState:AliasField",
-        "VRevdoc:deprecatedInFavorOf": "V:connectedRelations",
-        "VState:aliasOf": "V:connectedRelations",
-        "rdfs:subPropertyOf": "V:connectedRelations",
+        "VRevdoc:deprecatedInFavorOf": "V:ownsRelation",
+        "VState:aliasOf": "V:ownsRelation",
+        "rdfs:subPropertyOf": "V:ownsRelation",
         "rdfs:domain": "V:SourceredNode",
         "rdfs:range": "rdfs:List",
         "VState:isOwnerOf": true,
-        "VState:coupledToField": "V:connector",
-        "rdfs:comment": "A deprecation of V:connectedRelations; the ordered list of\nrelations contained within this sourcered node when seen as a graph.\nDo note that the semantics have changed: connectedRelations can now\nalso contain relations which have this sourcered node as their the\ntarget (instead of source) or as neither source nor target.\nThe set of just outgoing relations is 'outgoingRelations' and the set\nof owned outgoing relations is 'connectedOutRelations'.",
+        "VState:coupledToField": "V:graph",
+        "rdfs:comment": "A deprecation of V:ownsRelation; the ordered list of\nrelations contained within this sourcered node when seen as a graph.\nDo note that the semantics have changed: ownsRelation can now\nalso contain relations which have this sourcered node as their the\ntarget (instead of source) or as neither source nor target.\nThe set of just outgoing relations is 'outgoingRelations' and the set\nof owned outgoing relations is 'ownsOutRelation'.",
         "rdfs:label": [
           "$V.relations"
         ]
       },
       "outgoingRelations": {
         "@type": "VState:AliasField",
-        "VRevdoc:deprecatedInFavorOf": "V:outRelations",
-        "VState:aliasOf": "V:outRelations",
-        "rdfs:subPropertyOf": "V:outRelations",
+        "VRevdoc:deprecatedInFavorOf": "V:hasOutRelation",
+        "VState:aliasOf": "V:hasOutRelation",
+        "rdfs:subPropertyOf": "V:hasOutRelation",
         "rdfs:domain": "V:SourcerableNode",
         "rdfs:range": "rdfs:List",
         "VState:coupledToField": "V:source",
@@ -9647,9 +9666,9 @@
       },
       "incomingRelations": {
         "@type": "VState:AliasField",
-        "VRevdoc:deprecatedInFavorOf": "V:inRelations",
-        "VState:aliasOf": "V:inRelations",
-        "rdfs:subPropertyOf": "V:inRelations",
+        "VRevdoc:deprecatedInFavorOf": "V:hasInRelation",
+        "VState:aliasOf": "V:hasInRelation",
+        "rdfs:subPropertyOf": "V:hasInRelation",
         "rdfs:domain": "V:SourcerableNode",
         "rdfs:range": "rdfs:List",
         "VState:coupledToField": "V:target",
@@ -9722,26 +9741,26 @@
           "$V.typeName"
         ]
       },
-      "prototype": {
+      "specializationOf": {
         "@type": "VState:EventLoggedField",
         "rdfs:domain": "V:Resource",
         "rdfs:range": "V:Resource",
-        "VState:coupledToField": "V:derivations",
+        "VState:coupledToField": "V:hasSpecialization",
         "rdfs:comment": "The prototypes of this resource. All field lookups for which there is\nno associated value set and whose field descriptors don't have\nownDefaultValue are forwarded to the prototype.",
         "rdfs:label": [
-          "$V.prototype"
+          "$V.specializationOf"
         ]
       },
-      "derivations": {
+      "hasSpecialization": {
         "@type": "VState:CoupledField",
         "rdfs:domain": "V:Resource",
         "rdfs:range": "V:Resource",
-        "VState:coupledToField": "V:prototype",
+        "VState:coupledToField": "V:specializationOf",
         "VState:preventsDestroy": true,
         "VState:ownDefaultValue": [],
-        "rdfs:comment": "An unordered set of resources which have this resource as their\nV:prototype.",
+        "rdfs:comment": "An unordered set of resources which have this resource as their\nV:specializationOf.",
         "rdfs:label": [
-          "$V.derivations"
+          "$V.hasSpecialization"
         ]
       },
       "ownFields": {
@@ -9760,33 +9779,33 @@
           "$V.ownFields"
         ]
       },
-      "inheritors": {
+      "prototypeOf": {
         "@type": "VState:CoupledField",
-        "rdfs:subPropertyOf": "V:derivations",
+        "rdfs:subPropertyOf": "V:specializationOf",
         "rdfs:domain": "V:Resource",
         "rdfs:range": "V:Resource",
-        "VState:coupledToField": "V:inheritancePrototype",
+        "VState:coupledToField": "V:hasPrototype",
         "VState:preventsDestroy": true,
         "VState:ownDefaultValue": [],
-        "rdfs:comment": "An unordered set of resources which have this resource as their\nV:inheritancePrototype.",
+        "rdfs:comment": "An unordered set of resources which have this resource as their\nV:hasPrototype.",
         "rdfs:label": [
-          "$V.inheritors"
+          "$V.prototypeOf"
         ]
       },
-      "instances": {
+      "hasInstance": {
         "@type": "VState:CoupledField",
-        "rdfs:subPropertyOf": "V:derivations",
+        "rdfs:subPropertyOf": "V:hasSpecialization",
         "rdfs:domain": "V:Resource",
         "rdfs:range": "V:Resource",
-        "VState:coupledToField": "V:instancePrototype",
+        "VState:coupledToField": "V:instanceOf",
         "VState:preventsDestroy": true,
         "VState:ownDefaultValue": [],
-        "rdfs:comment": "An unordered set of resources which have this resource as their\ndirect V:instancePrototype.",
+        "rdfs:comment": "An unordered set of resources which have this resource as their\ndirect V:instanceOf.",
         "rdfs:label": [
-          "$V.instances"
+          "$V.hasInstance"
         ]
       },
-      "ghostPrototype": {
+      "ghostOf": {
         "@type": "VState:GeneratedField",
         "rdfs:subPropertyOf": "V:prototype",
         "rdfs:domain": "V:Resource",
@@ -9796,35 +9815,35 @@
           "owl:maxCardinality": 1
         },
         "VState:expressor": [
-          "@$VValk.resolveGhostPrototype@@"
+          "@$VValk.resolveGhostOf@@"
         ],
-        "VState:coupledToField": "V:ghosts",
+        "VState:coupledToField": "V:hasGhost",
         "rdfs:comment": "Ghost prototype of this ghost resource. The ghost prototype is the\nbase resource from which this ghost was created during some primary\ninstantiation.\nThis instantiation (which happens on prototype and results in an\ninstance of it) also ghost-instantiates all the direct and indirect\nownlings of the prototype as ghost ownlings in the instance. The\ninstance is called the *ghost host* of all these ghosts. Likewise, the\ninstance prototype is called the ghost host prototype, and the\n(grand-)ownlings of this ghost host prototype are the ghost prototypes\nof the corresponding ghosts (ie. this field).} .",
         "rdfs:label": [
-          "$V.ghostPrototype"
+          "$V.ghostOf"
         ]
       },
-      "ghosts": {
+      "hasGhost": {
         "@type": "VState:CoupledField",
-        "rdfs:subPropertyOf": "V:derivations",
+        "rdfs:subPropertyOf": "V:hasSpecialization",
         "rdfs:domain": "V:Resource",
         "rdfs:range": "V:Resource",
-        "VState:coupledToField": "V:ghostPrototype",
+        "VState:coupledToField": "V:ghostOf",
         "VState:preventsDestroy": true,
         "VState:ownDefaultValue": [],
-        "rdfs:comment": "An unordered set of all (materialized) ghosts which have this resource\nas their V:ghostPrototype. See VState:section_ghost_instancing\nfor why immaterial ghosts are not listed.",
+        "rdfs:comment": "An unordered set of all (materialized) ghosts which have this resource\nas their V:ghostOf. See VState:section_ghost_instancing\nfor why immaterial ghosts are not listed.",
         "rdfs:label": [
-          "$V.ghosts"
+          "$V.hasGhost"
         ]
       },
       "materializedGhosts": {
         "@type": "VState:AliasField",
-        "VRevdoc:deprecatedInFavorOf": "V:ghosts",
-        "VState:aliasOf": "V:ghosts",
-        "rdfs:subPropertyOf": "V:ghosts",
+        "VRevdoc:deprecatedInFavorOf": "V:hasGhost",
+        "VState:aliasOf": "V:hasGhost",
+        "rdfs:subPropertyOf": "V:hasGhost",
         "rdfs:domain": "V:Resource",
         "rdfs:range": "V:Resource",
-        "VState:coupledToField": "V:ghostPrototype",
+        "VState:coupledToField": "V:ghostOf",
         "VState:preventsDestroy": true,
         "VState:ownDefaultValue": [],
         "rdfs:label": [
@@ -9867,7 +9886,7 @@
           "owl:maxCardinality": 1
         },
         "VState:isOwnedBy": true,
-        "VState:coupledToField": "V:ghostOwnlings",
+        "VState:linkedToField": "V:ownsGhost",
         "VState:ownDefaultValue": null,
         "VState:allowTransientFieldToBeSingular": true,
         "rdfs:comment": "The instance resource which owns this materialized ghost or null if\nthis ghost is immaterial.\nNote that materialized ghosts will have a two own fields: the\nghostOwner and the regular owner (or one of its aliases). The\nremoval of either of these owning field relationships will\nimmaterialize, not destroy, the ghost.",
@@ -9875,16 +9894,17 @@
           "$V.ghostOwner"
         ]
       },
-      "ghostOwnlings": {
+      "ownsGhost": {
         "@type": "VState:CoupledField",
+        "rdfs:subPropertyOf": "V:ownsFixed",
         "rdfs:domain": "V:Resource",
         "rdfs:range": "V:Resource",
         "VState:isOwnerOf": true,
-        "VState:coupledToField": "V:ghostOwner",
+        "VState:linkedToField": "V:ghostOwner",
         "VState:ownDefaultValue": [],
         "rdfs:comment": "Materialized ghost resources which have this instance as their ghost\nhost.",
         "rdfs:label": [
-          "$V.ghostOwnlings"
+          "$V.ownsGhost"
         ]
       },
       "hashAlgorithm": {
@@ -9966,12 +9986,12 @@
             "VRevdoc:indexLabel": ".$V.name"
           },
           {
-            "@id": "#inheritancePrototype",
-            "VRevdoc:indexLabel": ".$V.inheritancePrototype"
+            "@id": "#hasPrototype",
+            "VRevdoc:indexLabel": ".$V.hasPrototype"
           },
           {
-            "@id": "#instancePrototype",
-            "VRevdoc:indexLabel": ".$V.instancePrototype"
+            "@id": "#instanceOf",
+            "VRevdoc:indexLabel": ".$V.instanceOf"
           },
           {
             "@id": "#ownlings",
@@ -10032,34 +10052,34 @@
           "$V.name"
         ]
       },
-      "inheritancePrototype": {
+      "hasPrototype": {
         "@type": "VState:EventLoggedField",
-        "rdfs:subPropertyOf": "V:prototype",
+        "rdfs:subPropertyOf": "V:specializationOf",
         "rdfs:domain": "V:Extant",
         "rdfs:range": "V:Resource",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "VState:coupledToField": "V:inheritors",
-        "rdfs:comment": "The inheritance prototype of this extant resource. This represents the\ntraditional prototypical inheritance where inherited field values are\nnot remapped in any way.",
+        "VState:coupledToField": "V:prototypeOf",
+        "rdfs:comment": "The prototype of this extant resource. This represents the\ntraditional prototypical inheritance where inherited field values are\nnot remapped in any way.",
         "rdfs:label": [
-          "$V.inheritancePrototype"
+          "$V.hasPrototype"
         ]
       },
-      "instancePrototype": {
+      "instanceOf": {
         "@type": "VState:EventLoggedField",
-        "rdfs:subPropertyOf": "V:prototype",
+        "rdfs:subPropertyOf": "V:specializationOf",
         "rdfs:domain": "V:Extant",
         "rdfs:range": "V:Resource",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "VState:coupledToField": "V:instances",
-        "rdfs:comment": "The instance prototype of this extant resource. This represents\nvalos 'ghost instantiation' where all recursively owned resources of\nthe instancePrototype are also inherited as 'ghosts' under this extant\nresource.",
+        "VState:coupledToField": "V:hasInstance",
+        "rdfs:comment": "The instance prototype of this extant resource. This represents valos\n'ghost instantiation' where all recursively owned resources of the\ninstanceOf are also inherited as 'ghosts' under this extant resource.",
         "rdfs:label": [
-          "$V.instancePrototype"
+          "$V.instanceOf"
         ]
       },
       "ownlings": {
@@ -10067,7 +10087,7 @@
         "rdfs:domain": "V:Extant",
         "rdfs:range": "rdfs:List",
         "VState:isOwnerOf": true,
-        "VState:coupledToField": "V:owner",
+        "VState:linkedToField": "V:owner",
         "rdfs:comment": "The ordered list of all resources owned by this extant resource. This\nlist is a union of all fields which define a VState:isOwnerOf.",
         "rdfs:label": [
           "$V.ownlings"
@@ -10079,7 +10099,7 @@
         "rdfs:domain": "V:Extant",
         "rdfs:range": "V:Extant",
         "VState:isOwnerOf": true,
-        "VState:coupledToField": "V:owner",
+        "VState:linkedToField": "V:owner",
         "rdfs:comment": "The ordered list of all resources owned by this extant resource which\nare not contained in another VState:isOwnerOf field list.",
         "rdfs:label": [
           "$V.unnamedOwnlings"
@@ -10123,15 +10143,16 @@
       },
       "prototypeAlias": {
         "@type": "VState:AliasField",
-        "VState:aliasOf": "V:prototype",
-        "rdfs:subPropertyOf": "V:prototype",
+        "VRevdoc:deprecatedInFavorOf": "V:specializationOf",
+        "VState:aliasOf": "V:specializationOf",
+        "rdfs:subPropertyOf": "V:specializationOf",
         "rdfs:domain": "V:Extant",
         "rdfs:range": "V:Resource",
         "restriction": {
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "rdfs:comment": "The prototype of this resource.\n\nThis is an alias for V:prototype to bypass conflicts with native\njavascript property 'prototype' in certain execution contexts.",
+        "rdfs:comment": "The prototype of this resource.\n\nThis is an alias for V:specializationOf to bypass conflicts with native\njavascript property 'prototype' in certain execution contexts.\n\nDeprecated after 'prototype' was renamed as V:specializationOf, making\nthis alias unnecessary.\n",
         "rdfs:label": [
           "$V.prototypeAlias"
         ]
@@ -10182,7 +10203,7 @@
           "owl:maxCardinality": 1
         },
         "VState:isOwnedBy": true,
-        "VState:coupledToField": "V:properties",
+        "VState:linkedToField": "V:ownsProperty",
         "rdfs:comment": "The scope resource (and owner) of this ScopeProperty.",
         "rdfs:label": [
           "$V.scope"
@@ -10278,16 +10299,16 @@
           "$V.object"
         ]
       },
-      "properties": {
+      "ownsProperty": {
         "@type": "VState:EventLoggedField",
         "rdfs:subPropertyOf": "V:ownlings",
         "rdfs:domain": "V:Scope",
         "rdfs:range": "rdfs:List",
         "VState:isOwnerOf": true,
-        "VState:coupledToField": "V:scope",
+        "VState:linkedToField": "V:scope",
         "rdfs:comment": "The ordered list of ScopeProperty resources of this scope",
         "rdfs:label": [
-          "$V.properties"
+          "$V.ownsProperty"
         ]
       }
     },
@@ -10303,6 +10324,10 @@
       },
       "V:Chronicle.createChronicleURI": {
         "@id": "#Chronicle.createChronicleURI",
+        "@type": "@id"
+      },
+      "V:Chronicle.splitChronicleURI": {
+        "@id": "#Chronicle.splitChronicleURI",
         "@type": "@id"
       },
       "V:Chronicle.tryPartitionConnection": {
@@ -10543,8 +10568,8 @@
         "@id": "#parent",
         "@type": "@id"
       },
-      "V:entities": {
-        "@id": "#entities",
+      "V:ownsEntity": {
+        "@id": "#ownsEntity",
         "@container": "@list",
         "@type": "@id"
       },
@@ -10552,8 +10577,8 @@
         "@id": "#folder",
         "@type": "@id"
       },
-      "V:medias": {
-        "@id": "#medias",
+      "V:ownsMedia": {
+        "@id": "#ownsMedia",
         "@container": "@list",
         "@type": "@id"
       },
@@ -10561,12 +10586,12 @@
         "@id": "#content",
         "@type": "@id"
       },
-      "V:connector": {
-        "@id": "#connector",
+      "V:graph": {
+        "@id": "#graph",
         "@type": "@id"
       },
-      "V:connectedRelations": {
-        "@id": "#connectedRelations",
+      "V:ownsRelation": {
+        "@id": "#ownsRelation",
         "@container": "@list",
         "@type": "@id"
       },
@@ -10574,8 +10599,8 @@
         "@id": "#source",
         "@type": "@id"
       },
-      "V:outRelations": {
-        "@id": "#outRelations",
+      "V:hasOutRelation": {
+        "@id": "#hasOutRelation",
         "@container": "@list",
         "@type": "@id"
       },
@@ -10583,44 +10608,44 @@
         "@id": "#target",
         "@type": "@id"
       },
-      "V:inRelations": {
-        "@id": "#inRelations",
+      "V:hasInRelation": {
+        "@id": "#hasInRelation",
         "@container": "@list",
         "@type": "@id"
       },
-      "V:pairedSource": {
-        "@id": "#pairedSource",
+      "V:linkedSource": {
+        "@id": "#linkedSource",
         "@type": "@id"
       },
-      "V:pairedOutRelations": {
-        "@id": "#pairedOutRelations",
+      "V:linkedOutRelation": {
+        "@id": "#linkedOutRelation",
         "@container": "@list",
         "@type": "@id"
       },
-      "V:pairedTarget": {
-        "@id": "#pairedTarget",
+      "V:linkedTarget": {
+        "@id": "#linkedTarget",
         "@type": "@id"
       },
-      "V:pairedInRelations": {
-        "@id": "#pairedInRelations",
+      "V:linkedInRelation": {
+        "@id": "#linkedInRelation",
         "@container": "@list",
         "@type": "@id"
       },
-      "V:connectedSource": {
-        "@id": "#connectedSource",
+      "V:ownerSource": {
+        "@id": "#ownerSource",
         "@type": "@id"
       },
-      "V:connectedOutRelations": {
-        "@id": "#connectedOutRelations",
+      "V:ownsOutRelation": {
+        "@id": "#ownsOutRelation",
         "@container": "@list",
         "@type": "@id"
       },
-      "V:connectedTarget": {
-        "@id": "#connectedTarget",
+      "V:ownerTarget": {
+        "@id": "#ownerTarget",
         "@type": "@id"
       },
-      "V:connectedInRelations": {
-        "@id": "#connectedInRelations",
+      "V:ownsInRelation": {
+        "@id": "#ownsInRelation",
         "@container": "@list",
         "@type": "@id"
       },
@@ -10644,32 +10669,32 @@
         "@container": "@list",
         "@type": "@id"
       },
-      "V:prototype": {
-        "@id": "#prototype",
+      "V:specializationOf": {
+        "@id": "#specializationOf",
         "@type": "@id"
       },
-      "V:derivations": {
-        "@id": "#derivations",
+      "V:hasSpecialization": {
+        "@id": "#hasSpecialization",
         "@type": "@id"
       },
       "V:ownFields": {
         "@id": "#ownFields",
         "@type": "@id"
       },
-      "V:inheritors": {
-        "@id": "#inheritors",
+      "V:prototypeOf": {
+        "@id": "#prototypeOf",
         "@type": "@id"
       },
-      "V:instances": {
-        "@id": "#instances",
+      "V:hasInstance": {
+        "@id": "#hasInstance",
         "@type": "@id"
       },
-      "V:ghostPrototype": {
-        "@id": "#ghostPrototype",
+      "V:ghostOf": {
+        "@id": "#ghostOf",
         "@type": "@id"
       },
-      "V:ghosts": {
-        "@id": "#ghosts",
+      "V:hasGhost": {
+        "@id": "#hasGhost",
         "@type": "@id"
       },
       "V:materializedGhosts": {
@@ -10688,8 +10713,8 @@
         "@id": "#ghostOwner",
         "@type": "@id"
       },
-      "V:ghostOwnlings": {
-        "@id": "#ghostOwnlings",
+      "V:ownsGhost": {
+        "@id": "#ownsGhost",
         "@type": "@id"
       },
       "V:contentReferrers": {
@@ -10704,12 +10729,12 @@
         "@id": "#name",
         "@type": "@id"
       },
-      "V:inheritancePrototype": {
-        "@id": "#inheritancePrototype",
+      "V:hasPrototype": {
+        "@id": "#hasPrototype",
         "@type": "@id"
       },
-      "V:instancePrototype": {
-        "@id": "#instancePrototype",
+      "V:instanceOf": {
+        "@id": "#instanceOf",
         "@type": "@id"
       },
       "V:ownlings": {
@@ -10733,8 +10758,8 @@
         "@id": "#value",
         "@type": "@id"
       },
-      "V:properties": {
-        "@id": "#properties",
+      "V:ownsProperty": {
+        "@id": "#ownsProperty",
         "@container": "@list",
         "@type": "@id"
       }
@@ -11107,7 +11132,7 @@
                 ]
               },
               "package": "@valos/kernel-vault",
-              "version": "0.37.0-alpha.5"
+              "version": "0.37.0-alpha.6"
             },
             "technician": {
               "@id": "https://valospace.org/technician",
@@ -11203,7 +11228,7 @@
                 ]
               },
               "package": "@valos/kernel-vault",
-              "version": "0.37.0-alpha.5"
+              "version": "0.37.0-alpha.6"
             },
             "voyager": {
               "@id": "https://valospace.org/voyager",
@@ -11271,7 +11296,7 @@
                 ]
               },
               "package": "@valos/kernel-vault",
-              "version": "0.37.0-alpha.5"
+              "version": "0.37.0-alpha.6"
             }
           },
           "VDoc:map": {
@@ -12255,25 +12280,25 @@
             "directory",
             "entries",
             "parent",
-            "entities",
+            "ownsEntity",
             "folder",
-            "medias",
+            "ownsMedia",
             "sourceURL",
             "content",
-            "connector",
-            "connectedRelations",
+            "graph",
+            "ownsRelation",
             "source",
-            "outRelations",
+            "hasOutRelation",
             "target",
-            "inRelations",
-            "pairedSource",
-            "pairedOutRelations",
-            "pairedTarget",
-            "pairedInRelations",
-            "connectedSource",
-            "connectedOutRelations",
-            "connectedTarget",
-            "connectedInRelations",
+            "hasInRelation",
+            "linkedSource",
+            "linkedOutRelation",
+            "linkedTarget",
+            "linkedInRelation",
+            "ownerSource",
+            "ownsOutRelation",
+            "ownerTarget",
+            "ownsInRelation",
             "relations",
             "outgoingRelations",
             "incomingRelations",
@@ -12281,26 +12306,26 @@
             "rawId",
             "vrid",
             "typeName",
-            "prototype",
-            "derivations",
+            "specializationOf",
+            "hasSpecialization",
             "ownFields",
-            "inheritors",
-            "instances",
-            "ghostPrototype",
-            "ghosts",
+            "prototypeOf",
+            "hasInstance",
+            "ghostOf",
+            "hasGhost",
             "materializedGhosts",
             "unnamedCouplings",
             "ghostHost",
             "ghostOwner",
-            "ghostOwnlings",
+            "ownsGhost",
             "hashAlgorithm",
             "contentHash",
             "contentLength",
             "contentReferrers",
             "owner",
             "name",
-            "inheritancePrototype",
-            "instancePrototype",
+            "hasPrototype",
+            "instanceOf",
             "ownlings",
             "unnamedOwnlings",
             "isFrozen",
@@ -12312,7 +12337,7 @@
             "subject",
             "predicate",
             "object",
-            "properties"
+            "ownsProperty"
           ]
         }
       ]
@@ -13079,6 +13104,7 @@
           "VDoc:entries": [
             "Chronicle.createPartitionURI",
             "Chronicle.createChronicleURI",
+            "Chronicle.splitChronicleURI",
             "Chronicle.tryPartitionConnection",
             "Chronicle.tryConnection",
             "Chronicle.acquirePartitionConnection",

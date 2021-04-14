@@ -3,6 +3,64 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0-prerelease.1](https://github.com/valaatech/kernel/compare/v0.37.0-prerelease.0...v0.37.0-prerelease.1) (2021-04-14)
+
+
+### Bug Fixes
+
+* Improve error context logging, especially with (this|then)ChainEagerly ([f24cdec](https://github.com/valaatech/kernel/commit/f24cdecf320b3a30a61dae240f373402abbcf01a))
+* Lint errors ([8aa1b12](https://github.com/valaatech/kernel/commit/8aa1b12eca33966bc902328050835fbfc2064227))
+* Minor fixes and document updates ([5e836b1](https://github.com/valaatech/kernel/commit/5e836b14bb399bfa47350b4e8274dee7ff6cd00e))
+* Reduce naiveURI usage and other minor fixes ([ae1c8da](https://github.com/valaatech/kernel/commit/ae1c8da8900494e76a253db43f5649019f24c615))
+* Regression bugs caught by test suite ([f77890a](https://github.com/valaatech/kernel/commit/f77890a972bb74e482bc31431050ac848180d43b))
+* Various minor fixes and logging improvements ([ed7866f](https://github.com/valaatech/kernel/commit/ed7866fd7aca7791b71040e089f82f138a84fb2f))
+* **log:** Fix fourth "inception" log test ([b6f88fa](https://github.com/valaatech/kernel/commit/b6f88fa3523fd2a59074a51ff539b9f4ea41e50b))
+* **log:** Instantiation test according the new log spec ([4974bc1](https://github.com/valaatech/kernel/commit/4974bc1d4ce000f5a742707de6b10d86084a74da))
+* **sourcerer:** Perform revisioning on profess errors ([6cae75a](https://github.com/valaatech/kernel/commit/6cae75afe27055ad09a23d300b5a4310aa1469d8))
+
+
+### Features
+
+* **authority-spindle:** Add full init flow with the revdoc setup guide ([6555579](https://github.com/valaatech/kernel/commit/6555579541905cfac1a0600bffa314064872ee6b))
+* Add "meta" section to all spindle prototypes ([3af199e](https://github.com/valaatech/kernel/commit/3af199e66f229dd66e4003868f93dc9789c76370))
+* **authority-spindle:** Add "headers" support for all projectors ([b213783](https://github.com/valaatech/kernel/commit/b213783831902578411f7f24848e7e4399084e5f))
+* **authority-spindle:** Add authority-worker test suite ([6aa50cf](https://github.com/valaatech/kernel/commit/6aa50cfcf227c5de45edfd50a5fd696fcbbfa150))
+* **authority-spindle:** Add bvob projector implementation base ([b97be63](https://github.com/valaatech/kernel/commit/b97be638e851661144cfee1897f4f316f9fd614f))
+* **authority-spindle:** Complete unauthenticated, nonauthored paths ([6766884](https://github.com/valaatech/kernel/commit/67668849c8f79509abf9230788ae4e0023b23c5d))
+* **authority-spindle:** Complete valosp PUT and GET event routes ([e2ff108](https://github.com/valaatech/kernel/commit/e2ff1085b36a58dd1985e8e5c5a8642aa2269e14))
+* **authority-spindle:** Determine chronicleURI with configured authorityURI ([87e35c5](https://github.com/valaatech/kernel/commit/87e35c5b1a604a878b269a489d1ac72ff8493e28))
+* **authority-spindle:** Export "event/log" projector skeletons for web spindle ([75cbffe](https://github.com/valaatech/kernel/commit/75cbffe51c3e917a14a0b220649d23e4fb9eaa1e))
+* **authority-spindle:** Implement ranges for (get|post)LogEvents ([a57b08a](https://github.com/valaatech/kernel/commit/a57b08adf23bc44c9f24c4663b7e682f18b7a14f))
+* **authority-spindle:** Initial skeleton for ValOS authority web route projectors spindle ([61c492f](https://github.com/valaatech/kernel/commit/61c492f0cea0407034fd64696de1ed8b52c09918))
+* **inspire:** Allow both "module.exports =" and "export default" for spindles ([ef8d0aa](https://github.com/valaatech/kernel/commit/ef8d0aa4ac3b7dd01010c2c40ec2b410939ddeb1))
+* **inspire:** Allow null rootChronicleURI and foci for non-browser contexts ([ef07a78](https://github.com/valaatech/kernel/commit/ef07a783f82faf1032fcf0ea1e8886a7f6573cdb))
+* **log:** Add resource origins and logical images to main test ([b52dc66](https://github.com/valaatech/kernel/commit/b52dc6693b7f3278d8d4db331168f9c0674cb55b))
+* **log:** Add vlog revdoc.test with create, reference and ghost examples ([b9b03ef](https://github.com/valaatech/kernel/commit/b9b03ef93eb854916fa53e61aac29d8c3b7652c9))
+* **log:** Implement fifth test "removal" (preliminary) ([47ddde5](https://github.com/valaatech/kernel/commit/47ddde5e28cda4edce362def89477f5aa074b6ab))
+* **log:** Rename several V:, VState: and VLog: properties ([61cfa9d](https://github.com/valaatech/kernel/commit/61cfa9d6926e27fb3ca55aff5d982577f1bf5d84))
+* **revdoc:** Add VRevdoc:RegExp and VRevdoc:regexp ([7ed3516](https://github.com/valaatech/kernel/commit/7ed351691e9d46f491f31d53308702fafdb5f640))
+* **sourcerer:** Add Connection.getActiveAuthority for delayed authorities ([11e97e0](https://github.com/valaatech/kernel/commit/11e97e063b80e75f898da06cbeafa9d9a18d1d00))
+* **sourcerer:** Add log.timeStamp when authorizing a valosp command as truth ([814253c](https://github.com/valaatech/kernel/commit/814253cc3eac90cd18dafa2f385bedd0415d09aa))
+* **sourcerer:** Add Sourcerer..createChronicleRootID ([0f734bd](https://github.com/valaatech/kernel/commit/0f734bd145be49d771d14c9653a07a2115a0f571))
+* **valma:** Add execute(..., { paramPrefix }) (with "--" as default) ([7b725cd](https://github.com/valaatech/kernel/commit/7b725cddc78d4d322e1cddf9adc8868761c21624))
+* **web-spindle:** Add all methods "static" projectors ([b01bfbb](https://github.com/valaatech/kernel/commit/b01bfbb43e441dbf8c1534fc99c90aa76cb63be5))
+* **web-spindle:** Add configure --ssl option ([822536c](https://github.com/valaatech/kernel/commit/822536c73f0a6b6ddf745e4229f74e368cb4faa7))
+* Add (encode|decode)VPlotValue, implement valosp URI conventions ([d9936c9](https://github.com/valaatech/kernel/commit/d9936c9b817b7759690b4fe941a5a9780d4563ae))
+* Add error.chainContextName for (this|then)Chain* error handlers ([5958ace](https://github.com/valaatech/kernel/commit/5958acec060f5595ca1f2350c80ad4da3f97e7b4))
+* Add hash40FromHexSHA512 as bvob hash fallback ([1285206](https://github.com/valaatech/kernel/commit/12852061e0a951ae2b92a43ef56872aacf6a3bbd))
+* Implement valosp bvob pathway as POST multipart/form-data file ([4a6d5ac](https://github.com/valaatech/kernel/commit/4a6d5ac8e9304c27de94917976b54301e1f6e8cc))
+* **sourcerer:** Implement valosp bvob operations ([3f6e963](https://github.com/valaatech/kernel/commit/3f6e96321ae95c8a16b46800fcb6c9138aacfd4a))
+* **sourcerer:** Initial valosp scheme Authority/Connection implementation ([bcde424](https://github.com/valaatech/kernel/commit/bcde424d4af7a2339efd7ceafef8924480644007))
+* **sourcerer:** Replace naiveURI with *.(create|split)ChronicleURI pipeline ([d75a1f2](https://github.com/valaatech/kernel/commit/d75a1f20715f40d9efdf582d703737e498759762))
+* **testaur:** Add test authority worker ([f0e63e2](https://github.com/valaatech/kernel/commit/f0e63e2e97fcc7441703b53d9c3fb45aae3ce810))
+* **web-spindle:** Add "static" projector ([9404316](https://github.com/valaatech/kernel/commit/94043161da1f8f30594ee521663c3e754a6be00c))
+* **web-spindle:** Expose route params as default rules ([436b1e3](https://github.com/valaatech/kernel/commit/436b1e315034ce3c7f3858ac2e2a36c34e127e69))
+* **web-spindle:** Import projectors from other spindles ([5058816](https://github.com/valaatech/kernel/commit/5058816891c6772e6c0bd1bbef132b93f27b644f))
+
+
+
+
+
 # [0.37.0-prerelease.0](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.6...v0.37.0-prerelease.0) (2021-02-16)
 
 

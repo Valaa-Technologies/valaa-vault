@@ -15,22 +15,18 @@
   <body class="vdoc vdoc-body">
     
   <section id="abstract" class="vdoc type-vdoc-chapter"><div><p>
-  <div class="vdoc type-vdoc-paragraph">ValOS Plots (&#x27;VPlots&#x27;) are *identifier-query* strings with recursive
-grammar with extensible semantics and a limited character set that
-makes them easily URI embeddable.
+  <div class="vdoc type-vdoc-paragraph">A vplot is a generic, hierarchically structured string with
+a character set that is untransformed by <a href="https://262.ecma-international.org/5.1/#sec-15.1.3.4" class="vdoc type-vdoc-reference">encodeURIComponent</a>(). The vplot structure expresses
+sequential dependencies, parameter lists, nesting, term/data pairs and
+arbitrary data encoding. The vplot strings themselves are
+meaning-agnostic: the semantics are provided by the specific vplot
+processors.
   </div>
 </p></div><div><p>
-  <div class="vdoc type-vdoc-paragraph">Generally speaking a query which always resolves to the same resource
-can be used as an identifier for that resource. VPlot is a format for
-expressing queries in an identifier-friendly string syntax. VPlot only
-provides primitives for query structure. The actual query semantics are
-specified by the semantic ontology terms that are used in the vplots.
-  </div>
-</p></div><div><p>
-  <div class="vdoc type-vdoc-paragraph">In ValOS context they are used as resource identifiers, valospace
+  <div class="vdoc type-vdoc-paragraph">In ValOS context vplots are used as resource identifiers, valospace
 queries, but also as a deterministic JSON serialization,
 an intermediate language for computation, a configuration language,
-JSON-LD interactions and more.
+JSON-LD integration glue and more.
   </div>
 </p></div><div><p>
   <div class="vdoc type-vdoc-paragraph"><em>VPlot</em> together with <a href="https://valospace.org/state/0#" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
@@ -577,7 +573,7 @@ current resource.
 Triple pattern &#x60;?s &#x3C;urn:valos:_$~u4.ba54&#x3E; ?o&#x60; matches like:
 <pre><code><span class="vdoc type-vdoc-node">
   ?o    V:ghostHost ?s
-      ; V:ghostPrototype &#x3C;urn:valos:$~u4.ba54&#x3E;
+      ; V:ghostOf &#x3C;urn:valos:$~u4.ba54&#x3E;
 </span>
 </code></pre>
 Mnemonic: The &#x27;_$~&#x27; is a &#x27;subspace of ghoStS&#x27;.</span>
@@ -982,8 +978,8 @@ well as other possible constraints.
     <span id="example_shared_vrid_verb_data" class="vdoc type-vdoc-node">
     <h3><a aria-label="§" href="#example_shared_vrid_verb_data">§ </a>Shared example data</h3>
 The examples below all share the following triples:<pre><code><span class="vdoc type-vdoc-node">
-  &#x3C;urn:valos:$~u4.f00b&#x3E; a V:Entity
-      ; V:prototype &#x3C;urn:valos:$~u4.f00b-b507-0763&#x3E;
+  &#x3C;urn:valos:$~u4.f00b&#x3E; a valos:Entity
+      ; V:specializationOf &#x3C;urn:valos:$~u4.f00b-b507-0763&#x3E;
 </span>
 </code></pre></span>
 
@@ -1007,7 +1003,7 @@ and infers triples:
 <pre><code><span class="vdoc type-vdoc-node">
   &#x3C;urn:valos:$~u4.f00b@_$~u4.ba54&#x3E;
         V:ghostHost &#x3C;urn:valos:$~u4.f00b&#x3E;
-      ; V:ghostPrototype &#x3C;urn:valos:$~u4.ba54&#x3E;
+      ; V:ghostOf &#x3C;urn:valos:$~u4.ba54&#x3E;
 </span>
 </code></pre></span>
 
@@ -1027,7 +1023,7 @@ the instance resource &#x60;f00b&#x60; the ghost of
 <pre><code><span class="vdoc type-vdoc-node">
   &#x3C;urn:valos:$~u4.f00b@_$~u4.ba54@_$~u4.b7e4&#x3E;
         V:ghostHost &#x3C;urn:valos:$~u4.f00b&#x3E;
-      ; V:ghostPrototype &#x3C;urn:valos:$~u4.ba54@_$~u4.b7e4&#x3E;
+      ; V:ghostOf &#x3C;urn:valos:$~u4.ba54@_$~u4.b7e4&#x3E;
 </span>
 </code></pre></span>
 
@@ -1042,7 +1038,7 @@ Selects a variant resource value for a base resource within a fixed
 subspace. The variant resource provides
 inferred &#x60;subspacePrototype&#x60; fallbacks to an *inner* subspace and
 eventually to the non-variant base resource as well as to the
-homologous sub-resource of the host resource inheritancePrototype.
+homologous sub-resource of the host resource hasPrototype.
   </div>
 </p></div><div><p>
   <div class="vdoc type-vdoc-paragraph">This means that no matter where a subspace variant is defined in
@@ -1083,7 +1079,7 @@ infers triples:
 <pre><code><span class="vdoc type-vdoc-node">
   &#x3C;urn:valos:$~u4.f00b@_$~u4.b453@_$lang.fi@_$~u4.b74e@.$.myProp&#x3E; a V:ScopeProperty
       ; V:ghostHost &#x3C;urn:valos:$~u4.f00b&#x3E;
-      ; V:ghostPrototype &#x3C;urn:valos:$~u4.b453@_$lang.fi@_$~u4.b74e@.$.myProp&#x3E;
+      ; V:ghostOf &#x3C;urn:valos:$~u4.b453@_$lang.fi@_$~u4.b74e@.$.myProp&#x3E;
       ; V:subspacePrototype &#x3C;urn:valos:$~u4.f00b@_$~u4.b453@_$~u4.b74e@_$lang.fi@.$.myProp&#x3E;
       ; V:language &#x22;fi&#x22;
 </span>
@@ -1109,13 +1105,13 @@ f00b-b507-0763 and thus infers triples:
 <pre><code><span class="vdoc type-vdoc-node">
   &#x3C;urn:valos:$~u4.f00b@.$.myProp&#x3E; a V:ScopeProperty
       ; V:scope &#x3C;urn:valos:$~u4.f00b&#x3E;
-      ; V:inheritancePrototype &#x3C;urn:valos:$~u4.f00b-b507-0763@.$.myProp&#x3E;
+      ; V:hasPrototype &#x3C;urn:valos:$~u4.f00b-b507-0763@.$.myProp&#x3E;
       ; V:name &#x22;myProp&#x22;
 </span>
 </code></pre></span>
 
 </blockquote><div><p>
-  <div class="vdoc type-vdoc-paragraph">The verbs &#x60;.O.&#x60;, &#x60;.O+&#x60;, and &#x60;.O~&#x60; denote the properties
+  <div class="vdoc type-vdoc-paragraph">The verbs &#x60;.O.&#x60;, &#x60;.O*&#x60;, and &#x60;.O~&#x60; denote the properties
 &#x60;V:value&#x60;, &#x60;V:id&#x60;, and &#x60;V:content&#x27;&#x60; respectively.
 These are the primary <em>rdf:object sub-properties</em> of
 ScopeProperty, Entity and Media, respectively (the &#x27;O&#x27; in the
@@ -1132,8 +1128,8 @@ which are the rdf:subject and rdf:object properties of a Relation.
 relation with fixed ~ih target 8766 and infers triples:
 <pre><code><span class="vdoc type-vdoc-node">
   &#x3C;urn:valos:$~u4.f00b@-out--$.PERMISSIONS:@.O-$~ih.8766&#x3E; a V:Relation
-      ; V:connectedSource &#x3C;urn:valos:$~u4.f00b&#x3E;
-      ; V:prototype &#x3C;urn:valos:$~u4.f00b-b507-0763@-out--$.PERMISSIONS:@.O-$~ih.8766&#x3E;
+      ; V:ownerSource &#x3C;urn:valos:$~u4.f00b&#x3E;
+      ; V:specializationOf &#x3C;urn:valos:$~u4.f00b-b507-0763@-out--$.PERMISSIONS:@.O-$~ih.8766&#x3E;
       ; V:name &#x22;PERMISSIONS&#x22;
       ; V:target &#x3C;urn:valos:$~u4.8766&#x3E;
 </span>
@@ -1160,8 +1156,8 @@ source, a structurally homologous prototype inside f00b-b507-0763
 and thus infers triples:
 <pre><code><span class="vdoc type-vdoc-node">
   &#x3C;urn:valos:$~u4.f00b@-out--$.PERMISSIONS&#x3E; a V:Relation
-      ; V:connectedSource &#x3C;urn:valos:$~u4.f00b&#x3E;
-      ; V:inheritancePrototype &#x3C;urn:valos:$~u4.f00b-b507-0763@-out--$.PERMISSIONS&#x3E;
+      ; V:ownerSource &#x3C;urn:valos:$~u4.f00b&#x3E;
+      ; V:hasPrototype &#x3C;urn:valos:$~u4.f00b-b507-0763@-out--$.PERMISSIONS&#x3E;
       ; V:name &#x22;PERMISSIONS&#x22;
   &#x3C;urn:valos:$~u4.f00b@-out--$.PERMISSIONS@_$.1&#x3E; a V:Relation
       ; V:subspacePrototype &#x3C;urn:valos:$~u4.f00b@-out--$.PERMISSIONS&#x3E;
@@ -1189,7 +1185,7 @@ infers triples:
 <pre><code><span class="vdoc type-vdoc-node">
   &#x3C;urn:valos:$~u4.f00b@*$.Scripts&#x3E; a V:Entity
       ; V:parent &#x3C;urn:valos:$~u4.f00b&#x3E;
-      ; V:inheritancePrototype &#x3C;urn:valos:$~u4.f00b-b507-0763@*$.Scripts&#x3E;
+      ; V:hasPrototype &#x3C;urn:valos:$~u4.f00b-b507-0763@*$.Scripts&#x3E;
       ; V:name &#x22;scripts&#x22;
 </span>
 </code></pre></span>
@@ -1213,7 +1209,7 @@ homologous prototype inside f00b-b507-0763 and thus infers triples:
 <pre><code><span class="vdoc type-vdoc-node">
   &#x3C;urn:valos:$~u4.f00b@~$.foo.vs&#x3E; a V:Media
       ; V:folder &#x3C;urn:valos:$~u4.f00b&#x3E;
-      ; V:inheritancePrototype &#x3C;urn:valos:$~u4.f00b-b507-0763@~$.foo.vs&#x3E;
+      ; V:hasPrototype &#x3C;urn:valos:$~u4.f00b-b507-0763@~$.foo.vs&#x3E;
       ; V:name &#x22;foo.vs&#x22;
 </span>
 </code></pre></span>
@@ -1228,27 +1224,27 @@ homologous prototype inside f00b-b507-0763 and thus infers triples:
   <section id="section_grammar" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#section_grammar">§ </a>Collected VPlot ABNF grammar</h3>
 <div><p>
-  <div class="vdoc type-vdoc-paragraph">The VPlot grammar is an LL(1) grammar. It is recursive be virtue of
-vvalue productions which can nest VPlots themselves without additional
+  <div class="vdoc type-vdoc-paragraph">The VPlot grammar is an LL(1) grammar. The recursion is by virtue of
+vparam productions which can nest VPlots themselves without additional
 encoding.
   </div>
 </p></div><div><p>
   <div class="vdoc type-vdoc-paragraph">The list of definitive rules:
-<pre><code><span class="vdoc type-vdoc-node">  vplot         = &#x22;@&#x22; *(vstep &#x22;@&#x22;) &#x22;@&#x22;
-  vstep         = [ verb-type ] *vparam
-  vparam        = &#x22;$&#x22; [ context-term ] &#x22;.&#x22; vvalue
-  vvalue        = vplot / &#x22;$&#x22; / 1*( unencoded / pct-encoded )
+<pre><code><span class="vdoc type-vdoc-node">  vplot       = 1*( &#x22;(&#x22; vstep &#x22;)&#x22; )
+  vstep       = vparam *( &#x22;&#x27;&#x22; vparam )
+  vparam      = vplot / [ vterm ] [ &#x22;!&#x22; ( vvalue / &#x22;!&#x22; vdata ) ]
 
-  verb-type     = 1*unencoded
-  context-term  = 1*unreserved
-  unencoded     = unreserved / &#x22;!&#x22; / &#x22;*&#x22; / &#x22;&#x27;&#x22; / &#x22;(&#x22; / &#x22;)&#x22;
-  unreserved    = unreserved-nt / &#x22;~&#x22;
-  unreserved-nt = ALPHA / DIGIT / &#x22;-&#x22; / &#x22;_&#x22; / &#x22;.&#x22;
-  pct-encoded   = &#x22;%&#x22; HEXDIG HEXDIG
+  route-vplot = vstep *( &#x22;/&#x22; vstep )
+  urn-vplot   = vstep *( &#x22;:&#x22; vstep )
 
-  ALPHA         = %x41-5A / %x61-7A                         ; A-Z / a-z
-  HEXDIG        = DIGIT / &#x22;A&#x22; / &#x22;B&#x22; / &#x22;C&#x22; / &#x22;D&#x22; / &#x22;E&#x22; / &#x22;F&#x22; ; 0-9 / A-F
-  DIGIT         = %x30-39                                   ; 0-9</span>
+  vterm       = 1*unencoded
+  vvalue      = 1*unencoded
+  vdata       = 1*b64urlchar
+
+  unencoded   = b64urlchar / &#x22;.&#x22; / &#x22;~&#x22; / &#x22;*&#x22;
+  b64urlchar  = ALPHANUM / &#x22;-&#x22; / &#x22;_&#x22;
+
+  ALPHANUM    = %x30-39 / %x41-5A / %x61-7A                             ; 0-9 / A-Z / a-z</span>
 </code></pre>
   </div>
 </p></div><div><p>

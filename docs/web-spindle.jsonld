@@ -232,7 +232,7 @@
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "All routes share common as well as separate characteristics. The\nhandler of a request is located using the most specific route config\nwhich matches the request IRI and its HTTP method. The route config\nspecifies the route *category* which when combined with the request\nmethod uniquely specifies the actual route type and thus the\nhandler callback."
+            "All routes share common as well as separate characteristics. The\nhandler of a request is located using the most specific route config\nwhich matches the request IRI and its HTTP method. The route config\nspecifies the route *projector* which when combined with the request\nmethod uniquely specifies the actual route type and thus the\nhandler callback."
           ]
         },
         {

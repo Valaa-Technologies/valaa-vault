@@ -55,7 +55,7 @@
     },
     "dc:title": "ValOSP Authority",
     "VRevdoc:package": "@valos/authority-spindle",
-    "VRevdoc:version": "0.37.0-prerelease.0",
+    "VRevdoc:version": "0.37.0-prerelease.1",
     "respecConfig": {
       "specStatus": "unofficial",
       "shortName": "valospAuthority",
@@ -470,7 +470,14 @@
                 ]
               ]
             },
-            "The echos are omitted for the rest of this guide.",
+            "The echos are omitted for the rest of this guide. Now let's choose no\ndomain and type to be ",
+            {
+              "VDoc:em": true,
+              "VDoc:content": [
+                "worker"
+              ]
+            },
+            ".",
             {
               "@type": "VRevdoc:CommandLineInteraction",
               "VDoc:lines": [
@@ -502,29 +509,6 @@
                       {
                         "@type": "VRevdoc:Command",
                         "VDoc:content": [
-                          ""
-                        ]
-                      },
-                      "@valos/kernel",
-                      "-",
-                      "Contribute",
-                      "to",
-                      "Valaa",
-                      "Open",
-                      "System",
-                      "core",
-                      "components"
-                    ],
-                    "VDoc:context": ""
-                  }
-                ],
-                [
-                  {
-                    "@type": "VRevdoc:Invokation",
-                    "VDoc:words": [
-                      {
-                        "@type": "VRevdoc:Command",
-                        "VDoc:content": [
                           "❯"
                         ]
                       },
@@ -538,57 +522,6 @@
                       "part",
                       "of",
                       "a",
-                      "domain>"
-                    ],
-                    "VDoc:context": ""
-                  }
-                ],
-                [
-                  {
-                    "@type": "VRevdoc:Invokation",
-                    "VDoc:words": [
-                      {
-                        "@type": "VRevdoc:Command",
-                        "VDoc:content": [
-                          ""
-                        ]
-                      },
-                      "<create>",
-                      "-",
-                      "<enter",
-                      "the",
-                      "name",
-                      "of",
-                      "a",
-                      "new",
-                      "domain",
-                      "this",
-                      "workspace",
-                      "introduces>"
-                    ],
-                    "VDoc:context": ""
-                  }
-                ],
-                [
-                  {
-                    "@type": "VRevdoc:Invokation",
-                    "VDoc:words": [
-                      {
-                        "@type": "VRevdoc:Command",
-                        "VDoc:content": [
-                          ""
-                        ]
-                      },
-                      "<unlisted>",
-                      "-",
-                      "<enter",
-                      "the",
-                      "name",
-                      "of",
-                      "an",
-                      "existing",
-                      "but",
-                      "unlisted",
                       "domain>"
                     ],
                     "VDoc:context": ""
@@ -616,21 +549,6 @@
                       "the",
                       "new",
                       "workspace"
-                    ],
-                    "VDoc:context": ""
-                  }
-                ],
-                [
-                  {
-                    "@type": "VRevdoc:Invokation",
-                    "VDoc:words": [
-                      {
-                        "@type": "VRevdoc:Command",
-                        "VDoc:content": [
-                          ""
-                        ]
-                      },
-                      "..."
                     ],
                     "VDoc:context": ""
                   }
@@ -702,6 +620,21 @@
                 ]
               ]
             },
+            "At this point ",
+            {
+              "@type": "VRevdoc:Command",
+              "VDoc:content": [
+                "vlm init"
+              ]
+            },
+            " asks to delegate package.json\ninitialization to ",
+            {
+              "@type": "VRevdoc:Command",
+              "VDoc:content": [
+                "yarn init"
+              ]
+            },
+            ". We accept defaults if\navailable and give sane values otherwise.",
             {
               "@type": "VRevdoc:CommandLineInteraction",
               "VDoc:lines": [
@@ -741,21 +674,6 @@
                 ]
               ]
             },
-            "At this point ",
-            {
-              "@type": "VRevdoc:Command",
-              "VDoc:content": [
-                "vlm init"
-              ]
-            },
-            " will delegate initialization to ",
-            {
-              "@type": "VRevdoc:Command",
-              "VDoc:content": [
-                "yarn init"
-              ]
-            },
-            ". We accept defaults if available and give sane values otherwise.",
             {
               "@type": "VRevdoc:CommandLineInteraction",
               "VDoc:lines": [
@@ -901,7 +819,7 @@
                 ]
               ]
             },
-            "Verify that @valos/kernel is visible, as it is the origin of ",
+            "Verify that the domain @valos/kernel is visible as it is the origin of ",
             {
               "@type": "VDoc:Reference",
               "VDoc:content": [
@@ -1100,25 +1018,28 @@
                       "[1]",
                       ">>",
                       "[4]",
-                      ""
+                      "vlm",
+                      "@",
+                      "yarn",
+                      "add",
+                      "--dev",
+                      "@valos/type-worker@>=0.37.0-prerelease.0"
                     ],
                     "VDoc:context": ""
                   }
                 ],
                 [
                   {
-                    "@type": "VRevdoc:Command",
-                    "VDoc:content": [
-                      "vlm @ yarn add --dev @valos/type-worker@>=0.37.0-prerelease.0"
-                    ],
-                    "VDoc:context": ""
-                  }
-                ],
-                [
-                  {
-                    "@type": "VRevdoc:Command",
-                    "VDoc:content": [
-                      "yarn add v1.21.1"
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "yarn"
+                        ]
+                      },
+                      "add",
+                      "v1.21.1"
                     ],
                     "VDoc:context": ""
                   }
@@ -1237,7 +1158,7 @@
                 ]
               ]
             },
-            "At this point the init is complete and we proceed to configuring the\nworkspace. The command",
+            "At this point the init is complete and we proceed to configuring the\nworkspace. The command ",
             {
               "@type": "VRevdoc:Command",
               "VDoc:content": [
@@ -1342,7 +1263,7 @@
                       {
                         "@type": "VRevdoc:Command",
                         "VDoc:content": [
-                          "❯◉"
+                          "◉"
                         ]
                       },
                       "copy-template-files",
@@ -1360,7 +1281,7 @@
                 ]
               ]
             },
-            "Now we get to select the toolsets we want. We need to manually install\nonly web-spindle first as authority-spindle depends on it (and\nunfortunately automated dependency ordering is not implemented yet)",
+            "Now we get to select the toolsets we want. We need to manually install\nweb-spindle only first as authority-spindle depends on it (and\nunfortunately automated dependency ordering is not implemented yet)",
             {
               "@type": "VRevdoc:CommandLineInteraction",
               "VDoc:lines": [
@@ -1572,7 +1493,7 @@
                 "openssl"
               ]
             },
-            " to create\ninsecure self-signed certificates for our test authority.",
+            " to create\ninsecure self-signed certificates for testing our authority.",
             {
               "@type": "VRevdoc:CommandLineInteraction",
               "VDoc:lines": [
@@ -1724,7 +1645,7 @@
                       {
                         "@type": "VRevdoc:Command",
                         "VDoc:content": [
-                          "❯◉"
+                          "◉"
                         ]
                       },
                       "copy-template-files",
@@ -2266,6 +2187,7 @@
                 ]
               ]
             },
+            "The setup of the authority is now complete. Let's start the perspire\nworker.",
             {
               "@type": "VRevdoc:CommandLineInteraction",
               "VDoc:lines": [
@@ -2276,15 +2198,17 @@
                       {
                         "@type": "VRevdoc:Command",
                         "VDoc:content": [
-                          ""
+                          "vlm"
                         ]
-                      }
+                      },
+                      "perspire"
                     ],
                     "VDoc:context": ""
                   }
                 ]
               ]
             },
+            "If everything runs smoothly, we should have 15 routes on two prefixes:",
             {
               "@type": "VRevdoc:CommandLineInteraction",
               "VDoc:lines": [
@@ -2295,18 +2219,28 @@
                       {
                         "@type": "VRevdoc:Command",
                         "VDoc:content": [
-                          ""
+                          "[1]"
                         ]
-                      }
+                      },
+                      "perspire",
+                      "informs:",
+                      "MapperService(MapperService$.1):",
+                      "listening",
+                      "@",
+                      "{",
+                      "address:",
+                      "'127.0.0.1',",
+                      "family:",
+                      "'IPv4',",
+                      "port:",
+                      "5443",
+                      "}",
+                      "prepared",
+                      "prefixes:"
                     ],
                     "VDoc:context": ""
                   }
-                ]
-              ]
-            },
-            {
-              "@type": "VRevdoc:CommandLineInteraction",
-              "VDoc:lines": [
+                ],
                 [
                   {
                     "@type": "VRevdoc:Invokation",
@@ -2314,9 +2248,32 @@
                       {
                         "@type": "VRevdoc:Command",
                         "VDoc:content": [
-                          ""
+                          "/:"
                         ]
-                      }
+                      },
+                      "taur-worker@0.1.0",
+                      "-",
+                      "openapi",
+                      "Example",
+                      "Title"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "valosp://localhost:5443/taur/:"
+                        ]
+                      },
+                      "taur-worker@0.1.0",
+                      "-",
+                      "Test",
+                      "authority"
                     ],
                     "VDoc:context": ""
                   }

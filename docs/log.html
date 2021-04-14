@@ -2,12 +2,12 @@
 <html>
   <head>
     <meta charset='utf-8'>
-    <title>@valos/log library workspace</title>
+    <title>VLog format specification</title>
     <script
      src='https://www.w3.org/Tools/respec/respec-w3c-common'
      class='remove'></script>
     <script class='remove'>
-      var respecConfig = {"specStatus":"unofficial","shortName":"log","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}]};
+      var respecConfig = {"specStatus":"unofficial","editors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"authors":[{"name":"Iridian Kiiskinen","url":"https://valaatech.github.io/fabric/authors/iridian","github":"http://github.com/valospace"}],"shortName":"vlog"};
     </script>
     <link rel = "stylesheet" type = "text/css" href = "/summary.css" />
     
@@ -15,382 +15,820 @@
   <body class="vdoc vdoc-body">
     
   <section id="abstract" class="vdoc type-vdoc-chapter"><div><p>
-  <div class="vdoc type-vdoc-paragraph">Specifies the ValOS event log JSON-LD format and the &#x27;VLog&#x27; namespace
-  </div>
-</p></div><div><p>
-  <div class="vdoc type-vdoc-paragraph">The event log is sequence of <a href="https://valospace.org/log/0#Event" class="vdoc type-vdoc-reference">event resources</a>.
-An event resource is a map of semantically different <a href="https://valospace.org/log/0#EventAspect" class="vdoc type-vdoc-reference">aspects</a>. Each aspect represents some role or lifecycle phase of the event and
-is a map of attributes that relate to that role. Most notable one is
-the <a href="https://valospace.org/log/0#DeltaAspect" class="vdoc type-vdoc-reference">delta aspect</a> which defines the
-actual state change payload of the event.
-  </div>
-</p></div><div><p>
-  <div class="vdoc type-vdoc-paragraph">The <em>VLog</em> namespace together with <a href="https://valospace.org/state/0#" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VState:</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The vocabulary for defining the ValOS state core model and for
-extending it with new types and fields.
-    </span>
-</span></a> <a href="https://valospace.org/plot/0#" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VPlot:</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The vocabulary for defining the hierarchical ValOS identifiers and for
-extending them with new step semantics
-    </span>
-</span></a> and <a href="https://valospace.org/valk/0#" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">VValk:</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The vocabulary for defining ValOS computations and for
-adding defining new semantics to it.
-    </span>
-</span></a> namespaces forms the
-infrastructural foundation or the <em>fabric</em> of the valospace.<em>VLog</em> provides the temporal dimension and thus makes change
-and reactions possible.
+  <div class="vdoc type-vdoc-paragraph">ValOS log (&#x27;VLog&#x27;) format specifies the ontology, the format and the
+algorithms for expressing a ValOS chronicle change event history as a
+sequence of<a href="https://valospace.org/state" class="vdoc type-vdoc-reference">VState</a>-formatted JSON-LD
+document entries.
   </div>
 </p></div>
   </section>
 
   <section id="sotd" class="vdoc type-vdoc-chapter"><div><p>
+  <div class="vdoc type-vdoc-paragraph">This document speficies the event delta structure and semantics via
+declarative examples.
+  </div>
+</p></div><div><p>
   <div class="vdoc type-vdoc-paragraph">This document is part of the library workspace <a href="https://valospace.org/log" class="vdoc type-vrevdoc-package"><em>@valos/log</em></a>
 (of domain <a href="https://valospace.org/kernel" class="vdoc type-vrevdoc-package"><em>@valos/kernel</em></a>) which has the description:
-&#x60;Specifies the ValOS event log JSON-LD format and the &#x27;VLog&#x27; namespace&#x60;.
+&#x60;VLog specification and reference implementation&#x60;.
   </div>
 </p></div>
   </section>
 
   <section id="introduction" class="vdoc type-vdoc-chapter"><div><p>
-  <div class="vdoc type-vdoc-paragraph">Edit me - this is the first payload chapter. Abstract and SOTD are
-essential <a href="https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate" class="vdoc type-vdoc-reference">ReSpec boilerplate</a>
+  <div class="vdoc type-vdoc-paragraph">A VLog event is a specifically structured JSON-LD document that
+represents a change between two VState documents. The document contains
+several sub-components, <a href="#section_aspects" class="vdoc type-vdoc-reference">aspects</a> that
+contain <a href="#section_delta_aspect" class="vdoc type-vdoc-reference">the delta payload</a> itself
+but also metadata, validations and other lifetime attribute of the
+event.
   </div>
 </p></div><div><p>
-  <div class="vdoc type-vdoc-paragraph">See <a href="https://valospace.org/revdoc/tutorial" class="vdoc type-vdoc-reference">ReVDoc tutorial</a> for
-instructions on how to write revdoc source documents.
-  </div>
-</p></div><div><p>
-  <div class="vdoc type-vdoc-paragraph">See also <a href="https://valospace.org/revdoc" class="vdoc type-vdoc-reference">ReVdoc specification</a> and <a href="https://valospace.org/vdoc" class="vdoc type-vdoc-reference">VDoc specification</a> for reference documentation.
+  <div class="vdoc type-vdoc-paragraph">The delta aspect is a semantically incomplete precursor of the actual
+triples that are added to (or removed from) the vstate graph itself. To
+complete the precursor the accumulated state @context <a href="#section_uri_mappings" class="vdoc type-vdoc-reference">URI mappings</a> must be added to the
+delta root context.
   </div>
 </p></div>
   </section>
 
-  <section id="section_fabric" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_fabric">§ </a>The <em>VLog</em> fabric namespace of the library ontology of <a href="https://valospace.org/log" class="vdoc type-vrevdoc-package"><em>@valos/log</em></a></h3>
+  <section id="principles" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#principles">§ </a>General principles</h3>
 <div><p>
-  <div class="vdoc type-vdoc-paragraph">The fabric storage and transport layer vocabulary that both specifies
-the ValOS event log and aspects structure and is used to express the
-content and behaviors of individual chronicles.
+  <div class="vdoc type-vdoc-paragraph">General design concepts, aims and ideas and out-right in a mish-mash
+wish-list:
+    <ul>
+      <li>Each event is a named graph with a name that is a monotonically
+  increasing vplot-name derived based on the chronicle id itself.</li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph">Event graphs are thus disjoint when flattened.
+  </div>
+</p></div></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph">Reduction is the process of applying the events in succession from
+  the very beginning of the vlog and yields a snapshot vstate graph.
+  </div>
+</p></div></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph">Reduction consists of validation, separation and update steps.
+  </div>
+</p></div></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph">Validation rejects heretical events. Separation removes event
+  metadata and splits the remaining payload to separate update stages.
+  Update applies these parts to state.
+  </div>
+</p></div></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph">Separation and update should be computationally simple, naive even,
+  as they are unavoidable and often heavily repeated.
+  </div>
+</p></div></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph">Validation can often be selectivelly waived by secondary consumers or
+  sub-sequent event log consumption runs and thus can be incrementally
+  (if not outrageously) costlier that the other steps.
+  </div>
+</p></div></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph">Event payload should be bytewise minimal. VLogs can appear anywhere
+  and compression aint free either.
+  </div>
+</p></div></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph">Event payload should be as flat as possible to facilitate easy
+  introspection APIs
+  </div>
+</p></div></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph">Events must be valid and internally consistent JSON-LD even in
+  isolation but they don&#x27;t need to be semantically complete.
+  </div>
+</p></div></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph">Events need to be semantically complete when evaluated using the
+  accumulated parent context of all previous vlog events.
+  </div>
+</p></div></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph">Cryptographical signing of event payloads by user signatures should
+  be simple.
+  </div>
+</p></div></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph">Event creators can specify crypto-behaviors that add validateable
+  constraints to the future vlog operations.
+  </div>
+</p></div></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph">Constraints can be used to limit the addition of new
+  crypto-behaviors
+  </div>
+</p></div></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph">Reordering of events by vlog authorities should be possible whenever
+  it can be proven that reordering doesn&#x27;t change essential semantics
+  </div>
+</p></div></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph">Event creators can specify what is considered essential semantics by
+  crypto-behaviors
+  </div>
+</p></div></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph">Dual construct is a triple which is directly &#x27;reified&#x27; by a resource
+  in the same named graph. Properties and Relations have dual nature.
+  </div>
+</p></div></li>
+    </ul>
+
   </div>
 </p></div>
-  <section id="section_prefixes" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_prefixes">§ </a><em>@valos/log</em> IRI prefixes</h3>
-
-    <table class="vdoc type-vdoc-table">
-      <thead>
-        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">Prefix</span>
-</th>
-        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">IRI</span>
-</th>
-      </thead>
-      <tbody>
-        <tr><td><span class="vdoc type-vdoc-node">rdf</span>
-</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/1999/02/22-rdf-syntax-ns#</span>
-</td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">rdfs</span>
-</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/2000/01/rdf-schema#</span>
-</td></tr>
-        <tr><td><span class="vdoc type-vdoc-node">xsd</span>
-</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/2001/XMLSchema#</span>
-</td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">owl</span>
-</td><td><span class="vdoc type-vdoc-node">http://www.w3.org/2002/07/owl#</span>
-</td></tr>
-        <tr><td><span class="vdoc type-vdoc-node">dc</span>
-</td><td><span class="vdoc type-vdoc-node">http://purl.org/dc/elements/1.1/</span>
-</td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VLog</span>
-</td><td><span class="vdoc type-vdoc-node">https://valospace.org/log/0#</span>
-</td></tr>
-        <tr><td><span class="vdoc type-vdoc-node">VKernel</span>
-</td><td><span class="vdoc type-vdoc-node">https://valospace.org/kernel/0#</span>
-</td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VPlot</span>
-</td><td><span class="vdoc type-vdoc-node">https://valospace.org/plot/0#</span>
-</td></tr>
-        <tr><td><span class="vdoc type-vdoc-node">VState</span>
-</td><td><span class="vdoc type-vdoc-node">https://valospace.org/state/0#</span>
-</td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node">VValk</span>
-</td><td><span class="vdoc type-vdoc-node">https://valospace.org/valk/0#</span>
-</td></tr>
-        <tr><td><span class="vdoc type-vdoc-node">V</span>
-</td><td><span class="vdoc type-vdoc-node">https://valospace.org/0#</span>
-</td></tr>
-      </tbody>
-    </table>
-
   </section>
 
-  <section id="section_classes" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_classes">§ </a><em>VLog</em> <a href="https://valospace.org/kernel/0#Class" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">fabric classes</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of classes which are defined by the ValOS kernel domain
-ontologies.
-    </span>
-</span></a></h3>
+  <section id="examples" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#examples">§ </a>Examples</h3>
 <div><p>
-  <div class="vdoc type-vdoc-paragraph">This section describes fabric classes introduced by the &#x27;VLog&#x27; namespace
+  <div class="vdoc type-vdoc-paragraph">The examples use the standard context as the initial starting context.
+Each successive example uses the output state of the previous example
+as its input state.
   </div>
 </p></div>
-    <table class="vdoc type-vdoc-table">
-      <thead>
-        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:subClassOf</span>
-</th>
-        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</th>
-      </thead>
-      <tbody>
-        <tr id="Event" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#Event" class="vdoc type-vdoc-reference">#Event</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td></td><td><span class="vdoc type-vdoc-node">The class of all chronicle event log entries</span>
-</td></tr>
-        <tr id="EventAspects" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#EventAspects" class="vdoc type-vdoc-reference">#EventAspects</a></em></strong> </h3></td></tr>
-        <tr><td></td><td><span class="vdoc type-vdoc-node">The class of resources which contain all different lifecycle aspects
-of some chronicle event as it advances through the proclamation
-lifecycle.</span>
-</td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><a href="https://valospace.org/engine/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">instance properties</span>
+<blockquote class="vdoc type-revdoc-example">
+    <span class="vdoc type-vdoc-node">
+    <h3>Initial state @context</h3>
+<pre><code><span class="vdoc type-vdoc-node">{
+  &#x22;^&#x22;: &#x22;urn:valos:&#x22;,
+  &#x22;@base&#x22;: &#x22;urn:valos:chronicle:&#x22;,
+  &#x22;@vocab&#x22;: &#x22;vplot:&#x27;&#x22;,
 
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all valosheath type prototype properties.
-    </span>
-</span></a></span>
-</td><td colspan=1> <a href="#version" class="vdoc type-vdoc-reference">VLog:version</a> <a href="#delta" class="vdoc type-vdoc-reference">VLog:delta</a> <a href="#command" class="vdoc type-vdoc-reference">VLog:command</a> <a href="#log" class="vdoc type-vdoc-reference">VLog:log</a> <a href="#author" class="vdoc type-vdoc-reference">VLog:author</a></td></tr>
-        <tr id="EventAspect" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#EventAspect" class="vdoc type-vdoc-reference">#EventAspect</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td></td><td><span class="vdoc type-vdoc-node">The class of resources which contain a set of attributes of a single
-lifecycle aspect of some chronicle event as it progresses through the
-proclamation lifecycle.</span>
-</td></tr>
-        <tr id="DeltaAspect" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#DeltaAspect" class="vdoc type-vdoc-reference">#DeltaAspect</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/log/0#EventAspect" class="vdoc type-vdoc-reference">VLog:EventAspect</a></td><td><span class="vdoc type-vdoc-node">The class of resources which contain the state delta payload of some
-chronicle event.</span>
-</td></tr>
-        <tr id="CommandAspect" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#CommandAspect" class="vdoc type-vdoc-reference">#CommandAspect</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/log/0#EventAspect" class="vdoc type-vdoc-reference">VLog:EventAspect</a></td><td><span class="vdoc type-vdoc-node">The class of resources which contain attributes added by a gateway to
-some event during the fabrication of the event command.</span>
-</td></tr>
-        <tr id="LogAspect" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#LogAspect" class="vdoc type-vdoc-reference">#LogAspect</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/log/0#EventAspect" class="vdoc type-vdoc-reference">VLog:EventAspect</a></td><td><span class="vdoc type-vdoc-node">The class of resources which contain attributes of an event which
-relate to its position in the chronicle event log. The contents of this
-aspect are ultimately finally provided by the authority but is
-typically provisionally provided by the gateway.</span>
-</td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><a href="https://valospace.org/engine/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">instance properties</span>
+  &#x22;V&#x22;: &#x22;https://valospace.org/0#&#x22;,
+  &#x22;VLog&#x22;: &#x22;https://valospace.org/log/0#&#x22;,
+  &#x22;VState&#x22;: &#x22;https://valospace.org/state/0#&#x22;,
 
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all valosheath type prototype properties.
-    </span>
-</span></a></span>
-</td><td colspan=1> <a href="#index" class="vdoc type-vdoc-reference">VLog:index</a> <a href="#vplotHashV0" class="vdoc type-vdoc-reference">VLog:vplotHashV0</a></td></tr>
-        <tr id="AuthorAspect" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#AuthorAspect" class="vdoc type-vdoc-reference">#AuthorAspect</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/log/0#EventAspect" class="vdoc type-vdoc-reference">VLog:EventAspect</a></td><td><span class="vdoc type-vdoc-node">The class of resources which contain the authoring attributes and the
-command signature of a single chronicle event.</span>
-</td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><a href="https://valospace.org/engine/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">instance properties</span>
+  &#x22;&#x26;^&#x22;: { &#x22;@id&#x22;: &#x22;VState:globalResources&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22;, &#x22;@container&#x22;: &#x22;@id&#x22; },
+  &#x22;&#x26;_&#x22;: { &#x22;@id&#x22;: &#x22;VState:subResources&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22;, &#x22;@container&#x22;: &#x22;@id&#x22; },
+  &#x22;&#x26;-&#x22;: { &#x22;@id&#x22;: &#x22;VState:removes&#x22;, &#x22;@container&#x22;: &#x22;@graph&#x22; },
 
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all valosheath type prototype properties.
-    </span>
-</span></a></span>
-</td><td colspan=1> <a href="#antecedent" class="vdoc type-vdoc-reference">VLog:antecedent</a> <a href="#publicIdentity" class="vdoc type-vdoc-reference">VLog:publicIdentity</a> <a href="#signature" class="vdoc type-vdoc-reference">VLog:signature</a></td></tr>
-      </tbody>
-    </table>
+  &#x22;~P&#x22;: { &#x22;@id&#x22;: &#x22;V:ownsProperty&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22;, &#x22;@container&#x22;: &#x22;@id&#x22; },
+  &#x22;~E&#x22;: { &#x22;@id&#x22;: &#x22;V:ownsEntity&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22;, &#x22;@container&#x22;: &#x22;@id&#x22; },
+  &#x22;~R&#x22;: { &#x22;@id&#x22;: &#x22;V:ownsRelation&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22;, &#x22;@container&#x22;: &#x22;@id&#x22; },
+  &#x22;~M&#x22;: { &#x22;@id&#x22;: &#x22;V:ownsMedia&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22;, &#x22;@container&#x22;: &#x22;@id&#x22; },
 
-  </section>
+  &#x22;.~&#x22;: { &#x22;@id&#x22;: &#x22;V:owner&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
 
-  <section id="section_properties" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_properties">§ </a><em>VLog</em> <a href="https://valospace.org/kernel/0#Property" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">fabric properties</span>
+  &#x22;.P~&#x22;: { &#x22;@id&#x22;: &#x22;V:scope&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
+  &#x22;.E~&#x22;: { &#x22;@id&#x22;: &#x22;V:parent&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
+  &#x22;.R~&#x22;: { &#x22;@id&#x22;: &#x22;V:graph&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
+  &#x22;.M~&#x22;: { &#x22;@id&#x22;: &#x22;V:folder&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
 
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of properties which are defined by the ValOS kernel domain
-ontologies.
-    </span>
-</span></a></h3>
-<div><p>
-  <div class="vdoc type-vdoc-paragraph">This section describes fabric properties introduced by the &#x27;VLog&#x27; namespace
+  &#x22;.n&#x22;: { &#x22;@id&#x22;: &#x22;V:name&#x22; },
+  &#x22;.c&#x22;: { &#x22;@id&#x22;: &#x22;V:content&#x22; },
+
+  &#x22;.iOf&#x22;: { &#x22;@id&#x22;: &#x22;V:instanceOf&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
+  &#x22;-hasI&#x22;: { &#x22;@id&#x22;: &#x22;V:hasInstance&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22;, &#x22;@container&#x22;: &#x22;@id&#x22; },
+
+  &#x22;.gOf&#x22;: { &#x22;@id&#x22;: &#x22;V:ghostOf&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
+  &#x22;-hasG&#x22;: { &#x22;@id&#x22;: &#x22;V:hasGhost&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22;, &#x22;@container&#x22;: &#x22;@id&#x22; },
+
+  &#x22;.src&#x22;: { &#x22;@id&#x22;: &#x22;V:source&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
+  &#x22;-out&#x22;: { &#x22;@id&#x22;: &#x22;V:hasOutRelation&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22;, &#x22;@container&#x22;: &#x22;@list&#x22; },
+
+  &#x22;.tgt&#x22;: { &#x22;@id&#x22;: &#x22;V:target&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
+  &#x22;-in&#x22;: { &#x22;@id&#x22;: &#x22;V:hasInRelation&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22;, &#x22;@container&#x22;: &#x22;@list&#x22; },
+
+  &#x22;.src-&#x22;: { &#x22;@id&#x22;: &#x22;V:linkedSource&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
+  &#x22;.tgt-&#x22;: { &#x22;@id&#x22;: &#x22;V:linkedTarget&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
+
+  &#x22;.src~&#x22;: { &#x22;@id&#x22;: &#x22;V:ownerSource&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
+  &#x22;.tgt~&#x22;: { &#x22;@id&#x22;: &#x22;V:ownerTarget&#x22;, &#x22;@type&#x22;: &#x22;@id&#x22; },
+
+  &#x22;VSourcerer&#x22;: &#x22;https://valospace.org/sourcerer/0#&#x22;,
+
+  &#x22;~u4&#x22;: &#x22;urn:valos:u4:&#x22;
+}</span>
+</code></pre></span>
+
+</blockquote><div><p>
+  <div class="vdoc type-vdoc-paragraph">The first vlog event always creates the chronicle root resource with
+an id equal to the vlog chronicle id itself. The id URN of the root
+resource is added into the context with key &#x22;0&#x22;. The root resource is
+assigned a blank node &#x27;_:0&#x27; that corresponds to id context entry URN.
   </div>
 </p></div>
-    <table class="vdoc type-vdoc-table">
-      <thead>
-        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:domain</span>
-</th>
-        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:range</span>
-</th>
-      </thead>
-      <tbody>
-        <tr id="version" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#version" class="vdoc type-vdoc-reference">#version</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/log/0#EventAspects" class="vdoc type-vdoc-reference">VLog:EventAspects</a></td><td><a href="http://www.w3.org/2001/XMLSchema#string" class="vdoc type-vdoc-reference">xsd:string</a></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">The aspect version string. The version of this specification is &#x22;0.3&#x22;</span>
-</td></tr>
-        <tr id="delta" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#delta" class="vdoc type-vdoc-reference">#delta</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/log/0#EventAspects" class="vdoc type-vdoc-reference">VLog:EventAspects</a></td><td><a href="https://valospace.org/log/0#DeltaAspect" class="vdoc type-vdoc-reference">VLog:DeltaAspect</a></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">The state delta aspect of the event.</span>
-</td></tr>
-        <tr id="command" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#command" class="vdoc type-vdoc-reference">#command</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/log/0#EventAspects" class="vdoc type-vdoc-reference">VLog:EventAspects</a></td><td><a href="https://valospace.org/log/0#CommandAspect" class="vdoc type-vdoc-reference">VLog:CommandAspect</a></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">The command fabrication aspect of the event.</span>
-</td></tr>
-        <tr id="log" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#log" class="vdoc type-vdoc-reference">#log</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/log/0#EventAspects" class="vdoc type-vdoc-reference">VLog:EventAspects</a></td><td><a href="https://valospace.org/log/0#LogAspect" class="vdoc type-vdoc-reference">VLog:LogAspect</a></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">The authority log aspect of the event.</span>
-</td></tr>
-        <tr id="index" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#index" class="vdoc type-vdoc-reference">#index</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/log/0#LogAspect" class="vdoc type-vdoc-reference">VLog:LogAspect</a></td><td><a href="http://www.w3.org/2001/XMLSchema#integer" class="vdoc type-vdoc-reference">xsd:integer</a></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">The 0-based index of the event in the event log.</span>
-</td></tr>
-        <tr id="vplotHashV0" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#vplotHashV0" class="vdoc type-vdoc-reference">#vplotHashV0</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/log/0#LogAspect" class="vdoc type-vdoc-reference">VLog:LogAspect</a></td><td><a href="http://www.w3.org/2001/XMLSchema#string" class="vdoc type-vdoc-reference">xsd:string</a></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">The base64url-encoded SHA-512/384 hash of the combination of the
-preceding event vplotHashV0 with the current event signature or delta.
-The exact format of the combination is pending. The event contents is
-defined to be the VLog:signature if the event is signed, otherwise it
-is the vplot serialization of the VLog:DeltaAspect of the event.</span>
-</td></tr>
-        <tr id="author" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#author" class="vdoc type-vdoc-reference">#author</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/log/0#EventAspects" class="vdoc type-vdoc-reference">VLog:EventAspects</a></td><td><a href="https://valospace.org/log/0#AuthorAspect" class="vdoc type-vdoc-reference">VLog:AuthorAspect</a></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">The command author aspect of the event.</span>
-</td></tr>
-        <tr id="antecedent" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#antecedent" class="vdoc type-vdoc-reference">#antecedent</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/log/0#AuthorAspect" class="vdoc type-vdoc-reference">VLog:AuthorAspect</a></td><td><a href="http://www.w3.org/2001/XMLSchema#integer" class="vdoc type-vdoc-reference">xsd:integer</a></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">The index of an antecedent event the payload of which this author
-section confirms. This usually is the index of the directly preceding
-event but if the chronicle allows for reordering and eventual
-consistency this can refer to further in the log.</span>
-</td></tr>
-        <tr id="publicIdentity" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#publicIdentity" class="vdoc type-vdoc-reference">#publicIdentity</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/log/0#AuthorAspect" class="vdoc type-vdoc-reference">VLog:AuthorAspect</a></td><td><a href="https://valospace.org/0#Entity" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">V:Entity</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of valospace resources which act as the main valospace tree
-hierarchy building block. With Relation and Media it forms the group of
-three primary node types. As a Scope it can have scriptable properties,
-which entities expose to all child resources as their lexical scripting
-namespace.
-
-The set of valospace tree hierarchies is defined via triple pattern:
-
-  SELECT ?root ?parent ?node WHERE {
-    ?node V:parent ?parent .
-    ?parent V:parent* ?root .
-    NOT EXISTS ( ?root V:parent ?rootParent )
+<blockquote class="vdoc type-revdoc-example">
+    <span class="vdoc type-vdoc-node">
+    <h3>creates chronicle root entity</h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> JSON.parse(JSON.stringify(state = applyVLogDelta(state, {
+  &#x22;@context&#x22;: [{
+    &#x22;0&#x22;: &#x22;~u4:cccccccc-6600-2211-cc77-333333333333&#x22;
+  }],
+  &#x22;&#x26;~&#x22;: { &#x22;&#x22;: { &#x22;.n&#x22;: &#x22;rootName&#x22;, &#x22;V:authorityURI&#x22;: &#x22;valaa-local:&#x22; } }
+})))</span>
+</code></pre></blockquote>toMatchObject<blockquote><pre><code><span class="vdoc type-vdoc-node"> ({
+  &#x22;@context&#x22;: [baseStateContext, {
+    &#x22;0&#x22;: &#x22;~u4:cccccccc-6600-2211-cc77-333333333333&#x22;
+  }],
+  &#x22;&#x26;^&#x22;: {
+    &#x22;0/&#x22;: { &#x22;.n&#x22;: &#x22;rootName&#x22;, &#x22;V:authorityURI&#x22;: &#x22;valaa-local:&#x22; }
   }
+})</span>
+</code></pre></blockquote>
+  </div>
+</p></div></span>
 
-This implies that only Entity resources can be nodes but any primary
-node can act as a root resource.
-
-    </span>
-</span></a></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">The public identity resource of the contributor of this event.</span>
-</td></tr>
-        <tr id="signature" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#signature" class="vdoc type-vdoc-reference">#signature</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/log/0#AuthorAspect" class="vdoc type-vdoc-reference">VLog:AuthorAspect</a></td><td><a href="http://www.w3.org/2001/XMLSchema#string" class="vdoc type-vdoc-reference">xsd:string</a></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1><span class="vdoc type-vdoc-node">The base64url-encoded 512-bit Ed25519 signature (as provided by
-tweetnacl.sign.detached) of the event payload. The exact format of the
-payload is pending precise specification. This signature is created
-using the secretKey associated with the chronicle publicKey of the
-authoring publicIdentity.</span>
-</td></tr>
-      </tbody>
-    </table>
-
-  </section>
-
-  <section id="section_methods" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_methods">§ </a><em>VLog</em> <a href="https://valospace.org/engine/0#Method" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">fabric methods</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all valosheath type prototype methods.
-    </span>
-</span></a></h3>
-<div><p>
-  <div class="vdoc type-vdoc-paragraph">This section describes fabric methods introduced by the &#x27;VLog&#x27; namespace
+</blockquote><div><p>
+  <div class="vdoc type-vdoc-paragraph">VLog node objects have chronicle-local vplot identifiers. A local
+vplot id begins with <pre><code><span class="vdoc type-vdoc-node">vplot:chronicle/</span>
+</code></pre> and is followed by a <a href="@valos/vplot#route-vplot" class="vdoc type-vdoc-reference">route-vplot</a> string. Each vterm of
+the local vplot id that matches the pattern 
+maps to a URI in the chronicle URI lookup. The local vplot id can be
+translated to a global valos:urn vplot id by replacing all the mappings
+with their corresponding URI and converting the id to <a href="@valos/vplot#urn-vplot" class="vdoc type-vdoc-reference">urn-vplot</a> form.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">These local vplot ids form a nested hierarchy. Resource views project
+subtrees of this hierarchy (<em>view origin</em>) to be accessible
+at other subtree locations (<em>view image</em>). Notably, ownership
+views project the stable root-level embodiment of a resource (<em>stable origin</em>) to be accessible at its current logical
+location in the ownership hierarchy (<em>logical image</em>).
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">Delta updates to resources must always be applied to the logical
+image, never to the resource origin itself (unless they&#x27;re the
+same). Similarily, references in deltas must refer to logical images
+as long as the referenced resource belongs to the same chronicle.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">Conversely, the state of a resource is always represented at the
+stable origin. Similarily, all references in state objects must refer
+to the stable origins of the resources.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">All references (in both deltas and state alike) to resources in other
+chronicles must refer to their stable origin.
+.
   </div>
 </p></div>
-    <table class="vdoc type-vdoc-table">
-      <thead>
-        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:domain</span>
-</th>
-        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:range</span>
-</th>
-      </thead>
-      <tbody>
-        
-      </tbody>
-    </table>
-
-  </section>
-
-  <section id="section_globals" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_globals">§ </a><em>VLog</em> <a href="https://valospace.org/engine/0#Global" class="vdoc type-vdoc-reference"><span class="vdoc type-revdoc-tooltip">
-    <span class="vdoc type-vdoc-node">fabric globals</span>
-
-    <span class="vdoc type-revdoc-tooltip-content">
-        The class of all valosheath global resources.
-    </span>
-</span></a></h3>
+<blockquote class="vdoc type-revdoc-example">
+    <span class="vdoc type-vdoc-node">
+    <h3>delta application to harmonize refs to appropriate stable origin refs</h3>
 <div><p>
-  <div class="vdoc type-vdoc-paragraph">This section describes fabric global objects introduced by the &#x27;VLog&#x27; namespace
+  <div class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> JSON.parse(JSON.stringify(state = applyVLogDelta(state,
+{
+  &#x22;@context&#x22;: [{
+    &#x22;1&#x22;: &#x22;~u4:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee&#x22;,
+    &#x22;2&#x22;: &#x22;~u4:bbbbbbbb-bbbb-cccc-dddd-eeeeeeeeeeee&#x22;,
+    &#x22;3&#x22;: &#x22;~u4:abababab-bbbb-cccc-dddd-eeeeeeeeeeee&#x22;,
+    &#x22;4&#x22;: &#x22;~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee&#x22;,
+    &#x22;5&#x22;: &#x22;valaa-test:?id=(~raw&#x27;extl!)#&#x22;
+  }],
+  &#x22;&#x26;~&#x22;: {
+    &#x22;&#x22;: { &#x22;.n&#x22;: &#x22;newRootName&#x22; },
+    &#x22;1/&#x22;: { &#x22;.E~&#x22;: &#x22;0/&#x22;, &#x22;.n&#x22;: &#x22;older&#x22;,
+      &#x22;toOutside&#x22;: { &#x22;@id&#x22;: &#x22;5/&#x22; }, &#x22;absolutelyParent&#x22;: { &#x22;@id&#x22;: &#x22;/0/&#x22; },
+    },
+    &#x22;2/&#x22;: { &#x22;.E~&#x22;: &#x22;0/&#x22;, &#x22;.n&#x22;: &#x22;unger&#x22;,
+      &#x22;toOlder&#x22;: { &#x22;@id&#x22;: &#x22;1/&#x22; }, &#x22;absolutelyOlder&#x22;: { &#x22;@id&#x22;: &#x22;/1/&#x22; },
+    },
+    &#x22;2/3/&#x22;: { &#x22;.tgt~&#x22;: &#x22;2/&#x22;, &#x22;.n&#x22;: &#x22;SIBLING&#x22;, &#x22;.src&#x22;: &#x22;1/&#x22; },
+    &#x22;2/4/&#x22;: { &#x22;.src~&#x22;: &#x22;2/&#x22;, &#x22;.n&#x22;: &#x22;SIBLING&#x22;, &#x22;.tgt&#x22;: &#x22;1/&#x22; },
+  },
+})))</span>
+</code></pre></blockquote>toMatchObject<blockquote><pre><code><span class="vdoc type-vdoc-node">{
+  &#x22;@context&#x22;: [
+    {
+      &#x22;^&#x22;: &#x22;urn:valos:&#x22;,
+      &#x22;@base&#x22;: &#x22;urn:valos:chronicle:&#x22;,
+      &#x22;@vocab&#x22;: &#x22;vplot:&#x27;&#x22;,
+      &#x22;V&#x22;: &#x22;https://valospace.org/0#&#x22;,
+      &#x22;VLog&#x22;: &#x22;https://valospace.org/log/0#&#x22;,
+      &#x22;VState&#x22;: &#x22;https://valospace.org/state/0#&#x22;,
+      &#x22;&#x26;^&#x22;: {
+        &#x22;@id&#x22;: &#x22;VState:globalResources&#x22;,
+        &#x22;@type&#x22;: &#x22;@id&#x22;,
+        &#x22;@container&#x22;: &#x22;@id&#x22;
+      },
+      &#x22;&#x26;_&#x22;: {
+        &#x22;@id&#x22;: &#x22;VState:subResources&#x22;,
+        &#x22;@type&#x22;: &#x22;@id&#x22;,
+        &#x22;@container&#x22;: &#x22;@id&#x22;
+      },
+      &#x22;&#x26;-&#x22;: {
+        &#x22;@id&#x22;: &#x22;VState:removes&#x22;,
+        &#x22;@container&#x22;: &#x22;@graph&#x22;
+      },
+      &#x22;~P&#x22;: {
+        &#x22;@id&#x22;: &#x22;V:ownsProperty&#x22;,
+        &#x22;@type&#x22;: &#x22;@id&#x22;,
+        &#x22;@container&#x22;: &#x22;@id&#x22;
+      },
+      &#x22;~E&#x22;: {
+        &#x22;@id&#x22;: &#x22;V:ownsEntity&#x22;,
+        &#x22;@type&#x22;: &#x22;@id&#x22;,
+        &#x22;@container&#x22;: &#x22;@id&#x22;
+      },
+      &#x22;~R&#x22;: {
+        &#x22;@id&#x22;: &#x22;V:ownsRelation&#x22;,
+        &#x22;@type&#x22;: &#x22;@id&#x22;,
+        &#x22;@container&#x22;: &#x22;@id&#x22;
+      },
+      &#x22;~M&#x22;: {
+        &#x22;@id&#x22;: &#x22;V:ownsMedia&#x22;,
+        &#x22;@type&#x22;: &#x22;@id&#x22;,
+        &#x22;@container&#x22;: &#x22;@id&#x22;
+      },
+      &#x22;.~&#x22;: {
+        &#x22;@id&#x22;: &#x22;V:owner&#x22;,
+        &#x22;@type&#x22;: &#x22;@id&#x22;
+      },
+      &#x22;.P~&#x22;: {
+        &#x22;@id&#x22;: &#x22;V:scope&#x22;,
+        &#x22;@type&#x22;: &#x22;@id&#x22;
+      },
+      &#x22;.E~&#x22;: {
+        &#x22;@id&#x22;: &#x22;V:parent&#x22;,
+        &#x22;@type&#x22;: &#x22;@id&#x22;
+      },
+      &#x22;.R~&#x22;: {
+        &#x22;@id&#x22;: &#x22;V:graph&#x22;,
+        &#x22;@type&#x22;: &#x22;@id&#x22;
+      },
+      &#x22;.M~&#x22;: {
+        &#x22;@id&#x22;: &#x22;V:folder&#x22;,
+        &#x22;@type&#x22;: &#x22;@id&#x22;
+      },
+      &#x22;.n&#x22;: {
+        &#x22;@id&#x22;: &#x22;V:name&#x22;
+      },
+      &#x22;.c&#x22;: {
+        &#x22;@id&#x22;: &#x22;V:content&#x22;
+      },
+      &#x22;.iOf&#x22;: {
+        &#x22;@id&#x22;: &#x22;V:instanceOf&#x22;,
+        &#x22;@type&#x22;: &#x22;@id&#x22;
+      },
+      &#x22;-hasI&#x22;: {
+        &#x22;@id&#x22;: &#x22;V:hasInstance&#x22;,
+        &#x22;@type&#x22;: &#x22;@id&#x22;,
+        &#x22;@container&#x22;: &#x22;@id&#x22;
+      },
+      &#x22;.gOf&#x22;: {
+        &#x22;@id&#x22;: &#x22;V:ghostOf&#x22;,
+        &#x22;@type&#x22;: &#x22;@id&#x22;
+      },
+      &#x22;-hasG&#x22;: {
+        &#x22;@id&#x22;: &#x22;V:hasGhost&#x22;,
+        &#x22;@type&#x22;: &#x22;@id&#x22;,
+        &#x22;@container&#x22;: &#x22;@id&#x22;
+      },
+      &#x22;.src&#x22;: {
+        &#x22;@id&#x22;: &#x22;V:source&#x22;,
+        &#x22;@type&#x22;: &#x22;@id&#x22;
+      },
+      &#x22;-out&#x22;: {
+        &#x22;@id&#x22;: &#x22;V:hasOutRelation&#x22;,
+        &#x22;@type&#x22;: &#x22;@id&#x22;,
+        &#x22;@container&#x22;: &#x22;@list&#x22;
+      },
+      &#x22;.tgt&#x22;: {
+        &#x22;@id&#x22;: &#x22;V:target&#x22;,
+        &#x22;@type&#x22;: &#x22;@id&#x22;
+      },
+      &#x22;-in&#x22;: {
+        &#x22;@id&#x22;: &#x22;V:hasInRelation&#x22;,
+        &#x22;@type&#x22;: &#x22;@id&#x22;,
+        &#x22;@container&#x22;: &#x22;@list&#x22;
+      },
+      &#x22;.src-&#x22;: {
+        &#x22;@id&#x22;: &#x22;V:linkedSource&#x22;,
+        &#x22;@type&#x22;: &#x22;@id&#x22;
+      },
+      &#x22;.tgt-&#x22;: {
+        &#x22;@id&#x22;: &#x22;V:linkedTarget&#x22;,
+        &#x22;@type&#x22;: &#x22;@id&#x22;
+      },
+      &#x22;.src~&#x22;: {
+        &#x22;@id&#x22;: &#x22;V:ownerSource&#x22;,
+        &#x22;@type&#x22;: &#x22;@id&#x22;
+      },
+      &#x22;.tgt~&#x22;: {
+        &#x22;@id&#x22;: &#x22;V:ownerTarget&#x22;,
+        &#x22;@type&#x22;: &#x22;@id&#x22;
+      },
+      &#x22;VSourcerer&#x22;: &#x22;https://valospace.org/sourcerer/0#&#x22;,
+      &#x22;~u4&#x22;: &#x22;urn:valos:u4:&#x22;
+    },
+    {
+      &#x22;0&#x22;: &#x22;~u4:cccccccc-6600-2211-cc77-333333333333&#x22;,
+      &#x22;1&#x22;: &#x22;~u4:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee&#x22;,
+      &#x22;2&#x22;: &#x22;~u4:bbbbbbbb-bbbb-cccc-dddd-eeeeeeeeeeee&#x22;,
+      &#x22;3&#x22;: &#x22;~u4:abababab-bbbb-cccc-dddd-eeeeeeeeeeee&#x22;,
+      &#x22;4&#x22;: &#x22;~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee&#x22;,
+      &#x22;5&#x22;: &#x22;valaa-test:?id=(~raw&#x27;extl!)#&#x22;
+    }
+  ],
+  &#x22;&#x26;^&#x22;: {
+    &#x22;0/&#x22;: {
+      &#x22;.n&#x22;: &#x22;newRootName&#x22;,
+      &#x22;V:authorityURI&#x22;: &#x22;valaa-local:&#x22;,
+      &#x22;~E&#x22;: [
+        &#x22;1/&#x22;,
+        &#x22;2/&#x22;
+      ]
+    },
+    &#x22;1/&#x22;: {
+      &#x22;.E~&#x22;: &#x22;0/&#x22;,
+      &#x22;.n&#x22;: &#x22;older&#x22;,
+      &#x22;-out&#x22;: [
+        &#x22;3/&#x22;
+      ],
+      &#x22;-in&#x22;: [
+        &#x22;4/&#x22;
+      ],
+      &#x22;toOutside&#x22;: {
+        &#x22;@id&#x22;: &#x22;5/&#x22;
+      },
+      &#x22;absolutelyParent&#x22;: {
+        &#x22;@id&#x22;: &#x22;/0/&#x22;
+      }
+    },
+    &#x22;2/&#x22;: {
+      &#x22;.E~&#x22;: &#x22;0/&#x22;,
+      &#x22;.n&#x22;: &#x22;unger&#x22;,
+      &#x22;~R&#x22;: [
+        &#x22;3/&#x22;,
+        &#x22;4/&#x22;
+      ],
+      &#x22;-out&#x22;: [
+        &#x22;4/&#x22;
+      ],
+      &#x22;-in&#x22;: [
+        &#x22;3/&#x22;
+      ],
+      &#x22;toOlder&#x22;: {
+        &#x22;@id&#x22;: &#x22;1/&#x22;
+      },
+      &#x22;absolutelyOlder&#x22;: {
+        &#x22;@id&#x22;: &#x22;/1/&#x22;
+      }
+    },
+    &#x22;3/&#x22;: {
+      &#x22;.tgt~&#x22;: &#x22;2/&#x22;,
+      &#x22;.n&#x22;: &#x22;SIBLING&#x22;,
+      &#x22;.src&#x22;: &#x22;1/&#x22;
+    },
+    &#x22;4/&#x22;: {
+      &#x22;.src~&#x22;: &#x22;2/&#x22;,
+      &#x22;.n&#x22;: &#x22;SIBLING&#x22;,
+      &#x22;.tgt&#x22;: &#x22;1/&#x22;
+    }
+  }
+}</span>
+</code></pre></blockquote>
+  </div>
+</p></div></span>
+
+</blockquote><div><p>
+  <div class="vdoc type-vdoc-paragraph">
+Ghost instancing with <a href="V:instanceOf" class="vdoc type-vdoc-reference">V:instanceOf</a> term &#x22;.iOf&#x22; and the
+recursive application of the <a href="VState:subResources" class="vdoc type-vdoc-reference">VState:subResources</a> term &#x27;&#x26;_&#x27; are the cornerstone of the unified valos resource model for
+application development.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">Instancing dynamics primarily affects state inference and as such no
+additional functionality for deltas is necessary. It should be noted
+however that the logical image vplot of ghosts &#x27;flattens&#x27; the stable
+origin vplot of its ghost prototype (See how resource &#x22;0/1/3/8&#x22; is
+ghosted as &#x22;0/6/8&#x22; and &#x22;0/7/8&#x22;). Instance views behave here similar to
+external references: the ghost vplot cannot know the exact logical
+location of its prototype (not least because the prototype might be
+in a different chronicle!).
+
   </div>
 </p></div>
-    <table class="vdoc type-vdoc-table">
-      <thead>
-        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdf:type</span>
-</th>
-        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">Comment</span>
-</th>
-      </thead>
-      <tbody>
-        
-      </tbody>
-    </table>
+<blockquote class="vdoc type-revdoc-example">
+    <span class="vdoc type-vdoc-node">
+    <h3>instances a resource with ghosts</h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> JSON.parse(JSON.stringify(state = applyVLogDelta(state,
+{
+  &#x22;@context&#x22;: [{
+    &#x22;6&#x22;: &#x22;~u4:11111111-2255-7744-22cc-eeeeeeeeeeee&#x22;,
+    &#x22;7&#x22;: &#x22;~u4:22222222-2255-7744-22cc-eeeeeeeeeeee&#x22;,
+    &#x22;8&#x22;: &#x22;~u4:d336d336-9999-6666-0000-777700000000&#x22;
+  }],
+  &#x22;&#x26;~&#x22;: {
+    &#x22;2/3/8/&#x22;: { &#x22;.E~&#x22;: &#x22;3/&#x22;, &#x22;.n&#x22;: &#x22;deeplyOwned&#x22; },
+    &#x22;6/&#x22;: {
+      &#x22;.E~&#x22;: &#x22;0/&#x22;, &#x22;.iOf&#x22;: &#x22;2/&#x22;, &#x22;.n&#x22;: &#x22;ungerInstance&#x22;,
+      &#x22;&#x26;_&#x22;: {
+        &#x22;6/3/&#x22;: {
+          &#x22;instance&#x22;: { &#x22;@id&#x22;: &#x22;6/&#x22; },
+          &#x22;absoluteInstance&#x22;: { &#x22;@id&#x22;: &#x22;/6/&#x22; },
+          &#x22;deepProto&#x22;: { &#x22;@id&#x22;: &#x22;8/&#x22; },
+          &#x22;absoluteDeepProto&#x22;: { &#x22;@id&#x22;: &#x22;/8/&#x22; },
+        },
+        &#x22;6/8/&#x22;: { &#x22;.n&#x22;: &#x22;deeplyOwnedGhost&#x22; },
+      },
+    },
+    &#x22;7/&#x22;: {
+      &#x22;.E~&#x22;: &#x22;0/&#x22;, &#x22;.iOf&#x22;: &#x22;6/&#x22;, &#x22;.n&#x22;: &#x22;ungerInstanceInstance&#x22;,
+      &#x22;&#x26;_&#x22;: {
+        &#x22;7/3/&#x22;: { &#x22;instanceInstance&#x22;: { &#x22;@id&#x22;: &#x22;7/&#x22; } },
+        &#x22;7/8/&#x22;: { &#x22;.n&#x22;: &#x22;deeplyOwnedGhostGhost&#x22; },
+      },
+    },
+  },
+})))</span>
+</code></pre></blockquote>toMatchObject<blockquote><pre><code><span class="vdoc type-vdoc-node"> ({
+  &#x22;@context&#x22;: [baseStateContext, {
+    &#x22;0&#x22;: &#x22;~u4:cccccccc-6600-2211-cc77-333333333333&#x22;,
+    &#x22;1&#x22;: &#x22;~u4:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee&#x22;,
+    &#x22;2&#x22;: &#x22;~u4:bbbbbbbb-bbbb-cccc-dddd-eeeeeeeeeeee&#x22;,
+    &#x22;3&#x22;: &#x22;~u4:abababab-bbbb-cccc-dddd-eeeeeeeeeeee&#x22;,
+    &#x22;4&#x22;: &#x22;~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee&#x22;,
+    &#x22;5&#x22;: &#x22;valaa-test:?id=(~raw&#x27;extl!)#&#x22;,
+    &#x22;6&#x22;: &#x22;~u4:11111111-2255-7744-22cc-eeeeeeeeeeee&#x22;,
+    &#x22;7&#x22;: &#x22;~u4:22222222-2255-7744-22cc-eeeeeeeeeeee&#x22;,
+    &#x22;8&#x22;: &#x22;~u4:d336d336-9999-6666-0000-777700000000&#x22;
+  }],
+  &#x22;&#x26;^&#x22;: {
+    &#x22;0/&#x22;: { &#x22;.n&#x22;: &#x22;newRootName&#x22;,
+      &#x22;V:authorityURI&#x22;: &#x22;valaa-local:&#x22;,
+      &#x22;~E&#x22;: [&#x22;1/&#x22;, &#x22;2/&#x22;, &#x22;6/&#x22;, &#x22;7/&#x22;]
+    },
+    &#x22;1/&#x22;: { &#x22;.E~&#x22;: &#x22;0/&#x22;, &#x22;.n&#x22;: &#x22;older&#x22;,
+      &#x22;-out&#x22;: [&#x22;3/&#x22;], &#x22;-in&#x22;: [&#x22;4/&#x22;],
+      &#x22;toOutside&#x22;: { &#x22;@id&#x22;: &#x22;5/&#x22; }, &#x22;absolutelyParent&#x22;: { &#x22;@id&#x22;: &#x22;/0/&#x22; }
+    },
+    &#x22;2/&#x22;: { &#x22;.E~&#x22;: &#x22;0/&#x22;, &#x22;.n&#x22;: &#x22;unger&#x22;,
+      &#x22;~R&#x22;: [&#x22;3/&#x22;, &#x22;4/&#x22;],
+      &#x22;-out&#x22;: [&#x22;4/&#x22;], &#x22;-in&#x22;: [&#x22;3/&#x22;], &#x22;-hasI&#x22;: [&#x22;6/&#x22;],
+      &#x22;toOlder&#x22;: { &#x22;@id&#x22;: &#x22;1/&#x22; }, &#x22;absolutelyOlder&#x22;: { &#x22;@id&#x22;: &#x22;/1/&#x22; }
+    },
+    &#x22;3/&#x22;: { &#x22;.tgt~&#x22;: &#x22;2/&#x22;, &#x22;.n&#x22;: &#x22;SIBLING&#x22;, &#x22;.src&#x22;: &#x22;1/&#x22;, &#x22;~E&#x22;: [&#x22;8/&#x22;] },
+    &#x22;4/&#x22;: { &#x22;.src~&#x22;: &#x22;2/&#x22;, &#x22;.n&#x22;: &#x22;SIBLING&#x22;, &#x22;.tgt&#x22;: &#x22;1/&#x22; },
+    &#x22;6/&#x22;: [{ &#x22;.E~&#x22;: &#x22;0/&#x22;, &#x22;.n&#x22;: &#x22;ungerInstance&#x22;,
+      &#x22;.iOf&#x22;: &#x22;2/&#x22;, &#x22;-hasI&#x22;: [&#x22;7/&#x22;],
+    }, {
+      &#x22;@context&#x22;: { &#x22;@base&#x22;: &#x22;6/&#x22; },
+      &#x22;&#x26;_&#x22;: {
+        &#x22;3/&#x22;: {
+          &#x22;instance&#x22;: { &#x22;@id&#x22;: &#x22;&#x22; },
+          &#x22;absoluteInstance&#x22;: { &#x22;@id&#x22;: &#x22;/6/&#x22; },
+          &#x22;deepProto&#x22;: { &#x22;@id&#x22;: &#x22;../8/&#x22; },
+          &#x22;absoluteDeepProto&#x22;: { &#x22;@id&#x22;: &#x22;/8/&#x22; },
+        },
+        &#x22;8/&#x22;: { &#x22;.n&#x22;: &#x22;deeplyOwnedGhost&#x22; }
+      }
+    }],
+    &#x22;7/&#x22;: [{ &#x22;.E~&#x22;: &#x22;0/&#x22;, &#x22;.n&#x22;: &#x22;ungerInstanceInstance&#x22;,
+      &#x22;.iOf&#x22;: &#x22;6/&#x22;,
+    }, {
+      &#x22;@context&#x22;: { &#x22;@base&#x22;: &#x22;7/&#x22; },
+      &#x22;&#x26;_&#x22;: {
+        &#x22;3/&#x22;: { &#x22;instanceInstance&#x22;: { &#x22;@id&#x22;: &#x22;&#x22; }, },
+        &#x22;8/&#x22;: { &#x22;.n&#x22;: &#x22;deeplyOwnedGhostGhost&#x22; }
+      }
+    }],
+    &#x22;8/&#x22;: { &#x22;.E~&#x22;: &#x22;3/&#x22;, &#x22;.n&#x22;: &#x22;deeplyOwned&#x22; },
+  },
+})</span>
+</code></pre></blockquote>
+  </div>
+</p></div></span>
 
-  </section>
+</blockquote><div><p>
+  <div class="vdoc type-vdoc-paragraph">
+Projection views are the underlying mechanism on top of which the
+instancing is built. Projection views project virtual, inferred copies
+of their origin subtrees to their view location. An instancing &#x22;.iOf&#x22;
+property creates such a projection from the prototype (as the origin)
+onto the instance (as view) itself.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">This virtual copying is lexical: projected relative references will now
+refer to the relative resources inside the instance view instead of
+to the originally referenced resources within the prototype. Conversely,
+absolute references (ie. those that begin with &#x22;/&#x22;) keep refering to
+to the same resources even when projected.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">The normalized vplot base of a relative reference that appears in the
+body of some resource is the vplot id of the <em>parent</em> of that
+resource. References that appear in a delta can be based arbitrarily
+however: the delta application will perform this reference normalization.
 
-  <section id="section_vocabulary_other" class="vdoc type-vdoc-chapter">
-    <h3><a aria-label="§" href="#section_vocabulary_other">§ </a><em>VLog</em> remaining vocabulary terms</h3>
+  </div>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span class="vdoc type-vdoc-node">
+    <h3>complex vplot relative references to be normalized</h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> JSON.parse(JSON.stringify(state = applyVLogDelta(state,
+{
+  &#x22;@context&#x22;: [{
+    &#x22;9&#x22;: &#x22;~u4:77777777-1111-eeee-3333-555555555555&#x22;,
+  }],
+  &#x22;&#x26;~&#x22;: {
+    &#x22;9/&#x22;: {
+      &#x22;.E~&#x22;: &#x22;0/&#x22;, &#x22;.n&#x22;: &#x22;inceptor&#x22;, &#x22;.iOf&#x22;: &#x22;0/&#x22;,
+      &#x22;&#x26;_&#x22;: {
+        &#x22;9/1/&#x22;: { &#x22;.n&#x22;: &#x22;olderGhost&#x22; },
+        &#x22;9/2/&#x22;: { &#x22;.n&#x22;: &#x22;ungerGhost&#x22; },
+        &#x22;9/3/&#x22;: { &#x22;.n&#x22;: &#x22;toNephewOldceptGhost&#x22;, &#x22;.tgt&#x22;: &#x22;9/9/1/&#x22; },
+        &#x22;9/4/&#x22;: { &#x22;.n&#x22;: &#x22;toNephewUngceptGhost&#x22;, &#x22;.tgt&#x22;: &#x22;9/9/2/&#x22; },
+        &#x22;9/9/&#x22;: { &#x22;.n&#x22;: &#x22;firstInception&#x22; },
+        &#x22;9/9/1/&#x22;: { &#x22;.n&#x22;: &#x22;oldceptGhost&#x22; },
+        &#x22;9/9/2/&#x22;: { &#x22;.n&#x22;: &#x22;ungceptGhost&#x22; }
+      }
+    },
+  },
+})))</span>
+</code></pre></blockquote>toMatchObject<blockquote><pre><code><span class="vdoc type-vdoc-node"> ({
+  &#x22;@context&#x22;: [baseStateContext, {
+    &#x22;0&#x22;: &#x22;~u4:cccccccc-6600-2211-cc77-333333333333&#x22;,
+    &#x22;1&#x22;: &#x22;~u4:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee&#x22;,
+    &#x22;2&#x22;: &#x22;~u4:bbbbbbbb-bbbb-cccc-dddd-eeeeeeeeeeee&#x22;,
+    &#x22;3&#x22;: &#x22;~u4:abababab-bbbb-cccc-dddd-eeeeeeeeeeee&#x22;,
+    &#x22;4&#x22;: &#x22;~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee&#x22;,
+    &#x22;5&#x22;: &#x22;valaa-test:?id=(~raw&#x27;extl!)#&#x22;,
+    &#x22;6&#x22;: &#x22;~u4:11111111-2255-7744-22cc-eeeeeeeeeeee&#x22;,
+    &#x22;7&#x22;: &#x22;~u4:22222222-2255-7744-22cc-eeeeeeeeeeee&#x22;,
+    &#x22;8&#x22;: &#x22;~u4:d336d336-9999-6666-0000-777700000000&#x22;,
+    &#x22;9&#x22;: &#x22;~u4:77777777-1111-eeee-3333-555555555555&#x22;
+  }],
+  &#x22;&#x26;^&#x22;: {
+    &#x22;0/&#x22;: { &#x22;.n&#x22;: &#x22;newRootName&#x22;,
+      &#x22;V:authorityURI&#x22;: &#x22;valaa-local:&#x22;,
+      &#x22;~E&#x22;: [&#x22;1/&#x22;, &#x22;2/&#x22;, &#x22;6/&#x22;, &#x22;7/&#x22;, &#x22;9/&#x22;]
+    },
+    &#x22;1/&#x22;: { &#x22;.E~&#x22;: &#x22;0/&#x22;, &#x22;.n&#x22;: &#x22;older&#x22;,
+      &#x22;-out&#x22;: [&#x22;3/&#x22;], &#x22;-in&#x22;: [&#x22;4/&#x22;],
+      &#x22;toOutside&#x22;: { &#x22;@id&#x22;: &#x22;5/&#x22; }, &#x22;absolutelyParent&#x22;: { &#x22;@id&#x22;: &#x22;/0/&#x22; }
+    },
+    &#x22;2/&#x22;: { &#x22;.E~&#x22;: &#x22;0/&#x22;, &#x22;.n&#x22;: &#x22;unger&#x22;,
+      &#x22;~R&#x22;: [&#x22;3/&#x22;, &#x22;4/&#x22;],
+      &#x22;-out&#x22;: [&#x22;4/&#x22;], &#x22;-in&#x22;: [&#x22;3/&#x22;], &#x22;-hasI&#x22;: [&#x22;6/&#x22;],
+      &#x22;toOlder&#x22;: { &#x22;@id&#x22;: &#x22;1/&#x22; }, &#x22;absolutelyOlder&#x22;: { &#x22;@id&#x22;: &#x22;/1/&#x22; }
+    },
+    &#x22;3/&#x22;: { &#x22;.tgt~&#x22;: &#x22;2/&#x22;, &#x22;.n&#x22;: &#x22;SIBLING&#x22;, &#x22;.src&#x22;: &#x22;1/&#x22;, &#x22;~E&#x22;: [&#x22;8/&#x22;] },
+    &#x22;4/&#x22;: { &#x22;.src~&#x22;: &#x22;2/&#x22;, &#x22;.n&#x22;: &#x22;SIBLING&#x22;, &#x22;.tgt&#x22;: &#x22;1/&#x22; },
+    &#x22;6/&#x22;: [{ &#x22;.E~&#x22;: &#x22;0/&#x22;, &#x22;.n&#x22;: &#x22;ungerInstance&#x22;,
+      &#x22;.iOf&#x22;: &#x22;2/&#x22;, &#x22;-hasI&#x22;: [&#x22;7/&#x22;]
+    }, {
+      &#x22;@context&#x22;: { &#x22;@base&#x22;: &#x22;6/&#x22; },
+      &#x22;&#x26;_&#x22;: {
+        &#x22;3/&#x22;: {
+          &#x22;instance&#x22;: { &#x22;@id&#x22;: &#x22;&#x22; },
+          &#x22;absoluteInstance&#x22;: { &#x22;@id&#x22;: &#x22;/6/&#x22; },
+          &#x22;deepProto&#x22;: { &#x22;@id&#x22;: &#x22;../8/&#x22; },
+          &#x22;absoluteDeepProto&#x22;: { &#x22;@id&#x22;: &#x22;/8/&#x22; }
+        },
+        &#x22;8/&#x22;: { &#x22;.n&#x22;: &#x22;deeplyOwnedGhost&#x22; }
+      }
+    }],
+    &#x22;7/&#x22;: [{ &#x22;.E~&#x22;: &#x22;0/&#x22;, &#x22;.n&#x22;: &#x22;ungerInstanceInstance&#x22;,
+      &#x22;.iOf&#x22;: &#x22;6/&#x22;
+    }, {
+      &#x22;@context&#x22;: { &#x22;@base&#x22;: &#x22;7/&#x22; },
+      &#x22;&#x26;_&#x22;: {
+        &#x22;3/&#x22;: { &#x22;instanceInstance&#x22;: { &#x22;@id&#x22;: &#x22;&#x22; } },
+        &#x22;8/&#x22;: { &#x22;.n&#x22;: &#x22;deeplyOwnedGhostGhost&#x22; }
+      }
+    }],
+    &#x22;8/&#x22;: { &#x22;.E~&#x22;: &#x22;3/&#x22;, &#x22;.n&#x22;: &#x22;deeplyOwned&#x22; },
+    &#x22;9/&#x22;: [{ &#x22;.E~&#x22;: &#x22;0/&#x22;, &#x22;.n&#x22;: &#x22;inceptor&#x22;, &#x22;.iOf&#x22;: &#x22;0/&#x22; }, {
+      &#x22;@context&#x22;: { &#x22;@base&#x22;: &#x22;9/&#x22; },
+      &#x22;&#x26;_&#x22;: {
+        &#x22;1/&#x22;: { &#x22;.n&#x22;: &#x22;olderGhost&#x22; },
+        &#x22;2/&#x22;: { &#x22;.n&#x22;: &#x22;ungerGhost&#x22; },
+        &#x22;3/&#x22;: { &#x22;.n&#x22;: &#x22;toNephewOldceptGhost&#x22;, &#x22;.tgt&#x22;: &#x22;9/1/&#x22; },
+        &#x22;4/&#x22;: { &#x22;.n&#x22;: &#x22;toNephewUngceptGhost&#x22;, &#x22;.tgt&#x22;: &#x22;9/2/&#x22; },
+        &#x22;9/&#x22;: [{
+          &#x22;.n&#x22;: &#x22;firstInception&#x22;,
+        }, {
+          &#x22;@context&#x22;: { &#x22;@base&#x22;: &#x22;9/&#x22; },
+          &#x22;&#x26;_&#x22;: {
+            &#x22;1/&#x22;: { &#x22;.n&#x22;: &#x22;oldceptGhost&#x22;, &#x22;-in&#x22;: [&#x22;../3/&#x22;] },
+            &#x22;2/&#x22;: { &#x22;.n&#x22;: &#x22;ungceptGhost&#x22;, &#x22;-in&#x22;: [&#x22;../4/&#x22;] }
+          }
+        }],
+      }
+    }]
+  },
+})</span>
+</code></pre></blockquote>
+  </div>
+</p></div></span>
 
-    <table class="vdoc type-vdoc-table">
-      <thead>
-        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdf:type</span>
-</th>
-        <th class="vdoc type-vdoc-header"><span class="vdoc type-vdoc-node">rdfs:subClassOf</span>
-</th>
-      </thead>
-      <tbody>
-        
-      </tbody>
-    </table>
+</blockquote><div><p>
+  <div class="vdoc type-vdoc-paragraph">
+Resource deletion is done by adding the removed triples to the removal
+graphs via <a href="VState:removes" class="vdoc type-vdoc-reference">VState:removes</a> term &#x22;&#x26;-&#x22;.
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">Triple removals from various container properties are persisted in the
+state in any resources that can be view images, as these removals are
+then continuously applied to a the possible corresponding inherited
+view container properties.
 
-  </section>
+  </div>
+</p></div>
+<blockquote class="vdoc type-revdoc-example">
+    <span class="vdoc type-vdoc-node">
+    <h3>resource deletions to be persisted in state</h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">we expect<blockquote><pre><code><span class="vdoc type-vdoc-node"> JSON.parse(JSON.stringify(state = applyVLogDelta(state,
+{
+  &#x22;@context&#x22;: [{}],
+  &#x22;&#x26;~&#x22;: {
+    &#x22;9/&#x22;: { &#x22;&#x26;_&#x22;: {
+      &#x22;9/4/&#x22;: { &#x22;&#x26;-&#x22;: { &#x22;.tgt&#x22;: &#x22;9/9/2/&#x22; } },
+      &#x22;9/9/&#x22;: { &#x22;&#x26;-&#x22;: { &#x22;&#x26;_&#x22;: [&#x22;9/9/2/&#x22;], &#x22;~E&#x22;: [&#x22;9/9/2/&#x22;] } },
+    }, },
+  },
+})))</span>
+</code></pre></blockquote>toMatchObject<blockquote><pre><code><span class="vdoc type-vdoc-node"> ({
+  &#x22;@context&#x22;: [baseStateContext, {
+    &#x22;0&#x22;: &#x22;~u4:cccccccc-6600-2211-cc77-333333333333&#x22;,
+    &#x22;1&#x22;: &#x22;~u4:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee&#x22;,
+    &#x22;2&#x22;: &#x22;~u4:bbbbbbbb-bbbb-cccc-dddd-eeeeeeeeeeee&#x22;,
+    &#x22;3&#x22;: &#x22;~u4:abababab-bbbb-cccc-dddd-eeeeeeeeeeee&#x22;,
+    &#x22;4&#x22;: &#x22;~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee&#x22;,
+    &#x22;5&#x22;: &#x22;valaa-test:?id=(~raw&#x27;extl!)#&#x22;,
+    &#x22;6&#x22;: &#x22;~u4:11111111-2255-7744-22cc-eeeeeeeeeeee&#x22;,
+    &#x22;7&#x22;: &#x22;~u4:22222222-2255-7744-22cc-eeeeeeeeeeee&#x22;,
+    &#x22;8&#x22;: &#x22;~u4:d336d336-9999-6666-0000-777700000000&#x22;,
+    &#x22;9&#x22;: &#x22;~u4:77777777-1111-eeee-3333-555555555555&#x22;
+  }],
+  &#x22;&#x26;^&#x22;: {
+    &#x22;0/&#x22;: { &#x22;.n&#x22;: &#x22;newRootName&#x22;,
+      &#x22;V:authorityURI&#x22;: &#x22;valaa-local:&#x22;,
+      &#x22;~E&#x22;: [&#x22;1/&#x22;, &#x22;2/&#x22;, &#x22;6/&#x22;, &#x22;7/&#x22;, &#x22;9/&#x22;]
+    },
+    &#x22;1/&#x22;: { &#x22;.E~&#x22;: &#x22;0/&#x22;, &#x22;.n&#x22;: &#x22;older&#x22;,
+      &#x22;-out&#x22;: [&#x22;3/&#x22;], &#x22;-in&#x22;: [&#x22;4/&#x22;],
+      &#x22;toOutside&#x22;: { &#x22;@id&#x22;: &#x22;5/&#x22; }, &#x22;absolutelyParent&#x22;: { &#x22;@id&#x22;: &#x22;/0/&#x22; }
+    },
+    &#x22;2/&#x22;: { &#x22;.E~&#x22;: &#x22;0/&#x22;, &#x22;.n&#x22;: &#x22;unger&#x22;,
+      &#x22;~R&#x22;: [&#x22;3/&#x22;, &#x22;4/&#x22;],
+      &#x22;-out&#x22;: [&#x22;4/&#x22;], &#x22;-in&#x22;: [&#x22;3/&#x22;], &#x22;-hasI&#x22;: [&#x22;6/&#x22;],
+      &#x22;toOlder&#x22;: { &#x22;@id&#x22;: &#x22;1/&#x22; }, &#x22;absolutelyOlder&#x22;: { &#x22;@id&#x22;: &#x22;/1/&#x22; }
+    },
+    &#x22;3/&#x22;: { &#x22;.tgt~&#x22;: &#x22;2/&#x22;, &#x22;.n&#x22;: &#x22;SIBLING&#x22;, &#x22;.src&#x22;: &#x22;1/&#x22;, &#x22;~E&#x22;: [&#x22;8/&#x22;] },
+    &#x22;4/&#x22;: { &#x22;.src~&#x22;: &#x22;2/&#x22;, &#x22;.n&#x22;: &#x22;SIBLING&#x22;, &#x22;.tgt&#x22;: &#x22;1/&#x22; },
+    &#x22;6/&#x22;: [{ &#x22;.E~&#x22;: &#x22;0/&#x22;, &#x22;.n&#x22;: &#x22;ungerInstance&#x22;,
+      &#x22;.iOf&#x22;: &#x22;2/&#x22;, &#x22;-hasI&#x22;: [&#x22;7/&#x22;]
+    }, {
+      &#x22;@context&#x22;: { &#x22;@base&#x22;: &#x22;6/&#x22; },
+      &#x22;&#x26;_&#x22;: {
+        &#x22;3/&#x22;: {
+          &#x22;instance&#x22;: { &#x22;@id&#x22;: &#x22;&#x22; },
+          &#x22;absoluteInstance&#x22;: { &#x22;@id&#x22;: &#x22;/6/&#x22; },
+          &#x22;deepProto&#x22;: { &#x22;@id&#x22;: &#x22;../8/&#x22; },
+          &#x22;absoluteDeepProto&#x22;: { &#x22;@id&#x22;: &#x22;/8/&#x22; }
+        },
+        &#x22;8/&#x22;: { &#x22;.n&#x22;: &#x22;deeplyOwnedGhost&#x22; }
+      }
+    }],
+    &#x22;7/&#x22;: [{ &#x22;.E~&#x22;: &#x22;0/&#x22;, &#x22;.n&#x22;: &#x22;ungerInstanceInstance&#x22;,
+      &#x22;.iOf&#x22;: &#x22;6/&#x22;
+    }, {
+      &#x22;@context&#x22;: { &#x22;@base&#x22;: &#x22;7/&#x22; },
+      &#x22;&#x26;_&#x22;: {
+        &#x22;3/&#x22;: { &#x22;instanceInstance&#x22;: { &#x22;@id&#x22;: &#x22;&#x22; } },
+        &#x22;8/&#x22;: { &#x22;.n&#x22;: &#x22;deeplyOwnedGhostGhost&#x22; }
+      }
+    }],
+    &#x22;8/&#x22;: { &#x22;.E~&#x22;: &#x22;3/&#x22;, &#x22;.n&#x22;: &#x22;deeplyOwned&#x22; },
+    &#x22;9/&#x22;: [{ &#x22;.E~&#x22;: &#x22;0/&#x22;, &#x22;.n&#x22;: &#x22;inceptor&#x22;, &#x22;.iOf&#x22;: &#x22;0/&#x22; }, {
+      &#x22;@context&#x22;: { &#x22;@base&#x22;: &#x22;9/&#x22; },
+      &#x22;&#x26;_&#x22;: {
+        &#x22;1/&#x22;: { &#x22;.n&#x22;: &#x22;olderGhost&#x22; },
+        &#x22;2/&#x22;: { &#x22;.n&#x22;: &#x22;ungerGhost&#x22; },
+        &#x22;3/&#x22;: { &#x22;.n&#x22;: &#x22;toNephewOldceptGhost&#x22;, &#x22;.tgt&#x22;: &#x22;9/1/&#x22; },
+        &#x22;4/&#x22;: { &#x22;.n&#x22;: &#x22;toNephewUngceptGhost&#x22; },
+        &#x22;9/&#x22;: [{
+          &#x22;.n&#x22;: &#x22;firstInception&#x22;,
+          &#x22;&#x26;-&#x22;: { &#x22;~E&#x22;: [&#x22;9/2/&#x22;] },
+        }, {
+          &#x22;@context&#x22;: { &#x22;@base&#x22;: &#x22;9/&#x22; },
+          &#x22;&#x26;_&#x22;: {
+            &#x22;1/&#x22;: { &#x22;.n&#x22;: &#x22;oldceptGhost&#x22;, &#x22;-in&#x22;: [&#x22;../3/&#x22;] }
+          }
+        }],
+      }
+    }],
+  },
+})</span>
+</code></pre></blockquote>
+  </div>
+</p></div></span>
 
+</blockquote>
   </section>
 
   </body>

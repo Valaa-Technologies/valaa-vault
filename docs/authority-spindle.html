@@ -101,23 +101,15 @@ performs like so:
 
   </div>
 
-</blockquote>The echos are omitted for the rest of this guide.
+</blockquote>The echos are omitted for the rest of this guide. Now let&#x27;s choose no
+domain and type to be <em>worker</em>.
 <blockquote class="vdoc type-revdoc-example">
     
   <div class="vdoc type-vdoc-node">      <p><span class="vdoc type-revdoc-prompt"></span><code><span class="vdoc type-vdoc-node"> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">?</span>
 </em></strong> Choose a package.json:valos.domain for the new workspace</span>
 </code></p>
-      <p><span class="vdoc type-revdoc-prompt"></span><code><span class="vdoc type-vdoc-node"> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node"></span>
-</em></strong> @valos/kernel - Contribute to Valaa Open System core components</span>
-</code></p>
       <p><span class="vdoc type-revdoc-prompt"></span><code><span class="vdoc type-vdoc-node"> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">&#x276F;</span>
 </em></strong> &#x3C;no domain&#x3E; - &#x3C;this workspace is not part of a domain&#x3E;</span>
-</code></p>
-      <p><span class="vdoc type-revdoc-prompt"></span><code><span class="vdoc type-vdoc-node"> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node"></span>
-</em></strong> &#x3C;create&#x3E; - &#x3C;enter the name of a new domain this workspace introduces&#x3E;</span>
-</code></p>
-      <p><span class="vdoc type-revdoc-prompt"></span><code><span class="vdoc type-vdoc-node"> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node"></span>
-</em></strong> &#x3C;unlisted&#x3E; - &#x3C;enter the name of an existing but unlisted domain&#x3E;</span>
 </code></p>
 
   </div>
@@ -127,9 +119,6 @@ performs like so:
     
   <div class="vdoc type-vdoc-node">      <p><span class="vdoc type-revdoc-prompt"></span><code><span class="vdoc type-vdoc-node"> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">?</span>
 </em></strong> Choose a package.json:valos.type for the new workspace</span>
-</code></p>
-      <p><span class="vdoc type-revdoc-prompt"></span><code><span class="vdoc type-vdoc-node"> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node"></span>
-</em></strong> ...</span>
 </code></p>
       <p><span class="vdoc type-revdoc-prompt"></span><code><span class="vdoc type-vdoc-node"> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">&#x276F;</span>
 </em></strong> worker - Execute perspire gateway as a Node.js process in this workspace</span>
@@ -149,7 +138,11 @@ performs like so:
 
   </div>
 
-</blockquote>
+</blockquote>At this point <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">vlm init</span>
+</em></strong> asks to delegate package.json
+initialization to <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">yarn init</span>
+</em></strong>. We accept defaults if
+available and give sane values otherwise.
 <blockquote class="vdoc type-revdoc-example">
     
   <div class="vdoc type-vdoc-node">      <p><span class="vdoc type-revdoc-prompt"></span><code><span class="vdoc type-vdoc-node"> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">?</span>
@@ -161,9 +154,7 @@ performs like so:
 
   </div>
 
-</blockquote>At this point <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">vlm init</span>
-</em></strong> will delegate initialization to <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">yarn init</span>
-</em></strong>. We accept defaults if available and give sane values otherwise.
+</blockquote>
 <blockquote class="vdoc type-revdoc-example">
     
   <div class="vdoc type-vdoc-node">      <p><span class="vdoc type-revdoc-prompt"></span><strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">yarn init v1.21.1</span>
@@ -195,7 +186,7 @@ performs like so:
 
   </div>
 
-</blockquote>Verify that @valos/kernel is visible, as it is the origin of <a href="https://valospace.org/web-spindle" class="vdoc type-vdoc-reference">@valos/web-spindle</a> and <a href="https://valospace.org/authority-spindle" class="vdoc type-vdoc-reference">@valos/authority-spindle</a> toolsets (among other things). We don&#x27;t need to add other domains, so
+</blockquote>Verify that the domain @valos/kernel is visible as it is the origin of <a href="https://valospace.org/web-spindle" class="vdoc type-vdoc-reference">@valos/web-spindle</a> and <a href="https://valospace.org/authority-spindle" class="vdoc type-vdoc-reference">@valos/authority-spindle</a> toolsets (among other things). We don&#x27;t need to add other domains, so
 we bypass adding them.
 <blockquote class="vdoc type-revdoc-example">
     
@@ -245,12 +236,11 @@ bring in initialization and configuration code for subsequent stages.
 <blockquote class="vdoc type-revdoc-example">
     
   <div class="vdoc type-vdoc-node">      <p><span class="vdoc type-revdoc-prompt"></span><code><span class="vdoc type-vdoc-node"> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node"></span>
-</em></strong> [1] &#x3E;&#x3E; [4] </span>
+</em></strong> [1] &#x3E;&#x3E; [4] vlm @ yarn add --dev @valos/type-worker@&#x3E;=0.37.0-prerelease.0</span>
 </code></p>
-      <p><span class="vdoc type-revdoc-prompt"></span><strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">vlm @ yarn add --dev @valos/type-worker@&#x3E;=0.37.0-prerelease.0</span>
-</em></strong></p>
-      <p><span class="vdoc type-revdoc-prompt"></span><strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">yarn add v1.21.1</span>
-</em></strong></p>
+      <p><span class="vdoc type-revdoc-prompt"></span><code><span class="vdoc type-vdoc-node"> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">yarn</span>
+</em></strong> add v1.21.1</span>
+</code></p>
       <p><span class="vdoc type-revdoc-prompt"></span><code><span class="vdoc type-vdoc-node"> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">success</span>
 </em></strong> Saved lockfile.</span>
 </code></p>
@@ -276,7 +266,7 @@ bring in initialization and configuration code for subsequent stages.
   </div>
 
 </blockquote>At this point the init is complete and we proceed to configuring the
-workspace. The command<strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">vlm configure --reconfigure</span>
+workspace. The command <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">vlm configure --reconfigure</span>
 </em></strong> can always be manually re-executed from the CLI if something goes
 wrong after this point.
 <blockquote class="vdoc type-revdoc-example">
@@ -306,14 +296,14 @@ involve any custom service logic.
   <div class="vdoc type-vdoc-node">      <p><span class="vdoc type-revdoc-prompt"></span><code><span class="vdoc type-vdoc-node"> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">?</span>
 </em></strong> Pick tools selection choices for the toolset &#x27;@valos/type-worker&#x27;</span>
 </code></p>
-      <p><span class="vdoc type-revdoc-prompt"></span><code><span class="vdoc type-vdoc-node"> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">&#x276F;&#x25C9;</span>
+      <p><span class="vdoc type-revdoc-prompt"></span><code><span class="vdoc type-vdoc-node"> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">&#x25C9;</span>
 </em></strong> copy-template-files - Copy toolset template files to the workspace</span>
 </code></p>
 
   </div>
 
 </blockquote>Now we get to select the toolsets we want. We need to manually install
-only web-spindle first as authority-spindle depends on it (and
+web-spindle only first as authority-spindle depends on it (and
 unfortunately automated dependency ordering is not implemented yet)
 <blockquote class="vdoc type-revdoc-example">
     
@@ -354,7 +344,7 @@ unfortunately automated dependency ordering is not implemented yet)
 
 </blockquote>We configure the web-spindle to have SSL enabled at <em>localhost</em> port 5443 and choose to have <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">openssl</span>
 </em></strong> to create
-insecure self-signed certificates for our test authority.
+insecure self-signed certificates for testing our authority.
 <blockquote class="vdoc type-revdoc-example">
     
   <div class="vdoc type-vdoc-node">      <p><span class="vdoc type-revdoc-prompt"></span><code><span class="vdoc type-vdoc-node"> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">?</span>
@@ -396,7 +386,7 @@ insecure self-signed certificates for our test authority.
   <div class="vdoc type-vdoc-node">      <p><span class="vdoc type-revdoc-prompt"></span><code><span class="vdoc type-vdoc-node"> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">?</span>
 </em></strong> Pick tools selection choices for the toolset &#x27;@valos/web-spindle&#x27;</span>
 </code></p>
-      <p><span class="vdoc type-revdoc-prompt"></span><code><span class="vdoc type-vdoc-node"> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">&#x276F;&#x25C9;</span>
+      <p><span class="vdoc type-revdoc-prompt"></span><code><span class="vdoc type-vdoc-node"> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">&#x25C9;</span>
 </em></strong> copy-template-files - Copy toolset template files to the workspace</span>
 </code></p>
 
@@ -539,29 +529,27 @@ can be anything. <em>taur</em> is only inferred from the package name.
 
   </div>
 
-</blockquote>
+</blockquote>The setup of the authority is now complete. Let&#x27;s start the perspire
+worker.
 <blockquote class="vdoc type-revdoc-example">
     
-  <div class="vdoc type-vdoc-node">      <p><span class="vdoc type-revdoc-prompt"></span><code><span class="vdoc type-vdoc-node"> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node"></span>
-</em></strong></span>
+  <div class="vdoc type-vdoc-node">      <p><span class="vdoc type-revdoc-prompt"></span><code><span class="vdoc type-vdoc-node"> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">vlm</span>
+</em></strong> perspire</span>
 </code></p>
 
   </div>
 
-</blockquote>
+</blockquote>If everything runs smoothly, we should have 15 routes on two prefixes:
 <blockquote class="vdoc type-revdoc-example">
     
-  <div class="vdoc type-vdoc-node">      <p><span class="vdoc type-revdoc-prompt"></span><code><span class="vdoc type-vdoc-node"> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node"></span>
-</em></strong></span>
+  <div class="vdoc type-vdoc-node">      <p><span class="vdoc type-revdoc-prompt"></span><code><span class="vdoc type-vdoc-node"> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">[1]</span>
+</em></strong> perspire informs: MapperService(MapperService$.1): listening @ { address: &#x27;127.0.0.1&#x27;, family: &#x27;IPv4&#x27;, port: 5443 } prepared prefixes:</span>
 </code></p>
-
-  </div>
-
-</blockquote>
-<blockquote class="vdoc type-revdoc-example">
-    
-  <div class="vdoc type-vdoc-node">      <p><span class="vdoc type-revdoc-prompt"></span><code><span class="vdoc type-vdoc-node"> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node"></span>
-</em></strong></span>
+      <p><span class="vdoc type-revdoc-prompt"></span><code><span class="vdoc type-vdoc-node"> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">/:</span>
+</em></strong> taur-worker@0.1.0 - openapi Example Title</span>
+</code></p>
+      <p><span class="vdoc type-revdoc-prompt"></span><code><span class="vdoc type-vdoc-node"> <strong><em class="vdoc type-revdoc-command"><span class="vdoc type-vdoc-node">valosp://localhost:5443/taur/:</span>
+</em></strong> taur-worker@0.1.0 - Test authority</span>
 </code></p>
 
   </div>

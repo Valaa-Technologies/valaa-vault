@@ -62,7 +62,7 @@
       "ONTOLOGY"
     ],
     "VRevdoc:package": "@valos/revdoc",
-    "VRevdoc:version": "0.37.0-prerelease.0",
+    "VRevdoc:version": "0.37.0-prerelease.1",
     "VRevdoc:preferredPrefix": "VRevdoc",
     "VRevdoc:baseIRI": "https://valospace.org/revdoc/0#",
     "VRevdoc:referencedModules": {
@@ -73,7 +73,7 @@
     },
     "VRevdoc:extenderModules": {},
     "respecConfig": {
-      "subtitle": "0.37.0-prerelease.0",
+      "subtitle": "0.37.0-prerelease.1",
       "specStatus": "unofficial",
       "editors": [
         {
@@ -273,6 +273,11 @@
         "@type": "VDoc:Class",
         "rdfs:subClassOf": "VDoc:CharacterData",
         "rdfs:comment": "An JSONLD section node"
+      },
+      "RegEx": {
+        "@type": "VDoc:Class",
+        "rdfs:subClassOf": "VDoc:CharacterData",
+        "rdfs:comment": "An RegEx section node"
       },
       "Turtle": {
         "@type": "VDoc:Class",
@@ -681,6 +686,7 @@
             "Package",
             "ABNF",
             "JSONLD",
+            "RegEx",
             "Turtle",
             "VSX",
             "Command",

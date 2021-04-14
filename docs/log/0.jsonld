@@ -91,7 +91,7 @@
     ],
     "dc:title": "@valos/log library workspace",
     "VRevdoc:package": "@valos/log",
-    "VRevdoc:version": "0.37.0-prerelease.0",
+    "VRevdoc:version": "0.37.0-prerelease.1",
     "VRevdoc:preferredPrefix": "VLog",
     "VRevdoc:baseIRI": "https://valospace.org/log/0#",
     "VRevdoc:referencedModules": {
@@ -455,7 +455,7 @@
         "@type": "VKernel:Class",
         "rdfs:subClassOf": "VLog:EventAspect",
         "VRevdoc:brief": "event log aspect",
-        "rdfs:comment": "The class of resources which contain attributes of an event which\nrelate to its position in the chronicle event log. The contents of this\naspect are ultimately finally provided by the authority but is\ntypically provisionally provided by the gateway.",
+        "rdfs:comment": "The class of resources which contain attributes of an event which\nrelate to its position in the chronicle event log. The contents of this\naspect are ultimately determined by the authority but is typically\nprovisionally provided by the gateway.",
         "VEngine:domainOfProperty": [
           {
             "@id": "#index",
@@ -485,7 +485,7 @@
           "@type": "owl:Restriction",
           "owl:maxCardinality": 1
         },
-        "rdfs:comment": "The 0-based index of the event in the event log."
+        "rdfs:comment": "The 0-based index of the event in the chronicle event log."
       },
       "vplotHashV0": {
         "@type": "VKernel:Property",

@@ -164,7 +164,7 @@ of its sub-classes as their rdf:domain.</span>
         The class of all valosheath type prototype properties.
     </span>
 </span></a></span>
-</td><td colspan=1> <a href="#isOwnerOf" class="vdoc type-vdoc-reference">VState:isOwnerOf</a> <a href="#isOwnedBy" class="vdoc type-vdoc-reference">VState:isOwnedBy</a> <a href="#coupledToField" class="vdoc type-vdoc-reference">VState:coupledToField</a> <a href="#coupledField" class="vdoc type-vdoc-reference">VState:coupledField</a> <a href="#defaultCoupledField" class="vdoc type-vdoc-reference">VState:defaultCoupledField</a> <a href="#preventsDestroy" class="vdoc type-vdoc-reference">VState:preventsDestroy</a> <a href="#isDuplicateable" class="vdoc type-vdoc-reference">VState:isDuplicateable</a> <a href="#initialValue" class="vdoc type-vdoc-reference">VState:initialValue</a> <a href="#ownDefaultValue" class="vdoc type-vdoc-reference">VState:ownDefaultValue</a> <a href="#finalDefaultValue" class="vdoc type-vdoc-reference">VState:finalDefaultValue</a> <a href="#allowTransientFieldToBeSingular" class="vdoc type-vdoc-reference">VState:allowTransientFieldToBeSingular</a></td></tr>
+</td><td colspan=1> <a href="#isOwnerOf" class="vdoc type-vdoc-reference">VState:isOwnerOf</a> <a href="#isOwnedBy" class="vdoc type-vdoc-reference">VState:isOwnedBy</a> <a href="#coupledToField" class="vdoc type-vdoc-reference">VState:coupledToField</a> <a href="#linkedToField" class="vdoc type-vdoc-reference">VState:linkedToField</a> <a href="#coupledField" class="vdoc type-vdoc-reference">VState:coupledField</a> <a href="#defaultCoupledField" class="vdoc type-vdoc-reference">VState:defaultCoupledField</a> <a href="#preventsDestroy" class="vdoc type-vdoc-reference">VState:preventsDestroy</a> <a href="#isDuplicateable" class="vdoc type-vdoc-reference">VState:isDuplicateable</a> <a href="#initialValue" class="vdoc type-vdoc-reference">VState:initialValue</a> <a href="#ownDefaultValue" class="vdoc type-vdoc-reference">VState:ownDefaultValue</a> <a href="#finalDefaultValue" class="vdoc type-vdoc-reference">VState:finalDefaultValue</a> <a href="#allowTransientFieldToBeSingular" class="vdoc type-vdoc-reference">VState:allowTransientFieldToBeSingular</a></td></tr>
         <tr id="ExpressedField" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#ExpressedField" class="vdoc type-vdoc-reference">#ExpressedField</a></em></strong> </h3></td></tr>
         <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference">VState:Field</a></td><td><span class="vdoc type-vdoc-node">The class of valospace fields which have a full triple expression in
 all regular query and graph contexts (as opposed to fields with
@@ -276,9 +276,31 @@ ontologies.
 </th>
       </thead>
       <tbody>
-        <tr id="expressor" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#expressor" class="vdoc type-vdoc-reference">#expressor</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/state/0#ExpressedField" class="vdoc type-vdoc-reference">VState:ExpressedField</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#List" class="vdoc type-vdoc-reference">rdfs:List</a></td></tr>
+        <tr id="globalResources" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#globalResources" class="vdoc type-vdoc-reference">#globalResources</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">This field refers to all resources that are global resources of a
+particular chronicle.</span>
+</td></tr>
+        <tr id="subResources" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#subResources" class="vdoc type-vdoc-reference">#subResources</a></em></strong> </h3></td></tr>
+        <tr><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">This field refers to all resources that are added as sub-resources to
+this resource.</span>
+</td></tr>
+        <tr id="removes" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#removes" class="vdoc type-vdoc-reference">#removes</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#Resource" class="vdoc type-vdoc-reference">rdfs:Resource</a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">This field refers to graph which contains triples that are to be
+removed from this resource. When this field is expressed in state
+graphs this removal affects triples that would be inferred from
+ownership and instancing projections. When this field is expressed in
+log delta graphs the removal represents state triple removal change
+and takes effect during the delta application.</span>
+</td></tr>
+        <tr id="expressor" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#expressor" class="vdoc type-vdoc-reference">#expressor</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/state/0#ExpressedField" class="vdoc type-vdoc-reference">VState:ExpressedField</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#List" class="vdoc type-vdoc-reference">rdfs:List</a></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
 </td><td colspan=1><span class="vdoc type-vdoc-node">The custom &#x27;getter&#x27; expressor of an ExpressedField as a VPlot.This expressor is used to resolve the dynamic, inferred value of the
 field whenever it is requested. More specifically, whenever an inferred
 state triple is requested for a resource field with a custom expressor
@@ -317,9 +339,9 @@ Once the valk is resolved the inferred triple subject, predicate and
   object are set to be the field owner resource id, the field id itself
   and the valk result value, respectively.</span>
 </td></tr>
-        <tr id="impressor" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#impressor" class="vdoc type-vdoc-reference">#impressor</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/state/0#EventLoggedField" class="vdoc type-vdoc-reference">VState:EventLoggedField</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#List" class="vdoc type-vdoc-reference">rdfs:List</a></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+        <tr id="impressor" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#impressor" class="vdoc type-vdoc-reference">#impressor</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/state/0#EventLoggedField" class="vdoc type-vdoc-reference">VState:EventLoggedField</a></td><td><a href="http://www.w3.org/2000/01/rdf-schema#List" class="vdoc type-vdoc-reference">rdfs:List</a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
 </td><td colspan=1><span class="vdoc type-vdoc-node">The custom &#x27;setter&#x27; impressor of an EventLoggedField as a VPlot.This impressor is used as part of building an event object whenever
 some operation would assign a value to the field. More specifically,
 upon assignment the impressor vplot is valked using following scope
@@ -360,32 +382,40 @@ values:
     </ul>
 </span>
 </td></tr>
-        <tr id="aliasOf" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#aliasOf" class="vdoc type-vdoc-reference">#aliasOf</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/state/0#AliasField" class="vdoc type-vdoc-reference">VState:AliasField</a></td><td><a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference">VState:Field</a></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+        <tr id="aliasOf" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#aliasOf" class="vdoc type-vdoc-reference">#aliasOf</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/state/0#AliasField" class="vdoc type-vdoc-reference">VState:AliasField</a></td><td><a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference">VState:Field</a></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
 </td><td colspan=1><span class="vdoc type-vdoc-node">The alias target property specifies the inference source and mutation
 target of an alias field.</span>
 </td></tr>
-        <tr id="isOwnerOf" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#isOwnerOf" class="vdoc type-vdoc-reference">#isOwnerOf</a></em></strong> </h3></td></tr>
-        <tr><td><a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference">VState:Field</a></td><td><a href="http://www.w3.org/2001/XMLSchema#boolean" class="vdoc type-vdoc-reference">xsd:boolean</a></td></tr>
-        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+        <tr id="isOwnerOf" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#isOwnerOf" class="vdoc type-vdoc-reference">#isOwnerOf</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference">VState:Field</a></td><td><a href="http://www.w3.org/2001/XMLSchema#boolean" class="vdoc type-vdoc-reference">xsd:boolean</a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
 </td><td colspan=1><span class="vdoc type-vdoc-node">This field refers to a resource which is owned by the field subject
 resource. If the subject resource is is destroyed or if this field
 is removed then the owned resource is cascade destroyed.</span>
 </td></tr>
-        <tr id="isOwnedBy" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#isOwnedBy" class="vdoc type-vdoc-reference">#isOwnedBy</a></em></strong> </h3></td></tr>
-        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference">VState:Field</a></td><td><a href="http://www.w3.org/2001/XMLSchema#boolean" class="vdoc type-vdoc-reference">xsd:boolean</a></td></tr>
-        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+        <tr id="isOwnedBy" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#isOwnedBy" class="vdoc type-vdoc-reference">#isOwnedBy</a></em></strong> </h3></td></tr>
+        <tr><td><a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference">VState:Field</a></td><td><a href="http://www.w3.org/2001/XMLSchema#boolean" class="vdoc type-vdoc-reference">xsd:boolean</a></td></tr>
+        <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
 </td><td colspan=1><span class="vdoc type-vdoc-node">This field refers to a resource which owns the field subject resource.
 If the owner is destroyed or if the coupled field (which is marked
 with isOwnerOf) is removed from the owner then the subject resource
 will be cascade destroyed. Removing the isOwnedBy field itself will
 only orphan the subject resource.</span>
 </td></tr>
-        <tr id="coupledToField" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#coupledToField" class="vdoc type-vdoc-reference">#coupledToField</a></em></strong> </h3></td></tr>
+        <tr id="coupledToField" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#coupledToField" class="vdoc type-vdoc-reference">#coupledToField</a></em></strong> </h3></td></tr>
+        <tr class="vdoc vdoc-nth-child-2n"><td><a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference">VState:Field</a></td><td><a href="valosField" class="vdoc type-vdoc-reference">valosField</a></td></tr>
+        <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
+</td><td colspan=1><span class="vdoc type-vdoc-node">This field infers a reverse triple with predicate equal to this field
+value.</span>
+</td></tr>
+        <tr id="linkedToField" class="vdoc vdoc-wide"><td colspan=2><h3> <strong><em><a href="#linkedToField" class="vdoc type-vdoc-reference">#linkedToField</a></em></strong> </h3></td></tr>
         <tr><td><a href="https://valospace.org/state/0#Field" class="vdoc type-vdoc-reference">VState:Field</a></td><td><a href="valosField" class="vdoc type-vdoc-reference">valosField</a></td></tr>
         <tr class="vdoc vdoc-wide"><td><span class="vdoc type-vdoc-node"><em><a href="http://www.w3.org/2000/01/rdf-schema#comment" class="vdoc type-vdoc-reference">description</a></em></span>
-</td><td colspan=1></td></tr>
+</td><td colspan=1><span class="vdoc type-vdoc-node">This field requires the existence of a reverse triple with predicate
+equal to the object of this property.</span>
+</td></tr>
         <tr id="coupledField" class="vdoc vdoc-wide vdoc-nth-child-2n"><td colspan=2><h3> <strong><em><a href="#coupledField" class="vdoc type-vdoc-reference">#coupledField</a></em></strong> </h3></td></tr>
         <tr class="vdoc vdoc-wide vdoc-nth-child-2n"><td><span class="vdoc type-vdoc-node"><em><strong>DEPRECATED</strong> in favor of:</em></span>
 </td><td colspan=1><a href="https://valospace.org/state/0#coupledToField" class="vdoc type-vdoc-reference">VState:coupledToField</a></td></tr>

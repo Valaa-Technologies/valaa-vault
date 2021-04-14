@@ -17,7 +17,7 @@
         </component>
         <component type="library">
             <name>balanced-match</name>
-            <version>1.0.0</version>
+            <version>1.0.2</version>
             <description>
                 <![CDATA[Match balanced character pairs, like "{" and "}"]]>
             </description>
@@ -26,7 +26,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/balanced-match@1.0.0</purl>
+            <purl>pkg:npm/balanced-match@1.0.2</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -255,7 +255,7 @@
         </component>
         <component type="library">
             <name>hosted-git-info</name>
-            <version>2.8.8</version>
+            <version>2.8.9</version>
             <description>
                 <![CDATA[Provides metadata and conversions from repository urls for Github, Bitbucket and Gitlab]]>
             </description>
@@ -264,7 +264,7 @@
                     <id>ISC</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/hosted-git-info@2.8.8</purl>
+            <purl>pkg:npm/hosted-git-info@2.8.9</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -296,6 +296,76 @@
             <modified>false</modified>
         </component>
         <component type="library">
+            <name>npm-normalize-package-bin</name>
+            <version>1.0.1</version>
+            <description>
+                <![CDATA[Turn any flavor of allowable package.json bin into a normalized object]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>ISC</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/npm-normalize-package-bin@1.0.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>parse-packagejson-name</name>
+            <version>1.0.1</version>
+            <description>
+                <![CDATA[Parse an npm package name and returns some mildly interesting details about it]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/parse-packagejson-name@1.0.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>path-parse</name>
+            <version>1.0.6</version>
+            <description>
+                <![CDATA[Node.js path.parse() ponyfill]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/path-parse@1.0.6</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>prettify-xml</name>
+            <version>1.2.0</version>
+            <description>
+                <![CDATA[Pretty-print XML.]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/prettify-xml@1.2.0</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>read-package-json</name>
+            <version>2.1.2</version>
+            <description>
+                <![CDATA[The thing npm uses to read package.json files with semantics and defaults and validation]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>ISC</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/read-package-json@2.1.2</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
             <name>normalize-package-data</name>
             <version>2.5.0</version>
             <description>
@@ -321,20 +391,6 @@
                 </license>
             </licenses>
             <purl>pkg:npm/resolve@1.20.0</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>path-parse</name>
-            <version>1.0.6</version>
-            <description>
-                <![CDATA[Node.js path.parse() ponyfill]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/path-parse@1.0.6</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -422,76 +478,6 @@
             <modified>false</modified>
         </component>
         <component type="library">
-            <name>npm-normalize-package-bin</name>
-            <version>1.0.1</version>
-            <description>
-                <![CDATA[Turn any flavor of allowable package.json bin into a normalized object]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>ISC</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/npm-normalize-package-bin@1.0.1</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>parse-packagejson-name</name>
-            <version>1.0.1</version>
-            <description>
-                <![CDATA[Parse an npm package name and returns some mildly interesting details about it]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/parse-packagejson-name@1.0.1</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>prettify-xml</name>
-            <version>1.2.0</version>
-            <description>
-                <![CDATA[Pretty-print XML.]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/prettify-xml@1.2.0</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>read-installed</name>
-            <version>4.0.3</version>
-            <description>
-                <![CDATA[Read all the installed packages in a folder, and return a tree structure with all the data.]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>ISC</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/read-installed@4.0.3</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>read-package-json</name>
-            <version>2.1.2</version>
-            <description>
-                <![CDATA[The thing npm uses to read package.json files with semantics and defaults and validation]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>ISC</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/read-package-json@2.1.2</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
             <name>readdir-scoped-modules</name>
             <version>1.1.0</version>
             <description>
@@ -503,34 +489,6 @@
                 </license>
             </licenses>
             <purl>pkg:npm/readdir-scoped-modules@1.1.0</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>slide</name>
-            <version>1.1.6</version>
-            <description>
-                <![CDATA[A flow control lib small enough to fit on in a slide presentation. Derived live at Oak.JS]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>ISC</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/slide@1.1.6</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <name>util-extend</name>
-            <version>1.0.3</version>
-            <description>
-                <![CDATA[Node's internal object extension function]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/util-extend@1.0.3</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -548,8 +506,22 @@
             <modified>false</modified>
         </component>
         <component type="library">
+            <name>slide</name>
+            <version>1.1.6</version>
+            <description>
+                <![CDATA[A flow control lib small enough to fit on in a slide presentation. Derived live at Oak.JS]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>ISC</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/slide@1.1.6</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
             <name>ssri</name>
-            <version>6.0.1</version>
+            <version>6.0.2</version>
             <description>
                 <![CDATA[Standard Subresource Integrity library --  parses, serializes, generates, and verifies integrity metadata according to the SRI spec.]]>
             </description>
@@ -558,7 +530,21 @@
                     <id>ISC</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/ssri@6.0.1</purl>
+            <purl>pkg:npm/ssri@6.0.2</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <name>util-extend</name>
+            <version>1.0.3</version>
+            <description>
+                <![CDATA[Node's internal object extension function]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/util-extend@1.0.3</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -577,6 +563,20 @@
             <modified>false</modified>
         </component>
         <component type="library">
+            <name>read-installed</name>
+            <version>4.0.3</version>
+            <description>
+                <![CDATA[Read all the installed packages in a folder, and return a tree structure with all the data.]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>ISC</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/read-installed@4.0.3</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
             <name>xml-js</name>
             <version>1.6.11</version>
             <description>
@@ -592,23 +592,8 @@
         </component>
         <component type="library">
             <group>valos</group>
-            <name>kernel</name>
-            <version>0.37.0-prerelease.0</version>
-            <description>
-                <![CDATA[@valos/kernel domain]]>
-            </description>
-            <licenses>
-                <license>
-                    <id>MIT</id>
-                </license>
-            </licenses>
-            <purl>pkg:npm/%40valos/kernel@0.37.0-prerelease.0</purl>
-            <modified>false</modified>
-        </component>
-        <component type="library">
-            <group>valos</group>
             <name>inspire</name>
-            <version>0.37.0-prerelease.0</version>
+            <version>0.37.0-prerelease.1</version>
             <description>
                 <![CDATA[ValOS Inspire application gateway]]>
             </description>
@@ -617,13 +602,28 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/inspire@0.37.0-prerelease.0</purl>
+            <purl>pkg:npm/%40valos/inspire@0.37.0-prerelease.1</purl>
+            <modified>false</modified>
+        </component>
+        <component type="library">
+            <group>valos</group>
+            <name>kernel</name>
+            <version>0.37.0-prerelease.1</version>
+            <description>
+                <![CDATA[@valos/kernel domain]]>
+            </description>
+            <licenses>
+                <license>
+                    <id>MIT</id>
+                </license>
+            </licenses>
+            <purl>pkg:npm/%40valos/kernel@0.37.0-prerelease.1</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <group>valos</group>
             <name>toolset-revealer</name>
-            <version>0.37.0-prerelease.0</version>
+            <version>0.37.0-prerelease.1</version>
             <description>
                 <![CDATA[Tools for building revelations both for development and deployment purposes]]>
             </description>
@@ -632,12 +632,12 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/toolset-revealer@0.37.0-prerelease.0</purl>
+            <purl>pkg:npm/%40valos/toolset-revealer@0.37.0-prerelease.1</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <name>valma</name>
-            <version>0.37.0-prerelease.0</version>
+            <version>0.37.0-prerelease.1</version>
             <description>
                 <![CDATA[A ValOS CLI tool for discovering and executing context-dependent command scripts]]>
             </description>
@@ -646,7 +646,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/valma@0.37.0-prerelease.0</purl>
+            <purl>pkg:npm/valma@0.37.0-prerelease.1</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -665,7 +665,7 @@
         </component>
         <component type="library">
             <name>ansi-escapes</name>
-            <version>4.3.1</version>
+            <version>4.3.2</version>
             <description>
                 <![CDATA[ANSI escape codes for manipulating the terminal]]>
             </description>
@@ -674,12 +674,12 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/ansi-escapes@4.3.1</purl>
+            <purl>pkg:npm/ansi-escapes@4.3.2</purl>
             <modified>false</modified>
         </component>
         <component type="library">
             <name>type-fest</name>
-            <version>0.11.0</version>
+            <version>0.21.3</version>
             <description>
                 <![CDATA[A collection of essential TypeScript types]]>
             </description>
@@ -688,7 +688,7 @@
                     <name>(MIT OR CC0-1.0)</name>
                 </license>
             </licenses>
-            <purl>pkg:npm/type-fest@0.11.0</purl>
+            <purl>pkg:npm/type-fest@0.21.3</purl>
             <modified>false</modified>
         </component>
         <component type="library">
@@ -988,7 +988,7 @@
         <component type="library">
             <group>valos</group>
             <name>type-vault</name>
-            <version>0.37.0-prerelease.0</version>
+            <version>0.37.0-prerelease.1</version>
             <description>
                 <![CDATA[The ValOS 'vault' workspace type toolset]]>
             </description>
@@ -997,7 +997,7 @@
                     <id>MIT</id>
                 </license>
             </licenses>
-            <purl>pkg:npm/%40valos/type-vault@0.37.0-prerelease.0</purl>
+            <purl>pkg:npm/%40valos/type-vault@0.37.0-prerelease.1</purl>
             <modified>false</modified>
         </component>
         <component type="library">

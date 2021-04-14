@@ -1,6 +1,6 @@
 {
   "name": "@valos/type-type",
-  "version": "0.37.0-prerelease.0",
+  "version": "0.37.0-prerelease.1",
   "valos": {
     "type": "type",
     "domain": "@valos/kernel"
@@ -15,6 +15,6 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@valos/type-toolset": "^0.37.0-prerelease.0"
+    "@valos/type-toolset": "^0.37.0-prerelease.1"
   }
 }

@@ -53,7 +53,7 @@
         "@type": "@id"
       }
     },
-    "dc:title": "@valos/kernel-vault@0.37.0-alpha.6 Software Bill of Materials",
+    "dc:title": "@valos/kernel-vault@0.37.0-prerelease.0 Software Bill of Materials",
     "respecConfig": {
       "specStatus": "unofficial",
       "editors": [
@@ -105,7 +105,7 @@
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
             "This document was automatically generated on ",
-            "2021-02-16T15:05:10.088Z",
+            "2021-04-14T19:47:57.775Z",
             "."
           ]
         },
@@ -182,10 +182,10 @@
       {
         "type": "library",
         "name": "balanced-match",
-        "version": "1.0.0",
+        "version": "1.0.2",
         "description": "Match balanced character pairs, like \"{\" and \"}\"",
         "licenses": "MIT",
-        "purl": "pkg:npm/balanced-match@1.0.0",
+        "purl": "pkg:npm/balanced-match@1.0.2",
         "modified": false
       },
       {
@@ -335,10 +335,10 @@
       {
         "type": "library",
         "name": "hosted-git-info",
-        "version": "2.8.8",
+        "version": "2.8.9",
         "description": "Provides metadata and conversions from repository urls for Github, Bitbucket and Gitlab",
         "licenses": "ISC",
-        "purl": "pkg:npm/hosted-git-info@2.8.8",
+        "purl": "pkg:npm/hosted-git-info@2.8.9",
         "modified": false
       },
       {
@@ -361,6 +361,51 @@
       },
       {
         "type": "library",
+        "name": "npm-normalize-package-bin",
+        "version": "1.0.1",
+        "description": "Turn any flavor of allowable package.json bin into a normalized object",
+        "licenses": "ISC",
+        "purl": "pkg:npm/npm-normalize-package-bin@1.0.1",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "name": "parse-packagejson-name",
+        "version": "1.0.1",
+        "description": "Parse an npm package name and returns some mildly interesting details about it",
+        "licenses": "MIT",
+        "purl": "pkg:npm/parse-packagejson-name@1.0.1",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "name": "path-parse",
+        "version": "1.0.6",
+        "description": "Node.js path.parse() ponyfill",
+        "licenses": "MIT",
+        "purl": "pkg:npm/path-parse@1.0.6",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "name": "prettify-xml",
+        "version": "1.2.0",
+        "description": "Pretty-print XML.",
+        "licenses": "MIT",
+        "purl": "pkg:npm/prettify-xml@1.2.0",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "name": "read-package-json",
+        "version": "2.1.2",
+        "description": "The thing npm uses to read package.json files with semantics and defaults and validation",
+        "licenses": "ISC",
+        "purl": "pkg:npm/read-package-json@2.1.2",
+        "modified": false
+      },
+      {
+        "type": "library",
         "name": "normalize-package-data",
         "version": "2.5.0",
         "description": "Normalizes data that can be found in package.json files.",
@@ -375,15 +420,6 @@
         "description": "resolve like require.resolve() on behalf of files asynchronously and synchronously",
         "licenses": "MIT",
         "purl": "pkg:npm/resolve@1.20.0",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "name": "path-parse",
-        "version": "1.0.6",
-        "description": "Node.js path.parse() ponyfill",
-        "licenses": "MIT",
-        "purl": "pkg:npm/path-parse@1.0.6",
         "modified": false
       },
       {
@@ -442,74 +478,11 @@
       },
       {
         "type": "library",
-        "name": "npm-normalize-package-bin",
-        "version": "1.0.1",
-        "description": "Turn any flavor of allowable package.json bin into a normalized object",
-        "licenses": "ISC",
-        "purl": "pkg:npm/npm-normalize-package-bin@1.0.1",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "name": "parse-packagejson-name",
-        "version": "1.0.1",
-        "description": "Parse an npm package name and returns some mildly interesting details about it",
-        "licenses": "MIT",
-        "purl": "pkg:npm/parse-packagejson-name@1.0.1",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "name": "prettify-xml",
-        "version": "1.2.0",
-        "description": "Pretty-print XML.",
-        "licenses": "MIT",
-        "purl": "pkg:npm/prettify-xml@1.2.0",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "name": "read-installed",
-        "version": "4.0.3",
-        "description": "Read all the installed packages in a folder, and return a tree structure with all the data.",
-        "licenses": "ISC",
-        "purl": "pkg:npm/read-installed@4.0.3",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "name": "read-package-json",
-        "version": "2.1.2",
-        "description": "The thing npm uses to read package.json files with semantics and defaults and validation",
-        "licenses": "ISC",
-        "purl": "pkg:npm/read-package-json@2.1.2",
-        "modified": false
-      },
-      {
-        "type": "library",
         "name": "readdir-scoped-modules",
         "version": "1.1.0",
         "description": "Like `fs.readdir` but handling `@org/module` dirs as if they were a single entry.",
         "licenses": "ISC",
         "purl": "pkg:npm/readdir-scoped-modules@1.1.0",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "name": "slide",
-        "version": "1.1.6",
-        "description": "A flow control lib small enough to fit on in a slide presentation. Derived live at Oak.JS",
-        "licenses": "ISC",
-        "purl": "pkg:npm/slide@1.1.6",
-        "modified": false
-      },
-      {
-        "type": "library",
-        "name": "util-extend",
-        "version": "1.0.3",
-        "description": "Node's internal object extension function",
-        "licenses": "MIT",
-        "purl": "pkg:npm/util-extend@1.0.3",
         "modified": false
       },
       {
@@ -523,11 +496,29 @@
       },
       {
         "type": "library",
+        "name": "slide",
+        "version": "1.1.6",
+        "description": "A flow control lib small enough to fit on in a slide presentation. Derived live at Oak.JS",
+        "licenses": "ISC",
+        "purl": "pkg:npm/slide@1.1.6",
+        "modified": false
+      },
+      {
+        "type": "library",
         "name": "ssri",
-        "version": "6.0.1",
+        "version": "6.0.2",
         "description": "Standard Subresource Integrity library --  parses, serializes, generates, and verifies integrity metadata according to the SRI spec.",
         "licenses": "ISC",
-        "purl": "pkg:npm/ssri@6.0.1",
+        "purl": "pkg:npm/ssri@6.0.2",
+        "modified": false
+      },
+      {
+        "type": "library",
+        "name": "util-extend",
+        "version": "1.0.3",
+        "description": "Node's internal object extension function",
+        "licenses": "MIT",
+        "purl": "pkg:npm/util-extend@1.0.3",
         "modified": false
       },
       {
@@ -542,6 +533,15 @@
       },
       {
         "type": "library",
+        "name": "read-installed",
+        "version": "4.0.3",
+        "description": "Read all the installed packages in a folder, and return a tree structure with all the data.",
+        "licenses": "ISC",
+        "purl": "pkg:npm/read-installed@4.0.3",
+        "modified": false
+      },
+      {
+        "type": "library",
         "name": "xml-js",
         "version": "1.6.11",
         "description": "A convertor between XML text and Javascript object / JSON text.",
@@ -552,40 +552,40 @@
       {
         "type": "library",
         "group": "valos",
-        "name": "kernel",
-        "version": "0.37.0-prerelease.0",
-        "description": "@valos/kernel domain",
+        "name": "inspire",
+        "version": "0.37.0-prerelease.1",
+        "description": "ValOS Inspire application gateway",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/kernel@0.37.0-prerelease.0",
+        "purl": "pkg:npm/%40valos/inspire@0.37.0-prerelease.1",
         "modified": false
       },
       {
         "type": "library",
         "group": "valos",
-        "name": "inspire",
-        "version": "0.37.0-prerelease.0",
-        "description": "ValOS Inspire application gateway",
+        "name": "kernel",
+        "version": "0.37.0-prerelease.1",
+        "description": "@valos/kernel domain",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/inspire@0.37.0-prerelease.0",
+        "purl": "pkg:npm/%40valos/kernel@0.37.0-prerelease.1",
         "modified": false
       },
       {
         "type": "library",
         "group": "valos",
         "name": "toolset-revealer",
-        "version": "0.37.0-prerelease.0",
+        "version": "0.37.0-prerelease.1",
         "description": "Tools for building revelations both for development and deployment purposes",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/toolset-revealer@0.37.0-prerelease.0",
+        "purl": "pkg:npm/%40valos/toolset-revealer@0.37.0-prerelease.1",
         "modified": false
       },
       {
         "type": "library",
         "name": "valma",
-        "version": "0.37.0-prerelease.0",
+        "version": "0.37.0-prerelease.1",
         "description": "A ValOS CLI tool for discovering and executing context-dependent command scripts",
         "licenses": "MIT",
-        "purl": "pkg:npm/valma@0.37.0-prerelease.0",
+        "purl": "pkg:npm/valma@0.37.0-prerelease.1",
         "modified": false
       },
       {
@@ -600,19 +600,19 @@
       {
         "type": "library",
         "name": "ansi-escapes",
-        "version": "4.3.1",
+        "version": "4.3.2",
         "description": "ANSI escape codes for manipulating the terminal",
         "licenses": "MIT",
-        "purl": "pkg:npm/ansi-escapes@4.3.1",
+        "purl": "pkg:npm/ansi-escapes@4.3.2",
         "modified": false
       },
       {
         "type": "library",
         "name": "type-fest",
-        "version": "0.11.0",
+        "version": "0.21.3",
         "description": "A collection of essential TypeScript types",
         "licenses": "[object Object]",
-        "purl": "pkg:npm/type-fest@0.11.0",
+        "purl": "pkg:npm/type-fest@0.21.3",
         "modified": false
       },
       {
@@ -808,10 +808,10 @@
         "type": "library",
         "group": "valos",
         "name": "type-vault",
-        "version": "0.37.0-prerelease.0",
+        "version": "0.37.0-prerelease.1",
         "description": "The ValOS 'vault' workspace type toolset",
         "licenses": "MIT",
-        "purl": "pkg:npm/%40valos/type-vault@0.37.0-prerelease.0",
+        "purl": "pkg:npm/%40valos/type-vault@0.37.0-prerelease.1",
         "modified": false
       },
       {

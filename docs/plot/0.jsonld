@@ -67,7 +67,7 @@
     ],
     "dc:title": "@valos/plot library workspace",
     "VRevdoc:package": "@valos/plot",
-    "VRevdoc:version": "0.37.0-prerelease.0",
+    "VRevdoc:version": "0.37.0-prerelease.1",
     "VRevdoc:preferredPrefix": "VPlot",
     "VRevdoc:baseIRI": "https://valospace.org/plot/0#",
     "VRevdoc:referencedModules": {
@@ -103,19 +103,29 @@
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "ValOS Plots ('VPlots') are *identifier-query* strings with recursive\ngrammar with extensible semantics and a limited character set that\nmakes them easily URI embeddable."
+            "A vplot is a generic, hierarchically structured string with\na character set that is untransformed by ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "encodeURIComponent"
+              ],
+              "VDoc:ref": "https://262.ecma-international.org/5.1/#sec-15.1.3.4"
+            },
+            "(",
+            {
+              "@type": "VRevdoc:RegExp",
+              "VDoc:content": [
+                "[a-zA-Z0-9_.!~*'()-]"
+              ],
+              "VDoc:language": "https://tc39.es/ecma262/#sec-regexp-regular-expression-objects"
+            },
+            "). The vplot structure expresses\nsequential dependencies, parameter lists, nesting, term/data pairs and\narbitrary data encoding. The vplot strings themselves are\nmeaning-agnostic: the semantics are provided by the specific vplot\nprocessors."
           ]
         },
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "Generally speaking a query which always resolves to the same resource\ncan be used as an identifier for that resource. VPlot is a format for\nexpressing queries in an identifier-friendly string syntax. VPlot only\nprovides primitives for query structure. The actual query semantics are\nspecified by the semantic ontology terms that are used in the vplots."
-          ]
-        },
-        {
-          "@type": "VDoc:Paragraph",
-          "VDoc:content": [
-            "In ValOS context they are used as resource identifiers, valospace\nqueries, but also as a deterministic JSON serialization,\nan intermediate language for computation, a configuration language,\nJSON-LD interactions and more."
+            "In ValOS context vplots are used as resource identifiers, valospace\nqueries, but also as a deterministic JSON serialization,\nan intermediate language for computation, a configuration language,\nJSON-LD integration glue and more."
           ]
         },
         {
@@ -871,7 +881,7 @@
         {
           "@type": "VRevdoc:Turtle",
           "VDoc:content": [
-            "\n  ?o    V:ghostHost ?s\n      ; V:ghostPrototype <urn:valos:$~u4.ba54>\n"
+            "\n  ?o    V:ghostHost ?s\n      ; V:ghostOf <urn:valos:$~u4.ba54>\n"
           ],
           "VDoc:language": "https://www.w3.org/TR/turtle/"
         },
@@ -1486,7 +1496,7 @@
         {
           "@type": "VRevdoc:Turtle",
           "VDoc:content": [
-            "\n  <urn:valos:$~u4.f00b> a V:Entity\n      ; V:prototype <urn:valos:$~u4.f00b-b507-0763>\n"
+            "\n  <urn:valos:$~u4.f00b> a valos:Entity\n      ; V:specializationOf <urn:valos:$~u4.f00b-b507-0763>\n"
           ],
           "VDoc:language": "https://www.w3.org/TR/turtle/"
         }
@@ -1526,7 +1536,7 @@
         {
           "@type": "VRevdoc:Turtle",
           "VDoc:content": [
-            "\n  <urn:valos:$~u4.f00b@_$~u4.ba54>\n        V:ghostHost <urn:valos:$~u4.f00b>\n      ; V:ghostPrototype <urn:valos:$~u4.ba54>\n"
+            "\n  <urn:valos:$~u4.f00b@_$~u4.ba54>\n        V:ghostHost <urn:valos:$~u4.f00b>\n      ; V:ghostOf <urn:valos:$~u4.ba54>\n"
           ],
           "VDoc:language": "https://www.w3.org/TR/turtle/"
         }
@@ -1541,7 +1551,7 @@
         {
           "@type": "VRevdoc:Turtle",
           "VDoc:content": [
-            "\n  <urn:valos:$~u4.f00b@_$~u4.ba54@_$~u4.b7e4>\n        V:ghostHost <urn:valos:$~u4.f00b>\n      ; V:ghostPrototype <urn:valos:$~u4.ba54@_$~u4.b7e4>\n"
+            "\n  <urn:valos:$~u4.f00b@_$~u4.ba54@_$~u4.b7e4>\n        V:ghostHost <urn:valos:$~u4.f00b>\n      ; V:ghostOf <urn:valos:$~u4.ba54@_$~u4.b7e4>\n"
           ],
           "VDoc:language": "https://www.w3.org/TR/turtle/"
         }
@@ -1555,7 +1565,7 @@
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "\nSelects a variant resource value for a base resource within a fixed\nsubspace. The variant resource provides\ninferred `subspacePrototype` fallbacks to an *inner* subspace and\neventually to the non-variant base resource as well as to the\nhomologous sub-resource of the host resource inheritancePrototype."
+            "\nSelects a variant resource value for a base resource within a fixed\nsubspace. The variant resource provides\ninferred `subspacePrototype` fallbacks to an *inner* subspace and\neventually to the non-variant base resource as well as to the\nhomologous sub-resource of the host resource hasPrototype."
           ]
         },
         {
@@ -1608,7 +1618,7 @@
         {
           "@type": "VRevdoc:Turtle",
           "VDoc:content": [
-            "\n  <urn:valos:$~u4.f00b@_$~u4.b453@_$lang.fi@_$~u4.b74e@.$.myProp> a V:ScopeProperty\n      ; V:ghostHost <urn:valos:$~u4.f00b>\n      ; V:ghostPrototype <urn:valos:$~u4.b453@_$lang.fi@_$~u4.b74e@.$.myProp>\n      ; V:subspacePrototype <urn:valos:$~u4.f00b@_$~u4.b453@_$~u4.b74e@_$lang.fi@.$.myProp>\n      ; V:language \"fi\"\n"
+            "\n  <urn:valos:$~u4.f00b@_$~u4.b453@_$lang.fi@_$~u4.b74e@.$.myProp> a V:ScopeProperty\n      ; V:ghostHost <urn:valos:$~u4.f00b>\n      ; V:ghostOf <urn:valos:$~u4.b453@_$lang.fi@_$~u4.b74e@.$.myProp>\n      ; V:subspacePrototype <urn:valos:$~u4.f00b@_$~u4.b453@_$~u4.b74e@_$lang.fi@.$.myProp>\n      ; V:language \"fi\"\n"
           ],
           "VDoc:language": "https://www.w3.org/TR/turtle/"
         }
@@ -1631,7 +1641,7 @@
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "The verbs `.O.`, `.O+`, and `.O~` denote the properties\n`V:value`, `V:id`, and `V:content'` respectively.\nThese are the primary ",
+            "The verbs `.O.`, `.O*`, and `.O~` denote the properties\n`V:value`, `V:id`, and `V:content'` respectively.\nThese are the primary ",
             {
               "VDoc:em": true,
               "VDoc:content": [
@@ -1655,7 +1665,7 @@
         {
           "@type": "VRevdoc:Turtle",
           "VDoc:content": [
-            "\n  <urn:valos:$~u4.f00b@.$.myProp> a V:ScopeProperty\n      ; V:scope <urn:valos:$~u4.f00b>\n      ; V:inheritancePrototype <urn:valos:$~u4.f00b-b507-0763@.$.myProp>\n      ; V:name \"myProp\"\n"
+            "\n  <urn:valos:$~u4.f00b@.$.myProp> a V:ScopeProperty\n      ; V:scope <urn:valos:$~u4.f00b>\n      ; V:hasPrototype <urn:valos:$~u4.f00b-b507-0763@.$.myProp>\n      ; V:name \"myProp\"\n"
           ],
           "VDoc:language": "https://www.w3.org/TR/turtle/"
         }
@@ -1670,7 +1680,7 @@
         {
           "@type": "VRevdoc:Turtle",
           "VDoc:content": [
-            "\n  <urn:valos:$~u4.f00b@-out--$.PERMISSIONS:@.O-$~ih.8766> a V:Relation\n      ; V:connectedSource <urn:valos:$~u4.f00b>\n      ; V:prototype <urn:valos:$~u4.f00b-b507-0763@-out--$.PERMISSIONS:@.O-$~ih.8766>\n      ; V:name \"PERMISSIONS\"\n      ; V:target <urn:valos:$~u4.8766>\n"
+            "\n  <urn:valos:$~u4.f00b@-out--$.PERMISSIONS:@.O-$~ih.8766> a V:Relation\n      ; V:ownerSource <urn:valos:$~u4.f00b>\n      ; V:specializationOf <urn:valos:$~u4.f00b-b507-0763@-out--$.PERMISSIONS:@.O-$~ih.8766>\n      ; V:name \"PERMISSIONS\"\n      ; V:target <urn:valos:$~u4.8766>\n"
           ],
           "VDoc:language": "https://www.w3.org/TR/turtle/"
         },
@@ -1702,7 +1712,7 @@
         {
           "@type": "VRevdoc:Turtle",
           "VDoc:content": [
-            "\n  <urn:valos:$~u4.f00b@-out--$.PERMISSIONS> a V:Relation\n      ; V:connectedSource <urn:valos:$~u4.f00b>\n      ; V:inheritancePrototype <urn:valos:$~u4.f00b-b507-0763@-out--$.PERMISSIONS>\n      ; V:name \"PERMISSIONS\"\n  <urn:valos:$~u4.f00b@-out--$.PERMISSIONS@_$.1> a V:Relation\n      ; V:subspacePrototype <urn:valos:$~u4.f00b@-out--$.PERMISSIONS>\n                          , <urn:valos:$~u4.f00b-b507-0763@-out--$.PERMISSIONS@_$.1>\n"
+            "\n  <urn:valos:$~u4.f00b@-out--$.PERMISSIONS> a V:Relation\n      ; V:ownerSource <urn:valos:$~u4.f00b>\n      ; V:hasPrototype <urn:valos:$~u4.f00b-b507-0763@-out--$.PERMISSIONS>\n      ; V:name \"PERMISSIONS\"\n  <urn:valos:$~u4.f00b@-out--$.PERMISSIONS@_$.1> a V:Relation\n      ; V:subspacePrototype <urn:valos:$~u4.f00b@-out--$.PERMISSIONS>\n                          , <urn:valos:$~u4.f00b-b507-0763@-out--$.PERMISSIONS@_$.1>\n"
           ],
           "VDoc:language": "https://www.w3.org/TR/turtle/"
         }
@@ -1733,7 +1743,7 @@
         {
           "@type": "VRevdoc:Turtle",
           "VDoc:content": [
-            "\n  <urn:valos:$~u4.f00b@*$.Scripts> a V:Entity\n      ; V:parent <urn:valos:$~u4.f00b>\n      ; V:inheritancePrototype <urn:valos:$~u4.f00b-b507-0763@*$.Scripts>\n      ; V:name \"scripts\"\n"
+            "\n  <urn:valos:$~u4.f00b@*$.Scripts> a V:Entity\n      ; V:parent <urn:valos:$~u4.f00b>\n      ; V:hasPrototype <urn:valos:$~u4.f00b-b507-0763@*$.Scripts>\n      ; V:name \"scripts\"\n"
           ],
           "VDoc:language": "https://www.w3.org/TR/turtle/"
         }
@@ -1764,7 +1774,7 @@
         {
           "@type": "VRevdoc:Turtle",
           "VDoc:content": [
-            "\n  <urn:valos:$~u4.f00b@~$.foo.vs> a V:Media\n      ; V:folder <urn:valos:$~u4.f00b>\n      ; V:inheritancePrototype <urn:valos:$~u4.f00b-b507-0763@~$.foo.vs>\n      ; V:name \"foo.vs\"\n"
+            "\n  <urn:valos:$~u4.f00b@~$.foo.vs> a V:Media\n      ; V:folder <urn:valos:$~u4.f00b>\n      ; V:hasPrototype <urn:valos:$~u4.f00b-b507-0763@~$.foo.vs>\n      ; V:name \"foo.vs\"\n"
           ],
           "VDoc:language": "https://www.w3.org/TR/turtle/"
         }
@@ -1778,7 +1788,7 @@
         {
           "@type": "VDoc:Paragraph",
           "VDoc:content": [
-            "The VPlot grammar is an LL(1) grammar. It is recursive be virtue of\nvvalue productions which can nest VPlots themselves without additional\nencoding."
+            "The VPlot grammar is an LL(1) grammar. The recursion is by virtue of\nvparam productions which can nest VPlots themselves without additional\nencoding."
           ]
         },
         {
@@ -1788,7 +1798,7 @@
             {
               "@type": "VRevdoc:ABNF",
               "VDoc:content": [
-                "  vplot         = \"@\" *(vstep \"@\") \"@\"\n  vstep         = [ verb-type ] *vparam\n  vparam        = \"$\" [ context-term ] \".\" vvalue\n  vvalue        = vplot / \"$\" / 1*( unencoded / pct-encoded )\n\n  verb-type     = 1*unencoded\n  context-term  = 1*unreserved\n  unencoded     = unreserved / \"!\" / \"*\" / \"'\" / \"(\" / \")\"\n  unreserved    = unreserved-nt / \"~\"\n  unreserved-nt = ALPHA / DIGIT / \"-\" / \"_\" / \".\"\n  pct-encoded   = \"%\" HEXDIG HEXDIG\n\n  ALPHA         = %x41-5A / %x61-7A                         ; A-Z / a-z\n  HEXDIG        = DIGIT / \"A\" / \"B\" / \"C\" / \"D\" / \"E\" / \"F\" ; 0-9 / A-F\n  DIGIT         = %x30-39                                   ; 0-9"
+                "  vplot       = 1*( \"(\" vstep \")\" )\n  vstep       = vparam *( \"'\" vparam )\n  vparam      = vplot / [ vterm ] [ \"!\" ( vvalue / \"!\" vdata ) ]\n\n  route-vplot = vstep *( \"/\" vstep )\n  urn-vplot   = vstep *( \":\" vstep )\n\n  vterm       = 1*unencoded\n  vvalue      = 1*unencoded\n  vdata       = 1*b64urlchar\n\n  unencoded   = b64urlchar / \".\" / \"~\" / \"*\"\n  b64urlchar  = ALPHANUM / \"-\" / \"_\"\n\n  ALPHANUM    = %x30-39 / %x41-5A / %x61-7A                             ; 0-9 / A-Z / a-z"
               ],
               "VDoc:language": "https://tools.ietf.org/html/rfc5234"
             }

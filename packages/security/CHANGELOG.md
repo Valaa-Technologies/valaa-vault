@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0-prerelease.1](https://github.com/valaatech/kernel/compare/v0.37.0-prerelease.0...v0.37.0-prerelease.1) (2021-04-14)
+
+
+### Bug Fixes
+
+* Various minor fixes and logging improvements ([ed7866f](https://github.com/valaatech/kernel/commit/ed7866fd7aca7791b71040e089f82f138a84fb2f))
+
+
+### Features
+
+* Add hash40FromHexSHA512 as bvob hash fallback ([1285206](https://github.com/valaatech/kernel/commit/12852061e0a951ae2b92a43ef56872aacf6a3bbd))
+* **sourcerer:** Add Sourcerer..createChronicleRootID ([0f734bd](https://github.com/valaatech/kernel/commit/0f734bd145be49d771d14c9653a07a2115a0f571))
+
+
+
+
+
 # [0.37.0-prerelease.0](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.6...v0.37.0-prerelease.0) (2021-02-16)
 
 

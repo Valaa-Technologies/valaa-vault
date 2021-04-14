@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0-prerelease.1](https://github.com/valaatech/kernel/compare/v0.37.0-prerelease.0...v0.37.0-prerelease.1) (2021-04-14)
+
+
+### Features
+
+* **revdoc:** Add VRevdoc:RegExp and VRevdoc:regexp ([7ed3516](https://github.com/valaatech/kernel/commit/7ed351691e9d46f491f31d53308702fafdb5f640))
+
+
+
+
+
 # [0.37.0-prerelease.0](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.6...v0.37.0-prerelease.0) (2021-02-16)
 
 **Note:** Version bump only for package @valos/revdoc

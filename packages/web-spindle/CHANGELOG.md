@@ -3,6 +3,36 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0-prerelease.1](https://github.com/valaatech/kernel/compare/v0.37.0-prerelease.0...v0.37.0-prerelease.1) (2021-04-14)
+
+
+### Bug Fixes
+
+* Lint errors ([8aa1b12](https://github.com/valaatech/kernel/commit/8aa1b12eca33966bc902328050835fbfc2064227))
+* Minor fixes and document updates ([5e836b1](https://github.com/valaatech/kernel/commit/5e836b14bb399bfa47350b4e8274dee7ff6cd00e))
+* Reduce naiveURI usage and other minor fixes ([ae1c8da](https://github.com/valaatech/kernel/commit/ae1c8da8900494e76a253db43f5649019f24c615))
+* Regression bugs caught by test suite ([f77890a](https://github.com/valaatech/kernel/commit/f77890a972bb74e482bc31431050ac848180d43b))
+* Various minor fixes and logging improvements ([ed7866f](https://github.com/valaatech/kernel/commit/ed7866fd7aca7791b71040e089f82f138a84fb2f))
+
+
+### Features
+
+* Add "meta" section to all spindle prototypes ([3af199e](https://github.com/valaatech/kernel/commit/3af199e66f229dd66e4003868f93dc9789c76370))
+* **web-spindle:** Add configure --ssl option ([822536c](https://github.com/valaatech/kernel/commit/822536c73f0a6b6ddf745e4229f74e368cb4faa7))
+* Implement valosp bvob pathway as POST multipart/form-data file ([4a6d5ac](https://github.com/valaatech/kernel/commit/4a6d5ac8e9304c27de94917976b54301e1f6e8cc))
+* **web-spindle:** Add all methods "static" projectors ([b01bfbb](https://github.com/valaatech/kernel/commit/b01bfbb43e441dbf8c1534fc99c90aa76cb63be5))
+* Add (encode|decode)VPlotValue, implement valosp URI conventions ([d9936c9](https://github.com/valaatech/kernel/commit/d9936c9b817b7759690b4fe941a5a9780d4563ae))
+* Add error.chainContextName for (this|then)Chain* error handlers ([5958ace](https://github.com/valaatech/kernel/commit/5958acec060f5595ca1f2350c80ad4da3f97e7b4))
+* **inspire:** Allow null rootChronicleURI and foci for non-browser contexts ([ef07a78](https://github.com/valaatech/kernel/commit/ef07a783f82faf1032fcf0ea1e8886a7f6573cdb))
+* **sourcerer:** Replace naiveURI with *.(create|split)ChronicleURI pipeline ([d75a1f2](https://github.com/valaatech/kernel/commit/d75a1f20715f40d9efdf582d703737e498759762))
+* **web-spindle:** Add "static" projector ([9404316](https://github.com/valaatech/kernel/commit/94043161da1f8f30594ee521663c3e754a6be00c))
+* **web-spindle:** Expose route params as default rules ([436b1e3](https://github.com/valaatech/kernel/commit/436b1e315034ce3c7f3858ac2e2a36c34e127e69))
+* **web-spindle:** Import projectors from other spindles ([5058816](https://github.com/valaatech/kernel/commit/5058816891c6772e6c0bd1bbef132b93f27b644f))
+
+
+
+
+
 # [0.37.0-prerelease.0](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.6...v0.37.0-prerelease.0) (2021-02-16)
 
 **Note:** Version bump only for package @valos/web-spindle

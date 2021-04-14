@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.37.0-prerelease.1](https://github.com/valaatech/kernel/compare/v0.37.0-prerelease.0...v0.37.0-prerelease.1) (2021-04-14)
+
+
+### Bug Fixes
+
+* Regression bugs caught by test suite ([f77890a](https://github.com/valaatech/kernel/commit/f77890a972bb74e482bc31431050ac848180d43b))
+* **log:** Instantiation test according the new log spec ([4974bc1](https://github.com/valaatech/kernel/commit/4974bc1d4ce000f5a742707de6b10d86084a74da))
+
+
+### Features
+
+* **authority-spindle:** Complete unauthenticated, nonauthored paths ([6766884](https://github.com/valaatech/kernel/commit/67668849c8f79509abf9230788ae4e0023b23c5d))
+* **log:** Add resource origins and logical images to main test ([b52dc66](https://github.com/valaatech/kernel/commit/b52dc6693b7f3278d8d4db331168f9c0674cb55b))
+* **log:** Add vlog revdoc.test with create, reference and ghost examples ([b9b03ef](https://github.com/valaatech/kernel/commit/b9b03ef93eb854916fa53e61aac29d8c3b7652c9))
+* **log:** Implement fifth test "removal" (preliminary) ([47ddde5](https://github.com/valaatech/kernel/commit/47ddde5e28cda4edce362def89477f5aa074b6ab))
+* **log:** Rename several V:, VState: and VLog: properties ([61cfa9d](https://github.com/valaatech/kernel/commit/61cfa9d6926e27fb3ca55aff5d982577f1bf5d84))
+
+
+
+
+
 # [0.37.0-prerelease.0](https://github.com/valaatech/kernel/compare/v0.37.0-alpha.6...v0.37.0-prerelease.0) (2021-02-16)
 
 **Note:** Version bump only for package @valos/state

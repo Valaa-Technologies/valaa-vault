@@ -1,0 +1,2346 @@
+[
+  {
+    "@id": "https://valospace.org/authority-spindle",
+    "@context": {
+      "@base": "https://valospace.org/vdoc/0#",
+      "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "owl": "http://www.w3.org/2002/07/owl#",
+      "dc": "http://purl.org/dc/elements/1.1/",
+      "VSbomdoc": "https://valospace.org/sbomdoc/0#",
+      "VKernel": "https://valospace.org/kernel/0#",
+      "VDoc": "https://valospace.org/vdoc/0#",
+      "VRevdoc": "https://valospace.org/revdoc/0#",
+      "restriction": {
+        "@reverse": "owl:onProperty"
+      },
+      "VRevdoc:tooltipContent": {
+        "@id": "#tooltipContent",
+        "@type": "@id"
+      },
+      "VDoc:content": {
+        "@id": "#content",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VDoc:entries": {
+        "@id": "#entries",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VDoc:words": {
+        "@id": "#words",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VDoc:lines": {
+        "@id": "#lines",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VDoc:columns": {
+        "@id": "#columns",
+        "@container": "@list",
+        "@type": "@id"
+      },
+      "VDoc:map": {
+        "@id": "#map",
+        "@type": "@id"
+      },
+      "VDoc:cell": {
+        "@id": "#cell",
+        "@type": "@id"
+      }
+    },
+    "dc:title": "ValOSP Authority",
+    "VRevdoc:package": "@valos/authority-spindle",
+    "VRevdoc:version": "0.37.0-prerelease.0",
+    "respecConfig": {
+      "specStatus": "unofficial",
+      "shortName": "valospAuthority",
+      "editors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ],
+      "authors": [
+        {
+          "name": "Iridian Kiiskinen",
+          "url": "https://valaatech.github.io/fabric/authors/iridian",
+          "github": "http://github.com/valospace"
+        }
+      ]
+    },
+    "abstract": {
+      "@id": "abstract",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "@valos/authority-spindle is a ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "perspire worker"
+              ],
+              "VDoc:ref": "@valos/inspire#perspire"
+            },
+            " plugin that implements a ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "valosp: scheme"
+              ],
+              "VDoc:ref": "@valos/sourcerer#valosp"
+            },
+            " authority as a set of ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "@valos/web-spindle"
+              ],
+              "VDoc:ref": "@valos/web-spindle"
+            },
+            " routes."
+          ]
+        }
+      ]
+    },
+    "sotd": {
+      "@id": "sotd",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "This document is part of the spindle workspace ",
+            {
+              "@type": "VRevdoc:Package",
+              "VDoc:content": [
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "@valos/authority-spindle"
+                  ]
+                }
+              ],
+              "VDoc:ref": "@valos/authority-spindle"
+            },
+            "\n(of domain ",
+            {
+              "@type": "VRevdoc:Package",
+              "VDoc:content": [
+                {
+                  "VDoc:em": true,
+                  "VDoc:content": [
+                    "@valos/kernel"
+                  ]
+                }
+              ],
+              "VDoc:ref": "@valos/kernel"
+            },
+            ") which has the description:\n`ValOS authority web route projectors spindle`."
+          ]
+        }
+      ]
+    },
+    "introduction": {
+      "@id": "introduction",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "Edit me - this is the first payload chapter. Abstract and SOTD are\nessential ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "ReSpec boilerplate"
+              ],
+              "VDoc:ref": "https://github.com/w3c/respec/wiki/ReSpec-Editor's-Guide#essential-w3c-boilerplate"
+            }
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "See ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "ReVDoc tutorial"
+              ],
+              "VDoc:ref": "@valos/revdoc/tutorial"
+            },
+            " for\ninstructions on how to write revdoc source documents."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "See also ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "ReVdoc specification"
+              ],
+              "VDoc:ref": "@valos/revdoc"
+            },
+            " and ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "VDoc specification"
+              ],
+              "VDoc:ref": "@valos/vdoc"
+            },
+            " for reference documentation."
+          ]
+        }
+      ]
+    },
+    "section_setup": {
+      "@id": "section_setup",
+      "dc:title": "Setting up the authority perspire server",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "Goal is to create and populate a directory as an npm workspace so that\nexecuting ",
+            {
+              "@type": "VRevdoc:Command",
+              "VDoc:content": [
+                "vlm perspire"
+              ]
+            },
+            " in it will launch a https\nserver as a node process. ",
+            {
+              "VDoc:em": true,
+              "VDoc:content": [
+                "node"
+              ]
+            },
+            " and ",
+            {
+              "VDoc:em": true,
+              "VDoc:content": [
+                "npm"
+              ]
+            },
+            " (or ",
+            {
+              "VDoc:em": true,
+              "VDoc:content": [
+                "yarn"
+              ]
+            },
+            ") are required as global CLI dependencies."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "Additionally, the ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                [
+                  "valos manager tool ",
+                  {
+                    "@type": "VRevdoc:Command",
+                    "VDoc:content": [
+                      "vlm"
+                    ]
+                  }
+                ]
+              ],
+              "VDoc:ref": "https://www.npmjs.com/package/valma"
+            },
+            " and the ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "@valos/kernel"
+              ],
+              "VDoc:ref": "@valos/kernel"
+            },
+            " domain need to be installed globally:",
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "sudo"
+                        ]
+                      },
+                      "npm",
+                      "install",
+                      "-g",
+                      "valma",
+                      "@valos/kernel"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "Once installed, create a new directory (example directory below is ",
+            {
+              "VDoc:em": true,
+              "VDoc:content": [
+                "\"taur\""
+              ]
+            },
+            ") and start the interactive session to initialize the workspace:",
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "vlm"
+                        ]
+                      },
+                      "init"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            "We will use this tool to create a ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "worker"
+              ],
+              "VDoc:ref": "@valos/kernel#worker"
+            },
+            " workspace without a domain and with ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "@valos/web-spindle"
+              ],
+              "VDoc:ref": "@valos/web-spindle"
+            },
+            " and ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "@valos/authority-spindle"
+              ],
+              "VDoc:ref": "@valos/authority-spindle"
+            },
+            " toolsets.",
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "?"
+                        ]
+                      },
+                      "Set",
+                      "'vault'",
+                      "as",
+                      "the",
+                      "valos.type",
+                      "(workspace",
+                      "is",
+                      "outside",
+                      "a",
+                      "vault)?",
+                      "(y/N)"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          ""
+                        ]
+                      },
+                      "No"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            "After answering, ",
+            {
+              "VDoc:em": true,
+              "VDoc:content": [
+                "vlm"
+              ]
+            },
+            " will echo the internal commands it\nperforms like so:",
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          ""
+                        ]
+                      },
+                      "[1]",
+                      ">>",
+                      "[2]",
+                      "vlm",
+                      ".configure/.valos-stanza"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          ""
+                        ]
+                      },
+                      "[2]",
+                      ">>",
+                      "[3]",
+                      "vlm",
+                      "'.select/.domain/**/*'",
+                      "--show-name",
+                      "--show-description"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          ""
+                        ]
+                      },
+                      "[2]",
+                      "<<",
+                      "[3]",
+                      "vlm",
+                      "'.select/.domain/**/*':",
+                      "[{\"...\":{\"columns\":[[\"name\",{\"text..."
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            "The echos are omitted for the rest of this guide.",
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "?"
+                        ]
+                      },
+                      "Choose",
+                      "a",
+                      "package.json:valos.domain",
+                      "for",
+                      "the",
+                      "new",
+                      "workspace"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          ""
+                        ]
+                      },
+                      "@valos/kernel",
+                      "-",
+                      "Contribute",
+                      "to",
+                      "Valaa",
+                      "Open",
+                      "System",
+                      "core",
+                      "components"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "❯"
+                        ]
+                      },
+                      "<no",
+                      "domain>",
+                      "-",
+                      "<this",
+                      "workspace",
+                      "is",
+                      "not",
+                      "part",
+                      "of",
+                      "a",
+                      "domain>"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          ""
+                        ]
+                      },
+                      "<create>",
+                      "-",
+                      "<enter",
+                      "the",
+                      "name",
+                      "of",
+                      "a",
+                      "new",
+                      "domain",
+                      "this",
+                      "workspace",
+                      "introduces>"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          ""
+                        ]
+                      },
+                      "<unlisted>",
+                      "-",
+                      "<enter",
+                      "the",
+                      "name",
+                      "of",
+                      "an",
+                      "existing",
+                      "but",
+                      "unlisted",
+                      "domain>"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "?"
+                        ]
+                      },
+                      "Choose",
+                      "a",
+                      "package.json:valos.type",
+                      "for",
+                      "the",
+                      "new",
+                      "workspace"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          ""
+                        ]
+                      },
+                      "..."
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "❯"
+                        ]
+                      },
+                      "worker",
+                      "-",
+                      "Execute",
+                      "perspire",
+                      "gateway",
+                      "as",
+                      "a",
+                      "Node.js",
+                      "process",
+                      "in",
+                      "this",
+                      "workspace"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "?"
+                        ]
+                      },
+                      "Confirm",
+                      "package.json:valos.type",
+                      "choice:",
+                      "'worker'?",
+                      "(Y/n)"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          ""
+                        ]
+                      },
+                      "Yes"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "?"
+                        ]
+                      },
+                      "Initialize",
+                      "package.json",
+                      "with",
+                      "'yarn",
+                      "init'?"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "❯"
+                        ]
+                      },
+                      "Initialize"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            "At this point ",
+            {
+              "@type": "VRevdoc:Command",
+              "VDoc:content": [
+                "vlm init"
+              ]
+            },
+            " will delegate initialization to ",
+            {
+              "@type": "VRevdoc:Command",
+              "VDoc:content": [
+                "yarn init"
+              ]
+            },
+            ". We accept defaults if available and give sane values otherwise.",
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Command",
+                    "VDoc:content": [
+                      "yarn init v1.21.1"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "question"
+                        ]
+                      },
+                      "name",
+                      "(taur-worker):"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "question"
+                        ]
+                      },
+                      "version",
+                      "(0.1.0):",
+                      "0.1.0"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "question"
+                        ]
+                      },
+                      "description:",
+                      "Test",
+                      "authority"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "question"
+                        ]
+                      },
+                      "entry",
+                      "point",
+                      "(index.js):"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "question"
+                        ]
+                      },
+                      "repository",
+                      "url:"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "question"
+                        ]
+                      },
+                      "author:",
+                      "Iridian"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "question"
+                        ]
+                      },
+                      "license",
+                      "(MIT):"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "question"
+                        ]
+                      },
+                      "private",
+                      "(true):"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            "Verify that @valos/kernel is visible, as it is the origin of ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "@valos/web-spindle"
+              ],
+              "VDoc:ref": "@valos/web-spindle"
+            },
+            " and ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "@valos/authority-spindle"
+              ],
+              "VDoc:ref": "@valos/authority-spindle"
+            },
+            " toolsets (among other things). We don't need to add other domains, so\nwe bypass adding them.",
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "[1]"
+                        ]
+                      },
+                      "init",
+                      "informs:",
+                      "Visible",
+                      "domains:"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "package"
+                        ]
+                      },
+                      "|version",
+                      "|pool",
+                      ""
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "-------------|-------------------|------"
+                        ]
+                      }
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "@valos/kernel|0.37.0-prerelease.0|global"
+                        ]
+                      }
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "?"
+                        ]
+                      },
+                      "yarn",
+                      "add",
+                      "more",
+                      "domains",
+                      "as",
+                      "devDependencies",
+                      "directly",
+                      "to",
+                      "this",
+                      "workspace?"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "❯"
+                        ]
+                      },
+                      "Bypass"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "?"
+                        ]
+                      },
+                      "Commit",
+                      "package.json",
+                      "valos",
+                      "stanza:",
+                      "{\"type\":\"worker\",\"domain\":\"\"}?"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "❯"
+                        ]
+                      },
+                      "Commit"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            "At this point ",
+            {
+              "@type": "VRevdoc:Command",
+              "VDoc:content": [
+                "vlm init"
+              ]
+            },
+            " makes the first of several calls to ",
+            {
+              "@type": "VRevdoc:Command",
+              "VDoc:content": [
+                "yarn init"
+              ]
+            },
+            ". These separate calls are necessary as they\nbring in initialization and configuration code for subsequent stages.",
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          ""
+                        ]
+                      },
+                      "[1]",
+                      ">>",
+                      "[4]",
+                      ""
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Command",
+                    "VDoc:content": [
+                      "vlm @ yarn add --dev @valos/type-worker@>=0.37.0-prerelease.0"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Command",
+                    "VDoc:content": [
+                      "yarn add v1.21.1"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "success"
+                        ]
+                      },
+                      "Saved",
+                      "lockfile."
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "success"
+                        ]
+                      },
+                      "Saved",
+                      "224",
+                      "new",
+                      "dependencies."
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "info"
+                        ]
+                      },
+                      "Direct",
+                      "dependencies"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "└─"
+                        ]
+                      },
+                      "@valos/type-worker@0.37.0-prerelease.0"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "info"
+                        ]
+                      },
+                      "All",
+                      "dependencies"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "└─"
+                        ]
+                      },
+                      "..."
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "Done"
+                        ]
+                      },
+                      "in",
+                      "38.60s."
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            "At this point the init is complete and we proceed to configuring the\nworkspace. The command",
+            {
+              "@type": "VRevdoc:Command",
+              "VDoc:content": [
+                "vlm configure --reconfigure"
+              ]
+            },
+            " can always be manually re-executed from the CLI if something goes\nwrong after this point.",
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "?"
+                        ]
+                      },
+                      "Configure",
+                      "workspace",
+                      "with",
+                      "'vlm",
+                      "configure",
+                      "--reconfigure'?"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "❯"
+                        ]
+                      },
+                      "Configure"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            "Leave service chronicle URI empty. The basic authority setup does not\ninvolve any custom service logic.",
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "?"
+                        ]
+                      },
+                      "The",
+                      "service",
+                      "chronicle",
+                      "URI"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            "Always select copy-templates-files when given the option",
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "?"
+                        ]
+                      },
+                      "Pick",
+                      "tools",
+                      "selection",
+                      "choices",
+                      "for",
+                      "the",
+                      "toolset",
+                      "'@valos/type-worker'"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "❯◉"
+                        ]
+                      },
+                      "copy-template-files",
+                      "-",
+                      "Copy",
+                      "toolset",
+                      "template",
+                      "files",
+                      "to",
+                      "the",
+                      "workspace"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            "Now we get to select the toolsets we want. We need to manually install\nonly web-spindle first as authority-spindle depends on it (and\nunfortunately automated dependency ordering is not implemented yet)",
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "?"
+                        ]
+                      },
+                      "Pick",
+                      "toolsets",
+                      "selection",
+                      "choices",
+                      "for",
+                      "the",
+                      "workspace"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "◯"
+                        ]
+                      },
+                      "@valos/authority-spindle",
+                      "-",
+                      "Host",
+                      "a",
+                      "standalone",
+                      "authority",
+                      "using",
+                      "web-spindle",
+                      "route",
+                      "projectors"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "◉"
+                        ]
+                      },
+                      "@valos/web-spindle",
+                      "-",
+                      "Project",
+                      "http/s",
+                      "requests",
+                      "to",
+                      "valospace-fabric",
+                      "via",
+                      "a",
+                      "gateway",
+                      "plugin"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "◯"
+                        ]
+                      },
+                      "@valos/toolset-revealer",
+                      "-",
+                      "Run",
+                      "'vlm",
+                      "rouse-revealer'",
+                      "to",
+                      "serve",
+                      "local",
+                      "inspire",
+                      "sites",
+                      "with",
+                      "webpack-dev-server"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "◯"
+                        ]
+                      },
+                      "@valos/type-toolset",
+                      "-",
+                      "Make",
+                      "current",
+                      "workspace",
+                      "selectable",
+                      "as",
+                      "a",
+                      "toolset",
+                      "for",
+                      "other",
+                      "workspaces"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "[13]"
+                        ]
+                      },
+                      ">>",
+                      "[18]",
+                      "vlm",
+                      "@",
+                      "yarn",
+                      "add",
+                      "--dev",
+                      "@valos/web-spindle@>=0.37.0-prerelease.0"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "yarn"
+                        ]
+                      },
+                      "add",
+                      "v1.21.1"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command"
+                      }
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "Done"
+                        ]
+                      },
+                      "in",
+                      "12.25s."
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            "We configure the web-spindle to have SSL enabled at ",
+            {
+              "VDoc:em": true,
+              "VDoc:content": [
+                "localhost"
+              ]
+            },
+            " port 5443 and choose to have ",
+            {
+              "@type": "VRevdoc:Command",
+              "VDoc:content": [
+                "openssl"
+              ]
+            },
+            " to create\ninsecure self-signed certificates for our test authority.",
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "?"
+                        ]
+                      },
+                      "Enable",
+                      "SSL"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          ""
+                        ]
+                      },
+                      "True"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "?"
+                        ]
+                      },
+                      "The",
+                      "port",
+                      "the",
+                      "Web",
+                      "API",
+                      "listens."
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          ""
+                        ]
+                      },
+                      "5443"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "?"
+                        ]
+                      },
+                      "The",
+                      "local",
+                      "address",
+                      "the",
+                      "Web",
+                      "API",
+                      "is",
+                      "bound",
+                      "to."
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          ""
+                        ]
+                      },
+                      "localhost"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "?"
+                        ]
+                      },
+                      "Pick",
+                      "tools",
+                      "selection",
+                      "choices",
+                      "for",
+                      "the",
+                      "toolset",
+                      "'@valos/web-spindle'"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "❯◉"
+                        ]
+                      },
+                      "copy-template-files",
+                      "-",
+                      "Copy",
+                      "toolset",
+                      "template",
+                      "files",
+                      "to",
+                      "the",
+                      "workspace"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "?"
+                        ]
+                      },
+                      "Use",
+                      "'openssl'",
+                      "to",
+                      "create",
+                      "insecure",
+                      "self-signed",
+                      "placeholder",
+                      "certificates?"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "Yes"
+                        ]
+                      }
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "[14]"
+                        ]
+                      },
+                      ">>",
+                      "[19]",
+                      "vlm",
+                      "@",
+                      "openssl",
+                      "req",
+                      "-x509",
+                      "-newkey=rsa:4096",
+                      "-keyout=env/local-authority.key.pem",
+                      "-out=env/local-authority.crt",
+                      "-days=7300",
+                      "-nodes",
+                      "-subj=/CN=localhost"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "key"
+                        ]
+                      },
+                      "|value"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "-------|-----"
+                        ]
+                      }
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "success|true"
+                        ]
+                      }
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            "At this point the init completes for the first time. We still need to\nselect the authority-spindle, so we re-execute configure:",
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Command",
+                    "VDoc:content": [
+                      "vlm configure"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            "These two copy-template-files are redundant",
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "?"
+                        ]
+                      },
+                      "Pick",
+                      "tools",
+                      "selection",
+                      "choices",
+                      "for",
+                      "the",
+                      "toolset",
+                      "'@valos/type-worker'"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "◉"
+                        ]
+                      },
+                      "copy-template-files"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "?"
+                        ]
+                      },
+                      "Pick",
+                      "tools",
+                      "selection",
+                      "choices",
+                      "for",
+                      "the",
+                      "toolset",
+                      "'@valos/web-spindle'"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "◉"
+                        ]
+                      },
+                      "copy-template-files"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            "Finally we get to select the authority-spindle toolset also.",
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "?"
+                        ]
+                      },
+                      "Pick",
+                      "toolsets",
+                      "selection",
+                      "choices",
+                      "for",
+                      "the",
+                      "workspace",
+                      ""
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "◉"
+                        ]
+                      },
+                      "@valos/authority-spindle",
+                      "-",
+                      "Host",
+                      "a",
+                      "standalone",
+                      "authority",
+                      "using",
+                      "web-spindle",
+                      "route",
+                      "projectors"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "◉"
+                        ]
+                      },
+                      "@valos/web-spindle",
+                      "-",
+                      "Project",
+                      "http/s",
+                      "requests",
+                      "to",
+                      "valospace-fabric",
+                      "via",
+                      "a",
+                      "gateway",
+                      "plugin"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "◯"
+                        ]
+                      },
+                      "@valos/toolset-revealer",
+                      "-",
+                      "Run",
+                      "'vlm",
+                      "rouse-revealer'",
+                      "to",
+                      "serve",
+                      "local",
+                      "inspire",
+                      "sites",
+                      "with",
+                      "webpack-dev-server"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "◯"
+                        ]
+                      },
+                      "@valos/type-toolset",
+                      "-",
+                      "Make",
+                      "current",
+                      "workspace",
+                      "selectable",
+                      "as",
+                      "a",
+                      "toolset",
+                      "for",
+                      "other",
+                      "workspaces"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            "Let's use the default URI for the actual authority URI. While the port\nand host should match the ones used by web-spindle, the hierarchy part\ncan be anything. ",
+            {
+              "VDoc:em": true,
+              "VDoc:content": [
+                "taur"
+              ]
+            },
+            " is only inferred from the package name.",
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "?"
+                        ]
+                      },
+                      "The",
+                      "authority",
+                      "valosp",
+                      "URI."
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          ""
+                        ]
+                      },
+                      "valosp://localhost:5443/taur/"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "?"
+                        ]
+                      },
+                      "Short",
+                      "description",
+                      "for",
+                      "the",
+                      "public",
+                      "authority",
+                      "config"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          ""
+                        ]
+                      },
+                      "Test",
+                      "authority"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "?"
+                        ]
+                      },
+                      "Pick",
+                      "tools",
+                      "selection",
+                      "choices",
+                      "for",
+                      "the",
+                      "toolset",
+                      "'@valos/authority-spindle'"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "◉"
+                        ]
+                      },
+                      "copy-template-files"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "key"
+                        ]
+                      },
+                      "|value"
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "-------|-----"
+                        ]
+                      }
+                    ],
+                    "VDoc:context": ""
+                  }
+                ],
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          "success|true"
+                        ]
+                      },
+                      ""
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          ""
+                        ]
+                      }
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          ""
+                        ]
+                      }
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            },
+            {
+              "@type": "VRevdoc:CommandLineInteraction",
+              "VDoc:lines": [
+                [
+                  {
+                    "@type": "VRevdoc:Invokation",
+                    "VDoc:words": [
+                      {
+                        "@type": "VRevdoc:Command",
+                        "VDoc:content": [
+                          ""
+                        ]
+                      }
+                    ],
+                    "VDoc:context": ""
+                  }
+                ]
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "@type": "VRevdoc:Document",
+    "VDoc:content": [
+      {
+        "@id": "abstract"
+      },
+      {
+        "@id": "sotd"
+      },
+      {
+        "@id": "introduction"
+      },
+      {
+        "@id": "section_setup"
+      }
+    ]
+  }
+]

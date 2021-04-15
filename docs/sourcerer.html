@@ -32,6 +32,56 @@ of the ValOS sourcerer architecture which is used to route <em>ValOS event strea
   <section id="introduction" class="vdoc type-vdoc-chapter">
   </section>
 
+  <section id="section_valosp" class="vdoc type-vdoc-chapter">
+    <h3><a aria-label="§" href="#section_valosp">§ </a>The ValOS protocol: &#x27;valosp:&#x27;</h3>
+<div><p>
+  <div class="vdoc type-vdoc-paragraph">valosp: scheme specifies remote chronicle sourcery as a combination of
+four primary https operations:
+    <ul>
+      <li>narrate events via GET</li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph">proclaim commands via PUT (single command) and POST (multi-command)
+  </div>
+</p></div></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph">bvob upload via multipart POST
+  </div>
+</p></div></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph">bvob download via GET
+  </div>
+</p></div></li>
+    </ul>
+A valid <em>valosp:</em> authority URI has no query or fragment
+parts and its hierarchy part (which can be arbitrarily deep) must
+terminate to &#x27;/&#x27;, (f.ex.:<em>valosp://localhost:5443/deep/taur/</em>).
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">Given an authority URI, a chronicle URI is an immediate sub-path with
+chronicle id <a href="@valos/vplot#route-vplot" class="vdoc type-vdoc-reference">route-vplot</a> as
+the step, f.ex.:<em>valosp://localhost:5443/deep/taur/~raw!example-chronicle/</em>
+  </div>
+</p></div><div><p>
+  <div class="vdoc type-vdoc-paragraph">The primary operations of the chronicle are sub-paths of the chronicle
+URI. These operations are grouped into three different route signatures
+(assuming authority URI sans terminating &#x22;/&#x22; as base):
+    <ul>
+      <li><em>/:chroniclePlot/-log!:eventIndex/</em> GET, PUT, OPTIONS: single-event, restful application/json single object operations</li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph"><em>/:chroniclePlot/-log{&#x27;!:startIndex}{&#x27;!:endIndex}</em> GET, POST, OPTIONS: multi-event, application/json array operations. Note no terminating &#x22;/&#x22;
+  </div>
+</p></div></li>
+      <li><div><p>
+  <div class="vdoc type-vdoc-paragraph"><em>/:chroniclePlot/~bvob!:contentHash/</em> GET, POST, OPTIONS: bvob operations, with application/octet-stream download and<a href="https://tools.ietf.org/html/rfc1867" class="vdoc type-vdoc-reference">multipart/form-data upload as per rfc1887</a>
+  </div>
+</p></div></li>
+    </ul>
+The event objects are version &#x22;0.3&#x22; events with the delta aspect as
+their root aspect.
+  </div>
+</p></div>
+  </section>
+
   <section id="section_valospace" class="vdoc type-vdoc-chapter">
     <h3><a aria-label="§" href="#section_valospace">§ </a>The <em>VSourcerer</em> valospace namespace of the library ontology of <em>@valos/sourcerer</em></h3>
 <div><p>

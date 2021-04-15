@@ -49,6 +49,40 @@ em("ValOS event streams"), `.`,
   "chapter#introduction>2": {
     "#0": [],
   },
+  "chapter#section_valosp>3;The ValOS protocol: 'valosp:'": {
+    "#0": [
+`valosp: scheme specifies remote chronicle sourcery as a combination of
+four primary https operations:`,
+      { "bulleted#": [
+[`narrate events via GET`],
+[`proclaim commands via PUT (single command) and POST (multi-command)`],
+[`bvob upload via multipart POST`],
+[`bvob download via GET`],
+      ] },
+`A valid `, em("valosp:"), ` authority URI has no query or fragment
+parts and its hierarchy part (which can be arbitrarily deep) must
+terminate to '/', (f.ex.:`, em("valosp://localhost:5443/deep/taur/"), `).`,
+null,
+`Given an authority URI, a chronicle URI is an immediate sub-path with
+chronicle id `, ref("route-vplot", "@valos/vplot#route-vplot"), ` as
+the step, f.ex.:`, em("valosp://localhost:5443/deep/taur/~raw!example-chronicle/"),
+null,
+`The primary operations of the chronicle are sub-paths of the chronicle
+URI. These operations are grouped into three different route signatures
+(assuming authority URI sans terminating "/" as base):`,
+      { "bulleted#": [
+[em("/:chroniclePlot/-log!:eventIndex/"),
+  ` GET, PUT, OPTIONS: single-event, restful application/json single object operations`],
+[em("/:chroniclePlot/-log{'!:startIndex}{'!:endIndex}"),
+  ` GET, POST, OPTIONS: multi-event, application/json array operations. Note no terminating "/"`],
+[em("/:chroniclePlot/~bvob!:contentHash/"),
+  ` GET, POST, OPTIONS: bvob operations, with application/octet-stream download and`,
+    ref("multipart/form-data upload as per rfc1887", "https://tools.ietf.org/html/rfc1867")],
+      ] },
+`The event objects are version "0.3" events with the delta aspect as
+their root aspect.`,
+    ],
+  },
   "chapter#section_valospace>8": {
     "dc:title": [
       "The ", em(preferredPrefix), " valospace namespace of the library ontology of ", em(name),

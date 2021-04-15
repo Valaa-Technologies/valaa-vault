@@ -157,6 +157,140 @@
       "@type": "VDoc:Chapter",
       "VDoc:content": []
     },
+    "section_valosp": {
+      "@id": "section_valosp",
+      "dc:title": "The ValOS protocol: 'valosp:'",
+      "@type": "VDoc:Chapter",
+      "VDoc:content": [
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "valosp: scheme specifies remote chronicle sourcery as a combination of\nfour primary https operations:",
+            {
+              "VDoc:content": [
+                {
+                  "@type": "VDoc:BulletList",
+                  "VDoc:lines": [
+                    [
+                      "narrate events via GET"
+                    ],
+                    {
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
+                        "proclaim commands via PUT (single command) and POST (multi-command)"
+                      ]
+                    },
+                    {
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
+                        "bvob upload via multipart POST"
+                      ]
+                    },
+                    {
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
+                        "bvob download via GET"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "A valid ",
+            {
+              "VDoc:em": true,
+              "VDoc:content": [
+                "valosp:"
+              ]
+            },
+            " authority URI has no query or fragment\nparts and its hierarchy part (which can be arbitrarily deep) must\nterminate to '/', (f.ex.:",
+            {
+              "VDoc:em": true,
+              "VDoc:content": [
+                "valosp://localhost:5443/deep/taur/"
+              ]
+            },
+            ")."
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "Given an authority URI, a chronicle URI is an immediate sub-path with\nchronicle id ",
+            {
+              "@type": "VDoc:Reference",
+              "VDoc:content": [
+                "route-vplot"
+              ],
+              "VDoc:ref": "@valos/vplot#route-vplot"
+            },
+            " as\nthe step, f.ex.:",
+            {
+              "VDoc:em": true,
+              "VDoc:content": [
+                "valosp://localhost:5443/deep/taur/~raw!example-chronicle/"
+              ]
+            }
+          ]
+        },
+        {
+          "@type": "VDoc:Paragraph",
+          "VDoc:content": [
+            "The primary operations of the chronicle are sub-paths of the chronicle\nURI. These operations are grouped into three different route signatures\n(assuming authority URI sans terminating \"/\" as base):",
+            {
+              "VDoc:content": [
+                {
+                  "@type": "VDoc:BulletList",
+                  "VDoc:lines": [
+                    [
+                      {
+                        "VDoc:em": true,
+                        "VDoc:content": [
+                          "/:chroniclePlot/-log!:eventIndex/"
+                        ]
+                      },
+                      " GET, PUT, OPTIONS: single-event, restful application/json single object operations"
+                    ],
+                    {
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
+                        {
+                          "VDoc:em": true,
+                          "VDoc:content": [
+                            "/:chroniclePlot/-log{'!:startIndex}{'!:endIndex}"
+                          ]
+                        },
+                        " GET, POST, OPTIONS: multi-event, application/json array operations. Note no terminating \"/\""
+                      ]
+                    },
+                    {
+                      "@type": "VDoc:Paragraph",
+                      "VDoc:content": [
+                        {
+                          "VDoc:em": true,
+                          "VDoc:content": [
+                            "/:chroniclePlot/~bvob!:contentHash/"
+                          ]
+                        },
+                        " GET, POST, OPTIONS: bvob operations, with application/octet-stream download and",
+                        {
+                          "@type": "VDoc:Reference",
+                          "VDoc:content": [
+                            "multipart/form-data upload as per rfc1887"
+                          ],
+                          "VDoc:ref": "https://tools.ietf.org/html/rfc1867"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "The event objects are version \"0.3\" events with the delta aspect as\ntheir root aspect."
+          ]
+        }
+      ]
+    },
     "section_valospace": {
       "@id": "section_valospace",
       "@type": "VDoc:Chapter",
@@ -1653,6 +1787,9 @@
       },
       {
         "@id": "introduction"
+      },
+      {
+        "@id": "section_valosp"
       },
       {
         "@id": "section_valospace"

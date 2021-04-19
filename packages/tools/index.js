@@ -28,6 +28,9 @@ export const dumpify = require("./dumpify").default;
 
 export const immutate = require("./immutate").default;
 
+export const createImmutateableSet = require("./immutateableSet").createImmutateableSet;
+export const isImmutateableSet = require("./immutateableSet").isImmutateableSet;
+
 export const invariantify = require("./invariantify").default;
 export const invariantifyArray = require("./invariantify").invariantifyArray;
 export const invariantifyBoolean = require("./invariantify").invariantifyBoolean;

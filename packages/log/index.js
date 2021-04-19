@@ -162,6 +162,9 @@ function _patchStateResource (mutableTarget, delta, key, parentTarget, deltaKey)
   } else {
     if (delta["&-"]) _processProperties(this, mutableTarget, delta["&-"], true);
     _processProperties(this, mutableTarget, delta);
+    console.log("Processing resource:", this.originPlot.join("/"), deltaKey,
+        "\n\troot", this.originPlot[0], ":", this.mutableRootResources[this.originPlot[0]],
+        "\n\tdelta:", delta);
     if (delta["&_"]) {
       if (this.originPlot.length !== 1) {
         throw new Error(
@@ -245,7 +248,10 @@ function _processSubResourcesDelta (stack, resourcesDelta, originParentSubs) {
 }
 
 function _processProperties (stack, mutableResource, propertiesDelta, isRemoval) {
+  console.log("processing properties:", propertiesDelta,
+      "\n\tof resource:", mutableResource);
   for (const [name, deltaValue] of Object.entries(propertiesDelta)) {
+    console.log("processing property:", name, deltaValue);
     let patcher = (isRemoval ? _nodeTermRemovers : _nodeTermUpserters)[name];
     let expandedName = name;
     if (patcher === undefined) {

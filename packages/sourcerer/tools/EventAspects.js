@@ -1,9 +1,5 @@
 // @flow
 
-import { EventBase } from "~/raem/events";
-
-type HashV240 = string;
-
 // Event Aspects
 
 // Event aspects provides shared types and idioms for conveniently but
@@ -20,7 +16,7 @@ type HashV240 = string;
 //
 // EventAspects also introduces an idiom of promoting one of these
 // aspects to be the root object for the message in a specific context:
-// 1. reducers inside Corpus promote Event aspect as the root, so that
+// 1. reducers inside Corpus promote DeltaAspect as the root, so that
 //    root.type, root.actions etc. are directly available.
 // 2. IndexedDB storage promotes Log aspect as the root so that
 //    root.index can be used the key and root.timeStamp is directly
@@ -43,16 +39,6 @@ type HashV240 = string;
 // newRoot.aspects = root.aspects;
 // delete root.aspects; // The 'aspects' must be only available from the current root.
 // ```
-
-export default class EventAspects {
-  version: string;
-
-  event: ?EventBase;
-  command: ?CommandAspect;
-  log: ?LogAspect;
-  envelope: ?EnvelopeAspect;
-  buffer: ?BufferAspect;
-}
 
 export function initializeAspects (root, newAspects = {}) {
   if (root.aspects) Object.assign(root.aspects, newAspects);
@@ -101,80 +87,3 @@ export function swapAspectRoot (newRootAspectName: string, currentRoot: Object,
   return newRoot;
 }
 
-class BufferAspect {
-  // JSON.stringify(aspect.event)
-  event: ?ArrayBuffer;
-
-  // JSON.stringify(aspect.command)
-  command: ?ArrayBuffer;
-
-  // JSON.stringify(aspect.chain)
-  log: ?ArrayBuffer;
-
-  // JSON.stringify(aspect.envelope)
-  envelope: ?ArrayBuffer;
-
-  // Contains the other aspects. Only present if this aspect is the root aspect.
-  aspects: ?EventAspects;
-}
-
-class CommandAspect {
-  // Command identifier
-  // uuidv4 || hashV240(`${aspect.command.idCertId} ${aspect.command.idSalt}`)
-  // HashV240 is required for all signed and/or multi-chronicle events.
-  // uuid or HashV240 is required for all events which create resources.
-  id: number | string | HashV240;
-
-  // Certificate id of a certificate that has been registered to this
-  // event log and hasn't been revoked which used as the derivation
-  // base of the command.id and optionally for signing the command.
-  idCertId: ?string;
-
-  // A monotonously increasing number (per idCertId in the the targeted
-  // event log)
-  // Required for signed events
-  idSalt: ?number;
-
-  // hashV240(aspect.buffer.event)
-  // Required for signed and multi-chronicle events
-  eventHash: ?HashV240;
-
-  // map of all other chronicles and their particular event hashes
-  // of a multi-chronicle command with the same aspects.command.id.
-  // Required for multi-chronicle events.
-  chronicles: ?{ [chronicleURI: string]: HashV240 };
-
-  // Contains the other aspects. Only present if this aspect is the root aspect.
-  aspects: ?EventAspects;
-}
-
-class LogAspect {
-  // Index of the command in the event log.
-  index: number;
-
-  // Unix epoch milliseconds as an integer.
-  timeStamp: number;
-
-  // hashV240(aspect.buffer.command)
-  commandHash: HashV240;
-
-  // sign(getPrivateCertificate(aspect.command.idCertId), aspect.chain.commandHash)
-  commandSignature: ?string;
-
-  // hashV240(`{aspect.command.eventHash} ${aspect.chain.timeStamp} ${
-  //     aspect.chain.commandSignature} ${previousEventInChain.aspect.chain.vplotHashV0}`)
-  vplotHashV0: HashV240;
-
-  // Contains the other aspects. Only present if this aspect is the root aspect.
-  aspects: ?EventAspects;
-}
-
-class EnvelopeAspect {
-  newResourceIds: ?string[];
-  prevCommandId: ?string;
-  reorder: ?Object;
-  commandSignature: ?string; // sign(privateCert, aspect.buffer.command)
-
-  // Contains the other aspects. Only present if this aspect is the root aspect.
-  aspects: ?EventAspects;
-}

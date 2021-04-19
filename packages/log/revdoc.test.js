@@ -15,6 +15,36 @@ let state = createVState();
 
 /* eslint-disable quote-props */
 
+const obj = {
+  "&+": {
+    "0": { ".n": "parent", "V:authorityURI": "valaa-local:", "~E": ["1", "2"] },
+    "1": { ".E~": "0", ".n": "older", "toOutside": { "@id": "5" }, "~R": ["3"] },
+    "2": { ".E~": "0", ".n": "unger", "toOlder": { "@id": "1" }, "~R": ["4"] },
+    "8": {
+      "@context": { "@base": "8/" },
+      ".iOf": "_:0", ".E~": "_:0", ".n": "inceptor",
+      "&+": {
+        "1": { ".gOf": "_:1", ".n": "olderGhost" },
+        "2": { ".gOf": "_:2", ".n": "ungerGhost" },
+        "3": { ".gOf": "_:3", ".n": "toNephewOldceptGhost", ".tgt": "_:8/8/1" },
+        "4": { ".gOf": "_:4", ".n": "toNephewUngceptGhost", ".tgt": "_:8/8/2" },
+        "8": {
+          "@context": { "@base": "8/" },
+          ".gOf": "_:8", ".n": "firstInception",
+          "&+": {
+            "1": { ".gOf": "_:8/1", ".n": "oldceptGhost" },
+            "2": { ".gOf": "_:8/2", ".n": "ungceptGhost" }
+          }
+        }
+      }
+    }
+  },
+  "/-": {
+    "3": { ".src~": "1", ".n": "SIBLING", ".tgt": "2" },
+    "4": { ".src~": "2", ".n": "SIBLING", ".tgt": "1" }
+  }
+};
+
 module.exports = {
   "dc:title": title,
   respecConfig: {

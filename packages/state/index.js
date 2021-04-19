@@ -1,3 +1,5 @@
+const { isImmutateableSet } = require("@valos/tools");
+
 const baseStateContextText = `{
   "^": "urn:valos:",
   "@base": "urn:valos:chronicle:",
@@ -108,7 +110,9 @@ function createVState (references = []) {
 
 function _flattenToJSON (object) {
   if (typeof object !== "object" || (object == null)) return object;
-  if (Array.isArray(object)) return object.map(_flattenToJSON);
+  if (Array.isArray(object) || isImmutateableSet(object)) {
+    return object.map(_flattenToJSON);
+  }
   const ret = {};
   let removals;
   // eslint-disable-next-line guard-for-in

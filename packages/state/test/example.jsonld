@@ -1,0 +1,18 @@
+[{
+  "@context": [{
+
+  }, {
+    "$pot": "https://oftrust/#",
+    "$pot_hypertwin": "https://pot.hypertwin.valospace.org/#",
+  }, {
+    "^a-0": "valaa-test:",
+    "^a-0-c": "^a-0:?id=@",
+    "^c-0": "^a-0-c:$~raw.testlane@_$~plt.@.$pot:@.O.:building1id@@@@@@",
+    "^hyperlane": "^c-0:#@$~raw.testlane@_$~plt.@.$pot:@.O.:building1id@@@@@",
+    "^thistwinroot": "^hyperlane:@_$~plt.@.$pot:@.O.:building1id@@@@@",
+    "^user1": "^hyperlane:@_$~plt.@.$pot:@.O.:user1-hyperprime-id@@@@@",
+    "^user2": "^hyperlane:@_$~plt.@.$pot:@.O.:user2-hyperprime-id@@@@@"
+  }],
+  "@id": "^c-0:",
+
+}]

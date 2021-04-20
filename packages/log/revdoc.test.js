@@ -6,7 +6,7 @@ const {
 } = require("@valos/revdoc");
 
 const { baseStateContext, baseStateContextText, createVState } = require("@valos/state");
-const { applyVLogDelta } = require("@valos/log");
+const { applyVLogDeltaToState } = require("@valos/log");
 
 const title = "VLog format specification";
 const { itExpects, runTestDoc } = prepareTestDoc(title);
@@ -155,7 +155,7 @@ assigned a blank node '_:0' that corresponds to id context entry URN.`,
     ],
     "example#>1": itExpects(
         "creates chronicle root entity",
-() => JSON.parse(JSON.stringify(state = applyVLogDelta(state, {
+() => JSON.parse(JSON.stringify(state = applyVLogDeltaToState(state, {
   "@context": [{
     "0": "~u4:cccccccc-6600-2211-cc77-333333333333"
   }],
@@ -205,7 +205,7 @@ chronicles must refer to their stable origin.
     ],
     "example#>2": itExpects(
         "delta application to harmonize refs to appropriate stable origin refs",
-() => JSON.parse(JSON.stringify(state = applyVLogDelta(state,
+() => JSON.parse(JSON.stringify(state = applyVLogDeltaToState(state,
 {
   "@context": [{
     "1": "~u4:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
@@ -272,7 +272,7 @@ in a different chronicle!).
 `],
     "example#>3": itExpects(
         "instances a resource with ghosts",
-() => JSON.parse(JSON.stringify(state = applyVLogDelta(state,
+() => JSON.parse(JSON.stringify(state = applyVLogDeltaToState(state,
 {
   "@context": [{
     "6": "~u4:11111111-2255-7744-22cc-eeeeeeeeeeee",
@@ -378,7 +378,7 @@ however: the delta application will perform this reference normalization.
 `],
     "example#>4": itExpects(
         "complex vplot relative references to be normalized",
-() => JSON.parse(JSON.stringify(state = applyVLogDelta(state,
+() => JSON.parse(JSON.stringify(state = applyVLogDeltaToState(state,
 {
   "@context": [{
     "9": "~u4:77777777-1111-eeee-3333-555555555555",
@@ -484,7 +484,7 @@ view container properties.
 `],
     "example#>5": itExpects(
         "resource deletions to be persisted in state",
-() => JSON.parse(JSON.stringify(state = applyVLogDelta(state,
+() => JSON.parse(JSON.stringify(state = applyVLogDeltaToState(state,
 {
   "@context": [{}],
   "&~": {

@@ -55,7 +55,7 @@ const baseStateContext = Object.freeze(Object.assign(Object.create(null),
     JSON.parse(baseStateContextText)));
 
 const referenceLookupTag = Symbol("VLog:referenceLookup");
-const referenceArrayTag = Symbol("VLog:referenceArray");
+const RefIndexTag = Symbol("VLog:referenceArray");
 
 module.exports = {
   baseStateContext,
@@ -63,7 +63,7 @@ module.exports = {
   createVState,
   mutateVState,
   referenceLookupTag,
-  referenceArrayTag,
+  RefIndexTag,
   lookupReference,
   obtainReferenceEntry,
 };
@@ -73,7 +73,7 @@ function createVState (references = []) {
   const _referenceLookup = {};
 
   const vstate = { "&^": Object.create(null) };
-  Object.defineProperty(vstate, referenceArrayTag, {
+  Object.defineProperty(vstate, RefIndexTag, {
     writable: true, configurable: false, enumerable: false,
     value: _referenceArray,
   });
@@ -137,7 +137,7 @@ function _flattenToJSON (object) {
 }
 
 function mutateVState (state) {
-  const ret = createVState(state[referenceArrayTag]);
+  const ret = createVState(state[RefIndexTag]);
   for (const key of Object.keys(state)) {
     if (key === "@context") continue;
     ret[key] = Object.create(state[key]);
@@ -146,14 +146,14 @@ function mutateVState (state) {
 }
 
 function lookupReference (state, index) {
-  return state[referenceArrayTag][index];
+  return state[RefIndexTag][index];
 }
 
 function obtainReferenceEntry (state, reference) {
   const lookup = state[referenceLookupTag];
   let ret = lookup[reference];
   if (!ret) {
-    const array = state[referenceArrayTag];
+    const array = state[RefIndexTag];
     array.push(reference);
     ret = lookup[reference] = [array.length, reference];
   }

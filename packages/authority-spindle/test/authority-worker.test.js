@@ -112,7 +112,7 @@ describe("Authority spindle worker", () => {
       "@context": [{
         0: `~cro:${croHash40}`,
       }],
-      "&^": {
+      "&~": {
         "": { ".n": "new thing", "V:authorityURI": _testAuthorityURI, value: 15 },
       },
       aspects: {
@@ -189,7 +189,7 @@ describe("Authority spindle worker", () => {
         1: "~cih:51ZYWV6CgKK2-zBeDH8H_UUzbyjaq5-6Pv739d_t",
         2: `~bvob:${bvobHash}`,
       }],
-      "&^": {
+      "&~": {
         "1/": {
           ".M~": "0/", ".n": "foo.txt", ".c": "2/",
           "V:mediaType": { type: "text", subtype: "plain" },

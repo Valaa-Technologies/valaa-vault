@@ -7,6 +7,7 @@ const baseStateContextText = `[{
 
   "&": "@id",
   "&/": { "@id": "@graph", "@container": "@id" },
+  "&t": "@type",
   "V": "https://valospace.org/0#",
   "VLog": "https://valospace.org/log/0#",
   "VState": "https://valospace.org/state/0#",
@@ -51,15 +52,14 @@ const baseStateContextText = `[{
 
   "VSourcerer": "https://valospace.org/sourcerer/0#",
 
-  "~u4": "urn:valos:u4:"
-}`;
 
-const baseStateContext = Object.freeze(Object.assign(Object.create(null),
-    JSON.parse(baseStateContextText)));
+  "~u4": "urn:valos:u4:",
+  "~raw": "urn:valos:raw:"
 }, {
   "state": { "@container": "@id" },
 }]`;
 
+const baseStateContext = Object.freeze(JSON.parse(baseStateContextText));
 
 const indexFromIRITag = Symbol("VState:indexFromIRI");
 const iriLookupTag = Symbol("VState:iriLookup");

@@ -82,7 +82,7 @@ const _nodeTermUpserters = {
   "@context": null,
   "&/": null,
   "!/": null,
-  "&-": null,
+  "!--": null,
   "~P": _patchRejectForbiddenDirectManipulation,
   "~E": _patchRejectForbiddenDirectManipulation,
   "~R": _patchRejectForbiddenDirectManipulation,
@@ -97,7 +97,7 @@ const _nodeTermRemovers = {
   "@context": null,
   "&/": null,
   "!/": null,
-  "&-": null,
+  "!--": _patchRejectForbiddenDirectManipulation,
 };
 
 const _namespaceTermUpserters = {

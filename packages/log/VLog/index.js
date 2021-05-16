@@ -59,6 +59,14 @@ proclamation lifecycle.`,
       "rdfs:comment":
 `VLog delta thing`,
     },
+    removalSubGraph: {
+      "@type": "VKernel:Property",
+      "rdfs:domain": "rdfs:Resource",
+      "rdfs:range": "rdfs:Resource",
+      restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
+      "rdfs:comment":
+`VLog delta thing`,
+    },
     indirectSubGraph: {
       "@type": "VKernel:Property",
       "rdfs:domain": "rdfs:Resource",

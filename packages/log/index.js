@@ -6,6 +6,7 @@ module.exports = {
   baseLogContext: [
     ...baseStateContext, {
       "!~": { "@id": "VLog:logicalOwner", "@type": "@id" },
+      "!--": { "@id": "VLog:removalSubGraph", "@container": "@graph" },
       "!/": { "@id": "VLog:indirectSubGraph", "@container": ["@graph", "@index"] },
     },
   ],

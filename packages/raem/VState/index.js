@@ -223,5 +223,10 @@ term is a sub-graph IRI, the quad graph term is the parent graph IRI
 and the object term is a name IRI that identifies the sub-graph within
 the scope of the parent graph.`,
     },
+    removalsGraph: {
+      "@type": "rdfs:Resource",
+      "rdfs:comment":
+`Constant name for a removals sub-graph.`,
+    },
   },
 };

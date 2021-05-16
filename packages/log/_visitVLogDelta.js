@@ -1,11 +1,14 @@
 
 const { wrapError } = require("@valos/tools");
 
+const removalGraphNameSymbol = Symbol("VLog:removalGraphName");
+
 module.exports = {
   visitVLogDelta,
   relativePlotFromDeltaRef,
   relativePlotFromAbsolute,
   absolutePlotFromRelative,
+  removalGraphNameSymbol,
 };
 
 function visitVLogDelta (delta, stack) {
@@ -83,8 +86,8 @@ function _visitDeltaResource (stack, delta, deltaKey, mutableTarget
   if (delta["@context"]) {
     throw new Error("@context not allowed for log deltas");
   }
-  if (delta["&-"]) {
-    _visitProperties(stack, mutableTarget, delta["&-"], stack.removalVisitors);
+  if (delta["!--"]) {
+    _visitProperties(stack, mutableTarget, delta["!--"], stack.removalVisitors);
   }
   _visitProperties(stack, mutableTarget, delta, stack.upsertVisitors);
   const subGraph = delta["&/"] || delta["!/"];

@@ -538,23 +538,45 @@ however: the delta application will perform this reference normalization.
 }),
     ),
     "#5": [`
-Resource deletion is done by adding the removed triples to the removal
-graphs via `, ref("VState:removes"), ` term "&-".
+Deletions are done by adding the removed triples under a delta-term
+"!--" inside the affected resource delta object. This term is syntactic
+sugar that is expanded during delta application to a more complex
+JSON-LD construct that expresses a removal graph. This removal graph
+has an id based on the resource plot and  contains the removed triples.
 
-Triple removals from various container properties are persisted in the
-state in any resources that can be view images, as these removals are
-then continuously applied to a the possible corresponding inherited
-view container properties.
+Some removed triples with their removal graph are semantically
+persisted in the state. This is useful for projection views which infer
+virtual triple sets and/or lists from their projection origin: such
+inferred triples cannot be normally removed from the projection view as
+they don't concretely exist. A persisted removal graph that is attached
+to the projection view makes it possible to prevent the inference of
+selected triples efficiently and in a way that allows tracking any
+other changes to the origin set.
+
+Note: removal of singular values, ie. of triples with predicates that
+have cardinality constraint of 1 are not persisted in removal graphs.
 `],
-    "example#>5": itExpects(
+    "example#>5": itExpects(null,
         "resource deletions to be persisted in state",
 () => JSON.parse(JSON.stringify(state = applyVLogDeltaToState(state,
 {
   "&/": {
-      "9/4/": { "&-": { ".tgt": "9/9/2/" } },
-      "9/9/": { "&-": { "&_": ["9/9/2/"], "~E": ["9/9/2/"] } },
-    }, },
+    "5:": { "!~": "4/",
+      "!--": { ".n": "SIBLING" }, // Remove name
+    },
     "11:": { "!~": "",
+      "&/": {
+        "6:": {
+          "!--": { ".tgt": "11/11/3/" } // Remove overridden target to expose original 6: target
+        },
+        "11:": {
+          "!--": {              // Perform a full removal of "11/11/4" by two unconnected operations
+            "~E": ["11/11/4/"], // 1. Remove the virtual child entity from ownsEntity set
+            "&/": ["11/11/4/"]  // 2. Also, remove all concretely overridden triples of 11/11/4/
+          }
+        },
+      }
+    }
   },
 }))),
         "toMatchObject",
@@ -587,9 +609,11 @@ view container properties.
       "-out": ["6:"], "-in": ["5:"], "-hasI": ["8:"],
       "toOlder": { "@id": "3:" }, "absolutelyOlder": { "@id": "^:/1/3/" }
     },
+    "5:": { ".tgt~": "4:",
+      // ".n": "SIBLING", // removed but as singular not persisted in a removal graph
+      ".src": "3:", "~E": ["10:"]
     },
     "6:": { ".src~": "4:", ".n": "SIBLING", ".tgt": "3:" },
-    "3/": { ".tgt~": "2/", ".n": "SIBLING", ".src": "1/", "~E": ["8/"] },
     "8:": { ".E~": "0:", ".n": "ungerInstance",
       ".iOf": "4:", "-hasI": ["9:"],
       "&/": { // first-order sub-graph "8:"
@@ -613,20 +637,27 @@ view container properties.
     },
     "10:": { ".E~": "5:", ".n": "deeplyOwned" },
     "11:": { ".E~": "0:", ".n": "inceptor", ".iOf": "0:",
+      "&/": { // first-order sub-graph "11:"
+        "3:": { ".n": "olderGhost" },
+        "4:": { ".n": "ungerGhost" },
+        "5:": { ".n": "fromNephewOldceptGhost", ".src": "11/11/3/" },
+        "6:": { ".n": "toNephewUngceptGhost"
+          // ".trg": "11/11/3", // removed but as singular not added to remove graph
+        },
+        "11:": { ".n": "firstInception" },
+        "11/11/": { ".ng": "11:", "&/": { // second-order sub-graph "11/11/"
+          ".-/": { ".ng": ".-:", "&/": { // third-order sub-graph "11/11/.-/"
+            "~E": ["11/4/"] // remove graph entry for virtual ownsEntity 11/11/4/
+          } },
+          "3:": {
+            ".n": "oldceptGhost", "-out": ["5/"]
+            // "-in": ["6/"] // removed via coupled property; not added to remove graph
+          }
+          // "4:": { ".n": "ungceptGhost" } // completely removed and added to remove graph
+        } }
       }
     },
 
-        "1/": { ".n": "olderGhost" },
-        "2/": { ".n": "ungerGhost" },
-        "3/": { ".n": "toNephewOldceptGhost", ".tgt": "9/1/" },
-        "4/": { ".n": "toNephewUngceptGhost" },
-        "9/": [{
-          ".n": "firstInception",
-          "&-": { "~E": ["9/2/"] },
-        }, {
-          "@context": { "@base": "9/" },
-          "&_": {
-            "1/": { ".n": "oldceptGhost", "-in": ["../3/"] }
           }
         }],
       }

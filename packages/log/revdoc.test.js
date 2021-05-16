@@ -15,43 +15,13 @@ let state = createVState();
 
 /* eslint-disable quote-props */
 
-const obj = {
-  "&+": {
-    "0": { ".n": "parent", "V:authorityURI": "valaa-local:", "~E": ["1", "2"] },
-    "1": { ".E~": "0", ".n": "older", "toOutside": { "@id": "5" }, "~R": ["3"] },
-    "2": { ".E~": "0", ".n": "unger", "toOlder": { "@id": "1" }, "~R": ["4"] },
-    "8": {
-      "@context": { "@base": "8/" },
-      ".iOf": "_:0", ".E~": "_:0", ".n": "inceptor",
-      "&+": {
-        "1": { ".gOf": "_:1", ".n": "olderGhost" },
-        "2": { ".gOf": "_:2", ".n": "ungerGhost" },
-        "3": { ".gOf": "_:3", ".n": "toNephewOldceptGhost", ".tgt": "_:8/8/1" },
-        "4": { ".gOf": "_:4", ".n": "toNephewUngceptGhost", ".tgt": "_:8/8/2" },
-        "8": {
-          "@context": { "@base": "8/" },
-          ".gOf": "_:8", ".n": "firstInception",
-          "&+": {
-            "1": { ".gOf": "_:8/1", ".n": "oldceptGhost" },
-            "2": { ".gOf": "_:8/2", ".n": "ungceptGhost" }
-          }
-        }
-      }
-    }
-  },
-  "/-": {
-    "3": { ".src~": "1", ".n": "SIBLING", ".tgt": "2" },
-    "4": { ".src~": "2", ".n": "SIBLING", ".tgt": "1" }
-  }
-};
-
 module.exports = {
   "dc:title": title,
   respecConfig: {
     specStatus: "unofficial",
     editors: authors("iridian"),
     authors: authors("iridian"),
-    shortName: "vlog",
+    shortName: "VLog",
   },
 
   "chapter#abstract>0": {
@@ -100,7 +70,7 @@ wish-list:`,
   increasing vplot-name derived based on the chronicle id itself.`],
 [`Event graphs are thus disjoint when flattened.`],
 [`Reduction is the process of applying the events in succession from
-  the very beginning of the vlog and yields a snapshot vstate graph.`],
+  the very beginning of the VLog and yields a snapshot vstate graph.`],
 [`Reduction consists of validation, separation and update steps.`],
 [`Validation rejects heretical events. Separation removes event
   metadata and splits the remaining payload to separate update stages.
@@ -117,17 +87,17 @@ wish-list:`,
 [`Events must be valid and internally consistent JSON-LD even in
   isolation but they don't need to be semantically complete.`],
 [`Events need to be semantically complete when evaluated using the
-  accumulated parent context of all previous vlog events.`
+  accumulated parent context of all previous VLog events.`
   // Won't get semantical completeness. Hierarchical VPlot references
   // will be broken before the implicit local contexts are added.
   ],
 [`Cryptographical signing of event payloads by user signatures should
   be simple.`],
 [`Event creators can specify crypto-behaviors that add validateable
-  constraints to the future vlog operations.`],
+  constraints to the future VLog operations.`],
 [`Constraints can be used to limit the addition of new
   crypto-behaviors`],
-[`Reordering of events by vlog authorities should be possible whenever
+[`Reordering of events by VLog authorities should be possible whenever
   it can be proven that reordering doesn't change essential semantics`],
 [`Event creators can specify what is considered essential semantics by
   crypto-behaviors`],
@@ -148,30 +118,114 @@ as its input state.`
     ],
     "example#>0;Initial state @context": jsonld(baseStateContextText),
     "#1": [
-`The first vlog event always creates the chronicle root resource with
-an id equal to the vlog chronicle id itself. The id URN of the root
-resource is added into the context with key "0". The root resource is
-assigned a blank node '_:0' that corresponds to id context entry URN.`,
+`VLog events have a so-called "@context IRI index" which maps integer
+strings into IRI values. The first three indexes have special,
+restricted semantics.
+
+The IRI index "0" contains the chronicle id of the chronicle root
+resource in its vplot form: this resource shall be created by the first
+VLog event.
+
+The IRI index "1" contains the chronicle URI. This is constructed as
+per the rules of the authority scheme from the authority URI and
+chronicle id.
+
+The IRI index "2" contains the authority URI of the chronicle. This
+shall be set as the V:authorityURI value of the root resource. Keep in
+mind that the definition of a new chronicle is the creation of a global
+resource which has its V:authorityURI set (or its assignment to an
+existing global resource) and denotes the beginning of the event log.
+
+When the event delta is applied the state is updated as defined by the
+event delta. In addition to this the event itself may be preserved in
+the state. Various JSON-LD aware fields are also added to the state
+complete the RDF data model projection.
+`,
     ],
     "example#>1": itExpects(
         "creates chronicle root entity",
-() => JSON.parse(JSON.stringify(state = applyVLogDeltaToState(state, {
+() => JSON.parse(JSON.stringify(state = applyVLogDeltaToState(
+    state = createVState({ ontologies: { V, VLog, VState } }), {
   "@context": [{
-    "0": "~u4:cccccccc-6600-2211-cc77-333333333333"
+    "0": "~u4:cccccccc-6600-2211-cc77-333333333333/",
+    "1": "valos://localhost/~u4!cccccccc-6600-2211-cc77-333333333333/",
+    "2": "valos://localhost/"
   }],
-  "&~": { "": { ".n": "rootName", "V:authorityURI": "valaa-local:" } }
+  "&/": {
+    "0:": { ".n": "rootName", ".cURI": "1:", ".aURI": "2:",  }
+  },
+  "aspects": {
+    "log": { index: 0 },
+  },
 }))),
         "toMatchObject",
 () => ({
-  "@context": [baseStateContext, {
-    "0": "~u4:cccccccc-6600-2211-cc77-333333333333"
+  "@context": [...baseStateContext, {
+    "0": "~u4:cccccccc-6600-2211-cc77-333333333333/",
+    "1": "valos://localhost/~u4!cccccccc-6600-2211-cc77-333333333333/",
+    "2": "valos://localhost/"
   }],
-  "&^": {
-    "0/": { ".n": "rootName", "V:authorityURI": "valaa-local:" }
+  "state": {
+    "0:": { ".n": "rootName", ".cURI": "1:", ".aURI": "2:" },
+
+    // chronicle event introspection
+    "1:": {
+      "@context": {                    // base URI set to the chronicle URI ...
+        "@base": "valos://localhost/~u4!cccccccc-6600-2211-cc77-333333333333/"
+      },
+      "events": {
+        "-log!a0/": {                  // ... so that event graphs can be relative to it ...
+          "@context": [{
+            "@base": "-log!a0/",       // ... and their contents based on it
+          }, {
+            "0": "~u4:cccccccc-6600-2211-cc77-333333333333/",
+            "1": "valos://localhost/~u4!cccccccc-6600-2211-cc77-333333333333/",
+            "2": "valos://localhost/"
+          }],
+          ".ng": "-log:a0",            // event name added
+          "&t": "VState:DeltaAspect", // event type added
+          "&/": { "0:": { ".n": "rootName", ".cURI": "1:", ".aURI": "2:" } },
+          "aspects": {
+            "log": { index: 0 }
+          }
+        }
+      }
+    }
   }
 }),
     ),
     "#2": [
+`ValOS resources have singular owners and form a logical ownership tree
+hierarchy. This hierarchy determines various resource behaviors and
+lifetimes: effects and rules that affect an owner can often affect its
+children well.
+Some of these resources have a globally unique identifier which doesn't
+contain information about their ownership hierarchy. This allows their
+ownership to be freely changed.
+
+These global identifiers are stored in the IRI index. Deltas that
+modify these resources are identified simply by the <index>: -notation.
+
+However as the logical path is relevant for the resource behaviors it
+must be included as the value of the delta-term "!~" in all
+global resource delta objects.
+
+Note: unlike other terms, the "!"-prefixed terms (ie. apply-terms) are
+mutated or removed during delta application and don't have a persisted
+representation on their own.
+
+The logical plot is a "/"-separated and -terminated string where each
+step is an IRI index of resource. Each step owns the resource to its
+right. The first step with is implicitly always "0" (the chronicle root
+resource) is omitted.
+
+The logical plot must be equal to the ownership hierarchy of the
+resource as determined by the previous events and/or state. Event
+processors which can validate the logical plot must do so and reject
+invalid events. This allows processors (naive proxies, filters etc.)
+which cannot validate the logical plot to still rely on it for
+determining behaviors.
+  `,
 // TODO(iridian, 2021-03): Move this section to a proper location in
 // the @valos/state revdoc
 `VLog node objects have chronicle-local vplot identifiers. A local
@@ -208,14 +262,14 @@ chronicles must refer to their stable origin.
 () => JSON.parse(JSON.stringify(state = applyVLogDeltaToState(state,
 {
   "@context": [{
-    "1": "~u4:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
-    "2": "~u4:bbbbbbbb-bbbb-cccc-dddd-eeeeeeeeeeee",
-    "3": "~u4:abababab-bbbb-cccc-dddd-eeeeeeeeeeee",
-    "4": "~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee",
-    "5": "valaa-test:?id=(~raw'extl!)#"
+    "3": "~u4:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/",
+    "4": "~u4:bbbbbbbb-bbbb-cccc-dddd-eeeeeeeeeeee/",
+    "5": "~u4:abababab-bbbb-cccc-dddd-eeeeeeeeeeee/",
+    "6": "~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee/",
+    "7": "valaa-test:?id=(~raw'extl!)#"
   }],
-  "&~": {
-    "": { ".n": "newRootName" },
+  "&/": {
+    "0:": { ".n": "newRootName" },
     "1/": { ".E~": "0/", ".n": "older",
       "toOutside": { "@id": "5/" }, "absolutelyParent": { "@id": "/0/" },
     },
@@ -227,19 +281,21 @@ chronicles must refer to their stable origin.
   },
 }))),
         "toMatchObject",
-{
-  "@context": [baseStateContext, {
-    "0": "~u4:cccccccc-6600-2211-cc77-333333333333",
-    "1": "~u4:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
-    "2": "~u4:bbbbbbbb-bbbb-cccc-dddd-eeeeeeeeeeee",
-    "3": "~u4:abababab-bbbb-cccc-dddd-eeeeeeeeeeee",
-    "4": "~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee",
-    "5": "valaa-test:?id=(~raw'extl!)#"
+() => ({
+  "@context": [...baseStateContext, {
+    "0": "~u4:cccccccc-6600-2211-cc77-333333333333/",
+    "1": "valos://localhost/~u4!cccccccc-6600-2211-cc77-333333333333/",
+    "2": "valos://localhost/",
+    "3": "~u4:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/",
+    "4": "~u4:bbbbbbbb-bbbb-cccc-dddd-eeeeeeeeeeee/",
+    "5": "~u4:abababab-bbbb-cccc-dddd-eeeeeeeeeeee/",
+    "6": "~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee/",
+    "7": "valaa-test:?id=(~raw'extl!)#"
   }],
-  "&^": {
-    "0/": { ".n": "newRootName",
-      "V:authorityURI": "valaa-local:",
-      "~E": ["1/", "2/"],
+  "state": {
+    "0:": { ".n": "newRootName",
+      ".cURI": "1:", ".aURI": "2:",
+      "~E": ["3:", "4:"],
     },
     "1/": { ".E~": "0/", ".n": "older",
       "-out": ["3/"], "-in": ["4/"],
@@ -258,14 +314,14 @@ chronicles must refer to their stable origin.
     "#3": [`
 Ghost instancing with `, ref("V:instanceOf"), ` term ".iOf" and the
 recursive application of the `, ref("VState:subResources"),
-` term '&_' are the cornerstone of the unified valos resource model for
+` term '&/' are the cornerstone of the unified valos resource model for
 application development.
 
 Instancing dynamics primarily affects state inference and as such no
 additional functionality for deltas is necessary. It should be noted
 however that the logical image vplot of ghosts 'flattens' the stable
-origin vplot of its ghost prototype (See how resource "0/1/3/8" is
-ghosted as "0/6/8" and "0/7/8"). Instance views behave here similar to
+origin vplot of its ghost prototype (See how resource "0/3/5/10" is
+ghosted as "0/8/10" and "0/9/10"). Instance views behave here similar to
 external references: the ghost vplot cannot know the exact logical
 location of its prototype (not least because the prototype might be
 in a different chronicle!).
@@ -275,11 +331,11 @@ in a different chronicle!).
 () => JSON.parse(JSON.stringify(state = applyVLogDeltaToState(state,
 {
   "@context": [{
-    "6": "~u4:11111111-2255-7744-22cc-eeeeeeeeeeee",
-    "7": "~u4:22222222-2255-7744-22cc-eeeeeeeeeeee",
-    "8": "~u4:d336d336-9999-6666-0000-777700000000"
+    "8": "~u4:11111111-2255-7744-22cc-eeeeeeeeeeee/",
+    "9": "~u4:22222222-2255-7744-22cc-eeeeeeeeeeee/",
+    "10": "~u4:d336d336-9999-6666-0000-777700000000/"
   }],
-  "&~": {
+  "&/": {
     "2/3/8/": { ".E~": "3/", ".n": "deeplyOwned" },
     "6/": {
       ".E~": "0/", ".iOf": "2/", ".n": "ungerInstance",
@@ -304,21 +360,23 @@ in a different chronicle!).
 }))),
         "toMatchObject",
 () => ({
-  "@context": [baseStateContext, {
-    "0": "~u4:cccccccc-6600-2211-cc77-333333333333",
-    "1": "~u4:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
-    "2": "~u4:bbbbbbbb-bbbb-cccc-dddd-eeeeeeeeeeee",
-    "3": "~u4:abababab-bbbb-cccc-dddd-eeeeeeeeeeee",
-    "4": "~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee",
-    "5": "valaa-test:?id=(~raw'extl!)#",
-    "6": "~u4:11111111-2255-7744-22cc-eeeeeeeeeeee",
-    "7": "~u4:22222222-2255-7744-22cc-eeeeeeeeeeee",
-    "8": "~u4:d336d336-9999-6666-0000-777700000000"
+  "@context": [...baseStateContext, {
+    "0": "~u4:cccccccc-6600-2211-cc77-333333333333/",
+    "1": "valos://localhost/~u4!cccccccc-6600-2211-cc77-333333333333/",
+    "2": "valos://localhost/",
+    "3": "~u4:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/",
+    "4": "~u4:bbbbbbbb-bbbb-cccc-dddd-eeeeeeeeeeee/",
+    "5": "~u4:abababab-bbbb-cccc-dddd-eeeeeeeeeeee/",
+    "6": "~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee/",
+    "7": "valaa-test:?id=(~raw'extl!)#",
+    "8": "~u4:11111111-2255-7744-22cc-eeeeeeeeeeee/",
+    "9": "~u4:22222222-2255-7744-22cc-eeeeeeeeeeee/",
+    "10": "~u4:d336d336-9999-6666-0000-777700000000/"
   }],
-  "&^": {
-    "0/": { ".n": "newRootName",
-      "V:authorityURI": "valaa-local:",
-      "~E": ["1/", "2/", "6/", "7/"]
+  "state": {
+    "0:": { ".n": "newRootName",
+      ".cURI": "1:", ".aURI": "2:",
+      "~E": ["3:", "4:", "8:", "9:"]
     },
     "1/": { ".E~": "0/", ".n": "older",
       "-out": ["3/"], "-in": ["4/"],
@@ -381,9 +439,9 @@ however: the delta application will perform this reference normalization.
 () => JSON.parse(JSON.stringify(state = applyVLogDeltaToState(state,
 {
   "@context": [{
-    "9": "~u4:77777777-1111-eeee-3333-555555555555",
+    "11": "~u4:77777777-1111-eeee-3333-555555555555/",
   }],
-  "&~": {
+  "&/": {
     "9/": {
       ".E~": "0/", ".n": "inceptor", ".iOf": "0/",
       "&_": {
@@ -400,19 +458,21 @@ however: the delta application will perform this reference normalization.
 }))),
         "toMatchObject",
 () => ({
-  "@context": [baseStateContext, {
-    "0": "~u4:cccccccc-6600-2211-cc77-333333333333",
-    "1": "~u4:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
-    "2": "~u4:bbbbbbbb-bbbb-cccc-dddd-eeeeeeeeeeee",
-    "3": "~u4:abababab-bbbb-cccc-dddd-eeeeeeeeeeee",
-    "4": "~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee",
-    "5": "valaa-test:?id=(~raw'extl!)#",
-    "6": "~u4:11111111-2255-7744-22cc-eeeeeeeeeeee",
-    "7": "~u4:22222222-2255-7744-22cc-eeeeeeeeeeee",
-    "8": "~u4:d336d336-9999-6666-0000-777700000000",
-    "9": "~u4:77777777-1111-eeee-3333-555555555555"
+  "@context": [...baseStateContext, {
+    "0": "~u4:cccccccc-6600-2211-cc77-333333333333/",
+    "1": "valos://localhost/~u4!cccccccc-6600-2211-cc77-333333333333/",
+    "2": "valos://localhost/",
+    "3": "~u4:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/",
+    "4": "~u4:bbbbbbbb-bbbb-cccc-dddd-eeeeeeeeeeee/",
+    "5": "~u4:abababab-bbbb-cccc-dddd-eeeeeeeeeeee/",
+    "6": "~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee/",
+    "7": "valaa-test:?id=(~raw'extl!)#",
+    "8": "~u4:11111111-2255-7744-22cc-eeeeeeeeeeee/",
+    "9": "~u4:22222222-2255-7744-22cc-eeeeeeeeeeee/",
+    "10": "~u4:d336d336-9999-6666-0000-777700000000/",
+    "11": "~u4:77777777-1111-eeee-3333-555555555555/"
   }],
-  "&^": {
+  "state": {
     "0/": { ".n": "newRootName",
       "V:authorityURI": "valaa-local:",
       "~E": ["1/", "2/", "6/", "7/", "9/"]
@@ -486,8 +546,7 @@ view container properties.
         "resource deletions to be persisted in state",
 () => JSON.parse(JSON.stringify(state = applyVLogDeltaToState(state,
 {
-  "@context": [{}],
-  "&~": {
+  "&/": {
     "9/": { "&_": {
       "9/4/": { "&-": { ".tgt": "9/9/2/" } },
       "9/9/": { "&-": { "&_": ["9/9/2/"], "~E": ["9/9/2/"] } },
@@ -496,22 +555,24 @@ view container properties.
 }))),
         "toMatchObject",
 () => ({
-  "@context": [baseStateContext, {
-    "0": "~u4:cccccccc-6600-2211-cc77-333333333333",
-    "1": "~u4:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
-    "2": "~u4:bbbbbbbb-bbbb-cccc-dddd-eeeeeeeeeeee",
-    "3": "~u4:abababab-bbbb-cccc-dddd-eeeeeeeeeeee",
-    "4": "~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee",
-    "5": "valaa-test:?id=(~raw'extl!)#",
-    "6": "~u4:11111111-2255-7744-22cc-eeeeeeeeeeee",
-    "7": "~u4:22222222-2255-7744-22cc-eeeeeeeeeeee",
-    "8": "~u4:d336d336-9999-6666-0000-777700000000",
-    "9": "~u4:77777777-1111-eeee-3333-555555555555"
+  "@context": [...baseStateContext, {
+    "0": "~u4:cccccccc-6600-2211-cc77-333333333333/",
+    "1": "valos://localhost/~u4!cccccccc-6600-2211-cc77-333333333333/",
+    "2": "valos://localhost/",
+    "3": "~u4:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/",
+    "4": "~u4:bbbbbbbb-bbbb-cccc-dddd-eeeeeeeeeeee/",
+    "5": "~u4:abababab-bbbb-cccc-dddd-eeeeeeeeeeee/",
+    "6": "~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee/",
+    "7": "valaa-test:?id=(~raw'extl!)#",
+    "8": "~u4:11111111-2255-7744-22cc-eeeeeeeeeeee/",
+    "9": "~u4:22222222-2255-7744-22cc-eeeeeeeeeeee/",
+    "10": "~u4:d336d336-9999-6666-0000-777700000000/",
+    "11": "~u4:77777777-1111-eeee-3333-555555555555/"
   }],
-  "&^": {
-    "0/": { ".n": "newRootName",
-      "V:authorityURI": "valaa-local:",
-      "~E": ["1/", "2/", "6/", "7/", "9/"]
+  "state": {
+    "0:": { ".n": "newRootName",
+      ".cURI": "1:", ".aURI": "2:",
+      "~E": ["3:", "4:", "8:", "9:", "11:"]
     },
     "1/": { ".E~": "0/", ".n": "older",
       "-out": ["3/"], "-in": ["4/"],

@@ -1,6 +1,6 @@
 const { isImmutateableSet } = require("@valos/tools");
 
-const baseStateContextText = `{
+const baseStateContextText = `[{
   "^": "urn:valos:",
   "@base": "urn:valos:chronicle:",
   "@vocab": "vplot:'",
@@ -9,7 +9,6 @@ const baseStateContextText = `{
   "VLog": "https://valospace.org/log/0#",
   "VState": "https://valospace.org/state/0#",
 
-  "&^": { "@id": "VState:globalResources", "@type": "@id", "@container": "@id" },
   "&_": { "@id": "VState:subResources", "@type": "@id", "@container": "@id" },
   "&-": { "@id": "VState:removes", "@container": "@graph" },
 
@@ -25,6 +24,8 @@ const baseStateContextText = `{
   ".R~": { "@id": "V:graph", "@type": "@id" },
   ".M~": { "@id": "V:folder", "@type": "@id" },
 
+  ".aURI": { "@id": "V:authorityURI", "@type": "@id" },
+  ".cURI": { "@id": "V:chronicleURI", "@type": "@id" },
   ".n": { "@id": "V:name" },
   ".c": { "@id": "V:content" },
 
@@ -53,57 +54,63 @@ const baseStateContextText = `{
 
 const baseStateContext = Object.freeze(Object.assign(Object.create(null),
     JSON.parse(baseStateContextText)));
+}, {
+  "state": { "@container": "@id" },
+}]`;
 
-const referenceLookupTag = Symbol("VLog:referenceLookup");
-const RefIndexTag = Symbol("VLog:referenceArray");
+
+const indexFromIRITag = Symbol("VState:indexFromIRI");
+const iriLookupTag = Symbol("VState:iriLookup");
 
 module.exports = {
   baseStateContext,
   baseStateContextText,
   createVState,
   mutateVState,
-  referenceLookupTag,
-  RefIndexTag,
+  indexFromIRITag,
+  iriLookupTag,
   lookupReference,
   obtainReferenceEntry,
 };
 
 function createVState (references = []) {
-  const _referenceArray = [];
-  const _referenceLookup = {};
-
   const vstate = { "&^": Object.create(null) };
-  Object.defineProperty(vstate, RefIndexTag, {
-    writable: true, configurable: false, enumerable: false,
-    value: _referenceArray,
-  });
-  Object.defineProperty(vstate, referenceLookupTag, {
-    writable: true, configurable: false, enumerable: false,
-    value: _referenceLookup,
-  });
-  Object.defineProperty(vstate, "toJSON", {
-    writable: true, configurable: false, enumerable: false,
-    value () {
+  const _iriLookup = [];
+  const _indexFromIRI = {};
+
+  const vstatePrivate = {
+    [iriLookupTag]: _iriLookup,
+    [indexFromIRITag]: _indexFromIRI,
+    toJSON () {
       const json = {
         "@context": [
           baseStateContext,
-          Object.fromEntries(_referenceArray.map((value, index) => [index, value])),
+          Object.fromEntries(_iriLookup.map((value, index) => [index, value])),
         ],
       };
       for (const [key, value] of Object.entries(vstate)) {
         json[key] = _flattenToJSON(value);
       }
       return json;
-    },
-  });
+    }
+  };
+  for (const privateKey of [
+    ...Object.getOwnPropertySymbols(vstatePrivate),
+    ...Object.getOwnPropertyNames(vstatePrivate),
+  ]) {
+    Object.defineProperty(vstate, privateKey, {
+      writable: true, configurable: false, enumerable: false,
+      value: vstatePrivate[privateKey],
+    });
+  }
 
   for (const [indexValue, reference] of Object.entries(references)) {
     const index = parseInt(indexValue, 10);
     if (typeof index !== "number" || String(index) !== String(indexValue) || index < 0) {
       throw new Error(`Invalid reference index: "${indexValue}" is not a non-negative integer`);
     }
-    _referenceArray[index] = reference;
-    _referenceLookup[reference] = [index, {}];
+    _iriLookup[index] = reference;
+    _indexFromIRI[reference] = [index, {}];
   }
   return vstate;
 }
@@ -137,7 +144,7 @@ function _flattenToJSON (object) {
 }
 
 function mutateVState (state) {
-  const ret = createVState(state[RefIndexTag]);
+  const ret = createVState(state[iriLookupTag]);
   for (const key of Object.keys(state)) {
     if (key === "@context") continue;
     ret[key] = Object.create(state[key]);
@@ -146,14 +153,14 @@ function mutateVState (state) {
 }
 
 function lookupReference (state, index) {
-  return state[RefIndexTag][index];
+  return state[iriLookupTag][index];
 }
 
 function obtainReferenceEntry (state, reference) {
-  const lookup = state[referenceLookupTag];
+  const lookup = state[indexFromIRITag];
   let ret = lookup[reference];
   if (!ret) {
-    const array = state[RefIndexTag];
+    const array = state[iriLookupTag];
     array.push(reference);
     ret = lookup[reference] = [array.length, reference];
   }

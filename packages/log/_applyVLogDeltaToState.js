@@ -1,6 +1,6 @@
 const { V } = require("@valos/space/ontology");
 
-const { mutateVState, baseStateContext, RefIndexTag } = require("@valos/state");
+const { mutateVState, baseStateContext, iriLookupTag, eventCountTag } = require("@valos/state");
 const { VState } = require("@valos/state/ontology");
 
 const { visitVLogDelta, appendToPlot, relativeIdFromOriginPlot } = require("./_visitVLogDelta");
@@ -10,15 +10,16 @@ module.exports = {
 };
 
 function applyVLogDeltaToState (currentVState, vlogDelta, stack = null) {
-  const mutableGlobal = mutateVState(currentVState);
+  const mutableState = mutateVState(currentVState);
   const refIndexDelta = (vlogDelta["@context"] || [])[0];
   if (refIndexDelta) {
-    Object.assign(mutableGlobal[RefIndexTag], refIndexDelta);
+    Object.assign(mutableState[iriLookupTag], refIndexDelta);
   }
   const applyStack = Object.assign(Object.create(stack), {
     // apply opts
-    mutableGlobalResources: _mutateSubs(mutableGlobal, undefined, "&^"),
+    mutableGlobalResources: _mutateSubGraph(mutableState, undefined, "state"),
     // visitor opts
+    iriLookup: mutableState[iriLookupTag],
     mutableGlobal,
     mutateTargetResource: _mutateTargetResource,
     removalVisitors: _removalVisitors,
@@ -61,8 +62,7 @@ const _nodeTermUpserters = {
   // needs to be resolved before other entries)
   // TODO(iridian, 2021-03): Validate @context and reject all unsupported fields.
   "@context": null,
-  "&~": null,
-  "&_": null,
+  "&/": null,
   "&-": null,
   "~P": _patchRejectForbiddenDirectManipulation,
   "~E": _patchRejectForbiddenDirectManipulation,
@@ -76,8 +76,6 @@ const _nodeTermUpserters = {
 
 const _nodeTermRemovers = {
   "@context": null,
-  "&~": null,
-  "&_": null,
   "&-": null,
 };
 
@@ -331,38 +329,6 @@ function _removeContainerEntry (mutableResource, containerName, value) {
 }
 
 /*
-function rootOriginIdFromRelativeId (rootResources, plotString) {
-  return rootOriginIdFromLogicalPlot(rootResources, appendToPlot([], plotString), 0, "");
-}
-
-function rootOriginIdFromLogicalPlot (
-    rootResources, logicalPlot, initialStepIndex, initialOriginId) {
-  let currentOriginId = initialOriginId;
-  let i = initialStepIndex;
-  for (; i < logicalPlot.length; ++i) {
-    const logicalStep = `${logicalPlot[i]}/`;
-    const globalResource = rootResources[logicalStep];
-    if (globalResource) {
-      currentOriginId = (currentOriginId === _getOwnerValue(globalResource))
-          ? logicalStep
-          : `${currentOriginId}${logicalStep}`;
-    } else if (i + 1 < logicalPlot.length) {
-      throw new Error(`No origin resource "${logicalStep}" in state for sub-plot "${
-        logicalPlot.join("/")}" step #${i}`);
-    } else {
-      currentOriginId = logicalStep;
-      // subStack.validateCreateGlobalLogicalPlot = logicalPlot;
-      // const currentLogicalOwnerId = logicalPlot.slice(0, -1).join("/");
-      // const patchOwnerLogicalId = appendToPlot([],
-      //     _getOwnerValue(Array.isArray(resourceDelta) ? resourceDelta[0] : resourceDelta));
-      // isOwnerGlobal = (currentLogicalOwnerId === patchOwnerLogicalId);
-      // console.log("isOwnerGlobal of local:", logicalStep, i, logicalSteps, isOwnerGlobal,
-      //     currentLogicalOwnerId, patchOwnerLogicalId);
-    }
-  }
-  return currentOriginId;
-}
-
 function _getOwnerValue (object) {
   return object["V:owner"]
       || object[".E~"] || object[".R~"] || object[".src~"]  || object[".tgt~"] || "";

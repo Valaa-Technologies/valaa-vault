@@ -6,7 +6,7 @@ const {
   },
 } = require("@valos/revdoc");
 
-const { baseStateContext, baseStateContextText } = require(".");
+const { baseStateContextText } = require(".");
 
 const title = "VState specification";
 const { itExpects, runTestDoc } = prepareTestDoc(title);

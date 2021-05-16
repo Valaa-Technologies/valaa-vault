@@ -9,8 +9,8 @@ module.exports = {
 };
 
 function visitVLogDelta (delta, stack) {
-  const resourcesDelta = delta["&~"];
-  if (!resourcesDelta) throw new Error("VLog delta is missing global resources section '&~'");
+  const resourcesDelta = delta["&/"];
+  if (!resourcesDelta) throw new Error("VLog delta is missing global resources section '&/'");
   const visitorStack = Object.create(stack);
   visitorStack.originPlot = [];
   // Top level delta.

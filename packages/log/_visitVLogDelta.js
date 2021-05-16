@@ -34,6 +34,9 @@ function _visitSubResources (stack, subResourceDeltas, mutableParentResource) {
     try {
       const key = _validateSubResourceKey(subId, subStack.iriLookup);
       subStack.resourcePlot = subStack.graphPlot.concat(key);
+
+      _validateLogicalOwnerPlot(subStack, subResourceDelta["!~"]);
+
       const mutableSubResource = subStack.mutateSubResource
           && subStack.mutateSubResource(subStack.mutableGraph || mutableParentResource, key);
 
@@ -59,6 +62,19 @@ function _validateSubResourceKey (key, iriLookup) {
   throw new Error(`Invalid sub-resource key "${key}": not a valid IRI index nor "--"`);
 }
 
+function _validateLogicalOwnerPlot (stack, logicalOwner) {
+  const resourceIndex = stack.resourcePlot[stack.resourcePlot.length - 1];
+  if ((stack.graphPlot.length > 1) || (resourceIndex === 0)) {
+    if (logicalOwner !== undefined) {
+      throw new Error(`Invalid resource "${stack.resourcePlot.join("/")}" delta:${
+          ""} has logical owner term "!~" which is only allowed for global non-root resources`);
+    }
+    return;
+  }
+  const logicalOwnerPlot = _parsePlotFromDeltaRef(
+      logicalOwner, stack.iriLookup, `logical owner term "!~"`);
+  if (stack.validateGlobalResource) {
+    stack.validateGlobalResourcePlot(resourceIndex, logicalOwnerPlot);
   }
 }
 

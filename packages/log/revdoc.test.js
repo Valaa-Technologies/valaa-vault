@@ -270,10 +270,10 @@ chronicles must refer to their stable origin.
   }],
   "&/": {
     "0:": { ".n": "newRootName" },
-    "1/": { ".E~": "0/", ".n": "older",
+    "3:": { "!~": "", ".E~": "0:", ".n": "older",
       "toOutside": { "@id": "7:" }, "absolutelyParent": { "@id": "^:/1/0/" },
     },
-    "2/": { ".E~": "0/", ".n": "unger",
+    "4:": { "!~": "", ".E~": "0:", ".n": "unger",
       "toOlder": { "@id": "3:" }, "absolutelyOlder": { "@id": "^:/1/3/" },
     },
     "5:": { "!~": "4/", ".tgt~": "4:", ".n": "SIBLING", ".src": "3:" },
@@ -449,8 +449,8 @@ however: the delta application will perform this reference normalization.
     "11": "~u4:77777777-1111-eeee-3333-555555555555/",
   }],
   "&/": {
-    "9/": {
-      ".E~": "0/", ".n": "inceptor", ".iOf": "0/",
+    "11:": { "!~": "", ".E~": "0:", ".n": "inceptor",
+      ".iOf": "0:",
       "&/": { // first-order sub-graph "11:"
         "3:": { ".n": "olderGhost" },
         "4:": { ".n": "ungerGhost" },
@@ -551,10 +551,10 @@ view container properties.
 () => JSON.parse(JSON.stringify(state = applyVLogDeltaToState(state,
 {
   "&/": {
-    "9/": { "&_": {
       "9/4/": { "&-": { ".tgt": "9/9/2/" } },
       "9/9/": { "&-": { "&_": ["9/9/2/"], "~E": ["9/9/2/"] } },
     }, },
+    "11:": { "!~": "",
   },
 }))),
         "toMatchObject",

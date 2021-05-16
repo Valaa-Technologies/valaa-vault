@@ -28,6 +28,7 @@ function applyVLogDeltaToState (currentVState, vlogDelta, stack = null) {
           ? applyStack.mutableGlobalResources
           : _mutateSubGraph(mutableParentResource, graphPlot[graphPlot.length - 1]);
     },
+    validateGlobalResourcePlot: _validateGlobalResourcePlot,
     mutateSubResource: _mutateSubResource,
     removalVisitors: _removalVisitors,
     upsertVisitors: _upsertVisitors,
@@ -41,6 +42,23 @@ function applyVLogDeltaToState (currentVState, vlogDelta, stack = null) {
 
   }
   return mutableState;
+
+  function _validateGlobalResourcePlot (resourceIndex, logicalOwnerPlot) {
+    // validate logical plot to be appropriate
+    let expectedParent = 0;
+    for (const [index, owner] of logicalOwnerPlot.entries()) {
+      const parent = _getOwnerValue(currentVState.state[owner]);
+      if (parent !== expectedParent) {
+        throw new Error(`Logical owner mismatch: expected parent ${
+            expectedParent} for step #${index} in "${logicalOwnerPlot}", got ${parent}`);
+      }
+      expectedParent = parent;
+    }
+    function _getOwnerValue (object) {
+      return object["V:owner"]
+          || object[".E~"] || object[".R~"] || object[".src~"]  || object[".tgt~"] || "";
+    }
+  }
 }
 
 /*
@@ -332,10 +350,3 @@ function _removeContainerEntry (mutableResource, containerName, value) {
   container.splice(index, 1);
   return container;
 }
-
-/*
-function _getOwnerValue (object) {
-  return object["V:owner"]
-      || object[".E~"] || object[".R~"] || object[".src~"]  || object[".tgt~"] || "";
-}
-*/

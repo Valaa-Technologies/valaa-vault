@@ -5,6 +5,7 @@ const { applyVLogDeltaToState } = require("./_applyVLogDeltaToState");
 module.exports = {
   baseLogContext: [
     ...baseStateContext, {
+      "!~": { "@id": "VLog:logicalOwner", "@type": "@id" },
       "!/": { "@id": "VLog:indirectSubGraph", "@container": ["@graph", "@index"] },
     },
   ],

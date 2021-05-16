@@ -271,13 +271,13 @@ chronicles must refer to their stable origin.
   "&/": {
     "0:": { ".n": "newRootName" },
     "1/": { ".E~": "0/", ".n": "older",
-      "toOutside": { "@id": "5/" }, "absolutelyParent": { "@id": "/0/" },
+      "toOutside": { "@id": "7:" }, "absolutelyParent": { "@id": "^:/1/0/" },
     },
     "2/": { ".E~": "0/", ".n": "unger",
-      "toOlder": { "@id": "1/" }, "absolutelyOlder": { "@id": "/1/" },
+      "toOlder": { "@id": "3:" }, "absolutelyOlder": { "@id": "^:/1/3/" },
     },
-    "2/3/": { ".tgt~": "2/", ".n": "SIBLING", ".src": "1/" },
-    "2/4/": { ".src~": "2/", ".n": "SIBLING", ".tgt": "1/" },
+    "5:": { "!~": "4/", ".tgt~": "4:", ".n": "SIBLING", ".src": "3:" },
+    "6:": { "!~": "4/", ".src~": "4:", ".n": "SIBLING", ".tgt": "3:" },
   },
 }))),
         "toMatchObject",
@@ -297,19 +297,20 @@ chronicles must refer to their stable origin.
       ".cURI": "1:", ".aURI": "2:",
       "~E": ["3:", "4:"],
     },
-    "1/": { ".E~": "0/", ".n": "older",
-      "-out": ["3/"], "-in": ["4/"],
-      "toOutside": { "@id": "5/" }, "absolutelyParent": { "@id": "/0/" }
+    "3:": { ".E~": "0:", ".n": "older",
+      "-out": ["5:"], "-in": ["6:"],
+      "toOutside": { "@id": "7:" }, "absolutelyParent": { "@id": "^:/1/0/" }
     },
-    "2/": { ".E~": "0/", ".n": "unger",
-      "~R": ["3/", "4/"],
-      "-out": ["4/"], "-in": ["3/"],
-      toOlder: { "@id": "1/" }, "absolutelyOlder": { "@id": "/1/" }
+    "4:": { ".E~": "0:", ".n": "unger",
+      "~R": ["5:", "6:"],
+      "-out": ["6:"], "-in": ["5:"],
+      "toOlder": { "@id": "3:" }, "absolutelyOlder": { "@id": "^:/1/3/" }
     },
-    "3/": { ".tgt~": "2/", ".n": "SIBLING", ".src": "1/" },
-    "4/": { ".src~": "2/", ".n": "SIBLING", ".tgt": "1/" },
+    "5:": { ".tgt~": "4:", ".n": "SIBLING", ".src": "3:" },
+    "6:": { ".src~": "4:", ".n": "SIBLING", ".tgt": "3:" },
+
   },
-}
+})
     ),
     "#3": [`
 Ghost instancing with `, ref("V:instanceOf"), ` term ".iOf" and the
@@ -336,26 +337,35 @@ in a different chronicle!).
     "10": "~u4:d336d336-9999-6666-0000-777700000000/"
   }],
   "&/": {
-    "2/3/8/": { ".E~": "3/", ".n": "deeplyOwned" },
-    "6/": {
-      ".E~": "0/", ".iOf": "2/", ".n": "ungerInstance",
-      "&_": {
-        "6/3/": {
-          "instance": { "@id": "6/" },
-          "absoluteInstance": { "@id": "/6/" },
-          "deepProto": { "@id": "8/" },
-          "absoluteDeepProto": { "@id": "/8/" },
+    "8:": { "!~": "", ".E~": "0:", ".n": "ungerInstance",
+      ".iOf": "4:",
+      "&/": {
+// "&/" -term takes the parent node id (here "8:") and sets it as the
+// graph value (ie. as the fourth quad term) for all resources inside
+// this object scope. As the parent id here is a direct reference to
+// a resource this sub-graph is called a first-order sub-graph. All
+// indirect vplot references are nth-order sub-graphs, where 'n' is the
+// number of steps in the vplot. All vplots with length 1 shell be
+// resolved as direct references when determining the sub-graph id.
+        "5:": {
+          "toInstance": { "@id": "8/" },
+          "absoluteInstance": { "@id": "^:/1/8/" },
+          "toDeeplyOwnedProto": { "@id": "10/" },
+          "toDeeplyOwnedSibling": { "@id": "10:" },
+          "absoluteDeepProto": { "@id": "^:/1/10/" },
+          "absoluteDeepSibling": { "@id": "^:/1/8/10/" }
         },
-        "6/8/": { ".n": "deeplyOwnedGhost" },
-      },
+        "10:": { ".n": "deeplyOwnedGhost" }
+      }
     },
-    "7/": {
-      ".E~": "0/", ".iOf": "6/", ".n": "ungerInstanceInstance",
-      "&_": {
-        "7/3/": { "instanceInstance": { "@id": "7/" } },
-        "7/8/": { ".n": "deeplyOwnedGhostGhost" },
-      },
+    "9:": { "!~": "", ".E~": "0:", ".n": "ungerInstanceInstance",
+      ".iOf": "8:",
+      "&/": { // first-order sub-graph "9:"
+        "5:": { "toInstanceInstance": { "@id": "9/" } },
+        "10:": { ".n": "deeplyOwnedGhostGhost" }
+      }
     },
+    "10:": { "!~": "4/5/", ".E~": "5:", ".n": "deeplyOwned" }
   },
 }))),
         "toMatchObject",
@@ -378,42 +388,39 @@ in a different chronicle!).
       ".cURI": "1:", ".aURI": "2:",
       "~E": ["3:", "4:", "8:", "9:"]
     },
-    "1/": { ".E~": "0/", ".n": "older",
-      "-out": ["3/"], "-in": ["4/"],
-      "toOutside": { "@id": "5/" }, "absolutelyParent": { "@id": "/0/" }
+    "3:": { ".E~": "0:", ".n": "older",
+      "-out": ["5:"], "-in": ["6:"],
+      "toOutside": { "@id": "7:" }, "absolutelyParent": { "@id": "^:/1/0/" }
     },
-    "2/": { ".E~": "0/", ".n": "unger",
-      "~R": ["3/", "4/"],
-      "-out": ["4/"], "-in": ["3/"], "-hasI": ["6/"],
-      "toOlder": { "@id": "1/" }, "absolutelyOlder": { "@id": "/1/" }
+    "4:": { ".E~": "0:", ".n": "unger",
+      "~R": ["5:", "6:"],
+      "-out": ["6:"], "-in": ["5:"], "-hasI": ["8:"],
+      "toOlder": { "@id": "3:" }, "absolutelyOlder": { "@id": "^:/1/3/" }
     },
-    "3/": { ".tgt~": "2/", ".n": "SIBLING", ".src": "1/", "~E": ["8/"] },
-    "4/": { ".src~": "2/", ".n": "SIBLING", ".tgt": "1/" },
-    "6/": [{ ".E~": "0/", ".n": "ungerInstance",
-      ".iOf": "2/", "-hasI": ["7/"],
-    }, {
-      "@context": { "@base": "6/" },
-      "&_": {
-        "3/": {
-          "instance": { "@id": "" },
-          "absoluteInstance": { "@id": "/6/" },
-          "deepProto": { "@id": "../8/" },
-          "absoluteDeepProto": { "@id": "/8/" },
+    "5:": { ".tgt~": "4:", ".n": "SIBLING", ".src": "3:", "~E": ["10:"] },
+    "6:": { ".src~": "4:", ".n": "SIBLING", ".tgt": "3:" },
+    "8:": { ".E~": "0:", ".n": "ungerInstance",
+      ".iOf": "4:", "-hasI": ["9:"],
+      "&/": { // first-order sub-graph "8:"
+        "5:": {
+          "toInstance": { "@id": "8/" },
+          "absoluteInstance": { "@id": "^:/1/8/" },
+          "toDeeplyOwnedProto": { "@id": "10/" },
+          "toDeeplyOwnedSibling": { "@id": "10:" },
+          "absoluteDeepProto": { "@id": "^:/1/10/" },
+          "absoluteDeepSibling": { "@id": "^:/1/8/10/" }
         },
-        "8/": { ".n": "deeplyOwnedGhost" }
+        "10:": { ".n": "deeplyOwnedGhost" }
       }
-    }],
-    "7/": [{ ".E~": "0/", ".n": "ungerInstanceInstance",
-      ".iOf": "6/",
-    }, {
-      "@context": { "@base": "7/" },
-      "&_": {
-        "3/": { "instanceInstance": { "@id": "" }, },
-        "8/": { ".n": "deeplyOwnedGhostGhost" }
+    },
+    "9:": { ".E~": "0:", ".n": "ungerInstanceInstance",
+      ".iOf": "8:",
+      "&/": { // first-order sub-graph 9:
+        "5:": { "toInstanceInstance": { "@id": "9/" }, },
+        "10:": { ".n": "deeplyOwnedGhostGhost" }
       }
-    }],
-    "8/": { ".E~": "3/", ".n": "deeplyOwned" },
-  },
+    },
+    "10:": { ".E~": "5:", ".n": "deeplyOwned" },
 }),
     ),
     "#4": [`
@@ -426,7 +433,7 @@ onto the instance (as view) itself.
 This virtual copying is lexical: projected relative references will now
 refer to the relative resources inside the instance view instead of
 to the originally referenced resources within the prototype. Conversely,
-absolute references (ie. those that begin with "/") keep refering to
+absolute references (ie. those that begin with "^:") keep refering to
 to the same resources even when projected.
 
 The normalized vplot base of a relative reference that appears in the
@@ -444,16 +451,19 @@ however: the delta application will perform this reference normalization.
   "&/": {
     "9/": {
       ".E~": "0/", ".n": "inceptor", ".iOf": "0/",
-      "&_": {
-        "9/1/": { ".n": "olderGhost" },
-        "9/2/": { ".n": "ungerGhost" },
-        "9/3/": { ".n": "toNephewOldceptGhost", ".tgt": "9/9/1/" },
-        "9/4/": { ".n": "toNephewUngceptGhost", ".tgt": "9/9/2/" },
-        "9/9/": { ".n": "firstInception" },
-        "9/9/1/": { ".n": "oldceptGhost" },
-        "9/9/2/": { ".n": "ungceptGhost" }
+      "&/": { // first-order sub-graph "11:"
+        "3:": { ".n": "olderGhost" },
+        "4:": { ".n": "ungerGhost" },
+// Override the projected source (which would be the sibling 'olderGhost'
+// above, ie. the indirect "11/3/" or graph-local "3:") with explicit
+// cross-graph value
+        "5:": { ".n": "fromNephewOldceptGhost", ".src": "11/11/3/" },
+        "6:": { ".n": "toNephewUngceptGhost", ".tgt": "11/11/3/" },
+        "11:": { ".n": "firstInception",
+          }
+        },
       }
-    },
+    }
   },
 }))),
         "toMatchObject",
@@ -473,59 +483,53 @@ however: the delta application will perform this reference normalization.
     "11": "~u4:77777777-1111-eeee-3333-555555555555/"
   }],
   "state": {
-    "0/": { ".n": "newRootName",
-      "V:authorityURI": "valaa-local:",
-      "~E": ["1/", "2/", "6/", "7/", "9/"]
+    "0:": { ".n": "newRootName",
+      ".cURI": "1:", ".aURI": "2:",
+      "~E": ["3:", "4:", "8:", "9:", "11:"]
     },
-    "1/": { ".E~": "0/", ".n": "older",
-      "-out": ["3/"], "-in": ["4/"],
-      "toOutside": { "@id": "5/" }, "absolutelyParent": { "@id": "/0/" }
+    "3:": { ".E~": "0:", ".n": "older",
+      "-out": ["5:"], "-in": ["6:"],
+      "toOutside": { "@id": "7:" }, "absolutelyParent": { "@id": "^:/1/0/" }
     },
-    "2/": { ".E~": "0/", ".n": "unger",
-      "~R": ["3/", "4/"],
-      "-out": ["4/"], "-in": ["3/"], "-hasI": ["6/"],
-      "toOlder": { "@id": "1/" }, "absolutelyOlder": { "@id": "/1/" }
+    "4:": { ".E~": "0:", ".n": "unger",
+      "~R": ["5:", "6:"],
+      "-out": ["6:"], "-in": ["5:"], "-hasI": ["8:"],
+      "toOlder": { "@id": "3:" }, "absolutelyOlder": { "@id": "^:/1/3/" }
     },
-    "3/": { ".tgt~": "2/", ".n": "SIBLING", ".src": "1/", "~E": ["8/"] },
-    "4/": { ".src~": "2/", ".n": "SIBLING", ".tgt": "1/" },
-    "6/": [{ ".E~": "0/", ".n": "ungerInstance",
-      ".iOf": "2/", "-hasI": ["7/"]
-    }, {
-      "@context": { "@base": "6/" },
-      "&_": {
-        "3/": {
-          "instance": { "@id": "" },
-          "absoluteInstance": { "@id": "/6/" },
-          "deepProto": { "@id": "../8/" },
-          "absoluteDeepProto": { "@id": "/8/" }
+    "5:": { ".tgt~": "4:", ".n": "SIBLING", ".src": "3:", "~E": ["10:"] },
+    "6:": { ".src~": "4:", ".n": "SIBLING", ".tgt": "3:" },
+    "8:": { ".E~": "0:", ".n": "ungerInstance",
+      ".iOf": "4:", "-hasI": ["9:"],
+      "&/": { // first-order sub-graph "8:"
+        "5:": {
+          "toInstance": { "@id": "" },
+          "absoluteInstance": { "@id": "^:/1/8/" },
+          "toDeeplyOwnedProto": { "@id": "10/" },
+          "toDeeplyOwnedSibling": { "@id": "10:" },
+          "absoluteDeepProto": { "@id": "^:/1/10/" },
+          "absoluteDeepSibling": { "@id": "^:/1/8/10/" }
         },
-        "8/": { ".n": "deeplyOwnedGhost" }
+        "10:": { ".n": "deeplyOwnedGhost" }
       }
-    }],
-    "7/": [{ ".E~": "0/", ".n": "ungerInstanceInstance",
-      ".iOf": "6/"
-    }, {
-      "@context": { "@base": "7/" },
-      "&_": {
-        "3/": { "instanceInstance": { "@id": "" } },
-        "8/": { ".n": "deeplyOwnedGhostGhost" }
+    },
+    "9:": { ".E~": "0:", ".n": "ungerInstanceInstance",
+      ".iOf": "8:",
+      "&/": { // first-order sub-graph "8:"
+        "5:": { "toInstanceInstance": { "@id": "" } },
+        "10:": { ".n": "deeplyOwnedGhostGhost" }
       }
-    }],
-    "8/": { ".E~": "3/", ".n": "deeplyOwned" },
-    "9/": [{ ".E~": "0/", ".n": "inceptor", ".iOf": "0/" }, {
-      "@context": { "@base": "9/" },
-      "&_": {
-        "1/": { ".n": "olderGhost" },
-        "2/": { ".n": "ungerGhost" },
-        "3/": { ".n": "toNephewOldceptGhost", ".tgt": "9/1/" },
-        "4/": { ".n": "toNephewUngceptGhost", ".tgt": "9/2/" },
-        "9/": [{
-          ".n": "firstInception",
-        }, {
-          "@context": { "@base": "9/" },
-          "&_": {
-            "1/": { ".n": "oldceptGhost", "-in": ["../3/"] },
-            "2/": { ".n": "ungceptGhost", "-in": ["../4/"] }
+    },
+    "10:": { ".E~": "5:", ".n": "deeplyOwned" },
+    "11:": { ".E~": "0:", ".n": "inceptor", ".iOf": "0:",
+      "&/": { // first-order sub-graph "11:"
+        "3:": { ".n": "olderGhost" },
+        "4:": { ".n": "ungerGhost" },
+        "5:": { ".n": "fromNephewOldceptGhost", ".src": "11/11/3/" },
+        "6:": { ".n": "toNephewUngceptGhost", ".tgt": "11/11/3/" },
+        "11:": { ".n": "firstInception" },
+      }
+    },
+
           }
         }],
       }
@@ -574,44 +578,44 @@ view container properties.
       ".cURI": "1:", ".aURI": "2:",
       "~E": ["3:", "4:", "8:", "9:", "11:"]
     },
-    "1/": { ".E~": "0/", ".n": "older",
-      "-out": ["3/"], "-in": ["4/"],
-      "toOutside": { "@id": "5/" }, "absolutelyParent": { "@id": "/0/" }
+    "3:": { ".E~": "0:", ".n": "older",
+      "-out": ["5:"], "-in": ["6:"],
+      "toOutside": { "@id": "7:" }, "absolutelyParent": { "@id": "^:/1/0/" }
     },
-    "2/": { ".E~": "0/", ".n": "unger",
-      "~R": ["3/", "4/"],
-      "-out": ["4/"], "-in": ["3/"], "-hasI": ["6/"],
-      "toOlder": { "@id": "1/" }, "absolutelyOlder": { "@id": "/1/" }
+    "4:": { ".E~": "0:", ".n": "unger",
+      "~R": ["5:", "6:"],
+      "-out": ["6:"], "-in": ["5:"], "-hasI": ["8:"],
+      "toOlder": { "@id": "3:" }, "absolutelyOlder": { "@id": "^:/1/3/" }
     },
+    },
+    "6:": { ".src~": "4:", ".n": "SIBLING", ".tgt": "3:" },
     "3/": { ".tgt~": "2/", ".n": "SIBLING", ".src": "1/", "~E": ["8/"] },
-    "4/": { ".src~": "2/", ".n": "SIBLING", ".tgt": "1/" },
-    "6/": [{ ".E~": "0/", ".n": "ungerInstance",
-      ".iOf": "2/", "-hasI": ["7/"]
-    }, {
-      "@context": { "@base": "6/" },
-      "&_": {
-        "3/": {
-          "instance": { "@id": "" },
-          "absoluteInstance": { "@id": "/6/" },
-          "deepProto": { "@id": "../8/" },
-          "absoluteDeepProto": { "@id": "/8/" }
+    "8:": { ".E~": "0:", ".n": "ungerInstance",
+      ".iOf": "4:", "-hasI": ["9:"],
+      "&/": { // first-order sub-graph "8:"
+        "5:": {
+          "toInstance": { "@id": "" },
+          "absoluteInstance": { "@id": "^:/1/8/" },
+          "toDeeplyOwnedProto": { "@id": "10/" },
+          "toDeeplyOwnedSibling": { "@id": "10:" },
+          "absoluteDeepProto": { "@id": "^:/1/10/" },
+          "absoluteDeepSibling": { "@id": "^:/1/8/10/" }
         },
-        "8/": { ".n": "deeplyOwnedGhost" }
+        "10:": { ".n": "deeplyOwnedGhost" }
       }
-    }],
-    "7/": [{ ".E~": "0/", ".n": "ungerInstanceInstance",
-      ".iOf": "6/"
-    }, {
-      "@context": { "@base": "7/" },
-      "&_": {
-        "3/": { "instanceInstance": { "@id": "" } },
-        "8/": { ".n": "deeplyOwnedGhostGhost" }
+    },
+    "9:": { ".E~": "0:", ".n": "ungerInstanceInstance",
+      ".iOf": "8:",
+      "&/": { // first-order sub-graph "9:"
+        "5:": { "toInstanceInstance": { "@id": "" } },
+        "10:": { ".n": "deeplyOwnedGhostGhost" }
       }
-    }],
-    "8/": { ".E~": "3/", ".n": "deeplyOwned" },
-    "9/": [{ ".E~": "0/", ".n": "inceptor", ".iOf": "0/" }, {
-      "@context": { "@base": "9/" },
-      "&_": {
+    },
+    "10:": { ".E~": "5:", ".n": "deeplyOwned" },
+    "11:": { ".E~": "0:", ".n": "inceptor", ".iOf": "0:",
+      }
+    },
+
         "1/": { ".n": "olderGhost" },
         "2/": { ".n": "ungerGhost" },
         "3/": { ".n": "toNephewOldceptGhost", ".tgt": "9/1/" },

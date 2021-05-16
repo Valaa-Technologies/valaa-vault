@@ -2,8 +2,11 @@ const { V } = require("@valos/space/ontology");
 
 const { mutateVState, baseStateContext, iriLookupTag, eventCountTag } = require("@valos/state");
 const { VState } = require("@valos/state/ontology");
+const { VLog } = require("@valos/log/ontology");
 
-const { visitVLogDelta, appendToPlot, relativeIdFromOriginPlot } = require("./_visitVLogDelta");
+const {
+  visitVLogDelta, relativePlotFromDeltaRef, relativePlotFromAbsolute, absolutePlotFromRelative,
+} = require("./_visitVLogDelta");
 
 module.exports = {
   applyVLogDeltaToState,
@@ -20,8 +23,12 @@ function applyVLogDeltaToState (currentVState, vlogDelta, stack = null) {
     mutableGlobalResources: _mutateSubGraph(mutableState, undefined, "state"),
     // visitor opts
     iriLookup: mutableState[iriLookupTag],
-    mutableGlobal,
-    mutateTargetResource: _mutateTargetResource,
+    mutateSubGraph (mutableParentResource, graphPlot) {
+      return graphPlot.length === 1
+          ? applyStack.mutableGlobalResources
+          : _mutateSubGraph(mutableParentResource, graphPlot[graphPlot.length - 1]);
+    },
+    mutateSubResource: _mutateSubResource,
     removalVisitors: _removalVisitors,
     upsertVisitors: _upsertVisitors,
     // patch opts
@@ -32,15 +39,8 @@ function applyVLogDeltaToState (currentVState, vlogDelta, stack = null) {
 
   visitVLogDelta(vlogDelta, applyStack);
 
-  return mutableGlobal;
-
-  function _mutateTargetResource (targetPlot, interimContainer, interimIndex) {
-    return _mutateDeepSubResource(
-        interimContainer
-            ? _mutateSubs(interimContainer, targetPlot[interimIndex - 1])
-            : applyStack.mutableGlobalResources,
-        targetPlot, interimIndex);
   }
+  return mutableState;
 }
 
 /*
@@ -54,7 +54,7 @@ function applyVLogDeltaToState (currentVState, vlogDelta, stack = null) {
 
 // Setup
 
-const ontologies = { V, VState };
+const ontologies = { V, VLog, VState };
 
 const _nodeTermUpserters = {
   // Ignore all direct @context modifications.
@@ -63,6 +63,7 @@ const _nodeTermUpserters = {
   // TODO(iridian, 2021-03): Validate @context and reject all unsupported fields.
   "@context": null,
   "&/": null,
+  "!/": null,
   "&-": null,
   "~P": _patchRejectForbiddenDirectManipulation,
   "~E": _patchRejectForbiddenDirectManipulation,
@@ -76,6 +77,8 @@ const _nodeTermUpserters = {
 
 const _nodeTermRemovers = {
   "@context": null,
+  "&/": null,
+  "!/": null,
   "&-": null,
 };
 
@@ -116,12 +119,12 @@ function _patchRejectForbiddenDirectManipulation (target, delta, key) {
 
 const _vlogTermById = {};
 
-for (const [term, expansion] of Object.entries(baseStateContext)) {
+for (const [term, expansion] of Object.entries(Object.assign({}, ...[].concat(baseStateContext)))) {
   if (!expansion["@id"]) continue;
   _vlogTermById[expansion["@id"]] = term;
 }
 
-for (const [term, expansion] of Object.entries(baseStateContext)) {
+for (const [term, expansion] of Object.entries(Object.assign({}, ...[].concat(baseStateContext)))) {
   if (term[0] === "@") continue;
   const id = expansion["@id"];
   if (!id) continue;
@@ -182,10 +185,7 @@ function _recurseSubProperties (definition, ret = []) {
 function _upsertGenericProperty (currentValue, deltaValue) {
   const id = (deltaValue != null) && deltaValue["@id"];
   if (id) {
-    const targetRootPlot = appendToPlot([], id);
-    const originRelativeId = relativeIdFromOriginPlot(
-        this.originPlot, targetRootPlot, id[0] === "/");
-    return { "@id": originRelativeId };
+    return { "@id": relativePlotFromDeltaRef(id, this.graphPlot, this.iriLookup) };
   }
   return deltaValue;
 }
@@ -216,37 +216,40 @@ function _createStandardTermVisitor (term, {
   }
 
   function _patchIdEntry (currentValue, deltaEntry, targetKey, mutableParent) {
-    // const remoteOriginId = rootOriginIdFromRelativeId(this.mutableGlobalResources, deltaEntry);
-    // _resourcePlotFromString(remoteOriginId);
-    const remoteRootPlot = appendToPlot([], deltaEntry);
-    let remoteId = relativeIdFromOriginPlot(this.originPlot, remoteRootPlot, deltaEntry[0] === "/");
+    let remotePlot = (deltaEntry == null) ? deltaEntry
+        : relativePlotFromDeltaRef(deltaEntry, this.graphPlot, this.iriLookup);
     if (isRemover) {
-      if (!isSingular) {
-        const afterSuccessfulRemoval = _removeContainerEntry(mutableParent, targetKey, remoteId);
-        const removals = _mutateStateObject(mutableParent["&-"] || null, "&-", mutableParent);
-        _addContainerEntry(removals, targetKey, remoteId);
-        return afterSuccessfulRemoval || currentValue; // Do not remove couplings
-      }
-      if (remoteId === undefined) {
+      if (remotePlot === undefined) {
         return null;
       }
-      if (remoteId !== currentValue) {
+      const remoteValue = remotePlot.join("/");
+      if (!isSingular) {
+        const afterSuccessfulRemoval = _removeContainerEntry(mutableParent, targetKey, remoteValue);
+        const removals = _mutateStateObject(mutableParent, "&-");
+        _addContainerEntry(removals, targetKey, remotePlot.join("/"));
+        return afterSuccessfulRemoval || currentValue; // Do not remove couplings
+      }
+      if (remoteValue !== currentValue) {
         throw new Error(`Mismatch between current value "${currentValue}" and removed value "${
-          remoteId}"`);
+          remotePlot}"`);
       } else {
-        remoteId = undefined;
+        remotePlot = undefined;
       }
     }
     if (aliases) {
       for (const alias of aliases) {
-        if (isSingular) mutableParent[alias] = remoteId;
+        if (isSingular) mutableParent[alias] = remotePlot;
         else throw new Error("multi-alias not implemented");
       }
     }
     if (coupledTerms || linkedTerms) {
-      const mutableRemoteResource = _mutateDeepSubResource(
-            this.mutableGlobalResources, remoteRootPlot);
-      const reverseSelfId = relativeIdFromOriginPlot(remoteRootPlot, this.originPlot);
+      const mutableRemoteResource = _mutateSubResource(
+          remotePlot[0] == null
+              ? this.mutableSubGraph
+              : this.mutableGlobalResources,
+          remotePlot);
+      const absoluteRemotePlot = absolutePlotFromRelative(remotePlot, this.graphPlot);
+      const reversePlot = relativePlotFromAbsolute(this.resourcePlot, absoluteRemotePlot);
       /*
       console.log("Adding reverse to", remoteRootPlot, ":", reverseSelfId,
           "\n\tstack.basePlot/deltaEntry:", this.basePlot, deltaEntry,
@@ -254,13 +257,13 @@ function _createStandardTermVisitor (term, {
           "\n\tstack.originPlot:", this.originPlot);
       */
       for (const reverseTerm of (coupledTerms || [])) {
-        updateContainerEntry(mutableRemoteResource, reverseTerm, reverseSelfId);
+        updateContainerEntry(mutableRemoteResource, reverseTerm, reversePlot.join("/"));
       }
       for (const reverseTerm of (linkedTerms || [])) {
-        updateContainerEntry(mutableRemoteResource, reverseTerm, reverseSelfId);
+        updateContainerEntry(mutableRemoteResource, reverseTerm, reversePlot.join("/"));
       }
     }
-    return remoteId;
+    return remotePlot;
   }
 }
 
@@ -273,27 +276,29 @@ function _createStandardTermVisitor (term, {
   ####      #    #    #     #    ######
 */
 
-function _mutateDeepSubResource (initialParentSubs, subResourcePlot, firstIndex = 0) {
-  let parentSubs = initialParentSubs;
-  let key, mutableResource;
-  if (!Array.isArray(subResourcePlot) || !subResourcePlot[firstIndex]) {
+function _mutateSubResource (parentSubGraph, subResourcePlot, firstIndex = 0) {
+  if (typeof subResourcePlot === "number") {
+    return _mutateStateObject(parentSubGraph, subResourcePlot);
+  }
+  if (!subResourcePlot[firstIndex]) {
     throw new Error(`Invalid subResourcePlot, array with non-empty items expected, got: "${
         String(subResourcePlot)}"`);
   }
+  let key, mutableResource, subGraph = parentSubGraph;
   for (let i = firstIndex; i !== subResourcePlot.length; ++i) {
-    if (key) parentSubs = _mutateSubs(mutableResource, subResourcePlot[i - 1]);
+    if (key) subGraph = _mutateSubGraph(mutableResource, subResourcePlot[i - 1]);
     key = `${subResourcePlot[i]}/`;
-    mutableResource = parentSubs[key];
-    if (!mutableResource || !Object.hasOwnProperty.call(parentSubs, key)) {
-      mutableResource = parentSubs[key] = Object.create(mutableResource || null);
+    mutableResource = _mutateStateObject(subGraph, key);
+    if (!mutableResource || !Object.hasOwnProperty.call(subGraph, key)) {
+      mutableResource = subGraph[key] = Object.create(mutableResource || null);
     }
   }
   return mutableResource;
 }
 
-function _mutateSubs (mutableResource, parentLocalStep, subsKey = "&_") {
-  if (Object.hasOwnProperty.call(mutableResource, subsKey)) {
-    return mutableResource[subsKey];
+function _mutateSubGraph (mutableResource, parentLocalStep, subGraphKey = "&/") {
+  if (Object.hasOwnProperty.call(mutableResource, subGraphKey)) {
+    return mutableResource[subGraphKey];
   }
   if (parentLocalStep) {
     if (!mutableResource["@context"]) {
@@ -303,15 +308,15 @@ function _mutateSubs (mutableResource, parentLocalStep, subsKey = "&_") {
           parentLocalStep}", got: "${mutableResource["@context"]["@base"]}"`);
     }
   }
-  return _mutateStateObject(mutableResource[subsKey] || null, subsKey, mutableResource);
+  return _mutateStateObject(mutableResource, subGraphKey);
 }
 
-function _mutateStateObject (maybeObject, keyInParent, parent) {
+function _mutateStateObject (parent, keyInParent) {
   if (Object.hasOwnProperty.call(parent, keyInParent)) {
-    return maybeObject;
+    return parent[keyInParent];
   }
   // Ensure that the updated target is a new object.
-  return parent[keyInParent] = Object.create(maybeObject);
+  return parent[keyInParent] = Object.create(parent[keyInParent] || null);
 }
 
 function _addContainerEntry (mutableResource, containerName, value) {

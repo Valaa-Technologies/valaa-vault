@@ -211,5 +211,17 @@ any resource in its prototype chain.`,
 `Bypass the default behavior which forces transient fields to be plural
 to allow for singular fields.`,
     },
+
+    subGraphName: {
+      "@type": "VKernel:Property",
+      "rdfs:domain": "rdfs:Resource",
+      "rdfs:range": "rdfs:Resource",
+      restriction: { "@type": "owl:Restriction", "owl:maxCardinality": 1 },
+      "rdfs:comment":
+`Given a quad which has this property as a predicate term; the subject
+term is a sub-graph IRI, the quad graph term is the parent graph IRI
+and the object term is a name IRI that identifies the sub-graph within
+the scope of the parent graph.`,
+    },
   },
 };

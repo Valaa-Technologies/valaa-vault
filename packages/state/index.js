@@ -5,11 +5,12 @@ const baseStateContextText = `[{
   "@base": "urn:valos:chronicle:",
   "@vocab": "vplot:'",
 
+  "&": "@id",
+  "&/": { "@id": "@graph", "@container": "@id" },
   "V": "https://valospace.org/0#",
   "VLog": "https://valospace.org/log/0#",
   "VState": "https://valospace.org/state/0#",
 
-  "&_": { "@id": "VState:subResources", "@type": "@id", "@container": "@id" },
   "&-": { "@id": "VState:removes", "@container": "@graph" },
 
   "~P": { "@id": "V:ownsProperty", "@type": "@id", "@container": "@id" },
@@ -29,6 +30,7 @@ const baseStateContextText = `[{
   ".n": { "@id": "V:name" },
   ".c": { "@id": "V:content" },
 
+  ".ng": { "@id": "VState:subGraphName", "@type": "@id" },
   ".iOf": { "@id": "V:instanceOf", "@type": "@id" },
   "-hasI": { "@id": "V:hasInstance", "@type": "@id", "@container": "@id" },
 
@@ -74,22 +76,22 @@ module.exports = {
 };
 
 function createVState (references = []) {
-  const vstate = { "&^": Object.create(null) };
   const _iriLookup = [];
   const _indexFromIRI = {};
 
+  const vstate = { state: Object.create(null) };
   const vstatePrivate = {
     [iriLookupTag]: _iriLookup,
     [indexFromIRITag]: _indexFromIRI,
     toJSON () {
       const json = {
         "@context": [
-          baseStateContext,
+          ...baseStateContext,
           Object.fromEntries(_iriLookup.map((value, index) => [index, value])),
         ],
       };
       for (const [key, value] of Object.entries(vstate)) {
-        json[key] = _flattenToJSON(value);
+        json[key] = _flattenToJSON(value, 0);
       }
       return json;
     }
@@ -115,32 +117,47 @@ function createVState (references = []) {
   return vstate;
 }
 
-function _flattenToJSON (object) {
+function _flattenToJSON (object, graphDepth) {
   if (typeof object !== "object" || (object == null)) return object;
   if (Array.isArray(object) || isImmutateableSet(object)) {
-    return object.map(_flattenToJSON);
+    return object.map(o => _flattenToJSON(o, graphDepth));
   }
   const ret = {};
+  const sourceRemovals = object["&-"] || {};
   let removals;
   // eslint-disable-next-line guard-for-in
   for (const key in object) {
     const value = object[key];
     if (typeof value === "function") continue;
     if (value !== undefined) {
-      ret[key] = _flattenToJSON(value);
-    } else if (!(object["&-"] || {})[key]) {
+      let retKey = key, newDepth = graphDepth;
+      if (key[0] === "@") {
+        if (key === "@id") {
+          ret["@id"] = _idFromPlot(value);
+          continue;
+        }
+        if (key === "@context") {
+          newDepth = undefined;
+        }
+      } else if (graphDepth !== undefined) {
+        if (key === "&/") {
+          newDepth = graphDepth + 1;
+        } else if (key.match(/^[0-9]+$/)) {
+          retKey = `${key}:`;
+        }
+      }
+      ret[retKey] = _flattenToJSON(value, newDepth);
+    } else if (!sourceRemovals[key]) {
       (removals || (removals = ret["&-"] = {}))[key] = null;
     }
   }
-  const subs = ret["&_"];
-  const context = ret["@context"];
-  if (!subs || !context) return ret;
-  // FIXME(iridian, 2021-03): This heuristic does not distinguish
-  // between actual resource nodes and literal value objects that
-  // happen to contain @context and &_ keys.
-  delete ret["&_"];
-  delete ret["@context"];
-  return [ret, { "@context": context, "&_": subs }];
+  return ret;
+}
+
+function _idFromPlot (plot) {
+  if (typeof plot === "number") return `${plot}:`;
+  if (!Array.isArray(plot)) return plot;
+  return `${plot.join("/")}/`;
 }
 
 function mutateVState (state) {

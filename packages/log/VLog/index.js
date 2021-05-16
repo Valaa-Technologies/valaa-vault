@@ -51,5 +51,12 @@ proclamation lifecycle.`,
     ...require("./CommandAspect"),
     ...require("./LogAspect"),
     ...require("./AuthorAspect"),
+    indirectSubGraph: {
+      "@type": "VKernel:Property",
+      "rdfs:domain": "rdfs:Resource",
+      "rdfs:range": "rdfs:Resource",
+      "rdfs:comment":
+`VLog delta thing`,
+    },
   },
 };

@@ -3,84 +3,64 @@ const { wrapError } = require("@valos/tools");
 
 module.exports = {
   visitVLogDelta,
-  appendToResourcePlot,
-  appendToPlot,
-  relativeIdFromOriginPlot,
+  relativePlotFromDeltaRef,
+  relativePlotFromAbsolute,
+  absolutePlotFromRelative,
 };
 
 function visitVLogDelta (delta, stack) {
   const resourcesDelta = delta["&/"];
   if (!resourcesDelta) throw new Error("VLog delta is missing global resources section '&/'");
   const visitorStack = Object.create(stack);
-  visitorStack.originPlot = [];
-  // Top level delta.
-  _visitDeltaGlobalResources(visitorStack, resourcesDelta);
+  visitorStack.resourcePlot = [1];
+  _visitSubResources(visitorStack, resourcesDelta, stack.mutableRoot);
 }
 
-function _visitDeltaGlobalResources (stack, globalResourceDeltas) {
-  const globalResourceKeys = Object.keys(globalResourceDeltas);
-  if (!globalResourceKeys.length) throw new Error(`Invalid empty "&~" global resources delta`);
-  for (const logicalStepsString of globalResourceKeys.sort()) {
-    const globalResourceDelta = globalResourceDeltas[logicalStepsString];
-    let logicalPlot, globalPlot;
+function _visitSubResources (stack, subResourceDeltas, mutableParentResource) {
+  const subIds = Object.keys(subResourceDeltas);
+  if (!subIds.length) {
+    throw new Error(`Invalid empty ${
+        stack.resourcePlot.length === 1
+            ? "global resources "
+            : `${stack.resourcePlot.length - 1}-order sub-`
+      }graph "${stack.resourcePlot.join("/")}" delta object`);
+  }
+  const subStack = Object.create(stack);
+  subStack.graphPlot = stack.resourcePlot;
+  subStack.mutableGraph = subStack.mutateSubGraph
+      && subStack.mutateSubGraph(mutableParentResource, subStack.graphPlot);
+  for (const subId of subIds.sort()) {
+    const subResourceDelta = subResourceDeltas[subId];
     try {
-      logicalPlot = appendToResourcePlot(["0"], logicalStepsString);
-      globalPlot = stack.originPlot = [logicalPlot[logicalPlot.length - 1]];
-      if (stack.validateGlobalResource) stack.validateGlobalResourcePlot(logicalPlot);
-      const mutableResource = stack.mutateTargetResource
-          && stack.mutateTargetResource(globalPlot);
-      _visitDeltaResource(stack, globalResourceDelta, logicalStepsString,
-          mutableResource, globalPlot[0], globalResourceDeltas);
+      const key = _validateSubResourceKey(subId, subStack.iriLookup);
+      subStack.resourcePlot = subStack.graphPlot.concat(key);
+      const mutableSubResource = subStack.mutateSubResource
+          && subStack.mutateSubResource(subStack.mutableGraph || mutableParentResource, key);
+
+      _visitDeltaResource(
+          subStack, subResourceDelta, subId, mutableSubResource, key, subResourceDeltas);
     } catch (error) {
-      throw wrapError(error, 1, `_visitDeltaGlobalResources["${logicalStepsString}"]`,
-          "\n\tlogicalPlot:", logicalPlot,
-          "\n\tglobalPlot:", globalPlot,
+      throw wrapError(error, 1, `_visitSubResources["${subId}"]`,
+          "\n\tresource plot:", stack.resourcePlot,
+          "\n\tgraph plot:", subStack.graphPlot,
       );
     }
   }
 }
 
-function _visitDeltaSubResources (stack, subResourceDeltas, mutableParentResource) {
-  const parentOriginPlot = stack.originPlot;
-  const subResourceKeys = Object.keys(subResourceDeltas);
-  if (!subResourceKeys.length) throw new Error(`Invalid empty "&_" sub-resources delta`);
-  for (const subResourcePlotString of subResourceKeys.sort()) {
-    const subResourceDelta = subResourceDeltas[subResourcePlotString];
-    try {
-      const originPlot = stack.originPlot = appendToResourcePlot([], subResourcePlotString);
-      if (originPlot[0] !== parentOriginPlot[0]) {
-        throw new Error(`Invalid sub-resource "${subResourcePlotString}" is not a child of "${
-            parentOriginPlot[0]}/"`);
-      }
-      const mutableSubResource = stack.mutateTargetResource
-          && stack.mutateTargetResource(originPlot, mutableParentResource, 1);
-      _visitDeltaResource(stack, subResourceDelta, subResourcePlotString,
-          mutableSubResource, originPlot[originPlot.length - 1], subResourceDeltas);
-    } catch (error) {
-      throw wrapError(error, 1, `_visitDeltaSubResources["${subResourcePlotString}"]`,
-          "\n\torigin plot:", stack.originPlot,
-          "\n\tparentOriginPlot:", parentOriginPlot,
-      );
-    }
+function _validateSubResourceKey (key, iriLookup) {
+  if (key[key.length - 1] !== ":") {
+    throw new Error(`Invalid sub-resource key "${key}": doesn't terminate in ":"`);
   }
+  const ret = key.slice(0, -1);
+  if (ret === "--") return removalGraphNameSymbol;
+  const num = _tryParseResourceIndex(ret, iriLookup);
+  if (num !== undefined) return num;
+  throw new Error(`Invalid sub-resource key "${key}": not a valid IRI index nor "--"`);
 }
 
-// validate logical plot to be appropriate
-/*
-let i = 0;
-for (; i !== parentLogicalPlot.length; ++i) {
-  if (logicalPlot[i] !== parentLogicalPlot[i]) {
-    throw new Error(`Invalid vplot "${logicalStepsString
-        }": step #${i} mismatch; resulting logical plot "${logicalPlot.join("/")
-        }" is not a descendant of the parent plot "${parentLogicalPlot.join("/")}"`);
   }
 }
-if (i >= logicalPlot.length) {
-  throw new Error(`Invalid vplot "${logicalStepsString}": length of resulting logical plot "${
-      logicalPlot.join("/")}" is shorter and thus not a descendant of the parent plot "${
-      parentLogicalPlot.join("/")}"`);
-}
-*/
 
 function _visitDeltaResource (stack, delta, deltaKey, mutableTarget
     /* , targetKey, parentResourcesDelta */) {
@@ -91,13 +71,17 @@ function _visitDeltaResource (stack, delta, deltaKey, mutableTarget
     _visitProperties(stack, mutableTarget, delta["&-"], stack.removalVisitors);
   }
   _visitProperties(stack, mutableTarget, delta, stack.upsertVisitors);
-  if (delta["&_"]) {
-    if (stack.originPlot.length !== 1) {
-      throw new Error(
-          `Nested sub-resources not allowed in deltas ('&_' present in sub-resource </${
-              stack.originPlot.join("/")}/>)`);
+  const subGraph = delta["&/"] || delta["!/"];
+  if (subGraph) {
+    if (delta["&/"] && stack.graphPlot.length > 1) {
+      throw new Error(`Invalid sub-graph "&/" term at delta object ${stack.resourcePlot.join("/")
+          }: second-order (and deeper) sub-graphs must use "!/"`);
     }
-    _visitDeltaSubResources(stack, delta["&_"], mutableTarget);
+    if (delta["!/"] && stack.graphPlot.length <= 1) {
+      throw new Error(`Invalid sub-graph "!/" term at delta object ${stack.resourcePlot.join("/")
+          }: only second-order (and deeper) sub-graphs can use "!/"`);
+    }
+    _visitSubResources(stack, subGraph, mutableTarget);
   }
   return mutableTarget;
 }
@@ -137,46 +121,92 @@ function _visitProperties (stack, mutableResource, propertiesDelta, visitors) {
   ####      #       #    ######
 */
 
-function appendToResourcePlot (resourcePlot, subPlotString) {
-  if (subPlotString[0] === "/") {
-    throw new Error(`Invalid vplot "${subPlotString}": resource sub-plots must be relative`);
-  }
-  return appendToPlot(resourcePlot, subPlotString,
-      resourcePlot.length ? "logical resource plot" : "sub-resource plot");
+function relativePlotFromDeltaRef (deltaRef, basePlot, iriLookup) {
+  const steps = _parsePlotFromDeltaRef(deltaRef, iriLookup, undefined, true);
+  if ((typeof steps[0] === "string") && steps[0].endsWith(":")) return steps; // absolute
+  return relativePlotFromAbsolute(steps, basePlot);
 }
 
-function appendToPlot (targetPlot, subPlotString, noDotsAllowedReason) {
-  const relativePlot = subPlotString.split("/");
-  if (relativePlot.pop() !== "") { // Has correct semantics for "" -split> [""] -pop> [] also.
-    throw new Error(`Invalid resource plot "${subPlotString}": must terminate in "/"`);
-  }
-  const isAbsolute = (relativePlot[0] === "");
-  const ret = isAbsolute ? [] : targetPlot;
-  for (let i = isAbsolute ? 1 : 0; i < relativePlot.length; ++i) {
-    const step = relativePlot[i];
-    if ((step !== ".") && (step !== "..")) {
-      ret.push(step);
-    } else if (noDotsAllowedReason || isAbsolute) {
-      throw new Error(`Invalid local id "${
-          subPlotString}": ${noDotsAllowedReason || "absolute vplot"} cannot contain "." or ".."`);
-    } else if (step === ".") {
-      continue;
-    } else if (ret.length === 0) {
-      throw new Error(`Invalid local id "${subPlotString}": cannot move up from root`);
-    } else {
-      ret.pop();
+function relativePlotFromAbsolute (absolutePlot, rebasePlot) {
+  let i = 0;
+  for (; i !== rebasePlot.length; ++i) {
+    const absoluteStep = absolutePlot[i];
+    if (absoluteStep !== rebasePlot[i]) {
+      // Second step is the global resource which must also differ in
+      // order for a relative plot to be formed.
+      if (i < 2) return absolutePlot;
+      const ret = absolutePlot.slice(i);
+      ret.unshift(i - rebasePlot.length);
+      return ret;
     }
   }
-  return ret;
+  return (i + 1 === absolutePlot.length) ? absolutePlot[i] : absolutePlot.slice(i);
 }
 
-// Ignores the last entry of originPlot. The relative base of resources
-// is their parent origin plot.
-function relativeIdFromOriginPlot (originPlot, relativeBasePlot, isAbsolute) {
-  if (isAbsolute) return `/${relativeBasePlot.join("/")}/`;
-  let i = 0;
-  const maxLen = originPlot.length - 1;
-  for (; i !== maxLen; ++i) if (originPlot[i] !== relativeBasePlot[i]) break;
-  const plotSuffix = relativeBasePlot.length === i ? "" : `${relativeBasePlot.slice(i).join("/")}/`;
-  return `${"../".repeat(maxLen - i)}${plotSuffix}`;
+function absolutePlotFromRelative (relativePlot, basePlot) {
+  if (Array.isArray(relativePlot)) {
+    const first = relativePlot[0];
+    if (typeof first === "string") {
+      if (first.endsWith(":")) return relativePlot; // was in fact absolute plot already
+    } else if (first < 0) {
+      return basePlot.slice(0, first).concat(relativePlot.slice(1));
+    }
+  }
+  return basePlot.concat(relativePlot);
+}
+
+function _parsePlotFromDeltaRef (deltaRef, iriLookup, requiredIRIIndexError, allowPrefixedInitial) {
+  if (typeof deltaRef !== "string") {
+    throw new Error(`Invalid plot: expected type string, got: ${typeof deltaRef}`);
+  }
+  const steps = deltaRef.split("/");
+
+  const maybePrefixedInitial = allowPrefixedInitial && steps[0].split(":");
+  const isPrefixed = maybePrefixedInitial && (maybePrefixedInitial.length === 2);
+
+  if (isPrefixed) {
+    if (steps.length === 1) {
+      if (maybePrefixedInitial[1]) {
+        throw new Error(`Invalid delta reference "${deltaRef}" prefixed entry "${
+            steps[0]}" must not have suffix`);
+      }
+      const entryStepAsIndex = _tryParseResourceIndex(maybePrefixedInitial[0]);
+      if (typeof entryStepAsIndex !== "number") {
+        throw new Error(`Invalid delta reference "${deltaRef
+            }": single-step ref must be a valid IRI index terminated by ":"`);
+      }
+      return entryStepAsIndex;
+    }
+    if (maybePrefixedInitial[0] !== "^:") {
+      return deltaRef;
+    }
+  } else if (maybePrefixedInitial && maybePrefixedInitial.length > 2) {
+    throw new Error(`Invalid delta deltaRef "${
+        deltaRef}": only single ":" allowed in prefixed first step`);
+  }
+
+  const last = steps && steps.pop();
+  if (last !== "") {
+    throw new Error(`Invalid plot "${
+        deltaRef}" delta: must be a string plot value and terminate in "/"`);
+  }
+
+  for (let i = isPrefixed ? 1 : 0; i !== steps.length; ++i) {
+    const iriIndex = _tryParseResourceIndex(steps[i], iriLookup);
+    if (iriIndex !== undefined) {
+      steps[i] = iriIndex;
+    } else if (requiredIRIIndexError) {
+      throw new Error(`Invalid ${requiredIRIIndexError} plot "${deltaRef}" step #${i
+        }: valid positive integer to IRI index expected, got: "${steps[i]}"`);
+    }
+  }
+
+  return steps;
+}
+
+function _tryParseResourceIndex (integerString, iriLookup) {
+  const ret = parseInt(integerString, 10);
+  if (String(ret) !== integerString) return undefined;
+  if (iriLookup && (iriLookup[ret] === undefined)) return undefined;
+  return ret;
 }

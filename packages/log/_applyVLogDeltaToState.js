@@ -12,12 +12,21 @@ module.exports = {
   applyVLogDeltaToState,
 };
 
+const _enableEventIntrospection = true;
+
 function applyVLogDeltaToState (currentVState, vlogDelta, stack = null) {
   const mutableState = mutateVState(currentVState);
   const refIndexDelta = (vlogDelta["@context"] || [])[0];
   if (refIndexDelta) {
     Object.assign(mutableState[iriLookupTag], refIndexDelta);
   }
+  const eventIndex = ((vlogDelta.aspects || {}).log || {}).index;
+  if (eventIndex !== currentVState[eventCountTag]) {
+    throw new Error(`Invalid delta.aspects.log.index; expected: ${currentVState[eventCountTag]
+        }, got: ${eventIndex}`);
+  }
+  ++mutableState[eventCountTag];
+
   const applyStack = Object.assign(Object.create(stack), {
     // apply opts
     mutableGlobalResources: _mutateSubGraph(mutableState, undefined, "state"),
@@ -40,6 +49,21 @@ function applyVLogDeltaToState (currentVState, vlogDelta, stack = null) {
 
   visitVLogDelta(vlogDelta, applyStack);
 
+  if (_enableEventIntrospection) {
+    const reflection = applyStack.mutableEventIntrospectionGraph = _mutateStateObject(
+        applyStack.mutableGlobalResources, "1");
+    if (!reflection["@context"]) {
+      reflection["@context"] = {
+        "@base": refIndexDelta["1"],
+      };
+      reflection.events = Object.create(null);
+    }
+    const lexOrderChar = String.fromCharCode(96 + String(eventIndex).length);
+    const eventGraphName = `-log!${lexOrderChar}${eventIndex}/`;
+    vlogDelta["@context"] = [{ "@base": eventGraphName }].concat(vlogDelta["@context"] || []);
+    vlogDelta[".ng"] = `-log:${lexOrderChar}${eventIndex}`;
+    vlogDelta["&t"] = "VState:DeltaAspect";
+    reflection.events[eventGraphName] = vlogDelta;
   }
   return mutableState;
 

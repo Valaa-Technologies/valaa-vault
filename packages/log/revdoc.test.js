@@ -11,7 +11,7 @@ const { applyVLogDeltaToState } = require("@valos/log");
 const title = "VLog format specification";
 const { itExpects, runTestDoc } = prepareTestDoc(title);
 
-let state = createVState();
+let state;
 
 /* eslint-disable quote-props */
 
@@ -279,6 +279,9 @@ chronicles must refer to their stable origin.
     "5:": { "!~": "4/", ".tgt~": "4:", ".n": "SIBLING", ".src": "3:" },
     "6:": { "!~": "4/", ".src~": "4:", ".n": "SIBLING", ".tgt": "3:" },
   },
+  "aspects": {
+    "log": { index: 1 }
+  }
 }))),
         "toMatchObject",
 () => ({
@@ -309,6 +312,47 @@ chronicles must refer to their stable origin.
     "5:": { ".tgt~": "4:", ".n": "SIBLING", ".src": "3:" },
     "6:": { ".src~": "4:", ".n": "SIBLING", ".tgt": "3:" },
 
+    // chronicle event introspection
+    "1:": {
+      "@context": { "@base": "valos://localhost/~u4!cccccccc-6600-2211-cc77-333333333333/" },
+      "events": {
+        // previous event untouched
+        "-log!a0/": { ".ng": "-log:a0", "&t": "VState:DeltaAspect",
+          "@context": [{ "@base": "-log!a0/" }, {
+            "0": "~u4:cccccccc-6600-2211-cc77-333333333333/",
+            "1": "valos://localhost/~u4!cccccccc-6600-2211-cc77-333333333333/",
+            "2": "valos://localhost/"
+          }],
+          "&/": { "0:": { ".n": "rootName", ".cURI": "1:", ".aURI": "2:" } },
+          "aspects": {
+            "log": { index: 0 }
+          }
+        },
+        "-log!a1/": { ".ng": "-log:a1", "&t": "VState:DeltaAspect",
+          "@context": [{ "@base": "-log!a1/" }, {
+            "3": "~u4:aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/",
+            "4": "~u4:bbbbbbbb-bbbb-cccc-dddd-eeeeeeeeeeee/",
+            "5": "~u4:abababab-bbbb-cccc-dddd-eeeeeeeeeeee/",
+            "6": "~u4:babababa-bbbb-cccc-dddd-eeeeeeeeeeee/",
+            "7": "valaa-test:?id=(~raw'extl!)#"
+          }],
+          "&/": {
+            "0:": { ".n": "newRootName" },
+            "3:": { "!~": "", ".E~": "0:", ".n": "older",
+              "toOutside": { "@id": "7:" }, "absolutelyParent": { "@id": "^:/1/0/" },
+            },
+            "4:": { "!~": "", ".E~": "0:", ".n": "unger",
+              "toOlder": { "@id": "3:" }, "absolutelyOlder": { "@id": "^:/1/3/" },
+            },
+            "5:": { "!~": "4/", ".tgt~": "4:", ".n": "SIBLING", ".src": "3:" },
+            "6:": { "!~": "4/", ".src~": "4:", ".n": "SIBLING", ".tgt": "3:" },
+          },
+          "aspects": {
+            "log": { index: 1 }
+          }
+        }
+      }
+    }
   },
 })
     ),
@@ -367,6 +411,9 @@ in a different chronicle!).
     },
     "10:": { "!~": "4/5/", ".E~": "5:", ".n": "deeplyOwned" }
   },
+  "aspects": {
+    "log": { index: 2 }
+  }
 }))),
         "toMatchObject",
 () => ({
@@ -421,6 +468,50 @@ in a different chronicle!).
       }
     },
     "10:": { ".E~": "5:", ".n": "deeplyOwned" },
+
+    // chronicle event introspection
+    "1:": {
+      "@context": { "@base": "valos://localhost/~u4!cccccccc-6600-2211-cc77-333333333333/" },
+      "events": {
+        "-log!a0/": {},
+        "-log!a1/": {},
+        "-log!a2/": { ".ng": "-log:a2", "&t": "VState:DeltaAspect",
+          "@context": [{ "@base": "-log!a2/" }, {
+            "8": "~u4:11111111-2255-7744-22cc-eeeeeeeeeeee/",
+            "9": "~u4:22222222-2255-7744-22cc-eeeeeeeeeeee/",
+            "10": "~u4:d336d336-9999-6666-0000-777700000000/"
+          }],
+          "&/": {
+            "8:": { "!~": "", ".E~": "0:", ".n": "ungerInstance", ".iOf": "4:" },
+            "8/": { ".ng": "8:", "&/": {
+// This sub-graph is extracted from "8:" as a second-order indirect
+// sub-graph with vplot "-log!a2/8/" as its graph id and "8:" as it's
+// sub-graph name. This is done so that the contents of the event won't
+// conflict with the primary state first-order sub-graphs.
+              "5:": {
+                "toInstance": { "@id": "8/" },
+                "absoluteInstance": { "@id": "^:/1/8/" },
+                "toDeeplyOwnedProto": { "@id": "10/" },
+                "toDeeplyOwnedSibling": { "@id": "10:" },
+                "absoluteDeepProto": { "@id": "^:/1/10/" },
+                "absoluteDeepSibling": { "@id": "^:/1/8/10/" }
+              },
+              "10:": { ".n": "deeplyOwnedGhost" },
+            } },
+            "9:": { "!~": "", ".E~": "0:", ".n": "ungerInstanceInstance", ".iOf": "8:" },
+            "9/": { ".ng": "9:", "&/": { // second-order sub-graph "-log!a2/9/"
+              "5:": { "toInstanceInstance": { "@id": "9/" } },
+              "10:": { ".n": "deeplyOwnedGhostGhost" }
+            } },
+            "10:": { "!~": "4/5/", ".E~": "5:", ".n": "deeplyOwned" },
+          },
+          "aspects": {
+            "log": { index: 2 }
+          }
+        }
+      }
+    }
+  }
 }),
     ),
     "#4": [`
@@ -460,11 +551,22 @@ however: the delta application will perform this reference normalization.
         "5:": { ".n": "fromNephewOldceptGhost", ".src": "11/11/3/" },
         "6:": { ".n": "toNephewUngceptGhost", ".tgt": "11/11/3/" },
         "11:": { ".n": "firstInception",
+// second-order (and deeper) sub-graphs have more complex sub-graph
+// names. To keep the log format simple a delta-term "!/" that
+// transforms into the full JSON-LD expression is used instead of "&/".
+// Other than a different term (and RDF expression) the object contents
+// are otherwise identical.
+          "!/": { // second-order sub-graph "11/11/"
+            "3:": { ".n": "oldceptGhost" }, // indirect resource "11/11/3"
+            "4:": { ".n": "ungceptGhost" }  // indirect resource "11/11/4"
           }
         },
       }
     }
   },
+  aspects: {
+    "log": { "index": 3 },
+  }
 }))),
         "toMatchObject",
 () => ({
@@ -527,13 +629,44 @@ however: the delta application will perform this reference normalization.
         "5:": { ".n": "fromNephewOldceptGhost", ".src": "11/11/3/" },
         "6:": { ".n": "toNephewUngceptGhost", ".tgt": "11/11/3/" },
         "11:": { ".n": "firstInception" },
+        "11/11/": { ".ng": "11:", "&/": { // second-order sub-graph "11/11/"
+          "3:": { ".n": "oldceptGhost", "-out": ["11/5/"], "-in": ["11/6/"] },
+          "4:": { ".n": "ungceptGhost" }
+        } },
       }
     },
 
+    // chronicle event introspection
+    "1:": {
+      "@context": { "@base": "valos://localhost/~u4!cccccccc-6600-2211-cc77-333333333333/" },
+      "events": {
+        "-log!a0/": {},
+        "-log!a1/": {},
+        "-log!a2/": {},
+        "-log!a3/": { ".ng": "-log:a3", "&t": "VState:DeltaAspect",
+          "@context": [{ "@base": "-log!a3/" }, {
+            "11": "~u4:77777777-1111-eeee-3333-555555555555/",
+          }],
+          "&/": {
+            "11:": { "!~": "", ".E~": "0:", ".n": "inceptor", ".iOf": "0:" },
+            "11/": { ".ng": "11:", "&/": { // second-order sub-graph "-log!a3/11/"
+              "3:": { ".n": "olderGhost" },
+              "4:": { ".n": "ungerGhost" },
+              "5:": { ".n": "fromNephewOldceptGhost", ".src": "11/11/3/" },
+              "6:": { ".n": "toNephewUngceptGhost", ".tgt": "11/11/3/" },
+              "11:": { ".n": "firstInception" },
+              "11/11/": { ".ng": "11:", "&/": { // third-order sub-graph "-log!a3/11/11/"
+                "3:": { ".n": "oldceptGhost" },
+                "4:": { ".n": "ungceptGhost" }
+              } }
+            } }
+          },
+          "aspects": {
+            "log": { "index": 3 },
           }
-        }],
+        }
       }
-    }]
+    }
   },
 }),
     ),
@@ -578,6 +711,9 @@ have cardinality constraint of 1 are not persisted in removal graphs.
       }
     }
   },
+  "aspects": {
+    "log": { index: 4 }
+  }
 }))),
         "toMatchObject",
 () => ({
@@ -658,10 +794,40 @@ have cardinality constraint of 1 are not persisted in removal graphs.
       }
     },
 
+    // chronicle event introspection
+    "1:": {
+      "@context": { "@base": "valos://localhost/~u4!cccccccc-6600-2211-cc77-333333333333/" },
+      "events": {
+        "-log!a0/": {},
+        "-log!a1/": {},
+        "-log!a2/": {},
+        "-log!a3/": {},
+        "-log!a4/": { ".ng": "-log:a4", "&t": "VState:DeltaAspect",
+          "@context": [{ "@base": "-log!a4/" }],
+          "&/": {
+            "5/": { ".ng": "5:", "&/": { // second-order sub-graph "-log!a4/5/"
+              "5/.-/": { ".ng": ".-:", "&/": { // third-order sub-graph "-log!a4/5/.-/"
+                "5:": { ".n": "SIBLING" },
+              } }
+            } },
+            "11/": { ".ng": "11:", "&/": { // second-order sub-graph "-log!a4/11/"
+              "11/6/.-/": { ".ng": ".-:", "&/": { // fourth-order sub-graph "-log!a4/11/6/.-/"
+// note that the names of higher than third order sub-graphs are still
+// stored in the second-order sub-graph here. Second order sub-graphs
+// are guaranteed to exist while the intervening sub-graphs might not.
+                "6:": { ".tgt": "11/11/3/" },
+              } },
+              "11/11/.-/": { ".ng": ".-:", "&/": { // fourth-order sub-graph "-log!a4/11/11/.-/"
+                "11:": { "~E": ["11/11/4/"], "&/": ["11/11/4/"] },
+              } }
+            } }
+          },
+          "aspects": {
+            "log": { index: 4 }
           }
-        }],
+        }
       }
-    }],
+    }
   },
 }),
     ),

@@ -74,5 +74,12 @@ proclamation lifecycle.`,
       "rdfs:comment":
 `VLog delta thing`,
     },
+    eventGraph: {
+      "@type": "VKernel:Property",
+      "rdfs:domain": "rdfs:Resource",
+      "rdfs:range": "rdfs:Resource",
+      "rdfs:comment":
+`VLog delta thing`,
+    },
   },
 };
